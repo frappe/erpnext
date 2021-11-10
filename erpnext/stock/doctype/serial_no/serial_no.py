@@ -30,8 +30,6 @@ class SerialNo(StockController):
 		self.via_stock_ledger = False
 
 	def validate(self):
-		if self.get("__islocal") and self.warehouse and not self.via_stock_ledger:
-			frappe.throw(_("New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt"), SerialNoCannotCreateDirectError)
 
 		self.set_maintenance_status()
 		self.validate_warehouse()
@@ -65,13 +63,18 @@ class SerialNo(StockController):
 			self.maintenance_status = "Under Warranty"
 
 	def validate_warehouse(self):
-		if not self.get("__islocal"):
-			item_code, warehouse = frappe.db.get_value("Serial No",
-				self.name, ["item_code", "warehouse"])
-			if not self.via_stock_ledger and item_code != self.item_code:
+		if self.via_stock_ledger:
+			return
+
+		if self.is_new():
+			if self.warehouse:
+				frappe.throw(_("New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt"),
+						exc=SerialNoCannotCreateDirectError)
+		else:
+			if self.has_value_changed("item_code"):
 				frappe.throw(_("Item Code cannot be changed for Serial No."),
 					SerialNoCannotCannotChangeError)
-			if not self.via_stock_ledger and warehouse != self.warehouse:
+			if self.has_value_changed("warehouse"):
 				frappe.throw(_("Warehouse cannot be changed for Serial No."),
 					SerialNoCannotCannotChangeError)
 
