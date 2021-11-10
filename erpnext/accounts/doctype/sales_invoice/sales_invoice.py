@@ -2069,7 +2069,7 @@ def get_mode_of_payments_info(mode_of_payments, company):
 			mpa.parent = mp.name and
 			mpa.company = %s and
 			mp.enabled = 1 and
-			mp.name in (%s)
+			mp.name in %s
 		group by
 			mp.name
 		""", (company, mode_of_payments), as_dict=1)
