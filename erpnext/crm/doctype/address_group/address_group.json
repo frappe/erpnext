@@ -29,6 +29,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "state",
    "fieldname": "address_group_item",
    "fieldtype": "Table",
    "label": "Address Group Item",
@@ -44,10 +45,11 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-01 10:52:00.389794",
+ "modified": "2021-11-10 10:01:48.444185",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Address Group",
+ "name_case": "Title Case",
  "owner": "Administrator",
  "permissions": [
   {
