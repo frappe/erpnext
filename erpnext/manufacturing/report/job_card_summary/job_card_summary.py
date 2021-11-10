@@ -24,7 +24,7 @@ def get_data(filters):
 	}
 
 	fields = ["name", "status", "work_order", "production_item", "item_name", "posting_date",
-		"total_completed_qty", "workstation", "operation", "employee_name", "total_time_in_mins"]
+		"total_completed_qty", "workstation", "operation", "total_time_in_mins"]
 
 	for field in ["work_order", "workstation", "operation", "company"]:
 		if filters.get(field):
@@ -45,7 +45,7 @@ def get_data(filters):
 	job_card_time_details = {}
 	for job_card_data in frappe.get_all("Job Card Time Log",
 		fields=["min(from_time) as from_time", "max(to_time) as to_time", "parent"],
-		filters=job_card_time_filter, group_by="parent", debug=1):
+		filters=job_card_time_filter, group_by="parent"):
 		job_card_time_details[job_card_data.parent] = job_card_data
 
 	res = []
@@ -170,12 +170,6 @@ def get_columns(filters):
 			"fieldname": "operation",
 			"fieldtype": "Link",
 			"options": "Operation",
-			"width": 110
-		},
-		{
-			"label": _("Employee Name"),
-			"fieldname": "employee_name",
-			"fieldtype": "Data",
 			"width": 110
 		},
 		{
