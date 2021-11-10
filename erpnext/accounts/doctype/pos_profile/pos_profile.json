@@ -24,6 +24,7 @@
   "allow_user_to_edit_discount",
   "allow_print_before_pay",
   "display_items_in_stock",
+  "allow_credit",
   "section_break_15",
   "applicable_for_users",
   "section_break_11",
@@ -393,11 +394,17 @@
    "fieldtype": "Data",
    "label": "Numeration CAI",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_credit",
+   "fieldtype": "Check",
+   "label": "Allow Credit"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
- "modified": "2021-07-09 14:42:40.497773",
+ "modified": "2021-11-10 15:21:31.720844",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
