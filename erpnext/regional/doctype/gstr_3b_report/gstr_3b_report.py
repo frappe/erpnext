@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import json
 import os
+from warnings import filters
 
 import frappe
 from frappe import _
@@ -362,11 +363,23 @@ class GSTR3BReport(Document):
 				self.report_dict["inter_sup"]["uin_details"].append(value)
 
 	def get_company_gst_details(self):
-		gst_details =  frappe.get_all("Address",
+		
+		# changes for address group 
+		if self.address_group:
+			add11 = frappe.get_last_doc("Address Group Item", filters = {"parent": self.address_group})
+			new_address = add11.address
+			gst_details = frappe.get_all("Address",
+			fields=["gstin", "gst_state", "gst_state_number"],
+			filters={
+				"name":new_address
+			})
+
+		else:
+			gst_details =  frappe.get_all("Address",
 			fields=["gstin", "gst_state", "gst_state_number"],
 			filters={
 				"name":self.company_address
-			})
+			})	
 
 		if gst_details:
 			return gst_details[0]
