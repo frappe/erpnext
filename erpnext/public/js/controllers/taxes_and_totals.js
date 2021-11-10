@@ -107,8 +107,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	calculate_item_values() {
 		var me = this;
 		if (!this.discount_amount_applied) {
+			
+			frappe.model.round_floats_childs_in(this.frm.doc["items"]);
+			var precision_in = [];
 			$.each(this.frm.doc["items"] || [], function(i, item) {
-				frappe.model.round_floats_in(item);
 				item.net_rate = item.rate;
 
 				if ((!item.qty) && me.frm.doc.is_return) {
@@ -121,15 +123,27 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				item.item_tax_amount = 0.0;
 				item.total_weight = flt(item.weight_per_unit * item.stock_qty);
 
-				me.set_in_company_currency(item, ["price_list_rate", "rate", "amount", "net_rate", "net_amount"]);
+				var fields = ["price_list_rate", "rate", "amount", "net_rate", "net_amount"];
+				if (i==0) { // cache precision on first arr position only
+					for(var f of fields) {
+						precision_in[f] = precision(f, item)
+						precision_in["base_" + f] = precision("base_" + f, item)
+					}	
+				}
+
+				me.set_in_company_currency(item, fields, precision_in);
 			});
 		}
 	}
 
-	set_in_company_currency(doc, fields) {
+	set_in_company_currency(doc, fields, precision_in) {
 		var me = this;
 		$.each(fields, function(i, f) {
-			doc["base_"+f] = flt(flt(doc[f], precision(f, doc)) * me.frm.doc.conversion_rate, precision("base_" + f, doc));
+			if (precision_in && precision_in[f] && precision_in["base_" + f]) {
+				doc["base_"+f] = flt(flt(doc[f], precision_in[f]) * me.frm.doc.conversion_rate, precision_in["base_" + f]);
+			} else {
+				doc["base_"+f] = flt(flt(doc[f], precision(f, doc)) * me.frm.doc.conversion_rate, precision("base_" + f, doc));
+			}
 		});
 	}
 
