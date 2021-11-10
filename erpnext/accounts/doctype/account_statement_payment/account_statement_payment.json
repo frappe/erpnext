@@ -10,6 +10,8 @@
   "general_data",
   "patient_statement",
   "customer",
+  "patient",
+  "patient_name",
   "columna_general",
   "company",
   "reason_for_sale",
@@ -32,7 +34,9 @@
   "total_discount",
   "contact_section",
   "customer_address",
-  "phone_number"
+  "phone_number",
+  "patient_dni",
+  "patient_age"
  ],
  "fields": [
   {
@@ -204,10 +208,39 @@
    "fieldtype": "Currency",
    "label": "Total Sale Invoice",
    "read_only": 1
+  },
+  {
+   "fetch_from": "patient_statement.patient",
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Patient",
+   "options": "Patient"
+  },
+  {
+   "fetch_from": "patient_statement.patient_dni",
+   "fieldname": "patient_dni",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Patient DNI"
+  },
+  {
+   "fetch_from": "patient_statement.age",
+   "fieldname": "patient_age",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Patient Age"
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-10-15 14:06:13.313392",
+ "modified": "2021-11-10 16:01:30.104640",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",
