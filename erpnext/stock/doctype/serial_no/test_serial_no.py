@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 # ERPNext - web based ERP (http://erpnext.com)
@@ -21,6 +21,10 @@ from erpnext.tests.utils import ERPNextTestCase
 
 
 class TestSerialNo(ERPNextTestCase):
+
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def test_cannot_create_direct(self):
 		frappe.delete_doc_if_exists("Serial No", "_TCSER0001")
 
@@ -192,7 +196,25 @@ class TestSerialNo(ERPNextTestCase):
 
 		self.assertEqual(se.get("items")[0].serial_no, "_TS1\n_TS2\n_TS3\n_TS4 - 2021")
 
-		frappe.db.rollback()
 
-	def tearDown(self):
-		frappe.db.rollback()
+	def test_new_sr_no_validation(self):
+
+		# new serial nos can't have warehouses
+		with self.assertRaises(SerialNoCannotCreateDirectError):
+			frappe.get_doc(
+					doctype="Serial No",
+					item_code="_Test Serialized Item",
+					serial_no = "TEST001",
+					warehouse="_Test Warehouse - _TC"
+				).save()
+
+		# item code / wh can't change
+		with self.assertRaises(SerialNoCannotCannotChangeError):
+			sr = frappe.get_doc(
+						doctype="Serial No",
+						item_code="_Test Serialized Item",
+						serial_no = "TEST001",
+					)
+			sr.save()
+			sr.item_code = "_Test Serialized Item With Series"
+			sr.save()
