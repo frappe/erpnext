@@ -417,10 +417,8 @@ def update_serial_nos(sle, item_det):
 	if sle.serial_no:
 		auto_make_serial_nos(sle)
 
-def get_auto_serial_nos(serial_no_series, qty):
-	serial_nos = []
-	for i in range(cint(qty)):
-		serial_nos.append(make_autoname(serial_no_series, "Serial No"))
+def get_auto_serial_nos(serial_no_series: str, qty: int) -> str:
+	serial_nos = [make_autoname(serial_no_series, "Serial No") for i in range(cint(qty))]
 
 	return "\n".join(serial_nos)
 
