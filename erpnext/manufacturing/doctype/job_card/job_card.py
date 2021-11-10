@@ -550,7 +550,7 @@ class JobCard(Document):
 
 	def validate_work_order(self):
 		if self.is_work_order_closed():
-			frappe.throw(_("You can't make any changes to Job Card since Work Order is stopped."))
+			frappe.throw(_("You can't make any changes to Job Card since Work Order is closed."))
 
 	def is_work_order_closed(self):
 		if self.work_order:
