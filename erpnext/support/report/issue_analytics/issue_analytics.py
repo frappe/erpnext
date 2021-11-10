@@ -1,14 +1,12 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 
 import frappe
 from frappe import _, scrub
 from frappe.utils import add_days, add_to_date, flt, getdate
-from six import iteritems
 
 from erpnext.accounts.utils import get_fiscal_year
 
@@ -171,7 +169,7 @@ class IssueAnalytics(object):
 		self.data = []
 		self.get_periodic_data()
 
-		for entity, period_data in iteritems(self.issue_periodic_data):
+		for entity, period_data in self.issue_periodic_data.items():
 			if self.filters.based_on == 'Customer':
 				row = {'customer': entity}
 			elif self.filters.based_on == 'Assigned To':
