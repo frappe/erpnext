@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 from collections import defaultdict
@@ -211,12 +210,15 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	meta = frappe.get_meta("Item", cached=True)
 	searchfields = meta.get_search_fields()
 
-	if "description" in searchfields:
-		searchfields.remove("description")
+	# these are handled separately
+	ignored_search_fields = ("item_name", "description")
+	for ignored_field in ignored_search_fields:
+		if ignored_field in searchfields:
+			searchfields.remove(ignored_field)
 
 	columns = ''
 	extra_searchfields = [field for field in searchfields
-		if not field in ["name", "item_group", "description"]]
+		if not field in ["name", "item_group", "description", "item_name"]]
 
 	if extra_searchfields:
 		columns = ", " + ", ".join(extra_searchfields)
@@ -253,10 +255,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	if frappe.db.count('Item', cache=True) < 50000:
 		# scan description only if items are less than 50000
 		description_cond = 'or tabItem.description LIKE %(txt)s'
-	return frappe.db.sql("""select tabItem.name,
-		if(length(tabItem.item_name) > 40,
-			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,
-		tabItem.item_group,
+	return frappe.db.sql("""select
+			tabItem.name, tabItem.item_name, tabItem.item_group,
 		if(length(tabItem.description) > 40, \
 			concat(substr(tabItem.description, 1, 40), "..."), description) as description
 		{columns}

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
@@ -10,7 +9,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc
 from frappe.utils import cint, floor, flt, today
-from six import iteritems
 
 from erpnext.selling.doctype.sales_order.sales_order import (
 	make_delivery_note as create_delivery_note_from_sales_order,
@@ -247,7 +245,7 @@ def get_available_item_locations_for_serialized_item(item_code, from_warehouses,
 		warehouse_serial_nos_map.setdefault(warehouse, []).append(serial_no)
 
 	locations = []
-	for warehouse, serial_nos in iteritems(warehouse_serial_nos_map):
+	for warehouse, serial_nos in warehouse_serial_nos_map.items():
 		locations.append({
 			'qty': len(serial_nos),
 			'warehouse': warehouse,

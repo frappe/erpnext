@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -69,7 +68,7 @@ class Quotation(SellingController):
 		opp.set_status(status=status, update=True)
 
 	@frappe.whitelist()
-	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
+	def declare_enquiry_lost(self, lost_reasons_list, competitors, detailed_reason=None):
 		if not self.has_sales_order():
 			get_lost_reasons = frappe.get_list('Quotation Lost Reason',
 			fields = ["name"])
@@ -84,6 +83,9 @@ class Quotation(SellingController):
 					self.append('lost_reasons', reason)
 				else:
 					frappe.throw(_("Invalid lost reason {0}, please create a new lost reason").format(frappe.bold(reason.get('lost_reason'))))
+
+			for competitor in competitors:
+				self.append('competitors', competitor)
 
 			self.update_opportunity('Lost')
 			self.update_lead()

@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import copy
 import json
@@ -12,7 +10,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, floor, flt, nowdate
-from six import string_types
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.utils import get_stock_balance
@@ -77,7 +74,7 @@ def apply_putaway_rule(doctype, items, company, sync=None, purpose=None):
 		purpose: Purpose of Stock Entry
 		sync (optional): Sync with client side only for client side calls
 	"""
-	if isinstance(items, string_types):
+	if isinstance(items, str):
 		items = json.loads(items)
 
 	items_not_accomodated, updated_table = [], []

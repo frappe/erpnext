@@ -1,9 +1,6 @@
-
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -522,14 +519,15 @@ class Subscription(Document):
 		2. Change the `Subscription` status to 'Past Due Date'
 		3. Change the `Subscription` status to 'Cancelled'
 		"""
-		if getdate() > getdate(self.current_invoice_end) and self.is_prepaid_to_invoice():
-			self.update_subscription_period(add_days(self.current_invoice_end, 1))
 
 		if not self.is_current_invoice_generated(self.current_invoice_start, self.current_invoice_end) \
 			and (self.is_postpaid_to_invoice() or self.is_prepaid_to_invoice()):
 
 			prorate = frappe.db.get_single_value('Subscription Settings', 'prorate')
 			self.generate_invoice(prorate)
+
+		if getdate() > getdate(self.current_invoice_end) and self.is_prepaid_to_invoice():
+			self.update_subscription_period(add_days(self.current_invoice_end, 1))
 
 		if self.cancel_at_period_end and getdate() > getdate(self.current_invoice_end):
 			self.cancel_subscription_at_period_end()

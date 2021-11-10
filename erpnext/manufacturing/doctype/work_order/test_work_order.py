@@ -12,6 +12,7 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	ItemHasVariantError,
 	OverProductionError,
 	StockOverProductionError,
+	close_work_order,
 	make_stock_entry,
 	stop_unstop,
 )
@@ -799,6 +800,46 @@ class TestWorkOrder(unittest.TestCase):
 		for row in stock_entry.items:
 			if row.is_scrap_item:
 				self.assertEqual(row.qty, 1)
+
+	def test_close_work_order(self):
+		items = ['Test FG Item for Closed WO', 'Test RM Item 1 for Closed WO',
+			'Test RM Item 2 for Closed WO']
+
+		company = '_Test Company with perpetual inventory'
+		for item_code in items:
+			create_item(item_code = item_code, is_stock_item = 1,
+				is_purchase_item=1, opening_stock=100, valuation_rate=10, company=company, warehouse='Stores - TCP1')
+
+		item = 'Test FG Item for Closed WO'
+		raw_materials = ['Test RM Item 1 for Closed WO', 'Test RM Item 2 for Closed WO']
+		if not frappe.db.get_value('BOM', {'item': item}):
+			bom = make_bom(item=item, source_warehouse='Stores - TCP1', raw_materials=raw_materials, do_not_save=True)
+			bom.with_operations = 1
+			bom.append('operations', {
+				'operation': '_Test Operation 1',
+				'workstation': '_Test Workstation 1',
+				'hour_rate': 20,
+				'time_in_mins': 60
+			})
+
+			bom.submit()
+
+		wo_order = make_wo_order_test_record(item=item, company=company, planned_start_date=now(), qty=20, skip_transfer=1)
+		job_cards = frappe.db.get_value('Job Card', {'work_order': wo_order.name}, 'name')
+
+		if len(job_cards) == len(bom.operations):
+			for jc in job_cards:
+				job_card_doc = frappe.get_doc('Job Card', jc)
+				job_card_doc.append('time_logs', {
+					'from_time': now(),
+					'time_in_mins': 60,
+					'completed_qty': job_card_doc.for_quantity
+				})
+
+				job_card_doc.submit()
+
+			close_work_order(wo_order, "Closed")
+			self.assertEqual(wo_order.get('status'), "Closed")
 
 def update_job_card(job_card):
 	job_card_doc = frappe.get_doc('Job Card', job_card)
