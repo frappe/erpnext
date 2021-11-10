@@ -10,10 +10,18 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.setup_posting_date_time_check();
 		this._super(doc);
 	},
-	company: function () {
+
+	company: function() {
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+		let me = this;
+		if (this.frm.doc.company) {
+			frappe.db.get_value('Company', this.frm.doc.company, 'default_receivable_account', (r) => {
+				me.frm.set_value('debit_to', r.default_receivable_account);
+			});
+		}
 	},
-	onload: function () {
+
+	onload: function() {
 		var me = this;
 		this._super();
 

@@ -820,6 +820,38 @@ class AccountsController(TransactionBase):
 			if frappe.db.get_single_value('Accounts Settings', 'unlink_advance_payment_on_cancelation_of_order'):
 				unlink_ref_doc_from_payment_entries(self)
 
+			if self.doctype == "Sales Order":
+				self.unlink_ref_doc_from_po()
+
+	def unlink_ref_doc_from_po(self):
+		so_items = []
+		for item in self.items:
+			so_items.append(item.name)
+
+		linked_po = list(set(frappe.get_all(
+			'Purchase Order Item',
+			filters = {
+				'sales_order': self.name,
+				'sales_order_item': ['in', so_items],
+				'docstatus': ['<', 2]
+			},
+			pluck='parent'
+		)))
+
+		if linked_po:
+			frappe.db.set_value(
+				'Purchase Order Item', {
+					'sales_order': self.name,
+					'sales_order_item': ['in', so_items],
+					'docstatus': ['<', 2]
+				},{
+					'sales_order': None,
+					'sales_order_item': None
+				}
+			)
+
+			frappe.msgprint(_("Purchase Orders {0} are un-linked").format("\n".join(linked_po)))
+
 	def get_tax_map(self):
 		tax_map = {}
 		for tax in self.get('taxes'):
@@ -1037,15 +1069,15 @@ class AccountsController(TransactionBase):
 
 		if role_allowed_to_over_bill in user_roles and total_overbilled_amt > 0.1:
 			frappe.msgprint(_("Overbilling of {} ignored because you have {} role.")
-					.format(total_overbilled_amt, role_allowed_to_over_bill), title=_("Warning"), indicator="orange")
+					.format(total_overbilled_amt, role_allowed_to_over_bill), indicator="orange", alert=True)
 
 	def throw_overbill_exception(self, item, max_allowed_amt):
 		frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
 			.format(item.item_code, item.idx, max_allowed_amt))
 
-	def get_company_default(self, fieldname):
+	def get_company_default(self, fieldname, ignore_validation=False):
 		from erpnext.accounts.utils import get_company_default
-		return get_company_default(self.company, fieldname)
+		return get_company_default(self.company, fieldname, ignore_validation=ignore_validation)
 
 	def get_stock_items(self):
 		stock_items = []
@@ -1359,8 +1391,8 @@ class AccountsController(TransactionBase):
 			total = 0
 			base_total = 0
 			for d in self.get("payment_schedule"):
-				total += flt(d.payment_amount)
-				base_total += flt(d.base_payment_amount)
+				total += flt(d.payment_amount, d.precision("payment_amount"))
+				base_total += flt(d.base_payment_amount, d.precision("base_payment_amount"))
 
 			base_grand_total = self.get("base_rounded_total") or self.base_grand_total
 			grand_total = self.get("rounded_total") or self.grand_total
@@ -1376,8 +1408,9 @@ class AccountsController(TransactionBase):
 				else:
 					grand_total -= self.get("total_advance")
 					base_grand_total = flt(grand_total * self.get("conversion_rate"), self.precision("base_grand_total"))
-			if total != flt(grand_total, self.precision("grand_total")) or \
-				base_total != flt(base_grand_total, self.precision("base_grand_total")):
+
+			if flt(total, self.precision("grand_total")) != flt(grand_total, self.precision("grand_total")) or \
+				flt(base_total, self.precision("base_grand_total")) != flt(base_grand_total, self.precision("base_grand_total")):
 				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
 
 	def is_rounded_total_disabled(self):

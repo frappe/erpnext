@@ -444,7 +444,7 @@
    "description": "Item Image (if not slideshow)",
    "fieldname": "website_image",
    "fieldtype": "Attach Image",
-   "label": "Image"
+   "label": "Website Image"
   },
   {
    "allow_on_submit": 1,
@@ -591,7 +591,11 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2021-09-23 20:29:54.609337",
+=======
+ "modified": "2021-10-27 14:52:04.500251",
+>>>>>>> ab904c22cc5d3106b01f22d61e12e5fcbd9fb030
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
