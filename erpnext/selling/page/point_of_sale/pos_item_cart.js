@@ -496,7 +496,7 @@ erpnext.PointOfSale.ItemCart = class {
 	render_total_item_qty(items) {
 		var total_item_qty = 0;
 		items.map((item) => {
-			total_item_qty = total_item_qty + item.qty
+			total_item_qty = total_item_qty + item.qty;
 		});
 
 		this.$totals_section.find('.item-qty-total-container').html(
