@@ -36,15 +36,6 @@ class SerialNo(StockController):
 		self.validate_item()
 		self.set_status()
 
-	def set_status(self):
-		if self.delivery_document_type:
-			self.status = "Delivered"
-		elif self.warranty_expiry_date and getdate(self.warranty_expiry_date) <= getdate(nowdate()):
-			self.status = "Expired"
-		elif not self.warehouse:
-			self.status = "Inactive"
-		else:
-			self.status = "Active"
 
 	def set_maintenance_status(self):
 		if not self.warranty_expiry_date and not self.amc_expiry_date:
@@ -91,6 +82,16 @@ class SerialNo(StockController):
 		self.item_name = item.item_name
 		self.brand = item.brand
 		self.warranty_period = item.warranty_period
+
+	def set_status(self):
+		if self.delivery_document_type:
+			self.status = "Delivered"
+		elif self.warranty_expiry_date and getdate(self.warranty_expiry_date) <= getdate(nowdate()):
+			self.status = "Expired"
+		elif not self.warehouse:
+			self.status = "Inactive"
+		else:
+			self.status = "Active"
 
 	def set_purchase_details(self, purchase_sle):
 		if purchase_sle:
