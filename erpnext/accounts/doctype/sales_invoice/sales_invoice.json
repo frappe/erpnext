@@ -11,6 +11,8 @@
   "dni_patient",
   "patient_mobile",
   "patient_sex",
+  "patient_cologne",
+  "patient_dob",
   "customer",
   "customer_name",
   "client_name",
@@ -1798,12 +1800,26 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Patient Sex"
+  },
+  {
+   "fetch_from": "patient.cologne",
+   "fieldname": "patient_cologne",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Patient Cologne"
+  },
+  {
+   "fetch_from": "patient.dob",
+   "fieldname": "patient_dob",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Patient DOB"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-11-08 16:39:26.048023",
+ "modified": "2021-11-10 13:29:37.911734",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
