@@ -188,15 +188,11 @@ class SerialNo(StockController):
 			where serial_no like %s and item_code=%s and is_cancelled=0""",
 			("%%%s%%" % self.name, self.item_code), as_dict=True)
 
-		# Find the exact match
-		sle_exists = False
 		for d in sl_entries:
 			if self.name.upper() in get_serial_nos(d.serial_no):
-				sle_exists = True
-				break
+				frappe.throw(_("Cannot delete Serial No {0}, as it is used in stock transactions")
+						.format(self.name), title=_("Cannot delete"))
 
-		if sle_exists:
-			frappe.throw(_("Cannot delete Serial No {0}, as it is used in stock transactions").format(self.name))
 
 	def before_rename(self, old, new, merge=False):
 		if merge:
