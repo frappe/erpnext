@@ -33,6 +33,9 @@ class RepostItemValuation(Document):
 			self.voucher_type = None
 			self.voucher_no = None
 
+		self.allow_negative_stock = self.allow_negative_stock or \
+				cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+
 	def set_company(self):
 		if self.voucher_type and self.voucher_no:
 			self.company = frappe.get_cached_value(self.voucher_type, self.voucher_no, "company")
