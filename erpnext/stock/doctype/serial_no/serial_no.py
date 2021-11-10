@@ -3,6 +3,7 @@
 
 
 import json
+from typing import List
 
 import frappe
 from frappe import ValidationError, _
@@ -469,7 +470,7 @@ def get_item_details(item_code):
 		is_stock_item, has_serial_no, serial_no_series
 		from tabItem where name=%s""", item_code, as_dict=True)[0]
 
-def get_serial_nos(serial_no):
+def get_serial_nos(serial_no: str) -> List[str]:
 	if isinstance(serial_no, list):
 		return serial_no
 
