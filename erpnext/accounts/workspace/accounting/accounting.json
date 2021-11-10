@@ -456,6 +456,15 @@
   },
   {
    "hidden": 0,
+   "is_query_report": 1,
+   "label": "Invoice Item Analysis",
+   "link_to": "Invoice Item Analysis",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
    "is_query_report": 0,
    "label": "Financial Statements",
    "onboard": 0,
@@ -1082,7 +1091,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-23 16:06:34.167267",
+ "modified": "2021-11-10 10:06:37.756305",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
