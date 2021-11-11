@@ -170,10 +170,27 @@ def _order(woocommerce_settings, *args, **kwargs):
 	if customer_id == 0: # this is guest login, a patient under a practitioner
 		edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
 		if pos_order_type == "patient_test_order":
+
+			#Check if Prac is Frozen and Patient Test Order
+			temporaryUnfreeze = 0
+			customer_doc = frappe.get_doc("Customer", customer_code)
+			if customer_doc.customer_status == "Stop Credit":
+				temporaryUnfreeze = 1
+				customer_doc.is_frozen = 0
+				customer_doc.save()
+
+
 			# We don't need to use the backorder flag for test order
 			test_order = 1
 			invoice_sending_option = "send receipt to patient" # this need to be added so that test kit is added for this type of orders
 			new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option, invoice_sending_option=invoice_sending_option, test_order=test_order, patient_dob=patient_dob)
+
+			DocTags("Sales Invoice").add(new_invoice.name, "Temporary Unfreeze")
+
+			#Check if Prac was Frozen and Patient Test Order
+			if temporaryUnfreeze == 1:
+				customer_doc.is_frozen = 1
+				customer_doc.save()
 
 		elif pos_order_type == "patient_product_order":
 			# Cannot handle that for now as we need to check if the patient account exist or not in ERPNext
@@ -209,7 +226,6 @@ def _order(woocommerce_settings, *args, **kwargs):
 					new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type)
 			else:
 				frappe.log_error(title="Error in authorized order", message="Cannot recoginized pos_order_type: {}".format(pos_order_type))
-
 
 	# Create a intergration request
 	try:
