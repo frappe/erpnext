@@ -928,12 +928,13 @@ frappe.ui.form.on('Sales Invoice', {
 		}
 
 		const timesheet_items = Object.keys(item_map);
-		const items_to_keep = frm.doc.items.filter(
+		const existing_items = frm.doc.items || [];
+		const items_to_keep = existing_items.filter(
 			item => !timesheet_items.includes(item.item_code)
 		);
 
 		await new Promise(resolve => {
-			if (items_to_keep.length == frm.doc.items.length) return resolve();
+			if (items_to_keep.length == existing_items.length) return resolve();
 
 			frappe.confirm(
 				__("Existing items will be overwritten. Are you sure you want to continue?"),

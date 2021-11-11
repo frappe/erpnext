@@ -162,52 +162,45 @@ frappe.ui.form.on("Timesheet", {
 		frm.refresh_fields();
 	},
 
-	make_invoice: function(frm) {
-		let fields = [{
-			"fieldtype": "Link",
-			"label": __("Item Code"),
-			"fieldname": "item_code",
-			"options": "Item"
-		}];
+	async make_invoice(frm) {
+		const args = await new Promise(resolve => {
+			if (frm.doc.customer) return resolve();
 
-		if (!frm.doc.customer) {
-			fields.push({
-				"fieldtype": "Link",
-				"label": __("Customer"),
-				"fieldname": "customer",
-				"options": "Customer",
-				"default": frm.doc.customer
-			});
-		}
-
-		let dialog = new frappe.ui.Dialog({
-			title: __("Create Sales Invoice"),
-			fields: fields
-		});
-
-		dialog.set_primary_action(__('Create Sales Invoice'), () => {
-			var args = dialog.get_values();
-			if(!args) return;
-			dialog.hide();
-			return frappe.call({
-				type: "GET",
-				method: "erpnext.projects.doctype.timesheet.timesheet.make_sales_invoice",
-				args: {
-					"source_name": frm.doc.name,
-					"item_code": args.item_code,
-					"customer": frm.doc.customer || args.customer,
-					"currency": frm.doc.currency
+			new frappe.ui.Dialog({
+				title: __("Create Sales Invoice"),
+				fields: [{
+					"fieldtype": "Link",
+					"label": __("Customer"),
+					"fieldname": "customer",
+					"options": "Customer",
+					"default": frm.doc.customer
+				}],
+				primary_action_label: __('Create Sales Invoice'),
+				primary_action() {
+					this.hide();
+					resolve(this.get_values());
 				},
-				freeze: true,
-				callback: function(r) {
-					if(!r.exc) {
-						frappe.model.sync(r.message);
-						frappe.set_route("Form", r.message.doctype, r.message.name);
-					}
-				}
-			});
+			}).show();
 		});
-		dialog.show();
+
+		const target_doctype = "Sales Invoice";
+		const sales_invoice = {
+			doctype: target_doctype,
+			customer: frm.doc.customer || (args && args.customer),
+			currency: frm.doc.currency,
+			company: frm.doc.company,
+			__islocal: true
+		};
+		frappe.model.sync(sales_invoice);
+		await frappe.set_route("Form", target_doctype, sales_invoice.name);
+
+		if (!cur_frm || cur_frm.doctype !== target_doctype) return;
+
+		frappe.model.set_default_values(cur_frm.doc);
+		cur_frm.events.add_timesheet_data(cur_frm, {
+			parent: frm.doc.name,
+			project: frm.doc.project,
+		});
 	},
 
 	make_salary_slip: function(frm) {

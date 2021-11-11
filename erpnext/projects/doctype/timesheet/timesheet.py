@@ -304,51 +304,6 @@ def get_timesheet_data(name, project):
 	}
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, item_code=None, customer=None, currency=None):
-	target = frappe.new_doc("Sales Invoice")
-	timesheet = frappe.get_doc('Timesheet', source_name)
-
-	if not timesheet.total_billable_hours:
-		frappe.throw(_("Invoice can't be made for zero billing hour"))
-
-	if timesheet.total_billable_hours == timesheet.total_billed_hours:
-		frappe.throw(_("Invoice already created for all billing hours"))
-
-	hours = flt(timesheet.total_billable_hours) - flt(timesheet.total_billed_hours)
-	billing_amount = flt(timesheet.total_billable_amount) - flt(timesheet.total_billed_amount)
-	billing_rate = billing_amount / hours
-
-	target.company = timesheet.company
-	if customer:
-		target.customer = customer
-
-	if currency:
-		target.currency = currency
-
-	if item_code:
-		target.append('items', {
-			'item_code': item_code,
-			'qty': hours,
-			'rate': billing_rate
-		})
-
-	for time_log in timesheet.time_logs:
-		if time_log.is_billable:
-			target.append('timesheets', {
-				'time_sheet': timesheet.name,
-				'billing_hours': time_log.billing_hours,
-				'billing_amount': time_log.billing_amount,
-				'timesheet_detail': time_log.name,
-				'activity_type': time_log.activity_type,
-				'description': time_log.description
-			})
-
-	target.run_method("calculate_billing_amount_for_timesheet")
-	target.run_method("set_missing_values")
-
-	return target
-
-@frappe.whitelist()
 def make_salary_slip(source_name, target_doc=None):
 	target = frappe.new_doc("Salary Slip")
 	set_missing_values(source_name, target)
