@@ -827,12 +827,7 @@ class WorkOrder(Document):
 
 	def validate_operation_time(self):
 		for d in self.operations:
-<<<<<<< HEAD
-			if d.time_in_mins < 0:
-				print(self.bom_no, self.production_item)
-=======
 			if not d.time_in_mins > 0:
->>>>>>> ab904c22cc5d3106b01f22d61e12e5fcbd9fb030
 				frappe.throw(_("Operation Time must be greater than 0 for Operation {0}").format(d.operation))
 
 	@frappe.whitelist()
