@@ -120,7 +120,7 @@ class AssetRepair(AccountsController):
 		for stock_item in self.get('stock_items'):
 			stock_entry.append('items', {
 				"s_warehouse": self.warehouse,
-				"item_code": stock_item.item,
+				"item_code": stock_item.item_code,
 				"qty": stock_item.consumed_quantity,
 				"basic_rate": stock_item.valuation_rate
 			})
