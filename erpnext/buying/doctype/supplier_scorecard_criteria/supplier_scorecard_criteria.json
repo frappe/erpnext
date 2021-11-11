@@ -2,7 +2,7 @@
  "allow_copy": 0, 
  "allow_guest_to_view": 0, 
  "allow_import": 0, 
- "allow_rename": 0, 
+ "allow_rename": 1, 
  "autoname": "field:criteria_name", 
  "beta": 0, 
  "creation": "2017-05-29 01:32:43.064891", 
