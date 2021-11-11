@@ -1277,7 +1277,7 @@ class SalesInvoice(SellingController):
 
 		self.make_loyalty_point_redemption_gle(gl_entries)
 		self.make_pos_gl_entries(gl_entries)
-		self.make_gle_for_change_amount(gl_entries)
+		#self.make_gle_for_change_amount(gl_entries)
 
 		self.make_write_off_gl_entry(gl_entries)
 		self.make_gle_for_rounding_adjustment(gl_entries)
@@ -1398,14 +1398,15 @@ class SalesInvoice(SellingController):
 			for payment_mode in self.payments:
 				if payment_mode.amount:
 					# POS, make payment entries
+					amount = payment_mode.base_amount - self.change_amount
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": self.debit_to,
 							"party_type": "Customer",
 							"party": self.customer,
 							"against": payment_mode.account,
-							"credit": payment_mode.base_amount,
-							"credit_in_account_currency": payment_mode.base_amount \
+							"credit": amount,
+							"credit_in_account_currency": amount \
 								if self.party_account_currency==self.company_currency \
 								else payment_mode.amount,
 							"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
@@ -1419,8 +1420,8 @@ class SalesInvoice(SellingController):
 						self.get_gl_dict({
 							"account": payment_mode.account,
 							"against": self.customer,
-							"debit": payment_mode.base_amount,
-							"debit_in_account_currency": payment_mode.base_amount \
+							"debit": amount,
+							"debit_in_account_currency": amount \
 								if payment_mode_account_currency==self.company_currency \
 								else payment_mode.amount,
 							"cost_center": self.cost_center
