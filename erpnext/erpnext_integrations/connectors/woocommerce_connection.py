@@ -174,7 +174,7 @@ def _order(woocommerce_settings, *args, **kwargs):
 			#Check if Prac is Frozen and Patient Test Order
 			temporaryUnfreeze = 0
 			customer_doc = frappe.get_doc("Customer", customer_code)
-			if customer_doc.customer_status == "Stop Credit":
+			if customer_doc.is_frozen == 1:
 				temporaryUnfreeze = 1
 				customer_doc.is_frozen = 0
 				customer_doc.save()
