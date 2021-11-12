@@ -1277,7 +1277,7 @@ class SalesInvoice(SellingController):
 
 		self.make_loyalty_point_redemption_gle(gl_entries)
 		self.make_pos_gl_entries(gl_entries)
-		#self.make_gle_for_change_amount(gl_entries)
+		self.make_gle_for_change_amount(gl_entries)
 
 		self.make_write_off_gl_entry(gl_entries)
 		self.make_gle_for_rounding_adjustment(gl_entries)
@@ -1398,7 +1398,11 @@ class SalesInvoice(SellingController):
 			for payment_mode in self.payments:
 				if payment_mode.amount:
 					# POS, make payment entries
-					amount = payment_mode.base_amount - self.change_amount
+					if payment_mode.mode_of_payment == "Efectivo":
+						amount = payment_mode.base_amount - self.change_amount
+					else:
+						amount = payment_mode.base_amount
+						
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": self.debit_to,

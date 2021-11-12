@@ -151,13 +151,13 @@
   {
    "fieldname": "total_references",
    "fieldtype": "Currency",
-   "label": "Total References",
+   "label": "Total Base",
    "options": "Currency",
    "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-11-10 13:38:48.305691",
+ "modified": "2021-11-12 13:56:25.217746",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Supplier Retention",
