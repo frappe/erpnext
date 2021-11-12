@@ -1729,8 +1729,8 @@ def update_invoice_status():
 			(invoice.docstatus == 1)
 			& (invoice.outstanding_amount > 0)
 			& (
-				invoice.status.like('Unpaid%')
-				| invoice.status.like('Partly Paid%')
+				invoice.status.like("Unpaid%")
+				| invoice.status.like("Partly Paid%")
 			)
 			& (
 				(invoice.is_pos & invoice.due_date < today) | is_overdue
@@ -1739,7 +1739,13 @@ def update_invoice_status():
 			)
 		)
 
-		frappe.qb.update(invoice).set("status", "Overdue").where(conditions).run()
+		status = (
+			frappe.qb.terms.Case()
+			.when(invoice.status.like("%Discounted"), "Overdue and Discounted")
+			.else_("Overdue")
+		)
+
+		frappe.qb.update(invoice).set("status", status).where(conditions).run()
 
 
 @frappe.whitelist()
