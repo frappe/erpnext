@@ -93,12 +93,22 @@ frappe.ui.form.on("Task", {
 					let row = frm.add_child("items");
 					row.item_code = item.item_code;
 					row.item_name = item.item_name;
-					row.uom = item.stock_uom;
+					row.basic_rate = item.rate;
 					row.qty = item.qty;
+					row.uom = item.stock_uom;
+					row.estimated_cost = flt(row.qty) * flt(row.basic_rate);
 					row.warehouse = item.source_warehouse;
 				  }
 			frm.refresh_fields("items");
 			}
 		});
+	}
+});
+
+frappe.ui.form.on("Task Item", {
+	basic_rate(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		row.estimated_cost = flt(row.qty) * flt(row.basic_rate);
+		frm.refresh()
 	}
 });

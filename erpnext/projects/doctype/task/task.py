@@ -222,6 +222,16 @@ class Task(NestedSet):
 			{'parent': item_code, 'company': company},
 			['default_warehouse'])
 
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_warehouse_details
+		def get_basic_rate(self, item):
+			args = frappe._dict(
+				{"item_code": item.item_code, "company": self.company,
+				"project": self.project, "uom": item.stock_uom, 'warehouse': item.source_warehouse})
+			args['posting_date'] = frappe.utils.nowdate()
+			args['posting_time'] = frappe.utils.nowtime()
+			stock_and_rate = get_warehouse_details(args)
+			return stock_and_rate['basic_rate']
+
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 
 		# item dict = { item_code: {qty, description, stock_uom} }
@@ -231,6 +241,7 @@ class Task(NestedSet):
 		for key, item in item_dict.items():
 			if not item.source_warehouse:
 				item.source_warehouse = get_default_source_warehouse(item.item_code, self.company)
+			item.rate = get_basic_rate(self, item)
 
 		return item_dict
 

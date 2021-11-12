@@ -8,6 +8,8 @@
  "field_order": [
   "item_code",
   "item_name",
+  "basic_rate",
+  "estimated_cost",
   "column_break_4",
   "qty",
   "uom",
@@ -53,12 +55,24 @@
   {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "basic_rate",
+   "fieldtype": "Float",
+   "label": "Basic Rate"
+  },
+  {
+   "fieldname": "estimated_cost",
+   "fieldtype": "Currency",
+   "label": "Estimated Cost",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-10-22 16:03:40.654341",
+ "modified": "2021-11-12 12:30:36.685888",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task Item",
