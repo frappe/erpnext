@@ -179,16 +179,14 @@ def _order(woocommerce_settings, *args, **kwargs):
 				customer_doc.is_frozen = 0
 				customer_doc.save()
 
-
 			# We don't need to use the backorder flag for test order
 			test_order = 1
 			invoice_sending_option = "send receipt to patient" # this need to be added so that test kit is added for this type of orders
 			new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option, invoice_sending_option=invoice_sending_option, test_order=test_order, patient_dob=patient_dob)
 
-			DocTags("Sales Invoice").add(new_invoice.name, "Temporary Unfreeze")
-
 			#Check if Prac was Frozen and Patient Test Order
 			if temporaryUnfreeze == 1:
+				DocTags("Sales Invoice").add(new_invoice.name, "Temporary Unfreeze")
 				customer_doc.is_frozen = 1
 				customer_doc.save()
 
