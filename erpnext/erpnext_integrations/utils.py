@@ -25,7 +25,6 @@ def validate_webhooks_request(doctype,  hmac_key, secret_key='secret'):
 			)
 
 			if frappe.request.data and \
-				frappe.get_request_header(hmac_key) and \
 				not sig == bytes(frappe.get_request_header(hmac_key).encode()):
 					frappe.throw(_("Unverified Webhook Data"))
 			frappe.set_user(settings.modified_by)
