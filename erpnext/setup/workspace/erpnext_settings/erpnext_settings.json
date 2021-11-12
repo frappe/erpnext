@@ -16,7 +16,7 @@
  "is_standard": 1,
  "label": "ERPNext Settings",
  "links": [],
- "modified": "2021-10-26 21:32:55.323591",
+ "modified": "2021-11-12 01:32:55.323591",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "ERPNext Settings",
@@ -76,8 +76,8 @@
   },
   {
    "icon": "retail",
-   "label": "Shopping Cart Settings",
-   "link_to": "Shopping Cart Settings",
+   "label": "E Commerce Settings",
+   "link_to": "E Commerce Settings",
    "type": "DocType"
   },
   {
@@ -118,13 +118,6 @@
    "icon": "setting",
    "label": "Domain Settings",
    "link_to": "Domain Settings",
-   "type": "DocType"
-  },
-  {
-   "doc_view": "",
-   "icon": "retail",
-   "label": "Products Settings",
-   "link_to": "Products Settings",
    "type": "DocType"
   }
  ]
