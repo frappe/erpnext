@@ -93,7 +93,7 @@ jobs:
           for version in $(seq 12 13)
           do
               echo "Updating to v$version"
-              branch_name="version-$version"
+              branch_name="version-$version-hotfix"
 
               git -C "apps/frappe" fetch --depth 1 upstream $branch_name:$branch_name
               git -C "apps/erpnext" fetch --depth 1 upstream $branch_name:$branch_name

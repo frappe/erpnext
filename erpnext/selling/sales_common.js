@@ -474,29 +474,33 @@ frappe.ui.form.on(cur_frm.doctype, {
 					"reqd": 1
 				},
 				{
+					"fieldtype": "Table MultiSelect",
+					"label": __("Competitors"),
+					"fieldname": "competitors",
+					"options": "Competitor Detail"
+				},
+				{
 					"fieldtype": "Text",
 					"label": __("Detailed Reason"),
 					"fieldname": "detailed_reason"
 				},
 			],
 			primary_action: function() {
-				var values = dialog.get_values();
-				var reasons = values["lost_reason"];
-				var detailed_reason = values["detailed_reason"];
+				let values = dialog.get_values();
 
 				frm.call({
 					doc: frm.doc,
 					method: 'declare_enquiry_lost',
 					args: {
-						'lost_reasons_list': reasons,
-						'detailed_reason': detailed_reason
+						'lost_reasons_list': values.lost_reason,
+						'competitors': values.competitors,
+						'detailed_reason': values.detailed_reason
 					},
 					callback: function(r) {
 						dialog.hide();
 						frm.reload_doc();
 					},
 				});
-				refresh_field("lost_reason");
 			},
 			primary_action_label: __('Declare Lost')
 		});
