@@ -79,7 +79,8 @@ def resolve_dunning(doc, state):
 			unresolved_dunnings = frappe.get_all("Dunning",
 				filters={
 					"sales_invoice": reference.reference_name,
-					"status": ("!=", "Resolved")
+					"status": ("!=", "Resolved"),
+					"docstatus": ("!=", 2),
 				},
 				pluck="name"
 			)
