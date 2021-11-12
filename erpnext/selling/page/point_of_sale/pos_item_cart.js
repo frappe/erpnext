@@ -101,7 +101,7 @@ erpnext.PointOfSale.ItemCart = class {
 				${this.get_discount_icon()} Add Discount
 			</div>
 			<div class="item-qty-total-container">
-				<div class="item-qty-total-label">Total Items</div>
+				<div class="item-qty-total-label">${__('Total Items')}</div>
 				<div class="item-qty-total-value">0.00</div>
 			</div>
 			<div class="net-total-container">
@@ -500,11 +500,11 @@ erpnext.PointOfSale.ItemCart = class {
 		});
 
 		this.$totals_section.find('.item-qty-total-container').html(
-			`<div>Total Item Qty</div><div>${total_item_qty}</div>`
+			`<div>${__('Total Item Qty')}</div><div>${total_item_qty}</div>`
 		);
 
 		this.$numpad_section.find('.numpad-item-qty-total').html(
-			`<div>Total Item Qty: <span>${total_item_qty}</span></div>`
+			`<div>${__('Total Item Qty')}: <span>${total_item_qty}</span></div>`
 		);
 	}
 
