@@ -1,14 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import datetime
 
 import frappe
 from frappe import _
 from frappe.utils import flt, formatdate
-from six import iteritems
 
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
 
@@ -49,7 +47,7 @@ def execute(filters=None):
 	return columns, data, None, chart
 
 def get_final_data(dimension, dimension_items, filters, period_month_ranges, data, DCC_allocation):
-	for account, monthwise_data in iteritems(dimension_items):
+	for account, monthwise_data in dimension_items.items():
 		row = [dimension, account]
 		totals = [0, 0, 0]
 		for year in get_fiscal_years(filters):

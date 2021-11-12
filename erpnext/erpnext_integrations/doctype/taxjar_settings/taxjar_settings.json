@@ -14,6 +14,8 @@
   "cb_keys",
   "sandbox_api_key",
   "configuration",
+  "company",
+  "column_break_10",
   "tax_account_head",
   "configuration_cb",
   "shipping_account_head",
@@ -68,10 +70,6 @@
    "label": "Sandbox API Key"
   },
   {
-   "fieldname": "configuration_cb",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
    "depends_on": "taxjar_calculate_tax",
    "fieldname": "taxjar_create_transactions",
@@ -104,11 +102,25 @@
    "label": "Nexus",
    "options": "TaxJar Nexus",
    "read_only": 1
+  },
+  {
+   "fieldname": "configuration_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2021-10-06 10:59:13.475442",
+ "modified": "2021-11-08 18:02:29.232090",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "TaxJar Settings",

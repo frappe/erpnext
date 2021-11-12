@@ -56,7 +56,7 @@
    "fieldname": "allocated_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Contribution Amount",
+   "label": "Contribution to Net Total",
    "oldfieldname": "allocated_amount",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -65,6 +65,8 @@
    "width": "120px"
   },
   {
+   "fetch_from": "sales_person.commission_rate",
+   "fetch_if_empty": 1,
    "fieldname": "commission_rate",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -85,7 +87,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-10-05 15:41:45.750062",
+ "modified": "2021-11-09 23:55:20.670475",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Team",
