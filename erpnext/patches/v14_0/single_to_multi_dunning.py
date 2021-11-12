@@ -7,7 +7,7 @@ def execute():
 	frappe.reload_doc("accounts", "doctype", "overdue_payment")
 	frappe.reload_doc("accounts", "doctype", "dunning")
 
-	all_dunnings = frappe.get_all("Dunning", pluck="name")
+	all_dunnings = frappe.get_all("Dunning", filters={"docstatus": ("!=", 2)}, pluck="name")
 	for dunning_name in all_dunnings:
 		dunning = frappe.get_doc("Dunning", dunning_name)
 		if not dunning.sales_invoice:
