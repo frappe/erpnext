@@ -2,18 +2,9 @@ name: Server
 
 on:
   pull_request:
-    paths-ignore:
-      - '**.js'
-      - '**.md'
-  workflow_dispatch:
-  push:
-    branches: [ develop ]
-    paths-ignore:
-      - '**.js'
-      - '**.md'
 
 concurrency:
-  group: server-develop-${{ github.event.number }}
+  group: server-postgres-develop-${{ github.event.number }}
   cancel-in-progress: true
 
 jobs:
@@ -23,22 +14,26 @@ jobs:
 
     strategy:
       fail-fast: false
-
       matrix:
-        container: [1, 2, 3]
+       container: [1, 2, 3]
 
-    name: Python Unit Tests
+    name: Python Unit Tests (Postgres)
 
     services:
-      mysql:
-        image: mariadb:10.3
+      postgres:
+        image: postgres:13.3
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: YES
+          POSTGRES_PASSWORD: travis
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
         ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+          - 5432:5432
 
     steps:
+
       - name: Clone
         uses: actions/checkout@v2
 
@@ -89,23 +84,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
+
       - name: Install
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
         env:
-          DB: mariadb
+          DB: postgres
           TYPE: server
 
       - name: Run Tests
-        run: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --use-orchestrator --with-coverage
+        run: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --use-orchestrator
         env:
           TYPE: server
           CI_BUILD_ID: ${{ github.run_id }}
           ORCHESTRATOR_URL: http://test-orchestrator.frappe.io
-
-      - name: Upload coverage data
-        uses: codecov/codecov-action@v2
-        with:
-          name: MariaDB
-          fail_ci_if_error: true
-          files: /home/runner/frappe-bench/sites/coverage.xml
-          verbose: true
