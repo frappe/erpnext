@@ -7,12 +7,8 @@ from collections import OrderedDict
 
 import frappe
 from frappe import _, _dict
-<<<<<<< HEAD
-from frappe.utils import cstr, flt, getdate
-from six import iteritems
-=======
 from frappe.utils import cstr, getdate
->>>>>>> ecbe4b16b8 (perf(minor): general ledger report (#27987))
+from six import iteritems
 
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
