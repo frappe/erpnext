@@ -20,7 +20,62 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			});
 		}
 	},
-
+	tax_category:function(frm){
+		frm.refresh_field("items")
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	shipping_address:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	supplier_address:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	customer_address:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	company_address:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
 	onload: function() {
 		var me = this;
 		this._super();
