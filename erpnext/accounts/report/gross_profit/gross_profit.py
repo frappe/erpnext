@@ -19,7 +19,7 @@ def execute(filters=None):
 	data = []
 
 	group_wise_columns = frappe._dict({
-		"invoice": ["parent", "customer", "customer_group", "posting_date","item_code", "item_name","item_group", "brand", "description", \
+		"invoice": ["invoice_or_item", "customer", "customer_group", "posting_date","item_code", "item_name","item_group", "brand", "description", \
 			"warehouse", "qty", "base_rate", "buying_rate", "base_amount",
 			"buying_amount", "gross_profit", "gross_profit_percent", "project"],
 		"item_code": ["item_code", "item_name", "brand", "description", "qty", "base_rate",
@@ -84,6 +84,7 @@ def get_columns(group_wise_columns, filters):
 	columns = []
 	column_map = frappe._dict({
 		"parent": _("Sales Invoice") + ":Link/Sales Invoice:120",
+		"invoice_or_item": _("Sales Invoice") + ":Link/Sales Invoice:120",
 		"posting_date": _("Posting Date") + ":Date:100",
 		"posting_time": _("Posting Time") + ":Data:100",
 		"item_code": _("Item Code") + ":Link/Item:100",
@@ -122,7 +123,7 @@ def get_columns(group_wise_columns, filters):
 
 def get_column_names():
 	return frappe._dict({
-		'parent': 'sales_invoice',
+		'invoice_or_item': 'sales_invoice',
 		'customer': 'customer',
 		'customer_group': 'customer_group',
 		'posting_date': 'posting_date',
@@ -446,7 +447,7 @@ class GrossProfitGenerator(object):
 				if not row.indent:
 					row.indent = 1.0
 					row.parent_invoice = row.parent
-					row.parent = row.item_code
+					row.invoice_or_item = row.item_code
 
 					if frappe.db.exists('Product Bundle', row.item_code):
 						self.add_bundle_items(row, index)
@@ -455,7 +456,8 @@ class GrossProfitGenerator(object):
 		return frappe._dict({
 			'parent_invoice': "",
 			'indent': 0.0,
-			'parent': row.parent,
+			'invoice_or_item': row.parent,
+			'parent': None,
 			'posting_date': row.posting_date,
 			'posting_time': row.posting_time,
 			'project': row.project,
@@ -499,7 +501,8 @@ class GrossProfitGenerator(object):
 		return frappe._dict({
 			'parent_invoice': product_bundle.item_code,
 			'indent': product_bundle.indent + 1,
-			'parent': item.item_code,
+			'parent': None,
+			'invoice_or_item': item.item_code,
 			'posting_date': product_bundle.posting_date,
 			'posting_time': product_bundle.posting_time,
 			'project': product_bundle.project,
