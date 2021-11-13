@@ -49,10 +49,11 @@ frappe.ui.form.on("Dunning", {
 		}
 
 		if (frm.doc.docstatus === 0) {
-			frm.add_custom_button(__("Fetch Overdue Payments"), function () {
+			frm.add_custom_button(__("Fetch Overdue Payments"), () => {
 				erpnext.utils.map_current_doc({
 					method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_dunning",
 					source_doctype: "Sales Invoice",
+					date_field: "due_date",
 					target: frm,
 					setters: {
 						customer: frm.doc.customer || undefined,
@@ -62,6 +63,9 @@ frappe.ui.form.on("Dunning", {
 						status: "Overdue",
 						company: frm.doc.company
 					},
+					allow_child_item_selection: true,
+					child_fielname: "payment_schedule",
+					child_columns: ["due_date", "outstanding"],
 				});
 			});
 		}
