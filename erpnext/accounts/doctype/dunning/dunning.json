@@ -2,6 +2,7 @@
  "actions": [],
  "allow_events_in_timeline": 1,
  "autoname": "naming_series:",
+ "beta": 1,
  "creation": "2019-07-05 16:34:31.013238",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -52,8 +53,9 @@
   "letter_head",
   "closing_text",
   "accounting_details_section",
-  "cost_center",
   "income_account",
+  "column_break_48",
+  "cost_center",
   "amended_from"
  ],
  "fields": [
@@ -247,6 +249,7 @@
   },
   {
    "description": "For dunning fee and interest",
+   "fetch_from": "dunning_type.income_account",
    "fieldname": "income_account",
    "fieldtype": "Link",
    "label": "Income Account",
@@ -308,6 +311,7 @@
    "label": "Accounting Details"
   },
   {
+   "fetch_from": "dunning_type.cost_center",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -375,6 +379,10 @@
    "label": "Dunning Amount (Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_48",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
