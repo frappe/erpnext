@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:dunning_type",
+ "beta": 1,
  "creation": "2019-12-04 04:59:08.003664",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -9,12 +9,18 @@
  "field_order": [
   "dunning_type",
   "is_default",
+  "column_break_3",
+  "company",
   "section_break_6",
   "dunning_fee",
   "column_break_8",
   "rate_of_interest",
   "text_block_section",
-  "dunning_letter_text"
+  "dunning_letter_text",
+  "section_break_9",
+  "income_account",
+  "column_break_13",
+  "cost_center"
  ],
  "fields": [
   {
@@ -61,6 +67,38 @@
    "fieldname": "is_default",
    "fieldtype": "Check",
    "label": "Is Default"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "income_account",
+   "fieldtype": "Link",
+   "label": "Income Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
   }
  ],
  "links": [
@@ -69,12 +107,11 @@
    "link_fieldname": "dunning_type"
   }
  ],
- "migration_hash": "3a2c71ceb1a15469ffe1eca6053656a0",
- "modified": "2021-10-12 17:26:48.080519",
+ "modified": "2021-11-13 00:25:35.659283",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning Type",
- "naming_rule": "By fieldname",
+ "naming_rule": "By script",
  "owner": "Administrator",
  "permissions": [
   {
