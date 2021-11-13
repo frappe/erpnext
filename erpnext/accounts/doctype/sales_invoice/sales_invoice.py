@@ -2516,7 +2516,7 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 	def postprocess_dunning(source, target):
 		from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text
 
-		dunning_type = frappe.db.exists("Dunning Type", {"is_default": 1})
+		dunning_type = frappe.db.exists("Dunning Type", {"is_default": 1, "company": source.company})
 		if dunning_type:
 			dunning_type = frappe.get_doc("Dunning Type", dunning_type)
 			target.dunning_type = dunning_type.name
@@ -2538,6 +2538,7 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 	return get_mapped_doc(
 		from_doctype="Sales Invoice",
 		from_docname=source_name,
+		target_doc=target_doc,
 		table_maps={
 			"Sales Invoice": {
 				"doctype": "Dunning",
