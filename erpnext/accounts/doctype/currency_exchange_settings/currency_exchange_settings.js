@@ -11,8 +11,7 @@ frappe.ui.form.on('Currency Exchange Settings', {
 				to: '{to_currency}'
 			};
 			add_param(frm, "https://api.exchangerate.host/convert", params, result);
-		}
-		else if (frm.doc.service_provider == "Frankfurter.app") {
+		} else if (frm.doc.service_provider == "Frankfurter.app") {
 			let result = ['rates', '{to_currency}'];
 			let params = {
 				base: '{from_currency}',
