@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import json
 import re
 
@@ -7,7 +5,6 @@ import frappe
 from frappe import _
 from frappe.model.utils import get_fetch_values
 from frappe.utils import cint, cstr, date_diff, flt, getdate, nowdate
-from six import string_types
 
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
@@ -29,12 +26,13 @@ def validate_gstin_for_india(doc, method):
 
 	gst_category = []
 
-	if len(doc.links):
-		link_doctype = doc.links[0].get("link_doctype")
-		link_name = doc.links[0].get("link_name")
+	if hasattr(doc, 'gst_category'):
+		if len(doc.links):
+			link_doctype = doc.links[0].get("link_doctype")
+			link_name = doc.links[0].get("link_name")
 
-		if link_doctype in ["Customer", "Supplier"]:
-			gst_category = frappe.db.get_value(link_doctype, {'name': link_name}, ['gst_category'])
+			if link_doctype in ["Customer", "Supplier"]:
+				gst_category = frappe.db.get_value(link_doctype, {'name': link_name}, ['gst_category'])
 
 	doc.gstin = doc.gstin.upper().strip()
 	if not doc.gstin or doc.gstin == 'NA':
@@ -76,12 +74,11 @@ def validate_tax_category(doc, method):
 			frappe.throw(_("Intra State tax category for GST State {0} already exists").format(doc.gst_state))
 
 def update_gst_category(doc, method):
-	for link in doc.links:
-		if link.link_doctype in ['Customer', 'Supplier']:
-			if doc.get('gstin'):
-				frappe.db.sql("""
-					UPDATE `tab{0}` SET gst_category = %s WHERE name = %s AND gst_category = 'Unregistered'
-				""".format(link.link_doctype), ("Registered Regular", link.link_name)) #nosec
+	if hasattr(doc, 'gst_category'):
+		for link in doc.links:
+			if link.link_doctype in ['Customer', 'Supplier']:
+				if doc.get('gstin'):
+					frappe.db.set_value(link.link_doctype, {'name': link.link_name, 'gst_category': 'Unregistered'}, 'gst_category', 'Registered Regular')
 
 def set_gst_state_and_state_number(doc):
 	if not doc.gst_state:
@@ -194,7 +191,7 @@ def get_place_of_supply(party_details, doctype):
 
 @frappe.whitelist()
 def get_regional_address_details(party_details, doctype, company):
-	if isinstance(party_details, string_types):
+	if isinstance(party_details, str):
 		party_details = json.loads(party_details)
 		party_details = frappe._dict(party_details)
 
@@ -446,7 +443,7 @@ def get_ewb_data(dt, dn):
 		data = get_address_details(data, doc, company_address, billing_address, dispatch_address)
 
 		data.itemList = []
-		data.totalValue = doc.total
+		data.totalValue = doc.net_total
 
 		data = get_item_list(data, doc, hsn_wise=True)
 
@@ -791,7 +788,7 @@ def get_regional_round_off_accounts(company, account_list):
 	if country != 'India':
 		return
 
-	if isinstance(account_list, string_types):
+	if isinstance(account_list, str):
 		account_list = json.loads(account_list)
 
 	if not frappe.db.get_single_value('GST Settings', 'round_off_gst_values'):
@@ -855,7 +852,7 @@ def get_depreciation_amount(asset, depreciable_value, row):
 	if row.depreciation_method in ("Straight Line", "Manual"):
 		# if the Depreciation Schedule is being prepared for the first time
 		if not asset.flags.increase_in_asset_life:
-			depreciation_amount = (flt(row.value_after_depreciation) -
+			depreciation_amount = (flt(asset.gross_purchase_amount) - flt(asset.opening_accumulated_depreciation) -
 				flt(row.expected_value_after_useful_life)) / depreciation_left
 
 		# if the Depreciation Schedule is being modified after Asset Repair

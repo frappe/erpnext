@@ -592,8 +592,17 @@ frappe.ui.form.on("Purchase Invoice", {
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 
 		if (frm.doc.company) {
-			frappe.db.get_value('Company', frm.doc.company, 'default_payable_account', (r) => {
-				frm.set_value('credit_to', r.default_payable_account);
+			frappe.call({
+				method:
+					"erpnext.accounts.party.get_party_account",
+				args: {
+					party_type: 'Supplier',
+					party: frm.doc.supplier,
+					company: frm.doc.company
+				},
+				callback: (response) => {
+					if (response) frm.set_value("credit_to", response.message);
+				},
 			});
 		}
 	},

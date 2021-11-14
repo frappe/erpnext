@@ -1,7 +1,4 @@
-from __future__ import unicode_literals
-
 import frappe
-from six import iteritems
 
 
 def execute():
@@ -11,7 +8,7 @@ def execute():
 		SELECT name, expenses_included_in_valuation from `tabCompany`
 	"""))
 
-	for company, account in iteritems(company_account_map):
+	for company, account in company_account_map.items():
 		frappe.db.sql("""
 			UPDATE
 				`tabLanded Cost Taxes and Charges` t, `tabLanded Cost Voucher` l

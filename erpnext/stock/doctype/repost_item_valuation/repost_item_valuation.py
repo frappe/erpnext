@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -32,6 +30,9 @@ class RepostItemValuation(Document):
 		else:
 			self.voucher_type = None
 			self.voucher_no = None
+
+		self.allow_negative_stock = self.allow_negative_stock or \
+				cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
 
 	def set_company(self):
 		if self.voucher_type and self.voucher_no:
