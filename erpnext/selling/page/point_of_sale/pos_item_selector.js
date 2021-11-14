@@ -21,7 +21,6 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	prepare_dom() {
-		debugger;
 		this.wrapper.append(
 			`<section class="items-selector">
 				<div class="filter-section">
