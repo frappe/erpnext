@@ -285,9 +285,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 			if (m.condition) {
 				m.visible_btns.forEach(b => {
 					const class_name = b.split(' ')[0].toLowerCase();
-					debugger;
 					const btn = __(b);
-					console.log(btn, b);
 					this.$summary_btns.append(
 						`<div class="summary-btn btn btn-default ${class_name}-btn">${btn}</div>`
 					);
