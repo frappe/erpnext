@@ -77,7 +77,8 @@ def get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_
 
 		row.append(filters.currency)
 		if idx == len(gross_profit_data.grouped_data)-1:
-			row[0] = frappe.bold("Total")
+			row[0] = "Total"
+
 		data.append(row)
 
 def get_columns(group_wise_columns, filters):
