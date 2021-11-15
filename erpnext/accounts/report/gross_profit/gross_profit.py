@@ -253,7 +253,7 @@ class GrossProfitGenerator(object):
 								row.qty += flt(returned_item_row.qty)
 								row.base_amount += flt(returned_item_row.base_amount, self.currency_precision)
 							row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
-						if (flt(row.qty) or row.base_amount) and self.is_not_invoice_row(row):
+						if (flt(row.qty) or row.base_amount):
 							row = self.set_average_rate(row)
 							self.grouped_data.append(row)
 						self.add_to_totals(row)
