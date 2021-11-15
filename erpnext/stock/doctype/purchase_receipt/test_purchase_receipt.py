@@ -15,12 +15,29 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchas
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError, get_serial_nos
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import SerialNoExistsInFutureTransaction
+from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.tests.utils import ERPNextTestCase
 
 
 class TestPurchaseReceipt(ERPNextTestCase):
 	def setUp(self):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
+
+	def test_purchase_receipt_received_qty(self):
+		"""
+			1. Test if received qty is validated against accepted + rejected
+			2. Test if received qty is auto set on save
+		"""
+		pr = make_purchase_receipt(qty=1, rejected_qty=1, received_qty=3,
+			item_code="_Test Item Home Desktop 200", do_not_save=True)
+		self.assertRaises(QtyMismatchError, pr.save)
+
+		pr.items[0].received_qty = 0
+		pr.save()
+		self.assertEqual(pr.items[0].received_qty, 2)
+
+		# teardown
+		pr.delete()
 
 	def test_reverse_purchase_receipt_sle(self):
 
@@ -1225,8 +1242,8 @@ def make_purchase_receipt(**args):
 	pr.return_against = args.return_against
 	pr.apply_putaway_rule = args.apply_putaway_rule
 	qty = args.qty or 5
-	received_qty = args.received_qty or qty
-	rejected_qty = args.rejected_qty or flt(received_qty) - flt(qty)
+	rejected_qty = args.rejected_qty or 0
+	received_qty = args.received_qty or flt(rejected_qty) + flt(qty)
 
 	item_code = args.item or args.item_code or "_Test Item"
 	uom = args.uom or frappe.db.get_value("Item", item_code, "stock_uom") or "_Test UOM"
