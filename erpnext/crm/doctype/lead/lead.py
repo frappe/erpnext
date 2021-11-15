@@ -11,11 +11,11 @@ from frappe.utils import (
 	cint,
 	comma_and,
 	cstr,
+	get_link_to_form,
 	getdate,
 	has_gravatar,
 	nowdate,
 	validate_email_address,
-	get_link_to_form,
 )
 
 from erpnext.accounts.party import set_taxes
