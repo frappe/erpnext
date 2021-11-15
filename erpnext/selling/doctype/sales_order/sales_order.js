@@ -319,7 +319,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						title: __('Select Items to Manufacture'),
 						fields: fields,
 						primary_action: function() {
-							var data = d.get_values();
+							var data = {items: d.fields_dict.items.grid.get_selected_children()};
 							me.frm.call({
 								method: 'make_work_orders',
 								args: {
