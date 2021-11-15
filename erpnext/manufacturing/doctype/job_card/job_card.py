@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 import datetime
@@ -37,6 +36,7 @@ class JobCard(Document):
 	def onload(self):
 		excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 		self.set_onload("job_card_excess_transfer", excess_transfer)
+		self.set_onload("work_order_stopped", self.is_work_order_stopped())
 
 	def validate(self):
 		self.validate_time_logs()
@@ -45,6 +45,7 @@ class JobCard(Document):
 		self.validate_sequence_id()
 		self.set_sub_operations()
 		self.update_sub_operation_status()
+		self.validate_work_order()
 
 	def set_sub_operations(self):
 		if self.operation:
@@ -503,13 +504,11 @@ class JobCard(Document):
 			self.status = 'Work In Progress'
 
 		if (self.docstatus == 1 and
-			(self.for_quantity <= self.transferred_qty or not self.items)):
-			# consider excess transfer
-			# completed qty is checked via separate validation
+			(self.for_quantity <= self.total_completed_qty or not self.items)):
 			self.status = 'Completed'
 
 		if self.status != 'Completed':
-			if self.for_quantity == self.transferred_qty:
+			if self.for_quantity <= self.transferred_qty:
 				self.status = 'Material Transferred'
 
 		if update_status:
@@ -549,6 +548,18 @@ class JobCard(Document):
 				frappe.throw(_("{0}, complete the operation {1} before the operation {2}.")
 					.format(message, bold(row.operation), bold(self.operation)), OperationSequenceError)
 
+	def validate_work_order(self):
+		if self.is_work_order_stopped():
+			frappe.throw(_("You can't make any changes to Job Card since Work Order is stopped."))
+
+	def is_work_order_stopped(self):
+		if self.work_order:
+			status = frappe.get_value('Work Order', self.work_order)
+
+			if status == "Closed":
+				return True
+
+		return False
 
 @frappe.whitelist()
 def make_time_log(args):
@@ -605,7 +616,8 @@ def make_material_request(source_name, target_doc=None):
 			"doctype": "Material Request Item",
 			"field_map": {
 				"required_qty": "qty",
-				"uom": "stock_uom"
+				"uom": "stock_uom",
+				"name": "job_card_item"
 			},
 			"postprocess": update_item,
 		}

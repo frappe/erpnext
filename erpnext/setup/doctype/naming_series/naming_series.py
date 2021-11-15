@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _, msgprint, throw
@@ -181,11 +180,11 @@ class NamingSeries(Document):
 		prefix = parse_naming_series(parts)
 		return prefix
 
-def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True):
+def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True, make_mandatory=1):
 	from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 	if naming_series:
 		make_property_setter(doctype, "naming_series", "hidden", 0, "Check", validate_fields_for_doctype=False)
-		make_property_setter(doctype, "naming_series", "reqd", 1, "Check", validate_fields_for_doctype=False)
+		make_property_setter(doctype, "naming_series", "reqd", make_mandatory, "Check", validate_fields_for_doctype=False)
 
 		# set values for mandatory
 		try:
