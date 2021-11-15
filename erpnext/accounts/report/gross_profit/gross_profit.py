@@ -245,19 +245,28 @@ class GrossProfitGenerator(object):
 				self.add_to_totals(new_row)
 			else:
 				for i, row in enumerate(self.grouped[key]):
-					if row.parent in self.returned_invoices \
-							and row.item_code in self.returned_invoices[row.parent]:
-						returned_item_rows = self.returned_invoices[row.parent][row.item_code]
-						for returned_item_row in returned_item_rows:
-							row.qty += flt(returned_item_row.qty)
-							row.base_amount += flt(returned_item_row.base_amount, self.currency_precision)
-						row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
-					if (flt(row.qty) or row.base_amount) and self.is_not_invoice_row(row):
-						row = self.set_average_rate(row)
-						self.grouped_data.append(row)
-					self.add_to_totals(row)
+					if row.indent == 1.0:
+						if row.parent in self.returned_invoices \
+								and row.item_code in self.returned_invoices[row.parent]:
+							returned_item_rows = self.returned_invoices[row.parent][row.item_code]
+							for returned_item_row in returned_item_rows:
+								row.qty += flt(returned_item_row.qty)
+								row.base_amount += flt(returned_item_row.base_amount, self.currency_precision)
+							row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
+						if (flt(row.qty) or row.base_amount) and self.is_not_invoice_row(row):
+							row = self.set_average_rate(row)
+							self.grouped_data.append(row)
+						self.add_to_totals(row)
+
 		self.set_average_gross_profit(self.totals)
-		self.grouped_data.append(self.totals)
+
+		if self.filters.get("group_by") == "Invoice":
+			self.totals.indent = 0.0
+			self.totals.parent_invoice = ""
+			self.totals.parent = "Totals"
+			self.si_list.append(self.totals)
+		else:
+			self.grouped_data.append(self.totals)
 
 	def is_not_invoice_row(self, row):
 		return (self.filters.get("group_by") == "Invoice" and row.indent != 0.0) or self.filters.get("group_by") != "Invoice"
