@@ -36,7 +36,7 @@ class Lead(SellingController):
 			self.address_doc = self.create_address()
 		if self.lead_name:
 			self.contact_doc = self.create_contact()
-		else: 
+		else:
 			self.contact_doc = None
 
 	def after_insert(self):
