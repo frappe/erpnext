@@ -21,7 +21,7 @@ class TestJobCard(unittest.TestCase):
 		transfer_material_against, source_warehouse = None, None
 
 		tests_that_skip_setup = (
-			"test_job_card_material_transfer_correctness"
+			"test_job_card_material_transfer_correctness",
 		)
 		tests_that_transfer_against_jc = (
 			"test_job_card_multiple_materials_transfer",
@@ -273,14 +273,10 @@ class TestJobCard(unittest.TestCase):
 		self.assertEqual(transfer_entry.items[0].item_code, "_Test Item")
 		self.assertEqual(transfer_entry.items[0].qty, 2)
 
-		# teardown
-		transfer_entry.delete()
-		frappe.db.delete("Job Card", {"work_order": work_order.name})
-		work_order.cancel()
-		bom.cancel()
-
+		# rollback via tearDown method
 
 def create_bom_with_multiple_operations():
+	"Create a BOM with multiple operations and Material Transfer against Job Card"
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 
 	test_record = frappe.get_test_records("BOM")[2]
@@ -304,6 +300,7 @@ def create_bom_with_multiple_operations():
 		"operating_cost": 100
 	})
 
+	bom_doc.transfer_material_against = "Job Card"
 	bom_doc.save()
 	bom_doc.submit()
 
