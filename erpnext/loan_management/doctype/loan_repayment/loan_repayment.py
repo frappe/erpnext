@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
 from frappe.utils import add_days, cint, date_diff, flt, get_datetime, getdate
-from six import iteritems
 
 import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
@@ -234,7 +231,7 @@ class LoanRepayment(AccountsController):
 		idx = 1
 
 		if interest_paid > 0:
-			for lia, amounts in iteritems(repayment_details.get('pending_accrual_entries', [])):
+			for lia, amounts in repayment_details.get('pending_accrual_entries', []).items():
 				interest_amount = 0
 				if amounts['interest_amount'] <= interest_paid:
 					interest_amount = amounts['interest_amount']
@@ -263,7 +260,7 @@ class LoanRepayment(AccountsController):
 
 	def allocate_principal_amount_for_term_loans(self, interest_paid, repayment_details, updated_entries):
 		if interest_paid > 0:
-			for lia, amounts in iteritems(repayment_details.get('pending_accrual_entries', [])):
+			for lia, amounts in repayment_details.get('pending_accrual_entries', []).items():
 				paid_principal = 0
 				if amounts['payable_principal_amount'] <= interest_paid:
 					paid_principal = amounts['payable_principal_amount']
