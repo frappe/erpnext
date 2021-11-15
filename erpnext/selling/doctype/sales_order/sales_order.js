@@ -112,8 +112,6 @@ frappe.ui.form.on("Sales Order", {
 		});
 		refresh_field("items");
 	},
-<<<<<<< HEAD
-=======
 	tax_category:function(frm){
 		frm.call({
 			method:"calcualte_taxes",
@@ -169,7 +167,6 @@ frappe.ui.form.on("Sales Order", {
 			}
 		});
 	},
->>>>>>> 63845155c93fe336776c2408b885def49cc34fe6
 	customer: function(frm,cdt,cdn) {
 	
 		frm.call({
@@ -881,13 +878,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	}
 });
 $.extend(cur_frm.cscript, new erpnext.selling.SalesOrderController({frm: cur_frm}));
-<<<<<<< HEAD
 
 
-=======
-
-
->>>>>>> 63845155c93fe336776c2408b885def49cc34fe6
 frappe.ui.form.on("Sales Order", "onload", function(frm) {
     cur_frm.set_query("transporter", function() {
         return {

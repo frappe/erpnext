@@ -33,7 +33,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				me.frm.set_value('debit_to', r.default_receivable_account);
 			});
 	},
-	
 	tax_category:function(frm){
 		frm.refresh_field("items")
 		frm.call({
