@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -13,6 +11,7 @@ from frappe.utils import cint, getdate
 class TaxWithholdingCategory(Document):
 	def validate(self):
 		self.validate_dates()
+		self.validate_accounts()
 		self.validate_thresholds()
 
 	def validate_dates(self):
@@ -24,6 +23,14 @@ class TaxWithholdingCategory(Document):
 			# validate overlapping of dates
 			if last_date and getdate(d.to_date) < getdate(last_date):
 				frappe.throw(_("Row #{0}: Dates overlapping with other row").format(d.idx))
+
+	def validate_accounts(self):
+		existing_accounts = []
+		for d in self.get('accounts'):
+			if d.get('account') in existing_accounts:
+				frappe.throw(_("Account {0} added multiple times").format(frappe.bold(d.get('account'))))
+
+			existing_accounts.append(d.get('account'))
 
 	def validate_thresholds(self):
 		for d in self.get('rates'):
@@ -49,15 +56,24 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 	pan_no = ''
 	parties = []
 	party_type, party = get_party_details(inv)
+	has_pan_field = frappe.get_meta(party_type).has_field("pan")
 
 	if not tax_withholding_category:
-		tax_withholding_category, pan_no = frappe.db.get_value(party_type, party, ['tax_withholding_category', 'pan'])
+		if has_pan_field:
+			fields = ['tax_withholding_category', 'pan']
+		else:
+			fields = ['tax_withholding_category']
+
+		tax_withholding_details = frappe.db.get_value(party_type, party, fields, as_dict=1)
+
+		tax_withholding_category = tax_withholding_details.get('tax_withholding_category')
+		pan_no = tax_withholding_details.get('pan')
 
 	if not tax_withholding_category:
 		return
 
 	# if tax_withholding_category passed as an argument but not pan_no
-	if not pan_no:
+	if not pan_no and has_pan_field:
 		pan_no = frappe.db.get_value(party_type, party, 'pan')
 
 	# Get others suppliers with the same PAN No
@@ -165,6 +181,7 @@ def get_lower_deduction_certificate(tax_details, pan_no):
 	ldc_name = frappe.db.get_value('Lower Deduction Certificate',
 		{
 			'pan_no': pan_no,
+			'tax_withholding_category': tax_details.tax_withholding_category,
 			'valid_from': ('>=', tax_details.from_date),
 			'valid_upto': ('<=', tax_details.to_date)
 		}, 'name')
@@ -202,6 +219,9 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 			#  if no TCS has been charged in FY,
 			# then chargeable value is "prev invoices + advances" value which cross the threshold
 			tax_amount = get_tcs_amount(parties, inv, tax_details, vouchers, advance_vouchers)
+
+	if cint(tax_details.round_off_tax_amount):
+		tax_amount = round(tax_amount)
 
 	return tax_amount, tax_deducted
 
@@ -322,9 +342,6 @@ def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 		else:
 			tds_amount = supp_credit_amt * tax_details.rate / 100 if supp_credit_amt > 0 else 0
 
-	if cint(tax_details.round_off_tax_amount):
-		tds_amount = round(tds_amount)
-
 	return tds_amount
 
 def get_tcs_amount(parties, inv, tax_details, vouchers, adv_vouchers):
@@ -361,7 +378,7 @@ def get_tcs_amount(parties, inv, tax_details, vouchers, adv_vouchers):
 	current_invoice_total = get_invoice_total_without_tcs(inv, tax_details)
 	total_invoiced_amt = current_invoice_total + invoiced_amt + advance_amt - credit_note_amt
 
-	if ((cumulative_threshold and total_invoiced_amt >= cumulative_threshold)):
+	if (cumulative_threshold and total_invoiced_amt >= cumulative_threshold):
 		chargeable_amt = total_invoiced_amt - cumulative_threshold
 		tcs_amount = chargeable_amt * tax_details.rate / 100 if chargeable_amt > 0 else 0
 

@@ -1,6 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
 import calendar
 import random
@@ -141,7 +140,6 @@ class TestSalarySlip(unittest.TestCase):
 			create_salary_structure_assignment,
 		)
 
-		no_of_days = self.get_no_of_days()
 		# Payroll based on attendance
 		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Attendance")
 
@@ -167,11 +165,6 @@ class TestSalarySlip(unittest.TestCase):
 		# make salary slip and assert payment days
 		ss = make_salary_slip_for_payment_days_dependency_test("test_payment_days_based_component@salary.com", salary_structure.name)
 		self.assertEqual(ss.absent_days, 1)
-
-		days_in_month = no_of_days[0]
-		no_of_holidays = no_of_days[1]
-
-		self.assertEqual(ss.payment_days, days_in_month - no_of_holidays - 1)
 
 		ss.reload()
 		payment_days_based_comp_amount = 0
@@ -540,6 +533,61 @@ class TestSalarySlip(unittest.TestCase):
 		frappe.db.sql("""delete from `tabAdditional Salary` where employee=%s""", (employee))
 
 		# undelete fixture data
+		frappe.db.rollback()
+
+	def test_tax_for_recurring_additional_salary(self):
+		frappe.db.sql("""delete from `tabPayroll Period`""")
+		frappe.db.sql("""delete from `tabSalary Component`""")
+
+		payroll_period = create_payroll_period()
+
+		create_tax_slab(payroll_period, allow_tax_exemption=True)
+
+		employee = make_employee("test_tax@salary.slip")
+		delete_docs = [
+			"Salary Slip",
+			"Additional Salary",
+			"Employee Tax Exemption Declaration",
+			"Employee Tax Exemption Proof Submission",
+			"Employee Benefit Claim",
+			"Salary Structure Assignment"
+		]
+		for doc in delete_docs:
+			frappe.db.sql("delete from `tab%s` where employee='%s'" % (doc, employee))
+
+		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
+
+		salary_structure = make_salary_structure("Stucture to test tax", "Monthly",
+			other_details={"max_benefits": 100000}, test_tax=True,
+			employee=employee, payroll_period=payroll_period)
+
+
+		create_salary_slips_for_payroll_period(employee, salary_structure.name,
+			payroll_period, deduct_random=False, num=3)
+
+		tax_paid = get_tax_paid_in_period(employee)
+
+		annual_tax = 23196.0
+		self.assertEqual(tax_paid, annual_tax)
+
+		frappe.db.sql("""delete from `tabSalary Slip` where employee=%s""", (employee))
+
+		#------------------------------------
+		# Recurring additional salary
+		start_date = add_months(payroll_period.start_date, 3)
+		end_date = add_months(payroll_period.start_date, 5)
+		create_recurring_additional_salary(employee, "Performance Bonus", 20000, start_date, end_date)
+
+		frappe.db.sql("""delete from `tabSalary Slip` where employee=%s""", (employee))
+
+		create_salary_slips_for_payroll_period(employee, salary_structure.name,
+			payroll_period, deduct_random=False, num=4)
+
+		tax_paid = get_tax_paid_in_period(employee)
+
+		annual_tax = 32315.0
+		self.assertEqual(tax_paid, annual_tax)
+
 		frappe.db.rollback()
 
 	def make_activity_for_employee(self):
@@ -994,13 +1042,14 @@ def make_salary_structure_for_payment_days_based_component_dependency():
 	return salary_structure_doc
 
 def make_salary_slip_for_payment_days_dependency_test(employee, salary_structure):
-	employee = frappe.db.get_value("Employee", {
-			"user_id": employee
-		},
+	employee = frappe.db.get_value(
+		"Employee",
+		{"user_id": employee},
 		["name", "company", "employee_name"],
-		as_dict=True)
+		as_dict=True
+	)
 
-	salary_slip_name = frappe.db.get_value("Salary Slip", {"employee": frappe.db.get_value("Employee", {"user_id": employee})})
+	salary_slip_name = frappe.db.get_value("Salary Slip", {"employee": employee.name})
 
 	if not salary_slip_name:
 		salary_slip = make_salary_slip(salary_structure, employee=employee.name)
@@ -1012,3 +1061,17 @@ def make_salary_slip_for_payment_days_dependency_test(employee, salary_structure
 		salary_slip = frappe.get_doc("Salary Slip", salary_slip_name)
 
 	return salary_slip
+
+def create_recurring_additional_salary(employee, salary_component, amount, from_date, to_date, company=None):
+	frappe.get_doc({
+		"doctype": "Additional Salary",
+		"employee": employee,
+		"company": company or erpnext.get_default_company(),
+		"salary_component": salary_component,
+		"is_recurring": 1,
+		"from_date": from_date,
+		"to_date": to_date,
+		"amount": amount,
+		"type": "Earning",
+		"currency": erpnext.get_default_currency()
+	}).submit()

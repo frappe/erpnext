@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 from collections import defaultdict
@@ -132,7 +131,8 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select {field} from `tabSupplier`
 		where docstatus < 2
 			and ({key} like %(txt)s
-				or supplier_name like %(txt)s) and disabled=0
+			or supplier_name like %(txt)s) and disabled=0
+			and (on_hold = 0 or (on_hold = 1 and CURDATE() > release_date))
 			{mcond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
@@ -210,12 +210,15 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	meta = frappe.get_meta("Item", cached=True)
 	searchfields = meta.get_search_fields()
 
-	if "description" in searchfields:
-		searchfields.remove("description")
+	# these are handled separately
+	ignored_search_fields = ("item_name", "description")
+	for ignored_field in ignored_search_fields:
+		if ignored_field in searchfields:
+			searchfields.remove(ignored_field)
 
 	columns = ''
 	extra_searchfields = [field for field in searchfields
-		if not field in ["name", "item_group", "description"]]
+		if not field in ["name", "item_group", "description", "item_name"]]
 
 	if extra_searchfields:
 		columns = ", " + ", ".join(extra_searchfields)
@@ -252,10 +255,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	if frappe.db.count('Item', cache=True) < 50000:
 		# scan description only if items are less than 50000
 		description_cond = 'or tabItem.description LIKE %(txt)s'
-	return frappe.db.sql("""select tabItem.name,
-		if(length(tabItem.item_name) > 40,
-			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,
-		tabItem.item_group,
+	return frappe.db.sql("""select
+			tabItem.name, tabItem.item_name, tabItem.item_group,
 		if(length(tabItem.description) > 40, \
 			concat(substr(tabItem.description, 1, 40), "..."), description) as description
 		{columns}
@@ -565,7 +566,7 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters)
 
 		query_filters.append(['name', query_selector, dimensions])
 
-	output = frappe.get_all(doctype, filters=query_filters)
+	output = frappe.get_list(doctype, filters=query_filters)
 	result = [d.name for d in output]
 
 	return [(d,) for d in set(result)]
@@ -692,36 +693,6 @@ def get_purchase_invoices(doctype, txt, searchfield, start, page_len, filters):
 
 	if filters and filters.get('item_code'):
 		query += " and piitem.item_code = {item_code}".format(item_code = frappe.db.escape(filters.get('item_code')))
-
-	return frappe.db.sql(query, filters)
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def get_healthcare_service_units(doctype, txt, searchfield, start, page_len, filters):
-	query = """
-		select name
-		from `tabHealthcare Service Unit`
-		where
-			is_group = 0
-			and company = {company}
-			and name like {txt}""".format(
-				company = frappe.db.escape(filters.get('company')), txt = frappe.db.escape('%{0}%'.format(txt)))
-
-	if filters and filters.get('inpatient_record'):
-		from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import (
-			get_current_healthcare_service_unit,
-		)
-		service_unit = get_current_healthcare_service_unit(filters.get('inpatient_record'))
-
-		# if the patient is admitted, then appointments should be allowed against the admission service unit,
-		# inspite of it being an Inpatient Occupancy service unit
-		if service_unit:
-			query += " and (allow_appointments = 1 or name = {service_unit})".format(service_unit = frappe.db.escape(service_unit))
-		else:
-			query += " and allow_appointments = 1"
-	else:
-		query += " and allow_appointments = 1"
 
 	return frappe.db.sql(query, filters)
 

@@ -123,7 +123,6 @@ class Item(WebsiteGenerator):
 		self.validate_barcode()
 		self.validate_warehouse_for_reorder()
 		self.update_bom_item_desc()
-		self.synced_with_hub = 0
 
 		self.validate_has_variants()
 		self.validate_attributes_in_variants()
@@ -181,6 +180,8 @@ class Item(WebsiteGenerator):
 				"doctype": "Item Price",
 				"price_list": price_list,
 				"item_code": self.name,
+				"uom": self.stock_uom,
+				"brand": self.brand,
 				"currency": erpnext.get_default_currency(),
 				"price_list_rate": self.standard_rate
 			})
@@ -634,9 +635,21 @@ class Item(WebsiteGenerator):
 				_("An Item Group exists with same name, please change the item name or rename the item group"))
 
 	def update_item_price(self):
-		frappe.db.sql("""update `tabItem Price` set item_name=%s,
-			item_description=%s, brand=%s where item_code=%s""",
-					(self.item_name, self.description, self.brand, self.name))
+		frappe.db.sql("""
+				UPDATE `tabItem Price`
+				SET
+					item_name=%(item_name)s,
+					item_description=%(item_description)s,
+					brand=%(brand)s
+				WHERE item_code=%(item_code)s
+			""",
+			dict(
+				item_name=self.item_name,
+				item_description=self.description,
+				brand=self.brand,
+				item_code=self.name
+			)
+		)
 
 	def on_trash(self):
 		super(Item, self).on_trash()
@@ -663,6 +676,8 @@ class Item(WebsiteGenerator):
 	def after_rename(self, old_name, new_name, merge):
 		if merge:
 			self.validate_duplicate_item_in_stock_reconciliation(old_name, new_name)
+			frappe.msgprint(_("It can take upto few hours for accurate stock values to be visible after merging items."),
+					indicator="orange", title="Note")
 
 		if self.route:
 			invalidate_cache_for_item(self)

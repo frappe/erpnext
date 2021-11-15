@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import copy
 import json
@@ -22,7 +20,6 @@ from frappe.utils import (
 	nowdate,
 )
 from frappe.utils.csvutils import build_csv_response
-from six import iteritems
 
 from erpnext.manufacturing.doctype.bom.bom import get_children, validate_bom_no
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
@@ -311,7 +308,7 @@ class ProductionPlan(Document):
 
 		if self.total_produced_qty > 0:
 			self.status = "In Process"
-			if self.total_produced_qty >= self.total_planned_qty:
+			if self.check_have_work_orders_completed():
 				self.status = "Completed"
 
 		if self.status != 'Completed':
@@ -424,7 +421,7 @@ class ProductionPlan(Document):
 			po = frappe.new_doc('Purchase Order')
 			po.supplier = supplier
 			po.schedule_date = getdate(po_list[0].schedule_date) if po_list[0].schedule_date else nowdate()
-			po.is_subcontracted_item = 'Yes'
+			po.is_subcontracted = 'Yes'
 			for row in po_list:
 				args = {
 					'item_code': row.production_item,
@@ -574,6 +571,15 @@ class ProductionPlan(Document):
 				else "In House")
 
 			self.append("sub_assembly_items", data)
+
+	def check_have_work_orders_completed(self):
+		wo_status = frappe.db.get_list(
+			"Work Order",
+			filters={"production_plan": self.name},
+			fields="status",
+			pluck="status"
+		)
+		return all(s == "Completed" for s in wo_status)
 
 @frappe.whitelist()
 def download_raw_materials(doc, warehouses=None):
@@ -899,7 +905,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 
 		sales_order = doc.get("sales_order")
 
-		for item_code, details in iteritems(item_details):
+		for item_code, details in item_details.items():
 			so_item_details.setdefault(sales_order, frappe._dict())
 			if item_code in so_item_details.get(sales_order, {}):
 				so_item_details[sales_order][item_code]['qty'] = so_item_details[sales_order][item_code].get("qty", 0) + flt(details.qty)
@@ -907,7 +913,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 				so_item_details[sales_order][item_code] = details
 
 	mr_items = []
-	for sales_order, item_code in iteritems(so_item_details):
+	for sales_order, item_code in so_item_details.items():
 		item_dict = so_item_details[sales_order]
 		for details in item_dict.values():
 			bin_dict = get_bin_details(details, doc.company, warehouse)

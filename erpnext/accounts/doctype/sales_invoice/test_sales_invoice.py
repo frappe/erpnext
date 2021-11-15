@@ -1,6 +1,5 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
 import copy
 import unittest
@@ -9,7 +8,6 @@ import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.model.naming import make_autoname
 from frappe.utils import add_days, flt, getdate, nowdate
-from six import iteritems
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
@@ -346,7 +344,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# check if item values are calculated
 		for i, d in enumerate(si.get("items")):
-			for k, v in iteritems(expected_values[i]):
+			for k, v in expected_values[i].items():
 				self.assertEqual(d.get(k), v)
 
 		# check net total
@@ -649,7 +647,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# check if item values are calculated
 		for i, d in enumerate(si.get("items")):
-			for key, val in iteritems(expected_values[i]):
+			for key, val in expected_values[i].items():
 				self.assertEqual(d.get(key), val)
 
 		# check net total
@@ -1086,8 +1084,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 
 		actual_qty_1 = get_qty_after_transaction(item_code = "_Test Item", warehouse = "Stores - TCP1")
-
-		frappe.db.commit()
 
 		self.assertEqual(actual_qty_0 - 5, actual_qty_1)
 
@@ -2023,11 +2019,7 @@ class TestSalesInvoice(unittest.TestCase):
 		frappe.local.enable_perpetual_inventory['_Test Company 1'] = old_perpetual_inventory
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", old_negative_stock)
 
-	def test_sle_if_target_warehouse_exists_accidentally(self):
-		"""
-			Check if inward entry exists if Target Warehouse accidentally exists
-			but Customer is not an internal customer.
-		"""
+	def test_sle_for_target_warehouse(self):
 		se = make_stock_entry(
 			item_code="138-CMS Shoe",
 			target="Finished Goods - _TC",
@@ -2048,9 +2040,9 @@ class TestSalesInvoice(unittest.TestCase):
 		sles = frappe.get_all("Stock Ledger Entry", filters={"voucher_no": si.name},
 			fields=["name", "actual_qty"])
 
-		# check if only one SLE for outward entry is created
-		self.assertEqual(len(sles), 1)
-		self.assertEqual(sles[0].actual_qty, -1)
+		# check if both SLEs are created
+		self.assertEqual(len(sles), 2)
+		self.assertEqual(sum(d.actual_qty for d in sles), 0.0)
 
 		# tear down
 		si.cancel()
@@ -2243,9 +2235,9 @@ class TestSalesInvoice(unittest.TestCase):
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
 		enable_discount_accounting(enable=0)
 
-	def test_asset_depreciation_on_sale(self):
+	def test_asset_depreciation_on_sale_with_pro_rata(self):
 		"""
-			Tests if an Asset set to depreciate yearly on June 30, that gets sold on Sept 30, creates an additional depreciation entry on Sept 30.
+			Tests if an Asset set to depreciate yearly on June 30, that gets sold on Sept 30, creates an additional depreciation entry on its date of sale.
 		"""
 
 		create_asset_data()
@@ -2258,7 +2250,7 @@ class TestSalesInvoice(unittest.TestCase):
 		expected_values = [
 			["2020-06-30", 1311.48, 1311.48],
 			["2021-06-30", 20000.0, 21311.48],
-			["2021-09-30", 3966.76, 25278.24]
+			["2021-09-30", 5041.1, 26352.58]
 		]
 
 		for i, schedule in enumerate(asset.schedules):
@@ -2266,6 +2258,59 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
 			self.assertTrue(schedule.journal_entry)
+
+	def test_asset_depreciation_on_sale_without_pro_rata(self):
+		"""
+			Tests if an Asset set to depreciate yearly on Dec 31, that gets sold on Dec 31 after two years, created an additional depreciation entry on its date of sale.
+		"""
+
+		create_asset_data()
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1,
+			available_for_use_date=getdate("2019-12-31"), total_number_of_depreciations=3,
+			expected_value_after_useful_life=10000, depreciation_start_date=getdate("2020-12-31"), submit=1)
+
+		post_depreciation_entries(getdate("2021-09-30"))
+
+		create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000, posting_date=getdate("2021-12-31"))
+		asset.load_from_db()
+
+		expected_values = [
+			["2020-12-31", 30000, 30000],
+			["2021-12-31", 30000, 60000]
+		]
+
+		for i, schedule in enumerate(asset.schedules):
+			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
+			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
+			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
+			self.assertTrue(schedule.journal_entry)
+
+	def test_depreciation_on_return_of_sold_asset(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		create_asset_data()
+		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, submit=1)
+		post_depreciation_entries(getdate("2021-09-30"))
+
+		si = create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000, posting_date=getdate("2021-09-30"))
+		return_si = make_return_doc("Sales Invoice", si.name)
+		return_si.submit()
+		asset.load_from_db()
+
+		expected_values = [
+			["2020-06-30", 1311.48, 1311.48, True],
+			["2021-06-30", 20000.0, 21311.48, True],
+			["2022-06-30", 20000.0, 41311.48, False],
+			["2023-06-30", 20000.0, 61311.48, False],
+			["2024-06-30",  20000.0, 81311.48,  False],
+			["2025-06-06",  18688.52,  100000.0, False]
+		]
+
+		for i, schedule in enumerate(asset.schedules):
+			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
+			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
+			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
+			self.assertEqual(schedule.journal_entry, schedule.journal_entry)
 
 	def test_sales_invoice_against_supplier(self):
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
@@ -2360,6 +2405,18 @@ class TestSalesInvoice(unittest.TestCase):
 		pe.submit()
 		si.reload()
 		self.assertEqual(si.status, "Paid")
+
+	def test_sales_invoice_submission_post_account_freezing_date(self):
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', add_days(getdate(), 1))
+		si = create_sales_invoice(do_not_save=True)
+		si.posting_date = add_days(getdate(), 1)
+		si.save()
+
+		self.assertRaises(frappe.ValidationError, si.submit)
+		si.posting_date = getdate()
+		si.submit()
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()

@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -13,7 +12,6 @@ from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate, strip_html
-from six import string_types
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
@@ -110,7 +108,7 @@ class SalesOrder(SellingController):
 		if self.order_type == 'Sales' and not self.skip_delivery_note:
 			delivery_date_list = [d.delivery_date for d in self.get("items") if d.delivery_date]
 			max_delivery_date = max(delivery_date_list) if delivery_date_list else None
-			if not self.delivery_date:
+			if (max_delivery_date and not self.delivery_date) or (max_delivery_date and getdate(self.delivery_date) != getdate(max_delivery_date)):
 				self.delivery_date = max_delivery_date
 			if self.delivery_date:
 				for d in self.get("items"):
@@ -119,8 +117,6 @@ class SalesOrder(SellingController):
 					if getdate(self.transaction_date) > getdate(d.delivery_date):
 						frappe.msgprint(_("Expected Delivery Date should be after Sales Order Date"),
 							indicator='orange', title=_('Warning'))
-				if getdate(self.delivery_date) != getdate(max_delivery_date):
-					self.delivery_date = max_delivery_date
 			else:
 				frappe.throw(_("Please enter Delivery Date"))
 
@@ -793,7 +789,7 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 	"""Creates Purchase Order for each Supplier. Returns a list of doc objects."""
 	if not selected_items: return
 
-	if isinstance(selected_items, string_types):
+	if isinstance(selected_items, str):
 		selected_items = json.loads(selected_items)
 
 	def set_missing_values(source, target):
@@ -894,7 +890,7 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 def make_purchase_order(source_name, selected_items=None, target_doc=None):
 	if not selected_items: return
 
-	if isinstance(selected_items, string_types):
+	if isinstance(selected_items, str):
 		selected_items = json.loads(selected_items)
 
 	items_to_map = [item.get('item_code') for item in selected_items if item.get('item_code') and item.get('item_code')]
@@ -1048,7 +1044,7 @@ def make_raw_material_request(items, company, sales_order, project=None):
 	if not frappe.has_permission("Sales Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
-	if isinstance(items, string_types):
+	if isinstance(items, str):
 		items = frappe._dict(json.loads(items))
 
 	for item in items.get('items'):

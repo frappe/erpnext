@@ -91,6 +91,8 @@ jobs:
 
       - name: Install
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
+        env:
+          TYPE: server
 
       - name: Run Tests
         run: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --use-orchestrator --with-coverage

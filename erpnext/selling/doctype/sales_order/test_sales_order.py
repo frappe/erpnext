@@ -1,6 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
 import json
 import unittest
@@ -1382,7 +1381,6 @@ def make_sales_order_workflow():
 
 	frappe.get_doc(dict(doctype='Role', role_name='Test Junior Approver')).insert(ignore_if_duplicate=True)
 	frappe.get_doc(dict(doctype='Role', role_name='Test Approver')).insert(ignore_if_duplicate=True)
-	frappe.db.commit()
 	frappe.cache().hdel('roles', frappe.session.user)
 
 	workflow = frappe.get_doc({

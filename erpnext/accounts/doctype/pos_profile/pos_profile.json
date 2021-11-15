@@ -120,6 +120,7 @@
   {
    "fieldname": "payments",
    "fieldtype": "Table",
+   "label": "Payment Methods",
    "options": "POS Payment Method",
    "reqd": 1
   },
@@ -377,7 +378,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2021-02-01 13:52:51.081311",
+ "modified": "2021-10-14 14:17:00.469298",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

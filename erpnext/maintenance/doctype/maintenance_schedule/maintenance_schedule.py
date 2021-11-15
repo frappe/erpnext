@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _, throw
@@ -47,7 +46,7 @@ class MaintenanceSchedule(TransactionBase):
 			"Yearly": 365
 		}
 		for item in self.items:
-			if item.periodicity and item.start_date:
+			if item.periodicity and item.periodicity != "Random" and item.start_date:
 				if not item.end_date:
 					if item.no_of_visits:
 						item.end_date = add_days(item.start_date, item.no_of_visits * days_in_period[item.periodicity])
@@ -199,12 +198,16 @@ class MaintenanceSchedule(TransactionBase):
 				if chk:
 					throw(_("Maintenance Schedule {0} exists against {1}").format(chk[0][0], d.sales_order))
 
+	def validate_no_of_visits(self):
+		return len(self.schedules) != sum(d.no_of_visits for d in self.items)
+
 	def validate(self):
 		self.validate_end_date_visits()
 		self.validate_maintenance_detail()
 		self.validate_dates_with_periodicity()
 		self.validate_sales_order()
-		self.generate_schedule()
+		if not self.schedules or self.validate_no_of_visits():
+			self.generate_schedule()
 
 	def on_update(self):
 		frappe.db.set(self, 'status', 'Draft')

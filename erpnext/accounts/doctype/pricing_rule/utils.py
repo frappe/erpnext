@@ -3,7 +3,6 @@
 
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import copy
 import json
@@ -28,6 +27,9 @@ apply_on_table = {
 def get_pricing_rules(args, doc=None):
 	pricing_rules = []
 	values =  {}
+
+	if not frappe.db.exists('Pricing Rule', {'disable': 0, args.transaction_type: 1}):
+		return
 
 	for apply_on in ['Item Code', 'Item Group', 'Brand']:
 		pricing_rules.extend(_get_pricing_rules(apply_on, args, values))
@@ -398,7 +400,9 @@ def get_qty_and_rate_for_other_item(doc, pr_doc, pricing_rules):
 				pricing_rules[0].apply_rule_on_other_items = items
 				return pricing_rules
 
-def get_qty_amount_data_for_cumulative(pr_doc, doc, items=[]):
+def get_qty_amount_data_for_cumulative(pr_doc, doc, items=None):
+	if items is None:
+		items = []
 	sum_qty, sum_amt = [0, 0]
 	doctype = doc.get('parenttype') or doc.doctype
 

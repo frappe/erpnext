@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 
 import frappe
-import six
 from frappe import _
 from frappe.email import sendmail_to_system_managers
 from frappe.model.document import Document
@@ -85,7 +82,7 @@ def capture_razorpay_donations(*args, **kwargs):
 		notify_failure(log)
 		return { 'status': 'Failed', 'reason': e }
 
-	if isinstance(data, six.string_types):
+	if isinstance(data, str):
 		data = json.loads(data)
 	data = frappe._dict(data)
 
@@ -171,7 +168,7 @@ def create_donor(payment):
 def get_company_for_donations():
 	company = frappe.db.get_single_value('Non Profit Settings', 'donation_company')
 	if not company:
-		from erpnext.healthcare.setup import get_company
+		from erpnext.non_profit.utils import get_company
 		company = get_company()
 	return company
 

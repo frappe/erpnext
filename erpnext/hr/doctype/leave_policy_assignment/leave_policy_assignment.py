@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 from math import ceil
@@ -11,7 +9,6 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.utils import date_diff, flt, formatdate, get_datetime, getdate
-from six import string_types
 
 
 class LeavePolicyAssignment(Document):
@@ -140,10 +137,10 @@ class LeavePolicyAssignment(Document):
 @frappe.whitelist()
 def create_assignment_for_multiple_employees(employees, data):
 
-	if isinstance(employees, string_types):
+	if isinstance(employees, str):
 		employees= json.loads(employees)
 
-	if isinstance(data, string_types):
+	if isinstance(data, str):
 		data = frappe._dict(json.loads(data))
 
 	docs_name = []

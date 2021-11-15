@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -38,8 +36,10 @@ def create_job_applicant(source_name, target_doc=None):
 		status = "Open"
 
 	job_applicant = frappe.new_doc("Job Applicant")
+	job_applicant.source = "Employee Referral"
 	job_applicant.employee_referral = emp_ref.name
 	job_applicant.status = status
+	job_applicant.designation = emp_ref.for_designation
 	job_applicant.applicant_name = emp_ref.full_name
 	job_applicant.email_id = emp_ref.email
 	job_applicant.phone_number = emp_ref.contact_no
@@ -60,9 +60,8 @@ def create_job_applicant(source_name, target_doc=None):
 def create_additional_salary(doc):
 	import json
 
-	from six import string_types
 
-	if isinstance(doc, string_types):
+	if isinstance(doc, str):
 		doc = frappe._dict(json.loads(doc))
 
 	if not frappe.db.exists("Additional Salary", {"ref_docname": doc.name}):

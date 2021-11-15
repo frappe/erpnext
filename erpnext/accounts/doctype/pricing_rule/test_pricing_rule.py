@@ -2,15 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from __future__ import unicode_literals
 
 import unittest
 
 import frappe
-from frappe import MandatoryError
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.healthcare.doctype.lab_test_template.lab_test_template import make_item_price
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.get_item_details import get_item_details
@@ -623,3 +620,12 @@ def delete_existing_pricing_rules():
 		"Pricing Rule Item Group", "Pricing Rule Brand"]:
 
 		frappe.db.sql("delete from `tab{0}`".format(doctype))
+
+
+def make_item_price(item, price_list_name, item_price):
+	frappe.get_doc({
+		'doctype': 'Item Price',
+		'price_list': price_list_name,
+		'item_code': item,
+		'price_list_rate': item_price
+	}).insert(ignore_permissions=True, ignore_mandatory=True)

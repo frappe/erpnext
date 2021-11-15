@@ -1,12 +1,10 @@
-from __future__ import unicode_literals
-
 import sys
 
 import frappe
 import frappe.utils
 
 import erpnext
-from erpnext.demo.setup import education, healthcare, manufacture, retail, setup_data
+from erpnext.demo.setup import education, manufacture, retail, setup_data
 from erpnext.demo.user import accounts
 from erpnext.demo.user import education as edu
 from erpnext.demo.user import fixed_asset, hr, manufacturing, projects, purchase, sales, stock
@@ -38,8 +36,6 @@ def make(domain='Manufacturing', days=100):
 		retail.setup_data()
 	elif domain== 'Education':
 		education.setup_data()
-	elif domain== 'Healthcare':
-		healthcare.setup_data()
 
 	site = frappe.local.site
 	frappe.destroy()
