@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe import _, msgprint
+from frappe import _, msgprint, ValidationError
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.utils import cint, cstr, flt, getdate
 
@@ -17,6 +17,7 @@ from erpnext.controllers.subcontracting import Subcontracting
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_incoming_rate
 
+class QtyMismatchError(ValidationError): pass
 
 class BuyingController(StockController, Subcontracting):
 
@@ -368,7 +369,8 @@ class BuyingController(StockController, Subcontracting):
 			# Check Received Qty = Accepted Qty + Rejected Qty
 			val = flt(d.qty) + flt(d.rejected_qty)
 			if (flt(val, d.precision("received_qty")) != flt(d.received_qty, d.precision("received_qty"))):
-				frappe.throw(_("Accepted + Rejected Qty must be equal to Received quantity for Item {0}").format(d.item_code))
+				message = _("Row #{0}: Received Qty must be equal to Accepted + Rejected Qty for Item {1}").format(d.idx, d.item_code)
+				frappe.throw(msg=message, title=_("Mismatch"), exc=QtyMismatchError)
 
 	def validate_negative_quantity(self, item_row, field_list):
 		if self.is_return:
