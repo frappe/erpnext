@@ -112,6 +112,61 @@ frappe.ui.form.on("Sales Order", {
 		});
 		refresh_field("items");
 	},
+	tax_category:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	shipping_address:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	supplier_address:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	customer_address:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	company_address:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
 	customer: function(frm,cdt,cdn) {
 	
 		frm.call({
@@ -823,8 +878,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	}
 });
 $.extend(cur_frm.cscript, new erpnext.selling.SalesOrderController({frm: cur_frm}));
-
-
 frappe.ui.form.on("Sales Order", "onload", function(frm) {
     cur_frm.set_query("transporter", function() {
         return {

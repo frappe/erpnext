@@ -323,6 +323,29 @@ class DeliveryNote(SellingController):
 				ps.cancel()
 			frappe.msgprint(_("Packing Slip(s) cancelled"))
 
+	@frappe.whitelist()
+	def calcualte_taxes(self):
+		if self.customer:
+			cus = frappe.get_doc("Customer",self.customer)
+			if not cus.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						doc=frappe.get_doc("Item",i.item_code)
+						for j in doc.taxes:
+							if self.tax_category==j.tax_category:
+								if j.item_tax_template:
+									i.item_tax_template=j.item_tax_template
+									
+			if cus.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						doc=frappe.get_doc("Item",i.item_code)
+						for j in doc.taxes:
+							if cus.tax_category==j.tax_category:
+								if j.item_tax_template:
+									i.item_tax_template=j.item_tax_template
+				self.tax_category=cus.tax_category
+				
 	def update_status(self, status):
 		self.set_status(update=True, status=status)
 		self.notify_update()
