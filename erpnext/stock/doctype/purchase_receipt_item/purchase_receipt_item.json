@@ -221,8 +221,10 @@
    "width": "100px"
   },
   {
+   "columns": 1,
    "fieldname": "rejected_qty",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Rejected Quantity",
    "oldfieldname": "rejected_qty",
    "oldfieldtype": "Currency",
@@ -329,7 +331,7 @@
   },
   {
    "bold": 1,
-   "columns": 3,
+   "columns": 2,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -974,7 +976,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-11-03 17:56:53.916921",
+ "modified": "2021-11-15 15:46:10.591600",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
