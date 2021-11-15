@@ -331,5 +331,11 @@ erpnext.patches.v13_0.requeue_failed_reposts
 erpnext.patches.v13_0.fetch_thumbnail_in_website_items
 erpnext.patches.v13_0.update_job_card_status
 erpnext.patches.v12_0.update_production_plan_status
+<<<<<<< HEAD
+=======
+erpnext.patches.v13_0.healthcare_deprecation_warning
+erpnext.patches.v13_0.item_naming_series_not_mandatory
+erpnext.patches.v14_0.delete_healthcare_doctypes
+>>>>>>> 54184e54ed (fix: patch for naming series property setter)
 erpnext.patches.v13_0.update_category_in_ltds_certificate
 erpnext.patches.v13_0.create_ksa_vat_custom_fields
