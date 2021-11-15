@@ -16,7 +16,7 @@ frappe.ui.form.on('POS Profile', {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
-		
+
 		frm.set_query("print_format", function() {
 			return {
 				filters: [
@@ -26,10 +26,10 @@ frappe.ui.form.on('POS Profile', {
 		});
 
 		frm.set_query("account_for_change_amount", function(doc) {
-			if(!doc.company) {
+			if (!doc.company) {
 				frappe.throw(__('Please set Company'));
 			}
-			
+
 			return {
 				filters: {
 					account_type: ['in', ["Cash", "Bank"]],
@@ -49,7 +49,7 @@ frappe.ui.form.on('POS Profile', {
 		});
 
 		frm.set_query('company_address', function(doc) {
-			if(!doc.company) {
+			if (!doc.company) {
 				frappe.throw(__('Please set Company'));
 			}
 
@@ -61,14 +61,14 @@ frappe.ui.form.on('POS Profile', {
 				}
 			};
 		});
-		
+
 		frm.set_query('income_account', function(doc) {
-			if(!doc.company) {
+			if (!doc.company) {
 				frappe.throw(__('Please set Company'));
 			}
-			
+
 			return {
-				filters:{
+				filters: {
 					'is_group': 0,
 					'company': doc.company,
 					'account_type': "Income Account"
@@ -77,12 +77,12 @@ frappe.ui.form.on('POS Profile', {
 		});
 
 		frm.set_query('cost_center', function(doc) {
-			if(!doc.company) {
+			if (!doc.company) {
 				frappe.throw(__('Please set Company'));
 			}
-			
+
 			return {
-				filters:{
+				filters: {
 					'company': doc.company,
 					'is_group': 0
 				}
@@ -90,10 +90,10 @@ frappe.ui.form.on('POS Profile', {
 		});
 
 		frm.set_query('expense_account', function(doc) {
-			if(!doc.company) {
+			if (!doc.company) {
 				frappe.throw(__('Please set Company'));
 			}
-			
+
 			return {
 				filters: {
 					"report_type": "Profit and Loss",
@@ -104,16 +104,16 @@ frappe.ui.form.on('POS Profile', {
 		});
 
 		frm.set_query("select_print_heading", function() {
-			return{
-				filters:[
+			return {
+				filters: [
 					['Print Heading', 'docstatus', '!=', 2]
 				]
 			};
 		});
 
 		frm.set_query("write_off_account", function(doc) {
-			return{
-				filters:{
+			return {
+				filters: {
 					'report_type': 'Profit and Loss',
 					'is_group': 0,
 					'company': doc.company
@@ -122,8 +122,8 @@ frappe.ui.form.on('POS Profile', {
 		});
 
 		frm.set_query("write_off_cost_center", function(doc) {
-			return{
-				filters:{
+			return {
+				filters: {
 					'is_group': 0,
 					'company': doc.company
 				}
@@ -134,7 +134,7 @@ frappe.ui.form.on('POS Profile', {
 	},
 
 	refresh: function(frm) {
-		if(frm.doc.company) {
+		if (frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}
 	},
@@ -148,4 +148,4 @@ frappe.ui.form.on('POS Profile', {
 		frm.toggle_display('expense_account',
 			erpnext.is_perpetual_inventory_enabled(frm.doc.company));
 	}
-})
+});
