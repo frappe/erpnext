@@ -366,7 +366,7 @@ class BuyingController(StockController, Subcontracting):
 				d.received_qty = flt(d.qty) + flt(d.rejected_qty)
 
 			# Check Received Qty = Accepted Qty + Rejected Qty
-			val  = flt(d.qty) + flt(d.rejected_qty)
+			val = flt(d.qty) + flt(d.rejected_qty)
 			if (flt(val, d.precision("received_qty")) != flt(d.received_qty, d.precision("received_qty"))):
 				frappe.throw(_("Accepted + Rejected Qty must be equal to Received quantity for Item {0}").format(d.item_code))
 
