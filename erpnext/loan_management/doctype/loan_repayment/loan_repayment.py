@@ -93,7 +93,7 @@ class LoanRepayment(AccountsController):
 
 	def book_unaccrued_interest(self):
 		precision = cint(frappe.db.get_default("currency_precision")) or 2
-		if self.total_interest_paid > self.interest_payable:
+		if flt(self.total_interest_paid, precision) > flt(self.interest_payable, precision):
 			if not self.is_term_loan:
 				# get last loan interest accrual date
 				last_accrual_date = get_last_accrual_date(self.against_loan)
