@@ -827,6 +827,8 @@ class WorkOrder(Document):
 
 	def validate_operation_time(self):
 		for d in self.operations:
+			if d.time_in_mins < 0:
+				print(self.bom_no, self.production_item)
 			if not d.time_in_mins > 0:
 				frappe.throw(_("Operation Time must be greater than 0 for Operation {0}").format(d.operation))
 

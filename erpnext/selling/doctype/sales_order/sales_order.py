@@ -131,6 +131,29 @@ class SalesOrder(SellingController):
 			if not res:
 				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
 
+	@frappe.whitelist()
+	def calcualte_taxes(self):
+		if self.customer:
+			cus = frappe.get_doc("Customer",self.customer)
+			if not cus.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						doc=frappe.get_doc("Item",i.item_code)
+						for j in doc.taxes:
+							if self.tax_category==j.tax_category:
+								if j.item_tax_template:
+									i.item_tax_template=j.item_tax_template
+									
+			if cus.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						doc=frappe.get_doc("Item",i.item_code)
+						for j in doc.taxes:
+							if cus.tax_category==j.tax_category:
+								if j.item_tax_template:
+									i.item_tax_template=j.item_tax_template
+				self.tax_category=cus.tax_category
+				
 	def validate_warehouse(self):
 		super(SalesOrder, self).validate_warehouse()
 

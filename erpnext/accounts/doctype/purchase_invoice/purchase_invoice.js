@@ -534,6 +534,16 @@ frappe.ui.form.on("Purchase Invoice", {
 				}
 			}
 		}
+
+		frm.fields_dict['items'].grid.get_field('discount_account').get_query = function(doc) {
+			return {
+				filters: {
+					'report_type': 'Profit and Loss',
+					'company': doc.company,
+					"is_group": 0
+				}
+			}
+		}
 	},
 
 	refresh: function(frm) {
@@ -608,6 +618,9 @@ frappe.ui.form.on("Purchase Invoice", {
 				callback: (response) => {
 					if (response) frm.set_value("credit_to", response.message);
 				},
+			});
+			frappe.db.get_value('Company', frm.doc.company, 'default_payable_account', (r) => {
+				frm.set_value('credit_to', r.default_payable_account);
 			});
 		}
 	},
