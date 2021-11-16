@@ -118,7 +118,6 @@ class POSInvoiceMergeLog(Document):
 
 		loyalty_amount_sum, loyalty_points_sum, idx = 0, 0, 1
 
-		invoice.write_off_amount = 0.0
 
 		for doc in data:
 			map_doc(doc, invoice, table_map={ "doctype": invoice.doctype })
