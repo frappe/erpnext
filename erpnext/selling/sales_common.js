@@ -206,8 +206,10 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 
-		if (item.serial_no && item.qty === item.serial_no.split(`\n`).length) {
-			return;
+		// check if serial nos entered are as much as qty in row
+		if (item.serial_no) {
+			let serial_nos = item.serial_no.split(`\n`).filter(sn => sn.trim()); // filter out whitespaces
+			if (item.qty === serial_nos.length) return;
 		}
 
 		if (item.serial_no && !item.batch_no) {
@@ -472,29 +474,33 @@ frappe.ui.form.on(cur_frm.doctype, {
 					"reqd": 1
 				},
 				{
+					"fieldtype": "Table MultiSelect",
+					"label": __("Competitors"),
+					"fieldname": "competitors",
+					"options": "Competitor Detail"
+				},
+				{
 					"fieldtype": "Text",
 					"label": __("Detailed Reason"),
 					"fieldname": "detailed_reason"
 				},
 			],
 			primary_action: function() {
-				var values = dialog.get_values();
-				var reasons = values["lost_reason"];
-				var detailed_reason = values["detailed_reason"];
+				let values = dialog.get_values();
 
 				frm.call({
 					doc: frm.doc,
 					method: 'declare_enquiry_lost',
 					args: {
-						'lost_reasons_list': reasons,
-						'detailed_reason': detailed_reason
+						'lost_reasons_list': values.lost_reason,
+						'competitors': values.competitors,
+						'detailed_reason': values.detailed_reason
 					},
 					callback: function(r) {
 						dialog.hide();
 						frm.reload_doc();
 					},
 				});
-				refresh_field("lost_reason");
 			},
 			primary_action_label: __('Declare Lost')
 		});

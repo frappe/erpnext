@@ -58,11 +58,7 @@ erpnext.patches.v11_0.set_department_for_doctypes
 erpnext.patches.v11_0.update_allow_transfer_for_manufacture
 erpnext.patches.v11_0.add_item_group_defaults
 erpnext.patches.v11_0.add_expense_claim_default_account
-execute:frappe.delete_doc("Page", "hub")
-erpnext.patches.v11_0.reset_publish_in_hub_for_all_items
-erpnext.patches.v11_0.update_hub_url # 2018-08-31  # 2018-09-03
 erpnext.patches.v11_0.make_job_card
-erpnext.patches.v10_0.delete_hub_documents # 12-08-2018
 erpnext.patches.v11_0.add_default_dispatch_notification_template
 erpnext.patches.v11_0.add_market_segments
 erpnext.patches.v11_0.add_sales_stages
@@ -153,7 +149,6 @@ erpnext.patches.v12_0.set_cost_center_in_child_table_of_expense_claim
 erpnext.patches.v12_0.add_eway_bill_in_delivery_note
 erpnext.patches.v12_0.set_lead_title_field
 erpnext.patches.v12_0.set_permission_einvoicing
-erpnext.patches.v12_0.set_published_in_hub_tracked_item
 erpnext.patches.v12_0.set_job_offer_applicant_email
 erpnext.patches.v12_0.create_irs_1099_field_united_states
 erpnext.patches.v12_0.move_bank_account_swift_number_to_bank
@@ -288,8 +283,8 @@ erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
 erpnext.patches.v13_0.einvoicing_deprecation_warning
 execute:frappe.reload_doc("erpnext_integrations", "doctype", "TaxJar Settings")
 execute:frappe.reload_doc("erpnext_integrations", "doctype", "Product Tax Category")
-erpnext.patches.v13_0.custom_fields_for_taxjar_integration
 erpnext.patches.v14_0.delete_einvoicing_doctypes
+erpnext.patches.v13_0.custom_fields_for_taxjar_integration          #08-11-2021
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
 erpnext.patches.v13_0.validate_options_for_data_field
 erpnext.patches.v13_0.create_gst_payment_entry_fields
@@ -308,6 +303,12 @@ erpnext.patches.v13_0.set_status_in_maintenance_schedule_table
 erpnext.patches.v13_0.add_default_interview_notification_templates
 erpnext.patches.v13_0.enable_scheduler_job_for_item_reposting
 erpnext.patches.v13_0.requeue_failed_reposts
+erpnext.patches.v13_0.update_job_card_status
+erpnext.patches.v12_0.update_production_plan_status
 erpnext.patches.v13_0.healthcare_deprecation_warning
+erpnext.patches.v13_0.item_naming_series_not_mandatory
 erpnext.patches.v14_0.delete_healthcare_doctypes
+erpnext.patches.v13_0.update_category_in_ltds_certificate
 erpnext.patches.v13_0.create_pan_field_for_india #2
+erpnext.patches.v14_0.delete_hub_doctypes
+erpnext.patches.v13_0.create_ksa_vat_custom_fields

@@ -6,7 +6,7 @@ from frappe import _
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.utils import cint, flt
 
-from erpnext import get_default_company
+from erpnext import get_default_company, get_region
 
 TAX_ACCOUNT_HEAD = frappe.db.get_single_value("TaxJar Settings", "tax_account_head")
 SHIP_ACCOUNT_HEAD = frappe.db.get_single_value("TaxJar Settings", "shipping_account_head")
@@ -19,6 +19,7 @@ SUPPORTED_STATE_CODES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', '
 	'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE',
 	'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD',
 	'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
+
 
 
 def get_client():
@@ -158,6 +159,9 @@ def set_sales_tax(doc, method):
 	if not TAXJAR_CALCULATE_TAX:
 		return
 
+	if get_region(doc.company) != 'United States':
+		return
+
 	if not doc.items:
 		return
 
@@ -262,7 +266,7 @@ def get_shipping_address_details(doc):
 	if doc.shipping_address_name:
 		shipping_address = frappe.get_doc("Address", doc.shipping_address_name)
 	elif doc.customer_address:
-		shipping_address = frappe.get_doc("Address", doc.customer_address_name)
+		shipping_address = frappe.get_doc("Address", doc.customer_address)
 	else:
 		shipping_address = get_company_address_details(doc)
 

@@ -1,12 +1,10 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
 from frappe.utils import cint, cstr
-from six import iteritems
 
 from erpnext.accounts.report.financial_statements import (
 	get_columns,
@@ -202,7 +200,7 @@ def add_total_row_account(out, data, label, period_list, currency, summary_data,
 def get_report_summary(summary_data, currency):
 	report_summary = []
 
-	for label, value in iteritems(summary_data):
+	for label, value in summary_data.items():
 		report_summary.append(
 			{
 				"value": value,
