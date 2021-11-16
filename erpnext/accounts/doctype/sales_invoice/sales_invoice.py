@@ -626,35 +626,29 @@ class SalesInvoice(SellingController):
 
 	@frappe.whitelist()
 	def calcualte_taxes(self):
-		print("&&&&&&&&&&&777")
-
 		if self.customer:
 			cus = frappe.get_doc("Customer",self.customer)
-			print("*")
 			if not cus.tax_category:
-				print("**")
 				if self.tax_category:
-					print("***")
 					for i in self.items:
-						print("****")
-						doc=frappe.get_doc("Item",i.item_code)
-						for j in doc.taxes:
-							print("*****")
-							if self.tax_category==j.tax_category:
-								if j.item_tax_template:
-									print("******")
-									i.item_tax_template=j.item_tax_template
-									print("*******************88",j.item_tax_template)
+						if i.item_code:
+							doc=frappe.get_doc("Item",i.item_code)
+							for j in doc.taxes:
+								if self.tax_category==j.tax_category:
+									if j.item_tax_template:
+										i.item_tax_template=j.item_tax_template
+									
 			if cus.tax_category:
 				if self.tax_category:
 					for i in self.items:
-						doc=frappe.get_doc("Item",i.item_code)
-						for j in doc.taxes:
-							if cus.tax_category==j.tax_category:
-								if j.item_tax_template:
-									i.item_tax_template=j.item_tax_template
+						if i.item_code:
+							doc=frappe.get_doc("Item",i.item_code)
+							for j in doc.taxes:
+								if cus.tax_category==j.tax_category:
+									if j.item_tax_template:
+										i.item_tax_template=j.item_tax_template
 				self.tax_category=cus.tax_category
-				print("*******************88",j.item_tax_template)
+				
 
 
 	def validate_with_previous_doc(self):
