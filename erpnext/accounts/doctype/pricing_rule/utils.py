@@ -265,6 +265,11 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 			else:
 				p.variant_of = None
 
+	if len(pricing_rules) > 1:
+		filtered_rules = list(filter(lambda x: x.currency==args.get('currency'), pricing_rules))
+		if filtered_rules:
+			pricing_rules = filtered_rules
+
 	# find pricing rule with highest priority
 	if pricing_rules:
 		max_priority = max(cint(p.priority) for p in pricing_rules)
