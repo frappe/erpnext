@@ -1270,6 +1270,12 @@ class AccountsController(TransactionBase):
 
 		group_data.taxes = list(group_data.taxes.values())
 
+	def get_taxes_for_item(self, item):
+		group_data = frappe._dict()
+		group_data.items = [item]
+		group_data.taxable_total = item.taxable_amount
+		self.calculate_taxes_for_group(group_data)
+		return group_data.taxes
 
 	def get_gl_entries_for_print(self):
 		from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions

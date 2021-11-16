@@ -25,6 +25,8 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
+from erpnext.erpnext_integrations.fbr_pos_integration import validate_fbr_pos_invoice, before_cancel_fbr_pos_invoice,\
+	on_submit_fbr_pos_invoice
 
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
 
@@ -243,6 +245,8 @@ class SalesInvoice(SellingController):
 		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points:
 			validate_loyalty_points(self, self.loyalty_points)
 
+		validate_fbr_pos_invoice(self)
+
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
 			if d.is_fixed_asset and d.meta.get_field("asset") and d.asset:
@@ -313,6 +317,8 @@ class SalesInvoice(SellingController):
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_submit")
 
+		on_submit_fbr_pos_invoice(self)
+
 	def validate_pos_return(self):
 
 		if self.is_pos and self.is_return:
@@ -335,6 +341,7 @@ class SalesInvoice(SellingController):
 
 	def before_cancel(self):
 		self.update_time_sheet(None)
+		before_cancel_fbr_pos_invoice(self)
 
 	def on_cancel(self):
 		super(SalesInvoice, self).on_cancel()

@@ -28,7 +28,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Type",
-   "options": "Cash\nBank\nGeneral"
+   "options": "Cash\nCard\nBank\nCheque\nGeneral"
   },
   {
    "fieldname": "accounts",
@@ -45,7 +45,7 @@
  ],
  "icon": "fa fa-credit-card",
  "idx": 1,
- "modified": "2021-02-25 01:25:45.384210",
+ "modified": "2021-11-11 15:09:37.390595",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Mode of Payment",

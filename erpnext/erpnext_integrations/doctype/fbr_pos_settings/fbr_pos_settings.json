@@ -1,0 +1,53 @@
+{
+ "creation": "2021-11-13 12:53:56.941423",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "post_invoice_data_endpoint",
+  "default_fbr_pos_id"
+ ],
+ "fields": [
+  {
+   "fieldname": "post_invoice_data_endpoint",
+   "fieldtype": "Small Text",
+   "label": "Post Invoice Data URL"
+  },
+  {
+   "fieldname": "default_fbr_pos_id",
+   "fieldtype": "Int",
+   "label": "Default FBR POS ID"
+  }
+ ],
+ "issingle": 1,
+ "modified": "2021-11-14 23:19:52.543553",
+ "modified_by": "Administrator",
+ "module": "ERPNext Integrations",
+ "name": "FBR POS Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
