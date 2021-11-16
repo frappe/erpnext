@@ -560,7 +560,7 @@ frappe.ui.form.on("Work Order", {
 	// 		}
 	// 	});
 	// }
-
+	}
 });
 
 frappe.ui.form.on("Work Order Item", {
