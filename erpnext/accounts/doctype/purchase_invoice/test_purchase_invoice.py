@@ -22,6 +22,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	make_purchase_receipt,
 )
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
+from erpnext.controllers.buying_controller import QtyMismatchError
 
 test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
 test_ignore = ["Serial No"]
@@ -35,6 +36,27 @@ class TestPurchaseInvoice(unittest.TestCase):
 	@classmethod
 	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
+
+	def test_purchase_invoice_received_qty(self):
+		"""
+			1. Test if received qty is validated against accepted + rejected
+			2. Test if received qty is auto set on save
+		"""
+		pi = make_purchase_invoice(
+			qty=1,
+			rejected_qty=1,
+			received_qty=3,
+			item_code="_Test Item Home Desktop 200",
+			rejected_warehouse = "_Test Rejected Warehouse - _TC",
+			update_stock=True, do_not_save=True)
+		self.assertRaises(QtyMismatchError, pi.save)
+
+		pi.items[0].received_qty = 0
+		pi.save()
+		self.assertEqual(pi.items[0].received_qty, 2)
+
+		# teardown
+		pi.delete()
 
 	def test_gl_entries_without_perpetual_inventory(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
