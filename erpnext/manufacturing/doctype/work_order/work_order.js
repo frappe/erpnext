@@ -1,6 +1,3 @@
-// Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
-// For license information, please see license.txt
-
 frappe.ui.form.on("Work Order", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
@@ -258,7 +255,7 @@ frappe.ui.form.on("Work Order", {
 
         // }
 
-	},
+	}},
 
 	make_job_card: function(frm) {
 		let qty = 0;
@@ -560,7 +557,7 @@ frappe.ui.form.on("Work Order", {
 	// 		}
 	// 	});
 	// }
-
+	
 });
 
 frappe.ui.form.on("Work Order Item", {
