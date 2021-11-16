@@ -49,6 +49,10 @@
   "warranty_expiry_date",
   "column_break_64",
   "maintenance_status",
+  "additional_information_section",
+  "reference_no",
+  "column_break_45",
+  "dispatch_date",
   "purchase_details",
   "purchase_document_type",
   "purchase_document_no",
@@ -58,7 +62,6 @@
   "column_break3",
   "supplier",
   "supplier_name",
-  "dispatch_date",
   "purchase_rate",
   "delivery_details",
   "delivery_document_type",
@@ -228,7 +231,6 @@
    "read_only": 1
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "purchase_details",
    "fieldtype": "Section Break",
    "label": "Receiving Details"
@@ -651,10 +653,29 @@
    "no_copy": 1,
    "options": "\nRegistration",
    "read_only": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "reference_no",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Reference Number",
+   "no_copy": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "additional_information_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Information"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "column_break_45",
+   "fieldtype": "Column Break"
   }
  ],
  "image_field": "image",
- "modified": "2021-11-03 13:09:23.814142",
+ "modified": "2021-11-16 16:46:28.950350",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
@@ -752,7 +773,7 @@
   }
  ],
  "quick_entry": 1,
- "search_fields": "item_code, item_name, license_plate, chassis_no, engine_no, color, customer, customer_name, warehouse",
+ "search_fields": "item_code, item_name, license_plate, chassis_no, engine_no, color, customer, customer_name, reference_no",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
  "sort_field": "modified",
