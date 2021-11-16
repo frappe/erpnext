@@ -425,7 +425,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			vehicle_invoice_issue = frappe.db.sql("""
 				select m.name, m.posting_date
 				from `tabVehicle Invoice Movement Detail` d
-				inner join `tabVehicle Invoice Movement` m
+				inner join `tabVehicle Invoice Movement` m on m.name = d.parent
 				where m.docstatus = 1 and d.vehicle = %s and m.purpose = 'Issue' and m.issued_for = 'Registration'
 				order by m.posting_date desc, m.creation desc
 			""", self.vehicle, as_dict=1)
@@ -433,7 +433,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			vehicle_invoice_return = frappe.db.sql("""
 				select m.name, m.posting_date
 				from `tabVehicle Invoice Movement Detail` d
-				inner join `tabVehicle Invoice Movement` m
+				inner join `tabVehicle Invoice Movement` m on m.name = d.parent
 				where m.docstatus = 1 and d.vehicle = %s and m.purpose = 'Return' and m.issued_for = 'Registration'
 				order by m.posting_date desc, m.creation desc
 			""", self.vehicle, as_dict=1)
