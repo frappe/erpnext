@@ -81,6 +81,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.initialize_taxes();
 		this.determine_exclusive_rate();
 		this.calculate_net_total();
+		calculate_shipping_charges();
 		this.calculate_taxes();
 		this.manipulate_grand_total_for_inclusive_tax();
 		this.calculate_totals();
@@ -265,6 +266,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			me.frm.doc.base_net_total += item.base_net_amount;
 			});
 
+		}
+	calculate_shipping_charges() {
 		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total"]);
 <<<<<<< HEAD
 	},
