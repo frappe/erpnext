@@ -220,8 +220,11 @@ class VehicleTransactionController(StockController):
 
 				else:
 					if self.customer not in (vbo.customer, vbo.financer):
-						frappe.throw(_("Customer does not match in {0}")
-							.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
+						if doc.get('vehicle'):
+							vehicle_customer = frappe.db.get_value("Vehicle", doc.get('vehicle'), 'customer')
+							if not vehicle_customer or self.customer != vehicle_customer:
+								frappe.throw(_("Customer does not match in {0}")
+									.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
 			if self.get('vehicle_owner'):
 				if self.vehicle_owner not in (vbo.customer, vbo.financer):
