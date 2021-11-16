@@ -50,6 +50,7 @@ class calculate_taxes_and_totals(object):
 		self.initialize_taxes()
 		self.determine_exclusive_rate()
 		self.calculate_net_total()
+		self.calculate_shipping_charges()
 		self.calculate_taxes()
 		self.manipulate_grand_total_for_inclusive_tax()
 		self.calculate_totals()
@@ -258,6 +259,7 @@ class calculate_taxes_and_totals(object):
 
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total"])
 
+	def calculate_shipping_charges(self):
 		if hasattr(self.doc, "shipping_rule") and self.doc.shipping_rule:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.doc.shipping_rule)
 			shipping_rule.apply(self.doc)

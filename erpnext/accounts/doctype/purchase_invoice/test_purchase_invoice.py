@@ -811,29 +811,12 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi.shipping_rule = shipping_rule.name
 		pi.insert()
-
-		shipping_amount = 0.0
-		for condition in shipping_rule.get("conditions"):
-			if not condition.to_value or (flt(condition.from_value) <= pi.net_total <= flt(condition.to_value)):
-				shipping_amount = condition.shipping_amount
-
-		shipping_charge = {
-			"doctype": "Purchase Taxes and Charges",
-			"category": "Valuation and Total",
-			"charge_type": "Actual",
-			"account_head": shipping_rule.account,
-			"cost_center": shipping_rule.cost_center,
-			"tax_amount": shipping_amount,
-			"description": shipping_rule.name,
-			"add_deduct_tax": "Add"
-		}
-		pi.append("taxes", shipping_charge)
 		pi.save()
 
 		self.assertEqual(pi.net_total, 1250)
 
-		self.assertEqual(pi.total_taxes_and_charges, 462.3)
-		self.assertEqual(pi.grand_total, 1712.3)
+		self.assertEqual(pi.total_taxes_and_charges, 354.1)
+		self.assertEqual(pi.grand_total, 1604.1)
 
 	def test_make_pi_without_terms(self):
 		pi = make_purchase_invoice(do_not_save=1)
