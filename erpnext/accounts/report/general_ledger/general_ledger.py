@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 import frappe
 from frappe import _, _dict
-from frappe.utils import cstr, flt, getdate
+from frappe.utils import cstr, getdate
 from six import iteritems
 
 from erpnext import get_company_currency, get_default_company
@@ -19,6 +19,8 @@ from erpnext.accounts.report.financial_statements import get_cost_centers_with_c
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
 from erpnext.accounts.utils import get_account_currency
 
+# to cache translations
+TRANSLATIONS = frappe._dict()
 
 def execute(filters=None):
 	if not filters:
@@ -44,10 +46,20 @@ def execute(filters=None):
 
 	columns = get_columns(filters)
 
+	update_translations()
+
 	res = get_result(filters, account_details)
 
 	return columns, res
 
+def update_translations():
+	TRANSLATIONS.update(
+		dict(
+			OPENING = _('Opening'),
+			TOTAL = _('Total'),
+			CLOSING_TOTAL = _('Closing (Opening + Total)')
+		)
+	)
 
 def validate_filters(filters, account_details):
 	if not filters.get("company"):
@@ -353,9 +365,9 @@ def get_totals_dict():
 			credit_in_account_currency=0.0
 		)
 	return _dict(
-		opening = _get_debit_credit_dict(_('Opening')),
-		total = _get_debit_credit_dict(_('Total')),
-		closing = _get_debit_credit_dict(_('Closing (Opening + Total)'))
+		opening = _get_debit_credit_dict(TRANSLATIONS.OPENING),
+		total = _get_debit_credit_dict(TRANSLATIONS.TOTAL),
+		closing = _get_debit_credit_dict(TRANSLATIONS.CLOSING_TOTAL)
 	)
 
 def group_by_field(group_by):
@@ -380,22 +392,23 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 	entries = []
 	consolidated_gle = OrderedDict()
 	group_by = group_by_field(filters.get('group_by'))
+	group_by_voucher_consolidated = filters.get("group_by") == 'Group by Voucher (Consolidated)'
 
 	if filters.get('show_net_values_in_party_account'):
 		account_type_map = get_account_type_map(filters.get('company'))
 
 	def update_value_in_dict(data, key, gle):
-		data[key].debit += flt(gle.debit)
-		data[key].credit += flt(gle.credit)
+		data[key].debit += gle.debit
+		data[key].credit += gle.credit
 
-		data[key].debit_in_account_currency += flt(gle.debit_in_account_currency)
-		data[key].credit_in_account_currency += flt(gle.credit_in_account_currency)
+		data[key].debit_in_account_currency += gle.debit_in_account_currency
+		data[key].credit_in_account_currency += gle.credit_in_account_currency
 
 		if filters.get('show_net_values_in_party_account') and \
 			account_type_map.get(data[key].account) in ('Receivable', 'Payable'):
-			net_value = flt(data[key].debit) - flt(data[key].credit)
-			net_value_in_account_currency = flt(data[key].debit_in_account_currency) \
-				- flt(data[key].credit_in_account_currency)
+			net_value = data[key].debit - data[key].credit
+			net_value_in_account_currency = data[key].debit_in_account_currency \
+				- data[key].credit_in_account_currency
 
 			if net_value < 0:
 				dr_or_cr = 'credit'
@@ -413,19 +426,29 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 			data[key].against_voucher += ', ' + gle.against_voucher
 
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
-	for gle in gl_entries:
-		if (gle.posting_date < from_date or
-			(cstr(gle.is_opening) == "Yes" and not filters.get("show_opening_entries"))):
-			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'opening', gle)
-			update_value_in_dict(totals, 'opening', gle)
+	show_opening_entries = filters.get("show_opening_entries")
 
-			update_value_in_dict(gle_map[gle.get(group_by)].totals, 'closing', gle)
+	for gle in gl_entries:
+		group_by_value = gle.get(group_by)
+
+		if (gle.posting_date < from_date or (cstr(gle.is_opening) == "Yes" and not show_opening_entries)):
+			if not group_by_voucher_consolidated:
+				update_value_in_dict(gle_map[group_by_value].totals, 'opening', gle)
+				update_value_in_dict(gle_map[group_by_value].totals, 'closing', gle)
+
+			update_value_in_dict(totals, 'opening', gle)
 			update_value_in_dict(totals, 'closing', gle)
 
 		elif gle.posting_date <= to_date:
-			if filters.get("group_by") != 'Group by Voucher (Consolidated)':
-				gle_map[gle.get(group_by)].entries.append(gle)
-			elif filters.get("group_by") == 'Group by Voucher (Consolidated)':
+			if not group_by_voucher_consolidated:
+				update_value_in_dict(gle_map[group_by_value].totals, 'total', gle)
+				update_value_in_dict(gle_map[group_by_value].totals, 'closing', gle)
+				update_value_in_dict(totals, 'total', gle)
+				update_value_in_dict(totals, 'closing', gle)
+
+				gle_map[group_by_value].entries.append(gle)
+
+			elif group_by_voucher_consolidated:
 				keylist = [gle.get("voucher_type"), gle.get("voucher_no"), gle.get("account")]
 				for dim in accounting_dimensions:
 					keylist.append(gle.get(dim))
@@ -437,9 +460,7 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 					update_value_in_dict(consolidated_gle, key, gle)
 
 	for key, value in consolidated_gle.items():
-		update_value_in_dict(gle_map[value.get(group_by)].totals, 'total', value)
 		update_value_in_dict(totals, 'total', value)
-		update_value_in_dict(gle_map[value.get(group_by)].totals, 'closing', value)
 		update_value_in_dict(totals, 'closing', value)
 		entries.append(value)
 

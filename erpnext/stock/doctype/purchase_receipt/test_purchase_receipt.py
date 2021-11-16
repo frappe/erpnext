@@ -1085,6 +1085,7 @@ class TestPurchaseReceipt(ERPNextTestCase):
 
 		automatically_fetch_payment_terms()
 
+
 		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
 		create_payment_terms_template()
 		po.payment_terms_template = 'Test Receivable Template'

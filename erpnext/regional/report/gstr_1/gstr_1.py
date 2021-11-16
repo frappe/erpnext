@@ -250,18 +250,17 @@ class Gstr1Report(object):
 		""" % (self.doctype, ', '.join(['%s']*len(self.invoices))), tuple(self.invoices), as_dict=1)
 
 		for d in items:
-			if d.item_code not in self.invoice_items.get(d.parent, {}):
-				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, 0.0)
-				self.invoice_items[d.parent][d.item_code] += d.get('taxable_value', 0) or d.get('base_net_amount', 0)
+			self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, 0.0)
+			self.invoice_items[d.parent][d.item_code] += d.get('taxable_value', 0) or d.get('base_net_amount', 0)
 
-				item_tax_rate = {}
+			item_tax_rate = {}
 
-				if d.item_tax_rate:
-					item_tax_rate = json.loads(d.item_tax_rate)
+			if d.item_tax_rate:
+				item_tax_rate = json.loads(d.item_tax_rate)
 
-					for account, rate in item_tax_rate.items():
-						tax_rate_dict = self.item_tax_rate.setdefault(d.parent, {}).setdefault(d.item_code, [])
-						tax_rate_dict.append(rate)
+				for account, rate in item_tax_rate.items():
+					tax_rate_dict = self.item_tax_rate.setdefault(d.parent, {}).setdefault(d.item_code, [])
+					tax_rate_dict.append(rate)
 
 	def get_items_based_on_tax_rate(self):
 		self.tax_details = frappe.db.sql("""

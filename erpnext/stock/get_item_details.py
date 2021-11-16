@@ -708,7 +708,7 @@ def insert_item_price(args):
 				{'item_code': args.item_code, 'price_list': args.price_list, 'currency': args.currency},
 				['name', 'price_list_rate'], as_dict=1)
 			if item_price and item_price.name:
-				if item_price.price_list_rate != price_list_rate:
+				if item_price.price_list_rate != price_list_rate and frappe.db.get_single_value('Stock Settings', 'update_existing_price_list_rate'):
 					frappe.db.set_value('Item Price', item_price.name, "price_list_rate", price_list_rate)
 					frappe.msgprint(_("Item Price updated for {0} in Price List {1}").format(args.item_code,
 						args.price_list), alert=True)

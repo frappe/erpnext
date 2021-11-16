@@ -329,6 +329,8 @@ erpnext.patches.v13_0.trim_sales_invoice_custom_field_length
 erpnext.patches.v13_0.enable_scheduler_job_for_item_reposting
 erpnext.patches.v13_0.requeue_failed_reposts
 erpnext.patches.v13_0.fetch_thumbnail_in_website_items
+erpnext.patches.v13_0.update_job_card_status
 erpnext.patches.v12_0.update_production_plan_status
+erpnext.patches.v13_0.item_naming_series_not_mandatory
 erpnext.patches.v13_0.update_category_in_ltds_certificate
 erpnext.patches.v13_0.create_ksa_vat_custom_fields
