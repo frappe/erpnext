@@ -216,21 +216,25 @@ class Task(NestedSet):
 				self.update_project()
 
 	@frappe.whitelist()
+	def get_basic_rate(self, item):
+		if isinstance(item, dict):
+			item = frappe._dict(item)
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_warehouse_details
+		args = frappe._dict(
+			{"item_code": item.item_code, "company": self.company,
+			"project": self.project, "uom": item.stock_uom, 'warehouse': item.source_warehouse})
+		args['posting_date'] = frappe.utils.nowdate()
+		args['posting_time'] = frappe.utils.nowtime()
+		stock_and_rate = get_warehouse_details(args)
+		return stock_and_rate['basic_rate']
+
+	@frappe.whitelist()
 	def get_items(self):
 		def get_default_source_warehouse(item_code, company):
 			return frappe.db.get_value('Item Default',
 			{'parent': item_code, 'company': company},
 			['default_warehouse'])
-
-		from erpnext.stock.doctype.stock_entry.stock_entry import get_warehouse_details
-		def get_basic_rate(self, item):
-			args = frappe._dict(
-				{"item_code": item.item_code, "company": self.company,
-				"project": self.project, "uom": item.stock_uom, 'warehouse': item.source_warehouse})
-			args['posting_date'] = frappe.utils.nowdate()
-			args['posting_time'] = frappe.utils.nowtime()
-			stock_and_rate = get_warehouse_details(args)
-			return stock_and_rate['basic_rate']
 
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 
@@ -241,7 +245,7 @@ class Task(NestedSet):
 		for key, item in item_dict.items():
 			if not item.source_warehouse:
 				item.source_warehouse = get_default_source_warehouse(item.item_code, self.company)
-			item.rate = get_basic_rate(self, item)
+			item.rate = self.get_basic_rate(item)
 
 		return item_dict
 
@@ -390,6 +394,7 @@ def make_stock_entry_mt(source_name, target_doc = None):
 			"doctype": "Stock Entry Detail",
 			"field_map": {
 				"warehouse": "s_warehouse",
+				"name": "task_item"
 			},
 			"postprocess": set_t_warehouse
 		}
@@ -410,10 +415,21 @@ def make_stock_entry_mi(source_name, target_doc = None):
 			"doctype": "Stock Entry Detail",
 			"field_map": {
 				"warehouse": "s_warehouse",
+				"name": "task_item"
 			},
 		}
 	}, target_doc)
 	return doc
+
+@frappe.whitelist()
+def check_if_deletable(items):
+	items = json.loads(items)
+	for item in items:
+		if '__checked' in item and (item['transferred'] or item['issued']):
+			e_message = "{0} cannot be deleted since \
+				{1} are linked against it.".format(
+			frappe.bold("Row " + str(item['idx'])), frappe.bold('Material Transfers/Issues'))
+			frappe.throw(e_message)
 
 
 

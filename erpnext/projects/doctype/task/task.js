@@ -80,6 +80,10 @@ frappe.ui.form.on("Task", {
 			frm: frm,
 		});
 	},
+	calculate_estimated_cost: function(frm, row) {
+		row.estimated_cost = flt(row.qty) * flt(row.basic_rate);
+		frm.refresh_field("items")
+	},
 	get_items(frm) {
 		if (!frm.doc.qty || !frm.doc.from_bom) {
 			frappe.throw(__('BOM and Quantity is required to fetch items.'));
@@ -104,11 +108,42 @@ frappe.ui.form.on("Task", {
 		});
 	}
 });
-
+let items_before_delete = [];
 frappe.ui.form.on("Task Item", {
+	items_remove: function(frm) {
+		frappe.call({
+			method: "erpnext.projects.doctype.task.task.check_if_deletable",
+			args: {
+				items: items_before_delete,
+			},
+			always: function (r) {
+				if (r.exc) {
+					frm.reload_doc();
+					items_before_delete = [];
+				}
+			},
+		})
+	},
+	warehouse(frm, cdt, cdn){
+		const row = locals[cdt][cdn];
+		frappe.call({
+			doc: frm.doc,
+			method: "get_basic_rate",
+			args: {
+				item: {"item_code": row.item_code, "stock_uom": row.uom, "source_warehouse": row.warehouse},
+			},
+			callback: function (r) {
+				frappe.model.set_value(cdt, cdn, 'basic_rate', r.message);
+				frm.events.calculate_estimated_cost(frm, row);
+			},
+		})
+	},
+	before_items_remove: function (frm) {
+		items_before_delete = frm.doc.items
+	},
 	basic_rate(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
-		row.estimated_cost = flt(row.qty) * flt(row.basic_rate);
-		frm.refresh()
+		frm.events.calculate_estimated_cost(frm, row);
 	}
 });
+
