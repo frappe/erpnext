@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe import _, msgprint, ValidationError
+from frappe import ValidationError, _, msgprint
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.utils import cint, cstr, flt, getdate
 
@@ -16,7 +16,9 @@ from erpnext.controllers.subcontracting import Subcontracting
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_incoming_rate
 
-class QtyMismatchError(ValidationError): pass
+
+class QtyMismatchError(ValidationError):
+	pass
 
 class BuyingController(StockController, Subcontracting):
 
