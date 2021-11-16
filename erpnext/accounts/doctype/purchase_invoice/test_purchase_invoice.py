@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.account.test_account import create_account, get_in
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.controllers.accounts_controller import get_payment_terms
+from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.exceptions import InvalidCurrency
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import create_item
@@ -34,6 +35,27 @@ class TestPurchaseInvoice(unittest.TestCase):
 	@classmethod
 	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
+
+	def test_purchase_invoice_received_qty(self):
+		"""
+			1. Test if received qty is validated against accepted + rejected
+			2. Test if received qty is auto set on save
+		"""
+		pi = make_purchase_invoice(
+			qty=1,
+			rejected_qty=1,
+			received_qty=3,
+			item_code="_Test Item Home Desktop 200",
+			rejected_warehouse = "_Test Rejected Warehouse - _TC",
+			update_stock=True, do_not_save=True)
+		self.assertRaises(QtyMismatchError, pi.save)
+
+		pi.items[0].received_qty = 0
+		pi.save()
+		self.assertEqual(pi.items[0].received_qty, 2)
+
+		# teardown
+		pi.delete()
 
 	def test_gl_entries_without_perpetual_inventory(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
