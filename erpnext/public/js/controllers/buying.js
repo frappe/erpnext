@@ -164,39 +164,18 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this.price_list_rate(doc, cdt, cdn);
 	},
 
-<<<<<<< HEAD
-	qty: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-=======
 	qty(doc, cdt, cdn) {
->>>>>>> 5fb5a757cf (refactor: (ux) Accepted/Rejected/Received Qty UX)
 		if ((doc.doctype == "Purchase Receipt") || (doc.doctype == "Purchase Invoice" && (doc.update_stock || doc.is_return))) {
 			this.calculate_received_qty(doc, cdt, cdn)
 		}
 		this._super(doc, cdt, cdn);
 	},
 
-<<<<<<< HEAD
-	batch_no: function(doc, cdt, cdn) {
-		this._super(doc, cdt, cdn);
-	},
-
-	received_qty: function(doc, cdt, cdn) {
-		this.calculate_accepted_qty(doc, cdt, cdn)
-	},
-
-	rejected_qty: function(doc, cdt, cdn) {
-		this.calculate_accepted_qty(doc, cdt, cdn)
-	},
-
-	calculate_accepted_qty: function(doc, cdt, cdn){
-=======
 	rejected_qty(doc, cdt, cdn) {
 		this.calculate_received_qty(doc, cdt, cdn)
-	}
+	},
 
 	calculate_received_qty(doc, cdt, cdn){
->>>>>>> 5fb5a757cf (refactor: (ux) Accepted/Rejected/Received Qty UX)
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["qty", "rejected_qty"]);
 
@@ -205,19 +184,13 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		let received_qty = flt(item.qty + item.rejected_qty, precision("received_qty", item));
 		let received_stock_qty = flt(item.conversion_factor, precision("conversion_factor", item)) * flt(received_qty);
 
-<<<<<<< HEAD
-		item.qty = flt(item.received_qty - item.rejected_qty, precision("qty", item));
-		this.qty(doc, cdt, cdn);
-	},
-=======
 		frappe.model.set_value(cdt, cdn, "received_qty", received_qty);
 		frappe.model.set_value(cdt, cdn, "received_stock_qty", received_stock_qty);
-	}
+	},
 
 	batch_no(doc, cdt, cdn) {
 		super.batch_no(doc, cdt, cdn);
-	}
->>>>>>> 5fb5a757cf (refactor: (ux) Accepted/Rejected/Received Qty UX)
+	},
 
 	validate_negative_quantity: function(cdt, cdn, item, fieldnames){
 		if(!item || !fieldnames) { return }
