@@ -57,8 +57,10 @@ def make_depreciation_entry(asset_name, date=None):
 			je.finance_book = d.finance_book
 			je.remark = "Depreciation Entry against {0} worth {1}".format(asset_name, d.depreciation_amount)
 
+			credit_account, debit_account = get_credit_and_debit_accounts(accumulated_depreciation_account, depreciation_expense_account)
+
 			credit_entry = {
-				"account": accumulated_depreciation_account,
+				"account": credit_account,
 				"credit_in_account_currency": d.depreciation_amount,
 				"reference_type": "Asset",
 				"reference_name": asset.name,
@@ -66,7 +68,7 @@ def make_depreciation_entry(asset_name, date=None):
 			}
 
 			debit_entry = {
-				"account": depreciation_expense_account,
+				"account": debit_account,
 				"debit_in_account_currency": d.depreciation_amount,
 				"reference_type": "Asset",
 				"reference_name": asset.name,
@@ -131,6 +133,30 @@ def get_depreciation_accounts(asset):
 			.format(asset.asset_category, asset.company))
 
 	return fixed_asset_account, accumulated_depreciation_account, depreciation_expense_account
+
+def get_credit_and_debit_accounts(accumulated_depreciation_account, depreciation_expense_account):
+	if is_income_or_expense_account(depreciation_expense_account) == "Expense":
+		credit_account = accumulated_depreciation_account
+		debit_account = depreciation_expense_account
+	else:
+		credit_account = depreciation_expense_account
+		debit_account = accumulated_depreciation_account
+
+	return credit_account, debit_account
+
+def is_income_or_expense_account(account):
+	from frappe.utils.nestedset import get_ancestors_of
+
+	ancestors = get_ancestors_of("Account", account)
+	if ancestors:
+		root_account = ancestors[-1].split(' - ')[0]
+
+		if root_account == "Expenses":
+			return "Expense"
+		elif root_account == "Income":
+			return "Income"
+
+	frappe.throw(_("Depreciation Expense Account should be an Income or Expense Account."))
 
 @frappe.whitelist()
 def scrap_asset(asset_name):
