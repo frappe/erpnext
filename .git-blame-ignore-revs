@@ -20,3 +20,6 @@ b147b85e6ac19a9220cd1e2958a6ebd99373283a
 
 # sort and cleanup imports
 915b34391c2066dfc83e60a5813c5a877cebe7ac
+
+# removing six compatibility layer
+8fe5feb6a4372bf5f2dfaf65fca41bbcc25c8ce7

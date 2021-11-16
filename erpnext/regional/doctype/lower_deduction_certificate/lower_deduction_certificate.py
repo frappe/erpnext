@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -31,7 +29,7 @@ class LowerDeductionCertificate(Document):
 			<= fiscal_year.year_end_date):
 			frappe.throw(_("Valid Upto date not in Fiscal Year {0}").format(frappe.bold(self.fiscal_year)))
 
-	def tax_withholding_category(self):
+	def validate_supplier_against_tax_category(self):
 		duplicate_certificate = frappe.db.get_value('Lower Deduction Certificate',
 			{'supplier': self.supplier, 'tax_withholding_category': self.tax_withholding_category, 'name': ("!=", self.name)},
 			['name', 'valid_from', 'valid_upto'], as_dict=True)

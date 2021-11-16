@@ -4,7 +4,6 @@
 # ERPNext - web based ERP (http://erpnext.com)
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe.utils import add_days, flt, nowdate, nowtime, random_string
@@ -399,6 +398,34 @@ class TestStockReconciliation(ERPNextTestCase):
 		sr = create_stock_reconciliation(item_code="Testing Batch Item 1", qty=1, rate=100, batch_no="002"
 			, do_not_submit=True)
 		self.assertRaises(frappe.ValidationError, sr.submit)
+
+	def test_serial_no_cancellation(self):
+
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		item = create_item("Stock-Reco-Serial-Item-9", is_stock_item=1)
+		if not item.has_serial_no:
+			item.has_serial_no = 1
+			item.serial_no_series = "SRS9.####"
+			item.save()
+
+		item_code = item.name
+		warehouse = "_Test Warehouse - _TC"
+
+		se1 = make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=700)
+
+		serial_nos = get_serial_nos(se1.items[0].serial_no)
+		# reduce 1 item
+		serial_nos.pop()
+		new_serial_nos = "\n".join(serial_nos)
+
+		sr = create_stock_reconciliation(item_code=item.name, warehouse=warehouse, serial_no=new_serial_nos, qty=9)
+		sr.cancel()
+
+		active_sr_no = frappe.get_all("Serial No",
+				filters={"item_code": item_code, "warehouse": warehouse, "status": "Active"})
+
+		self.assertEqual(len(active_sr_no), 10)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)

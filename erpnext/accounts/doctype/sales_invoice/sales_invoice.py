@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _, msgprint, throw
@@ -19,7 +18,6 @@ from frappe.utils import (
 	getdate,
 	nowdate,
 )
-from six import iteritems
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
@@ -37,7 +35,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	get_disposal_account_and_cost_center,
 	get_gl_entries_on_asset_disposal,
 	get_gl_entries_on_asset_regain,
-	post_depreciation_entries,
+	make_depreciation_entry,
 )
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
@@ -534,7 +532,7 @@ class SalesInvoice(SellingController):
 			for item in self.get("items"):
 				if item.get('item_code'):
 					profile_details = get_pos_profile_item_details(pos, frappe._dict(item.as_dict()), pos, update_data=True)
-					for fname, val in iteritems(profile_details):
+					for fname, val in profile_details.items():
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
 
@@ -640,7 +638,7 @@ class SalesInvoice(SellingController):
 			return
 
 		prev_doc_field_map = {'Sales Order': ['so_required', 'is_pos'],'Delivery Note': ['dn_required', 'update_stock']}
-		for key, value in iteritems(prev_doc_field_map):
+		for key, value in prev_doc_field_map.items():
 			if frappe.db.get_single_value('Selling Settings', value[0]) == 'Yes':
 
 				if frappe.get_value('Customer', self.customer, value[0]):
@@ -934,6 +932,7 @@ class SalesInvoice(SellingController):
 						asset.db_set("disposal_date", None)
 
 						if asset.calculate_depreciation:
+							self.reverse_depreciation_entry_made_after_sale(asset)
 							self.reset_depreciation_schedule(asset)
 
 					else:
@@ -997,21 +996,19 @@ class SalesInvoice(SellingController):
 
 	def depreciate_asset(self, asset):
 		asset.flags.ignore_validate_update_after_submit = True
-		asset.prepare_depreciation_data(self.posting_date)
+		asset.prepare_depreciation_data(date_of_sale=self.posting_date)
 		asset.save()
 
-		post_depreciation_entries(self.posting_date)
+		make_depreciation_entry(asset.name, self.posting_date)
 
 	def reset_depreciation_schedule(self, asset):
 		asset.flags.ignore_validate_update_after_submit = True
 
 		# recreate original depreciation schedule of the asset
-		asset.prepare_depreciation_data()
+		asset.prepare_depreciation_data(date_of_return=self.posting_date)
 
 		self.modify_depreciation_schedule_for_asset_repairs(asset)
 		asset.save()
-
-		self.delete_depreciation_entry_made_after_sale(asset)
 
 	def modify_depreciation_schedule_for_asset_repairs(self, asset):
 		asset_repairs = frappe.get_all(
@@ -1026,7 +1023,7 @@ class SalesInvoice(SellingController):
 				asset_repair.modify_depreciation_schedule()
 				asset.prepare_depreciation_data()
 
-	def delete_depreciation_entry_made_after_sale(self, asset):
+	def reverse_depreciation_entry_made_after_sale(self, asset):
 		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
 
 		posting_date_of_original_invoice = self.get_posting_date_of_sales_invoice()
@@ -1041,10 +1038,18 @@ class SalesInvoice(SellingController):
 				row += 1
 
 			if schedule.schedule_date == posting_date_of_original_invoice:
-				if not self.sale_was_made_on_original_schedule_date(asset, schedule, row, posting_date_of_original_invoice):
+				if not self.sale_was_made_on_original_schedule_date(asset, schedule, row, posting_date_of_original_invoice) \
+					or self.sale_happens_in_the_future(posting_date_of_original_invoice):
+
 					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
 					reverse_journal_entry.posting_date = nowdate()
+					frappe.flags.is_reverse_depr_entry = True
 					reverse_journal_entry.submit()
+
+					frappe.flags.is_reverse_depr_entry = False
+					asset.flags.ignore_validate_update_after_submit = True
+					schedule.journal_entry = None
+					asset.save()
 
 	def get_posting_date_of_sales_invoice(self):
 		return frappe.db.get_value('Sales Invoice', self.return_against, 'posting_date')
@@ -1058,6 +1063,12 @@ class SalesInvoice(SellingController):
 
 				if orginal_schedule_date == posting_date_of_original_invoice:
 					return True
+		return False
+
+	def sale_happens_in_the_future(self, posting_date_of_original_invoice):
+		if posting_date_of_original_invoice > getdate():
+			return True
+
 		return False
 
 	@property
@@ -2018,7 +2029,7 @@ def get_mode_of_payments_info(mode_of_payments, company):
 			mpa.parent = mp.name and
 			mpa.company = %s and
 			mp.enabled = 1 and
-			mp.name in (%s)
+			mp.name in %s
 		group by
 			mp.name
 		""", (company, mode_of_payments), as_dict=1)
