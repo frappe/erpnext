@@ -1,7 +1,6 @@
 # Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -9,7 +8,6 @@ import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
 from frappe.utils import cstr, flt, getdate
-from six import iteritems
 
 import erpnext
 from erpnext.regional.india.utils import get_gst_accounts
@@ -213,7 +211,7 @@ def get_merged_data(columns, data):
 				else:
 					merged_hsn_dict[row[0]][d['fieldname']] = row[i]
 
-	for key, value in iteritems(merged_hsn_dict):
+	for key, value in merged_hsn_dict.items():
 		result.append(value)
 
 	return result

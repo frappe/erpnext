@@ -10,7 +10,7 @@ from erpnext.e_commerce.shopping_cart.product_info import set_product_info_for_w
 # For SEARCH -------
 from redisearch import AutoCompleter, Client, Query
 from erpnext.e_commerce.website_item_indexing import (
-	WEBSITE_ITEM_INDEX, 
+	WEBSITE_ITEM_INDEX,
 	WEBSITE_ITEM_NAME_AUTOCOMPLETE,
 	WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE,
 	make_key
@@ -72,8 +72,8 @@ def search(query, limit=10, fuzzy_search=True):
 	ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=red)
 	client = Client(make_key(WEBSITE_ITEM_INDEX), conn=red)
 	suggestions = ac.get_suggestions(
-		query, 
-		num=limit, 
+		query,
+		num=limit,
 		fuzzy= fuzzy_search and len(query) > 4 # Fuzzy on length < 3 can be real slow
 	)
 

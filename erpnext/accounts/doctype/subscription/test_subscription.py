@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import unittest
 
@@ -18,6 +16,7 @@ from frappe.utils.data import (
 
 from erpnext.accounts.doctype.subscription.subscription import get_prorata_factor
 
+test_dependencies = ("UOM", "Item Group", "Item")
 
 def create_plan():
 	if not frappe.db.exists('Subscription Plan', '_Test Plan Name'):
@@ -68,7 +67,6 @@ def create_plan():
 		supplier.insert()
 
 class TestSubscription(unittest.TestCase):
-
 	def setUp(self):
 		create_plan()
 

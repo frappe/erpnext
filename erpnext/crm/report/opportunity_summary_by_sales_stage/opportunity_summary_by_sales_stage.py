@@ -6,7 +6,6 @@ import frappe
 import pandas
 from frappe import _
 from frappe.utils import flt
-from six import iteritems
 
 from erpnext.setup.utils import get_exchange_rate
 
@@ -126,7 +125,7 @@ class OpportunitySummaryBySalesStage(object):
 		self.data = []
 		self.get_formatted_data()
 
-		for based_on,data in iteritems(self.formatted_data):
+		for based_on,data in self.formatted_data.items():
 			row_based_on={
 				'Opportunity Owner': 'opportunity_owner',
 				'Source': 'source',

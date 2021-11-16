@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -33,6 +32,7 @@ class Opportunity(TransactionBase):
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
+		self.map_fields()
 
 		if not self.title:
 			self.title = self.customer_name
@@ -42,6 +42,15 @@ class Opportunity(TransactionBase):
 
 		else:
 			self.calculate_totals()
+
+	def map_fields(self):
+		for field in self.meta.fields:
+			if not self.get(field.fieldname):
+				try:
+					value = frappe.db.get_value(self.opportunity_from, self.party_name, field.fieldname)
+					frappe.db.set(self, field.fieldname, value)
+				except Exception:
+					continue
 
 	def calculate_totals(self):
 		total = base_total = 0
@@ -107,15 +116,19 @@ class Opportunity(TransactionBase):
 			self.party_name = lead_name
 
 	@frappe.whitelist()
-	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
+	def declare_enquiry_lost(self, lost_reasons_list, competitors, detailed_reason=None):
 		if not self.has_active_quotation():
-			frappe.db.set(self, 'status', 'Lost')
+			self.status = 'Lost'
+			self.lost_reasons = self.competitors = []
 
 			if detailed_reason:
-				frappe.db.set(self, 'order_lost_reason', detailed_reason)
+				self.order_lost_reason = detailed_reason
 
 			for reason in lost_reasons_list:
 				self.append('lost_reasons', reason)
+
+			for competitor in competitors:
+				self.append('competitors', competitor)
 
 			self.save()
 
@@ -304,6 +317,8 @@ def make_request_for_quotation(source_name, target_doc=None):
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):
 	def set_missing_values(source, target):
+		target.opportunity_name = source.name
+
 		if source.opportunity_from == "Lead":
 			target.lead_name = source.party_name
 
