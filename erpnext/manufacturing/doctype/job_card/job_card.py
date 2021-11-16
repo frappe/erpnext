@@ -627,17 +627,22 @@ def make_material_request(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None):
-	def update_item(obj, target, source_parent):
+	def update_item(source, target, source_parent):
 		target.t_warehouse = source_parent.wip_warehouse
+
 		if not target.conversion_factor:
 			target.conversion_factor = 1
+
+		pending_rm_qty = flt(source.required_qty) - flt(source.transferred_qty)
+		if pending_rm_qty > 0:
+			target.qty = pending_rm_qty
 
 	def set_missing_values(source, target):
 		target.purpose = "Material Transfer for Manufacture"
 		target.from_bom = 1
 
 		# avoid negative 'For Quantity'
-		pending_fg_qty = source.get('for_quantity', 0) - source.get('transferred_qty', 0)
+		pending_fg_qty = flt(source.get('for_quantity', 0)) - flt(source.get('transferred_qty', 0))
 		target.fg_completed_qty = pending_fg_qty if pending_fg_qty > 0 else 0
 
 		target.set_transfer_qty()
