@@ -22,6 +22,9 @@ price_discount_fields = ['rate_or_discount', 'apply_discount_on', 'apply_discoun
 product_discount_fields = ['free_item', 'free_qty', 'free_item_uom',
 	'free_item_rate', 'same_item', 'is_recursive', 'apply_multiple_pricing_rules']
 
+class TransactionExists(frappe.ValidationError):
+	pass
+
 class PromotionalScheme(Document):
 	def validate(self):
 		if not self.selling and not self.buying:
@@ -29,6 +32,40 @@ class PromotionalScheme(Document):
 		if not (self.price_discount_slabs
 			or self.product_discount_slabs):
 			frappe.throw(_("Price or product discount slabs are required"))
+
+		self.validate_applicable_for()
+		self.validate_pricing_rules()
+
+	def validate_applicable_for(self):
+		if self.applicable_for:
+			applicable_for = frappe.scrub(self.applicable_for)
+
+			if not self.get(applicable_for):
+				msg = (f'The field {frappe.bold(self.applicable_for)} is required')
+				frappe.throw(_(msg))
+
+	def validate_pricing_rules(self):
+		if self.is_new():
+			return
+
+		transaction_exists = False
+		docnames = []
+
+		# If user has changed applicable for
+		if self._doc_before_save.applicable_for == self.applicable_for:
+			return
+
+		docnames = frappe.get_all('Pricing Rule',
+			filters= {'promotional_scheme': self.name})
+
+		for docname in docnames:
+			if frappe.db.exists('Pricing Rule Detail',
+				{'pricing_rule': docname.name, 'docstatus': ('<', 2)}):
+				raise_for_transaction_exists(self.name)
+
+		if docnames and not transaction_exists:
+			for docname in docnames:
+				frappe.delete_doc('Pricing Rule', docname.name)
 
 	def on_update(self):
 		pricing_rules = frappe.get_all(
@@ -69,6 +106,13 @@ class PromotionalScheme(Document):
 			{'promotional_scheme': self.name}):
 			frappe.delete_doc('Pricing Rule', rule.name)
 
+def raise_for_transaction_exists(name):
+	msg = (f"""You can't change the {frappe.bold(_('Applicable For'))}
+		because transactions are present against the Promotional Scheme {frappe.bold(name)}. """)
+	msg += 'Kindly disable this Promotional Scheme and create new for new Applicable For.'
+
+	frappe.throw(_(msg), TransactionExists)
+
 def get_pricing_rules(doc, rules=None):
 	if rules is None:
 		rules = {}
@@ -86,45 +130,59 @@ def _get_pricing_rules(doc, child_doc, discount_fields, rules=None):
 	new_doc = []
 	args = get_args_for_pricing_rule(doc)
 	applicable_for = frappe.scrub(doc.get('applicable_for'))
+
 	for idx, d in enumerate(doc.get(child_doc)):
 		if d.name in rules:
-			for applicable_for_value in args.get(applicable_for):
-				temp_args = args.copy()
-				docname = frappe.get_all(
-					'Pricing Rule',
-					fields = ["promotional_scheme_id", "name", applicable_for],
-					filters = {
-						'promotional_scheme_id': d.name,
-						applicable_for: applicable_for_value
-					}
-				)
-
-				if docname:
-					pr = frappe.get_doc('Pricing Rule', docname[0].get('name'))
-					temp_args[applicable_for] = applicable_for_value
-					pr = set_args(temp_args, pr, doc, child_doc, discount_fields, d)
-				else:
-					pr = frappe.new_doc("Pricing Rule")
-					pr.title = doc.name
-					temp_args[applicable_for] = applicable_for_value
-					pr = set_args(temp_args, pr, doc, child_doc, discount_fields, d)
-
+			if not args.get(applicable_for):
+				docname = get_pricing_rule_docname(d)
+				pr = prepare_pricing_rule(args, doc, child_doc, discount_fields, d, docname)
 				new_doc.append(pr)
+			else:
+				for applicable_for_value in args.get(applicable_for):
+					docname = get_pricing_rule_docname(d, applicable_for, applicable_for_value)
+					pr = prepare_pricing_rule(args, doc, child_doc, discount_fields,
+						d, docname, applicable_for, applicable_for_value)
+					new_doc.append(pr)
 
-		else:
+		elif args.get(applicable_for):
 			applicable_for_values = args.get(applicable_for) or []
 			for applicable_for_value in applicable_for_values:
-				pr = frappe.new_doc("Pricing Rule")
-				pr.title = doc.name
-				temp_args = args.copy()
-				temp_args[applicable_for] = applicable_for_value
-				pr = set_args(temp_args, pr, doc, child_doc, discount_fields, d)
+				pr = prepare_pricing_rule(args, doc, child_doc, discount_fields,
+					d, applicable_for=applicable_for, value= applicable_for_value)
+
 				new_doc.append(pr)
+		else:
+			pr = prepare_pricing_rule(args, doc, child_doc, discount_fields, d)
+			new_doc.append(pr)
 
 	return new_doc
 
+def get_pricing_rule_docname(row: dict, applicable_for: str = None, applicable_for_value: str = None) -> str:
+	fields = ['promotional_scheme_id', 'name']
+	filters = {
+		'promotional_scheme_id': row.name
+	}
 
+	if applicable_for:
+		fields.append(applicable_for)
+		filters[applicable_for] = applicable_for_value
 
+	docname = frappe.get_all('Pricing Rule', fields = fields, filters = filters)
+	return docname[0].name if docname else ''
+
+def prepare_pricing_rule(args, doc, child_doc, discount_fields, d, docname=None, applicable_for=None, value=None):
+	if docname:
+		pr = frappe.get_doc("Pricing Rule", docname)
+	else:
+		pr = frappe.new_doc("Pricing Rule")
+
+	pr.title = doc.name
+	temp_args = args.copy()
+
+	if value:
+		temp_args[applicable_for] = value
+
+	return set_args(temp_args, pr, doc, child_doc, discount_fields, d)
 
 def set_args(args, pr, doc, child_doc, discount_fields, child_doc_fields):
 	pr.update(args)
@@ -147,6 +205,7 @@ def set_args(args, pr, doc, child_doc, discount_fields, child_doc_fields):
 				apply_on: d.get(apply_on),
 				'uom': d.uom
 			})
+
 	return pr
 
 def get_args_for_pricing_rule(doc):
