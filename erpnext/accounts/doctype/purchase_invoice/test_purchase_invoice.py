@@ -22,6 +22,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	make_purchase_receipt,
 )
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
+from erpnext.controllers.buying_controller import QtyMismatchError
 
 test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
 test_ignore = ["Serial No"]
