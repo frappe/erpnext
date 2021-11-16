@@ -147,13 +147,11 @@ def get_credit_and_debit_accounts(accumulated_depreciation_account, depreciation
 def is_income_or_expense_account(account):
 	from frappe.utils.nestedset import get_ancestors_of
 
-	ancestors = get_ancestors_of("Account", account)
+	ancestors = [ancestor.split(' - ')[0] for ancestor in get_ancestors_of("Account", account)]
 	if ancestors:
-		root_account = ancestors[-1].split(' - ')[0]
-
-		if root_account == "Expenses":
+		if "Expenses" in ancestors:
 			return "Expense"
-		elif root_account == "Income":
+		elif "Income" in ancestors:
 			return "Income"
 
 	frappe.throw(_("Depreciation Expense Account should be an Income or Expense Account."))
