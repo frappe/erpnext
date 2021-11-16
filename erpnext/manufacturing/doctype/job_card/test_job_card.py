@@ -16,8 +16,9 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
 class TestJobCard(unittest.TestCase):
-
 	def setUp(self):
+		make_bom_for_jc_tests()
+
 		transfer_material_against, source_warehouse = None, None
 
 		tests_that_skip_setup = (
@@ -244,7 +245,7 @@ class TestJobCard(unittest.TestCase):
 			1. Test if only current Job Card Items are pulled in a Stock Entry against a Job Card
 			2. Test impact of changing 'For Qty' in such a Stock Entry
 		"""
-		bom = create_bom_with_multiple_operations()
+		create_bom_with_multiple_operations()
 		work_order = make_wo_with_transfer_against_jc()
 
 		job_card_name = frappe.db.get_value(
@@ -321,3 +322,12 @@ def make_wo_with_transfer_against_jc():
 	work_order.submit()
 
 	return work_order
+
+def make_bom_for_jc_tests():
+	test_records = frappe.get_test_records('BOM')
+	bom = frappe.copy_doc(test_records[2])
+	bom.set_rate_of_sub_assembly_item_based_on_bom = 0
+	bom.rm_cost_as_per = "Valuation Rate"
+	bom.items[0].uom = "_Test UOM 1"
+	bom.items[0].conversion_factor = 5
+	bom.insert()
