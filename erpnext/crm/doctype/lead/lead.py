@@ -49,7 +49,10 @@ class Lead(SellingController):
 		})
 
 		self.set_status()
-		self.check_email_id_is_unique()
+
+		# for handling customization. [Allow Lead Duplication based on Emails]
+		if not self.get('allow_lead_duplication_based_on_emails'):
+			self.check_email_id_is_unique()
 
 		if self.email_id:
 			if not self.flags.ignore_email_validation:
