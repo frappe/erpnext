@@ -73,6 +73,8 @@
   "receiver_contact_phone",
   "receiver_contact_email",
   "receiver_contact_cnic",
+  "delivery_details_section",
+  "keys",
   "documents_section",
   "documents"
  ],
@@ -568,12 +570,24 @@
    "fieldtype": "Table",
    "label": "Documents",
    "options": "Vehicle Invoice Document"
+  },
+  {
+   "fieldname": "delivery_details_section",
+   "fieldtype": "Section Break",
+   "label": "Delivery Details"
+  },
+  {
+   "fieldname": "keys",
+   "fieldtype": "Int",
+   "label": "Keys",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-07 23:21:34.133586",
+ "modified": "2021-11-17 13:32:20.796036",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice Delivery",
