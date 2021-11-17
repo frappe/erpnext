@@ -92,6 +92,7 @@ def return_filters(filters, from_date, to_date):
 	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
 	conditions += ', "naming_series": "{}"'.format(filters.get("prefix"))
 	conditions += ', "company": "{}"'.format(filters.get("company"))
+	conditions += ', "discount_reason": "{}"'.format(filters.get("discount_reason"))
 	conditions += '}'
 
 	return conditions
