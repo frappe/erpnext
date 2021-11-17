@@ -10,9 +10,11 @@ from frappe.utils import cint, date_diff, flt, formatdate, getdate
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
-from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
 from erpnext.assets.doctype.asset.asset import get_depreciation_amount
-from erpnext.regional.india.utils import get_depreciation_amount as get_depreciation_amount_for_india
+from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
+from erpnext.regional.india.utils import (
+	get_depreciation_amount as get_depreciation_amount_for_india,
+)
 
 class AssetValueAdjustment(Document):
 	def validate(self):
