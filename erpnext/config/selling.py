@@ -358,6 +358,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Discount Reason Sales",
+					"doctype": "Sales Invoice"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Daily summary",
 					"doctype": "Sales Invoice"
 				},

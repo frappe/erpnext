@@ -29,12 +29,6 @@ def execute(filters=None):
 			"width": 140
 		},
 		{
-   			"fieldname": "type_document",
-  			"fieldtype": "Data",
-  			"label": "Type Document",
-			"width": 100
-  		},
-		{
 			"fieldname": "document",
    			"fieldtype": "Data",
    			"label": "Document",
@@ -94,7 +88,7 @@ def execute(filters=None):
 	data = []
 
 	conditions = return_filters(filters)
-	sales_invoice = frappe.get_all("Sales Invoice", ["name", "posting_date", "rtn", "customer", "type_document", "numeration", "grand_total", "exonerated", "status"], filters = conditions, order_by='numeration')
+	sales_invoice = frappe.get_all("Sales Invoice", ["name", "posting_date", "rtn", "customer", "grand_total", "exonerated", "status"], filters = conditions, order_by='name')
 	for sales in sales_invoice:
 		taxes_calculate_15 = 0
 		taxes_calculate_18 = 0
@@ -133,8 +127,7 @@ def execute(filters=None):
 			sales.posting_date,
 			sales.rtn,
 			sales.customer,
-			sales.type_document,
-			sales.numeration,
+			sales.name,
 			sales.grand_total,
 			total,
 			total_exepmt,
@@ -154,9 +147,7 @@ def return_filters(filters):
 	conditions += "{"
 	if filters.get("from_date") and filters.get("to_date"):conditions += '"posting_date": [">=", "{}"], "modified": ["<=", "{}"]'.format(filters.get("from_date"), filters.get("to_date"))
 	if filters.get("company"): conditions += ', "company": "{}"'.format(filters.get("company"))
-	if filters.get("type_document"): conditions += ', "type_document": "{}"'.format(filters.get("type_document"))
-	if filters.get("cashier"): conditions += ', "pos": "{}"'.format(filters.get("cashier"))
-	if filters.get("branch_office"): conditions += ', "branch_office": "{}"'.format(filters.get("branch_office"))
+	conditions += ', "naming_series": "{}"'.format(filters.get("prefix"))
 	conditions += '}'
 
 	return conditions

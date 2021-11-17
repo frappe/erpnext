@@ -69,26 +69,28 @@ class PaymentEntry(AccountsController):
 			self.calculate_diferred_account()
 
 	def calculate_diferred_account(self):
-		doc = frappe.get_doc("Bank Account", self.bank_account)
-		if self.payment_type == "Receive":
-			doc.deferred_credits += self.paid_amount
-		if self.payment_type == "Pay":
-			doc.deferred_debits += self.paid_amount
+		if self.bank_account != None:
+			doc = frappe.get_doc("Bank Account", self.bank_account)
+			if self.payment_type == "Receive":
+				doc.deferred_credits += self.paid_amount
+			if self.payment_type == "Pay":
+				doc.deferred_debits += self.paid_amount
 		
-		doc.current_balance = doc.deferred_credits - doc.deferred_debits
+			doc.current_balance = doc.deferred_credits - doc.deferred_debits
 		
-		doc.save()
+			doc.save()
 	
 	def calculate_diferred_account_cancel(self):
-		doc = frappe.get_doc("Bank Account", self.bank_account)
-		if self.payment_type == "Receive":
-			doc.deferred_credits -= self.paid_amount
-		if self.payment_type == "Pay":
-			doc.deferred_debits -= self.paid_amount
+		if self.bank_account != None:
+			doc = frappe.get_doc("Bank Account", self.bank_account)
+			if self.payment_type == "Receive":
+				doc.deferred_credits -= self.paid_amount
+			if self.payment_type == "Pay":
+				doc.deferred_debits -= self.paid_amount
 		
-		doc.current_balance = doc.deferred_credits - doc.deferred_debits
+			doc.current_balance = doc.deferred_credits - doc.deferred_debits
 		
-		doc.save()
+			doc.save()
 
 	def on_submit(self):
 		self.setup_party_account_field()
