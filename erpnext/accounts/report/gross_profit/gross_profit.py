@@ -19,7 +19,7 @@ def execute(filters=None):
 	data = []
 
 	group_wise_columns = frappe._dict({
-		"invoice": ["invoice_or_item", "customer", "customer_group", "posting_date","item_code", "item_name","item_group", "brand", "description", \
+		"invoice": ["invoice_or_item", "customer", "customer_group", "posting_date","item_code", "item_name","item_group", "brand", "description",
 			"warehouse", "qty", "base_rate", "buying_rate", "base_amount",
 			"buying_amount", "gross_profit", "gross_profit_percent", "project"],
 		"item_code": ["item_code", "item_name", "brand", "description", "qty", "base_rate",
