@@ -34,10 +34,10 @@ class Lead(SellingController):
 	def before_insert(self):
 		if self.address_title and self.address_type:
 			self.address_doc = self.create_address()
+
+		self.contact_doc = None
 		if self.lead_name:
 			self.contact_doc = self.create_contact()
-		else:
-			self.contact_doc = None
 
 	def after_insert(self):
 		self.update_links()
