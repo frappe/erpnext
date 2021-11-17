@@ -13,7 +13,11 @@
   "column_break_4",
   "qty",
   "uom",
-  "warehouse"
+  "warehouse",
+  "section_break_9",
+  "issued",
+  "column_break_11",
+  "transferred"
  ],
  "fields": [
   {
@@ -67,12 +71,32 @@
    "label": "Estimated Cost",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "issued",
+   "fieldtype": "Float",
+   "label": "Issued",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transferred",
+   "fieldtype": "Float",
+   "label": "Transferred",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-11-12 12:30:36.685888",
+ "modified": "2021-11-17 15:43:04.799317",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task Item",

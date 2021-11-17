@@ -68,7 +68,6 @@ class StockEntry(StockController):
 		self.pro_doc = frappe._dict()
 		if self.work_order:
 			self.pro_doc = frappe.get_doc('Work Order', self.work_order)
-
 		self.validate_posting_time()
 		self.validate_purpose()
 		self.set_title()
@@ -130,6 +129,9 @@ class StockEntry(StockController):
 		if self.purpose == 'Material Transfer' and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status('Completed')
 
+		if self.stock_entry_type in ['Material Transfer', 'Material Issue']:
+			self.update_task_items()
+
 	def on_cancel(self):
 		self.update_purchase_order_supplied_items()
 
@@ -153,6 +155,8 @@ class StockEntry(StockController):
 			self.set_material_request_transfer_status('Not Started')
 		if self.purpose == 'Material Transfer' and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status('In Transit')
+		if self.stock_entry_type in ['Material Transfer', 'Material Issue']:
+			self.update_task_items()
 
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
@@ -452,6 +456,35 @@ class StockEntry(StockController):
 
 			if transferred_serial_no:
 				d.serial_no = transferred_serial_no
+
+	def update_task_items(self):
+		from frappe.query_builder.functions import Coalesce, Sum
+		sed = frappe.qb.DocType('Stock Entry Detail')
+		se = frappe.qb.DocType('Stock Entry')
+
+		if self.stock_entry_type == 'Material Transfer':
+			stock_entry_type = 'Material Transfer'
+			update_field = 'transferred'
+		else:
+			stock_entry_type = 'Material Issue'
+			update_field = 'issued'
+
+		for item in self.items:
+			if item.task_item:
+				update_qty = frappe.qb.from_(
+					sed
+				).join(
+					se
+				).on(sed.parent == se.name).select(
+					Coalesce(Sum(sed.transfer_qty), 0).as_("qty")
+				).where(
+					(sed.task_item == item.task_item)
+					& (sed.parent == se.name)
+					& (sed.docstatus == 1)
+					& (se.stock_entry_type == stock_entry_type)
+				).run(as_dict=1)
+			print(item.task_item, update_field, update_qty[0].qty)
+			frappe.db.set_value('Task Item', item.task_item, update_field, update_qty[0].qty)
 
 	@frappe.whitelist()
 	def get_stock_and_rate(self):
