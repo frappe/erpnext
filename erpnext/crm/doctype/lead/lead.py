@@ -217,7 +217,7 @@ class Lead(SellingController):
 			self.contact_doc.append("links", {
 				"link_doctype": "Lead",
 				"link_name": self.name,
-				"link_title": self.lead_name if not self.organization_lead else self.company_name
+				"link_title": self.title
 			})
 			self.contact_doc.save()
 
