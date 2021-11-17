@@ -43,10 +43,8 @@ class Lead(SellingController):
 		self.update_links()
 
 	def validate(self):
-		if self.organization_lead:
-			self.set_company_name()
-		else:
-			self.set_lead_name()
+		self.validate_company_name()
+		self.set_lead_name()
 		self.set_title()
 		self._prev = frappe._dict({
 			"contact_date": frappe.db.get_value("Lead", self.name, "contact_date") if (not cint(self.is_new())) else None,
@@ -162,7 +160,8 @@ class Lead(SellingController):
 		return address
 
 	def create_contact(self):
-		if self.lead_name:
+		if not self.lead_name:
+			return
 
 			names = self.lead_name.strip().split(" ")
 			if len(names) > 1:
