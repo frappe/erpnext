@@ -119,10 +119,6 @@ frappe.ui.form.on("Work Order", {
 			});
 			erpnext.work_order.set_default_warehouse(frm);
 		}
-
-		if (frm.fields_dict["operations"].get_value().length == 0) {
-			frm.fields_dict["operations_section"].collapse();
-		}
 	},
 
 	source_warehouse: function(frm) {
