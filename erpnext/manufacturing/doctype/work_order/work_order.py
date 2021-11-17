@@ -221,10 +221,24 @@ class WorkOrder(Document):
 			if (purpose == 'Material Transfer for Manufacture' and
 				self.operations and self.transfer_material_against == 'Job Card'):
 				continue
-
-			qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
-				from `tabStock Entry` where work_order=%s and docstatus=1
-				and purpose=%s""", (self.name, purpose))[0][0])
+			if (purpose == 'Material Transfer for Manufacture'):
+				qty_query = frappe.db.sql("""SELECT sum(s.fg_completed_qty) as fg_completed_qty,se.item_code  from `tabStock Entry` s join `tabStock Entry Detail` se on se.parent = s.name where s.work_order = '{0}' and se.item_code in (SELECT woi.item_code from `tabWork Order Item`  woi where woi.parent = '{0}') and s.docstatus = 1 and s.purpose = 'Material Transfer for Manufacture' group by se.item_code""".format(self.name),as_dict=1)
+				final_data = {}
+				for row in qty_query:
+					if row.get('item_code') in final_data:
+						updated_data = final_data.get(row.get("item_code"))
+						updated_data[row.get("item_code")] = updated_data[row.get("item_code")] + row.get("fg_completed_qty", 0) 
+					else :
+						final_data[row.get("item_code")] = row.get("fg_completed_qty")
+				item_code_data = frappe.db.sql("""SELECT item_code from `tabWork Order Item` where parent = '{0}'""".format(self.name),as_dict=1)
+				for item in item_code_data:
+					if item.get("item_code") in final_data:
+						pass
+					else:
+						final_data[item.get("item_code")] = 0
+				qty = min(final_data.values())
+			else:
+				qty = flt(frappe.db.sql("""select sum(fg_completed_qty) from `tabStock Entry` where work_order=%s and docstatus=1 and purpose=%s""", (self.name, purpose))[0][0])
 
 			completed_qty = self.qty + (allowance_percentage/100 * self.qty)
 			if qty > completed_qty:
