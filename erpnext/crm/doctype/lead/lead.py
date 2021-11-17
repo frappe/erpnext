@@ -42,15 +42,13 @@ class Lead(SellingController):
 	def validate(self):
 		self.set_lead_name()
 		self.set_title()
-		self._prev = frappe._dict({
-			"contact_date": frappe.db.get_value("Lead", self.name, "contact_date") if (not cint(self.is_new())) else None,
-			"ends_on": frappe.db.get_value("Lead", self.name, "ends_on") if (not cint(self.is_new())) else None,
-			"contact_by": frappe.db.get_value("Lead", self.name, "contact_by") if (not cint(self.is_new())) else None,
-		})
-
 		self.set_status()
 		self.check_email_id_is_unique()
+		self.validate_email_id()
+		self.validate_contact_date()
+		self.set_prev()
 
+	def validate_email_id(self):
 		if self.email_id:
 			if not self.flags.ignore_email_validation:
 				validate_email_address(self.email_id, throw=True)
@@ -64,6 +62,7 @@ class Lead(SellingController):
 			if self.is_new() or not self.image:
 				self.image = has_gravatar(self.email_id)
 
+	def validate_contact_date(self):
 		if self.contact_date and getdate(self.contact_date) < getdate(nowdate()):
 			frappe.throw(_("Next Contact Date cannot be in the past"))
 
@@ -73,6 +72,16 @@ class Lead(SellingController):
 
 	def on_update(self):
 		self.add_calendar_event()
+
+	def set_prev(self):
+		if self.is_new():
+			self._prev = frappe._dict({
+				"contact_date": None,
+				"ends_on": None,
+				"contact_by": None
+			})
+		else:
+			self._prev = frappe.db.get_value("Lead", self.name, ["contact_date", "ends_on", "contact_by"], as_dict=1)
 
 	def add_calendar_event(self, opts=None, force=False):
 		super(Lead, self).add_calendar_event({
