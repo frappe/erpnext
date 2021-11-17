@@ -543,7 +543,7 @@
    "fieldname": "tax_status",
    "fieldtype": "Select",
    "label": "Income Tax Status",
-   "options": "\nFiler\nNon Filer"
+   "options": "\nFiler\nNon Filer\nExempt"
   },
   {
    "fieldname": "tax_overseas_cnic",
@@ -663,7 +663,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2021-06-08 22:22:57.659475",
+ "modified": "2021-11-17 12:01:32.109017",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

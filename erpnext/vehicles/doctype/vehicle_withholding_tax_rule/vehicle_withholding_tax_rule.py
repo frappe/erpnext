@@ -99,15 +99,18 @@ class VehicleWithholdingTaxRule(Document):
 
 @frappe.whitelist()
 def get_withholding_tax_amount(date, item_code, tax_status, company):
+	if tax_status == "Exempt":
+		return 0
+
 	name = get_applicable_rules(company, date)
 	name = name[0] if name else None
 	if not name:
 		return 0
 
-	engine_capacity, exempt = frappe.get_cached_value("Item", item_code,
+	engine_capacity, item_exempt = frappe.get_cached_value("Item", item_code,
 		["vehicle_engine_capacity", "exempt_from_vehicle_withholding_tax"])
 
-	if exempt:
+	if item_exempt:
 		return 0
 
 	doc = frappe.get_cached_doc("Vehicle Withholding Tax Rule", name)
