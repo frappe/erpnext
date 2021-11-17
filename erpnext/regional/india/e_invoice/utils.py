@@ -151,7 +151,7 @@ def validate_address_fields(address, skip_gstin_validation):
 			title=_('Missing Address Fields')
 		)
 
-	if len(address.address_line2) < 2:
+	if address.address_line2 and len(address.address_line2) < 2:
 		# to prevent "The field Address 2 must be a string with a minimum length of 3 and a maximum length of 100"
 		address.address_line2 = ""
 
