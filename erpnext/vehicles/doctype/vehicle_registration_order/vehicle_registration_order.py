@@ -78,7 +78,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		disallowed_fields = []
 
 		# Cannot edit anything after completion or after receiving registration receipt
-		if self.status == "Completed" or self.vehicle_license_plate:
+		if self.status == "Completed":
 			excluding_fields = []
 			if self.status != "Completed":
 				excluding_fields.append('agent_commission')
