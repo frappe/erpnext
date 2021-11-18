@@ -20,7 +20,7 @@ frappe.ui.form.on('Asset Value Adjustment', {
 					calculate_depreciation: 1,
 					docstatus: 1
 				}
-			}
+			};
 		});
 	},
 
