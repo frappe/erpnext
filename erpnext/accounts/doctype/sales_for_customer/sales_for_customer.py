@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 import datetime
+from erpnext.controllers.queries import get_match_cond
 
 class SalesForCustomer(Document):
 	def on_update(self):
@@ -15,16 +16,47 @@ class SalesForCustomer(Document):
 	def return_data(self):
 		outstanding_amount, cash, cards, adv_app, total_monetary, total_income, total_utility, total_exempt_sales = 0,0,0,0,0,0,0,0
 		dates = []
-		conditions = self.return_filters()
+		condition = self.return_filters()
+		conditions = self.return_filters_sql()
 		serie = self.prefix
 		split_serie = serie.split("-")
 		serie_final = ("{}-{}-{}").format(split_serie[0],split_serie[1],split_serie[2])
 
-		salary_slips = frappe.get_all("Sales Invoice", ["name", "outstanding_amount", "total_advance", "status","naming_series", "creation_date", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total"], filters = conditions,  order_by = "name asc")
+		salary_slips = frappe.get_all("Sales Invoice", ["name","outstanding_amount", "total_advance", "status","naming_series", "creation_date", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total"], filters = condition,  order_by = "name asc")
 
 		self.total_invoice = len(salary_slips)
 		self.total_operations = len(salary_slips)
 		date_actual = self.start_date
+		sales_person_cols = ""
+		sales_team_table = ""
+
+		# si_list = frappe.db.sql("""
+		# 	select
+		# 		`tabSales Invoice Item`.parenttype, `tabSales Invoice Item`.parent,
+		# 		`tabSales Invoice`.posting_date, `tabSales Invoice`.posting_time,
+		# 		`tabSales Invoice`.project, `tabSales Invoice`.update_stock,
+		# 		`tabSales Invoice`.customer, `tabSales Invoice`.customer_group,
+		# 		`tabSales Invoice`.territory, `tabSales Invoice Item`.item_code,
+		# 		`tabSales Invoice Item`.item_name, `tabSales Invoice Item`.description,
+		# 		`tabSales Invoice Item`.warehouse, `tabSales Invoice Item`.item_group,
+		# 		`tabSales Invoice Item`.brand, `tabSales Invoice Item`.dn_detail,
+		# 		`tabSales Invoice Item`.delivery_note, `tabSales Invoice Item`.stock_qty as qty,
+		# 		`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
+		# 		`tabSales Invoice Item`.name as "item_row", `tabSales Invoice`.is_return
+		# 		{sales_person_cols}
+		# 	from
+		# 		`tabSales Invoice` inner join `tabSales Invoice Item`
+		# 			on `tabSales Invoice Item`.parent = `tabSales Invoice`.name
+		# 		{sales_team_table}
+		# 	where
+		# 		`tabSales Invoice`.docstatus=1 and `tabSales Invoice`.is_opening!='Yes' {conditions} {match_cond}
+		# 	order by
+		# 		`tabSales Invoice`.posting_date desc, `tabSales Invoice`.posting_time desc"""
+		# 	.format(conditions=conditions, sales_person_cols=sales_person_cols,
+		# 		sales_team_table=sales_team_table, match_cond = get_match_cond('Sales Invoice')), as_dict=1)
+
+		# for row1 in si_list:
+		# 	hello = 125
 
 		while date_actual <= self.final_date:
 			register = date_actual
@@ -114,6 +146,28 @@ class SalesForCustomer(Document):
 		conditions += ', "posting_time": [">", "{}"]'.format(self.start_hour)
 		conditions += ', "posting_time": ["<", "{}"]'.format(self.final_hour)
 		conditions += ', "cashier": "{}"'.format(self.user)
-		conditions += '}'
+		conditions += '}'			
+
+		return conditions
+
+	def return_filters_sql(self):
+		conditions = ''	
+
+		# conditions += "{"
+		# conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(self.start_date, self.final_date)
+		# conditions += ', "naming_series": "{}"'.format(self.prefix)
+		# conditions += ', "company": "{}"'.format(self.company)
+		# conditions += ', "posting_time": [">", "{}"]'.format(self.start_hour)
+		# conditions += ', "posting_time": ["<", "{}"]'.format(self.final_hour)
+		# conditions += ', "cashier": "{}"'.format(self.user)
+		# conditions += '}'			
+
+		conditions += ' and company = {}'.format(self.company)
+		conditions += ' and posting_date >= {}'.format(self.start_date)
+		conditions += ' and posting_date <= {}'.format(self.final_date)
+		conditions += ' and naming_series = {}'.format(self.prefix)
+		conditions += ' and posting_time >= {}'.format(self.start_hour)
+		conditions += ' and posting_time <= {}'.format(self.final_hour)
+		conditions += ' and cashier = {}'.format(self.user)
 
 		return conditions
