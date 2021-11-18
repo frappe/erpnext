@@ -216,6 +216,24 @@ def get_data(filters):
 
 
 def get_price_lists(filters):
+	def get_additional_price_lists():
+		res = []
+		for i in range(3):
+			if filters.get('price_list_' + str(i+1)):
+				res.append(filters.get('price_list_' + str(i+1)))
+		return res
+
+	def add_to_price_lists(price_list):
+		if not price_list:
+			return
+
+		if not isinstance(price_list, list):
+			price_list = [price_list]
+
+		for pl in price_list:
+			if pl and pl not in price_lists:
+				price_lists.append(pl)
+
 	conditions = []
 
 	if filters.filter_price_list_by == "Disabled":
@@ -234,30 +252,25 @@ def get_price_lists(filters):
 
 	conditions = " and ".join(conditions)
 
-	price_lists = [filters.standard_price_list]
+	price_lists = []
+	add_to_price_lists(filters.standard_price_list)
 
 	if filters.customer:
 		filters.selected_price_list = frappe.db.get_value("Customer", filters.customer, 'default_price_list')
 
-	if filters.selected_price_list:
-		price_lists.append(filters.selected_price_list)
-
-	def get_additional_price_lists():
-		res = []
-		for i in range(3):
-			if filters.get('price_list_' + str(i+1)):
-				res.append(filters.get('price_list_' + str(i+1)))
-		return res
+	add_to_price_lists(filters.selected_price_list)
 
 	additional_price_lists = get_additional_price_lists()
-	if additional_price_lists:
-		price_lists += additional_price_lists
+	add_to_price_lists(additional_price_lists)
 
 	if not additional_price_lists and not filters.selected_price_list:
-		price_lists += frappe.db.sql_list("select name from `tabPrice List` where {0}"
-				.format(conditions))
+		add_to_price_lists(frappe.db.sql_list("""
+			select name
+			from `tabPrice List`
+			where {0}
+			order by creation
+		""".format(conditions)))
 
-	price_lists = list(set([d for d in price_lists if d]))
 	return price_lists, filters.selected_price_list
 
 
@@ -308,7 +321,7 @@ def get_columns(filters, price_lists):
 			{"fieldname": "margin_rate", "label": _("Margin"), "fieldtype": "Percent", "width": 60, "restricted": 1},
 		]
 
-	for price_list in sorted(price_lists):
+	for price_list in price_lists:
 		if price_list != filters.standard_price_list:
 			columns.append({
 				"fieldname": "rate_" + scrub(price_list),
