@@ -376,6 +376,7 @@ class SalesInvoice(SellingController):
 		exonerated = 0
 		taxed_sales15 = 0
 		taxed_sales18 = 0
+		outstanding_amount = 0
 
 		if self.taxes_and_charges:
 					if self.exonerated == 1:
@@ -444,7 +445,12 @@ class SalesInvoice(SellingController):
 			else:
 				self.grand_total = self.total
 		
-		self.outstanding_amount = self.grand_total - self.total_advance
+		if self.is_pos and self.change_amount > 0:
+			outstanding_amount = 0
+			self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+		else:
+			self.outstanding_amount = self.grand_total - self.total_advance
+		
 		self.rounded_total = self.grand_total
 		self.in_words = money_in_words(self.grand_total)
 
@@ -1277,7 +1283,7 @@ class SalesInvoice(SellingController):
 
 		self.make_loyalty_point_redemption_gle(gl_entries)
 		self.make_pos_gl_entries(gl_entries)
-		self.make_gle_for_change_amount(gl_entries)
+		# self.make_gle_for_change_amount(gl_entries)
 
 		self.make_write_off_gl_entry(gl_entries)
 		self.make_gle_for_rounding_adjustment(gl_entries)
