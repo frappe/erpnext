@@ -373,6 +373,7 @@ class WorkOrder(Document):
 		manufacturing_settings_doc = frappe.get_doc("Manufacturing Settings")
 
 		enable_capacity_planning = not cint(manufacturing_settings_doc.disable_capacity_planning)
+		auto_create_time_log = cint(manufacturing_settings_doc.auto_create_time_log_in_job_card)
 		plan_days = cint(manufacturing_settings_doc.capacity_planning_for_days) or 30
 
 		for index, row in enumerate(self.operations):
@@ -381,13 +382,13 @@ class WorkOrder(Document):
 				qty = split_qty_based_on_batch_size(self, row, qty)
 				if row.job_card_qty > 0:
 					self.prepare_data_for_job_card(row, index,
-						plan_days, enable_capacity_planning)
+						plan_days, enable_capacity_planning, auto_create_time_log)
 
 		planned_end_date = self.operations and self.operations[-1].planned_end_time
 		if planned_end_date:
 			self.db_set("planned_end_date", planned_end_date)
 
-	def prepare_data_for_job_card(self, row, index, plan_days, enable_capacity_planning):
+	def prepare_data_for_job_card(self, row, index, plan_days, enable_capacity_planning, auto_create_time_log):
 		self.set_operation_start_end_time(index, row)
 
 		if not row.workstation:
@@ -396,9 +397,9 @@ class WorkOrder(Document):
 
 		original_start_time = row.planned_start_time
 		job_card_doc = create_job_card(self, row, auto_create=True,
-			enable_capacity_planning=enable_capacity_planning)
+			enable_capacity_planning=enable_capacity_planning, auto_create_time_log=auto_create_time_log)
 
-		if enable_capacity_planning and job_card_doc:
+		if enable_capacity_planning and job_card_doc and auto_create_time_log:
 			row.planned_start_time = job_card_doc.time_logs[-1].from_time
 			row.planned_end_time = job_card_doc.time_logs[-1].to_time
 
@@ -1073,7 +1074,7 @@ def validate_operation_data(row):
 			)
 		)
 
-def create_job_card(work_order, row, enable_capacity_planning=False, auto_create=False):
+def create_job_card(work_order, row, enable_capacity_planning=False, auto_create=False, auto_create_time_log=False):
 	doc = frappe.new_doc("Job Card")
 	doc.update({
 		'work_order': work_order.name,
@@ -1096,7 +1097,7 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 
 	if auto_create:
 		doc.flags.ignore_mandatory = True
-		if enable_capacity_planning:
+		if enable_capacity_planning and auto_create_time_log:
 			doc.schedule_time_logs(row)
 
 		doc.insert()

@@ -27,6 +27,7 @@
   "overproduction_percentage_for_work_order",
   "job_card_section",
   "add_corrective_operation_cost_in_finished_good_valuation",
+  "auto_create_time_log_in_job_card",
   "column_break_24",
   "job_card_excess_transfer",
   "other_settings_section",
@@ -194,13 +195,20 @@
    "fieldname": "job_card_excess_transfer",
    "fieldtype": "Check",
    "label": "Allow Excess Material Transfer"
+  },
+  {
+   "default": "0",
+   "description": "Auto creates a Time Log in Job Card on submission of the Work Order.",
+   "fieldname": "auto_create_time_log_in_job_card",
+   "fieldtype": "Check",
+   "label": "Auto Create Time Log In Job Card"
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-13 22:09:09.401559",
+ "modified": "2021-11-18 19:34:57.142390",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",
