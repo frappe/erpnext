@@ -136,7 +136,7 @@
    "label": "Threshold for Suggestion"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "validate_applied_rule",
    "fieldtype": "Check",
    "label": "Validate Applied Rule"
@@ -169,7 +169,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-11-16 00:25:33.843996",
+ "modified": "2021-08-19 15:49:29.598727",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Promotional Scheme Price Discount",

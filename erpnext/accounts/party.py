@@ -83,8 +83,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	if party_type=="Customer":
 		party_details["sales_team"] = [{
 			"sales_person": d.sales_person,
-			"allocated_percentage": d.allocated_percentage or None,
-			"commission_rate": d.commission_rate
+			"allocated_percentage": d.allocated_percentage or None
 		} for d in party.get("sales_team")]
 
 	# supplier tax withholding category
@@ -219,7 +218,7 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 	return out
 
 @frappe.whitelist()
-def get_party_account(party_type, party=None, company=None):
+def get_party_account(party_type, party, company=None):
 	"""Returns the account for the given `party`.
 		Will first search in party (Customer / Supplier) record, if not found,
 		will search in group (Customer Group / Supplier Group),
@@ -227,11 +226,8 @@ def get_party_account(party_type, party=None, company=None):
 	if not company:
 		frappe.throw(_("Please select a Company"))
 
-	if not party and party_type in ['Customer', 'Supplier']:
-		default_account_name = "default_receivable_account" \
-			if party_type=="Customer" else "default_payable_account"
-
-		return frappe.get_cached_value('Company',  company,  default_account_name)
+	if not party:
+		return
 
 	account = frappe.db.get_value("Party Account",
 		{"parenttype": party_type, "parent": party, "company": company}, "account")
