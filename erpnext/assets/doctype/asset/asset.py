@@ -186,10 +186,10 @@ class Asset(AccountsController):
 		if not self.available_for_use_date:
 			return
 
+		start = self.clear_depreciation_schedule()
+
 		for d in self.get('finance_books'):
 			self.validate_asset_finance_books(d)
-
-			start = self.clear_depreciation_schedule()
 
 			# value_after_depreciation - current Asset value
 			if self.docstatus == 1 and d.value_after_depreciation:
