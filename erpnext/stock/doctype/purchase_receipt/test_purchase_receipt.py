@@ -430,23 +430,27 @@ class TestPurchaseReceipt(ERPNextTestCase):
 		item_code = "_Test Subcontracted FG Item 1"
 		make_subcontracted_item(item_code=item_code)
 
-		po = create_purchase_order(item_code=item_code, qty=1, include_exploded_items=0,
-			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
+		po = create_purchase_order(
+			item_code=item_code,
+			qty=1, include_exploded_items=0,
+			is_subcontracted="Yes",
+			supplier_warehouse="_Test Warehouse 1 - _TC"
+		)
 
 		# stock raw materials in a warehouse before transfer
-		make_stock_entry(
+		se1 = make_stock_entry(
 			target="_Test Warehouse - _TC",
-			item_code = "Test Extra Item 1",
+			item_code="Test Extra Item 1",
 			qty=10, basic_rate=100
 		)
-		make_stock_entry(
+		se2 = make_stock_entry(
 			target="_Test Warehouse - _TC",
-			item_code = "_Test FG Item",
+			item_code="_Test FG Item",
 			qty=1, basic_rate=100
 		)
-		make_stock_entry(
+		se3 = make_stock_entry(
 			target="_Test Warehouse - _TC",
-			item_code = "Test Extra Item 2",
+			item_code="Test Extra Item 2",
 			qty=1, basic_rate=100
 		)
 
