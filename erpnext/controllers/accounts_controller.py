@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -21,7 +20,6 @@ from frappe.utils import (
 	nowdate,
 	today,
 )
-from six import text_type
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -1081,7 +1079,7 @@ class AccountsController(TransactionBase):
 			stock_items = [r[0] for r in frappe.db.sql("""
 				select name from `tabItem`
 				where name in (%s) and is_stock_item=1
-			""" % (", ".join((["%s"] * len(item_codes))),), item_codes)]
+			""" % (", ".join(["%s"] * len(item_codes)),), item_codes)]
 
 		return stock_items
 
@@ -1404,8 +1402,8 @@ class AccountsController(TransactionBase):
 					grand_total -= self.get("total_advance")
 					base_grand_total = flt(grand_total * self.get("conversion_rate"), self.precision("base_grand_total"))
 
-			if flt(total, self.precision("grand_total")) != flt(grand_total, self.precision("grand_total")) or \
-				flt(base_total, self.precision("base_grand_total")) != flt(base_grand_total, self.precision("base_grand_total")):
+			if flt(total, self.precision("grand_total")) - flt(grand_total, self.precision("grand_total")) > 0.1 or \
+				flt(base_total, self.precision("base_grand_total")) - flt(base_grand_total, self.precision("base_grand_total")) > 0.1:
 				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
 
 	def is_rounded_total_disabled(self):
@@ -1790,7 +1788,7 @@ def get_payment_terms(terms_template, posting_date=None, grand_total=None, base_
 @frappe.whitelist()
 def get_payment_term_details(term, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None):
 	term_details = frappe._dict()
-	if isinstance(term, text_type):
+	if isinstance(term, str):
 		term = frappe.get_doc("Payment Term", term)
 	else:
 		term_details.payment_term = term.payment_term

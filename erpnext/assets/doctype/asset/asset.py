@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 import math
@@ -22,7 +20,6 @@ from frappe.utils import (
 	nowdate,
 	today,
 )
-from six import string_types
 
 import erpnext
 from erpnext.accounts.general_ledger import make_reverse_gl_entries
@@ -627,7 +624,7 @@ class Asset(AccountsController):
 
 	@frappe.whitelist()
 	def get_depreciation_rate(self, args, on_validate=False):
-		if isinstance(args, string_types):
+		if isinstance(args, str):
 			args = json.loads(args)
 
 		float_precision = cint(frappe.db.get_default("float_precision")) or 2
@@ -822,9 +819,7 @@ def make_journal_entry(asset_name):
 def make_asset_movement(assets, purpose=None):
 	import json
 
-	from six import string_types
-
-	if isinstance(assets, string_types):
+	if isinstance(assets, str):
 		assets = json.loads(assets)
 
 	if len(assets) == 0:

@@ -6,7 +6,7 @@ frappe.provide("erpnext.accounts.dimensions");
 frappe.ui.form.on('Loyalty Program', {
 	setup: function(frm) {
 		var help_content =
-			`<table class="table table-bordered" style="background-color: #f9f9f9;">
+			`<table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 				<tr><td>
 					<h4>
 						<i class="fa fa-hand-right"></i>

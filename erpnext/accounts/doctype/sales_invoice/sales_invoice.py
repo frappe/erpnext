@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _, msgprint, throw
@@ -19,7 +18,6 @@ from frappe.utils import (
 	getdate,
 	nowdate,
 )
-from six import iteritems
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
@@ -534,7 +532,7 @@ class SalesInvoice(SellingController):
 			for item in self.get("items"):
 				if item.get('item_code'):
 					profile_details = get_pos_profile_item_details(pos, frappe._dict(item.as_dict()), pos, update_data=True)
-					for fname, val in iteritems(profile_details):
+					for fname, val in profile_details.items():
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
 
@@ -640,7 +638,7 @@ class SalesInvoice(SellingController):
 			return
 
 		prev_doc_field_map = {'Sales Order': ['so_required', 'is_pos'],'Delivery Note': ['dn_required', 'update_stock']}
-		for key, value in iteritems(prev_doc_field_map):
+		for key, value in prev_doc_field_map.items():
 			if frappe.db.get_single_value('Selling Settings', value[0]) == 'Yes':
 
 				if frappe.get_value('Customer', self.customer, value[0]):
@@ -2031,7 +2029,7 @@ def get_mode_of_payments_info(mode_of_payments, company):
 			mpa.parent = mp.name and
 			mpa.company = %s and
 			mp.enabled = 1 and
-			mp.name in (%s)
+			mp.name in %s
 		group by
 			mp.name
 		""", (company, mode_of_payments), as_dict=1)

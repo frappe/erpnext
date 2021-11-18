@@ -1,12 +1,10 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _, scrub
 from frappe.utils import cint
-from six import iteritems
 
 from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
@@ -38,7 +36,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		party_advance_amount = get_partywise_advanced_payment_amount(self.party_type,
 			self.filters.report_date, self.filters.show_future_payments, self.filters.company) or {}
 
-		for party, party_dict in iteritems(self.party_total):
+		for party, party_dict in self.party_total.items():
 			if party_dict.outstanding == 0:
 				continue
 
