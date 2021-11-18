@@ -1280,7 +1280,6 @@ class AccountsController(TransactionBase):
 				data = dict(due_date=due_date, invoice_portion=100, payment_amount=grand_total, base_payment_amount=base_grand_total)
 				self.append("payment_schedule", data)
 
-		amount = 0
 		for d in self.get("payment_schedule"):
 			if d.invoice_portion:
 				d.payment_amount = flt(grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
@@ -1288,25 +1287,7 @@ class AccountsController(TransactionBase):
 				d.outstanding = d.payment_amount
 			elif not d.invoice_portion:
 				d.base_payment_amount = flt(d.payment_amount * self.get("conversion_rate"), d.precision('base_payment_amount'))
-			amount += d.payment_amount
 
-		diff = flt(grand_total - amount, self.precision("grand_total"))
-		if diff != 0 and self.get("payment_schedule"):
-			# Check which portion has the highest percentage
-			invoice_portion = 0
-			schedule = None
-			for d in self.get("payment_schedule"):
-				if d.invoice_portion > invoice_portion:
-					invoice_portion = d.invoice_portion
-					schedule = d
-			if not schedule:
-				pos = len(self.get("payment_schedule")) - 1
-				schedule = self.get("payment_schedule")[pos]
-			# Update installment with the difference
-			if schedule:
-				schedule.payment_amount += diff
-				schedule.base_payment_amount += diff
-				schedule.outstanding = schedule.payment_amount
 
 	def get_order_details(self):
 		if self.doctype == "Sales Invoice":
@@ -1403,8 +1384,8 @@ class AccountsController(TransactionBase):
 			total = 0
 			base_total = 0
 			for d in self.get("payment_schedule"):
-				total += flt(d.payment_amount)
-				base_total += flt(d.base_payment_amount)
+				total += flt(d.payment_amount, d.precision("payment_amount"))
+				base_total += flt(d.base_payment_amount, d.precision("base_payment_amount"))
 
 			base_grand_total = self.get("base_rounded_total") or self.base_grand_total
 			grand_total = self.get("rounded_total") or self.grand_total
