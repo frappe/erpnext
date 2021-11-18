@@ -3,14 +3,11 @@ import os
 
 import frappe
 
-from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_charges
-
 
 def create_ksa_vat_setting(company):
     """On creation of first company. Creates KSA VAT Setting"""
 
     company = frappe.get_doc('Company', company)
-    setup_taxes_and_charges(company.name, company.country)
 
     file_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'ksa_vat_settings.json')
     with open(file_path, 'r') as json_file:

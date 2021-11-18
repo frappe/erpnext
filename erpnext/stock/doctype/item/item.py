@@ -152,7 +152,6 @@ class Item(WebsiteGenerator):
 
 	def on_update(self):
 		invalidate_cache_for_item(self)
-		self.validate_name_with_item_group()
 		self.update_variants()
 		self.update_item_price()
 		self.update_template_item()
@@ -628,12 +627,6 @@ class Item(WebsiteGenerator):
 				where item_code = %s and is_cancelled = 0 limit 1""", self.name))
 		return self._stock_ledger_created
 
-	def validate_name_with_item_group(self):
-		# causes problem with tree build
-		if frappe.db.exists("Item Group", self.name):
-			frappe.throw(
-				_("An Item Group exists with same name, please change the item name or rename the item group"))
-
 	def update_item_price(self):
 		frappe.db.sql("""
 				UPDATE `tabItem Price`
@@ -676,6 +669,8 @@ class Item(WebsiteGenerator):
 	def after_rename(self, old_name, new_name, merge):
 		if merge:
 			self.validate_duplicate_item_in_stock_reconciliation(old_name, new_name)
+			frappe.msgprint(_("It can take upto few hours for accurate stock values to be visible after merging items."),
+					indicator="orange", title="Note")
 
 		if self.route:
 			invalidate_cache_for_item(self)

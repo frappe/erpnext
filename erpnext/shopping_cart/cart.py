@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 import frappe.defaults
@@ -195,7 +194,9 @@ def add_new_address(doc):
 def create_lead_for_item_inquiry(lead, subject, message):
 	lead = frappe.parse_json(lead)
 	lead_doc = frappe.new_doc('Lead')
-	lead_doc.update(lead)
+	for fieldname in ("lead_name", "company_name", "email_id", "phone"):
+		lead_doc.set(fieldname, lead.get(fieldname))
+
 	lead_doc.set('lead_owner', '')
 
 	if not frappe.db.exists('Lead Source', 'Product Inquiry'):
@@ -203,6 +204,7 @@ def create_lead_for_item_inquiry(lead, subject, message):
 			'doctype': 'Lead Source',
 			'source_name' : 'Product Inquiry'
 		}).insert(ignore_permissions=True)
+
 	lead_doc.set('source', 'Product Inquiry')
 
 	try:

@@ -1,6 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import unittest
 
@@ -18,15 +17,13 @@ def make_operation(*args, **kwargs):
 
 	args = frappe._dict(args)
 
-	try:
+	if not frappe.db.exists("Operation", args.operation):
 		doc = frappe.get_doc({
 			"doctype": "Operation",
 			"name": args.operation,
 			"workstation": args.workstation
 		})
-
 		doc.insert()
-
 		return doc
-	except frappe.DuplicateEntryError:
-		return frappe.get_doc("Operation", args.operation)
+
+	return frappe.get_doc("Operation", args.operation)
