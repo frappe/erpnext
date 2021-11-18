@@ -680,11 +680,36 @@ frappe.ui.form.on("BOM Item", "items_remove", function(frm) {
 	erpnext.bom.calculate_total(frm.doc);
 });
 
+<<<<<<< HEAD
 frappe.ui.form.on("BOM", "with_operations", function(frm) {
 	if(!cint(frm.doc.with_operations)) {
 		frm.set_value("operations", []);
 	}
 });
+=======
+frappe.tour['BOM'] = [
+	{
+		fieldname: "item",
+		title: "Item",
+		description: __("Select the Item to be manufactured. The Item name, UoM, Company, and Currency will be fetched automatically.")
+	},
+	{
+		fieldname: "quantity",
+		title: "Quantity",
+		description: __("Enter the quantity of the Item that will be manufactured from this Bill of Materials.")
+	},
+	{
+		fieldname: "with_operations",
+		title: "With Operations",
+		description: __("To add Operations tick the 'With Operations' checkbox.")
+	},
+	{
+		fieldname: "items",
+		title: "Raw Materials",
+		description: __("Select the raw materials (Items) required to manufacture the Item")
+	}
+];
+>>>>>>> 488d34af1f (fix: unchecking the "With Operations" in BOM clears operations table #28446)
 
 frappe.ui.form.on("BOM Scrap Item", {
 	item_code(frm, cdt, cdn) {
