@@ -37,12 +37,22 @@ frappe.ui.form.on("Task", {
 	},
 	refresh(frm) {
 		if (frm.doc.items.length) {
-			frm.add_custom_button(__('Material Transfer'), function(){
-				frm.events.make_se_mt(frm)
-			}, __("Create"));
-			frm.add_custom_button(__('Material Issue'), function(){
-				frm.events.make_se_mi(frm)
-			}, __("Create"));
+			frappe.call({
+				method: "erpnext.projects.doctype.task.task.check_items_complete",
+				args: {
+					items: frm.doc.items
+				},
+				callback: function (r) {
+					if (!r.message) {
+						frm.add_custom_button(__('Material Transfer'), function(){
+							frm.events.make_se_mt(frm)
+						}, __("Create"));
+						frm.add_custom_button(__('Material Issue'), function(){
+							frm.events.make_se_mi(frm)
+						}, __("Create"));
+					}
+				}
+			})
 		}
 	},
 

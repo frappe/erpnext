@@ -382,8 +382,10 @@ def make_stock_entry_mt(source_name, target_doc = None):
 	def set_purpose(source, target, source_parent):
 		target.stock_entry_type = "Material Transfer"
 
-	def set_t_warehouse(source, target, source_parent):
+	def set_t_warehouse_and_max_qty(source, target, source_parent):
 		target.t_warehouse = source_parent.project_warehouse
+		max_qty = flt(source.qty) - (flt(source.transferred) + flt(source.issued))
+		target.qty = max_qty
 
 	doc = get_mapped_doc("Task", source_name, {
 		"Task": {
@@ -396,9 +398,12 @@ def make_stock_entry_mt(source_name, target_doc = None):
 				"warehouse": "s_warehouse",
 				"name": "task_item"
 			},
-			"postprocess": set_t_warehouse
+			"postprocess": set_t_warehouse_and_max_qty
 		}
 	}, target_doc)
+
+	doc = remove_invalid_rows(doc)
+
 	return doc
 
 @frappe.whitelist()
@@ -406,6 +411,10 @@ def make_stock_entry_mi(source_name, target_doc = None):
 	def set_purpose(source, target, source_parent):
 		target.stock_entry_type = "Material Issue"
 
+	def set_max_qty(source, target, source_parent):
+		max_qty = flt(source.qty) - (flt(source.transferred) + flt(source.issued))
+		target.qty = max_qty
+
 	doc = get_mapped_doc("Task", source_name, {
 		"Task": {
 			"doctype": "Stock Entry",
@@ -417,9 +426,18 @@ def make_stock_entry_mi(source_name, target_doc = None):
 				"warehouse": "s_warehouse",
 				"name": "task_item"
 			},
+			"postprocess": set_max_qty
 		}
 	}, target_doc)
+
+	doc = remove_invalid_rows(doc)
+
 	return doc
+
+def remove_invalid_rows(doc):
+	doc.items = list(filter(lambda item: item.qty != 0 ,doc.items))
+	return doc
+
 
 @frappe.whitelist()
 def check_if_deletable(items):
@@ -430,6 +448,15 @@ def check_if_deletable(items):
 				{1} are linked against it.".format(
 			frappe.bold("Row " + str(item['idx'])), frappe.bold('Material Transfers/Issues'))
 			frappe.throw(e_message)
+
+@frappe.whitelist()
+def check_items_complete(items):
+	items = json.loads(items)
+	for item in items:
+		qty_diff = flt(item['qty']) - (flt(item['issued']) + flt(item['transferred']))
+		if qty_diff:
+			return False
+	return True
 
 
 
