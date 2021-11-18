@@ -5,11 +5,13 @@ frappe.listview_settings['Vehicle Registration Order'] = {
 
 		if(doc.status === "Completed") {
 			indicator = [__("Completed"), "green", "status,=,Completed"];
-		} else if(["To Pay Agent", "To Retrieve Invoice"].includes(doc.status)) {
+		} else if(["To Issue Invoice", "To Close Accounts", "To Deliver Invoice"].includes(doc.status)) {
 			indicator = [__(doc.status), "purple", `status,=,${doc.status}`];
-		} else if (["To Receive Payment", "To Receive Invoice", "To Receive Receipt"].includes(doc.status)) {
+		} else if (["To Pay Agent", "To Retrieve Invoice"].includes(doc.status)) {
+			indicator = [__(doc.status), "blue", `status,=,${doc.status}`];
+		} else if (["To Receive Invoice"].includes(doc.status)) {
 			indicator = [__(doc.status), "yellow", `status,=,${doc.status}`];
-		} else if(["To Pay Authority", "To Issue Invoice", "To Deliver Invoice", "To Close Accounts"].includes(doc.status)) {
+		} else if(["To Receive Receipt", "To Pay Authority", "To Receive Payment"].includes(doc.status)) {
 			indicator = [__(doc.status), "orange", `status,=,${doc.status}`];
 		}
 
