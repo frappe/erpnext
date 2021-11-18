@@ -16,6 +16,7 @@ from erpnext.regional.india.utils import (
 	get_depreciation_amount as get_depreciation_amount_for_india,
 )
 
+
 class AssetValueAdjustment(Document):
 	def validate(self):
 		self.validate_date()
