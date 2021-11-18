@@ -40,8 +40,6 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			groups.append(item.item_group)
 
 	data = []
-	data_group = []
-	data_item = []
 	for group in groups:
 		for d in item_list:
 			if d.item_group == group:
@@ -78,8 +76,6 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 					total_tax += flt(item_tax.get("tax_amount"))
 
 				row += [total_tax, d.base_net_amount + total_tax, company_currency]
-
-				final_row = [{'indent': 1.0, "Item Code":row[0],"Item Name":row[1], "Item Group":row[2],"Description":row[3],"Invoice":row[4], "Posting Date":row[5], "Customer":row[6], "Customer Name":row[7],"Customer Group":row[8],"Receivable Account":row[9],"Mode of Payment":row[10],"Territory":row[11],"Project":row[12],"Company":row[13],"Sales Order":row[14],"Delivery Note":row[15],"Income Account":row[16],"Cost Center":row[17],"Stock Qty":row[18],"Stock UOM":row[19],"Rate":row[20],"Amount":row[21],"Total Tax":row[22],"Total":row[23],"Currency":row[24]}]
 
 				data.append(row)
 
