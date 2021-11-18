@@ -38,7 +38,7 @@ frappe.ui.form.on('Pricing Rule', {
 
 	refresh: function(frm) {
 		var help_content =
-			`<table class="table table-bordered" style="background-color: #f9f9f9;">
+			`<table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 				<tr><td>
 					<h4>
 						<i class="fa fa-hand-right"></i>
