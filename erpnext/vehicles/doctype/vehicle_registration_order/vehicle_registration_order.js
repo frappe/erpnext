@@ -104,7 +104,7 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 				this.frm.add_custom_button(__('Authority Payment'),
 					() => this.make_journal_entry('Authority Payment'), __('Payment'));
 			}
-			if (flt(this.frm.doc.agent_balance)) {
+			if (flt(this.frm.doc.agent_outstanding)) {
 				this.frm.add_custom_button(__('Agent Payment'),
 					() => this.make_journal_entry('Agent Payment'), __('Payment'));
 			}
@@ -387,14 +387,16 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 		if (this.frm.doc.docstatus === 0) {
 			this.frm.doc.customer_payment = 0;
 			this.frm.doc.customer_closed_amount = 0;
+
 			this.frm.doc.authority_payment = 0;
+
 			this.frm.doc.agent_payment = 0;
-			this.frm.doc.agent_balance = 0;
 			this.frm.doc.agent_closed_amount = 0;
 		}
 
 		this.frm.doc.customer_outstanding = flt(this.frm.doc.customer_total) - flt(this.frm.doc.customer_payment) - flt(this.frm.doc.customer_authority_payment);
 		this.frm.doc.authority_outstanding = flt(this.frm.doc.authority_total) - flt(this.frm.doc.authority_payment) - flt(this.frm.doc.customer_authority_payment);
+		this.frm.doc.agent_outstanding = flt(this.frm.doc.agent_total) - flt(this.frm.doc.agent_payment);
 	},
 
 	make_journal_entry: function(purpose) {

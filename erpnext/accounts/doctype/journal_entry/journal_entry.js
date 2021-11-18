@@ -252,7 +252,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 					party_account_field = "agent_account";
 
 					if (me.frm.doc.vehicle_registration_purpose == "Agent Payment") {
-						out.filters.push([jvd.reference_type, "agent_balance", "!=", 0]);
+						out.filters.push([jvd.reference_type, "agent_outstanding", "!=", 0]);
 					}
 				}
 			}

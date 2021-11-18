@@ -226,9 +226,10 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		if self.docstatus == 0:
 			self.customer_payment = 0
 			self.customer_closed_amount = 0
+
 			self.authority_payment = 0
+
 			self.agent_payment = 0
-			self.agent_balance = 0
 			self.agent_closed_amount = 0
 		else:
 			gl_values = self.get_values_from_gl_entries()
@@ -236,6 +237,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 
 		self.customer_outstanding = flt(self.customer_total) - flt(self.customer_payment) - flt(self.customer_authority_payment)
 		self.authority_outstanding = flt(self.authority_total) - flt(self.authority_payment) - flt(self.customer_authority_payment)
+		self.agent_outstanding = flt(self.agent_total) - flt(self.agent_payment)
 
 	def get_values_from_gl_entries(self):
 		args = {
@@ -293,15 +295,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			""", args)
 			agent_payment = flt(agent_payment[0][0]) if agent_payment else 0
 
-			agent_balance = frappe.db.sql("""
-				select sum(gle.credit-gle.debit) as amount
-				from `tabGL Entry` gle
-				where gle.against_voucher_type = 'Vehicle Registration Order'
-					and gle.against_voucher = %(vehicle_registration_order)s
-					and gle.account = %(agent_account)s and gle.party_type = 'Supplier' and gle.party = %(agent)s
-			""", args)
-			agent_balance = flt(agent_balance[0][0]) if agent_balance else 0
-
 			agent_closed_amount = frappe.db.sql("""
 				select sum(gle.credit-gle.debit) as amount
 				from `tabGL Entry` gle
@@ -314,7 +307,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			agent_closed_amount = flt(agent_closed_amount[0][0]) if agent_closed_amount else 0
 		else:
 			agent_payment = 0
-			agent_balance = 0
 			agent_closed_amount = 0
 
 		return frappe._dict({
@@ -322,7 +314,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			'customer_closed_amount': customer_closed_amount,
 			'authority_payment': authority_payment,
 			'agent_payment': agent_payment,
-			'agent_balance': agent_balance,
 			'agent_closed_amount': agent_closed_amount,
 		})
 
@@ -382,9 +373,9 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			self.precision('margin_amount'))
 		return unclosed_income_amount
 
-	def is_unclosed(self, ignore_agent_balance=False):
+	def is_unclosed(self, ignore_agent_outstanding=False):
 		return self.get_unclosed_customer_amount() or self.get_unclosed_agent_amount() or self.get_unclosed_income_amount()\
-			or self.customer_outstanding or self.authority_outstanding or (self.agent_balance and not ignore_agent_balance)
+			or self.customer_outstanding or self.authority_outstanding or (self.agent_outstanding and not ignore_agent_outstanding)
 
 	def update_payment_status(self, update=False):
 		self.calculate_outstanding_amount()
@@ -397,7 +388,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				'authority_payment': self.authority_payment,
 				'authority_outstanding': self.authority_outstanding,
 				'agent_payment': self.agent_payment,
-				'agent_balance': self.agent_balance,
+				'agent_outstanding': self.agent_outstanding,
 				'agent_closed_amount': self.agent_closed_amount,
 			})
 
@@ -516,7 +507,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				else:
 					self.status = "To Receive Receipt"
 			else:
-				if self.is_unclosed(ignore_agent_balance=True):
+				if self.is_unclosed(ignore_agent_outstanding=True):
 					self.status = "To Close Accounts"
 
 				elif self.invoice_status == "Issued":
@@ -525,7 +516,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				elif self.invoice_status == "In Hand":
 					self.status = "To Deliver Invoice"
 
-				elif self.agent_balance > 0:
+				elif self.agent_outstanding > 0:
 					self.status = "To Pay Agent"
 
 				else:
@@ -605,8 +596,8 @@ def get_journal_entry(vehicle_registration_order, purpose):
 		add_journal_entry_row(jv, vro.authority_outstanding, vro.customer_account, 'Customer', vro.customer, vro.name)
 		add_journal_entry_row(jv, -1 * vro.authority_outstanding)
 	elif purpose == "Agent Payment":
-		add_journal_entry_row(jv, vro.agent_balance, vro.agent_account, 'Supplier', vro.agent, vro.name)
-		add_journal_entry_row(jv, -1 * vro.agent_balance)
+		add_journal_entry_row(jv, vro.agent_outstanding, vro.agent_account, 'Supplier', vro.agent, vro.name)
+		add_journal_entry_row(jv, -1 * vro.agent_outstanding)
 	elif purpose == "Closing Entry":
 		unclosed_customer_amount = vro.get_unclosed_customer_amount()
 		unclosed_agent_amount = vro.get_unclosed_agent_amount()
@@ -657,7 +648,7 @@ def get_agent_payment_voucher(names):
 	for name in names:
 		vro = frappe.get_doc("Vehicle Registration Order", name)
 
-		if vro.docstatus != 1 or not vro.agent or not flt(vro.agent_balance):
+		if vro.docstatus != 1 or not vro.agent or not flt(vro.agent_outstanding):
 			continue
 
 		if not company:
@@ -666,12 +657,12 @@ def get_agent_payment_voucher(names):
 		elif vro.company != company:
 			continue
 
-		row = add_journal_entry_row(jv, vro.agent_balance, vro.agent_account, 'Supplier', vro.agent, vro.name)
+		row = add_journal_entry_row(jv, vro.agent_outstanding, vro.agent_account, 'Supplier', vro.agent, vro.name)
 		row.vehicle_booking_order = vro.vehicle_booking_order
 		row.applies_to_vehicle = vro.vehicle
 		row.update(get_fetch_values(row.doctype, "applies_to_vehicle", row.applies_to_vehicle))
 
-		total_amount += flt(vro.agent_balance)
+		total_amount += flt(vro.agent_outstanding)
 
 	if not total_amount:
 		frappe.throw(_("No Agent payable Vehicle Registration Order selected"))

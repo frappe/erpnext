@@ -65,7 +65,6 @@
   "column_break_55",
   "agent",
   "agent_name",
-  "authority_charges_paid_to_agent",
   "custom_license_plate_by_agent",
   "column_break_57",
   "remarks",
@@ -96,7 +95,7 @@
   "column_break_70",
   "agent_payment",
   "agent_closed_amount",
-  "agent_balance",
+  "agent_outstanding",
   "column_break_62",
   "invoice_status",
   "invoice_issued_for",
@@ -494,8 +493,7 @@
    "fieldname": "authority_charges",
    "fieldtype": "Table",
    "label": "Registration Authority Charges",
-   "options": "Vehicle Registration Component",
-   "reqd": 1
+   "options": "Vehicle Registration Component"
   },
   {
    "fieldname": "status_section",
@@ -555,6 +553,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "fieldname": "authority_total",
    "fieldtype": "Currency",
    "label": "Registration Authority Total",
@@ -698,15 +697,6 @@
    "ignore_user_permissions": 1,
    "label": "Registration Agent Payable Account",
    "options": "Account"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "agent_balance",
-   "fieldtype": "Currency",
-   "label": "Registration Agent Balance",
-   "no_copy": 1,
-   "options": "Company:company:default_currency",
-   "read_only": 1
   },
   {
    "fieldname": "customer_closed_amount",
@@ -881,25 +871,27 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "authority_charges_paid_to_agent",
-   "fieldtype": "Check",
-   "label": "Authority Charges Paid to Agent"
-  },
-  {
    "fieldname": "section_break_95",
    "fieldtype": "Section Break"
   },
   {
    "fieldname": "column_break_101",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "agent_outstanding",
+   "fieldtype": "Currency",
+   "label": "Registration Agent Outstanding",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-18 15:46:28.176190",
+ "modified": "2021-11-18 16:47:40.278514",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",

@@ -46,7 +46,7 @@ class VehicleRegistrationRegisterReport(object):
 				m.contact_person, m.contact_mobile, m.contact_phone,
 				m.customer_total, m.customer_payment, m.customer_authority_payment, m.customer_outstanding,
 				m.authority_total, m.authority_payment, m.authority_outstanding,
-				m.agent_total, m.agent_payment, m.agent_balance,
+				m.agent_total, m.agent_payment, m.agent_outstanding,
 				m.margin_amount, m.status, m.remarks
 			from `tabVehicle Registration Order` m
 			left join `tabItem` item on item.name = m.item_code
@@ -104,7 +104,7 @@ class VehicleRegistrationRegisterReport(object):
 		sum_fields = [
 			'customer_total', 'authority_total', 'agent_total',
 			'customer_payment', 'authority_payment', 'agent_payment',
-			'customer_outstanding', 'authority_outstanding', 'agent_balance',
+			'customer_outstanding', 'authority_outstanding', 'agent_outstanding',
 			'margin_amount'
 		]
 		for f in sum_fields:
@@ -229,7 +229,7 @@ class VehicleRegistrationRegisterReport(object):
 			{"label": _("Authority Outstanding"), "fieldname": "authority_outstanding", "fieldtype": "Currency", "width": 110},
 			{"label": _("Agent Total"), "fieldname": "invoice_total", "fieldtype": "Currency", "width": 110},
 			{"label": _("Agent Payment"), "fieldname": "agent_payment", "fieldtype": "Currency", "width": 110},
-			{"label": _("Agent Balance"), "fieldname": "agent_balance", "fieldtype": "Currency", "width": 110},
+			{"label": _("Agent Outstanding"), "fieldname": "agent_outstanding", "fieldtype": "Currency", "width": 110},
 			{"label": _("Margin"), "fieldname": "margin_amount", "fieldtype": "Currency", "width": 100},
 			{"label": _("Registration Date"), "fieldname": "registration_receipt_date", "fieldtype": "Date", "width": 120},
 			{"label": _("Call Date"), "fieldname": "call_date", "fieldtype": "Date", "width": 80},

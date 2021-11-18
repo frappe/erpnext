@@ -142,7 +142,7 @@ frappe.query_reports["Vehicle Registration Register"] = {
 			style['color'] = 'red';
 		}
 
-		$.each(['customer_outstanding', 'authority_outstanding', 'agent_balance'], function (i, f) {
+		$.each(['customer_outstanding', 'authority_outstanding', 'agent_outstanding'], function (i, f) {
 			if (column.fieldname === f) {
 				style['color'] = flt(data[f]) ? 'orange' : 'green';
 			}
