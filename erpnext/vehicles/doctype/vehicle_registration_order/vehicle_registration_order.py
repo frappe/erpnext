@@ -41,7 +41,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 
 	def validate_common(self):
 		self.validate_pricing_components()
-		self.validate_agent_license_plate_charges()
 		self.calculate_totals()
 		self.calculate_outstanding_amount()
 		self.validate_amounts()
@@ -81,8 +80,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		if self.status == "Completed":
 			excluding_fields = []
 			if self.status != "Completed":
-				excluding_fields.append('agent_commission')
-				excluding_fields.append('agent_license_plate_charges')
+				excluding_fields.append('agent_charges')
 				excluding_fields.append('agent_total')
 				excluding_fields.append('margin_amount')
 				excluding_fields.append('status')
@@ -195,8 +193,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		validate_component_type("Registration", self.get('authority_charges'))
 
 	def validate_agent_mandatory(self):
-		if flt(self.agent_total) and not self.agent:
-			frappe.throw(_("Registration Agent is mandatory for Registration Agent Commission"))
+		if self.agent_charges and not self.agent:
+			frappe.throw(_("Registration Agent is mandatory if Agent Charges are set"))
 
 	def validate_account_mandatory(self):
 		if not self.customer_account:
@@ -210,16 +208,10 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		if not self.agent_account:
 			self.agent_account = frappe.get_cached_value("Vehicles Settings", None, "registration_agent_account")
 
-	def validate_agent_license_plate_charges(self):
-		if not self.custom_license_plate_required or not self.custom_license_plate_by_agent:
-			self.agent_license_plate_charges = 0
-
 	def calculate_totals(self):
 		calculate_total_price(self, 'customer_charges', 'customer_total')
 		calculate_total_price(self, 'authority_charges', 'authority_total')
-
-		self.round_floats_in(self, ['agent_commission', 'agent_license_plate_charges'])
-		self.agent_total = flt(self.agent_commission + self.agent_license_plate_charges, self.precision('agent_total'))
+		calculate_total_price(self, 'agent_charges', 'agent_total')
 
 		self.margin_amount = flt(self.customer_total - self.authority_total - self.agent_total,
 			self.precision('margin_amount'))
@@ -227,7 +219,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		self.customer_authority_payment = 0
 		for d in self.customer_authority_instruments:
 			self.round_floats_in(d, ['instrument_amount'])
-			self.customer_authority_payment = d.instrument_amount
+			self.customer_authority_payment += d.instrument_amount
 		self.customer_authority_payment = flt(self.customer_authority_payment, self.precision('customer_authority_payment'))
 
 	def calculate_outstanding_amount(self):
@@ -364,7 +356,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		self.all_customer_payments = sorted(self.all_customer_payments, key=lambda d: getdate(d.date))
 
 	def validate_amounts(self):
-		for field in ['agent_commission', 'agent_license_plate_charges', 'customer_total', 'authority_total']:
+		for field in ['customer_total', 'authority_total', 'agent_total']:
 			self.validate_value(field, '>=', 0)
 
 		for d in self.customer_authority_instruments:
@@ -624,9 +616,13 @@ def get_journal_entry(vehicle_registration_order, purpose):
 			add_journal_entry_row(jv, unclosed_customer_amount, vro.customer_account, 'Customer', vro.customer, vro.name)
 		if unclosed_agent_amount:
 			if not flt(vro.agent_closed_amount):
-				add_journal_entry_row(jv, -1 * vro.agent_commission, vro.agent_account, 'Supplier', vro.agent, vro.name)
-				add_journal_entry_row(jv, -1 * vro.agent_license_plate_charges, vro.agent_account, 'Supplier', vro.agent,
-					vro.name, remarks=_("Number Plate Charges"))
+				for d in vro.agent_charges:
+					remarks = None
+					if d.component and d.component_type:
+						remarks = _(d.component_type)
+
+					add_journal_entry_row(jv, -1 * flt(d.component_amount), vro.agent_account,
+						'Supplier', vro.agent, vro.name, remarks=remarks)
 			else:
 				add_journal_entry_row(jv, -1 * unclosed_agent_amount, vro.agent_account, 'Supplier', vro.agent, vro.name)
 		if unclosed_income_amount:

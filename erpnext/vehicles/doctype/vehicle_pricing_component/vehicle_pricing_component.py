@@ -45,8 +45,9 @@ class VehiclePricingComponent(Document):
 
 	def validate_price_list_mandatory(self):
 		for d in self.price_lists:
-			if not d.selling_price_list and not d.buying_price_list and not flt(d.selling_price) and not flt(d.buying_price):
-				frappe.throw(_("Row #{0}: Please set either Selling Price or Buying Price or remove the row")
+			if not d.selling_price_list and not d.buying_price_list and not d.agent_price_list\
+					and not flt(d.selling_price) and not flt(d.buying_price) and not flt(d.agent_price):
+				frappe.throw(_("Row #{0}: Please set either Selling Price or Buying Price or Agent Price or remove the row")
 					.format(d.idx))
 
 	def validate_duplicate_territory(self):

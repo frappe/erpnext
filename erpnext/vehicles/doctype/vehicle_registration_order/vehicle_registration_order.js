@@ -69,6 +69,9 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 
 		this.frm.set_query("component", "authority_charges",
 			() => erpnext.vehicles.pricing.pricing_component_query('Registration'));
+
+		this.frm.set_query("component", "agent_charges",
+			() => erpnext.vehicles.pricing.pricing_component_query('Registration'));
 	},
 
 	setup_route_options: function () {
@@ -81,6 +84,11 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 
 		var authority_component_field = this.frm.get_docfield("authority_charges", "component");
 		authority_component_field.get_route_options_for_new_doc = () => {
+			return erpnext.vehicles.pricing.pricing_component_route_options('Registration');
+		}
+
+		var agent_component_field = this.frm.get_docfield("agent_charges", "component");
+		agent_component_field.get_route_options_for_new_doc = () => {
 			return erpnext.vehicles.pricing.pricing_component_route_options('Registration');
 		}
 	},
@@ -164,8 +172,10 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 				component_type: "Registration",
 				get_selling_components: true,
 				get_buying_components: true,
+				get_agent_components: true,
 				selling_components_field: 'customer_charges',
 				buying_components_field: 'authority_charges',
+				agent_components_field: 'agent_charges',
 				clear_table: true,
 				callback: function () {
 					me.calculate_totals();
@@ -183,6 +193,8 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 				selling_or_buying = 'selling';
 			} else if (row.parentfield == 'authority_charges') {
 				selling_or_buying = 'buying';
+			} else if (row.parentfield == 'agent_charges') {
+				selling_or_buying = 'agent';
 			}
 			return erpnext.vehicles.pricing.get_component_details({
 				frm: me.frm,
@@ -204,8 +216,10 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 				component_type: "Registration",
 				get_selling_components: true,
 				get_buying_components: true,
+				get_agent_components: true,
 				selling_components_field: 'customer_charges',
 				buying_components_field: 'authority_charges',
+				agent_components_field: 'agent_charges',
 				filters: {
 					registration_component_type: 'Choice Number'
 				},
@@ -217,6 +231,7 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 			var filters = d => cint(d.component_type == "Choice Number");
 			erpnext.vehicles.pricing.remove_components(me.frm, 'customer_charges', filters);
 			erpnext.vehicles.pricing.remove_components(me.frm, 'authority_charges', filters);
+			erpnext.vehicles.pricing.remove_components(me.frm, 'agent_charges', filters);
 		}
 	},
 
@@ -228,8 +243,10 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 				component_type: "Registration",
 				get_selling_components: true,
 				get_buying_components: true,
+				get_agent_components: true,
 				selling_components_field: 'customer_charges',
 				buying_components_field: 'authority_charges',
+				agent_components_field: 'agent_charges',
 				filters: {
 					registration_component_type: 'Ownership Transfer'
 				},
@@ -241,6 +258,7 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 			var filters = d => cint(d.component_type == "Ownership Transfer");
 			erpnext.vehicles.pricing.remove_components(me.frm, 'customer_charges', filters);
 			erpnext.vehicles.pricing.remove_components(me.frm, 'authority_charges', filters);
+			erpnext.vehicles.pricing.remove_components(me.frm, 'agent_charges', filters);
 		}
 	},
 
@@ -251,8 +269,9 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 				frm: me.frm,
 				component_type: "Registration",
 				get_selling_components: true,
-				get_buying_components: true,
+				get_agent_components: true,
 				selling_components_field: 'customer_charges',
+				agent_components_field: 'agent_charges',
 				filters: {
 					registration_component_type: 'License Plate'
 				},
@@ -264,7 +283,7 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 			var filters = d => cint(d.component_type == "License Plate");
 			erpnext.vehicles.pricing.remove_components(me.frm, 'customer_charges', filters);
 			erpnext.vehicles.pricing.remove_components(me.frm, 'authority_charges', filters);
-			me.frm.set_value('agent_license_plate_charges', 0);
+			erpnext.vehicles.pricing.remove_components(me.frm, 'agent_charges', filters);
 		}
 	},
 
@@ -279,7 +298,8 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 			return erpnext.vehicles.pricing.get_pricing_components({
 				frm: me.frm,
 				component_type: "Registration",
-				get_buying_components: true,
+				get_agent_components: true,
+				agent_components_field: 'agent_charges',
 				filters: {
 					registration_component_type: 'License Plate'
 				},
@@ -288,7 +308,8 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 				}
 			});
 		} else {
-			me.frm.set_value('agent_license_plate_charges', 0);
+			var filters = d => cint(d.component_type == "License Plate");
+			erpnext.vehicles.pricing.remove_components(me.frm, 'agent_charges', filters);
 		}
 	},
 
@@ -300,8 +321,10 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 				component_type: "Registration",
 				get_selling_components: true,
 				get_buying_components: true,
+				get_agent_components: true,
 				selling_components_field: 'customer_charges',
 				buying_components_field: 'authority_charges',
+				agent_components_field: 'agent_charges',
 				filters: {
 					registration_component_type: 'Withholding Tax'
 				},
@@ -313,6 +336,7 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 			var filters = d => cint(d.component_type == "Withholding Tax");
 			erpnext.vehicles.pricing.remove_components(me.frm, 'customer_charges', filters);
 			erpnext.vehicles.pricing.remove_components(me.frm, 'authority_charges', filters);
+			erpnext.vehicles.pricing.remove_components(me.frm, 'agent_charges', filters);
 		}
 	},
 
@@ -325,14 +349,6 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 	},
 
 	authority_charges_remove: function () {
-		this.calculate_totals();
-	},
-
-	agent_commission: function () {
-		this.calculate_totals();
-	},
-
-	agent_license_plate_charges: function () {
 		this.calculate_totals();
 	},
 
@@ -349,13 +365,10 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 
 		erpnext.vehicles.pricing.calculate_total_price(me.frm, 'customer_charges', 'customer_total');
 		erpnext.vehicles.pricing.calculate_total_price(me.frm, 'authority_charges', 'authority_total');
+		erpnext.vehicles.pricing.calculate_total_price(me.frm, 'agent_charges', 'agent_total');
 
-		frappe.model.round_floats_in(me.frm.doc, ['agent_commission', 'agent_license_plate_charges']);
-		me.frm.doc.agent_total = flt(me.frm.doc.agent_commission + me.frm.doc.agent_license_plate_charges,
-			precision('agent_total'));
-
-		me.frm.doc.margin_amount = flt(me.frm.doc.customer_total - me.frm.doc.authority_total
-			- me.frm.doc.agent_total, precision('margin_amount'));
+		me.frm.doc.margin_amount = flt(me.frm.doc.customer_total - me.frm.doc.authority_total - me.frm.doc.agent_total,
+			precision('margin_amount'));
 
 		me.frm.doc.customer_authority_payment = 0;
 		$.each(me.frm.doc.customer_authority_instruments || [], function (i, d) {

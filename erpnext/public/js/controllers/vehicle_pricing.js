@@ -48,6 +48,7 @@ $.extend(erpnext.vehicles.pricing, {
 					args: args,
 					get_selling_components: cint(opts.get_selling_components || opts.selling_components_field),
 					get_buying_components: cint(opts.get_buying_components || opts.buying_components_field),
+					get_agent_components: cint(opts.get_agent_components || opts.agent_components_field),
 					filters: opts.filters
 				},
 				callback: function (r) {
@@ -60,6 +61,10 @@ $.extend(erpnext.vehicles.pricing, {
 							if (opts.buying_components_field && r.message.buying) {
 								erpnext.vehicles.pricing.apply_pricing_components(frm, opts.buying_components_field,
 									r.message.buying, opts.clear_table, opts.update_amount);
+							}
+							if (opts.agent_components_field && r.message.agent) {
+								erpnext.vehicles.pricing.apply_pricing_components(frm, opts.agent_components_field,
+									r.message.agent, opts.clear_table, opts.update_amount);
 							}
 							if (r.message.doc) {
 								frm.set_value(r.message.doc);

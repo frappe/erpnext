@@ -16,10 +16,10 @@
   "column_break_8",
   "registration_customer",
   "registration_customer_name",
-  "booking_customer_name",
   "column_break_11",
   "amended_from",
   "transaction_date",
+  "booking_customer_name",
   "address_and_contact_section",
   "customer_address",
   "address_display",
@@ -62,32 +62,26 @@
   "ownership_transfer_required",
   "choice_number_required",
   "custom_license_plate_required",
-  "custom_license_plate_by_agent",
   "column_break_55",
-  "remarks",
+  "agent",
+  "agent_name",
+  "authority_charges_paid_to_agent",
+  "custom_license_plate_by_agent",
   "column_break_57",
-  "invoice_issue_date",
-  "invoice_return_date",
-  "invoice_delivered_date",
-  "cb_60",
-  "registration_receipt_date",
-  "call_date",
+  "remarks",
   "pricing_section",
   "customer_charges",
-  "column_break_54",
+  "column_break_60",
   "authority_charges",
+  "column_break_54",
+  "agent_charges",
   "section_break_56",
   "customer_total",
   "column_break_58",
   "authority_total",
-  "commission_section",
-  "agent",
-  "agent_name",
-  "column_break_60",
-  "agent_commission",
-  "agent_license_plate_charges",
-  "column_break_75",
+  "column_break_79",
   "agent_total",
+  "column_break_81",
   "margin_amount",
   "customer_pay_orders_section",
   "customer_authority_instruments",
@@ -107,6 +101,14 @@
   "invoice_status",
   "invoice_issued_for",
   "status",
+  "section_break_95",
+  "invoice_issue_date",
+  "invoice_return_date",
+  "cb_60",
+  "registration_receipt_date",
+  "call_date",
+  "column_break_101",
+  "invoice_delivered_date",
   "accounting_details_section",
   "customer_account",
   "column_break_85",
@@ -496,13 +498,6 @@
    "reqd": 1
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "agent_commission",
-   "fieldtype": "Currency",
-   "label": "Registration Agent Commission",
-   "options": "Company:company:default_currency"
-  },
-  {
    "fieldname": "status_section",
    "fieldtype": "Section Break",
    "label": "Status"
@@ -567,11 +562,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "commission_section",
-   "fieldtype": "Section Break",
-   "label": "Registration Agent"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "agent",
    "fieldtype": "Link",
@@ -622,6 +612,7 @@
    "default": "0",
    "fieldname": "choice_number_required",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Choice Number Required"
   },
   {
@@ -751,6 +742,7 @@
    "default": "0",
    "fieldname": "ownership_transfer_required",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Ownership Transfer Required",
    "no_copy": 1
   },
@@ -787,11 +779,8 @@
    "default": "0",
    "fieldname": "custom_license_plate_required",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Custom License Plate Required"
-  },
-  {
-   "fieldname": "column_break_75",
-   "fieldtype": "Column Break"
   },
   {
    "allow_on_submit": 1,
@@ -800,14 +789,6 @@
    "fieldname": "custom_license_plate_by_agent",
    "fieldtype": "Check",
    "label": "Custom License Plate Provided By Agent"
-  },
-  {
-   "allow_on_submit": 1,
-   "depends_on": "eval:doc.custom_license_plate_required && doc.custom_license_plate_by_agent",
-   "fieldname": "agent_license_plate_charges",
-   "fieldtype": "Currency",
-   "label": "Agent License Plate Charges",
-   "options": "Company:company:default_currency"
   },
   {
    "allow_on_submit": 1,
@@ -850,6 +831,7 @@
    "allow_on_submit": 1,
    "fieldname": "tax_status",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Income Tax Status",
    "options": "\nFiler\nNon Filer\nExempt",
    "read_only": 1
@@ -882,12 +864,42 @@
    "label": "Invoice Delivered Date",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "agent_charges",
+   "fieldtype": "Table",
+   "label": "Agent Charges",
+   "options": "Vehicle Registration Component"
+  },
+  {
+   "fieldname": "column_break_79",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_81",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "authority_charges_paid_to_agent",
+   "fieldtype": "Check",
+   "label": "Authority Charges Paid to Agent"
+  },
+  {
+   "fieldname": "section_break_95",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_101",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-17 12:01:58.672429",
+ "modified": "2021-11-18 15:46:28.176190",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",

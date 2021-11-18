@@ -21,7 +21,8 @@ def calculate_total_price(doc, table_field, total_field):
 
 
 @frappe.whitelist()
-def get_pricing_components(component_type, args, get_selling_components=True, get_buying_components=False, filters=None):
+def get_pricing_components(component_type, args,
+		get_selling_components=True, get_buying_components=False, get_agent_components=False, filters=None):
 	args = validate_args(args)
 	get_selling_components = cint(get_selling_components)
 	get_buying_components = cint(get_buying_components)
@@ -37,6 +38,8 @@ def get_pricing_components(component_type, args, get_selling_components=True, ge
 		out.selling = []
 	if get_buying_components:
 		out.buying = []
+	if get_agent_components:
+		out.agent = []
 
 	# get all active components
 	component_filters = {
@@ -91,6 +94,13 @@ def get_pricing_components(component_type, args, get_selling_components=True, ge
 					out.buying.append(buying_component.component)
 				out.doc.update(buying_component.doc)
 
+		if get_agent_components:
+			agent_component = get_component_details(component_name, args, "agent")
+			if force or agent_component.component.price_list or agent_component.component.component_amount:
+				if not agent_component.component.do_not_append:
+					out.agent.append(agent_component.component)
+				out.doc.update(agent_component.doc)
+
 	return out
 
 
@@ -135,10 +145,9 @@ def get_component_details(component_name, args, selling_or_buying="selling"):
 		if component_doc.registration_component_type == "Ownership Transfer":
 			out.doc.ownership_transfer_required = 1
 		if component_doc.registration_component_type == "License Plate":
-			if selling_or_buying == "buying":
-				out.component.do_not_append = True
-				if cint(args.custom_license_plate_required) and cint(args.custom_license_plate_by_agent):
-					out.doc.agent_license_plate_charges = out.component.component_amount
+			out.doc.custom_license_plate_required = 1
+			if selling_or_buying == "agent":
+				out.doc.custom_license_plate_by_agent = 1
 
 	return out
 
@@ -166,6 +175,8 @@ def get_price_list(row, selling_or_buying):
 		fieldname = "selling_price_list"
 	elif selling_or_buying == "buying":
 		fieldname = "buying_price_list"
+	elif selling_or_buying == "agent":
+		fieldname = "agent_price_list"
 	else:
 		fieldname = selling_or_buying
 
@@ -180,6 +191,8 @@ def get_default_price(row, selling_or_buying):
 		fieldname = "selling_price"
 	elif selling_or_buying == "buying":
 		fieldname = "buying_price"
+	elif selling_or_buying == "agent":
+		fieldname = "agent_price"
 	else:
 		fieldname = selling_or_buying
 

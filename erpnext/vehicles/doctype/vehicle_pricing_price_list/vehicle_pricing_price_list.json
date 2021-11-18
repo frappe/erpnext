@@ -9,11 +9,13 @@
   "selling_price",
   "selling_price_list",
   "buying_price",
-  "buying_price_list"
+  "buying_price_list",
+  "agent_price",
+  "agent_price_list"
  ],
  "fields": [
   {
-   "columns": 2,
+   "columns": 3,
    "fieldname": "territory",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -22,7 +24,7 @@
    "options": "Territory"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "selling_price_list",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -31,7 +33,7 @@
    "options": "Price List"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "buying_price_list",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -60,10 +62,26 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Buying Price"
+  },
+  {
+   "columns": 1,
+   "fieldname": "agent_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Agent Price"
+  },
+  {
+   "columns": 1,
+   "fieldname": "agent_price_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Agent Price List",
+   "options": "Price List"
   }
  ],
  "istable": 1,
- "modified": "2021-10-28 12:40:07.053902",
+ "modified": "2021-11-18 13:53:44.887745",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Pricing Price List",

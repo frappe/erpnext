@@ -80,10 +80,10 @@
    "fieldtype": "Select",
    "label": "Registration Component Type",
    "no_copy": 1,
-   "options": "\nChoice Number\nOwnership Transfer\nLicense Plate\nWithholding Tax"
+   "options": "\nChoice Number\nOwnership Transfer\nWithholding Tax\nLicense Plate"
   }
  ],
- "modified": "2021-10-30 12:08:59.186704",
+ "modified": "2021-11-18 15:54:15.067868",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Pricing Component",
