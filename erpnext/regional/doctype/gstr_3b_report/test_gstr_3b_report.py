@@ -67,6 +67,84 @@ class TestGSTR3BReport(unittest.TestCase):
 		self.assertEqual(output["itc_elg"]["itc_avl"][4]["samt"], 22.50)
 		self.assertEqual(output["itc_elg"]["itc_avl"][4]["camt"], 22.50)
 
+<<<<<<< HEAD
+=======
+	def test_gst_rounding(self):
+		gst_settings = frappe.get_doc('GST Settings')
+		gst_settings.round_off_gst_values = 1
+		gst_settings.save()
+
+		current_country = frappe.flags.country
+		frappe.flags.country = 'India'
+
+		si = create_sales_invoice(company="_Test Company GST",
+			customer = '_Test GST Customer',
+			currency = 'INR',
+			warehouse = 'Finished Goods - _GST',
+			debit_to = 'Debtors - _GST',
+			income_account = 'Sales - _GST',
+			expense_account = 'Cost of Goods Sold - _GST',
+			cost_center = 'Main - _GST',
+			rate=216,
+			do_not_save=1
+		)
+
+		si.append("taxes", {
+			"charge_type": "On Net Total",
+			"account_head": "Output Tax IGST - _GST",
+			"cost_center": "Main - _GST",
+			"description": "IGST @ 18.0",
+			"rate": 18
+		})
+
+		si.save()
+		# Check for 39 instead of 38.88
+		self.assertEqual(si.taxes[0].base_tax_amount_after_discount_amount, 39)
+
+		frappe.flags.country = current_country
+		gst_settings.round_off_gst_values = 1
+		gst_settings.save()
+
+	def test_gst_category_auto_update(self):
+		if not frappe.db.exists("Customer", "_Test GST Customer With GSTIN"):
+			customer = frappe.get_doc({
+				"customer_group": "_Test Customer Group",
+				"customer_name": "_Test GST Customer With GSTIN",
+				"customer_type": "Individual",
+				"doctype": "Customer",
+				"territory": "_Test Territory"
+			}).insert()
+
+			self.assertEqual(customer.gst_category, 'Unregistered')
+
+		if not frappe.db.exists('Address', '_Test GST Category-1-Billing'):
+			address = frappe.get_doc({
+				"address_line1": "_Test Address Line 1",
+				"address_title": "_Test GST Category-1",
+				"address_type": "Billing",
+				"city": "_Test City",
+				"state": "Test State",
+				"country": "India",
+				"doctype": "Address",
+				"is_primary_address": 1,
+				"phone": "+91 0000000000",
+				"gstin": "29AZWPS7135H1ZG",
+				"gst_state": "Karnataka",
+				"gst_state_number": "29"
+			}).insert()
+
+			address.append("links", {
+				"link_doctype": "Customer",
+				"link_name": "_Test GST Customer With GSTIN"
+			})
+
+			address.save()
+
+		customer.load_from_db()
+		self.assertEqual(customer.gst_category, 'Registered Regular')
+
+
+>>>>>>> cdbc991e3f (fix: Add test for gst category check)
 def make_sales_invoice():
 	si = create_sales_invoice(company="_Test Company GST",
 			customer = '_Test GST Customer',
