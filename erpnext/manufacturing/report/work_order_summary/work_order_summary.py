@@ -58,21 +58,22 @@ def get_chart_data(data, filters):
 		return get_chart_based_on_qty(data, filters)
 
 def get_chart_based_on_status(data):
-	labels = ["Completed", "In Process", "Stopped", "Not Started"]
+	labels = ["Completed", "In Process", "Stopped", "Not Started", "Closed"]
 
 	status_wise_data = {
 		"Not Started": 0,
 		"In Process": 0,
 		"Stopped": 0,
 		"Completed": 0,
-		"Draft": 0
+		"Draft": 0,
+		"Closed": 0
 	}
 
 	for d in data:
 		status_wise_data[d.status] += 1
 
 	values = [status_wise_data["Completed"], status_wise_data["In Process"],
-		status_wise_data["Stopped"], status_wise_data["Not Started"]]
+		status_wise_data["Stopped"], status_wise_data["Not Started"], status_wise_data["Closed"]]
 
 	chart = {
 		"data": {
