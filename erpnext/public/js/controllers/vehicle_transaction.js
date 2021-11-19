@@ -258,7 +258,9 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 	},
 
 	customer_address: function () {
-		erpnext.utils.get_address_display(this.frm, "customer_address", "address_display");
+		if (this.frm.fields_dict.address_display) {
+			erpnext.utils.get_address_display(this.frm, "customer_address", "address_display");
+		}
 	},
 
 	contact_person: function () {
