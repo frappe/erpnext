@@ -610,6 +610,12 @@ def get_data():
 					"doctype": "Sales Invoice"
 				},
 				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Advances Applied",
+					"doctype": "Payment Entry"
+				},
+				{
 					"type": "doctype",
 					"name": "Cash Report",
 				}
