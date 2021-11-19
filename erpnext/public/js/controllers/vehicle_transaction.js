@@ -152,6 +152,10 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 		this.get_customer_details();
 	},
 
+	financer: function () {
+		this.get_customer_details();
+	},
+
 	vehicle_owner: function () {
 		this.get_customer_details();
 	},
@@ -186,6 +190,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 					doctype: me.frm.doc.doctype,
 					company: me.frm.doc.company,
 					customer: me.frm.doc.customer,
+					financer: me.frm.doc.financer,
 					vehicle_owner: me.frm.doc.vehicle_owner,
 					registration_customer: me.frm.doc.registration_customer,
 					supplier: me.frm.doc.supplier,

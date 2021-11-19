@@ -17,7 +17,8 @@ from six import string_types
 
 
 force_fields = [
-	'customer_name', 'vehicle_owner_name', 'broker_name', 'transporter_name', 'registration_customer_name',
+	'customer_name', 'financer_name', 'lessee_name', 'vehicle_owner_name', 'registration_customer_name',
+	'broker_name', 'transporter_name',
 	'variant_of', 'variant_of_name',
 	'tax_id', 'tax_cnic', 'tax_strn', 'tax_status',
 	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone', 'territory',
@@ -526,6 +527,10 @@ def get_customer_details(args):
 	if args.customer:
 		customer = frappe.get_cached_doc("Customer", args.customer)
 
+	financer = frappe._dict()
+	if args.financer:
+		financer = frappe.get_cached_doc("Customer", args.financer)
+
 	vehicle_owner = frappe._dict()
 	if args.vehicle_owner:
 		vehicle_owner = frappe.get_cached_doc("Customer", args.vehicle_owner)
@@ -536,6 +541,11 @@ def get_customer_details(args):
 
 	# Customer Name
 	out.customer_name = customer.customer_name
+	if financer:
+		out.customer_name = "{0} HPA {1}".format(out.customer_name, financer.customer_name)
+
+	out.financer_name = financer.customer_name
+	out.lessee_name = customer.customer_name if financer else None
 	out.vehicle_owner_name = vehicle_owner.customer_name
 	out.registration_customer_name = registration_customer.customer_name
 
