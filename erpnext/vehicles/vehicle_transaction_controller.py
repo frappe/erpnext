@@ -209,7 +209,7 @@ class VehicleTransactionController(StockController):
 				# Customer must match with booking customer/financer or vehicle owner must be set (and match)
 				if self.doctype == "Vehicle Delivery":
 					if self.customer not in (vbo.customer, vbo.financer, vbo.transfer_customer, vehicle_customer) and not self.vehicle_owner:
-						frappe.throw(_("Customer (User) does not match in {0}. Please set Vehicle Owner if the User of the Vehicle is different from the Booking Customer.")
+						frappe.throw(_("Customer does not match in {0}. Please set Vehicle Owner if the User of the Vehicle is different from the Booking Customer.")
 							.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
 				elif self.doctype == 'Vehicle Transfer Letter':
@@ -221,10 +221,9 @@ class VehicleTransactionController(StockController):
 					pass
 
 				else:
-					if self.customer not in (vbo.customer, vbo.financer, vbo.transfer_customer):
-						if not vehicle_customer or self.customer != vehicle_customer:
-							frappe.throw(_("Customer does not match in {0}")
-								.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
+					if self.customer not in (vbo.customer, vbo.financer, vbo.transfer_customer, vehicle_customer):
+						frappe.throw(_("Customer does not match in {0}")
+							.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
 			if self.get('vehicle_owner'):
 				if self.vehicle_owner not in (vbo.customer, vbo.financer):
