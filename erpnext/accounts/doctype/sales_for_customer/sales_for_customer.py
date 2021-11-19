@@ -27,6 +27,16 @@ class SalesForCustomer(Document):
 		self.total_invoice = len(salary_slips)
 		self.total_operations = len(salary_slips)
 		date_actual = self.start_date
+
+		for salary in salary_slips:
+			payments = frappe.get_all("Sales Invoice Payment", ["*"], filters = {"parent": salary.name})
+
+			for payment in payments:
+				if payment.mode_of_payment == "Efectivo":
+					cash += payment.amount
+				if payment.mode_of_payment == "Tarjetas de credito":
+					cards += payment.amount
+
 		sales_person_cols = ""
 		sales_team_table = ""
 
@@ -130,7 +140,9 @@ class SalesForCustomer(Document):
 
 			self.total_exempt_sales = 0
 			self.total_exempt_sales += total_exempt
-		
+
+		self.total_cash = cash
+		self.total_cards = cards		
 		total_income = cash + cards + total_monetary
 
 		self.total_income = total_income
@@ -146,6 +158,7 @@ class SalesForCustomer(Document):
 		conditions += ', "posting_time": [">", "{}"]'.format(self.start_hour)
 		conditions += ', "posting_time": ["<", "{}"]'.format(self.final_hour)
 		conditions += ', "cashier": "{}"'.format(self.user)
+		conditions += ', "is_pos": 1'.format(self.user)
 		conditions += '}'			
 
 		return conditions
