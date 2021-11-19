@@ -530,24 +530,14 @@ def get_customer_details(args):
 	if args.vehicle_owner:
 		vehicle_owner = frappe.get_cached_doc("Customer", args.vehicle_owner)
 
-	broker = frappe._dict()
-	if args.broker:
-		broker = frappe.get_cached_doc("Customer", args.broker)
-
 	registration_customer = frappe._dict()
 	if args.registration_customer:
 		registration_customer = frappe.get_cached_doc("Customer", args.registration_customer)
 
-	transporter = frappe._dict()
-	if args.transporter:
-		transporter = frappe.get_cached_doc("Supplier", args.transporter)
-
 	# Customer Name
 	out.customer_name = customer.customer_name
 	out.vehicle_owner_name = vehicle_owner.customer_name
-	out.broker_name = broker.customer_name
 	out.registration_customer_name = registration_customer.customer_name
-	out.transporter_name = transporter.supplier_name
 
 	customer_details = registration_customer or customer
 
