@@ -2,12 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Delivery Planning Item', {
-
-	setup : function(frm){
-		if (frm.doc.customer){
-			frm.doc.full_dname = frm.doc.customer+ " " + frm.doc.item_name + " " + frm.doc.qty_to_deliver + " " + frm.doc.uom
-		}
-	}, 
 	
 	refresh : function(frm){
 		if(frm.doc.docstatus != 1){
@@ -43,7 +37,7 @@ frappe.ui.form.on('Delivery Planning Item', {
 	},
 
 	validate : function(frm) {
-		if (frm.doc.customer && docstatus !=1 ){
+		if (frm.doc.customer && frm.doc.qty_to_deliver && frm.doc.uom && frm.doc.item_name){
 			frm.doc.full_dname = frm.doc.customer+ " " + frm.doc.item_name + " " + frm.doc.qty_to_deliver + " " + frm.doc.uom
 		}
 	},
@@ -64,17 +58,17 @@ frappe.ui.form.on('Delivery Planning Item', {
 
 	onload: function(frm){
 
-		// if(frm.doc.docstatus != 1){
-		// 			frm.call({
-		// 						doc:frm.doc,
-		// 						method: 'update_stock',
-		// 						callback: function(r){
-		// 							if(r.message){
-		// 								console.log("Item stock Updated")
-		// 							}
-		// 						}
-		// 					});
-		// 		}
+		if(frm.doc.docstatus != 1){
+					frm.call({
+								doc:frm.doc,
+								method: 'update_stock',
+								callback: function(r){
+									if(r.message){
+										console.log("Item stock Updated")
+									}
+								}
+							});
+				}
 
 		cur_frm.set_query("transporter", function() {
 			return {
