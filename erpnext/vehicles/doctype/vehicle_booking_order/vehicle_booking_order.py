@@ -683,32 +683,20 @@ def set_next_document_values(source, target):
 	if source.vehicle_allocation_required and not source.vehicle_allocation and target.doctype != 'Purchase Order':
 		frappe.throw(_("Please set Vehicle Allocation first"))
 
-	target.vehicle_booking_order = source.name
 	target.company = source.company
+	target.vehicle_booking_order = source.name
+	target.item_code = source.item_code
+	target.vehicle = source.vehicle
 
-	if target.doctype != "Vehicle Transfer Letter":
-		if target.meta.has_field('customer'):
-			target.customer = source.customer
-			target.customer_name = source.customer_name
-
-		if target.meta.has_field('registration_customer'):
-			target.registration_customer = source.customer
-			target.registration_customer_name = source.customer_name
-
-		if target.meta.has_field('customer_address'):
-			target.customer_address = source.customer_address
-
-		if target.meta.has_field('contact_person'):
-			target.contact_person = source.contact_person
+	if target.meta.has_field('registration_customer'):
+		target.registration_customer = source.customer
+		target.registration_customer_name = source.customer_name
 
 	if target.meta.has_field('supplier'):
 		target.supplier = source.supplier
 
 	if target.meta.has_field('warehouse'):
 		target.warehouse = source.warehouse
-
-	target.item_code = source.item_code
-	target.vehicle = source.vehicle
 
 
 @frappe.whitelist()

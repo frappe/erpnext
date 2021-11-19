@@ -187,10 +187,12 @@ class VehicleTransactionController(StockController):
 		if doc.get('vehicle_booking_order'):
 			vbo = frappe.db.get_value("Vehicle Booking Order", doc.vehicle_booking_order, [
 					'docstatus', 'status',
-					'customer', 'financer', 'supplier',
+					'customer', 'financer', 'supplier', 'transfer_customer',
 					'item_code', 'vehicle',
 					'vehicle_delivered_date', 'vehicle_received_date'
 			], as_dict=1)
+
+			vehicle_customer = frappe.db.get_value("Vehicle", doc.get('vehicle'), 'customer') if doc.get('vehicle') else None
 
 			if not vbo:
 				frappe.throw(_("Vehicle Booking Order {0} does not exist").format(doc.vehicle_booking_order))
@@ -206,7 +208,7 @@ class VehicleTransactionController(StockController):
 			if self.get('customer'):
 				# Customer must match with booking customer/financer or vehicle owner must be set (and match)
 				if self.doctype == "Vehicle Delivery":
-					if self.customer not in (vbo.customer, vbo.financer) and not self.vehicle_owner:
+					if self.customer not in (vbo.customer, vbo.financer, vbo.transfer_customer, vehicle_customer) and not self.vehicle_owner:
 						frappe.throw(_("Customer (User) does not match in {0}. Please set Vehicle Owner if the User of the Vehicle is different from the Booking Customer.")
 							.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
@@ -219,12 +221,10 @@ class VehicleTransactionController(StockController):
 					pass
 
 				else:
-					if self.customer not in (vbo.customer, vbo.financer):
-						if doc.get('vehicle'):
-							vehicle_customer = frappe.db.get_value("Vehicle", doc.get('vehicle'), 'customer')
-							if not vehicle_customer or self.customer != vehicle_customer:
-								frappe.throw(_("Customer does not match in {0}")
-									.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
+					if self.customer not in (vbo.customer, vbo.financer, vbo.transfer_customer):
+						if not vehicle_customer or self.customer != vehicle_customer:
+							frappe.throw(_("Customer does not match in {0}")
+								.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
 			if self.get('vehicle_owner'):
 				if self.vehicle_owner not in (vbo.customer, vbo.financer):
@@ -589,31 +589,50 @@ def get_vehicle_booking_order_details(args):
 	booking_details = frappe._dict()
 	if args.vehicle_booking_order:
 		booking_details = frappe.db.get_value("Vehicle Booking Order", args.vehicle_booking_order,
-			['customer', 'customer_name', 'financer', 'finance_type', 'supplier',
+			['customer', 'customer_name',
+				'financer', 'finance_type', 'financer_name',
+				'supplier', 'supplier_name',
+				'transfer_customer', 'transfer_customer_name',
 				'tax_id', 'tax_cnic', 'tax_strn',
-				'address_display', 'contact_email', 'contact_mobile', 'contact_phone',
-				'item_code', 'warehouse', 'vehicle',
-				'bill_no', 'bill_date'], as_dict=1)
+				'contact_person', 'financer_contact_person',
+				'contact_email', 'contact_mobile', 'contact_phone',
+				'customer_address', 'address_display',
+				'item_code', 'warehouse', 'vehicle'], as_dict=1)
 
 	out = frappe._dict()
 
 	if booking_details:
+		is_leased = booking_details.financer and booking_details.finance_type == "Leased"
+
 		if args.doctype == "Vehicle Transfer Letter":
-			out.vehicle_owner = booking_details.financer if booking_details.financer and booking_details.finance_type == 'Leased' \
-				else booking_details.customer
+			out.vehicle_owner = booking_details.financer if is_leased else booking_details.customer
+
+		elif args.doctype == "Vehicle Invoice Delivery":
+			if booking_details.transfer_customer:
+				out.customer = booking_details.transfer_customer
+			else:
+				out.customer = booking_details.financer if is_leased else booking_details.customer
+				out.customer_address = booking_details.customer_address
+				out.contact_person = booking_details.financer_contact_person if is_leased else booking_details.contact_person
+
 		else:
-			out.customer = booking_details.customer
+			if booking_details.transfer_customer:
+				out.customer = booking_details.transfer_customer
+			else:
+				out.customer = booking_details.customer
+				out.customer_address = booking_details.customer_address
+				out.contact_person = booking_details.contact_person
+
+		if args.doctype != "Vehicle Transfer Letter":
+			out.vehicle_owner = booking_details.financer if is_leased else None
 
 		if args.doctype == "Vehicle Registration Order":
 			out.registration_customer = booking_details.customer
 
-		out.supplier = booking_details.supplier
 		out.item_code = booking_details.item_code
 		out.vehicle = booking_details.vehicle
-		out.bill_no = booking_details.bill_no
-		out.bill_date = booking_details.bill_date
-
 		out.warehouse = booking_details.warehouse
+		out.supplier = booking_details.supplier
 
 	out.booking_customer_name = booking_details.customer_name
 	out.booking_tax_id = booking_details.tax_id
@@ -626,9 +645,6 @@ def get_vehicle_booking_order_details(args):
 	out.booking_phone = booking_details.contact_phone
 
 	out.finance_type = booking_details.finance_type
-
-	if args.doctype != "Vehicle Transfer Letter":
-		out.vehicle_owner = booking_details.financer if booking_details.financer and booking_details.finance_type == 'Leased' else None
 
 	return out
 
