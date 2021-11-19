@@ -21,3 +21,25 @@ def update_lead_phone_numbers(contact, method):
 			lead = frappe.get_doc("Lead", contact_lead)
 			lead.db_set("phone", phone)
 			lead.db_set("mobile_no", mobile_no)
+
+def copy_comments(doctype, docname, doc):
+	comments = frappe.db.get_values("Comment", filters={"reference_doctype": doctype, "reference_name": docname}, fieldname="*")
+	for comment in comments:
+		comment = frappe.get_doc(comment.update({"doctype":"Comment"}))
+		comment.name = None
+		comment.reference_doctype = doc.doctype
+		comment.reference_name = doc.name
+		comment.insert()
+
+def add_link_in_communication(doctype, docname, doc):
+	communications = frappe.get_all("Communication", filters={"reference_doctype": doctype, "reference_name": docname}, pluck='name')
+	communication_links = frappe.get_all('Communication Link',
+		{
+			"link_doctype": doctype,
+			"link_name": docname,
+			"parent": ("not in", communications)
+		}, pluck="parent")
+	
+	for communication in communications + communication_links:
+		communication_doc = frappe.get_doc("Communication", communication)
+		communication_doc.add_link(doc.doctype, doc.name, autosave=True)

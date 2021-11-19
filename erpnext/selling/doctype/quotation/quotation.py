@@ -8,6 +8,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, getdate, nowdate
 
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.crm.utils import copy_comments, add_link_in_communication
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -33,6 +34,15 @@ class Quotation(SellingController):
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
+
+	def after_insert(self):
+		if self.opportunity:
+			copy_comments("Opportunity", self.opportunity, self)
+			add_link_in_communication("Opportunity", self.opportunity, self)
+		
+		elif self.quotation_to == "Lead" and self.party_name:
+			copy_comments("Lead", self.party_name, self)
+			add_link_in_communication("Lead", self.party_name, self)
 
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):

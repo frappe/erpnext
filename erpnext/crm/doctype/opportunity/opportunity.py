@@ -12,12 +12,17 @@ from frappe.utils import cint, cstr, flt, get_fullname
 
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
+from erpnext.crm.utils import copy_comments, add_link_in_communication
 
 
 class Opportunity(TransactionBase):
 	def after_insert(self):
 		if self.opportunity_from == "Lead":
 			frappe.get_doc("Lead", self.party_name).set_status(update=True)
+
+		if self.opportunity_from in ["Lead", "Prospect"]:
+			copy_comments(self.opportunity_from, self.party_name, self)
+			add_link_in_communication(self.opportunity_from, self.party_name, self)
 
 	def validate(self):
 		self._prev = frappe._dict({
