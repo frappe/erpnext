@@ -6,7 +6,7 @@ from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
-from erpnext.crm.utils import copy_comments, add_link_in_communication
+from erpnext.crm.utils import add_link_in_communication, copy_comments
 
 
 class Prospect(Document):

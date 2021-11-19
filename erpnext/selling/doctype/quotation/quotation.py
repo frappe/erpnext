@@ -8,7 +8,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, getdate, nowdate
 
 from erpnext.controllers.selling_controller import SellingController
-from erpnext.crm.utils import copy_comments, add_link_in_communication
+from erpnext.crm.utils import add_link_in_communication, copy_comments
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
