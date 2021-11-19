@@ -67,8 +67,6 @@ class TestGSTR3BReport(unittest.TestCase):
 		self.assertEqual(output["itc_elg"]["itc_avl"][4]["samt"], 22.50)
 		self.assertEqual(output["itc_elg"]["itc_avl"][4]["camt"], 22.50)
 
-<<<<<<< HEAD
-=======
 	def test_gst_rounding(self):
 		gst_settings = frappe.get_doc('GST Settings')
 		gst_settings.round_off_gst_values = 1
@@ -143,8 +141,6 @@ class TestGSTR3BReport(unittest.TestCase):
 		customer.load_from_db()
 		self.assertEqual(customer.gst_category, 'Registered Regular')
 
-
->>>>>>> cdbc991e3f (fix: Add test for gst category check)
 def make_sales_invoice():
 	si = create_sales_invoice(company="_Test Company GST",
 			customer = '_Test GST Customer',
