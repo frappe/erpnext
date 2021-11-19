@@ -594,7 +594,7 @@ def get_vehicle_booking_order_details(args):
 		is_leased = booking_details.financer and booking_details.finance_type == "Leased"
 
 		if args.doctype == "Vehicle Transfer Letter":
-			out.vehicle_owner = booking_details.financer if is_leased else booking_details.customer
+			out.vehicle_owner = booking_details.financer or booking_details.customer
 
 		elif args.doctype == "Vehicle Invoice Delivery":
 			if booking_details.transfer_customer:
@@ -613,7 +613,7 @@ def get_vehicle_booking_order_details(args):
 				out.contact_person = booking_details.contact_person
 
 		if args.doctype != "Vehicle Transfer Letter":
-			out.vehicle_owner = booking_details.financer if is_leased else None
+			out.vehicle_owner = booking_details.financer
 
 		if args.doctype == "Vehicle Registration Order":
 			out.registration_customer = booking_details.customer
