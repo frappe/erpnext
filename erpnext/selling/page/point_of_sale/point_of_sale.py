@@ -284,3 +284,17 @@ def set_customer_info(fieldname, customer, value=""):
 		contact_doc.set('phone_nos', [{ 'phone': value, 'is_primary_mobile_no': 1}])
 		frappe.db.set_value('Customer', customer, 'mobile_no', value)
 	contact_doc.save()
+
+@frappe.whitelist()
+def get_credit_note_options():
+	credit_note_list = {}
+	pos_inv = frappe.get_all('POS Invoice', filters={
+				'is_pos': 1,
+				'is_return': 1
+				},
+				fields=['name', 'grand_total']
+			)
+	for inv in pos_inv:
+		credit_note_list.setdefault(inv.name, inv.grand_total)
+	print(credit_note_list)
+	return credit_note_list

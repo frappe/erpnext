@@ -29,7 +29,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Type",
-   "options": "Cash\nBank\nGeneral\nPhone"
+   "options": "Cash\nBank\nGeneral\nPhone\nCredit Note"
   },
   {
    "fieldname": "accounts",
@@ -48,10 +48,12 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-09-18 17:57:23.835236",
+ "migration_hash": "54043fbbb01893f2866c8367069f2ed0",
+ "modified": "2021-11-16 17:07:44.347158",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Mode of Payment",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {

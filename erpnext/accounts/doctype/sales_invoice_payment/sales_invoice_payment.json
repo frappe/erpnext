@@ -12,7 +12,8 @@
   "account",
   "type",
   "base_amount",
-  "clearance_date"
+  "clearance_date",
+  "credit_note"
  ],
  "fields": [
   {
@@ -75,11 +76,19 @@
    "hidden": 1,
    "label": "Default",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.type == 'Credit Note'",
+   "fieldname": "credit_note",
+   "fieldtype": "Link",
+   "label": "Credit Note",
+   "options": "POS Invoice"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-08-03 12:45:39.986598",
+ "migration_hash": "29b4b3e7e735c353a41171740d05cd27",
+ "modified": "2021-11-16 17:19:21.524113",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Payment",
