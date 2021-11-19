@@ -161,6 +161,31 @@ class PurchaseInvoice(BuyingController):
 		if (self.currency == default_currency and flt(self.conversion_rate) != 1.00) or not self.conversion_rate or (self.currency != default_currency and flt(self.conversion_rate) == 1.00):
 			throw(_("Conversion rate cannot be 0 or 1"))
 
+	@frappe.whitelist()
+	def calculate_taxes(self):
+		if self.supplier:
+			sup = frappe.get_doc("Supplier",self.supplier)
+			if not sup.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						if i.item_code:
+							doc=frappe.get_doc("Item",i.item_code)
+							for j in doc.taxes:
+								if self.tax_category==j.tax_category:
+									if j.item_tax_template:
+										i.item_tax_template=j.item_tax_template						
+			if sup.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						if i.item_code:
+							doc=frappe.get_doc("Item",i.item_code)
+							for j in doc.taxes:
+								if sup.tax_category==j.tax_category:
+									if j.item_tax_template:
+										i.item_tax_template=j.item_tax_template
+				self.tax_category=sup.tax_category
+			return self.tax_category
+
 	def validate_credit_to_acc(self):
 		if not self.credit_to:
 			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
