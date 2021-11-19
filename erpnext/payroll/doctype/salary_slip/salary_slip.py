@@ -254,7 +254,7 @@ class SalarySlip(TransactionBase):
 
 		if self.salary_slip_based_on_timesheet:
 			self.salary_structure = self._salary_structure_doc.name
-			self.hour_rate = self._salary_structure_doc.hour_rate
+			self.hour_rate = self.get_hour_rate()
 			self.base_hour_rate = flt(self.hour_rate) * flt(self.exchange_rate)
 			self.total_working_hours = sum([d.working_hours or 0.0 for d in self.timesheets]) or 0.0
 			wages_amount = self.hour_rate * self.total_working_hours
@@ -262,6 +262,29 @@ class SalarySlip(TransactionBase):
 			self.add_earning_for_hourly_wages(self, self._salary_structure_doc.salary_component, wages_amount)
 
 		make_salary_slip(self._salary_structure_doc.name, self)
+
+	def get_hour_rate(self):
+		# I duplicated this from get_data_for_eval. Maybe there is a better way to organize this code.
+		employee = frappe.get_doc("Employee", self.employee).as_dict()
+
+		start_date = getdate(self.start_date)
+		date_to_validate = (
+			employee.date_of_joining
+			if employee.date_of_joining > start_date
+			else start_date
+		)
+		hour_rate = frappe.get_value(
+			"Salary Structure Assignment",
+			{
+				"employee": self.employee,
+				"salary_structure": self.salary_structure,
+				"from_date": ("<=", date_to_validate),
+				"docstatus": 1,
+			},
+			"hour_rate",
+			order_by="from_date desc"
+		)
+		return hour_rate or self._salary_structure_doc.hour_rate
 
 	def get_working_days_details(self, joining_date=None, relieving_date=None, lwp=None, for_preview=0):
 		payroll_based_on = frappe.db.get_value("Payroll Settings", None, "payroll_based_on")
@@ -518,6 +541,8 @@ class SalarySlip(TransactionBase):
 			if amount and struct_row.statistical_component == 0:
 				self.update_component_row(struct_row, amount, component_type)
 
+
+
 	def get_data_for_eval(self):
 		'''Returns data for evaluating formula'''
 		data = frappe._dict()
@@ -554,6 +579,7 @@ class SalarySlip(TransactionBase):
 
 		data.update(salary_structure_assignment)
 		data.update(employee)
+		self.hour_rate = self.get_hour_rate()
 		data.update(self.as_dict())
 
 		# set values for components
