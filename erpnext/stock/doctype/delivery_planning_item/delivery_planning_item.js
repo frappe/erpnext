@@ -2,16 +2,26 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Delivery Planning Item', {
-	
-	// refresh : function(frm){
-	// 	if(frm.doc.docstatus != 1){
 
-	// 		frm.call({
-	// 					doc:frm.doc,
-	// 					method: 'update_stock',	
-	// 				});
-	// 	}
-	// },
+	setup : function(frm){
+		if (frm.doc.customer){
+			frm.doc.full_dname = frm.doc.customer+ " " + frm.doc.item_name + " " + frm.doc.qty_to_deliver + " " + frm.doc.uom
+		}
+	}, 
+	
+	refresh : function(frm){
+		if(frm.doc.docstatus != 1){
+			frm.call({
+						doc:frm.doc,
+						method: 'update_stock',
+						callback: function(r){
+							if(r.message){
+								console.log("Item stock Updated")
+							}
+						}
+					});
+		}
+	},
 	
 
 	sorce_warehouse: function(frm){
@@ -32,19 +42,8 @@ frappe.ui.form.on('Delivery Planning Item', {
 		}
 	},
 
-	// before_load: function(frm){
-
-	// 	if(frm.doc.docstatus != 1){
-
-	// 		frm.call({
-	// 					doc:frm.doc,
-	// 					method: 'update_stock',
-						
-	// 				});
-	// 	}
-	// },
 	validate : function(frm) {
-		if (frm.doc.customer){
+		if (frm.doc.customer && docstatus !=1 ){
 			frm.doc.full_dname = frm.doc.customer+ " " + frm.doc.item_name + " " + frm.doc.qty_to_deliver + " " + frm.doc.uom
 		}
 	},
@@ -63,26 +62,19 @@ frappe.ui.form.on('Delivery Planning Item', {
 		}
 	},
 
-	// pending_qty: function(frm){
-	// 	frm.set_value({
-			
-	// 		weight_to_deliver: frm.doc.pending_qty * frm.doc.weight_per_unit 
-	// 	})
-	// },
-
 	onload: function(frm){
 
-		if(frm.doc.docstatus != 1){
-					frm.call({
-								doc:frm.doc,
-								method: 'update_stock',
-								callback: function(r){
-									if(r.message){
-										console.log("Item stock Updated")
-									}
-								}
-							});
-				}
+		// if(frm.doc.docstatus != 1){
+		// 			frm.call({
+		// 						doc:frm.doc,
+		// 						method: 'update_stock',
+		// 						callback: function(r){
+		// 							if(r.message){
+		// 								console.log("Item stock Updated")
+		// 							}
+		// 						}
+		// 					});
+		// 		}
 
 		cur_frm.set_query("transporter", function() {
 			return {

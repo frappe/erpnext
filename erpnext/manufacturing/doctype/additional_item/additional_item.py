@@ -3,8 +3,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+import json
 import frappe
 from frappe.model.document import Document
+from frappe.utils.data import nowdate
 
 class AdditionalItem(Document):
 	def after_save(self):
@@ -95,6 +97,7 @@ class AdditionalItem(Document):
 					'amount': amt
 
 				})
+				doc.flags.ignore_validate_update_after_submit = True
 				doc.save(ignore_permissions= True)
 
 @frappe.whitelist()
