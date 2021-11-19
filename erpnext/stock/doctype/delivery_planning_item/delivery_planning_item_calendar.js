@@ -6,18 +6,18 @@ frappe.views.calendar["Delivery Planning Item"] = {
 		"start": "planned_date",
         "end": "planned_date",
 		"id": "name",
-		"title": "full_dname"
+		"title": "full_dname",		
 	},
+	filters: [
+	{
+		"fieldtype": "Select",
+		"fieldname": "docstatus",
+		"options": "Submitted\nDraft\nCancelled",
+		"label": __("Status")
+	},],
 
 	gantt: true,
-	filters: [
-		{
-			"fieldtype": "Select",
-			"fieldname": "docstatus",
-			"options": 1,
-			"label": __("Document Status")
-			// "docstatus":
-		}
-	],
-	get_events_method: "frappe.desk.calendar.get_events"
+	
+	get_events_method: "frappe.desk.calendar.get_events",
+
 }

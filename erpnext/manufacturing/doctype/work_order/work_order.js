@@ -129,6 +129,11 @@ frappe.ui.form.on("Work Order", {
 			});
 			erpnext.work_order.set_default_warehouse(frm);
 		}
+		// code to reload doc 
+		var prev_route = frappe.get_prev_route();
+		if (prev_route[1] == "Additional Item"){
+			location.reload();
+		}
 	},
 	company: function(frm){
 		frappe.call({
@@ -152,6 +157,12 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	refresh: function(frm) {
+
+		// code to reload doc
+		var prev_route = frappe.get_prev_route();
+		if (prev_route[1] == "Additional Item"){
+			location.reload();
+		}
 		frm.set_query("bom_no", function() {
 			return {
 				filters: {
