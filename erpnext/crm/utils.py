@@ -39,7 +39,7 @@ def add_link_in_communication(doctype, docname, doc):
 			"link_name": docname,
 			"parent": ("not in", communications)
 		}, pluck="parent")
-	
+
 	for communication in communications + communication_links:
 		communication_doc = frappe.get_doc("Communication", communication)
 		communication_doc.add_link(doc.doctype, doc.name, autosave=True)

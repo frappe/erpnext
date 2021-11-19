@@ -39,7 +39,7 @@ class Quotation(SellingController):
 		if self.opportunity:
 			copy_comments("Opportunity", self.opportunity, self)
 			add_link_in_communication("Opportunity", self.opportunity, self)
-		
+
 		elif self.quotation_to == "Lead" and self.party_name:
 			copy_comments("Lead", self.party_name, self)
 			add_link_in_communication("Lead", self.party_name, self)

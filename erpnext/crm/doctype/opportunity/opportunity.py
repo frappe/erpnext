@@ -10,7 +10,7 @@ from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, cstr, flt, get_fullname
 
-rom erpnext.crm.utils import add_link_in_communication, copy_comments
+from erpnext.crm.utils import add_link_in_communication, copy_comments
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
 
