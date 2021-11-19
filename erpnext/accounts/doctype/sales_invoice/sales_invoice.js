@@ -10,10 +10,86 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.setup_posting_date_time_check();
 		this._super(doc);
 	},
-	company: function () {
+
+	company: function() {
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+		let me = this;
+		if (this.frm.doc.company) {
+			frappe.call({
+				method:
+					"erpnext.accounts.party.get_party_account",
+				args: {
+					party_type: 'Customer',
+					party: this.frm.doc.customer,
+					company: this.frm.doc.company
+				},
+				callback: (response) => {
+					if (response) me.frm.set_value("debit_to", response.message);
+				},
+			});
+		}
+
+			frappe.db.get_value('Company', this.frm.doc.company, 'default_receivable_account', (r) => {
+				me.frm.set_value('debit_to', r.default_receivable_account);
+			});
 	},
-	onload: function () {
+	tax_category:function(frm){
+		frm.refresh_field("items")
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	shipping_address:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	supplier_address:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	customer_address:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	company_address:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	onload: function() {
 		var me = this;
 		this._super();
 

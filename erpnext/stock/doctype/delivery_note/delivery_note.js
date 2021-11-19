@@ -99,6 +99,66 @@ frappe.ui.form.on("Delivery Note", {
 		erpnext.stock.delivery_note.set_print_hide(frm.doc);
 	},
 
+	tax_category:function(frm){
+		frm.refresh_field("items")
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	shipping_address:function(frm){
+		frm.refresh_field("items")
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	supplier_address:function(frm){
+		frm.refresh_field("items")
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	customer_address:function(frm){
+		frm.refresh_field("items")
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	company_address:function(frm){
+		frm.refresh_field("items")
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
 	refresh: function(frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.is_return === 1 && frm.doc.per_billed !== 100) {
 			frm.add_custom_button(__('Credit Note'), function() {

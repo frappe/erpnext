@@ -138,8 +138,8 @@ def get_doc_details(invoice):
 		invoice_date=invoice_date
 	))
 
-def validate_address_fields(address, is_shipping_address):
-	if ((not address.gstin and not is_shipping_address)
+def validate_address_fields(address, skip_gstin_validation):
+	if ((not address.gstin and not skip_gstin_validation)
 		or not address.city
 		or not address.pincode
 		or not address.address_title
@@ -151,10 +151,10 @@ def validate_address_fields(address, is_shipping_address):
 			title=_('Missing Address Fields')
 		)
 
-def get_party_details(address_name, is_shipping_address=False):
+def get_party_details(address_name, skip_gstin_validation=False):
 	addr = frappe.get_doc('Address', address_name)
 
-	validate_address_fields(addr, is_shipping_address)
+	validate_address_fields(addr, skip_gstin_validation)
 
 	if addr.gst_state_number == 97:
 		# according to einvoice standard
@@ -443,7 +443,11 @@ def make_einvoice(invoice):
 		if invoice.gst_category == 'Overseas':
 			shipping_details = get_overseas_address_details(invoice.shipping_address_name)
 		else:
-			shipping_details = get_party_details(invoice.shipping_address_name, is_shipping_address=True)
+			shipping_details = get_party_details(invoice.shipping_address_name, skip_gstin_validation=True)
+
+	dispatch_details = frappe._dict({})
+	if invoice.dispatch_address_name:
+		dispatch_details = get_party_details(invoice.dispatch_address_name, skip_gstin_validation=True)
 
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
@@ -455,7 +459,7 @@ def make_einvoice(invoice):
 		eway_bill_details = get_eway_bill_details(invoice)
 
 	# not yet implemented
-	dispatch_details = period_details = export_details = frappe._dict({})
+	period_details = export_details = frappe._dict({})
 
 	einvoice = schema.format(
 		transaction_details=transaction_details, doc_details=doc_details, dispatch_details=dispatch_details,

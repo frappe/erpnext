@@ -1,6 +1,3 @@
-// Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
-// For license information, please see license.txt
-
 frappe.ui.form.on("Work Order", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
@@ -132,6 +129,11 @@ frappe.ui.form.on("Work Order", {
 			});
 			erpnext.work_order.set_default_warehouse(frm);
 		}
+		// code to reload doc 
+		var prev_route = frappe.get_prev_route();
+		if (prev_route[1] == "Additional Item"){
+			location.reload();
+		}
 	},
 	company: function(frm){
 		frappe.call({
@@ -155,6 +157,12 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	refresh: function(frm) {
+
+		// code to reload doc
+		var prev_route = frappe.get_prev_route();
+		if (prev_route[1] == "Additional Item"){
+			location.reload();
+		}
 		frm.set_query("bom_no", function() {
 			return {
 				filters: {
@@ -200,16 +208,26 @@ frappe.ui.form.on("Work Order", {
 		if (frm.doc.docstatus === 1
 			&& frm.doc.operations && frm.doc.operations.length) {
 
-			const not_completed = frm.doc.operations.filter(d => {
-				if(d.status != 'Completed') {
-					return true;
-				}
-			});
+		if (frm.doc.status != "Closed") {
+			if (frm.doc.docstatus===1) {
+				frm.trigger('show_progress_for_items');
+				frm.trigger('show_progress_for_operations');
+			}
 
-			if(not_completed && not_completed.length) {
-				frm.add_custom_button(__('Create Job Card'), () => {
-					frm.trigger("make_job_card");
-				}).addClass('btn-primary');
+			if (frm.doc.docstatus === 1
+				&& frm.doc.operations && frm.doc.operations.length) {
+
+				const not_completed = frm.doc.operations.filter(d => {
+					if (d.status != 'Completed') {
+						return true;
+					}
+				});
+
+				if (not_completed && not_completed.length) {
+					frm.add_custom_button(__('Create Job Card'), () => {
+						frm.trigger("make_job_card");
+					}).addClass('btn-primary');
+				}
 			}
 		}
 
@@ -248,7 +266,7 @@ frappe.ui.form.on("Work Order", {
 
         // }
 
-	},
+	}},
 
 	make_job_card: function(frm) {
 		let qty = 0;
@@ -550,7 +568,7 @@ frappe.ui.form.on("Work Order", {
 	// 		}
 	// 	});
 	// }
-
+	
 });
 
 frappe.ui.form.on("Work Order Item", {
@@ -639,14 +657,22 @@ frappe.ui.form.on("Work Order Operation", {
 erpnext.work_order = {
 	set_custom_buttons: function(frm) {
 		var doc = frm.doc;
-		if (doc.docstatus === 1) {
+		if (doc.docstatus === 1 && doc.status != "Closed") {
+			frm.add_custom_button(__('Close'), function() {
+				frappe.confirm(__("Once the Work Order is Closed. It can't be resumed."),
+					() => {
+						erpnext.work_order.change_work_order_status(frm, "Closed");
+					}
+				);
+			}, __("Status"));
+
 			if (doc.status != 'Stopped' && doc.status != 'Completed') {
 				frm.add_custom_button(__('Stop'), function() {
-					erpnext.work_order.stop_work_order(frm, "Stopped");
+					erpnext.work_order.change_work_order_status(frm, "Stopped");
 				}, __("Status"));
 			} else if (doc.status == 'Stopped') {
 				frm.add_custom_button(__('Re-open'), function() {
-					erpnext.work_order.stop_work_order(frm, "Resumed");
+					erpnext.work_order.change_work_order_status(frm, "Resumed");
 				}, __("Status"));
 			}
 			const show_start_btn = (frm.doc.skip_transfer
@@ -876,9 +902,10 @@ erpnext.work_order = {
 		});
 	},
 
-	stop_work_order: function(frm, status) {
+	change_work_order_status: function(frm, status) {
+		let method_name = status=="Closed" ? "close_work_order" : "stop_unstop";
 		frappe.call({
-			method: "erpnext.manufacturing.doctype.work_order.work_order.stop_unstop",
+			method: `erpnext.manufacturing.doctype.work_order.work_order.${method_name}`,
 			freeze: true,
 			freeze_message: __("Updating Work Order status"),
 			args: {

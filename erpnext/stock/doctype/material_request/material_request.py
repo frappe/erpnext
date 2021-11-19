@@ -7,7 +7,7 @@
 from __future__ import unicode_literals
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 import json
-
+import math
 import frappe
 from frappe import _, msgprint
 from frappe.model.mapper import get_mapped_doc
@@ -117,10 +117,8 @@ class MaterialRequest(BuyingController):
 				d['valuation_rate'] = bin_data.get('valuation_rate')
 
 				for r in res.get('qty'):
-					print('r is: ',r)
 					qty_sum +=r
 				if(item_detail.get('staging_multiple') > 0):
-					#round_up_qty=(round(qty/self.staging_multiple),up)*self.staging_multiple
 					round_up_qty = (math.ceil(qty_sum/item_detail.get('staging_multiple'))) * item_detail.get('staging_multiple')
 					d['qty'] = round_up_qty
 				else:
@@ -723,31 +721,27 @@ def make_material_request(source_name, target_doc=None, ignore_permissions=False
 		qty = flt(itm.get('required_qty') - itm.get('transferred_qty'),float_precision)
 		(qty)
 		is_staging_enabled = cint(frappe.db.get_singles_value('Manufacturing Settings', 'enable_staging'))
+		
 		if is_staging_enabled:
 			staging_warhouse = frappe.get_value("Staging Details",{'company':company},'staging_material_request_warehouse')
 			if staging_warhouse:
 				projected_qty = frappe.get_value('Bin', {'warehouse':staging_warhouse,'item_code':itm.item_code},'projected_qty')
-				print("--------projected_qty--", projected_qty)
-				# ujjwal  Code
-				# if projected_qty:
-				# 	qty = flt(itm.get('transferred_qty')) - flt(itm.get("consumed_qty")) - projected_qty
-				# 	item=frappe.get_doc("Item",itm.get('item_code'))
-				# 	if item.allowed_in_wo_staging=="Yes" and item.staging_multiple > 0:
-				# 		sqty=math.ceil(qty/item.staging_multiple)
-				# 		final_qty=item.staging_multiple*sqty
-				# 		if final_qty > 0:
-				# 			target.qty = final_qty
 				if projected_qty:
+					print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.")
+					print(projected_qty,qty)
 					item = frappe.get_doc("Item", itm.get('item_code'))
-					if item.allowed_in_wo_staging == "Yes" and item.staging_multiple > 0 \
-						and projected_qty < qty :
-						result_qty = (qty - projected_qty)/item.staging_multiple
-						print("--------",qty,projected_qty,item.staging_multiple)
-						if result_qty > 0:
-							qty = result_qty
-							target.qty = result_qty
+					if projected_qty < 0:
+						target.qty = 0
 					elif item.allowed_in_wo_staging == "Yes" and item.staging_multiple > 0 \
-						and projected_qty >  qty :
+						and projected_qty < qty:
+						result_qty = math.ceil((qty - projected_qty)/item.staging_multiple)
+						if result_qty > 0:
+							#qty = result_qty
+							target.qty = result_qty
+						else:
+							target.qty = 0
+					elif item.allowed_in_wo_staging == "Yes" and item.staging_multiple > 0 \
+						and projected_qty >=  qty :
 						qty = 0
 						target.qty = 0
 					elif item.allowed_in_wo_staging == "Yes" and not item.staging_multiple > 0 \
@@ -759,9 +753,11 @@ def make_material_request(source_name, target_doc=None, ignore_permissions=False
 						and projected_qty > qty :
 						qty = 0
 						target.qty = 0
-		if qty < 0:
-			qty = 0
-		target.qty = qty
+
+		else:
+			if qty < 0:
+				qty = 0
+			target.qty = qty
 		uom = frappe.get_value("Item",{'item_code':itm.get('item_code')},'stock_uom')
 		target.uom = uom
 
@@ -772,12 +768,10 @@ def make_material_request(source_name, target_doc=None, ignore_permissions=False
 		"Work Order Item": {
 			"doctype": "Material Request Item",
 			"field_map": {
-				# "name": "so_detail",
 				"parent": "work_order",
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: frappe.db.exists("Item",{'name':doc.item_code,"allowed_in_wo_staging":"Yes"})
-			#"condition": non_zero_qty,
 		},
 
 	}, target_doc, ignore_permissions=ignore_permissions)

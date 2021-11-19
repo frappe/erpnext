@@ -306,7 +306,9 @@ erpnext.patches.v13_0.add_custom_field_for_south_africa #2
 erpnext.patches.v13_0.rename_discharge_ordered_date_in_ip_record
 erpnext.patches.v13_0.migrate_stripe_api
 erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
-erpnext.patches.v13_0.custom_fields_for_taxjar_integration
+execute:frappe.reload_doc("erpnext_integrations", "doctype", "TaxJar Settings")
+execute:frappe.reload_doc("erpnext_integrations", "doctype", "Product Tax Category")
+erpnext.patches.v13_0.custom_fields_for_taxjar_integration          #08-11-2021
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
 erpnext.patches.v13_0.validate_options_for_data_field
 erpnext.patches.v13_0.create_website_items #30-09-2021
@@ -327,3 +329,6 @@ erpnext.patches.v13_0.trim_sales_invoice_custom_field_length
 erpnext.patches.v13_0.enable_scheduler_job_for_item_reposting
 erpnext.patches.v13_0.requeue_failed_reposts
 erpnext.patches.v13_0.fetch_thumbnail_in_website_items
+erpnext.patches.v12_0.update_production_plan_status
+erpnext.patches.v13_0.update_category_in_ltds_certificate
+erpnext.patches.v13_0.create_ksa_vat_custom_fields

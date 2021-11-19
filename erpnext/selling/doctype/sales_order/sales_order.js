@@ -92,6 +92,7 @@ frappe.ui.form.on("Sales Order", {
 				}
 			}
 		})
+		frm.ignore_doctypes_on_cancel_all = ['Purchase Order'];
 	},
 	before_save:function(frm){
 		frm.call({
@@ -111,6 +112,61 @@ frappe.ui.form.on("Sales Order", {
 		});
 		refresh_field("items");
 	},
+	tax_category:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	shipping_address:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	supplier_address:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	customer_address:function(frm){
+		frm.call({
+			method:"calcualte_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.refresh_field("items")
+			}
+		});
+	},
+	// company_address:function(frm){
+	// 	frm.call({
+	// 		method:"calcualte_taxes",
+	// 		doc:frm.doc,
+	// 		callback: function(r)
+	// 		{
+				
+	// 			frm.refresh_field("items")
+	// 		}
+	// 	});
+	// },
 	customer: function(frm,cdt,cdn) {
 	
 		frm.call({
