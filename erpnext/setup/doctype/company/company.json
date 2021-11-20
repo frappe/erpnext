@@ -749,15 +749,10 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
-<<<<<<< HEAD
  "modified": "2021-05-12 16:51:08.187233",
-=======
- "modified": "2021-10-04 12:09:25.833133",
->>>>>>> 64c1347d1e (refactor!: remove abbreviation renaming (#27766))
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
- "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_company",
  "owner": "Administrator",
  "permissions": [
