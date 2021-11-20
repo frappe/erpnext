@@ -69,6 +69,9 @@ class SalesInvoice(SellingController):
 			'overflow_type': 'billing'
 		}]
 
+	def before_save(self):
+		self.get_commision()
+
 	def set_indicator(self):
 		"""Set indicator for portal"""
 		if self.outstanding_amount < 0:
@@ -277,13 +280,13 @@ class SalesInvoice(SellingController):
 
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_submit")
-	
+
 	@frappe.whitelist()
 	def get_commision(self):
 		tot=[]
 		if self.sales_partner:
 			doc=frappe.get_doc("Sales Partner",self.sales_partner)
-			if self.commission_based_on_target_lines==1: 
+			if self.commission_based_on_target_lines==1:
 				for i in self.items:
 					for j in doc.item_target_details:
 						if i.item_code==j.item_code:
@@ -291,7 +294,7 @@ class SalesInvoice(SellingController):
 								if j.commision_formula:
 									data=eval(j.commision_formula)
 									tot.append(data)
-									self.total_commission=sum(tot)			
+									self.total_commission=sum(tot)
 
 
 		self.process_common_party_accounting()
@@ -308,7 +311,7 @@ class SalesInvoice(SellingController):
 							for j in doc.taxes:
 								if self.tax_category==j.tax_category:
 									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template						
+										i.item_tax_template=j.item_tax_template
 			if cus.tax_category:
 				if self.tax_category:
 					for i in self.items:

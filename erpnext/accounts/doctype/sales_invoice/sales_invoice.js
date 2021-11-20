@@ -33,7 +33,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				me.frm.set_value('debit_to', r.default_receivable_account);
 			});
 	},
-	
+
 	onload: function() {
 		var me = this;
 		this._super();
@@ -725,17 +725,17 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 		};
 	},
-	before_save:function(frm){
-		frm.call({
-			method:"get_commision",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-				frm.refresh_field("total_commission")
-			}
-		});
-	 },
+//	before_save:function(frm){
+//		frm.call({
+//			method:"get_commision",
+//			doc:frm.doc,
+//			callback: function(r)
+//			{
+//
+//				frm.refresh_field("total_commission")
+//			}
+//		});
+//	 },
 	// When multiple companies are set up. in case company name is changed set default company address
 	company: function (frm) {
 		if (frm.doc.company) {
@@ -760,7 +760,7 @@ frappe.ui.form.on('Sales Invoice', {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.refresh_field("items")
 			}
 		});
@@ -771,7 +771,7 @@ frappe.ui.form.on('Sales Invoice', {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -785,7 +785,7 @@ frappe.ui.form.on('Sales Invoice', {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -799,7 +799,7 @@ frappe.ui.form.on('Sales Invoice', {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -813,7 +813,7 @@ frappe.ui.form.on('Sales Invoice', {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -827,7 +827,7 @@ frappe.ui.form.on('Sales Invoice', {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
 				frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -841,7 +841,7 @@ frappe.ui.form.on('Sales Invoice', {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
 				frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -855,7 +855,7 @@ frappe.ui.form.on('Sales Invoice', {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
 				frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);

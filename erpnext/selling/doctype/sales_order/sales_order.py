@@ -38,6 +38,9 @@ class SalesOrder(SellingController):
 	def __init__(self, *args, **kwargs):
 		super(SalesOrder, self).__init__(*args, **kwargs)
 
+	def before_save(self):
+		self.get_commision()
+
 	def validate(self):
 		super(SalesOrder, self).validate()
 		self.validate_delivery_date()
@@ -227,7 +230,7 @@ class SalesOrder(SellingController):
 							for j in doc.taxes:
 								if self.tax_category==j.tax_category:
 									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template						
+										i.item_tax_template=j.item_tax_template
 			if cus.tax_category:
 				if self.tax_category:
 					for i in self.items:
@@ -407,7 +410,7 @@ class SalesOrder(SellingController):
 		tot=[]
 		if self.sales_partner:
 			doc=frappe.get_doc("Sales Partner",self.sales_partner)
-			if self.commission_based_on_target_lines==1: 
+			if self.commission_based_on_target_lines==1:
 				for i in self.items:
 					for j in doc.item_target_details:
 						if i.item_code==j.item_code:
@@ -415,7 +418,7 @@ class SalesOrder(SellingController):
 								if j.commision_formula:
 									data=eval(j.commision_formula)
 									tot.append(data)
-									self.total_commission=sum(tot)			
+									self.total_commission=sum(tot)
 
 	@frappe.whitelist()
 	def get_work_order_items(self, for_raw_material_request=0):

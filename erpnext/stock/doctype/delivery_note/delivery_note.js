@@ -83,24 +83,24 @@ frappe.ui.form.on("Delivery Note", {
 		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
 	},
 
-	before_save:function(frm){
-		frm.call({
-			method:"get_commision",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-				frm.refresh_field("total_commission")
-			}
-		});
-	},
+//	before_save:function(frm){
+//		frm.call({
+//			method:"get_commision",
+//			doc:frm.doc,
+//			callback: function(r)
+//			{
+//
+//				frm.refresh_field("total_commission")
+//			}
+//		});
+//	},
 	tax_category:function(frm){
 		frm.call({
 			method:"calculate_taxes",
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.refresh_field("items")
 			}
 		});
@@ -111,7 +111,7 @@ frappe.ui.form.on("Delivery Note", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -125,7 +125,7 @@ frappe.ui.form.on("Delivery Note", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -139,7 +139,7 @@ frappe.ui.form.on("Delivery Note", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -153,7 +153,7 @@ frappe.ui.form.on("Delivery Note", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -167,7 +167,7 @@ frappe.ui.form.on("Delivery Note", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
 				frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -181,7 +181,7 @@ frappe.ui.form.on("Delivery Note", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
 				frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -195,7 +195,7 @@ frappe.ui.form.on("Delivery Note", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
 				frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -235,7 +235,7 @@ frappe.ui.form.on("Delivery Note", {
 
 
 	},
-	
+
 });
 
 frappe.ui.form.on("Delivery Note Item", {
