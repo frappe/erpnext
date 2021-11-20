@@ -78,6 +78,7 @@ frappe.treeview_settings["Account"] = {
 				const format = (value, currency) => format_currency(Math.abs(value), currency);
 
 				if (account.balance!==undefined) {
+					node.parent && node.parent.find('.balance-area').remove();
 					$('<span class="balance-area pull-right">'
 						+ (account.balance_in_account_currency ?
 							(format(account.balance_in_account_currency, account.account_currency) + " / ") : "")
