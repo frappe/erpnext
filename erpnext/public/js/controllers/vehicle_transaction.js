@@ -26,6 +26,9 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 		if (this.frm.fields_dict.customer) {
 			this.frm.set_query('customer', erpnext.queries.customer);
 		}
+		if (this.frm.fields_dict.financer) {
+			this.frm.set_query('financer', erpnext.queries.customer);
+		}
 		if (this.frm.fields_dict.vehicle_owner) {
 			this.frm.set_query('vehicle_owner', erpnext.queries.customer);
 		}
@@ -221,7 +224,9 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 					customer: me.frm.doc.customer,
 					supplier: me.frm.doc.supplier,
 					vehicle_booking_order: doc.vehicle_booking_order,
-					posting_date: me.frm.doc.posting_date || me.frm.doc.transaction_date
+					vehicle: doc.vehicle,
+					posting_date: me.frm.doc.posting_date || me.frm.doc.transaction_date,
+					issued_for: me.frm.doc.issued_for,
 				}
 			},
 			callback: function (r) {

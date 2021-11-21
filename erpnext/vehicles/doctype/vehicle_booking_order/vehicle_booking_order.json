@@ -22,12 +22,17 @@
   "financer",
   "financer_name",
   "finance_type",
-  "transfer_customer",
-  "transfer_customer_name",
   "column_break_9",
   "amended_from",
   "transaction_date",
   "booking_number",
+  "transfer_details_section",
+  "transfer_customer",
+  "transfer_lessee_name",
+  "transfer_customer_name",
+  "column_break_24",
+  "transfer_financer",
+  "transfer_financer_name",
   "customer_details_section",
   "customer_category",
   "territory",
@@ -1107,12 +1112,46 @@
    "no_copy": 1,
    "options": "\nRegistration",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "transfer_details_section",
+   "fieldtype": "Section Break",
+   "label": "Transfer Details"
+  },
+  {
+   "depends_on": "eval:doc.transfer_financer && doc.transfer_lessee_name != doc.transfer_customer",
+   "fieldname": "transfer_lessee_name",
+   "fieldtype": "Data",
+   "label": "Transfer Lessee Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transfer_financer",
+   "fieldtype": "Link",
+   "label": "Transfer Financer",
+   "no_copy": 1,
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.transfer_financer && doc.transfer_financer_name != doc.transfer_financer",
+   "fieldname": "transfer_financer_name",
+   "fieldtype": "Data",
+   "label": "Transfer Financer Name",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-17 12:01:49.143485",
+ "modified": "2021-11-20 10:48:47.787119",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",

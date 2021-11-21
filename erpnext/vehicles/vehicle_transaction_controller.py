@@ -541,15 +541,16 @@ def get_customer_details(args):
 
 	# Customer Name
 	out.customer_name = customer.customer_name
-	if financer:
-		out.customer_name = "{0} HPA {1}".format(out.customer_name, financer.customer_name)
-
 	out.financer_name = financer.customer_name
 	out.lessee_name = customer.customer_name if financer else None
 	out.vehicle_owner_name = vehicle_owner.customer_name
 	out.registration_customer_name = registration_customer.customer_name
 
 	customer_details = registration_customer or customer
+
+	if financer:
+		hpa_customer_fieldname = "registration_customer_name" if registration_customer else "customer_name"
+		out[hpa_customer_fieldname] = "{0} HPA {1}".format(customer_details.customer_name, financer.customer_name)
 
 	# Tax IDs
 	out.tax_id = customer_details.tax_id
@@ -592,6 +593,7 @@ def get_vehicle_booking_order_details(args):
 				'financer', 'finance_type', 'financer_name',
 				'supplier', 'supplier_name',
 				'transfer_customer', 'transfer_customer_name',
+				'transfer_financer', 'transfer_financer_name', 'transfer_lessee_name',
 				'tax_id', 'tax_cnic', 'tax_strn',
 				'contact_person', 'financer_contact_person',
 				'contact_email', 'contact_mobile', 'contact_phone',
@@ -602,9 +604,38 @@ def get_vehicle_booking_order_details(args):
 
 	if booking_details:
 		is_leased = booking_details.financer and booking_details.finance_type == "Leased"
+		is_financed = booking_details.financer and booking_details.finance_type == "Financed"
 
+		# Set Customer, Financer, Address and Contact
 		if args.doctype == "Vehicle Transfer Letter":
+			registration_details = get_vehicle_registration_order_details(args, get_customer=True)
+			if registration_details and registration_details.customer:
+				out.customer = registration_details.customer
+				out.financer = registration_details.financer
+
 			out.vehicle_owner = booking_details.financer or booking_details.customer
+
+		elif args.doctype == "Vehicle Registration Order":
+			if booking_details.transfer_customer:
+				out.customer = booking_details.transfer_customer
+				out.registration_customer = booking_details.transfer_customer
+				out.financer = booking_details.transfer_financer
+			else:
+				out.customer = booking_details.customer
+				out.registration_customer = booking_details.customer
+				out.financer = booking_details.financer if is_financed else None
+
+		elif args.doctype == "Vehicle Registration Receipt":
+			registration_details = get_vehicle_registration_order_details(args, get_customer=True)
+			if registration_details and registration_details.customer:
+				out.customer = registration_details.customer
+				out.financer = registration_details.financer
+			elif registration_details.transfer_customer:
+				out.customer = booking_details.transfer_customer
+				out.financer = booking_details.transfer_financer
+			else:
+				out.customer = booking_details.customer
+				out.financer = booking_details.financer if is_financed else None
 
 		elif args.doctype == "Vehicle Invoice Delivery":
 			if booking_details.transfer_customer:
@@ -617,16 +648,16 @@ def get_vehicle_booking_order_details(args):
 		else:
 			if booking_details.transfer_customer:
 				out.customer = booking_details.transfer_customer
+				out.financer = booking_details.transfer_financer
 			else:
 				out.customer = booking_details.customer
+				out.financer = booking_details.financer if is_financed else None
 				out.customer_address = booking_details.customer_address
 				out.contact_person = booking_details.contact_person
 
+		# Set Vehicle Owner
 		if args.doctype != "Vehicle Transfer Letter":
 			out.vehicle_owner = booking_details.financer
-
-		if args.doctype == "Vehicle Registration Order":
-			out.registration_customer = booking_details.customer
 
 		out.item_code = booking_details.item_code
 		out.vehicle = booking_details.vehicle
@@ -709,13 +740,7 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, warn_reserved=True
 		out.vehicle_invoice = get_vehicle_invoice(args.vehicle)
 		out.update(get_vehicle_invoice_details(out.vehicle_invoice))
 
-	get_registration = args.doctype in ['Vehicle Registration Receipt', 'Vehicle Transfer Letter', 'Vehicle Invoice Delivery']\
-		or (args.doctype == 'Vehicle Invoice Movement' and args.issued_for == "Registration")
-	if get_registration:
-		from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order,\
-			get_vehicle_registration_order_details
-		out.vehicle_registration_order = get_vehicle_registration_order(vehicle=args.vehicle)
-		out.update(get_vehicle_registration_order_details(out.vehicle_registration_order))
+	out.update(get_vehicle_registration_order_details(args))
 
 	if args.doctype == "Vehicle Invoice Delivery":
 		from erpnext.vehicles.doctype.vehicle_invoice_delivery.vehicle_invoice_delivery import get_default_documents
@@ -723,6 +748,22 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, warn_reserved=True
 
 	if warn_reserved and args.doctype == "Vehicle Delivery":
 		warn_vehicle_reserved(args.vehicle, args.customer)
+
+	return out
+
+
+def get_vehicle_registration_order_details(args, get_customer=False):
+	from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order, \
+		get_vehicle_registration_order_details
+
+	out = frappe._dict()
+
+	get_registration = args.doctype in ['Vehicle Registration Receipt', 'Vehicle Transfer Letter', 'Vehicle Invoice Delivery']\
+		or (args.doctype == 'Vehicle Invoice Movement' and args.issued_for == "Registration")
+	if get_registration:
+		out.vehicle_registration_order = get_vehicle_registration_order(vehicle=args.vehicle,
+			vehicle_booking_order=args.vehicle_booking_order)
+		out.update(get_vehicle_registration_order_details(out.vehicle_registration_order, get_customer=get_customer))
 
 	return out
 

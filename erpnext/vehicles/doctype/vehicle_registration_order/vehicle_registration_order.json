@@ -14,11 +14,15 @@
   "customer",
   "customer_name",
   "column_break_8",
+  "transaction_date",
+  "amended_from",
+  "registration_name_section",
   "registration_customer",
+  "lessee_name",
   "registration_customer_name",
   "column_break_11",
-  "amended_from",
-  "transaction_date",
+  "financer",
+  "financer_name",
   "booking_customer_name",
   "address_and_contact_section",
   "customer_address",
@@ -159,7 +163,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.vehicle_booking_order && doc.booking_customer_name != doc.customer_name",
+   "depends_on": "eval:doc.vehicle_booking_order && doc.booking_customer_name != doc.registration_customer_name",
    "fetch_from": "vehicle_booking_order.customer_name",
    "fieldname": "booking_customer_name",
    "fieldtype": "Data",
@@ -838,11 +842,10 @@
   {
    "allow_on_submit": 1,
    "depends_on": "eval:doc.registration_customer && doc.registration_customer_name != doc.registration_customer",
-   "fetch_from": "transfer_customer.customer_name",
    "fetch_if_empty": 1,
    "fieldname": "registration_customer_name",
    "fieldtype": "Data",
-   "label": "Registration Customer Name",
+   "label": "Registration Name",
    "no_copy": 1,
    "read_only": 1
   },
@@ -885,12 +888,41 @@
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.financer && doc.lessee_name != doc.registration_customer",
+   "fieldname": "lessee_name",
+   "fieldtype": "Data",
+   "label": "Registration Lessee Name",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "financer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Registration Financer",
+   "options": "Customer"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.financer && doc.financer_name != doc.financer",
+   "fieldname": "financer_name",
+   "fieldtype": "Data",
+   "label": "Registration Financer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "registration_name_section",
+   "fieldtype": "Section Break",
+   "label": "Registration Name"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-19 15:37:46.327571",
+ "modified": "2021-11-19 17:05:25.959341",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",

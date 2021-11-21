@@ -12,12 +12,14 @@
   "naming_series",
   "company",
   "customer",
+  "lessee_name",
   "customer_name",
   "column_break_8",
-  "agent",
-  "agent_name",
+  "financer",
+  "financer_name",
   "column_break_11",
   "posting_date",
+  "booking_customer_name",
   "amended_from",
   "section_break_13",
   "vehicle_booking_order",
@@ -27,6 +29,9 @@
   "vehicle_license_plate",
   "call_date",
   "column_break_17",
+  "agent",
+  "agent_name",
+  "column_break_22",
   "remarks",
   "vehicle_details_section",
   "variant_of",
@@ -290,7 +295,7 @@
    "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
    "fieldname": "customer_name",
    "fieldtype": "Data",
-   "label": "Registration Customer Name",
+   "label": "Registration Name",
    "read_only": 1
   },
   {
@@ -300,12 +305,46 @@
   {
    "fieldname": "column_break_15",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.financer && doc.lessee_name != doc.customer",
+   "fieldname": "lessee_name",
+   "fieldtype": "Data",
+   "label": "Registration Lessee Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "financer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Registration Financer",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.financer && doc.financer_name != doc.financer",
+   "fieldname": "financer_name",
+   "fieldtype": "Data",
+   "label": "Registration Financer Name",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.vehicle_booking_order && doc.booking_customer_name != doc.customer_name",
+   "fetch_from": "vehicle_booking_order.customer_name",
+   "fieldname": "booking_customer_name",
+   "fieldtype": "Data",
+   "label": "Booking Customer Name",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-03 14:59:33.404838",
+ "modified": "2021-11-20 09:53:33.683497",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Receipt",

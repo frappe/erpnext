@@ -451,9 +451,11 @@ class VehicleBookingOrder(VehicleBookingController):
 
 		if self.docstatus != 0:
 			vehicle_transfer_letter = frappe.db.get_all("Vehicle Transfer Letter", {"vehicle_booking_order": self.name, "docstatus": 1},
-				['customer', 'customer_name', 'posting_date', 'creation'], order_by="posting_date desc, creation desc", limit=1)
+				['customer', 'customer_name', 'financer', 'financer_name', 'lessee_name', 'posting_date', 'creation'],
+				order_by="posting_date desc, creation desc", limit=1)
 			vehicle_registration_receipt = frappe.db.get_all("Vehicle Registration Receipt", {"vehicle_booking_order": self.name, "docstatus": 1},
-				['customer', 'customer_name', 'posting_date', 'creation'], order_by="posting_date desc, creation desc", limit=1)
+				['customer', 'customer_name', 'financer', 'financer_name', 'lessee_name', 'posting_date', 'creation'],
+				order_by="posting_date desc, creation desc", limit=1)
 
 		transfer_transactions = vehicle_transfer_letter + vehicle_registration_receipt
 		transfer_details = max(transfer_transactions, key=lambda d: (d.posting_date, d.creation)) if transfer_transactions else None
@@ -461,14 +463,23 @@ class VehicleBookingOrder(VehicleBookingController):
 		if transfer_details and transfer_details.customer not in [self.customer, self.financer]:
 			self.transfer_customer = transfer_details.customer
 			self.transfer_customer_name = transfer_details.customer_name
+			self.transfer_financer = transfer_details.financer
+			self.transfer_financer_name = transfer_details.financer_name
+			self.transfer_lessee_name = transfer_details.lessee_name
 		else:
 			self.transfer_customer = None
 			self.transfer_customer_name = None
+			self.transfer_financer = None
+			self.transfer_financer_name = None
+			self.transfer_lessee_name = None
 
 		if update:
 			self.db_set({
 				"transfer_customer": self.transfer_customer,
-				"transfer_customer_name": self.transfer_customer_name
+				"transfer_customer_name": self.transfer_customer_name,
+				"transfer_financer": self.transfer_financer,
+				"transfer_financer_name": self.transfer_financer_name,
+				"transfer_lessee_name": self.transfer_lessee_name,
 			})
 
 	def set_status(self, update=False, status=None, update_modified=True):

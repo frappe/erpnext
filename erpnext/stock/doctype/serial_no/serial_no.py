@@ -179,11 +179,11 @@ class SerialNo(StockController):
 				filters['posting_date'] = ['>=', self.purchase_date]
 
 			transfer_letter_details = frappe.get_all("Vehicle Transfer Letter",
-				fields=['customer', 'customer_name', 'posting_date', 'creation'],
+				fields=['customer', 'customer_name', 'financer', 'financer_name', 'lessee_name', 'posting_date', 'creation'],
 				filters=filters, order_by="posting_date desc, creation desc", limit=1)
 
 			registration_receipt_details = frappe.get_all("Vehicle Registration Receipt",
-				fields=['customer', 'customer_name', 'posting_date', 'creation'],
+				fields=['customer', 'customer_name', 'financer', 'financer_name', 'lessee_name', 'posting_date', 'creation'],
 				filters=filters, order_by="posting_date desc, creation desc", limit=1)
 
 			name_change_transactions = transfer_letter_details + registration_receipt_details
@@ -191,9 +191,9 @@ class SerialNo(StockController):
 
 			if name_change_details:
 				self.customer = name_change_details.get('customer')
-				self.customer_name = name_change_details.get('customer_name')
-				self.vehicle_owner = None
-				self.vehicle_owner_name = None
+				self.customer_name = name_change_details.get('lessee_name') or name_change_details.get('customer_name')
+				self.vehicle_owner = name_change_details.get('financer')
+				self.vehicle_owner_name = name_change_details.get('financer_name')
 
 	def get_last_sle(self, serial_no=None):
 		entries = {}

@@ -12,20 +12,25 @@
   "naming_series",
   "company",
   "customer",
+  "lessee_name",
   "customer_name",
   "column_break_8",
-  "vehicle_owner",
-  "vehicle_owner_name",
-  "booking_customer_name",
+  "financer",
+  "financer_name",
   "column_break_11",
   "posting_date",
   "amended_from",
+  "previous_owner_section",
+  "vehicle_owner",
+  "column_break_16",
+  "vehicle_owner_name",
+  "column_break_17",
+  "booking_customer_name",
   "section_break_18",
   "vehicle_booking_order",
   "finance_type",
-  "vehicle_registration_order",
   "column_break_20",
-  "project",
+  "vehicle_registration_order",
   "address_and_contact_section",
   "customer_address",
   "address_display",
@@ -163,13 +168,6 @@
   {
    "fieldname": "column_break_20",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "no_copy": 1,
-   "options": "Project"
   },
   {
    "collapsible": 1,
@@ -394,12 +392,46 @@
    "options": "Vehicle Registration Order",
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "depends_on": "eval:doc.financer && doc.lessee_name != doc.customer",
+   "fieldname": "lessee_name",
+   "fieldtype": "Data",
+   "label": "Lessee Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "financer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Financer (New Owner)",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.financer && doc.financer_name != doc.financer",
+   "fieldname": "financer_name",
+   "fieldtype": "Data",
+   "label": "Financer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "previous_owner_section",
+   "fieldtype": "Section Break",
+   "label": "Previous Owner"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-19 15:37:39.125461",
+ "modified": "2021-11-20 10:38:04.514015",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Transfer Letter",

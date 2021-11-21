@@ -25,6 +25,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		if self.docstatus == 1:
 			self.set_onload('disallow_on_submit', self.get_disallow_on_submit_fields())
 			self.set_onload('transfer_letter_exists', self.transfer_letter_exists())
+			self.set_onload('registration_receipt_exists', self.registration_receipt_exists())
 
 	def validate(self):
 		super(VehicleRegistrationOrder, self).validate()
@@ -35,6 +36,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		self.set_title()
 
 	def before_update_after_submit(self):
+		self.set_customer_details(for_validate=True)
 		self.get_disallow_on_submit_fields()
 		self.validate_common()
 		self.validate_agent_mandatory()
@@ -96,6 +98,9 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		else:
 			if self.agent_gl_entry_exists():
 				disallowed_fields.append(('agent', None))
+			if self.registration_receipt_exists():
+				disallowed_fields.append(('registration_customer', None))
+				disallowed_fields.append(('financer', None))
 
 		self.flags.disallow_on_submit = disallowed_fields
 		return disallowed_fields
@@ -119,6 +124,15 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			})
 
 		return self._transfer_letter_exists
+
+	def registration_receipt_exists(self):
+		if not hasattr(self, '_registration_receipt_exists'):
+			self._registration_receipt_exists = frappe.db.exists("Vehicle Registration Receipt", {
+				'vehicle_registration_order': self.name,
+				'docstatus': 1
+			})
+
+		return self._registration_receipt_exists
 
 	def set_title(self):
 		names = []
@@ -449,7 +463,9 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			})
 
 	def update_registration_receipt_details(self, update=False):
-		fields = ['name', 'vehicle_license_plate', 'customer', 'customer_name', 'posting_date', 'call_date']
+		fields = ['name', 'vehicle_license_plate',
+			'customer', 'customer_name', 'financer', 'financer_name', 'lessee_name',
+			'posting_date', 'call_date']
 
 		registration_receipt = frappe.db.get_all("Vehicle Registration Receipt",
 			{"vehicle_registration_order": self.name, "docstatus": 1}, fields,
@@ -465,6 +481,9 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		if registration_receipt.customer:
 			self.registration_customer = registration_receipt.customer
 			self.registration_customer_name = registration_receipt.customer_name
+			self.lessee_name = registration_receipt.lessee_name
+			self.financer = registration_receipt.financer
+			self.financer_name = registration_receipt.financer_name
 
 		self.vehicle_license_plate = registration_receipt.vehicle_license_plate
 		self.registration_receipt_date = registration_receipt.posting_date
@@ -474,6 +493,9 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			self.db_set({
 				"registration_customer": self.registration_customer,
 				"registration_customer_name": self.registration_customer_name,
+				"lessee_name": self.lessee_name,
+				"financer": self.financer,
+				"financer_name": self.financer_name,
 				"vehicle_license_plate": self.vehicle_license_plate,
 				"call_date": self.call_date,
 				"registration_receipt_date": self.registration_receipt_date,
@@ -552,20 +574,25 @@ def get_vehicle_registration_order(vehicle=None, vehicle_booking_order=None, fie
 	return vehicle_registration_order
 
 
-def get_vehicle_registration_order_details(vehicle_registration_order):
+def get_vehicle_registration_order_details(vehicle_registration_order, get_customer=False):
 	details = frappe._dict()
 	if vehicle_registration_order:
 		details = frappe.db.get_value("Vehicle Registration Order", vehicle_registration_order, [
-			'agent', 'agent_name', 'customer', 'customer_name', 'registration_customer', 'registration_customer_name'
+			'agent', 'agent_name',
+			'customer', 'customer_name',
+			'registration_customer', 'registration_customer_name',
+			'financer', 'financer_name', 'lessee_name',
 		], as_dict=1) or frappe._dict()
 
 	out = frappe._dict()
 
-	if details.agent:
-		out.customer = details.registration_customer or details.customer
-		out.customer_name = details.registration_customer_name if details.registration_customer else details.customer_name
+	if details:
 		out.agent = details.agent
 		out.agent_name = details.agent_name
+
+		if get_customer and details.registration_customer:
+			out.customer = details.registration_customer
+			out.financer = details.financer
 
 	return out
 
@@ -773,6 +800,7 @@ def get_registration_receipt(vehicle_registration_order):
 	receipt.company = vro.company
 	receipt.vehicle_registration_order = vro.name
 	receipt.customer = vro.registration_customer or vro.customer
+	receipt.financer = vro.financer
 	receipt.agent = vro.agent
 	receipt.vehicle = vro.vehicle
 	receipt.vehicle_booking_order = vro.vehicle_booking_order
