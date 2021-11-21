@@ -12,7 +12,7 @@ from six import string_types
 
 class VehicleInvoice(VehicleTransactionController):
 	def get_feed(self):
-		return _("From {0} | {1}").format(self.get("suplier_name") or self.get('supplier'), self.get("bill_no"))
+		return _("For {0} | {1}").format(self.get("customer_name") or self.get('customer'), self.get("bill_no"))
 
 	def validate(self):
 		super(VehicleInvoice, self).validate()
@@ -38,7 +38,7 @@ class VehicleInvoice(VehicleTransactionController):
 		self.update_vehicle_registration_order()
 
 	def set_title(self):
-		self.title = "{0} ({1})".format(self.get('bill_no'), self.get('supplier_name') or self.get('supplier'))
+		self.title = "{0} - {1}".format(self.get('customer_name') or self.get('customer'), self.get('bill_no'))
 
 	def validate_duplicate_invoice(self):
 		if self.vehicle:
@@ -93,6 +93,7 @@ def get_vehicle_invoice_details(vehicle_invoice):
 			'bill_no', 'bill_date',
 			'employee', 'employee_name',
 			'agent', 'agent_name',
+			'customer', 'customer_name',
 		], as_dict=1) or frappe._dict()
 
 	out = frappe._dict()
@@ -102,6 +103,9 @@ def get_vehicle_invoice_details(vehicle_invoice):
 	out.current_employee_name = invoice_details.employee_name
 	out.current_agent = invoice_details.agent
 	out.current_agent_name = invoice_details.agent_name
+
+	if invoice_details.customer_name:
+		out.invoice_customer_name = invoice_details.customer_name
 
 	return out
 

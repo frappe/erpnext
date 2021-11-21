@@ -29,7 +29,12 @@
   "column_break_23",
   "vehicle_color",
   "vehicle_license_plate",
-  "vehicle_unregistered"
+  "vehicle_unregistered",
+  "customer_details_section",
+  "invoice_customer_name",
+  "transfer_customer_name",
+  "column_break_29",
+  "booking_customer_name"
  ],
  "fields": [
   {
@@ -81,7 +86,6 @@
    "fetch_from": "vehicle_invoice.bill_no",
    "fieldname": "bill_no",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Invoice No",
    "no_copy": 1,
@@ -92,7 +96,6 @@
    "fetch_from": "vehicle_invoice.bill_date",
    "fieldname": "bill_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Invoice Date",
    "no_copy": 1,
@@ -250,10 +253,41 @@
    "label": "Is Unregistered",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "customer_details_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Details"
+  },
+  {
+   "columns": 2,
+   "fieldname": "invoice_customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Invoice Name",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transfer_customer_name",
+   "fieldtype": "Data",
+   "label": "Transfer Name",
+   "no_copy": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.customer_name",
+   "fieldname": "booking_customer_name",
+   "fieldtype": "Data",
+   "label": "Booking Customer Name",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2021-11-02 15:31:37.861543",
+ "modified": "2021-11-21 11:00:40.198881",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice Movement Detail",

@@ -13,11 +13,10 @@
   "company",
   "customer",
   "customer_name",
-  "booking_customer_name",
   "column_break_8",
-  "remarks",
-  "current_employee",
-  "current_employee_name",
+  "invoice_customer_name",
+  "transfer_customer_name",
+  "booking_customer_name",
   "column_break_11",
   "amended_from",
   "posting_date",
@@ -75,6 +74,10 @@
   "receiver_contact_cnic",
   "delivery_details_section",
   "keys",
+  "current_employee",
+  "current_employee_name",
+  "column_break_68",
+  "remarks",
   "documents_section",
   "documents"
  ],
@@ -582,12 +585,28 @@
    "label": "Keys",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_68",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "invoice_customer_name",
+   "fieldtype": "Data",
+   "label": "Invoice Customer Name",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "transfer_customer_name",
+   "fieldtype": "Data",
+   "label": "Transfer Customer Name",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-17 13:32:20.796036",
+ "modified": "2021-11-21 10:36:08.714461",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice Delivery",

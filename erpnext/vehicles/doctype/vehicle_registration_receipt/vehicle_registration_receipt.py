@@ -41,8 +41,7 @@ class VehicleRegistrationReceipt(VehicleTransactionController):
 		self.update_vehicle_booking_order_transfer_customer()
 
 	def set_title(self):
-		self.title = "{0}{1}".format(self.get('vehicle_license_plate'),
-			" ({0})".format(self.get('customer_name') or self.get('customer')))
+		self.title = "{0} - {1}".format(self.get('vehicle_license_plate'), self.get('customer_name') or self.get('customer'))
 
 	def validate_duplicate_registration_receipt(self):
 		registration_receipt = frappe.db.get_value("Vehicle Registration Receipt",

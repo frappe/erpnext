@@ -719,3 +719,4 @@ erpnext.patches.v12_0.rename_and_patch_vehicle_invoice_documents
 erpnext.patches.v12_0.set_vehicle_invoice_receipt_in_delivery
 erpnext.patches.v12_0.set_vehicle_registration_agent_charges_table
 erpnext.patches.v12_0.set_vehicle_registration_agent_outstanding
+erpnext.patches.v12_0.set_vehicle_invoice_customer

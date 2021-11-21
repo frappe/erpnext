@@ -14,7 +14,6 @@
   "supplier",
   "supplier_name",
   "vehicle_booking_order",
-  "booking_customer_name",
   "finance_type",
   "column_break_8",
   "vehicle_invoice_movement",
@@ -26,6 +25,14 @@
   "posting_date",
   "bill_no",
   "bill_date",
+  "customer_details_section",
+  "customer",
+  "lessee_name",
+  "customer_name",
+  "column_break_20",
+  "financer",
+  "financer_name",
+  "booking_customer_name",
   "address_and_contact_section",
   "booking_address_display",
   "column_break_19",
@@ -266,11 +273,13 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.vehicle_booking_order && doc.booking_customer_name != doc.customer_name",
    "fetch_from": "vehicle_booking_order.customer_name",
    "fieldname": "booking_customer_name",
    "fieldtype": "Data",
    "label": "Booking Customer Name",
-   "no_copy": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fetch_from": "vehicle_booking_order.finance_type",
@@ -503,12 +512,55 @@
    "label": "Received By Name",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "customer_details_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Details"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.financer && doc.lessee_name != doc.customer",
+   "fieldname": "lessee_name",
+   "fieldtype": "Data",
+   "label": "Lessee Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "financer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Financer",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.financer && doc.financer_name != doc.financer",
+   "fieldname": "financer_name",
+   "fieldtype": "Data",
+   "label": "Financer Name",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-03 13:09:18.608311",
+ "modified": "2021-11-21 10:39:20.670772",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice",

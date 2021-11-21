@@ -637,6 +637,10 @@ def get_vehicle_booking_order_details(args):
 				out.customer = booking_details.customer
 				out.financer = booking_details.financer if is_financed else None
 
+		elif args.doctype == "Vehicle Invoice":
+			out.customer = booking_details.financer if is_leased else booking_details.customer
+			out.financer = booking_details.financer if is_financed else None
+
 		elif args.doctype == "Vehicle Invoice Delivery":
 			if booking_details.transfer_customer:
 				out.customer = booking_details.transfer_customer
@@ -658,6 +662,10 @@ def get_vehicle_booking_order_details(args):
 		# Set Vehicle Owner
 		if args.doctype != "Vehicle Transfer Letter":
 			out.vehicle_owner = booking_details.financer
+
+		# Set Transfer Customer Name
+		if (args.doctype and frappe.get_meta(args.doctype).has_field('transfer_customer_name')) or args.doctype == "Vehicle Invoice Movement":
+			out.transfer_customer_name = booking_details.transfer_customer_name
 
 		out.item_code = booking_details.item_code
 		out.vehicle = booking_details.vehicle
@@ -734,7 +742,7 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, warn_reserved=True
 		if vehicle_booking_order:
 			out.vehicle_booking_order = vehicle_booking_order
 
-	if args.doctype in ['Vehicle Invoice Delivery', 'Vehicle Invoice Movement']:
+	if args.doctype and frappe.get_meta(args.doctype).has_field('vehicle_invoice') or args.doctype == "Vehicle Invoice Movement":
 		from erpnext.vehicles.doctype.vehicle_invoice.vehicle_invoice import get_vehicle_invoice,\
 			get_vehicle_invoice_details
 		out.vehicle_invoice = get_vehicle_invoice(args.vehicle)
@@ -753,14 +761,15 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, warn_reserved=True
 
 
 def get_vehicle_registration_order_details(args, get_customer=False):
-	from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order, \
-		get_vehicle_registration_order_details
-
 	out = frappe._dict()
 
-	get_registration = args.doctype in ['Vehicle Registration Receipt', 'Vehicle Transfer Letter', 'Vehicle Invoice Delivery']\
+	get_registration = (args.doctype and frappe.get_meta(args.doctype).has_field('vehicle_registration_order')) \
 		or (args.doctype == 'Vehicle Invoice Movement' and args.issued_for == "Registration")
+
 	if get_registration:
+		from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order, \
+			get_vehicle_registration_order_details
+
 		out.vehicle_registration_order = get_vehicle_registration_order(vehicle=args.vehicle,
 			vehicle_booking_order=args.vehicle_booking_order)
 		out.update(get_vehicle_registration_order_details(out.vehicle_registration_order, get_customer=get_customer))

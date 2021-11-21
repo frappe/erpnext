@@ -9,8 +9,12 @@ from erpnext.vehicles.vehicle_transaction_controller import VehicleTransactionCo
 
 class VehicleReceipt(VehicleTransactionController):
 	def get_feed(self):
-		return _("From {0} | {1}").format(self.get("suplier_name") or self.get('supplier'),
-			self.get("item_name") or self.get("item_code"))
+		if self.get('customer'):
+			return _("For {0} | {1}").format(self.get("customer_name") or self.get('customer'),
+				self.get("item_name") or self.get("item_code"))
+		else:
+			return _("From {0} | {1}").format(self.get("suplier_name") or self.get('supplier'),
+				self.get("item_name") or self.get("item_code"))
 
 	def validate(self):
 		super(VehicleReceipt, self).validate()
@@ -34,7 +38,7 @@ class VehicleReceipt(VehicleTransactionController):
 
 	def set_title(self):
 		party = self.get('customer_name') or self.get('customer') or self.get('supplier_name') or self.get('supplier')
-		self.title = "{0}{1}".format(self.item_name or self.item_code, ' ({0})'.format(party) if party else '')
+		self.title = "{0} - {1}".format(party, self.item_name or self.item_code)
 
 	def validate_transporter(self):
 		if self.get('transporter') and not self.get('lr_no'):

@@ -37,7 +37,7 @@ class VehicleTransferLetter(VehicleTransactionController):
 			frappe.throw(_("New Owner and Previous Owner cannot be the same"))
 
 	def set_title(self):
-		self.title = "{0} ({1})".format(self.customer_name or self.customer, self.get_previous_owner_name())
+		self.title = "{0} / {1}".format(self.customer_name or self.customer, self.get_previous_owner_name())
 
 	def get_previous_owner_name(self):
 		return self.get('booking_customer_name') or self.get('vehicle_owner_name') \

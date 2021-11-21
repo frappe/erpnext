@@ -41,7 +41,7 @@ class VehicleInvoiceDelivery(VehicleTransactionController):
 		self.update_vehicle_registration_order()
 
 	def set_title(self):
-		self.title = "{0} ({1})".format(self.get('bill_no'), self.get('customer_name') or self.get('customer'))
+		self.title = "{0} - {1}".format(self.get('customer_name') or self.get('customer'), self.get('bill_no'))
 
 	def validate_duplicate_invoice_delivery(self):
 		invoice_delivery = frappe.db.get_value("Vehicle Invoice Delivery",
