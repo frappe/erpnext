@@ -732,15 +732,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "hr_settings_section",
-   "fieldtype": "Section Break",
-   "label": "HR & Payroll Settings"
-  },
-  {
-   "fieldname": "column_break_26",
-   "fieldtype": "Column Break"
-  },
-  {
    "collapsible": 1,
    "fieldname": "fixed_asset_defaults",
    "fieldtype": "Section Break",
