@@ -10,6 +10,12 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import add_days, flt, getdate, nowdate
 
 from erpnext.controllers.accounts_controller import update_child_qty_rate
+from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
+	make_maintenance_schedule,
+)
+from erpnext.maintenance.doctype.maintenance_visit.test_maintenance_visit import (
+	make_maintenance_visit,
+)
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.sales_order import (
@@ -1277,6 +1283,72 @@ class TestSalesOrder(unittest.TestCase):
 		si.save()
 
 		self.assertRaises(frappe.ValidationError, so.cancel)
+
+	def test_so_cancellation_after_si_submission(self):
+		"""
+			Test to check if Sales Order gets cancelled when linked Sales Invoice has been Submitted
+			Expected result: Sales Order should not get cancelled
+		"""
+		so = make_sales_order()
+		so.submit()
+		si = make_sales_invoice(so.name)
+		si.submit()
+
+		so.load_from_db()
+		self.assertRaises(frappe.LinkExistsError, so.cancel)
+
+	def test_so_cancellation_after_dn_submission(self):
+		"""
+			Test to check if Sales Order gets cancelled when linked Delivery Note has been Submitted
+			Expected result: Sales Order should not get cancelled
+		"""
+		so = make_sales_order()
+		so.submit()
+		dn = make_delivery_note(so.name)
+		dn.submit()
+
+		so.load_from_db()
+		self.assertRaises(frappe.LinkExistsError, so.cancel)
+
+	def test_so_cancellation_after_maintenance_schedule_submission(self):
+		"""
+			Expected result: Sales Order should not get cancelled
+		"""
+		so = make_sales_order()
+		so.submit()
+		ms = make_maintenance_schedule()
+		ms.items[0].sales_order = so.name
+		ms.submit()
+
+		so.load_from_db()
+		self.assertRaises(frappe.LinkExistsError, so.cancel)
+
+	def test_so_cancellation_after_maintenance_visit_submission(self):
+		"""
+			Expected result: Sales Order should not get cancelled
+		"""
+		so = make_sales_order()
+		so.submit()
+		mv = make_maintenance_visit()
+		mv.purposes[0].prevdoc_doctype = "Sales Order"
+		mv.purposes[0].prevdoc_docname = so.name
+		mv.submit()
+
+		so.load_from_db()
+		self.assertRaises(frappe.LinkExistsError, so.cancel)
+
+	def test_so_cancellation_after_work_order_submission(self):
+		"""
+			Expected result: Sales Order should not get cancelled
+		"""
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		so = make_sales_order(item_code="_Test FG Item", qty=10)
+		so.submit()
+		make_wo_order_test_record(sales_order=so.name)
+
+		so.load_from_db()
+		self.assertRaises(frappe.LinkExistsError, so.cancel)
 
 	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
