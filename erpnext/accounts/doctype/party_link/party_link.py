@@ -37,3 +37,5 @@ def create_party_link(primary_role, primary_party, secondary_party):
 
 	party_link.save(ignore_permissions=True)
 
+	return party_link
+
