@@ -388,7 +388,7 @@ class WorkOrder(Document):
 		if planned_end_date:
 			self.db_set("planned_end_date", planned_end_date)
 
-	def prepare_data_for_job_card(self, row, index, plan_days, enable_capacity_planning, auto_create_time_log):
+	def prepare_data_for_job_card(self, row, index, plan_days, enable_capacity_planning, auto_create_time_log=False):
 		self.set_operation_start_end_time(index, row)
 
 		if not row.workstation:
