@@ -345,7 +345,7 @@ def check_serial_no_validity_on_cancel(serial_no, sle):
 	is_stock_reco = sle.voucher_type == "Stock Reconciliation"
 	msg = None
 
-	if sr and (actual_qty < 0 or is_stock_reco) and sr.warehouse != sle.warehouse:
+	if sr and (actual_qty < 0 or is_stock_reco) and (sr.warehouse and sr.warehouse != sle.warehouse):
 		# receipt(inward) is being cancelled
 		msg = _("Cannot cancel {0} {1} as Serial No {2} does not belong to the warehouse {3}").format(
 			sle.voucher_type, doc_link, sr_link, frappe.bold(sle.warehouse))
