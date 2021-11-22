@@ -12,6 +12,7 @@ from erpnext.vehicles.vehicle_additional_service import VehicleAdditionalService
 from erpnext.vehicles.vehicle_pricing import calculate_total_price, validate_duplicate_components,\
 	validate_component_type, validate_disabled_component, get_pricing_components, get_component_details,\
 	pricing_force_fields
+from erpnext.accounts.party import validate_party_frozen_disabled
 from six import string_types
 import json
 
@@ -33,8 +34,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 
 		self.validate_common()
 
-		self.set_title()
-
 	def before_update_after_submit(self):
 		self.set_customer_details(for_validate=True)
 		self.get_disallow_on_submit_fields()
@@ -42,6 +41,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		self.validate_agent_mandatory()
 
 	def validate_common(self):
+		self.validate_registration_party()
 		self.validate_pricing_components()
 		self.calculate_totals()
 		self.calculate_outstanding_amount()
@@ -53,6 +53,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		self.update_invoice_status()
 		self.update_registration_receipt_details()
 		self.set_status()
+		self.set_title()
 
 	def before_submit(self):
 		if not self.vehicle and not self.vehicle_booking_order:
@@ -188,6 +189,13 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				frappe.throw(_("Vehicle Registration Order for {0} already exists in {1}")
 					.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order),
 						frappe.get_desk_link("Vehicle Registration Order", registration_order)))
+
+	def validate_registration_party(self):
+		if self.get('registration_customer'):
+			validate_party_frozen_disabled("Customer", self.registration_customer)
+
+		if self.get('registration_customer') and self.get('financer') and self.registration_customer == self.financer:
+			frappe.throw(_("Registration Customer and Financer cannot be the same"))
 
 	def validate_vehicle_unregistered(self):
 		if self.vehicle:
@@ -490,6 +498,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		self.registration_receipt_date = registration_receipt.posting_date
 		self.call_date = registration_receipt.call_date
 
+		self.set_title()
+
 		if update:
 			self.db_set({
 				"registration_customer": self.registration_customer,
@@ -500,6 +510,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				"vehicle_license_plate": self.vehicle_license_plate,
 				"call_date": self.call_date,
 				"registration_receipt_date": self.registration_receipt_date,
+				"title": self.title,
 			})
 
 	def set_status(self, update=False, status=None, update_modified=True):

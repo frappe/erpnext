@@ -150,6 +150,9 @@ class VehicleTransactionController(StockController):
 		elif self.get('transfer_customer'):
 			validate_party_frozen_disabled("Customer", self.transfer_customer)
 
+		if self.get('customer') and self.get('financer') and self.customer == self.financer:
+			frappe.throw(_("Customer and Financer cannot be the same"))
+
 	def validate_vehicle_item(self, doc=None):
 		if not doc:
 			doc = self
