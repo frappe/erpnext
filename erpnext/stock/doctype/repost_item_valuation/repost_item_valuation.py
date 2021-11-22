@@ -133,7 +133,7 @@ def repost_entries():
 	riv_entries = get_repost_item_valuation_entries()
 
 	for row in riv_entries:
-		doc = frappe.get_cached_doc('Repost Item Valuation', row.name)
+		doc = frappe.get_doc('Repost Item Valuation', row.name)
 		repost(doc)
 
 	riv_entries = get_repost_item_valuation_entries()
