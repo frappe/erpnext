@@ -89,9 +89,10 @@ class PeriodClosingVoucher(AccountsController):
 
 		for acc in pl_accounts:
 			if flt(acc.bal_in_company_currency):
+				cost_center = acc.cost_center if self.cost_center_wise_pnl else company_cost_center
 				gl_entry = self.get_gl_dict({
 					"account": self.closing_account_head,
-					"cost_center": acc.cost_center or company_cost_center,
+					"cost_center": cost_center,
 					"finance_book": acc.finance_book,
 					"account_currency": acc.account_currency,
 					"debit_in_account_currency": abs(flt(acc.bal_in_account_currency)) if flt(acc.bal_in_account_currency) > 0 else 0,
