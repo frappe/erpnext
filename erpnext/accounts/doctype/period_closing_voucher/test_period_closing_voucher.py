@@ -67,8 +67,8 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		company = create_company()
 		surplus_account = create_account()
 
-		cost_center1 = create_cost_center("Test Cost Center 1")
-		cost_center2 = create_cost_center("Test Cost Center 2")
+		cost_center1 = create_cost_center("Main")
+		cost_center2 = create_cost_center("Western Branch")
 
 		create_sales_invoice(
 			company=company,
@@ -87,7 +87,10 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			debit_to="Debtors - TPC"
 		)
 
-		pcv = self.make_period_closing_voucher()
+		pcv = self.make_period_closing_voucher(submit=False)
+		pcv.cost_center_wise_pnl = 1
+		pcv.save()
+		pcv.submit()
 		surplus_account = pcv.closing_account_head
 
 		expected_gle = (
@@ -150,7 +153,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 
 		self.assertEqual(pcv_gle, expected_gle)
 
-	def make_period_closing_voucher(self):
+	def make_period_closing_voucher(self, submit=True):
 		surplus_account = create_account()
 		cost_center = create_cost_center("Test Cost Center 1")
 		pcv = frappe.get_doc({
@@ -164,7 +167,8 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			"remarks": "test"
 		})
 		pcv.insert()
-		pcv.submit()
+		if submit:
+			pcv.submit()
 
 		return pcv
 
