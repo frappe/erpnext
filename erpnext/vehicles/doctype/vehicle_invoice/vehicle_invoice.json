@@ -70,7 +70,8 @@
   "return_date",
   "column_break_43",
   "delivered_date",
-  "status"
+  "status",
+  "copy_delivered"
  ],
  "fields": [
   {
@@ -555,12 +556,20 @@
    "fieldtype": "Data",
    "label": "Financer Name",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "copy_delivered",
+   "fieldtype": "Check",
+   "label": "Invoice Copy Delivered",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-21 10:39:20.670772",
+ "modified": "2021-11-22 12:06:39.681191",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice",

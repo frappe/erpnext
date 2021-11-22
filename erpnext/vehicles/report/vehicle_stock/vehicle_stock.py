@@ -556,7 +556,7 @@ class VehicleStockReport(object):
 		delivery_data = frappe.db.sql("""
 			select name, vehicle, posting_date
 			from `tabVehicle Invoice Delivery`
-			where docstatus = 1 and vehicle in %(vehicle_names)s {0}
+			where docstatus = 1 and is_copy = 0 and vehicle in %(vehicle_names)s {0}
 			order by posting_date desc, creation desc
 		""".format(date_condition), args, as_dict=1)
 

@@ -662,7 +662,7 @@ def get_vehicle_invoice_delivery(source):
 	from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import can_deliver_invoice
 
 	can_deliver_invoice(source, throw=True)
-	check_if_doc_exists("Vehicle Invoice Delivery", source.name)
+	check_if_doc_exists("Vehicle Invoice Delivery", source.name, {'is_copy': 0})
 
 	if not has_previous_doc("Vehicle Invoice", source):
 		frappe.throw(_("Cannot deliver Vehicle Invoice against Vehicle Booking Order before receiving Vehicle Invoice"))

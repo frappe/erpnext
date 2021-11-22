@@ -75,8 +75,12 @@ class VehicleInvoiceMovement(VehicleTransactionController):
 
 	def validate_invoice_already_delivered(self):
 		for d in self.invoices:
-			invoice_delivery = frappe.db.get_value("Vehicle Invoice Delivery",
-				filters={"vehicle": d.vehicle, "docstatus": 1, "posting_date": ['<=', getdate(self.posting_date)]})
+			invoice_delivery = frappe.db.get_value("Vehicle Invoice Delivery", filters={
+				"vehicle": d.vehicle,
+				"docstatus": 1,
+				"is_copy": 0,
+				"posting_date": ['<=', getdate(self.posting_date)]
+			})
 
 			if invoice_delivery:
 				frappe.throw(_("Row #{0}: Invoice for {1} has already been delivered in {2}")

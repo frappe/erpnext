@@ -85,6 +85,17 @@ class VehicleInvoice(VehicleTransactionController):
 			doc.update_invoice_status(update=True, update_modified=update_modified)
 			doc.notify_update()
 
+	def update_copy_delivered(self, update_modified=True):
+		has_copy_delivery = frappe.db.get_value("Vehicle Invoice Delivery", filters={
+			"docstatus": 1,
+			"vehicle_invoice": self.name,
+			"is_copy": 1
+		})
+		self.copy_delivered = 1 if has_copy_delivery else 0
+
+		if update_modified:
+			self.db_set('copy_delivered', self.copy_delivered)
+
 @frappe.whitelist()
 def get_vehicle_invoice_details(vehicle_invoice):
 	invoice_details = frappe._dict()
@@ -229,7 +240,7 @@ def get_vehicle_invoice_transactions(vehicle_invoice, posting_date=None):
 				trn.posting_date, trn.creation,
 				'Delivery' as purpose, trn.customer, trn.customer_name
 			from `tabVehicle Invoice Delivery` trn
-			where trn.docstatus = 1 and trn.vehicle_invoice = %(vehicle_invoice)s {0}
+			where trn.docstatus = 1 and trn.is_copy = 0 and trn.vehicle_invoice = %(vehicle_invoice)s {0}
 		""".format(conditions), filter_values, as_dict=1)
 
 	movements = frappe.db.sql("""

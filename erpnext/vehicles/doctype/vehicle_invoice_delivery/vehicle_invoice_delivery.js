@@ -10,11 +10,13 @@ erpnext.vehicles.VehicleInvoiceDeliveryController = erpnext.vehicles.VehicleTran
 		this.frm.set_query("vehicle", function () {
 			var filters = {
 				item_code: me.frm.doc.item_code,
-				invoice_status: 'In Hand',
 			};
 
 			if (me.frm.doc.supplier) {
 				filters['supplier'] = ['in', ['', me.frm.doc.supplier]];
+			}
+			if (!cint(me.frm.doc.is_copy)) {
+				filters['invoice_status'] = 'In Hand';
 			}
 
 			return {
@@ -23,12 +25,17 @@ erpnext.vehicles.VehicleInvoiceDeliveryController = erpnext.vehicles.VehicleTran
 		});
 
 		this.frm.set_query("vehicle_booking_order", function() {
+			var filters = {
+				docstatus: 1,
+				status: ['!=', 'Cancelled Booking'],
+			}
+
+			if (!cint(me.frm.doc.is_copy)) {
+				filters['invoice_status'] = 'In Hand';
+			}
+
 			return {
-				filters: {
-					docstatus: 1,
-					status: ['!=', 'Cancelled Booking'],
-					invoice_status: 'In Hand'
-				}
+				filters: filters
 			};
 		});
 	}

@@ -416,7 +416,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			vehicle_invoice = frappe.db.get_all("Vehicle Invoice", {"vehicle": self.vehicle, "docstatus": 1},
 				['name', 'status', 'issued_for'], order_by="posting_date desc, creation desc")
 
-			vehicle_invoice_delivery = frappe.db.get_all("Vehicle Invoice Delivery", {"vehicle": self.vehicle, "docstatus": 1},
+			vehicle_invoice_delivery = frappe.db.get_all("Vehicle Invoice Delivery",
+				{"vehicle": self.vehicle, "docstatus": 1, "is_copy": 0},
 				['name', 'posting_date'], order_by="posting_date desc, creation desc")
 
 			vehicle_invoice_issue = frappe.db.sql("""

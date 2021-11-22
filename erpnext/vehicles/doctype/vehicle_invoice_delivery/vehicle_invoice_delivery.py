@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate
+from frappe.utils import getdate, cint
 from erpnext.vehicles.vehicle_transaction_controller import VehicleTransactionController
 from erpnext.vehicles.doctype.vehicle_invoice.vehicle_invoice import get_vehicle_invoice_details,\
 	get_vehicle_invoice
@@ -31,21 +31,30 @@ class VehicleInvoiceDelivery(VehicleTransactionController):
 		self.validate_invoice_not_received()
 
 	def on_submit(self):
-		self.update_vehicle_invoice()
-		self.update_vehicle_booking_order_invoice()
-		self.update_vehicle_registration_order()
+		if cint(self.is_copy):
+			self.update_vehicle_invoice_copy_delivered()
+		else:
+			self.update_vehicle_invoice()
+			self.update_vehicle_booking_order_invoice()
+			self.update_vehicle_registration_order()
 
 	def on_cancel(self):
-		self.update_vehicle_invoice()
-		self.update_vehicle_booking_order_invoice()
-		self.update_vehicle_registration_order()
+		if cint(self.is_copy):
+			self.update_vehicle_invoice_copy_delivered()
+		else:
+			self.update_vehicle_invoice()
+			self.update_vehicle_booking_order_invoice()
+			self.update_vehicle_registration_order()
 
 	def set_title(self):
 		self.title = "{0} - {1}".format(self.get('customer_name') or self.get('customer'), self.get('bill_no'))
 
 	def validate_duplicate_invoice_delivery(self):
+		if cint(self.is_copy):
+			return
+
 		invoice_delivery = frappe.db.get_value("Vehicle Invoice Delivery",
-			filters={"vehicle": self.vehicle, "docstatus": 1, "name": ['!=', self.name]})
+			filters={"vehicle": self.vehicle, "docstatus": 1, "is_copy": 0, "name": ['!=', self.name]})
 
 		if invoice_delivery:
 			frappe.throw(_("Invoice for {0} has already been delivered in {1}")
@@ -71,6 +80,12 @@ class VehicleInvoiceDelivery(VehicleTransactionController):
 		if not self.vehicle_invoice:
 			frappe.throw(_("Invoice for {0} has not yet been received")
 				.format(frappe.get_desk_link('Vehicle', self.vehicle)))
+
+	def update_vehicle_invoice_copy_delivered(self):
+		if self.vehicle_invoice:
+			vinvr = frappe.get_doc("Vehicle Invoice", self.vehicle_invoice)
+			vinvr.update_copy_delivered()
+			vinvr.notify_update()
 
 
 @frappe.whitelist()
