@@ -3,24 +3,39 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
+import base64
+import io
+import json
 import os
 import re
-import jwt
 import sys
-import json
-import base64
-import frappe
-import six
 import traceback
-import io
+
+import frappe
+import jwt
+import six
 from frappe import _, bold
-from pyqrcode import create as qrcreate
-from frappe.utils.background_jobs import enqueue
-from frappe.utils.scheduler import is_scheduler_inactive
 from frappe.core.page.background_jobs.background_jobs import get_info
-from frappe.integrations.utils import make_post_request, make_get_request
+from frappe.integrations.utils import make_get_request, make_post_request
+from frappe.utils.background_jobs import enqueue
+from frappe.utils.data import (
+	add_to_date,
+	cint,
+	cstr,
+	flt,
+	format_date,
+	get_link_to_form,
+	getdate,
+	now_datetime,
+	time_diff_in_hours,
+	time_diff_in_seconds,
+)
+from frappe.utils.scheduler import is_scheduler_inactive
+from pyqrcode import create as qrcreate
+
 from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
-from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, get_link_to_form, getdate, time_diff_in_hours
+
 
 @frappe.whitelist()
 def validate_eligibility(doc):
@@ -135,6 +150,10 @@ def validate_address_fields(address, skip_gstin_validation):
 			msg=_('Address Lines, City, Pincode, GSTIN are mandatory for address {}. Please set them and try again.').format(address.name),
 			title=_('Missing Address Fields')
 		)
+
+	if address.address_line2 and len(address.address_line2) < 2:
+		# to prevent "The field Address 2 must be a string with a minimum length of 3 and a maximum length of 100"
+		address.address_line2 = ""
 
 def get_party_details(address_name, skip_gstin_validation=False):
 	addr = frappe.get_doc('Address', address_name)
@@ -387,10 +406,17 @@ def validate_totals(einvoice):
 	if abs(flt(value_details['AssVal']) - total_item_ass_value) > 1:
 		frappe.throw(_('Total Taxable Value of the items is not equal to the Invoice Net Total. Please check item taxes / discounts for any correction.'))
 
+	if abs(flt(value_details['CgstVal']) + flt(value_details['SgstVal']) - total_item_cgst_value - total_item_sgst_value) > 1:
+		frappe.throw(_('CGST + SGST value of the items is not equal to total CGST + SGST value. Please review taxes for any correction.'))
+
+	if abs(flt(value_details['IgstVal']) - total_item_igst_value) > 1:
+		frappe.throw(_('IGST value of all items is not equal to total IGST value. Please review taxes for any correction.'))
+
 	if abs(
 		flt(value_details['TotInvVal']) + flt(value_details['Discount']) -
 		flt(value_details['OthChrg']) - flt(value_details['RndOffAmt']) -
-		total_item_value) > 1:
+		total_item_value
+	) > 1:
 		frappe.throw(_('Total Value of the items is not equal to the Invoice Grand Total. Please check item taxes / discounts for any correction.'))
 
 	calculated_invoice_value = \
@@ -463,7 +489,11 @@ def make_einvoice(invoice):
 	except Exception:
 		show_link_to_error_log(invoice, einvoice)
 
-	validate_totals(einvoice)
+	try:
+		validate_totals(einvoice)
+	except Exception:
+		log_error(einvoice)
+		raise
 
 	return einvoice
 
@@ -617,9 +647,11 @@ class GSPConnector():
 		frappe.db.commit()
 
 	def fetch_auth_token(self):
+		client_id = self.e_invoice_settings.client_id or frappe.conf.einvoice_client_id
+		client_secret = self.e_invoice_settings.get_password('client_secret') or frappe.conf.einvoice_client_secret
 		headers = {
-			'gspappid': frappe.conf.einvoice_client_id,
-			'gspappsecret': frappe.conf.einvoice_client_secret
+			'gspappid': client_id,
+			'gspappsecret': client_secret
 		}
 		res = {}
 		try:
@@ -919,12 +951,14 @@ class GSPConnector():
 
 		return errors
 
-	def raise_error(self, raise_exception=False, errors=[]):
+	def raise_error(self, raise_exception=False, errors=None):
+		if errors is None:
+			errors = []
 		title = _('E Invoice Request Failed')
 		if errors:
 			frappe.throw(errors, title=title, as_list=1)
 		else:
-			link_to_error_list = '<a href="/app/error-log">Error Log</a>'
+			link_to_error_list = '<a href="/app/error-log" target="_blank">Error Log</a>'
 			frappe.msgprint(
 				_('An error occurred while making e-invoicing request. Please check {} for more information.').format(link_to_error_list),
 				title=title,
