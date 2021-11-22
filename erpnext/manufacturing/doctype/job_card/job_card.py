@@ -36,7 +36,7 @@ class JobCard(Document):
 	def onload(self):
 		excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 		self.set_onload("job_card_excess_transfer", excess_transfer)
-		self.set_onload("work_order_stopped", self.is_work_order_stopped())
+		self.set_onload("work_order_closed", self.is_work_order_closed())
 
 	def validate(self):
 		self.validate_time_logs()
@@ -549,10 +549,10 @@ class JobCard(Document):
 					.format(message, bold(row.operation), bold(self.operation)), OperationSequenceError)
 
 	def validate_work_order(self):
-		if self.is_work_order_stopped():
-			frappe.throw(_("You can't make any changes to Job Card since Work Order is stopped."))
+		if self.is_work_order_closed():
+			frappe.throw(_("You can't make any changes to Job Card since Work Order is closed."))
 
-	def is_work_order_stopped(self):
+	def is_work_order_closed(self):
 		if self.work_order:
 			status = frappe.get_value('Work Order', self.work_order)
 
