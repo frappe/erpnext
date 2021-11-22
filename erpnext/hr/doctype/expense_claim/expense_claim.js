@@ -389,7 +389,9 @@ frappe.ui.form.on("Expense Claim Detail", {
 	sanctioned_amount: function(frm, cdt, cdn) {
 		cur_frm.cscript.calculate_total(frm.doc, cdt, cdn);
 		frm.trigger("get_taxes");
+		frm.trigger("calculate_grand_total");
 	},
+
 	cost_center: function(frm, cdt, cdn) {
 		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "expenses", "cost_center");
 	}
