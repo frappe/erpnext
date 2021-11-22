@@ -83,8 +83,8 @@ class DeliveryNote(SellingController):
 			}
 		])
 
-	def before_save(self):
-		self.get_commision()
+	# def before_save(self):
+	# 	self.get_commision()
 
 	def before_print(self, settings=None):
 		def toggle_print_hide(meta, fieldname):
