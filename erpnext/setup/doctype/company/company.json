@@ -125,7 +125,8 @@
    "label": "Abbr",
    "oldfieldname": "abbr",
    "oldfieldtype": "Data",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "depends_on": "eval:!doc.__islocal && in_list(frappe.user_roles, \"System Manager\")",
