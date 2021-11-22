@@ -397,6 +397,7 @@
    "options": "Batch"
   },
   {
+   "collapsible": 1,
    "fieldname": "scrap_items_section",
    "fieldtype": "Section Break",
    "label": "Scrap Items"
@@ -419,7 +420,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-09 14:07:20.290306",
+ "modified": "2021-11-12 10:15:06.572401",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
