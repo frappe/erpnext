@@ -215,7 +215,8 @@ class Asset(AccountsController):
 				number_of_pending_depreciations += 1
 
 			skip_row = False
-			for n in range(start, number_of_pending_depreciations):
+
+			for n in range(start[finance_book.idx-1], number_of_pending_depreciations):
 				# If depreciation is already completed (for double declining balance)
 				if skip_row: continue
 
@@ -341,14 +342,39 @@ class Asset(AccountsController):
 							"finance_book_id": finance_book.idx
 						})
 
-	# used when depreciation schedule needs to be modified due to increase in asset life
+	# depreciation schedules need to be cleared before modification due to increase in asset life/asset sales
+	# JE: Journal Entry, FB: Finance Book
 	def clear_depreciation_schedule(self):
-		start = 0
-		for n in range(len(self.schedules)):
-			if not self.schedules[n].journal_entry:
-				del self.schedules[n:]
-				start = n
-				break
+		start = []
+		num_of_depreciations_completed = 0
+		depr_schedule = []
+
+		for schedule in self.get('schedules'):
+
+			# to ensure that start will only be updated once for each FB
+			if len(start) == (int(schedule.finance_book_id) - 1):
+				if schedule.journal_entry:
+					num_of_depreciations_completed += 1
+					depr_schedule.append(schedule)
+				else:
+					start.append(num_of_depreciations_completed)
+					num_of_depreciations_completed = 0
+
+			# to update start when there are JEs linked with all the schedule rows corresponding to an FB
+			elif len(start) == (int(schedule.finance_book_id) - 2):
+				start.append(num_of_depreciations_completed)
+				num_of_depreciations_completed = 0
+
+		# to update start when all the schedule rows corresponding to the last FB are linked with JEs
+		if len(start) == (len(self.finance_books) - 1):
+			start.append(num_of_depreciations_completed)
+
+		# when the Depreciation Schedule is being created for the first time
+		if start == []:
+			start = [0] * len(self.finance_books)
+		else:
+			self.schedules = depr_schedule
+
 		return start
 
 	def get_from_date(self, finance_book):
