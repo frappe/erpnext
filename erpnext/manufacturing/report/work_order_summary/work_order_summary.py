@@ -1,11 +1,7 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-<<<<<<< HEAD
-from __future__ import unicode_literals
-=======
 from collections import defaultdict
->>>>>>> aa689874e3 (fix: Closed status error in Work Order Summary (#28460))
 
 import frappe
 from frappe import _
