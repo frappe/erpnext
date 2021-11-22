@@ -35,6 +35,7 @@
   "last_odometer",
   "insurance_details",
   "insurance_company",
+  "insurance_company_name",
   "column_break_19",
   "insurance_policy_no",
   "column_break_15",
@@ -50,6 +51,11 @@
   "column_break_64",
   "maintenance_status",
   "additional_information_section",
+  "tracker_company",
+  "tracker_company_name",
+  "column_break_48",
+  "tracker_installation_date",
+  "column_break_49",
   "reference_no",
   "column_break_45",
   "dispatch_date",
@@ -672,10 +678,46 @@
    "allow_in_quick_entry": 1,
    "fieldname": "column_break_45",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.insurance_company && doc.insurance_company_name != doc.insurance_company",
+   "fetch_from": "insurance_company.customer_name",
+   "fieldname": "insurance_company_name",
+   "fieldtype": "Data",
+   "label": "Insurance Company Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tracker_company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Tracker Company",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.tracker_company && doc.tracker_company_name != doc.tracker_company",
+   "fetch_from": "tracker_company.customer_name",
+   "fieldname": "tracker_company_name",
+   "fieldtype": "Data",
+   "label": "Tracker Company Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_48",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tracker_installation_date",
+   "fieldtype": "Date",
+   "label": "Tracker Installation Date"
+  },
+  {
+   "fieldname": "column_break_49",
+   "fieldtype": "Column Break"
   }
  ],
  "image_field": "image",
- "modified": "2021-11-16 16:46:28.950350",
+ "modified": "2021-11-22 10:35:17.689660",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
