@@ -19,17 +19,32 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/selling",
  "idx": 0,
  "is_complete": 0,
- "modified": "2021-08-24 18:12:38.052434",
+ "modified": "2020-07-08 14:05:37.669753",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
  "owner": "Administrator",
  "steps": [
   {
-   "step": "Selling Settings"
+   "step": "Introduction to Selling"
   },
   {
-   "step": "Sales Order"
+   "step": "Create a Customer"
+  },
+  {
+   "step": "Setup your Warehouse"
+  },
+  {
+   "step": "Create a Product"
+  },
+  {
+   "step": "Create a Quotation"
+  },
+  {
+   "step": "Create your first Sales Order"
+  },
+  {
+   "step": "Selling Settings"
   }
  ],
  "subtitle": "Products, Sales, Analysis, and more.",
