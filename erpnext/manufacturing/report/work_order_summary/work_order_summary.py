@@ -1,6 +1,7 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from collections import defaultdict
 
 import frappe
 from frappe import _
@@ -58,17 +59,16 @@ def get_chart_data(data, filters):
 		return get_chart_based_on_qty(data, filters)
 
 def get_chart_based_on_status(data):
-	all_labels = frappe.get_meta("Work Order").get_options("status").split("\n")
-	remove_labels = [""]
+	labels = frappe.get_meta("Work Order").get_options("status").split("\n")
+	if "" in labels:
+		labels.remove("")
 
-	labels = list(set(all_labels) - set(remove_labels))
-
-	status_wise_data = { k:0 for k in labels}
+	status_wise_data = defaultdict(int)
 
 	for d in data:
 		status_wise_data[d.status] += 1
 
-	values = [status_wise_data[i] for i in labels]
+	values = [status_wise_data[label] for label in labels]
 
 	chart = {
 		"data": {
