@@ -2300,6 +2300,7 @@ class TestSalesInvoice(unittest.TestCase):
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
 			make_customer,
 		)
+		from erpnext.accounts.doctype.party_link.party_link import create_party_link
 		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
 		# create a customer
@@ -2308,13 +2309,7 @@ class TestSalesInvoice(unittest.TestCase):
 		supplier = create_supplier(supplier_name="_Test Common Supplier").name
 
 		# create a party link between customer & supplier
-		# set primary role as supplier
-		party_link = frappe.new_doc("Party Link")
-		party_link.primary_role = "Supplier"
-		party_link.primary_party = supplier
-		party_link.secondary_role = "Customer"
-		party_link.secondary_party = customer
-		party_link.save()
+		party_link = create_party_link("Supplier", supplier, customer)
 
 		# enable common party accounting
 		frappe.db.set_value('Accounts Settings', None, 'enable_common_party_accounting', 1)
