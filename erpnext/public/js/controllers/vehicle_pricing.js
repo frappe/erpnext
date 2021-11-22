@@ -182,6 +182,7 @@ $.extend(erpnext.vehicles.pricing, {
 			do_not_apply_withholding_tax: cint(frm.doc.do_not_apply_withholding_tax),
 			doctype: frm.doc.doctype,
 			name: frm.doc.name,
+			financer: frm.doc.financer,
 		};
 
 		if (frm.doc.doctype == "Vehicle Registration Order") {

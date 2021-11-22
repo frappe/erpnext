@@ -79,6 +79,11 @@ def get_pricing_components(component_type, args,
 					force = True
 				else:
 					continue
+			if component_doc.registration_component_type == "HPA":
+				if args.financer:
+					force = True
+				else:
+					continue
 
 		if get_selling_components:
 			selling_component = get_component_details(component_name, args, "selling")

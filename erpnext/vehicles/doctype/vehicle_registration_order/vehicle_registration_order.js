@@ -340,6 +340,35 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 		}
 	},
 
+	financer: function () {
+		this._super();
+
+		var me = this;
+		if (me.frm.doc.financer) {
+			return erpnext.vehicles.pricing.get_pricing_components({
+				frm: me.frm,
+				component_type: "Registration",
+				get_selling_components: true,
+				get_buying_components: true,
+				get_agent_components: true,
+				selling_components_field: 'customer_charges',
+				buying_components_field: 'authority_charges',
+				agent_components_field: 'agent_charges',
+				filters: {
+					registration_component_type: 'HPA'
+				},
+				callback: function () {
+					me.calculate_totals();
+				}
+			});
+		} else {
+			var filters = d => cint(d.component_type == "HPA");
+			erpnext.vehicles.pricing.remove_components(me.frm, 'customer_charges', filters);
+			erpnext.vehicles.pricing.remove_components(me.frm, 'authority_charges', filters);
+			erpnext.vehicles.pricing.remove_components(me.frm, 'agent_charges', filters);
+		}
+	},
+
 	component_amount: function () {
 		this.calculate_totals();
 	},
