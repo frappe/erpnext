@@ -110,10 +110,11 @@ class POSInvoiceMergeLog(Document):
 
 	def merge_pos_invoice_into(self, invoice, data):
 		items, payments, taxes = [], [], []
-		loyalty_amount_sum, loyalty_points_sum = 0, 0
+
+		write_off_amount, base_write_off_amount = 0, 0
 		rounding_adjustment, base_rounding_adjustment = 0, 0
 		rounded_total, base_rounded_total = 0, 0
-		write_off_amount, base_write_off_amount = 0, 0
+		loyalty_amount_sum, loyalty_points_sum, idx = 0, 0, 1
 
 		for doc in data:
 			map_doc(doc, invoice, table_map={ "doctype": invoice.doctype })
@@ -149,6 +150,8 @@ class POSInvoiceMergeLog(Document):
 
 				if not found:
 					tax.charge_type = 'Actual'
+					tax.idx = idx
+					idx += 1
 					tax.included_in_print_rate = 0
 					tax.tax_amount = tax.tax_amount_after_discount_amount
 					tax.base_tax_amount = tax.base_tax_amount_after_discount_amount
@@ -182,6 +185,7 @@ class POSInvoiceMergeLog(Document):
 		invoice.set('items', items)
 		invoice.set('payments', payments)
 		invoice.set('taxes', taxes)
+
 		invoice.set('rounding_adjustment', rounding_adjustment)
 		invoice.set('rounding_adjustment', base_rounding_adjustment)
 		invoice.set('base_rounded_total', base_rounded_total)
