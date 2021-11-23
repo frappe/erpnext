@@ -986,28 +986,28 @@ class TestDepreciationBasics(AssetSetup):
 		asset.calculate_depreciation = 1
 		asset.append("finance_books", {
 			"depreciation_method": "Straight Line",
-			"frequency_of_depreciation": 12,
+			"frequency_of_depreciation": 1,
 			"total_number_of_depreciations": 3,
 			"expected_value_after_useful_life": 10000,
-			"depreciation_start_date": "2020-12-31"
+			"depreciation_start_date": "2020-01-31"
 		})
 		asset.append("finance_books", {
 			"depreciation_method": "Straight Line",
-			"frequency_of_depreciation": 12,
+			"frequency_of_depreciation": 1,
 			"total_number_of_depreciations": 6,
 			"expected_value_after_useful_life": 10000,
-			"depreciation_start_date": "2020-12-31"
+			"depreciation_start_date": "2020-01-31"
 		})
 		asset.append("finance_books", {
 			"depreciation_method": "Straight Line",
 			"frequency_of_depreciation": 12,
 			"total_number_of_depreciations": 3,
 			"expected_value_after_useful_life": 10000,
-			"depreciation_start_date": "2023-12-31"
+			"depreciation_start_date": "2020-12-31"
 		})
 		asset.submit()
 
-		post_depreciation_entries(date="2023-01-01")
+		post_depreciation_entries(date="2020-04-01")
 		asset.load_from_db()
 
 		asset.clear_depreciation_schedule()
