@@ -676,5 +676,6 @@ def create_repost_item_valuation_entry(args):
 	repost_entry.company = args.company
 	repost_entry.allow_zero_rate = args.allow_zero_rate
 	repost_entry.flags.ignore_links = True
+	repost_entry.flags.ignore_permissions = True
 	repost_entry.save()
 	repost_entry.submit()

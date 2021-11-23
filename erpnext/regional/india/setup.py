@@ -791,7 +791,7 @@ def set_tax_withholding_category(company):
 		accounts = [dict(company=company, account=tds_account)]
 
 	try:
-		fiscal_year_details = get_fiscal_year(today(), verbose=0, company=company)
+		fiscal_year_details = get_fiscal_year(today(), verbose=0)
 	except FiscalYearError:
 		pass
 
