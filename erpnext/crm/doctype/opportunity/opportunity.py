@@ -83,7 +83,7 @@ class Opportunity(TransactionBase):
 				dynamic_link.link_name
 			).distinct().run(as_dict=True)
 
-			if customer and customer[0].customer:
+			if customer and customer[0].link_name:
 				self.party_name = customer[0].link_name
 				self.opportunity_from = "Customer"
 				return
