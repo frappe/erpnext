@@ -111,6 +111,7 @@ def validate_cancellation(args):
 				frappe.throw(_("Cannot cancel the transaction. Reposting of item valuation on submission is not completed yet."))
 			if repost_entry.status == 'Queued':
 				doc = frappe.get_doc("Repost Item Valuation", repost_entry.name)
+				doc.flags.ignore_permissions = True
 				doc.cancel()
 				doc.delete()
 

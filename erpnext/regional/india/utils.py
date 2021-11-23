@@ -74,11 +74,11 @@ def validate_tax_category(doc, method):
 			frappe.throw(_("Intra State tax category for GST State {0} already exists").format(doc.gst_state))
 
 def update_gst_category(doc, method):
-	if hasattr(doc, 'gst_category'):
-		for link in doc.links:
-			if link.link_doctype in ['Customer', 'Supplier']:
-				if doc.get('gstin'):
-					frappe.db.set_value(link.link_doctype, {'name': link.link_name, 'gst_category': 'Unregistered'}, 'gst_category', 'Registered Regular')
+	for link in doc.links:
+		if link.link_doctype in ['Customer', 'Supplier']:
+			meta = frappe.get_meta(link.link_doctype)
+			if doc.get('gstin') and meta.has_field('gst_category'):
+				frappe.db.set_value(link.link_doctype, {'name': link.link_name, 'gst_category': 'Unregistered'}, 'gst_category', 'Registered Regular')
 
 def set_gst_state_and_state_number(doc):
 	if not doc.gst_state:
