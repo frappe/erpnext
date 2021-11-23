@@ -33,17 +33,6 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Shopify Settings",
-   "link_count": 0,
-   "link_to": "Shopify Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Amazon MWS Settings",
    "link_count": 0,
    "link_to": "Amazon MWS Settings",
@@ -74,7 +63,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:15:58.951705",
+ "modified": "2021-11-23 04:30:33.106991",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "ERPNext Integrations Settings",
