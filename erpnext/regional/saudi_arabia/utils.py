@@ -28,14 +28,22 @@ def create_qr_code(doc, method):
 
 	for field in meta.get_image_fields():
 		if field.fieldname == 'qr_code':
+			from urllib.parse import urlencode
+
 			# Creating public url to print format
 			default_print_format = frappe.db.get_value('Property Setter', dict(property='default_print_format', doc_type=doc.doctype), "value")
 
 			# System Language
 			language = frappe.get_system_settings('language')
 
+			params = urlencode({
+				'format': default_print_format or 'Standard',
+				'_lang': language,
+				'key': doc.get_signature()
+			})
+
 			# creating qr code for the url
-			url = f"{ frappe.utils.get_url() }/{ doc.doctype }/{ doc.name }?format={ default_print_format or 'Standard' }&_lang={ language }&key={ doc.get_signature() }"
+			url = f"{ frappe.utils.get_url() }/{ doc.doctype }/{ doc.name }?{ params }"
 			qr_image = io.BytesIO()
 			url = qr_create(url, error='L')
 			url.png(qr_image, scale=2, quiet_zone=1)
@@ -75,3 +83,10 @@ def delete_qr_code_file(doc, method):
 			})
 			if len(file_doc):
 				frappe.delete_doc('File', file_doc[0].name)
+
+def delete_vat_settings_for_company(doc, method):
+	if doc.country != 'Saudi Arabia':
+		return
+
+	settings_doc = frappe.get_doc('KSA VAT Setting', {'company': doc.name})
+	settings_doc.delete()
