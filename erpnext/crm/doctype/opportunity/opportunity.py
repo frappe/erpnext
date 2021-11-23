@@ -78,7 +78,7 @@ class Opportunity(TransactionBase):
 			).on(
 				(contact.name == dynamic_link.parent)
 				& (dynamic_link.link_doctype == "Customer")
-				& (contact.email_id == 'anupam@frappe.io')
+				& (contact.email_id == self.contact_email)
 			).select(
 				dynamic_link.link_name
 			).distinct().run(as_dict=True)
