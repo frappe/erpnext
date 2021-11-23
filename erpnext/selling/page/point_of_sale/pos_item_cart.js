@@ -146,8 +146,8 @@ erpnext.PointOfSale.ItemCart = class {
 
 		this.$numpad_section.prepend(
 			`<div class="numpad-totals">
+			<span class="numpad-item-qty-total"></span>
 				<span class="numpad-net-total"></span>
-				<span class="numpad-item-qty-total"></span>
 				<span class="numpad-grand-total"></span>
 			</div>`
 		)
