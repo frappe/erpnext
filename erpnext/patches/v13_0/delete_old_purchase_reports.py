@@ -16,6 +16,8 @@ def execute():
 		if frappe.db.exists("Report", report):
 			delete_auto_email_reports(report)
 			check_and_delete_linked_reports(report)
+			for prepared_report in frappe.get_all('Prepared Report', filters={'ref_report_doctype': report}, pluck='name'):
+				frappe.delete_doc("Prepared Report", prepared_report)
 
 			frappe.delete_doc("Report", report)
 
