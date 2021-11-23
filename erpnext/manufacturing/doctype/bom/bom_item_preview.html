@@ -16,7 +16,7 @@
 			</div>
 			<hr style="margin: 15px -15px;">
 			<p>
-				{% if data.value != "BOM" %}
+				{% if data.value && data.value != "BOM" %}
 				<a style="margin-right: 7px; margin-bottom: 7px" class="btn btn-default btn-xs" href="#Form/BOM/{{ data.value }}">
 					{{ __("Open BOM {0}", [data.value.bold()]) }}</a>
 				{% endif %}
