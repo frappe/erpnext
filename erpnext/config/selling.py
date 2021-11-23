@@ -369,6 +369,12 @@ def get_data():
 					"doctype": "Sales Invoice"
 				},
 				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales For Discount Reason",
+					"doctype": "Sales Invoice"
+				},
+				{
 					"type": "doctype",
 					"name": "Sales For Customer"
 				},
