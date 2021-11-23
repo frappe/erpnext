@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder import DocType
 from frappe.utils import cint, cstr, flt, get_fullname
 
 from erpnext.setup.utils import get_exchange_rate
@@ -69,22 +70,21 @@ class Opportunity(TransactionBase):
 		"""Set lead against new opportunity"""
 		if (not self.get("party_name")) and self.contact_email:
 			# check if customer is already created agains the self.contact_email
-			customer = frappe.db.sql("""SELECT
-				DISTINCT `tabDynamic Link`.link_name AS customer
-				FROM
-					`tabContact`,
-					`tabDynamic Link`
-				WHERE `tabContact`.email_id='{0}'
-				AND
-					`tabContact`.name=`tabDynamic Link`.parent
-				AND
-					ifnull(`tabDynamic Link`.link_name, '')<>''
-				AND
-					`tabDynamic Link`.link_doctype='Customer'
-			""".format(self.contact_email), as_dict=True)
+			dynamic_link, contact = DocType("Dynamic Link"), DocType("Contact")
+			customer = frappe.qb.from_(
+				dynamic_link
+			).join(
+				contact
+			).on(
+				(contact.name == dynamic_link.parent)
+				& (dynamic_link.link_doctype == "Customer")
+				& (contact.email_id == 'anupam@frappe.io')
+			).select(
+				dynamic_link.link_name
+			).distinct().run(as_dict=True)
 
 			if customer and customer[0].customer:
-				self.party_name = customer[0].customer
+				self.party_name = customer[0].link_name
 				self.opportunity_from = "Customer"
 				return
 
