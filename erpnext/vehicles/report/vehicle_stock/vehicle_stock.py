@@ -164,8 +164,8 @@ class VehicleStockReport(object):
 				if vehicle_receipt_data:
 					d.chassis_no = vehicle_receipt_data.vehicle_chassis_no
 					d.engine_no = vehicle_receipt_data.vehicle_engine_no
-					d.license_plate = vehicle_receipt_data.vehicle_license_plate
-					d.unregistered = vehicle_receipt_data.vehicle_unregistered
+					d.license_plate = vehicle_receipt_data.vehicle_license_plate or d.license_plate
+					d.unregistered = vehicle_receipt_data.vehicle_unregistered or d.unregistered
 					d.color = vehicle_receipt_data.vehicle_color or d.color
 					d.odometer = cint(vehicle_receipt_data.vehicle_odometer) or None
 					d.vehicle_booking_order = vehicle_receipt_data.vehicle_booking_order
