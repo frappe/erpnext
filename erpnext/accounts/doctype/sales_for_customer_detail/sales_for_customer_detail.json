@@ -13,6 +13,8 @@
   "isv15",
   "taxed_sales_18",
   "isv18",
+  "partial_discount",
+  "discount",
   "total"
  ],
  "fields": [
@@ -75,10 +77,20 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Total"
+  },
+  {
+   "fieldname": "partial_discount",
+   "fieldtype": "Currency",
+   "label": "Partial Discount"
+  },
+  {
+   "fieldname": "discount",
+   "fieldtype": "Currency",
+   "label": "Discount"
   }
  ],
  "istable": 1,
- "modified": "2021-11-16 11:11:45.956531",
+ "modified": "2021-11-22 15:35:09.120310",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales For Customer Detail",

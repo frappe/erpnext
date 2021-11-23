@@ -22,7 +22,7 @@ class SalesForCustomer(Document):
 		split_serie = serie.split("-")
 		serie_final = ("{}-{}-{}").format(split_serie[0],split_serie[1],split_serie[2])
 
-		salary_slips = frappe.get_all("Sales Invoice", ["name","outstanding_amount", "total_advance", "status","naming_series", "creation_date", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total"], filters = condition,  order_by = "name asc")
+		salary_slips = frappe.get_all("Sales Invoice", ["name","outstanding_amount", "total_advance", "status","naming_series", "creation_date", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total", "partial_discount", "discount_amount"], filters = condition,  order_by = "name asc")
 
 		self.total_invoice = len(salary_slips)
 		self.total_operations = len(salary_slips)
@@ -94,6 +94,8 @@ class SalesForCustomer(Document):
 			taxed_sales18 = 0
 			isv18 = 0
 			cont = 0
+			discount = 0
+			partial_discount = 0
 
 			for salary_slip in salary_slips: 
 				date_validate = salary_slip.posting_date.strftime('%Y-%m-%d')
@@ -109,6 +111,8 @@ class SalesForCustomer(Document):
 					taxed_sales15 += salary_slip.taxed_sales15
 					isv15 += salary_slip.isv15
 					taxed_sales18 += salary_slip.taxed_sales18
+					discount += salary_slip.discount_amount
+					partial_discount += salary_slip.partial_discount
 					isv18 = salary_slip.isv18
 					authorized_range = salary_slip.authorized_range
 
@@ -130,16 +134,17 @@ class SalesForCustomer(Document):
 			row.date = creation_date
 			row.serie = serie_final
 			row.range = final_range
-			row.exempts_sales = total_exempt
+			row.exempts_sales = grand_total
 			row.exonerated = total_exonerated
 			row.taxed_sales_15 = taxed_sales15
 			row.isv15 = isv15
 			row.taxed_sales_18 = taxed_sales18
 			row.isv18 = isv18
 			row.total = grand_total
+			row.discount = discount
+			row.partial_discount = partial_discount
 
-			self.total_exempt_sales = 0
-			self.total_exempt_sales += total_exempt
+			self.total_exempt_sales += grand_total
 
 		self.total_cash = cash
 		self.total_cards = cards		
@@ -157,7 +162,8 @@ class SalesForCustomer(Document):
 		conditions += ', "company": "{}"'.format(self.company)
 		conditions += ', "posting_time": [">", "{}"]'.format(self.start_hour)
 		conditions += ', "posting_time": ["<", "{}"]'.format(self.final_hour)
-		conditions += ', "cashier": "{}"'.format(self.user)
+		if self.user != None:
+			conditions += ', "cashier": "{}"'.format(self.user)
 		conditions += ', "is_pos": 1'.format(self.user)
 		conditions += '}'			
 
@@ -181,6 +187,7 @@ class SalesForCustomer(Document):
 		conditions += ' and naming_series = {}'.format(self.prefix)
 		conditions += ' and posting_time >= {}'.format(self.start_hour)
 		conditions += ' and posting_time <= {}'.format(self.final_hour)
-		conditions += ' and cashier = {}'.format(self.user)
+		if self.user != None:
+			conditions += ' and cashier = {}'.format(self.user)
 
 		return conditions

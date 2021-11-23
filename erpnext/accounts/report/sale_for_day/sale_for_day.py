@@ -80,7 +80,7 @@ def return_data(filters):
 		grand_total = taxed_sales15 + isv15 + taxed_sales18 + isv18 + total_exempt
 		final_range = "{}-{}".format(initial_range, final_range)
 
-		row = [creation_date, serie_final, final_range, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, partial_discount, discount_amount, grand_total]
+		row = [creation_date, serie_final, final_range, grand_total, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, partial_discount, discount_amount, grand_total]
 		data.append(row)
 
 	return data
