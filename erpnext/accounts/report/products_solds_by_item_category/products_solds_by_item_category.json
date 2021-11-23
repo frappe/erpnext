@@ -1,0 +1,27 @@
+{
+ "add_total_row": 1,
+ "creation": "2021-11-23 13:08:15.824413",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2021-11-23 13:08:47.267189",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Products Solds By Item Category",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Sales Invoice",
+ "report_name": "Products Solds By Item Category",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ]
+}

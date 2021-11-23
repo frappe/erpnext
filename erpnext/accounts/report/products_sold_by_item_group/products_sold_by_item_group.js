@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Discount Reason Sales"] = {
+frappe.query_reports["Products Sold By Item Group"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
@@ -19,6 +19,18 @@ frappe.query_reports["Discount Reason Sales"] = {
 			"reqd": 1
 		},
 		{
+			"fieldname":"from_time",
+			"label": __("From Time"),
+			"fieldtype": "Time",
+			"reqd": 1
+		},
+		{
+			"fieldname":"to_time",
+			"label": __("To Time"),
+			"fieldtype": "Time",
+			"reqd": 1
+		},
+		{
 			"fieldname":"prefix",
 			"label": __("Prefix"),
 			"fieldtype": "Link",
@@ -26,17 +38,10 @@ frappe.query_reports["Discount Reason Sales"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"company",
-			"label": __("Company"),
+			"fieldname":"user",
+			"label": __("User"),
 			"fieldtype": "Link",
-			"options": "Company",
-			"reqd": 1
-		},
-		{
-			"fieldname":"discount_reason",
-			"label": __("Discount Reason"),
-			"fieldtype": "Link",
-			"options": "Reason For Discount"
+			"options": "User"
 		}
 	]
 };

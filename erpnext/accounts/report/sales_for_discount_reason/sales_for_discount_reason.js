@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Discount Reason Sales"] = {
+frappe.query_reports["Sales For Discount Reason"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
