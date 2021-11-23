@@ -23,18 +23,12 @@ frappe.ui.form.on('Job Card', {
 		);
 	},
 
-	onload: function(frm) {
-		if (frm.doc.scrap_items.length == 0) {
-			frm.fields_dict['scrap_items_section'].collapse();
-		}
-	},
-
 	refresh: function(frm) {
 		frappe.flags.pause_job = 0;
 		frappe.flags.resume_job = 0;
 		let has_items = frm.doc.items && frm.doc.items.length;
 
-		if (frm.doc.__onload.work_order_stopped) {
+		if (frm.doc.__onload.work_order_closed) {
 			frm.disable_save();
 			return;
 		}
