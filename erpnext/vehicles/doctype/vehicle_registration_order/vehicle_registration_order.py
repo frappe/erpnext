@@ -655,7 +655,8 @@ def get_journal_entry(vehicle_registration_order, purpose):
 		add_journal_entry_row(jv, -1 * vro.authority_outstanding)
 	elif purpose == "Agent Payment":
 		vro.validate_agent_mandatory()
-		add_journal_entry_row(jv, vro.agent_outstanding, vro.agent_account, 'Supplier', vro.agent, vro.name)
+		add_journal_entry_row(jv, vro.agent_outstanding, vro.agent_account, 'Supplier', vro.agent, vro.name,
+			remarks=vro.registration_customer_name or vro.customer_name)
 		add_journal_entry_row(jv, -1 * vro.agent_outstanding)
 	elif purpose == "Closing Entry":
 		unclosed_customer_amount = vro.get_unclosed_customer_amount()
@@ -727,7 +728,8 @@ def get_agent_payment_voucher(names):
 		elif vro.company != company:
 			continue
 
-		row = add_journal_entry_row(jv, vro.agent_outstanding, vro.agent_account, 'Supplier', vro.agent, vro.name)
+		row = add_journal_entry_row(jv, vro.agent_outstanding, vro.agent_account, 'Supplier', vro.agent, vro.name,
+			remarks=vro.registration_customer_name or vro.customer_name)
 		row.vehicle_booking_order = vro.vehicle_booking_order
 		row.applies_to_vehicle = vro.vehicle
 		row.update(get_fetch_values(row.doctype, "applies_to_vehicle", row.applies_to_vehicle))
