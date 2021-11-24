@@ -124,13 +124,15 @@
    "fieldtype": "Float",
    "label": "Hour Rate",
    "oldfieldname": "hour_rate",
-   "oldfieldtype": "Currency"
+   "oldfieldtype": "Currency",
+   "read_only": 1
   },
   {
    "fieldname": "planned_operating_cost",
    "fieldtype": "Currency",
    "label": "Planned Operating Cost",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_9",
@@ -142,14 +144,16 @@
    "fieldname": "actual_start_time",
    "fieldtype": "Datetime",
    "label": "Actual Start Time",
-   "no_copy": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "description": "Updated via 'Time Log' (In Minutes)",
    "fieldname": "actual_end_time",
    "fieldtype": "Datetime",
    "label": "Actual End Time",
-   "no_copy": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_11",
@@ -160,7 +164,8 @@
    "fieldname": "actual_operation_time",
    "fieldtype": "Float",
    "label": "Actual Operation Time",
-   "no_copy": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "description": "(Hour Rate / 60) * Actual Operation Time",
@@ -168,7 +173,8 @@
    "fieldtype": "Currency",
    "label": "Actual Operating Cost",
    "no_copy": 1,
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
    "fieldname": "batch_size",
@@ -194,7 +200,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-11-03 11:09:48.788530",
+ "modified": "2021-11-24 04:52:54.295168",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Operation",
