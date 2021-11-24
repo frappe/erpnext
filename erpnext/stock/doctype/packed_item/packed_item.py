@@ -106,11 +106,15 @@ def cleanup_packing_list(doc, parent_items):
 	if not delete_list:
 		return doc
 
+	index = 1
 	packed_items = doc.get("packed_items")
 	doc.set("packed_items", [])
+
 	for d in packed_items:
 		if d not in delete_list:
+			d.idx = index
 			doc.append("packed_items", d)
+			index += 1
 
 def update_product_bundle_price(doc, parent_items):
 	"""Updates the prices of Product Bundles based on the rates of the Items in the bundle."""
