@@ -562,6 +562,11 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			self.db_set('status', self.status, update_modified=update_modified)
 
 
+@frappe.whitelist()
+def get_vehicle_registration_order_name(vehicle=None, vehicle_booking_order=None):
+	return get_vehicle_registration_order(vehicle, vehicle_booking_order)
+
+
 def get_vehicle_registration_order(vehicle=None, vehicle_booking_order=None, fields='name', as_dict=False):
 	vehicle_registration_order = None
 
@@ -583,7 +588,9 @@ def get_vehicle_registration_order(vehicle=None, vehicle_booking_order=None, fie
 	return vehicle_registration_order
 
 
-def get_vehicle_registration_order_details(vehicle_registration_order, get_customer=False):
+@frappe.whitelist()
+def get_vehicle_registration_order_details(vehicle_registration_order, get_customer=False, get_vehicle=False,
+		get_vehicle_booking_order=False):
 	details = frappe._dict()
 	if vehicle_registration_order:
 		details = frappe.db.get_value("Vehicle Registration Order", vehicle_registration_order, [
@@ -591,6 +598,9 @@ def get_vehicle_registration_order_details(vehicle_registration_order, get_custo
 			'customer', 'customer_name',
 			'registration_customer', 'registration_customer_name',
 			'financer', 'financer_name', 'lessee_name',
+			'vehicle_booking_order',
+			'vehicle', 'item_code', 'item_name',
+			'vehicle_chassis_no', 'vehicle_engine_no', 'vehicle_license_plate',
 		], as_dict=1) or frappe._dict()
 
 	out = frappe._dict()
@@ -599,9 +609,21 @@ def get_vehicle_registration_order_details(vehicle_registration_order, get_custo
 		out.agent = details.agent
 		out.agent_name = details.agent_name
 
-		if get_customer and details.registration_customer:
+		if cint(get_customer) and details.registration_customer:
 			out.customer = details.registration_customer
 			out.financer = details.financer
+			out.registration_customer_name = details.registration_customer_name
+
+		if cint(get_vehicle_booking_order):
+			out.vehicle_booking_order = details.vehicle_booking_order
+
+		if cint(get_vehicle):
+			out.vehicle = details.vehicle
+			out.item_code = details.item_code
+			out.item_name = details.item_name
+			out.vehicle_chassis_no = details.vehicle_chassis_no
+			out.vehicle_engine_no = details.vehicle_engine_no
+			out.vehicle_license_plate = details.vehicle_license_plate
 
 	return out
 
@@ -686,10 +708,17 @@ def get_agent_payment_voucher(names):
 	jv.posting_date = frappe.utils.nowdate()
 	jv.vehicle_registration_purpose = 'Agent Payment'
 
+	visited = set()
+
 	for name in names:
+		if name in visited or not name:
+			continue
+		else:
+			visited.add(name)
+
 		vro = frappe.get_doc("Vehicle Registration Order", name)
 
-		if vro.docstatus != 1 or not vro.agent or not flt(vro.agent_outstanding):
+		if vro.docstatus != 1 or not vro.agent:
 			continue
 
 		if not company:
@@ -706,7 +735,7 @@ def get_agent_payment_voucher(names):
 		total_amount += flt(vro.agent_outstanding)
 
 	if not total_amount:
-		frappe.throw(_("No Agent payable Vehicle Registration Order selected"))
+		frappe.throw(_("No Vehicle Registration Order selected"))
 
 	add_journal_entry_row(jv, -1 * total_amount)
 
