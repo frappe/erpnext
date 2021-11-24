@@ -220,7 +220,7 @@ def get_assessment_criteria(course):
 
 	:param Course: Course
 	"""
-	return frappe.get_all("Course Assessment Criteria", \
+	return frappe.get_all("Course Assessment Criteria",
 		fields=["assessment_criteria", "weightage"], filters={"parent": course}, order_by= "idx")
 
 
@@ -253,7 +253,7 @@ def get_assessment_details(assessment_plan):
 
 	:param Assessment Plan: Assessment Plan
 	"""
-	return frappe.get_all("Assessment Plan Criteria", \
+	return frappe.get_all("Assessment Plan Criteria",
 		fields=["assessment_criteria", "maximum_score", "docstatus"], filters={"parent": assessment_plan}, order_by= "idx")
 
 
