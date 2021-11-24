@@ -116,7 +116,7 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 				precision('customer_total'));
 			var unclosed_agent_amount = flt(flt(this.frm.doc.agent_total) - flt(this.frm.doc.agent_closed_amount),
 				precision('agent_total'));
-			if (unclosed_customer_amount || (this.frm.doc.agent && unclosed_agent_amount)) {
+			if (unclosed_customer_amount || unclosed_agent_amount) {
 				this.frm.add_custom_button(__('Closing Entry'), () => this.make_journal_entry('Closing Entry'));
 			}
 

@@ -38,10 +38,10 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		self.set_customer_details(for_validate=True)
 		self.get_disallow_on_submit_fields()
 		self.validate_common()
-		self.validate_agent_mandatory()
 
 	def validate_common(self):
 		self.validate_registration_party()
+		self.validate_account_mandatory()
 		self.validate_pricing_components()
 		self.calculate_totals()
 		self.calculate_outstanding_amount()
@@ -58,9 +58,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 	def before_submit(self):
 		if not self.vehicle and not self.vehicle_booking_order:
 			frappe.throw(_("Please set either Vehicle Booking Order or Vehicle"))
-
-		self.validate_agent_mandatory()
-		self.validate_account_mandatory()
 
 	def on_submit(self):
 		self.update_vehicle_booking_order_registration()
@@ -215,8 +212,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		validate_component_type("Registration", self.get('authority_charges'))
 
 	def validate_agent_mandatory(self):
-		if self.agent_charges and not self.agent:
-			frappe.throw(_("Registration Agent is mandatory if Agent Charges are set"))
+		if not self.agent:
+			frappe.throw(_("Please set Agent first"))
 
 	def validate_account_mandatory(self):
 		if not self.customer_account:
@@ -635,6 +632,7 @@ def get_journal_entry(vehicle_registration_order, purpose):
 		add_journal_entry_row(jv, vro.authority_outstanding, vro.customer_account, 'Customer', vro.customer, vro.name)
 		add_journal_entry_row(jv, -1 * vro.authority_outstanding)
 	elif purpose == "Agent Payment":
+		vro.validate_agent_mandatory()
 		add_journal_entry_row(jv, vro.agent_outstanding, vro.agent_account, 'Supplier', vro.agent, vro.name)
 		add_journal_entry_row(jv, -1 * vro.agent_outstanding)
 	elif purpose == "Closing Entry":
@@ -644,7 +642,10 @@ def get_journal_entry(vehicle_registration_order, purpose):
 
 		if unclosed_customer_amount:
 			add_journal_entry_row(jv, unclosed_customer_amount, vro.customer_account, 'Customer', vro.customer, vro.name)
+
 		if unclosed_agent_amount:
+			vro.validate_agent_mandatory()
+
 			if not flt(vro.agent_closed_amount):
 				for d in vro.agent_charges:
 					remarks = None
@@ -655,6 +656,7 @@ def get_journal_entry(vehicle_registration_order, purpose):
 						'Supplier', vro.agent, vro.name, remarks=remarks)
 			else:
 				add_journal_entry_row(jv, -1 * unclosed_agent_amount, vro.agent_account, 'Supplier', vro.agent, vro.name)
+
 		if unclosed_income_amount:
 			registration_income_account = frappe.get_cached_value("Vehicles Settings", None, 'registration_income_account')
 			add_journal_entry_row(jv, -1 * unclosed_income_amount, registration_income_account)
