@@ -189,7 +189,8 @@ def update_product_bundle_price(doc, parent_items):
 		else:
 			update_parent_item_price(doc, parent_items[parent_items_index][0], bundle_price)
 
-			bundle_price = 0
+			bundle_item_rate = bundle_item.rate if bundle_item.rate else 0
+			bundle_price = bundle_item.qty * bundle_item_rate
 			parent_items_index += 1
 
 	# for the last product bundle
