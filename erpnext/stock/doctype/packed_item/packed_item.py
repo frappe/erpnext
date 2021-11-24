@@ -94,7 +94,7 @@ def make_packing_list(doc):
     for d in doc.get("items"):
         if frappe.db.get_value("Product Bundle", {"new_item_code": d.item_code}):
             for i in get_product_bundle_items(d.item_code, d.uom):
-                update_packing_list_item(doc, i.item_code, flt(i.qty), d, i.description, pb_item)
+                update_packing_list_item(doc, i.item_code, flt(i.qty)*flt(d.stock_qty), d, i.description, pb_item)
 
             if [d.item_code, d.name] not in parent_items:
                 parent_items.append([d.item_code, d.name])
