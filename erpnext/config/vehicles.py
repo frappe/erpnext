@@ -31,6 +31,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Vehicle Quotation",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
@@ -87,6 +88,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Vehicle Registration Order",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
