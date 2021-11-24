@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 from datetime import datetime
 
@@ -339,7 +337,7 @@ def set_documents_with_active_service_level_agreement():
 
 def apply(doc, method=None):
 	# Applies SLA to document on validate
-	if frappe.flags.in_patch or frappe.flags.in_install or frappe.flags.in_setup_wizard or \
+	if frappe.flags.in_patch or frappe.flags.in_migrate or frappe.flags.in_install or frappe.flags.in_setup_wizard or \
 		doc.doctype not in get_documents_with_active_service_level_agreement():
 		return
 

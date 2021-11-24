@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 import os
@@ -202,7 +201,6 @@ def install(country=None):
 		{'doctype': "Party Type", "party_type": "Student", "account_type": "Receivable"},
 		{'doctype': "Party Type", "party_type": "Donor", "account_type": "Receivable"},
 
-		{'doctype': "Opportunity Type", "name": "Hub"},
 		{'doctype': "Opportunity Type", "name": _("Sales")},
 		{'doctype': "Opportunity Type", "name": _("Support")},
 		{'doctype': "Opportunity Type", "name": _("Maintenance")},
@@ -264,16 +262,26 @@ def install(country=None):
 	base_path = frappe.get_app_path("erpnext", "hr", "doctype")
 	response = frappe.read_file(os.path.join(base_path, "leave_application/leave_application_email_template.html"))
 
-	records += [{'doctype': 'Email Template', 'name': _("Leave Approval Notification"), 'response': response,\
+	records += [{'doctype': 'Email Template', 'name': _("Leave Approval Notification"), 'response': response,
 		'subject': _("Leave Approval Notification"), 'owner': frappe.session.user}]
 
-	records += [{'doctype': 'Email Template', 'name': _("Leave Status Notification"), 'response': response,\
+	records += [{'doctype': 'Email Template', 'name': _("Leave Status Notification"), 'response': response,
 		'subject': _("Leave Status Notification"), 'owner': frappe.session.user}]
+
+	response = frappe.read_file(os.path.join(base_path, "interview/interview_reminder_notification_template.html"))
+
+	records += [{'doctype': 'Email Template', 'name': _('Interview Reminder'), 'response': response,
+		'subject': _('Interview Reminder'), 'owner': frappe.session.user}]
+
+	response = frappe.read_file(os.path.join(base_path, "interview/interview_feedback_reminder_template.html"))
+
+	records += [{'doctype': 'Email Template', 'name': _('Interview Feedback Reminder'), 'response': response,
+		'subject': _('Interview Feedback Reminder'), 'owner': frappe.session.user}]
 
 	base_path = frappe.get_app_path("erpnext", "stock", "doctype")
 	response = frappe.read_file(os.path.join(base_path, "delivery_trip/dispatch_notification_template.html"))
 
-	records += [{'doctype': 'Email Template', 'name': _("Dispatch Notification"), 'response': response,\
+	records += [{'doctype': 'Email Template', 'name': _("Dispatch Notification"), 'response': response,
 		'subject': _("Your order is out for delivery!"), 'owner': frappe.session.user}]
 
 	# Records for the Supplier Scorecard
@@ -317,6 +325,14 @@ def update_hr_defaults():
 	hr_settings.emp_created_by = "Naming Series"
 	hr_settings.leave_approval_notification_template = _("Leave Approval Notification")
 	hr_settings.leave_status_notification_template = _("Leave Status Notification")
+
+	hr_settings.send_interview_reminder = 1
+	hr_settings.interview_reminder_template = _("Interview Reminder")
+	hr_settings.remind_before = "00:15:00"
+
+	hr_settings.send_interview_feedback_reminder = 1
+	hr_settings.feedback_reminder_notification_template = _("Interview Feedback Reminder")
+
 	hr_settings.save()
 
 def update_item_variant_settings():

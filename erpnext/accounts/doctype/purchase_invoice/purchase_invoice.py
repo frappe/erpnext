@@ -1,20 +1,19 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-# -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _, throw
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
-from six import iteritems
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	check_if_return_invoice_linked_with_payment_entry,
+	get_total_in_party_account_currency,
+	is_overdue,
 	unlink_inter_company_doc,
 	update_linked_doc,
 	validate_inter_company_party,
@@ -600,7 +599,7 @@ class PurchaseInvoice(BuyingController):
 
 					# Amount added through landed-cost-voucher
 					if landed_cost_entries:
-						for account, amount in iteritems(landed_cost_entries[(item.item_code, item.name)]):
+						for account, amount in landed_cost_entries[(item.item_code, item.name)].items():
 							gl_entries.append(self.get_gl_dict({
 								"account": account,
 								"against": item.expense_account,
@@ -1145,6 +1144,12 @@ class PurchaseInvoice(BuyingController):
 		if not self.apply_tds:
 			return
 
+		if self.apply_tds and not self.get('tax_withholding_category'):
+			self.tax_withholding_category = frappe.db.get_value('Supplier', self.supplier, 'tax_withholding_category')
+
+		if not self.tax_withholding_category:
+			return
+
 		tax_withholding_details = get_party_tax_withholding_details(self, self.tax_withholding_category)
 
 		if not tax_withholding_details:
@@ -1175,10 +1180,8 @@ class PurchaseInvoice(BuyingController):
 				self.status = 'Draft'
 			return
 
-		precision = self.precision("outstanding_amount")
-		outstanding_amount = flt(self.outstanding_amount, precision)
-		due_date = getdate(self.due_date)
-		nowdate = getdate()
+		outstanding_amount = flt(self.outstanding_amount, self.precision("outstanding_amount"))
+		total = get_total_in_party_account_currency(self)
 
 		if not status:
 			if self.docstatus == 2:
@@ -1186,9 +1189,11 @@ class PurchaseInvoice(BuyingController):
 			elif self.docstatus == 1:
 				if self.is_internal_transfer():
 					self.status = 'Internal Transfer'
-				elif outstanding_amount > 0 and due_date < nowdate:
+				elif is_overdue(self, total):
 					self.status = "Overdue"
-				elif outstanding_amount > 0 and due_date >= nowdate:
+				elif 0 < outstanding_amount < total:
+					self.status = "Partly Paid"
+				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate():
 					self.status = "Unpaid"
 				#Check if outstanding amount is 0 due to debit note issued against invoice
 				elif outstanding_amount <= 0 and self.is_return == 0 and frappe.db.get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):

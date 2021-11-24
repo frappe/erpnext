@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
-
-from __future__ import unicode_literals
-
 import datetime
 import json
 
@@ -37,6 +33,11 @@ class OperationSequenceError(frappe.ValidationError): pass
 class JobCardCancelError(frappe.ValidationError): pass
 
 class JobCard(Document):
+	def onload(self):
+		excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
+		self.set_onload("job_card_excess_transfer", excess_transfer)
+		self.set_onload("work_order_closed", self.is_work_order_closed())
+
 	def validate(self):
 		self.validate_time_logs()
 		self.set_status()
@@ -44,6 +45,7 @@ class JobCard(Document):
 		self.validate_sequence_id()
 		self.set_sub_operations()
 		self.update_sub_operation_status()
+		self.validate_work_order()
 
 	def set_sub_operations(self):
 		if self.operation:
@@ -91,7 +93,7 @@ class JobCard(Document):
 		if args.get("employee"):
 			# override capacity for employee
 			production_capacity = 1
-			validate_overlap_for = " and jc.employee = %(employee)s "
+			validate_overlap_for = " and jctl.employee = %(employee)s "
 
 		extra_cond = ''
 		if check_next_available_slot:
@@ -449,6 +451,7 @@ class JobCard(Document):
 			frappe.db.set_value('Job Card Item', row.job_card_item, 'transferred_qty', flt(qty))
 
 	def set_transferred_qty(self, update_status=False):
+		"Set total FG Qty for which RM was transferred."
 		if not self.items:
 			self.transferred_qty = self.for_quantity if self.docstatus == 1 else 0
 
@@ -457,6 +460,7 @@ class JobCard(Document):
 			return
 
 		if self.items:
+			# sum of 'For Quantity' of Stock Entries against JC
 			self.transferred_qty = frappe.db.get_value('Stock Entry', {
 				'job_card': self.name,
 				'work_order': self.work_order,
@@ -500,11 +504,11 @@ class JobCard(Document):
 			self.status = 'Work In Progress'
 
 		if (self.docstatus == 1 and
-			(self.for_quantity == self.transferred_qty or not self.items)):
+			(self.for_quantity <= self.total_completed_qty or not self.items)):
 			self.status = 'Completed'
 
 		if self.status != 'Completed':
-			if self.for_quantity == self.transferred_qty:
+			if self.for_quantity <= self.transferred_qty:
 				self.status = 'Material Transferred'
 
 		if update_status:
@@ -544,6 +548,18 @@ class JobCard(Document):
 				frappe.throw(_("{0}, complete the operation {1} before the operation {2}.")
 					.format(message, bold(row.operation), bold(self.operation)), OperationSequenceError)
 
+	def validate_work_order(self):
+		if self.is_work_order_closed():
+			frappe.throw(_("You can't make any changes to Job Card since Work Order is closed."))
+
+	def is_work_order_closed(self):
+		if self.work_order:
+			status = frappe.get_value('Work Order', self.work_order)
+
+			if status == "Closed":
+				return True
+
+		return False
 
 @frappe.whitelist()
 def make_time_log(args):
@@ -600,7 +616,8 @@ def make_material_request(source_name, target_doc=None):
 			"doctype": "Material Request Item",
 			"field_map": {
 				"required_qty": "qty",
-				"uom": "stock_uom"
+				"uom": "stock_uom",
+				"name": "job_card_item"
 			},
 			"postprocess": update_item,
 		}
@@ -610,15 +627,24 @@ def make_material_request(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None):
-	def update_item(obj, target, source_parent):
+	def update_item(source, target, source_parent):
 		target.t_warehouse = source_parent.wip_warehouse
+
 		if not target.conversion_factor:
 			target.conversion_factor = 1
+
+		pending_rm_qty = flt(source.required_qty) - flt(source.transferred_qty)
+		if pending_rm_qty > 0:
+			target.qty = pending_rm_qty
 
 	def set_missing_values(source, target):
 		target.purpose = "Material Transfer for Manufacture"
 		target.from_bom = 1
-		target.fg_completed_qty = source.get('for_quantity', 0) - source.get('transferred_qty', 0)
+
+		# avoid negative 'For Quantity'
+		pending_fg_qty = flt(source.get('for_quantity', 0)) - flt(source.get('transferred_qty', 0))
+		target.fg_completed_qty = pending_fg_qty if pending_fg_qty > 0 else 0
+
 		target.set_transfer_qty()
 		target.calculate_rate_and_amount()
 		target.set_missing_values()
@@ -668,7 +694,7 @@ def get_job_details(start, end, filters=None):
 	conditions = get_filters_cond("Job Card", filters, [])
 
 	job_cards = frappe.db.sql(""" SELECT `tabJob Card`.name, `tabJob Card`.work_order,
-			`tabJob Card`.employee_name, `tabJob Card`.status, ifnull(`tabJob Card`.remarks, ''),
+			`tabJob Card`.status, ifnull(`tabJob Card`.remarks, ''),
 			min(`tabJob Card Time Log`.from_time) as from_time,
 			max(`tabJob Card Time Log`.to_time) as to_time
 		FROM `tabJob Card` , `tabJob Card Time Log`
@@ -678,7 +704,7 @@ def get_job_details(start, end, filters=None):
 
 	for d in job_cards:
 			subject_data = []
-			for field in ["name", "work_order", "remarks", "employee_name"]:
+			for field in ["name", "work_order", "remarks"]:
 				if not d.get(field): continue
 
 				subject_data.append(d.get(field))

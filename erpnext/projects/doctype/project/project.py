@@ -1,7 +1,6 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from email_reply_parser import EmailReplyParser
@@ -143,6 +142,9 @@ class Project(Document):
 		self.copy_from_template()
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
+
+	def on_trash(self):
+		frappe.db.set_value("Sales Order", {"project": self.name}, "project", "")
 
 	def update_percent_complete(self):
 		if self.percent_complete_method == "Manual":

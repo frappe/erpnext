@@ -1,6 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
 import calendar
 import random
@@ -17,6 +16,7 @@ from frappe.utils import (
 	getdate,
 	nowdate,
 )
+from frappe.utils.make_random import get_random
 
 import erpnext
 from erpnext.accounts.utils import get_fiscal_year
@@ -132,6 +132,59 @@ class TestSalarySlip(unittest.TestCase):
 
 		self.assertEqual(ss.payment_days, days_in_month - no_of_holidays - 4)
 
+		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Leave")
+
+	def test_component_amount_dependent_on_another_payment_days_based_component(self):
+		from erpnext.hr.doctype.attendance.attendance import mark_attendance
+		from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
+			create_salary_structure_assignment,
+		)
+
+		# Payroll based on attendance
+		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Attendance")
+
+		salary_structure = make_salary_structure_for_payment_days_based_component_dependency()
+		employee = make_employee("test_payment_days_based_component@salary.com", company="_Test Company")
+
+		# base = 50000
+		create_salary_structure_assignment(employee, salary_structure.name, company="_Test Company", currency="INR")
+
+		# mark employee absent for a day since this case works fine if payment days are equal to working days
+		month_start_date = get_first_day(nowdate())
+		month_end_date = get_last_day(nowdate())
+
+		first_sunday = frappe.db.sql("""
+			select holiday_date from `tabHoliday`
+			where parent = 'Salary Slip Test Holiday List'
+				and holiday_date between %s and %s
+			order by holiday_date
+		""", (month_start_date, month_end_date))[0][0]
+
+		mark_attendance(employee, add_days(first_sunday, 1), 'Absent', ignore_validate=True) # counted as absent
+
+		# make salary slip and assert payment days
+		ss = make_salary_slip_for_payment_days_dependency_test("test_payment_days_based_component@salary.com", salary_structure.name)
+		self.assertEqual(ss.absent_days, 1)
+
+		ss.reload()
+		payment_days_based_comp_amount = 0
+		for component in ss.earnings:
+			if component.salary_component == "HRA - Payment Days":
+				payment_days_based_comp_amount = flt(component.amount, component.precision("amount"))
+				break
+
+		# check if the dependent component is calculated using the amount updated after payment days
+		actual_amount = 0
+		precision = 0
+		for component in ss.deductions:
+			if component.salary_component == "P - Employee Provident Fund":
+				precision = component.precision("amount")
+				actual_amount = flt(component.amount, precision)
+				break
+
+		expected_amount = flt((flt(ss.gross_pay) - payment_days_based_comp_amount) * 0.12, precision)
+
+		self.assertEqual(actual_amount, expected_amount)
 		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Leave")
 
 	def test_salary_slip_with_holidays_included(self):
@@ -480,6 +533,61 @@ class TestSalarySlip(unittest.TestCase):
 		frappe.db.sql("""delete from `tabAdditional Salary` where employee=%s""", (employee))
 
 		# undelete fixture data
+		frappe.db.rollback()
+
+	def test_tax_for_recurring_additional_salary(self):
+		frappe.db.sql("""delete from `tabPayroll Period`""")
+		frappe.db.sql("""delete from `tabSalary Component`""")
+
+		payroll_period = create_payroll_period()
+
+		create_tax_slab(payroll_period, allow_tax_exemption=True)
+
+		employee = make_employee("test_tax@salary.slip")
+		delete_docs = [
+			"Salary Slip",
+			"Additional Salary",
+			"Employee Tax Exemption Declaration",
+			"Employee Tax Exemption Proof Submission",
+			"Employee Benefit Claim",
+			"Salary Structure Assignment"
+		]
+		for doc in delete_docs:
+			frappe.db.sql("delete from `tab%s` where employee='%s'" % (doc, employee))
+
+		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
+
+		salary_structure = make_salary_structure("Stucture to test tax", "Monthly",
+			other_details={"max_benefits": 100000}, test_tax=True,
+			employee=employee, payroll_period=payroll_period)
+
+
+		create_salary_slips_for_payroll_period(employee, salary_structure.name,
+			payroll_period, deduct_random=False, num=3)
+
+		tax_paid = get_tax_paid_in_period(employee)
+
+		annual_tax = 23196.0
+		self.assertEqual(tax_paid, annual_tax)
+
+		frappe.db.sql("""delete from `tabSalary Slip` where employee=%s""", (employee))
+
+		#------------------------------------
+		# Recurring additional salary
+		start_date = add_months(payroll_period.start_date, 3)
+		end_date = add_months(payroll_period.start_date, 5)
+		create_recurring_additional_salary(employee, "Performance Bonus", 20000, start_date, end_date)
+
+		frappe.db.sql("""delete from `tabSalary Slip` where employee=%s""", (employee))
+
+		create_salary_slips_for_payroll_period(employee, salary_structure.name,
+			payroll_period, deduct_random=False, num=4)
+
+		tax_paid = get_tax_paid_in_period(employee)
+
+		annual_tax = 32315.0
+		self.assertEqual(tax_paid, annual_tax)
+
 		frappe.db.rollback()
 
 	def make_activity_for_employee(self):
@@ -864,3 +972,106 @@ def make_holiday_list():
 		holiday_list = holiday_list.name
 
 	return holiday_list
+
+def make_salary_structure_for_payment_days_based_component_dependency():
+	earnings = [
+		{
+			"salary_component": "Basic Salary - Payment Days",
+			"abbr": "P_BS",
+			"type": "Earning",
+			"formula": "base",
+			"amount_based_on_formula": 1
+		},
+		{
+			"salary_component": "HRA - Payment Days",
+			"abbr": "P_HRA",
+			"type": "Earning",
+			"depends_on_payment_days": 1,
+			"amount_based_on_formula": 1,
+			"formula": "base * 0.20"
+		}
+	]
+
+	make_salary_component(earnings, False, company_list=["_Test Company"])
+
+	deductions = [
+		{
+			"salary_component": "P - Professional Tax",
+			"abbr": "P_PT",
+			"type": "Deduction",
+			"depends_on_payment_days": 1,
+			"amount": 200.00
+		},
+		{
+			"salary_component": "P - Employee Provident Fund",
+			"abbr": "P_EPF",
+			"type": "Deduction",
+			"exempted_from_income_tax": 1,
+			"amount_based_on_formula": 1,
+			"depends_on_payment_days": 0,
+			"formula": "(gross_pay - P_HRA) * 0.12"
+		}
+	]
+
+	make_salary_component(deductions, False, company_list=["_Test Company"])
+
+	salary_structure = "Salary Structure with PF"
+	if frappe.db.exists("Salary Structure", salary_structure):
+		frappe.db.delete("Salary Structure", salary_structure)
+
+	details = {
+		"doctype": "Salary Structure",
+		"name": salary_structure,
+		"company": "_Test Company",
+		"payroll_frequency": "Monthly",
+		"payment_account": get_random("Account", filters={"account_currency": "INR"}),
+		"currency": "INR"
+	}
+
+	salary_structure_doc = frappe.get_doc(details)
+
+	for entry in earnings:
+		salary_structure_doc.append("earnings", entry)
+
+	for entry in deductions:
+		salary_structure_doc.append("deductions", entry)
+
+	salary_structure_doc.insert()
+	salary_structure_doc.submit()
+
+	return salary_structure_doc
+
+def make_salary_slip_for_payment_days_dependency_test(employee, salary_structure):
+	employee = frappe.db.get_value(
+		"Employee",
+		{"user_id": employee},
+		["name", "company", "employee_name"],
+		as_dict=True
+	)
+
+	salary_slip_name = frappe.db.get_value("Salary Slip", {"employee": employee.name})
+
+	if not salary_slip_name:
+		salary_slip = make_salary_slip(salary_structure, employee=employee.name)
+		salary_slip.employee_name = employee.employee_name
+		salary_slip.payroll_frequency = "Monthly"
+		salary_slip.posting_date = nowdate()
+		salary_slip.insert()
+	else:
+		salary_slip = frappe.get_doc("Salary Slip", salary_slip_name)
+
+	return salary_slip
+
+def create_recurring_additional_salary(employee, salary_component, amount, from_date, to_date, company=None):
+	frappe.get_doc({
+		"doctype": "Additional Salary",
+		"employee": employee,
+		"company": company or erpnext.get_default_company(),
+		"salary_component": salary_component,
+		"is_recurring": 1,
+		"from_date": from_date,
+		"to_date": to_date,
+		"amount": amount,
+		"type": "Earning",
+		"currency": erpnext.get_default_currency()
+	}).submit()

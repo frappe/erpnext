@@ -1,12 +1,10 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
 from frappe.utils import cint, cstr
-from six import iteritems
 
 from erpnext.accounts.report.financial_statements import (
 	get_columns,
@@ -139,9 +137,9 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 	data["total"] = total
 	return data
 
-def get_account_type_based_gl_data(company, start_date, end_date, account_type, filters={}):
+def get_account_type_based_gl_data(company, start_date, end_date, account_type, filters=None):
 	cond = ""
-	filters = frappe._dict(filters)
+	filters = frappe._dict(filters or {})
 
 	if filters.include_default_book_entries:
 		company_fb = frappe.db.get_value("Company", company, 'default_finance_book')
@@ -202,7 +200,7 @@ def add_total_row_account(out, data, label, period_list, currency, summary_data,
 def get_report_summary(summary_data, currency):
 	report_summary = []
 
-	for label, value in iteritems(summary_data):
+	for label, value in summary_data.items():
 		report_summary.append(
 			{
 				"value": value,

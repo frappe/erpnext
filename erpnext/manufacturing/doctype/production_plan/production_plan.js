@@ -105,7 +105,7 @@ frappe.ui.form.on('Production Plan', {
 		}
 		frm.trigger("material_requirement");
 
-		const projected_qty_formula = ` <table class="table table-bordered" style="background-color: #f9f9f9;">
+		const projected_qty_formula = ` <table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 			<tr><td style="padding-left:25px">
 				<div>
 				<h3 style="text-decoration: underline;">
@@ -242,6 +242,8 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	get_sub_assembly_items: function(frm) {
+		frm.dirty();
+
 		frappe.call({
 			method: "get_sub_assembly_items",
 			freeze: true,
@@ -431,6 +433,25 @@ frappe.ui.form.on("Material Request Plan Item", {
 				}
 			})
 		}
+	}
+});
+
+frappe.ui.form.on("Production Plan Sales Order", {
+	sales_order(frm, cdt, cdn) {
+		const { sales_order } = locals[cdt][cdn];
+		if (!sales_order) {
+			return;
+		}
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_so_details",
+			args: { sales_order },
+			callback(r) {
+				const {transaction_date, customer, grand_total} = r.message;
+				frappe.model.set_value(cdt, cdn, 'sales_order_date', transaction_date);
+				frappe.model.set_value(cdt, cdn, 'customer', customer);
+				frappe.model.set_value(cdt, cdn, 'grand_total', grand_total);
+			}
+		});
 	}
 });
 

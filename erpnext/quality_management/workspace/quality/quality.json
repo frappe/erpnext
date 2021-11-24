@@ -1,20 +1,13 @@
 {
- "category": "",
  "charts": [],
  "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Quality Goal\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Quality Procedure\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Quality Inspection\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Quality Review\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Quality Action\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Non Conformance\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Goal and Procedure\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Feedback\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Meeting\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Review and Action\", \"col\": 4}}]",
  "creation": "2020-03-02 15:49:28.632014",
- "developer_mode_only": 0,
- "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Workspace",
- "extends": "",
- "extends_another_page": 0,
  "for_user": "",
  "hide_custom": 0,
  "icon": "quality",
  "idx": 0,
- "is_default": 0,
- "is_standard": 0,
  "label": "Quality",
  "links": [
   {
@@ -149,15 +142,12 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:16:01.699912",
+ "modified": "2021-08-05 12:16:01.699913",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",
- "onboarding": "",
  "owner": "Administrator",
  "parent_page": "",
- "pin_to_bottom": 0,
- "pin_to_top": 0,
  "public": 1,
  "restrict_to_domain": "",
  "roles": [],

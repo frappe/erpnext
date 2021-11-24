@@ -4,7 +4,8 @@
 # ERPNext - web based ERP (http://erpnext.com)
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
+import json
 
 import frappe
 from frappe import _, msgprint
@@ -269,7 +270,11 @@ def update_status(name, status):
 	material_request.update_status(status)
 
 @frappe.whitelist()
-def make_purchase_order(source_name, target_doc=None):
+def make_purchase_order(source_name, target_doc=None, args=None):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
 
 	def postprocess(source, target_doc):
 		if frappe.flags.args and frappe.flags.args.default_supplier:
@@ -284,9 +289,12 @@ def make_purchase_order(source_name, target_doc=None):
 		set_missing_values(source, target_doc)
 
 	def select_item(d):
-		return d.ordered_qty < d.stock_qty
+		filtered_items = args.get('filtered_children', [])
+		child_filter = d.name in filtered_items if filtered_items else True
 
-	doclist = get_mapped_doc("Material Request", source_name, 	{
+		return d.ordered_qty < d.stock_qty and child_filter
+
+	doclist = get_mapped_doc("Material Request", source_name, {
 		"Material Request": {
 			"doctype": "Purchase Order",
 			"validation": {
@@ -313,7 +321,7 @@ def make_purchase_order(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_request_for_quotation(source_name, target_doc=None):
-	doclist = get_mapped_doc("Material Request", source_name, 	{
+	doclist = get_mapped_doc("Material Request", source_name, {
 		"Material Request": {
 			"doctype": "Request for Quotation",
 			"validation": {
@@ -492,7 +500,8 @@ def make_stock_entry(source_name, target_doc=None):
 			"field_map": {
 				"name": "material_request_item",
 				"parent": "material_request",
-				"uom": "stock_uom"
+				"uom": "stock_uom",
+				"job_card_item": "job_card_item"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.ordered_qty < doc.stock_qty

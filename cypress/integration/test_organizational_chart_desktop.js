@@ -6,7 +6,7 @@ context('Organizational Chart', () => {
 
 	it('navigates to org chart', () => {
 		cy.visit('/app');
-		cy.awesomebar('Organizational Chart');
+		cy.visit('/app/organizational-chart');
 		cy.url().should('include', '/organizational-chart');
 
 		cy.window().its('frappe.csrf_token').then(csrf_token => {
@@ -24,7 +24,7 @@ context('Organizational Chart', () => {
 				cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
 				cy.get('@input')
 					.clear({ force: true })
-					.type('Test Org Chart{enter}', { force: true })
+					.type('Test Org Chart{downarrow}{enter}', { force: true })
 					.blur({ force: true });
 			});
 		});

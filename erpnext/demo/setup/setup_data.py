@@ -1,5 +1,3 @@
-from __future__ import print_function, unicode_literals
-
 import json
 import random
 
@@ -195,10 +193,6 @@ def setup_user_roles(domain):
 		'Stock User', 'Stock Manager', 'Sales User', 'Sales Manager', 'Purchase User',
 		'Purchase Manager', 'Projects User', 'Manufacturing User', 'Manufacturing Manager',
 		'Support Team')
-
-	if domain == "Healthcare":
-		user.add_roles('Physician', 'Healthcare Administrator', 'Laboratory User',
-			'Nursing User', 'Patient')
 
 	if domain == "Education":
 		user.add_roles('Academics User')

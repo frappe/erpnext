@@ -1,6 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
 import copy
 import json
@@ -9,12 +8,11 @@ import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now
-from six import iteritems
 
 import erpnext
 from erpnext.stock.utils import (
-	get_bin,
 	get_incoming_outgoing_rate_for_cancel,
+	get_or_make_bin,
 	get_valuation_method,
 )
 
@@ -113,6 +111,7 @@ def validate_cancellation(args):
 				frappe.throw(_("Cannot cancel the transaction. Reposting of item valuation on submission is not completed yet."))
 			if repost_entry.status == 'Queued':
 				doc = frappe.get_doc("Repost Item Valuation", repost_entry.name)
+				doc.flags.ignore_permissions = True
 				doc.cancel()
 				doc.delete()
 
@@ -123,12 +122,11 @@ def set_as_cancel(voucher_type, voucher_no):
 		(now(), frappe.session.user, voucher_type, voucher_no))
 
 def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
-	args.update({"doctype": "Stock Ledger Entry"})
+	args["doctype"] = "Stock Ledger Entry"
 	sle = frappe.get_doc(args)
 	sle.flags.ignore_permissions = 1
 	sle.allow_negative_stock=allow_negative_stock
 	sle.via_landed_cost_voucher = via_landed_cost_voucher
-	sle.insert()
 	sle.submit()
 	return sle
 
@@ -154,7 +152,7 @@ def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negat
 		distinct_item_warehouses[(args[i].get('item_code'), args[i].get('warehouse'))].reposting_status = True
 
 		if obj.new_items_found:
-			for item_wh, data in iteritems(distinct_item_warehouses):
+			for item_wh, data in distinct_item_warehouses.items():
 				if ('args_idx' not in data and not data.reposting_status) or (data.sle_changed and data.reposting_status):
 					data.args_idx = len(args)
 					args.append(data.sle)
@@ -407,7 +405,8 @@ class update_entries_after(object):
 				return
 
 		# Get dynamic incoming/outgoing rate
-		self.get_dynamic_incoming_outgoing_rate(sle)
+		if not self.args.get("sle_id"):
+			self.get_dynamic_incoming_outgoing_rate(sle)
 
 		if sle.serial_no:
 			self.get_serialized_values(sle)
@@ -431,7 +430,7 @@ class update_entries_after(object):
 				else:
 					self.get_fifo_values(sle)
 					self.wh_data.qty_after_transaction += flt(sle.actual_qty)
-					self.wh_data.stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in self.wh_data.stock_queue))
+					self.wh_data.stock_value = sum(flt(batch[0]) * flt(batch[1]) for batch in self.wh_data.stock_queue)
 
 		# rounding as per precision
 		self.wh_data.stock_value = flt(self.wh_data.stock_value, self.precision)
@@ -447,7 +446,8 @@ class update_entries_after(object):
 		sle.doctype="Stock Ledger Entry"
 		frappe.get_doc(sle).db_update()
 
-		self.update_outgoing_rate_on_transaction(sle)
+		if not self.args.get("sle_id"):
+			self.update_outgoing_rate_on_transaction(sle)
 
 	def validate_negative_stock(self, sle):
 		"""
@@ -599,7 +599,7 @@ class update_entries_after(object):
 			if not allow_zero_rate:
 				self.wh_data.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 					sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
-					currency=erpnext.get_company_currency(sle.company))
+					currency=erpnext.get_company_currency(sle.company), company=sle.company)
 
 	def get_incoming_value_for_serial_nos(self, sle, serial_nos):
 		# get rate from serial nos within same company
@@ -666,7 +666,7 @@ class update_entries_after(object):
 				if not allow_zero_valuation_rate:
 					self.wh_data.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 						sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
-						currency=erpnext.get_company_currency(sle.company))
+						currency=erpnext.get_company_currency(sle.company), company=sle.company)
 
 	def get_fifo_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
@@ -681,11 +681,15 @@ class update_entries_after(object):
 			if self.wh_data.stock_queue[-1][1]==incoming_rate:
 				self.wh_data.stock_queue[-1][0] += actual_qty
 			else:
+				# Item has a positive balance qty, add new entry
 				if self.wh_data.stock_queue[-1][0] > 0:
 					self.wh_data.stock_queue.append([actual_qty, incoming_rate])
-				else:
+				else: # negative balance qty
 					qty = self.wh_data.stock_queue[-1][0] + actual_qty
-					self.wh_data.stock_queue[-1] = [qty, incoming_rate]
+					if qty > 0: # new balance qty is positive
+						self.wh_data.stock_queue[-1] = [qty, incoming_rate]
+					else: # new balance qty is still negative, maintain same rate
+						self.wh_data.stock_queue[-1][0] = qty
 		else:
 			qty_to_pop = abs(actual_qty)
 			while qty_to_pop:
@@ -695,7 +699,7 @@ class update_entries_after(object):
 					if not allow_zero_valuation_rate:
 						_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 							sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
-							currency=erpnext.get_company_currency(sle.company))
+							currency=erpnext.get_company_currency(sle.company), company=sle.company)
 					else:
 						_rate = 0
 
@@ -711,8 +715,8 @@ class update_entries_after(object):
 
 					# If no entry found with outgoing rate, collapse stack
 					if index is None:  # nosemgrep
-						new_stock_value = sum((d[0]*d[1] for d in self.wh_data.stock_queue)) - qty_to_pop*outgoing_rate
-						new_stock_qty = sum((d[0] for d in self.wh_data.stock_queue)) - qty_to_pop
+						new_stock_value = sum(d[0]*d[1] for d in self.wh_data.stock_queue) - qty_to_pop*outgoing_rate
+						new_stock_qty = sum(d[0] for d in self.wh_data.stock_queue) - qty_to_pop
 						self.wh_data.stock_queue = [[new_stock_qty, new_stock_value/new_stock_qty if new_stock_qty > 0 else outgoing_rate]]
 						break
 				else:
@@ -736,8 +740,8 @@ class update_entries_after(object):
 					batch[0] = batch[0] - qty_to_pop
 					qty_to_pop = 0
 
-		stock_value = _round_off_if_near_zero(sum((flt(batch[0]) * flt(batch[1]) for batch in self.wh_data.stock_queue)))
-		stock_qty = _round_off_if_near_zero(sum((flt(batch[0]) for batch in self.wh_data.stock_queue)))
+		stock_value = _round_off_if_near_zero(sum(flt(batch[0]) * flt(batch[1]) for batch in self.wh_data.stock_queue))
+		stock_qty = _round_off_if_near_zero(sum(flt(batch[0]) for batch in self.wh_data.stock_queue))
 
 		if stock_qty:
 			self.wh_data.valuation_rate = stock_value / flt(stock_qty)
@@ -770,7 +774,7 @@ class update_entries_after(object):
 
 	def raise_exceptions(self):
 		msg_list = []
-		for warehouse, exceptions in iteritems(self.exceptions):
+		for warehouse, exceptions in self.exceptions.items():
 			deficiency = min(e["diff"] for e in exceptions)
 
 			if ((exceptions[0]["voucher_type"], exceptions[0]["voucher_no"]) in
@@ -798,15 +802,14 @@ class update_entries_after(object):
 
 	def update_bin(self):
 		# update bin for each warehouse
-		for warehouse, data in iteritems(self.data):
-			bin_doc = get_bin(self.item_code, warehouse)
-			bin_doc.update({
+		for warehouse, data in self.data.items():
+			bin_record = get_or_make_bin(self.item_code, warehouse)
+
+			frappe.db.set_value('Bin', bin_record, {
 				"valuation_rate": data.valuation_rate,
 				"actual_qty": data.qty_after_transaction,
 				"stock_value": data.stock_value
 			})
-			bin_doc.flags.via_stock_ledger_entry = True
-			bin_doc.save(ignore_permissions=True)
 
 
 def get_previous_sle_of_current_voucher(args, exclude_current_voucher=False):
@@ -907,12 +910,13 @@ def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 
 def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	allow_zero_rate=False, currency=None, company=None, raise_error_if_no_rate=True):
-	# Get valuation rate from last sle for the same item and warehouse
-	if not company:
-		company = erpnext.get_default_company()
 
+	if not company:
+		company =  frappe.get_cached_value("Warehouse", warehouse, "company")
+
+	# Get valuation rate from last sle for the same item and warehouse
 	last_valuation_rate = frappe.db.sql("""select valuation_rate
-		from `tabStock Ledger Entry`
+		from `tabStock Ledger Entry` force index (item_warehouse)
 		where
 			item_code = %s
 			AND warehouse = %s
@@ -923,7 +927,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	if not last_valuation_rate:
 		# Get valuation rate from last sle for the item against any warehouse
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
-			from `tabStock Ledger Entry`
+			from `tabStock Ledger Entry` force index (item_code)
 			where
 				item_code = %s
 				AND valuation_rate > 0

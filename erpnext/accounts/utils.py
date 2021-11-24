@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
+from json import loads
 
 import frappe
 import frappe.defaults
@@ -447,7 +447,8 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 
 	# new row with references
 	new_row = journal_entry.append("accounts")
-	new_row.update(jv_detail.as_dict().copy())
+
+	new_row.update((frappe.copy_doc(jv_detail)).as_dict())
 
 	new_row.set(d["dr_or_cr"], d["allocated_amount"])
 	new_row.set('debit' if d['dr_or_cr'] == 'debit_in_account_currency' else 'credit',
@@ -787,15 +788,27 @@ def get_children(doctype, parent, company, is_root=False):
 
 	if doctype == 'Account':
 		sort_accounts(acc, is_root, key="value")
-		company_currency = frappe.get_cached_value('Company',  company,  "default_currency")
-		for each in acc:
-			each["company_currency"] = company_currency
-			each["balance"] = flt(get_balance_on(each.get("value"), in_account_currency=False, company=company))
-
-			if each.account_currency != company_currency:
-				each["balance_in_account_currency"] = flt(get_balance_on(each.get("value"), company=company))
 
 	return acc
+
+@frappe.whitelist()
+def get_account_balances(accounts, company):
+
+	if isinstance(accounts, str):
+		accounts = loads(accounts)
+
+	if not accounts:
+		return []
+
+	company_currency = frappe.get_cached_value("Company",  company,  "default_currency")
+
+	for account in accounts:
+		account["company_currency"] = company_currency
+		account["balance"] = flt(get_balance_on(account["value"], in_account_currency=False, company=company))
+		if account["account_currency"] and account["account_currency"] != company_currency:
+			account["balance_in_account_currency"] = flt(get_balance_on(account["value"], company=company))
+
+	return accounts
 
 def create_payment_gateway_account(gateway, payment_channel="Email"):
 	from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
@@ -963,6 +976,9 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 
 	Only fetches GLE fields required for comparing with new GLE.
 	Check compare_existing_and_expected_gle function below.
+
+	returns:
+		Dict[Tuple[voucher_type, voucher_no], List[GL Entries]]
 	"""
 	gl_entries = {}
 	if not future_stock_vouchers:
@@ -971,7 +987,7 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 	voucher_nos = [d[1] for d in future_stock_vouchers]
 
 	gles = frappe.db.sql("""
-		select name, account, credit, debit, cost_center, project
+		select name, account, credit, debit, cost_center, project, voucher_type, voucher_no
 			from `tabGL Entry`
 		where
 			posting_date >= %s and voucher_no in (%s)""" %

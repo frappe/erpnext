@@ -16,11 +16,9 @@
   "customer_name",
   "gender",
   "customer_type",
-  "pan",
   "tax_withholding_category",
   "default_bank_account",
   "lead_name",
-  "prospect",
   "opportunity_name",
   "image",
   "column_break0",
@@ -214,7 +212,8 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Represents Company",
-   "options": "Company"
+   "options": "Company",
+   "unique": 1
   },
   {
    "depends_on": "represents_company",
@@ -487,23 +486,10 @@
    "label": "Allow Sales Invoice Creation Without Delivery Note"
   },
   {
-   "fieldname": "pan",
-   "fieldtype": "Data",
-   "label": "PAN"
-  },
-  {
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category"
-  },
-  {
-   "fieldname": "prospect",
-   "fieldtype": "Link",
-   "label": "Prospect",
-   "no_copy": 1,
-   "options": "Prospect",
-   "print_hide": 1
   },
   {
    "fieldname": "opportunity_name",
@@ -518,12 +504,19 @@
  "idx": 363,
  "image_field": "image",
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2021-08-25 18:56:09.929905",
+ "links": [
+  {
+   "group": "Allowed Items",
+   "link_doctype": "Party Specific Item",
+   "link_fieldname": "party"
+  }
+ ],
+ "modified": "2021-10-20 22:07:52.485809",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
  "name_case": "Title Case",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from __future__ import unicode_literals
 
 import unittest
 
@@ -14,6 +13,7 @@ from erpnext.accounts.doctype.account.test_account import create_account, get_in
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.controllers.accounts_controller import get_payment_terms
+from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.exceptions import InvalidCurrency
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import create_item
@@ -35,6 +35,27 @@ class TestPurchaseInvoice(unittest.TestCase):
 	@classmethod
 	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
+
+	def test_purchase_invoice_received_qty(self):
+		"""
+			1. Test if received qty is validated against accepted + rejected
+			2. Test if received qty is auto set on save
+		"""
+		pi = make_purchase_invoice(
+			qty=1,
+			rejected_qty=1,
+			received_qty=3,
+			item_code="_Test Item Home Desktop 200",
+			rejected_warehouse = "_Test Rejected Warehouse - _TC",
+			update_stock=True, do_not_save=True)
+		self.assertRaises(QtyMismatchError, pi.save)
+
+		pi.items[0].received_qty = 0
+		pi.save()
+		self.assertEqual(pi.items[0].received_qty, 2)
+
+		# teardown
+		pi.delete()
 
 	def test_gl_entries_without_perpetual_inventory(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
@@ -812,29 +833,12 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi.shipping_rule = shipping_rule.name
 		pi.insert()
-
-		shipping_amount = 0.0
-		for condition in shipping_rule.get("conditions"):
-			if not condition.to_value or (flt(condition.from_value) <= pi.net_total <= flt(condition.to_value)):
-				shipping_amount = condition.shipping_amount
-
-		shipping_charge = {
-			"doctype": "Purchase Taxes and Charges",
-			"category": "Valuation and Total",
-			"charge_type": "Actual",
-			"account_head": shipping_rule.account,
-			"cost_center": shipping_rule.cost_center,
-			"tax_amount": shipping_amount,
-			"description": shipping_rule.name,
-			"add_deduct_tax": "Add"
-		}
-		pi.append("taxes", shipping_charge)
 		pi.save()
 
 		self.assertEqual(pi.net_total, 1250)
 
-		self.assertEqual(pi.total_taxes_and_charges, 462.3)
-		self.assertEqual(pi.grand_total, 1712.3)
+		self.assertEqual(pi.total_taxes_and_charges, 354.1)
+		self.assertEqual(pi.grand_total, 1604.1)
 
 	def test_make_pi_without_terms(self):
 		pi = make_purchase_invoice(do_not_save=1)
@@ -1151,10 +1155,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 			tax_withholding_category = 'TDS - 194 - Dividends - Individual')
 
 		# Update tax withholding category with current fiscal year and rate details
-		update_tax_witholding_category('_Test Company', 'TDS Payable - _TC', nowdate())
+		update_tax_witholding_category('_Test Company', 'TDS Payable - _TC')
 
 		# Create Purchase Order with TDS applied
-		po = create_purchase_order(do_not_save=1, supplier=supplier.name, rate=3000, item='_Test Non Stock Item')
+		po = create_purchase_order(do_not_save=1, supplier=supplier.name, rate=3000, item='_Test Non Stock Item',
+			posting_date='2021-09-15')
 		po.apply_tds = 1
 		po.tax_withholding_category = 'TDS - 194 - Dividends - Individual'
 		po.save()
@@ -1226,16 +1231,20 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 		doc.assertEqual(expected_gle[i][2], gle.credit)
 		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
-def update_tax_witholding_category(company, account, date):
+def update_tax_witholding_category(company, account):
 	from erpnext.accounts.utils import get_fiscal_year
 
-	fiscal_year = get_fiscal_year(date=date, company=company)
+	fiscal_year = get_fiscal_year(fiscal_year='2021')
 
 	if not frappe.db.get_value('Tax Withholding Rate',
-		{'parent': 'TDS - 194 - Dividends - Individual', 'fiscal_year': fiscal_year[0]}):
+		{'parent': 'TDS - 194 - Dividends - Individual', 'from_date': ('>=', fiscal_year[1]),
+			'to_date': ('<=', fiscal_year[2])}):
 		tds_category = frappe.get_doc('Tax Withholding Category', 'TDS - 194 - Dividends - Individual')
+		tds_category.set('rates', [])
+
 		tds_category.append('rates', {
-			'fiscal_year': fiscal_year[0],
+			'from_date': fiscal_year[1],
+			'to_date': fiscal_year[2],
 			'tax_withholding_rate': 10,
 			'single_threshold': 2500,
 			'cumulative_threshold': 0

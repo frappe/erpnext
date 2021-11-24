@@ -1,14 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import unittest
 
 import frappe
 from frappe.permissions import add_user_permission, remove_user_permission
 from frappe.utils import flt, nowdate, nowtime
-from six import iteritems
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.item.test_item import (
@@ -31,7 +29,7 @@ from erpnext.stock.stock_ledger import get_previous_sle
 
 def get_sle(**args):
 	condition, values = "", []
-	for key, value in iteritems(args):
+	for key, value in args.items():
 		condition += " and " if condition else " where "
 		condition += "`{0}`=%s".format(key)
 		values.append(value)
@@ -836,6 +834,39 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual(repack_entry.items[0].transfer_qty, 100)
 
 		frappe.db.set_default("allow_negative_stock", 0)
+
+	def test_additional_cost_distribution_manufacture(self):
+		se = frappe.get_doc(
+				doctype="Stock Entry",
+				purpose="Manufacture",
+				additional_costs=[frappe._dict(base_amount=100)],
+				items=[
+					frappe._dict(item_code="RM", basic_amount=10),
+					frappe._dict(item_code="FG", basic_amount=20, t_warehouse="X", is_finished_item=1),
+					frappe._dict(item_code="scrap", basic_amount=30, t_warehouse="X")
+				],
+			)
+
+		se.distribute_additional_costs()
+
+		distributed_costs = [d.additional_cost for d in se.items]
+		self.assertEqual([0.0, 100.0, 0.0], distributed_costs)
+
+	def test_additional_cost_distribution_non_manufacture(self):
+		se = frappe.get_doc(
+				doctype="Stock Entry",
+				purpose="Material Receipt",
+				additional_costs=[frappe._dict(base_amount=100)],
+				items=[
+					frappe._dict(item_code="RECEIVED_1", basic_amount=20, t_warehouse="X"),
+					frappe._dict(item_code="RECEIVED_2", basic_amount=30, t_warehouse="X")
+				],
+			)
+
+		se.distribute_additional_costs()
+
+		distributed_costs = [d.additional_cost for d in se.items]
+		self.assertEqual([40.0, 60.0], distributed_costs)
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)

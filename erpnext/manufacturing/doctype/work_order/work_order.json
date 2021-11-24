@@ -99,7 +99,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nStopped\nCancelled",
+   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nStopped\nClosed\nCancelled",
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
@@ -182,6 +182,7 @@
    "reqd": 1
   },
   {
+   "default": "1.0",
    "fieldname": "qty",
    "fieldtype": "Float",
    "label": "Qty To Manufacture",
@@ -572,10 +573,12 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-24 15:14:03.844937",
+ "migration_hash": "a18118963f4fcdb7f9d326de5f4063ba",
+ "modified": "2021-10-29 15:12:32.203605",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
+ "naming_rule": "By \"Naming Series\" field",
  "nsm_parent_field": "parent_work_order",
  "owner": "Administrator",
  "permissions": [

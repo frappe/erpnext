@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import unittest
 
@@ -404,6 +402,7 @@ def make_bom(**args):
 			'uom': item_doc.stock_uom,
 			'stock_uom': item_doc.stock_uom,
 			'rate': item_doc.valuation_rate or args.rate,
+			'source_warehouse': args.source_warehouse
 		})
 
 	if not args.do_not_save:

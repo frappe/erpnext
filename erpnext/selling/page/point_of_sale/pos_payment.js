@@ -18,11 +18,11 @@ erpnext.PointOfSale.Payment = class {
 	prepare_dom() {
 		this.wrapper.append(
 			`<section class="payment-container">
-				<div class="section-label payment-section">Payment Method</div>
+				<div class="section-label payment-section">${__('Payment Method')}</div>
 				<div class="payment-modes"></div>
 				<div class="fields-numpad-container">
 					<div class="fields-section">
-						<div class="section-label">Additional Information</div>
+						<div class="section-label">${__('Additional Information')}</div>
 						<div class="invoice-fields"></div>
 					</div>
 					<div class="number-pad"></div>
@@ -30,7 +30,7 @@ erpnext.PointOfSale.Payment = class {
 				<div class="totals-section">
 					<div class="totals"></div>
 				</div>
-				<div class="submit-order-btn">Complete Order</div>
+				<div class="submit-order-btn">${__("Complete Order")}</div>
 			</section>`
 		);
 		this.$component = this.wrapper.find('.payment-container');
@@ -297,6 +297,7 @@ erpnext.PointOfSale.Payment = class {
 		this.render_payment_mode_dom();
 		this.make_invoice_fields_control();
 		this.update_totals_section();
+		this.focus_on_default_mop();
 	}
 
 	edit_cart() {
@@ -378,17 +379,24 @@ erpnext.PointOfSale.Payment = class {
 			});
 			this[`${mode}_control`].toggle_label(false);
 			this[`${mode}_control`].set_value(p.amount);
+		});
 
+		this.render_loyalty_points_payment_mode();
+
+		this.attach_cash_shortcuts(doc);
+	}
+
+	focus_on_default_mop() {
+		const doc = this.events.get_frm().doc;
+		const payments = doc.payments;
+		payments.forEach(p => {
+			const mode = p.mode_of_payment.replace(/ +/g, "_").toLowerCase();
 			if (p.default) {
 				setTimeout(() => {
 					this.$payment_modes.find(`.${mode}.mode-of-payment-control`).parent().click();
 				}, 500);
 			}
 		});
-
-		this.render_loyalty_points_payment_mode();
-
-		this.attach_cash_shortcuts(doc);
 	}
 
 	attach_cash_shortcuts(doc) {
@@ -510,12 +518,12 @@ erpnext.PointOfSale.Payment = class {
 
 		this.$totals.html(
 			`<div class="col">
-				<div class="total-label">Grand Total</div>
+				<div class="total-label">${__('Grand Total')}</div>
 				<div class="value">${format_currency(grand_total, currency)}</div>
 			</div>
 			<div class="seperator-y"></div>
 			<div class="col">
-				<div class="total-label">Paid Amount</div>
+				<div class="total-label">${__('Paid Amount')}</div>
 				<div class="value">${format_currency(paid_amount, currency)}</div>
 			</div>
 			<div class="seperator-y"></div>

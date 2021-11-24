@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -172,7 +170,10 @@ def get_paying_amount_paying_exchange_rate(payment_account, doc):
 @frappe.whitelist()
 def create_return_through_additional_salary(doc):
 	import json
-	doc = frappe._dict(json.loads(doc))
+
+	if isinstance(doc, str):
+		doc = frappe._dict(json.loads(doc))
+
 	additional_salary = frappe.new_doc('Additional Salary')
 	additional_salary.employee = doc.employee
 	additional_salary.currency = doc.currency

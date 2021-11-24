@@ -1,6 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
 import unittest
 
@@ -121,6 +120,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		application = self.get_application(_test_records[0])
 		application.insert()
+		application.reload()
 		application.status = "Approved"
 		self.assertRaises(LeaveDayBlockedError, application.submit)
 

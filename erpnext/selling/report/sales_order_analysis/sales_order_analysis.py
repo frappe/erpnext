@@ -1,7 +1,6 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import copy
 
@@ -73,7 +72,7 @@ def get_data(conditions, filters):
 			`tabSales Order` so,
 			`tabSales Order Item` soi
 		LEFT JOIN `tabSales Invoice Item` sii
-			ON sii.so_detail = soi.name
+			ON sii.so_detail = soi.name and sii.docstatus = 1
 		WHERE
 			soi.parent = so.name
 			and so.status not in ('Stopped', 'Closed', 'On Hold')

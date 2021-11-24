@@ -2,15 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from __future__ import unicode_literals
 
 import unittest
 
 import frappe
-from frappe import MandatoryError
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.healthcare.doctype.lab_test_template.lab_test_template import make_item_price
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.get_item_details import get_item_details
@@ -546,6 +543,75 @@ class TestPricingRule(unittest.TestCase):
 		frappe.get_doc("Item Price", {"item_code": "Water Flask"}).delete()
 		item.delete()
 
+	def test_pricing_rule_for_different_currency(self):
+		make_item("Test Sanitizer Item")
+
+		pricing_rule_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Sanitizer Rule",
+			"apply_on": "Item Code",
+			"items": [{
+				"item_code": "Test Sanitizer Item",
+			}],
+			"selling": 1,
+			"currency": "INR",
+			"rate_or_discount": "Rate",
+			"rate": 0,
+			"priority": 2,
+			"margin_type": "Percentage",
+			"margin_rate_or_amount": 0.0,
+			"company": "_Test Company"
+		}
+
+		rule = frappe.get_doc(pricing_rule_record)
+		rule.rate_or_discount = 'Rate'
+		rule.rate = 100.0
+		rule.insert()
+
+		rule1 = frappe.get_doc(pricing_rule_record)
+		rule1.currency = 'USD'
+		rule1.rate_or_discount = 'Rate'
+		rule1.rate = 2.0
+		rule1.priority = 1
+		rule1.insert()
+
+		args = frappe._dict({
+			"item_code": "Test Sanitizer Item",
+			"company": "_Test Company",
+			"price_list": "_Test Price List",
+			"currency": "USD",
+			"doctype": "Sales Invoice",
+			"conversion_rate": 1,
+			"price_list_currency": "_Test Currency",
+			"plc_conversion_rate": 1,
+			"order_type": "Sales",
+			"customer": "_Test Customer",
+			"name": None,
+			"transaction_date": frappe.utils.nowdate()
+		})
+
+		details = get_item_details(args)
+		self.assertEqual(details.price_list_rate, 2.0)
+
+
+		args = frappe._dict({
+			"item_code": "Test Sanitizer Item",
+			"company": "_Test Company",
+			"price_list": "_Test Price List",
+			"currency": "INR",
+			"doctype": "Sales Invoice",
+			"conversion_rate": 1,
+			"price_list_currency": "_Test Currency",
+			"plc_conversion_rate": 1,
+			"order_type": "Sales",
+			"customer": "_Test Customer",
+			"name": None,
+			"transaction_date": frappe.utils.nowdate()
+		})
+
+		details = get_item_details(args)
+		self.assertEqual(details.price_list_rate, 100.0)
+
 	def test_pricing_rule_for_transaction(self):
 		make_item("Water Flask 1")
 		frappe.delete_doc_if_exists('Pricing Rule', '_Test Pricing Rule')
@@ -623,3 +689,12 @@ def delete_existing_pricing_rules():
 		"Pricing Rule Item Group", "Pricing Rule Brand"]:
 
 		frappe.db.sql("delete from `tab{0}`".format(doctype))
+
+
+def make_item_price(item, price_list_name, item_price):
+	frappe.get_doc({
+		'doctype': 'Item Price',
+		'price_list': price_list_name,
+		'item_code': item,
+		'price_list_rate': item_price
+	}).insert(ignore_permissions=True, ignore_mandatory=True)

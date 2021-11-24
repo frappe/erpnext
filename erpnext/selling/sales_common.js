@@ -63,7 +63,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 			this.frm.set_query("item_code", "items", function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
-					filters: {'is_sales_item': 1}
+					filters: {'is_sales_item': 1, 'customer': cur_frm.doc.customer}
 				}
 			});
 		}
@@ -206,8 +206,10 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 
-		if (item.serial_no && item.qty === item.serial_no.split(`\n`).length) {
-			return;
+		// check if serial nos entered are as much as qty in row
+		if (item.serial_no) {
+			let serial_nos = item.serial_no.split(`\n`).filter(sn => sn.trim()); // filter out whitespaces
+			if (item.qty === serial_nos.length) return;
 		}
 
 		if (item.serial_no && !item.batch_no) {
@@ -247,7 +249,12 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		var editable_price_list_rate = cint(frappe.defaults.get_default("editable_price_list_rate"));
 
 		if(df && editable_price_list_rate) {
-			df.read_only = 0;
+			const parent_field = frappe.meta.get_parentfield(this.frm.doc.doctype, this.frm.doc.doctype + " Item");
+			if (!this.frm.fields_dict[parent_field]) return;
+
+			this.frm.fields_dict[parent_field].grid.update_docfield_property(
+				'price_list_rate', 'read_only', 0
+			);
 		}
 	}
 
@@ -467,29 +474,33 @@ frappe.ui.form.on(cur_frm.doctype, {
 					"reqd": 1
 				},
 				{
+					"fieldtype": "Table MultiSelect",
+					"label": __("Competitors"),
+					"fieldname": "competitors",
+					"options": "Competitor Detail"
+				},
+				{
 					"fieldtype": "Text",
 					"label": __("Detailed Reason"),
 					"fieldname": "detailed_reason"
 				},
 			],
 			primary_action: function() {
-				var values = dialog.get_values();
-				var reasons = values["lost_reason"];
-				var detailed_reason = values["detailed_reason"];
+				let values = dialog.get_values();
 
 				frm.call({
 					doc: frm.doc,
 					method: 'declare_enquiry_lost',
 					args: {
-						'lost_reasons_list': reasons,
-						'detailed_reason': detailed_reason
+						'lost_reasons_list': values.lost_reason,
+						'competitors': values.competitors,
+						'detailed_reason': values.detailed_reason
 					},
 					callback: function(r) {
 						dialog.hide();
 						frm.reload_doc();
 					},
 				});
-				refresh_field("lost_reason");
 			},
 			primary_action_label: __('Declare Lost')
 		});

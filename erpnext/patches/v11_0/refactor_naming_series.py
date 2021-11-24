@@ -1,7 +1,6 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import print_function, unicode_literals
 
 import frappe
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
@@ -15,7 +14,6 @@ doctype_series_map = {
 	'Blanket Order': 'MFG-BLR-.YYYY.-',
 	'C-Form': 'ACC-CF-.YYYY.-',
 	'Campaign': 'SAL-CAM-.YYYY.-',
-	'Clinical Procedure': 'HLC-CPR-.YYYY.-',
 	'Course Schedule': 'EDU-CSH-.YYYY.-',
 	'Customer': 'CUST-.YYYY.-',
 	'Delivery Note': 'MAT-DN-.YYYY.-',
@@ -27,12 +25,10 @@ doctype_series_map = {
 	'Fee Schedule': 'EDU-FSH-.YYYY.-',
 	'Fee Structure': 'EDU-FST-.YYYY.-',
 	'Fees': 'EDU-FEE-.YYYY.-',
-	'Inpatient Record': 'HLC-INP-.YYYY.-',
 	'Installation Note': 'MAT-INS-.YYYY.-',
 	'Instructor': 'EDU-INS-.YYYY.-',
 	'Issue': 'ISS-.YYYY.-',
 	'Journal Entry': 'ACC-JV-.YYYY.-',
-	'Lab Test': 'HLC-LT-.YYYY.-',
 	'Landed Cost Voucher': 'MAT-LCV-.YYYY.-',
 	'Lead': 'CRM-LEAD-.YYYY.-',
 	'Leave Allocation': 'HR-LAL-.YYYY.-',
@@ -43,9 +39,6 @@ doctype_series_map = {
 	'Member': 'NPO-MEM-.YYYY.-',
 	'Opportunity': 'CRM-OPP-.YYYY.-',
 	'Packing Slip': 'MAT-PAC-.YYYY.-',
-	'Patient': 'HLC-PAT-.YYYY.-',
-	'Patient Encounter': 'HLC-ENC-.YYYY.-',
-	'Patient Medical Record': 'HLC-PMR-.YYYY.-',
 	'Payment Entry': 'ACC-PAY-.YYYY.-',
 	'Payment Request': 'ACC-PRQ-.YYYY.-',
 	'Production Plan': 'MFG-PP-.YYYY.-',

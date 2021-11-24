@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 
 import frappe
-import six
 from frappe import _
 from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.model.document import Document
@@ -23,6 +20,9 @@ class POSInvoiceMergeLog(Document):
 		self.validate_pos_invoice_status()
 
 	def validate_customer(self):
+		if self.merge_invoices_based_on == 'Customer Group':
+			return
+
 		for d in self.pos_invoices:
 			if d.customer != self.customer:
 				frappe.throw(_("Row #{}: POS Invoice {} is not against customer {}").format(d.idx, d.pos_invoice, self.customer))
@@ -110,7 +110,15 @@ class POSInvoiceMergeLog(Document):
 
 	def merge_pos_invoice_into(self, invoice, data):
 		items, payments, taxes = [], [], []
+
 		loyalty_amount_sum, loyalty_points_sum = 0, 0
+
+		rounding_adjustment, base_rounding_adjustment = 0, 0
+		rounded_total, base_rounded_total = 0, 0
+
+		loyalty_amount_sum, loyalty_points_sum, idx = 0, 0, 1
+
+
 		for doc in data:
 			map_doc(doc, invoice, table_map={ "doctype": invoice.doctype })
 
@@ -124,7 +132,7 @@ class POSInvoiceMergeLog(Document):
 				found = False
 				for i in items:
 					if (i.item_code == item.item_code and not i.serial_no and not i.batch_no and
-						i.uom == item.uom and i.net_rate == item.net_rate):
+						i.uom == item.uom and i.net_rate == item.net_rate and i.warehouse == item.warehouse):
 						found = True
 						i.qty = i.qty + item.qty
 
@@ -144,6 +152,8 @@ class POSInvoiceMergeLog(Document):
 						found = True
 				if not found:
 					tax.charge_type = 'Actual'
+					tax.idx = idx
+					idx += 1
 					tax.included_in_print_rate = 0
 					tax.tax_amount = tax.tax_amount_after_discount_amount
 					tax.base_tax_amount = tax.base_tax_amount_after_discount_amount
@@ -159,6 +169,11 @@ class POSInvoiceMergeLog(Document):
 						found = True
 				if not found:
 					payments.append(payment)
+			rounding_adjustment += doc.rounding_adjustment
+			rounded_total += doc.rounded_total
+			base_rounding_adjustment += doc.base_rounding_adjustment
+			base_rounded_total += doc.base_rounded_total
+
 
 		if loyalty_points_sum:
 			invoice.redeem_loyalty_points = 1
@@ -168,10 +183,19 @@ class POSInvoiceMergeLog(Document):
 		invoice.set('items', items)
 		invoice.set('payments', payments)
 		invoice.set('taxes', taxes)
+		invoice.set('rounding_adjustment',rounding_adjustment)
+		invoice.set('base_rounding_adjustment',base_rounding_adjustment)
+		invoice.set('rounded_total',rounded_total)
+		invoice.set('base_rounded_total',base_rounded_total)
 		invoice.additional_discount_percentage = 0
 		invoice.discount_amount = 0.0
 		invoice.taxes_and_charges = None
 		invoice.ignore_pricing_rule = 1
+		invoice.customer = self.customer
+
+		if self.merge_invoices_based_on == 'Customer Group':
+			invoice.flags.ignore_pos_profile = True
+			invoice.pos_profile = ''
 
 		return invoice
 
@@ -228,7 +252,7 @@ def get_all_unconsolidated_invoices():
 	return pos_invoices
 
 def get_invoice_customer_map(pos_invoices):
-	# pos_invoice_customer_map = { 'Customer 1': [{}, {}, {}], 'Custoemr 2' : [{}] }
+	# pos_invoice_customer_map = { 'Customer 1': [{}, {}, {}], 'Customer 2' : [{}] }
 	pos_invoice_customer_map = {}
 	for invoice in pos_invoices:
 		customer = invoice.get('customer')
@@ -238,7 +262,10 @@ def get_invoice_customer_map(pos_invoices):
 	return pos_invoice_customer_map
 
 def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
-	invoices = pos_invoices or (closing_entry and closing_entry.get('pos_transactions')) or get_all_unconsolidated_invoices()
+	invoices = pos_invoices or (closing_entry and closing_entry.get('pos_transactions'))
+	if frappe.flags.in_test and not invoices:
+		invoices = get_all_unconsolidated_invoices()
+
 	invoice_by_customer = get_invoice_customer_map(invoices)
 
 	if len(invoices) >= 10 and closing_entry:
@@ -262,7 +289,7 @@ def unconsolidate_pos_invoices(closing_entry):
 
 def create_merge_logs(invoice_by_customer, closing_entry=None):
 	try:
-		for customer, invoices in six.iteritems(invoice_by_customer):
+		for customer, invoices in invoice_by_customer.items():
 			merge_log = frappe.new_doc('POS Invoice Merge Log')
 			merge_log.posting_date = getdate(closing_entry.get('posting_date')) if closing_entry else nowdate()
 			merge_log.customer = customer

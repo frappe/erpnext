@@ -1,19 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
 
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 
 test_records = frappe.get_test_records('Item Attribute')
 
 from erpnext.stock.doctype.item_attribute.item_attribute import ItemAttributeIncrementError
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestItemAttribute(unittest.TestCase):
+class TestItemAttribute(ERPNextTestCase):
 	def setUp(self):
+		super().setUp()
 		if frappe.db.exists("Item Attribute", "_Test_Length"):
 			frappe.delete_doc("Item Attribute", "_Test_Length")
 

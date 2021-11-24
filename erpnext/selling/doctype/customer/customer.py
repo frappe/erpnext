@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -14,7 +13,7 @@ from frappe.contacts.address_and_contact import (
 )
 from frappe.desk.reportview import build_match_conditions, get_filters_cond
 from frappe.model.mapper import get_mapped_doc
-from frappe.model.naming import set_name_by_naming_series
+from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.rename_doc import update_linked_doctypes
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
@@ -40,8 +39,10 @@ class Customer(TransactionBase):
 		cust_master_name = frappe.defaults.get_global_default('cust_master_name')
 		if cust_master_name == 'Customer Name':
 			self.name = self.get_customer_name()
-		else:
+		elif cust_master_name == 'Naming Series':
 			set_name_by_naming_series(self)
+		else:
+			self.name = set_name_from_naming_options(frappe.get_meta(self.doctype).autoname, self)
 
 	def get_customer_name(self):
 
@@ -462,11 +463,14 @@ def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 
 
 def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, extra_amount=0):
+	credit_limit = get_credit_limit(customer, company)
+	if not credit_limit:
+		return
+
 	customer_outstanding = get_customer_outstanding(customer, company, ignore_outstanding_sales_order)
 	if extra_amount > 0:
 		customer_outstanding += flt(extra_amount)
 
-	credit_limit = get_credit_limit(customer, company)
 	if credit_limit > 0 and flt(customer_outstanding) > credit_limit:
 		msgprint(_("Credit limit has been crossed for customer {0} ({1}/{2})")
 			.format(customer, customer_outstanding, credit_limit))
