@@ -166,7 +166,7 @@
  "modified": "2021-11-20 10:20:16.053562",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Sales For Customer",
+ "name": "Sales For User",
  "owner": "Administrator",
  "permissions": [
   {

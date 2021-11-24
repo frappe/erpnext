@@ -9,7 +9,7 @@ from frappe import _
 import datetime
 from erpnext.controllers.queries import get_match_cond
 
-class SalesForCustomer(Document):
+class SalesForUser(Document):
 	def on_update(self):
 		self.return_data()
 
@@ -80,6 +80,8 @@ class SalesForCustomer(Document):
 			date_actual = tomorrow.strftime('%Y-%m-%d')
 
 		dates_reverse = sorted(dates, reverse=False)
+
+		self.total_exempt_sales = 0
 	
 		for date in dates_reverse:
 			split_date = str(date).split("T")[0].split("-")
@@ -96,6 +98,7 @@ class SalesForCustomer(Document):
 			cont = 0
 			discount = 0
 			partial_discount = 0
+			grand_total = 0
 
 			for salary_slip in salary_slips: 
 				date_validate = salary_slip.posting_date.strftime('%Y-%m-%d')
@@ -125,10 +128,10 @@ class SalesForCustomer(Document):
 
 			# row1 = [creation_date, serie_final, final_range, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
 
-			details = frappe.get_all("Sales For Customer Detail", ["name"], filters = {"parent": self.name})
+			details = frappe.get_all("Sales For User Detail", ["name"], filters = {"parent": self.name})
 
 			for detail in details:
-				frappe.delete_doc("Sales For Customer Detail", detail.name)
+				frappe.delete_doc("Sales For User Detail", detail.name)
 
 			row = self.append("details", {})
 			row.date = creation_date
