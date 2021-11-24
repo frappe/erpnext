@@ -123,7 +123,6 @@
    "search_index": 1
   },
   {
-   "default": "Medium",
    "fieldname": "priority",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -410,10 +409,11 @@
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2021-06-10 03:22:27.098898",
+ "modified": "2021-11-24 13:13:10.276630",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
