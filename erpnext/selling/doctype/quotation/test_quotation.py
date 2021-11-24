@@ -394,7 +394,7 @@ class TestQuotation(unittest.TestCase):
 				"rate": 400,
 				"delivered_by_supplier": 1,
 				"supplier": '_Test Supplier'
-			},
+			}
 		]
 
 		quotation = make_quotation(item_list=item_list, do_not_submit=1)
