@@ -41,7 +41,7 @@ class VATAuditReport(object):
 		return self.columns, self.data
 
 	def get_sa_vat_accounts(self):
-		self.sa_vat_accounts = frappe.get_list("South Africa VAT Account",
+		self.sa_vat_accounts = frappe.get_all("South Africa VAT Account",
 			filters = {"parent": self.filters.company}, pluck="account")
 		if not self.sa_vat_accounts and not frappe.flags.in_test and not frappe.flags.in_migrate:
 			link_to_settings = get_link_to_form("South Africa VAT Settings", "", label="South Africa VAT Settings")
