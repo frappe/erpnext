@@ -171,7 +171,7 @@
   {
    "depends_on": "discount_check",
    "fieldname": "total_discount",
-   "fieldtype": "Currency",
+   "fieldtype": "Data",
    "label": "Total With Discount",
    "read_only": 1
   },
@@ -234,13 +234,13 @@
   },
   {
    "fieldname": "total_without_medical_fees",
-   "fieldtype": "Currency",
+   "fieldtype": "Data",
    "label": "Total Without Medical Fees",
    "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-11-24 11:20:33.171875",
+ "modified": "2021-11-24 11:44:50.453929",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",
