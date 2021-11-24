@@ -22,6 +22,7 @@ from frappe.utils import (
 	time_diff_in_seconds,
 	to_timedelta,
 )
+from frappe.utils.nestedset import get_ancestors_of
 from frappe.utils.safe_exec import get_safe_globals
 
 from erpnext.support.doctype.issue.issue import get_holidays
@@ -248,7 +249,7 @@ def get_active_service_level_agreement_for(doc):
 
 	customer = doc.get('customer')
 	or_filters.append(
-		["Service Level Agreement", "entity", "in", [customer, get_customer_group(customer), get_customer_territory(customer)]]
+		["Service Level Agreement", "entity", "in", [customer] + get_customer_group(customer) + get_customer_territory(customer)]
 	)
 
 	default_sla_filter = filters + [["Service Level Agreement", "default_service_level_agreement", "=", 1]]
@@ -275,11 +276,23 @@ def get_context(doc):
 	return {"doc": doc.as_dict(), "nowdate": nowdate, "frappe": frappe._dict(utils=get_safe_globals().get("frappe").get("utils"))}
 
 def get_customer_group(customer):
-	return frappe.db.get_value("Customer", customer, "customer_group") if customer else None
+	customer_groups = []
+	customer_group = frappe.db.get_value("Customer", customer, "customer_group") if customer else None
+	if customer_group:
+		ancestors = get_ancestors_of("Customer Group", customer_group)
+		customer_groups = [customer_group] + ancestors
+
+	return customer_groups
 
 
 def get_customer_territory(customer):
-	return frappe.db.get_value("Customer", customer, "territory") if customer else None
+	customer_territories = []
+	customer_territory = frappe.db.get_value("Customer", customer, "territory") if customer else None
+	if customer_territory:
+		ancestors = get_ancestors_of("Territory", customer_territory)
+		customer_territories = [customer_territory] + ancestors
+
+	return customer_territories
 
 
 @frappe.whitelist()
@@ -299,7 +312,7 @@ def get_service_level_agreement_filters(doctype, name, customer=None):
 	if customer:
 		# Include SLA with No Entity and Entity Type
 		or_filters.append(
-			["Service Level Agreement", "entity", "in", [customer, get_customer_group(customer), get_customer_territory(customer), ""]]
+			["Service Level Agreement", "entity", "in", [""] + [customer] + get_customer_group(customer) + get_customer_territory(customer)]
 		)
 
 	return {
@@ -342,6 +355,8 @@ def apply(doc, method=None):
 		return
 
 	service_level_agreement = get_active_service_level_agreement_for(doc)
+
+	print(service_level_agreement)
 
 	if not service_level_agreement:
 		return
