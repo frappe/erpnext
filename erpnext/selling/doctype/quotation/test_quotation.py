@@ -302,6 +302,59 @@ class TestQuotation(unittest.TestCase):
 
 		enable_calculate_bundle_price(enable=0)
 
+	def test_packed_items_indices_are_reset_when_product_bundle_is_deleted_from_items_table(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		make_item("_Test Product Bundle 1", {"is_stock_item": 0})
+		make_item("_Test Product Bundle 2", {"is_stock_item": 0})
+		make_item("_Test Product Bundle 3", {"is_stock_item": 0})
+		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
+		make_item("_Test Bundle Item 2", {"is_stock_item": 1})
+		make_item("_Test Bundle Item 3", {"is_stock_item": 1})
+
+		make_product_bundle("_Test Product Bundle 1",
+			["_Test Bundle Item 1", "_Test Bundle Item 2"])
+		make_product_bundle("_Test Product Bundle 2",
+			["_Test Bundle Item 2", "_Test Bundle Item 3"])
+		make_product_bundle("_Test Product Bundle 3",
+			["_Test Bundle Item 3", "_Test Bundle Item 1"])
+
+		item_list = [
+			{
+				"item_code": "_Test Product Bundle 1",
+				"warehouse": "",
+				"qty": 1,
+				"rate": 400,
+				"delivered_by_supplier": 1,
+				"supplier": '_Test Supplier'
+			},
+			{
+				"item_code": "_Test Product Bundle 2",
+				"warehouse": "",
+				"qty": 1,
+				"rate": 400,
+				"delivered_by_supplier": 1,
+				"supplier": '_Test Supplier'
+			},
+			{
+				"item_code": "_Test Product Bundle 3",
+				"warehouse": "",
+				"qty": 1,
+				"rate": 400,
+				"delivered_by_supplier": 1,
+				"supplier": '_Test Supplier'
+			},
+		]
+
+		quotation = make_quotation(item_list=item_list, do_not_submit=1)
+		del quotation.items[1]
+		quotation.save()
+
+		for id, item in enumerate(quotation.packed_items):
+			expected_index = id + 1
+			self.assertEqual(item.idx, expected_index)
+
 test_records = frappe.get_test_records('Quotation')
 
 def enable_calculate_bundle_price(enable=1):
