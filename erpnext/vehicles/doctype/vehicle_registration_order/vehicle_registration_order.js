@@ -110,12 +110,8 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 			}
 
 			// Closing Entry
-			var customer_margin = flt(flt(this.frm.doc.customer_total) - flt(this.frm.doc.authority_total),
-				precision('customer_total'));
-			var unclosed_customer_amount = flt(customer_margin - flt(this.frm.doc.customer_closed_amount),
-				precision('customer_total'));
-			var unclosed_agent_amount = flt(flt(this.frm.doc.agent_total) - flt(this.frm.doc.agent_closed_amount),
-				precision('agent_total'));
+			var unclosed_customer_amount = this.get_unclosed_customer_amount();
+			var unclosed_agent_amount = this.get_unclosed_agent_amount();
 			if (unclosed_customer_amount || unclosed_agent_amount) {
 				this.frm.add_custom_button(__('Closing Entry'), () => this.make_journal_entry('Closing Entry'));
 			}
@@ -426,6 +422,18 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 		this.frm.doc.customer_outstanding = flt(this.frm.doc.customer_total) - flt(this.frm.doc.customer_payment) - flt(this.frm.doc.customer_authority_payment);
 		this.frm.doc.authority_outstanding = flt(this.frm.doc.authority_total) - flt(this.frm.doc.authority_payment) - flt(this.frm.doc.customer_authority_payment);
 		this.frm.doc.agent_outstanding = flt(this.frm.doc.agent_total) - flt(this.frm.doc.agent_payment);
+	},
+
+	get_unclosed_customer_amount: function () {
+		var customer_margin = flt(flt(this.frm.doc.customer_total) - flt(this.frm.doc.authority_total),
+			precision('customer_total'));
+		return flt(customer_margin - flt(this.frm.doc.customer_closed_amount),
+			precision('customer_total'));
+	},
+
+	get_unclosed_agent_amount: function () {
+		return flt(flt(this.frm.doc.agent_total) - flt(this.frm.doc.agent_closed_amount),
+			precision('agent_total'));
 	},
 
 	make_journal_entry: function(purpose) {
