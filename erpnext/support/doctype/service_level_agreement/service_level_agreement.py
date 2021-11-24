@@ -515,17 +515,21 @@ def set_service_level_agreement_variance(doctype, doc=None):
 
 		if not current_doc.first_responded_on: # first_responded_on set when first reply is sent to customer
 			variance = round(time_diff_in_seconds(current_doc.response_by, current_time), 2)
-			frappe.db.set_value(current_doc.doctype, current_doc.name, "response_by_variance", variance, update_modified=False)
+		else:
+			variance = round(time_diff_in_seconds(current_doc.response_by, current_doc.first_responded_on), 2)
 
-			if variance < 0:
-				frappe.db.set_value(current_doc.doctype, current_doc.name, "agreement_status", "Failed", update_modified=False)
+		frappe.db.set_value(current_doc.doctype, current_doc.name, "response_by_variance", variance, update_modified=False)
+		if variance < 0:
+			frappe.db.set_value(current_doc.doctype, current_doc.name, "agreement_status", "Failed", update_modified=False)
 
 		if apply_sla_for_resolution and not current_doc.get("resolution_date"): # resolution_date set when issue has been closed
 			variance = round(time_diff_in_seconds(current_doc.resolution_by, current_time), 2)
-			frappe.db.set_value(current_doc.doctype, current_doc.name, "resolution_by_variance", variance, update_modified=False)
+		elif apply_sla_for_resolution and current_doc.get("resolution_date"):
+			variance = round(time_diff_in_seconds(current_doc.resolution_by, current_doc.get("resolution_date")), 2)
 
-			if variance < 0:
-				frappe.db.set_value(current_doc.doctype, current_doc.name, "agreement_status", "Failed", update_modified=False)
+		frappe.db.set_value(current_doc.doctype, current_doc.name, "resolution_by_variance", variance, update_modified=False)
+		if variance < 0:
+			frappe.db.set_value(current_doc.doctype, current_doc.name, "agreement_status", "Failed", update_modified=False)
 
 
 def set_user_resolution_time(doc, meta):
@@ -808,9 +812,17 @@ def update_agreement_status_on_custom_status(doc):
 		# first_responded_on set when first reply is sent to customer
 		doc.response_by_variance = round(time_diff_in_seconds(doc.response_by, now_time), 2)
 
+	if meta.has_field("first_responded_on") and doc.first_responded_on:
+		# first_responded_on set when first reply is sent to customer
+		doc.response_by_variance = round(time_diff_in_seconds(doc.response_by, doc.first_responded_on), 2)
+
 	if meta.has_field("resolution_date") and not doc.resolution_date:
 		# resolution_date set when issue has been closed
 		doc.resolution_by_variance = round(time_diff_in_seconds(doc.resolution_by, now_time), 2)
+
+	if meta.has_field("resolution_date") and doc.resolution_date:
+		# resolution_date set when issue has been closed
+		doc.resolution_by_variance = round(time_diff_in_seconds(doc.resolution_by, doc.resolution_date), 2)
 
 	if meta.has_field("agreement_status"):
 		doc.agreement_status = "Fulfilled" if doc.response_by_variance > 0 and doc.resolution_by_variance > 0 else "Failed"
@@ -857,6 +869,8 @@ def set_response_by_and_variance(doc, meta, start_date_time, priority):
 	if meta.has_field("response_by_variance") and not doc.get('first_responded_on'):
 		now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
 		doc.response_by_variance = round(time_diff_in_seconds(doc.response_by, now_time), 2)
+	elif meta.has_field("response_by_variance") and doc.get('first_responded_on'):
+		doc.response_by_variance = round(time_diff_in_seconds(doc.response_by, doc.get('first_responded_on')), 2)
 
 def set_resolution_by_and_variance(doc, meta, start_date_time, priority):
 	if meta.has_field("resolution_by"):
