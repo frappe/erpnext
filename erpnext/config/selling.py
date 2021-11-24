@@ -383,7 +383,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Sales For Customer"
+					"name": "Sales For User"
 				},
 				{
 					"type": "report",

@@ -171,7 +171,7 @@
   {
    "depends_on": "discount_check",
    "fieldname": "total_discount",
-   "fieldtype": "Data",
+   "fieldtype": "Currency",
    "label": "Total With Discount",
    "read_only": 1
   },
@@ -183,12 +183,6 @@
    "fieldname": "total_medical_fees",
    "fieldtype": "Currency",
    "label": "total medical fees",
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_without_medical_fees",
-   "fieldtype": "Data",
-   "label": "total without medical fees",
    "read_only": 1
   },
   {
@@ -237,10 +231,16 @@
    "fieldtype": "Data",
    "label": "Patient Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "total_without_medical_fees",
+   "fieldtype": "Currency",
+   "label": "Total Without Medical Fees",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-11-10 16:01:30.104640",
+ "modified": "2021-11-24 11:20:33.171875",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",
