@@ -56,4 +56,42 @@ frappe.listview_settings["Purchase Invoice"] = {
 			];
 		}
 	},
+
+	onload: function(listview) {
+		listview.page.add_action_item(__("Purchase Receipt"), ()=>{
+		    checked_items = listview.get_checked_items();
+			count_of_rows = checked_items.length;
+
+		    frappe.confirm(__("Create {0} Purchase Receipt ?", [count_of_rows]),()=>{
+				frappe.call({
+					method:"erpnext.utilities.bulk_transaction.transaction_processing",
+					args: {data: checked_items, to_create: "Purchase Receipt From Purchase Invoice"}
+				}).then(r => {
+					console.log(r);
+				})
+
+				if(count_of_rows > 10){
+					frappe.show_alert(`Starting a background job to create ${count_of_rows} purchase receipt`,count_of_rows);
+				}
+		    })
+		});
+
+		listview.page.add_action_item(__("Payment"), ()=>{
+		    checked_items = listview.get_checked_items();
+		    count_of_rows = checked_items.length;
+
+			frappe.confirm(__("Make {0} Payment ?", [count_of_rows]),()=>{
+		        frappe.call({
+		        method:"erpnext.utilities.bulk_transaction.transaction_processing",
+		        args: {data: checked_items, to_create: "Payment From Purchase Invoice"}
+		        }).then(r => {
+		        console.log(r);
+		        })
+
+				if(count_of_rows > 10){
+					frappe.show_alert(`Starting a background job to create ${count_of_rows} payment`,count_of_rows);
+				}
+		    })
+		});
+	}
 };

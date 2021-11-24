@@ -12,6 +12,41 @@ frappe.listview_settings['Quotation'] = {
 				};
 			};
 		}
+
+		listview.page.add_action_item(__("Sales Order"),()=>{
+			checked_items = listview.get_checked_items();
+			count_of_rows = checked_items.length;
+
+			frappe.confirm(__("Create {0} Sales Order ?", [count_of_rows]),()=>{
+				frappe.call({
+					method:"erpnext.utilities.bulk_transaction.transaction_processing",
+					args: {data: checked_items, to_create: "Sales Order From Quotation"}
+				}).then(r => {
+					console.log(r);
+				})
+				if(count_of_rows > 10){
+					frappe.show_alert(`Starting a background to create ${count_of_rows} sales order`,count_of_rows);
+				}
+			})
+		});
+
+		listview.page.add_action_item(__("Sales Invoice"),()=>{
+			checked_items = listview.get_checked_items();
+			count_of_rows = checked_items.length;
+
+			frappe.confirm(__("Create {0} Sales Invoice ?", [count_of_rows]),()=>{
+				frappe.call({
+					method:"erpnext.utilities.bulk_transaction.transaction_processing",
+					args: {data: checked_items, to_create: "Sales Invoice From Quotation"}
+				}).then(r => {
+					console.log(r);
+				})
+			if(count_of_rows > 10){
+				frappe.show_alert(`Starting a background to create ${count_of_rows} sales invoice`,count_of_rows);
+			}
+
+			})
+		});
 	},
 
 	get_indicator: function(doc) {

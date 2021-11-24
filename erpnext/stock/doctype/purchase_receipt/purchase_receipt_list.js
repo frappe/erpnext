@@ -13,5 +13,27 @@ frappe.listview_settings['Purchase Receipt'] = {
 		} else if (flt(doc.grand_total) === 0 || flt(doc.per_billed, 2) === 100) {
 			return [__("Completed"), "green", "per_billed,=,100"];
 		}
+	},
+
+	onload: function(listview){
+
+	listview.page.add_action_item(__("Purchase Invoice"), ()=>{
+		checked_items = listview.get_checked_items();
+		count_of_rows = checked_items.length;
+
+		frappe.confirm(__("Create {0} Purchase Invoice ?", [count_of_rows]),()=>{
+			frappe.call({
+			method:"erpnext.utilities.bulk_transaction.transaction_processing",
+			args: {data: checked_items, to_create: "Purchase Invoice From Purchase Receipt"}
+			}).then(r => {
+			console.log(r);
+			})
+
+			if(count_of_rows > 10){
+				frappe.show_alert(`Starting a background job to create ${count_of_rows} purchase invoice`,count_of_rows);
+			}
+		})
+		});
 	}
+
 };

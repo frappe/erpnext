@@ -16,7 +16,7 @@ frappe.listview_settings['Sales Order'] = {
 				return [__("Overdue"), "red",
 					"per_delivered,<,100|delivery_date,<,Today|status,!=,Closed"];
 			} else if (flt(doc.grand_total) === 0) {
-				// not delivered (zero-amount order)
+				// not delivered (zeroount order)
 				return [__("To Deliver"), "orange",
 					"per_delivered,<,100|grand_total,=,0|status,!=,Closed"];
 			} else if (flt(doc.per_billed, 6) < 100) {
@@ -47,6 +47,54 @@ frappe.listview_settings['Sales Order'] = {
 		listview.page.add_menu_item(__("Re-open"), function() {
 			listview.call_for_selected_items(method, {"status": "Submitted"});
 		});
+
+		listview.page.add_action_item(__("Sales Invoice"),()=>{
+			checked_items = listview.get_checked_items();
+			count_of_rows = checked_items.length;
+			frappe.confirm(__("Create {0} Sales Invoice ?", [count_of_rows]),()=>{
+				frappe.call({
+					method:"erpnext.utilities.bulk_transaction.transaction_processing",
+					args: {data: checked_items, to_create: "Sales Invoice From Sales Order"}
+				}).then(r => {
+					console.log(r);
+				})
+				if(count_of_rows > 10){
+					frappe.show_alert(`Starting a background to create ${count_of_rows} sales invoice`,count_of_rows);
+				}
+			})
+		});
+
+		listview.page.add_action_item(__("Delivery Note"), ()=>{
+			checked_items = listview.get_checked_items();
+			count_of_rows = checked_items.length;
+			frappe.confirm(__("Create {0} Delivery Note ?", [count_of_rows]),()=>{
+				frappe.call({
+					method:"erpnext.utilities.bulk_transaction.transaction_processing",
+					args: {data: checked_items, to_create: "Delivery Note From Sales Order"}
+					}).then(r => {
+						console.log(r);
+					})
+				if(count_of_rows > 10){
+					frappe.show_alert(`Starting a background to create ${count_of_rows} delivery note`,count_of_rows);
+				}
+			})
+		})
+
+		listview.page.add_action_item(__("Advance Payment"), ()=>{
+			checked_items = listview.get_checked_items();
+			count_of_rows = checked_items.length;
+			frappe.confirm(__("Create {0} Advance Payment ?", [count_of_rows]),()=>{
+				frappe.call({
+					method:"erpnext.utilities.bulk_transaction.transaction_processing",
+					args: {data: checked_items, to_create: "Advance Payment From Sales Order"}
+				}).then(r => {
+					console.log(r);
+				})
+				if(count_of_rows > 10){
+					frappe.show_alert(`Starting a background to create ${count_of_rows} Advance Payment`,count_of_rows);
+				}
+			})
+		})
 
 	}
 };
