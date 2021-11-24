@@ -711,6 +711,7 @@ def create_item_wise_repost_entries(voucher_type, voucher_no, allow_zero_rate=Fa
 		repost_entry.posting_time = sle.posting_time
 		repost_entry.allow_zero_rate = allow_zero_rate
 		repost_entry.flags.ignore_links = True
+		repost_entry.flags.ignore_permissions = True
 		repost_entry.submit()
 		repost_entries.append(repost_entry)
 
