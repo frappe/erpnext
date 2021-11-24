@@ -116,12 +116,14 @@ class TestRepostItemValuation(unittest.TestCase):
 		riv2 = frappe.get_doc(riv_args.update({"posting_date": "2021-01-03"}))
 		riv2.flags.dont_run_in_test = True
 		riv2.submit()
+		riv1.deduplicate_similar_repost()
 		_assert_status(riv2, "Skipped")
 
 		# older than exisitng duplicate - riv1
 		riv3 = frappe.get_doc(riv_args.update({"posting_date": "2021-01-01"}))
 		riv3.flags.dont_run_in_test = True
 		riv3.submit()
+		riv3.deduplicate_similar_repost()
 		_assert_status(riv3, "Queued")
 		_assert_status(riv1, "Skipped")
 
@@ -129,6 +131,7 @@ class TestRepostItemValuation(unittest.TestCase):
 		riv4 = frappe.get_doc(riv_args.update({"warehouse": "Stores - _TC"}))
 		riv4.flags.dont_run_in_test = True
 		riv4.submit()
+		riv4.deduplicate_similar_repost()
 		_assert_status(riv4, "Queued")
 		_assert_status(riv3, "Queued")
 

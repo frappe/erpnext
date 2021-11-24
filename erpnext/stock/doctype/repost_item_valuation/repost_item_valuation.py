@@ -1,22 +1,10 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
-import datetime
-
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import (
-	cint,
-	get_datetime,
-	get_link_to_form,
-	get_time,
-	get_weekday,
-	now,
-	nowtime,
-	today,
-)
+from frappe.utils import cint, get_link_to_form, get_weekday, now, nowtime, today
 from frappe.utils.user import get_users_with_role
 from rq.timeouts import JobTimeoutException
 
@@ -58,7 +46,6 @@ class RepostItemValuation(Document):
 			self.db_set('status', self.status)
 
 	def on_submit(self):
-		self.deduplicate_similar_repost()
 		if not frappe.flags.in_test or self.flags.dont_run_in_test:
 			return
 
@@ -76,30 +63,27 @@ class RepostItemValuation(Document):
 		if self.based_on != "Item and Warehouse":
 			return
 
-		queued = frappe.db.get_value(
-				"Repost Item Valuation",
-				filters={
-					"docstatus": 1,
-					"status": "Queued",
-					"item_code": self.item_code,
-					"warehouse": self.warehouse,
-					"based_on": self.based_on,
-					"name": ("!=", self.name)
-				},
-				fieldname=["name", "posting_date", "posting_time"],
-				as_dict=True
-			)
-		if not queued:
-			return
+		filters = {
+			"item_code": self.item_code,
+			"warehouse": self.warehouse,
+			"name": self.name,
+			"posting_date": self.posting_date,
+			"posting_time": self.posting_time,
+		}
 
-		posting_timestamp = datetime.datetime.combine(get_datetime(self.posting_date), get_time(self.posting_time))
-		queued_timestamp = datetime.datetime.combine(get_datetime(queued.posting_date), get_time(queued.posting_time))
-
-		if posting_timestamp > queued_timestamp:
-			self.set_status("Skipped")
-		else:
-			frappe.db.set_value("Repost Item Valuation", queued.name, "status", "Skipped")
-
+		frappe.db.sql("""
+			update `tabRepost Item Valuation`
+			set status = 'Skipped'
+			WHERE item_code = %(item_code)s
+				and warehouse = %(warehouse)s
+				and name != %(name)s
+				and TIMESTAMP(posting_date, posting_time) > TIMESTAMP(%(posting_date)s, %(posting_time)s)
+				and docstatus = 1
+				and status = 'Queued'
+				and based_on = 'Item and Warehouse'
+				""",
+			filters
+		)
 
 def on_doctype_update():
 	frappe.db.add_index("Repost Item Valuation", ["warehouse", "item_code"], "item_warehouse")
@@ -182,6 +166,7 @@ def repost_entries():
 	for row in riv_entries:
 		doc = frappe.get_doc('Repost Item Valuation', row.name)
 		if doc.status in ('Queued', 'In Progress'):
+			doc.deduplicate_similar_repost()
 			repost(doc)
 
 	riv_entries = get_repost_item_valuation_entries()
