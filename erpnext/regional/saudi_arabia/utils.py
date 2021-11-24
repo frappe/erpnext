@@ -61,7 +61,6 @@ def create_qr_code(doc, method):
 			if not tax_id:
 				frappe.throw(_('Tax ID missing for {} in the company document'.format(doc.company)))
 
-			# tax_id = '310122393500003'  #
 			tag = bytes([2]).hex()
 			length = bytes([len(tax_id)]).hex()
 			value = tax_id.encode('utf-8').hex()
@@ -74,7 +73,6 @@ def create_qr_code(doc, method):
 			time_stamp = add_to_date(posting_date, seconds=seconds)
 			time_stamp = time_stamp.strftime('%Y-%m-%dT%H:%M:%SZ')
 
-			# time_stamp = '2022-04-25T15:30:00Z'  #
 			tag = bytes([3]).hex()
 			length = bytes([len(time_stamp)]).hex()
 			value = time_stamp.encode('utf-8').hex()
@@ -82,7 +80,6 @@ def create_qr_code(doc, method):
 
 			# Invoice Amount
 			invoice_amount = str(doc.total)
-			# invoice_amount = '1000.00'  #
 			tag = bytes([4]).hex()
 			length = bytes([len(invoice_amount)]).hex()
 			value = invoice_amount.encode('utf-8').hex()
@@ -91,7 +88,6 @@ def create_qr_code(doc, method):
 			# VAT Amount
 			vat_amount = str(doc.total_taxes_and_charges)
 
-			# vat_amount = '150.00'  #
 			tag = bytes([5]).hex()
 			length = bytes([len(vat_amount)]).hex()
 			value = vat_amount.encode('utf-8').hex()
