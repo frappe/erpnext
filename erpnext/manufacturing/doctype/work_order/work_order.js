@@ -443,18 +443,6 @@ frappe.ui.form.on("Work Order", {
 		erpnext.work_order.calculate_cost(frm.doc);
 		erpnext.work_order.calculate_total_cost(frm);
 	},
-
-	onload_post_render: function(frm) {
-		if (frm.doc.transfer_material_against == "Job Card") {
-			frappe.msgprint(__("Please add an operation in required items table"));
-		}
-	},
-
-	transfer_material_against: function(frm) {
-		if (frm.doc.transfer_material_against == "Job Card") {
-			frappe.msgprint(__("Please add an operation in required items table"));
-		}
-	}
 });
 
 frappe.ui.form.on("Work Order Item", {
