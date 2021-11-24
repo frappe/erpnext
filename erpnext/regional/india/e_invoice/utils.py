@@ -641,7 +641,7 @@ class GSPConnector():
 		})
 		request_log.save(ignore_permissions=True)
 		frappe.db.commit()
-	
+
 	def get_client_credentials(self):
 		if self.e_invoice_settings.client_id and self.e_invoice_settings.client_secret:
 			return self.e_invoice_settings.client_id, self.e_invoice_settings.get_password('client_secret')
