@@ -20,8 +20,8 @@ from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.party import (  # noqa
 	get_dashboard_info,
-	validate_party_accounts,
 	get_timeline_data,
+	validate_party_accounts,
 )
 from erpnext.utilities.transaction_base import TransactionBase
 
