@@ -265,7 +265,7 @@ class GrossProfitGenerator(object):
 		if self.filters.get("group_by") == "Invoice":
 			self.totals.indent = 0.0
 			self.totals.parent_invoice = ""
-			self.totals.parent = "Total"
+			self.totals.invoice_or_item = "Total"
 			self.si_list.append(self.totals)
 		else:
 			self.grouped_data.append(self.totals)
