@@ -36,52 +36,46 @@ def get_bin_qty(item, warehouse):
     return det and det[0] or frappe._dict()
 
 def update_packing_list_item(doc, packing_item_code, qty, main_item_row, description,pb_item):
-    pd_item_len = []
-    for item_qty in pb_item:
-        if item_qty.item_code not in pd_item_len:
-        	pd_item_len.append(item_qty.item_code)
+	if doc.amended_from:
+		old_packed_items_map = get_old_packed_item_details(doc.packed_items)
+	else:
+		old_packed_items_map = False
+	item = get_packing_item_details(packing_item_code, doc.company)
 
-    if len(pd_item_len) != len(doc.get('packed_items')):
-        if doc.amended_from:
-            old_packed_items_map = get_old_packed_item_details(doc.packed_items)
-        else:
-            old_packed_items_map = False
-        item = get_packing_item_details(packing_item_code, doc.company)
+	# check if exists
+	exists = 0
+	for d in doc.get("packed_items"):
+		if d.parent_item == main_item_row.item_code and d.item_code == packing_item_code:
+			if d.parent_detail_docname != main_item_row.name:
+				d.parent_detail_docname = main_item_row.name
+			pi, exists = d, 1
+			break
 
-        # check if exists
-        exists = 0
-        for d in doc.get("packed_items"):
-            if d.parent_item == main_item_row.item_code and d.item_code == packing_item_code:
-                if d.parent_detail_docname != main_item_row.name:
-                    d.parent_detail_docname = main_item_row.name
-                pi, exists = d, 1
-                break
-
-        if not exists:
-            pi = doc.append('packed_items', {})
-            pi.parent_item = main_item_row.item_code
-            pi.item_code = packing_item_code
-            pi.item_name = item.item_name
-            pi.parent_detail_docname = main_item_row.name
-            pi.uom = item.stock_uom
-            pi.qty = flt(sum([flt(item_qty.qty) for item_qty in pb_item if item_qty.item_code == packing_item_code]))
-            pi.conversion_factor = main_item_row.conversion_factor
-            if description and not pi.description:
-                pi.description = description
-            if not pi.warehouse and not doc.amended_from:
-                pi.warehouse = (main_item_row.warehouse if ((doc.get('is_pos') or item.is_stock_item \
-                    or not item.default_warehouse) and main_item_row.warehouse) else item.default_warehouse)
-            if not pi.batch_no and not doc.amended_from:
-                pi.batch_no = cstr(main_item_row.get("batch_no"))
-            if not pi.target_warehouse:
-                pi.target_warehouse = main_item_row.get("target_warehouse")
-            bin = get_bin_qty(packing_item_code, pi.warehouse)
-            pi.actual_qty = flt(bin.get("actual_qty"))
-            pi.projected_qty = flt(bin.get("projected_qty"))
-            if old_packed_items_map and old_packed_items_map.get((packing_item_code, main_item_row.item_code)):
-                pi.batch_no = old_packed_items_map.get((packing_item_code, main_item_row.item_code))[0].batch_no
-                pi.serial_no = old_packed_items_map.get((packing_item_code, main_item_row.item_code))[0].serial_no
-                pi.warehouse = old_packed_items_map.get((packing_item_code, main_item_row.item_code))[0].warehouse
+	if not exists:
+		pi = doc.append('packed_items', {})
+		pi.parent_item = main_item_row.item_code
+		pi.item_code = packing_item_code
+		pi.item_name = item.item_name
+		pi.parent_detail_docname = main_item_row.name
+		pi.uom = item.stock_uom
+		pi.qty = flt(sum([flt(item_qty.qty) for item_qty in pb_item if item_qty.item_code == packing_item_code]))
+		pi.conversion_factor = main_item_row.conversion_factor
+		if description and not pi.description:
+			pi.description = description
+		if not pi.warehouse and not doc.amended_from:
+			pi.warehouse = (main_item_row.warehouse if ((doc.get('is_pos') or item.is_stock_item \
+				or not item.default_warehouse) and main_item_row.warehouse) else item.default_warehouse)
+		if not pi.batch_no and not doc.amended_from:
+			pi.batch_no = cstr(main_item_row.get("batch_no"))
+		if not pi.target_warehouse:
+			pi.target_warehouse = main_item_row.get("target_warehouse")
+		bin = get_bin_qty(packing_item_code, pi.warehouse)
+		pi.actual_qty = flt(bin.get("actual_qty"))
+		pi.projected_qty = flt(bin.get("projected_qty"))
+		if old_packed_items_map and old_packed_items_map.get((packing_item_code, main_item_row.item_code)):
+			pi.batch_no = old_packed_items_map.get((packing_item_code, main_item_row.item_code))[0].batch_no
+			pi.serial_no = old_packed_items_map.get((packing_item_code, main_item_row.item_code))[0].serial_no
+			pi.warehouse = old_packed_items_map.get((packing_item_code, main_item_row.item_code))[0].warehouse
 
 def make_packing_list(doc):
     """make packing list for Product Bundle item"""
