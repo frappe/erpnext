@@ -699,13 +699,13 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			this.calculate_paid_amount();
 		}
 
-		if (this.frm.doc.is_return || (this.frm.doc.docstatus > 0) || this.is_internal_invoice()) return;
+		if ((this.frm.doc.is_return && this.frm.doctype != 'POS Invoice') || (this.frm.doc.docstatus > 0) || this.is_internal_invoice()) return;
 
 		frappe.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "write_off_amount"]);
 
 		if(in_list(["Sales Invoice", "POS Invoice", "Purchase Invoice"], this.frm.doc.doctype)) {
 			var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
-
+			debugger;
 			if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
 				var total_amount_to_pay = flt((grand_total - this.frm.doc.total_advance
 					- this.frm.doc.write_off_amount), precision("grand_total"));
@@ -733,7 +733,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				this.calculate_paid_amount();
 			}
 			this.calculate_change_amount();
-
+			debugger;
 			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
 				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
 			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
@@ -805,6 +805,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	calculate_change_amount(){
 		this.frm.doc.change_amount = 0.0;
 		this.frm.doc.base_change_amount = 0.0;
+
+		if(this.frm.doc.doctype == 'POS Invoice' && this.frm.doc.is_return && this.frm.doc.ignore_payments_for_return)
+			return;
+
 		if(in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype)
 			&& this.frm.doc.paid_amount > this.frm.doc.grand_total && !this.frm.doc.is_return) {
 
@@ -824,6 +828,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	calculate_write_off_amount(){
+		if(this.frm.doc.doctype == 'POS Invoice' && this.frm.doc.is_return && this.frm.doc.ignore_payments_for_return)
+		this.frm.doc.write_off_amount = this.frm.doc.base_write_off_amount = 0.0
+		return;
+
 		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
 			this.frm.doc.write_off_amount = flt(this.frm.doc.grand_total - this.frm.doc.paid_amount
 				+ this.frm.doc.change_amount, precision("write_off_amount"));

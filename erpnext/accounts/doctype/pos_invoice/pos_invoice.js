@@ -88,6 +88,10 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 			});
 	}
 
+	ignore_payments_for_return() {
+		this.calculate_outstanding_amount();
+	}
+
 	amount(){
 		this.write_off_outstanding_amount_automatically()
 	}

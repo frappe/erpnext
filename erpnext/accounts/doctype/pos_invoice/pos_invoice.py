@@ -242,6 +242,10 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(_("The selected change account {} doesn't belongs to Company {}.").format(self.account_for_change_amount, self.company))
 
 	def validate_change_amount(self):
+		if self.is_return and self.ignore_payments_for_return:
+			self.change_amount = self.base_change_amount = 0.0
+			return
+
 		grand_total = flt(self.rounded_total) or flt(self.grand_total)
 		base_grand_total = flt(self.base_rounded_total) or flt(self.base_grand_total)
 		if not flt(self.change_amount) and grand_total < flt(self.paid_amount):

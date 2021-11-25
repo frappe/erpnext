@@ -639,6 +639,10 @@ class calculate_taxes_and_totals(object):
 		self.doc.change_amount = 0.0
 		self.doc.base_change_amount = 0.0
 
+		if self.doc.doctype == 'POS Invoice' and self.doc.is_return and self.doc.ignore_payments_for_return:
+			# self.calculate_outstanding_amount()
+			return
+
 		if self.doc.doctype == "Sales Invoice" \
 			and self.doc.paid_amount > self.doc.grand_total and not self.doc.is_return \
 			and any(d.type == "Cash" for d in self.doc.payments):
@@ -652,6 +656,9 @@ class calculate_taxes_and_totals(object):
 				self.doc.base_write_off_amount, self.doc.precision("base_change_amount"))
 
 	def calculate_write_off_amount(self):
+		if self.doc.doctype == 'POS Invoice' and self.doc.is_return and self.doc.ignore_payments_for_return:
+			return
+
 		if flt(self.doc.change_amount) > 0:
 			self.doc.write_off_amount = flt(self.doc.grand_total - self.doc.paid_amount
 				+ self.doc.change_amount, self.doc.precision("write_off_amount"))

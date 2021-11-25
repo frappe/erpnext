@@ -125,6 +125,7 @@
   "payment_terms_template",
   "payment_schedule",
   "payments_section",
+  "ignore_payments_for_return",
   "cash_bank_account",
   "payments",
   "section_break_84",
@@ -1561,16 +1562,25 @@
    "label": "Coupon Code",
    "options": "Coupon Code",
    "print_hide": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_return",
+   "fieldname": "ignore_payments_for_return",
+   "fieldtype": "Check",
+   "label": "Ignore Payments For Return"
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-27 20:12:57.306772",
+ "migration_hash": "0a999807d0a5e17446532c77bebf97ff",
+ "modified": "2021-11-25 19:58:23.024118",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
  "name_case": "Title Case",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

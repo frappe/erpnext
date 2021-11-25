@@ -181,13 +181,14 @@ erpnext.PointOfSale.Payment = class {
 			const paid_amount = doc.paid_amount;
 			const items = doc.items;
 
-			if (paid_amount == 0 || !items.length) {
-				const message = items.length ? __("You cannot submit the order without payment.") : __("You cannot submit empty order.");
-				frappe.show_alert({ message, indicator: "orange" });
-				frappe.utils.play_sound("error");
-				return;
+			if (!doc.ignore_payments_for_return) {
+				if (paid_amount == 0 || !items.length) {
+					const message = items.length ? __("You cannot submit the order without payment.") : __("You cannot submit empty order.");
+					frappe.show_alert({ message, indicator: "orange" });
+					frappe.utils.play_sound("error");
+					return;
+				}
 			}
-
 			this.events.submit_invoice();
 		});
 
@@ -445,16 +446,18 @@ erpnext.PointOfSale.Payment = class {
 
 	update_field_value_onchange(args) {
 		var {me, p, mode, currency, option_list} = args;
-		const options = ['None'];
-		if (p.type == 'Credit Note')
-			Object.keys(option_list).map((inv) => { if (inv==null || inv==undefined) {console.log(inv)}; options.push(inv);});
+		// const options = ['None'];
+		// if (p.type == 'Credit Note')
+		// 	Object.keys(option_list).map((inv) => { if (inv==null || inv==undefined) {console.log(inv)}; options.push(inv);});
+		const query = { query: 'erpnext.selling.page.point_of_sale.point_of_sale.pos_invoice_credit_notes' };
 
 		this[`${mode}_control`] = frappe.ui.form.make_control({
 			df: {
 				label: p.mode_of_payment,
-				fieldtype: (p.type == 'Credit Note') ? 'Select' : 'Currency',
+				fieldtype: (p.type == 'Credit Note') ? 'Link' : 'Currency',
 				placeholder: (p.type == 'Credit Note') ? __('Select POS Credit Note') : __('Enter {0} amount.', [p.mode_of_payment]),
-				options: options,
+				options: (p.type == 'Credit Note') ? 'POS Invoice' : '',
+				get_query: () => query,
 				onchange: function() {
 
 					const cn_or_amount = (p.type == 'Credit Note') ? 'credit_note' : 'amount';
