@@ -29,7 +29,6 @@ def get_data(report_filters):
 
 		for row in job_cards:
 			row.operating_cost = flt(row.hour_rate) * (flt(row.total_time_in_mins) / 60.0)
-			# update_raw_material_cost(row, report_filters)
 			data.append(row)
 
 	return data
@@ -44,14 +43,6 @@ def get_filters(report_filters, operations):
 				filters[field] = ('like', '% {} %'.format(report_filters.get(field)))
 
 	return filters
-
-# Check PR #28123 as to why this is commented
-
-# def update_raw_material_cost(row, filters):
-# 	row.rm_cost = 0.0
-# 	for data in frappe.get_all("Job Card Item", fields = ["amount"],
-# 		filters={"parent": row.name, "docstatus": 1}):
-# 		row.rm_cost += data.amount
 
 def get_columns(filters):
 	return [
@@ -114,12 +105,6 @@ def get_columns(filters):
 			"fieldname": "operating_cost",
 			"width": "150"
 		},
-		# {
-		# 	"label": _("Raw Material Cost"),
-		# 	"fieldtype": "Currency",
-		# 	"fieldname": "rm_cost",
-		# 	"width": "100"
-		# },
 		{
 			"label": _("Total Time (in Mins)"),
 			"fieldtype": "Float",
