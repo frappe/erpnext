@@ -659,7 +659,7 @@ class SalesInvoice(SellingController):
 				throw(_("Customer {0} does not belong to project {1}").format(self.customer,self.project))
 
 	def validate_pos(self):
-		if self.is_return:
+		if self.is_return and not self.is_pos:
 			invoice_total = self.rounded_total or self.grand_total
 			if flt(self.paid_amount) + flt(self.write_off_amount) - flt(invoice_total) > \
 				1.0/(10.0**(self.precision("grand_total") + 1.0)):

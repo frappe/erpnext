@@ -290,11 +290,19 @@ def get_credit_note_options():
 	credit_note_list = {}
 	pos_inv = frappe.get_all('POS Invoice', filters={
 				'is_pos': 1,
-				'is_return': 1
+				'is_return': 1,
+				# 'outstanding_amount': ['>','0']
 				},
 				fields=['name', 'grand_total']
 			)
 	for inv in pos_inv:
 		credit_note_list.setdefault(inv.name, inv.grand_total)
-	print(credit_note_list)
 	return credit_note_list
+
+@frappe.whitelist()
+def pos_invoice_credit_notes(doctype, txt, searchfield, start, page_len, filters):
+	pos_inv = frappe.db.sql(''' SELECT name
+				FROM `tabPOS Invoice`
+				WHERE is_pos = 1 AND is_return = 1 AND outstanding_amount != 0
+				''')
+	return pos_inv
