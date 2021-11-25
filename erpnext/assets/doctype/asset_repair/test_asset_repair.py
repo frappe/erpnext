@@ -70,7 +70,7 @@ class TestAssetRepair(unittest.TestCase):
 
 		self.assertEqual(stock_entry.stock_entry_type, "Material Issue")
 		self.assertEqual(stock_entry.items[0].s_warehouse, asset_repair.warehouse)
-		self.assertEqual(stock_entry.items[0].item_code, asset_repair.stock_items[0].item)
+		self.assertEqual(stock_entry.items[0].item_code, asset_repair.stock_items[0].item_code)
 		self.assertEqual(stock_entry.items[0].qty, asset_repair.stock_items[0].consumed_quantity)
 
 	def test_increase_in_asset_value_due_to_stock_consumption(self):
@@ -139,7 +139,7 @@ def create_asset_repair(**args):
 		asset_repair.stock_consumption = 1
 		asset_repair.warehouse = create_warehouse("Test Warehouse", company = asset.company)
 		asset_repair.append("stock_items", {
-			"item": args.item or args.item_code or "_Test Item",
+			"item_code": args.item_code or "_Test Item",
 			"valuation_rate": args.rate if args.get("rate") is not None else 100,
 			"consumed_quantity": args.qty or 1
 		})
@@ -158,7 +158,7 @@ def create_asset_repair(**args):
 			})
 			stock_entry.append('items', {
 				"t_warehouse": asset_repair.warehouse,
-				"item_code": asset_repair.stock_items[0].item,
+				"item_code": asset_repair.stock_items[0].item_code,
 				"qty": asset_repair.stock_items[0].consumed_quantity
 			})
 			stock_entry.submit()
