@@ -69,6 +69,9 @@ class SalesInvoice(SellingController):
 			'overflow_type': 'billing'
 		}]
 
+	def before_save(self):
+		self.get_commision()
+
 	def set_indicator(self):
 		"""Set indicator for portal"""
 		if self.outstanding_amount < 0:
@@ -277,13 +280,13 @@ class SalesInvoice(SellingController):
 
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_submit")
-	
+
 	@frappe.whitelist()
 	def get_commision(self):
 		tot=[]
 		if self.sales_partner:
 			doc=frappe.get_doc("Sales Partner",self.sales_partner)
-			if self.commission_based_on_target_lines==1: 
+			if self.commission_based_on_target_lines==1:
 				for i in self.items:
 					for j in doc.item_target_details:
 						if i.item_code==j.item_code:
@@ -291,10 +294,35 @@ class SalesInvoice(SellingController):
 								if j.commision_formula:
 									data=eval(j.commision_formula)
 									tot.append(data)
-									self.total_commission=sum(tot)			
+									self.total_commission=sum(tot)
 
 
 		self.process_common_party_accounting()
+
+	@frappe.whitelist()
+	def calculate_taxes(self):
+		if self.customer:
+			cus = frappe.get_doc("Customer",self.customer)
+			if not cus.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						if i.item_code:
+							doc=frappe.get_doc("Item",i.item_code)
+							for j in doc.taxes:
+								if self.tax_category==j.tax_category:
+									if j.item_tax_template:
+										i.item_tax_template=j.item_tax_template
+			if cus.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						if i.item_code:
+							doc=frappe.get_doc("Item",i.item_code)
+							for j in doc.taxes:
+								if cus.tax_category==j.tax_category:
+									if j.item_tax_template:
+										i.item_tax_template=j.item_tax_template
+				self.tax_category=cus.tax_category
+			return self.tax_category
 
 	def validate_pos_return(self):
 
@@ -623,32 +651,6 @@ class SalesInvoice(SellingController):
 
 		frappe.db.sql("""delete from `tabSales Invoice Payment` where parent = %s
 			and amount = 0""", self.name)
-
-	@frappe.whitelist()
-	def calcualte_taxes(self):
-		if self.customer:
-			cus = frappe.get_doc("Customer",self.customer)
-			if not cus.tax_category:
-				if self.tax_category:
-					for i in self.items:
-						if i.item_code:
-							doc=frappe.get_doc("Item",i.item_code)
-							for j in doc.taxes:
-								if self.tax_category==j.tax_category:
-									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template
-									
-			if cus.tax_category:
-				if self.tax_category:
-					for i in self.items:
-						if i.item_code:
-							doc=frappe.get_doc("Item",i.item_code)
-							for j in doc.taxes:
-								if cus.tax_category==j.tax_category:
-									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template
-				self.tax_category=cus.tax_category
-				
 
 
 	def validate_with_previous_doc(self):

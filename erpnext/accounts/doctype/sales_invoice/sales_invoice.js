@@ -33,62 +33,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				me.frm.set_value('debit_to', r.default_receivable_account);
 			});
 	},
-	tax_category:function(frm){
-		frm.refresh_field("items")
-		frm.call({
-			method:"calcualte_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-				frm.refresh_field("items")
-			}
-		});
-	},
-	shipping_address:function(frm){
-		frm.call({
-			method:"calcualte_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-				frm.refresh_field("items")
-			}
-		});
-	},
-	supplier_address:function(frm){
-		frm.call({
-			method:"calcualte_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-				frm.refresh_field("items")
-			}
-		});
-	},
-	customer_address:function(frm){
-		frm.call({
-			method:"calcualte_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-				frm.refresh_field("items")
-			}
-		});
-	},
-	company_address:function(frm){
-		frm.call({
-			method:"calcualte_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-				frm.refresh_field("items")
-			}
-		});
-	},
+
 	onload: function() {
 		var me = this;
 		this._super();
@@ -780,17 +725,17 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 		};
 	},
-	before_save:function(frm){
-		frm.call({
-			method:"get_commision",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-				frm.refresh_field("total_commission")
-			}
-		});
-	 },
+//	before_save:function(frm){
+//		frm.call({
+//			method:"get_commision",
+//			doc:frm.doc,
+//			callback: function(r)
+//			{
+//
+//				frm.refresh_field("total_commission")
+//			}
+//		});
+//	 },
 	// When multiple companies are set up. in case company name is changed set default company address
 	company: function (frm) {
 		if (frm.doc.company) {
@@ -809,7 +754,115 @@ frappe.ui.form.on('Sales Invoice', {
 			})
 		}
 	},
+	tax_category:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
 
+                frm.refresh_field("items")
+			}
+		});
+	},
+	shipping_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                frm.refresh_field("tax_category")
+			}
+		});
+	},
+	supplier_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	customer_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	company_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	branch:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	location:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	cost_center:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
 	project: function (frm) {
 		if (!frm.doc.is_return) {
 			frm.call({

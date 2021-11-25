@@ -83,6 +83,9 @@ class DeliveryNote(SellingController):
 			}
 		])
 
+	# def before_save(self):
+	# 	self.get_commision()
+
 	def before_print(self, settings=None):
 		def toggle_print_hide(meta, fieldname):
 			df = meta.get_field(fieldname)
@@ -323,31 +326,7 @@ class DeliveryNote(SellingController):
 				ps.cancel()
 			frappe.msgprint(_("Packing Slip(s) cancelled"))
 
-	@frappe.whitelist()
-	def calcualte_taxes(self):
-		if self.customer:
-			cus = frappe.get_doc("Customer",self.customer)
-			if not cus.tax_category:
-				if self.tax_category:
-					for i in self.items:
-						if i.item_code:
-							doc=frappe.get_doc("Item",i.item_code)
-							for j in doc.taxes:
-								if self.tax_category==j.tax_category:
-									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template
-									
-			if cus.tax_category:
-				if self.tax_category:
-					for i in self.items:
-						if i.item_code:
-							doc=frappe.get_doc("Item",i.item_code)
-							for j in doc.taxes:
-								if cus.tax_category==j.tax_category:
-									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template
-				self.tax_category=cus.tax_category
-				
+
 	def update_status(self, status):
 		self.set_status(update=True, status=status)
 		self.notify_update()
@@ -366,14 +345,14 @@ class DeliveryNote(SellingController):
 			dn_doc.update_billing_percentage(update_modified=update_modified)
 
 		self.load_from_db()
-		
-	
+
+
 	@frappe.whitelist()
 	def get_commision(self):
 		tot=[]
 		if self.sales_partner:
 			doc=frappe.get_doc("Sales Partner",self.sales_partner)
-			if self.commission_based_on_target_lines==1: 
+			if self.commission_based_on_target_lines==1:
 				for i in self.items:
 					for j in doc.item_target_details:
 						if i.item_code==j.item_code:
@@ -381,8 +360,32 @@ class DeliveryNote(SellingController):
 								if j.commision_formula:
 									data=eval(j.commision_formula)
 									tot.append(data)
-									self.total_commission=sum(tot)			
-	 
+									self.total_commission=sum(tot)
+
+	@frappe.whitelist()
+	def calculate_taxes(self):
+		if self.customer:
+			cus = frappe.get_doc("Customer",self.customer)
+			if not cus.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						if i.item_code:
+							doc=frappe.get_doc("Item",i.item_code)
+							for j in doc.taxes:
+								if self.tax_category==j.tax_category:
+									if j.item_tax_template:
+										i.item_tax_template=j.item_tax_template
+			if cus.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						if i.item_code:
+							doc=frappe.get_doc("Item",i.item_code)
+							for j in doc.taxes:
+								if cus.tax_category==j.tax_category:
+									if j.item_tax_template:
+										i.item_tax_template=j.item_tax_template
+				self.tax_category=cus.tax_category
+			return self.tax_category
 
 	def make_return_invoice(self):
 		try:
