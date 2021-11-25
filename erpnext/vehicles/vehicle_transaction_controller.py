@@ -191,7 +191,8 @@ class VehicleTransactionController(StockController):
 		if doc.get('vehicle_booking_order'):
 			vbo = frappe.db.get_value("Vehicle Booking Order", doc.vehicle_booking_order, [
 					'docstatus', 'status',
-					'customer', 'financer', 'supplier', 'transfer_customer',
+					'customer', 'financer', 'supplier',
+					'transfer_customer', 'transfer_financer',
 					'item_code', 'vehicle',
 					'vehicle_delivered_date', 'vehicle_received_date'
 			], as_dict=1)
@@ -212,7 +213,7 @@ class VehicleTransactionController(StockController):
 			if self.get('customer'):
 				# Customer must match with booking customer/financer or vehicle owner must be set (and match)
 				if self.doctype == "Vehicle Delivery":
-					if self.customer not in (vbo.customer, vbo.financer, vbo.transfer_customer, vehicle_customer) and not self.vehicle_owner:
+					if self.customer not in (vbo.customer, vbo.financer, vbo.transfer_customer, vbo.transfer_financer, vehicle_customer) and not self.vehicle_owner:
 						frappe.throw(_("Customer does not match in {0}. Please set Vehicle Owner if the User of the Vehicle is different from the Booking Customer.")
 							.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
@@ -225,7 +226,7 @@ class VehicleTransactionController(StockController):
 					pass
 
 				else:
-					if self.customer not in (vbo.customer, vbo.financer, vbo.transfer_customer, vehicle_customer):
+					if self.customer not in (vbo.customer, vbo.financer, vbo.transfer_customer, vbo.transfer_financer, vehicle_customer):
 						frappe.throw(_("Customer does not match in {0}")
 							.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
@@ -645,8 +646,8 @@ def get_vehicle_booking_order_details(args):
 			out.financer = booking_details.financer if is_financed else None
 
 		elif args.doctype == "Vehicle Invoice Delivery":
-			if booking_details.transfer_customer:
-				out.customer = booking_details.financer or booking_details.transfer_customer
+			if booking_details.transfer_customer or booking_details.transfer_financer:
+				out.customer = booking_details.transfer_financer or booking_details.transfer_customer
 			else:
 				out.customer = booking_details.financer if booking_details.financer else booking_details.customer
 				out.customer_address = booking_details.customer_address
