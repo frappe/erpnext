@@ -760,7 +760,7 @@ frappe.ui.form.on('Sales Invoice', {
 			doc:frm.doc,
 			callback: function(r)
 			{
-
+				frm.refresh_field("tax_category")
                 frm.refresh_field("items")
 			}
 		});
