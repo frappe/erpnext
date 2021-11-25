@@ -124,6 +124,14 @@ frappe.ui.form.on("Request for Quotation",{
 		dialog.show()
 	},
 
+	schedule_date(frm) {
+		if(frm.doc.schedule_date){
+			frm.doc.items.forEach((item) => {
+				item.schedule_date = frm.doc.schedule_date;
+			})
+		}
+		refresh_field("items");
+	},
 	preview: (frm) => {
 		let dialog = new frappe.ui.Dialog({
 			title: __('Preview Email'),
@@ -184,7 +192,16 @@ frappe.ui.form.on("Request for Quotation",{
 		dialog.show();
 	}
 })
+frappe.ui.form.on("Request for Quotation Item", {
+	items_add(frm, cdt, cdn) {
+		if (frm.doc.schedule_date) {
+			let row = locals[cdt][cdn];
+			row.schedule_date = frm.doc.schedule_date;
+			frm.refresh_field("items");
+		}
 
+	}
+});
 frappe.ui.form.on("Request for Quotation Supplier",{
 	supplier: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn]
