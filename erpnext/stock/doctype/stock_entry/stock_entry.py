@@ -722,21 +722,34 @@ class StockEntry(StockController):
 		return finished_item
 
 	def validate_finished_goods(self):
-		"""validation: finished good quantity should be same as manufacturing quantity"""
-		if not self.work_order: return
+		"""
+			1. Check if FG exists
+			2. Check if Multiple FG Items are present
+			3. Check FG Item and Qty against WO if present
+		"""
+		production_item, wo_qty, finished_items = None, 0, []
 
-		production_item, wo_qty = frappe.db.get_value("Work Order",
-			self.work_order, ["production_item", "qty"])
+		wo_details = frappe.db.get_value(
+			"Work Order", self.work_order, ["production_item", "qty"]
+		)
+		if wo_details:
+			production_item, wo_qty = wo_details
 
-		finished_items = []
 		for d in self.get('items'):
 			if d.is_finished_item:
+				if not self.work_order:
+					finished_items.append(d.item_code)
+					continue # Independent Manufacture Entry, no WO to match against
+
 				if d.item_code != production_item:
 					frappe.throw(_("Finished Item {0} does not match with Work Order {1}")
-						.format(d.item_code, self.work_order))
+						.format(d.item_code, self.work_order)
+					)
 				elif flt(d.transfer_qty) > flt(self.fg_completed_qty):
-					frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}"). \
-						format(d.idx, d.transfer_qty, self.fg_completed_qty))
+					frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}")
+						.format(d.idx, d.transfer_qty, self.fg_completed_qty)
+					)
+
 				finished_items.append(d.item_code)
 
 		if len(set(finished_items)) > 1:
@@ -744,16 +757,24 @@ class StockEntry(StockController):
 
 		if self.purpose == "Manufacture":
 			if not finished_items:
-				frappe.throw(_('Finished Good has not set in the stock entry {0}')
-					.format(self.name))
+				frappe.throw(
+					msg=_("There must be atleast 1 Finished Good in this Stock Entry").format(self.name),
+					title=_("Missing Finished Good")
+				)
 
-			allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
-				"overproduction_percentage_for_work_order"))
+			allowance_percentage = flt(
+				frappe.db.get_single_value(
+					"Manufacturing Settings","overproduction_percentage_for_work_order"
+				)
+			)
+			allowed_qty = wo_qty + ((allowance_percentage/100) * wo_qty)
 
-			allowed_qty = wo_qty + (allowance_percentage/100 * wo_qty)
-			if self.fg_completed_qty > allowed_qty:
-				frappe.throw(_("For quantity {0} should not be greater than work order quantity {1}")
-					.format(flt(self.fg_completed_qty), wo_qty))
+			# No work order could mean independent Manufacture entry, if so skip validation
+			if self.work_order and self.fg_completed_qty > allowed_qty:
+				frappe.throw(
+					_("For quantity {0} should not be greater than work order quantity {1}")
+					.format(flt(self.fg_completed_qty), wo_qty)
+				)
 
 	def update_stock_ledger(self):
 		sl_entries = []
