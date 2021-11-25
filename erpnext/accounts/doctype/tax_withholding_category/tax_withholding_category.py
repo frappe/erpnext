@@ -197,7 +197,10 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 	advance_vouchers = get_advance_vouchers(parties, company=inv.company, from_date=tax_details.from_date,
 		to_date=tax_details.to_date, party_type=party_type)
 	taxable_vouchers = vouchers + advance_vouchers
-	tax_deducted_on_advances = get_taxes_deducted_on_advances_allocated(inv, tax_details)
+	tax_deducted_on_advances = 0
+
+	if inv.doctype == 'Purchase Invoice':
+		tax_deducted_on_advances = get_taxes_deducted_on_advances_allocated(inv, tax_details)
 
 	tax_deducted = 0
 	if taxable_vouchers:

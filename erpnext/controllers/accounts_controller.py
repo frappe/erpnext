@@ -145,15 +145,16 @@ class AccountsController(TransactionBase):
 		self.validate_party()
 		self.validate_currency()
 
+		if self.doctype in ['Purchase Invoice', 'Sales Invoice']:
+			pos_check_field = "is_pos" if self.doctype=="Sales Invoice" else "is_paid"
+			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
+				self.set_advances()
+
 		if self.doctype == 'Purchase Invoice':
 			self.calculate_paid_amount()
 			# apply tax withholding only if checked and applicable
 			self.set_tax_withholding()
 
-		if self.doctype in ['Purchase Invoice', 'Sales Invoice']:
-			pos_check_field = "is_pos" if self.doctype=="Sales Invoice" else "is_paid"
-			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
-				self.set_advances()
 
 			self.set_advance_gain_or_loss()
 

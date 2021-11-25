@@ -435,24 +435,16 @@ class PaymentEntry(AccountsController):
 
 		net_total = self.paid_amount
 
-		for reference in self.get("references"):
-			net_total_for_tds = 0
-			if reference.reference_doctype == 'Purchase Order':
-				net_total_for_tds += flt(frappe.db.get_value('Purchase Order', reference.reference_name, 'net_total'))
-
-			if net_total_for_tds:
-				net_total = net_total_for_tds
-
 		# Adding args as purchase invoice to get TDS amount
 		args = frappe._dict({
 			'company': self.company,
-			'doctype': 'Purchase Invoice',
+			'doctype': 'Payment Entry',
 			'supplier': self.party,
 			'posting_date': self.posting_date,
 			'net_total': net_total
 		})
 
-		tax_withholding_details, tax_deducted_on_advances = get_party_tax_withholding_details(args, self.tax_withholding_category)
+		tax_withholding_details = get_party_tax_withholding_details(args, self.tax_withholding_category)
 
 		if not tax_withholding_details:
 			return
@@ -1592,10 +1584,6 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 				'amount': discount_amount * (-1 if payment_type == "Pay" else 1)
 			})
 			pe.set_difference_amount()
-
-	if doc.doctype == 'Purchase Order' and doc.apply_tds:
-		pe.apply_tax_withholding_amount = 1
-		pe.tax_withholding_category = doc.tax_withholding_category
 
 	return pe
 
