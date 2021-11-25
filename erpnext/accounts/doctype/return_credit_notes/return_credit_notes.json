@@ -13,6 +13,7 @@
   "patient_sex",
   "patient_cologne",
   "patient_dob",
+  "sale_invoice",
   "customer",
   "customer_name",
   "client_name",
@@ -22,6 +23,7 @@
   "pos_profile",
   "offline_pos_name",
   "is_return",
+  "reason_for_return",
   "column_break1",
   "company",
   "posting_date",
@@ -285,6 +287,7 @@
   },
   {
    "bold": 1,
+   "fetch_from": "sale_invoice.customer",
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -746,8 +749,8 @@
    "label": "Items",
    "oldfieldname": "entries",
    "oldfieldtype": "Table",
-   "options": "Sales Invoice Item",
-   "reqd": 1
+   "options": "Return credit notes Item",
+   "read_only": 1
   },
   {
    "fieldname": "pricing_rule_details",
@@ -1133,34 +1136,46 @@
    "print_hide": 1
   },
   {
+   "fetch_from": "sale_invoice.taxed_sales15",
    "fieldname": "taxed_sales15",
    "fieldtype": "Currency",
-   "label": "Taxed Sales15"
+   "label": "Taxed Sales15",
+   "read_only": 1
   },
   {
+   "fetch_from": "sale_invoice.isv15",
    "fieldname": "isv15",
    "fieldtype": "Currency",
-   "label": "ISV 15%"
+   "label": "ISV 15%",
+   "read_only": 1
   },
   {
+   "fetch_from": "sale_invoice.taxed_sales18",
    "fieldname": "taxed_sales18",
    "fieldtype": "Currency",
-   "label": "Taxed Sales18"
+   "label": "Taxed Sales18",
+   "read_only": 1
   },
   {
+   "fetch_from": "sale_invoice.isv18",
    "fieldname": "isv18",
    "fieldtype": "Currency",
-   "label": "ISV 18%"
+   "label": "ISV 18%",
+   "read_only": 1
   },
   {
+   "fetch_from": "sale_invoice.total_exempt",
    "fieldname": "total_exempt",
    "fieldtype": "Currency",
-   "label": "Total Exempt"
+   "label": "Total Exempt",
+   "read_only": 1
   },
   {
+   "fetch_from": "sale_invoice.total_exonerated",
    "fieldname": "total_exonerated",
    "fieldtype": "Currency",
-   "label": "Total Exonerated"
+   "label": "Total Exonerated",
+   "read_only": 1
   },
   {
    "fieldname": "base_grand_total",
@@ -1252,6 +1267,7 @@
   {
    "fieldname": "total_advance",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Advance",
    "oldfieldname": "total_advance",
    "oldfieldtype": "Currency",
@@ -1263,6 +1279,7 @@
    "allow_on_submit": 1,
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Outstanding Amount",
    "no_copy": 1,
    "oldfieldname": "outstanding_amount",
@@ -1820,11 +1837,23 @@
    "options": "Return credit notes",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "reason_for_return",
+   "fieldtype": "Link",
+   "label": "Reason For Return",
+   "options": "Reason For Return"
+  },
+  {
+   "fieldname": "sale_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice"
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2021-11-18 16:28:43.711774",
+ "modified": "2021-11-24 17:08:10.420596",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Return credit notes",
@@ -1869,7 +1898,6 @@
    "role": "All"
   }
  ],
- "quick_entry": 1,
  "search_fields": "posting_date, due_date, customer, base_grand_total, outstanding_amount",
  "show_name_in_global_search": 1,
  "sort_field": "modified",

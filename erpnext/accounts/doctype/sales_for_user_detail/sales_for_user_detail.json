@@ -93,7 +93,7 @@
  "modified": "2021-11-22 15:35:09.120310",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Sales For Customer Detail",
+ "name": "Sales For User Detail",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
