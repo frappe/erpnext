@@ -41,13 +41,13 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 
 	def validate_common(self):
 		self.validate_registration_party()
-		self.validate_account_mandatory()
 		self.validate_pricing_components()
 		self.calculate_totals()
 		self.calculate_outstanding_amount()
 		self.validate_amounts()
 
 		self.set_missing_accounts()
+		self.validate_account_mandatory()
 
 		self.update_payment_status()
 		self.update_invoice_status()
