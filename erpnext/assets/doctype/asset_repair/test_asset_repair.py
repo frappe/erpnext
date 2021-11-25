@@ -15,7 +15,8 @@ from erpnext.stock.doctype.item.test_item import create_item
 
 
 class TestAssetRepair(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(cls):
 		set_depreciation_settings_in_company()
 		create_asset_data()
 		create_item("_Test Stock Item")
