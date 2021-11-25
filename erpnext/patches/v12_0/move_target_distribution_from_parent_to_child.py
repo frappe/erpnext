@@ -7,6 +7,7 @@ import frappe
 
 def execute():
     frappe.reload_doc("setup", "doctype", "target_detail")
+    frappe.reload_doc("core", "doctype", "prepared_report")
 
     for d in ['Sales Person', 'Sales Partner', 'Territory']:
         frappe.db.sql("""
