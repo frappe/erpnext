@@ -5,6 +5,8 @@ import unittest
 
 import frappe
 
+from erpnext.controllers.stock_controller import create_item_wise_repost_entries
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
 	in_configured_timeslot,
 )
@@ -70,3 +72,69 @@ class TestRepostItemValuation(unittest.TestCase):
 				in_configured_timeslot(repost_settings, case.get("current_time")),
 				msg=f"Exepcted false from : {case}",
 			)
+
+	def test_create_item_wise_repost_item_valuation_entries(self):
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			get_multiple_items=True,
+		)
+
+		rivs = create_item_wise_repost_entries(pr.doctype, pr.name)
+		self.assertGreaterEqual(len(rivs), 2)
+		self.assertIn("_Test Item", [d.item_code for d in rivs])
+
+		for riv in rivs:
+			self.assertEqual(riv.company, "_Test Company with perpetual inventory")
+			self.assertEqual(riv.warehouse, "Stores - TCP1")
+
+	def test_deduplication(self):
+		def _assert_status(doc, status):
+			doc.load_from_db()
+			self.assertEqual(doc.status, status)
+
+		riv_args = frappe._dict(
+			doctype="Repost Item Valuation",
+			item_code="_Test Item",
+			warehouse="_Test Warehouse - _TC",
+			based_on="Item and Warehouse",
+			voucher_type="Sales Invoice",
+			voucher_no="SI-1",
+			posting_date="2021-01-02",
+			posting_time="00:01:00",
+		)
+
+		# new repost without any duplicates
+		riv1 = frappe.get_doc(riv_args)
+		riv1.flags.dont_run_in_test = True
+		riv1.submit()
+		_assert_status(riv1, "Queued")
+		self.assertEqual(riv1.voucher_type, "Sales Invoice")  # traceability
+		self.assertEqual(riv1.voucher_no, "SI-1")
+
+		# newer than existing duplicate - riv1
+		riv2 = frappe.get_doc(riv_args.update({"posting_date": "2021-01-03"}))
+		riv2.flags.dont_run_in_test = True
+		riv2.submit()
+		riv1.deduplicate_similar_repost()
+		_assert_status(riv2, "Skipped")
+
+		# older than exisitng duplicate - riv1
+		riv3 = frappe.get_doc(riv_args.update({"posting_date": "2021-01-01"}))
+		riv3.flags.dont_run_in_test = True
+		riv3.submit()
+		riv3.deduplicate_similar_repost()
+		_assert_status(riv3, "Queued")
+		_assert_status(riv1, "Skipped")
+
+		# unrelated reposts, shouldn't do anything to others.
+		riv4 = frappe.get_doc(riv_args.update({"warehouse": "Stores - _TC"}))
+		riv4.flags.dont_run_in_test = True
+		riv4.submit()
+		riv4.deduplicate_similar_repost()
+		_assert_status(riv4, "Queued")
+		_assert_status(riv3, "Queued")
+
+		# to avoid breaking other tests accidentaly
+		riv4.set_status("Skipped")
+		riv3.set_status("Skipped")
