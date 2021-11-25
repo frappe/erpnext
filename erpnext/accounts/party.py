@@ -85,7 +85,8 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	if party_type=="Customer":
 		party_details["sales_team"] = [{
 			"sales_person": d.sales_person,
-			"allocated_percentage": d.allocated_percentage or None
+			"allocated_percentage": d.allocated_percentage or None,
+			"commission_rate": d.commission_rate
 		} for d in party.get("sales_team")]
 
 	# supplier tax withholding category

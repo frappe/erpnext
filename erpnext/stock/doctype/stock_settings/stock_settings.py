@@ -21,7 +21,7 @@ class StockSettings(Document):
 
 		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
 		set_by_naming_series("Item", "item_code",
-			self.get("item_naming_by")=="Naming Series", hide_name_field=True)
+			self.get("item_naming_by")=="Naming Series", hide_name_field=True, make_mandatory=0)
 
 		stock_frozen_limit = 356
 		submitted_stock_frozen = self.stock_frozen_upto_days or 0

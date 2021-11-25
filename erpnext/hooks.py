@@ -316,7 +316,8 @@ doc_events = {
 		'validate': ["erpnext.erpnext_integrations.taxjar_integration.set_sales_tax"]
 	},
 	"Company": {
-		"on_trash": "erpnext.regional.india.utils.delete_gst_settings_for_company"
+		"on_trash": ["erpnext.regional.india.utils.delete_gst_settings_for_company",
+			"erpnext.regional.saudi_arabia.utils.delete_vat_settings_for_company"]
 	},
 	"Integration Request": {
 		"validate": "erpnext.accounts.doctype.payment_request.payment_request.validate_payment"

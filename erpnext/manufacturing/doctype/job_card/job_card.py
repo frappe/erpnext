@@ -505,13 +505,11 @@ class JobCard(Document):
 			self.status = 'Work In Progress'
 
 		if (self.docstatus == 1 and
-			(self.for_quantity <= self.transferred_qty or not self.items)):
-			# consider excess transfer
-			# completed qty is checked via separate validation
+			(self.for_quantity <= self.total_completed_qty or not self.items)):
 			self.status = 'Completed'
 
 		if self.status != 'Completed':
-			if self.for_quantity == self.transferred_qty:
+			if self.for_quantity <= self.transferred_qty:
 				self.status = 'Material Transferred'
 
 		if update_status:
@@ -619,7 +617,8 @@ def make_material_request(source_name, target_doc=None):
 			"doctype": "Material Request Item",
 			"field_map": {
 				"required_qty": "qty",
-				"uom": "stock_uom"
+				"uom": "stock_uom",
+				"name": "job_card_item"
 			},
 			"postprocess": update_item,
 		}
@@ -629,17 +628,22 @@ def make_material_request(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None):
-	def update_item(obj, target, source_parent):
+	def update_item(source, target, source_parent):
 		target.t_warehouse = source_parent.wip_warehouse
+
 		if not target.conversion_factor:
 			target.conversion_factor = 1
+
+		pending_rm_qty = flt(source.required_qty) - flt(source.transferred_qty)
+		if pending_rm_qty > 0:
+			target.qty = pending_rm_qty
 
 	def set_missing_values(source, target):
 		target.purpose = "Material Transfer for Manufacture"
 		target.from_bom = 1
 
 		# avoid negative 'For Quantity'
-		pending_fg_qty = source.get('for_quantity', 0) - source.get('transferred_qty', 0)
+		pending_fg_qty = flt(source.get('for_quantity', 0)) - flt(source.get('transferred_qty', 0))
 		target.fg_completed_qty = pending_fg_qty if pending_fg_qty > 0 else 0
 
 		target.set_transfer_qty()
