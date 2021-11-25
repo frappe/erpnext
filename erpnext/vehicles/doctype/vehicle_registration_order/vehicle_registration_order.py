@@ -671,12 +671,13 @@ def get_journal_entry(vehicle_registration_order, purpose):
 
 			if not flt(vro.agent_closed_amount):
 				for d in vro.agent_charges:
-					remarks = None
-					if d.component and d.component_type:
-						remarks = _(d.component_type)
+					if flt(d.component_amount):
+						remarks = vro.registration_customer_name or vro.customer_name
+						if d.component and d.component_type:
+							remarks = _(d.component_type)
 
-					add_journal_entry_row(jv, -1 * flt(d.component_amount), vro.agent_account,
-						'Supplier', vro.agent, vro.name, remarks=remarks)
+						add_journal_entry_row(jv, -1 * flt(d.component_amount), vro.agent_account,
+							'Supplier', vro.agent, vro.name, remarks=remarks)
 			else:
 				add_journal_entry_row(jv, -1 * unclosed_agent_amount, vro.agent_account, 'Supplier', vro.agent, vro.name)
 

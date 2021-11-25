@@ -634,11 +634,11 @@ def get_vehicle_booking_order_details(args):
 			if registration_details and registration_details.customer:
 				out.customer = registration_details.customer
 				out.financer = registration_details.financer
-			elif registration_details.transfer_customer:
+			elif booking_details.transfer_customer:
 				out.customer = booking_details.transfer_customer
 				out.financer = booking_details.transfer_financer
 			else:
-				out.customer = booking_details.customer
+				out.customer = booking_details.financer if is_leased else booking_details.customer
 				out.financer = booking_details.financer if is_financed else None
 
 		elif args.doctype == "Vehicle Invoice":
