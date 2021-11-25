@@ -7,7 +7,6 @@ Provide a report and downloadable CSV according to the German DATEV format.
 - CSV download functionality `download_datev_csv` that provides a CSV file with
 	all required columns. Used to import the data into the DATEV Software.
 """
-from __future__ import unicode_literals
 
 import json
 

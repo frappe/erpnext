@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 import frappe
 from frappe.permissions import add_permission, update_permission_property
 from erpnext.regional.united_arab_emirates.setup import make_custom_fields as uae_custom_fields, add_print_formats
