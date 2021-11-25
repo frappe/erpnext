@@ -5,7 +5,6 @@ import unittest
 
 import frappe
 from frappe.utils import flt, nowdate
-from traceback import print_exc
 
 from erpnext.assets.doctype.asset.test_asset import (
 	create_asset,
