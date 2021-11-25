@@ -20,7 +20,7 @@ from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_ban
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
 	get_party_tax_withholding_details,
 )
-from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.accounts.general_ledger import make_gl_entries, process_gl_map
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency, get_balance_on, get_outstanding_invoices
 from erpnext.controllers.accounts_controller import (
@@ -433,9 +433,6 @@ class PaymentEntry(AccountsController):
 		if not self.apply_tax_withholding_amount:
 			return
 
-		if not self.advance_tax_account:
-			frappe.throw(_("Advance TDS account is mandatory for advance TDS deduction"))
-
 		net_total = self.paid_amount
 
 		for reference in self.get("references"):
@@ -455,13 +452,12 @@ class PaymentEntry(AccountsController):
 			'net_total': net_total
 		})
 
-		tax_withholding_details = get_party_tax_withholding_details(args, self.tax_withholding_category)
+		tax_withholding_details, tax_deducted_on_advances = get_party_tax_withholding_details(args, self.tax_withholding_category)
 
 		if not tax_withholding_details:
 			return
 
 		tax_withholding_details.update({
-			'add_deduct_tax': 'Add',
 			'cost_center': self.cost_center or erpnext.get_default_cost_center(self.company)
 		})
 
@@ -689,6 +685,7 @@ class PaymentEntry(AccountsController):
 		self.add_deductions_gl_entries(gl_entries)
 		self.add_tax_gl_entries(gl_entries)
 
+		gl_entries = process_gl_map(gl_entries)
 		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
 
 	def add_party_gl_entries(self, gl_entries):
@@ -752,7 +749,8 @@ class PaymentEntry(AccountsController):
 					"against": self.party if self.payment_type=="Pay" else self.paid_to,
 					"credit_in_account_currency": self.paid_amount,
 					"credit": self.base_paid_amount,
-					"cost_center": self.cost_center
+					"cost_center": self.cost_center,
+					"post_net_value": True
 				}, item=self)
 			)
 		if self.payment_type in ("Receive", "Internal Transfer"):
@@ -782,13 +780,9 @@ class PaymentEntry(AccountsController):
 				rev_dr_or_cr = "credit" if dr_or_cr == "debit" else "debit"
 				against = self.party or self.paid_to
 
-			payment_or_advance_account = self.get_party_account_for_taxes()
+			payment_account = self.get_party_account_for_taxes()
 			tax_amount = d.tax_amount
 			base_tax_amount = d.base_tax_amount
-
-			if self.advance_tax_account:
-				tax_amount = -1 * tax_amount
-				base_tax_amount = -1 * base_tax_amount
 
 			gl_entries.append(
 				self.get_gl_dict({
@@ -798,19 +792,21 @@ class PaymentEntry(AccountsController):
 					dr_or_cr + "_in_account_currency": base_tax_amount
 					if account_currency==self.company_currency
 					else d.tax_amount,
-					"cost_center": d.cost_center
+					"cost_center": d.cost_center,
+					"post_net_value": True,
 				}, account_currency, item=d))
 
-			if not d.included_in_paid_amount or self.advance_tax_account:
+			if not d.included_in_paid_amount:
 				gl_entries.append(
 					self.get_gl_dict({
-						"account": payment_or_advance_account,
+						"account": payment_account,
 						"against": against,
 						rev_dr_or_cr: tax_amount,
 						rev_dr_or_cr + "_in_account_currency": base_tax_amount
 						if account_currency==self.company_currency
 						else d.tax_amount,
 						"cost_center": self.cost_center,
+						"post_net_value": True,
 					}, account_currency, item=d))
 
 	def add_deductions_gl_entries(self, gl_entries):
@@ -832,9 +828,7 @@ class PaymentEntry(AccountsController):
 				)
 
 	def get_party_account_for_taxes(self):
-		if self.advance_tax_account:
-			return self.advance_tax_account
-		elif self.payment_type == 'Receive':
+		if self.payment_type == 'Receive':
 			return self.paid_to
 		elif self.payment_type in ('Pay', 'Internal Transfer'):
 			return self.paid_from
@@ -1602,9 +1596,6 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	if doc.doctype == 'Purchase Order' and doc.apply_tds:
 		pe.apply_tax_withholding_amount = 1
 		pe.tax_withholding_category = doc.tax_withholding_category
-
-		if not pe.advance_tax_account:
-			pe.advance_tax_account = frappe.db.get_value('Company', pe.company, 'unrealized_profit_loss_account')
 
 	return pe
 

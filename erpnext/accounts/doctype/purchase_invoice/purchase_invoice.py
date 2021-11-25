@@ -427,6 +427,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
+		self.update_advance_tax_references()
 
 		self.process_common_party_accounting()
 
@@ -471,8 +472,6 @@ class PurchaseInvoice(BuyingController):
 		self.make_tax_gl_entries(gl_entries)
 		self.make_exchange_gain_loss_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
-
-		self.allocate_advance_taxes(gl_entries)
 
 		gl_entries = make_regional_gl_entries(gl_entries, self)
 
@@ -1074,6 +1073,7 @@ class PurchaseInvoice(BuyingController):
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
+		self.update_advance_tax_references(cancel=1)
 
 	def update_project(self):
 		project_list = []
@@ -1150,7 +1150,10 @@ class PurchaseInvoice(BuyingController):
 		if not self.tax_withholding_category:
 			return
 
-		tax_withholding_details = get_party_tax_withholding_details(self, self.tax_withholding_category)
+		tax_withholding_details, advance_taxes = get_party_tax_withholding_details(self, self.tax_withholding_category)
+
+		# Adjust TDS paid on advances
+		self.allocate_advance_tds(tax_withholding_details, advance_taxes)
 
 		if not tax_withholding_details:
 			return
@@ -1173,6 +1176,39 @@ class PurchaseInvoice(BuyingController):
 
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
+
+	def allocate_advance_tds(self, tax_withholding_details, advance_taxes):
+		self.set('advance_tax', [])
+		for tax in advance_taxes:
+			allocated_amount = 0
+			pending_amount = flt(tax.tax_amount - tax.allocated_amount)
+			if flt(tax_withholding_details.get('tax_amount')) >= pending_amount:
+				tax_withholding_details['tax_amount'] -= pending_amount
+				allocated_amount = pending_amount
+			elif flt(tax_withholding_details.get('tax_amount')) and flt(tax_withholding_details.get('tax_amount')) < pending_amount:
+				allocated_amount = tax_withholding_details['tax_amount']
+				tax_withholding_details['tax_amount'] = 0
+
+			self.append('advance_tax', {
+				'reference_type': 'Payment Entry',
+				'reference_name': tax.parent,
+				'reference_detail': tax.name,
+				'account_head': tax.account_head,
+				'allocated_amount': allocated_amount
+			})
+
+	def update_advance_tax_references(self, cancel=0):
+		for tax in self.get('advance_tax'):
+			at = frappe.qb.DocType("Advance Taxes and Charges").as_("at")
+
+			if cancel:
+				frappe.qb.update(at).set(
+					at.allocated_amount, at.allocated_amount - tax.allocated_amount
+				).where(at.name == tax.reference_detail).run()
+			else:
+				frappe.qb.update(at).set(
+					at.allocated_amount, at.allocated_amount + tax.allocated_amount
+				).where(at.name == tax.reference_detail).run()
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
