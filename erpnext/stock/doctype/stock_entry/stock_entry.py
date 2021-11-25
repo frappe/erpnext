@@ -702,6 +702,11 @@ class StockEntry(StockController):
 
 			finished_item = self.get_finished_item()
 
+			if not finished_item:
+				# In case of independent Manufacture entry, don't auto set
+				# user must decide and set
+				return
+
 			for d in self.items:
 				if d.t_warehouse and not d.s_warehouse:
 					if self.purpose=="Repack" or d.item_code == finished_item:
