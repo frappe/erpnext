@@ -646,7 +646,7 @@ def get_vehicle_booking_order_details(args):
 
 		elif args.doctype == "Vehicle Invoice Delivery":
 			if booking_details.transfer_customer:
-				out.customer = booking_details.transfer_customer
+				out.customer = booking_details.financer or booking_details.transfer_customer
 			else:
 				out.customer = booking_details.financer if booking_details.financer else booking_details.customer
 				out.customer_address = booking_details.customer_address

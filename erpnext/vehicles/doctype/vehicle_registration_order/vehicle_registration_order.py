@@ -807,8 +807,8 @@ def get_invoice_delivery(vehicle_registration_order):
 	delivery.company = vro.company
 	delivery.vehicle = vro.vehicle
 	delivery.vehicle_booking_order = vro.vehicle_booking_order
-	delivery.customer = vro.registration_customer
-	delivery.customer_name = vro.registration_customer_name
+	delivery.customer = vro.financer if vro.financer or vro.registration_customer
+	delivery.customer_name = vro.financer_name if vro.financer or vro.registration_customer_name
 
 	delivery.run_method("set_missing_values")
 
