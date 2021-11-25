@@ -11,12 +11,14 @@ from erpnext.assets.doctype.asset.test_asset import (
 	create_asset_data,
 	set_depreciation_settings_in_company,
 )
+from erpnext.stock.doctype.item.test_item import create_item
 
 
 class TestAssetRepair(unittest.TestCase):
 	def setUp(self):
 		set_depreciation_settings_in_company()
 		create_asset_data()
+		create_item("_Test Stock Item")
 		frappe.db.sql("delete from `tabTax Rule`")
 
 	def test_update_status(self):
@@ -139,7 +141,7 @@ def create_asset_repair(**args):
 		asset_repair.stock_consumption = 1
 		asset_repair.warehouse = create_warehouse("Test Warehouse", company = asset.company)
 		asset_repair.append("stock_items", {
-			"item_code": args.item_code or "_Test Item",
+			"item_code": args.item_code or "_Test Stock Item",
 			"valuation_rate": args.rate if args.get("rate") is not None else 100,
 			"consumed_quantity": args.qty or 1
 		})
