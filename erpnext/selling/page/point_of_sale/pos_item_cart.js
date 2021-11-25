@@ -49,11 +49,11 @@ erpnext.PointOfSale.ItemCart = class {
 		this.$component.append(
 			`<div class="cart-container">
 				<div class="abs-cart-container">
-					<div class="cart-label">Item Cart</div>
+					<div class="cart-label">${__('Item Cart')}</div>
 					<div class="cart-header">
-						<div class="name-header">Item</div>
-						<div class="qty-header">Qty</div>
-						<div class="rate-amount-header">Amount</div>
+						<div class="name-header">${__('Item')}</div>
+						<div class="qty-header">${__('Quantity')}</div>
+						<div class="rate-amount-header">${__('Amount')}</div>
 					</div>
 					<div class="cart-items-section"></div>
 					<div class="cart-totals-section"></div>
@@ -78,7 +78,7 @@ erpnext.PointOfSale.ItemCart = class {
 	make_no_items_placeholder() {
 		this.$cart_header.css('display', 'none');
 		this.$cart_items_wrapper.html(
-			`<div class="no-item-wrapper">No items in cart</div>`
+			`<div class="no-item-wrapper">${__('No items in cart')}</div>`
 		);
 	}
 
@@ -98,19 +98,19 @@ erpnext.PointOfSale.ItemCart = class {
 
 		this.$totals_section.append(
 			`<div class="add-discount-wrapper">
-				${this.get_discount_icon()} Add Discount
+				${this.get_discount_icon()} ${__('Add Discount')}
 			</div>
 			<div class="net-total-container">
-				<div class="net-total-label">Net Total</div>
+				<div class="net-total-label">${__("Net Total")}</div>
 				<div class="net-total-value">0.00</div>
 			</div>
 			<div class="taxes-container"></div>
 			<div class="grand-total-container">
-				<div>Grand Total</div>
+				<div>${__('Grand Total')}</div>
 				<div>0.00</div>
 			</div>
-			<div class="checkout-btn">Checkout</div>
-			<div class="edit-cart-btn">Edit Cart</div>`
+			<div class="checkout-btn">${__('Checkout')}</div>
+			<div class="edit-cart-btn">${__('Edit Cart')}</div>`
 		)
 
 		this.$add_discount_elem = this.$component.find(".add-discount-wrapper");
@@ -126,10 +126,10 @@ erpnext.PointOfSale.ItemCart = class {
 			},
 			cols: 5,
 			keys: [
-				[ 1, 2, 3, 'Quantity' ],
-				[ 4, 5, 6, 'Discount' ],
-				[ 7, 8, 9, 'Rate' ],
-				[ '.', 0, 'Delete', 'Remove' ]
+				[ 1, 2, 3, __('Quantity') ],
+				[ 4, 5, 6, __('Discount') ],
+				[ 7, 8, 9, __('Rate') ],
+				[ '.', 0, __('Delete'), __('Remove') ]
 			],
 			css_classes: [
 				[ '', '', '', 'col-span-2' ],
@@ -148,7 +148,7 @@ erpnext.PointOfSale.ItemCart = class {
 		)
 
 		this.$numpad_section.append(
-			`<div class="numpad-btn checkout-btn" data-button-value="checkout">Checkout</div>`
+			`<div class="numpad-btn checkout-btn" data-button-value="checkout">${__('Checkout')}</div>`
 		)
 	}
 
@@ -386,7 +386,7 @@ erpnext.PointOfSale.ItemCart = class {
 							'border': '1px dashed var(--gray-500)',
 							'padding': 'var(--padding-sm) var(--padding-md)'
 						});
-						me.$add_discount_elem.html(`${me.get_discount_icon()} Add Discount`);
+						me.$add_discount_elem.html(`${me.get_discount_icon()} ${__('Add Discount')}`);
 						me.discount_field = undefined;
 					}
 				},
@@ -411,7 +411,7 @@ erpnext.PointOfSale.ItemCart = class {
 			});
 			this.$add_discount_elem.html(
 				`<div class="edit-discount-btn">
-					${this.get_discount_icon()} Additional&nbsp;${String(discount).bold()}% discount applied
+					${this.get_discount_icon()} ${__("Additional")}&nbsp;${String(discount).bold()}% ${__("discount applied")}
 				</div>`
 			);
 		}
@@ -445,7 +445,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 		function get_customer_description() {
 			if (!email_id && !mobile_no) {
-				return `<div class="customer-desc">Click to add email / phone</div>`;
+				return `<div class="customer-desc">${__('Click to add email / phone')}</div>`;
 			} else if (email_id && !mobile_no) {
 				return `<div class="customer-desc">${email_id}</div>`;
 			} else if (mobile_no && !email_id) {
@@ -479,22 +479,22 @@ erpnext.PointOfSale.ItemCart = class {
 	render_net_total(value) {
 		const currency = this.events.get_frm().doc.currency;
 		this.$totals_section.find('.net-total-container').html(
-			`<div>Net Total</div><div>${format_currency(value, currency)}</div>`
+			`<div>${__('Net Total')}</div><div>${format_currency(value, currency)}</div>`
 		)
 
 		this.$numpad_section.find('.numpad-net-total').html(
-			`<div>Net Total: <span>${format_currency(value, currency)}</span></div>`
+			`<div>${__('Net Total')}: <span>${format_currency(value, currency)}</span></div>`
 		);
 	}
 
 	render_grand_total(value) {
 		const currency = this.events.get_frm().doc.currency;
 		this.$totals_section.find('.grand-total-container').html(
-			`<div>Grand Total</div><div>${format_currency(value, currency)}</div>`
+			`<div>${__('Grand Total')}</div><div>${format_currency(value, currency)}</div>`
 		)
 
 		this.$numpad_section.find('.numpad-grand-total').html(
-			`<div>Grand Total: <span>${format_currency(value, currency)}</span></div>`
+			`<div>${__('Grand Total')}: <span>${format_currency(value, currency)}</span></div>`
 		);
 	}
 
@@ -502,6 +502,7 @@ erpnext.PointOfSale.ItemCart = class {
 		if (taxes.length) {
 			const currency = this.events.get_frm().doc.currency;
 			const taxes_html = taxes.map(t => {
+				if (t.tax_amount_after_discount_amount == 0.0) return;
 				const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
 				return `<div class="tax-row">
 					<div class="tax-label">${description}</div>
