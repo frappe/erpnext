@@ -105,6 +105,45 @@ class TestGSTR3BReport(unittest.TestCase):
 		gst_settings.round_off_gst_values = 1
 		gst_settings.save()
 
+	def test_gst_category_auto_update(self):
+		if not frappe.db.exists("Customer", "_Test GST Customer With GSTIN"):
+			customer = frappe.get_doc({
+				"customer_group": "_Test Customer Group",
+				"customer_name": "_Test GST Customer With GSTIN",
+				"customer_type": "Individual",
+				"doctype": "Customer",
+				"territory": "_Test Territory"
+			}).insert()
+
+			self.assertEqual(customer.gst_category, 'Unregistered')
+
+		if not frappe.db.exists('Address', '_Test GST Category-1-Billing'):
+			address = frappe.get_doc({
+				"address_line1": "_Test Address Line 1",
+				"address_title": "_Test GST Category-1",
+				"address_type": "Billing",
+				"city": "_Test City",
+				"state": "Test State",
+				"country": "India",
+				"doctype": "Address",
+				"is_primary_address": 1,
+				"phone": "+91 0000000000",
+				"gstin": "29AZWPS7135H1ZG",
+				"gst_state": "Karnataka",
+				"gst_state_number": "29"
+			}).insert()
+
+			address.append("links", {
+				"link_doctype": "Customer",
+				"link_name": "_Test GST Customer With GSTIN"
+			})
+
+			address.save()
+
+		customer.load_from_db()
+		self.assertEqual(customer.gst_category, 'Registered Regular')
+
+
 def make_sales_invoice():
 	si = create_sales_invoice(company="_Test Company GST",
 			customer = '_Test GST Customer',

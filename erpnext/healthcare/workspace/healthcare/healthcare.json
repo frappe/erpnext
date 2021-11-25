@@ -16,6 +16,7 @@
  "hide_custom": 0,
  "icon": "healthcare",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Healthcare",
  "links": [
@@ -534,7 +535,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-01-30 19:35:45.316999",
+ "modified": "2021-10-29 14:31:16.795628",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
@@ -569,8 +570,12 @@
    "type": "DocType"
   },
   {
+   "color": "#29CD42",
+   "doc_view": "List",
+   "format": "{} Active",
    "label": "Healthcare Practitioner",
    "link_to": "Healthcare Practitioner",
+   "stats_filter": "{\n    \"status\": \"Active\"\n}",
    "type": "DocType"
   },
   {

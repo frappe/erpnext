@@ -7,10 +7,17 @@ import unittest
 
 import frappe
 
+from erpnext.accounts.doctype.promotional_scheme.promotional_scheme import TransactionExists
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
 
 class TestPromotionalScheme(unittest.TestCase):
+	def setUp(self):
+		if frappe.db.exists('Promotional Scheme', '_Test Scheme'):
+			frappe.delete_doc('Promotional Scheme', '_Test Scheme')
+
 	def test_promotional_scheme(self):
-		ps = make_promotional_scheme()
+		ps = make_promotional_scheme(applicable_for='Customer', customer='_Test Customer')
 		price_rules = frappe.get_all('Pricing Rule', fields = ["promotional_scheme_id", "name", "creation"],
 			filters = {'promotional_scheme': ps.name})
 		self.assertTrue(len(price_rules),1)
@@ -41,22 +48,62 @@ class TestPromotionalScheme(unittest.TestCase):
 			filters = {'promotional_scheme': ps.name})
 		self.assertEqual(price_rules, [])
 
-def make_promotional_scheme():
+	def test_promotional_scheme_without_applicable_for(self):
+		ps = make_promotional_scheme()
+		price_rules = frappe.get_all('Pricing Rule', filters = {'promotional_scheme': ps.name})
+
+		self.assertTrue(len(price_rules), 1)
+		frappe.delete_doc('Promotional Scheme', ps.name)
+
+		price_rules = frappe.get_all('Pricing Rule', filters = {'promotional_scheme': ps.name})
+		self.assertEqual(price_rules, [])
+
+	def test_change_applicable_for_in_promotional_scheme(self):
+		ps = make_promotional_scheme()
+		price_rules = frappe.get_all('Pricing Rule', filters = {'promotional_scheme': ps.name})
+		self.assertTrue(len(price_rules), 1)
+
+		so = make_sales_order(qty=5, currency='USD', do_not_save=True)
+		so.set_missing_values()
+		so.save()
+		self.assertEqual(price_rules[0].name, so.pricing_rules[0].pricing_rule)
+
+		ps.applicable_for = 'Customer'
+		ps.append('customer', {
+			'customer': '_Test Customer'
+		})
+
+		self.assertRaises(TransactionExists, ps.save)
+
+		frappe.delete_doc('Sales Order', so.name)
+		frappe.delete_doc('Promotional Scheme', ps.name)
+		price_rules = frappe.get_all('Pricing Rule', filters = {'promotional_scheme': ps.name})
+		self.assertEqual(price_rules, [])
+
+def make_promotional_scheme(**args):
+	args = frappe._dict(args)
+
 	ps = frappe.new_doc('Promotional Scheme')
 	ps.name = '_Test Scheme'
 	ps.append('items',{
 		'item_code': '_Test Item'
 	})
+
 	ps.selling = 1
 	ps.append('price_discount_slabs',{
 		'min_qty': 4,
+		'validate_applied_rule': 0,
 		'discount_percentage': 20,
 		'rule_description': 'Test'
 	})
-	ps.applicable_for = 'Customer'
-	ps.append('customer',{
-		'customer': "_Test Customer"
-	})
+
+	ps.company = '_Test Company'
+	if args.applicable_for:
+		ps.applicable_for = args.applicable_for
+		ps.append(frappe.scrub(args.applicable_for), {
+			frappe.scrub(args.applicable_for): args.get(frappe.scrub(args.applicable_for))
+		})
+
 	ps.save()
 
 	return ps
