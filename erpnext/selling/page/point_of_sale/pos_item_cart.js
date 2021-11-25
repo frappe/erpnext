@@ -500,11 +500,11 @@ erpnext.PointOfSale.ItemCart = class {
 		});
 
 		this.$totals_section.find('.item-qty-total-container').html(
-			`<div>${__('Total Item Qty')}</div><div>${total_item_qty}</div>`
+			`<div>${__('Total Quantity')}</div><div>${total_item_qty}</div>`
 		);
 
 		this.$numpad_section.find('.numpad-item-qty-total').html(
-			`<div>${__('Total Item Qty')}: <span>${total_item_qty}</span></div>`
+			`<div>${__('Total Quantity')}: <span>${total_item_qty}</span></div>`
 		);
 	}
 
