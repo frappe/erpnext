@@ -354,16 +354,11 @@ class SalarySlip(TransactionBase):
 	def paid(self):	
 		#Paid Holidays
 		cdoc = frappe.get_doc("Employee",self.employee)
-		print(">>>>>>>cdoc-Paid-method-347>>>>>",cdoc)
 		if cdoc.holiday_list:
-			# print("???????????????????cdoc??",cdoc.holiday_list)	
 			get_national_holiday = frappe.db.sql("""select count(is_national_holiday) as inh from `tabHoliday`
 												where weekly_off = 0 and holiday_date
 												between '{0}' and '{1}'""".format(self.start_date, self.end_date), as_dict= True)
-			# print(">>>>>>>>>>>>>>>>>>>>>>>get_national_holiday>>>>>>>>>>>>>>>>>>>>>>>>>>>>",get_national_holiday[0].get('inh'), type(get_national_holiday), get_national_holiday)
 			get_paid_value = get_national_holiday[0].get('inh')
-			print(">>>>>>>>>>>>>>>>>>>>>>inh>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",get_paid_value, type(get_paid_value))
-			# self.db_set("paid_holidays", get_paid_value)
 			return get_paid_value
 
 	def get_payment_days(self, joining_date, relieving_date, include_holidays_in_total_working_days):
@@ -432,13 +427,10 @@ class SalarySlip(TransactionBase):
 			
 	@frappe.whitelist()
 	def set_days(self):
-		#days_in_month
 		from calendar import monthrange
 		a = getdate(self.start_date).year
 		b = getdate(self.start_date).month
 		num_days = monthrange(a, b)[1]
-		# self.days_in_month = num_days
-		# self.db_set('days_in_month', num_days)		
 		return num_days
 
 	@frappe.whitelist()
@@ -447,10 +439,8 @@ class SalarySlip(TransactionBase):
 		comp_off = frappe.db.sql("""select name from `tabCompensatory Leave Request`
 								where employee= '{0}' and  docstatus=1 and work_from_date 
 								between '{1}' and '{2}' and work_end_date between '{3}'and '{4}' """.format(self.employee,self.start_date, self.end_date, self.start_date, self.end_date),as_dict=1)
-		# print(";;;;;;;;;;;;;;;;>>>",comp_off)
 		lst=[]
-		for i in comp_off:
-			# print(">>>>>>>>>iprinting", i) 
+		for i in comp_off: 
 			doc = frappe.get_doc("Compensatory Leave Request",i.get("name"))
 			# a=doc.work_from_date.replace('-',',')
 			# b=doc.work_end_date.replace('-',',')
@@ -460,12 +450,9 @@ class SalarySlip(TransactionBase):
 			# date_difference = date_diff(work_end_date,work_from_date)
 			date_difference = frappe.db.sql("""SELECT DATEDIFF(work_end_date , work_from_date) as date 
 											from `tabCompensatory Leave Request` where name = '{0}' """.format(doc.name),as_dict=1)
-			# print("$$$$$$$$$$$$$$$$$$$$$$$",date_difference)
 			for i in date_difference:
 				lst.append(i.get("date") + 1)
 				self.compoff=sum(lst)
-		# print(":compoff:::::::>",sum(lst))	
-				# self.db_set('compoff', sum(lst))
 		return sum(lst)
 
 	@frappe.whitelist()
@@ -485,8 +472,7 @@ class SalarySlip(TransactionBase):
 			
 			for i in week:
 				if i ==hdoc.weekly_off:
-					self.weekly_off = week[i]
-					print('in::::weekoff:::',week)				
+					self.weekly_off = week[i]	
 			return week[i]
 	
 	# Present Days   : Days in month- Weekly Off - Paid Holidays- Total Leave(Current Month) 
