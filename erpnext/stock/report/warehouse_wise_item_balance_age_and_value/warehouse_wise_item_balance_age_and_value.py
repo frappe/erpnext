@@ -39,8 +39,8 @@ def execute(filters=None):
 		item_balance.setdefault((item, item_map[item]["item_group"]), [])
 		total_stock_value = 0.00
 		for wh in warehouse_list:
-			row += [qty_dict.bal_qty] if wh.name in warehouse else [0.00]
-			total_stock_value += qty_dict.bal_val if wh.name in warehouse else 0.00
+			row += [qty_dict.bal_qty] if wh.name == warehouse else [0.00]
+			total_stock_value += qty_dict.bal_val if wh.name == warehouse else 0.00
 
 		item_balance[(item, item_map[item]["item_group"])].append(row)
 		item_value.setdefault((item, item_map[item]["item_group"]),[])
