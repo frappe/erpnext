@@ -359,7 +359,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				() => set_value('is_subcontracted', 'No'),
 				() => {
 					if(this.frm.doc.company && !this.frm.doc.amended_from) {
-						this.frm.trigger("company");
+						this.set_company_defaults();
 					}
 				}
 			]);
@@ -881,6 +881,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	company: function() {
+		this.set_company_defaults(true);
+	},
+
+	set_company_defaults: function (reset_account) {
 		var me = this;
 		var set_pricing = function() {
 			if(me.frm.doc.company && me.frm.fields_dict.currency) {
@@ -946,8 +950,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						},
 						callback: function(r) {
 							if(!r.exc && r.message) {
-								me.frm.set_value(party_account_field, r.message.account);
-								if (r.message.cost_center) {
+								if (reset_account || !me.frm.doc[party_account_field]) {
+									me.frm.set_value(party_account_field, r.message.account);
+								}
+								if (r.message.cost_center && (reset_account || !me.frm.doc.cost_center)) {
 									me.frm.set_value("cost_center", r.message.cost_center);
 								}
 								set_pricing();
