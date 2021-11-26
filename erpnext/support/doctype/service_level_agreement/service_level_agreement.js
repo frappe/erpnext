@@ -47,7 +47,7 @@ frappe.ui.form.on('Service Level Agreement', {
 	entity: function(frm) {
 		const field = frm.get_field('entity');
 		if (frm.doc.entity) {
-			const and_descendants = frm.doc.entity_type != 'Customer' ? __(' or its descendants') : '';
+			const and_descendants = frm.doc.entity_type != 'Customer' ? ' ' + __('or its descendants') : '';
 			field.set_description(
 				__('SLA will be applied if {1} is set as {2}{3}', [
 					frm.doc.document_type, frm.doc.entity_type,
