@@ -15,6 +15,12 @@ class Returncreditnotes(Document):
 	def before_insert(self):
 		if self.docstatus == 0:
 			self.assign_cai()
+		
+		if self.docstatus == 1:
+			self.add_bin()
+	
+	def on_cancel(self):
+		self.delete_bin()
 
 	def validate(self):		
 		if self.docstatus == 0:
@@ -226,3 +232,26 @@ class Returncreditnotes(Document):
 					if str(date) == str(sum_dates1):
 						frappe.msgprint(_("This CAI expires in {} days.".format(i)))
 						break
+	
+	def add_bin(self):
+		items = frappe.get_all("Return credit notes Item", ["*"], filters = {"parent": self.name})
+
+		for item in items:
+			items_bin = frappe.get_all("Bin", ["*"], filters = {"item_code": item.item_code})
+
+			for bin in items_bin:
+				if item.warehouse == bin.warehouse:
+					doc = frappe.get_doc("Bin", bin.name)
+					doc.actual_qty += item.qty
+	
+	def delete_bin(self):
+		items = frappe.get_all("Return credit notes Item", ["*"], filters = {"parent": self.name})
+
+		for item in items:
+			items_bin = frappe.get_all("Bin", ["*"], filters = {"item_code": item.item_code})
+
+			for bin in items_bin:
+				if item.warehouse == bin.warehouse:
+					doc = frappe.get_doc("Bin", bin.name)
+					doc.actual_qty -= item.qty
+	
