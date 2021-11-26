@@ -59,7 +59,7 @@ frappe.listview_settings['Sales Order'] = {
 					console.log(r);
 				})
 				if(count_of_rows > 10){
-					frappe.show_alert(`Starting a background to create ${count_of_rows} sales invoice`,count_of_rows);
+					frappe.show_alert(`Starting a background job to create ${count_of_rows} sales invoice`,count_of_rows);
 				}
 			})
 		});
@@ -91,7 +91,7 @@ frappe.listview_settings['Sales Order'] = {
 					console.log(r);
 				})
 				if(count_of_rows > 10){
-					frappe.show_alert(`Starting a background to create ${count_of_rows} Advance Payment`,count_of_rows);
+					frappe.show_alert(`Starting a background job to create ${count_of_rows} Advance Payment`,count_of_rows);
 				}
 			})
 		})

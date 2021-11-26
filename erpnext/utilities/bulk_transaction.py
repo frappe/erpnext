@@ -1,5 +1,4 @@
 import json
-from datetime import date
 
 import frappe
 
@@ -34,31 +33,35 @@ def job(deserialized_data, to_create):
 			# From Sales Order
 			if to_create == "Sales Invoice From Sales Order":
 				si = sales_order.make_sales_invoice(d.get('name'))
-				si.insert()
+				si.flags.ignore_validate = True
+				si.insert(ignore_mandatory=True)
 
 			if to_create == "Delivery Note From Sales Order":
 				dn_so = sales_order.make_delivery_note(d.get('name'))
-				dn_so.insert()
+				si.flags.ignore_validate = True
+				dn_so.insert(ignore_mandatory=True)
 
 			if to_create == "Advance Payment From Sales Order":
 				ap_so = payment_entry.get_payment_entry("Sales Order", d.get('name'))
 				ap_so.flags.ignore_validate = True
-				ap_so.insert()
+				ap_so.insert(ignore_mandatory=True)
 
 			# From Sales Invoice
 			if to_create == "Delivery Note From Sales Invoice":
 				dn_si = sales_invoice.make_delivery_note(d.get('name'))
-				dn_si.insert()
+				dn_si.flags.ignore_validate = True
+				dn_si.insert(ignore_mandatory=True)
 
 			if to_create == "Payment Sales Invoice":
 				p_si = payment_entry.get_payment_entry("Sales Invoice", d.get('name'))
 				p_si.flags.ignore_validate = True
-				p_si.insert()
+				p_si.insert(ignore_mandatory=True)
 
 			# From Delivery Note
 			if to_create == "Sales Invoice From Delivery Note":
 				si_from_dn = delivery_note.make_sales_invoice(d.get('name'))
-				si_from_dn.insert()
+				si_from_dn.flags.ignore_validate = True
+				si_from_dn.insert(ignore_mandatory=True)
 
 			if to_create == "Packaging Slip From Delivery Note":
 				ps  = delivery_note.make_packing_slip(d.get('name'))
@@ -68,52 +71,58 @@ def job(deserialized_data, to_create):
 			# From Quotation
 			if to_create == "Sales Order From Quotation":
 				so_qtn = quotation._make_sales_order(d.get('name'))
-				so_qtn.delivery_date = date.today()
-				so_qtn.insert()
+				so_qtn.flags.ignore_validate = True
+				so_qtn.insert(ignore_mandatory=True)
 
 			if to_create == "Sales Invoice From Quotation":
 				si_qtn = quotation._make_sales_invoice(d.get('name'))
-				si_qtn.insert()
+				si_qtn.flags.ignore_validate = True
+				si_qtn.insert(ignore_mandatory=True)
 
 			# From Supplier Quotation
 			if to_create == "Purchase Order From Supplier Quotation":
 				po_sq = supplier_quotation.make_purchase_order(d.get('name'))
-				po_sq.schedule_date = date.today()
-				po_sq.insert()
+				po_sq.flags.ignore_validate = True
+				po_sq.insert(ignore_mandatory=True)
 
 			if to_create == "Purchase Invoice From Supplier Quotation":
 				# created method to create purchase invoice from supplier quotation
 				pi_sq = supplier_quotation.make_purchase_invoice(d.get('name'))
-				pi_sq.insert()
+				pi_sq.flags.ignonre_validate = True
+				pi_sq.insert(ignore_mandatory=True)
 
 			# From Purchase Order
 			if to_create == "Purchase Invoice From Purchase Order":
 				pi_po = purchase_order.get_mapped_purchase_invoice(d.get('name'))
-				pi_po.insert()
+				pi_po.flags.ignore_validate = True
+				pi_po.insert(ignore_mandatory=True)
 
 			if to_create == "Purchase Receipt From Purchase Order":
 				pr_po = purchase_order.make_purchase_receipt(d.get('name'))
-				pr_po.insert()
+				pr_po.flags.ignore_validate = True
+				pr_po.insert(ignore_mandatory=True)
 
 			if to_create == "Advance Payment From Purchase Order":
 				ap_po = payment_entry.get_payment_entry("Purchase Order", d.get('name'))
 				ap_po.flags.ignore_validate = True
-				ap_po.insert()
+				ap_po.insert(ignore_mandatory=True)
 
 			# From Purchase Invoice
 			if to_create == "Purchase Receipt From Purchase Invoice":
 				pr_pi = purchase_invoice.make_purchase_receipt(d.get('name'))
-				pr_pi.insert()
+				pr_pi.flags.ignore_valdiate = True
+				pr_pi.insert(ignore_mandatory=True)
 
 			if to_create == "Payment Purchase Invoice":
 				p_pi = payment_entry.get_payment_entry("Purchase Invoice", d.get("name"))
 				p_pi.flags.ignore_validate = True
-				p_pi.insert()
+				p_pi.insert(ignore_mandatory=True)
 
 			# From Purchase Receipt
 			if to_create == "Purchase Invoice From Purchase Receipt":
 				pr_pi = purchase_receipt.make_purchase_invoice(d.get('name'))
-				pr_pi.insert()
+				pr_pi.flags.ignore_validate = True
+				pr_pi.insert(ignore_mandatory=True)
 
 		except Exception as e:
-			frappe.throw("Error while creating {1} from {0}".format(d.get('name'), to_create),exc=e, title="Invoice Creation Failed")
+			frappe.msgprint("Error while creating {1} from {0}".format(d.get('name'), to_create), title="Invoice Creation Failed")
