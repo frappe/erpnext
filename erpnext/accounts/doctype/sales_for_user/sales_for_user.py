@@ -22,7 +22,7 @@ class SalesForUser(Document):
 		split_serie = serie.split("-")
 		serie_final = ("{}-{}-{}").format(split_serie[0],split_serie[1],split_serie[2])
 
-		salary_slips = frappe.get_all("Sales Invoice", ["name","outstanding_amount", "total_advance", "status","naming_series", "creation_date", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total", "partial_discount", "discount_amount"], filters = condition,  order_by = "name asc")
+		salary_slips = frappe.get_all("Sales Invoice", ["name","outstanding_amount", "total_advance", "status","naming_series", "creation_date", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total", "partial_discount", "discount_amount", "total"], filters = condition,  order_by = "name asc")
 
 		self.total_invoice = len(salary_slips)
 		self.total_operations = len(salary_slips)
@@ -99,6 +99,7 @@ class SalesForUser(Document):
 			discount = 0
 			partial_discount = 0
 			grand_total = 0
+			gross = 0
 
 			for salary_slip in salary_slips: 
 				date_validate = salary_slip.posting_date.strftime('%Y-%m-%d')
@@ -110,20 +111,20 @@ class SalesForUser(Document):
 					outstanding_amount += salary_slip.outstanding_amount
 					adv_app += salary_slip.total_advance
 					total_exempt += salary_slip.total_exempt
+					gross += salary_slip.total
 					total_exonerated += salary_slip.total_exonerated
 					taxed_sales15 += salary_slip.taxed_sales15
 					isv15 += salary_slip.isv15
 					taxed_sales18 += salary_slip.taxed_sales18
 					discount += salary_slip.discount_amount
 					partial_discount += salary_slip.partial_discount
+					grand_total += salary_slip.grand_total
 					isv18 = salary_slip.isv18
 					authorized_range = salary_slip.authorized_range
 
 					split_final_range = salary_slip.name.split("-")
 					final_range = split_final_range[3]
 					cont += 1
-		
-			grand_total = taxed_sales15 + isv15 + taxed_sales18 + isv18 + total_exempt
 			final_range = "{}-{}".format(initial_range, final_range)
 
 			# row1 = [creation_date, serie_final, final_range, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
@@ -137,6 +138,7 @@ class SalesForUser(Document):
 			row.date = creation_date
 			row.serie = serie_final
 			row.range = final_range
+			row.gross = gross
 			row.exempts_sales = grand_total
 			row.exonerated = total_exonerated
 			row.taxed_sales_15 = taxed_sales15
