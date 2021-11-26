@@ -18,6 +18,7 @@
   "remarks",
   "po_no",
   "po_date",
+  "vehicle_registration_order",
   "depreciation_type",
   "is_return",
   "return_against",
@@ -2222,12 +2223,20 @@
    "label": "FBR POS QR Code",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_registration_order",
+   "fieldtype": "Link",
+   "label": "Vehicle Registration Order",
+   "no_copy": 1,
+   "options": "Vehicle Registration Order",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-11-14 23:24:17.766914",
+ "modified": "2021-11-26 11:03:17.317953",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

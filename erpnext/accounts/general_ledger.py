@@ -139,7 +139,7 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 		if not from_repost:
 			validate_expense_against_budget(entry)
 
-		if update_outstanding and not from_repost and entry.get("party_type") and entry.get("party"):
+		if update_outstanding and not from_repost:
 			add_to_reference_documents_for_update(reference_documents_for_update, entry)
 
 	from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
@@ -319,7 +319,7 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		if not adv_adj:
 			validate_expense_against_budget(entry)
 
-		if update_outstanding and not adv_adj and entry.get("party_type") and entry.get("party"):
+		if update_outstanding and not adv_adj:
 			add_to_reference_documents_for_update(reference_documents_for_update, entry)
 
 	for voucher_type, voucher_no, account, party_type, party in reference_documents_for_update:
@@ -327,6 +327,9 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 
 
 def add_to_reference_documents_for_update(reference_documents_for_update, entry):
+	if (not entry.get("party_type") or not entry.get("party")) and entry.against_voucher_type not in ['Vehicle Registration Order']:
+		return
+
 	if entry.get("against_voucher_type") and entry.get("against_voucher"):
 		reference_documents_for_update.add((entry.get("against_voucher_type"), entry.get("against_voucher"),
 			entry.get("account"), entry.get("party_type"), entry.get("party")))

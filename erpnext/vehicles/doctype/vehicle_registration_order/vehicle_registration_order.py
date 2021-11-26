@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import erpnext
 from frappe import _
-from frappe.utils import flt, cint, getdate
+from frappe.utils import flt, cint, cstr, getdate
 from frappe.model.utils import get_fetch_values
 from erpnext.vehicles.vehicle_additional_service import VehicleAdditionalServiceController
 from erpnext.vehicles.vehicle_pricing import calculate_total_price, validate_duplicate_components,\
@@ -27,6 +27,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			self.set_onload('disallow_on_submit', self.get_disallow_on_submit_fields())
 			self.set_onload('transfer_letter_exists', self.transfer_letter_exists())
 			self.set_onload('registration_receipt_exists', self.registration_receipt_exists())
+			self.set_onload('sales_invoice_exists', self.sales_invoice_exists())
 
 	def validate(self):
 		super(VehicleRegistrationOrder, self).validate()
@@ -132,6 +133,15 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 
 		return self._registration_receipt_exists
 
+	def sales_invoice_exists(self):
+		if not hasattr(self, '_sales_invoice_exists'):
+			self._sales_invoice_exists = frappe.db.exists("Sales Invoice", {
+				'vehicle_registration_order': self.name,
+				'docstatus': 1
+			})
+
+		return self._sales_invoice_exists
+
 	def set_title(self):
 		names = []
 
@@ -220,12 +230,26 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			frappe.throw(_("Customer Receivable Account is mandatory"))
 		if not self.agent_account and self.agent:
 			frappe.throw(_("Agent Payable Account is mandatory"))
+		if not self.authority_charges_account and cint(self.use_sales_invoice):
+			frappe.throw(_("Authority Charges Account is mandatory"))
+
+		if not self.customer_charges_item and cint(self.use_sales_invoice):
+			frappe.throw(_("Customer Charges Item is mandatory"))
+		if not self.authority_charges_item and cint(self.use_sales_invoice):
+			frappe.throw(_("Authority Charges Item is mandatory"))
 
 	def set_missing_accounts(self):
 		if not self.customer_account:
 			self.customer_account = frappe.get_cached_value("Vehicles Settings", None, "registration_customer_account")
 		if not self.agent_account:
 			self.agent_account = frappe.get_cached_value("Vehicles Settings", None, "registration_agent_account")
+		if not self.authority_charges_account:
+			self.authority_charges_account = frappe.get_cached_value("Vehicles Settings", None, "registration_authority_charges_account")
+
+		if not self.customer_charges_item and cint(self.use_sales_invoice):
+			self.customer_charges_item = frappe.get_cached_value("Vehicles Settings", None, "registration_customer_charges_item")
+		if not self.authority_charges_item and cint(self.use_sales_invoice):
+			self.authority_charges_item = frappe.get_cached_value("Vehicles Settings", None, "registration_authority_charges_item")
 
 	def calculate_totals(self):
 		calculate_total_price(self, 'customer_charges', 'customer_total')
@@ -254,7 +278,11 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			gl_values = self.get_values_from_gl_entries()
 			self.update(gl_values)
 
-		self.customer_outstanding = flt(self.customer_total) - flt(self.customer_payment) - flt(self.customer_authority_payment)
+		if cint(self.use_sales_invoice):
+			self.customer_outstanding = self.get_invoice_outstanding_amount()
+		else:
+			self.customer_outstanding = flt(self.customer_total) - flt(self.customer_payment) - flt(self.customer_authority_payment)
+
 		self.authority_outstanding = flt(self.authority_total) - flt(self.authority_payment) - flt(self.customer_authority_payment)
 		self.agent_outstanding = flt(self.agent_total) - flt(self.agent_payment)
 
@@ -264,7 +292,9 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			'customer': self.customer,
 			'customer_account': self.customer_account,
 			'agent': self.agent,
-			'agent_account': self.agent_account
+			'agent_account': self.agent_account,
+			'authority_charges_account': cstr(self.authority_charges_account),
+			'customer_charges_item': cstr(self.customer_charges_item),
 		}
 
 		customer_payment = frappe.db.sql("""
@@ -279,6 +309,18 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		""", args)
 		customer_payment = flt(customer_payment[0][0]) if customer_payment else 0
 
+		if cint(self.use_sales_invoice):
+			invoice_payment = frappe.db.sql("""
+				select sum(gle.credit-gle.debit) as amount
+				from `tabGL Entry` gle
+				inner join `tabSales Invoice` inv on gle.against_voucher = inv.name and gle.against_voucher_type = 'Sales Invoice'
+				where gle.account = %(customer_account)s and gle.party_type = 'Customer' and gle.party = %(customer)s
+					and inv.vehicle_registration_order = %(vehicle_registration_order)s
+			""", args)
+
+			invoice_payment = flt(invoice_payment[0][0]) if invoice_payment else 0
+			customer_payment += invoice_payment
+
 		authority_payment = frappe.db.sql("""
 			select sum(gle.debit-gle.credit) as amount
 			from `tabGL Entry` gle
@@ -286,7 +328,10 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			where jv.vehicle_registration_purpose = 'Authority Payment'
 				and gle.against_voucher_type = 'Vehicle Registration Order'
 				and gle.against_voucher = %(vehicle_registration_order)s
-				and gle.account = %(customer_account)s and gle.party_type = 'Customer' and gle.party = %(customer)s
+				and (
+					(gle.account = %(customer_account)s and gle.party_type = 'Customer' and gle.party = %(customer)s)
+					or gle.account = %(authority_charges_account)s
+				)
 		""", args)
 		authority_payment = flt(authority_payment[0][0]) if authority_payment else 0
 
@@ -300,6 +345,17 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				and gle.account = %(customer_account)s and gle.party_type = 'Customer' and gle.party = %(customer)s
 		""", args)
 		customer_closed_amount = flt(customer_closed_amount[0][0]) if customer_closed_amount else 0
+
+		if cint(self.use_sales_invoice):
+			invoice_closed_amount = frappe.db.sql("""
+				select sum(item.base_net_amount)
+				from `tabSales Invoice Item` item
+				inner join `tabSales Invoice` inv on inv.name = item.parent
+				where inv.docstatus = 1 and item.item_code = %(customer_charges_item)s
+					and inv.vehicle_registration_order = %(vehicle_registration_order)s
+			""", args)
+			invoice_closed_amount = flt(invoice_closed_amount[0][0]) if invoice_closed_amount else 0
+			customer_closed_amount += invoice_closed_amount
 
 		if self.agent and self.agent_account:
 			agent_payment = frappe.db.sql("""
@@ -335,6 +391,15 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			'agent_payment': agent_payment,
 			'agent_closed_amount': agent_closed_amount,
 		})
+
+	def get_invoice_outstanding_amount(self):
+		outstanding_amount = frappe.db.sql("""
+			select sum(outstanding_amount)
+			from `tabSales Invoice`
+			where docstatus = 1 and vehicle_registration_order = %s
+		""", self.name)
+		outstanding_amount = flt(outstanding_amount[0][0]) if outstanding_amount else 0
+		return outstanding_amount
 
 	def get_customer_payments(self):
 		args = {
@@ -392,9 +457,13 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			self.precision('margin_amount'))
 		return unclosed_income_amount
 
-	def is_unclosed(self, ignore_agent_outstanding=False):
-		return self.get_unclosed_customer_amount() or self.get_unclosed_agent_amount() or self.get_unclosed_income_amount()\
-			or self.customer_outstanding or self.authority_outstanding or (self.agent_outstanding and not ignore_agent_outstanding)
+	def is_unclosed(self, ignore_agent_outstanding=False, ignore_customer_outstanding=False):
+		return self.get_unclosed_customer_amount()\
+			or self.get_unclosed_agent_amount()\
+			or self.get_unclosed_income_amount()\
+			or (self.customer_outstanding and not ignore_customer_outstanding)\
+			or self.authority_outstanding\
+			or (self.agent_outstanding and not ignore_agent_outstanding)
 
 	def update_payment_status(self, update=False):
 		self.calculate_outstanding_amount()
@@ -525,7 +594,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			if self.invoice_status == "Not Received":
 				self.status = "To Receive Invoice"
 
-			elif self.customer_outstanding > 0:
+			elif self.customer_outstanding > 0 and not cint(self.use_sales_invoice):
 				self.status = "To Receive Payment"
 
 			elif self.authority_outstanding > 0:
@@ -538,7 +607,10 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				else:
 					self.status = "To Receive Receipt"
 			else:
-				if self.is_unclosed(ignore_agent_outstanding=True):
+				if cint(self.use_sales_invoice) and not self.sales_invoice_exists():
+					self.status = "To Bill"
+
+				elif self.is_unclosed(ignore_agent_outstanding=True, ignore_customer_outstanding=cint(self.use_sales_invoice)):
 					self.status = "To Close Accounts"
 
 				elif self.invoice_status == "Issued":
@@ -546,6 +618,9 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 
 				elif self.invoice_status == "In Hand":
 					self.status = "To Deliver Invoice"
+
+				elif self.customer_outstanding > 0 and cint(self.use_sales_invoice):
+					self.status = "To Receive Payment"
 
 				elif self.agent_outstanding > 0:
 					self.status = "To Pay Agent"
@@ -631,6 +706,7 @@ def get_vehicle_registration_order_details(vehicle_registration_order, get_custo
 @frappe.whitelist()
 def get_journal_entry(vehicle_registration_order, purpose):
 	vro = frappe.get_doc("Vehicle Registration Order", vehicle_registration_order)
+	vro_customer_name = vro.registration_customer_name or vro.customer_name
 
 	if vro.docstatus != 1:
 		frappe.throw(_("Vehicle Registration Order must be submitted"))
@@ -644,6 +720,7 @@ def get_journal_entry(vehicle_registration_order, purpose):
 	jv.applies_to_vehicle = vro.vehicle
 
 	jv.update(get_fetch_values(jv.doctype, "applies_to_vehicle", jv.applies_to_vehicle))
+	jv.update(get_fetch_values(jv.doctype, "vehicle_booking_order", jv.vehicle_booking_order))
 
 	jv.vehicle_registration_purpose = purpose
 
@@ -651,12 +728,17 @@ def get_journal_entry(vehicle_registration_order, purpose):
 		add_journal_entry_row(jv, vro.customer_outstanding)
 		add_journal_entry_row(jv, -1 * vro.customer_outstanding, vro.customer_account, 'Customer', vro.customer, vro.name)
 	elif purpose == "Authority Payment":
-		add_journal_entry_row(jv, vro.authority_outstanding, vro.customer_account, 'Customer', vro.customer, vro.name)
+		if cint(vro.use_sales_invoice):
+			add_journal_entry_row(jv, vro.authority_outstanding, vro.authority_charges_account,
+				vehicle_registration_order=vro.name, remarks=vro_customer_name)
+		else:
+			add_journal_entry_row(jv, vro.authority_outstanding, vro.customer_account, 'Customer', vro.customer, vro.name)
+
 		add_journal_entry_row(jv, -1 * vro.authority_outstanding)
 	elif purpose == "Agent Payment":
 		vro.validate_agent_mandatory()
 		add_journal_entry_row(jv, vro.agent_outstanding, vro.agent_account, 'Supplier', vro.agent, vro.name,
-			remarks=vro.registration_customer_name or vro.customer_name)
+			remarks=vro_customer_name)
 		add_journal_entry_row(jv, -1 * vro.agent_outstanding)
 	elif purpose == "Closing Entry":
 		unclosed_customer_amount = vro.get_unclosed_customer_amount()
@@ -672,7 +754,7 @@ def get_journal_entry(vehicle_registration_order, purpose):
 			if not flt(vro.agent_closed_amount):
 				for d in vro.agent_charges:
 					if flt(d.component_amount):
-						remarks = vro.registration_customer_name or vro.customer_name
+						remarks = vro_customer_name
 						if d.component and d.component_type:
 							remarks = _(d.component_type)
 
@@ -854,3 +936,57 @@ def get_registration_receipt(vehicle_registration_order):
 	receipt.run_method("set_missing_values")
 
 	return receipt
+
+
+@frappe.whitelist()
+def get_sales_invoice(vehicle_registration_order):
+	from erpnext.controllers.accounts_controller import get_taxes_and_charges, get_default_taxes_and_charges
+
+	vro = frappe.get_doc("Vehicle Registration Order", vehicle_registration_order)
+
+	if vro.docstatus != 1:
+		frappe.throw(_("Vehicle Registration Order must be submitted"))
+	if not cint(vro.use_sales_invoice):
+		frappe.throw(_("Sales Invoice not required"))
+
+	cost_center = frappe.get_cached_value("Vehicles Settings", None, 'registration_cost_center')\
+		or erpnext.get_default_cost_center(vro.company)
+
+	invoice = frappe.new_doc("Sales Invoice")
+	invoice.company = vro.company
+	invoice.vehicle_registration_order = vro.name
+	invoice.customer = vro.customer
+	invoice.transaction_type = frappe.get_cached_value("Vehicles Settings", None, "registration_transaction_type")
+	invoice.debit_to = vro.customer_account
+
+	invoice.vehicle_booking_order = vro.vehicle_booking_order
+	invoice.applies_to_vehicle = vro.vehicle
+	invoice.update(get_fetch_values(invoice.doctype, "applies_to_vehicle", invoice.applies_to_vehicle))
+	invoice.update(get_fetch_values(invoice.doctype, "applies_to_item", invoice.applies_to_item))
+
+	customer_item = invoice.append('items')
+	customer_item.item_code = vro.customer_charges_item
+	customer_item.qty = 1
+	customer_item.rate = vro.customer_total - vro.authority_total
+	customer_item.cost_center = cost_center
+
+	authority_item = invoice.append('items')
+	authority_item.item_code = vro.authority_charges_item
+	authority_item.qty = 1
+	authority_item.rate = vro.authority_total
+	authority_item.income_account = vro.authority_charges_account
+	customer_item.cost_center = cost_center
+
+	invoice.run_method("set_missing_values")
+
+	if invoice.taxes_and_charges:
+		invoice.set("taxes", get_taxes_and_charges("Sales Taxes and Charges Template", invoice.taxes_and_charges))
+	else:
+		default_tax = get_default_taxes_and_charges("Sales Taxes and Charges Template", company=invoice.company)
+		invoice.update(default_tax)
+
+	invoice.run_method("calculate_taxes_and_totals")
+	invoice.run_method("set_payment_schedule")
+	invoice.run_method("set_due_date")
+
+	return invoice

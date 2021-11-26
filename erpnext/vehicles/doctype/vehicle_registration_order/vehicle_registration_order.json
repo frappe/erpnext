@@ -66,6 +66,7 @@
   "ownership_transfer_required",
   "choice_number_required",
   "custom_license_plate_required",
+  "use_sales_invoice",
   "column_break_55",
   "agent",
   "agent_name",
@@ -114,8 +115,12 @@
   "invoice_delivered_date",
   "accounting_details_section",
   "customer_account",
+  "agent_account",
   "column_break_85",
-  "agent_account"
+  "customer_charges_item",
+  "authority_charges_item",
+  "column_break_113",
+  "authority_charges_account"
  ],
  "fields": [
   {
@@ -512,7 +517,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nTo Receive Invoice\nTo Receive Payment\nTo Pay Authority\nTo Issue Invoice\nTo Receive Receipt\nTo Close Accounts\nTo Retrieve Invoice\nTo Deliver Invoice\nTo Pay Agent\nCompleted\nCancelled",
+   "options": "Draft\nTo Receive Invoice\nTo Receive Payment\nTo Pay Authority\nTo Issue Invoice\nTo Receive Receipt\nTo Bill\nTo Close Accounts\nTo Retrieve Invoice\nTo Deliver Invoice\nTo Pay Agent\nCompleted\nCancelled",
    "read_only": 1
   },
   {
@@ -918,12 +923,41 @@
    "fieldname": "registration_name_section",
    "fieldtype": "Section Break",
    "label": "Registration Name"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_sales_invoice",
+   "fieldtype": "Check",
+   "label": "Bill Using Sales Invoice"
+  },
+  {
+   "fieldname": "customer_charges_item",
+   "fieldtype": "Link",
+   "label": "Customer Charges Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "authority_charges_item",
+   "fieldtype": "Link",
+   "label": "Authority Charges Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "column_break_113",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "authority_charges_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Authority Charges Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-22 12:27:18.105721",
+ "modified": "2021-11-26 10:59:49.750963",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",

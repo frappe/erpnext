@@ -280,6 +280,8 @@ class SalesInvoice(SellingController):
 		if self.update_stock == 1:
 			self.update_stock_ledger()
 
+		self.validate_vehicle_registration_order()
+
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
 
@@ -1360,6 +1362,39 @@ class SalesInvoice(SellingController):
 				item_line.description = checked_item['description']
 
 		self.set_missing_values(for_validate = True)
+
+	def validate_vehicle_registration_order(self):
+		if self.get('vehicle_registration_order'):
+			vro = frappe.db.get_value("Vehicle Registration Order", self.vehicle_registration_order,
+				['docstatus', 'use_sales_invoice', 'customer', 'customer_account'], as_dict=1)
+
+			if not vro:
+				frappe.throw(_("Vehicle Registration Order {0} does not exist")
+					.format(self.vehicle_registration_order))
+
+			if vro.docstatus != 1:
+				frappe.throw(_("{0} is not submitted")
+					.format(frappe.get_desk_link("Vehicle Registration Order", self.vehicle_registration_order)))
+
+			if not cint(vro.use_sales_invoice):
+				frappe.throw(_("Sales Invoice not required in {0}")
+					.format(frappe.get_desk_link("Vehicle Registration Order", self.vehicle_registration_order)))
+
+			billing_customer = self.get('bill_to') or self.get('customer')
+			if not billing_customer or billing_customer != vro.customer:
+				frappe.throw(_("Billing Customer does not match with {0}")
+					.format(frappe.get_desk_link("Vehicle Registration Order", self.vehicle_registration_order)))
+
+			if not self.debit_to or self.debit_to != vro.customer_account:
+				frappe.throw(_("Customer Account {0} does not match with {1}")
+					.format(self.debit_to, frappe.get_desk_link("Vehicle Registration Order", self.vehicle_registration_order)))
+
+	def update_vehicle_registration_order(self):
+		if self.get('vehicle_registration_order'):
+			vro = frappe.get_doc("Vehicle Registration Order", self.vehicle_registration_order)
+			vro.update_payment_status(update=True)
+			vro.set_status(update=True)
+			vro.notify_update()
 
 	def set_title(self):
 		if self.get('bill_to') and self.bill_to != self.customer:

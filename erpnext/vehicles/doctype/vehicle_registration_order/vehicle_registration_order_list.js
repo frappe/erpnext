@@ -5,7 +5,7 @@ frappe.listview_settings['Vehicle Registration Order'] = {
 
 		if(doc.status === "Completed") {
 			indicator = [__("Completed"), "green", "status,=,Completed"];
-		} else if(["To Issue Invoice", "To Close Accounts", "To Deliver Invoice"].includes(doc.status)) {
+		} else if(["To Issue Invoice", "To Close Accounts", "To Bill", "To Deliver Invoice"].includes(doc.status)) {
 			indicator = [__(doc.status), "purple", `status,=,${doc.status}`];
 		} else if (["To Pay Agent", "To Retrieve Invoice"].includes(doc.status)) {
 			indicator = [__(doc.status), "lightblue", `status,=,${doc.status}`];

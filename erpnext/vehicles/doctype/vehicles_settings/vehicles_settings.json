@@ -19,12 +19,16 @@
   "dealership_code",
   "registration_section",
   "registration_customer_account",
-  "column_break_15",
   "registration_agent_account",
-  "cb_17",
+  "column_break_15",
   "registration_income_account",
+  "registration_authority_charges_account",
   "column_break_19",
+  "registration_customer_charges_item",
+  "registration_authority_charges_item",
+  "column_break_22",
   "registration_cost_center",
+  "registration_transaction_type",
   "section_break_14",
   "role_change_booking_after_payment",
   "role_change_payment_adjustment",
@@ -187,10 +191,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "cb_17",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "registration_income_account",
    "fieldtype": "Link",
    "label": "Registration Income Account",
@@ -216,11 +216,39 @@
    "fieldtype": "Table",
    "label": "Invoice Documents",
    "options": "Vehicle Invoice Document Template"
+  },
+  {
+   "fieldname": "registration_customer_charges_item",
+   "fieldtype": "Link",
+   "label": "Registration Customer Charges Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "registration_authority_charges_item",
+   "fieldtype": "Link",
+   "label": "Registration Authority Charges Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "registration_authority_charges_account",
+   "fieldtype": "Link",
+   "label": "Registration Authority Charges Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "registration_transaction_type",
+   "fieldtype": "Link",
+   "label": "Registration Transaction Type",
+   "options": "Transaction Type"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2021-11-07 23:40:47.181534",
+ "modified": "2021-11-26 11:15:03.604432",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",

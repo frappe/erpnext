@@ -252,6 +252,8 @@ def update_outstanding_amt(voucher_type, voucher_no, account, party_type, party,
 		ref_doc.set_payment_and_claimed_amount(update=True)
 	elif voucher_type == "Vehicle Registration Order":
 		ref_doc.update_payment_status(update=True)
+	elif voucher_type == "Sales Invoice" and ref_doc.get('vehicle_registration_order'):
+		ref_doc.update_vehicle_registration_order()
 
 	ref_doc.set_status(update=True)
 	ref_doc.notify_update()
