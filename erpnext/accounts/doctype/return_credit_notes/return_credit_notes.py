@@ -16,6 +16,10 @@ class Returncreditnotes(Document):
 		if self.docstatus == 0:
 			self.assign_cai()
 
+	def on_cancel(self):
+		self.delete_bin()
+		self.delete_gl_entry()
+
 	def validate(self):		
 		if self.docstatus == 0:
 			if self.grand_total > 0:
@@ -23,6 +27,10 @@ class Returncreditnotes(Document):
 				self.delete_items(items)
 
 			self.get_items()
+		
+		if self.docstatus == 1:
+			self.add_bin()
+			self.apply_gl_entry()
 	
 	def delete_items(self, items):
 		for item in items:
@@ -226,3 +234,101 @@ class Returncreditnotes(Document):
 					if str(date) == str(sum_dates1):
 						frappe.msgprint(_("This CAI expires in {} days.".format(i)))
 						break
+	
+	def add_bin(self):
+		items = frappe.get_all("Return credit notes Item", ["*"], filters = {"parent": self.name})
+
+		for item in items:
+			items_bin = frappe.get_all("Bin", ["*"], filters = {"item_code": item.item_code})
+
+			for bin in items_bin:
+				if item.warehouse == bin.warehouse:
+					doc = frappe.get_doc("Bin", bin.name)
+					doc.actual_qty += item.qty
+					doc.db_set('actual_qty', doc.actual_qty, update_modified=False)
+	
+	def delete_bin(self):
+		items = frappe.get_all("Return credit notes Item", ["*"], filters = {"parent": self.name})
+
+		for item in items:
+			items_bin = frappe.get_all("Bin", ["*"], filters = {"item_code": item.item_code})
+
+			for bin in items_bin:
+				if item.warehouse == bin.warehouse:
+					doc = frappe.get_doc("Bin", bin.name)
+					doc.actual_qty -= item.qty
+					doc.db_set('actual_qty', doc.actual_qty, update_modified=False)
+	
+	def apply_gl_entry(self):
+		entrys = frappe.get_all("GL Entry", ["*"], filters = {"voucher_no": self.sale_invoice})
+
+		for entry in entrys:
+			if entry.debit == 0:
+				doc = frappe.new_doc("GL Entry")
+				doc.posting_date = self.posting_date
+				doc.transaction_date = entry.transaction_date
+				doc.account = entry.account
+				doc.party_type = entry.party_type
+				doc.party = entry.party
+				doc.cost_center = entry.cost_center
+				doc.debit = entry.credit
+				doc.credit = entry.debit
+				doc.account_currency = entry.account_currency
+				doc.debit_in_account_currency = doc.credit_in_account_currency
+				doc.credit_in_account_currency = doc.debit_in_account_currency
+				doc.against = entry.against
+				doc.against_voucher_type = self.doctype
+				doc.against_voucher = self.name
+				doc.voucher_type =  self.doctype
+				doc.voucher_no = self.name
+				doc.voucher_detail_no = entry.voucher_detail_no
+				doc.project = entry.project
+				doc.remarks = entry.remarks
+				doc.is_opening = entry.is_opening
+				doc.is_advance = entry.is_advance
+				doc.fiscal_year = entry.fiscal_year
+				doc.company = entry.company
+				doc.finance_book = entry.finance_book
+				doc.to_rename = entry.to_rename
+				doc.due_date = entry.due_date
+				doc.docstatus = 1
+				doc.insert()
+			else:
+				doc = frappe.new_doc("GL Entry")
+				doc.posting_date = self.posting_date
+				doc.transaction_date = entry.transaction_date
+				doc.account = entry.account
+				doc.party_type = entry.party_type
+				doc.party = entry.party
+				doc.cost_center = entry.cost_center
+				doc.debit = entry.credit
+				doc.credit = entry.debit
+				doc.account_currency = entry.account_currency
+				doc.debit_in_account_currency = doc.credit_in_account_currency
+				doc.credit_in_account_currency = doc.debit_in_account_currency
+				doc.against = entry.against
+				doc.against_voucher_type = self.doctype
+				doc.against_voucher = self.name
+				doc.voucher_type =  self.doctype
+				doc.voucher_no = self.name
+				doc.voucher_detail_no = entry.voucher_detail_no
+				doc.project = entry.project
+				doc.remarks = entry.remarks
+				doc.is_opening = entry.is_opening
+				doc.is_advance = entry.is_advance
+				doc.fiscal_year = entry.fiscal_year
+				doc.company = entry.company
+				doc.finance_book = entry.finance_book
+				doc.to_rename = entry.to_rename
+				doc.due_date = entry.due_date
+				doc.docstatus = 1
+				doc.insert()
+
+	def delete_gl_entry(self):
+		entrys = frappe.get_all("GL Entry", ["*"], filters = {"voucher_no": self.name})
+
+		for entry in entrys:
+			doc = frappe.get_doc("GL Entry", entry.name)
+			doc.db_set('docstatus', 0, update_modified=False)
+
+			frappe.delete_doc("GL Entry", entry.name)		
