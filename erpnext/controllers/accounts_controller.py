@@ -1011,6 +1011,7 @@ class AccountsController(TransactionBase):
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
 		from erpnext.controllers.status_updater import get_allowance_for
+
 		item_allowance = {}
 		global_qty_allowance, global_amount_allowance = None, None
 
@@ -1031,12 +1032,7 @@ class AccountsController(TransactionBase):
 						.format(item.item_code, ref_dt), title=_("Warning"), indicator="orange")
 				continue
 
-			already_billed = frappe.db.sql("""
-				select sum(%s)
-				from `tab%s`
-				where %s=%s and docstatus=1 and parent != %s
-			""" % (based_on, self.doctype + " Item", item_ref_dn, '%s', '%s'),
-				(item.get(item_ref_dn), self.name))[0][0]
+			already_billed = self.get_billed_amount_for_item(item, item_ref_dn, based_on)
 
 			total_billed_amt = flt(flt(already_billed) + flt(item.get(based_on)),
 				self.precision(based_on, item))
@@ -1063,6 +1059,43 @@ class AccountsController(TransactionBase):
 		if role_allowed_to_over_bill in user_roles and total_overbilled_amt > 0.1:
 			frappe.msgprint(_("Overbilling of {} ignored because you have {} role.")
 					.format(total_overbilled_amt, role_allowed_to_over_bill), indicator="orange", alert=True)
+
+	def get_billed_amount_for_item(self, item, item_ref_dn, based_on):
+		'''
+			Returns Sum of Amount of
+			Sales/Purchase Invoice Items
+			that are linked to `item_ref_dn` (`dn_detail` / `pr_detail`)
+			that are submitted OR not submitted but are under current invoice
+		'''
+
+		from frappe.query_builder import Criterion
+		from frappe.query_builder.functions import Sum
+
+		item_doctype = frappe.qb.DocType(item.doctype)
+		based_on_field = frappe.qb.Field(based_on)
+		join_field = frappe.qb.Field(item_ref_dn)
+
+		result = (
+			frappe.qb.from_(item_doctype)
+			.select(Sum(based_on_field))
+			.where(
+				join_field == item.get(item_ref_dn)
+			).where(
+				Criterion.any([ # select all items from other invoices OR current invoices
+					Criterion.all([ # for selecting items from other invoices
+						item_doctype.docstatus == 1,
+						item_doctype.parent != self.name
+					]),
+					Criterion.all([ # for selecting items from current invoice, that are linked to same reference
+						item_doctype.docstatus == 0,
+						item_doctype.parent == self.name,
+						item_doctype.name != item.name
+					])
+				])
+			)
+		).run()
+
+		return result[0][0] if result else 0
 
 	def throw_overbill_exception(self, item, max_allowed_amt):
 		frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
