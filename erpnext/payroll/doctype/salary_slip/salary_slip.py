@@ -72,8 +72,6 @@ class SalarySlip(TransactionBase):
 	def autoname(self):
 		self.name = make_autoname(self.series)
 
-
-
 	def validate(self):
 		self.status = self.get_status()
 		validate_active_employee(self.employee)
@@ -99,6 +97,16 @@ class SalarySlip(TransactionBase):
 			if self.salary_slip_based_on_timesheet and (self.total_working_hours > int(max_working_hours)):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
 								format(max_working_hours), alert=True)
+
+	def before_save(self):
+		self.months_of_service_in_payment_period = self.get_payroll()
+		self.present_days = self.days()
+		self.encashment_days = self.leave_type_encasement_days()
+		self.days_in_month = self.set_days()
+		self.paid_holidays = self.paid()
+		self.compoff = self.comp_off()
+		self.weekly_off = self.week_off()
+		self.leave = self.get_total_leave_in_current_month()
 
 	def set_net_total_in_words(self):
 		doc_currency = self.currency
@@ -183,7 +191,6 @@ class SalarySlip(TransactionBase):
 						and employee = %s and name != %s {0}""".format(cond),
 						(self.start_date, self.end_date, self.employee, self.name))
 			if ret_exist:
-				self.employee = ''
 				frappe.throw(_("Salary Slip of employee {0} already created for this period").format(self.employee))
 		else:
 			for data in self.timesheets:
@@ -343,6 +350,21 @@ class SalarySlip(TransactionBase):
 
 		return self.total_working_days - marked_days
 
+	@frappe.whitelist()		
+	def paid(self):	
+		#Paid Holidays
+		cdoc = frappe.get_doc("Employee",self.employee)
+		print(">>>>>>>cdoc-Paid-method-347>>>>>",cdoc)
+		if cdoc.holiday_list:
+			# print("???????????????????cdoc??",cdoc.holiday_list)	
+			get_national_holiday = frappe.db.sql("""select count(is_national_holiday) as inh from `tabHoliday`
+												where weekly_off = 0 and holiday_date
+												between '{0}' and '{1}'""".format(self.start_date, self.end_date), as_dict= True)
+			# print(">>>>>>>>>>>>>>>>>>>>>>>get_national_holiday>>>>>>>>>>>>>>>>>>>>>>>>>>>>",get_national_holiday[0].get('inh'), type(get_national_holiday), get_national_holiday)
+			get_paid_value = get_national_holiday[0].get('inh')
+			print(">>>>>>>>>>>>>>>>>>>>>>inh>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",get_paid_value, type(get_paid_value))
+			# self.db_set("paid_holidays", get_paid_value)
+			return get_paid_value
 
 	def get_payment_days(self, joining_date, relieving_date, include_holidays_in_total_working_days):
 		if not joining_date:
@@ -374,7 +396,7 @@ class SalarySlip(TransactionBase):
 
 	def get_holidays_for_employee(self, start_date, end_date):
 		return get_holiday_dates_for_employee(self.employee, start_date, end_date)
-
+	
 	@frappe.whitelist()
 	def get_payroll(self):
 		from datetime import date
@@ -407,8 +429,75 @@ class SalarySlip(TransactionBase):
 				days = abs(start_date-end_date).days
 				num_months=flt(days/7,precision=0)
 				return num_months
+			
+	@frappe.whitelist()
+	def set_days(self):
+		#days_in_month
+		from calendar import monthrange
+		a = getdate(self.start_date).year
+		b = getdate(self.start_date).month
+		num_days = monthrange(a, b)[1]
+		# self.days_in_month = num_days
+		# self.db_set('days_in_month', num_days)		
+		return num_days
 
+	@frappe.whitelist()
+	def comp_off(self):
+		#Comp_off
+		comp_off = frappe.db.sql("""select name from `tabCompensatory Leave Request`
+								where employee= '{0}' and  docstatus=1 and work_from_date 
+								between '{1}' and '{2}' and work_end_date between '{3}'and '{4}' """.format(self.employee,self.start_date, self.end_date, self.start_date, self.end_date),as_dict=1)
+		# print(";;;;;;;;;;;;;;;;>>>",comp_off)
+		lst=[]
+		for i in comp_off:
+			# print(">>>>>>>>>iprinting", i) 
+			doc = frappe.get_doc("Compensatory Leave Request",i.get("name"))
+			# a=doc.work_from_date.replace('-',',')
+			# b=doc.work_end_date.replace('-',',')
+			# from datetime import date
+			# work_from_date = date(a)
+			# work_end_date = date(b)
+			# date_difference = date_diff(work_end_date,work_from_date)
+			date_difference = frappe.db.sql("""SELECT DATEDIFF(work_end_date , work_from_date) as date 
+											from `tabCompensatory Leave Request` where name = '{0}' """.format(doc.name),as_dict=1)
+			# print("$$$$$$$$$$$$$$$$$$$$$$$",date_difference)
+			for i in date_difference:
+				lst.append(i.get("date") + 1)
+				self.compoff=sum(lst)
+		# print(":compoff:::::::>",sum(lst))	
+				# self.db_set('compoff', sum(lst))
+		return sum(lst)
 
+	@frappe.whitelist()
+	def week_off(self):
+		#Weekly_off
+		cdoc = frappe.get_doc("Employee",self.employee)
+		if cdoc.holiday_list:
+			hdoc = frappe.get_doc("Holiday List",cdoc.holiday_list)	
+			import datetime
+			import calendar
+			start_date  = getdate(self.start_date )
+			end_date    = getdate(self.end_date)
+			week        = {}
+			for i in range((end_date - start_date).days):
+				day       = calendar.day_name[(start_date + datetime.timedelta(days=i+1)).weekday()]
+				week[day] = week[day] + 1 if day in week else 1
+			
+			for i in week:
+				if i ==hdoc.weekly_off:
+					self.weekly_off = week[i]
+					print('in::::weekoff:::',week)				
+			return week[i]
+	
+	# Present Days   : Days in month- Weekly Off - Paid Holidays- Total Leave(Current Month) 
+	@frappe.whitelist()
+	def days(self):
+		set_days = self.set_days() if self.set_days() else 0
+		paid = self.paid() if self.paid() else 0
+		leave = self.get_total_leave_in_current_month() if self.get_total_leave_in_current_month() else 0
+		week_off = self.week_off() if self.week_off() else 0			
+		present_days = set_days - paid - leave - week_off
+		return present_days
 
 	def calculate_lwp_or_ppl_based_on_leave_application(self, holidays, working_days):
 		lwp = 0
@@ -676,7 +765,8 @@ class SalarySlip(TransactionBase):
 				get_salary_component_data(additional_salary.component),
 				additional_salary.amount,
 				component_type,
-				additional_salary
+				additional_salary,
+				is_recurring = additional_salary.is_recurring
 			)
 
 	def add_tax_components(self, payroll_period):
@@ -697,7 +787,7 @@ class SalarySlip(TransactionBase):
 			tax_row = get_salary_component_data(d)
 			self.update_component_row(tax_row, tax_amount, "deductions")
 
-	def update_component_row(self, component_data, amount, component_type, additional_salary=None):
+	def update_component_row(self, component_data, amount, component_type, additional_salary=None, is_recurring = 0):
 		component_row = None
 		for d in self.get(component_type):
 			if d.salary_component != component_data.salary_component:
@@ -748,6 +838,7 @@ class SalarySlip(TransactionBase):
 				component_row.default_amount = 0
 				component_row.additional_amount = amount
 
+			component_row.is_recurring_additional_salary = is_recurring
 			component_row.additional_salary = additional_salary.name
 			component_row.deduct_full_tax_on_selected_payroll_date = \
 				additional_salary.deduct_full_tax_on_selected_payroll_date
@@ -944,25 +1035,33 @@ class SalarySlip(TransactionBase):
 					amount, additional_amount = earning.default_amount, earning.additional_amount
 
 			if earning.is_tax_applicable:
-				if additional_amount:
-					taxable_earnings += (amount - additional_amount)
-					additional_income += additional_amount
-					if earning.deduct_full_tax_on_selected_payroll_date:
-						additional_income_with_full_tax += additional_amount
-					continue
-
 				if earning.is_flexible_benefit:
 					flexi_benefits += amount
 				else:
-					taxable_earnings += amount
+					taxable_earnings += (amount - additional_amount)
+					additional_income += additional_amount
+
+					# Get additional amount based on future recurring additional salary
+					if additional_amount and earning.is_recurring_additional_salary:
+						additional_income += self.get_future_recurring_additional_amount(earning.additional_salary,
+							earning.additional_amount) # Used earning.additional_amount to consider the amount for the full month
+
+					if earning.deduct_full_tax_on_selected_payroll_date:
+						additional_income_with_full_tax += additional_amount
 
 		if allow_tax_exemption:
 			for ded in self.deductions:
 				if ded.exempted_from_income_tax:
-					amount = ded.amount
+					amount, additional_amount = ded.amount, ded.additional_amount
 					if based_on_payment_days:
-						amount = self.get_amount_based_on_payment_days(ded, joining_date, relieving_date)[0]
-					taxable_earnings -= flt(amount)
+						amount, additional_amount = self.get_amount_based_on_payment_days(ded, joining_date, relieving_date)
+
+					taxable_earnings -= flt(amount - additional_amount)
+					additional_income -= additional_amount
+
+					if additional_amount and ded.is_recurring_additional_salary:
+						additional_income -= self.get_future_recurring_additional_amount(ded.additional_salary,
+							ded.additional_amount) # Used ded.additional_amount to consider the amount for the full month
 
 		return frappe._dict({
 			"taxable_earnings": taxable_earnings,
@@ -971,11 +1070,21 @@ class SalarySlip(TransactionBase):
 			"flexi_benefits": flexi_benefits
 		})
 
+	def get_future_recurring_additional_amount(self, additional_salary, monthly_additional_amount):
+		future_recurring_additional_amount = 0
+		to_date = frappe.db.get_value("Additional Salary", additional_salary, 'to_date')
+		# future month count excluding current
+		future_recurring_period = (getdate(to_date).month - getdate(self.start_date).month)
+		if future_recurring_period > 0:
+			future_recurring_additional_amount = monthly_additional_amount * future_recurring_period # Used earning.additional_amount to consider the amount for the full month
+		return future_recurring_additional_amount
+
 	def get_amount_based_on_payment_days(self, row, joining_date, relieving_date):
 		amount, additional_amount = row.amount, row.additional_amount
 		if (self.salary_structure and
-			cint(row.depends_on_payment_days) and cint(self.total_working_days) and
-			(not self.salary_slip_based_on_timesheet or
+			cint(row.depends_on_payment_days) and cint(self.total_working_days)
+			and not (row.additional_salary and row.default_amount) # to identify overwritten additional salary
+			and (not self.salary_slip_based_on_timesheet or
 				getdate(self.start_date) < joining_date or
 				(relieving_date and getdate(self.end_date) > relieving_date)
 			)):
@@ -1294,7 +1403,7 @@ class SalarySlip(TransactionBase):
 
 		salary_slip_sum = frappe.get_list('Salary Slip',
 			fields = ['sum(net_pay) as net_sum', 'sum(gross_pay) as gross_sum'],
-			filters = {'employee_name' : self.employee_name,
+			filters = {'employee' : self.employee,
 				'start_date' : ['>=', period_start_date],
 				'end_date' : ['<', period_end_date],
 				'name': ['!=', self.name],
@@ -1309,12 +1418,62 @@ class SalarySlip(TransactionBase):
 		self.year_to_date = year_to_date
 		self.gross_year_to_date = gross_year_to_date
 
+	@frappe.whitelist()
+	def leave_type_encasement_days(self):
+		if self.employee and self.start_date and self.end_date:
+			doc = frappe.db.sql("""select sum(encashable_days) from `tabLeave Encashment`  where employee = '{0}' and
+			encashment_date between '{1}' and '{2}' and docstatus=1 """.format(self.employee,self.start_date,self.end_date), as_dict = 1)
+			
+			sick_leave = frappe.db.sql("""select sum(encashable_days) from `tabLeave Encashment`  where employee = '{0}' and
+			encashment_date between '{1}' and '{2}' and docstatus=1 and leave_type = "Sick Leave" """.format(self.employee,self.start_date,self.end_date), as_dict=1)
+			
+			earned_leave = frappe.db.sql("""select sum(encashable_days) from `tabLeave Encashment`  where employee = '{0}' and
+			encashment_date between '{1}' and '{2}' and docstatus=1 and leave_type = "Earned Leave" """.format(self.employee,self.start_date,self.end_date),as_dict=1)
+			casual_leave = frappe.db.sql("""select sum(encashable_days) from `tabLeave Encashment`  where employee = '{0}' and
+			encashment_date between '{1}' and '{2}' and docstatus=1 and leave_type = "Casual Leave" """.format(self.employee,self.start_date,self.end_date),as_dict=1)
+			for i in self.leave_details:
+				if i.leave_type == "Sick Leave":
+					for j in sick_leave:
+						i.encashment_days = j.get("sum(encashable_days)")
+				if i.leave_type == "Earned Leave":
+					for j in earned_leave:
+						i.encashment_days = j.get("sum(encashable_days)")
+
+				if i.leave_type == "Casual Leave":
+					for j in casual_leave:
+						i.encashment_days = j.get("sum(encashable_days)")
+
+			
+			sdoc = frappe.db.sql("""select (total_leaves_allocated - total_leaves_encashed ) as day from `tabLeave Allocation` l  where employee = '{0}' and 
+			'{1}'between l.from_date and l.to_date and docstatus=1  and leave_type = "Sick Leave" """.format(self.employee,self.start_date),as_dict=1)
+			edoc = frappe.db.sql("""select (total_leaves_allocated - total_leaves_encashed ) as day from `tabLeave Allocation` l  where employee = '{0}' and 
+			'{1}'between l.from_date and l.to_date and docstatus=1  and leave_type = "Earned Leave" """.format(self.employee,self.start_date),as_dict=1)
+			cdoc = frappe.db.sql("""select (total_leaves_allocated - total_leaves_encashed ) as day from `tabLeave Allocation` l  where employee = '{0}' and 
+			'{1}'between l.from_date and l.to_date and docstatus=1  and leave_type = "Casual Leave" """.format(self.employee,self.start_date),as_dict=1)
+			for f in self.leave_details:
+				if f.leave_type == "Sick Leave":
+					for p in sdoc:
+						f.balance = p.get("day")
+
+				if f.leave_type == "Earned Leave":
+					for p in edoc:
+						f.balance = p.get("day")
+					
+				if f.leave_type == "Casual Leave":
+					for p in cdoc:
+						f.balance = p.get("day")
+			for g in doc:
+				return g.get("sum(encashable_days)")
+
+
+
+
 	def compute_month_to_date(self):
 		month_to_date = 0
 		first_day_of_the_month = get_first_day(self.start_date)
 		salary_slip_sum = frappe.get_list('Salary Slip',
 			fields = ['sum(net_pay) as sum'],
-			filters = {'employee_name' : self.employee_name,
+			filters = {'employee' : self.employee,
 				'start_date' : ['>=', first_day_of_the_month],
 				'end_date' : ['<', self.start_date],
 				'name': ['!=', self.name],
@@ -1338,13 +1497,13 @@ class SalarySlip(TransactionBase):
 					INNER JOIN `tabSalary Slip` as salary_slip
 					ON detail.parent = salary_slip.name
 					WHERE
-						salary_slip.employee_name = %(employee_name)s
+						salary_slip.employee = %(employee)s
 						AND detail.salary_component = %(component)s
 						AND salary_slip.start_date >= %(period_start_date)s
 						AND salary_slip.end_date < %(period_end_date)s
 						AND salary_slip.name != %(docname)s
 						AND salary_slip.docstatus = 1""",
-						{'employee_name': self.employee_name, 'component': component.salary_component, 'period_start_date': period_start_date,
+						{'employee': self.employee, 'component': component.salary_component, 'period_start_date': period_start_date,
 							'period_end_date': period_end_date, 'docname': self.name}
 				)
 
