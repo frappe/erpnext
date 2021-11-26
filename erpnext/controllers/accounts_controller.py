@@ -150,12 +150,6 @@ class AccountsController(TransactionBase):
 			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
 				self.set_advances()
 
-		if self.doctype == 'Purchase Invoice':
-			self.calculate_paid_amount()
-			# apply tax withholding only if checked and applicable
-			self.set_tax_withholding()
-
-
 			self.set_advance_gain_or_loss()
 
 			if self.is_return:
@@ -164,6 +158,11 @@ class AccountsController(TransactionBase):
 				self.validate_deferred_start_and_end_date()
 
 			self.set_inter_company_account()
+
+		if self.doctype == 'Purchase Invoice':
+			self.calculate_paid_amount()
+			# apply tax withholding only if checked and applicable
+			self.set_tax_withholding()
 
 		validate_regional(self)
 
