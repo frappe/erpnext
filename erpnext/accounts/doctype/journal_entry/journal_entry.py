@@ -10,6 +10,7 @@ from erpnext.accounts.utils import get_balance_on, get_balance_on_voucher, get_a
 from erpnext.accounts.party import get_party_account, get_party_name
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get_party_account_based_on_invoice_discounting
+from frappe.model.utils import get_fetch_values
 
 from six import string_types, iteritems
 
@@ -904,6 +905,9 @@ def get_payment_entry_against_invoice(dt, dn, amount=None,  debit_in_account_cur
 		amount_field_party = "debit_in_account_currency"
 		amount_field_bank = "credit_in_account_currency"
 
+	vehicle = ref_doc.get('applies_to_vehicle') or ref_doc.get('vehicle')
+	vehicle_booking_order = ref_doc.get('vehicle_booking_order')
+
 	return get_payment_entry(ref_doc, {
 		"party_type": party_type,
 		"party_account": party_account,
@@ -914,7 +918,9 @@ def get_payment_entry_against_invoice(dt, dn, amount=None,  debit_in_account_cur
 		"debit_in_account_currency": debit_in_account_currency,
 		"remarks": 'Payment received against {0} {1}. {2}'.format(dt, dn, ref_doc.remarks),
 		"bank_account": bank_account,
-		"journal_entry": journal_entry
+		"journal_entry": journal_entry,
+		"vehicle": vehicle,
+		"vehicle_booking_order": vehicle_booking_order,
 	})
 
 def get_payment_entry(ref_doc, args):
@@ -975,6 +981,14 @@ def get_payment_entry(ref_doc, args):
 	if party_row.account_currency != ref_doc.company_currency \
 		or (bank_row.account_currency and bank_row.account_currency != ref_doc.company_currency):
 			je.multi_currency = 1
+
+	# Vehicle and Booking
+	if je.meta.has_field('applies_to_vehicle') and args.get('vehicle'):
+		je.applies_to_vehicle = args.get('vehicle')
+		je.update(get_fetch_values(je.doctype, "applies_to_vehicle", je.applies_to_vehicle))
+	if je.meta.has_field('vehicle_booking_order') and args.get('vehicle_booking_order'):
+		je.vehicle_booking_order = args.get('vehicle_booking_order')
+		je.update(get_fetch_values(je.doctype, "vehicle_booking_order", je.vehicle_booking_order))
 
 	je.set_amounts_in_company_currency()
 	je.set_total_debit_credit()
