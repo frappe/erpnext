@@ -238,6 +238,12 @@ frappe.ui.form.on('Production Plan', {
 			method: "get_items",
 			freeze: true,
 			doc: frm.doc,
+			callback: function() {
+				frm.refresh_field("po_items");
+				if (frm.doc.sub_assembly_items.length > 0) {
+					frm.trigger("get_sub_assembly_items");
+				}
+			}
 		});
 	},
 
