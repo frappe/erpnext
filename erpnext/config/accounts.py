@@ -45,6 +45,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Return credit notes",
+					"description": _("Return credit notes."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "Customer Documents",
 					"description": _("Customer Documents"),
 					"onboard": 1,

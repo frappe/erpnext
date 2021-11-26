@@ -7,6 +7,7 @@
   "date",
   "serie",
   "range",
+  "gross",
   "exempts_sales",
   "exonerated",
   "taxed_sales_15",
@@ -87,10 +88,16 @@
    "fieldname": "discount",
    "fieldtype": "Currency",
    "label": "Discount"
+  },
+  {
+   "fieldname": "gross",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Gross"
   }
  ],
  "istable": 1,
- "modified": "2021-11-22 15:35:09.120310",
+ "modified": "2021-11-26 11:36:58.552468",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales For User Detail",
