@@ -42,22 +42,32 @@ class EmployeeAdvance(Document):
 
 	def set_total_advance_paid(self):
 		paid_amount = frappe.db.sql("""
-			select ifnull(sum(debit), 0) as paid_amount
-			from `tabGL Entry`
-			where against_voucher_type = 'Employee Advance'
+			select
+				ifnull(sum(debit), 0) as paid_amount
+			from
+				`tabGL Entry`
+			where
+				against_voucher_type = 'Employee Advance'
 				and against_voucher = %s
 				and party_type = 'Employee'
 				and party = %s
+				and docstatus = 1
+				and is_cancelled = 0
 		""", (self.name, self.employee), as_dict=1)[0].paid_amount
 
 		return_amount = frappe.db.sql("""
-			select ifnull(sum(credit), 0) as return_amount
-			from `tabGL Entry`
-			where against_voucher_type = 'Employee Advance'
+			select
+				ifnull(sum(credit), 0) as return_amount
+			from
+				`tabGL Entry`
+			where
+				against_voucher_type = 'Employee Advance'
 				and voucher_type != 'Expense Claim'
 				and against_voucher = %s
 				and party_type = 'Employee'
 				and party = %s
+				and docstatus = 1
+				and is_cancelled = 0
 		""", (self.name, self.employee), as_dict=1)[0].return_amount
 
 		if paid_amount != 0:
