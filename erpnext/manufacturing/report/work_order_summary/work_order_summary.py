@@ -65,7 +65,8 @@ def get_chart_based_on_status(data):
 		"In Process": 0,
 		"Stopped": 0,
 		"Completed": 0,
-		"Draft": 0
+		"Draft": 0,
+		"Closed": 0
 	}
 
 	for d in data:
