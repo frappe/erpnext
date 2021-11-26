@@ -1,7 +1,6 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -19,7 +18,7 @@ from erpnext.stock.stock_ledger import repost_future_sle
 
 class RepostItemValuation(Document):
 	def validate(self):
-		self.set_status()
+		self.set_status(write=False)
 		self.reset_field_values()
 		self.set_company()
 
@@ -27,26 +26,27 @@ class RepostItemValuation(Document):
 		if self.based_on == 'Transaction':
 			self.item_code = None
 			self.warehouse = None
-		else:
-			self.voucher_type = None
-			self.voucher_no = None
 
 		self.allow_negative_stock = self.allow_negative_stock or \
 				cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
 
 	def set_company(self):
-		if self.voucher_type and self.voucher_no:
+		if self.based_on == "Transaction":
 			self.company = frappe.get_cached_value(self.voucher_type, self.voucher_no, "company")
 		elif self.warehouse:
 			self.company = frappe.get_cached_value("Warehouse", self.warehouse, "company")
 
-	def set_status(self, status=None):
+	def set_status(self, status=None, write=True):
+		status = status or self.status
 		if not status:
-			status = 'Queued'
-		self.db_set('status', status)
+			self.status = 'Queued'
+		else:
+			self.status = status
+		if write:
+			self.db_set('status', self.status)
 
 	def on_submit(self):
-		if not frappe.flags.in_test:
+		if not frappe.flags.in_test or self.flags.dont_run_in_test:
 			return
 
 		frappe.enqueue(repost, timeout=1800, queue='long',
@@ -57,6 +57,37 @@ class RepostItemValuation(Document):
 		self.set_status('Queued')
 		frappe.enqueue(repost, timeout=1800, queue='long',
 			job_name='repost_sle', now=True, doc=self)
+
+	def deduplicate_similar_repost(self):
+		""" Deduplicate similar reposts based on item-warehouse-posting combination."""
+		if self.based_on != "Item and Warehouse":
+			return
+
+		filters = {
+			"item_code": self.item_code,
+			"warehouse": self.warehouse,
+			"name": self.name,
+			"posting_date": self.posting_date,
+			"posting_time": self.posting_time,
+		}
+
+		frappe.db.sql("""
+			update `tabRepost Item Valuation`
+			set status = 'Skipped'
+			WHERE item_code = %(item_code)s
+				and warehouse = %(warehouse)s
+				and name != %(name)s
+				and TIMESTAMP(posting_date, posting_time) > TIMESTAMP(%(posting_date)s, %(posting_time)s)
+				and docstatus = 1
+				and status = 'Queued'
+				and based_on = 'Item and Warehouse'
+				""",
+			filters
+		)
+
+def on_doctype_update():
+	frappe.db.add_index("Repost Item Valuation", ["warehouse", "item_code"], "item_warehouse")
+
 
 def repost(doc):
 	try:
@@ -134,7 +165,9 @@ def repost_entries():
 
 	for row in riv_entries:
 		doc = frappe.get_doc('Repost Item Valuation', row.name)
-		repost(doc)
+		if doc.status in ('Queued', 'In Progress'):
+			doc.deduplicate_similar_repost()
+			repost(doc)
 
 	riv_entries = get_repost_item_valuation_entries()
 	if riv_entries:
