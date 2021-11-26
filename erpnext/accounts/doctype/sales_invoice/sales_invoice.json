@@ -420,6 +420,7 @@
    "fieldtype": "Check",
    "label": "Edit Posting Date and Time",
    "no_copy": 1,
+   "permlevel": 1,
    "print_hide": 1
   },
   {
@@ -2236,28 +2237,13 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-11-26 11:03:17.317953",
+ "modified": "2021-11-26 16:26:19.197921",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
  "name_case": "Title Case",
  "owner": "Administrator",
  "permissions": [
-  {
-   "amend": 1,
-   "cancel": 1,
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Accounts Manager",
-   "share": 1,
-   "submit": 1,
-   "write": 1
-  },
   {
    "amend": 1,
    "cancel": 1,
@@ -2276,19 +2262,28 @@
   {
    "permlevel": 1,
    "read": 1,
-   "role": "Accounts Manager",
+   "role": "Accounts User",
    "write": 1
   },
   {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
    "export": 1,
-   "permlevel": 1,
+   "print": 1,
    "read": 1,
-   "role": "All"
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
   },
   {
    "permlevel": 1,
    "read": 1,
-   "role": "Invoice User",
+   "role": "Accounts Manager",
    "write": 1
   },
   {
@@ -2307,6 +2302,27 @@
    "write": 1
   },
   {
+   "amend": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Cashier",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User"
+  },
+  {
    "email": 1,
    "export": 1,
    "print": 1,
@@ -2322,18 +2338,10 @@
    "role": "Auditor"
   },
   {
+   "export": 1,
    "permlevel": 1,
    "read": 1,
-   "role": "Accounts User",
-   "write": 1
-  },
-  {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Sales User"
+   "role": "All"
   }
  ],
  "quick_entry": 1,

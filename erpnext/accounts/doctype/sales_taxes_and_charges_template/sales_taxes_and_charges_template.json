@@ -77,17 +77,12 @@
  ],
  "icon": "fa fa-money",
  "idx": 1,
- "modified": "2020-10-03 14:12:32.094055",
+ "modified": "2021-11-26 16:41:40.798383",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Taxes and Charges Template",
  "owner": "Administrator",
  "permissions": [
-  {
-   "read": 1,
-   "report": 1,
-   "role": "Sales User"
-  },
   {
    "create": 1,
    "delete": 1,
@@ -100,17 +95,6 @@
    "write": 1
   },
   {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Customer Master Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
    "read": 1,
    "report": 1,
    "role": "Accounts User"
@@ -118,7 +102,20 @@
   {
    "read": 1,
    "report": 1,
+   "role": "Sales User"
+  },
+  {
+   "read": 1,
+   "report": 1,
    "role": "Sales User (Read Only)"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Customer Master Manager",
+   "share": 1
   }
  ],
  "sort_field": "modified",
