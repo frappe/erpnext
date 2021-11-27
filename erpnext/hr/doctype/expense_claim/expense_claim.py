@@ -171,7 +171,7 @@ class ExpenseClaim(AccountsController):
 					"account": d.expense_account,
 					"debit": d.sanctioned_amount,
 					"debit_in_account_currency": d.sanctioned_amount,
-					"against": self.employee,
+					"against": self.employee_name or self.employee,
 					"cost_center": d.cost_center,
 					"project": d.project,
 					"party_type": d.party_type,

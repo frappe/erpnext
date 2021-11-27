@@ -901,7 +901,7 @@ class SalesInvoice(SellingController):
 			)
 
 	def make_tax_gl_entries(self, gl_entries):
-		billing_party_type, billing_party = self.get_billing_party()
+		billing_party_type, billing_party, billing_party_name = self.get_billing_party(with_name=True)
 
 		for tax in self.get("taxes"):
 			if flt(tax.base_tax_amount_after_discount_amount):
@@ -909,7 +909,7 @@ class SalesInvoice(SellingController):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
-						"against": billing_party,
+						"against": billing_party_name or billing_party,
 						"credit": flt(tax.base_tax_amount_after_discount_amount,
 							tax.precision("tax_amount_after_discount_amount")),
 						"credit_in_account_currency": (flt(tax.base_tax_amount_after_discount_amount,
@@ -920,7 +920,7 @@ class SalesInvoice(SellingController):
 				)
 
 	def make_item_gl_entries(self, gl_entries):
-		billing_party_type, billing_party = self.get_billing_party()
+		billing_party_type, billing_party, billing_party_name = self.get_billing_party(with_name=True)
 
 		# income account gl entries
 		for item in self.get("items"):
@@ -937,7 +937,7 @@ class SalesInvoice(SellingController):
 						item.base_net_amount, item.finance_book)
 
 					for gle in fixed_asset_gl_entries:
-						gle["against"] = billing_party
+						gle["against"] = billing_party_name or billing_party
 						gl_entries.append(self.get_gl_dict(gle, item=item))
 
 					asset.db_set("disposal_date", self.posting_date)
@@ -950,7 +950,7 @@ class SalesInvoice(SellingController):
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": income_account,
-							"against": billing_party,
+							"against": billing_party_name or billing_party,
 							"credit": flt(item.base_net_amount, item.precision("base_net_amount")),
 							"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))
 								if account_currency==self.company_currency
@@ -967,14 +967,14 @@ class SalesInvoice(SellingController):
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
 		if cint(self.redeem_loyalty_points):
-			billing_party_type, billing_party = self.get_billing_party()
+			billing_party_type, billing_party, billing_party_name = self.get_billing_party(with_name=True)
 
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
 					"party_type": billing_party_type,
 					"party": billing_party,
-					"against": "Expense account - " + cstr(self.loyalty_redemption_account) + " for the Loyalty Program",
+					"against": cstr(self.loyalty_redemption_account),
 					"credit": self.loyalty_amount,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
@@ -985,7 +985,7 @@ class SalesInvoice(SellingController):
 				self.get_gl_dict({
 					"account": self.loyalty_redemption_account,
 					"cost_center": self.cost_center or self.loyalty_redemption_cost_center,
-					"against": billing_party,
+					"against": billing_party_name or billing_party,
 					"debit": self.loyalty_amount,
 					"remark": "Loyalty Points redeemed by the customer"
 				}, item=self)
@@ -993,7 +993,7 @@ class SalesInvoice(SellingController):
 
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos):
-			billing_party_type, billing_party = self.get_billing_party()
+			billing_party_type, billing_party, billing_party_name = self.get_billing_party(with_name=True)
 
 			for payment_mode in self.payments:
 				if payment_mode.amount:
@@ -1018,7 +1018,7 @@ class SalesInvoice(SellingController):
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": payment_mode.account,
-							"against": billing_party,
+							"against": billing_party_name or billing_party,
 							"debit": payment_mode.base_amount,
 							"debit_in_account_currency": payment_mode.base_amount \
 								if payment_mode_account_currency==self.company_currency \
@@ -1029,7 +1029,7 @@ class SalesInvoice(SellingController):
 
 	def make_gle_for_change_amount(self, gl_entries):
 		if cint(self.is_pos) and self.change_amount:
-			billing_party_type, billing_party = self.get_billing_party()
+			billing_party_type, billing_party, billing_party_name = self.get_billing_party(with_name=True)
 
 			if self.account_for_change_amount:
 				gl_entries.append(
@@ -1051,7 +1051,7 @@ class SalesInvoice(SellingController):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": self.account_for_change_amount,
-						"against": billing_party,
+						"against": billing_party_name or billing_party,
 						"credit": self.base_change_amount,
 						"cost_center": self.cost_center
 					}, item=self)
@@ -1062,7 +1062,7 @@ class SalesInvoice(SellingController):
 	def make_write_off_gl_entry(self, gl_entries):
 		# write off entries, applicable if only pos
 		if self.write_off_account and flt(self.write_off_amount, self.precision("write_off_amount")):
-			billing_party_type, billing_party = self.get_billing_party()
+			billing_party_type, billing_party, billing_party_name = self.get_billing_party(with_name=True)
 
 			write_off_account_currency = get_account_currency(self.write_off_account)
 			default_cost_center = frappe.get_cached_value('Company',  self.company,  'cost_center')
@@ -1086,7 +1086,7 @@ class SalesInvoice(SellingController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.write_off_account,
-					"against": billing_party,
+					"against": billing_party_name or billing_party,
 					"debit": flt(self.base_write_off_amount, self.precision("base_write_off_amount")),
 					"debit_in_account_currency": (flt(self.base_write_off_amount,
 						self.precision("base_write_off_amount")) if write_off_account_currency==self.company_currency
@@ -1097,7 +1097,7 @@ class SalesInvoice(SellingController):
 
 	def make_gle_for_rounding_adjustment(self, gl_entries):
 		if flt(self.rounding_adjustment, self.precision("rounding_adjustment")) and self.base_rounding_adjustment:
-			billing_party_type, billing_party = self.get_billing_party()
+			billing_party_type, billing_party, billing_party_name = self.get_billing_party(with_name=True)
 
 			round_off_account, round_off_cost_center = \
 				get_round_off_account_and_cost_center(self.company)
@@ -1106,7 +1106,7 @@ class SalesInvoice(SellingController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": round_off_account,
-					"against": billing_party,
+					"against": billing_party_name or billing_party,
 					"credit_in_account_currency": (flt(self.base_rounding_adjustment,
 						self.precision('base_rounding_adjustment')) if round_off_account_currency == self.company_currency
 						else flt(self.rounding_adjustment, self.precision("rounding_adjustment"))),

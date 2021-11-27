@@ -729,7 +729,7 @@ def make_regional_gl_entries(gl_entries, doc):
 						"account": tax.account_head,
 						"cost_center": tax.cost_center,
 						"posting_date": doc.posting_date,
-						"against": doc.supplier,
+						"against": doc.supplier_name or doc.supplier,
 						dr_or_cr: tax.base_tax_amount_after_discount_amount,
 						dr_or_cr + "_in_account_currency": tax.base_tax_amount_after_discount_amount \
 							if account_currency==doc.company_currency \

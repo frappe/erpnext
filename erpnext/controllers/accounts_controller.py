@@ -940,7 +940,7 @@ class AccountsController(TransactionBase):
 		if (billing_party_type, billing_party) != (party_type, party):
 			validate_party_frozen_disabled(billing_party_type, billing_party)
 
-	def get_party(self):
+	def get_party(self, with_name=False):
 		if self.doctype == "Landed Cost Voucher":
 			return self.get("party_type"), self.get("party")
 
@@ -958,17 +958,27 @@ class AccountsController(TransactionBase):
 			party_type = "Supplier"
 
 		party = self.get(scrub(party_type)) if party_type else None
+		party_name = self.get(scrub(party_type) + "_name") if party_type else None
 
-		return party_type, party
+		if with_name:
+			return party_type, party, party_name
+		else:
+			return party_type, party
 
-	def get_billing_party(self):
+	def get_billing_party(self, with_name=False):
 		if self.get("bill_to"):
 			party_type, party = self.get_party()
-			return party_type, self.get("bill_to")
+			if with_name:
+				return party_type, self.get("bill_to"), self.get("bill_to_name")
+			else:
+				return party_type, self.get("bill_to")
 		if self.get("letter_of_credit"):
-			return "Letter of Credit", self.get("letter_of_credit")
+			if with_name:
+				return "Letter of Credit", self.get("letter_of_credit"), self.get("letter_of_credit")
+			else:
+				return "Letter of Credit", self.get("letter_of_credit")
 		else:
-			return self.get_party()
+			return self.get_party(with_name=with_name)
 
 	def validate_currency(self):
 		if self.get("currency"):

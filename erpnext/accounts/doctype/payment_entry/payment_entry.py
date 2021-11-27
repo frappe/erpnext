@@ -585,7 +585,7 @@ class PaymentEntry(AccountsController):
 				self.get_gl_dict({
 					"account": self.paid_from,
 					"account_currency": self.paid_from_account_currency,
-					"against": self.party if self.payment_type=="Pay" else self.paid_to,
+					"against": self.party_name or self.party if self.payment_type=="Pay" else self.paid_to,
 					"credit_in_account_currency": self.paid_amount,
 					"credit": self.base_paid_amount,
 					"cost_center": self.cost_center,
@@ -599,7 +599,7 @@ class PaymentEntry(AccountsController):
 				self.get_gl_dict({
 					"account": self.paid_to,
 					"account_currency": self.paid_to_account_currency,
-					"against": self.party if self.payment_type=="Receive" else self.paid_from,
+					"against": self.party_name or self.party if self.payment_type=="Receive" else self.paid_from,
 					"debit_in_account_currency": self.received_amount,
 					"debit": self.base_received_amount,
 					"cost_center": self.cost_center,
@@ -620,7 +620,7 @@ class PaymentEntry(AccountsController):
 					self.get_gl_dict({
 						"account": d.account,
 						"account_currency": account_currency,
-						"against": self.party or self.paid_from,
+						"against": self.party_name or self.party or self.paid_from,
 						"debit_in_account_currency": d.amount,
 						"debit": d.amount,
 						"cost_center": d.cost_center or self.cost_center,

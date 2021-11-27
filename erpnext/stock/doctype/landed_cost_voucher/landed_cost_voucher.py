@@ -336,7 +336,7 @@ class LandedCostVoucher(AccountsController):
 					"debit": tax.base_amount,
 					"debit_in_account_currency": tax.base_amount \
 						if account_currency == self.company_currency else tax.amount,
-					"against": self.party,
+					"against": self.get('party_name') or self.party,
 					"cost_center": tax.cost_center,
 					"project": self.project,
 					"remarks": remarks

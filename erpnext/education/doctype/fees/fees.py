@@ -99,7 +99,7 @@ class Fees(AccountsController):
 
 		fee_gl_entry = self.get_gl_dict({
 			"account": self.income_account,
-			"against": self.student,
+			"against": self.student_name or self.student,
 			"credit": self.grand_total,
 			"credit_in_account_currency": self.grand_total,
 			"cost_center": self.cost_center
