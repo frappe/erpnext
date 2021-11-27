@@ -58,7 +58,7 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 		pi.item_name = item.item_name
 		pi.parent_detail_docname = main_item_row.name
 		pi.uom = item.stock_uom
-		pi.qty = flt(sum([flt(item_qty.qty) for item_qty in pb_item if item_qty.item_code == packing_item_code]))
+		pi.qty = flt(sum([(item_qty.qty * main_item_row.qty) for item_qty in pb_item if item_qty.item_code == packing_item_code]))
 		pi.conversion_factor = main_item_row.conversion_factor
 		if description and not pi.description:
 			pi.description = description
