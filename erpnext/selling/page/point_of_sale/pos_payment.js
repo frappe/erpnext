@@ -360,6 +360,7 @@ erpnext.PointOfSale.Payment = class {
 			const me = this;
 			const args = {
 				me: me,
+				doc: doc,
 				p: p,
 				mode: mode,
 				currency: currency,
@@ -445,10 +446,7 @@ erpnext.PointOfSale.Payment = class {
 	}
 
 	update_field_value_onchange(args) {
-		var {me, p, mode, currency, option_list} = args;
-		// const options = ['None'];
-		// if (p.type == 'Credit Note')
-		// 	Object.keys(option_list).map((inv) => { if (inv==null || inv==undefined) {console.log(inv)}; options.push(inv);});
+		var {me, doc, p, mode, currency, option_list} = args;
 		const query = { query: 'erpnext.selling.page.point_of_sale.point_of_sale.pos_invoice_credit_notes' };
 
 		this[`${mode}_control`] = frappe.ui.form.make_control({
@@ -459,7 +457,6 @@ erpnext.PointOfSale.Payment = class {
 				options: (p.type == 'Credit Note') ? 'POS Invoice' : '',
 				get_query: () => query,
 				onchange: function() {
-
 					const cn_or_amount = (p.type == 'Credit Note') ? 'credit_note' : 'amount';
 					const current_value = frappe.model.get_value(p.doctype, p.name, cn_or_amount);
 
@@ -468,19 +465,23 @@ erpnext.PointOfSale.Payment = class {
 
 					if (current_value != this.value) {
 						if (p.type == 'Credit Note' && cond) {
-								const new_credit_note = this.value;
-								frappe.model
-									.set_value(p.doctype, p.name, 'credit_note', new_credit_note);
+							const new_credit_note = this.value;
+							if (p.credit_note && (p.credit_note == new_credit_note)) {
+								console.log('exists');
+								return;}
+							frappe.model
+								.set_value(p.doctype, p.name, 'credit_note', new_credit_note);
 						}
-
 						var new_amount;
-
 						// this is to skip the else part if its a number and not for credit note
 						const is_not_credit_note = (p.type == 'Credit Note') ? 0 : 1;
 
 						// typeof(this.value) != 'number' condition to check if it's called due to amount being set
 						if (option_list && p.type == 'Credit Note' && cond) {
-							new_amount = flt(0 - flt(option_list[this.value]));
+							new_amount = (doc.grand_total < (-flt(option_list[this.value])))
+							? flt(doc.grand_total)
+							: (-flt(option_list[this.value]));
+
 							me.set_payment_amount_and_currency(me, p, mode, new_amount, currency);
 
 						} else {

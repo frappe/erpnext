@@ -68,6 +68,8 @@ class POSInvoice(SalesInvoice):
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 			update_coupon_code_count(self.coupon_code,'used')
 
+		self.update_credit_note()
+
 	def before_cancel(self):
 		if self.consolidated_invoice and frappe.db.get_value('Sales Invoice', self.consolidated_invoice, 'docstatus') == 1:
 			pos_closing_entry = frappe.get_all(
@@ -472,6 +474,38 @@ class POSInvoice(SalesInvoice):
 		pr = frappe.db.exists(args)
 		if pr:
 			return frappe.get_doc('Payment Request', pr[0][0])
+
+	@frappe.whitelist()
+	def update_credit_note(self):
+		print('COME HERE',self.is_return,self.ignore_payments_for_return)
+		if self.is_return and self.ignore_payments_for_return :
+			return
+		# pick out the mop with credit note
+		cn_mop = [x for x in self.payments if x.type == 'Credit Note'][0]
+		print('credit note1',cn_mop)
+		if cn_mop:
+			cn_inv = frappe.get_doc('POS Invoice',cn_mop.credit_note)
+			print('credit note2',cn_inv)
+
+			if cn_inv.outstanding_amount :
+				print('credit note3',cn_inv.outstanding_amount)
+				update_cn_outstanding_amount(cn_inv, cn_mop, self.name)
+
+
+def update_cn_outstanding_amount(cn_inv, cn_mop, pos_inv):
+	print('flag',cn_inv.flags.ignore)
+	cn_inv.flags.ignore_validate_update_after_submit = True
+	outstanding_amount = cn_inv.outstanding_amount
+	cn_inv.outstanding_amount += cn_mop.amount
+	cn_inv.save()
+
+	if cn_inv.outstanding_amount == (outstanding_amount+cn_mop.amount):
+		cn_inv.append("payments", dict(mode_of_payment=cn_mop.mode_of_payment,type=cn_mop.type, reference_credit_note=pos_inv))
+		cn_inv.save()
+
+	cn_inv.flags.ignore_validate_update_after_submit = False
+
+
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):

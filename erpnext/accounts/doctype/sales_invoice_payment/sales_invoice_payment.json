@@ -13,7 +13,8 @@
   "type",
   "base_amount",
   "clearance_date",
-  "credit_note"
+  "credit_note",
+  "reference_credit_note"
  ],
  "fields": [
   {
@@ -83,12 +84,20 @@
    "fieldtype": "Link",
    "label": "Credit Note",
    "options": "POS Invoice"
+  },
+  {
+   "depends_on": "eval:doc.type=='Credit Note'",
+   "description": "This is the invoice in which current document is used as payment",
+   "fieldname": "reference_credit_note",
+   "fieldtype": "Link",
+   "label": "Reference Credit Note",
+   "options": "POS Invoice"
   }
  ],
  "istable": 1,
  "links": [],
- "migration_hash": "29b4b3e7e735c353a41171740d05cd27",
- "modified": "2021-11-16 17:19:21.524113",
+ "migration_hash": "c3a1e585986db6aa4b3cc4f0f24c4400",
+ "modified": "2021-11-27 18:45:58.505044",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Payment",
