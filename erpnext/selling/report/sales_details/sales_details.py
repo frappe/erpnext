@@ -57,7 +57,9 @@ class SalesPurchaseDetailsReport(object):
 		if self.filters.from_date > self.filters.to_date:
 			frappe.throw(_("From Date must be before To Date"))
 
-		if self.filters.get("cost_center") and not frappe.get_meta(self.filters.doctype + " Item").has_field("cost_center"):
+		if self.filters.get("cost_center") \
+				and not frappe.get_meta(self.filters.doctype + " Item").has_field("cost_center")\
+				and not frappe.get_meta(self.filters.doctype).has_field("cost_center"):
 			frappe.throw(_("Cannot filter {0} by Cost Center").format(self.filters.doctype))
 
 		self.filters.party_type = party_type
@@ -83,8 +85,11 @@ class SalesPurchaseDetailsReport(object):
 
 		territory_field = ", s.territory" if self.filters.party_type == "Customer" else ""
 
-		cost_center_field = ", i.cost_center" if frappe.get_meta(self.filters.doctype + " Item").has_field("cost_center")\
+		item_cost_center_field = ", i.cost_center as item_cost_center" if frappe.get_meta(self.filters.doctype + " Item").has_field("cost_center")\
 			else ""
+		parent_cost_center_field = ", s.cost_center as parent_cost_center" if frappe.get_meta(self.filters.doctype).has_field("cost_center")\
+			else ""
+
 		project_field = ", i.project" if frappe.get_meta(self.filters.doctype + " Item").has_field("project")\
 			else ", s.project"
 
@@ -109,7 +114,7 @@ class SalesPurchaseDetailsReport(object):
 				i.uom, i.stock_uom, i.alt_uom,
 				i.brand, im.item_group,
 				{amount_fields} {party_group_field} {territory_field} {sales_person_field} {contribution_field}
-				{cost_center_field} {project_field}
+				{item_cost_center_field} {parent_cost_center_field} {project_field}
 				{stin_field}
 			from `tab{doctype} Item` i
 			inner join `tab{doctype}` s on i.parent = s.name
@@ -134,7 +139,8 @@ class SalesPurchaseDetailsReport(object):
 			sales_person_field=sales_person_field,
 			contribution_field=contribution_field,
 			sales_person_join=sales_person_join,
-			cost_center_field=cost_center_field,
+			item_cost_center_field=item_cost_center_field,
+			parent_cost_center_field=parent_cost_center_field,
 			project_field=project_field,
 			supplier_join=supplier_join,
 			is_opening_condition=is_opening_condition,
@@ -198,7 +204,7 @@ class SalesPurchaseDetailsReport(object):
 				"group_doctype": "Item Group",
 				"group": d.item_group,
 				"brand": d.brand,
-				"cost_center": d.cost_center,
+				"cost_center": d.parent_cost_center or d.item_cost_center,
 				"project": d.project,
 				scrub(self.filters.party_type) + "_name": d.party_name,
 				"party_name": d.party_name,
@@ -444,7 +450,13 @@ class SalesPurchaseDetailsReport(object):
 
 		if self.filters.get("cost_center"):
 			self.filters.cost_center = get_cost_centers_with_children(self.filters.get("cost_center"))
-			conditions.append("i.cost_center in %(cost_center)s")
+
+			if frappe.get_meta(self.filters.doctype + " Item").has_field("cost_center") and frappe.get_meta(self.filters.doctype).has_field("cost_center"):
+				conditions.append("IF(s.cost_center IS NULL or s.cost_center = '', i.cost_center, s.cost_center) in %(cost_center)s")
+			elif frappe.get_meta(self.filters.doctype + " Item").has_field("cost_center"):
+				conditions.append("i.cost_center in %(cost_center)s")
+			elif frappe.get_meta(self.filters.doctype).has_field("cost_center"):
+				conditions.append("s.cost_center in %(cost_center)s")
 
 		if self.filters.get("project"):
 			if isinstance(self.filters.project, string_types):
