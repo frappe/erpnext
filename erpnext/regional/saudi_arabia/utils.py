@@ -41,18 +41,16 @@ def create_qr_code(doc, method):
 			tlv_array = []
 			# Sellers Name
 
-			'''TODO: Fix arabic conversion'''
-			# seller_name = frappe.db.get_value(
-			# 	'Company',
-			# 	doc.company,
-			# 	'company_name_in_arabic')
+			seller_name = frappe.db.get_value(
+				'Company',
+				doc.company,
+				'company_name_in_arabic')
 
-			# if not seller_name:
-			# 	frappe.throw(_('Arabic name missing for {} in the company document'.format(doc.company)))
+			if not seller_name:
+				frappe.throw(_('Arabic name missing for {} in the company document'.format(doc.company)))
 
-			seller_name = doc.company
 			tag = bytes([1]).hex()
-			length = bytes([len(seller_name)]).hex()
+			length = bytes([len(seller_name.encode('utf-8'))]).hex()
 			value = seller_name.encode('utf-8').hex()
 			tlv_array.append(''.join([tag, length, value]))
 
