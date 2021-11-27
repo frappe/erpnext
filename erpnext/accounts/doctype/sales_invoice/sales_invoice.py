@@ -178,6 +178,7 @@ class SalesInvoice(SellingController):
 			set_name_by_naming_series(self, 'stin')
 
 	def validate(self):
+		self.validate_posting_time()
 		super(SalesInvoice, self).validate()
 
 		self.so_dn_required()
@@ -625,13 +626,6 @@ class SalesInvoice(SellingController):
 			if d.income_account and d.income_account not in against_acc:
 				against_acc.append(d.income_account)
 		self.against_income_account = ', '.join(against_acc)
-
-	def validate_auto_set_posting_time(self):
-		# Don't auto set the posting date and time if invoice is amended
-		if self.is_new() and self.amended_from:
-			self.set_posting_time = 1
-
-		self.validate_posting_time()
 
 	def so_dn_required(self):
 		"""check in manage account if sales order / delivery note required or not."""

@@ -47,6 +47,7 @@
   {
    "fieldname": "account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Account",
    "options": "Account",
    "print_hide": 1,
@@ -78,7 +79,7 @@
   }
  ],
  "istable": 1,
- "modified": "2020-08-03 13:07:49.260534",
+ "modified": "2021-11-27 09:35:39.958938",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Payment",
