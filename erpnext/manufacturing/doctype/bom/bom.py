@@ -264,6 +264,10 @@ class BOM(WebsiteGenerator):
 		existing_bom_cost = self.total_cost
 
 		for d in self.get("items"):
+			d.conversion_factor = get_conversion_factor(d.item_code, d.uom).get("conversion_factor") or 1
+			d.stock_qty = flt(d.conversion_factor) * flt(d.qty)
+			d.update(get_fetch_values(d.doctype, 'item_code', d.item_code))
+
 			rate = self.get_rm_rate({
 				"item_code": d.item_code,
 				"bom_no": d.bom_no,
