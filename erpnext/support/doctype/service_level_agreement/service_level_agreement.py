@@ -642,8 +642,8 @@ def reset_expected_response_and_resolution(doc):
 def set_response_by_and_variance(doc, start_date_time, priority):
 	if doc.meta.has_field("response_by"):
 		doc.response_by = get_expected_time_for(parameter="response", service_level=priority, start_date_time=start_date_time)
-		if doc.meta.has_field("total_hold_time") and doc.total_hold_time:
-			doc.response_by = add_to_date(doc.response_by, seconds=round(doc.total_hold_time))
+		if doc.meta.has_field("total_hold_time") and doc.get('total_hold_time'):
+			doc.response_by = add_to_date(doc.response_by, seconds=round(doc.get('total_hold_time')))
 
 	if doc.meta.has_field("response_by_variance") and not doc.get('first_responded_on'):
 		now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
@@ -656,8 +656,8 @@ def set_response_by_and_variance(doc, start_date_time, priority):
 def set_resolution_by_and_variance(doc, start_date_time, priority):
 	if doc.meta.has_field("resolution_by"):
 		doc.resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
-		if doc.meta.has_field("total_hold_time") and doc.total_hold_time:
-			doc.resolution_by = add_to_date(doc.resolution_by, seconds=round(doc.total_hold_time))
+		if doc.meta.has_field("total_hold_time") and doc.get('total_hold_time'):
+			doc.resolution_by = add_to_date(doc.resolution_by, seconds=round(doc.get('total_hold_time')))
 
 	if doc.meta.has_field("resolution_by_variance") and not doc.get("resolution_date"):
 		now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
