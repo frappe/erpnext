@@ -142,6 +142,32 @@ class TestIssue(TestSetUp):
 		issue.reload()
 		self.assertEqual(flt(issue.total_hold_time, 2), 2700)
 
+	def test_issue_close_after_on_hold(self):
+		creation = get_datetime("2021-11-01 19:00")
+
+		issue = make_issue(creation, index=1)
+		create_communication(issue.name, "test@example.com", "Received", creation)
+
+		# send a reply within SLA
+		creation = get_datetime("2021-11-02 11:00")
+		create_communication(issue.name, "test@admin.com", "Sent", creation)
+
+		frappe.flags.current_time = creation
+		issue.reload()
+		issue.status = 'Replied'
+		issue.save()
+
+		self.assertEqual(issue.on_hold_since, frappe.flags.current_time)
+
+		# close the issue after being on hold for 20 days
+		frappe.flags.current_time = get_datetime("2021-11-22 01:00")
+		issue.status = 'Closed'
+		issue.save()
+
+		self.assertEqual(issue.resolution_by, get_datetime('2021-11-22 06:00:00'))
+		self.assertEqual(issue.resolution_date, get_datetime('2021-11-22 01:00:00'))
+		self.assertEqual(issue.agreement_status, 'Fulfilled')
+
 class TestFirstResponseTime(TestSetUp):
 	# working hours used in all cases: Mon-Fri, 10am to 6pm
 	# all dates are in the mm-dd-yyyy format
