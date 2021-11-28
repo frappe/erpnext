@@ -339,7 +339,7 @@ class PaymentEntry(AccountsController):
 		for k, v in no_oustanding_refs.items():
 			frappe.msgprint(
 				_("{} - {} now have {} as they had no outstanding amount left before submitting the Payment Entry.")
-					.format(k, frappe.bold(", ".join(d.reference_name for d in v)), frappe.bold("negative outstanding amount"))
+					.format(_(k), frappe.bold(", ".join(d.reference_name for d in v)), frappe.bold(_("negative outstanding amount")))
 				+ "<br><br>" + _("If this is undesirable please cancel the corresponding Payment Entry."),
 				title=_("Warning"), indicator="orange")
 
@@ -611,7 +611,7 @@ class PaymentEntry(AccountsController):
 
 			if not total_negative_outstanding:
 				frappe.throw(_("Cannot {0} {1} {2} without any negative outstanding invoice")
-					.format(self.payment_type, ("to" if self.party_type=="Customer" else "from"),
+					.format(_(self.payment_type), (_("to") if self.party_type=="Customer" else _("from")),
 						self.party_type), InvalidPaymentEntry)
 
 			elif paid_amount - additional_charges > total_negative_outstanding:
@@ -1092,7 +1092,7 @@ def get_outstanding_reference_documents(args):
 
 	if not data:
 		frappe.msgprint(_("No outstanding invoices found for the {0} {1} which qualify the filters you have specified.")
-			.format(args.get("party_type").lower(), frappe.bold(args.get("party"))))
+			.format(_(args.get("party_type")).lower(), frappe.bold(args.get("party"))))
 
 	return data
 
