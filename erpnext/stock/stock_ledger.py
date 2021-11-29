@@ -1,6 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
 import copy
 import json
@@ -113,6 +112,7 @@ def validate_cancellation(args):
 				frappe.throw(_("Cannot cancel the transaction. Reposting of item valuation on submission is not completed yet."))
 			if repost_entry.status == 'Queued':
 				doc = frappe.get_doc("Repost Item Valuation", repost_entry.name)
+				doc.flags.ignore_permissions = True
 				doc.cancel()
 				doc.delete()
 
