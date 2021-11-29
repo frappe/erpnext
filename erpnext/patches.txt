@@ -292,7 +292,7 @@ erpnext.patches.v13_0.rename_issue_status_hold_to_on_hold
 erpnext.patches.v13_0.bill_for_rejected_quantity_in_purchase_invoice
 erpnext.patches.v13_0.update_job_card_details
 erpnext.patches.v13_0.update_level_in_bom #1234sswef
-erpnext.patches.v13_0.create_gst_payment_entry_fields
+erpnext.patches.v13_0.create_gst_payment_entry_fields #27-11-2021
 erpnext.patches.v13_0.add_missing_fg_item_for_stock_entry
 erpnext.patches.v13_0.update_subscription_status_in_memberships
 erpnext.patches.v13_0.update_amt_in_work_order_required_items
@@ -315,7 +315,6 @@ erpnext.patches.v13_0.create_website_items #30-09-2021
 erpnext.patches.v13_0.populate_e_commerce_settings
 erpnext.patches.v13_0.make_homepage_products_website_items
 erpnext.patches.v13_0.update_dates_in_tax_withholding_category
-erpnext.patches.v13_0.create_gst_payment_entry_fields #27-11-2021
 erpnext.patches.v13_0.fix_invoice_statuses
 erpnext.patches.v13_0.replace_supplier_item_group_with_party_specific_item
 erpnext.patches.v13_0.gst_fields_for_pos_invoice
