@@ -333,6 +333,7 @@
    "default": "0",
    "fieldname": "is_pos",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Include Payment (POS)",
    "oldfieldname": "is_pos",
    "oldfieldtype": "Check",
@@ -358,6 +359,7 @@
    "default": "0",
    "fieldname": "is_return",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Return (Credit Note)",
    "no_copy": 1,
    "print_hide": 1
@@ -419,6 +421,7 @@
   {
    "fieldname": "reason_for_sale",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Reason for sale",
    "options": "Reason for sale",
    "print_hide": 1
@@ -426,8 +429,10 @@
   {
    "fieldname": "patient_statement",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Patient Statement",
-   "options": "Patient statement"
+   "options": "Patient statement",
+   "print_hide": 1
   },
   {
    "fieldname": "amended_from",
@@ -478,6 +483,7 @@
    "depends_on": "return_against",
    "fieldname": "return_against",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Return Against Sales Invoice",
    "no_copy": 1,
    "options": "Sales Invoice",
@@ -493,7 +499,9 @@
    "depends_on": "eval: doc.is_return && doc.return_against",
    "fieldname": "update_billed_amount_in_sales_order",
    "fieldtype": "Check",
-   "label": "Update Billed Amount in Sales Order"
+   "hidden": 1,
+   "label": "Update Billed Amount in Sales Order",
+   "print_hide": 1
   },
   {
    "fieldname": "column_numeration",
@@ -508,12 +516,15 @@
   {
    "fieldname": "deadline_for_authorization",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Deadline for authorization",
+   "print_hide": 1,
    "read_only": 1
   },
   {
    "fieldname": "project",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_global_search": 1,
    "label": "Project",
    "oldfieldname": "project_name",
@@ -530,12 +541,15 @@
    "collapsible_depends_on": "po_no",
    "fieldname": "customer_po_details",
    "fieldtype": "Section Break",
-   "label": "Customer PO Details"
+   "hidden": 1,
+   "label": "Customer PO Details",
+   "print_hide": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "po_no",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Customer's Purchase Order",
    "no_copy": 1,
    "print_hide": 1
@@ -548,17 +562,22 @@
    "allow_on_submit": 1,
    "fieldname": "po_date",
    "fieldtype": "Date",
-   "label": "Customer's Purchase Order Date"
+   "hidden": 1,
+   "label": "Customer's Purchase Order Date",
+   "print_hide": 1
   },
   {
    "collapsible": 1,
    "fieldname": "address_and_contact",
    "fieldtype": "Section Break",
-   "label": "Address and Contact"
+   "hidden": 1,
+   "label": "Address and Contact",
+   "print_hide": 1
   },
   {
    "fieldname": "customer_address",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Customer Address",
    "options": "Address",
    "print_hide": 1
@@ -566,6 +585,7 @@
   {
    "fieldname": "address_display",
    "fieldtype": "Small Text",
+   "hidden": 1,
    "label": "Address",
    "print_hide": 1,
    "read_only": 1
@@ -573,6 +593,7 @@
   {
    "fieldname": "contact_person",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_global_search": 1,
    "label": "Contact Person",
    "options": "Contact",
@@ -581,7 +602,9 @@
   {
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
+   "hidden": 1,
    "label": "Contact",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -589,6 +612,7 @@
    "fieldtype": "Small Text",
    "hidden": 1,
    "label": "Mobile No",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -603,6 +627,7 @@
   {
    "fieldname": "territory",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Territory",
    "options": "Territory",
    "print_hide": 1
@@ -614,6 +639,7 @@
   {
    "fieldname": "shipping_address_name",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Shipping Address Name",
    "options": "Address",
    "print_hide": 1
@@ -621,6 +647,7 @@
   {
    "fieldname": "shipping_address",
    "fieldtype": "Small Text",
+   "hidden": 1,
    "label": "Shipping Address",
    "print_hide": 1,
    "read_only": 1
@@ -628,6 +655,7 @@
   {
    "fieldname": "company_address",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Company Address Name",
    "options": "Address",
    "print_hide": 1
@@ -645,28 +673,30 @@
    "depends_on": "customer",
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
-   "label": "Currency and Price List"
+   "hidden": 1,
+   "label": "Currency and Price List",
+   "print_hide": 1
   },
   {
    "fieldname": "currency",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Currency",
    "oldfieldname": "currency",
    "oldfieldtype": "Select",
    "options": "Currency",
-   "print_hide": 1,
-   "reqd": 1
+   "print_hide": 1
   },
   {
    "description": "Rate at which Customer Currency is converted to customer's base currency",
    "fieldname": "conversion_rate",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Exchange Rate",
    "oldfieldname": "conversion_rate",
    "oldfieldtype": "Currency",
    "precision": "9",
-   "print_hide": 1,
-   "reqd": 1
+   "print_hide": 1
   },
   {
    "fieldname": "column_break2",
@@ -676,35 +706,36 @@
   {
    "fieldname": "selling_price_list",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Price List",
    "oldfieldname": "price_list_name",
    "oldfieldtype": "Select",
    "options": "Price List",
-   "print_hide": 1,
-   "reqd": 1
+   "print_hide": 1
   },
   {
    "fieldname": "price_list_currency",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Price List Currency",
    "options": "Currency",
    "print_hide": 1,
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "description": "Rate at which Price list currency is converted to customer's base currency",
    "fieldname": "plc_conversion_rate",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Price List Exchange Rate",
    "precision": "9",
-   "print_hide": 1,
-   "reqd": 1
+   "print_hide": 1
   },
   {
    "default": "0",
    "fieldname": "ignore_pricing_rule",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Ignore Pricing Rule",
    "no_copy": 1,
    "permlevel": 1,
@@ -718,6 +749,7 @@
    "depends_on": "update_stock",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Set Source Warehouse",
    "options": "Warehouse",
    "print_hide": 1
@@ -732,6 +764,7 @@
    "default": "0",
    "fieldname": "update_stock",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Update Stock",
    "oldfieldname": "update_stock",
    "oldfieldtype": "Check",
@@ -740,7 +773,9 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
-   "label": "Scan Barcode"
+   "hidden": 1,
+   "label": "Scan Barcode",
+   "print_hide": 1
   },
   {
    "allow_bulk_edit": 1,
@@ -755,18 +790,23 @@
   {
    "fieldname": "pricing_rule_details",
    "fieldtype": "Section Break",
-   "label": "Pricing Rules"
+   "hidden": 1,
+   "label": "Pricing Rules",
+   "print_hide": 1
   },
   {
    "fieldname": "pricing_rules",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Pricing Rule Detail",
    "options": "Pricing Rule Detail",
+   "print_hide": 1,
    "read_only": 1
   },
   {
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Packing List",
    "options": "fa fa-suitcase",
    "print_hide": 1
@@ -774,6 +814,7 @@
   {
    "fieldname": "packed_items",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Packed Items",
    "options": "Packed Item",
    "print_hide": 1
@@ -781,6 +822,7 @@
   {
    "fieldname": "product_bundle_help",
    "fieldtype": "HTML",
+   "hidden": 1,
    "label": "Product Bundle Help",
    "print_hide": 1
   },
@@ -789,11 +831,14 @@
    "collapsible_depends_on": "eval:doc.total_billing_amount > 0",
    "fieldname": "time_sheet_list",
    "fieldtype": "Section Break",
-   "label": "Time Sheet List"
+   "hidden": 1,
+   "label": "Time Sheet List",
+   "print_hide": 1
   },
   {
    "fieldname": "timesheets",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Time Sheets",
    "options": "Sales Invoice Timesheet",
    "print_hide": 1
@@ -802,6 +847,7 @@
    "default": "0",
    "fieldname": "total_billing_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Billing Amount",
    "print_hide": 1,
    "read_only": 1
@@ -872,27 +918,37 @@
    "default": "0",
    "fieldname": "exonerated",
    "fieldtype": "Check",
-   "label": "Exonerated"
+   "hidden": 1,
+   "label": "Exonerated",
+   "print_hide": 1
   },
   {
    "fieldname": "sale_order",
    "fieldtype": "Data",
-   "label": "Sale Order"
+   "hidden": 1,
+   "label": "Sale Order",
+   "print_hide": 1
   },
   {
    "fieldname": "oc_exenta",
    "fieldtype": "Data",
-   "label": "O/C Exenta"
+   "hidden": 1,
+   "label": "O/C Exenta",
+   "print_hide": 1
   },
   {
    "fieldname": "reg_sag",
    "fieldtype": "Data",
-   "label": "N. de Reg. De La SAG"
+   "hidden": 1,
+   "label": "N. de Reg. De La SAG",
+   "print_hide": 1
   },
   {
    "fieldname": "n_reg_exonerados",
    "fieldtype": "Data",
-   "label": "N Reg de Exonerados"
+   "hidden": 1,
+   "label": "N Reg de Exonerados",
+   "print_hide": 1
   },
   {
    "fieldname": "column_break_38",
@@ -902,19 +958,24 @@
    "depends_on": "exonerated",
    "fieldname": "charge_type",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Type",
-   "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total\nOn Item Quantity"
+   "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total\nOn Item Quantity",
+   "print_hide": 1
   },
   {
    "depends_on": "exonerated",
    "fieldname": "account_head",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Account Head",
-   "options": "Account"
+   "options": "Account",
+   "print_hide": 1
   },
   {
    "fieldname": "taxes_and_charges",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Sales Taxes and Charges Template",
    "oldfieldname": "charge",
    "oldfieldtype": "Link",
@@ -925,12 +986,15 @@
    "depends_on": "exonerated",
    "fieldname": "cost_center",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Cost Center",
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "print_hide": 1
   },
   {
    "fieldname": "shipping_rule",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Shipping Rule",
    "oldfieldtype": "Button",
    "options": "Shipping Rule",
@@ -939,6 +1003,7 @@
   {
    "fieldname": "tax_category",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Tax Category",
    "options": "Tax Category",
    "print_hide": 1
@@ -950,20 +1015,25 @@
   {
    "fieldname": "taxes",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Sales Taxes and Charges",
    "oldfieldname": "other_charges",
    "oldfieldtype": "Table",
-   "options": "Sales Taxes and Charges"
+   "options": "Sales Taxes and Charges",
+   "print_hide": 1
   },
   {
    "collapsible": 1,
    "fieldname": "sec_tax_breakup",
    "fieldtype": "Section Break",
-   "label": "Tax Breakup"
+   "hidden": 1,
+   "label": "Tax Breakup",
+   "print_hide": 1
   },
   {
    "fieldname": "other_charges_calculation",
    "fieldtype": "Text",
+   "hidden": 1,
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -977,6 +1047,7 @@
   {
    "fieldname": "base_total_taxes_and_charges",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Taxes and Charges (Company Currency)",
    "oldfieldname": "other_charges_total",
    "oldfieldtype": "Currency",
@@ -991,6 +1062,7 @@
   {
    "fieldname": "total_taxes_and_charges",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Taxes and Charges",
    "options": "currency",
    "print_hide": 1,
@@ -1005,7 +1077,8 @@
    "fieldname": "empty",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Empty"
+   "label": "Empty",
+   "print_hide": 1
   },
   {
    "fieldname": "column_break_141",
@@ -1029,6 +1102,7 @@
    "depends_on": "redeem_loyalty_points",
    "fieldname": "loyalty_points",
    "fieldtype": "Int",
+   "hidden": 1,
    "label": "Loyalty Points",
    "no_copy": 1,
    "print_hide": 1
@@ -1037,6 +1111,7 @@
    "depends_on": "redeem_loyalty_points",
    "fieldname": "loyalty_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Loyalty Amount",
    "no_copy": 1,
    "options": "Company:company:default_currency",
@@ -1047,6 +1122,7 @@
    "default": "0",
    "fieldname": "redeem_loyalty_points",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Redeem Loyalty Points",
    "no_copy": 1,
    "print_hide": 1
@@ -1059,6 +1135,7 @@
    "fetch_from": "customer.loyalty_program",
    "fieldname": "loyalty_program",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Loyalty Program",
    "no_copy": 1,
    "options": "Loyalty Program",
@@ -1069,35 +1146,44 @@
    "depends_on": "redeem_loyalty_points",
    "fieldname": "loyalty_redemption_account",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Redemption Account",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "print_hide": 1
   },
   {
    "depends_on": "redeem_loyalty_points",
    "fieldname": "loyalty_redemption_cost_center",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Redemption Cost Center",
    "no_copy": 1,
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "print_hide": 1
   },
   {
    "collapsible": 1,
    "collapsible_depends_on": "discount_amount",
    "fieldname": "section_break_49",
    "fieldtype": "Section Break",
-   "label": "Additional Discount"
+   "hidden": 1,
+   "label": "Additional Discount",
+   "print_hide": 1
   },
   {
    "fieldname": "discount_reason",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Discount Reason",
-   "options": "Reason For Discount"
+   "options": "Reason For Discount",
+   "print_hide": 1
   },
   {
    "default": "Grand Total",
    "fieldname": "apply_discount_on",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Apply Additional Discount On",
    "options": "\nGrand Total\nNet Total",
    "print_hide": 1
@@ -1105,6 +1191,7 @@
   {
    "fieldname": "base_discount_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Additional Discount Amount (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -1117,12 +1204,14 @@
   {
    "fieldname": "additional_discount_percentage",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Additional Discount Percentage",
    "print_hide": 1
   },
   {
    "fieldname": "discount_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Additional Discount Amount",
    "options": "currency",
    "print_hide": 1
@@ -1302,18 +1391,23 @@
    "default": "0",
    "fieldname": "allocate_advances_automatically",
    "fieldtype": "Check",
-   "label": "Allocate Advances Automatically (FIFO)"
+   "hidden": 1,
+   "label": "Allocate Advances Automatically (FIFO)",
+   "print_hide": 1
   },
   {
    "depends_on": "eval:!doc.allocate_advances_automatically",
    "fieldname": "get_advances",
    "fieldtype": "Button",
+   "hidden": 1,
    "label": "Get Advances Received",
-   "options": "set_advances"
+   "options": "set_advances",
+   "print_hide": 1
   },
   {
    "fieldname": "advances",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Advances",
    "oldfieldname": "advance_adjustment_details",
    "oldfieldtype": "Table",
@@ -1325,12 +1419,15 @@
    "collapsible_depends_on": "eval:(!doc.is_pos && !doc.is_return)",
    "fieldname": "payment_schedule_section",
    "fieldtype": "Section Break",
-   "label": "Payment Terms"
+   "hidden": 1,
+   "label": "Payment Terms",
+   "print_hide": 1
   },
   {
    "depends_on": "eval:(!doc.is_pos && !doc.is_return)",
    "fieldname": "payment_terms_template",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Payment Terms Template",
    "no_copy": 1,
    "options": "Payment Terms Template",
@@ -1340,6 +1437,7 @@
    "depends_on": "eval:(!doc.is_pos && !doc.is_return)",
    "fieldname": "payment_schedule",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Payment Schedule",
    "no_copy": 1,
    "options": "Payment Schedule",
@@ -1349,8 +1447,10 @@
    "depends_on": "eval:doc.is_pos===1||(doc.advances && doc.advances.length>0)",
    "fieldname": "payments_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Payments",
-   "options": "fa fa-money"
+   "options": "fa fa-money",
+   "print_hide": 1
   },
   {
    "depends_on": "is_pos",
@@ -1367,6 +1467,7 @@
    "depends_on": "eval:doc.is_pos===1",
    "fieldname": "payments",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Sales Invoice Payment",
    "options": "Sales Invoice Payment",
    "print_hide": 1
@@ -1378,6 +1479,7 @@
   {
    "fieldname": "base_paid_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Paid Amount (Company Currency)",
    "no_copy": 1,
    "options": "Company:company:default_currency",
@@ -1392,6 +1494,7 @@
    "depends_on": "eval: doc.is_pos || doc.redeem_loyalty_points",
    "fieldname": "paid_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Paid Amount",
    "no_copy": 1,
    "oldfieldname": "paid_amount",
@@ -1408,6 +1511,7 @@
    "depends_on": "is_pos",
    "fieldname": "base_change_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Base Change Amount (Company Currency)",
    "no_copy": 1,
    "options": "Company:company:default_currency",
@@ -1422,6 +1526,7 @@
    "depends_on": "is_pos",
    "fieldname": "change_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Change Amount",
    "no_copy": 1,
    "options": "currency",
@@ -1431,6 +1536,7 @@
    "depends_on": "is_pos",
    "fieldname": "account_for_change_amount",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Account for Change Amount",
    "options": "Account",
    "print_hide": 1
@@ -1441,12 +1547,15 @@
    "depends_on": "grand_total",
    "fieldname": "column_break4",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Write Off",
+   "print_hide": 1,
    "width": "50%"
   },
   {
    "fieldname": "write_off_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Write Off Amount",
    "no_copy": 1,
    "options": "currency",
@@ -1455,6 +1564,7 @@
   {
    "fieldname": "base_write_off_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Write Off Amount (Company Currency)",
    "no_copy": 1,
    "options": "Company:company:default_currency",
@@ -1466,6 +1576,7 @@
    "depends_on": "is_pos",
    "fieldname": "write_off_outstanding_amount_automatically",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Write Off Outstanding Amount",
    "print_hide": 1
   },
@@ -1476,6 +1587,7 @@
   {
    "fieldname": "write_off_account",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Write Off Account",
    "options": "Account",
    "print_hide": 1
@@ -1483,6 +1595,7 @@
   {
    "fieldname": "write_off_cost_center",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Write Off Cost Center",
    "options": "Cost Center",
    "print_hide": 1
@@ -1492,12 +1605,15 @@
    "collapsible_depends_on": "terms",
    "fieldname": "terms_section_break",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Terms and Conditions",
-   "oldfieldtype": "Section Break"
+   "oldfieldtype": "Section Break",
+   "print_hide": 1
   },
   {
    "fieldname": "tc_name",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Terms",
    "oldfieldname": "tc_name",
    "oldfieldtype": "Link",
@@ -1507,20 +1623,25 @@
   {
    "fieldname": "terms",
    "fieldtype": "Text Editor",
+   "hidden": 1,
    "label": "Terms and Conditions Details",
    "oldfieldname": "terms",
-   "oldfieldtype": "Text Editor"
+   "oldfieldtype": "Text Editor",
+   "print_hide": 1
   },
   {
    "collapsible": 1,
    "fieldname": "edit_printing_settings",
    "fieldtype": "Section Break",
-   "label": "Printing Settings"
+   "hidden": 1,
+   "label": "Printing Settings",
+   "print_hide": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "letter_head",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Letter Head",
    "oldfieldname": "letter_head",
    "oldfieldtype": "Select",
@@ -1532,12 +1653,14 @@
    "default": "0",
    "fieldname": "group_same_items",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Group same items",
    "print_hide": 1
   },
   {
    "fieldname": "language",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Print Language",
    "print_hide": 1,
    "read_only": 1
@@ -1550,6 +1673,7 @@
    "allow_on_submit": 1,
    "fieldname": "select_print_heading",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Print Heading",
    "no_copy": 1,
    "oldfieldname": "select_print_heading",
@@ -1563,13 +1687,17 @@
    "depends_on": "customer",
    "fieldname": "more_information",
    "fieldtype": "Section Break",
-   "label": "More Information"
+   "hidden": 1,
+   "label": "More Information",
+   "print_hide": 1
   },
   {
    "fieldname": "inter_company_invoice_reference",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Inter Company Invoice Reference",
    "options": "Purchase Invoice",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -1583,6 +1711,7 @@
   {
    "fieldname": "campaign",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Campaign",
    "oldfieldname": "campaign",
    "oldfieldtype": "Link",
@@ -1593,8 +1722,10 @@
    "default": "0",
    "fieldname": "is_discounted",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Discounted",
    "no_copy": 1,
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -1607,6 +1738,7 @@
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
@@ -1617,6 +1749,7 @@
   {
    "fieldname": "source",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Source",
    "oldfieldname": "source",
    "oldfieldtype": "Select",
@@ -1627,6 +1760,7 @@
    "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Accounting Details",
    "oldfieldtype": "Section Break",
    "options": "fa fa-file-text",
@@ -1635,12 +1769,12 @@
   {
    "fieldname": "debit_to",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Debit To",
    "oldfieldname": "debit_to",
    "oldfieldtype": "Link",
    "options": "Account",
    "print_hide": 1,
-   "reqd": 1,
    "search_index": 1
   },
   {
@@ -1657,6 +1791,7 @@
    "default": "No",
    "fieldname": "is_opening",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Is Opening Entry",
    "oldfieldname": "is_opening",
    "oldfieldtype": "Select",
@@ -1666,6 +1801,7 @@
   {
    "fieldname": "c_form_applicable",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "C-Form Applicable",
    "no_copy": 1,
    "options": "No\nYes",
@@ -1674,6 +1810,7 @@
   {
    "fieldname": "c_form_no",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "C-Form No",
    "no_copy": 1,
    "options": "C-Form",
@@ -1689,6 +1826,7 @@
   {
    "fieldname": "remarks",
    "fieldtype": "Small Text",
+   "hidden": 1,
    "label": "Remarks",
    "no_copy": 1,
    "oldfieldname": "remarks",
@@ -1700,6 +1838,7 @@
    "collapsible_depends_on": "sales_partner",
    "fieldname": "sales_team_section_break",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Commission",
    "oldfieldtype": "Section Break",
    "options": "fa fa-group",
@@ -1708,6 +1847,7 @@
   {
    "fieldname": "sales_partner",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Sales Partner",
    "oldfieldname": "sales_partner",
    "oldfieldtype": "Link",
@@ -1724,6 +1864,7 @@
   {
    "fieldname": "commission_rate",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Commission Rate (%)",
    "oldfieldname": "commission_rate",
    "oldfieldtype": "Currency",
@@ -1732,6 +1873,7 @@
   {
    "fieldname": "total_commission",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Commission",
    "oldfieldname": "total_commission",
    "oldfieldtype": "Currency",
@@ -1743,6 +1885,7 @@
    "collapsible_depends_on": "sales_team",
    "fieldname": "section_break2",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Sales Team",
    "print_hide": 1
   },
@@ -1750,6 +1893,7 @@
    "allow_on_submit": 1,
    "fieldname": "sales_team",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Sales Team1",
    "oldfieldname": "sales_team",
    "oldfieldtype": "Table",
@@ -1759,12 +1903,15 @@
   {
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
-   "label": "Subscription Section"
+   "hidden": 1,
+   "label": "Subscription Section",
+   "print_hide": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "from_date",
    "fieldtype": "Date",
+   "hidden": 1,
    "label": "From Date",
    "no_copy": 1,
    "print_hide": 1
@@ -1773,6 +1920,7 @@
    "allow_on_submit": 1,
    "fieldname": "to_date",
    "fieldtype": "Date",
+   "hidden": 1,
    "label": "To Date",
    "no_copy": 1,
    "print_hide": 1
@@ -1785,6 +1933,7 @@
    "allow_on_submit": 1,
    "fieldname": "auto_repeat",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Auto Repeat",
    "no_copy": 1,
    "options": "Auto Repeat",
@@ -1796,7 +1945,9 @@
    "depends_on": "eval: doc.auto_repeat",
    "fieldname": "update_auto_repeat_reference",
    "fieldtype": "Button",
-   "label": "Update Auto Repeat Reference"
+   "hidden": 1,
+   "label": "Update Auto Repeat Reference",
+   "print_hide": 1
   },
   {
    "fieldname": "against_income_account",
@@ -1821,13 +1972,16 @@
   {
    "fieldname": "creation_date",
    "fieldtype": "Date",
-   "label": "Creation Date"
+   "hidden": 1,
+   "label": "Creation Date",
+   "print_hide": 1
   },
   {
    "fieldname": "total_with_discount",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Total With Discount"
+   "label": "Total With Discount",
+   "print_hide": 1
   },
   {
    "fieldname": "amended_from",
@@ -1853,7 +2007,7 @@
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2021-11-29 10:14:55.798276",
+ "modified": "2021-11-29 16:09:07.559801",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Return credit notes",
