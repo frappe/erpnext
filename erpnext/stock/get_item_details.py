@@ -1044,16 +1044,35 @@ def get_serial_no_batchwise(args, sales_order=None):
 
 @frappe.whitelist()
 def get_conversion_factor(item_code, uom):
-	variant_of = frappe.db.get_value("Item", item_code, "variant_of", cache=True)
-	filters = {"parent": item_code, "uom": uom}
-	if variant_of:
-		filters["parent"] = ("in", (item_code, variant_of))
-	conversion_factor = frappe.db.get_value("UOM Conversion Detail",
-		filters, "conversion_factor")
+	# first look for direct conversion factor in item
+	item = frappe.get_cached_doc("Item", item_code)
+	item_conversion_factors = dict([(c.uom, c.conversion_factor) for c in item.uoms])
+	conversion_factor = flt(item_conversion_factors.get(uom))
+
+	# then look for conversion factor in template item if variant
+	if not conversion_factor and item.variant_of:
+		template_item = frappe.get_cached_doc("Item", item.variant_of)
+		template_item_conversion_factors = dict([(c.uom, c.conversion_factor) for c in template_item.uoms])
+		if uom in template_item_conversion_factors:
+			conversion_factor = flt(item_conversion_factors.get(uom))
+
+	# then look for global conversion factor for stock uom first then the rest of the item's convertible uoms
 	if not conversion_factor:
-		stock_uom = frappe.db.get_value("Item", item_code, "stock_uom")
-		conversion_factor = get_uom_conv_factor(uom, stock_uom)
-	return {"conversion_factor": conversion_factor or 1.0}
+		stock_uom = item.stock_uom
+		item_uoms = [stock_uom] + [cuom for cuom, cf in item_conversion_factors.items() if cuom != stock_uom and flt(cf)]
+
+		for item_uom in item_uoms:
+			conversion_factor = flt(get_uom_conv_factor(uom, item_uom))
+			if conversion_factor:
+				if item_uom != stock_uom:
+					# apply item_uom -> stock_uom conversion factor and then exit loop
+					conversion_factor *= flt(item_conversion_factors.get(item_uom))
+				break
+
+	return frappe._dict({
+		"conversion_factor": conversion_factor or 1.0,
+		"not_convertible": 1 if not conversion_factor else 0
+	})
 
 @frappe.whitelist()
 def get_projected_qty(item_code, warehouse):

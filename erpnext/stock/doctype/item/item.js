@@ -861,8 +861,8 @@ frappe.ui.form.on("UOM Conversion Detail", {
 			frappe.call({
 				method: "erpnext.stock.doctype.item.item.get_uom_conv_factor",
 				args: {
-					"uom": row.uom,
-					"stock_uom": frm.doc.stock_uom
+					"from_uom": row.uom,
+					"to_uom": frm.doc.stock_uom
 				},
 				callback: function(r) {
 					if (!r.exc && r.message) {

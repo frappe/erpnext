@@ -11,6 +11,7 @@ import copy
 from erpnext.controllers.item_variant import (ItemVariantExistsError,
 		copy_attributes_to_variant, get_variant, make_variant_item_code, validate_item_variant_attributes)
 from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
+from erpnext.setup.doctype.uom_conversion_factor.uom_conversion_factor import UOMConversionGraph
 from frappe import _, msgprint, unscrub
 from frappe.utils import (cint, cstr, flt, formatdate, get_timestamp, getdate,
 						  now_datetime, random_string, strip, get_link_to_form, clean_whitespace)
@@ -481,40 +482,6 @@ class Item(WebsiteGenerator):
 		context.metatags['og:site_name'] = 'ERPNext'
 
 	def calculate_uom_conversion_factors(self):
-		# Modified version of https://www.geeksforgeeks.org/find-paths-given-source-destination/
-		class Graph:
-			def __init__(self, vertices):
-				from collections import defaultdict
-				self.V = vertices
-				self.graph = defaultdict(list)
-
-			def add_edge(self, src, dest, weight):
-				self.graph[src].append((dest, weight))
-
-			def get_all_paths_util(self, src, d, visited, path, all_paths, weight):
-				# Mark the current node as visited and store in path
-				visited[src] = True
-				path.append((src, weight))
-
-				# If current vertex is same as destination, then print current path[]
-				if src == d:
-					all_paths.append(path[:])
-				else:  # If current vertex is not destination Recur for all the vertices adjacent to this vertex
-					for i, weight in self.graph[src]:
-						if not visited[i]:
-							self.get_all_paths_util(i, d, visited, path, all_paths, weight)
-
-				# Remove current vertex from path[] and mark it as unvisited
-				path.pop()
-				visited[src] = False
-
-			def get_all_paths(self, s, d):
-				visited = [False] * self.V
-				all_paths = []
-				path = []
-				self.get_all_paths_util(s, d, visited, path, all_paths, 1.0)
-				return all_paths
-
 		# Get list of all UOMs, stock UOM being index 0
 		uoms = [self.stock_uom]
 		for d in self.uom_conversion_graph:
@@ -529,8 +496,8 @@ class Item(WebsiteGenerator):
 			if predefined_conv_factor:
 				input_conv_factor = flt(d.to_qty) / flt(d.from_qty)
 				if abs(predefined_conv_factor - input_conv_factor) > 0.1/10**self.precision("conversion_factor", "uoms"):
-					frappe.msgprint("Row {0}: Setting conversion quantities from {1} to {2} from UOM Conversion Factor"
-						.format(d.idx, d.from_uom, d.to_uom), alert=True)
+					frappe.msgprint("Row {0}: Setting conversion quantities for {1} -> {2} from Global UOM Conversion Factor"
+						.format(d.idx, frappe.bold(d.from_uom), frappe.bold(d.to_uom)), alert=True)
 					if abs(predefined_conv_factor) >= 1:
 						d.from_qty = 1
 						d.to_qty = flt(predefined_conv_factor, self.precision("to_qty", "uom_conversion_graph"))
@@ -544,39 +511,23 @@ class Item(WebsiteGenerator):
 				uoms.append(d.to_uom)
 
 		# Create a graph of UOMs
-		graph = Graph(len(uoms))
+		graph = UOMConversionGraph()
 		for d in self.uom_conversion_graph:
-			src = uoms.index(d.from_uom)
-			dest = uoms.index(d.to_uom)
-			w = flt(d.from_qty) / flt(d.to_qty)
-			graph.add_edge(src, dest, 1/w)
-			graph.add_edge(dest, src, w)
+			w = flt(d.to_qty) / flt(d.from_qty)
+			graph.add_conversion(d.from_uom, d.to_uom, w)
 
 		# Get paths from all UOMs to stock UOM
 		uom_conversion_factors = {}
-		for uom_idx in range(1, len(uoms)):
-			uom = uoms[uom_idx]
-			paths = graph.get_all_paths(uom_idx, 0)
-			if not paths:
-				frappe.throw(_("No conversion factor can be found from {0} to {1}").format(uom, self.stock_uom))
+		for from_uom in uoms:
+			if from_uom == self.stock_uom:
+				continue
 
-			# calculate the net conversion factor for each uom considering all paths
-			weights = [1] * len(paths)
-			for path_idx, path in enumerate(paths):
-				for d in path:
-					weights[path_idx] *= d[1]
-
-			# if there are multiple paths, make sure their conversion_factors are the same
-			conv = weights[0]
-			for w in weights:
-				if abs(w-conv) > 0.1/10**self.precision("conversion_factor", "uoms"):
-					frappe.throw(_("Multiple conversion factors found from {0} to {1}")
-						.format(uom, self.stock_uom), ConflictingConversionFactors)
-
+			conv = graph.get_conversion_factor(from_uom, self.stock_uom,
+				validate_not_convertible=True, validate_multiple_conversion=True, raise_exception=True)
 			if not conv:
-				frappe.throw(_("Conversion factor for UOM {0} is 0").format(uom))
+				frappe.throw(_("Conversion factor for UOM {0} is 0").format(from_uom))
 
-			uom_conversion_factors[uom] = conv
+			uom_conversion_factors[from_uom] = conv
 
 		# Set Stock UOM's conversion_factor 1
 		if self.stock_uom not in uom_conversion_factors:
@@ -594,9 +545,9 @@ class Item(WebsiteGenerator):
 			self.remove(d)
 
 		existing_uoms = [d.uom for d in self.uoms]
-		for uom, conversion_factor in iteritems(uom_conversion_factors):
-			if uom not in existing_uoms:
-				self.append('uoms', {'uom': uom, 'conversion_factor': conversion_factor})
+		for from_uom, conversion_factor in iteritems(uom_conversion_factors):
+			if from_uom not in existing_uoms:
+				self.append('uoms', {'uom': from_uom, 'conversion_factor': conversion_factor})
 
 	def add_alt_uom_in_conversion_table(self):
 		uom_conv_list = [(d.from_uom, d.to_uom) for d in self.get("uom_conversion_graph")]
@@ -1315,50 +1266,34 @@ def set_item_default(item_code, company, fieldname, value):
 	item.clear_cache()
 
 @frappe.whitelist()
-def get_uom_conv_factor(uom, stock_uom):
-	uoms = [uom, stock_uom]
-	value = ""
-	uom_details = frappe.db.sql("""select to_uom, from_uom, value from `tabUOM Conversion Factor`\
-		where to_uom in ({0})
-		""".format(', '.join([frappe.db.escape(i, percent=False) for i in uoms])), as_dict=True)
-
-	for d in uom_details:
-		if d.from_uom == stock_uom and d.to_uom == uom:
-			value = 1/flt(d.value)
-		elif d.from_uom == uom and d.to_uom == stock_uom:
-			value = d.value
-
-	if not value:
-		uom_stock = frappe.db.get_value("UOM Conversion Factor", {"to_uom": stock_uom}, ["from_uom", "value"], as_dict=1)
-		uom_row = frappe.db.get_value("UOM Conversion Factor", {"to_uom": uom}, ["from_uom", "value"], as_dict=1)
-
-		if uom_stock and uom_row:
-			if uom_stock.from_uom == uom_row.from_uom:
-				value = flt(uom_stock.value) * 1/flt(uom_row.value)
-
-	return value
+def get_uom_conv_factor(from_uom, to_uom):
+	from erpnext.setup.doctype.uom_conversion_factor.uom_conversion_factor import get_uom_conv_factor
+	return get_uom_conv_factor(from_uom, to_uom)
 
 @frappe.whitelist()
 def convert_item_uom_for(value, item_code, from_uom=None, to_uom=None, conversion_factor=None, null_if_not_convertible=False):
+	from erpnext.stock.get_item_details import get_conversion_factor
+
 	value = flt(value)
 	conversion_factor = flt(conversion_factor)
 
 	if cstr(from_uom) != cstr(to_uom):
-		item = frappe.get_cached_doc("Item", item_code)
-		uom_conversion_factors = dict([(c.uom, c.conversion_factor) for c in item.uoms])
-		from_uom = from_uom or item.stock_uom
+		from_uom = from_uom or frappe.get_cached_value("Item", item_code, 'stock_uom')
 
-		if from_uom in uom_conversion_factors:
-			value /= uom_conversion_factors.get(from_uom)
-		elif null_if_not_convertible:
+		from_stock_uom_conversion = get_conversion_factor(item_code, from_uom)
+		if from_stock_uom_conversion.get('not_convertible') and null_if_not_convertible:
 			return None
+
+		value /= flt(from_stock_uom_conversion.get('conversion_factor'))
 
 		if conversion_factor:
 			value *= conversion_factor
-		elif to_uom and to_uom in uom_conversion_factors:
-			value *= uom_conversion_factors.get(to_uom)
-		elif null_if_not_convertible:
-			return None
+		else:
+			to_uom_conversion = get_conversion_factor(item_code, to_uom)
+			if to_uom_conversion.get('not_convertible') and null_if_not_convertible:
+				return None
+
+			value *= flt(to_uom_conversion.get('conversion_factor'))
 
 	return value
 
