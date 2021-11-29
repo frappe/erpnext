@@ -644,42 +644,43 @@ erpnext.utils.map_current_doc = function(opts) {
 					return;
 				}
 			}
+			else {
+				// search in existing items if the source_name is already set and full qty fetched
+				var already_set = false;
+				var item_qty_map = {};
 
-			// search in existing items if the source_name is already set and full qty fetched
-			var already_set = false;
-			var item_qty_map = {};
-
-			$.each(cur_frm.doc.items, function(i, d) {
-				opts.source_name.forEach(function(src) {
-					if(d[link_fieldname]==src) {
-						already_set = true;
-						if (item_qty_map[d.item_code])
-							item_qty_map[d.item_code] += flt(d.qty);
-						else
-							item_qty_map[d.item_code] = flt(d.qty);
-					}
+				$.each(cur_frm.doc.items, function(i, d) {
+					opts.source_name.forEach(function(src) {
+						if(d[link_fieldname]==src) {
+							already_set = true;
+							if (item_qty_map[d.item_code])
+								item_qty_map[d.item_code] += flt(d.qty);
+							else
+								item_qty_map[d.item_code] = flt(d.qty);
+						}
+					});
 				});
-			});
 
-			if(already_set) {
-				opts.source_name.forEach(function(src) {
-					frappe.model.with_doc(opts.source_doctype, src, function(r) {
-						var source_doc = frappe.model.get_doc(opts.source_doctype, src);
-						$.each(source_doc.items || [], function(i, row) {
-							if(row.qty > flt(item_qty_map[row.item_code])) {
-								already_set = false;
-								return false;
-							}
+				if(already_set) {
+					opts.source_name.forEach(function(src) {
+						frappe.model.with_doc(opts.source_doctype, src, function(r) {
+							var source_doc = frappe.model.get_doc(opts.source_doctype, src);
+							$.each(source_doc.items || [], function(i, row) {
+								if(row.qty > flt(item_qty_map[row.item_code])) {
+									already_set = false;
+									return false;
+								}
+							})
 						})
+
+						if(already_set) {
+							frappe.msgprint(__("You have already selected items from {0} {1}",
+								[opts.source_doctype, src]));
+							return;
+						}
+
 					})
-
-					if(already_set) {
-						frappe.msgprint(__("You have already selected items from {0} {1}",
-							[opts.source_doctype, src]));
-						return;
-					}
-
-				})
+				}
 			}
 		}
 
@@ -690,7 +691,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			method: 'frappe.model.mapper.map_docs',
 			args: {
 				"method": opts.method,
-				"source_names": opts.source_name,
+				"source_names": [opts.source_name[0]],
 				"target_doc": cur_frm.doc,
 				"args": opts.args
 			},
