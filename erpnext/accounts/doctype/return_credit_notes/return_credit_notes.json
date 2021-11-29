@@ -245,7 +245,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "000-002-06-.########",
+   "options": "SSM 000-002-06-########\nDMD 000-002-06-########",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -1853,7 +1853,7 @@
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2021-11-27 09:59:48.580264",
+ "modified": "2021-11-29 10:14:55.798276",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Return credit notes",
