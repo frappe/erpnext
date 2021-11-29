@@ -691,7 +691,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			method: 'frappe.model.mapper.map_docs',
 			args: {
 				"method": opts.method,
-				"source_names": [opts.source_name[0]],
+				"source_names": opts.source_name,
 				"target_doc": cur_frm.doc,
 				"args": opts.args
 			},
