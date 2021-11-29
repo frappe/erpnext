@@ -47,7 +47,7 @@ def create_qr_code(doc, method):
 				'company_name_in_arabic')
 
 			if not seller_name:
-				frappe.throw(_('Arabic name missing for {} in the company document'.format(doc.company)))
+				frappe.throw(_('Arabic name missing for {} in the company document').format(doc.company))
 
 			tag = bytes([1]).hex()
 			length = bytes([len(seller_name.encode('utf-8'))]).hex()
@@ -57,7 +57,7 @@ def create_qr_code(doc, method):
 			# VAT Number
 			tax_id = frappe.db.get_value('Company', doc.company, 'tax_id')
 			if not tax_id:
-				frappe.throw(_('Tax ID missing for {} in the company document'.format(doc.company)))
+				frappe.throw(_('Tax ID missing for {} in the company document').format(doc.company))
 
 			tag = bytes([2]).hex()
 			length = bytes([len(tax_id)]).hex()
