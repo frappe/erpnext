@@ -597,7 +597,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							frappe.run_serially([
 								() => {
 									var d = locals[cdt][cdn];
-									me.add_taxes_from_item_tax_template(d.item_tax_rate);
+									// me.add_taxes_from_item_tax_template(d.item_tax_rate);
 									if (d.free_item_data) {
 										me.apply_product_discount(d);
 									}
@@ -735,25 +735,25 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 	}
 
-	add_taxes_from_item_tax_template(item_tax_map) {
-		let me = this;
+	// add_taxes_from_item_tax_template(item_tax_map) {
+	// 	let me = this;
 
-		if(item_tax_map && cint(frappe.defaults.get_default("add_taxes_from_item_tax_template"))) {
-			if(typeof (item_tax_map) == "string") {
-				item_tax_map = JSON.parse(item_tax_map);
-			}
+	// 	if(item_tax_map && cint(frappe.defaults.get_default("add_taxes_from_item_tax_template"))) {
+	// 		if(typeof (item_tax_map) == "string") {
+	// 			item_tax_map = JSON.parse(item_tax_map);
+	// 		}
 
-			$.each(item_tax_map, function(tax, rate) {
-				let found = (me.frm.doc.taxes || []).find(d => d.account_head === tax);
-				if(!found) {
-					let child = frappe.model.add_child(me.frm.doc, "taxes");
-					child.charge_type = "On Net Total";
-					child.account_head = tax;
-					child.rate = 0;
-				}
-			});
-		}
-	}
+	// 		$.each(item_tax_map, function(tax, rate) {
+	// 			let found = (me.frm.doc.taxes || []).find(d => d.account_head === tax);
+	// 			if(!found) {
+	// 				let child = frappe.model.add_child(me.frm.doc, "taxes");
+	// 				child.charge_type = "On Net Total";
+	// 				child.account_head = tax;
+	// 				child.rate = 0;
+	// 			}
+	// 		});
+	// 	}
+	// }
 
 	serial_no(doc, cdt, cdn) {
 		var me = this;
@@ -862,7 +862,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 				frappe.run_serially([
 					() => me.frm.script_manager.trigger("currency"),
-					() => me.update_item_tax_map(),
+					// () => me.update_item_tax_map(),
 					() => me.apply_default_taxes(),
 					() => me.apply_pricing_rule()
 				]);
@@ -1816,50 +1816,50 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if(me.frm.updating_party_details) return;
 
 		frappe.run_serially([
-			() => this.update_item_tax_map(),
+			// () => this.update_item_tax_map(),
 			() => erpnext.utils.set_taxes(this.frm, "tax_category"),
 		]);
 	}
 
-	update_item_tax_map() {
-		let me = this;
-		let item_codes = [];
-		let item_rates = {};
-		let item_tax_templates = {};
+	// update_item_tax_map() {
+	// 	let me = this;
+	// 	let item_codes = [];
+	// 	let item_rates = {};
+	// 	let item_tax_templates = {};
 
-		$.each(this.frm.doc.items || [], function(i, item) {
-			if (item.item_code) {
-				// Use combination of name and item code in case same item is added multiple times
-				item_codes.push([item.item_code, item.name]);
-				item_rates[item.name] = item.net_rate;
-				item_tax_templates[item.name] = item.item_tax_template;
-			}
-		});
+	// 	$.each(this.frm.doc.items || [], function(i, item) {
+	// 		if (item.item_code) {
+	// 			// Use combination of name and item code in case same item is added multiple times
+	// 			item_codes.push([item.item_code, item.name]);
+	// 			item_rates[item.name] = item.net_rate;
+	// 			item_tax_templates[item.name] = item.item_tax_template;
+	// 		}
+	// 	});
 
-		if (item_codes.length) {
-			return this.frm.call({
-				method: "erpnext.stock.get_item_details.get_item_tax_info",
-				args: {
-					company: me.frm.doc.company,
-					tax_category: cstr(me.frm.doc.tax_category),
-					item_codes: item_codes,
-					item_rates: item_rates,
-					item_tax_templates: item_tax_templates
-				},
-				callback: function(r) {
-					if (!r.exc) {
-						$.each(me.frm.doc.items || [], function(i, item) {
-							if (item.name && r.message.hasOwnProperty(item.name) && r.message[item.name].item_tax_template) {
-								item.item_tax_template = r.message[item.name].item_tax_template;
-								item.item_tax_rate = r.message[item.name].item_tax_rate;
-								me.add_taxes_from_item_tax_template(item.item_tax_rate);
-							}
-						});
-					}
-				}
-			});
-		}
-	}
+	// 	if (item_codes.length) {
+	// 		return this.frm.call({
+	// 			method: "erpnext.stock.get_item_details.get_item_tax_info",
+	// 			args: {
+	// 				company: me.frm.doc.company,
+	// 				tax_category: cstr(me.frm.doc.tax_category),
+	// 				item_codes: item_codes,
+	// 				item_rates: item_rates,
+	// 				item_tax_templates: item_tax_templates
+	// 			},
+	// 			callback: function(r) {
+	// 				if (!r.exc) {
+	// 					$.each(me.frm.doc.items || [], function(i, item) {
+	// 						if (item.name && r.message.hasOwnProperty(item.name) && r.message[item.name].item_tax_template) {
+	// 							item.item_tax_template = r.message[item.name].item_tax_template;
+	// 							item.item_tax_rate = r.message[item.name].item_tax_rate;
+	// 							me.add_taxes_from_item_tax_template(item.item_tax_rate);
+	// 						}
+	// 					});
+	// 				}
+	// 			}
+	// 		});
+	// 	}
+	// }
 
 	item_tax_template(doc, cdt, cdn) {
 		var me = this;

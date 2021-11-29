@@ -467,7 +467,7 @@ def get_item_tax_info(company, tax_category, item_codes, item_rates=None, item_t
 		item_tax_templates = json.loads(item_tax_templates)
 
 	for item_code in item_codes:
-		if not item_code or item_code[1] in out or not item_tax_templates.get(item_code[1]):
+		if not item_code or item_code[1] in out:
 			continue
 
 		out[item_code[1]] = {}
