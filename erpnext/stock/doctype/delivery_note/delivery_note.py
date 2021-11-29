@@ -128,8 +128,12 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
 
-		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-		make_packing_list(self)
+		# Keeps mapped packed_items in case product bundle is updated.
+		if self.is_return and self.return_against:
+			self.calculate_mapped_packed_items_return()
+		else:
+			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+			make_packing_list(self)
 
 		if self._action != 'submit' and not self.is_return:
 			set_batch_nos(self, 'warehouse', throw=True)
@@ -331,6 +335,15 @@ class DeliveryNote(SellingController):
 			frappe.msgprint(_("Credit Note {0} has been created automatically").format(credit_note_link))
 		except Exception:
 			frappe.throw(_("Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"))
+
+	def calculate_mapped_packed_items_return(self):
+		parent_items = set([item.parent_item for item in self.packed_items])
+		dn = frappe.get_doc(self.doctype, self.return_against)
+		for d_item, item in zip(dn.items, self.items):
+			if d_item.item_code in parent_items:
+				for p_item, d_p_item in zip(self.packed_items, dn.packed_items):
+					p_item.parent_detail_docname = item.name
+					p_item.qty = (d_p_item.qty / d_item.qty) * item.qty
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
 	# Billed against Sales Order directly
