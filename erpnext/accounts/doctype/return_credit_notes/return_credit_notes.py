@@ -9,7 +9,6 @@ from frappe import _
 from datetime import datetime, timedelta, date
 from frappe.model.naming import parse_naming_series
 from frappe.utils.data import money_in_words
-from datetime import datetime
 
 class Returncreditnotes(Document):
 	def before_insert(self):
@@ -249,6 +248,7 @@ class Returncreditnotes(Document):
 					doc = frappe.get_doc("Bin", bin.name)
 					doc.actual_qty += item.qty
 					doc.db_set('actual_qty', doc.actual_qty, update_modified=False)
+					self.create_stock_ledger_entry(item, doc.actual_qty, 0)
 	
 	def delete_bin(self):
 		items = frappe.get_all("Return credit notes Item", ["*"], filters = {"parent": self.name})
@@ -261,6 +261,7 @@ class Returncreditnotes(Document):
 					doc = frappe.get_doc("Bin", bin.name)
 					doc.actual_qty -= item.qty
 					doc.db_set('actual_qty', doc.actual_qty, update_modified=False)
+					self.create_stock_ledger_entry(item, doc.actual_qty, 1)
 	
 	def apply_gl_entry(self):
 		entrys = frappe.get_all("GL Entry", ["*"], filters = {"voucher_no": self.sale_invoice})
@@ -334,4 +335,45 @@ class Returncreditnotes(Document):
 			doc = frappe.get_doc("GL Entry", entry.name)
 			doc.db_set('docstatus', 0, update_modified=False)
 
-			frappe.delete_doc("GL Entry", entry.name)		
+			frappe.delete_doc("GL Entry", entry.name)	
+
+	def create_stock_ledger_entry(self, item, qty, delete):
+		qty_item = 0
+
+		if delete == 1:
+			qty_item = item.qty - (item.qty * 2)
+		else:
+			qty_item = item.qty
+
+		currentDateTime = datetime.now()
+		date = currentDateTime.date()
+		year = date.strftime("%Y")
+
+		fecha_inicial = '01-01-{}'.format(year)
+		fecha_final = '31-12-{}'.format(year)
+		fecha_i = datetime.strptime(fecha_inicial, '%d-%m-%Y')
+		fecha_f = datetime.strptime(fecha_final, '%d-%m-%Y')
+
+		año_fiscal = frappe.get_all("Fiscal Year", ["*"], filters = {"year_start_date": [">=", fecha_i], "year_end_date": ["<=", fecha_f]})
+
+		doc = frappe.new_doc("Stock Ledger Entry")
+		doc.item_code = item.item_code
+		doc.batch_no = item.batch_no
+		doc.warehouse = item.warehouse
+		doc.serial_no = item.serial_no
+		doc.posting_date = self.posting_date
+		doc.posting_time = self.posting_time
+		doc.voucher_type =  self.doctype
+		doc.voucher_no = self.name
+		doc.voucher_detail_no = self.name
+		doc.actual_qty = qty_item
+		doc.incoming_rate = 0
+		doc.outgoing_rate = 0
+		doc.stock_uom = item.stock_uom
+		doc.qty_after_transaction = qty
+		doc.valuation_rate = item.rate
+		doc.stock_value = qty * item.rate
+		doc.stock_value_difference = qty_item * item.rate
+		doc.company = self.company
+		doc.fiscal_year = año_fiscal[0].name
+		doc.insert()
