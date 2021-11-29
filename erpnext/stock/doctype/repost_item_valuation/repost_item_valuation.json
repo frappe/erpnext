@@ -64,7 +64,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Queued\nIn Progress\nCompleted\nFailed",
+   "options": "Queued\nIn Progress\nCompleted\nSkipped\nFailed",
    "read_only": 1
   },
   {
@@ -177,10 +177,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-22 18:59:43.057878",
+ "modified": "2021-11-24 02:18:10.524560",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -206,27 +207,12 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Stock User",
-   "share": 1,
-   "submit": 1,
-   "write": 1
-  },
-  {
-   "cancel": 1,
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
    "role": "Stock Manager",
    "share": 1,
    "submit": 1,
    "write": 1
   },
   {
-   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -234,7 +220,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Accounts User",
+   "role": "Accounts Manager",
    "share": 1,
    "submit": 1,
    "write": 1
