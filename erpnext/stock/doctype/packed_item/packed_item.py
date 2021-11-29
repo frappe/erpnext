@@ -45,7 +45,7 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 	# check if exists
 	exists = 0
 	for d in doc.get("packed_items"):
-		if d.parent_item == main_item_row.item_code and d.item_code == packing_item_code:
+		if d.item_code == packing_item_code:
 			if d.parent_detail_docname != main_item_row.name:
 				d.parent_detail_docname = main_item_row.name
 			pi, exists = d, 1
