@@ -90,16 +90,12 @@ frappe.ui.form.on("Dunning", {
 				args: { name: frm.doc.company, existing_address: frm.doc.company_address || "" },
 				debounce: 2000,
 				callback: function (r) {
-					if (r.message) {
-						frm.set_value("company_address", r.message);
-					} else {
-						frm.set_value("company_address", "");
-					}
+					frm.set_value("company_address", r && r.message || "");
 				}
 			});
 
 			if (frm.fields_dict.currency) {
-				var company_currency = erpnext.get_currency(frm.doc.company);
+				const company_currency = erpnext.get_currency(frm.doc.company);
 
 				if (!frm.doc.currency) {
 					frm.set_value("currency", company_currency);
@@ -110,7 +106,7 @@ frappe.ui.form.on("Dunning", {
 				}
 			}
 
-			var company_doc = frappe.get_doc(":Company", frm.doc.company);
+			const company_doc = frappe.get_doc(":Company", frm.doc.company);
 			if (company_doc.default_letter_head) {
 				if (frm.fields_dict.letter_head) {
 					frm.set_value("letter_head", company_doc.default_letter_head);
@@ -120,7 +116,7 @@ frappe.ui.form.on("Dunning", {
 	},
 	currency: function (frm) {
 		// this.set_dynamic_labels();
-		var company_currency = erpnext.get_currency(frm.doc.company);
+		const company_currency = erpnext.get_currency(frm.doc.company);
 		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
 		if (frm.doc.currency && frm.doc.currency !== company_currency) {
 			frappe.call({
