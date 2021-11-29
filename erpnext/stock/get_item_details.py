@@ -247,14 +247,16 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			args.get('name'), 'material_request_type', cache=True)
 
 	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
-	if not args.get('uom'):
-		if args.get('doctype') in sales_doctypes:
-			args.uom = item.sales_uom if item.sales_uom else item.stock_uom
-		elif (args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']) or \
+	if args.get('doctype') in sales_doctypes:
+		default_uom = item.sales_uom if item.sales_uom else item.stock_uom
+	elif (args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']) or \
 			(args.get('doctype') == 'Material Request' and args.get('material_request_type') == 'Purchase'):
-			args.uom = item.purchase_uom if item.purchase_uom else item.stock_uom
-		else:
-			args.uom = item.stock_uom
+		default_uom = item.purchase_uom if item.purchase_uom else item.stock_uom
+	else:
+		default_uom = item.stock_uom
+
+	if not args.get('uom'):
+		args.uom = default_uom
 
 	out = frappe._dict({
 		"item_code": item.name,
@@ -267,7 +269,8 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		'has_batch_no': item.has_batch_no,
 		'is_vehicle': item.is_vehicle,
 		"batch_no": args.get("batch_no") if args.get("batch_no") and frappe.db.get_value("Batch", args.get("batch_no"), 'item') == item.name else "",
-		"uom": args.uom,
+		"stock_uom": item.stock_uom,
+		"uom": default_uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
 		"qty": flt(args.qty) or 1.0,
 		"stock_qty": flt(args.qty) or 1.0,
@@ -298,10 +301,16 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 
 	# calculate conversion factor
 	if item.stock_uom == args.uom:
+		out.uom = args.uom
 		out.conversion_factor = 1.0
 	else:
-		out.conversion_factor = args.conversion_factor or \
-			get_conversion_factor(item.name, args.uom).get("conversion_factor")
+		conversion = get_conversion_factor(item.name, args.uom)
+		if conversion.get('not_convertible'):
+			out.uom = default_uom
+			out.conversion_factor = flt(get_conversion_factor(item.name, args.uom).get("conversion_factor")) or 1
+		else:
+			out.uom = args.uom
+			out.conversion_factor = flt(conversion.get("conversion_factor"))
 
 	args.conversion_factor = out.conversion_factor
 	out.stock_qty = out.qty * out.conversion_factor

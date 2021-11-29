@@ -589,6 +589,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 		if(d.item_code) {
 			var args = {
 				'item_code'			: d.item_code,
+				'uom'				: d.uom,
 				'hide_item_code'	: d.hide_item_code,
 				'warehouse'			: cstr(d.s_warehouse) || cstr(d.t_warehouse),
 				'transfer_qty'		: d.transfer_qty,
@@ -709,6 +710,16 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				}
 			}
 		}
+
+		this.frm.set_query("uom", "items", function(doc, cdt, cdn) {
+			var d = locals[cdt][cdn];
+			return {
+				query : "erpnext.controllers.queries.item_uom_query",
+				filters: {
+					item_code: d.item_code
+				}
+			}
+		});
 
 		this.frm.set_indicator_formatter('item_code', function(doc, parent) {
 			if (!doc.s_warehouse) {

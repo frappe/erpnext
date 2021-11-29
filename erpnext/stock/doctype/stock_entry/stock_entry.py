@@ -905,8 +905,11 @@ class StockEntry(StockController):
 			ret["allow_alternative_item"] = item.allow_alternative_item
 
 		# update uom
-		if args.get("uom") and for_update:
-			ret.update(get_uom_details(args.get('item_code'), args.get('uom'), args.get('qty')))
+		if args.get("uom"):
+			uom_details = get_uom_details(args.get('item_code'), args.get('uom'), args.get('qty'))
+			if not uom_details.get('not_convertible'):
+				ret['uom'] = args.get("uom")
+				ret.update(uom_details)
 
 		company_copy_fields = {
 			'stock_adjustment_account': 'expense_account',
@@ -1651,7 +1654,9 @@ def get_uom_details(item_code, uom, qty):
 	"""Returns dict `{"conversion_factor": [value], "transfer_qty": qty * [value]}`
 
 	:param args: dict with `item_code`, `uom` and `qty`"""
-	conversion_factor = get_conversion_factor(item_code, uom).get("conversion_factor")
+	conversion = get_conversion_factor(item_code, uom)
+	conversion_factor = flt(conversion.get("conversion_factor"))
+	not_convertible = cint(conversion.get('not_convertible'))
 
 	if not conversion_factor:
 		frappe.msgprint(_("UOM coversion factor required for UOM: {0} in Item: {1}")
@@ -1660,7 +1665,8 @@ def get_uom_details(item_code, uom, qty):
 	else:
 		ret = {
 			'conversion_factor'		: flt(conversion_factor),
-			'transfer_qty'			: flt(qty) * flt(conversion_factor)
+			'transfer_qty'			: flt(qty) * flt(conversion_factor),
+			'not_convertible'		: not_convertible
 		}
 	return ret
 
