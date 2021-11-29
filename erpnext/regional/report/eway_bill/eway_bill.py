@@ -1,7 +1,6 @@
 # Copyright (c) 2013, FinByz Tech Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 import re
@@ -107,14 +106,14 @@ def set_address_details(row, special_characters):
 		row.update({'ship_to_state': row.to_state})
 
 def set_taxes(row, filters):
-	taxes = frappe.get_list("Sales Taxes and Charges",
+	taxes = frappe.get_all("Sales Taxes and Charges",
 				filters={
 					'parent': row.dn_id
 				},
 				fields=('item_wise_tax_detail', 'account_head'))
 
 	account_list = ["cgst_account", "sgst_account", "igst_account", "cess_account"]
-	taxes_list = frappe.get_list("GST Account",
+	taxes_list = frappe.get_all("GST Account",
 		filters={
 			"parent": "GST Settings",
 			"company": filters.company
