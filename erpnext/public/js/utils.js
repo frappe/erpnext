@@ -683,22 +683,6 @@ erpnext.utils.map_current_doc = function(opts) {
 			}
 		}
 
-		// if(true) {
-		// 	$.each(cur_frm.doc.items, (parent_idx, parent_val) => {
-		// 		$.each(opts.args.filtered_children, (child_idx, child_val) => {
-		// 			if(parent_val[link_fieldname + "_item"] == child_val) {
-		// 				opts.args.filtered_children.splice(child_idx, 1);
-		// 				frappe.msgprint(__("You have already selected item {0}", 
-		// 					[parent_val["item_code"]]));
-		// 			}
-		// 		});
-		// 	});
-
-		// 	if(opts.args.filtered_children.length < 1) {
-		// 		return;
-		// 	}
-		// }
-
 		return frappe.call({
 			// Sometimes we hit the limit for URL length of a GET request
 			// as we send the full target_doc. Hence this is a POST request.
