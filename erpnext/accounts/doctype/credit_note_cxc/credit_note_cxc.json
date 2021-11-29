@@ -40,7 +40,7 @@
    "fieldtype": "Select",
    "label": "Series",
    "no_copy": 1,
-   "options": "000-002-06-.########",
+   "options": "SSM 000-002-06-########\nDMD 000-002-06-########",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -213,7 +213,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-11-27 09:56:08.942526",
+ "modified": "2021-11-29 10:13:51.176222",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Credit Note CXC",
