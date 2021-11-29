@@ -3,7 +3,7 @@ erpnext.ProductSearch = class {
 		/* Options: search_box_class (for custom search box) */
 		$.extend(this, opts);
 		this.MAX_RECENT_SEARCHES = 4;
-		this.search_box_class = this.search_box_class || "#search-box"
+		this.search_box_class = this.search_box_class || "#search-box";
 		this.searchBox = $(this.search_box_class);
 
 		this.setupSearchDropDown();
