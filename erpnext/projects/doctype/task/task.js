@@ -14,6 +14,18 @@ frappe.ui.form.on("Task", {
 	},
 
 	onload: function (frm) {
+		let hide = false;
+		if (frm.doc.items.length > 0) {
+			frm.doc.items.forEach((item) => {
+				if (item.transferred > 0 | item.issued > 0) {
+					hide = true;
+				}
+			})
+			frm.toggle_display(["get_items"], hide == true ? 0 : 1);
+			frm.set_df_property("from_bom", "read_only", hide == true ? 1 : 0);
+			frm.set_df_property("qty", "read_only", hide == true ? 1 : 0);
+			frm.set_df_property("use_multi_level_bom", "read_only", hide == true ? 1 : 0);
+		}
 		frm.set_query("task", "depends_on", function () {
 			let filters = {
 				name: ["!=", frm.doc.name]

@@ -77,6 +77,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "default": "0",
    "fieldname": "issued",
    "fieldtype": "Float",
    "label": "Issued",
@@ -87,6 +88,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "transferred",
    "fieldtype": "Float",
    "label": "Transferred",
@@ -96,7 +98,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-11-17 15:43:04.799317",
+ "modified": "2021-11-29 11:15:55.821801",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task Item",
