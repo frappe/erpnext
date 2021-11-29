@@ -72,70 +72,70 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		if(doc.update_stock) this.show_stock_ledger();
 
-		if (doc.docstatus == 1 && doc.outstanding_amount!=0
-			&& !(cint(doc.is_return) && doc.return_against)) {
-			cur_frm.add_custom_button(__('Payment'),
-				this.make_payment_entry, __('Create'));
-			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
-		}
+		// if (doc.docstatus == 1 && doc.outstanding_amount!=0
+		// 	&& !(cint(doc.is_return) && doc.return_against)) {
+		// 	cur_frm.add_custom_button(__('Payment'),
+		// 		this.make_payment_entry, __('Create'));
+		// 	cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
+		// }
 
-		if(doc.docstatus==1 && !doc.is_return) {
+		// if(doc.docstatus==1 && !doc.is_return) {
 
-			var is_delivered_by_supplier = false;
+		// 	var is_delivered_by_supplier = false;
 
-			is_delivered_by_supplier = cur_frm.doc.items.some(function(item){
-				return item.is_delivered_by_supplier ? true : false;
-			})
+		// 	is_delivered_by_supplier = cur_frm.doc.items.some(function(item){
+		// 		return item.is_delivered_by_supplier ? true : false;
+		// 	})
 
-			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
-				cur_frm.add_custom_button(__('Return / Credit Note'),
-					this.make_sales_return, __('Create'));
-				cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
-			}
+		// 	if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
+		// 		cur_frm.add_custom_button(__('Return / Credit Note'),
+		// 			this.make_sales_return, __('Create'));
+		// 		cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
+		// 	}
 
-			if(cint(doc.update_stock)!=1) {
-				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
-				var from_delivery_note = false;
-				from_delivery_note = cur_frm.doc.items
-					.some(function(item) {
-						return item.delivery_note ? true : false;
-					});
+		// 	if(cint(doc.update_stock)!=1) {
+		// 		// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
+		// 		var from_delivery_note = false;
+		// 		from_delivery_note = cur_frm.doc.items
+		// 			.some(function(item) {
+		// 				return item.delivery_note ? true : false;
+		// 			});
 
-				if(!from_delivery_note && !is_delivered_by_supplier) {
-					cur_frm.add_custom_button(__('Delivery'),
-						cur_frm.cscript['Make Delivery Note'], __('Create'));
-				}
-			}
+		// 		if(!from_delivery_note && !is_delivered_by_supplier) {
+		// 			cur_frm.add_custom_button(__('Delivery'),
+		// 				cur_frm.cscript['Make Delivery Note'], __('Create'));
+		// 		}
+		// 	}
 
-			if (doc.outstanding_amount>0) {
-				cur_frm.add_custom_button(__('Payment Request'), function() {
-					me.make_payment_request();
-				}, __('Create'));
+		// 	if (doc.outstanding_amount>0) {
+		// 		cur_frm.add_custom_button(__('Payment Request'), function() {
+		// 			me.make_payment_request();
+		// 		}, __('Create'));
 
-				cur_frm.add_custom_button(__('Invoice Discounting'), function() {
-					cur_frm.events.create_invoice_discounting(cur_frm);
-				}, __('Create'));
-			}
+		// 		cur_frm.add_custom_button(__('Invoice Discounting'), function() {
+		// 			cur_frm.events.create_invoice_discounting(cur_frm);
+		// 		}, __('Create'));
+		// 	}
 
-			if (doc.docstatus === 1) {
-				cur_frm.add_custom_button(__('Maintenance Schedule'), function () {
-					cur_frm.cscript.make_maintenance_schedule();
-				}, __('Create'));
-			}
+		// 	if (doc.docstatus === 1) {
+		// 		cur_frm.add_custom_button(__('Maintenance Schedule'), function () {
+		// 			cur_frm.cscript.make_maintenance_schedule();
+		// 		}, __('Create'));
+		// 	}
 
-			if(!doc.auto_repeat) {
-				cur_frm.add_custom_button(__('Subscription'), function() {
-					erpnext.utils.make_subscription(doc.doctype, doc.name)
-				}, __('Create'))
-			}
-		}
+		// 	if(!doc.auto_repeat) {
+		// 		cur_frm.add_custom_button(__('Subscription'), function() {
+		// 			erpnext.utils.make_subscription(doc.doctype, doc.name)
+		// 		}, __('Create'))
+		// 	}
+		// }
 
-		// Show buttons only when pos view is active
-		if (cint(doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !doc.is_return) {
-			this.frm.cscript.sales_order_btn();
-			this.frm.cscript.delivery_note_btn();
-			this.frm.cscript.quotation_btn();
-		}
+		// // Show buttons only when pos view is active
+		// if (cint(doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !doc.is_return) {
+		// 	this.frm.cscript.sales_order_btn();
+		// 	this.frm.cscript.delivery_note_btn();
+		// 	this.frm.cscript.quotation_btn();
+		// }
 
 		this.set_default_print_format();
 		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
@@ -143,11 +143,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				var customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
 				var internal = customer.is_internal_customer;
 				var disabled = customer.disabled;
-				if (internal == 1 && disabled == 0) {
-					me.frm.add_custom_button("Inter Company Invoice", function() {
-						me.make_inter_company_invoice();
-					}, __('Create'));
-				}
+				// if (internal == 1 && disabled == 0) {
+				// 	me.frm.add_custom_button("Inter Company Invoice", function() {
+				// 		me.make_inter_company_invoice();
+				// 	}, __('Create'));
+				// }
 			});
 		}
 	},
@@ -846,14 +846,14 @@ frappe.ui.form.on('Return credit notes', {
 			frm.set_df_property("patient", "hidden", 0);
 			frm.set_df_property("patient_name", "hidden", 0);
 			frm.set_df_property("ref_practitioner", "hidden", 0);
-			if (cint(frm.doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !frm.doc.is_return) {
-				frm.add_custom_button(__('Healthcare Services'), function() {
-					get_healthcare_services_to_invoice(frm);
-				},"Get items from");
-				frm.add_custom_button(__('Prescriptions'), function() {
-					get_drugs_to_invoice(frm);
-				},"Get items from");
-			}
+			// if (cint(frm.doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !frm.doc.is_return) {
+			// 	frm.add_custom_button(__('Healthcare Services'), function() {
+			// 		get_healthcare_services_to_invoice(frm);
+			// 	},"Get items from");
+			// 	frm.add_custom_button(__('Prescriptions'), function() {
+			// 		get_drugs_to_invoice(frm);
+			// 	},"Get items from");
+			// }
 		}
 		else{
 			frm.set_df_property("patient", "hidden", 1);
