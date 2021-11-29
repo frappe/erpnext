@@ -18,7 +18,11 @@ from frappe.model.rename_doc import update_linked_doctypes
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
 
-from erpnext.accounts.party import get_dashboard_info, validate_party_accounts
+from erpnext.accounts.party import (  # noqa
+	get_dashboard_info,
+	get_timeline_data,
+	validate_party_accounts,
+)
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -463,11 +467,14 @@ def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 
 
 def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, extra_amount=0):
+	credit_limit = get_credit_limit(customer, company)
+	if not credit_limit:
+		return
+
 	customer_outstanding = get_customer_outstanding(customer, company, ignore_outstanding_sales_order)
 	if extra_amount > 0:
 		customer_outstanding += flt(extra_amount)
 
-	credit_limit = get_credit_limit(customer, company)
 	if credit_limit > 0 and flt(customer_outstanding) > credit_limit:
 		msgprint(_("Credit limit has been crossed for customer {0} ({1}/{2})")
 			.format(customer, customer_outstanding, credit_limit))
