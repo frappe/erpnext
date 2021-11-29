@@ -106,10 +106,11 @@ class WebsiteItem(WebsiteGenerator):
 					make_website_item(template_item)
 
 	def validate_website_image(self):
+		"""Validate if the website image is a public file"""
+
 		if frappe.flags.in_import:
 			return
 
-		"""Validate if the website image is a public file"""
 		auto_set_website_image = False
 		if not self.website_image and self.image:
 			auto_set_website_image = True
