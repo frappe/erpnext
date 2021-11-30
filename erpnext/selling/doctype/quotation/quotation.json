@@ -927,8 +927,13 @@
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
+<<<<<<< HEAD
  "max_attachments": 1,
  "modified": "2020-08-12 23:35:13.621823",
+=======
+ "links": [],
+ "modified": "2021-11-30 01:33:21.106073",
+>>>>>>> aeb62af544 (fix(ux): remove attachment limits)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

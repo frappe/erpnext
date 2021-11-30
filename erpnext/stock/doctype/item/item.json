@@ -1067,8 +1067,12 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
+<<<<<<< HEAD
  "max_attachments": 1,
  "modified": "2021-03-18 11:24:58.384992",
+=======
+ "modified": "2021-11-30 01:33:06.572442",
+>>>>>>> aeb62af544 (fix(ux): remove attachment limits)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
