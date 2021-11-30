@@ -726,6 +726,7 @@
    "fieldtype": "Int",
    "hidden": 1,
    "label": "lft",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -733,6 +734,7 @@
    "fieldtype": "Int",
    "hidden": 1,
    "label": "rgt",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -813,11 +815,12 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2021-06-17 11:31:37.730760",
+ "modified": "2021-11-30 13:54:19.616448",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
  "name_case": "Title Case",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
