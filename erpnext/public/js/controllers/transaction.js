@@ -767,7 +767,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							weight_uom: item.weight_uom,
 							manufacturer: item.manufacturer,
 							stock_uom: item.stock_uom,
-							uom: item.uom,
 							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
 							cost_center: item.cost_center,
 							apply_discount_after_taxes: item.apply_discount_after_taxes,
