@@ -99,6 +99,8 @@ class POSInvoice(SalesInvoice):
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 			update_coupon_code_count(self.coupon_code,'cancelled')
+		self.update_credit_note(cancel=True)
+
 
 	def check_phone_payments(self):
 		for pay in self.payments:
@@ -476,33 +478,26 @@ class POSInvoice(SalesInvoice):
 			return frappe.get_doc('Payment Request', pr[0][0])
 
 	@frappe.whitelist()
-	def update_credit_note(self):
-		print('COME HERE',self.is_return,self.ignore_payments_for_return)
-		if self.is_return and self.ignore_payments_for_return :
-			return
+	def update_credit_note(self, cancel=False):
 		# pick out the mop with credit note
-		cn_mop = [x for x in self.payments if x.type == 'Credit Note'][0]
-		print('credit note1',cn_mop)
-		if cn_mop:
-			cn_inv = frappe.get_doc('POS Invoice',cn_mop.credit_note)
-			print('credit note2',cn_inv)
+		mop_dict = {p.type:p for p in self.payments}
+		cn_mop = mop_dict.get('Credit Note')
+		if not cn_mop:
+			return
+		cn_inv = frappe.get_doc('POS Invoice',cn_mop.credit_note)
 
-			if cn_inv.outstanding_amount :
-				print('credit note3',cn_inv.outstanding_amount)
-				update_cn_outstanding_amount(cn_inv, cn_mop, self.name)
+		if cn_inv.outstanding_amount :
+			update_cn_outstanding_amount(cn_inv, cn_mop, cancel=cancel)
 
 
-def update_cn_outstanding_amount(cn_inv, cn_mop, pos_inv):
-	print('flag',cn_inv.flags.ignore)
+def update_cn_outstanding_amount(cn_inv, cn_mop, cancel=False):
 	cn_inv.flags.ignore_validate_update_after_submit = True
-	outstanding_amount = cn_inv.outstanding_amount
-	cn_inv.outstanding_amount += cn_mop.amount
+	if not cancel:
+		cn_inv.outstanding_amount += flt(cn_mop.amount)
+	else:
+		cn_inv.outstanding_amount -= flt(cn_mop.amount)
+
 	cn_inv.save()
-
-	if cn_inv.outstanding_amount == (outstanding_amount+cn_mop.amount):
-		cn_inv.append("payments", dict(mode_of_payment=cn_mop.mode_of_payment,type=cn_mop.type, reference_credit_note=pos_inv))
-		cn_inv.save()
-
 	cn_inv.flags.ignore_validate_update_after_submit = False
 
 

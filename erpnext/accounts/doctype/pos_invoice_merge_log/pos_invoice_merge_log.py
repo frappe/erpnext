@@ -83,7 +83,11 @@ class POSInvoiceMergeLog(Document):
 		sales_invoice.is_consolidated = 1
 		sales_invoice.set_posting_time = 1
 		sales_invoice.posting_date = getdate(self.posting_date)
+		# print('ADVANCES BEFORE', sales_invoice.advances, sales_invoice.grand_total, sales_invoice.outstanding_amount)
 		sales_invoice.save()
+		if sales_invoice.advances:
+			print('ADVANCES', sales_invoice.advances, sales_invoice.grand_total, sales_invoice.outstanding_amount)
+		# frappe.throw('here')
 		sales_invoice.submit()
 
 		self.consolidated_invoice = sales_invoice.name
@@ -109,7 +113,7 @@ class POSInvoiceMergeLog(Document):
 		return credit_note.name
 
 	def merge_pos_invoice_into(self, invoice, data):
-		items, payments, taxes = [], [], []
+		items, payments, taxes, advances = [], [], [], []
 		loyalty_amount_sum, loyalty_points_sum = 0, 0
 		rounding_adjustment, base_rounding_adjustment = 0, 0
 		rounded_total, base_rounded_total = 0, 0
@@ -155,11 +159,20 @@ class POSInvoiceMergeLog(Document):
 			for payment in doc.get('payments'):
 				found = False
 				for pay in payments:
+					if payment.type == 'Credit Note' and payment.credit_note:
+						found = True
+						print('inside credit note')
+						self.get_advance_pos_credit_notes(doc, invoice)
+						# for a in invoice.advances:
+							# print('AFtER INVOICE',a.reference_type, a.allocated_amount, a.advance_amount, a.reference_name)
+						continue
+					print('continue loop',payment.type)
 					if pay.account == payment.account and pay.mode_of_payment == payment.mode_of_payment:
 						pay.amount = flt(pay.amount) + flt(payment.amount)
 						pay.base_amount = flt(pay.base_amount) + flt(payment.base_amount)
 						found = True
 				if not found:
+					print('continue loop 111',payment.type)
 					payments.append(payment)
 			rounding_adjustment += doc.rounding_adjustment
 			rounded_total += doc.rounded_total
@@ -171,8 +184,11 @@ class POSInvoiceMergeLog(Document):
 			invoice.redeem_loyalty_points = 1
 			invoice.loyalty_points = loyalty_points_sum
 			invoice.loyalty_amount = loyalty_amount_sum
-
+		# print('PAYMENT',payments)
 		invoice.set('items', items)
+		# invoice.append('advances', advances)
+		for p in payments:
+			print('PAYMENTS',p.type,p.amount)
 		invoice.set('payments', payments)
 		invoice.set('taxes', taxes)
 		invoice.set('rounding_adjustment',rounding_adjustment)
@@ -185,11 +201,46 @@ class POSInvoiceMergeLog(Document):
 		invoice.ignore_pricing_rule = 1
 		invoice.customer = self.customer
 
+		if invoice.get("advances"):
+			print('inside advances')
+			invoice.get_advances = 1
+
 		if self.merge_invoices_based_on == 'Customer Group':
 			invoice.flags.ignore_pos_profile = True
 			invoice.pos_profile = ''
 
 		return invoice
+
+
+	def get_advance_pos_credit_notes(self, doc, invoice):
+		customer = self.customer
+		pos_inv_amount_map = {p.get('pos_invoice'):p.get('amount') for p in self.pos_invoices}
+		pos_invoices = pos_inv_amount_map.keys()
+		pos_credit_notes = frappe.db.sql('''
+			select
+				"POS Invoice" as reference_type, t2.credit_note as reference_name,
+				t2.amount as amount, t1.posting_date, t1.currency
+			from
+				`tabPOS Invoice` t1, `tabSales Invoice Payment` t2
+			where
+				t1.name = t2.parent and t2.type = 'Credit Note' and t1.customer = "{0}" and t1.name = "{1}"
+			'''.format(customer, doc.name), as_dict=1, debug = 1)
+
+		advances = []
+		for d in pos_credit_notes:
+			advance_amount = abs(flt(frappe.db.get_value('POS Invoice', d.get('reference_name'), "outstanding_amount"))) + d.get('amount')
+			advance_row = {
+					"doctype": "Sales Invoice Advance",
+					"reference_type": "POS Invoice",
+					"reference_name": d.reference_name,
+					"advance_amount": flt(advance_amount),
+					"allocated_amount": flt(d.amount),
+					"ref_exchange_rate": flt(d.exchange_rate) # exchange_rate of advance entry
+				}
+			invoice.append("advances",advance_row)
+		print('invoices',invoice.advances)
+		return
+
 
 	def get_new_sales_invoice(self):
 		sales_invoice = frappe.new_doc('Sales Invoice')

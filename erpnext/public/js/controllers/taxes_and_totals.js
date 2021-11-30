@@ -705,7 +705,6 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 		if(in_list(["Sales Invoice", "POS Invoice", "Purchase Invoice"], this.frm.doc.doctype)) {
 			var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
-			debugger;
 			if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
 				var total_amount_to_pay = flt((grand_total - this.frm.doc.total_advance
 					- this.frm.doc.write_off_amount), precision("grand_total"));
@@ -733,7 +732,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				this.calculate_paid_amount();
 			}
 			this.calculate_change_amount();
-			debugger;
+
 			var paid_amount = (this.frm.doc.party_account_currency == this.frm.doc.currency) ?
 				this.frm.doc.paid_amount : this.frm.doc.base_paid_amount;
 			this.frm.doc.outstanding_amount =  flt(total_amount_to_pay - flt(paid_amount) +
