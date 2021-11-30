@@ -616,7 +616,7 @@ cur_frm.set_query("asset", "items", function(doc, cdt, cdn) {
 	}
 });
 
-frappe.ui.form.on('Cancellation Of Invoices', {
+frappe.ui.form.on('Return credit notes', {
 	setup: function(frm){
 		frm.add_fetch('customer', 'tax_id', 'tax_id');
 		frm.add_fetch('payment_term', 'invoice_portion', 'invoice_portion');

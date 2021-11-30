@@ -288,6 +288,77 @@ def return_data(filters):
 		if is_row:
 			row = [posting_date, serie_number, type_transaction, final_range, grand_total, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
 			data.append(row)
+	
+	dates.clear()
+
+	conditions = return_filters(filters, from_date, to_date)
+
+	salary_slips = frappe.get_all("Return credit notes", ["name", "status", "creation_date", "naming_series", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total", "discount_amount", "partial_discount", "total"], filters = conditions, order_by = "name asc")
+
+	for salary_slip in salary_slips:
+		if len(dates) == 0:
+			register = salary_slip.posting_date
+			dates.append(register)
+		else:
+			new_date = False	
+			if salary_slip.posting_date in dates:
+				new_date = False
+			else:
+				register = salary_slip.posting_date
+				dates.append(register)
+
+	dates_reverse = sorted(dates, reverse=False)
+	
+	for date in dates_reverse:		
+		split_date = str(date).split("T")[0].split("-")
+		posting_date = "-".join(reversed(split_date))
+		serie_number = filters.get("serie")
+		type_transaction = "DEV"
+		initial_range = ""
+		final_range = ""
+		total_exempt = 0
+		gross = 0
+		total_exonerated = 0
+		taxed_sales15 = 0
+		isv15 = 0
+		taxed_sales18 = 0
+		isv18 = 0
+		is_row = False
+		cont = 0
+		partial_discount = 0
+		discount_amount = 0
+		grand_total = 0
+
+		for salary_slip in salary_slips:
+			split_serie_space = salary_slip.naming_series.split(' ')
+			split_serie = split_serie_space[1].split('-')
+			serie =  "{}-{}".format(split_serie[0], split_serie[1])		
+				
+			if date == salary_slip.posting_date and serie_number == serie and salary_slip.status != "Return":
+				if cont == 0:
+					split_initial_range = salary_slip.name.split("-")
+					initial_range = split_initial_range[3]
+
+				total_exempt += salary_slip.total_exempt
+				gross += salary_slip.total
+				total_exonerated += salary_slip.total_exonerated
+				taxed_sales15 += salary_slip.taxed_sales15
+				isv15 += salary_slip.isv15
+				taxed_sales18 += salary_slip.taxed_sales18
+				isv18 = salary_slip.isv18
+				grand_total += salary_slip.grand_total
+				is_row = True
+				split_final_range = salary_slip.name.split("-")
+				final_range = split_final_range[3]
+				partial_discount += salary_slip.partial_discount
+				discount_amount += salary_slip.discount_amount
+				cont += 1
+
+		final_range = "{}-{}".format(initial_range, final_range)
+
+		if is_row:
+			row = [posting_date, serie_number, type_transaction, final_range, gross, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, partial_discount, discount_amount, grand_total]
+			data.append(row)
 
 	return data
 
