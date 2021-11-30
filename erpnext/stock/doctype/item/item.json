@@ -89,6 +89,7 @@
   "sales_details",
   "sales_uom",
   "is_sales_item",
+  "grant_commission",
   "column_break3",
   "max_discount",
   "deferred_revenue",
@@ -930,6 +931,7 @@
    "read_only": 1
   },
   {
+<<<<<<< HEAD
    "collapsible": 1,
    "fieldname": "more_information_section",
    "fieldtype": "Section Break",
@@ -942,6 +944,18 @@
    "fieldtype": "Check",
    "label": "Published in Website",
    "read_only": 1
+=======
+   "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
+   "fieldname": "website_image_alt",
+   "fieldtype": "Data",
+   "label": "Image Description"
+  },
+  {
+   "default": "1",
+   "fieldname": "grant_commission",
+   "fieldtype": "Check",
+   "label": "Grant Commission"
+>>>>>>> e10ab1626c (feat: Grant commission on certain items only (#27467))
   }
  ],
  "icon": "fa fa-tag",
@@ -949,7 +963,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-30 01:33:06.572442",
+ "modified": "2021-11-30 02:33:06.572442",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
