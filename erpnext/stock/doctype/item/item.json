@@ -931,7 +931,6 @@
    "read_only": 1
   },
   {
-<<<<<<< HEAD
    "collapsible": 1,
    "fieldname": "more_information_section",
    "fieldtype": "Section Break",
@@ -944,18 +943,12 @@
    "fieldtype": "Check",
    "label": "Published in Website",
    "read_only": 1
-=======
-   "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
-   "fieldname": "website_image_alt",
-   "fieldtype": "Data",
-   "label": "Image Description"
   },
   {
    "default": "1",
    "fieldname": "grant_commission",
    "fieldtype": "Check",
    "label": "Grant Commission"
->>>>>>> e10ab1626c (feat: Grant commission on certain items only (#27467))
   }
  ],
  "icon": "fa fa-tag",

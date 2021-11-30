@@ -157,36 +157,21 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	commission_rate: function() {
 		this.calculate_commission();
-<<<<<<< HEAD
 		refresh_field("total_commission");
 	},
 
 	total_commission: function() {
-		if(this.frm.doc.base_net_total) {
-			frappe.model.round_floats_in(this.frm.doc, ["base_net_total", "total_commission"]);
-=======
-	}
-
-	total_commission() {
 		frappe.model.round_floats_in(this.frm.doc, ["amount_eligible_for_commission", "total_commission"]);
->>>>>>> e10ab1626c (feat: Grant commission on certain items only (#27467))
 
 		const { amount_eligible_for_commission } = this.frm.doc;
-		if(!amount_eligible_for_commission) return;
+		if (!amount_eligible_for_commission) return;
 
-<<<<<<< HEAD
-			this.frm.set_value("commission_rate",
-				flt(this.frm.doc.total_commission * 100.0 / this.frm.doc.base_net_total));
-		}
-	},
-=======
 		this.frm.set_value(
 			"commission_rate", flt(
 				this.frm.doc.total_commission * 100.0 / amount_eligible_for_commission
 			)
 		);
-	}
->>>>>>> e10ab1626c (feat: Grant commission on certain items only (#27467))
+	},
 
 	allocated_percentage: function(doc, cdt, cdn) {
 		var sales_person = frappe.get_doc(cdt, cdn);
@@ -268,29 +253,15 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 
-<<<<<<< HEAD
 	calculate_commission: function() {
-		if(this.frm.fields_dict.commission_rate) {
-			if(this.frm.doc.commission_rate > 100) {
-				var msg = __(frappe.meta.get_label(this.frm.doc.doctype, "commission_rate", this.frm.doc.name)) +
-					" " + __("cannot be greater than 100");
-				frappe.msgprint(msg);
-				throw msg;
-			}
-=======
-	calculate_commission() {
-		if(!this.frm.fields_dict.commission_rate) return;
->>>>>>> e10ab1626c (feat: Grant commission on certain items only (#27467))
+		if (!this.frm.fields_dict.commission_rate) return;
 
-		if(this.frm.doc.commission_rate > 100) {
+		if (this.frm.doc.commission_rate > 100) {
 			this.frm.set_value("commission_rate", 100);
 			frappe.throw(`${__(frappe.meta.get_label(
 				this.frm.doc.doctype, "commission_rate", this.frm.doc.name
 			))} ${__("cannot be greater than 100")}`);
 		}
-<<<<<<< HEAD
-	},
-=======
 
 		this.frm.doc.amount_eligible_for_commission = this.frm.doc.items.reduce(
 			(sum, item) => item.grant_commission ? sum + item.base_net_amount : sum, 0
@@ -302,8 +273,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		);
 
 		refresh_field(["amount_eligible_for_commission", "total_commission"]);
-	}
->>>>>>> e10ab1626c (feat: Grant commission on certain items only (#27467))
+	},
 
 	calculate_contribution: function() {
 		var me = this;
