@@ -629,10 +629,10 @@ erpnext.utils.map_current_doc = function(opts) {
 			frappe.get_meta(items_doctype).fields.forEach(function(d) {
 				if(d.options===opts.source_doctype) link_fieldname = d.fieldname; });
 
-			if(opts.remove_common_rows) {
+			if (opts.remove_common_rows) {
 				$.each(cur_frm.doc.items, (parent_idx, parent_val) => {
 					$.each(opts.args.filtered_children, (child_idx, child_val) => {
-						if(parent_val[link_fieldname + "_item"] == child_val) {
+						if (parent_val[link_fieldname + "_item"] == child_val) {
 							opts.args.filtered_children.splice(child_idx, 1);
 							frappe.msgprint(__("You have already selected item {0}", 
 								[parent_val["item_code"]]));
@@ -640,18 +640,17 @@ erpnext.utils.map_current_doc = function(opts) {
 					});
 				});
 		
-				if(opts.args.filtered_children.length < 1) {
+				if (opts.args.filtered_children.length < 1) {
 					return;
 				}
-			}
-			else {
+			} else {
 				// search in existing items if the source_name is already set and full qty fetched
 				var already_set = false;
 				var item_qty_map = {};
 
 				$.each(cur_frm.doc.items, function(i, d) {
 					opts.source_name.forEach(function(src) {
-						if(d[link_fieldname]==src) {
+						if (d[link_fieldname]==src) {
 							already_set = true;
 							if (item_qty_map[d.item_code])
 								item_qty_map[d.item_code] += flt(d.qty);
@@ -661,25 +660,25 @@ erpnext.utils.map_current_doc = function(opts) {
 					});
 				});
 
-				if(already_set) {
+				if (already_set) {
 					opts.source_name.forEach(function(src) {
-						frappe.model.with_doc(opts.source_doctype, src, function(r) {
+						frappe.model.with_doc(opts.source_doctype, src, function() {
 							var source_doc = frappe.model.get_doc(opts.source_doctype, src);
 							$.each(source_doc.items || [], function(i, row) {
-								if(row.qty > flt(item_qty_map[row.item_code])) {
+								if (row.qty > flt(item_qty_map[row.item_code])) {
 									already_set = false;
 									return false;
 								}
-							})
-						})
+							});
+						});
 
-						if(already_set) {
+						if (already_set) {
 							frappe.msgprint(__("You have already selected items from {0} {1}",
 								[opts.source_doctype, src]));
 							return;
 						}
 
-					})
+					});
 				}
 			}
 		}
