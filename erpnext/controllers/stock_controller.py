@@ -17,7 +17,7 @@ from erpnext.accounts.general_ledger import (
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock import get_warehouse_account_map
-from erpnext.stock.stock_ledger import get_valuation_rate
+from erpnext.stock.stock_ledger import get_items_to_be_repost, get_valuation_rate
 
 
 class QualityInspectionRequiredError(frappe.ValidationError): pass
@@ -134,7 +134,7 @@ class StockController(AccountsController):
 							"against": expense_account,
 							"cost_center": item_row.cost_center,
 							"project": item_row.project or self.get('project'),
-							"remarks": self.get("remarks") or "Accounting Entry for Stock",
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"debit": flt(sle.stock_value_difference, precision),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
 						}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
@@ -143,7 +143,7 @@ class StockController(AccountsController):
 							"account": expense_account,
 							"against": warehouse_account[sle.warehouse]["account"],
 							"cost_center": item_row.cost_center,
-							"remarks": self.get("remarks") or "Accounting Entry for Stock",
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(sle.stock_value_difference, precision),
 							"project": item_row.get("project") or self.get("project"),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
@@ -544,7 +544,12 @@ class StockController(AccountsController):
 			"company": self.company
 		})
 		if future_sle_exists(args):
-			create_repost_item_valuation_entry(args)
+			item_based_reposting =  cint(frappe.db.get_single_value("Stock Reposting Settings", "item_based_reposting"))
+			if item_based_reposting:
+				create_item_wise_repost_entries(voucher_type=self.doctype, voucher_no=self.name)
+			else:
+				create_repost_item_valuation_entry(args)
+
 
 @frappe.whitelist()
 def make_quality_inspections(doctype, docname, items):
@@ -676,5 +681,38 @@ def create_repost_item_valuation_entry(args):
 	repost_entry.company = args.company
 	repost_entry.allow_zero_rate = args.allow_zero_rate
 	repost_entry.flags.ignore_links = True
+	repost_entry.flags.ignore_permissions = True
 	repost_entry.save()
 	repost_entry.submit()
+
+
+def create_item_wise_repost_entries(voucher_type, voucher_no, allow_zero_rate=False):
+	"""Using a voucher create repost item valuation records for all item-warehouse pairs."""
+
+	stock_ledger_entries = get_items_to_be_repost(voucher_type, voucher_no)
+
+	distinct_item_warehouses = set()
+	repost_entries = []
+
+	for sle in stock_ledger_entries:
+		item_wh = (sle.item_code, sle.warehouse)
+		if item_wh in distinct_item_warehouses:
+			continue
+		distinct_item_warehouses.add(item_wh)
+
+		repost_entry = frappe.new_doc("Repost Item Valuation")
+		repost_entry.based_on = "Item and Warehouse"
+		repost_entry.voucher_type = voucher_type
+		repost_entry.voucher_no = voucher_no
+
+		repost_entry.item_code = sle.item_code
+		repost_entry.warehouse = sle.warehouse
+		repost_entry.posting_date = sle.posting_date
+		repost_entry.posting_time = sle.posting_time
+		repost_entry.allow_zero_rate = allow_zero_rate
+		repost_entry.flags.ignore_links = True
+		repost_entry.flags.ignore_permissions = True
+		repost_entry.submit()
+		repost_entries.append(repost_entry)
+
+	return repost_entries
