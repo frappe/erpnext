@@ -1067,14 +1067,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				method: "apply_shipping_rule",
 			}).fail(() => this.frm.set_value('shipping_rule', ''));
 		}
-<<<<<<< HEAD
-		else {
-			me.calculate_taxes_and_totals();
-		}
 	},
-=======
-	}
->>>>>>> c78b8b7897 (fix: Shipping Rule picking up old net_rate)
 
 	set_margin_amount_based_on_currency: function(exchange_rate) {
 		if (in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "Purchase Invoice", "Purchase Order", "Purchase Receipt"]), this.frm.doc.doctype) {

@@ -265,23 +265,14 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			me.frm.doc.net_total += item.net_amount;
 			me.frm.doc.base_net_total += item.base_net_amount;
 			});
-	}
-
-	calculate_shipping_charges() {
-		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total"]);
-<<<<<<< HEAD
-<<<<<<< HEAD
 	},
-=======
-		if(frappe.meta.get_docfield(this.frm.doc.doctype,"shipping_rule",this.frm.doc.name)) {
-			this.shipping_rule()
-=======
+
+	calculate_shipping_charges: function() {
+		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total"]);
 		if (frappe.meta.get_docfield(this.frm.doc.doctype, "shipping_rule", this.frm.doc.name)) {
 			this.shipping_rule();
->>>>>>> e7b4204c35 (fix: sider issues)
 		}
-	}
->>>>>>> c78b8b7897 (fix: Shipping Rule picking up old net_rate)
+	},
 
 	add_taxes_from_item_tax_template: function(item_tax_map) {
 		let me = this;
