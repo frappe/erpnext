@@ -5,7 +5,10 @@ import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
 from frappe.utils import add_days, today
 
-from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+from erpnext.stock.doctype.delivery_note.test_delivery_note import (
+	create_delivery_note,
+	create_return_delivery_note,
+)
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 	create_landed_cost_voucher,
@@ -232,8 +235,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 		self.assertEqual(outgoing_rate, 100)
 
 		# Return Entry: Qty = -2, Rate = 150
-		return_dn = create_delivery_note(is_return=1, return_against=dn.name, item_code=bundled_item, qty=-2, rate=150,
-			company=company, warehouse="Stores - _TC", expense_account="Cost of Goods Sold - _TC", cost_center="Main - _TC")
+		return_dn = create_return_delivery_note(source_name=dn.name, rate=150, qty=-2)
 
 		# check incoming rate for Return entry
 		incoming_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
