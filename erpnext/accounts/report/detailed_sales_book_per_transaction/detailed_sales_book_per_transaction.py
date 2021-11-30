@@ -245,6 +245,53 @@ def return_data(filters):
 			row = [customer_retetention.posting_date, customer_retetention.rtn,customer_retetention.customer, type_transaction, serie_number, customer_retetention.name, customer_retetention.cai, grand_total, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, 0, 0, grand_total]
 			data.append(row)
 
+	conditions = return_filters(filters, from_date, to_date)
+
+	salary_slips = frappe.get_all("Return credit notes", ["name", "status","creation_date", "rtn", "client_name", "cai", "naming_series", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total", "discount_amount", "partial_discount", "total"], filters = conditions, order_by = "name asc")	
+
+	for salary_slip in salary_slips:
+		split_date = str(salary_slip.posting_date).split("T")[0].split("-")
+		posting_date = "-".join(reversed(split_date))
+		serie_number = filters.get("prefix")	
+		type_transaction = "DEV"
+		initial_range = ""
+		final_range = ""
+		total_exempt = 0
+		gross = 0
+		total_exonerated = 0
+		taxed_sales15 = 0
+		isv15 = 0
+		taxed_sales18 = 0
+		isv18 = 0
+		rtn = salary_slip.rtn
+		partial_discount = 0
+		discount_amount = 0
+		grand_total = 0
+
+		split_serie_space = salary_slip.naming_series.split(' ')
+		split_serie = split_serie_space[1].split('-')
+		serie =  "{}-{}".format(split_serie[0], split_serie[1])			
+
+		if serie_number == serie and salary_slip.status != "Return":	
+			total_exempt = salary_slip.total_exempt
+			gross += salary_slip.total
+			total_exonerated = salary_slip.total_exonerated
+			taxed_sales15 = salary_slip.taxed_sales15
+			isv15 += salary_slip.isv15
+			taxed_sales18 = salary_slip.taxed_sales18
+			isv18 = salary_slip.isv18
+			partial_discount += salary_slip.partial_discount
+			discount_amount += salary_slip.discount_amount
+			grand_total += salary_slip.grand_total
+			is_row = True
+			split_final_range = salary_slip.name.split("-")
+			final_range = split_final_range[3]
+
+			final_range = "{}-{}".format(initial_range, final_range)
+
+			row = [posting_date, rtn, salary_slip.client_name, type_transaction, serie_number,salary_slip.name, salary_slip.cai, gross,total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, partial_discount, discount_amount, grand_total]
+			data.append(row)
+
 	return data
 
 def return_filters(filters, from_date, to_date):
