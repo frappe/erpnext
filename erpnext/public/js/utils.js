@@ -629,10 +629,10 @@ erpnext.utils.map_current_doc = function(opts) {
 			frappe.get_meta(items_doctype).fields.forEach(function(d) {
 				if(d.options===opts.source_doctype) link_fieldname = d.fieldname; });
 
-			if (opts.remove_common_rows) {
+			if (opts.remove_common_rows && opts.row_id_fieldname) {
 				$.each(cur_frm.doc.items, (parent_idx, parent_val) => {
 					$.each(opts.args.filtered_children, (child_idx, child_val) => {
-						if (parent_val[link_fieldname + "_item"] == child_val) {
+						if (parent_val[opts.row_id_fieldname] == child_val) {
 							opts.args.filtered_children.splice(child_idx, 1);
 							frappe.msgprint(__("You have already selected item {0}", 
 								[parent_val["item_code"]]));

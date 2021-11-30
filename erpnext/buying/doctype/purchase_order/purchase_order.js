@@ -429,6 +429,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 					allow_child_item_selection: true,
 					child_fielname: "items",
 					child_columns: ["item_code", "qty"],
+					row_id_fieldname: "material_request_item",
 					remove_common_rows: true
 				})
 			}, __("Get Items From"));
