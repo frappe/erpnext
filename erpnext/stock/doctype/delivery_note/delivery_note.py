@@ -14,6 +14,7 @@ from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
+from erpnext.stock.utils import calculate_mapped_packed_items_return
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -130,7 +131,7 @@ class DeliveryNote(SellingController):
 
 		# Keeps mapped packed_items in case product bundle is updated.
 		if self.is_return and self.return_against:
-			self.calculate_mapped_packed_items_return()
+			calculate_mapped_packed_items_return(self)
 		else:
 			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 			make_packing_list(self)
@@ -335,15 +336,6 @@ class DeliveryNote(SellingController):
 			frappe.msgprint(_("Credit Note {0} has been created automatically").format(credit_note_link))
 		except Exception:
 			frappe.throw(_("Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"))
-
-	def calculate_mapped_packed_items_return(self):
-		parent_items = set([item.parent_item for item in self.packed_items])
-		dn = frappe.get_doc(self.doctype, self.return_against)
-		for d_item, item in zip(dn.items, self.items):
-			if d_item.item_code in parent_items:
-				for p_item, d_p_item in zip(self.packed_items, dn.packed_items):
-					p_item.parent_detail_docname = item.name
-					p_item.qty = (d_p_item.qty / d_item.qty) * item.qty
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
 	# Billed against Sales Order directly
