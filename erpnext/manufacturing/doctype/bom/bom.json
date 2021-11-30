@@ -237,6 +237,7 @@
    "options": "Price List"
   },
   {
+   "depends_on": "with_operations",
    "fieldname": "operations_section",
    "fieldtype": "Section Break",
    "hide_border": 1,
@@ -539,7 +540,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-27 14:52:04.500251",
+ "modified": "2021-11-18 13:04:16.271975",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

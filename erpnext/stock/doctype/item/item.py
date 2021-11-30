@@ -152,7 +152,6 @@ class Item(WebsiteGenerator):
 
 	def on_update(self):
 		invalidate_cache_for_item(self)
-		self.validate_name_with_item_group()
 		self.update_variants()
 		self.update_item_price()
 		self.update_template_item()
@@ -223,10 +222,11 @@ class Item(WebsiteGenerator):
 					'route')) + '/' + self.scrub((self.item_name or self.item_code) + '-' + random_string(5))
 
 	def validate_website_image(self):
+		"""Validate if the website image is a public file"""
+
 		if frappe.flags.in_import:
 			return
 
-		"""Validate if the website image is a public file"""
 		auto_set_website_image = False
 		if not self.website_image and self.image:
 			auto_set_website_image = True
@@ -256,10 +256,11 @@ class Item(WebsiteGenerator):
 			self.website_image = None
 
 	def make_thumbnail(self):
+		"""Make a thumbnail of `website_image`"""
+
 		if frappe.flags.in_import:
 			return
 
-		"""Make a thumbnail of `website_image`"""
 		import requests.exceptions
 
 		if not self.is_new() and self.website_image != frappe.db.get_value(self.doctype, self.name, "website_image"):
@@ -627,12 +628,6 @@ class Item(WebsiteGenerator):
 			self._stock_ledger_created = len(frappe.db.sql("""select name from `tabStock Ledger Entry`
 				where item_code = %s and is_cancelled = 0 limit 1""", self.name))
 		return self._stock_ledger_created
-
-	def validate_name_with_item_group(self):
-		# causes problem with tree build
-		if frappe.db.exists("Item Group", self.name):
-			frappe.throw(
-				_("An Item Group exists with same name, please change the item name or rename the item group"))
 
 	def update_item_price(self):
 		frappe.db.sql("""

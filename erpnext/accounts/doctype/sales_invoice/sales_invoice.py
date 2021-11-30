@@ -831,8 +831,6 @@ class SalesInvoice(SellingController):
 		self.make_exchange_gain_loss_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
 
-		self.allocate_advance_taxes(gl_entries)
-
 		self.make_item_gl_entries(gl_entries)
 		self.make_discount_gl_entries(gl_entries)
 
@@ -1935,7 +1933,7 @@ def get_mode_of_payments_info(mode_of_payments, company):
 			mpa.parent = mp.name and
 			mpa.company = %s and
 			mp.enabled = 1 and
-			mp.name in (%s)
+			mp.name in %s
 		group by
 			mp.name
 		""", (company, mode_of_payments), as_dict=1)
