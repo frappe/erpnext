@@ -355,7 +355,7 @@ class Returncreditnotes(Document):
 		fecha_i = datetime.strptime(fecha_inicial, '%d-%m-%Y')
 		fecha_f = datetime.strptime(fecha_final, '%d-%m-%Y')
 
-		año_fiscal = frappe.get_all("Fiscal Year", ["*"], filters = {"year_start_date": [">=", fecha_i], "year_end_date": ["<=", fecha_f]})
+		fiscal_year = frappe.get_all("Fiscal Year", ["*"], filters = {"year_start_date": [">=", fecha_i], "year_end_date": ["<=", fecha_f]})
 
 		doc = frappe.new_doc("Stock Ledger Entry")
 		doc.item_code = item.item_code
@@ -376,5 +376,5 @@ class Returncreditnotes(Document):
 		doc.stock_value = qty * item.rate
 		doc.stock_value_difference = qty_item * item.rate
 		doc.company = self.company
-		doc.fiscal_year = año_fiscal[0].name
+		doc.fiscal_year = fiscal_year[0].name
 		doc.insert()
