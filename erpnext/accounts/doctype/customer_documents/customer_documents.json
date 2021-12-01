@@ -18,6 +18,11 @@
   "cai",
   "due_date_cai",
   "authorized_range",
+  "sectionaccount",
+  "account_to_debit",
+  "currency",
+  "columnaccount",
+  "account_to_credit",
   "section_break_1",
   "total_exempt",
   "taxes",
@@ -221,10 +226,40 @@
    "fieldtype": "Data",
    "label": "Document number",
    "reqd": 1
+  },
+  {
+   "fieldname": "sectionaccount",
+   "fieldtype": "Section Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "account_to_debit",
+   "fieldtype": "Link",
+   "label": "Account To Debit",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "account_to_credit",
+   "fieldtype": "Link",
+   "label": "Account To Credit",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "columnaccount",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-11-29 10:37:06.973310",
+ "modified": "2021-12-01 14:41:53.642530",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Customer Documents",

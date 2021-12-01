@@ -24,6 +24,7 @@
   "is_return",
   "column_break1",
   "company",
+  "company_tax_id",
   "posting_date",
   "posting_time",
   "set_posting_time",
@@ -1814,12 +1815,19 @@
    "fieldtype": "Date",
    "hidden": 1,
    "label": "Patient DOB"
+  },
+  {
+   "fetch_from": "company.tax_id",
+   "fieldname": "company_tax_id",
+   "fieldtype": "Data",
+   "label": "Company Tax ID",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-11-10 13:29:37.911734",
+ "modified": "2021-12-01 08:57:31.141792",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

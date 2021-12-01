@@ -19,7 +19,8 @@ class Returncreditnotes(Document):
 		self.delete_bin()
 		self.delete_gl_entry()
 
-	def validate(self):		
+	def validate(self):
+		self.in_words = money_in_words(self.grand_total)	
 		if self.docstatus == 0:
 			if self.grand_total > 0:
 				items = frappe.get_all("Return credit notes Item", ["*"], filters = {"parent": self.name})
@@ -354,7 +355,7 @@ class Returncreditnotes(Document):
 		fecha_i = datetime.strptime(fecha_inicial, '%d-%m-%Y')
 		fecha_f = datetime.strptime(fecha_final, '%d-%m-%Y')
 
-		año_fiscal = frappe.get_all("Fiscal Year", ["*"], filters = {"year_start_date": [">=", fecha_i], "year_end_date": ["<=", fecha_f]})
+		fiscal_year = frappe.get_all("Fiscal Year", ["*"], filters = {"year_start_date": [">=", fecha_i], "year_end_date": ["<=", fecha_f]})
 
 		doc = frappe.new_doc("Stock Ledger Entry")
 		doc.item_code = item.item_code
@@ -375,5 +376,5 @@ class Returncreditnotes(Document):
 		doc.stock_value = qty * item.rate
 		doc.stock_value_difference = qty_item * item.rate
 		doc.company = self.company
-		doc.fiscal_year = año_fiscal[0].name
+		doc.fiscal_year = fiscal_year[0].name
 		doc.insert()
