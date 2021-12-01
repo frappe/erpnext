@@ -635,6 +635,184 @@ class TestAsset(unittest.TestCase):
 		frappe.db.set_value("Asset Category Account", name, "capital_work_in_progress_account", cwip_acc)
 		frappe.db.get_value("Company", "_Test Company", "capital_work_in_progress_account", cwip_acc)
 
+<<<<<<< HEAD
+=======
+class TestDepreciationMethods(AssetSetup):
+	def test_schedule_for_straight_line_method(self):
+		asset = create_asset(
+			calculate_depreciation = 1,
+			available_for_use_date = "2030-01-01",
+			purchase_date = "2030-01-01",
+			expected_value_after_useful_life = 10000,
+			depreciation_start_date = "2030-12-31",
+			total_number_of_depreciations = 3,
+			frequency_of_depreciation = 12
+		)
+
+		self.assertEqual(asset.status, "Draft")
+		expected_schedules = [
+			["2030-12-31", 30000.00, 30000.00],
+			["2031-12-31", 30000.00, 60000.00],
+			["2032-12-31", 30000.00, 90000.00]
+		]
+
+		schedules = [[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
+			for d in asset.get("schedules")]
+
+		self.assertEqual(schedules, expected_schedules)
+
+	def test_schedule_for_straight_line_method_for_existing_asset(self):
+		asset = create_asset(
+			calculate_depreciation = 1,
+			available_for_use_date = "2030-06-06",
+			is_existing_asset = 1,
+			number_of_depreciations_booked = 2,
+			opening_accumulated_depreciation = 47095.89,
+			expected_value_after_useful_life = 10000,
+			depreciation_start_date = "2032-12-31",
+			total_number_of_depreciations = 3,
+			frequency_of_depreciation = 12
+		)
+
+		self.assertEqual(asset.status, "Draft")
+		expected_schedules = [
+			["2032-12-31", 30000.0, 77095.89],
+			["2033-06-06", 12904.11, 90000.0]
+		]
+		schedules = [[cstr(d.schedule_date), flt(d.depreciation_amount, 2), d.accumulated_depreciation_amount]
+			for d in asset.get("schedules")]
+
+		self.assertEqual(schedules, expected_schedules)
+
+	def test_schedule_for_double_declining_method(self):
+		asset = create_asset(
+			calculate_depreciation = 1,
+			available_for_use_date = "2030-01-01",
+			purchase_date = "2030-01-01",
+			depreciation_method = "Double Declining Balance",
+			expected_value_after_useful_life = 10000,
+			depreciation_start_date = "2030-12-31",
+			total_number_of_depreciations = 3,
+			frequency_of_depreciation = 12
+		)
+
+		self.assertEqual(asset.status, "Draft")
+
+		expected_schedules = [
+			['2030-12-31', 66667.00, 66667.00],
+			['2031-12-31', 22222.11, 88889.11],
+			['2032-12-31', 1110.89, 90000.0]
+		]
+
+		schedules = [[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
+			for d in asset.get("schedules")]
+
+		self.assertEqual(schedules, expected_schedules)
+
+	def test_schedule_for_double_declining_method_for_existing_asset(self):
+		asset = create_asset(
+			calculate_depreciation = 1,
+			available_for_use_date = "2030-01-01",
+			is_existing_asset = 1,
+			depreciation_method = "Double Declining Balance",
+			number_of_depreciations_booked = 1,
+			opening_accumulated_depreciation = 50000,
+			expected_value_after_useful_life = 10000,
+			depreciation_start_date = "2030-12-31",
+			total_number_of_depreciations = 3,
+			frequency_of_depreciation = 12
+		)
+
+		self.assertEqual(asset.status, "Draft")
+
+		expected_schedules = [
+			["2030-12-31", 33333.50, 83333.50],
+			["2031-12-31", 6666.50, 90000.0]
+		]
+
+		schedules = [[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
+			for d in asset.get("schedules")]
+
+		self.assertEqual(schedules, expected_schedules)
+
+	def test_schedule_for_prorated_straight_line_method(self):
+		asset = create_asset(
+			calculate_depreciation = 1,
+			available_for_use_date = "2030-01-30",
+			purchase_date = "2030-01-30",
+			depreciation_method = "Straight Line",
+			expected_value_after_useful_life = 10000,
+			depreciation_start_date = "2030-12-31",
+			total_number_of_depreciations = 3,
+			frequency_of_depreciation = 12
+		)
+
+		expected_schedules = [
+			["2030-12-31", 27534.25, 27534.25],
+			["2031-12-31", 30000.0, 57534.25],
+			["2032-12-31", 30000.0, 87534.25],
+			["2033-01-30", 2465.75, 90000.0]
+		]
+
+		schedules = [[cstr(d.schedule_date), flt(d.depreciation_amount, 2), flt(d.accumulated_depreciation_amount, 2)]
+			for d in asset.get("schedules")]
+
+		self.assertEqual(schedules, expected_schedules)
+
+	# WDV: Written Down Value method
+	def test_depreciation_entry_for_wdv_without_pro_rata(self):
+		asset = create_asset(
+			calculate_depreciation = 1,
+			available_for_use_date = "2030-01-01",
+			purchase_date = "2030-01-01",
+			depreciation_method = "Written Down Value",
+			expected_value_after_useful_life = 12500,
+			depreciation_start_date = "2030-12-31",
+			total_number_of_depreciations = 3,
+			frequency_of_depreciation = 12
+		)
+
+		self.assertEqual(asset.finance_books[0].rate_of_depreciation, 50.0)
+
+		expected_schedules = [
+			["2030-12-31", 50000.0, 50000.0],
+			["2031-12-31", 25000.0, 75000.0],
+			["2032-12-31", 12500.0, 87500.0],
+		]
+
+		schedules = [[cstr(d.schedule_date), flt(d.depreciation_amount, 2), flt(d.accumulated_depreciation_amount, 2)]
+			for d in asset.get("schedules")]
+
+		self.assertEqual(schedules, expected_schedules)
+
+	# WDV: Written Down Value method
+	def test_pro_rata_depreciation_entry_for_wdv(self):
+		asset = create_asset(
+			calculate_depreciation = 1,
+			available_for_use_date = "2030-06-06",
+			purchase_date = "2030-01-01",
+			depreciation_method = "Written Down Value",
+			expected_value_after_useful_life = 12500,
+			depreciation_start_date = "2030-12-31",
+			total_number_of_depreciations = 3,
+			frequency_of_depreciation = 12
+		)
+
+		self.assertEqual(asset.finance_books[0].rate_of_depreciation, 50.0)
+
+		expected_schedules = [
+			["2030-12-31", 28493.15, 28493.15],
+			["2031-12-31", 35753.43, 64246.58],
+			["2032-12-31", 17876.71, 82123.29],
+			["2033-06-06", 5376.71, 87500.0]
+		]
+
+		schedules = [[cstr(d.schedule_date), flt(d.depreciation_amount, 2), flt(d.accumulated_depreciation_amount, 2)]
+			for d in asset.get("schedules")]
+
+		self.assertEqual(schedules, expected_schedules)
+
+>>>>>>> 774ac852c9 (fix: Test if depreciation schedules are set up properly for existing assets)
 	def test_discounted_wdv_depreciation_rate_for_indian_region(self):
 		# set indian company
 		company_flag = frappe.flags.company
