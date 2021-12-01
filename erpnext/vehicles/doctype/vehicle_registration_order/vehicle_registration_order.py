@@ -33,6 +33,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		super(VehicleRegistrationOrder, self).validate()
 		self.validate_duplicate_registration_order()
 
+		self.set_missing_accounts()
 		self.validate_common()
 
 	def before_update_after_submit(self):
@@ -47,7 +48,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 		self.calculate_outstanding_amount()
 		self.validate_amounts()
 
-		self.set_missing_accounts()
 		self.validate_account_mandatory()
 
 		self.update_payment_status()
