@@ -236,7 +236,7 @@ class SalarySlip(TransactionBase):
 		# LWP and Late calculation
 		no_of_late_days_as_lwp = cint(frappe.get_cached_value("HR Settings", None, "no_of_late_days"))
 
-		actual_lwp = self.calculate_lwp(holidays, working_days)
+		actual_lwp = self.calculate_lwp(holidays, working_days, joining_date, relieving_date)
 		self.actual_late_days = self.calculate_late_days(holidays)
 		actual_late_lwp = self.actual_late_days // no_of_late_days_as_lwp if no_of_late_days_as_lwp else 0
 		actual_lwp_with_late = actual_lwp + actual_late_lwp
@@ -299,9 +299,18 @@ class SalarySlip(TransactionBase):
 
 		return holidays
 
-	def calculate_lwp(self, holidays, working_days):
+	def calculate_lwp(self, holidays, working_days, joining_date, relieving_date):
 		lwp = 0
 		holidays = "','".join(holidays)
+
+		start_date = self.start_date
+		if joining_date and getdate(self.start_date) <= getdate(joining_date) <= getdate(self.end_date):
+			start_date = joining_date
+
+		end_date = self.end_date
+		if relieving_date and getdate(self.start_date) <= getdate(relieving_date) <= getdate(self.end_date):
+			end_date = relieving_date
+
 		for d in range(working_days):
 			dt = add_days(cstr(getdate(self.start_date)), d)
 			leave = frappe.db.sql("""
@@ -333,7 +342,7 @@ class SalarySlip(TransactionBase):
 				AND ifnull(leave_application, '') = ''
 				AND employee = %(employee)s
 				AND attendance_date between %(st_dt)s AND %(end_dt)s
-			""", {"employee": self.employee, "st_dt": self.start_date, "end_dt": self.end_date})
+			""", {"employee": self.employee, "st_dt": start_date, "end_dt": end_date})
 
 			absent_days = flt(absent[0][0]) if absent else 0
 			lwp += absent_days
