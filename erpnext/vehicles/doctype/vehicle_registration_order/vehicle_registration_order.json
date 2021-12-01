@@ -708,6 +708,7 @@
    "options": "Account"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "customer_closed_amount",
    "fieldtype": "Currency",
    "label": "Customer Closed Amount",
@@ -716,6 +717,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "agent_closed_amount",
    "fieldtype": "Currency",
    "label": "Registration Agent Closed Amount",
@@ -957,7 +959,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-26 10:59:49.750963",
+ "modified": "2021-12-01 16:07:19.354394",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",
