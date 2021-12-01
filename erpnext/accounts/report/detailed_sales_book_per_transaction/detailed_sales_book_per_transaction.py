@@ -268,8 +268,7 @@ def return_data(filters):
 		discount_amount = 0
 		grand_total = 0
 
-		split_serie_space = salary_slip.naming_series.split(' ')
-		split_serie = split_serie_space[1].split('-')
+		split_serie = salary_slip.naming_series.split('-')
 		serie =  "{}-{}".format(split_serie[0], split_serie[1])			
 
 		if serie_number == serie and salary_slip.status != "Return":	

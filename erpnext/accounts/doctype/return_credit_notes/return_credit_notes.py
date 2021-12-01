@@ -19,7 +19,8 @@ class Returncreditnotes(Document):
 		self.delete_bin()
 		self.delete_gl_entry()
 
-	def validate(self):		
+	def validate(self):
+		self.in_words = money_in_words(self.grand_total)	
 		if self.docstatus == 0:
 			if self.grand_total > 0:
 				items = frappe.get_all("Return credit notes Item", ["*"], filters = {"parent": self.name})
