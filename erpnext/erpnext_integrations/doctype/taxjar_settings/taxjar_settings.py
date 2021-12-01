@@ -16,9 +16,9 @@ from erpnext.erpnext_integrations.taxjar_integration import get_client
 class TaxJarSettings(Document):
 
 	def on_update(self):
-		TAXJAR_CREATE_TRANSACTIONS = frappe.db.get_single_value("TaxJar Settings", "taxjar_create_transactions")
-		TAXJAR_CALCULATE_TAX = frappe.db.get_single_value("TaxJar Settings", "taxjar_calculate_tax")
-		TAXJAR_SANDBOX_MODE = frappe.db.get_single_value("TaxJar Settings", "is_sandbox")
+		TAXJAR_CREATE_TRANSACTIONS = self.taxjar_create_transactions
+		TAXJAR_CALCULATE_TAX = self.taxjar_calculate_tax
+		TAXJAR_SANDBOX_MODE = self.is_sandbox
 
 		fields_already_exist = frappe.db.exists('Custom Field', {'dt': ('in', ['Item','Sales Invoice Item']), 'fieldname':'product_tax_category'})
 		fields_hidden = frappe.get_value('Custom Field', {'dt': ('in', ['Sales Invoice Item'])}, 'hidden')
