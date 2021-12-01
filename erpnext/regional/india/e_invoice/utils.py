@@ -642,9 +642,14 @@ class GSPConnector():
 		request_log.save(ignore_permissions=True)
 		frappe.db.commit()
 
+	def get_client_credentials(self):
+		if self.e_invoice_settings.client_id and self.e_invoice_settings.client_secret:
+			return self.e_invoice_settings.client_id, self.e_invoice_settings.get_password('client_secret')
+
+		return frappe.conf.einvoice_client_id, frappe.conf.einvoice_client_secret
+
 	def fetch_auth_token(self):
-		client_id = self.e_invoice_settings.client_id or frappe.conf.einvoice_client_id
-		client_secret = self.e_invoice_settings.get_password('client_secret') or frappe.conf.einvoice_client_secret
+		client_id, client_secret = self.get_client_credentials()
 		headers = {
 			'gspappid': client_id,
 			'gspappsecret': client_secret
