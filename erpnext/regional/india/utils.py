@@ -847,12 +847,12 @@ def update_taxable_values(doc, method):
 		doc.get('items')[item_count - 1].taxable_value += diff
 
 def get_depreciation_amount(asset, depreciable_value, row):
-	depreciation_left = flt(row.total_number_of_depreciations) - flt(asset.number_of_depreciations_booked)
+	depreciation_left = flt(row.total_number_of_depreciations)
 
 	if row.depreciation_method in ("Straight Line", "Manual"):
 		# if the Depreciation Schedule is being prepared for the first time
 		if not asset.flags.increase_in_asset_life:
-			depreciation_amount = (flt(asset.gross_purchase_amount) - flt(asset.opening_accumulated_depreciation) -
+			depreciation_amount = (flt(asset.gross_purchase_amount) -
 				flt(row.expected_value_after_useful_life)) / depreciation_left
 
 		# if the Depreciation Schedule is being modified after Asset Repair
