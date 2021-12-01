@@ -348,7 +348,12 @@ class Asset(AccountsController):
 	# if it returns True, depreciation_amount will not be equal for the first and last rows
 	def check_is_pro_rata(self, row):
 		has_pro_rata = False
-		days = date_diff(row.depreciation_start_date, self.available_for_use_date) + 1
+
+		# if not existing asset, from_date = available_for_use_date
+		# otherwise, if number_of_depreciations_booked = 2, available_for_use_date = 01/01/2020 and frequency_of_depreciation = 12
+		# from_date = 01/01/2022
+		from_date = self.get_modified_available_for_use_date(row)
+		days = date_diff(row.depreciation_start_date, from_date) + 1
 
 		# if frequency_of_depreciation is 12 months, total_days = 365
 		total_days = get_total_days(row.depreciation_start_date, row.frequency_of_depreciation)
@@ -357,6 +362,9 @@ class Asset(AccountsController):
 			has_pro_rata = True
 
 		return has_pro_rata
+
+	def get_modified_available_for_use_date(self, row):
+		return add_months(self.available_for_use_date, (self.number_of_depreciations_booked * row.frequency_of_depreciation))
 
 	def validate_asset_finance_books(self, row):
 		if flt(row.expected_value_after_useful_life) >= flt(self.gross_purchase_amount):
