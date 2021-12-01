@@ -16,6 +16,8 @@
   "customer",
   "customer_name",
   "client_name",
+  "patient",
+  "patient_name",
   "rtn",
   "tax_id",
   "is_pos",
@@ -25,6 +27,7 @@
   "reason_for_return",
   "column_break1",
   "company",
+  "company_tax_id",
   "posting_date",
   "posting_time",
   "set_posting_time",
@@ -240,6 +243,7 @@
    "fetch_from": "patient.dni",
    "fieldname": "dni_patient",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "DNI Patient",
    "read_only": 1
   },
@@ -247,6 +251,7 @@
    "fetch_from": "patient.mobile",
    "fieldname": "patient_mobile",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Patient Mobile",
    "read_only": 1
   },
@@ -288,6 +293,7 @@
    "oldfieldtype": "Link",
    "options": "Customer",
    "print_hide": 1,
+   "read_only": 1,
    "search_index": 1
   },
   {
@@ -306,13 +312,15 @@
    "fetch_from": "customer.customer_name",
    "fieldname": "client_name",
    "fieldtype": "Data",
-   "label": "Client Name"
+   "label": "Client Name",
+   "read_only": 1
   },
   {
    "fetch_from": "customer.rtn",
    "fieldname": "rtn",
    "fieldtype": "Data",
-   "label": "RTN"
+   "label": "RTN",
+   "read_only": 1
   },
   {
    "fieldname": "tax_id",
@@ -1989,11 +1997,33 @@
    "options": "Return credit notes",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "company.tax_id",
+   "fieldname": "company_tax_id",
+   "fieldtype": "Data",
+   "label": "Company Tax ID",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "sale_invoice.patient",
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient",
+   "options": "Patient",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2021-11-30 15:45:35.685743",
+ "modified": "2021-12-01 10:03:37.352428",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cancellation Of Invoices",
