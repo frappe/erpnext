@@ -330,8 +330,7 @@ def return_data(filters):
 		grand_total = 0
 
 		for salary_slip in salary_slips:
-			split_serie_space = salary_slip.naming_series.split(' ')
-			split_serie = split_serie_space[1].split('-')
+			split_serie = salary_slip.naming_series.split('-')
 			serie =  "{}-{}".format(split_serie[0], split_serie[1])		
 				
 			if date == salary_slip.posting_date and serie_number == serie and salary_slip.status != "Return":
