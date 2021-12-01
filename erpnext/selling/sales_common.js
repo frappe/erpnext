@@ -157,7 +157,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	commission_rate: function() {
 		this.calculate_commission();
-		refresh_field("total_commission");
 	},
 
 	total_commission: function() {
