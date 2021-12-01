@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 3,
  "is_standard": "Yes",
- "modified": "2020-10-03 14:32:30.369259",
+ "modified": "2021-12-01 12:39:45.526877",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Prices",
@@ -25,6 +25,9 @@
   },
   {
    "role": "Item Manager"
+  },
+  {
+   "role": "Sales User"
   }
  ]
 }
