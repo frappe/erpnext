@@ -723,7 +723,7 @@ def create_asset_repair(asset, asset_name):
 	return asset_repair
 
 @frappe.whitelist()
-def create_asset_adjustment(asset, asset_category, company):
+def create_asset_value_adjustment(asset, asset_category, company):
 	asset_value_adjustment = frappe.new_doc("Asset Value Adjustment")
 	asset_value_adjustment.update({
 		"asset": asset,
