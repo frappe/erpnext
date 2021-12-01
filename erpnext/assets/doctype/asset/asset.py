@@ -199,9 +199,8 @@ class Asset(AccountsController):
 			start = self.clear_depreciation_schedule()
 
 			# value_after_depreciation - current Asset value
-			if d.value_after_depreciation:
-				value_after_depreciation = (flt(d.value_after_depreciation) -
-					flt(self.opening_accumulated_depreciation))
+			if self.docstatus == 1 and d.value_after_depreciation:
+				value_after_depreciation = flt(d.value_after_depreciation)
 			else:
 				value_after_depreciation = (flt(self.gross_purchase_amount) -
 					flt(self.opening_accumulated_depreciation))
@@ -247,7 +246,7 @@ class Asset(AccountsController):
 					break
 
 				# For first row
-				if has_pro_rata and n==0:
+				if has_pro_rata and not self.opening_accumulated_depreciation and n==0:
 					depreciation_amount, days, months = self.get_pro_rata_amt(d, depreciation_amount,
 						self.available_for_use_date, d.depreciation_start_date)
 
@@ -260,7 +259,7 @@ class Asset(AccountsController):
 					if not self.flags.increase_in_asset_life:
 						# In case of increase_in_asset_life, the self.to_date is already set on asset_repair submission
 						self.to_date = add_months(self.available_for_use_date,
-							n * cint(d.frequency_of_depreciation))
+							(n + self.number_of_depreciations_booked) * cint(d.frequency_of_depreciation))
 
 					depreciation_amount, days, months = self.get_pro_rata_amt(d,
 						depreciation_amount, schedule_date, self.to_date)
@@ -405,6 +404,28 @@ class Asset(AccountsController):
 		if row.depreciation_start_date and getdate(row.depreciation_start_date) < getdate(self.available_for_use_date):
 			frappe.throw(_("Depreciation Row {0}: Next Depreciation Date cannot be before Available-for-use Date")
 				.format(row.idx))
+
+	# to ensure that final accumulated depreciation amount is accurate
+	def get_adjusted_depreciation_amount(self, depreciation_amount_without_pro_rata, depreciation_amount_for_last_row, finance_book):
+		if not self.opening_accumulated_depreciation:
+			depreciation_amount_for_first_row = self.get_depreciation_amount_for_first_row(finance_book)
+
+			if depreciation_amount_for_first_row + depreciation_amount_for_last_row != depreciation_amount_without_pro_rata:
+				depreciation_amount_for_last_row = depreciation_amount_without_pro_rata - depreciation_amount_for_first_row
+
+		return depreciation_amount_for_last_row
+
+	def get_depreciation_amount_for_first_row(self, finance_book):
+		if self.has_only_one_finance_book():
+			return self.schedules[0].depreciation_amount
+		else:
+			for schedule in self.schedules:
+				if schedule.finance_book == finance_book:
+					return schedule.depreciation_amount
+
+	def has_only_one_finance_book(self):
+		if len(self.finance_books) == 1:
+			return True
 
 	def set_accumulated_depreciation(self, date_of_sale=None, ignore_booked_entry = False):
 		straight_line_idx = [d.idx for d in self.get("schedules") if d.depreciation_method == 'Straight Line']
@@ -836,12 +857,12 @@ def get_total_days(date, frequency):
 
 @erpnext.allow_regional
 def get_depreciation_amount(asset, depreciable_value, row):
-	depreciation_left = flt(row.total_number_of_depreciations) - flt(asset.number_of_depreciations_booked)
+	depreciation_left = flt(row.total_number_of_depreciations)
 
 	if row.depreciation_method in ("Straight Line", "Manual"):
 		# if the Depreciation Schedule is being prepared for the first time
 		if not asset.flags.increase_in_asset_life:
-			depreciation_amount = (flt(row.value_after_depreciation) -
+			depreciation_amount = (flt(asset.gross_purchase_amount) -
 				flt(row.expected_value_after_useful_life)) / depreciation_left
 
 		# if the Depreciation Schedule is being modified after Asset Repair
