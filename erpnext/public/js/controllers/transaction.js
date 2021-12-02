@@ -1822,7 +1822,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		var me = this;
 		var args = this._get_args(item);
-		if (!((args.items && args.items.length) || args.price_list)) {
+		if (!args.items || !args.items.length || args.price_list) {
 			return;
 		}
 
