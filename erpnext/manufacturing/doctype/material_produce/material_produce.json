@@ -13,6 +13,8 @@
   "partial_produce",
   "column_break_6",
   "t_warehouse",
+  "target_warehouse_address",
+  "target_warehouse_display",
   "company",
   "material_produce_item_section",
   "material_produce_item",
@@ -213,12 +215,25 @@
    "label": "Cost of Scrap",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "target_warehouse_address",
+   "fieldtype": "Link",
+   "label": "Target Warehouse Address",
+   "options": "Address",
+   "reqd": 1
+  },
+  {
+   "fieldname": "target_warehouse_display",
+   "fieldtype": "Small Text",
+   "label": "Target Warehouse Address",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-24 11:22:37.115886",
+ "modified": "2021-12-02 17:53:30.282677",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Produce",
