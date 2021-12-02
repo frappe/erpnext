@@ -315,7 +315,8 @@ class MaterialRequest(BuyingController):
 	def create_stock_entry(self):
 		stock_entry = frappe.new_doc('Stock Entry')
 		stock_entry.purpose = self.material_request_type
-		stock_entry.set_stock_entry_type()
+		if self.material_request_type != "Purchase":
+			stock_entry.set_stock_entry_type()
 		stock_entry.from_warehouse = self.set_warehouse
 		stock_entry.company = self.company
 		# cost_center = frappe.get_cached_value('Company', self.company, 'cost_center')
