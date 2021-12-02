@@ -409,7 +409,7 @@ def handle_status_change(doc, prev_status, apply_sla_for_resolution):
 
 	if is_open_status(prev_status) and not is_open_status(doc.status):
 		# status changed from Open to something else
-		if doc.meta.has_field("first_responded_on") and not doc.first_responded_on:
+		if doc.meta.has_field("first_responded_on") and not doc.get('first_responded_on'):
 			doc.first_responded_on = now_time
 
 	# Open to Replied
@@ -760,18 +760,18 @@ def update_agreement_status(doc, apply_sla_for_resolution):
 	if (doc.meta.has_field("agreement_status")):
 		# if SLA is applied for resolution check for response and resolution, else only response
 		if apply_sla_for_resolution:
-			if doc.meta.has_field("first_responded_on") and not doc.first_responded_on:
+			if doc.meta.has_field("first_responded_on") and not doc.get('first_responded_on'):
 				doc.agreement_status = "First Response Due"
-			elif not doc.resolution_date:
+			elif doc.meta.has_field("resolution_date") and not doc.get('resolution_date'):
 				doc.agreement_status = "Resolution Due"
-			elif get_datetime(doc.resolution_date) <= get_datetime(doc.resolution_by):
+			elif get_datetime(doc.get('resolution_date')) <= get_datetime(doc.get('resolution_by')):
 				doc.agreement_status = "Fulfilled"
 			else:
 				doc.agreement_status = "Failed"
 		else:
-			if doc.meta.has_field("first_responded_on") and not doc.first_responded_on:
+			if doc.meta.has_field("first_responded_on") and not doc.get('first_responded_on'):
 				doc.agreement_status = "First Response Due"
-			elif get_datetime(doc.first_responded_on) <= get_datetime(doc.response_by):
+			elif get_datetime(doc.get('first_responded_on')) <= get_datetime(doc.get('response_by')):
 				doc.agreement_status = "Fulfilled"
 			else:
 				doc.agreement_status = "Failed"
