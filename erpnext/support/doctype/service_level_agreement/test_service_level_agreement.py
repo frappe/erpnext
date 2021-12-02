@@ -351,7 +351,7 @@ def create_service_level_agreement(default_service_level_agreement, holiday_list
 	if sla:
 		frappe.delete_doc("Service Level Agreement", sla, force=1)
 
-	return frappe.get_doc(service_level_agreement).insert(ignore_permissions=True)
+	return frappe.get_doc(service_level_agreement).insert(ignore_permissions=True, ignore_if_duplicate=True)
 
 
 def create_customer():

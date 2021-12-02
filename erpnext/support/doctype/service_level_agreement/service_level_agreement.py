@@ -647,9 +647,9 @@ def update_hold_time(doc, status):
 
 def reset_expected_response_and_resolution(doc):
 	update_values = {}
-	if doc.meta.has_field("first_responded_on") and not doc.first_responded_on:
+	if doc.meta.has_field("first_responded_on") and not doc.get('first_responded_on'):
 		update_values['response_by'] = None
-	if doc.meta.has_field("resolution_by") and not doc.resolution_date:
+	if doc.meta.has_field("resolution_by") and not doc.get('resolution_date'):
 		update_values['resolution_by'] = None
 	doc.db_set(update_values)
 
@@ -760,7 +760,7 @@ def update_agreement_status(doc, apply_sla_for_resolution):
 	if (doc.meta.has_field("agreement_status")):
 		# if SLA is applied for resolution check for response and resolution, else only response
 		if apply_sla_for_resolution:
-			if not doc.first_responded_on:
+			if doc.meta.has_field("first_responded_on") and not doc.first_responded_on:
 				doc.agreement_status = "First Response Due"
 			elif not doc.resolution_date:
 				doc.agreement_status = "Resolution Due"
@@ -769,7 +769,7 @@ def update_agreement_status(doc, apply_sla_for_resolution):
 			else:
 				doc.agreement_status = "Failed"
 		else:
-			if not doc.first_responded_on:
+			if doc.meta.has_field("first_responded_on") and not doc.first_responded_on:
 				doc.agreement_status = "First Response Due"
 			elif get_datetime(doc.first_responded_on) <= get_datetime(doc.response_by):
 				doc.agreement_status = "Fulfilled"
