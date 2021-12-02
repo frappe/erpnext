@@ -83,30 +83,6 @@ class TestIssue(TestSetUp):
 
 		self.assertEqual(issue.agreement_status, 'Fulfilled')
 
-	def test_issue_metrics(self):
-		creation = get_datetime("2020-03-04 4:00")
-
-		issue = make_issue(creation, index=1)
-		create_communication(issue.name, "test@example.com", "Received", creation)
-
-		creation = get_datetime("2020-03-04 4:15")
-		create_communication(issue.name, "test@admin.com", "Sent", creation)
-
-		creation = get_datetime("2020-03-04 5:00")
-		create_communication(issue.name, "test@example.com", "Received", creation)
-
-		creation = get_datetime("2020-03-04 5:05")
-		create_communication(issue.name, "test@admin.com", "Sent", creation)
-
-		frappe.flags.current_time = get_datetime("2020-03-04 5:05")
-		issue.reload()
-		issue.status = 'Closed'
-		issue.save()
-
-		self.assertEqual(issue.avg_response_time, 600)
-		self.assertEqual(issue.resolution_time, 3900)
-		self.assertEqual(issue.user_resolution_time, 1200)
-
 	def test_hold_time_on_replied(self):
 		creation = get_datetime("2020-03-04 4:00")
 
@@ -143,16 +119,15 @@ class TestIssue(TestSetUp):
 		self.assertEqual(flt(issue.total_hold_time, 2), 2700)
 
 	def test_issue_close_after_on_hold(self):
-		creation = get_datetime("2021-11-01 19:00")
+		frappe.flags.current_time = get_datetime("2021-11-01 19:00")
 
-		issue = make_issue(creation, index=1)
-		create_communication(issue.name, "test@example.com", "Received", creation)
+		issue = make_issue(frappe.flags.current_time, index=1)
+		create_communication(issue.name, "test@example.com", "Received", frappe.flags.current_time)
 
 		# send a reply within SLA
-		creation = get_datetime("2021-11-02 11:00")
-		create_communication(issue.name, "test@admin.com", "Sent", creation)
+		frappe.flags.current_time = get_datetime("2021-11-02 11:00")
+		create_communication(issue.name, "test@admin.com", "Sent", frappe.flags.current_time)
 
-		frappe.flags.current_time = creation
 		issue.reload()
 		issue.status = 'Replied'
 		issue.save()
@@ -167,6 +142,75 @@ class TestIssue(TestSetUp):
 		self.assertEqual(issue.resolution_by, get_datetime('2021-11-22 06:00:00'))
 		self.assertEqual(issue.resolution_date, get_datetime('2021-11-22 01:00:00'))
 		self.assertEqual(issue.agreement_status, 'Fulfilled')
+
+	def test_issue_open_after_closed(self):
+
+		# Created on -> 1 pm, Response Time -> 4 hrs, Resolution Time -> 6 hrs
+		frappe.flags.current_time = get_datetime("2021-11-01 13:00")
+		issue = make_issue(frappe.flags.current_time, index=1, issue_type='Critical') # Applies 24hr working time SLA
+		create_communication(issue.name, "test@example.com", "Received", frappe.flags.current_time)
+		self.assertEquals(issue.agreement_status, 'First Response Due')
+		self.assertEquals(issue.response_by, get_datetime("2021-11-01 17:00"))
+		self.assertEquals(issue.resolution_by, get_datetime("2021-11-01 19:00"))
+
+		# Replied on → 2 pm
+		frappe.flags.current_time = get_datetime("2021-11-01 14:00")
+		create_communication(issue.name, "test@admin.com", "Sent", frappe.flags.current_time)
+		issue.reload()
+		issue.status = 'Replied'
+		issue.save()
+		self.assertEquals(issue.agreement_status, 'Resolution Due')
+		self.assertEquals(issue.on_hold_since, frappe.flags.current_time)
+		self.assertEquals(issue.first_responded_on, frappe.flags.current_time)
+
+		# Customer Replied → 3 pm
+		frappe.flags.current_time = get_datetime("2021-11-01 15:00")
+		create_communication(issue.name, "test@example.com", "Received", frappe.flags.current_time)
+		issue.reload()
+		self.assertEquals(issue.status, 'Open')
+		# Hold Time + 1 Hrs
+		self.assertEquals(issue.total_hold_time, 3600)
+		# Resolution By should increase by one hrs
+		self.assertEquals(issue.resolution_by, get_datetime("2021-11-01 20:00"))
+
+		# Replied on → 4 pm, Open → 1 hr, Resolution Due → 8 pm
+		frappe.flags.current_time = get_datetime("2021-11-01 16:00")
+		create_communication(issue.name, "test@admin.com", "Sent", frappe.flags.current_time)
+		issue.reload()
+		issue.status = 'Replied'
+		issue.save()
+		self.assertEquals(issue.agreement_status, 'Resolution Due')
+
+		# Customer Closed → 10 pm
+		frappe.flags.current_time = get_datetime("2021-11-01 22:00")
+		issue.status = 'Closed'
+		issue.save()
+		# Hold Time + 6 Hrs
+		self.assertEquals(issue.total_hold_time, 3600 + 21600)
+		# Resolution By should increase by 6 hrs
+		self.assertEquals(issue.resolution_by, get_datetime("2021-11-02 02:00"))
+		self.assertEquals(issue.agreement_status, 'Fulfilled')
+		self.assertEquals(issue.resolution_date, frappe.flags.current_time)
+
+		# Customer Open → 3 am i.e after resolution by is crossed
+		frappe.flags.current_time = get_datetime("2021-11-02 03:00")
+		create_communication(issue.name, "test@example.com", "Received", frappe.flags.current_time)
+		issue.reload()
+		# Since issue was Resolved, Resolution By should be increased by 5 hrs (3am - 10pm)
+		self.assertEquals(issue.total_hold_time, 3600 + 21600 + 18000)
+		# Resolution By should increase by 5 hrs
+		self.assertEquals(issue.resolution_by, get_datetime("2021-11-02 07:00"))
+		self.assertEquals(issue.agreement_status, 'Resolution Due')
+		self.assertFalse(issue.resolution_date)
+
+		# We Closed → 4 am, SLA should be Fulfilled
+		frappe.flags.current_time = get_datetime("2021-11-02 04:00")
+		issue.status = 'Closed'
+		issue.save()
+		self.assertEquals(issue.resolution_by, get_datetime("2021-11-02 07:00"))
+		self.assertEquals(issue.agreement_status, 'Fulfilled')
+		self.assertEquals(issue.resolution_date, frappe.flags.current_time)
+
 
 class TestFirstResponseTime(TestSetUp):
 	# working hours used in all cases: Mon-Fri, 10am to 6pm
@@ -386,7 +430,10 @@ def create_issue_and_communication(issue_creation, first_responded_on):
 
 	return issue
 
-def make_issue(creation=None, customer=None, index=0, priority=None, issue_type=None):
+def make_issue(creation=None, customer=None, index=0, priority=None, issue_type=None, do_not_insert=False):
+	if not frappe.db.exists('Issue Type', issue_type):
+		frappe.get_doc(dict(doctype='Issue Type', name=issue_type)).insert()
+
 	issue = frappe.get_doc({
 		"doctype": "Issue",
 		"subject": "Service Level Agreement Issue {0}".format(index),
