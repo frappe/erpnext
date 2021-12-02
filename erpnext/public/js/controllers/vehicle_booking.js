@@ -350,8 +350,14 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		this.calculate_taxes_and_totals();
 	},
 
+	sales_team_add: function () {
+		this.calculate_sales_team_contribution();
+	},
 	allocated_percentage: function () {
-		this.calculate_taxes_and_totals();
+		this.calculate_sales_team_contribution();
+	},
+	sales_person: function () {
+		this.calculate_sales_team_contribution();
 	},
 
 	calculate_taxes_and_totals: function () {
@@ -360,16 +366,27 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		this.frm.doc.invoice_total = flt(this.frm.doc.vehicle_amount + this.frm.doc.fni_amount + this.frm.doc.withholding_tax_amount,
 			precision('invoice_total'));
 
-		this.frm.doc.in_words = "";
+		if (this.frm.doc.docstatus == 0) {
+			this.frm.doc.in_words = "";
+		}
 
 		if (frappe.meta.has_field(this.frm.doc.doctype, "qty")) {
 			this.calculate_grand_total();
 		}
 
-		this.calculate_contribution();
+		this.calculate_sales_team_contribution(true);
 		this.reset_outstanding_amount();
 
 		this.frm.refresh_fields();
+	},
+
+	calculate_sales_team_contribution: function (do_not_refresh) {
+		erpnext.vehicles.pricing.calculate_sales_team_contribution(this.frm,
+			this.frm.doc.grand_total || this.frm.doc.invoice_total);
+
+		if (!do_not_refresh) {
+			refresh_field('sales_team');
+		}
 	},
 
 	calculate_grand_total: function () {
@@ -397,19 +414,6 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 			this.frm.doc.customer_outstanding = this.frm.doc.invoice_total;
 			this.frm.doc.supplier_outstanding = this.frm.doc.invoice_total;
 		}
-	},
-
-	calculate_contribution: function() {
-		var me = this;
-		var grand_total = me.frm.doc.grand_total || me.frm.doc.invoice_total;
-		$.each(this.frm.doc.sales_team || [], function(i, sales_person) {
-			frappe.model.round_floats_in(sales_person);
-			if(sales_person.allocated_percentage) {
-				sales_person.allocated_amount = flt(
-					flt(grand_total) * sales_person.allocated_percentage / 100.0,
-					precision("allocated_amount", sales_person));
-			}
-		});
 	},
 
 	transaction_date: function () {

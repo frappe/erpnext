@@ -394,6 +394,16 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 		this.calculate_totals();
 	},
 
+	sales_team_add: function () {
+		this.calculate_sales_team_contribution();
+	},
+	allocated_percentage: function () {
+		this.calculate_sales_team_contribution();
+	},
+	sales_person: function() {
+		this.calculate_sales_team_contribution();
+	},
+
 	calculate_totals: function () {
 		var me = this;
 
@@ -412,9 +422,18 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 		me.frm.doc.customer_authority_payment = flt(me.frm.doc.customer_authority_payment,
 			precision('customer_authority_payment'));
 
+		this.calculate_sales_team_contribution(true);
 		this.reset_outstanding_amount();
 
 		this.frm.refresh_fields();
+	},
+
+	calculate_sales_team_contribution: function (do_not_refresh) {
+		erpnext.vehicles.pricing.calculate_sales_team_contribution(this.frm, this.frm.doc.customer_total);
+
+		if (!do_not_refresh) {
+			refresh_field('sales_team');
+		}
 	},
 
 	reset_outstanding_amount: function () {

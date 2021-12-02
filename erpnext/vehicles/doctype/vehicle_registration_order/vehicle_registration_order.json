@@ -90,6 +90,8 @@
   "customer_pay_orders_section",
   "customer_authority_instruments",
   "customer_authority_payment",
+  "sales_team_section",
+  "sales_team",
   "status_section",
   "customer_payment",
   "customer_closed_amount",
@@ -954,12 +956,26 @@
    "ignore_user_permissions": 1,
    "label": "Authority Charges Account",
    "options": "Account"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "sales_team",
+   "fieldname": "sales_team_section",
+   "fieldtype": "Section Break",
+   "label": "Sales Team"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sales_team",
+   "fieldtype": "Table",
+   "label": "Sales Team",
+   "options": "Sales Team"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-12-01 16:07:19.354394",
+ "modified": "2021-12-02 13:17:44.191063",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",

@@ -290,28 +290,14 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 
-	allocated_percentage: function(doc, cdt, cdn) {
-		var sales_person = frappe.get_doc(cdt, cdn);
-		if(sales_person.allocated_percentage) {
-
-			sales_person.allocated_percentage = flt(sales_person.allocated_percentage,
-				precision("allocated_percentage", sales_person));
-
-			sales_person.allocated_amount = flt(this.frm.doc.base_net_total *
-				sales_person.allocated_percentage / 100.0,
-				precision("allocated_amount", sales_person));
-				refresh_field(["allocated_amount"], sales_person);
-
-			this.calculate_incentive(sales_person);
-			refresh_field(["allocated_percentage", "allocated_amount", "commission_rate","incentives"], sales_person.name,
-				sales_person.parentfield);
-		}
+	sales_team_add: function () {
+		this.calculate_sales_team_contribution();
 	},
-
-	sales_person: function(doc, cdt, cdn) {
-		var row = frappe.get_doc(cdt, cdn);
-		this.calculate_incentive(row);
-		refresh_field("incentives",row.name,row.parentfield);
+	allocated_percentage: function() {
+		this.calculate_sales_team_contribution();
+	},
+	sales_person: function() {
+		this.calculate_sales_team_contribution();
 	},
 
 	warehouse: function(doc, cdt, cdn) {
@@ -374,24 +360,22 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 
-	calculate_contribution: function() {
+	calculate_sales_team_contribution: function(do_not_refresh) {
 		var me = this;
+		var net_total = flt(me.frm.doc.base_net_total);
+
 		$.each(this.frm.doc.sales_team || [], function(i, sales_person) {
 			frappe.model.round_floats_in(sales_person);
-			if(sales_person.allocated_percentage) {
-				sales_person.allocated_amount = flt(
-					me.frm.doc.base_net_total * sales_person.allocated_percentage / 100.0,
-					precision("allocated_amount", sales_person));
-			}
-		});
-	},
 
-	calculate_incentive: function(row) {
-		if(row.allocated_amount)
-		{
-			row.incentives = flt(
-					row.allocated_amount * row.commission_rate / 100.0,
-					precision("incentives", row));
+			sales_person.allocated_amount = flt(net_total * sales_person.allocated_percentage / 100.0,
+				precision("allocated_amount", sales_person));
+
+			sales_person.incentives = flt(sales_person.allocated_amount * sales_person.commission_rate / 100.0,
+				precision("incentives", sales_person));
+		});
+
+		if (!do_not_refresh) {
+			refresh_field('sales_team');
 		}
 	},
 

@@ -194,4 +194,17 @@ $.extend(erpnext.vehicles.pricing, {
 
 		return args;
 	},
+
+	calculate_sales_team_contribution: function(frm, net_total) {
+		net_total = flt(net_total);
+		$.each(frm.doc.sales_team || [], function(i, sales_person) {
+			frappe.model.round_floats_in(sales_person);
+
+			sales_person.allocated_amount = flt(net_total * sales_person.allocated_percentage / 100.0,
+				precision("allocated_amount", sales_person));
+
+			sales_person.incentives = flt(sales_person.allocated_amount * sales_person.commission_rate / 100.0,
+				precision("incentives", sales_person));
+		});
+	},
 });

@@ -59,7 +59,7 @@ class SellingController(StockController):
 		self.validate_target_warehouse()
 
 	def before_update_after_submit(self):
-		self.calculate_contribution()
+		self.calculate_sales_team_contribution(self.get('base_net_total'))
 
 	def set_missing_values(self, for_validate=False):
 
@@ -152,24 +152,6 @@ class SellingController(StockController):
 
 			self.total_commission = flt(self.base_net_total * self.commission_rate / 100.0,
 				self.precision("total_commission"))
-
-	def calculate_contribution(self):
-		if not self.meta.get_field("sales_team"):
-			return
-
-		total = 0.0
-		sales_team = self.get("sales_team")
-		for sales_person in sales_team:
-			self.round_floats_in(sales_person)
-
-			sales_person.allocated_amount = flt(
-				self.base_net_total * sales_person.allocated_percentage / 100.0,
-				self.precision("allocated_amount", sales_person))
-
-			total += sales_person.allocated_percentage
-
-		if sales_team and total != 100.0:
-			throw(_("Total allocated percentage for sales team should be 100"))
 
 	def validate_max_discount(self):
 		for d in self.get("items"):

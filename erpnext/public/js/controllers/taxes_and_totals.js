@@ -57,7 +57,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		// Sales person's commission
 		if(in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"], this.frm.doc.doctype)) {
 			this.calculate_commission();
-			this.calculate_contribution();
+			this.calculate_sales_team_contribution(true);
 		}
 
 		// Update paid amount on return/debit note creation

@@ -265,6 +265,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			self.customer_authority_payment += d.instrument_amount
 		self.customer_authority_payment = flt(self.customer_authority_payment, self.precision('customer_authority_payment'))
 
+		self.calculate_sales_team_contribution(self.get('customer_total'))
+
 	def calculate_outstanding_amount(self):
 		if self.docstatus == 0:
 			self.customer_payment = 0

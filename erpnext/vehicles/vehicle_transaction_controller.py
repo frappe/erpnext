@@ -28,6 +28,8 @@ force_fields = [
 	'vehicle_chassis_no', 'vehicle_engine_no', 'vehicle_license_plate', 'vehicle_unregistered', 'vehicle_color'
 ]
 
+dont_update_if_missing = ['sales_team']
+
 
 class VehicleTransactionController(StockController):
 	def validate(self):
@@ -72,7 +74,7 @@ class VehicleTransactionController(StockController):
 
 		vehicle_booking_order_details = get_vehicle_booking_order_details(args)
 		for k, v in vehicle_booking_order_details.items():
-			if doc.meta.has_field(k) and (not doc.get(k) or k in force_fields):
+			if doc.meta.has_field(k) and (not doc.get(k) or k in force_fields) and k not in dont_update_if_missing:
 				doc.set(k, v)
 
 	def set_vehicle_details(self, doc=None, for_validate=False, update=False):
@@ -87,7 +89,7 @@ class VehicleTransactionController(StockController):
 		vehicle_details = get_vehicle_details(args, get_vehicle_booking_order=False, warn_reserved=for_validate)
 		values = {}
 		for k, v in vehicle_details.items():
-			if doc.meta.has_field(k) and (not doc.get(k) or k in force_fields):
+			if doc.meta.has_field(k) and (not doc.get(k) or k in force_fields) and k not in dont_update_if_missing:
 				if k == "vehicle_license_plate" and self.doctype in ["Vehicle Registration Order", "Vehicle Registration Receipt"]:
 					continue
 
@@ -113,7 +115,7 @@ class VehicleTransactionController(StockController):
 	def set_customer_details(self, for_validate=False):
 		customer_details = get_customer_details(self.as_dict())
 		for k, v in customer_details.items():
-			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
+			if self.meta.has_field(k) and (not self.get(k) or k in force_fields) and k not in dont_update_if_missing:
 				self.set(k, v)
 
 	def update_stock_ledger(self):
@@ -687,6 +689,12 @@ def get_vehicle_booking_order_details(args):
 	out.booking_phone = booking_details.contact_phone
 
 	out.finance_type = booking_details.finance_type
+
+	# Sales Team table
+	if booking_details and args.doctype and frappe.get_meta(args.doctype).has_field('sales_team'):
+		vbo_sales_team = frappe.get_all("Sales Team", fields=['sales_person', 'allocated_percentage'],
+			filters={"parenttype": "Vehicle Booking Order", "parent": args.vehicle_booking_order})
+		out.sales_team = vbo_sales_team
 
 	return out
 

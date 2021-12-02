@@ -45,7 +45,7 @@
    "columns": 2,
    "default": "100",
    "fieldname": "allocated_percentage",
-   "fieldtype": "Float",
+   "fieldtype": "Percent",
    "in_list_view": 1,
    "label": "Contribution (%)",
    "oldfieldname": "allocated_percentage",
@@ -59,7 +59,7 @@
    "fieldname": "allocated_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Contribution to Net Total",
+   "label": "Contribution Amount",
    "oldfieldname": "allocated_amount",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -68,13 +68,15 @@
    "width": "120px"
   },
   {
+   "default": "0",
    "fieldname": "commission_rate",
-   "fieldtype": "Data",
+   "fieldtype": "Percent",
    "label": "Commission Rate",
    "read_only": 1
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "fieldname": "incentives",
    "fieldtype": "Currency",
    "label": "Incentives",
@@ -85,7 +87,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-01 02:34:19.400605",
+ "modified": "2021-12-02 13:35:22.505581",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Team",

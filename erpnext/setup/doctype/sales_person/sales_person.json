@@ -18,11 +18,11 @@
   "employee",
   "employee_name",
   "department",
+  "target_details_section_break",
+  "targets",
   "lft",
   "rgt",
-  "old_parent",
-  "target_details_section_break",
-  "targets"
+  "old_parent"
  ],
  "fields": [
   {
@@ -53,8 +53,9 @@
   },
   {
    "fieldname": "commission_rate",
-   "fieldtype": "Data",
+   "fieldtype": "Percent",
    "label": "Commission Rate",
+   "permlevel": 1,
    "print_hide": 1
   },
   {
@@ -153,7 +154,7 @@
  "icon": "icon-user",
  "idx": 1,
  "is_tree": 1,
- "modified": "2021-11-26 17:10:59.584868",
+ "modified": "2021-12-02 13:46:26.574004",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Person",
@@ -161,8 +162,16 @@
  "owner": "Administrator",
  "permissions": [
   {
+   "create": 1,
+   "delete": 1,
    "read": 1,
    "report": 1,
+   "role": "Sales Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
    "role": "Sales Manager",
    "write": 1
   },
@@ -170,6 +179,22 @@
    "read": 1,
    "report": 1,
    "role": "Sales User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "write": 1
   },
   {
    "create": 1,
@@ -183,16 +208,6 @@
    "role": "Customer Master Manager",
    "share": 1,
    "write": 1
-  },
-  {
-   "read": 1,
-   "report": 1,
-   "role": "Accounts User"
-  },
-  {
-   "read": 1,
-   "report": 1,
-   "role": "Sales User (Read Only)"
   }
  ],
  "search_fields": "parent_sales_person",

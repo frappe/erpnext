@@ -308,7 +308,7 @@ class AccountsController(TransactionBase):
 
 		if self.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
 			self.calculate_commission()
-			self.calculate_contribution()
+			self.calculate_sales_team_contribution(self.get('base_net_total'))
 
 	def validate_date_with_fiscal_year(self):
 		if self.meta.get_field("fiscal_year"):
@@ -1503,7 +1503,6 @@ class AccountsController(TransactionBase):
 			if self.meta.has_field('calculate_tax_on_company_currency') and doc.calculate_tax_on_company_currency:
 				self.calculate_tax_on_company_currency = cint(doc.calculate_tax_on_company_currency == "Yes")
 
-
 	def validate_zero_outstanding(self):
 		if self.get('transaction_type'):
 			validate_zero_outstanding = cint(frappe.get_cached_value('Transaction Type', self.get('transaction_type'),
@@ -1512,6 +1511,28 @@ class AccountsController(TransactionBase):
 			if validate_zero_outstanding and self.outstanding_amount != 0:
 				frappe.throw(_("Outstanding Amount must be 0 for Transaction Type {0}")
 					.format(frappe.bold(self.get('transaction_type'))))
+
+	def calculate_sales_team_contribution(self, net_total):
+		if not self.meta.get_field("sales_team"):
+			return
+
+		net_total = flt(net_total)
+		total_allocated_percentage = 0.0
+		sales_team = self.get("sales_team", [])
+
+		for sales_person in sales_team:
+			self.round_floats_in(sales_person)
+
+			sales_person.allocated_amount = flt(net_total * sales_person.allocated_percentage / 100.0,
+				sales_person.precision("allocated_amount"))
+
+			sales_person.incentives = flt(sales_person.allocated_amount * sales_person.commission_rate / 100.0,
+				sales_person.precision("incentives"))
+
+			total_allocated_percentage += sales_person.allocated_percentage
+
+		if sales_team and total_allocated_percentage != 100.0:
+			throw(_("Total allocated percentage for Sales Team should be 100%"))
 
 
 @frappe.whitelist()

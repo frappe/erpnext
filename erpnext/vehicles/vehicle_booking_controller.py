@@ -62,7 +62,7 @@ class VehicleBookingController(AccountsController):
 		self.clean_remarks()
 
 	def before_update_after_submit(self):
-		self.calculate_contribution()
+		self.calculate_sales_team_contribution(self.get('grand_total') or self.get('invoice_total'))
 
 	def onload(self):
 		super(VehicleBookingController, self).onload()
@@ -178,7 +178,7 @@ class VehicleBookingController(AccountsController):
 		if self.meta.has_field('qty'):
 			self.calculate_grand_total()
 
-		self.calculate_contribution()
+		self.calculate_sales_team_contribution(self.get('grand_total') or self.get('invoice_total'))
 
 	def calculate_grand_total(self):
 		self.total_vehicle_amount = flt(flt(self.vehicle_amount) * cint(self.qty),
@@ -196,25 +196,6 @@ class VehicleBookingController(AccountsController):
 			self.precision('grand_total'))
 
 		self.set_grand_total_in_words()
-
-	def calculate_contribution(self):
-		if not self.meta.get_field("sales_team"):
-			return
-
-		grand_total = self.get('grand_total') or self.get('invoice_total')
-		total = 0.0
-		sales_team = self.get("sales_team", [])
-		for sales_person in sales_team:
-			self.round_floats_in(sales_person)
-
-			sales_person.allocated_amount = flt(
-				flt(grand_total) * sales_person.allocated_percentage / 100.0,
-				self.precision("allocated_amount", sales_person))
-
-			total += sales_person.allocated_percentage
-
-		if sales_team and total != 100.0:
-			frappe.throw(_("Total allocated percentage for sales team should be 100"))
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
