@@ -54,9 +54,11 @@ class RepostItemValuation(Document):
 
 	@frappe.whitelist()
 	def restart_reposting(self):
-		self.set_status('Queued')
-		frappe.enqueue(repost, timeout=1800, queue='long',
-			job_name='repost_sle', now=True, doc=self)
+		self.set_status('Queued', write=False)
+		self.current_index = 0
+		self.distinct_item_and_warehouse = None
+		self.items_to_be_repost = None
+		self.db_update()
 
 	def deduplicate_similar_repost(self):
 		""" Deduplicate similar reposts based on item-warehouse-posting combination."""
