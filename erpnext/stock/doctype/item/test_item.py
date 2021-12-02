@@ -468,7 +468,7 @@ class TestItem(unittest.TestCase):
 			item_doc.save()
 
 		# Check values saved correctly
-		barcodes = frappe.get_list(
+		barcodes = frappe.get_all(
 			'Item Barcode',
 			fields=['barcode', 'barcode_type'],
 			filters={'parent': item_code})
