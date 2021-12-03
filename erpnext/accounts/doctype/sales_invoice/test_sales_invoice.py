@@ -1611,28 +1611,12 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si.shipping_rule = shipping_rule.name
 		si.insert()
-
-		shipping_amount = 0.0
-		for condition in shipping_rule.get("conditions"):
-			if not condition.to_value or (flt(condition.from_value) <= si.net_total <= flt(condition.to_value)):
-				shipping_amount = condition.shipping_amount
-
-		shipping_charge = {
-			"doctype": "Sales Taxes and Charges",
-			"category": "Valuation and Total",
-			"charge_type": "Actual",
-			"account_head": shipping_rule.account,
-			"cost_center": shipping_rule.cost_center,
-			"tax_amount": shipping_amount,
-			"description": shipping_rule.name
-		}
-		si.append("taxes", shipping_charge)
 		si.save()
 
 		self.assertEqual(si.net_total, 1250)
 
-		self.assertEqual(si.total_taxes_and_charges, 577.05)
-		self.assertEqual(si.grand_total, 1827.05)
+		self.assertEqual(si.total_taxes_and_charges, 468.85)
+		self.assertEqual(si.grand_total, 1718.85)
 
 
 
@@ -2320,6 +2304,29 @@ class TestSalesInvoice(unittest.TestCase):
 		pe.submit()
 		si.reload()
 		self.assertEqual(si.status, "Paid")
+
+	def test_sales_commission(self):
+		si = frappe.copy_doc(test_records[0])
+		item = copy.deepcopy(si.get('items')[0])
+		item.update({
+			"qty": 1,
+			"rate": 500,
+			"grant_commission": 1
+		})
+		si.append("items", item)
+
+		# Test valid values
+		for commission_rate, total_commission in ((0, 0), (10, 50), (100, 500)):
+			si.commission_rate = commission_rate
+			si.save()
+			self.assertEqual(si.amount_eligible_for_commission, 500)
+			self.assertEqual(si.total_commission, total_commission)
+
+		# Test invalid values
+		for commission_rate in (101, -1):
+			si.reload()
+			si.commission_rate = commission_rate
+			self.assertRaises(frappe.ValidationError, si.save)
 
 	def test_sales_invoice_submission_post_account_freezing_date(self):
 		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', add_days(getdate(), 1))
