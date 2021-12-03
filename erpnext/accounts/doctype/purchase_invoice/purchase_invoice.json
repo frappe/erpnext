@@ -161,7 +161,8 @@
   "to_date",
   "column_break_114",
   "auto_repeat",
-  "update_auto_repeat_reference"
+  "update_auto_repeat_reference",
+  "transaction_number"
  ],
  "fields": [
   {
@@ -1330,12 +1331,18 @@
    "fieldname": "tax_included",
    "fieldtype": "Check",
    "label": "Tax Included"
+  },
+  {
+   "fieldname": "transaction_number",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Transaction Number"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2021-04-23 16:17:49.047179",
+ "modified": "2021-12-03 14:44:10.861615",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
