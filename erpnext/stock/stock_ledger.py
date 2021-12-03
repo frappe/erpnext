@@ -7,10 +7,11 @@ import json
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdate
 from six import iteritems
 
 import erpnext
+from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
 from erpnext.stock.utils import (
 	get_incoming_outgoing_rate_for_cancel,
 	get_or_make_bin,
@@ -18,19 +19,15 @@ from erpnext.stock.utils import (
 )
 
 
-# future reposting
 class NegativeStockError(frappe.ValidationError): pass
 class SerialNoExistsInFutureTransaction(frappe.ValidationError):
 	pass
 
 _exceptions = frappe.local('stockledger_exceptions')
-# _exceptions = []
 
 def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 	from erpnext.controllers.stock_controller import future_sle_exists
 	if sl_entries:
-		from erpnext.stock.utils import update_bin
-
 		cancel = sl_entries[0].get("is_cancelled")
 		if cancel:
 			validate_cancellation(sl_entries)
@@ -65,7 +62,38 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 				# preserve previous_qty_after_transaction for qty reposting
 				args.previous_qty_after_transaction = sle.get("previous_qty_after_transaction")
 
-			update_bin(args, allow_negative_stock, via_landed_cost_voucher)
+			is_stock_item = frappe.get_cached_value('Item', args.get("item_code"), 'is_stock_item')
+			if is_stock_item:
+				bin_name = get_or_make_bin(args.get("item_code"), args.get("warehouse"))
+				update_bin_qty(bin_name, args)
+				repost_current_voucher(args, allow_negative_stock, via_landed_cost_voucher)
+			else:
+				frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
+
+def repost_current_voucher(args, allow_negative_stock=False, via_landed_cost_voucher=False):
+	if args.get("actual_qty") or args.get("voucher_type") == "Stock Reconciliation":
+		if not args.get("posting_date"):
+			args["posting_date"] = nowdate()
+
+		if args.get("is_cancelled") and via_landed_cost_voucher:
+			return
+
+		# Reposts only current voucher SL Entries
+		# Updates valuation rate, stock value, stock queue for current transaction
+		update_entries_after({
+			"item_code": args.get('item_code'),
+			"warehouse": args.get('warehouse'),
+			"posting_date": args.get("posting_date"),
+			"posting_time": args.get("posting_time"),
+			"voucher_type": args.get("voucher_type"),
+			"voucher_no": args.get("voucher_no"),
+			"sle_id": args.get('name'),
+			"creation": args.get('creation')
+		}, allow_negative_stock=allow_negative_stock, via_landed_cost_voucher=via_landed_cost_voucher)
+
+		# update qty in future sle and Validate negative qty
+		update_qty_in_future_sle(args, allow_negative_stock)
+
 
 def get_args_for_future_sle(row):
 	return frappe._dict({
