@@ -430,9 +430,11 @@ def create_issue_and_communication(issue_creation, first_responded_on):
 
 	return issue
 
-def make_issue(creation=None, customer=None, index=0, priority=None, issue_type=None, do_not_insert=False):
-	if not frappe.db.exists('Issue Type', issue_type):
-		frappe.get_doc(dict(doctype='Issue Type', name=issue_type)).insert()
+def make_issue(creation=None, customer=None, index=0, priority=None, issue_type=None):
+	if issue_type and not frappe.db.exists('Issue Type', issue_type):
+		doc = frappe.new_doc('Issue Type')
+		doc.name = issue_type
+		doc.insert()
 
 	issue = frappe.get_doc({
 		"doctype": "Issue",
