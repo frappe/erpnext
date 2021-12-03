@@ -204,6 +204,7 @@ def get_or_make_bin(item_code: str , warehouse: str) -> str:
 	return bin_record
 
 def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
+	"""WARNING: This function is deprecated. Inline this function instead of using it."""
 	from erpnext.stock.doctype.bin.bin import update_stock
 	is_stock_item = frappe.get_cached_value('Item', args.get("item_code"), 'is_stock_item')
 	if is_stock_item:
