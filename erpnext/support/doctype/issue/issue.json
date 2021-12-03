@@ -42,6 +42,8 @@
   "opening_date",
   "opening_time",
   "resolution_date",
+  "resolution_time",
+  "user_resolution_time",
   "additional_info",
   "lead",
   "contact",
@@ -345,16 +347,16 @@
    "read_only": 1
   },
   {
-   "fieldname": "resolution_time",
-   "fieldtype": "Duration",
-   "label": "Resolution Time",
-   "read_only": 1
+  "fieldname": "resolution_time",
+  "fieldtype": "Duration",
+  "label": "Resolution Time",
+  "read_only": 1
   },
   {
-   "fieldname": "user_resolution_time",
-   "fieldtype": "Duration",
-   "label": "User Resolution Time",
-   "read_only": 1
+    "fieldname": "user_resolution_time",
+    "fieldtype": "Duration",
+    "label": "User Resolution Time",
+    "read_only": 1
   },
   {
    "fieldname": "on_hold_since",
