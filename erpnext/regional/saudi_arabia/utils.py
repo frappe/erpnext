@@ -1,6 +1,7 @@
 import io
 import os
 from base64 import b64encode
+from urllib.parse import quote
 
 import frappe
 from frappe import _
@@ -101,8 +102,9 @@ def create_qr_code(doc, method):
 			url = qr_create(base64_string, error='L')
 			url.png(qr_image, scale=2, quiet_zone=1)
 
+			urlencoded_name = quote(doc.name)
 			# making file
-			filename = f"QR-CODE-{doc.name}.png".replace(os.path.sep, "__")
+			filename = f"QR-CODE-{urlencoded_name}.png".replace(os.path.sep, "__")
 			_file = frappe.get_doc({
 				"doctype": "File",
 				"file_name": filename,
