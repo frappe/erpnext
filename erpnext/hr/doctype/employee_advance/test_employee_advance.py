@@ -34,6 +34,24 @@ class TestEmployeeAdvance(unittest.TestCase):
 		journal_entry1 = make_payment_entry(advance)
 		self.assertRaises(EmployeeAdvanceOverPayment, journal_entry1.submit)
 
+	def test_paid_amount_on_pe_cancellation(self):
+		employee_name = make_employee("_T@employe.advance")
+		advance = make_employee_advance(employee_name)
+
+		pe = make_payment_entry(advance)
+		pe.submit()
+
+		advance.reload()
+
+		self.assertEqual(advance.paid_amount, 1000)
+		self.assertEqual(advance.status, "Paid")
+
+		pe.cancel()
+		advance.reload()
+
+		self.assertEqual(advance.paid_amount, 0)
+		self.assertEqual(advance.status, "Unpaid")
+
 	def test_repay_unclaimed_amount_from_salary(self):
 		employee_name = make_employee("_T@employe.advance")
 		advance = make_employee_advance(employee_name, {"repay_unclaimed_amount_from_salary": 1})

@@ -248,20 +248,18 @@ doc_events = {
 		"validate": "erpnext.regional.india.utils.validate_tax_category"
 	},
 	"Sales Invoice": {
-		"after_insert": "erpnext.regional.saudi_arabia.utils.create_qr_code",
 		"on_submit": [
 			"erpnext.regional.create_transaction_log",
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
+			"erpnext.regional.saudi_arabia.utils.create_qr_code",
 			"erpnext.erpnext_integrations.taxjar_integration.create_transaction"
 		],
 		"on_cancel": [
 			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
-			"erpnext.erpnext_integrations.taxjar_integration.delete_transaction"
-		],
-		"on_trash": [
-			"erpnext.regional.check_deletion_permission",
+			"erpnext.erpnext_integrations.taxjar_integration.delete_transaction",
 			"erpnext.regional.saudi_arabia.utils.delete_qr_code_file"
 		],
+		"on_trash": "erpnext.regional.check_deletion_permission",
 		"validate": [
 			"erpnext.regional.india.utils.validate_document_name",
 			"erpnext.regional.india.utils.update_taxable_values"
@@ -306,7 +304,8 @@ doc_events = {
 		'validate': ["erpnext.erpnext_integrations.taxjar_integration.set_sales_tax"]
 	},
 	"Company": {
-		"on_trash": "erpnext.regional.india.utils.delete_gst_settings_for_company"
+		"on_trash": ["erpnext.regional.india.utils.delete_gst_settings_for_company",
+			"erpnext.regional.saudi_arabia.utils.delete_vat_settings_for_company"]
 	},
 	"Integration Request": {
 		"validate": "erpnext.accounts.doctype.payment_request.payment_request.validate_payment"
