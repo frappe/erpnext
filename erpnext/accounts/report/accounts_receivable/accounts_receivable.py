@@ -103,7 +103,7 @@ class ReceivablePayableReport(object):
 			self.get_invoices(gle)
 
 	def get_invoices(self, gle):
-		if gle.voucher_type in ('Sales Invoice', 'Purchase Invoice', 'Supplier Documents'):
+		if gle.voucher_type in ('Sales Invoice', 'Purchase Invoice'):
 			if self.filters.get("sales_person"):
 				if gle.voucher_no in self.sales_person_records.get("Sales Invoice", []) \
 					or gle.party in self.sales_person_records.get("Customer", []):
@@ -150,7 +150,7 @@ class ReceivablePayableReport(object):
 			# If payment is made against credit note
 			# and credit note is made against a Sales Invoice
 			# then consider the payment against original sales invoice.
-			if gle.against_voucher_type in ('Sales Invoice', 'Purchase Invoice', 'Supplier Documents'):
+			if gle.against_voucher_type in ('Sales Invoice', 'Purchase Invoice'):
 				if gle.against_voucher in self.return_entries:
 					return_against = self.return_entries.get(gle.against_voucher)
 					if return_against:
