@@ -12,6 +12,10 @@ frappe.ui.form.on("Company", {
 				}
 			});
 		}
+
+		frm.call('check_if_transactions_exist').then(r => {
+			frm.toggle_enable("default_currency", (!r.message));
+		});
 	},
 	setup: function(frm) {
 		erpnext.company.setup_queries(frm);
@@ -86,9 +90,6 @@ frappe.ui.form.on("Company", {
 			frappe.contacts.render_address_and_contact(frm);
 
 			frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Company'}
-
-			frm.toggle_enable("default_currency", (frm.doc.__onload &&
-				!frm.doc.__onload.transactions_exist));
 
 			if (frappe.perm.has_perm("Cost Center", 0, 'read')) {
 				frm.add_custom_button(__('Cost Centers'), function() {
