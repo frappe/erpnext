@@ -721,3 +721,4 @@ erpnext.patches.v12_0.set_vehicle_registration_agent_charges_table
 erpnext.patches.v12_0.set_vehicle_registration_agent_outstanding
 erpnext.patches.v12_0.set_vehicle_invoice_customer
 erpnext.patches.v12_0.set_sales_team_commission_rate_numerical
+erpnext.patches.v12_0.remove_vehicle_registration_to_pay_agent_status

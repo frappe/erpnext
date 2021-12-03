@@ -459,13 +459,12 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			self.precision('margin_amount'))
 		return unclosed_income_amount
 
-	def is_unclosed(self, ignore_agent_outstanding=False, ignore_customer_outstanding=False):
+	def is_unclosed(self, ignore_customer_outstanding=False):
 		return self.get_unclosed_customer_amount()\
 			or self.get_unclosed_agent_amount()\
 			or self.get_unclosed_income_amount()\
 			or (self.customer_outstanding and not ignore_customer_outstanding)\
-			or self.authority_outstanding\
-			or (self.agent_outstanding and not ignore_agent_outstanding)
+			or self.authority_outstanding
 
 	def update_payment_status(self, update=False):
 		self.calculate_outstanding_amount()
@@ -612,7 +611,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				if cint(self.use_sales_invoice) and not self.sales_invoice_exists():
 					self.status = "To Bill"
 
-				elif self.is_unclosed(ignore_agent_outstanding=True, ignore_customer_outstanding=cint(self.use_sales_invoice)):
+				elif self.is_unclosed(ignore_customer_outstanding=cint(self.use_sales_invoice)):
 					self.status = "To Close Accounts"
 
 				elif self.invoice_status == "Issued":
@@ -623,9 +622,6 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 
 				elif self.customer_outstanding > 0 and cint(self.use_sales_invoice):
 					self.status = "To Receive Payment"
-
-				elif self.agent_outstanding > 0:
-					self.status = "To Pay Agent"
 
 				else:
 					self.status = "Completed"
