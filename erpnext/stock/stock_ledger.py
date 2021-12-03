@@ -795,10 +795,10 @@ class update_entries_after(object):
 
 	def update_bin(self):
 		# update bin for each warehouse
-		for warehouse, data in iteritems(self.data):
-			bin_record = get_or_make_bin(self.item_code, warehouse)
+		for warehouse, data in self.data.items():
+			bin_name = get_or_make_bin(self.item_code, warehouse)
 
-			frappe.db.set_value('Bin', bin_record, {
+			frappe.db.set_value('Bin', bin_name, {
 				"valuation_rate": data.valuation_rate,
 				"actual_qty": data.qty_after_transaction,
 				"stock_value": data.stock_value
