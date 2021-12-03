@@ -402,9 +402,6 @@ class Asset(AccountsController):
 			frappe.throw(_("Depreciation Row {0}: Next Depreciation Date cannot be before Available-for-use Date")
 				.format(row.idx))
 
-<<<<<<< HEAD
-	def set_accumulated_depreciation(self, date_of_sale=None, ignore_booked_entry = False):
-=======
 	# to ensure that final accumulated depreciation amount is accurate
 	def get_adjusted_depreciation_amount(self, depreciation_amount_without_pro_rata, depreciation_amount_for_last_row, finance_book):
 		if not self.opening_accumulated_depreciation:
@@ -427,8 +424,7 @@ class Asset(AccountsController):
 		if len(self.finance_books) == 1:
 			return True
 
-	def set_accumulated_depreciation(self, date_of_sale=None, date_of_return=None, ignore_booked_entry = False):
->>>>>>> 5c3d4caeda (fix: Create Depreciation Schedules properly for existing Assets)
+	def set_accumulated_depreciation(self, date_of_sale=None, ignore_booked_entry = False):
 		straight_line_idx = [d.idx for d in self.get("schedules") if d.depreciation_method == 'Straight Line']
 		finance_books = []
 
@@ -862,16 +858,8 @@ def get_depreciation_amount(asset, depreciable_value, row):
 	if row.depreciation_method in ("Straight Line", "Manual"):
 		# if the Depreciation Schedule is being prepared for the first time
 		if not asset.flags.increase_in_asset_life:
-<<<<<<< HEAD
-			depreciation_amount = (flt(row.value_after_depreciation) -
-=======
 			depreciation_amount = (flt(asset.gross_purchase_amount) -
-<<<<<<< HEAD
->>>>>>> 5c3d4caeda (fix: Create Depreciation Schedules properly for existing Assets)
-				flt(row.expected_value_after_useful_life)) / depreciation_left
-=======
 				flt(row.expected_value_after_useful_life)) / flt(row.total_number_of_depreciations)
->>>>>>> 828769ca70 (fix: Remove unnecessary variable)
 
 		# if the Depreciation Schedule is being modified after Asset Repair
 		else:
