@@ -187,7 +187,7 @@ def get_bin(item_code, warehouse):
 	bin_obj.flags.ignore_permissions = True
 	return bin_obj
 
-def get_or_make_bin(item_code, warehouse) -> str:
+def get_or_make_bin(item_code: str , warehouse: str) -> str:
 	bin_record = frappe.db.get_value('Bin', {'item_code': item_code, 'warehouse': warehouse})
 
 	if not bin_record:
@@ -206,8 +206,8 @@ def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	from erpnext.stock.doctype.bin.bin import update_stock
 	is_stock_item = frappe.get_cached_value('Item', args.get("item_code"), 'is_stock_item')
 	if is_stock_item:
-		bin_record = get_or_make_bin(args.get("item_code"), args.get("warehouse"))
-		update_stock(bin_record, args, allow_negative_stock, via_landed_cost_voucher)
+		bin_name = get_or_make_bin(args.get("item_code"), args.get("warehouse"))
+		update_stock(bin_name, args, allow_negative_stock, via_landed_cost_voucher)
 	else:
 		frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
 
