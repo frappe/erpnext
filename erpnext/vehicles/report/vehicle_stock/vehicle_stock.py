@@ -329,6 +329,10 @@ class VehicleStockReport(object):
 			data = [d for d in self.data if d.invoice_received_date or d.invoice_delivery_date]
 		elif self.filters.invoice_status == "Invoice In Hand":
 			data = [d for d in self.data if d.invoice_received_date and not d.invoice_delivery_date]
+		elif self.filters.invoice_status == "Invoice Issued":
+			was_issued = lambda d: d.invoice_issue_date and getdate(d.invoice_issue_date) >= getdate(d.invoice_received_date)
+			was_returned = lambda d: d.invoice_issue_date and d.invoice_return_date and getdate(d.invoice_return_date) >= getdate(d.invoice_issue_date)
+			data = [d for d in self.data if was_issued(d) and not was_returned(d)]
 		elif self.filters.invoice_status == "Invoice Delivered":
 			data = [d for d in self.data if d.invoice_delivery_date]
 		elif self.filters.invoice_status == "Invoice Not Received":

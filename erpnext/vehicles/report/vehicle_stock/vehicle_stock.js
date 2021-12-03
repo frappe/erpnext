@@ -25,6 +25,7 @@ frappe.query_reports["Vehicle Stock"] = {
 				'',
 				'Invoice In Hand and Delivered',
 				'Invoice In Hand',
+				'Invoice Issued',
 				'Invoice Delivered',
 				'Invoice Not Received'
 			]
