@@ -13,9 +13,6 @@ class VehicleRegistrationRegisterReport(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 
-		self.filters.from_date = getdate(self.filters.from_date or nowdate())
-		self.filters.to_date = getdate(self.filters.to_date or nowdate())
-
 		self.show_item_name = frappe.defaults.get_global_default('item_naming_by') != "Item Name"
 		self.show_customer_name = frappe.defaults.get_global_default('cust_master_name') == "Naming Series"
 
@@ -144,30 +141,48 @@ class VehicleRegistrationRegisterReport(object):
 	def get_conditions(self):
 		conditions = []
 
-		# Date Filter
+		# Date Field and sorting
+		date_field = 'm.transaction_date'
 		if self.filters.date_type == "Registration Receipt Date":
 			self.order_by = "m.registration_receipt_date, m.transaction_date, m.name"
-			conditions.append('m.registration_receipt_date between %(from_date)s and %(to_date)s')
-
+			date_field = "m.registration_receipt_date"
 		elif self.filters.date_type == "Call Date":
 			self.order_by = "m.call_date, m.transaction_date, m.name"
-			conditions.append('m.call_date between %(from_date)s and %(to_date)s')
-
+			date_field = "m.call_date"
 		elif self.filters.date_type == "Invoice Delivered Date":
 			self.order_by = "m.invoice_delivered_date, m.transaction_date, m.name"
-			conditions.append('m.invoice_delivered_date between %(from_date)s and %(to_date)s')
-
+			date_field = "m.invoice_delivered_date"
 		elif self.filters.date_type == "Invoice Issue Date":
 			self.order_by = "m.invoice_issue_date, m.transaction_date, m.name"
-			conditions.append('m.invoice_issue_date between %(from_date)s and %(to_date)s')
-
+			date_field = "m.invoice_issue_date"
 		elif self.filters.date_type == "Invoice Return Date":
 			self.order_by = "m.invoice_return_date, m.transaction_date, m.name"
-			conditions.append('m.invoice_return_date between %(from_date)s and %(to_date)s')
-
+			date_field = "m.invoice_return_date"
 		else:
 			self.order_by = "m.transaction_date, m.name"
-			conditions.append('m.transaction_date between %(from_date)s and %(to_date)s')
+			date_field = "m.transaction_date"
+
+		# Date filter
+		if self.filters.from_date:
+			conditions.append('{0} >= %(from_date)s'.format(date_field))
+		if self.filters.to_date:
+			conditions.append('{0} <= %(to_date)s'.format(date_field))
+
+		# Order Status
+		if self.filters.order_status == "Open Orders":
+			conditions.append("m.status != 'Completed'")
+		elif self.filters.order_status == "Closed Orders":
+			conditions.append("m.status = 'Completed'")
+
+		# Registration Status
+		if self.filters.registration_status == "Registered":
+			conditions.append("ifnull(m.vehicle_license_plate, '') != ''")
+		elif self.filters.registration_status == "Unregistered":
+			conditions.append("ifnull(m.vehicle_license_plate, '') = ''")
+
+		# Invoice Status
+		if self.filters.invoice_status:
+			conditions.append("m.invoice_status = %(invoice_status)s")
 
 		# Rest of the filters
 		if self.filters.company:
@@ -187,6 +202,9 @@ class VehicleRegistrationRegisterReport(object):
 
 		if self.filters.vehicle:
 			conditions.append("m.vehicle = %(vehicle)s")
+
+		if self.filters.vehicle_booking_order:
+			conditions.append("m.vehicle_booking_order = %(vehicle_booking_order)s")
 
 		if self.filters.customer:
 			conditions.append("m.customer = %(customer)s")
@@ -208,28 +226,20 @@ class VehicleRegistrationRegisterReport(object):
 			columns.append({"label": _("Registration Order"), "fieldname": "name", "fieldtype": "Link", "options": "Vehicle Registration Order", "width": 140})
 
 		columns += [
-			{"label": _("Date"), "fieldname": "transaction_date", "fieldtype": "Date", "width": 80},
+			{"label": _("Order Date"), "fieldname": "transaction_date", "fieldtype": "Date", "width": 80},
 			{"label": _("Registration Customer"), "fieldname": "registration_customer_name", "fieldtype": "Data", "width": 150},
-			{"label": _("Payment Customer"), "fieldname": "customer_name", "fieldtype": "Data", "width": 150},
 			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 105},
 			{"label": _("Variant Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 120},
 			{"label": _("Variant Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 150},
-			{"label": _("Chassis No"), "fieldname": "vehicle_chassis_no", "fieldtype": "Data", "width": 150},
-			{"label": _("Engine No"), "fieldname": "vehicle_engine_no", "fieldtype": "Data", "width": 115},
 			{"label": _("Reg No"), "fieldname": "vehicle_license_plate", "fieldtype": "Data", "width": 70},
+			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 140},
 			{"label": _("Customer Total"), "fieldname": "customer_total", "fieldtype": "Currency", "width": 110},
 			{"label": _("Customer Payment"), "fieldname": "customer_payment", "fieldtype": "Currency", "width": 110},
 			{"label": _("Customer Outstanding"), "fieldname": "customer_outstanding", "fieldtype": "Currency", "width": 110},
-			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 120},
 			{"label": _("Remarks"), "fieldname": "remarks", "fieldtype": "Data", "width": 150},
 			{"label": _("Agent"), "fieldname": "agent", "fieldtype": "Link", "options": "Supplier", "width": 100},
-			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
 			{"label": _("Authority Total"), "fieldname": "authority_total", "fieldtype": "Currency", "width": 110},
-			{"label": _("Authority Payment"), "fieldname": "authority_payment", "fieldtype": "Currency", "width": 110},
-			{"label": _("Authority Outstanding"), "fieldname": "authority_outstanding", "fieldtype": "Currency", "width": 110},
-			{"label": _("Agent Total"), "fieldname": "invoice_total", "fieldtype": "Currency", "width": 110},
-			{"label": _("Agent Payment"), "fieldname": "agent_payment", "fieldtype": "Currency", "width": 110},
-			{"label": _("Agent Outstanding"), "fieldname": "agent_outstanding", "fieldtype": "Currency", "width": 110},
+			{"label": _("Agent Total"), "fieldname": "agent_total", "fieldtype": "Currency", "width": 110},
 			{"label": _("Margin"), "fieldname": "margin_amount", "fieldtype": "Currency", "width": 100},
 			{"label": _("Registration Date"), "fieldname": "registration_receipt_date", "fieldtype": "Date", "width": 120},
 			{"label": _("Call Date"), "fieldname": "call_date", "fieldtype": "Date", "width": 80},
@@ -237,6 +247,10 @@ class VehicleRegistrationRegisterReport(object):
 			{"label": _("Invoice Return Date"), "fieldname": "invoice_return_date", "fieldtype": "Date", "width": 120},
 			{"label": _("Invoice Delivered Date"), "fieldname": "invoice_delivered_date", "fieldtype": "Date", "width": 120},
 			{"label": _("Vehicle"), "fieldname": "vehicle", "fieldtype": "Link", "options": "Vehicle", "width": 100},
+			{"label": _("Chassis No"), "fieldname": "vehicle_chassis_no", "fieldtype": "Data", "width": 150},
+			{"label": _("Engine No"), "fieldname": "vehicle_engine_no", "fieldtype": "Data", "width": 115},
+			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
+			{"label": _("Payment Customer"), "fieldname": "customer_name", "fieldtype": "Data", "width": 150},
 		]
 
 		return columns

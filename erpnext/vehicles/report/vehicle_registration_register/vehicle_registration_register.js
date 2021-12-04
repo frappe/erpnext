@@ -2,15 +2,28 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
+{% include 'erpnext/vehicles/doctype/vehicle_registration_order/vehicle_registration_order_list.js' %}
+
 frappe.query_reports["Vehicle Registration Register"] = {
 	filters: [
 		{
-			fieldname: "company",
-			label: __("Company"),
-			fieldtype: "Link",
-			options: "Company",
-			default: frappe.defaults.get_user_default("Company"),
-			reqd: 1
+			fieldname: "order_status",
+			label: __("Order Status"),
+			fieldtype: "Select",
+			options: ["", "Open Orders", "Closed Orders"],
+			default: "Open Orders",
+		},
+		{
+			fieldname: "registration_status",
+			label: __("Registration Status"),
+			fieldtype: "Select",
+			options: ["", "Registered", "Unregistered"],
+		},
+		{
+			fieldname: "invoice_status",
+			label: __("Invoice Status"),
+			fieldtype: "Select",
+			options: ["", "Not Received", "In Hand", "Issued", "Delivered"],
 		},
 		{
 			fieldname: "date_type",
@@ -19,21 +32,24 @@ frappe.query_reports["Vehicle Registration Register"] = {
 			options: ["Order Date", "Registration Receipt Date", "Call Date",
 				"Invoice Delivered Date", "Invoice Issue Date", "Invoice Return Date"],
 			default: "Order Date",
-			reqd: 1,
 		},
 		{
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
-			default: frappe.defaults.get_user_default("year_start_date"),
-			reqd: 1,
 		},
 		{
 			fieldname: "to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
-			default: frappe.defaults.get_user_default("year_end_date"),
-			reqd: 1,
+		},
+		{
+			fieldname: "company",
+			label: __("Company"),
+			fieldtype: "Link",
+			options: "Company",
+			default: frappe.defaults.get_user_default("Company"),
+			reqd: 1
 		},
 		{
 			fieldname: "variant_of",
@@ -83,8 +99,14 @@ frappe.query_reports["Vehicle Registration Register"] = {
 			options: "Vehicle"
 		},
 		{
-			fieldname: "customer",
-			label: __("Payment Customer"),
+			fieldname: "vehicle_booking_order",
+			label: __("Vehicle Booking Order"),
+			fieldtype: "Link",
+			options: "Vehicle Booking Order"
+		},
+		{
+			fieldname: "registration_customer",
+			label: __("Registration Customer"),
 			fieldtype: "Link",
 			options: "Customer",
 			get_query: function() {
@@ -94,8 +116,8 @@ frappe.query_reports["Vehicle Registration Register"] = {
 			}
 		},
 		{
-			fieldname: "registration_customer",
-			label: __("Registration Customer"),
+			fieldname: "customer",
+			label: __("Payment Customer"),
 			fieldtype: "Link",
 			options: "Customer",
 			get_query: function() {
@@ -144,9 +166,26 @@ frappe.query_reports["Vehicle Registration Register"] = {
 
 		$.each(['customer_outstanding', 'authority_outstanding', 'agent_outstanding'], function (i, f) {
 			if (column.fieldname === f) {
-				style['color'] = flt(data[f]) ? 'orange' : 'green';
+				var outstanding = flt(data[f]);
+				if (outstanding > 0) {
+					style['color'] = 'orange';
+				} else if (outstanding < 0) {
+					style['color'] = 'red';
+				} else {
+					style['color'] = 'green';
+				}
 			}
 		});
+
+		if (column.fieldname == 'status') {
+			if (frappe.listview_settings['Vehicle Registration Order']) {
+				var indicator = frappe.listview_settings['Vehicle Registration Order'].get_indicator(data);
+				if (indicator) {
+					var indicator_color = indicator[1];
+					return `<span class="indicator ${indicator_color}"><span>${data.status}</span></span>`;
+				}
+			}
+		}
 
 		return default_formatter(value, row, column, data, {css: style});
 	},
