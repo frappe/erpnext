@@ -375,9 +375,9 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 			frappe.db.commit()
 		except Exception as e:
 			if frappe.flags.in_test:
-				raise e
 				traceback = frappe.get_traceback()
 				frappe.log_error(title=_('Error while processing deferred accounting for Invoice {0}').format(doc.name), message=traceback)
+				raise e
 			else:
 				frappe.db.rollback()
 				traceback = frappe.get_traceback()
