@@ -448,6 +448,8 @@ def book_revenue_via_journal_entry(doc, credit_account, debit_account, against,
 
 		if submit:
 			journal_entry.submit()
+
+		frappe.db.commit()
 	except Exception:
 		frappe.db.rollback()
 		traceback = frappe.get_traceback()
