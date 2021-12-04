@@ -115,8 +115,6 @@ class Customer(TransactionBase):
 		self.generateSerie()
 	
 	def validate(self):
-		self.verificate_quantity_id(self.tax_id, "Tax ID", 13)
-		self.verificate_quantity_id(self.rtn, "RTN", 14)
 		self.flags.is_new_doc = self.is_new()
 		self.flags.old_lead = self.lead_name
 		validate_party_accounts(self)
