@@ -469,18 +469,18 @@ def get_item_tax_info(company, tax_category, item_codes, item_rates=None, item_t
 		item_tax_templates = json.loads(item_tax_templates)
 
 	for item_code in item_codes:
-		if not item_code or item_code[1] in out or not item_tax_templates.get(item_code[1]):
+		if not item_code or item_code in out or not item_tax_templates.get(item_code):
 			continue
 
-		out[item_code[1]] = {}
-		item = frappe.get_cached_doc("Item", item_code[0])
-		args = {"company": company, "tax_category": tax_category, "net_rate": item_rates.get(item_code[1])}
+		out[item_code] = {}
+		item = frappe.get_cached_doc("Item", item_code)
+		args = {"company": company, "tax_category": tax_category, "net_rate": item_rates.get(item_code)}
 
 		if item_tax_templates:
-			args.update({"item_tax_template": item_tax_templates.get(item_code[1])})
+			args.update({"item_tax_template": item_tax_templates.get(item_code)})
 
-		get_item_tax_template(args, item, out[item_code[1]])
-		out[item_code[1]]["item_tax_rate"] = get_item_tax_map(company, out[item_code[1]].get("item_tax_template"), as_json=True)
+		get_item_tax_template(args, item, out[item_code])
+		out[item_code]["item_tax_rate"] = get_item_tax_map(company, out[item_code].get("item_tax_template"), as_json=True)
 
 	return out
 
