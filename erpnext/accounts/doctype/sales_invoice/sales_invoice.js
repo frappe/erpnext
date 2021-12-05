@@ -517,15 +517,6 @@ cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
 	}
 }
 
-// project name
-//--------------------------
-cur_frm.fields_dict['project'].get_query = function(doc, cdt, cdn) {
-	return{
-		query: "erpnext.controllers.queries.get_project_name",
-		filters: {'customer': doc.customer}
-	}
-}
-
 // Income Account in Details Table
 // --------------------------------
 cur_frm.set_query("income_account", "items", function(doc) {
@@ -979,7 +970,7 @@ frappe.ui.form.on('Sales Invoice', {
 		}
 
 		if (frm.doc.is_debit_note) {
-			frm.set_df_property('return_against', 'label', 'Adjustment Against');
+			frm.set_df_property('return_against', 'label', __('Adjustment Against'));
 		}
 
 		if (frappe.boot.active_domains.includes("Healthcare")) {
@@ -989,10 +980,10 @@ frappe.ui.form.on('Sales Invoice', {
 			if (cint(frm.doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !frm.doc.is_return) {
 				frm.add_custom_button(__('Healthcare Services'), function() {
 					get_healthcare_services_to_invoice(frm);
-				},"Get Items From");
+				},__("Get Items From"));
 				frm.add_custom_button(__('Prescriptions'), function() {
 					get_drugs_to_invoice(frm);
-				},"Get Items From");
+				},__("Get Items From"));
 			}
 		}
 		else {

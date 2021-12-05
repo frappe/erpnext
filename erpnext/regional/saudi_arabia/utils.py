@@ -77,7 +77,7 @@ def create_qr_code(doc, method):
 			tlv_array.append(''.join([tag, length, value]))
 
 			# Invoice Amount
-			invoice_amount = str(doc.total)
+			invoice_amount = str(doc.grand_total)
 			tag = bytes([4]).hex()
 			length = bytes([len(invoice_amount)]).hex()
 			value = invoice_amount.encode('utf-8').hex()
@@ -101,8 +101,10 @@ def create_qr_code(doc, method):
 			url = qr_create(base64_string, error='L')
 			url.png(qr_image, scale=2, quiet_zone=1)
 
+			name = frappe.generate_hash(doc.name, 5)
+
 			# making file
-			filename = f"QR-CODE-{doc.name}.png".replace(os.path.sep, "__")
+			filename = f"QRCode-{name}.png".replace(os.path.sep, "__")
 			_file = frappe.get_doc({
 				"doctype": "File",
 				"file_name": filename,

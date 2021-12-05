@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
 import inspect
 
@@ -7,7 +5,7 @@ import frappe
 
 from erpnext.hooks import regional_overrides
 
-__version__ = '13.15.2'
+__version__ = '13.16.0'
 
 def get_default_company(user=None):
 	'''Get default company for user'''

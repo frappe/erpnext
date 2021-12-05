@@ -1,6 +1,5 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
 import copy
 import unittest
@@ -1624,28 +1623,12 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si.shipping_rule = shipping_rule.name
 		si.insert()
-
-		shipping_amount = 0.0
-		for condition in shipping_rule.get("conditions"):
-			if not condition.to_value or (flt(condition.from_value) <= si.net_total <= flt(condition.to_value)):
-				shipping_amount = condition.shipping_amount
-
-		shipping_charge = {
-			"doctype": "Sales Taxes and Charges",
-			"category": "Valuation and Total",
-			"charge_type": "Actual",
-			"account_head": shipping_rule.account,
-			"cost_center": shipping_rule.cost_center,
-			"tax_amount": shipping_amount,
-			"description": shipping_rule.name
-		}
-		si.append("taxes", shipping_charge)
 		si.save()
 
 		self.assertEqual(si.net_total, 1250)
 
-		self.assertEqual(si.total_taxes_and_charges, 577.05)
-		self.assertEqual(si.grand_total, 1827.05)
+		self.assertEqual(si.total_taxes_and_charges, 468.85)
+		self.assertEqual(si.grand_total, 1718.85)
 
 
 
@@ -2249,6 +2232,7 @@ class TestSalesInvoice(unittest.TestCase):
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
 			make_customer,
 		)
+		from erpnext.accounts.doctype.party_link.party_link import create_party_link
 		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
 		# create a customer
@@ -2257,13 +2241,7 @@ class TestSalesInvoice(unittest.TestCase):
 		supplier = create_supplier(supplier_name="_Test Common Supplier").name
 
 		# create a party link between customer & supplier
-		# set primary role as supplier
-		party_link = frappe.new_doc("Party Link")
-		party_link.primary_role = "Supplier"
-		party_link.primary_party = supplier
-		party_link.secondary_role = "Customer"
-		party_link.secondary_party = customer
-		party_link.save()
+		party_link = create_party_link("Supplier", supplier, customer)
 
 		# enable common party accounting
 		frappe.db.set_value('Accounts Settings', None, 'enable_common_party_accounting', 1)
@@ -2350,6 +2328,32 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 
 		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
+
+	def test_over_billing_case_against_delivery_note(self):
+		'''
+			Test a case where duplicating the item with qty = 1 in the invoice
+			allows overbilling even if it is disabled
+		'''
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		over_billing_allowance = frappe.db.get_single_value('Accounts Settings', 'over_billing_allowance')
+		frappe.db.set_value('Accounts Settings', None, 'over_billing_allowance', 0)
+
+		dn = create_delivery_note()
+		dn.submit()
+
+		si = make_sales_invoice(dn.name)
+		# make a copy of first item and add it to invoice
+		item_copy = frappe.copy_doc(si.items[0])
+		si.append('items', item_copy)
+		si.save()
+
+		with self.assertRaises(frappe.ValidationError) as err:
+			si.submit()
+
+		self.assertTrue("cannot overbill" in str(err.exception).lower())
+
+		frappe.db.set_value('Accounts Settings', None, 'over_billing_allowance', over_billing_allowance)
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()

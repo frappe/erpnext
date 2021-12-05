@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 from collections import defaultdict
@@ -540,6 +539,10 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters)
 	dimension_filters = get_dimension_filter_map()
 	dimension_filters = dimension_filters.get((filters.get('dimension'),filters.get('account')))
 	query_filters = []
+	or_filters = []
+	fields = ['name']
+
+	searchfields = frappe.get_meta(doctype).get_search_fields()
 
 	meta = frappe.get_meta(doctype)
 	if meta.is_tree:
@@ -551,8 +554,9 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters)
 	if meta.has_field('company'):
 		query_filters.append(['company', '=', filters.get('company')])
 
-	if txt:
-		query_filters.append([searchfield, 'LIKE', "%%%s%%" % txt])
+	for field in searchfields:
+		or_filters.append([field, 'LIKE', "%%%s%%" % txt])
+		fields.append(field)
 
 	if dimension_filters:
 		if dimension_filters['allow_or_restrict'] == 'Allow':
@@ -567,10 +571,9 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters)
 
 		query_filters.append(['name', query_selector, dimensions])
 
-	output = frappe.get_list(doctype, filters=query_filters)
-	result = [d.name for d in output]
+	output = frappe.get_list(doctype, fields=fields, filters=query_filters, or_filters=or_filters, as_list=1)
 
-	return [(d,) for d in set(result)]
+	return [tuple(d) for d in set(output)]
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
