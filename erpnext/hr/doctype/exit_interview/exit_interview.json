@@ -5,11 +5,13 @@
  "creation": "2021-12-05 13:56:36.241690",
  "doctype": "DocType",
  "editable_grid": 1,
+ "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
   "employee",
   "employee_name",
+  "email",
   "column_break_5",
   "company",
   "date",
@@ -22,6 +24,7 @@
   "relieving_date",
   "exit_questionnaire_section",
   "ref_doctype",
+  "questionnaire_email_sent",
   "column_break_10",
   "reference_document_name",
   "interview_summary_section",
@@ -130,6 +133,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "employee.reports_to",
    "fieldname": "reports_to",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -159,11 +163,25 @@
    "fieldtype": "Select",
    "label": "Naming Series",
    "options": "HR-EXIT-INT-"
+  },
+  {
+   "default": "0",
+   "fieldname": "questionnaire_email_sent",
+   "fieldtype": "Check",
+   "label": "Questionnaire Email Sent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email ID",
+   "options": "Email",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-05 14:25:40.416023",
+ "modified": "2021-12-05 16:50:05.933394",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Exit Interview",
@@ -183,6 +201,7 @@
    "write": 1
   }
  ],
+ "sender_field": "email",
  "sort_field": "modified",
  "sort_order": "DESC",
  "title_field": "employee_name",
