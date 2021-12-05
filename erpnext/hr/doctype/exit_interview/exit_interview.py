@@ -38,28 +38,76 @@ class ExitInterview(Document):
 
 
 @frappe.whitelist()
-def send_exit_questionnaire(exit_interview):
-	exit_interview = frappe.get_doc('Exit Interview', exit_interview)
-	context = exit_interview.as_dict()
+def send_exit_questionnaire(interviews):
+	interviews = get_interviews(interviews)
+	validate_questionnaire_settings()
 
-	employee = frappe.get_doc('Employee', exit_interview.employee)
-	context.update(employee.as_dict())
+	email_success = []
+	email_failure = []
 
-	email = get_employee_email(employee)
-	template_name = frappe.db.get_single_value('HR Settings', 'exit_questionnaire_notification_template')
-	template = frappe.get_doc('Email Template', template_name)
+	for exit_interview in interviews:
+		interview = frappe.get_doc('Exit Interview', exit_interview.get('name'))
+		if interview.get('questionnaire_email_sent'):
+			continue
 
-	if email:
-		frappe.sendmail(
-			recipients=email,
-			subject=template.subject,
-			message=frappe.render_template(template.response, context),
-			reference_doctype=exit_interview.doctype,
-			reference_name=exit_interview.name
+		employee = frappe.get_doc('Employee', interview.employee)
+		email = get_employee_email(employee)
+
+		context = interview.as_dict()
+		context.update(employee.as_dict())
+		template_name = frappe.db.get_single_value('HR Settings', 'exit_questionnaire_notification_template')
+		template = frappe.get_doc('Email Template', template_name)
+
+		if email:
+			frappe.sendmail(
+				recipients=email,
+				subject=template.subject,
+				message=frappe.render_template(template.response, context),
+				reference_doctype=interview.doctype,
+				reference_name=interview.name
+			)
+			interview.db_set('questionnaire_email_sent', True)
+			interview.notify_update()
+			email_success.append(email)
+		else:
+			email_failure.append(get_link_to_form('Employee', employee.name))
+
+	show_email_summary(email_success, email_failure)
+
+
+def get_interviews(interviews):
+	import json
+
+	if isinstance(interviews, str):
+		interviews = json.loads(interviews)
+
+	if not len(interviews):
+		frappe.throw(_('Atleast one interview has to be selected.'))
+
+	return interviews
+
+
+def validate_questionnaire_settings():
+	settings = frappe.db.get_value('HR Settings', 'HR Settings',
+		['exit_questionnaire_web_form', 'exit_questionnaire_notification_template'], as_dict=True)
+
+	if not settings.exit_questionnaire_web_form or not settings.exit_questionnaire_notification_template:
+		frappe.throw(
+			message=_('Please set {0} and {1} in {2}.').format(
+				frappe.bold('Exit Questionnaire Web Form'),
+				frappe.bold('Notification Template'),
+				get_link_to_form('HR Settings', 'HR Settings')),
+			title=_('Settings Missing')
 		)
-		frappe.msgprint(_('Exit Questionnaire sent to {0}').format(email),
-			title='Success', indicator='green')
-		exit_interview.db_set('questionnaire_email_sent', True)
-		exit_interview.notify_update()
-	else:
-		frappe.msgprint(_('Email IDs for employee not found.'))
+
+
+def show_email_summary(email_success, email_failure):
+	message = ''
+	if email_success:
+		message += _('{0}: {1}').format(
+			frappe.bold('Sent Successfully'), ', '.join(email_success))
+	if email_failure:
+		message += + '<br><br>' + _('{0} due to missing email information for employee(s): {1}').format(
+			frappe.bold('Sending Failed'), ', '.join(email_failure))
+
+	frappe.msgprint(message, title=_('Exit Questionnaire'), indicator='blue', is_minimizable=True, wide=True)

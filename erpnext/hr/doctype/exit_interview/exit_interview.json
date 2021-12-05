@@ -87,8 +87,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Date",
-   "mandatory_depends_on": "eval:doc.status==='Scheduled';",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.status==='Scheduled';"
   },
   {
    "fieldname": "exit_questionnaire_section",
@@ -174,6 +173,7 @@
    "fieldtype": "Check",
    "in_standard_filter": 1,
    "label": "Questionnaire Email Sent",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -218,7 +218,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-12-05 17:49:44.839277",
+ "modified": "2021-12-05 18:56:34.856854",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Exit Interview",

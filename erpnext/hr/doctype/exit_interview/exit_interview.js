@@ -23,29 +23,15 @@ frappe.ui.form.on('Exit Interview', {
 	},
 
 	send_exit_questionnaire: function(frm) {
-		frappe.db.get_value('HR Settings', 'HR Settings',
-			['exit_questionnaire_web_form', 'exit_questionnaire_notification_template'], (r) => {
-			if (!r.exit_questionnaire_web_form || !r.exit_questionnaire_notification_template) {
-				frappe.throw({
-					message: __('Please set {0} and {1} in {2}.',
-						['Exit Questionnaire Web Form'.bold(),
-						'Notification Template'.bold(),
-						'<a href="/app/hr-settings" target="_blank">HR Settings</a>']
-					),
-					title: __('Settings Missing')
-				});
-			} else {
-				frappe.call({
-					method: 'erpnext.hr.doctype.exit_interview.exit_interview.send_exit_questionnaire',
-					args: {
-						'exit_interview': frm.doc.name
-					},
-					callback: function(r) {
-						if (!r.exc) {
-							frm.refresh_field('questionnaire_email_sent');
-						}
-					}
-				});
+		frappe.call({
+			method: 'erpnext.hr.doctype.exit_interview.exit_interview.send_exit_questionnaire',
+			args: {
+				'interviews': [frm.doc]
+			},
+			callback: function(r) {
+				if (!r.exc) {
+					frm.refresh_field('questionnaire_email_sent');
+				}
 			}
 		});
 	}
