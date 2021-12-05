@@ -285,8 +285,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	customer: function () {
 		var me = this;
 
-		this.frm.set_value("bill_to", this.frm.doc.customer);
-
 		if(this.frm.doc.customer) {
 			frappe.call({
 				"method": "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_loyalty_programs",
@@ -300,6 +298,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			});
 		}
+
+		return this.frm.set_value("bill_to", this.frm.doc.customer);
 	},
 
 	bill_to: function() {
@@ -311,7 +311,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		var me = this;
 		if(this.frm.updating_party_details) return;
-		erpnext.utils.get_party_details(this.frm,
+		return erpnext.utils.get_party_details(this.frm,
 			"erpnext.accounts.party.get_party_details", {
 				posting_date: this.frm.doc.posting_date,
 				party: this.frm.doc.customer,

@@ -35,9 +35,9 @@ frappe.ui.form.on("Opportunity", {
 		frm.trigger('set_contact_link');
 
 		if (frm.doc.opportunity_from == "Customer") {
-			erpnext.utils.get_party_details(frm);
+			return erpnext.utils.get_party_details(frm);
 		} else if (frm.doc.opportunity_from == "Lead") {
-			erpnext.utils.map_current_doc({
+			return erpnext.utils.map_current_doc({
 				method: "erpnext.crm.doctype.lead.lead.make_opportunity",
 				source_name: frm.doc.party_name,
 				frm: frm

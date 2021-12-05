@@ -1091,11 +1091,11 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	supplier: function(doc) {
-		erpnext.utils.get_party_details(this.frm, null, null, null);
+		return erpnext.utils.get_party_details(this.frm, null, null, null);
 	},
 
 	customer: function(doc) {
-		erpnext.utils.get_party_details(this.frm, null, null, null);
+		return erpnext.utils.get_party_details(this.frm, null, null, null);
 	}
 });
 

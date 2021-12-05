@@ -302,7 +302,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			return;
 
 		var me = this;
-		erpnext.utils.get_party_details(this.frm, "erpnext.accounts.party.get_party_details",
+		return erpnext.utils.get_party_details(this.frm, "erpnext.accounts.party.get_party_details",
 			{
 				posting_date: this.frm.doc.posting_date,
 				bill_date: this.frm.doc.bill_date,

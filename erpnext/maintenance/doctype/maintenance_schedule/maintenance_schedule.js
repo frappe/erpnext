@@ -30,7 +30,7 @@ frappe.ui.form.on('Maintenance Schedule', {
 		},10);
 	},
 	customer: function(frm) {
-		erpnext.utils.get_party_details(frm)
+		return erpnext.utils.get_party_details(frm)
 	},
 	customer_address: function(frm) {
 		erpnext.utils.get_address_display(frm, 'customer_address', 'address_display');

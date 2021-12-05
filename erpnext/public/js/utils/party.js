@@ -104,14 +104,14 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 		args["has_stin"] = cint(frm.doc.has_stin);
 	}
 
-	frappe.call({
+	return frappe.call({
 		method: method,
 		args: args,
 		callback: function(r) {
 			if (r.message) {
 				frm.supplier_tds = r.message.supplier_tds;
 				frm.updating_party_details = true;
-				frappe.run_serially([
+				return frappe.run_serially([
 					() => frm.set_value(r.message),
 					() => {
 						frm.updating_party_details = false;

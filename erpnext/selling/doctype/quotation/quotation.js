@@ -47,13 +47,14 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	},
 	party_name: function() {
 		var me = this;
-		erpnext.utils.get_party_details(this.frm, null, null, function() {
-			me.apply_price_list();
-		});
 
 		if(me.frm.doc.quotation_to=="Lead" && me.frm.doc.party_name) {
 			me.frm.trigger("get_lead_details");
 		}
+
+		return erpnext.utils.get_party_details(this.frm, null, null, function() {
+			me.apply_price_list();
+		});
 	},
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
