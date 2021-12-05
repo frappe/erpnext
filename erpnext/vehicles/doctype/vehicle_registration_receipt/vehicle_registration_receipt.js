@@ -6,24 +6,11 @@ erpnext.vehicles.VehicleRegistrationReceiptController = erpnext.vehicles.Vehicle
 	setup_queries: function () {
 		this._super();
 
-		var me = this;
-		this.frm.set_query("vehicle", function () {
-			var filters = {};
-
-			if (me.frm.doc.item_code) {
-				filters['item_code'] = me.frm.doc.item_code;
-			}
-
-			return {
-				filters: filters
-			}
-		});
-
 		this.frm.set_query("vehicle_booking_order", function() {
 			return {
 				filters: {
-					docstatus: 1,
-					status: ['!=', 'Cancelled Booking']
+					status: ['!=', 'Cancelled Booking'],
+					docstatus: 1
 				}
 			};
 		});

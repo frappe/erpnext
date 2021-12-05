@@ -9,7 +9,6 @@ erpnext.vehicles.VehicleInvoiceController = erpnext.vehicles.VehicleTransactionC
 		var me = this;
 		this.frm.set_query("vehicle", function () {
 			var filters = {
-				item_code: me.frm.doc.item_code,
 				invoice_status: 'Not Received'
 			};
 
@@ -25,10 +24,9 @@ erpnext.vehicles.VehicleInvoiceController = erpnext.vehicles.VehicleTransactionC
 		this.frm.set_query("vehicle_booking_order", function() {
 			return {
 				filters: {
-					docstatus: 1,
-					status: ['!=', 'Cancelled Booking'],
 					invoice_status: 'Not Received',
-					vehicle: ['is', 'set']
+					status: ['!=', 'Cancelled Booking'],
+					docstatus: 1,
 				}
 			};
 		});

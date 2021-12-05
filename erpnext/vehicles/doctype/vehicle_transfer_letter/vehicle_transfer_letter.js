@@ -10,25 +10,11 @@ erpnext.vehicles.VehicleTransferLetterController = erpnext.vehicles.VehicleTrans
 	setup_queries: function () {
 		this._super();
 
-		var me = this;
-		this.frm.set_query("vehicle", function () {
-			var filters = {item_code: me.frm.doc.item_code};
-
-			if (me.frm.doc.vehicle_booking_order) {
-				filters['is_booked'] = 1;
-			}
-
-			return {
-				filters: filters
-			}
-		});
-
 		this.frm.set_query("vehicle_booking_order", function() {
 			return {
 				filters: {
-					docstatus: 1,
 					status: ['!=', 'Cancelled Booking'],
-					vehicle: ['is', 'set']
+					docstatus: 1,
 				}
 			};
 		});

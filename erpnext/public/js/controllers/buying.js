@@ -171,14 +171,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				return me.set_query_for_item_tax_template(doc, cdt, cdn)
 			});
 		}
-
-		if(this.frm.fields_dict.applies_to_vehicle) {
-			this.frm.set_query("applies_to_vehicle", function(doc) {
-				if (doc.applies_to_item) {
-					return {filters: {item_code: doc.applies_to_item}};
-				}
-			});
-		}
 	},
 
 	refresh: function(doc) {

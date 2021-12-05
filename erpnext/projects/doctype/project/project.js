@@ -80,14 +80,6 @@ frappe.ui.form.on("Project", {
 				return {filters: {is_insurance_company: 1}};
 			});
 		}
-
-		if(frm.fields_dict.applies_to_vehicle) {
-			frm.set_query("applies_to_vehicle", function(doc) {
-				if (doc.applies_to_item) {
-					return {filters: {item_code: doc.applies_to_item}};
-				}
-			});
-		}
 	},
 
 	refresh: function (frm) {

@@ -19,14 +19,11 @@ erpnext.vehicles.VehicleInvoiceMovementController = erpnext.vehicles.VehicleTran
 		me.frm.set_query("vehicle", "invoices", function () {
 			var filters = {};
 
-			if (me.frm.doc.item_code) {
-				filters['item_code'] = me.frm.doc.item_code;
-			}
+			me.set_invoice_filter(filters);
+
 			if (me.frm.doc.supplier) {
 				filters['supplier'] = ['in', ['', me.frm.doc.supplier]];
 			}
-
-			me.set_invoice_filter(filters);
 
 			return {
 				filters: filters
@@ -34,12 +31,12 @@ erpnext.vehicles.VehicleInvoiceMovementController = erpnext.vehicles.VehicleTran
 		});
 
 		me.frm.set_query("vehicle_booking_order", "invoices", function () {
-			var filters = {
-				docstatus: 1,
-				status: ['!=', 'Cancelled Booking']
-			}
+			var filters = {};
 
 			me.set_invoice_filter(filters);
+
+			filters['status'] = ['!=', 'Cancelled Booking'];
+			filters['docstatus'] = 1;
 
 			return {
 				filters: filters

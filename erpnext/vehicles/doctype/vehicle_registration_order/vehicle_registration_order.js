@@ -38,24 +38,11 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 	setup_queries: function () {
 		this._super();
 
-		var me = this;
-		this.frm.set_query("vehicle", function () {
-			var filters = {};
-
-			if (me.frm.doc.item_code) {
-				filters['item_code'] = me.frm.doc.item_code;
-			}
-
-			return {
-				filters: filters
-			}
-		});
-
 		this.frm.set_query("vehicle_booking_order", function() {
 			var filters = {
-				docstatus: 1,
+				registration_status: 'Not Ordered',
 				status: ['!=', 'Cancelled Booking'],
-				registration_status: 'Not Ordered'
+				docstatus: 1,
 			}
 
 			return {

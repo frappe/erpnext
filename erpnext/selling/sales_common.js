@@ -71,14 +71,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 
-		if(this.frm.fields_dict.applies_to_vehicle) {
-			this.frm.set_query("applies_to_vehicle", function(doc) {
-				if (doc.applies_to_item) {
-					return {filters: {item_code: doc.applies_to_item}};
-				}
-			});
-		}
-
 		if(this.frm.fields_dict.insurance_company) {
 			this.frm.set_query("insurance_company", function(doc) {
 				return {filters: {is_insurance_company: 1}};
