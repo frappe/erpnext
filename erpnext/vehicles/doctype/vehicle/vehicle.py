@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import getdate, nowdate, cstr, cint
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
+from erpnext.vehicles.utils import format_vehicle_id
 from six import string_types
 
 class Vehicle(Document):
@@ -86,14 +87,12 @@ class Vehicle(Document):
 		self.variant_of_name = frappe.get_cached_value("Item", self.variant_of, 'item_name') if self.variant_of else None
 
 	def validate_vehicle_id(self):
-		import re
-
 		if self.unregistered:
 			self.license_plate = ""
 
-		self.chassis_no = re.sub(r"\s+", "", cstr(self.chassis_no).upper())
-		self.engine_no = re.sub(r"\s+", "", cstr(self.engine_no).upper())
-		self.license_plate = re.sub(r"\s+", "", cstr(self.license_plate).upper())
+		self.chassis_no = format_vehicle_id(self.chassis_no)
+		self.engine_no = format_vehicle_id(self.engine_no)
+		self.license_plate = format_vehicle_id(self.license_plate)
 
 		exclude = None if self.is_new() else self.name
 		validate_duplicate_vehicle('chassis_no', self.chassis_no, exclude=exclude, throw=True)

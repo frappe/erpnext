@@ -545,18 +545,24 @@ def set_project_status(project, status):
 def get_project_details(project_name, doctype):
 	project = frappe.get_doc("Project", project_name)
 
+	sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
+
 	out = {}
 	fieldnames = [
-		'customer', 'bill_to', 'applies_to_vehicle',
+		'customer', 'bill_to', 'vehicle_owner',
+		'applies_to_item', 'applies_to_vehicle',
+		'vehicle_chassis_no', 'vehicle_engine_no',
+		'vehicle_license_plate', 'vehicle_unregistered',
+		'vehicle_last_odometer',
 		'service_advisor', 'service_manager',
-		'insurance_company', 'insurance_loss_no', 'insurance_policy_no', 'insurance_surveyor', 'insurance_surveyor_company'
+		'insurance_company', 'insurance_loss_no', 'insurance_policy_no',
+		'insurance_surveyor', 'insurance_surveyor_company'
 	]
 	for f in fieldnames:
+		if f in ['customer', 'bill_to', 'vehicle_owner'] and doctype not in sales_doctypes:
+			continue
 		if project.get(f):
 			out[f] = project.get(f)
-
-	if out.get('applies_to_vehicle'):
-		out.update(get_fetch_values(doctype, 'applies_to_vehicle', out.get('applies_to_vehicle')))
 
 	return out
 

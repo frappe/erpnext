@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import getdate, cstr
 from erpnext.vehicles.vehicle_transaction_controller import VehicleTransactionController
-import re
+from erpnext.vehicles.utils import format_vehicle_id
 
 
 class VehicleRegistrationReceipt(VehicleTransactionController):
@@ -53,7 +53,7 @@ class VehicleRegistrationReceipt(VehicleTransactionController):
 				frappe.get_desk_link("Vehicle Registration Receipt", registration_receipt)))
 
 	def validate_registration_number(self):
-		self.vehicle_license_plate = re.sub(r"\s+", "", cstr(self.vehicle_license_plate).upper())
+		self.vehicle_license_plate = format_vehicle_id(self.vehicle_license_plate)
 
 	def validate_call_date(self):
 		if self.call_date and self.posting_date:

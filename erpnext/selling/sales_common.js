@@ -591,26 +591,3 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	}
 });
-
-frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
-	if (frm.doc.project) {
-		frappe.call({
-			method: 'erpnext.projects.doctype.project.project.get_project_details',
-			args: {project_name: frm.doc.project, doctype: frm.doc.doctype},
-			callback: function (r) {
-				if (!r.exc) {
-					if (frm.fields_dict.bill_to && r.message.bill_to && r.message.customer) {
-						frm.doc.customer = r.message.customer;
-						delete r.message['customer'];
-					}
-
-					$.each(r.message, function(fieldname, value) {
-						if (frm.fields_dict[fieldname]) {
-							frm.set_value(fieldname, value);
-						}
-					});
-				}
-			}
-		});
-	}
-})

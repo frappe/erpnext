@@ -1347,3 +1347,63 @@ def get_reserved_qty_for_so(sales_order, item_code):
 		return reserved_qty[0][0]
 	else:
 		return 0
+
+
+@frappe.whitelist()
+def get_applies_to_details(args):
+	if isinstance(args, string_types):
+		args = json.loads(args)
+
+	args = frappe._dict(args)
+	out = frappe._dict()
+
+	# Get Vehicle and Vehicle's Item Code
+	vehicle = frappe._dict()
+	if args.applies_to_vehicle:
+		vehicle = frappe.get_doc("Vehicle", args.applies_to_vehicle)
+		out.applies_to_item = vehicle.item_code
+
+	# Get Item
+	item = frappe._dict()
+	item_code = out.applies_to_item or args.applies_to_item
+	if item_code:
+		item = frappe.get_cached_doc("Item", item_code)
+
+	# Item Details
+	if item:
+		out.applies_to_item_name = item.item_name
+
+	out.applies_to_variant_of = item.variant_of
+	out.applies_to_variant_of_name = frappe.get_cached_value("Item", item.variant_of, 'item_name') if item.variant_of else None
+
+	# Vehicle Details
+	if vehicle:
+		out.vehicle_chassis_no = vehicle.chassis_no
+		out.vehicle_engine_no = vehicle.engine_no
+		out.vehicle_license_plate = vehicle.license_plate
+		out.vehicle_unregistered = vehicle.unregistered
+		out.vehicle_color = vehicle.color
+
+		out.vehicle_last_odometer = get_applies_to_vehicle_odometer(args)
+
+	# Vehicle Owner
+	vehicle_owner = args.vehicle_owner
+	out.vehicle_owner_name = frappe.get_cached_value("Customer", vehicle_owner, 'customer_name') if vehicle_owner\
+		else None
+
+	return out
+
+
+@frappe.whitelist()
+def get_applies_to_vehicle_odometer(args):
+	from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_vehicle_odometer
+
+	if isinstance(args, string_types):
+		args = json.loads(args)
+
+	args = frappe._dict(args)
+
+	if args.applies_to_vehicle:
+		return get_vehicle_odometer(args.applies_to_vehicle, project=args.project)
+	else:
+		return 0

@@ -8,7 +8,7 @@ from frappe import _, throw, scrub
 from frappe.utils import (today, flt, cint, fmt_money, formatdate, cstr, date_diff,
 	getdate, add_days, add_months, get_last_day, nowdate, get_link_to_form, clean_whitespace)
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied, WorkflowPermissionError
-from erpnext.stock.get_item_details import get_conversion_factor, get_item_details
+from erpnext.stock.get_item_details import get_conversion_factor, get_item_details, get_applies_to_details
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
@@ -28,10 +28,14 @@ from collections import OrderedDict
 force_item_fields = ("item_group", "brand", "stock_uom", "alt_uom", "alt_uom_size", "is_fixed_asset", "item_tax_rate", "pricing_rules",
 	"allow_zero_valuation_rate", "has_batch_no", "has_serial_no", "is_vehicle")
 
-force_party_fields = ("customer_name", "bill_to_name", "customer_group", "supplier", "supplier_group",
+force_party_fields = ("customer_name", "bill_to_name", "supplier_name",
+	"customer_group", "supplier_group",
 	"contact_display", "contact_mobile", "contact_phone", "contact_email",
 	"customer_credit_limit", "customer_credit_balance", "customer_outstanding_amount", "previous_outstanding_amount",
 	"tax_id", "tax_cnic", "tax_strn")
+
+force_applies_to_fields = ("vehicle_chassis_no", "vehicle_engine_no", "vehicle_license_plate", "vehicle_unregistered",
+	"vehicle_color", "vehicle_last_odometer", "applies_to_item", "vehicle_owner_name")
 
 merge_items_sum_fields = ['qty', 'stock_qty', 'alt_uom_qty', 'total_weight',
 	'amount', 'taxable_amount', 'net_amount', 'total_discount', 'amount_before_discount',
@@ -384,46 +388,55 @@ class AccountsController(TransactionBase):
 				self.conversion_rate = get_exchange_rate(self.currency,
 														 self.company_currency, transaction_date, args)
 
+	def get_item_details_parent_args(self):
+		parent_dict = {}
+		for fieldname in self.meta.get_valid_columns():
+			parent_dict[fieldname] = self.get(fieldname)
+
+		if self.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+			document_type = "{} Item".format(self.doctype)
+			parent_dict.update({"document_type": document_type})
+
+		if 'transaction_type' in parent_dict:
+			parent_dict['transaction_type_name'] = parent_dict.pop('transaction_type')
+
+		# party_name field used for customer in quotation
+		if self.doctype == "Quotation" and self.quotation_to == "Customer" and parent_dict.get("party_name"):
+			parent_dict.update({"customer": parent_dict.get("party_name")})
+
+		return parent_dict
+
+	def get_item_details_child_args(self, item, parent_dict):
+		args = parent_dict.copy()
+		args.update(item.as_dict())
+
+		args["doctype"] = self.doctype
+		args["name"] = self.name
+		args["child_docname"] = item.name
+
+		if not args.get("transaction_date"):
+			args["transaction_date"] = args.get("posting_date")
+
+		if self.get("is_subcontracted"):
+			args["is_subcontracted"] = self.is_subcontracted
+
+		return args
+
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		if hasattr(self, "items"):
-			parent_dict = {}
-			for fieldname in self.meta.get_valid_columns():
-				parent_dict[fieldname] = self.get(fieldname)
-
-			if self.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
-				document_type = "{} Item".format(self.doctype)
-				parent_dict.update({"document_type": document_type})
-
-			if 'transaction_type' in parent_dict:
-				parent_dict['transaction_type_name'] = parent_dict.pop('transaction_type')
-
-			# party_name field used for customer in quotation
-			if self.doctype == "Quotation" and self.quotation_to == "Customer" and parent_dict.get("party_name"):
-				parent_dict.update({"customer": parent_dict.get("party_name")})
+			parent_dict = self.get_item_details_parent_args()
 
 			for item in self.get("items"):
 				if item.get("item_code"):
-					args = parent_dict.copy()
-					args.update(item.as_dict())
-
-					args["doctype"] = self.doctype
-					args["name"] = self.name
-					args["child_docname"] = item.name
-
-					if not args.get("transaction_date"):
-						args["transaction_date"] = args.get("posting_date")
-
-					if self.get("is_subcontracted"):
-						args["is_subcontracted"] = self.is_subcontracted
-
+					args = self.get_item_details_child_args(item, parent_dict)
 					ret = get_item_details(args, self, for_validate=True, overwrite_warehouse=False)
 
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
-							if (item.get(fieldname) is None or fieldname in force_item_fields):
+							if item.get(fieldname) is None or fieldname in force_item_fields:
 								item.set(fieldname, value)
 
 							elif fieldname in ['cost_center', 'conversion_factor'] and not item.get(fieldname):
@@ -445,6 +458,35 @@ class AccountsController(TransactionBase):
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
+
+		self.set_missing_applies_to_details()
+
+	def set_missing_applies_to_details(self):
+		if not self.meta.has_field('applies_to_item') and not self.meta.has_field('applies_to_vehicle'):
+			return
+
+		args = self.get_item_details_parent_args()
+		applies_to_details = get_applies_to_details(args)
+
+		for k, v in applies_to_details.items():
+			if self.meta.has_field(k) and not self.get(k) or k in force_applies_to_fields:
+				self.set(k, v)
+
+		self.format_vehicle_fields()
+
+	def format_vehicle_fields(self):
+		from erpnext.vehicles.utils import format_vehicle_id
+
+		if self.meta.has_field('vehicle_unregistered') and self.meta.has_field('vehicle_license_plate'):
+			if self.get('vehicle_unregistered'):
+				self.vehicle_license_plate = ""
+
+		if self.meta.has_field('vehicle_chassis_no'):
+			self.vehicle_chassis_no = format_vehicle_id(self.vehicle_chassis_no)
+		if self.meta.has_field('vehicle_engine_no'):
+			self.vehicle_engine_no = format_vehicle_id(self.vehicle_engine_no)
+		if self.meta.has_field('vehicle_license_plate'):
+			self.vehicle_license_plate = format_vehicle_id(self.vehicle_license_plate)
 
 	def apply_pricing_rule_on_items(self, item, pricing_rule_args):
 		if not pricing_rule_args.get("validate_applied_rule", 0):

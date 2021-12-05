@@ -219,6 +219,61 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 		});
 
+		frappe.ui.form.on(this.frm.doctype,"project", function(frm) {
+			if (frm.doc.project) {
+				return frappe.call({
+					method: 'erpnext.projects.doctype.project.project.get_project_details',
+					args: {
+						project_name: frm.doc.project,
+						doctype: frm.doc.doctype
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							var customer_changed = false;
+							var prev_bill_to = cstr(frm.doc.bill_to);
+							var prev_customer = cstr(frm.doc.customer);
+
+							// Set Customer and Bill To first
+							if (r.message.customer) {
+								if (frm.fields_dict.customer) {
+									frm.doc.customer = r.message.customer;
+									if (frm.doc.customer != prev_customer) {
+										customer_changed = true;
+									}
+								}
+								delete r.message['customer'];
+							}
+							if (r.message.bill_to) {
+								if (frm.fields_dict.bill_to) {
+									frm.doc.bill_to = r.message.bill_to;
+									if (frm.doc.bill_to != prev_bill_to) {
+										customer_changed = true;
+									}
+								}
+								delete r.message['bill_to'];
+							}
+
+							return frappe.run_serially([
+								() => {
+									if (customer_changed) {
+										if (frm.fields_dict.bill_to) {
+											return frm.trigger('bill_to');
+										} else if (frm.fields_dict.customer) {
+											return frm.trigger('customer');
+										}
+									}
+								},
+								() => frm.set_value(r.message)
+							]);
+						}
+					}
+				});
+			} else {
+				frm.cscript.get_applies_vehicle_odometer();
+			}
+		});
+
+
 		var me = this;
 		if(this.frm.fields_dict["items"].grid.get_field('batch_no')) {
 			this.frm.set_query("batch_no", "items", function(doc, cdt, cdn) {
@@ -1332,18 +1387,70 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	applies_to_item: function () {
-		if (!this.frm.doc.applies_to_item) {
-			this.frm.set_value('applies_to_item_name', '');
+		this.get_applies_to_details();
+	},
+	applies_to_vehicle: function () {
+		this.get_applies_to_details();
+	},
+	vehicle_owner: function () {
+		if (!this.frm.doc.vehicle_owner) {
+			this.frm.doc.vehicle_owner_name = null;
 		}
 	},
 
-	applies_to_vehicle: function () {
-		if (!this.frm.doc.applies_to_vehicle) {
-			this.frm.set_value('vehicle_license_plate', '');
-			this.frm.set_value('vehicle_chassis_no', '');
-			this.frm.set_value('vehicle_engine_no', '');
-			this.frm.set_value('vehicle_last_odometer', '');
-			this.frm.set_value('vehicle_color', '');
+	vehicle_chassis_no: function () {
+		erpnext.utils.format_vehicle_id(this.frm, 'vehicle_chassis_no');
+	},
+	vehicle_engine_no: function () {
+		erpnext.utils.format_vehicle_id(this.frm, 'vehicle_engine_no');
+	},
+	vehicle_license_plate: function () {
+		erpnext.utils.format_vehicle_id(this.frm, 'vehicle_license_plate');
+	},
+
+	get_applies_to_details: function () {
+		var me = this;
+		var args = this.get_applies_to_args();
+		return frappe.call({
+			method: "erpnext.stock.get_item_details.get_applies_to_details",
+			args: {
+				args: args
+			},
+			callback: function(r) {
+				if(!r.exc) {
+					me.frm.set_value(r.message);
+				}
+			}
+		});
+	},
+
+	get_applies_vehicle_odometer: function () {
+		if (!this.frm.doc.applies_to_vehicle || !this.frm.fields_dict.vehicle_last_odometer) {
+			return;
+		}
+
+		var me = this;
+		var args = this.get_applies_to_args();
+		return frappe.call({
+			method: "erpnext.stock.get_item_details.get_applies_to_vehicle_odometer",
+			args: {
+				args: args
+			},
+			callback: function(r) {
+				if(!r.exc) {
+					me.frm.set_value('vehicle_last_odometer', r.message);
+				}
+			}
+		});
+	},
+
+	get_applies_to_args: function () {
+		return {
+			applies_to_item: this.frm.doc.applies_to_item,
+			applies_to_vehicle: this.frm.doc.applies_to_vehicle,
+			doctype: this.frm.doc.doctype,
+			name: this.frm.doc.name,
+			project: this.frm.doc.project,
 		}
 	},
 

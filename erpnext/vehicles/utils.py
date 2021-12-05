@@ -1,8 +1,12 @@
 import frappe
-import erpnext
 from frappe import _
-from frappe.utils import getdate, flt, fmt_money
+from frappe.utils import cstr, getdate, flt
 from six import string_types
+
+
+def format_vehicle_id(value):
+	import re
+	return re.sub(r"\s+", "", cstr(value).upper())
 
 
 def validate_vehicle_item(item, validate_in_vehicle_booking=True):
