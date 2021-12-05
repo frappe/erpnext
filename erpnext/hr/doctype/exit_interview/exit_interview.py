@@ -12,6 +12,7 @@ from erpnext.hr.doctype.employee.employee import get_employee_email
 class ExitInterview(Document):
 	def validate(self):
 		self.validate_relieving_date()
+		self.validate_duplicate_interview()
 		self.set_employee_email()
 
 	def validate_relieving_date(self):
@@ -20,9 +21,20 @@ class ExitInterview(Document):
 				get_link_to_form('Employee', self.employee)),
 				title=_('Relieving Date Missing'))
 
+	def validate_duplicate_interview(self):
+		doc = frappe.db.exists('Exit Interview', {'employee': self.employee, 'name': ('!=', self.name)})
+		if doc:
+			frappe.throw(_('Exit Interview {0} already scheduled for Employee: {1}').format(
+				get_link_to_form('Exit Interview', doc), frappe.bold(self.employee)),
+				title=_('Duplicate Document'))
+
 	def set_employee_email(self):
 		employee = frappe.get_doc('Employee', self.employee)
 		self.email = get_employee_email(employee)
+
+	def on_submit(self):
+		if self.status != 'Completed':
+			frappe.throw(_('Only Completed documents can be submitted'))
 
 
 @frappe.whitelist()

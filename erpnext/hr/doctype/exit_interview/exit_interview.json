@@ -32,7 +32,8 @@
   "interviewers",
   "text_editor_12",
   "employee_status_section",
-  "employee_status"
+  "employee_status",
+  "amended_from"
  ],
  "fields": [
   {
@@ -188,7 +189,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Pending\nScheduled\nCompleted",
+   "options": "Pending\nScheduled\nCompleted\nCancelled",
    "reqd": 1
   },
   {
@@ -203,11 +204,21 @@
    "label": "Final Decision",
    "mandatory_depends_on": "eval:doc.status==='Completed';",
    "options": "\nEmployee Retained\nExit Confirmed"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Exit Interview",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2021-12-05 17:17:20.033950",
+ "modified": "2021-12-05 17:49:44.839277",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Exit Interview",
