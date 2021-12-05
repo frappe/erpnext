@@ -42,6 +42,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	refresh: function () {
 		this.setup_route_options();
 		this.setup_naming_series();
+		erpnext.hide_company();
 		this.setup_web_link();
 		this.setup_buttons();
 		this.toggle_vehicle_odometer_fields();
@@ -256,18 +257,49 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	},
 
 	applies_to_item: function () {
-		if (!this.frm.doc.applies_to_item) {
-			this.frm.set_value('applies_to_item_name', '');
+		this.get_applies_to_details();
+	},
+	applies_to_vehicle: function () {
+		this.get_applies_to_details();
+	},
+	vehicle_owner: function () {
+		if (!this.frm.doc.vehicle_owner) {
+			this.frm.doc.vehicle_owner_name = null;
 		}
 	},
 
-	applies_to_vehicle: function () {
-		if (!this.frm.doc.applies_to_vehicle) {
-			this.frm.set_value('vehicle_license_plate', '');
-			this.frm.set_value('vehicle_chassis_no', '');
-			this.frm.set_value('vehicle_engine_no', '');
-			this.frm.set_value('vehicle_last_odometer', '');
-			this.frm.set_value('vehicle_color', '');
+	vehicle_chassis_no: function () {
+		erpnext.utils.format_vehicle_id(this.frm, 'vehicle_chassis_no');
+	},
+	vehicle_engine_no: function () {
+		erpnext.utils.format_vehicle_id(this.frm, 'vehicle_engine_no');
+	},
+	vehicle_license_plate: function () {
+		erpnext.utils.format_vehicle_id(this.frm, 'vehicle_license_plate');
+	},
+
+	get_applies_to_details: function () {
+		var me = this;
+		var args = this.get_applies_to_args();
+		return frappe.call({
+			method: "erpnext.stock.get_item_details.get_applies_to_details",
+			args: {
+				args: args
+			},
+			callback: function(r) {
+				if(!r.exc) {
+					me.frm.set_value(r.message);
+				}
+			}
+		});
+	},
+
+	get_applies_to_args: function () {
+		return {
+			applies_to_item: this.frm.doc.applies_to_item,
+			applies_to_vehicle: this.frm.doc.applies_to_vehicle,
+			doctype: this.frm.doc.doctype,
+			name: this.frm.doc.name,
 		}
 	},
 

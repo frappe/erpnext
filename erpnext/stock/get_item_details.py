@@ -1350,7 +1350,7 @@ def get_reserved_qty_for_so(sales_order, item_code):
 
 
 @frappe.whitelist()
-def get_applies_to_details(args):
+def get_applies_to_details(args, for_validate=False):
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
@@ -1384,7 +1384,12 @@ def get_applies_to_details(args):
 		out.vehicle_unregistered = vehicle.unregistered
 		out.vehicle_color = vehicle.color
 
-		out.vehicle_last_odometer = get_applies_to_vehicle_odometer(args)
+		if args.doctype == "Project":
+			if not for_validate:
+				from erpnext.vehicles.doctype.vehicle.vehicle import get_project_odometer
+				out.update(get_project_odometer(args.name, vehicle.name))
+		else:
+			out.vehicle_last_odometer = get_applies_to_vehicle_odometer(args)
 
 	# Vehicle Owner
 	vehicle_owner = args.vehicle_owner

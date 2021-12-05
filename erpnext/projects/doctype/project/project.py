@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from six import iteritems
 from email_reply_parser import EmailReplyParser
 from frappe.utils import (flt, getdate, get_url, now,
 	nowtime, get_time, today, get_datetime, add_days)
@@ -12,8 +11,14 @@ from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
-from frappe.model.utils import get_fetch_values
+from erpnext.stock.get_item_details import get_applies_to_details
+
 from frappe.model.document import Document
+
+
+force_applies_to_fields = ("vehicle_chassis_no", "vehicle_engine_no", "vehicle_license_plate", "vehicle_unregistered",
+	"vehicle_color", "applies_to_item", "vehicle_owner_name")
+
 
 class Project(Document):
 	def get_feed(self):
@@ -33,11 +38,12 @@ class Project(Document):
 	def validate(self):
 		if not self.is_new():
 			self.copy_from_template()
-		self.send_welcome_email()
+
 		self.update_costing()
-		self.update_percent_complete()
-		self.validate_applies_to_item()
 		self.validate_service_person()
+		self.validate_applies_to()
+		self.update_percent_complete()
+		self.send_welcome_email()
 
 	def on_update(self):
 		if 'Vehicles' in frappe.get_active_domains():
@@ -52,37 +58,40 @@ class Project(Document):
 
 		if self.get('applies_to_vehicle'):
 			reload = False
-			first_odometer, last_odometer = get_project_odometer(self.name, self.applies_to_vehicle)
-			if not first_odometer and self.vehicle_first_odometer:
+			odo = get_project_odometer(self.name, self.applies_to_vehicle)
+			if not odo.vehicle_first_odometer and self.vehicle_first_odometer:
 				make_odometer_log(self.applies_to_vehicle, self.vehicle_first_odometer, project=self.name)
 				reload = True
-			if (not last_odometer or first_odometer == last_odometer) and self.vehicle_last_odometer and self.vehicle_last_odometer > self.vehicle_first_odometer:
+			if (not odo.vehicle_last_odometer or odo.vehicle_first_odometer == odo.vehicle_last_odometer)\
+					and self.vehicle_last_odometer and self.vehicle_last_odometer > self.vehicle_first_odometer:
 				make_odometer_log(self.applies_to_vehicle, self.vehicle_last_odometer, project=self.name)
 				reload = True
 
 			if reload:
 				self.vehicle_first_odometer, self.vehicle_last_odometer = self.db_get(['vehicle_first_odometer', 'vehicle_last_odometer'])
 			else:
-				first_odometer, last_odometer = get_project_odometer(self.name, self.applies_to_vehicle)
+				odo = get_project_odometer(self.name, self.applies_to_vehicle)
 				self.db_set({
-					"vehicle_first_odometer": first_odometer,
-					"vehicle_last_odometer": last_odometer
+					"vehicle_first_odometer": odo.vehicle_first_odometer,
+					"vehicle_last_odometer": odo.vehicle_last_odometer,
 				})
-		else:
-			self.db_set({
-				"vehicle_first_odometer": 0,
-				"vehicle_last_odometer": 0
-			})
-
-	def validate_applies_to_item(self):
-		if self.meta.has_field('applies_to_item') and self.meta.has_field('applies_to_item_name') and not self.get('applies_to_item'):
-			self.applies_to_item_name = ''
 
 	def validate_service_person(self):
 		if self.meta.has_field('service_advisor') and self.meta.has_field('service_advisor_name') and not self.get('service_advisor'):
 			self.service_advisor_name = ''
 		if self.meta.has_field('service_manager') and self.meta.has_field('service_manager_name') and not self.get('service_manager'):
 			self.service_manager_name = ''
+
+	def validate_applies_to(self):
+		args = self.as_dict()
+		applies_to_details = get_applies_to_details(args, for_validate=True)
+
+		for k, v in applies_to_details.items():
+			if self.meta.has_field(k) and not self.get(k) or k in force_applies_to_fields:
+				self.set(k, v)
+
+		from erpnext.vehicles.utils import format_vehicle_fields
+		format_vehicle_fields(self)
 
 	def copy_from_template(self):
 		'''

@@ -487,10 +487,19 @@ def get_vehicle_odometer(vehicle, date=None, project=None, ascending=False):
 	return cint(odometer[0].odometer) if odometer else 0
 
 
+@frappe.whitelist()
 def get_project_odometer(project, vehicle):
-	first_odometer = get_vehicle_odometer(vehicle, project=project, ascending=True)
-	last_odometer = get_vehicle_odometer(vehicle, project=project, ascending=False)
-	return first_odometer, last_odometer
+	if project:
+		first_odometer = get_vehicle_odometer(vehicle, project=project, ascending=True)
+		last_odometer = get_vehicle_odometer(vehicle, project=project, ascending=False)
+	else:
+		first_odometer = 0
+		last_odometer = 0
+
+	return frappe._dict({
+		'vehicle_first_odometer': first_odometer,
+		'vehicle_last_odometer': last_odometer,
+	})
 
 
 @frappe.whitelist()

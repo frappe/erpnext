@@ -19,7 +19,6 @@ from erpnext.accounts.doctype.pricing_rule.utils import (apply_pricing_rule_on_t
 	apply_pricing_rule_for_free_items, get_applied_pricing_rules, update_pricing_rule_table)
 from erpnext.exceptions import InvalidCurrency
 from six import text_type
-import re
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.stock.get_item_details import get_item_warehouse
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
@@ -176,17 +175,12 @@ class AccountsController(TransactionBase):
 			else:
 				self.validate_deferred_start_and_end_date()
 
-		self.validate_applies_to_item()
 		self.validate_service_person()
 
 		validate_regional(self)
 		if self.doctype != 'Material Request':
 			apply_pricing_rule_on_transaction(self)
 			update_pricing_rule_table(self)
-
-	def validate_applies_to_item(self):
-		if self.meta.has_field('applies_to_item') and self.meta.has_field('applies_to_item_name') and not self.get('applies_to_item'):
-			self.applies_to_item_name = ''
 
 	def validate_service_person(self):
 		if self.meta.has_field('service_advisor') and self.meta.has_field('service_advisor_name') and not self.get('service_advisor'):
@@ -466,27 +460,14 @@ class AccountsController(TransactionBase):
 			return
 
 		args = self.get_item_details_parent_args()
-		applies_to_details = get_applies_to_details(args)
+		applies_to_details = get_applies_to_details(args, for_validate=True)
 
 		for k, v in applies_to_details.items():
 			if self.meta.has_field(k) and not self.get(k) or k in force_applies_to_fields:
 				self.set(k, v)
 
-		self.format_vehicle_fields()
-
-	def format_vehicle_fields(self):
-		from erpnext.vehicles.utils import format_vehicle_id
-
-		if self.meta.has_field('vehicle_unregistered') and self.meta.has_field('vehicle_license_plate'):
-			if self.get('vehicle_unregistered'):
-				self.vehicle_license_plate = ""
-
-		if self.meta.has_field('vehicle_chassis_no'):
-			self.vehicle_chassis_no = format_vehicle_id(self.vehicle_chassis_no)
-		if self.meta.has_field('vehicle_engine_no'):
-			self.vehicle_engine_no = format_vehicle_id(self.vehicle_engine_no)
-		if self.meta.has_field('vehicle_license_plate'):
-			self.vehicle_license_plate = format_vehicle_id(self.vehicle_license_plate)
+		from erpnext.vehicles.utils import format_vehicle_fields
+		format_vehicle_fields(self)
 
 	def apply_pricing_rule_on_items(self, item, pricing_rule_args):
 		if not pricing_rule_args.get("validate_applied_rule", 0):

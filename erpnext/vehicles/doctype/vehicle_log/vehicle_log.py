@@ -40,10 +40,10 @@ class VehicleLog(Document):
 			if vehicle:
 				update_modified = ('Project', self.project) not in frappe.flags.currently_saving
 
-				first_odometer, last_odometer = get_project_odometer(self.project, vehicle)
+				odo = get_project_odometer(self.project, vehicle)
 				frappe.db.set_value("Project", self.project, {
-					"vehicle_first_odometer": first_odometer,
-					"vehicle_last_odometer": last_odometer
+					"vehicle_first_odometer": odo.vehicle_first_odometer,
+					"vehicle_last_odometer": odo.vehicle_last_odometer
 				}, None, update_modified=update_modified, notify=update_modified)
 
 @frappe.whitelist()
