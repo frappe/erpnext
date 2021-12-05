@@ -7,10 +7,11 @@ frappe.ui.form.InsuranceSurveyorQuickEntryForm = frappe.ui.form.QuickEntryForm.e
 
 	render_dialog: function() {
 		this._super();
-		this.dialog.get_field("insurance_company").get_query = function () {
-			return {
-				filters: {
-					'is_insurance_company': 1
+		if (this.dialog.get_field("insurance_company")) {
+			this.dialog.get_field("insurance_company").get_query = function () {
+				return {
+					query: "erpnext.controllers.queries.customer_query",
+					filters: {'is_insurance_company': 1}
 				}
 			}
 		}

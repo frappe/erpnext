@@ -31,12 +31,17 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	setup_queries: function() {
 		var me = this;
 
-		$.each([["customer", "customer"],
-			["lead", "lead"]],
-			function(i, opts) {
-				if(me.frm.fields_dict[opts[0]])
-					me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
-			});
+		var party_queries = [
+			["customer", "customer"],
+			["bill_to", "customer"],
+			["vehicle_owner", "customer"],
+			["lead", "lead"]
+		];
+
+		$.each(party_queries, function(i, opts) {
+			if(me.frm.fields_dict[opts[0]])
+				me.frm.set_query(opts[0], erpnext.queries[opts[1]]);
+		});
 
 		me.frm.set_query('contact_person', erpnext.queries.contact_query);
 		me.frm.set_query('customer_address', erpnext.queries.address_query);
@@ -73,7 +78,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		if(this.frm.fields_dict.insurance_company) {
 			this.frm.set_query("insurance_company", function(doc) {
-				return {filters: {is_insurance_company: 1}};
+				return {
+					query: "erpnext.controllers.queries.customer_query",
+					filters: {is_insurance_company: 1}
+				};
 			});
 		}
 

@@ -64,6 +64,7 @@ frappe.ui.form.VehicleQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		if (insurance_field) {
 			insurance_field.get_query = function () {
 				return {
+					query: "erpnext.controllers.queries.customer_query",
 					filters: {
 						'is_insurance_company': 1
 					}
