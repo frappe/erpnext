@@ -14,6 +14,7 @@
   "email",
   "column_break_5",
   "company",
+  "status",
   "date",
   "employee_details_section",
   "department",
@@ -29,7 +30,9 @@
   "reference_document_name",
   "interview_summary_section",
   "interviewers",
-  "text_editor_12"
+  "text_editor_12",
+  "employee_status_section",
+  "employee_status"
  ],
  "fields": [
   {
@@ -72,7 +75,6 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
@@ -84,6 +86,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Date",
+   "mandatory_depends_on": "eval:doc.status==='Scheduled';",
    "reqd": 1
   },
   {
@@ -168,6 +171,7 @@
    "default": "0",
    "fieldname": "questionnaire_email_sent",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Questionnaire Email Sent",
    "read_only": 1
   },
@@ -177,11 +181,33 @@
    "label": "Email ID",
    "options": "Email",
    "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Pending\nScheduled\nCompleted",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee_status_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employee_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Final Decision",
+   "mandatory_depends_on": "eval:doc.status==='Completed';",
+   "options": "\nEmployee Retained\nExit Confirmed"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-05 16:50:05.933394",
+ "modified": "2021-12-05 17:17:20.033950",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Exit Interview",
