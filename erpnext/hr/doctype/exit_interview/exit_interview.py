@@ -22,7 +22,11 @@ class ExitInterview(Document):
 				title=_('Relieving Date Missing'))
 
 	def validate_duplicate_interview(self):
-		doc = frappe.db.exists('Exit Interview', {'employee': self.employee, 'name': ('!=', self.name)})
+		doc = frappe.db.exists('Exit Interview', {
+			'employee': self.employee,
+			'name': ('!=', self.name),
+			'docstatus': ('!=', 2)
+		})
 		if doc:
 			frappe.throw(_('Exit Interview {0} already scheduled for Employee: {1}').format(
 				get_link_to_form('Exit Interview', doc), frappe.bold(self.employee)),
@@ -35,6 +39,18 @@ class ExitInterview(Document):
 	def on_submit(self):
 		if self.status != 'Completed':
 			frappe.throw(_('Only Completed documents can be submitted'))
+
+		self.update_interview_date_in_employee()
+
+	def on_cancel(self):
+		self.update_interview_date_in_employee()
+		self.db_set('status', 'Cancelled')
+
+	def update_interview_date_in_employee(self):
+		if self.docstatus == 1:
+			frappe.db.set_value('Employee', self.employee, 'held_on', self.date)
+		elif self.docstatus == 2:
+			frappe.db.set_value('Employee', self.employee, 'held_on', None)
 
 
 @frappe.whitelist()
