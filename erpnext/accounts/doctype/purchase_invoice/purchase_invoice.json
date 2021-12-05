@@ -65,7 +65,7 @@
   "poa_address_display",
   "sec_applies_to",
   "applies_to_item",
-  "col_break_applies_to",
+  "column_break_60",
   "applies_to_item_name",
   "currency_and_price_list",
   "currency",
@@ -1780,12 +1780,12 @@
    "label": "Applies To"
   },
   {
-   "depends_on": "eval:doc.applies_to_item_name != doc.applies_to_item",
+   "depends_on": "eval:!doc.applies_to_item || doc.applies_to_item_name != doc.applies_to_item",
    "fetch_from": "applies_to_item.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "applies_to_item_name",
    "fieldtype": "Data",
-   "label": "Applies to Item Name",
-   "read_only": 1
+   "label": "Applies to Item Name"
   },
   {
    "fieldname": "applies_to_item",
@@ -1795,18 +1795,18 @@
    "options": "Item"
   },
   {
-   "fieldname": "col_break_applies_to",
+   "fieldname": "column_break_169",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_169",
+   "fieldname": "column_break_60",
    "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2021-11-26 16:13:03.340888",
+ "modified": "2021-12-05 01:14:00.516389",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

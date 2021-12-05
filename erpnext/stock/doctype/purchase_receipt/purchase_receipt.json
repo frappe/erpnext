@@ -1518,12 +1518,12 @@
    "label": "Applies To"
   },
   {
-   "depends_on": "eval:doc.applies_to_item_name != doc.applies_to_item",
+   "depends_on": "eval:!doc.applies_to_item || doc.applies_to_item_name != doc.applies_to_item",
    "fetch_from": "applies_to_item.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "applies_to_item_name",
    "fieldtype": "Data",
-   "label": "Applies to Item Name",
-   "read_only": 1
+   "label": "Applies to Item Name"
   },
   {
    "fieldname": "applies_to_item",
@@ -1540,7 +1540,7 @@
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
- "modified": "2021-06-09 23:48:18.448613",
+ "modified": "2021-12-05 01:13:24.380498",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

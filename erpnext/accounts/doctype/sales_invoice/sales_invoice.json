@@ -72,10 +72,8 @@
   "company_address_display",
   "sec_applies_to",
   "applies_to_item",
-  "col_break_applies_to",
+  "column_break_68",
   "applies_to_item_name",
-  "section_break2",
-  "sales_team",
   "sec_insurance",
   "insurance_company",
   "insurance_company_name",
@@ -85,6 +83,8 @@
   "col_break_insurance2",
   "insurance_surveyor",
   "insurance_surveyor_company",
+  "section_break2",
+  "sales_team",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -1691,7 +1691,6 @@
    "fieldname": "order_type",
    "fieldtype": "Select",
    "hidden": 1,
-   "in_standard_filter": 1,
    "label": "Order Type",
    "options": "\nSales\nMaintenance\nShopping Cart",
    "print_hide": 1
@@ -1978,12 +1977,12 @@
    "label": "Applies To"
   },
   {
-   "depends_on": "eval:doc.applies_to_item_name != doc.applies_to_item",
+   "depends_on": "eval:!doc.applies_to_item || doc.applies_to_item_name != doc.applies_to_item",
    "fetch_from": "applies_to_item.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "applies_to_item_name",
    "fieldtype": "Data",
-   "label": "Applies to Item Name",
-   "read_only": 1
+   "label": "Applies to Item Name"
   },
   {
    "fieldname": "applies_to_item",
@@ -1991,10 +1990,6 @@
    "in_standard_filter": 1,
    "label": "Applies to Item",
    "options": "Item"
-  },
-  {
-   "fieldname": "col_break_applies_to",
-   "fieldtype": "Column Break"
   },
   {
    "depends_on": "eval:doc.docstatus == 0 || doc.bill_to != doc.customer",
@@ -2232,12 +2227,16 @@
    "no_copy": 1,
    "options": "Vehicle Registration Order",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_68",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-11-26 16:26:19.197921",
+ "modified": "2021-12-05 01:37:17.209331",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

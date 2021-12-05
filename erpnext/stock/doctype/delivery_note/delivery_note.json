@@ -59,7 +59,7 @@
   "company_address_display",
   "sec_applies_to",
   "applies_to_item",
-  "col_break_applies_to",
+  "column_break_54",
   "applies_to_item_name",
   "currency_and_price_list",
   "currency",
@@ -1325,7 +1325,6 @@
    "fieldname": "order_type",
    "fieldtype": "Select",
    "hidden": 1,
-   "in_standard_filter": 1,
    "label": "Order Type",
    "options": "\nSales\nMaintenance\nShopping Cart",
    "print_hide": 1
@@ -1620,12 +1619,12 @@
    "label": "Applies To"
   },
   {
-   "depends_on": "eval:doc.applies_to_item_name != doc.applies_to_item",
+   "depends_on": "eval:!doc.applies_to_item || doc.applies_to_item_name != doc.applies_to_item",
    "fetch_from": "applies_to_item.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "applies_to_item_name",
    "fieldtype": "Data",
-   "label": "Applies to Item Name",
-   "read_only": 1
+   "label": "Applies to Item Name"
   },
   {
    "fieldname": "applies_to_item",
@@ -1633,10 +1632,6 @@
    "in_standard_filter": 1,
    "label": "Applies to Item",
    "options": "Item"
-  },
-  {
-   "fieldname": "col_break_applies_to",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "more_info_cb_1",
@@ -1684,12 +1679,16 @@
   {
    "fieldname": "more_info_cb_3",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_54",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2021-06-10 00:36:23.093386",
+ "modified": "2021-12-05 01:13:52.349834",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

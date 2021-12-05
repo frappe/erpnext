@@ -49,7 +49,7 @@
   "contact_phone",
   "sec_applies_to",
   "applies_to_item",
-  "col_break_applies_to",
+  "column_break_43",
   "applies_to_item_name",
   "sec_insurance",
   "insurance_company",
@@ -285,7 +285,6 @@
    "fieldname": "order_type",
    "fieldtype": "Select",
    "hidden": 1,
-   "in_standard_filter": 1,
    "label": "Order Type",
    "oldfieldname": "order_type",
    "oldfieldtype": "Select",
@@ -1284,12 +1283,12 @@
    "label": "Applies To"
   },
   {
-   "depends_on": "eval:doc.applies_to_item_name != doc.applies_to_item",
+   "depends_on": "eval:!doc.applies_to_item || doc.applies_to_item_name != doc.applies_to_item",
    "fetch_from": "applies_to_item.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "applies_to_item_name",
    "fieldtype": "Data",
-   "label": "Applies to Item Name",
-   "read_only": 1
+   "label": "Applies to Item Name"
   },
   {
    "fieldname": "applies_to_item",
@@ -1297,10 +1296,6 @@
    "in_standard_filter": 1,
    "label": "Applies to Item",
    "options": "Item"
-  },
-  {
-   "fieldname": "col_break_applies_to",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "more_info_cb_1",
@@ -1384,13 +1379,17 @@
    "fieldname": "quotation_validity_days",
    "fieldtype": "Int",
    "label": "Validity Days"
+  },
+  {
+   "fieldname": "column_break_43",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2021-06-02 22:15:27.402344",
+ "modified": "2021-12-05 01:13:46.760643",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

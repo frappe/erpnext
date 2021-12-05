@@ -60,12 +60,12 @@
   "col_break46",
   "company_address",
   "company_address_display",
-  "section_break1",
-  "sales_team",
   "sec_applies_to",
   "applies_to_item",
   "col_break_applies_to",
   "applies_to_item_name",
+  "section_break1",
+  "sales_team",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -1654,12 +1654,12 @@
    "label": "Applies To"
   },
   {
-   "depends_on": "eval:doc.applies_to_item_name != doc.applies_to_item",
+   "depends_on": "eval:!doc.applies_to_item || doc.applies_to_item_name != doc.applies_to_item",
    "fetch_from": "applies_to_item.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "applies_to_item_name",
    "fieldtype": "Data",
-   "label": "Applies to Item Name",
-   "read_only": 1
+   "label": "Applies to Item Name"
   },
   {
    "fieldname": "applies_to_item",
@@ -1667,10 +1667,6 @@
    "in_standard_filter": 1,
    "label": "Applies to Item",
    "options": "Item"
-  },
-  {
-   "fieldname": "col_break_applies_to",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "more_info_cb_1",
@@ -1687,12 +1683,16 @@
   {
    "fieldname": "column_break_140",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_break_applies_to",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2021-06-10 00:36:25.702860",
+ "modified": "2021-12-05 01:56:28.328728",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

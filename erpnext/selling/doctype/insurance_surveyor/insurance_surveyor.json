@@ -27,7 +27,7 @@
    "options": "Insurance Surveyor Company"
   }
  ],
- "modified": "2020-11-19 16:57:55.002451",
+ "modified": "2021-12-05 01:04:58.661443",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Insurance Surveyor",
@@ -94,6 +94,7 @@
   }
  ],
  "quick_entry": 1,
+ "search_fields": "insurance_surveyor_company",
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

@@ -491,16 +491,12 @@
    "options": "fa fa-user"
   },
   {
-   "fieldname": "col_break_applies_to",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:doc.applies_to_item_name != doc.applies_to_item",
+   "depends_on": "eval:!doc.applies_to_item || doc.applies_to_item_name != doc.applies_to_item",
    "fetch_from": "applies_to_item.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "applies_to_item_name",
    "fieldtype": "Data",
-   "label": "Applies to Item Name",
-   "read_only": 1
+   "label": "Applies to Item Name"
   },
   {
    "fieldname": "applies_to_item",
@@ -603,11 +599,15 @@
   {
    "fieldname": "more_info_cb_3",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_break_applies_to",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2021-11-03 13:09:25.612319",
+ "modified": "2021-12-05 01:13:12.653997",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

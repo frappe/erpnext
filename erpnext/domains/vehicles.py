@@ -1,42 +1,69 @@
 from __future__ import unicode_literals
 from copy import deepcopy
 
+# Vehicle Details
 applies_to_fields = [
+	{"label": "Applies to Model", "fieldname": "applies_to_variant_of", "fieldtype": "Link", "options": "Item",
+		"insert_after": "sec_applies_to", "in_standard_filter": 1, "hidden": 1, "read_only": 1, "fetch_from": "applies_to_item.variant_of"},
+	{"label": "Applies to Model Name", "fieldname": "applies_to_variant_of_name", "fieldtype": "Data",
+		"insert_after": "applies_to_variant_of", "hidden": 1, "read_only": 1, "fetch_from": "applies_to_variant_of.item_name"},
+
 	{"label": "Applies to Vehicle", "fieldname": "applies_to_vehicle", "fieldtype": "Link", "options": "Vehicle",
-		"insert_after": "sec_applies_to", "in_standard_filter": 1},
-	{"label": "Vehicle Owner", "fieldname": "vehicle_owner", "fieldtype": "Link", "options": "Customer",
-		"insert_after": "applies_to_item", "in_standard_filter": 1, "fetch_from": "applies_to_vehicle.vehicle_owner"},
+		"insert_after": "applies_to_variant_of_name", "in_standard_filter": 1},
+
 	{"label": "License Plate", "fieldname": "vehicle_license_plate", "fieldtype": "Data", "depends_on": "eval:!doc.vehicle_unregistered",
-		"insert_after": "col_break_applies_to", "fetch_from": "applies_to_vehicle.license_plate"},
+		"insert_after": "applies_to_item_name", "read_only": 0, "fetch_from": ""},
 	{"label": "Is Unregistered", "fieldname": "vehicle_unregistered", "fieldtype": "Check", "depends_on": "eval:!doc.vehicle_license_plate || doc.vehicle_unregistered",
-		"insert_after": "vehicle_license_plate", "fetch_from": "applies_to_vehicle.unregistered"},
-	{"label": "Vehicle Owner Name", "fieldname": "vehicle_owner_name", "fieldtype": "Data",
-		"insert_after": "applies_to_item_name", "fetch_from": "vehicle_owner.customer_name", "read_only": 1,
-		"depends_on": "eval:doc.vehicle_owner && doc.vehicle_owner_name != doc.vehicle_owner"},
+		"insert_after": "vehicle_license_plate", "read_only": 0, "fetch_from": ""},
+
 	{"label": "", "fieldname": "col_break_vehicle_1", "fieldtype": "Column Break",
-		"insert_after": "vehicle_owner_name"},
+		"insert_after": "vehicle_unregistered"},
+
 	{"label": "Chassis No", "fieldname": "vehicle_chassis_no", "fieldtype": "Data",
-		"insert_after": "col_break_vehicle_1", "fetch_from": "applies_to_vehicle.chassis_no"},
+		"insert_after": "col_break_vehicle_1", "read_only": 0, "fetch_from": ""},
 	{"label": "Engine No", "fieldname": "vehicle_engine_no", "fieldtype": "Data",
-		"insert_after": "vehicle_chassis_no", "fetch_from": "applies_to_vehicle.engine_no"},
+		"insert_after": "vehicle_chassis_no", "read_only": 0, "fetch_from": ""},
+
 	{"label": "", "fieldname": "col_break_vehicle_2", "fieldtype": "Column Break",
 		"insert_after": "vehicle_engine_no"},
-	{"label": "Odometer Reading", "fieldname": "vehicle_last_odometer", "fieldtype": "Int",
-		"insert_after": "col_break_vehicle_2", "fetch_from": "applies_to_vehicle.last_odometer", "no_copy": 1},
+
 	{"label": "Vehicle Color", "fieldname": "vehicle_color", "fieldtype": "Link", "options": "Vehicle Color",
-		"insert_after": "vehicle_last_odometer", "fetch_from": "applies_to_vehicle.color"},
+		"insert_after": "col_break_vehicle_2", "read_only": 0, "fetch_from": ""},
+	{"label": "Odometer Reading", "fieldname": "vehicle_last_odometer", "fieldtype": "Int",
+		"insert_after": "vehicle_color", "read_only": 0, "fetch_from": "", "no_copy": 1},
 ]
 
 applies_to_project_fields = deepcopy(applies_to_fields)
-
 project_first_odometer = {"label": "Odometer Reading (First)", "fieldname": "vehicle_first_odometer", "fieldtype": "Int",
-	"insert_after": "col_break_vehicle_2"}
+	"insert_after": "vehicle_color"}
 applies_to_project_fields.append(project_first_odometer)
 
 project_last_odometer = [f for f in applies_to_project_fields if f['fieldname'] == 'vehicle_last_odometer'][0]
 project_last_odometer.update({"label": "Odometer Reading (Last)", "fetch_from": "",
 	"insert_after": "vehicle_first_odometer"})
 
+# Vehicle Owner
+vehicle_owner_fields = [
+	{"label": "Vehicle Owner", "fieldname": "vehicle_owner", "fieldtype": "Link", "options": "Customer",
+		"insert_after": "", "in_standard_filter": 0, "fetch_from": "", "read_only": 0},
+	{"label": "Vehicle Owner Name", "fieldname": "vehicle_owner_name", "fieldtype": "Data",
+		"insert_after": "vehicle_owner", "fetch_from": "vehicle_owner.customer_name", "read_only": 1,
+		"depends_on": "eval:doc.vehicle_owner && doc.vehicle_owner_name != doc.vehicle_owner"},
+]
+
+sales_invoice_vehicle_owner_fields = deepcopy(vehicle_owner_fields)
+sales_invoice_vehicle_owner_field = [f for f in sales_invoice_vehicle_owner_fields if f['fieldname'] == 'vehicle_owner'][0]
+sales_invoice_vehicle_owner_field['insert_after'] = 'bill_to_name'
+
+project_vehicle_owner_fields = deepcopy(vehicle_owner_fields)
+project_vehicle_owner_column_break = {"label": "", "fieldname": "col_break_customer_details_2", "fieldtype": "Column Break",
+	"insert_after": "bill_to_name"}
+project_vehicle_owner_fields.insert(0, project_vehicle_owner_column_break)
+
+project_vehicle_owner_field = [f for f in project_vehicle_owner_fields if f['fieldname'] == 'vehicle_owner'][0]
+project_vehicle_owner_field['insert_after'] = 'col_break_customer_details_2'
+
+# Service Person
 service_person_fields = [
 	{"label": "Service Advisor", "fieldname": "service_advisor", "fieldtype": "Link", "options": "Employee",
 		"insert_after": "more_info_cb_2", "in_standard_filter": 1, "ignore_user_permissions": 1},
@@ -50,6 +77,7 @@ service_person_fields = [
 		"depends_on": "eval:doc.service_manager && doc.service_manager_name != doc.service_manager"},
 ]
 
+# Accounting Dimensions
 accounting_dimension_fields = [
 	{"label": "Applies to Vehicle", "fieldname": "applies_to_vehicle", "fieldtype": "Link", "options": "Vehicle",
 		"insert_after": "cost_center", "in_standard_filter": 1, "ignore_user_permissions": 1},
@@ -73,20 +101,28 @@ accounting_dimension_fields = [
 		"insert_after": "vehicle_engine_no", "read_only": 1, "fetch_from": "applies_to_vehicle.license_plate"},
 ]
 
+accounting_dimension_table_fields = deepcopy(accounting_dimension_fields)
+for d in accounting_dimension_table_fields:
+	if 'in_standard_filter' in d:
+		del d['in_standard_filter']
+
+# Item Fields
 item_fields = [
 	{"label": "Vehicle Allocation Required From Delivery Period", "fieldname": "vehicle_allocation_required_from_delivery_period",
 		"fieldtype": "Link", "options": "Vehicle Allocation Period",
 		"insert_after": "vehicle_allocation_required", "depends_on": "vehicle_allocation_required", "ignore_user_permissions": 1},
 ]
 
-accounting_dimension_table_fields = deepcopy(accounting_dimension_fields)
-for d in accounting_dimension_table_fields:
-	if 'in_standard_filter' in d:
-		del d['in_standard_filter']
-
+# Set Translatable = 0
 for d in applies_to_fields:
 	d['translatable'] = 0
 for d in applies_to_project_fields:
+	d['translatable'] = 0
+for d in vehicle_owner_fields:
+	d['translatable'] = 0
+for d in sales_invoice_vehicle_owner_fields:
+	d['translatable'] = 0
+for d in project_vehicle_owner_fields:
 	d['translatable'] = 0
 for d in service_person_fields:
 	d['translatable'] = 0
@@ -99,16 +135,20 @@ for d in item_fields:
 
 common_properties = [
 	[('Delivery Note Item', 'Sales Invoice Item', 'Purchase Receipt Item', 'Purchase Invoice Item', 'Stock Entry Detail'),
-		{"fieldname": "vehicle", "property": "in_standard_filter", "value": 1}],
+		{"fieldname": "vehicle", "property": "in_standard_filter", "value": 0}],
 
 	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project'),
 		{"fieldname": "sec_applies_to", "property": "hidden", "value": 0}],
 
 	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project'),
-		{"fieldname": "applies_to_item", "property": "fetch_from", "value": "applies_to_vehicle.item_code"}],
+		{"fieldname": "sec_applies_to", "property": "label", "value": "Vehicle Details"}],
 
 	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project'),
-		{"fieldname": "sec_applies_to", "property": "label", "value": "Vehicle Details"}],
+		{"fieldname": "sec_applies_to", "property": "collapsible_depends_on",
+			"value": "eval:doc.applies_to_item || doc.applies_to_vehicle || doc.vehicle_license_plate || doc.vehicle_chassis_no || doc.vehicle_engine_no"}],
+
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project'),
+		{"fieldname": "applies_to_item", "property": "fetch_from", "value": "applies_to_vehicle.item_code"}],
 
 	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Project'),
 		{"fieldname": "customer", "property": "label", "value": "Customer (User)"}],
@@ -148,14 +188,14 @@ data = {
 	],
 	'custom_fields': {
 		"Item": item_fields,
-		"Sales Invoice": applies_to_fields + service_person_fields,
+		"Sales Invoice": sales_invoice_vehicle_owner_fields + applies_to_fields + service_person_fields,
 		"Delivery Note": applies_to_fields + service_person_fields,
 		"Sales Order": applies_to_fields + service_person_fields,
 		"Quotation": applies_to_fields + service_person_fields,
 		"Purchase Order": applies_to_fields,
 		"Purchase Receipt": applies_to_fields,
 		"Purchase Invoice": applies_to_fields,
-		"Project": applies_to_project_fields + service_person_fields,
+		"Project": project_vehicle_owner_fields + applies_to_project_fields + service_person_fields,
 		"Journal Entry": accounting_dimension_fields,
 		"Journal Entry Account": accounting_dimension_table_fields,
 		"Payment Entry": accounting_dimension_fields,
