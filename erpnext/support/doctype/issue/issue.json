@@ -372,7 +372,7 @@
    "read_only": 1
   },
   {
-   "default": "Ongoing",
+   "default": "First Response Due",
    "depends_on": "eval: doc.service_level_agreement",
    "fieldname": "agreement_status",
    "fieldtype": "Select",

@@ -625,7 +625,7 @@ def reset_resolution_metrics(doc):
 		doc.user_resolution_time = None
 
 	if doc.meta.has_field("agreement_status"):
-		doc.agreement_status = "Ongoing"
+		doc.agreement_status = "First Response Due"
 
 
 # called via hooks on communication update
