@@ -10,7 +10,7 @@
 	<tbody>
 		{% for ss_dict in ss_list %}
 			<tr>
-			{% for key, value in ss_dict.iteritems()|sort %}
+			{% for key, value in ss_dict.items()|sort %}
 				<td {% if key == "Total Pay"%} align = "right" {% endif %}> {{value}} </td>
 			{% endfor %}
 			</tr>

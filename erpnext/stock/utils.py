@@ -1,14 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
 import frappe
 from frappe import _
 from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
-from six import string_types
 
 import erpnext
 
@@ -189,7 +187,7 @@ def get_bin(item_code, warehouse):
 	bin_obj.flags.ignore_permissions = True
 	return bin_obj
 
-def get_or_make_bin(item_code, warehouse) -> str:
+def get_or_make_bin(item_code: str , warehouse: str) -> str:
 	bin_record = frappe.db.get_value('Bin', {'item_code': item_code, 'warehouse': warehouse})
 
 	if not bin_record:
@@ -205,11 +203,12 @@ def get_or_make_bin(item_code, warehouse) -> str:
 	return bin_record
 
 def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
+	"""WARNING: This function is deprecated. Inline this function instead of using it."""
 	from erpnext.stock.doctype.bin.bin import update_stock
 	is_stock_item = frappe.get_cached_value('Item', args.get("item_code"), 'is_stock_item')
 	if is_stock_item:
-		bin_record = get_or_make_bin(args.get("item_code"), args.get("warehouse"))
-		update_stock(bin_record, args, allow_negative_stock, via_landed_cost_voucher)
+		bin_name = get_or_make_bin(args.get("item_code"), args.get("warehouse"))
+		update_stock(bin_name, args, allow_negative_stock, via_landed_cost_voucher)
 	else:
 		frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
 
@@ -217,7 +216,7 @@ def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 def get_incoming_rate(args, raise_error_if_no_rate=True):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
-	if isinstance(args, string_types):
+	if isinstance(args, str):
 		args = json.loads(args)
 
 	in_rate = 0
