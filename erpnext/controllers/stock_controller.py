@@ -389,7 +389,7 @@ class StockController(AccountsController):
 
 		# return if inspection is not required on document level
 		if ((not inspection_required_fieldname and self.doctype != "Stock Entry") or
-			(self.doctype == "Stock Entry" and not self.inspection_required) or
+			self.doctype == "Stock Entry" or
 			(self.doctype in ["Sales Invoice", "Purchase Invoice"] and not self.update_stock)):
 				return
 

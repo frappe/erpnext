@@ -753,7 +753,6 @@ class TestStockEntry(unittest.TestCase):
 			create_item(item_code)
 
 		repack = frappe.copy_doc(test_records[3])
-		repack.inspection_required = 1
 		for d in repack.items:
 			if not d.s_warehouse and d.t_warehouse:
 				d.item_code = item_code
@@ -761,6 +760,7 @@ class TestStockEntry(unittest.TestCase):
 				d.uom = "Nos"
 				d.stock_uom = "Nos"
 				d.basic_rate = 5000
+				d.inspection_required = 1
 
 		repack.insert()
 		self.assertRaises(frappe.ValidationError, repack.submit)
