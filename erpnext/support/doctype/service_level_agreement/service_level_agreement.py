@@ -376,14 +376,14 @@ def process_sla(doc, sla):
 	doc.service_level_agreement = sla.name
 	doc.priority = doc.get("priority") or sla.default_priority
 
-	prev_status = frappe.db.get_value(doc.doctype, doc.name, 'status')
-	handle_status_change(doc, prev_status, sla.apply_sla_for_resolution)
+	handle_status_change(doc, sla.apply_sla_for_resolution)
 	update_response_and_resolution_metrics(doc, sla.apply_sla_for_resolution)
 	update_agreement_status(doc, sla.apply_sla_for_resolution)
 
 
-def handle_status_change(doc, prev_status, apply_sla_for_resolution):
+def handle_status_change(doc, apply_sla_for_resolution):
 	now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
+	prev_status = frappe.db.get_value(doc.doctype, doc.name, 'status')
 
 	hold_statuses = get_hold_statuses(doc.service_level_agreement)
 	fulfillment_statuses = get_fulfillment_statuses(doc.service_level_agreement)
@@ -407,7 +407,7 @@ def handle_status_change(doc, prev_status, apply_sla_for_resolution):
 			doc.total_hold_time = (doc.total_hold_time or 0) + current_hold_hours
 		doc.on_hold_since = None
 
-	if is_open_status(prev_status) and not is_open_status(doc.status):
+	if ((is_open_status(prev_status) and not is_open_status(doc.status)) or doc.flags.on_first_reply):
 		# status changed from Open to something else
 		if doc.meta.has_field("first_responded_on") and not doc.get('first_responded_on'):
 			doc.first_responded_on = now_time
@@ -625,8 +625,8 @@ def reset_resolution_metrics(doc):
 
 
 # called via hooks on communication update
-def update_hold_time(doc, status):
-	if doc.communication_type == "Comment" or doc.sent_or_received != "Received":
+def on_communication_update(doc, status):
+	if doc.communication_type == "Comment":
 		return
 
 	parent = get_parent_doc(doc)
@@ -638,7 +638,27 @@ def update_hold_time(doc, status):
 
 	for_resolution = frappe.db.get_value('Service Level Agreement', parent.service_level_agreement, 'apply_sla_for_resolution')
 
-	handle_status_change(parent, 'Replied', for_resolution)
+	if (
+		doc.sent_or_received == "Received" # a reply is received
+		and parent.get('status') == 'Open' # issue status is set as open from communication.py
+		and parent._doc_before_save
+		and parent.get('status') != parent._doc_before_save.get('status') # status changed
+	):
+		# undo the status change in db
+		# since prev status is fetched from db
+		frappe.db.set_value(parent.doctype, parent.name, 'status', parent._doc_before_save.get('status'))
+
+	elif (
+		doc.sent_or_received == "Sent" # a reply is sent
+		and parent.get('first_responded_on') # first_responded_on is set from communication.py
+		and parent._doc_before_save
+		and not parent._doc_before_save.get('first_responded_on') # first_responded_on was not set
+	):
+		# reset first_responded_on since it will be handled/set later on
+		parent.first_responded_on = None
+		parent.flags.on_first_reply = True
+
+	handle_status_change(parent, for_resolution)
 	update_response_and_resolution_metrics(parent, for_resolution)
 	update_agreement_status(parent, for_resolution)
 

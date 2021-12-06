@@ -234,7 +234,7 @@ doc_events = {
 	},
 	"Communication": {
 		"on_update": [
-			"erpnext.support.doctype.service_level_agreement.service_level_agreement.update_hold_time",
+			"erpnext.support.doctype.service_level_agreement.service_level_agreement.on_communication_update",
 			"erpnext.support.doctype.issue.issue.set_first_response_time"
 		]
 	},
