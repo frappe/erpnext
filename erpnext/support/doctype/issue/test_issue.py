@@ -1,10 +1,10 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
 
-import datetime
 import unittest
 
 import frappe
+from frappe import _
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import flt, get_datetime
 
@@ -231,8 +231,13 @@ class TestIssue(TestSetUp):
 
 		# assert if a new timeline item has been added
 		# to record the assignment
-		comment = frappe.get_last_doc('Comment')
-		self.assertTrue('First Response SLA Failed' in comment.content)
+		comment = frappe.db.exists('Comment', {
+			'reference_doctype': 'Issue',
+			'reference_name': issue.name,
+			'comment_type': 'Assigned',
+			'content': _('First Response SLA Failed by {}').format('test')
+		})
+		self.assertTrue(comment)
 
 	def test_agreement_status_on_response(self):
 		frappe.flags.current_time = get_datetime("2021-11-01 19:00")
