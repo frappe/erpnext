@@ -347,16 +347,16 @@
    "read_only": 1
   },
   {
-  "fieldname": "resolution_time",
-  "fieldtype": "Duration",
-  "label": "Resolution Time",
-  "read_only": 1
+   "fieldname": "resolution_time",
+   "fieldtype": "Duration",
+   "label": "Resolution Time",
+   "read_only": 1
   },
   {
-    "fieldname": "user_resolution_time",
-    "fieldtype": "Duration",
-    "label": "User Resolution Time",
-    "read_only": 1
+   "fieldname": "user_resolution_time",
+   "fieldtype": "Duration",
+   "label": "User Resolution Time",
+   "read_only": 1
   },
   {
    "fieldname": "on_hold_since",
