@@ -10,6 +10,18 @@ from frappe.desk.notifications import clear_notifications
 
 import functools
 
+
+excluded_dts = (
+	"Account", "Cost Center", "Budget", "Warehouse",
+	"Sales Taxes and Charges Template", "Purchase Taxes and Charges Template",
+	"Party Account", "Employee", "BOM",
+	"POS Profile", "Mode Of Payment", "Mode of Payment Account",
+	"Company", "Bank Account", "Item Tax Template",
+	"Item Default", "Customer", "Supplier", "GST Account",
+	"Vehicle Withholding Tax Rule"
+)
+
+
 @frappe.whitelist()
 def delete_company_transactions(company_name):
 	frappe.only_for("System Manager")
@@ -24,9 +36,7 @@ def delete_company_transactions(company_name):
 
 	for doctype in frappe.db.sql_list("""select parent from
 		tabDocField where fieldtype='Link' and options='Company'"""):
-		if doctype not in ("Account", "Cost Center", "Warehouse", "Budget",
-			"Party Account", "Employee", "Sales Taxes and Charges Template",
-			"Purchase Taxes and Charges Template", "POS Profile", 'BOM'):
+		if doctype not in excluded_dts:
 				delete_for_doctype(doctype, company_name)
 
 	# reset company values
