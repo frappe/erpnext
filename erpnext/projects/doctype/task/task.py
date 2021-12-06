@@ -227,7 +227,7 @@ class Task(NestedSet):
 		args['posting_date'] = frappe.utils.nowdate()
 		args['posting_time'] = frappe.utils.nowtime()
 		stock_and_rate = get_warehouse_details(args)
-		return stock_and_rate['basic_rate']
+		return stock_and_rate.get('basic_rate')
 
 	@frappe.whitelist()
 	def get_items(self):
@@ -242,12 +242,21 @@ class Task(NestedSet):
 		item_dict = get_bom_items_as_dict(self.from_bom, self.company, qty=self.qty,
 			fetch_exploded = self.use_multi_level_bom, fetch_qty_in_stock_uom=False)
 
+		self.items = []
 		for key, item in item_dict.items():
 			if not item.source_warehouse:
 				item.source_warehouse = get_default_source_warehouse(item.item_code, self.company)
 			item.rate = self.get_basic_rate(item)
+			row = self.append('items', {})
+			row.item_code = item.item_code
+			row.item_name = item.item_name
+			row.basic_rate = item.rate
+			row.qty = item.qty
+			row.uom = item.stock_uom
+			row.estimated_cost = flt(row.qty) * flt(row.basic_rate)
+			row.warehouse = item.source_warehouse
 
-		return item_dict
+		return self
 
 @frappe.whitelist()
 def check_if_child_exists(name):

@@ -435,6 +435,7 @@
    "label": "Get Items"
   },
   {
+   "default": "1.0",
    "depends_on": "eval:doc.from_bom",
    "fieldname": "qty",
    "fieldtype": "Float",
@@ -461,7 +462,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2021-10-29 14:54:48.487133",
+ "modified": "2021-12-06 14:38:45.992721",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

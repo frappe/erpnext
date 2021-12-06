@@ -14,18 +14,6 @@ frappe.ui.form.on("Task", {
 	},
 
 	onload: function (frm) {
-		let hide = false;
-		if (frm.doc.items.length > 0) {
-			frm.doc.items.forEach((item) => {
-				if (item.transferred > 0 | item.issued > 0) {
-					hide = true;
-				}
-			})
-			frm.toggle_display(["get_items"], hide == true ? 0 : 1);
-			frm.set_df_property("from_bom", "read_only", hide == true ? 1 : 0);
-			frm.set_df_property("qty", "read_only", hide == true ? 1 : 0);
-			frm.set_df_property("use_multi_level_bom", "read_only", hide == true ? 1 : 0);
-		}
 		frm.set_query("task", "depends_on", function () {
 			let filters = {
 				name: ["!=", frm.doc.name]
@@ -48,6 +36,19 @@ frappe.ui.form.on("Task", {
 		});
 	},
 	refresh(frm) {
+		let hide = false;
+		if (frm.doc.items.length > 0) {
+			frm.doc.items.forEach((item) => {
+				if (item.transferred > 0 | item.issued > 0) {
+					hide = true;
+				}
+			})
+			frm.toggle_display(["get_items"], hide == true ? 0 : 1);
+			frm.set_df_property("from_bom", "read_only", hide == true ? 1 : 0);
+			frm.set_df_property("qty", "read_only", hide == true ? 1 : 0);
+			frm.set_df_property("use_multi_level_bom", "read_only", hide == true ? 1 : 0);
+		}
+
 		if (frm.doc.items.length) {
 			frappe.call({
 				method: "erpnext.projects.doctype.task.task.check_items_complete",
@@ -110,22 +111,12 @@ frappe.ui.form.on("Task", {
 		if (!frm.doc.qty || !frm.doc.from_bom) {
 			frappe.throw(__('BOM and Quantity is required to fetch items.'));
 		}
+		frm.doc.items = [];
 	 	frappe.call({
 			doc: frm.doc,
 			method: 'get_items',
-			callback: (response) => {
-				const items = response.message;
-				for (const [key, item] of Object.entries(items)) {
-					let row = frm.add_child("items");
-					row.item_code = item.item_code;
-					row.item_name = item.item_name;
-					row.basic_rate = item.rate;
-					row.qty = item.qty;
-					row.uom = item.stock_uom;
-					row.estimated_cost = flt(row.qty) * flt(row.basic_rate);
-					row.warehouse = item.source_warehouse;
-				  }
-			frm.refresh_fields("items");
+			callback: (r) => {
+				frm.refresh_fields("items");
 			}
 		});
 	}
