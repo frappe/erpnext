@@ -1,0 +1,86 @@
+{
+ "actions": [],
+ "autoname": "field:label",
+ "creation": "2019-05-04 18:13:37.002352",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "document_type",
+  "label",
+  "fieldname",
+  "dimension_defaults",
+  "disabled"
+ ],
+ "fields": [
+  {
+   "fieldname": "label",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Dimension Name",
+   "unique": 1
+  },
+  {
+   "fieldname": "fieldname",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Fieldname"
+  },
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Link",
+   "label": "Reference Document Type",
+   "options": "DocType",
+   "read_only_depends_on": "eval:!doc.__islocal",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Disable",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dimension_defaults",
+   "fieldtype": "Table",
+   "label": "Dimension Defaults",
+   "options": "Accounting Dimension Detail"
+  }
+ ],
+ "links": [],
+ "modified": "2021-02-08 16:37:53.936656",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Accounting Dimension",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

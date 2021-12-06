@@ -1,0 +1,13 @@
+apps/erpnext/erpnext/accounts/general_ledger.py,Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction.,Riq jun ajilib’al jechataj chupam re le nima wuj teq xa sach che le uk’exik
+DocType: Company,Create Chart Of Accounts Based On,Kujak uwach etal pa ri
+DocType: Program Enrollment Fee,Program Enrollment Fee,Rajil re utz’ib’axik pale cholb’al chak
+DocType: Employee Transfer,New Company,K’ak’ chakulib’al
+DocType: Selling Settings,Validate Selling Price for Item against Purchase Rate or Valuation Rate,Utz re uk’ayixik le q’atoj le copanawi le ka loq’ik
+DocType: Opportunity,Opportunity Type,Uwach ramajil
+DocType: Fee Schedule,Fee Schedule,Cholb’al chak utojik jujunal
+DocType: Cheque Print Template,Cheque Width,Nim uxach uk’exwach pwaq
+apps/erpnext/erpnext/hr/doctype/employee/employee.js,Please enter Preferred Contact Email,Taquqxa’n kematz’ib’m uj’el
+DocType: Item,Supplier Items,Q’ataj che uyaik
+,Stock Ageing,Najtir k’oji’k
+apps/erpnext/erpnext/education/doctype/student/student.py,Date of Birth cannot be greater than today.,Ler q’ij k’ojik kumaj taj che le q’ij re kamik
+apps/erpnext/erpnext/setup/doctype/company/delete_company_transactions.py,Transactions can only be deleted by the creator of the Company,Le uk’exik xaqxu’ kakiw uk’exik le b’anowik le chakulib’al

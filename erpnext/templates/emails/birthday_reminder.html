@@ -1,0 +1,25 @@
+<div class="gray-container text-center">
+	<div>
+		{% for person in birthday_persons %}
+			{% if person.image  %}
+			<img
+				class="avatar-frame standard-image"
+				src="{{ person.image }}"
+				style="{{ css_style or '' }}"
+				title="{{ person.name }}">
+			</span>
+			{% else %}
+			<span
+				class="avatar-frame standard-image"
+				style="{{ css_style or '' }}"
+				title="{{ person.name }}">
+				{{ frappe.utils.get_abbr(person.name) }}
+			</span>
+			{% endif %}
+		{% endfor %}
+	</div>
+	<div style="margin-top: 15px">
+		<span>{{ reminder_text }}</span>
+		<p class="text-muted">{{ message }}</p>
+	</div>
+</div>

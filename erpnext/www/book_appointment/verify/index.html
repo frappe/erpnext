@@ -1,0 +1,18 @@
+{% extends "templates/web.html" %}
+
+{% block title %}
+{{ _("Verify Email") }}
+{% endblock%}
+
+{% block page_content %}
+
+    {% if success==True %}
+        <div class="alert alert-success">
+            Your email has been verified and your appointment has been scheduled
+        </div>
+    {% else %}
+        <div class="alert alert-danger">
+            Verification failed please check the link
+        </div>
+    {% endif %}
+{% endblock%}

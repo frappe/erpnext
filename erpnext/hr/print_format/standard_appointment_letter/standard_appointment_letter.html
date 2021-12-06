@@ -1,0 +1,38 @@
+{%- from "templates/print_formats/standard_macros.html" import add_header -%}
+
+<div class="text-center" style="margin-bottom: 10%;"><h3>Appointment Letter</h3></div>
+<div class ='row' style="margin-bottom: 5%;">
+    <div class = "col-sm-6">
+        <b>{{ doc.applicant_name }},</b>
+    </div>
+    <div class="col-sm-6">
+        <span style = "float: right;"><b> Date: </b>{{ doc.appointment_date }}</span>
+    </div>
+</div>
+<div style="margin-bottom: 5%;">
+    {{ doc.introduction }}
+</div>
+<div style="margin-bottom: 5%;">
+    <ul>
+    {% for content in doc.terms %}
+        <li style="padding-bottom: 3%;">
+            <span>
+                <span><b>{{ content.title }}: </b></span> {{ content.description }}
+            </span>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+<div style="margin-bottom: 5%;">
+<span>Your sincerely,</span><br>
+<span><b>For {{ doc.company }}</b></span>
+</div>
+
+<div style="margin-bottom: 5%;">
+    <span>{{ doc.closing_notes }}</span>
+</div>
+
+<div>
+    <span><b>________________</b></span><br>
+    <span><b>{{ doc.applicant_name }}</b></span>
+</div>

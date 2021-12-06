@@ -1,0 +1,480 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:serial_no",
+ "creation": "2013-05-16 10:59:15",
+ "description": "Distinct unit of an Item",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "details",
+  "column_break0",
+  "serial_no",
+  "item_code",
+  "warehouse",
+  "batch_no",
+  "column_break1",
+  "item_name",
+  "description",
+  "item_group",
+  "brand",
+  "sales_order",
+  "purchase_details",
+  "column_break2",
+  "purchase_document_type",
+  "purchase_document_no",
+  "purchase_date",
+  "purchase_time",
+  "purchase_rate",
+  "column_break3",
+  "supplier",
+  "supplier_name",
+  "asset_details",
+  "asset",
+  "asset_status",
+  "column_break_24",
+  "location",
+  "employee",
+  "delivery_details",
+  "delivery_document_type",
+  "delivery_document_no",
+  "delivery_date",
+  "delivery_time",
+  "column_break5",
+  "customer",
+  "customer_name",
+  "invoice_details",
+  "sales_invoice",
+  "warranty_amc_details",
+  "column_break6",
+  "warranty_expiry_date",
+  "amc_expiry_date",
+  "column_break7",
+  "maintenance_status",
+  "warranty_period",
+  "more_info",
+  "serial_no_details",
+  "company",
+  "status",
+  "work_order"
+ ],
+ "fields": [
+  {
+   "fieldname": "details",
+   "fieldtype": "Section Break",
+   "oldfieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Data",
+   "label": "Serial No",
+   "no_copy": 1,
+   "oldfieldname": "serial_no",
+   "oldfieldtype": "Data",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Item Code",
+   "oldfieldname": "item_code",
+   "oldfieldtype": "Link",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "description": "Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt",
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Warehouse",
+   "no_copy": 1,
+   "oldfieldname": "warehouse",
+   "oldfieldtype": "Link",
+   "options": "Warehouse",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Batch No",
+   "options": "Batch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description",
+   "oldfieldname": "description",
+   "oldfieldtype": "Text",
+   "read_only": 1,
+   "width": "300px"
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "oldfieldname": "item_group",
+   "oldfieldtype": "Link",
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "brand",
+   "fieldtype": "Link",
+   "label": "Brand",
+   "oldfieldname": "brand",
+   "oldfieldtype": "Link",
+   "options": "Brand",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order"
+  },
+  {
+   "fieldname": "purchase_details",
+   "fieldtype": "Section Break",
+   "label": "Purchase / Manufacture Details"
+  },
+  {
+   "fieldname": "column_break2",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "purchase_document_type",
+   "fieldtype": "Link",
+   "label": "Creation Document Type",
+   "no_copy": 1,
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_document_no",
+   "fieldtype": "Dynamic Link",
+   "label": "Creation Document No",
+   "no_copy": 1,
+   "options": "purchase_document_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_date",
+   "fieldtype": "Date",
+   "label": "Creation Date",
+   "no_copy": 1,
+   "oldfieldname": "purchase_date",
+   "oldfieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_time",
+   "fieldtype": "Time",
+   "label": "Creation Time",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_rate",
+   "fieldtype": "Currency",
+   "label": "Incoming Rate",
+   "no_copy": 1,
+   "oldfieldname": "purchase_rate",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break3",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "no_copy": 1,
+   "options": "Supplier"
+  },
+  {
+   "bold": 1,
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "asset_details",
+   "fieldtype": "Section Break",
+   "label": "Asset Details"
+  },
+  {
+   "fieldname": "asset",
+   "fieldtype": "Link",
+   "label": "Asset",
+   "no_copy": 1,
+   "options": "Asset",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "asset",
+   "fieldname": "asset_status",
+   "fieldtype": "Select",
+   "label": "Asset Status",
+   "options": "\nIssue\nReceipt\nTransfer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Link",
+   "label": "Location",
+   "options": "Location",
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_details",
+   "fieldtype": "Section Break",
+   "label": "Delivery Details",
+   "oldfieldtype": "Column Break"
+  },
+  {
+   "fieldname": "delivery_document_type",
+   "fieldtype": "Link",
+   "label": "Delivery Document Type",
+   "no_copy": 1,
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_document_no",
+   "fieldtype": "Dynamic Link",
+   "label": "Delivery Document No",
+   "no_copy": 1,
+   "options": "delivery_document_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_date",
+   "fieldtype": "Date",
+   "label": "Delivery Date",
+   "no_copy": 1,
+   "oldfieldname": "delivery_date",
+   "oldfieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_time",
+   "fieldtype": "Time",
+   "label": "Delivery Time",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break5",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "no_copy": 1,
+   "oldfieldname": "customer",
+   "oldfieldtype": "Link",
+   "options": "Customer",
+   "print_hide": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "no_copy": 1,
+   "oldfieldname": "customer_name",
+   "oldfieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_details",
+   "fieldtype": "Section Break",
+   "label": "Invoice Details"
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "warranty_amc_details",
+   "fieldtype": "Section Break",
+   "label": "Warranty / AMC Details"
+  },
+  {
+   "fieldname": "column_break6",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "maintenance_status",
+   "fieldtype": "Select",
+   "label": "Maintenance Status",
+   "oldfieldname": "maintenance_status",
+   "oldfieldtype": "Select",
+   "options": "\nUnder Warranty\nOut of Warranty\nUnder AMC\nOut of AMC",
+   "read_only": 1,
+   "search_index": 1,
+   "width": "150px"
+  },
+  {
+   "fieldname": "warranty_period",
+   "fieldtype": "Int",
+   "label": "Warranty Period (Days)",
+   "oldfieldname": "warranty_period",
+   "oldfieldtype": "Int",
+   "read_only": 1,
+   "width": "150px"
+  },
+  {
+   "fieldname": "column_break7",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "warranty_expiry_date",
+   "fieldtype": "Date",
+   "label": "Warranty Expiry Date",
+   "oldfieldname": "warranty_expiry_date",
+   "oldfieldtype": "Date",
+   "width": "150px"
+  },
+  {
+   "fieldname": "amc_expiry_date",
+   "fieldtype": "Date",
+   "label": "AMC Expiry Date",
+   "oldfieldname": "amc_expiry_date",
+   "oldfieldtype": "Date",
+   "width": "150px"
+  },
+  {
+   "fieldname": "more_info",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "serial_no_details",
+   "fieldtype": "Text Editor",
+   "label": "Serial No Details"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "remember_last_selected_value": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "\nActive\nInactive\nDelivered\nExpired",
+   "read_only": 1
+  },
+  {
+   "fieldname": "work_order",
+   "fieldtype": "Link",
+   "label": "Work Order",
+   "options": "Work Order"
+  }
+ ],
+ "icon": "fa fa-barcode",
+ "idx": 1,
+ "links": [],
+ "modified": "2021-01-08 14:31:15.375996",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Serial No",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Item Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "set_user_permissions": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User"
+  }
+ ],
+ "search_fields": "item_code",
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

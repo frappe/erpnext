@@ -1,0 +1,82 @@
+{
+ "actions": [],
+ "creation": "2019-08-29 22:29:37.628178",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "loan_security",
+  "loan_security_name",
+  "qty",
+  "loan_security_price",
+  "amount",
+  "haircut",
+  "post_haircut_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "loan_security_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Loan Security Price",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fetch_from": "loan_security.haircut",
+   "fieldname": "haircut",
+   "fieldtype": "Percent",
+   "label": "Haircut %",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "loan_security_pledge.qty",
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Quantity",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "loan_security",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Loan Security",
+   "options": "Loan Security"
+  },
+  {
+   "fieldname": "post_haircut_amount",
+   "fieldtype": "Currency",
+   "label": "Post Haircut Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "loan_security.loan_security_name",
+   "fieldname": "loan_security_name",
+   "fieldtype": "Data",
+   "label": "Loan Security Name",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-01-17 07:29:01.671722",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Proposed Pledge",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

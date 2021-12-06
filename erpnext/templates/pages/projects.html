@@ -1,0 +1,173 @@
+{% extends "templates/web.html" %}
+
+{% block title %}
+  {{ doc.project_name }}
+{% endblock %}
+
+{% block head_include %}
+  <link rel="stylesheet" href="/assets/frappe/css/font-awesome.css">
+{% endblock %}
+
+{% block header %}
+  <h1>{{ doc.project_name }}</h1>
+{% endblock %}
+
+{% block style %}
+  <style>
+    {
+      % include "templates/includes/projects.css"%
+    }
+  </style>
+{% endblock %}
+
+{% block page_content %}
+
+  {{ progress_bar(doc.percent_complete) }}
+
+  <div class="d-flex mt-5 mb-5 justify-content-between">
+    <h4>Status:</h4>
+    <h4>Progress:
+      <span>{{ doc.percent_complete }}
+        %</span>
+    </h4>
+    <h4>Hours Spent:
+      <span>{{ doc.actual_time }}</span>
+    </h4>
+  </div>
+
+  {{ progress_bar(doc.percent_complete) }}
+
+  {% if doc.tasks %}
+    <div class="website-list">
+      <div class="result">
+        <div class="web-list-item transaction-list-item">
+          <div class="row">
+            <h3 class="col-xs-4">Tasks</h3>
+            <h3 class="col-xs-2">Status</h3>
+            <h3 class="col-xs-2">End Date</h3>
+            <h3 class="col-xs-2">Assigned To</h3>
+            <div class="col-xs-2 text-right">
+              <a class="btn btn-secondary btn-light btn-sm" href='/tasks?new=1&project={{ doc.project_name }}'>{{ _("New task") }}</a>
+            </div>
+          </div>
+        </div>
+        {% include "erpnext/templates/includes/projects/project_tasks.html" %}
+      </div>
+    </div>
+  {% else %}
+    <p class="font-weight-bold">{{ _("No Tasks") }}</p>
+  {% endif %}
+
+  {% if doc.timesheets %}
+    <div class="website-list">
+      <div class="result">
+        <div class="web-list-item transaction-list-item">
+          <div class="row">
+            <h3 class="col-xs-2">Timesheets</h3>
+            <h3 class="col-xs-2">Status</h3>
+            <h3 class="col-xs-2">From</h3>
+            <h3 class="col-xs-2">To</h3>
+            <h3 class="col-xs-2">Modified By</h3>
+            <h3 class="col-xs-2 text-right">Modified On</h3>
+          </div>
+        </div>
+        {% include "erpnext/templates/includes/projects/project_timesheets.html" %}
+      </div>
+    </div>
+  {% else %}
+    <p class="font-weight-bold mt-5">{{ _("No Timesheets") }}</p>
+  {% endif %}
+
+  {% if doc.attachments %}
+    <div class='padding'></div>
+
+    <h4>{{ _("Attachments") }}</h4>
+    <div class="project-attachments">
+      {% for attachment in doc.attachments %}
+        <div class="attachment">
+          <a class="no-decoration attachment-link" href="{{ attachment.file_url }}" target="blank">
+            <div class="row">
+              <div class="col-xs-9">
+                <span class="indicator red file-name">
+                  {{ attachment.file_name }}</span>
+              </div>
+              <div class="col-xs-3">
+                <span class="pull-right file-size">{{ attachment.file_size }}</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+</div>
+
+<script>
+  { % include "frappe/public/js/frappe/provide.js" %
+  } { % include "frappe/public/js/frappe/form/formatters.js" %
+  }
+</script>
+
+{% endblock %}
+
+{% macro progress_bar(percent_complete) %}
+{% if percent_complete %}
+  <div class="progress progress-hg" style="height: 5px;">
+    <div class="progress-bar progress-bar-{{ 'warning' if percent_complete|round < 100 else 'success' }} active" role="progressbar" aria-valuenow="{{ percent_complete|round|int }}" aria-valuemin="0" aria-valuemax="100" style="width:{{ percent_complete|round|int }}%;"></div>
+  </div>
+{% else %}
+  <hr>
+{% endif %}
+{% endmacro %}
+
+{% macro task_row(task, indent) %}
+<div class="row mt-5 {% if task.children %} font-weight-bold {% endif %}">
+  <div class="col-xs-4">
+    <a class="nav-link " style="color: inherit; {% if task.parent_task %} margin-left: {{ indent }}px {% endif %}" href="/tasks?name={{ task.name | urlencode }}">
+      {% if task.parent_task %}
+        <span class="">
+          <i class="fa fa-level-up fa-rotate-90"></i>
+        </span>
+      {% endif %}
+      {{ task.subject }}</a>
+  </div>
+  <div class="col-xs-2">{{ task.status }}</div>
+  <div class="col-xs-2">
+    {% if task.exp_end_date %}
+      {{ task.exp_end_date }}
+    {% else %}
+      --
+    {% endif %}
+  </div>
+  <div class="col-xs-2">
+    {% if task["_assign"] %}
+      {% set assigned_users = json.loads(task["_assign"])%}
+      {% for user in assigned_users %}
+        {% set user_details = frappe.db.get_value("User", user,
+		["full_name", "user_image"],
+		as_dict = True)%}
+        {% if user_details.user_image %}
+          <span class="avatar avatar-small" style="width:32px; height:32px;" title="{{ user_details.full_name }}">
+            <img src="{{ user_details.user_image }}">
+          </span>
+        {% else %}
+          <span class="avatar avatar-small" style="width:32px; height:32px;" title="{{ user_details.full_name }}">
+            <div class='standard-image' style='background-color: #F5F4F4; color: #000;'>
+              {{ frappe.utils.get_abbr(user_details.full_name) }}
+            </div>
+          </span>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <div class="col-xs-2 text-right">
+    {{ frappe.utils.pretty_date(task.modified) }}
+  </div>
+</div>
+{% if task.children %}
+  {% for child in task.children %}
+    {{ task_row(child, indent + 30) }}
+  {% endfor %}
+{% endif %}
+{% endmacro %}

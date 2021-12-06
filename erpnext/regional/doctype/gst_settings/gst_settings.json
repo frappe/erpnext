@@ -1,0 +1,85 @@
+{
+ "actions": [],
+ "creation": "2017-06-27 15:09:01.318003",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "gst_summary",
+  "gst_tax_settings_section",
+  "round_off_gst_values",
+  "column_break_4",
+  "hsn_wise_tax_breakup",
+  "gstin_email_sent_on",
+  "section_break_4",
+  "gst_accounts",
+  "b2c_limit"
+ ],
+ "fields": [
+  {
+   "fieldname": "gst_summary",
+   "fieldtype": "HTML",
+   "label": "GST Summary"
+  },
+  {
+   "fieldname": "gstin_email_sent_on",
+   "fieldtype": "Date",
+   "label": "GSTIN Email Sent On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "gst_accounts",
+   "fieldtype": "Table",
+   "label": "GST Accounts",
+   "options": "GST Account"
+  },
+  {
+   "default": "250000",
+   "description": "Set Invoice Value for B2C. B2CL and B2CS calculated based on this invoice value.",
+   "fieldname": "b2c_limit",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "B2C Limit",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Enabling this option will round off individual GST components in all the Invoices",
+   "fieldname": "round_off_gst_values",
+   "fieldtype": "Check",
+   "label": "Round Off GST Values"
+  },
+  {
+   "default": "0",
+   "fieldname": "hsn_wise_tax_breakup",
+   "fieldtype": "Check",
+   "label": "Tax Breakup Table Based On HSN Code"
+  },
+  {
+   "fieldname": "gst_tax_settings_section",
+   "fieldtype": "Section Break",
+   "label": "GST Tax Settings"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-10-11 18:10:14.242614",
+ "modified_by": "Administrator",
+ "module": "Regional",
+ "name": "GST Settings",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

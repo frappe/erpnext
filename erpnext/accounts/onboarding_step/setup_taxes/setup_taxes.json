@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Manage Sales Tax Templates",
+ "creation": "2020-05-13 19:29:43.844463",
+ "description": "# Setting up Taxes\n\nERPNext lets you configure your taxes so that they are automatically applied in your buying and selling transactions. You can configure them globally or even on Items. ERPNext taxes are pre-configured for most regions.\n",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-08-13 11:48:37.238610",
+ "modified_by": "Administrator",
+ "name": "Setup Taxes",
+ "owner": "Administrator",
+ "reference_document": "Sales Taxes and Charges Template",
+ "show_form_tour": 1,
+ "show_full_form": 1,
+ "title": "Setting up Taxes",
+ "validate_action": 0
+}

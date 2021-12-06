@@ -1,0 +1,60 @@
+{
+ "actions": [],
+ "creation": "2018-04-13 16:36:18.389786",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "earning_component",
+  "pay_against_benefit_claim",
+  "max_benefit_amount",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "earning_component",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Earning Component",
+   "options": "Salary Component",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "earning_component.pay_against_benefit_claim",
+   "fieldname": "pay_against_benefit_claim",
+   "fieldtype": "Check",
+   "label": "Pay Against Benefit Claim",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "earning_component.max_benefit_amount",
+   "fieldname": "max_benefit_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Max Benefit Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "currency",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-09-29 16:22:15.783854",
+ "modified_by": "Administrator",
+ "module": "Payroll",
+ "name": "Employee Benefit Application Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,21 @@
+{
+ "action": "Show Form Tour",
+ "action_label": "Show Tour",
+ "creation": "2020-05-14 11:48:56.123718",
+ "description": "<h3>Leave Allocation</h3>\n\nLeave Allocation enables you to allocate a specific number of leaves of a particular type to an Employee so that, an employee will be able to create a Leave Application only if Leaves are allocated. ",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-05-19 04:22:34.220238",
+ "modified_by": "Administrator",
+ "name": "Create Leave Allocation",
+ "owner": "Administrator",
+ "reference_document": "Leave Allocation",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Create Leave Allocation",
+ "validate_action": 0
+}

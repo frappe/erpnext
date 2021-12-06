@@ -1,0 +1,227 @@
+{
+ "actions": [],
+ "creation": "2013-04-24 11:39:32",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "charge_type",
+  "row_id",
+  "account_head",
+  "col_break_1",
+  "description",
+  "included_in_print_rate",
+  "included_in_paid_amount",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "section_break_8",
+  "rate",
+  "section_break_9",
+  "account_currency",
+  "tax_amount",
+  "total",
+  "tax_amount_after_discount_amount",
+  "column_break_13",
+  "base_tax_amount",
+  "base_total",
+  "base_tax_amount_after_discount_amount",
+  "item_wise_tax_detail",
+  "dont_recompute_tax"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "charge_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "oldfieldname": "charge_type",
+   "oldfieldtype": "Select",
+   "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total\nOn Item Quantity",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:[\"On Previous Row Amount\", \"On Previous Row Total\"].indexOf(doc.charge_type)!==-1",
+   "fieldname": "row_id",
+   "fieldtype": "Data",
+   "label": "Reference Row #",
+   "oldfieldname": "row_id",
+   "oldfieldtype": "Data"
+  },
+  {
+   "columns": 2,
+   "fieldname": "account_head",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Account Head",
+   "oldfieldname": "account_head",
+   "oldfieldtype": "Link",
+   "options": "Account",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "default": ":Company",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "oldfieldname": "cost_center_other_charges",
+   "oldfieldtype": "Link",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description",
+   "oldfieldname": "description",
+   "oldfieldtype": "Small Text",
+   "print_width": "300px",
+   "reqd": 1,
+   "width": "300px"
+  },
+  {
+   "default": "0",
+   "description": "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount",
+   "fieldname": "included_in_print_rate",
+   "fieldtype": "Check",
+   "label": "Is this Tax included in Basic Rate?",
+   "print_hide": 1,
+   "print_width": "150px",
+   "report_hide": 1,
+   "width": "150px"
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "rate",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Rate",
+   "oldfieldname": "rate",
+   "oldfieldtype": "Currency"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "tax_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "currency"
+  },
+  {
+   "columns": 2,
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_amount_after_discount_amount",
+   "fieldtype": "Currency",
+   "label": "Tax Amount After Discount Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "base_tax_amount",
+   "fieldtype": "Currency",
+   "label": "Amount (Company Currency)",
+   "oldfieldname": "tax_amount",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_total",
+   "fieldtype": "Currency",
+   "label": "Total (Company Currency)",
+   "oldfieldname": "total",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:parent.discount_amount",
+   "fieldname": "base_tax_amount_after_discount_amount",
+   "fieldtype": "Currency",
+   "label": "Tax Amount After Discount Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_wise_tax_detail",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Item Wise Tax Detail",
+   "oldfieldname": "item_wise_tax_detail",
+   "oldfieldtype": "Small Text",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:['Sales Taxes and Charges Template', 'Payment Entry'].includes(parent.doctype)",
+   "description": "If checked, the tax amount will be considered as already included in the Paid Amount in Payment Entry",
+   "fieldname": "included_in_paid_amount",
+   "fieldtype": "Check",
+   "label": "Considered In Paid Amount"
+  },
+  {
+   "default": "0",
+   "fieldname": "dont_recompute_tax",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Dont Recompute tax",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "account_head.account_currency",
+   "fieldname": "account_currency",
+   "fieldtype": "Link",
+   "label": "Account Currency",
+   "options": "Currency",
+   "read_only": 1
+  }
+ ],
+ "idx": 1,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-08-05 20:04:01.726867",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Sales Taxes and Charges",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "ASC"
+}

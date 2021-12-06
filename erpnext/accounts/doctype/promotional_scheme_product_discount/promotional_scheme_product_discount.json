@@ -1,0 +1,177 @@
+{
+ "actions": [],
+ "creation": "2019-03-24 14:48:59.649168",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "disable",
+  "apply_multiple_pricing_rules",
+  "column_break_2",
+  "rule_description",
+  "section_break_1",
+  "min_qty",
+  "max_qty",
+  "column_break_3",
+  "min_amount",
+  "max_amount",
+  "section_break_6",
+  "same_item",
+  "free_item",
+  "free_qty",
+  "column_break_9",
+  "free_item_uom",
+  "free_item_rate",
+  "section_break_12",
+  "warehouse",
+  "threshold_percentage",
+  "column_break_15",
+  "priority",
+  "is_recursive"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "disable",
+   "fieldtype": "Check",
+   "label": "Disable"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rule_description",
+   "fieldtype": "Small Text",
+   "label": "Rule Description",
+   "no_copy": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "min_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Min Qty"
+  },
+  {
+   "default": "0",
+   "fieldname": "max_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Max Qty"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "min_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Min Amount"
+  },
+  {
+   "default": "0",
+   "fieldname": "max_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Max Amount"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break",
+   "label": "Free Item"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!parent.mixed_conditions",
+   "fieldname": "same_item",
+   "fieldtype": "Check",
+   "label": "Same Item"
+  },
+  {
+   "depends_on": "eval:!doc.same_item || parent.mixed_conditions",
+   "fieldname": "free_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "free_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "free_item_uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "free_item_rate",
+   "fieldtype": "Currency",
+   "label": "Rate"
+  },
+  {
+   "fieldname": "section_break_12",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "threshold_percentage",
+   "fieldtype": "Percent",
+   "label": "Threshold for Suggestion"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20"
+  },
+  {
+   "default": "0",
+   "fieldname": "apply_multiple_pricing_rules",
+   "fieldtype": "Check",
+   "label": "Apply Multiple Pricing Rules"
+  },
+  {
+   "default": "0",
+   "description": "Discounts to be applied in sequential ranges like buy 1 get 1, buy 2 get 2, buy 3 get 3 and so on",
+   "fieldname": "is_recursive",
+   "fieldtype": "Check",
+   "label": "Is Recursive"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-03-06 21:58:18.162346",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Promotional Scheme Product Discount",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

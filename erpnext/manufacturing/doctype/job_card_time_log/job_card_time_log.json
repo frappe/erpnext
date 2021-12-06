@@ -1,0 +1,77 @@
+{
+ "actions": [],
+ "creation": "2019-03-08 23:56:43.187569",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "from_time",
+  "to_time",
+  "column_break_2",
+  "time_in_mins",
+  "completed_qty",
+  "operation"
+ ],
+ "fields": [
+  {
+   "fieldname": "from_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "From Time"
+  },
+  {
+   "fieldname": "to_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "To Time"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "time_in_mins",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Time In Mins",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "completed_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Completed Qty",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "label": "Operation",
+   "no_copy": 1,
+   "options": "Operation",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2020-12-23 14:30:00.970916",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Job Card Time Log",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

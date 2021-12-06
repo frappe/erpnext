@@ -1,0 +1,229 @@
+{
+ "actions": [],
+ "autoname": "LM-LIA-.#####",
+ "creation": "2019-09-09 22:34:36.346812",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "loan",
+  "applicant_type",
+  "applicant",
+  "interest_income_account",
+  "loan_account",
+  "column_break_4",
+  "company",
+  "posting_date",
+  "accrual_type",
+  "is_term_loan",
+  "section_break_7",
+  "pending_principal_amount",
+  "payable_principal_amount",
+  "paid_principal_amount",
+  "column_break_14",
+  "interest_amount",
+  "total_pending_interest_amount",
+  "paid_interest_amount",
+  "penalty_amount",
+  "section_break_15",
+  "process_loan_interest_accrual",
+  "repayment_schedule_name",
+  "last_accrual_date",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "loan",
+   "fieldtype": "Link",
+   "label": "Loan",
+   "options": "Loan"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "pending_principal_amount",
+   "fieldtype": "Currency",
+   "label": "Pending Principal Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "interest_amount",
+   "fieldtype": "Currency",
+   "label": "Interest Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Loan Interest Accrual",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "loan.applicant_type",
+   "fieldname": "applicant_type",
+   "fieldtype": "Select",
+   "label": "Applicant Type",
+   "options": "Employee\nMember\nCustomer"
+  },
+  {
+   "fetch_from": "loan.applicant",
+   "fieldname": "applicant",
+   "fieldtype": "Dynamic Link",
+   "label": "Applicant",
+   "options": "applicant_type"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "loan.interest_income_account",
+   "fieldname": "interest_income_account",
+   "fieldtype": "Data",
+   "label": "Interest Income Account"
+  },
+  {
+   "fetch_from": "loan.loan_account",
+   "fieldname": "loan_account",
+   "fieldtype": "Data",
+   "label": "Loan Account"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break",
+   "label": "Amounts"
+  },
+  {
+   "fetch_from": "loan.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "default": "0",
+   "fetch_from": "loan.is_term_loan",
+   "fieldname": "is_term_loan",
+   "fieldtype": "Check",
+   "label": "Is Term Loan",
+   "read_only": 1
+  },
+  {
+   "depends_on": "is_term_loan",
+   "fieldname": "payable_principal_amount",
+   "fieldtype": "Currency",
+   "label": "Payable Principal Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "process_loan_interest_accrual",
+   "fieldtype": "Link",
+   "label": "Process Loan Interest Accrual",
+   "options": "Process Loan Interest Accrual"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "repayment_schedule_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Repayment Schedule Name",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.is_term_loan",
+   "fieldname": "paid_principal_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Principal Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "paid_interest_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Interest Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "accrual_type",
+   "fieldtype": "Select",
+   "label": "Accrual Type",
+   "options": "Regular\nRepayment\nDisbursement"
+  },
+  {
+   "fieldname": "penalty_amount",
+   "fieldtype": "Currency",
+   "label": "Penalty Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "last_accrual_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Last Accrual Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_pending_interest_amount",
+   "fieldtype": "Currency",
+   "label": "Total Pending Interest Amount",
+   "options": "Company:company:default_currency"
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-04-19 18:26:38.871889",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Loan Interest Accrual",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

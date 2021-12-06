@@ -1,0 +1,98 @@
+{% if doc.taxes %}
+<tr>
+	<td class="text-right" colspan="2">
+		{{ _("Net Total") }}
+	</td>
+	<td class="text-right">
+		{{ doc.get_formatted("net_total") }}
+	</td>
+</tr>
+{% endif %}
+
+{% for d in doc.taxes %}
+	{% if d.base_tax_amount %}
+	<tr>
+		<td class="text-right" colspan="2">
+			{{ d.description }}
+		</td>
+		<td class="text-right">
+			{{ d.get_formatted("base_tax_amount") }}
+		</td>
+	</tr>
+	{% endif %}
+{% endfor %}
+
+{% if doc.doctype == 'Quotation' %}
+{% if doc.coupon_code %}
+<tr>
+	<th class="text-right" colspan="2">
+		{{ _("Discount") }}
+	</th>
+	<th class="text-right tot_quotation_discount">
+		{% set tot_quotation_discount = [] %}
+		{%- for item in doc.items -%}
+		{% if tot_quotation_discount.append((((item.price_list_rate * item.qty)
+			* item.discount_percentage) / 100)) %}{% endif %}
+		{% endfor %}
+		{{ frappe.utils.fmt_money((tot_quotation_discount | sum),currency=doc.currency) }}
+	</th>
+</tr>
+{% endif %}
+{% endif %}
+
+{% if doc.doctype == 'Sales Order' %}
+{% if doc.coupon_code %}
+<tr>
+	<th class="text-right" colspan="2">
+		{{ _("Total Amount") }}
+	</th>
+	<th class="text-right">
+		<span>
+		{% set total_amount = [] %}
+		{%- for item in doc.items -%}
+		{% if total_amount.append((item.price_list_rate * item.qty)) %}{% endif %}
+		{% endfor %}
+		{{ frappe.utils.fmt_money((total_amount | sum),currency=doc.currency) }}
+		</span>
+	</th>
+</tr>
+<tr>
+	<th class="text-right" colspan="2">
+		{{ _("Applied Coupon Code") }}
+	</th>
+	<th class="text-right">
+		<span>
+		{%- for row in frappe.get_all(doctype="Coupon Code",
+		fields=["coupon_code"], filters={ "name":doc.coupon_code}) -%}
+			<span>{{ row.coupon_code }}</span>
+		{% endfor %}
+		</span>
+	</th>
+</tr>
+<tr>
+	<th class="text-right" colspan="2">
+		{{ _("Discount") }}
+	</th>
+	<th class="text-right">
+		<span>
+		{% set tot_SO_discount = [] %}
+		{%- for item in doc.items -%}
+		{% if tot_SO_discount.append((((item.price_list_rate * item.qty)
+			* item.discount_percentage) / 100)) %}{% endif %}
+		{% endfor %}
+		{{ frappe.utils.fmt_money((tot_SO_discount | sum),currency=doc.currency) }}
+		</span>
+	</th>
+</tr>
+{% endif %}
+{% endif %}
+
+<tr>
+	<th></th>
+	<th class="item-grand-total">
+		{{ _("Grand Total") }}
+	</th>
+	<th class="text-right item-grand-total">
+		{{ doc.get_formatted("grand_total") }}
+	</th>
+</tr>

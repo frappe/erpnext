@@ -1,0 +1,20 @@
+{% if shopping_cart and shopping_cart.cart_settings.enabled %}
+{% set cart_settings = shopping_cart.cart_settings %}
+
+<div class="mt-5 mb-6">
+	{% if cart_settings.enable_variants | int %}
+	<button class="btn btn-primary-light btn-configure"
+		data-item-code="{{ doc.name }}"
+		data-item-name="{{ doc.item_name }}"
+	>
+		{{ _('Configure') }}
+	</button>
+	{% endif %}
+	{% if cart_settings.show_contact_us_button %}
+		{% include "templates/generators/item/item_inquiry.html" %}
+	{% endif %}
+</div>
+<script>
+{% include "templates/generators/item/item_configure.js" %}
+</script>
+{% endif %}

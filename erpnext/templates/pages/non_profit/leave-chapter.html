@@ -1,0 +1,42 @@
+{% extends "templates/web.html" %}
+{% block page_content %}
+
+	{% if member_deleted %}
+		<p>You are not a member of {{ chapter.name }}!</p>
+		<div>
+			<form>
+				<div class="form-group">
+					<label for="leave">Why do you want to leave this chapter</label>
+					<input type="text" name="leave" class="form-control" id="leave">
+				</div>
+				<button type="button" class="btn btn-light btn-leave" data-title= "{{ chapter.name }}" id="btn-leave">Submit
+				</button>
+			</form>
+		</div>
+		<p>Please signup and login to join this chapter</p>
+
+		<p><a href="/join-chapter?name={{ chapter.name }}" class='btn btn-primary'>Become Member agian</a></p>
+	{% endif %}
+	<script>
+		frappe.ready(function() {
+			$(".btn-leave").on("click", function() {
+				var leave =  $("#leave").val();
+				var user_id = frappe.session.user;
+				var title =  $(this).attr("data-title");
+				frappe.call({
+						method: "erpnext.non_profit.doctype.chapter.chapter.leave",
+						args: {
+							leave_reason: leave,
+							user_id: user_id,
+							title: title
+						},
+						callback: function(r) {
+							if(r.message) {
+								frappe.msgprint(r.message)
+							}
+						}
+				})
+			});
+		})
+	</script>
+{% endblock %}

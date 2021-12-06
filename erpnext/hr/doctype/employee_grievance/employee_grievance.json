@@ -1,0 +1,261 @@
+{
+ "actions": [],
+ "autoname": "HR-GRIEV-.YYYY.-.#####",
+ "creation": "2021-05-11 13:41:51.485295",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "subject",
+  "raised_by",
+  "employee_name",
+  "designation",
+  "column_break_3",
+  "date",
+  "status",
+  "reports_to",
+  "grievance_details_section",
+  "grievance_against_party",
+  "grievance_against",
+  "grievance_type",
+  "column_break_11",
+  "associated_document_type",
+  "associated_document",
+  "section_break_14",
+  "description",
+  "investigation_details_section",
+  "cause_of_grievance",
+  "resolution_details_section",
+  "resolved_by",
+  "resolution_date",
+  "employee_responsible",
+  "column_break_16",
+  "resolution_detail",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "grievance_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Grievance Type",
+   "options": "Grievance Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date ",
+   "reqd": 1
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Open\nInvestigated\nResolved\nInvalid",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cause_of_grievance",
+   "fieldtype": "Text",
+   "label": "Cause of Grievance",
+   "mandatory_depends_on": "eval: doc.status == \"Investigated\" || doc.status ==  \"Resolved\""
+  },
+  {
+   "fieldname": "resolution_details_section",
+   "fieldtype": "Section Break",
+   "label": "Resolution Details"
+  },
+  {
+   "fieldname": "resolved_by",
+   "fieldtype": "Link",
+   "label": "Resolved By",
+   "mandatory_depends_on": "eval: doc.status == \"Resolved\"",
+   "options": "User"
+  },
+  {
+   "fieldname": "employee_responsible",
+   "fieldtype": "Link",
+   "label": "Employee Responsible ",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "resolution_detail",
+   "fieldtype": "Small Text",
+   "label": "Resolution Details",
+   "mandatory_depends_on": "eval: doc.status == \"Resolved\""
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "resolution_date",
+   "fieldtype": "Date",
+   "label": "Resolution Date",
+   "mandatory_depends_on": "eval: doc.status == \"Resolved\""
+  },
+  {
+   "fieldname": "grievance_against",
+   "fieldtype": "Dynamic Link",
+   "label": "Grievance Against",
+   "options": "grievance_against_party",
+   "reqd": 1
+  },
+  {
+   "fieldname": "raised_by",
+   "fieldtype": "Link",
+   "label": "Raised By",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Employee Grievance",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "raised_by.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "raised_by.reports_to",
+   "fieldname": "reports_to",
+   "fieldtype": "Link",
+   "label": "Reports To",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grievance_details_section",
+   "fieldtype": "Section Break",
+   "label": "Grievance Details"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "grievance_against_party",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Grievance Against Party",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "associated_document_type",
+   "fieldtype": "Link",
+   "label": "Associated Document Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "associated_document",
+   "fieldtype": "Dynamic Link",
+   "label": "Associated Document",
+   "options": "associated_document_type"
+  },
+  {
+   "fieldname": "investigation_details_section",
+   "fieldtype": "Section Break",
+   "label": "Investigation Details"
+  },
+  {
+   "fetch_from": "raised_by.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Subject",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-06-21 12:51:01.499486",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Employee Grievance",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "select": 1,
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "subject,raised_by,grievance_against_party",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "subject",
+ "track_changes": 1
+}

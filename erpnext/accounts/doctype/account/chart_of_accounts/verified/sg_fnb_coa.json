@@ -1,0 +1,414 @@
+{
+	"country_code": "sg",
+	"name": "Singapore - F&B Chart of Accounts",
+	"tree": {
+		"Assets": {
+			"Current assets": {
+				"Accounts Receivable": {
+					"Credit Cards": {
+						"AMEX Receivable": {},
+						"CUP Receivale": {},
+						"MC Receivable": {},
+						"NETS Receivable": {},
+						"VISA Receivable": {}
+					},
+					"Debtors": {
+						"account_type": "Receivable"
+					}
+				},
+				"Bank Accounts": {
+					"Paypal Account": {
+						"account_type": "Bank"
+					},
+					"account_type": "Bank"
+				},
+				"Cash in Hand": {
+					"Cash in Transit": {
+						"account_type": "Cash"
+					},
+					"Petty Cash": {
+						"account_type": "Cash"
+					},
+					"account_type": "Cash"
+				},
+				"Loans and Advances-Assets": {
+					"Prepayments": {}
+				},
+				"Securities and Deposits": {
+					"Bank Guarantees": {},
+					"Bank Deposits": {},
+					"Rental Deposits": {}
+				},
+				"Stock Assets": {
+                    "Stock in Hand": {
+                        "account_type": "Stock"
+                    }
+				},
+				"Tax Assets": {
+					"GST-Input": {}
+				}
+			},
+			"Non-current assets": {
+				"Fixed Assets": {
+					"Accumulated Depreciation": {
+						"AccDep-Equipment-AV": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Equipment-Bar": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Equipment-ICT": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Equipment-Electrical": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Furniture and Fixtures": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Equipment-Kitchen": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Equipment-Lighting": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Equipment-Office": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Motor Vehicle": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Plant and Machinery": {
+							"account_type": "Accumulated Depreciation"
+						},
+						"AccDep-Renovation": {
+							"account_type": "Accumulated Depreciation"
+						}
+					},
+					"Equipment-AV": {
+						"account_type": "Fixed Asset"
+					},
+					"Equipment-Bar": {
+						"account_type": "Fixed Asset"
+					},
+					"Equipment-ICT": {
+						"account_type": "Fixed Asset"
+					},
+					"Equipment-Electrical": {
+						"account_type": "Fixed Asset"
+					},
+					"Furniture and Fixtures": {
+						"account_type": "Fixed Asset"
+					},
+					"Equipment-Kitchen": {
+						"account_type": "Fixed Asset"
+					},
+					"Equipment-Lighting": {
+						"account_type": "Fixed Asset"
+					},
+					"Equipment-Office": {
+						"account_type": "Fixed Asset"
+					},
+					"Motor Vehicle": {
+						"account_type": "Fixed Asset"
+					},
+					"Plant and Machinery": {
+						"account_type": "Fixed Asset"
+					},
+					"Renovation": {
+						"account_type": "Fixed Asset"
+					}
+				},
+				"Non-Fixed Assets": {
+					"Goodwill": {},
+					"Investments": {
+						"Investments-Associated Company": {},
+						"Investments-Subsidiary": {}
+					}
+				},
+				"Shares": {
+					  "Shares-Quoted": {},
+					  "Shares-Unquoted": {}
+				}
+			},
+			"Temporary Accunts": {
+				"Temporary Opening": {
+					"account_type": "Temporary"
+				}
+			},
+			"root_type": "Asset"
+		},
+		"Liabilities": {
+			"Current liabilities": {
+				"Accounts Payable": {
+					"Creditors":{
+						"account_type": "Payable"
+					},
+					"Payroll Payable": {}
+			 	},
+			 	"Duties and Taxes": {
+					"account_type": "Tax",
+					"Deferred Tax Liabilities-Current": {},
+					"GST-Output": {},
+					"Income Tax Payable": {}
+				},
+				"Loans-Current": {
+					"Amount Owing to Directors": {},
+					"Bank Overdaft Account": {},
+					"Secured Loans": {},
+					"Unsecured Loans": {}
+				},
+				"Provision and Accruals": {
+					"Accruals": {
+						"Accr-CPF": {},
+						"Accr-Incentives": {},
+						"Accr-OCR Employee Card": {},
+						"Accr-Paypal Credit": {},
+						"Accr-Sundry": {},
+						"Accr-Tips": {},
+						"Accr-Withholding Tax": {}
+					},
+					"Provisions": {
+						"Prov-Audit Fee": {},
+						"Prov-Others": {},
+						"Prov-Tax Fee": {},
+						"Prov-Bonus": {
+							"Prov-Bonus-Executive": {},
+							"Prov-Bonus-Non Executive": {}
+						}
+					}
+				},
+				"Sponsorship Funds": {},
+				"Stock Liabilities": {
+					"Stock Received But Not Billed": {
+						"account_type": "Stock Received But Not Billed"
+					}
+				}
+			},
+			"Non-current liabilities": {
+				"Deferred Tax Liabilities": {},
+				"Loans-Non Current": {}
+			},
+			"Capital Account": {
+				"Reserves and Surplus": {},
+				"Shareholder Funds": {}
+			},
+		"root_type": "Liability"
+		},
+		"Equity": {
+			"Share Capital": {},
+			"Current Year Earnings": {},
+			"Proposed Dividends": {},
+			"Retained Earnings": {},
+			"root_type": "Equity"
+		},
+		"Income": {
+			"Direct Income": {
+				"Management Income": {},
+				"Sales Income": {
+					"Sales-Food": {},
+					"Sales-Beverage": {},
+					"Sales-Events and Functions": {},
+					"Sales-Merchandise": {},
+					"Sales-Pool Tables": {},
+					"Sales-Tobacco": {},
+					"Sales-Rental": {}
+				}
+			},
+			"Indirect Income": {
+				"Government Grants": {},
+				"Interest Income": {
+					"Current Account Interest Earned": {},
+					"Fixed Deposit Interest Earned": {}
+				},
+				"Other Income": {},
+				"Service Charges": {}
+			},
+			"root_type": "Income"
+		},
+		"Expenses": {
+			"Expenses-Administrative": {
+				"Admin Management Fees": {},
+				"Audit Fees": {},
+				"Auto": {},
+				"Bank charges and interest": {},
+				"Currency Exchange Differences": {},
+				"Insurance": {},
+				"Interest on Loan": {},
+				"Legal and Professional Fees": {},
+				"Loss on Disposal of FA": {},
+				"Postal and Courier Charges": {},
+				"Printing and Stationery": {},
+				"Secretarial Fees": {},
+				"Tax Agent Fees": {}
+			},
+			"Expenses-Direct": {
+				"Cost of Goods Sold": {
+					"account_type": "Cost of Goods Sold"
+				},
+				"Cost of Sales": {
+					"COS-Food": {},
+					"COS-Beverage": {},
+					"COS-Tobacco": {},
+					"COS-Events and Functions": {},
+					"COS-Merchandise": {}
+				},
+				"Expenses Included in Valuation": {
+					"account_type": "Expenses Included In Valuation"
+				},
+				"Stock Adjustment": {
+					"account_type": "Stock Adjustment"
+				}
+			},
+			"Expenses-Marketing": {
+				"Advertising and Promotion": {},
+				"Graphic Design Fees": {},
+				"Internet Marketing": {
+					"Marketing-Social Media": {},
+					"Marketing-Website": {}
+				}
+			},
+			"Expenses-Operating": {
+				"Cleaning Costs": {
+					"Cleaning-Kitchen": {},
+					"Cleaning-Laundry": {},
+					"Cleaning-Outlet": {}
+				},
+				"Commission Charges": {
+					"Comm-Credit Card": {},
+					"Comm-NETS": {},
+					"Comm-Paypal": {}
+				},
+				"Communication Costs": {
+					  "Internet Connection": {},
+					  "Telephone Costs": {}
+				},
+				"Disposals": {
+					"Disposals-Food": {},
+					"Disposals-Beverage": {},
+					"Disposals-Merchandise": {},
+					"Disposals-Others": {}
+				},
+				"Entertainment Expenses": {
+					"DJ Costs": {},
+					"Live Band Costs": {},
+					"Recorded Music Costs": {}
+				},
+				"FoC Accounts": {
+					"FoC-ENT": {},
+					"FoC-OC": {}
+				},
+				"General Expenses": {},
+				"Landscaping Costs": {},
+				"Licence Fees": {},
+				"Operational Supplies": {
+					"Supplies-Bar": {},
+					"Supplies-Guest": {},
+					"Supplies-Kitchen": {},
+					"Supplies-Restaurant": {},
+					"Supplies-Stewarding": {}
+				},
+				"Rental Costs": {
+					"Rental-Premises": {},
+					"Rental-Equipment": {},
+					"Rental-Storage": {}
+				},
+				"Repairs and Maintenance": {
+					"R&M-ICT": {},
+					"R&M-AV": {},
+					"R&M-Building": {},
+					"R&M-Electrical & Lighting": {},
+					"R&M-Fixtures & Furniture": {},
+					"R&M-Kitchen & Bar": {},
+					"R&M-Office": {},
+					"R&M-Plant & Machinery": {}
+				},
+				"Service Fees": {},
+				"Subscription Fees": {
+					"Publication Subscriptions": {},
+					"TV Subscriptions": {}
+				},
+				"Travel Expenses": {},
+				"Utilities": {
+					"Utility-Electricity": {},
+					"Utility-Gas": {},
+					"Utility-Refuse Removal": {},
+					"Utility-Water": {}
+				}
+			},
+			"Expenses-Other": {
+				"Bad Debts Written Off": {},
+				"Depreciation": {
+					"Dep-AV Equipment": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Bar Equipment": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-ICT Equipment": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Electrical Equipment": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Fixtures & Furniture": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Kitchen Equipment": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Lighting Equipment": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Motor Vehicle": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Office Equipment": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Plant & Machinery": {
+						 "account_type": "Depreciation"
+					},
+					"Dep-Renovation": {
+						 "account_type": "Depreciation"
+					}
+				},
+				"Donations": {},
+				"Round Off": {
+					"account_type": "Round Off"
+				},
+				"Tax Expenses": {
+					"is_group": 1
+				}
+			},
+			"Expenses-Staff": {
+				"Bonuses": {
+					"Bonus-Executive": {},
+					"Bonus-Non Executive": {},
+					"Bonus-Performance": {}
+				},
+				"CPF": {},
+				"Directors Fees": {},
+				"FWL": {},
+				"Incentives": {},
+				"Medical Expenses": {},
+				"Salaries": {
+					"Casual Labour": {},
+					"Salary-Executive": {},
+					"Salary-Non Executive-Full Time": {},
+					"Salary-Non Executive-Part Time": {}
+				},
+				"SDF": {},
+				"Security Expenses": {},
+				"Staff Advertising": {},
+				"Staff Commission Paid": {},
+				"Staff Meals": {},
+				"Staff Training": {},
+				"Staff Transport": {},
+				"Staff Uniforms": {},
+				"Staff Welfare": {}
+			},
+			"root_type": "Expense"
+		}
+	}
+}

@@ -1,0 +1,30 @@
+{
+ "actions": [],
+ "creation": "2020-08-03 16:56:45.744905",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "cost_center_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "cost_center_name",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-08-03 16:56:45.744905",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "PSOA Cost Center",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

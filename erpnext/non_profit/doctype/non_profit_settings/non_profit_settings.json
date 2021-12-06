@@ -1,0 +1,273 @@
+{
+ "actions": [],
+ "creation": "2020-03-29 12:57:03.005120",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enable_razorpay_for_memberships",
+  "razorpay_settings_section",
+  "billing_cycle",
+  "billing_frequency",
+  "membership_webhook_secret",
+  "column_break_6",
+  "allow_invoicing",
+  "automate_membership_invoicing",
+  "automate_membership_payment_entries",
+  "company",
+  "membership_debit_account",
+  "membership_payment_account",
+  "column_break_9",
+  "send_email",
+  "send_invoice",
+  "membership_print_format",
+  "inv_print_format",
+  "email_template",
+  "donation_settings_section",
+  "donation_company",
+  "default_donor_type",
+  "donation_webhook_secret",
+  "column_break_22",
+  "automate_donation_payment_entries",
+  "donation_debit_account",
+  "donation_payment_account",
+  "section_break_27",
+  "creation_user"
+ ],
+ "fields": [
+  {
+   "fieldname": "billing_cycle",
+   "fieldtype": "Select",
+   "label": "Billing Cycle",
+   "options": "Monthly\nYearly"
+  },
+  {
+   "depends_on": "eval:doc.enable_razorpay_for_memberships",
+   "fieldname": "razorpay_settings_section",
+   "fieldtype": "Section Break",
+   "label": "RazorPay Settings for Memberships"
+  },
+  {
+   "description": "The number of billing cycles for which the customer should be charged. For example, if a customer is buying a 1-year membership that should be billed on a monthly basis, this value should be 12.",
+   "fieldname": "billing_frequency",
+   "fieldtype": "Int",
+   "label": "Billing Frequency"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Section Break",
+   "label": "Membership Invoicing"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "This company will be set for the Memberships created via webhook.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.allow_invoicing && doc.send_email",
+   "fieldname": "send_invoice",
+   "fieldtype": "Check",
+   "label": "Send Invoice with Email"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_email",
+   "fieldtype": "Check",
+   "label": "Send Membership Acknowledgement"
+  },
+  {
+   "depends_on": "eval: doc.send_invoice",
+   "fieldname": "inv_print_format",
+   "fieldtype": "Link",
+   "label": "Invoice Print Format",
+   "mandatory_depends_on": "eval: doc.send_invoice",
+   "options": "Print Format"
+  },
+  {
+   "depends_on": "eval:doc.send_email",
+   "fieldname": "membership_print_format",
+   "fieldtype": "Link",
+   "label": "Membership Print Format",
+   "options": "Print Format"
+  },
+  {
+   "depends_on": "eval:doc.send_email",
+   "fieldname": "email_template",
+   "fieldtype": "Link",
+   "label": "Email Template",
+   "mandatory_depends_on": "eval:doc.send_email",
+   "options": "Email Template"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_invoicing",
+   "fieldtype": "Check",
+   "label": "Allow Invoicing for Memberships",
+   "mandatory_depends_on": "eval:doc.send_invoice || doc.make_payment_entry"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.allow_invoicing",
+   "description": "Automatically create an invoice when payment is authorized from a web form entry",
+   "fieldname": "automate_membership_invoicing",
+   "fieldtype": "Check",
+   "label": "Automate Invoicing for Web Forms"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.allow_invoicing",
+   "description": "Auto creates Payment Entry for Sales Invoices created for Membership from web forms.",
+   "fieldname": "automate_membership_payment_entries",
+   "fieldtype": "Check",
+   "label": "Automate Payment Entry Creation"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_razorpay_for_memberships",
+   "fieldtype": "Check",
+   "label": "Enable RazorPay For Memberships"
+  },
+  {
+   "depends_on": "eval:doc.automate_membership_payment_entries",
+   "description": "Account for accepting membership payments",
+   "fieldname": "membership_payment_account",
+   "fieldtype": "Link",
+   "label": "Membership Payment To",
+   "mandatory_depends_on": "eval:doc.automate_membership_payment_entries",
+   "options": "Account"
+  },
+  {
+   "fieldname": "membership_webhook_secret",
+   "fieldtype": "Password",
+   "label": "Membership Webhook Secret",
+   "read_only": 1
+  },
+  {
+   "fieldname": "donation_webhook_secret",
+   "fieldtype": "Password",
+   "label": "Donation Webhook Secret",
+   "read_only": 1
+  },
+  {
+   "depends_on": "automate_donation_payment_entries",
+   "description": "Account for accepting donation payments",
+   "fieldname": "donation_payment_account",
+   "fieldtype": "Link",
+   "label": "Donation Payment To",
+   "mandatory_depends_on": "automate_donation_payment_entries",
+   "options": "Account"
+  },
+  {
+   "default": "0",
+   "description": "Auto creates Payment Entry for Donations created from web forms.",
+   "fieldname": "automate_donation_payment_entries",
+   "fieldtype": "Check",
+   "label": "Automate Donation Payment Entries"
+  },
+  {
+   "depends_on": "eval:doc.allow_invoicing",
+   "fieldname": "membership_debit_account",
+   "fieldtype": "Link",
+   "label": "Debit Account",
+   "mandatory_depends_on": "eval:doc.allow_invoicing",
+   "options": "Account"
+  },
+  {
+   "depends_on": "automate_donation_payment_entries",
+   "fieldname": "donation_debit_account",
+   "fieldtype": "Link",
+   "label": "Debit Account",
+   "mandatory_depends_on": "automate_donation_payment_entries",
+   "options": "Account"
+  },
+  {
+   "description": "This company will be set for the Donations created via webhook.",
+   "fieldname": "donation_company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "donation_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Donation Settings"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "This Donor Type will be set for the Donor created via Donation web form entry.",
+   "fieldname": "default_donor_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Default Donor Type",
+   "options": "Donor Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_27",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "The user that will be used to create Donations, Memberships, Invoices, and Payment Entries. This user should have the relevant permissions.",
+   "fieldname": "creation_user",
+   "fieldtype": "Link",
+   "label": "Creation User",
+   "options": "User",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-03-11 10:43:38.124240",
+ "modified_by": "Administrator",
+ "module": "Non Profit",
+ "name": "Non Profit Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Non Profit Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Non Profit Member",
+   "share": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

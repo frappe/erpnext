@@ -1,0 +1,41 @@
+{
+ "allow_roles": [
+  {
+   "role": "Sales Master Manager"
+  },
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Sales User"
+  }
+ ],
+ "creation": "2020-05-09 23:42:50.901548",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/CRM",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2020-07-08 14:05:42.644448",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "CRM",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Introduction to CRM"
+  },
+  {
+   "step": "Create Lead"
+  },
+  {
+   "step": "Create Opportunity"
+  },
+  {
+   "step": "Create and Send Quotation"
+  }
+ ],
+ "subtitle": "Lead, Opportunity, Customer, and more.",
+ "success_message": "The CRM Module is all set up!",
+ "title": "Let's Set Up Your CRM."
+}

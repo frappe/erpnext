@@ -1,0 +1,42 @@
+{% for d in doc.items %}
+<tr data-name="{{ d.name }}">
+	<td>
+		<div class="item-title mb-1">
+			{{ d.item_name }}
+		</div>
+		<div class="item-subtitle">
+			{{ d.item_code }}
+		</div>
+		{%- set variant_of = frappe.db.get_value('Item', d.item_code, 'variant_of') %}
+		{% if variant_of %}
+		<span class="item-subtitle">
+			{{ _('Variant of') }} <a href="{{frappe.db.get_value('Item', variant_of, 'route')}}">{{ variant_of }}</a>
+		</span>
+		{% endif %}
+		<div class="mt-2">
+			<textarea data-item-code="{{d.item_code}}" class="form-control" rows="2" placeholder="{{ _('Add notes') }}">{{d.additional_notes or ''}}</textarea>
+		</div>
+	</td>
+	<td class="text-right">
+		<div class="input-group number-spinner">
+			<span class="input-group-prepend d-none d-sm-inline-block">
+				<button class="btn cart-btn" data-dir="dwn">–</button>
+			</span>
+			<input class="form-control text-center cart-qty" value="{{ d.get_formatted('qty') }}" data-item-code="{{ d.item_code }}">
+			<span class="input-group-append d-none d-sm-inline-block">
+				<button class="btn cart-btn" data-dir="up">+</button>
+			</span>
+		</div>
+	</td>
+	{% if cart_settings.enable_checkout %}
+	<td class="text-right item-subtotal">
+		<div>
+			{{ d.get_formatted('amount') }}
+		</div>
+		<span class="item-rate">
+			{{ _('Rate:') }} {{ d.get_formatted('rate') }}
+		</span>
+	</td>
+	{% endif %}
+</tr>
+{% endfor %}

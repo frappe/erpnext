@@ -1,0 +1,145 @@
+{% extends "templates/web.html" %}
+
+{% block title %} {{ _("Shopping Cart") }} {% endblock %}
+
+{% block header %}<h3 class="shopping-cart-header mt-2 mb-6">{{ _("Shopping Cart") }}</h1>{% endblock %}
+
+<!--
+{% block script %}
+<script>{% include "templates/includes/cart.js" %}</script>
+{% endblock %}
+-->
+
+
+{% block header_actions %}
+{% endblock %}
+
+{% block page_content %}
+
+{% from "templates/includes/macros.html" import item_name_and_description %}
+
+{% if doc.items %}
+<div class="cart-container">
+	<div class="row m-0">
+		<div class="col-md-8 frappe-card p-5">
+			<div>
+				<div id="cart-error" class="alert alert-danger" style="display: none;"></div>
+				<div class="cart-items-header">
+					{{ _('Items') }}
+				</div>
+				<table class="table mt-3 cart-table">
+					<thead>
+						<tr>
+							<th width="60%">{{ _('Item') }}</th>
+							<th width="20%">{{ _('Quantity') }}</th>
+							{% if cart_settings.enable_checkout %}
+							<th width="20%" class="text-right">{{ _('Subtotal') }}</th>
+							{% endif %}
+						</tr>
+					</thead>
+					<tbody class="cart-items">
+						{% include "templates/includes/cart/cart_items.html" %}
+					</tbody>
+					{% if cart_settings.enable_checkout %}
+					<tfoot class="cart-tax-items">
+						{% include "templates/includes/order/order_taxes.html" %}
+					</tfoot>
+					{% endif %}
+				</table>
+			</div>
+			<div class="row">
+				<div class="col-4">
+					{% if cart_settings.enable_checkout %}
+					<a class="btn btn-outline-primary" href="/orders">
+						{{ _('See past orders') }}
+					</a>
+					{% else %}
+					<a class="btn btn-outline-primary" href="/quotations">
+						{{ _('See past quotations') }}
+					</a>
+					{% endif %}
+				</div>
+				<div class="col-8">
+					{% if doc.items %}
+					<div class="place-order-container">
+						<a class="btn btn-primary-light mr-2" href="/all-products">
+							{{ _("Continue Shopping") }}
+						</a>
+						{% if cart_settings.enable_checkout %}
+							<button class="btn btn-primary btn-place-order" type="button">
+								{{ _("Place Order") }}
+							</button>
+						{% else %}
+							<button class="btn btn-primary btn-request-for-quotation" type="button">
+								{{ _("Request for Quotation") }}
+							</button>
+						{% endif %}
+					</div>
+					{% endif %}
+				</div>
+			</div>
+
+
+			{% if doc.items %}
+			{% if doc.tc_name %}
+				<div class="terms-and-conditions-link">
+					<a href class="link-terms-and-conditions" data-terms-name="{{ doc.tc_name }}">
+						{{ _("Terms and Conditions") }}
+					</a>
+					<script>
+						frappe.ready(() => {
+							$('.link-terms-and-conditions').click((e) => {
+								e.preventDefault();
+								const $link = $(e.target);
+								const terms_name = $link.attr('data-terms-name');
+								show_terms_and_conditions(terms_name);
+							})
+						});
+						function show_terms_and_conditions(terms_name) {
+							frappe.call('erpnext.shopping_cart.cart.get_terms_and_conditions', { terms_name })
+							.then(r => {
+								frappe.msgprint({
+									title: terms_name,
+									message: r.message
+								});
+							});
+						}
+					</script>
+				</div>
+			{% endif %}
+		</div>
+
+		<div class="col-md-4">
+			<div class="cart-addresses">
+				{% include "templates/includes/cart/cart_address.html" %}
+				</div>
+		</div>
+		{% endif %}
+	</div>
+</div>
+{% else %}
+<div class="cart-empty frappe-card">
+	<div class="cart-empty-state">
+		<img src="/assets/erpnext/images/ui-states/cart-empty-state.png" alt="Empty State">
+	</div>
+	<div class="cart-empty-message mt-4">{{ _('Your cart is Empty') }}</p>
+	{% if cart_settings.enable_checkout %}
+		<a class="btn btn-outline-primary" href="/orders">
+			{{ _('See past orders') }}
+		</a>
+		{% else %}
+		<a class="btn btn-outline-primary" href="/quotations">
+			{{ _('See past quotations') }}
+		</a>
+	{% endif %}
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block base_scripts %}
+<!-- js should be loaded in body! -->
+{{ include_script("frappe-web.bundle.js") }}
+{{ include_script("controls.bundle.js") }}
+{{ include_script("dialog.bundle.js") }}
+{% endblock %}

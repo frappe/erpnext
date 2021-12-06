@@ -1,0 +1,33 @@
+{% for timesheet in doc.timesheets %}
+  <div class="web-list-item transaction-list-item">
+    <div class="row">
+      <div class="col-xs-2">{{ timesheet.name }}</div>
+      <a class="transaction-item-link" href="/timesheet/{{ timesheet.name}}">Link</a>
+      <div class="col-xs-2">{{ timesheet.status }}</div>
+      <div class="col-xs-2">{{ frappe.utils.format_date(timesheet.from_time, "medium") }}</div>
+      <div class="col-xs-2">{{ frappe.utils.format_date(timesheet.to_time, "medium") }}</div>
+      <div class="col-xs-2">
+        {% set user_details = frappe
+          .db
+          .get_value("User", timesheet.modified_by, [
+            "full_name", "user_image"
+          ], as_dict = True)
+ 		    %}
+        {% if user_details.user_image %}
+          <span class="avatar avatar-small" style="width:32px; height:32px;" title="{{ user_details.full_name }}">
+            <img src="{{ user_details.user_image }}">
+          </span>
+        {% else %}
+          <span class="avatar avatar-small" style="width:32px; height:32px;" title="{{ user_details.full_name }}">
+            <div class='standard-image' style='background-color: #F5F4F4; color: #000;'>
+              {{ frappe.utils.get_abbr(user_details.full_name) }}
+            </div>
+          </span>
+        {% endif %}
+      </div>
+      <div class="col-xs-2 text-right">
+        {{ frappe.utils.pretty_date(timesheet.modified) }}
+      </div>
+    </div>
+  </div>
+{% endfor %}

@@ -1,0 +1,145 @@
+{
+ "actions": [],
+ "creation": "2013-06-25 11:04:03",
+ "description": "Settings for Buying Module",
+ "doctype": "DocType",
+ "document_type": "Other",
+ "engine": "InnoDB",
+ "field_order": [
+  "supp_master_name",
+  "supplier_group",
+  "buying_price_list",
+  "maintain_same_rate_action",
+  "role_to_override_stop_action",
+  "column_break_3",
+  "po_required",
+  "pr_required",
+  "maintain_same_rate",
+  "allow_multiple_items",
+  "bill_for_rejected_quantity_in_purchase_invoice",
+  "subcontract",
+  "backflush_raw_materials_of_subcontract_based_on",
+  "column_break_11",
+  "over_transfer_allowance"
+ ],
+ "fields": [
+  {
+   "default": "Supplier Name",
+   "fieldname": "supp_master_name",
+   "fieldtype": "Select",
+   "label": "Supplier Naming By",
+   "options": "Supplier Name\nNaming Series\nAuto Name"
+  },
+  {
+   "fieldname": "supplier_group",
+   "fieldtype": "Link",
+   "label": "Default Supplier Group",
+   "options": "Supplier Group"
+  },
+  {
+   "fieldname": "buying_price_list",
+   "fieldtype": "Link",
+   "label": "Default Buying Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "po_required",
+   "fieldtype": "Select",
+   "label": "Is Purchase Order Required for Purchase Invoice & Receipt Creation?",
+   "options": "No\nYes"
+  },
+  {
+   "fieldname": "pr_required",
+   "fieldtype": "Select",
+   "label": "Is Purchase Receipt Required for Purchase Invoice Creation?",
+   "options": "No\nYes"
+  },
+  {
+   "default": "0",
+   "fieldname": "maintain_same_rate",
+   "fieldtype": "Check",
+   "label": "Maintain Same Rate Throughout the Purchase Cycle"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_multiple_items",
+   "fieldtype": "Check",
+   "label": "Allow Item To Be Added Multiple Times in a Transaction"
+  },
+  {
+   "fieldname": "subcontract",
+   "fieldtype": "Section Break",
+   "label": "Subcontract"
+  },
+  {
+   "default": "Material Transferred for Subcontract",
+   "fieldname": "backflush_raw_materials_of_subcontract_based_on",
+   "fieldtype": "Select",
+   "label": "Backflush Raw Materials of Subcontract Based On",
+   "options": "BOM\nMaterial Transferred for Subcontract"
+  },
+  {
+   "depends_on": "eval:doc.backflush_raw_materials_of_subcontract_based_on == \"BOM\"",
+   "description": "Percentage you are allowed to transfer more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to transfer 110 units.",
+   "fieldname": "over_transfer_allowance",
+   "fieldtype": "Float",
+   "label": "Over Transfer Allowance (%)"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Stop",
+   "depends_on": "maintain_same_rate",
+   "description": "Configure the action to stop the transaction or just warn if the same rate is not maintained.",
+   "fieldname": "maintain_same_rate_action",
+   "fieldtype": "Select",
+   "label": "Action If Same Rate is Not Maintained",
+   "mandatory_depends_on": "maintain_same_rate",
+   "options": "Stop\nWarn"
+  },
+  {
+   "depends_on": "eval:doc.maintain_same_rate_action == 'Stop'",
+   "fieldname": "role_to_override_stop_action",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Override Stop Action",
+   "options": "Role"
+  },
+  {
+   "default": "1",
+   "description": "If checked, Rejected Quantity will be included while making Purchase Invoice from Purchase Receipt.",
+   "fieldname": "bill_for_rejected_quantity_in_purchase_invoice",
+   "fieldtype": "Check",
+   "label": "Bill for Rejected Quantity in Purchase Invoice"
+  }
+ ],
+ "icon": "fa fa-cog",
+ "idx": 1,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-09-08 19:26:23.548837",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Buying Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

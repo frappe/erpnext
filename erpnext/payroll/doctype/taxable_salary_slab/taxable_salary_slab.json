@@ -1,0 +1,68 @@
+{
+ "actions": [],
+ "creation": "2018-04-13 17:42:13.516032",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "from_amount",
+  "to_amount",
+  "percent_deduction",
+  "condition",
+  "column_break_5",
+  "html_6"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "from_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "From Amount",
+   "options": "currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "To Amount",
+   "options": "currency"
+  },
+  {
+   "default": "0",
+   "fieldname": "percent_deduction",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Percent Deduction",
+   "reqd": 1
+  },
+  {
+   "fieldname": "condition",
+   "fieldtype": "Code",
+   "in_list_view": 1,
+   "label": "Condition"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "html_6",
+   "fieldtype": "HTML",
+   "options": "<h4>Condition Examples</h4>\n<ol>\n<li>Applying tax if employee born between 31-12-1937 and 01-01-1958 (Employees aged 60 to 80)<br>\n<code>Condition: date_of_birth&gt;date(1937, 12, 31) and date_of_birth&lt;date(1958, 01, 01)</code></li><br><li>Applying tax by employee gender<br>\n<code>Condition: gender==\"Male\"</code></li><br>\n<li>Applying tax by Salary Component<br>\n<code>Condition: base &gt; 10000</code></li></ol>"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-10-19 13:44:39.549337",
+ "modified_by": "Administrator",
+ "module": "Payroll",
+ "name": "Taxable Salary Slab",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

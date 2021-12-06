@@ -1,0 +1,236 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2013-02-22 01:27:43",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "specification",
+  "parameter_group",
+  "status",
+  "value",
+  "numeric",
+  "manual_inspection",
+  "column_break_4",
+  "min_value",
+  "max_value",
+  "formula_based_criteria",
+  "acceptance_formula",
+  "section_break_3",
+  "reading_value",
+  "section_break_14",
+  "reading_1",
+  "reading_2",
+  "reading_3",
+  "reading_4",
+  "column_break_10",
+  "reading_5",
+  "reading_6",
+  "reading_7",
+  "reading_8",
+  "column_break_14",
+  "reading_9",
+  "reading_10"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "specification",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Parameter",
+   "oldfieldname": "specification",
+   "oldfieldtype": "Data",
+   "options": "Quality Inspection Parameter",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "depends_on": "eval:(!doc.formula_based_criteria && !doc.numeric)",
+   "fieldname": "value",
+   "fieldtype": "Data",
+   "label": "Acceptance Criteria Value",
+   "oldfieldname": "value",
+   "oldfieldtype": "Data"
+  },
+  {
+   "columns": 2,
+   "fieldname": "reading_1",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Reading 1",
+   "oldfieldname": "reading_1",
+   "oldfieldtype": "Data"
+  },
+  {
+   "columns": 1,
+   "fieldname": "reading_2",
+   "fieldtype": "Data",
+   "label": "Reading 2",
+   "oldfieldname": "reading_2",
+   "oldfieldtype": "Data"
+  },
+  {
+   "columns": 1,
+   "fieldname": "reading_3",
+   "fieldtype": "Data",
+   "label": "Reading 3",
+   "oldfieldname": "reading_3",
+   "oldfieldtype": "Data"
+  },
+  {
+   "fieldname": "reading_4",
+   "fieldtype": "Data",
+   "label": "Reading 4",
+   "oldfieldname": "reading_4",
+   "oldfieldtype": "Data"
+  },
+  {
+   "fieldname": "reading_5",
+   "fieldtype": "Data",
+   "label": "Reading 5",
+   "oldfieldname": "reading_5",
+   "oldfieldtype": "Data"
+  },
+  {
+   "fieldname": "reading_6",
+   "fieldtype": "Data",
+   "label": "Reading 6",
+   "oldfieldname": "reading_6",
+   "oldfieldtype": "Data"
+  },
+  {
+   "fieldname": "reading_7",
+   "fieldtype": "Data",
+   "label": "Reading 7",
+   "oldfieldname": "reading_7",
+   "oldfieldtype": "Data"
+  },
+  {
+   "fieldname": "reading_8",
+   "fieldtype": "Data",
+   "label": "Reading 8",
+   "oldfieldname": "reading_8",
+   "oldfieldtype": "Data"
+  },
+  {
+   "fieldname": "reading_9",
+   "fieldtype": "Data",
+   "label": "Reading 9",
+   "oldfieldname": "reading_9",
+   "oldfieldtype": "Data"
+  },
+  {
+   "fieldname": "reading_10",
+   "fieldtype": "Data",
+   "label": "Reading 10",
+   "oldfieldname": "reading_10",
+   "oldfieldtype": "Data"
+  },
+  {
+   "columns": 2,
+   "default": "Accepted",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "oldfieldname": "status",
+   "oldfieldtype": "Select",
+   "options": "\nAccepted\nRejected"
+  },
+  {
+   "depends_on": "eval:!doc.numeric",
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break",
+   "label": "Value Based Inspection"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "formula_based_criteria",
+   "description": "Simple Python formula applied on Reading fields.<br> Numeric eg. 1: <b>reading_1 &gt; 0.2 and reading_1 &lt; 0.5</b><br>\nNumeric eg. 2: <b>mean &gt; 3.5</b> (mean of populated fields)<br>\nValue based eg.:  <b>reading_value in (\"A\", \"B\", \"C\")</b>",
+   "fieldname": "acceptance_formula",
+   "fieldtype": "Code",
+   "label": "Acceptance Criteria Formula"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "formula_based_criteria",
+   "fieldtype": "Check",
+   "label": "Formula Based Criteria"
+  },
+  {
+   "depends_on": "eval:(!doc.formula_based_criteria && doc.numeric)",
+   "description": "Applied on each reading.",
+   "fieldname": "min_value",
+   "fieldtype": "Float",
+   "label": "Minimum Value"
+  },
+  {
+   "depends_on": "eval:(!doc.formula_based_criteria && doc.numeric)",
+   "description": "Applied on each reading.",
+   "fieldname": "max_value",
+   "fieldtype": "Float",
+   "label": "Maximum Value"
+  },
+  {
+   "columns": 2,
+   "depends_on": "eval:!doc.numeric",
+   "fieldname": "reading_value",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Reading Value"
+  },
+  {
+   "depends_on": "numeric",
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break",
+   "label": "Numeric Inspection"
+  },
+  {
+   "default": "0",
+   "description": "Set the status manually.",
+   "fieldname": "manual_inspection",
+   "fieldtype": "Check",
+   "label": "Manual Inspection"
+  },
+  {
+   "default": "1",
+   "fieldname": "numeric",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Numeric"
+  },
+  {
+   "fetch_from": "specification.parameter_group",
+   "fieldname": "parameter_group",
+   "fieldtype": "Link",
+   "label": "Parameter Group",
+   "options": "Quality Inspection Parameter Group",
+   "read_only": 1
+  }
+ ],
+ "idx": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-02-04 19:15:37.991221",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Quality Inspection Reading",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

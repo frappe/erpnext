@@ -1,0 +1,41 @@
+{
+ "allow_roles": [
+  {
+   "role": "Purchase Manager"
+  },
+  {
+   "role": "Purchase User"
+  },
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Stock User"
+  }
+ ],
+ "creation": "2020-05-06 15:56:35.049205",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/buying",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2021-08-24 18:13:42.463776",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Buying",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Introduction to Buying"
+  },
+  {
+   "step": "Create a Material Request"
+  },
+  {
+   "step": "Create your first Purchase Order"
+  }
+ ],
+ "subtitle": "Products, Purchases, Analysis, and more.",
+ "success_message": "The Buying Module is all set up!",
+ "title": "Let's Set Up the Buying Module."
+}

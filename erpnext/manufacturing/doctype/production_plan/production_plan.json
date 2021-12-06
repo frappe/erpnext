@@ -1,0 +1,401 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2017-10-29 11:53:09.523362",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "company",
+  "get_items_from",
+  "column_break1",
+  "posting_date",
+  "filters",
+  "item_code",
+  "customer",
+  "warehouse",
+  "project",
+  "sales_order_status",
+  "column_break2",
+  "from_date",
+  "to_date",
+  "from_delivery_date",
+  "to_delivery_date",
+  "sales_orders_detail",
+  "get_sales_orders",
+  "sales_orders",
+  "material_request_detail",
+  "get_material_request",
+  "material_requests",
+  "select_items_to_manufacture_section",
+  "get_items",
+  "combine_items",
+  "po_items",
+  "section_break_25",
+  "prod_plan_references",
+  "section_break_24",
+  "get_sub_assembly_items",
+  "sub_assembly_items",
+  "material_request_planning",
+  "include_non_stock_items",
+  "include_subcontracted_items",
+  "include_safety_stock",
+  "ignore_existing_ordered_qty",
+  "column_break_25",
+  "for_warehouse",
+  "download_materials_required",
+  "get_items_for_mr",
+  "section_break_27",
+  "mr_items",
+  "other_details",
+  "total_planned_qty",
+  "total_produced_qty",
+  "column_break_32",
+  "status",
+  "warehouses",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "MFG-PP-.YYYY.-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "get_items_from",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Get Items From",
+   "options": "\nSales Order\nMaterial Request"
+  },
+  {
+   "fieldname": "column_break1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.__islocal",
+   "depends_on": "eval: doc.get_items_from",
+   "fieldname": "filters",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "depends_on": "eval: doc.get_items_from == \"Sales Order\"",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval: doc.get_items_from == \"Material Request\"",
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "depends_on": "eval: doc.get_items_from == \"Sales Order\"",
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "column_break2",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.__islocal",
+   "depends_on": "eval: doc.get_items_from == \"Sales Order\"",
+   "fieldname": "sales_orders_detail",
+   "fieldtype": "Section Break",
+   "label": "Sales Orders"
+  },
+  {
+   "fieldname": "get_sales_orders",
+   "fieldtype": "Button",
+   "label": "Get Sales Orders"
+  },
+  {
+   "fieldname": "sales_orders",
+   "fieldtype": "Table",
+   "label": "Sales Orders",
+   "no_copy": 1,
+   "options": "Production Plan Sales Order"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.__islocal",
+   "depends_on": "eval: doc.get_items_from == \"Material Request\"",
+   "fieldname": "material_request_detail",
+   "fieldtype": "Section Break",
+   "label": "Material Request Detail"
+  },
+  {
+   "fieldname": "get_material_request",
+   "fieldtype": "Button",
+   "label": "Get Material Request"
+  },
+  {
+   "fieldname": "material_requests",
+   "fieldtype": "Table",
+   "label": "Material Requests",
+   "no_copy": 1,
+   "options": "Production Plan Material Request"
+  },
+  {
+   "fieldname": "select_items_to_manufacture_section",
+   "fieldtype": "Section Break",
+   "label": "Select Items to Manufacture"
+  },
+  {
+   "depends_on": "get_items_from",
+   "fieldname": "get_items",
+   "fieldtype": "Button",
+   "label": "Get Finished Goods for Manufacture"
+  },
+  {
+   "fieldname": "po_items",
+   "fieldtype": "Table",
+   "no_copy": 1,
+   "options": "Production Plan Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "material_request_planning",
+   "fieldtype": "Section Break",
+   "label": "Material Requirement Planning"
+  },
+  {
+   "default": "1",
+   "fieldname": "include_non_stock_items",
+   "fieldtype": "Check",
+   "label": "Include Non Stock Items"
+  },
+  {
+   "default": "1",
+   "fieldname": "include_subcontracted_items",
+   "fieldtype": "Check",
+   "label": "Include Subcontracted Items"
+  },
+  {
+   "default": "0",
+   "description": "To know more about projected quantity, <a href=\"https://erpnext.com/docs/user/manual/en/stock/projected-quantity\" style=\"text-decoration: underline;\" target=\"_blank\">click here</a>.",
+   "fieldname": "ignore_existing_ordered_qty",
+   "fieldtype": "Check",
+   "label": "Ignore Existing Projected Quantity"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "download_materials_required",
+   "fieldtype": "Button",
+   "label": "Download Required Materials"
+  },
+  {
+   "fieldname": "get_items_for_mr",
+   "fieldtype": "Button",
+   "label": "Get Raw Materials For Production"
+  },
+  {
+   "fieldname": "section_break_27",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "mr_items",
+   "fieldtype": "Table",
+   "label": "Raw Materials",
+   "no_copy": 1,
+   "options": "Material Request Plan Item"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "other_details",
+   "fieldtype": "Section Break",
+   "label": "Other Details"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_planned_qty",
+   "fieldtype": "Float",
+   "label": "Total Planned Qty",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "total_produced_qty",
+   "fieldtype": "Float",
+   "label": "Total Produced Qty",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_32",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "no_copy": 1,
+   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nClosed\nCancelled\nMaterial Requested",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Production Plan",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "for_warehouse",
+   "fieldtype": "Link",
+   "label": "Make Material Request for Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "warehouses",
+   "fieldtype": "Table MultiSelect",
+   "hidden": 1,
+   "label": "Warehouses",
+   "options": "Production Plan Material Request Warehouse",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.get_items_from == \"Sales Order\"",
+   "fieldname": "sales_order_status",
+   "fieldtype": "Select",
+   "label": "Sales Order Status",
+   "options": "\nTo Deliver and Bill\nTo Bill\nTo Deliver"
+  },
+  {
+   "default": "0",
+   "fieldname": "include_safety_stock",
+   "fieldtype": "Check",
+   "label": "Include Safety Stock in Required Qty Calculation"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.get_items_from == 'Sales Order'",
+   "fieldname": "combine_items",
+   "fieldtype": "Check",
+   "label": "Consolidate Items"
+  },
+  {
+   "fieldname": "section_break_25",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "prod_plan_references",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Production Plan Item Reference",
+   "options": "Production Plan Item Reference"
+  },
+  {
+   "fieldname": "section_break_24",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "sub_assembly_items",
+   "fieldtype": "Table",
+   "label": "Sub Assembly Items",
+   "no_copy": 1,
+   "options": "Production Plan Sub Assembly Item"
+  },
+  {
+   "fieldname": "get_sub_assembly_items",
+   "fieldtype": "Button",
+   "label": "Get Sub Assembly Items"
+  },
+  {
+   "fieldname": "from_delivery_date",
+   "fieldtype": "Date",
+   "label": "From Delivery Date"
+  },
+  {
+   "fieldname": "to_delivery_date",
+   "fieldtype": "Date",
+   "label": "To Delivery Date"
+  }
+ ],
+ "icon": "fa fa-calendar",
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-09-06 18:35:59.642232",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Production Plan",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Manufacturing User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "ASC"
+}

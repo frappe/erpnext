@@ -1,0 +1,218 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "EDU-ENR-.YYYY.-.#####",
+ "creation": "2015-12-02 12:58:32.916080",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "engine": "InnoDB",
+ "field_order": [
+  "student",
+  "student_name",
+  "student_category",
+  "student_batch_name",
+  "school_house",
+  "column_break_4",
+  "program",
+  "academic_year",
+  "academic_term",
+  "enrollment_date",
+  "boarding_student",
+  "enrolled_courses",
+  "courses",
+  "transportation",
+  "mode_of_transportation",
+  "column_break_13",
+  "vehicle_no",
+  "section_break_7",
+  "fees",
+  "amended_from",
+  "image"
+ ],
+ "fields": [
+  {
+   "fieldname": "student",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "label": "Student",
+   "options": "Student",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "student.title",
+   "fieldname": "student_name",
+   "fieldtype": "Read Only",
+   "in_global_search": 1,
+   "label": "Student Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "student_category",
+   "fieldtype": "Link",
+   "label": "Student Category",
+   "options": "Student Category"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "student_batch_name",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "label": "Student Batch",
+   "options": "Student Batch Name"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "school_house",
+   "fieldtype": "Link",
+   "label": "School House",
+   "options": "School House"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "program",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Program",
+   "options": "Program",
+   "reqd": 1
+  },
+  {
+   "fieldname": "academic_year",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Academic Year",
+   "options": "Academic Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "academic_term",
+   "fieldtype": "Link",
+   "label": "Academic Term",
+   "options": "Academic Term"
+  },
+  {
+   "default": "Today",
+   "fieldname": "enrollment_date",
+   "fieldtype": "Date",
+   "label": "Enrollment Date",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Check this if the Student is residing at the Institute's Hostel.",
+   "fieldname": "boarding_student",
+   "fieldtype": "Check",
+   "label": "Boarding Student"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "vehicle_no",
+   "fieldname": "transportation",
+   "fieldtype": "Section Break",
+   "label": "Transportation"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "mode_of_transportation",
+   "fieldtype": "Select",
+   "label": "Mode of Transportation",
+   "options": "\nWalking\nInstitute's Bus\nPublic Transport\nSelf-Driving Vehicle\nPick/Drop by Guardian"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "vehicle_no",
+   "fieldtype": "Data",
+   "label": "Vehicle/Bus Number"
+  },
+  {
+   "fieldname": "enrolled_courses",
+   "fieldtype": "Section Break",
+   "label": "Enrolled courses"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "courses",
+   "fieldtype": "Table",
+   "label": "Courses",
+   "options": "Program Enrollment Course"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break",
+   "label": "Fees"
+  },
+  {
+   "fieldname": "fees",
+   "fieldtype": "Table",
+   "label": "Fees",
+   "options": "Program Fee"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Program Enrollment",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Image"
+  }
+ ],
+ "image_field": "image",
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-09-15 18:12:11.988565",
+ "modified_by": "Administrator",
+ "module": "Education",
+ "name": "Program Enrollment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Academics User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "LMS User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "restrict_to_domain": "Education",
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "student_name"
+}

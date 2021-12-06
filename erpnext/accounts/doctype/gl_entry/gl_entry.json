@@ -1,0 +1,294 @@
+{
+ "actions": [],
+ "autoname": "ACC-GLE-.YYYY.-.#####",
+ "creation": "2013-01-10 16:34:06",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "engine": "InnoDB",
+ "field_order": [
+  "posting_date",
+  "transaction_date",
+  "account",
+  "party_type",
+  "party",
+  "cost_center",
+  "debit",
+  "credit",
+  "account_currency",
+  "debit_in_account_currency",
+  "credit_in_account_currency",
+  "against",
+  "against_voucher_type",
+  "against_voucher",
+  "voucher_type",
+  "voucher_no",
+  "voucher_detail_no",
+  "project",
+  "remarks",
+  "is_opening",
+  "is_advance",
+  "fiscal_year",
+  "company",
+  "finance_book",
+  "to_rename",
+  "due_date",
+  "is_cancelled"
+ ],
+ "fields": [
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "oldfieldname": "posting_date",
+   "oldfieldtype": "Date",
+   "search_index": 1
+  },
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Transaction Date",
+   "oldfieldname": "transaction_date",
+   "oldfieldtype": "Date"
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Account",
+   "oldfieldname": "account",
+   "oldfieldtype": "Link",
+   "options": "Account",
+   "search_index": 1
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "label": "Party Type",
+   "options": "DocType",
+   "search_index": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_standard_filter": 1,
+   "label": "Party",
+   "options": "party_type",
+   "search_index": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "label": "Cost Center",
+   "oldfieldname": "cost_center",
+   "oldfieldtype": "Link",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "debit",
+   "fieldtype": "Currency",
+   "label": "Debit Amount",
+   "oldfieldname": "debit",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "credit",
+   "fieldtype": "Currency",
+   "label": "Credit Amount",
+   "oldfieldname": "credit",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "account_currency",
+   "fieldtype": "Link",
+   "label": "Account Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "debit_in_account_currency",
+   "fieldtype": "Currency",
+   "label": "Debit Amount in Account Currency",
+   "options": "account_currency"
+  },
+  {
+   "fieldname": "credit_in_account_currency",
+   "fieldtype": "Currency",
+   "label": "Credit Amount in Account Currency",
+   "options": "account_currency"
+  },
+  {
+   "fieldname": "against",
+   "fieldtype": "Text",
+   "in_filter": 1,
+   "label": "Against",
+   "oldfieldname": "against",
+   "oldfieldtype": "Text"
+  },
+  {
+   "fieldname": "against_voucher_type",
+   "fieldtype": "Link",
+   "label": "Against Voucher Type",
+   "oldfieldname": "against_voucher_type",
+   "oldfieldtype": "Data",
+   "options": "DocType",
+   "search_index": 1
+  },
+  {
+   "fieldname": "against_voucher",
+   "fieldtype": "Dynamic Link",
+   "in_filter": 1,
+   "label": "Against Voucher",
+   "oldfieldname": "against_voucher",
+   "oldfieldtype": "Data",
+   "options": "against_voucher_type",
+   "search_index": 1
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "label": "Voucher Type",
+   "oldfieldname": "voucher_type",
+   "oldfieldtype": "Select",
+   "options": "DocType",
+   "search_index": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_filter": 1,
+   "in_standard_filter": 1,
+   "label": "Voucher No",
+   "oldfieldname": "voucher_no",
+   "oldfieldtype": "Data",
+   "options": "voucher_type",
+   "search_index": 1
+  },
+  {
+   "fieldname": "voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "Voucher Detail No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "in_filter": 1,
+   "label": "Remarks",
+   "no_copy": 1,
+   "oldfieldname": "remarks",
+   "oldfieldtype": "Text"
+  },
+  {
+   "fieldname": "is_opening",
+   "fieldtype": "Select",
+   "in_filter": 1,
+   "label": "Is Opening",
+   "oldfieldname": "is_opening",
+   "oldfieldtype": "Select",
+   "options": "No\nYes"
+  },
+  {
+   "fieldname": "is_advance",
+   "fieldtype": "Select",
+   "label": "Is Advance",
+   "oldfieldname": "is_advance",
+   "oldfieldtype": "Select",
+   "options": "No\nYes"
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "label": "Fiscal Year",
+   "oldfieldname": "fiscal_year",
+   "oldfieldtype": "Select",
+   "options": "Fiscal Year"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "label": "Company",
+   "oldfieldname": "company",
+   "oldfieldtype": "Link",
+   "options": "Company",
+   "search_index": 1
+  },
+  {
+   "fieldname": "finance_book",
+   "fieldtype": "Link",
+   "label": "Finance Book",
+   "options": "Finance Book"
+  },
+  {
+   "default": "1",
+   "fieldname": "to_rename",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "To Rename",
+   "search_index": 1
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cancelled",
+   "fieldtype": "Check",
+   "label": "Is Cancelled"
+  }
+ ],
+ "icon": "fa fa-list",
+ "idx": 1,
+ "in_create": 1,
+ "modified": "2020-04-07 16:22:33.766994",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "GL Entry",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Auditor"
+  }
+ ],
+ "quick_entry": 1,
+ "search_fields": "voucher_no,account,posting_date,against_voucher",
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

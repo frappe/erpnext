@@ -1,0 +1,185 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:sales_person_name",
+ "creation": "2013-01-10 16:34:24",
+ "description": "All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "name_and_employee_id",
+  "sales_person_name",
+  "parent_sales_person",
+  "commission_rate",
+  "is_group",
+  "enabled",
+  "cb0",
+  "employee",
+  "department",
+  "lft",
+  "rgt",
+  "old_parent",
+  "target_details_section_break",
+  "targets"
+ ],
+ "fields": [
+  {
+   "fieldname": "name_and_employee_id",
+   "fieldtype": "Section Break",
+   "label": "Name and Employee ID",
+   "options": "icon-user"
+  },
+  {
+   "fieldname": "sales_person_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Sales Person Name",
+   "oldfieldname": "sales_person_name",
+   "oldfieldtype": "Data",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "Select company name first.",
+   "fieldname": "parent_sales_person",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Parent Sales Person",
+   "oldfieldname": "parent_sales_person",
+   "oldfieldtype": "Link",
+   "options": "Sales Person"
+  },
+  {
+   "fieldname": "commission_rate",
+   "fieldtype": "Data",
+   "label": "Commission Rate",
+   "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Group",
+   "oldfieldname": "is_group",
+   "oldfieldtype": "Select",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "cb0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "lft",
+   "no_copy": 1,
+   "oldfieldname": "lft",
+   "oldfieldtype": "Int",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "rgt",
+   "no_copy": 1,
+   "oldfieldname": "rgt",
+   "oldfieldtype": "Int",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "old_parent",
+   "no_copy": 1,
+   "oldfieldname": "old_parent",
+   "oldfieldtype": "Data",
+   "print_hide": 1
+  },
+  {
+   "description": "Set targets Item Group-wise for this Sales Person.",
+   "fieldname": "target_details_section_break",
+   "fieldtype": "Section Break",
+   "label": "Sales Person Targets",
+   "oldfieldtype": "Section Break",
+   "options": "icon-bullseye"
+  },
+  {
+   "fieldname": "targets",
+   "fieldtype": "Table",
+   "label": "Targets",
+   "oldfieldname": "target_details",
+   "oldfieldtype": "Table",
+   "options": "Target Detail"
+  }
+ ],
+ "icon": "icon-user",
+ "idx": 1,
+ "is_tree": 1,
+ "links": [],
+ "modified": "2020-03-18 18:11:13.968024",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Sales Person",
+ "nsm_parent_field": "parent_sales_person",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Master Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "parent_sales_person",
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "ASC"
+}

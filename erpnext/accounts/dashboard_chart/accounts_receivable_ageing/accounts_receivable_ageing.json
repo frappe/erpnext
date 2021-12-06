@@ -1,0 +1,23 @@
+{
+ "chart_name": "Accounts Receivable Ageing",
+ "chart_type": "Report",
+ "creation": "2020-07-17 11:25:34.535388",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "dynamic_filters_json": "{\"company\":\"frappe.defaults.get_user_default(\\\"Company\\\")\",\"report_date\":\"frappe.datetime.now_date()\"}",
+ "filters_json": "{\"ageing_based_on\":\"Due Date\",\"range1\":30,\"range2\":60,\"range3\":90,\"range4\":120,\"group_by_party\":0,\"based_on_payment_terms\":0,\"show_future_payments\":0,\"show_delivery_notes\":0,\"show_sales_person\":0}",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "modified": "2020-07-22 12:28:42.743551",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Accounts Receivable Ageing",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "report_name": "Accounts Receivable",
+ "timeseries": 0,
+ "type": "Donut",
+ "use_report_chart": 1,
+ "y_axis": []
+}

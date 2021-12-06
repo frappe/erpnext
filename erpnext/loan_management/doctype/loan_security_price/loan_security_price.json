@@ -1,0 +1,129 @@
+{
+ "actions": [],
+ "autoname": "LM-LSP-.####",
+ "creation": "2019-09-03 18:20:31.382887",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "loan_security",
+  "loan_security_name",
+  "loan_security_type",
+  "column_break_2",
+  "uom",
+  "section_break_4",
+  "loan_security_price",
+  "section_break_6",
+  "valid_from",
+  "column_break_8",
+  "valid_upto"
+ ],
+ "fields": [
+  {
+   "fieldname": "loan_security",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Loan Security",
+   "options": "Loan Security",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "loan_security.unit_of_measure",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "loan_security_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Loan Security Price",
+   "options": "Company:company:default_currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "valid_from",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Valid From",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "valid_upto",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Valid Upto",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "loan_security.loan_security_type",
+   "fieldname": "loan_security_type",
+   "fieldtype": "Link",
+   "label": "Loan Security Type",
+   "options": "Loan Security Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "loan_security.loan_security_name",
+   "fieldname": "loan_security_name",
+   "fieldtype": "Data",
+   "label": "Loan Security Name",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-01-17 07:41:49.598086",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Loan Security Price",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

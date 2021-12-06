@@ -1,0 +1,39 @@
+[
+ {
+  "advance_paid": 0.0,
+  "company": "_Test Company",
+  "conversion_rate": 1.0,
+  "currency": "INR",
+  "customer": "_Test Customer",
+  "customer_group": "_Test Customer Group",
+  "customer_name": "_Test Customer",
+  "doctype": "Sales Order",
+  "base_grand_total": 1000.0,
+  "grand_total": 1000.0,
+  "naming_series": "_T-Sales Order-",
+  "order_type": "Sales",
+  "plc_conversion_rate": 1.0,
+  "price_list_currency": "INR",
+  "items": [
+   {
+    "base_amount": 1000.0,
+    "base_rate": 100.0,
+    "description": "CPU",
+    "doctype": "Sales Order Item",
+    "item_code": "_Test Item",
+    "item_name": "_Test Item 1",
+    "delivery_date": "2013-02-23",
+    "parentfield": "items",
+    "qty": 10.0,
+    "rate": 100.0,
+    "warehouse": "_Test Warehouse - _TC",
+    "stock_uom": "_Test UOM",
+	"conversion_factor": 1.0,
+	"uom": "_Test UOM"
+   }
+  ],
+  "selling_price_list": "_Test Price List",
+  "territory": "_Test Territory",
+  "transaction_date": "2013-02-21"
+ }
+]

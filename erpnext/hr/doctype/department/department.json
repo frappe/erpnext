@@ -1,0 +1,228 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "creation": "2013-02-05 11:48:26",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "department_name",
+  "parent_department",
+  "column_break_3",
+  "company",
+  "is_group",
+  "disabled",
+  "section_break_4",
+  "payroll_cost_center",
+  "column_break_9",
+  "leave_block_list",
+  "approvers",
+  "leave_approvers",
+  "expense_approvers",
+  "shift_request_approver",
+  "lft",
+  "rgt",
+  "old_parent"
+ ],
+ "fields": [
+  {
+   "fieldname": "department_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Department",
+   "oldfieldname": "department_name",
+   "oldfieldtype": "Data",
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "parent_department",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Parent Department",
+   "options": "Department",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "bold": 1,
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Group",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "description": "Days for which Holidays are blocked for this department.",
+   "fieldname": "leave_block_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Leave Block List",
+   "options": "Leave Block List",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "leave_approvers",
+   "fieldtype": "Table",
+   "label": "Leave Approver",
+   "options": "Department Approver",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "expense_approvers",
+   "fieldtype": "Table",
+   "label": "Expense Approver",
+   "options": "Department Approver",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "lft",
+   "print_hide": 1,
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "rgt",
+   "print_hide": 1,
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "ignore_user_permissions": 1,
+   "label": "Old Parent",
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "payroll_cost_center",
+   "fieldtype": "Link",
+   "label": "Payroll Cost Center",
+   "options": "Cost Center",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "description": "The first Approver in the list will be set as the default Approver.",
+   "fieldname": "approvers",
+   "fieldtype": "Section Break",
+   "label": "Approvers",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "shift_request_approver",
+   "fieldtype": "Table",
+   "label": "Shift Request Approver",
+   "options": "Department Approver",
+   "show_days": 1,
+   "show_seconds": 1
+  }
+ ],
+ "icon": "fa fa-sitemap",
+ "idx": 1,
+ "is_tree": 1,
+ "links": [],
+ "modified": "2020-06-23 15:42:00.563272",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Department",
+ "nsm_parent_field": "parent_department",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Academics User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "set_user_permissions": 1,
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "ASC"
+}

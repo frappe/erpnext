@@ -1,0 +1,220 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2013-02-22 01:27:49",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "include_exploded_items",
+  "item_code",
+  "bom_no",
+  "column_break_6",
+  "planned_qty",
+  "warehouse",
+  "planned_start_date",
+  "section_break_9",
+  "pending_qty",
+  "ordered_qty",
+  "column_break_17",
+  "description",
+  "stock_uom",
+  "produced_qty",
+  "reference_section",
+  "sales_order",
+  "sales_order_item",
+  "column_break_19",
+  "material_request",
+  "material_request_item",
+  "product_bundle_item",
+  "item_reference"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "default": "1",
+   "fieldname": "include_exploded_items",
+   "fieldtype": "Check",
+   "label": "Include Exploded Items"
+  },
+  {
+   "columns": 2,
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "oldfieldname": "item_code",
+   "oldfieldtype": "Link",
+   "options": "Item",
+   "print_width": "150px",
+   "reqd": 1,
+   "width": "150px"
+  },
+  {
+   "columns": 2,
+   "fieldname": "bom_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "BOM No",
+   "oldfieldname": "bom_no",
+   "oldfieldtype": "Link",
+   "options": "BOM",
+   "print_width": "100px",
+   "reqd": 1,
+   "width": "100px"
+  },
+  {
+   "fieldname": "planned_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Planned Qty",
+   "oldfieldname": "planned_qty",
+   "oldfieldtype": "Currency",
+   "print_width": "100px",
+   "reqd": 1,
+   "width": "100px"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "For Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "default": "Today",
+   "fieldname": "planned_start_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Planned Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break",
+   "label": "Quantity and Description"
+  },
+  {
+   "default": "0",
+   "fieldname": "pending_qty",
+   "fieldtype": "Float",
+   "label": "Pending Qty",
+   "oldfieldname": "prevdoc_reqd_qty",
+   "oldfieldtype": "Currency",
+   "print_width": "100px",
+   "read_only": 1,
+   "width": "100px"
+  },
+  {
+   "default": "0",
+   "fieldname": "ordered_qty",
+   "fieldtype": "Float",
+   "label": "Ordered Qty",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "produced_qty",
+   "fieldtype": "Float",
+   "label": "Produced Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description",
+   "oldfieldname": "description",
+   "oldfieldtype": "Text",
+   "print_width": "200px",
+   "read_only": 1,
+   "width": "200px"
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "oldfieldname": "stock_uom",
+   "oldfieldtype": "Data",
+   "options": "UOM",
+   "print_width": "80px",
+   "read_only": 1,
+   "reqd": 1,
+   "width": "80px"
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "oldfieldname": "source_docname",
+   "oldfieldtype": "Data",
+   "options": "Sales Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_order_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Sales Order Item",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "material_request",
+   "fieldtype": "Link",
+   "label": "Material Request",
+   "options": "Material Request",
+   "read_only": 1
+  },
+  {
+   "fieldname": "material_request_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "material_request_item"
+  },
+  {
+   "fieldname": "product_bundle_item",
+   "fieldtype": "Link",
+   "label": "Product Bundle Item",
+   "no_copy": 1,
+   "options": "Item",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_reference",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Item Reference"
+  }
+ ],
+ "idx": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-06-28 18:31:06.822168",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Production Plan Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "ASC"
+}

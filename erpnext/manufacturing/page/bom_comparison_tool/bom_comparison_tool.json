@@ -1,0 +1,30 @@
+{
+ "content": null,
+ "creation": "2019-07-29 13:24:38.201981",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2019-07-29 13:24:38.201981",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "bom-comparison-tool",
+ "owner": "Administrator",
+ "page_name": "BOM Comparison Tool",
+ "restrict_to_domain": "Manufacturing",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Manufacturing User"
+  },
+  {
+   "role": "Manufacturing Manager"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "BOM Comparison Tool"
+}

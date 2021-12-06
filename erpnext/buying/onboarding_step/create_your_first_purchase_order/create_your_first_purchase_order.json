@@ -1,0 +1,21 @@
+{
+ "action": "Show Form Tour",
+ "action_label": "Let\u2019s create your first Purchase Order",
+ "creation": "2020-05-12 18:17:49.976035",
+ "description": "# Create first Purchase Order\n\nPurchase Order is at the heart of your buying transactions. In ERPNext, Purchase Order can can be created against a Purchase Material Request (indent) and Supplier Quotation as well.  Purchase Orders is also linked to Purchase Receipt and Purchase Invoices, allowing you to keep a birds-eye view on your purchase deals.\n\n",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-08-24 18:08:08.936484",
+ "modified_by": "Administrator",
+ "name": "Create your first Purchase Order",
+ "owner": "Administrator",
+ "reference_document": "Purchase Order",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Create first Purchase Order",
+ "validate_action": 1
+}

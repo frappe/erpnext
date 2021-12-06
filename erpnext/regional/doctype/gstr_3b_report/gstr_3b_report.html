@@ -1,0 +1,297 @@
+<style>
+	.print-format {
+		padding: 15mm;
+		font-size: 8.0pt !important;
+		font-family: Tahoma, sans-serif;
+	}
+	.disabled {
+		background-color: #d9d9d9;
+	}
+
+</style>
+<div>
+	<h3 class="text-center">{{ __("GSTR3B-Form")}}</h3>
+	<h5>{{__("GSTIN")}}: &nbsp {{ data.gstin }}</h5>
+	<h5>{{__("Period")}}: &nbsp {{ data.ret_period }}</h5>
+</div>
+
+<h5>3.1&nbsp&nbsp{{__("Details of Outward Supplies and inward supplies liable to reverse charge")}}</h5>
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th>{{__("Nature Of Supplies")}}</th>
+			<th>{{__("Total Taxable value")}}</th>
+			<th>{{__("Integrated Tax")}}</th>
+			<th>{{__("Central Tax")}}</th>
+			<th>{{__("State/UT Tax")}}</th>
+			<th>{{__("Cess")}}</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>(a) {{__("Outward taxable supplies(other than zero rated, nil rated and exempted)")}}</td>
+			<td class="right">{{ flt(data.sup_details.osup_det.txval, 2) }}</td>
+			<td class="right">{{ flt(data.sup_details.osup_det.iamt, 2) }}</td>
+			<td class="right">{{ flt(data.sup_details.osup_det.camt, 2) }}</td>
+			<td class="right">{{ flt(data.sup_details.osup_det.samt, 2) }}</td>
+			<td class="right">{{ flt(data.sup_details.osup_det.csamt, 2) }}</td>
+		</tr>
+		<tr>
+			<td>(b) {{__("Outward taxable supplies(zero rated)")}}</td>
+			<td class="right">{{ flt(data.sup_details.osup_zero.txval, 2) }}</td>
+			<td class="right">{{ flt(data.sup_details.osup_zero.iamt, 2) }}</td>
+			<td class="disabled"></td>
+			<td class="disabled"></td>
+			<td class="right">{{ flt(data.sup_details.osup_zero.csamt, 2) }}</td>
+		</tr>
+		<tr>
+			<td>(b) {{__("Other outward supplies(Nil rated,Exempted)")}}</td>
+			<td class="right">{{ data.sup_details.osup_nil_exmp.txval }}</td>
+			<td class="disabled"></td>
+			<td class="disabled"></td>
+			<td class="disabled"></td>
+			<td class="disabled"></td>
+		<tr>
+			<td>(d) {{__("Inward Supplies(liable to reverse charge)")}}</td>
+			<td class="right">{{ flt(data.sup_details.isup_rev.txval, 2) }}</td>
+			<td class="right">{{ flt(data.sup_details.isup_rev.iamt, 2) }}</td>
+			<td class="right">{{ flt(data.sup_details.isup_rev.camt, 2) }}</td>
+			<td class="right">{{ flt(data.sup_details.isup_rev.samt, 2) }}</td>
+			<td class="right">{{ flt(data.sup_details.isup_rev.csamt,2) }}</td>
+		</tr>
+		<tr>
+			<td>(e) {{__("Non-GST outward supplies")}}</td>
+			<td class="right">{{ data.sup_details.osup_nongst.txval }}</td>
+			<td class="disabled"></td>
+			<td class="disabled"></td>
+			<td class="disabled"></td>
+			<td class="disabled"></td>
+		</tr>
+	</tbody>
+</table>
+
+<h5>
+	3.2&nbsp&nbsp{{__("Of the supplies shown in 3.1 (a) above, details of inter-State supplies made to unregisterd
+	persons, composition taxable persons and UIN holders")}}
+</h5>
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th></th>
+			<th>{{__("Place Of Supply (State/UT)")}}</th>
+			<th>{{__("Total Taxable Value")}}</th>
+			<th>{{__("Amount of Integrated Tax")}}</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>{{__("Supplies made to Unregistered Persons")}}</td>
+			<td class="right">
+				{% for row in data.inter_sup.unreg_details %}
+					{% if row %}
+						{{ row.pos }}<br>
+					{% endif %}
+				{% endfor %}
+			</td>
+			<td class="right">
+				{% for row in data.inter_sup.unreg_details %}
+					{% if row %}
+						{{ flt(row.txval, 2) }}<br>
+					{% endif %}
+				{% endfor %}
+			</td>
+			<td class="right">
+				{% for row in data.inter_sup.unreg_details %}
+					{% if row %}
+						{{ flt(row.iamt, 2) }}<br>
+					{% endif %}
+				{% endfor %}
+			</td>
+		</tr>
+		<tr>
+			<td>{{__("Supplies made to Composition Taxable Persons")}}</td>
+			<td class="right">
+				{% for row in data.inter_sup.comp_details %}
+					{% if row %}
+						{{ row.pos }}<br>
+					{% endif %}
+				{% endfor %}
+			</td>
+			<td class="right">
+				{% for row in data.inter_sup.comp_details %}
+					{% if row %}
+						{{ flt(row.txval, 2) }}<br>
+					{% endif %}
+				{% endfor %}
+			</td>
+			<td class="right">
+				{% for row in data.inter_sup.comp_details %}
+					{% if row %}
+						{{ flt(row.iamt, 2) }}<br>
+					{% endif %}
+				{% endfor %}
+			</td>
+		</tr>
+		<tr>
+			<td>{{__("Supplies made to UIN holders")}}</td>
+			<td class="right">
+				{% for row in data.inter_sup.uin_details %}
+					{% if row %}
+						{{ row.pos }}<br>
+					{% endif %}
+				{% endfor %}
+			</td>
+			<td class="right">
+				{% for row in data.inter_sup.uin_details %}
+					{% if row %}
+						{{ flt(row.txval, 2) }}<br>
+					{% endif %}
+				{% endfor %}
+			</td>
+			<td class="right">
+				{% for row in data.inter_sup.uin_details %}
+					{% if row %}
+						{{ flt(row.iamt, 2) }}<br>
+					{% endif %}
+				{% endfor %}
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<h5>4. &nbsp {{__("Eligible ITC")}}</h5>
+<table class="table table-bordered">
+		<thead>
+			<tr>
+				<th>Details</th>
+				<th>Integrated Tax</th>
+				<th>Central Tax</th>
+				<th>State/UT tax</th>
+				<th>Cess</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><b>(A) {{__("ITC Available (whether in full or part)")}}</b></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>&nbsp (1) {{__("Import of goods")}} </td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[0].iamt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[0].camt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[0].samt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[0].csamt, 2) }}</td>
+			</tr>
+			<tr>
+				<td>&nbsp (2) {{__("Import of services")}}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[1].iamt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[1].camt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[1].samt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[1].csamt, 2) }}</td>
+			</tr>
+			<tr>
+				<td>&nbsp (3) {{__("Inward supplies liable to reverse charge (other than 1 & 2 above)")}}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[2].iamt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[2].camt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[2].samt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[2].csamt, 2) }}</td>
+			</tr>
+			<tr>
+				<td>&nbsp (4) {{__("Inward supplies from ISD")}}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[3].iamt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[3].camt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[3].samt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[3].csamt, 2) }}</td>
+			</tr>
+			<tr>
+				<td>&nbsp (5) {{__("All other ITC")}}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[4].iamt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[4].camt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[4].samt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_avl[4].csamt, 2) }}</td>
+			</tr>
+			<tr>
+				<td><b>(B) {{__("ITC Reversed")}}</b></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>&nbsp (1) {{__("As per rules 42 & 43 of CGST Rules")}}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_rev[0].iamt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_rev[0].camt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_rev[0].samt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_rev[0].csamt, 2) }}</td>
+			</tr>
+			<tr>
+				<td>&nbsp (2) {{__("Others")}}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_rev[1].iamt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_rev[1].camt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_rev[1].samt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_rev[1].csamt, 2) }}</td>
+			</tr>
+			<tr>
+				<td><b>(C) {{__("Net ITC Available(A) - (B)")}}</b></td>
+				<td class="right">{{ flt(data.itc_elg.itc_net.iamt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_net.camt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_net.samt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_net.csamt, 2) }}</td>
+			</tr>
+			<tr>
+				<td><b>(D) {{__("Ineligible ITC")}}</b></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>&nbsp (1) {{__("As per section 17(5)")}}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_inelg[0].iamt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_inelg[0].camt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_inelg[0].samt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_inelg[0].csamt, 2) }}</td>
+			</tr>
+			<tr>
+				<td>&nbsp (2) {{__("Others")}}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_inelg[1].iamt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_inelg[1].camt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_inelg[1].samt, 2) }}</td>
+				<td class="right">{{ flt(data.itc_elg.itc_inelg[1].csamt, 2) }}</td>
+			</tr>
+		</tbody>
+	</table>
+
+<h5>5. &nbsp&nbsp {{__("Values of exempt, nil rated and non-GST inward supplies")}}</h5>
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th>{{__("Nature of Supplies")}}</th>
+			<th>{{__("Inter-State Supplies")}}</th>
+			<th>{{__("Intra-State Supplies")}}</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>{{__("From a supplier under composition scheme, Exempt and Nil rated")}}</td>
+			<td class="right">{{ flt(data.inward_sup.isup_details[0].inter, 2) }}</td>
+			<td class="right">{{ flt(data.inward_sup.isup_details[0].intra, 2) }}</td>
+		</tr>
+		<tr>
+			<td>{{__("Non GST Inward Supplies")}}</td>
+			<td class="right">{{ flt(data.inward_sup.isup_details[1].inter, 2) }}</td>
+			<td class="right">{{ flt(data.inward_sup.isup_details[1].intra, 2) }}</td>
+		</tr>
+	</tbody>
+</table>
+
+<style>
+
+.right{
+	text-align: right;
+}
+
+</style>

@@ -1,0 +1,29 @@
+{%- from "templates/print_formats/standard_macros.html" import add_header -%}
+<div class="page-break">
+    {%- if not doc.get("print_heading") and not doc.get("select_print_heading")
+        and doc.set("select_print_heading", _("Payment Receipt Note")) -%}{%- endif -%}
+    {{ add_header(0, 1, doc, letter_head, no_letterhead, print_settings) }}
+
+    {%- for label, value in (
+        (_("Received On"), frappe.utils.format_date(doc.voucher_date)),
+        (_("Received From"), doc.pay_to_recd_from),
+        (_("Amount"), "<strong>" + doc.get_formatted("total_amount") + "</strong><br>" + (doc.total_amount_in_words or "") + "<br>"),
+        (_("Remarks"), doc.remark)
+    ) -%}
+    <div class="row">
+        <div class="col-xs-3"><label class="text-right">{{ label }}</label></div>
+        <div class="col-xs-9">{{ value }}</div>
+    </div>
+
+    {%- endfor -%}
+
+    <hr>
+    <br>
+    <p class="strong">
+        {{ _("For") }} {{ doc.company }},<br>
+        <br>
+        <br>
+        <br>
+        {{ _("Authorized Signatory") }}
+    </p>
+</div>

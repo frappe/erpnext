@@ -1,0 +1,25 @@
+name: 'Documentation Required'
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened, edited ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 'Setup Environment'
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
+
+      - name: 'Clone repo'
+        uses: actions/checkout@v2
+
+      - name: Validate Docs
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          pip install requests --quiet
+          python $GITHUB_WORKSPACE/.github/helper/documentation.py $PR_NUMBER

@@ -1,0 +1,43 @@
+{% from "erpnext/templates/includes/macros.html" import product_image_square %}
+
+{% macro item_name_and_description(d) %}
+    <div class="row item_name_and_description">
+        <div class="col-xs-4 col-sm-2 order-image-col">
+            <div class="order-image">
+                {{ product_image_square(d.thumbnail or d.image) }}
+            </div>
+        </div>
+        <div class="col-xs-8 col-sm-10">
+            {{ d.item_code }}
+            <div class="text-muted small item-description">
+				{{ html2text(d.description) | truncate(140) }}
+			</div>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro item_name_and_description_cart(d) %}
+    <div class="row item_name_dropdown">
+        <div class="col-xs-4 col-sm-4 order-image-col">
+            <div class="order-image">
+             {{ product_image_square(d.thumbnail or d.image) }}
+            </div>
+        </div>
+        <div class="col-xs-8 col-sm-8">
+           {{ d.item_name|truncate(25) }}
+			<div class="input-group number-spinner">
+                <span class="input-group-btn">
+                    <button class="btn btn-light cart-btn" data-dir="dwn">
+                        –</button>
+                </span>
+	            <input class="form-control text-right cart-qty"
+		            value = "{{ d.get_formatted('qty') }}"
+		            data-item-code="{{ d.item_code }}">
+                <span class="input-group-btn">
+                    <button class="btn btn-light cart-btn" data-dir="up">
+                        +</button>
+                </span>
+			</div>
+        </div>
+    </div>
+{% endmacro %}

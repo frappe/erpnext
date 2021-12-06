@@ -1,0 +1,19 @@
+{
+ "action": "Create Entry",
+ "creation": "2020-07-27 19:10:28.530226",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-07-27 19:10:28.530226",
+ "modified_by": "Administrator",
+ "name": "Enroll a Student in a Program",
+ "owner": "Administrator",
+ "reference_document": "Program Enrollment",
+ "show_full_form": 0,
+ "title": "Enroll a Student in a Program",
+ "validate_action": 1
+}

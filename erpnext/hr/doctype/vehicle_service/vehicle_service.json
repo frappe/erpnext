@@ -1,0 +1,57 @@
+{
+ "creation": "2016-09-03 19:20:14.561962",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "service_item",
+  "type",
+  "frequency",
+  "expense_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "service_item",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Service Item",
+   "options": "\nBrake Oil\nBrake Pad\nClutch Plate\nEngine Oil\nOil Change\nWheels",
+   "reqd": 1
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "\nInspection\nService\nChange",
+   "reqd": 1
+  },
+  {
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Frequency",
+   "options": "\nMileage\nMonthly\nQuarterly\nHalf Yearly\nYearly",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expense_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Expense",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2020-03-18 16:49:46.645004",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Vehicle Service",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

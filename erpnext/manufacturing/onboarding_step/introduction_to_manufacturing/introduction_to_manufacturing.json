@@ -1,0 +1,20 @@
+{
+ "action": "Update Settings",
+ "creation": "2020-05-05 16:40:23.676406",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-05-14 19:11:57.152883",
+ "modified_by": "Administrator",
+ "name": "Introduction to Manufacturing",
+ "owner": "Administrator",
+ "reference_document": "Manufacturing Settings",
+ "show_full_form": 0,
+ "title": "Manufacturing Settings",
+ "validate_action": 1,
+ "video_url": "https://www.youtube.com/watch?v=UVGfzwOOZC4"
+}

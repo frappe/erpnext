@@ -1,0 +1,80 @@
+{% if shopping_cart and shopping_cart.cart_settings.enabled %}
+
+{% set cart_settings = shopping_cart.cart_settings %}
+{% set product_info = shopping_cart.product_info %}
+
+<div class="item-cart row mt-2" data-variant-item-code="{{ item_code }}">
+	<div class="col-md-12">
+		{% if cart_settings.show_price and product_info.price %}
+		<div class="product-price">
+			{{ product_info.price.formatted_price_sales_uom }}
+			<small class="formatted-price">({{ product_info.price.formatted_price }} / {{ product_info.uom }})</small>
+		</div>
+		{% else %}
+			{{ _("UOM") }} : {{ product_info.uom }}
+		{% endif %}
+
+		{% if cart_settings.show_stock_availability %}
+		<div>
+			{% if product_info.in_stock == 0 %}
+			<span class="text-danger no-stock">
+				{{ _('Not in stock') }}
+			</span>
+			{% elif product_info.in_stock == 1 %}
+			<span class="text-success has-stock">
+				{{ _('In stock') }}
+				{% if product_info.show_stock_qty and product_info.stock_qty %}
+					({{ product_info.stock_qty[0][0] }})
+				{% endif %}
+			</span>
+			{% endif %}
+		</div>
+		{% endif %}
+		<div class="mt-5 mb-5">
+			{% if product_info.price and (cart_settings.allow_items_not_in_stock or product_info.in_stock) %}
+				<a href="/cart"
+					class="btn btn-light btn-view-in-cart {% if not product_info.qty %}hidden{% endif %}"
+					role="button"
+				>
+					{{ _("View in Cart") }}
+				</a>
+				<button
+					data-item-code="{{item_code}}"
+					class="btn btn-primary btn-add-to-cart {% if product_info.qty %}hidden{% endif %} w-100"
+				>
+					<span class="mr-2">
+						<svg class="icon icon-md">
+							<use href="#icon-assets"></use>
+						</svg>
+					</span>
+					{{ _("Add to Cart") }}
+				</button>
+			{% endif %}
+			{% if cart_settings.show_contact_us_button %}
+				{% include "templates/generators/item/item_inquiry.html" %}
+			{% endif %}
+		</div>
+	</div>
+</div>
+
+<script>
+	frappe.ready(() => {
+		$('.page_content').on('click', '.btn-add-to-cart', (e) => {
+			const $btn = $(e.currentTarget);
+			$btn.prop('disabled', true);
+			const item_code = $btn.data('item-code');
+			erpnext.shopping_cart.update_cart({
+				item_code,
+				qty: 1,
+				callback(r) {
+					$btn.prop('disabled', false);
+					if (r.message) {
+						$('.btn-add-to-cart, .btn-view-in-cart').toggleClass('hidden');
+					}
+				}
+			});
+		});
+	});
+</script>
+
+{% endif %}

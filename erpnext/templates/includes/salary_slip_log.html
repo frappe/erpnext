@@ -1,0 +1,19 @@
+<table class='table table-bordered'>
+	<caption>{{title}}</caption>
+	<thead>
+		<tr>
+		{% for key in keys %}
+			<th {% if key == "Total Pay"%} style="text-align: right;" {% endif %}> {{ key }} </th>
+		{% endfor %}
+		</tr>
+	</thead>
+	<tbody>
+		{% for ss_dict in ss_list %}
+			<tr>
+			{% for key, value in ss_dict.items()|sort %}
+				<td {% if key == "Total Pay"%} align = "right" {% endif %}> {{value}} </td>
+			{% endfor %}
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>

@@ -1,0 +1,177 @@
+[
+ {
+  "state_number": "33",
+  "state_code": "TN",
+  "state_name": "Tamil Nadu"
+ },
+ {
+  "state_number": "35",
+  "state_code": "UP",
+  "state_name": "Uttar Pradesh"
+ },
+ {
+  "state_number": "05",
+  "state_code": "UT",
+  "state_name": "Uttarakhand"
+ },
+ {
+  "state_number": "19",
+  "state_code": "WB",
+  "state_name": "West Bengal"
+ },
+ {
+  "state_number": "16",
+  "state_code": "TR",
+  "state_name": "Tripura"
+ },
+ {
+  "state_number": "36",
+  "state_code": "TS",
+  "state_name": "Telangana"
+ },
+ {
+  "state_number": "11",
+  "state_code": "SK",
+  "state_name": "Sikkim"
+ },
+ {
+  "state_number": "08",
+  "state_code": "RJ",
+  "state_name": "Rajasthan"
+ },
+ {
+  "state_number": "03",
+  "state_code": "PB",
+  "state_name": "Punjab"
+ },
+ {
+  "state_number": "34",
+  "state_code": "PY",
+  "state_name": "Pondicherry"
+ },
+ {
+  "state_number": "21",
+  "state_code": "OR",
+  "state_name": "Odisha"
+ },
+ {
+  "state_number": "13",
+  "state_code": "NL",
+  "state_name": "Nagaland"
+ },
+ {
+  "state_number": "15",
+  "state_code": "MI",
+  "state_name": "Mizoram"
+ },
+ {
+  "state_number": "17",
+  "state_code": "ME",
+  "state_name": "Meghalaya"
+ },
+ {
+  "state_number": "14",
+  "state_code": "MN",
+  "state_name": "Manipur"
+ },
+ {
+  "state_number": "27",
+  "state_code": "MH",
+  "state_name": "Maharashtra"
+ },
+ {
+  "state_number": "23",
+  "state_code": "MP",
+  "state_name": "Madhya Pradesh"
+ },
+ {
+  "state_number": "31",
+  "state_code": "LD",
+  "state_name": "Lakshadweep Islands"
+ },
+ {
+  "state_number": "32",
+  "state_code": "KL",
+  "state_name": "Kerala"
+ },
+ {
+  "state_number": "29",
+  "state_code": "KA",
+  "state_name": "Karnataka"
+ },
+ {
+  "state_number": "20",
+  "state_code": "JH",
+  "state_name": "Jharkhand"
+ },
+ {
+  "state_number": "01",
+  "state_code": "JK",
+  "state_name": "Jammu and Kashmir"
+ },
+ {
+  "state_number": "02",
+  "state_code": "HP",
+  "state_name": "Himachal Pradesh"
+ },
+ {
+  "state_number": "06",
+  "state_code": "HR",
+  "state_name": "Haryana"
+ },
+ {
+  "state_number": "24",
+  "state_code": "GJ",
+  "state_name": "Gujarat"
+ },
+ {
+  "state_number": "30",
+  "state_code": "GA",
+  "state_name": "Goa"
+ },
+ {
+  "state_number": "07",
+  "state_code": "DL",
+  "state_name": "Delhi"
+ },
+ {
+  "state_number": "26",
+  "state_code": "DN",
+  "state_name": "Dadra and Nagar Haveli and Daman and Diu"
+ },
+ {
+  "state_number": "22",
+  "state_code": "CT",
+  "state_name": "Chhattisgarh"
+ },
+ {
+  "state_number": "04",
+  "state_code": "CH",
+  "state_name": "Chandigarh"
+ },
+ {
+  "state_number": "10",
+  "state_code": "BH",
+  "state_name": "Bihar"
+ },
+ {
+  "state_number": "18",
+  "state_code": "AS",
+  "state_name": "Assam"
+ },
+ {
+  "state_number": "12",
+  "state_code": "AR",
+  "state_name": "Arunachal Pradesh"
+ },
+ {
+  "state_number": "37",
+  "state_code": "AD",
+  "state_name": "Andhra Pradesh (New)"
+ },
+ {
+  "state_number": "38",
+  "state_code": "LA",
+  "state_name": "Ladakh"
+ }
+]

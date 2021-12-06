@@ -1,0 +1,210 @@
+# Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
+
+
+import frappe
+from frappe import _
+from frappe.model.document import Document
+from frappe.model.meta import get_field_precision
+from frappe.utils import flt
+
+import erpnext
+from erpnext.accounts.doctype.journal_entry.journal_entry import get_balance_on
+from erpnext.setup.utils import get_exchange_rate
+
+
+class ExchangeRateRevaluation(Document):
+	def validate(self):
+		self.set_total_gain_loss()
+
+	def set_total_gain_loss(self):
+		total_gain_loss = 0
+		for d in self.accounts:
+			d.gain_loss = flt(d.new_balance_in_base_currency, d.precision("new_balance_in_base_currency")) \
+				- flt(d.balance_in_base_currency, d.precision("balance_in_base_currency"))
+			total_gain_loss += flt(d.gain_loss, d.precision("gain_loss"))
+		self.total_gain_loss = flt(total_gain_loss, self.precision("total_gain_loss"))
+
+	def validate_mandatory(self):
+		if not (self.company and self.posting_date):
+			frappe.throw(_("Please select Company and Posting Date to getting entries"))
+
+	def on_cancel(self):
+		self.ignore_linked_doctypes = ('GL Entry')
+
+	@frappe.whitelist()
+	def check_journal_entry_condition(self):
+		total_debit = frappe.db.get_value("Journal Entry Account", {
+			'reference_type': 'Exchange Rate Revaluation',
+			'reference_name': self.name,
+			'docstatus': 1
+		}, "sum(debit) as sum")
+
+		total_amt = 0
+		for d in self.accounts:
+			total_amt = total_amt + d.new_balance_in_base_currency
+
+		if total_amt != total_debit:
+			return True
+
+		return False
+
+	@frappe.whitelist()
+	def get_accounts_data(self, account=None):
+		accounts = []
+		self.validate_mandatory()
+		company_currency = erpnext.get_company_currency(self.company)
+		precision = get_field_precision(frappe.get_meta("Exchange Rate Revaluation Account")
+			.get_field("new_balance_in_base_currency"), company_currency)
+
+		account_details = self.get_accounts_from_gle()
+		for d in account_details:
+			current_exchange_rate = d.balance / d.balance_in_account_currency \
+				if d.balance_in_account_currency else 0
+			new_exchange_rate = get_exchange_rate(d.account_currency, company_currency, self.posting_date)
+			new_balance_in_base_currency = flt(d.balance_in_account_currency * new_exchange_rate)
+			gain_loss = flt(new_balance_in_base_currency, precision) - flt(d.balance, precision)
+			if gain_loss:
+				accounts.append({
+					"account": d.account,
+					"party_type": d.party_type,
+					"party": d.party,
+					"account_currency": d.account_currency,
+					"balance_in_base_currency": d.balance,
+					"balance_in_account_currency": d.balance_in_account_currency,
+					"current_exchange_rate": current_exchange_rate,
+					"new_exchange_rate": new_exchange_rate,
+					"new_balance_in_base_currency": new_balance_in_base_currency
+				})
+
+		if not accounts:
+			self.throw_invalid_response_message(account_details)
+
+		return accounts
+
+	def get_accounts_from_gle(self):
+		company_currency = erpnext.get_company_currency(self.company)
+		accounts = frappe.db.sql_list("""
+			select name
+			from tabAccount
+			where is_group = 0
+				and report_type = 'Balance Sheet'
+				and root_type in ('Asset', 'Liability', 'Equity')
+				and account_type != 'Stock'
+				and company=%s
+				and account_currency != %s
+			order by name""",(self.company, company_currency))
+
+		account_details = []
+		if accounts:
+			account_details = frappe.db.sql("""
+				select
+					account, party_type, party, account_currency,
+					sum(debit_in_account_currency) - sum(credit_in_account_currency) as balance_in_account_currency,
+					sum(debit) - sum(credit) as balance
+				from `tabGL Entry`
+				where account in (%s)
+				and posting_date <= %s
+				and is_cancelled = 0
+				group by account, NULLIF(party_type,''), NULLIF(party,'')
+				having sum(debit) != sum(credit)
+				order by account
+			""" % (', '.join(['%s']*len(accounts)), '%s'), tuple(accounts + [self.posting_date]), as_dict=1)
+
+		return account_details
+
+	def throw_invalid_response_message(self, account_details):
+		if account_details:
+			message = _("No outstanding invoices require exchange rate revaluation")
+		else:
+			message = _("No outstanding invoices found")
+		frappe.msgprint(message)
+
+	@frappe.whitelist()
+	def make_jv_entry(self):
+		if self.total_gain_loss == 0:
+			return
+
+		unrealized_exchange_gain_loss_account = frappe.get_cached_value('Company',  self.company,
+			"unrealized_exchange_gain_loss_account")
+		if not unrealized_exchange_gain_loss_account:
+			frappe.throw(_("Please set Unrealized Exchange Gain/Loss Account in Company {0}")
+				.format(self.company))
+
+		journal_entry = frappe.new_doc('Journal Entry')
+		journal_entry.voucher_type = 'Exchange Rate Revaluation'
+		journal_entry.company = self.company
+		journal_entry.posting_date = self.posting_date
+		journal_entry.multi_currency = 1
+
+		journal_entry_accounts = []
+		for d in self.accounts:
+			dr_or_cr = "debit_in_account_currency" \
+				if d.get("balance_in_account_currency") > 0 else "credit_in_account_currency"
+
+			reverse_dr_or_cr = "debit_in_account_currency" \
+				if dr_or_cr=="credit_in_account_currency" else "credit_in_account_currency"
+
+			journal_entry_accounts.append({
+				"account": d.get("account"),
+				"party_type": d.get("party_type"),
+				"party": d.get("party"),
+				"account_currency": d.get("account_currency"),
+				"balance": flt(d.get("balance_in_account_currency"), d.precision("balance_in_account_currency")),
+				dr_or_cr: flt(abs(d.get("balance_in_account_currency")), d.precision("balance_in_account_currency")),
+				"exchange_rate": flt(d.get("new_exchange_rate"), d.precision("new_exchange_rate")),
+				"reference_type": "Exchange Rate Revaluation",
+				"reference_name": self.name,
+				})
+			journal_entry_accounts.append({
+				"account": d.get("account"),
+				"party_type": d.get("party_type"),
+				"party": d.get("party"),
+				"account_currency": d.get("account_currency"),
+				"balance": flt(d.get("balance_in_account_currency"), d.precision("balance_in_account_currency")),
+				reverse_dr_or_cr: flt(abs(d.get("balance_in_account_currency")), d.precision("balance_in_account_currency")),
+				"exchange_rate": flt(d.get("current_exchange_rate"), d.precision("current_exchange_rate")),
+				"reference_type": "Exchange Rate Revaluation",
+				"reference_name": self.name
+				})
+
+		journal_entry_accounts.append({
+			"account": unrealized_exchange_gain_loss_account,
+			"balance": get_balance_on(unrealized_exchange_gain_loss_account),
+			"debit_in_account_currency": abs(self.total_gain_loss) if self.total_gain_loss < 0 else 0,
+			"credit_in_account_currency": self.total_gain_loss if self.total_gain_loss > 0 else 0,
+			"exchange_rate": 1,
+			"reference_type": "Exchange Rate Revaluation",
+			"reference_name": self.name,
+			})
+
+		journal_entry.set("accounts", journal_entry_accounts)
+		journal_entry.set_amounts_in_company_currency()
+		journal_entry.set_total_debit_credit()
+		return journal_entry.as_dict()
+
+@frappe.whitelist()
+def get_account_details(account, company, posting_date, party_type=None, party=None):
+	account_currency, account_type = frappe.db.get_value("Account", account,
+		["account_currency", "account_type"])
+	if account_type in ["Receivable", "Payable"] and not (party_type and party):
+		frappe.throw(_("Party Type and Party is mandatory for {0} account").format(account_type))
+
+	account_details = {}
+	company_currency = erpnext.get_company_currency(company)
+	balance = get_balance_on(account, date=posting_date, party_type=party_type, party=party, in_account_currency=False)
+	if balance:
+		balance_in_account_currency = get_balance_on(account, date=posting_date, party_type=party_type, party=party)
+		current_exchange_rate = balance / balance_in_account_currency if balance_in_account_currency else 0
+		new_exchange_rate = get_exchange_rate(account_currency, company_currency, posting_date)
+		new_balance_in_base_currency = balance_in_account_currency * new_exchange_rate
+		account_details = {
+			"account_currency": account_currency,
+			"balance_in_base_currency": balance,
+			"balance_in_account_currency": balance_in_account_currency,
+			"current_exchange_rate": current_exchange_rate,
+			"new_exchange_rate": new_exchange_rate,
+			"new_balance_in_base_currency": new_balance_in_base_currency
+		}
+
+	return account_details

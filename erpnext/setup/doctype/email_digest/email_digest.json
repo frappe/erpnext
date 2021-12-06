@@ -1,0 +1,338 @@
+{
+ "actions": [],
+ "autoname": "Prompt",
+ "creation": "2018-09-16 22:00:00",
+ "description": "Send regular summary reports via Email.",
+ "doctype": "DocType",
+ "document_type": "System",
+ "engine": "InnoDB",
+ "field_order": [
+  "settings",
+  "column_break0",
+  "enabled",
+  "company",
+  "frequency",
+  "next_send",
+  "column_break1",
+  "recipients",
+  "accounts",
+  "accounts_module",
+  "income",
+  "expenses_booked",
+  "income_year_to_date",
+  "expense_year_to_date",
+  "column_break_16",
+  "bank_balance",
+  "credit_balance",
+  "invoiced_amount",
+  "payables",
+  "work_in_progress",
+  "sales_orders_to_bill",
+  "purchase_orders_to_bill",
+  "operation",
+  "column_break_21",
+  "sales_order",
+  "purchase_order",
+  "sales_orders_to_deliver",
+  "purchase_orders_to_receive",
+  "sales_invoice",
+  "purchase_invoice",
+  "column_break_operation",
+  "new_quotations",
+  "pending_quotations",
+  "issue",
+  "project",
+  "purchase_orders_items_overdue",
+  "other",
+  "tools",
+  "calendar_events",
+  "todo_list",
+  "notifications",
+  "column_break_32",
+  "add_quote"
+ ],
+ "fields": [
+  {
+   "fieldname": "settings",
+   "fieldtype": "Section Break",
+   "label": "Email Digest Settings"
+  },
+  {
+   "fieldname": "column_break0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "For Company",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "How frequently?",
+   "options": "Daily\nWeekly\nMonthly",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.enabled",
+   "fieldname": "next_send",
+   "fieldtype": "Data",
+   "label": "Next email will be sent on:",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accounts",
+   "fieldtype": "Section Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "accounts_module",
+   "fieldtype": "Column Break",
+   "hidden": 1,
+   "label": "Profit & Loss"
+  },
+  {
+   "default": "0",
+   "fieldname": "income",
+   "fieldtype": "Check",
+   "label": "New Income"
+  },
+  {
+   "default": "0",
+   "fieldname": "expenses_booked",
+   "fieldtype": "Check",
+   "label": "New Expenses"
+  },
+  {
+   "default": "0",
+   "fieldname": "income_year_to_date",
+   "fieldtype": "Check",
+   "label": "Annual Income"
+  },
+  {
+   "default": "0",
+   "fieldname": "expense_year_to_date",
+   "fieldtype": "Check",
+   "label": "Annual Expenses"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break",
+   "label": "Balance Sheet"
+  },
+  {
+   "default": "0",
+   "fieldname": "bank_balance",
+   "fieldtype": "Check",
+   "label": "Bank Balance"
+  },
+  {
+   "default": "0",
+   "fieldname": "credit_balance",
+   "fieldtype": "Check",
+   "label": "Bank Credit Balance"
+  },
+  {
+   "default": "0",
+   "fieldname": "invoiced_amount",
+   "fieldtype": "Check",
+   "label": "Receivables"
+  },
+  {
+   "default": "0",
+   "fieldname": "payables",
+   "fieldtype": "Check",
+   "label": "Payables"
+  },
+  {
+   "fieldname": "work_in_progress",
+   "fieldtype": "Column Break",
+   "label": "Work in Progress"
+  },
+  {
+   "default": "0",
+   "fieldname": "sales_orders_to_bill",
+   "fieldtype": "Check",
+   "label": "Sales Orders to Bill"
+  },
+  {
+   "default": "0",
+   "fieldname": "purchase_orders_to_bill",
+   "fieldtype": "Check",
+   "label": "Purchase Orders to Bill"
+  },
+  {
+   "fieldname": "operation",
+   "fieldtype": "Section Break",
+   "label": "Operations"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "sales_order",
+   "fieldtype": "Check",
+   "label": "New Sales Orders"
+  },
+  {
+   "default": "0",
+   "fieldname": "purchase_order",
+   "fieldtype": "Check",
+   "label": "New Purchase Orders"
+  },
+  {
+   "default": "0",
+   "fieldname": "sales_orders_to_deliver",
+   "fieldtype": "Check",
+   "label": "Sales Orders to Deliver"
+  },
+  {
+   "default": "0",
+   "fieldname": "purchase_orders_to_receive",
+   "fieldtype": "Check",
+   "label": "Purchase Orders to Receive"
+  },
+  {
+   "default": "0",
+   "fieldname": "sales_invoice",
+   "fieldtype": "Check",
+   "label": "New Sales Invoice"
+  },
+  {
+   "default": "0",
+   "fieldname": "purchase_invoice",
+   "fieldtype": "Check",
+   "label": "New Purchase Invoice"
+  },
+  {
+   "fieldname": "column_break_operation",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "new_quotations",
+   "fieldtype": "Check",
+   "label": "New Quotations"
+  },
+  {
+   "default": "0",
+   "fieldname": "pending_quotations",
+   "fieldtype": "Check",
+   "label": "Open Quotations"
+  },
+  {
+   "default": "0",
+   "fieldname": "issue",
+   "fieldtype": "Check",
+   "label": "Open Issues"
+  },
+  {
+   "default": "0",
+   "fieldname": "project",
+   "fieldtype": "Check",
+   "label": "Open Projects"
+  },
+  {
+   "default": "0",
+   "fieldname": "purchase_orders_items_overdue",
+   "fieldtype": "Check",
+   "label": "Purchase Orders Items Overdue"
+  },
+  {
+   "fieldname": "other",
+   "fieldtype": "Section Break",
+   "label": "Other"
+  },
+  {
+   "fieldname": "tools",
+   "fieldtype": "Column Break",
+   "label": "Tools"
+  },
+  {
+   "default": "0",
+   "fieldname": "calendar_events",
+   "fieldtype": "Check",
+   "label": "Upcoming Calendar Events"
+  },
+  {
+   "default": "0",
+   "fieldname": "todo_list",
+   "fieldtype": "Check",
+   "label": "Open To Do"
+  },
+  {
+   "default": "0",
+   "fieldname": "notifications",
+   "fieldtype": "Check",
+   "label": "Open Notifications"
+  },
+  {
+   "fieldname": "column_break_32",
+   "fieldtype": "Column Break",
+   "label": "  "
+  },
+  {
+   "default": "0",
+   "fieldname": "add_quote",
+   "fieldtype": "Check",
+   "label": "Add Quote"
+  },
+  {
+   "description": "Note: Email will not be sent to disabled users",
+   "fieldname": "recipients",
+   "fieldtype": "Table MultiSelect",
+   "label": "Recipients",
+   "options": "Email Digest Recipient",
+   "reqd": 1
+  }
+ ],
+ "icon": "fa fa-envelope",
+ "idx": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2020-08-24 23:49:00.081695",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Email Digest",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "System Manager"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

@@ -1,0 +1,29 @@
+{
+ "add_total_row": 0, 
+ "creation": "2014-07-14 05:24:20.385279", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 2, 
+ "is_standard": "Yes", 
+ "modified": "2018-09-07 12:18:21.850851", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "Balance Sheet", 
+ "owner": "Administrator", 
+ "prepared_report": 0, 
+ "ref_doctype": "GL Entry", 
+ "report_name": "Balance Sheet", 
+ "report_type": "Script Report", 
+ "roles": [
+  {
+   "role": "Accounts User"
+  }, 
+  {
+   "role": "Accounts Manager"
+  }, 
+  {
+   "role": "Auditor"
+  }
+ ]
+}

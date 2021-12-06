@@ -1,0 +1,130 @@
+{
+ "actions": [],
+ "creation": "2013-02-22 01:27:46",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "expense_date",
+  "column_break_2",
+  "expense_type",
+  "default_account",
+  "section_break_4",
+  "description",
+  "section_break_6",
+  "amount",
+  "column_break_8",
+  "sanctioned_amount",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break"
+ ],
+ "fields": [
+  {
+   "fieldname": "expense_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Expense Date",
+   "oldfieldname": "expense_date",
+   "oldfieldtype": "Date",
+   "print_width": "150px",
+   "width": "150px"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expense_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Expense Claim Type",
+   "oldfieldname": "expense_type",
+   "oldfieldtype": "Link",
+   "options": "Expense Claim Type",
+   "print_width": "150px",
+   "reqd": 1,
+   "width": "150px"
+  },
+  {
+   "depends_on": "expense_type",
+   "fieldname": "default_account",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Default Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Description",
+   "oldfieldname": "description",
+   "oldfieldtype": "Small Text",
+   "print_width": "300px",
+   "width": "300px"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "oldfieldname": "claim_amount",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
+   "print_width": "150px",
+   "reqd": 1,
+   "width": "150px"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sanctioned_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Sanctioned Amount",
+   "oldfieldname": "sanctioned_amount",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
+   "print_width": "150px",
+   "width": "150px"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "idx": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-11-26 14:23:45.539922",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Expense Claim Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

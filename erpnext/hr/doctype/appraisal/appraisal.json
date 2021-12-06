@@ -1,0 +1,254 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2013-01-10 16:34:12",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_details",
+  "naming_series",
+  "kra_template",
+  "employee",
+  "employee_name",
+  "column_break0",
+  "status",
+  "start_date",
+  "end_date",
+  "department",
+  "section_break0",
+  "goals",
+  "total_score",
+  "section_break1",
+  "remarks",
+  "other_details",
+  "company",
+  "column_break_17",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee_details",
+   "fieldtype": "Section Break",
+   "oldfieldtype": "Section Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "HR-APR-.YY.-.MM.",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "kra_template",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Appraisal Template",
+   "oldfieldname": "kra_template",
+   "oldfieldtype": "Link",
+   "options": "Appraisal Template",
+   "reqd": 1
+  },
+  {
+   "depends_on": "kra_template",
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_standard_filter": 1,
+   "label": "For Employee",
+   "oldfieldname": "employee",
+   "oldfieldtype": "Link",
+   "options": "Employee",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "kra_template",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "For Employee Name",
+   "oldfieldname": "employee_name",
+   "oldfieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "depends_on": "kra_template",
+   "fieldname": "column_break0",
+   "fieldtype": "Column Break",
+   "oldfieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "default": "Draft",
+   "depends_on": "kra_template",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "oldfieldname": "status",
+   "oldfieldtype": "Select",
+   "options": "\nDraft\nSubmitted\nCompleted\nCancelled",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "kra_template",
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Start Date",
+   "oldfieldname": "start_date",
+   "oldfieldtype": "Date",
+   "reqd": 1
+  },
+  {
+   "depends_on": "kra_template",
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date",
+   "oldfieldname": "end_date",
+   "oldfieldtype": "Date",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "depends_on": "kra_template",
+   "fieldname": "section_break0",
+   "fieldtype": "Section Break",
+   "label": "Goals",
+   "oldfieldtype": "Section Break",
+   "options": "Simple"
+  },
+  {
+   "fieldname": "goals",
+   "fieldtype": "Table",
+   "label": "Goals",
+   "oldfieldname": "appraisal_details",
+   "oldfieldtype": "Table",
+   "options": "Appraisal Goal"
+  },
+  {
+   "fieldname": "total_score",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Score (Out of 5)",
+   "no_copy": 1,
+   "oldfieldname": "total_score",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "kra_template",
+   "fieldname": "section_break1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "Any other remarks, noteworthy effort that should go in the records.",
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "label": "Remarks"
+  },
+  {
+   "depends_on": "kra_template",
+   "fieldname": "other_details",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "oldfieldname": "company",
+   "oldfieldtype": "Link",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "ignore_user_permissions": 1,
+   "label": "Amended From",
+   "no_copy": 1,
+   "oldfieldname": "amended_from",
+   "oldfieldtype": "Data",
+   "options": "Appraisal",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1,
+   "width": "150px"
+  }
+ ],
+ "icon": "fa fa-thumbs-up",
+ "idx": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-10-03 21:48:33.297065",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Appraisal",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "status, employee, employee_name",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "timeline_field": "employee",
+ "title_field": "employee_name"
+}

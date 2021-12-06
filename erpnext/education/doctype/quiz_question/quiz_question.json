@@ -1,0 +1,40 @@
+{
+ "allow_rename": 1,
+ "creation": "2018-10-17 06:13:00.098883",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "question_link",
+  "question"
+ ],
+ "fields": [
+  {
+   "fieldname": "question_link",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Question Link",
+   "options": "Question",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "question_link.question",
+   "fieldname": "question",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Question",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2020-09-24 12:24:02.312577",
+ "modified_by": "Administrator",
+ "module": "Education",
+ "name": "Quiz Question",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

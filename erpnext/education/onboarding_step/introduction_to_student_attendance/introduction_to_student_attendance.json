@@ -1,0 +1,19 @@
+{
+ "action": "Watch Video",
+ "creation": "2020-07-27 19:14:57.176131",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-07-27 19:55:55.411032",
+ "modified_by": "Administrator",
+ "name": "Introduction to Student Attendance",
+ "owner": "Administrator",
+ "show_full_form": 0,
+ "title": "Introduction to Student Attendance",
+ "validate_action": 1,
+ "video_url": "https://youtu.be/j9pgkPuyiaI"
+}
