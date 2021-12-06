@@ -174,7 +174,7 @@ class StockLedgerEntry(Document):
 		if not self.batch_no or self.actual_qty is None or self.actual_qty >= 0:
 			return
 
-		if frappe.db.get_single_value('Stock Settings', 'allow_negative_stock'):
+		if self.get("allow_negative_stock"):
 			return
 
 		voucher_condition = ""
