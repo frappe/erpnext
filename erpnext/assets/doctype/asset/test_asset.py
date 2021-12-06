@@ -924,6 +924,7 @@ class TestDepreciationBasics(AssetSetup):
 		depr_expense_account = frappe.get_doc("Account", "_Test Depreciations - _TC")
 		depr_expense_account.root_type = "Income"
 		depr_expense_account.parent_account = "Income - _TC"
+		depr_expense_account.save()
 
 		asset = create_asset(
 			item_code = "Macbook Pro",
@@ -953,6 +954,7 @@ class TestDepreciationBasics(AssetSetup):
 		# resetting
 		depr_expense_account.root_type = "Expense"
 		depr_expense_account.parent_account = "Expenses - _TC"
+		depr_expense_account.save()
 
 	def test_clear_depreciation_schedule(self):
 		"""Tests if clear_depreciation_schedule() works as expected."""
