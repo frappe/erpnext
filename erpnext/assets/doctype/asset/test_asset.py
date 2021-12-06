@@ -889,6 +889,72 @@ class TestDepreciationBasics(AssetSetup):
 		self.assertFalse(asset.schedules[1].journal_entry)
 		self.assertFalse(asset.schedules[2].journal_entry)
 
+	def test_depr_entry_posting_when_depr_expense_account_is_an_expense_account(self):
+		"""Tests if the Depreciation Expense Account gets debited and the Accumulated Depreciation Account gets credited when the former's an Expense Account."""
+
+		asset = create_asset(
+			item_code = "Macbook Pro",
+			calculate_depreciation = 1,
+			available_for_use_date = "2019-12-31",
+			depreciation_start_date = "2020-12-31",
+			frequency_of_depreciation = 12,
+			total_number_of_depreciations = 3,
+			expected_value_after_useful_life = 10000,
+			submit = 1
+		)
+
+		post_depreciation_entries(date="2021-06-01")
+		asset.load_from_db()
+
+		je = frappe.get_doc("Journal Entry", asset.schedules[0].journal_entry)
+		accounting_entries = [{"account": entry.account, "debit": entry.debit, "credit": entry.credit} for entry in je.accounts]
+
+		for entry in accounting_entries:
+			if entry["account"] == "_Test Depreciations - _TC":
+				self.assertTrue(entry["debit"])
+				self.assertFalse(entry["credit"])
+			else:
+				self.assertTrue(entry["credit"])
+				self.assertFalse(entry["debit"])
+
+	def test_depr_entry_posting_when_depr_expense_account_is_an_income_account(self):
+		"""Tests if the Depreciation Expense Account gets credited and the Accumulated Depreciation Account gets debited when the former's an Income Account."""
+
+		depr_expense_account = frappe.get_doc("Account", "_Test Depreciations - _TC")
+		depr_expense_account.root_type = "Income"
+		depr_expense_account.parent_account = "Income - _TC"
+		depr_expense_account.save()
+
+		asset = create_asset(
+			item_code = "Macbook Pro",
+			calculate_depreciation = 1,
+			available_for_use_date = "2019-12-31",
+			depreciation_start_date = "2020-12-31",
+			frequency_of_depreciation = 12,
+			total_number_of_depreciations = 3,
+			expected_value_after_useful_life = 10000,
+			submit = 1
+		)
+
+		post_depreciation_entries(date="2021-06-01")
+		asset.load_from_db()
+
+		je = frappe.get_doc("Journal Entry", asset.schedules[0].journal_entry)
+		accounting_entries = [{"account": entry.account, "debit": entry.debit, "credit": entry.credit} for entry in je.accounts]
+
+		for entry in accounting_entries:
+			if entry["account"] == "_Test Depreciations - _TC":
+				self.assertTrue(entry["credit"])
+				self.assertFalse(entry["debit"])
+			else:
+				self.assertTrue(entry["debit"])
+				self.assertFalse(entry["credit"])
+
+		# resetting
+		depr_expense_account.root_type = "Expense"
+		depr_expense_account.parent_account = "Expenses - _TC"
+		depr_expense_account.save()
+
 	def test_clear_depreciation_schedule(self):
 		"""Tests if clear_depreciation_schedule() works as expected."""
 
