@@ -1,11 +1,10 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import formatdate
-import itertools
 from frappe import _, get_all
+
 
 def execute(filters=None):
 	columns = [

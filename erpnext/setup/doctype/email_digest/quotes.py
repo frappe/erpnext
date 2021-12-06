@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 import random
+
 
 def get_random_quote():
 	quotes = [

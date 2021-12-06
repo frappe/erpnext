@@ -1,15 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, json
-from frappe.utils import cstr, flt
-from frappe import _
-from six import string_types
-from erpnext.manufacturing.doctype.bom.bom import get_boms_in_bottom_up_order
-from frappe.model.document import Document
+
+import json
+
 import click
+import frappe
+from frappe import _
+from frappe.model.document import Document
+from frappe.utils import cstr, flt
+
+from erpnext.manufacturing.doctype.bom.bom import get_boms_in_bottom_up_order
+
 
 class BOMUpdateTool(Document):
 	def replace_bom(self):
@@ -76,7 +78,7 @@ def get_new_bom_unit_cost(bom):
 
 @frappe.whitelist()
 def enqueue_replace_bom(args):
-	if isinstance(args, string_types):
+	if isinstance(args, str):
 		args = json.loads(args)
 
 	frappe.enqueue("erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.replace_bom", args=args, timeout=40000)

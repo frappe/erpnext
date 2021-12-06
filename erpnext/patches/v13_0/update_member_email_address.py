@@ -1,9 +1,10 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe.model.utils.rename_field import rename_field
+
 
 def execute():
 	"""add value to email_id column from email"""

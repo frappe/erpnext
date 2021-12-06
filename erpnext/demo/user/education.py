@@ -1,16 +1,22 @@
-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
+import random
+from datetime import timedelta
 
 import frappe
-import random
 from frappe.utils import cstr
 from frappe.utils.make_random import get_random
-from datetime import timedelta
-from erpnext.education.api import get_student_group_students, make_attendance_records, enroll_student, \
-								get_fee_schedule, collect_fees, get_course
+
+from erpnext.education.api import (
+	collect_fees,
+	enroll_student,
+	get_course,
+	get_fee_schedule,
+	get_student_group_students,
+	make_attendance_records,
+)
 
 
 def work():

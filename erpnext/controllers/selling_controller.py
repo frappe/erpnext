@@ -1,19 +1,19 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
-from frappe.utils import cint, flt, cstr, get_link_to_form, nowtime
-from frappe import _, bold, throw
-from erpnext.stock.get_item_details import get_bin_details
-from erpnext.stock.utils import get_incoming_rate
-from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.stock.doctype.item.item import set_item_default
-from frappe.contacts.doctype.address.address import get_address_display
-from erpnext.controllers.accounts_controller import get_taxes_and_charges
 
-from erpnext.controllers.stock_controller import StockController
+import frappe
+from frappe import _, bold, throw
+from frappe.contacts.doctype.address.address import get_address_display
+from frappe.utils import cint, cstr, flt, get_link_to_form, nowtime
+
+from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
+from erpnext.controllers.stock_controller import StockController
+from erpnext.stock.doctype.item.item import set_item_default
+from erpnext.stock.get_item_details import get_bin_details, get_conversion_factor
+from erpnext.stock.utils import get_incoming_rate
+
 
 class SellingController(StockController):
 	def get_feed(self):
@@ -120,13 +120,27 @@ class SellingController(StockController):
 			self.in_words = money_in_words(amount, self.currency)
 
 	def calculate_commission(self):
-		if self.meta.get_field("commission_rate"):
-			self.round_floats_in(self, ["base_net_total", "commission_rate"])
-			if self.commission_rate > 100.0:
-				throw(_("Commission rate cannot be greater than 100"))
+		if not self.meta.get_field("commission_rate"):
+			return
 
-			self.total_commission = flt(self.base_net_total * self.commission_rate / 100.0,
-				self.precision("total_commission"))
+		self.round_floats_in(
+			self, ("amount_eligible_for_commission", "commission_rate")
+		)
+
+		if not (0 <= self.commission_rate <= 100.0):
+			throw("{} {}".format(
+				_(self.meta.get_label("commission_rate")),
+				_("must be between 0 and 100"),
+			))
+
+		self.amount_eligible_for_commission = sum(
+			item.base_net_amount for item in self.items if item.grant_commission
+		)
+
+		self.total_commission = flt(
+			self.amount_eligible_for_commission * self.commission_rate / 100.0,
+			self.precision("total_commission")
+		)
 
 	def calculate_contribution(self):
 		if not self.meta.get_field("sales_team"):
@@ -138,7 +152,7 @@ class SellingController(StockController):
 			self.round_floats_in(sales_person)
 
 			sales_person.allocated_amount = flt(
-				self.base_net_total * sales_person.allocated_percentage / 100.0,
+				self.amount_eligible_for_commission * sales_person.allocated_percentage / 100.0,
 				self.precision("allocated_amount", sales_person))
 
 			if sales_person.commission_rate:
@@ -423,7 +437,7 @@ class SellingController(StockController):
 					or (cint(self.is_return) and self.docstatus==2)):
 						sl_entries.append(self.get_sle_for_source_warehouse(d))
 
-				if d.target_warehouse and self.get("is_internal_customer"):
+				if d.target_warehouse:
 					sl_entries.append(self.get_sle_for_target_warehouse(d))
 
 				if d.warehouse and ((not cint(self.is_return) and self.docstatus==2)
@@ -557,6 +571,12 @@ class SellingController(StockController):
 				warehouse = frappe.bold(d.get("target_warehouse"))
 				frappe.throw(_("Row {0}: Delivery Warehouse ({1}) and Customer Warehouse ({2}) can not be same")
 					.format(d.idx, warehouse, warehouse))
+
+		if not self.get("is_internal_customer") and any(d.get("target_warehouse") for d in items):
+			msg = _("Target Warehouse is set for some items but the customer is not an internal customer.")
+			msg += " " + _("This {} will be treated as material transfer.").format(_(self.doctype))
+			frappe.msgprint(msg, title="Internal Transfer", alert=True)
+
 
 	def validate_items(self):
 		# validate items to see if they have is_sales_item enabled

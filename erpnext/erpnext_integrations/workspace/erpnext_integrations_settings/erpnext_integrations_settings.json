@@ -1,20 +1,13 @@
 {
- "category": "",
  "charts": [],
  "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Integrations Settings\", \"col\": 4}}]",
  "creation": "2020-07-31 10:38:54.021237",
- "developer_mode_only": 0,
- "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Workspace",
- "extends": "",
- "extends_another_page": 0,
  "for_user": "",
  "hide_custom": 0,
  "icon": "setting",
  "idx": 0,
- "is_default": 0,
- "is_standard": 0,
  "label": "ERPNext Integrations Settings",
  "links": [
   {
@@ -32,17 +25,6 @@
    "label": "Woocommerce Settings",
    "link_count": 0,
    "link_to": "Woocommerce Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Shopify Settings",
-   "link_count": 0,
-   "link_to": "Shopify Settings",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -81,15 +63,12 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:15:58.951704",
+ "modified": "2021-11-23 04:30:33.106991",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "ERPNext Integrations Settings",
- "onboarding": "",
  "owner": "Administrator",
  "parent_page": "",
- "pin_to_bottom": 0,
- "pin_to_top": 0,
  "public": 1,
  "restrict_to_domain": "",
  "roles": [],

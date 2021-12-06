@@ -3,12 +3,12 @@
 
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import cint
-from frappe.model.document import Document
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.model.document import Document
+from frappe.utils import cint
 
 
 class AccountsSettings(Document):
@@ -18,6 +18,9 @@ class AccountsSettings(Document):
 	def validate(self):
 		frappe.db.set_default("add_taxes_from_item_tax_template",
 			self.get("add_taxes_from_item_tax_template", 0))
+
+		frappe.db.set_default("enable_common_party_accounting",
+			self.get("enable_common_party_accounting", 0))
 
 		self.validate_stale_days()
 		self.enable_payment_schedule_in_print()

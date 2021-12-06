@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
-from frappe.utils import add_days, today, flt, DATE_FORMAT, getdate
+from frappe.model.document import Document
+from frappe.utils import DATE_FORMAT, flt, getdate, today
+
 
 class LeaveLedgerEntry(Document):
 	def validate(self):

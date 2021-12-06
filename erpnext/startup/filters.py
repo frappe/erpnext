@@ -1,6 +1,3 @@
-
-import frappe
-
 def get_filters_config():
 	filters_config = {
 		"fiscal year": {

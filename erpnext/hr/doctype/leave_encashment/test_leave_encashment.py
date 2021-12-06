@@ -1,16 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
-from frappe.utils import today, add_months
+from frappe.utils import add_months, today
+
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 from erpnext.hr.doctype.leave_period.test_leave_period import create_leave_period
-from erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment import create_assignment_for_multiple_employees
-from erpnext.hr.doctype.leave_policy.test_leave_policy import create_leave_policy\
+from erpnext.hr.doctype.leave_policy.test_leave_policy import create_leave_policy
+from erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment import (
+	create_assignment_for_multiple_employees,
+)
+from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
 test_dependencies = ["Leave Type"]
 

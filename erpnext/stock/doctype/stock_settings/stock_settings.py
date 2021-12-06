@@ -3,13 +3,14 @@
 
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.model.document import Document
-from frappe.utils.html_utils import clean_html
-from frappe.utils import cint
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.model.document import Document
+from frappe.utils import cint
+from frappe.utils.html_utils import clean_html
+
 
 class StockSettings(Document):
 	def validate(self):
@@ -19,7 +20,7 @@ class StockSettings(Document):
 
 		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
 		set_by_naming_series("Item", "item_code",
-			self.get("item_naming_by")=="Naming Series", hide_name_field=True)
+			self.get("item_naming_by")=="Naming Series", hide_name_field=True, make_mandatory=0)
 
 		stock_frozen_limit = 356
 		submitted_stock_frozen = self.stock_frozen_upto_days or 0

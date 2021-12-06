@@ -1,5 +1,6 @@
 import frappe
 
+
 def execute():
 	if frappe.db.exists('DocType', 'Member'):
 		frappe.reload_doc('Non Profit', 'doctype', 'Member')

@@ -1,12 +1,13 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-import erpnext
 from frappe import _
-from frappe.utils import get_datetime, flt
-from six import iteritems
+from frappe.utils import flt
+
+import erpnext
+
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -42,7 +43,7 @@ def get_data(filters):
 
 	currency = erpnext.get_company_currency(filters.get('company'))
 
-	for key, qty in iteritems(pledge_values):
+	for key, qty in pledge_values.items():
 		if qty:
 			row = {}
 			current_value = flt(qty * loan_security_details.get(key[1], {}).get('latest_price', 0))

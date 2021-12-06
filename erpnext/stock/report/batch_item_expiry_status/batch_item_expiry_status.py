@@ -1,10 +1,11 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt, cint, getdate
+from frappe.utils import cint, getdate
+
 
 def execute(filters=None):
 	if not filters: filters = {}

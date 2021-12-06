@@ -1,25 +1,24 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe import _, msgprint
-from frappe.utils import flt,cint, cstr, getdate
-from six import iteritems
-from collections import OrderedDict
-from erpnext.accounts.party import get_party_details
-from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.buying.utils import validate_for_items, update_last_purchase_rate
-from erpnext.stock.stock_ledger import get_valuation_rate
-from erpnext.stock.doctype.serial_no.serial_no import get_auto_serial_nos, auto_make_serial_nos, get_serial_nos
+from frappe import ValidationError, _, msgprint
 from frappe.contacts.doctype.address.address import get_address_display
+from frappe.utils import cint, cstr, flt, getdate
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
+from erpnext.accounts.party import get_party_details
+from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
-from erpnext.stock.utils import get_incoming_rate
-
 from erpnext.controllers.stock_controller import StockController
 from erpnext.controllers.subcontracting import Subcontracting
+from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.utils import get_incoming_rate
+
+
+class QtyMismatchError(ValidationError):
+	pass
 
 class BuyingController(StockController, Subcontracting):
 
@@ -364,19 +363,15 @@ class BuyingController(StockController, Subcontracting):
 	def validate_accepted_rejected_qty(self):
 		for d in self.get("items"):
 			self.validate_negative_quantity(d, ["received_qty","qty", "rejected_qty"])
-			if not flt(d.received_qty) and flt(d.qty):
-				d.received_qty = flt(d.qty) - flt(d.rejected_qty)
 
-			elif not flt(d.qty) and flt(d.rejected_qty):
-				d.qty = flt(d.received_qty) - flt(d.rejected_qty)
+			if not flt(d.received_qty) and (flt(d.qty) or flt(d.rejected_qty)):
+				d.received_qty = flt(d.qty) + flt(d.rejected_qty)
 
-			elif not flt(d.rejected_qty):
-				d.rejected_qty = flt(d.received_qty) -  flt(d.qty)
-
-			val  = flt(d.qty) + flt(d.rejected_qty)
 			# Check Received Qty = Accepted Qty + Rejected Qty
+			val = flt(d.qty) + flt(d.rejected_qty)
 			if (flt(val, d.precision("received_qty")) != flt(d.received_qty, d.precision("received_qty"))):
-				frappe.throw(_("Accepted + Rejected Qty must be equal to Received quantity for Item {0}").format(d.item_code))
+				message = _("Row #{0}: Received Qty must be equal to Accepted + Rejected Qty for Item {1}").format(d.idx, d.item_code)
+				frappe.throw(msg=message, title=_("Mismatch"), exc=QtyMismatchError)
 
 	def validate_negative_quantity(self, item_row, field_list):
 		if self.is_return:

@@ -1,19 +1,30 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, json, copy
-from frappe import msgprint, _
-from six import iteritems
 
+import copy
+import json
+
+import frappe
+from frappe import _, msgprint
 from frappe.model.document import Document
-from frappe.utils import (flt, cint, nowdate, add_days, comma_and, now_datetime,
-	ceil, get_link_to_form, getdate)
+from frappe.utils import (
+	add_days,
+	ceil,
+	cint,
+	comma_and,
+	flt,
+	get_link_to_form,
+	getdate,
+	now_datetime,
+	nowdate,
+)
 from frappe.utils.csvutils import build_csv_response
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_children
+
+from erpnext.manufacturing.doctype.bom.bom import get_children, validate_bom_no
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+
 
 class ProductionPlan(Document):
 	def validate(self):
@@ -297,7 +308,7 @@ class ProductionPlan(Document):
 
 		if self.total_produced_qty > 0:
 			self.status = "In Process"
-			if self.total_produced_qty >= self.total_planned_qty:
+			if self.check_have_work_orders_completed():
 				self.status = "Completed"
 
 		if self.status != 'Completed':
@@ -331,7 +342,7 @@ class ProductionPlan(Document):
 	def get_production_items(self):
 		item_dict = {}
 		for d in self.po_items:
-			item_details= {
+			item_details = {
 				"production_item"		: d.item_code,
 				"use_multi_level_bom"   : d.include_exploded_items,
 				"sales_order"			: d.sales_order,
@@ -346,8 +357,7 @@ class ProductionPlan(Document):
 				"production_plan"       : self.name,
 				"production_plan_item"  : d.name,
 				"product_bundle_item"	: d.product_bundle_item,
-				"planned_start_date"    : d.planned_start_date,
-				"make_work_order_for_sub_assembly_items": d.get("make_work_order_for_sub_assembly_items", 0)
+				"planned_start_date"    : d.planned_start_date
 			}
 
 			item_details.update({
@@ -411,7 +421,7 @@ class ProductionPlan(Document):
 			po = frappe.new_doc('Purchase Order')
 			po.supplier = supplier
 			po.schedule_date = getdate(po_list[0].schedule_date) if po_list[0].schedule_date else nowdate()
-			po.is_subcontracted_item = 'Yes'
+			po.is_subcontracted = 'Yes'
 			for row in po_list:
 				args = {
 					'item_code': row.production_item,
@@ -444,7 +454,8 @@ class ProductionPlan(Document):
 
 	def prepare_args_for_sub_assembly_items(self, row, args):
 		for field in ["production_item", "item_name", "qty", "fg_warehouse",
-			"description", "bom_no", "stock_uom", "bom_level", "production_plan_item"]:
+			"description", "bom_no", "stock_uom", "bom_level",
+			"production_plan_item", "schedule_date"]:
 			args[field] = row.get(field)
 
 		args.update({
@@ -454,10 +465,14 @@ class ProductionPlan(Document):
 		})
 
 	def create_work_order(self, item):
-		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError, get_default_warehouse
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			OverProductionError,
+			get_default_warehouse,
+		)
 		warehouse = get_default_warehouse()
 		wo = frappe.new_doc("Work Order")
 		wo.update(item)
+		wo.planned_start_date = item.get('planned_start_date') or item.get('schedule_date')
 
 		if item.get("warehouse"):
 			wo.fg_warehouse = item.get("warehouse")
@@ -544,8 +559,6 @@ class ProductionPlan(Document):
 			get_sub_assembly_items(row.bom_no, bom_data, row.planned_qty)
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
 
-		self.save()
-
 	def set_sub_assembly_items_based_on_level(self, row, bom_data, manufacturing_type=None):
 		bom_data = sorted(bom_data, key = lambda i: i.bom_level)
 
@@ -559,6 +572,15 @@ class ProductionPlan(Document):
 
 			self.append("sub_assembly_items", data)
 
+	def check_have_work_orders_completed(self):
+		wo_status = frappe.db.get_list(
+			"Work Order",
+			filters={"production_plan": self.name},
+			fields="status",
+			pluck="status"
+		)
+		return all(s == "Completed" for s in wo_status)
+
 @frappe.whitelist()
 def download_raw_materials(doc, warehouses=None):
 	if isinstance(doc, str):
@@ -569,7 +591,10 @@ def download_raw_materials(doc, warehouses=None):
 		'Reserved Qty for Production', 'Safety Stock', 'Required Qty']]
 
 	doc.warehouse = None
-	for d in get_items_for_material_requests(doc, warehouses=warehouses, get_parent_warehouse_data=True):
+	frappe.flags.show_qty_in_stock_uom = 1
+	items = get_items_for_material_requests(doc, warehouses=warehouses, get_parent_warehouse_data=True)
+
+	for d in items:
 		item_list.append([d.get('item_code'), d.get('description'), d.get('stock_uom'), d.get('warehouse'),
 			d.get('required_bom_qty'), d.get('projected_qty'), d.get('actual_qty'), d.get('ordered_qty'),
 			d.get('planned_qty'), d.get('reserved_qty_for_production'), d.get('safety_stock'), d.get('quantity')])
@@ -605,8 +630,15 @@ def get_exploded_items(item_details, company, bom_no, include_non_stock_items, p
 			and bom.name=%s and item.is_stock_item in (1, {0})
 		group by bei.item_code, bei.stock_uom""".format(0 if include_non_stock_items else 1),
 		(planned_qty, company, bom_no), as_dict=1):
-			item_details.setdefault(d.get('item_code'), d)
+		if not d.conversion_factor and d.purchase_uom:
+			d.conversion_factor = get_uom_conversion_factor(d.item_code, d.purchase_uom)
+		item_details.setdefault(d.get('item_code'), d)
+
 	return item_details
+
+def get_uom_conversion_factor(item_code, uom):
+	return frappe.db.get_value('UOM Conversion Detail',
+		{'parent': item_code, 'uom': uom}, 'conversion_factor')
 
 def get_subitems(doc, data, item_details, bom_no, company, include_non_stock_items,
 	include_subcontracted_items, parent_qty, planned_qty=1):
@@ -642,6 +674,9 @@ def get_subitems(doc, data, item_details, bom_no, company, include_non_stock_ite
 			if d.item_code in item_details:
 				item_details[d.item_code].qty = item_details[d.item_code].qty + d.qty
 			else:
+				if not d.conversion_factor and d.purchase_uom:
+					d.conversion_factor = get_uom_conversion_factor(d.item_code, d.purchase_uom)
+
 				item_details[d.item_code] = d
 
 		if data.get('include_exploded_items') and d.default_bom:
@@ -669,10 +704,11 @@ def get_material_request_items(row, sales_order, company,
 		row['purchase_uom'] = row['stock_uom']
 
 	if row['purchase_uom'] != row['stock_uom']:
-		if not row['conversion_factor']:
+		if not (row['conversion_factor'] or frappe.flags.show_qty_in_stock_uom):
 			frappe.throw(_("UOM Conversion factor ({0} -> {1}) not found for item: {2}")
 				.format(row['purchase_uom'], row['stock_uom'], row.item_code))
-		required_qty = required_qty / row['conversion_factor']
+
+			required_qty = required_qty / row['conversion_factor']
 
 	if frappe.db.get_value("UOM", row['purchase_uom'], "must_be_whole_number"):
 		required_qty = ceil(required_qty)
@@ -704,43 +740,42 @@ def get_material_request_items(row, sales_order, company,
 def get_sales_orders(self):
 	so_filter = item_filter = ""
 	bom_item = "bom.item = so_item.item_code"
-	if self.from_date:
-		so_filter += " and so.transaction_date >= %(from_date)s"
-	if self.to_date:
-		so_filter += " and so.transaction_date <= %(to_date)s"
-	if self.customer:
-		so_filter += " and so.customer = %(customer)s"
-	if self.project:
-		so_filter += " and so.project = %(project)s"
-	if self.sales_order_status:
-		so_filter += "and so.status = %(sales_order_status)s"
+
+	date_field_mapper = {
+		'from_date': ('>=', 'so.transaction_date'),
+		'to_date': ('<=', 'so.transaction_date'),
+		'from_delivery_date': ('>=', 'so_item.delivery_date'),
+		'to_delivery_date': ('<=', 'so_item.delivery_date')
+	}
+
+	for field, value in date_field_mapper.items():
+		if self.get(field):
+			so_filter += f" and {value[1]} {value[0]} %({field})s"
+
+	for field in ['customer', 'project', 'sales_order_status']:
+		if self.get(field):
+			so_field = 'status' if field == 'sales_order_status' else field
+			so_filter += f" and so.{so_field} = %({field})s"
 
 	if self.item_code and frappe.db.exists('Item', self.item_code):
 		bom_item = self.get_bom_item() or bom_item
-		item_filter += " and so_item.item_code = %(item)s"
+		item_filter += " and so_item.item_code = %(item_code)s"
 
-	open_so = frappe.db.sql("""
+	open_so = frappe.db.sql(f"""
 		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
 		from `tabSales Order` so, `tabSales Order Item` so_item
 		where so_item.parent = so.name
 			and so.docstatus = 1 and so.status not in ("Stopped", "Closed")
 			and so.company = %(company)s
-			and so_item.qty > so_item.work_order_qty {0} {1}
-			and (exists (select name from `tabBOM` bom where {2}
+			and so_item.qty > so_item.work_order_qty {so_filter} {item_filter}
+			and (exists (select name from `tabBOM` bom where {bom_item}
 					and bom.is_active = 1)
 				or exists (select name from `tabPacked Item` pi
 					where pi.parent = so.name and pi.parent_item = so_item.item_code
 						and exists (select name from `tabBOM` bom where bom.item=pi.item_code
 							and bom.is_active = 1)))
-		""".format(so_filter, item_filter, bom_item), {
-			"from_date": self.from_date,
-			"to_date": self.to_date,
-			"customer": self.customer,
-			"project": self.project,
-			"item": self.item_code,
-			"company": self.company,
-			"sales_order_status": self.sales_order_status
-		}, as_dict=1)
+		""", self.as_dict(), as_dict=1)
+
 	return open_so
 
 @frappe.whitelist()
@@ -768,6 +803,12 @@ def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
 		from `tabBin` where item_code = %(item_code)s {conditions}
 		group by item_code, warehouse
 	""".format(conditions=conditions), { "item_code": row['item_code'] }, as_dict=1)
+
+@frappe.whitelist()
+def get_so_details(sales_order):
+	return frappe.db.get_value("Sales Order", sales_order,
+		['transaction_date', 'customer', 'grand_total'], as_dict=1
+	)
 
 def get_warehouse_list(warehouses):
 	warehouse_list = []
@@ -841,10 +882,8 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 		elif data.get('item_code'):
 			item_master = frappe.get_doc('Item', data['item_code']).as_dict()
 			purchase_uom = item_master.purchase_uom or item_master.stock_uom
-			conversion_factor = 0
-			for d in item_master.get("uoms"):
-				if d.uom == purchase_uom:
-					conversion_factor = d.conversion_factor
+			conversion_factor = (get_uom_conversion_factor(item_master.name, purchase_uom)
+				if item_master.purchase_uom else 1.0)
 
 			item_details[item_master.name] = frappe._dict(
 				{
@@ -866,7 +905,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 
 		sales_order = doc.get("sales_order")
 
-		for item_code, details in iteritems(item_details):
+		for item_code, details in item_details.items():
 			so_item_details.setdefault(sales_order, frappe._dict())
 			if item_code in so_item_details.get(sales_order, {}):
 				so_item_details[sales_order][item_code]['qty'] = so_item_details[sales_order][item_code].get("qty", 0) + flt(details.qty)
@@ -874,7 +913,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 				so_item_details[sales_order][item_code] = details
 
 	mr_items = []
-	for sales_order, item_code in iteritems(so_item_details):
+	for sales_order, item_code in so_item_details.items():
 		item_dict = so_item_details[sales_order]
 		for details in item_dict.values():
 			bin_dict = get_bin_details(details, doc.company, warehouse)

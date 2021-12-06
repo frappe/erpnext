@@ -2,9 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+
 
 def execute():
 	create_stock_entry_types()

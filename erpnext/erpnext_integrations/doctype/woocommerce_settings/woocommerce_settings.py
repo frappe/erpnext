@@ -1,14 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils.nestedset import get_root_of
-from frappe.model.document import Document
-from six.moves.urllib.parse import urlparse
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+from frappe.model.document import Document
+from frappe.utils.nestedset import get_root_of
+from six.moves.urllib.parse import urlparse
+
 
 class WoocommerceSettings(Document):
 	def validate(self):

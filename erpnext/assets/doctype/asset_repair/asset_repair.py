@@ -1,14 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import time_diff_in_hours, getdate, add_months, flt, cint
+from frappe.utils import add_months, cint, flt, getdate, time_diff_in_hours
+
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.assets.doctype.asset.asset import get_asset_account
 from erpnext.controllers.accounts_controller import AccountsController
+
 
 class AssetRepair(AccountsController):
 	def validate(self):
@@ -117,9 +118,10 @@ class AssetRepair(AccountsController):
 		for stock_item in self.get('stock_items'):
 			stock_entry.append('items', {
 				"s_warehouse": self.warehouse,
-				"item_code": stock_item.item,
+				"item_code": stock_item.item_code,
 				"qty": stock_item.consumed_quantity,
-				"basic_rate": stock_item.valuation_rate
+				"basic_rate": stock_item.valuation_rate,
+				"serial_no": stock_item.serial_no
 			})
 
 		stock_entry.insert()

@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
+from datetime import date
 
 import frappe
-import unittest
 from frappe.utils import nowdate
-from datetime import date
 
 test_dependencies = ["Employee"]
 

@@ -1,14 +1,15 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-import erpnext
 from frappe import _
-from six import iteritems
-from frappe.utils import add_days, today, getdate
-from erpnext.stock.utils import get_stock_value_on
+from frappe.utils import add_days, getdate, today
+
+import erpnext
 from erpnext.accounts.utils import get_stock_and_account_balance
+from erpnext.stock.utils import get_stock_value_on
+
 
 def execute(filters=None):
 	if not erpnext.is_perpetual_inventory_enabled(filters.company):
@@ -64,7 +65,7 @@ def get_data(report_filters):
 		voucher_wise_dict.setdefault((d.item_code, d.warehouse), []).append(d)
 
 	closing_date = add_days(from_date, -1)
-	for key, stock_data in iteritems(voucher_wise_dict):
+	for key, stock_data in voucher_wise_dict.items():
 		prev_stock_value = get_stock_value_on(posting_date = closing_date, item_code=key[0], warehouse =key[1])
 		for data in stock_data:
 			expected_stock_value = prev_stock_value + data.stock_value_difference

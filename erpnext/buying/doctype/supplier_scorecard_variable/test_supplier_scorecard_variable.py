@@ -1,12 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
-import frappe
 import unittest
 
-from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable import VariablePathNotFound
+import frappe
+
+from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable import (
+	VariablePathNotFound,
+)
 
 
 class TestSupplierScorecardVariable(unittest.TestCase):

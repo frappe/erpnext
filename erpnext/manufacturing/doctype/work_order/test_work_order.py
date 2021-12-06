@@ -1,22 +1,30 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-
-from __future__ import unicode_literals
 import unittest
-import frappe
-from frappe.utils import flt, now, add_months, cint, today, add_to_date
-from erpnext.manufacturing.doctype.work_order.work_order import (make_stock_entry,
-	ItemHasVariantError, stop_unstop, StockOverProductionError, OverProductionError, CapacityError)
-from erpnext.stock.doctype.stock_entry import test_stock_entry
-from erpnext.stock.utils import get_bin
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 
-class TestWorkOrder(unittest.TestCase):
+import frappe
+from frappe.utils import add_months, cint, flt, now, today
+
+from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
+from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.manufacturing.doctype.work_order.work_order import (
+	CapacityError,
+	ItemHasVariantError,
+	OverProductionError,
+	StockOverProductionError,
+	close_work_order,
+	make_stock_entry,
+	stop_unstop,
+)
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.stock.doctype.item.test_item import create_item, make_item
+from erpnext.stock.doctype.stock_entry import test_stock_entry
+from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.utils import get_bin
+from erpnext.tests.utils import ERPNextTestCase, timeout
+
+
+class TestWorkOrder(ERPNextTestCase):
 	def setUp(self):
 		self.warehouse = '_Test Warehouse 2 - _TC'
 		self.item = '_Test Item'
@@ -369,6 +377,7 @@ class TestWorkOrder(unittest.TestCase):
 		self.assertEqual(len(ste.additional_costs), 1)
 		self.assertEqual(ste.total_additional_costs, 1000)
 
+	@timeout(seconds=60)
 	def test_job_card(self):
 		stock_entries = []
 		bom = frappe.get_doc('BOM', {
@@ -696,8 +705,10 @@ class TestWorkOrder(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, make_stock_entry, wo.name, 'Material Transfer for Manufacture')
 
 	def test_wo_completion_with_pl_bom(self):
-		from erpnext.manufacturing.doctype.bom.test_bom import create_process_loss_bom_items
-		from erpnext.manufacturing.doctype.bom.test_bom import create_bom_with_process_loss_item
+		from erpnext.manufacturing.doctype.bom.test_bom import (
+			create_bom_with_process_loss_item,
+			create_process_loss_bom_items,
+		)
 
 		qty = 4
 		scrap_qty = 0.25 # bom item qty = 1, consider as 25% of FG
@@ -760,6 +771,101 @@ class TestWorkOrder(unittest.TestCase):
 			total_pl_qty
 		)
 
+	@timeout(seconds=60)
+	def test_job_card_scrap_item(self):
+		items = ['Test FG Item for Scrap Item Test', 'Test RM Item 1 for Scrap Item Test',
+			'Test RM Item 2 for Scrap Item Test']
+
+		company = '_Test Company with perpetual inventory'
+		for item_code in items:
+			create_item(item_code = item_code, is_stock_item = 1,
+				is_purchase_item=1, opening_stock=100, valuation_rate=10, company=company, warehouse='Stores - TCP1')
+
+		item = 'Test FG Item for Scrap Item Test'
+		raw_materials = ['Test RM Item 1 for Scrap Item Test', 'Test RM Item 2 for Scrap Item Test']
+		if not frappe.db.get_value('BOM', {'item': item}):
+			bom = make_bom(item=item, source_warehouse='Stores - TCP1', raw_materials=raw_materials, do_not_save=True)
+			bom.with_operations = 1
+			bom.append('operations', {
+				'operation': '_Test Operation 1',
+				'workstation': '_Test Workstation 1',
+				'hour_rate': 20,
+				'time_in_mins': 60
+			})
+
+			bom.submit()
+
+		wo_order = make_wo_order_test_record(item=item, company=company, planned_start_date=now(), qty=20, skip_transfer=1)
+		job_card = frappe.db.get_value('Job Card', {'work_order': wo_order.name}, 'name')
+		update_job_card(job_card)
+
+		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
+		for row in stock_entry.items:
+			if row.is_scrap_item:
+				self.assertEqual(row.qty, 1)
+
+	def test_close_work_order(self):
+		items = ['Test FG Item for Closed WO', 'Test RM Item 1 for Closed WO',
+			'Test RM Item 2 for Closed WO']
+
+		company = '_Test Company with perpetual inventory'
+		for item_code in items:
+			create_item(item_code = item_code, is_stock_item = 1,
+				is_purchase_item=1, opening_stock=100, valuation_rate=10, company=company, warehouse='Stores - TCP1')
+
+		item = 'Test FG Item for Closed WO'
+		raw_materials = ['Test RM Item 1 for Closed WO', 'Test RM Item 2 for Closed WO']
+		if not frappe.db.get_value('BOM', {'item': item}):
+			bom = make_bom(item=item, source_warehouse='Stores - TCP1', raw_materials=raw_materials, do_not_save=True)
+			bom.with_operations = 1
+			bom.append('operations', {
+				'operation': '_Test Operation 1',
+				'workstation': '_Test Workstation 1',
+				'hour_rate': 20,
+				'time_in_mins': 60
+			})
+
+			bom.submit()
+
+		wo_order = make_wo_order_test_record(item=item, company=company, planned_start_date=now(), qty=20, skip_transfer=1)
+		job_cards = frappe.db.get_value('Job Card', {'work_order': wo_order.name}, 'name')
+
+		if len(job_cards) == len(bom.operations):
+			for jc in job_cards:
+				job_card_doc = frappe.get_doc('Job Card', jc)
+				job_card_doc.append('time_logs', {
+					'from_time': now(),
+					'time_in_mins': 60,
+					'completed_qty': job_card_doc.for_quantity
+				})
+
+				job_card_doc.submit()
+
+			close_work_order(wo_order, "Closed")
+			self.assertEqual(wo_order.get('status'), "Closed")
+
+def update_job_card(job_card):
+	job_card_doc = frappe.get_doc('Job Card', job_card)
+	job_card_doc.set('scrap_items', [
+		{
+			'item_code': 'Test RM Item 1 for Scrap Item Test',
+			'stock_qty': 2
+		},
+		{
+			'item_code': 'Test RM Item 2 for Scrap Item Test',
+			'stock_qty': 2
+		},
+	])
+
+	job_card_doc.append('time_logs', {
+		'from_time': now(),
+		'time_in_mins': 60,
+		'completed_qty': job_card_doc.for_quantity
+	})
+
+	job_card_doc.submit()
+
+
 def get_scrap_item_details(bom_no):
 	scrap_items = {}
 	for item in frappe.db.sql("""select item_code, stock_qty from `tabBOM Scrap Item`
@@ -802,6 +908,7 @@ def make_wo_order_test_record(**args):
 	wo_order.get_items_and_operations_from_bom()
 	wo_order.sales_order = args.sales_order or None
 	wo_order.planned_start_date = args.planned_start_date or now()
+	wo_order.transfer_material_against = args.transfer_material_against or "Work Order"
 
 	if args.source_warehouse:
 		for item in wo_order.get("required_items"):

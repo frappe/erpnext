@@ -1,10 +1,11 @@
 # Copyright (c) 2019, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from six import iteritems
+
 from erpnext.setup.install import add_non_standard_user_types
+
 
 def execute():
 	doctype_dict = {
@@ -13,7 +14,7 @@ def execute():
 		'hr': ['Employee', 'Expense Claim', 'Leave Application', 'Attendance Request', 'Compensatory Leave Request']
 	}
 
-	for module, doctypes in iteritems(doctype_dict):
+	for module, doctypes in doctype_dict.items():
 		for doctype in doctypes:
 			frappe.reload_doc(module, 'doctype', doctype)
 

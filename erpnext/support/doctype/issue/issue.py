@@ -1,17 +1,19 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
+
 import json
-from frappe import _
-from frappe.model.document import Document
-from frappe.utils import now_datetime, time_diff_in_seconds, get_datetime, date_diff
-from frappe.core.utils import get_parent_doc
 from datetime import timedelta
-from frappe.model.mapper import get_mapped_doc
-from frappe.utils.user import is_website_user
+
+import frappe
+from frappe import _
+from frappe.core.utils import get_parent_doc
 from frappe.email.inbox import link_communication_to_document
+from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import date_diff, get_datetime, now_datetime, time_diff_in_seconds
+from frappe.utils.user import is_website_user
+
 
 class Issue(Document):
 	def get_feed(self):
@@ -225,7 +227,7 @@ def get_time_in_timedelta(time):
 def set_first_response_time(communication, method):
 	if communication.get('reference_doctype') == "Issue":
 		issue = get_parent_doc(communication)
-		if is_first_response(issue):
+		if is_first_response(issue) and issue.service_level_agreement:
 			first_response_time = calculate_first_response_time(issue, get_datetime(issue.first_responded_on))
 			issue.db_set("first_response_time", first_response_time)
 

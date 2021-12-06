@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
-from erpnext.education.utils import validate_duplicate_student
+from frappe.model.document import Document
 from frappe.utils import cint
+
+from erpnext.education.utils import validate_duplicate_student
+
 
 class StudentGroup(Document):
 	def validate(self):

@@ -1,20 +1,22 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies and contributors
 # For license information, please see license.txt
 
 
-from __future__ import unicode_literals
-from json import loads, dumps
+
+from json import dumps, loads
 
 import frappe
-from frappe.model.document import Document
 from frappe import _
-from frappe.utils import call_hook_method, fmt_money
-from frappe.integrations.utils import create_request_log, create_payment_gateway
-from frappe.utils import get_request_site_address
-from erpnext.erpnext_integrations.utils import create_mode_of_payment
+from frappe.integrations.utils import create_payment_gateway, create_request_log
+from frappe.model.document import Document
+from frappe.utils import call_hook_method, fmt_money, get_request_site_address
+
 from erpnext.erpnext_integrations.doctype.mpesa_settings.mpesa_connector import MpesaConnector
-from erpnext.erpnext_integrations.doctype.mpesa_settings.mpesa_custom_fields import create_custom_pos_fields
+from erpnext.erpnext_integrations.doctype.mpesa_settings.mpesa_custom_fields import (
+	create_custom_pos_fields,
+)
+from erpnext.erpnext_integrations.utils import create_mode_of_payment
+
 
 class MpesaSettings(Document):
 	supported_currencies = ["KES"]
@@ -39,7 +41,9 @@ class MpesaSettings(Document):
 		for i, amount in enumerate(request_amounts):
 			args.request_amount = amount
 			if frappe.flags.in_test:
-				from erpnext.erpnext_integrations.doctype.mpesa_settings.test_mpesa_settings import get_payment_request_response_payload
+				from erpnext.erpnext_integrations.doctype.mpesa_settings.test_mpesa_settings import (
+					get_payment_request_response_payload,
+				)
 				response = frappe._dict(get_payment_request_response_payload(amount))
 			else:
 				response = frappe._dict(generate_stk_push(**args))
@@ -71,7 +75,9 @@ class MpesaSettings(Document):
 		)
 
 		if frappe.flags.in_test:
-			from erpnext.erpnext_integrations.doctype.mpesa_settings.test_mpesa_settings import get_test_account_balance_response
+			from erpnext.erpnext_integrations.doctype.mpesa_settings.test_mpesa_settings import (
+				get_test_account_balance_response,
+			)
 			response = frappe._dict(get_test_account_balance_response())
 		else:
 			response = frappe._dict(get_account_balance(payload))
@@ -135,6 +141,9 @@ def verify_transaction(**kwargs):
 	transaction_response = frappe._dict(kwargs["Body"]["stkCallback"])
 
 	checkout_id = getattr(transaction_response, "CheckoutRequestID", "")
+	if not isinstance(checkout_id, str):
+		frappe.throw(_("Invalid Checkout Request ID"))
+
 	integration_request = frappe.get_doc("Integration Request", checkout_id)
 	transaction_data = frappe._dict(loads(integration_request.data))
 	total_paid = 0 # for multiple integration request made against a pos invoice
@@ -225,6 +234,9 @@ def process_balance_info(**kwargs):
 	account_balance_response = frappe._dict(kwargs["Result"])
 
 	conversation_id = getattr(account_balance_response, "ConversationID", "")
+	if not isinstance(conversation_id, str):
+		frappe.throw(_("Invalid Conversation ID"))
+
 	request = frappe.get_doc("Integration Request", conversation_id)
 
 	if request.status == "Completed":

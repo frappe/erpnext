@@ -1,11 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe.utils.nestedset import NestedSet, get_root_of
+
 from erpnext.utilities.transaction_base import delete_events
-from frappe.model.document import Document
+
 
 class Department(NestedSet):
 	nsm_parent_field = 'parent_department'

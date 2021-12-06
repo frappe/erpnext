@@ -1,23 +1,23 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
+from frappe import _, throw
+from frappe.utils import add_days, cint, cstr, date_diff, formatdate, getdate
 
-from frappe.utils import add_days, getdate, cint, cstr, date_diff, formatdate
-
-from frappe import throw, _
-from erpnext.utilities.transaction_base import TransactionBase, delete_events
-from erpnext.stock.utils import get_valid_serial_nos
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.utils import get_valid_serial_nos
+from erpnext.utilities.transaction_base import TransactionBase, delete_events
+
 
 class MaintenanceSchedule(TransactionBase):
 	@frappe.whitelist()
 	def generate_schedule(self):
+		if self.docstatus != 0:
+			return
 		self.set('schedules', [])
-		frappe.db.sql("""delete from `tabMaintenance Schedule Detail`
-			where parent=%s""", (self.name))
 		count = 1
 		for d in self.get('items'):
 			self.validate_maintenance_detail()
@@ -46,7 +46,7 @@ class MaintenanceSchedule(TransactionBase):
 			"Yearly": 365
 		}
 		for item in self.items:
-			if item.periodicity and item.start_date:
+			if item.periodicity and item.periodicity != "Random" and item.start_date:
 				if not item.end_date:
 					if item.no_of_visits:
 						item.end_date = add_days(item.start_date, item.no_of_visits * days_in_period[item.periodicity])
@@ -198,12 +198,16 @@ class MaintenanceSchedule(TransactionBase):
 				if chk:
 					throw(_("Maintenance Schedule {0} exists against {1}").format(chk[0][0], d.sales_order))
 
+	def validate_no_of_visits(self):
+		return len(self.schedules) != sum(d.no_of_visits for d in self.items)
+
 	def validate(self):
 		self.validate_end_date_visits()
 		self.validate_maintenance_detail()
 		self.validate_dates_with_periodicity()
 		self.validate_sales_order()
-		self.generate_schedule()
+		if not self.schedules or self.validate_no_of_visits():
+			self.generate_schedule()
 
 	def on_update(self):
 		frappe.db.set(self, 'status', 'Draft')
@@ -319,10 +323,14 @@ def make_maintenance_visit(source_name, target_doc=None, item_name=None, s_id=No
 		target.maintenance_schedule = source.name
 		target.maintenance_schedule_detail = s_id
 
-	def update_sales(source, target, parent):
+	def update_sales_and_serial(source, target, parent):
 		sales_person = frappe.db.get_value('Maintenance Schedule Detail', s_id, 'sales_person')
 		target.service_person = sales_person
-		target.serial_no = ''
+		serial_nos = get_serial_nos(target.serial_no)
+		if len(serial_nos) == 1:
+			target.serial_no = serial_nos[0]
+		else:
+			target.serial_no = ''
 
 	doclist = get_mapped_doc("Maintenance Schedule", source_name, {
 		"Maintenance Schedule": {
@@ -338,7 +346,7 @@ def make_maintenance_visit(source_name, target_doc=None, item_name=None, s_id=No
 		"Maintenance Schedule Item": {
 			"doctype": "Maintenance Visit Purpose",
 			"condition": lambda doc: doc.item_name == item_name,
-			"postprocess": update_sales
+			"postprocess": update_sales_and_serial
 		}
 	}, target_doc)
 

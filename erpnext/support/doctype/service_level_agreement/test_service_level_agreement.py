@@ -1,14 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import datetime
+import unittest
 
 import frappe
-import unittest
-import datetime
 from frappe.utils import flt
+
 from erpnext.support.doctype.issue_priority.test_issue_priority import make_priorities
-from erpnext.support.doctype.service_level_agreement.service_level_agreement import get_service_level_agreement_fields
+from erpnext.support.doctype.service_level_agreement.service_level_agreement import (
+	get_service_level_agreement_fields,
+)
+
 
 class TestServiceLevelAgreement(unittest.TestCase):
 	def setUp(self):

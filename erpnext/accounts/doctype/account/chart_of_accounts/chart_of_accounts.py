@@ -1,25 +1,26 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
+import json
+import os
 
-import frappe, os, json
+import frappe
 from frappe.utils import cstr
-from unidecode import unidecode
-from six import iteritems
 from frappe.utils.nestedset import rebuild_tree
+from unidecode import unidecode
 
-def create_charts(company, chart_template=None, existing_company=None, custom_chart=None):
+
+def create_charts(company, chart_template=None, existing_company=None, custom_chart=None, from_coa_importer=None):
 	chart = custom_chart or get_chart(chart_template, existing_company)
 	if chart:
 		accounts = []
 
 		def _import_accounts(children, parent, root_type, root_account=False):
-			for account_name, child in iteritems(children):
+			for account_name, child in children.items():
 				if root_account:
 					root_type = child.get("root_type")
 
-				if account_name not in ["account_number", "account_type",
+				if account_name not in ["account_name", "account_number", "account_type",
 					"root_type", "is_group", "tax_rate"]:
 
 					account_number = cstr(child.get("account_number")).strip()
@@ -32,7 +33,7 @@ def create_charts(company, chart_template=None, existing_company=None, custom_ch
 
 					account = frappe.get_doc({
 						"doctype": "Account",
-						"account_name": account_name,
+						"account_name": child.get('account_name') if from_coa_importer else account_name,
 						"company": company,
 						"parent_account": parent,
 						"is_group": is_group,
@@ -78,7 +79,7 @@ def add_suffix_if_duplicate(account_name, account_number, accounts):
 def identify_is_group(child):
 	if child.get("is_group"):
 		is_group = child.get("is_group")
-	elif len(set(child.keys()) - set(["account_type", "root_type", "is_group", "tax_rate", "account_number"])):
+	elif len(set(child.keys()) - set(["account_name", "account_type", "root_type", "is_group", "tax_rate", "account_number"])):
 		is_group = 1
 	else:
 		is_group = 0
@@ -91,11 +92,14 @@ def get_chart(chart_template, existing_company=None):
 		return get_account_tree_from_existing_company(existing_company)
 
 	elif chart_template == "Standard":
-		from erpnext.accounts.doctype.account.chart_of_accounts.verified import standard_chart_of_accounts
+		from erpnext.accounts.doctype.account.chart_of_accounts.verified import (
+			standard_chart_of_accounts,
+		)
 		return standard_chart_of_accounts.get()
 	elif chart_template == "Standard with Numbers":
-		from erpnext.accounts.doctype.account.chart_of_accounts.verified \
-			import standard_chart_of_accounts_with_account_number
+		from erpnext.accounts.doctype.account.chart_of_accounts.verified import (
+			standard_chart_of_accounts_with_account_number,
+		)
 		return standard_chart_of_accounts_with_account_number.get()
 	else:
 		folders = ("verified",)
@@ -195,7 +199,7 @@ def validate_bank_account(coa, bank_account):
 
 	if chart:
 		def _get_account_names(account_master):
-			for account_name, child in iteritems(account_master):
+			for account_name, child in account_master.items():
 				if account_name not in ["account_number", "account_type",
 					"root_type", "is_group", "tax_rate"]:
 					accounts.append(account_name)
@@ -207,7 +211,7 @@ def validate_bank_account(coa, bank_account):
 	return (bank_account in accounts)
 
 @frappe.whitelist()
-def build_tree_from_json(chart_template, chart_data=None):
+def build_tree_from_json(chart_template, chart_data=None, from_coa_importer=False):
 	''' get chart template from its folder and parse the json to be rendered as tree '''
 	chart = chart_data or get_chart(chart_template)
 
@@ -218,10 +222,13 @@ def build_tree_from_json(chart_template, chart_data=None):
 	accounts = []
 	def _import_accounts(children, parent):
 		''' recursively called to form a parent-child based list of dict from chart template '''
-		for account_name, child in iteritems(children):
+		for account_name, child in children.items():
 			account = {}
-			if account_name in ["account_number", "account_type",\
+			if account_name in ["account_name", "account_number", "account_type",\
 				"root_type", "is_group", "tax_rate"]: continue
+
+			if from_coa_importer:
+				account_name = child['account_name']
 
 			account['parent_account'] = parent
 			account['expandable'] = True if identify_is_group(child) else False

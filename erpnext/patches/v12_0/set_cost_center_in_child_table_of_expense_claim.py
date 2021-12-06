@@ -1,4 +1,6 @@
 import frappe
+
+
 def execute():
 	frappe.reload_doc('hr', 'doctype', 'expense_claim_detail')
 	frappe.db.sql("""

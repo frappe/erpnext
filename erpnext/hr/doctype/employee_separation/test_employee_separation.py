@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
+from frappe.utils import getdate
 
 test_dependencies = ['Employee Onboarding']
 
@@ -34,9 +34,10 @@ class TestEmployeeSeparation(unittest.TestCase):
 			doc.delete()
 
 def create_employee_separation():
-	employee = frappe.db.get_value('Employee', {'status': 'Active'})
+	employee = frappe.db.get_value('Employee', {'status': 'Active', 'company': '_Test Company'})
 	separation = frappe.new_doc('Employee Separation')
 	separation.employee = employee
+	separation.boarding_begins_on = getdate()
 	separation.company = '_Test Company'
 	separation.append('activities', {
 		'activity_name': 'Deactivate Employee',

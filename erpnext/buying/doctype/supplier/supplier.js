@@ -24,7 +24,26 @@ frappe.ui.form.on("Supplier", {
 				}
 			}
 		});
+
+		frm.set_query("supplier_primary_contact", function(doc) {
+			return {
+				query: "erpnext.buying.doctype.supplier.supplier.get_supplier_primary_contact",
+				filters: {
+					"supplier": doc.name
+				}
+			};
+		});
+
+		frm.set_query("supplier_primary_address", function(doc) {
+			return {
+				filters: {
+					"link_doctype": "Supplier",
+					"link_name": doc.name
+				}
+			};
+		});
 	},
+
 	refresh: function (frm) {
 		frappe.dynamic_link = { doc: frm.doc, fieldname: 'name', doctype: 'Supplier' }
 
@@ -64,6 +83,12 @@ frappe.ui.form.on("Supplier", {
 				frm.trigger("get_supplier_group_details");
 			}, __('Actions'));
 
+			if (cint(frappe.defaults.get_default("enable_common_party_accounting"))) {
+				frm.add_custom_button(__('Link with Customer'), function () {
+					frm.trigger('show_party_link_dialog');
+				}, __('Actions'));
+			}
+
 			// indicators
 			erpnext.utils.set_party_dashboard_indicators(frm);
 		}
@@ -78,6 +103,30 @@ frappe.ui.form.on("Supplier", {
 		});
 	},
 
+	supplier_primary_address: function(frm) {
+		if (frm.doc.supplier_primary_address) {
+			frappe.call({
+				method: 'frappe.contacts.doctype.address.address.get_address_display',
+				args: {
+					"address_dict": frm.doc.supplier_primary_address
+				},
+				callback: function(r) {
+					frm.set_value("primary_address", r.message);
+				}
+			});
+		}
+		if (!frm.doc.supplier_primary_address) {
+			frm.set_value("primary_address", "");
+		}
+	},
+
+	supplier_primary_contact: function(frm) {
+		if (!frm.doc.supplier_primary_contact) {
+			frm.set_value("mobile_no", "");
+			frm.set_value("email_id", "");
+		}
+	},
+
 	is_internal_supplier: function(frm) {
 		if (frm.doc.is_internal_supplier == 1) {
 			frm.toggle_reqd("represents_company", true);
@@ -85,5 +134,42 @@ frappe.ui.form.on("Supplier", {
 		else {
 			frm.toggle_reqd("represents_company", false);
 		}
+	},
+	show_party_link_dialog: function(frm) {
+		const dialog = new frappe.ui.Dialog({
+			title: __('Select a Customer'),
+			fields: [{
+				fieldtype: 'Link', label: __('Customer'),
+				options: 'Customer', fieldname: 'customer', reqd: 1
+			}],
+			primary_action: function({ customer }) {
+				frappe.call({
+					method: 'erpnext.accounts.doctype.party_link.party_link.create_party_link',
+					args: {
+						primary_role: 'Supplier',
+						primary_party: frm.doc.name,
+						secondary_party: customer
+					},
+					freeze: true,
+					callback: function() {
+						dialog.hide();
+						frappe.msgprint({
+							message: __('Successfully linked to Customer'),
+							alert: true
+						});
+					},
+					error: function() {
+						dialog.hide();
+						frappe.msgprint({
+							message: __('Linking to Customer Failed. Please try again.'),
+							title: __('Linking Failed'),
+							indicator: 'red'
+						});
+					}
+				});
+			},
+			primary_action_label: __('Create Link')
+		});
+		dialog.show();
 	}
 });

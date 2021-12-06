@@ -1,0 +1,231 @@
+{
+ "actions": [],
+ "autoname": "HR-FNF-.YYYY.-.#####",
+ "creation": "2021-06-28 13:17:36.050459",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "employee_name",
+  "transaction_date",
+  "column_break_12",
+  "company",
+  "status",
+  "amended_from",
+  "employee_details_section",
+  "date_of_joining",
+  "relieving_date",
+  "column_break_4",
+  "designation",
+  "department",
+  "section_break_8",
+  "payables",
+  "section_break_10",
+  "receivables",
+  "totals_section",
+  "total_payable_amount",
+  "column_break_21",
+  "total_receivable_amount",
+  "section_break_15",
+  "assets_allocated"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Unpaid",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Paid\nUnpaid",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Full and Final Statement",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break",
+   "label": "Payables"
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break",
+   "label": "Receivables"
+  },
+  {
+   "fieldname": "assets_allocated",
+   "fieldtype": "Table",
+   "options": "Full and Final Asset"
+  },
+  {
+   "fetch_from": "employee.relieving_date",
+   "fieldname": "relieving_date",
+   "fieldtype": "Date",
+   "label": "Relieving Date ",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.date_of_joining",
+   "fieldname": "date_of_joining",
+   "fieldtype": "Date",
+   "label": "Date of Joining",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break",
+   "label": "Assets Allocated"
+  },
+  {
+   "fetch_from": "employee.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "payables",
+   "fieldtype": "Table",
+   "options": "Full and Final Outstanding Statement"
+  },
+  {
+   "fieldname": "receivables",
+   "fieldtype": "Table",
+   "options": "Full and Final Outstanding Statement"
+  },
+  {
+   "fieldname": "employee_details_section",
+   "fieldtype": "Section Break",
+   "label": "Employee Details"
+  },
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "in_standard_filter": 1,
+   "label": "Transaction Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "fieldname": "total_payable_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Payable Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_receivable_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Receivable Amount",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-08-30 21:11:09.892560",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Full and Final Statement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "employee_name",
+ "track_changes": 1
+}

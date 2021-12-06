@@ -1,12 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
+import re
+
 import frappe
 from frappe import _
-import re
 from frappe.model.document import Document
+
 
 class InvalidFormulaVariable(frappe.ValidationError): pass
 

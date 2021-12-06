@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 data = {
 	'Manufacturing': {
 		'company_name': 'Wind Power LLC'
@@ -15,9 +13,6 @@ data = {
 	},
 	'Education': {
 		'company_name': 'Whitmore College'
-	},
-	'Healthcare': {
-		'company_name': 'ABC Hospital Ltd.'
 	},
 	'Agriculture': {
 		'company_name': 'Schrute Farms'

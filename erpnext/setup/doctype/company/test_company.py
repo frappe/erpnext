@@ -1,13 +1,16 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
+
+import json
+import unittest
 
 import frappe
-import unittest
-import json
 from frappe import _
 from frappe.utils import random_string
-from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import get_charts_for_country
+
+from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
+	get_charts_for_country,
+)
 
 test_ignore = ["Account", "Cost Center", "Payment Terms Template", "Salary Component", "Warehouse"]
 test_dependencies = ["Fiscal Year"]

@@ -1,9 +1,10 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-from frappe import _
+
 import frappe
+from frappe import _
+
 
 def execute(filters=None):
 	columns, data = get_columns(), get_data(filters)

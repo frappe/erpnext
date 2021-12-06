@@ -1,12 +1,13 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-import erpnext
 from frappe import _
 from frappe.utils import flt
+
 from erpnext.accounts.report.financial_statements import get_period_list
+
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
@@ -95,8 +96,6 @@ def get_columns():
 			'width': 150
 		}
 	]
-
-	return columns
 
 
 def get_vehicle_log_data(filters):

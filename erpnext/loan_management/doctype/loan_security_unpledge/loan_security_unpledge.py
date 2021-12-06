@@ -1,15 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_datetime, flt, getdate
-import json
-from six import iteritems
-from erpnext.loan_management.doctype.loan_security_price.loan_security_price import get_loan_security_price
+from frappe.utils import flt, get_datetime, getdate
+
 
 class LoanSecurityUnpledge(Document):
 	def validate(self):
@@ -30,7 +27,9 @@ class LoanSecurityUnpledge(Document):
 					d.idx, frappe.bold(d.loan_security)))
 
 	def validate_unpledge_qty(self):
-		from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import get_ltv_ratio
+		from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import (
+			get_ltv_ratio,
+		)
 
 		pledge_qty_map = get_pledged_security_qty(self.loan)
 
@@ -109,7 +108,7 @@ class LoanSecurityUnpledge(Document):
 			pledged_qty = 0
 			current_pledges = get_pledged_security_qty(self.loan)
 
-			for security, qty in iteritems(current_pledges):
+			for security, qty in current_pledges.items():
 				pledged_qty += qty
 
 			if not pledged_qty:
@@ -142,7 +141,7 @@ def get_pledged_security_qty(loan):
 		GROUP BY p.loan_security
 	""", (loan)))
 
-	for security, qty in iteritems(pledges):
+	for security, qty in pledges.items():
 		current_pledges.setdefault(security, qty)
 		current_pledges[security] -= unpledges.get(security, 0.0)
 

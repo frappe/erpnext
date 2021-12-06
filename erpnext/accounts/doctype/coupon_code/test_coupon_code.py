@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
+
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.stock.get_item_details import get_item_details
-from frappe.test_runner import make_test_objects
 
 test_dependencies = ['Item']
 

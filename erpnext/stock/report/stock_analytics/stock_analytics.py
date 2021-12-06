@@ -4,12 +4,17 @@ import datetime
 
 import frappe
 from frappe import _, scrub
-from frappe.utils import getdate, get_quarter_start, get_first_day_of_week
 from frappe.utils import get_first_day as get_first_day_of_month
+from frappe.utils import get_first_day_of_week, get_quarter_start, getdate
 
-from erpnext.stock.report.stock_balance.stock_balance import (get_items, get_stock_ledger_entries, get_item_details)
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.stock.report.stock_balance.stock_balance import (
+	get_item_details,
+	get_items,
+	get_stock_ledger_entries,
+)
 from erpnext.stock.utils import is_reposting_item_valuation_in_progress
+
 
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()

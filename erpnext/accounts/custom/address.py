@@ -1,11 +1,16 @@
 import frappe
 from frappe import _
-from frappe.contacts.doctype.address.address import Address
-from frappe.contacts.doctype.address.address import get_address_templates, get_address_display
+from frappe.contacts.doctype.address.address import (
+	Address,
+	get_address_display,
+	get_address_templates,
+)
+
 
 class ERPNextAddress(Address):
 	def validate(self):
 		self.validate_reference()
+		self.update_compnay_address()
 		super(ERPNextAddress, self).validate()
 
 	def link_address(self):
@@ -14,6 +19,11 @@ class ERPNextAddress(Address):
 			return
 
 		return super(ERPNextAddress, self).link_address()
+
+	def update_compnay_address(self):
+		for link in self.get('links'):
+			if link.link_doctype == 'Company':
+				self.is_your_company_address = 1
 
 	def validate_reference(self):
 		if self.is_your_company_address and not [
@@ -31,7 +41,7 @@ class ERPNextAddress(Address):
 		customers = frappe.db.get_all("Customer", filters=filters, as_list=True)
 		for customer_name in customers:
 			frappe.db.set_value("Customer", customer_name[0], "primary_address", address_display)
-			
+
 @frappe.whitelist()
 def get_shipping_address(company, address = None):
 	filters = [

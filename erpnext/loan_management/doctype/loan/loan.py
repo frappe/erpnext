@@ -1,16 +1,21 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, math, json
-import erpnext
+
+import json
+import math
+
+import frappe
 from frappe import _
-from six import string_types
-from frappe.utils import flt, rounded, add_months, nowdate, getdate, now_datetime
-from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
+from frappe.utils import add_months, flt, getdate, now_datetime, nowdate
+
+import erpnext
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts
+from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import (
+	get_pledged_security_qty,
+)
+
 
 class Loan(AccountsController):
 	def validate(self):
@@ -129,16 +134,23 @@ class Loan(AccountsController):
 			frappe.throw(_("Loan amount is mandatory"))
 
 	def link_loan_security_pledge(self):
-		if self.is_secured_loan:
-			loan_security_pledge = frappe.db.get_value('Loan Security Pledge', {'loan_application': self.loan_application},
-				'name')
+		if self.is_secured_loan and self.loan_application:
+			maximum_loan_value = frappe.db.get_value('Loan Security Pledge',
+				{
+					'loan_application': self.loan_application,
+					'status': 'Requested'
+				},
+				'sum(maximum_loan_value)'
+			)
 
-			if loan_security_pledge:
-				frappe.db.set_value('Loan Security Pledge', loan_security_pledge, {
-					'loan': self.name,
-					'status': 'Pledged',
-					'pledge_time': now_datetime()
-				})
+			if maximum_loan_value:
+				frappe.db.sql("""
+					UPDATE `tabLoan Security Pledge`
+					SET loan = %s, pledge_time = %s, status = 'Pledged'
+					WHERE status = 'Requested' and loan_application = %s
+				""", (self.name, now_datetime(), self.loan_application))
+
+				self.db_set('maximum_loan_amount', maximum_loan_value)
 
 	def unlink_loan_security_pledge(self):
 		pledges = frappe.get_all('Loan Security Pledge', fields=['name'], filters={'loan': self.name})
@@ -308,7 +320,7 @@ def make_loan_write_off(loan, company=None, posting_date=None, amount=0, as_dict
 @frappe.whitelist()
 def unpledge_security(loan=None, loan_security_pledge=None, security_map=None, as_dict=0, save=0, submit=0, approve=0):
 	# if no security_map is passed it will be considered as full unpledge
-	if security_map and isinstance(security_map, string_types):
+	if security_map and isinstance(security_map, str):
 		security_map = json.loads(security_map)
 
 	if loan:
@@ -361,7 +373,9 @@ def create_loan_security_unpledge(unpledge_map, loan, company, applicant_type, a
 	return unpledge_request
 
 def validate_employee_currency_with_company_currency(applicant, company):
-	from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_employee_currency
+	from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import (
+		get_employee_currency,
+	)
 	if not applicant:
 		frappe.throw(_("Please select Applicant"))
 	if not company:

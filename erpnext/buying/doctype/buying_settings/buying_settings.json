@@ -28,7 +28,7 @@
    "fieldname": "supp_master_name",
    "fieldtype": "Select",
    "label": "Supplier Naming By",
-   "options": "Supplier Name\nNaming Series"
+   "options": "Supplier Name\nNaming Series\nAuto Name"
   },
   {
    "fieldname": "supplier_group",
@@ -123,7 +123,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-06-24 10:38:28.934525",
+ "modified": "2021-09-08 19:26:23.548837",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",

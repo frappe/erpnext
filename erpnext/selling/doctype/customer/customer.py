@@ -1,20 +1,29 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
+
 import json
-from frappe.model.naming import set_name_by_naming_series
-from frappe import _, msgprint
+
+import frappe
 import frappe.defaults
-from frappe.utils import flt, cint, cstr, today, get_formatted_email
+from frappe import _, msgprint
+from frappe.contacts.address_and_contact import (
+	delete_contact_and_address,
+	load_address_and_contact,
+)
 from frappe.desk.reportview import build_match_conditions, get_filters_cond
-from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
-from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
-from frappe.model.rename_doc import update_linked_doctypes
 from frappe.model.mapper import get_mapped_doc
+from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
+from frappe.model.rename_doc import update_linked_doctypes
+from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
+
+from erpnext.accounts.party import (  # noqa
+	get_dashboard_info,
+	get_timeline_data,
+	validate_party_accounts,
+)
+from erpnext.utilities.transaction_base import TransactionBase
 
 
 class Customer(TransactionBase):
@@ -34,8 +43,10 @@ class Customer(TransactionBase):
 		cust_master_name = frappe.defaults.get_global_default('cust_master_name')
 		if cust_master_name == 'Customer Name':
 			self.name = self.get_customer_name()
-		else:
+		elif cust_master_name == 'Naming Series':
 			set_name_by_naming_series(self)
+		else:
+			self.name = set_name_from_naming_options(frappe.get_meta(self.doctype).autoname, self)
 
 	def get_customer_name(self):
 
@@ -150,8 +161,14 @@ class Customer(TransactionBase):
 				self.db_set('email_id', self.email_id)
 
 	def create_primary_address(self):
+		from frappe.contacts.doctype.address.address import get_address_display
+
 		if self.flags.is_new_doc and self.get('address_line1'):
-			make_address(self)
+			address = make_address(self)
+			address_display = get_address_display(address.name)
+
+			self.db_set("customer_primary_address", address.name)
+			self.db_set("primary_address", address_display)
 
 	def update_lead_status(self):
 		'''If Customer created from Lead, update lead status to "Converted"
@@ -246,9 +263,15 @@ class Customer(TransactionBase):
 
 	def on_trash(self):
 		if self.customer_primary_contact:
-			frappe.db.sql("""update `tabCustomer`
-				set customer_primary_contact=null, mobile_no=null, email_id=null
-				where name=%s""", self.name)
+			frappe.db.sql("""
+				UPDATE `tabCustomer`
+				SET
+					customer_primary_contact=null,
+					customer_primary_address=null,
+					mobile_no=null,
+					email_id=null,
+					primary_address=null
+				WHERE name=%(name)s""", {"name": self.name})
 
 		delete_contact_and_address('Customer', self.name)
 		if self.lead_name:
@@ -444,11 +467,14 @@ def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 
 
 def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, extra_amount=0):
+	credit_limit = get_credit_limit(customer, company)
+	if not credit_limit:
+		return
+
 	customer_outstanding = get_customer_outstanding(customer, company, ignore_outstanding_sales_order)
 	if extra_amount > 0:
 		customer_outstanding += flt(extra_amount)
 
-	credit_limit = get_credit_limit(customer, company)
 	if credit_limit > 0 and flt(customer_outstanding) > credit_limit:
 		msgprint(_("Credit limit has been crossed for customer {0} ({1}/{2})")
 			.format(customer, customer_outstanding, credit_limit))

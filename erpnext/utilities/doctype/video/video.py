@@ -1,16 +1,16 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe
+
 import re
-import pytz
-from frappe.model.document import Document
-from frappe import _
 from datetime import datetime
-from six import string_types
+
+import frappe
+import pytz
+from frappe import _
+from frappe.model.document import Document
 from pyyoutube import Api
+
 
 class Video(Document):
 	def validate(self):
@@ -86,7 +86,7 @@ def get_id_from_url(url):
 		Returns video id from url
 		:param youtube url: String URL
 	"""
-	if not isinstance(url, string_types):
+	if not isinstance(url, str):
 		frappe.throw(_("URL can only be a string"), title=_("Invalid URL"))
 
 	pattern = re.compile(r'[a-z\:\//\.]+(youtube|youtu)\.(com|be)/(watch\?v=|embed/|.+\?v=)?([^"&?\s]{11})?')

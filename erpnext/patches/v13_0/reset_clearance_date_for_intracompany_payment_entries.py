@@ -1,9 +1,9 @@
 # Copyright (c) 2019, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
+
 
 def execute():
     """
@@ -35,10 +35,10 @@ def get_reconciled_bank_transactions(intra_company_pe):
 
     for payment_entry in intra_company_pe:
         reconciled_bank_transactions[payment_entry] = frappe.get_all(
-            'Bank Transaction Payments', 
+            'Bank Transaction Payments',
             filters = {
                 'payment_entry': payment_entry
-            }, 
+            },
             pluck='parent'
         )
 

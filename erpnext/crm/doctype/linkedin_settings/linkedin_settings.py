@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 import requests
 from frappe import _
-from frappe.utils import get_url_to_form
 from frappe.model.document import Document
+from frappe.utils import get_url_to_form
 from frappe.utils.file_manager import get_file_path
 from six.moves.urllib.parse import urlencode
+
 
 class LinkedInSettings(Document):
 	@frappe.whitelist()
@@ -146,7 +146,7 @@ class LinkedInSettings(Document):
 
 		except Exception as e:
 			self.api_error(response)
-		
+
 		return response
 
 	def get_headers(self):
@@ -168,7 +168,7 @@ class LinkedInSettings(Document):
 				raise
 		except Exception:
 			self.api_error(response)
-	
+
 	def get_post(self, post_id):
 		url = "https://api.linkedin.com/v2/organizationalEntityShareStatistics?q=organizationalEntity&organizationalEntity=urn:li:organization:{0}&shares[0]=urn:li:share:{1}".format(self.company_id, post_id)
 
@@ -176,7 +176,7 @@ class LinkedInSettings(Document):
 			response = requests.get(url=url, headers=self.get_headers())
 			if response.status_code !=200:
 				raise
-	
+
 		except Exception:
 			self.api_error(response)
 

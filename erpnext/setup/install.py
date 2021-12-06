@@ -1,18 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import print_function, unicode_literals
 
 import frappe
-from erpnext.accounts.doctype.cash_flow_mapper.default_cash_flow_mapper import DEFAULT_MAPPERS
-from .default_success_action import get_default_success_action
 from frappe import _
-from frappe.utils import cint
-from frappe.installer import update_site_config
-from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
+from frappe.installer import update_site_config
+from frappe.utils import cint
+
+from erpnext.accounts.doctype.cash_flow_mapper.default_cash_flow_mapper import DEFAULT_MAPPERS
 from erpnext.setup.default_energy_point_rules import get_default_energy_point_rules
-from six import iteritems
+
+from .default_success_action import get_default_success_action
 
 default_mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via
 	<a style="color: #888" href="http://erpnext.org">ERPNext</a></div>"""
@@ -172,12 +172,12 @@ def add_non_standard_user_types():
 	user_types = get_user_types_data()
 
 	user_type_limit = {}
-	for user_type, data in iteritems(user_types):
+	for user_type, data in user_types.items():
 		user_type_limit.setdefault(frappe.scrub(user_type), 10)
 
 	update_site_config('user_type_doctype_limit', user_type_limit)
 
-	for user_type, data in iteritems(user_types):
+	for user_type, data in user_types.items():
 		create_custom_role(data)
 		create_user_type(user_type, data)
 
@@ -227,7 +227,7 @@ def create_user_type(user_type, data):
 	doc.save(ignore_permissions=True)
 
 def create_role_permissions_for_doctype(doc, data):
-	for doctype, perms in iteritems(data.get('doctypes')):
+	for doctype, perms in data.get('doctypes').items():
 		args = {'document_type': doctype}
 		for perm in perms:
 			args[perm] = 1

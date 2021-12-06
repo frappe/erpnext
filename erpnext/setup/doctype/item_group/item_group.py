@@ -1,20 +1,22 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
+
 import copy
+
+import frappe
 from frappe import _
-from frappe.utils import nowdate, cint, cstr
+from frappe.utils import cint, cstr, nowdate
 from frappe.utils.nestedset import NestedSet
-from frappe.website.website_generator import WebsiteGenerator
 from frappe.website.utils import clear_cache
-from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
-from erpnext.shopping_cart.product_info import set_product_info_for_website
-from erpnext.utilities.product import get_qty_in_stock
+from frappe.website.website_generator import WebsiteGenerator
 from six.moves.urllib.parse import quote
-from erpnext.shopping_cart.product_query import ProductQuery
+
 from erpnext.shopping_cart.filters import ProductFiltersBuilder
+from erpnext.shopping_cart.product_info import set_product_info_for_website
+from erpnext.shopping_cart.product_query import ProductQuery
+from erpnext.utilities.product import get_qty_in_stock
+
 
 class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'
@@ -36,11 +38,11 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 				self.parent_item_group = _('All Item Groups')
 
 		self.make_route()
+		self.validate_item_group_defaults()
 
 	def on_update(self):
 		NestedSet.on_update(self)
 		invalidate_cache_for(self)
-		self.validate_name_with_item()
 		self.validate_one_root()
 		self.delete_child_item_groups_key()
 
@@ -63,10 +65,6 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		NestedSet.on_trash(self)
 		WebsiteGenerator.on_trash(self)
 		self.delete_child_item_groups_key()
-
-	def validate_name_with_item(self):
-		if frappe.db.exists("Item", self.name):
-			frappe.throw(frappe._("An item exists with same name ({0}), please change the item group name or rename the item").format(self.name), frappe.NameError)
 
 	def get_context(self, context):
 		context.show_search=True
@@ -96,7 +94,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		filter_engine = ProductFiltersBuilder(self.name)
 
 		context.field_filters = filter_engine.get_field_filters()
-		context.attribute_filters = filter_engine.get_attribute_fitlers()
+		context.attribute_filters = filter_engine.get_attribute_filters()
 
 		context.update({
 			"parents": get_parent_item_groups(self.parent_item_group),
@@ -130,6 +128,10 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 	def delete_child_item_groups_key(self):
 		frappe.cache().hdel("child_item_groups", self.name)
+
+	def validate_item_group_defaults(self):
+		from erpnext.stock.doctype.item.item import validate_item_default_company_links
+		validate_item_default_company_links(self.item_group_defaults)
 
 @frappe.whitelist(allow_guest=True)
 def get_product_list_for_group(product_group=None, start=0, limit=10, search=None):

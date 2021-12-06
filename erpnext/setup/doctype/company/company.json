@@ -125,7 +125,8 @@
    "label": "Abbr",
    "oldfieldname": "abbr",
    "oldfieldtype": "Data",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "bold": 1,
@@ -716,6 +717,15 @@
    "options": "Account"
   },
   {
+   "fieldname": "hr_settings_section",
+   "fieldtype": "Section Break",
+   "label": "HR & Payroll Settings"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
    "collapsible": 1,
    "fieldname": "fixed_asset_defaults",
    "fieldtype": "Section Break",
@@ -731,15 +741,6 @@
    "fieldname": "section_break_28",
    "fieldtype": "Section Break",
    "label": "Chart of Accounts"
-  },
-  {
-   "fieldname": "hr_settings_section",
-   "fieldtype": "Section Break",
-   "label": "HR & Payroll Settings"
-  },
-  {
-   "fieldname": "column_break_26",
-   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-building",
@@ -747,10 +748,11 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2021-07-12 11:27:06.353860",
+ "modified": "2021-10-04 12:09:25.833133",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_company",
  "owner": "Administrator",
  "permissions": [
