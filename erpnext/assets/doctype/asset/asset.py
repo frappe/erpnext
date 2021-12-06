@@ -413,28 +413,6 @@ class Asset(AccountsController):
 			frappe.throw(_("Depreciation Row {0}: Next Depreciation Date cannot be before Available-for-use Date")
 				.format(row.idx))
 
-	# to ensure that final accumulated depreciation amount is accurate
-	def get_adjusted_depreciation_amount(self, depreciation_amount_without_pro_rata, depreciation_amount_for_last_row, finance_book):
-		if not self.opening_accumulated_depreciation:
-			depreciation_amount_for_first_row = self.get_depreciation_amount_for_first_row(finance_book)
-
-			if depreciation_amount_for_first_row + depreciation_amount_for_last_row != depreciation_amount_without_pro_rata:
-				depreciation_amount_for_last_row = depreciation_amount_without_pro_rata - depreciation_amount_for_first_row
-
-		return depreciation_amount_for_last_row
-
-	def get_depreciation_amount_for_first_row(self, finance_book):
-		if self.has_only_one_finance_book():
-			return self.schedules[0].depreciation_amount
-		else:
-			for schedule in self.schedules:
-				if schedule.finance_book == finance_book:
-					return schedule.depreciation_amount
-
-	def has_only_one_finance_book(self):
-		if len(self.finance_books) == 1:
-			return True
-
 	def set_accumulated_depreciation(self, date_of_sale=None, ignore_booked_entry = False):
 		straight_line_idx = [d.idx for d in self.get("schedules") if d.depreciation_method == 'Straight Line']
 		finance_books = []
