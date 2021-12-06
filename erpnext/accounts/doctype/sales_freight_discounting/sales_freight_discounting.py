@@ -16,7 +16,6 @@ class SalesFreightDiscounting(Document):
 
 	@frappe.whitelist()
 	def get_invoices(self):
-		print("Testing Get Query")
 
 		conditions = ""
 		if self.company:
@@ -116,12 +115,9 @@ class SalesFreightDiscounting(Document):
 	
 		# Setting True value for delivery note.
 		if self.journal_entry_name:
-			# print("???????????>>>>>", doc.name)
 			var = frappe.get_all('Delivery Details', filters={'parent': self.name}, fields=['delivery_note'])
-			# print("FFFFFFFFFFF",var)
 			
 			for val in var:
-				# print("VALLLLLLLLLLL", val)
 				frappe.db.set_value('Delivery Note', val.delivery_note, 'sales_freight_checkbox', 1)
 
 		frappe.msgprint("Journal Entry Created Please Check")
@@ -131,8 +127,8 @@ class SalesFreightDiscounting(Document):
 		doc = frappe.get_doc('Journal Entry', self.journal_entry_name)	
 		doc.cancel()
 		frappe.msgprint("Sales Freight Discounting And Journal Entry Cancelled")
+		
 		for val in self.delivery_details:
-			# print("Cancel", val)
 			frappe.db.set_value('Delivery Note', val.delivery_note, 'sales_freight_checkbox', 0)		
 			doc = frappe.get_doc("Delivery Note", val.delivery_note)
 			doc.reload()

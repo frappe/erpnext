@@ -15,18 +15,3 @@ def get_data():
 			},
 		]
 	}
-
-	# return {
-
-	# 	'fieldname': 'related_delivery_planning',
-	# 	'non_standard_fieldnames': {
-	# 		'Delivery Planning Item' : 'related_delivey_planning',
-	# 		'Batch': 'item'
-	# 	},
-	# 	'transactions': [
-	# 		{
-	# 			'label': _('Journal Entry'),
-	# 			'items': ['Pick List','Delivery Note']
-	# 		}
-	# 	]
-	# }

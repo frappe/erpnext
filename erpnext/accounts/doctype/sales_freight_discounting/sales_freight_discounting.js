@@ -10,14 +10,13 @@ frappe.ui.form.on('Sales Freight Discounting', {
 		// 	frm.set_df_property('journal_entry_name', 'hidden',1)
 		// }
 		
-		cur_frm.set_query("freight_account", function() {
-			return {
-				"filters":{
-					"parent_account": "Freight Charges - BAL",
-				}
-			};
-		
-		});
+		// cur_frm.set_query("freight_account", function() {
+		// 	return {
+		// 		"filters":{
+		// 			"parent_account": "Freight Charges - BAL",
+		// 		}
+		// 	};
+		// });
 	},
 	get_invoices: function(frm){
 		frm.clear_table("delivery_details")
