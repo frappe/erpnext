@@ -1035,7 +1035,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-30 02:33:06.572442",
+ "modified": "2021-12-03 08:32:03.869294",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -1103,7 +1103,7 @@
  "search_fields": "item_name,description,item_group,customer_code",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
- "sort_field": "idx desc,modified desc",
+ "sort_field": "modified",
  "sort_order": "DESC",
  "title_field": "item_name",
  "track_changes": 1
