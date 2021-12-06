@@ -14,6 +14,22 @@ frappe.ui.form.on("Task", {
 	},
 
 	onload: function (frm) {
+		frm.set_query("project_warehouse", function(doc) {
+			return {
+				filters: {
+					"company": doc.company
+				}
+			};
+		});
+
+		frm.set_query("warehouse", "items", function(doc) {
+			return {
+				filters: {
+					"company": doc.company
+				}
+			};
+		});
+
 		frm.set_query("task", "depends_on", function () {
 			let filters = {
 				name: ["!=", frm.doc.name]
