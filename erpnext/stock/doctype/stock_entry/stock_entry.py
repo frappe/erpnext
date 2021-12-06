@@ -483,7 +483,7 @@ class StockEntry(StockController):
 					& (sed.docstatus == 1)
 					& (se.stock_entry_type == stock_entry_type)
 				).run(as_dict=1)
-			print(item.task_item, update_field, update_qty[0].qty)
+
 			frappe.db.set_value('Task Item', item.task_item, update_field, update_qty[0].qty)
 
 	@frappe.whitelist()

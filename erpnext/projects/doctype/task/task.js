@@ -58,7 +58,7 @@ frappe.ui.form.on("Task", {
 				if (item.transferred > 0 | item.issued > 0) {
 					hide = true;
 				}
-			})
+			});
 			frm.toggle_display(["get_items"], hide == true ? 0 : 1);
 			frm.set_df_property("from_bom", "read_only", hide == true ? 1 : 0);
 			frm.set_df_property("qty", "read_only", hide == true ? 1 : 0);
@@ -73,15 +73,15 @@ frappe.ui.form.on("Task", {
 				},
 				callback: function (r) {
 					if (!r.message) {
-						frm.add_custom_button(__('Material Transfer'), function(){
-							frm.events.make_se_mt(frm)
+						frm.add_custom_button(__('Material Transfer'), function() {
+							frm.events.make_se_mt(frm);
 						}, __("Create"));
-						frm.add_custom_button(__('Material Issue'), function(){
-							frm.events.make_se_mi(frm)
+						frm.add_custom_button(__('Material Issue'), function() {
+							frm.events.make_se_mi(frm);
 						}, __("Create"));
 					}
 				}
-			})
+			});
 		}
 	},
 
@@ -121,17 +121,17 @@ frappe.ui.form.on("Task", {
 	},
 	calculate_estimated_cost: function(frm, row) {
 		row.estimated_cost = flt(row.qty) * flt(row.basic_rate);
-		frm.refresh_field("items")
+		frm.refresh_field("items");
 	},
 	get_items(frm) {
 		if (!frm.doc.qty || !frm.doc.from_bom) {
 			frappe.throw(__('BOM and Quantity is required to fetch items.'));
 		}
 		frm.doc.items = [];
-	 	frappe.call({
+		frappe.call({
 			doc: frm.doc,
 			method: 'get_items',
-			callback: (r) => {
+			callback: () => {
 				frm.refresh_fields("items");
 			}
 		});
@@ -151,24 +151,24 @@ frappe.ui.form.on("Task Item", {
 					items_before_delete = [];
 				}
 			},
-		})
+		});
 	},
-	warehouse(frm, cdt, cdn){
+	warehouse(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
 		frappe.call({
 			doc: frm.doc,
 			method: "get_basic_rate",
 			args: {
-				item: {"item_code": row.item_code, "stock_uom": row.uom, "source_warehouse": row.warehouse},
+				item: {"item_code": row.item_code, "stock_uom": row.uom, "source_warehouse": row.warehouse}
 			},
 			callback: function (r) {
 				frappe.model.set_value(cdt, cdn, 'basic_rate', r.message);
 				frm.events.calculate_estimated_cost(frm, row);
 			},
-		})
+		});
 	},
 	before_items_remove: function (frm) {
-		items_before_delete = frm.doc.items
+		items_before_delete = frm.doc.items;
 	},
 	basic_rate(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];

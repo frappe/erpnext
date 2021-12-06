@@ -233,8 +233,8 @@ class Task(NestedSet):
 	def get_items(self):
 		def get_default_source_warehouse(item_code, company):
 			return frappe.db.get_value('Item Default',
-			{'parent': item_code, 'company': company},
-			['default_warehouse'])
+				{'parent': item_code, 'company': company},
+				['default_warehouse'])
 
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 
@@ -455,7 +455,7 @@ def check_if_deletable(items):
 		if '__checked' in item and (item['transferred'] or item['issued']):
 			e_message = "{0} cannot be deleted since \
 				{1} are linked against it.".format(
-			frappe.bold("Row " + str(item['idx'])), frappe.bold('Material Transfers/Issues'))
+					frappe.bold("Row " + str(item['idx'])), frappe.bold('Material Transfers/Issues'))
 			frappe.throw(e_message)
 
 @frappe.whitelist()
