@@ -7,21 +7,21 @@ def execute():
 	for doctype in active_sla_documents:
 		doctype = frappe.qb.DocType(doctype)
 		try:
-			query = (
-				frappe.qb
-					.update(doctype)
-					.set(doctype.agreement_status, 'First Response Due')
-					.where(
-						(doctype.first_responded_on.isnull()) | (doctype.first_responded_on == '')
-					)
-			)
-			query.run()
-			query = (
-				frappe.qb
-					.update(doctype)
-					.set(doctype.agreement_status, 'Resolution Due')
-					.where(doctype.agreement_status == 'Ongoing')
-			)
-			query.run()
-		except Exception as e:
+			frappe.qb.update(
+				doctype
+			).set(
+				doctype.agreement_status, 'First Response Due'
+			).where(
+				(doctype.first_responded_on.isnull()) | (doctype.first_responded_on == '')
+			).run()
+
+			frappe.qb.update(
+				doctype
+			).set(
+				doctype.agreement_status, 'Resolution Due'
+			).where(
+				doctype.agreement_status == 'Ongoing'
+			).run()
+
+		except Exception:
 			frappe.log_error('Failed to Patch SLA Status')
