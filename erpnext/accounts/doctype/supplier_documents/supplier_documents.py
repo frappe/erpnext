@@ -117,8 +117,8 @@ class SupplierDocuments(Document):
 		doc.posting_date = self.posting_date
 		doc.transaction_date = None
 		doc.account = self.account_to_debit
-		doc.party_type = None
-		doc.party = None
+		doc.party_type = "Supplier"
+		doc.party = self.supplier
 		doc.cost_center = None
 		doc.debit = self.total
 		doc.credit = 0

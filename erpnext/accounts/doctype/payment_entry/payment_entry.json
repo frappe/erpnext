@@ -13,6 +13,7 @@
   "column_break_5",
   "posting_date",
   "company",
+  "company_rtn",
   "mode_of_payment",
   "party_section",
   "party_type",
@@ -595,10 +596,17 @@
    "fieldtype": "Data",
    "label": "Party RTN",
    "read_only": 1
+  },
+  {
+   "fetch_from": "company.tax_id",
+   "fieldname": "company_rtn",
+   "fieldtype": "Data",
+   "label": "Company RTN",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-12-03 15:07:13.386161",
+ "modified": "2021-12-04 10:12:58.658899",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
