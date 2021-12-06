@@ -561,46 +561,11 @@ class TestDepreciationMethods(AssetSetup):
 		company_flag = frappe.flags.company
 		frappe.flags.company = "_Test Company"
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-		pr = make_purchase_receipt(item_code="Macbook Pro",
-			qty=1, rate=8000.0, location="Test Location")
-
-		finance_book = frappe.new_doc('Finance Book')
-		finance_book.finance_book_name = 'Income Tax'
-		finance_book.for_income_tax = 1
-		finance_book.insert(ignore_if_duplicate=1)
-
-		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
-		asset = frappe.get_doc('Asset', asset_name)
-		asset.calculate_depreciation = 1
-		asset.available_for_use_date = '2030-07-12'
-		asset.purchase_date = '2030-01-01'
-		asset.append("finance_books", {
-			"finance_book": finance_book.name,
-			"expected_value_after_useful_life": 1000,
-			"depreciation_method": "Written Down Value",
-			"total_number_of_depreciations": 3,
-			"frequency_of_depreciation": 12,
-			"depreciation_start_date": "2030-12-31"
-		})
-		asset.save(ignore_permissions=True)
-=======
-		asset = create_asset(calculate_depreciation=1,
-			available_for_use_date="2030-07-12", purchase_date="2030-01-01",
-			depreciation_method="Written Down Value",
-			expected_value_after_useful_life=12500, depreciation_start_date="2030-12-31",
-			total_number_of_depreciations=3, frequency_of_depreciation=12)
->>>>>>> 09215a9781 (fix: Remove PR creation from all tests for Depreciation Methods)
-=======
-=======
 		finance_book = frappe.new_doc("Finance Book")
 		finance_book.finance_book_name = "Income Tax"
 		finance_book.for_income_tax = 1
 		finance_book.insert(ignore_if_duplicate = True)
 
->>>>>>> f047c6ffc8 (fix: Test for WDV)
 		asset = create_asset(
 			calculate_depreciation = 1,
 			available_for_use_date = "2030-07-12",
@@ -612,7 +577,6 @@ class TestDepreciationMethods(AssetSetup):
 			total_number_of_depreciations = 3,
 			frequency_of_depreciation = 12
 		)
->>>>>>> e9d310a13e (fix: Format tests)
 
 		self.assertEqual(asset.finance_books[0].rate_of_depreciation, 50.0)
 
@@ -631,8 +595,6 @@ class TestDepreciationMethods(AssetSetup):
 		# reset indian company
 		frappe.flags.company = company_flag
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	def test_expected_value_change(self):
 		"""
 			tests if changing `expected_value_after_useful_life`
@@ -653,10 +615,8 @@ class TestDepreciationMethods(AssetSetup):
 		asset.save()
 		asset.reload()
 		self.assertEquals(asset.finance_books[0].value_after_depreciation, 98000.0)
-=======
-=======
+
 class TestDepreciationBasics(AssetSetup):
->>>>>>> c84c983073 (fix: Categorize into test suites)
 	def test_depreciation_without_pro_rata(self):
 		asset = create_asset(
 			item_code = "Macbook Pro",
@@ -950,7 +910,6 @@ class TestDepreciationBasics(AssetSetup):
 		asset.clear_depreciation_schedule()
 
 		self.assertEqual(len(asset.schedules), 1)
->>>>>>> 40ec2d622b (fix: Add tests for depreciation)
 
 	def test_depreciation_entry_cancellation(self):
 		asset = create_asset(
@@ -1010,23 +969,6 @@ class TestDepreciationBasics(AssetSetup):
 			submit = 1
 		)
 
-<<<<<<< HEAD
-		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
-		asset = frappe.get_doc('Asset', asset_name)
-		asset.calculate_depreciation = 1
-		asset.purchase_date = '2020-01-30'
-		asset.available_for_use_date = "2020-01-30"
-		asset.append("finance_books", {
-			"expected_value_after_useful_life": 10000,
-			"depreciation_method": "Straight Line",
-			"total_number_of_depreciations": 3,
-			"frequency_of_depreciation": 10,
-			"depreciation_start_date": "2020-12-31"
-		})
-		asset.submit()
-		asset.load_from_db()
-=======
->>>>>>> 968be70bd1 (fix: Remove PR creation from all tests in TestDepreciationBasics)
 		self.assertEqual(asset.status, "Submitted")
 
 		frappe.db.set_value("Company", "_Test Company", "series_for_depreciation_entry", "DEPR-")
