@@ -697,7 +697,7 @@ def record_assigned_users_on_failure(doc):
 	if assigned_users:
 		from frappe.utils import get_fullname
 		assigned_users = ', '.join((get_fullname(user) for user in assigned_users))
-		message = _(f'First Response SLA Failed by {assigned_users}')
+		message = _('First Response SLA Failed by {}').format(assigned_users)
 		doc.add_comment(
 			comment_type='Assigned',
 			text=message
