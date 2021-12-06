@@ -344,7 +344,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-20 09:53:33.683497",
+ "modified": "2021-12-06 16:41:20.295053",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Receipt",
@@ -398,7 +398,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "posting_date",
  "sort_order": "DESC",
- "timeline_field": "agent",
+ "timeline_field": "customer",
  "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
