@@ -1113,7 +1113,6 @@ def get_future_sle_with_negative_qty(args):
 			and warehouse = %(warehouse)s
 			and voucher_no != %(voucher_no)s
 			and ifnull(batch_no,'') = %(batch_no)s
-			and ifnull(serial_no,'') = %(serial_no)s
 			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
 			and is_cancelled = 0
 			and qty_after_transaction < 0
