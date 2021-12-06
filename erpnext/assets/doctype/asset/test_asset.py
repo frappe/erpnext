@@ -595,8 +595,6 @@ class TestDepreciationMethods(AssetSetup):
 		# reset indian company
 		frappe.flags.company = company_flag
 
-<<<<<<< HEAD
-=======
 class TestDepreciationBasics(AssetSetup):
 	def test_depreciation_without_pro_rata(self):
 		asset = create_asset(
@@ -1036,7 +1034,7 @@ class TestDepreciationBasics(AssetSetup):
 
 		self.assertEqual(gle, expected_gle)
 		self.assertEqual(asset.get("value_after_depreciation"), 0)
->>>>>>> a36713cd2d (fix: Test Depreciation Entry posting when Depreciation Expense Account is an Expense Account)
+
 	def test_expected_value_change(self):
 		"""
 			tests if changing `expected_value_after_useful_life`
