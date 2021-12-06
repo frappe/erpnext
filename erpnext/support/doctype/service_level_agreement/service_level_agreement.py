@@ -397,6 +397,12 @@ def handle_status_change(doc, apply_sla_for_resolution):
 	def is_open_status(status):
 		return status not in hold_statuses and status not in fulfillment_statuses
 
+	def set_first_response():
+		if doc.meta.has_field("first_responded_on") and not doc.get('first_responded_on'):
+			doc.first_responded_on = now_time
+			if get_datetime(doc.get('first_responded_on')) > get_datetime(doc.get('response_by')):
+				record_assigned_users_on_failure(doc)
+
 	def calculate_hold_hours():
 		# In case issue was closed and after few days it has been opened
 		# The hold time should be calculated from resolution_date
@@ -408,9 +414,7 @@ def handle_status_change(doc, apply_sla_for_resolution):
 		doc.on_hold_since = None
 
 	if ((is_open_status(prev_status) and not is_open_status(doc.status)) or doc.flags.on_first_reply):
-		# status changed from Open to something else
-		if doc.meta.has_field("first_responded_on") and not doc.get('first_responded_on'):
-			doc.first_responded_on = now_time
+		set_first_response()
 
 	# Open to Replied
 	if is_open_status(prev_status) and is_hold_status(doc.status):
@@ -686,6 +690,18 @@ def set_resolution_by(doc, start_date_time, priority):
 		doc.resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
 		if doc.meta.has_field("total_hold_time") and doc.get('total_hold_time'):
 			doc.resolution_by = add_to_date(doc.resolution_by, seconds=round(doc.get('total_hold_time')))
+
+
+def record_assigned_users_on_failure(doc):
+	assigned_users = doc.get_assigned_users()
+	if assigned_users:
+		from frappe.utils import get_fullname
+		assigned_users = ', '.join((get_fullname(user) for user in assigned_users))
+		message = _(f'First Response SLA Failed by {assigned_users}')
+		doc.add_comment(
+			comment_type='Assigned',
+			text=message
+		)
 
 
 def get_service_level_agreement_fields():

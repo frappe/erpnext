@@ -211,6 +211,43 @@ class TestIssue(TestSetUp):
 		self.assertEquals(issue.agreement_status, 'Fulfilled')
 		self.assertEquals(issue.resolution_date, frappe.flags.current_time)
 
+	def test_recording_of_assignment_on_first_reponse_failure(self):
+		from frappe.desk.form.assign_to import add as add_assignment
+
+		frappe.flags.current_time = get_datetime("2021-11-01 19:00")
+
+		issue = make_issue(frappe.flags.current_time, index=1)
+		create_communication(issue.name, "test@example.com", "Received", frappe.flags.current_time)
+		add_assignment({
+			'doctype': issue.doctype,
+			'name': issue.name,
+			'assign_to': ['test@admin.com']
+		})
+		issue.reload()
+
+		# send a reply failing response SLA
+		frappe.flags.current_time = get_datetime("2021-11-02 15:00")
+		create_communication(issue.name, "test@admin.com", "Sent", frappe.flags.current_time)
+
+		# assert if a new timeline item has been added
+		# to record the assignment
+		comment = frappe.get_last_doc('Comment')
+		self.assertTrue('First Response SLA Failed' in comment.content)
+
+	def test_agreement_status_on_response(self):
+		frappe.flags.current_time = get_datetime("2021-11-01 19:00")
+
+		issue = make_issue(frappe.flags.current_time, index=1)
+		create_communication(issue.name, "test@example.com", "Received", frappe.flags.current_time)
+		self.assertTrue(issue.status == 'Open')
+
+		# send a reply within response SLA
+		frappe.flags.current_time = get_datetime("2021-11-02 11:00")
+		create_communication(issue.name, "test@admin.com", "Sent", frappe.flags.current_time)
+
+		issue.reload()
+		self.assertEquals(issue.first_responded_on, frappe.flags.current_time)
+		self.assertEquals(issue.agreement_status, 'Resolution Due')
 
 class TestFirstResponseTime(TestSetUp):
 	# working hours used in all cases: Mon-Fri, 10am to 6pm
@@ -425,6 +462,7 @@ class TestFirstResponseTime(TestSetUp):
 def create_issue_and_communication(issue_creation, first_responded_on):
 	issue = make_issue(issue_creation, index=1)
 	sender = create_user("test@admin.com")
+	frappe.flags.current_time = first_responded_on
 	create_communication(issue.name, sender.email, "Sent", first_responded_on)
 	issue.reload()
 
