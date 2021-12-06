@@ -73,12 +73,12 @@ class Asset(AccountsController):
 		if self.is_existing_asset and self.purchase_invoice:
 			frappe.throw(_("Purchase Invoice cannot be made against an existing asset {0}").format(self.name))
 
-	def prepare_depreciation_data(self, date_of_sale=None):
+	def prepare_depreciation_data(self, date_of_sale=None, date_of_return=None):
 		if self.calculate_depreciation:
 			self.value_after_depreciation = 0
 			self.set_depreciation_rate()
 			self.make_depreciation_schedule(date_of_sale)
-			self.set_accumulated_depreciation(date_of_sale)
+			self.set_accumulated_depreciation(date_of_sale, date_of_return)
 		else:
 			self.finance_books = []
 			self.value_after_depreciation = (flt(self.gross_purchase_amount) -
@@ -180,7 +180,7 @@ class Asset(AccountsController):
 				d.precision("rate_of_depreciation"))
 
 	def make_depreciation_schedule(self, date_of_sale):
-		if 'Manual' not in [d.depreciation_method for d in self.finance_books] and not self.schedules:
+		if 'Manual' not in [d.depreciation_method for d in self.finance_books] and not self.get('schedules'):
 			self.schedules = []
 
 		if not self.available_for_use_date:
@@ -229,13 +229,15 @@ class Asset(AccountsController):
 					depreciation_amount, days, months = self.get_pro_rata_amt(d, depreciation_amount,
 						from_date, date_of_sale)
 
-					self.append("schedules", {
-						"schedule_date": date_of_sale,
-						"depreciation_amount": depreciation_amount,
-						"depreciation_method": d.depreciation_method,
-						"finance_book": d.finance_book,
-						"finance_book_id": d.idx
-					})
+					if depreciation_amount > 0:
+						self.append("schedules", {
+							"schedule_date": date_of_sale,
+							"depreciation_amount": depreciation_amount,
+							"depreciation_method": d.depreciation_method,
+							"finance_book": d.finance_book,
+							"finance_book_id": d.idx
+						})
+
 					break
 
 				# For first row
@@ -254,11 +256,15 @@ class Asset(AccountsController):
 						self.to_date = add_months(self.available_for_use_date,
 							(n + self.number_of_depreciations_booked) * cint(d.frequency_of_depreciation))
 
+					depreciation_amount_without_pro_rata = depreciation_amount
+
 					depreciation_amount, days, months = self.get_pro_rata_amt(d,
 						depreciation_amount, schedule_date, self.to_date)
 
-					monthly_schedule_date = add_months(schedule_date, 1)
+					depreciation_amount = self.get_adjusted_depreciation_amount(depreciation_amount_without_pro_rata,
+						depreciation_amount, d.finance_book)
 
+					monthly_schedule_date = add_months(schedule_date, 1)
 					schedule_date = add_days(schedule_date, days)
 					last_schedule_date = schedule_date
 
@@ -424,7 +430,7 @@ class Asset(AccountsController):
 		if len(self.finance_books) == 1:
 			return True
 
-	def set_accumulated_depreciation(self, date_of_sale=None, ignore_booked_entry = False):
+	def set_accumulated_depreciation(self, date_of_sale=None, date_of_return=None, ignore_booked_entry = False):
 		straight_line_idx = [d.idx for d in self.get("schedules") if d.depreciation_method == 'Straight Line']
 		finance_books = []
 
@@ -441,7 +447,7 @@ class Asset(AccountsController):
 			value_after_depreciation -= flt(depreciation_amount)
 
 			# for the last row, if depreciation method = Straight Line
-			if straight_line_idx and i == max(straight_line_idx) - 1 and not date_of_sale:
+			if straight_line_idx and i == max(straight_line_idx) - 1 and not date_of_sale and not date_of_return:
 				book = self.get('finance_books')[cint(d.finance_book_id) - 1]
 				depreciation_amount += flt(value_after_depreciation -
 					flt(book.expected_value_after_useful_life), d.precision("depreciation_amount"))
