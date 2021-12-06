@@ -12,7 +12,7 @@ def execute():
 			).set(
 				doctype.agreement_status, 'First Response Due'
 			).where(
-				(doctype.first_responded_on.isnull()) | (doctype.first_responded_on == '')
+				doctype.first_responded_on.isnull()
 			).run()
 
 			frappe.qb.update(
@@ -24,4 +24,4 @@ def execute():
 			).run()
 
 		except Exception:
-			frappe.log_error('Failed to Patch SLA Status')
+			frappe.log_error(title='Failed to Patch SLA Status')
