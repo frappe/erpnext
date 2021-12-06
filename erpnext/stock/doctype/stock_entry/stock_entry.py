@@ -1697,18 +1697,18 @@ class StockEntry(StockController):
 			self._update_percent_field_in_targets(args, update_modified=True)
 
 	def update_quality_inspection(self):
-		if self.inspection_required:
-			reference_type = reference_name = ''
-			if self.docstatus == 1:
-				reference_name = self.name
-				reference_type = 'Stock Entry'
+		reference_type = reference_name = ''
+		if self.docstatus == 1:
+			reference_name = self.name
+			reference_type = 'Stock Entry'
 
-			for d in self.items:
-				if d.quality_inspection:
-					frappe.db.set_value("Quality Inspection", d.quality_inspection, {
-						'reference_type': reference_type,
-						'reference_name': reference_name
-					})
+		for d in self.items:
+			if d.inspection_required and d.quality_inspection:
+				frappe.db.set_value("Quality Inspection", d.quality_inspection, {
+					'reference_type': reference_type,
+					'reference_name': reference_name
+				})
+
 	def set_material_request_transfer_status(self, status):
 		material_requests = []
 		if self.outgoing_stock_entry:
