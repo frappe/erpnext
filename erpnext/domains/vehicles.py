@@ -65,16 +65,10 @@ project_vehicle_owner_field['insert_after'] = 'col_break_customer_details_2'
 
 # Service Person
 service_person_fields = [
-	{"label": "Service Advisor", "fieldname": "service_advisor", "fieldtype": "Link", "options": "Employee",
-		"insert_after": "more_info_cb_2", "in_standard_filter": 1, "ignore_user_permissions": 1},
-	{"label": "Service Advisor Name", "fieldname": "service_advisor_name", "fieldtype": "Data",
-		"insert_after": "service_advisor", "read_only": 1, "fetch_from": "service_advisor.employee_name",
-		"depends_on": "eval:doc.service_advisor && doc.service_advisor_name != doc.service_advisor"},
-	{"label": "Service Manager", "fieldname": "service_manager", "fieldtype": "Link", "options": "Employee",
-		"insert_after": "more_info_cb_3", "in_standard_filter": 1, "ignore_user_permissions": 1},
-	{"label": "Service Manager Name", "fieldname": "service_manager_name", "fieldtype": "Data",
-		"insert_after": "service_manager", "read_only": 1, "fetch_from": "service_manager.employee_name",
-		"depends_on": "eval:doc.service_manager && doc.service_manager_name != doc.service_manager"},
+	{"label": "Service Advisor", "fieldname": "service_advisor", "fieldtype": "Link", "options": "Sales Person",
+		"insert_after": "more_info_cb_2", "in_standard_filter": 1},
+	{"label": "Service Manager", "fieldname": "service_manager", "fieldtype": "Link", "options": "Sales Person",
+		"insert_after": "more_info_cb_3", "in_standard_filter": 1},
 ]
 
 # Accounting Dimensions

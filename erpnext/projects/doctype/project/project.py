@@ -40,7 +40,6 @@ class Project(Document):
 			self.copy_from_template()
 
 		self.update_costing()
-		self.validate_service_person()
 		self.validate_applies_to()
 		self.update_percent_complete()
 		self.send_welcome_email()
@@ -75,12 +74,6 @@ class Project(Document):
 					"vehicle_first_odometer": odo.vehicle_first_odometer,
 					"vehicle_last_odometer": odo.vehicle_last_odometer,
 				})
-
-	def validate_service_person(self):
-		if self.meta.has_field('service_advisor') and self.meta.has_field('service_advisor_name') and not self.get('service_advisor'):
-			self.service_advisor_name = ''
-		if self.meta.has_field('service_manager') and self.meta.has_field('service_manager_name') and not self.get('service_manager'):
-			self.service_manager_name = ''
 
 	def validate_applies_to(self):
 		args = self.as_dict()
