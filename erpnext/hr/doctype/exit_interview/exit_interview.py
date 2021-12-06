@@ -123,7 +123,7 @@ def show_email_summary(email_success, email_failure):
 		message += _('{0}: {1}').format(
 			frappe.bold('Sent Successfully'), ', '.join(email_success))
 	if email_failure:
-		message += + '<br><br>' + _('{0} due to missing email information for employee(s): {1}').format(
+		message += '<br><br>' + _('{0} due to missing email information for employee(s): {1}').format(
 			frappe.bold('Sending Failed'), ', '.join(email_failure))
 
 	frappe.msgprint(message, title=_('Exit Questionnaire'), indicator='blue', is_minimizable=True, wide=True)
