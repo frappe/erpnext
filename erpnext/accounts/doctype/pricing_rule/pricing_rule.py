@@ -387,7 +387,7 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 			if field not in item_details:
 				item_details.setdefault(field, 0)
 
-			item_details[field] += (pricing_rule.get(field, 0)
+			item_details[field] += (pricing_rule.get(field, 0) * args.get("conversion_factor", 1)
 				if pricing_rule else args.get(field, 0))
 
 def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
