@@ -105,8 +105,9 @@ def get_data(filters):
 				employee.department.as_('department'), employee.designation.as_('designation'),
 				employee.reports_to.as_('reports_to'), interview.name.as_('exit_interview'),
 				interview.status.as_('interview_status'), interview.employee_status.as_('employee_status'),
-				interview.reference_document_name.as_('questionnaire'), fnf.name.as_('full_and_final_statement')
-			).distinct()
+				interview.reference_document_name.as_('questionnaire'), fnf.name.as_('full_and_final_statement'))
+			.distinct()
+			.orderby(employee.relieving_date)
 			.where(
 				((employee.relieving_date.isnotnull()) | (employee.relieving_date != ''))
 				& ((interview.name.isnull()) | ((interview.name.isnotnull()) & (interview.docstatus != 2)))
@@ -158,7 +159,7 @@ def get_conditions(filters, query, employee, interview, fnf):
 		query = query.where((interview.reference_document_name == '') | (interview.reference_document_name.isnull()))
 
 	if filters.get('fnf_pending'):
-		query = query.where((fnf.name == '') | (interview.name.isnull()))
+		query = query.where((fnf.name == '') | (fnf.name.isnull()))
 
 	return query
 
