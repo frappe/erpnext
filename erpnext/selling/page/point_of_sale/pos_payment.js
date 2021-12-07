@@ -364,7 +364,8 @@ erpnext.PointOfSale.Payment = class {
 				p: p,
 				mode: mode,
 				currency: currency,
-			}
+			};
+
 			if (p.type != 'Credit Note') {
 				args.option_list = null;
 				// this.update_field_value_onchange(args);
@@ -378,7 +379,7 @@ erpnext.PointOfSale.Payment = class {
 							if (current_value != this.value) {
 								frappe.model
 									.set_value(p.doctype, p.name, 'amount', flt(this.value))
-									.then(() => me.update_totals_section())
+									.then(() => me.update_totals_section());
 
 								const formatted_currency = format_currency(this.value, currency);
 								me.$payment_modes.find(`.${mode}-amount`).html(formatted_currency);
@@ -390,10 +391,7 @@ erpnext.PointOfSale.Payment = class {
 				});
 			} else {
 				const opt = await frappe.call({
-					method:'erpnext.selling.page.point_of_sale.point_of_sale.get_credit_note_options',
-					callback: (r) => {
-						if (!r.exc) {}
-					}
+					method: 'erpnext.selling.page.point_of_sale.point_of_sale.get_credit_note_options'
 				});
 				const option_list = opt.message;
 				args.option_list = option_list;
@@ -410,7 +408,7 @@ erpnext.PointOfSale.Payment = class {
 						get_query: () => query,
 						onchange: function() {
 							const current_value = frappe.model.get_value(p.doctype, p.name, 'credit_note');
-							const cond = (typeof(this.value) != 'number' && this.value != '') ? 1 : 0;
+							const cond = (typeof (this.value) != 'number' && this.value != '') ? 1 : 0;
 
 							if (current_value != this.value) {
 
@@ -451,11 +449,11 @@ erpnext.PointOfSale.Payment = class {
 
 	set_payment_amount_and_currency(me, p, mode, new_amount, currency) {
 		frappe.model
-				.set_value(p.doctype, p.name, 'amount', flt(new_amount))
-				.then(() => me.update_totals_section());
+			.set_value(p.doctype, p.name, 'amount', flt(new_amount))
+			.then(() => me.update_totals_section());
 
-			const formatted_currency = format_currency(this.value, currency);
-			me.$payment_modes.find(`.${mode}-amount`).html(formatted_currency);
+		const formatted_currency = format_currency(this.value, currency);
+		me.$payment_modes.find(`.${mode}-amount`).html(formatted_currency);
 	}
 
 	focus_on_default_mop() {

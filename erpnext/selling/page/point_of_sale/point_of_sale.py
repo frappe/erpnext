@@ -288,13 +288,7 @@ def set_customer_info(fieldname, customer, value=""):
 @frappe.whitelist()
 def get_credit_note_options():
 	credit_note_list = {}
-	pos_inv = frappe.get_all('POS Invoice', filters={
-				'is_pos': 1,
-				'is_return': 1,
-				# 'outstanding_amount': ['>','0']
-				},
-				fields=['name', 'grand_total']
-			)
+	pos_inv = frappe.get_all('POS Invoice', filters={'is_pos': 1, 'is_return': 1}, fields=['name', 'grand_total'])
 	for inv in pos_inv:
 		credit_note_list.setdefault(inv.name, inv.grand_total)
 	return credit_note_list

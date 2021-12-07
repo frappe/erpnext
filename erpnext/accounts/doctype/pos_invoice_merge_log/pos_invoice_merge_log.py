@@ -256,7 +256,7 @@ class POSInvoiceMergeLog(Document):
 				# reset the outstanding values on cancellation
 				set_pos_cn_outstanding_value(advances, cn_amount_mapping, set_zero=False)
 
-			doc.update({ 'consolidated_invoice': None if self.docstatus==2 else cons_inv })
+			doc.update({'consolidated_invoice': None if self.docstatus==2 else cons_inv})
 			doc.set_status(update=True)
 			doc.save()
 
@@ -278,7 +278,7 @@ def get_pos_advance_credit_notes(sales, returns):
 			if p.type == "Credit Note":
 				found = 1
 				ret = remove_from_returns_list(returns, p.credit_note)
-				if ret: #if already removed from the list then skip
+				if ret:
 					cn_amount_mapping[ret.name] = p.amount
 					advances.append(ret)
 

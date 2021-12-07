@@ -801,14 +801,14 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		this.frm.set_value('base_paid_amount', flt(base_paid_amount, precision("base_paid_amount")));
 	}
 
-	calculate_change_amount(){
+	calculate_change_amount() {
 		this.frm.doc.change_amount = 0.0;
 		this.frm.doc.base_change_amount = 0.0;
 
-		if(this.frm.doc.doctype == 'POS Invoice' && this.frm.doc.is_return && this.frm.doc.ignore_payments_for_return)
+		if (this.frm.doc.doctype == 'POS Invoice' && this.frm.doc.is_return && this.frm.doc.ignore_payments_for_return)
 			return;
 
-		if(in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype)
+		if (in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype)
 			&& this.frm.doc.paid_amount > this.frm.doc.grand_total && !this.frm.doc.is_return) {
 
 			var payment_types = $.map(this.frm.doc.payments, function(d) { return d.type; });
@@ -826,12 +826,13 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		}
 	}
 
-	calculate_write_off_amount(){
-		if(this.frm.doc.doctype == 'POS Invoice' && this.frm.doc.is_return && this.frm.doc.ignore_payments_for_return)
-		this.frm.doc.write_off_amount = this.frm.doc.base_write_off_amount = 0.0
-		return;
+	calculate_write_off_amount() {
+		this.frm.doc.write_off_amount = this.frm.doc.base_write_off_amount = 0.0;
 
-		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
+		if (this.frm.doc.doctype == 'POS Invoice' && this.frm.doc.is_return && this.frm.doc.ignore_payments_for_return)
+			return;
+
+		if (this.frm.doc.paid_amount > this.frm.doc.grand_total){
 			this.frm.doc.write_off_amount = flt(this.frm.doc.grand_total - this.frm.doc.paid_amount
 				+ this.frm.doc.change_amount, precision("write_off_amount"));
 
