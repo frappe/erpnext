@@ -14,6 +14,7 @@
   "posting_date",
   "due_date",
   "company",
+  "company_rtn",
   "cai_info_section",
   "cai",
   "due_date_cai",
@@ -170,10 +171,17 @@
    "label": "Currency",
    "options": "Currency",
    "reqd": 1
+  },
+  {
+   "fetch_from": "company.tax_id",
+   "fieldname": "company_rtn",
+   "fieldtype": "Data",
+   "label": "Company RTN",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-12-07 11:12:45.105140",
+ "modified": "2021-12-07 15:02:30.731194",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Supplier Retention",
