@@ -33,13 +33,39 @@ def get_columns():
 			'label': _('Date of Joining'),
 			'fieldname': 'date_of_joining',
 			'fieldtype': 'Date',
-			'width': 100
+			'width': 120
 		},
 		{
 			'label': _('Relieving Date'),
 			'fieldname': 'relieving_date',
 			'fieldtype': 'Date',
-			'width': 100
+			'width': 120
+		},
+		{
+			'label': _('Exit Interview'),
+			'fieldname': 'exit_interview',
+			'fieldtype': 'Link',
+			'options': 'Exit Interview',
+			'width': 150
+		},
+		{
+			'label': _('Interview Status'),
+			'fieldname': 'interview_status',
+			'fieldtype': 'Data',
+			'width': 130
+		},
+		{
+			'label': _('Final Decision'),
+			'fieldname': 'employee_status',
+			'fieldtype': 'Data',
+			'width': 150
+		},
+		{
+			'label': _('Full and Final Statement'),
+			'fieldname': 'full_and_final_statement',
+			'fieldtype': 'Link',
+			'options': 'Full and Final Statement',
+			'width': 180
 		},
 		{
 			'label': _('Department'),
@@ -61,32 +87,6 @@ def get_columns():
 			'fieldtype': 'Link',
 			'options': 'Employee',
 			'width': 120
-		},
-		{
-			'label': _('Exit Interview'),
-			'fieldname': 'exit_interview',
-			'fieldtype': 'Link',
-			'options': 'Exit Interview',
-			'width': 98
-		},
-		{
-			'label': _('Interview Status'),
-			'fieldname': 'interview_status',
-			'fieldtype': 'Data',
-			'width': 98
-		},
-		{
-			'label': _('Final Decision'),
-			'fieldname': 'employee_status',
-			'fieldtype': 'Data',
-			'width': 98
-		},
-		{
-			'label': _('Full and Final Statement'),
-			'fieldname': 'full_and_final_statement',
-			'fieldtype': 'Link',
-			'options': 'Full and Final Statement',
-			'width': 150
 		}
 	]
 
