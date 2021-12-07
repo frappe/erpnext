@@ -39,6 +39,14 @@ def make_custom_fields():
 				read_only=1, no_copy=1, hidden=1
 			)
 		],
+		'POS Invoice': [
+			dict(
+				fieldname='ksa_einv_qr',
+				label='KSA E-Invoicing QR',
+				fieldtype='Attach Image',
+				read_only=1, no_copy=1, hidden=1
+			)
+		],
 		'Address': [
 			dict(
 				fieldname='address_in_arabic',
