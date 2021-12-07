@@ -15,7 +15,7 @@
 			<div class="col-sm-3 small">
 				<span class="inline-graph">
 					<span class="inline-graph-half" title="{{ __("Reserved Qty") }}">
-						<span class="inline-graph-count">{{ d.total_reserved }}</span>
+						<span class="inline-graph-count">{{"Reserved: "+ d.total_reserved }}</span>
 						<span class="inline-graph-bar">
 							<span class="inline-graph-bar-inner"
 								style="width: {{ cint(Math.abs(d.total_reserved)/max_count * 100) || 5 }}%">
