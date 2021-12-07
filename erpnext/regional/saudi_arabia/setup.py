@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.permissions import add_permission, update_permission_property
-from erpnext.regional.united_arab_emirates.setup import make_custom_fields as uae_custom_fields, add_print_formats
+from erpnext.regional.united_arab_emirates.setup import make_custom_fields as uae_custom_fields
 from erpnext.regional.saudi_arabia.wizard.operations.setup_ksa_vat_setting import create_ksa_vat_setting
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
@@ -12,6 +12,18 @@ def setup(company=None, patch=True):
 	add_print_formats()
 	add_permissions()
 	make_custom_fields()
+
+def add_print_formats():
+	frappe.reload_doc("regional", "print_format", "detailed_tax_invoice")
+	frappe.reload_doc("regional", "print_format", "simplified_tax_invoice")
+	frappe.reload_doc("regional", "print_format", "tax_invoice")
+	frappe.reload_doc("regional", "print_format", "ksa_vat_invoice")
+	frappe.reload_doc("regional", "print_format", "ksa_pos_invoice")
+
+	frappe.db.sql("""UPDATE`tabPrint Format` SET disabled = 0 WHERE
+			name IN ('Simplified Tax Invoice', 'Detailed Tax Invoice',
+			'Tax Invoice', 'KSA VAT Invoice', 'KSA POS Invoice')
+		""")
 
 def add_permissions():
 	"""Add Permissions for KSA VAT Setting."""
