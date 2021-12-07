@@ -30,7 +30,7 @@
   "reference_document_name",
   "interview_summary_section",
   "interviewers",
-  "text_editor_12",
+  "interview_summary",
   "employee_status_section",
   "employee_status",
   "amended_from"
@@ -111,11 +111,6 @@
    "fieldname": "interview_summary_section",
    "fieldtype": "Section Break",
    "label": "Interview Details"
-  },
-  {
-   "fieldname": "text_editor_12",
-   "fieldtype": "Text Editor",
-   "label": "Interview Summary"
   },
   {
    "fieldname": "column_break_10",
@@ -213,12 +208,17 @@
    "options": "Exit Interview",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "interview_summary",
+   "fieldtype": "Text Editor",
+   "label": "Interview Summary"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-12-05 18:56:34.856854",
+ "modified": "2021-12-07 14:08:29.355390",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Exit Interview",

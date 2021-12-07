@@ -109,7 +109,7 @@ def validate_questionnaire_settings():
 
 	if not settings.exit_questionnaire_web_form or not settings.exit_questionnaire_notification_template:
 		frappe.throw(
-			message=_('Please set {0} and {1} in {2}.').format(
+			_('Please set {0} and {1} in {2}.').format(
 				frappe.bold('Exit Questionnaire Web Form'),
 				frappe.bold('Notification Template'),
 				get_link_to_form('HR Settings', 'HR Settings')),
@@ -122,8 +122,10 @@ def show_email_summary(email_success, email_failure):
 	if email_success:
 		message += _('{0}: {1}').format(
 			frappe.bold('Sent Successfully'), ', '.join(email_success))
+	if message and email_failure:
+		message += '<br><br>'
 	if email_failure:
-		message += '<br><br>' + _('{0} due to missing email information for employee(s): {1}').format(
+		message += _('{0} due to missing email information for employee(s): {1}').format(
 			frappe.bold('Sending Failed'), ', '.join(email_failure))
 
 	frappe.msgprint(message, title=_('Exit Questionnaire'), indicator='blue', is_minimizable=True, wide=True)
