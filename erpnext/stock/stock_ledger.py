@@ -549,3 +549,179 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 		frappe.throw(msg=msg, title=_("Valuation Rate Missing"))
 
 	return valuation_rate
+<<<<<<< HEAD
+=======
+
+def update_qty_in_future_sle(args, allow_negative_stock=False):
+	"""Recalculate Qty after Transaction in future SLEs based on current SLE."""
+	datetime_limit_condition = ""
+	qty_shift = args.actual_qty
+
+	# find difference/shift in qty caused by stock reconciliation
+	if args.voucher_type == "Stock Reconciliation":
+		qty_shift = get_stock_reco_qty_shift(args)
+
+	# find the next nearest stock reco so that we only recalculate SLEs till that point
+	next_stock_reco_detail = get_next_stock_reco(args)
+	if next_stock_reco_detail:
+		detail = next_stock_reco_detail[0]
+		# add condition to update SLEs before this date & time
+		datetime_limit_condition = get_datetime_limit_condition(detail)
+
+	frappe.db.sql("""
+		update `tabStock Ledger Entry`
+		set qty_after_transaction = qty_after_transaction + {qty_shift}
+		where
+			item_code = %(item_code)s
+			and warehouse = %(warehouse)s
+			and voucher_no != %(voucher_no)s
+			and is_cancelled = 0
+			and (timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)
+				or (
+					timestamp(posting_date, posting_time) = timestamp(%(posting_date)s, %(posting_time)s)
+					and creation > %(creation)s
+				)
+			)
+		{datetime_limit_condition}
+		""".format(qty_shift=qty_shift, datetime_limit_condition=datetime_limit_condition), args)
+
+	validate_negative_qty_in_future_sle(args, allow_negative_stock)
+
+def get_stock_reco_qty_shift(args):
+	stock_reco_qty_shift = 0
+	if args.get("is_cancelled"):
+		if args.get("previous_qty_after_transaction"):
+			# get qty (balance) that was set at submission
+			last_balance = args.get("previous_qty_after_transaction")
+			stock_reco_qty_shift = flt(args.qty_after_transaction) - flt(last_balance)
+		else:
+			stock_reco_qty_shift = flt(args.actual_qty)
+	else:
+		# reco is being submitted
+		last_balance = get_previous_sle_of_current_voucher(args,
+			exclude_current_voucher=True).get("qty_after_transaction")
+
+		if last_balance is not None:
+			stock_reco_qty_shift = flt(args.qty_after_transaction) - flt(last_balance)
+		else:
+			stock_reco_qty_shift = args.qty_after_transaction
+
+	return stock_reco_qty_shift
+
+def get_next_stock_reco(args):
+	"""Returns next nearest stock reconciliaton's details."""
+
+	return frappe.db.sql("""
+		select
+			name, posting_date, posting_time, creation, voucher_no
+		from
+			`tabStock Ledger Entry`
+		where
+			item_code = %(item_code)s
+			and warehouse = %(warehouse)s
+			and voucher_type = 'Stock Reconciliation'
+			and voucher_no != %(voucher_no)s
+			and is_cancelled = 0
+			and (timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)
+				or (
+					timestamp(posting_date, posting_time) = timestamp(%(posting_date)s, %(posting_time)s)
+					and creation > %(creation)s
+				)
+			)
+		limit 1
+	""", args, as_dict=1)
+
+def get_datetime_limit_condition(detail):
+	return f"""
+		and
+		(timestamp(posting_date, posting_time) < timestamp('{detail.posting_date}', '{detail.posting_time}')
+			or (
+				timestamp(posting_date, posting_time) = timestamp('{detail.posting_date}', '{detail.posting_time}')
+				and creation < '{detail.creation}'
+			)
+		)"""
+
+def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
+	allow_negative_stock = cint(allow_negative_stock) \
+		or cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+
+	if allow_negative_stock:
+		return
+	if not (args.actual_qty < 0 or args.voucher_type == "Stock Reconciliation"):
+		return
+
+	neg_sle = get_future_sle_with_negative_qty(args)
+	if neg_sle:
+		message = _("{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction.").format(
+			abs(neg_sle[0]["qty_after_transaction"]),
+			frappe.get_desk_link('Item', args.item_code),
+			frappe.get_desk_link('Warehouse', args.warehouse),
+			neg_sle[0]["posting_date"], neg_sle[0]["posting_time"],
+			frappe.get_desk_link(neg_sle[0]["voucher_type"], neg_sle[0]["voucher_no"]))
+
+		frappe.throw(message, NegativeStockError, title='Insufficient Stock')
+
+
+	if not args.batch_no:
+		return
+
+	neg_batch_sle = get_future_sle_with_negative_batch_qty(args)
+	if neg_batch_sle:
+		message = _("{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction.").format(
+			abs(neg_batch_sle[0]["cumulative_total"]),
+			frappe.get_desk_link('Batch', args.batch_no),
+			frappe.get_desk_link('Warehouse', args.warehouse),
+			neg_batch_sle[0]["posting_date"], neg_batch_sle[0]["posting_time"],
+			frappe.get_desk_link(neg_batch_sle[0]["voucher_type"], neg_batch_sle[0]["voucher_no"]))
+		frappe.throw(message, NegativeStockError, title="Insufficient Stock for Batch")
+
+
+def get_future_sle_with_negative_qty(args):
+	return frappe.db.sql("""
+		select
+			qty_after_transaction, posting_date, posting_time,
+			voucher_type, voucher_no
+		from `tabStock Ledger Entry`
+		where
+			item_code = %(item_code)s
+			and warehouse = %(warehouse)s
+			and voucher_no != %(voucher_no)s
+			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
+			and is_cancelled = 0
+			and qty_after_transaction < 0
+		order by timestamp(posting_date, posting_time) asc
+		limit 1
+	""", args, as_dict=1)
+
+
+def get_future_sle_with_negative_batch_qty(args):
+	return frappe.db.sql("""
+		with batch_ledger as (
+			select
+				posting_date, posting_time, voucher_type, voucher_no,
+				sum(actual_qty) over (order by posting_date, posting_time, creation) as cumulative_total
+			from `tabStock Ledger Entry`
+			where
+				item_code = %(item_code)s
+				and warehouse = %(warehouse)s
+				and batch_no=%(batch_no)s
+				and is_cancelled = 0
+			order by posting_date, posting_time, creation
+		)
+		select * from batch_ledger
+		where
+			cumulative_total < 0.0
+			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
+		limit 1
+	""", args, as_dict=1)
+
+
+def _round_off_if_near_zero(number: float, precision: int = 6) -> float:
+	""" Rounds off the number to zero only if number is close to zero for decimal
+		specified in precision. Precision defaults to 6.
+	"""
+	if flt(number) < (1.0 / (10**precision)):
+		return 0
+
+	return flt(number)
+>>>>>>> 5eba57528c (fix: check future negative stock for batches)
