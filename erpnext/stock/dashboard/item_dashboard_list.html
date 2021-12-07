@@ -24,7 +24,7 @@
 					</span>
 					<span class="inline-graph-half" title="{{ __("Actual Qty {0} / Waiting Qty {1}", [d.actual_qty, d.pending_qty]) }}">
 						<span class="inline-graph-count">
-							{{ d.actual_qty }} {{ (d.pending_qty > 0) ? ("(" + d.pending_qty+ ")") : "" }}
+							{{"Actual: " + d.actual_qty }} {{ (d.pending_qty > 0) ? ("| Pending: " + d.pending_qty) : "" }}
 						</span>
 						<span class="inline-graph-bar">
 							<span class="inline-graph-bar-inner dark"
