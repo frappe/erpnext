@@ -120,8 +120,8 @@
    "fieldname": "interviewers",
    "fieldtype": "Table MultiSelect",
    "label": "Interviewers",
-   "options": "Interviewer",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.status==='Scheduled';",
+   "options": "Interviewer"
   },
   {
    "fetch_from": "employee.date_of_joining",
@@ -218,7 +218,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-12-07 14:08:29.355390",
+ "modified": "2021-12-07 23:39:22.645401",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Exit Interview",

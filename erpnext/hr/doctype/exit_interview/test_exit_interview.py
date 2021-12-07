@@ -4,6 +4,7 @@
 import unittest
 
 import frappe
+from frappe import _
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.tests.test_webform import create_custom_doctype, create_webform
 from frappe.utils import getdate
@@ -13,6 +14,9 @@ from erpnext.hr.doctype.exit_interview.exit_interview import send_exit_questionn
 
 
 class TestExitInterview(unittest.TestCase):
+	def setUp(self):
+		frappe.db.sql('delete from `tabExit Interview`')
+
 	def test_duplicate_interview(self):
 		employee = make_employee('employeeexit1@example.com')
 		frappe.db.set_value('Employee', employee, 'relieving_date', getdate())
@@ -23,6 +27,8 @@ class TestExitInterview(unittest.TestCase):
 
 	def test_relieving_date_validation(self):
 		employee = make_employee('employeeexit2@example.com')
+		# unset relieving date
+		frappe.db.set_value('Employee', employee, 'relieving_date', None)
 
 		interview = create_exit_interview(employee, save=False)
 		self.assertRaises(frappe.ValidationError, interview.save)
@@ -52,9 +58,13 @@ class TestExitInterview(unittest.TestCase):
 	def test_send_exit_questionnaire(self):
 		create_custom_doctype()
 		create_webform()
+		template = create_notification_template()
 
 		webform = frappe.db.get_all('Web Form', limit=1)
-		frappe.db.set_value('HR Settings', 'HR Settings', 'exit_questionnaire_web_form', webform[0].name)
+		frappe.db.set_value('HR Settings', 'HR Settings', {
+			'exit_questionnaire_web_form': webform[0].name,
+			'exit_questionnaire_notification_template': template
+		})
 
 		employee = make_employee('employeeexit3@example.com')
 		frappe.db.set_value('Employee', employee, 'relieving_date', getdate())
@@ -87,3 +97,21 @@ def create_exit_interview(employee, save=True):
 	if save:
 		return doc.insert()
 	return doc
+
+
+def create_notification_template():
+	template = frappe.db.exists('Email Template', _('Exit Questionnaire Notification'))
+	if not template:
+		base_path = frappe.get_app_path('erpnext', 'hr', 'doctype')
+		response = frappe.read_file(os.path.join(base_path, 'exit_interview/exit_questionnaire_notification_template.html'))
+
+		template = frappe.get_doc({
+			'doctype': 'Email Template',
+			'name': _('Exit Questionnaire Notification'),
+			'response': response,
+			'subject': _('Exit Questionnaire Notification'),
+			'owner': frappe.session.user,
+		}).insert(ignore_permissions=True)
+		template = template.name
+
+	return template
