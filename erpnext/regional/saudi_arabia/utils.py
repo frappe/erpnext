@@ -22,7 +22,7 @@ def create_qr_code(doc, method=None):
 			doc.doctype: [
 				dict(
 					fieldname='ksa_einv_qr',
-					label='QR Code',
+					label='KSA E-Invoicing QR',
 					fieldtype='Attach Image',
 					read_only=1, no_copy=1, hidden=1
 				)
