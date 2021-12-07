@@ -33,8 +33,8 @@ def make_custom_fields():
 	custom_fields = {
 		'Sales Invoice': [
 			dict(
-				fieldname='qr_code',
-				label='QR Code',
+				fieldname='ksa_einv_qr',
+				label='KSA E-Invoicing QR',
 				fieldtype='Attach Image',
 				read_only=1, no_copy=1, hidden=1
 			)
