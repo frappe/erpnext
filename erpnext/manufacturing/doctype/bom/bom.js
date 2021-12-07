@@ -644,6 +644,7 @@ frappe.ui.form.on("BOM Item", "qty", function(frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	d.stock_qty = d.qty * d.conversion_factor;
 	refresh_field("stock_qty", d.name, d.parentfield);
+	add_scrap_item(frm, cdt, cdn);
 });
 
 frappe.ui.form.on("BOM Item", "item_code", function(frm, cdt, cdn) {
@@ -668,6 +669,11 @@ frappe.ui.form.on("BOM Item", "rate", function(frm, cdt, cdn) {
 		d.rate = 0;
 		refresh_field("rate", d.name, d.parentfield);
 	}
+	add_scrap_item(frm, cdt, cdn);
+});
+
+frappe.ui.form.on("BOM Item", "scrap", function(frm, cdt, cdn) {
+	add_scrap_item(frm, cdt, cdn);
 });
 
 frappe.ui.form.on("BOM Operation", "operations_remove", function(frm) {
@@ -733,4 +739,45 @@ function trigger_process_loss_qty_prompt(frm, cdt, cdn, item_code) {
 		__("Set Process Loss Item Quantity"),
 		__("Set Quantity")
 	);
+}
+
+function add_scrap_item(frm, cdt, cdn) {
+	var item = locals[cdt][cdn];
+
+	if (item.scrap) {
+		let row = null;
+		var scrap_item_qty = (item.qty / 100) * item.scrap;
+
+		for (var i = 0; i < frm.doc.scrap_items.length; i++) {
+			if (frm.doc.scrap_items[i].item_code == item.item_code) {
+				row = frm.doc.scrap_items[i];
+				break;
+			}
+		}
+
+		if (row) {
+			row.stock_qty = scrap_item_qty;
+			row.rate = item.rate;
+			row.amount = scrap_item_qty * item.rate;
+			row.stock_uom = item.stock_uom;
+			row.base_rate = item.base_rate;
+			row.base_amount = item.base_rate * scrap_item_qty;
+		}
+		else {
+			row = frm.add_child('scrap_items', {
+				item_code: item.item_code,
+				item_name: item.item_name,
+				stock_qty: scrap_item_qty,
+				rate: item.rate,
+				amount: scrap_item_qty * item.rate,
+				stock_uom: item.stock_uom,
+				base_rate: item.base_rate,
+				base_amount: item.base_rate * scrap_item_qty,
+				is_process_loss: 0
+			});
+		}
+
+		frm.refresh_field('scrap_items');
+		erpnext.bom.update_cost(frm.doc);
+	}
 }
