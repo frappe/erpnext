@@ -11,7 +11,7 @@ from frappe.utils.data import add_to_date, get_time, getdate
 from erpnext import get_region
 
 
-def create_qr_code(doc, method):
+def create_qr_code(doc, method=None):
 	region = get_region(doc.company)
 	if region not in ['Saudi Arabia']:
 		return
@@ -19,7 +19,7 @@ def create_qr_code(doc, method):
 	# if QR Code field not present, create it. Invoices without QR are invalid as per law.
 	if not hasattr(doc, 'ksa_einv_qr'):
 		create_custom_fields({
-			'Sales Invoice': [
+			doc.doctype: [
 				dict(
 					fieldname='ksa_einv_qr',
 					label='QR Code',
