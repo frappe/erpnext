@@ -9,6 +9,7 @@
   "party_type",
   "supplier",
   "rtn",
+  "currency",
   "column_break_1",
   "posting_date",
   "due_date",
@@ -162,10 +163,17 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-12-03 14:54:32.358239",
+ "modified": "2021-12-07 11:12:45.105140",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Supplier Retention",
