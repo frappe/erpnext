@@ -566,6 +566,10 @@ def get_project_details(project_name, doctype):
 		if project.get(f):
 			out[f] = project.get(f)
 
+			if doctype == "Quotation" and f == 'customer':
+				out['quotation_to'] = 'Customer'
+				out['party_name'] = project.get(f)
+
 	return out
 
 @frappe.whitelist()

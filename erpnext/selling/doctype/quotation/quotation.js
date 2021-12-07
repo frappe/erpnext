@@ -52,7 +52,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 			me.frm.trigger("get_lead_details");
 		}
 
-		return erpnext.utils.get_party_details(this.frm, null, null, function() {
+		return erpnext.utils.get_party_details(this.frm, null, null, function(r) {
 			me.apply_price_list();
 		});
 	},

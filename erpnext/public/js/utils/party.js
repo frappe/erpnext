@@ -115,7 +115,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 					() => frm.set_value(r.message),
 					() => {
 						frm.updating_party_details = false;
-						if (callback) callback();
+						if (callback) callback(r);
 						frm.refresh_fields();
 						erpnext.utils.add_item(frm);
 					}
