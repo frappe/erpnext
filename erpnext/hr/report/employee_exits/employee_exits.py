@@ -91,8 +91,6 @@ def get_columns():
 	]
 
 def get_data(filters):
-	data = []
-
 	employee = frappe.qb.DocType('Employee')
 	interview = frappe.qb.DocType('Exit Interview')
 	fnf = frappe.qb.DocType('Full and Final Statement')

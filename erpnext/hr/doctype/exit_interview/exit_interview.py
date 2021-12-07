@@ -28,9 +28,9 @@ class ExitInterview(Document):
 			'docstatus': ('!=', 2)
 		})
 		if doc:
-			frappe.throw(_('Exit Interview {0} already scheduled for Employee: {1}').format(
+			frappe.throw(_('Exit Interview {0} already exists for Employee: {1}').format(
 				get_link_to_form('Exit Interview', doc), frappe.bold(self.employee)),
-				title=_('Duplicate Document'))
+				frappe.DuplicateEntryError)
 
 	def set_employee_email(self):
 		employee = frappe.get_doc('Employee', self.employee)

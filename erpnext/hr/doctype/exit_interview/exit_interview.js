@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Exit Interview', {
 	refresh: function(frm) {
-		if (!frm.doc.__islocal && !frm.doc.questionnaire_email_sent) {
+		if (!frm.doc.__islocal && !frm.doc.questionnaire_email_sent && frappe.boot.user.can_write.includes('Exit Interview')) {
 			frm.add_custom_button(__('Send Exit Questionnaire'), function () {
 				frm.trigger('send_exit_questionnaire');
 			});
