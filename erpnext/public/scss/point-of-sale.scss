@@ -788,6 +788,7 @@
 					@extend .pos-card;
 					@extend .pointer-no-select;
 					padding: var(--padding-md) var(--padding-lg);
+					overflow-y: scroll;
 
 					> .pay-amount {
 						display: inline;

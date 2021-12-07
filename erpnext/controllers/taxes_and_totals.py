@@ -703,7 +703,8 @@ class calculate_taxes_and_totals(object):
 	def set_total_amount_to_default_mop(self, total_amount_to_pay):
 		default_mode_of_payment = frappe.db.get_value('POS Payment Method',
 			{'parent': self.doc.pos_profile, 'default': 1}, ['mode_of_payment'], as_dict=1)
-
+		if self.doc.is_return and self.doc.outstanding_amount < 0:
+			total_amount_to_pay = 0
 		if default_mode_of_payment:
 			self.doc.payments = []
 			self.doc.append('payments', {

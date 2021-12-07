@@ -477,7 +477,6 @@ class POSInvoice(SalesInvoice):
 		if pr:
 			return frappe.get_doc('Payment Request', pr[0][0])
 
-	@frappe.whitelist()
 	def update_credit_note(self, cancel=False):
 		# pick out the mop with credit note
 		mop_dict = {p.type:p for p in self.payments}
@@ -493,9 +492,9 @@ class POSInvoice(SalesInvoice):
 def update_cn_outstanding_amount(cn_inv, cn_mop, cancel=False):
 	cn_inv.flags.ignore_validate_update_after_submit = True
 	if not cancel:
-		cn_inv.outstanding_amount += flt(cn_mop.amount)
+		cn_inv.outstanding_amount = 0
 	else:
-		cn_inv.outstanding_amount -= flt(cn_mop.amount)
+		cn_inv.outstanding_amount = flt(cn_mop.amount)
 
 	cn_inv.save()
 	cn_inv.flags.ignore_validate_update_after_submit = False

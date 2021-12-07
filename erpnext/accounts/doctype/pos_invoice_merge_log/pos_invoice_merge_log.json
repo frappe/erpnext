@@ -17,6 +17,7 @@
   "consolidated_invoice",
   "column_break_7",
   "consolidated_credit_note",
+  "consolidate_advances_credit_note",
   "amended_from"
  ],
  "fields": [
@@ -105,12 +106,21 @@
    "label": "Customer Group",
    "mandatory_depends_on": "eval:doc.merge_invoices_based_on == 'Customer Group'",
    "options": "Customer Group"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "consolidate_advances_credit_note",
+   "fieldtype": "Link",
+   "label": "Consolidate Advances Credit Note",
+   "options": "Sales Invoice",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-14 11:17:19.001142",
+ "migration_hash": "68e462071d0c4b17941f5e6c57acfd88",
+ "modified": "2021-12-06 15:36:06.661720",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice Merge Log",

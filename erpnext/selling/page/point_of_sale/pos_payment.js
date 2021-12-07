@@ -367,34 +367,32 @@ erpnext.PointOfSale.Payment = class {
 			}
 			if (p.type != 'Credit Note') {
 				args.option_list = null;
-				this.update_field_value_onchange(args);
-				// this[`${mode}_control`] = frappe.ui.form.make_control({
-				// 	df: {
-				// 		label: p.mode_of_payment,
-				// 		fieldtype: 'Currency',
-				// 		placeholder: __('Enter {0} amount.', [p.mode_of_payment]),
-				// 		onchange: function() {
-				// 			const current_value = frappe.model.get_value(p.doctype, p.name, 'amount');
-				// 			if (current_value != this.value) {
-				// 				frappe.model
-				// 					.set_value(p.doctype, p.name, 'amount', flt(this.value))
-				// 					.then(() => me.update_totals_section())
+				// this.update_field_value_onchange(args);
+				this[`${mode}_control`] = frappe.ui.form.make_control({
+					df: {
+						label: p.mode_of_payment,
+						fieldtype: 'Currency',
+						placeholder: __('Enter {0} amount.', [p.mode_of_payment]),
+						onchange: function() {
+							const current_value = frappe.model.get_value(p.doctype, p.name, 'amount');
+							if (current_value != this.value) {
+								frappe.model
+									.set_value(p.doctype, p.name, 'amount', flt(this.value))
+									.then(() => me.update_totals_section())
 
-				// 				const formatted_currency = format_currency(this.value, currency);
-				// 				me.$payment_modes.find(`.${mode}-amount`).html(formatted_currency);
-				// 			}
-				// 		}
-				// 	},
-				// 	parent: this.$payment_modes.find(`.${mode}.mode-of-payment-control`),
-				// 	render_input: true,
-				// });
+								const formatted_currency = format_currency(this.value, currency);
+								me.$payment_modes.find(`.${mode}-amount`).html(formatted_currency);
+							}
+						}
+					},
+					parent: this.$payment_modes.find(`.${mode}.mode-of-payment-control`),
+					render_input: true,
+				});
 			} else {
 				const opt = await frappe.call({
 					method:'erpnext.selling.page.point_of_sale.point_of_sale.get_credit_note_options',
 					callback: (r) => {
-						if (!r.exc) {
-							// console.log(r.message);
-						}
+						if (!r.exc) {}
 					}
 				});
 				const option_list = opt.message;
@@ -403,7 +401,6 @@ erpnext.PointOfSale.Payment = class {
 
 				// this.update_field_value_onchange(args);
 
-				console.log('option_list',option_list);
 				this[`${mode}_control`] = frappe.ui.form.make_control({
 					df: {
 						label: p.mode_of_payment,
@@ -412,9 +409,7 @@ erpnext.PointOfSale.Payment = class {
 						placeholder: __('Select POS Credit Note'),
 						get_query: () => query,
 						onchange: function() {
-							debugger;
 							const current_value = frappe.model.get_value(p.doctype, p.name, 'credit_note');
-							console.log('VALUE',this.value)
 							const cond = (typeof(this.value) != 'number' && this.value != '') ? 1 : 0;
 
 							if (current_value != this.value) {
@@ -430,11 +425,8 @@ erpnext.PointOfSale.Payment = class {
 								const is_not_credit_note = (p.type == 'Credit Note') ? 0 : 1;
 
 								// typeof(this.value) != 'number' condition to check if it's called due to amount being set
-								debugger;
 								if (option_list && p.type == 'Credit Note' && cond) {
-									new_credit_note_amount = (doc.grand_total < (-flt(option_list[this.value])))
-									? flt(doc.grand_total)
-									: (-flt(option_list[this.value]));
+									new_credit_note_amount = (-flt(option_list[this.value]));
 
 									me.set_payment_amount_and_currency(me, p, mode, new_credit_note_amount, currency);
 									const formatted_currency = format_currency(new_credit_note_amount, currency);
@@ -455,61 +447,6 @@ erpnext.PointOfSale.Payment = class {
 		this.render_loyalty_points_payment_mode();
 
 		this.attach_cash_shortcuts(doc);
-	}
-
-	update_field_value_onchange(args) {
-		var {me, doc, p, mode, currency, option_list} = args;
-		const query = { query: 'erpnext.selling.page.point_of_sale.point_of_sale.pos_invoice_credit_notes' };
-
-		this[`${mode}_control`] = frappe.ui.form.make_control({
-			df: {
-				label: p.mode_of_payment,
-				fieldtype: (p.type == 'Credit Note') ? 'Link' : 'Currency',
-				placeholder: (p.type == 'Credit Note') ? __('Select POS Credit Note') : __('Enter {0} amount.', [p.mode_of_payment]),
-				options: (p.type == 'Credit Note') ? 'POS Invoice' : '',
-				get_query: () => query,
-				onchange: function() {
-					const cn_or_amount = (p.type == 'Credit Note') ? 'credit_note' : 'amount';
-					const current_value = frappe.model.get_value(p.doctype, p.name, cn_or_amount);
-
-					// condition to check for empty string and type for repeat iterations
-					const cond = (typeof(this.value) != 'number' && this.value != '') ? 1 : 0;
-
-					if (current_value != this.value) {
-						if (p.type == 'Credit Note' && cond) {
-							const new_credit_note = this.value;
-							if (p.credit_note && (p.credit_note == new_credit_note)) {
-								console.log('exists');
-								return;}
-							frappe.model
-								.set_value(p.doctype, p.name, 'credit_note', new_credit_note);
-						}
-						var new_amount;
-						// this is to skip the else part if its a number and not for credit note
-						const is_not_credit_note = (p.type == 'Credit Note') ? 0 : 1;
-
-						// typeof(this.value) != 'number' condition to check if it's called due to amount being set
-						if (option_list && p.type == 'Credit Note' && cond) {
-							new_amount = (doc.grand_total < (-flt(option_list[this.value])))
-							? flt(doc.grand_total)
-							: (-flt(option_list[this.value]));
-
-							me.set_payment_amount_and_currency(me, p, mode, new_amount, currency);
-
-						} else {
-							new_amount = this.value;
-						}
-
-						// below part runs only for non CN payment types
-						if (is_not_credit_note) {
-							me.set_payment_amount_and_currency(me, p, mode, new_amount, currency);
-						}
-					}
-				}
-			},
-			parent: this.$payment_modes.find(`.${mode}.mode-of-payment-control`),
-			render_input: true,
-		});
 	}
 
 	set_payment_amount_and_currency(me, p, mode, new_amount, currency) {

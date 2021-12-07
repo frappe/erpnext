@@ -651,7 +651,9 @@ class AccountsController(TransactionBase):
 		payment_entries = get_advance_payment_entries(party_type, party, party_account,
 			order_doctype, order_list, include_unallocated)
 
-		res = journal_entries + payment_entries
+		sales_invoices = get_si_credit_notes(party_type, party)
+
+		res = journal_entries + payment_entries + sales_invoices
 
 		return res
 
@@ -770,7 +772,7 @@ class AccountsController(TransactionBase):
 			party_account = self.credit_to
 			dr_or_cr = "debit_in_account_currency"
 
-		lst = []
+		pe_jv_lst, si_lst = [], []
 		for d in self.get('advances'):
 			if flt(d.allocated_amount) > 0:
 				args = frappe._dict({
@@ -795,11 +797,19 @@ class AccountsController(TransactionBase):
 					'difference_account': frappe.db.get_value('Company', self.company, 'exchange_gain_loss_account'),
 					'exchange_gain_loss': flt(d.get('exchange_gain_loss'))
 				})
-				lst.append(args)
+				if d.reference_type != "Sales Invoice":
+					pe_jv_lst.append(args)
+				else:
+					si_lst.append(args)
 
-		if lst:
+		if pe_jv_lst:
 			from erpnext.accounts.utils import reconcile_against_document
-			reconcile_against_document(lst)
+			reconcile_against_document(pe_jv_lst)
+		if si_lst:
+			from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation import (
+				reconcile_dr_cr_note,
+			)
+			reconcile_dr_cr_note(si_lst, self.company)
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
@@ -1714,6 +1724,23 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 			(party_account, party_type, party, payment_type), as_dict=1)
 
 	return list(payment_entries_against_order) + list(unallocated_payment_entries)
+
+def get_si_credit_notes(party_type, party, limit=None, condition=None):
+	unallocated_payment_entries = []
+	limit_cond = "limit %s" % limit if limit else ""
+
+	unallocated_payment_entries = frappe.db.sql("""
+			select "Sales Invoice" as reference_type, name as reference_name, posting_date,
+			remarks, abs(outstanding_amount) as amount
+			from `tabSales Invoice`
+			where
+				customer = %s and outstanding_amount != 0
+				and docstatus = 1 and is_return = 1 {condition}
+			order by posting_date {0}
+		""".format(limit_cond, condition=condition or ""),
+		(party), as_dict=1)
+
+	return list(unallocated_payment_entries)
 
 def update_invoice_status():
 	"""Updates status as Overdue for applicable invoices. Runs daily."""
