@@ -470,6 +470,10 @@ def get_item_details(args):
 
 	out.loose_uom = args.loose_uom or item.stock_uom
 	out.stock_uom = item.stock_uom
+
+	if not args.warehouse and args.default_warehouse:
+		args.warehouse = args.default_warehouse
+
 	if args.warehouse:
 		out.warehouse = args.warehouse
 	else:

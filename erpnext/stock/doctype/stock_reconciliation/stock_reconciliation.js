@@ -129,7 +129,8 @@ frappe.ui.form.on("Stock Reconciliation", {
 						cost_center: d.cost_center,
 						valuation_rate: d.valuation_rate,
 						reset_rate: frm.doc.reset_rate,
-						loose_uom: frm.doc.loose_uom
+						loose_uom: frm.doc.loose_uom,
+						default_warehouse: frm.doc.default_warehouse,
 					}
 				},
 				callback: function(r) {
@@ -213,7 +214,10 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 		frm.events.set_item_code(frm, cdt, cdn);
 	},
 	warehouse: function(frm, cdt, cdn) {
-		frm.events.get_item_details(frm, cdt, cdn);
+		var doc = frappe.get_doc(cdt, cdn);
+		if (doc.warehouse) {
+			frm.events.get_item_details(frm, cdt, cdn);
+		}
 	},
 	batch_no: function(frm, cdt, cdn) {
 		frm.events.get_item_details(frm, cdt, cdn);
