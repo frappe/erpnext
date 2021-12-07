@@ -5,33 +5,7 @@ frappe.provide('erpnext.projects');
 
 erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	setup: function() {
-		var me = this;
-
-		me.frm.make_methods = {
-			'Timesheet': () => {
-				open_form(me.frm, "Timesheet", "Timesheet Detail", "time_logs");
-			},
-			'Purchase Order': () => {
-				open_form(me.frm, "Purchase Order", "Purchase Order Item", "items");
-			},
-			'Purchase Receipt': () => {
-				open_form(me.frm, "Purchase Receipt", "Purchase Receipt Item", "items");
-			},
-			'Purchase Invoice': () => {
-				open_form(me.frm, "Purchase Invoice", "Purchase Invoice Item", "items");
-			},
-		};
-
-		me.frm.custom_make_buttons = {};
-		me.frm.make_button_dts = [
-			'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice',
-			'Maintenance Visit', 'Warranty Claim', 'Quality Inspection',
-			'Stock Entry'
-		];
-		$.each(me.frm.make_button_dts, function (i, dt) {
-			me.frm.custom_make_buttons[dt] = __(dt);
-		});
-
+		this.setup_make_methods();
 		this.setup_indicator();
 	},
 
@@ -97,7 +71,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 				if (me.frm.is_new()) return;
 				return {
 					"customer": me.frm.doc.customer,
-					"project_name": me.frm.doc.name
+					"project": me.frm.doc.name
 				};
 			};
 		}
@@ -144,13 +118,24 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		}
 	},
 
+	setup_make_methods: function () {
+		var me = this;
+
+		var make_method_doctypes = [
+			'Maintenance Visit', 'Warranty Claim', 'Quality Inspection', 'Timesheet',
+		];
+
+		me.frm.make_methods = {};
+		$.each(make_method_doctypes, function (i, dt) {
+			me.frm.make_methods[dt] = () => me.open_form(dt);
+		});
+	},
+
 	setup_buttons: function() {
 		var me = this;
 
 		if (!me.frm.is_new()) {
-			me.frm.add_custom_button(__('Duplicate Project with Tasks'), () => {
-				me.create_duplicate();
-			});
+			me.frm.add_custom_button(__('Duplicate Project with Tasks'), () => me.create_duplicate());
 
 			me.frm.add_custom_button(__('Completed'), () => {
 				me.set_status('Completed');
@@ -159,64 +144,23 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 			me.frm.add_custom_button(__('Cancelled'), () => {
 				me.set_status('Cancelled');
 			}, __('Set Status'));
-		}
 
-		if (frappe.model.can_read("Task")) {
-			me.frm.add_custom_button(__("Gantt Chart"), function () {
-				frappe.route_options = {
-					"project": me.frm.doc.name
-				};
-				frappe.set_route("List", "Task", "Gantt");
-			});
-
-			me.frm.add_custom_button(__("Kanban Board"), () => {
-				frappe.call('erpnext.projects.doctype.project.project.create_kanban_board_if_not_exists', {
-					project: me.frm.doc.project_name
-				}).then(() => {
-					frappe.set_route('List', 'Task', 'Kanban', me.frm.doc.project_name);
+			if (frappe.model.can_read("Task")) {
+				me.frm.add_custom_button(__("Gantt Chart"), function () {
+					frappe.route_options = {
+						"project": me.frm.doc.name
+					};
+					frappe.set_route("List", "Task", "Gantt");
 				});
-			});
-		}
 
-		if (!me.frm.doc.__islocal) {
-			var item_table_fieldnames = {
-				'Maintenance Visit': 'purposes',
-				'Stock Entry': 'items',
-				'Delivery Note': 'items'
-			};
-
-			$.each(me.frm.make_button_dts, function (i, dt) {
-				var items_fieldname = item_table_fieldnames[dt];
-
-				me.frm.add_custom_button(__(dt), function() {
-					frappe.new_doc(dt, {
-						customer: me.frm.doc.customer,
-						party: me.frm.doc.customer,
-						party_name: me.frm.doc.customer,
-						quotation_to: 'Customer',
-						party_type: 'Customer',
-						project: me.frm.doc.name,
-						item_code: me.frm.doc.item_code,
-						serial_no: me.frm.doc.serial_no,
-						item_serial_no: me.frm.doc.serial_no
-					}).then(r => {
-						if (dt == "Stock Entry") {
-							cur_frm.set_value('purpose', 'Material Receipt');
-							cur_frm.set_value('customer_provided', 1);
-						}
-						if (items_fieldname) {
-							cur_frm.doc[items_fieldname] = [];
-							var child = cur_frm.add_child(items_fieldname, {
-								project: me.frm.doc.name,
-								serial_no: me.frm.doc.serial_no
-							});
-							if (me.frm.doc.item_code) {
-								frappe.model.set_value(child.doctype, child.name, 'item_code', me.frm.doc.item_code);
-							}
-						}
+				me.frm.add_custom_button(__("Kanban Board"), () => {
+					frappe.call('erpnext.projects.doctype.project.project.create_kanban_board_if_not_exists', {
+						project: me.frm.doc.project_name
+					}).then(() => {
+						frappe.set_route('List', 'Task', 'Kanban', me.frm.doc.project_name);
 					});
-				}, __("Make"));
-			});
+				});
+			}
 		}
 	},
 
@@ -322,23 +266,40 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 
 	collect_progress: function() {
 		this.frm.set_df_property("message", "reqd", this.frm.doc.collect_progress);
-	}
+	},
+
+	open_form: function (doctype) {
+		var me = this;
+
+		var item_table_fieldnames = {
+			'Maintenance Visit': 'purposes',
+			'Stock Entry': 'items',
+			'Delivery Note': 'items',
+			'Timesheet': 'time_logs',
+		};
+
+		var items_fieldname = item_table_fieldnames[doctype];
+
+		frappe.new_doc(doctype, {
+			customer: me.frm.doc.customer,
+			party: me.frm.doc.customer,
+			party_name: me.frm.doc.customer,
+			quotation_to: 'Customer',
+			party_type: 'Customer',
+			project: me.frm.doc.name,
+			item_code: me.frm.doc.item_code,
+			serial_no: me.frm.doc.serial_no,
+			item_serial_no: me.frm.doc.serial_no
+		}).then(r => {
+			if (items_fieldname) {
+				cur_frm.doc[items_fieldname] = [];
+				var child = cur_frm.add_child(items_fieldname, {
+					project: me.frm.doc.name
+				});
+				cur_frm.refresh_field(items_fieldname);
+			}
+		});
+	},
 });
-
-function open_form(frm, doctype, child_doctype, parentfield) {
-	frappe.model.with_doctype(doctype, () => {
-		let new_doc = frappe.model.get_new_doc(doctype);
-
-		// add a new row and set the project
-		let new_child_doc = frappe.model.get_new_doc(child_doctype);
-		new_child_doc.project = frm.doc.name;
-		new_child_doc.parent = new_doc.name;
-		new_child_doc.parentfield = parentfield;
-		new_child_doc.parenttype = doctype;
-		new_doc[parentfield] = [new_child_doc];
-
-		frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
-	});
-}
 
 $.extend(cur_frm.cscript, new erpnext.projects.ProjectController({frm: cur_frm}));
