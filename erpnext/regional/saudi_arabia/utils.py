@@ -1,12 +1,12 @@
 import io
 import os
 from base64 import b64encode
-from pyqrcode import create as qr_create
 
 import frappe
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.utils.data import add_to_date, get_time, getdate
+from pyqrcode import create as qr_create
 
 from erpnext import get_region
 
