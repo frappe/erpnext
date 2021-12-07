@@ -1024,6 +1024,7 @@ def make_work_orders(items, sales_order, company, project=None):
 			description=i['description']
 		)).insert()
 		work_order.set_work_order_operations()
+		work_order.flags.ignore_mandatory = True
 		work_order.save()
 		out.append(work_order)
 
