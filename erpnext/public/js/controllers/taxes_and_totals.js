@@ -832,7 +832,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		if (this.frm.doc.doctype == 'POS Invoice' && this.frm.doc.is_return && this.frm.doc.ignore_payments_for_return)
 			return;
 
-		if (this.frm.doc.paid_amount > this.frm.doc.grand_total){
+		if (this.frm.doc.paid_amount > this.frm.doc.grand_total) {
 			this.frm.doc.write_off_amount = flt(this.frm.doc.grand_total - this.frm.doc.paid_amount
 				+ this.frm.doc.change_amount, precision("write_off_amount"));
 
