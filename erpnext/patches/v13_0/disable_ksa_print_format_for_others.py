@@ -10,8 +10,8 @@ def execute():
 		return
 
 	if frappe.db.exists('DocType', 'Print Format'):
-        frappe.reload_doc("regional", "print_format", "ksa_vat_invoice", force=True)
-    	frappe.reload_doc("regional", "print_format", "ksa_pos_invoice", force=True)
-        frappe.db.sql("""UPDATE`tabPrint Format` SET disabled = 1
-                WHERE name IN ('KSA VAT Invoice', 'KSA POS Invoice')
-            """)
+		frappe.reload_doc("regional", "print_format", "ksa_vat_invoice", force=True)
+		frappe.reload_doc("regional", "print_format", "ksa_pos_invoice", force=True)
+		frappe.db.sql("""UPDATE`tabPrint Format` SET disabled = 1
+				WHERE name IN ('KSA VAT Invoice', 'KSA POS Invoice')
+			""")
