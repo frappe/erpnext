@@ -261,10 +261,10 @@ class JournalEntry(AccountsController):
 			['name', 'docstatus', 'customer_account', 'agent_account', 'customer', 'agent'], as_dict=1)
 
 		if not vro:
-			frappe.throw(_("Row #{0}: Vehicle Registration Order {0} does not exist").format(d.idx, vro.name))
+			frappe.throw(_("Row #{0}: Vehicle Registration Order {1} does not exist").format(d.idx, vro.name))
 
 		if vro.docstatus != 1:
-			frappe.throw(_("Row #{0}: Cannot select Vehicle Registration Order {0} because it is not submitted")
+			frappe.throw(_("Row #{0}: Cannot select Vehicle Registration Order {1} because it is not submitted")
 				.format(d.idx, vro.name))
 
 		if d.party_type == "Customer":
