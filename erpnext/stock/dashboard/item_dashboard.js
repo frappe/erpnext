@@ -366,8 +366,9 @@ function append_breakdown(element, item_code, poi_results, boi_results) {
 		boi_backgroundColor.push(Object.values(CHART_COLORS)[colorIndex])
 
 		stockRequired += boi_results[i].qty
-
-		boi_label_data.push(`${boi_results[i].parent} | ${(boi_results[i].customer_name)? (boi_results[i].customer_name): "Customer Name Unset!"} | ${boi_results[i].added_time} |  Stock Required: ${stockRequired} | BO Qty`)
+		let message = `${boi_results[i].parent} | ${(boi_results[i].customer_name)? (boi_results[i].customer_name): "Customer Name Unset!"} | ${boi_results[i].added_time} | Stock Required: ${stockRequired} | BO Qty`
+		let message2 = message.split(` | `)
+		boi_label_data.push(message2)
 
 	}
 
