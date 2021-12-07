@@ -925,6 +925,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 				"supplier",
 				"pricing_rules"
 			],
+			"condition": lambda doc: doc.parent_item in items_to_map
 		}
 	}, target_doc, set_missing_values)
 
@@ -977,6 +978,7 @@ def make_work_orders(items, sales_order, company, project=None):
 			description=i['description']
 		)).insert()
 		work_order.set_work_order_operations()
+		work_order.flags.ignore_mandatory = True
 		work_order.save()
 		out.append(work_order)
 
