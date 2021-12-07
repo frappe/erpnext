@@ -115,7 +115,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			}
 
 			// Registration Order button
-			if (this.frm.doc.registration_status == "Not Ordered" && this.frm.doc.invoice_status != "Delivered") {
+			if (this.frm.doc.registration_status == "Not Ordered") {
 				this.frm.add_custom_button(__('Registration Order'), () => this.make_next_document('Vehicle Registration Order'),
 					__("Registration"));
 			}
