@@ -10,5 +10,7 @@ def execute():
 	if not company:
 		return
 
-	if frappe.db.exists('DocType', 'Sales Invoice') and frappe.get_meta('Sales Invoice').has_field('qr_code'):
-		rename_field('Sales Invoice', 'qr_code', 'ksa_einv_qr')
+	if frappe.db.exists('DocType', 'Sales Invoice'):
+		frappe.reload_doc('accounts', 'doctype', 'sales_invoice', force=True)
+		if frappe.db.has_column('Sales Invoice', 'qr_code'):
+			rename_field('Sales Invoice', 'qr_code', 'ksa_einv_qr')
