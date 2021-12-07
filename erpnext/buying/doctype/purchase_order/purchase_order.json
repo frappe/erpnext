@@ -24,14 +24,14 @@
   "naming_series",
   "more_info",
   "transaction_type",
-  "col_break_19",
+  "more_info_cb_1",
   "project",
-  "column_break_17",
+  "more_info_cb_2",
   "payment_terms_template",
   "ref_sq",
   "party_account_currency",
   "inter_company_order_reference",
-  "column_break_23",
+  "more_info_cb_3",
   "incoterms",
   "drop_ship",
   "customer",
@@ -1505,14 +1505,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_23",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_17",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "col_break_132",
    "fieldtype": "Column Break"
   },
@@ -1525,10 +1517,6 @@
    "fieldtype": "Link",
    "label": "Transaction Type",
    "options": "Transaction Type"
-  },
-  {
-   "fieldname": "col_break_19",
-   "fieldtype": "Column Break"
   },
   {
    "depends_on": "eval:doc.docstatus==1",
@@ -1562,12 +1550,24 @@
   {
    "fieldname": "column_break_55",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_3",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2021-12-05 01:13:41.172724",
+ "modified": "2021-12-07 10:56:14.916669",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

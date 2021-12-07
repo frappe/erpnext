@@ -12,12 +12,22 @@
   "title",
   "material_request_type",
   "customer",
+  "customer_name",
+  "column_break_8",
   "set_warehouse",
   "requested_by",
   "column_break_2",
   "amended_from",
   "transaction_date",
   "schedule_date",
+  "more_info",
+  "project",
+  "more_info_cb_1",
+  "more_info_cb_2",
+  "sec_applies_to",
+  "applies_to_item",
+  "col_break_applies_to",
+  "applies_to_item_name",
   "items_section",
   "scan_barcode",
   "items",
@@ -25,7 +35,7 @@
   "total_qty",
   "column_break_18",
   "total_alt_uom_qty",
-  "more_info",
+  "status_section",
   "per_ordered",
   "column_break2",
   "per_received",
@@ -93,7 +103,7 @@
    "allow_on_submit": 1,
    "fieldname": "schedule_date",
    "fieldtype": "Date",
-   "label": "Required By",
+   "label": "Required By Date",
    "search_index": 1
   },
   {
@@ -149,9 +159,7 @@
    "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
-   "label": "Status",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-file-text"
+   "label": "More Information"
   },
   {
    "fieldname": "requested_by",
@@ -313,12 +321,72 @@
    "fieldtype": "Float",
    "label": "Total Contents Qty",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "more_info_cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-file-text"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "applies_to_item",
+   "fieldname": "sec_applies_to",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Applies To"
+  },
+  {
+   "fieldname": "applies_to_item",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Applies to Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "col_break_applies_to",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:!doc.applies_to_item || doc.applies_to_item_name != doc.applies_to_item",
+   "fetch_from": "applies_to_item.item_name",
+   "fetch_if_empty": 1,
+   "fieldname": "applies_to_item_name",
+   "fieldtype": "Data",
+   "label": "Applies to Item Name"
+  },
+  {
+   "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
- "modified": "2021-03-24 10:39:41.973531",
+ "modified": "2021-12-07 11:04:37.845604",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",

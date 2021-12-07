@@ -71,6 +71,10 @@ service_person_fields = [
 		"insert_after": "more_info_cb_3", "in_standard_filter": 1},
 ]
 
+material_request_service_person_fields = deepcopy(service_person_fields)
+[d for d in material_request_service_person_fields if d['fieldname'] == 'service_advisor'][0]['insert_after'] = 'more_info_cb_1'
+[d for d in material_request_service_person_fields if d['fieldname'] == 'service_manager'][0]['insert_after'] = 'more_info_cb_2'
+
 # Accounting Dimensions
 accounting_dimension_fields = [
 	{"label": "Applies to Vehicle", "fieldname": "applies_to_vehicle", "fieldtype": "Link", "options": "Vehicle",
@@ -120,6 +124,8 @@ for d in project_vehicle_owner_fields:
 	d['translatable'] = 0
 for d in service_person_fields:
 	d['translatable'] = 0
+for d in material_request_service_person_fields:
+	d['translatable'] = 0
 for d in accounting_dimension_fields:
 	d['translatable'] = 0
 for d in accounting_dimension_table_fields:
@@ -131,22 +137,22 @@ common_properties = [
 	[('Delivery Note Item', 'Sales Invoice Item', 'Purchase Receipt Item', 'Purchase Invoice Item', 'Stock Entry Detail'),
 		{"fieldname": "vehicle", "property": "in_standard_filter", "value": 0}],
 
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project'),
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request'),
 		{"fieldname": "sec_applies_to", "property": "hidden", "value": 0}],
 
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project'),
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request'),
 		{"fieldname": "sec_applies_to", "property": "label", "value": "Vehicle Details"}],
 
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project'),
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request'),
 		{"fieldname": "sec_applies_to", "property": "collapsible_depends_on",
 			"value": "eval:doc.applies_to_item || doc.applies_to_vehicle || doc.vehicle_license_plate || doc.vehicle_chassis_no || doc.vehicle_engine_no"}],
 
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project'),
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request'),
 		{"fieldname": "applies_to_item", "property": "fetch_from", "value": "applies_to_vehicle.item_code"}],
 
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Project'),
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Project', 'Material Request'),
 		{"fieldname": "customer", "property": "label", "value": "Customer (User)"}],
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Project'),
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Project', 'Material Request'),
 		{"fieldname": "customer_name", "property": "label", "value": "Customer Name (User)"}],
 
 	[('Sales Invoice', 'Quotation', 'Project'),
@@ -190,6 +196,7 @@ data = {
 		"Purchase Receipt": applies_to_fields,
 		"Purchase Invoice": applies_to_fields,
 		"Project": project_vehicle_owner_fields + applies_to_project_fields + service_person_fields,
+		"Material Request": applies_to_fields + material_request_service_person_fields,
 		"Journal Entry": accounting_dimension_fields,
 		"Journal Entry Account": accounting_dimension_table_fields,
 		"Payment Entry": accounting_dimension_fields,

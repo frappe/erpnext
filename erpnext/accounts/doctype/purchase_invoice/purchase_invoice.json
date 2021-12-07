@@ -30,12 +30,12 @@
   "due_date",
   "more_info",
   "transaction_type",
-  "column_break_25",
+  "more_info_cb_1",
   "project",
-  "column_break_63",
+  "more_info_cb_2",
   "incoterms",
   "inter_company_invoice_reference",
-  "col_break_28",
+  "more_info_cb_3",
   "cost_center",
   "tax_id",
   "tax_cnic",
@@ -1291,10 +1291,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "column_break_63",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -1732,10 +1728,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "col_break_28",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_42",
    "fieldtype": "Column Break"
   },
@@ -1760,10 +1752,6 @@
    "fieldtype": "Link",
    "label": "Transaction Type",
    "options": "Transaction Type"
-  },
-  {
-   "fieldname": "column_break_25",
-   "fieldtype": "Column Break"
   },
   {
    "depends_on": "eval:doc.docstatus==1",
@@ -1801,12 +1789,24 @@
   {
    "fieldname": "column_break_60",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_3",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2021-12-05 01:14:00.516389",
+ "modified": "2021-12-07 10:56:51.713054",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

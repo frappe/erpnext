@@ -19,9 +19,9 @@
   "naming_series",
   "more_info",
   "project",
-  "column_break_14",
+  "more_info_cb_1",
   "is_subcontracted",
-  "column_break_57",
+  "more_info_cb_2",
   "opportunity",
   "status",
   "address_section",
@@ -832,10 +832,6 @@
    "search_index": 1
   },
   {
-   "fieldname": "column_break_57",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "No",
    "fieldname": "is_subcontracted",
    "fieldtype": "Select",
@@ -1097,18 +1093,22 @@
    "print_hide": 1
   },
   {
-   "fieldname": "column_break_14",
+   "fieldname": "col_break_96",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "col_break_96",
+   "fieldname": "more_info_cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_2",
    "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 29,
  "is_submittable": 1,
- "modified": "2020-10-31 02:19:45.862473",
+ "modified": "2021-12-07 10:57:28.986046",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
