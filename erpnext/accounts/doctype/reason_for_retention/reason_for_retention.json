@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "reason_for_retention",
+  "company",
   "account",
   "percentage"
  ],
@@ -31,9 +32,16 @@
    "label": "Account",
    "options": "Account",
    "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
- "modified": "2021-12-07 11:06:25.609411",
+ "modified": "2021-12-07 15:03:56.607628",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Reason For Retention",
