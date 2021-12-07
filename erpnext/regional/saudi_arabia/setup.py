@@ -14,11 +14,11 @@ def setup(company=None, patch=True):
 	make_custom_fields()
 
 def add_print_formats():
-	frappe.reload_doc("regional", "print_format", "detailed_tax_invoice")
-	frappe.reload_doc("regional", "print_format", "simplified_tax_invoice")
-	frappe.reload_doc("regional", "print_format", "tax_invoice")
-	frappe.reload_doc("regional", "print_format", "ksa_vat_invoice")
-	frappe.reload_doc("regional", "print_format", "ksa_pos_invoice")
+	frappe.reload_doc("regional", "print_format", "detailed_tax_invoice", force=True)
+	frappe.reload_doc("regional", "print_format", "simplified_tax_invoice", force=True)
+	frappe.reload_doc("regional", "print_format", "tax_invoice", force=True)
+	frappe.reload_doc("regional", "print_format", "ksa_vat_invoice", force=True)
+	frappe.reload_doc("regional", "print_format", "ksa_pos_invoice", force=True)
 
 	frappe.db.sql("""UPDATE`tabPrint Format` SET disabled = 0 WHERE
 			name IN ('Simplified Tax Invoice', 'Detailed Tax Invoice',
