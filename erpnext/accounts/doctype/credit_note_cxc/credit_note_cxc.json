@@ -8,8 +8,9 @@
   "naming_series",
   "party_type",
   "customer",
+  "customer_rtn",
   "company",
-  "rtn",
+  "company_rtn",
   "column_break_1",
   "posting_date",
   "due_date",
@@ -52,14 +53,6 @@
    "label": "Customer",
    "options": "Customer",
    "reqd": 1
-  },
-  {
-   "fetch_from": "customer.rtn",
-   "fetch_if_empty": 1,
-   "fieldname": "rtn",
-   "fieldtype": "Data",
-   "label": "RTN",
-   "read_only": 1
   },
   {
    "fieldname": "column_break_1",
@@ -210,10 +203,24 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fetch_from": "company.tax_id",
+   "fieldname": "company_rtn",
+   "fieldtype": "Data",
+   "label": "Company RTN",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.rtn",
+   "fieldname": "customer_rtn",
+   "fieldtype": "Data",
+   "label": "Customer RTN",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-11-29 10:13:51.176222",
+ "modified": "2021-12-08 13:23:11.528540",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Credit Note CXC",
