@@ -6,6 +6,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
 
 import erpnext
@@ -417,3 +418,16 @@ def is_reposting_item_valuation_in_progress():
 		{'docstatus': 1, 'status': ['in', ['Queued','In Progress']]})
 	if reposting_in_progress:
 		frappe.msgprint(_("Item valuation reposting in progress. Report might show incorrect item valuation."), alert=1)
+
+def reset_default_field(doc: Document, default_field: str, child_table_name: str, child_table_field: str) -> None:
+	"""If the field(child_table_field) value in child table(child_table_name) are not matching the field(default_field) value then set it's value to None."""
+	if doc.get(default_field):
+		child_table_values = set()
+
+		for row in doc.get(child_table_name):
+			child_table_values.add(row.get(child_table_field))
+
+		if len(child_table_values) > 1:
+			doc.set(default_field, None)
+		else:
+			doc.set(default_field, list(child_table_values)[0])

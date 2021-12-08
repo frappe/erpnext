@@ -38,6 +38,7 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	get_item_account_wise_additional_cost,
 	update_billed_amount_based_on_po,
 )
+from erpnext.stock.utils import reset_default_field
 
 
 class WarehouseMissingError(frappe.ValidationError): pass
@@ -114,6 +115,8 @@ class PurchaseInvoice(BuyingController):
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
+		reset_default_field(self, "set_warehouse", "items", "warehouse")
+		reset_default_field(self, "set_from_warehouse", "items", "from_warehouse")
 
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):

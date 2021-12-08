@@ -17,6 +17,7 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.stock_balance import get_indented_qty, update_bin_qty
+from erpnext.stock.utils import reset_default_field
 
 form_grid_templates = {
 	"items": "templates/form_grid/material_request_grid.html"
@@ -79,6 +80,9 @@ class MaterialRequest(BuyingController):
 		# self.validate_qty_against_so()
 		# NOTE: Since Item BOM and FG quantities are combined, using current data, it cannot be validated
 		# Though the creation of Material Request from a Production Plan can be rethought to fix this
+
+		reset_default_field(self, "set_warehouse", "items", "warehouse")
+		reset_default_field(self, "set_from_warehouse", "items", "from_warehouse")
 
 	def set_title(self):
 		'''Set title as comma separated list of items'''
