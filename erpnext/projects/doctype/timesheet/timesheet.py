@@ -3,7 +3,6 @@
 
 
 import json
-from datetime import timedelta
 
 import frappe
 from frappe import _

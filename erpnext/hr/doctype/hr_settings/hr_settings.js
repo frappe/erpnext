@@ -2,13 +2,15 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('HR Settings', {
-	frm.set_query('overtime_salary_component', function() {
-		return {
-			filters: {
-				type: "Earning"
-			}
-		};
-	});
+	refresh: function (frm) {
+		frm.set_query('overtime_salary_component', function () {
+			return {
+				filters: {
+					type: "Earning"
+				}
+			};
+		});
+	}
 });
 
 frappe.tour['HR Settings'] = [
