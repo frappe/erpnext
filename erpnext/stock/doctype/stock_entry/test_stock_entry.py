@@ -8,6 +8,7 @@ from frappe.utils import flt, nowdate, nowtime
 from erpnext.stock.doctype.serial_no.serial_no import *
 from erpnext import set_perpetual_inventory
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
+<<<<<<< HEAD
 from erpnext.stock.stock_ledger import get_previous_sle
 from frappe.permissions import add_user_permission, remove_user_permission
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
@@ -19,6 +20,17 @@ from erpnext.stock.doctype.stock_entry.stock_entry import (move_sample_to_retent
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from six import iteritems
+=======
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+	OpeningEntryAccountError,
+)
+from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+	create_stock_reconciliation,
+)
+from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle
+from erpnext.tests.utils import change_settings
+
+>>>>>>> f0152d03a4 (test: simplfy test and expect specific exception)
 
 def get_sle(**args):
 	condition, values = "", []
@@ -1016,11 +1028,9 @@ def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 		distributed_costs = [d.additional_cost for d in se.items]
 		self.assertEqual([40.0, 60.0], distributed_costs)
 
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_future_negative_sle(self):
 		# Initialize item, batch, warehouse, opening qty
-		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
-		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 0)
-
 		item_code = '_Test Future Neg Item'
 		batch_no = '_Test Future Neg Batch'
 		warehouses = [
@@ -1057,8 +1067,7 @@ def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 				purpose='Material Transfer')
 		]
 
-		self.assertRaises(frappe.ValidationError, create_stock_entries, sequence_of_entries)
-		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
+		self.assertRaises(NegativeStockError, create_stock_entries, sequence_of_entries)
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)
