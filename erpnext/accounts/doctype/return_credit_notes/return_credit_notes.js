@@ -630,6 +630,14 @@ frappe.ui.form.on('Cancellation Of Invoices', {
 			};
 		});
 
+		frm.set_query("sale_invoice", function () {
+			return {
+				"filters": {
+					company: frm.doc.company,
+				}
+			}
+		});
+
 		frm.set_query("cost_center", function() {
 			return {
 				filters: {
