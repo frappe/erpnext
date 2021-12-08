@@ -12,6 +12,5 @@ def execute():
 	if frappe.db.exists('DocType', 'Print Format'):
 		frappe.reload_doc("regional", "print_format", "ksa_vat_invoice", force=True)
 		frappe.reload_doc("regional", "print_format", "ksa_pos_invoice", force=True)
-		frappe.db.sql("""UPDATE`tabPrint Format` SET disabled = 1
-				WHERE name IN ('KSA VAT Invoice', 'KSA POS Invoice')
-			""")
+		for d in ('KSA VAT Invoice', 'KSA POS Invoice'):
+			frappe.db.set_value("Print Format", d, "disabled", 1)
