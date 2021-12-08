@@ -35,54 +35,15 @@ frappe.listview_settings['Purchase Order'] = {
 
 
 		listview.page.add_action_item(__("Purchase Invoice"), ()=>{
-			checked_items = listview.get_checked_items();
-			count_of_rows = checked_items.length;
-
-			frappe.confirm(__("Create {0} Purchase Invoice ?", [count_of_rows]),()=>{
-				frappe.call({
-					method:"erpnext.utilities.bulk_transaction.transaction_processing",
-					args: {data: checked_items, to_create: "Purchase Invoice From Purchase Order"}
-					}).then(r => {
-						console.log(r);
-						frappe.show_alert("Purchase Invoice Created Successfully !",5);
-					})
-			})
+			erpnext.bulk_transaction_processing.create(listview, "Purchase Order", "Purchase Invoice");
 		});
 
 		listview.page.add_action_item(__("Purchase Receipt"), ()=>{
-			checked_items = listview.get_checked_items();
-			count_of_rows = checked_items.length;
-
-			frappe.confirm(__("Create {0} Purchase Receipt ?", [count_of_rows]),()=>{
-				frappe.call({
-					method:"erpnext.utilities.bulk_transaction.transaction_processing",
-					args: {data: checked_items, to_create: "Purchase Receipt From Purchase Order"}
-				}).then(r => {
-					console.log(r);
-				})
-
-				if(count_of_rows > 10){
-					frappe.show_alert(`Starting a background job to create ${count_of_rows} purchase receipt`,count_of_rows);
-				}
-			})
+			erpnext.bulk_transaction_processing.create(listview, "Purchase Order", "Purchase Receipt");
 		});
 
 		listview.page.add_action_item(__("Advance Payment"), ()=>{
-			checked_items = listview.get_checked_items();
-			count_of_rows = checked_items.length;
-
-			frappe.confirm(__("Make {0} Advance Payment ?", [count_of_rows]),()=>{
-				frappe.call({
-					method:"erpnext.utilities.bulk_transaction.transaction_processing",
-					args: {data: checked_items, to_create: "Advance Payment From Purchase Order"}
-				}).then(r => {
-					console.log(r);
-				})
-
-				if(count_of_rows > 10){
-					frappe.show_alert(`Starting a background job to create ${count_of_rows} advance payment`,count_of_rows);
-				}
-			})
+			erpnext.bulk_transaction_processing.create(listview, "Purchase Order", "Advance Payment");
 		});
 
 	}

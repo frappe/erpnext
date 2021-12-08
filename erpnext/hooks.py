@@ -345,7 +345,8 @@ scheduler_events = {
 		"erpnext.support.doctype.service_level_agreement.service_level_agreement.set_service_level_agreement_variance"
 	],
 	"hourly_long": [
-		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries"
+		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
+		"erpnext.bulk_transaction.doctype.bulk_transaction_logger.bulk_transaction_logger.retry_failing_transaction"
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",

@@ -49,52 +49,16 @@ frappe.listview_settings['Sales Order'] = {
 		});
 
 		listview.page.add_action_item(__("Sales Invoice"),()=>{
-			checked_items = listview.get_checked_items();
-			count_of_rows = checked_items.length;
-			frappe.confirm(__("Create {0} Sales Invoice ?", [count_of_rows]),()=>{
-				frappe.call({
-					method:"erpnext.utilities.bulk_transaction.transaction_processing",
-					args: {data: checked_items, to_create: "Sales Invoice From Sales Order"}
-				}).then(r => {
-					console.log(r);
-				})
-				if(count_of_rows > 10){
-					frappe.show_alert(`Starting a background job to create ${count_of_rows} sales invoice`,count_of_rows);
-				}
-			})
+			erpnext.bulk_transaction_processing.create(listview, "Sales Order", "Sales Invoice");
 		});
 
 		listview.page.add_action_item(__("Delivery Note"), ()=>{
-			checked_items = listview.get_checked_items();
-			count_of_rows = checked_items.length;
-			frappe.confirm(__("Create {0} Delivery Note ?", [count_of_rows]),()=>{
-				frappe.call({
-					method:"erpnext.utilities.bulk_transaction.transaction_processing",
-					args: {data: checked_items, to_create: "Delivery Note From Sales Order"}
-					}).then(r => {
-						console.log(r);
-					})
-				if(count_of_rows > 10){
-					frappe.show_alert(`Starting a background to create ${count_of_rows} delivery note`,count_of_rows);
-				}
-			})
-		})
+			erpnext.bulk_transaction_processing.create(listview, "Sales Order", "Delivery Note");
+		});
 
 		listview.page.add_action_item(__("Advance Payment"), ()=>{
-			checked_items = listview.get_checked_items();
-			count_of_rows = checked_items.length;
-			frappe.confirm(__("Create {0} Advance Payment ?", [count_of_rows]),()=>{
-				frappe.call({
-					method:"erpnext.utilities.bulk_transaction.transaction_processing",
-					args: {data: checked_items, to_create: "Advance Payment From Sales Order"}
-				}).then(r => {
-					console.log(r);
-				})
-				if(count_of_rows > 10){
-					frappe.show_alert(`Starting a background job to create ${count_of_rows} Advance Payment`,count_of_rows);
-				}
-			})
-		})
+			erpnext.bulk_transaction_processing.create(listview, "Sales Order", "Advance Payment");
+		});
 
 	}
 };

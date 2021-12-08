@@ -25,3 +25,4 @@ Communication
 Loan Management
 Payroll
 Telephony
+Bulk Transaction
