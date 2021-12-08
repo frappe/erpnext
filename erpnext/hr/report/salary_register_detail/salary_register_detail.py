@@ -52,6 +52,12 @@ def execute(filters=None):
 		row += [ss.total_deduction, ss.net_pay]
 
 		data.append(row)
+	
+	row = ["ELABORADO POR:","","","","","","",""]
+	data.append(row)
+
+	row = ["REVISADO POR:","","","","","","",""]
+	data.append(row)
 
 	return columns, data
 

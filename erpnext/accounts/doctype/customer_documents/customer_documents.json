@@ -23,6 +23,7 @@
   "currency",
   "columnaccount",
   "account_to_credit",
+  "cost_center",
   "section_break_1",
   "total_exempt",
   "taxes",
@@ -256,10 +257,16 @@
    "label": "Currency",
    "options": "Currency",
    "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-12-01 14:41:53.642530",
+ "modified": "2021-12-08 15:47:09.863295",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Customer Documents",
