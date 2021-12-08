@@ -119,7 +119,7 @@ class SupplierDocuments(Document):
 		doc.account = self.account_to_debit
 		doc.party_type = "Supplier"
 		doc.party = self.supplier
-		doc.cost_center = None
+		doc.cost_center = self.cost_center
 		doc.debit = self.total
 		doc.credit = 0
 		doc.account_currency = self.currency
@@ -149,7 +149,7 @@ class SupplierDocuments(Document):
 		doc.account = self.account_to_credit
 		doc.party_type = "Supplier"
 		doc.party = self.supplier
-		doc.cost_center = None
+		doc.cost_center = self.cost_center
 		doc.debit = 0
 		doc.credit = self.total
 		doc.account_currency = self.currency
