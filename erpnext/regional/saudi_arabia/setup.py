@@ -20,10 +20,8 @@ def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "ksa_vat_invoice", force=True)
 	frappe.reload_doc("regional", "print_format", "ksa_pos_invoice", force=True)
 
-	frappe.db.sql("""UPDATE`tabPrint Format` SET disabled = 0 WHERE
-			name IN ('Simplified Tax Invoice', 'Detailed Tax Invoice',
-			'Tax Invoice', 'KSA VAT Invoice', 'KSA POS Invoice')
-		""")
+	for d in ('Simplified Tax Invoice', 'Detailed Tax Invoice', 'Tax Invoice', 'KSA VAT Invoice', 'KSA POS Invoice'):
+		frappe.db.set_value("Print Format", d, "disabled", 0)
 
 def add_permissions():
 	"""Add Permissions for KSA VAT Setting."""
