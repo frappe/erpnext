@@ -141,10 +141,9 @@ def delete_qr_code_file(doc, method=None):
 			if len(file_doc):
 				frappe.delete_doc('File', file_doc[0].name)
 
-def delete_vat_settings_for_company(doc, method):
+def delete_vat_settings_for_company(doc, method=None):
 	if doc.country != 'Saudi Arabia':
 		return
 
-	settings_doc = frappe.get_all('KSA VAT Setting', filters={'company': doc.name}, pluck='name')
-	for settings in settings_doc:
-		frappe.delete_doc('KSA VAT Setting', settings)
+	if frappe.db.exists('KSA VAT Setting', doc.name):
+		frappe.delete_doc('KSA VAT Setting', doc.name)
