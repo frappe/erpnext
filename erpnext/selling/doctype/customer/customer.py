@@ -43,6 +43,7 @@ class Customer(TransactionBase):
 		cust_master_name = frappe.defaults.get_global_default('cust_master_name')
 		if cust_master_name == 'Customer Name':
 			self.name = self.get_customer_name()
+			self.name = self.name.replace(' ', '-').lower()
 		elif cust_master_name == 'Naming Series':
 			set_name_by_naming_series(self)
 		else:
@@ -55,7 +56,7 @@ class Customer(TransactionBase):
 				 where name like %s""", "%{0} - %".format(self.customer_name), as_list=1)[0][0]
 			count = cint(count) + 1
 
-			new_customer_name = "{0} - {1}".format(self.customer_name, cstr(count))
+			new_customer_name = "{0}-{1}".format(self.customer_name, cstr(count))
 
 			msgprint(_("Changed customer name to '{}' as '{}' already exists.")
 					.format(new_customer_name, self.customer_name),
