@@ -88,7 +88,7 @@ frappe.query_reports["Sales Analytics"] = {
 		{
 			"label": __("Customer"),
 			"fieldname": "customer_id",
-			"fieldtype": "Data",
+			"fieldtype": "Link",
 			"options": "Customer"
 		}
 	],
