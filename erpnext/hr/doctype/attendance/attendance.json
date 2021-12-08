@@ -26,6 +26,7 @@
   "column_break_18",
   "shift_duration",
   "working_time",
+  "working_hours",
   "late_entry",
   "early_exit",
   "overtime_details_section",
@@ -215,6 +216,15 @@
    "label": "Total Working Time",
    "precision": "1",
    "read_only": 1
+  },
+  {
+   "depends_on": "working_hours",
+   "fieldname": "working_hours",
+   "fieldtype": "Float",
+   "label": "Working Hours",
+   "precision": "1",
+   "read_only": 1,
+   "hidden": 1
   },
   {
    "default": "0000",
