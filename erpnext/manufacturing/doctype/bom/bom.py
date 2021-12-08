@@ -17,7 +17,6 @@ import erpnext
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_item_details
 from erpnext.stock.get_item_details import get_conversion_factor, get_price_list_rate
-from erpnext.utilities.transaction_base import UOMMustBeIntegerError
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -143,7 +142,7 @@ class BOM(WebsiteGenerator):
 
 		for scrap_item in self.scrap_items:
 			if isinstance(scrap_item.stock_qty, float) and frappe.db.get_value("UOM", scrap_item.stock_uom, "must_be_whole_number"):
-				frappe.msgprint(msg=f"Scrap for <b>{scrap_item.item_name}</b> cannot be in fraction. The UOM <b>{scrap_item.stock_uom}</b> must be a whole number.", raise_exception=UOMMustBeIntegerError, title="Message...")
+				frappe.throw(msg=f"Scrap for <b>{scrap_item.item_name}</b> cannot be in fraction. The UOM <b>{scrap_item.stock_uom}</b> must be a whole number.", title="Message")
 
 		self.clear_operations()
 		self.validate_main_item()
