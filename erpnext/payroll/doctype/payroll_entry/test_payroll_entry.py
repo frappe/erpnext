@@ -23,10 +23,10 @@ from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_end_date, ge
 from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
 	create_account,
 	get_salary_component_account,
+	get_salary_component_for_overtime,
 	make_deduction_salary_component,
 	make_earning_salary_component,
 	make_employee_salary_slip,
-	get_salary_component_for_overtime,
 )
 from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
 	create_salary_structure_assignment,

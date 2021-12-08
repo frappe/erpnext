@@ -1,14 +1,16 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+import unittest
+from datetime import timedelta
+
 import frappe
+from frappe.utils import add_days, get_datetime, today
+
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.employee_checkin.test_employee_checkin import make_checkin
+from erpnext.hr.doctype.shift_type.test_shift_type import create_shift_type
 from erpnext.payroll.doctype.overtime_type.test_overtime_type import create_overtime_type
 from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
-from erpnext.hr.doctype.shift_type.test_shift_type import create_shift_type
-from erpnext.hr.doctype.employee_checkin.test_employee_checkin import make_checkin
-from frappe.utils import today, add_days, get_datetime
-from datetime import timedelta
-import unittest
 
 
 class TestOvertimeSlip(unittest.TestCase):

@@ -598,9 +598,11 @@ class TestSalarySlip(unittest.TestCase):
 
 
 	def test_overtime_calculation(self):
+		from erpnext.payroll.doctype.overtime_slip.test_overtime_slip import (
+			create_attendance_records_for_overtime,
+			create_overtime_slip,
+		)
 		from erpnext.payroll.doctype.overtime_type.test_overtime_type import create_overtime_type
-		from erpnext.payroll.doctype.overtime_slip.test_overtime_slip import create_overtime_slip
-		from erpnext.payroll.doctype.overtime_slip.test_overtime_slip import create_attendance_records_for_overtime
 		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
 		employee = make_employee("overtime_calc@salary.slip")

@@ -3,10 +3,13 @@
 
 import frappe
 from frappe import _, bold
-from frappe.utils import get_datetime, getdate, get_link_to_form, formatdate
-from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates
-from erpnext.payroll.doctype.gratuity.gratuity import get_salary_structure
 from frappe.model.document import Document
+from frappe.utils import formatdate, get_datetime, get_link_to_form, getdate
+
+from erpnext.payroll.doctype.gratuity.gratuity import get_salary_structure
+from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates
+
+
 class OvertimeSlip(Document):
 	def validate(self):
 		if not (self.from_date or self.to_date or self.payroll_frequency):

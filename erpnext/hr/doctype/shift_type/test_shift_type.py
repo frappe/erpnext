@@ -2,7 +2,9 @@
 # See license.txt
 
 import unittest
+
 import frappe
+
 
 class TestShiftType(unittest.TestCase):
 	pass

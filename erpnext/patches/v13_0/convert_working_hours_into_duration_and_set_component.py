@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 
+
 def execute():
 	if not frappe.db.exists('Salary Component', _('Overtime Allowance')):
 		frappe.get_doc({'doctype': 'Salary Component',

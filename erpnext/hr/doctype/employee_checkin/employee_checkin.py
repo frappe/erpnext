@@ -2,6 +2,9 @@
 # For license information, please see license.txt
 
 
+from datetime import timedelta
+from math import modf
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -11,9 +14,6 @@ from erpnext.hr.doctype.shift_assignment.shift_assignment import (
 	get_actual_start_end_datetime_of_shift,
 )
 from erpnext.hr.utils import validate_active_employee
-
-from datetime import timedelta
-from math import modf
 
 
 class EmployeeCheckin(Document):
