@@ -612,6 +612,7 @@ class TestSalarySlip(unittest.TestCase):
 		frappe.db.set_value("Payroll Settings", None, "fetch_standard_working_hours_from_shift_type", 0)
 		get_salary_component_for_overtime()
 		frappe.db.set_value("Payroll Settings", None, "overtime_salary_component", "Overtime Allowance")
+		frappe.db.set_value("HR Settings", None, "standard_working_hours", 7)
 
 		overtime_type = create_overtime_type(employee = employee).name
 		create_attendance_records_for_overtime(employee, overtime_type=overtime_type)
