@@ -129,7 +129,8 @@ class StockEntry(StockController):
 		if self.purpose == 'Material Transfer' and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status('Completed')
 
-		if self.stock_entry_type in ['Material Transfer', 'Material Issue']:
+		if (self.stock_entry_type in ['Material Transfer', 'Material Issue'] and
+			self.check_task_items_exist()):
 			self.update_task_items()
 
 	def on_cancel(self):
@@ -155,7 +156,8 @@ class StockEntry(StockController):
 			self.set_material_request_transfer_status('Not Started')
 		if self.purpose == 'Material Transfer' and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status('In Transit')
-		if self.stock_entry_type in ['Material Transfer', 'Material Issue']:
+		if (self.stock_entry_type in ['Material Transfer', 'Material Issue'] and
+			self.check_task_items_exist()):
 			self.update_task_items()
 
 	def set_job_card_data(self):
@@ -456,6 +458,13 @@ class StockEntry(StockController):
 
 			if transferred_serial_no:
 				d.serial_no = transferred_serial_no
+
+	def check_task_items_exist(self, exists=False):
+		for item in self.items:
+			if item.task_item:
+				exists = True
+				break
+		return exists
 
 	def update_task_items(self):
 		from frappe.query_builder.functions import Coalesce, Sum
