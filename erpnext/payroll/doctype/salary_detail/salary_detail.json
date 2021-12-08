@@ -251,7 +251,6 @@
    "fieldtype": "Small Text",
    "label": "Overtime Slip(s)",
    "read_only": 1
-  }
   },
   {
     "default": "0",
