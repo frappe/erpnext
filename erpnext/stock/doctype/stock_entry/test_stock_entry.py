@@ -24,7 +24,8 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
-from erpnext.stock.stock_ledger import get_previous_sle
+from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle
+from erpnext.tests.utils import change_settings
 
 
 def get_sle(**args):
@@ -928,11 +929,9 @@ class TestStockEntry(unittest.TestCase):
 		distributed_costs = [d.additional_cost for d in se.items]
 		self.assertEqual([40.0, 60.0], distributed_costs)
 
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_future_negative_sle(self):
 		# Initialize item, batch, warehouse, opening qty
-		is_allow_neg = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
-		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', 0)
-
 		item_code = '_Test Future Neg Item'
 		batch_no = '_Test Future Neg Batch'
 		warehouses = [
@@ -969,8 +968,7 @@ class TestStockEntry(unittest.TestCase):
 				purpose='Material Transfer')
 		]
 
-		self.assertRaises(frappe.ValidationError, create_stock_entries, sequence_of_entries)
-		frappe.db.set_value('Stock Settings', 'Stock Settings', 'allow_negative_stock', is_allow_neg)
+		self.assertRaises(NegativeStockError, create_stock_entries, sequence_of_entries)
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)
