@@ -207,18 +207,9 @@ class update_entries_after(object):
 		if self.batch_wise_valuation:
 			self.get_previous_batch_sle(sle)
 
-		if not cint(self.allow_negative_stock):
-			# validate negative stock for serialized items, fifo valuation
-			# or when negative stock is not allowed for moving average
-			if self.batch_wise_valuation and not self.validate_negative_stock(sle, validate_batch=True):
-				self.batch_data.batch_qty_after_transaction += flt(sle.actual_qty)
-				return
-			if not self.validate_negative_stock(sle):
-				self.qty_after_transaction += flt(sle.actual_qty)
-				return
-
 		self.get_dependent_values(sle)
 
+		# process values
 		serial_nos = get_serial_nos(sle.serial_no)
 		if serial_nos:
 			if sle.voucher_type == "Stock Reconciliation" and not sle.reset_rate:
@@ -238,6 +229,7 @@ class update_entries_after(object):
 				else:
 					self.get_fifo_values(sle)
 
+		# set current sle values
 		# rounding as per precision
 		self.stock_value = flt(self.stock_value, self.value_precision)
 
@@ -251,7 +243,6 @@ class update_entries_after(object):
 
 		stock_value_difference_changed = flt(stock_value_difference, self.value_db_precision) != sle.stock_value_difference
 
-		# update current sle
 		sle.qty_after_transaction = self.qty_after_transaction
 		sle.valuation_rate = self.valuation_rate
 		sle.stock_value = self.stock_value
@@ -267,6 +258,14 @@ class update_entries_after(object):
 			sle.batch_valuation_rate = self.valuation_rate
 			sle.batch_stock_value = self.stock_value
 
+		# validate negative stock
+		if not cint(self.allow_negative_stock):
+			if self.batch_wise_valuation and not self.validate_negative_stock(sle, validate_batch=True):
+				return
+			if not self.validate_negative_stock(sle):
+				return
+
+		# update SLE and Serial Nos
 		sle.doctype="Stock Ledger Entry"
 		frappe.get_doc(sle).db_update()
 
@@ -282,7 +281,6 @@ class update_entries_after(object):
 			will not consider cancelled entries
 		"""
 		diff = self.batch_data.batch_qty_after_transaction if validate_batch else self.qty_after_transaction
-		diff += flt(sle.actual_qty)
 
 		if diff < 0 and abs(diff) > 0.0001:
 			# negative stock!
