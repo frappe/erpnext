@@ -1,12 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
-from frappe.utils import getdate, add_days
+from frappe.utils import add_days, getdate
+
 from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_employee
+
 
 class TestEmployeePromotion(unittest.TestCase):
 	def setUp(self):

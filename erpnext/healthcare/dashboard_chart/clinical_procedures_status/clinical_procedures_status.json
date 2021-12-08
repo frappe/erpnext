@@ -12,15 +12,15 @@
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
- "last_synced_on": "2020-07-22 13:22:46.691764",
- "modified": "2020-07-22 13:40:17.215775",
+ "last_synced_on": "2021-02-01 13:36:38.787783",
+ "modified": "2021-02-01 13:37:18.718275",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedures Status",
  "number_of_groups": 0,
  "owner": "Administrator",
  "timeseries": 0,
- "type": "Pie",
+ "type": "Bar",
  "use_report_chart": 0,
  "y_axis": []
 }

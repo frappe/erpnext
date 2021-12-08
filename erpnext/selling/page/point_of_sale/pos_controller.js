@@ -525,7 +525,7 @@ erpnext.PointOfSale.Controller = class {
 				}
 
 			} else {
-				if (!this.frm.doc.customer) 
+				if (!this.frm.doc.customer)
 					return this.raise_customer_selection_alert();
 
 				const { item_code, batch_no, serial_no, rate } = item;
@@ -549,7 +549,7 @@ erpnext.PointOfSale.Controller = class {
 					await this.check_stock_availability(item_row, value, this.frm.doc.set_warehouse);
 
 				await this.trigger_new_item_events(item_row);
-				
+
 				this.update_cart_html(item_row);
 
 				if (this.item_details.$component.is(':visible'))
@@ -708,4 +708,3 @@ erpnext.PointOfSale.Controller = class {
 			.catch(e => console.log(e));
 	}
 };
-

@@ -1,13 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
-import frappe, erpnext
+import frappe
 from frappe.utils import flt
 from frappe.utils.make_random import get_random
-from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
+
+import erpnext
 from erpnext.demo.user.hr import make_sales_invoice_for_timesheet
+from erpnext.projects.doctype.timesheet.test_timesheet import make_timesheet
+
 
 def run_projects(current_date):
 	frappe.set_user(frappe.db.get_global('demo_projects_user'))

@@ -282,7 +282,7 @@
  ],
  "image_field": "image",
  "links": [],
- "modified": "2021-01-22 10:14:43.187675",
+ "modified": "2021-08-24 10:42:08.513054",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Practitioner",
@@ -295,6 +295,7 @@
    "read": 1,
    "report": 1,
    "role": "Laboratory User",
+   "select": 1,
    "share": 1,
    "write": 1
   },
@@ -307,6 +308,7 @@
    "read": 1,
    "report": 1,
    "role": "Physician",
+   "select": 1,
    "share": 1,
    "write": 1
   },
@@ -319,6 +321,7 @@
    "read": 1,
    "report": 1,
    "role": "Nursing User",
+   "select": 1,
    "share": 1,
    "write": 1
   }

@@ -15,6 +15,8 @@ frappe.pages['organizational-chart'].on_page_load = function(wrapper) {
 			} else {
 				organizational_chart = new erpnext.HierarchyChart('Employee', wrapper, method);
 			}
+
+			frappe.breadcrumbs.add('HR');
 			organizational_chart.show();
 		});
 	});

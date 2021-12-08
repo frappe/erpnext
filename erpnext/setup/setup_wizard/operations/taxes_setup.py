@@ -1,10 +1,9 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
-import os
 import json
+import os
 
 import frappe
 from frappe import _
@@ -145,7 +144,7 @@ def make_taxes_and_charges_template(company_name, doctype, template):
 
 	doc = frappe.get_doc(template)
 
-	# Data in country wise json is already pre validated, hence validations can be ignored 
+	# Data in country wise json is already pre validated, hence validations can be ignored
 	# Ingone validations to make doctypes faster
 	doc.flags.ignore_links = True
 	doc.flags.ignore_validate = True
@@ -177,7 +176,7 @@ def make_item_tax_template(company_name, template):
 
 	doc = frappe.get_doc(template)
 
-	# Data in country wise json is already pre validated, hence validations can be ignored 
+	# Data in country wise json is already pre validated, hence validations can be ignored
 	# Ingone validations to make doctypes faster
 	doc.flags.ignore_links = True
 	doc.flags.ignore_validate = True
@@ -202,7 +201,7 @@ def get_or_create_account(company_name, account):
 	default_root_type = 'Liability'
 	root_type = account.get('root_type', default_root_type)
 
-	existing_accounts = frappe.get_list('Account',
+	existing_accounts = frappe.get_all('Account',
 		filters={
 			'company': company_name,
 			'root_type': root_type
@@ -257,7 +256,7 @@ def get_or_create_tax_group(company_name, root_type):
 
 	# Create a new group account named 'Duties and Taxes' or 'Tax Assets' just
 	# below the root account
-	root_account = frappe.get_list('Account', {
+	root_account = frappe.get_all('Account', {
 		'is_group': 1,
 		'root_type': root_type,
 		'company': company_name,

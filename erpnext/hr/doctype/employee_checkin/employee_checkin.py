@@ -1,17 +1,20 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import cint, get_datetime
+from frappe import _
 from frappe.model.document import Document
+from frappe.utils import cint, get_datetime
+
+from erpnext.hr.doctype.shift_assignment.shift_assignment import (
+	get_actual_start_end_datetime_of_shift,
+)
+from erpnext.hr.utils import validate_active_employee
+
 from datetime import timedelta
 from math import modf
-from frappe import _
 
-from erpnext.hr.doctype.shift_assignment.shift_assignment import get_actual_start_end_datetime_of_shift
-from erpnext.hr.utils import validate_active_employee
 
 class EmployeeCheckin(Document):
 	def validate(self):
@@ -66,8 +69,7 @@ def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=N
 	if not employee_field_value or not timestamp:
 		frappe.throw(_("'employee_field_value' and 'timestamp' are required."))
 
-	employee = frappe.db.get_values("Employee", {employee_fieldname: employee_field_value},
-		["name", "employee_name", employee_fieldname], as_dict=True)
+	employee = frappe.db.get_values("Employee", {employee_fieldname: employee_field_value}, ["name", "employee_name", employee_fieldname], as_dict=True)
 	if employee:
 		employee = employee[0]
 	else:
@@ -83,6 +85,7 @@ def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=N
 	doc.insert()
 
 	return doc
+
 
 def mark_attendance_and_link_log(logs, attendance_status, attendance_date, working_hours=None, late_entry=False, early_exit=False, in_time=None, out_time=None, shift=None):
 	"""Creates an attendance and links the attendance to the Employee Checkin.
@@ -143,10 +146,10 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 		frappe.throw(_('{} is an invalid Attendance Status.').format(attendance_status))
 
 
-
 def calculate_working_hours(logs, check_in_out_type, working_hours_calc_type):
 	"""Given a set of logs in chronological order calculates the total working hours based on the parameters.
 	Zero is returned for all invalid cases.
+
 	:param logs: The List of 'Employee Checkin'.
 	:param check_in_out_type: One of: 'Alternating entries as IN and OUT during the same shift', 'Strictly based on Log Type in Employee Checkin'
 	:param working_hours_calc_type: One of: 'First Check-in and Last Check-out', 'Every Valid Check-in and Check-out'
@@ -198,4 +201,3 @@ def time_diff_in_hours(start, end):
 
 def find_index_in_dict(dict_list, key, value):
 	return next((index for (index, d) in enumerate(dict_list) if d[key] == value), None)
-

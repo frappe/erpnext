@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
+
 
 class TestSupplierScorecard(unittest.TestCase):
 
@@ -128,4 +128,3 @@ valid_scorecard = [
 		"weighting_function":"{total_score} * max( 0, min ( 1 , (12 - {period_number}) / 12) )"
 	}
 ]
-

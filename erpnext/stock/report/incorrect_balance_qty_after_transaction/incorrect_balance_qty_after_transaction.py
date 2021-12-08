@@ -3,8 +3,9 @@
 
 import frappe
 from frappe import _
-from six import iteritems
 from frappe.utils import flt
+from six import iteritems
+
 
 def execute(filters=None):
 	columns, data = [], []
@@ -46,7 +47,7 @@ def get_incorrect_data(data):
 			return row
 
 def get_stock_ledger_entries(report_filters):
-	filters = {}
+	filters = {"is_cancelled": 0}
 	fields = ['name', 'voucher_type', 'voucher_no', 'item_code', 'actual_qty',
 		'posting_date', 'posting_time', 'company', 'warehouse', 'qty_after_transaction', 'batch_no']
 

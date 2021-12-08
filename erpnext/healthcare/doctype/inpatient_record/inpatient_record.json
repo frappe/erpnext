@@ -50,7 +50,7 @@
   "inpatient_occupancies",
   "btn_transfer",
   "sb_discharge_details",
-  "discharge_ordered_date",
+  "discharge_ordered_datetime",
   "discharge_practitioner",
   "discharge_encounter",
   "discharge_datetime",
@@ -375,13 +375,6 @@
    "label": "Discharge Instructions"
   },
   {
-   "fieldname": "discharge_ordered_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Discharge Ordered Date",
-   "read_only": 1
-  },
-  {
    "collapsible": 1,
    "fieldname": "rehabilitation_section",
    "fieldtype": "Section Break",
@@ -406,13 +399,20 @@
   {
    "fieldname": "discharge_datetime",
    "fieldtype": "Datetime",
-   "label": "Discharge Date",
+   "label": "Discharge Datetime",
    "permlevel": 2
+  },
+  {
+   "fieldname": "discharge_ordered_datetime",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Discharge Ordered Datetime",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-03-18 15:59:17.318988",
+ "modified": "2021-08-09 22:49:07.419692",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Record",

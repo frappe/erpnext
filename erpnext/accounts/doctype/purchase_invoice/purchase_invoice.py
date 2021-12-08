@@ -1,31 +1,44 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-# -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-import frappe, erpnext
-from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate, get_link_to_form
+
+import frappe
 from frappe import _, throw
-import frappe.defaults
-
-from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
-from erpnext.controllers.buying_controller import BuyingController
-from erpnext.accounts.party import get_party_account, get_due_date
-from erpnext.accounts.utils import get_account_currency, get_fiscal_year
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billed_amount_based_on_po
-from erpnext.stock import get_warehouse_account_map
-from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, make_reverse_gl_entries
-from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
-from erpnext.buying.utils import check_on_hold_or_closed_status
-from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
-from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
 from six import iteritems
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
-	unlink_inter_company_doc, check_if_return_invoice_linked_with_payment_entry
-from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
+
+import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_item_account_wise_additional_cost
+from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+	check_if_return_invoice_linked_with_payment_entry,
+	get_total_in_party_account_currency,
+	is_overdue,
+	unlink_inter_company_doc,
+	update_linked_doc,
+	validate_inter_company_party,
+)
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
+	get_party_tax_withholding_details,
+)
+from erpnext.accounts.general_ledger import (
+	get_round_off_account_and_cost_center,
+	make_gl_entries,
+	make_reverse_gl_entries,
+	merge_similar_entries,
+)
+from erpnext.accounts.party import get_due_date, get_party_account
+from erpnext.accounts.utils import get_account_currency, get_fiscal_year
+from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
+from erpnext.buying.utils import check_on_hold_or_closed_status
+from erpnext.controllers.buying_controller import BuyingController
+from erpnext.stock import get_warehouse_account_map
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+	get_item_account_wise_additional_cost,
+	update_billed_amount_based_on_po,
+)
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -412,6 +425,9 @@ class PurchaseInvoice(BuyingController):
 
 		self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
+		self.update_advance_tax_references()
+
+		self.process_common_party_accounting()
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if not gl_entries:
@@ -454,8 +470,6 @@ class PurchaseInvoice(BuyingController):
 		self.make_tax_gl_entries(gl_entries)
 		self.make_exchange_gain_loss_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
-
-		self.allocate_advance_taxes(gl_entries)
 
 		gl_entries = make_regional_gl_entries(gl_entries, self)
 
@@ -680,7 +694,7 @@ class PurchaseInvoice(BuyingController):
 									"account": self.stock_received_but_not_billed,
 									"against": self.supplier,
 									"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
-									"remarks": self.remarks or "Accounting Entry for Stock",
+									"remarks": self.remarks or _("Accounting Entry for Stock"),
 									"cost_center": self.cost_center,
 									"project": item.project or self.project
 								}, item=item)
@@ -887,7 +901,7 @@ class PurchaseInvoice(BuyingController):
 							"cost_center": tax.cost_center,
 							"against": self.supplier,
 							"credit": valuation_tax[tax.name],
-							"remarks": self.remarks or "Accounting Entry for Stock"
+							"remarks": self.remarks or _("Accounting Entry for Stock")
 						}, item=tax))
 
 	@property
@@ -1024,6 +1038,7 @@ class PurchaseInvoice(BuyingController):
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
+		self.update_advance_tax_references(cancel=1)
 
 	def update_project(self):
 		project_list = []
@@ -1094,7 +1109,16 @@ class PurchaseInvoice(BuyingController):
 		if not self.apply_tds:
 			return
 
-		tax_withholding_details = get_party_tax_withholding_details(self, self.tax_withholding_category)
+		if self.apply_tds and not self.get('tax_withholding_category'):
+			self.tax_withholding_category = frappe.db.get_value('Supplier', self.supplier, 'tax_withholding_category')
+
+		if not self.tax_withholding_category:
+			return
+
+		tax_withholding_details, advance_taxes = get_party_tax_withholding_details(self, self.tax_withholding_category)
+
+		# Adjust TDS paid on advances
+		self.allocate_advance_tds(tax_withholding_details, advance_taxes)
 
 		if not tax_withholding_details:
 			return
@@ -1118,16 +1142,47 @@ class PurchaseInvoice(BuyingController):
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
 
+	def allocate_advance_tds(self, tax_withholding_details, advance_taxes):
+		self.set('advance_tax', [])
+		for tax in advance_taxes:
+			allocated_amount = 0
+			pending_amount = flt(tax.tax_amount - tax.allocated_amount)
+			if flt(tax_withholding_details.get('tax_amount')) >= pending_amount:
+				tax_withholding_details['tax_amount'] -= pending_amount
+				allocated_amount = pending_amount
+			elif flt(tax_withholding_details.get('tax_amount')) and flt(tax_withholding_details.get('tax_amount')) < pending_amount:
+				allocated_amount = tax_withholding_details['tax_amount']
+				tax_withholding_details['tax_amount'] = 0
+
+			self.append('advance_tax', {
+				'reference_type': 'Payment Entry',
+				'reference_name': tax.parent,
+				'reference_detail': tax.name,
+				'account_head': tax.account_head,
+				'allocated_amount': allocated_amount
+			})
+
+	def update_advance_tax_references(self, cancel=0):
+		for tax in self.get('advance_tax'):
+			at = frappe.qb.DocType("Advance Taxes and Charges").as_("at")
+
+			if cancel:
+				frappe.qb.update(at).set(
+					at.allocated_amount, at.allocated_amount - tax.allocated_amount
+				).where(at.name == tax.reference_detail).run()
+			else:
+				frappe.qb.update(at).set(
+					at.allocated_amount, at.allocated_amount + tax.allocated_amount
+				).where(at.name == tax.reference_detail).run()
+
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
 			if self.get('amended_from'):
 				self.status = 'Draft'
 			return
 
-		precision = self.precision("outstanding_amount")
-		outstanding_amount = flt(self.outstanding_amount, precision)
-		due_date = getdate(self.due_date)
-		nowdate = getdate()
+		outstanding_amount = flt(self.outstanding_amount, self.precision("outstanding_amount"))
+		total = get_total_in_party_account_currency(self)
 
 		if not status:
 			if self.docstatus == 2:
@@ -1135,9 +1190,11 @@ class PurchaseInvoice(BuyingController):
 			elif self.docstatus == 1:
 				if self.is_internal_transfer():
 					self.status = 'Internal Transfer'
-				elif outstanding_amount > 0 and due_date < nowdate:
+				elif is_overdue(self, total):
 					self.status = "Overdue"
-				elif outstanding_amount > 0 and due_date >= nowdate:
+				elif 0 < outstanding_amount < total:
+					self.status = "Partly Paid"
+				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate():
 					self.status = "Unpaid"
 				#Check if outstanding amount is 0 due to debit note issued against invoice
 				elif outstanding_amount <= 0 and self.is_return == 0 and frappe.db.get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):

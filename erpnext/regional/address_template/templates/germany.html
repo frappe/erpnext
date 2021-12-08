@@ -3,6 +3,6 @@
 {% if country in ["Germany", "Deutschland"] %}
     {{ pincode }} {{ city }}
 {% else %}
-    {{ pincode }} {{ city | upper }}<br>    
+    {{ pincode }} {{ city | upper }}<br>
     {{ country | upper }}
 {% endif %}

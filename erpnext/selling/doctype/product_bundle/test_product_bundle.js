@@ -33,4 +33,3 @@ QUnit.test("test sales order", function(assert) {
 		() => done()
 	]);
 });
-

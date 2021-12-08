@@ -1,5 +1,10 @@
-from __future__ import unicode_literals
-import unittest, frappe, erpnext
+
+import unittest
+
+import frappe
+
+import erpnext
+
 
 @erpnext.allow_regional
 def test_method():

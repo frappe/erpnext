@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
+
 from erpnext.projects.doctype.task.test_task import create_task
+
 
 class TestProjectTemplate(unittest.TestCase):
 	pass

@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-from  frappe import _
-from  frappe import ValidationError
-import unittest
+from frappe import ValidationError
 
 # test_records = frappe.get_test_records('Bank Account')
 

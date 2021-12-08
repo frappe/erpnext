@@ -26,15 +26,28 @@ frappe.ui.form.on('Job Card', {
 	refresh: function(frm) {
 		frappe.flags.pause_job = 0;
 		frappe.flags.resume_job = 0;
+		let has_items = frm.doc.items && frm.doc.items.length;
 
-		if(!frm.doc.__islocal && frm.doc.items && frm.doc.items.length) {
-			if (frm.doc.for_quantity != frm.doc.transferred_qty) {
+		if (frm.doc.__onload.work_order_stopped) {
+			frm.disable_save();
+			return;
+		}
+
+		if (!frm.doc.__islocal && has_items && frm.doc.docstatus < 2) {
+			let to_request = frm.doc.for_quantity > frm.doc.transferred_qty;
+			let excess_transfer_allowed = frm.doc.__onload.job_card_excess_transfer;
+
+			if (to_request || excess_transfer_allowed) {
 				frm.add_custom_button(__("Material Request"), () => {
 					frm.trigger("make_material_request");
 				});
 			}
 
-			if (frm.doc.for_quantity != frm.doc.transferred_qty) {
+			// check if any row has untransferred materials
+			// in case of multiple items in JC
+			let to_transfer = frm.doc.items.some((row) => row.transferred_qty < row.required_qty);
+
+			if (to_transfer || excess_transfer_allowed) {
 				frm.add_custom_button(__("Material Transfer"), () => {
 					frm.trigger("make_stock_entry");
 				}).addClass("btn-primary");
@@ -62,6 +75,23 @@ frappe.ui.form.on('Job Card', {
 			&& (frm.doc.items || !frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)) {
 			frm.trigger("prepare_timer_buttons");
 		}
+		frm.trigger("setup_quality_inspection");
+	},
+
+	setup_quality_inspection: function(frm) {
+		let quality_inspection_field = frm.get_docfield("quality_inspection");
+		quality_inspection_field.get_route_options_for_new_doc = function(frm) {
+			return  {
+				"inspection_type": "In Process",
+				"reference_type": "Job Card",
+				"reference_name": frm.doc.name,
+				"item_code": frm.doc.production_item,
+				"item_name": frm.doc.item_name,
+				"item_serial_no": frm.doc.serial_no,
+				"batch_no": frm.doc.batch_no,
+				"quality_inspection_template": frm.doc.quality_inspection_template,
+			};
+		};
 	},
 
 	setup_corrective_job_card: function(frm) {

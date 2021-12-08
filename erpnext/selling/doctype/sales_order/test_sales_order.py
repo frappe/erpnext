@@ -1,21 +1,28 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
+
 import json
 import unittest
+
 import frappe
 import frappe.permissions
-from frappe.utils import flt, add_days, nowdate, getdate
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-from erpnext.selling.doctype.sales_order.sales_order \
-	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.selling.doctype.sales_order.sales_order import make_work_orders
+from frappe.utils import add_days, flt, getdate, nowdate
+
 from erpnext.controllers.accounts_controller import update_child_qty_rate
-from erpnext.selling.doctype.sales_order.sales_order import make_raw_material_request
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+from erpnext.selling.doctype.sales_order.sales_order import (
+	WarehouseRequired,
+	make_delivery_note,
+	make_material_request,
+	make_raw_material_request,
+	make_sales_invoice,
+	make_work_orders,
+)
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
 
 class TestSalesOrder(unittest.TestCase):
 
@@ -162,8 +169,8 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(so.get("items")[0].delivered_qty, 9)
 
 		# Make return deliver note, sales invoice and check quantity
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-3, do_not_submit=True)
 		dn1.items[0].against_sales_order = so.name
@@ -444,8 +451,8 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Sales Order', trans_item, so.name)
 
 	def test_update_child_with_precision(self):
-		from frappe.model.meta import get_field_precision
 		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+		from frappe.model.meta import get_field_precision
 
 		precision = get_field_precision(frappe.get_meta("Sales Order Item").get_field("rate"))
 
@@ -673,6 +680,8 @@ class TestSalesOrder(unittest.TestCase):
 
 		so.cancel()
 
+		dn.load_from_db()
+
 		self.assertRaises(frappe.CancelledLinkError, dn.submit)
 
 	def test_service_type_product_bundle(self):
@@ -729,9 +738,11 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 1)
 
 	def test_drop_shipping(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order_for_default_supplier, \
-			update_status as so_update_status
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
+		from erpnext.selling.doctype.sales_order.sales_order import (
+			make_purchase_order_for_default_supplier,
+		)
+		from erpnext.selling.doctype.sales_order.sales_order import update_status as so_update_status
 
 		# make items
 		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "delivered_by_supplier": 1})
@@ -813,8 +824,10 @@ class TestSalesOrder(unittest.TestCase):
 		so.cancel()
 
 	def test_drop_shipping_partial_order(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order_for_default_supplier, \
-			update_status as so_update_status
+		from erpnext.selling.doctype.sales_order.sales_order import (
+			make_purchase_order_for_default_supplier,
+		)
+		from erpnext.selling.doctype.sales_order.sales_order import update_status as so_update_status
 
 		# make items
 		po_item1 = make_item("_Test Item for Drop Shipping 1", {"is_stock_item": 1, "delivered_by_supplier": 1})
@@ -867,7 +880,9 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_drop_shipping_full_for_default_suppliers(self):
 		"""Test if multiple POs are generated in one go against different default suppliers."""
-		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order_for_default_supplier
+		from erpnext.selling.doctype.sales_order.sales_order import (
+			make_purchase_order_for_default_supplier,
+		)
 
 		if not frappe.db.exists("Item", "_Test Item for Drop Shipping 1"):
 			make_item("_Test Item for Drop Shipping 1", {"is_stock_item": 1, "delivered_by_supplier": 1})
@@ -1041,8 +1056,7 @@ class TestSalesOrder(unittest.TestCase):
 			}]
 		})
 		so.submit()
-		from erpnext.manufacturing.doctype.work_order.test_work_order import \
-			make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 		work_order = make_wo_order_test_record(item=item.item_code,
 			qty=1, do_not_save=True)
 		work_order.fg_warehouse = "_Test Warehouse - _TC"
@@ -1050,8 +1064,9 @@ class TestSalesOrder(unittest.TestCase):
 		work_order.submit()
 		make_stock_entry(item_code=item.item_code, target="_Test Warehouse - _TC", qty=1)
 		item_serial_no = frappe.get_doc("Serial No", {"item_code": item.item_code})
-		from erpnext.manufacturing.doctype.work_order.work_order import \
-			make_stock_entry as make_production_stock_entry
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_production_stock_entry,
+		)
 		se = frappe.get_doc(make_production_stock_entry(work_order.name, "Manufacture", 1))
 		se.submit()
 		reserved_serial_no = se.get("items")[2].serial_no
@@ -1083,8 +1098,9 @@ class TestSalesOrder(unittest.TestCase):
 		si = make_sales_invoice(so.name)
 		si.update_stock = 0
 		si.submit()
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import \
-			make_delivery_note as make_delivery_note_from_invoice
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+			make_delivery_note as make_delivery_note_from_invoice,
+		)
 		dn = make_delivery_note_from_invoice(si.name)
 		dn.save()
 		dn.submit()
@@ -1121,6 +1137,7 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_cancel_sales_order_after_cancel_payment_entry(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
 		# make a sales order
 		so = make_sales_order()
 
@@ -1220,7 +1237,7 @@ class TestSalesOrder(unittest.TestCase):
 	def test_so_cancellation_when_si_drafted(self):
 		"""
 			Test to check if Sales Order gets cancelled if Sales Invoice is in Draft state
-			Expected result: sales order should not get cancelled 
+			Expected result: sales order should not get cancelled
 		"""
 		so = make_sales_order()
 		so.submit()
@@ -1230,7 +1247,9 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, so.cancel)
 
 	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+			create_payment_terms_template,
+		)
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 		automatically_fetch_payment_terms()
@@ -1248,7 +1267,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(so.payment_terms_template, si.payment_terms_template)
 		compare_payment_schedules(self, so, si)
 
-		automatically_fetch_payment_terms(enable=0)		
+		automatically_fetch_payment_terms(enable=0)
 
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
@@ -1330,7 +1349,6 @@ def make_sales_order_workflow():
 
 	frappe.get_doc(dict(doctype='Role', role_name='Test Junior Approver')).insert(ignore_if_duplicate=True)
 	frappe.get_doc(dict(doctype='Role', role_name='Test Approver')).insert(ignore_if_duplicate=True)
-	frappe.db.commit()
 	frappe.cache().hdel('roles', frappe.session.user)
 
 	workflow = frappe.get_doc({

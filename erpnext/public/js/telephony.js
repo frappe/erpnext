@@ -6,7 +6,7 @@ frappe.ui.form.ControlData = frappe.ui.form.ControlData.extend( {
 		}
 		if (this.frm && this.frm.fields_dict) {
 			Object.values(this.frm.fields_dict).forEach(function(field) {
-				if (field.df.read_only === 1 && field.df.options === 'Phone' 
+				if (field.df.read_only === 1 && field.df.options === 'Phone'
 					&& field.disp_area.style[0] != 'display' && !field.has_icon) {
 					field.setup_phone();
 					field.has_icon = true;

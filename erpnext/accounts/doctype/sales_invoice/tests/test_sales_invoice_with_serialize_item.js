@@ -42,4 +42,3 @@ QUnit.test("test sales Invoice with serialize item", function(assert) {
 		() => done()
 	]);
 });
-

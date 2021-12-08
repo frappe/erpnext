@@ -1,6 +1,6 @@
 {
  "actions": [],
- "allow_copy": 1,
+ "allow_events_in_timeline": 1,
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
@@ -24,12 +24,19 @@
   "image",
   "column_break_14",
   "status",
+  "uid",
   "inpatient_record",
   "inpatient_status",
   "report_preference",
   "mobile",
-  "email",
   "phone",
+  "email",
+  "invite_user",
+  "user_id",
+  "address_contacts",
+  "address_html",
+  "column_break_22",
+  "contact_html",
   "customer_details_section",
   "customer",
   "customer_group",
@@ -74,6 +81,7 @@
    "fieldtype": "Select",
    "in_preview": 1,
    "label": "Inpatient Status",
+   "no_copy": 1,
    "options": "\nAdmission Scheduled\nAdmitted\nDischarge Scheduled",
    "read_only": 1
   },
@@ -81,6 +89,7 @@
    "fieldname": "inpatient_record",
    "fieldtype": "Link",
    "label": "Inpatient Record",
+   "no_copy": 1,
    "options": "Inpatient Record",
    "read_only": 1
   },
@@ -101,6 +110,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Full Name",
+   "no_copy": 1,
    "read_only": 1,
    "search_index": 1
   },
@@ -118,6 +128,7 @@
    "fieldtype": "Select",
    "in_preview": 1,
    "label": "Blood Group",
+   "no_copy": 1,
    "options": "\nA Positive\nA Negative\nAB Positive\nAB Negative\nB Positive\nB Negative\nO Positive\nO Negative"
   },
   {
@@ -125,7 +136,8 @@
    "fieldname": "dob",
    "fieldtype": "Date",
    "in_preview": 1,
-   "label": "Date of birth"
+   "label": "Date of birth",
+   "no_copy": 1
   },
   {
    "fieldname": "age_html",
@@ -167,6 +179,7 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Customer",
+   "no_copy": 1,
    "options": "Customer",
    "set_only_once": 1
   },
@@ -183,6 +196,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Mobile",
+   "no_copy": 1,
    "options": "Phone"
   },
   {
@@ -192,6 +206,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Email",
+   "no_copy": 1,
    "options": "Email"
   },
   {
@@ -199,6 +214,7 @@
    "fieldtype": "Data",
    "in_filter": 1,
    "label": "Phone",
+   "no_copy": 1,
    "options": "Phone"
   },
   {
@@ -230,7 +246,8 @@
    "fieldname": "medication",
    "fieldtype": "Small Text",
    "ignore_xss_filter": 1,
-   "label": "Medication"
+   "label": "Medication",
+   "no_copy": 1
   },
   {
    "fieldname": "column_break_20",
@@ -240,13 +257,15 @@
    "fieldname": "medical_history",
    "fieldtype": "Small Text",
    "ignore_xss_filter": 1,
-   "label": "Medical History"
+   "label": "Medical History",
+   "no_copy": 1
   },
   {
    "fieldname": "surgical_history",
    "fieldtype": "Small Text",
    "ignore_xss_filter": 1,
-   "label": "Surgical History"
+   "label": "Surgical History",
+   "no_copy": 1
   },
   {
    "collapsible": 1,
@@ -258,8 +277,8 @@
    "fieldname": "occupation",
    "fieldtype": "Data",
    "ignore_xss_filter": 1,
-   "in_standard_filter": 1,
-   "label": "Occupation"
+   "label": "Occupation",
+   "no_copy": 1
   },
   {
    "fieldname": "column_break_25",
@@ -269,6 +288,7 @@
    "fieldname": "marital_status",
    "fieldtype": "Select",
    "label": "Marital Status",
+   "no_copy": 1,
    "options": "\nSingle\nMarried\nDivorced\nWidow"
   },
   {
@@ -281,25 +301,29 @@
    "fieldname": "tobacco_past_use",
    "fieldtype": "Data",
    "ignore_xss_filter": 1,
-   "label": "Tobacco Consumption (Past)"
+   "label": "Tobacco Consumption (Past)",
+   "no_copy": 1
   },
   {
    "fieldname": "tobacco_current_use",
    "fieldtype": "Data",
    "ignore_xss_filter": 1,
-   "label": "Tobacco Consumption (Present)"
+   "label": "Tobacco Consumption (Present)",
+   "no_copy": 1
   },
   {
    "fieldname": "alcohol_past_use",
    "fieldtype": "Data",
    "ignore_xss_filter": 1,
-   "label": "Alcohol Consumption (Past)"
+   "label": "Alcohol Consumption (Past)",
+   "no_copy": 1
   },
   {
    "fieldname": "alcohol_current_use",
    "fieldtype": "Data",
    "ignore_user_permissions": 1,
-   "label": "Alcohol Consumption (Present)"
+   "label": "Alcohol Consumption (Present)",
+   "no_copy": 1
   },
   {
    "fieldname": "column_break_32",
@@ -309,13 +333,15 @@
    "fieldname": "surrounding_factors",
    "fieldtype": "Small Text",
    "ignore_xss_filter": 1,
-   "label": "Occupational Hazards and Environmental Factors"
+   "label": "Occupational Hazards and Environmental Factors",
+   "no_copy": 1
   },
   {
    "fieldname": "other_risk_factors",
    "fieldtype": "Small Text",
    "ignore_xss_filter": 1,
-   "label": "Other Risk Factors"
+   "label": "Other Risk Factors",
+   "no_copy": 1
   },
   {
    "collapsible": 1,
@@ -331,7 +357,8 @@
    "fieldname": "patient_details",
    "fieldtype": "Text",
    "ignore_xss_filter": 1,
-   "label": "Patient Details"
+   "label": "Patient Details",
+   "no_copy": 1
   },
   {
    "fieldname": "default_currency",
@@ -342,19 +369,22 @@
   {
    "fieldname": "last_name",
    "fieldtype": "Data",
-   "label": "Last Name"
+   "label": "Last Name",
+   "no_copy": 1
   },
   {
    "fieldname": "first_name",
    "fieldtype": "Data",
    "label": "First Name",
+   "no_copy": 1,
    "oldfieldtype": "Data",
    "reqd": 1
   },
   {
    "fieldname": "middle_name",
    "fieldtype": "Data",
-   "label": "Middle Name (optional)"
+   "label": "Middle Name (optional)",
+   "no_copy": 1
   },
   {
    "collapsible": 1,
@@ -389,13 +419,63 @@
    "fieldtype": "Link",
    "label": "Print Language",
    "options": "Language"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "address_contacts",
+   "fieldtype": "Section Break",
+   "label": "Address and Contact",
+   "options": "fa fa-map-marker"
+  },
+  {
+   "fieldname": "address_html",
+   "fieldtype": "HTML",
+   "label": "Address HTML",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact_html",
+   "fieldtype": "HTML",
+   "label": "Contact HTML",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "default": "1",
+   "fieldname": "invite_user",
+   "fieldtype": "Check",
+   "label": "Invite as User",
+   "no_copy": 1,
+   "read_only_depends_on": "eval: doc.user_id"
+  },
+  {
+   "fieldname": "user_id",
+   "fieldtype": "Read Only",
+   "label": "User ID",
+   "no_copy": 1,
+   "options": "User"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "bold": 1,
+   "fieldname": "uid",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Identification Number (UID)",
+   "unique": 1
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2020-04-25 17:24:32.146415",
+ "modified": "2021-03-14 13:21:09.759906",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
@@ -453,7 +533,7 @@
  ],
  "quick_entry": 1,
  "restrict_to_domain": "Healthcare",
- "search_fields": "patient_name,mobile,email,phone",
+ "search_fields": "patient_name,mobile,email,phone,uid",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",

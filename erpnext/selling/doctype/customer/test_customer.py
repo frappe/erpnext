@@ -1,15 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
-import frappe
 import unittest
 
-from erpnext.accounts.party import get_due_date
+import frappe
 from frappe.test_runner import make_test_records
-from erpnext.exceptions import PartyFrozen, PartyDisabled
 from frappe.utils import flt
+
+from erpnext.accounts.party import get_due_date
+from erpnext.exceptions import PartyDisabled, PartyFrozen
 from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 from erpnext.tests.utils import create_test_contact_and_address
 
@@ -19,6 +19,7 @@ test_records = frappe.get_test_records('Customer')
 
 from six import iteritems
 
+
 class TestCustomer(unittest.TestCase):
 	def setUp(self):
 		if not frappe.get_value('Item', '_Test Item'):
@@ -26,6 +27,42 @@ class TestCustomer(unittest.TestCase):
 
 	def tearDown(self):
 		set_credit_limit('_Test Customer', '_Test Company', 0)
+
+	def test_get_customer_group_details(self):
+		doc = frappe.new_doc("Customer Group")
+		doc.customer_group_name = "_Testing Customer Group"
+		doc.payment_terms = "_Test Payment Term Template 3"
+		doc.accounts = []
+		doc.default_price_list = "Standard Buying"
+		doc.credit_limits = []
+		test_account_details = {
+			"company": "_Test Company",
+			"account": "Creditors - _TC",
+		}
+		test_credit_limits = {
+			"company": "_Test Company",
+			"credit_limit": 350000
+		}
+		doc.append("accounts", test_account_details)
+		doc.append("credit_limits", test_credit_limits)
+		doc.insert()
+
+		c_doc = frappe.new_doc("Customer")
+		c_doc.customer_name = "Testing Customer"
+		c_doc.customer_group = "_Testing Customer Group"
+		c_doc.payment_terms = c_doc.default_price_list = ""
+		c_doc.accounts = c_doc.credit_limits= []
+		c_doc.insert()
+		c_doc.get_customer_group_details()
+		self.assertEqual(c_doc.payment_terms, "_Test Payment Term Template 3")
+
+		self.assertEqual(c_doc.accounts[0].company, "_Test Company")
+		self.assertEqual(c_doc.accounts[0].account, "Creditors - _TC")
+
+		self.assertEqual(c_doc.credit_limits[0].company, "_Test Company")
+		self.assertEqual(c_doc.credit_limits[0].credit_limit, 350000)
+		c_doc.delete()
+		doc.delete()
 
 	def test_party_details(self):
 		from erpnext.accounts.party import get_party_details
@@ -217,10 +254,10 @@ class TestCustomer(unittest.TestCase):
 		return get_customer_outstanding('_Test Customer', '_Test Company')
 
 	def test_customer_credit_limit(self):
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		outstanding_amt = self.get_customer_outstanding_amount()
 		credit_limit = get_credit_limit('_Test Customer', '_Test Company')
@@ -316,3 +353,26 @@ def set_credit_limit(customer, company, credit_limit):
 			'credit_limit': credit_limit
 		})
 		customer.credit_limits[-1].db_insert()
+
+def create_internal_customer(customer_name, represents_company, allowed_to_interact_with):
+	if not frappe.db.exists("Customer", customer_name):
+		customer = frappe.get_doc({
+			"doctype": "Customer",
+			"customer_group": "_Test Customer Group",
+			"customer_name": customer_name,
+			"customer_type": "Individual",
+			"territory": "_Test Territory",
+			"is_internal_customer": 1,
+			"represents_company": represents_company
+		})
+
+		customer.append("companies", {
+			"company": allowed_to_interact_with
+		})
+
+		customer.insert()
+		customer_name = customer.name
+	else:
+		customer_name = frappe.db.get_value("Customer", customer_name)
+
+	return customer_name

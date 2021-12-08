@@ -1,6 +1,7 @@
-from __future__ import unicode_literals
+
 import frappe
 from frappe.utils import getdate, nowdate
+
 
 def execute():
 	frappe.reload_doc('stock', 'doctype', 'serial_no')

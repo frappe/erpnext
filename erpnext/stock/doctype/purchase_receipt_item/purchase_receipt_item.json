@@ -10,6 +10,7 @@
   "barcode",
   "section_break_2",
   "item_code",
+  "product_bundle",
   "supplier_part_no",
   "column_break_2",
   "item_name",
@@ -196,6 +197,7 @@
   },
   {
    "bold": 1,
+   "default": "0",
    "fieldname": "received_qty",
    "fieldtype": "Float",
    "label": "Received Quantity",
@@ -203,6 +205,7 @@
    "oldfieldtype": "Currency",
    "print_hide": 1,
    "print_width": "100px",
+   "read_only": 1,
    "reqd": 1,
    "width": "100px"
   },
@@ -218,8 +221,10 @@
    "width": "100px"
   },
   {
+   "columns": 1,
    "fieldname": "rejected_qty",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Rejected Quantity",
    "oldfieldname": "rejected_qty",
    "oldfieldtype": "Currency",
@@ -326,7 +331,7 @@
   },
   {
    "bold": 1,
-   "columns": 3,
+   "columns": 2,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -542,6 +547,7 @@
    "fieldname": "stock_qty",
    "fieldtype": "Float",
    "label": "Accepted Qty in Stock UOM",
+   "no_copy": 1,
    "oldfieldname": "stock_qty",
    "oldfieldtype": "Currency",
    "print_hide": 1,
@@ -881,7 +887,9 @@
    "fieldname": "received_stock_qty",
    "fieldtype": "Float",
    "label": "Received Qty in Stock UOM",
-   "print_hide": 1
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "depends_on": "eval: doc.uom != doc.stock_uom",
@@ -956,15 +964,23 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "product_bundle",
+   "fieldtype": "Link",
+   "label": "Product Bundle",
+   "options": "Product Bundle",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-03-29 04:17:00.336298",
+ "modified": "2021-11-15 15:46:10.591600",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,

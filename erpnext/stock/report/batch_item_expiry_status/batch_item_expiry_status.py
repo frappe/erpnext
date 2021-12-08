@@ -1,10 +1,11 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt, cint, getdate
+from frappe.utils import cint, getdate
+
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -24,7 +25,7 @@ def execute(filters=None):
 				data.append([item, item_map[item]["item_name"], item_map[item]["description"], wh, batch,
 					frappe.db.get_value('Batch', batch, 'expiry_date'), qty_dict.expiry_status
 				])
-			
+
 
 	return columns, data
 
@@ -70,7 +71,7 @@ def get_item_warehouse_batch_map(filters, float_precision):
 				"expires_on": None, "expiry_status": None}))
 
 		qty_dict = iwb_map[d.item_code][d.warehouse][d.batch_no]
-		
+
 		expiry_date_unicode = frappe.db.get_value('Batch', d.batch_no, 'expiry_date')
 		qty_dict.expires_on = expiry_date_unicode
 

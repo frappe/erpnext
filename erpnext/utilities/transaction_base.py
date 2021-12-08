@@ -1,14 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 import frappe.share
 from frappe import _
-from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_datetime, get_link_to_form, date_diff, nowdate
+from frappe.utils import cint, cstr, flt, get_time, now_datetime
+from six import string_types
+
 from erpnext.controllers.status_updater import StatusUpdater
 
-from six import string_types
 
 class UOMMustBeIntegerError(frappe.ValidationError): pass
 

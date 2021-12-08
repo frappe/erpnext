@@ -1,9 +1,9 @@
 # Copyright (c) 2019, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
+
 
 def execute():
 	frappe.reload_doc("accounts", "doctype", "pos_payment_method")
@@ -23,5 +23,5 @@ def execute():
 				pos_payment_method.parentfield = payment_mode.parentfield
 				pos_payment_method.parenttype = payment_mode.parenttype
 				pos_payment_method.db_insert()
-		
+
 		frappe.db.sql("""delete from `tabSales Invoice Payment` where parent=%s""", pos_profile.name)

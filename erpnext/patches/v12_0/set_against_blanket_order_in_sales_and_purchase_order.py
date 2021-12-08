@@ -1,5 +1,6 @@
 import frappe
 
+
 def execute():
 
 	frappe.reload_doc('selling', 'doctype', 'sales_order_item', force=True)

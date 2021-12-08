@@ -1,18 +1,26 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import itertools
+from datetime import timedelta
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, getdate, get_datetime
-from erpnext.hr.doctype.shift_assignment.shift_assignment import get_actual_start_end_datetime_of_shift, get_employee_shift
-from erpnext.hr.doctype.employee_checkin.employee_checkin import mark_attendance_and_link_log, calculate_working_hours
+from frappe.utils import cint, get_datetime, getdate
+
 from erpnext.hr.doctype.attendance.attendance import mark_attendance
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
-from datetime import timedelta
+from erpnext.hr.doctype.employee_checkin.employee_checkin import (
+	calculate_working_hours,
+	mark_attendance_and_link_log,
+)
+from erpnext.hr.doctype.shift_assignment.shift_assignment import (
+	get_actual_start_end_datetime_of_shift,
+	get_employee_shift,
+)
+
 
 class ShiftType(Document):
 	def validate(self):
@@ -63,11 +71,8 @@ class ShiftType(Document):
 
 		for key, group in checkins_log:
 			single_shift_logs = list(group)
-
 			attendance_status, working_hours, late_entry, early_exit, in_time, out_time = self.get_attendance(single_shift_logs)
-
 			mark_attendance_and_link_log(single_shift_logs, attendance_status, key[1].date(), working_hours, late_entry, early_exit, in_time, out_time, self.name)
-
 		for employee in self.get_assigned_employee(self.process_attendance_after, True):
 			self.mark_absent_for_dates_with_no_attendance(employee)
 
@@ -78,10 +83,8 @@ class ShiftType(Document):
 			1. These logs belongs to an single shift, single employee and is not in a holiday date.
 			2. Logs are in chronological order
 		"""
-
 		late_entry = early_exit = False
 		total_working_hours, in_time, out_time = calculate_working_hours(logs, self.determine_check_in_and_check_out, self.working_hours_calculation_based_on)
-
 		if cint(self.enable_entry_grace_period) and in_time and in_time > logs[0].shift_start + timedelta(minutes=cint(self.late_entry_grace_period)):
 			late_entry = True
 
@@ -90,10 +93,8 @@ class ShiftType(Document):
 
 		if self.working_hours_threshold_for_absent and total_working_hours < self.working_hours_threshold_for_absent:
 			return 'Absent', total_working_hours, late_entry, early_exit, in_time, out_time
-
 		if self.working_hours_threshold_for_half_day and total_working_hours < self.working_hours_threshold_for_half_day:
 			return 'Half Day', total_working_hours, late_entry, early_exit, in_time, out_time
-
 		return 'Present', total_working_hours, late_entry, early_exit, in_time, out_time
 
 	def mark_absent_for_dates_with_no_attendance(self, employee):
@@ -129,7 +130,7 @@ class ShiftType(Document):
 		assigned_employees = [x[0] for x in assigned_employees]
 
 		if consider_default_shift:
-			filters = {'default_shift': self.name}
+			filters = {'default_shift': self.name, 'status': ['!=', 'Inactive']}
 			default_shift_employees = frappe.get_all('Employee', 'name', filters, as_list=True)
 			default_shift_employees = [x[0] for x in default_shift_employees]
 			return list(set(assigned_employees+default_shift_employees))

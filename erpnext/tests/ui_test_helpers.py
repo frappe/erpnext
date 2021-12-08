@@ -1,10 +1,13 @@
 import frappe
 from frappe.utils import getdate
 
+
 @frappe.whitelist()
 def create_employee_records():
 	create_company()
 	create_missing_designation()
+
+	frappe.db.sql("DELETE FROM tabEmployee WHERE company='Test Org Chart'")
 
 	emp1 = create_employee('Test Employee 1', 'CEO')
 	emp2 = create_employee('Test Employee 2', 'CTO')

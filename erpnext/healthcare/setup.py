@@ -1,8 +1,9 @@
-from __future__ import unicode_literals
-import frappe
 
+import frappe
 from frappe import _
+
 from erpnext.setup.utils import insert_record
+
 
 def setup_healthcare():
 	if frappe.db.exists('Medical Department', 'Cardiology'):

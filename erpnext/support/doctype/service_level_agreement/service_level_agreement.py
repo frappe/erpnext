@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
-from frappe.model.document import Document
 from frappe import _
-from frappe.utils import getdate, get_weekdays, get_link_to_form, nowdate
+from frappe.model.document import Document
+from frappe.utils import get_link_to_form, get_weekdays, getdate, nowdate
 from frappe.utils.safe_exec import get_safe_globals
+
 
 class ServiceLevelAgreement(Document):
 
@@ -153,7 +152,7 @@ def get_active_service_level_agreement_for(doc):
 	filters += [["Service Level Agreement", "default_service_level_agreement", "=", 0]]
 	agreements = frappe.get_all("Service Level Agreement", filters=filters, or_filters=or_filters,
 		fields=["name", "default_priority", "condition"])
-	
+
 	# check if the current document on which SLA is to be applied fulfills all the conditions
 	filtered_agreements = []
 	for agreement in agreements:

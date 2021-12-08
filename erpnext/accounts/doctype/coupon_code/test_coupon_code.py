@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
+
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.stock.get_item_details import get_item_details
-from frappe.test_runner import make_test_objects
 
 test_dependencies = ['Item']
 
@@ -41,9 +39,6 @@ def test_create_test_data():
 		"selling_cost_center": "Main - _TC",
 		"income_account": "Sales - _TC"
 		}],
-		"show_in_website": 1,
-		"route":"-test-tesla-car",
-		"website_warehouse": "Stores - _TC"
 		})
 		item.insert()
 	# create test item price
@@ -124,6 +119,3 @@ class TestCouponCode(unittest.TestCase):
 
 		so.submit()
 		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
-
-
-

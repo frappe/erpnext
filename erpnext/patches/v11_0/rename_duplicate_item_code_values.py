@@ -1,5 +1,6 @@
 import frappe
 
+
 def execute():
 	items = []
 	items = frappe.db.sql("""select item_code from `tabItem` group by item_code having count(*) > 1""", as_dict=True)

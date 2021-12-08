@@ -1,14 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
-import erpnext
 from frappe.utils import getdate
-from erpnext.hr.doctype.upload_attendance.upload_attendance import get_data
+
+import erpnext
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.upload_attendance.upload_attendance import get_data
 
 test_dependencies = ['Holiday List']
 

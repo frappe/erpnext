@@ -1,10 +1,12 @@
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
 from frappe.utils import getdate
-from erpnext.accounts.report.account_balance.account_balance import execute
+
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.report.account_balance.account_balance import execute
+
 
 class TestAccountBalance(unittest.TestCase):
 	def test_account_balance(self):
@@ -62,8 +64,3 @@ def make_sales_invoice():
 		income_account = 'Sales - _TC2',
 		expense_account = 'Cost of Goods Sold - _TC2',
 		cost_center = 'Main - _TC2')
-
-
-
-
-

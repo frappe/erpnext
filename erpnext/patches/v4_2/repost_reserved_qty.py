@@ -1,9 +1,11 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
+
+from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
+
 
 def execute():
 	for doctype in ("Sales Order Item", "Bin"):

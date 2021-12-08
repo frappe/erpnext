@@ -1,13 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
-from __future__ import unicode_literals
-from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+
+import unittest
 
 import frappe
-import unittest
-from erpnext.manufacturing.doctype.workstation.workstation import check_if_within_operating_hours, NotInWorkingHoursError, WorkstationHolidayError
-from erpnext.manufacturing.doctype.routing.test_routing import setup_bom, create_routing
 from frappe.test_runner import make_test_records
+
+from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+from erpnext.manufacturing.doctype.routing.test_routing import create_routing, setup_bom
+from erpnext.manufacturing.doctype.workstation.workstation import (
+	NotInWorkingHoursError,
+	WorkstationHolidayError,
+	check_if_within_operating_hours,
+)
 
 test_dependencies = ["Warehouse"]
 test_records = frappe.get_test_records('Workstation')
@@ -84,7 +89,7 @@ def make_workstation(*args, **kwargs):
 	args = frappe._dict(args)
 
 	workstation_name = args.workstation_name or args.workstation
-	try:
+	if not frappe.db.exists("Workstation", workstation_name):
 		doc = frappe.get_doc({
 			"doctype": "Workstation",
 			"workstation_name": workstation_name
@@ -94,5 +99,5 @@ def make_workstation(*args, **kwargs):
 		doc.insert()
 
 		return doc
-	except frappe.DuplicateEntryError:
-		return frappe.get_doc("Workstation", workstation_name)
+
+	return frappe.get_doc("Workstation", workstation_name)

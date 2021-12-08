@@ -1,15 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
-from frappe.utils import flt
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
-from erpnext.setup.utils import get_exchange_rate
+from frappe.utils import flt
+
+import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_balance_on
+from erpnext.setup.utils import get_exchange_rate
+
 
 class ExchangeRateRevaluation(Document):
 	def validate(self):
@@ -44,7 +46,7 @@ class ExchangeRateRevaluation(Document):
 
 		if total_amt != total_debit:
 			return True
-		
+
 		return False
 
 	@frappe.whitelist()

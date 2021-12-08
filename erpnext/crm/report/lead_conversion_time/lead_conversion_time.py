@@ -1,10 +1,11 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _, msgprint
 from frappe.utils import date_diff, flt
+
 
 def execute(filters=None):
 	if not filters: filters = {}

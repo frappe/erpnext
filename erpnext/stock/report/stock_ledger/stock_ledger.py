@@ -1,13 +1,17 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import cint, flt
-from erpnext.stock.utils import update_included_uom_in_report, is_reposting_item_valuation_in_progress
 from frappe import _
+from frappe.utils import cint, flt
+
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.utils import (
+	is_reposting_item_valuation_in_progress,
+	update_included_uom_in_report,
+)
+
 
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
@@ -16,13 +20,14 @@ def execute(filters=None):
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
-	opening_row = get_opening_balance(filters, columns)
+	opening_row = get_opening_balance(filters, columns, sl_entries)
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 
 	data = []
 	conversion_factors = []
 	if opening_row:
 		data.append(opening_row)
+		conversion_factors.append(0)
 
 	actual_qty = stock_value = 0
 
@@ -212,7 +217,7 @@ def get_sle_conditions(filters):
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 
-def get_opening_balance(filters, columns):
+def get_opening_balance(filters, columns, sl_entries):
 	if not (filters.item_code and filters.warehouse and filters.from_date):
 		return
 
@@ -223,6 +228,15 @@ def get_opening_balance(filters, columns):
 		"posting_date": filters.from_date,
 		"posting_time": "00:00:00"
 	})
+
+	# check if any SLEs are actually Opening Stock Reconciliation
+	for sle in sl_entries:
+		if (sle.get("voucher_type") == "Stock Reconciliation"
+			and sle.get("date").split()[0] == filters.from_date
+			and frappe.db.get_value("Stock Reconciliation", sle.voucher_no, "purpose") == "Opening Stock"
+		):
+			last_entry = sle
+			sl_entries.remove(sle)
 
 	row = {
 		"item_code": _("'Opening'"),

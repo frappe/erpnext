@@ -1,13 +1,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
 
+import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import cstr, formatdate, get_datetime, getdate, nowdate
+
 from erpnext.hr.utils import validate_active_employee
-from frappe.utils import cstr, get_datetime, formatdate, getdate, nowdate
+
 
 class Attendance(Document):
 	def validate(self):
@@ -28,7 +29,7 @@ class Attendance(Document):
 		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
 
 		# leaves can be marked for future dates
-		if self.status != "On Leave" and not self.leave_application and getdate(self.attendance_date) > getdate(nowdate()):
+		if self.status != 'On Leave' and not self.leave_application and getdate(self.attendance_date) > getdate(nowdate()):
 			frappe.throw(_("Attendance can not be marked for future dates"))
 		elif date_of_joining and getdate(self.attendance_date) < getdate(date_of_joining):
 			frappe.throw(_("Attendance date can not be less than employee's joining date"))
@@ -81,11 +82,11 @@ class Attendance(Document):
 			for d in leave_record:
 				self.leave_type = d.leave_type
 				if d.half_day_date == getdate(self.attendance_date):
-					self.status = "Half Day"
+					self.status = 'Half Day'
 					frappe.msgprint(_("Employee {0} on Half day on {1}")
 						.format(self.employee, formatdate(self.attendance_date)))
 				else:
-					self.status = "On Leave"
+					self.status = 'On Leave'
 					frappe.msgprint(_("Employee {0} is on Leave on {1}")
 						.format(self.employee, formatdate(self.attendance_date)))
 
@@ -217,7 +218,7 @@ def mark_attendance(employee, attendance_date, status, shift=None, leave_type=No
 @frappe.whitelist()
 def mark_bulk_attendance(data):
 	import json
-	if isinstance(data, frappe.string_types):
+	if isinstance(data, str):
 		data = json.loads(data)
 	data = frappe._dict(data)
 	company = frappe.get_value('Employee', data.employee, 'company')
@@ -266,7 +267,7 @@ def get_unmarked_days(employee, month):
 	month_start, month_end = dates_of_month[0], dates_of_month[length-1]
 
 
-	records = frappe.get_all("Attendance", fields = ["attendance_date", "employee"] , filters = [
+	records = frappe.get_all("Attendance", fields = ['attendance_date', 'employee'] , filters = [
 		["attendance_date", ">=", month_start],
 		["attendance_date", "<=", month_end],
 		["employee", "=", employee],

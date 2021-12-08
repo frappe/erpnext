@@ -12,7 +12,6 @@
   "details",
   "company_name",
   "abbr",
-  "change_abbr",
   "is_group",
   "cb0",
   "domain",
@@ -125,13 +124,8 @@
    "label": "Abbr",
    "oldfieldname": "abbr",
    "oldfieldtype": "Data",
-   "reqd": 1
-  },
-  {
-   "depends_on": "eval:!doc.__islocal && in_list(frappe.user_roles, \"System Manager\")",
-   "fieldname": "change_abbr",
-   "fieldtype": "Button",
-   "label": "Change Abbreviation"
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "bold": 1,
@@ -748,7 +742,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2021-05-12 16:51:08.187233",
+ "modified": "2021-12-02 14:52:08.187233",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

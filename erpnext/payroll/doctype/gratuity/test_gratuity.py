@@ -1,17 +1,20 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
+from frappe.utils import add_days, flt, get_datetime, getdate
+
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_employee_salary_slip, make_earning_salary_component, \
-	make_deduction_salary_component
-from erpnext.payroll.doctype.gratuity.gratuity import get_last_salary_slip
-from erpnext.regional.united_arab_emirates.setup import create_gratuity_rule
 from erpnext.hr.doctype.expense_claim.test_expense_claim import get_payable_account
-from frappe.utils import getdate, add_days, get_datetime, flt
+from erpnext.payroll.doctype.gratuity.gratuity import get_last_salary_slip
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
+	make_deduction_salary_component,
+	make_earning_salary_component,
+	make_employee_salary_slip,
+)
+from erpnext.regional.united_arab_emirates.setup import create_gratuity_rule
 
 test_dependencies = ["Salary Component", "Salary Slip", "Account"]
 class TestGratuity(unittest.TestCase):
@@ -23,6 +26,11 @@ class TestGratuity(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("DELETE FROM `tabGratuity`")
 		frappe.db.sql("DELETE FROM `tabAdditional Salary` WHERE ref_doctype = 'Gratuity'")
+
+	def test_get_last_salary_slip_should_return_none_for_new_employee(self):
+		new_employee = make_employee("new_employee@salary.com", company='_Test Company')
+		salary_slip = get_last_salary_slip(new_employee)
+		assert salary_slip is None
 
 	def test_check_gratuity_amount_based_on_current_slab_and_additional_salary_creation(self):
 		employee, sal_slip = create_employee_and_get_last_salary_slip()
@@ -41,7 +49,7 @@ class TestGratuity(unittest.TestCase):
 		self.assertEqual(floor(experience), gratuity.current_work_experience)
 
 		#amount Calculation
-		component_amount = frappe.get_list("Salary Detail",
+		component_amount = frappe.get_all("Salary Detail",
 		filters={
 			"docstatus": 1,
 			'parent': sal_slip,
@@ -80,7 +88,7 @@ class TestGratuity(unittest.TestCase):
 		self.assertEqual(floor(experience), gratuity.current_work_experience)
 
 		#amount Calculation
-		component_amount = frappe.get_list("Salary Detail",
+		component_amount = frappe.get_all("Salary Detail",
 		filters={
 			"docstatus": 1,
 			'parent': sal_slip,

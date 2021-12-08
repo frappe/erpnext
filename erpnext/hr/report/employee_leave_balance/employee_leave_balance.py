@@ -1,12 +1,18 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe
-from frappe.utils import flt, add_days
-from frappe import _
-from erpnext.hr.doctype.leave_application.leave_application import get_leaves_for_period, get_leave_balance_on
+
 from itertools import groupby
+
+import frappe
+from frappe import _
+from frappe.utils import add_days
+
+from erpnext.hr.doctype.leave_application.leave_application import (
+	get_leave_balance_on,
+	get_leaves_for_period,
+)
+
 
 def execute(filters=None):
 	if filters.to_date <= filters.from_date:
@@ -175,10 +181,11 @@ def get_allocated_and_expired_leaves(from_date, to_date, employee, leave_type):
 	records= frappe.db.sql("""
 		SELECT
 			employee, leave_type, from_date, to_date, leaves, transaction_name,
-			is_carry_forward, is_expired
+			transaction_type, is_carry_forward, is_expired
 		FROM `tabLeave Ledger Entry`
 		WHERE employee=%(employee)s AND leave_type=%(leave_type)s
 			AND docstatus=1
+			AND transaction_type = 'Leave Allocation'
 			AND (from_date between %(from_date)s AND %(to_date)s
 				OR to_date between %(from_date)s AND %(to_date)s
 				OR (from_date < %(from_date)s AND to_date > %(to_date)s))

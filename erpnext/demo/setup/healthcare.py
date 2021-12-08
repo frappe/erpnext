@@ -1,13 +1,16 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
-import frappe, json
-from frappe.utils.make_random import get_random
 import datetime
-from erpnext.demo.setup.setup_data import import_json
+import json
+
+import frappe
 from frappe.utils import getdate
+from frappe.utils.make_random import get_random
+
+from erpnext.demo.setup.setup_data import import_json
 from erpnext.healthcare.doctype.lab_test.lab_test import create_test_from_template
+
 
 def setup_data():
 	frappe.flags.mute_emails = True

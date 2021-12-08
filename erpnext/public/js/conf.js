@@ -21,6 +21,6 @@ $.extend(frappe.breadcrumbs.module_map, {
 	'Geo': 'Settings',
 	'Portal': 'Website',
 	'Utilities': 'Settings',
-	'Shopping Cart': 'Website',
+	'E-commerce': 'Website',
 	'Contacts': 'CRM'
 });

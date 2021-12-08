@@ -1,14 +1,22 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import unittest
 
 import frappe
+from frappe.utils.data import (
+	add_days,
+	add_months,
+	add_to_date,
+	date_diff,
+	flt,
+	get_date_str,
+	nowdate,
+)
+
 from erpnext.accounts.doctype.subscription.subscription import get_prorata_factor
-from frappe.utils.data import (nowdate, add_days, add_to_date, add_months, date_diff, flt, get_date_str,
-	get_first_day, get_last_day)
+
+test_dependencies = ("UOM", "Item Group", "Item")
 
 def create_plan():
 	if not frappe.db.exists('Subscription Plan', '_Test Plan Name'):
@@ -59,7 +67,6 @@ def create_plan():
 		supplier.insert()
 
 class TestSubscription(unittest.TestCase):
-
 	def setUp(self):
 		create_plan()
 
@@ -630,5 +637,3 @@ class TestSubscription(unittest.TestCase):
 
 		subscription.process()
 		self.assertEqual(len(subscription.invoices), 1)
-
-

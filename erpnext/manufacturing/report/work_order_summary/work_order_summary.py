@@ -1,11 +1,14 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+from collections import defaultdict
+
 import frappe
-from frappe.utils import date_diff, today, getdate, flt
 from frappe import _
-from erpnext.stock.report.stock_analytics.stock_analytics import (get_period_date_ranges, get_period)
+from frappe.utils import date_diff, flt, getdate, today
+
+from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
+
 
 def execute(filters=None):
 	columns, data = [], []
@@ -56,21 +59,16 @@ def get_chart_data(data, filters):
 		return get_chart_based_on_qty(data, filters)
 
 def get_chart_based_on_status(data):
-	labels = ["Completed", "In Process", "Stopped", "Not Started"]
+	labels = frappe.get_meta("Work Order").get_options("status").split("\n")
+	if "" in labels:
+		labels.remove("")
 
-	status_wise_data = {
-		"Not Started": 0,
-		"In Process": 0,
-		"Stopped": 0,
-		"Completed": 0,
-		"Draft": 0
-	}
+	status_wise_data = defaultdict(int)
 
 	for d in data:
 		status_wise_data[d.status] += 1
 
-	values = [status_wise_data["Completed"], status_wise_data["In Process"],
-		status_wise_data["Stopped"], status_wise_data["Not Started"]]
+	values = [status_wise_data[label] for label in labels]
 
 	chart = {
 		"data": {

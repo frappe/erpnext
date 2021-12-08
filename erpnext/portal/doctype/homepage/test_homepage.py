@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
 from frappe.utils import set_request
 from frappe.website.render import render
+
 
 class TestHomepage(unittest.TestCase):
 	def test_homepage_load(self):

@@ -28,7 +28,7 @@ erpnext.PointOfSale.ItemDetails = class {
 	init_child_components() {
 		this.$component.html(
 			`<div class="item-details-header">
-				<div class="label">Item Details</div>
+				<div class="label">${__('Item Details')}</div>
 				<div class="close-btn">
 					<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
 						<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
@@ -65,7 +65,7 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		// if item is null or highlighted cart item is clicked twice
 		const hide_item_details = !Boolean(item) || !current_item_changed;
-		
+
 		this.events.toggle_item_selector(!hide_item_details);
 		this.toggle_component(!hide_item_details);
 
@@ -127,7 +127,7 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.$item_price.html(format_currency(price_list_rate, this.currency));
 		if (!this.hide_images && image) {
 			this.$item_image.html(
-				`<img 
+				`<img
 					onerror="cur_pos.item_details.handle_broken_image(this)"
 					class="h-full" src="${image}"
 					alt="${frappe.get_abbr(item_name)}"
@@ -201,8 +201,9 @@ erpnext.PointOfSale.ItemDetails = class {
 					`<div class="grid-filler no-select"></div>`
 				);
 			}
+			const label = __('Auto Fetch Serial Numbers');
 			this.$form_container.append(
-				`<div class="btn btn-sm btn-secondary auto-fetch-btn">Auto Fetch Serial Numbers</div>`
+				`<div class="btn btn-sm btn-secondary auto-fetch-btn">${label}</div>`
 			);
 			this.$form_container.find('.serial_no-control').find('textarea').css('height', '6rem');
 		}

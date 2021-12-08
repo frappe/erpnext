@@ -19,7 +19,7 @@ QUnit.test("test: Crop Cycle", function (assert) {
 					{disease: 'Aphids'}
 				]
 			]},
-			{linked_land_unit: [ 
+			{linked_land_unit: [
 				[
 					{land_unit: 'Basil Farm'}
 				]

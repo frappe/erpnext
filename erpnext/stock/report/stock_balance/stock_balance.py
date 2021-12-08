@@ -1,16 +1,19 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
-from frappe import _
-from frappe.utils import flt, cint, getdate, now, date_diff
-from erpnext.stock.utils import add_additional_uom_columns
-from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
-from erpnext.stock.utils import is_reposting_item_valuation_in_progress
-from erpnext.stock.report.stock_ageing.stock_ageing import get_fifo_queue, get_average_age
 
+from operator import itemgetter
+
+import frappe
+from frappe import _
+from frappe.utils import cint, date_diff, flt, getdate
 from six import iteritems
+
+import erpnext
+from erpnext.stock.report.stock_ageing.stock_ageing import get_average_age, get_fifo_queue
+from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
+from erpnext.stock.utils import add_additional_uom_columns, is_reposting_item_valuation_in_progress
+
 
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
@@ -44,7 +47,7 @@ def execute(filters=None):
 	data = []
 	conversion_factors = {}
 
-	_func = lambda x: x[1]
+	_func = itemgetter(1)
 
 	for (company, item, warehouse) in sorted(iwb_map):
 		if item_map.get(item):
@@ -198,7 +201,9 @@ def get_item_warehouse_map(filters, sle):
 
 		value_diff = flt(d.stock_value_difference)
 
-		if d.posting_date < from_date:
+		if d.posting_date < from_date or (d.posting_date == from_date
+			and d.voucher_type == "Stock Reconciliation" and
+			frappe.db.get_value("Stock Reconciliation", d.voucher_no, "purpose") == "Opening Stock"):
 			qty_dict.opening_qty += qty_diff
 			qty_dict.opening_val += value_diff
 

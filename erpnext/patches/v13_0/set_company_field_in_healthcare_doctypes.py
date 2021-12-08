@@ -1,5 +1,6 @@
-from __future__ import unicode_literals
+
 import frappe
+
 
 def execute():
 	company = frappe.db.get_single_value('Global Defaults', 'default_company')

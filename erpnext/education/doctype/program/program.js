@@ -4,5 +4,5 @@
 cur_frm.add_fetch('fee_structure', 'total_amount', 'amount');
 
 frappe.ui.form.on("Program", "refresh", function(frm) {
-	
+
 });

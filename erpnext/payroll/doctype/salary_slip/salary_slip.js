@@ -135,15 +135,15 @@ frappe.ui.form.on("Salary Slip", {
 
 	change_form_labels: function(frm, company_currency) {
 		frm.set_currency_labels(["base_hour_rate", "base_gross_pay", "base_total_deduction",
-			"base_net_pay", "base_rounded_total", "base_total_in_words", "base_year_to_date", "base_month_to_date"],
+			"base_net_pay", "base_rounded_total", "base_total_in_words", "base_year_to_date", "base_month_to_date", "gross_base_year_to_date"],
 		company_currency);
 
-		frm.set_currency_labels(["hour_rate", "gross_pay", "total_deduction", "net_pay", "rounded_total", "total_in_words", "year_to_date", "month_to_date"],
+		frm.set_currency_labels(["hour_rate", "gross_pay", "total_deduction", "net_pay", "rounded_total", "total_in_words", "year_to_date", "month_to_date", "gross_year_to_date"],
 			frm.doc.currency);
 
 		// toggle fields
 		frm.toggle_display(["exchange_rate", "base_hour_rate", "base_gross_pay", "base_total_deduction",
-			"base_net_pay", "base_rounded_total", "base_total_in_words", "base_year_to_date", "base_month_to_date"],
+			"base_net_pay", "base_rounded_total", "base_total_in_words", "base_year_to_date", "base_month_to_date", "base_gross_year_to_date"],
 		frm.doc.currency != company_currency);
 	},
 

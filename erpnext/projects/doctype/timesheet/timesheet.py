@@ -1,17 +1,19 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe
+
 import json
-from frappe import _
 from datetime import timedelta
-from erpnext.controllers.queries import get_match_cond
-from frappe.utils import flt, time_diff_in_hours, getdate
+
+import frappe
+from frappe import _
 from frappe.model.document import Document
-from erpnext.setup.utils import get_exchange_rate
+from frappe.utils import flt, getdate, time_diff_in_hours
+
+from erpnext.controllers.queries import get_match_cond
 from erpnext.hr.utils import validate_active_employee
+from erpnext.setup.utils import get_exchange_rate
+
 
 class OverlapError(frappe.ValidationError): pass
 class OverWorkLoggedError(frappe.ValidationError): pass
@@ -138,7 +140,19 @@ class Timesheet(Document):
 		self.update_task_and_project()
 
 	def on_submit(self):
+		self.validate_mandatory_fields()
 		self.update_task_and_project()
+
+	def validate_mandatory_fields(self):
+		for data in self.time_logs:
+			if not data.from_time and not data.to_time:
+				frappe.throw(_("Row {0}: From Time and To Time is mandatory.").format(data.idx))
+
+			if not data.activity_type and self.employee:
+				frappe.throw(_("Row {0}: Activity Type is mandatory.").format(data.idx))
+
+			if flt(data.hours) == 0.0:
+				frappe.throw(_("Row {0}: Hours value must be greater than zero.").format(data.idx))
 
 	def update_task_and_project(self):
 		tasks, projects = [], []
@@ -238,25 +252,47 @@ class Timesheet(Document):
 
 @frappe.whitelist()
 def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to_time=None):
-	condition = ''
+	condition = ""
 	if project:
-		condition += "and tsd.project = %(project)s"
+		condition += "AND tsd.project = %(project)s "
 	if parent:
-		condition += "AND tsd.parent = %(parent)s"
+		condition += "AND tsd.parent = %(parent)s "
 	if from_time and to_time:
 		condition += "AND CAST(tsd.from_time as DATE) BETWEEN %(from_time)s AND %(to_time)s"
 
-	return frappe.db.sql("""SELECT tsd.name as name,
-				tsd.parent as parent, tsd.billing_hours as billing_hours,
-				tsd.billing_amount as billing_amount, tsd.activity_type as activity_type,
-				tsd.description as description, ts.currency as currency,
-				tsd.project_name as project_name
-			FROM `tabTimesheet Detail` tsd
-			INNER JOIN `tabTimesheet` ts ON ts.name = tsd.parent
-			WHERE tsd.parenttype = 'Timesheet'
-				and tsd.docstatus=1 {0}
-				and tsd.is_billable = 1
-				and tsd.sales_invoice is null""".format(condition), {'project': project, 'parent': parent, 'from_time': from_time, 'to_time': to_time}, as_dict=1)
+	query = f"""
+		SELECT
+			tsd.name as name,
+			tsd.parent as time_sheet,
+			tsd.from_time as from_time,
+			tsd.to_time as to_time,
+			tsd.billing_hours as billing_hours,
+			tsd.billing_amount as billing_amount,
+			tsd.activity_type as activity_type,
+			tsd.description as description,
+			ts.currency as currency,
+			tsd.project_name as project_name
+		FROM `tabTimesheet Detail` tsd
+			INNER JOIN `tabTimesheet` ts
+			ON ts.name = tsd.parent
+		WHERE
+			tsd.parenttype = 'Timesheet'
+			AND tsd.docstatus = 1
+			AND tsd.is_billable = 1
+			AND tsd.sales_invoice is NULL
+			{condition}
+		ORDER BY tsd.from_time ASC
+	"""
+
+	filters = {
+		"project": project,
+		"parent": parent,
+		"from_time": from_time,
+		"to_time": to_time
+	}
+
+	return frappe.db.sql(query, filters, as_dict=1)
+
 
 @frappe.whitelist()
 def get_timesheet_detail_rate(timelog, currency):

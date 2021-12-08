@@ -1,16 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
-import frappe.defaults
-from frappe import msgprint, _
-from frappe.utils import cstr, flt, cint
-from erpnext.controllers.stock_controller import StockController
+
+import frappe
+from frappe import _, msgprint
+from frappe.utils import cint, cstr, flt
+
+import erpnext
 from erpnext.accounts.utils import get_company_default
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.utils import get_stock_balance, get_incoming_rate, get_available_serial_nos
+from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_batch_qty
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.utils import get_stock_balance
+
 
 class OpeningEntryAccountError(frappe.ValidationError): pass
 class EmptyStockReconciliationItemsError(frappe.ValidationError): pass
@@ -159,8 +161,11 @@ class StockReconciliation(StockController):
 			raise frappe.ValidationError(self.validation_messages)
 
 	def validate_item(self, item_code, row):
-		from erpnext.stock.doctype.item.item import validate_end_of_life, \
-			validate_is_stock_item, validate_cancelled_item
+		from erpnext.stock.doctype.item.item import (
+			validate_cancelled_item,
+			validate_end_of_life,
+			validate_is_stock_item,
+		)
 
 		# using try except to catch all validation msgs and display together
 
@@ -390,7 +395,7 @@ class StockReconciliation(StockController):
 				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
 
 			sl_entries.reverse()
-			allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
+			allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
 			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
 
 
@@ -484,7 +489,8 @@ class StockReconciliation(StockController):
 			self._cancel()
 
 @frappe.whitelist()
-def get_items(warehouse, posting_date, posting_time, company, item_code=None):
+def get_items(warehouse, posting_date, posting_time, company, item_code=None, ignore_empty_stock=False):
+	ignore_empty_stock = cint(ignore_empty_stock)
 	items = [frappe._dict({
 		'item_code': item_code,
 		'warehouse': warehouse
@@ -498,18 +504,24 @@ def get_items(warehouse, posting_date, posting_time, company, item_code=None):
 
 	for d in items:
 		if d.item_code in itemwise_batch_data:
-			stock_bal = get_stock_balance(d.item_code, d.warehouse,
-				posting_date, posting_time, with_valuation_rate=True)
+			valuation_rate = get_stock_balance(d.item_code, d.warehouse,
+				posting_date, posting_time, with_valuation_rate=True)[1]
 
 			for row in itemwise_batch_data.get(d.item_code):
-				args = get_item_data(row, row.qty, stock_bal[1])
+				if ignore_empty_stock and not row.qty:
+					continue
+
+				args = get_item_data(row, row.qty, valuation_rate)
 				res.append(args)
 		else:
 			stock_bal = get_stock_balance(d.item_code, d.warehouse, posting_date, posting_time,
 				with_valuation_rate=True , with_serial_no=cint(d.has_serial_no))
+			qty, valuation_rate, serial_no = stock_bal[0], stock_bal[1], stock_bal[2] if cint(d.has_serial_no) else ''
 
-			args = get_item_data(d, stock_bal[0], stock_bal[1],
-				stock_bal[2] if cint(d.has_serial_no) else '')
+			if ignore_empty_stock and not stock_bal[0]:
+					continue
+
+			args = get_item_data(d, qty, valuation_rate, serial_no)
 
 			res.append(args)
 
@@ -517,23 +529,43 @@ def get_items(warehouse, posting_date, posting_time, company, item_code=None):
 
 def get_items_for_stock_reco(warehouse, company):
 	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
-	items = frappe.db.sql("""
-		select i.name as item_code, i.item_name, bin.warehouse as warehouse, i.has_serial_no, i.has_batch_no
-		from tabBin bin, tabItem i
-		where i.name=bin.item_code and IFNULL(i.disabled, 0) = 0 and i.is_stock_item = 1
-		and i.has_variants = 0 and exists(
-			select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=bin.warehouse
-		)
-	""", (lft, rgt), as_dict=1)
+	items = frappe.db.sql(f"""
+		select
+			i.name as item_code, i.item_name, bin.warehouse as warehouse, i.has_serial_no, i.has_batch_no
+		from
+			tabBin bin, tabItem i
+		where
+			i.name = bin.item_code
+			and IFNULL(i.disabled, 0) = 0
+			and i.is_stock_item = 1
+			and i.has_variants = 0
+			and exists(
+				select name from `tabWarehouse` where lft >= {lft} and rgt <= {rgt} and name = bin.warehouse
+			)
+	""", as_dict=1)
 
 	items += frappe.db.sql("""
-		select i.name as item_code, i.item_name, id.default_warehouse as warehouse, i.has_serial_no, i.has_batch_no
-		from tabItem i, `tabItem Default` id
-		where i.name = id.parent
-			and exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=id.default_warehouse)
-			and i.is_stock_item = 1 and i.has_variants = 0 and IFNULL(i.disabled, 0) = 0 and id.company=%s
+		select
+			i.name as item_code, i.item_name, id.default_warehouse as warehouse, i.has_serial_no, i.has_batch_no
+		from
+			tabItem i, `tabItem Default` id
+		where
+			i.name = id.parent
+			and exists(
+				select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=id.default_warehouse
+			)
+			and i.is_stock_item = 1
+			and i.has_variants = 0
+			and IFNULL(i.disabled, 0) = 0
+			and id.company = %s
 		group by i.name
 	""", (lft, rgt, company), as_dict=1)
+
+	# remove duplicates
+	# check if item-warehouse key extracted from each entry exists in set iw_keys
+	# and update iw_keys
+	iw_keys = set()
+	items = [item for item in items if [(item.item_code, item.warehouse) not in iw_keys, iw_keys.add((item.item_code, item.warehouse))][0]]
 
 	return items
 
@@ -585,6 +617,11 @@ def get_stock_balance_for(item_code, warehouse,
 
 	item_dict = frappe.db.get_value("Item", item_code,
 		["has_serial_no", "has_batch_no"], as_dict=1)
+
+	if not item_dict:
+		# In cases of data upload to Items table
+		msg = _("Item {} does not exist.").format(item_code)
+		frappe.throw(msg, title=_("Missing"))
 
 	serial_nos = ""
 	with_serial_no = True if item_dict.get("has_serial_no") else False

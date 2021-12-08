@@ -1,7 +1,8 @@
 
-from __future__ import unicode_literals, print_function
+
 import frappe
 from frappe.utils import cint
+
 
 def get_leaderboards():
 	leaderboards = {

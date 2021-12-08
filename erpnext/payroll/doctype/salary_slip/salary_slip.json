@@ -56,6 +56,8 @@
   "totals",
   "gross_pay",
   "base_gross_pay",
+  "gross_year_to_date",
+  "base_gross_year_to_date",
   "column_break_25",
   "total_deduction",
   "base_total_deduction",
@@ -327,7 +329,7 @@
   {
    "fieldname": "earning_deduction",
    "fieldtype": "Section Break",
-   "label": "Earning & Deduction",
+   "label": "Earnings & Deductions",
    "oldfieldtype": "Section Break"
   },
   {
@@ -378,7 +380,7 @@
    "depends_on": "total_loan_repayment",
    "fieldname": "loan_repayment",
    "fieldtype": "Section Break",
-   "label": "Loan repayment"
+   "label": "Loan Repayment"
   },
   {
    "fieldname": "loans",
@@ -625,6 +627,20 @@
    "label": "Leave Details",
    "options": "Salary Slip Leave",
    "read_only": 1
+  },
+  {
+   "fieldname": "gross_year_to_date",
+   "fieldtype": "Currency",
+   "label": "Gross Year To Date",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_gross_year_to_date",
+   "fieldtype": "Currency",
+   "label": "Gross Year To Date(Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -636,7 +652,7 @@
    "link_fieldname": "salary_slip"
   }
  ],
- "modified": "2021-08-11 13:35:14.650988",
+ "modified": "2021-12-08 10:22:14.650988",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",

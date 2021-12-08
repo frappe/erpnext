@@ -85,5 +85,3 @@ frappe.ui.form.on('Blanket Order', {
 		frm.trigger('set_tc_name_filter');
 	}
 });
-
-
