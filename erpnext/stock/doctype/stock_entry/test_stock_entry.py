@@ -25,7 +25,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle
-from erpnext.tests.utils import change_settings
+from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 
 def get_sle(**args):
@@ -39,7 +39,7 @@ def get_sle(**args):
 		order by timestamp(posting_date, posting_time) desc, creation desc limit 1"""% condition,
 		values, as_dict=1)
 
-class TestStockEntry(unittest.TestCase):
+class TestStockEntry(ERPNextTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", "0")
@@ -969,6 +969,42 @@ class TestStockEntry(unittest.TestCase):
 		]
 
 		self.assertRaises(NegativeStockError, create_stock_entries, sequence_of_entries)
+
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_future_negative_sle_batch(self):
+		from erpnext.stock.doctype.batch.test_batch import TestBatch
+
+		# Initialize item, batch, warehouse, opening qty
+		item_code = '_Test MultiBatch Item'
+		TestBatch.make_batch_item(item_code)
+
+		batch_nos = [] # store generate batches
+		warehouse = '_Test Warehouse - _TC'
+
+		se1 = make_stock_entry(
+				item_code=item_code,
+				qty=2,
+				to_warehouse=warehouse,
+				posting_date='2021-09-01',
+				purpose='Material Receipt'
+			)
+		batch_nos.append(se1.items[0].batch_no)
+		se2 = make_stock_entry(
+				item_code=item_code,
+				qty=2,
+				to_warehouse=warehouse,
+				posting_date='2021-09-03',
+				purpose='Material Receipt'
+			)
+		batch_nos.append(se2.items[0].batch_no)
+
+		with self.assertRaises(NegativeStockError) as nse:
+			make_stock_entry(item_code=item_code,
+				qty=1,
+				from_warehouse=warehouse,
+				batch_no=batch_nos[1],
+				posting_date='2021-09-02', # backdated consumption of 2nd batch
+				purpose='Material Issue')
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)
