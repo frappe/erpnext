@@ -25,6 +25,7 @@ from six import iteritems
 
 import erpnext
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.utils import get_holiday_dates_for_employee, validate_active_employee
 from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
 	calculate_amounts,
@@ -595,10 +596,19 @@ class SalarySlip(TransactionBase):
 		return weekend_multiplier, public_holiday_multiplier
 
 	def get_holiday_map(self, from_date, to_date):
-		holiday_date = self.get_holidays_for_employee(from_date, to_date, as_dict=1)
+		holiday_list = get_holiday_list_for_employee(self.employee)
+		holidays = frappe.db.sql('''select holiday_date, weekly_off from `tabHoliday`
+					where
+						parent=%(holiday_list)s
+						and holiday_date >= %(start_date)s
+						and holiday_date <= %(end_date)s''', {
+			"holiday_list": holiday_list,
+			"start_date": from_date,
+			"end_date": to_date
+		}, as_dict=1)
 
 		holiday_date_map = {}
-		for date in holiday_date:
+		for date in holidays:
 			holiday_date_map[cstr(date.holiday_date)] = date
 
 		return holiday_date_map
