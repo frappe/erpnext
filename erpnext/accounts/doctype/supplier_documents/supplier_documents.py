@@ -140,7 +140,7 @@ class SupplierDocuments(Document):
 		doc.finance_book = None
 		doc.to_rename = 1
 		doc.due_date = None
-		doc.docstatus = 1
+		# doc.docstatus = 1
 		doc.insert()
 
 		doc = frappe.new_doc("GL Entry")
@@ -170,5 +170,5 @@ class SupplierDocuments(Document):
 		doc.finance_book = None
 		doc.to_rename = 1
 		doc.due_date = None
-		doc.docstatus = 1
+		# doc.docstatus = 1
 		doc.insert()
