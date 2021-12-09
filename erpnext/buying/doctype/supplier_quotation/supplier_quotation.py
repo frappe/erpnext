@@ -156,7 +156,7 @@ def make_quotation(source_name, target_doc=None):
 		},
 		"Supplier Quotation Item": {
 			"doctype": "Quotation Item",
-			"condition": lambda doc: frappe.db.get_value("Item", doc.item_code, "is_sales_item")==1,
+			"condition": lambda row, source, target: frappe.get_cached_value("Item", row.item_code, "is_sales_item"),
 			"add_if_empty": True
 		}
 	}, target_doc)

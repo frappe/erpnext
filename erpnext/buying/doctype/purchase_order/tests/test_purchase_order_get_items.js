@@ -28,7 +28,7 @@ QUnit.test("test: purchase order with get items", function(assert) {
 		},
 
 		() => frappe.timeout(0.3),
-		() => frappe.click_button('Get items from'),
+		() => frappe.click_button('Get Items From'),
 		() => frappe.timeout(0.3),
 
 		() => frappe.click_link('Product Bundle'),

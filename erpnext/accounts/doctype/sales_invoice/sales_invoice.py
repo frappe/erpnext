@@ -1558,17 +1558,25 @@ def make_maintenance_schedule(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
+	def get_pending_qty(source):
+		return flt(source.qty) - flt(source.delivered_qty)
+
+	def item_condition(source, source_parent, target_parent):
+		if source.name in [d.si_detail for d in target_parent.get('items') if d.si_detail]:
+			return False
+
+		if source.delivered_by_supplier:
+			return False
+
+		return get_pending_qty(source)
+
 	def set_missing_values(source, target):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
-	def update_item(source_doc, target_doc, source_parent):
-		target_doc.qty = flt(source_doc.qty) - flt(source_doc.delivered_qty)
-		target_doc.stock_qty = target_doc.qty * flt(source_doc.conversion_factor)
-
-		target_doc.base_amount = target_doc.qty * flt(source_doc.base_rate)
-		target_doc.amount = target_doc.qty * flt(source_doc.rate)
+	def update_item(source, target, source_parent):
+		target.qty = get_pending_qty(source)
 
 	doclist = get_mapped_doc("Sales Invoice", source_name, 	{
 		"Sales Invoice": {
@@ -1592,7 +1600,7 @@ def make_delivery_note(source_name, target_doc=None):
 				"cost_center": "cost_center"
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.delivered_by_supplier!=1
+			"condition": item_condition,
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",

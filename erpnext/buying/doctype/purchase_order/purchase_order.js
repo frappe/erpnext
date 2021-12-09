@@ -384,7 +384,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						per_ordered: ["<", 99.99],
 					}
 				})
-			}, __("Get items from"));
+			}, __("Get Items From"));
 
 		this.frm.add_custom_button(__('Supplier Quotation'),
 			function() {
@@ -400,7 +400,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						status: ["!=", "Stopped"],
 					}
 				})
-			}, __("Get items from"));
+			}, __("Get Items From"));
 
 		this.frm.add_custom_button(__('Update rate as per last purchase'),
 			function() {

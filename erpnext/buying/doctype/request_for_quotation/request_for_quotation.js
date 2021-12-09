@@ -274,8 +274,8 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 							per_ordered: ["<", 99.99]
 						}
 					})
-				}, __("Get items from"));
-			// Get items from Opportunity
+				}, __("Get Items From"));
+			// Get Items From Opportunity
             this.frm.add_custom_button(__('Opportunity'),
 				function() {
 					erpnext.utils.map_current_doc({
@@ -286,8 +286,8 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 							company: me.frm.doc.company
 						},
 					})
-				}, __("Get items from"));
-			// Get items from open Material Requests based on supplier
+				}, __("Get Items From"));
+			// Get Items From open Material Requests based on supplier
 			this.frm.add_custom_button(__('Possible Supplier'), function() {
 				// Create a dialog window for the user to pick their supplier
 				var d = new frappe.ui.Dialog({
@@ -324,7 +324,7 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 					}
 				}
 				d.show();
-			}, __("Get items from"));
+			}, __("Get Items From"));
 
 		}
 	},

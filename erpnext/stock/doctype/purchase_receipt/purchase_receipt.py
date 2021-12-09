@@ -558,10 +558,22 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
-	doc = frappe.get_doc('Purchase Receipt', source_name)
 
 	def get_pending_qty(source_doc):
 		return source_doc.qty - source_doc.billed_qty - source_doc.returned_qty
+
+	def item_condition(source, source_parent, target_parent):
+		if source.name in [d.pr_detail for d in target_parent.get('items') if d.pr_detail]:
+			return False
+
+		if source_parent.get('is_return'):
+			return get_pending_qty(source) <= 0
+		else:
+			return get_pending_qty(source) > 0
+
+	def update_item(source_doc, target_doc, source_parent):
+		target_doc.qty = get_pending_qty(source_doc)
+		target_doc.received_qty = target_doc.qty
 
 	def set_missing_values(source, target):
 		if len(target.get("items")) == 0:
@@ -572,10 +584,6 @@ def make_purchase_invoice(source_name, target_doc=None):
 		doc.run_method("onload")
 		doc.run_method("set_missing_values")
 		doc.run_method("calculate_taxes_and_totals")
-
-	def update_item(source_doc, target_doc, source_parent):
-		target_doc.qty = get_pending_qty(source_doc)
-		target_doc.received_qty = target_doc.qty
 
 	doclist = get_mapped_doc("Purchase Receipt", source_name,	{
 		"Purchase Receipt": {
@@ -603,7 +611,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"vehicle": "vehicle",
 			},
 			"postprocess": update_item,
-			"filter": lambda d: get_pending_qty(d) <= 0 if not doc.get("is_return") else get_pending_qty(d) >= 0
+			"condition": item_condition,
 		},
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",

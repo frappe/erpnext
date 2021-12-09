@@ -153,6 +153,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 								customer: me.frm.doc.customer || undefined,
 								project: me.frm.doc.project || undefined,
 							},
+							columns: ['customer_name', 'project'],
 							get_query_filters: {
 								docstatus: 1,
 								status: ["not in", ["Closed", "On Hold"]],
@@ -160,7 +161,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 								company: me.frm.doc.company,
 							}
 						})
-					}, __("Get items from"));
+					}, __("Get Items From"));
 			}
 		}
 

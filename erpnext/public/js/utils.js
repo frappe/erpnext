@@ -828,7 +828,7 @@ erpnext.utils.map_current_doc = function(opts) {
 				if(!r.exc) {
 					var doc = frappe.model.sync(r.message);
 					cur_frm.dirty();
-					cur_frm.refresh();
+					cur_frm.refresh_fields();
 				}
 			}
 		});
@@ -839,6 +839,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			target: opts.target,
 			date_field: opts.date_field || undefined,
 			setters: opts.setters,
+			columns: opts.columns,
 			get_query: opts.get_query,
 			action: function(selections, args) {
 				let values = selections;

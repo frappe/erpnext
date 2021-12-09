@@ -49,7 +49,7 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 							per_ordered: ["<", 99.99]
 						}
 					})
-				}, __("Get items from"));
+				}, __("Get Items From"));
 		}
 	},
 

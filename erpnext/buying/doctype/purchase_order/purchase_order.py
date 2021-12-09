@@ -359,19 +359,25 @@ def set_missing_values(source, target):
 
 @frappe.whitelist()
 def make_purchase_receipt(source_name, target_doc=None):
-	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) - flt(obj.received_qty)
-		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
-		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
-		target.base_amount = (flt(obj.qty) - flt(obj.received_qty)) * \
-			flt(obj.rate) * flt(source_parent.conversion_rate)
+	def get_pending_qty(source):
+		return flt(source.qty) - flt(source.received_qty)
+
+	def item_condition(source, source_parent, target_parent):
+		if source.name in [d.purchase_order_item for d in target_parent.get('items') if d.purchase_order_item]:
+			return False
+		if source.delivered_by_supplier:
+			return False
+		return abs(source.received_qty) < abs(source.qty)
+
+	def update_item(source, target, source_parent):
+		target.qty = get_pending_qty(source)
 
 	doc = get_mapped_doc("Purchase Order", source_name,	{
 		"Purchase Order": {
 			"doctype": "Purchase Receipt",
 			"field_map": {
 				"per_billed": "per_billed",
-				"supplier_warehouse":"supplier_warehouse",
+				"supplier_warehouse": "supplier_warehouse",
 				"remarks": "remarks"
 			},
 			"validation": {
@@ -388,7 +394,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 				"material_request_item": "material_request_item"
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
+			"condition": item_condition,
 		},
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",
@@ -413,16 +419,28 @@ def make_purchase_invoice_from_portal(purchase_order_name):
 	frappe.response.location = '/purchase-invoices/' + doc.name
 
 def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions=False):
+	unbilled_pr_qty_map = get_unbilled_pr_qty_map(source_name)
+
+	def get_pending_qty(source):
+		billable_qty = flt(source.qty) - flt(source.billed_qty) - flt(source.returned_qty)
+		unbilled_pr_qty = flt(unbilled_pr_qty_map.get(source.name))
+		return billable_qty - unbilled_pr_qty
+
+	def item_condition(source, source_parent, target_parent):
+		if source.name in [d.po_detail for d in target_parent.get('items') if d.po_detail and not d.pr_detail]:
+			return False
+
+		return get_pending_qty(source)
+
+	def update_item(source, target, source_parent):
+		target.qty = get_pending_qty(source)
+
 	def postprocess(source, target):
 		target.flags.ignore_permissions = ignore_permissions
 		set_missing_values(source, target)
-		#Get the advance paid Journal Entries in Purchase Invoice Advance
 
 		if target.get("allocate_advances_automatically"):
 			target.set_advances()
-
-	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) - flt(obj.billed_qty) - flt(obj.returned_qty)
 
 	fields = {
 		"Purchase Order": {
@@ -443,7 +461,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 				"parent": "purchase_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.qty and (abs(doc.billed_qty) < abs(doc.qty))
+			"condition": item_condition,
 		},
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",
@@ -461,6 +479,23 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		target_doc, postprocess, ignore_permissions=ignore_permissions)
 
 	return doc
+
+
+def get_unbilled_pr_qty_map(purchase_order):
+	unbilled_pr_qty_map = {}
+
+	item_data = frappe.db.sql("""
+		select purchase_order_item, qty - billed_qty
+		from `tabPurchase Receipt Item`
+		where purchase_order=%s and docstatus=1
+	""", purchase_order)
+
+	for pr_detail, qty in item_data:
+		if not unbilled_pr_qty_map.get(pr_detail):
+			unbilled_pr_qty_map[pr_detail] = 0
+		unbilled_pr_qty_map[pr_detail] += qty
+
+	return unbilled_pr_qty_map
 
 @frappe.whitelist()
 def make_rm_stock_entry(purchase_order, rm_items):

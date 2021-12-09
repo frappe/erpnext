@@ -869,7 +869,7 @@ def create_pick_list(source_name, target_doc=None, for_qty=None):
 		'Work Order Item': {
 			'doctype': 'Pick List Item',
 			'postprocess': update_item_quantity,
-			'condition': lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty)
+			'condition': lambda doc, source, target: abs(doc.transferred_qty) < abs(doc.required_qty)
 		},
 	}, target_doc)
 

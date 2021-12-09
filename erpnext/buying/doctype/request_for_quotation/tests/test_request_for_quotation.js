@@ -48,7 +48,7 @@ QUnit.test("test: request_for_quotation", function(assert) {
 		},
 		() => cur_frm.print_doc(),
 		() => frappe.timeout(1),
-		() => frappe.click_button('Get items from'),
+		() => frappe.click_button('Get Items From'),
 		() => frappe.timeout(0.3),
 		() => frappe.click_link('Material Request'),
 		() => frappe.timeout(1),

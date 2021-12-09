@@ -335,7 +335,7 @@ def get_item_from_material_requests_based_on_supplier(source_name, target_doc = 
 			},
 			"Material Request Item": {
 				"doctype": "Request for Quotation Item",
-				"condition": lambda row: row.item_code in items,
+				"condition": lambda row, source, target: row.item_code in items,
 				"field_map": [
 					["name", "material_request_item"],
 					["parent", "material_request"],

@@ -272,7 +272,7 @@ def create_delivery_note(source_name, target_doc=None):
 			'name': 'so_detail',
 			'parent': 'against_sales_order',
 		},
-		'condition': lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
+		'condition': lambda doc, source, target: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 	}
 
 	item_table_mapper_without_so = {

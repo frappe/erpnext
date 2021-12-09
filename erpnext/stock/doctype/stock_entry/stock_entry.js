@@ -237,7 +237,7 @@ frappe.ui.form.on('Stock Entry', {
 						docstatus: 1
 					}
 				})
-			}, __("Get items from"));
+			}, __("Get Items From"));
 
 			frm.add_custom_button(__('Material Request'), function() {
 				erpnext.utils.map_current_doc({
@@ -254,7 +254,7 @@ frappe.ui.form.on('Stock Entry', {
 						status: ["not in", ["Transferred", "Issued"]]
 					}
 				})
-			}, __("Get items from"));
+			}, __("Get Items From"));
 		}
 		if (frm.doc.docstatus===0 && frm.doc.purpose == "Material Issue") {
 			frm.add_custom_button(__('Expired Batches'), function() {
@@ -277,7 +277,7 @@ frappe.ui.form.on('Stock Entry', {
 						}
 					}
 				});
-			}, __("Get items from"));
+			}, __("Get Items From"));
 		}
 
 		if (frm.doc.company) {

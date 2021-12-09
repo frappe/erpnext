@@ -174,7 +174,6 @@ class MaterialRequest(BuyingController):
 		self.set_missing_item_details(for_validate=True)
 		self.calculate_totals()
 
-
 	def update_completed_qty(self, mr_items=None, update_modified=True):
 		if self.material_request_type == "Purchase":
 			return
@@ -260,7 +259,7 @@ def update_completed_and_requested_qty(stock_entry, method):
 				mr_obj.update_requested_qty(mr_item_rows)
 
 def set_missing_values(source, target_doc):
-	if target_doc.doctype == "Purchase Order" and getdate(target_doc.schedule_date) <  getdate(nowdate()):
+	if target_doc.doctype == "Purchase Order" and getdate(target_doc.schedule_date) < getdate(nowdate()):
 		target_doc.schedule_date = None
 	target_doc.run_method("set_missing_values")
 	target_doc.run_method("calculate_taxes_and_totals")
@@ -292,7 +291,6 @@ def update_status(name, status):
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
-
 	def postprocess(source, target_doc):
 		if frappe.flags.args and frappe.flags.args.default_supplier:
 			# items only for given default supplier
@@ -305,8 +303,11 @@ def make_purchase_order(source_name, target_doc=None):
 
 		set_missing_values(source, target_doc)
 
-	def select_item(d):
-		return d.ordered_qty < d.stock_qty
+	def item_condition(source, source_parent, target_parent):
+		if source.name in [d.material_request_item for d in target_parent.get('items') if d.material_request_item]:
+			return False
+
+		return flt(source.ordered_qty) < flt(source.stock_qty)
 
 	doclist = get_mapped_doc("Material Request", source_name, 	{
 		"Material Request": {
@@ -327,7 +328,7 @@ def make_purchase_order(source_name, target_doc=None):
 				["sales_order_item", "sales_order_item"]
 			],
 			"postprocess": update_item,
-			"condition": select_item
+			"condition": item_condition
 		}
 	}, target_doc, postprocess)
 
@@ -365,6 +366,12 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 
 	material_requests, supplier_items = get_material_requests_based_on_supplier(source_name)
 
+	def item_condition(source, source_parent, target_parent):
+		if source.name in [d.material_request_item for d in target_parent.get('items') if d.material_request_item]:
+			return False
+
+		return flt(source.ordered_qty) < flt(source.stock_qty)
+
 	def postprocess(source, target_doc):
 		target_doc.supplier = source_name
 		if getdate(target_doc.schedule_date) < getdate(nowdate()):
@@ -388,7 +395,7 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 					["uom", "uom"]
 				],
 				"postprocess": update_item,
-				"condition": lambda doc: doc.ordered_qty < doc.qty
+				"condition": item_condition,
 			}
 		}, target_doc, postprocess)
 
@@ -454,6 +461,12 @@ def make_supplier_quotation(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None):
+	def item_condition(source, source_parent, target_parent):
+		if source.name in [d.material_request_item for d in target_parent.get('items') if d.material_request_item]:
+			return False
+
+		return flt(source.ordered_qty) < flt(source.stock_qty)
+
 	def update_item(obj, target, source_parent):
 		qty = flt(flt(obj.stock_qty) - flt(obj.ordered_qty))/ target.conversion_factor \
 			if flt(obj.stock_qty) > flt(obj.ordered_qty) else 0
@@ -498,7 +511,7 @@ def make_stock_entry(source_name, target_doc=None):
 			},
 			"field_no_map": ['expense_account'],
 			"postprocess": update_item,
-			"condition": lambda doc: doc.ordered_qty < doc.stock_qty
+			"condition": item_condition,
 		}
 	}, target_doc, set_missing_values)
 

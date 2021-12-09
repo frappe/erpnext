@@ -224,7 +224,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				return frappe.call({
 					method: 'erpnext.projects.doctype.project.project.get_project_details',
 					args: {
-						project_name: frm.doc.project,
+						project: frm.doc.project,
 						doctype: frm.doc.doctype
 					},
 					callback: function (r) {

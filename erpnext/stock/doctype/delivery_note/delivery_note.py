@@ -482,10 +482,24 @@ def get_list_context(context=None):
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
-	doc = frappe.get_doc('Delivery Note', source_name)
-
 	def get_pending_qty(source_doc):
 		return source_doc.qty - source_doc.billed_qty - source_doc.returned_qty
+
+	def item_condition(source, source_parent, target_parent):
+		if source.name in [d.dn_detail for d in target_parent.get('items') if d.dn_detail]:
+			return False
+
+		if source_parent.get('is_return'):
+			return get_pending_qty(source) <= 0
+		else:
+			return get_pending_qty(source) > 0
+
+	def update_item(source_doc, target_doc, source_parent):
+		target_doc.qty = get_pending_qty(source_doc)
+
+		if source_doc.serial_no and source_parent.per_billed > 0:
+			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
+				target_doc.qty, source_parent.name)
 
 	def set_missing_values(source, target):
 		target.ignore_pricing_rule = 1
@@ -493,7 +507,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		target.run_method("set_po_nos")
 
 		if len(target.get("items")) == 0:
-			frappe.throw(_("All these items have already been Invoiced/Returned"))
+			frappe.throw(_("All items from Delivery Note {0} have already been invoiced or returned").format(source.name))
 
 		target.run_method("calculate_taxes_and_totals")
 
@@ -506,13 +520,6 @@ def make_sales_invoice(source_name, target_doc=None):
 
 		if target.company_address:
 			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
-
-	def update_item(source_doc, target_doc, source_parent):
-		target_doc.qty = get_pending_qty(source_doc)
-
-		if source_doc.serial_no and source_parent.per_billed > 0:
-			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
-				target_doc.qty, source_parent.name)
 
 	doc = get_mapped_doc("Delivery Note", source_name, {
 		"Delivery Note": {
@@ -538,7 +545,7 @@ def make_sales_invoice(source_name, target_doc=None):
 				"cost_center": "cost_center"
 			},
 			"postprocess": update_item,
-			"filter": lambda d: get_pending_qty(d) <= 0 if not doc.get("is_return") else get_pending_qty(d) > 0
+			"condition": item_condition,
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
@@ -582,7 +589,7 @@ def make_delivery_trip(source_name, target_doc=None):
 			"field_map": {
 				"parent": "delivery_note"
 			},
-			"condition": lambda item: item.parent not in delivery_notes,
+			"condition": lambda item, source, target: item.parent not in delivery_notes,
 			"postprocess": update_stop_details
 		}
 	}, target_doc)
@@ -610,7 +617,7 @@ def make_installation_note(source_name, target_doc=None):
 				"parenttype": "prevdoc_doctype",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.installed_qty < doc.qty
+			"condition": lambda doc, source, target: doc.installed_qty < doc.qty
 		}
 	}, target_doc)
 
