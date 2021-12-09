@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from datetime import datetime, timedelta, date
 from frappe.utils import cint, cstr, getdate, flt
 import dateutil
 from frappe.model.naming import set_name_by_naming_series
@@ -23,6 +24,9 @@ class Patient(Document):
 
 	def on_update(self):
 		self.add_as_website_user()
+
+	def validate(self):
+		self.calculate_age()
 
 	def add_as_website_user(self):
 		if(self.email):
@@ -71,6 +75,15 @@ class Patient(Document):
 			sales_invoice = make_invoice(self.name, company)
 			sales_invoice.save(ignore_permissions=True)
 			return {'invoice': sales_invoice.name}
+	
+	def calculate_age(self):
+		dates = self.dob.split("-")
+
+		if self.dob != None:
+			today = date.today()
+			self.age = today.year - int(dates[0]) - ((today.month, today.day) < (int(dates[1]), int(dates[2])))
+		else:
+			frappe.msgprint(_("Pacient has no date of birthday"))
 
 def create_customer(doc):
 	customer_group = frappe.get_value("Selling Settings", None, "customer_group")
