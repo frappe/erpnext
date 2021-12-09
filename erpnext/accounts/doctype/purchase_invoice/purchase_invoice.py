@@ -115,6 +115,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_purchase_receipt_if_update_stock()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
 
 	def validate_release_date(self):
