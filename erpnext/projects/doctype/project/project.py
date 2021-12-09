@@ -12,7 +12,7 @@ from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 from erpnext.stock.get_item_details import get_applies_to_details
-
+from six import string_types
 from frappe.model.document import Document
 
 
@@ -544,8 +544,9 @@ def set_project_status(project, status):
 	project.save()
 
 @frappe.whitelist()
-def get_project_details(project_name, doctype):
-	project = frappe.get_doc("Project", project_name)
+def get_project_details(project, doctype):
+	if isinstance(project, string_types):
+		project = frappe.get_doc("Project", project)
 
 	sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
 
@@ -614,3 +615,50 @@ def make_against_project(project_name, dt):
 	doc.run_method("set_missing_values")
 	doc.run_method("calculate_taxes_and_totals")
 	return doc
+
+
+@frappe.whitelist()
+def get_sales_invoice(project_name):
+	from erpnext.controllers.queries import _get_delivery_notes_to_be_billed
+	from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice as invoice_from_delivery_note
+	from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice as invoice_from_sales_order
+
+	project = frappe.get_doc("Project", project_name)
+	project_details = get_project_details(project, "Sales Invoice")
+
+	# Create Sales Invoice
+	target_doc = frappe.new_doc("Sales Invoice")
+	target_doc.company = project.company
+	target_doc.project = project.name
+
+	for k, v in project_details.items():
+		if target_doc.meta.has_field(k):
+			target_doc.set(k, v)
+
+	filters = {"project": project.name}
+	if project.customer:
+		filters['customer'] = project.customer
+	if project.company:
+		filters['company'] = project.company
+
+	# Get Delivery Notes
+	delivery_note_filters = filters.copy()
+	delivery_note_filters['is_return'] = 0
+
+	delivery_notes = _get_delivery_notes_to_be_billed(filters=delivery_note_filters)
+	for d in delivery_notes:
+		target_doc = invoice_from_delivery_note(d.name, target_doc=target_doc)
+
+	# Get Sales Orders
+	sales_order_filters = {
+		"docstatus": 1,
+		"status": ["not in", ["Closed", "On Hold"]],
+		"per_completed": ["<", 99.99],
+	}
+	sales_order_filters.update(filters)
+
+	sales_orders = frappe.get_all("Sales Order", filters=sales_order_filters)
+	for d in sales_orders:
+		target_doc = invoice_from_sales_order(d.name, target_doc=target_doc)
+
+	return target_doc

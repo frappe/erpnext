@@ -6,7 +6,7 @@ import frappe
 import erpnext
 from frappe import _
 from frappe.desk.reportview import get_match_cond, get_filters_cond
-from frappe.utils import nowdate, getdate, flt, cstr
+from frappe.utils import nowdate, getdate, flt, cstr, cint
 from collections import defaultdict
 from erpnext.stock.get_item_details import _get_item_tax_template
 from frappe.utils import unique
@@ -363,31 +363,34 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters, as_dict):
-	fields = get_fields("Delivery Note", ["name", "customer", "posting_date", "project"])
+	return _get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters, as_dict)
+
+def _get_delivery_notes_to_be_billed(doctype="Delivery Note", txt="", searchfield="name", start=0, page_len=0,
+		filters=None, as_dict=True, ignore_permissions=False):
+	fields = get_fields("Delivery Note", ["name", "customer", "customer_name", "posting_date", "project"])
+	select_fields = ", ".join(["`tabDelivery Note`.{0}".format(f) for f in fields])
+	limit = "limit {0}, {1}".format(start, page_len) if page_len else ""
 
 	return frappe.db.sql("""
-		select %(fields)s
+		select {fields}
 		from `tabDelivery Note`
-		where `tabDelivery Note`.`%(key)s` like %(txt)s and
-			`tabDelivery Note`.docstatus = 1
-			and status not in ("Stopped", "Closed") %(fcond)s
-			and (
-				(`tabDelivery Note`.is_return = 0 and `tabDelivery Note`.per_completed < 100)
-				or (
-					`tabDelivery Note`.is_return = 1
-					and return_against in (select name from `tabDelivery Note` where per_completed < 100)
-				)
-			)
-			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc limit %(start)s, %(page_len)s
-	""" % {
-		"fields": ", ".join(["`tabDelivery Note`.{0}".format(f) for f in fields]),
-		"key": searchfield,
-		"fcond": get_filters_cond(doctype, filters, []),
-		"mcond": get_match_cond(doctype),
-		"start": start,
-		"page_len": page_len,
-		"txt": "%(txt)s"
-	}, {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)
+		left join `tabDelivery Note` dr on `tabDelivery Note`.is_return = 1 and dr.name = `tabDelivery Note`.return_against
+		where `tabDelivery Note`.docstatus = 1
+			and `tabDelivery Note`.`{key}` like {txt}
+			and `tabDelivery Note`.`status` not in ('Stopped', 'Closed')
+			and `tabDelivery Note`.per_completed < 100
+			and (`tabDelivery Note`.is_return = 0 or dr.per_completed < 100)
+			{fcond} {mcond}
+			order by `tabDelivery Note`.posting_date, `tabDelivery Note`.posting_time, `tabDelivery Note`.creation
+			{limit}
+	""".format(
+		fields=select_fields,
+		key=searchfield,
+		fcond=get_filters_cond(doctype, filters, [], ignore_permissions=ignore_permissions),
+		mcond="" if ignore_permissions else get_match_cond(doctype),
+		limit=limit,
+		txt="%(txt)s",
+	), {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)
 
 
 @frappe.whitelist()

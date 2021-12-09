@@ -135,8 +135,6 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		var me = this;
 
 		if (!me.frm.is_new()) {
-			me.frm.add_custom_button(__('Duplicate Project with Tasks'), () => me.create_duplicate());
-
 			me.frm.add_custom_button(__('Completed'), () => {
 				me.set_status('Completed');
 			}, __('Set Status'));
@@ -151,7 +149,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 						"project": me.frm.doc.name
 					};
 					frappe.set_route("List", "Task", "Gantt");
-				});
+				}, __("Tasks"));
 
 				me.frm.add_custom_button(__("Kanban Board"), () => {
 					frappe.call('erpnext.projects.doctype.project.project.create_kanban_board_if_not_exists', {
@@ -159,7 +157,15 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 					}).then(() => {
 						frappe.set_route('List', 'Task', 'Kanban', me.frm.doc.project_name);
 					});
-				});
+				}, __("Tasks"));
+			}
+
+			me.frm.add_custom_button(__('Duplicate Project with Tasks'), () => me.create_duplicate(), __("Tasks"));
+
+			if (frappe.model.can_write("Sales Invoice")) {
+				me.frm.add_custom_button(__("Sales Invoice"), function () {
+					me.make_sales_invoice()
+				}, __("Create"));
 			}
 		}
 	},
@@ -300,6 +306,21 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 			}
 		});
 	},
+
+	make_sales_invoice: function () {
+		return frappe.call({
+			method: "erpnext.projects.doctype.project.project.get_sales_invoice",
+			args: {
+				"project_name": this.frm.doc.name,
+			},
+			callback: function (r) {
+				if (!r.exc) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				}
+			}
+		});
+	}
 });
 
 $.extend(cur_frm.cscript, new erpnext.projects.ProjectController({frm: cur_frm}));
