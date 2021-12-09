@@ -296,7 +296,7 @@ class Returncreditnotes(Document):
 				doc.finance_book = entry.finance_book
 				doc.to_rename = entry.to_rename
 				doc.due_date = entry.due_date
-				doc.docstatus = 1
+				# doc.docstatus = 1
 				doc.insert()
 			else:
 				doc = frappe.new_doc("GL Entry")
@@ -326,7 +326,7 @@ class Returncreditnotes(Document):
 				doc.finance_book = entry.finance_book
 				doc.to_rename = entry.to_rename
 				doc.due_date = entry.due_date
-				doc.docstatus = 1
+				# doc.docstatus = 1
 				doc.insert()
 
 	def delete_gl_entry(self):
