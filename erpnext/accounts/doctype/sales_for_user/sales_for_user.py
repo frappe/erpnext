@@ -169,7 +169,7 @@ class SalesForUser(Document):
 		conditions += ', "posting_time": ["<", "{}"]'.format(self.final_hour)
 		if self.user != None:
 			conditions += ', "cashier": "{}"'.format(self.user)
-		conditions += ', "is_pos": 1'.format(self.user)
+		# conditions += ', "is_pos": 1'.format(self.user)
 		conditions += '}'			
 
 		return conditions
