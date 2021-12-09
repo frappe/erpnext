@@ -394,12 +394,15 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		var me = this;
 		if (me.frm.doc.docstatus === 0) {
 			me.frm.fields_dict.items.grid.add_custom_button(__("Remove 0 Qty rows"),  function () {
-				$.each(me.frm.doc.items, function(i,d) {
-					if ( d.qty == 0 ) {
-						me.frm.fields_dict.items.grid.grid_rows[i].remove()
+				var actions = [];
+				$.each(me.frm.doc.items || [], function(i, d) {
+					if (!flt(d.qty, precision('qty', d))) {
+						actions.push(() => me.frm.fields_dict.items.grid.get_row(d.name).remove());
 					}
-				})
-			})
+				});
+
+				return frappe.run_serially(actions);
+			});
 		}
 	},
 
