@@ -15,10 +15,11 @@ class BulkTransactionLogger(Document):
 def retry_failing_transaction():
 	btp = frappe.qb.DocType("Bulk Transaction Logger List")
 	data = (frappe.qb.from_(btp)
-	.select(btp.transaction_name, btp.from_doctype, btp.to_doctype).distinct()
-	.where(btp.retried != 1)
-	.where(btp.transaction_status == "Failed")
-	.where(btp.date == fn.CurDate())).run(as_dict=True)
+		.select(btp.transaction_name, btp.from_doctype, btp.to_doctype).distinct()
+		.where(btp.retried != 1)
+		.where(btp.transaction_status == "Failed")
+		.where(btp.date == fn.CurDate())
+	).run(as_dict=True)
 	if len(data) > 10:
 		frappe.enqueue(job,queue="long",job_name="bulk_retry",data=data)
 	else:
