@@ -1,12 +1,11 @@
 {
- "creation": "2021-05-25 15:14:09.090961",
+ "creation": "2021-12-09 14:34:42.457435",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "reference_doctype",
   "reference_name",
-  "transaction_number",
   "cai",
   "net_total",
   "reference_base"
@@ -29,12 +28,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "net_total",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Base"
-  },
-  {
    "fetch_from": "reference_name.cai",
    "fieldname": "cai",
    "fieldtype": "Data",
@@ -43,11 +36,10 @@
    "read_only": 1
   },
   {
-   "fetch_from": "reference_name.transaction_number",
-   "fieldname": "transaction_number",
-   "fieldtype": "Data",
+   "fieldname": "net_total",
+   "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Transaction Number"
+   "label": "Base"
   },
   {
    "fetch_from": "reference_name.grand_total",
@@ -59,10 +51,10 @@
   }
  ],
  "istable": 1,
- "modified": "2021-12-09 14:44:23.069727",
+ "modified": "2021-12-09 14:46:45.501429",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Withholding Reference",
+ "name": "Reference Customer Retention",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,

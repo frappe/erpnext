@@ -53,7 +53,8 @@
   "more_info",
   "patient_details",
   "ac_sb",
-  "default_currency"
+  "default_currency",
+  "age"
  ],
  "fields": [
   {
@@ -362,12 +363,18 @@
    "fieldtype": "Link",
    "label": "Cologne",
    "options": "Cologne"
+  },
+  {
+   "fieldname": "age",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Age"
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
  "max_attachments": 50,
- "modified": "2021-11-10 13:30:07.973786",
+ "modified": "2021-12-09 15:14:41.191480",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
