@@ -205,6 +205,13 @@ frappe.query_reports["Vehicle Stock"] = {
 			options: ["Ungrouped", "Group by Model", "Group by Variant", "Group by Item Group", "Group by Brand", "Group by Warehouse"],
 			default: "Ungrouped"
 		},
+		{
+			fieldname: "show_customer_in_print",
+			label: __("Show Customer In Print"),
+			fieldtype: "Check",
+			default: 1,
+			on_change: function() { return false; }
+		},
 	],
 	formatter: function(value, row, column, data, default_formatter) {
 		var style = {};

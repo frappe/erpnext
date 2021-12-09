@@ -64,8 +64,10 @@
 	</div>
 </div>
 
-{% var show_delivered_to = data.filter(d => d.delivered_to || d.broker).length %}
-{% var total_colspan = show_delivered_to ? "8" : "7" %}
+{% var show_delivered_to = filters.show_customer_in_print && data.filter(d => d.delivered_to || d.broker).length %}
+{% var total_colspan = 6 %}
+{% total_colspan += filters.show_customer_in_print ? 1 : 0 %}
+{% total_colspan += show_delivered_to ? 1 : 0 %}
 
 <table class="table table-bordered">
 	<thead>
@@ -74,7 +76,9 @@
 			<th class="text-center">{%= __("Date") %}</th>
 			<th class="text-center">{%= __("Variant") %}</th>
 			<th class="text-center">{%= __("Vehicle") %}</th>
+			{% if filters.show_customer_in_print %}
 			<th class="text-center">{%= __("Customer") %}</th>
+			{% endif %}
 			{% if show_delivered_to %}
 				<th class="text-center">{%= __("Delivered To") %}</th>
 			{% endif %}
@@ -139,6 +143,7 @@
 					{% } %}
 				</td>
 
+				{% if filters.show_customer_in_print %}
 				<td>
 					{% if(data[i].customer_name) { %}
 						<div>{%= data[i].customer_name %}</div>
@@ -150,6 +155,7 @@
 						<div>Contact #: {%= data[i].contact_number %}</div>
 					{% } %}
 				</td>
+				{% endif %}
 
 				{% if show_delivered_to %}
 					<td>
