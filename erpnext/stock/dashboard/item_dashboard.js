@@ -381,7 +381,7 @@ function append_breakdown(element, item_code, poi_results, boi_results) {
 		plugins: {
 			legend: {
 				position: "bottom",
-				display: (boi_results.length >= 10) ? false : true,
+				display: false,
 				align: "start",
 			},
 			title: {
