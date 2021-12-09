@@ -14,7 +14,6 @@ from erpnext.assets.doctype.asset_category.asset_category import get_asset_categ
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
-from erpnext.stock.utils import reset_default_field
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -119,9 +118,9 @@ class PurchaseReceipt(BuyingController):
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
 
-		reset_default_field(self, "set_warehouse", "items", "warehouse")
-		reset_default_field(self, "rejected_warehouse", "items", "rejected_warehouse")
-		reset_default_field(self, "set_from_warehouse", "items", "from_warehouse")
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
+		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
 
 
 	def validate_cwip_accounts(self):
