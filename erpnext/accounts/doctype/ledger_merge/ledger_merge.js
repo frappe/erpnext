@@ -3,6 +3,27 @@
 
 frappe.ui.form.on('Ledger Merge', {
   setup: function(frm) {
+    frappe.realtime.on('data_import_refresh', ({ ledger_merge }) => {
+			if (ledger_merge !== frm.doc.name) return;
+			frm.refresh();
+		});
+
+		frappe.realtime.on('data_import_progress', data => {
+			if (data.data_import !== frm.doc.name) return;
+			let message = __('Merging {0} of {1}', [data.current, data.total]);
+      let percent = Math.floor((data.current * 100) / data.total);
+			frm.dashboard.show_progress(__('Merge Progress'), percent, message);
+			frm.page.set_indicator(__('In Progress'), 'orange');
+
+			// hide progress when complete
+			if (data.current === data.total) {
+				setTimeout(() => {
+					frm.dashboard.hide();
+					frm.refresh();
+				}, 2000);
+			}
+		});
+
     frm.set_query("account", function(doc) {
       if (!doc.company) frappe.throw(__('Please set Company'));
       if (!doc.root_type) frappe.throw(__('Please set Root Type'));
@@ -32,6 +53,7 @@ frappe.ui.form.on('Ledger Merge', {
 
 	refresh: function(frm) {
     frm.page.hide_icon_group();
+    frm.trigger('set_merge_status');
 	},
 
   onload_post_render: function(frm) {
@@ -60,8 +82,15 @@ frappe.ui.form.on('Ledger Merge', {
 	},
 
   start_merge: function(frm) {
-    console.log('Hi');
-    frm.trigger('set_merge_status');
+    frm.call({
+			method: 'form_start_merge',
+			args: { docname: frm.doc.name },
+			btn: frm.page.btn_primary
+		}).then(r => {
+			if (r.message === true) {
+				frm.disable_save();
+			}
+		});
   },
 
   set_merge_status: function(frm) {
@@ -72,6 +101,16 @@ frappe.ui.form.on('Ledger Merge', {
 		});
     let message_args = [successful_records, frm.doc.merge_accounts.length];
     frm.dashboard.set_headline(__('Successfully merged {0} out of {1}.', message_args));
+  },
+
+  root_type: function(frm) {
+    frm.set_value('account', '');
+    frm.set_value('merge_accounts', []);
+  },
+
+  company: function(frm) {
+    frm.set_value('account', '');
+    frm.set_value('merge_accounts', []);
   }
 });
 
