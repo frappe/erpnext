@@ -147,6 +147,7 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.submit()
 
 def validate_account_for_perpetual_inventory(gl_map):
+	#if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)):
 	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)) and gl_map[0].voucher_type=="Journal Entry":
 		account_list = [gl_entries.account for gl_entries in gl_map]
 
@@ -159,8 +160,14 @@ def validate_account_for_perpetual_inventory(gl_map):
 
 			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(account,
 				gl_map[0].posting_date, gl_map[0].company)
-			# In case of Journal Entry, there are no corresponding SL entries,
-			# hence deducting currency amount
+
+			#if gl_map[0].voucher_type=="Journal Entry":
+				# In case of Journal Entry, there are no corresponding SL entries,
+				# hence deducting currency amount
+				#account_bal -= flt(gl_map[0].debit) - flt(gl_map[0].credit)
+				#if account_bal == stock_bal:
+					#frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
+						#.format(account), StockAccountInvalidTransaction)
 			account_bal -= flt(gl_map[0].debit) - flt(gl_map[0].credit)
 			if account_bal == stock_bal:
 				frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
@@ -309,3 +316,4 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		if entry.get("against_voucher") and update_outstanding == 'Yes' and not adv_adj:
 			update_outstanding_amt(entry["account"], entry.get("party_type"), entry.get("party"), entry.get("against_voucher_type"),
 				entry.get("against_voucher"), on_cancel=True)
+

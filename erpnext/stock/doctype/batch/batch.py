@@ -291,7 +291,7 @@ def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	return frappe.db.sql("""
 		select batch_id, sum(`tabStock Ledger Entry`.actual_qty) as qty
 		from `tabBatch`
-			join `tabStock Ledger Entry` ignore index (item_code, warehouse)
+			join `tabStock Ledger Entry`
 				on (`tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no )
 		where `tabStock Ledger Entry`.item_code = %s and `tabStock Ledger Entry`.warehouse = %s
 			and (`tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL) {0}
