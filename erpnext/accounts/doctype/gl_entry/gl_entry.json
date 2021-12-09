@@ -247,7 +247,7 @@
  ],
  "icon": "fa fa-list",
  "idx": 1,
- "modified": "2021-12-06 08:51:58.417847",
+ "modified": "2021-12-09 09:18:12.099266",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",
@@ -270,10 +270,13 @@
    "role": "Accounts Manager"
   },
   {
+   "create": 1,
+   "delete": 1,
    "export": 1,
    "read": 1,
    "report": 1,
-   "role": "Auditor"
+   "role": "Auditor",
+   "write": 1
   }
  ],
  "quick_entry": 1,
