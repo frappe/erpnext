@@ -41,6 +41,7 @@
    "label": "Posting Date",
    "oldfieldname": "posting_date",
    "oldfieldtype": "Date",
+   "read_only": 1,
    "search_index": 1
   },
   {
@@ -49,7 +50,8 @@
    "in_list_view": 1,
    "label": "Transaction Date",
    "oldfieldname": "transaction_date",
-   "oldfieldtype": "Date"
+   "oldfieldtype": "Date",
+   "read_only": 1
   },
   {
    "fieldname": "account",
@@ -61,6 +63,7 @@
    "oldfieldname": "account",
    "oldfieldtype": "Link",
    "options": "Account",
+   "read_only": 1,
    "search_index": 1
   },
   {
@@ -68,6 +71,7 @@
    "fieldtype": "Link",
    "label": "Party Type",
    "options": "DocType",
+   "read_only": 1,
    "search_index": 1
   },
   {
@@ -76,6 +80,7 @@
    "in_standard_filter": 1,
    "label": "Party",
    "options": "party_type",
+   "read_only": 1,
    "search_index": 1
   },
   {
@@ -86,7 +91,8 @@
    "label": "Cost Center",
    "oldfieldname": "cost_center",
    "oldfieldtype": "Link",
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "read_only": 1
   },
   {
    "fieldname": "debit",
@@ -94,7 +100,8 @@
    "label": "Debit Amount",
    "oldfieldname": "debit",
    "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
    "fieldname": "credit",
@@ -102,25 +109,29 @@
    "label": "Credit Amount",
    "oldfieldname": "credit",
    "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
    "fieldname": "account_currency",
    "fieldtype": "Link",
    "label": "Account Currency",
-   "options": "Currency"
+   "options": "Currency",
+   "read_only": 1
   },
   {
    "fieldname": "debit_in_account_currency",
    "fieldtype": "Currency",
    "label": "Debit Amount in Account Currency",
-   "options": "currency"
+   "options": "currency",
+   "read_only": 1
   },
   {
    "fieldname": "credit_in_account_currency",
    "fieldtype": "Currency",
    "label": "Credit Amount in Account Currency",
-   "options": "currency"
+   "options": "currency",
+   "read_only": 1
   },
   {
    "fieldname": "against",
@@ -128,7 +139,8 @@
    "in_filter": 1,
    "label": "Against",
    "oldfieldname": "against",
-   "oldfieldtype": "Text"
+   "oldfieldtype": "Text",
+   "read_only": 1
   },
   {
    "fieldname": "against_voucher_type",
@@ -136,7 +148,8 @@
    "label": "Against Voucher Type",
    "oldfieldname": "against_voucher_type",
    "oldfieldtype": "Data",
-   "options": "DocType"
+   "options": "DocType",
+   "read_only": 1
   },
   {
    "fieldname": "against_voucher",
@@ -146,6 +159,7 @@
    "oldfieldname": "against_voucher",
    "oldfieldtype": "Data",
    "options": "against_voucher_type",
+   "read_only": 1,
    "search_index": 1
   },
   {
@@ -155,7 +169,8 @@
    "label": "Voucher Type",
    "oldfieldname": "voucher_type",
    "oldfieldtype": "Select",
-   "options": "DocType"
+   "options": "DocType",
+   "read_only": 1
   },
   {
    "fieldname": "voucher_no",
@@ -166,6 +181,7 @@
    "oldfieldname": "voucher_no",
    "oldfieldtype": "Data",
    "options": "voucher_type",
+   "read_only": 1,
    "search_index": 1
   },
   {
@@ -178,7 +194,8 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
-   "options": "Project"
+   "options": "Project",
+   "read_only": 1
   },
   {
    "fieldname": "remarks",
@@ -187,7 +204,8 @@
    "label": "Remarks",
    "no_copy": 1,
    "oldfieldname": "remarks",
-   "oldfieldtype": "Text"
+   "oldfieldtype": "Text",
+   "read_only": 1
   },
   {
    "fieldname": "is_opening",
@@ -196,7 +214,8 @@
    "label": "Is Opening",
    "oldfieldname": "is_opening",
    "oldfieldtype": "Select",
-   "options": "No\nYes"
+   "options": "No\nYes",
+   "read_only": 1
   },
   {
    "fieldname": "is_advance",
@@ -204,7 +223,8 @@
    "label": "Is Advance",
    "oldfieldname": "is_advance",
    "oldfieldtype": "Select",
-   "options": "No\nYes"
+   "options": "No\nYes",
+   "read_only": 1
   },
   {
    "fieldname": "fiscal_year",
@@ -213,7 +233,8 @@
    "label": "Fiscal Year",
    "oldfieldname": "fiscal_year",
    "oldfieldtype": "Select",
-   "options": "Fiscal Year"
+   "options": "Fiscal Year",
+   "read_only": 1
   },
   {
    "fieldname": "company",
@@ -223,13 +244,15 @@
    "oldfieldname": "company",
    "oldfieldtype": "Link",
    "options": "Company",
+   "read_only": 1,
    "search_index": 1
   },
   {
    "fieldname": "finance_book",
    "fieldtype": "Link",
    "label": "Finance Book",
-   "options": "Finance Book"
+   "options": "Finance Book",
+   "read_only": 1
   },
   {
    "default": "1",
@@ -237,17 +260,19 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "To Rename",
+   "read_only": 1,
    "search_index": 1
   },
   {
    "fieldname": "due_date",
    "fieldtype": "Date",
-   "label": "Due Date"
+   "label": "Due Date",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-list",
  "idx": 1,
- "modified": "2021-12-09 09:18:12.099266",
+ "modified": "2021-12-09 10:33:24.939168",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",
