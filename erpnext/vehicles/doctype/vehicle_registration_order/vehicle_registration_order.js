@@ -84,7 +84,7 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 	setup_buttons: function () {
 		if (this.frm.doc.docstatus == 1) {
 			// Payment
-			if (flt(this.frm.doc.customer_outstanding) && !cint(this.frm.doc.use_sales_invoice)) {
+			if (!cint(this.frm.doc.use_sales_invoice)) {
 				this.frm.add_custom_button(__('Customer Payment'),
 					() => this.make_journal_entry('Customer Payment'), __('Payment'));
 			}
