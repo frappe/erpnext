@@ -1,6 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
-frappe.provide("erpnext");
+frappe.provide("erpnext ");
 frappe.provide("erpnext.utils");
 
 $.extend(erpnext, {
@@ -634,12 +634,12 @@ erpnext.utils.map_current_doc = function(opts) {
 					$.each(opts.args.filtered_children, (child_idx, child_val) => {
 						if (parent_val[opts.row_id_fieldname] == child_val) {
 							opts.args.filtered_children.splice(child_idx, 1);
-							frappe.msgprint(__("You have already selected item {0}", 
+							frappe.msgprint(__("You have already selected item {0}",
 								[parent_val["item_code"]]));
 						}
 					});
 				});
-		
+
 				if (opts.args.filtered_children.length < 1) {
 					return;
 				}
