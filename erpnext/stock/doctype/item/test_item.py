@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -489,7 +488,7 @@ class TestItem(ERPNextTestCase):
 			item_doc.save()
 
 		# Check values saved correctly
-		barcodes = frappe.get_list(
+		barcodes = frappe.get_all(
 			'Item Barcode',
 			fields=['barcode', 'barcode_type'],
 			filters={'parent': item_code})
@@ -535,8 +534,6 @@ class TestItem(ERPNextTestCase):
 
 	def test_index_creation(self):
 		"check if index is getting created in db"
-		from erpnext.stock.doctype.item.item import on_doctype_update
-		on_doctype_update()
 
 		indices = frappe.db.sql("show index from tabItem", as_dict=1)
 		expected_columns = {"item_code", "item_name", "item_group", "route"}

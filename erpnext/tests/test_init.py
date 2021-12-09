@@ -1,9 +1,6 @@
-from __future__ import unicode_literals
-
 import unittest
 
 import frappe
-from six.moves import range
 
 from erpnext import encode_company_abbr
 
