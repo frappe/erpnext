@@ -76,10 +76,10 @@ body:
     validations:
       required: true
 
-  - type: Installation method
+  - type: dropdown
     id: install-method
     attributes:
-      label: Module
+      label: Installation method
       options:
         - docker
         - easy-install
