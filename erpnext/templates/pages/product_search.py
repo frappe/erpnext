@@ -20,7 +20,7 @@ from erpnext.e_commerce.redisearch import (
 	is_search_module_loaded,
 =======
 
-from erpnext.e_commerce.redisearch import (
+from erpnext.e_commerce.redisearch_utils import (
 	WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE,
 >>>>>>> 9fb61efba8 (chore: Fix imports and formatting (linter) & Sider (unused import))
 	WEBSITE_ITEM_INDEX,
