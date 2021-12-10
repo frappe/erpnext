@@ -6,15 +6,15 @@
 
 frappe.ui.form.on('Quotation', {
 	setup: function(frm) {
-		frm.custom_make_buttons = {
-			'Sales Order': 'Make Sales Order'
-		},
-
 		frm.set_query("item_code", "items", function(doc, cdt, cdn) {
 			return {
 				filters:{"default_company": doc.company}
 			};
 		});
+		
+		frm.custom_make_buttons = {
+			'Sales Order': 'Make Sales Order'
+		},		
 
 		frm.set_query("quotation_to", function() {
 			return{
