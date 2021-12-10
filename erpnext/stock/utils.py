@@ -12,6 +12,7 @@ import erpnext
 
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
+class PendingRepostingError(frappe.ValidationError): pass
 
 def get_stock_value_from_bin(warehouse=None, item_code=None):
 	values = {}
@@ -431,7 +432,7 @@ def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool
 	if reposting_pending and throw_error:
 		msg = _("Stock/Accounts can not be frozen as processing of backdated entries is going on. Please try again later.")
 		frappe.msgprint(msg,
-				raise_exception=frappe.ValidationError,
+				raise_exception=PendingRepostingError,
 				title="Stock Reposting Ongoing",
 				indicator="red",
 				primary_action={
