@@ -467,6 +467,10 @@ class StockEntry(StockController):
 		return exists
 
 	def update_task_items(self):
+		task_name = frappe.db.get_value('Task Item', self.items[0].task_item, 'parent')
+		task = frappe.get_doc('Task', task_name)
+		req_qty = {item.name : item.qty for item in task.items}
+
 		from frappe.query_builder.functions import Coalesce, Sum
 		sed = frappe.qb.DocType('Stock Entry Detail')
 		se = frappe.qb.DocType('Stock Entry')
@@ -492,6 +496,11 @@ class StockEntry(StockController):
 					& (sed.docstatus == 1)
 					& (se.stock_entry_type == stock_entry_type)
 				).run(as_dict=1)
+
+			if update_qty[0].qty > req_qty[item.task_item]:
+				frappe.throw(_("The total Issue / Transfer quantity {0} in Task {1}  \
+					cannot be greater than requested quantity {2} for Item {3}")
+					.format(update_qty[0].qty, task_name, req_qty[item.task_item], item.item_code))
 
 			frappe.db.set_value('Task Item', item.task_item, update_field, update_qty[0].qty)
 
