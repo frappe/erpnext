@@ -102,6 +102,12 @@ def get_data():
 					"name": "Item Price Stock",
 					"doctype": "Item",
 					"dependencies": ["Item"],
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Type Price List",
+					"doctype": "Price List"
 				}
 			]
 		},

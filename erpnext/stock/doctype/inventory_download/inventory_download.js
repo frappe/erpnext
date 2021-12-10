@@ -13,5 +13,13 @@ frappe.ui.form.on('Inventory Download', {
 				filters:{'company': doc.company}
 			}
 		}
-	}
+	},
+	
+	setup: function(frm) {
+		frm.set_query("item_code", "items", function(doc, cdt, cdn) {
+			return {
+				filters:{"default_company": doc.company}
+			};
+		});
+    },
 });
