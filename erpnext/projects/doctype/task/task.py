@@ -220,14 +220,20 @@ class Task(NestedSet):
 		if isinstance(item, dict):
 			item = frappe._dict(item)
 
-		from erpnext.stock.doctype.stock_entry.stock_entry import get_warehouse_details
-		args = frappe._dict(
-			{"item_code": item.item_code, "company": self.company,
-			"project": self.project, "uom": item.stock_uom, 'warehouse': item.source_warehouse})
-		args['posting_date'] = frappe.utils.nowdate()
-		args['posting_time'] = frappe.utils.nowtime()
-		stock_and_rate = get_warehouse_details(args)
-		return stock_and_rate.get('basic_rate')
+		args = frappe._dict({
+			'item_code': item.item_code,
+			'warehouse': item.get('warehouse'),
+			'posting_date': frappe.utils.nowdate(),
+			'posting_time': frappe.utils.nowtime(),
+			'company': self.company,
+			'qty': -1 * flt(item.qty),
+			'voucher_type': 'Stock Entry',
+			'allow_zero_valuation': 1,
+		})
+		from erpnext.stock.utils import get_incoming_rate
+		in_rate = get_incoming_rate(args)
+
+		return in_rate
 
 	@frappe.whitelist()
 	def get_items(self):

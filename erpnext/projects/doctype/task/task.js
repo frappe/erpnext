@@ -159,7 +159,12 @@ frappe.ui.form.on("Task Item", {
 			doc: frm.doc,
 			method: "get_basic_rate",
 			args: {
-				item: {"item_code": row.item_code, "stock_uom": row.uom, "source_warehouse": row.warehouse}
+				item: {
+					"item_code": row.item_code,
+					"stock_uom": row.uom,
+					"warehouse": row.warehouse,
+					"qty": row.qty
+				}
 			},
 			callback: function (r) {
 				frappe.model.set_value(cdt, cdn, 'basic_rate', r.message);
