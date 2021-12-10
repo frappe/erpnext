@@ -2,8 +2,8 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Ledger Merge', {
-  setup: function(frm) {
-    frappe.realtime.on('ledger_merge_refresh', ({ ledger_merge }) => {
+	setup: function(frm) {
+		frappe.realtime.on('ledger_merge_refresh', ({ ledger_merge }) => {
 			if (ledger_merge !== frm.doc.name) return;
 			frm.refresh();
 		});
@@ -11,57 +11,54 @@ frappe.ui.form.on('Ledger Merge', {
 		frappe.realtime.on('ledger_merge_progress', data => {
 			if (data.ledger_merge !== frm.doc.name) return;
 			let message = __('Merging {0} of {1}', [data.current, data.total]);
-      let percent = Math.floor((data.current * 100) / data.total);
+			let percent = Math.floor((data.current * 100) / data.total);
 			frm.dashboard.show_progress(__('Merge Progress'), percent, message);
 			frm.page.set_indicator(__('In Progress'), 'orange');
 		});
 
-    frm.set_query("account", function(doc) {
-      if (!doc.company) frappe.throw(__('Please set Company'));
-      if (!doc.root_type) frappe.throw(__('Please set Root Type'));
-      return {
-        filters: {
-          is_group: 0,
-          root_type: doc.root_type,
-          company: doc.company
-        }
-      }
-    });
-
-    frm.set_query('account', 'merge_accounts', function(doc, cdt, cdn) {
-      if (!doc.company) frappe.throw(__('Please set Company'));
-      if (!doc.root_type) frappe.throw(__('Please set Root Type'));
-      if (!doc.account) frappe.throw(__('Please set Account'));
+		frm.set_query("account", function(doc) {
+			if (!doc.company) frappe.throw(__('Please set Company'));
+			if (!doc.root_type) frappe.throw(__('Please set Root Type'));
 			return {
-        filters: {
-          is_group: 0,
-          root_type: doc.root_type,
-          name: ["!=", doc.account],
-          company: doc.company
-        }
-      }
+				filters: {
+					is_group: 0,
+					root_type: doc.root_type,
+					company: doc.company
+				}
+			}
 		});
-  },
 
-	refresh: function(frm) {
-    frm.page.hide_icon_group();
-    frm.trigger('set_merge_status');
+		frm.set_query('account', 'merge_accounts', function(doc, cdt, cdn) {
+			if (!doc.company) frappe.throw(__('Please set Company'));
+			if (!doc.root_type) frappe.throw(__('Please set Root Type'));
+			if (!doc.account) frappe.throw(__('Please set Account'));
+			return {
+				filters: {
+					is_group: 0,
+					root_type: doc.root_type,
+					name: ["!=", doc.account],
+					company: doc.company
+				}
+			}
+		});
 	},
 
-  onload_post_render: function(frm) {
+	refresh: function(frm) {
+		frm.page.hide_icon_group();
+		frm.trigger('set_merge_status');
+	},
+
+	onload_post_render: function(frm) {
 		frm.trigger('update_primary_action');
 	},
 
-  after_save: function(frm) {
-    setTimeout(() => {
-      frm.trigger('update_primary_action');
-		}, 750);
+	after_save: function(frm) {
+		setTimeout(() => {
+			frm.trigger('update_primary_action');
+		}, 500);
 	},
 
 	update_primary_action: function(frm) {
-    console.log(!frm.is_new());
-    console.log(frm.is_dirty());
-    console.log("-");
 		if (frm.is_dirty()) {
 			frm.enable_save();
 			return;
@@ -69,8 +66,7 @@ frappe.ui.form.on('Ledger Merge', {
 		frm.disable_save();
 		if (frm.doc.status !== 'Success') {
 			if (!frm.is_new()) {
-				let label =
-					frm.doc.status === 'Pending' ? __('Start Merge') : __('Retry');
+				let label = frm.doc.status === 'Pending' ? __('Start Merge') : __('Retry');
 				frm.page.set_primary_action(label, () => frm.events.start_merge(frm));
 			} else {
 				frm.page.set_primary_action(__('Save'), () => frm.save());
@@ -78,8 +74,8 @@ frappe.ui.form.on('Ledger Merge', {
 		}
 	},
 
-  start_merge: function(frm) {
-    frm.call({
+	start_merge: function(frm) {
+		frm.call({
 			method: 'form_start_merge',
 			args: { docname: frm.doc.name },
 			btn: frm.page.btn_primary
@@ -88,37 +84,39 @@ frappe.ui.form.on('Ledger Merge', {
 				frm.disable_save();
 			}
 		});
-  },
+	},
 
-  set_merge_status: function(frm) {
-    if (frm.doc.status == "Pending") return;
-    let successful_records = 0;
-    frm.doc.merge_accounts.forEach((row) => {
+	set_merge_status: function(frm) {
+		if (frm.doc.status == "Pending") return;
+		let successful_records = 0;
+		frm.doc.merge_accounts.forEach((row) => {
 			if(row.merged) successful_records += 1;
 		});
-    let message_args = [successful_records, frm.doc.merge_accounts.length];
-    frm.dashboard.set_headline(__('Successfully merged {0} out of {1}.', message_args));
-  },
+		let message_args = [successful_records, frm.doc.merge_accounts.length];
+		frm.dashboard.set_headline(__('Successfully merged {0} out of {1}.', message_args));
+	},
 
-  root_type: function(frm) {
-    frm.set_value('account', '');
-    frm.set_value('merge_accounts', []);
-  },
+	root_type: function(frm) {
+		frm.set_value('account', '');
+		frm.set_value('merge_accounts', []);
+	},
 
-  company: function(frm) {
-    frm.set_value('account', '');
-    frm.set_value('merge_accounts', []);
-  }
+	company: function(frm) {
+		frm.set_value('account', '');
+		frm.set_value('merge_accounts', []);
+	}
 });
 
 frappe.ui.form.on('Ledger Merge Accounts', {
-    merge_accounts_add: function(frm, cdt, cdn) {
-      frm.trigger('update_primary_action');
-    },
-    merge_accounts_remove: function(frm, cdt, cdn) {
-      frm.trigger('update_primary_action');
-    },
-    account: function(frm, cdt, cdn) {
-      frm.trigger('update_primary_action');
-    }
-})
+	merge_accounts_add: function(frm, cdt, cdn) {
+		frm.trigger('update_primary_action');
+	},
+
+	merge_accounts_remove: function(frm, cdt, cdn) {
+		frm.trigger('update_primary_action');
+	},
+
+	account: function(frm, cdt, cdn) {
+		frm.trigger('update_primary_action');
+	}
+});
