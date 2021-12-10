@@ -11,6 +11,7 @@ class InventoryDownload(Document):
 	def validate(self):
 		if self.docstatus == 1:
 			self.apply_inventory_download()
+			self.set_valuation_rate()
 	
 	def on_cancel(self):
 		self.apply_inventory_download_cancel()
@@ -29,7 +30,7 @@ class InventoryDownload(Document):
 				else:
 					frappe.throw(_("There is not enough quantity to download in stock."))
 			else:
-				frappe.throw(_("This product does not exist in inventory with the selected warehouse."))
+				frappe.throw(_("This {} product does not exist in inventory with the selected warehouse.".format(item.item_code)))
 	
 	def apply_inventory_download_cancel(self):
 		items = frappe.get_all("Inventory Download Detail", ["item_code", "qty"], filters = {"parent": self.name})
@@ -43,3 +44,13 @@ class InventoryDownload(Document):
 				doc.save()
 			else:
 				frappe.throw(_("This product does not exist in inventory with the selected warehouse."))
+	
+	def set_valuation_rate(self):
+		
+		for item in self.get("items"):
+			stock = frappe.get_all("Stock Ledger Entry", ["*"], filters = {"item_code": item.item_code})
+
+			# stock_reversed = list(reversed(stock))
+
+			doc = frappe.get_doc("Inventory Download Detail", item.name)
+			doc.db_set('valuation_rate', stock[0].valuation_rate, update_modified=False)
