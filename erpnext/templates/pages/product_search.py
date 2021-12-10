@@ -5,7 +5,7 @@ import frappe
 from frappe.utils import cint, cstr
 from redisearch import AutoCompleter, Client, Query
 
-from erpnext.e_commerce.redisearch import (
+from erpnext.e_commerce.rsearch import (
 	WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE,
 	WEBSITE_ITEM_INDEX,
 	WEBSITE_ITEM_NAME_AUTOCOMPLETE,
