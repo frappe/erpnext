@@ -6,7 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import comma_and, flt, unique
 
-from erpnext.e_commerce.redisearch import (
+from erpnext.e_commerce.redisearch_utils import (
 	create_website_items_index,
 	get_indexable_web_fields,
 	is_search_module_loaded,
