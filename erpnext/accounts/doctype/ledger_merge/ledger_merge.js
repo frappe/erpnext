@@ -3,25 +3,17 @@
 
 frappe.ui.form.on('Ledger Merge', {
   setup: function(frm) {
-    frappe.realtime.on('data_import_refresh', ({ ledger_merge }) => {
+    frappe.realtime.on('ledger_merge_refresh', ({ ledger_merge }) => {
 			if (ledger_merge !== frm.doc.name) return;
 			frm.refresh();
 		});
 
-		frappe.realtime.on('data_import_progress', data => {
-			if (data.data_import !== frm.doc.name) return;
+		frappe.realtime.on('ledger_merge_progress', data => {
+			if (data.ledger_merge !== frm.doc.name) return;
 			let message = __('Merging {0} of {1}', [data.current, data.total]);
       let percent = Math.floor((data.current * 100) / data.total);
 			frm.dashboard.show_progress(__('Merge Progress'), percent, message);
 			frm.page.set_indicator(__('In Progress'), 'orange');
-
-			// hide progress when complete
-			if (data.current === data.total) {
-				setTimeout(() => {
-					frm.dashboard.hide();
-					frm.refresh();
-				}, 2000);
-			}
 		});
 
     frm.set_query("account", function(doc) {
@@ -61,10 +53,15 @@ frappe.ui.form.on('Ledger Merge', {
 	},
 
   after_save: function(frm) {
-		frm.trigger('update_primary_action');
+    setTimeout(() => {
+      frm.trigger('update_primary_action');
+		}, 750);
 	},
 
 	update_primary_action: function(frm) {
+    console.log(!frm.is_new());
+    console.log(frm.is_dirty());
+    console.log("-");
 		if (frm.is_dirty()) {
 			frm.enable_save();
 			return;

@@ -43,27 +43,28 @@ def start_merge(docname):
 	successful_merges = 0
 	total = len(ledger_merge.merge_accounts)
 	for row in ledger_merge.merge_accounts:
-		try:
-			merge_account(row.account, ledger_merge.account, 0, ledger_merge.root_type, ledger_merge.company)
-			row.db_set('merged', 1)
-			frappe.db.commit()
-			successful_merges += 1
-			frappe.publish_realtime("ledger_merge_progress", {
-					"ledger_merge": ledger_merge.name,
-					"current": successful_merges,
-					"total": total
-				}
-			)
-		except Exception:
-			frappe.db.rollback()
-			ledger_merge.db_set("status", "Error")
-			frappe.log_error(title=ledger_merge.name)
-		finally:
-			if successful_merges == total:
-				ledger_merge.db_set('status', 'Success')
-			elif successful_merges > 0:
-				ledger_merge.db_set('status', 'Partial Success')
-			else:
-				ledger_merge.db_set('status', 'Error')
+		if not row.merged:
+			try:
+				merge_account(row.account, ledger_merge.account, 0, ledger_merge.root_type, ledger_merge.company)
+				row.db_set('merged', 1)
+				frappe.db.commit()
+				successful_merges += 1
+				frappe.publish_realtime("ledger_merge_progress", {
+						"ledger_merge": ledger_merge.name,
+						"current": successful_merges,
+						"total": total
+					}
+				)
+			except Exception:
+				frappe.db.rollback()
+				ledger_merge.db_set("status", "Error")
+				frappe.log_error(title=ledger_merge.name)
+			finally:
+				if successful_merges == total:
+					ledger_merge.db_set('status', 'Success')
+				elif successful_merges > 0:
+					ledger_merge.db_set('status', 'Partial Success')
+				else:
+					ledger_merge.db_set('status', 'Error')
 
 	frappe.publish_realtime("ledger_merge_refresh", {"ledger_merge": ledger_merge.name})

@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "format:{account} merger on {creation}",
+ "autoname": "format:{account_name} merger on {creation}",
  "creation": "2021-12-09 15:38:04.556584",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -9,6 +9,7 @@
   "section_break_1",
   "root_type",
   "account",
+  "account_name",
   "column_break_3",
   "company",
   "status",
@@ -68,11 +69,21 @@
    "options": "\nAsset\nLiability\nIncome\nExpense\nEquity",
    "reqd": 1,
    "set_only_once": 1
+  },
+  {
+   "depends_on": "account",
+   "fetch_from": "account.account_name",
+   "fetch_if_empty": 1,
+   "fieldname": "account_name",
+   "fieldtype": "Data",
+   "label": "Account Name",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "hide_toolbar": 1,
  "links": [],
- "modified": "2021-12-09 18:35:30.720538",
+ "modified": "2021-12-09 23:41:11.097097",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Ledger Merge",
