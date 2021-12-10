@@ -99,7 +99,7 @@ class DeliveryPlanning(Document):
 			dp_item.item_code = i.item_code
 			# dp_item.item_name = i.item_name
 			dp_item.item_dname = i.dname
-			# dp_item.rate = i.rate
+			dp_item.rate = i.rate
 			if i.delivered_qty > 0:
 				dp_item.ordered_qty = abs(i.qty - i.delivered_qty)
 				dp_item.pending_qty = 0
@@ -623,23 +623,42 @@ class DeliveryPlanning(Document):
 													"pick_list",
 													"item_dname",
 													"qty_to_deliver",
-													"docstatus"]
+													"docstatus",
+													"item_dname"]
 											)
 
 				for i in item:
 					if(i.pick_list):
 						pick_list = i.pick_list
 					salesno = i.sales_order
-					dnote.append('items', {
-						'item_code': i.item_code,
-						'warehouse': i.sorce_warehouse,
-						'qty': i.ordered_qty,
-						'stock_qty': i.ordered_qty,
-						'uom': i.uom,
-						'stock_uom': i.stock_uom,
-						'conversion_factor': i.conversion_factor,
-						'against_sales_order': i.sales_order
-					})
+					# so_item = {}
+					if i.item_dname:
+						so_item = frappe.get_doc("Sales Order Item", i.item_dname)
+
+						dnote.append('items', {
+							'item_code': i.item_code,
+							'warehouse': i.sorce_warehouse,
+							'qty': i.ordered_qty,
+							'stock_qty': i.ordered_qty,
+							'uom': so_item.uom,
+							'rate': so_item.rate,
+							'stock_uom': so_item.stock_uom,
+							'conversion_factor': i.conversion_factor,
+							'against_sales_order': i.sales_order
+						})
+
+					else: 
+							dnote.append('items', {
+							'item_code': i.item_code,
+							'warehouse': i.sorce_warehouse,
+							'qty': i.ordered_qty,
+							'stock_qty': i.ordered_qty,
+							'uom': i.uom,
+							'rate': i.rate,
+							'stock_uom': i.stock_uom,
+							'conversion_factor': i.conversion_factor,
+							'against_sales_order': i.sales_order
+						})	
 
 				discount = frappe.get_doc('Sales Order', salesno)
 
