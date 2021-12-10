@@ -21,7 +21,6 @@
    "depends_on": "root_type",
    "fieldname": "account",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Account",
    "options": "Account",
    "reqd": 1,
@@ -58,6 +57,7 @@
   {
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Status",
    "options": "Pending\nSuccess\nPartial Success\nError",
    "read_only": 1
@@ -83,7 +83,7 @@
  ],
  "hide_toolbar": 1,
  "links": [],
- "modified": "2021-12-09 23:41:11.097097",
+ "modified": "2021-12-10 15:28:34.520588",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Ledger Merge",

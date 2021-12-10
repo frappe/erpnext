@@ -31,7 +31,6 @@
   },
   {
    "columns": 4,
-   "fetch_from": "account.account_name",
    "fieldname": "account_name",
    "fieldtype": "Data",
    "label": "Account Name",
@@ -42,7 +41,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-12-09 23:19:15.193921",
+ "modified": "2021-12-10 15:27:24.477139",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Ledger Merge Accounts",
