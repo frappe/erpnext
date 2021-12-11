@@ -18,7 +18,6 @@
   "transaction_date",
   "valid_till",
   "quotation_number",
-  "quotation_date",
   "amended_from",
   "address_section",
   "supplier_address",
@@ -801,12 +800,6 @@
    "label": "Valid Till"
   },
   {
-   "depends_on": "eval: doc.quotation_number",
-   "fieldname": "quotation_date",
-   "fieldtype": "Date",
-   "label": "Quotation Date"
-  },
-  {
    "fieldname": "quotation_number",
    "fieldtype": "Data",
    "label": "Quotation Number"
@@ -817,7 +810,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-12-11 05:24:55.188014",
+ "modified": "2021-12-11 06:43:20.924080",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
