@@ -93,10 +93,10 @@ class PeriodClosingVoucher(AccountsController):
 					"account": self.closing_account_head,
 					"cost_center": cost_center,
 					"finance_book": acc.finance_book,
-					#"account_currency": acc.account_currency,
-					#"debit_in_account_currency": abs(flt(acc.bal_in_account_currency)) if flt(acc.bal_in_account_currency) > 0 else 0,
+					"account_currency": acc.account_currency,
+					"debit_in_account_currency": abs(flt(acc.bal_in_account_currency)) if flt(acc.bal_in_account_currency) > 0 else 0,
 					"debit": abs(flt(acc.bal_in_company_currency)) if flt(acc.bal_in_company_currency) > 0 else 0,
-					#"credit_in_account_currency": abs(flt(acc.bal_in_account_currency)) if flt(acc.bal_in_account_currency) < 0 else 0,
+					"credit_in_account_currency": abs(flt(acc.bal_in_account_currency)) if flt(acc.bal_in_account_currency) < 0 else 0,
 					"credit": abs(flt(acc.bal_in_company_currency)) if flt(acc.bal_in_company_currency) < 0 else 0
 				}, item=acc)
 
