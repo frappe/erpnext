@@ -1,7 +1,10 @@
 ---
 name: Feature request
 about: Suggest an idea to improve ERPNext
+title: ''
 labels: feature-request
+assignees: ''
+
 ---
 
 <!--
