@@ -1,6 +1,7 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+import os
 import unittest
 
 import frappe
@@ -80,7 +81,7 @@ class TestExitInterview(unittest.TestCase):
 
 
 def create_exit_interview(employee, save=True):
-	interviewer = create_user('test_interviewer1@example.com')
+	interviewer = create_user('test_exit_interviewer@example.com')
 
 	doc = frappe.get_doc({
 		'doctype': 'Exit Interview',
