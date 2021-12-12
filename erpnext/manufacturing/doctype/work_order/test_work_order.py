@@ -29,6 +29,9 @@ class TestWorkOrder(ERPNextTestCase):
 		self.warehouse = '_Test Warehouse 2 - _TC'
 		self.item = '_Test Item'
 
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def check_planned_qty(self):
 
 		planned0 = frappe.db.get_value("Bin", {"item_code": "_Test FG Item",
