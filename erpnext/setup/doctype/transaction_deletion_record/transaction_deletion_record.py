@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-from frappe.utils import cint
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
 from frappe.desk.notifications import clear_notifications
+from frappe.model.document import Document
+from frappe.utils import cint
+
 
 class TransactionDeletionRecord(Document):
 	def validate(self):

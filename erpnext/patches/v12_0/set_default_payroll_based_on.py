@@ -1,5 +1,5 @@
-from __future__ import unicode_literals
 import frappe
+
 
 def execute():
 	frappe.reload_doc("hr", "doctype", "hr_settings")

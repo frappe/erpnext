@@ -1,15 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies and Contributors
 # See license.txt
-from __future__ import unicode_literals
-
-import frappe
-import unittest
 
 import datetime
-from frappe.utils import today, to_timedelta
+import unittest
+
+import frappe
+from frappe.utils import to_timedelta, today
+
 from erpnext.education.utils import OverlapError
-from frappe.utils.make_random import get_random
 
 # test_records = frappe.get_test_records('Course Schedule')
 

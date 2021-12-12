@@ -1,13 +1,16 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
+import json
+import os
+import random
 
 import frappe
-from frappe.utils.make_random import add_random_children
 import frappe.utils
-import random, os, json
 from frappe import _
+from frappe.utils.make_random import add_random_children
+
 
 def make_sample_data(domains, make_dependent = False):
 	"""Create a few opportunities, quotes, material requests, issues, todos, projects

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Tue Jun 26 15:42:07 2012
 
@@ -6,10 +5,9 @@ Borrowed from https://github.com/timotheus/ebaysdk-python
 
 @author: pierre
 """
-from __future__ import unicode_literals
 
-import xml.etree.ElementTree as ET
 import re
+import xml.etree.ElementTree as ET
 
 
 class object_dict(dict):
@@ -88,7 +86,7 @@ class xml2dict(object):
 		ns = http://cs.sfsu.edu/csc867/myscheduler
 		name = patients
 		"""
-		result = re.compile("\{(.*)\}(.*)").search(tag)
+		result = re.compile(r"\{(.*)\}(.*)").search(tag)
 		if result:
 			value.namespace, tag = result.groups()
 

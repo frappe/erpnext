@@ -1,19 +1,21 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import frappe
-import unittest
+from frappe import _dict
+
 test_dependencies = ['Item', 'Sales Invoice', 'Stock Entry', 'Batch']
 
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
-from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation \
-		import EmptyStockReconciliationItemsError
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+	EmptyStockReconciliationItemsError,
+)
+from erpnext.tests.utils import ERPNextTestCase
 
-class TestPickList(unittest.TestCase):
+
+class TestPickList(ERPNextTestCase):
 
 	def test_pick_list_picks_warehouse_for_each_item(self):
 		try:
@@ -352,6 +354,39 @@ class TestPickList(unittest.TestCase):
 		pick_list.cancel()
 		sales_order.cancel()
 		purchase_receipt.cancel()
+
+	def test_pick_list_grouping_before_print(self):
+		def _compare_dicts(a, b):
+			"compare dicts but ignore missing keys in `a`"
+			for key, value in a.items():
+				self.assertEqual(b.get(key), value, msg=f"{key} doesn't match")
+
+		# nothing should be grouped
+		pl = frappe.get_doc(doctype="Pick List", group_same_items=True, locations=[
+			_dict(item_code="A", warehouse="X", qty=1, picked_qty=2),
+			_dict(item_code="B", warehouse="X", qty=1, picked_qty=2),
+			_dict(item_code="A", warehouse="Y", qty=1, picked_qty=2),
+			_dict(item_code="B", warehouse="Y", qty=1, picked_qty=2),
+		])
+		pl.before_print()
+		self.assertEqual(len(pl.locations), 4)
+
+		# grouping should halve the number of items
+		pl = frappe.get_doc(doctype="Pick List", group_same_items=True, locations=[
+			_dict(item_code="A", warehouse="X", qty=5, picked_qty=1),
+			_dict(item_code="B", warehouse="Y", qty=4, picked_qty=2),
+			_dict(item_code="A", warehouse="X", qty=3, picked_qty=2),
+			_dict(item_code="B", warehouse="Y", qty=2, picked_qty=2),
+		])
+		pl.before_print()
+		self.assertEqual(len(pl.locations), 2)
+
+		expected_items = [
+			_dict(item_code="A", warehouse="X", qty=8, picked_qty=3),
+			_dict(item_code="B", warehouse="Y", qty=6, picked_qty=4),
+		]
+		for expected_item, created_item in zip(expected_items, pl.locations):
+			_compare_dicts(expected_item, created_item)
 
 	# def test_pick_list_skips_items_in_expired_batch(self):
 	# 	pass

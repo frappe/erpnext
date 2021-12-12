@@ -1,10 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import flt, getdate, nowdate
 from frappe import _
+from frappe.utils import flt, getdate, nowdate
+
 
 def execute(filters=None):
 	if not filters: filters = {}

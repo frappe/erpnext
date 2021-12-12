@@ -1,11 +1,13 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import frappe
 import copy
+
+import frappe
 from frappe import _
-from six import iteritems
+
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 
 def execute(filters=None):
 	columns, data = [], []
@@ -40,7 +42,7 @@ def get_incorrect_serial_nos(serial_nos_data):
 
 	total_value = frappe._dict({'qty': 0, 'valuation_rate': 0, 'serial_no': frappe.bold(_('Balance'))})
 
-	for serial_no, data in iteritems(serial_nos_data):
+	for serial_no, data in serial_nos_data.items():
 		total_dict = frappe._dict({'qty': 0, 'valuation_rate': 0, 'serial_no': frappe.bold(_('Total'))})
 
 		if check_incorrect_serial_data(data, total_dict):

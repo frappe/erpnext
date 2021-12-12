@@ -1,5 +1,6 @@
 import frappe
 
+
 def execute():
 	frappe.delete_doc('DocType', 'E Invoice Settings', ignore_missing=True)
 	frappe.delete_doc('DocType', 'E Invoice User', ignore_missing=True)

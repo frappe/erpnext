@@ -1,11 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt, nowdate, getdate
 from frappe import _
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import flt, getdate, nowdate
 
 from erpnext.controllers.selling_controller import SellingController
 
@@ -30,6 +30,9 @@ class Quotation(SellingController):
 		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
+
+		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+		make_packing_list(self)
 
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
@@ -65,7 +68,7 @@ class Quotation(SellingController):
 		opp.set_status(status=status, update=True)
 
 	@frappe.whitelist()
-	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
+	def declare_enquiry_lost(self, lost_reasons_list, competitors, detailed_reason=None):
 		if not self.has_sales_order():
 			get_lost_reasons = frappe.get_list('Quotation Lost Reason',
 			fields = ["name"])
@@ -80,6 +83,9 @@ class Quotation(SellingController):
 					self.append('lost_reasons', reason)
 				else:
 					frappe.throw(_("Invalid lost reason {0}, please create a new lost reason").format(frappe.bold(reason.get('lost_reason'))))
+
+			for competitor in competitors:
+				self.append('competitors', competitor)
 
 			self.update_opportunity('Lost')
 			self.update_lead()

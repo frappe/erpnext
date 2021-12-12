@@ -1,17 +1,20 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe import throw, _
 import frappe.defaults
-from frappe.utils import cint, flt, get_fullname, cstr
+from frappe import _, throw
 from frappe.contacts.doctype.address.address import get_address_display
-from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_shopping_cart_settings
-from frappe.utils.nestedset import get_root_of
-from erpnext.accounts.utils import get_account_name
-from erpnext.utilities.product import get_qty_in_stock
 from frappe.contacts.doctype.contact.contact import get_contact_name
+from frappe.utils import cint, cstr, flt, get_fullname
+from frappe.utils.nestedset import get_root_of
+
+from erpnext.accounts.utils import get_account_name
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import (
+	get_shopping_cart_settings,
+)
+from erpnext.utilities.product import get_qty_in_stock
 
 
 class WebsitePriceListMissingError(frappe.ValidationError):
@@ -191,7 +194,9 @@ def add_new_address(doc):
 def create_lead_for_item_inquiry(lead, subject, message):
 	lead = frappe.parse_json(lead)
 	lead_doc = frappe.new_doc('Lead')
-	lead_doc.update(lead)
+	for fieldname in ("lead_name", "company_name", "email_id", "phone"):
+		lead_doc.set(fieldname, lead.get(fieldname))
+
 	lead_doc.set('lead_owner', '')
 
 	if not frappe.db.exists('Lead Source', 'Product Inquiry'):
@@ -199,6 +204,7 @@ def create_lead_for_item_inquiry(lead, subject, message):
 			'doctype': 'Lead Source',
 			'source_name' : 'Product Inquiry'
 		}).insert(ignore_permissions=True)
+
 	lead_doc.set('source', 'Product Inquiry')
 
 	try:

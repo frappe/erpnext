@@ -1,15 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
 
+import frappe
+from frappe import _
+from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, getdate
 
-from frappe import _
-from frappe.model.mapper import get_mapped_doc
-from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name, validate_active_employee
+
 
 class Appraisal(Document):
 	def validate(self):

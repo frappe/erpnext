@@ -1,12 +1,13 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe
+
 import json
-from six import iteritems
+
+import frappe
 from frappe import _, scrub
 from frappe.utils import flt
+
 
 def execute(filters=None):
 	return IssueSummary(filters).run()
@@ -139,7 +140,7 @@ class IssueSummary(object):
 		self.data = []
 		self.get_summary_data()
 
-		for entity, data in iteritems(self.issue_summary_data):
+		for entity, data in self.issue_summary_data.items():
 			if self.filters.based_on == 'Customer':
 				row = {'customer': entity}
 			elif self.filters.based_on == 'Assigned To':

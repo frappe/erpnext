@@ -1,11 +1,10 @@
-
 # Copyright (c) 2019, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe.utils import add_to_date
+
 
 def execute():
 	frappe.reload_doc("manufacturing", "doctype", "work_order")

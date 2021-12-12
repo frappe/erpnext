@@ -1,28 +1,26 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # Basic interface to Amazon MWS
 # Based on http://code.google.com/p/amazon-mws-python
 # Extended to include finances object
-from __future__ import unicode_literals
 
-import urllib
-from urllib.parse import quote
+import base64
 import hashlib
 import hmac
-import base64
-import six
-from erpnext.erpnext_integrations.doctype.amazon_mws_settings import xml_utils
 import re
+from urllib.parse import quote
+
+from erpnext.erpnext_integrations.doctype.amazon_mws_settings import xml_utils
+
 try:
 	from xml.etree.ElementTree import ParseError as XMLError
 except ImportError:
 	from xml.parsers.expat import ExpatError as XMLError
-from time import strftime, gmtime
+
+from time import gmtime, strftime
 
 from requests import request
 from requests.exceptions import HTTPError
-
 
 __all__ = [
 	'Feeds',

@@ -1,16 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-from six import text_type
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-from frappe.utils import flt, cint, get_link_to_form
-from frappe.utils.jinja import render_template
+from frappe.utils import cint, flt, get_link_to_form
 from frappe.utils.data import add_days
-from six import string_types
+from frappe.utils.jinja import render_template
+
 
 class UnableToSelectBatchError(frappe.ValidationError):
 	pass
@@ -62,7 +61,7 @@ def _make_naming_series_key(prefix):
 	:param prefix: Naming series prefix gotten from Stock Settings
 	:return: The derived key. If no prefix is given, an empty string is returned
 	"""
-	if not text_type(prefix):
+	if not str(prefix):
 		return ''
 	else:
 		return prefix.upper() + '.#####'

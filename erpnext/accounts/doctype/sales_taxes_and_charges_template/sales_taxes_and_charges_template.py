@@ -1,12 +1,19 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt
 from frappe.model.document import Document
-from erpnext.controllers.accounts_controller import validate_taxes_and_charges, validate_inclusive_tax, validate_cost_center, validate_account_head
+from frappe.utils import flt
+
+from erpnext.controllers.accounts_controller import (
+	validate_account_head,
+	validate_cost_center,
+	validate_inclusive_tax,
+	validate_taxes_and_charges,
+)
+
 
 class SalesTaxesandChargesTemplate(Document):
 	def validate(self):

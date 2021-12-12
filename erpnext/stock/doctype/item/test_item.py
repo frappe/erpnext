@@ -1,21 +1,29 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import unittest
-import frappe
+
 import json
 
+import frappe
 from frappe.test_runner import make_test_objects
-from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
-	InvalidItemAttributeValueError, get_variant)
-from erpnext.stock.doctype.item.item import StockExistsForTemplate, InvalidBarcode
-from erpnext.stock.doctype.item.item import (get_uom_conv_factor, get_item_attribute,
-	validate_is_stock_item, get_timeline_data)
+
+from erpnext.controllers.item_variant import (
+	InvalidItemAttributeValueError,
+	ItemVariantExistsError,
+	create_variant,
+	get_variant,
+)
+from erpnext.stock.doctype.item.item import (
+	InvalidBarcode,
+	StockExistsForTemplate,
+	get_item_attribute,
+	get_timeline_data,
+	get_uom_conv_factor,
+	validate_is_stock_item,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
-from erpnext.tests.utils import change_settings
-
+from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]
@@ -43,8 +51,9 @@ def make_item(item_code, properties=None):
 
 	return item
 
-class TestItem(unittest.TestCase):
+class TestItem(ERPNextTestCase):
 	def setUp(self):
+		super().setUp()
 		frappe.flags.attribute_values = None
 
 	def get_item(self, idx):
@@ -221,6 +230,23 @@ class TestItem(unittest.TestCase):
 		})
 		for key, value in purchase_item_check.items():
 			self.assertEqual(value, purchase_item_details.get(key))
+
+	def test_item_default_validations(self):
+
+		with self.assertRaises(frappe.ValidationError) as ve:
+			make_item("Bad Item defaults", {
+				"item_group": "_Test Item Group",
+				"item_defaults": [{
+					"company": "_Test Company 1",
+					"default_warehouse": "_Test Warehouse - _TC",
+					"expense_account": "Stock In Hand - _TC",
+					"buying_cost_center": "_Test Cost Center - _TC",
+					"selling_cost_center": "_Test Cost Center - _TC",
+				}]
+			})
+
+		self.assertTrue("belong to company" in str(ve.exception).lower(),
+				msg="Mismatching company entities in item defaults should not be allowed.")
 
 	def test_item_attribute_change_after_variant(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
@@ -462,7 +488,7 @@ class TestItem(unittest.TestCase):
 			item_doc.save()
 
 		# Check values saved correctly
-		barcodes = frappe.get_list(
+		barcodes = frappe.get_all(
 			'Item Barcode',
 			fields=['barcode', 'barcode_type'],
 			filters={'parent': item_code})
@@ -508,8 +534,6 @@ class TestItem(unittest.TestCase):
 
 	def test_index_creation(self):
 		"check if index is getting created in db"
-		from erpnext.stock.doctype.item.item import on_doctype_update
-		on_doctype_update()
 
 		indices = frappe.db.sql("show index from tabItem", as_dict=1)
 		expected_columns = {"item_code", "item_name", "item_group", "route"}

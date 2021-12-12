@@ -1,12 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt, add_days
-from frappe.utils import get_datetime_str, nowdate
+from frappe.utils import add_days, flt, get_datetime_str, nowdate
+
 from erpnext import get_default_company
+
 
 def get_root_of(doctype):
 	"""Get root element of a DocType with a tree structure"""
@@ -52,6 +53,7 @@ def before_tests():
 
 	frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 0)
 	enable_all_roles_and_domains()
+	set_defaults_for_tests()
 
 	frappe.db.commit()
 
@@ -109,7 +111,7 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 			value = response.json()["result"]
 			cache.setex(name=key, time=21600, value=flt(value))
 		return flt(value)
-	except:
+	except Exception:
 		frappe.log_error(title="Get Exchange Rate")
 		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually").format(from_currency, to_currency, transaction_date))
 		return 0.0
@@ -125,6 +127,14 @@ def enable_all_roles_and_domains():
 	frappe.get_single('Domain Settings').set_active_domains(\
 		[d.name for d in domains])
 	add_all_roles_to('Administrator')
+
+def set_defaults_for_tests():
+	from frappe.utils.nestedset import get_root_of
+
+	selling_settings = frappe.get_single("Selling Settings")
+	selling_settings.customer_group = get_root_of("Customer Group")
+	selling_settings.territory = get_root_of("Territory")
+	selling_settings.save()
 
 
 def insert_record(records):

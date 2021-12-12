@@ -2,17 +2,15 @@
 
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe
-import json
+
 import copy
+import json
 import re
 
-from frappe import throw, _
-from frappe.utils import flt, cint, getdate
+import frappe
+from frappe import _, throw
 from frappe.model.document import Document
-
-from six import string_types
+from frappe.utils import cint, flt, getdate
 
 apply_on_dict = {"Item Code": "items",
 	"Item Group": "item_groups", "Brand": "brands"}
@@ -179,7 +177,7 @@ def apply_pricing_rule(args, doc=None):
 		}
 	"""
 
-	if isinstance(args, string_types):
+	if isinstance(args, str):
 		args = json.loads(args)
 
 	args = frappe._dict(args)
@@ -203,13 +201,13 @@ def apply_pricing_rule(args, doc=None):
 	serialized_items = dict()
 	for item_code, val in query_items:
 		serialized_items.setdefault(item_code, val)
-	
+
 	for item in item_list:
 		args_copy = copy.deepcopy(args)
 		args_copy.update(item)
 		data = get_pricing_rule_for_item(args_copy, item.get('price_list_rate'), doc=doc)
 		out.append(data)
-		
+
 		if serialized_items.get(item.get('item_code')) and not item.get("serial_no") and set_serial_nos_based_on_fifo and not args.get('is_return'):
 			out[0].update(get_serial_no_for_item(args_copy))
 
@@ -228,10 +226,14 @@ def get_serial_no_for_item(args):
 	return item_details
 
 def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=False):
-	from erpnext.accounts.doctype.pricing_rule.utils import (get_pricing_rules,
-			get_applied_pricing_rules, get_pricing_rule_items, get_product_discount_rule)
+	from erpnext.accounts.doctype.pricing_rule.utils import (
+		get_applied_pricing_rules,
+		get_pricing_rule_items,
+		get_pricing_rules,
+		get_product_discount_rule,
+	)
 
-	if isinstance(doc, string_types):
+	if isinstance(doc, str):
 		doc = json.loads(doc)
 
 	if doc:
@@ -267,7 +269,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 		for pricing_rule in pricing_rules:
 			if not pricing_rule: continue
 
-			if isinstance(pricing_rule, string_types):
+			if isinstance(pricing_rule, str):
 				pricing_rule = frappe.get_cached_doc("Pricing Rule", pricing_rule)
 				pricing_rule.apply_rule_on_other_items = get_pricing_rule_items(pricing_rule)
 
@@ -315,9 +317,8 @@ def update_args_for_pricing_rule(args):
 	if not (args.item_group and args.brand):
 		try:
 			args.item_group, args.brand = frappe.get_cached_value("Item", args.item_code, ["item_group", "brand"])
-		except TypeError:
-			# invalid item_code
-			return item_details
+		except frappe.DoesNotExistError:
+			return
 		if not args.item_group:
 			frappe.throw(_("Item Group not mentioned in item master for item {0}").format(args.item_code))
 
@@ -390,8 +391,10 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 				if pricing_rule else args.get(field, 0))
 
 def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
-	from erpnext.accounts.doctype.pricing_rule.utils import (get_applied_pricing_rules,
-		get_pricing_rule_items)
+	from erpnext.accounts.doctype.pricing_rule.utils import (
+		get_applied_pricing_rules,
+		get_pricing_rule_items,
+	)
 	for d in get_applied_pricing_rules(pricing_rules):
 		if not d or not frappe.db.exists("Pricing Rule", d): continue
 		pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
@@ -423,7 +426,7 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
 
 @frappe.whitelist()
 def remove_pricing_rules(item_list):
-	if isinstance(item_list, string_types):
+	if isinstance(item_list, str):
 		item_list = json.loads(item_list)
 
 	out = []

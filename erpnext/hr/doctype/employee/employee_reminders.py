@@ -3,15 +3,17 @@
 
 import frappe
 from frappe import _
-from frappe.utils import comma_sep, getdate, today, add_months, add_days
+from frappe.utils import add_days, add_months, comma_sep, getdate, today
+
 from erpnext.hr.doctype.employee.employee import get_all_employee_emails, get_employee_email
 from erpnext.hr.utils import get_holidays_for_employee
+
 
 # -----------------
 # HOLIDAY REMINDERS
 # -----------------
 def send_reminders_in_advance_weekly():
-	to_send_in_advance = int(frappe.db.get_single_value("HR Settings", "send_holiday_reminders") or 1)
+	to_send_in_advance = int(frappe.db.get_single_value("HR Settings", "send_holiday_reminders"))
 	frequency = frappe.db.get_single_value("HR Settings", "frequency")
 	if not (to_send_in_advance and frequency == "Weekly"):
 		return
@@ -19,7 +21,7 @@ def send_reminders_in_advance_weekly():
 	send_advance_holiday_reminders("Weekly")
 
 def send_reminders_in_advance_monthly():
-	to_send_in_advance = int(frappe.db.get_single_value("HR Settings", "send_holiday_reminders") or 1)
+	to_send_in_advance = int(frappe.db.get_single_value("HR Settings", "send_holiday_reminders"))
 	frequency = frappe.db.get_single_value("HR Settings", "frequency")
 	if not (to_send_in_advance and frequency == "Monthly"):
 		return
@@ -77,7 +79,7 @@ def send_holidays_reminder_in_advance(employee, holidays):
 # ------------------
 def send_birthday_reminders():
 	"""Send Employee birthday reminders if no 'Stop Birthday Reminders' is not set."""
-	to_send = int(frappe.db.get_single_value("HR Settings", "send_birthday_reminders") or 1)
+	to_send = int(frappe.db.get_single_value("HR Settings", "send_birthday_reminders"))
 	if not to_send:
 		return
 
@@ -155,6 +157,8 @@ def get_employees_having_an_event_today(event_type):
 			AND
 				MONTH({condition_column}) = MONTH(%(today)s)
 			AND
+				YEAR({condition_column}) < YEAR(%(today)s)
+			AND
 				`status` = 'Active'
 		""",
 		"postgres": f"""
@@ -164,6 +168,8 @@ def get_employees_having_an_event_today(event_type):
 				DATE_PART('day', {condition_column}) = date_part('day', %(today)s)
 			AND
 				DATE_PART('month', {condition_column}) = date_part('month', %(today)s)
+			AND
+				DATE_PART('year', {condition_column}) < date_part('year', %(today)s)
 			AND
 				"status" = 'Active'
 		""",
@@ -182,7 +188,7 @@ def get_employees_having_an_event_today(event_type):
 # --------------------------
 def send_work_anniversary_reminders():
 	"""Send Employee Work Anniversary Reminders if 'Send Work Anniversary Reminders' is checked"""
-	to_send = int(frappe.db.get_single_value("HR Settings", "send_work_anniversary_reminders") or 1)
+	to_send = int(frappe.db.get_single_value("HR Settings", "send_work_anniversary_reminders"))
 	if not to_send:
 		return
 

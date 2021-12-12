@@ -1,15 +1,16 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe
+
 import json
-from six import string_types
-from frappe.utils import getdate, get_datetime, rounded, flt, cint
-from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import days_in_year
+
+import frappe
+from frappe.utils import cint, flt, getdate
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.controllers.accounts_controller import AccountsController
 
 
@@ -106,7 +107,7 @@ def calculate_interest_and_amount(outstanding_amount, rate_of_interest, dunning_
 
 @frappe.whitelist()
 def get_dunning_letter_text(dunning_type, doc, language=None):
-	if isinstance(doc, string_types):
+	if isinstance(doc, str):
 		doc = json.loads(doc)
 	if language:
 		filters = {'parent': dunning_type, 'language': language}

@@ -1,22 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-
-from frappe.utils import flt, cint, nowdate
-
-from frappe import throw, _
-import frappe.defaults
-from frappe.utils import getdate
-from erpnext.controllers.buying_controller import BuyingController
-from erpnext.accounts.utils import get_account_currency
+from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
-from erpnext.buying.utils import check_on_hold_or_closed_status
+from frappe.utils import cint, flt, getdate, nowdate
+
+from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
-from six import iteritems
+from erpnext.buying.utils import check_on_hold_or_closed_status
+from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
 
 form_grid_templates = {
@@ -121,6 +117,10 @@ class PurchaseReceipt(BuyingController):
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
+
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
+		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
 
 
 	def validate_cwip_accounts(self):
@@ -254,7 +254,9 @@ class PurchaseReceipt(BuyingController):
 		return process_gl_map(gl_entries)
 
 	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
-		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_purchase_document_details
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
+			get_purchase_document_details,
+		)
 
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
@@ -359,7 +361,7 @@ class PurchaseReceipt(BuyingController):
 
 					# Amount added through landed-cos-voucher
 					if d.landed_cost_voucher_amount and landed_cost_entries:
-						for account, amount in iteritems(landed_cost_entries[(d.item_code, d.name)]):
+						for account, amount in landed_cost_entries[(d.item_code, d.name)].items():
 							account_currency = get_account_currency(account)
 							credit_amount = (flt(amount["base_amount"]) if (amount["base_amount"] or
 								account_currency!=self.company_currency) else flt(amount["amount"]))
@@ -842,7 +844,8 @@ def make_stock_entry(source_name,target_doc=None):
 			"doctype": "Stock Entry Detail",
 			"field_map": {
 				"warehouse": "s_warehouse",
-				"parent": "reference_purchase_receipt"
+				"parent": "reference_purchase_receipt",
+				"batch_no": "batch_no"
 			},
 		},
 	}, target_doc, set_missing_values)

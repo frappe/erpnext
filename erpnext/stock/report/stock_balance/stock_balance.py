@@ -1,16 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
-from frappe import _
-from frappe.utils import flt, cint, getdate, now, date_diff
-from erpnext.stock.utils import add_additional_uom_columns
-from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
-from erpnext.stock.utils import is_reposting_item_valuation_in_progress
-from erpnext.stock.report.stock_ageing.stock_ageing import get_fifo_queue, get_average_age
 
-from six import iteritems
+from operator import itemgetter
+
+import frappe
+from frappe import _
+from frappe.utils import cint, date_diff, flt, getdate
+
+import erpnext
+from erpnext.stock.report.stock_ageing.stock_ageing import get_average_age, get_fifo_queue
+from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
+from erpnext.stock.utils import add_additional_uom_columns, is_reposting_item_valuation_in_progress
+
 
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
@@ -44,7 +46,7 @@ def execute(filters=None):
 	data = []
 	conversion_factors = {}
 
-	_func = lambda x: x[1]
+	_func = itemgetter(1)
 
 	for (company, item, warehouse) in sorted(iwb_map):
 		if item_map.get(item):
@@ -198,7 +200,9 @@ def get_item_warehouse_map(filters, sle):
 
 		value_diff = flt(d.stock_value_difference)
 
-		if d.posting_date < from_date:
+		if d.posting_date < from_date or (d.posting_date == from_date
+			and d.voucher_type == "Stock Reconciliation" and
+			frappe.db.get_value("Stock Reconciliation", d.voucher_no, "purpose") == "Opening Stock"):
 			qty_dict.opening_qty += qty_diff
 			qty_dict.opening_val += value_diff
 
@@ -223,7 +227,7 @@ def filter_items_with_no_transactions(iwb_map, float_precision):
 		qty_dict = iwb_map[(company, item, warehouse)]
 
 		no_transactions = True
-		for key, val in iteritems(qty_dict):
+		for key, val in qty_dict.items():
 			val = flt(val, float_precision)
 			qty_dict[key] = val
 			if key != "val_rate" and val:
@@ -280,7 +284,7 @@ def get_item_details(items, sle, filters):
 
 	if filters.get('show_variant_attributes', 0) == 1:
 		variant_values = get_variant_values_for(list(item_details))
-		item_details = {k: v.update(variant_values.get(k, {})) for k, v in iteritems(item_details)}
+		item_details = {k: v.update(variant_values.get(k, {})) for k, v in item_details.items()}
 
 	return item_details
 

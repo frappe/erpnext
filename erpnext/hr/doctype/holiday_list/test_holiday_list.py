@@ -1,11 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
+
+import unittest
+from datetime import timedelta
 
 import frappe
-import unittest
 from frappe.utils import getdate
-from datetime import timedelta
 
 
 class TestHolidayList(unittest.TestCase):

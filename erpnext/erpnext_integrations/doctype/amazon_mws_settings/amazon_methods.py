@@ -1,12 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, time, dateutil, math, csv
-from six import StringIO
-import erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_api as mws
+
+import csv
+import math
+import time
+
+import dateutil
+import frappe
 from frappe import _
+from six import StringIO
+
+import erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_api as mws
+
 
 #Get and Create Products
 def get_products_details():
@@ -24,7 +30,7 @@ def get_products_details():
 
 			#Get ASIN Codes
 			string_io = StringIO(frappe.safe_decode(listings_response.original))
-			csv_rows = list(csv.reader(string_io, delimiter=str('\t')))
+			csv_rows = list(csv.reader(string_io, delimiter='\t'))
 			asin_list = list(set([row[1] for row in csv_rows[1:]]))
 			#break into chunks of 10
 			asin_chunked_list = list(chunks(asin_list, 10))

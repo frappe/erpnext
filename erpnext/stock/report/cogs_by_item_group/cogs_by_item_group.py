@@ -1,8 +1,8 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from collections import OrderedDict
 import datetime
+from collections import OrderedDict
 from typing import Dict, List, Tuple, Union
 
 import frappe
@@ -10,7 +10,6 @@ from frappe import _
 from frappe.utils import date_diff
 
 from erpnext.accounts.report.general_ledger.general_ledger import get_gl_entries
-
 
 Filters = frappe._dict
 Row = frappe._dict
@@ -43,13 +42,13 @@ def validate_filters(filters: Filters) -> None:
 def get_columns() -> Columns:
 	return [
 		{
-			'label': 'Item Group',
+			'label': _('Item Group'),
 			'fieldname': 'item_group',
 			'fieldtype': 'Data',
 			'width': '200'
 		},
 		{
-			'label': 'COGS Debit',
+			'label': _('COGS Debit'),
 			'fieldname': 'cogs_debit',
 			'fieldtype': 'Currency',
 			'width': '200'

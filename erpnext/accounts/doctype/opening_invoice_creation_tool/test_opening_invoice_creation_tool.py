@@ -1,14 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
-import frappe
 import unittest
 
+import frappe
 from frappe.cache_manager import clear_doctype_cache
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
-from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import get_temporary_opening_account
+
+from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import (
+	get_temporary_opening_account,
+)
 
 test_dependencies = ["Customer", "Supplier"]
 

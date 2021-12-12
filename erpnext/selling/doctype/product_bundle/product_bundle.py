@@ -1,14 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
 
+import frappe
+from frappe import _
+from frappe.model.document import Document
 from frappe.utils import get_link_to_form
 
-from frappe import _
-
-from frappe.model.document import Document
 
 class ProductBundle(Document):
 	def autoname(self):

@@ -345,26 +345,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	scan_barcode() {
-		let scan_barcode_field = this.frm.fields_dict["scan_barcode"];
-
-		let show_description = function(idx, exist = null) {
-			if (exist) {
-				frappe.show_alert({
-					message: __('Row #{0}: Qty increased by 1', [idx]),
-					indicator: 'green'
-				});
-			} else {
-				frappe.show_alert({
-					message: __('Row #{0}: Item added', [idx]),
-					indicator: 'green'
-				});
-			}
-		}
+		let me = this;
 
 		if(this.frm.doc.scan_barcode) {
 			frappe.call({
 				method: "erpnext.selling.page.point_of_sale.point_of_sale.search_for_serial_or_batch_or_barcode_number",
-				args: { search_value: this.frm.doc.scan_barcode }
+				args: {
+					search_value: this.frm.doc.scan_barcode
+				}
 			}).then(r => {
 				const data = r && r.message;
 				if (!data || Object.keys(data).length === 0) {
@@ -375,47 +363,94 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					return;
 				}
 
-				let cur_grid = this.frm.fields_dict.items.grid;
-
-				let row_to_modify = null;
-				const existing_item_row = this.frm.doc.items.find(d => d.item_code === data.item_code);
-				const blank_item_row = this.frm.doc.items.find(d => !d.item_code);
-
-				if (existing_item_row) {
-					row_to_modify = existing_item_row;
-				} else if (blank_item_row) {
-					row_to_modify = blank_item_row;
-				}
-
-				if (!row_to_modify) {
-					// add new row
-					row_to_modify = frappe.model.add_child(this.frm.doc, cur_grid.doctype, 'items');
-				}
-
-				show_description(row_to_modify.idx, row_to_modify.item_code);
-
-				this.frm.from_barcode = this.frm.from_barcode ? this.frm.from_barcode + 1 : 1;
-				frappe.model.set_value(row_to_modify.doctype, row_to_modify.name, {
-					item_code: data.item_code,
-					qty: (row_to_modify.qty || 0) + 1
-				});
-
-				['serial_no', 'batch_no', 'barcode'].forEach(field => {
-					if (data[field] && frappe.meta.has_field(row_to_modify.doctype, field)) {
-
-						let value = (row_to_modify[field] && field === "serial_no")
-							? row_to_modify[field] + '\n' + data[field] : data[field];
-
-						frappe.model.set_value(row_to_modify.doctype,
-							row_to_modify.name, field, value);
-					}
-				});
-
-				scan_barcode_field.set_value('');
-				refresh_field("items");
+				me.modify_table_after_scan(data);
 			});
 		}
 		return false;
+	}
+
+	modify_table_after_scan(data) {
+		let scan_barcode_field = this.frm.fields_dict["scan_barcode"];
+		let cur_grid = this.frm.fields_dict.items.grid;
+		let row_to_modify = null;
+
+		// Check if batch is scanned and table has batch no field
+		let batch_no_scan = Boolean(data.batch_no) && frappe.meta.has_field(cur_grid.doctype, "batch_no");
+
+		if (batch_no_scan) {
+			row_to_modify = this.get_batch_row_to_modify(data.batch_no);
+		} else {
+			// serial or barcode scan
+			row_to_modify = this.get_row_to_modify_on_scan(row_to_modify, data);
+		}
+
+		if (!row_to_modify) {
+			// add new row if new item/batch is scanned
+			row_to_modify = frappe.model.add_child(this.frm.doc, cur_grid.doctype, 'items');
+		}
+
+		this.show_scan_message(row_to_modify.idx, row_to_modify.item_code);
+		this.set_scanned_values(row_to_modify, data, scan_barcode_field);
+	}
+
+	set_scanned_values(row_to_modify, data, scan_barcode_field) {
+		// increase qty and set scanned value and item in row
+		this.frm.from_barcode = this.frm.from_barcode ? this.frm.from_barcode + 1 : 1;
+		frappe.model.set_value(row_to_modify.doctype, row_to_modify.name, {
+			item_code: data.item_code,
+			qty: (row_to_modify.qty || 0) + 1
+		});
+
+		['serial_no', 'batch_no', 'barcode'].forEach(field => {
+			if (data[field] && frappe.meta.has_field(row_to_modify.doctype, field)) {
+				let is_serial_no = row_to_modify[field] && field === "serial_no";
+				let value = data[field];
+
+				if (is_serial_no) {
+					value = row_to_modify[field] + '\n' + data[field];
+				}
+
+				frappe.model.set_value(row_to_modify.doctype, row_to_modify.name, field, value);
+			}
+		});
+
+		scan_barcode_field.set_value('');
+		refresh_field("items");
+	}
+
+	get_row_to_modify_on_scan(row_to_modify, data) {
+		// get an existing item row to increment or blank row to modify
+		const existing_item_row = this.frm.doc.items.find(d => d.item_code === data.item_code);
+		const blank_item_row = this.frm.doc.items.find(d => !d.item_code);
+
+		if (existing_item_row) {
+			row_to_modify = existing_item_row;
+		} else if (blank_item_row) {
+			row_to_modify = blank_item_row;
+		}
+
+		return row_to_modify;
+	}
+
+	get_batch_row_to_modify(batch_no) {
+		// get row if batch already exists in table
+		const existing_batch_row = this.frm.doc.items.find(d => d.batch_no === batch_no);
+		return existing_batch_row || null;
+	}
+
+	show_scan_message (idx, exist = null) {
+		// show new row or qty increase toast
+		if (exist) {
+			frappe.show_alert({
+				message: __('Row #{0}: Qty increased by 1', [idx]),
+				indicator: 'green'
+			});
+		} else {
+			frappe.show_alert({
+				message: __('Row #{0}: Item added', [idx]),
+				indicator: 'green'
+			});
+		}
 	}
 
 	apply_default_taxes() {
@@ -487,6 +522,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 		var update_stock = 0, show_batch_dialog = 0;
+
+		item.weight_per_unit = 0;
+		item.weight_uom = '';
+
 		if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
 			show_batch_dialog = update_stock;
@@ -613,6 +652,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 											me.frm.script_manager.trigger('qty', item.doctype, item.name);
 											if (!me.frm.doc.set_warehouse)
 												me.frm.script_manager.trigger('warehouse', item.doctype, item.name);
+											me.apply_price_list(item, true);
 										}, undefined, !frappe.flags.hide_serial_batch_dialog);
 									}
 								},
@@ -866,21 +906,27 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		if (frappe.meta.get_docfield(this.frm.doctype, "shipping_address") &&
 			in_list(['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'], this.frm.doctype)) {
-			erpnext.utils.get_shipping_address(this.frm, function(){
+			erpnext.utils.get_shipping_address(this.frm, function() {
 				set_party_account(set_pricing);
 			});
 
 			// Get default company billing address in Purchase Invoice, Order and Receipt
-			frappe.call({
-				'method': 'frappe.contacts.doctype.address.address.get_default_address',
-				'args': {
-					'doctype': 'Company',
-					'name': this.frm.doc.company
-				},
-				'callback': function(r) {
-					me.frm.set_value('billing_address', r.message);
-				}
-			});
+			if (this.frm.doc.company && frappe.meta.get_docfield(this.frm.doctype, "billing_address")) {
+				frappe.call({
+					method: "erpnext.setup.doctype.company.company.get_default_company_address",
+					args: {name: this.frm.doc.company, existing_address: this.frm.doc.billing_address || ""},
+					debounce: 2000,
+					callback: function(r) {
+						if (r.message) {
+							me.frm.set_value("billing_address", r.message);
+						} else {
+							if (frappe.meta.get_docfield(me.frm.doctype, 'company_address')) {
+								me.frm.set_value("company_address", "");
+							}
+						}
+					}
+				});
+			}
 
 		} else {
 			set_party_account(set_pricing);
@@ -1039,15 +1085,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			return this.frm.call({
 				doc: this.frm.doc,
 				method: "apply_shipping_rule",
-				callback: function(r) {
-					if(!r.exc) {
-						me.calculate_taxes_and_totals();
-					}
-				}
 			}).fail(() => this.frm.set_value('shipping_rule', ''));
-		}
-		else {
-			me.calculate_taxes_and_totals();
 		}
 	}
 
@@ -1068,7 +1106,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		$.each(this.frm.doc.taxes || [], function(i, d) {
 			if(d.charge_type == "Actual") {
 				frappe.model.set_value(d.doctype, d.name, "tax_amount",
-					flt(d.tax_amount) / flt(exchange_rate));
+					flt(d.base_tax_amount) / flt(exchange_rate));
 			}
 		});
 	}

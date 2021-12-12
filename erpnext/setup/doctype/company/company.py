@@ -1,31 +1,29 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe, os, json
-from frappe import _
-from frappe.utils import get_timestamp
 
-from frappe.utils import cint, today, formatdate
+import json
+import os
+
+import frappe
 import frappe.defaults
+from frappe import _
 from frappe.cache_manager import clear_defaults_cache
-
-from frappe.model.document import Document
 from frappe.contacts.address_and_contact import load_address_and_contact
+from frappe.utils import cint, formatdate, get_timestamp, today
 from frappe.utils.nestedset import NestedSet
 
-from past.builtins import cmp
-import functools
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_charges
+
 
 class Company(NestedSet):
 	nsm_parent_field = 'parent_company'
 
 	def onload(self):
 		load_address_and_contact(self, "company")
-		self.get("__onload")["transactions_exist"] = self.check_if_transactions_exist()
 
+	@frappe.whitelist()
 	def check_if_transactions_exist(self):
 		exists = False
 		for doctype in ["Sales Invoice", "Delivery Note", "Sales Order", "Quotation",
@@ -387,6 +385,7 @@ class Company(NestedSet):
 		frappe.db.sql("delete from tabEmployee where company=%s", self.name)
 		frappe.db.sql("delete from tabDepartment where company=%s", self.name)
 		frappe.db.sql("delete from `tabTax Withholding Account` where company=%s", self.name)
+		frappe.db.sql("delete from `tabTransaction Deletion Record` where company=%s", self.name)
 
 		# delete tax templates
 		frappe.db.sql("delete from `tabSales Taxes and Charges Template` where company=%s", self.name)
@@ -396,44 +395,6 @@ class Company(NestedSet):
 		# delete Process Deferred Accounts if no GL Entry found
 		if not frappe.db.get_value('GL Entry', {'company': self.name}):
 			frappe.db.sql("delete from `tabProcess Deferred Accounting` where company=%s", self.name)
-
-@frappe.whitelist()
-def enqueue_replace_abbr(company, old, new):
-	kwargs = dict(queue="long", company=company, old=old, new=new)
-	frappe.enqueue('erpnext.setup.doctype.company.company.replace_abbr', **kwargs)
-
-
-@frappe.whitelist()
-def replace_abbr(company, old, new):
-	new = new.strip()
-	if not new:
-		frappe.throw(_("Abbr can not be blank or space"))
-
-	frappe.only_for("System Manager")
-
-	def _rename_record(doc):
-		parts = doc[0].rsplit(" - ", 1)
-		if len(parts) == 1 or parts[1].lower() == old.lower():
-			frappe.rename_doc(dt, doc[0], parts[0] + " - " + new, force=True)
-
-	def _rename_records(dt):
-		# rename is expensive so let's be economical with memory usage
-		doc = (d for d in frappe.db.sql("select name from `tab%s` where company=%s" % (dt, '%s'), company))
-		for d in doc:
-			_rename_record(d)
-	try:
-		frappe.db.auto_commit_on_many_writes = 1
-		for dt in ["Warehouse", "Account", "Cost Center", "Department",
-				"Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
-			_rename_records(dt)
-			frappe.db.commit()
-		frappe.db.set_value("Company", company, "abbr", new)
-
-	except Exception:
-		frappe.log_error(title=_('Abbreviation Rename Error'))
-	finally:
-		frappe.db.auto_commit_on_many_writes = 0
-
 
 def get_name_with_abbr(name, company):
 	company_abbr = frappe.get_cached_value('Company',  company,  "abbr")
@@ -452,7 +413,7 @@ def install_country_fixtures(company, country):
 			frappe.get_attr(module_name)(company, False)
 		except Exception as e:
 			frappe.log_error()
-			frappe.throw(_("Failed to setup defaults for country {0}. Please contact support@erpnext.com").format(frappe.bold(country)))
+			frappe.throw(_("Failed to setup defaults for country {0}. Please contact support.").format(frappe.bold(country)))
 
 
 def update_company_current_month_sales(company):
@@ -479,8 +440,9 @@ def update_company_current_month_sales(company):
 
 def update_company_monthly_sales(company):
 	'''Cache past year monthly sales of every company based on sales invoices'''
-	from frappe.utils.goal import get_monthly_results
 	import json
+
+	from frappe.utils.goal import get_monthly_results
 	filter_str = "company = {0} and status != 'Draft' and docstatus=1".format(frappe.db.escape(company))
 	month_to_value_dict = get_monthly_results("Sales Invoice", "base_grand_total",
 		"posting_date", filter_str, "sum")
@@ -619,7 +581,7 @@ def get_default_company_address(name, sort_key='is_primary_address', existing_ad
 			return existing_address
 
 	if out:
-		return sorted(out, key = functools.cmp_to_key(lambda x,y: cmp(y[1], x[1])))[0][0]
+		return min(out, key=lambda x: x[1])[0]  # find min by sort_key
 	else:
 		return None
 

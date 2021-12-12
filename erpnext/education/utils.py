@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies and contributors
 
-from __future__ import unicode_literals, division
 import frappe
 from frappe import _
+
 
 class OverlapError(frappe.ValidationError): pass
 
@@ -219,7 +218,7 @@ def get_quiz(quiz_name, course):
 	try:
 		quiz = frappe.get_doc("Quiz", quiz_name)
 		questions = quiz.get_questions()
-	except:
+	except Exception:
 		frappe.throw(_("Quiz {0} does not exist").format(quiz_name), frappe.DoesNotExistError)
 		return None
 

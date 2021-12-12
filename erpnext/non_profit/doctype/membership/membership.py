@@ -1,20 +1,20 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import json
-import frappe
-import six
-import os
 from datetime import datetime
-from frappe.model.document import Document
-from frappe.email import sendmail_to_system_managers
-from frappe.utils import add_days, add_years, nowdate, getdate, add_months, get_link_to_form
-from erpnext.non_profit.doctype.member.member import create_member
+
+import frappe
 from frappe import _
+from frappe.email import sendmail_to_system_managers
+from frappe.model.document import Document
+from frappe.utils import add_days, add_months, add_years, get_link_to_form, getdate, nowdate
+
 import erpnext
 from erpnext import get_company_currency
+from erpnext.non_profit.doctype.member.member import create_member
+
 
 class Membership(Document):
 	def validate(self):
@@ -208,7 +208,7 @@ def get_member_based_on_subscription(subscription_id, email=None, customer_id=No
 
 	try:
 		return frappe.get_doc("Member", members[0]["name"])
-	except:
+	except Exception:
 		return None
 
 
@@ -343,7 +343,7 @@ def process_request_data(data):
 		notify_failure(log)
 		return {"status": "Failed", "reason": e}
 
-	if isinstance(data, six.string_types):
+	if isinstance(data, str):
 		data = json.loads(data)
 	data = frappe._dict(data)
 
@@ -353,7 +353,7 @@ def process_request_data(data):
 def get_company_for_memberships():
 	company = frappe.db.get_single_value("Non Profit Settings", "company")
 	if not company:
-		from erpnext.healthcare.setup import get_company
+		from erpnext.non_profit.utils import get_company
 		company = get_company()
 	return company
 
@@ -394,7 +394,7 @@ def notify_failure(log):
 		""".format(get_link_to_form("Error Log", log.name))
 
 		sendmail_to_system_managers("[Important] [ERPNext] Razorpay membership webhook failed , please check.", content)
-	except:
+	except Exception:
 		pass
 
 
@@ -403,7 +403,7 @@ def get_plan_from_razorpay_id(plan_id):
 
 	try:
 		return plan[0]["name"]
-	except:
+	except Exception:
 		return None
 
 

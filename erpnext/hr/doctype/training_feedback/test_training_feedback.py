@@ -1,12 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
+
+from erpnext.hr.doctype.training_event.test_training_event import (
+	create_training_event,
+	create_training_program,
+)
 from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_employee
-from erpnext.hr.doctype.training_event.test_training_event import create_training_program, create_training_event
+
+
 class TestTrainingFeedback(unittest.TestCase):
 	def setUp(self):
 		create_training_program("Basic Training")

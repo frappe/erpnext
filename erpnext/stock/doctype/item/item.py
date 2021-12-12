@@ -1,23 +1,43 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import copy
 import itertools
 import json
-import erpnext
-import frappe
-import copy
-from erpnext.controllers.item_variant import (ItemVariantExistsError,
-		copy_attributes_to_variant, get_variant, make_variant_item_code, validate_item_variant_attributes)
-from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
-from frappe import _, msgprint
-from frappe.utils import (cint, cstr, flt, formatdate, getdate,
-		now_datetime, random_string, strip, get_link_to_form, nowtime)
-from frappe.utils.html_utils import clean_html
-from frappe.website.doctype.website_slideshow.website_slideshow import \
-	get_slideshow
+from typing import List
 
+import frappe
+from frappe import _
+from frappe.utils import (
+	cint,
+	cstr,
+	flt,
+	formatdate,
+	get_link_to_form,
+	getdate,
+	now_datetime,
+	nowtime,
+	random_string,
+	strip,
+)
+from frappe.utils.html_utils import clean_html
+from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from frappe.website.utils import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
+
+import erpnext
+from erpnext.controllers.item_variant import (
+	ItemVariantExistsError,
+	copy_attributes_to_variant,
+	get_variant,
+	make_variant_item_code,
+	validate_item_variant_attributes,
+)
+from erpnext.setup.doctype.item_group.item_group import (
+	get_parent_item_groups,
+	invalidate_cache_for,
+)
+from erpnext.stock.doctype.item_default.item_default import ItemDefault
 
 
 class DuplicateReorderRows(frappe.ValidationError):
@@ -103,7 +123,6 @@ class Item(WebsiteGenerator):
 		self.validate_barcode()
 		self.validate_warehouse_for_reorder()
 		self.update_bom_item_desc()
-		self.synced_with_hub = 0
 
 		self.validate_has_variants()
 		self.validate_attributes_in_variants()
@@ -116,9 +135,9 @@ class Item(WebsiteGenerator):
 		self.validate_fixed_asset()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
-		self.validate_item_defaults()
 		self.validate_customer_provided_part()
 		self.update_defaults_from_item_group()
+		self.validate_item_defaults()
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
 		self.update_show_in_website()
@@ -133,7 +152,6 @@ class Item(WebsiteGenerator):
 
 	def on_update(self):
 		invalidate_cache_for_item(self)
-		self.validate_name_with_item_group()
 		self.update_variants()
 		self.update_item_price()
 		self.update_template_item()
@@ -161,6 +179,8 @@ class Item(WebsiteGenerator):
 				"doctype": "Item Price",
 				"price_list": price_list,
 				"item_code": self.name,
+				"uom": self.stock_uom,
+				"brand": self.brand,
 				"currency": erpnext.get_default_currency(),
 				"price_list_rate": self.standard_rate
 			})
@@ -202,10 +222,11 @@ class Item(WebsiteGenerator):
 					'route')) + '/' + self.scrub((self.item_name or self.item_code) + '-' + random_string(5))
 
 	def validate_website_image(self):
+		"""Validate if the website image is a public file"""
+
 		if frappe.flags.in_import:
 			return
 
-		"""Validate if the website image is a public file"""
 		auto_set_website_image = False
 		if not self.website_image and self.image:
 			auto_set_website_image = True
@@ -235,10 +256,11 @@ class Item(WebsiteGenerator):
 			self.website_image = None
 
 	def make_thumbnail(self):
+		"""Make a thumbnail of `website_image`"""
+
 		if frappe.flags.in_import:
 			return
 
-		"""Make a thumbnail of `website_image`"""
 		import requests.exceptions
 
 		if not self.is_new() and self.website_image != frappe.db.get_value(self.doctype, self.name, "website_image"):
@@ -543,8 +565,12 @@ class Item(WebsiteGenerator):
 					_("Default BOM ({0}) must be active for this item or its template").format(bom_item))
 
 	def fill_customer_code(self):
-		""" Append all the customer codes and insert into "customer_code" field of item table """
-		self.customer_code = ','.join(d.ref_code for d in self.get("customer_items", []))
+		"""
+			Append all the customer codes and insert into "customer_code" field of item table.
+			Used to search Item by customer code.
+		"""
+		customer_codes = set(d.ref_code for d in self.get("customer_items", []))
+		self.customer_code = ','.join(customer_codes)
 
 	def check_item_tax(self):
 		"""Check whether Tax Rate is not entered twice for same Tax Type"""
@@ -603,16 +629,22 @@ class Item(WebsiteGenerator):
 				where item_code = %s and is_cancelled = 0 limit 1""", self.name))
 		return self._stock_ledger_created
 
-	def validate_name_with_item_group(self):
-		# causes problem with tree build
-		if frappe.db.exists("Item Group", self.name):
-			frappe.throw(
-				_("An Item Group exists with same name, please change the item name or rename the item group"))
-
 	def update_item_price(self):
-		frappe.db.sql("""update `tabItem Price` set item_name=%s,
-			item_description=%s, brand=%s where item_code=%s""",
-					(self.item_name, self.description, self.brand, self.name))
+		frappe.db.sql("""
+				UPDATE `tabItem Price`
+				SET
+					item_name=%(item_name)s,
+					item_description=%(item_description)s,
+					brand=%(brand)s
+				WHERE item_code=%(item_code)s
+			""",
+			dict(
+				item_name=self.item_name,
+				item_description=self.description,
+				brand=self.brand,
+				item_code=self.name
+			)
+		)
 
 	def on_trash(self):
 		super(Item, self).on_trash()
@@ -639,6 +671,8 @@ class Item(WebsiteGenerator):
 	def after_rename(self, old_name, new_name, merge):
 		if merge:
 			self.validate_duplicate_item_in_stock_reconciliation(old_name, new_name)
+			frappe.msgprint(_("It can take upto few hours for accurate stock values to be visible after merging items."),
+					indicator="orange", title="Note")
 
 		if self.route:
 			invalidate_cache_for_item(self)
@@ -690,7 +724,6 @@ class Item(WebsiteGenerator):
 
 	def recalculate_bin_qty(self, new_name):
 		from erpnext.stock.stock_balance import repost_stock
-		frappe.db.auto_commit_on_many_writes = 1
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
@@ -704,7 +737,6 @@ class Item(WebsiteGenerator):
 			repost_stock(new_name, warehouse)
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
-		frappe.db.auto_commit_on_many_writes = 0
 
 	@frappe.whitelist()
 	def copy_specification_from_item_group(self):
@@ -764,35 +796,39 @@ class Item(WebsiteGenerator):
 		if len(companies) != len(self.item_defaults):
 			frappe.throw(_("Cannot set multiple Item Defaults for a company."))
 
+		validate_item_default_company_links(self.item_defaults)
+
+
 	def update_defaults_from_item_group(self):
 		"""Get defaults from Item Group"""
-		if self.item_group and not self.item_defaults:
-			item_defaults = frappe.db.get_values("Item Default", {"parent": self.item_group},
-				['company', 'default_warehouse','default_price_list','buying_cost_center','default_supplier',
-				'expense_account','selling_cost_center','income_account'], as_dict = 1)
-			if item_defaults:
-				for item in item_defaults:
-					self.append('item_defaults', {
-						'company': item.company,
-						'default_warehouse': item.default_warehouse,
-						'default_price_list': item.default_price_list,
-						'buying_cost_center': item.buying_cost_center,
-						'default_supplier': item.default_supplier,
-						'expense_account': item.expense_account,
-						'selling_cost_center': item.selling_cost_center,
-						'income_account': item.income_account
-					})
-			else:
-				warehouse = ''
-				defaults = frappe.defaults.get_defaults() or {}
+		if self.item_defaults or not self.item_group:
+			return
 
-				# To check default warehouse is belong to the default company
-				if defaults.get("default_warehouse") and defaults.company and frappe.db.exists("Warehouse",
-					{'name': defaults.default_warehouse, 'company': defaults.company}):
-						self.append("item_defaults", {
-							"company": defaults.get("company"),
-							"default_warehouse": defaults.default_warehouse
-						})
+		item_defaults = frappe.db.get_values("Item Default", {"parent": self.item_group},
+			['company', 'default_warehouse','default_price_list','buying_cost_center','default_supplier',
+			'expense_account','selling_cost_center','income_account'], as_dict = 1)
+		if item_defaults:
+			for item in item_defaults:
+				self.append('item_defaults', {
+					'company': item.company,
+					'default_warehouse': item.default_warehouse,
+					'default_price_list': item.default_price_list,
+					'buying_cost_center': item.buying_cost_center,
+					'default_supplier': item.default_supplier,
+					'expense_account': item.expense_account,
+					'selling_cost_center': item.selling_cost_center,
+					'income_account': item.income_account
+				})
+		else:
+			defaults = frappe.defaults.get_defaults() or {}
+
+			# To check default warehouse is belong to the default company
+			if defaults.get("default_warehouse") and defaults.company and frappe.db.exists("Warehouse",
+				{'name': defaults.default_warehouse, 'company': defaults.company}):
+					self.append("item_defaults", {
+						"company": defaults.get("company"),
+						"default_warehouse": defaults.default_warehouse
+					})
 
 	def update_variants(self):
 		if self.flags.dont_update_variants or \
@@ -1310,3 +1346,25 @@ def on_doctype_update():
 @erpnext.allow_regional
 def set_item_tax_from_hsn_code(item):
 	pass
+
+
+def validate_item_default_company_links(item_defaults: List[ItemDefault]) -> None:
+	for item_default in item_defaults:
+		for doctype, field in [
+			['Warehouse', 'default_warehouse'],
+			['Cost Center', 'buying_cost_center'],
+			['Cost Center', 'selling_cost_center'],
+			['Account', 'expense_account'],
+			['Account', 'income_account']
+		]:
+			if item_default.get(field):
+				company = frappe.db.get_value(doctype, item_default.get(field), 'company', cache=True)
+				if company and company != item_default.company:
+					frappe.throw(_("Row #{}: {} {} doesn't belong to Company {}. Please select valid {}.")
+						.format(
+							item_default.idx,
+							doctype,
+							frappe.bold(item_default.get(field)),
+							frappe.bold(item_default.company),
+							frappe.bold(frappe.unscrub(field))
+						), title=_("Invalid Item Defaults"))

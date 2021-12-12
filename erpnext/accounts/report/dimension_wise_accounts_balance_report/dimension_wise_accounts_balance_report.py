@@ -1,15 +1,18 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
-from frappe import _
-from frappe.utils import (flt, cstr)
 
-from erpnext.accounts.report.financial_statements import filter_accounts, filter_out_zero_value_rows
+import frappe
+from frappe import _
+from frappe.utils import cstr, flt
+
+import erpnext
+from erpnext.accounts.report.financial_statements import (
+	filter_accounts,
+	filter_out_zero_value_rows,
+)
 from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
 
-from six import itervalues
 
 def execute(filters=None):
 	validate_filters(filters)
@@ -103,7 +106,7 @@ def set_gl_entries_by_account(dimension_items_list, filters, account, gl_entries
 
 def format_gl_entries(gl_entries_by_account, accounts_by_name, dimension_items_list):
 
-	for entries in itervalues(gl_entries_by_account):
+	for entries in gl_entries_by_account.values():
 		for entry in entries:
 			d = accounts_by_name.get(entry.account)
 			if not d:

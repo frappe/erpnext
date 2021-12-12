@@ -1,11 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
-from erpnext.hotels.doctype.hotel_room_reservation.hotel_room_reservation import HotelRoomPricingNotSetError, HotelRoomUnavailableError
+
+from erpnext.hotels.doctype.hotel_room_reservation.hotel_room_reservation import (
+	HotelRoomPricingNotSetError,
+	HotelRoomUnavailableError,
+)
+
 test_dependencies = ["Hotel Room Package", "Hotel Room Pricing", "Hotel Room"]
 
 class TestHotelRoomReservation(unittest.TestCase):

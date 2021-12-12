@@ -1,9 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import datetime
-from six import iteritems
 
 import frappe
 from frappe import _
@@ -48,7 +47,7 @@ def execute(filters=None):
 	return columns, data, None, chart
 
 def get_final_data(dimension, dimension_items, filters, period_month_ranges, data, DCC_allocation):
-	for account, monthwise_data in iteritems(dimension_items):
+	for account, monthwise_data in dimension_items.items():
 		row = [dimension, account]
 		totals = [0, 0, 0]
 		for year in get_fiscal_years(filters):

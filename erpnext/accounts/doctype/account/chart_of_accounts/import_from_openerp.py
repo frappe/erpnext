@@ -4,15 +4,14 @@
 """
 Import chart of accounts from OpenERP sources
 """
-from __future__ import print_function, unicode_literals
 
-import os, json
 import ast
+import json
+import os
 from xml.etree import ElementTree as ET
-from frappe.utils.csvutils import read_csv_content
-import frappe
 
-from six import iteritems
+import frappe
+from frappe.utils.csvutils import read_csv_content
 
 path = "/Users/nabinhait/projects/odoo/addons"
 
@@ -139,7 +138,7 @@ def get_account_types(root_list, csv_content, prefix=None):
 
 def make_maps_for_xml(xml_roots, account_types, country_dir):
 	"""make maps for `charts` and `accounts`"""
-	for model, root_list in iteritems(xml_roots):
+	for model, root_list in xml_roots.items():
 		for root in root_list:
 			for node in root[0].findall("record"):
 				if node.get("model")=="account.account.template":

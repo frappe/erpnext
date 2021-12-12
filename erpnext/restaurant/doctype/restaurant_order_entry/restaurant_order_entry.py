@@ -1,12 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, json
-from frappe.model.document import Document
+
+import json
+
+import frappe
 from frappe import _
+from frappe.model.document import Document
+
 from erpnext.controllers.queries import item_query
+
 
 class RestaurantOrderEntry(Document):
 	pass

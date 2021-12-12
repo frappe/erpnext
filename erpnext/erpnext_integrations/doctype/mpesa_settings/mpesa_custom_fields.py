@@ -1,6 +1,7 @@
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
+
 def create_custom_pos_fields():
 	"""Create custom fields corresponding to POS Settings and POS Invoice."""
 	pos_field = {

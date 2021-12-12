@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
-from erpnext.hr.utils import update_employee
+
+from erpnext.hr.utils import update_employee_work_history
+
 
 class EmployeeTransfer(Document):
 	def before_submit(self):
@@ -21,7 +22,7 @@ class EmployeeTransfer(Document):
 			new_employee = frappe.copy_doc(employee)
 			new_employee.name = None
 			new_employee.employee_number = None
-			new_employee = update_employee(new_employee, self.transfer_details, date=self.transfer_date)
+			new_employee = update_employee_work_history(new_employee, self.transfer_details, date=self.transfer_date)
 			if self.new_company and self.company != self.new_company:
 				new_employee.internal_work_history = []
 				new_employee.date_of_joining = self.transfer_date
@@ -36,7 +37,7 @@ class EmployeeTransfer(Document):
 			employee.db_set("relieving_date", self.transfer_date)
 			employee.db_set("status", "Left")
 		else:
-			employee = update_employee(employee, self.transfer_details, date=self.transfer_date)
+			employee = update_employee_work_history(employee, self.transfer_details, date=self.transfer_date)
 			if self.new_company and self.company != self.new_company:
 				employee.company = self.new_company
 				employee.date_of_joining = self.transfer_date
@@ -53,7 +54,7 @@ class EmployeeTransfer(Document):
 			employee.status = "Active"
 			employee.relieving_date = ''
 		else:
-			employee = update_employee(employee, self.transfer_details, cancel=True)
+			employee = update_employee_work_history(employee, self.transfer_details, date=self.transfer_date, cancel=True)
 		if self.new_company != self.company:
 			employee.company = self.company
 		employee.save()

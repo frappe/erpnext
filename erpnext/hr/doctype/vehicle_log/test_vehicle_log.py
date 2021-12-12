@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
-from frappe.utils import nowdate, flt, cstr, random_string
+from frappe.utils import cstr, flt, nowdate, random_string
+
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.vehicle_log.vehicle_log import make_expense_claim
+
 
 class TestVehicleLog(unittest.TestCase):
 	def setUp(self):

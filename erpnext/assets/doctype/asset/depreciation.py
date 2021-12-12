@@ -1,12 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt, today, getdate, cint
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_checks_for_pl_and_bs_accounts
+from frappe.utils import cint, flt, getdate, today
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_checks_for_pl_and_bs_accounts,
+)
+
 
 def post_depreciation_entries(date=None):
 	# Return if automatic booking of asset depreciation is disabled
@@ -54,16 +57,18 @@ def make_depreciation_entry(asset_name, date=None):
 			je.finance_book = d.finance_book
 			je.remark = "Depreciation Entry against {0} worth {1}".format(asset_name, d.depreciation_amount)
 
+			credit_account, debit_account = get_credit_and_debit_accounts(accumulated_depreciation_account, depreciation_expense_account)
+
 			credit_entry = {
-				"account": accumulated_depreciation_account,
+				"account": credit_account,
 				"credit_in_account_currency": d.depreciation_amount,
 				"reference_type": "Asset",
 				"reference_name": asset.name,
-				"cost_center": ""
+				"cost_center": depreciation_cost_center
 			}
 
 			debit_entry = {
-				"account": depreciation_expense_account,
+				"account": debit_account,
 				"debit_in_account_currency": d.depreciation_amount,
 				"reference_type": "Asset",
 				"reference_name": asset.name,
@@ -128,6 +133,20 @@ def get_depreciation_accounts(asset):
 			.format(asset.asset_category, asset.company))
 
 	return fixed_asset_account, accumulated_depreciation_account, depreciation_expense_account
+
+def get_credit_and_debit_accounts(accumulated_depreciation_account, depreciation_expense_account):
+	root_type = frappe.get_value("Account", depreciation_expense_account, "root_type")
+
+	if root_type == "Expense":
+		credit_account = accumulated_depreciation_account
+		debit_account = depreciation_expense_account
+	elif root_type == "Income":
+		credit_account = depreciation_expense_account
+		debit_account = accumulated_depreciation_account
+	else:
+		frappe.throw(_("Depreciation Expense Account should be an Income or Expense Account."))
+
+	return credit_account, debit_account
 
 @frappe.whitelist()
 def scrap_asset(asset_name):

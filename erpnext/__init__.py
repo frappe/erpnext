@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 import inspect
-import frappe
-from erpnext.hooks import regional_overrides
-from frappe.utils import getdate
 
-__version__ = '13.9.0'
+import frappe
+
+from erpnext.hooks import regional_overrides
+
+__version__ = '14.0.0-dev'
 
 def get_default_company(user=None):
 	'''Get default company for user'''

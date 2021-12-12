@@ -1,11 +1,12 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
+
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
