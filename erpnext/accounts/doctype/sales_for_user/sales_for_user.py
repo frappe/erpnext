@@ -14,7 +14,7 @@ class SalesForUser(Document):
 		self.return_data()
 
 	def return_data(self):
-		outstanding_amount, cash, cards, adv_app, total_monetary, total_income, total_utility, total_exempt_sales = 0,0,0,0,0,0,0,0
+		outstanding_amount, cash, cards, adv_app, total_monetary, total_income, total_utility, total_exempt_sales, advances = 0,0,0,0,0,0,0,0,0
 		dates = []
 		condition = self.return_filters()
 		conditions = self.return_filters_sql()
@@ -36,6 +36,8 @@ class SalesForUser(Document):
 					cash += payment.amount
 				if payment.mode_of_payment == "Tarjetas de credito":
 					cards += payment.amount
+
+			advances += salary.total_advance
 
 		sales_person_cols = ""
 		sales_team_table = ""
@@ -152,7 +154,8 @@ class SalesForUser(Document):
 			self.total_exempt_sales += grand_total
 
 		self.total_cash = cash
-		self.total_cards = cards		
+		self.total_cards = cards
+		self.total_advances_applied = advances
 		total_income = cash + cards + total_monetary
 
 		self.total_income = total_income
