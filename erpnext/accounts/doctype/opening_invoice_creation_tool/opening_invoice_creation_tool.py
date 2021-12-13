@@ -201,15 +201,14 @@ def start_import(invoices):
 	names = []
 	for idx, d in enumerate(invoices):
 		try:
-			invoice_number = ''
+			invoice_number = None
 			set_child_names = False
 			if d.invoice_number:
 				invoice_number = d.invoice_number
-				set_child_names = True
 			publish(idx, len(invoices), d.doctype)
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_mandatory = True
-			doc.insert(set_name=invoice_number, set_child_names=set_child_names)
+			doc.insert(set_name=invoice_number)
 			doc.submit()
 			frappe.db.commit()
 			names.append(doc.name)
