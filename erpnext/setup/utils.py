@@ -53,6 +53,7 @@ def before_tests():
 
 	frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 0)
 	enable_all_roles_and_domains()
+	set_defaults_for_tests()
 
 	frappe.db.commit()
 
@@ -126,6 +127,14 @@ def enable_all_roles_and_domains():
 	frappe.get_single('Domain Settings').set_active_domains(\
 		[d.name for d in domains])
 	add_all_roles_to('Administrator')
+
+def set_defaults_for_tests():
+	from frappe.utils.nestedset import get_root_of
+
+	selling_settings = frappe.get_single("Selling Settings")
+	selling_settings.customer_group = get_root_of("Customer Group")
+	selling_settings.territory = get_root_of("Territory")
+	selling_settings.save()
 
 
 def insert_record(records):

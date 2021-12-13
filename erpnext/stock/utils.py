@@ -13,6 +13,7 @@ import erpnext
 
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
+class PendingRepostingError(frappe.ValidationError): pass
 
 def get_stock_value_from_bin(warehouse=None, item_code=None):
 	values = {}
@@ -188,7 +189,7 @@ def get_bin(item_code, warehouse):
 	bin_obj.flags.ignore_permissions = True
 	return bin_obj
 
-def get_or_make_bin(item_code, warehouse) -> str:
+def get_or_make_bin(item_code: str , warehouse: str) -> str:
 	bin_record = frappe.db.get_value('Bin', {'item_code': item_code, 'warehouse': warehouse})
 
 	if not bin_record:
@@ -204,11 +205,12 @@ def get_or_make_bin(item_code, warehouse) -> str:
 	return bin_record
 
 def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
+	"""WARNING: This function is deprecated. Inline this function instead of using it."""
 	from erpnext.stock.doctype.bin.bin import update_stock
 	is_stock_item = frappe.get_cached_value('Item', args.get("item_code"), 'is_stock_item')
 	if is_stock_item:
-		bin_record = get_or_make_bin(args.get("item_code"), args.get("warehouse"))
-		update_stock(bin_record, args, allow_negative_stock, via_landed_cost_voucher)
+		bin_name = get_or_make_bin(args.get("item_code"), args.get("warehouse"))
+		update_stock(bin_name, args, allow_negative_stock, via_landed_cost_voucher)
 	else:
 		frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
 
@@ -417,3 +419,28 @@ def is_reposting_item_valuation_in_progress():
 		{'docstatus': 1, 'status': ['in', ['Queued','In Progress']]})
 	if reposting_in_progress:
 		frappe.msgprint(_("Item valuation reposting in progress. Report might show incorrect item valuation."), alert=1)
+
+def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool:
+	"""Check if there are pending reposting job till the specified posting date."""
+
+	filters = {
+		"docstatus": 1,
+		"status": ["in", ["Queued","In Progress", "Failed"]],
+		"posting_date": ["<=", posting_date],
+	}
+
+	reposting_pending =  frappe.db.exists("Repost Item Valuation", filters)
+	if reposting_pending and throw_error:
+		msg = _("Stock/Accounts can not be frozen as processing of backdated entries is going on. Please try again later.")
+		frappe.msgprint(msg,
+				raise_exception=PendingRepostingError,
+				title="Stock Reposting Ongoing",
+				indicator="red",
+				primary_action={
+					"label": _("Show pending entries"),
+					"client_action": "erpnext.route_to_pending_reposts",
+					"args": filters,
+				}
+			)
+
+	return bool(reposting_pending)

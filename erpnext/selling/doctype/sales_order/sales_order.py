@@ -64,6 +64,8 @@ class SalesOrder(SellingController):
 		if not self.billing_status: self.billing_status = 'Not Billed'
 		if not self.delivery_status: self.delivery_status = 'Not Delivered'
 
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+
 	def validate_po(self):
 		# validate p.o date v/s delivery date
 		if self.po_date and not self.skip_delivery_note:
@@ -1024,6 +1026,7 @@ def make_work_orders(items, sales_order, company, project=None):
 			description=i['description']
 		)).insert()
 		work_order.set_work_order_operations()
+		work_order.flags.ignore_mandatory = True
 		work_order.save()
 		out.append(work_order)
 

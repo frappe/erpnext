@@ -1086,7 +1086,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		$.each(this.frm.doc.taxes || [], function(i, d) {
 			if(d.charge_type == "Actual") {
 				frappe.model.set_value(d.doctype, d.name, "tax_amount",
-					flt(d.tax_amount) / flt(exchange_rate));
+					flt(d.base_tax_amount) / flt(exchange_rate));
 			}
 		});
 	},
