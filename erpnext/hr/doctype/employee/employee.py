@@ -96,15 +96,8 @@ class Employee(NestedSet):
 			'user': self.user_id
 		})
 
-		if employee_user_permission_exists: return
-
-		employee_user_permission_exists = frappe.db.exists('User Permission', {
-			'allow': 'Employee',
-			'for_value': self.name,
-			'user': self.user_id
-		})
-
-		if employee_user_permission_exists: return
+		if employee_user_permission_exists:
+			return
 
 		add_user_permission("Employee", self.name, self.user_id)
 		set_user_permission_if_allowed("Company", self.company, self.user_id)
