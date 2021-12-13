@@ -14,8 +14,9 @@
   "credit_note",
   "column3",
   "bank_deposit",
-  "section",
+  "section_party",
   "person_name",
+  "section",
   "no_bank_check",
   "check_date",
   "release_date",
@@ -324,14 +325,18 @@
    "label": "Amount"
   },
   {
-   "depends_on": "check",
    "fieldname": "person_name",
    "fieldtype": "Data",
-   "label": "Person Name"
+   "label": "Party Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_party",
+   "fieldtype": "Section Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-11-09 11:07:57.981736",
+ "modified": "2021-12-13 17:04:31.671325",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transactions",
