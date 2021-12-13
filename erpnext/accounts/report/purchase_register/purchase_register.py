@@ -35,7 +35,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
 		project = list(set(invoice_po_pr_map.get(inv.name, {}).get("project", [])))
 
-		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name]
+		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name, inv.tax_category, inv.bill_no, inv.bill_date]
 
 		if additional_query_columns:
 			for col in additional_query_columns:
@@ -77,7 +77,7 @@ def get_columns(invoice_list, additional_table_columns):
 	"""return columns based on filters"""
 	columns = [
 		_("Invoice") + ":Link/Purchase Invoice:120", _("Posting Date") + ":Date:80",
-		_("Supplier Id") + "::120", _("Supplier Name") + "::120"]
+		_("Supplier Id") + "::120", _("Supplier Name") + "::120", _("Tax Category") + "::120",  _("Transaction Number") + "::120", _("Supplier Invoice Date") + ":Date:80"]
 
 	if additional_table_columns:
 		columns += additional_table_columns
