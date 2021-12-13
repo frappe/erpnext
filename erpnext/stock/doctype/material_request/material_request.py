@@ -112,9 +112,10 @@ class MaterialRequest(BuyingController):
 				d['cost_center'] = default_data.get('buying_cost_center')
 				d['expense_account'] = default_data.get('expense_account')
 				d['min_order_qty'] = item_detail.get('min_order_qty')
-				d['projected_qty'] = bin_data.get('projected_qty')
-				d['actual_qty'] = bin_data.get('actual_qty')
-				d['valuation_rate'] = bin_data.get('valuation_rate')
+				if bin_data:
+					d['projected_qty'] = bin_data.get('projected_qty')
+					d['actual_qty'] = bin_data.get('actual_qty')
+					d['valuation_rate'] = bin_data.get('valuation_rate')
 
 				for r in res.get('qty'):
 					qty_sum +=r
