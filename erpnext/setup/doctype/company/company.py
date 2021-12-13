@@ -24,8 +24,8 @@ class Company(NestedSet):
 
 	def onload(self):
 		load_address_and_contact(self, "company")
-		self.get("__onload")["transactions_exist"] = self.check_if_transactions_exist()
 
+	@frappe.whitelist()
 	def check_if_transactions_exist(self):
 		exists = False
 		for doctype in ["Sales Invoice", "Delivery Note", "Sales Order", "Quotation",

@@ -11,12 +11,15 @@ from erpnext.assets.doctype.asset.test_asset import (
 	create_asset_data,
 	set_depreciation_settings_in_company,
 )
+from erpnext.stock.doctype.item.test_item import create_item
 
 
 class TestAssetRepair(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(cls):
 		set_depreciation_settings_in_company()
 		create_asset_data()
+		create_item("_Test Stock Item")
 		frappe.db.sql("delete from `tabTax Rule`")
 
 	def test_update_status(self):
@@ -70,8 +73,27 @@ class TestAssetRepair(unittest.TestCase):
 
 		self.assertEqual(stock_entry.stock_entry_type, "Material Issue")
 		self.assertEqual(stock_entry.items[0].s_warehouse, asset_repair.warehouse)
-		self.assertEqual(stock_entry.items[0].item_code, asset_repair.stock_items[0].item)
+		self.assertEqual(stock_entry.items[0].item_code, asset_repair.stock_items[0].item_code)
 		self.assertEqual(stock_entry.items[0].qty, asset_repair.stock_items[0].consumed_quantity)
+
+	def test_serialized_item_consumption(self):
+		from erpnext.stock.doctype.serial_no.serial_no import SerialNoRequiredError
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+
+		stock_entry = make_serialized_item()
+		serial_nos = stock_entry.get("items")[0].serial_no
+		serial_no = serial_nos.split("\n")[0]
+
+		# should not raise any error
+		create_asset_repair(stock_consumption = 1, item_code = stock_entry.get("items")[0].item_code,
+			warehouse = "_Test Warehouse - _TC", serial_no = serial_no, submit = 1)
+
+		# should raise error
+		asset_repair = create_asset_repair(stock_consumption = 1, warehouse = "_Test Warehouse - _TC",
+			item_code = stock_entry.get("items")[0].item_code)
+
+		asset_repair.repair_status = "Completed"
+		self.assertRaises(SerialNoRequiredError, asset_repair.submit)
 
 	def test_increase_in_asset_value_due_to_stock_consumption(self):
 		asset = create_asset(calculate_depreciation = 1, submit=1)
@@ -137,11 +159,12 @@ def create_asset_repair(**args):
 
 	if args.stock_consumption:
 		asset_repair.stock_consumption = 1
-		asset_repair.warehouse = create_warehouse("Test Warehouse", company = asset.company)
+		asset_repair.warehouse = args.warehouse or create_warehouse("Test Warehouse", company = asset.company)
 		asset_repair.append("stock_items", {
-			"item": args.item or args.item_code or "_Test Item",
+			"item_code": args.item_code or "_Test Stock Item",
 			"valuation_rate": args.rate if args.get("rate") is not None else 100,
-			"consumed_quantity": args.qty or 1
+			"consumed_quantity": args.qty or 1,
+			"serial_no": args.serial_no
 		})
 
 	asset_repair.insert(ignore_if_duplicate=True)
@@ -158,7 +181,7 @@ def create_asset_repair(**args):
 			})
 			stock_entry.append('items', {
 				"t_warehouse": asset_repair.warehouse,
-				"item_code": asset_repair.stock_items[0].item,
+				"item_code": asset_repair.stock_items[0].item_code,
 				"qty": asset_repair.stock_items[0].consumed_quantity
 			})
 			stock_entry.submit()

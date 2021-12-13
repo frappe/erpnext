@@ -84,6 +84,10 @@ $.extend(erpnext, {
 		});
 	},
 
+	route_to_pending_reposts: (args) => {
+		frappe.set_route('List', 'Repost Item Valuation', args);
+	},
+
 	proceed_save_with_reminders_frequency_change: () => {
 		frappe.ui.hide_open_dialog();
 
