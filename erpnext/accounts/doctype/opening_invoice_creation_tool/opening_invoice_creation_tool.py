@@ -202,7 +202,6 @@ def start_import(invoices):
 	for idx, d in enumerate(invoices):
 		try:
 			invoice_number = None
-			set_child_names = False
 			if d.invoice_number:
 				invoice_number = d.invoice_number
 			publish(idx, len(invoices), d.doctype)
