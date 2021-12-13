@@ -151,6 +151,12 @@
   "in_words",
   "total_advance",
   "outstanding_amount",
+  "insurance_section",
+  "excesses",
+  "deductible",
+  "ineligible_expenses",
+  "co_pay20",
+  "total_insurance_deduction",
   "advances_section",
   "allocate_advances_automatically",
   "get_advances",
@@ -1822,12 +1828,43 @@
    "fieldtype": "Data",
    "label": "Company Tax ID",
    "read_only": 1
+  },
+  {
+   "fieldname": "insurance_section",
+   "fieldtype": "Section Break",
+   "label": "Insurance Plan"
+  },
+  {
+   "fieldname": "excesses",
+   "fieldtype": "Currency",
+   "label": "Excesses"
+  },
+  {
+   "fieldname": "deductible",
+   "fieldtype": "Currency",
+   "label": "Deductible"
+  },
+  {
+   "fieldname": "ineligible_expenses",
+   "fieldtype": "Currency",
+   "label": "Ineligible expenses"
+  },
+  {
+   "fieldname": "co_pay20",
+   "fieldtype": "Currency",
+   "label": "Co-Pay 20%"
+  },
+  {
+   "fieldname": "total_insurance_deduction",
+   "fieldtype": "Currency",
+   "label": "Total Insurance Deduction",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-12-01 08:57:31.141792",
+ "modified": "2021-12-13 17:12:43.884954",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
