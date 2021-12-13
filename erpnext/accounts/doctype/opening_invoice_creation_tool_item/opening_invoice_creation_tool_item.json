@@ -1,9 +1,11 @@
 {
+ "actions": [],
  "creation": "2017-08-29 04:26:36.159247",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "old_invoice_number",
   "party_type",
   "party",
   "temporary_opening_account",
@@ -105,16 +107,15 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Reference number of the invoice from the previous system",
-   "fieldname": "invoice_number",
+   "description": "Write reference number of the invoices from the previous system",
+   "fieldname": "old_invoice_number",
    "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Invoice Number"
+   "label": "Old Invoice Number"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-12-17 19:25:06.053187",
+ "modified": "2021-12-13 17:48:33.937956",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool Item",
