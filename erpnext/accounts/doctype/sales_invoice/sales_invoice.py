@@ -195,11 +195,14 @@ class SalesInvoice(SellingController):
 					self.set_new_row_item(item, product_price[0].price_list_rate, amount, 0)
 					frappe.delete_doc('Sales Invoice Item', item.name)
 
+	def calculate_insurance(self):
+		self.total_insurance_deduction = self.excesses + self.deductible + self.ineligible_expenses + self.co_pay20
 
 	def validate(self):
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
 		self.discount_product()
+		self.calculate_insurance()
 
 		if self.docstatus == 0:
 			self.caculate_items_amount()
