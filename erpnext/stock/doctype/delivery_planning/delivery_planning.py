@@ -115,9 +115,6 @@ class DeliveryPlanning(Document):
 			dp_item.sorce_warehouse = i.warehouse
 			dp_item.postal_code = i.pincode
 			dp_item.delivery_date = i.delivery_date
-
-			
-
 			dp_item.related_delivey_planning = self.name
 			dp_item.weight_per_unit = i.weight_per_unit
 			dp_item.supplier_dc = i.delivered_by_supplier
@@ -127,19 +124,15 @@ class DeliveryPlanning(Document):
 			dp_item.stock_uom = i.stock_uom
 			dp_item.save(ignore_permissions = True);
 			dp_item.reload()
-			print("22222222222222222222222222 ")
-
 			
-
 			docs = frappe.db.get_all(doctype='Bin',
 							filters={"warehouse": i.warehouse,
 									"item_code": i.item_code},
 							fields= ["projected_qty","actual_qty"])
-			print(" ITEM CODE  ---------------", docs, i.item_code)
-
+			
 			if docs:
 				for d in docs:
-					print("22222222222222222222222222 ",d)
+					
 					frappe.db.set_value('Delivery Planning Item', dp_item.name, {
 									'current_stock': d.projected_qty,
 									'available_stock':  d.actual_qty

@@ -211,7 +211,7 @@ class DeliveryPlanningItem(Document):
 		if docs:
 			for doc in docs:	
 				if(doc.projected_qty == 0 or doc.actual_qty == 0):
-					print(" INSIDE IF PRINT =========== 80808080 ")
+					
 					frappe.db.sql("""UPDATE `tabDelivery Planning Item` 
 					SET current_stock = 0,
 					available_stock = 0
@@ -221,7 +221,7 @@ class DeliveryPlanningItem(Document):
 						msg='Selected Warehouse does not have stock'
 						)
 				else:	
-					print(" INSIDE Else  PRINT =========== 8080808000000 ")
+					
 					frappe.db.sql("""UPDATE `tabDelivery Planning Item` 
 					SET current_stock = {0},
 					available_stock = {1}
