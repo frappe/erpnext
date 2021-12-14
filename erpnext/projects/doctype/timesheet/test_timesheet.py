@@ -20,10 +20,6 @@ class TestTimesheet(unittest.TestCase):
 		for dt in ["Salary Slip", "Salary Structure", "Salary Structure Assignment", "Timesheet"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
 
-		if not frappe.db.exists("Salary Component", "Timesheet Component"):
-			frappe.get_doc({"doctype": "Salary Component", "salary_component": "Timesheet Component"}).insert()
-
-
 	def test_timesheet_billing_amount(self):
 		make_salary_structure_for_timesheet("_T-Employee-00001")
 		timesheet = make_timesheet("_T-Employee-00001", simulate=True, billable=1)
@@ -177,7 +173,14 @@ def make_salary_structure_for_timesheet(employee):
 	salary_structure_name = "Timesheet Salary Structure Test"
 	frequency = "Monthly"
 
+<<<<<<< HEAD
 	salary_structure = make_salary_structure(salary_structure_name, frequency, dont_submit=True)
+=======
+	if not frappe.db.exists("Salary Component", "Timesheet Component"):
+		frappe.get_doc({"doctype": "Salary Component", "salary_component": "Timesheet Component"}).insert()
+
+	salary_structure = make_salary_structure(salary_structure_name, frequency, company=company, dont_submit=True)
+>>>>>>> b027050f77 (Merge pull request #28845 from ruchamahabal/fix-salary-slip-timesheet)
 	salary_structure.salary_component = "Timesheet Component"
 	salary_structure.salary_slip_based_on_timesheet = 1
 	salary_structure.hour_rate = 50.0

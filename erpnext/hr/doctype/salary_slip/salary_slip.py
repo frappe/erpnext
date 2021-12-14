@@ -676,9 +676,17 @@ class SalarySlip(TransactionBase):
 
 	def get_amount_based_on_payment_days(self, row, joining_date, relieving_date):
 		amount, additional_amount = row.amount, row.additional_amount
+		timesheet_component = frappe.db.get_value("Salary Structure", self.salary_structure, "salary_component")
+
 		if (self.salary_structure and
+<<<<<<< HEAD:erpnext/hr/doctype/salary_slip/salary_slip.py
 			cint(row.depends_on_payment_days) and cint(self.total_working_days) and
 			(not self.salary_slip_based_on_timesheet or
+=======
+			cint(row.depends_on_payment_days) and cint(self.total_working_days)
+			and not (row.additional_salary and row.default_amount) # to identify overwritten additional salary
+			and (row.salary_component != timesheet_component or
+>>>>>>> b027050f77 (Merge pull request #28845 from ruchamahabal/fix-salary-slip-timesheet):erpnext/payroll/doctype/salary_slip/salary_slip.py
 				getdate(self.start_date) < joining_date or
 				(relieving_date and getdate(self.end_date) > relieving_date)
 			)):
@@ -687,7 +695,7 @@ class SalarySlip(TransactionBase):
 			amount = flt((flt(row.default_amount) * flt(self.payment_days)
 				/ cint(self.total_working_days)), row.precision("amount")) + additional_amount
 
-		elif not self.payment_days and not self.salary_slip_based_on_timesheet and cint(row.depends_on_payment_days):
+		elif not self.payment_days and row.salary_component != timesheet_component and cint(row.depends_on_payment_days):
 			amount, additional_amount = 0, 0
 		elif not row.amount:
 			amount = flt(row.default_amount) + flt(row.additional_amount)
