@@ -108,12 +108,11 @@ def get_data(filters):
 				interview.status.as_('interview_status'), interview.employee_status.as_('employee_status'),
 				interview.reference_document_name.as_('questionnaire'), fnf.name.as_('full_and_final_statement'))
 			.distinct()
-			.orderby(employee.relieving_date, order=Order.asc)
 			.where(
 				((employee.relieving_date.isnotnull()) | (employee.relieving_date != ''))
 				& ((interview.name.isnull()) | ((interview.name.isnotnull()) & (interview.docstatus != 2)))
 				& ((fnf.name.isnull()) | ((fnf.name.isnotnull()) & (fnf.docstatus != 2)))
-			)
+			).orderby(employee.relieving_date, order=Order.asc)
 	)
 
 	query = get_conditions(filters, query, employee, interview, fnf)

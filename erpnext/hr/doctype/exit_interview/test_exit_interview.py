@@ -19,7 +19,7 @@ class TestExitInterview(unittest.TestCase):
 		frappe.db.sql('delete from `tabExit Interview`')
 
 	def test_duplicate_interview(self):
-		employee = make_employee('employeeexit1@example.com')
+		employee = make_employee('employeeexitint1@example.com')
 		frappe.db.set_value('Employee', employee, 'relieving_date', getdate())
 		interview = create_exit_interview(employee)
 
@@ -27,7 +27,7 @@ class TestExitInterview(unittest.TestCase):
 		self.assertRaises(frappe.DuplicateEntryError, doc.save)
 
 	def test_relieving_date_validation(self):
-		employee = make_employee('employeeexit2@example.com')
+		employee = make_employee('employeeexitint2@example.com')
 		# unset relieving date
 		frappe.db.set_value('Employee', employee, 'relieving_date', None)
 
