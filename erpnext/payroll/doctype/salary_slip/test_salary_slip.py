@@ -164,7 +164,7 @@ class TestSalarySlip(unittest.TestCase):
 		mark_attendance(emp, add_days(first_sunday, 1), 'Absent', ignore_validate=True) # counted as absent
 
 		# salary structure based on timesheet
-		salary_structure = make_salary_structure_for_timesheet(emp)
+		make_salary_structure_for_timesheet(emp)
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
 		salary_slip = make_salary_slip_for_timesheet(timesheet.name)
 		salary_slip.start_date = month_start_date
