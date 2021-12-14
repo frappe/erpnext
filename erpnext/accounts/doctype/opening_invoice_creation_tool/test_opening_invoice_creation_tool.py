@@ -95,7 +95,7 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 	def test_renaming_of_invoice_using_invoice_number_field(self):
 		company = "_Test Opening Invoice Company"
 		party_1, party_2 = make_customer("Customer A"), make_customer("Customer B")
-		invoices = self.make_invoices(company=company, party_1=party_1, party_2=party_2, invoice_number="TEST-NEW-INV-11")
+		self.make_invoices(company=company, party_1=party_1, party_2=party_2, invoice_number="TEST-NEW-INV-11")
 
 		sales_inv1 = frappe.get_all('Sales Invoice', filters={'customer':'Customer A'})[0].get("name")
 		sales_inv2 = frappe.get_all('Sales Invoice', filters={'customer':'Customer B'})[0].get("name")
