@@ -420,13 +420,13 @@ def handle_status_change(doc, apply_sla_for_resolution):
 	if is_open_status(prev_status) and is_hold_status(doc.status):
 		# Issue is on hold -> Set on_hold_since
 		doc.on_hold_since = now_time
+		reset_expected_response_and_resolution(doc)
 
 	# Replied to Open
 	if is_hold_status(prev_status) and is_open_status(doc.status):
 		# Issue was on hold -> Calculate Total Hold Time
 		calculate_hold_hours()
 		# Issue is open -> reset resolution_date
-		reset_expected_response_and_resolution(doc)
 		reset_resolution_metrics(doc)
 
 	# Open to Closed
@@ -440,7 +440,6 @@ def handle_status_change(doc, apply_sla_for_resolution):
 		# Issue was closed -> Calculate Total Hold Time from resolution_date
 		calculate_hold_hours()
 		# Issue is open -> reset resolution_date
-		reset_expected_response_and_resolution(doc)
 		reset_resolution_metrics(doc)
 
 	# Closed to Replied
@@ -449,6 +448,7 @@ def handle_status_change(doc, apply_sla_for_resolution):
 		calculate_hold_hours()
 		# Issue is on hold -> Set on_hold_since
 		doc.on_hold_since = now_time
+		reset_expected_response_and_resolution(doc)
 
 	# Replied to Closed
 	if is_hold_status(prev_status) and is_fulfilled_status(doc.status):
@@ -645,7 +645,7 @@ def on_communication_update(doc, status):
 	if (
 		doc.sent_or_received == "Received" # a reply is received
 		and parent.get('status') == 'Open' # issue status is set as open from communication.py
-		and parent._doc_before_save
+		and parent.get_doc_before_save()
 		and parent.get('status') != parent._doc_before_save.get('status') # status changed
 	):
 		# undo the status change in db
@@ -655,12 +655,15 @@ def on_communication_update(doc, status):
 	elif (
 		doc.sent_or_received == "Sent" # a reply is sent
 		and parent.get('first_responded_on') # first_responded_on is set from communication.py
-		and parent._doc_before_save
+		and parent.get_doc_before_save()
 		and not parent._doc_before_save.get('first_responded_on') # first_responded_on was not set
 	):
 		# reset first_responded_on since it will be handled/set later on
 		parent.first_responded_on = None
 		parent.flags.on_first_reply = True
+
+	else:
+		return
 
 	handle_status_change(parent, for_resolution)
 	update_response_and_resolution_metrics(parent, for_resolution)
