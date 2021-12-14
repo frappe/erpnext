@@ -61,7 +61,7 @@ def get_data(conditions, filters):
 			IF(so.status in ('Completed','To Bill'), 0, (SELECT delay_days)) as delay,
 			soi.qty, soi.delivered_qty,
 			(soi.qty - soi.delivered_qty) AS pending_qty,
-			IF((SELECT pending_qty) = 0, DATEDIFF(Max(dn.posting_date), so.transaction_date), 0) as time_taken_to_deliver,
+			IF((SELECT pending_qty) = 0, (TO_SECONDS(Max(dn.posting_date))-TO_SECONDS(so.transaction_date)), 0) as time_taken_to_deliver,
 			IFNULL(SUM(sii.qty), 0) as billed_qty,
 			soi.base_amount as amount,
 			(soi.delivered_qty * soi.base_rate) as delivered_qty_amount,
@@ -268,7 +268,7 @@ def get_columns(filters):
 		{
 			"label": _("Time Taken to Deliver"),
 			"fieldname": "time_taken_to_deliver",
-			"fieldtype": "Data",
+			"fieldtype": "Duration",
 			"width": 100
 		}
 	])
