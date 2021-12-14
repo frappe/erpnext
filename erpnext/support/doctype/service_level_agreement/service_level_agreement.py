@@ -640,8 +640,6 @@ def on_communication_update(doc, status):
 	if not parent.meta.has_field('service_level_agreement'):
 		return
 
-	for_resolution = frappe.db.get_value('Service Level Agreement', parent.service_level_agreement, 'apply_sla_for_resolution')
-
 	if (
 		doc.sent_or_received == "Received" # a reply is received
 		and parent.get('status') == 'Open' # issue status is set as open from communication.py
@@ -650,7 +648,11 @@ def on_communication_update(doc, status):
 	):
 		# undo the status change in db
 		# since prev status is fetched from db
-		frappe.db.set_value(parent.doctype, parent.name, 'status', parent._doc_before_save.get('status'))
+		frappe.db.set_value(
+			parent.doctype, parent.name,
+			'status', parent._doc_before_save.get('status'),
+			update_modified=False
+		)
 
 	elif (
 		doc.sent_or_received == "Sent" # a reply is sent
@@ -665,6 +667,8 @@ def on_communication_update(doc, status):
 	else:
 		return
 
+	for_resolution = frappe.db.get_value('Service Level Agreement', parent.service_level_agreement, 'apply_sla_for_resolution')
+
 	handle_status_change(parent, for_resolution)
 	update_response_and_resolution_metrics(parent, for_resolution)
 	update_agreement_status(parent, for_resolution)
@@ -673,12 +677,10 @@ def on_communication_update(doc, status):
 
 
 def reset_expected_response_and_resolution(doc):
-	update_values = {}
 	if doc.meta.has_field("first_responded_on") and not doc.get('first_responded_on'):
-		update_values['response_by'] = None
+		doc.response_by = None
 	if doc.meta.has_field("resolution_by") and not doc.get('resolution_date'):
-		update_values['resolution_by'] = None
-	doc.db_set(update_values)
+		doc.resolution_by = None
 
 
 def set_response_by(doc, start_date_time, priority):
