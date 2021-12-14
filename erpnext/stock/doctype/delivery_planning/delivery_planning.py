@@ -689,7 +689,10 @@ class DeliveryPlanning(Document):
 				dnote._action = "save"
 				dnote.validate()
 				dnote.insert()
-				dnote.submit()
+				auto_submit = frappe.db.get_single_value('Stock Settings', 'dn_auto_submit')
+				if auto_submit == "Yes":
+					dnote.submit()
+
 				for i in item:
 					frappe.db.set_value('Delivery Planning Item', i.name,
 										{'delivery_note' : dnote.name,
