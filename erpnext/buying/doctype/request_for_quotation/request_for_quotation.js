@@ -195,11 +195,8 @@ frappe.ui.form.on("Request for Quotation",{
 frappe.ui.form.on("Request for Quotation Item", {
 	items_add(frm, cdt, cdn) {
 		if (frm.doc.schedule_date) {
-			let row = locals[cdt][cdn];
-			row.schedule_date = frm.doc.schedule_date;
-			frm.refresh_field("items");
+			frappe.model.set_value(cdt, cdn, 'schedule_date', frm.doc.schedule_date);
 		}
-
 	}
 });
 frappe.ui.form.on("Request for Quotation Supplier",{
