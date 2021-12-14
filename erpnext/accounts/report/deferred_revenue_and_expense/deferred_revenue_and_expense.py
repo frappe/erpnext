@@ -181,12 +181,6 @@ class Deferred_Invoice(object):
 		for item in self.uniq_items:
 			self.items.append(Deferred_Item(item, self, [x for x in items if x.item == item]))
 
-	def get_postings(self):
-		"""
-		get GL/Journal postings for deferred items in  invoice
-		"""
-		[item.get_gl_and_journal_postings() for item in self.items]
-
 	def calculate_invoice_revenue_expense_for_period(self):
 		"""
 		calculate deferred revenue/expense for all items in invoice
