@@ -2,7 +2,7 @@
 # License: MIT. See LICENSE
 
 import frappe
-from frappe import qb
+from frappe import _, qb
 from frappe.query_builder import Column, functions
 from frappe.utils import add_days, date_diff, flt, get_first_day, get_last_day, rounded
 
@@ -352,11 +352,15 @@ class Deferred_Revenue_and_Expense_Report(object):
 
 	def get_columns(self):
 		columns = []
-		columns.append({"label": "Name", "fieldname": "name", "fieldtype": "Data", "read_only": 1})
+		columns.append({"label": _("Name"), "fieldname": "name", "fieldtype": "Data", "read_only": 1})
 		for period in self.period_list:
 			columns.append(
-				{"label": period.label, "fieldname": period.key, "fieldtype": "Currency", "read_only": 1,}
-			)
+				{
+					"label": _(period.label),
+					"fieldname": period.key,
+					"fieldtype": "Currency",
+					"read_only": 1,
+				})
 		return columns
 
 	def generate_report_data(self):
@@ -393,8 +397,7 @@ class Deferred_Revenue_and_Expense_Report(object):
 						"name": "Actual Posting",
 						"chartType": "bar",
 						"values": [x.actual for x in self.period_total],
-					},
-					{"name": "Expected", "chartType": "line", "values": [x.total for x in self.period_total],},
+					}
 				],
 			},
 			"type": "axis-mixed",
@@ -402,6 +405,13 @@ class Deferred_Revenue_and_Expense_Report(object):
 			"axisOptions": {"xAxisMode": "Tick", "xIsSeries": True},
 			"barOptions": {"stacked": False, "spaceRatio": 0.5},
 		}
+
+		if self.filters.with_upcoming_postings:
+			chart["data"]["datasets"].append({
+				"name": "Expected",
+				"chartType": "line",
+				"values": [x.total for x in self.period_total]
+			})
 
 		return chart
 
