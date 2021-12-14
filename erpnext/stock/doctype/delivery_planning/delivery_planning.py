@@ -115,8 +115,6 @@ class DeliveryPlanning(Document):
 			dp_item.sorce_warehouse = i.warehouse
 			dp_item.postal_code = i.pincode
 			dp_item.delivery_date = i.delivery_date
-			dp_item.current_stock = i.projected_qty
-			dp_item.available_stock = i.actual_qty
 			dp_item.related_delivey_planning = self.name
 			dp_item.weight_per_unit = i.weight_per_unit
 			dp_item.supplier_dc = i.delivered_by_supplier
@@ -125,6 +123,25 @@ class DeliveryPlanning(Document):
 			dp_item.conversion_factor = i.conversion_factor
 			dp_item.stock_uom = i.stock_uom
 			dp_item.save(ignore_permissions = True);
+			dp_item.reload()
+			
+			docs = frappe.db.get_all(doctype='Bin',
+							filters={"warehouse": i.warehouse,
+									"item_code": i.item_code},
+							fields= ["projected_qty","actual_qty"])
+			
+			if docs:
+				for d in docs:
+					
+					frappe.db.set_value('Delivery Planning Item', dp_item.name, {
+									'current_stock': d.projected_qty,
+									'available_stock':  d.actual_qty
+										})
+					# dp_item.current_stock = d.projected_qty
+						# dp_item.available_stock = d.actual_qty
+			dp_item.reload()		
+
+
 		self.reload()	
 		if query:	
 			frappe.msgprint(
@@ -596,9 +613,9 @@ class DeliveryPlanning(Document):
 		conditions += "AND related_delivey_planning = %s" % frappe.db.escape(self.name)
 		dpi = frappe.db.sql(""" Select name, customer, transporter
 						from `tabDelivery Planning Item`
-						where docstatus = 1 AND supplier_dc = 0
+						where docstatus = 1 AND supplier_dc = 0 AND d_status != "Complete"
 						{conditions}
-						Group By customer, transporter
+						Group By customer, transporter, delivery_date
 						""".format(conditions=conditions), as_dict=1)
 		if dpi:
 			for d in dpi:
@@ -611,7 +628,9 @@ class DeliveryPlanning(Document):
 										filters={'related_delivey_planning': self.name,
 													'supplier_dc': 0,
 													'customer': d.customer,
-													'transporter': d.transporter},
+													'transporter': d.transporter,
+													'docstatus' :1,
+													'd_status':  "Incomplete"},
 										fields= ["item_code",
 													"ordered_qty",
 													'stock_uom',
@@ -638,8 +657,8 @@ class DeliveryPlanning(Document):
 						dnote.append('items', {
 							'item_code': i.item_code,
 							'warehouse': i.sorce_warehouse,
-							'qty': i.ordered_qty,
-							'stock_qty': i.ordered_qty,
+							'qty': i.qty_to_deliver,
+							'stock_qty': i.qty_to_deliver,
 							'uom': so_item.uom,
 							'rate': so_item.rate,
 							'stock_uom': so_item.stock_uom,
@@ -651,8 +670,8 @@ class DeliveryPlanning(Document):
 							dnote.append('items', {
 							'item_code': i.item_code,
 							'warehouse': i.sorce_warehouse,
-							'qty': i.ordered_qty,
-							'stock_qty': i.ordered_qty,
+							'qty': i.qty_to_deliver,
+							'stock_qty': i.qty_to_deliver,
 							'uom': i.uom,
 							'rate': i.rate,
 							'stock_uom': i.stock_uom,

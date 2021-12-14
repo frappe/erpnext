@@ -47,7 +47,7 @@ frappe.ui.form.on('Delivery Planning', {
 			}
 		});
 
-		if( frm.doc.docstatus === 1 && frm.doc.d_status != "Completed"){
+		if( frm.doc.docstatus === 1 ){
 
 		// code to show Delivery palnning button
 		frm.call({
