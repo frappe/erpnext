@@ -10,7 +10,11 @@ frappe.ui.form.on('Delivery Planning Item', {
 						method: 'update_stock',
 						callback: function(r){
 							if(r.message){
-								console.log("Item stock Updated")
+								
+							frm.doc.current_stock = r.message.projected_qty
+							frm.refresh_field("current_stock");
+							frm.doc.available_stock = r.message.actual_qty
+							frm.refresh_field("available_stock")
 							}
 						}
 					});
@@ -65,6 +69,10 @@ frappe.ui.form.on('Delivery Planning Item', {
 								callback: function(r){
 									if(r.message){
 										console.log("Item stock Updated")
+										frm.doc.current_stock = r.message.projected_qty
+										frm.refresh_field("current_stock");
+										frm.doc.available_stock = r.message.actual_qty
+										frm.refresh_field("available_stock")
 									}
 								}
 							});

@@ -206,20 +206,40 @@ class DeliveryPlanningItem(Document):
 								filters={"warehouse": self.sorce_warehouse,
 										"item_code": self.item_code},
 								fields= ["projected_qty","actual_qty"])
+		print(" ITEM CODE", docs, self.item_code)						
 
-		if(docs):
+		if docs:
 			for doc in docs:	
-				frappe.db.sql("""UPDATE `tabDelivery Planning Item` 
+				if(doc.projected_qty == 0 or doc.actual_qty == 0):
+					print(" INSIDE IF PRINT =========== 80808080 ")
+					frappe.db.sql("""UPDATE `tabDelivery Planning Item` 
+					SET current_stock = 0,
+					available_stock = 0
+					WHERE name = {0} """.format("'"+self.name+"'"))
+					frappe.throw(
+						title='Error',
+						msg='Selected Warehouse does not have stock'
+						)
+				else:	
+					print(" INSIDE Else  PRINT =========== 8080808000000 ")
+					frappe.db.sql("""UPDATE `tabDelivery Planning Item` 
 					SET current_stock = {0},
 					available_stock = {1}
 					WHERE name = {2} """.format(doc.projected_qty, doc.actual_qty, "'"+self.name+"'"))	
 
+					return doc	
+
+		else:
+			frappe.throw(
+						title='Error',
+						msg='Selected Warehouse does not have stock'
+						)
 				# frappe.db.set_value('Delivery Planning Item', self.name, {
 				# 		'available_stock' : doc.actual_qty,
 				# 		'current_stock' : doc.projected_qty
 				# 	})
 		# self.save()
-			return doc			
+					
 
 @frappe.whitelist()
 def approve_function(source_names):
