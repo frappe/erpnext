@@ -116,6 +116,8 @@
   "delivered_by_supplier",
   "warehouse_and_reference",
   "warehouse",
+  "force_default_warehouse",
+  "is_stock_item",
   "item_tax_template",
   "target_warehouse",
   "quality_inspection",
@@ -771,7 +773,6 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Is Fixed Asset",
-   "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
   },
@@ -1343,11 +1344,27 @@
    "label": "Item Tax Detail (Before Discount)",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_stock_item",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Stock Item",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "force_default_warehouse",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Force Default Warehouse",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-08-20 00:38:18.172960",
+ "modified": "2021-12-14 23:36:21.666686",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

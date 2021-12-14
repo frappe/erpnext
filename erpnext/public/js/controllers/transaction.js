@@ -2487,7 +2487,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if ((warehouse || force) && child_table && child_table.length) {
 			let doctype = child_table[0].doctype;
 			$.each(child_table || [], function(i, item) {
-				frappe.model.set_value(doctype, item.name, warehouse_field, warehouse);
+				if (force || !item.force_default_warehouse || warehouse_field != "warehouse") {
+					frappe.model.set_value(doctype, item.name, warehouse_field, warehouse);
+				}
 			});
 		}
 	},

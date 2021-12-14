@@ -117,6 +117,8 @@
   "warehouse_and_reference",
   "warehouse",
   "rejected_warehouse",
+  "force_default_warehouse",
+  "is_stock_item",
   "column_break_114",
   "material_request",
   "material_request_item",
@@ -555,7 +557,6 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Is Fixed Asset",
-   "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
   },
@@ -1335,11 +1336,27 @@
    "label": "Item Tax Detail (Before Discount)",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_stock_item",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Stock Item",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "force_default_warehouse",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Force Default Warehouse",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-08-20 00:38:19.166273",
+ "modified": "2021-12-14 23:35:50.042559",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

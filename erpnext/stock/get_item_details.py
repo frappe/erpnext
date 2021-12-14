@@ -241,6 +241,8 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 
 	warehouse = get_item_warehouse(item, args, overwrite_warehouse, item_defaults, item_group_defaults, brand_defaults,
 		item_source_defaults, transaction_type_defaults)
+	force_default_warehouse = get_force_default_warehouse(item_defaults, item_group_defaults, brand_defaults,
+		item_source_defaults, transaction_type_defaults)
 
 	if args.get('doctype') == "Material Request" and not args.get('material_request_type'):
 		args['material_request_type'] = frappe.db.get_value('Material Request',
@@ -265,9 +267,12 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"description": cstr(item.description).strip(),
 		"image": cstr(item.image).strip(),
 		"warehouse": warehouse,
-		'has_serial_no': item.has_serial_no,
-		'has_batch_no': item.has_batch_no,
-		'is_vehicle': item.is_vehicle,
+		"force_default_warehouse": force_default_warehouse,
+		"is_fixed_asset": item.is_fixed_asset,
+		"is_stock_item": item.is_stock_item,
+		"has_serial_no": item.has_serial_no,
+		"has_batch_no": item.has_batch_no,
+		"is_vehicle": item.is_vehicle,
 		"batch_no": args.get("batch_no") if args.get("batch_no") and frappe.db.get_value("Batch", args.get("batch_no"), 'item') == item.name else "",
 		"stock_uom": item.stock_uom,
 		"uom": default_uom,
@@ -286,7 +291,6 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"supplier": get_default_supplier(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults, transaction_type_defaults),
 		"update_stock": args.get("update_stock") if args.get('doctype') in ['Sales Invoice', 'Purchase Invoice'] else 0,
 		"delivered_by_supplier": item.delivered_by_supplier if args.get("doctype") in ["Sales Order", "Sales Invoice"] else 0,
-		"is_fixed_asset": item.is_fixed_asset,
 		"weight_per_unit":item.weight_per_unit,
 		"weight_uom":item.weight_uom,
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0,
@@ -361,6 +365,20 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 
 	return out
 
+
+def get_force_default_warehouse(item_defaults=None, item_group_defaults=None, brand_defaults=None,
+		item_source_defaults=None, transaction_type_defaults=None):
+	force_default_warehouse = (
+		transaction_type_defaults.get("force_default_warehouse") or
+		item_defaults.get("force_default_warehouse") or
+		item_source_defaults.get("force_default_warehouse") or
+		item_group_defaults.get("force_default_warehouse") or
+		brand_defaults.get("force_default_warehouse")
+	)
+
+	return cint(force_default_warehouse == "Yes")
+
+
 def get_item_warehouse(item, args, overwrite_warehouse, item_defaults=None, item_group_defaults=None, brand_defaults=None,
 		item_source_defaults=None, transaction_type_defaults=None):
 	if not item_defaults:
@@ -374,9 +392,10 @@ def get_item_warehouse(item, args, overwrite_warehouse, item_defaults=None, item
 	if not transaction_type_defaults:
 		transaction_type_defaults = get_transaction_type_defaults(args.get('transaction_type_name'), args.company)
 
+	parent_warehouse = args.get("set_warehouse")
+
 	if overwrite_warehouse or not args.warehouse:
-		warehouse = (
-			args.get("set_warehouse") or
+		default_warehouse = (
 			transaction_type_defaults.get("default_warehouse") or
 			item_defaults.get("default_warehouse") or
 			item_source_defaults.get("default_warehouse") or
@@ -384,6 +403,13 @@ def get_item_warehouse(item, args, overwrite_warehouse, item_defaults=None, item
 			brand_defaults.get("default_warehouse") or
 			args.get('warehouse')
 		)
+		force_default_warehouse = get_force_default_warehouse(item_defaults, item_group_defaults, brand_defaults,
+			item_source_defaults, transaction_type_defaults)
+
+		if force_default_warehouse:
+			warehouse = default_warehouse
+		else:
+			warehouse = parent_warehouse or default_warehouse
 
 		if not warehouse:
 			defaults = frappe.defaults.get_defaults() or {}

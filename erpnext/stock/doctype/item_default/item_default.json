@@ -6,9 +6,10 @@
  "field_order": [
   "company",
   "default_warehouse",
-  "default_terms",
+  "force_default_warehouse",
   "column_break_3",
   "default_price_list",
+  "default_terms",
   "allow_zero_valuation_rate",
   "purchase_defaults",
   "buying_cost_center",
@@ -25,6 +26,7 @@
  ],
  "fields": [
   {
+   "columns": 1,
    "fieldname": "company",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -34,9 +36,11 @@
    "reqd": 1
   },
   {
+   "columns": 1,
    "fieldname": "default_warehouse",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_list_view": 1,
    "label": "Default Warehouse",
    "options": "Warehouse"
   },
@@ -138,10 +142,16 @@
    "ignore_user_permissions": 1,
    "label": "Default Terms and Conditions",
    "options": "Terms and Conditions"
+  },
+  {
+   "fieldname": "force_default_warehouse",
+   "fieldtype": "Select",
+   "label": "Force Default Warehouse",
+   "options": "\nNo\nYes"
   }
  ],
  "istable": 1,
- "modified": "2021-03-26 18:13:44.789951",
+ "modified": "2021-12-14 12:00:18.419553",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Default",

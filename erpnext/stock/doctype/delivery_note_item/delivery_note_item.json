@@ -106,6 +106,9 @@
   "base_taxable_amount",
   "warehouse_and_reference",
   "warehouse",
+  "force_default_warehouse",
+  "is_stock_item",
+  "is_fixed_asset",
   "quality_inspection",
   "against_sales_order",
   "so_detail",
@@ -1199,11 +1202,35 @@
    "label": "Item Tax Detail (Before Discount)",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_stock_item",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Stock Item",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "force_default_warehouse",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Force Default Warehouse",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_fixed_asset",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Fixed Asset",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-08-20 00:38:20.185645",
+ "modified": "2021-12-14 23:38:52.615069",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
