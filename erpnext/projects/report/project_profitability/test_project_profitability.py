@@ -1,9 +1,8 @@
-from __future__ import unicode_literals
 
 import unittest
 
 import frappe
-from frappe.utils import add_days, getdate, nowdate
+from frappe.utils import add_days, getdate
 
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.projects.doctype.timesheet.test_timesheet import (
@@ -15,21 +14,26 @@ from erpnext.projects.report.project_profitability.project_profitability import 
 
 
 class TestProjectProfitability(unittest.TestCase):
-
 	def setUp(self):
+		frappe.db.sql('delete from `tabTimesheet`')
 		emp = make_employee('test_employee_9@salary.com', company='_Test Company')
+
 		if not frappe.db.exists('Salary Component', 'Timesheet Component'):
 			frappe.get_doc({'doctype': 'Salary Component', 'salary_component': 'Timesheet Component'}).insert()
+
 		make_salary_structure_for_timesheet(emp, company='_Test Company')
-		self.timesheet = make_timesheet(emp, simulate = True, is_billable=1)
+		date = getdate()
+
+		self.timesheet = make_timesheet(emp, is_billable=1)
 		self.salary_slip = make_salary_slip(self.timesheet.name)
-		holidays = self.salary_slip.get_holidays_for_employee(nowdate(), nowdate())
+
+		holidays = self.salary_slip.get_holidays_for_employee(date, date)
 		if holidays:
 			frappe.db.set_value('Payroll Settings', None, 'include_holidays_in_total_working_days', 1)
 
 		self.salary_slip.submit()
 		self.sales_invoice = make_sales_invoice(self.timesheet.name, '_Test Item', '_Test Customer')
-		self.sales_invoice.due_date = nowdate()
+		self.sales_invoice.due_date = date
 		self.sales_invoice.submit()
 
 		frappe.db.set_value('HR Settings', None, 'standard_working_hours', 8)
@@ -65,6 +69,4 @@ class TestProjectProfitability(unittest.TestCase):
 		self.assertEqual(fractional_cost, row.fractional_cost)
 
 	def tearDown(self):
-		frappe.get_doc("Sales Invoice", self.sales_invoice.name).cancel()
-		frappe.get_doc("Salary Slip", self.salary_slip.name).cancel()
-		frappe.get_doc("Timesheet", self.timesheet.name).cancel()
+		frappe.db.rollback()

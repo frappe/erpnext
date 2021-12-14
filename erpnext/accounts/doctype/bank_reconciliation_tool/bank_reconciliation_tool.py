@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -436,7 +434,7 @@ def get_pi_matching_query(amount_condition):
 
 def get_ec_matching_query(bank_account, company, amount_condition):
 	# get matching Expense Claim query
-	mode_of_payments = [x["parent"] for x in frappe.db.get_list("Mode of Payment Account",
+	mode_of_payments = [x["parent"] for x in frappe.db.get_all("Mode of Payment Account",
 			filters={"default_account": bank_account}, fields=["parent"])]
 	mode_of_payments = '(\'' + '\', \''.join(mode_of_payments) + '\' )'
 	company_currency = get_company_currency(company)
