@@ -1,16 +1,15 @@
 from __future__ import print_function, unicode_literals
 
+import unittest
 from uuid import uuid4 as _uuid4
 
 import frappe
-
-from erpnext.tests.utils import ERPNextTestCase
 
 
 def uuid4():
     return str(_uuid4())
 
-class TestTaxes(ERPNextTestCase):
+class TestTaxes(unittest.TestCase):
     def setUp(self):
         self.company = frappe.get_doc({
             'doctype': 'Company',

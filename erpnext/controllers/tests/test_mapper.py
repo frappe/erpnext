@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import json
+import unittest
 
 import frappe
 import frappe.utils
@@ -8,10 +9,8 @@ from frappe.model import mapper
 from frappe.test_runner import make_test_records
 from frappe.utils import add_months, nowdate
 
-from erpnext.tests.utils import ERPNextTestCase
 
-
-class TestMapper(ERPNextTestCase):
+class TestMapper(unittest.TestCase):
 	def test_map_docs(self):
 		'''Test mapping of multiple source docs on a single target doc'''
 
