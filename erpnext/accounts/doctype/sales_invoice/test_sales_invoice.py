@@ -2385,6 +2385,29 @@ class TestSalesInvoice(unittest.TestCase):
 		si.reload()
 		self.assertEqual(si.status, "Paid")
 
+	def test_sales_commission(self):
+		si = frappe.copy_doc(test_records[0])
+		item = copy.deepcopy(si.get('items')[0])
+		item.update({
+			"qty": 1,
+			"rate": 500,
+			"grant_commission": 1
+		})
+		si.append("items", item)
+
+		# Test valid values
+		for commission_rate, total_commission in ((0, 0), (10, 50), (100, 500)):
+			si.commission_rate = commission_rate
+			si.save()
+			self.assertEqual(si.amount_eligible_for_commission, 500)
+			self.assertEqual(si.total_commission, total_commission)
+
+		# Test invalid values
+		for commission_rate in (101, -1):
+			si.reload()
+			si.commission_rate = commission_rate
+			self.assertRaises(frappe.ValidationError, si.save)
+
 	def test_sales_invoice_submission_post_account_freezing_date(self):
 		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', add_days(getdate(), 1))
 		si = create_sales_invoice(do_not_save=True)
@@ -2396,6 +2419,32 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 
 		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
+
+	def test_over_billing_case_against_delivery_note(self):
+		'''
+			Test a case where duplicating the item with qty = 1 in the invoice
+			allows overbilling even if it is disabled
+		'''
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		over_billing_allowance = frappe.db.get_single_value('Accounts Settings', 'over_billing_allowance')
+		frappe.db.set_value('Accounts Settings', None, 'over_billing_allowance', 0)
+
+		dn = create_delivery_note()
+		dn.submit()
+
+		si = make_sales_invoice(dn.name)
+		# make a copy of first item and add it to invoice
+		item_copy = frappe.copy_doc(si.items[0])
+		si.append('items', item_copy)
+		si.save()
+
+		with self.assertRaises(frappe.ValidationError) as err:
+			si.submit()
+
+		self.assertTrue("cannot overbill" in str(err.exception).lower())
+
+		frappe.db.set_value('Accounts Settings', None, 'over_billing_allowance', over_billing_allowance)
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
