@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -550,10 +548,14 @@ def make_payment_order(source_name, target_doc=None):
 
 	return doclist
 
-def validate_payment(doc, method=""):
-	if not frappe.db.has_column(doc.reference_doctype, 'status'):
+def validate_payment(doc, method=None):
+	if doc.reference_doctype != "Payment Request" or (
+		frappe.db.get_value(doc.reference_doctype, doc.reference_docname, 'status')
+		!= "Paid"
+	):
 		return
 
-	status = frappe.db.get_value(doc.reference_doctype, doc.reference_docname, 'status')
-	if status == 'Paid':
-		frappe.throw(_("The Payment Request {0} is already paid, cannot process payment twice").format(doc.reference_docname))
+	frappe.throw(
+		_("The Payment Request {0} is already paid, cannot process payment twice")
+		.format(doc.reference_docname)
+	)

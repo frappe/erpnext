@@ -28,6 +28,11 @@ frappe.ui.form.on('Job Card', {
 		frappe.flags.resume_job = 0;
 		let has_items = frm.doc.items && frm.doc.items.length;
 
+		if (frm.doc.__onload.work_order_closed) {
+			frm.disable_save();
+			return;
+		}
+
 		if (!frm.doc.__islocal && has_items && frm.doc.docstatus < 2) {
 			let to_request = frm.doc.for_quantity > frm.doc.transferred_qty;
 			let excess_transfer_allowed = frm.doc.__onload.job_card_excess_transfer;
@@ -69,6 +74,15 @@ frappe.ui.form.on('Job Card', {
 			(frm.doc.for_quantity > frm.doc.total_completed_qty || !frm.doc.for_quantity)
 			&& (frm.doc.items || !frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)) {
 			frm.trigger("prepare_timer_buttons");
+		}
+
+		if (frm.doc.work_order) {
+			frappe.db.get_value('Work Order', frm.doc.work_order,
+				'transfer_material_against').then((r) => {
+				if (r.message.transfer_material_against == 'Work Order') {
+					frm.set_df_property('items', 'hidden', 1);
+				}
+			});
 		}
 	},
 

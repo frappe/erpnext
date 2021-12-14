@@ -1,6 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
-
 import frappe
 from frappe.test_runner import make_test_records
 
@@ -88,7 +87,7 @@ def make_workstation(*args, **kwargs):
 	args = frappe._dict(args)
 
 	workstation_name = args.workstation_name or args.workstation
-	try:
+	if not frappe.db.exists("Workstation", workstation_name):
 		doc = frappe.get_doc({
 			"doctype": "Workstation",
 			"workstation_name": workstation_name
@@ -98,5 +97,5 @@ def make_workstation(*args, **kwargs):
 		doc.insert()
 
 		return doc
-	except frappe.DuplicateEntryError:
-		return frappe.get_doc("Workstation", workstation_name)
+
+	return frappe.get_doc("Workstation", workstation_name)
