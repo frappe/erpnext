@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+from __future__ import unicode_literals
+
+import unittest
 
 import frappe
 
@@ -10,11 +13,10 @@ from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension imp
 )
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.exceptions import InvalidAccountDimensionError, MandatoryAccountDimensionError
-from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ['Location', 'Cost Center', 'Department']
 
-class TestAccountingDimensionFilter(ERPNextTestCase):
+class TestAccountingDimensionFilter(unittest.TestCase):
 	def setUp(self):
 		create_dimension()
 		create_accounting_dimension_filter()

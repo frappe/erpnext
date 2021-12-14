@@ -2,6 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from __future__ import unicode_literals
+
+import unittest
 
 import frappe
 from frappe.utils import add_days, cint, flt, getdate, nowdate, today
@@ -19,22 +22,19 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	make_purchase_receipt,
 )
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
-from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
 test_ignore = ["Serial No"]
 
-class TestPurchaseInvoice(ERPNextTestCase):
+class TestPurchaseInvoice(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
-		super().setUpClass()
 		unlink_payment_on_cancel_of_invoice()
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 
 	@classmethod
 	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
-		super().tearDownClass()
 
 	def test_gl_entries_without_perpetual_inventory(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")

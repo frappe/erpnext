@@ -1,10 +1,11 @@
+from __future__ import unicode_literals
+
+import unittest
 
 import frappe
 
-from erpnext.tests.utils import ERPNextTestCase
 
-
-class TestAccountsSettings(ERPNextTestCase):
+class TestAccountsSettings(unittest.TestCase):
 	def tearDown(self):
 		# Just in case `save` method succeeds, we need to take things back to default so that other tests
 		# don't break

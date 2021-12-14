@@ -1,5 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
+from __future__ import unicode_literals
+
+import unittest
 
 import frappe
 
@@ -8,11 +11,10 @@ from erpnext.accounts.doctype.shipping_rule.shipping_rule import (
 	ManyBlankToValuesError,
 	OverlappingConditionError,
 )
-from erpnext.tests.utils import ERPNextTestCase
 
 test_records = frappe.get_test_records('Shipping Rule')
 
-class TestShippingRule(ERPNextTestCase):
+class TestShippingRule(unittest.TestCase):
 	def test_from_greater_than_to(self):
 		shipping_rule = frappe.copy_doc(test_records[0])
 		shipping_rule.name = test_records[0].get('name')

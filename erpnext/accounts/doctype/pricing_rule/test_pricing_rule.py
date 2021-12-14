@@ -2,6 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from __future__ import unicode_literals
+
+import unittest
 
 import frappe
 
@@ -9,10 +12,9 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.get_item_details import get_item_details
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestPricingRule(ERPNextTestCase):
+class TestPricingRule(unittest.TestCase):
 	def setUp(self):
 		delete_existing_pricing_rules()
 		setup_pricing_rule_data()

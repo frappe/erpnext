@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+from __future__ import unicode_literals
+
+import unittest
 
 import frappe
 from frappe.utils import today
 
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ["Supplier Group", "Customer Group"]
 
-class TestTaxWithholdingCategory(ERPNextTestCase):
+class TestTaxWithholdingCategory(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
 		# create relevant supplier, etc
-		super().setUpClass()
 		create_records()
 		create_tax_with_holding_category()
 

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+from __future__ import unicode_literals
+
+import unittest
 
 import frappe
 from frappe.utils import add_months, nowdate
@@ -8,11 +11,10 @@ from frappe.utils import add_months, nowdate
 from erpnext.accounts.doctype.accounting_period.accounting_period import OverlapError
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.general_ledger import ClosedAccountingPeriod
-from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ['Item']
 
-class TestAccountingPeriod(ERPNextTestCase):
+class TestAccountingPeriod(unittest.TestCase):
 	def test_overlap(self):
 		ap1 = create_accounting_period(start_date = "2018-04-01",
 			end_date = "2018-06-30", company = "Wind Power LLC")

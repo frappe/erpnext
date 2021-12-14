@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+from __future__ import unicode_literals
+
+import unittest
 
 import frappe
 
 from erpnext.accounts.doctype.share_transfer.share_transfer import ShareDontExists
-from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ["Share Type", "Shareholder"]
 
-class TestShareTransfer(ERPNextTestCase):
+class TestShareTransfer(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("delete from `tabShare Transfer`")
 		frappe.db.sql("delete from `tabShare Balance`")

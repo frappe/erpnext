@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+from __future__ import unicode_literals
+
+import unittest
 
 import frappe
 from frappe.utils import getdate
@@ -11,10 +14,9 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	make_payment_order,
 )
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestPaymentOrder(ERPNextTestCase):
+class TestPaymentOrder(unittest.TestCase):
 	def setUp(self):
 		create_bank_account()
 

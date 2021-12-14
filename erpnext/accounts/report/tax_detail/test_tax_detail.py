@@ -1,7 +1,9 @@
+from __future__ import unicode_literals
 
 import datetime
 import json
 import os
+import unittest
 
 import frappe
 from frappe.utils import (
@@ -13,12 +15,10 @@ from frappe.utils import (
 	getdate,
 )
 
-from erpnext.tests.utils import ERPNextTestCase
-
 from .tax_detail import filter_match, save_custom_report
 
 
-class TestTaxDetail(ERPNextTestCase):
+class TestTaxDetail(unittest.TestCase):
 	def load_testdocs(self):
 		from erpnext.accounts.utils import FiscalYearError, get_fiscal_year
 		datapath, _ = os.path.splitext(os.path.realpath(__file__))

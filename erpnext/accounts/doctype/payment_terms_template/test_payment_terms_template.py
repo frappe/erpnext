@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+from __future__ import unicode_literals
+
+import unittest
 
 import frappe
 
-from erpnext.tests.utils import ERPNextTestCase
 
-
-class TestPaymentTermsTemplate(ERPNextTestCase):
+class TestPaymentTermsTemplate(unittest.TestCase):
 	def tearDown(self):
 		frappe.delete_doc('Payment Terms Template', '_Test Payment Terms Template For Test', force=1)
 

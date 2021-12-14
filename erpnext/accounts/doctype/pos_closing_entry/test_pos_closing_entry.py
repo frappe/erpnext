@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+from __future__ import unicode_literals
+
+import unittest
 
 import frappe
 
@@ -11,10 +14,9 @@ from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_inv
 from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestPOSClosingEntry(ERPNextTestCase):
+class TestPOSClosingEntry(unittest.TestCase):
 	def setUp(self):
 		# Make stock available for POS Sales
 		make_stock_entry(target="_Test Warehouse - _TC", qty=2, basic_rate=100)

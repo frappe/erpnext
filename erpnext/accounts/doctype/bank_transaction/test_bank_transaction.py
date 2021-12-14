@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+from __future__ import unicode_literals
 
 import json
+import unittest
 
 import frappe
 
@@ -14,14 +16,12 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_paymen
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ["Item", "Cost Center"]
 
-class TestBankTransaction(ERPNextTestCase):
+class TestBankTransaction(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
-		super().setUpClass()
 		make_pos_profile()
 		add_transactions()
 		add_vouchers()
@@ -40,7 +40,6 @@ class TestBankTransaction(ERPNextTestCase):
 
 		# Delete POS Profile
 		frappe.db.sql("delete from `tabPOS Profile`")
-		super().tearDownClass()
 
 	# This test checks if ERPNext is able to provide a linked payment for a bank transaction based on the amount of the bank transaction.
 	def test_linked_payments(self):

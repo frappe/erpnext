@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+from __future__ import unicode_literals
+
+import unittest
 
 import frappe
 
-from erpnext.tests.utils import ERPNextTestCase
 
-
-class TestPromotionalScheme(ERPNextTestCase):
+class TestPromotionalScheme(unittest.TestCase):
 	def test_promotional_scheme(self):
 		ps = make_promotional_scheme()
 		price_rules = frappe.get_all('Pricing Rule', fields = ["promotional_scheme_id", "name", "creation"],

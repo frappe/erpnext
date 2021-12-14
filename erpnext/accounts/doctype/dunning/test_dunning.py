@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+from __future__ import unicode_literals
+
+import unittest
 
 import frappe
 from frappe.utils import add_days, nowdate, today
@@ -13,13 +16,11 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice_against_cost_center,
 )
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestDunning(ERPNextTestCase):
+class TestDunning(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
-		super().setUpClass()
 		create_dunning_type()
 		create_dunning_type_with_zero_interest_rate()
 		unlink_payment_on_cancel_of_invoice()
@@ -27,7 +28,6 @@ class TestDunning(ERPNextTestCase):
 	@classmethod
 	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
-		super().tearDownClass()
 
 	def test_dunning(self):
 		dunning = create_dunning()

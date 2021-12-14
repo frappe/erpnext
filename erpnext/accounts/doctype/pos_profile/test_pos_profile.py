@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
+from __future__ import unicode_literals
+
+import unittest
 
 import frappe
 
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_child_nodes
 from erpnext.stock.get_item_details import get_pos_profile
-from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ['Item']
 
-class TestPOSProfile(ERPNextTestCase):
+class TestPOSProfile(unittest.TestCase):
 	def test_pos_profile(self):
 		make_pos_profile()
 

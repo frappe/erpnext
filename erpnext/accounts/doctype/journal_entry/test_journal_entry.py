@@ -1,6 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from __future__ import unicode_literals
+
+import unittest
 
 import frappe
 from frappe.utils import flt, nowdate
@@ -8,10 +11,9 @@ from frappe.utils import flt, nowdate
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import StockAccountInvalidTransaction
 from erpnext.exceptions import InvalidAccountCurrency
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestJournalEntry(ERPNextTestCase):
+class TestJournalEntry(unittest.TestCase):
 	def test_journal_entry_with_against_jv(self):
 		jv_invoice = frappe.copy_doc(test_records[2])
 		base_jv = frappe.copy_doc(test_records[0])
