@@ -1,9 +1,8 @@
-import datetime
 import unittest
 
 import frappe
 from frappe import qb
-from frappe.utils import add_months, nowdate
+from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -123,6 +122,7 @@ class TestDeferredRevenueAndExpense(unittest.TestCase):
 		supplier = create_supplier(
 			supplier_name="_Test Furniture Supplier", supplier_group="Local", supplier_type="Company"
 		)
+		supplier.save()
 
 		item = create_item(
 			"_Test Office Desk",
