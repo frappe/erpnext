@@ -197,6 +197,7 @@ class SalesInvoice(SellingController):
 
 	def calculate_insurance(self):
 		self.total_insurance_deduction = self.excesses + self.deductible + self.ineligible_expenses + self.co_pay20
+		self.deduction_grand_total = self.grand_total - self.total_insurance_deduction
 
 	def validate(self):
 		super(SalesInvoice, self).validate()
