@@ -9,6 +9,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-18.04
+    timeout-minutes: 60
 
     strategy:
       fail-fast: false
@@ -99,6 +100,8 @@ jobs:
 
       - name: Build Assets
         run: cd ~/frappe-bench/ && bench build
+        env:
+          CI: Yes
 
       - name: UI Tests
         run: cd ~/frappe-bench/ && bench --site test_site run-ui-tests erpnext --headless

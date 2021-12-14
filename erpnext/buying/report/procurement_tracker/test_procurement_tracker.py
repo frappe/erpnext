@@ -1,7 +1,6 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import unittest
 from datetime import datetime
@@ -45,7 +44,6 @@ class TestProcurementTracker(unittest.TestCase):
 		pr = make_purchase_receipt(po.name)
 		pr.get("items")[0].cost_center = "Main - _TPC"
 		pr.submit()
-		frappe.db.commit()
 		date_obj = datetime.date(datetime.now())
 
 		po.load_from_db()

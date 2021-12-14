@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, ESS LLP and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import unittest
 
@@ -21,6 +19,7 @@ class TestPatientMedicalRecord(unittest.TestCase):
 	def setUp(self):
 		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 0)
 		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
+		frappe.db.sql('delete from `tabPatient Appointment`')
 		make_pos_profile()
 
 	def test_medical_record(self):

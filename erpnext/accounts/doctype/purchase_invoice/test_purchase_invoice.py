@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from __future__ import unicode_literals
 
 import unittest
 
@@ -14,6 +13,7 @@ from erpnext.accounts.doctype.account.test_account import create_account, get_in
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.controllers.accounts_controller import get_payment_terms
+from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.exceptions import InvalidCurrency
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import create_item
@@ -35,6 +35,27 @@ class TestPurchaseInvoice(unittest.TestCase):
 	@classmethod
 	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
+
+	def test_purchase_invoice_received_qty(self):
+		"""
+			1. Test if received qty is validated against accepted + rejected
+			2. Test if received qty is auto set on save
+		"""
+		pi = make_purchase_invoice(
+			qty=1,
+			rejected_qty=1,
+			received_qty=3,
+			item_code="_Test Item Home Desktop 200",
+			rejected_warehouse = "_Test Rejected Warehouse - _TC",
+			update_stock=True, do_not_save=True)
+		self.assertRaises(QtyMismatchError, pi.save)
+
+		pi.items[0].received_qty = 0
+		pi.save()
+		self.assertEqual(pi.items[0].received_qty, 2)
+
+		# teardown
+		pi.delete()
 
 	def test_gl_entries_without_perpetual_inventory(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
@@ -789,29 +810,12 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi.shipping_rule = shipping_rule.name
 		pi.insert()
-
-		shipping_amount = 0.0
-		for condition in shipping_rule.get("conditions"):
-			if not condition.to_value or (flt(condition.from_value) <= pi.net_total <= flt(condition.to_value)):
-				shipping_amount = condition.shipping_amount
-
-		shipping_charge = {
-			"doctype": "Purchase Taxes and Charges",
-			"category": "Valuation and Total",
-			"charge_type": "Actual",
-			"account_head": shipping_rule.account,
-			"cost_center": shipping_rule.cost_center,
-			"tax_amount": shipping_amount,
-			"description": shipping_rule.name,
-			"add_deduct_tax": "Add"
-		}
-		pi.append("taxes", shipping_charge)
 		pi.save()
 
 		self.assertEqual(pi.net_total, 1250)
 
-		self.assertEqual(pi.total_taxes_and_charges, 462.3)
-		self.assertEqual(pi.grand_total, 1712.3)
+		self.assertEqual(pi.total_taxes_and_charges, 354.1)
+		self.assertEqual(pi.grand_total, 1604.1)
 
 	def test_make_pi_without_terms(self):
 		pi = make_purchase_invoice(do_not_save=1)
@@ -1133,25 +1137,21 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# Create Purchase Order with TDS applied
 		po = create_purchase_order(do_not_save=1, supplier=supplier.name, rate=3000, item='_Test Non Stock Item',
 			posting_date='2021-09-15')
-		po.apply_tds = 1
-		po.tax_withholding_category = 'TDS - 194 - Dividends - Individual'
 		po.save()
 		po.submit()
-
-		# Update Unrealized Profit / Loss Account which is used as default advance tax account
-		frappe.db.set_value('Company', '_Test Company', 'unrealized_profit_loss_account', '_Test Account Excise Duty - _TC')
 
 		# Create Payment Entry Against the order
 		payment_entry = get_payment_entry(dt='Purchase Order', dn=po.name)
 		payment_entry.paid_from = 'Cash - _TC'
+		payment_entry.apply_tax_withholding_amount = 1
+		payment_entry.tax_withholding_category = 'TDS - 194 - Dividends - Individual'
 		payment_entry.save()
 		payment_entry.submit()
 
 		# Check GLE for Payment Entry
 		expected_gle = [
-			['_Test Account Excise Duty - _TC', 3000, 0],
 			['Cash - _TC', 0, 27000],
-			['Creditors - _TC', 27000, 0],
+			['Creditors - _TC', 30000, 0],
 			['TDS Payable - _TC', 0, 3000],
 		]
 
@@ -1177,9 +1177,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# Zero net effect on final TDS Payable on invoice
 		expected_gle = [
 			['_Test Account Cost for Goods Sold - _TC', 30000],
-			['_Test Account Excise Duty - _TC', -3000],
-			['Creditors - _TC', -27000],
-			['TDS Payable - _TC', 0]
+			['Creditors - _TC', -30000]
 		]
 
 		gl_entries = frappe.db.sql("""select account, sum(debit - credit) as amount
@@ -1191,6 +1189,14 @@ class TestPurchaseInvoice(unittest.TestCase):
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[i][0], gle.account)
 			self.assertEqual(expected_gle[i][1], gle.amount)
+
+		payment_entry.load_from_db()
+		self.assertEqual(payment_entry.taxes[0].allocated_amount, 3000)
+
+		purchase_invoice.cancel()
+
+		payment_entry.load_from_db()
+		self.assertEqual(payment_entry.taxes[0].allocated_amount, 0)
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 	gl_entries = frappe.db.sql("""select account, debit, credit, posting_date

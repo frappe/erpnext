@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -62,7 +60,9 @@ class InpatientRecord(Document):
 		admit_patient(self, service_unit, check_in, expected_discharge)
 
 	@frappe.whitelist()
-	def discharge(self, check_out=now_datetime()):
+	def discharge(self, check_out=None):
+		if not check_out:
+			check_out = now_datetime()
 		if (getdate(check_out) < getdate(self.admitted_datetime)):
 			frappe.throw(_('Discharge date cannot be less than Admission date'))
 		discharge_patient(self, check_out)

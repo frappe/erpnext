@@ -4,9 +4,6 @@
 # ERPNext - web based ERP (http://erpnext.com)
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 from frappe.utils import add_days, flt, nowdate, nowtime, random_string
@@ -22,12 +19,13 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.utils import get_incoming_rate, get_stock_value_on, get_valuation_method
-from erpnext.tests.utils import change_settings
+from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 
-class TestStockReconciliation(unittest.TestCase):
+class TestStockReconciliation(ERPNextTestCase):
 	@classmethod
 	def setUpClass(self):
+		super().setUpClass()
 		create_batch_or_serial_no_items()
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
@@ -372,7 +370,6 @@ class TestStockReconciliation(unittest.TestCase):
 		"""
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.stock_ledger import NegativeStockError
-		frappe.db.commit()
 
 		item_code = "Backdated-Reco-Cancellation-Item"
 		warehouse = "_Test Warehouse - _TC"
@@ -395,16 +392,40 @@ class TestStockReconciliation(unittest.TestCase):
 		repost_exists = bool(frappe.db.exists("Repost Item Valuation", {"voucher_no": sr.name}))
 		self.assertFalse(repost_exists, msg="Negative stock validation not working on reco cancellation")
 
-		# teardown
-		frappe.db.rollback()
-
-
 	def test_valid_batch(self):
 		create_batch_item_with_batch("Testing Batch Item 1", "001")
 		create_batch_item_with_batch("Testing Batch Item 2", "002")
 		sr = create_stock_reconciliation(item_code="Testing Batch Item 1", qty=1, rate=100, batch_no="002"
 			, do_not_submit=True)
 		self.assertRaises(frappe.ValidationError, sr.submit)
+
+	def test_serial_no_cancellation(self):
+
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		item = create_item("Stock-Reco-Serial-Item-9", is_stock_item=1)
+		if not item.has_serial_no:
+			item.has_serial_no = 1
+			item.serial_no_series = "SRS9.####"
+			item.save()
+
+		item_code = item.name
+		warehouse = "_Test Warehouse - _TC"
+
+		se1 = make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=700)
+
+		serial_nos = get_serial_nos(se1.items[0].serial_no)
+		# reduce 1 item
+		serial_nos.pop()
+		new_serial_nos = "\n".join(serial_nos)
+
+		sr = create_stock_reconciliation(item_code=item.name, warehouse=warehouse, serial_no=new_serial_nos, qty=9)
+		sr.cancel()
+
+		active_sr_no = frappe.get_all("Serial No",
+				filters={"item_code": item_code, "warehouse": warehouse, "status": "Active"})
+
+		self.assertEqual(len(active_sr_no), 10)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)

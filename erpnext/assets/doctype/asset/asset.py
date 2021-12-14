@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 import math
@@ -194,7 +192,7 @@ class Asset(AccountsController):
 			start = self.clear_depreciation_schedule()
 
 			# value_after_depreciation - current Asset value
-			if d.value_after_depreciation:
+			if self.docstatus == 1 and d.value_after_depreciation:
 				value_after_depreciation = (flt(d.value_after_depreciation) -
 					flt(self.opening_accumulated_depreciation))
 			else:

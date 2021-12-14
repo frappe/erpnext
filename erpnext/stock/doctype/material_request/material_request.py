@@ -4,7 +4,6 @@
 # ERPNext - web based ERP (http://erpnext.com)
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -296,7 +295,7 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 
 		return d.ordered_qty < d.stock_qty and child_filter
 
-	doclist = get_mapped_doc("Material Request", source_name, 	{
+	doclist = get_mapped_doc("Material Request", source_name, {
 		"Material Request": {
 			"doctype": "Purchase Order",
 			"validation": {
@@ -323,7 +322,7 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 
 @frappe.whitelist()
 def make_request_for_quotation(source_name, target_doc=None):
-	doclist = get_mapped_doc("Material Request", source_name, 	{
+	doclist = get_mapped_doc("Material Request", source_name, {
 		"Material Request": {
 			"doctype": "Request for Quotation",
 			"validation": {
@@ -502,7 +501,8 @@ def make_stock_entry(source_name, target_doc=None):
 			"field_map": {
 				"name": "material_request_item",
 				"parent": "material_request",
-				"uom": "stock_uom"
+				"uom": "stock_uom",
+				"job_card_item": "job_card_item"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.ordered_qty < doc.stock_qty

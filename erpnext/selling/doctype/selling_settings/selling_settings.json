@@ -193,12 +193,6 @@
    "fieldname": "sales_transactions_settings_section",
    "fieldtype": "Section Break",
    "label": "Transaction Settings"
-  },
-  {
-   "default": "0",
-   "fieldname": "editable_bundle_item_rates",
-   "fieldtype": "Check",
-   "label": "Calculate Product Bundle Price based on Child Items' Rates"
   }
  ],
  "icon": "fa fa-cog",

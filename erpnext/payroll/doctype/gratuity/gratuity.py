@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 from math import floor
 
@@ -211,7 +209,7 @@ def get_total_applicable_component_amount(employee, applicable_earnings_componen
 	sal_slip  = get_last_salary_slip(employee)
 	if not sal_slip:
 		frappe.throw(_("No Salary Slip is found for Employee: {0}").format(bold(employee)))
-	component_and_amounts = frappe.get_list("Salary Detail",
+	component_and_amounts = frappe.get_all("Salary Detail",
 		filters={
 			"docstatus": 1,
 			'parent': sal_slip,

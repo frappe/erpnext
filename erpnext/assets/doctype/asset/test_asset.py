@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import unittest
 
@@ -681,6 +679,27 @@ class TestAsset(unittest.TestCase):
 
 		# reset indian company
 		frappe.flags.company = company_flag
+
+	def test_expected_value_change(self):
+		"""
+			tests if changing `expected_value_after_useful_life`
+			affects `value_after_depreciation`
+		"""
+
+		asset = create_asset(calculate_depreciation=1)
+		asset.opening_accumulated_depreciation = 2000
+		asset.number_of_depreciations_booked = 1
+
+		asset.finance_books[0].expected_value_after_useful_life = 100
+		asset.save()
+		asset.reload()
+		self.assertEquals(asset.finance_books[0].value_after_depreciation, 98000.0)
+
+		# changing expected_value_after_useful_life shouldn't affect value_after_depreciation
+		asset.finance_books[0].expected_value_after_useful_life = 200
+		asset.save()
+		asset.reload()
+		self.assertEquals(asset.finance_books[0].value_after_depreciation, 98000.0)
 
 def create_asset_data():
 	if not frappe.db.exists("Asset Category", "Computers"):

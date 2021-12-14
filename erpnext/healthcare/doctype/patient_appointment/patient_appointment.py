@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, ESS LLP and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import datetime
 import json
@@ -354,7 +352,7 @@ def get_available_slots(practitioner_doc, date):
 		validate_practitioner_schedules(schedule_entry, practitioner)
 		practitioner_schedule = frappe.get_doc('Practitioner Schedule', schedule_entry.schedule)
 
-		if practitioner_schedule:
+		if practitioner_schedule and not practitioner_schedule.disabled:
 			available_slots = []
 			for time_slot in practitioner_schedule.time_slots:
 				if weekday == time_slot.day:

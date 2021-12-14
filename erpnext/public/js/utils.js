@@ -712,6 +712,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			allow_child_item_selection: opts.allow_child_item_selection,
 			child_fieldname: opts.child_fielname,
 			child_columns: opts.child_columns,
+			size: opts.size,
 			action: function(selections, args) {
 				let values = selections;
 				if (values.length === 0) {
@@ -750,9 +751,13 @@ frappe.form.link_formatters['Item'] = function(value, doc) {
 }
 
 frappe.form.link_formatters['Employee'] = function(value, doc) {
-	if(doc && doc.employee_name && doc.employee_name !== value) {
-		return value? value + ': ' + doc.employee_name: doc.employee_name;
+	if (doc && value && doc.employee_name && doc.employee_name !== value && doc.employee === value) {
+		return value + ': ' + doc.employee_name;
+	} else if (!value && doc.doctype && doc.employee_name) {
+		// format blank value in child table
+		return doc.employee;
 	} else {
+		// if value is blank in report view or project name and name are the same, return as is
 		return value;
 	}
 }

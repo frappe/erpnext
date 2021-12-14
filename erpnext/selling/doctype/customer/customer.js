@@ -116,14 +116,15 @@ frappe.ui.form.on("Customer", {
 			frappe.contacts.render_address_and_contact(frm);
 
 			// custom buttons
-			frm.add_custom_button(__('Accounting Ledger'), function() {
-				frappe.set_route('query-report', 'General Ledger',
-					{party_type:'Customer', party:frm.doc.name});
-			});
 
-			frm.add_custom_button(__('Accounts Receivable'), function() {
+			frm.add_custom_button(__('Accounts Receivable'), function () {
 				frappe.set_route('query-report', 'Accounts Receivable', {customer:frm.doc.name});
-			});
+			}, __('View'));
+
+			frm.add_custom_button(__('Accounting Ledger'), function () {
+				frappe.set_route('query-report', 'General Ledger',
+					{party_type: 'Customer', party: frm.doc.name});
+			}, __('View'));
 
 			frm.add_custom_button(__('Pricing Rule'), function () {
 				erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
@@ -132,6 +133,12 @@ frappe.ui.form.on("Customer", {
 			frm.add_custom_button(__('Get Customer Group Details'), function () {
 				frm.trigger("get_customer_group_details");
 			}, __('Actions'));
+
+			if (cint(frappe.defaults.get_default("enable_common_party_accounting"))) {
+				frm.add_custom_button(__('Link with Supplier'), function () {
+					frm.trigger('show_party_link_dialog');
+				}, __('Actions'));
+			}
 
 			// indicator
 			erpnext.utils.set_party_dashboard_indicators(frm);
@@ -157,6 +164,43 @@ frappe.ui.form.on("Customer", {
 			}
 		});
 
+	},
+	show_party_link_dialog: function(frm) {
+		const dialog = new frappe.ui.Dialog({
+			title: __('Select a Supplier'),
+			fields: [{
+				fieldtype: 'Link', label: __('Supplier'),
+				options: 'Supplier', fieldname: 'supplier', reqd: 1
+			}],
+			primary_action: function({ supplier }) {
+				frappe.call({
+					method: 'erpnext.accounts.doctype.party_link.party_link.create_party_link',
+					args: {
+						primary_role: 'Customer',
+						primary_party: frm.doc.name,
+						secondary_party: supplier
+					},
+					freeze: true,
+					callback: function() {
+						dialog.hide();
+						frappe.msgprint({
+							message: __('Successfully linked to Supplier'),
+							alert: true
+						});
+					},
+					error: function() {
+						dialog.hide();
+						frappe.msgprint({
+							message: __('Linking to Supplier Failed. Please try again.'),
+							title: __('Linking Failed'),
+							indicator: 'red'
+						});
+					}
+				});
+			},
+			primary_action_label: __('Create Link')
+		});
+		dialog.show();
 	}
 });
 

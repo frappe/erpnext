@@ -37,7 +37,6 @@
   },
   {
    "default": "7",
-   "description": "Auto close Issue after 7 days",
    "fieldname": "close_issue_after_days",
    "fieldtype": "Int",
    "label": "Close Issue After Days"
@@ -164,7 +163,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-06-11 13:08:38.473616",
+ "modified": "2021-10-14 13:08:38.473616",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support Settings",
