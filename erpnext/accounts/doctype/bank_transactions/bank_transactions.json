@@ -96,7 +96,8 @@
    "depends_on": "bank_deposit",
    "fieldname": "document",
    "fieldtype": "Data",
-   "label": "Document"
+   "label": "Document",
+   "unique": 1
   },
   {
    "depends_on": "bank_deposit",
@@ -184,7 +185,8 @@
    "depends_on": "credit_note",
    "fieldname": "next_note_nc",
    "fieldtype": "Data",
-   "label": "Next Note"
+   "label": "Next Note",
+   "unique": 1
   },
   {
    "depends_on": "credit_note",
@@ -215,7 +217,8 @@
    "depends_on": "debit_note",
    "fieldname": "next_note_nd",
    "fieldtype": "Data",
-   "label": "Next Note"
+   "label": "Next Note",
+   "unique": 1
   },
   {
    "depends_on": "debit_note",
@@ -336,7 +339,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-12-13 17:04:31.671325",
+ "modified": "2021-12-14 12:59:34.956494",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transactions",
