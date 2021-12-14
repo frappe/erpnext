@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder import DocType
 from frappe.utils import cint, cstr, flt, get_fullname
 
 from erpnext.crm.utils import add_link_in_communication, copy_comments
@@ -33,7 +34,6 @@ class Opportunity(TransactionBase):
 		})
 
 		self.make_new_lead_if_required()
-
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
@@ -75,21 +75,21 @@ class Opportunity(TransactionBase):
 		"""Set lead against new opportunity"""
 		if (not self.get("party_name")) and self.contact_email:
 			# check if customer is already created agains the self.contact_email
-			customer = frappe.db.sql("""select
-				distinct `tabDynamic Link`.link_name as customer
-				from
-					`tabContact`,
-					`tabDynamic Link`
-				where `tabContact`.email_id='{0}'
-				and
-					`tabContact`.name=`tabDynamic Link`.parent
-				and
-					ifnull(`tabDynamic Link`.link_name, '')<>''
-				and
-					`tabDynamic Link`.link_doctype='Customer'
-			""".format(self.contact_email), as_dict=True)
-			if customer and customer[0].customer:
-				self.party_name = customer[0].customer
+			dynamic_link, contact = DocType("Dynamic Link"), DocType("Contact")
+			customer = frappe.qb.from_(
+				dynamic_link
+			).join(
+				contact
+			).on(
+				(contact.name == dynamic_link.parent)
+				& (dynamic_link.link_doctype == "Customer")
+				& (contact.email_id == self.contact_email)
+			).select(
+				dynamic_link.link_name
+			).distinct().run(as_dict=True)
+
+			if customer and customer[0].link_name:
+				self.party_name = customer[0].link_name
 				self.opportunity_from = "Customer"
 				return
 
@@ -196,30 +196,31 @@ class Opportunity(TransactionBase):
 		self.add_calendar_event()
 
 	def add_calendar_event(self, opts=None, force=False):
-		if not opts:
-			opts = frappe._dict()
+		if frappe.db.get_single_value('CRM Settings', 'create_event_on_next_contact_date_opportunity'):
+			if not opts:
+				opts = frappe._dict()
 
-		opts.description = ""
-		opts.contact_date = self.contact_date
+			opts.description = ""
+			opts.contact_date = self.contact_date
 
-		if self.party_name and self.opportunity_from == 'Customer':
-			if self.contact_person:
-				opts.description = 'Contact '+cstr(self.contact_person)
-			else:
-				opts.description = 'Contact customer '+cstr(self.party_name)
-		elif self.party_name and self.opportunity_from == 'Lead':
-			if self.contact_display:
-				opts.description = 'Contact '+cstr(self.contact_display)
-			else:
-				opts.description = 'Contact lead '+cstr(self.party_name)
+			if self.party_name and self.opportunity_from == 'Customer':
+				if self.contact_person:
+					opts.description = 'Contact '+cstr(self.contact_person)
+				else:
+					opts.description = 'Contact customer '+cstr(self.party_name)
+			elif self.party_name and self.opportunity_from == 'Lead':
+				if self.contact_display:
+					opts.description = 'Contact '+cstr(self.contact_display)
+				else:
+					opts.description = 'Contact lead '+cstr(self.party_name)
 
-		opts.subject = opts.description
-		opts.description += '. By : ' + cstr(self.contact_by)
+			opts.subject = opts.description
+			opts.description += '. By : ' + cstr(self.contact_by)
 
-		if self.to_discuss:
-			opts.description += ' To Discuss : ' + cstr(self.to_discuss)
+			if self.to_discuss:
+				opts.description += ' To Discuss : ' + cstr(self.to_discuss)
 
-		super(Opportunity, self).add_calendar_event(opts, force)
+			super(Opportunity, self).add_calendar_event(opts, force)
 
 	def validate_item_details(self):
 		if not self.get('items'):
@@ -368,7 +369,7 @@ def set_multiple_status(names, status):
 
 def auto_close_opportunity():
 	""" auto close the `Replied` Opportunities after 7 days """
-	auto_close_after_days = frappe.db.get_single_value("Selling Settings", "close_opportunity_after_days") or 15
+	auto_close_after_days = frappe.db.get_single_value("CRM Settings", "close_opportunity_after_days") or 15
 
 	opportunities = frappe.db.sql(""" select name from tabOpportunity where status='Replied' and
 		modified<DATE_SUB(CURDATE(), INTERVAL %s DAY) """, (auto_close_after_days), as_dict=True)

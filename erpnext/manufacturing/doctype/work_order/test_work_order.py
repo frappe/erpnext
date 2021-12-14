@@ -21,12 +21,16 @@ from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.utils import get_bin
+from erpnext.tests.utils import ERPNextTestCase, timeout
 
 
-class TestWorkOrder(unittest.TestCase):
+class TestWorkOrder(ERPNextTestCase):
 	def setUp(self):
 		self.warehouse = '_Test Warehouse 2 - _TC'
 		self.item = '_Test Item'
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def check_planned_qty(self):
 
@@ -376,6 +380,7 @@ class TestWorkOrder(unittest.TestCase):
 		self.assertEqual(len(ste.additional_costs), 1)
 		self.assertEqual(ste.total_additional_costs, 1000)
 
+	@timeout(seconds=60)
 	def test_job_card(self):
 		stock_entries = []
 		bom = frappe.get_doc('BOM', {
@@ -769,6 +774,7 @@ class TestWorkOrder(unittest.TestCase):
 			total_pl_qty
 		)
 
+	@timeout(seconds=60)
 	def test_job_card_scrap_item(self):
 		items = ['Test FG Item for Scrap Item Test', 'Test RM Item 1 for Scrap Item Test',
 			'Test RM Item 2 for Scrap Item Test']
