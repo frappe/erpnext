@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import json
 import os
@@ -12,6 +10,9 @@ from frappe.core.doctype.data_import.data_import import import_doc
 from frappe.utils import cint, cstr
 
 from erpnext.erpnext_integrations.connectors.shopify_connection import create_order
+from erpnext.erpnext_integrations.doctype.shopify_settings.shopify_settings import (
+	setup_custom_fields,
+)
 from erpnext.erpnext_integrations.doctype.shopify_settings.sync_customer import create_customer
 from erpnext.erpnext_integrations.doctype.shopify_settings.sync_product import make_item
 
@@ -25,8 +26,7 @@ class ShopifySettings(unittest.TestCase):
 		if not cls.allow_negative_stock:
 			frappe.db.set_value('Stock Settings', None, 'allow_negative_stock', 1)
 
-		# use the fixture data
-		import_doc(path=frappe.get_app_path("erpnext", "erpnext_integrations/doctype/shopify_settings/test_data/custom_field.json"))
+		setup_custom_fields()
 
 		frappe.reload_doctype("Customer")
 		frappe.reload_doctype("Sales Order")

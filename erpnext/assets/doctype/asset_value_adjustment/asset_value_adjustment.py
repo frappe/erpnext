@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -12,7 +10,11 @@ from frappe.utils import cint, date_diff, flt, formatdate, getdate
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
+from erpnext.assets.doctype.asset.asset import get_depreciation_amount
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
+from erpnext.regional.india.utils import (
+	get_depreciation_amount as get_depreciation_amount_for_india,
+)
 
 
 class AssetValueAdjustment(Document):
@@ -92,6 +94,7 @@ class AssetValueAdjustment(Document):
 
 	def reschedule_depreciations(self, asset_value):
 		asset = frappe.get_doc('Asset', self.asset)
+		country = frappe.get_value('Company', self.company, 'country')
 
 		for d in asset.finance_books:
 			d.value_after_depreciation = asset_value
@@ -113,8 +116,10 @@ class AssetValueAdjustment(Document):
 						depreciation_amount = days * rate_per_day
 						from_date = data.schedule_date
 					else:
-						depreciation_amount = asset.get_depreciation_amount(value_after_depreciation,
-							no_of_depreciations, d)
+						if country == "India":
+							depreciation_amount = get_depreciation_amount_for_india(asset, value_after_depreciation, d)
+						else:
+							depreciation_amount = get_depreciation_amount(asset, value_after_depreciation, d)
 
 					if depreciation_amount:
 						value_after_depreciation -= flt(depreciation_amount)
