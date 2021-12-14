@@ -246,8 +246,8 @@ class SellingController(StockController):
 					'voucher_type': self.doctype,
 					'allow_zero_valuation': d.allow_zero_valuation_rate,
 					'delivery_note': d.get('delivery_note'),
-					'dn_detail': d.get('dn_detail'),
-					'si_detail': d.get('si_detail')
+					'delivery_note_item': d.get('delivery_note_item'),
+					'sales_invoice_item': d.get('sales_invoice_item')
 				}))
 		return il
 
@@ -265,27 +265,27 @@ class SellingController(StockController):
 			where pb.new_item_code = %s and pbi.parent = pb.name and i.name = pbi.item_code and i.is_stock_item = 1""", item_code))
 		return ret
 
-	def get_already_delivered_qty(self, current_docname, so, so_detail):
+	def get_already_delivered_qty(self, current_docname, so, sales_order_item):
 		delivered_via_dn = frappe.db.sql("""select sum(qty) from `tabDelivery Note Item`
-			where so_detail = %s and docstatus = 1
-			and against_sales_order = %s
-			and parent != %s""", (so_detail, so, current_docname))
+			where sales_order_item = %s and docstatus = 1
+			and sales_order = %s
+			and parent != %s""", (sales_order_item, so, current_docname))
 
 		delivered_via_si = frappe.db.sql("""select sum(si_item.qty)
 			from `tabSales Invoice Item` si_item, `tabSales Invoice` si
 			where si_item.parent = si.name and si.update_stock = 1
-			and si_item.so_detail = %s and si.docstatus = 1
+			and si_item.sales_order_item = %s and si.docstatus = 1
 			and si_item.sales_order = %s
-			and si.name != %s""", (so_detail, so, current_docname))
+			and si.name != %s""", (sales_order_item, so, current_docname))
 
 		total_delivered_qty = (flt(delivered_via_dn[0][0]) if delivered_via_dn else 0) \
 			+ (flt(delivered_via_si[0][0]) if delivered_via_si else 0)
 
 		return total_delivered_qty
 
-	def get_so_qty_and_warehouse(self, so_detail):
+	def get_so_qty_and_warehouse(self, sales_order_item):
 		so_item = frappe.db.sql("""select qty, warehouse from `tabSales Order Item`
-			where name = %s and docstatus = 1""", so_detail, as_dict=1)
+			where name = %s and docstatus = 1""", sales_order_item, as_dict=1)
 		so_qty = so_item and flt(so_item[0]["qty"]) or 0.0
 		so_warehouse = so_item and so_item[0]["warehouse"] or ""
 		return so_qty, so_warehouse
@@ -300,11 +300,11 @@ class SellingController(StockController):
 	def update_reserved_qty(self):
 		so_map = {}
 		for d in self.get("items"):
-			if d.so_detail:
-				if self.doctype == "Delivery Note" and d.against_sales_order:
-					so_map.setdefault(d.against_sales_order, []).append(d.so_detail)
+			if d.sales_order_item:
+				if self.doctype == "Delivery Note" and d.sales_order:
+					so_map.setdefault(d.sales_order, []).append(d.sales_order_item)
 				elif self.doctype == "Sales Invoice" and d.sales_order and self.update_stock:
-					so_map.setdefault(d.sales_order, []).append(d.so_detail)
+					so_map.setdefault(d.sales_order, []).append(d.sales_order_item)
 
 		for so, so_item_rows in so_map.items():
 			if so and so_item_rows:
@@ -331,24 +331,24 @@ class SellingController(StockController):
 
 				if cint(self.is_return) and self.docstatus==1:
 					delivery_note = self.return_against if self.doctype == "Delivery Note" else d.get('delivery_note')
-					if d.get('dn_detail') and delivery_note:
+					if d.get('delivery_note_item') and delivery_note:
 						return_dependency = [{
 							"dependent_voucher_type": "Delivery Note",
 							"dependent_voucher_no": delivery_note,
-							"dependent_voucher_detail_no": d.dn_detail,
+							"dependent_voucher_detail_no": d.delivery_note_item,
 							"dependency_type": "Rate"
 						}]
-						return_rate = self.get_incoming_rate_for_sales_return(voucher_detail_no=d.dn_detail,
+						return_rate = self.get_incoming_rate_for_sales_return(voucher_detail_no=d.delivery_note_item,
 							against_document_type="Delivery Note", against_document=delivery_note)
-					elif self.doctype == "Sales Invoice" and d.get('si_detail') and self.get('return_against')\
+					elif self.doctype == "Sales Invoice" and d.get('sales_invoice_item') and self.get('return_against')\
 							and frappe.db.get_value("Sales Invoice", self.return_against, 'update_stock', cache=1):
 						return_dependency = [{
 							"dependent_voucher_type": "Sales Invoice",
 							"dependent_voucher_no": self.return_against,
-							"dependent_voucher_detail_no": d.si_detail,
+							"dependent_voucher_detail_no": d.sales_invoice_item,
 							"dependency_type": "Rate"
 						}]
-						return_rate = self.get_incoming_rate_for_sales_return(voucher_detail_no=d.si_detail,
+						return_rate = self.get_incoming_rate_for_sales_return(voucher_detail_no=d.sales_invoice_item,
 							against_document_type="Sales Invoice", against_document=self.return_against)
 					else:
 						return_rate = self.get_incoming_rate_for_sales_return(item_code=d.item_code,
@@ -420,7 +420,7 @@ class SellingController(StockController):
 
 	def set_po_nos(self):
 		if self.doctype in ("Delivery Note", "Sales Invoice") and hasattr(self, "items"):
-			ref_fieldname = "against_sales_order" if self.doctype == "Delivery Note" else "sales_order"
+			ref_fieldname = "sales_order" if self.doctype == "Delivery Note" else "sales_order"
 			sales_orders = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
 			if sales_orders:
 				po_nos = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', sales_orders)})
@@ -463,8 +463,8 @@ class SellingController(StockController):
 				e = [d.item_code, d.description, d.warehouse, d.sales_order or d.delivery_note, d.batch_no or '']
 				f = [d.item_code, d.description, d.sales_order or d.delivery_note]
 			elif self.doctype == "Delivery Note":
-				e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
-				f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
+				e = [d.item_code, d.description, d.warehouse, d.sales_order or d.sales_invoice, d.batch_no or '']
+				f = [d.item_code, d.description, d.sales_order or d.sales_invoice]
 			elif self.doctype in ["Sales Order", "Quotation"]:
 				e = [d.item_code, d.description, d.warehouse, '']
 				f = [d.item_code, d.description]

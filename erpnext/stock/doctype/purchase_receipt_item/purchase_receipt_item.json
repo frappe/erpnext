@@ -129,7 +129,7 @@
   "asset_location",
   "asset_category",
   "schedule_date",
-  "pr_detail",
+  "purchase_receipt_item",
   "planning_section",
   "landed_cost_voucher_amount",
   "column_break_127",
@@ -1248,16 +1248,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "pr_detail",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Against Purchase Receipt Item",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "planning_section",
    "fieldtype": "Section Break",
    "label": "Planning"
@@ -1352,11 +1342,21 @@
    "hidden": 1,
    "label": "Force Default Warehouse",
    "read_only": 1
+  },
+  {
+   "fieldname": "purchase_receipt_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Purchase Receipt Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-12-14 23:35:50.042559",
+ "modified": "2021-12-14 23:57:00.492215",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

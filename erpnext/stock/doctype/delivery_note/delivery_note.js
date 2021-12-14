@@ -186,7 +186,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			// show Make Invoice button only if Delivery Note is not created from Sales Invoice
 			var from_sales_invoice = false;
 			from_sales_invoice = me.frm.doc.items.some(function(item) {
-				return item.against_sales_invoice ? true : false;
+				return item.sales_invoice ? true : false;
 			});
 
 			if(!from_sales_invoice) {

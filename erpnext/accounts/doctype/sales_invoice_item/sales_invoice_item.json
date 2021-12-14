@@ -128,10 +128,10 @@
   "serial_no",
   "col_break5",
   "sales_order",
-  "so_detail",
-  "si_detail",
+  "sales_order_item",
+  "sales_invoice_item",
   "delivery_note",
-  "dn_detail",
+  "delivery_note_item",
   "allow_zero_valuation_rate",
   "planning_section",
   "delivered_qty",
@@ -723,18 +723,6 @@
    "search_index": 1
   },
   {
-   "fieldname": "so_detail",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Sales Order Item",
-   "no_copy": 1,
-   "oldfieldname": "so_detail",
-   "oldfieldtype": "Data",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "delivery_note",
    "fieldtype": "Link",
    "label": "Delivery Note",
@@ -742,18 +730,6 @@
    "oldfieldname": "delivery_note",
    "oldfieldtype": "Link",
    "options": "Delivery Note",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "dn_detail",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Delivery Note Item",
-   "no_copy": 1,
-   "oldfieldname": "dn_detail",
-   "oldfieldtype": "Data",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -1302,16 +1278,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "si_detail",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Against Sales Invoice Item",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "depends_on": "eval:!parent.is_return",
    "fieldname": "returned_qty",
    "fieldtype": "Float",
@@ -1360,11 +1326,45 @@
    "hidden": 1,
    "label": "Force Default Warehouse",
    "read_only": 1
+  },
+  {
+   "fieldname": "sales_order_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Sales Order Item",
+   "no_copy": 1,
+   "oldfieldname": "so_detail",
+   "oldfieldtype": "Data",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "delivery_note_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Deliver Note Item",
+   "no_copy": 1,
+   "oldfieldname": "dn_detail",
+   "oldfieldtype": "Data",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "sales_invoice_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Sales Invoice Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-12-14 23:36:21.666686",
+ "modified": "2021-12-14 23:56:57.501456",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

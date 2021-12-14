@@ -648,19 +648,19 @@ class BuyingController(StockController):
 						})
 
 						purchase_receipt = self.return_against if self.doctype == "Purchase Receipt" else d.get('purchase_receipt')
-						if d.get('pr_detail') and purchase_receipt:
+						if d.get('purchase_receipt_item') and purchase_receipt:
 							sle.dependencies = [{
 								"dependent_voucher_type": "Purchase Receipt",
 								"dependent_voucher_no": purchase_receipt,
-								"dependent_voucher_detail_no": d.pr_detail,
+								"dependent_voucher_detail_no": d.purchase_receipt_item,
 								"dependency_type": "Rate"
 							}]
-						elif self.doctype == "Purchase Invoice" and d.get('pi_detail') and self.get('return_against')\
+						elif self.doctype == "Purchase Invoice" and d.get('purchase_invoice_item') and self.get('return_against')\
 								and frappe.db.get_value("Purchase Invoice", self.return_against, 'update_stock', cache=1):
 							sle.dependencies = [{
 								"dependent_voucher_type": "Purchase Invoice",
 								"dependent_voucher_no": self.return_against,
-								"dependent_voucher_detail_no": d.pi_detail,
+								"dependent_voucher_detail_no": d.purchase_invoice_item,
 								"dependency_type": "Rate"
 							}]
 					else:
@@ -689,8 +689,8 @@ class BuyingController(StockController):
 				and d.purchase_order:
 					po_map.setdefault(d.purchase_order, []).append(d.purchase_order_item)
 
-			elif self.doctype=="Purchase Invoice" and d.purchase_order and d.po_detail:
-				po_map.setdefault(d.purchase_order, []).append(d.po_detail)
+			elif self.doctype=="Purchase Invoice" and d.purchase_order and d.purchase_order_item:
+				po_map.setdefault(d.purchase_order, []).append(d.purchase_order_item)
 
 		for po, po_item_rows in po_map.items():
 			if po and po_item_rows:

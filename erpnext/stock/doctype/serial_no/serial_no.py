@@ -387,9 +387,9 @@ def validate_serial_no_reservation(sle, sr):
 						to fullfill Sales Order {3}").format(label_serial_no, sr.name, sle.item_code, sr.sales_order))
 			elif sle.voucher_type == "Delivery Note":
 				if not frappe.db.exists("Delivery Note Item", {"parent": sle.voucher_no,
-					"item_code": sle.item_code, "against_sales_order": sr.sales_order}):
+					"item_code": sle.item_code, "sales_order": sr.sales_order}):
 					invoice = frappe.db.get_value("Delivery Note Item", {"parent": sle.voucher_no,
-						"item_code": sle.item_code}, "against_sales_invoice")
+						"item_code": sle.item_code}, "sales_invoice")
 					if not invoice or frappe.db.exists("Sales Invoice Item",
 							{"parent": invoice, "item_code": sle.item_code,
 								"sales_order": sr.sales_order}):
@@ -404,12 +404,12 @@ def validate_serial_no_reservation(sle, sr):
 			validate_so_serial_no(sr, sales_order)
 	elif sle.voucher_type == "Delivery Note":
 		sales_order = frappe.get_value("Delivery Note Item", {"parent": sle.voucher_no,
-			"item_code": sle.item_code}, "against_sales_order")
+			"item_code": sle.item_code}, "sales_order")
 		if sales_order and get_reserved_qty_for_so(sales_order, sle.item_code):
 			validate_so_serial_no(sr, sales_order)
 		else:
 			sales_invoice = frappe.get_value("Delivery Note Item", {"parent": sle.voucher_no,
-				"item_code": sle.item_code}, "against_sales_invoice")
+				"item_code": sle.item_code}, "sales_invoice")
 			if sales_invoice:
 				sales_order = frappe.db.get_value("Sales Invoice Item", {
 					"parent": sales_invoice, "item_code": sle.item_code}, "sales_order")

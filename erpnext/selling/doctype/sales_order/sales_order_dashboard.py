@@ -10,7 +10,7 @@ def get_data():
 	return {
 		'fieldname': 'sales_order',
 		'non_standard_fieldnames': {
-			'Delivery Note': 'against_sales_order',
+			'Delivery Note': 'sales_order',
 			'Journal Entry': 'reference_name',
 			'Payment Entry': 'reference_name',
 			'Payment Request': 'reference_name',

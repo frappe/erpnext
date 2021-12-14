@@ -1351,12 +1351,12 @@ def get_blanket_order_details(args):
 
 def get_so_reservation_for_item(args):
 	reserved_so = None
-	if args.get('against_sales_order'):
-		if get_reserved_qty_for_so(args.get('against_sales_order'), args.get('item_code')):
-			reserved_so = args.get('against_sales_order')
-	elif args.get('against_sales_invoice'):
+	if args.get('sales_order'):
+		if get_reserved_qty_for_so(args.get('sales_order'), args.get('item_code')):
+			reserved_so = args.get('sales_order')
+	elif args.get('sales_invoice'):
 		sales_order = frappe.db.sql("""select sales_order from `tabSales Invoice Item` where
-		parent=%s and item_code=%s""", (args.get('against_sales_invoice'), args.get('item_code')))
+		parent=%s and item_code=%s""", (args.get('sales_invoice'), args.get('item_code')))
 		if sales_order and sales_order[0]:
 			if get_reserved_qty_for_so(sales_order[0][0], args.get('item_code')):
 				reserved_so = sales_order[0]

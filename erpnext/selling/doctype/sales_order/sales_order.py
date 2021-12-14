@@ -226,7 +226,7 @@ class SalesOrder(SellingController):
 		submit_dn = frappe.db.sql_list("""
 			select t1.name
 			from `tabDelivery Note` t1,`tabDelivery Note Item` t2
-			where t1.name = t2.parent and t2.against_sales_order = %s and t1.docstatus = 1""", self.name)
+			where t1.name = t2.parent and t2.sales_order = %s and t1.docstatus = 1""", self.name)
 
 		if submit_dn:
 			submit_dn = [get_link_to_form("Delivery Note", dn) for dn in submit_dn]
@@ -628,7 +628,7 @@ def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_m
 		warehouse = frappe.flags.args.warehouse
 
 	def item_condition(source, source_parent, target_parent):
-		if source.name in [d.so_detail for d in target_parent.get('items') if d.so_detail]:
+		if source.name in [d.sales_order_item for d in target_parent.get('items') if d.sales_order_item]:
 			return False
 
 		if source.delivered_by_supplier:
@@ -672,20 +672,20 @@ def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_m
 			has_batch_no, has_serial_no = frappe.get_cached_value("Item", target_dn_item.item_code,
 				['has_batch_no', 'has_serial_no'], as_dict=1)
 
-			if target_dn_item.against_sales_order and (has_batch_no or has_serial_no):
+			if target_dn_item.sales_order and (has_batch_no or has_serial_no):
 				purchase_receipt_items = frappe.db.sql("""
 					select pr_item.batch_no, pr_item.serial_no, pr_item.qty
 					from `tabPurchase Receipt Item` pr_item
 					inner join `tabPurchase Order Item` po_item on po_item.name = pr_item.purchase_order_item
 					where pr_item.docstatus = 1 and po_item.sales_order_item = %s
-				""", target_dn_item.so_detail, as_dict=1)
+				""", target_dn_item.sales_order_item, as_dict=1)
 
 				delivery_note_items = frappe.db.sql("""
 					select dn_item.batch_no, dn_item.serial_no, dn_item.qty
 					from `tabDelivery Note Item` dn_item
-					inner join `tabSales Order Item` so_item on so_item.name = dn_item.so_detail
-					where dn_item.docstatus = 1 and dn_item.so_detail = %s
-				""", target_dn_item.so_detail, as_dict=1)
+					inner join `tabSales Order Item` so_item on so_item.name = dn_item.sales_order_item
+					where dn_item.docstatus = 1 and dn_item.sales_order_item = %s
+				""", target_dn_item.sales_order_item, as_dict=1)
 
 				batch_wise_details = {}
 
@@ -752,8 +752,8 @@ def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_m
 			"doctype": "Delivery Note Item",
 			"field_map": {
 				"rate": "rate",
-				"name": "so_detail",
-				"parent": "against_sales_order",
+				"name": "sales_order_item",
+				"parent": "sales_order",
 			},
 			"postprocess": update_item,
 			"condition": item_condition,
@@ -773,7 +773,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		return billable_qty - unbilled_dn_qty
 
 	def item_condition(source, source_parent, target_parent):
-		if source.name in [d.so_detail for d in target_parent.get('items') if d.so_detail and not d.dn_detail]:
+		if source.name in [d.sales_order_item for d in target_parent.get('items') if d.sales_order_item and not d.delivery_note_item]:
 			return False
 
 		return get_pending_qty(source)
@@ -822,7 +822,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		"Sales Order Item": {
 			"doctype": "Sales Invoice Item",
 			"field_map": {
-				"name": "so_detail",
+				"name": "sales_order_item",
 				"parent": "sales_order",
 			},
 			"postprocess": update_item,
@@ -845,15 +845,15 @@ def get_unbilled_dn_qty_map(sales_order):
 	unbilled_dn_qty_map = {}
 
 	item_data = frappe.db.sql("""
-		select so_detail, qty - billed_qty
+		select sales_order_item, qty - billed_qty
 		from `tabDelivery Note Item`
-		where against_sales_order=%s and docstatus=1
+		where sales_order=%s and docstatus=1
 	""", sales_order)
 
-	for so_detail, qty in item_data:
-		if not unbilled_dn_qty_map.get(so_detail):
-			unbilled_dn_qty_map[so_detail] = 0
-		unbilled_dn_qty_map[so_detail] += qty
+	for sales_order_item, qty in item_data:
+		if not unbilled_dn_qty_map.get(sales_order_item):
+			unbilled_dn_qty_map[sales_order_item] = 0
+		unbilled_dn_qty_map[sales_order_item] += qty
 
 	return unbilled_dn_qty_map
 

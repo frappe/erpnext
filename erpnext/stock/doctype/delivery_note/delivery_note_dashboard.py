@@ -12,7 +12,7 @@ def get_data():
 			'Delivery Note': 'return_against'
 		},
 		'internal_links': {
-			'Sales Order': ['items', 'against_sales_order'],
+			'Sales Order': ['items', 'sales_order'],
 			'Vehicle': ['items', 'vehicle']
 		},
 		'transactions': [

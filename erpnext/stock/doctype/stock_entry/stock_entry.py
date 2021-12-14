@@ -1331,7 +1331,7 @@ class StockEntry(StockController):
 			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
 			se_child.subcontracted_item = item_dict[d].get("main_item_code")
 
-			for field in ["po_detail", "original_item", "description", "item_name"]:
+			for field in ["purchase_order_item", "original_item", "description", "item_name"]:
 				if item_dict[d].get(field):
 					se_child.set(field, item_dict[d].get(field))
 
@@ -1391,7 +1391,7 @@ class StockEntry(StockController):
 					FROM
 						`tabStock Entry Detail` sed, `tabStock Entry` se
 					WHERE
-						(pos.name = sed.po_detail OR sed.subcontracted_item = pos.main_item_code)
+						(pos.name = sed.purchase_order_item OR sed.subcontracted_item = pos.main_item_code)
 						AND sed.docstatus = 1 AND se.name = sed.parent and se.purchase_order = %(po)s
 				), 0)
 			WHERE pos.docstatus = 1 and pos.parent = %(po)s""", {"po": self.purchase_order})

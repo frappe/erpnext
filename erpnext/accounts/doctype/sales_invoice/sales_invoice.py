@@ -44,7 +44,7 @@ class SalesInvoice(SellingController):
 			'target_field': 'billed_qty',
 			'target_ref_field': 'qty',
 			'target_dt': 'Sales Order Item',
-			'join_field': 'so_detail',
+			'join_field': 'sales_order_item',
 			'target_parent_dt': 'Sales Order',
 			'target_parent_field': 'per_billed',
 			'source_field': 'qty',
@@ -59,7 +59,7 @@ class SalesInvoice(SellingController):
 			'source_dt': 'Sales Invoice Item',
 			'target_field': 'billed_amt',
 			'target_dt': 'Sales Order Item',
-			'join_field': 'so_detail',
+			'join_field': 'sales_order_item',
 			'source_field': 'amount',
 			'extra_cond': """ and exists(select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent
 				and (is_return=0 or reopen_order=1))"""
@@ -70,14 +70,14 @@ class SalesInvoice(SellingController):
 			'target_field': 'billed_qty',
 			'target_ref_field': 'qty',
 			'target_dt': 'Delivery Note Item',
-			'join_field': 'dn_detail',
+			'join_field': 'delivery_note_item',
 			'target_parent_dt': 'Delivery Note',
 			'target_parent_field': 'per_billed',
 		},
 		{
 			'source_dt': 'Sales Invoice Item',
 			'target_dt': 'Sales Order Item',
-			'join_field': 'so_detail',
+			'join_field': 'sales_order_item',
 			'target_field': '(billed_qty + returned_qty)',
 			'update_children': False,
 			'target_ref_field': 'qty',
@@ -88,7 +88,7 @@ class SalesInvoice(SellingController):
 		{
 			'source_dt': 'Sales Invoice Item',
 			'target_dt': 'Delivery Note Item',
-			'join_field': 'dn_detail',
+			'join_field': 'delivery_note_item',
 			'target_field': '(billed_qty + returned_qty)',
 			'update_children': False,
 			'target_ref_field': 'qty',
@@ -105,13 +105,13 @@ class SalesInvoice(SellingController):
 				'target_field':'delivered_qty',
 				'target_ref_field':'qty',
 				'source_field':'qty',
-				'join_field':'so_detail',
+				'join_field':'sales_order_item',
 				'percent_join_field':'sales_order',
 				'status_field':'delivery_status',
 				'keyword':'Delivered',
 				'second_source_dt': 'Delivery Note Item',
 				'second_source_field': 'qty',
-				'second_join_field': 'so_detail',
+				'second_join_field': 'sales_order_item',
 				'overflow_type': 'delivery',
 				'extra_cond': """ and exists(select name from `tabSales Invoice`
 					where name=`tabSales Invoice Item`.parent and update_stock = 1 and (is_return=0 or reopen_order=1))""",
@@ -122,13 +122,13 @@ class SalesInvoice(SellingController):
 				self.status_updater.append({
 					'source_dt': 'Sales Invoice Item',
 					'target_dt': 'Sales Order Item',
-					'join_field': 'so_detail',
+					'join_field': 'sales_order_item',
 					'target_field': 'total_returned_qty',
 					'target_parent_dt': 'Sales Order',
 					'source_field': '-1 * qty',
 					'second_source_dt': 'Delivery Note Item',
 					'second_source_field': '-1 * qty',
-					'second_join_field': 'so_detail',
+					'second_join_field': 'sales_order_item',
 					'extra_cond': """ and exists (select name from `tabSales Invoice`
 						where name=`tabSales Invoice Item`.parent and is_return=1 and update_stock=1)""",
 					'second_source_extra_cond': """ and exists (select name from `tabDelivery Note`
@@ -139,7 +139,7 @@ class SalesInvoice(SellingController):
 			self.status_updater.append({
 				'source_dt': 'Sales Invoice Item',
 				'target_dt': 'Sales Invoice Item',
-				'join_field': 'si_detail',
+				'join_field': 'sales_invoice_item',
 				'target_field': 'returned_qty',
 				'source_field': '-1 * qty',
 				'extra_cond': """ and exists(select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent
@@ -148,7 +148,7 @@ class SalesInvoice(SellingController):
 			self.status_updater.append({
 				'source_dt': 'Sales Invoice Item',
 				'target_dt': 'Sales Invoice Item',
-				'join_field': 'si_detail',
+				'join_field': 'sales_invoice_item',
 				'target_field': 'base_returned_amount',
 				'source_field': '-1 * base_net_amount',
 				'extra_cond': """ and exists(select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent
@@ -228,7 +228,7 @@ class SalesInvoice(SellingController):
 		self.validate_c_form()
 		self.validate_time_sheets_are_submitted()
 		if frappe.get_cached_value("Accounts Settings", None, "validate_over_billing_in_sales_invoice"):
-			self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
+			self.validate_multiple_billing("Delivery Note", "delivery_note_item", "amount", "items")
 		if not self.is_return:
 			self.validate_serial_numbers()
 		self.update_packing_list()
@@ -584,7 +584,7 @@ class SalesInvoice(SellingController):
 				"compare_fields": [["customer", "="], ["company", "="], ["project", "="], ["currency", "="]]
 			},
 			"Sales Order Item": {
-				"ref_dn_field": "so_detail",
+				"ref_dn_field": "sales_order_item",
 				"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="]],
 				"is_child_table": True,
 				"allow_duplicate_prev_row_id": True
@@ -594,7 +594,7 @@ class SalesInvoice(SellingController):
 				"compare_fields": [["customer", "="], ["company", "="], ["project", "="], ["currency", "="]]
 			},
 			"Delivery Note Item": {
-				"ref_dn_field": "dn_detail",
+				"ref_dn_field": "delivery_note_item",
 				"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="], ["vehicle", "="]],
 				"is_child_table": True,
 				"allow_duplicate_prev_row_id": True
@@ -603,8 +603,8 @@ class SalesInvoice(SellingController):
 
 		if cint(frappe.db.get_single_value('Selling Settings', 'maintain_same_sales_rate')) and not self.is_return:
 			self.validate_rate_with_reference_doc([
-				["Sales Order", "sales_order", "so_detail"],
-				["Delivery Note", "delivery_note", "dn_detail"]
+				["Sales Order", "sales_order", "sales_order_item"],
+				["Delivery Note", "delivery_note", "delivery_note_item"]
 			])
 
 	def validate_return_against(self):
@@ -740,7 +740,7 @@ class SalesInvoice(SellingController):
 	def validate_dropship_item(self):
 		for item in self.items:
 			if item.sales_order:
-				if frappe.db.get_value("Sales Order Item", item.so_detail, "delivered_by_supplier"):
+				if frappe.db.get_value("Sales Order Item", item.sales_order_item, "delivered_by_supplier"):
 					frappe.throw(_("Could not update stock, invoice contains drop shipping item."))
 
 	def update_current_stock(self):
@@ -1118,11 +1118,11 @@ class SalesInvoice(SellingController):
 	def update_billing_status_in_dn(self, update_modified=True):
 		updated_delivery_notes = []
 		for d in self.get("items"):
-			if d.dn_detail:
-				update_billed_amount_based_on_dn(d.dn_detail, update_modified)
+			if d.delivery_note_item:
+				update_billed_amount_based_on_dn(d.delivery_note_item, update_modified)
 				updated_delivery_notes.append(d.delivery_note)
-			elif d.so_detail:
-				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
+			elif d.sales_order_item:
+				updated_delivery_notes += update_billed_amount_based_on_so(d.sales_order_item, update_modified)
 
 		for dn in set(updated_delivery_notes):
 			frappe.get_doc("Delivery Note", dn).update_billing_status()
@@ -1171,10 +1171,10 @@ class SalesInvoice(SellingController):
 		"""
 
 		for item in self.items:
-			if not item.delivery_note or not item.dn_detail:
+			if not item.delivery_note or not item.delivery_note_item:
 				continue
 
-			serial_nos = frappe.db.get_value("Delivery Note Item", item.dn_detail, "serial_no") or ""
+			serial_nos = frappe.db.get_value("Delivery Note Item", item.delivery_note_item, "serial_no") or ""
 			dn_serial_nos = set(get_serial_nos(serial_nos))
 
 			serial_nos = item.serial_no or ""
@@ -1562,7 +1562,7 @@ def make_delivery_note(source_name, target_doc=None):
 		return flt(source.qty) - flt(source.delivered_qty)
 
 	def item_condition(source, source_parent, target_parent):
-		if source.name in [d.si_detail for d in target_parent.get('items') if d.si_detail]:
+		if source.name in [d.sales_invoice_item for d in target_parent.get('items') if d.sales_invoice_item]:
 			return False
 
 		if source.delivered_by_supplier:
@@ -1591,12 +1591,12 @@ def make_delivery_note(source_name, target_doc=None):
 		"Sales Invoice Item": {
 			"doctype": "Delivery Note Item",
 			"field_map": {
-				"name": "si_detail",
-				"parent": "against_sales_invoice",
+				"name": "sales_invoice_item",
+				"parent": "sales_invoice",
 				"serial_no": "serial_no",
 				"vehicle": "vehicle",
-				"sales_order": "against_sales_order",
-				"so_detail": "so_detail",
+				"sales_order": "sales_order",
+				"sales_order_item": "sales_order_item",
 				"cost_center": "cost_center"
 			},
 			"postprocess": update_item,

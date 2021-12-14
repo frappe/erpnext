@@ -267,7 +267,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		pi1= make_purchase_invoice_return(is_return=1, return_against=pi2.name, qty=-1, update_stock=1, do_not_submit=True)
 		pi1.items[0].purchase_order = po.name
-		pi1.items[0].po_detail = po.items[0].name
+		pi1.items[0].purchase_order_item = po.items[0].name
 		pi1.submit()
 
 

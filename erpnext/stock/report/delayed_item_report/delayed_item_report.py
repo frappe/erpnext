@@ -36,7 +36,7 @@ class DelayedItemReport(object):
 				conditions += " and `tab%s`.%s = %s" % (doctype,
 					field, frappe.db.escape(self.filters.get(field)))
 
-		sales_order_field = "against_sales_order"
+		sales_order_field = "sales_order"
 		if doctype == "Sales Invoice":
 			sales_order_field = "sales_order"
 
@@ -45,7 +45,7 @@ class DelayedItemReport(object):
 
 		self.transactions = frappe.db.sql(""" SELECT `tab{child_doc}`.item_code, `tab{child_doc}`.item_name,
 				`tab{child_doc}`.item_group, `tab{child_doc}`.qty, `tab{child_doc}`.rate, `tab{child_doc}`.amount,
-				`tab{child_doc}`.so_detail, `tab{child_doc}`.{so_field} as sales_order,
+				`tab{child_doc}`.sales_order_item, `tab{child_doc}`.{so_field} as sales_order,
 				`tab{doctype}`.shipping_address_name, `tab{doctype}`.po_no, `tab{doctype}`.customer,
 				`tab{doctype}`.posting_date, `tab{doctype}`.name, `tab{doctype}`.grand_total
 			FROM `tab{child_doc}`, `tab{doctype}`
@@ -69,7 +69,7 @@ class DelayedItemReport(object):
 		filters = {'name': ('in', sales_orders)}
 
 		if not consolidated:
-			sales_order_items = [d.so_detail for d in self.transactions]
+			sales_order_items = [d.sales_order_item for d in self.transactions]
 			doctype = "Sales Order Item"
 			filters = {'parent': ('in', sales_orders), 'name': ('in', sales_order_items)}
 
@@ -81,7 +81,7 @@ class DelayedItemReport(object):
 				so_data.setdefault(key, d.delivery_date)
 
 		for row in self.transactions:
-			key = row.sales_order if consolidated else (row.sales_order, row.so_detail)
+			key = row.sales_order if consolidated else (row.sales_order, row.sales_order_item)
 			row.update({
 				'delivery_date': so_data.get(key),
 				'delayed_days': date_diff(row.posting_date, so_data.get(key))

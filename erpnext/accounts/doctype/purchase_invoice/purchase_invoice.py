@@ -43,7 +43,7 @@ class PurchaseInvoice(BuyingController):
 			'target_field': 'billed_qty',
 			'target_ref_field': 'qty',
 			'target_dt': 'Purchase Order Item',
-			'join_field': 'po_detail',
+			'join_field': 'purchase_order_item',
 			'target_parent_dt': 'Purchase Order',
 			'target_parent_field': 'per_billed',
 			'source_field': 'qty',
@@ -56,7 +56,7 @@ class PurchaseInvoice(BuyingController):
 			'source_dt': 'Purchase Invoice Item',
 			'target_field': 'billed_amt',
 			'target_dt': 'Purchase Order Item',
-			'join_field': 'po_detail',
+			'join_field': 'purchase_order_item',
 			'source_field': 'amount',
 			'extra_cond': """ and exists(select name from `tabPurchase Invoice` where name=`tabPurchase Invoice Item`.parent
 				and (is_return=0 or reopen_order=1))"""
@@ -67,14 +67,14 @@ class PurchaseInvoice(BuyingController):
 			'target_field': 'billed_qty',
 			'target_ref_field': 'received_qty',
 			'target_dt': 'Purchase Receipt Item',
-			'join_field': 'pr_detail',
+			'join_field': 'purchase_receipt_item',
 			'target_parent_dt': 'Purchase Receipt',
 			'target_parent_field': 'per_billed',
 		},
 		{
 			'source_dt': 'Purchase Invoice Item',
 			'target_dt': 'Purchase Order Item',
-			'join_field': 'po_detail',
+			'join_field': 'purchase_order_item',
 			'target_field': '(billed_qty + returned_qty)',
 			'update_children': False,
 			'target_ref_field': 'qty',
@@ -85,7 +85,7 @@ class PurchaseInvoice(BuyingController):
 		{
 			'source_dt': 'Purchase Invoice Item',
 			'target_dt': 'Purchase Receipt Item',
-			'join_field': 'pr_detail',
+			'join_field': 'purchase_receipt_item',
 			'target_field': '(billed_qty + returned_qty)',
 			'update_children': False,
 			'target_ref_field': 'qty',
@@ -102,7 +102,7 @@ class PurchaseInvoice(BuyingController):
 				'target_field':'received_qty',
 				'target_ref_field':'qty',
 				'source_field':'received_qty',
-				'join_field':'po_detail',
+				'join_field':'purchase_order_item',
 				'percent_join_field':'purchase_order',
 				'second_source_dt': 'Purchase Receipt Item',
 				'second_source_field': 'received_qty',
@@ -117,7 +117,7 @@ class PurchaseInvoice(BuyingController):
 				self.status_updater.append({
 					'source_dt': 'Purchase Invoice Item',
 					'target_dt': 'Purchase Order Item',
-					'join_field': 'po_detail',
+					'join_field': 'purchase_order_item',
 					'target_field': 'total_returned_qty',
 					'target_parent_dt': 'Purchase Order',
 					'source_field': '-1 * received_qty',
@@ -183,7 +183,7 @@ class PurchaseInvoice(BuyingController):
 		self.set_against_expense_account()
 		self.validate_write_off_account()
 		if frappe.get_cached_value("Accounts Settings", None, "validate_over_billing_in_purchase_invoice"):
-			self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount", "items")
+			self.validate_multiple_billing("Purchase Receipt", "purchase_receipt_item", "amount", "items")
 		self.create_remarks()
 		self.set_status()
 		self.set_title()
@@ -263,7 +263,7 @@ class PurchaseInvoice(BuyingController):
 				"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
 			},
 			"Purchase Order Item": {
-				"ref_dn_field": "po_detail",
+				"ref_dn_field": "purchase_order_item",
 				"compare_fields": [["project", "="], ["item_code", "="], ["uom", "="]],
 				"is_child_table": True,
 				"allow_duplicate_prev_row_id": True
@@ -273,7 +273,7 @@ class PurchaseInvoice(BuyingController):
 				"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
 			},
 			"Purchase Receipt Item": {
-				"ref_dn_field": "pr_detail",
+				"ref_dn_field": "purchase_receipt_item",
 				"compare_fields": [["project", "="], ["item_code", "="], ["uom", "="], ["vehicle", "="]],
 				"is_child_table": True
 			}
@@ -281,8 +281,8 @@ class PurchaseInvoice(BuyingController):
 
 		if cint(frappe.db.get_single_value('Buying Settings', 'maintain_same_rate')) and not self.is_return:
 			self.validate_rate_with_reference_doc([
-				["Purchase Order", "purchase_order", "po_detail"],
-				["Purchase Receipt", "purchase_receipt", "pr_detail"]
+				["Purchase Order", "purchase_order", "purchase_order_item"],
+				["Purchase Receipt", "purchase_receipt", "purchase_receipt_item"]
 			])
 
 	def check_valuation_amounts_with_previous_doc(self):
@@ -290,8 +290,8 @@ class PurchaseInvoice(BuyingController):
 
 		if not self.is_return or not self.update_stock:
 			for item in self.items:
-				if item.pr_detail:
-					pr_item = frappe.db.get_value("Purchase Receipt Item", item.pr_detail,
+				if item.purchase_receipt_item:
+					pr_item = frappe.db.get_value("Purchase Receipt Item", item.purchase_receipt_item,
 						["base_net_rate", "item_tax_amount"], as_dict=1)
 
 					if pr_item:
@@ -364,8 +364,8 @@ class PurchaseInvoice(BuyingController):
 
 			if auto_accounting_for_stock and item.item_code in stock_items \
 				and self.is_opening == 'No' and not item.is_fixed_asset \
-				and (not item.po_detail or
-					not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
+				and (not item.purchase_order_item or
+					not frappe.db.get_value("Purchase Order Item", item.purchase_order_item, "delivered_by_supplier")):
 
 				if self.update_stock:
 					item.expense_account = warehouse_account[item.warehouse]["account"]
@@ -374,7 +374,7 @@ class PurchaseInvoice(BuyingController):
 			elif item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category):
 				item.expense_account = get_asset_category_account('fixed_asset_account', item=item.item_code,
 					company = self.company)
-			elif item.is_fixed_asset and item.pr_detail:
+			elif item.is_fixed_asset and item.purchase_receipt_item:
 				item.expense_account = asset_received_but_not_billed
 			elif not item.expense_account and for_validate:
 				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
@@ -521,7 +521,7 @@ class PurchaseInvoice(BuyingController):
 			debit_note_amount = frappe.db.sql("""
 				select -sum(item.base_net_amount)
 				from `tabPurchase Invoice Item` item, `tabPurchase Invoice` inv
-				where inv.name=item.parent and item.pi_detail=%s and item.docstatus=1
+				where inv.name=item.parent and item.purchase_invoice_item=%s and item.docstatus=1
 					and inv.update_stock = 0 and inv.is_return = 1 and inv.return_against = %s
 			""",[ d.name, self.name])
 
@@ -1093,11 +1093,11 @@ class PurchaseInvoice(BuyingController):
 	def update_billing_status_in_pr(self, update_modified=True):
 		updated_purchase_receipts = []
 		for d in self.get("items"):
-			if d.pr_detail:
-				update_billed_amount_based_on_pr(d.pr_detail, update_modified)
+			if d.purchase_receipt_item:
+				update_billed_amount_based_on_pr(d.purchase_receipt_item, update_modified)
 				updated_purchase_receipts.append(d.purchase_receipt)
-			elif d.po_detail:
-				updated_purchase_receipts += update_billed_amount_based_on_po(d.po_detail, update_modified)
+			elif d.purchase_order_item:
+				updated_purchase_receipts += update_billed_amount_based_on_po(d.purchase_order_item, update_modified)
 
 		for pr in set(updated_purchase_receipts):
 			frappe.get_doc("Purchase Receipt", pr).update_billing_percentage(update_modified=update_modified)

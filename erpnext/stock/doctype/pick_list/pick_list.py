@@ -269,8 +269,8 @@ def create_delivery_note(source_name, target_doc=None):
 		'doctype': 'Delivery Note Item',
 		'field_map': {
 			'rate': 'rate',
-			'name': 'so_detail',
-			'parent': 'against_sales_order',
+			'name': 'sales_order_item',
+			'parent': 'sales_order',
 		},
 		'condition': lambda doc, source, target: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 	}

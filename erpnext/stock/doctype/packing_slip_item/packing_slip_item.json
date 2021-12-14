@@ -19,7 +19,7 @@
   "stock_uom",
   "weight_uom",
   "page_break",
-  "dn_detail"
+  "delivery_note_item"
  ],
  "fields": [
   {
@@ -116,16 +116,16 @@
    "label": "Page Break"
   },
   {
-   "fieldname": "dn_detail",
+   "fieldname": "delivery_note_item",
    "fieldtype": "Data",
    "hidden": 1,
    "in_list_view": 1,
-   "label": "DN Detail"
+   "label": "Deliver Note Item"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:42:01.176117",
+ "modified": "2021-12-14 23:56:55.507782",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Item",

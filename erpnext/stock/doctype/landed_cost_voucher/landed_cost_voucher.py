@@ -46,7 +46,7 @@ class LandedCostVoucher(AccountsController):
 		for pr in self.get("purchase_receipts"):
 			if pr.receipt_document_type and pr.receipt_document:
 				if pr.receipt_document_type == "Purchase Invoice":
-					po_detail_field = "po_detail"
+					po_detail_field = "purchase_order_item"
 				else:
 					po_detail_field = "purchase_order_item"
 

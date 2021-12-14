@@ -586,8 +586,8 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 			dn.name = dn_item.parent
 			and dn.customer=%s and dn.company=%s
 			and dn.docstatus = 1 and dn.status not in ('Closed', 'Stopped')
-			and ifnull(dn_item.against_sales_order, '') = ''
-			and ifnull(dn_item.against_sales_invoice, '') = ''
+			and ifnull(dn_item.sales_order, '') = ''
+			and ifnull(dn_item.sales_invoice, '') = ''
 		""", (customer, company), as_dict=True)
 
 	outstanding_based_on_dn = 0.0
@@ -595,7 +595,7 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 	for dn_item in unmarked_delivery_note_items:
 		si_amount = frappe.db.sql("""select sum(amount)
 			from `tabSales Invoice Item`
-			where dn_detail = %s and docstatus = 1""", dn_item.name)[0][0]
+			where delivery_note_item = %s and docstatus = 1""", dn_item.name)[0][0]
 
 		if flt(dn_item.amount) > flt(si_amount) and dn_item.base_net_total:
 			outstanding_based_on_dn += ((flt(dn_item.amount) - flt(si_amount)) \

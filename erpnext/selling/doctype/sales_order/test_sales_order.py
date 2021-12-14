@@ -150,13 +150,13 @@ class TestSalesOrder(unittest.TestCase):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-3, do_not_submit=True)
-		dn1.items[0].against_sales_order = so.name
-		dn1.items[0].so_detail = so.items[0].name
+		dn1.items[0].sales_order = so.name
+		dn1.items[0].sales_order_item = so.items[0].name
 		dn1.submit()
 
 		si1 = create_sales_invoice(is_return=1, return_against=si2.name, qty=-1, update_stock=1, do_not_submit=True)
 		si1.items[0].sales_order = so.name
-		si1.items[0].so_detail = so.items[0].name
+		si1.items[0].sales_order_item = so.items[0].name
 		si1.submit()
 
 

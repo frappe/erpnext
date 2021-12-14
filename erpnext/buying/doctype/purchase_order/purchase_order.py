@@ -427,7 +427,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		return billable_qty - unbilled_pr_qty
 
 	def item_condition(source, source_parent, target_parent):
-		if source.name in [d.po_detail for d in target_parent.get('items') if d.po_detail and not d.pr_detail]:
+		if source.name in [d.purchase_order_item for d in target_parent.get('items') if d.purchase_order_item and not d.purchase_receipt_item]:
 			return False
 
 		return get_pending_qty(source)
@@ -457,7 +457,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		"Purchase Order Item": {
 			"doctype": "Purchase Invoice Item",
 			"field_map": {
-				"name": "po_detail",
+				"name": "purchase_order_item",
 				"parent": "purchase_order",
 			},
 			"postprocess": update_item,
@@ -490,10 +490,10 @@ def get_unbilled_pr_qty_map(purchase_order):
 		where purchase_order=%s and docstatus=1
 	""", purchase_order)
 
-	for pr_detail, qty in item_data:
-		if not unbilled_pr_qty_map.get(pr_detail):
-			unbilled_pr_qty_map[pr_detail] = 0
-		unbilled_pr_qty_map[pr_detail] += qty
+	for purchase_receipt_item, qty in item_data:
+		if not unbilled_pr_qty_map.get(purchase_receipt_item):
+			unbilled_pr_qty_map[purchase_receipt_item] = 0
+		unbilled_pr_qty_map[purchase_receipt_item] += qty
 
 	return unbilled_pr_qty_map
 
@@ -533,7 +533,7 @@ def make_rm_stock_entry(purchase_order, rm_items):
 					rm_item_code = rm_item_data["rm_item_code"]
 					items_dict = {
 						rm_item_code: {
-							"po_detail": rm_item_data.get("name"),
+							"purchase_order_item": rm_item_data.get("name"),
 							"item_name": rm_item_data["item_name"],
 							"description": item_wh.get(rm_item_code, {}).get('description', ""),
 							'qty': rm_item_data["qty"],
