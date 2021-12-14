@@ -99,7 +99,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nStopped\nCancelled",
+   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nStopped\nClosed\nCancelled",
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
@@ -326,6 +326,7 @@
    "label": "Expected Delivery Date"
   },
   {
+   "collapsible": 1,
    "fieldname": "operations_section",
    "fieldtype": "Section Break",
    "label": "Operations",
@@ -337,7 +338,7 @@
    "fieldname": "transfer_material_against",
    "fieldtype": "Select",
    "label": "Transfer Material Against",
-   "options": "\nWork Order\nJob Card"
+   "options": "Work Order\nJob Card"
   },
   {
    "fieldname": "operations",
@@ -573,7 +574,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-27 19:21:35.139888",
+ "modified": "2021-11-08 17:36:07.016300",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -344,7 +342,15 @@ def get_pe_matching_query(amount_condition, account_from_to, transaction):
 
 def get_je_matching_query(amount_condition, transaction):
 	# get matching journal entry query
-	cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
+
+	company_account = frappe.get_value("Bank Account", transaction.bank_account, "account")
+	root_type = frappe.get_value("Account", company_account, "root_type")
+
+	if root_type == "Liability":
+		cr_or_dr = "debit" if transaction.withdrawal > 0 else "credit"
+	else:
+		cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
+
 	return f"""
 
 		SELECT
@@ -428,7 +434,7 @@ def get_pi_matching_query(amount_condition):
 
 def get_ec_matching_query(bank_account, company, amount_condition):
 	# get matching Expense Claim query
-	mode_of_payments = [x["parent"] for x in frappe.db.get_list("Mode of Payment Account",
+	mode_of_payments = [x["parent"] for x in frappe.db.get_all("Mode of Payment Account",
 			filters={"default_account": bank_account}, fields=["parent"])]
 	mode_of_payments = '(\'' + '\', \''.join(mode_of_payments) + '\' )'
 	company_currency = get_company_currency(company)

@@ -3,7 +3,6 @@
 
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import copy
 import json
@@ -264,6 +263,11 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 				p.variant_of = args.variant_of
 			else:
 				p.variant_of = None
+
+	if len(pricing_rules) > 1:
+		filtered_rules = list(filter(lambda x: x.currency==args.get('currency'), pricing_rules))
+		if filtered_rules:
+			pricing_rules = filtered_rules
 
 	# find pricing rule with highest priority
 	if pricing_rules:
