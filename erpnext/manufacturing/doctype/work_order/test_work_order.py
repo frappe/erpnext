@@ -95,7 +95,7 @@ class TestWorkOrder(ERPNextTestCase):
 
 	def test_reserved_qty_for_partial_completion(self):
 		item = "_Test Item"
-		warehouse = create_warehouse("Test Warehouse for reserved_qty - _TC")
+		warehouse = "_Test Warehouse - _TC"
 
 		bin1_at_start = get_bin(item, warehouse)
 
