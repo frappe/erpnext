@@ -298,7 +298,6 @@
   {
    "fieldname": "from_warehouse",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Default Source Warehouse",
    "no_copy": 1,
@@ -327,7 +326,6 @@
   {
    "fieldname": "to_warehouse",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Default Target Warehouse",
    "no_copy": 1,
@@ -650,6 +648,8 @@
   {
    "fieldname": "patient",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Patient",
    "options": "Patient"
   },
@@ -665,7 +665,7 @@
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2021-11-04 10:35:16.176642",
+ "modified": "2021-12-14 13:51:25.016121",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
