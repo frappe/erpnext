@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import datetime
 import math
@@ -22,7 +21,6 @@ from frappe.utils import (
 	rounded,
 )
 from frappe.utils.background_jobs import enqueue
-from six import iteritems
 
 import erpnext
 from erpnext.accounts.utils import get_fiscal_year
@@ -942,10 +940,12 @@ class SalarySlip(TransactionBase):
 
 	def get_amount_based_on_payment_days(self, row, joining_date, relieving_date):
 		amount, additional_amount = row.amount, row.additional_amount
+		timesheet_component = frappe.db.get_value("Salary Structure", self.salary_structure, "salary_component")
+
 		if (self.salary_structure and
 			cint(row.depends_on_payment_days) and cint(self.total_working_days)
 			and not (row.additional_salary and row.default_amount) # to identify overwritten additional salary
-			and (not self.salary_slip_based_on_timesheet or
+			and (row.salary_component != timesheet_component or
 				getdate(self.start_date) < joining_date or
 				(relieving_date and getdate(self.end_date) > relieving_date)
 			)):
@@ -954,7 +954,7 @@ class SalarySlip(TransactionBase):
 			amount = flt((flt(row.default_amount) * flt(self.payment_days)
 				/ cint(self.total_working_days)), row.precision("amount")) + additional_amount
 
-		elif not self.payment_days and not self.salary_slip_based_on_timesheet and cint(row.depends_on_payment_days):
+		elif not self.payment_days and row.salary_component != timesheet_component and cint(row.depends_on_payment_days):
 			amount, additional_amount = 0, 0
 		elif not row.amount:
 			amount = flt(row.default_amount) + flt(row.additional_amount)
@@ -1343,7 +1343,7 @@ class SalarySlip(TransactionBase):
 			from erpnext.hr.doctype.leave_application.leave_application import get_leave_details
 			leave_details = get_leave_details(self.employee, self.end_date)
 
-			for leave_type, leave_values in iteritems(leave_details['leave_allocation']):
+			for leave_type, leave_values in leave_details['leave_allocation'].items():
 				self.append('leave_details', {
 					'leave_type': leave_type,
 					'total_allocated_leaves': flt(leave_values.get('total_leaves')),

@@ -123,7 +123,6 @@ class Item(WebsiteGenerator):
 		self.validate_barcode()
 		self.validate_warehouse_for_reorder()
 		self.update_bom_item_desc()
-		self.synced_with_hub = 0
 
 		self.validate_has_variants()
 		self.validate_attributes_in_variants()
@@ -153,7 +152,6 @@ class Item(WebsiteGenerator):
 
 	def on_update(self):
 		invalidate_cache_for_item(self)
-		self.validate_name_with_item_group()
 		self.update_variants()
 		self.update_item_price()
 		self.update_template_item()
@@ -224,10 +222,11 @@ class Item(WebsiteGenerator):
 					'route')) + '/' + self.scrub((self.item_name or self.item_code) + '-' + random_string(5))
 
 	def validate_website_image(self):
+		"""Validate if the website image is a public file"""
+
 		if frappe.flags.in_import:
 			return
 
-		"""Validate if the website image is a public file"""
 		auto_set_website_image = False
 		if not self.website_image and self.image:
 			auto_set_website_image = True
@@ -257,10 +256,11 @@ class Item(WebsiteGenerator):
 			self.website_image = None
 
 	def make_thumbnail(self):
+		"""Make a thumbnail of `website_image`"""
+
 		if frappe.flags.in_import:
 			return
 
-		"""Make a thumbnail of `website_image`"""
 		import requests.exceptions
 
 		if not self.is_new() and self.website_image != frappe.db.get_value(self.doctype, self.name, "website_image"):
@@ -629,12 +629,6 @@ class Item(WebsiteGenerator):
 				where item_code = %s and is_cancelled = 0 limit 1""", self.name))
 		return self._stock_ledger_created
 
-	def validate_name_with_item_group(self):
-		# causes problem with tree build
-		if frappe.db.exists("Item Group", self.name):
-			frappe.throw(
-				_("An Item Group exists with same name, please change the item name or rename the item group"))
-
 	def update_item_price(self):
 		frappe.db.sql("""
 				UPDATE `tabItem Price`
@@ -677,6 +671,8 @@ class Item(WebsiteGenerator):
 	def after_rename(self, old_name, new_name, merge):
 		if merge:
 			self.validate_duplicate_item_in_stock_reconciliation(old_name, new_name)
+			frappe.msgprint(_("It can take upto few hours for accurate stock values to be visible after merging items."),
+					indicator="orange", title="Note")
 
 		if self.route:
 			invalidate_cache_for_item(self)
@@ -728,7 +724,6 @@ class Item(WebsiteGenerator):
 
 	def recalculate_bin_qty(self, new_name):
 		from erpnext.stock.stock_balance import repost_stock
-		frappe.db.auto_commit_on_many_writes = 1
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
@@ -742,7 +737,6 @@ class Item(WebsiteGenerator):
 			repost_stock(new_name, warehouse)
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
-		frappe.db.auto_commit_on_many_writes = 0
 
 	@frappe.whitelist()
 	def copy_specification_from_item_group(self):

@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import csv
 import math
@@ -32,7 +30,7 @@ def get_products_details():
 
 			#Get ASIN Codes
 			string_io = StringIO(frappe.safe_decode(listings_response.original))
-			csv_rows = list(csv.reader(string_io, delimiter=str('\t')))
+			csv_rows = list(csv.reader(string_io, delimiter='\t'))
 			asin_list = list(set([row[1] for row in csv_rows[1:]]))
 			#break into chunks of 10
 			asin_chunked_list = list(chunks(asin_list, 10))
