@@ -107,7 +107,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Write reference number of the invoices from the previous system",
+   "description": "Reference number of the invoice from the previous system",
    "fieldname": "invoice_number",
    "fieldtype": "Data",
    "label": "Invoice Number"

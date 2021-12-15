@@ -201,7 +201,7 @@ def start_import(invoices):
 	names = []
 	for idx, d in enumerate(invoices):
 		try:
-			invoice_number = ''
+			invoice_number = None
 			if d.invoice_number:
 				invoice_number = d.invoice_number
 			publish(idx, len(invoices), d.doctype)

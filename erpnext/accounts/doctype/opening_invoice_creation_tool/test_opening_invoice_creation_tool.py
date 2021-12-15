@@ -18,7 +18,7 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 		if not frappe.db.exists("Company", "_Test Opening Invoice Company"):
 			make_company()
 
-	def make_invoices(self, invoice_type="Sales", company=None, party_1=None, party_2=None, invoice_number=''):
+	def make_invoices(self, invoice_type="Sales", company=None, party_1=None, party_2=None, invoice_number=None):
 		doc = frappe.get_single("Opening Invoice Creation Tool")
 		args = get_opening_invoice_creation_dict(invoice_type=invoice_type, company=company,
 			party_1=party_1, party_2=party_2, invoice_number=invoice_number)
@@ -105,6 +105,7 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 		for inv in [sales_inv1, sales_inv2]:
 			doc = frappe.get_doc('Sales Invoice', inv)
 			doc.cancel()
+			doc.delete()
 
 def get_opening_invoice_creation_dict(**args):
 	party = "Customer" if args.get("invoice_type", "Sales") == "Sales" else "Supplier"
@@ -132,7 +133,7 @@ def get_opening_invoice_creation_dict(**args):
 				"due_date": "2016-09-10",
 				"posting_date": "2016-09-05",
 				"temporary_opening_account": get_temporary_opening_account(company),
-				"invoice_number": ""
+				"invoice_number": None
 			}
 		]
 	})
