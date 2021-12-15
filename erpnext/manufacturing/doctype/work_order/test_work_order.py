@@ -1,6 +1,5 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-import unittest
 
 import frappe
 from frappe.utils import add_months, cint, flt, now, today
@@ -95,7 +94,7 @@ class TestWorkOrder(ERPNextTestCase):
 
 	def test_reserved_qty_for_partial_completion(self):
 		item = "_Test Item"
-		warehouse = create_warehouse("Test Warehouse for reserved_qty - _TC")
+		warehouse = "_Test Warehouse - _TC"
 
 		bin1_at_start = get_bin(item, warehouse)
 
