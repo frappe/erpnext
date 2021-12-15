@@ -506,7 +506,7 @@ class WorkOrder(Document):
 
 		def _get_operations(bom_no, qty=1):
 			data = frappe.db.sql(
-					f"""select
+					"""select
 						operation, description, workstation, idx,
 						base_hour_rate as hour_rate, time_in_mins as time_in_mins,
 						"Pending" as status, parent as bom, batch_size, sequence_id, fixed_time
