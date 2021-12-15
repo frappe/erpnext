@@ -313,3 +313,29 @@ def make_batch(args):
 	if frappe.db.get_value("Item", args.item, "has_batch_no"):
 		args.doctype = "Batch"
 		frappe.get_doc(args).insert().name
+
+@frappe.whitelist()
+def get_pos_reserved_batch_qty(filters):
+	import json
+
+	if isinstance(filters, str):
+		filters = json.loads(filters)
+
+	pos_transacted_batch_nos = frappe.db.sql("""select item.qty
+		from `tabPOS Invoice` p, `tabPOS Invoice Item` item
+		where p.name = item.parent
+		and p.consolidated_invoice is NULL
+		and p.status != "Consolidated"
+		and p.docstatus = 1
+		and item.docstatus = 1
+		and item.item_code = %(item_code)s
+		and item.warehouse = %(warehouse)s
+		and item.batch_no = %(batch_no)s
+
+		""", filters, as_dict=1)
+
+	reserved_batch_qty = 0.0
+	for d in pos_transacted_batch_nos:
+		reserved_batch_qty += d.qty
+
+	return reserved_batch_qty
