@@ -105,7 +105,6 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 		for inv in [sales_inv1, sales_inv2]:
 			doc = frappe.get_doc('Sales Invoice', inv)
 			doc.cancel()
-			doc.delete()
 
 def get_opening_invoice_creation_dict(**args):
 	party = "Customer" if args.get("invoice_type", "Sales") == "Sales" else "Supplier"
