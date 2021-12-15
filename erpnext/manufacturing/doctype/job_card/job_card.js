@@ -75,7 +75,17 @@ frappe.ui.form.on('Job Card', {
 			&& (frm.doc.items || !frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)) {
 			frm.trigger("prepare_timer_buttons");
 		}
+
 		frm.trigger("setup_quality_inspection");
+    
+		if (frm.doc.work_order) {
+			frappe.db.get_value('Work Order', frm.doc.work_order,
+				'transfer_material_against').then((r) => {
+				if (r.message.transfer_material_against == 'Work Order') {
+					frm.set_df_property('items', 'hidden', 1);
+				}
+			});
+		}
 	},
 
 	setup_quality_inspection: function(frm) {
