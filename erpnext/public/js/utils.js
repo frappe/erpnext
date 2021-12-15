@@ -888,9 +888,11 @@ $(document).on('app_ready', function() {
 function set_time_to_resolve_and_response(frm, apply_sla_for_resolution) {
 	frm.dashboard.clear_headline();
 
-	let time_to_respond = get_status(frm.doc.response_by);
+	let time_to_respond;
 	if (!frm.doc.first_responded_on) {
 		time_to_respond = get_time_left(frm.doc.response_by, frm.doc.agreement_status);
+	} else {
+		time_to_respond = get_status(frm.doc.response_by, frm.doc.first_responded_on);
 	}
 
 	let alert = `
@@ -903,9 +905,11 @@ function set_time_to_resolve_and_response(frm, apply_sla_for_resolution) {
 
 
 	if (apply_sla_for_resolution) {
-		let time_to_resolve = get_status(frm.doc.resolution_by);
+		let time_to_resolve;
 		if (!frm.doc.resolution_date) {
 			time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_status);
+		} else {
+			time_to_resolve = get_status(frm.doc.resolution_by, frm.doc.resolution_date);
 		}
 
 		alert += `
@@ -928,8 +932,8 @@ function get_time_left(timestamp, agreement_status) {
 	return {'diff_display': diff_display, 'indicator': indicator};
 }
 
-function get_status(timestamp) {
-	const time_left = moment(timestamp).diff(moment());
+function get_status(expected, actual) {
+	const time_left = moment(expected).diff(moment(actual));
 	if (time_left >= 0) {
 		return {'diff_display': 'Fulfilled', 'indicator': 'green'};
 	} else {
