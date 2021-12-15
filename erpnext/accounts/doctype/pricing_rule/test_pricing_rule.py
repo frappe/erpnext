@@ -630,7 +630,7 @@ class TestPricingRule(unittest.TestCase):
 		for doc in [si, si1]:
 			doc.delete()
 
-	def test_multiple_pricing_rules(self):
+	def test_multiple_pricing_rules_with_min_qty(self):
 		make_pricing_rule(discount_percentage=20, selling=1, priority=1, min_qty=4,
 			apply_multiple_pricing_rules=1, title="_Test Pricing Rule with Min Qty - 1")
 		make_pricing_rule(discount_percentage=10, selling=1, priority=2, min_qty=4,
