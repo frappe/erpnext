@@ -77,7 +77,6 @@ frappe.ui.form.on('Job Card', {
 		}
 
 		frm.trigger("setup_quality_inspection");
-    
 		if (frm.doc.work_order) {
 			frappe.db.get_value('Work Order', frm.doc.work_order,
 				'transfer_material_against').then((r) => {
