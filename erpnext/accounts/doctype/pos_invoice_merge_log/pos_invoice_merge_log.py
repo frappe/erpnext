@@ -23,6 +23,8 @@ class POSInvoiceMergeLog(Document):
 		self.validate_pos_invoice_status()
 
 	def validate_customer(self):
+		# just to return
+		self.merge_invoices_based_on = 'Customer Group'
 		if self.merge_invoices_based_on == 'Customer Group':
 			return
 
