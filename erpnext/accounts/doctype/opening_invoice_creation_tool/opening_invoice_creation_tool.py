@@ -159,7 +159,8 @@ class OpeningInvoiceCreationTool(Document):
 			frappe.scrub(row.party_type): row.party,
 			"is_pos": 0,
 			"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice",
-			"update_stock": 0
+			"update_stock": 0,
+			"invoice_number": row.invoice_number
 		})
 
 		accounting_dimension = get_accounting_dimensions()
@@ -200,10 +201,13 @@ def start_import(invoices):
 	names = []
 	for idx, d in enumerate(invoices):
 		try:
+			invoice_number = None
+			if d.invoice_number:
+				invoice_number = d.invoice_number
 			publish(idx, len(invoices), d.doctype)
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_mandatory = True
-			doc.insert()
+			doc.insert(set_name=invoice_number)
 			doc.submit()
 			frappe.db.commit()
 			names.append(doc.name)
