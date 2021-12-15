@@ -52,7 +52,6 @@ def execute():
             'gst_category': addr.gst_category,
             'export_type': addr.export_type
         })
-    frappe.db.commit()
 
     # delete custom fields
     cf = frappe.qb.DocType('Custom Field')
