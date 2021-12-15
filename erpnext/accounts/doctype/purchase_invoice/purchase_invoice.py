@@ -579,9 +579,7 @@ class PurchaseInvoice(BuyingController):
 		return 0
 
 	def make_supplier_gl_entry(self, gl_entries):
-		# Checked both rounding_adjustment and rounded_total
-		# because rounded_total had value even before introcution of posting GLE based on rounded total
-		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
+		grand_total = self.rounded_total or self.grand_total
 
 		if grand_total:
 			billing_party_type, billing_party = self.get_billing_party()
