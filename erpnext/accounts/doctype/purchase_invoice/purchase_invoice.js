@@ -559,20 +559,6 @@ frappe.ui.form.on("Purchase Invoice", {
 			}
 		});
 	},
-	validate:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-
-                frm.set_value("tax_category","");
-				frm.refresh_field("tax_category")
-                frm.set_value("tax_category",r.message);
-                frm.refresh_field("tax_category")
-			}
-		});
-	},
 	shipping_address:function(frm){
 		frm.call({
 			method:"calculate_taxes",
