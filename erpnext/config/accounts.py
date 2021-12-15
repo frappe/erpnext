@@ -331,6 +331,24 @@ def get_data():
               		"label": _("Reconciled balances"),
               		"description": _("Create Reconciled balances"),
             	},
+				{
+					"type": "report",
+					"name": "Credit Note Transaction",
+					"doctype": "Bank Transactions",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Debit Note Transaction",
+					"doctype": "Bank Transactions",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Bank Check Transaction",
+					"doctype": "Bank Transactions",
+					"is_query_report": True,
+				},
 			]
 		},
 		{
