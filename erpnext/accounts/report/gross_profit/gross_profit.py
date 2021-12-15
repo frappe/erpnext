@@ -335,7 +335,7 @@ class GrossProfitGenerator(object):
 		else:
 			my_sle = self.sle.get((item_code, row.warehouse))
 			if (row.update_stock or row.dn_detail) and my_sle:
-				parenttype, parent = row.parenttype, row.parent
+				parenttype, parent = row.parenttype, (row.parent_invoice if row.parenttype == "Sales Invoice" and row.parent_invoice else row.parent)
 				if row.dn_detail:
 					parenttype, parent = "Delivery Note", row.delivery_note
 
