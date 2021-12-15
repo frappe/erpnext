@@ -313,4 +313,5 @@ erpnext.patches.v13_0.update_category_in_ltds_certificate
 erpnext.patches.v13_0.create_pan_field_for_india #2
 erpnext.patches.v14_0.delete_hub_doctypes
 erpnext.patches.v13_0.create_ksa_vat_custom_fields
+erpnext.patches.v13_0.update_maintenance_schedule_field_in_visit
 erpnext.patches.v14_0.migrate_crm_settings
