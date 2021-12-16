@@ -47,7 +47,7 @@ frappe.ui.form.on('Maintenance Visit', {
 			frm.set_value({ status: 'Draft' });
 		}
 		if (frm.doc.__islocal) {
-			frm.clear_table("purposes");
+			frm.doc.maintenance_type == 'Unscheduled' && frm.clear_table("purposes");
 			frm.set_value({ mntc_date: frappe.datetime.get_today() });
 		}
 	},
