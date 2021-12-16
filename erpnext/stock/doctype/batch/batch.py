@@ -321,18 +321,19 @@ def get_pos_reserved_batch_qty(filters):
 	if isinstance(filters, str):
 		filters = json.loads(filters)
 
-	pos_transacted_batch_nos = frappe.db.sql("""select item.qty
-		from `tabPOS Invoice` p, `tabPOS Invoice Item` item
-		where p.name = item.parent
-		and p.consolidated_invoice is NULL
-		and p.status != "Consolidated"
-		and p.docstatus = 1
-		and item.docstatus = 1
-		and item.item_code = %(item_code)s
-		and item.warehouse = %(warehouse)s
-		and item.batch_no = %(batch_no)s
+	p = frappe.qb.DocType("POS Invoice").as_("p")
+	item = frappe.qb.DocType("POS Invoice Item").as_("item")
 
-		""", filters, as_dict=1)
+	pos_transacted_batch_nos = frappe.qb.from_(p).from_(item).select(item.qty).where(
+		(p.name == item.parent) &
+		(p.consolidated_invoice.isnull()) &
+		(p.status != "Consolidated") &
+		(p.docstatus == 1) &
+		(item.docstatus == 1) &
+		(item.item_code == filters.get('item_code')) &
+		(item.warehouse == filters.get('warehouse')) &
+		(item.batch_no == filters.get('batch_no'))
+	).run(as_dict=True)
 
 	reserved_batch_qty = 0.0
 	for d in pos_transacted_batch_nos:
