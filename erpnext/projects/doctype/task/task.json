@@ -31,6 +31,10 @@
   "get_items",
   "section_break_23",
   "items",
+  "section_break_25",
+  "total_estimated_cost",
+  "column_break_26",
+  "total_actual_cost",
   "sb_timeline",
   "exp_start_date",
   "expected_time",
@@ -455,6 +459,29 @@
   {
    "fieldname": "section_break_23",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_estimated_cost",
+   "fieldtype": "Currency",
+   "label": "Total Estimated Cost",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "total_actual_cost",
+   "fieldtype": "Currency",
+   "label": "Total Actual Cost",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_25",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-check",
@@ -462,7 +489,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2021-12-06 14:38:45.992721",
+ "modified": "2021-12-16 04:55:21.430231",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

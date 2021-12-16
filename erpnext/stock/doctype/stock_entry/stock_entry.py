@@ -497,12 +497,25 @@ class StockEntry(StockController):
 					& (se.stock_entry_type == stock_entry_type)
 				).run(as_dict=1)
 
+				actual_cost = frappe.qb.from_(
+					sed
+				).join(
+					se
+				).on(sed.parent == se.name).select(
+					Coalesce(Sum(sed.amount), 0).as_("actual_cost")
+				).where(
+					(sed.task_item == item.task_item)
+					& (sed.parent == se.name)
+					& (sed.docstatus == 1)
+				).run(as_dict=1)
+
 			if update_qty[0].qty > req_qty[item.task_item]:
 				frappe.throw(_("The total Issue / Transfer quantity {0} in Task {1}  \
 					cannot be greater than requested quantity {2} for Item {3}")
 					.format(update_qty[0].qty, task_name, req_qty[item.task_item], item.item_code))
 
 			frappe.db.set_value('Task Item', item.task_item, update_field, update_qty[0].qty)
+			frappe.db.set_value('Task Item', item.task_item, "actual_cost", actual_cost[0].actual_cost)
 
 	@frappe.whitelist()
 	def get_stock_and_rate(self):

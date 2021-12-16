@@ -59,10 +59,12 @@ frappe.ui.form.on("Task", {
 					hide = true;
 				}
 			});
+			frm.events.calculate_total_costs(frm);
 			frm.toggle_display(["get_items"], hide == true ? 0 : 1);
-			frm.set_df_property("from_bom", "read_only", hide == true ? 1 : 0);
-			frm.set_df_property("qty", "read_only", hide == true ? 1 : 0);
-			frm.set_df_property("use_multi_level_bom", "read_only", hide == true ? 1 : 0);
+			let fields = ["from_bom", "qty", "use_multi_level_bom"];
+			fields.forEach(field => {
+				frm.set_df_property(field, "read_only", hide == true ? 1 : 0);
+			});
 		}
 
 		if (frm.doc.items.length) {
@@ -119,9 +121,37 @@ frappe.ui.form.on("Task", {
 			frm: frm,
 		});
 	},
-	calculate_estimated_cost: function(frm, row) {
-		row.estimated_cost = flt(row.qty) * flt(row.basic_rate);
-		frm.refresh_field("items");
+	calculate_estimated_cost: function(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		frappe.call({
+			doc: frm.doc,
+			method: "get_basic_rate",
+			args: {
+				item: {
+					"item_code": row.item_code,
+					"stock_uom": row.uom,
+					"warehouse": row.warehouse,
+					"qty": row.qty
+				}
+			},
+			callback: function (r) {
+				frappe.model.set_value(cdt, cdn, 'basic_rate', r.message);
+				row.estimated_cost = flt(row.qty) * flt(row.basic_rate);
+				frm.refresh_field("items");
+			},
+		});
+	},
+	calculate_total_costs(frm) {
+		let total_estimated_cost = 0, total_actual_cost = 0;
+		if (frm.doc.items.length > 0) {
+			frm.doc.items.forEach((item) => {
+				total_estimated_cost += item.estimated_cost;
+				total_actual_cost += item.actual_cost;
+			});
+			frm.doc.total_estimated_cost = total_estimated_cost;
+			frm.doc.total_actual_cost = total_actual_cost;
+			frm.refresh_fields();
+		}
 	},
 	get_items(frm) {
 		if (!frm.doc.qty || !frm.doc.from_bom) {
@@ -154,23 +184,10 @@ frappe.ui.form.on("Task Item", {
 		});
 	},
 	warehouse(frm, cdt, cdn) {
-		const row = locals[cdt][cdn];
-		frappe.call({
-			doc: frm.doc,
-			method: "get_basic_rate",
-			args: {
-				item: {
-					"item_code": row.item_code,
-					"stock_uom": row.uom,
-					"warehouse": row.warehouse,
-					"qty": row.qty
-				}
-			},
-			callback: function (r) {
-				frappe.model.set_value(cdt, cdn, 'basic_rate', r.message);
-				frm.events.calculate_estimated_cost(frm, row);
-			},
-		});
+		frm.events.calculate_estimated_cost(frm, cdt, cdn);
+	},
+	qty(frm, cdt, cdn) {
+		frm.events.calculate_estimated_cost(frm, cdt, cdn);
 	},
 	before_items_remove: function (frm) {
 		items_before_delete = frm.doc.items;
