@@ -44,7 +44,7 @@ class Account(NestedSet):
 		self.validate_frozen_accounts_modifier()
 		self.validate_balance_must_be_debit_or_credit()
 		self.validate_account_currency()
-		self.validate_root_company_and_sync_account_to_children()
+		self.validate_root_company()
 
 	def validate_parent(self):
 		"""Fetch Parent Details and validate parent account"""
@@ -60,6 +60,9 @@ class Account(NestedSet):
 			elif par.company != self.company:
 				throw(_("Account {0}: Parent account {1} does not belong to company: {2}")
 					.format(self.name, self.parent_account, self.company))
+
+	def after_insert(self):
+		self.sync_account_to_children()
 
 	def set_root_and_report_type(self):
 		if self.parent_account:
@@ -94,7 +97,7 @@ class Account(NestedSet):
 		if not self.parent_account and not self.is_group:
 			frappe.throw(_("The root account {0} must be a group").format(frappe.bold(self.name)))
 
-	def validate_root_company_and_sync_account_to_children(self):
+	def validate_root_company(self):
 		# ignore validation while creating new compnay or while syncing to child companies
 		if frappe.local.flags.ignore_root_company_validation or self.flags.ignore_root_company_validation:
 			return
@@ -105,7 +108,9 @@ class Account(NestedSet):
 			if not frappe.db.get_value("Account",
 				{'account_name': self.account_name, 'company': ancestors[0]}, 'name'):
 				frappe.throw(_("Please add the account to root level Company - {}").format(ancestors[0]))
-		elif self.parent_account:
+
+	def sync_account_to_children(self):
+		if self.parent_account:
 			descendants = get_descendants_of('Company', self.company)
 			if not descendants: return
 			parent_acc_name_map = {}
