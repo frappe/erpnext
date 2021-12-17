@@ -1386,7 +1386,7 @@ class SalesInvoice(SellingController):
 	def update_vehicle_registration_order(self):
 		if self.get('vehicle_registration_order'):
 			vro = frappe.get_doc("Vehicle Registration Order", self.vehicle_registration_order)
-			vro.update_payment_status(update=True)
+			vro.set_payment_status(update=True)
 			vro.set_status(update=True)
 			vro.notify_update()
 

@@ -50,9 +50,9 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 
 		self.validate_account_mandatory()
 
-		self.update_payment_status()
-		self.update_invoice_status()
-		self.update_registration_receipt_details()
+		self.set_payment_status()
+		self.set_invoice_status()
+		self.set_registration_receipt_details()
 		self.set_status()
 		self.set_title()
 
@@ -466,7 +466,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 			or (self.customer_outstanding and not ignore_customer_outstanding)\
 			or self.authority_outstanding
 
-	def update_payment_status(self, update=False):
+	def set_payment_status(self, update=False):
 		self.calculate_outstanding_amount()
 
 		if update:
@@ -481,7 +481,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				'agent_closed_amount': self.agent_closed_amount,
 			})
 
-	def update_invoice_status(self, update=False):
+	def set_invoice_status(self, update=False):
 		vehicle_invoice = None
 		vehicle_invoice_issue = None
 		vehicle_invoice_return = None
@@ -538,7 +538,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				"invoice_delivered_date": self.invoice_delivered_date,
 			})
 
-	def update_registration_receipt_details(self, update=False):
+	def set_registration_receipt_details(self, update=False):
 		fields = ['name', 'vehicle_license_plate',
 			'customer', 'customer_name', 'financer', 'financer_name', 'lessee_name',
 			'posting_date', 'call_date']

@@ -50,7 +50,7 @@ class Vehicle(Document):
 		self.validate_vehicle_id()
 		self.update_reference_from_serial_no()
 		self.copy_image_from_item()
-		self.update_invoice_status()
+		self.set_invoice_status()
 		self.set_status()
 		self.cant_change()
 
@@ -162,7 +162,7 @@ class Vehicle(Document):
 			doc.set_vehicle_details(update=True)
 			doc.notify_update()
 
-	def update_invoice_status(self, update=False, update_modified=True):
+	def set_invoice_status(self, update=False, update_modified=True):
 		vehicle_invoice = frappe.db.get_value("Vehicle Invoice", filters={'vehicle': self.name, 'docstatus': 1},
 			fieldname=['status', 'issued_for'], as_dict=1)
 

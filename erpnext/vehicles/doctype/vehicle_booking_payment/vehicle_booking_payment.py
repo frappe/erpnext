@@ -250,7 +250,7 @@ class VehicleBookingPayment(Document):
 			vbo = frappe.get_doc("Vehicle Booking Order", self.vehicle_booking_order)
 			vbo.check_cancelled(throw=True)
 			vbo.update_paid_amount(update=True)
-			vbo.update_payment_status(update=True)
+			vbo.set_payment_status(update=True)
 			vbo.set_status(update=True)
 			vbo.notify_update()
 

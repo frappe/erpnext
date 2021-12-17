@@ -49,9 +49,9 @@ def change_vehicle(vehicle_booking_order, vehicle):
 	vbo_doc.validate_vehicle()
 	vbo_doc.set_vehicle_details()
 
-	vbo_doc.update_delivery_status()
-	vbo_doc.update_invoice_status()
-	vbo_doc.update_registration_status()
+	vbo_doc.set_delivery_status()
+	vbo_doc.set_invoice_status()
+	vbo_doc.set_registration_status()
 
 	save_document_for_update(vbo_doc)
 
@@ -80,7 +80,7 @@ def change_vehicle_in_registration_order(booking_doc):
 	vro_doc.set_vehicle_details()
 
 	vro_doc.validate_vehicle_booking_order()
-	vro_doc.update_invoice_status()
+	vro_doc.set_invoice_status()
 
 	save_document_for_update(vro_doc)
 
@@ -150,7 +150,7 @@ def change_item(vehicle_booking_order, item_code):
 
 	vbo_doc.calculate_taxes_and_totals()
 	vbo_doc.validate_payment_schedule()
-	vbo_doc.update_payment_status()
+	vbo_doc.set_payment_status()
 	vbo_doc.validate_amounts()
 
 	vbo_doc.get_terms_and_conditions()
@@ -180,10 +180,10 @@ def change_item_in_registration_order(booking_doc):
 	vro_doc.set_pricing_details(update_component_amounts=True)
 
 	vro_doc.calculate_totals()
-	vro_doc.update_payment_status()
+	vro_doc.set_payment_status()
 
 	vro_doc.validate_vehicle_booking_order()
-	vro_doc.update_invoice_status()
+	vro_doc.set_invoice_status()
 
 	save_document_for_update(vro_doc)
 
@@ -359,7 +359,7 @@ def change_customer_details(vehicle_booking_order, customer_is_company=None, cus
 	vbo_doc.set_title()
 	vbo_doc.calculate_taxes_and_totals()
 	vbo_doc.validate_payment_schedule()
-	vbo_doc.update_payment_status()
+	vbo_doc.set_payment_status()
 	vbo_doc.validate_amounts()
 
 	save_document_for_update(vbo_doc)
@@ -392,7 +392,7 @@ def change_payment_adjustment(vehicle_booking_order, payment_adjustment):
 
 	vbo_doc.payment_adjustment = payment_adjustment
 
-	vbo_doc.update_payment_status()
+	vbo_doc.set_payment_status()
 	vbo_doc.validate_amounts()
 	vbo_doc.validate_payment_adjustment()
 
@@ -440,7 +440,7 @@ def change_vehicle_price(vehicle_booking_order, vehicle_amount=0, fni_amount=0):
 
 	vbo_doc.calculate_taxes_and_totals()
 	vbo_doc.validate_payment_schedule()
-	vbo_doc.update_payment_status()
+	vbo_doc.set_payment_status()
 	vbo_doc.validate_amounts()
 
 	save_document_for_update(vbo_doc)
@@ -506,7 +506,7 @@ def change_cancellation(vehicle_booking_order, cancelled):
 			.format(frappe.format(undeposited_amount, df=vbo_doc.meta.get_field('supplier_outstanding'))))
 
 	vbo_doc.status = "Cancelled Booking" if cancelled else None
-	vbo_doc.update_payment_status()
+	vbo_doc.set_payment_status()
 
 	save_document_for_update(vbo_doc)
 	vbo_doc.update_allocation_status()
@@ -561,8 +561,8 @@ def handle_delivery_period_changed(vbo_doc):
 	vbo_doc.payment_schedule = []
 	vbo_doc.validate_payment_schedule()
 
-	vbo_doc.update_delivery_status()
-	vbo_doc.update_payment_status()
+	vbo_doc.set_delivery_status()
+	vbo_doc.set_payment_status()
 
 	frappe.msgprint(_("Delivery Period has been changed from {0} to {1}")
 		.format(frappe.bold(vbo_doc._doc_before_save.delivery_period or 'None'), frappe.bold(vbo_doc.delivery_period)))
