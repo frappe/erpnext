@@ -150,6 +150,7 @@ erpnext.SerialNoBatchSelector = class SerialNoBatchSelector {
 					() => {
 						refresh_field("items");
 						refresh_field("packed_items");
+						refresh_field("stock_items");
 						if (me.callback) {
 							return me.callback(me.item);
 						}
