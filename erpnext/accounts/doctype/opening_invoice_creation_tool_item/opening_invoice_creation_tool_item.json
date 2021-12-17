@@ -103,12 +103,6 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
-<<<<<<< HEAD
-  }
- ],
- "istable": 1,
- "modified": "2019-07-25 15:00:00.460695",
-=======
   },
   {
    "description": "Reference number of the invoice from the previous system",
@@ -121,7 +115,6 @@
  "istable": 1,
  "links": [],
  "modified": "2021-12-17 19:25:06.053187",
->>>>>>> e85da7a03a (fix: Add Invoice Number field to list view in Opening Inv Creation Tool (#28938))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool Item",
