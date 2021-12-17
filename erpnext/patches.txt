@@ -336,4 +336,4 @@ erpnext.patches.v13_0.item_naming_series_not_mandatory
 erpnext.patches.v13_0.update_category_in_ltds_certificate
 erpnext.patches.v13_0.create_ksa_vat_custom_fields
 erpnext.patches.v13_0.rename_ksa_qr_field
-erpnext.patches.v13_0.disable_ksa_print_format_for_others
+erpnext.patches.v13_0.disable_ksa_print_format_for_others # 16-12-2021
