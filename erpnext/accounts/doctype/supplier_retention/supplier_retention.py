@@ -36,10 +36,19 @@ class SupplierRetention(Document):
 	
 	def calculate_retention(self):
 		for document in self.get("references"):
-			total = document.net_total * (self.percentage_total/100)
-			sales_invoice = frappe.get_doc("Purchase Invoice", document.reference_name)
-			sales_invoice.outstanding_amount -= total
-			sales_invoice.save()
+			total = document.net_total * (self.percentage_total/100)			
+
+			if document.reference_doctype == "Purchase Invoice":
+				sales_invoice = frappe.get_doc("Purchase Invoice", document.reference_name)
+				outstanding_amount = sales_invoice.outstanding_amount
+				outstanding_amount -= total
+				sales_invoice.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+
+			if document.reference_doctype == "Supplier Documents":
+				supllier_document = frappe.get_doc("Supplier Documents", document.reference_name)
+				outstanding_amount = supllier_document.outstanding_amount
+				outstanding_amount -= total
+				supllier_document.db_set('outstanding_amount', outstanding_amount, update_modified=False)
 	
 	def update_accounts_status(self):
 		supplier = frappe.get_doc("Supplier", self.supplier)
