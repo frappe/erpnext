@@ -115,7 +115,8 @@ def make_serial_item_with_serial(item_code):
 		serial_item_doc.has_serial_no = 1
 		serial_item_doc.serial_no_series = "TEST.###"
 		serial_item_doc.save(ignore_permissions=True)
-	if frappe.db.exists('Serial No', {"status": "Active", "item_code": item_code}):
+	active_serials = frappe.db.get_all('Serial No', {"status": "Active", "item_code": item_code})
+	if len(active_serials) < 2:
 		make_serialized_item(item_code=item_code)
 
 def get_events(ms):
