@@ -545,7 +545,9 @@ class ReceivablePayableReport(object):
 
 	def set_ageing(self, row):
 		if self.filters.ageing_based_on == "Due Date":
-			entry_date = row.due_date
+			# use posting date as a fallback for advances posted via journal and payment entry
+			# when ageing viewed by due date
+			entry_date = row.due_date or row.posting_date
 		elif self.filters.ageing_based_on == "Supplier Invoice Date":
 			entry_date = row.bill_date
 		else:

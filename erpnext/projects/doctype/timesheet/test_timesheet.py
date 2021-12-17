@@ -34,10 +34,6 @@ class TestTimesheet(unittest.TestCase):
 		for dt in ["Salary Slip", "Salary Structure", "Salary Structure Assignment", "Timesheet"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
 
-		if not frappe.db.exists("Salary Component", "Timesheet Component"):
-			frappe.get_doc({"doctype": "Salary Component", "salary_component": "Timesheet Component"}).insert()
-
-
 	def test_timesheet_billing_amount(self):
 		emp = make_employee("test_employee_6@salary.com")
 
@@ -159,6 +155,9 @@ class TestTimesheet(unittest.TestCase):
 def make_salary_structure_for_timesheet(employee, company=None):
 	salary_structure_name = "Timesheet Salary Structure Test"
 	frequency = "Monthly"
+
+	if not frappe.db.exists("Salary Component", "Timesheet Component"):
+		frappe.get_doc({"doctype": "Salary Component", "salary_component": "Timesheet Component"}).insert()
 
 	salary_structure = make_salary_structure(salary_structure_name, frequency, company=company, dont_submit=True)
 	salary_structure.salary_component = "Timesheet Component"
