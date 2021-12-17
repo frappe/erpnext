@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -305,6 +304,8 @@ def make_request_for_quotation(source_name, target_doc=None):
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):
 	def set_missing_values(source, target):
+		target.opportunity_name = source.name
+
 		if source.opportunity_from == "Lead":
 			target.lead_name = source.party_name
 

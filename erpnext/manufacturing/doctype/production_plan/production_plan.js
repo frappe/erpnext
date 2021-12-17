@@ -105,7 +105,7 @@ frappe.ui.form.on('Production Plan', {
 		}
 		frm.trigger("material_requirement");
 
-		const projected_qty_formula = ` <table class="table table-bordered" style="background-color: #f9f9f9;">
+		const projected_qty_formula = ` <table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 			<tr><td style="padding-left:25px">
 				<div>
 				<h3 style="text-decoration: underline;">
@@ -238,6 +238,12 @@ frappe.ui.form.on('Production Plan', {
 			method: "get_items",
 			freeze: true,
 			doc: frm.doc,
+			callback: function() {
+				frm.refresh_field("po_items");
+				if (frm.doc.sub_assembly_items.length > 0) {
+					frm.trigger("get_sub_assembly_items");
+				}
+			}
 		});
 	},
 

@@ -111,6 +111,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		erpnext.utils.set_taxes_from_address(this.frm, "shipping_address_name", "customer_address", "shipping_address_name");
 	},
 
+	dispatch_address_name: function() {
+		erpnext.utils.get_address_display(this.frm, "dispatch_address_name", "dispatch_address");
+	},
+
 	sales_partner: function() {
 		this.apply_pricing_rule();
 	},
@@ -202,8 +206,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 
-		if (item.serial_no && item.qty === item.serial_no.split(`\n`).length) {
-			return;
+		// check if serial nos entered are as much as qty in row
+		if (item.serial_no) {
+			let serial_nos = item.serial_no.split(`\n`).filter(sn => sn.trim()); // filter out whitespaces
+			if (item.qty === serial_nos.length) return;
 		}
 
 		if (item.serial_no && !item.batch_no) {

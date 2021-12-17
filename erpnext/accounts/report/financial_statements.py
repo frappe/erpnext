@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import functools
 import math
@@ -425,8 +423,7 @@ def set_gl_entries_by_account(
 			{additional_conditions}
 			and posting_date <= %(to_date)s
 			and is_cancelled = 0
-			{distributed_cost_center_query}
-			order by account, posting_date""".format(
+			{distributed_cost_center_query}""".format(
 				additional_conditions=additional_conditions,
 				distributed_cost_center_query=distributed_cost_center_query), gl_filters, as_dict=True) #nosec
 

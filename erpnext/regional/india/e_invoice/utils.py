@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import base64
 import io
@@ -138,8 +136,8 @@ def get_doc_details(invoice):
 		invoice_date=invoice_date
 	))
 
-def validate_address_fields(address, is_shipping_address):
-	if ((not address.gstin and not is_shipping_address)
+def validate_address_fields(address, skip_gstin_validation):
+	if ((not address.gstin and not skip_gstin_validation)
 		or not address.city
 		or not address.pincode
 		or not address.address_title
@@ -151,10 +149,14 @@ def validate_address_fields(address, is_shipping_address):
 			title=_('Missing Address Fields')
 		)
 
-def get_party_details(address_name, is_shipping_address=False):
+	if address.address_line2 and len(address.address_line2) < 2:
+		# to prevent "The field Address 2 must be a string with a minimum length of 3 and a maximum length of 100"
+		address.address_line2 = ""
+
+def get_party_details(address_name, skip_gstin_validation=False):
 	addr = frappe.get_doc('Address', address_name)
 
-	validate_address_fields(addr, is_shipping_address)
+	validate_address_fields(addr, skip_gstin_validation)
 
 	if addr.gst_state_number == 97:
 		# according to einvoice standard
@@ -402,6 +404,12 @@ def validate_totals(einvoice):
 	if abs(flt(value_details['AssVal']) - total_item_ass_value) > 1:
 		frappe.throw(_('Total Taxable Value of the items is not equal to the Invoice Net Total. Please check item taxes / discounts for any correction.'))
 
+	if abs(flt(value_details['CgstVal']) + flt(value_details['SgstVal']) - total_item_cgst_value - total_item_sgst_value) > 1:
+		frappe.throw(_('CGST + SGST value of the items is not equal to total CGST + SGST value. Please review taxes for any correction.'))
+
+	if abs(flt(value_details['IgstVal']) - total_item_igst_value) > 1:
+		frappe.throw(_('IGST value of all items is not equal to total IGST value. Please review taxes for any correction.'))
+
 	if abs(flt(value_details['TotInvVal']) + flt(value_details['Discount']) - flt(value_details['OthChrg']) - total_item_value) > 1:
 		frappe.throw(_('Total Value of the items is not equal to the Invoice Grand Total. Please check item taxes / discounts for any correction.'))
 
@@ -443,7 +451,11 @@ def make_einvoice(invoice):
 		if invoice.gst_category == 'Overseas':
 			shipping_details = get_overseas_address_details(invoice.shipping_address_name)
 		else:
-			shipping_details = get_party_details(invoice.shipping_address_name, is_shipping_address=True)
+			shipping_details = get_party_details(invoice.shipping_address_name, skip_gstin_validation=True)
+
+	dispatch_details = frappe._dict({})
+	if invoice.dispatch_address_name:
+		dispatch_details = get_party_details(invoice.dispatch_address_name, skip_gstin_validation=True)
 
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
@@ -455,7 +467,7 @@ def make_einvoice(invoice):
 		eway_bill_details = get_eway_bill_details(invoice)
 
 	# not yet implemented
-	dispatch_details = period_details = export_details = frappe._dict({})
+	period_details = export_details = frappe._dict({})
 
 	einvoice = schema.format(
 		transaction_details=transaction_details, doc_details=doc_details, dispatch_details=dispatch_details,
@@ -471,7 +483,11 @@ def make_einvoice(invoice):
 	except Exception:
 		show_link_to_error_log(invoice, einvoice)
 
-	validate_totals(einvoice)
+	try:
+		validate_totals(einvoice)
+	except Exception:
+		log_error(einvoice)
+		raise
 
 	return einvoice
 
@@ -624,10 +640,17 @@ class GSPConnector():
 		request_log.save(ignore_permissions=True)
 		frappe.db.commit()
 
+	def get_client_credentials(self):
+		if self.e_invoice_settings.client_id and self.e_invoice_settings.client_secret:
+			return self.e_invoice_settings.client_id, self.e_invoice_settings.get_password('client_secret')
+
+		return frappe.conf.einvoice_client_id, frappe.conf.einvoice_client_secret
+
 	def fetch_auth_token(self):
+		client_id, client_secret = self.get_client_credentials()
 		headers = {
-			'gspappid': frappe.conf.einvoice_client_id,
-			'gspappsecret': frappe.conf.einvoice_client_secret
+			'gspappid': client_id,
+			'gspappsecret': client_secret
 		}
 		res = {}
 		try:
@@ -932,7 +955,7 @@ class GSPConnector():
 		if errors:
 			frappe.throw(errors, title=title, as_list=1)
 		else:
-			link_to_error_list = '<a href="desk#List/Error Log/List?method=E Invoice Request Failed">Error Log</a>'
+			link_to_error_list = '<a href="/app/error-log" target="_blank">Error Log</a>'
 			frappe.msgprint(
 				_('An error occurred while making e-invoicing request. Please check {} for more information.').format(link_to_error_list),
 				title=title,

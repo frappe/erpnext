@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -49,15 +47,24 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 	pan_no = ''
 	parties = []
 	party_type, party = get_party_details(inv)
+	has_pan_field = frappe.get_meta(party_type).has_field("pan")
 
 	if not tax_withholding_category:
-		tax_withholding_category, pan_no = frappe.db.get_value(party_type, party, ['tax_withholding_category', 'pan'])
+		if has_pan_field:
+			fields = ['tax_withholding_category', 'pan']
+		else:
+			fields = ['tax_withholding_category']
+
+		tax_withholding_details = frappe.db.get_value(party_type, party, fields, as_dict=1)
+
+		tax_withholding_category = tax_withholding_details.get('tax_withholding_category')
+		pan_no = tax_withholding_details.get('pan')
 
 	if not tax_withholding_category:
 		return
 
 	# if tax_withholding_category passed as an argument but not pan_no
-	if not pan_no:
+	if not pan_no and has_pan_field:
 		pan_no = frappe.db.get_value(party_type, party, 'pan')
 
 	# Get others suppliers with the same PAN No
@@ -79,7 +86,7 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 		frappe.throw(_('Tax Withholding Category {} against Company {} for Customer {} should have Cumulative Threshold value.')
 			.format(tax_withholding_category, inv.company, party))
 
-	tax_amount, tax_deducted = get_tax_amount(
+	tax_amount, tax_deducted, tax_deducted_on_advances = get_tax_amount(
 		party_type, parties,
 		inv, tax_details,
 		posting_date, pan_no
@@ -90,7 +97,10 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 	else:
 		tax_row = get_tax_row_for_tcs(inv, tax_details, tax_amount, tax_deducted)
 
-	return tax_row
+	if inv.doctype == 'Purchase Invoice':
+		return tax_row, tax_deducted_on_advances
+	else:
+		return tax_row
 
 def get_tax_withholding_details(tax_withholding_category, posting_date, company):
 	tax_withholding = frappe.get_doc("Tax Withholding Category", tax_withholding_category)
@@ -165,6 +175,7 @@ def get_lower_deduction_certificate(tax_details, pan_no):
 	ldc_name = frappe.db.get_value('Lower Deduction Certificate',
 		{
 			'pan_no': pan_no,
+			'tax_withholding_category': tax_details.tax_withholding_category,
 			'valid_from': ('>=', tax_details.from_date),
 			'valid_upto': ('<=', tax_details.to_date)
 		}, 'name')
@@ -177,6 +188,10 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 	advance_vouchers = get_advance_vouchers(parties, company=inv.company, from_date=tax_details.from_date,
 		to_date=tax_details.to_date, party_type=party_type)
 	taxable_vouchers = vouchers + advance_vouchers
+	tax_deducted_on_advances = 0
+
+	if inv.doctype == 'Purchase Invoice':
+		tax_deducted_on_advances = get_taxes_deducted_on_advances_allocated(inv, tax_details)
 
 	tax_deducted = 0
 	if taxable_vouchers:
@@ -206,7 +221,7 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 	if cint(tax_details.round_off_tax_amount):
 		tax_amount = round(tax_amount)
 
-	return tax_amount, tax_deducted
+	return tax_amount, tax_deducted, tax_deducted_on_advances
 
 def get_invoice_vouchers(parties, tax_details, company, party_type='Supplier'):
 	dr_or_cr = 'credit' if party_type == 'Supplier' else 'debit'
@@ -263,6 +278,29 @@ def get_advance_vouchers(parties, company=None, from_date=None, to_date=None, pa
 		filters['posting_date'] = ['between', (from_date, to_date)]
 
 	return frappe.get_all('GL Entry', filters=filters, distinct=1, pluck='voucher_no') or [""]
+
+def get_taxes_deducted_on_advances_allocated(inv, tax_details):
+	advances = [d.reference_name for d in inv.get('advances')]
+	tax_info = []
+
+	if advances:
+		pe = frappe.qb.DocType("Payment Entry").as_("pe")
+		at = frappe.qb.DocType("Advance Taxes and Charges").as_("at")
+
+		tax_info = frappe.qb.from_(at).inner_join(pe).on(
+			pe.name == at.parent
+		).select(
+			at.parent, at.name, at.tax_amount, at.allocated_amount
+		).where(
+			pe.tax_withholding_category == tax_details.get('tax_withholding_category')
+		).where(
+			at.parent.isin(advances)
+		).where(
+			at.account_head == tax_details.account_head
+		).run(as_dict=True)
+
+	return tax_info
+
 
 def get_deducted_tax(taxable_vouchers, tax_details):
 	# check if TDS / TCS account is already charged on taxable vouchers

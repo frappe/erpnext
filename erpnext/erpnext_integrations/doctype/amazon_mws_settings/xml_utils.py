@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Tue Jun 26 15:42:07 2012
 
@@ -6,7 +5,6 @@ Borrowed from https://github.com/timotheus/ebaysdk-python
 
 @author: pierre
 """
-from __future__ import unicode_literals
 
 import re
 import xml.etree.ElementTree as ET
