@@ -405,6 +405,9 @@ def make_stock_entry_mt(source_name, target_doc = None):
 	doc = get_mapped_doc("Task", source_name, {
 		"Task": {
 			"doctype": "Stock Entry",
+			"field_map": {
+				"name": "task_reference"
+			},
 			"postprocess": set_purpose
 		},
 		"Task Item": {
@@ -433,6 +436,9 @@ def make_stock_entry_mi(source_name, target_doc = None):
 	doc = get_mapped_doc("Task", source_name, {
 		"Task": {
 			"doctype": "Stock Entry",
+			"field_map": {
+				"name": "task_reference"
+			},
 			"postprocess": set_purpose
 		},
 		"Task Item": {

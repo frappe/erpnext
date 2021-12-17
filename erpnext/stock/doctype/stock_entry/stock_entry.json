@@ -73,6 +73,7 @@
   "per_transferred",
   "total_amount",
   "job_card",
+  "task_reference",
   "amended_from",
   "credit_note",
   "is_return"
@@ -353,9 +354,9 @@
   },
   {
    "fieldname": "scan_barcode",
-   "options": "Barcode",
    "fieldtype": "Data",
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -621,6 +622,14 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "task_reference",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Task Reference",
+   "no_copy": 1,
+   "options": "Task"
   }
  ],
  "icon": "fa fa-file-text",
@@ -628,10 +637,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-20 19:19:31.514846",
+ "modified": "2021-12-17 04:54:15.462861",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
