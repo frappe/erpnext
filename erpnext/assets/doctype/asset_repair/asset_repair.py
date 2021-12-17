@@ -28,7 +28,7 @@ class AssetRepair(AccountsController):
 
 	def set_total_value(self):
 		for item in self.get('stock_items'):
-			item.total_value = flt(item.valuation_rate) * flt(item.consumed_quantity)
+			item.total_value = flt(item.rate) * flt(item.qty)
 
 	def calculate_total_repair_cost(self):
 		self.total_repair_cost = flt(self.repair_cost)
@@ -119,8 +119,8 @@ class AssetRepair(AccountsController):
 			stock_entry.append('items', {
 				"s_warehouse": self.warehouse,
 				"item_code": stock_item.item_code,
-				"qty": stock_item.consumed_quantity,
-				"basic_rate": stock_item.valuation_rate,
+				"qty": stock_item.qty,
+				"basic_rate": stock_item.rate,
 				"serial_no": stock_item.serial_no
 			})
 
