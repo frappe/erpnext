@@ -321,5 +321,9 @@ erpnext.patches.v13_0.disable_ksa_print_format_for_others # 16-12-2021
 erpnext.patches.v14_0.add_default_exit_questionnaire_notification_template
 =======
 erpnext.patches.v13_0.disable_ksa_print_format_for_others
+<<<<<<< HEAD
 erpnext.patches.v13_0.update_tax_category_for_rcm #1
 >>>>>>> b33fd6acc7 (fix: Is Reverse Charge check in Tax Category)
+=======
+erpnext.patches.v13_0.update_tax_category_for_rcm
+>>>>>>> 7c1bfe6b46 (chore: Remove patch comment)
