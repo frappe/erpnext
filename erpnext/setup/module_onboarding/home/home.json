@@ -1,0 +1,62 @@
+{
+ "allow_roles": [
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Purchase Manager"
+  },
+  {
+   "role": "Manufacturing Manager"
+  },
+  {
+   "role": "Item Manager"
+  }
+ ],
+ "creation": "2021-11-22 12:19:15.888642",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "documentation_url": "https://docs.erpnext.com/docs/v13/user/manual/en/setting-up/company-setup",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2021-12-15 14:23:52.460913",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Home",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Company Set Up"
+  },
+  {
+   "step": "Navigation Help"
+  },
+  {
+   "step": "Data import"
+  },
+  {
+   "step": "Create an Item"
+  },
+  {
+   "step": "Create a Customer"
+  },
+  {
+   "step": "Create a Supplier"
+  },
+  {
+   "step": "Create a Quotation"
+  },
+  {
+   "step": "Letterhead"
+  }
+ ],
+ "subtitle": "Company, Item, Customer, Supplier, Navigation Help, Data Import, Letter Head, Quotation",
+ "success_message": "Masters are all set up!",
+ "title": "Let's Set Up Some Masters"
+}
