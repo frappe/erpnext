@@ -23,7 +23,7 @@ def update_lead_phone_numbers(contact, method):
 			lead.db_set("mobile_no", mobile_no)
 
 def copy_comments(doctype, docname, doc):
-	comments = frappe.db.get_values("Comment", filters={"reference_doctype": doctype, "reference_name": docname}, fieldname="*")
+	comments = frappe.db.get_values("Comment", filters={"reference_doctype": doctype, "reference_name": docname, "comment_type": "Comment"}, fieldname="*")
 	for comment in comments:
 		comment = frappe.get_doc(comment.update({"doctype":"Comment"}))
 		comment.name = None
@@ -32,6 +32,13 @@ def copy_comments(doctype, docname, doc):
 		comment.insert()
 
 def add_link_in_communication(doctype, docname, doc):
+	communication_list = get_linked_communication_list(doctype, docname)
+
+	for communication in communication_list:
+		communication_doc = frappe.get_doc("Communication", communication)
+		communication_doc.add_link(doc.doctype, doc.name, autosave=True)
+
+def get_linked_communication_list(doctype, docname):
 	communications = frappe.get_all("Communication", filters={"reference_doctype": doctype, "reference_name": docname}, pluck='name')
 	communication_links = frappe.get_all('Communication Link',
 		{
@@ -39,7 +46,5 @@ def add_link_in_communication(doctype, docname, doc):
 			"link_name": docname,
 			"parent": ("not in", communications)
 		}, pluck="parent")
-
-	for communication in communications + communication_links:
-		communication_doc = frappe.get_doc("Communication", communication)
-		communication_doc.add_link(doc.doctype, doc.name, autosave=True)
+	
+	return communications + communication_links

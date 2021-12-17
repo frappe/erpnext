@@ -23,9 +23,10 @@ class Prospect(Document):
 		self.unlink_dynamic_links()
 
 	def after_insert(self):
-		for row in self.get('prospect_lead'):
-			copy_comments("Lead", row.lead, self)
-			add_link_in_communication("Lead", row.lead, self)
+		if frappe.db.get_single_value("CRM Settings", "carry_forward_communication_and_comments"):
+			for row in self.get('prospect_lead'):
+				copy_comments("Lead", row.lead, self)
+				add_link_in_communication("Lead", row.lead, self)
 
 	def update_lead_details(self):
 		for row in self.get('prospect_lead'):

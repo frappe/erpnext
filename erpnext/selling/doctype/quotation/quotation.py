@@ -36,13 +36,14 @@ class Quotation(SellingController):
 		make_packing_list(self)
 
 	def after_insert(self):
-		if self.opportunity:
-			copy_comments("Opportunity", self.opportunity, self)
-			add_link_in_communication("Opportunity", self.opportunity, self)
+		if frappe.db.get_single_value("CRM Settings", "carry_forward_communication_and_comments"):
+			if self.opportunity:
+				copy_comments("Opportunity", self.opportunity, self)
+				add_link_in_communication("Opportunity", self.opportunity, self)
 
-		elif self.quotation_to == "Lead" and self.party_name:
-			copy_comments("Lead", self.party_name, self)
-			add_link_in_communication("Lead", self.party_name, self)
+			elif self.quotation_to == "Lead" and self.party_name:
+				copy_comments("Lead", self.party_name, self)
+				add_link_in_communication("Lead", self.party_name, self)
 
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):

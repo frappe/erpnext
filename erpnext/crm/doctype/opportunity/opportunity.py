@@ -22,8 +22,9 @@ class Opportunity(TransactionBase):
 			frappe.get_doc("Lead", self.party_name).set_status(update=True)
 
 		if self.opportunity_from in ["Lead", "Prospect"]:
-			copy_comments(self.opportunity_from, self.party_name, self)
-			add_link_in_communication(self.opportunity_from, self.party_name, self)
+			if frappe.db.get_single_value("CRM Settings", "carry_forward_communication_and_comments"):
+				copy_comments(self.opportunity_from, self.party_name, self)
+				add_link_in_communication(self.opportunity_from, self.party_name, self)
 
 	def validate(self):
 		self._prev = frappe._dict({
