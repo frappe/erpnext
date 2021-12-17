@@ -72,5 +72,6 @@ def start_merge(docname):
 					ledger_merge.db_set('status', 'Partial Success')
 				else:
 					ledger_merge.db_set('status', 'Error')
+				frappe.db.commit()
 
 	frappe.publish_realtime("ledger_merge_refresh", {"ledger_merge": ledger_merge.name})
