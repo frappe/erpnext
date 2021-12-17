@@ -601,7 +601,7 @@ frappe.ui.form.on("Purchase Invoice", {
 			}
 		});
 	},
-	company_address:function(frm){
+	billing_address:function(frm){
 		frm.call({
 			method:"calculate_taxes",
 			doc:frm.doc,

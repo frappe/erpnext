@@ -220,8 +220,7 @@
    "fieldname": "target_warehouse_address",
    "fieldtype": "Link",
    "label": "Target Warehouse Address",
-   "options": "Address",
-   "reqd": 1
+   "options": "Address"
   },
   {
    "fieldname": "target_warehouse_display",
@@ -233,7 +232,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-12-02 17:53:30.282677",
+ "modified": "2021-12-16 11:03:06.916618",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Produce",

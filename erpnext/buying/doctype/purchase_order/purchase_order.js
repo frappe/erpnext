@@ -111,7 +111,7 @@ frappe.ui.form.on("Purchase Order", {
 			}
 		});
 	},
-	company_address:function(frm){
+	billing_address:function(frm){
 		frm.call({
 			method:"calculate_taxes",
 			doc:frm.doc,
