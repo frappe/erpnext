@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "creation": "2013-01-10 16:34:15",
  "doctype": "DocType",
@@ -17,6 +16,7 @@
   "journal_entry",
   "payroll_entry",
   "company",
+  "company_rtn",
   "company_logo",
   "letter_head",
   "section_break_10",
@@ -467,13 +467,19 @@
    "fieldname": "company_logo",
    "fieldtype": "Data",
    "label": "Image"
+  },
+  {
+   "fetch_from": "company.tax_id",
+   "fieldname": "company_rtn",
+   "fieldtype": "Data",
+   "label": "Company RTN",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-01-27 16:47:25.545365",
+ "modified": "2021-12-16 13:27:22.521899",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Slip",
