@@ -648,8 +648,6 @@
   {
    "fieldname": "patient",
    "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Patient",
    "options": "Patient"
   },
@@ -657,6 +655,7 @@
    "fetch_from": "patient.patient_name",
    "fieldname": "patient_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Patient Name",
    "read_only": 1
@@ -665,7 +664,7 @@
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2021-12-14 13:51:25.016121",
+ "modified": "2021-12-17 12:56:13.642324",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
