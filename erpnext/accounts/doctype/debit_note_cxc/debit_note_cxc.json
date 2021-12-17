@@ -13,6 +13,8 @@
   "posting_date",
   "due_date",
   "reason_debit_note",
+  "company",
+  "company_rtn",
   "cai_info_section",
   "cai",
   "due_date_cai",
@@ -21,7 +23,6 @@
   "total_exempt",
   "taxes",
   "section_break_2",
-  "company",
   "affects_sale_book",
   "affects_sales_month",
   "column_break_2",
@@ -151,7 +152,6 @@
    "label": "Company",
    "options": "Company",
    "print_hide": 1,
-   "read_only": 1,
    "remember_last_selected_value": 1,
    "reqd": 1
   },
@@ -246,10 +246,17 @@
    "label": "Cost Center",
    "options": "Cost Center",
    "reqd": 1
+  },
+  {
+   "fetch_from": "company.tax_id",
+   "fieldname": "company_rtn",
+   "fieldtype": "Data",
+   "label": "Company RTN",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-12-09 15:41:16.972448",
+ "modified": "2021-12-16 13:38:26.021455",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Debit Note CXC",
