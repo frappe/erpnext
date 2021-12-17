@@ -24,7 +24,6 @@ frappe.ui.form.on('Ledger Merge', {
 			if (!doc.root_type) frappe.throw(__('Please set Root Type'));
 			return {
 				filters: {
-					is_group: 0,
 					root_type: doc.root_type,
 					company: doc.company
 				}
@@ -41,7 +40,7 @@ frappe.ui.form.on('Ledger Merge', {
 			});
 			return {
 				filters: {
-					is_group: 0,
+					is_group: doc.is_group,
 					root_type: doc.root_type,
 					name: ["not in", acc],
 					company: doc.company

@@ -13,6 +13,7 @@
   "column_break_3",
   "company",
   "status",
+  "is_group",
   "section_break_5",
   "merge_accounts"
  ],
@@ -79,11 +80,20 @@
    "label": "Account Name",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "account",
+   "fetch_from": "account.is_group",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "links": [],
- "modified": "2021-12-10 15:28:34.520588",
+ "modified": "2021-12-12 21:34:55.155146",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Ledger Merge",

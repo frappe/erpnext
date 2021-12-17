@@ -46,7 +46,13 @@ def start_merge(docname):
 	for row in ledger_merge.merge_accounts:
 		if not row.merged:
 			try:
-				merge_account(row.account, ledger_merge.account, 0, ledger_merge.root_type, ledger_merge.company)
+				merge_account(
+					row.account,
+					ledger_merge.account,
+					ledger_merge.is_group,
+					ledger_merge.root_type,
+					ledger_merge.company
+				)
 				row.db_set('merged', 1)
 				frappe.db.commit()
 				successful_merges += 1
@@ -58,7 +64,6 @@ def start_merge(docname):
 				)
 			except Exception:
 				frappe.db.rollback()
-				ledger_merge.db_set("status", "Error")
 				frappe.log_error(title=ledger_merge.name)
 			finally:
 				if successful_merges == total:
