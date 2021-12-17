@@ -49,17 +49,8 @@ class DeliveryPlanningItem(Document):
 			frappe.db.set_value('Sales Order Item', self.split_from_item,
 						{'qty' : pdpi.qty_to_deliver,
 						'stock_qty' : pdpi.qty_to_deliver,
-						'amount' : pdpi.qty_to_deliver * pdpi.rate,
-						})
-			
-			# osoi = frappe.get_doc('Sales Order Item', self.split_from_item)
-			# osoi.qty = pdpi.qty_to_deliver
-			# osoi.stock_qty =  pdpi.qty_to_deliver
-			# osoi.amount = pdpi.qty_to_deliver * pdpi.rate
-			# osoi._action = "save"
-			
-
-			
+						'amount' : pdpi.qty_to_deliver * ref_soi.rate,
+						})		
 
 			# getting length soi for sales order child table items for IDX of new SOI
 			sos = frappe.get_all(doctype = 'Sales Order Item', filters={ 'parent': self.sales_order})
@@ -68,8 +59,8 @@ class DeliveryPlanningItem(Document):
 			soi = frappe.new_doc('Sales Order Item')
 			soi.stock_qty = self.qty_to_deliver
 			soi.idx = len(sos)+1
-			soi.rate = self.rate
-			soi.amount = self.rate * self.qty_to_deliver
+			soi.rate = ref_soi.rate
+			soi.amount = ref_soi.rate * self.qty_to_deliver
 			soi.parentfield = "items"
 			soi.docstatus = 1
 			soi.item_name = self.item_name
@@ -81,9 +72,9 @@ class DeliveryPlanningItem(Document):
 			soi.qty = self.qty_to_deliver
 			soi.delivered_by_supplier = self.supplier_dc
 			soi.supplier = self.supplier
-			soi.uom = self.uom
+			soi.uom = ref_soi.uom
 			soi.warehouse = self.sorce_warehouse
-			soi.conversion_factor = self.conversion_factor
+			soi.conversion_factor = ref_soi.conversion_factor
 			# soi.save(ignore_permissions=True)
 			soi._action = "save"
 			soi.insert()
