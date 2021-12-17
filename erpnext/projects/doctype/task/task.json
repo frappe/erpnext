@@ -461,6 +461,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "default": "0",
    "fieldname": "total_estimated_cost",
    "fieldtype": "Currency",
    "label": "Total Estimated Cost",
@@ -489,7 +490,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2021-12-16 04:55:21.430231",
+ "modified": "2021-12-17 06:11:00.514038",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

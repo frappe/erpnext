@@ -516,6 +516,10 @@ class StockEntry(StockController):
 
 			frappe.db.set_value('Task Item', item.task_item, update_field, update_qty[0].qty)
 			frappe.db.set_value('Task Item', item.task_item, "actual_cost", actual_cost[0].actual_cost)
+			task.reload()
+			total_actual_cost = sum([item.actual_cost for item in task.items])
+			frappe.db.set_value('Task', self.task_reference, "total_actual_cost", total_actual_cost)
+
 
 	@frappe.whitelist()
 	def get_stock_and_rate(self):

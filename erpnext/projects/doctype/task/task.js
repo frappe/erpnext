@@ -53,20 +53,6 @@ frappe.ui.form.on("Task", {
 	},
 	refresh(frm) {
 		let hide = false;
-		if (frm.doc.items.length > 0) {
-			frm.doc.items.forEach((item) => {
-				if (item.transferred > 0 | item.issued > 0) {
-					hide = true;
-				}
-			});
-			frm.events.calculate_total_costs(frm);
-			frm.toggle_display(["get_items"], hide == true ? 0 : 1);
-			let fields = ["from_bom", "qty", "use_multi_level_bom"];
-			fields.forEach(field => {
-				frm.set_df_property(field, "read_only", hide == true ? 1 : 0);
-			});
-		}
-
 		if (frm.doc.items.length) {
 			frappe.call({
 				method: "erpnext.projects.doctype.task.task.check_items_complete",
@@ -75,7 +61,7 @@ frappe.ui.form.on("Task", {
 				}
 			}).then((r) => {
 				if (!r.message) {
-					if (frm.doc.project_warehouse){
+					if (frm.doc.project_warehouse) {
 						frm.add_custom_button(__('Material Transfer'), function() {
 							frm.events.make_se_mt(frm);
 						}, __("Create"));
@@ -84,6 +70,16 @@ frappe.ui.form.on("Task", {
 						frm.events.make_se_mi(frm);
 					}, __("Create"));
 				}
+				frm.doc.items.forEach((item) => {
+					if (item.transferred > 0 | item.issued > 0) {
+						hide = true;
+					}
+				});
+				frm.toggle_display(["get_items"], hide == true ? 0 : 1);
+				let fields = ["from_bom", "qty", "use_multi_level_bom"];
+				fields.forEach(field => {
+					frm.set_df_property(field, "read_only", hide == true ? 1 : 0);
+				});
 			});
 		}
 	},
@@ -138,19 +134,17 @@ frappe.ui.form.on("Task", {
 			callback: function (r) {
 				frappe.model.set_value(cdt, cdn, 'basic_rate', r.message);
 				row.estimated_cost = flt(row.qty) * flt(row.basic_rate);
-				frm.refresh_field("items");
+				frm.events.calculate_total_estimated_costs(frm);
 			},
 		});
 	},
-	calculate_total_costs(frm) {
-		let total_estimated_cost = 0, total_actual_cost = 0;
+	calculate_total_estimated_costs(frm) {
+		let total_estimated_cost = 0;
 		if (frm.doc.items.length > 0) {
 			frm.doc.items.forEach((item) => {
 				total_estimated_cost += item.estimated_cost;
-				total_actual_cost += item.actual_cost;
 			});
-			frm.doc.total_estimated_cost = total_estimated_cost;
-			frm.doc.total_actual_cost = total_actual_cost;
+			frm.set_value('total_estimated_cost', total_estimated_cost);
 			frm.refresh_fields();
 		}
 	},
@@ -163,7 +157,7 @@ frappe.ui.form.on("Task", {
 			doc: frm.doc,
 			method: 'get_items',
 			callback: () => {
-				frm.refresh_fields("items");
+				frm.events.calculate_total_estimated_costs(frm);
 			}
 		});
 	}
@@ -192,10 +186,6 @@ frappe.ui.form.on("Task Item", {
 	},
 	before_items_remove: function (frm) {
 		items_before_delete = frm.doc.items;
-	},
-	basic_rate(frm, cdt, cdn) {
-		let row = locals[cdt][cdn];
-		frm.events.calculate_estimated_cost(frm, row);
 	}
 });
 
