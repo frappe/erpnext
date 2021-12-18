@@ -11,6 +11,7 @@
   "col_break1",
   "workstation",
   "time_in_mins",
+  "fixed_time",
   "costing_section",
   "hour_rate",
   "base_hour_rate",
@@ -78,6 +79,14 @@
    "oldfieldname": "time_in_mins",
    "oldfieldtype": "Currency",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Operation time does not depend on quantity to produce",
+   "fieldname": "fixed_time",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Fixed Time"
   },
   {
    "fieldname": "operating_cost",
@@ -177,12 +186,13 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-13 16:45:01.092868",
+ "modified": "2021-12-15 03:00:00.473173",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }
