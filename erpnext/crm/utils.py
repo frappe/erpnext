@@ -46,5 +46,5 @@ def get_linked_communication_list(doctype, docname):
 			"link_name": docname,
 			"parent": ("not in", communications)
 		}, pluck="parent")
-	
+
 	return communications + communication_links

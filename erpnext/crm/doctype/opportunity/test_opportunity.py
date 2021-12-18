@@ -7,8 +7,8 @@ import frappe
 from frappe.utils import now_datetime, random_string, today
 
 from erpnext.crm.doctype.lead.lead import make_customer
-from erpnext.crm.doctype.opportunity.opportunity import make_quotation
 from erpnext.crm.doctype.lead.test_lead import make_lead
+from erpnext.crm.doctype.opportunity.opportunity import make_quotation
 from erpnext.crm.utils import get_linked_communication_list
 
 test_records = frappe.get_test_records('Opportunity')
@@ -66,7 +66,7 @@ class TestOpportunity(unittest.TestCase):
 		lead_doc.add_comment('Comment', text='Test Comment 2')
 		create_communication(lead_doc.doctype, lead_doc.name, lead_doc.email_id)
 		create_communication(lead_doc.doctype, lead_doc.name, lead_doc.email_id)
-		
+
 		opp_doc = make_opportunity(opportunity_from="Lead", lead=lead_doc.name)
 		opportunity_comment_count = frappe.db.count("Comment", {"reference_doctype": opp_doc.doctype, "reference_name": opp_doc.name})
 		opportunity_communication_count = len(get_linked_communication_list(opp_doc.doctype, opp_doc.name))
