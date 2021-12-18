@@ -1157,7 +1157,7 @@ def _round_off_if_near_zero(number: float, precision: int = 6) -> float:
 	""" Rounds off the number to zero only if number is close to zero for decimal
 		specified in precision. Precision defaults to 6.
 	"""
-	if flt(number) < (1.0 / (10**precision)):
-		return 0
+	if abs(0.0 - flt(number)) < (1.0 / (10**precision)):
+		return 0.0
 
 	return flt(number)
