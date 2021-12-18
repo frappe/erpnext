@@ -23,6 +23,17 @@ class FifoValuation:
 	def __init__(self, state: Optional[List[FifoBin]]):
 		self.queue: List[FifoBin] = state if state is not None else []
 
+	def __repr__(self):
+		return str(self.queue)
+
+	def __iter__(self):
+		return iter(self.queue)
+
+	def __eq__(self, other):
+		if isinstance(other, list):
+			return self.queue == other
+		return self.queue == other.queue
+
 	def get_state(self) -> List[FifoBin]:
 		"""Get current state of queue."""
 		return self.queue
