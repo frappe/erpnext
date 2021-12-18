@@ -165,6 +165,7 @@ erpnext.patches.v12_0.set_updated_purpose_in_pick_list
 erpnext.patches.v12_0.set_default_payroll_based_on
 erpnext.patches.v12_0.repost_stock_ledger_entries_for_target_warehouse
 erpnext.patches.v12_0.update_end_date_and_status_in_email_campaign
+erpnext.patches.v13_0.validate_options_for_data_field
 erpnext.patches.v13_0.move_tax_slabs_from_payroll_period_to_income_tax_slab #123
 erpnext.patches.v12_0.fix_quotation_expired_status
 erpnext.patches.v12_0.rename_pos_closing_doctype
@@ -287,7 +288,6 @@ execute:frappe.reload_doc("erpnext_integrations", "doctype", "Product Tax Catego
 erpnext.patches.v14_0.delete_einvoicing_doctypes
 erpnext.patches.v13_0.custom_fields_for_taxjar_integration          #08-11-2021
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
-erpnext.patches.v13_0.validate_options_for_data_field
 erpnext.patches.v13_0.create_gst_payment_entry_fields #27-11-2021
 erpnext.patches.v14_0.delete_shopify_doctypes
 erpnext.patches.v13_0.fix_invoice_statuses
@@ -316,5 +316,5 @@ erpnext.patches.v13_0.create_ksa_vat_custom_fields
 erpnext.patches.v14_0.rename_ongoing_status_in_sla_documents
 erpnext.patches.v14_0.migrate_crm_settings
 erpnext.patches.v13_0.rename_ksa_qr_field
-erpnext.patches.v13_0.disable_ksa_print_format_for_others
+erpnext.patches.v13_0.disable_ksa_print_format_for_others # 16-12-2021
 erpnext.patches.v14_0.add_default_exit_questionnaire_notification_template
