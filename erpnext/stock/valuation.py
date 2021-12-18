@@ -120,17 +120,17 @@ class FifoValuation:
 
 			else:
 				# qty found in current bin consume it and exit
-				fifo_bin[QTY] = fifo_bin[QTY] - qty
+				fifo_bin[QTY] = _round_off_if_near_zero(fifo_bin[QTY] - qty)
 				qty = 0
 
 		return self.get_state()
 
 
-def _round_off_if_near_zero(number: float, precision: int = 6) -> float:
+def _round_off_if_near_zero(number: float, precision: int = 7) -> float:
 	"""Rounds off the number to zero only if number is close to zero for decimal
 	specified in precision. Precision defaults to 6.
 	"""
-	if flt(number) < (1.0 / (10 ** precision)):
-		return 0
+	if abs(0.0 - flt(number)) < (1.0 / (10 ** precision)):
+		return 0.0
 
 	return flt(number)
