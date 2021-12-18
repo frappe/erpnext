@@ -17,6 +17,7 @@
   "company",
   "transaction_date",
   "valid_till",
+  "quotation_number",
   "amended_from",
   "address_section",
   "supplier_address",
@@ -797,6 +798,11 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Valid Till"
+  },
+  {
+   "fieldname": "quotation_number",
+   "fieldtype": "Data",
+   "label": "Quotation Number"
   }
  ],
  "icon": "fa fa-shopping-cart",
@@ -804,10 +810,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-19 00:58:20.995491",
+ "modified": "2021-12-11 06:43:20.924080",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

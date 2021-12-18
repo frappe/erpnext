@@ -8,7 +8,6 @@ import frappe
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.model.document import Document
 from frappe.utils import cint
-from frappe.utils.nestedset import get_root_of
 
 
 class SellingSettings(Document):
@@ -37,9 +36,3 @@ class SellingSettings(Document):
 		editable_bundle_item_rates = cint(self.editable_bundle_item_rates)
 
 		make_property_setter("Packed Item", "rate", "read_only", not(editable_bundle_item_rates), "Check", validate_fields_for_doctype=False)
-
-	def set_default_customer_group_and_territory(self):
-		if not self.customer_group:
-			self.customer_group = get_root_of('Customer Group')
-		if not self.territory:
-			self.territory = get_root_of('Territory')

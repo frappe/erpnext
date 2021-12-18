@@ -155,6 +155,8 @@ class SalesInvoice(SellingController):
 		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points and not self.is_consolidated:
 			validate_loyalty_points(self, self.loyalty_points)
 
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
 			if d.is_fixed_asset and d.meta.get_field("asset") and d.asset:
@@ -845,8 +847,6 @@ class SalesInvoice(SellingController):
 		self.make_tax_gl_entries(gl_entries)
 		self.make_exchange_gain_loss_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
-
-		self.allocate_advance_taxes(gl_entries)
 
 		self.make_item_gl_entries(gl_entries)
 		self.make_discount_gl_entries(gl_entries)

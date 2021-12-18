@@ -80,20 +80,20 @@ frappe.ui.form.on('Asset', {
 
 		if (frm.doc.docstatus==1) {
 			if (in_list(["Submitted", "Partially Depreciated", "Fully Depreciated"], frm.doc.status)) {
-				frm.add_custom_button("Transfer Asset", function() {
+				frm.add_custom_button(__("Transfer Asset"), function() {
 					erpnext.asset.transfer_asset(frm);
 				}, __("Manage"));
 
-				frm.add_custom_button("Scrap Asset", function() {
+				frm.add_custom_button(__("Scrap Asset"), function() {
 					erpnext.asset.scrap_asset(frm);
 				}, __("Manage"));
 
-				frm.add_custom_button("Sell Asset", function() {
+				frm.add_custom_button(__("Sell Asset"), function() {
 					frm.trigger("make_sales_invoice");
 				}, __("Manage"));
 
 			} else if (frm.doc.status=='Scrapped') {
-				frm.add_custom_button("Restore Asset", function() {
+				frm.add_custom_button(__("Restore Asset"), function() {
 					erpnext.asset.restore_asset(frm);
 				}, __("Manage"));
 			}
@@ -110,7 +110,7 @@ frappe.ui.form.on('Asset', {
 
 			if (frm.doc.status != 'Fully Depreciated') {
 				frm.add_custom_button(__("Adjust Asset Value"), function() {
-					frm.trigger("create_asset_adjustment");
+					frm.trigger("create_asset_value_adjustment");
 				}, __("Manage"));
 			}
 
@@ -121,7 +121,7 @@ frappe.ui.form.on('Asset', {
 			}
 
 			if (frm.doc.purchase_receipt || !frm.doc.is_existing_asset) {
-				frm.add_custom_button("View General Ledger", function() {
+				frm.add_custom_button(__("View General Ledger"), function() {
 					frappe.route_options = {
 						"voucher_no": frm.doc.name,
 						"from_date": frm.doc.available_for_use_date,
@@ -322,14 +322,14 @@ frappe.ui.form.on('Asset', {
 		});
 	},
 
-	create_asset_adjustment: function(frm) {
+	create_asset_value_adjustment: function(frm) {
 		frappe.call({
 			args: {
 				"asset": frm.doc.name,
 				"asset_category": frm.doc.asset_category,
 				"company": frm.doc.company
 			},
-			method: "erpnext.assets.doctype.asset.asset.create_asset_adjustment",
+			method: "erpnext.assets.doctype.asset.asset.create_asset_value_adjustment",
 			freeze: 1,
 			callback: function(r) {
 				var doclist = frappe.model.sync(r.message);

@@ -172,6 +172,7 @@
   "sales_team_section_break",
   "sales_partner",
   "column_break10",
+  "amount_eligible_for_commission",
   "commission_rate",
   "total_commission",
   "section_break2",
@@ -1569,13 +1570,18 @@
    "fieldname": "ignore_payments_for_return",
    "fieldtype": "Check",
    "label": "Ignore Payments For Return"
+  },
+  {
+   "fieldname": "amount_eligible_for_commission",
+   "fieldtype": "Currency",
+   "label": "Amount Eligible for Commission",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "migration_hash": "0a999807d0a5e17446532c77bebf97ff",
- "modified": "2021-11-25 19:58:23.024118",
+ "modified": "2021-11-25 12:11:53.871828",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
