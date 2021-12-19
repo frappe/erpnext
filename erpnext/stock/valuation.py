@@ -9,7 +9,7 @@ QTY = 0
 RATE = 1
 
 
-class FifoValuation:
+class FIFOValuation:
 	"""Valuation method where a queue of all the incoming stock is maintained.
 
 	New stock is added at end of the queue.

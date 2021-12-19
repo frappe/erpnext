@@ -16,7 +16,7 @@ from erpnext.stock.utils import (
 	get_or_make_bin,
 	get_valuation_method,
 )
-from erpnext.stock.valuation import FifoValuation
+from erpnext.stock.valuation import FIFOValuation
 
 
 class NegativeStockError(frappe.ValidationError): pass
@@ -701,7 +701,7 @@ class update_entries_after(object):
 		actual_qty = flt(sle.actual_qty)
 		outgoing_rate = flt(sle.outgoing_rate)
 
-		fifo_queue = FifoValuation(self.wh_data.stock_queue)
+		fifo_queue = FIFOValuation(self.wh_data.stock_queue)
 		if actual_qty > 0:
 			fifo_queue.add_stock(qty=actual_qty, rate=incoming_rate)
 		else:
