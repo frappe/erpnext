@@ -3,7 +3,7 @@ import unittest
 from hypothesis import given
 from hypothesis import strategies as st
 
-from erpnext.stock.valuation import FifoValuation, _round_off_if_near_zero
+from erpnext.stock.valuation import FIFOValuation, _round_off_if_near_zero
 
 qty_gen = st.floats(min_value=-1e6, max_value=1e6)
 value_gen = st.floats(min_value=1, max_value=1e6)
@@ -13,7 +13,7 @@ stock_queue_generator = st.lists(st.tuples(qty_gen, value_gen), min_size=10)
 class TestFifoValuation(unittest.TestCase):
 
 	def setUp(self):
-		self.queue = FifoValuation([])
+		self.queue = FIFOValuation([])
 
 	def tearDown(self):
 		qty, value = self.queue.get_total_stock_and_value()
@@ -41,12 +41,12 @@ class TestFifoValuation(unittest.TestCase):
 		self.assertEqual(self.queue, [[2, 10]])
 
 	def test_adding_negative_stock_keeps_rate(self):
-		self.queue = FifoValuation([[-5.0, 100]])
+		self.queue = FIFOValuation([[-5.0, 100]])
 		self.queue.add_stock(1, 10)
 		self.assertEqual(self.queue, [[-4, 100]])
 
 	def test_adding_negative_stock_updates_rate(self):
-		self.queue = FifoValuation([[-5.0, 100]])
+		self.queue = FIFOValuation([[-5.0, 100]])
 		self.queue.add_stock(6, 10)
 		self.assertEqual(self.queue, [[1, 10]])
 
@@ -126,7 +126,7 @@ class TestFifoValuation(unittest.TestCase):
 
 	@given(stock_queue_generator)
 	def test_fifo_qty_hypothesis(self, stock_queue):
-		self.queue = FifoValuation([])
+		self.queue = FIFOValuation([])
 		total_qty = 0
 
 		for qty, rate in stock_queue:
@@ -144,7 +144,7 @@ class TestFifoValuation(unittest.TestCase):
 
 	@given(stock_queue_generator)
 	def test_fifo_qty_value_nonneg_hypothesis(self, stock_queue):
-		self.queue = FifoValuation([])
+		self.queue = FIFOValuation([])
 		total_qty = 0.0
 		total_value = 0.0
 
