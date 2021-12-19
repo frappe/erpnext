@@ -366,7 +366,8 @@ function append_breakdown(element, item_code, poi_results, boi_results) {
 		boi_backgroundColor.push(Object.values(CHART_COLORS)[colorIndex])
 
 		stockRequired += boi_results[i].qty
-		let message = `${boi_results[i].parent} | ${(boi_results[i].customer_name)? (boi_results[i].customer_name): "Customer Name Unset!"} | ${boi_results[i].added_time} | Stock Required: ${stockRequired} | BO Qty`
+		let message = `${boi_results[i].parent} | ${(boi_results[i].customer_name)? (boi_results[i].customer_name): "Customer Name Unset!"} | ${boi_results[i].added_time} | Stock Required: ${stockRequired} | BO Qty ${boi_results[i].qty}`
+		message += ` | Customer ID:${boi_results[i].customer_id}`
 		let message2 = message.split(` | `)
 		boi_label_data.push(message2)
 
@@ -402,6 +403,7 @@ function append_breakdown(element, item_code, poi_results, boi_results) {
 		<div class="col-sm-6" width="48%">
 			<canvas id="po-${item_code}"></canvas>
 		</div>
+		<button id="backorder-report">Open backorder report in new tab.</button> 
 	</div>`
 
 	let empty_display = `<div id="pending-breakdown-${item_code}" width="100%" class="col-sm-12" style="padding: 15px 15px;
@@ -415,7 +417,9 @@ function append_breakdown(element, item_code, poi_results, boi_results) {
 	} else {
 		$row.append(empty_display)
 	}
-
+	$("#backorder-report" ).click(function() {
+		frappe.set_route('List', 'Backorder/Report',{item_code: item_code});
+	});
 	// Render the chart using our configuration
 	$.getScript("https://cdn.jsdelivr.net/npm/chart.js").done(function(){
 		if (poi_results.length > 0){
@@ -448,7 +452,7 @@ function append_breakdown(element, item_code, poi_results, boi_results) {
 			);
 
 			// Open a new tab for backorder review
-			bo_ctx.onclick = function(evt){   
+			bo_ctx.onclick = function(evt){  
 				var activePoints = boChart.getActiveElements(evt);
 				if(activePoints.length > 0){
 					//get the internal index of slice in pie chart
@@ -456,7 +460,7 @@ function append_breakdown(element, item_code, poi_results, boi_results) {
 
 					//get specific label by index 
 					var label = boChart.data.labels[clickedElementindex];
-					let bo_id  = label.split(" | ")[0]
+					let bo_id  = label[0]
 					window.open(frappe.urllib.get_full_url(`/desk#Form/Backorder/${bo_id}`));
 
 					//get value by index      
