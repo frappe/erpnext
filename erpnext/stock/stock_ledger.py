@@ -714,7 +714,7 @@ class update_entries_after(object):
 				else:
 					return 0.0
 
-			fifo_queue.remove_stock(qty=abs(actual_qty), rate=outgoing_rate, rate_generator=rate_generator)
+			fifo_queue.remove_stock(qty=abs(actual_qty), outgoing_rate=outgoing_rate, rate_generator=rate_generator)
 
 		stock_qty, stock_value = fifo_queue.get_total_stock_and_value()
 
