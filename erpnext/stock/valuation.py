@@ -73,7 +73,7 @@ class FifoValuation:
 					self.queue[-1][QTY] = qty
 
 	def remove_stock(
-		self, qty: float, rate: float, rate_generator: Callable[[], float]
+		self, qty: float, outgoing_rate: float = 0.0, rate_generator: Callable[[], float] = None
 	) -> List[FifoBin]:
 		"""Remove stock from the queue and return popped bins.
 
@@ -82,6 +82,8 @@ class FifoValuation:
 			rate: outgoing rate
 			rate_generator: function to be called if queue is not found and rate is required.
 		"""
+		if not rate_generator:
+			rate_generator = lambda : 0.0  # noqa
 
 		consumed_bins = []
 		while qty:
@@ -90,18 +92,18 @@ class FifoValuation:
 				self.queue.append([0, rate_generator()])
 
 			index = None
-			if rate > 0:
+			if outgoing_rate > 0:
 				# Find the entry where rate matched with outgoing rate
 				for idx, fifo_bin in enumerate(self.queue):
-					if fifo_bin[RATE] == rate:
+					if fifo_bin[RATE] == outgoing_rate:
 						index = idx
 						break
 
 				# If no entry found with outgoing rate, collapse stack
 				if index is None:  # nosemgrep
-					new_stock_value = sum(d[QTY] * d[RATE] for d in self.queue) - qty * rate
+					new_stock_value = sum(d[QTY] * d[RATE] for d in self.queue) - qty * outgoing_rate
 					new_stock_qty = sum(d[QTY] for d in self.queue) - qty
-					self.queue = [[new_stock_qty, new_stock_value / new_stock_qty if new_stock_qty > 0 else rate]]
+					self.queue = [[new_stock_qty, new_stock_value / new_stock_qty if new_stock_qty > 0 else outgoing_rate]]
 					break
 			else:
 				index = 0
@@ -117,8 +119,8 @@ class FifoValuation:
 				if not self.queue and qty:
 					# stock finished, qty still remains to be withdrawn
 					# negative stock, keep in as a negative bin
-					self.queue.append([-qty, rate or fifo_bin[RATE]])
-					consumed_bins.append([qty, rate or fifo_bin[RATE]])
+					self.queue.append([-qty, outgoing_rate or fifo_bin[RATE]])
+					consumed_bins.append([qty, outgoing_rate or fifo_bin[RATE]])
 					break
 			else:
 				# qty found in current bin consume it and exit
