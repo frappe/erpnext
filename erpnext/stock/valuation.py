@@ -48,8 +48,8 @@ class FifoValuation:
 
 		return _round_off_if_near_zero(total_qty), _round_off_if_near_zero(total_value)
 
-	def add_stock(self, qty: float, rate: float) -> List[FifoBin]:
-		"""Update fifo queue with new stock and return queue.
+	def add_stock(self, qty: float, rate: float) -> None:
+		"""Update fifo queue with new stock.
 
 			args:
 				qty: new quantity to add
@@ -71,12 +71,11 @@ class FifoValuation:
 					self.queue[-1] = [qty, rate]
 				else:  # new balance qty is still negative, maintain same rate
 					self.queue[-1][QTY] = qty
-		return self.get_state()
 
 	def remove_stock(
 		self, qty: float, rate: float, rate_generator: Callable[[], float]
 	) -> List[FifoBin]:
-		"""Remove stock from the queue and return queue.
+		"""Remove stock from the queue and return popped bins.
 
 		args:
 			qty: quantity to remove
@@ -84,6 +83,7 @@ class FifoValuation:
 			rate_generator: function to be called if queue is not found and rate is required.
 		"""
 
+		consumed_bins = []
 		while qty:
 			if not len(self.queue):
 				# rely on rate generator.
@@ -111,19 +111,22 @@ class FifoValuation:
 			if qty >= fifo_bin[QTY]:
 				# consume current bin
 				qty = _round_off_if_near_zero(qty - fifo_bin[QTY])
-				self.queue.pop(index)
+				to_consume = self.queue.pop(index)
+				consumed_bins.append(list(to_consume))
+
 				if not self.queue and qty:
 					# stock finished, qty still remains to be withdrawn
 					# negative stock, keep in as a negative bin
 					self.queue.append([-qty, rate or fifo_bin[RATE]])
+					consumed_bins.append([qty, rate or fifo_bin[RATE]])
 					break
-
 			else:
 				# qty found in current bin consume it and exit
 				fifo_bin[QTY] = _round_off_if_near_zero(fifo_bin[QTY] - qty)
+				consumed_bins.append([qty, fifo_bin[RATE]])
 				qty = 0
 
-		return self.get_state()
+		return consumed_bins
 
 
 def _round_off_if_near_zero(number: float, precision: int = 7) -> float:
