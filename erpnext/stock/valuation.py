@@ -20,6 +20,10 @@ class FifoValuation:
 	ref: https://en.wikipedia.org/wiki/FIFO_and_LIFO_accounting
 	"""
 
+	# specifying the attributes to save resources
+	# ref: https://docs.python.org/3/reference/datamodel.html#slots
+	__slots__ = ["queue",]
+
 	def __init__(self, state: Optional[List[FifoBin]]):
 		self.queue: List[FifoBin] = state if state is not None else []
 
