@@ -99,11 +99,12 @@ class FifoValuation:
 						index = idx
 						break
 
-				# If no entry found with outgoing rate, collapse stack
+				# If no entry found with outgoing rate, collapse queue
 				if index is None:  # nosemgrep
 					new_stock_value = sum(d[QTY] * d[RATE] for d in self.queue) - qty * outgoing_rate
 					new_stock_qty = sum(d[QTY] for d in self.queue) - qty
 					self.queue = [[new_stock_qty, new_stock_value / new_stock_qty if new_stock_qty > 0 else outgoing_rate]]
+					consumed_bins.append([qty, outgoing_rate])
 					break
 			else:
 				index = 0
