@@ -6,12 +6,6 @@ from datetime import date
 
 import frappe
 
-from erpnext.tests.ui_test_bulk_transaction_processing import (
-	create_company,
-	create_customer,
-	create_item,
-	create_so,
-)
 from erpnext.utilities.bulk_transaction import transaction_processing
 
 

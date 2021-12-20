@@ -1,5 +1,11 @@
-from erpnext.bulk_transaction.doctype.bulk_transaction_logger.test_bulk_transaction_logger import create_company, create_customer, create_item, create_so
 import frappe
+
+from erpnext.bulk_transaction.doctype.bulk_transaction_logger.test_bulk_transaction_logger import (
+	create_company,
+	create_customer,
+	create_item,
+	create_so,
+)
 
 
 @frappe.whitelist()
