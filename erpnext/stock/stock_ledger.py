@@ -1323,29 +1323,6 @@ def get_future_sle_with_negative_batch_qty(args):
 	"""}, args, as_dict=1)
 
 
-
-def get_future_sle_with_negative_batch_qty(args):
-	return frappe.db.sql("""
-		with batch_ledger as (
-			select
-				posting_date, posting_time, voucher_type, voucher_no,
-				sum(actual_qty) over (order by posting_date, posting_time, creation) as cumulative_total
-			from `tabStock Ledger Entry`
-			where
-				item_code = %(item_code)s
-				and warehouse = %(warehouse)s
-				and batch_no=%(batch_no)s
-				and is_cancelled = 0
-			order by posting_date, posting_time, creation
-		)
-		select * from batch_ledger
-		where
-			cumulative_total < 0.0
-			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
-		limit 1
-	""", args, as_dict=1)
-
-
 def _round_off_if_near_zero(number: float, precision: int = 6) -> float:
 	""" Rounds off the number to zero only if number is close to zero for decimal
 		specified in precision. Precision defaults to 6.
