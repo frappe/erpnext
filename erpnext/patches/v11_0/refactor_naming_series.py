@@ -118,7 +118,7 @@ def get_series():
 	return series_to_set
 
 def get_series_to_preserve(doctype):
-	series_to_preserve = frappe.db.sql_list("""select distinct naming_series from `tab{doctype}` where ifnull(naming_series, '') != ''""".format(doctype=doctype))
+	series_to_preserve = frappe.db.sql_list("""select distinct naming_series from `tab{doctype}` where coalesce(naming_series, '') != ''""".format(doctype=doctype))
 	series_to_preserve.sort()
 	return series_to_preserve
 

@@ -50,7 +50,7 @@ class Fees(AccountsController):
 			select g.email_address
 			from `tabGuardian` g, `tabStudent Guardian` sg
 			where g.name = sg.guardian and sg.parent = %s and sg.parenttype = 'Student'
-			and ifnull(g.email_address, '')!=''
+			and coalesce(g.email_address, '')!=''
 		""", self.student)
 
 		student_email_id = frappe.db.get_value("Student", self.student, "student_email_id")
@@ -121,7 +121,7 @@ def get_fee_list(doctype, txt, filters, limit_start, limit_page_length=20, order
 			outstanding_amount, grand_total, currency
 			from `tabFees`
 			where student= %s and docstatus=1
-			order by due_date asc limit {0} , {1}'''
+			order by due_date asc limit {1} offset {0}'''
 			.format(limit_start, limit_page_length), student, as_dict = True)
 
 def get_list_context(context=None):

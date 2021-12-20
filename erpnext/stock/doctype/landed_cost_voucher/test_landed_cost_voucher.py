@@ -204,8 +204,9 @@ class TestLandedCostVoucher(ERPNextTestCase):
 		distribute_landed_cost_on_items(lcv2)
 
 		lcv2.submit()
-
 		pr.load_from_db()
+		if not pr.items[0].landed_cost_voucher_amount:
+			pr = frappe.db.get_value("Purchase Receipt", pr.name)
 
 		self.assertEqual(pr.items[0].landed_cost_voucher_amount, 100)
 		self.assertEqual(pr.items[1].landed_cost_voucher_amount, 100)

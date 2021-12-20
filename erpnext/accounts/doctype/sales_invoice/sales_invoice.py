@@ -774,7 +774,7 @@ class SalesInvoice(SellingController):
 
 	def get_warehouse(self):
 		user_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`
-			where ifnull(user,'') = %s and company = %s""", (frappe.session['user'], self.company))
+			where coalesce(user,'') = %s and company = %s""", (frappe.session['user'], self.company))
 		warehouse = user_pos_profile[0][1] if user_pos_profile else None
 
 		if not warehouse:
@@ -1387,7 +1387,7 @@ class SalesInvoice(SellingController):
 		returned_amount = frappe.db.sql("""
 			select sum(grand_total)
 			from `tabSales Invoice`
-			where docstatus=1 and is_return=1 and ifnull(return_against, '')=%s
+			where docstatus=1 and is_return=1 and coalesce(return_against, '')=%s
 		""", self.name)
 		return abs(flt(returned_amount[0][0])) if returned_amount else 0
 
@@ -2019,8 +2019,8 @@ def get_all_mode_of_payments(doc):
 	{'company': doc.company}, as_dict=1)
 
 def get_mode_of_payments_info(mode_of_payments, company):
-	data = frappe.db.sql(
-		"""
+	data = frappe.db.multisql({
+		'mariadb':"""
 		select
 			mpa.default_account, mpa.parent as mop, mp.type as type
 		from
@@ -2031,8 +2031,21 @@ def get_mode_of_payments_info(mode_of_payments, company):
 			mp.enabled = 1 and
 			mp.name in %s
 		group by
-			mp.name
-		""", (company, mode_of_payments), as_dict=1)
+			mp.name, mpa.default_account, mpa.parent, mp.type
+		""",
+		'postgres': """
+		select
+			mpa.default_account, mpa.parent as mop, mp.type as type
+		from
+			`tabMode of Payment Account` mpa,`tabMode of Payment` mp
+		where
+			mpa.parent = mp.name and
+			mpa.company = '{company}' and
+			mp.enabled = 1 and
+			mp.name in {mode_of_payments}
+		group by
+			mp.name, mpa.default_account, mpa.parent, mp.type
+		""".format(company = company, mode_of_payments = "('" + ",".join(mode_of_payments) + "')")}, (company, mode_of_payments), as_dict=1)
 
 	return {row.get('mop'): row for row in data}
 

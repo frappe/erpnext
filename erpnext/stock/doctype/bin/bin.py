@@ -55,8 +55,10 @@ class Bin(Document):
 						& (wo.status.notin(["Stopped", "Completed"]))
 						& ((wo_item.required_qty > wo_item.transferred_qty)
 							| (wo_item.required_qty > wo_item.consumed_qty))
-					)
-		).run()[0][0] or 0.0
+					).groupby(wo.skip_transfer)
+		).run()
+		
+		self.reserved_qty_for_production = sum( sum(x) for x in self.reserved_qty_for_production) if self.reserved_qty_for_production else 0.0
 
 		self.set_projected_qty()
 

@@ -14,4 +14,4 @@ def execute():
 		frappe.db.sql("""UPDATE `tabBank` b, `tabBank Account` ba
 			SET ba.branch_code = b.branch_code
 			WHERE ba.bank = b.name AND
-			ifnull(b.branch_code, '') != '' AND ifnull(ba.branch_code, '') = ''""")
+			coalesce(b.branch_code, '') != '' AND coalesce(ba.branch_code, '') = ''""")

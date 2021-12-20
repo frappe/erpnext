@@ -57,11 +57,11 @@ class TestTaxDetail(unittest.TestCase):
 				db_doc = frappe.get_doc(doc)
 				if 'Invoice' in db_doc.doctype:
 					db_doc.due_date = add_to_date(now, days=1)
-					db_doc.insert()
+					db_doc.insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
 					# Create GL Entries:
 					db_doc.submit()
 				else:
-					db_doc.insert()
+					db_doc.insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
 			except frappe.exceptions.DuplicateEntryError:
 				pass
 

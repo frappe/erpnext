@@ -43,18 +43,17 @@ def execute(filters=None):
 			s.tax_id as "tax_id",
 			SUM(gl.debit_in_account_currency) AS "payments"
 		FROM
-			`tabGL Entry` gl
-				INNER JOIN `tabSupplier` s
+			`tabGL Entry` gl,`tabSupplier` s
 		WHERE
 			s.name = gl.party
 				AND s.irs_1099 = 1
 				AND gl.fiscal_year = %(fiscal_year)s
-				AND gl.party_type = "Supplier"
+				AND gl.party_type = 'Supplier'
 				AND gl.company = %(company)s
 				{conditions}
 
 		GROUP BY
-			gl.party
+			gl.party, s.supplier_group, s.tax_id
 
 		ORDER BY
 			gl.party DESC""".format(conditions=conditions), {

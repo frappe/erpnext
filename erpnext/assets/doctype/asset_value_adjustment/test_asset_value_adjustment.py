@@ -70,16 +70,16 @@ class TestAssetValueAdjustment(unittest.TestCase):
 			current_asset_value = current_value, new_asset_value = 50000.0)
 		adj_doc.submit()
 
-		expected_gle = (
+		expected_gle = [
 			("_Test Accumulated Depreciations - _TC", 0.0, 50000.0),
 			("_Test Depreciations - _TC", 50000.0, 0.0)
-		)
+		]
 
 		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
 			where voucher_type='Journal Entry' and voucher_no = %s
 			order by account""", adj_doc.journal_entry)
 
-		self.assertEqual(gle, expected_gle)
+		self.assertEqual(list(gle), expected_gle)
 
 def make_asset_value_adjustment(**args):
 	args = frappe._dict(args)

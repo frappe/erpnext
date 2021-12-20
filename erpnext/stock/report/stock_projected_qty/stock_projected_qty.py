@@ -129,17 +129,28 @@ def get_item_map(item_code, include_uom):
 		cf_field = ", ucd.conversion_factor"
 		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%(include_uom)s"
 
-	items = frappe.db.sql("""
-		select item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom{cf_field}
+	items = frappe.db.multisql({
+		'mariadb':"""
+ 		select item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom{cf_field}
 		from `tabItem` item
 		{cf_join}
 		where item.is_stock_item = 1
 		and item.disabled=0
 		{condition}
 		and (item.end_of_life > %(today)s or item.end_of_life is null or item.end_of_life='0000-00-00')
-		and exists (select name from `tabBin` bin where bin.item_code=item.name)"""\
+		and exists (select name from `tabBin` bin where bin.item_code=item.name)"""
 		.format(cf_field=cf_field, cf_join=cf_join, condition=condition),
-		{"today": today(), "include_uom": include_uom}, as_dict=True)
+		'postgres':"""
+ 		select item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom{cf_field}
+		from `tabItem` item
+		{cf_join}
+		where item.is_stock_item = 1
+		and item.disabled=0
+		{condition}
+		and (item.end_of_life > %(today)s or item.end_of_life is null)
+		and exists (select name from `tabBin` bin where bin.item_code=item.name)"""
+		.format(cf_field=cf_field, cf_join=cf_join, condition=condition),
+		},{"today": today(), "include_uom": include_uom}, as_dict=True)
 
 	condition = ""
 	if item_code:

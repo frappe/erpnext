@@ -26,7 +26,7 @@ def execute():
 		condition = "state_code = (case state {0} end),".format(condition)
 
 	frappe.db.sql("""
-		UPDATE tabAddress set {condition} country_code = UPPER(ifnull((select code
+		UPDATE tabAddress set {condition} country_code = UPPER(coalesce((select code
 			from `tabCountry` where name = `tabAddress`.country), ''))
 			where country_code is null and state_code is null
 	""".format(condition=condition))

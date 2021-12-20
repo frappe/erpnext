@@ -54,7 +54,7 @@ def create_hsn_codes(data, code_field):
 		hsn_code.hsn_code = d[code_field]
 		hsn_code.name = d[code_field]
 		try:
-			hsn_code.db_insert()
+			hsn_code.db_insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
 		except frappe.DuplicateEntryError:
 			pass
 
@@ -70,7 +70,7 @@ def add_custom_roles_for_reports():
 					dict(role='Accounts User'),
 					dict(role='Accounts Manager')
 				]
-			)).insert()
+			)).insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
 
 	for report_name in ('Professional Tax Deductions', 'Provident Fund Deductions'):
 
@@ -83,7 +83,7 @@ def add_custom_roles_for_reports():
 					dict(role='HR Manager'),
 					dict(role='Employee')
 				]
-			)).insert()
+			)).insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
 
 	for report_name in ('HSN-wise-summary of outward supplies', 'GSTR-1', 'GSTR-2'):
 
@@ -96,7 +96,7 @@ def add_custom_roles_for_reports():
 					dict(role='Accounts Manager'),
 					dict(role='Auditor')
 				]
-			)).insert()
+			)).insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
 
 def add_permissions():
 	for doctype in ('GST HSN Code', 'GST Settings', 'GSTR 3B Report', 'Lower Deduction Certificate'):
@@ -709,7 +709,7 @@ def make_fixtures(company=None):
 		try:
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_permissions = True
-			doc.insert()
+			doc.insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
 		except frappe.NameError:
 			frappe.clear_messages()
 		except frappe.DuplicateEntryError:
@@ -803,7 +803,7 @@ def set_tax_withholding_category(company):
 			doc.flags.ignore_validate = True
 			doc.flags.ignore_permissions = True
 			doc.flags.ignore_mandatory = True
-			doc.insert()
+			doc.insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
 		else:
 			doc = frappe.get_doc("Tax Withholding Category", d.get("name"), for_update=True)
 

@@ -17,8 +17,8 @@ company_name = '_Test Company 4'
 
 class TestExpenseClaim(unittest.TestCase):
 	def test_total_expense_claim_for_project(self):
-		frappe.db.sql("""delete from `tabTask` where project = "_Test Project 1" """)
-		frappe.db.sql("""delete from `tabProject` where name = "_Test Project 1" """)
+		frappe.db.sql("""delete from `tabTask` where project = '_Test Project 1' """)
+		frappe.db.sql("""delete from `tabProject` where name = '_Test Project 1' """)
 		frappe.db.sql("update `tabExpense Claim` set project = '', task = ''")
 
 		project = frappe.get_doc({

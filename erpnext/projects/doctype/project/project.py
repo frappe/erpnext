@@ -263,11 +263,18 @@ class Project(Document):
 
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
-	return dict(frappe.db.sql('''select unix_timestamp(from_time), count(*)
+	return dict(frappe.db.multisql({
+		'mariadb':'''select unix_timestamp(from_time), count(*)
 		from `tabTimesheet Detail` where project=%s
-			and from_time > date_sub(curdate(), interval 1 year)
+			and from_time > date_sub(CURRENT_DATE, interval 1 year)
 			and docstatus < 2
-			group by date(from_time)''', name))
+			group by date(from_time)''',
+		'postgres':'''select extract(epoch from from_time), count(*)
+		from `tabTimesheet Detail` where project=%s
+			and from_time > (current_date - interval '1 year')
+			and docstatus < 2
+			group by date(from_time)'''
+	}, name))
 
 
 def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):
@@ -278,7 +285,7 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 			and project_user.parent = project.name)
 			or project.owner = %(user)s
 			order by project.modified desc
-			limit {0}, {1}
+			limit {1} offset {0}
 		'''.format(limit_start, limit_page_length),
 						 {'user': frappe.session.user},
 						 as_dict=True,
@@ -307,11 +314,11 @@ def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 				or full_name like %(txt)s)
 			{fcond} {mcond}
 		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, full_name), locate(%(_txt)s, full_name), 99999),
+			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
+			(case when locate(%(_txt)s, full_name) > 0 then locate(%(_txt)s, full_name) else 99999 end)
 			idx desc,
 			name, full_name
-		limit %(start)s, %(page_len)s""".format(**{
+		limit %(page_len)s offset %(start)s""".format(**{
 		'key': searchfield,
 		'fcond': get_filters_cond(doctype, filters, conditions),
 		'mcond': get_match_cond(doctype)

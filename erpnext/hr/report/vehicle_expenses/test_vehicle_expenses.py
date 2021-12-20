@@ -19,7 +19,7 @@ class TestVehicleExpenses(unittest.TestCase):
 	def setUpClass(self):
 		frappe.db.sql('delete from `tabVehicle Log`')
 
-		employee_id = frappe.db.sql('''select name from `tabEmployee` where name="testdriver@example.com"''')
+		employee_id = frappe.db.sql('''select name from `tabEmployee` where name='testdriver@example.com' ''')
 		self.employee_id = employee_id[0][0] if employee_id else None
 		if not self.employee_id:
 			self.employee_id = make_employee('testdriver@example.com', company='_Test Company')

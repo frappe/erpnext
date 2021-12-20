@@ -66,21 +66,39 @@ def get_timeline_data(doctype, name):
 
 	out = {}
 
-	out.update(dict(frappe.db.sql('''select
+	out.update(dict(frappe.db.multisql({
+		'mariadb': '''select
 			unix_timestamp(dt.transaction_date), count(st.parenttype)
 		from
 			`tabSales Order` dt, `tabSales Team` st
 		where
-			st.sales_person = %s and st.parent = dt.name and dt.transaction_date > date_sub(curdate(), interval 1 year)
-			group by dt.transaction_date ''', name)))
+			st.sales_person = %s and st.parent = dt.name and dt.transaction_date > date_sub(CURRENT_DATE, interval 1 year)
+			group by dt.transaction_date ''',
+		'postgres': '''select
+			extract(epoch from dt.transaction_date), count(st.parenttype)
+		from
+			`tabSales Order` dt, `tabSales Team` st
+		where
+			st.sales_person = %s and st.parent = dt.name and dt.transaction_date > (current_date - interval '1 year')
+			group by dt.transaction_date '''
+			}, name)))
 
-	sales_invoice = dict(frappe.db.sql('''select
+	sales_invoice = dict(frappe.db.multisql({
+		'mariadb': '''select
 			unix_timestamp(dt.posting_date), count(st.parenttype)
 		from
 			`tabSales Invoice` dt, `tabSales Team` st
 		where
-			st.sales_person = %s and st.parent = dt.name and dt.posting_date > date_sub(curdate(), interval 1 year)
-			group by dt.posting_date ''', name))
+			st.sales_person = %s and st.parent = dt.name and dt.posting_date > date_sub(CURRENT_DATE, interval 1 year)
+			group by dt.posting_date ''',
+		'postgres': '''select
+			extract(epoch from dt.posting_date), count(st.parenttype)
+		from
+			`tabSales Invoice` dt, `tabSales Team` st
+		where
+			st.sales_person = %s and st.parent = dt.name and dt.posting_date > (current_date - interval '1 year')
+			group by dt.posting_date '''
+			}, name))
 
 	for key in sales_invoice:
 		if out.get(key):
@@ -88,13 +106,22 @@ def get_timeline_data(doctype, name):
 		else:
 			out[key] = sales_invoice[key]
 
-	delivery_note = dict(frappe.db.sql('''select
+	delivery_note = dict(frappe.db.multisql({
+		'mariadb':'''select
 			unix_timestamp(dt.posting_date), count(st.parenttype)
 		from
 			`tabDelivery Note` dt, `tabSales Team` st
 		where
-			st.sales_person = %s and st.parent = dt.name and dt.posting_date > date_sub(curdate(), interval 1 year)
-			group by dt.posting_date ''', name))
+			st.sales_person = %s and st.parent = dt.name and dt.posting_date > date_sub(CURRENT_DATE, interval 1 year)
+			group by dt.posting_date ''',
+		'postgres':'''select
+			extract(epoch from dt.posting_date), count(st.parenttype)
+		from
+			`tabDelivery Note` dt, `tabSales Team` st
+		where
+			st.sales_person = %s and st.parent = dt.name and dt.posting_date > (current_date - interval '1 year')
+			group by dt.posting_date '''
+			}, name))
 
 	for key in delivery_note:
 		if out.get(key):

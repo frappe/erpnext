@@ -340,7 +340,7 @@ class JournalEntry(AccountsController):
 
 				against_entries = frappe.db.sql("""select * from `tabJournal Entry Account`
 					where account = %s and docstatus = 1 and parent = %s
-					and (reference_type is null or reference_type in ("", "Sales Order", "Purchase Order"))
+					and (reference_type is null or reference_type in ('', 'Sales Order', 'Purchase Order'))
 					""", (d.account, d.reference_name), as_dict=True)
 
 				if not against_entries:
@@ -785,7 +785,7 @@ def get_default_bank_cash_account(company, account_type=None, mode_of_payment=No
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 	if mode_of_payment:
 		account = get_bank_cash_account(mode_of_payment, company).get("account")
-
+	
 	if not account:
 		'''
 			Set the default account first. If the user hasn't set any default account then, he doesn't
@@ -982,7 +982,7 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 		FROM `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail
 		WHERE jv_detail.parent = jv.name
 			AND jv_detail.account = %(account)s
-			AND IFNULL(jv_detail.party, '') = %(party)s
+			AND COALESCE(jv_detail.party, '') = %(party)s
 			AND (
 				jv_detail.reference_type IS NULL
 				OR jv_detail.reference_type = ''
@@ -990,7 +990,7 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 			AND jv.docstatus = 1
 			AND jv.`{0}` LIKE %(txt)s
 		ORDER BY jv.name DESC
-		LIMIT %(offset)s, %(limit)s
+		LIMIT %(limit)s offset %(offset)s
 		""".format(searchfield), dict(
 				account=filters.get("account"),
 				party=cstr(filters.get("party")),

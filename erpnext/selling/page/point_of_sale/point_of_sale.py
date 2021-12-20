@@ -192,7 +192,7 @@ def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 			cond = cond % tuple(item_groups)
 
 	return frappe.db.sql(""" select distinct name from `tabItem Group`
-			where {condition} and (name like %(txt)s) limit {start}, {page_len}"""
+			where {condition} and (name like %(txt)s) limit {page_len} offset {start}"""
 		.format(condition = cond, start=start, page_len= page_len),
 			{'txt': '%%%s%%' % txt})
 

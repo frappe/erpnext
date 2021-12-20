@@ -527,7 +527,7 @@ class TestDeliveryNote(ERPNextTestCase):
 		dn.submit()
 
 		update_delivery_note_status(dn.name, "Closed")
-		self.assertEqual(frappe.db.get_value("Delivery Note", dn.name, "Status"), "Closed")
+		self.assertEqual(frappe.db.get_value("Delivery Note", dn.name, 'status'), 'Closed')
 
 	def test_dn_billing_status_case1(self):
 		# SO -> DN -> SI

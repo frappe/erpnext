@@ -5,6 +5,7 @@ import unittest
 
 import frappe
 from frappe.utils import add_days, add_months, add_to_date, date_diff, flt, get_datetime, nowdate
+from frappe.query_builder.functions import Sum
 
 from erpnext.loan_management.doctype.loan.loan import (
 	make_loan_write_off,
@@ -252,8 +253,9 @@ class TestLoan(unittest.TestCase):
 			flt(loan.loan_amount + accrued_interest_amount))
 
 		repayment_entry.submit()
-
-		amount = frappe.db.get_value('Loan Interest Accrual', {'loan': loan.name}, ['sum(paid_interest_amount)'])
+		lia = frappe.qb.DocType("Loan Interest Accrual")
+		amount = frappe.qb.from_(lia).select(Sum(lia.paid_interest_amount)).where(lia.loan == loan.name).groupby(lia.modified).run()
+		amount = sum( x[0] for x in amount )
 
 		self.assertEqual(flt(amount, 0),flt(accrued_interest_amount, 0))
 		self.assertEqual(flt(repayment_entry.penalty_amount, 5), 0)
@@ -638,7 +640,9 @@ class TestLoan(unittest.TestCase):
 
 		repayment_entry.submit()
 
-		amount = frappe.db.get_value('Loan Interest Accrual', {'loan': loan.name}, ['sum(paid_interest_amount)'])
+		lia = frappe.qb.DocType("Loan Interest Accrual")
+		amount = frappe.qb.from_(lia).select(Sum(lia.paid_interest_amount)).where(lia.loan == loan.name).groupby(lia.modified).run()
+		amount = sum( x[0] for x in amount )
 
 		self.assertEqual(flt(amount, 0),flt(accrued_interest_amount, 0))
 		self.assertEqual(flt(repayment_entry.penalty_amount, 5), 0)
@@ -681,8 +685,8 @@ class TestLoan(unittest.TestCase):
 			flt(loan.loan_amount + accrued_interest_amount - 100))
 
 		repayment_entry.submit()
-
-		amount = frappe.db.get_value('Loan Interest Accrual', {'loan': loan.name}, ['sum(paid_interest_amount)'])
+		lia = frappe.qb.DocType("Loan Interest Accrual")
+		amount = frappe.qb.from_(lia).select(Sum(lia.paid_interest_amount)).where(lia.loan == loan.name).run()[0][0] or 0.0
 
 		self.assertEqual(flt(amount, 0),flt(accrued_interest_amount, 0))
 		self.assertEqual(flt(repayment_entry.penalty_amount, 5), 0)

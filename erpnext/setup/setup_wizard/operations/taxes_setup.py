@@ -249,7 +249,7 @@ def get_or_create_tax_group(company_name, root_type):
 	root_account = frappe.get_all('Account', {
 		'is_group': 1,
 		'root_type': root_type,
-		'company': company_name,
+		'company': frappe.db.escape(company_name, underscore = True).replace("'", ""),
 		'report_type': 'Balance Sheet',
 		'parent_account': ('is', 'not set')
 	}, limit=1)[0]

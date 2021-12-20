@@ -439,7 +439,7 @@ def calculate_hra_exemption_for_period(doc):
 def get_previous_claimed_amount(employee, payroll_period, non_pro_rata=False, component=False):
 	total_claimed_amount = 0
 	query = """
-	select sum(claimed_amount) as 'total_amount'
+	select sum(claimed_amount) as total_amount
 	from `tabEmployee Benefit Claim`
 	where employee=%(employee)s
 	and docstatus = 1

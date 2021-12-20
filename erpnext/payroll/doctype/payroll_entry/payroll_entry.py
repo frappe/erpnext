@@ -160,7 +160,7 @@ class PayrollEntry(Document):
 		ss_list = frappe.db.sql("""
 			select t1.name, t1.salary_structure, t1.payroll_cost_center from `tabSalary Slip` t1
 			where t1.docstatus = %s and t1.start_date >= %s and t1.end_date <= %s and t1.payroll_entry = %s
-			and (t1.journal_entry is null or t1.journal_entry = "") and ifnull(salary_slip_based_on_timesheet,0) = %s
+			and (t1.journal_entry is null or t1.journal_entry = '') and coalesce(salary_slip_based_on_timesheet,0) = %s
 		""", (ss_status, self.start_date, self.end_date, self.name, self.salary_slip_based_on_timesheet), as_dict=as_dict)
 		return ss_list
 
@@ -443,7 +443,7 @@ def get_sal_struct(company, currency, salary_slip_based_on_timesheet, condition)
 			is_active = 'Yes'
 			and company = %(company)s
 			and currency = %(currency)s and
-			ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s
+			coalesce(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s
 			{condition}""".format(condition=condition),
 		{"company": company, "currency": currency, "salary_slip_based_on_timesheet": salary_slip_based_on_timesheet})
 
@@ -457,15 +457,15 @@ def get_filter_condition(filters):
 
 def get_joining_relieving_condition(start_date, end_date):
 	cond = """
-		and ifnull(t1.date_of_joining, '0000-00-00') <= '%(end_date)s'
-		and ifnull(t1.relieving_date, '2199-12-31') >= '%(start_date)s'
+		and coalesce(t1.date_of_joining, '1900-01-01') <= '%(end_date)s'
+		and coalesce(t1.relieving_date, '2199-12-31') >= '%(start_date)s'
 	""" % {"start_date": start_date, "end_date": end_date}
 	return cond
 
 def get_emp_list(sal_struct, cond, end_date, payroll_payable_account):
 	return frappe.db.sql("""
 			select
-				distinct t1.name as employee, t1.employee_name, t1.department, t1.designation
+				distinct t1.name as employee, t1.employee_name, t1.department, t1.designation, t2.from_date
 			from
 				`tabEmployee` t1, `tabSalary Structure Assignment` t2
 			where
@@ -665,7 +665,7 @@ def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filte
 		and name not in
 			(select reference_name from `tabJournal Entry Account`
 				where reference_type="Payroll Entry")
-		order by name limit %(start)s, %(page_len)s"""
+		order by name limit %(page_len)s offset %(start)s"""
 		.format(key=searchfield), {
 			'txt': "%%%s%%" % frappe.db.escape(txt),
 			'start': start, 'page_len': page_len
@@ -721,11 +721,11 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 			{emp_cond}
 			{fcond} {mcond}
 		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, employee_name), locate(%(_txt)s, employee_name), 99999),
+			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
+			(case when locate(%(_txt)s, employee_name) > 0 then locate(%(_txt)s, employee_name) else 99999 end),
 			idx desc,
 			name, employee_name
-		limit %(start)s, %(page_len)s""".format(**{
+		limit %(page_len)s offset %(start)s""".format(**{
 			'key': searchfield,
 			'fcond': get_filters_cond(doctype, filters, conditions),
 			'mcond': get_match_cond(doctype),

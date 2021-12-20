@@ -34,7 +34,7 @@ class TestProcurementTracker(unittest.TestCase):
 				abbr="_TPC",
 				default_currency="INR",
 				country="Pakistan"
-				)).insert()
+				)).insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
 		warehouse = create_warehouse("_Test Procurement Warehouse", company="_Test Procurement Company")
 		mr = make_material_request(company="_Test Procurement Company", warehouse=warehouse, cost_center="Main - _TPC")
 		po = make_purchase_order(mr.name)

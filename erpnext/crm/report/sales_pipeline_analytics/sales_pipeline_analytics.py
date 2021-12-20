@@ -74,7 +74,11 @@ class SalesPipelineAnalytics(object):
 				'width': 200
 			})
 
+
 	def get_fields(self):
+		db_month = "to_char(expected_closing, 'FMMonth')" if frappe.db.db_type == 'postgres' else "monthname(expected_closing)"
+		db_quarter = "extract(quarter from " if frappe.db.db_type == 'postgres' else "quarter("
+		
 		self.based_on ={
 			'Owner': '_assign as opportunity_owner',
 			'Sales Stage': 'sales_stage'
@@ -91,8 +95,8 @@ class SalesPipelineAnalytics(object):
 		}[self.filters.get('pipeline_by')]
 
 		self.group_by_period = {
-			'Monthly': 'month(expected_closing)',
-			'Quarterly': 'QUARTER(expected_closing)'
+			'Monthly': "{month}".format(month = db_month),
+			'Quarterly': '{quarter}expected_closing)'.format(quarter = db_quarter)
 		}[self.filters.get('range')]
 
 		self.pipeline_by = {
@@ -101,8 +105,8 @@ class SalesPipelineAnalytics(object):
 		}[self.filters.get('pipeline_by')]
 
 		self.duration = {
-			'Monthly': 'monthname(expected_closing) as month',
-			'Quarterly': 'QUARTER(expected_closing) as quarter'
+			'Monthly': "{month} as month".format(month = db_month),
+			'Quarterly': '{quarter}expected_closing) as quarter'.format(quarter = db_quarter)
 		}[self.filters.get('range')]
 
 		self.period_by = {
@@ -118,14 +122,12 @@ class SalesPipelineAnalytics(object):
 				filters=self.get_conditions(),
 				fields=[self.based_on, self.data_based_on, self.duration],
 				group_by='{},{}'.format(self.group_by_based_on, self.group_by_period),
-				order_by=self.group_by_period
-			)
+				order_by=self.group_by_period)
 
 		if self.filters.get('based_on') == 'Amount':
 			self.query_result = frappe.db.get_list('Opportunity',
 				filters=self.get_conditions(),
-				fields=[self.based_on, self.data_based_on, self.duration, 'currency']
-			)
+				fields=[self.based_on, self.data_based_on, self.duration, 'currency'])
 
 			self.convert_to_base_currency()
 

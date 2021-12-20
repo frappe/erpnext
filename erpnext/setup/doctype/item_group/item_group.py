@@ -143,20 +143,22 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 
 	child_groups = ", ".join(frappe.db.escape(i[0]) for i in get_child_groups(product_group))
 
+	query_params = "or I.end_of_life='0000-00-00'" if frappe.db.db_type == "mariadb" else ""
+
 	# base query
 	query = """select I.name, I.item_name, I.item_code, I.route, I.image, I.website_image, I.thumbnail, I.item_group,
 			I.description, I.web_long_description as website_description, I.is_stock_item,
 			case when (S.actual_qty - S.reserved_qty) > 0 then 1 else 0 end as in_stock, I.website_warehouse,
 			I.has_batch_no
 		from `tabItem` I
-		left join tabBin S on I.item_code = S.item_code and I.website_warehouse = S.warehouse
+		left join `tabBin` S on I.item_code = S.item_code and I.website_warehouse = S.warehouse
 		where I.show_in_website = 1
 			and I.disabled = 0
-			and (I.end_of_life is null or I.end_of_life='0000-00-00' or I.end_of_life > %(today)s)
+			and (I.end_of_life is null {query_params} or I.end_of_life > CURRENT_DATE)
 			and (I.variant_of = '' or I.variant_of is null)
 			and (I.item_group in ({child_groups})
 			or I.name in (select parent from `tabWebsite Item Group` where item_group in ({child_groups})))
-			""".format(child_groups=child_groups)
+			""".format(child_groups=child_groups, query_params = query_params)
 	# search term condition
 	if search:
 		query += """ and (I.web_long_description like %(search)s
@@ -164,7 +166,7 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 				or I.name like %(search)s)"""
 		search = "%" + cstr(search) + "%"
 
-	query += """order by I.weightage desc, in_stock desc, I.modified desc limit %s, %s""" % (cint(start), cint(limit))
+	query += """order by I.weightage desc, in_stock desc, I.modified desc limit %s offset %s""" % (cint(limit), cint(start))
 
 	data = frappe.db.sql(query, {"product_group": product_group,"search": search, "today": nowdate()}, as_dict=1)
 	data = adjust_qty_for_expired_items(data)

@@ -265,9 +265,9 @@ class Account(NestedSet):
 def get_parent_account(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select name from tabAccount
 		where is_group = 1 and docstatus != 2 and company = %s
-		and %s like %s order by name limit %s, %s""" %
+		and %s like %s order by name limit %s offset %s""" %
 		("%s", searchfield, "%s", "%s", "%s"),
-		(filters["company"], "%%%s%%" % txt, start, page_len), as_list=1)
+		(filters["company"], "%%%s%%" % txt, page_len, start), as_list=1)
 
 def get_account_currency(account):
 	"""Helper function to get account currency"""
@@ -381,6 +381,5 @@ def sync_update_account_number_in_child(descendants, old_acc_name, account_name,
 	}
 	if old_acc_number:
 		filters["account_number"] = old_acc_number
-
-	for d in frappe.db.get_values('Account', filters=filters, fieldname=["company", "name"], as_dict=True):
+	for d in frappe.db.get_values('Account', filters=filters, fieldname=["company", "name"], as_dict=True, order_by = 'company asc'):
 			update_account_number(d["name"], account_name, account_number, from_descendant=True)

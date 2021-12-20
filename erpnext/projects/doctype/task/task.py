@@ -67,7 +67,7 @@ class Task(NestedSet):
 			self.status = "Template"
 		if self.status!=self.get_db_value("status") and self.status == "Completed":
 			for d in self.depends_on:
-				if frappe.db.get_value("Task", d.task, "status") not in ("Completed", "Cancelled"):
+				if frappe.db.get_value("Task", d.task, "status") not in ('Completed', 'Cancelled'):
 					frappe.throw(_("Cannot complete task {0} as its dependant task {1} are not ccompleted / cancelled.").format(frappe.bold(self.name), frappe.bold(d.task)))
 
 			close_all_assignments(self.doctype, self.name)
@@ -235,7 +235,7 @@ def get_project(doctype, txt, searchfield, start, page_len, filters):
 			%(mcond)s
 			{search_condition}
 		order by name
-		limit %(start)s, %(page_len)s""".format(search_columns = search_columns,
+		limit %(page_len)s offset %(start)s""".format(search_columns = search_columns,
 			search_condition=search_cond), {
 			'key': searchfield,
 			'txt': '%' + txt + '%',
@@ -292,7 +292,7 @@ def get_children(doctype, parent, task=None, project=None, is_root=False):
 		# via expand child
 		filters.append(['parent_task', '=', parent])
 	else:
-		filters.append(['ifnull(`parent_task`, "")', '=', ''])
+		filters.append(['coalesce(`parent_task`, "")', '=', ''])
 
 	if project:
 		filters.append(['project', '=', project])

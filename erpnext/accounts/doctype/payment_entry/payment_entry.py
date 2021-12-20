@@ -1178,7 +1178,7 @@ def get_orders_to_be_billed(posting_date, party_type, party,
 				{party_type} = %s
 				and docstatus = 1
 				and company = %s
-				and ifnull(status, "") != "Closed"
+				and coalesce(status, "") != "Closed"
 				and if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) > advance_paid
 				and abs(100 - per_billed) > 0.01
 				{condition}
@@ -1210,7 +1210,7 @@ def get_negative_outstanding_invoices(party_type, party, party_account,
 	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
 	supplier_condition = ""
 	if voucher_type == "Purchase Invoice":
-		supplier_condition = "and (release_date is null or release_date <= CURDATE())"
+		supplier_condition = "and (release_date is null or release_date <= CURRENT_DATE)"
 	if party_account_currency == company_currency:
 		grand_total_field = "base_grand_total"
 		rounded_total_field = "base_rounded_total"
@@ -1312,8 +1312,8 @@ def get_outstanding_on_journal_entry(name):
 	res = frappe.db.sql(
 			'SELECT '
 			'CASE WHEN party_type IN ("Customer", "Student") '
-			'THEN ifnull(sum(debit_in_account_currency - credit_in_account_currency), 0) '
-			'ELSE ifnull(sum(credit_in_account_currency - debit_in_account_currency), 0) '
+			'THEN coalesce(sum(debit_in_account_currency - credit_in_account_currency), 0) '
+			'ELSE coalesce(sum(credit_in_account_currency - debit_in_account_currency), 0) '
 			'END as outstanding_amount '
 			'FROM `tabGL Entry` WHERE (voucher_no=%s OR against_voucher=%s) '
 			'AND party_type IS NOT NULL '
@@ -1760,7 +1760,7 @@ def get_paid_amount(dt, dn, party_type, party, account, due_date):
 		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 
 	paid_amount = frappe.db.sql("""
-		select ifnull(sum({dr_or_cr}), 0) as paid_amount
+		select coalesce(sum({dr_or_cr}), 0) as paid_amount
 		from `tabGL Entry`
 		where against_voucher_type = %s
 			and against_voucher = %s

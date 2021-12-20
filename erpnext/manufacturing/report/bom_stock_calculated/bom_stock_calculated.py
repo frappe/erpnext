@@ -75,8 +75,8 @@ def get_bom_stock(filters):
 				bom_item.item_code,
 				bom_item.description,
 				bom_item.{qty_field},
-				ifnull(sum(ledger.actual_qty), 0) as actual_qty,
-				ifnull(sum(FLOOR(ledger.actual_qty / bom_item.{qty_field})), 0) as to_build
+				coalesce(sum(ledger.actual_qty), 0) as actual_qty,
+				coalesce(sum(FLOOR(ledger.actual_qty / bom_item.{qty_field})), 0) as to_build
 			FROM
 				{table} AS bom_item
 				LEFT JOIN `tabBin` AS ledger
@@ -86,7 +86,7 @@ def get_bom_stock(filters):
 			WHERE
 				bom_item.parent = '{bom}' and bom_item.parenttype='BOM'
 
-			GROUP BY bom_item.item_code""".format(qty_field=qty_field, table=table, conditions=conditions, bom=bom), as_dict=1)
+			GROUP BY bom_item.item_code, bom_item.description, bom_item.{qty_field}""".format(qty_field=qty_field, table=table, conditions=conditions, bom=bom), as_dict=1)
 
 def get_manufacturer_records():
 	details = frappe.get_all('Item Manufacturer', fields = ["manufacturer", "manufacturer_part_no", "parent"])

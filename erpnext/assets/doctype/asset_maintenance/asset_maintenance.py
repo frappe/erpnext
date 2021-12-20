@@ -47,8 +47,8 @@ def assign_tasks(asset_maintenance_name, assign_to_member, maintenance_task, nex
 		'date' : next_due_date
 	}
 	if not frappe.db.sql("""select owner from `tabToDo`
-		where reference_type=%(doctype)s and reference_name=%(name)s and status="Open"
-		and owner=%(assign_to)s""", args):
+		where reference_type=%(doctype)s and reference_name=%(name)s and status='Open'
+		and owner={assign_to}""".format(assign_to = "('" + team_member + "')"), args):
 		assign_to.add(args)
 
 @frappe.whitelist()

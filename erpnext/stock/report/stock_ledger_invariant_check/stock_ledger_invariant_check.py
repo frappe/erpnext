@@ -36,16 +36,15 @@ def get_data(filters):
 
 
 def get_stock_ledger_entries(filters):
-	return frappe.get_all(
-		"Stock Ledger Entry",
-		fields=SLE_FIELDS,
-		filters={
-			"item_code": filters.item_code,
-			"warehouse": filters.warehouse,
-			"is_cancelled": 0
-		},
-		order_by="timestamp(posting_date, posting_time), creation",
-	)
+	result = frappe.db.multisql({
+		'mariadb': """select {fields} from `tabStock Ledger Entry`
+		where item_code = %s and warehouse = %s and is_cancelled = 0
+		order by timestamp(posting_date, posting_time), creation""".format(fields = ",".join(SLE_FIELDS)),
+		'postgres': """select {fields} from `tabStock Ledger Entry`
+		where item_code = '{item_code}' and warehouse = '{warehouse}' and is_cancelled = 0
+		order by (posting_date + posting_time), creation""".format(fields = ",".join(SLE_FIELDS), item_code = filters.item_code, warehouse = filters.warehouse),
+	}, (filters.item_code, filters.warehouse))
+	return result
 
 
 def add_invariant_check_fields(sles):

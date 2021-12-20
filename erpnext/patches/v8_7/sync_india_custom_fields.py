@@ -31,5 +31,5 @@ def execute():
 	frappe.db.sql("""
 		update tabAddress
 		set gst_state_number=concat("0", gst_state_number)
-		where ifnull(gst_state_number, '') != '' and gst_state_number<10
+		where coalesce(gst_state_number, '') != '' and gst_state_number<10
 	""")

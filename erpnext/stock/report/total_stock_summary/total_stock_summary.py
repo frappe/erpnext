@@ -34,10 +34,10 @@ def get_total_stock(filters):
 		if filters.get("company"):
 			conditions += " AND warehouse.company = %s" % frappe.db.escape(filters.get("company"), percent=False)
 
-		conditions += " GROUP BY ledger.warehouse, item.item_code"
+		conditions += " GROUP BY ledger.warehouse, item.item_code, item.description"
 		columns += "'' as company, ledger.warehouse"
 	else:
-		conditions += " GROUP BY warehouse.company, item.item_code"
+		conditions += " GROUP BY warehouse.company, item.item_code, item.description"
 		columns += " warehouse.company, '' as warehouse"
 
 	return frappe.db.sql("""

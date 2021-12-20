@@ -275,7 +275,7 @@ def check_matching(bank_account, company, transaction, document_types):
 	matching_vouchers = []
 	for query in subquery:
 		matching_vouchers.extend(
-			frappe.db.sql(query, filters,)
+			frappe.db.sql(query, filters)
 		)
 
 	return sorted(matching_vouchers, key = lambda x: x[0], reverse=True) if matching_vouchers else []
@@ -335,14 +335,16 @@ def get_pe_matching_query(amount_condition, account_from_to, transaction):
 		paid_amount {amount_condition} %(amount)s
 		AND docstatus = 1
 		AND payment_type IN (%(payment_type)s, 'Internal Transfer')
-		AND ifnull(clearance_date, '') = ""
+		AND coalesce(cast(clearance_date as char), '') = ''
 		AND {account_from_to} = %(bank_account)s
+	ORDER BY modified
 	"""
 
 
 def get_je_matching_query(amount_condition, transaction):
-	# get matching journal entry query
 
+	# get matching journal entry query
+	query_param = "or je.clearance_date='0000-00-00'" if frappe.db.db_type == "mariadb" else ""
 	company_account = frappe.get_value("Bank Account", transaction.bank_account, "account")
 	root_type = frappe.get_value("Account", company_account, "root_type")
 
@@ -372,15 +374,18 @@ def get_je_matching_query(amount_condition, transaction):
 		ON
 			jea.parent = je.name
 		WHERE
-			(je.clearance_date is null or je.clearance_date='0000-00-00')
+			(je.clearance_date is null {query_param})
 			AND jea.account = %(bank_account)s
 			AND jea.{cr_or_dr}_in_account_currency {amount_condition} %(amount)s
 			AND je.docstatus = 1
+		ORDER BY jea.modified
 	"""
 
 
 def get_si_matching_query(amount_condition):
 	# get matchin sales invoice query
+	query_param = "or sip.clearance_date='0000-00-00'" if frappe.db.db_type == "mariadb" else ""
+
 	return f"""
 		SELECT
 			( CASE WHEN si.customer = %(party)s  THEN 1 ELSE 0  END
@@ -401,10 +406,11 @@ def get_si_matching_query(amount_condition):
 			`tabSales Invoice` as si
 		ON
 			sip.parent = si.name
-		WHERE (sip.clearance_date is null or sip.clearance_date='0000-00-00')
+		WHERE (sip.clearance_date is null {query_param})
 			AND sip.account = %(bank_account)s
 			AND sip.amount {amount_condition} %(amount)s
 			AND si.docstatus = 1
+		ORDER BY si.modified
 	"""
 
 def get_pi_matching_query(amount_condition):
@@ -428,8 +434,9 @@ def get_pi_matching_query(amount_condition):
 			paid_amount {amount_condition} %(amount)s
 			AND docstatus = 1
 			AND is_paid = 1
-			AND ifnull(clearance_date, '') = ""
+			AND coalesce(cast(clearance_date as text), '') = ""
 			AND cash_bank_account  = %(bank_account)s
+		ORDER BY modified
 	"""
 
 def get_ec_matching_query(bank_account, company, amount_condition):
@@ -457,6 +464,7 @@ def get_ec_matching_query(bank_account, company, amount_condition):
 			total_sanctioned_amount {amount_condition} %(amount)s
 			AND docstatus = 1
 			AND is_paid = 1
-			AND ifnull(clearance_date, '') = ""
+			AND coalesce(clearance_date, '') = ""
 			AND mode_of_payment in {mode_of_payments}
+		ORDER BY modified
 	"""

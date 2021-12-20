@@ -155,7 +155,7 @@ class TransactionDeletionRecord(Document):
 		else:
 			last = 0
 
-		frappe.db.sql("""update tabSeries set current = %s where name=%s""", (last, prefix))
+		frappe.db.sql("""update `tabSeries` set current = %s where name=%s""", (last, prefix))
 
 	def delete_version_log(self, doctype, company_fieldname):
 		frappe.db.sql("""delete from `tabVersion` where ref_doctype=%s and docname in

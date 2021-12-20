@@ -92,7 +92,7 @@ class TestPayrollEntry(unittest.TestCase):
 			self.assertEqual(salary_slip.base_gross_pay, payroll_je_doc.total_credit)
 
 		payment_entry = frappe.db.sql('''
-			Select ifnull(sum(je.total_debit),0) as total_debit, ifnull(sum(je.total_credit),0) as total_credit from `tabJournal Entry` je, `tabJournal Entry Account` jea
+			Select coalesce(sum(je.total_debit),0) as total_debit, coalesce(sum(je.total_credit),0) as total_credit from `tabJournal Entry` je, `tabJournal Entry Account` jea
 			Where je.name = jea.parent
 			And jea.reference_name = %s
 			''', (payroll_entry.name), as_dict=1)
@@ -144,17 +144,17 @@ class TestPayrollEntry(unittest.TestCase):
 				select account, cost_center, debit, credit
 				from `tabJournal Entry Account`
 				where parent=%s
-				order by account, cost_center
+				order by replace(replace(replace(account, '_', ''), '-', ''), ' ', ''), replace(replace(replace(cost_center, '_', ''), '-', ''), ' ', '')
 			""", je)
-			expected_je = (
-				('_Test Payroll Payable - _TC', 'Main - _TC', 0.0, 155600.0),
-				('Salary - _TC', '_Test Cost Center - _TC', 78000.0, 0.0),
-				('Salary - _TC', '_Test Cost Center 2 - _TC', 78000.0, 0.0),
+			expected_je = [
+				('Salary Deductions - _TC', '_Test Cost Center 2 - _TC', 0.0, 200.0),
 				('Salary Deductions - _TC', '_Test Cost Center - _TC', 0.0, 200.0),
-				('Salary Deductions - _TC', '_Test Cost Center 2 - _TC', 0.0, 200.0)
-			)
+				('Salary - _TC', '_Test Cost Center 2 - _TC', 78000.0, 0.0),
+				('Salary - _TC', '_Test Cost Center - _TC', 78000.0, 0.0),
+				('_Test Payroll Payable - _TC', 'Main - _TC', 0.0, 155600.0)
+			]
 
-			self.assertEqual(je_entries, expected_je)
+			self.assertEqual(list(je_entries), expected_je)
 
 	def test_get_end_date(self):
 		self.assertEqual(get_end_date('2017-01-01', 'monthly'), {'end_date': '2017-01-31'})

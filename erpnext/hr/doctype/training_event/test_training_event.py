@@ -36,7 +36,7 @@ class TestTrainingEvent(unittest.TestCase):
 
 		for entry in training_event.employees:
 			self.assertEqual(entry.status, "Open")
-
+		training_event.cancel()
 	def tearDown(self):
 		frappe.db.rollback()
 

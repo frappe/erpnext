@@ -35,7 +35,7 @@ class TestEmployeeAdvance(unittest.TestCase):
 		self.assertRaises(EmployeeAdvanceOverPayment, journal_entry1.submit)
 
 	def test_paid_amount_on_pe_cancellation(self):
-		employee_name = make_employee("_T@employe.advance")
+		employee_name = make_employee("_T@employe.advance2")
 		advance = make_employee_advance(employee_name)
 
 		pe = make_payment_entry(advance)
@@ -53,7 +53,7 @@ class TestEmployeeAdvance(unittest.TestCase):
 		self.assertEqual(advance.status, "Unpaid")
 
 	def test_repay_unclaimed_amount_from_salary(self):
-		employee_name = make_employee("_T@employe.advance")
+		employee_name = make_employee("_T@employe.advance3")
 		advance = make_employee_advance(employee_name, {"repay_unclaimed_amount_from_salary": 1})
 
 		args = {"type": "Deduction"}
@@ -103,7 +103,7 @@ def make_payment_entry(advance):
 def make_employee_advance(employee_name, args=None):
 	doc = frappe.new_doc("Employee Advance")
 	doc.employee = employee_name
-	doc.company  = "_Test company"
+	doc.company  = "_Test Company"
 	doc.purpose = "For site visit"
 	doc.currency = erpnext.get_company_currency("_Test company")
 	doc.exchange_rate = 1

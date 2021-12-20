@@ -1067,6 +1067,8 @@ class AccountsController(TransactionBase):
 			where
 				against_voucher_type = %s and against_voucher = %s and party=%s
 				and docstatus = 1
+			group by
+				account_currency
 		""".format(dr_or_cr=dr_or_cr, rev_dr_cr=rev_dr_or_cr), (self.doctype, self.name, party), as_dict=1) #nosec
 
 		if advance:
@@ -1606,18 +1608,18 @@ def get_advance_journal_entries(party_type, party, party_account, amount_field,
 
 	conditions = []
 	if include_unallocated:
-		conditions.append("ifnull(t2.reference_name, '')=''")
+		conditions.append("coalesce(t2.reference_name, '')=''")
 
 	if order_list:
 		order_condition = ', '.join(['%s'] * len(order_list))
-		conditions.append(" (t2.reference_type = '{0}' and ifnull(t2.reference_name, '') in ({1}))" \
+		conditions.append(" (t2.reference_type = '{0}' and coalesce(t2.reference_name, '') in ({1}))" \
 						  .format(order_doctype, order_condition))
 
 	reference_condition = " and (" + " or ".join(conditions) + ")" if conditions else ""
 
 	journal_entries = frappe.db.sql("""
 		select
-			"Journal Entry" as reference_type, t1.name as reference_name,
+			'Journal Entry' as reference_type, t1.name as reference_name,
 			t1.remark as remarks, t2.{0} as amount, t2.name as reference_row,
 			t2.reference_name as against_order
 		from
@@ -1653,7 +1655,7 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 
 		payment_entries_against_order = frappe.db.sql("""
 			select
-				"Payment Entry" as reference_type, t1.name as reference_name,
+				'Payment Entry' as reference_type, t1.name as reference_name,
 				t1.remarks, t2.allocated_amount as amount, t2.name as reference_row,
 				t2.reference_name as against_order, t1.posting_date,
 				t1.{0} as currency, t1.{4} as exchange_rate
@@ -1669,7 +1671,7 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 
 	if include_unallocated:
 		unallocated_payment_entries = frappe.db.sql("""
-				select "Payment Entry" as reference_type, name as reference_name, posting_date,
+				select 'Payment Entry' as reference_type, name as reference_name, posting_date,
 				remarks, unallocated_amount as amount, {2} as exchange_rate, {3} as currency
 				from `tabPayment Entry`
 				where

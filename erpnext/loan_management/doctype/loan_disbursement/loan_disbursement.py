@@ -209,4 +209,10 @@ def get_disbursal_amount(loan, on_current_security_price=0):
 	return disbursal_amount
 
 def get_maximum_amount_as_per_pledged_security(loan):
-	return flt(frappe.db.get_value('Loan Security Pledge', {'loan': loan}, 'sum(maximum_loan_value)'))
+	max_pledged_security = frappe.db.sql("""
+		select sum(maximum_loan_value) from `tabLoan Security Pledge`
+		where loan = '{loan}'
+		""".format(loan = loan), as_list = 1)
+	max_pledged_security = max_pledged_security[0][0] if any(isinstance(i, list) for i in max_pledged_security) and max_pledged_security[0][0] else max_pledged_security
+
+	return flt(max_pledged_security)

@@ -110,7 +110,7 @@ def run_query(query_args: QueryArgs) -> Data:
 			{item_filter}
 			{work_order_filter}
 		GROUP BY
-			se.work_order
+			se.work_order, wo.name, wo.status, wo.production_item, wo.qty, wo.produced_qty, wo.process_loss_qty
 	""".format(**query_args), query_args, as_dict=1)
 
 def update_data_with_total_pl_value(data: Data) -> None:

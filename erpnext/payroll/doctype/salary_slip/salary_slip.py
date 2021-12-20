@@ -232,7 +232,7 @@ class SalarySlip(TransactionBase):
 
 		st_name = frappe.db.sql("""
 			select sa.salary_structure
-			from `tabSalary Structure Assignment` sa join `tabSalary Structure` ss
+			from `tabSalary Structure Assignment` sa, `tabSalary Structure` ss
 			where sa.salary_structure=ss.name
 				and sa.docstatus = 1 and ss.docstatus = 1 and ss.is_active ='Yes' %s
 			order by sa.from_date desc
@@ -380,11 +380,11 @@ class SalarySlip(TransactionBase):
 				AND (t2.is_lwp = 1 or t2.is_ppl = 1)
 				AND t1.docstatus = 1
 				AND t1.employee = %(employee)s
-				AND ifnull(t1.salary_slip, '') = ''
+				AND coalesce(t1.salary_slip, '') = ''
 				AND CASE
-					WHEN t2.include_holiday != 1
+					WHEN (t2.include_holiday != 1)
 						THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date
-					WHEN t2.include_holiday
+					WHEN t2.include_holiday = 1
 						THEN %(dt)s between from_date and to_date
 					END
 				""".format(holidays), {"employee": self.employee, "dt": dt})
@@ -423,7 +423,7 @@ class SalarySlip(TransactionBase):
 			SELECT attendance_date, status, leave_type
 			FROM `tabAttendance`
 			WHERE
-				status in ("Absent", "Half Day", "On leave")
+				status in ('Absent', 'Half Day', 'On Leave')
 				AND employee = %s
 				AND docstatus = 1
 				AND attendance_date between %s and %s
@@ -813,9 +813,10 @@ class SalarySlip(TransactionBase):
 		taxable_earnings = frappe.db.sql("""
 			select sum(sd.amount)
 			from
-				`tabSalary Detail` sd join `tabSalary Slip` ss on sd.parent=ss.name
+				`tabSalary Detail` sd, `tabSalary Slip` ss
 			where
-				sd.parentfield='earnings'
+				sd.parent=ss.name
+				and sd.parentfield='earnings'
 				and sd.is_tax_applicable=1
 				and is_flexible_benefit=0
 				and ss.docstatus=1
@@ -834,9 +835,10 @@ class SalarySlip(TransactionBase):
 			exempted_amount = frappe.db.sql("""
 				select sum(sd.amount)
 				from
-					`tabSalary Detail` sd join `tabSalary Slip` ss on sd.parent=ss.name
+					`tabSalary Detail` sd, `tabSalary Slip` ss
 				where
-					sd.parentfield='deductions'
+					sd.parent=ss.name
+					and sd.parentfield='deductions'
 					and sd.exempted_from_income_tax=1
 					and is_flexible_benefit=0
 					and ss.docstatus=1
@@ -858,9 +860,10 @@ class SalarySlip(TransactionBase):
 			select
 				sum(sd.amount)
 			from
-				`tabSalary Detail` sd join `tabSalary Slip` ss on sd.parent=ss.name
+				`tabSalary Detail` sd, `tabSalary Slip` ss
 			where
-				sd.parentfield='deductions'
+				sd.parent=ss.name
+				and sd.parentfield='deductions'
 				and sd.salary_component=%(salary_component)s
 				and sd.variable_based_on_taxable_salary=1
 				and ss.docstatus=1
@@ -969,9 +972,10 @@ class SalarySlip(TransactionBase):
 		# get total sum of benefits paid
 		total_benefits_paid = flt(frappe.db.sql("""
 			select sum(sd.amount)
-			from `tabSalary Detail` sd join `tabSalary Slip` ss on sd.parent=ss.name
+			from `tabSalary Detail` sd, `tabSalary Slip` ss
 			where
-				sd.parentfield='earnings'
+				sd.parent=ss.name
+				and sd.parentfield='earnings'
 				and sd.is_tax_applicable=1
 				and is_flexible_benefit=1
 				and ss.docstatus=1
@@ -1017,15 +1021,17 @@ class SalarySlip(TransactionBase):
 		return total_exemption_amount
 
 	def get_income_form_other_sources(self, payroll_period):
-		return frappe.get_all("Employee Other Income",
-			filters={
-				"employee": self.employee,
-				"payroll_period": payroll_period.name,
-				"company": self.company,
-				"docstatus": 1
-			},
-			fields="SUM(amount) as total_amount"
-		)[0].total_amount
+
+			query_results = frappe.db.sql("""
+			select sum(amount) as total_amount
+			from `tabEmployee Other Income`
+			where employee = '{employee}'
+			and payroll_period = '{payroll_period}'
+			and company = '{company}'
+			and docstatus = 1
+			""".format(employee = self.employee, payroll_period = payroll_period.name, company = self.company), as_dict=1)
+			return query_results[0].total_amount if query_results else 0
+
 
 	def calculate_tax_by_tax_slab(self, annual_taxable_earning, tax_slab):
 		data = self.get_data_for_eval()
@@ -1261,15 +1267,26 @@ class SalarySlip(TransactionBase):
 	def compute_year_to_date(self):
 		year_to_date = 0
 		period_start_date, period_end_date = self.get_year_to_date_period()
-
-		salary_slip_sum = frappe.get_list('Salary Slip',
-			fields = ['sum(net_pay) as net_sum', 'sum(gross_pay) as gross_sum'],
-			filters = {'employee' : self.employee,
-				'start_date' : ['>=', period_start_date],
-				'end_date' : ['<', period_end_date],
-				'name': ['!=', self.name],
-				'docstatus': 1
-			})
+		salary_slip_sum = frappe.db.multisql({
+			'mariadb': """
+		select sum(net_pay) as net_sum, sum(gross_pay) as gross_sum
+		from `tabSalary Slip`
+		where employee = '{employee}'
+			and start_date >= '{period_start_date}'
+			and end_date < '{period_end_date}'
+			and name != '{name}'
+			and docstatus = 1
+		""".format(employee = self.employee, period_start_date = period_start_date, period_end_date = period_end_date, name=self.name),
+		'postgres': """
+		select sum(net_pay) as net_sum, sum(gross_pay) as gross_sum
+		from `tabSalary Slip`
+		where employee = '{employee}'
+			and start_date >= to_date(cast('{period_start_date}' as text), 'YYYY-MM-DD')
+			and end_date < to_date(cast('{period_end_date}' as text), 'YYYY-MM-DD')
+			and name != '{name}'
+			and docstatus = 1
+		""".format(employee = self.employee, period_start_date = period_start_date, period_end_date = period_end_date, name=self.name)
+		}, as_dict = 1)
 
 		year_to_date = flt(salary_slip_sum[0].net_sum) if salary_slip_sum else 0.0
 		gross_year_to_date = flt(salary_slip_sum[0].gross_sum) if salary_slip_sum else 0.0
@@ -1282,14 +1299,24 @@ class SalarySlip(TransactionBase):
 	def compute_month_to_date(self):
 		month_to_date = 0
 		first_day_of_the_month = get_first_day(self.start_date)
-		salary_slip_sum = frappe.get_list('Salary Slip',
-			fields = ['sum(net_pay) as sum'],
-			filters = {'employee' : self.employee,
-				'start_date' : ['>=', first_day_of_the_month],
-				'end_date' : ['<', self.start_date],
-				'name': ['!=', self.name],
-				'docstatus': 1
-			})
+		salary_slip_sum = frappe.db.multisql({
+		'mariadb': """
+		select sum(net_pay) as sum
+		from `tabSalary Slip`
+		where start_date >= '{first_day_of_the_month}'
+		and end_date < '{start_date}'
+		and name != '{name}'
+		and docstatus = 1
+		""".format(employee = self.employee, first_day_of_the_month = first_day_of_the_month, start_date = self.start_date, name = self.name),
+		'postgres': """
+		select sum(net_pay) as sum
+		from `tabSalary Slip`
+		where start_date >= to_date(cast('{first_day_of_the_month}' as text), 'YYYY-MM-DD')
+		and end_date < to_date(cast('{start_date}' as text), 'YYYY-MM-DD')
+		and name != '{name}'
+		and docstatus = 1
+		""".format(employee = self.employee, first_day_of_the_month = first_day_of_the_month, start_date = self.start_date, name = self.name)
+		}, as_dict = 1)
 
 		month_to_date = flt(salary_slip_sum[0].sum) if salary_slip_sum else 0.0
 
@@ -1302,7 +1329,8 @@ class SalarySlip(TransactionBase):
 		for key in ('earnings', 'deductions'):
 			for component in self.get(key):
 				year_to_date = 0
-				component_sum = frappe.db.sql("""
+				component_sum = frappe.db.multisql({
+					'mariadb':"""
 					SELECT sum(detail.amount) as sum
 					FROM `tabSalary Detail` as detail
 					INNER JOIN `tabSalary Slip` as salary_slip
@@ -1313,8 +1341,21 @@ class SalarySlip(TransactionBase):
 						AND salary_slip.start_date >= %(period_start_date)s
 						AND salary_slip.end_date < %(period_end_date)s
 						AND salary_slip.name != %(docname)s
-						AND salary_slip.docstatus = 1""",
-						{'employee': self.employee, 'component': component.salary_component, 'period_start_date': period_start_date,
+						AND salary_slip.docstatus = 1
+						""",
+						'postgres':"""
+					SELECT sum(detail.amount) as sum
+					FROM `tabSalary Detail` as detail
+					INNER JOIN `tabSalary Slip` as salary_slip
+					ON detail.parent = salary_slip.name
+					WHERE
+						salary_slip.employee = %(employee)s
+						AND detail.salary_component = %(component)s
+						AND salary_slip.start_date >= %(period_start_date)s
+						AND salary_slip.end_date < %(period_end_date)s
+						AND salary_slip.name != %(docname)s
+						AND salary_slip.docstatus = 1
+						"""},{'employee': self.employee, 'component': component.salary_component, 'period_start_date': period_start_date,
 							'period_end_date': period_end_date, 'docname': self.name}
 				)
 

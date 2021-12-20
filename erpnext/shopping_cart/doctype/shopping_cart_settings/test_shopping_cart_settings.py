@@ -15,7 +15,7 @@ from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings
 
 class TestShoppingCartSettings(unittest.TestCase):
 	def setUp(self):
-		frappe.db.sql("""delete from `tabSingles` where doctype="Shipping Cart Settings" """)
+		frappe.db.sql("""delete from `tabSingles` where doctype='Shipping Cart Settings' """)
 
 	def get_cart_settings(self):
 		return frappe.get_doc({"doctype": "Shopping Cart Settings",

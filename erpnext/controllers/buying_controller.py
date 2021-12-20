@@ -127,7 +127,7 @@ class BuyingController(StockController, Subcontracting):
 
 	def set_landed_cost_voucher_amount(self):
 		for d in self.get("items"):
-			lc_voucher_data = frappe.db.sql("""select sum(applicable_charges), cost_center
+			lc_voucher_data = frappe.db.sql("""select sum(applicable_charges), max(cost_center)
 				from `tabLanded Cost Item`
 				where docstatus = 1 and purchase_receipt_item = %s""", d.name)
 			d.landed_cost_voucher_amount = lc_voucher_data[0][0] if lc_voucher_data else 0.0

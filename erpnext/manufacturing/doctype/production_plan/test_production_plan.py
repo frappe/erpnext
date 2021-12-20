@@ -43,7 +43,7 @@ class TestProductionPlan(ERPNextTestCase):
 
 		pln = frappe.get_doc('Production Plan', pln.name)
 		self.assertTrue(pln.status, 'Material Requested')
-		material_requests = frappe.get_all('Material Request Item', fields = ['distinct parent'],
+		material_requests = frappe.get_all('Material Request Item', fields = ['distinct parent', 'modified'],
 			filters = {'production_plan': pln.name}, as_list=1)
 
 		self.assertTrue(len(material_requests), 2)

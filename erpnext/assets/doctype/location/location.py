@@ -199,7 +199,7 @@ def get_children(doctype, parent=None, location=None, is_root=False):
 		from
 			`tab{doctype}` comp
 		where
-			ifnull(parent_location, "")={parent}
+			coalesce(parent_location, "")={parent}
 		""".format(
 			doctype=doctype,
 			parent=frappe.db.escape(parent)

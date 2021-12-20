@@ -9,11 +9,11 @@ def execute():
 
     frappe.db.sql(""" UPDATE `tabSales Invoice` set gst_category = 'Unregistered'
         where gst_category = 'Registered Regular'
-        and ifnull(customer_gstin, '')=''
-        and ifnull(billing_address_gstin,'')=''
+        and coalesce(customer_gstin, '')=''
+        and coalesce(billing_address_gstin,'')=''
     """)
 
     frappe.db.sql(""" UPDATE `tabPurchase Invoice` set gst_category = 'Unregistered'
         where gst_category = 'Registered Regular'
-        and ifnull(supplier_gstin, '')=''
+        and coalesce(supplier_gstin, '')=''
     """)

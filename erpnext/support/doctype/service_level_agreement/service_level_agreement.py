@@ -3,6 +3,7 @@
 
 
 from datetime import datetime
+from datetime import time
 
 import frappe
 from frappe import _
@@ -368,6 +369,7 @@ def apply(doc, method=None):
 
 def process_sla(doc, sla):
 
+
 	if not doc.creation:
 		doc.creation = now_datetime(doc.get("owner"))
 		if doc.meta.has_field("service_level_agreement_creation"):
@@ -380,6 +382,9 @@ def process_sla(doc, sla):
 	update_response_and_resolution_metrics(doc, sla.apply_sla_for_resolution)
 	update_agreement_status(doc, sla.apply_sla_for_resolution)
 
+	handle_status_change(doc, sla.apply_sla_for_resolution)
+	update_response_and_resolution_metrics(doc, sla.apply_sla_for_resolution)
+	update_agreement_status(doc, sla.apply_sla_for_resolution)
 
 def handle_status_change(doc, apply_sla_for_resolution):
 	now_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
@@ -493,15 +498,14 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 
 	while not expected_time_is_set:
 		current_weekday = weekdays[current_date_time.weekday()]
-
 		if not is_holiday(current_date_time, holidays) and current_weekday in support_days:
+			#postgres stores start and end time as time, mariadb as timedelta
+			start_time = get_time_in_timedelta(support_days[current_weekday].start_time) if isinstance(support_days[current_weekday].start_time, time) else support_days[current_weekday].start_time
+			end_time = get_time_in_timedelta(support_days[current_weekday].end_time) if isinstance(support_days[current_weekday].end_time, time) else support_days[current_weekday].end_time
 			if getdate(current_date_time) == getdate(start_date_time) \
-				and get_time_in_timedelta(current_date_time.time()) > support_days[current_weekday].start_time:
+				and get_time_in_timedelta(current_date_time.time()) > start_time:
 				start_time = current_date_time - datetime(current_date_time.year, current_date_time.month, current_date_time.day)
-			else:
-				start_time = support_days[current_weekday].start_time
 
-			end_time = support_days[current_weekday].end_time
 			time_left_today = time_diff_in_seconds(end_time, start_time)
 			# no time left for support today
 			if time_left_today <= 0:

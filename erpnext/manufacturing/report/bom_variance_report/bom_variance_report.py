@@ -104,6 +104,6 @@ def get_work_orders(doctype, txt, searchfield, start, page_len, filters):
 
 	return frappe.db.sql("""select name from `tabWork Order`
 		where name like %(name)s and {0} and produced_qty > qty and docstatus = 1
-		order by name limit {1}, {2}""".format(cond, start, page_len),{
+		order by name limit {2} offset {1}""".format(cond, start, page_len),{
 			'name': "%%%s%%" % txt
 		}, as_list=1)

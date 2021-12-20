@@ -51,8 +51,11 @@ class Customer(TransactionBase):
 	def get_customer_name(self):
 
 		if frappe.db.get_value("Customer", self.customer_name) and not frappe.flags.in_import:
-			count = frappe.db.sql("""select ifnull(MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)), 0) from tabCustomer
-				 where name like %s""", "%{0} - %".format(self.customer_name), as_list=1)[0][0]
+			count = frappe.db.multisql({
+				'mariadb': """select coalesce(MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)), 0) from tabCustomer
+				 where name like %s""",
+				 'postgres': """select MAX(CAST(REVERSE(SPLIT_PART(REVERSE(name), ' ', 1)) AS BIGINT)) from tabCustomer
+				 where name like %s"""}, "%{0} - %".format(self.customer_name), as_list=1)[0][0]
 			count = cint(count) + 1
 
 			new_customer_name = "{0} - {1}".format(self.customer_name, cstr(count))
@@ -401,10 +404,11 @@ def get_loyalty_programs(doc):
 	''' returns applicable loyalty programs for a customer '''
 
 	lp_details = []
-	loyalty_programs = frappe.get_all("Loyalty Program",
-		fields=["name", "customer_group", "customer_territory"],
-		filters={"auto_opt_in": 1, "from_date": ["<=", today()],
-			"ifnull(to_date, '2500-01-01')": [">=", today()]})
+	loyalty_programs = frappe.db.sql("""
+		select name, customer_group, customer_territory
+		from `tabLoyalty Program`
+		where auto_opt_in = 1 and from_date <= current_date
+			and coalesce(to_date, '2500-01-01') >= current_date""", as_dict = 1)
 
 	for loyalty_program in loyalty_programs:
 		if (
@@ -560,8 +564,8 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 			dn.name = dn_item.parent
 			and dn.customer=%s and dn.company=%s
 			and dn.docstatus = 1 and dn.status not in ('Closed', 'Stopped')
-			and ifnull(dn_item.against_sales_order, '') = ''
-			and ifnull(dn_item.against_sales_invoice, '') = ''
+			and coalesce(dn_item.against_sales_order, '') = ''
+			and coalesce(dn_item.against_sales_invoice, '') = ''
 		""", (customer, company), as_dict=True)
 
 	if not unmarked_delivery_note_items:

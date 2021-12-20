@@ -71,7 +71,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 	def _clear_roles(self):
 		frappe.db.sql("""delete from `tabHas Role` where parent in
-			("test@example.com", "test1@example.com", "test2@example.com")""")
+			('test@example.com', 'test1@example.com', 'test2@example.com')""")
 
 	def _clear_applications(self):
 		frappe.db.sql("""delete from `tabLeave Application`""")
@@ -472,7 +472,7 @@ class TestLeaveApplication(unittest.TestCase):
 	# test to not consider current leave in leave balance while submitting
 	def test_current_leave_on_submit(self):
 		employee = get_employee()
-		leave_type = 'Sick leave'
+		leave_type = 'Sick Leave'
 		allocation = frappe.get_doc(dict(
 			doctype = 'Leave Allocation',
 			employee = employee.name,

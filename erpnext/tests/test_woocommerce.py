@@ -29,8 +29,8 @@ class TestWoocommerce(unittest.TestCase):
 		order()
 
 		self.assertTrue(frappe.get_value("Customer",{"woocommerce_email":"tony@gmail.com"}))
-		self.assertTrue(frappe.get_value("Item",{"woocommerce_id": 56}))
-		self.assertTrue(frappe.get_value("Sales Order",{"woocommerce_id":75}))
+		self.assertTrue(frappe.get_value("Item",{"woocommerce_id": '56'}))
+		self.assertTrue(frappe.get_value("Sales Order",{"woocommerce_id":'75'}))
 		frappe.flags.woocomm_test_order_data = {}
 
 def emulate_request():

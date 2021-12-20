@@ -264,8 +264,8 @@ def get_count_on(account, fieldname, date):
 			else:
 				dr_or_cr = "debit" if fieldname == "invoiced_amount" else "credit"
 				cr_or_dr = "credit" if fieldname == "invoiced_amount" else "debit"
-				select_fields = "ifnull(sum(credit-debit),0)" \
-					if fieldname == "invoiced_amount" else "ifnull(sum(debit-credit),0)"
+				select_fields = "coalesce(sum(credit-debit),0)" \
+					if fieldname == "invoiced_amount" else "coalesce(sum(debit-credit),0)"
 
 				if ((not gle.against_voucher) or (gle.against_voucher_type in ["Sales Order", "Purchase Order"]) or
 				(gle.against_voucher==gle.voucher_no and gle.get(dr_or_cr) > 0)):
@@ -395,7 +395,7 @@ def check_if_advance_entry_modified(args):
 			select t2.{dr_or_cr} from `tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where t1.name = t2.parent and t2.account = %(account)s
 			and t2.party_type = %(party_type)s and t2.party = %(party)s
-			and (t2.reference_type is null or t2.reference_type in ("", "Sales Order", "Purchase Order"))
+			and (t2.reference_type is null or t2.reference_type in ('', 'Sales Order', 'Purchase Order'))
 			and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
 			and t1.docstatus=1 """.format(dr_or_cr = args.get("dr_or_cr")), args)
 	else:
@@ -409,7 +409,7 @@ def check_if_advance_entry_modified(args):
 					t1.name = t2.parent and t1.docstatus = 1
 					and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
 					and t1.party_type = %(party_type)s and t1.party = %(party)s and t1.{0} = %(account)s
-					and t2.reference_doctype in ("", "Sales Order", "Purchase Order")
+					and t2.reference_doctype in ('', 'Sales Order', 'Purchase Order')
 					and t2.allocated_amount = %(unreconciled_amount)s
 			""".format(party_account_field), args)
 		else:
@@ -525,7 +525,7 @@ def unlink_ref_doc_from_payment_entries(ref_doc):
 		set against_voucher_type=null, against_voucher=null,
 		modified=%s, modified_by=%s
 		where against_voucher_type=%s and against_voucher=%s
-		and voucher_no != ifnull(against_voucher, '')""",
+		and voucher_no != coalesce(against_voucher, '')""",
 		(now(), frappe.session.user, ref_doc.doctype, ref_doc.name))
 
 	if ref_doc.doctype in ("Sales Invoice", "Purchase Invoice"):
@@ -647,7 +647,7 @@ def get_held_invoices(party_type, party):
 
 	if party_type == 'Supplier':
 		held_invoices = frappe.db.sql(
-			'select name from `tabPurchase Invoice` where release_date IS NOT NULL and release_date > CURDATE()',
+			'select name from `tabPurchase Invoice` where release_date IS NOT NULL and release_date > CURRENT_DATE',
 			as_dict=1
 		)
 		held_invoices = set(d['name'] for d in held_invoices)
@@ -678,7 +678,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 	invoice_list = frappe.db.sql("""
 		select
 			voucher_no, voucher_type, posting_date, due_date,
-			ifnull(sum({dr_or_cr}), 0) as invoice_amount,
+			coalesce(sum({dr_or_cr}), 0) as invoice_amount,
 			account_currency as currency
 		from
 			`tabGL Entry`
@@ -702,7 +702,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 
 	payment_entries = frappe.db.sql("""
 		select against_voucher_type, against_voucher,
-			ifnull(sum({payment_dr_or_cr}), 0) as payment_amount
+			coalesce(sum({payment_dr_or_cr}), 0) as payment_amount
 		from `tabGL Entry`
 		where party_type = %(party_type)s and party = %(party)s
 			and account = %(account)s
@@ -774,7 +774,7 @@ def get_children(doctype, parent, company, is_root=False):
 	]
 	filters = [['docstatus', '<', 2]]
 
-	filters.append(['ifnull(`{0}`,"")'.format(parent_fieldname), '=', '' if is_root else parent])
+	filters.append(['coalesce(`{0}`,"")'.format(parent_fieldname), '=', '' if is_root else parent])
 
 	if is_root:
 		fields += ['root_type', 'report_type', 'account_currency'] if doctype == 'Account' else []
@@ -960,14 +960,22 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 		condition += " and company = %s"
 		values.append(company)
 
-	future_stock_vouchers = frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
+	future_stock_vouchers = frappe.db.multisql({
+		'mariadb': """select distinct sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle
 		where
 			timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s)
 			and is_cancelled = 0
 			{condition}
 		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc for update""".format(condition=condition),
-		tuple([posting_date, posting_time] + values), as_dict=True)
+		'postgres': """select distinct sle.voucher_type, sle.voucher_no, (sle.posting_date + sle.posting_time), creation
+		from `tabStock Ledger Entry` sle
+		where
+			sle.posting_date + sle.posting_time >= %s::date + %s::time
+			and is_cancelled = 0
+			{condition}
+		order by (sle.posting_date + sle.posting_time) asc, creation asc""".format(condition=condition)
+		}, tuple([posting_date, posting_time] + values), as_dict=True)
 
 	return [(d.voucher_type, d.voucher_no) for d in future_stock_vouchers]
 

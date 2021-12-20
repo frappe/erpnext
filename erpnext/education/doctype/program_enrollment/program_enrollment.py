@@ -61,7 +61,7 @@ class ProgramEnrollment(Document):
 
 	def update_student_joining_date(self):
 		date = frappe.db.sql("select min(enrollment_date) from `tabProgram Enrollment` where student= %s", self.student)
-		frappe.db.set_value("Student", self.student, "joining_date", date)
+		frappe.db.set_value("Student", self.student, "joining_date", date[0])
 
 	def make_fee_records(self):
 		from erpnext.education.api import get_fee_components
@@ -132,10 +132,10 @@ def get_program_courses(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select course, course_name from `tabProgram Course`
 		where  parent = %(program)s and course like %(txt)s {match_cond}
 		order by
-			if(locate(%(_txt)s, course), locate(%(_txt)s, course), 99999),
+			(case when locate(%(_txt)s, course) > 0 then locate(%(_txt)s, course) else 99999 end),
 			idx desc,
 			`tabProgram Course`.course asc
-		limit {start}, {page_len}""".format(
+		limit {page_len} offset {start}""".format(
 			match_cond=get_match_cond(doctype),
 			start=start,
 			page_len=page_len), {
@@ -168,8 +168,8 @@ def get_students(doctype, txt, searchfield, start, page_len, filters):
 			`%s` LIKE %s
 		order by
 			idx desc, name
-		limit %s, %s"""%(
+		limit %s offset %s"""%(
 			", ".join(['%s']*len(students)), searchfield, "%s", "%s", "%s"),
-			tuple(students + ["%%%s%%" % txt, start, page_len]
+			tuple(students + ["%%%s%%" % txt, page_len, start]
 		)
 	)

@@ -19,6 +19,8 @@ class TestUploadAttendance(unittest.TestCase):
 
 	def test_date_range(self):
 		employee = make_employee("test_employee@company.com")
+		frappe.db.set_value("Company", 'Test Company', "default_holiday_list", '_Test Holiday List')
+		frappe.db.set_value("Company", '_Test Company', "default_holiday_list", '_Test Holiday List')
 		employee_doc = frappe.get_doc("Employee", employee)
 		date_of_joining = "2018-01-02"
 		relieving_date = "2018-01-03"

@@ -88,8 +88,29 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 
 	def test_tax_withholding_category_checks(self):
 		invoices = []
-		frappe.db.set_value("Supplier", "Test TDS Supplier3", "tax_withholding_category", "New TDS Category")
+		frappe.db.commit()
+		frappe.db.begin()
+		frappe.db.sql("""delete from `tabPurchase Invoice`""")
+		frappe.db.sql("delete from `tabItem` where name = 'TCS Item'")
+		frappe.db.sql("delete from `tabItem` where name = 'TDS Item'")
+		if not frappe.db.exists('Item', "TDS Item"):
+			frappe.get_doc({
+			"doctype": "Item",
+			"item_code": "TDS Item",
+			"item_name": "TDS Item",
+			"item_group": "All Item Groups",
+			"is_stock_item": 0,
+		}).insert()
 
+		if not frappe.db.exists('Item', "TCS Item"):
+			frappe.get_doc({
+				"doctype": "Item",
+				"item_code": "TCS Item",
+				"item_name": "TCS Item",
+				"item_group": "All Item Groups",
+				"is_stock_item": 1
+			}).insert()
+		frappe.db.set_value("Supplier", "Test TDS Supplier3", "tax_withholding_category", "New TDS Category")
 		# First Invoice with no tds check
 		pi = create_purchase_invoice(supplier = "Test TDS Supplier3", rate = 20000, do_not_save=True)
 		pi.apply_tds = 0
@@ -101,14 +122,14 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		pi1 = create_purchase_invoice(supplier = "Test TDS Supplier3", rate = 20000)
 		pi1.submit()
 		invoices.append(pi1)
-
+		
 		# Cumulative threshold is 30000
 		# Threshold calculation should be on both the invoices
 		# TDS should be applied only on 1000
 		self.assertEqual(pi1.taxes[0].tax_amount, 1000)
-
 		for d in invoices:
 			d.cancel()
+		frappe.db.rollback()
 
 
 	def test_cumulative_threshold_tcs(self):

@@ -157,7 +157,7 @@ def get_points_earned(self):
 		returned_amount = frappe.db.sql("""
 			select sum(grand_total)
 			from `tabSales Invoice`
-			where docstatus=1 and is_return=1 and ifnull(return_against, '')=%s
+			where docstatus=1 and is_return=1 and coalesce(return_against, '')=%s
 		""", self.name)
 		return abs(flt(returned_amount[0][0])) if returned_amount else 0
 
@@ -168,7 +168,6 @@ def get_points_earned(self):
 		returned_amount = get_returned_amount()
 		eligible_amount = flt(self.grand_total) - cint(self.loyalty_amount) - returned_amount
 		points_earned = cint(eligible_amount/lp_details.collection_factor)
-
 	return points_earned or 0
 
 def create_sales_invoice_record(qty=1):
@@ -180,7 +179,7 @@ def create_sales_invoice_record(qty=1):
 		"due_date": today(),
 		"posting_date": today(),
 		"currency": "INR",
-		"taxes_and_charges": "",
+		"taxes_and_charges": '',
 		"debit_to": "Debtors - _TC",
 		"taxes": [],
 		"items": [{

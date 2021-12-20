@@ -73,11 +73,11 @@ class EmployeeBoardingController(Document):
 						DISTINCT(has_role.parent)
 					FROM
 						`tabHas Role` has_role
-							LEFT JOIN `tabUser` user
-								ON has_role.parent = user.name
+							LEFT JOIN `tabUser`
+								ON has_role.parent = `tabUser`.name
 					WHERE
 						has_role.parenttype = 'User'
-							AND user.enabled = 1
+							AND `tabUser`.enabled = 1
 							AND has_role.role = %s
 				''', activity.role)
 				users = unique(users + user_list)

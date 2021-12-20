@@ -10,4 +10,4 @@ def execute():
 			set \
 				description = (select description from tabItem where name=pro.production_item) \
 			where \
-				ifnull(description, '') = ''")
+				coalesce(description, '') = ''")

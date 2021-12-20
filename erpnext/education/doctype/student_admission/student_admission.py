@@ -42,5 +42,5 @@ def get_list_context(context=None):
 def get_admission_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):
 	return frappe.db.sql('''select name, title, academic_year, modified, admission_start_date, route,
 		admission_end_date from `tabStudent Admission` where published=1 and admission_end_date >= %s
-		order by admission_end_date asc limit {0}, {1}
+		order by admission_end_date asc limit {1} offset {0}
 		'''.format(limit_start, limit_page_length), [nowdate()], as_dict=1)

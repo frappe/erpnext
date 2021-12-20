@@ -254,7 +254,7 @@ class LeaveApplication(Document):
 			select
 				name, leave_type, posting_date, from_date, to_date, total_leave_days, half_day_date
 			from `tabLeave Application`
-			where employee = %(employee)s and docstatus < 2 and status in ("Open", "Approved")
+			where employee = %(employee)s and docstatus < 2 and status in ('Open', 'Approved')
 			and to_date >= %(from_date)s and from_date <= %(to_date)s
 			and name != %(name)s""", {
 				"employee": self.employee,
@@ -284,7 +284,7 @@ class LeaveApplication(Document):
 		leave_count_on_half_day_date = frappe.db.sql("""select count(name) from `tabLeave Application`
 			where employee = %(employee)s
 			and docstatus < 2
-			and status in ("Open", "Approved")
+			and status in ('Open', 'Approved')
 			and half_day = 1
 			and half_day_date = %(half_day_date)s
 			and name != %(name)s""", {
@@ -302,7 +302,7 @@ class LeaveApplication(Document):
 
 	def validate_attendance(self):
 		attendance = frappe.db.sql("""select name from `tabAttendance` where employee = %s and (attendance_date between %s and %s)
-					and status = "Present" and docstatus = 1""",
+					and status = 'Present' and docstatus = 1""",
 			(self.employee, self.from_date, self.to_date))
 		if attendance:
 			frappe.throw(_("Attendance for employee {0} is already marked for this day").format(self.employee),
@@ -557,7 +557,7 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 			from_date <= %(date)s
 			AND to_date >= %(date)s
 			AND docstatus=1
-			AND transaction_type="Leave Allocation"
+			AND transaction_type='Leave Allocation'
 			AND employee=%(employee)s
 			AND is_expired=0
 			AND is_lwp=0

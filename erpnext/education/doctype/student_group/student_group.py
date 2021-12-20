@@ -121,8 +121,8 @@ def fetch_students(doctype, txt, searchfield, start, page_len, filters):
 		return frappe.db.sql("""select name, title from tabStudent
 			where name in ({0}) and (`{1}` LIKE %s or title LIKE %s)
 			order by idx desc, name
-			limit %s, %s""".format(", ".join(['%s']*len(students)), searchfield),
-			tuple(students + ["%%%s%%" % txt, "%%%s%%" % txt, start, page_len]))
+			limit %s offset %s""".format(", ".join(['%s']*len(students)), searchfield),
+			tuple(students + ["%%%s%%" % txt, "%%%s%%" % txt, page_len, start]))
 	else:
 		return frappe.db.sql("""select name, title from tabStudent
 			where `{0}` LIKE %s or title LIKE %s

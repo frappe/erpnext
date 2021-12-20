@@ -28,11 +28,11 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 				or employee_name like %(txt)s)
 			{fcond} {mcond}
 		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, employee_name), locate(%(_txt)s, employee_name), 99999),
+			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
+			(case when locate(%(_txt)s, employee_name) > 0 then locate(%(_txt)s, employee_name) else 99999 end),
 			idx desc,
 			name, employee_name
-		limit %(start)s, %(page_len)s""".format(**{
+		limit %(page_len)s offset %(start)s""".format(**{
 			'fields': ", ".join(fields),
 			'key': searchfield,
 			'fcond': get_filters_cond(doctype, filters, conditions),
@@ -53,18 +53,18 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 
 	return frappe.db.sql("""select {fields} from `tabLead`
 		where docstatus < 2
-			and ifnull(status, '') != 'Converted'
+			and coalesce(status, '') != 'Converted'
 			and ({key} like %(txt)s
 				or lead_name like %(txt)s
 				or company_name like %(txt)s)
 			{mcond}
 		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, lead_name), locate(%(_txt)s, lead_name), 99999),
-			if(locate(%(_txt)s, company_name), locate(%(_txt)s, company_name), 99999),
+			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
+			(case when locate(%(_txt)s, lead_name) > 0 then locate(%(_txt)s, lead_name) else 99999 end),
+			(case when locate(%(_txt)s, company_name) > 0 then locate(%(_txt)s, company_name) else 99999 end),
 			idx desc,
 			name, lead_name
-		limit %(start)s, %(page_len)s""".format(**{
+		limit %(page_len)s offset %(start)s""".format(**{
 			'fields': ", ".join(fields),
 			'key': searchfield,
 			'mcond':get_match_cond(doctype)
@@ -98,11 +98,11 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 			and ({scond}) and disabled=0
 			{fcond} {mcond}
 		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, customer_name), locate(%(_txt)s, customer_name), 99999),
+			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
+			(case when locate(%(_txt)s, customer_name) > 0 then locate(%(_txt)s, customer_name) else 99999 end),
 			idx desc,
 			name, customer_name
-		limit %(start)s, %(page_len)s""".format(**{
+		limit %(page_len)s offset %(start)s""".format(**{
 			"fields": ", ".join(fields),
 			"scond": searchfields,
 			"mcond": get_match_cond(doctype),
@@ -132,14 +132,14 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 		where docstatus < 2
 			and ({key} like %(txt)s
 			or supplier_name like %(txt)s) and disabled=0
-			and (on_hold = 0 or (on_hold = 1 and CURDATE() > release_date))
+			and (on_hold = 0 or (on_hold = 1 and CURRENT_DATE > release_date))
 			{mcond}
 		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, supplier_name), locate(%(_txt)s, supplier_name), 99999),
+			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
+			(case when locate(%(_txt)s, supplier_name) > 0 then locate(%(_txt)s, supplier_name) else 99999 end),
 			idx desc,
 			name, supplier_name
-		limit %(start)s, %(page_len)s """.format(**{
+		limit %(page_len)s offset %(start)s""".format(**{
 			'field': ', '.join(fields),
 			'key': searchfield,
 			'mcond':get_match_cond(doctype)
@@ -172,7 +172,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 				AND `{searchfield}` LIKE %(txt)s
 				{mcond}
 			ORDER BY idx DESC, name
-			LIMIT %(offset)s, %(limit)s
+			LIMIT %(limit)s offset %(offset)s
 		""".format(
 				account_type_condition=account_type_condition,
 				searchfield=searchfield,
@@ -254,38 +254,63 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	description_cond = ''
 	if frappe.db.count('Item', cache=True) < 50000:
 		# scan description only if items are less than 50000
-		description_cond = 'or tabItem.description LIKE %(txt)s'
-	return frappe.db.sql("""select
+		description_cond = 'or `tabItem`.description LIKE %(txt)s'
+	return frappe.db.multisql({
+		'mariadb': """select
 			tabItem.name, tabItem.item_name, tabItem.item_group,
-		if(length(tabItem.description) > 40, \
-			concat(substr(tabItem.description, 1, 40), "..."), description) as description
-		{columns}
-		from tabItem
-		where tabItem.docstatus < 2
-			and tabItem.disabled=0
-			and tabItem.has_variants=0
-			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
-			and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
-				{description_cond})
-			{fcond} {mcond}
-		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
-			idx desc,
-			name, item_name
-		limit %(start)s, %(page_len)s """.format(
-			columns=columns,
-			scond=searchfields,
-			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
-			mcond=get_match_cond(doctype).replace('%', '%%'),
-			description_cond = description_cond),
-			{
-				"today": nowdate(),
-				"txt": "%%%s%%" % txt,
-				"_txt": txt.replace("%", ""),
-				"start": start,
-				"page_len": page_len
-			}, as_dict=as_dict)
+			if(length(tabItem.description) > 40, \
+				concat(substr(tabItem.description, 1, 40), "..."), description) as description
+			{columns}
+			from `tabItem`
+			where tabItem.docstatus < 2
+				and tabItem.disabled=0
+				and tabItem.has_variants=0
+				and (tabItem.end_of_life > %(today)s or coalesce(tabItem.end_of_life, '0000-00-00')='0000-00-00')
+				and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
+					{description_cond})
+				{fcond} {mcond}
+			order by
+				(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
+				(case when locate(%(_txt)s, item_name) > 0 then locate(%(_txt)s, item_name) else 99999 end),
+				idx desc,
+				name, item_name
+			limit %(page_len)s offset %(start)s""".format(
+				columns=columns,
+				scond=searchfields,
+				fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
+				mcond=get_match_cond(doctype).replace('%', '%%'),
+				description_cond = description_cond),
+		'postgres': """select
+			`tabItem`.name, `tabItem`.item_name, `tabItem`.item_group,
+			(case when length(`tabItem`.description) > 40 then concat(substr(`tabItem`.description, 1, 40), '...') else description end) as description
+			{columns}
+			from `tabItem`
+			where `tabItem`.docstatus < 2
+				and `tabItem`.disabled=0
+				and `tabItem`.has_variants=0
+				and (`tabItem`.end_of_life > %(today)s or `tabItem`.end_of_life is null)
+				and ({scond} or `tabItem`.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
+					{description_cond})
+				{fcond} {mcond}
+			order by
+				(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
+				(case when locate(%(_txt)s, item_name) > 0 then locate(%(_txt)s, item_name) else 99999 end),
+				idx desc,
+				`tabItem`.name, `tabItem`.item_name
+			limit %(page_len)s offset %(start)s""".format(
+				columns=columns,
+				scond=searchfields,
+				fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
+				mcond=get_match_cond(doctype).replace('%', '%%'),
+				description_cond = description_cond)},
+				{
+					"today": nowdate(),
+					"txt": "%%%s%%" % txt,
+					"_txt": txt.replace("%", ""),
+					"start": start,
+					"page_len": page_len
+				}
+				, as_dict=as_dict)
 
 
 @frappe.whitelist()
@@ -295,15 +320,15 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 	fields = get_fields("BOM", ["name", "item"])
 
 	return frappe.db.sql("""select {fields}
-		from tabBOM
-		where tabBOM.docstatus=1
-			and tabBOM.is_active=1
-			and tabBOM.`{key}` like %(txt)s
+		from `tabBOM`
+		where `tabBOM`.docstatus=1
+			and `tabBOM`.is_active=1
+			and `tabBOM`.`{key}` like %(txt)s
 			{fcond} {mcond}
 		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
 			idx desc, name
-		limit %(start)s, %(page_len)s """.format(
+		limit %(page_len)s offset %(start)s""".format(
 			fields=", ".join(fields),
 			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
 			mcond=get_match_cond(doctype).replace('%', '%%'),
@@ -322,21 +347,21 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	cond = ''
 	if filters and filters.get('customer'):
 		cond = """(`tabProject`.customer = %s or
-			ifnull(`tabProject`.customer,"")="") and""" %(frappe.db.escape(filters.get("customer")))
+			coalesce(`tabProject`.customer,"")="") and""" %(frappe.db.escape(filters.get("customer")))
 
 	fields = get_fields("Project", ["name", "project_name"])
 	searchfields = frappe.get_meta("Project").get_search_fields()
-	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
+	searchfields = " or ".join(["`tabProject`." + field + " like %(txt)s" for field in searchfields])
 
-	return frappe.db.sql("""select {fields} from `tabProject`
+	return frappe.db.sql("""select {fields} from `tabProject`, `tabBOM`
 		where
-			`tabProject`.status not in ("Completed", "Cancelled")
+			`tabProject`.status not in ('Completed', 'Cancelled')
 			and {cond} {scond} {match_cond}
 		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			idx desc,
+			(case when locate(%(_txt)s, `tabProject`.name) > 0 then locate(%(_txt)s, `tabProject`.name) else 99999 end),
+			`tabProject`.idx desc,
 			`tabProject`.name asc
-		limit {start}, {page_len}""".format(
+		limit {page_len} offset {start}""".format(
 			fields=", ".join(['`tabProject`.{0}'.format(f) for f in fields]),
 			cond=cond,
 			scond=searchfields,
@@ -358,7 +383,7 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 		from `tabDelivery Note`
 		where `tabDelivery Note`.`%(key)s` like %(txt)s and
 			`tabDelivery Note`.docstatus = 1
-			and status not in ("Stopped", "Closed") %(fcond)s
+			and status not in ('Stopped', 'Closed') %(fcond)s
 			and (
 				(`tabDelivery Note`.is_return = 0 and `tabDelivery Note`.per_billed < 100)
 				or (`tabDelivery Note`.grand_total = 0 and `tabDelivery Note`.per_billed < 100)
@@ -367,7 +392,7 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 					and return_against in (select name from `tabDelivery Note` where per_billed < 100)
 				)
 			)
-			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc limit %(start)s, %(page_len)s
+			%(mcond)s order by `tabDelivery Note`.`%(key)s` asc limit %(page_len)s offset %(start)s
 	""" % {
 		"fields": ", ".join(["`tabDelivery Note`.{0}".format(f) for f in fields]),
 		"key": searchfield,
@@ -435,7 +460,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 				{match_conditions}
 			group by batch_no {having_clause}
 			order by batch.expiry_date, sle.batch_no desc
-			limit %(start)s, %(page_len)s""".format(
+			limit %(page_len)s offset %(start)s""".format(
 				search_columns = search_columns,
 				cond=cond,
 				match_conditions=get_match_cond(doctype),
@@ -459,7 +484,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 			{match_conditions}
 
 			order by expiry_date, name desc
-			limit %(start)s, %(page_len)s""".format(cond, search_columns = search_columns,
+			limit %(page_len)s offset %(start)s""".format(cond, search_columns = search_columns,
 			search_cond = search_cond, match_conditions=get_match_cond(doctype)), args)
 
 
@@ -516,13 +541,13 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 
 	condition = ""
 	if filters.get("company"):
-		condition += "and tabAccount.company = %(company)s"
+		condition += "and `tabAccount`.company = %(company)s"
 
-	return frappe.db.sql("""select tabAccount.name from `tabAccount`
-			where (tabAccount.report_type = "Profit and Loss"
-					or tabAccount.account_type in ("Income Account", "Temporary"))
-				and tabAccount.is_group=0
-				and tabAccount.`{key}` LIKE %(txt)s
+	return frappe.db.sql("""select `tabAccount`.name from `tabAccount`
+			where (`tabAccount`.report_type = 'Profit and Loss'
+					or `tabAccount`.account_type in ('Income Account', 'Temporary'))
+				and `tabAccount`.is_group=0
+				and `tabAccount`.`{key}` LIKE %(txt)s
 				{condition} {match_condition}
 			order by idx desc, name"""
 			.format(condition=condition, match_condition=get_match_cond(doctype), key=searchfield), {
@@ -584,14 +609,14 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 
 	condition = ""
 	if filters.get("company"):
-		condition += "and tabAccount.company = %(company)s"
+		condition += "and `tabAccount`.company = %(company)s"
 
-	return frappe.db.sql("""select tabAccount.name from `tabAccount`
-		where (tabAccount.report_type = "Profit and Loss"
-				or tabAccount.account_type in ("Expense Account", "Fixed Asset", "Temporary", "Asset Received But Not Billed", "Capital Work in Progress"))
-			and tabAccount.is_group=0
-			and tabAccount.docstatus!=2
-			and tabAccount.{key} LIKE %(txt)s
+	return frappe.db.sql("""select `tabAccount`.name from `tabAccount`
+		where (`tabAccount`.report_type = 'Profit and Loss'
+				or `tabAccount`.account_type in ('Expense Account', 'Fixed Asset', 'Temporary', 'Asset Received But Not Billed', 'Capital Work in Progress'))
+			and `tabAccount`.is_group=0
+			and `tabAccount`.docstatus!=2
+			and `tabAccount`.{key} LIKE %(txt)s
 			{condition} {match_condition}"""
 		.format(condition=condition, key=searchfield,
 			match_condition=get_match_cond(doctype)), {
@@ -608,15 +633,16 @@ def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
 	filter_dict = get_doctype_wise_filters(filters)
 
 	query = """select `tabWarehouse`.name,
-		CONCAT_WS(" : ", "Actual Qty", ifnull(round(`tabBin`.actual_qty, 2), 0 )) actual_qty
-		from `tabWarehouse` left join `tabBin`
+		CONCAT_WS(' : ', 'Actual Qty', coalesce(round(`tabBin`.actual_qty, 2), 0 )) actual_qty
+		from `tabWarehouse`
+		left join `tabBin`
 		on `tabBin`.warehouse = `tabWarehouse`.name {bin_conditions}
 		where
 			`tabWarehouse`.`{key}` like {txt}
 			{fcond} {mcond}
-		order by ifnull(`tabBin`.actual_qty, 0) desc
+		order by coalesce(`tabBin`.actual_qty, 0) desc
 		limit
-			{start}, {page_len}
+			{page_len} offset {start}
 		""".format(
 			bin_conditions=get_filters_cond(doctype, filter_dict.get("Bin"),bin_conditions, ignore_permissions=True),
 			key=searchfield,
@@ -643,7 +669,7 @@ def get_doctype_wise_filters(filters):
 def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 	query = """select batch_id from `tabBatch`
 			where disabled = 0
-			and (expiry_date >= CURDATE() or expiry_date IS NULL)
+			and (expiry_date >= CURRENT_DATE or expiry_date IS NULL)
 			and name like {txt}""".format(txt = frappe.db.escape('%{0}%'.format(txt)))
 
 	if filters and filters.get('item'):

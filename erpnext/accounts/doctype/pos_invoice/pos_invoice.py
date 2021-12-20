@@ -506,7 +506,7 @@ def get_pos_reserved_qty(item_code, warehouse):
 	reserved_qty = frappe.db.sql("""select sum(p_item.qty) as qty
 		from `tabPOS Invoice` p, `tabPOS Invoice Item` p_item
 		where p.name = p_item.parent
-		and ifnull(p.consolidated_invoice, '') = ''
+		and coalesce(p.consolidated_invoice, '') = ''
 		and p_item.docstatus = 1
 		and p_item.item_code = %s
 		and p_item.warehouse = %s

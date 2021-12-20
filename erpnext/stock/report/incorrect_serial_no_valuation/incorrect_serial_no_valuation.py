@@ -82,7 +82,7 @@ def get_stock_ledger_entries(report_filters):
 		filters['posting_date'] = ('between', [report_filters.get('from_date'), report_filters.get('to_date')])
 
 	return frappe.get_all('Stock Ledger Entry', fields = fields, filters = filters,
-		order_by = 'timestamp(posting_date, posting_time) asc, creation asc')
+		order_by = 'posting_date asc, posting_time asc, creation asc')
 
 def get_columns():
 	return [{

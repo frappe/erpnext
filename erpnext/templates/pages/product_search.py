@@ -17,6 +17,8 @@ def get_context(context):
 def get_product_list(search=None, start=0, limit=12):
 	# limit = 12 because we show 12 items in the grid view
 
+	query_param = "or I.end_of_life='0000-00-00'" if frappe.db.db_type == "mariadb" else ""
+
 	# base query
 	query = """select I.name, I.item_name, I.item_code, I.route, I.image, I.website_image, I.thumbnail, I.item_group,
 			I.description, I.web_long_description as website_description, I.is_stock_item,
@@ -26,7 +28,7 @@ def get_product_list(search=None, start=0, limit=12):
 		left join tabBin S on I.item_code = S.item_code and I.website_warehouse = S.warehouse
 		where (I.show_in_website = 1)
 			and I.disabled = 0
-			and (I.end_of_life is null or I.end_of_life='0000-00-00' or I.end_of_life > %(today)s)"""
+			and (I.end_of_life is null {query_param} or I.end_of_life > CURRENT_DATE)""".format(query_param = query_param)
 
 	# search term condition
 	if search:
@@ -37,7 +39,7 @@ def get_product_list(search=None, start=0, limit=12):
 		search = "%" + cstr(search) + "%"
 
 	# order by
-	query += """ order by I.weightage desc, in_stock desc, I.modified desc limit %s, %s""" % (cint(start), cint(limit))
+	query += """ order by I.weightage desc, in_stock desc, I.modified desc limit %s offset %s""" % (cint(limit), cint(start))
 
 	data = frappe.db.sql(query, {
 		"search": search,

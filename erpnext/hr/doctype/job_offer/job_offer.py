@@ -50,7 +50,8 @@ def update_job_applicant(status, job_applicant):
 		frappe.set_value("Job Applicant", job_applicant, "status", status)
 
 def get_staffing_plan_detail(designation, company, offer_date):
-	detail = frappe.db.sql("""
+	detail = frappe.db.multisql({
+		'mariadb': """
 		SELECT DISTINCT spd.parent,
 			sp.from_date as from_date,
 			sp.to_date as to_date,
@@ -64,7 +65,26 @@ def get_staffing_plan_detail(designation, company, offer_date):
 			AND sp.company=%s
 			AND spd.parent = sp.name
 			AND %s between sp.from_date and sp.to_date
-	""", (designation, company, offer_date), as_dict=1)
+		GROUP BY
+			sp.docstatus, spd.designation, sp.company, spd.parent, sp.from_date, sp.to_date, sp.name
+	""",
+	'postgres': """
+		SELECT DISTINCT spd.parent,
+			sp.from_date as from_date,
+			sp.to_date as to_date,
+			sp.name,
+			sum(spd.vacancies) as vacancies,
+			spd.designation
+		FROM `tabStaffing Plan Detail` spd, `tabStaffing Plan` sp
+		WHERE
+			sp.docstatus=1
+			AND spd.designation=%s
+			AND sp.company=%s
+			AND spd.parent = sp.name
+			AND %s between sp.from_date and sp.to_date
+		GROUP BY
+			sp.docstatus, spd.designation, sp.company, spd.parent, sp.from_date, sp.to_date, sp.name
+	"""}, (designation, company, offer_date), as_dict=1)
 
 	return frappe._dict(detail[0]) if (detail and detail[0].parent) else None
 

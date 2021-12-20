@@ -365,12 +365,12 @@ class Company(NestedSet):
 				% ', '.join(['%s']*len(warehouses)), tuple(warehouses))
 
 		# reset default company
-		frappe.db.sql("""update `tabSingles` set value=""
+		frappe.db.sql("""update `tabSingles` set value=''
 			where doctype='Global Defaults' and field='default_company'
 			and value=%s""", self.name)
 
 		# reset default company
-		frappe.db.sql("""update `tabSingles` set value=""
+		frappe.db.sql("""update `tabSingles` set value=''
 			where doctype='Chart of Accounts Importer' and field='company'
 			and value=%s""", self.name)
 
@@ -419,7 +419,8 @@ def install_country_fixtures(company, country):
 def update_company_current_month_sales(company):
 	current_month_year = formatdate(today(), "MM-yyyy")
 
-	results = frappe.db.sql('''
+	results = frappe.db.multisql({
+		'mariadb': '''
 		SELECT
 			SUM(base_grand_total) AS total,
 			DATE_FORMAT(`posting_date`, '%m-%Y') AS month_year
@@ -432,7 +433,20 @@ def update_company_current_month_sales(company):
 		GROUP BY
 			month_year
 	'''.format(current_month_year=current_month_year, company=frappe.db.escape(company)),
-		as_dict = True)
+	'postgres': '''
+		SELECT
+			SUM(base_grand_total) AS total,
+			to_char(`posting_date`, '%m-%Y') AS month_year
+		FROM
+			`tabSales Invoice`
+		WHERE
+			to_char(`posting_date`, 'MM-YYYY') = '{current_month_year}'
+			AND docstatus = 1
+			AND company = {company}
+		GROUP BY
+			month_year
+	'''.format(current_month_year=current_month_year, company=frappe.db.escape(company))
+	}, as_dict = True)
 
 	monthly_total = results[0]['total'] if len(results) > 0 else 0
 
@@ -475,7 +489,7 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 		from
 			`tab{doctype}` comp
 		where
-			ifnull(parent_company, "")={parent}
+			coalesce(parent_company, "")={parent}
 		""".format(
 			doctype = doctype,
 			parent=frappe.db.escape(parent)
@@ -495,7 +509,8 @@ def add_node():
 def get_all_transactions_annual_history(company):
 	out = {}
 
-	items = frappe.db.sql('''
+	items = frappe.db.multisql({
+		'mariadb': '''
 		select transaction_date, count(*) as count
 
 		from (
@@ -531,11 +546,54 @@ def get_all_transactions_annual_history(company):
 		where
 			company=%s
 			and
-			transaction_date > date_sub(curdate(), interval 1 year)
+			transaction_date > date_sub(CURRENT_DATE, interval 1 year)
 
 		group by
 			transaction_date
-			''', (company), as_dict=True)
+			''',
+		'postgres': '''
+		select transaction_date, count(*) as count
+
+		from (
+			select name, transaction_date, company
+			from `tabQuotation`
+
+			UNION ALL
+
+			select name, transaction_date, company
+			from `tabSales Order`
+
+			UNION ALL
+
+			select name, posting_date as transaction_date, company
+			from `tabDelivery Note`
+
+			UNION ALL
+
+			select name, posting_date as transaction_date, company
+			from `tabSales Invoice`
+
+			UNION ALL
+
+			select name, creation as transaction_date, company
+			from `tabIssue`
+
+			UNION ALL
+
+			select name, creation as transaction_date, company
+			from `tabProject`
+		) t
+
+		where
+			company=%s
+			and
+			transaction_date > (CURRENT_DATE - interval '1 year')
+
+		group by
+			transaction_date
+			''',
+
+			}, (company), as_dict=True)
 
 	for d in items:
 		timestamp = get_timestamp(d["transaction_date"])
@@ -573,7 +631,7 @@ def get_default_company_address(name, sort_key='is_primary_address', existing_ad
 			`tabAddress` addr, `tabDynamic Link` dl
 		WHERE
 			dl.parent = addr.name and dl.link_doctype = 'Company' and
-			dl.link_name = %s and ifnull(addr.disabled, 0) = 0
+			dl.link_name = %s and coalesce(addr.disabled, 0) = 0
 		""" %(sort_key, '%s'), (name)) #nosec
 
 	if existing_address:

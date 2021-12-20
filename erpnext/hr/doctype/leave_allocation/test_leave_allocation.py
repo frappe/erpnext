@@ -16,7 +16,7 @@ class TestLeaveAllocation(unittest.TestCase):
 	def test_overlapping_allocation(self):
 		frappe.db.sql("delete from `tabLeave Allocation`")
 
-		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from tabEmployee limit 1")[0])
+		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from `tabEmployee` where status != 'Inactive' limit 1")[0])
 		leaves = [
 			{
 				"doctype": "Leave Allocation",
@@ -45,7 +45,7 @@ class TestLeaveAllocation(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, frappe.get_doc(leaves[1]).save)
 
 	def test_invalid_period(self):
-		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from tabEmployee limit 1")[0])
+		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from `tabEmployee` where status != 'Inactive' limit 1")[0])
 
 		doc = frappe.get_doc({
 			"doctype": "Leave Allocation",
@@ -62,7 +62,7 @@ class TestLeaveAllocation(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, doc.save)
 
 	def test_allocated_leave_days_over_period(self):
-		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from tabEmployee limit 1")[0])
+		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from `tabEmployee` where status != 'Inactive' limit 1")[0])
 		doc = frappe.get_doc({
 			"doctype": "Leave Allocation",
 			"__islocal": 1,
@@ -191,11 +191,13 @@ class TestLeaveAllocation(unittest.TestCase):
 	def test_against_leave_application_validation_after_submit(self):
 		frappe.db.sql("delete from `tabLeave Allocation`")
 		frappe.db.sql("delete from `tabLeave Ledger Entry`")
+		frappe.db.set_value("Company", 'Test Company', "default_holiday_list", '_Test Holiday List')
+		frappe.db.set_value("Company", '_Test Company', "default_holiday_list", '_Test Holiday List')
 
 		leave_allocation = create_leave_allocation()
 		leave_allocation.submit()
 		self.assertTrue(leave_allocation.total_leaves_allocated, 15)
-		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from tabEmployee limit 1")[0])
+		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from `tabEmployee` where status != 'Inactive' limit 1")[0])
 		leave_application = frappe.get_doc({
 			"doctype": 'Leave Application',
 			"employee": employee.name,
@@ -215,7 +217,7 @@ class TestLeaveAllocation(unittest.TestCase):
 def create_leave_allocation(**args):
 	args = frappe._dict(args)
 
-	employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from tabEmployee limit 1")[0])
+	employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from `tabEmployee` where status != 'Inactive' limit 1")[0])
 	leave_allocation = frappe.get_doc({
 		"doctype": "Leave Allocation",
 		"__islocal": 1,

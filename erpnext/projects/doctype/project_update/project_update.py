@@ -21,12 +21,12 @@ def daily_reminder():
         draft = frappe.db.sql("""SELECT count(docstatus) from `tabProject Update` WHERE `tabProject Update`.project = %s AND `tabProject Update`.docstatus = 0;""",project_name)
         for drafts in draft:
             number_of_drafts = drafts[0]
-        update = frappe.db.sql("""SELECT name,date,time,progress,progress_details FROM `tabProject Update` WHERE `tabProject Update`.project = %s AND date = DATE_ADD(CURDATE(), INTERVAL -1 DAY);""",project_name)
+        update = frappe.db.sql("""SELECT name,date,time,progress,progress_details FROM `tabProject Update` WHERE `tabProject Update`.project = %s AND date = DATE_ADD(CURRENT_DATE, INTERVAL -1 DAY);""",project_name)
         email_sending(project_name,frequency,date_start,date_end,progress,number_of_drafts,update)
 
 def email_sending(project_name,frequency,date_start,date_end,progress,number_of_drafts,update):
 
-    holiday = frappe.db.sql("""SELECT holiday_date FROM `tabHoliday` where holiday_date = CURDATE();""")
+    holiday = frappe.db.sql("""SELECT holiday_date FROM `tabHoliday` where holiday_date = CURRENT_DATE;""")
     msg = "<p>Project Name: " + project_name + "</p><p>Frequency: " + " " + frequency + "</p><p>Update Reminder:" + " " + str(date_start) + "</p><p>Expected Date End:" + " " + str(date_end) + "</p><p>Percent Progress:" + " " + str(progress) + "</p><p>Number of Updates:" + " " + str(len(update)) + "</p>" + "</p><p>Number of drafts:" + " " + str(number_of_drafts) + "</p>"
     msg += """</u></b></p><table class='table table-bordered'><tr>
                 <th>Project ID</th><th>Date Updated</th><th>Time Updated</th><th>Project Status</th><th>Notes</th>"""

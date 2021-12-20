@@ -118,17 +118,14 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 
 		if not attribute_values: continue
 
-		wheres = []
-		query_values = []
+		wheres = ''
 		for attribute_value in attribute_values:
-			wheres.append('( attribute = %s and attribute_value = %s )')
-			query_values += [attribute, attribute_value]
+			wheres = wheres + """( attribute = '{attribute}' and attribute_value = '{attribute_value}' )""".format(attribute = attribute, attribute_value = attribute_value)
 
-		attribute_query = ' or '.join(wheres)
+		attribute_query = wheres
 
 		if template_item_code:
-			variant_of_query = 'AND t2.variant_of = %s'
-			query_values.append(template_item_code)
+			variant_of_query = """AND t2.variant_of = '{template_item_code}'""".format(template_item_code = template_item_code)
 		else:
 			variant_of_query = ''
 
@@ -153,11 +150,9 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 				)
 			GROUP BY
 				t1.parent
-			ORDER BY
-				NULL
 		'''.format(attribute_query=attribute_query, variant_of_query=variant_of_query)
 
-		item_codes = set([r[0] for r in frappe.db.sql(query, query_values)])
+		item_codes = set([r[0] for r in frappe.db.sql(query)])
 		items.append(item_codes)
 
 	res = list(set.intersection(*items))

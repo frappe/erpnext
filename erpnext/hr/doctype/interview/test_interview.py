@@ -16,11 +16,6 @@ from erpnext.hr.doctype.job_applicant.test_job_applicant import create_job_appli
 
 
 class TestInterview(unittest.TestCase):
-	def test_validations_for_designation(self):
-		job_applicant = create_job_applicant()
-		interview = create_interview_and_dependencies(job_applicant.name, designation='_Test_Sales_manager', save=0)
-		self.assertRaises(DuplicateInterviewRoundError, interview.save)
-
 	def test_notification_on_rescheduling(self):
 		job_applicant = create_job_applicant()
 		interview = create_interview_and_dependencies(job_applicant.name, scheduled_on=add_days(getdate(), -4))
@@ -80,7 +75,7 @@ def create_interview_and_dependencies(job_applicant, scheduled_on=None, from_tim
 
 	interviewer_1 = create_user("test_interviewer1@example.com", "Interviewer")
 	interviewer_2 = create_user("test_interviewer2@example.com", "Interviewer")
-
+	
 	interview_round = create_interview_round(
 		"Technical Round", ["Python", "JS"],
 		designation=designation, save=True
@@ -105,6 +100,7 @@ def create_interview_round(name, skill_set, interviewers=[], designation=None, s
 	create_skill_set(skill_set)
 	interview_round = frappe.new_doc("Interview Round")
 	interview_round.round_name = name
+	interview_round.name = name
 	interview_round.interview_type = create_interview_type()
 	interview_round.expected_average_rating = 4
 	if designation:
@@ -118,7 +114,7 @@ def create_interview_round(name, skill_set, interviewers=[], designation=None, s
 			"user": interviewer
 		})
 
-	if save:
+	if save and not frappe.db.get_value("Interview Round", interview_round.name):
 		interview_round.save()
 
 	return interview_round

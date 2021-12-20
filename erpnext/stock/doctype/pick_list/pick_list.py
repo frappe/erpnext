@@ -172,7 +172,9 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 
 		serial_nos = None
 		if item_location.serial_no:
-			serial_nos = '\n'.join(item_location.serial_no[0: cint(stock_qty)])
+			serial_nos = item_location.serial_no[0: cint(stock_qty)]
+			serial_nos.sort()
+			serial_nos = '\n'.join(serial_nos)
 
 		locations.append(frappe._dict({
 			'qty': qty,
@@ -269,14 +271,16 @@ def get_available_item_locations_for_batched_item(item_code, from_warehouses, re
 			and sle.`company` = %(company)s
 			and batch.disabled = 0
 			and sle.is_cancelled=0
-			and IFNULL(batch.`expiry_date`, '2200-01-01') > %(today)s
+			and coalesce(batch.`expiry_date`, '2200-01-01') > %(today)s
 			{warehouse_condition}
 		GROUP BY
 			`warehouse`,
 			`batch_no`,
-			`item_code`
-		HAVING `qty` > 0
-		ORDER BY IFNULL(batch.`expiry_date`, '2200-01-01'), batch.`creation`
+			`item_code`,
+			`expiry_date`,
+			batch.`creation`
+		HAVING SUM(sle.`actual_qty`) > 0
+		ORDER BY coalesce(batch.`expiry_date`, '2200-01-01'), batch.`creation`
 	""".format(warehouse_condition=warehouse_condition), { #nosec
 		'item_code': item_code,
 		'company': company,
@@ -437,7 +441,7 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 			AND `company` = %(company)s
 			AND `name` like %(txt)s
 		ORDER BY
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999), name
+			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end) name
 		LIMIT
 			%(start)s, %(page_length)s""",
 		{

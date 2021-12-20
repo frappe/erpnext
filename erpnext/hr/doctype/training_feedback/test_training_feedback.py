@@ -40,7 +40,7 @@ class TestTrainingFeedback(unittest.TestCase):
 		frappe.db.set_value("Training Event Employee", employee, "attendance", "Absent")
 		feedback = create_training_feedback(training_event.name, self.employee)
 		self.assertRaises(frappe.ValidationError, feedback.save)
-
+		training_event.cancel()
 	def test_training_feedback_status(self):
 		training_event = create_training_event(self.attendees)
 		training_event.submit()
@@ -58,7 +58,8 @@ class TestTrainingFeedback(unittest.TestCase):
 		}, "status")
 
 		self.assertEqual(status, "Feedback Submitted")
-
+		feedback.cancel()
+		training_event.cancel()
 	def tearDown(self):
 		frappe.db.rollback()
 

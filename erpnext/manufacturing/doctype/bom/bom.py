@@ -641,8 +641,8 @@ class BOM(WebsiteGenerator):
 				bom_item.rate,
 				bom_item.include_item_in_manufacturing,
 				bom_item.sourced_by_supplier,
-				bom_item.stock_qty / ifnull(bom.quantity, 1) AS qty_consumed_per_unit
-			FROM `tabBOM Explosion Item` bom_item, tabBOM bom
+				bom_item.stock_qty / coalesce(bom.quantity, 1) AS qty_consumed_per_unit
+			FROM `tabBOM Explosion Item` bom_item, `tabBOM` bom
 			WHERE
 				bom_item.parent = bom.name
 				AND bom.name = %s
@@ -828,11 +828,11 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				bom_item.item_code,
 				bom_item.idx,
 				item.item_name,
-				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * %(qty)s as qty,
+				sum(bom_item.{qty_field}/coalesce(bom.quantity, 1)) * %(qty)s as qty,
 				item.image,
 				bom.project,
 				bom_item.rate,
-				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * bom_item.rate * %(qty)s as amount,
+				sum(bom_item.{qty_field}/coalesce(bom.quantity, 1)) * bom_item.rate * %(qty)s as amount,
 				item.stock_uom,
 				item.item_group,
 				item.allow_alternative_item,
@@ -849,11 +849,11 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 			where
 				bom_item.docstatus < 2
 				and bom.name = %(bom)s
-				and ifnull(item.has_variants, 0) = 0
+				and coalesce(item.has_variants, 0) = 0
 				and item.is_stock_item in (1, {is_stock_item})
 				{where_conditions}
-				group by item_code, stock_uom
-				order by idx"""
+				group by bom_item.item_code, bom_item.idx, item.item_name, item.image, bom.project, bom_item.rate, item.stock_uom, item.item_group, item.allow_alternative_item, item_default.default_warehouse, item_default.expense_account, item_default.buying_cost_center {select_columns}
+				order by bom_item.idx"""
 
 	is_stock_item = 0 if include_non_stock_items else 1
 	if cint(fetch_exploded):
@@ -863,7 +863,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 			qty_field="stock_qty",
 			select_columns = """, bom_item.source_warehouse, bom_item.operation,
 				bom_item.include_item_in_manufacturing, bom_item.description, bom_item.rate, bom_item.sourced_by_supplier,
-				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1) as idx""")
+				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1)""")
 
 		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	elif fetch_scrap_items:
@@ -879,7 +879,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
 			select_columns = """, bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
 				bom_item.idx, bom_item.operation, bom_item.include_item_in_manufacturing, bom_item.sourced_by_supplier,
-				bom_item.description, bom_item.base_rate as rate """)
+				bom_item.description, bom_item.base_rate""")
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 
 	for item in items:
@@ -981,7 +981,7 @@ def get_boms_in_bottom_up_order(bom_no=None):
 		bom_list = frappe.db.sql_list("""select name from `tabBOM` bom
 			where docstatus=1 and is_active=1
 				and not exists(select bom_no from `tabBOM Item`
-					where parent=bom.name and ifnull(bom_no, '')!='')""")
+					where parent=bom.name and coalesce(bom_no, '')!='')""")
 
 	while(count < len(bom_list)):
 		for child_bom in _get_parent(bom_list[count]):
@@ -1009,7 +1009,7 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account):
 		items.setdefault(d.item_code, d.amount)
 
 	non_stock_items = frappe.get_all('Item',
-		fields="name", filters={'name': ('in', list(items.keys())), 'ifnull(is_stock_item, 0)': 0}, as_list=1)
+		fields="name", filters={'name': ('in', list(items.keys())), 'is_stock_item': 0}, as_list=1)
 
 	non_stock_items_cost = 0.0
 	for name in non_stock_items:
@@ -1114,7 +1114,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 	query_filters = {
 		"disabled": 0,
-		"ifnull(end_of_life, '5050-50-50')": (">", today())
+		"end_of_life": (">", today())
 	}
 
 	or_cond_filters = {}
@@ -1123,7 +1123,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 			or_cond_filters[s_field] = ("like", "%{0}%".format(txt))
 
 		barcodes = frappe.get_all("Item Barcode",
-			fields=["distinct parent as item_code"],
+			fields=["distinct parent as item_code, modified"],
 			filters = {"barcode": ("like", "%{0}%".format(txt))})
 
 		barcodes = [d.item_code for d in barcodes]

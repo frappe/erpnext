@@ -49,12 +49,13 @@ def get_stock_ledger_data(report_filters, filters):
 			report_filters.company)
 
 		filters["warehouse"] = ("in", warehouses)
-
-	return frappe.get_all("Stock Ledger Entry", filters=filters,
-		fields = ["name", "voucher_type", "voucher_no",
-			"sum(stock_value_difference) as stock_value", "posting_date", "posting_time"],
-		group_by = "voucher_type, voucher_no",
-		order_by = "posting_date ASC, posting_time ASC")
+	condition = 'where warehouse ' + str(filters["warehouse"][0]) + " ('" + "', '".join(filters["warehouse"][1]) + "')" if filters["warehouse"] else ''
+	return frappe.db.sql("""
+	select name, voucher_type, voucher_no, sum(stock_value_difference) as stock_value, posting_date, posting_time
+	from `tabStock Ledger Entry`
+	{condition}
+	group by name, voucher_type, voucher_no, posting_date, posting_time
+	order by posting_date asc, posting_time asc""".format(condition = condition), as_dict = 1)
 
 def get_gl_data(report_filters, filters):
 	if report_filters.account:
@@ -72,7 +73,7 @@ def get_gl_data(report_filters, filters):
 	gl_entries = frappe.get_all("GL Entry", filters=filters,
 		fields = ["name", "voucher_type", "voucher_no",
 			"sum(debit_in_account_currency) - sum(credit_in_account_currency) as account_value"],
-		group_by = "voucher_type, voucher_no")
+		group_by = "name, voucher_type, voucher_no")
 
 	voucher_wise_gl_data = {}
 	for d in gl_entries:

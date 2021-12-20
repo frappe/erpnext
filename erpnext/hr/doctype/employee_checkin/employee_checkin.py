@@ -90,10 +90,11 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 	if attendance_status == 'Skip':
 		frappe.db.sql("""update `tabEmployee Checkin`
 			set skip_auto_attendance = %s
-			where name in %s""", ('1', log_names))
+			where name in ('{log_names}')""".format(log_names = "','".join(log_names)), ('1'))
 		return None
 	elif attendance_status in ('Present', 'Absent', 'Half Day'):
 		employee_doc = frappe.get_doc('Employee', employee)
+		ec = frappe.qb.DocType("Employee Checkin")
 		if not frappe.db.exists('Attendance', {'employee':employee, 'attendance_date':attendance_date, 'docstatus':('!=', '2')}):
 			doc_dict = {
 				'doctype': 'Attendance',
@@ -110,14 +111,10 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 			}
 			attendance = frappe.get_doc(doc_dict).insert()
 			attendance.submit()
-			frappe.db.sql("""update `tabEmployee Checkin`
-				set attendance = %s
-				where name in %s""", (attendance.name, log_names))
+			frappe.qb.update(ec).set(ec.attendance, attendance.name).where(ec.name.isin(log_names)).run()
 			return attendance
 		else:
-			frappe.db.sql("""update `tabEmployee Checkin`
-				set skip_auto_attendance = %s
-				where name in %s""", ('1', log_names))
+			frappe.qb.update(ec).set(ec.attendance, '1').where(ec.name.isin(log_names)).run()
 			return None
 	else:
 		frappe.throw(_('{} is an invalid Attendance Status.').format(attendance_status))

@@ -99,7 +99,7 @@ def get_conditions(filters):
 		("gst_hsn_code", " and gst_hsn_code=%(gst_hsn_code)s"),
 		("company_gstin", " and company_gstin=%(company_gstin)s"),
 		("from_date", " and posting_date >= %(from_date)s"),
-		("to_date", "and posting_date <= %(to_date)s")):
+		("to_date", " and posting_date <= %(to_date)s")):
 			if filters.get(opts[0]):
 				conditions += opts[1]
 
@@ -127,7 +127,8 @@ def get_items(filters):
 			and `tabSales Invoice Item`.gst_hsn_code is not NULL
 			and `tabSales Invoice Item`.gst_hsn_code = `tabGST HSN Code`.name %s %s
 		group by
-			`tabSales Invoice Item`.parent, `tabSales Invoice Item`.item_code
+			`tabSales Invoice Item`.parent, `tabSales Invoice Item`.item_code, `tabSales Invoice Item`.gst_hsn_code, `tabSales Invoice Item`.stock_uom,
+			`tabGST HSN Code`.description
 
 		""" % (conditions, match_conditions), filters, as_dict=1)
 

@@ -73,11 +73,12 @@ def make_company(company_name, abbr):
 			"country": "United Arab Emirates",
 			"create_chart_of_accounts_based_on": "Standard Template",
 		})
-		company.insert()
+		company.insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
 	else:
 		company = frappe.get_doc("Company", company_name)
 
 	company.create_default_warehouses()
+	company.create_default_tax_template()
 
 	if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": company.name}):
 		company.create_default_cost_center()
@@ -108,7 +109,7 @@ def set_vat_accounts():
 			"company": "_Test Company UAE VAT",
 			"uae_vat_accounts": uae_vat_accounts,
 			"doctype": "UAE VAT Settings",
-		}).insert()
+		}).insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
 
 def make_customer():
 	if not frappe.db.exists("Customer", "_Test UAE Customer"):

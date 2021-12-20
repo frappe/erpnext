@@ -70,14 +70,16 @@ class TestAsset(AssetSetup):
 		self.assertRaises(frappe.DoesNotExistError, asset.save)
 
 	def test_validate_item(self):
-		asset = create_asset(item_code="MacBook Pro", do_not_save=1)
-		item = frappe.get_doc("Item", "MacBook Pro")
+		asset = create_asset(item_code="Macbook Pro", do_not_save=1)
+		item = frappe.get_doc("Item", "Macbook Pro")
 
 		item.disabled = 1
 		item.save()
 		self.assertRaises(frappe.ValidationError, asset.save)
 		item.disabled = 0
-
+		item.save()
+		
+		item = frappe.get_doc("Item", "Macbook Pro")
 		item.is_fixed_asset = 0
 		self.assertRaises(frappe.ValidationError, asset.save)
 		item.is_fixed_asset = 1
@@ -117,15 +119,15 @@ class TestAsset(AssetSetup):
 		# Asset won't have reference to PI when purchased through PR
 		self.assertEqual(asset.purchase_receipt, pr.name)
 
-		expected_gle = (
+		expected_gle = [
 			("Asset Received But Not Billed - _TC", 100000.0, 0.0),
 			("Creditors - _TC", 0.0, 100000.0)
-		)
+		]
 
 		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
 			where voucher_type='Purchase Invoice' and voucher_no = %s
 			order by account""", pi.name)
-		self.assertEqual(gle, expected_gle)
+		self.assertEqual(list(gle), expected_gle)
 
 		pi.cancel()
 		asset.cancel()
@@ -166,16 +168,16 @@ class TestAsset(AssetSetup):
 		self.assertEqual(asset.status, "Scrapped")
 		self.assertTrue(asset.journal_entry_for_scrap)
 
-		expected_gle = (
+		expected_gle = [
 			("_Test Accumulated Depreciations - _TC", 36000.0, 0.0),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
 			("_Test Gain/Loss on Asset Disposal - _TC", 64000.0, 0.0)
-		)
+		]
 
 		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
 			where voucher_type='Journal Entry' and voucher_no = %s
 			order by account""", asset.journal_entry_for_scrap)
-		self.assertEqual(gle, expected_gle)
+		self.assertEqual(list(gle), expected_gle)
 
 		restore_asset(asset.name)
 
@@ -206,18 +208,18 @@ class TestAsset(AssetSetup):
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
-		expected_gle = (
+		expected_gle = [
+			("Debtors - _TC", 25000.0, 0.0),
 			("_Test Accumulated Depreciations - _TC", 20392.16, 0.0),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
-			("_Test Gain/Loss on Asset Disposal - _TC", 54607.84, 0.0),
-			("Debtors - _TC", 25000.0, 0.0)
-		)
+			("_Test Gain/Loss on Asset Disposal - _TC", 54607.84, 0.0)
+		]
 
 		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no = %s
-			order by account""", si.name)
+			order by replace(account, '_', '') asc""", si.name)
 
-		self.assertEqual(gle, expected_gle)
+		self.assertEqual(list(gle), expected_gle)
 
 		si.cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Partially Depreciated")
@@ -254,33 +256,33 @@ class TestAsset(AssetSetup):
 
 		pr.submit()
 
-		expected_gle = (
+		expected_gle = [
 			("Asset Received But Not Billed - _TC", 0.0, 5250.0),
 			("CWIP Account - _TC", 5250.0, 0.0)
-		)
+		]
 
 		pr_gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
 			where voucher_type='Purchase Receipt' and voucher_no = %s
-			order by account""", pr.name)
+			order by replace(account, '_', '')""", pr.name)
 
-		self.assertEqual(pr_gle, expected_gle)
+		self.assertEqual(list(pr_gle), expected_gle)
 
 		pi = make_invoice(pr.name)
 		pi.submit()
 
-		expected_gle = (
-			("_Test Account Service Tax - _TC", 250.0, 0.0),
-			("_Test Account Shipping Charges - _TC", 250.0, 0.0),
+		expected_gle = [
 			("Asset Received But Not Billed - _TC", 5250.0, 0.0),
 			("Creditors - _TC", 0.0, 5500.0),
 			("Expenses Included In Asset Valuation - _TC", 0.0, 250.0),
-		)
+			("_Test Account Service Tax - _TC", 250.0, 0.0),
+			("_Test Account Shipping Charges - _TC", 250.0, 0.0)
+		]
 
 		pi_gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
 			where voucher_type='Purchase Invoice' and voucher_no = %s
-			order by account""", pi.name)
+			order by replace(account, '_', '')""", pi.name)
 
-		self.assertEqual(pi_gle, expected_gle)
+		self.assertEqual(list(pi_gle), expected_gle)
 
 		asset = frappe.db.get_value('Asset',
 			{'purchase_receipt': pr.name, 'docstatus': 0}, 'name')
@@ -300,17 +302,17 @@ class TestAsset(AssetSetup):
 		})
 		asset_doc.submit()
 
-		expected_gle = (
-			("_Test Fixed Asset - _TC", 5250.0, 0.0),
-			("CWIP Account - _TC", 0.0, 5250.0)
-		)
+		expected_gle = [
+			("CWIP Account - _TC", 0.0, 5250.0),
+			("_Test Fixed Asset - _TC", 5250.0, 0.0)
+		]
 
 		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
 			where voucher_type='Asset' and voucher_no = %s
-			order by account""", asset_doc.name)
+			order by replace(account, '_', '')""", asset_doc.name)
 
 
-		self.assertEqual(gle, expected_gle)
+		self.assertEqual(list(gle), expected_gle)
 
 	def test_asset_cwip_toggling_cases(self):
 		cwip = frappe.db.get_value("Asset Category", "Computers", "enable_cwip_accounting")
@@ -1098,16 +1100,16 @@ class TestDepreciationBasics(AssetSetup):
 		# check depreciation entry series
 		self.assertEqual(asset.get("schedules")[0].journal_entry[:4], "DEPR")
 
-		expected_gle = (
+		expected_gle = [
 			("_Test Accumulated Depreciations - _TC", 0.0, 30000.0),
 			("_Test Depreciations - _TC", 30000.0, 0.0)
-		)
+		]
 
 		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
 			where against_voucher_type='Asset' and against_voucher = %s
-			order by account""", asset.name)
+			order by replace(account, '_', '') asc""", asset.name)
 
-		self.assertEqual(gle, expected_gle)
+		self.assertEqual(list(gle), expected_gle)
 		self.assertEqual(asset.get("value_after_depreciation"), 0)
 	def test_expected_value_change(self):
 		"""

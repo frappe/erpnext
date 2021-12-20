@@ -59,13 +59,13 @@ def make_employee(user, company=None, **kwargs):
 			"roles": [{"doctype": "Has Role", "role": "Employee"}]
 		}).insert()
 
-	if not frappe.db.get_value("Employee", {"user_id": user}):
+	if not frappe.db.get_value("Employee", {"user_id": user.lower()}):
 		employee = frappe.get_doc({
 			"doctype": "Employee",
 			"naming_series": "EMP-",
 			"first_name": user,
 			"company": company or erpnext.get_default_company(),
-			"user_id": user,
+			"user_id": user.lower(),
 			"date_of_birth": "1990-05-08",
 			"date_of_joining": "2013-01-01",
 			"department": frappe.get_all("Department", fields="name")[0].name,

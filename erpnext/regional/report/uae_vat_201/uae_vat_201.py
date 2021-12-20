@@ -149,27 +149,28 @@ def get_emirates():
 
 def get_filters(filters):
 	"""The conditions to be used to filter data to calculate the total sale."""
-	query_filters = []
+	query_filters = ""
 	if filters.get("company"):
-		query_filters.append(["company", '=', filters['company']])
+		query_filters += " and company = '" + filters['company'] + "'"
 	if filters.get("from_date"):
-		query_filters.append(["posting_date", '>=', filters['from_date']])
+		query_filters += " and posting_date >= " + filters['from_date']
 	if filters.get("from_date"):
-		query_filters.append(["posting_date", '<=', filters['to_date']])
+		query_filters += " and posting_date <= " + filters['to_date']
 	return query_filters
 
 def get_reverse_charge_total(filters):
 	"""Returns the sum of the total of each Purchase invoice made."""
 	query_filters = get_filters(filters)
-	query_filters.append(['reverse_charge', '=', 'Y'])
-	query_filters.append(['docstatus', '=', 1])
+	query_filters = " where reverse_charge = 'Y'" + query_filters
+	query_filters += " and docstatus = 1"
 	try:
-		return frappe.db.get_all('Purchase Invoice',
-			filters = query_filters,
-			fields = ['sum(total)'],
-			as_list=True,
-			limit = 1
-		)[0][0] or 0
+		return frappe.db.multisql({
+			'mariadb': """select sum(total) from `tabPurchase Invoice`
+			{query_filters}  limit 1""".format(query_filters = query_filters),
+			'postgres': """select sum(total) from `tabPurchase Invoice`
+			{query_filters}
+			limit 1""".format(query_filters = query_filters)
+			}, as_list = True)[0][0] or 0
 	except (IndexError, TypeError):
 		return 0
 
@@ -192,16 +193,17 @@ def get_reverse_charge_tax(filters):
 def get_reverse_charge_recoverable_total(filters):
 	"""Returns the sum of the total of each Purchase invoice made with recoverable reverse charge."""
 	query_filters = get_filters(filters)
-	query_filters.append(['reverse_charge', '=', 'Y'])
-	query_filters.append(['recoverable_reverse_charge', '>', '0'])
-	query_filters.append(['docstatus', '=', 1])
+	query_filters = " where reverse_charge = 'Y'" + query_filters
+	query_filters += " and docstatus = 1"
+	query_filters += " and recoverable_reverse_charge > 0"
 	try:
-		return frappe.db.get_all('Purchase Invoice',
-			filters = query_filters,
-			fields = ['sum(total)'],
-			as_list=True,
-			limit = 1
-		)[0][0] or 0
+		return frappe.db.multisql({
+			'mariadb': """select sum(total) from `tabPurchase Invoice`
+			{query_filters}  limit 1""".format(query_filters = query_filters),
+			'postgres': """select sum(total) from `tabPurchase Invoice`
+			{query_filters}
+			limit 1""".format(query_filters = query_filters)
+			}, as_list = True)[0][0] or 0
 	except (IndexError, TypeError):
 		return 0
 
@@ -237,60 +239,66 @@ def get_conditions_join(filters):
 def get_standard_rated_expenses_total(filters):
 	"""Returns the sum of the total of each Purchase invoice made with recoverable reverse charge."""
 	query_filters = get_filters(filters)
-	query_filters.append(['recoverable_standard_rated_expenses', '>', 0])
-	query_filters.append(['docstatus', '=', 1])
+	query_filters = " where recoverable_standard_rated_expenses > 0" + query_filters
+	query_filters += " and docstatus = 1"
+
 	try:
-		return frappe.db.get_all('Purchase Invoice',
-			filters = query_filters,
-			fields = ['sum(total)'],
-			as_list=True,
-			limit = 1
-		)[0][0]  or 0
+		return frappe.db.multisql({
+			'mariadb': """select sum(total) from `tabPurchase Invoice`
+			{query_filters}  limit 1""".format(query_filters = query_filters),
+			'postgres': """select sum(total) from `tabPurchase Invoice`
+			{query_filters}
+			limit 1""".format(query_filters = query_filters)
+			}, as_list = True)[0][0] or 0
 	except (IndexError, TypeError):
 		return 0
 
 def get_standard_rated_expenses_tax(filters):
 	"""Returns the sum of the tax of each Purchase invoice made."""
 	query_filters = get_filters(filters)
-	query_filters.append(['recoverable_standard_rated_expenses', '>', 0])
-	query_filters.append(['docstatus', '=', 1])
+	query_filters = " where recoverable_standard_rated_expenses > 0" + query_filters
+	query_filters += " and docstatus = 1"
 	try:
-		return frappe.db.get_all('Purchase Invoice',
-			filters = query_filters,
-			fields = ['sum(recoverable_standard_rated_expenses)'],
-			as_list=True,
-			limit = 1
-		)[0][0]  or 0
+		return frappe.db.multisql({
+			'mariadb': """select sum(recoverable_standard_rated_expenses) from `tabPurchase Invoice`
+			{query_filters}  limit 1""".format(query_filters = query_filters),
+			'postgres': """select sum(recoverable_standard_rated_expenses) from `tabPurchase Invoice`
+			{query_filters}
+			limit 1""".format(query_filters = query_filters)
+			}, as_list = True)[0][0] or 0
 	except (IndexError, TypeError):
 		return 0
 
 def get_tourist_tax_return_total(filters):
 	"""Returns the sum of the total of each Sales invoice with non zero tourist_tax_return."""
 	query_filters = get_filters(filters)
-	query_filters.append(['tourist_tax_return', '>', 0])
-	query_filters.append(['docstatus', '=', 1])
+	query_filters = " where tourist_tax_return > 0" + query_filters
+	query_filters += " and docstatus = 1"
 	try:
-		return frappe.db.get_all('Sales Invoice',
-			filters = query_filters,
-			fields = ['sum(total)'],
-			as_list=True,
-			limit = 1
-		)[0][0]  or 0
+		test = frappe.db.multisql({
+			'mariadb': """select sum(total) from `tabSales Invoice`
+			{query_filters} limit 1""".format(query_filters = query_filters),
+			'postgres': """select sum(total) from `tabSales Invoice`
+			{query_filters}
+			limit 1""".format(query_filters = query_filters)
+			}, as_list = True)
+		return test[0][0] or 0
 	except (IndexError, TypeError):
 		return 0
 
 def get_tourist_tax_return_tax(filters):
 	"""Returns the sum of the tax of each Sales invoice with non zero tourist_tax_return."""
 	query_filters = get_filters(filters)
-	query_filters.append(['tourist_tax_return', '>', 0])
-	query_filters.append(['docstatus', '=', 1])
+	query_filters = " where tourist_tax_return > 0" + query_filters
+	query_filters += " and docstatus = 1"
 	try:
-		return frappe.db.get_all('Sales Invoice',
-			filters = query_filters,
-			fields = ['sum(tourist_tax_return)'],
-			as_list=True,
-			limit = 1
-		)[0][0]  or 0
+		return frappe.db.multisql({
+			'mariadb': """select sum(tourist_tax_return) from `tabSales Invoice`
+			{query_filters}""".format(query_filters = query_filters),
+			'postgres': """select sum(tourist_tax_return) from `tabSales Invoice`
+			{query_filters}
+			limit 1""".format(query_filters = query_filters)
+			}, as_list = True)[0][0] or 0
 	except (IndexError, TypeError):
 		return 0
 

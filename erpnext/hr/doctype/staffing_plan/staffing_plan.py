@@ -136,19 +136,15 @@ def get_designation_counts(designation, company):
 	company_set = get_descendants_of('Company', company)
 	company_set.append(company)
 
-	employee_counts["employee_count"] = frappe.db.get_value("Employee",
-		filters={
-			'designation': designation,
-			'status': 'Active',
-			'company': ('in', company_set)
-		}, fieldname=['count(name)'])
+	employee_counts["employee_count"] = frappe.db.sql("""
+	select count(name) from `tabEmployee`
+	where designation = '{designation}' and status = 'Active' and company in {company_set}
+	""".format(designation = designation, company_set = "('" + "','".join(company_set) + "')"))
 
-	employee_counts['job_openings'] = frappe.db.get_value("Job Opening",
-		filters={
-			'designation': designation,
-			'status': 'Open',
-			'company': ('in', company_set)
-		}, fieldname=['count(name)'])
+	employee_counts["job_openings"] = frappe.db.sql("""
+	select count(name) from `tabJob Opening`
+	where designation = '{designation}' and status = 'Open' and company in {company_set}
+	""".format(designation = designation, company_set = "('" + "','".join(company_set) + "')"))
 
 	return employee_counts
 

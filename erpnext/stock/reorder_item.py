@@ -28,19 +28,27 @@ def _reorder_item():
 	default_company = (erpnext.get_default_company() or
 		frappe.db.sql("""select name from tabCompany limit 1""")[0][0])
 
-	items_to_consider = frappe.db.sql_list("""select name from `tabItem` item
+	items_to_consider = frappe.db.multisql({
+		'mariadb': """select name from `tabItem` item
 		where is_stock_item=1 and has_variants=0
 			and disabled=0
-			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %(today)s)
+			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > CURRENT_DATE)
 			and (exists (select name from `tabItem Reorder` ir where ir.parent=item.name)
 				or (variant_of is not null and variant_of != ''
 				and exists (select name from `tabItem Reorder` ir where ir.parent=item.variant_of))
 			)""",
-		{"today": nowdate()})
-
+		'postgres': """select name from `tabItem` item
+		where is_stock_item=1 and has_variants=0
+			and disabled=0
+			and (end_of_life is null or end_of_life > CURRENT_DATE)
+			and (exists (select name from `tabItem Reorder` ir where ir.parent=item.name)
+				or (variant_of is not null and variant_of != ''
+				and exists (select name from `tabItem Reorder` ir where ir.parent=item.variant_of))
+			)"""
+			}, as_list = 1)
+	items_to_consider = [item for sublist in items_to_consider for item in sublist] if any(isinstance(i, list) for i in items_to_consider) else items_to_consider
 	if not items_to_consider:
 		return
-
 	item_warehouse_projected_qty = get_item_warehouse_projected_qty(items_to_consider)
 
 	def add_to_material_request(item_code, warehouse, reorder_level, reorder_qty, material_request_type, warehouse_group=None):
@@ -89,7 +97,7 @@ def get_item_warehouse_projected_qty(items_to_consider):
 
 	for item_code, warehouse, projected_qty in frappe.db.sql("""select item_code, warehouse, projected_qty
 		from tabBin where item_code in ({0})
-			and (warehouse != "" and warehouse is not null)"""\
+			and (warehouse != '' and warehouse is not null)"""\
 		.format(", ".join(["%s"] * len(items_to_consider))), items_to_consider):
 
 		if item_code not in item_warehouse_projected_qty:

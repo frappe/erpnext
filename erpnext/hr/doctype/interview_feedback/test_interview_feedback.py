@@ -35,14 +35,14 @@ class TestInterviewFeedback(unittest.TestCase):
 		job_applicant = create_job_applicant()
 		interview = create_interview_and_dependencies(job_applicant.name, scheduled_on=add_days(getdate(), -1))
 		skill_ratings = get_skills_rating(interview.interview_round)
-
+		
 		# For First Interviewer Feedback
 		interviewer = interview.interview_details[0].interviewer
 		frappe.set_user(interviewer)
 
 		# calculating Average
 		feedback_1 = create_interview_feedback(interview.name, interviewer, skill_ratings)
-
+		
 		total_rating = 0
 		for d in feedback_1.skill_assessment:
 			if d.rating:
@@ -51,7 +51,7 @@ class TestInterviewFeedback(unittest.TestCase):
 		avg_rating = flt(total_rating / len(feedback_1.skill_assessment) if len(feedback_1.skill_assessment) else 0)
 
 		self.assertEqual(flt(avg_rating, 3), feedback_1.average_rating)
-
+		interview.reload()
 		avg_on_interview_detail = frappe.db.get_value('Interview Detail', {
 			'parent': feedback_1.interview,
 			'interviewer': feedback_1.interviewer,
@@ -60,7 +60,6 @@ class TestInterviewFeedback(unittest.TestCase):
 
 		# 1. average should be reflected in Interview Detail.
 		self.assertEqual(avg_on_interview_detail, feedback_1.average_rating)
-
 		'''For Second Interviewer Feedback'''
 		interviewer = interview.interview_details[1].interviewer
 		frappe.set_user(interviewer)
@@ -72,6 +71,7 @@ class TestInterviewFeedback(unittest.TestCase):
 		interview.reload()
 
 		frappe.set_user("Administrator")
+		
 
 	def tearDown(self):
 		frappe.db.rollback()

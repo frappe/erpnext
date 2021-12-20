@@ -162,14 +162,14 @@ def get_employees_having_an_event_today(event_type):
 				`status` = 'Active'
 		""",
 		"postgres": f"""
-			SELECT "personal_email", "company", "company_email", "user_id", "employee_name" AS 'name', "image"
+			SELECT "personal_email", "company", "company_email", "user_id", "employee_name" AS name, "image", "date_of_joining"
 			FROM "tabEmployee"
 			WHERE
-				DATE_PART('day', {condition_column}) = date_part('day', %(today)s)
+				DATE_PART('day', {condition_column}::timestamp) = date_part('day', %(today)s::timestamp)
 			AND
-				DATE_PART('month', {condition_column}) = date_part('month', %(today)s)
+				DATE_PART('month', {condition_column}::timestamp) = date_part('month', %(today)s::timestamp)
 			AND
-				DATE_PART('year', {condition_column}) < date_part('year', %(today)s)
+				DATE_PART('year', {condition_column}::timestamp) < date_part('year', %(today)s::timestamp)
 			AND
 				"status" = 'Active'
 		""",

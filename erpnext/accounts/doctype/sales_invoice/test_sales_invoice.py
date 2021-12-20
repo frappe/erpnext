@@ -2210,10 +2210,10 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 
 		expected_gle = [
-			["_Test Account VAT - _TC", 0.0, 10.0, nowdate()],
 			["Debtors - _TC", 88, 0.0, nowdate()],
 			["Discount Account - _TC", 22.0, 0.0, nowdate()],
-			["Sales - _TC", 0.0, 100.0, nowdate()]
+			["Sales - _TC", 0.0, 100.0, nowdate()],
+			["_Test Account VAT - _TC", 0.0, 10.0, nowdate()]
 		]
 
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
@@ -2636,7 +2636,7 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 	gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
 		from `tabGL Entry`
 		where voucher_type='Sales Invoice' and voucher_no=%s and posting_date > %s
-		order by posting_date asc, account asc""", (voucher_no, posting_date), as_dict=1)
+		order by posting_date asc, replace(account, '_', '') asc""", (voucher_no, posting_date), as_dict=1)
 
 	for i, gle in enumerate(gl_entries):
 		doc.assertEqual(expected_gle[i][0], gle.account)
@@ -2686,7 +2686,7 @@ def create_sales_invoice(**args):
 	})
 
 	if not args.do_not_save:
-		si.insert()
+		si.insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
 		if not args.do_not_submit:
 			si.submit()
 		else:

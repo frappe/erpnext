@@ -32,7 +32,8 @@ def execute():
 
 	company_list = []
 
-	data = frappe.db.sql('''
+	data = frappe.db.multisql({
+		'mariadb': '''
 		SELECT
 			name, item_code, warehouse, voucher_type, voucher_no, posting_date, posting_time, company
 		FROM
@@ -41,7 +42,18 @@ def execute():
 			creation > %s
 			and is_cancelled = 0
 		ORDER BY timestamp(posting_date, posting_time) asc, creation asc
-	''', reposting_project_deployed_on, as_dict=1)
+	''',
+	'postgres': '''
+		SELECT
+			name, item_code, warehouse, voucher_type, voucher_no, posting_date, posting_time, company
+		FROM
+			`tabStock Ledger Entry`
+		WHERE
+			creation > %s
+			and is_cancelled = 0
+		ORDER BY posting_date + posting_time asc, creation asc
+	'''
+	}, reposting_project_deployed_on, as_dict=1)
 
 	frappe.db.auto_commit_on_many_writes = 1
 	print("Reposting Stock Ledger Entries...")

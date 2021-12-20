@@ -140,7 +140,7 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 		where
 			pfu.parent = pf.name and pfu.user = %(user)s and pf.company = %(company)s
 			and (pf.name like %(txt)s)
-			and pf.disabled = 0 limit %(start)s, %(page_len)s""", args)
+			and pf.disabled = 0 limit %(page_len)s offset %(start)s""", args)
 
 	if not pos_profile:
 		del args['user']
@@ -151,7 +151,7 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 			on
 				pf.name = pfu.parent
 			where
-				ifnull(pfu.user, '') = ''
+				coalesce(pfu.user, '') = ''
 				and pf.company = %(company)s
 				and pf.name like %(txt)s
 				and pf.disabled = 0""", args)

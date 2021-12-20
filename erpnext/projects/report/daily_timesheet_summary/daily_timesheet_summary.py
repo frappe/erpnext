@@ -27,23 +27,33 @@ def get_column():
 		_("Project") + ":Link/Project:120", _("Status") + "::70"]
 
 def get_data(conditions, filters):
-	time_sheet = frappe.db.sql(""" select `tabTimesheet`.name, `tabTimesheet`.employee, `tabTimesheet`.employee_name,
+	time_sheet = frappe.db.multisql({
+		'mariadb': """ select `tabTimesheet`.name, `tabTimesheet`.employee, `tabTimesheet`.employee_name,
 		`tabTimesheet Detail`.from_time, `tabTimesheet Detail`.to_time, `tabTimesheet Detail`.hours,
 		`tabTimesheet Detail`.activity_type, `tabTimesheet Detail`.task, `tabTimesheet Detail`.project,
 		`tabTimesheet`.status from `tabTimesheet Detail`, `tabTimesheet` where
-		`tabTimesheet Detail`.parent = `tabTimesheet`.name and %s order by `tabTimesheet`.name"""%(conditions), filters, as_list=1)
+		`tabTimesheet Detail`.parent = `tabTimesheet`.name and %s order by `tabTimesheet`.name"""%(conditions['mariadb']),
+		'postgres': """ select `tabTimesheet`.name, `tabTimesheet`.employee, `tabTimesheet`.employee_name,
+		`tabTimesheet Detail`.from_time, `tabTimesheet Detail`.to_time, `tabTimesheet Detail`.hours,
+		`tabTimesheet Detail`.activity_type, `tabTimesheet Detail`.task, `tabTimesheet Detail`.project,
+		`tabTimesheet`.status from `tabTimesheet Detail`, `tabTimesheet` where
+		`tabTimesheet Detail`.parent = `tabTimesheet`.name and %s order by `tabTimesheet`.name"""%(conditions['postgres'])}, filters, as_list=1)
 
 	return time_sheet
 
 def get_conditions(filters):
-	conditions = "`tabTimesheet`.docstatus = 1"
+	conditions = {'mariadb': "`tabTimesheet`.docstatus = 1", 'postgres': "`tabTimesheet`.docstatus = 1"}
 	if filters.get("from_date"):
-		conditions += " and `tabTimesheet Detail`.from_time >= timestamp(%(from_date)s, %(from_time)s)"
+		conditions['mariadb'] += " and `tabTimesheet Detail`.from_time >= timestamp(%(from_date)s, %(from_time)s)"
+		conditions['postgres'] += " and `tabTimesheet Detail`.from_time >= cast(concat(%(from_date)s, ' ', %(from_time)s) as timestamp)"
+
 	if filters.get("to_date"):
-		conditions += " and `tabTimesheet Detail`.to_time <= timestamp(%(to_date)s, %(to_time)s)"
+		conditions['mariadb'] += " and `tabTimesheet Detail`.to_time <= timestamp(%(to_date)s, ' ', %(to_time)s)"
+		conditions['postgres'] += " and `tabTimesheet Detail`.to_time <= cast(concat(%(to_date)s, ' ', %(to_time)s) as timestamp)"
 
 	match_conditions = build_match_conditions("Timesheet")
 	if match_conditions:
-		conditions += " and %s" % match_conditions
+		conditions['mariadb'] += " and %s" % match_conditions
+		conditions['postgres'] += " and %s" % match_conditions
 
 	return conditions

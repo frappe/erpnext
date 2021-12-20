@@ -25,7 +25,7 @@ def work():
 	make_leave_application()
 
 	# payroll entry
-	if not frappe.db.sql('select name from `tabSalary Slip` where month(adddate(start_date, interval 1 month))=month(curdate())'):
+	if not frappe.db.sql('select name from `tabSalary Slip` where month(adddate(start_date, interval 1 month))=month(CURRENT_DATE)'):
 		# based on frequency
 		payroll_entry = get_payroll_entry()
 		payroll_entry.salary_slip_based_on_timesheet = 0

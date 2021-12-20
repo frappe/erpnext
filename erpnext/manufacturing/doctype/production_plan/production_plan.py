@@ -83,7 +83,7 @@ class ProductionPlan(Document):
 			where mr_item.parent = mr.name
 				and mr.material_request_type = "Manufacture"
 				and mr.docstatus = 1 and mr.status != "Stopped" and mr.company = %(company)s
-				and mr_item.qty > ifnull(mr_item.ordered_qty,0) {0} {1}
+				and mr_item.qty > coalesce(mr_item.ordered_qty,0) {0} {1}
 				and (exists (select name from `tabBOM` bom where bom.item=mr_item.item_code
 					and bom.is_active = 1))
 			""".format(mr_filter, item_filter), {
@@ -613,7 +613,7 @@ def download_raw_materials(doc, warehouses=None):
 
 def get_exploded_items(item_details, company, bom_no, include_non_stock_items, planned_qty=1):
 	for d in frappe.db.sql("""select bei.item_code, item.default_bom as bom,
-			ifnull(sum(bei.stock_qty/ifnull(bom.quantity, 1)), 0)*%s as qty, item.item_name,
+			coalesce(sum(bei.stock_qty/coalesce(bom.quantity, 1)), 0)*%s as qty, item.item_name,
 			bei.description, bei.stock_uom, item.min_order_qty, bei.source_warehouse,
 			item.default_material_request_type, item.min_order_qty, item_default.default_warehouse,
 			item.purchase_uom, item_uom.conversion_factor, item.safety_stock
@@ -645,7 +645,7 @@ def get_subitems(doc, data, item_details, bom_no, company, include_non_stock_ite
 	items = frappe.db.sql("""
 		SELECT
 			bom_item.item_code, default_material_request_type, item.item_name,
-			ifnull(%(parent_qty)s * sum(bom_item.stock_qty/ifnull(bom.quantity, 1)) * %(planned_qty)s, 0) as qty,
+			coalesce(%(parent_qty)s * sum(bom_item.stock_qty/coalesce(bom.quantity, 1)) * %(planned_qty)s, 0) as qty,
 			item.is_sub_contracted_item as is_sub_contracted, bom_item.source_warehouse,
 			item.default_bom as default_bom, bom_item.description as description,
 			bom_item.stock_uom as stock_uom, item.min_order_qty as min_order_qty, item.safety_stock as safety_stock,
@@ -653,7 +653,7 @@ def get_subitems(doc, data, item_details, bom_no, company, include_non_stock_ite
 		FROM
 			`tabBOM Item` bom_item
 			JOIN `tabBOM` bom ON bom.name = bom_item.parent
-			JOIN tabItem item ON bom_item.item_code = item.name
+			JOIN `tabItem` item ON bom_item.item_code = item.name
 			LEFT JOIN `tabItem Default` item_default
 				ON item.name = item_default.parent and item_default.company = %(company)s
 			LEFT JOIN `tabUOM Conversion Detail` item_uom
@@ -662,7 +662,9 @@ def get_subitems(doc, data, item_details, bom_no, company, include_non_stock_ite
 			bom.name = %(bom)s
 			and bom_item.docstatus < 2
 			and item.is_stock_item in (1, {0})
-		group by bom_item.item_code""".format(0 if include_non_stock_items else 1),{
+		group by bom_item.item_code, default_material_request_type, item.item_name, item.is_sub_contracted_item, bom_item.source_warehouse,
+			item.default_bom, bom_item.description, bom_item.stock_uom, item.min_order_qty, item.safety_stock, item_default.default_warehouse,
+			item.purchase_uom, item_uom.conversion_factor""".format(0 if include_non_stock_items else 1),{
 			'bom': bom_no,
 			'parent_qty': parent_qty,
 			'planned_qty': planned_qty,
@@ -765,7 +767,7 @@ def get_sales_orders(self):
 		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
 		from `tabSales Order` so, `tabSales Order Item` so_item
 		where so_item.parent = so.name
-			and so.docstatus = 1 and so.status not in ("Stopped", "Closed")
+			and so.docstatus = 1 and so.status not in ('Stopped', 'Closed')
 			and so.company = %(company)s
 			and so_item.qty > so_item.work_order_qty {so_filter} {item_filter}
 			and (exists (select name from `tabBOM` bom where {bom_item}
@@ -796,10 +798,10 @@ def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
 			where lft >= {0} and rgt <= {1} and name=`tabBin`.warehouse and company = {2})
 		""".format(lft, rgt, company)
 
-	return frappe.db.sql(""" select ifnull(sum(projected_qty),0) as projected_qty,
-		ifnull(sum(actual_qty),0) as actual_qty, ifnull(sum(ordered_qty),0) as ordered_qty,
-		ifnull(sum(reserved_qty_for_production),0) as reserved_qty_for_production, warehouse,
-		ifnull(sum(planned_qty),0) as planned_qty
+	return frappe.db.sql(""" select coalesce(sum(projected_qty),0) as projected_qty,
+		coalesce(sum(actual_qty),0) as actual_qty, coalesce(sum(ordered_qty),0) as ordered_qty,
+		coalesce(sum(reserved_qty_for_production),0) as reserved_qty_for_production, warehouse,
+		coalesce(sum(planned_qty),0) as planned_qty
 		from `tabBin` where item_code = %(item_code)s {conditions}
 		group by item_code, warehouse
 	""".format(conditions=conditions), { "item_code": row['item_code'] }, as_dict=1)

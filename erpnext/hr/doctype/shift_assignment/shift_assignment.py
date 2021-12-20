@@ -47,7 +47,7 @@ class ShiftAssignment(Document):
 			where
 				employee=%(employee)s and docstatus = 1
 				and name != %(name)s
-				and status = "Active"
+				and status = 'Active'
 				{0}
 		""".format(condition), {
 			"employee": self.employee,

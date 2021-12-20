@@ -32,12 +32,21 @@ class Instructor(Document):
 
 def get_timeline_data(doctype, name):
 	"""Return timeline for course schedule"""
-	return dict(frappe.db.sql(
-		"""
+	return dict(frappe.db.multisql({
+		'mariadb': """
 			SELECT unix_timestamp(`schedule_date`), count(*)
 			FROM `tabCourse Schedule`
 			WHERE
 				instructor=%s and
-				`schedule_date` > date_sub(curdate(), interval 1 year)
+				`schedule_date` > date_sub(CURRENT_DATE, interval 1 year)
 			GROUP BY schedule_date
-		""", name))
+		""",
+		'postgres': """
+			SELECT extract(epoch from `schedule_date`), count(*)
+			FROM `tabCourse Schedule`
+			WHERE
+				instructor=%s and
+				`schedule_date` > (current_date - interval '1 year')
+			GROUP BY schedule_date
+		"""
+		}, name))

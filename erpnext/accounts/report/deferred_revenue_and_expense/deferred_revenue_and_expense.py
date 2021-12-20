@@ -3,8 +3,10 @@
 
 import frappe
 from frappe import _, qb
-from frappe.query_builder import Column, functions
+from frappe.query_builder import functions
 from frappe.utils import add_days, date_diff, flt, get_first_day, get_last_day, rounded
+
+from pypika.terms import PseudoColumn
 
 from erpnext.accounts.report.financial_statements import get_period_list
 
@@ -267,7 +269,7 @@ class Deferred_Revenue_and_Expense_Report(object):
 		"""
 		gle = qb.DocType("GL Entry")
 		# column doesn't have an alias option
-		posted = Column("posted")
+		posted = PseudoColumn("""'posted' as "posted" """).as_("posted")
 
 		if self.filters.type == "Revenue":
 			inv = qb.DocType("Sales Invoice")

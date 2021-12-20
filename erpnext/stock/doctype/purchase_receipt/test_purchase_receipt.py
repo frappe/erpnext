@@ -1149,9 +1149,9 @@ class TestPurchaseReceipt(ERPNextTestCase):
 		sl_entries = get_sl_entries('Purchase Receipt', pr.name)
 
 		expected_gle = [
-			['Stock In Hand - TCP1', 272.5, 0.0],
 			['_Test Account Stock In Hand - TCP1', 0.0, 250.0],
-			['_Test Account Shipping Charges - TCP1', 0.0, 22.5]
+			['_Test Account Shipping Charges - TCP1', 0.0, 22.5],
+			['Stock In Hand - TCP1', 272.5, 0.0]
 		]
 
 		expected_sle = {
@@ -1447,7 +1447,7 @@ def get_sl_entries(voucher_type, voucher_no):
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit, cost_center, is_cancelled
 		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
-		order by account desc""", (voucher_type, voucher_no), as_dict=1)
+		order by replace(account, '_', '') desc""", (voucher_type, voucher_no), as_dict=1)
 
 def get_taxes(**args):
 

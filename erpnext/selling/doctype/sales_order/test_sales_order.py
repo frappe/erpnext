@@ -316,7 +316,7 @@ class TestSalesOrder(ERPNextTestCase):
 
 	def test_sales_order_on_hold(self):
 		so = make_sales_order(item_code="_Test Product Bundle Item")
-		so.db_set('Status', "On Hold")
+		so.db_set('status', 'On Hold')
 		si = make_sales_invoice(so.name)
 		self.assertRaises(frappe.ValidationError, create_dn_against_so, so.name)
 		self.assertRaises(frappe.ValidationError, si.submit)
@@ -607,7 +607,7 @@ class TestSalesOrder(ERPNextTestCase):
 			item_doc.save()
 		else:
 			# update valid from
-			frappe.db.sql("""UPDATE `tabItem Tax` set valid_from = CURDATE()
+			frappe.db.sql("""UPDATE `tabItem Tax` set valid_from = CURRENT_DATE
 				where parent = %(item)s and item_tax_template = %(tax)s""",
 					{"item": item, "tax": tax_template})
 

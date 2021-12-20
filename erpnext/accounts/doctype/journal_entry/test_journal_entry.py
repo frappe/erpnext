@@ -387,7 +387,7 @@ def make_journal_entry(account1, account2, amount, cost_center=None, posting_dat
 		}
 	])
 	if save or submit:
-		jv.insert()
+		jv.insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
 
 		if submit:
 			jv.submit()
