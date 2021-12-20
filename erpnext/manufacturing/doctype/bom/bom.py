@@ -3,6 +3,7 @@
 
 import functools
 from collections import deque
+from math import trunc
 from operator import itemgetter
 from typing import List
 
@@ -140,9 +141,13 @@ class BOM(WebsiteGenerator):
 		if not self.company:
 			frappe.throw(_("Please select a Company first."), title=_("Mandatory"))
 
-		for scrap_item in self.scrap_items:
+		items_in_msg = []
+		for idx, scrap_item in enumerate(self.scrap_items):
 			if isinstance(scrap_item.stock_qty, float) and frappe.db.get_value("UOM", scrap_item.stock_uom, "must_be_whole_number"):
-				frappe.throw(msg=f"Scrap for <b>{scrap_item.item_name}</b> cannot be in fraction. The UOM <b>{scrap_item.stock_uom}</b> must be a whole number.", title="Message")
+				self.scrap_items[idx].stock_qty = trunc(scrap_item.stock_qty)
+				items_in_msg.append(f"<b>{scrap_item.item_name}</b>")
+		if items_in_msg:
+			frappe.msgprint("Scrap cannot be in fraction for Item(s): " + ", ".join(map(str, items_in_msg)))
 
 		self.clear_operations()
 		self.validate_main_item()
