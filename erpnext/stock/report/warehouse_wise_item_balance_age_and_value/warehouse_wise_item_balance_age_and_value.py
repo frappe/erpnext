@@ -10,7 +10,7 @@ from frappe import _
 from frappe.utils import flt
 from six import iteritems
 
-from erpnext.stock.report.stock_ageing.stock_ageing import get_average_age, FIFOSlots
+from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, get_average_age
 from erpnext.stock.report.stock_balance.stock_balance import (
 	get_item_details,
 	get_item_warehouse_map,
