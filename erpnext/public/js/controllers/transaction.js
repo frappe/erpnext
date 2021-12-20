@@ -1586,17 +1586,19 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var items_rule_dict = {};
 
 		for(var i=0, l=children.length; i<l; i++) {
-			var d = children[i];
+			var d = children[i] ;
+			let item_row = frappe.get_doc(d.doctype, d.name)
 			var existing_pricing_rule = frappe.model.get_value(d.doctype, d.name, "pricing_rules");
 			for(var k in d) {
 				var v = d[k];
 				if (["doctype", "name"].indexOf(k)===-1) {
 					if(k=="price_list_rate") {
 						if(flt(v) != flt(d.price_list_rate)) price_list_rate_changed = true;
+						item_row['rate'] = v;
 					}
 
 					if (k !== 'free_item_data') {
-						frappe.model.set_value(d.doctype, d.name, k, v);
+						item_row[k] = v;
 					}
 				}
 			}
@@ -1617,6 +1619,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}
 		}
 
+		me.frm.refresh_field('items');
 		me.apply_rule_on_other_items(items_rule_dict);
 
 		if(!price_list_rate_changed) me.calculate_taxes_and_totals();
