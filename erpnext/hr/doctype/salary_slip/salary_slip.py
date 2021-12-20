@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import datetime, math
-
 from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words
 from frappe.model.naming import make_autoname
 
@@ -142,6 +141,24 @@ class SalarySlip(TransactionBase):
 				self.salary_slip_based_on_timesheet = self._salary_structure_doc.salary_slip_based_on_timesheet or 0
 				self.set_time_sheet()
 				self.pull_sal_struct()
+	
+	def confidentials(self):
+		'''First time, load all the components from salary structure'''
+		user = frappe.session.user
+
+		users = frappe.get_all("User", ["*"], filters = {"name": user})
+
+		roles = frappe.get_all("Has Role", ["*"], filters = {"parent": users[0].name})
+
+		roles_arr = []
+
+		for role in roles:
+			roles_arr.append(role.role)
+
+		if "Confidential Payroll" in roles_arr:
+			self.db_set('confidential', 1, update_modified=False)
+		else:
+			self.db_set('confidential', 0, update_modified=False)
 
 	def set_time_sheet(self):
 		if self.salary_slip_based_on_timesheet:
