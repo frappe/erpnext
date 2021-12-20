@@ -6,7 +6,12 @@ import frappe
 
 @frappe.whitelist()
 def transaction_processing(data, from_doctype, to_doctype):
-	deserialized_data = json.loads(data)
+	if isinstance(data, str):
+		deserialized_data = json.loads(data)
+
+	else:
+		deserialized_data = data
+
 	length_of_data = len(deserialized_data)
 
 	if length_of_data > 10:
