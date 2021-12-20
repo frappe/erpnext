@@ -10,8 +10,9 @@ import datetime
 from erpnext.controllers.queries import get_match_cond
 
 class SalesForUser(Document):
-	def on_update(self):
-		self.return_data()
+	def validate(self):
+		if self.docstatus == 0:
+			self.return_data()
 
 	def return_data(self):
 		outstanding_amount, cash, cards, adv_app, total_monetary, total_income, total_utility, total_exempt_sales, advances = 0,0,0,0,0,0,0,0,0
