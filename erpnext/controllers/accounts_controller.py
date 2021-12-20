@@ -1733,7 +1733,7 @@ def update_invoice_status():
 				| invoice.status.like("Partly Paid%")
 			)
 			& (
-				(invoice.is_pos & invoice.due_date < today) | is_overdue
+				((invoice.is_pos & invoice.due_date < today) | is_overdue)
 				if doctype == "Sales Invoice"
 				else is_overdue
 			)
