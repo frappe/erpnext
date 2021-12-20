@@ -1587,7 +1587,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		for(var i=0, l=children.length; i<l; i++) {
 			var d = children[i] ;
-			let item_row = frappe.get_doc(d.doctype, d.name)
+			let item_row = frappe.get_doc(d.doctype, d.name);
 			var existing_pricing_rule = frappe.model.get_value(d.doctype, d.name, "pricing_rules");
 			for(var k in d) {
 				var v = d[k];
