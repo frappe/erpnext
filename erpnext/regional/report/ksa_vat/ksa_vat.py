@@ -1,8 +1,6 @@
 # Copyright (c) 2021, Havenir Solutions, Wahni Green Technologies and contributors
 # For license information, please see license.txt
 
-import json
-
 import frappe
 from frappe import _
 from frappe.utils import get_url_to_list
