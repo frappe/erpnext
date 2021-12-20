@@ -8,7 +8,6 @@ from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import (
-	cint,
 	comma_and,
 	cstr,
 	get_link_to_form,
