@@ -199,8 +199,6 @@ class TestWorkOrder(ERPNextTestCase):
 		# no change in reserved / projected
 		self.assertEqual(cint(bin1_on_end_production.reserved_qty_for_production),
 			cint(bin1_on_start_production.reserved_qty_for_production))
-		self.assertEqual(cint(bin1_on_end_production.projected_qty),
-			cint(bin1_on_end_production.projected_qty))
 
 	def test_backflush_qty_for_overpduction_manufacture(self):
 		cancel_stock_entry = []
