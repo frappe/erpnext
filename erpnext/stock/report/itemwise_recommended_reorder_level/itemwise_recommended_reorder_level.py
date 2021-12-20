@@ -48,6 +48,7 @@ def get_item_info(filters):
 	conditions = [get_item_group_condition(filters.get("item_group"))]
 	if filters.get("brand"):
 		conditions.append("item.brand=%(brand)s")
+	conditions.append("is_stock_item = 1")
 
 	return frappe.db.sql("""select name, item_name, description, brand, item_group,
 		safety_stock, lead_time_days from `tabItem` item where {}"""

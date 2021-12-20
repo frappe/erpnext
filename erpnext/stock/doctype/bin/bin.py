@@ -43,9 +43,9 @@ class Bin(Document):
 				frappe.qb
 					.from_(wo)
 					.from_(wo_item)
-					.select(Case()
-							.when(wo.skip_transfer == 0, Sum(wo_item.required_qty - wo_item.transferred_qty))
-							.else_(Sum(wo_item.required_qty - wo_item.consumed_qty))
+					.select(Sum(Case()
+							.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
+							.else_(wo_item.required_qty - wo_item.consumed_qty))
 						)
 					.where(
 						(wo_item.item_code == self.item_code)
