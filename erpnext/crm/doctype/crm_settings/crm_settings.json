@@ -90,20 +90,22 @@
   },
   {
    "fieldname": "section_break_13",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Other Settings"
   },
   {
    "default": "0",
+   "description": "All the comments and Emails will be copied from one document to another newly created document(Lead -> Opportunity -> Quotation) throughout the sales cycle.",
    "fieldname": "carry_forward_communication_and_comments",
    "fieldtype": "Check",
-   "label": "Carry forward Communication and Comments"
+   "label": "Carry Forward Communication and Comments"
   }
  ],
  "icon": "fa fa-cog",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-12-14 16:51:57.839939",
+ "modified": "2021-12-20 12:51:38.894252",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM Settings",
