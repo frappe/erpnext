@@ -9,7 +9,7 @@ from frappe import _
 from frappe.utils import cint, date_diff, flt, getdate
 
 import erpnext
-from erpnext.stock.report.stock_ageing.stock_ageing import get_average_age, FIFOSlots
+from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, get_average_age
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from erpnext.stock.utils import add_additional_uom_columns, is_reposting_item_valuation_in_progress
 
