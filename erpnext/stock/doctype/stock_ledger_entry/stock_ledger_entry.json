@@ -226,7 +226,7 @@
   {
    "fieldname": "stock_queue",
    "fieldtype": "Text",
-   "label": "FIFO Queue (qty, rate)",
+   "label": "FIFO Stock Queue (qty, rate)",
    "oldfieldname": "fcfs_stack",
    "oldfieldtype": "Text",
    "print_hide": 1,
