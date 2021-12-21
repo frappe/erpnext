@@ -30,30 +30,33 @@ def get_data(report_filters):
 		itemcode = (job_card.production_item).as_('item_code')
 		query = (
 			frappe.qb.from_(job_card)
-				.select(job_card.name, job_card.work_order, itemcode, job_card.item_name, job_card.operation,
+			.select(job_card.name, job_card.work_order, itemcode, job_card.item_name, job_card.operation,
 			job_card.serial_no, job_card.batch_no, job_card.workstation, job_card.total_time_in_mins, job_card.hour_rate,
 			operatingcost)
-			.where(Criterion.all(
-				[job_card.docstatus==1 ,
-				job_card.is_corrective_job_card == 1,
-				job_card.name.like('%{}%'.format(report_filters.get('name',''))),
-				job_card.work_order.like('%{}%'.format(report_filters.get('work_order',''))),
-				job_card.workstation.like('%{}%'.format(report_filters.get('workstation',''))),
-				job_card.company.like('%{}%'.format(report_filters.get('company',''))),
-				job_card.serial_no.like('%{}%'.format(report_filters.get('serial_no',''))),
-				job_card.batch_no.like('%{}%'.format(report_filters.get('batch_no',''))),
-				job_card.production_item.like('%{}%'.format(report_filters.get('production_item',''))),
-				job_card.serial_no.like('%{}%'.format(report_filters.get('serial_no',''))),
-				job_card.operation.isin(operations)
-				])
-			).where( job_card.name.isin(
-					frappe.qb.from_(job_card_time_log)
-					.select(job_card_time_log.parent)
-					.where(job_card_time_log.parent == job_card.name)
-					.where(job_card_time_log.from_time >= report_filters.get('from_date','') )
-					.where(job_card_time_log.to_time <= report_filters.get('to_date','') )
-			))
-		)
+			.where(
+				Criterion.all([
+					job_card.docstatus==1 ,
+					job_card.is_corrective_job_card == 1,
+					job_card.name.like('%{}%'.format(report_filters.get('name',''))),
+					job_card.work_order.like('%{}%'.format(report_filters.get('work_order',''))),
+					job_card.workstation.like('%{}%'.format(report_filters.get('workstation',''))),
+					job_card.company.like('%{}%'.format(report_filters.get('company',''))),
+					job_card.serial_no.like('%{}%'.format(report_filters.get('serial_no',''))),
+					job_card.batch_no.like('%{}%'.format(report_filters.get('batch_no',''))),
+					job_card.production_item.like('%{}%'.format(report_filters.get('production_item',''))),
+					job_card.serial_no.like('%{}%'.format(report_filters.get('serial_no',''))),
+					job_card.operation.isin(operations)
+							])
+				  )
+			.where(job_card.name.isin(
+				frappe.qb.from_(job_card_time_log)
+				.select(job_card_time_log.parent)
+				.where(job_card_time_log.parent == job_card.name)
+				.where(job_card_time_log.from_time >= report_filters.get('from_date',''))
+				.where(job_card_time_log.to_time <= report_filters.get('to_date',''))
+									)
+				  )
+		    )
 		data = query.run()
 	return data
 
