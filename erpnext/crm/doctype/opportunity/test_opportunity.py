@@ -49,7 +49,6 @@ class TestOpportunity(unittest.TestCase):
 		contact.add_email(opp_doc.contact_email, is_primary=True)
 		contact.insert(ignore_permissions=True)
 
-		opp_doc = frappe.get_doc(args).insert(ignore_permissions=True)
 		self.assertTrue(opp_doc.party_name)
 		self.assertEqual(opp_doc.opportunity_from, "Customer")
 		self.assertEqual(opp_doc.party_name, customer.name)
