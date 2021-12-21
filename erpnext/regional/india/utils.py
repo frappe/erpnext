@@ -213,7 +213,7 @@ def get_regional_address_details(party_details, doctype, company):
 		tax_template_by_category = get_tax_template_based_on_category(master_doctype, company, party_details)
 
 	if tax_template_by_category:
-		party_details.get['taxes_and_charges'] = tax_template_by_category
+		party_details['taxes_and_charges'] = tax_template_by_category
 		return
 
 	if not party_details.place_of_supply: return party_details
