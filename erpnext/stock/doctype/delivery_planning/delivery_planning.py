@@ -624,6 +624,9 @@ class DeliveryPlanning(Document):
 				dnote.related_delivery_planning = self.name
 				dnote.transporter = d.transporter
 
+				t_name = frappe.db.get_value('Supplier', d.transporter, 'supplier_name')
+				dnote.transporter_name = t_name
+
 				item = frappe.db.get_all('Delivery Planning Item',
 										filters={'related_delivey_planning': self.name,
 													'supplier_dc': 0,
