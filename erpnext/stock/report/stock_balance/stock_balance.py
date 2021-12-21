@@ -167,7 +167,7 @@ def get_stock_ledger_entries(filters, items):
 			sle.company, sle.voucher_type, sle.qty_after_transaction, sle.stock_value_difference,
 			sle.item_code as name, sle.voucher_no, sle.stock_value, sle.batch_no
 		from
-			`tabStock Ledger Entry` sle force index (posting_sort_index)
+			`tabStock Ledger Entry` sle
 		where sle.docstatus < 2 %s %s
 		and is_cancelled = 0
 		order by sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty""" % #nosec
