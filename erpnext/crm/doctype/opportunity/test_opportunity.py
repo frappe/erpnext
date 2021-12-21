@@ -49,10 +49,6 @@ class TestOpportunity(unittest.TestCase):
 		contact.add_email(opp_doc.contact_email, is_primary=True)
 		contact.insert(ignore_permissions=True)
 
-		self.assertTrue(opp_doc.party_name)
-		self.assertEqual(opp_doc.opportunity_from, "Lead")
-		self.assertEqual(opp_doc.party_name, customer.name)
-
 	def test_opportunity_item(self):
 		opportunity_doc = make_opportunity(with_items=1, rate=1100, qty=2)
 		self.assertEqual(opportunity_doc.total, 2200)
