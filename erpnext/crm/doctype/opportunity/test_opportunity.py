@@ -50,7 +50,7 @@ class TestOpportunity(unittest.TestCase):
 		contact.insert(ignore_permissions=True)
 
 		self.assertTrue(opp_doc.party_name)
-		self.assertEqual(opp_doc.opportunity_from, "Customer")
+		self.assertEqual(opp_doc.opportunity_from, "Lead")
 		self.assertEqual(opp_doc.party_name, customer.name)
 
 	def test_opportunity_item(self):
