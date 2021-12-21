@@ -65,8 +65,8 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 			is_stock_item = frappe.get_cached_value('Item', args.get("item_code"), 'is_stock_item')
 			if is_stock_item:
 				bin_name = get_or_make_bin(args.get("item_code"), args.get("warehouse"))
-				update_bin_qty(bin_name, args)
 				repost_current_voucher(args, allow_negative_stock, via_landed_cost_voucher)
+				update_bin_qty(bin_name, args)
 			else:
 				frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
 
@@ -1157,7 +1157,7 @@ def _round_off_if_near_zero(number: float, precision: int = 6) -> float:
 	""" Rounds off the number to zero only if number is close to zero for decimal
 		specified in precision. Precision defaults to 6.
 	"""
-	if flt(number) < (1.0 / (10**precision)):
-		return 0
+	if abs(0.0 - flt(number)) < (1.0 / (10**precision)):
+		return 0.0
 
 	return flt(number)
