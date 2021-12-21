@@ -46,7 +46,12 @@ class JobOpening(WebsiteGenerator):
 			designation_counts = get_designation_counts(self.designation, self.company)
 			current_count = designation_counts['employee_count'] + designation_counts['job_openings']
 
-			if self.planned_vacancies <= current_count:
+			number_of_positions = frappe.db.sql("""
+				select number_of_positions from `tabStaffing Plan Detail`
+				where parent=%s and designation=%s""", (self.staffing_plan, self.designation))
+			expected_number_of_positions = number_of_positions[0][0] if number_of_positions else None
+
+			if expected_number_of_positions <= current_count:
 				frappe.throw(_("Job Openings for designation {0} already open or hiring completed as per Staffing Plan {1}").format(
 					self.designation, self.staffing_plan))
 
