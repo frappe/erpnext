@@ -33,7 +33,7 @@ def execute(filters=None):
 
 	if filters.get('show_stock_ageing_data'):
 		filters['show_warehouse_wise_stock'] = True
-		item_wise_fifo_queue = FIFOSlots().generate(filters, sle)
+		item_wise_fifo_queue = FIFOSlots(filters, sle).generate()
 
 	# if no stock ledger entry found return
 	if not sle:
