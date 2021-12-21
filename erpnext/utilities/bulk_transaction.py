@@ -52,48 +52,20 @@ def task(doc_name, from_doctype, to_doctype):
 	from erpnext.stock.doctype.delivery_note import delivery_note
 	from erpnext.stock.doctype.purchase_receipt import purchase_receipt
 
-	# From Sales Order
-	if from_doctype == "Sales Order" and to_doctype == "Sales Invoice":
-		obj = sales_order.make_sales_invoice(doc_name)
-	if from_doctype == "Sales Order" and to_doctype == "Delivery Note":
-		obj = sales_order.make_delivery_note(doc_name)
-	if from_doctype == "Sales Order" and to_doctype == "Advance Payment":
-		obj = payment_entry.get_payment_entry(from_doctype, doc_name)
-	# From Sales Invoice
-	if from_doctype == "Sales Invoice" and to_doctype == "Delivery Note":
-		obj = sales_invoice.make_delivery_note(doc_name)
-	if from_doctype == "Sales Invoice" and to_doctype == "Payment":
-		obj = payment_entry.get_payment_entry(from_doctype, doc_name)
-	# From Delivery Note
-	if from_doctype == "Delivery Note" and to_doctype == "Sales Invoice":
-		obj = delivery_note.make_sales_invoice(doc_name)
-	if from_doctype == "Delivery Note" and to_doctype == "Packing Slip":
-		obj = delivery_note.make_packing_slip(doc_name)
-	# From Quotation
-	if from_doctype == "Quotation" and to_doctype == "Sales Order":
-		obj = quotation.make_sales_order(doc_name)
-	if from_doctype == "Quotation" and to_doctype == "Sales Invoice":
-		obj = quotation.make_sales_invoice(doc_name)
-	# From Supplier Quotation
-	if from_doctype == "Supplier Quotation" and to_doctype == "Purchase Order":
-		obj = supplier_quotation.make_purchase_order(doc_name)
-	if from_doctype == "Supplier Quotation" and to_doctype == "Purchase Invoice":
-		obj = supplier_quotation.make_purchase_invoice(doc_name)
-	# From Purchase Order
-	if from_doctype == "Purchase Order" and to_doctype == "Purchase Invoice":
-		obj = purchase_order.make_purchase_invoice(doc_name)
-	if from_doctype == "Purchase Order" and to_doctype == "Purchase Receipt":
-		obj = purchase_order.make_purchase_receipt(doc_name)
-	if from_doctype == "Purchase Order" and to_doctype == "Advance Payment":
-		obj = payment_entry.get_payment_entry(from_doctype, doc_name)
-	# From Purchase Invoice
-	if from_doctype == "Purchase Invoice" and to_doctype == "Purchase Receipt":
-		obj = purchase_invoice.make_purchase_receipt(doc_name)
-	if from_doctype == "Purchase Invoice" and to_doctype == "Payment":
-		obj = payment_entry.get_payment_entry(from_doctype, doc_name)
-	# From Purchase Receipt
-	if from_doctype == "Purchase Receipt" and to_doctype == "Purchase Invoice":
-		obj = purchase_receipt.make_purchase_invoice(doc_name)
+	mapper = {
+				"Sales Order": {"Sales Invoice": sales_order.make_sales_invoice, "Delivery Note": sales_order.make_delivery_note, "Advance Payment": payment_entry.get_payment_entry},
+				"Sales Invoice": {"Delivery Note": sales_invoice.make_delivery_note, "Payment": payment_entry.get_payment_entry},
+				"Delivery Note": {"Sales Invoice": delivery_note.make_sales_invoice, "Packing Slip": delivery_note.make_packing_slip},
+				"Quotation": {"Sales Order": quotation.make_sales_order, "Sales Invoice": quotation.make_sales_invoice},
+				"Supplier Quotation": {"Purchase Order": supplier_quotation.make_purchase_order, "Purchase Invoice": supplier_quotation.make_purchase_invoice, "Advance Payment": payment_entry.get_payment_entry},
+				"Purchase Order": {"Purchase Invoice": purchase_order.make_purchase_invoice, "Purchase Receipt": purchase_order.make_purchase_receipt},
+				"Purhcase Invoice": {"Purchase Receipt": purchase_invoice.make_purchase_receipt, "Payment": payment_entry.get_payment_entry},
+				"Purchase Receipt": {"Purchase Invoice": purchase_receipt.make_purchase_invoice}
+			}
+	if to_doctype == "Advance Payment" or to_doctype == "Payment":
+		obj = mapper[from_doctype][to_doctype](from_doctype, doc_name)
+	else:
+		obj = mapper[from_doctype][to_doctype](doc_name)
 
 	obj.flags.ignore_validate = True
 	obj.insert(ignore_mandatory=True)
