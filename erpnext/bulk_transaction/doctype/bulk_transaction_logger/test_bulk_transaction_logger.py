@@ -46,16 +46,12 @@ def create_company():
 			'default_currency': 'INR'
 		}).insert()
 
-	return company
-
 def create_customer():
 	if not frappe.db.exists('Customer', 'Bulk Customer'):
 		customer = frappe.get_doc({
             'doctype': 'Customer',
             'customer_name': 'Bulk Customer'
         }).insert()
-
-	return customer
 
 def create_item():
 	if not frappe.db.exists("Item", "MK"):
@@ -66,8 +62,6 @@ def create_item():
 			"description": "Milk",
 			"item_group": "Products"
 		}).insert()
-
-	return item
 
 def create_so():
 	so = frappe.new_doc("Sales Order")
