@@ -85,10 +85,10 @@ class SalesForUser(Document):
 		dates_reverse = sorted(dates, reverse=False)
 
 		self.total_exempt_sales = 0
-	
+
 		for date in dates_reverse:
 			split_date = str(date).split("T")[0].split("-")
-			creation_date = "-".join(reversed(split_date))		
+			creation_date = "-".join(reversed(split_date))
 			initial_range = ""
 			final_range = ""
 			authorized_range = ""
@@ -104,7 +104,7 @@ class SalesForUser(Document):
 			grand_total = 0
 			gross = 0
 
-			for salary_slip in salary_slips: 
+			for salary_slip in salary_slips:
 				date_validate = salary_slip.posting_date.strftime('%Y-%m-%d')
 				if date == date_validate and salary_slip.status != "Return":
 					if cont == 0:
@@ -163,23 +163,24 @@ class SalesForUser(Document):
 		self.total_credit = outstanding_amount
 
 	def return_filters(self):
-		conditions = ''	
+		conditions = ''
 
 		conditions += "{"
 		conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(self.start_date, self.final_date)
 		conditions += ', "naming_series": "{}"'.format(self.prefix)
 		conditions += ', "company": "{}"'.format(self.company)
-		conditions += ', "posting_time": [">", "{}"]'.format(self.start_hour)
-		conditions += ', "posting_time": ["<", "{}"]'.format(self.final_hour)
+		# conditions += '"posting_time": ["between", ["{}", "{}"]]'.format(self.start_hour, self.final_hour)
+		conditions += ', "posting_time": [">=", "{}"]'.format(self.start_hour)
+		conditions += ', "posting_time": ["<=", "{}"]'.format(self.final_hour)
 		if self.user != None:
 			conditions += ', "cashier": "{}"'.format(self.user)
 		# conditions += ', "is_pos": 1'.format(self.user)
-		conditions += '}'			
+		conditions += '}'
 
 		return conditions
 
 	def return_filters_sql(self):
-		conditions = ''	
+		conditions = ''
 
 		# conditions += "{"
 		# conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(self.start_date, self.final_date)
@@ -188,7 +189,7 @@ class SalesForUser(Document):
 		# conditions += ', "posting_time": [">", "{}"]'.format(self.start_hour)
 		# conditions += ', "posting_time": ["<", "{}"]'.format(self.final_hour)
 		# conditions += ', "cashier": "{}"'.format(self.user)
-		# conditions += '}'			
+		# conditions += '}'
 
 		conditions += ' and company = {}'.format(self.company)
 		conditions += ' and posting_date >= {}'.format(self.start_date)
