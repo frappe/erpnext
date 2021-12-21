@@ -41,6 +41,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		me.frm.set_query('contact_person', erpnext.queries.contact_query);
 		me.frm.set_query('customer_address', erpnext.queries.address_query);
 		me.frm.set_query('shipping_address_name', erpnext.queries.address_query);
+		me.frm.set_query('dispatch_address_name', erpnext.queries.dispatch_address_query);
 
 
 		if(this.frm.fields_dict.selling_price_list) {
