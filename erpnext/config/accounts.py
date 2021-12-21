@@ -458,6 +458,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Ledger",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
 					"name": "Profit and Loss Statement",
 					"doctype": "GL Entry",
 					"is_query_report": True
