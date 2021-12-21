@@ -21,7 +21,7 @@ class TestLandedCostVoucher(ERPNextTestCase):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 
 		pr = make_purchase_receipt(company="_Test Company with perpetual inventory",
-			warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1",
+			warehouse = "Stores - TCP1", supplier_warehouse = "Work In Progress - TCP1",
 			get_multiple_items = True, get_taxes_and_charges = True)
 
 		last_sle = frappe.db.get_value("Stock Ledger Entry", {
@@ -133,7 +133,7 @@ class TestLandedCostVoucher(ERPNextTestCase):
 	def test_landed_cost_voucher_for_serialized_item(self):
 		frappe.db.sql("delete from `tabSerial No` where name in ('SN001', 'SN002', 'SN003', 'SN004', 'SN005')")
 		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1",
-		supplier_warehouse = "Work in Progress - TCP1", get_multiple_items = True,
+		supplier_warehouse = "Work In Progress - TCP1", get_multiple_items = True,
 		get_taxes_and_charges = True, do_not_submit = True)
 
 		pr.items[0].item_code = "_Test Serialized Item"
@@ -152,7 +152,7 @@ class TestLandedCostVoucher(ERPNextTestCase):
 
 
 	def test_landed_cost_voucher_for_odd_numbers (self):
-		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", do_not_save=True)
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work In Progress - TCP1", do_not_save=True)
 		pr.items[0].cost_center = "Main - TCP1"
 		for x in range(2):
 			pr.append("items", {
