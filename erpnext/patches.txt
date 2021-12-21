@@ -337,6 +337,7 @@ erpnext.patches.v14_0.delete_agriculture_doctypes
 erpnext.patches.v13_0.update_exchange_rate_settings
 erpnext.patches.v14_0.update_leave_notification_template
 erpnext.patches.v14_0.restore_einvoice_fields
+<<<<<<< HEAD
 erpnext.patches.v14_0.rearrange_company_fields
 =======
 erpnext.patches.v13_0.create_website_items
@@ -346,3 +347,9 @@ erpnext.patches.v13_0.make_homepage_products_website_items
 =======
 erpnext.patches.v13_0.fetch_thumbnail_in_website_items
 >>>>>>> dc42c45ebb (fix: Move thumbnail updation to different patch)
+=======
+erpnext.patches.v13_0.update_sane_transfer_against
+erpnext.patches.v12_0.add_company_link_to_einvoice_settings
+erpnext.patches.v14_0.migrate_cost_center_allocations
+erpnext.patches.v13_0.convert_to_website_item_in_item_card_group_template
+>>>>>>> 456f27724c (fix: Convert Item links to Website Item links in Item Card Group template data)
