@@ -14,7 +14,7 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 Filters = frappe._dict
 
-def execute(filters: Filters =None) -> Tuple:
+def execute(filters: Filters = None) -> Tuple:
 	to_date = filters["to_date"]
 	columns = get_columns(filters)
 
@@ -218,10 +218,10 @@ def setup_ageing_columns(filters: Filters, range_columns: List):
 		f"{cint(filters['range3']) + 1} - {_('Above')}"
 	]
 	for i, label in enumerate(ranges):
-			fieldname = 'range' + str(i+1)
-			add_column(range_columns, label=f"Age ({label})",fieldname=fieldname)
+		fieldname = 'range' + str(i+1)
+		add_column(range_columns, label=f"Age ({label})",fieldname=fieldname)
 
-def add_column(range_columns: List, label:str, fieldname: str, fieldtype: str ='Float', width: int =140):
+def add_column(range_columns: List, label:str, fieldname: str, fieldtype: str = 'Float', width: int = 140):
 	range_columns.append(dict(
 		label=label,
 		fieldname=fieldname,
@@ -233,7 +233,7 @@ def add_column(range_columns: List, label:str, fieldname: str, fieldtype: str ='
 class FIFOSlots:
 	"Returns FIFO computed slots of inwarded stock as per date."
 
-	def __init__(self, filters: Dict =None , sle: List =None):
+	def __init__(self, filters: Dict = None , sle: List = None):
 		self.item_details = {}
 		self.transferred_item_details = {}
 		self.serial_no_batch_purchase_details = {}
@@ -250,7 +250,7 @@ class FIFOSlots:
 					consumed/updated and maintained via FIFO. **
 			}
 		"""
-		if self.sle == None:
+		if self.sle is None:
 			self.sle = self.__get_stock_ledger_entries()
 
 		for d in self.sle:
@@ -363,7 +363,8 @@ class FIFOSlots:
 				posting_date <= %(to_date)s and
 				is_cancelled != 1
 				{sle_conditions}
-			order by posting_date, posting_time, sle.creation, actual_qty""" #nosec
+			order by posting_date, posting_time, sle.creation, actual_qty
+			""" #nosec
 			.format(
 				item_conditions=self.__get_item_conditions(),
 				sle_conditions=self.__get_sle_conditions()
