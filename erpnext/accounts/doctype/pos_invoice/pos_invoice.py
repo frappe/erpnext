@@ -142,7 +142,7 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(_("Row #{}: Batch No. {} of item {} has no stock available. Please select valid batch no.")
 						.format(item.idx, bold_invalid_batch_no, bold_item_name), title=_("Item Unavailable"))
 		elif (available_batch_qty - reserved_batch_qty - item.qty) < 0:
-			frappe.throw(_("Row #{}: Batch No. {}  of item {} has less than required stock available, {} more required")
+			frappe.throw(_("Row #{}: Batch No. {} of item {} has less than required stock available, {} more required")
 						.format(item.idx, bold_invalid_batch_no, bold_item_name, bold_extra_batch_qty_needed), title=_("Item Unavailable"))
 
 	def validate_delivered_serial_nos(self, item):
