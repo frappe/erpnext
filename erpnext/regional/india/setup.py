@@ -170,7 +170,7 @@ def get_custom_fields():
 		dict(fieldname='gst_category', label='GST Category',
 			fieldtype='Select', insert_after='gst_section', print_hide=1,
 			options='\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
-			fetch_from='customer.gst_category', fetch_if_empty=1, length=25),
+			fetch_from='customer_address.gst_category', fetch_if_empty=1, length=25),
 		dict(fieldname='export_type', label='Export Type',
 			fieldtype='Select', insert_after='gst_category', print_hide=1,
 			depends_on='eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',

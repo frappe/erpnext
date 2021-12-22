@@ -13,7 +13,7 @@ from erpnext.payroll.doctype.salary_structure.salary_structure import make_salar
 from erpnext.regional.india import number_state_mapping, state_numbers, states
 
 #alphanumeric and - /
-GST_INVOICE_NUMBER_FORMAT = re.compile(r"^[a-zA-Z0-9\-/]+$")   
+GST_INVOICE_NUMBER_FORMAT = re.compile(r"^[a-zA-Z0-9\-/]+$")
 GSTIN_FORMAT = re.compile("^[0-9]{2}[A-Z]{4}[0-9A-Z]{1}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[1-9A-Z]{1}[0-9A-Z]{1}$")
 GSTIN_UIN_FORMAT = re.compile("^[0-9]{4}[A-Z]{3}[0-9]{5}[0-9A-Z]{3}")
 PAN_NUMBER_FORMAT = re.compile("[A-Z]{5}[0-9]{4}[A-Z]{1}")
@@ -57,8 +57,8 @@ def validate_gstin_for_india(doc, method):
 
 def validate_gst_category(doc, valid_gst_category):
 	if doc.gst_category not in valid_gst_category:
-		frappe.throw(_("GST Category can be one of {}."
-			.format(', '.join(valid_gst_category))), title=_("Invalid GST Category"))
+		frappe.throw(_("GST Category can be one of {0}.")
+			.format(', '.join(valid_gst_category)), title=_("Invalid GST Category"))
 
 def validate_pan_for_india(doc, method):
 	if doc.get('country') != 'India' or not doc.get('pan'):
@@ -211,10 +211,10 @@ def get_regional_address_details(party_details, doctype, company):
 		party_details['taxes_and_charges'] = tax_template_by_category
 		return
 
-	if not party_details.place_of_supply: 
+	if not party_details.place_of_supply:
 		return party_details
 
-	if not party_details.company_gstin: 
+	if not party_details.company_gstin:
 		return party_details
 
 	if ((doctype in ("Sales Invoice", "Delivery Note", "Sales Order") and party_details.company_gstin
