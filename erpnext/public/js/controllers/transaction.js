@@ -1562,7 +1562,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	_set_values_for_item_list: function(children) {
 		var me = this;
-		var price_list_rate_changed = false;
 		var items_rule_dict = {};
 
 		for(var i=0, l=children.length; i<l; i++) {
@@ -1573,7 +1572,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				var v = d[k];
 				if (["doctype", "name"].indexOf(k)===-1) {
 					if(k=="price_list_rate") {
-						if(flt(v) != flt(d.price_list_rate)) price_list_rate_changed = true;
 						item_row['rate'] = v;
 					}
 
@@ -1602,7 +1600,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		me.frm.refresh_field('items');
 		me.apply_rule_on_other_items(items_rule_dict);
 
-		if(!price_list_rate_changed) me.calculate_taxes_and_totals();
+		me.calculate_taxes_and_totals();
 	},
 
 	apply_rule_on_other_items: function(args) {
