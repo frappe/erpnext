@@ -54,5 +54,5 @@ def make_new_website_item(item, web_template_value, field):
         return web_item[0]
     except Exception:
         title = f"{item}: Error while converting to Website Item "
-        frappe.log_error(title + "for Item Card Group Template" + "\n\n" +  frappe.get_traceback(), title=title)
+        frappe.log_error(title + "for Item Card Group Template" + "\n\n" + frappe.get_traceback(), title=title)
         return None
