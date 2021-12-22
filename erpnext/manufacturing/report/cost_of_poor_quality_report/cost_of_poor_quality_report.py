@@ -3,7 +3,6 @@
 
 import frappe
 from frappe import _
-from pypika import Criterion
 
 
 def execute(filters=None):
@@ -28,37 +27,35 @@ def get_data(report_filters):
 		job_card = frappe.qb.DocType("Job Card")
 		operatingcost = ((job_card.hour_rate) * (job_card.total_time_in_mins) / 60.0).as_('operating_cost')
 		itemcode = (job_card.production_item).as_('item_code')
-		query = (
-			frappe.qb.from_(job_card)
-			.select(job_card.name, job_card.work_order, itemcode, job_card.item_name, job_card.operation,
-			job_card.serial_no, job_card.batch_no, job_card.workstation, job_card.total_time_in_mins, job_card.hour_rate,
-			operatingcost)
-			.where(
-				Criterion.all([
-					job_card.docstatus==1 ,
-					job_card.is_corrective_job_card == 1,
-					job_card.name.like('%{}%'.format(report_filters.get('name',''))),
-					job_card.work_order.like('%{}%'.format(report_filters.get('work_order',''))),
-					job_card.workstation.like('%{}%'.format(report_filters.get('workstation',''))),
-					job_card.company.like('%{}%'.format(report_filters.get('company',''))),
-					job_card.serial_no.like('%{}%'.format(report_filters.get('serial_no',''))),
-					job_card.batch_no.like('%{}%'.format(report_filters.get('batch_no',''))),
-					job_card.production_item.like('%{}%'.format(report_filters.get('production_item',''))),
-					job_card.serial_no.like('%{}%'.format(report_filters.get('serial_no',''))),
-					job_card.operation.isin(operations)
-							])
-				  )
-			.where(job_card.name.isin(
-				frappe.qb.from_(job_card_time_log)
-				.select(job_card_time_log.parent)
-				.where(job_card_time_log.parent == job_card.name)
-				.where(job_card_time_log.from_time >= report_filters.get('from_date',''))
-				.where(job_card_time_log.to_time <= report_filters.get('to_date',''))
-									)
-				  )
-		    )
+		query = (frappe.qb.from_(job_card)
+				.select(job_card.name, job_card.work_order, itemcode, job_card.item_name, job_card.operation,
+				job_card.serial_no, job_card.batch_no, job_card.workstation, job_card.total_time_in_mins, job_card.hour_rate,
+				operatingcost)
+				.where(job_card.docstatus==1)
+				.where(job_card.is_corrective_job_card==1)
+				.where(job_card.name.isin(
+					frappe.qb.from_(job_card_time_log)
+					.select(job_card_time_log.parent)
+					.where(job_card_time_log.parent == job_card.name)
+					.where(job_card_time_log.from_time >= report_filters.get('from_date',''))
+					.where(job_card_time_log.to_time <= report_filters.get('to_date',''))
+										)
+					)
+				)
+		query = append_filters(report_filters,operations,query,job_card)
 		data = query.run()
 	return data
+
+def append_filters(report_filters, operations,query,job_Card):
+	for field in ["name", "work_order", "operation", "workstation", "company", "serial_no", "batch_no", "production_item"]:
+		if report_filters.get(field):
+			if field == 'serial_no':
+				query = query.where(job_Card[field].like('%{}%'.format(report_filters.get(field))))
+			elif field == 'operation':
+				query = query.where(job_Card[field].isin(operations))
+			else:
+				query = query.where(job_Card[field] ==report_filters.get(field))
+	return query
 
 def get_columns(filters):
 	return [
