@@ -6,6 +6,9 @@ from datetime import date
 
 import frappe
 
+from erpnext.bulk_transaction.doctype.bulk_transaction_logger.bulk_transaction_logger import (
+	retry_failing_transaction,
+)
 from erpnext.utilities.bulk_transaction import transaction_processing
 
 
@@ -36,6 +39,28 @@ class TestBulkTransactionLogger(unittest.TestCase):
 				self.assertEqual(d.to_doctype, "Sales Invoice")
 				self.assertEqual(d.retried, 0)
 
+	def test_bypass_failing_transaction(self):
+		so_name = create_so()
+		data = [{"name": "SAL_ORD_12345"}, {"name": so_name}]
+		transaction_processing(data, "Sales Order", "Sales Invoice")
+
+		doc = frappe.get_doc("Bulk Transaction Logger", str(date.today()))
+		for d in doc.get("logger_data"):
+			if d.get('transaction_name') == data[0]["name"]:
+				self.assertEqual(d.get('transaction_status'), "Failed")
+
+			if d.get('transaction_name') == data[1]["name"]:
+				self.assertEqual(d.get('transaction_status'), "Success")
+
+	def test_retry_failing_transaction(self):
+		data = [{"name": "SAL_ORD_12345"}]
+		transaction_processing(data, "Sales Order", "Sales Invoice")
+		retry_failing_transaction()
+		doc = frappe.get_doc("Bulk Transaction Logger", str(date.today()))
+		for d in doc.get("logger_data"):
+			if d.get('transaction_name') == data[0]["name"]:
+				self.assertEqual(d.get('transaction_status'), "Failed")
+				self.assertEqual(d.retried, 1)
 
 def create_company():
 	if not frappe.db.exists('Company', 'Test Bulk'):
