@@ -43,9 +43,9 @@ class Bin(Document):
 				frappe.qb
 					.from_(wo)
 					.from_(wo_item)
-					.select(Case()
-							.when(wo.skip_transfer == 0, Sum(wo_item.required_qty - wo_item.transferred_qty))
-							.else_(Sum(wo_item.required_qty - wo_item.consumed_qty))
+					.select(Sum(Case()
+							.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
+							.else_(wo_item.required_qty - wo_item.consumed_qty))
 						)
 					.where(
 						(wo_item.item_code == self.item_code)
@@ -130,8 +130,8 @@ def update_stock(bin_name, args, allow_negative_stock=False, via_landed_cost_vou
 	"""WARNING: This function is deprecated. Inline this function instead of using it."""
 	from erpnext.stock.stock_ledger import repost_current_voucher
 
-	update_qty(bin_name, args)
 	repost_current_voucher(args, allow_negative_stock, via_landed_cost_voucher)
+	update_qty(bin_name, args)
 
 def get_bin_details(bin_name):
 	return frappe.db.get_value('Bin', bin_name, ['actual_qty', 'ordered_qty',
@@ -139,13 +139,23 @@ def get_bin_details(bin_name):
 	'reserved_qty_for_sub_contract'], as_dict=1)
 
 def update_qty(bin_name, args):
-	bin_details = get_bin_details(bin_name)
+	from erpnext.controllers.stock_controller import future_sle_exists
 
-	# update the stock values (for current quantities)
-	if args.get("voucher_type")=="Stock Reconciliation":
-		actual_qty = args.get('qty_after_transaction')
-	else:
-		actual_qty = bin_details.actual_qty + flt(args.get("actual_qty"))
+	bin_details = get_bin_details(bin_name)
+	# actual qty is already updated by processing current voucher
+	actual_qty = bin_details.actual_qty
+
+	# actual qty is not up to date in case of backdated transaction
+	if future_sle_exists(args):
+		actual_qty = frappe.db.get_value("Stock Ledger Entry",
+				filters={
+					"item_code": args.get("item_code"),
+					"warehouse": args.get("warehouse"),
+					"is_cancelled": 0
+				},
+				fieldname="qty_after_transaction",
+				order_by="posting_date desc, posting_time desc, creation desc",
+			) or 0.0
 
 	ordered_qty = flt(bin_details.ordered_qty) + flt(args.get("ordered_qty"))
 	reserved_qty = flt(bin_details.reserved_qty) + flt(args.get("reserved_qty"))
