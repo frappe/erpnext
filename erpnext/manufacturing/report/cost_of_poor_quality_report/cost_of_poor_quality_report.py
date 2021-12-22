@@ -39,7 +39,7 @@ def get_data(report_filters):
 					.where(job_card_time_log.parent == job_card.name)
 					.where(job_card_time_log.from_time >= report_filters.get('from_date',''))
 					.where(job_card_time_log.to_time <= report_filters.get('to_date',''))
-										)
+												)
 					)
 				)
 		query = append_filters(report_filters,operations,query,job_card)
