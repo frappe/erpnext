@@ -33,7 +33,6 @@ def execute():
                 website_item = frappe.db.get_value("Website Item", {"item_code": item})
             else:
                 website_item = make_new_website_item(item)
-                continue
 
             if website_item:
                 web_template_value[field] = website_item
