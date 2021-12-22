@@ -141,14 +141,15 @@ class BOM(WebsiteGenerator):
 		if not self.company:
 			frappe.throw(_("Please select a Company first."), title=_("Mandatory"))
 
-		items_in_msg = []
-		for idx, scrap_item in enumerate(self.scrap_items):
-			if isinstance(scrap_item.stock_qty, float) and frappe.db.get_value("UOM", scrap_item.stock_uom, "must_be_whole_number"):
-				self.scrap_items[idx].stock_qty = trunc(scrap_item.stock_qty)
-				items_in_msg.append(f"<b>{scrap_item.item_name}</b>")
-		if items_in_msg:
-			frappe.msgprint("Scrap cannot be in fraction for Item(s): " + ", ".join(map(str, items_in_msg)))
+		# items_in_msg = []
+		# for idx, scrap_item in enumerate(self.scrap_items):
+		# 	if isinstance(scrap_item.stock_qty, float) and frappe.db.get_value("UOM", scrap_item.stock_uom, "must_be_whole_number"):
+		# 		self.scrap_items[idx].stock_qty = trunc(scrap_item.stock_qty)
+		# 		items_in_msg.append(f"<b>{scrap_item.item_name}</b>")
+		# if items_in_msg:
+		# 	frappe.msgprint("Scrap cannot be in fraction for Item(s): " + ", ".join(map(str, items_in_msg)))
 
+		self.validate_scrap_item_qty()
 		self.clear_operations()
 		self.validate_main_item()
 		self.validate_currency()
@@ -390,6 +391,17 @@ class BOM(WebsiteGenerator):
 			item = frappe.get_doc("Item", self.item)
 			if item.default_bom == self.name:
 				frappe.db.set_value('Item', self.item, 'default_bom', None)
+
+	def validate_scrap_item_qty(self):
+		items_in_msg = []
+
+		for idx, scrap_item in enumerate(self.scrap_items):
+			if isinstance(scrap_item.stock_qty, float) and frappe.db.get_value("UOM", scrap_item.stock_uom, "must_be_whole_number"):
+				self.scrap_items[idx].stock_qty = trunc(scrap_item.stock_qty)
+				items_in_msg.append(f"<b>{scrap_item.item_name}</b>")
+
+		if items_in_msg:
+			frappe.msgprint("Scrap rounded down since it cannot be a fraction for Item(s): " + ", ".join(map(str, items_in_msg)), alert=True, indicator="orange")
 
 	def clear_operations(self):
 		if not self.with_operations:
