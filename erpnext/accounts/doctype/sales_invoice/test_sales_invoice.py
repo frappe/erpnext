@@ -2490,6 +2490,7 @@ def make_test_address_for_ewaybill():
 			"gstin": "27AAECE4835E1ZR",
 			"gst_state": "Maharashtra",
 			"gst_state_number": "27",
+			"gst_category": "Registered Regular",
 			"pincode": "401108"
 		}).insert()
 
@@ -2515,6 +2516,7 @@ def make_test_address_for_ewaybill():
 			"gstin": "27AACCM7806M1Z3",
 			"gst_state": "Maharashtra",
 			"gst_state_number": "27",
+			"gst_category": "Registered Regular",
 			"pincode": "410038"
 		}).insert()
 
@@ -2562,6 +2564,7 @@ def make_test_address_for_ewaybill():
 			"is_primary_address": 0,
 			"phone": "+910000000000",
 			"gstin": "07AAACC1206D1ZI",
+			"gst_category": "Registered Regular",
 			"gst_state": "Delhi",
 			"gst_state_number": "07",
 			"pincode": "1100101"

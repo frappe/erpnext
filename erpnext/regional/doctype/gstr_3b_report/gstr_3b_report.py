@@ -397,22 +397,14 @@ class GSTR3BReport(Document):
 
 		for doctype in ["Sales Invoice", "Purchase Invoice"]:
 
-			if doctype == "Sales Invoice":
-				party_type = 'Customer'
-				party = 'customer'
-			else:
-				party_type = 'Supplier'
-				party = 'supplier'
-
 			docnames = frappe.db.sql(
 			"""
-				SELECT t1.name FROM `tab{doctype}` t1, `tab{party_type}` t2
-				WHERE t1.docstatus = 1 and t1.is_opening = 'No'
-				and month(t1.posting_date) = %s and year(t1.posting_date) = %s
-				and t1.company = %s and t1.place_of_supply IS NULL and t1.{party} = t2.name and
-				t2.gst_category != 'Overseas'
-			""".format(doctype = doctype, party_type = party_type,
-				party=party) ,(self.month_no, self.year, self.company), as_dict=1) #nosec
+				SELECT name FROM `tab{doctype}`
+				WHERE docstatus = 1 and is_opening = 'No'
+				and month(posting_date) = %s and year(posting_date) = %s
+				and company = %s and place_of_supply IS NULL and
+				gst_category != 'Overseas'
+			""".format(doctype = doctype) ,(self.month_no, self.year, self.company), as_dict=1) # nosec
 
 			for d in docnames:
 				missing_field_invoices.append(d.name)

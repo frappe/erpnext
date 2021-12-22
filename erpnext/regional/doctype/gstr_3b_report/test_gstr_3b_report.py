@@ -103,44 +103,6 @@ class TestGSTR3BReport(unittest.TestCase):
 		gst_settings.round_off_gst_values = 1
 		gst_settings.save()
 
-	def test_gst_category_auto_update(self):
-		if not frappe.db.exists("Customer", "_Test GST Customer With GSTIN"):
-			customer = frappe.get_doc({
-				"customer_group": "_Test Customer Group",
-				"customer_name": "_Test GST Customer With GSTIN",
-				"customer_type": "Individual",
-				"doctype": "Customer",
-				"territory": "_Test Territory"
-			}).insert()
-
-			self.assertEqual(customer.gst_category, 'Unregistered')
-
-		if not frappe.db.exists('Address', '_Test GST Category-1-Billing'):
-			address = frappe.get_doc({
-				"address_line1": "_Test Address Line 1",
-				"address_title": "_Test GST Category-1",
-				"address_type": "Billing",
-				"city": "_Test City",
-				"state": "Test State",
-				"country": "India",
-				"doctype": "Address",
-				"is_primary_address": 1,
-				"phone": "+91 0000000000",
-				"gstin": "29AZWPS7135H1ZG",
-				"gst_state": "Karnataka",
-				"gst_state_number": "29"
-			}).insert()
-
-			address.append("links", {
-				"link_doctype": "Customer",
-				"link_name": "_Test GST Customer With GSTIN"
-			})
-
-			address.save()
-
-		customer.load_from_db()
-		self.assertEqual(customer.gst_category, 'Registered Regular')
-
 
 def make_sales_invoice():
 	si = create_sales_invoice(company="_Test Company GST",
@@ -284,7 +246,6 @@ def make_suppliers():
 		frappe.get_doc({
 			"supplier_group": "_Test Supplier Group",
 			"supplier_name": "_Test Registered Supplier",
-			"gst_category": "Registered Regular",
 			"supplier_type": "Individual",
 			"doctype": "Supplier",
 		}).insert()
@@ -293,7 +254,6 @@ def make_suppliers():
 		frappe.get_doc({
 			"supplier_group": "_Test Supplier Group",
 			"supplier_name": "_Test Unregistered Supplier",
-			"gst_category": "Unregistered",
 			"supplier_type": "Individual",
 			"doctype": "Supplier",
 		}).insert()
@@ -311,6 +271,7 @@ def make_suppliers():
 			"phone": "+91 0000000000",
 			"gstin": "29AACCV0498C1Z9",
 			"gst_state": "Karnataka",
+			"gst_category": "Registered Regular",
 		}).insert()
 
 		address.append("links", {
@@ -337,7 +298,8 @@ def make_suppliers():
 
 		address.append("links", {
 			"link_doctype": "Supplier",
-			"link_name": "_Test Unregistered Supplier"
+			"link_name": "_Test Unregistered Supplier",
+			"gst_category": "Unregistered",
 		})
 
 		address.save()
@@ -347,7 +309,6 @@ def make_customers():
 		frappe.get_doc({
 			"customer_group": "_Test Customer Group",
 			"customer_name": "_Test GST Customer",
-			"gst_category": "Registered Regular",
 			"customer_type": "Individual",
 			"doctype": "Customer",
 			"territory": "_Test Territory"
@@ -357,7 +318,6 @@ def make_customers():
 		frappe.get_doc({
 			"customer_group": "_Test Customer Group",
 			"customer_name": "_Test GST SEZ Customer",
-			"gst_category": "SEZ",
 			"customer_type": "Individual",
 			"doctype": "Customer",
 			"territory": "_Test Territory"
@@ -367,7 +327,6 @@ def make_customers():
 		frappe.get_doc({
 			"customer_group": "_Test Customer Group",
 			"customer_name": "_Test Unregistered Customer",
-			"gst_category": "Unregistered",
 			"customer_type": "Individual",
 			"doctype": "Customer",
 			"territory": "_Test Territory"
@@ -386,7 +345,8 @@ def make_customers():
 			"phone": "+91 0000000000",
 			"gstin": "29AZWPS7135H1ZG",
 			"gst_state": "Karnataka",
-			"gst_state_number": "29"
+			"gst_state_number": "29",
+			"gst_category": "Registered Regular",
 		}).insert()
 
 		address.append("links", {
@@ -408,6 +368,8 @@ def make_customers():
 			"is_primary_address": 1,
 			"phone": "+91 0000000000",
 			"gst_state": "Haryana",
+			"gst_category": "Unregistered",
+			"gstin": "URP",
 		}).insert()
 
 		address.append("links", {
@@ -429,6 +391,7 @@ def make_customers():
 			"is_primary_address": 1,
 			"phone": "+91 0000000000",
 			"gst_state": "Gujarat",
+			"gst_category": "SEZ",
 		}).insert()
 
 		address.append("links", {
@@ -462,7 +425,8 @@ def make_company():
 			"phone": "+91 0000000000",
 			"gstin": "27AAECE4835E1ZR",
 			"gst_state": "Maharashtra",
-			"gst_state_number": "27"
+			"gst_state_number": "27",
+			"gst_category": "Registered Regular",
 		}).insert()
 
 		address.append("links", {
