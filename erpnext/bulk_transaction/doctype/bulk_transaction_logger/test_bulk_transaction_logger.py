@@ -14,10 +14,12 @@ from erpnext.utilities.bulk_transaction import transaction_processing
 
 class TestBulkTransactionLogger(unittest.TestCase):
 
-	def test_for_single_record(self):
+	def setUp(self):
 		create_company()
 		create_customer()
 		create_item()
+
+	def test_for_single_record(self):
 		so_name = create_so()
 		transaction_processing([{"name": so_name}], "Sales Order", "Sales Invoice")
 		data = frappe.db.get_list("Sales Invoice", filters = {"posting_date": date.today(), "customer": "Bulk Customer"}, fields=["*"])
@@ -25,9 +27,6 @@ class TestBulkTransactionLogger(unittest.TestCase):
 			self.fail("No Sales Invoice Created !")
 
 	def test_entry_in_log(self):
-		create_company()
-		create_customer()
-		create_item()
 		so_name = create_so()
 		transaction_processing([{"name": so_name}], "Sales Order", "Sales Invoice")
 		doc = frappe.get_doc("Bulk Transaction Logger", str(date.today()))
