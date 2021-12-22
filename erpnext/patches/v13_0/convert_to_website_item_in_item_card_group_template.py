@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import List, Union
 
 import frappe
 
@@ -32,7 +32,7 @@ def execute():
             if frappe.db.exists("Website Item", {"item_code": item}):
                 website_item = frappe.db.get_value("Website Item", {"item_code": item})
             else:
-                website_item = make_new_website_item(item, web_template_value, field)
+                website_item = make_new_website_item(item)
                 continue
 
             if website_item:
@@ -47,7 +47,7 @@ def generate_fields_to_edit() -> List:
 
     return fields
 
-def make_new_website_item(item, web_template_value, field):
+def make_new_website_item(item: str) -> Union[str, None]:
     try:
         doc = frappe.get_doc("Item", item)
         web_item = make_website_item(doc) # returns [website_item.name, item_name]
