@@ -27,20 +27,20 @@ def get_data(report_filters):
 		job_card = frappe.qb.DocType("Job Card")
 		operatingcost = ((job_card.hour_rate) * (job_card.total_time_in_mins) / 60.0).as_('operating_cost')
 		itemcode = (job_card.production_item).as_('item_code')
-		query = (frappe.qb.from_(job_card)
-				.select(job_card.name, job_card.work_order, itemcode, job_card.item_name, job_card.operation,
-				job_card.serial_no, job_card.batch_no, job_card.workstation, job_card.total_time_in_mins, job_card.hour_rate,
-				operatingcost)
-				.where(job_card.docstatus==1)
-				.where(job_card.is_corrective_job_card==1)
-				.where(job_card.name.isin(
-					frappe.qb.from_(job_card_time_log)
-					.select(job_card_time_log.parent)
-					.where(job_card_time_log.parent == job_card.name)
-					.where(job_card_time_log.from_time >= report_filters.get('from_date',''))
-					.where(job_card_time_log.to_time <= report_filters.get('to_date',''))
-												)
-					)
+		query = (
+					frappe.qb.from_(job_card)
+					.select(job_card.name, job_card.work_order, itemcode, job_card.item_name, job_card.operation,
+					job_card.serial_no, job_card.batch_no, job_card.workstation, job_card.total_time_in_mins, job_card.hour_rate,
+					operatingcost)
+					.where(job_card.docstatus==1)
+					.where(job_card.is_corrective_job_card==1)
+					.where(job_card.name.isin(
+						frappe.qb.from_(job_card_time_log)
+						.select(job_card_time_log.parent)
+						.where(job_card_time_log.parent == job_card.name)
+						.where(job_card_time_log.from_time >= report_filters.get('from_date',''))
+						.where(job_card_time_log.to_time <= report_filters.get('to_date',''))
+												))
 				)
 		query = append_filters(report_filters,operations,query,job_card)
 		data = query.run()
