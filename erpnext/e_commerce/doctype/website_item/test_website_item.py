@@ -47,12 +47,15 @@ class TestWebsiteItem(unittest.TestCase):
 				]
 			})
 		elif self._testMethodName in WEBITEM_PRICE_TESTS:
+			create_user_if_not_exists("test_contact_customer@example.com", "_Test Contact For _Test Customer")
 			create_regular_web_item()
 			make_web_item_price(item_code="Test Mobile Phone")
 			make_web_pricing_rule(
 				title="Test Pricing Rule for Test Mobile Phone",
 				item_code="Test Mobile Phone",
-				selling=1)
+				selling=1,
+				applicable_for="Customer",
+				customer="test_contact_customer@example.com")
 
 	def test_index_creation(self):
 		"Check if index is getting created in db."
@@ -189,6 +192,9 @@ class TestWebsiteItem(unittest.TestCase):
 
 		# price and pricing rule added via setUp
 
+		# login as customer with pricing rule
+		frappe.set_user("test_contact_customer@example.com")
+
 		# check if price and slashed price is fetched correctly
 		frappe.local.shopping_cart_settings = None
 		data = get_product_info_for_website(item_code, skip_quotation_creation=True)
@@ -201,10 +207,12 @@ class TestWebsiteItem(unittest.TestCase):
 		self.assertEqual(price_object.get("formatted_price"), "₹ 900.00")
 		self.assertEqual(price_object.get("formatted_discount_percent"), "10%")
 
-		# disable show price
+		# switch to admin and disable show price
+		frappe.set_user("Administrator")
 		setup_e_commerce_settings({"show_price": 0})
 
-		# price should not be fetched
+		# price should not be fetched for logged in user.
+		frappe.set_user("test_contact_customer@example.com")
 		frappe.local.shopping_cart_settings = None
 		data = get_product_info_for_website(item_code, skip_quotation_creation=True)
 		self.assertFalse(bool(data.product_info["price"]))
@@ -493,3 +501,18 @@ def make_web_pricing_rule(**kwargs):
 		pricing_rule = frappe.get_doc("Pricing Rule", {"title": title})
 
 	return pricing_rule
+
+
+def create_user_if_not_exists(email, first_name = None):
+	if frappe.db.exists("User", email):
+		return
+
+	frappe.get_doc({
+		"doctype": "User",
+		"user_type": "Website User",
+		"email": email,
+		"send_welcome_email": 0,
+		"first_name": first_name or email.split("@")[0]
+	}).insert(ignore_permissions=True)
+
+test_dependencies = ["Price List", "Item Price", "Customer", "Contact", "Item"]
