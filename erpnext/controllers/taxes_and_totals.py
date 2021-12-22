@@ -139,6 +139,8 @@ class calculate_taxes_and_totals(object):
 
 				if not item.qty and self.doc.get("is_return"):
 					item.amount = flt(-1 * item.rate, item.precision("amount"))
+				elif not item.qty and self.doc.get("is_debit_note"):
+					item.amount = flt(item.rate, item.precision("amount"))
 				else:
 					item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 
