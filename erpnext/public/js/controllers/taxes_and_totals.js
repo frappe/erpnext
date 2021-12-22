@@ -114,6 +114,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 				if ((!item.qty) && me.frm.doc.is_return) {
 					item.amount = flt(item.rate * -1, precision("amount", item));
+				} else if ((!item.qty) && me.frm.doc.is_debit_note) {
+					item.amount = flt(item.rate, precision("amount", item));
 				} else {
 					item.amount = flt(item.rate * item.qty, precision("amount", item));
 				}
