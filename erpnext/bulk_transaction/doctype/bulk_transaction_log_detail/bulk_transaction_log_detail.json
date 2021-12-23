@@ -66,7 +66,7 @@
  "modified": "2021-12-02 16:55:13.684803",
  "modified_by": "Administrator",
  "module": "Bulk Transaction",
- "name": "Bulk Transaction Logger List",
+ "name": "Bulk Transaction Log Detail",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

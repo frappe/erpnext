@@ -19,15 +19,15 @@
    "fieldname": "logger_data",
    "fieldtype": "Table",
    "label": "Logger Data",
-   "options": "Bulk Transaction Logger List"
+   "options": "Bulk Transaction Log Detail"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-01 14:57:39.667566",
+ "modified": "2021-12-23 16:10:43.622245",
  "modified_by": "Administrator",
  "module": "Bulk Transaction",
- "name": "Bulk Transaction Logger",
+ "name": "Bulk Transaction Log",
  "owner": "Administrator",
  "permissions": [
   {

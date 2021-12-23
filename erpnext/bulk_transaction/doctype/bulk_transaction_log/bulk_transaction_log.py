@@ -8,13 +8,13 @@ from pypika import functions as fn
 from erpnext.utilities.bulk_transaction import task, update_logger
 
 
-class BulkTransactionLogger(Document):
+class BulkTransactionLog(Document):
     pass
 
 
 @frappe.whitelist()
 def retry_failing_transaction():
-    btp = frappe.qb.DocType("Bulk Transaction Logger List")
+    btp = frappe.qb.DocType("Bulk Transaction Log Detail")
     data = (
         frappe.qb.from_(btp)
         .select(btp.transaction_name, btp.from_doctype, btp.to_doctype)

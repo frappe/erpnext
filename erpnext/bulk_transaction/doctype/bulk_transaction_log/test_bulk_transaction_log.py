@@ -6,13 +6,13 @@ from datetime import date
 
 import frappe
 
-from erpnext.bulk_transaction.doctype.bulk_transaction_logger.bulk_transaction_logger import (
+from erpnext.bulk_transaction.doctype.bulk_transaction_log.bulk_transaction_log import (
 	retry_failing_transaction,
 )
 from erpnext.utilities.bulk_transaction import transaction_processing
 
 
-class TestBulkTransactionLogger(unittest.TestCase):
+class TestBulkTransactionLog(unittest.TestCase):
 
 	def setUp(self):
 		create_company()
@@ -29,7 +29,7 @@ class TestBulkTransactionLogger(unittest.TestCase):
 	def test_entry_in_log(self):
 		so_name = create_so()
 		transaction_processing([{"name": so_name}], "Sales Order", "Sales Invoice")
-		doc = frappe.get_doc("Bulk Transaction Logger", str(date.today()))
+		doc = frappe.get_doc("Bulk Transaction Log", str(date.today()))
 		for d in doc.get("logger_data"):
 			if d.name == so_name:
 				self.assertEqual(d.name, so_name)
@@ -43,7 +43,7 @@ class TestBulkTransactionLogger(unittest.TestCase):
 		data = [{"name": "SAL_ORD_12345"}, {"name": so_name}]
 		transaction_processing(data, "Sales Order", "Sales Invoice")
 
-		doc = frappe.get_doc("Bulk Transaction Logger", str(date.today()))
+		doc = frappe.get_doc("Bulk Transaction Log", str(date.today()))
 		for d in doc.get("logger_data"):
 			if d.get('transaction_name') == data[0]["name"]:
 				self.assertEqual(d.get('transaction_status'), "Failed")
@@ -55,7 +55,7 @@ class TestBulkTransactionLogger(unittest.TestCase):
 		data = [{"name": "SAL_ORD_12345"}]
 		transaction_processing(data, "Sales Order", "Sales Invoice")
 		retry_failing_transaction()
-		doc = frappe.get_doc("Bulk Transaction Logger", str(date.today()))
+		doc = frappe.get_doc("Bulk Transaction Log", str(date.today()))
 		for d in doc.get("logger_data"):
 			if d.get('transaction_name') == data[0]["name"]:
 				self.assertEqual(d.get('transaction_status'), "Failed")

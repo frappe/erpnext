@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class BulkTransactionLoggerList(Document):
+class BulkTransactionLogDetail(Document):
 	pass
