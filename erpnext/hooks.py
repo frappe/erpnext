@@ -346,7 +346,7 @@ scheduler_events = {
 	],
 	"hourly_long": [
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
-		"erpnext.bulk_transaction.doctype.bulk_transaction_logger.bulk_transaction_logger.retry_failing_transaction"
+		"erpnext.bulk_transaction.doctype.bulk_transaction_log.bulk_transaction_log.retry_failing_transaction"
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
