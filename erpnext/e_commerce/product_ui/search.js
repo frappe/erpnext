@@ -1,7 +1,10 @@
 erpnext.ProductSearch = class {
-	constructor() {
+	constructor(opts) {
+		/* Options: search_box_id (for custom search box) */
+		$.extend(this, opts);
 		this.MAX_RECENT_SEARCHES = 4;
-		this.searchBox = $("#search-box");
+		this.search_box_id = this.search_box_id || "#search-box";
+		this.searchBox = $(this.search_box_id);
 
 		this.setupSearchDropDown();
 		this.bindSearchAction();
@@ -24,7 +27,7 @@ erpnext.ProductSearch = class {
 		// If click occurs outside search input/results, hide results.
 		// Click can happen anywhere on the page
 		$("body").on("click", (e) => {
-			let searchEvent = $(e.target).closest('#search-box').length;
+			let searchEvent = $(e.target).closest(this.search_box_id).length;
 			let resultsEvent = $(e.target).closest('#search-results-container').length;
 			let isResultHidden = this.search_dropdown.hasClass("hidden");
 

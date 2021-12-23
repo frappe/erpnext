@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -68,5 +66,8 @@ def dump_request_data(data, event="create/order"):
 @frappe.whitelist()
 def resync(method, name, request_data):
 	frappe.db.set_value("Shopify Log", name, "status", "Queued", update_modified=False)
+	if not method.startswith("erpnext.erpnext_integrations.connectors.shopify_connection"):
+		return
+
 	frappe.enqueue(method=method, queue='short', timeout=300, is_async=True,
 		**{"order": json.loads(request_data), "request_id": name})

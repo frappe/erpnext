@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -58,7 +57,10 @@ class JournalEntry(AccountsController):
 		if not frappe.flags.in_import:
 			self.validate_total_debit_and_credit()
 
-		self.validate_against_jv()
+		if not frappe.flags.is_reverse_depr_entry:
+			self.validate_against_jv()
+			self.validate_stock_accounts()
+
 		self.validate_reference_doc()
 		if self.docstatus == 0:
 			self.set_against_account()
@@ -69,7 +71,6 @@ class JournalEntry(AccountsController):
 		self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
 		self.validate_inter_company_accounts()
-		self.validate_stock_accounts()
 
 		if self.docstatus == 0:
 			self.apply_tax_withholding()
