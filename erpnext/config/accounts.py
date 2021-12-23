@@ -156,6 +156,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Cancellation Of Supplier Retentions",
+					"description": _("Cancellation Of Supplier Retentions"),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "Payment Entry",
 					"description": _("Bank/Cash transactions against party or for internal transfer")
 				},
