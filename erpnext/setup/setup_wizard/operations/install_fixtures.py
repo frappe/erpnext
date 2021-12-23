@@ -33,7 +33,6 @@ def install(country=None):
 		{ 'doctype': 'Domain', 'domain': 'Services'},
 		{ 'doctype': 'Domain', 'domain': 'Education'},
 		{ 'doctype': 'Domain', 'domain': 'Healthcare'},
-		{ 'doctype': 'Domain', 'domain': 'Agriculture'},
 		{ 'doctype': 'Domain', 'domain': 'Non Profit'},
 
 		# ensure at least an empty Address Template exists for this Country

@@ -1,9 +1,0 @@
-[
-	{
-		"doctype": "Soil Texture",
-		"location": "{\"type\":\"FeatureCollection\",\"features\":[{\"type\":\"Feature\",\"properties\":{},\"geometry\":{\"type\":\"Point\",\"coordinates\":[72.861242,19.079153]}}]}",
-		"collection_datetime": "2017-11-08",
-		"clay_composition": 20,
-		"sand_composition": 30
-	}
-]

@@ -166,7 +166,7 @@ class TestPricingRule(unittest.TestCase):
 					"item_group": "Products",
 				},
 				{
-					"item_group": "Seed",
+					"item_group": "_Test Item Group",
 				},
 			],
 			"selling": 1,
