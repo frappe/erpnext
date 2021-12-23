@@ -178,6 +178,7 @@ erpnext.patches.v12_0.set_updated_purpose_in_pick_list
 erpnext.patches.v12_0.set_default_payroll_based_on
 erpnext.patches.v12_0.repost_stock_ledger_entries_for_target_warehouse
 erpnext.patches.v12_0.update_end_date_and_status_in_email_campaign
+erpnext.patches.v13_0.validate_options_for_data_field
 erpnext.patches.v13_0.move_tax_slabs_from_payroll_period_to_income_tax_slab #123
 erpnext.patches.v12_0.fix_quotation_expired_status
 erpnext.patches.v12_0.update_appointment_reminder_scheduler_entry
@@ -292,7 +293,7 @@ erpnext.patches.v13_0.rename_issue_status_hold_to_on_hold
 erpnext.patches.v13_0.bill_for_rejected_quantity_in_purchase_invoice
 erpnext.patches.v13_0.update_job_card_details
 erpnext.patches.v13_0.update_level_in_bom #1234sswef
-erpnext.patches.v13_0.create_gst_payment_entry_fields
+erpnext.patches.v13_0.create_gst_payment_entry_fields #27-11-2021
 erpnext.patches.v13_0.add_missing_fg_item_for_stock_entry
 erpnext.patches.v13_0.update_subscription_status_in_memberships
 erpnext.patches.v13_0.update_amt_in_work_order_required_items
@@ -304,13 +305,13 @@ erpnext.patches.v13_0.update_recipient_email_digest
 erpnext.patches.v13_0.shopify_deprecation_warning
 erpnext.patches.v13_0.add_custom_field_for_south_africa #2
 erpnext.patches.v13_0.rename_discharge_ordered_date_in_ip_record
+erpnext.patches.v13_0.remove_bad_selling_defaults
 erpnext.patches.v13_0.migrate_stripe_api
 erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
 execute:frappe.reload_doc("erpnext_integrations", "doctype", "TaxJar Settings")
 execute:frappe.reload_doc("erpnext_integrations", "doctype", "Product Tax Category")
 erpnext.patches.v13_0.custom_fields_for_taxjar_integration          #08-11-2021
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
-erpnext.patches.v13_0.validate_options_for_data_field
 erpnext.patches.v13_0.create_website_items #30-09-2021
 erpnext.patches.v13_0.populate_e_commerce_settings
 erpnext.patches.v13_0.make_homepage_products_website_items
@@ -334,3 +335,5 @@ erpnext.patches.v12_0.update_production_plan_status
 erpnext.patches.v13_0.item_naming_series_not_mandatory
 erpnext.patches.v13_0.update_category_in_ltds_certificate
 erpnext.patches.v13_0.create_ksa_vat_custom_fields
+erpnext.patches.v13_0.rename_ksa_qr_field
+erpnext.patches.v13_0.disable_ksa_print_format_for_others #16-12-2021

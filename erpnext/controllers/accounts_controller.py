@@ -256,7 +256,12 @@ class AccountsController(TransactionBase):
 		from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 		calculate_taxes_and_totals(self)
 
-		if self.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+		if self.doctype in (
+			'Sales Order',
+			'Delivery Note',
+			'Sales Invoice',
+			'POS Invoice',
+		):
 			self.calculate_commission()
 			self.calculate_contribution()
 

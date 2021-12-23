@@ -61,7 +61,10 @@ frappe.ui.form.on('Asset Repair', {
 			frm.set_value('completion_date', frappe.datetime.now_datetime());
 		}
 	},
-	
+
+	stock_items_on_form_rendered() {
+		erpnext.setup_serial_or_batch_no();
+	}
 });
 
 frappe.ui.form.on('Asset Repair Consumed Item', {
