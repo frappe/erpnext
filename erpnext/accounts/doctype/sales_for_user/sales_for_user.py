@@ -71,16 +71,20 @@ class SalesForUser(Document):
 		# for row1 in si_list:
 		# 	hello = 125
 
-		while date_actual <= self.final_date:
-			register = date_actual
+		da_string = date_actual.split(" ")
+
+		# da = datetime.datetime.strptime(da_string[0], '%d/%m/%Y')
+
+		while da_string[0] <= self.final_date:
+			register = da_string[0]
 			dates.append(register)
 
-			date_split = date_actual.split("-")
+			date_split = da_string[0].split("-")
 			date_format = ("{}/{}/{}").format(date_split[2], date_split[1], date_split[0])
 
 			cast_date = datetime.datetime.strptime(date_format, '%d/%m/%Y')
 			tomorrow = cast_date + datetime.timedelta(days=1)
-			date_actual = tomorrow.strftime('%Y-%m-%d')
+			da_string[0] = tomorrow.strftime('%Y-%m-%d')
 
 		dates_reverse = sorted(dates, reverse=False)
 
@@ -166,12 +170,12 @@ class SalesForUser(Document):
 		conditions = ''
 
 		conditions += "{"
-		conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(self.start_date, self.final_date)
+		conditions += '"creation": ["between", ["{}", "{}"]]'.format(self.start_date, self.final_date)
 		conditions += ', "naming_series": "{}"'.format(self.prefix)
 		conditions += ', "company": "{}"'.format(self.company)
 		# conditions += '"posting_time": ["between", ["{}", "{}"]]'.format(self.start_hour, self.final_hour)
-		conditions += ', "posting_time": [">=", "{}"]'.format(self.start_hour)
-		conditions += ', "posting_time": ["<=", "{}"]'.format(self.final_hour)
+		# conditions += ', "posting_time": [">=", "{}"]'.format(self.start_hour)
+		# conditions += ', "posting_time": ["<=", "{}"]'.format(self.final_hour)
 		if self.user != None:
 			conditions += ', "cashier": "{}"'.format(self.user)
 		# conditions += ', "is_pos": 1'.format(self.user)
