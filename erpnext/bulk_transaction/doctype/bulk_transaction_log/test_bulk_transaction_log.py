@@ -31,8 +31,8 @@ class TestBulkTransactionLog(unittest.TestCase):
 		transaction_processing([{"name": so_name}], "Sales Order", "Sales Invoice")
 		doc = frappe.get_doc("Bulk Transaction Log", str(date.today()))
 		for d in doc.get("logger_data"):
-			if d.name == so_name:
-				self.assertEqual(d.name, so_name)
+			if d.transaction_name == so_name:
+				self.assertEqual(d.transaction_name, so_name)
 				self.assertEqual(d.transaction_status, "Success")
 				self.assertEqual(d.from_doctype, "Sales Order")
 				self.assertEqual(d.to_doctype, "Sales Invoice")
