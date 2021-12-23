@@ -188,7 +188,7 @@ class TestLeaveAllocation(unittest.TestCase):
 		leave_allocation.submit()
 		self.assertTrue(leave_allocation.total_leaves_allocated, 10)
 
-	def test_against_leave_application_validation_after_submit(self):
+	def test_validation_against_leave_application_after_submit(self):
 		frappe.db.sql("delete from `tabLeave Allocation`")
 		frappe.db.sql("delete from `tabLeave Ledger Entry`")
 
@@ -208,8 +208,11 @@ class TestLeaveAllocation(unittest.TestCase):
 			"leave_approver": 'test@example.com'
 		})
 		leave_application.submit()
-		leave_allocation.new_leaves_allocated = 8
-		leave_allocation.total_leaves_allocated = 8
+		leave_application.reload()
+
+		# allocate less leaves than the ones which are already approved
+		leave_allocation.new_leaves_allocated = leave_application.total_leave_days - 1
+		leave_allocation.total_leaves_allocated = leave_application.total_leave_days - 1
 		self.assertRaises(frappe.ValidationError, leave_allocation.submit)
 
 def create_leave_allocation(**args):
