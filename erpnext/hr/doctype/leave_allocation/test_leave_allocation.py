@@ -12,9 +12,14 @@ from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
 class TestLeaveAllocation(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
+		from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_holiday_list
+
 		frappe.db.sql("delete from `tabLeave Period`")
 		emp_id = make_employee("test_emp_leave_allocation@salary.com")
 		cls.employee = frappe.get_doc("Employee", emp_id)
+
+		make_holiday_list()
+		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Slip Test Holiday List")
 
 	def tearDown(self):
 		frappe.db.rollback()
