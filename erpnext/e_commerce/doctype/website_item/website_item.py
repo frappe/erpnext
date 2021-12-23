@@ -11,7 +11,7 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 from frappe.website.website_generator import WebsiteGenerator
 
 from erpnext.e_commerce.doctype.item_review.item_review import get_item_reviews
-from erpnext.e_commerce.redisearch import (
+from erpnext.e_commerce.redisearch_utils import (
 	delete_item_from_index,
 	insert_item_to_index,
 	update_index_for_item,
