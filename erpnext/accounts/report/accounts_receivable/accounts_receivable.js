@@ -201,6 +201,30 @@ frappe.query_reports["Accounts Receivable"] = {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Accounts Receivable Summary', {company: filters.company});
 		});
+
+		report.page.add_menu_item(__("New Email"), function(communication_doc=null, reply_all=false) {
+			let email_id;
+			let cust_id = frappe.query_report.get_filter_value('customer');
+			frappe.db.get_doc('Customer', cust_id).then(e  => {
+				email_id = e.email_id;
+				const args = {
+					report: report.page,
+					recipients: email_id,
+					is_a_reply: Boolean(communication_doc),
+					title: communication_doc ? __('Reply') : null,
+					last_email: communication_doc,
+					subject: communication_doc && communication_doc.subject
+				};
+				if (communication_doc && reply_all) {
+					args.cc = communication_doc.cc;
+					args.bcc = communication_doc.bcc;
+				}
+				new frappe.views.CommunicationComposer(args);
+			});
+
+
+			
+		});
 	}
 }
 
