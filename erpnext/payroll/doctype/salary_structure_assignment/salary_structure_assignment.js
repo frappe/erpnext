@@ -47,12 +47,12 @@ frappe.ui.form.on('Salary Structure Assignment', {
 					"company": frm.doc.company,
 					"is_group": 0
 				}
-			}
+			};
 		});
 	},
 
 	employee: function(frm) {
-		if(frm.doc.employee){
+		if (frm.doc.employee) {
 			frappe.call({
 				method: "set_payroll_cost_centers",
 				doc: frm.doc,
@@ -61,7 +61,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
 				}
 			});
 		}
-		else{
+		else {
 			frm.set_value("payroll_cost_centers", []);
 		}
 	},

@@ -239,8 +239,14 @@ class PayrollEntry(Document):
 				cost_centers = dict(frappe.get_all("Employee Cost Center", {"parent": ss_assignment_name},
 					["cost_center", "percentage"], as_list=1))
 				if not cost_centers:
+					default_cost_center, department = frappe.get_cached_value("Employee", employee, ["payroll_cost_center", "department"])
+					if not default_cost_center and department:
+						default_cost_center = frappe.get_cached_value("Department", department, "payroll_cost_center")
+					if not default_cost_center:
+						default_cost_center = self.cost_center
+						
 					cost_centers = {
-						self.cost_center: 100
+						default_cost_center: 100
 					}
 
 				self.employee_cost_centers.setdefault(employee, cost_centers)

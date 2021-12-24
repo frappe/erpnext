@@ -13,7 +13,7 @@ frappe.ui.form.on('Department', {
 					"company": frm.doc.company,
 					"is_group": 0
 				}
-			}
+			};
 		});
 	},
 	refresh: function(frm) {

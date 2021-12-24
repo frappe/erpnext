@@ -54,7 +54,7 @@ frappe.ui.form.on('Employee', {
 					"company": frm.doc.company,
 					"is_group": 0
 				}
-			}
+			};
 		});
 	},
 	onload: function (frm) {
