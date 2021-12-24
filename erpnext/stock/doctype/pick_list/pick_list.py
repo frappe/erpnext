@@ -353,38 +353,12 @@ def get_available_item_locations_for_other_item(item_code, from_warehouses, requ
 @frappe.whitelist()
 def create_delivery_note(source_name, target_doc=None):
 
-	def map_pl_locations(pl_locations,sales_order):
-
-		for location in pl_locations:
-			if location.sales_order == sales_order:
-				if location.sales_order_item:
-					sales_order_item = frappe.get_cached_doc('Sales Order Item', {'name':location.sales_order_item})
-				else:
-					sales_order_item = None
-
-				source_doc, table_mapper = [sales_order_item, item_table_mapper] if sales_order_item \
-					else [location, item_table_mapper_without_so]
-
-				dn_item = map_child_doc(source_doc, delivery_note, table_mapper)
-
-				if dn_item:
-					dn_item.warehouse = location.warehouse
-					dn_item.qty = flt(location.picked_qty) / (flt(location.conversion_factor) or 1)
-					dn_item.batch_no = location.batch_no
-					dn_item.serial_no = location.serial_no
-
-					update_delivery_note_item(source_doc, dn_item, delivery_note)
-
-		set_delivery_note_missing_values(delivery_note)
-
-		delivery_note.pick_list = pick_list.name
-		delivery_note.customer = frappe.get_value("Sales Order",sales_order,"customer")
-
 	pick_list = frappe.get_doc('Pick List', source_name)
 	validate_item_locations(pick_list)
-	sales_dict = dict()
+
 	sales_orders = []
 	delivery_note = None
+	
 	for d in pick_list.locations:
 		if d.sales_order:
 			sales_orders.append([frappe.db.get_value("Sales Order",d.sales_order,'customer'),d.sales_order])
@@ -392,7 +366,22 @@ def create_delivery_note(source_name, target_doc=None):
 	from itertools import groupby
 	from operator import itemgetter
 
-	# Group sales orders by customer
+	# Create DNs for SO, Group by customer
+	delivery_note = create_dn_with_so(sales_orders,pick_list)
+
+	# Create a DN for items without sales orders as well
+	if not delivery_note:
+		delivery_note = create_dn_wo_so(pick_list)
+
+	frappe.msgprint('Delivery Note(s) created for the Pick List!')
+	return delivery_note
+
+def create_dn_with_so(sales_orders,pick_list):
+
+	from itertools import groupby
+	from operator import itemgetter
+	sales_dict = dict()
+
 	for key,keydata in groupby(sales_orders,key=itemgetter(0)):
 		sales_dict[key] = set([d[1] for d in keydata])
 
@@ -407,7 +396,7 @@ def create_delivery_note(source_name, target_doc=None):
 				'field_map': {
 					'rate': 'rate',
 					'name': 'so_detail',
-					'parent': 'against_sales_order',
+ 					'parent': 'against_sales_order',
 				},
 				'condition': lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 			}
@@ -415,14 +404,13 @@ def create_delivery_note(source_name, target_doc=None):
 		if delivery_note:
 			# map all items of all sales orders of that customer
 			for so in sales_dict[customer]:		
-				map_pl_locations(pick_list.locations,so)
-			delivery_note.insert(ignore_mandatory = True)
+				map_pl_locations(pick_list,item_table_mapper,delivery_note,so)
+			return delivery_note
 
-	# Create a DN for items without sales orders as well
-	if not delivery_note:
-		delivery_note = frappe.new_doc("Delivery Note")
+def create_dn_wo_so(pick_list):		
+	delivery_note = frappe.new_doc("Delivery Note")
 
-		item_table_mapper_without_so = {
+	item_table_mapper_without_so = {
 			'doctype': 'Delivery Note Item',
 			'field_map': {
 				'rate': 'rate',
@@ -430,12 +418,35 @@ def create_delivery_note(source_name, target_doc=None):
 				'parent': '',
 			}
 		}
-		map_pl_locations(pick_list.locations,None)
-		delivery_note.insert(ignore_mandatory = True)
+	map_pl_locations(pick_list,item_table_mapper_without_so,delivery_note)
 
-	frappe.msgprint('Delivery Note(s) created for the Pick List!')
 	return delivery_note
 
+def map_pl_locations(pick_list,item_mapper,delivery_note,so=None):
+
+	for location in pick_list.locations:
+		if location.sales_order_item:
+			sales_order_item = frappe.get_cached_doc('Sales Order Item', {'name':location.sales_order_item})
+			delivery_note.customer = frappe.get_value("Sales Order",so,"customer")
+			source_doc, table_mapper =  [sales_order_item, item_mapper]
+		else:
+			sales_order_item = None
+			source_doc, table_mapper =  [location, item_mapper]
+		
+		dn_item = map_child_doc(source_doc, delivery_note, table_mapper)
+		
+		if dn_item:
+			dn_item.warehouse = location.warehouse
+			dn_item.qty = flt(location.picked_qty) / (flt(location.conversion_factor) or 1)
+			dn_item.batch_no = location.batch_no
+			dn_item.serial_no = location.serial_no
+
+			update_delivery_note_item(source_doc, dn_item, delivery_note)
+
+	set_delivery_note_missing_values(delivery_note)
+
+	delivery_note.pick_list = pick_list.name
+	delivery_note.insert(ignore_mandatory = True)
 
 @frappe.whitelist()
 def create_stock_entry(pick_list):
