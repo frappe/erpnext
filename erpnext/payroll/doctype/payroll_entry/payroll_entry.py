@@ -158,7 +158,7 @@ class PayrollEntry(Document):
 		"""
 
 		ss_list = frappe.db.sql("""
-			select t1.name, t1.salary_structure, t1.payroll_cost_center from `tabSalary Slip` t1
+			select t1.name, t1.salary_structure from `tabSalary Slip` t1
 			where t1.docstatus = %s and t1.start_date >= %s and t1.end_date <= %s and t1.payroll_entry = %s
 			and (t1.journal_entry is null or t1.journal_entry = "") and ifnull(salary_slip_based_on_timesheet,0) = %s
 		""", (ss_status, self.start_date, self.end_date, self.name, self.salary_slip_based_on_timesheet), as_dict=as_dict)
@@ -192,9 +192,15 @@ class PayrollEntry(Document):
 		salary_slips = self.get_sal_slip_list(ss_status = 1, as_dict = True)
 		if salary_slips:
 			salary_components = frappe.db.sql("""
-				select ssd.salary_component, ssd.amount, ssd.parentfield, ss.payroll_cost_center
-				from `tabSalary Slip` ss, `tabSalary Detail` ssd
-				where ss.name = ssd.parent and ssd.parentfield = '%s' and ss.name in (%s)
+				SELECT
+					ssd.salary_component, ssd.amount, ssd.parentfield, ss.salary_structure, ss.employee
+				FROM
+					`tabSalary Slip` ss,
+					`tabSalary Detail` ssd
+				WHERE
+					ss.name = ssd.parent
+					and ssd.parentfield = '%s'
+					and ss.name in (%s)
 			""" % (component_type, ', '.join(['%s']*len(salary_slips))),
 				tuple([d.name for d in salary_slips]), as_dict=True)
 
@@ -204,17 +210,42 @@ class PayrollEntry(Document):
 		salary_components = self.get_salary_components(component_type)
 		if salary_components:
 			component_dict = {}
+			self.employee_cost_centers = {}
 			for item in salary_components:
+				employee_cost_centers = self.get_payroll_cost_centers_for_employee(item.employee, item.salary_structure)
+
 				add_component_to_accrual_jv_entry = True
 				if component_type == "earnings":
-					is_flexible_benefit, only_tax_impact = frappe.db.get_value("Salary Component", item['salary_component'], ['is_flexible_benefit', 'only_tax_impact'])
+					is_flexible_benefit, only_tax_impact = \
+						frappe.get_cached_value("Salary Component",item['salary_component'], ['is_flexible_benefit', 'only_tax_impact'])
 					if is_flexible_benefit == 1 and only_tax_impact ==1:
 						add_component_to_accrual_jv_entry = False
+
 				if add_component_to_accrual_jv_entry:
-					component_dict[(item.salary_component, item.payroll_cost_center)] \
-						= component_dict.get((item.salary_component, item.payroll_cost_center), 0) + flt(item.amount)
+					for cost_center, percentage in employee_cost_centers.items():
+						amount_against_cost_center = flt(item.amount) * percentage / 100
+						component_dict[(item.salary_component, cost_center)] \
+							= component_dict.get((item.salary_component, cost_center), 0) + amount_against_cost_center
+
 			account_details = self.get_account(component_dict = component_dict)
 			return account_details
+
+	def get_payroll_cost_centers_for_employee(self, employee, salary_structure):
+		if not self.employee_cost_centers.get(employee):
+			ss_assignment_name = frappe.db.get_value("Salary Structure Assignment",
+				{"employee": employee, "salary_structure": salary_structure, "docstatus": 1}, 'name')
+		
+			if ss_assignment_name:
+				cost_centers = dict(frappe.get_all("Employee Cost Center", {"parent": ss_assignment_name},
+					["cost_center", "percentage"], as_list=1))
+				if not cost_centers:
+					cost_centers = {
+						self.cost_center: 100
+					}
+
+				self.employee_cost_centers.setdefault(employee, cost_centers)
+
+		return self.employee_cost_centers.get(employee, {})
 
 	def get_account(self, component_dict = None):
 		account_dict = {}
