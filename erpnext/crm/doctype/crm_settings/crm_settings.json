@@ -95,7 +95,7 @@
   },
   {
    "default": "0",
-   "description": "All the comments and Emails will be copied from one document to another newly created document(Lead -> Opportunity -> Quotation) throughout the sales cycle.",
+   "description": "All the Comments and Emails will be copied from one document to another newly created document(Lead -> Opportunity -> Quotation) throughout the CRM documents.",
    "fieldname": "carry_forward_communication_and_comments",
    "fieldtype": "Check",
    "label": "Carry Forward Communication and Comments"
