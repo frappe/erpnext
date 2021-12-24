@@ -1834,6 +1834,11 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			"name": target_detail_field,
 		})
 
+	if doctype in ("Purchase Order", "Sales Order"):
+		item_field_map["field_map"].update({
+			"warehouse": "warehouse"
+		})
+
 	if source_doc.get('update_stock'):
 		item_field_map["field_map"].update({
 			source_document_warehouse_field: target_document_warehouse_field,
