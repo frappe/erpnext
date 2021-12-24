@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_rename": 1,
- "beta": 1,
  "creation": "2021-10-01 10:56:30.814787",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -11,8 +10,7 @@
   "limit_reposting_timeslot",
   "start_time",
   "end_time",
-  "limits_dont_apply_on",
-  "item_based_reposting"
+  "limits_dont_apply_on"
  ],
  "fields": [
   {
@@ -46,18 +44,12 @@
    "fieldname": "limit_reposting_timeslot",
    "fieldtype": "Check",
    "label": "Limit timeslot for Stock Reposting"
-  },
-  {
-   "default": "0",
-   "fieldname": "item_based_reposting",
-   "fieldtype": "Check",
-   "label": "Use Item based reposting"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-11-02 01:22:45.155841",
+ "modified": "2021-10-01 11:27:28.981594",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reposting Settings",

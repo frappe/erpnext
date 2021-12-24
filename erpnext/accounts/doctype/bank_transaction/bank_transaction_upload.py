@@ -1,12 +1,15 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from __future__ import unicode_literals
 
 import json
 
 import frappe
 from frappe.utils import getdate
 from frappe.utils.dateutils import parse_date
+from six import iteritems
 
 
 @frappe.whitelist()
@@ -42,7 +45,7 @@ def create_bank_entries(columns, data, bank_account):
 		if all(item is None for item in d) is True:
 			continue
 		fields = {}
-		for key, value in header_map.items():
+		for key, value in iteritems(header_map):
 			fields.update({key: d[int(value)-1]})
 
 		try:

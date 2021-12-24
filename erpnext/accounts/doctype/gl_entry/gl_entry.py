@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -8,6 +9,7 @@ from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.model.naming import set_name_from_naming_options
 from frappe.utils import flt, fmt_money
+from six import iteritems
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -56,8 +58,7 @@ class GLEntry(Document):
 
 			# Update outstanding amt on against voucher
 			if (self.against_voucher_type in ['Journal Entry', 'Sales Invoice', 'Purchase Invoice', 'Fees']
-				and self.against_voucher and self.flags.update_outstanding == 'Yes'
-				and not frappe.flags.is_reverse_depr_entry):
+				and self.against_voucher and self.flags.update_outstanding == 'Yes'):
 					update_outstanding_amt(self.account, self.party_type, self.party, self.against_voucher_type,
 						self.against_voucher)
 
@@ -114,7 +115,7 @@ class GLEntry(Document):
 
 	def validate_allowed_dimensions(self):
 		dimension_filter_map = get_dimension_filter_map()
-		for key, value in dimension_filter_map.items():
+		for key, value in iteritems(dimension_filter_map):
 			dimension = key[0]
 			account = key[1]
 

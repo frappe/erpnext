@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import unittest
 
 from frappe.test_runner import make_test_objects

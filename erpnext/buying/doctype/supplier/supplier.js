@@ -83,12 +83,6 @@ frappe.ui.form.on("Supplier", {
 				frm.trigger("get_supplier_group_details");
 			}, __('Actions'));
 
-			if (cint(frappe.defaults.get_default("enable_common_party_accounting"))) {
-				frm.add_custom_button(__('Link with Customer'), function () {
-					frm.trigger('show_party_link_dialog');
-				}, __('Actions'));
-			}
-
 			// indicators
 			erpnext.utils.set_party_dashboard_indicators(frm);
 		}
@@ -134,42 +128,5 @@ frappe.ui.form.on("Supplier", {
 		else {
 			frm.toggle_reqd("represents_company", false);
 		}
-	},
-	show_party_link_dialog: function(frm) {
-		const dialog = new frappe.ui.Dialog({
-			title: __('Select a Customer'),
-			fields: [{
-				fieldtype: 'Link', label: __('Customer'),
-				options: 'Customer', fieldname: 'customer', reqd: 1
-			}],
-			primary_action: function({ customer }) {
-				frappe.call({
-					method: 'erpnext.accounts.doctype.party_link.party_link.create_party_link',
-					args: {
-						primary_role: 'Supplier',
-						primary_party: frm.doc.name,
-						secondary_party: customer
-					},
-					freeze: true,
-					callback: function() {
-						dialog.hide();
-						frappe.msgprint({
-							message: __('Successfully linked to Customer'),
-							alert: true
-						});
-					},
-					error: function() {
-						dialog.hide();
-						frappe.msgprint({
-							message: __('Linking to Customer Failed. Please try again.'),
-							title: __('Linking Failed'),
-							indicator: 'red'
-						});
-					}
-				});
-			},
-			primary_action_label: __('Create Link')
-		});
-		dialog.show();
 	}
 });

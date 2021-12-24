@@ -1,6 +1,7 @@
 # Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from __future__ import unicode_literals
 
 import json
 
@@ -8,6 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
 from frappe.utils import cstr, flt, getdate
+from six import iteritems
 
 import erpnext
 from erpnext.regional.india.utils import get_gst_accounts
@@ -114,11 +116,9 @@ def get_items(filters):
 
 	items = frappe.db.sql("""
 		select
-			`tabSales Invoice Item`.gst_hsn_code,
-			`tabSales Invoice Item`.stock_uom,
-			sum(`tabSales Invoice Item`.stock_qty) as stock_qty,
-			sum(`tabSales Invoice Item`.base_net_amount) as base_net_amount,
-			sum(`tabSales Invoice Item`.base_price_list_rate) as base_price_list_rate,
+			`tabSales Invoice Item`.name, `tabSales Invoice Item`.base_price_list_rate,
+			`tabSales Invoice Item`.gst_hsn_code, `tabSales Invoice Item`.stock_qty,
+			`tabSales Invoice Item`.stock_uom, `tabSales Invoice Item`.base_net_amount,
 			`tabSales Invoice Item`.parent, `tabSales Invoice Item`.item_code,
 			`tabGST HSN Code`.description
 		from `tabSales Invoice`, `tabSales Invoice Item`, `tabGST HSN Code`
@@ -126,8 +126,6 @@ def get_items(filters):
 			and `tabSales Invoice`.docstatus = 1
 			and `tabSales Invoice Item`.gst_hsn_code is not NULL
 			and `tabSales Invoice Item`.gst_hsn_code = `tabGST HSN Code`.name %s %s
-		group by
-			`tabSales Invoice Item`.parent, `tabSales Invoice Item`.item_code
 
 		""" % (conditions, match_conditions), filters, as_dict=1)
 
@@ -215,7 +213,7 @@ def get_merged_data(columns, data):
 				else:
 					merged_hsn_dict[row[0]][d['fieldname']] = row[i]
 
-	for key, value in merged_hsn_dict.items():
+	for key, value in iteritems(merged_hsn_dict):
 		result.append(value)
 
 	return result

@@ -1,8 +1,11 @@
+from __future__ import unicode_literals
+
 import json
 import random
 
 import frappe
 from frappe.utils import add_days, nowdate
+from six import iteritems
 
 from erpnext.demo.domains import data
 from erpnext.demo.setup.setup_data import import_json
@@ -128,7 +131,7 @@ def setup_item_price():
 	}
 
 	for price_list in ("standard_buying", "standard_selling"):
-		for item, rate in locals().get(price_list).items():
+		for item, rate in iteritems(locals().get(price_list)):
 			frappe.get_doc({
 				"doctype": "Item Price",
 				"price_list": price_list.replace("_", " ").title(),

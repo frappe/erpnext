@@ -307,9 +307,6 @@ class BOM(WebsiteGenerator):
 		existing_bom_cost = self.total_cost
 
 		for d in self.get("items"):
-			if not d.item_code:
-				continue
-
 			rate = self.get_rm_rate({
 				"company": self.company,
 				"item_code": d.item_code,
@@ -602,7 +599,7 @@ class BOM(WebsiteGenerator):
 		for d in self.get('items'):
 			if d.bom_no:
 				self.get_child_exploded_items(d.bom_no, d.stock_qty)
-			elif d.item_code:
+			else:
 				self.add_to_cur_exploded_items(frappe._dict({
 					'item_code'		: d.item_code,
 					'item_name'		: d.item_name,
@@ -922,7 +919,7 @@ def validate_bom_no(item, bom_no):
 				rm_item_exists = True
 		if bom.item.lower() == item.lower() or \
 			bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower():
-				rm_item_exists = True
+ 				rm_item_exists = True
 		if not rm_item_exists:
 			frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
 

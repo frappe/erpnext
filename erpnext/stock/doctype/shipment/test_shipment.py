@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+from __future__ import unicode_literals
 
 from datetime import date, timedelta
 
@@ -39,9 +41,9 @@ def create_test_delivery_note():
 			"description": 'Test delivery note for shipment',
 			"qty": 5,
 			"uom": 'Nos',
-			"warehouse": 'Stores - _TC',
+			"warehouse": 'Stores - SC',
 			"rate": item.standard_rate,
-			"cost_center": 'Main - _TC'
+			"cost_center": 'Main - SC'
 		}
 	)
 	delivery_note.insert()
@@ -127,7 +129,13 @@ def get_shipment_company_address(company_name):
 		return create_shipment_address(address_title, company_name, 80331)
 
 def get_shipment_company():
-	return frappe.get_doc("Company", "_Test Company")
+	company_name = 'Shipment Company'
+	abbr = 'SC'
+	companies = frappe.get_all("Company", fields=["name"], filters = {"company_name": company_name})
+	if len(companies):
+		return companies[0]
+	else:
+		return create_shipment_company(company_name, abbr)
 
 def get_shipment_item(company_name):
 	item_name = 'Testing Shipment item'
@@ -176,6 +184,17 @@ def create_customer_contact(fname, lname):
 	customer.insert()
 	return customer
 
+
+def create_shipment_company(company_name, abbr):
+	company = frappe.new_doc("Company")
+	company.company_name = company_name
+	company.abbr = abbr
+	company.default_currency = 'EUR'
+	company.country = 'Germany'
+	company.enable_perpetual_inventory = 0
+	company.insert()
+	return company
+
 def create_shipment_customer(customer_name):
 	customer = frappe.new_doc("Customer")
 	customer.customer_name = customer_name
@@ -194,12 +213,12 @@ def create_material_receipt(item, company):
 	stock.posting_date = posting_date.strftime("%Y-%m-%d")
 	stock.append('items',
 		{
-			"t_warehouse": 'Stores - _TC',
+			"t_warehouse": 'Stores - SC',
 			"item_code": item.name,
 			"qty": 5,
 			"uom": 'Nos',
 			"basic_rate": item.standard_rate,
-			"cost_center": 'Main - _TC'
+			"cost_center": 'Main - SC'
 		}
 	)
 	stock.insert()
@@ -216,7 +235,7 @@ def create_shipment_item(item_name, company_name):
 	item.append('item_defaults',
 		{
 			"company": company_name,
-			"default_warehouse": 'Stores - _TC'
+			"default_warehouse": 'Stores - SC'
 		}
 	)
 	item.insert()

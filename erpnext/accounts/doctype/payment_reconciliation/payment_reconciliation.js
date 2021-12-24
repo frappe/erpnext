@@ -4,14 +4,9 @@
 frappe.provide("erpnext.accounts");
 erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationController extends frappe.ui.form.Controller {
 	onload() {
-		const default_company = frappe.defaults.get_default('company');
-		this.frm.set_value('company', default_company);
+		var me = this;
 
-		this.frm.set_value('party_type', '');
-		this.frm.set_value('party', '');
-		this.frm.set_value('receivable_payable_account', '');
-
-		this.frm.set_query("party_type", () => {
+		this.frm.set_query("party_type", function() {
 			return {
 				"filters": {
 					"name": ["in", Object.keys(frappe.boot.party_account_types)],
@@ -19,30 +14,44 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			}
 		});
 
-		this.frm.set_query('receivable_payable_account', () => {
+		this.frm.set_query('receivable_payable_account', function() {
+			check_mandatory(me.frm);
 			return {
 				filters: {
-					"company": this.frm.doc.company,
+					"company": me.frm.doc.company,
 					"is_group": 0,
-					"account_type": frappe.boot.party_account_types[this.frm.doc.party_type]
+					"account_type": frappe.boot.party_account_types[me.frm.doc.party_type]
 				}
 			};
 		});
 
-		this.frm.set_query('bank_cash_account', () => {
+		this.frm.set_query('bank_cash_account', function() {
+			check_mandatory(me.frm, true);
 			return {
 				filters:[
-					['Account', 'company', '=', this.frm.doc.company],
+					['Account', 'company', '=', me.frm.doc.company],
 					['Account', 'is_group', '=', 0],
 					['Account', 'account_type', 'in', ['Bank', 'Cash']]
 				]
 			};
 		});
+
+		this.frm.set_value('party_type', '');
+		this.frm.set_value('party', '');
+		this.frm.set_value('receivable_payable_account', '');
+
+		var check_mandatory = (frm, only_company=false) => {
+			var title = __("Mandatory");
+			if (only_company && !frm.doc.company) {
+				frappe.throw({message: __("Please Select a Company First"), title: title});
+			} else if (!frm.doc.company || !frm.doc.party_type) {
+				frappe.throw({message: __("Please Select Both Company and Party Type First"), title: title});
+			}
+		};
 	}
 
 	refresh() {
 		this.frm.disable_save();
-
 		this.frm.set_df_property('invoices', 'cannot_delete_rows', true);
 		this.frm.set_df_property('payments', 'cannot_delete_rows', true);
 		this.frm.set_df_property('allocation', 'cannot_delete_rows', true);
@@ -76,92 +85,76 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 	}
 
 	company() {
-		this.frm.set_value('party', '');
+		var me = this;
 		this.frm.set_value('receivable_payable_account', '');
-	}
-
-	party_type() {
-		this.frm.set_value('party', '');
+		me.frm.clear_table("allocation");
+		me.frm.clear_table("invoices");
+		me.frm.clear_table("payments");
+		me.frm.refresh_fields();
+		me.frm.trigger('party');
 	}
 
 	party() {
-		this.frm.set_value('receivable_payable_account', '');
-		this.frm.trigger("clear_child_tables");
-
-		if (!this.frm.doc.receivable_payable_account && this.frm.doc.party_type && this.frm.doc.party) {
+		var me = this;
+		if (!me.frm.doc.receivable_payable_account && me.frm.doc.party_type && me.frm.doc.party) {
 			return frappe.call({
 				method: "erpnext.accounts.party.get_party_account",
 				args: {
-					company: this.frm.doc.company,
-					party_type: this.frm.doc.party_type,
-					party: this.frm.doc.party
+					company: me.frm.doc.company,
+					party_type: me.frm.doc.party_type,
+					party: me.frm.doc.party
 				},
-				callback: (r) => {
+				callback: function(r) {
 					if (!r.exc && r.message) {
-						this.frm.set_value("receivable_payable_account", r.message);
+						me.frm.set_value("receivable_payable_account", r.message);
 					}
-					this.frm.refresh();
-
+					me.frm.refresh();
 				}
 			});
 		}
 	}
 
-	receivable_payable_account() {
-		this.frm.trigger("clear_child_tables");
-		this.frm.refresh();
-	}
-
-	clear_child_tables() {
-		this.frm.clear_table("invoices");
-		this.frm.clear_table("payments");
-		this.frm.clear_table("allocation");
-		this.frm.refresh_fields();
-	}
-
 	get_unreconciled_entries() {
-		this.frm.clear_table("allocation");
+		var me = this;
 		return this.frm.call({
-			doc: this.frm.doc,
+			doc: me.frm.doc,
 			method: 'get_unreconciled_entries',
-			callback: () => {
-				if (!(this.frm.doc.payments.length || this.frm.doc.invoices.length)) {
-					frappe.throw({message: __("No Unreconciled Invoices and Payments found for this party and account")});
-				} else if (!(this.frm.doc.invoices.length)) {
-					frappe.throw({message: __("No Outstanding Invoices found for this party")});
-				} else if (!(this.frm.doc.payments.length)) {
-					frappe.throw({message: __("No Unreconciled Payments found for this party")});
+			callback: function(r, rt) {
+				if (!(me.frm.doc.payments.length || me.frm.doc.invoices.length)) {
+					frappe.throw({message: __("No invoice and payment records found for this party")});
 				}
-				this.frm.refresh();
+				me.frm.refresh();
 			}
 		});
 
 	}
 
 	allocate() {
-		let payments = this.frm.fields_dict.payments.grid.get_selected_children();
+		var me = this;
+		let payments = me.frm.fields_dict.payments.grid.get_selected_children();
 		if (!(payments.length)) {
-			payments = this.frm.doc.payments;
+			payments = me.frm.doc.payments;
 		}
-		let invoices = this.frm.fields_dict.invoices.grid.get_selected_children();
+		let invoices = me.frm.fields_dict.invoices.grid.get_selected_children();
 		if (!(invoices.length)) {
-			invoices = this.frm.doc.invoices;
+			invoices = me.frm.doc.invoices;
 		}
-		return this.frm.call({
-			doc: this.frm.doc,
+		return me.frm.call({
+			doc: me.frm.doc,
 			method: 'allocate_entries',
 			args: {
 				payments: payments,
 				invoices: invoices
 			},
-			callback: () => {
-				this.frm.refresh();
+			callback: function() {
+				me.frm.refresh();
 			}
 		});
 	}
 
 	reconcile() {
-		var show_dialog = this.frm.doc.allocation.filter(d => d.difference_amount && !d.difference_account);
+		var me = this;
+		var show_dialog = me.frm.doc.allocation.filter(d => d.difference_amount && !d.difference_account);
 
 		if (show_dialog && show_dialog.length) {
 
@@ -193,10 +186,10 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 							label: __("Difference Account"),
 							fieldname: 'difference_account',
 							reqd: 1,
-							get_query: () => {
+							get_query: function() {
 								return {
 									filters: {
-										company: this.frm.doc.company,
+										company: me.frm.doc.company,
 										is_group: 0
 									}
 								}
@@ -210,7 +203,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 						}]
 					},
 				],
-				primary_action: () => {
+				primary_action: function() {
 					const args = dialog.get_values()["allocation"];
 
 					args.forEach(d => {
@@ -218,7 +211,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 							"difference_account", d.difference_account);
 					});
 
-					this.reconcile_payment_entries();
+					me.reconcile_payment_entries();
 					dialog.hide();
 				},
 				primary_action_label: __('Reconcile Entries')
@@ -244,12 +237,15 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 	}
 
 	reconcile_payment_entries() {
+		var me = this;
+
 		return this.frm.call({
-			doc: this.frm.doc,
+			doc: me.frm.doc,
 			method: 'reconcile',
-			callback: () => {
-				this.frm.clear_table("allocation");
-				this.frm.refresh();
+			callback: function(r, rt) {
+				me.frm.clear_table("allocation");
+				me.frm.refresh_fields();
+				me.frm.refresh();
 			}
 		});
 	}

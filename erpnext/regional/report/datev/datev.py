@@ -1,3 +1,4 @@
+# coding: utf-8
 """
 Provide a report and downloadable CSV according to the German DATEV format.
 
@@ -6,11 +7,13 @@ Provide a report and downloadable CSV according to the German DATEV format.
 - CSV download functionality `download_datev_csv` that provides a CSV file with
 	all required columns. Used to import the data into the DATEV Software.
 """
+from __future__ import unicode_literals
 
 import json
 
 import frappe
 from frappe import _
+from six import string_types
 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.regional.germany.utils.datev.datev_constants import (
@@ -348,7 +351,7 @@ def run_query(filters, extra_fields, extra_joins, extra_filters, as_dict=1):
 
 			gl.posting_date as 'Belegdatum',
 			gl.voucher_no as 'Belegfeld 1',
-			REPLACE(LEFT(gl.remarks, 60), '\n', ' ') as 'Buchungstext',
+			LEFT(gl.remarks, 60) as 'Buchungstext',
 			gl.voucher_type as 'Beleginfo - Art 1',
 			gl.voucher_no as 'Beleginfo - Inhalt 1',
 			gl.against_voucher_type as 'Beleginfo - Art 2',
@@ -543,7 +546,7 @@ def download_datev_csv(filters):
 	Arguments / Params:
 	filters -- dict of filters to be passed to the sql query
 	"""
-	if isinstance(filters, str):
+	if isinstance(filters, string_types):
 		filters = json.loads(filters)
 
 	validate(filters)

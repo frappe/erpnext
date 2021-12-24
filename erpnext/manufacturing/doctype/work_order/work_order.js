@@ -135,26 +135,24 @@ frappe.ui.form.on("Work Order", {
 			frm.set_intro(__("Submit this Work Order for further processing."));
 		}
 
-		if (frm.doc.status != "Closed") {
-			if (frm.doc.docstatus===1) {
-				frm.trigger('show_progress_for_items');
-				frm.trigger('show_progress_for_operations');
-			}
+		if (frm.doc.docstatus===1) {
+			frm.trigger('show_progress_for_items');
+			frm.trigger('show_progress_for_operations');
+		}
 
-			if (frm.doc.docstatus === 1
-				&& frm.doc.operations && frm.doc.operations.length) {
+		if (frm.doc.docstatus === 1
+			&& frm.doc.operations && frm.doc.operations.length) {
 
-				const not_completed = frm.doc.operations.filter(d => {
-					if (d.status != 'Completed') {
-						return true;
-					}
-				});
-
-				if (not_completed && not_completed.length) {
-					frm.add_custom_button(__('Create Job Card'), () => {
-						frm.trigger("make_job_card");
-					}).addClass('btn-primary');
+			const not_completed = frm.doc.operations.filter(d => {
+				if(d.status != 'Completed') {
+					return true;
 				}
+			});
+
+			if(not_completed && not_completed.length) {
+				frm.add_custom_button(__('Create Job Card'), () => {
+					frm.trigger("make_job_card");
+				}).addClass('btn-primary');
 			}
 		}
 
@@ -442,7 +440,7 @@ frappe.ui.form.on("Work Order", {
 	additional_operating_cost: function(frm) {
 		erpnext.work_order.calculate_cost(frm.doc);
 		erpnext.work_order.calculate_total_cost(frm);
-	},
+	}
 });
 
 frappe.ui.form.on("Work Order Item", {
@@ -519,22 +517,14 @@ frappe.ui.form.on("Work Order Operation", {
 erpnext.work_order = {
 	set_custom_buttons: function(frm) {
 		var doc = frm.doc;
-		if (doc.docstatus === 1 && doc.status != "Closed") {
-			frm.add_custom_button(__('Close'), function() {
-				frappe.confirm(__("Once the Work Order is Closed. It can't be resumed."),
-					() => {
-						erpnext.work_order.change_work_order_status(frm, "Closed");
-					}
-				);
-			}, __("Status"));
-
+		if (doc.docstatus === 1) {
 			if (doc.status != 'Stopped' && doc.status != 'Completed') {
 				frm.add_custom_button(__('Stop'), function() {
-					erpnext.work_order.change_work_order_status(frm, "Stopped");
+					erpnext.work_order.stop_work_order(frm, "Stopped");
 				}, __("Status"));
 			} else if (doc.status == 'Stopped') {
 				frm.add_custom_button(__('Re-open'), function() {
-					erpnext.work_order.change_work_order_status(frm, "Resumed");
+					erpnext.work_order.stop_work_order(frm, "Resumed");
 				}, __("Status"));
 			}
 
@@ -723,10 +713,9 @@ erpnext.work_order = {
 		});
 	},
 
-	change_work_order_status: function(frm, status) {
-		let method_name = status=="Closed" ? "close_work_order" : "stop_unstop";
+	stop_work_order: function(frm, status) {
 		frappe.call({
-			method: `erpnext.manufacturing.doctype.work_order.work_order.${method_name}`,
+			method: "erpnext.manufacturing.doctype.work_order.work_order.stop_unstop",
 			freeze: true,
 			freeze_message: __("Updating Work Order status"),
 			args: {

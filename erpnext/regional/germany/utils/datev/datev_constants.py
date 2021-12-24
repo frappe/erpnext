@@ -1,3 +1,4 @@
+# coding: utf-8
 """Constants used in datev.py."""
 
 TRANSACTION_COLUMNS = [

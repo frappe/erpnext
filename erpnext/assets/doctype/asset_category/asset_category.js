@@ -33,7 +33,7 @@ frappe.ui.form.on('Asset Category', {
 			var d  = locals[cdt][cdn];
 			return {
 				"filters": {
-					"root_type": ["in", ["Expense", "Income"]],
+					"root_type": "Expense",
 					"is_group": 0,
 					"company": d.company_name
 				}

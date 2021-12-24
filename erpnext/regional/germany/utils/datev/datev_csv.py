@@ -1,3 +1,6 @@
+# coding: utf-8
+from __future__ import unicode_literals
+
 import datetime
 import zipfile
 from csv import QUOTE_NONNUMERIC
@@ -43,7 +46,7 @@ def get_datev_csv(data, filters, csv_class):
 
 	data = result.to_csv(
 		# Reason for str(';'): https://github.com/pandas-dev/pandas/issues/6035
-		sep=';',
+		sep=str(';'),
 		# European decimal seperator
 		decimal=',',
 		# Windows "ANSI" encoding

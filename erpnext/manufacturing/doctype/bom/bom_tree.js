@@ -66,7 +66,6 @@ frappe.treeview_settings["BOM"] = {
 				var bom = frappe.model.get_doc("BOM", node.data.value);
 				node.data.image = escape(bom.image) || "";
 				node.data.description = bom.description || "";
-				node.data.item_code = bom.item || "";
 			});
 		}
 	},

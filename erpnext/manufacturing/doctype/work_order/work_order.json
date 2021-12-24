@@ -99,7 +99,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nStopped\nClosed\nCancelled",
+   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nStopped\nCancelled",
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
@@ -182,7 +182,6 @@
    "reqd": 1
   },
   {
-   "default": "1.0",
    "fieldname": "qty",
    "fieldtype": "Float",
    "label": "Qty To Manufacture",
@@ -326,7 +325,6 @@
    "label": "Expected Delivery Date"
   },
   {
-   "collapsible": 1,
    "fieldname": "operations_section",
    "fieldtype": "Section Break",
    "label": "Operations",
@@ -338,7 +336,7 @@
    "fieldname": "transfer_material_against",
    "fieldtype": "Select",
    "label": "Transfer Material Against",
-   "options": "Work Order\nJob Card"
+   "options": "\nWork Order\nJob Card"
   },
   {
    "fieldname": "operations",
@@ -574,11 +572,10 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-08 17:36:07.016300",
+ "modified": "2021-08-24 15:14:03.844937",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
- "naming_rule": "By \"Naming Series\" field",
  "nsm_parent_field": "parent_work_order",
  "owner": "Administrator",
  "permissions": [

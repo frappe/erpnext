@@ -1,11 +1,14 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from __future__ import unicode_literals
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, get_datetime, getdate
+from six import iteritems
 
 
 class LoanSecurityUnpledge(Document):
@@ -108,7 +111,7 @@ class LoanSecurityUnpledge(Document):
 			pledged_qty = 0
 			current_pledges = get_pledged_security_qty(self.loan)
 
-			for security, qty in current_pledges.items():
+			for security, qty in iteritems(current_pledges):
 				pledged_qty += qty
 
 			if not pledged_qty:
@@ -141,7 +144,7 @@ def get_pledged_security_qty(loan):
 		GROUP BY p.loan_security
 	""", (loan)))
 
-	for security, qty in pledges.items():
+	for security, qty in iteritems(pledges):
 		current_pledges.setdefault(security, qty)
 		current_pledges[security] -= unpledges.get(security, 0.0)
 

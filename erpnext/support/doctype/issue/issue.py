@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from __future__ import unicode_literals
 
 import json
 from datetime import timedelta
@@ -87,9 +88,11 @@ class Issue(Document):
 		if replicated_issue.service_level_agreement:
 			replicated_issue.service_level_agreement_creation = now_datetime()
 			replicated_issue.service_level_agreement = None
-			replicated_issue.agreement_status = "First Response Due"
+			replicated_issue.agreement_status = "Ongoing"
 			replicated_issue.response_by = None
+			replicated_issue.response_by_variance = None
 			replicated_issue.resolution_by = None
+			replicated_issue.resolution_by_variance = None
 			replicated_issue.reset_issue_metrics()
 
 		frappe.get_doc(replicated_issue).insert()

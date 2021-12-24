@@ -81,7 +81,6 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		this.initialize_taxes();
 		this.determine_exclusive_rate();
 		this.calculate_net_total();
-		this.calculate_shipping_charges();
 		this.calculate_taxes();
 		this.manipulate_grand_total_for_inclusive_tax();
 		this.calculate_totals();
@@ -138,9 +137,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		var me = this;
 
 		$.each(this.frm.doc["taxes"] || [], function(i, tax) {
-			if (!tax.dont_recompute_tax) {
-				tax.item_wise_tax_detail = {};
-			}
+			tax.item_wise_tax_detail = {};
 			var tax_fields = ["total", "tax_amount_after_discount_amount",
 				"tax_amount_for_current_item", "grand_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"];
@@ -267,13 +264,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			me.frm.doc.net_total += item.net_amount;
 			me.frm.doc.base_net_total += item.base_net_amount;
 			});
-	}
 
-	calculate_shipping_charges() {
 		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total"]);
-		if (frappe.meta.get_docfield(this.frm.doc.doctype, "shipping_rule", this.frm.doc.name)) {
-			this.shipping_rule();
-		}
 	}
 
 	add_taxes_from_item_tax_template(item_tax_map) {
@@ -429,9 +421,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			current_tax_amount = tax_rate * item.qty;
 		}
 
-		if (!tax.dont_recompute_tax) {
-			this.set_item_wise_tax(item, tax, tax_rate, current_tax_amount);
-		}
+		this.set_item_wise_tax(item, tax, tax_rate, current_tax_amount);
 
 		return current_tax_amount;
 	}
@@ -599,9 +589,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 					delete tax[fieldname];
 				});
 
-				if (!tax.dont_recompute_tax) {
-					tax.item_wise_tax_detail = JSON.stringify(tax.item_wise_tax_detail);
-				}
+				tax.item_wise_tax_detail = JSON.stringify(tax.item_wise_tax_detail);
 			});
 		}
 	}

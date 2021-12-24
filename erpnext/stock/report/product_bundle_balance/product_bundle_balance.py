@@ -1,10 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from __future__ import unicode_literals
 
 import frappe
 from frappe import _
 from frappe.utils import flt
+from six import iteritems
 
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 
@@ -25,11 +27,11 @@ def execute(filters=None):
 		warehouse_company_map = {}
 		for child_item in required_items:
 			child_item_balance = stock_balance.get(child_item.item_code, frappe._dict())
-			for warehouse, sle in child_item_balance.items():
+			for warehouse, sle in iteritems(child_item_balance):
 				if flt(sle.qty_after_transaction) > 0:
 					warehouse_company_map[warehouse] = sle.company
 
-		for warehouse, company in warehouse_company_map.items():
+		for warehouse, company in iteritems(warehouse_company_map):
 			parent_row = {
 				"indent": 0,
 				"item_code": parent_item,

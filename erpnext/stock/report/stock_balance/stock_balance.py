@@ -1,12 +1,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from __future__ import unicode_literals
 
 from operator import itemgetter
 
 import frappe
 from frappe import _
 from frappe.utils import cint, date_diff, flt, getdate
+from six import iteritems
 
 import erpnext
 from erpnext.stock.report.stock_ageing.stock_ageing import get_average_age, get_fifo_queue
@@ -167,7 +169,7 @@ def get_stock_ledger_entries(filters, items):
 			sle.company, sle.voucher_type, sle.qty_after_transaction, sle.stock_value_difference,
 			sle.item_code as name, sle.voucher_no, sle.stock_value, sle.batch_no
 		from
-			`tabStock Ledger Entry` sle
+			`tabStock Ledger Entry` sle force index (posting_sort_index)
 		where sle.docstatus < 2 %s %s
 		and is_cancelled = 0
 		order by sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty""" % #nosec
@@ -200,9 +202,7 @@ def get_item_warehouse_map(filters, sle):
 
 		value_diff = flt(d.stock_value_difference)
 
-		if d.posting_date < from_date or (d.posting_date == from_date
-			and d.voucher_type == "Stock Reconciliation" and
-			frappe.db.get_value("Stock Reconciliation", d.voucher_no, "purpose") == "Opening Stock"):
+		if d.posting_date < from_date:
 			qty_dict.opening_qty += qty_diff
 			qty_dict.opening_val += value_diff
 
@@ -227,7 +227,7 @@ def filter_items_with_no_transactions(iwb_map, float_precision):
 		qty_dict = iwb_map[(company, item, warehouse)]
 
 		no_transactions = True
-		for key, val in qty_dict.items():
+		for key, val in iteritems(qty_dict):
 			val = flt(val, float_precision)
 			qty_dict[key] = val
 			if key != "val_rate" and val:
@@ -284,7 +284,7 @@ def get_item_details(items, sle, filters):
 
 	if filters.get('show_variant_attributes', 0) == 1:
 		variant_values = get_variant_values_for(list(item_details))
-		item_details = {k: v.update(variant_values.get(k, {})) for k, v in item_details.items()}
+		item_details = {k: v.update(variant_values.get(k, {})) for k, v in iteritems(item_details)}
 
 	return item_details
 

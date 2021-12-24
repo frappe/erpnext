@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
+from __future__ import unicode_literals
 
 import unittest
 
@@ -48,7 +50,7 @@ class TestGratuity(unittest.TestCase):
 		self.assertEqual(floor(experience), gratuity.current_work_experience)
 
 		#amount Calculation
-		component_amount = frappe.get_all("Salary Detail",
+		component_amount = frappe.get_list("Salary Detail",
 		filters={
 			"docstatus": 1,
 			'parent': sal_slip,
@@ -84,7 +86,7 @@ class TestGratuity(unittest.TestCase):
 		self.assertEqual(floor(experience), gratuity.current_work_experience)
 
 		#amount Calculation
-		component_amount = frappe.get_all("Salary Detail",
+		component_amount = frappe.get_list("Salary Detail",
 		filters={
 			"docstatus": 1,
 			'parent': sal_slip,

@@ -21,7 +21,6 @@
   "mr_qty_allowance",
   "column_break_12",
   "auto_insert_price_list_rate_if_missing",
-  "update_existing_price_list_rate",
   "allow_negative_stock",
   "show_barcode_field",
   "clean_description_html",
@@ -291,13 +290,6 @@
    "fieldname": "mr_qty_allowance",
    "fieldtype": "Float",
    "label": "Over Transfer Allowance"
-  },
-  {
-   "default": "0",
-   "depends_on": "auto_insert_price_list_rate_if_missing",
-   "fieldname": "update_existing_price_list_rate",
-   "fieldtype": "Check",
-   "label": "Update Existing Price List Rate"
   }
  ],
  "icon": "icon-cog",
@@ -305,7 +297,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-11-06 19:40:02.183592",
+ "modified": "2021-06-28 17:02:26.683002",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

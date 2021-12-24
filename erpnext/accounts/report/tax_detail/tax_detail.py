@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 # Contributed by Case Solved and sponsored by Nulight Studios
 
+from __future__ import unicode_literals
 
 import json
 

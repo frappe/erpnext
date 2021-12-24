@@ -113,15 +113,15 @@ function get_filters() {
 			"fieldname":"period_start_date",
 			"label": __("Start Date"),
 			"fieldtype": "Date",
-			"reqd": 1,
-			"depends_on": "eval:doc.filter_based_on == 'Date Range'"
+			"hidden": 1,
+			"reqd": 1
 		},
 		{
 			"fieldname":"period_end_date",
 			"label": __("End Date"),
 			"fieldtype": "Date",
-			"reqd": 1,
-			"depends_on": "eval:doc.filter_based_on == 'Date Range'"
+			"hidden": 1,
+			"reqd": 1
 		},
 		{
 			"fieldname":"from_fiscal_year",
@@ -129,8 +129,7 @@ function get_filters() {
 			"fieldtype": "Link",
 			"options": "Fiscal Year",
 			"default": frappe.defaults.get_user_default("fiscal_year"),
-			"reqd": 1,
-			"depends_on": "eval:doc.filter_based_on == 'Fiscal Year'"
+			"reqd": 1
 		},
 		{
 			"fieldname":"to_fiscal_year",
@@ -138,8 +137,7 @@ function get_filters() {
 			"fieldtype": "Link",
 			"options": "Fiscal Year",
 			"default": frappe.defaults.get_user_default("fiscal_year"),
-			"reqd": 1,
-			"depends_on": "eval:doc.filter_based_on == 'Fiscal Year'"
+			"reqd": 1
 		},
 		{
 			"fieldname": "periodicity",

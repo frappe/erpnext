@@ -1,5 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
+from __future__ import unicode_literals
+
+import unittest
+
 import frappe
 from frappe.test_runner import make_test_records
 
@@ -10,13 +14,12 @@ from erpnext.manufacturing.doctype.workstation.workstation import (
 	WorkstationHolidayError,
 	check_if_within_operating_hours,
 )
-from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ["Warehouse"]
 test_records = frappe.get_test_records('Workstation')
 make_test_records('Workstation')
 
-class TestWorkstation(ERPNextTestCase):
+class TestWorkstation(unittest.TestCase):
 	def test_validate_timings(self):
 		check_if_within_operating_hours("_Test Workstation 1", "Operation 1", "2013-02-02 11:00:00", "2013-02-02 19:00:00")
 		check_if_within_operating_hours("_Test Workstation 1", "Operation 1", "2013-02-02 10:00:00", "2013-02-02 20:00:00")
@@ -87,7 +90,7 @@ def make_workstation(*args, **kwargs):
 	args = frappe._dict(args)
 
 	workstation_name = args.workstation_name or args.workstation
-	if not frappe.db.exists("Workstation", workstation_name):
+	try:
 		doc = frappe.get_doc({
 			"doctype": "Workstation",
 			"workstation_name": workstation_name
@@ -97,5 +100,5 @@ def make_workstation(*args, **kwargs):
 		doc.insert()
 
 		return doc
-
-	return frappe.get_doc("Workstation", workstation_name)
+	except frappe.DuplicateEntryError:
+		return frappe.get_doc("Workstation", workstation_name)

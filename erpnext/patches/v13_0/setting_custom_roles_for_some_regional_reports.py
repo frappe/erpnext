@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import frappe
 
 from erpnext.regional.india.setup import add_custom_roles_for_reports

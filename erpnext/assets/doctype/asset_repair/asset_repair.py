@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -118,10 +120,9 @@ class AssetRepair(AccountsController):
 		for stock_item in self.get('stock_items'):
 			stock_entry.append('items', {
 				"s_warehouse": self.warehouse,
-				"item_code": stock_item.item_code,
+				"item_code": stock_item.item,
 				"qty": stock_item.consumed_quantity,
-				"basic_rate": stock_item.valuation_rate,
-				"serial_no": stock_item.serial_no
+				"basic_rate": stock_item.valuation_rate
 			})
 
 		stock_entry.insert()

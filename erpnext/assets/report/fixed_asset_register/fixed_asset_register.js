@@ -16,8 +16,9 @@ frappe.query_reports["Fixed Asset Register"] = {
 			fieldname:"status",
 			label: __("Status"),
 			fieldtype: "Select",
-			options: "\nIn Location\nDisposed",
-			default: 'In Location'
+			options: "In Location\nDisposed",
+			default: 'In Location',
+			reqd: 1
 		},
 		{
 			"fieldname":"filter_based_on",

@@ -1,5 +1,7 @@
-# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
+
+from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -29,6 +31,7 @@ def get_data(report_filters):
 
 		for row in job_cards:
 			row.operating_cost = flt(row.hour_rate) * (flt(row.total_time_in_mins) / 60.0)
+			update_raw_material_cost(row, report_filters)
 			data.append(row)
 
 	return data
@@ -44,6 +47,12 @@ def get_filters(report_filters, operations):
 
 	return filters
 
+def update_raw_material_cost(row, filters):
+	row.rm_cost = 0.0
+	for data in frappe.get_all("Job Card Item", fields = ["amount"],
+		filters={"parent": row.name, "docstatus": 1}):
+		row.rm_cost += data.amount
+
 def get_columns(filters):
 	return [
 		{
@@ -51,7 +60,7 @@ def get_columns(filters):
 			"fieldtype": "Link",
 			"fieldname": "name",
 			"options": "Job Card",
-			"width": "120"
+			"width": "100"
 		},
 		{
 			"label": _("Work Order"),
@@ -103,12 +112,18 @@ def get_columns(filters):
 			"label": _("Operating Cost"),
 			"fieldtype": "Currency",
 			"fieldname": "operating_cost",
-			"width": "150"
+			"width": "100"
+		},
+		{
+			"label": _("Raw Material Cost"),
+			"fieldtype": "Currency",
+			"fieldname": "rm_cost",
+			"width": "100"
 		},
 		{
 			"label": _("Total Time (in Mins)"),
 			"fieldtype": "Float",
 			"fieldname": "total_time_in_mins",
-			"width": "150"
+			"width": "100"
 		}
 	]

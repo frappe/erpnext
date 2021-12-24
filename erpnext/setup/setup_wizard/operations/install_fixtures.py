@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from __future__ import unicode_literals
 
 import json
 import os
@@ -201,6 +202,7 @@ def install(country=None):
 		{'doctype': "Party Type", "party_type": "Student", "account_type": "Receivable"},
 		{'doctype': "Party Type", "party_type": "Donor", "account_type": "Receivable"},
 
+		{'doctype': "Opportunity Type", "name": "Hub"},
 		{'doctype': "Opportunity Type", "name": _("Sales")},
 		{'doctype': "Opportunity Type", "name": _("Support")},
 		{'doctype': "Opportunity Type", "name": _("Maintenance")},
@@ -278,11 +280,6 @@ def install(country=None):
 	records += [{'doctype': 'Email Template', 'name': _('Interview Feedback Reminder'), 'response': response,
 		'subject': _('Interview Feedback Reminder'), 'owner': frappe.session.user}]
 
-	response = frappe.read_file(os.path.join(base_path, 'exit_interview/exit_questionnaire_notification_template.html'))
-
-	records += [{'doctype': 'Email Template', 'name': _('Exit Questionnaire Notification'), 'response': response,
-		'subject': _('Exit Questionnaire Notification'), 'owner': frappe.session.user}]
-
 	base_path = frappe.get_app_path("erpnext", "stock", "doctype")
 	response = frappe.read_file(os.path.join(base_path, "delivery_trip/dispatch_notification_template.html"))
 
@@ -308,6 +305,7 @@ def set_more_defaults():
 
 def update_selling_defaults():
 	selling_settings = frappe.get_doc("Selling Settings")
+	selling_settings.set_default_customer_group_and_territory()
 	selling_settings.cust_master_name = "Customer Name"
 	selling_settings.so_required = "No"
 	selling_settings.dn_required = "No"

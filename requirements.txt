@@ -1,3 +1,4 @@
+future==0.18.2
 # frappe   # https://github.com/frappe/frappe is installed during bench-init
 gocardless-pro~=1.22.0
 googlemaps  # used in ERPNext, but dependency is defined in Frappe

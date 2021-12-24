@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -20,7 +21,7 @@ def execute(filters=None):
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
-	opening_row = get_opening_balance(filters, columns, sl_entries)
+	opening_row = get_opening_balance(filters, columns)
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 
 	data = []
@@ -217,7 +218,7 @@ def get_sle_conditions(filters):
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 
-def get_opening_balance(filters, columns, sl_entries):
+def get_opening_balance(filters, columns):
 	if not (filters.item_code and filters.warehouse and filters.from_date):
 		return
 
@@ -228,15 +229,6 @@ def get_opening_balance(filters, columns, sl_entries):
 		"posting_date": filters.from_date,
 		"posting_time": "00:00:00"
 	})
-
-	# check if any SLEs are actually Opening Stock Reconciliation
-	for sle in sl_entries:
-		if (sle.get("voucher_type") == "Stock Reconciliation"
-			and sle.get("date").split()[0] == filters.from_date
-			and frappe.db.get_value("Stock Reconciliation", sle.voucher_no, "purpose") == "Opening Stock"
-		):
-			last_entry = sle
-			sl_entries.remove(sle)
 
 	row = {
 		"item_code": _("'Opening'"),

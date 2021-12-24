@@ -1,6 +1,7 @@
 # Copyright (c) 2013, Havenir Solutions and contributors
 # For license information, please see license.txt
 
+from __future__ import unicode_literals
 
 import json
 
@@ -118,14 +119,14 @@ def get_tax_data_for_each_vat_setting(vat_setting, filters, doctype):
 	total_taxable_adjustment_amount = 0
 	total_tax = 0
 	# Fetch All Invoices
-	invoices = frappe.get_all(doctype,
+	invoices = frappe.get_list(doctype,
 	filters ={
 		'docstatus': 1,
 		'posting_date': ['between', [from_date, to_date]]
 	}, fields =['name', 'is_return'])
 
 	for invoice in invoices:
-		invoice_items = frappe.get_all(f'{doctype} Item',
+		invoice_items = frappe.get_list(f'{doctype} Item',
 		filters ={
 			'docstatus': 1,
 			'parent': invoice.name,

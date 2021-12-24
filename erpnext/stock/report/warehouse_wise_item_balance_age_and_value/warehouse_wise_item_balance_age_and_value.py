@@ -4,10 +4,12 @@
 # Copyright (c) 2013, Tristar Enterprises and contributors
 # For license information, please see license.txt
 
+from __future__ import unicode_literals
 
 import frappe
 from frappe import _
 from frappe.utils import flt
+from six import iteritems
 
 from erpnext.stock.report.stock_ageing.stock_ageing import get_average_age, get_fifo_queue
 from erpnext.stock.report.stock_balance.stock_balance import (
@@ -46,8 +48,8 @@ def execute(filters=None):
 		item_balance.setdefault((item, item_map[item]["item_group"]), [])
 		total_stock_value = 0.00
 		for wh in warehouse_list:
-			row += [qty_dict.bal_qty] if wh.name == warehouse else [0.00]
-			total_stock_value += qty_dict.bal_val if wh.name == warehouse else 0.00
+			row += [qty_dict.bal_qty] if wh.name in warehouse else [0.00]
+			total_stock_value += qty_dict.bal_val if wh.name in warehouse else 0.00
 
 		item_balance[(item, item_map[item]["item_group"])].append(row)
 		item_value.setdefault((item, item_map[item]["item_group"]),[])
@@ -55,7 +57,7 @@ def execute(filters=None):
 
 
 	# sum bal_qty by item
-	for (item, item_group), wh_balance in item_balance.items():
+	for (item, item_group), wh_balance in iteritems(item_balance):
 		if not item_ageing.get(item):  continue
 
 		total_stock_value = sum(item_value[(item, item_group)])

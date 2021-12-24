@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from __future__ import unicode_literals
 
 import copy
 import json
@@ -8,6 +9,7 @@ import json
 import frappe
 from frappe import _
 from frappe.utils import cstr, flt
+from six import string_types
 
 
 class ItemVariantExistsError(frappe.ValidationError): pass
@@ -29,7 +31,7 @@ def get_variant(template, args=None, variant=None, manufacturer=None,
 		return make_variant_based_on_manufacturer(item_template, manufacturer,
 			manufacturer_part_no)
 	else:
-		if isinstance(args, str):
+		if isinstance(args, string_types):
 			args = json.loads(args)
 
 		if not args:
@@ -53,7 +55,7 @@ def make_variant_based_on_manufacturer(template, manufacturer, manufacturer_part
 	return variant
 
 def validate_item_variant_attributes(item, args=None):
-	if isinstance(item, str):
+	if isinstance(item, string_types):
 		item = frappe.get_doc('Item', item)
 
 	if not args:
@@ -155,7 +157,7 @@ def find_variant(template, args, variant_item_code=None):
 
 @frappe.whitelist()
 def create_variant(item, args):
-	if isinstance(args, str):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	template = frappe.get_doc("Item", item)
@@ -178,7 +180,7 @@ def create_variant(item, args):
 @frappe.whitelist()
 def enqueue_multiple_variant_creation(item, args):
 	# There can be innumerable attribute combinations, enqueue
-	if isinstance(args, str):
+	if isinstance(args, string_types):
 		variants = json.loads(args)
 	total_variants = 1
 	for key in variants:
@@ -195,7 +197,7 @@ def enqueue_multiple_variant_creation(item, args):
 
 def create_multiple_variants(item, args):
 	count = 0
-	if isinstance(args, str):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	args_set = generate_keyed_value_combinations(args)

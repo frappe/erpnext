@@ -130,11 +130,11 @@
   "per_delivered",
   "column_break_81",
   "per_billed",
+  "per_picked",
   "billing_status",
   "sales_team_section_break",
   "sales_partner",
   "column_break7",
-  "amount_eligible_for_commission",
   "commission_rate",
   "total_commission",
   "section_break1",
@@ -1510,9 +1510,11 @@
    "read_only": 1
   },
   {
-   "fieldname": "amount_eligible_for_commission",
-   "fieldtype": "Currency",
-   "label": "Amount Eligible for Commission",
+   "fieldname": "per_picked",
+   "fieldtype": "Percent",
+   "label": "% Picked",
+   "no_copy": 1,
+   "print_hide": 1,
    "read_only": 1
   }
  ],
@@ -1520,7 +1522,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-05 12:16:40.775704",
+ "modified": "2021-09-29 13:09:51.515542",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

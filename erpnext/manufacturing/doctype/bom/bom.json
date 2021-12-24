@@ -237,7 +237,6 @@
    "options": "Price List"
   },
   {
-   "depends_on": "with_operations",
    "fieldname": "operations_section",
    "fieldtype": "Section Break",
    "hide_border": 1,
@@ -437,7 +436,7 @@
    "description": "Item Image (if not slideshow)",
    "fieldname": "website_image",
    "fieldtype": "Attach Image",
-   "label": "Website Image"
+   "label": "Image"
   },
   {
    "allow_on_submit": 1,
@@ -540,7 +539,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-18 13:04:16.271975",
+ "modified": "2021-05-16 12:25:09.081968",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

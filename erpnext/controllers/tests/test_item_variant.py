@@ -1,7 +1,10 @@
+from __future__ import unicode_literals
+
 import json
 import unittest
 
 import frappe
+from six import string_types
 
 from erpnext.controllers.item_variant import copy_attributes_to_variant, make_variant_item_code
 from erpnext.stock.doctype.item.test_item import set_item_variant_settings
@@ -18,7 +21,7 @@ class TestItemVariant(unittest.TestCase):
 		self.assertEqual(variant.get("quality_inspection_template"), "_Test QC Template")
 
 def create_variant_with_tables(item, args):
-	if isinstance(args, str):
+	if isinstance(args, string_types):
 		args = json.loads(args)
 
 	qc_name = make_quality_inspection_template()

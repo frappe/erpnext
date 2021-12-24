@@ -4,6 +4,7 @@
 import frappe
 from frappe import _
 from frappe.utils import flt
+from six import iteritems
 
 
 def execute(filters=None):
@@ -25,7 +26,7 @@ def get_data(filters):
 
 def validate_data(itewise_balance_qty):
 	res = []
-	for key, data in itewise_balance_qty.items():
+	for key, data in iteritems(itewise_balance_qty):
 		row = get_incorrect_data(data)
 		if row:
 			res.append(row)
@@ -46,7 +47,7 @@ def get_incorrect_data(data):
 			return row
 
 def get_stock_ledger_entries(report_filters):
-	filters = {"is_cancelled": 0}
+	filters = {}
 	fields = ['name', 'voucher_type', 'voucher_no', 'item_code', 'actual_qty',
 		'posting_date', 'posting_time', 'company', 'warehouse', 'qty_after_transaction', 'batch_no']
 

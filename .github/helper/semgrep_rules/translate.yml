@@ -1,0 +1,64 @@
+rules:
+- id: frappe-translation-empty-string
+  pattern-either:
+  - pattern: _("")
+  - pattern: __("")
+  message: |
+    Empty string is useless for translation.
+    Please refer: https://frappeframework.com/docs/user/en/translations
+  languages: [python, javascript, json]
+  severity: ERROR
+
+- id: frappe-translation-trailing-spaces
+  pattern-either:
+    - pattern: _("=~/(^[ \t]+|[ \t]+$)/")
+    - pattern: __("=~/(^[ \t]+|[ \t]+$)/")
+  message: |
+    Trailing or leading whitespace not allowed in translate strings.
+    Please refer: https://frappeframework.com/docs/user/en/translations
+  languages: [python, javascript, json]
+  severity: ERROR
+
+- id: frappe-translation-python-formatting
+  pattern-either:
+  - pattern: _("..." % ...)
+  - pattern: _("...".format(...))
+  - pattern: _(f"...")
+  message: |
+    Only positional formatters are allowed and formatting should not be done before translating.
+    Please refer: https://frappeframework.com/docs/user/en/translations
+  languages: [python]
+  severity: ERROR
+
+- id: frappe-translation-js-formatting
+  patterns:
+  - pattern: __(`...`)
+  - pattern-not: __("...")
+  message: |
+    Template strings are not allowed for text formatting.
+    Please refer: https://frappeframework.com/docs/user/en/translations
+  languages: [javascript, json]
+  severity: ERROR
+
+- id: frappe-translation-python-splitting
+  pattern-either:
+  - pattern: _(...) + _(...)
+  - pattern: _("..." + "...")
+  - pattern-regex: '[\s\.]_\([^\)]*\\\s*'    # lines broken by `\`
+  - pattern-regex: '[\s\.]_\(\s*\n'          # line breaks allowed by python for using ( )
+  message: |
+    Do not split strings inside translate function. Do not concatenate using translate functions.
+    Please refer: https://frappeframework.com/docs/user/en/translations
+  languages: [python]
+  severity: ERROR
+
+- id: frappe-translation-js-splitting
+  pattern-either:
+  - pattern-regex: '__\([^\)]*[\\]\s+'
+  - pattern: __('...' + '...', ...)
+  - pattern: __('...') + __('...')
+  message: |
+    Do not split strings inside translate function. Do not concatenate using translate functions.
+    Please refer: https://frappeframework.com/docs/user/en/translations
+  languages: [javascript, json]
+  severity: ERROR

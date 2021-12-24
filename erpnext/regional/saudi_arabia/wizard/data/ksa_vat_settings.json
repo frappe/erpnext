@@ -15,7 +15,7 @@
             {
                 "title": "Exempted sales",
                 "item_tax_template": "KSA VAT Exempted",
-                "account": "VAT Exempted"
+                "account": "VAT Zero"
             }
         ]
     },
@@ -40,7 +40,7 @@
             {
                 "title": "Exempted purchases",
                 "item_tax_template": "KSA VAT Exempted",
-                "account": "VAT Exempted"
+                "account": "VAT Zero"
             }
         ]
     }

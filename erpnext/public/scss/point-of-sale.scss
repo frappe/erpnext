@@ -495,11 +495,6 @@
 						font-size: var(--text-md);
 					}
 
-					> .item-qty-total-container {
-						@extend .net-total-container;
-						padding: 5px 0px 0px 0px;
-					}
-
 					> .taxes-container {
 						display: none;
 						flex-direction: column;
