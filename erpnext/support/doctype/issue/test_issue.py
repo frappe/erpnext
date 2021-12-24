@@ -98,6 +98,7 @@ class TestIssue(TestSetUp):
 		issue.save()
 
 		self.assertEqual(issue.on_hold_since, frappe.flags.current_time)
+		self.assertFalse(issue.resolution_by)
 
 		creation = get_datetime("2020-03-04 5:00")
 		frappe.flags.current_time = get_datetime("2020-03-04 5:00")
