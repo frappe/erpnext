@@ -1622,13 +1622,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		me.frm.refresh_field('items');
 		me.apply_rule_on_other_items(items_rule_dict);
 
-<<<<<<< HEAD
-		if(!price_list_rate_changed) me.calculate_taxes_and_totals();
-	}
-=======
 		me.calculate_taxes_and_totals();
-	},
->>>>>>> 233f79bf96 (fix: Recalculate taxes irrespective of price list rate changed or not)
+	}
 
 	apply_rule_on_other_items(args) {
 		const me = this;
