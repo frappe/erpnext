@@ -274,6 +274,18 @@ class Subscription(Document):
 		self.validate_end_date()
 		self.validate_to_follow_calendar_months()
 		self.cost_center = erpnext.get_default_cost_center(self.get('company'))
+		self.validate_plan_currency()
+	
+	def validate_plan_currency(self):
+		for p in self.plans:
+			plan_currency = frappe.db.get_value("Subscription Plan",p.plan, ["currency"])
+			for pp in self.plans:
+				cur_currency = frappe.db.get_value("Subscription Plan",pp.plan, ["currency"])
+				if cur_currency!=plan_currency:
+					frappe.throw(_("Subscription can not has different plan Currency"))
+			
+
+			
 
 	def validate_trial_period(self):
 		"""
@@ -371,6 +383,8 @@ class Subscription(Document):
 		for item in items_list:
 			item['cost_center'] = self.cost_center
 			invoice.append('items', item)
+			# currency
+			invoice.currency = item["currency"]
 
 		# Taxes
 		tax_template = ''
@@ -405,6 +419,7 @@ class Subscription(Document):
 			discount_on = self.apply_additional_discount
 			invoice.apply_discount_on = discount_on if discount_on else 'Grand Total'
 
+		
 		# Subscription period
 		invoice.from_date = self.current_invoice_start
 		invoice.to_date = self.current_invoice_end
