@@ -275,6 +275,15 @@ class Subscription(Document):
 		self.validate_end_date()
 		self.validate_to_follow_calendar_months()
 		self.cost_center = erpnext.get_default_cost_center(self.get('company'))
+		self.validate_plan_currency()
+
+	def validate_plan_currency(self):
+		for p in self.plans:
+			plan_currency = frappe.db.get_value("Subscription Plan",p.plan, ["currency"])
+			for pp in self.plans:
+				cur_currency = frappe.db.get_value("Subscription Plan",pp.plan, ["currency"])
+				if cur_currency!=plan_currency:
+					frappe.throw(_("Subscription can not has different plan Currency"))
 
 	def validate_trial_period(self):
 		"""
@@ -371,10 +380,12 @@ class Subscription(Document):
 
 		# Subscription is better suited for service items. I won't update `update_stock`
 		# for that reason
-		items_list = self.get_items_from_plans(self.plans, prorate)
+		items_list, temp_currency = self.get_items_from_plans(self.plans, prorate)
 		for item in items_list:
 			item['cost_center'] = self.cost_center
 			invoice.append('items', item)
+			# currency
+			invoice.currency = temp_currency
 
 		# Taxes
 		tax_template = ''
@@ -468,7 +479,7 @@ class Subscription(Document):
 
 			items.append(item)
 
-		return items
+		return items, plan_doc.currency
 
 	def process(self):
 		"""
