@@ -23,9 +23,9 @@
 		{%- for index in ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'] -%}
 		{%- set item = values['card_' + index + '_item'] -%}
 			{%- if item -%}
-				{%- set item = frappe.get_doc("Item", item) -%}
+				{%- set web_item = frappe.get_doc("Website Item", item) -%}
 				{{ item_card(
-					item, is_featured=values['card_' + index + '_featured'],
+					web_item, is_featured=values['card_' + index + '_featured'],
 					is_full_width=True, align="Center"
 				) }}
 			{%- endif -%}
