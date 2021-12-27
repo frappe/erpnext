@@ -109,8 +109,11 @@ frappe.ui.form.on('Payment Entry', {
 			var filters = {"docstatus": 1, "company": doc.company};
 			const party_type_doctypes = ['Sales Invoice', 'Sales Order', 'Purchase Invoice',
 				'Purchase Order', 'Expense Claim', 'Fees', 'Debit Note CXC', 'Credit Note CXP', "Customer Documents", "Supplier Documents"];
-			if(child.reference_doctype == "Sales Invoice" || child.reference_doctype == "Purchase Invoice"){
+			if(child.reference_doctype == "Purchase Invoice"){
 				filters = {"docstatus": 1, "company": doc.company, "status": ["in", ["Unpaid", "Overdue"]], "supplier": doc.party};
+			}
+			if(child.reference_doctype == "Sales Invoice" ){
+				filters = {"docstatus": 1, "company": doc.company, "status": ["in", ["Unpaid", "Overdue"]], "customer": doc.party};
 			}
 			if(child.reference_doctype == "Supplier Documents" || child.reference_doctype == "Credit Note CXP"){
 				filters = {"docstatus": 1, "company": doc.company, "status": ["in", ["Unpaid", "Overdue"]]};
