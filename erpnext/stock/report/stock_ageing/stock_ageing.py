@@ -297,7 +297,7 @@ class FIFOSlots:
 					fifo_queue[0][0] += flt(row.actual_qty)
 					fifo_queue[0][1] = row.posting_date
 				else:
-					fifo_queue.append([row.actual_qty, row.posting_date])
+					fifo_queue.append([flt(row.actual_qty), row.posting_date])
 				return
 
 			for serial_no in serial_nos:
@@ -400,10 +400,10 @@ class FIFOSlots:
 
 		warehouse_results = (
 			frappe.qb.from_(warehouse)
-				.select("name").where(
-					(warehouse.lft >= lft)
-					& (warehouse.rgt <= rgt)
-				).run()
+			.select("name").where(
+				(warehouse.lft >= lft)
+				& (warehouse.rgt <= rgt)
+			).run()
 		)
 		warehouse_results = [x[0] for x in warehouse_results]
 
