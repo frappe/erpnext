@@ -395,8 +395,7 @@ class FIFOSlots:
 
 		warehouse_results = (
 			frappe.qb.from_(warehouse)
-				.select("name")
-				.where(
+				.select("name").where(
 					(warehouse.lft >= lft)
 					& (warehouse.rgt <= rgt)
 				).run()
