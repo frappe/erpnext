@@ -23,7 +23,7 @@ class SalesForUser(Document):
 		split_serie = serie.split("-")
 		serie_final = ("{}-{}-{}").format(split_serie[0],split_serie[1],split_serie[2])
 
-		salary_slips = frappe.get_all("Sales Invoice", ["name","outstanding_amount", "total_advance", "status","naming_series", "creation_date", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total", "partial_discount", "discount_amount", "total"], filters = condition,  order_by = "name asc")
+		salary_slips = frappe.get_all("Sales Invoice", ["name","outstanding_amount", "total_advance", "creation", "status","naming_series", "creation_date", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total", "partial_discount", "discount_amount", "total"], filters = condition,  order_by = "name asc")
 
 		self.total_invoice = len(salary_slips)
 		self.total_operations = len(salary_slips)
@@ -109,8 +109,8 @@ class SalesForUser(Document):
 			gross = 0
 
 			for salary_slip in salary_slips:
-				date_validate = salary_slip.posting_date.strftime('%Y-%m-%d')
-				if date == date_validate and salary_slip.status != "Return":
+				date_validate = salary_slip.creation.strftime('%Y-%m-%d %H:%M:%S')
+				if salary_slip.status != "Return" and date_validate >= self.start_date and date_validate <= self.final_date:
 					if cont == 0:
 						split_initial_range = salary_slip.name.split("-")
 						initial_range = split_initial_range[3]
@@ -170,7 +170,9 @@ class SalesForUser(Document):
 		conditions = ''
 
 		conditions += "{"
-		conditions += '"creation": ["between", ["{}", "{}"]]'.format(self.start_date, self.final_date)
+		conditions += '"creation": ["between", ["{}", "{}"]]'.format(self.final_date, self.start_date)
+		# conditions += '"creation": [">=", "{}"]'.format(self.start_date)
+		# conditions += ', "creation": ["<=", "{}"]'.format(self.final_date)
 		conditions += ', "naming_series": "{}"'.format(self.prefix)
 		conditions += ', "company": "{}"'.format(self.company)
 		# conditions += '"posting_time": ["between", ["{}", "{}"]]'.format(self.start_hour, self.final_hour)
