@@ -196,13 +196,20 @@ class TestLeaveAllocation(unittest.TestCase):
 		leave_allocation.submit()
 		self.assertTrue(leave_allocation.total_leaves_allocated, 15)
 		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from tabEmployee limit 1")[0])
+		company = erpnext.get_default_company() or "_Test Company"
+		company = frappe.get_doc('Company', company)
+		if not company.default_holiday_list:
+			holiday_list = frappe.get_list('Holiday List', pluck='name')[0]
+			company.default_holiday_list = holiday_list
+			company.save()
+
 		leave_application = frappe.get_doc({
 			"doctype": 'Leave Application',
 			"employee": employee.name,
 			"leave_type": "_Test Leave Type",
 			"from_date": add_months(nowdate(), 2),
 			"to_date": add_months(add_days(nowdate(), 10), 2),
-			"company": erpnext.get_default_company() or "_Test Company",
+			"company": company,
 			"docstatus": 1,
 			"status": "Approved",
 			"leave_approver": 'test@example.com'
