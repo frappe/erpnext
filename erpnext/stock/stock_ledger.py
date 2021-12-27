@@ -65,8 +65,8 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 			is_stock_item = frappe.get_cached_value('Item', args.get("item_code"), 'is_stock_item')
 			if is_stock_item:
 				bin_name = get_or_make_bin(args.get("item_code"), args.get("warehouse"))
-				update_bin_qty(bin_name, args)
 				repost_current_voucher(args, allow_negative_stock, via_landed_cost_voucher)
+				update_bin_qty(bin_name, args)
 			else:
 				frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
 
