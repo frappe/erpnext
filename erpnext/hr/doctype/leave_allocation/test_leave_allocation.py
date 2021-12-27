@@ -12,12 +12,7 @@ from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
 class TestLeaveAllocation(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
-		from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_holiday_list
-
 		frappe.db.sql("delete from `tabLeave Period`")
-
-		make_holiday_list()
-		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Slip Test Holiday List")
 
 		emp_id = make_employee("test_emp_leave_allocation@salary.com")
 		cls.employee = frappe.get_doc("Employee", emp_id)
@@ -206,6 +201,11 @@ class TestLeaveAllocation(unittest.TestCase):
 		self.assertTrue(leave_allocation.total_leaves_allocated, 10)
 
 	def test_validation_against_leave_application_after_submit(self):
+		from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_holiday_list
+
+		make_holiday_list()
+		frappe.db.set_value("Company", self.employee.company, "default_holiday_list", "Salary Slip Test Holiday List")
+
 		leave_allocation = create_leave_allocation(
 			employee=self.employee.name,
 			employee_name=self.employee.employee_name
