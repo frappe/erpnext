@@ -33,4 +33,5 @@ def execute():
 	hr_settings = frappe.get_doc('HR Settings')
 	hr_settings.interview_reminder_template = _('Interview Reminder')
 	hr_settings.feedback_reminder_notification_template = _('Interview Feedback Reminder')
+	hr_settings.flags.ignore_links = True
 	hr_settings.save()
