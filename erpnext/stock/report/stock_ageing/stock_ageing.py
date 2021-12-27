@@ -287,7 +287,7 @@ class FIFOSlots:
 			fifo_queue.append(slot)
 		else:
 			if not serial_nos:
-				if fifo_queue and fifo_queue[0][0] < 0:
+				if fifo_queue and flt(fifo_queue[0][0]) < 0:
 					# neutralize negative stock by adding positive stock
 					fifo_queue[0][0] += flt(row.actual_qty)
 					fifo_queue[0][1] = row.posting_date
@@ -339,54 +339,68 @@ class FIFOSlots:
 		self.item_details[key]["has_serial_no"] = row.has_serial_no
 
 	def __get_stock_ledger_entries(self) -> List[Dict]:
-		return frappe.db.sql("""
-			select
-				item.name, item.item_name, item_group, brand, description,
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		item = self.__get_item_query() # used as derived table in sle query
+
+		sle_query = (
+			frappe.qb.from_(sle).from_(item)
+			.select(
+				item.name, item.item_name, item.item_group,
+				item.brand, item.description,
 				item.stock_uom, item.has_serial_no,
-				actual_qty, posting_date, voucher_type, voucher_no,
-				serial_no, batch_no, qty_after_transaction, warehouse
-			from
-				`tabStock Ledger Entry` sle,
-				(
-					select name, item_name, description, stock_uom,
-					brand, item_group, has_serial_no
-					from `tabItem` {item_conditions}
-				) item
-			where
-				item_code = item.name and
-				company = %(company)s and
-				posting_date <= %(to_date)s and
-				is_cancelled != 1
-				{sle_conditions}
-			order by posting_date, posting_time, sle.creation, actual_qty
-			""" #nosec
-			.format(
-				item_conditions=self.__get_item_conditions(),
-				sle_conditions=self.__get_sle_conditions()
-			),
-			self.filters,
-			as_dict=True
+				sle.actual_qty, sle.posting_date,
+				sle.voucher_type, sle.voucher_no,
+				sle.serial_no, sle.batch_no,
+				sle.qty_after_transaction, sle.warehouse
+			).where(
+				(sle.item_code == item.name)
+				& (sle.company == self.filters.get("company"))
+				& (sle.posting_date <= self.filters.get("to_date"))
+				& (sle.is_cancelled != 1)
+			)
 		)
 
-	def __get_item_conditions(self) -> str:
-		conditions = []
-		if self.filters.get("item_code"):
-			conditions.append("item_code=%(item_code)s")
-		if self.filters.get("brand"):
-			conditions.append("brand=%(brand)s")
-
-		return "where {}".format(" and ".join(conditions)) if conditions else ""
-
-	def __get_sle_conditions(self) -> str:
-		conditions = []
-
 		if self.filters.get("warehouse"):
-			lft, rgt = frappe.db.get_value("Warehouse", self.filters.get("warehouse"), ['lft', 'rgt'])
-			conditions.append("""
-				warehouse in (
-					select wh.name from `tabWarehouse` wh
-					where wh.lft >= {0} and rgt <= {1}
-				)
-			""".format(lft, rgt))
+			sle_query = self.__get_warehouse_conditions(sle, sle_query)
 
-		return "and {}".format(" and ".join(conditions)) if conditions else ""
+		sle_query = sle_query.orderby(
+			sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty
+		)
+
+		return sle_query.run(as_dict=True)
+
+	def __get_item_query(self) -> str:
+		item_table = frappe.qb.DocType("Item")
+
+		item = frappe.qb.from_("Item").select(
+			"name", "item_name", "description", "stock_uom",
+			"brand", "item_group", "has_serial_no"
+		)
+
+		if self.filters.get("item_code"):
+			item = item.where(item_table.item_code == self.filters.get("item_code"))
+
+		if self.filters.get("brand"):
+			item = item.where(item_table.brand == self.filters.get("brand"))
+
+		return item
+
+	def __get_warehouse_conditions(self, sle, sle_query) -> str:
+		warehouse = frappe.qb.DocType("Warehouse")
+		lft, rgt = frappe.db.get_value(
+			"Warehouse",
+			self.filters.get("warehouse"),
+			['lft', 'rgt']
+		)
+
+		warehouse_results = (
+			frappe.qb.from_(warehouse)
+				.select("name")
+				.where(
+					(warehouse.lft >= lft)
+					& (warehouse.rgt <= rgt)
+				).run()
+		)
+		warehouse_results = [x[0] for x in warehouse_results]
+
+		return sle_query.where(sle.warehouse.isin(warehouse_results))
