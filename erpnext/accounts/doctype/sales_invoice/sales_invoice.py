@@ -2522,6 +2522,8 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 			target.dunning_type = dunning_type.name
 			target.rate_of_interest = dunning_type.rate_of_interest
 			target.dunning_fee = dunning_type.dunning_fee
+			target.income_account = dunning_type.income_account
+			target.cost_center = dunning_type.cost_center
 			letter_text = get_dunning_letter_text(
 				dunning_type=dunning_type.name,
 				doc=target.as_dict(),
