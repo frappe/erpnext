@@ -95,7 +95,7 @@ frappe.ui.form.on("Project", {
 	set_project_status_button: function(frm) {
 		frm.add_custom_button(__('Set Project Status'), () => {
 			let d = new frappe.ui.Dialog({
-				"title": "Set Project Status",
+				"title": __("Set Project Status"),
 				"fields": [
 					{
 						"fieldname": "status",
