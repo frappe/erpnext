@@ -6,6 +6,7 @@ import frappe
 from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots
 from erpnext.tests.utils import ERPNextTestCase
 
+
 class TestStockAgeing(ERPNextTestCase):
 	def setUp(self) -> None:
 		self.filters = frappe._dict(
