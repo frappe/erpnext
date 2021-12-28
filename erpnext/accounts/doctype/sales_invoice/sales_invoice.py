@@ -293,9 +293,6 @@ class SalesInvoice(SellingController):
 		if self.outstanding_amount > 0:
 			if pos_profile[0].allow_credit == 0:
 				frappe.throw(_("It is not allowed to give credit at this point of sale"))
-		else:#cambioaplicado
-			self.db_set('status', "status", update_modified=False)
-			self.db_set('docstatus', 5, update_modified=False)
 
 	def create_dispatch_control(self):
 		products = frappe.get_all("Sales Invoice Item", ["item_code", "qty"], filters = {"parent": self.name})
