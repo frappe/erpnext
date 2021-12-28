@@ -64,7 +64,7 @@ def create_hsn_codes(data, code_field):
 		hsn_code.hsn_code = d[code_field]
 		hsn_code.name = d[code_field]
 		try:
-			hsn_code.db_insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
+			hsn_code.db_insert()
 		except frappe.DuplicateEntryError:
 			pass
 

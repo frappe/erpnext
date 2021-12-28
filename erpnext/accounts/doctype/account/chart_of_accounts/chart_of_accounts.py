@@ -11,13 +11,14 @@ from unidecode import unidecode
 
 
 def create_charts(company, chart_template=None, existing_company=None, custom_chart=None, from_coa_importer=None):
-	if frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard:
-		frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
+
 	chart = custom_chart or get_chart(chart_template, existing_company)
 	if chart:
 		accounts = []
 
 		def _import_accounts(children, parent, root_type, root_account=False):
+			if frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard:
+				frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 			for account_name, child in children.items():
 				if root_account:
 					root_type = child.get("root_type")
@@ -57,14 +58,16 @@ def create_charts(company, chart_template=None, existing_company=None, custom_ch
 					accounts.append(account_name_in_db)
 
 					_import_accounts(child, account.name, root_type)
-
+			if frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard:
+				frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
+				frappe.db.commit()
 		# Rebuild NestedSet HSM tree for Account Doctype
 		# after all accounts are already inserted.
 		frappe.local.flags.ignore_update_nsm = True
 		_import_accounts(chart, None, None, root_account=True)
 		rebuild_tree("Account", "parent_account")
 		frappe.local.flags.ignore_update_nsm = False
-	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
+	
 
 def add_suffix_if_duplicate(account_name, account_number, accounts):
 	if account_number:
