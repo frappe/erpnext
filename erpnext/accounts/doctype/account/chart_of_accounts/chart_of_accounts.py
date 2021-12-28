@@ -11,6 +11,8 @@ from unidecode import unidecode
 
 
 def create_charts(company, chart_template=None, existing_company=None, custom_chart=None, from_coa_importer=None):
+	if frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard:
+		frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 	chart = custom_chart or get_chart(chart_template, existing_company)
 	if chart:
 		accounts = []
@@ -62,6 +64,7 @@ def create_charts(company, chart_template=None, existing_company=None, custom_ch
 		_import_accounts(chart, None, None, root_account=True)
 		rebuild_tree("Account", "parent_account")
 		frappe.local.flags.ignore_update_nsm = False
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 
 def add_suffix_if_duplicate(account_name, account_number, accounts):
 	if account_number:
