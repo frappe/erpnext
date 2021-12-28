@@ -933,7 +933,6 @@ class TestStockEntry(ERPNextTestCase):
 		distributed_costs = [d.additional_cost for d in se.items]
 		self.assertEqual([40.0, 60.0], distributed_costs)
 
-<<<<<<< HEAD
 	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_future_negative_sle(self):
 		# Initialize item, batch, warehouse, opening qty
@@ -1010,7 +1009,7 @@ class TestStockEntry(ERPNextTestCase):
 				batch_no=batch_nos[1],
 				posting_date='2021-09-02', # backdated consumption of 2nd batch
 				purpose='Material Issue')
-=======
+
 	def test_independent_manufacture_entry(self):
 		"Test FG items and incoming rate calculation in Maniufacture Entry without WO or BOM linked."
 		se = frappe.get_doc(
@@ -1042,7 +1041,6 @@ class TestStockEntry(ERPNextTestCase):
 
 		# teardown
 		se.delete()
->>>>>>> affb29194b (test: Independent Manufacture Entry)
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)
