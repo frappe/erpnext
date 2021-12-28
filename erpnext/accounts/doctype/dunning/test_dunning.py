@@ -92,6 +92,7 @@ def create_dunning_type(title, fee, interest, is_default):
 
 	dunning_type = frappe.new_doc("Dunning Type")
 	dunning_type.dunning_type = title
+	dunning_type.company = "_Test Company"
 	dunning_type.is_default = is_default
 	dunning_type.dunning_fee = fee
 	dunning_type.rate_of_interest = interest
