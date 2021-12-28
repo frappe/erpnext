@@ -116,8 +116,14 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 					cur_frm.events.create_invoice_discounting(cur_frm);
 				}, __('Create'));
 
-				if (doc.due_date < frappe.datetime.get_today()) {
-					cur_frm.add_custom_button(__('Dunning'), function() {
+				const payment_is_overdue = doc.payment_schedule.map(
+					row => Date.parse(row.due_date) < Date.now()
+				).reduce(
+					(prev, current) => prev || current
+				);
+
+				if (payment_is_overdue) {
+					cur_frm.add_custom_button(__('Dunning'), function () {
 						cur_frm.events.create_dunning(cur_frm);
 					}, __('Create'));
 				}
