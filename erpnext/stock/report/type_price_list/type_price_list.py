@@ -17,7 +17,8 @@ def return_data(filters):
 	lists = frappe.get_all("Price List", ["*"], filters = condition)
 
 	for list in lists:
-		items = frappe.get_all("Item Price", ["*"], filters = {"price_list": list.name})
+		condition_items = conditions_items(filters, list.name)
+		items = frappe.get_all("Item Price", ["*"], filters = condition_items)
 
 		for item in items:
 			row = [item.item_name, item.price_list, item.price_list_rate]
@@ -34,6 +35,19 @@ def conditions(filters):
 
 	if filters.get("type") == "Selling":
 		conditions += '"selling": 1'
+	conditions += '}'
+
+	return conditions
+
+def conditions_items(filters, list):
+	conditions = ''	
+
+	conditions += "{"
+	conditions += '"price_list": "{}"'.format(list)
+	if filters.get("item_code"):
+		conditions += ', "item_code": "{}"'.format(filters.get("item_code"))
+	if filters.get("item_group"):
+		conditions += ', "item_group": "{}"'.format(filters.get("item_group"))
 	conditions += '}'
 
 	return conditions
