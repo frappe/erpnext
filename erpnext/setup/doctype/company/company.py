@@ -405,7 +405,7 @@ class Company(NestedSet):
 		frappe.flags.parent_company_changed = False
 
 		if not self.is_new() and \
-			self.parent_company != frappe.get_cached_value("Company",  self.name,  "parent_company"):
+			self.parent_company != frappe.db.get_value("Company",  self.name,  "parent_company"):
 			frappe.flags.parent_company_changed = True
 
 def get_name_with_abbr(name, company):
