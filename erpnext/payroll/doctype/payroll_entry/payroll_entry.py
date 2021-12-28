@@ -234,7 +234,7 @@ class PayrollEntry(Document):
 		if not self.employee_cost_centers.get(employee):
 			ss_assignment_name = frappe.db.get_value("Salary Structure Assignment",
 				{"employee": employee, "salary_structure": salary_structure, "docstatus": 1}, 'name')
-		
+
 			if ss_assignment_name:
 				cost_centers = dict(frappe.get_all("Employee Cost Center", {"parent": ss_assignment_name},
 					["cost_center", "percentage"], as_list=1))
@@ -244,7 +244,7 @@ class PayrollEntry(Document):
 						default_cost_center = frappe.get_cached_value("Department", department, "payroll_cost_center")
 					if not default_cost_center:
 						default_cost_center = self.cost_center
-						
+
 					cost_centers = {
 						default_cost_center: 100
 					}

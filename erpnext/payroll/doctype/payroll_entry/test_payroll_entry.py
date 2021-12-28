@@ -131,14 +131,14 @@ class TestPayrollEntry(unittest.TestCase):
 				frappe.db.set_value("Company", "_Test Company", "default_payroll_payable_account",
 					"_Test Payroll Payable - _TC")
 		currency=frappe.db.get_value("Company", "_Test Company", "default_currency")
-		
+
 		make_salary_structure("_Test Salary Structure 1", "Monthly", employee1, company="_Test Company", currency=currency, test_tax=False)
 		ss = make_salary_structure("_Test Salary Structure 2", "Monthly", employee2, company="_Test Company", currency=currency, test_tax=False)
 
 		# update cost centers in salary structure assignment for employee2
 		ssa = frappe.db.get_value("Salary Structure Assignment",
 			{"employee": employee2, "salary_structure": ss.name, "docstatus": 1}, 'name')
-		
+
 		ssa_doc = frappe.get_doc("Salary Structure Assignment", ssa)
 		ssa_doc.payroll_cost_centers = []
 		ssa_doc.append("payroll_cost_centers", {

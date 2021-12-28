@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, flt
+from frappe.utils import flt, getdate
 
 
 class DuplicateAssignment(frappe.ValidationError): pass
@@ -54,7 +54,7 @@ class SalaryStructureAssignment(Document):
 						"account_name": _("Payroll Payable"), "company": self.company, "account_currency": frappe.db.get_value(
 							"Company", self.company, "default_currency"), "is_group": 0})
 			self.payroll_payable_account = payroll_payable_account
-	
+
 	@frappe.whitelist()
 	def set_payroll_cost_centers(self):
 		self.payroll_cost_centers = []
@@ -69,7 +69,7 @@ class SalaryStructureAssignment(Document):
 		payroll_cost_center = frappe.db.get_value("Employee", self.employee, "payroll_cost_center")
 		if not payroll_cost_center and self.department:
 			payroll_cost_center = frappe.db.get_value("Department", self.department, "payroll_cost_center")
-		
+
 		return payroll_cost_center
 
 	def validate_cost_center_distribution(self):
@@ -77,8 +77,7 @@ class SalaryStructureAssignment(Document):
 			total_percentage = sum([flt(d.percentage) for d in self.get("payroll_cost_centers", [])])
 			if total_percentage != 100:
 				frappe.throw(_("Total percentage against cost centers should be 100"))
-			
-			
+
 
 def get_assigned_salary_structure(employee, on_date):
 	if not employee or not on_date:
@@ -92,6 +91,7 @@ def get_assigned_salary_structure(employee, on_date):
 			'on_date': on_date,
 		})
 	return salary_structure[0][0] if salary_structure else None
+
 
 @frappe.whitelist()
 def get_employee_currency(employee):
