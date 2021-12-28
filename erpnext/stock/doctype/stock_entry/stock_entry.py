@@ -708,7 +708,7 @@ class StockEntry(StockController):
 
 			finished_item = self.get_finished_item()
 
-			if not finished_item:
+			if not finished_item and self.purpose == "Manufacture":
 				# In case of independent Manufacture entry, don't auto set
 				# user must decide and set
 				return
