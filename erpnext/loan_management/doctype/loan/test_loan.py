@@ -311,9 +311,9 @@ class TestLoan(unittest.TestCase):
 
 		loan.load_from_db()
 
-		self.assertEqual(flt(loan.get('repayment_schedule')[3].principal_amount, 2), 32151.83)
-		self.assertEqual(flt(loan.get('repayment_schedule')[3].interest_amount, 2), 225.06)
-		self.assertEqual(flt(loan.get('repayment_schedule')[3].total_payment, 2), 32376.89)
+		self.assertEqual(flt(loan.get('repayment_schedule')[3].principal_amount, 2), 41369.83)
+		self.assertEqual(flt(loan.get('repayment_schedule')[3].interest_amount, 2), 289.59)
+		self.assertEqual(flt(loan.get('repayment_schedule')[3].total_payment, 2), 41659.41)
 		self.assertEqual(flt(loan.get('repayment_schedule')[3].balance_loan_amount, 2), 0)
 
 	def test_security_shortfall(self):
