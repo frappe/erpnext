@@ -273,6 +273,9 @@ doc_events = {
 			"erpnext.regional.india.utils.update_taxable_values"
 		]
 	},
+	"POS Invoice": {
+		"on_submit": ["erpnext.regional.saudi_arabia.utils.create_qr_code"]
+	},
 	"Purchase Invoice": {
 		"validate": [
 			"erpnext.regional.india.utils.validate_reverse_charge_transaction",
