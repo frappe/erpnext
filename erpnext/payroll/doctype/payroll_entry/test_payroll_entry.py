@@ -164,13 +164,13 @@ class TestPayrollEntry(unittest.TestCase):
 				order by replace(replace(replace(account, '_', ''), '-', ''), ' ', ''), replace(replace(replace(cost_center, '_', ''), '-', ''), ' ', '')
 			""", je)
       
-			expected_je = (
-				('_Test Payroll Payable - _TC', 'Main - _TC', 0.0, 155600.0),
-				('Salary - _TC', '_Test Cost Center - _TC', 124800.0, 0.0),
-				('Salary - _TC', '_Test Cost Center 2 - _TC', 31200.0, 0.0),
+			expected_je = [
+				('Salary Deductions - _TC', '_Test Cost Center 2 - _TC', 0.0, 80.0),
 				('Salary Deductions - _TC', '_Test Cost Center - _TC', 0.0, 320.0),
-				('Salary Deductions - _TC', '_Test Cost Center 2 - _TC', 0.0, 80.0)
-			)
+				('Salary - _TC', '_Test Cost Center 2 - _TC', 31200.0, 0.0),
+				('Salary - _TC', '_Test Cost Center - _TC', 124800.0, 0.0),
+				('_Test Payroll Payable - _TC', 'Main - _TC', 0.0, 155600.0)
+			]
 
 			self.assertEqual(list(je_entries), expected_je)
 
