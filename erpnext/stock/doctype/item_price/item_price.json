@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "creation": "2013-05-02 16:29:48",
  "description": "Multiple Item prices.",
@@ -13,6 +12,7 @@
   "min_qty",
   "column_break_17",
   "item_name",
+  "item_group",
   "brand",
   "item_description",
   "price_list_details",
@@ -207,12 +207,18 @@
    "fieldname": "reference",
    "fieldtype": "Data",
    "label": "Reference"
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Data",
+   "label": "Item Group",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-flag",
  "idx": 1,
- "links": [],
- "modified": "2020-03-18 19:13:55.340253",
+ "modified": "2021-12-28 10:18:23.088926",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
