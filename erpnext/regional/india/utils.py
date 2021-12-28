@@ -67,7 +67,8 @@ def validate_pan_for_india(doc, method):
 		frappe.throw(_("Invalid PAN No. The input you've entered doesn't match the format of PAN."))
 
 def validate_tax_category(doc, method):
-	if doc.get('gst_state') and frappe.db.get_value('Tax Category', {'gst_state': doc.gst_state, 'is_inter_state': doc.is_inter_state}):
+	if doc.get('gst_state') and frappe.db.get_value('Tax Category', {'gst_state': doc.gst_state, 'is_inter_state': doc.is_inter_state,
+		'is_reverse_charge': doc.is_reverse_charge}):
 		if doc.is_inter_state:
 			frappe.throw(_("Inter State tax category for GST State {0} already exists").format(doc.gst_state))
 		else:
@@ -264,7 +265,7 @@ def get_tax_template_based_on_category(master_doctype, company, party_details):
 
 def get_tax_template(master_doctype, company, is_inter_state, state_code):
 	tax_categories = frappe.get_all('Tax Category', fields = ['name', 'is_inter_state', 'gst_state'],
-		filters = {'is_inter_state': is_inter_state})
+		filters = {'is_inter_state': is_inter_state, 'is_reverse_charge': 0})
 
 	default_tax = ''
 

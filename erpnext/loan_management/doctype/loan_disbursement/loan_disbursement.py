@@ -176,20 +176,19 @@ def get_total_pledged_security_value(loan):
 
 @frappe.whitelist()
 def get_disbursal_amount(loan, on_current_security_price=0):
+	from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
+		get_pending_principal_amount,
+	)
+
 	loan_details = frappe.get_value("Loan", loan, ["loan_amount", "disbursed_amount", "total_payment",
 		"total_principal_paid", "total_interest_payable", "status", "is_term_loan", "is_secured_loan",
-		"maximum_loan_amount"], as_dict=1)
+		"maximum_loan_amount", "written_off_amount"], as_dict=1)
 
 	if loan_details.is_secured_loan and frappe.get_all('Loan Security Shortfall', filters={'loan': loan,
 		'status': 'Pending'}):
 		return 0
 
-	if loan_details.status == 'Disbursed':
-		pending_principal_amount = flt(loan_details.total_payment) - flt(loan_details.total_interest_payable) \
-			- flt(loan_details.total_principal_paid)
-	else:
-		pending_principal_amount = flt(loan_details.disbursed_amount) - flt(loan_details.total_interest_payable) \
-			- flt(loan_details.total_principal_paid)
+	pending_principal_amount = get_pending_principal_amount(loan_details)
 
 	security_value = 0.0
 	if loan_details.is_secured_loan and on_current_security_price:
