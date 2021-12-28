@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.model.document import Document
+from frappe.query_builder.functions import Coalesce
 from frappe.utils import (
 	DATE_FORMAT,
 	add_days,
@@ -157,11 +158,20 @@ class PayrollEntry(Document):
 			Returns list of salary slips based on selected criteria
 		"""
 
-		ss_list = frappe.db.sql("""
-			select t1.name, t1.salary_structure from `tabSalary Slip` t1
-			where t1.docstatus = %s and t1.start_date >= %s and t1.end_date <= %s and t1.payroll_entry = %s
-			and (t1.journal_entry is null or t1.journal_entry = "") and ifnull(salary_slip_based_on_timesheet,0) = %s
-		""", (ss_status, self.start_date, self.end_date, self.name, self.salary_slip_based_on_timesheet), as_dict=as_dict)
+		ss = frappe.qb.DocType("Salary Slip")
+		ss_list = (
+			frappe.qb.from_(ss)
+				.select(ss.name, ss.salary_structure)
+				.where(
+					(ss.docstatus == ss_status)
+					& (ss.start_date >= self.start_date)
+					& (ss.end_date <= self.end_date)
+					& (ss.payroll_entry == self.name)
+					& ((ss.journal_entry.isnull()) | (ss.journal_entry == ""))
+					& (Coalesce(ss.salary_slip_based_on_timesheet, 0) == self.salary_slip_based_on_timesheet)
+				)
+		).run(as_dict=as_dict)
+
 		return ss_list
 
 	@frappe.whitelist()
@@ -190,19 +200,20 @@ class PayrollEntry(Document):
 
 	def get_salary_components(self, component_type):
 		salary_slips = self.get_sal_slip_list(ss_status = 1, as_dict = True)
+
 		if salary_slips:
-			salary_components = frappe.db.sql("""
-				SELECT
-					ssd.salary_component, ssd.amount, ssd.parentfield, ss.salary_structure, ss.employee
-				FROM
-					`tabSalary Slip` ss,
-					`tabSalary Detail` ssd
-				WHERE
-					ss.name = ssd.parent
-					and ssd.parentfield = '%s'
-					and ss.name in (%s)
-			""" % (component_type, ', '.join(['%s']*len(salary_slips))),
-				tuple([d.name for d in salary_slips]), as_dict=True)
+			ss = frappe.qb.DocType("Salary Slip")
+			ssd = frappe.qb.DocType("Salary Detail")
+			salary_components = (
+				frappe.qb.from_(ss)
+					.join(ssd)
+					.on(ss.name == ssd.parent)
+					.select(ssd.salary_component, ssd.amount, ssd.parentfield, ss.salary_structure, ss.employee)
+					.where(
+						(ssd.parentfield == component_type)
+						& (ss.name.isin(tuple([d.name for d in salary_slips])))
+					)
+			).run(as_dict=True)
 
 			return salary_components
 
