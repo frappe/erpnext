@@ -218,6 +218,14 @@ class TestLoan(unittest.TestCase):
 		self.assertEqual(flt(loan.total_principal_paid, 0), flt(repayment_entry.amount_paid -
 			 penalty_amount - total_interest_paid, 0))
 
+		# Check Repayment Entry cancel
+		repayment_entry.load_from_db()
+		repayment_entry.cancel()
+
+		loan.load_from_db()
+		self.assertEqual(loan.total_principal_paid, 0)
+		self.assertEqual(loan.total_principal_paid, 0)
+
 	def test_loan_closure(self):
 		pledge = [{
 			"loan_security": "Test Security 1",

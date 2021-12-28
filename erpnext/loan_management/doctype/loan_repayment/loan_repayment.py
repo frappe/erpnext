@@ -134,7 +134,7 @@ class LoanRepayment(AccountsController):
 		})
 
 		pending_principal_amount = get_pending_principal_amount(loan)
-		if not loan.is_secured_loan and pending_principal_amount < 0:
+		if not loan.is_secured_loan and pending_principal_amount <= 0:
 			loan.update({'status': 'Loan Closure Requested'})
 
 		for payment in self.repayment_details:
