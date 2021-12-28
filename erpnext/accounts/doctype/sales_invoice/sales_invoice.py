@@ -622,9 +622,7 @@ class SalesInvoice(SellingController):
 			return
 
 		if not self.account_for_change_amount:
-			self.account_for_change_amount = frappe.get_cached_value(
-				"Company", self.company, "default_cash_account"
-			)
+			self.account_for_change_amount = frappe.get_cached_value('Company',	 self.company,	'default_cash_account')
 
 		from erpnext.stock.get_item_details import get_pos_profile, get_pos_profile_item_details
 
@@ -1909,17 +1907,17 @@ def get_bank_cash_account(mode_of_payment, company):
 
 @frappe.whitelist()
 def make_maintenance_schedule(source_name, target_doc=None):
-	doclist = get_mapped_doc(
-		"Sales Invoice",
-		source_name,
-		{
-			"Sales Invoice": {"doctype": "Maintenance Schedule", "validation": {"docstatus": ["=", 1]}},
-			"Sales Invoice Item": {
-				"doctype": "Maintenance Schedule Item",
-			},
+	doclist = get_mapped_doc("Sales Invoice", source_name,	{
+		"Sales Invoice": {
+			"doctype": "Maintenance Schedule",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
 		},
-		target_doc,
-	)
+		"Sales Invoice Item": {
+			"doctype": "Maintenance Schedule Item",
+		},
+	}, target_doc)
 
 	return doclist
 
@@ -2555,7 +2553,7 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 					"name": "payment_schedule",
 					"parent": "sales_invoice"
 				},
-				"condition": lambda doc: doc.outstanding > 0
+				"condition": lambda doc: doc.outstanding > 0 and getdate(doc.due_date) < getdate(),
 			}
 		},
 		postprocess=postprocess_dunning,
