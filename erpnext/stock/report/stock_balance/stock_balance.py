@@ -9,7 +9,7 @@ from frappe import _
 from frappe.utils import cint, date_diff, flt, getdate
 
 import erpnext
-from erpnext.stock.report.stock_ageing.stock_ageing import get_average_age, get_fifo_queue
+from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, get_average_age
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from erpnext.stock.utils import add_additional_uom_columns, is_reposting_item_valuation_in_progress
 
@@ -33,7 +33,7 @@ def execute(filters=None):
 
 	if filters.get('show_stock_ageing_data'):
 		filters['show_warehouse_wise_stock'] = True
-		item_wise_fifo_queue = get_fifo_queue(filters, sle)
+		item_wise_fifo_queue = FIFOSlots(filters, sle).generate()
 
 	# if no stock ledger entry found return
 	if not sle:
@@ -167,7 +167,7 @@ def get_stock_ledger_entries(filters, items):
 			sle.company, sle.voucher_type, sle.qty_after_transaction, sle.stock_value_difference,
 			sle.item_code as name, sle.voucher_no, sle.stock_value, sle.batch_no
 		from
-			`tabStock Ledger Entry` sle force index (posting_sort_index)
+			`tabStock Ledger Entry` sle
 		where sle.docstatus < 2 %s %s
 		and is_cancelled = 0
 		order by sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty""" % #nosec

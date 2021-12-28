@@ -1,6 +1,5 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-import unittest
 
 import frappe
 from frappe.utils import add_months, cint, flt, now, today
@@ -21,12 +20,16 @@ from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.utils import get_bin
+from erpnext.tests.utils import ERPNextTestCase, timeout
 
 
-class TestWorkOrder(unittest.TestCase):
+class TestWorkOrder(ERPNextTestCase):
 	def setUp(self):
 		self.warehouse = '_Test Warehouse 2 - _TC'
 		self.item = '_Test Item'
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def check_planned_qty(self):
 
@@ -91,7 +94,7 @@ class TestWorkOrder(unittest.TestCase):
 
 	def test_reserved_qty_for_partial_completion(self):
 		item = "_Test Item"
-		warehouse = create_warehouse("Test Warehouse for reserved_qty - _TC")
+		warehouse = "_Test Warehouse - _TC"
 
 		bin1_at_start = get_bin(item, warehouse)
 
@@ -196,8 +199,6 @@ class TestWorkOrder(unittest.TestCase):
 		# no change in reserved / projected
 		self.assertEqual(cint(bin1_on_end_production.reserved_qty_for_production),
 			cint(bin1_on_start_production.reserved_qty_for_production))
-		self.assertEqual(cint(bin1_on_end_production.projected_qty),
-			cint(bin1_on_end_production.projected_qty))
 
 	def test_backflush_qty_for_overpduction_manufacture(self):
 		cancel_stock_entry = []
@@ -376,6 +377,7 @@ class TestWorkOrder(unittest.TestCase):
 		self.assertEqual(len(ste.additional_costs), 1)
 		self.assertEqual(ste.total_additional_costs, 1000)
 
+	@timeout(seconds=60)
 	def test_job_card(self):
 		stock_entries = []
 		bom = frappe.get_doc('BOM', {
@@ -769,6 +771,7 @@ class TestWorkOrder(unittest.TestCase):
 			total_pl_qty
 		)
 
+	@timeout(seconds=60)
 	def test_job_card_scrap_item(self):
 		items = ['Test FG Item for Scrap Item Test', 'Test RM Item 1 for Scrap Item Test',
 			'Test RM Item 2 for Scrap Item Test']
@@ -840,6 +843,45 @@ class TestWorkOrder(unittest.TestCase):
 
 			close_work_order(wo_order, "Closed")
 			self.assertEqual(wo_order.get('status'), "Closed")
+
+	def test_fix_time_operations(self):
+		bom = frappe.get_doc({
+			"doctype": "BOM",
+			"item": "_Test FG Item 2",
+			"is_active": 1,
+			"is_default": 1,
+			"quantity": 1.0,
+			"with_operations": 1,
+			"operations": [
+				{
+					"operation": "_Test Operation 1",
+					"description": "_Test",
+					"workstation": "_Test Workstation 1",
+					"time_in_mins": 60,
+					"operating_cost": 140,
+					"fixed_time": 1
+				}
+			],
+			"items": [
+				{
+					"amount": 5000.0,
+					"doctype": "BOM Item",
+					"item_code": "_Test Item",
+					"parentfield": "items",
+					"qty": 1.0,
+					"rate": 5000.0,
+				},
+			],
+		})
+		bom.save()
+		bom.submit()
+
+
+		wo1 = make_wo_order_test_record(item=bom.item, bom_no=bom.name, qty=1, skip_transfer=1, do_not_submit=1)
+		wo2 = make_wo_order_test_record(item=bom.item, bom_no=bom.name, qty=2, skip_transfer=1, do_not_submit=1)
+
+		self.assertEqual(wo1.operations[0].time_in_mins, wo2.operations[0].time_in_mins)
+
 
 def update_job_card(job_card):
 	job_card_doc = frappe.get_doc('Job Card', job_card)
