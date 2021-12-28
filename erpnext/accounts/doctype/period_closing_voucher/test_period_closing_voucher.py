@@ -188,16 +188,20 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		return pcv
 
 def create_company():
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 	company = frappe.get_doc({
 		'doctype': 'Company',
 		'company_name': "Test PCV Company",
 		'country': 'United States',
 		'default_currency': 'USD'
 	})
-	company.insert(ignore_if_duplicate = True, db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
+	company.insert(ignore_if_duplicate = True)
+	frappe.db.commit()
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 	return company.name
 
 def create_account():
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 	account = frappe.get_doc({
 		"account_name": "Reserve and Surplus",
 		"is_group": 0,
@@ -207,17 +211,22 @@ def create_account():
 		"account_currency": "USD",
 		"parent_account": "Current Liabilities - TPC",
 		"doctype": "Account"
-	}).insert(ignore_if_duplicate = True, db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
+	}).insert(ignore_if_duplicate = True)
+	frappe.db.commit()
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 	return account.name
 
-def create_cost_center(cc_name):
+def create_cost_center(cc_name):  
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 	costcenter = frappe.get_doc({
 		"company": "Test PCV Company",
 		"cost_center_name": cc_name,
 		"doctype": "Cost Center",
 		"parent_cost_center": "Test PCV Company - TPC"
 	})
-	costcenter.insert(ignore_if_duplicate = True, db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
+	costcenter.insert(ignore_if_duplicate = True)
+	frappe.db.commit()
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 	return costcenter.name
 
 test_dependencies = ["Customer", "Cost Center"]
