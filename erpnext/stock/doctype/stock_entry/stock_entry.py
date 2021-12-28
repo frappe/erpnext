@@ -35,11 +35,16 @@ from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle, get
 from erpnext.stock.utils import get_bin, get_incoming_rate
 
 
-class FinishedGoodError(frappe.ValidationError): pass
-class IncorrectValuationRateError(frappe.ValidationError): pass
-class DuplicateEntryForWorkOrderError(frappe.ValidationError): pass
-class OperationsNotCompleteError(frappe.ValidationError): pass
-class MaxSampleAlreadyRetainedError(frappe.ValidationError): pass
+class FinishedGoodError(frappe.ValidationError):
+	pass
+class IncorrectValuationRateError(frappe.ValidationError):
+	pass
+class DuplicateEntryForWorkOrderError(frappe.ValidationError):
+	pass
+class OperationsNotCompleteError(frappe.ValidationError):
+	pass
+class MaxSampleAlreadyRetainedError(frappe.ValidationError):
+	pass
 
 from erpnext.controllers.stock_controller import StockController
 
