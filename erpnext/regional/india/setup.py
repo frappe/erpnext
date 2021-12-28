@@ -21,7 +21,10 @@ def setup(company=None, patch=True):
 # TODO: for all countries
 def setup_company_independent_fixtures(patch=False):
 	make_custom_fields()
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 	make_property_setters(patch=patch)
+	frappe.db.commit()
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 	add_permissions()
 	add_custom_roles_for_reports()
 	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', is_async = False)
@@ -805,7 +808,7 @@ def set_tax_withholding_category(company):
 			doc.flags.ignore_validate = True
 			doc.flags.ignore_permissions = True
 			doc.flags.ignore_mandatory = True
-			doc.insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
+			doc.insert()
 		else:
 			doc = frappe.get_doc("Tax Withholding Category", d.get("name"), for_update=True)
 
