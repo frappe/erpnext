@@ -212,7 +212,7 @@ frappe.ui.form.on("Dunning", {
 	calculate_interest: function (frm) {
 		frm.doc.overdue_payments.forEach((row) => {
 			const interest_per_day = frm.doc.rate_of_interest / 100 / 365;
-			const interest = flt((interest_per_day * row.overdue_days * row.outstanding), precision("interest"));
+			const interest = flt((interest_per_day * row.overdue_days * row.outstanding), precision("interest", row));
 			frappe.model.set_value(row.doctype, row.name, "interest", interest);
 		});
 	},
