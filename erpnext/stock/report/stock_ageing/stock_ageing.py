@@ -8,7 +8,6 @@ from typing import Dict, List, Tuple, Union
 import frappe
 from frappe import _
 from frappe.utils import cint, date_diff, flt
-from six import iteritems
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -29,12 +28,8 @@ def format_report_data(filters: Filters, item_details: Dict, to_date: str) -> Li
 	"Returns ordered, formatted data with ranges."
 	_func = itemgetter(1)
 	data = []
-<<<<<<< HEAD
-	for item, item_dict in iteritems(item_details):
-=======
 
 	for item, item_dict in item_details.items():
->>>>>>> 0f43792dbb (fix: Stock Ageing Report - Negative Opening Stock)
 		earliest_age, latest_age = 0, 0
 		details = item_dict["details"]
 
