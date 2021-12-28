@@ -27,6 +27,7 @@ class TestProcurementTracker(unittest.TestCase):
 		self.assertEqual(expected_data, report[1][length-1])
 
 	def generate_expected_data(self):
+		frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 		if not frappe.db.exists("Company", "_Test Procurement Company"):
 			frappe.get_doc(dict(
 				doctype="Company",
@@ -34,7 +35,9 @@ class TestProcurementTracker(unittest.TestCase):
 				abbr="_TPC",
 				default_currency="INR",
 				country="Pakistan"
-				)).insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
+				)).insert()
+		frappe.db.commit()
+		frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 		warehouse = create_warehouse("_Test Procurement Warehouse", company="_Test Procurement Company")
 		mr = make_material_request(company="_Test Procurement Company", warehouse=warehouse, cost_center="Main - _TPC")
 		po = make_purchase_order(mr.name)

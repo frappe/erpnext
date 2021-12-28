@@ -360,7 +360,8 @@ class TestJournalEntry(unittest.TestCase):
 		account_balance = get_balance_on(account="_Test Bank - _TC", cost_center=cost_center)
 		self.assertEqual(expected_account_balance, account_balance)
 
-def make_journal_entry(account1, account2, amount, cost_center=None, posting_date=None, exchange_rate=1, save=True, submit=False, project=None):
+def make_journal_entry(account1, account2, amount, cost_center=None, posting_date=None, exchange_rate=1, save=True, submit=False, project=None):   	
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 	if not cost_center:
 		cost_center = "_Test Cost Center - _TC"
 
@@ -387,11 +388,12 @@ def make_journal_entry(account1, account2, amount, cost_center=None, posting_dat
 		}
 	])
 	if save or submit:
-		jv.insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
+		jv.insert()
 
 		if submit:
 			jv.submit()
-
+	frappe.db.commit()
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 	return jv
 
 test_records = frappe.get_test_records('Journal Entry')

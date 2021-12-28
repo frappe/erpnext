@@ -2645,6 +2645,7 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
 def create_sales_invoice(**args):
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)
 	if args.posting_date:
@@ -2686,14 +2687,15 @@ def create_sales_invoice(**args):
 	})
 
 	if not args.do_not_save:
-		si.insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
+		si.insert()
 		if not args.do_not_submit:
 			si.submit()
 		else:
 			si.payment_schedule = []
 	else:
 		si.payment_schedule = []
-
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
+	frappe.db.commit()
 	return si
 
 def create_sales_invoice_against_cost_center(**args):
