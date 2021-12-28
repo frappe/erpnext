@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import copy
+import signal
 import unittest
 from contextlib import contextmanager
 from typing import Any, Dict, NewType, Optional
@@ -135,3 +136,23 @@ def execute_script_report(
 			report_execute_fn(filter_with_optional_param)
 
 	return report_data
+
+
+def timeout(seconds=30, error_message="Test timed out."):
+	""" Timeout decorator to ensure a test doesn't run for too long.
+
+		adapted from https://stackoverflow.com/a/2282656"""
+	def decorator(func):
+		def _handle_timeout(signum, frame):
+			raise Exception(error_message)
+
+		def wrapper(*args, **kwargs):
+			signal.signal(signal.SIGALRM, _handle_timeout)
+			signal.alarm(seconds)
+			try:
+				result = func(*args, **kwargs)
+			finally:
+				signal.alarm(0)
+			return result
+		return wrapper
+	return decorator

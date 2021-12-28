@@ -277,8 +277,10 @@ def get_custom_fields():
 	inter_state_gst_field = [
 		dict(fieldname='is_inter_state', label='Is Inter State',
 			fieldtype='Check', insert_after='disabled', print_hide=1),
+		dict(fieldname='is_reverse_charge', label='Is Reverse Charge', fieldtype='Check',
+			insert_after='is_inter_state', print_hide=1),
 		dict(fieldname='tax_category_column_break', fieldtype='Column Break',
-			insert_after='is_inter_state'),
+			insert_after='is_reverse_charge'),
 		dict(fieldname='gst_state', label='Source State', fieldtype='Select',
 			options='\n'.join(states), insert_after='company')
 	]
@@ -791,7 +793,7 @@ def set_tax_withholding_category(company):
 		accounts = [dict(company=company, account=tds_account)]
 
 	try:
-		fiscal_year_details = get_fiscal_year(today(), verbose=0, company=company)
+		fiscal_year_details = get_fiscal_year(today(), verbose=0)
 	except FiscalYearError:
 		pass
 
