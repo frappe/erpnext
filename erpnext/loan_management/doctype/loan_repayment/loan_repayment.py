@@ -558,16 +558,7 @@ def get_amounts(amounts, against_loan, posting_date):
 		if due_date and not final_due_date:
 			final_due_date = add_days(due_date, loan_type_details.grace_period_in_days)
 
-<<<<<<< HEAD
-	if against_loan_doc.status in ('Disbursed', 'Closed') or against_loan_doc.disbursed_amount >= against_loan_doc.loan_amount:
-		pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid \
-			- against_loan_doc.total_interest_payable - against_loan_doc.written_off_amount
-	else:
-		pending_principal_amount = against_loan_doc.disbursed_amount - against_loan_doc.total_principal_paid \
-			- against_loan_doc.total_interest_payable - against_loan_doc.written_off_amount
-=======
 	pending_principal_amount = get_pending_principal_amount(against_loan_doc)
->>>>>>> dcae9ba86e (fix: Unsecured loan status update)
 
 	unaccrued_interest = 0
 	if due_date:
