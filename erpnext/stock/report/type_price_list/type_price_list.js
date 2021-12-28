@@ -9,7 +9,18 @@ frappe.query_reports["Type Price List"] = {
 			"label": __("Type"),
 			"fieldtype": "Select",
 			"options": "\nBuying\nSelling",
-			"reqd": 1
+		},
+		{
+			"fieldname": "item_code",
+			"label": __("Item"),
+			"fieldtype": "Link",
+			"options": "Item",
+		},
+		{
+			"fieldname": "item_group",
+			"label": __("Item Group"),
+			"fieldtype": "Link",
+			"options": "Item Group"
 		},
 	]
 };
