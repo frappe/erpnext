@@ -11,26 +11,33 @@ from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
 from frappe.utils import today
 
 def setup(company=None, patch=True):
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 	# Company independent fixtures should be called only once at the first company setup
 	if patch or frappe.db.count('Company', {'country': 'India'}) <=1:
 		setup_company_independent_fixtures(patch=patch)
+		frappe.db.commit()
 
 	if not patch:
 		make_fixtures(company)
+		frappe.db.commit()
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 
 # TODO: for all countries
 def setup_company_independent_fixtures(patch=False):
 	make_custom_fields()
-	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
+
 	make_property_setters(patch=patch)
 	frappe.db.commit()
-	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 	add_permissions()
+	frappe.db.commit()
 	add_custom_roles_for_reports()
+	frappe.db.commit()
 	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', is_async = False)
+	frappe.db.commit()
 	create_gratuity_rule()
 	add_print_formats()
 	update_accounts_settings_for_taxes()
+
 
 def add_hsn_sac_codes():
 	if frappe.flags.in_test and frappe.flags.created_hsn_codes:
@@ -73,7 +80,7 @@ def add_custom_roles_for_reports():
 					dict(role='Accounts User'),
 					dict(role='Accounts Manager')
 				]
-			)).insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
+			)).insert()
 
 	for report_name in ('Professional Tax Deductions', 'Provident Fund Deductions'):
 
@@ -86,7 +93,7 @@ def add_custom_roles_for_reports():
 					dict(role='HR Manager'),
 					dict(role='Employee')
 				]
-			)).insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
+			)).insert()
 
 	for report_name in ('HSN-wise-summary of outward supplies', 'GSTR-1', 'GSTR-2'):
 
@@ -99,7 +106,7 @@ def add_custom_roles_for_reports():
 					dict(role='Accounts Manager'),
 					dict(role='Auditor')
 				]
-			)).insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
+			)).insert()
 
 def add_permissions():
 	for doctype in ('GST HSN Code', 'GST Settings', 'GSTR 3B Report', 'Lower Deduction Certificate'):
@@ -714,7 +721,7 @@ def make_fixtures(company=None):
 		try:
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_permissions = True
-			doc.insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
+			doc.insert()
 		except frappe.NameError:
 			frappe.clear_messages()
 		except frappe.DuplicateEntryError:
