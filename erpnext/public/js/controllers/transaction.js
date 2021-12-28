@@ -680,7 +680,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
-		// check if child doctype is Sales Order Item/Qutation Item and calculate the rate
+		// check if child doctype is Sales Order Item/Quotation Item and calculate the rate
 		if (in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item", "POS Invoice Item", "Purchase Invoice Item", "Purchase Order Item", "Purchase Receipt Item"]), cdt)
 			this.apply_pricing_rule_on_item(item);
 		else
@@ -1582,24 +1582,26 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	_set_values_for_item_list(children) {
 		var me = this;
-		var price_list_rate_changed = false;
 		var items_rule_dict = {};
 
 		for(var i=0, l=children.length; i<l; i++) {
-			var d = children[i];
+			var d = children[i] ;
+			let item_row = frappe.get_doc(d.doctype, d.name);
 			var existing_pricing_rule = frappe.model.get_value(d.doctype, d.name, "pricing_rules");
 			for(var k in d) {
 				var v = d[k];
 				if (["doctype", "name"].indexOf(k)===-1) {
 					if(k=="price_list_rate") {
-						if(flt(v) != flt(d.price_list_rate)) price_list_rate_changed = true;
+						item_row['rate'] = v;
 					}
 
 					if (k !== 'free_item_data') {
-						frappe.model.set_value(d.doctype, d.name, k, v);
+						item_row[k] = v;
 					}
 				}
 			}
+
+			frappe.model.round_floats_in(item_row, ["price_list_rate", "discount_percentage"]);
 
 			// if pricing rule set as blank from an existing value, apply price_list
 			if(!me.frm.doc.ignore_pricing_rule && existing_pricing_rule && !d.pricing_rules) {
@@ -1617,9 +1619,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}
 		}
 
+		me.frm.refresh_field('items');
 		me.apply_rule_on_other_items(items_rule_dict);
 
-		if(!price_list_rate_changed) me.calculate_taxes_and_totals();
+		me.calculate_taxes_and_totals();
 	}
 
 	apply_rule_on_other_items(args) {
