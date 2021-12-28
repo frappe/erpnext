@@ -10,11 +10,13 @@
   "customer",
   "company",
   "rtn",
+  "currency",
   "column_break_1",
   "posting_date",
   "due_date",
   "cai",
   "transaction_number",
+  "retention_reason",
   "section_break_1",
   "reasons",
   "percentage_total",
@@ -71,20 +73,17 @@
    "fieldname": "due_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Due Date",
-   "reqd": 1
+   "label": "Due Date"
   },
   {
    "fieldname": "cai",
    "fieldtype": "Data",
-   "label": "Cai",
-   "reqd": 1
+   "label": "Cai"
   },
   {
    "fieldname": "transaction_number",
    "fieldtype": "Data",
-   "label": "Transaction Numer",
-   "reqd": 1
+   "label": "Transaction Number"
   },
   {
    "fieldname": "amended_from",
@@ -140,10 +139,23 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "retention_reason",
+   "fieldtype": "Link",
+   "label": "Retention Reason",
+   "options": "Retention Reason"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-12-09 14:36:20.192698",
+ "modified": "2021-12-28 14:32:31.413609",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Customer Retention",
