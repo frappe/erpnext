@@ -115,7 +115,7 @@ def get_paid_amount(payment_entry, currency, bank_account):
 			payment_entry.payment_entry, paid_amount_field)
 
 	elif payment_entry.payment_document == "Journal Entry":
-		return frappe.db.get_value('Journal Entry Account', {'parent': payment_entry.payment_entry, 'account': bank_account}, "sum(credit_in_account_currency)", debug=1)
+		return frappe.db.get_value('Journal Entry Account', {'parent': payment_entry.payment_entry, 'account': bank_account}, "sum(credit_in_account_currency)")
 
 	elif payment_entry.payment_document == "Expense Claim":
 		return frappe.db.get_value(payment_entry.payment_document, payment_entry.payment_entry, "total_amount_reimbursed")
