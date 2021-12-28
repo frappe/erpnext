@@ -50,7 +50,7 @@ def create_charts(company, chart_template=None, existing_company=None, custom_ch
 
 					account.flags.ignore_permissions = True
 
-					account.insert(db_auto_commit = frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard)
+					account.insert()
 
 					accounts.append(account_name_in_db)
 
