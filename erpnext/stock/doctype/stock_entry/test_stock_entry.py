@@ -15,7 +15,10 @@ from erpnext.stock.doctype.item.test_item import (
 	set_item_variant_settings,
 )
 from erpnext.stock.doctype.serial_no.serial_no import *  # noqa
-from erpnext.stock.doctype.stock_entry.stock_entry import move_sample_to_retention_warehouse
+from erpnext.stock.doctype.stock_entry.stock_entry import (
+	FinishedGoodError,
+	move_sample_to_retention_warehouse,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
@@ -928,6 +931,38 @@ class TestStockEntry(ERPNextTestCase):
 
 		distributed_costs = [d.additional_cost for d in se.items]
 		self.assertEqual([40.0, 60.0], distributed_costs)
+
+	def test_independent_manufacture_entry(self):
+		"Test FG items and incoming rate calculation in Maniufacture Entry without WO or BOM linked."
+		se = frappe.get_doc(
+			doctype="Stock Entry",
+			purpose="Manufacture",
+			stock_entry_type="Manufacture",
+			company="_Test Company",
+			items=[
+				frappe._dict(item_code="_Test Item", qty=1, basic_rate=200, s_warehouse="_Test Warehouse - _TC"),
+				frappe._dict(item_code="_Test FG Item", qty=4, t_warehouse="_Test Warehouse 1 - _TC")
+			]
+		)
+		# SE must have atleast one FG
+		self.assertRaises(FinishedGoodError, se.save)
+
+		se.items[0].is_finished_item = 1
+		se.items[1].is_finished_item = 1
+		# SE cannot have multiple FGs
+		self.assertRaises(FinishedGoodError, se.save)
+
+		se.items[0].is_finished_item = 0
+		se.save()
+
+		# Check if FG cost is calculated based on RM total cost
+		# RM total cost = 200, FG rate = 200/4(FG qty) =  50
+		self.assertEqual(se.items[1].basic_rate, 50)
+		self.assertEqual(se.value_difference, 0.0)
+		self.assertEqual(se.total_incoming_value, se.total_outgoing_value)
+
+		# teardown
+		se.delete()
 
 	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_future_negative_sle(self):
