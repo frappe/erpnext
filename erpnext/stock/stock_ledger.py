@@ -1306,7 +1306,9 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 	args["time_format"] = "%H:%i:%s"
 
 	# find difference/shift in qty caused by stock reconciliation
-	if args.voucher_type == "Stock Reconciliation":
+	# for batch reco, SLE has actual_qty unlike other reco SLEs
+	# treat it like normal SLE
+	if args.voucher_type == "Stock Reconciliation" and not args.batch_no:
 		qty_shift = get_stock_reco_qty_shift(args)
 
 	# find the next nearest stock reco so that we only recalculate SLEs till that point
