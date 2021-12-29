@@ -132,8 +132,12 @@ class calculate_taxes_and_totals(object):
 					item.discount_amount = 0
 					item.discount_percentage = 0
 
-				item.amount_before_discount = flt(rate_before_discount * item.qty, item.precision("amount_before_discount"))
-				item.amount = flt(item.rate * item.qty,	item.precision("amount"))
+				if not item.qty and self.doc.is_return:
+					item.amount_before_discount = flt(rate_before_discount * -1, item.precision("amount_before_discount"))
+					item.amount = flt(item.rate * -1, item.precision("amount"))
+				else:
+					item.amount_before_discount = flt(rate_before_discount * item.qty, item.precision("amount_before_discount"))
+					item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 				item.total_discount = flt(item.amount_before_discount - item.amount, item.precision("total_discount"))
 
 				has_depreciation_field = item.meta.has_field('depreciation_amount')
