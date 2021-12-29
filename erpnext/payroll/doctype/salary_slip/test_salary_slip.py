@@ -171,6 +171,7 @@ class TestSalarySlip(unittest.TestCase):
 		salary_slip.end_date = month_end_date
 		salary_slip.save()
 		salary_slip.submit()
+		salary_slip.reload()
 
 		no_of_days = self.get_no_of_days()
 		days_in_month = no_of_days[0]
