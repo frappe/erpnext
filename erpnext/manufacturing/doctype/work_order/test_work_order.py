@@ -1,6 +1,5 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-import unittest
 
 import frappe
 from frappe.utils import add_months, cint, flt, now, today
@@ -21,9 +20,10 @@ from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.utils import get_bin
+from erpnext.tests.utils import ERPNextTestCase, timeout
 
 
-class TestWorkOrder(unittest.TestCase):
+class TestWorkOrder(ERPNextTestCase):
 	def setUp(self):
 		self.warehouse = '_Test Warehouse 2 - _TC'
 		self.item = '_Test Item'
@@ -91,7 +91,7 @@ class TestWorkOrder(unittest.TestCase):
 
 	def test_reserved_qty_for_partial_completion(self):
 		item = "_Test Item"
-		warehouse = create_warehouse("Test Warehouse for reserved_qty - _TC")
+		warehouse = "_Test Warehouse - _TC"
 
 		bin1_at_start = get_bin(item, warehouse)
 
@@ -196,8 +196,6 @@ class TestWorkOrder(unittest.TestCase):
 		# no change in reserved / projected
 		self.assertEqual(cint(bin1_on_end_production.reserved_qty_for_production),
 			cint(bin1_on_start_production.reserved_qty_for_production))
-		self.assertEqual(cint(bin1_on_end_production.projected_qty),
-			cint(bin1_on_end_production.projected_qty))
 
 	def test_backflush_qty_for_overpduction_manufacture(self):
 		cancel_stock_entry = []
@@ -376,6 +374,7 @@ class TestWorkOrder(unittest.TestCase):
 		self.assertEqual(len(ste.additional_costs), 1)
 		self.assertEqual(ste.total_additional_costs, 1000)
 
+	@timeout(seconds=60)
 	def test_job_card(self):
 		stock_entries = []
 		bom = frappe.get_doc('BOM', {
@@ -769,6 +768,7 @@ class TestWorkOrder(unittest.TestCase):
 			total_pl_qty
 		)
 
+	@timeout(seconds=60)
 	def test_job_card_scrap_item(self):
 		items = ['Test FG Item for Scrap Item Test', 'Test RM Item 1 for Scrap Item Test',
 			'Test RM Item 2 for Scrap Item Test']

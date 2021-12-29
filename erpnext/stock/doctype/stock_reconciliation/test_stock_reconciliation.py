@@ -24,10 +24,14 @@ from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 class TestStockReconciliation(ERPNextTestCase):
 	@classmethod
-	def setUpClass(self):
+	def setUpClass(cls):
 		super().setUpClass()
 		create_batch_or_serial_no_items()
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+
+	def tearDown(self):
+		frappe.flags.dont_execute_stock_reposts = None
+
 
 	def test_reco_for_fifo(self):
 		self._test_reco_sle_gle("FIFO")
@@ -391,6 +395,41 @@ class TestStockReconciliation(ERPNextTestCase):
 
 		repost_exists = bool(frappe.db.exists("Repost Item Valuation", {"voucher_no": sr.name}))
 		self.assertFalse(repost_exists, msg="Negative stock validation not working on reco cancellation")
+
+	def test_intermediate_sr_bin_update(self):
+		"""Bin should show correct qty even for backdated entries.
+
+			-------------------------------------------
+			| creation | Var | Doc  | Qty | balance qty
+			-------------------------------------------
+			|  1       | SR  | Reco | 10  | 10     (posting date: today+10)
+			|  3       | SR2 | Reco | 11  | 11     (posting date: today+11)
+			|  2       | DN  | DN   | 5   | 6 <-- assert in BIN  (posting date: today+12)
+		"""
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		# repost will make this test useless, qty should update in realtime without reposts
+		frappe.flags.dont_execute_stock_reposts = True
+		frappe.db.rollback()
+
+		item_code = "Backdated-Reco-Cancellation-Item"
+		warehouse = "_Test Warehouse - _TC"
+		create_item(item_code)
+
+		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=10, rate=100,
+			posting_date=add_days(nowdate(), 10))
+
+		create_delivery_note(item_code=item_code, warehouse=warehouse, qty=5, rate=120,
+			posting_date=add_days(nowdate(), 12))
+		old_bin_qty = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
+
+		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=11, rate=100,
+			posting_date=add_days(nowdate(), 11))
+		new_bin_qty = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
+
+		self.assertEqual(old_bin_qty + 1, new_bin_qty)
+		frappe.db.rollback()
+
 
 	def test_valid_batch(self):
 		create_batch_item_with_batch("Testing Batch Item 1", "001")

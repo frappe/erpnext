@@ -963,7 +963,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi = make_purchase_invoice(item=item.name, qty=1, rate=100, do_not_save=True)
 		pi.set_posting_time = 1
-		pi.posting_date = '2019-03-15'
+		pi.posting_date = '2019-01-10'
 		pi.items[0].enable_deferred_expense = 1
 		pi.items[0].service_start_date = "2019-01-10"
 		pi.items[0].service_end_date = "2019-03-15"

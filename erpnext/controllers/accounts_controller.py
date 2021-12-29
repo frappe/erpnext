@@ -190,6 +190,8 @@ class AccountsController(TransactionBase):
 					frappe.throw(_("Row #{0}: Service Start Date cannot be greater than Service End Date").format(d.idx))
 				elif getdate(self.posting_date) > getdate(d.service_end_date):
 					frappe.throw(_("Row #{0}: Service End Date cannot be before Invoice Posting Date").format(d.idx))
+				elif getdate(self.posting_date) > getdate(d.service_start_date):
+					frappe.throw(_("Row #{0}: Service Start Date cannot be before Invoice Posting Date").format(d.idx))
 
 	def validate_invoice_documents_schedule(self):
 		self.validate_payment_schedule_dates()

@@ -26,6 +26,7 @@ class TestProjectProfitability(unittest.TestCase):
 
 		self.timesheet = make_timesheet(emp, is_billable=1)
 		self.salary_slip = make_salary_slip(self.timesheet.name)
+		self.salary_slip.start_date = self.timesheet.start_date
 
 		holidays = self.salary_slip.get_holidays_for_employee(date, date)
 		if holidays:
@@ -42,8 +43,8 @@ class TestProjectProfitability(unittest.TestCase):
 	def test_project_profitability(self):
 		filters = {
 			'company': '_Test Company',
-			'start_date': add_days(getdate(), -3),
-			'end_date': getdate()
+			'start_date': add_days(self.timesheet.start_date, -3),
+			'end_date': self.timesheet.start_date
 		}
 
 		report = execute(filters)
