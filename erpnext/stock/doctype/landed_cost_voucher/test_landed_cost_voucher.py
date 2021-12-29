@@ -170,6 +170,7 @@ class TestLandedCostVoucher(ERPNextTestCase):
 		self.assertEqual(flt(lcv.items[2].applicable_charges, 2), 41.08)
 
 	def test_multiple_landed_cost_voucher_against_pr(self):
+		frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1",
 			supplier_warehouse = "Stores - TCP1", do_not_save=True)
 
@@ -204,13 +205,14 @@ class TestLandedCostVoucher(ERPNextTestCase):
 		distribute_landed_cost_on_items(lcv2)
 
 		lcv2.submit()
+		frappe.db.commit()
 		pr.load_from_db()
 		if not pr.items[0].landed_cost_voucher_amount:
 			pr = frappe.db.get_value("Purchase Receipt", pr.name)
 
 		self.assertEqual(pr.items[0].landed_cost_voucher_amount, 100)
 		self.assertEqual(pr.items[1].landed_cost_voucher_amount, 100)
-
+		frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 	def test_multi_currency_lcv(self):
 		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
 			save_new_records,
