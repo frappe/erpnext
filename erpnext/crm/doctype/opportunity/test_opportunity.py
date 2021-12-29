@@ -31,6 +31,7 @@ class TestOpportunity(unittest.TestCase):
 		frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 
 	def test_make_new_lead_if_required(self):
+		frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 		new_lead_email_id = "new{}@example.com".format(random_string(5))
 		args = {
 			"doctype": "Opportunity",
@@ -64,7 +65,7 @@ class TestOpportunity(unittest.TestCase):
 		self.assertTrue(opp_doc.party_name)
 		self.assertEqual(opp_doc.opportunity_from, "Customer")
 		self.assertEqual(opp_doc.party_name, customer.name)
-
+		frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 	def test_opportunity_item(self):
 		opportunity_doc = make_opportunity(with_items=1, rate=1100, qty=2)
 		self.assertEqual(opportunity_doc.total, 2200)
