@@ -14,12 +14,14 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 class TestFullandFinalStatement(unittest.TestCase):
 
 	def setUp(self):
+		frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 		create_asset_data()
 
 	def tearDown(self):
 		frappe.db.sql("Delete from `tabFull and Final Statement`")
 		frappe.db.sql("Delete from `tabAsset`")
 		frappe.db.sql("Delete from `tabAsset Movement`")
+		frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 
 	def test_check_bootstraped_data_asset_movement_and_jv_creation(self):
 		employee = make_employee("test_fnf@example.com", company="_Test Company")
