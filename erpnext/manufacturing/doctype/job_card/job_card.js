@@ -74,8 +74,7 @@ frappe.ui.form.on('Job Card', {
 			(frm.doc.for_quantity > frm.doc.total_completed_qty || !frm.doc.for_quantity)
 			&& (frm.doc.items || !frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)) {
 
-			//if Jobcard is link to work ORder, the job card cannot be start if Work Order is not startd yet
-			// (aka stock entry for transfert to Work in progress wharehouse is not done yet)
+			//if Job Card is link to Work Order, the job card must not be able to start if Work Order in "Started" status yet
 			if (frm.doc.work_order) {
 				frappe.db.get_value('Work Order', frm.doc.work_order,
 					'status').then((r) => {
