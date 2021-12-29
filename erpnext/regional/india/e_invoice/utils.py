@@ -964,9 +964,7 @@ class GSPConnector():
 			)
 
 	def set_einvoice_data(self, res):
-		print(" TEST FOR E-INVOICING --- ", res ,"-----------")
 		enc_signed_invoice = res.get('SignedInvoice')
-		print(" TEST FOR E-INVOICING --- res", enc_signed_invoice ,"-----------")
 		dec_signed_invoice = jwt.decode(enc_signed_invoice, verify=False)['data']
 
 		self.invoice.irn = res.get('Irn')
