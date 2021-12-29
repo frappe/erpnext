@@ -10,6 +10,7 @@ import json
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.doctype.item.item import validate_end_of_life
 
+
 def update_last_purchase_rate(doc, is_submit):
 	"""updates last_purchase_rate in item table for each item"""
 	import frappe.utils
@@ -38,6 +39,7 @@ def update_last_purchase_rate(doc, is_submit):
 		if last_purchase_rate:
 			frappe.db.sql("""update `tabItem` set last_purchase_rate = %s where name = %s""",
 				(flt(last_purchase_rate), d.item_code))
+
 
 def validate_for_items(doc):
 	items = []
@@ -70,22 +72,25 @@ def validate_for_items(doc):
 
 		items.append(cstr(d.item_code))
 
-	if items and len(items) != len(set(items)) and \
-		not cint(frappe.db.get_single_value("Buying Settings", "allow_multiple_items") or 0):
-		frappe.throw(_("Same item cannot be entered multiple times."))
+	if not cint(frappe.get_cached_value("Buying Settings", None, "allow_multiple_items") or 0):
+		if items and len(items) != len(set(items)):
+			frappe.throw(_("Same item cannot be entered multiple times."))
+
 
 def check_on_hold_or_closed_status(doctype, docname):
 	status = frappe.db.get_value(doctype, docname, "status")
 
-	if status in ("Closed", "On Hold"):
+	if status in ("Closed", "On Hold", "Stopped"):
 		frappe.throw(_("{0} {1} status is {2}").format(doctype, docname, status), frappe.InvalidStatusError)
+
 
 @frappe.whitelist()
 def get_linked_material_requests(items):
 	items = json.loads(items)
 	mr_list = []
 	for item in items:
-		material_request = frappe.db.sql("""SELECT distinct mr.name AS mr_name,
+		material_request = frappe.db.sql("""
+			SELECT distinct mr.name AS mr_name,
 				(mr_item.qty - mr_item.ordered_qty) AS qty,
 				mr_item.item_code AS item_code,
 				mr_item.name AS mr_item
@@ -96,9 +101,10 @@ def get_linked_material_requests(items):
 				AND mr.per_ordered < 99.99
 				AND mr.docstatus = 1
 				AND mr.status != 'Stopped'
-                        ORDER BY mr_item.item_code ASC""",{"item": item}, as_dict=1)
+			ORDER BY mr_item.item_code
+		""", {"item": item}, as_dict=1)
+
 		if material_request:
 			mr_list.append(material_request)
 
 	return mr_list
-
