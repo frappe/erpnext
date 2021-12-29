@@ -33,8 +33,7 @@ def execute():
 			po_doc = frappe.get_doc("Purchase Order", po)
 
 			# update the so in the status updater
-			po_doc.update_status_updater()
-			po_doc.update_qty(update_modified=False)
+			po_doc.update_previous_doc_status()
 
 		except Exception:
 			pass

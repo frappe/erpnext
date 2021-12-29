@@ -977,7 +977,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nTo Bill\nCompleted\nCancelled\nClosed",
+   "options": "\nDraft\nTo Bill\nCompleted\nReturn\nCancelled\nClosed",
    "print_hide": 1,
    "print_width": "150px",
    "read_only": 1,
@@ -1003,7 +1003,7 @@
   {
    "fieldname": "per_billed",
    "fieldtype": "Percent",
-   "label": "% Amount Billed",
+   "label": "% Billed",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
@@ -1540,7 +1540,7 @@
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
- "modified": "2021-12-15 16:42:11.863640",
+ "modified": "2021-12-21 16:08:35.346593",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

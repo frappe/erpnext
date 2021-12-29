@@ -17,17 +17,4 @@ def execute():
 
 	for pr in purchase_receipts:
 		doc = frappe.get_doc("Purchase Receipt", pr)
-		doc.status_updater = [
-			{
-			'source_dt': 'Purchase Receipt Item',
-			'target_dt': 'Material Request Item',
-			'join_field': 'material_request_item',
-			'target_field': 'received_qty',
-			'target_parent_dt': 'Material Request',
-			'target_parent_field': 'per_received',
-			'target_ref_field': 'stock_qty',
-			'source_field': 'stock_qty',
-			'percent_join_field': 'material_request'
-			}
-		]
-		doc.update_qty()
+		doc.update_previous_doc_status()

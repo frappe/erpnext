@@ -22,6 +22,10 @@ def execute():
 	for dt in dts:
 		frappe.reload_doctype(dt)
 
+		if dt == "Sales Order":
+			if frappe.db.has_column(dt, 'prevdoc_docname'):
+				rename_field(dt, 'prevdoc_docname', 'quotation')
+
 		for old_fieldname, new_fieldname in rename_map.items():
 			if frappe.db.has_column(dt, old_fieldname):
 				rename_field(dt, old_fieldname, new_fieldname)

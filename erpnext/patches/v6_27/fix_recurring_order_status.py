@@ -40,7 +40,7 @@ def execute():
 
 			if stock_doc_list:
 				for dn in stock_doc_list:
-					frappe.get_doc(doc["stock_doctype"], dn[0]).update_qty(update_modified=False)
+					frappe.get_doc(doc["stock_doctype"], dn[0]).update_previous_doc_status()
 
 			# Check against Invoice
 			invoice_list = frappe.db.sql("""select distinct parent from `tab{0} Item`
@@ -49,6 +49,6 @@ def execute():
 
 			if invoice_list:
 				for dn in invoice_list:
-					frappe.get_doc(doc["invoice_doctype"], dn[0]).update_qty(update_modified=False)
+					frappe.get_doc(doc["invoice_doctype"], dn[0]).update_previous_doc_status()
 
 			frappe.get_doc(doc["doctype"], order.name).set_status(update=True, update_modified=False)

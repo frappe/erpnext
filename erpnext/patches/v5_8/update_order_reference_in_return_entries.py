@@ -56,7 +56,7 @@ def execute():
 					doc.status_updater = []
 					doc.update_status_updater_args()
 
-				doc.update_prevdoc_status()
+				doc.update_previous_doc_status()
 
 	#--------------------------
 	# purchase return
@@ -88,5 +88,5 @@ def execute():
 
 			pr = frappe.get_doc("Purchase Receipt", d.name)
 			pr.update_ordered_and_reserved_qty()
-			pr.update_prevdoc_status()
+			pr.update_previous_doc_status()
 

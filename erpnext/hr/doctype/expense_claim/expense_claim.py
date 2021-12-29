@@ -11,10 +11,23 @@ from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.hr.doctype.employee_advance.employee_advance import get_unclaimed_advances
 
+
 class InvalidExpenseApproverError(frappe.ValidationError): pass
 class ExpenseApproverIdentityError(frappe.ValidationError): pass
 
+
 class ExpenseClaim(AccountsController):
+	def __init__(self, *args, **kwargs):
+		super(ExpenseClaim, self).__init__(*args, **kwargs)
+		self.status_map = [
+			["Draft", None],
+			["Submitted", "eval:self.docstatus==1"],
+			["Unpaid", "eval:self.approval_status == 'Approved' and self.outstanding_amount > 0 and self.docstatus==1"],
+			["Paid", "eval:self.approval_status == 'Approved' and self.outstanding_amount == 0 and self.docstatus==1"],
+			["Rejected", "eval:self.approval_status == 'Rejected' and self.docstatus==1"],
+			["Cancelled", "eval:self.docstatus==2"],
+		]
+
 	def onload(self):
 		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings',
 			'make_payment_via_journal_entry')

@@ -93,7 +93,7 @@ def repost_dn(dn_failed_list):
 		try:
 			dn_doc = frappe.get_doc("Delivery Note", dn.name)
 			dn_doc.docstatus = 2
-			dn_doc.update_prevdoc_status()
+			dn_doc.update_previous_doc_status()
 			dn_doc.update_stock_ledger()
 			dn_doc.cancel_packing_slips()
 			frappe.db.sql("""delete from `tabGL Entry` 

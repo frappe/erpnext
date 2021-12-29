@@ -10,6 +10,16 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.vehicles.vehicle_booking_controller import VehicleBookingController
 
 class VehicleQuotation(VehicleBookingController):
+	def __init__(self, *args, **kwargs):
+		super(VehicleQuotation, self).__init__(*args, **kwargs)
+		self.status_map = [
+			["Draft", None],
+			["Open", "eval:self.docstatus==1"],
+			["Lost", "eval:self.status=='Lost'"],
+			["Ordered", "has_vehicle_booking_order"],
+			["Cancelled", "eval:self.docstatus==2"],
+		]
+
 	def get_feed(self):
 		customer = self.get('party_name') or self.get('financer')
 		return _("To {0} | {1}").format(self.get("customer_name") or customer, self.get("item_name") or self.get("item_code"))
@@ -18,7 +28,6 @@ class VehicleQuotation(VehicleBookingController):
 		super(VehicleQuotation, self).validate()
 
 		self.validate_vehicle_qty()
-		self.update_opportunity()
 		self.validate_quotation_valid_till()
 		self.get_terms_and_conditions()
 

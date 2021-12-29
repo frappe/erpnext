@@ -139,6 +139,7 @@
   "purchase_receipt_item",
   "purchase_invoice_item",
   "debit_note_amount",
+  "returned_qty",
   "asset_category",
   "accounting_dimensions_section",
   "expense_account",
@@ -1223,11 +1224,20 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "depends_on": "eval:!parent.is_return",
+   "fieldname": "returned_qty",
+   "fieldtype": "Float",
+   "label": "Returned Qty",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-12-14 23:57:02.119182",
+ "modified": "2021-12-21 16:17:23.012622",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

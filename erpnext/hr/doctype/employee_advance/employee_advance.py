@@ -11,10 +11,23 @@ from erpnext.controllers.status_updater import StatusUpdater
 from six import string_types
 import json
 
+
 class EmployeeAdvanceOverPayment(frappe.ValidationError):
 	pass
 
+
 class EmployeeAdvance(StatusUpdater):
+	def __init__(self, *args, **kwargs):
+		super(EmployeeAdvance, self).__init__(*args, **kwargs)
+		self.status_map = [
+			["Draft", None],
+			["Unpaid", "eval:self.docstatus==1"],
+			["Unclaimed", "eval:self.paid_amount and self.paid_amount == self.advance_amount and self.docstatus==1"],
+			["Claimed", "eval:self.paid_amount and self.balance_amount == 0 and self.docstatus==1"],
+			["Deducted from Salary", "eval:self.paid_amount and self.salary_deduction_amount and self.balance_amount == 0 and self.docstatus==1"],
+			["Cancelled", "eval:self.docstatus==2"],
+		]
+
 	def onload(self):
 		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings',
 			'make_payment_via_journal_entry')

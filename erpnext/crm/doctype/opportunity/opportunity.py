@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe.utils import cstr, cint, get_fullname
-from frappe import msgprint, _
+from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
@@ -14,7 +14,18 @@ from frappe.email.inbox import link_communication_to_document
 subject_field = "title"
 sender_field = "contact_email"
 
+
 class Opportunity(TransactionBase):
+	def __init__(self, *args, **kwargs):
+		super(Opportunity, self).__init__(*args, **kwargs)
+		self.status_map = [
+			["Lost", "eval:self.status=='Lost'"],
+			["Lost", "has_lost_quotation"],
+			["Quotation", "has_active_quotation"],
+			["Converted", "has_ordered_quotation"],
+			["Closed", "eval:self.status=='Closed'"]
+		]
+
 	def after_insert(self):
 		if self.opportunity_from == "Lead":
 			frappe.get_doc("Lead", self.party_name).set_status(update=True)

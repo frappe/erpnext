@@ -33,4 +33,4 @@ def execute():
 	if len(parent_list) > 0:
 		for parent in set(parent_list):
 			doc = frappe.get_doc('Purchase Receipt', parent)
-			doc.update_qty(update_modified=False)
+			doc.update_previous_doc_status()

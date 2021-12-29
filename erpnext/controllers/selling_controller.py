@@ -62,7 +62,6 @@ class SellingController(StockController):
 		self.calculate_sales_team_contribution(self.get('base_net_total'))
 
 	def set_missing_values(self, for_validate=False):
-
 		super(SellingController, self).set_missing_values(for_validate)
 
 		# set contact and address details for customer, if they are not mentioned
@@ -205,7 +204,6 @@ class SellingController(StockController):
 				if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate_in_sales_uom):
 					throw_message(it.idx, frappe.bold(it.item_name), last_valuation_rate_in_sales_uom, "valuation rate")
 
-
 	def get_item_list(self):
 		il = []
 		for d in self.get("items"):
@@ -293,7 +291,7 @@ class SellingController(StockController):
 	def check_sales_order_on_hold_or_close(self, ref_fieldname):
 		for d in self.get("items"):
 			if d.get(ref_fieldname):
-				status = frappe.db.get_value("Sales Order", d.get(ref_fieldname), "status")
+				status = frappe.db.get_value("Sales Order", d.get(ref_fieldname), "status", cache=1)
 				if status in ("Closed", "On Hold"):
 					frappe.throw(_("Sales Order {0} is {1}").format(d.get(ref_fieldname), status))
 
@@ -519,6 +517,17 @@ class SellingController(StockController):
 		if self.get('transaction_type'):
 			if not frappe.get_cached_value("Transaction Type", self.transaction_type, 'selling'):
 				frappe.throw(_("Transaction Type {0} is not allowed for sales transactions").format(frappe.bold(self.transaction_type)))
+
+	def validate_project_customer(self):
+		if self.project and self.customer:
+			res = frappe.db.sql("""
+				select name
+				from `tabProject`
+				where name = %s and (customer = %s or ifnull(customer,'') = '')
+			""", (self.project, self.customer))
+			if not res:
+				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
+
 
 def set_default_income_account_for_item(obj):
 	for d in obj.get("items"):

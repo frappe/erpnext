@@ -7,7 +7,6 @@ from frappe import _
 from frappe.utils import (cstr, validate_email_address, cint, comma_and, has_gravatar, now, getdate, nowdate)
 from frappe.model.mapper import get_mapped_doc
 
-from frappe.model.document import Document
 from erpnext.controllers.selling_controller import SellingController
 from frappe.contacts.address_and_contact import load_address_and_contact
 from erpnext.accounts.party import set_taxes
@@ -15,7 +14,17 @@ from frappe.email.inbox import link_communication_to_document
 
 sender_field = "email_id"
 
+
 class Lead(SellingController):
+	def __init__(self, *args, **kwargs):
+		super(Lead, self).__init__(*args, **kwargs)
+		self.status_map = [
+			["Lost Quotation", "has_lost_quotation"],
+			["Opportunity", "has_opportunity"],
+			["Quotation", "has_quotation"],
+			["Converted", "has_customer"],
+		]
+
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), self.lead_name)
 
