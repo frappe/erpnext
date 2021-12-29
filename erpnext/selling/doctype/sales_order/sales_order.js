@@ -150,8 +150,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 			   	else if(doc.status === 'Closed') {
 				   // un-close
-				   this.frm.add_custom_button(__('Re-open'), function() {
-					   me.frm.cscript.update_status('Re-open', 'Draft')
+				   this.frm.add_custom_button(__('Re-Open'), function() {
+					   me.frm.cscript.update_status('Re-Open', 'Draft')
 				   }, __("Status"));
 			   }
 			}

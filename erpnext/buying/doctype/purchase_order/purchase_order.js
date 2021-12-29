@@ -146,7 +146,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				}
 			} else if(in_list(["Closed", "Delivered"], doc.status)) {
 				if (this.frm.has_perm("submit")) {
-					this.frm.add_custom_button(__('Re-open'), () => this.unclose_purchase_order(), __("Status"));
+					this.frm.add_custom_button(__('Re-Open'), () => this.unclose_purchase_order(), __("Status"));
 				}
 			}
 			if(doc.status != "Closed") {
@@ -513,7 +513,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	},
 
 	unclose_purchase_order: function(){
-		cur_frm.cscript.update_status('Re-open', 'Submitted')
+		cur_frm.cscript.update_status('Re-Open', 'Submitted')
 	},
 
 	close_purchase_order: function(){

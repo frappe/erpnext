@@ -25,11 +25,11 @@ frappe.listview_settings['Purchase Order'] = {
 	onload: function (listview) {
 		var method = "erpnext.buying.doctype.purchase_order.purchase_order.close_or_unclose_purchase_orders";
 
-		listview.page.add_menu_item(__("Close"), function () {
+		listview.page.add_action_item(__("Close"), function () {
 			listview.call_for_selected_items(method, { "status": "Closed" });
 		});
 
-		listview.page.add_menu_item(__("Re-open"), function () {
+		listview.page.add_action_item(__("Re-Open"), function () {
 			listview.call_for_selected_items(method, { "status": "Submitted" });
 		});
 	}
