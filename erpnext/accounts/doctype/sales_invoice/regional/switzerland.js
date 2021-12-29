@@ -8,6 +8,29 @@ frappe.ui.form.on('Sales Invoice', {
 		const FORMAT_RF_BODY = /^[A-Z0-9]{1,21}$/;
 		const FORMAT_RF_HEAD = 'RF';
 
+		var iso7064 = {
+			compute: function(rawValue) {
+				const value = stringifyInput1(rawValue);
+				if (!value.match(FORMAT)) {
+					throw new Error('Invalid data format; expecting: \'' + FORMAT + '\', found: \'' + value + '\'');
+				}
+				return mod97(value);
+			},
+			computeWithoutCheck: function(rawValue) {
+				return mod97(rawValue);
+			}
+		};
+
+		function stringifyInput1(rawValue) {
+			if (rawValue === null || rawValue === undefined) {
+				throw new Error('Expecting \'rawValue\' of type \'string\', found: \'' + rawValue + '\'');
+			}
+			if (typeof rawValue !== 'string') {
+				throw new Error('Expecting \'rawValue\' of type \'string\', found: \'' + (typeof rawValue) + '\'');
+			}
+			return rawValue;
+		}
+
 		function mod97(value) {
 			var buffer = 0;
 			var charCode;
@@ -21,37 +44,16 @@ frappe.ui.form.on('Sales Invoice', {
 			return buffer % 97;
 		}
 
-		function stringifyInput(rawValue) {
-			if (rawValue === null || rawValue === undefined) {
-				throw new Error('Expecting \'rawValue\' of type \'string\', found: \'' + rawValue + '\'');
-			}
-			if (typeof rawValue !== 'string') {
-				throw new Error('Expecting \'rawValue\' of type \'string\', found: \'' + (typeof rawValue) + '\'');
-			}
-			return rawValue;
-		}
-		var iso7064 = {
-			compute: function(rawValue) {
-				const value = stringifyInput(rawValue);
-				if (!value.match(FORMAT)) {
-					throw new Error('Invalid data format; expecting: \'' + FORMAT + '\', found: \'' + value + '\'');
-				}
-				return mod97(value);
-			},
-			computeWithoutCheck: function(rawValue) {
-				return mod97(rawValue);
-			}
-		};
 		var iso11649 = {
 			generate: function(rawValue) {
-				const value = stringifyInput(rawValue);
+				const value = stringifyInput2(rawValue);
 				if (!value.match(FORMAT_RF_BODY)) {
 					throw new Error('Invalid Creditor Reference format; expecting: \'' + FORMAT_RF_BODY + '\', found: \'' + value + '\'');
 				}
 				return FORMAT_RF_HEAD + ('0' + (98 - iso7064.computeWithoutCheck(value + FORMAT_RF_HEAD + '00'))).slice(-2) + value;
 			},
 			validate: function(rawValue) {
-				const value = stringifyInput(rawValue);
+				const value = stringifyInput2(rawValue);
 				if (!value.match(FORMAT_RF)) {
 					throw new Error('Invalid Creditor Reference format; expecting: \'' + FORMAT_RF + '\', found: \'' + value + '\'');
 				}
@@ -59,7 +61,7 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 		};
 
-		function stringifyInput(rawValue, valueName = 'rawValue') {
+		function stringifyInput2(rawValue, valueName = 'rawValue') {
 			if (rawValue !== null && rawValue !== undefined) {
 				switch (typeof rawValue) {
 					case 'string':
