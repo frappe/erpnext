@@ -98,6 +98,8 @@ def execute():
 				'itc_central_tax': 0,
 				'itc_cess_amount': 0
 			})
+			if not gst_accounts:
+				continue
 
 			if d.account_head in gst_accounts.get('igst_account'):
 				amount_map[d.parent]['itc_integrated_tax'] += d.amount

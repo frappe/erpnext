@@ -23,4 +23,5 @@ def execute():
 
 	delivery_settings = frappe.get_doc("Delivery Settings")
 	delivery_settings.dispatch_template = _("Dispatch Notification")
+	delivery_settings.flags.ignore_links = True
 	delivery_settings.save()
