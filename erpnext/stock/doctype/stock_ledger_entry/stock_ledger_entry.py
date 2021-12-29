@@ -9,7 +9,7 @@ import frappe
 from frappe import _
 from frappe.core.doctype.role.role import get_users
 from frappe.model.document import Document
-from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
+from frappe.utils import add_days, cint, formatdate, get_datetime, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
@@ -44,7 +44,6 @@ class StockLedgerEntry(Document):
 
 	def on_submit(self):
 		self.check_stock_frozen_date()
-		self.actual_amt_check()
 		self.calculate_batch_qty()
 
 		if not self.get("via_landed_cost_voucher"):
@@ -57,18 +56,6 @@ class StockLedgerEntry(Document):
 				{"docstatus": 1, "batch_no": self.batch_no, "is_cancelled": 0},
 				"sum(actual_qty)") or 0
 			frappe.db.set_value("Batch", self.batch_no, "batch_qty", batch_qty)
-
-	def actual_amt_check(self):
-		"""Validate that qty at warehouse for selected batch is >=0"""
-		if self.batch_no and not self.get("allow_negative_stock"):
-			batch_bal_after_transaction = flt(frappe.db.sql("""select sum(actual_qty)
-				from `tabStock Ledger Entry`
-				where is_cancelled =0 and warehouse=%s and item_code=%s and batch_no=%s""",
-				(self.warehouse, self.item_code, self.batch_no))[0][0])
-
-			if batch_bal_after_transaction < 0:
-				frappe.throw(_("Stock balance in Batch {0} will become negative {1} for Item {2} at Warehouse {3}")
-					.format(self.batch_no, batch_bal_after_transaction, self.item_code, self.warehouse))
 
 	def validate_mandatory(self):
 		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','company']

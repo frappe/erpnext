@@ -157,25 +157,19 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	commission_rate: function() {
 		this.calculate_commission();
-		refresh_field("total_commission");
 	},
 
 	total_commission: function() {
-		if(this.frm.doc.base_net_total) {
-			frappe.model.round_floats_in(this.frm.doc, ["base_net_total", "total_commission"]);
+		frappe.model.round_floats_in(this.frm.doc, ["amount_eligible_for_commission", "total_commission"]);
 
-			if(this.frm.doc.base_net_total < this.frm.doc.total_commission) {
-				var msg = (__("[Error]") + " " +
-					__(frappe.meta.get_label(this.frm.doc.doctype, "total_commission",
-						this.frm.doc.name)) + " > " +
-					__(frappe.meta.get_label(this.frm.doc.doctype, "base_net_total", this.frm.doc.name)));
-				frappe.msgprint(msg);
-				throw msg;
-			}
+		const { amount_eligible_for_commission } = this.frm.doc;
+		if (!amount_eligible_for_commission) return;
 
-			this.frm.set_value("commission_rate",
-				flt(this.frm.doc.total_commission * 100.0 / this.frm.doc.base_net_total));
-		}
+		this.frm.set_value(
+			"commission_rate", flt(
+				this.frm.doc.total_commission * 100.0 / amount_eligible_for_commission
+			)
+		);
 	},
 
 	allocated_percentage: function(doc, cdt, cdn) {
@@ -185,7 +179,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			sales_person.allocated_percentage = flt(sales_person.allocated_percentage,
 				precision("allocated_percentage", sales_person));
 
-			sales_person.allocated_amount = flt(this.frm.doc.base_net_total *
+			sales_person.allocated_amount = flt(this.frm.doc.amount_eligible_for_commission *
 				sales_person.allocated_percentage / 100.0,
 				precision("allocated_amount", sales_person));
 				refresh_field(["allocated_amount"], sales_person);
@@ -259,28 +253,39 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	calculate_commission: function() {
-		if(this.frm.fields_dict.commission_rate) {
-			if(this.frm.doc.commission_rate > 100) {
-				var msg = __(frappe.meta.get_label(this.frm.doc.doctype, "commission_rate", this.frm.doc.name)) +
-					" " + __("cannot be greater than 100");
-				frappe.msgprint(msg);
-				throw msg;
-			}
+		if (!this.frm.fields_dict.commission_rate) return;
 
-			this.frm.doc.total_commission = flt(this.frm.doc.base_net_total * this.frm.doc.commission_rate / 100.0,
-				precision("total_commission"));
+		if (this.frm.doc.commission_rate > 100) {
+			this.frm.set_value("commission_rate", 100);
+			frappe.throw(`${__(frappe.meta.get_label(
+				this.frm.doc.doctype, "commission_rate", this.frm.doc.name
+			))} ${__("cannot be greater than 100")}`);
 		}
+
+		this.frm.doc.amount_eligible_for_commission = this.frm.doc.items.reduce(
+			(sum, item) => item.grant_commission ? sum + item.base_net_amount : sum, 0
+		)
+
+		this.frm.doc.total_commission = flt(
+			this.frm.doc.amount_eligible_for_commission * this.frm.doc.commission_rate / 100.0,
+			precision("total_commission")
+		);
+
+		refresh_field(["amount_eligible_for_commission", "total_commission"]);
 	},
 
 	calculate_contribution: function() {
 		var me = this;
 		$.each(this.frm.doc.doctype.sales_team || [], function(i, sales_person) {
 			frappe.model.round_floats_in(sales_person);
-			if(sales_person.allocated_percentage) {
-				sales_person.allocated_amount = flt(
-					me.frm.doc.base_net_total * sales_person.allocated_percentage / 100.0,
-					precision("allocated_amount", sales_person));
-			}
+			if (!sales_person.allocated_percentage) return;
+
+			sales_person.allocated_amount = flt(
+				me.frm.doc.amount_eligible_for_commission
+				* sales_person.allocated_percentage
+				/ 100.0,
+				precision("allocated_amount", sales_person)
+			);
 		});
 	},
 

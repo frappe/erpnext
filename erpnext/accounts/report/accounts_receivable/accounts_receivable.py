@@ -109,7 +109,11 @@ class ReceivablePayableReport(object):
 					invoiced = 0.0,
 					paid = 0.0,
 					credit_note = 0.0,
-					outstanding = 0.0
+					outstanding = 0.0,
+					invoiced_in_account_currency = 0.0,
+					paid_in_account_currency = 0.0,
+					credit_note_in_account_currency = 0.0,
+					outstanding_in_account_currency = 0.0
 				)
 			self.get_invoices(gle)
 
@@ -150,21 +154,28 @@ class ReceivablePayableReport(object):
 		# gle_balance will be the total "debit - credit" for receivable type reports and
 		# and vice-versa for payable type reports
 		gle_balance = self.get_gle_balance(gle)
+		gle_balance_in_account_currency = self.get_gle_balance_in_account_currency(gle)
+
 		if gle_balance > 0:
 			if gle.voucher_type in ('Journal Entry', 'Payment Entry') and gle.against_voucher:
 				# debit against sales / purchase invoice
 				row.paid -= gle_balance
+				row.paid_in_account_currency -= gle_balance_in_account_currency
 			else:
 				# invoice
 				row.invoiced += gle_balance
+				row.invoiced_in_account_currency += gle_balance_in_account_currency
 		else:
 			# payment or credit note for receivables
 			if self.is_invoice(gle):
 				# stand alone debit / credit note
 				row.credit_note -= gle_balance
+				row.credit_note_in_account_currency -= gle_balance_in_account_currency
 			else:
 				# advance / unlinked payment or other adjustment
 				row.paid -= gle_balance
+				row.paid_in_account_currency -= gle_balance_in_account_currency
+
 		if gle.cost_center:
 			row.cost_center =  str(gle.cost_center)
 
@@ -216,8 +227,13 @@ class ReceivablePayableReport(object):
 		# as we can use this to filter out invoices without outstanding
 		for key, row in self.voucher_balance.items():
 			row.outstanding = flt(row.invoiced - row.paid - row.credit_note, self.currency_precision)
+			row.outstanding_in_account_currency = flt(row.invoiced_in_account_currency - row.paid_in_account_currency - \
+				row.credit_note_in_account_currency, self.currency_precision)
+
 			row.invoice_grand_total = row.invoiced
-			if abs(row.outstanding) > 1.0/10 ** self.currency_precision:
+
+			if (abs(row.outstanding) > 1.0/10 ** self.currency_precision) and \
+				(abs(row.outstanding_in_account_currency) > 1.0/10 ** self.currency_precision):
 				# non-zero oustanding, we must consider this row
 
 				if self.is_invoice(row) and self.filters.based_on_payment_terms:
@@ -529,7 +545,9 @@ class ReceivablePayableReport(object):
 
 	def set_ageing(self, row):
 		if self.filters.ageing_based_on == "Due Date":
-			entry_date = row.due_date
+			# use posting date as a fallback for advances posted via journal and payment entry
+			# when ageing viewed by due date
+			entry_date = row.due_date or row.posting_date
 		elif self.filters.ageing_based_on == "Supplier Invoice Date":
 			entry_date = row.bill_date
 		else:
@@ -583,12 +601,14 @@ class ReceivablePayableReport(object):
 		else:
 			select_fields = "debit, credit"
 
+		doc_currency_fields = "debit_in_account_currency, credit_in_account_currency"
+
 		remarks = ", remarks" if self.filters.get("show_remarks") else ""
 
 		self.gl_entries = frappe.db.sql("""
 			select
 				name, posting_date, account, party_type, party, voucher_type, voucher_no, cost_center,
-				against_voucher_type, against_voucher, account_currency, {0} {remarks}
+				against_voucher_type, against_voucher, account_currency, {0}, {1} {remarks}
 			from
 				`tabGL Entry`
 			where
@@ -596,8 +616,8 @@ class ReceivablePayableReport(object):
 				and is_cancelled = 0
 				and party_type=%s
 				and (party is not null and party != '')
-				{1} {2} {3}"""
-			.format(select_fields, date_condition, conditions, order_by, remarks=remarks), values, as_dict=True)
+				{2} {3} {4}"""
+			.format(select_fields, doc_currency_fields, date_condition, conditions, order_by, remarks=remarks), values, as_dict=True)
 
 	def get_sales_invoices_or_customers_based_on_sales_person(self):
 		if self.filters.get("sales_person"):
@@ -717,6 +737,13 @@ class ReceivablePayableReport(object):
 	def get_gle_balance(self, gle):
 		# get the balance of the GL (debit - credit) or reverse balance based on report type
 		return gle.get(self.dr_or_cr) - self.get_reverse_balance(gle)
+
+	def get_gle_balance_in_account_currency(self, gle):
+		# get the balance of the GL (debit - credit) or reverse balance based on report type
+		return gle.get(self.dr_or_cr + '_in_account_currency') - self.get_reverse_balance_in_account_currency(gle)
+
+	def get_reverse_balance_in_account_currency(self, gle):
+		return gle.get('debit_in_account_currency' if self.dr_or_cr=='credit' else 'credit_in_account_currency')
 
 	def get_reverse_balance(self, gle):
 		# get "credit" balance if report type is "debit" and vice versa
