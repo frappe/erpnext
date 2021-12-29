@@ -104,7 +104,8 @@
 				<span class="order-rate">
 					{{ d.get_formatted("rate") }}
 				</span>
-				<span class="btn btn-secondary shadow-none d-l-n btn-sm">Qty: {{ d.qty }} </span>
+				<span class="btn btn-secondary shadow-none d-l-n btn-sm">
+					{{ _("Qty: ") }} {{ d.get_formatted("qty") }} </span>
 				<span class="d-s-n">
 					{{ d.get_formatted("amount") }}
 				</span>
