@@ -67,6 +67,7 @@ class TestOpportunity(unittest.TestCase):
 		self.assertEqual(opportunity_doc.total, 2200)
 
 def make_opportunity(**args):
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 	args = frappe._dict(args)
 
 	opp_doc = frappe.get_doc({
@@ -94,4 +95,6 @@ def make_opportunity(**args):
 		})
 
 	opp_doc.insert()
+	frappe.db.commit()
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 	return opp_doc
