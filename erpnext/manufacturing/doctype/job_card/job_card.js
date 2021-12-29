@@ -73,7 +73,19 @@ frappe.ui.form.on('Job Card', {
 		if (frm.doc.docstatus == 0 && !frm.is_new() &&
 			(frm.doc.for_quantity > frm.doc.total_completed_qty || !frm.doc.for_quantity)
 			&& (frm.doc.items || !frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)) {
-			frm.trigger("prepare_timer_buttons");
+
+			//if Jobcard is link to work ORder, the job card cannot be start if Work Order is not startd yet
+			// (aka stock entry for transfert to Work in progress wharehouse is not done yet)
+			if (frm.doc.work_order) {
+				frappe.db.get_value('Work Order', frm.doc.work_order,
+					'status').then((r) => {
+					if (r.message.status == 'In Process' || r.message.status == 'Completed') {
+						frm.trigger("prepare_timer_buttons");
+					}
+				});
+			} else {
+				frm.trigger("prepare_timer_buttons");
+			}
 		}
 
 		frm.trigger("setup_quality_inspection");
