@@ -52,7 +52,7 @@ class SalesOrder(SellingController):
 		self.validate_warehouse()
 		self.validate_drop_ship()
 		self.validate_serial_no_based_delivery()
-		self.get_commision()
+		
 		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_order_reference)
 
 		if self.coupon_code:
@@ -422,6 +422,8 @@ class SalesOrder(SellingController):
 									data=eval(j.commision_formula)
 									tot.append(data)
 									self.total_commission=sum(tot)
+									frappe.set_value("Sales Order",self.name, "total_commission",sum(tot))
+
 
 	@frappe.whitelist()
 	def get_work_order_items(self, for_raw_material_request=0):
