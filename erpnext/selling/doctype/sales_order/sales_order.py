@@ -422,7 +422,7 @@ class SalesOrder(SellingController):
 									data=eval(j.commision_formula)
 									tot.append(data)
 				self.total_commission=sum(tot)
-				frappe.set_value("Sales Order",self.name, "total_commission",sum(tot))
+				# frappe.set_value("Sales Order",self.name, "total_commission",sum(tot))
 
 
 	@frappe.whitelist()
