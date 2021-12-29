@@ -69,6 +69,8 @@ def qty_from_all_warehouses(batch_info):
 	return qty
 
 def get_price(item_code, price_list, customer_group, company, qty=1):
+	from erpnext.e_commerce.shopping_cart.cart import get_party
+
 	template_item_code = frappe.db.get_value("Item", item_code, "variant_of")
 
 	if price_list:
@@ -80,7 +82,8 @@ def get_price(item_code, price_list, customer_group, company, qty=1):
 				filters={"price_list": price_list, "item_code": template_item_code})
 
 		if price:
-			pricing_rule = get_pricing_rule_for_item(frappe._dict({
+			party = get_party()
+			pricing_rule_dict = frappe._dict({
 				"item_code": item_code,
 				"qty": qty,
 				"stock_qty": qty,
@@ -91,7 +94,12 @@ def get_price(item_code, price_list, customer_group, company, qty=1):
 				"conversion_rate": 1,
 				"for_shopping_cart": True,
 				"currency": frappe.db.get_value("Price List", price_list, "currency")
-			}))
+			})
+
+			if party and party.doctype == "Customer":
+				pricing_rule_dict.update({"customer": party.name})
+
+			pricing_rule = get_pricing_rule_for_item(pricing_rule_dict)
 			price_obj = price[0]
 
 			if pricing_rule:
