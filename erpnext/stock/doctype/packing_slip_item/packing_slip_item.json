@@ -73,7 +73,7 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Quantity",
+   "label": "Qty",
    "print_width": "100px",
    "reqd": 1,
    "width": "100px"
@@ -125,7 +125,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-12-14 23:56:55.507782",
+ "modified": "2021-12-18 18:19:57.077441",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Item",

@@ -84,7 +84,7 @@
    "default": "1",
    "fieldname": "qty",
    "fieldtype": "Float",
-   "label": "Quantity"
+   "label": "Qty"
   },
   {
    "columns": 2,
@@ -148,7 +148,7 @@
   }
  ],
  "istable": 1,
- "modified": "2020-03-09 12:38:46.363629",
+ "modified": "2021-12-18 18:20:27.802169",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool Item",

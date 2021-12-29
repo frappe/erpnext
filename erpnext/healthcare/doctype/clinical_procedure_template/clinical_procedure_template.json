@@ -130,7 +130,7 @@
   {
    "fieldname": "sample_qty",
    "fieldtype": "Float",
-   "label": "Quantity"
+   "label": "Qty"
   },
   {
    "fieldname": "column_break_21",
@@ -167,7 +167,7 @@
    "read_only": 1
   }
  ],
- "modified": "2020-02-27 16:32:55.780893",
+ "modified": "2021-12-18 18:21:22.392276",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure Template",
