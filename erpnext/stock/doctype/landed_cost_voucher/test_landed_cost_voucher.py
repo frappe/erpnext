@@ -322,6 +322,7 @@ def make_landed_cost_voucher(** args):
 
 
 def create_landed_cost_voucher(receipt_document_type, receipt_document, company, charges=50):
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 	ref_doc = frappe.get_doc(receipt_document_type, receipt_document)
 
 	lcv = frappe.new_doc("Landed Cost Voucher")
@@ -347,6 +348,8 @@ def create_landed_cost_voucher(receipt_document_type, receipt_document, company,
 	distribute_landed_cost_on_items(lcv)
 
 	lcv.submit()
+	frappe.db.commit()
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 
 	return lcv
 

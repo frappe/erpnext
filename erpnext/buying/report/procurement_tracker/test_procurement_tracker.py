@@ -37,7 +37,6 @@ class TestProcurementTracker(unittest.TestCase):
 				country="Pakistan"
 				)).insert()
 		frappe.db.commit()
-		frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 		warehouse = create_warehouse("_Test Procurement Warehouse", company="_Test Procurement Company")
 		mr = make_material_request(company="_Test Procurement Company", warehouse=warehouse, cost_center="Main - _TPC")
 		po = make_purchase_order(mr.name)
@@ -72,5 +71,6 @@ class TestProcurementTracker(unittest.TestCase):
 			"expected_delivery_date": date_obj,
 			"actual_delivery_date": date_obj
 		}
-
+		frappe.db.commit()
+		frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 		return expected_data

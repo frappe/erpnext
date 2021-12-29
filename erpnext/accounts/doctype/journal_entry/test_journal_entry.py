@@ -393,7 +393,7 @@ def make_journal_entry(account1, account2, amount, cost_center=None, posting_dat
 		if submit:
 			jv.submit()
 	frappe.db.commit()
-	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
+	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 	return jv
 
 test_records = frappe.get_test_records('Journal Entry')
