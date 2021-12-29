@@ -13,6 +13,7 @@ test_records = frappe.get_test_records('Opportunity')
 
 class TestOpportunity(unittest.TestCase):
 	def test_opportunity_status(self):
+		frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 		doc = make_opportunity(with_items=0)
 		quotation = make_quotation(doc.name)
 		quotation.append('items', {
@@ -25,7 +26,9 @@ class TestOpportunity(unittest.TestCase):
 		quotation.submit()
 
 		doc = frappe.get_doc('Opportunity', doc.name)
+
 		self.assertEqual(doc.status, "Quotation")
+		frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 
 	def test_make_new_lead_if_required(self):
 		new_lead_email_id = "new{}@example.com".format(random_string(5))
@@ -67,7 +70,6 @@ class TestOpportunity(unittest.TestCase):
 		self.assertEqual(opportunity_doc.total, 2200)
 
 def make_opportunity(**args):
-	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 	args = frappe._dict(args)
 
 	opp_doc = frappe.get_doc({
@@ -95,6 +97,4 @@ def make_opportunity(**args):
 		})
 
 	opp_doc.insert()
-	frappe.db.commit()
-	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 	return opp_doc
