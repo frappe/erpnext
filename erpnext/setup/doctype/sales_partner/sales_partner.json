@@ -209,7 +209,7 @@
  "icon": "fa fa-user",
  "idx": 1,
  "links": [],
- "modified": "2021-09-03 22:33:10.697936",
+ "modified": "2021-12-27 17:41:01.034920",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Partner",
@@ -240,6 +240,7 @@
    "write": 1
   }
  ],
+ "search_fields": "commission_rate, territory",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC"
