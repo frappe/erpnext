@@ -20,20 +20,20 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'label': _('Related'),
-				'items': ['Purchase Invoice', 'Landed Cost Voucher', 'Asset']
+				'label': _('Fulfilment'),
+				'items': ['Purchase Invoice', 'Landed Cost Voucher']
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Purchase Order', 'Quality Inspection', 'Project']
+				'items': ['Purchase Order', 'Asset']
+			},
+			{
+				'label': _('Reference'),
+				'items': ['Quality Inspection', 'Project', 'Auto Repeat']
 			},
 			{
 				'label': _('Returns'),
 				'items': ['Purchase Receipt']
-			},
-			{
-				'label': _('Subscription'),
-				'items': ['Auto Repeat']
 			},
 		]
 	}

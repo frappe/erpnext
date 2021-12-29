@@ -24,7 +24,9 @@ frappe.ui.form.on("Sales Order", {
 		// formatter for material request item
 		frm.set_indicator_formatter('item_code', function(doc) {
 			if (doc.docstatus === 0) {
-				if (!doc.actual_qty) {
+				if (!doc.is_stock_item && !doc.is_fixed_asset) {
+					return "blue";
+				} else if (!doc.actual_qty) {
 					return "red";
 				} else if (doc.actual_qty < doc.stock_qty) {
 					return "orange";
@@ -129,6 +131,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		var me = this;
 		this._super();
 		let allow_delivery = false;
+
+		me.toggle_delivery_date();
 
 		if (doc.docstatus==1) {
 
@@ -562,7 +566,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		var warehouses = [];
 		var delivery_dates = [];
 		$.each(this.frm.doc.items || [], function(i, d) {
-			if(!warehouses.includes(d.warehouse)) {
+			if(d.warehouse && !warehouses.includes(d.warehouse)) {
 				warehouses.push(d.warehouse);
 			}
 			if(!delivery_dates.includes(d.delivery_date)) {

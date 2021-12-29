@@ -18,19 +18,19 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Fulfilment'),
-				'items': ['Purchase Receipt', 'Purchase Invoice', 'Sales Order']
+				'items': ['Purchase Receipt', 'Purchase Invoice']
+			},
+			{
+				'label': _('Reference'),
+				'items': ['Material Request', 'Supplier Quotation', 'Sales Order']
+			},
+			{
+				'label': _('Reference'),
+				'items': ['Stock Entry', 'Project', 'Auto Repeat']
 			},
 			{
 				'label': _('Payment'),
 				'items': ['Payment Entry', 'Journal Entry']
-			},
-			{
-				'label': _('Reference'),
-				'items': ['Material Request', 'Supplier Quotation', 'Project']
-			},
-			{
-				'label': _('Sub-contracting / Subscription'),
-				'items': ['Stock Entry', 'Auto Repeat']
 			},
 		]
 	}
