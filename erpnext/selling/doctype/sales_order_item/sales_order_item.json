@@ -23,6 +23,7 @@
   "quantity_and_rate",
   "qty",
   "stock_uom",
+  "picked_qty",
   "col_break2",
   "uom",
   "conversion_factor",
@@ -797,12 +798,17 @@
    "fieldtype": "Check",
    "label": "Grant Commission",
    "read_only": 1
+  },
+  {
+   "fieldname": "picked_qty",
+   "fieldtype": "Float",
+   "label": "Picked Qty"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-10-05 12:27:25.014789",
+ "modified": "2021-12-27 21:11:34.782900",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",
@@ -811,5 +817,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
