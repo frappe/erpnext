@@ -121,12 +121,6 @@ class TestCompany(unittest.TestCase):
 			self.assertTrue(lft >= min_lft)
 			self.assertTrue(rgt <= max_rgt)
 
-			no_of_children = self.get_no_of_children(company["company_name"])
-			self.assertTrue(rgt == (lft + 1 + (2 * no_of_children)))
-
-			no_of_children = self.get_no_of_children(parent_company)
-			self.assertTrue(parent_rgt == (parent_lft + 1 + (2 * no_of_children)))
-
 	def get_no_of_children(self, company):
 		def get_no_of_children(companies, no_of_children):
 			children = []
