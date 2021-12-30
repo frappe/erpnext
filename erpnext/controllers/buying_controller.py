@@ -22,7 +22,7 @@ from erpnext.controllers.stock_controller import StockController
 class BuyingController(StockController):
 	def __setup__(self):
 		if hasattr(self, "taxes"):
-			self.flags.print_taxes_with_zero_amount = cint(frappe.db.get_single_value("Print Settings",
+			self.flags.print_taxes_with_zero_amount = cint(frappe.get_cached_value("Print Settings", None,
 				 "print_taxes_with_zero_amount"))
 			self.flags.show_inclusive_tax_in_print = self.is_inclusive_tax()
 
