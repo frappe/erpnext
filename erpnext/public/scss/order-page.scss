@@ -32,7 +32,7 @@
         .order-rate {
             @media screen and (max-width: 567px) {
                 font-weight: 600;
-                font-size: var(--font-size-base);
+                font-size: var(--text-base);
             }
         }
 
@@ -48,19 +48,19 @@
         }
 
         &.order-item-name {
-            font-size: var(--font-size-base);
+            font-size: var(--text-base);
         }
     }
 }
 
 .item-grand-total {
-    font-size: var(--font-size-base);
+    font-size: var(--text-base);
 }
 
 .list-item-name,
 .item-total,
 .order-container {
-    font-size: var(--font-size-sm);
+    font-size: var(--text-md);
 }
 
 .d-s-n {
