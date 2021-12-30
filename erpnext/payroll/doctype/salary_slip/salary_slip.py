@@ -321,13 +321,25 @@ class SalarySlip(TransactionBase):
 			self.payment_days = 0
 
 	def get_unmarked_days(self):
-		marked_days = frappe.get_all("Attendance", filters = {
-					"attendance_date": ["between", [self.start_date, self.end_date]],
-					"employee": self.employee,
-					"docstatus": 1
-				}, fields = ["COUNT(*) as marked_days"])[0].marked_days
+		unmarked_days = self.total_working_days
+		joining_date, relieving_date = frappe.get_cached_value("Employee", self.employee,
+			["date_of_joining", "relieving_date"])
 
-		return self.total_working_days - marked_days
+		if joining_date:
+			if getdate(self.start_date) <= joining_date <= getdate(self.end_date):
+				unmarked_days -= date_diff(joining_date, self.start_date)
+
+		if relieving_date:
+			if getdate(self.start_date) <= relieving_date <= getdate(self.end_date):
+				unmarked_days -= date_diff(relieving_date, self.end_date)
+
+		unmarked_days -= frappe.get_all("Attendance", filters = {
+			"attendance_date": ["between", [self.start_date, self.end_date]],
+			"employee": self.employee,
+			"docstatus": 1
+		}, fields = ["COUNT(*) as marked_days"])[0].marked_days
+
+		return unmarked_days
 
 
 	def get_payment_days(self, joining_date, relieving_date, include_holidays_in_total_working_days):
