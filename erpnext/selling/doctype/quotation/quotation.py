@@ -27,6 +27,7 @@ class Quotation(SellingController):
 		self.set_status()
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_valid_till()
+		self.validate_shopping_cart_items()	
 		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
@@ -48,6 +49,13 @@ class Quotation(SellingController):
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
 			frappe.throw(_("Valid till date cannot be before transaction date"))
+
+	def validate_shopping_cart_items(self):
+		if self.order_type != "Shopping Cart": return
+
+		for item in self.items:
+			if not frappe.db.exists("Website Item", {"item_code": item.item_code}):
+				frappe.throw(_("Item {0} must be a website item for Shopping Cart quotations".format(item.item_code)))
 
 	def has_sales_order(self):
 		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.name, "docstatus": 1})
