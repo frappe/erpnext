@@ -16,7 +16,6 @@
   "due_date",
   "cai",
   "transaction_number",
-  "retention_reason",
   "section_break_1",
   "reasons",
   "percentage_total",
@@ -102,7 +101,7 @@
    "fieldname": "reasons",
    "fieldtype": "Table",
    "label": "Reasons",
-   "options": "Reason And Percentage",
+   "options": "Customer Reason And Percentage",
    "reqd": 1
   },
   {
@@ -141,12 +140,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "retention_reason",
-   "fieldtype": "Link",
-   "label": "Retention Reason",
-   "options": "Retention Reason"
-  },
-  {
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
@@ -155,7 +148,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-12-28 14:32:31.413609",
+ "modified": "2021-12-30 14:23:50.706465",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Customer Retention",

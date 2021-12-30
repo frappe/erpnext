@@ -18,27 +18,25 @@ class SalesForUser(Document):
 		outstanding_amount, cash, cards, adv_app, total_monetary, total_income, total_utility, total_exempt_sales, advances = 0,0,0,0,0,0,0,0,0
 		dates = []
 		condition = self.return_filters()
-		conditions = self.return_filters_sql()
+		operations = 0
 		serie = self.prefix
 		split_serie = serie.split("-")
 		serie_final = ("{}-{}-{}").format(split_serie[0],split_serie[1],split_serie[2])
 
 		salary_slips = frappe.get_all("Sales Invoice", ["name","outstanding_amount", "total_advance", "creation", "status","naming_series", "creation_date", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total", "partial_discount", "discount_amount", "total"], filters = condition,  order_by = "name asc")
 
-		self.total_invoice = len(salary_slips)
-		self.total_operations = len(salary_slips)
 		date_actual = self.start_date
 
-		for salary in salary_slips:
-			payments = frappe.get_all("Sales Invoice Payment", ["*"], filters = {"parent": salary.name})
+		# for salary in salary_slips:
+		# 	payments = frappe.get_all("Sales Invoice Payment", ["*"], filters = {"parent": salary.name})
+			
+		# 	for payment in payments:
+		# 		if payment.mode_of_payment == "Efectivo":
+		# 			cash += payment.amount
+		# 		if payment.mode_of_payment == "Tarjetas de credito":
+		# 			cards += payment.amount
 
-			for payment in payments:
-				if payment.mode_of_payment == "Efectivo":
-					cash += payment.amount
-				if payment.mode_of_payment == "Tarjetas de credito":
-					cards += payment.amount
-
-			advances += salary.total_advance
+		# 	advances += salary.total_advance
 
 		sales_person_cols = ""
 		sales_team_table = ""
@@ -112,6 +110,7 @@ class SalesForUser(Document):
 				date_validate = salary_slip.creation.strftime('%Y-%m-%d %H:%M:%S')
 				dates_validate = salary_slip.posting_date.strftime('%Y-%m-%d')
 				if date == dates_validate and salary_slip.status != "Return" and date_validate >= self.start_date and date_validate <= self.final_date:
+					operations += 1
 					if cont == 0:
 						split_initial_range = salary_slip.name.split("-")
 						initial_range = split_initial_range[3]
@@ -133,6 +132,16 @@ class SalesForUser(Document):
 					split_final_range = salary_slip.name.split("-")
 					final_range = split_final_range[3]
 					cont += 1
+
+					payments = frappe.get_all("Sales Invoice Payment", ["*"], filters = {"parent": salary_slip.name})
+			
+					for payment in payments:
+						if payment.mode_of_payment == "Efectivo":
+							cash += payment.amount
+						if payment.mode_of_payment == "Tarjetas de credito":
+							cards += payment.amount
+
+					advances += salary_slip.total_advance
 			final_range = "{}-{}".format(initial_range, final_range)
 
 			# row1 = [creation_date, serie_final, final_range, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
@@ -166,6 +175,9 @@ class SalesForUser(Document):
 
 		self.total_income = total_income
 		self.total_credit = outstanding_amount
+
+		self.total_invoice = operations
+		self.total_operations = operations
 
 	def return_filters(self):
 		conditions = ''
