@@ -1027,19 +1027,20 @@ def validate_item_type(doc, fieldname, message):
 	if not items:
 		return
 
-	item_list = ", ".join(["%s" % frappe.db.escape(d) for d in items])
-
-	invalid_items = [d[0] for d in frappe.db.sql("""
-		select item_code from tabItem where name in ({0}) and {1}=0
-		""".format(item_list, fieldname), as_list=True)]
+	invalid_items = []
+	for item_code in items:
+		if item_code not in invalid_items:
+			if not frappe.get_cached_value("Item", item_code, fieldname):
+				invalid_items.append(item_code)
 
 	if invalid_items:
-		items = ", ".join([d for d in invalid_items])
-
+		invalid_items_message = ", ".join([frappe.utils.get_link_to_form("Item", item_code) for item_code in invalid_items])
 		if len(invalid_items) > 1:
-			error_message = _("Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master".format(items, message))
+			error_message = _("The following Items {0} are not marked as {1} Item. You can enable them as {1} Item from Item Master")\
+				.format(invalid_items_message, message)
 		else:
-			error_message = _("Following item {0} is not marked as {1} item. You can enable them as {1} item from its Item master".format(items, message))
+			error_message = _("Item {0} is not marked as {1} Item. You can enable them as {1} Item from Item Master")\
+				.format(invalid_items_message, message)
 
 		frappe.throw(error_message)
 

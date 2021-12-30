@@ -18,7 +18,7 @@ from erpnext.controllers.stock_controller import StockController
 class SellingController(StockController):
 	def __setup__(self):
 		if hasattr(self, "taxes"):
-			self.flags.print_taxes_with_zero_amount = cint(frappe.db.get_single_value("Print Settings",
+			self.flags.print_taxes_with_zero_amount = cint(frappe.get_cached_value("Print Settings", None,
 				"print_taxes_with_zero_amount"))
 			self.flags.show_inclusive_tax_in_print = self.is_inclusive_tax()
 
@@ -179,7 +179,7 @@ class SellingController(StockController):
 			frappe.throw(_("""Row #{}: Selling rate for item {} is lower than its {}. Selling rate should be atleast {}""")
 				.format(idx, item_name, ref_rate_field, rate))
 
-		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
+		if not frappe.get_cached_value("Selling Settings", None, "validate_selling_price"):
 			return
 
 		if hasattr(self, "is_return") and self.is_return:
@@ -453,7 +453,7 @@ class SellingController(StockController):
 
 	def validate_for_duplicate_items(self):
 		check_list, chk_dupl_itm = [], []
-		if cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
+		if cint(frappe.get_cached_value("Selling Settings", None, "allow_multiple_items")):
 			return
 
 		for d in self.get('items'):

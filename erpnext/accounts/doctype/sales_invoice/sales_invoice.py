@@ -507,9 +507,9 @@ class SalesInvoice(SellingController):
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
 
 	def validate_tax_id_mandatory(self):
-		restricted = frappe.get_cached_value("Accounts Settings", None, 'restrict_sales_tax_invoice_without_tax_id')
-		if self.get('has_stin') and restricted:
-			if not self.get('tax_id') and not self.get('tax_cnic') and not self.get('tax_strn'):
+		if self.get('has_stin') and not self.get('tax_id') and not self.get('tax_cnic') and not self.get('tax_strn'):
+			restricted = frappe.get_cached_value("Accounts Settings", None, 'restrict_sales_tax_invoice_without_tax_id')
+			if restricted:
 				frappe.throw(_("Customer Tax ID or Identification Number is mandatory for Sales Tax Invoice"))
 
 	def check_credit_limit(self):
@@ -728,7 +728,7 @@ class SalesInvoice(SellingController):
 			},
 		})
 
-		if cint(frappe.get_cached_value('Selling Settings', None, 'maintain_same_sales_rate')) and not self.is_return:
+		if not self.is_return and cint(frappe.get_cached_value('Selling Settings', None, 'maintain_same_sales_rate')):
 			self.validate_rate_with_reference_doc([
 				["Sales Order", "sales_order", "sales_order_item"],
 				["Delivery Note", "delivery_note", "delivery_note_item"]
@@ -818,7 +818,7 @@ class SalesInvoice(SellingController):
 					msgprint(_("Stock cannot be updated against Delivery Note {0}").format(d.delivery_note), raise_exception=1)
 
 	def validate_update_stock_mandatory(self):
-		if not cint(self.update_stock) and not cint(frappe.db.get_single_value("Accounts Settings", "allow_invoicing_without_updating_stock")) and not self.return_against:
+		if not cint(self.update_stock) and not self.return_against and not cint(frappe.get_cached_value("Accounts Settings", None, "allow_invoicing_without_updating_stock")):
 			packed_items = []
 			for p in self.get('packed_items'):
 				packed_items.append(p.parent_detail_docname)

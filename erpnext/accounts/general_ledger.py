@@ -209,9 +209,11 @@ def validate_account_for_perpetual_inventory(gl_map):
 			# 		})
 
 def validate_cwip_accounts(gl_map):
-	cwip_enabled = any([cint(ac.enable_cwip_accounting) for ac in frappe.db.get_all("Asset Category","enable_cwip_accounting")])
+	if gl_map[0].voucher_type != "Journal Entry":
+		return
 
-	if cwip_enabled and gl_map[0].voucher_type == "Journal Entry":
+	cwip_enabled = any([cint(ac.enable_cwip_accounting) for ac in frappe.db.get_all("Asset Category","enable_cwip_accounting")])
+	if cwip_enabled:
 			cwip_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
 				where account_type = 'Capital Work in Progress' and is_group=0""")]
 

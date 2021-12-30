@@ -395,7 +395,8 @@
    "fieldname": "is_return",
    "fieldtype": "Check",
    "in_standard_filter": 1,
-   "label": "Is Return"
+   "label": "Is Return",
+   "search_index": 1
   },
   {
    "fieldname": "more_info_section",
@@ -461,7 +462,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-21 22:34:28.312539",
+ "modified": "2021-12-30 17:43:05.567651",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Receipt",
