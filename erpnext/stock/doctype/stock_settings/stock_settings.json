@@ -47,7 +47,9 @@
   "stock_frozen_upto_days",
   "column_break_26",
   "role_allowed_to_create_edit_back_dated_transactions",
-  "stock_auth_role"
+  "stock_auth_role",
+  "delivery_planning_section",
+  "dn_auto_submit"
  ],
  "fields": [
   {
@@ -298,6 +300,17 @@
    "fieldname": "update_existing_price_list_rate",
    "fieldtype": "Check",
    "label": "Update Existing Price List Rate"
+  },
+  {
+   "fieldname": "delivery_planning_section",
+   "fieldtype": "Section Break",
+   "label": "Delivery Planning"
+  },
+  {
+   "fieldname": "dn_auto_submit",
+   "fieldtype": "Select",
+   "label": "Auto Submit Delivery Note On Creation",
+   "options": "Yes\nNo"
   }
  ],
  "icon": "icon-cog",
@@ -305,7 +318,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-11-06 19:40:02.183592",
+ "modified": "2021-12-13 12:31:40.156098",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

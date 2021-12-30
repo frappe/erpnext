@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _, msgprint
@@ -41,14 +40,12 @@ class PaymentReconciliation(Document):
 
 	def get_payment_entries(self):
 		order_doctype = "Sales Order" if self.party_type=="Customer" else "Purchase Order"
-		payment_entries = get_advance_payment_entries(self.party_type, self.party,self.receivable_payable_account, order_doctype, against_all_orders=True, limit=self.limit)
-		data_list = []
-		for entry in payment_entries:
-			if(entry.get('reference_type') == 'Payment Entry'):
-				posting_date = frappe.db.get_value("Payment Entry", {'name': entry.get('reference_name')}, ['posting_date'])
-				entry['payment_date'] = posting_date
-				data_list.append(entry)
-		return data_list
+		condition = self.get_conditions(get_payments=True)
+		payment_entries = get_advance_payment_entries(self.party_type, self.party,
+			self.receivable_payable_account, order_doctype, against_all_orders=True, limit=self.payment_limit,
+			condition=condition)
+
+		return payment_entries
 
 	def get_jv_entries(self):
 		condition = self.get_conditions()

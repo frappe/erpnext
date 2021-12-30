@@ -84,6 +84,10 @@ $.extend(erpnext, {
 		});
 	},
 
+	route_to_pending_reposts: (args) => {
+		frappe.set_route('List', 'Repost Item Valuation', args);
+	},
+
 	proceed_save_with_reminders_frequency_change: () => {
 		frappe.ui.hide_open_dialog();
 
@@ -770,9 +774,13 @@ frappe.form.link_formatters['Item'] = function(value, doc) {
 }
 
 frappe.form.link_formatters['Employee'] = function(value, doc) {
-	if(doc && doc.employee_name && doc.employee_name !== value) {
-		return value? value + ': ' + doc.employee_name: doc.employee_name;
+	if (doc && value && doc.employee_name && doc.employee_name !== value && doc.employee === value) {
+		return value + ': ' + doc.employee_name;
+	} else if (!value && doc.doctype && doc.employee_name) {
+		// format blank value in child table
+		return doc.employee;
 	} else {
+		// if value is blank in report view or project name and name are the same, return as is
 		return value;
 	}
 }

@@ -12,6 +12,10 @@ frappe.ui.form.on("Company", {
 				}
 			});
 		}
+
+		frm.call('check_if_transactions_exist').then(r => {
+			frm.toggle_enable("default_currency", (!r.message));
+		});
 	},
 	setup: function(frm) {
 		erpnext.company.setup_queries(frm);
@@ -86,9 +90,6 @@ frappe.ui.form.on("Company", {
 			frappe.contacts.render_address_and_contact(frm);
 
 			frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Company'}
-
-			frm.toggle_enable("default_currency", (frm.doc.__onload &&
-				!frm.doc.__onload.transactions_exist));
 
 			if (frappe.perm.has_perm("Cost Center", 0, 'read')) {
 				frm.add_custom_button(__('Cost Centers'), function() {
@@ -202,43 +203,6 @@ erpnext.company.set_chart_of_accounts_options = function(doc) {
 			}
 		})
 	}
-}
-
-cur_frm.cscript.change_abbr = function() {
-	var dialog = new frappe.ui.Dialog({
-		title: "Replace Abbr",
-		fields: [
-			{"fieldtype": "Data", "label": "New Abbreviation", "fieldname": "new_abbr",
-				"reqd": 1 },
-			{"fieldtype": "Button", "label": "Update", "fieldname": "update"},
-		]
-	});
-
-	dialog.fields_dict.update.$input.click(function() {
-		var args = dialog.get_values();
-		if(!args) return;
-		frappe.show_alert(__("Update in progress. It might take a while."));
-		return frappe.call({
-			method: "erpnext.setup.doctype.company.company.enqueue_replace_abbr",
-			args: {
-				"company": cur_frm.doc.name,
-				"old": cur_frm.doc.abbr,
-				"new": args.new_abbr
-			},
-			callback: function(r) {
-				if(r.exc) {
-					frappe.msgprint(__("There were errors."));
-					return;
-				} else {
-					cur_frm.set_value("abbr", args.new_abbr);
-				}
-				dialog.hide();
-				cur_frm.refresh();
-			},
-			btn: this
-		})
-	});
-	dialog.show();
 }
 
 erpnext.company.setup_queries = function(frm) {

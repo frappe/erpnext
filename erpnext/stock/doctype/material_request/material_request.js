@@ -59,7 +59,7 @@ frappe.ui.form.on('Material Request', {
 				callback: function(r){
 					if (r.message === 'Item not found') {
 						frappe.throw(__(r.message));
-					}
+					} 
 					if(r.message > 0) {
 						frm.refresh_field('items')
 					}
@@ -115,30 +115,30 @@ frappe.ui.form.on('Material Request', {
 					method: "erpnext.stock.doctype.material_request.material_request.make_material_request",
 					source_doctype: "Work Order",
 					target: frm.doc,
+					
 					setters: {
 						bom_no: frm.doc.bom_no || undefined,
 						company: frm.doc.company || undefined
 					},
 					get_query_filters: {
-						docstatus: ['in',['1','0']],
-						status: ['not in',['Completed','Stopped']]
+						docstatus: 1,
 					}
 				})
 			},
 				__("Get Items From"));
 		}
 	},
-
+	
 	onload_post_render: function(frm) {
 		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	},
 
 	refresh: function(frm) {
+		frm.events.make_custom_buttons(frm);
 		var d = frm.doc.work_order_detail
 		if(d.length > 0){
 			frm.set_df_property("items",'read_only',1)
 		}
-		frm.events.make_custom_buttons(frm);
 		frm.toggle_reqd('customer', frm.doc.material_request_type=="Customer Provided");
 
 		if (frm.doc.docstatus===0 && frm.doc.manufacturing_staging === 1) {
@@ -148,7 +148,7 @@ frappe.ui.form.on('Material Request', {
 					method: "erpnext.stock.doctype.material_request.material_request.make_material_request",
 					source_doctype: "Work Order",
 					target: frm.doc,
-
+					
 					setters: {
 						bom_no: frm.doc.bom_no || undefined,
 						company: frm.doc.company || undefined
@@ -162,6 +162,7 @@ frappe.ui.form.on('Material Request', {
 		}
 
 	},
+
 	set_from_warehouse: function(frm) {
 		if (frm.doc.material_request_type == "Material Transfer"
 			&& frm.doc.set_from_warehouse) {
@@ -234,7 +235,7 @@ frappe.ui.form.on('Material Request', {
 			frm.add_custom_button(__('Sales Order'), () => frm.events.get_items_from_sales_order(frm),
 				__("Get Items From"));
 		}
-
+		
 		if (frm.doc.docstatus == 1 && frm.doc.status == 'Stopped') {
 			frm.add_custom_button(__('Re-open'), () => frm.events.update_status(frm, 'Submitted'));
 		}

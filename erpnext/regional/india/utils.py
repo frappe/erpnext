@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 
 import json
 import re
@@ -209,26 +208,17 @@ def get_regional_address_details(party_details, doctype, company):
 
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
 		master_doctype = "Sales Taxes and Charges Template"
-		get_tax_template_based_on_category(master_doctype, company, party_details)
-
-		if party_details.get('taxes_and_charges'):
-			return party_details
-
-		if not party_details.company_gstin:
-			return party_details
+		tax_template_by_category = get_tax_template_based_on_category(master_doctype, company, party_details)
 
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		master_doctype = "Purchase Taxes and Charges Template"
-		get_tax_template_based_on_category(master_doctype, company, party_details)
+		tax_template_by_category = get_tax_template_based_on_category(master_doctype, company, party_details)
 
-		if party_details.get('taxes_and_charges'):
-			return party_details
-
-		if not party_details.supplier_gstin:
-			return party_details
+	if tax_template_by_category:
+		party_details['taxes_and_charges'] = tax_template_by_category
+		return
 
 	if not party_details.place_of_supply: return party_details
-
 	if not party_details.company_gstin: return party_details
 
 	if ((doctype in ("Sales Invoice", "Delivery Note", "Sales Order") and party_details.company_gstin
@@ -240,6 +230,7 @@ def get_regional_address_details(party_details, doctype, company):
 
 	if not default_tax:
 		return party_details
+
 	party_details["taxes_and_charges"] = default_tax
 	party_details.taxes = get_taxes_and_charges(master_doctype, default_tax)
 
@@ -271,9 +262,7 @@ def get_tax_template_based_on_category(master_doctype, company, party_details):
 	default_tax = frappe.db.get_value(master_doctype, {'company': company, 'tax_category': party_details.get('tax_category')},
 		'name')
 
-	if default_tax:
-		party_details["taxes_and_charges"] = default_tax
-		party_details.taxes = get_taxes_and_charges(master_doctype, default_tax)
+	return default_tax
 
 def get_tax_template(master_doctype, company, is_inter_state, state_code):
 	tax_categories = frappe.get_all('Tax Category', fields = ['name', 'is_inter_state', 'gst_state'],
@@ -572,17 +561,17 @@ def get_item_list(data, doc, hsn_wise=False):
 	}
 	item_data_attrs = ['sgstRate', 'cgstRate', 'igstRate', 'cessRate', 'cessNonAdvol']
 	hsn_wise_charges, hsn_taxable_amount = get_itemised_tax_breakup_data(doc, account_wise=True, hsn_wise=hsn_wise)
-	for hsn_code, taxable_amount in hsn_taxable_amount.items():
+	for item_or_hsn, taxable_amount in hsn_taxable_amount.items():
 		item_data = frappe._dict()
-		if not hsn_code:
+		if not item_or_hsn:
 			frappe.throw(_('GST HSN Code does not exist for one or more items'))
-		item_data.hsnCode = int(hsn_code)
+		item_data.hsnCode = int(item_or_hsn) if hsn_wise else item_or_hsn
 		item_data.taxableAmount = taxable_amount
 		item_data.qtyUnit = ""
 		for attr in item_data_attrs:
 			item_data[attr] = 0
 
-		for account, tax_detail in hsn_wise_charges.get(hsn_code, {}).items():
+		for account, tax_detail in hsn_wise_charges.get(item_or_hsn, {}).items():
 			account_type = gst_accounts.get(account, '')
 			for tax_acc, attrs in tax_map.items():
 				if account_type == tax_acc:
@@ -850,13 +839,11 @@ def update_taxable_values(doc, method):
 		doc.get('items')[item_count - 1].taxable_value += diff
 
 def get_depreciation_amount(asset, depreciable_value, row):
-	depreciation_left = flt(row.total_number_of_depreciations) - flt(asset.number_of_depreciations_booked)
-
 	if row.depreciation_method in ("Straight Line", "Manual"):
 		# if the Depreciation Schedule is being prepared for the first time
 		if not asset.flags.increase_in_asset_life:
-			depreciation_amount = (flt(row.value_after_depreciation) -
-				flt(row.expected_value_after_useful_life)) / depreciation_left
+			depreciation_amount = (flt(asset.gross_purchase_amount) -
+				flt(row.expected_value_after_useful_life)) / flt(row.total_number_of_depreciations)
 
 		# if the Depreciation Schedule is being modified after Asset Repair
 		else:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
@@ -7,7 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import comma_and, flt, unique
 
-from erpnext.e_commerce.redisearch import (
+from erpnext.e_commerce.redisearch_utils import (
 	create_website_items_index,
 	get_indexable_web_fields,
 	is_search_module_loaded,

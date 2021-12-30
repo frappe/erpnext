@@ -546,29 +546,6 @@ frappe.ui.form.on("Work Order", {
 		erpnext.work_order.calculate_cost(frm.doc);
 		erpnext.work_order.calculate_total_cost(frm);
 	},
-
-	// actual_fg_weight: function(frm) {
-	// 	frappe.call({
-	// 		method: "yeild_calc",
-	// 		callback: function(r) {
-	// 			if(r.message) {
-	// 				console.log(r.message);
-	// 			}
-	// 		}
-	// 	});
-	// },
-
-	// actual_rm_weight: function(frm) {
-	// 	frappe.call({
-	// 		method: "consumption_dev",
-	// 		callback: function(r) {
-	// 			if(r.message) {
-	// 				frm.reload_doc();
-	// 			}
-	// 		}
-	// 	});
-	// }
-	
 });
 
 frappe.ui.form.on("Work Order Item", {
