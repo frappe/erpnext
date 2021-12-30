@@ -1413,7 +1413,6 @@ class SalarySlip(TransactionBase):
 				if i.leave_type == "Casual Leave":
 					for j in casual_leave:
 						i.encashment_days = j.get("sum(encashable_days)")
-						# print("We are in encashment#############",j.get("sum(encashable_days)"))
 
 			
 			sdoc = frappe.db.sql("""select (total_leaves_allocated - total_leaves_encashed ) as day from `tabLeave Allocation` l  where employee = '{0}' and 
@@ -1422,18 +1421,15 @@ class SalarySlip(TransactionBase):
 			'{1}'between l.from_date and l.to_date and docstatus=1  and leave_type = "Earned Leave" """.format(self.employee,self.start_date),as_dict=1)
 			cdoc = frappe.db.sql("""select (total_leaves_allocated - total_leaves_encashed ) as day from `tabLeave Allocation` l  where employee = '{0}' and 
 			'{1}'between l.from_date and l.to_date and docstatus=1  and leave_type = "Casual Leave" """.format(self.employee,self.start_date),as_dict=1)
-			# print("In cdoc***********1426", cdoc)
 			for f in self.leave_details:
 				if f.leave_type == "Casual Leave":
 					for p in cdoc:
 						print("))))))))))))))))))****** CL",p)
 						f.balance = p.get("day")
-						# print("We are in Casual Leave#############",p.get("day"))
 				
 				if f.leave_type == "Sick Leave":
 					for p in sdoc:
 						f.balance = p.get("day")
-						# print("We are in Sick Leave#############",p.get("day"))	
 				
 				if f.leave_type == "Earned Leave":
 					for p in edoc:
