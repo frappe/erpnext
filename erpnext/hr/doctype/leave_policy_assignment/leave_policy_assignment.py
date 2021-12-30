@@ -58,8 +58,6 @@ class LeavePolicyAssignment(Document):
 					)
 					leave_allocations[leave_policy_detail.leave_type] = {"name": leave_allocation, "leaves": new_leaves_allocated}
 				
-
-
 			self.db_set("leaves_allocated", 1)
 			return leave_allocations
 
