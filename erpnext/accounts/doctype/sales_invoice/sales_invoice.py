@@ -431,33 +431,49 @@ class SalesInvoice(SellingController):
 		precision = self.precision("outstanding_amount")
 		outstanding_amount = flt(self.outstanding_amount, precision)
 		due_date = getdate(self.due_date)
-		nowdate = getdate()
+		today = getdate()
 
 		discounting_status = None
 		if self.is_discounted:
 			discounting_status = get_discounting_status(self.name)
 
 		if not status:
+			# Cancelled
 			if self.docstatus == 2:
 				self.status = "Cancelled"
+
+			# Submitted
 			elif self.docstatus == 1:
-				if outstanding_amount > 0 and due_date < nowdate and self.is_discounted and discounting_status == 'Disbursed':
-					self.status = "Overdue and Discounted"
-				elif outstanding_amount > 0 and due_date < nowdate:
-					self.status = "Overdue"
-				elif outstanding_amount > 0 and due_date >= nowdate and self.is_discounted and discounting_status == 'Disbursed':
-					self.status = "Unpaid and Discounted"
-				elif outstanding_amount > 0 and due_date >= nowdate:
-					self.status = "Unpaid"
-				#Check if outstanding amount is 0 due to credit note issued against invoice
+				# Positive Outstanding
+				if outstanding_amount > 0:
+					# Discounted
+					if self.is_discounted and discounting_status == 'Disbursed':
+						if due_date < today:
+							self.status = "Overdue and Discounted"
+						else:
+							self.status = "Unpaid and Discounted"
+
+					# Normal / Not Discounted
+					else:
+						if due_date < today:
+							self.status = "Overdue"
+						else:
+							self.status = "Unpaid"
+
+				# Negative Outstanding
 				elif outstanding_amount < 0:
 					self.status = "Credit Note Issued"
-				elif self.is_return == 1:
-					self.status = "Return"
-				elif outstanding_amount <= 0:
-					self.status = "Paid"
+
+				# Zero Outstanding
 				else:
-					self.status = "Submitted"
+					if self.is_return:
+						self.status = "Return"
+					elif frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+						self.status = "Credit Note Issued"
+					else:
+						self.status = "Paid"
+
+			# Draft
 			else:
 				self.status = "Draft"
 

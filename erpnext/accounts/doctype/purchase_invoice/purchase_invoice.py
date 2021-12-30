@@ -364,32 +364,43 @@ class PurchaseInvoice(BuyingController):
 		precision = self.precision("outstanding_amount")
 		outstanding_amount = flt(self.outstanding_amount, precision)
 		due_date = getdate(self.due_date)
-		nowdate = getdate()
+		today = getdate()
 
 		if not status:
+			# Cancelled
 			if self.docstatus == 2:
 				self.status = "Cancelled"
+
+			# Submitted
 			elif self.docstatus == 1:
-				if outstanding_amount > 0 and due_date < nowdate:
-					self.status = "Overdue"
-				elif outstanding_amount > 0 and due_date >= nowdate:
-					self.status = "Unpaid"
-				#Check if outstanding amount is 0 due to debit note issued against invoice
-				elif outstanding_amount <= 0 and self.is_return == 0 and frappe.db.get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+				# Positive Outstanding
+				if outstanding_amount > 0:
+					if due_date < today:
+						self.status = "Overdue"
+					else:
+						self.status = "Unpaid"
+
+				# Negative Outstanding
+				elif outstanding_amount < 0:
 					self.status = "Debit Note Issued"
-				elif self.is_return == 1:
-					self.status = "Return"
-				elif outstanding_amount<=0:
-					self.status = "Paid"
+
+				# Zero Outstanding
 				else:
-					self.status = "Submitted"
+					if self.is_return:
+						self.status = "Return"
+					elif frappe.db.get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+						self.status = "Debit Note Issued"
+					else:
+						self.status = "Paid"
+
+			# Draft
 			else:
 				self.status = "Draft"
 
 		self.add_status_comment(previous_status)
 
 		if update:
-			self.db_set('status', self.status, update_modified = update_modified)
+			self.db_set('status', self.status, update_modified=update_modified)
 
 	def invoice_is_blocked(self):
 		return self.on_hold and (not self.release_date or self.release_date > getdate(nowdate()))
