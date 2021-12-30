@@ -296,6 +296,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Inventory Download",
+					"doctype": "Inventory Download"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Delivery Note Trends",
 					"doctype": "Delivery Note"
 				},

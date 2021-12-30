@@ -76,9 +76,9 @@ class CustomerRetention(Document):
 
 		account_to_debit = company.default_payable_account
 
-		reason_porcentage = frappe.get_all("Reason And Percentage", ["reason"], filters = {"parent": self.name})
+		reason_porcentage = frappe.get_all("Customer Reason And Percentage", ["reason"], filters = {"parent": self.name})
 
-		reason_retention = frappe.get_doc("Reason For Retention", reason_porcentage[0].reason)
+		reason_retention = frappe.get_doc("Customer Reason For Retention", reason_porcentage[0].reason)
 
 		account_to_credit = reason_retention.account
 
