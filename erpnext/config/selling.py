@@ -237,6 +237,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Type Price List",
+					"doctype": "Price List",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Customer Acquisition and Loyalty",
 					"doctype": "Customer",
 					"icon": "fa fa-bar-chart",
