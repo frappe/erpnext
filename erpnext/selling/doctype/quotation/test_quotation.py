@@ -131,8 +131,6 @@ class TestQuotation(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
 
 	def test_shopping_cart_without_website_item(self):
-		from erpnext.selling.doctype.quotation.quotation import make_sales_order
-
 		if frappe.db.exists('Website Item', {'item_code': '_Test Item Home Desktop 100'}):
 			frappe.get_last_doc('Website Item', {'item_code': '_Test Item Home Desktop 100'}).delete()
 

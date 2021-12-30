@@ -51,7 +51,8 @@ class Quotation(SellingController):
 			frappe.throw(_("Valid till date cannot be before transaction date"))
 
 	def validate_shopping_cart_items(self):
-		if self.order_type != "Shopping Cart": return
+		if self.order_type != "Shopping Cart":
+			return
 
 		for item in self.items:
 			if not frappe.db.exists("Website Item", {"item_code": item.item_code}):
