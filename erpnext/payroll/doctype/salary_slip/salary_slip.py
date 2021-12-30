@@ -766,7 +766,7 @@ class SalarySlip(TransactionBase):
 
 		#Employee Other Incomes
 		other_incomes = self.get_income_form_other_sources(payroll_period) or 0.0
-
+		
 		# Total taxable earnings including additional and other incomes
 		total_taxable_earnings = previous_taxable_earnings + current_structured_taxable_earnings + future_structured_taxable_earnings \
 			+ current_additional_earnings + other_incomes + unclaimed_taxable_benefits - total_exemption_amount
@@ -932,8 +932,11 @@ class SalarySlip(TransactionBase):
 	def get_future_recurring_additional_amount(self, additional_salary, monthly_additional_amount):
 		future_recurring_additional_amount = 0
 		to_date = frappe.db.get_value("Additional Salary", additional_salary, 'to_date')
+		
 		# future month count excluding current
-		future_recurring_period = (getdate(to_date).month - getdate(self.start_date).month)
+		from_date, to_date = getdate(self.start_date), getdate(to_date)
+		future_recurring_period = ((to_date.year - from_date.year) * 12) + (to_date.month - from_date.month)
+		
 		if future_recurring_period > 0:
 			future_recurring_additional_amount = monthly_additional_amount * future_recurring_period # Used earning.additional_amount to consider the amount for the full month
 		return future_recurring_additional_amount
@@ -1032,7 +1035,8 @@ class SalarySlip(TransactionBase):
 		data.update({"annual_taxable_earning": annual_taxable_earning})
 		tax_amount = 0
 		for slab in tax_slab.slabs:
-			if slab.condition and not self.eval_tax_slab_condition(slab.condition, data):
+			cond = cstr(slab.condition).strip()
+			if cond and not self.eval_tax_slab_condition(cond, data):
 				continue
 			if not slab.to_amount and annual_taxable_earning >= slab.from_amount:
 				tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction *.01
