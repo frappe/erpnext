@@ -1,17 +1,30 @@
 frappe.listview_settings['Delivery Note'] = {
-	add_fields: ["customer", "customer_name", "base_grand_total", "per_installed", "per_billed", "per_completed",
-		"transporter_name", "grand_total", "is_return", "status", "currency"],
+	add_fields: [
+		"customer", "customer_name", "transporter_name",
+		"base_grand_total", "grand_total", "currency",
+		"per_installed", "per_billed", "per_completed",
+		"is_return", "status",
+	],
+
 	get_indicator: function(doc) {
-		if(cint(doc.is_return)==1) {
+		// Return
+		if(cint(doc.is_return)) {
 			return [__("Return"), "darkgrey", "is_return,=,Yes"];
+
+		// Closed
 		} else if (doc.status === "Closed") {
 			return [__("Closed"), "green", "status,=,Closed"];
+
+		// To Bill
 		} else if (flt(doc.per_completed, 2) < 100) {
-			return [__("To Bill"), "orange", "per_completed,<,100"];
+			return [__("To Bill"), "orange", "per_completed,<,100|status,!=,Closed|docstatus,=,1"];
+
+		// Completed
 		} else if (flt(doc.per_completed, 2) == 100) {
-			return [__("Completed"), "green", "per_completed,=,100"];
+			return [__("Completed"), "green", "per_completed,=,100|docstatus,=,1"];
 		}
 	},
+
 	onload: function (doclist) {
 		const action = () => {
 			const selected_docs = doclist.get_checked_items();
