@@ -49,7 +49,10 @@ class TestAccountBalance(unittest.TestCase):
 			},
 		]
 
-		self.assertEqual(expected_data, report[1])
+		expected_data = sorted(expected_data, key=lambda k:k['account'])
+		output = sorted(report[1], key=lambda k:k['account'])
+
+		self.assertEqual(expected_data, output)
 
 def make_sales_invoice():
 	frappe.set_user("Administrator")

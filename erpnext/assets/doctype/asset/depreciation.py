@@ -59,7 +59,7 @@ def make_depreciation_entry(asset_name, date=None):
 				"credit_in_account_currency": d.depreciation_amount,
 				"reference_type": "Asset",
 				"reference_name": asset.name,
-				"cost_center": ""
+				"cost_center": depreciation_cost_center
 			}
 
 			debit_entry = {
