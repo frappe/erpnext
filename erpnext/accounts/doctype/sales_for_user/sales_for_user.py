@@ -110,7 +110,8 @@ class SalesForUser(Document):
 
 			for salary_slip in salary_slips:
 				date_validate = salary_slip.creation.strftime('%Y-%m-%d %H:%M:%S')
-				if salary_slip.status != "Return" and date_validate >= self.start_date and date_validate <= self.final_date:
+				dates_validate = salary_slip.posting_date.strftime('%Y-%m-%d')
+				if date == dates_validate and salary_slip.status != "Return" and date_validate >= self.start_date and date_validate <= self.final_date:
 					if cont == 0:
 						split_initial_range = salary_slip.name.split("-")
 						initial_range = split_initial_range[3]
@@ -170,7 +171,7 @@ class SalesForUser(Document):
 		conditions = ''
 
 		conditions += "{"
-		conditions += '"creation": ["between", ["{}", "{}"]]'.format(self.final_date, self.start_date)
+		conditions += '"creation": ["between", ["{}", "{}"]]'.format(self.start_date, self.final_date)
 		# conditions += '"creation": [">=", "{}"]'.format(self.start_date)
 		# conditions += ', "creation": ["<=", "{}"]'.format(self.final_date)
 		conditions += ', "naming_series": "{}"'.format(self.prefix)
