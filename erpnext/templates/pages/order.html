@@ -46,8 +46,8 @@
 		{% endif %}
 	</div>
 </div>
-<div class="row indicator-container">
-	<div class="col-10 mt-2">
+<div class="row indicator-container mt-2">
+	<div class="col-10">
 		<span class="indicator-pill {{ doc.indicator_color or (" blue" if doc.docstatus==1 else "darkgrey" ) }}">
 			{% if doc.doctype == "Quotation" and not doc.docstatus %}
 				{{ _("Pending") }}
@@ -90,7 +90,7 @@
 			</span>
 		</div>
 		{% for d in doc.items %}
-		<div class="order-items row">
+		<div class="order-items row align-items-center">
 			<span class="order-item-name d-flex col-5">
 				{{ item_name_and_description(d) }}
 			</span>
