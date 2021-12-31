@@ -418,13 +418,14 @@ class SellingController(StockController):
 
 	def set_po_nos(self):
 		if self.doctype in ("Delivery Note", "Sales Invoice") and hasattr(self, "items"):
-			ref_fieldname = "sales_order" if self.doctype == "Delivery Note" else "sales_order"
-			sales_orders = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
+			sales_orders = list(set([d.get('sales_order') for d in self.items if d.get('sales_order')]))
 			if sales_orders:
-				po_nos = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', sales_orders)})
-				po_nos = [d.po_no for d in po_nos]
-
-				po_nos = list(set(filter(lambda po_no: po_no, po_nos)))
+				po_nos = frappe.db.sql_list("""
+					select distinct po_no
+					from `tabSales Order`
+					where name in %s and ifnull(po_no, '') != ''
+					order by transaction_date
+				""", [sales_orders])
 				if po_nos:
 					self.po_no = ', '.join(po_nos)
 
