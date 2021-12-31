@@ -26,7 +26,8 @@ class CancellationOfInvoices(Document):
 			self.modified_sale_invoice()
 	
 	def on_cancel(self):
-		frappe.throw(_("An annulment cannot be canceled."))
+		self.delete_stock_ledger_entry()
+		# frappe.throw(_("An annulment cannot be canceled."))
 	
 	def delete_items(self, items):
 		for item in items:
@@ -45,6 +46,12 @@ class CancellationOfInvoices(Document):
 					doc.db_set('actual_qty', doc.actual_qty, update_modified=False)
 					self.create_stock_ledger_entry(item, doc.actual_qty, 0)
 	
+	def delete_stock_ledger_entry(self):
+		stocks = frappe.get_all("Stock Ledger Entry", ["*"], filters = {"voucher_no": self.name})
+
+		for stock in stocks:
+			frappe.delete_doc("Stock Ledger Entry", stock.name)
+			
 	def create_stock_ledger_entry(self, item, qty, delete):
 		qty_item = 0
 
