@@ -463,9 +463,10 @@ def update_directly_billed_qty_for_dn(delivery_note, delivery_note_item, update_
 		is_delivery_return = delivery_note.get('is_return')
 
 	billed = frappe.db.sql("""
-		select item.qty, item.amount, inv.is_return, inv.update_stock, inv.reopen_order, inv.depreciation_type
-		from `tabSales Invoice Item` item, `tabSales Invoice` inv
-		where inv.name=item.parent and item.delivery_note_item=%s and item.docstatus=1
+		select i.qty, i.amount, inv.is_return, inv.update_stock, inv.reopen_order, inv.depreciation_type
+		from `tabSales Invoice Item` i
+		inner join `tabSales Invoice` inv on inv.name = i.parent
+		where i.delivery_note_item=%s and inv.docstatus = 1
 	""", delivery_note_item, as_dict=1)
 
 	billed_qty, billed_amt = calculate_billed_qty_and_amount(billed, for_delivery_return=is_delivery_return)
