@@ -20,7 +20,7 @@ class AdditionalSalary(Document):
 		self.update_employee_referral(cancel=True)
 
 	def validate(self):
-		validate_active_employee(self.employee)
+		validate_active_employee(self.employee, self.payroll_date)
 		self.validate_dates()
 		self.validate_salary_structure()
 		self.validate_recurring_additional_salary_overlap()
