@@ -24,7 +24,7 @@ from frappe.utils.background_jobs import enqueue
 
 import erpnext
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.hr.utils import get_holiday_dates_for_employee, validate_active_employee
+from erpnext.hr.utils import get_holiday_dates_for_employee
 from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
 	calculate_amounts,
 	create_repayment_entry,
@@ -63,7 +63,6 @@ class SalarySlip(TransactionBase):
 
 	def validate(self):
 		self.status = self.get_status()
-		validate_active_employee(self.employee)
 		self.validate_dates()
 		self.check_existing()
 		if not self.salary_slip_based_on_timesheet:
