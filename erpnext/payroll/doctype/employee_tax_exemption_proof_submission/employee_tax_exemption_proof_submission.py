@@ -16,7 +16,7 @@ from erpnext.hr.utils import (
 
 class EmployeeTaxExemptionProofSubmission(Document):
 	def validate(self):
-		validate_active_employee(self.employee)
+		validate_active_employee(self.employee, self.submission_date)
 		validate_tax_declaration(self.tax_exemption_proofs)
 		self.set_total_actual_amount()
 		self.set_total_exemption_amount()
