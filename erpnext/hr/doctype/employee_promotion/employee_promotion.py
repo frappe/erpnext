@@ -12,7 +12,7 @@ from erpnext.hr.utils import update_employee_work_history, validate_active_emplo
 
 class EmployeePromotion(Document):
 	def validate(self):
-		validate_active_employee(self.employee)
+		validate_active_employee(self.employee, self.promotion_date)
 
 	def before_submit(self):
 		if getdate(self.promotion_date) > getdate():
