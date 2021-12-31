@@ -18,7 +18,7 @@ from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assign
 class LeaveEncashment(Document):
 	def validate(self):
 		set_employee_name(self)
-		validate_active_employee(self.employee)
+		validate_active_employee(self.employee, self.encashment_date)
 		self.get_leave_details_for_encashment()
 		self.validate_salary_structure()
 
