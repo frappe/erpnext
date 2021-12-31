@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from typing import Optional
 import frappe
 from frappe import _
 from frappe.utils import (
@@ -482,7 +483,11 @@ def share_doc_with_approver(doc, user):
 		if doc_before_save.get(approver) != doc.get(approver):
 			frappe.share.remove(doc.doctype, doc.name, doc_before_save.get(approver))
 
-def validate_active_employee(employee):
-	if frappe.db.get_value("Employee", employee, "status") == "Inactive":
-		frappe.throw(_("Transactions cannot be created for an Inactive Employee {0}.").format(
+def validate_active_employee(employee: str, on_date: Optional[str] = None):
+	relieving_date, status = frappe.get_value(
+		"Employee", employee, ("relieving_date", "status")
+	)
+
+	if (on_date and relieving_date and relieving_date < getdate(on_date)) or status == "Inactive":
+		frappe.throw(_("Transaction cannot be created for inactive Employee {0}.").format(
 			get_link_to_form("Employee", employee)), InactiveEmployeeStatusError)
