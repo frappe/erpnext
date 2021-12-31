@@ -22,11 +22,12 @@ class InventoryDownload(Document):
 						doc = frappe.get_doc("Bin", bin.name)
 						doc.actual_qty += item.qty
 						doc.db_set('actual_qty', doc.actual_qty, update_modified=False)
-						self.create_stock_ledger_entry(item, doc.actual_qty, 0)
+						# self.create_stock_ledger_entry(item, doc.actual_qty, 0)
 	
 	def on_cancel(self):
 		self.delete_bin()
 		self.apply_inventory_download_cancel()
+		self.delete_stock_ledger_entry()
 	
 	def apply_inventory_download(self):
 		items = frappe.get_all("Inventory Download Detail", ["item_code", "qty"], filters = {"parent": self.name})
@@ -56,6 +57,12 @@ class InventoryDownload(Document):
 				doc.save()
 			else:
 				frappe.throw(_("This product does not exist in inventory with the selected warehouse."))
+
+	def delete_stock_ledger_entry(self):
+		stocks = frappe.get_all("Stock Ledger Entry", ["*"], filters = {"voucher_no": self.name})
+
+		for stock in stocks:
+			frappe.delete_doc("Stock Ledger Entry", stock.name)
 	
 	def set_valuation_rate(self):
 		
@@ -76,7 +83,7 @@ class InventoryDownload(Document):
 					doc = frappe.get_doc("Bin", bin.name)
 					doc.actual_qty -= item.qty
 					doc.db_set('actual_qty', doc.actual_qty, update_modified=False)
-					self.create_stock_ledger_entry(item, doc.actual_qty, 1)
+					# self.create_stock_ledger_entry(item, doc.actual_qty, 1)
 	
 	def create_stock_ledger_entry(self, item, qty, delete):
 		qty_item = 0
