@@ -20,7 +20,7 @@ class OverWorkLoggedError(frappe.ValidationError): pass
 class Timesheet(Document):
 	def validate(self):
 		if self.employee:
-			validate_active_employee(self.employee)
+			validate_active_employee(self.employee, self.end_date)
 		self.set_employee_name()
 		self.set_status()
 		self.validate_dates()
