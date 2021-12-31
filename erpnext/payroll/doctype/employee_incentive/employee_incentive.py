@@ -11,7 +11,7 @@ from erpnext.hr.utils import validate_active_employee
 
 class EmployeeIncentive(Document):
 	def validate(self):
-		validate_active_employee(self.employee)
+		validate_active_employee(self.employee, self.payroll_date)
 		self.validate_salary_structure()
 
 	def validate_salary_structure(self):
