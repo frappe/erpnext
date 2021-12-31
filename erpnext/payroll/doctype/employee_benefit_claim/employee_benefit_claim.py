@@ -19,7 +19,7 @@ from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assign
 
 class EmployeeBenefitClaim(Document):
 	def validate(self):
-		validate_active_employee(self.employee)
+		validate_active_employee(self.employee, self.claim_date)
 		max_benefits = get_max_benefits(self.employee, self.claim_date)
 		if not max_benefits or max_benefits <= 0:
 			frappe.throw(_("Employee {0} has no maximum benefit amount").format(self.employee))
