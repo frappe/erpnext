@@ -42,7 +42,7 @@ class LeaveApplication(Document):
 		return _("{0}: From {0} of type {1}").format(self.employee_name, self.leave_type)
 
 	def validate(self):
-		validate_active_employee(self.employee)
+		validate_active_employee(self.employee, self.to_date)
 		set_employee_name(self)
 		self.validate_dates()
 		self.validate_balance_leaves()
@@ -381,8 +381,8 @@ class LeaveApplication(Document):
 				if not args.notify == "employee":
 					contact = frappe.get_doc('User', contact).email or contact
 
-			sender      	    = dict()
-			sender['email']     = frappe.get_doc('User', frappe.session.user).email
+			sender				= dict()
+			sender['email']		= frappe.get_doc('User', frappe.session.user).email
 			sender['full_name'] = get_fullname(sender['email'])
 
 			try:
@@ -618,7 +618,7 @@ def get_leaves_for_period(employee, leave_type, from_date, to_date, do_not_skip_
 	for leave_entry in leave_entries:
 		inclusive_period = leave_entry.from_date >= getdate(from_date) and leave_entry.to_date <= getdate(to_date)
 
-		if  inclusive_period and leave_entry.transaction_type == 'Leave Encashment':
+		if	inclusive_period and leave_entry.transaction_type == 'Leave Encashment':
 			leave_days += leave_entry.leaves
 
 		elif inclusive_period and leave_entry.transaction_type == 'Leave Allocation' and leave_entry.is_expired \
@@ -806,7 +806,7 @@ def add_holidays(events, start, end, employee, company):
 			events.append({
 				"doctype": "Holiday",
 				"from_date": holiday.holiday_date,
-				"to_date":  holiday.holiday_date,
+				"to_date":	holiday.holiday_date,
 				"title": _("Holiday") + ": " + cstr(holiday.description),
 				"name": holiday.name
 			})
