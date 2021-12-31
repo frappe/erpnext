@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 import os
@@ -18,9 +16,9 @@ from erpnext.erpnext_integrations.taxjar_integration import get_client
 class TaxJarSettings(Document):
 
 	def on_update(self):
-		TAXJAR_CREATE_TRANSACTIONS = frappe.db.get_single_value("TaxJar Settings", "taxjar_create_transactions")
-		TAXJAR_CALCULATE_TAX = frappe.db.get_single_value("TaxJar Settings", "taxjar_calculate_tax")
-		TAXJAR_SANDBOX_MODE = frappe.db.get_single_value("TaxJar Settings", "is_sandbox")
+		TAXJAR_CREATE_TRANSACTIONS = self.taxjar_create_transactions
+		TAXJAR_CALCULATE_TAX = self.taxjar_calculate_tax
+		TAXJAR_SANDBOX_MODE = self.is_sandbox
 
 		fields_already_exist = frappe.db.exists('Custom Field', {'dt': ('in', ['Item','Sales Invoice Item']), 'fieldname':'product_tax_category'})
 		fields_hidden = frappe.get_value('Custom Field', {'dt': ('in', ['Sales Invoice Item'])}, 'hidden')
@@ -82,9 +80,9 @@ def make_custom_fields(update=True):
 			dict(fieldname='product_tax_category', fieldtype='Link', insert_after='description', options='Product Tax Category',
 				label='Product Tax Category', fetch_from='item_code.product_tax_category'),
 			dict(fieldname='tax_collectable', fieldtype='Currency', insert_after='net_amount',
-				label='Tax Collectable', read_only=1),
+				label='Tax Collectable', read_only=1, options='currency'),
 			dict(fieldname='taxable_amount', fieldtype='Currency', insert_after='tax_collectable',
-				label='Taxable Amount', read_only=1)
+				label='Taxable Amount', read_only=1, options='currency')
 		],
 		'Item': [
 			dict(fieldname='product_tax_category', fieldtype='Link', insert_after='item_group', options='Product Tax Category',

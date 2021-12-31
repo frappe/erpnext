@@ -3,7 +3,6 @@
 
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -11,6 +10,8 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 from frappe.model.document import Document
 from frappe.utils import cint
 from frappe.utils.html_utils import clean_html
+
+from erpnext.stock.utils import check_pending_reposting
 
 
 class StockSettings(Document):
@@ -21,7 +22,7 @@ class StockSettings(Document):
 
 		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
 		set_by_naming_series("Item", "item_code",
-			self.get("item_naming_by")=="Naming Series", hide_name_field=True)
+			self.get("item_naming_by")=="Naming Series", hide_name_field=True, make_mandatory=0)
 
 		stock_frozen_limit = 356
 		submitted_stock_frozen = self.stock_frozen_upto_days or 0
@@ -37,6 +38,7 @@ class StockSettings(Document):
 		self.validate_warehouses()
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
+		self.validate_pending_reposts()
 
 	def validate_warehouses(self):
 		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
@@ -64,6 +66,11 @@ class StockSettings(Document):
 			and not int(self.db_get('clean_description_html') or 0):
 			# changed to text
 			frappe.enqueue('erpnext.stock.doctype.stock_settings.stock_settings.clean_all_descriptions', now=frappe.flags.in_test)
+
+	def validate_pending_reposts(self):
+		if self.stock_frozen_upto:
+			check_pending_reposting(self.stock_frozen_upto)
+
 
 	def on_update(self):
 		self.toggle_warehouse_field_for_inter_warehouse_transfer()

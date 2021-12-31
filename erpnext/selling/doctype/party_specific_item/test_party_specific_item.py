@@ -6,6 +6,7 @@ import unittest
 import frappe
 
 from erpnext.controllers.queries import item_query
+from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ['Item', 'Customer', 'Supplier']
 
@@ -17,7 +18,7 @@ def create_party_specific_item(**args):
 	psi.based_on_value = args.get('based_on_value')
 	psi.insert()
 
-class TestPartySpecificItem(unittest.TestCase):
+class TestPartySpecificItem(ERPNextTestCase):
 	def setUp(self):
 		self.customer = frappe.get_last_doc("Customer")
 		self.supplier = frappe.get_last_doc("Supplier")

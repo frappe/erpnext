@@ -1,8 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-# -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _, throw
@@ -15,6 +13,7 @@ from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	check_if_return_invoice_linked_with_payment_entry,
+	get_total_in_party_account_currency,
 	is_overdue,
 	unlink_inter_company_doc,
 	update_linked_doc,
@@ -113,6 +112,9 @@ class PurchaseInvoice(BuyingController):
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
+		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
 
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
@@ -293,8 +295,15 @@ class PurchaseInvoice(BuyingController):
 						item.expense_account = stock_not_billed_account
 
 			elif item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category):
-				item.expense_account = get_asset_category_account('fixed_asset_account', item=item.item_code,
+				asset_category_account = get_asset_category_account('fixed_asset_account', item=item.item_code,
 					company = self.company)
+				if not asset_category_account:
+					form_link = get_link_to_form('Asset Category', asset_category)
+					throw(
+						_("Please set Fixed Asset Account in {} against {}.").format(form_link, self.company),
+						title=_("Missing Account")
+					)
+				item.expense_account = asset_category_account
 			elif item.is_fixed_asset and item.pr_detail:
 				item.expense_account = asset_received_but_not_billed
 			elif not item.expense_account and for_validate:
@@ -426,6 +435,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
+		self.update_advance_tax_references()
 
 		self.process_common_party_accounting()
 
@@ -470,8 +480,6 @@ class PurchaseInvoice(BuyingController):
 		self.make_tax_gl_entries(gl_entries)
 		self.make_exchange_gain_loss_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
-
-		self.allocate_advance_taxes(gl_entries)
 
 		gl_entries = make_regional_gl_entries(gl_entries, self)
 
@@ -696,7 +704,7 @@ class PurchaseInvoice(BuyingController):
 									"account": self.stock_received_but_not_billed,
 									"against": self.supplier,
 									"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
-									"remarks": self.remarks or "Accounting Entry for Stock",
+									"remarks": self.remarks or _("Accounting Entry for Stock"),
 									"cost_center": self.cost_center,
 									"project": item.project or self.project
 								}, item=item)
@@ -903,7 +911,7 @@ class PurchaseInvoice(BuyingController):
 							"cost_center": tax.cost_center,
 							"against": self.supplier,
 							"credit": valuation_tax[tax.name],
-							"remarks": self.remarks or "Accounting Entry for Stock"
+							"remarks": self.remarks or _("Accounting Entry for Stock")
 						}, item=tax))
 
 	@property
@@ -1040,6 +1048,7 @@ class PurchaseInvoice(BuyingController):
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
+		self.update_advance_tax_references(cancel=1)
 
 	def update_project(self):
 		project_list = []
@@ -1116,7 +1125,10 @@ class PurchaseInvoice(BuyingController):
 		if not self.tax_withholding_category:
 			return
 
-		tax_withholding_details = get_party_tax_withholding_details(self, self.tax_withholding_category)
+		tax_withholding_details, advance_taxes = get_party_tax_withholding_details(self, self.tax_withholding_category)
+
+		# Adjust TDS paid on advances
+		self.allocate_advance_tds(tax_withholding_details, advance_taxes)
 
 		if not tax_withholding_details:
 			return
@@ -1140,6 +1152,39 @@ class PurchaseInvoice(BuyingController):
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
 
+	def allocate_advance_tds(self, tax_withholding_details, advance_taxes):
+		self.set('advance_tax', [])
+		for tax in advance_taxes:
+			allocated_amount = 0
+			pending_amount = flt(tax.tax_amount - tax.allocated_amount)
+			if flt(tax_withholding_details.get('tax_amount')) >= pending_amount:
+				tax_withholding_details['tax_amount'] -= pending_amount
+				allocated_amount = pending_amount
+			elif flt(tax_withholding_details.get('tax_amount')) and flt(tax_withholding_details.get('tax_amount')) < pending_amount:
+				allocated_amount = tax_withholding_details['tax_amount']
+				tax_withholding_details['tax_amount'] = 0
+
+			self.append('advance_tax', {
+				'reference_type': 'Payment Entry',
+				'reference_name': tax.parent,
+				'reference_detail': tax.name,
+				'account_head': tax.account_head,
+				'allocated_amount': allocated_amount
+			})
+
+	def update_advance_tax_references(self, cancel=0):
+		for tax in self.get('advance_tax'):
+			at = frappe.qb.DocType("Advance Taxes and Charges").as_("at")
+
+			if cancel:
+				frappe.qb.update(at).set(
+					at.allocated_amount, at.allocated_amount - tax.allocated_amount
+				).where(at.name == tax.reference_detail).run()
+			else:
+				frappe.qb.update(at).set(
+					at.allocated_amount, at.allocated_amount + tax.allocated_amount
+				).where(at.name == tax.reference_detail).run()
+
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
 			if self.get('amended_from'):
@@ -1147,6 +1192,7 @@ class PurchaseInvoice(BuyingController):
 			return
 
 		outstanding_amount = flt(self.outstanding_amount, self.precision("outstanding_amount"))
+		total = get_total_in_party_account_currency(self)
 
 		if not status:
 			if self.docstatus == 2:
@@ -1154,9 +1200,9 @@ class PurchaseInvoice(BuyingController):
 			elif self.docstatus == 1:
 				if self.is_internal_transfer():
 					self.status = 'Internal Transfer'
-				elif is_overdue(self):
+				elif is_overdue(self, total):
 					self.status = "Overdue"
-				elif 0 < outstanding_amount < flt(self.grand_total, self.precision("grand_total")):
+				elif 0 < outstanding_amount < total:
 					self.status = "Partly Paid"
 				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate():
 					self.status = "Unpaid"

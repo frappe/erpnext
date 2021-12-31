@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 import frappe.defaults
@@ -25,7 +24,7 @@ def set_cart_count(quotation=None):
 	if cint(frappe.db.get_singles_value("E Commerce Settings", "enabled")):
 		if not quotation:
 			quotation = _get_cart_quotation()
-		cart_count = cstr(len(quotation.get("items")))
+		cart_count = cstr(cint(quotation.get("total_qty")))
 
 		if hasattr(frappe.local, "cookie_manager"):
 			frappe.local.cookie_manager.set_cookie("cart_count", cart_count)
@@ -201,7 +200,9 @@ def add_new_address(doc):
 def create_lead_for_item_inquiry(lead, subject, message):
 	lead = frappe.parse_json(lead)
 	lead_doc = frappe.new_doc('Lead')
-	lead_doc.update(lead)
+	for fieldname in ("lead_name", "company_name", "email_id", "phone"):
+		lead_doc.set(fieldname, lead.get(fieldname))
+
 	lead_doc.set('lead_owner', '')
 
 	if not frappe.db.exists('Lead Source', 'Product Inquiry'):
@@ -209,6 +210,7 @@ def create_lead_for_item_inquiry(lead, subject, message):
 			'doctype': 'Lead Source',
 			'source_name' : 'Product Inquiry'
 		}).insert(ignore_permissions=True)
+
 	lead_doc.set('source', 'Product Inquiry')
 
 	try:

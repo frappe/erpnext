@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -30,6 +28,9 @@ class LoanSecurityUnpledge(Document):
 					d.idx, frappe.bold(d.loan_security)))
 
 	def validate_unpledge_qty(self):
+		from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
+			get_pending_principal_amount,
+		)
 		from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import (
 			get_ltv_ratio,
 		)
@@ -46,15 +47,10 @@ class LoanSecurityUnpledge(Document):
 				"valid_upto": (">=", get_datetime())
 			}, as_list=1))
 
-		loan_details = frappe.get_value("Loan", self.loan, ['total_payment', 'total_principal_paid',
+		loan_details = frappe.get_value("Loan", self.loan, ['total_payment', 'total_principal_paid', 'loan_amount',
 			'total_interest_payable', 'written_off_amount', 'disbursed_amount', 'status'], as_dict=1)
 
-		if loan_details.status == 'Disbursed':
-			pending_principal_amount = flt(loan_details.total_payment) - flt(loan_details.total_interest_payable) \
-				- flt(loan_details.total_principal_paid) - flt(loan_details.written_off_amount)
-		else:
-			pending_principal_amount = flt(loan_details.disbursed_amount) - flt(loan_details.total_interest_payable) \
-				- flt(loan_details.total_principal_paid) - flt(loan_details.written_off_amount)
+		pending_principal_amount = get_pending_principal_amount(loan_details)
 
 		security_value = 0
 		unpledge_qty_map = {}

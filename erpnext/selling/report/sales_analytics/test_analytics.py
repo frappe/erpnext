@@ -1,17 +1,15 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.selling.report.sales_analytics.sales_analytics import execute
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestAnalytics(unittest.TestCase):
+class TestAnalytics(ERPNextTestCase):
 	def test_sales_analytics(self):
 		frappe.db.sql("delete from `tabSales Order` where company='_Test Company 2'")
 

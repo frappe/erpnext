@@ -1,9 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 from frappe.test_runner import make_test_records
@@ -12,7 +9,7 @@ from frappe.utils import flt
 from erpnext.accounts.party import get_due_date
 from erpnext.exceptions import PartyDisabled, PartyFrozen
 from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
-from erpnext.tests.utils import create_test_contact_and_address
+from erpnext.tests.utils import ERPNextTestCase, create_test_contact_and_address
 
 test_ignore = ["Price List"]
 test_dependencies = ['Payment Term', 'Payment Terms Template']
@@ -21,7 +18,7 @@ test_records = frappe.get_test_records('Customer')
 from six import iteritems
 
 
-class TestCustomer(unittest.TestCase):
+class TestCustomer(ERPNextTestCase):
 	def setUp(self):
 		if not frappe.get_value('Item', '_Test Item'):
 			make_test_records('Item')

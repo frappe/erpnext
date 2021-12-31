@@ -1,11 +1,10 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import flt, nowdate
+from frappe.utils import flt
 
 
 class Bin(Document):
@@ -34,10 +33,10 @@ class Bin(Document):
 			in open work orders'''
 		self.reserved_qty_for_production = frappe.db.sql('''
 			SELECT
-				CASE WHEN ifnull(skip_transfer, 0) = 0 THEN
-					SUM(item.required_qty - item.transferred_qty)
+				SUM(CASE WHEN ifnull(skip_transfer, 0) = 0 THEN
+					item.required_qty - item.transferred_qty
 				ELSE
-					SUM(item.required_qty - item.consumed_qty)
+					item.required_qty - item.consumed_qty END)
 				END
 			FROM `tabWork Order` pro, `tabWork Order Item` item
 			WHERE
@@ -101,33 +100,11 @@ def on_doctype_update():
 
 
 def update_stock(bin_name, args, allow_negative_stock=False, via_landed_cost_voucher=False):
-	'''Called from erpnext.stock.utils.update_bin'''
+	"""WARNING: This function is deprecated. Inline this function instead of using it."""
+	from erpnext.stock.stock_ledger import repost_current_voucher
+
+	repost_current_voucher(args, allow_negative_stock, via_landed_cost_voucher)
 	update_qty(bin_name, args)
-
-	if args.get("actual_qty") or args.get("voucher_type") == "Stock Reconciliation":
-		from erpnext.stock.stock_ledger import update_entries_after, update_qty_in_future_sle
-
-		if not args.get("posting_date"):
-			args["posting_date"] = nowdate()
-
-		if args.get("is_cancelled") and via_landed_cost_voucher:
-			return
-
-		# Reposts only current voucher SL Entries
-		# Updates valuation rate, stock value, stock queue for current transaction
-		update_entries_after({
-			"item_code": args.get('item_code'),
-			"warehouse": args.get('warehouse'),
-			"posting_date": args.get("posting_date"),
-			"posting_time": args.get("posting_time"),
-			"voucher_type": args.get("voucher_type"),
-			"voucher_no": args.get("voucher_no"),
-			"sle_id": args.get('name'),
-			"creation": args.get('creation')
-		}, allow_negative_stock=allow_negative_stock, via_landed_cost_voucher=via_landed_cost_voucher)
-
-		# update qty in future sle and Validate negative qty
-		update_qty_in_future_sle(args, allow_negative_stock)
 
 def get_bin_details(bin_name):
 	return frappe.db.get_value('Bin', bin_name, ['actual_qty', 'ordered_qty',
@@ -135,13 +112,23 @@ def get_bin_details(bin_name):
 	'reserved_qty_for_sub_contract'], as_dict=1)
 
 def update_qty(bin_name, args):
-	bin_details = get_bin_details(bin_name)
+	from erpnext.controllers.stock_controller import future_sle_exists
 
-	# update the stock values (for current quantities)
-	if args.get("voucher_type")=="Stock Reconciliation":
-		actual_qty = args.get('qty_after_transaction')
-	else:
-		actual_qty = bin_details.actual_qty + flt(args.get("actual_qty"))
+	bin_details = get_bin_details(bin_name)
+	# actual qty is already updated by processing current voucher
+	actual_qty = bin_details.actual_qty
+
+	# actual qty is not up to date in case of backdated transaction
+	if future_sle_exists(args):
+		actual_qty = frappe.db.get_value("Stock Ledger Entry",
+				filters={
+					"item_code": args.get("item_code"),
+					"warehouse": args.get("warehouse"),
+					"is_cancelled": 0
+				},
+				fieldname="qty_after_transaction",
+				order_by="posting_date desc, posting_time desc, creation desc",
+			) or 0.0
 
 	ordered_qty = flt(bin_details.ordered_qty) + flt(args.get("ordered_qty"))
 	reserved_qty = flt(bin_details.reserved_qty) + flt(args.get("reserved_qty"))

@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import unittest
 from collections import deque
 from functools import partial
 
@@ -18,10 +17,11 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.tests.test_subcontracting import set_backflush_based_on
+from erpnext.tests.utils import ERPNextTestCase
 
 test_records = frappe.get_test_records('BOM')
 
-class TestBOM(unittest.TestCase):
+class TestBOM(ERPNextTestCase):
 	def setUp(self):
 		if not frappe.get_value('Item', '_Test Item'):
 			make_test_records('Item')
