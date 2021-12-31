@@ -75,41 +75,35 @@
 <div class="order-container mt-4">
 	<!-- items -->
 	<div class="w-100">
-		<div class="order-items order-item-header mb-1 row d-s-n">
-			<span class="col-6">
+		<div class="order-items order-item-header mb-1 row">
+			<span class="col-5">
 				{{ _("Item") }}
 			</span>
-			<div class="col-6 d-flex justify-content-between">
-				<span class="">
-					{{ _("Quantity") }}
-				</span>
-				<span class="mr-8">
-					{{ _("Rate") }}
-				</span>
-				<span class="">
-					{{ _("Amount") }}
-				</span>
-			</div>
+			<span class="d-s-n col-3">
+				{{ _("Quantity") }}
+			</span>
+			<span class="col-2 pl-10">
+				{{ _("Rate") }}
+			</span>
+			<span class="col-2 text-right">
+				{{ _("Amount") }}
+			</span>
 		</div>
 		{% for d in doc.items %}
-		<div class="order-items d-flex row">
-			<span class="order-item-name col-6">
+		<div class="order-items row">
+			<span class="order-item-name d-flex col-5">
 				{{ item_name_and_description(d) }}
 			</span>
-			<div class="qty-container d-flex justify-content-between col-6">
 
-				<span class="d-s-n ml-5">
-					{{ d.get_formatted("qty") }}
-				</span>
-				<span class="order-rate">
-					{{ d.get_formatted("rate") }}
-				</span>
-				<span class="btn btn-secondary shadow-none d-l-n btn-sm">
-					{{ _("Qty: ") }} {{ d.get_formatted("qty") }} </span>
-				<span class="d-s-n">
-					{{ d.get_formatted("amount") }}
-				</span>
-			</div>
+			<span class="d-s-n col-3 pl-10">
+				{{ d.get_formatted("qty") }}
+			</span>
+			<span class="order-rate pl-4 col-2">
+				{{ d.get_formatted("rate") }}
+			</span>
+			<span class="col-2 text-right">
+				{{ d.get_formatted("amount") }}
+			</span>
 		</div>
 		{% endfor %}
 	</div>
