@@ -74,11 +74,6 @@ class Attendance(Document):
 			self.leave_type = None
 			self.leave_application = None
 
-	def validate_employee(self):
-		emp = frappe.db.sql("select name from `tabEmployee` where name = %s and status = 'Active'",
-		 	self.employee)
-		if not emp:
-			frappe.throw(_("Employee {0} is not active or does not exist").format(self.employee))
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
