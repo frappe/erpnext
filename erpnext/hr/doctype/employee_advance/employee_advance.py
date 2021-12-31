@@ -22,7 +22,7 @@ class EmployeeAdvance(Document):
 			'make_payment_via_journal_entry')
 
 	def validate(self):
-		validate_active_employee(self.employee)
+		validate_active_employee(self.employee, self.posting_date)
 		self.set_status()
 
 	def on_cancel(self):
@@ -196,7 +196,7 @@ def create_return_through_additional_salary(doc):
 	return additional_salary
 
 @frappe.whitelist()
-def make_return_entry(employee, company, employee_advance_name, return_amount,  advance_account, currency, exchange_rate, mode_of_payment=None):
+def make_return_entry(employee, company, employee_advance_name, return_amount,	advance_account, currency, exchange_rate, mode_of_payment=None):
 	bank_cash_account = get_default_bank_cash_account(company, account_type='Cash', mode_of_payment = mode_of_payment)
 	if not bank_cash_account:
 		frappe.throw(_("Please set a Default Cash Account in Company defaults"))
