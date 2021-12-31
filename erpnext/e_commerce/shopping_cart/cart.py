@@ -23,7 +23,7 @@ def set_cart_count(quotation=None):
 	if cint(frappe.db.get_singles_value("E Commerce Settings", "enabled")):
 		if not quotation:
 			quotation = _get_cart_quotation()
-		cart_count = cstr(len(quotation.get("items")))
+		cart_count = cstr(cint(quotation.get("total_qty")))
 
 		if hasattr(frappe.local, "cookie_manager"):
 			frappe.local.cookie_manager.set_cookie("cart_count", cart_count)
