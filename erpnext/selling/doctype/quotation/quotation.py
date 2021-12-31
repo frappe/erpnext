@@ -27,7 +27,7 @@ class Quotation(SellingController):
 		self.set_status()
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_valid_till()
-		self.validate_shopping_cart_items()	
+		self.validate_shopping_cart_items()
 		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
