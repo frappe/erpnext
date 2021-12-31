@@ -13,7 +13,7 @@ from erpnext.hr.utils import validate_active_employee, validate_dates
 
 class AttendanceRequest(Document):
 	def validate(self):
-		validate_active_employee(self.employee)
+		validate_active_employee(self.employee, self.to_date)
 		validate_dates(self, self.from_date, self.to_date)
 		if self.half_day:
 			if not getdate(self.from_date)<=getdate(self.half_day_date)<=getdate(self.to_date):
