@@ -56,7 +56,7 @@ class Quotation(SellingController):
 
 		for item in self.items:
 			if not frappe.db.exists("Website Item", {"item_code": item.item_code}):
-				frappe.throw(_("Item {0} must be a website item for Shopping Cart quotations".format(item.item_code)))
+				frappe.throw(_("Item {0} must be a website item for Shopping Cart quotations").format(item.item_code))
 
 	def has_sales_order(self):
 		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.name, "docstatus": 1})
