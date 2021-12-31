@@ -14,7 +14,7 @@ class OverlapError(frappe.ValidationError): pass
 
 class ShiftRequest(Document):
 	def validate(self):
-		validate_active_employee(self.employee)
+		validate_active_employee(self.employee, self.to_date)
 		self.validate_dates()
 		self.validate_shift_request_overlap_dates()
 		self.validate_approver()
