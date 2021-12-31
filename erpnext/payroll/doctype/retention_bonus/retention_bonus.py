@@ -12,7 +12,7 @@ from erpnext.hr.utils import validate_active_employee
 
 class RetentionBonus(Document):
 	def validate(self):
-		validate_active_employee(self.employee)
+		validate_active_employee(self.employee, self.bonus_payment_date)
 		if getdate(self.bonus_payment_date) < getdate():
 			frappe.throw(_('Bonus Payment Date cannot be a past date'))
 
