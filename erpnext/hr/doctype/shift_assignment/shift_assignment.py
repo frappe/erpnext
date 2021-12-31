@@ -95,7 +95,7 @@ def add_assignments(events, start, end, conditions=None):
 		employee, docstatus, shift_type
 		from `tabShift Assignment` where
 		start_date >= %(start_date)s
-		or end_date <=	%(end_date)s
+		or end_date <=  %(end_date)s
 		or (%(start_date)s between start_date and end_date and %(end_date)s between start_date and end_date)
 		and docstatus = 1"""
 	if conditions:

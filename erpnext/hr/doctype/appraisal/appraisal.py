@@ -43,7 +43,7 @@ class Appraisal(Document):
 			frappe.throw(_("Appraisal {0} created for Employee {1} in the given date range").format(chk[0][0], self.employee_name))
 
 	def calculate_total(self):
-		total, total_w	= 0, 0
+		total, total_w = 0, 0
 		for d in self.get('goals'):
 			if d.score:
 				d.score_earned = flt(d.score) * flt(d.per_weightage) / 100

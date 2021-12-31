@@ -71,7 +71,7 @@ class EmployeeBenefitApplication(Document):
 						else:
 							non_pro_rata_amount += max_benefit_amount
 
-			if pro_rata_amount == 0	 and non_pro_rata_amount == 0:
+			if pro_rata_amount == 0  and non_pro_rata_amount == 0:
 				frappe.throw(_("Please add the remaining benefits {0} to any of the existing component").format(self.remaining_benefit))
 			elif non_pro_rata_amount > 0 and non_pro_rata_amount < rounded(self.remaining_benefit):
 				frappe.throw(_("You can claim only an amount of {0}, the rest amount {1} should be in the application as pro-rata component").format(
