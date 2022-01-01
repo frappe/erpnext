@@ -22,8 +22,8 @@ class Company(NestedSet):
 
 	def onload(self):
 		load_address_and_contact(self, "company")
-		self.get("__onload")["transactions_exist"] = self.check_if_transactions_exist()
 
+	@frappe.whitelist()
 	def check_if_transactions_exist(self):
 		exists = False
 		for doctype in ["Sales Invoice", "Delivery Note", "Sales Order", "Quotation",
@@ -413,7 +413,7 @@ def install_country_fixtures(company, country):
 			frappe.get_attr(module_name)(company, False)
 		except Exception as e:
 			frappe.log_error()
-			frappe.throw(_("Failed to setup defaults for country {0}. Please contact support@erpnext.com").format(frappe.bold(country)))
+			frappe.throw(_("Failed to setup defaults for country {0}. Please contact support.").format(frappe.bold(country)))
 
 
 def update_company_current_month_sales(company):

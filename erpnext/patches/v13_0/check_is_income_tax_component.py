@@ -3,9 +3,9 @@
 
 
 import frappe
+from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 
 import erpnext
-from erpnext.regional.india.setup import setup
 
 
 def execute():
@@ -30,7 +30,14 @@ def execute():
 		frappe.reload_doc('Regional', 'Report', report)
 
 	if erpnext.get_region() == "India":
-		setup(patch=True)
+		create_custom_field('Salary Component',
+			dict(fieldname='component_type',
+			label='Component Type',
+			fieldtype='Select',
+			insert_after='description',
+			options='\nProvident Fund\nAdditional Provident Fund\nProvident Fund Loan\nProfessional Tax',
+			depends_on='eval:doc.type == "Deduction"')
+		)
 
 	if frappe.db.exists("Salary Component", "Income Tax"):
 		frappe.db.set_value("Salary Component", "Income Tax", "is_income_tax_component", 1)

@@ -84,6 +84,10 @@ $.extend(erpnext, {
 		});
 	},
 
+	route_to_pending_reposts: (args) => {
+		frappe.set_route('List', 'Repost Item Valuation', args);
+	},
+
 	proceed_save_with_reminders_frequency_change: () => {
 		frappe.ui.hide_open_dialog();
 
@@ -426,12 +430,9 @@ erpnext.utils.select_alternate_items = function(opts) {
 					qty = row.qty;
 				}
 				row[item_field] = d.alternate_item;
-				frm.script_manager.trigger(item_field, row.doctype, row.name)
-					.then(() => {
-						frappe.model.set_value(row.doctype, row.name, 'qty', qty);
-						frappe.model.set_value(row.doctype, row.name,
-							opts.original_item_field, d.item_code);
-					});
+				frappe.model.set_value(row.doctype, row.name, 'qty', qty);
+				frappe.model.set_value(row.doctype, row.name, opts.original_item_field, d.item_code);
+				frm.trigger(item_field, row.doctype, row.name);
 			});
 
 			refresh_field(opts.child_docname);
@@ -751,9 +752,13 @@ frappe.form.link_formatters['Item'] = function(value, doc) {
 }
 
 frappe.form.link_formatters['Employee'] = function(value, doc) {
-	if(doc && doc.employee_name && doc.employee_name !== value) {
-		return value? value + ': ' + doc.employee_name: doc.employee_name;
+	if (doc && value && doc.employee_name && doc.employee_name !== value && doc.employee === value) {
+		return value + ': ' + doc.employee_name;
+	} else if (!value && doc.doctype && doc.employee_name) {
+		// format blank value in child table
+		return doc.employee;
 	} else {
+		// if value is blank in report view or project name and name are the same, return as is
 		return value;
 	}
 }
@@ -827,7 +832,7 @@ $(document).on('app_ready', function() {
 
 					refresh: function(frm) {
 						if (frm.doc.status !== 'Closed' && frm.doc.service_level_agreement
-							&& frm.doc.agreement_status === 'Ongoing') {
+							&& ['First Response Due', 'Resolution Due'].includes(frm.doc.agreement_status)) {
 							frappe.call({
 								'method': 'frappe.client.get',
 								args: {
@@ -880,9 +885,11 @@ $(document).on('app_ready', function() {
 function set_time_to_resolve_and_response(frm, apply_sla_for_resolution) {
 	frm.dashboard.clear_headline();
 
-	let time_to_respond = get_status(frm.doc.response_by_variance);
-	if (!frm.doc.first_responded_on && frm.doc.agreement_status === 'Ongoing') {
+	let time_to_respond;
+	if (!frm.doc.first_responded_on) {
 		time_to_respond = get_time_left(frm.doc.response_by, frm.doc.agreement_status);
+	} else {
+		time_to_respond = get_status(frm.doc.response_by, frm.doc.first_responded_on);
 	}
 
 	let alert = `
@@ -895,9 +902,11 @@ function set_time_to_resolve_and_response(frm, apply_sla_for_resolution) {
 
 
 	if (apply_sla_for_resolution) {
-		let time_to_resolve = get_status(frm.doc.resolution_by_variance);
-		if (!frm.doc.resolution_date && frm.doc.agreement_status === 'Ongoing') {
+		let time_to_resolve;
+		if (!frm.doc.resolution_date) {
 			time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_status);
+		} else {
+			time_to_resolve = get_status(frm.doc.resolution_by, frm.doc.resolution_date);
 		}
 
 		alert += `
@@ -920,8 +929,9 @@ function get_time_left(timestamp, agreement_status) {
 	return {'diff_display': diff_display, 'indicator': indicator};
 }
 
-function get_status(variance) {
-	if (variance > 0) {
+function get_status(expected, actual) {
+	const time_left = moment(expected).diff(moment(actual));
+	if (time_left >= 0) {
 		return {'diff_display': 'Fulfilled', 'indicator': 'green'};
 	} else {
 		return {'diff_display': 'Failed', 'indicator': 'red'};

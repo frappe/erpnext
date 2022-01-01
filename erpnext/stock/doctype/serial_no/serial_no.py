@@ -194,23 +194,6 @@ class SerialNo(StockController):
 		if sle_exists:
 			frappe.throw(_("Cannot delete Serial No {0}, as it is used in stock transactions").format(self.name))
 
-	def before_rename(self, old, new, merge=False):
-		if merge:
-			frappe.throw(_("Sorry, Serial Nos cannot be merged"))
-
-	def after_rename(self, old, new, merge=False):
-		"""rename serial_no text fields"""
-		for dt in frappe.db.sql("""select parent from tabDocField
-			where fieldname='serial_no' and fieldtype in ('Text', 'Small Text', 'Long Text')"""):
-
-			for item in frappe.db.sql("""select name, serial_no from `tab%s`
-				where serial_no like %s""" % (dt[0], frappe.db.escape('%' + old + '%'))):
-
-				serial_nos = map(lambda i: new if i.upper()==old.upper() else i, item[1].split('\n'))
-				frappe.db.sql("""update `tab%s` set serial_no = %s
-					where name=%s""" % (dt[0], '%s', '%s'),
-					('\n'.join(list(serial_nos)), item[0]))
-
 	def update_serial_no_reference(self, serial_no=None):
 		last_sle = self.get_last_sle(serial_no)
 		self.set_purchase_details(last_sle.get("purchase_sle"))
@@ -342,7 +325,7 @@ def check_serial_no_validity_on_cancel(serial_no, sle):
 	is_stock_reco = sle.voucher_type == "Stock Reconciliation"
 	msg = None
 
-	if sr and (actual_qty < 0 or is_stock_reco) and sr.warehouse != sle.warehouse:
+	if sr and (actual_qty < 0 or is_stock_reco) and (sr.warehouse and sr.warehouse != sle.warehouse):
 		# receipt(inward) is being cancelled
 		msg = _("Cannot cancel {0} {1} as Serial No {2} does not belong to the warehouse {3}").format(
 			sle.voucher_type, doc_link, sr_link, frappe.bold(sle.warehouse))
