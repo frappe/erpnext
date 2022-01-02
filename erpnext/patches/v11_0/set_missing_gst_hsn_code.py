@@ -22,8 +22,8 @@ def execute():
 			where dt.name = dt_item.parent
 				and dt.`{date_field}` > '2018-06-01'
 				and dt.docstatus = 1
-				and coalesce(dt_item.gst_hsn_code, '') = ''
-				and coalesce(dt_item.item_code, '') != ''
+				and ifnull(dt_item.gst_hsn_code, '') = ''
+				and ifnull(dt_item.item_code, '') != ''
 				and dt.company in ({company})
 		""".format(dt=dt, date_field=date_field, company=", ".join(['%s']*len(company))), tuple(company), as_dict=1)
 

@@ -19,13 +19,13 @@ def execute():
 				party_type = 'Customer',
 				party = customer,
 				sales_tax_template = tax_template
-			WHERE coalesce(party,'') = ''
+			WHERE IFNULL(party,'') = ''
 		""")
 
 	frappe.db.sql("""
 		UPDATE `tabSubscription Invoice`
 		SET document_type = 'Sales Invoice'
-		WHERE coalesce(document_type, '') = ''
+		WHERE IFNULL(document_type, '') = ''
 	""")
 
 	price_determination_map = {

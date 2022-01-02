@@ -25,7 +25,7 @@ def execute():
 				)
 			) so_item
 		where
-			exists(select name from tabItem where name=so_item.item_code and coalesce(is_stock_item, 0)=1)
+			exists(select name from tabItem where name=so_item.item_code and ifnull(is_stock_item, 0)=1)
 	""")
 
 	for item_code, warehouse in repost_for:
@@ -35,6 +35,6 @@ def execute():
 
 	frappe.db.sql("""delete from tabBin
 		where exists(
-			select name from tabItem where name=tabBin.item_code and coalesce(is_stock_item, 0) = 0
+			select name from tabItem where name=tabBin.item_code and ifnull(is_stock_item, 0) = 0
 		)
 	""")

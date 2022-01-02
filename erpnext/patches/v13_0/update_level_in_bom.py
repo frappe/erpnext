@@ -13,7 +13,7 @@ def execute():
 
 	bom_list = frappe.db.sql_list("""select name from `tabBOM` bom
 		where docstatus=1 and is_active=1 and not exists(select bom_no from `tabBOM Item`
-		where parent=bom.name and coalesce(bom_no, '')!='')""")
+		where parent=bom.name and ifnull(bom_no, '')!='')""")
 
 	count = 0
 	while(count < len(bom_list)):

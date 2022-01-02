@@ -38,7 +38,7 @@ def execute():
 				buying_cost_center, expense_account, selling_cost_center, income_account
 			FROM tabItem
 			WHERE
-				name not in (select distinct parent from `tabItem Default`) and coalesce(disabled, 0) = 0"""
+				name not in (select distinct parent from `tabItem Default`) and ifnull(disabled, 0) = 0"""
 		, as_dict=1)
 
 		items_default_data = {}

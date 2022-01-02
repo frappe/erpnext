@@ -6,19 +6,10 @@ from erpnext.stock.stock_ledger import update_entries_after
 
 
 def execute():
-	doctypes_to_reload = [
-			("stock", "repost_item_valuation"),
-			("stock", "stock_entry_detail"),
-			("stock", "purchase_receipt_item"),
-			("stock", "delivery_note_item"),
-			("stock", "packed_item"),
-			("accounts", "sales_invoice_item"),
-			("accounts", "purchase_invoice_item"),
-			("buying", "purchase_receipt_item_supplied")
-		]
-
-	for module, doctype in doctypes_to_reload:
-		frappe.reload_doc(module, 'doctype', doctype)
+	for doctype in ('repost_item_valuation', 'stock_entry_detail', 'purchase_receipt_item',
+			'purchase_invoice_item', 'delivery_note_item', 'sales_invoice_item', 'packed_item'):
+		frappe.reload_doc('stock', 'doctype', doctype)
+	frappe.reload_doc('buying', 'doctype', 'purchase_receipt_item_supplied')
 
 	reposting_project_deployed_on = get_creation_time()
 	posting_date = getdate(reposting_project_deployed_on)
@@ -32,8 +23,7 @@ def execute():
 
 	company_list = []
 
-	data = frappe.db.multisql({
-		'mariadb': '''
+	data = frappe.db.sql('''
 		SELECT
 			name, item_code, warehouse, voucher_type, voucher_no, posting_date, posting_time, company
 		FROM
@@ -42,18 +32,7 @@ def execute():
 			creation > %s
 			and is_cancelled = 0
 		ORDER BY timestamp(posting_date, posting_time) asc, creation asc
-	''',
-	'postgres': '''
-		SELECT
-			name, item_code, warehouse, voucher_type, voucher_no, posting_date, posting_time, company
-		FROM
-			`tabStock Ledger Entry`
-		WHERE
-			creation > %s
-			and is_cancelled = 0
-		ORDER BY posting_date + posting_time asc, creation asc
-	'''
-	}, reposting_project_deployed_on, as_dict=1)
+	''', reposting_project_deployed_on, as_dict=1)
 
 	frappe.db.auto_commit_on_many_writes = 1
 	print("Reposting Stock Ledger Entries...")

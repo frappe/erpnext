@@ -20,8 +20,8 @@ def execute():
 	frappe.db.sql('''
 		update tabQuotation, tabLead
 		set
-			tabQuotation.customer_name =  case when coalesce(tabLead.company_name, '') != '' then tabLead.company_name else tabLead.lead_name end,
-			tabQuotation.title = case when coalesce(tabLead.company_name, '') != '' then tabLead.company_name else tabLead.lead_name end
+			tabQuotation.customer_name =  case when ifnull(tabLead.company_name, '') != '' then tabLead.company_name else tabLead.lead_name end,
+			tabQuotation.title = case when ifnull(tabLead.company_name, '') != '' then tabLead.company_name else tabLead.lead_name end
 		where
 			tabQuotation.customer_name is null
 			and tabQuotation.party_name = tabLead.name

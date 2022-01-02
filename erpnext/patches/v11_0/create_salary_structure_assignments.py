@@ -25,7 +25,7 @@ def execute():
 				sse.base, sse.variable, sse.parent as salary_structure, ss.company
 			from `tabSalary Structure Employee` sse, `tabSalary Structure` ss
 			where ss.name = sse.parent AND ss.is_active='Yes'
-			AND sse.employee in (select name from `tabEmployee` where coalesce(status, '') != 'Left')""", as_dict=1)
+			AND sse.employee in (select name from `tabEmployee` where ifNull(status, '') != 'Left')""", as_dict=1)
 	else:
 		cols = ""
 		if "base" in frappe.db.get_table_columns("Salary Structure"):
@@ -35,7 +35,7 @@ def execute():
 			select name as salary_structure, employee, employee_name, from_date, to_date, company {0}
 			from `tabSalary Structure`
 			where is_active='Yes'
-			AND employee in (select name from `tabEmployee` where coalesce(status, '') != 'Left')
+			AND employee in (select name from `tabEmployee` where ifNull(status, '') != 'Left')
 		""".format(cols), as_dict=1)
 
 	all_companies = frappe.db.get_all("Company", fields=["name", "default_currency"])

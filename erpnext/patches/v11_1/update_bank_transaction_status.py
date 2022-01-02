@@ -15,7 +15,7 @@ def execute():
             SET status = 'Reconciled'
             WHERE
                 status = 'Settled' and (debit = allocated_amount or credit = allocated_amount)
-                and coalesce(allocated_amount, 0) > 0
+                and ifnull(allocated_amount, 0) > 0
         """)
 
     elif 'deposit' in bank_transaction_fields:
@@ -23,5 +23,5 @@ def execute():
             SET status = 'Reconciled'
             WHERE
                 status = 'Settled' and (deposit = allocated_amount or withdrawal = allocated_amount)
-                and coalesce(allocated_amount, 0) > 0
+                and ifnull(allocated_amount, 0) > 0
         """)

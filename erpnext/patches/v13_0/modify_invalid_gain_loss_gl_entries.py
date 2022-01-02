@@ -15,7 +15,7 @@ def execute():
 		where
 			ref_exchange_rate = 1
 			and docstatus = 1
-			and coalesce(exchange_gain_loss, 0) != 0
+			and ifnull(exchange_gain_loss, 0) != 0
 		group by
 			parent
 	""", as_dict=1)
@@ -28,7 +28,7 @@ def execute():
 		where
 			ref_exchange_rate = 1
 			and docstatus = 1
-			and coalesce(exchange_gain_loss, 0) != 0
+			and ifnull(exchange_gain_loss, 0) != 0
 		group by
 			parent
 	""", as_dict=1)

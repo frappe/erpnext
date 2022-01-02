@@ -10,5 +10,5 @@ def execute():
 		frappe.db.sql("""
 			UPDATE `tab{0}`
 			SET against_blanket_order = 1
-			WHERE coalesce(blanket_order, '') != ''
+			WHERE ifnull(blanket_order, '') != ''
 		""".format(doctype))

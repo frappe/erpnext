@@ -67,7 +67,7 @@ def execute():
 
 	for dt in doctypes:
 		for d in frappe.db.sql("""select name, parenttype, parent, item_code, item_tax_rate from `tab{0} Item`
-								where coalesce(item_tax_rate, '') not in ('', '{{}}')
+								where ifnull(item_tax_rate, '') not in ('', '{{}}')
 								and item_tax_template is NULL""".format(dt), as_dict=1):
 			item_tax_map = json.loads(d.item_tax_rate)
 			item_tax_template_name = get_item_tax_template(item_tax_templates,

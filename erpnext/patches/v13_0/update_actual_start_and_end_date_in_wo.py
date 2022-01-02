@@ -36,5 +36,5 @@ def execute():
 		SET
 			jc.production_item = wo.production_item, jc.item_name = wo.item_name
 		WHERE
-			jc.work_order = wo.name and coalesce(jc.production_item, "") = ""
+			jc.work_order = wo.name and IFNULL(jc.production_item, "") = ""
 	""")
