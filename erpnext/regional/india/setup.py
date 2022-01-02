@@ -44,11 +44,6 @@ def add_hsn_sac_codes():
 		sac_codes = json.loads(f.read())
 	create_hsn_codes(sac_codes, code_field="sac_code")
 
-	# DEBUG
-	rollback_watcher = type('', (), {})()
-	rollback_watcher.on_rollback = lambda: frappe.throw("HSN codes getting rolled back")
-	frappe.local.rollback_observers.append(rollback_watcher)
-
 	if frappe.flags.in_test:
 		frappe.flags.created_hsn_codes = True
 
