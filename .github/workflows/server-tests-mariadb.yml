@@ -1,10 +1,11 @@
-name: Server
+name: Server (Mariadb)
 
 on:
   pull_request:
     paths-ignore:
       - '**.js'
       - '**.md'
+      - '**.html'
   workflow_dispatch:
   push:
     branches: [ develop ]
@@ -13,7 +14,7 @@ on:
       - '**.md'
 
 concurrency:
-  group: server-develop-${{ github.event.number }}
+  group: server-mariadb-develop-${{ github.event.number }}
   cancel-in-progress: true
 
 jobs:
