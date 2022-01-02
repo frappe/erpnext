@@ -1,4 +1,4 @@
-name: Server (Posgres)
+name: Server (Postgres)
 
 on:
   pull_request:
