@@ -1,7 +1,11 @@
-name: Server
+name: Server (Posgres)
 
 on:
   pull_request:
+    paths-ignore:
+      - '**.js'
+      - '**.md'
+      - '**.html'
 
 concurrency:
   group: server-postgres-develop-${{ github.event.number }}
@@ -17,7 +21,7 @@ jobs:
       matrix:
        container: [1, 2, 3]
 
-    name: Python Unit Tests (Postgres)
+    name: Python Unit Tests
 
     services:
       postgres:
