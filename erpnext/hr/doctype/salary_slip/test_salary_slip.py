@@ -115,6 +115,41 @@ class TestSalarySlip(unittest.TestCase):
 		frappe.db.set_value("Employee", frappe.get_value("Employee",
 			{"employee_name":"test_employee@salary.com"}, "name"), "status", "Active")
 
+	def test_payment_days_in_salary_slip_based_on_timesheet(self):
+		from erpnext.projects.doctype.timesheet.test_timesheet import (
+			make_salary_structure_for_timesheet,
+			make_timesheet,
+		)
+		from erpnext.projects.doctype.timesheet.timesheet import (
+			make_salary_slip as make_salary_slip_for_timesheet,
+		)
+
+		# Holidays included in working days
+		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
+
+		emp = make_employee("test_employee_timesheet1@salary.com", company=erpnext.get_default_company())
+		frappe.db.set_value("Employee", emp, {"relieving_date": None, "status": "Active"})
+
+		# salary structure based on timesheet
+		make_salary_structure_for_timesheet(emp)
+		timesheet = make_timesheet(emp, simulate=True)
+		salary_slip = make_salary_slip_for_timesheet(timesheet.name)
+		salary_slip.start_date = get_first_day(nowdate())
+		salary_slip.end_date = get_last_day(nowdate())
+		salary_slip.save()
+		salary_slip.submit()
+
+		no_of_days = self.get_no_of_days()
+		days_in_month = no_of_days[0]
+		no_of_holidays = no_of_days[1]
+
+		self.assertEqual(salary_slip.payment_days, days_in_month - no_of_holidays)
+
+		# gross pay calculation based on attendance (payment days)
+		gross_pay = 78100 - ((78000 / (days_in_month - no_of_holidays)) * flt(salary_slip.leave_without_pay))
+
+		self.assertEqual(salary_slip.gross_pay, flt(gross_pay, 2))
+
 	def test_employee_salary_slip_read_permission(self):
 		make_employee("test_employee@salary.com")
 
@@ -175,7 +210,7 @@ class TestSalarySlip(unittest.TestCase):
 		# as per assigned salary structure 40500 in monthly salary so 236000*5/100/12
 		frappe.db.sql("""delete from `tabPayroll Period`""")
 		frappe.db.sql("""delete from `tabSalary Component`""")
-	
+
 		payroll_period = create_payroll_period()
 
 		create_tax_slab(payroll_period, allow_tax_exemption=True)
