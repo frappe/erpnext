@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from typing import Optional
+
 import frappe
 from frappe import _
 from frappe.utils import (
