@@ -6,6 +6,7 @@ on:
       - '**.js'
       - '**.md'
       - '**.html'
+    types: [opened, labelled, synchronize, reopened]
 
 concurrency:
   group: server-postgres-develop-${{ github.event.number }}
@@ -13,6 +14,7 @@ concurrency:
 
 jobs:
   test:
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'postgres') }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
