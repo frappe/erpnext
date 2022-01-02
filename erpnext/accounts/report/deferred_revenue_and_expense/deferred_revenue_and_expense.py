@@ -5,7 +5,6 @@ import frappe
 from frappe import _, qb
 from frappe.query_builder import functions
 from frappe.utils import add_days, date_diff, flt, get_first_day, get_last_day, rounded
-
 from pypika.terms import PseudoColumn
 
 from erpnext.accounts.report.financial_statements import get_period_list

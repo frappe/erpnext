@@ -75,7 +75,7 @@ def create_interview_and_dependencies(job_applicant, scheduled_on=None, from_tim
 
 	interviewer_1 = create_user("test_interviewer1@example.com", "Interviewer")
 	interviewer_2 = create_user("test_interviewer2@example.com", "Interviewer")
-	
+
 	interview_round = create_interview_round(
 		"Technical Round", ["Python", "JS"],
 		designation=designation, save=True

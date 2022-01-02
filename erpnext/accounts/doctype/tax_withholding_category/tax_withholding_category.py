@@ -5,8 +5,8 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, getdate
 from frappe.query_builder.functions import Sum
+from frappe.utils import cint, getdate
 
 
 class TaxWithholdingCategory(Document):
@@ -338,16 +338,16 @@ def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 	jea = frappe.qb.DocType("Journal Entry Account")
 
 	if cint(tax_details.consider_party_ledger_amount):
-		supp_credit_amt = frappe.qb.from_(pi).select(Sum(pi.grand_total)).where((pi.docstatus == 1) 
+		supp_credit_amt = frappe.qb.from_(pi).select(Sum(pi.grand_total)).where((pi.docstatus == 1)
 		& (pi.name.isin(vouchers))).run()[0][0] or 0.0
 
 	else:
-		supp_credit_amt = frappe.qb.from_(pi).select(Sum(pi.net_total)).where((pi.docstatus == 1) 
-		& (pi.name.isin(vouchers)) 
+		supp_credit_amt = frappe.qb.from_(pi).select(Sum(pi.net_total)).where((pi.docstatus == 1)
+		& (pi.name.isin(vouchers))
 		& (pi.apply_tds == 1)).run()[0][0] or 0.0
 
-	supp_jv_credit_amt = frappe.qb.from_(jea).select(Sum(jea.credit_in_account_currency)).where((jea.party.isin(parties)) 
-	& (jea.parent.isin(vouchers)) 
+	supp_jv_credit_amt = frappe.qb.from_(jea).select(Sum(jea.credit_in_account_currency)).where((jea.party.isin(parties))
+	& (jea.parent.isin(vouchers))
 	& (jea.reference_type != 'Purchase Invoice')).run()[0][0] or 0.0
 
 	supp_credit_amt += supp_jv_credit_amt
@@ -385,25 +385,25 @@ def get_tcs_amount(parties, inv, tax_details, vouchers, adv_vouchers):
 
 	# sum of debit entries made from sales invoices
 	invoiced_amt = (frappe.qb.from_(gle).select(Sum(gle.debit)).where(
-		(gle.is_cancelled == 0) 
-		& (gle.party.isin(parties)) 
-		& (gle.company == inv.company) 
+		(gle.is_cancelled == 0)
+		& (gle.party.isin(parties))
+		& (gle.company == inv.company)
 		& (gle.voucher_no.isin(vouchers)))).run()[0][0] or 0.0
 
 	# sum of credit entries made from PE / JV with unset 'against voucher'
 	advance_amt = (frappe.qb.from_(gle).select(Sum(gle.credit)).where(
-		(gle.is_cancelled == 0) 
-		& (gle.party.isin(parties)) 
-		& (gle.company == inv.company) 
+		(gle.is_cancelled == 0)
+		& (gle.party.isin(parties))
+		& (gle.company == inv.company)
 		& (gle.voucher_no.isin(vouchers)))).run()[0][0] or 0.0
 
 	# sum of credit entries made from sales invoice
 	credit_note_amt = (frappe.qb.from_(gle).select(Sum(gle.credit)).where(
-		(gle.is_cancelled == 0) 
-		& (gle.credit > 0) 
-		& (gle.party.isin(parties)) 
-		& (gle.posting_date[tax_details.from_date:tax_details.to_date]) 
-		& (gle.company == inv.company) 
+		(gle.is_cancelled == 0)
+		& (gle.credit > 0)
+		& (gle.party.isin(parties))
+		& (gle.posting_date[tax_details.from_date:tax_details.to_date])
+		& (gle.company == inv.company)
 		& (gle.voucher_type == 'Sales Invoice'))).run()[0][0] or 0.0
 
 	cumulative_threshold = tax_details.get('cumulative_threshold', 0)

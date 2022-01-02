@@ -51,8 +51,8 @@ class StockLedgerEntry(Document):
 
 	def calculate_batch_qty(self):
 		if self.batch_no:
-			batch_qty = frappe.db.sql("""select sum(actual_qty) from `tabStock Ledger Entry` 
-			where docstatus=1 and batch_no = %s 
+			batch_qty = frappe.db.sql("""select sum(actual_qty) from `tabStock Ledger Entry`
+			where docstatus=1 and batch_no = %s
 			and is_cancelled=0""",(self.batch_no), as_list=1)
 			if batch_qty:
     				batch_qty = batch_qty[0][0] if batch_qty[0][0] else 0

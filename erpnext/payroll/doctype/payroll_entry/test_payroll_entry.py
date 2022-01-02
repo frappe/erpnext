@@ -163,7 +163,7 @@ class TestPayrollEntry(unittest.TestCase):
 				where parent=%s
 				order by replace(replace(replace(account, '_', ''), '-', ''), ' ', ''), replace(replace(replace(cost_center, '_', ''), '-', ''), ' ', '')
 			""", je)
-      
+
 			expected_je = [
 				('Salary Deductions - _TC', '_Test Cost Center 2 - _TC', 0.0, 80.0),
 				('Salary Deductions - _TC', '_Test Cost Center - _TC', 0.0, 320.0),

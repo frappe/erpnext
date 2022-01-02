@@ -2,8 +2,7 @@
 # For license information, please see license.txt
 
 
-from datetime import datetime
-from datetime import time
+from datetime import datetime, time
 
 import frappe
 from frappe import _

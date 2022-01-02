@@ -2,12 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import json
 import datetime
+import json
 from datetime import timedelta
-
-
-
 
 import frappe
 from frappe import _
@@ -309,7 +306,7 @@ def get_working_hours(date, support_hours):
 			if day.workday == weekday:
     			#postgres stores start and end time as datetime.time, mariadb as timedelta
 				start_time = get_time_in_timedelta(day.start_time) if isinstance(day.start_time, datetime.time) else day.start_time
-				end_time = get_time_in_timedelta(day.end_time) if isinstance(day.end_time, datetime.time) else day.end_time			
+				end_time = get_time_in_timedelta(day.end_time) if isinstance(day.end_time, datetime.time) else day.end_time
 				return start_time, end_time
 
 def is_work_day(date, support_hours):
@@ -320,8 +317,8 @@ def is_work_day(date, support_hours):
 	return False
 
 def is_during_working_hours(date, support_hours):
-	
-	start_time, end_time = get_working_hours(date, support_hours)	
+
+	start_time, end_time = get_working_hours(date, support_hours)
 	time = get_time_in_seconds(date)
 	if time >= start_time and time <= end_time:
 		return True

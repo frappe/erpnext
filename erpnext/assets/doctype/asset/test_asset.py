@@ -78,7 +78,7 @@ class TestAsset(AssetSetup):
 		self.assertRaises(frappe.ValidationError, asset.save)
 		item.disabled = 0
 		item.save()
-		
+
 		item = frappe.get_doc("Item", "Macbook Pro")
 		item.is_fixed_asset = 0
 		self.assertRaises(frappe.ValidationError, asset.save)

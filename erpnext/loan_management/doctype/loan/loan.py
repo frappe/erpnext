@@ -147,10 +147,10 @@ class Loan(AccountsController):
 				from `tabLoan Security Pledge`
 				where loan_application = '{loan_application}'
 				and status = 'Requested'
-			""".format(loan_application = self.loan_application)		
+			""".format(loan_application = self.loan_application)
 			}, as_list = 1)
 			maximum_loan_value = maximum_loan_value[0][0] if any(isinstance(i, list) for i in maximum_loan_value) and maximum_loan_value[0][0] else maximum_loan_value
-			
+
 			if maximum_loan_value:
 				frappe.db.sql("""
 					UPDATE `tabLoan Security Pledge`

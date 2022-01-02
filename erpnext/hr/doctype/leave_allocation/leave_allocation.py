@@ -254,7 +254,7 @@ def get_carry_forwarded_leaves(employee, leave_type, date, carry_forward=None):
 	return unused_leaves
 
 def get_unused_leaves(employee, leave_type, from_date, to_date):
-    	
+
 	from_date = from_date if from_date else '1900-01-01'
 	to_date = to_date if to_date else '3000-01-01'
 	''' Returns unused leaves between the given period while skipping leave allocation expiry '''

@@ -785,7 +785,7 @@ def get_default_bank_cash_account(company, account_type=None, mode_of_payment=No
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 	if mode_of_payment:
 		account = get_bank_cash_account(mode_of_payment, company).get("account")
-	
+
 	if not account:
 		'''
 			Set the default account first. If the user hasn't set any default account then, he doesn't

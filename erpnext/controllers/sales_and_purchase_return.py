@@ -238,7 +238,7 @@ def get_returned_qty_map_for_row(row_name, doctype):
 	'postgres': """
 	select {select_fields}
 	from `tab{doctype}`
-	left join `tab{child_doctype}` on `tab{child_doctype}`.parent = `tab{doctype}`.name 
+	left join `tab{child_doctype}` on `tab{child_doctype}`.parent = `tab{doctype}`.name
 	where `tab{doctype}`.docstatus = 1 and `tab{doctype}`.is_return = 1 and `tab{child_doctype}`.{reference_field} = '{r_n}'
 	""".format(select_fields = select_fields, doctype = doctype, child_doctype = child_doctype, reference_field = reference_field, r_n = row_name)
 	}, as_dict = 1)

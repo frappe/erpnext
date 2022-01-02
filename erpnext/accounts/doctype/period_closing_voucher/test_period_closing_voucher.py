@@ -216,7 +216,7 @@ def create_account():
 	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000
 	return account.name
 
-def create_cost_center(cc_name):  
+def create_cost_center(cc_name):
 	frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000_000
 	costcenter = frappe.get_doc({
 		"company": "Test PCV Company",

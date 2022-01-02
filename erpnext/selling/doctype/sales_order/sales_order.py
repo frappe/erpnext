@@ -75,10 +75,10 @@ class SalesOrder(SellingController):
 
 		if self.po_no and self.customer and not self.skip_delivery_note:
 			so = frappe.db.multisql({
-				'mariadb': """select name from `tabSales Order` 
+				'mariadb': """select name from `tabSales Order`
 				where coalesce(po_no, '') = %s and name != %s and docstatus < 2
 				and customer = %s""",
-				'postgres': """select name from `tabSales Order` 
+				'postgres': """select name from `tabSales Order`
 				where coalesce(po_no, '') = '{po_no}' and name != '{name}' and docstatus < 2
 				and customer = '{customer}'""".format(po_no = self.po_no, name = self.name, customer = self.customer)}, (self.po_no, self.name, self.customer))
 			if so and so[0][0] and not cint(frappe.db.get_single_value("Selling Settings",

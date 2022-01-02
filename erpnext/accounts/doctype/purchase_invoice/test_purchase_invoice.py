@@ -1017,7 +1017,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			[deferred_account, 43.08, 0.0, "2019-02-28"],
 			["_Test Account Cost for Goods Sold - _TC", 0.0, 43.08, "2019-02-28"],
 			[deferred_account, 23.07, 0.0, "2019-03-15"],
-			["_Test Account Cost for Goods Sold - _TC", 0.0, 23.07, "2019-03-15"]			
+			["_Test Account Cost for Goods Sold - _TC", 0.0, 23.07, "2019-03-15"]
 		]
 
 		gl_entries = frappe.db.sql("""select account, debit, credit, posting_date

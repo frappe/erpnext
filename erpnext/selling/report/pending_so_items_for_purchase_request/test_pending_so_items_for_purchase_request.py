@@ -2,9 +2,8 @@
 # For license information, please see license.txt
 
 
-from frappe.utils import add_months, nowdate
-
 import frappe
+from frappe.utils import add_months, nowdate
 
 from erpnext.selling.doctype.sales_order.sales_order import make_material_request
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order

@@ -122,7 +122,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		pi1 = create_purchase_invoice(supplier = "Test TDS Supplier3", rate = 20000)
 		pi1.submit()
 		invoices.append(pi1)
-		
+
 		# Cumulative threshold is 30000
 		# Threshold calculation should be on both the invoices
 		# TDS should be applied only on 1000

@@ -78,7 +78,7 @@ class SalesPipelineAnalytics(object):
 	def get_fields(self):
 		db_month = "to_char(expected_closing, 'FMMonth')" if frappe.db.db_type == 'postgres' else "monthname(expected_closing)"
 		db_quarter = "extract(quarter from " if frappe.db.db_type == 'postgres' else "quarter("
-		
+
 		self.based_on ={
 			'Owner': '_assign as opportunity_owner',
 			'Sales Stage': 'sales_stage'

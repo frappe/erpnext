@@ -778,7 +778,7 @@ class TestWorkOrder(ERPNextTestCase):
 
 		frappe.db.sql("delete from `tabJob Card`")
 		frappe.db.sql("delete from `tabJob Card Time Log`")
-		
+
 		company = '_Test Company with perpetual inventory'
 		for item_code in items:
 			create_item(item_code = item_code, is_stock_item = 1,

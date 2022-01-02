@@ -95,7 +95,7 @@ class GSTR3BReport(Document):
 			and j.voucher_type = 'Reversal Of ITC'
 			and to_char(j.posting_date, 'MM')::integer = %s and to_char(j.posting_date, 'YYYY')::integer = %s
 			and j.company = %s and j.company_gstin = %s
-			GROUP BY ja.account, j.reversal_type""",			
+			GROUP BY ja.account, j.reversal_type""",
 			}, (self.month_no, self.year, self.company,
 			self.gst_details.get("gstin")), as_dict=1)
 

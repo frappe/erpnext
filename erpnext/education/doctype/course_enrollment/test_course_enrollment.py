@@ -29,7 +29,7 @@ class TestCourseEnrollment(unittest.TestCase):
 		self.assertTrue(finished in progress)
 		frappe.db.rollback()
 
-	def tearDown(self):	
+	def tearDown(self):
 		for entry in frappe.db.get_all("Course Activity"):
 			frappe.delete_doc("Course Activity", entry.name)
 

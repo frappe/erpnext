@@ -157,7 +157,7 @@ class PayrollEntry(Document):
 		"""
 			Returns list of salary slips based on selected criteria
 		"""
-    
+
 		ss = frappe.qb.DocType("Salary Slip")
 		ss_list = (
 			frappe.qb.from_(ss)

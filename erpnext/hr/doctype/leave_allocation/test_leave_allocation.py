@@ -233,7 +233,7 @@ class TestLeaveAllocation(unittest.TestCase):
 
 def create_leave_allocation(**args):
 	args = frappe._dict(args)
-  
+
 	emp_id = make_employee("test_emp_leave_allocation@salary.com")
 	employee = frappe.get_doc("Employee", emp_id)
 

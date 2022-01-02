@@ -5,8 +5,7 @@
 import json
 
 import frappe
-from frappe.test_runner import make_test_records_for_doctype
-from frappe.test_runner import make_test_objects
+from frappe.test_runner import make_test_objects, make_test_records_for_doctype
 
 from erpnext.controllers.item_variant import (
 	InvalidItemAttributeValueError,

@@ -57,7 +57,7 @@ class Bin(Document):
 							| (wo_item.required_qty > wo_item.consumed_qty))
 					).groupby(wo.skip_transfer)
 		).run()
-		
+
 		self.reserved_qty_for_production = sum( sum(x) for x in self.reserved_qty_for_production) if self.reserved_qty_for_production else 0.0
 
 		self.set_projected_qty()
