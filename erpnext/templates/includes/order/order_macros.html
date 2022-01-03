@@ -2,16 +2,21 @@
 
 {% macro item_name_and_description(d) %}
     <div class="row item_name_and_description">
-        <div class="col-xs-4 col-sm-2 order-image-col">
+        {% if d.image or d.thumbnail %}
+        <div class="pr-0 col-xs-4 col-sm-2 order-image-col">
             <div class="order-image h-100">
                 {{ product_image_square(d.thumbnail or d.image) }}
             </div>
         </div>
+        {% endif %}
         <div class="col-xs-8 col-sm-10">
             {{ d.item_code }}
-            <div class="text-muted small item-description">
+            <div class="d-s-n text-muted small item-description mt-1">
 				{{ html2text(d.description) | truncate(140) }}
 			</div>
+            <span class="text-muted mt-2 d-l-n order-qty">
+                {{ _("Qty ") }}({{ d.get_formatted("qty") }})
+            </span>
         </div>
     </div>
 {% endmacro %}
