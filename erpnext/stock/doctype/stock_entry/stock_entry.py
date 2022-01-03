@@ -1935,7 +1935,8 @@ def referance_challan(reference_challan,name):
 def get_list(company):
 	list=[]
 	lst=[]
-	doc=frappe.db.get_all("Stock Entry",{"stock_entry_type":"Send to Subcontractor","docstatus":1,"company":["!=", company]},['name'])
+	doc=frappe.db.get_all("Stock Entry",{"stock_entry_type":"Send to Subcontractor","docstatus":1,"company":["!=", company],'posting_date': ['>=', '2021-07-08']},['name'])
+
 	db=frappe.db.get_all("Stock Entry",{"stock_entry_type":"Material Receipt","docstatus":1},['reference_challan'])
 	for i in db:
 		if i.reference_challan:
