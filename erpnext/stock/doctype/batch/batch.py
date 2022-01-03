@@ -317,8 +317,9 @@ def make_batch(args):
 @frappe.whitelist()
 def get_pos_reserved_batch_qty(filters):
 	import json
+
 	from frappe.query_builder.functions import Sum
-	
+
 	if isinstance(filters, str):
 		filters = json.loads(filters)
 
