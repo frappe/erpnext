@@ -43,7 +43,6 @@ class POSInvoice(SalesInvoice):
 		self.validate_serialised_or_batched_item()
 		self.validate_stock_availablility()
 		self.validate_return_items_qty()
-		# self.validate_non_stock_items()
 		self.set_status()
 		self.set_account_for_mode_of_payment()
 		self.validate_pos()
@@ -246,14 +245,6 @@ class POSInvoice(SalesInvoice):
 							_("Row #{}: Serial No {} cannot be returned since it was not transacted in original invoice {}")
 							.format(d.idx, bold_serial_no, bold_return_against)
 						)
-
-	def validate_non_stock_items(self):
-		for d in self.get("items"):
-			is_stock_item = frappe.get_cached_value("Item", d.get("item_code"), "is_stock_item")
-			if not is_stock_item:
-				if not frappe.db.exists('Product Bundle', d.item_code):
-					frappe.throw(_("Row #{}: Item {} is a non stock item. You can only include stock items in a POS Invoice.")
-						.format(d.idx, frappe.bold(d.item_code)), title=_("Invalid Item"))
 
 	def validate_mode_of_payment(self):
 		if len(self.payments) == 0:
@@ -497,11 +488,12 @@ def get_stock_availability(item_code, warehouse):
 		bin_qty = get_bin_qty(item_code, warehouse)
 		pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
 		return bin_qty - pos_sales_qty
-	elif frappe.db.exists('Product Bundle', item_code):
-		return get_bundle_availability(item_code, warehouse)
-	#To continue the flow considering a service item
-	elif frappe.db.get_value('Item', item_code, 'is_stock_item') == 0:
-		return 0
+	else:
+		if frappe.db.exists('Product Bundle', item_code):
+			return get_bundle_availability(item_code, warehouse)
+		else:
+			# Is a service item
+			return 0
 
 
 def get_bundle_availability(bundle_item_code, warehouse):
