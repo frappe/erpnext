@@ -323,8 +323,9 @@ def get_pos_reserved_batch_qty(filters):
 
 	p = frappe.qb.DocType("POS Invoice").as_("p")
 	item = frappe.qb.DocType("POS Invoice Item").as_("item")
+	sum_qty = frappe.query_builder.functions.Sum(item.qty).as_("qty")
 
-	pos_transacted_batch_nos = frappe.qb.from_(p).from_(item).select(item.qty).where(
+	reserved_batch_qty = frappe.qb.from_(p).from_(item).select(sum_qty).where(
 		(p.name == item.parent) &
 		(p.consolidated_invoice.isnull()) &
 		(p.status != "Consolidated") &
@@ -333,10 +334,6 @@ def get_pos_reserved_batch_qty(filters):
 		(item.item_code == filters.get('item_code')) &
 		(item.warehouse == filters.get('warehouse')) &
 		(item.batch_no == filters.get('batch_no'))
-	).run(as_dict=True)
+	).run()
 
-	reserved_batch_qty = 0.0
-	for d in pos_transacted_batch_nos:
-		reserved_batch_qty += d.qty
-
-	return reserved_batch_qty
+	return reserved_batch_qty[0][0]
