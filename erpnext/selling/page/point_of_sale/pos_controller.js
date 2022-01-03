@@ -639,14 +639,13 @@ erpnext.PointOfSale.Controller = class {
 		if (!(available_qty > 0)) {
 			frappe.db.get_value('Item', item_row.item_code, 'is_stock_item').then(({message}) => {
 				const is_service_item = message.is_stock_item;
-				console.log('is_service_item', is_service_item);
 				if (!is_service_item) return;
 
 				frappe.model.clear_doc(item_row.doctype, item_row.name);
 				frappe.throw({
 					title: __("Not Available"),
 					message: __('Item Code: {0} is not available under warehouse {1}.', [bold_item_code, bold_warehouse])
-				})
+				});
 			});
 		} else if (available_qty < qty_needed) {
 			frappe.throw({
