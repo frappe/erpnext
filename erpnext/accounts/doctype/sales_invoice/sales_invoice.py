@@ -622,7 +622,7 @@ class SalesInvoice(SellingController):
 			return
 
 		if not self.account_for_change_amount:
-			self.account_for_change_amount = frappe.get_cached_value('Company',	 self.company,	'default_cash_account')
+			self.account_for_change_amount = frappe.get_cached_value('Company', self.company, 'default_cash_account')
 
 		from erpnext.stock.get_item_details import get_pos_profile, get_pos_profile_item_details
 
@@ -1907,7 +1907,7 @@ def get_bank_cash_account(mode_of_payment, company):
 
 @frappe.whitelist()
 def make_maintenance_schedule(source_name, target_doc=None):
-	doclist = get_mapped_doc("Sales Invoice", source_name,	{
+	doclist = get_mapped_doc("Sales Invoice", source_name, {
 		"Sales Invoice": {
 			"doctype": "Maintenance Schedule",
 			"validation": {
