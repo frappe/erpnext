@@ -23,4 +23,4 @@ def execute():
                     options=NULL
                 WHERE
                     name=%s
-            """, (field))
+            """, (field.name))
