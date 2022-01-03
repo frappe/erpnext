@@ -28,14 +28,23 @@
 }
 
 .order-items {
-    padding: 1.8rem 0;
+    padding: 1.5rem 0;
     border-bottom: 1px solid var(--border-color);
+    color: var(--gray-700);
 
+    @media screen and (max-width: 567px) {
+        align-items: flex-start !important;
+    }
     .col-2 {
         @media screen and (max-width: 567px) {
             flex: auto;
             max-width: 28%;
         }
+    }
+
+    .order-item-name {
+        font-size: var(--text-base);
+        font-weight: 500;
     }
 
     .btn:focus,
@@ -61,7 +70,8 @@
 
 .list-item-name,
 .item-total,
-.order-container {
+.order-container,
+.order-qty {
     font-size: var(--text-md);
 }
 

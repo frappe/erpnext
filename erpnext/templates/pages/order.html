@@ -75,7 +75,7 @@
 <div class="order-container mt-4">
 	<!-- items -->
 	<div class="w-100">
-		<div class="order-items order-item-header mb-1 row">
+		<div class="order-items order-item-header mb-1 row text-muted">
 			<span class="col-5">
 				{{ _("Item") }}
 			</span>
@@ -91,7 +91,7 @@
 		</div>
 		{% for d in doc.items %}
 		<div class="order-items row align-items-center">
-			<span class="order-item-name d-flex col-5">
+			<span class="order-item-name col-5 pr-0">
 				{{ item_name_and_description(d) }}
 			</span>
 
