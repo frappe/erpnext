@@ -335,4 +335,5 @@ def get_pos_reserved_batch_qty(filters):
 		(item.batch_no == filters.get('batch_no'))
 	).run()
 
-	return reserved_batch_qty[0][0]
+	flt_reserved_batch_qty = flt(reserved_batch_qty[0][0])
+	return flt_reserved_batch_qty
