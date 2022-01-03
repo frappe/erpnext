@@ -479,7 +479,7 @@ class SalesInvoice(SellingController):
 			return
 
 		if not self.account_for_change_amount:
-			self.account_for_change_amount = frappe.get_cached_value('Company',	 self.company,	'default_cash_account')
+			self.account_for_change_amount = frappe.get_cached_value('Company', self.company, 'default_cash_account')
 
 		from erpnext.stock.get_item_details import get_pos_profile, get_pos_profile_item_details
 		if not self.pos_profile and not self.flags.ignore_pos_profile:
@@ -686,7 +686,7 @@ class SalesInvoice(SellingController):
 
 	def validate_write_off_account(self):
 		if flt(self.write_off_amount) and not self.write_off_account:
-			self.write_off_account = frappe.get_cached_value('Company',	 self.company,	'write_off_account')
+			self.write_off_account = frappe.get_cached_value('Company', self.company, 'write_off_account')
 
 		if flt(self.write_off_amount) and not self.write_off_account:
 			msgprint(_("Please enter Write Off Account"), raise_exception=1)
@@ -699,7 +699,7 @@ class SalesInvoice(SellingController):
 		""" Blank C-form no if C-form applicable marked as 'No'"""
 		if self.amended_from and self.c_form_applicable == 'No' and self.c_form_no:
 			frappe.db.sql("""delete from `tabC-Form Invoice Detail` where invoice_no = %s
-					and parent = %s""", (self.amended_from,	self.c_form_no))
+					and parent = %s""", (self.amended_from, self.c_form_no))
 
 			frappe.db.set(self, 'c_form_no', '')
 
@@ -1193,7 +1193,7 @@ class SalesInvoice(SellingController):
 		# write off entries, applicable if only pos
 		if self.write_off_account and flt(self.write_off_amount, self.precision("write_off_amount")):
 			write_off_account_currency = get_account_currency(self.write_off_account)
-			default_cost_center = frappe.get_cached_value('Company',  self.company,	 'cost_center')
+			default_cost_center = frappe.get_cached_value('Company',  self.company, 'cost_center')
 
 			gl_entries.append(
 				self.get_gl_dict({
@@ -1621,7 +1621,7 @@ def get_bank_cash_account(mode_of_payment, company):
 
 @frappe.whitelist()
 def make_maintenance_schedule(source_name, target_doc=None):
-	doclist = get_mapped_doc("Sales Invoice", source_name,	{
+	doclist = get_mapped_doc("Sales Invoice", source_name, {
 		"Sales Invoice": {
 			"doctype": "Maintenance Schedule",
 			"validation": {
@@ -1650,7 +1650,7 @@ def make_delivery_note(source_name, target_doc=None):
 		target_doc.base_amount = target_doc.qty * flt(source_doc.base_rate)
 		target_doc.amount = target_doc.qty * flt(source_doc.rate)
 
-	doclist = get_mapped_doc("Sales Invoice", source_name,	{
+	doclist = get_mapped_doc("Sales Invoice", source_name, {
 		"Sales Invoice": {
 			"doctype": "Delivery Note",
 			"validation": {
@@ -1841,7 +1841,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			'serial_no': 'serial_no'
 		})
 
-	doclist = get_mapped_doc(doctype, source_name,	{
+	doclist = get_mapped_doc(doctype, source_name, {
 		doctype: {
 			"doctype": target_doctype,
 			"postprocess": update_details,
