@@ -696,11 +696,13 @@ class SalesInvoice(SellingController):
 			msgprint(_("Please enter Account for Change Amount"), raise_exception=1)
 
 	def validate_c_form(self):
-		""" Blank C-form no if C-form applicable marked as 'No'"""
+		"""Blank C-form no if C-form applicable marked as 'No'"""
 		if self.amended_from and self.c_form_applicable == 'No' and self.c_form_no:
-			frappe.db.sql("""delete from `tabC-Form Invoice Detail` where invoice_no = %s
-					and parent = %s""", (self.amended_from, self.c_form_no))
-
+			cid = frappe.qb.DocType("C-Form Invoice Detail")
+			frappe.qb.from_(cid).delete().where(
+				(cid.invoice_no == self.amended_from) &
+				(cid.parent == self.c_form_no)
+			).run()
 			frappe.db.set(self, 'c_form_no', '')
 
 	def validate_c_form_on_cancel(self):

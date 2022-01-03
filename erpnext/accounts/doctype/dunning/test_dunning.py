@@ -27,7 +27,6 @@ class TestDunning(unittest.TestCase):
 		create_dunning_type("First Notice", fee=0.0, interest=0.0, is_default=1)
 		create_dunning_type("Second Notice", fee=10.0, interest=10.0, is_default=0)
 		unlink_payment_on_cancel_of_invoice()
-		frappe.db.commit()
 
 	@classmethod
 	def tearDownClass(cls):
