@@ -6,6 +6,7 @@ import unittest
 import frappe
 from frappe.utils import add_days, nowdate, today
 
+from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 	unlink_payment_on_cancel_of_invoice,
@@ -17,16 +18,19 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice_against_cost_center,
 )
 
+test_dependencies = ["Company", "Cost Center"]
+
 
 class TestDunning(unittest.TestCase):
 	@classmethod
-	def setUpClass(self):
+	def setUpClass(cls):
 		create_dunning_type("First Notice", fee=0.0, interest=0.0, is_default=1)
 		create_dunning_type("Second Notice", fee=10.0, interest=10.0, is_default=0)
 		unlink_payment_on_cancel_of_invoice()
+		frappe.db.commit()
 
 	@classmethod
-	def tearDownClass(self):
+	def tearDownClass(cls):
 		unlink_payment_on_cancel_of_invoice(0)
 
 	def test_first_dunning(self):
@@ -39,7 +43,7 @@ class TestDunning(unittest.TestCase):
 		self.assertEqual(round(dunning.grand_total, 2), 100.00)
 
 	def test_second_dunning(self):
-		dunning = create_dunning(overdue_days=15, dunning_type_name="Second Notice")
+		dunning = create_dunning(overdue_days=15, dunning_type_name="Second Notice - _TC")
 
 		self.assertEqual(round(dunning.total_outstanding, 2), 100.00)
 		self.assertEqual(round(dunning.total_interest, 2), 0.41)
@@ -48,7 +52,7 @@ class TestDunning(unittest.TestCase):
 		self.assertEqual(round(dunning.grand_total, 2), 110.41)
 
 	def test_payment_entry(self):
-		dunning = create_dunning(overdue_days=15, dunning_type_name="Second Notice")
+		dunning = create_dunning(overdue_days=15, dunning_type_name="Second Notice - _TC")
 		dunning.submit()
 		pe = get_payment_entry("Dunning", dunning.name)
 		pe.reference_no = "1"
@@ -78,24 +82,25 @@ def create_dunning(overdue_days, dunning_type_name=None):
 		dunning.dunning_type = dunning_type.name
 		dunning.rate_of_interest = dunning_type.rate_of_interest
 		dunning.dunning_fee = dunning_type.dunning_fee
+		dunning.income_account = dunning_type.income_account
+		dunning.cost_center = dunning_type.cost_center
 
-	dunning.income_account = get_income_account(dunning.company)
-	dunning.save()
-
-	return dunning
+	return dunning.save()
 
 
 def create_dunning_type(title, fee, interest, is_default):
-	existing = frappe.db.exists("Dunning Type", title)
-	if existing:
-		return frappe.get_doc("Dunning Type", existing)
+	company = "_Test Company"
+	if frappe.db.exists("Dunning Type", f"{title} - _TC"):
+		return
 
 	dunning_type = frappe.new_doc("Dunning Type")
 	dunning_type.dunning_type = title
-	dunning_type.company = "_Test Company"
+	dunning_type.company = company
 	dunning_type.is_default = is_default
 	dunning_type.dunning_fee = fee
 	dunning_type.rate_of_interest = interest
+	dunning_type.income_account = get_income_account(company)
+	dunning_type.cost_center = get_default_cost_center(company)
 	dunning_type.append(
 		"dunning_letter_text",
 		{
@@ -104,8 +109,7 @@ def create_dunning_type(title, fee, interest, is_default):
 			"closing_text": "We kindly request that you pay the outstanding amount immediately, including interest and late fees.",
 		},
 	)
-	dunning_type.save()
-	return dunning_type
+	dunning_type.insert()
 
 
 def get_income_account(company):
