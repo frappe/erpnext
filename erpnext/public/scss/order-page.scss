@@ -1,6 +1,13 @@
 #page-order {
     .main-column {
         .page-content-wrapper {
+
+            .breadcrumb-container {
+                @media screen and (min-width: 567px) {
+                    padding-left: var(--padding-sm);
+                }
+            }
+
             .container.my-4 {
                 background-color: var(--fg-color);
 
