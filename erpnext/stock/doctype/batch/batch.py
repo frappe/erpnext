@@ -315,6 +315,7 @@ def make_batch(args):
 
 @frappe.whitelist()
 def get_pos_reserved_batch_qty(filters):
+	from frappe.query_builder.functions import Sum
 	import json
 
 	if isinstance(filters, str):
@@ -322,7 +323,7 @@ def get_pos_reserved_batch_qty(filters):
 
 	p = frappe.qb.DocType("POS Invoice").as_("p")
 	item = frappe.qb.DocType("POS Invoice Item").as_("item")
-	sum_qty = frappe.query_builder.functions.Sum(item.qty).as_("qty")
+	sum_qty = Sum(item.qty).as_("qty")
 
 	reserved_batch_qty = frappe.qb.from_(p).from_(item).select(sum_qty).where(
 		(p.name == item.parent) &
