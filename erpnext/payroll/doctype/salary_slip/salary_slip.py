@@ -326,11 +326,11 @@ class SalarySlip(TransactionBase):
 			["date_of_joining", "relieving_date"])
 
 		if joining_date:
-			if getdate(self.start_date) <= joining_date <= getdate(self.end_date):
+			if getdate(self.start_date) < joining_date <= getdate(self.end_date):
 				unmarked_days -= date_diff(joining_date, self.start_date)
 
 		if relieving_date:
-			if getdate(self.start_date) <= relieving_date <= getdate(self.end_date):
+			if getdate(self.start_date) <= relieving_date < getdate(self.end_date):
 				unmarked_days -= date_diff(relieving_date, self.end_date)
 
 		unmarked_days -= frappe.get_all("Attendance", filters = {
