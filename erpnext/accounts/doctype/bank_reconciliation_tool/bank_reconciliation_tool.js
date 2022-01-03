@@ -7,7 +7,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 		frm.set_query("bank_account", function () {
 			return {
 				filters: {
-					company: ["in", frm.doc.company],
+					company: frm.doc.company,
 					'is_company_account': 1
 				},
 			};
