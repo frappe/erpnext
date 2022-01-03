@@ -259,7 +259,7 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 		start_date, end_date, last_gl_entry = get_booking_dates(doc, item, posting_date=posting_date)
 		if not (start_date and end_date): return
 
-		account_currency = get_account_currency(item.expense_account)
+		account_currency = get_account_currency(item.expense_account or item.income_account)
 		if doc.doctype == "Sales Invoice":
 			against, project = doc.customer, doc.project
 			credit_account, debit_account = item.income_account, item.deferred_revenue_account
