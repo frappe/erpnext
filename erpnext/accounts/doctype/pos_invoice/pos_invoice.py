@@ -16,7 +16,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_multi_mode_option,
 )
 from erpnext.accounts.party import get_due_date, get_party_account
-from erpnext.stock.doctype.batch.batch import get_pos_reserved_batch_qty
+from erpnext.stock.doctype.batch.batch import get_batch_qty, get_pos_reserved_batch_qty
 from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
 
 
@@ -132,7 +132,7 @@ class POSInvoice(SalesInvoice):
 	def validate_pos_reserved_batch_qty(self, item):
 		filters = {"item_code": item.item_code, "warehouse": item.warehouse, "batch_no":item.batch_no}
 
-		available_batch_qty = frappe.db.get_value('Batch', item.batch_no, 'batch_qty')
+		available_batch_qty = get_batch_qty(item.batch_no, item.warehouse, item.item_code)
 		reserved_batch_qty = get_pos_reserved_batch_qty(filters)
 
 		bold_item_name = frappe.bold(item.item_name)
