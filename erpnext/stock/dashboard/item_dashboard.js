@@ -403,7 +403,10 @@ function append_breakdown(element, item_code, poi_results, boi_results) {
 		<div class="col-sm-6" width="48%">
 			<canvas id="po-${item_code}"></canvas>
 		</div>
-		<button id="backorder-report">Open backorder report in new tab.</button> 
+		<div style="text-align: center">
+		<button id="backorder-report" class="btn btn-light">Open backorder report for this item.</button> 
+		</div>
+
 	</div>`
 
 	let empty_display = `<div id="pending-breakdown-${item_code}" width="100%" class="col-sm-12" style="padding: 15px 15px;
