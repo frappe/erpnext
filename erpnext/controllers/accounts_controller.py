@@ -2125,6 +2125,11 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			parent.update_status_updater()
 	else:
 		parent.check_credit_limit()
+
+	# reset index of child table
+	for idx, row in enumerate(parent.get(child_docname), start=1):
+		row.idx = idx
+
 	parent.save()
 
 	if parent_doctype == 'Purchase Order':
