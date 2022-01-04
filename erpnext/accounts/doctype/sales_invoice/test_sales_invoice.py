@@ -2474,6 +2474,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si.set_posting_time = 1
 		si.posting_date = '2019-01-01'
+		si.debit_to = '_Test Receivable USD - _TC'
 		si.items[0].enable_deferred_revenue = 1
 		si.items[0].service_start_date = "2019-01-01"
 		si.items[0].service_end_date = "2019-03-30"
