@@ -316,5 +316,10 @@ erpnext.patches.v13_0.create_ksa_vat_custom_fields
 erpnext.patches.v14_0.rename_ongoing_status_in_sla_documents
 erpnext.patches.v14_0.migrate_crm_settings
 erpnext.patches.v13_0.rename_ksa_qr_field
-erpnext.patches.v13_0.disable_ksa_print_format_for_others
+erpnext.patches.v13_0.disable_ksa_print_format_for_others # 16-12-2021
 erpnext.patches.v14_0.add_default_exit_questionnaire_notification_template
+erpnext.patches.v13_0.update_tax_category_for_rcm
+execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
+erpnext.patches.v14_0.set_payroll_cost_centers
+erpnext.patches.v13_0.agriculture_deprecation_warning
+erpnext.patches.v14_0.delete_agriculture_doctypes

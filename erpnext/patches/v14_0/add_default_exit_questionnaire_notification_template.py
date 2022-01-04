@@ -24,4 +24,5 @@ def execute():
 
 	hr_settings = frappe.get_doc("HR Settings")
 	hr_settings.exit_questionnaire_notification_template = template
+	hr_settings.flags.ignore_links = True
 	hr_settings.save()

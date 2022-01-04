@@ -150,7 +150,7 @@
    "fieldtype": "Float",
    "in_filter": 1,
    "in_list_view": 1,
-   "label": "Actual Quantity",
+   "label": "Qty Change",
    "oldfieldname": "actual_qty",
    "oldfieldtype": "Currency",
    "print_width": "150px",
@@ -189,7 +189,7 @@
    "fieldname": "qty_after_transaction",
    "fieldtype": "Float",
    "in_filter": 1,
-   "label": "Actual Qty After Transaction",
+   "label": "Qty After Transaction",
    "oldfieldname": "bin_aqat",
    "oldfieldtype": "Currency",
    "print_width": "150px",
@@ -210,7 +210,7 @@
   {
    "fieldname": "stock_value",
    "fieldtype": "Currency",
-   "label": "Stock Value",
+   "label": "Balance Stock Value",
    "oldfieldname": "stock_value",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
@@ -219,14 +219,14 @@
   {
    "fieldname": "stock_value_difference",
    "fieldtype": "Currency",
-   "label": "Stock Value Difference",
+   "label": "Change in Stock Value",
    "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
    "fieldname": "stock_queue",
    "fieldtype": "Text",
-   "label": "Stock Queue (FIFO)",
+   "label": "FIFO Stock Queue (qty, rate)",
    "oldfieldname": "fcfs_stack",
    "oldfieldtype": "Text",
    "print_hide": 1,
@@ -317,10 +317,11 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-10-08 13:42:51.857631",
+ "modified": "2021-12-21 06:25:30.040801",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -338,5 +339,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }
