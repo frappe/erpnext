@@ -6,7 +6,6 @@
  "engine": "InnoDB",
  "field_order": [
   "title",
-  "item_tax_template",
   "account"
  ],
  "fields": [
@@ -24,20 +23,12 @@
    "in_list_view": 1,
    "label": "Title",
    "reqd": 1
-  },
-  {
-   "fieldname": "item_tax_template",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Item Tax Template",
-   "options": "Item Tax Template",
-   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-08-04 06:42:38.205597",
+ "modified": "2022-01-04 13:07:19.236120",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "KSA VAT Purchase Account",
