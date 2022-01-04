@@ -47,6 +47,7 @@ class Company(NestedSet):
 		self.validate_perpetual_inventory()
 		self.validate_perpetual_inventory_for_non_stock_items()
 		self.check_country_change()
+		self.check_parent_changed()
 		self.set_chart_of_accounts()
 		self.validate_parent_company()
 
@@ -130,6 +131,10 @@ class Company(NestedSet):
 			self.name in frappe.local.enable_perpetual_inventory:
 			frappe.local.enable_perpetual_inventory[self.name] = self.enable_perpetual_inventory
 
+		if frappe.flags.parent_company_changed:
+			from frappe.utils.nestedset import rebuild_tree
+			rebuild_tree("Company", "parent_company")
+
 		frappe.clear_cache()
 
 	def create_default_warehouses(self):
@@ -191,7 +196,7 @@ class Company(NestedSet):
 	def check_country_change(self):
 		frappe.flags.country_change = False
 
-		if not self.get('__islocal') and \
+		if not self.is_new() and \
 			self.country != frappe.get_cached_value('Company',  self.name,  'country'):
 			frappe.flags.country_change = True
 
@@ -395,6 +400,13 @@ class Company(NestedSet):
 		# delete Process Deferred Accounts if no GL Entry found
 		if not frappe.db.get_value('GL Entry', {'company': self.name}):
 			frappe.db.sql("delete from `tabProcess Deferred Accounting` where company=%s", self.name)
+
+	def check_parent_changed(self):
+		frappe.flags.parent_company_changed = False
+
+		if not self.is_new() and \
+			self.parent_company != frappe.db.get_value("Company",  self.name,  "parent_company"):
+			frappe.flags.parent_company_changed = True
 
 def get_name_with_abbr(name, company):
 	company_abbr = frappe.get_cached_value('Company',  company,  "abbr")
