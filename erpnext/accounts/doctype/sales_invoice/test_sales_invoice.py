@@ -2446,6 +2446,69 @@ class TestSalesInvoice(unittest.TestCase):
 
 		frappe.db.set_value('Accounts Settings', None, 'over_billing_allowance', over_billing_allowance)
 
+	def test_multi_currency_deferred_revenue_via_journal_entry(self):
+		deferred_account = create_account(account_name="Deferred Revenue",
+			parent_account="Current Liabilities - _TC", company="_Test Company")
+
+		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		acc_settings.book_deferred_entries_via_journal_entry = 1
+		acc_settings.submit_journal_entries = 1
+		acc_settings.save()
+
+		item = create_item("_Test Item for Deferred Accounting")
+		item.enable_deferred_expense = 1
+		item.deferred_revenue_account = deferred_account
+		item.save()
+
+		si = create_sales_invoice(customer='_Test Customer USD', currency='USD',
+			item=item.name, qty=1, rate=100, conversion_rate=60, do_not_save=True)
+
+		si.set_posting_time = 1
+		si.posting_date = '2019-01-01'
+		si.items[0].enable_deferred_revenue = 1
+		si.items[0].service_start_date = "2019-01-01"
+		si.items[0].service_end_date = "2019-03-30"
+		si.items[0].deferred_expense_account = deferred_account
+		si.save()
+		si.submit()
+
+		pda1 = frappe.get_doc(dict(
+			doctype='Process Deferred Accounting',
+			posting_date=nowdate(),
+			start_date="2019-01-01",
+			end_date="2019-03-31",
+			type="Income",
+			company="_Test Company"
+		))
+
+		pda1.insert()
+		pda1.submit()
+
+		expected_gle = [
+			["Sales - _TC", 0.0, 2089.89, "2019-01-31"],
+			[deferred_account, 2089.89, 0.0, "2019-01-31"],
+			["Sales - _TC", 0.0, 1887.64, "2019-02-28"],
+			[deferred_account, 1887.64, 0.0, "2019-02-28"],
+			["Sales - _TC", 0.0, 2022.47, "2019-03-15"],
+			[deferred_account, 2022.47, 0.0, "2019-03-15"]
+		]
+
+		gl_entries = gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
+			from `tabGL Entry`
+			where voucher_type='Journal Entry' and voucher_detail_no=%s and posting_date <= %s
+			order by posting_date asc, account asc""", (si.items[0].name, si.posting_date), as_dict=1)
+
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_gle[i][0], gle.account)
+			self.assertEqual(expected_gle[i][1], gle.credit)
+			self.assertEqual(expected_gle[i][2], gle.debit)
+			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+
+		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		acc_settings.book_deferred_entries_via_journal_entry = 0
+		acc_settings.submit_journal_entriessubmit_journal_entries = 0
+		acc_settings.save()
+
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
 	si.naming_series = 'INV-2020-.#####'
