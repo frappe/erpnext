@@ -21,8 +21,7 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
 	def test_payment_terms_status(self):
 		# disable Must be a whole number
 		nos = frappe.get_doc("UOM", "Nos")
-		nos.must_be_whole_number = 0
-		nos.save()
+		nos.db_set("must_be_whole_number", 0, commit=True)
 
 		template = None
 		if frappe.db.exists("Payment Terms Template", "_Test 50-50"):
@@ -62,9 +61,9 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
 			item=item.item_code,
 			qty=1,
 			rate=1000000,
-			po_no=54321,
 			do_not_save=True,
 		)
+		so.po_no = ""
 		so.payment_terms_template = template.name
 		so.save()
 		so.submit()
@@ -86,8 +85,7 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
 		)
 
 		# revert changes to Nos
-		nos.must_be_whole_number = 1
-		nos.save()
+		nos.db_set("must_be_whole_number", 1, commit=True)
 
 		expected_value = [
 			{
