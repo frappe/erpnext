@@ -3,12 +3,15 @@
 
 
 import frappe, os, json
+
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.permissions import add_permission, update_permission_property
+from frappe.utils import today
+from frappe.database import savepoint
+
 from erpnext.regional.india import states
 from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
-from frappe.utils import today
 
 def setup(company=None, patch=True):
 	# Company independent fixtures should be called only once at the first company setup
@@ -708,14 +711,10 @@ def make_fixtures(company=None):
 	set_tds_account(docs, company)
 
 	for d in docs:
-		try:
+		with savepoint(catch=(frappe.NameError, frappe.DuplicateEntryError)):
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_permissions = True
 			doc.insert()
-		except frappe.NameError:
-			frappe.clear_messages()
-		except frappe.DuplicateEntryError:
-			frappe.clear_messages()
 
 	# create records for Tax Withholding Category
 	set_tax_withholding_category(company)
