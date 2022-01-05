@@ -16,9 +16,6 @@ test_dependencies = ["Sales Order", "Item", "Sales Invoice", "Payment Terms Temp
 
 class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
 	def test_payment_terms_status(self):
-		# disable Must be a whole number
-		nos = frappe.get_doc("UOM", "Nos")
-		nos.db_set("must_be_whole_number", 0, commit=True)
 
 		template = None
 		if frappe.db.exists("Payment Terms Template", "_Test 50-50"):
@@ -56,8 +53,8 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
 			transaction_date="2021-06-15",
 			delivery_date=add_days("2021-06-15", -30),
 			item=item.item_code,
-			qty=1,
-			rate=1000000,
+			qty=10,
+			rate=100000,
 			do_not_save=True,
 		)
 		so.po_no = ""
@@ -67,8 +64,7 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
 
 		# make invoice with 60% of the total sales order value
 		sinv = make_sales_invoice(so.name)
-		# sinv.posting_date = "2021-06-29"
-		sinv.items[0].qty *= 0.60
+		sinv.items[0].qty = 6
 		sinv.insert()
 		sinv.submit()
 
@@ -80,9 +76,6 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
 				"sales_order": [so.name],
 			}
 		)
-
-		# revert changes to Nos
-		nos.db_set("must_be_whole_number", 1, commit=True)
 
 		expected_value = [
 			{
