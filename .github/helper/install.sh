@@ -8,7 +8,7 @@ sudo apt-get install redis-server libcups2-dev
 
 pip install frappe-bench
 
-git clone https://github.com/cpdeethree/frappe --branch develop --depth 1
+git clone https://github.com/cpdeethree/frappe --branch "frappe-postgres-changes" --depth 1
 bench init --skip-assets --frappe-path ~/frappe --python "$(which python)" frappe-bench
 
 mkdir ~/frappe-bench/sites/test_site
