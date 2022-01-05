@@ -142,8 +142,11 @@ class Timesheet(Document):
 			self.validate_project(data)
 
 	def set_to_time(self, data):
+		if not (data.from_time and data.hours):
+			return
+
 		_to_date = add_to_date(data.from_time, hours=data.hours, as_datetime=True)
-		if data.from_time and data.hours and not data.to_time == _to_date:
+		if not data.to_time == _to_date:
 			data.to_time = _to_date
 
 	def validate_overlap(self, data):
