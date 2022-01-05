@@ -93,6 +93,61 @@ class TestCompany(unittest.TestCase):
 		frappe.db.sql(""" delete from `tabMode of Payment Account`
 			where company =%s """, (company))
 
+	def test_basic_tree(self, records=None):
+		min_lft = 1
+		max_rgt = frappe.db.sql("select max(rgt) from `tabCompany`")[0][0]
+
+		if not records:
+			records = test_records[2:]
+
+		for company in records:
+			lft, rgt, parent_company = frappe.db.get_value("Company", company["company_name"],
+				["lft", "rgt", "parent_company"])
+
+			if parent_company:
+				parent_lft, parent_rgt = frappe.db.get_value("Company", parent_company,
+					["lft", "rgt"])
+			else:
+				# root
+				parent_lft = min_lft - 1
+				parent_rgt = max_rgt + 1
+
+			self.assertTrue(lft)
+			self.assertTrue(rgt)
+			self.assertTrue(lft < rgt)
+			self.assertTrue(parent_lft < parent_rgt)
+			self.assertTrue(lft > parent_lft)
+			self.assertTrue(rgt < parent_rgt)
+			self.assertTrue(lft >= min_lft)
+			self.assertTrue(rgt <= max_rgt)
+
+	def get_no_of_children(self, company):
+		def get_no_of_children(companies, no_of_children):
+			children = []
+			for company in companies:
+				children += frappe.db.sql_list("""select name from `tabCompany`
+				where ifnull(parent_company, '')=%s""", company or '')
+
+			if len(children):
+				return get_no_of_children(children, no_of_children + len(children))
+			else:
+				return no_of_children
+
+		return get_no_of_children([company], 0)
+
+	def test_change_parent_company(self):
+		child_company = frappe.get_doc("Company", "_Test Company 5")
+
+		# changing parent of company
+		child_company.parent_company = "_Test Company 3"
+		child_company.save()
+		self.test_basic_tree()
+
+		# move it back
+		child_company.parent_company = "_Test Company 4"
+		child_company.save()
+		self.test_basic_tree()
+
 def create_company_communication(doctype, docname):
 	comm = frappe.get_doc({
 			"doctype": "Communication",
