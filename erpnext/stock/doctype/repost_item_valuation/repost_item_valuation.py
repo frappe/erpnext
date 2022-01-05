@@ -46,7 +46,7 @@ class RepostItemValuation(Document):
 			self.db_set('status', self.status)
 
 	def on_submit(self):
-		if not frappe.flags.in_test or self.flags.dont_run_in_test:
+		if not frappe.flags.in_test or self.flags.dont_run_in_test or frappe.flags.dont_execute_stock_reposts:
 			return
 
 		frappe.enqueue(repost, timeout=1800, queue='long',
@@ -54,9 +54,11 @@ class RepostItemValuation(Document):
 
 	@frappe.whitelist()
 	def restart_reposting(self):
-		self.set_status('Queued')
-		frappe.enqueue(repost, timeout=1800, queue='long',
-			job_name='repost_sle', now=True, doc=self)
+		self.set_status('Queued', write=False)
+		self.current_index = 0
+		self.distinct_item_and_warehouse = None
+		self.items_to_be_repost = None
+		self.db_update()
 
 	def deduplicate_similar_repost(self):
 		""" Deduplicate similar reposts based on item-warehouse-posting combination."""
@@ -95,7 +97,8 @@ def repost(doc):
 			return
 
 		doc.set_status('In Progress')
-		frappe.db.commit()
+		if not frappe.flags.in_test:
+			frappe.db.commit()
 
 		repost_sl_entries(doc)
 		repost_gl_entries(doc)
@@ -166,8 +169,8 @@ def repost_entries():
 	for row in riv_entries:
 		doc = frappe.get_doc('Repost Item Valuation', row.name)
 		if doc.status in ('Queued', 'In Progress'):
-			doc.deduplicate_similar_repost()
 			repost(doc)
+			doc.deduplicate_similar_repost()
 
 	riv_entries = get_repost_item_valuation_entries()
 	if riv_entries:

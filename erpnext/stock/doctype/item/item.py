@@ -222,10 +222,11 @@ class Item(WebsiteGenerator):
 					'route')) + '/' + self.scrub((self.item_name or self.item_code) + '-' + random_string(5))
 
 	def validate_website_image(self):
+		"""Validate if the website image is a public file"""
+
 		if frappe.flags.in_import:
 			return
 
-		"""Validate if the website image is a public file"""
 		auto_set_website_image = False
 		if not self.website_image and self.image:
 			auto_set_website_image = True
@@ -255,10 +256,11 @@ class Item(WebsiteGenerator):
 			self.website_image = None
 
 	def make_thumbnail(self):
+		"""Make a thumbnail of `website_image`"""
+
 		if frappe.flags.in_import:
 			return
 
-		"""Make a thumbnail of `website_image`"""
 		import requests.exceptions
 
 		if not self.is_new() and self.website_image != frappe.db.get_value(self.doctype, self.name, "website_image"):
@@ -722,7 +724,6 @@ class Item(WebsiteGenerator):
 
 	def recalculate_bin_qty(self, new_name):
 		from erpnext.stock.stock_balance import repost_stock
-		frappe.db.auto_commit_on_many_writes = 1
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
@@ -736,7 +737,6 @@ class Item(WebsiteGenerator):
 			repost_stock(new_name, warehouse)
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
-		frappe.db.auto_commit_on_many_writes = 0
 
 	@frappe.whitelist()
 	def copy_specification_from_item_group(self):

@@ -59,7 +59,7 @@ frappe.ui.form.on("Quality Inspection", {
 	},
 
 	item_code: function(frm) {
-		if (frm.doc.item_code) {
+		if (frm.doc.item_code && !frm.doc.quality_inspection_template) {
 			return frm.call({
 				method: "get_quality_inspection_template",
 				doc: frm.doc,

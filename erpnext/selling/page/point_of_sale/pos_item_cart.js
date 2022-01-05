@@ -100,6 +100,10 @@ erpnext.PointOfSale.ItemCart = class {
 			`<div class="add-discount-wrapper">
 				${this.get_discount_icon()} ${__('Add Discount')}
 			</div>
+			<div class="item-qty-total-container">
+				<div class="item-qty-total-label">${__('Total Items')}</div>
+				<div class="item-qty-total-value">0.00</div>
+			</div>
 			<div class="net-total-container">
 				<div class="net-total-label">${__("Net Total")}</div>
 				<div class="net-total-value">0.00</div>
@@ -142,6 +146,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 		this.$numpad_section.prepend(
 			`<div class="numpad-totals">
+			<span class="numpad-item-qty-total"></span>
 				<span class="numpad-net-total"></span>
 				<span class="numpad-grand-total"></span>
 			</div>`
@@ -470,6 +475,7 @@ erpnext.PointOfSale.ItemCart = class {
 		if (!frm) frm = this.events.get_frm();
 
 		this.render_net_total(frm.doc.net_total);
+		this.render_total_item_qty(frm.doc.items);
 		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
 		this.render_grand_total(grand_total);
 
@@ -484,6 +490,21 @@ erpnext.PointOfSale.ItemCart = class {
 
 		this.$numpad_section.find('.numpad-net-total').html(
 			`<div>${__('Net Total')}: <span>${format_currency(value, currency)}</span></div>`
+		);
+	}
+
+	render_total_item_qty(items) {
+		var total_item_qty = 0;
+		items.map((item) => {
+			total_item_qty = total_item_qty + item.qty;
+		});
+
+		this.$totals_section.find('.item-qty-total-container').html(
+			`<div>${__('Total Quantity')}</div><div>${total_item_qty}</div>`
+		);
+
+		this.$numpad_section.find('.numpad-item-qty-total').html(
+			`<div>${__('Total Quantity')}: <span>${total_item_qty}</span></div>`
 		);
 	}
 

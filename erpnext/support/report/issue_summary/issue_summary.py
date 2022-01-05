@@ -82,7 +82,8 @@ class IssueSummary(object):
 		self.sla_status_map = {
 			'SLA Failed': 'failed',
 			'SLA Fulfilled': 'fulfilled',
-			'SLA Ongoing': 'ongoing'
+			'First Response Due': 'first_response_due',
+			'Resolution Due': 'resolution_due'
 		}
 
 		for label, fieldname in self.sla_status_map.items():
