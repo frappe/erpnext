@@ -679,14 +679,6 @@ def get_custom_fields():
 				'insert_after': 'email_id'
 			}
 		],
-		'Donor': [
-			{
-				'fieldname': 'pan_number',
-				'label': 'PAN Details',
-				'fieldtype': 'Data',
-				'insert_after': 'email'
-			}
-		],
 		'Finance Book': [
 			{
 				'fieldname': 'for_income_tax',

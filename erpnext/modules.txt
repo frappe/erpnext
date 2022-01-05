@@ -17,7 +17,6 @@ Education
 Regional
 Restaurant
 ERPNext Integrations
-Non Profit
 Hotels
 Quality Management
 Communication
