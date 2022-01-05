@@ -339,3 +339,4 @@ erpnext.patches.v13_0.rename_ksa_qr_field
 erpnext.patches.v13_0.disable_ksa_print_format_for_others # 16-12-2021
 erpnext.patches.v13_0.update_tax_category_for_rcm
 erpnext.patches.v13_0.convert_to_website_item_in_item_card_group_template
+erpnext.patches.v13_0.agriculture_deprecation_warning
