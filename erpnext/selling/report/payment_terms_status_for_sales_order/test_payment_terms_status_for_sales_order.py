@@ -1,11 +1,8 @@
 import datetime
-import unittest
 
 import frappe
-from frappe import qb
 from frappe.utils import add_days
 
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.selling.report.payment_terms_status_for_sales_order.payment_terms_status_for_sales_order import (
