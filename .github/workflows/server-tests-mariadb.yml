@@ -1,14 +1,20 @@
-name: Patch
+name: Server (Mariadb)
 
 on:
   pull_request:
     paths-ignore:
       - '**.js'
       - '**.md'
+      - '**.html'
   workflow_dispatch:
+  push:
+    branches: [ develop ]
+    paths-ignore:
+      - '**.js'
+      - '**.md'
 
 concurrency:
-  group: patch-develop-${{ github.event.number }}
+  group: server-mariadb-develop-${{ github.event.number }}
   cancel-in-progress: true
 
 jobs:
@@ -16,7 +22,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
-    name: Patch Test
+    strategy:
+      fail-fast: false
+
+      matrix:
+        container: [1, 2, 3]
+
+    name: Python Unit Tests
 
     services:
       mysql:
@@ -84,32 +96,17 @@ jobs:
           DB: mariadb
           TYPE: server
 
-      - name: Run Patch Tests
-        run: |
-          cd ~/frappe-bench/
-          wget https://erpnext.com/files/v10-erpnext.sql.gz
-          bench --site test_site --force restore ~/frappe-bench/v10-erpnext.sql.gz
+      - name: Run Tests
+        run: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --use-orchestrator --with-coverage
+        env:
+          TYPE: server
+          CI_BUILD_ID: ${{ github.run_id }}
+          ORCHESTRATOR_URL: http://test-orchestrator.frappe.io
 
-          git -C "apps/frappe" remote set-url upstream https://github.com/frappe/frappe.git
-          git -C "apps/erpnext" remote set-url upstream https://github.com/frappe/erpnext.git
-
-          for version in $(seq 12 13)
-          do
-              echo "Updating to v$version"
-              branch_name="version-$version-hotfix"
-
-              git -C "apps/frappe" fetch --depth 1 upstream $branch_name:$branch_name
-              git -C "apps/erpnext" fetch --depth 1 upstream $branch_name:$branch_name
-
-              git -C "apps/frappe" checkout -q -f $branch_name
-              git -C "apps/erpnext" checkout -q -f $branch_name
-
-              bench setup requirements --python
-              bench --site test_site migrate
-          done
-
-
-          echo "Updating to latest version"
-          git -C "apps/frappe" checkout -q -f "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
-          git -C "apps/erpnext" checkout -q -f "$GITHUB_SHA"
-          bench --site test_site migrate
+      - name: Upload coverage data
+        uses: codecov/codecov-action@v2
+        with:
+          name: MariaDB
+          fail_ci_if_error: true
+          files: /home/runner/frappe-bench/sites/coverage.xml
+          verbose: true
