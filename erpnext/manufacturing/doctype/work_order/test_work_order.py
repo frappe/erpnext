@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.utils import add_months, cint, flt, now, today
+from frappe.utils import add_days, add_months, cint, flt, now, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -12,6 +12,7 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	OverProductionError,
 	StockOverProductionError,
 	close_work_order,
+	make_job_card,
 	make_stock_entry,
 	stop_unstop,
 )
@@ -801,6 +802,34 @@ class TestWorkOrder(ERPNextTestCase):
 			if row.is_scrap_item:
 				self.assertEqual(row.qty, 1)
 
+		# Partial Job Card 1 with qty 10
+		wo_order = make_wo_order_test_record(item=item, company=company, planned_start_date=add_days(now(), 60), qty=20, skip_transfer=1)
+		job_card = frappe.db.get_value('Job Card', {'work_order': wo_order.name}, 'name')
+		update_job_card(job_card, 10)
+
+		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
+		for row in stock_entry.items:
+			if row.is_scrap_item:
+				self.assertEqual(row.qty, 2)
+
+		# Partial Job Card 2 with qty 10
+		operations = []
+		wo_order.load_from_db()
+		for row in wo_order.operations:
+			n_dict = row.as_dict()
+			n_dict['qty'] = 10
+			n_dict['pending_qty'] = 10
+			operations.append(n_dict)
+
+		make_job_card(wo_order.name, operations)
+		job_card = frappe.db.get_value('Job Card', {'work_order': wo_order.name, 'docstatus': 0}, 'name')
+		update_job_card(job_card, 10)
+
+		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
+		for row in stock_entry.items:
+			if row.is_scrap_item:
+				self.assertEqual(row.qty, 2)
+
 	def test_close_work_order(self):
 		items = ['Test FG Item for Closed WO', 'Test RM Item 1 for Closed WO',
 			'Test RM Item 2 for Closed WO']
@@ -841,7 +870,51 @@ class TestWorkOrder(ERPNextTestCase):
 			close_work_order(wo_order, "Closed")
 			self.assertEqual(wo_order.get('status'), "Closed")
 
+<<<<<<< HEAD
 def update_job_card(job_card):
+=======
+	def test_fix_time_operations(self):
+		bom = frappe.get_doc({
+			"doctype": "BOM",
+			"item": "_Test FG Item 2",
+			"is_active": 1,
+			"is_default": 1,
+			"quantity": 1.0,
+			"with_operations": 1,
+			"operations": [
+				{
+					"operation": "_Test Operation 1",
+					"description": "_Test",
+					"workstation": "_Test Workstation 1",
+					"time_in_mins": 60,
+					"operating_cost": 140,
+					"fixed_time": 1
+				}
+			],
+			"items": [
+				{
+					"amount": 5000.0,
+					"doctype": "BOM Item",
+					"item_code": "_Test Item",
+					"parentfield": "items",
+					"qty": 1.0,
+					"rate": 5000.0,
+				},
+			],
+		})
+		bom.save()
+		bom.submit()
+
+
+		wo1 = make_wo_order_test_record(item=bom.item, bom_no=bom.name, qty=1, skip_transfer=1, do_not_submit=1)
+		wo2 = make_wo_order_test_record(item=bom.item, bom_no=bom.name, qty=2, skip_transfer=1, do_not_submit=1)
+
+		self.assertEqual(wo1.operations[0].time_in_mins, wo2.operations[0].time_in_mins)
+
+
+def update_job_card(job_card, jc_qty=None):
+	employee = frappe.db.get_value('Employee', {'status': 'Active'}, 'name')
+>>>>>>> 8f0b2fa90e (fix: incorrect scrap item qty)
 	job_card_doc = frappe.get_doc('Job Card', job_card)
 	job_card_doc.set('scrap_items', [
 		{
@@ -854,8 +927,12 @@ def update_job_card(job_card):
 		},
 	])
 
+	if jc_qty:
+		job_card_doc.for_quantity = jc_qty
+
 	job_card_doc.append('time_logs', {
 		'from_time': now(),
+		'employee': employee,
 		'time_in_mins': 60,
 		'completed_qty': job_card_doc.for_quantity
 	})
