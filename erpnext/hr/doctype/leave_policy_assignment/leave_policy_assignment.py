@@ -131,6 +131,8 @@ class LeavePolicyAssignment(Document):
 			monthly_earned_leave = get_monthly_earned_leave(new_leaves_allocated,
 				leave_type_details.get(leave_type).earned_leave_frequency, leave_type_details.get(leave_type).rounding)
 			new_leaves_allocated = monthly_earned_leave * months_passed
+		else:
+			new_leaves_allocated = 0
 
 		return new_leaves_allocated
 
