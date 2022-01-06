@@ -5,7 +5,7 @@ import frappe
 
 from erpnext.hooks import regional_overrides
 
-__version__ = '13.17.0'
+__version__ = '13.18.0'
 
 def get_default_company(user=None):
 	'''Get default company for user'''
@@ -56,9 +56,9 @@ def set_perpetual_inventory(enable=1, company=None):
 	company.enable_perpetual_inventory = enable
 	company.save()
 
-def encode_company_abbr(name, company):
+def encode_company_abbr(name, company=None, abbr=None):
 	'''Returns name encoded with company abbreviation'''
-	company_abbr = frappe.get_cached_value('Company',  company,  "abbr")
+	company_abbr = abbr or frappe.get_cached_value('Company',  company,  "abbr")
 	parts = name.rsplit(" - ", 1)
 
 	if parts[-1].lower() != company_abbr.lower():

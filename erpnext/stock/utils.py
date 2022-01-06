@@ -87,8 +87,8 @@ def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None
 
 	from erpnext.stock.stock_ledger import get_previous_sle
 
-	if not posting_date: posting_date = nowdate()
-	if not posting_time: posting_time = nowtime()
+	if posting_date is None: posting_date = nowdate()
+	if posting_time is None: posting_time = nowtime()
 
 	args = {
 		"item_code": item_code,

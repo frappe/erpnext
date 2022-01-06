@@ -218,6 +218,8 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 	# updated clear date of all the vouchers based on the bank transaction
 	vouchers = json.loads(vouchers)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
+	company_account = frappe.db.get_value('Bank Account', transaction.bank_account, 'account')
+
 	if transaction.unallocated_amount == 0:
 		frappe.throw(_("This bank transaction is already fully reconciled"))
 	total_amount = 0
@@ -226,7 +228,7 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 		total_amount += get_paid_amount(frappe._dict({
 			'payment_document': voucher['payment_doctype'],
 			'payment_entry': voucher['payment_name'],
-		}), transaction.currency)
+		}), transaction.currency, company_account)
 
 	if total_amount > transaction.unallocated_amount:
 		frappe.throw(_("The Sum Total of Amounts of All Selected Vouchers Should be Less than the Unallocated Amount of the Bank Transaction"))
@@ -261,7 +263,7 @@ def get_linked_payments(bank_transaction_name, document_types = None):
 	return matching
 
 def check_matching(bank_account, company, transaction, document_types):
-	# combine all types of vocuhers
+	# combine all types of vouchers
 	subquery = get_queries(bank_account, company, transaction, document_types)
 	filters = {
 			"amount": transaction.unallocated_amount,
@@ -343,13 +345,11 @@ def get_pe_matching_query(amount_condition, account_from_to, transaction):
 def get_je_matching_query(amount_condition, transaction):
 	# get matching journal entry query
 
+	# We have mapping at the bank level
+	# So one bank could have both types of bank accounts like asset and liability
+	# So cr_or_dr should be judged only on basis of withdrawal and deposit and not account type
 	company_account = frappe.get_value("Bank Account", transaction.bank_account, "account")
-	root_type = frappe.get_value("Account", company_account, "root_type")
-
-	if root_type == "Liability":
-		cr_or_dr = "debit" if transaction.withdrawal > 0 else "credit"
-	else:
-		cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
+	cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
 
 	return f"""
 

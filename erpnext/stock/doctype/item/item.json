@@ -359,8 +359,7 @@
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Valuation Method",
-   "options": "\nFIFO\nMoving Average",
-   "set_only_once": 1
+   "options": "\nFIFO\nMoving Average"
   },
   {
    "depends_on": "is_stock_item",
@@ -956,7 +955,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-03 08:32:03.869294",
+ "modified": "2021-12-14 04:13:16.857534",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
