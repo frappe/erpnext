@@ -1,8 +1,0 @@
-{
- "custom_fields": [
- ],
- "custom_perms": [],
- "doctype": "Employee Transfer",
- "property_setters": [],
- "sync_on_migrate": 1
-}
