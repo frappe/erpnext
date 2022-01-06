@@ -323,3 +323,5 @@ execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings'
 erpnext.patches.v14_0.set_payroll_cost_centers
 erpnext.patches.v13_0.agriculture_deprecation_warning
 erpnext.patches.v14_0.delete_agriculture_doctypes
+erpnext.patches.v13_0.hospitality_deprecation_warning
+erpnext.patches.v14_0.delete_hospitality_doctypes
