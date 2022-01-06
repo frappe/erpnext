@@ -3,10 +3,9 @@
 
 import frappe
 from frappe import _
-from frappe.utils import get_url_to_list
+from frappe.utils import flt, get_url_to_list
 
-from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
-
+import json
 
 def execute(filters=None):
 	columns = columns = get_columns()
@@ -55,14 +54,34 @@ def get_data(filters):
 
 	# Sales Heading
 	data.append({"title": 'VAT on Sales', "amount": '', "adjustment_amount": '', "vat_amount": ''})
-	get_tax_data(data, settings.ksa_vat_sales_accounts, filters, 'Sales Invoice')
+	gt_tax_amt, gt_adj_amt, gt_tax = get_tax_data(data, settings.ksa_vat_sales_accounts, filters, 'Sales Invoice')
+
+	gt_tax_amt, gt_adj_amt = get_zero_rated_total(data, "Sales Invoice", filters, gt_tax_amt, gt_adj_amt)
+	gt_tax_amt, gt_adj_amt = get_exempt_total(data, "Sales Invoice", filters, gt_tax_amt, gt_adj_amt)
+
+	data.append({
+		"title": _("Grand Total"),
+		"amount": gt_tax_amt,
+		"adjustment_amount": gt_adj_amt,
+		"vat_amount": gt_tax
+	})
 
 	# Blank Line
 	data.append({"title": '', "amount": '', "adjustment_amount": '', "vat_amount": ''})
 
 	# Purchase Heading
 	data.append({"title": 'VAT on Purchases', "amount": '', "adjustment_amount": '', "vat_amount": ''})
-	get_tax_data(data, settings.ksa_vat_purchase_accounts, filters, 'Purchase Invoice')
+	gt_tax_amt, gt_adj_amt, gt_tax = get_tax_data(data, settings.ksa_vat_purchase_accounts, filters, 'Purchase Invoice')
+
+	gt_tax_amt, gt_adj_amt = get_zero_rated_total(data, "Purchase Invoice", filters, gt_tax_amt, gt_adj_amt)
+	gt_tax_amt, gt_adj_amt = get_exempt_total(data, "Purchase Invoice", filters, gt_tax_amt, gt_adj_amt)
+
+	data.append({
+		"title": _("Grand Total"),
+		"amount": gt_tax_amt,
+		"adjustment_amount": gt_adj_amt,
+		"vat_amount": gt_tax
+	})
 
 	return data
 
@@ -78,33 +97,36 @@ def get_tax_data(data, settings, filters, doctype):
 		}
 
 	# Fetch All Invoices
-	invoices = frappe.get_all(doctype, filters ={
-		'company': filters.get('company'),
-		'docstatus': 1,
-		'posting_date': ['between', [filters.get('from_date'), filters.get('to_date')]]
-	})
+	conditions = get_conditions(filters)
+	invoices = frappe.db.sql(f"""
+		SELECT
+			j.account_head, j.base_tax_amount, j.base_total,
+			j.item_wise_tax_detail, s.is_return
+		FROM
+			`tab{doctype}` s
+			INNER JOIN `tabSales Taxes and Charges` j
+			ON j.parent = s.name
+		WHERE
+			s.docstatus = 1
+			{conditions};
+	""", filters, as_dict=1)
 
 	for inv in invoices:
-		invoice = frappe.get_doc(doctype, inv)
-		if not invoice.taxes:
-			continue
-		itemised_tax = get_itemised_tax(invoice.taxes, True)
-		itemised_taxable_amount = get_itemised_taxable_amount(invoice.items)
+		acc = inv["account_head"]
+		if tax_details.get(acc):
+			tax_details[acc]["total_tax"] += inv["base_tax_amount"]
+			# 'item_wise_tax_detail': '{"Item Code":[Tax Rate, Tax Amount]}'
+			item_wise = json.loads(inv["item_wise_tax_detail"])
+			if not inv["is_return"]:
+				for x in item_wise:
+					if item_wise[x][1] > 0.0:
+						tax_details[acc]["taxable_amount"] += item_wise[x][1]*100/item_wise[x][0]
+			else:
+				for x in item_wise:
+					if item_wise[x][1] > 0.0:
+						tax_details[acc]["adjustment_amount"] += item_wise[x][1]*100/item_wise[x][0]
 
-		for item in itemised_taxable_amount.keys():
-			# Summing up total tax
-			item_itemised_tax = itemised_tax.get(item)
-			for item_tax in item_itemised_tax.keys():
-				acc = item_itemised_tax[item_tax]['tax_account']
-				if tax_details.get(acc):
-					tax_details[acc]["total_tax"] += item_itemised_tax[item_tax]['tax_amount']
-					# Summing up total taxable amount
-					if not invoice.is_return:
-						tax_details[acc]["taxable_amount"] += itemised_taxable_amount[item]
-					else:
-						tax_details[acc]["adjustment_amount"] += itemised_taxable_amount[item]
-
-	grand_total_taxable_amount, grand_total_adjustment_amount, grand_total_tax = 0, 0, 0
+	gt_tax_amt, gt_adj_amt, gt_tax = 0, 0, 0
 	for account in tax_details.keys():
 		data.append({
 			"title": _(tax_details[account]["title"]),
@@ -112,13 +134,80 @@ def get_tax_data(data, settings, filters, doctype):
 			"adjustment_amount": tax_details[account]["adjustment_amount"],
 			"vat_amount": tax_details[account]["total_tax"]
 		})
-		grand_total_taxable_amount += tax_details[account]["taxable_amount"]
-		grand_total_adjustment_amount += tax_details[account]["adjustment_amount"]
-		grand_total_tax += tax_details[account]["total_tax"]
+		gt_tax_amt += tax_details[account]["taxable_amount"]
+		gt_adj_amt += tax_details[account]["adjustment_amount"]
+		gt_tax += tax_details[account]["total_tax"]
+
+	return gt_tax_amt, gt_adj_amt, gt_tax
+
+def get_zero_rated_total(data, doctype, filters, gt_tax_amt, gt_adj_amt):
+	conditions = get_conditions(filters)
+	amount = frappe.db.sql(f"""
+		SELECT
+			sum(i.base_amount) as total
+		FROM
+			`tab{doctype} Item` i inner join `tab{doctype}` s
+		ON
+			i.parent = s.name
+		WHERE
+			s.docstatus = 1 and i.is_zero_rated = 1
+			{conditions}
+		GROUP BY
+			s.is_return
+		ORDER BY
+			s.is_return
+	""", filters)
+
+	title = "Zero rated domestic sales" if doctype == "Sales Invoice" \
+		else "Zero rated purchases"
+	gt_tax_amt += flt(amount[0][0] if len(amount) > 0 else 0)
+	gt_adj_amt += flt(amount[1][0] if len(amount) > 1 else 0)
 
 	data.append({
-		"title": _("Grand Total"),
-		"amount": grand_total_taxable_amount,
-		"adjustment_amount": grand_total_adjustment_amount,
-		"vat_amount": grand_total_tax
+		"title": _(title),
+		"amount": flt(amount[0][0] if len(amount) > 0 else 0),
+		"adjustment_amount": flt(amount[1][0] if len(amount) > 1 else 0),
+		"vat_amount": 0.00
 	})
+
+	return gt_tax_amt, gt_adj_amt
+
+def get_exempt_total(data, doctype, filters, gt_tax_amt, gt_adj_amt):
+	conditions = get_conditions(filters)
+	amount = frappe.db.sql(f"""
+		SELECT
+			sum(i.base_amount) as total
+		FROM
+			`tab{doctype} Item` i inner join `tab{doctype}` s
+		ON
+			i.parent = s.name
+		WHERE
+			s.docstatus = 1 and i.is_exempt = 1
+			{conditions}
+		GROUP BY
+			s.is_return
+		ORDER BY
+			s.is_return
+	""", filters)
+
+	title = "Exempted sales" if doctype == "Sales Invoice" else "Exempted purchases"
+	gt_tax_amt += flt(amount[0][0] if len(amount) > 0 else 0)
+	gt_adj_amt += flt(amount[1][0] if len(amount) > 1 else 0)
+
+	data.append({
+		"title": _(title),
+		"amount": flt(amount[0][0] if len(amount) > 0 else 0),
+		"adjustment_amount": flt(amount[1][0] if len(amount) > 1 else 0),
+		"vat_amount": 0.00
+	})
+
+	return gt_tax_amt, gt_adj_amt
+
+def get_conditions(filters):
+	conditions = ""
+	for opts in (("company", " AND company=%(company)s"),
+		("from_date", " AND posting_date>=%(from_date)s"),
+		("to_date", " AND posting_date<=%(to_date)s")):
+		if filters.get(opts[0]):
+			conditions += opts[1]
+	return conditions
