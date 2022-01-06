@@ -1,5 +1,5 @@
 frappe.listview_settings['Vehicle Booking Order'] = {
-	add_fields: ["status", "delivery_overdue", "high_priority"],
+	add_fields: ["status", "delivery_overdue"],
 	get_indicator: function(doc) {
 		var indicator;
 

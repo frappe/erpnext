@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.model.naming import make_autoname
-from frappe.utils import cint, cstr, flt, add_days, nowdate, getdate, get_datetime
+from frappe.utils import cint, cstr, flt, add_days, nowdate, getdate
 from erpnext.stock.get_item_details import get_reserved_qty_for_so
 from frappe import _, ValidationError
 from erpnext.controllers.stock_controller import StockController
@@ -32,16 +32,46 @@ class SerialNo(StockController):
 
 	def validate(self):
 		if self.get("__islocal") and self.warehouse and not self.via_stock_ledger:
-			frappe.throw(_("New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt"), SerialNoCannotCreateDirectError)
+			frappe.throw(_("New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt"),
+				SerialNoCannotCreateDirectError)
+
+		self.validate_item()
+		self.validate_warehouse()
+		self.update_customer_from_sales_order()
 
 		self.set_maintenance_status()
-		self.validate_warehouse()
-		self.validate_item()
-		self.update_customer_from_sales_order()
 		self.set_status()
 
 	def on_update(self):
 		self.update_vehicle_reference()
+
+	def before_rename(self, old, new, merge=False):
+		if merge:
+			frappe.throw(_("Sorry, Serial Nos cannot be merged"))
+
+	def after_rename(self, old, new, merge=False):
+		"""rename serial_no text fields"""
+		docfields = frappe.db.sql("""
+			select distinct parent, fieldname
+			from tabDocField
+			where fieldname in ('serial_no', 'rejected_serial_no', 'current_serial_no')
+				and fieldtype in ('Text', 'Small Text', 'Long Text')
+		""")
+
+		for dt, fieldname in docfields:
+			rows = frappe.db.sql("""
+				select name, `{0}`
+				from `tab{1}`
+				where `{0}` like {2}
+			""".format(fieldname, dt, frappe.db.escape('%' + old + '%')))
+
+			for row_name, serial_text in rows:
+				serial_nos = map(lambda i: new if i.upper() == old.upper() else i, get_serial_nos(serial_text))
+				frappe.db.sql("""
+					update `tab{0}`
+					set `{1}` = %s
+					where name = %s
+				""".format(dt, fieldname), ('\n'.join(list(serial_nos)), row_name))
 
 	def set_status(self):
 		if self.delivery_document_type:
@@ -73,7 +103,7 @@ class SerialNo(StockController):
 		if not self.get("__islocal"):
 			item_code, warehouse = frappe.db.get_value("Serial No",
 				self.name, ["item_code", "warehouse"])
-			if not self.via_stock_ledger and item_code != self.item_code:
+			if not self.via_stock_ledger and item_code != self.item_code and not self.flags.allow_change_item_code:
 				frappe.throw(_("Item Code cannot be changed for Serial No."),
 					SerialNoCannotCannotChangeError)
 			if not self.via_stock_ledger and warehouse != self.warehouse:
@@ -85,7 +115,8 @@ class SerialNo(StockController):
 			Validate whether serial no is required for this item
 		"""
 		item = frappe.get_cached_doc("Item", self.item_code)
-		if item.has_serial_no!=1:
+
+		if not item.has_serial_no:
 			frappe.throw(_("Item {0} is not setup for Serial Nos. Check Item master").format(self.item_code))
 
 		self.item_group = item.item_group
@@ -236,34 +267,6 @@ class SerialNo(StockController):
 					sle_dict.setdefault("outgoing", []).append(sle)
 
 		return sle_dict
-
-	def before_rename(self, old, new, merge=False):
-		if merge:
-			frappe.throw(_("Sorry, Serial Nos cannot be merged"))
-
-	def after_rename(self, old, new, merge=False):
-		"""rename serial_no text fields"""
-		docfields = frappe.db.sql("""
-			select distinct parent, fieldname
-			from tabDocField
-			where fieldname in ('serial_no', 'rejected_serial_no', 'current_serial_no')
-				and fieldtype in ('Text', 'Small Text', 'Long Text')
-		""")
-
-		for dt, fieldname in docfields:
-			rows = frappe.db.sql("""
-				select name, `{0}`
-				from `tab{1}`
-				where `{0}` like {2}
-			""".format(fieldname, dt, frappe.db.escape('%' + old + '%')))
-
-			for row_name, serial_text in rows:
-				serial_nos = map(lambda i: new if i.upper()==old.upper() else i, get_serial_nos(serial_text))
-				frappe.db.sql("""
-					update `tab{0}`
-					set `{1}` = %s
-					where name = %s
-				""".format(dt, fieldname), ('\n'.join(list(serial_nos)), row_name))
 
 	def update_serial_no_reference(self, serial_no=None):
 		last_sle = self.get_last_sle(serial_no)
@@ -538,6 +541,7 @@ def get_serial_no_last_available_sle(sl_entries, exclude=None):
 
 	return available_sle
 
+
 def set_auto_serial_nos(sle, item_details):
 	if sle.is_cancelled == "No" and not sle.serial_no and cint(sle.actual_qty) > 0 \
 			and item_details.has_serial_no == 1 and item_details.serial_no_series:
@@ -559,11 +563,11 @@ def allow_serial_nos_with_different_item(sle_serial_no, sle):
 		in Manufacture / Repack type Stock Entry
 	"""
 	allow_serial_nos = False
-	if sle.voucher_type=="Stock Entry" and cint(sle.actual_qty) > 0:
+	if sle.voucher_type == "Stock Entry" and cint(sle.actual_qty) > 0:
 		stock_entry = frappe.get_cached_doc("Stock Entry", sle.voucher_no)
 		if stock_entry.purpose in ("Repack", "Manufacture"):
 			for d in stock_entry.get("items"):
-				if d.serial_no and (d.s_warehouse if sle.is_cancelled=="No" else d.t_warehouse):
+				if d.serial_no and (d.s_warehouse if sle.is_cancelled == "No" else d.t_warehouse):
 					serial_nos = get_serial_nos(d.serial_no)
 					if sle_serial_no in serial_nos:
 						allow_serial_nos = True

@@ -183,15 +183,13 @@
   },
   {
    "allow_in_quick_entry": 1,
-   "fetch_from": "vehicle_booking_order.item_code",
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Vehicle Item Code",
    "options": "Item",
    "reqd": 1,
-   "search_index": 1,
-   "set_only_once": 1
+   "search_index": 1
   },
   {
    "allow_in_quick_entry": 1,
@@ -717,7 +715,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2021-11-22 10:35:17.689660",
+ "modified": "2022-01-06 12:52:23.826804",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
