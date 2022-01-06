@@ -33,65 +33,6 @@ class TestWarehouse(ERPNextTestCase):
 			self.assertEqual(p_warehouse.name, child_warehouse.parent_warehouse)
 			self.assertEqual(child_warehouse.is_group, 0)
 
-	def test_warehouse_renaming(self):
-		create_warehouse("Test Warehouse for Renaming 1", company="_Test Company with perpetual inventory")
-		account = get_inventory_account("_Test Company with perpetual inventory", "Test Warehouse for Renaming 1 - TCP1")
-		self.assertTrue(frappe.db.get_value("Warehouse", filters={"account": account}))
-
-		# Rename with abbr
-		if frappe.db.exists("Warehouse", "Test Warehouse for Renaming 2 - TCP1"):
-			frappe.delete_doc("Warehouse", "Test Warehouse for Renaming 2 - TCP1")
-		frappe.rename_doc("Warehouse", "Test Warehouse for Renaming 1 - TCP1", "Test Warehouse for Renaming 2 - TCP1")
-
-		self.assertTrue(frappe.db.get_value("Warehouse",
-			filters={"account": "Test Warehouse for Renaming 1 - TCP1"}))
-
-		# Rename without abbr
-		if frappe.db.exists("Warehouse", "Test Warehouse for Renaming 3 - TCP1"):
-			frappe.delete_doc("Warehouse", "Test Warehouse for Renaming 3 - TCP1")
-
-		frappe.rename_doc("Warehouse", "Test Warehouse for Renaming 2 - TCP1", "Test Warehouse for Renaming 3")
-
-		self.assertTrue(frappe.db.get_value("Warehouse",
-			filters={"account": "Test Warehouse for Renaming 1 - TCP1"}))
-
-		# Another rename with multiple dashes
-		if frappe.db.exists("Warehouse", "Test - Warehouse - Company - TCP1"):
-			frappe.delete_doc("Warehouse", "Test - Warehouse - Company - TCP1")
-		frappe.rename_doc("Warehouse", "Test Warehouse for Renaming 3 - TCP1", "Test - Warehouse - Company")
-
-	def test_warehouse_merging(self):
-		company = "_Test Company with perpetual inventory"
-		create_warehouse("Test Warehouse for Merging 1", company=company,
-			properties={"parent_warehouse": "All Warehouses - TCP1"})
-		create_warehouse("Test Warehouse for Merging 2", company=company,
-			properties={"parent_warehouse": "All Warehouses - TCP1"})
-
-		make_stock_entry(item_code="_Test Item", target="Test Warehouse for Merging 1 - TCP1",
-			qty=1, rate=100, company=company)
-		make_stock_entry(item_code="_Test Item", target="Test Warehouse for Merging 2 - TCP1",
-			qty=1, rate=100, company=company)
-
-		existing_bin_qty = (
-			cint(frappe.db.get_value("Bin",
-				{"item_code": "_Test Item", "warehouse": "Test Warehouse for Merging 1 - TCP1"}, "actual_qty"))
-			+ cint(frappe.db.get_value("Bin",
-				{"item_code": "_Test Item", "warehouse": "Test Warehouse for Merging 2 - TCP1"}, "actual_qty"))
-		)
-
-		frappe.rename_doc("Warehouse", "Test Warehouse for Merging 1 - TCP1",
-			"Test Warehouse for Merging 2 - TCP1", merge=True)
-
-		self.assertFalse(frappe.db.exists("Warehouse", "Test Warehouse for Merging 1 - TCP1"))
-
-		bin_qty = frappe.db.get_value("Bin",
-			{"item_code": "_Test Item", "warehouse": "Test Warehouse for Merging 2 - TCP1"}, "actual_qty")
-
-		self.assertEqual(bin_qty, existing_bin_qty)
-
-		self.assertTrue(frappe.db.get_value("Warehouse",
-			filters={"account": "Test Warehouse for Merging 2 - TCP1"}))
-
 	def test_unlinking_warehouse_from_item_defaults(self):
 		company = "_Test Company"
 

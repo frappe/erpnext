@@ -36,12 +36,16 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map):
 			posting_date = entry.posting_date
 			voucher_type = entry.voucher_type
 
+			if not tax_withholding_category:
+				tax_withholding_category = supplier_map.get(supplier, {}).get('tax_withholding_category')
+				rate = tax_rate_map.get(tax_withholding_category)
+
 			if entry.account in tds_accounts:
 				tds_deducted += (entry.credit - entry.debit)
 
 			total_amount_credited += (entry.credit - entry.debit)
 
-		if rate and tds_deducted:
+		if tds_deducted:
 			row = {
 				'pan' if frappe.db.has_column('Supplier', 'pan') else 'tax_id': supplier_map.get(supplier, {}).get('pan'),
 				'supplier': supplier_map.get(supplier, {}).get('name')
@@ -67,7 +71,7 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map):
 
 def get_supplier_pan_map():
 	supplier_map = frappe._dict()
-	suppliers = frappe.db.get_all('Supplier', fields=['name', 'pan', 'supplier_type', 'supplier_name'])
+	suppliers = frappe.db.get_all('Supplier', fields=['name', 'pan', 'supplier_type', 'supplier_name', 'tax_withholding_category'])
 
 	for d in suppliers:
 		supplier_map[d.name] = d

@@ -23,6 +23,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
+from erpnext.accounts.party import get_party_account_currency
 
 
 class Subscription(Document):
@@ -354,6 +355,9 @@ class Subscription(Document):
 			invoice.supplier = self.party
 			if frappe.db.get_value('Supplier', self.party, 'tax_withholding_category'):
 				invoice.apply_tds = 1
+
+		### Add party currency to invoice
+		invoice.currency = get_party_account_currency(self.party_type, self.party, self.company)
 
 		## Add dimensions in invoice for subscription:
 		accounting_dimensions = get_accounting_dimensions()

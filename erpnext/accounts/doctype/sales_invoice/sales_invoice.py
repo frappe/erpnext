@@ -155,6 +155,8 @@ class SalesInvoice(SellingController):
 		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points and not self.is_consolidated:
 			validate_loyalty_points(self, self.loyalty_points)
 
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
 			if d.is_fixed_asset and d.meta.get_field("asset") and d.asset:
@@ -1047,6 +1049,8 @@ class SalesInvoice(SellingController):
 					frappe.flags.is_reverse_depr_entry = False
 					asset.flags.ignore_validate_update_after_submit = True
 					schedule.journal_entry = None
+					depreciation_amount = self.get_depreciation_amount_in_je(reverse_journal_entry)
+					asset.finance_books[0].value_after_depreciation += depreciation_amount
 					asset.save()
 
 	def get_posting_date_of_sales_invoice(self):
@@ -1068,6 +1072,12 @@ class SalesInvoice(SellingController):
 			return True
 
 		return False
+
+	def get_depreciation_amount_in_je(self, journal_entry):
+		if journal_entry.accounts[0].debit_in_account_currency:
+			return journal_entry.accounts[0].debit_in_account_currency
+		else:
+			return journal_entry.accounts[0].credit_in_account_currency
 
 	@property
 	def enable_discount_accounting(self):

@@ -534,8 +534,6 @@ class TestItem(ERPNextTestCase):
 
 	def test_index_creation(self):
 		"check if index is getting created in db"
-		from erpnext.stock.doctype.item.item import on_doctype_update
-		on_doctype_update()
 
 		indices = frappe.db.sql("show index from tabItem", as_dict=1)
 		expected_columns = {"item_code", "item_name", "item_group", "route"}
