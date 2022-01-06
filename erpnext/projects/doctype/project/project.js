@@ -238,7 +238,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 			},
 			callback: function(r) {
 				if(!r.exc) {
-					me.frm.set_value(r.message);
+					return me.frm.set_value(r.message);
 				}
 			}
 		});

@@ -232,6 +232,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							var customer_changed = false;
 							var prev_bill_to = cstr(frm.doc.bill_to);
 							var prev_customer = cstr(frm.doc.customer);
+							var applies_to_vehicle = null;
 
 							// Set Customer and Bill To first
 							if (r.message.customer) {
@@ -253,6 +254,17 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								delete r.message['bill_to'];
 							}
 
+							// Set Applies to Vehicle Later
+							if (r.message.applies_to_vehicle) {
+								applies_to_vehicle = r.message['applies_to_vehicle'];
+								delete r.message['applies_to_vehicle'];
+								delete r.message['applies_to_item'];
+							// Remove Applies to Vehicle if Applies to Item is given
+							} else if (r.message.applies_to_item && frm.fields_dict.applies_to_vehicle) {
+								frm.doc.applies_to_vehicle = null;
+								frm.refresh_field('applies_to_vehicle');
+							}
+
 							return frappe.run_serially([
 								() => {
 									if (customer_changed) {
@@ -263,13 +275,18 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 										}
 									}
 								},
-								() => frm.set_value(r.message)
+								() => frm.set_value(r.message),
+								() => {
+									if (applies_to_vehicle && frm.fields_dict.applies_to_vehicle) {
+										return frm.set_value("applies_to_vehicle", applies_to_vehicle);
+									}
+								},
 							]);
 						}
 					}
 				});
 			} else {
-				frm.cscript.get_applies_vehicle_odometer();
+				return frm.cscript.get_applies_to_details();
 			}
 		});
 
@@ -1418,23 +1435,23 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			},
 			callback: function(r) {
 				if(!r.exc) {
-					me.frm.set_value(r.message);
+					return me.frm.set_value(r.message);
 				}
 			}
 		});
 	},
 
-	get_applies_vehicle_odometer: function () {
+	get_applies_to_vehicle_odometer: function () {
 		if (!this.frm.doc.applies_to_vehicle || !this.frm.fields_dict.vehicle_last_odometer) {
 			return;
 		}
 
 		var me = this;
-		var args = this.get_applies_to_args();
 		return frappe.call({
 			method: "erpnext.stock.get_item_details.get_applies_to_vehicle_odometer",
 			args: {
-				args: args
+				vehicle: this.frm.doc.applies_to_vehicle,
+				project: this.frm.doc.project,
 			},
 			callback: function(r) {
 				if(!r.exc) {

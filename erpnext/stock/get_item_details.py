@@ -1424,33 +1424,52 @@ def get_applies_to_details(args, for_validate=False):
 		vehicle = frappe.get_doc("Vehicle", args.applies_to_vehicle)
 		out.applies_to_item = vehicle.item_code
 
-	# Get Item
-	item = frappe._dict()
-	item_code = out.applies_to_item or args.applies_to_item
-	if item_code:
-		item = frappe.get_cached_doc("Item", item_code)
-
-	# Item Details
-	if item:
-		out.applies_to_item_name = item.item_name
-
-	out.applies_to_variant_of = item.variant_of
-	out.applies_to_variant_of_name = frappe.get_cached_value("Item", item.variant_of, 'item_name') if item.variant_of else None
+	# Get Project
+	project = None
+	if args.project and args.doctype != 'Project':
+		project = frappe.db.get_value("Project", args.project, [
+			'name', 'applies_to_vehicle',
+			'vehicle_chassis_no', 'vehicle_engine_no',
+			'vehicle_license_plate', 'vehicle_unregistered',
+			'vehicle_color', 'vehicle_last_odometer',
+		], as_dict=1)
 
 	# Vehicle Details
-	if vehicle:
+	# Get Vehicle Details from Project if Vehicle is the same in Transaction and Project
+	if project and cstr(project.applies_to_vehicle) == cstr(args.applies_to_vehicle):
+		out.vehicle_chassis_no = project.vehicle_chassis_no
+		out.vehicle_engine_no = project.vehicle_engine_no
+		out.vehicle_license_plate = project.vehicle_license_plate
+		out.vehicle_unregistered = project.vehicle_unregistered
+		out.vehicle_color = project.vehicle_color
+		out.vehicle_last_odometer = project.vehicle_last_odometer
+
+	# Otherwise get it from the Vehicle
+	elif vehicle:
 		out.vehicle_chassis_no = vehicle.chassis_no
 		out.vehicle_engine_no = vehicle.engine_no
 		out.vehicle_license_plate = vehicle.license_plate
 		out.vehicle_unregistered = vehicle.unregistered
 		out.vehicle_color = vehicle.color
 
-		if args.doctype == "Project":
-			if not for_validate:
-				from erpnext.vehicles.doctype.vehicle.vehicle import get_project_odometer
-				out.update(get_project_odometer(args.name, vehicle.name))
-		else:
-			out.vehicle_last_odometer = get_applies_to_vehicle_odometer(args)
+		if args.doctype != "Project":
+			out.vehicle_last_odometer = get_applies_to_vehicle_odometer(args.applies_to_vehicle)
+
+	# If called by Project, get first and last project's odometer readings
+	if vehicle and args.doctype == "Project" and not for_validate:
+		from erpnext.vehicles.doctype.vehicle.vehicle import get_project_odometer
+		out.update(get_project_odometer(args.name, vehicle.name))
+
+	# Item Details
+	item = frappe._dict()
+	item_code = out.applies_to_item or args.applies_to_item
+	if item_code:
+		item = frappe.get_cached_doc("Item", item_code)
+
+	if item:
+		out.applies_to_item_name = item.item_name
+	out.applies_to_variant_of = item.variant_of
+	out.applies_to_variant_of_name = frappe.get_cached_value("Item", item.variant_of, 'item_name') if item.variant_of else None
 
 	# Vehicle Owner
 	vehicle_owner = args.vehicle_owner
@@ -1461,15 +1480,10 @@ def get_applies_to_details(args, for_validate=False):
 
 
 @frappe.whitelist()
-def get_applies_to_vehicle_odometer(args):
+def get_applies_to_vehicle_odometer(vehicle, project=None):
 	from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_vehicle_odometer
 
-	if isinstance(args, string_types):
-		args = json.loads(args)
-
-	args = frappe._dict(args)
-
-	if args.applies_to_vehicle:
-		return get_vehicle_odometer(args.applies_to_vehicle, project=args.project)
+	if vehicle:
+		return get_vehicle_odometer(vehicle, project=project)
 	else:
 		return 0

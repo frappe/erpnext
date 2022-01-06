@@ -535,12 +535,14 @@ def get_project_details(project, doctype):
 	for f in fieldnames:
 		if f in ['customer', 'bill_to', 'vehicle_owner'] and doctype not in sales_doctypes:
 			continue
-		if project.get(f):
-			out[f] = project.get(f)
+		if f in ['customer', 'bill_to'] and not project.get(f):
+			continue
 
-			if doctype == "Quotation" and f == 'customer':
-				out['quotation_to'] = 'Customer'
-				out['party_name'] = project.get(f)
+		out[f] = project.get(f)
+
+		if doctype == "Quotation" and f == 'customer':
+			out['quotation_to'] = 'Customer'
+			out['party_name'] = project.get(f)
 
 	return out
 
@@ -595,16 +597,11 @@ def get_sales_invoice(project_name):
 	from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice as invoice_from_sales_order
 
 	project = frappe.get_doc("Project", project_name)
-	project_details = get_project_details(project, "Sales Invoice")
 
 	# Create Sales Invoice
 	target_doc = frappe.new_doc("Sales Invoice")
 	target_doc.company = project.company
 	target_doc.project = project.name
-
-	for k, v in project_details.items():
-		if target_doc.meta.has_field(k):
-			target_doc.set(k, v)
 
 	filters = {"project": project.name}
 	if project.customer:
@@ -631,5 +628,11 @@ def get_sales_invoice(project_name):
 	sales_orders = frappe.get_all("Sales Order", filters=sales_order_filters)
 	for d in sales_orders:
 		target_doc = invoice_from_sales_order(d.name, target_doc=target_doc)
+
+	# Set Project Details
+	project_details = get_project_details(project, "Sales Invoice")
+	for k, v in project_details.items():
+		if target_doc.meta.has_field(k):
+			target_doc.set(k, v)
 
 	return target_doc
