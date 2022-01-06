@@ -3,6 +3,7 @@
 
 
 import json
+from functools import reduce
 
 import frappe
 from frappe import ValidationError, _, scrub, throw
@@ -1522,6 +1523,8 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.paid_amount = paid_amount
 	pe.received_amount = received_amount
 	pe.letter_head = doc.get("letter_head")
+	if dt == 'Purchase Order':
+		pe.project = reduce(lambda prev,cur: prev or cur, [x.project for x in doc.get('items')], None) # get first non-empty project from items
 
 	if pe.party_type in ["Customer", "Supplier"]:
 		bank_account = get_party_bank_account(pe.party_type, pe.party)
