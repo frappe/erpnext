@@ -524,6 +524,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
+		this.set_applies_to_read_only();
+
 		let scan_barcode_field = this.frm.get_field('scan_barcode');
 		if (scan_barcode_field) {
 			scan_barcode_field.set_value("");
@@ -1407,6 +1409,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.get_applies_to_details();
 	},
 	applies_to_vehicle: function () {
+		this.set_applies_to_read_only();
 		this.get_applies_to_details();
 	},
 	vehicle_owner: function () {
@@ -1469,6 +1472,21 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			name: this.frm.doc.name,
 			project: this.frm.doc.project,
 		}
+	},
+
+	set_applies_to_read_only: function() {
+		var me = this;
+		var read_only_fields = [
+			'applies_to_item', 'applies_to_item_name',
+			'vehicle_license_plate', 'vehicle_unregistered',
+			'vehicle_chassis_no', 'vehicle_engine_no',
+			'vehicle_color', 'vehicle_last_odometer',
+		];
+		$.each(read_only_fields, function (i, f) {
+			if (me.frm.fields_dict[f]) {
+				me.frm.set_df_property(f, "read_only", me.frm.doc.applies_to_vehicle ? 1 : 0);
+			}
+		});
 	},
 
 	calculate_net_weight: function(){

@@ -19,6 +19,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		erpnext.hide_company();
 		this.setup_web_link();
 		this.setup_buttons();
+		this.set_applies_to_read_only();
 		this.toggle_vehicle_odometer_fields();
 	},
 
@@ -181,6 +182,21 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		}
 	},
 
+	set_applies_to_read_only: function() {
+		var me = this;
+		var read_only_fields = [
+			'applies_to_item', 'applies_to_item_name',
+			'vehicle_license_plate', 'vehicle_unregistered',
+			'vehicle_chassis_no', 'vehicle_engine_no',
+			'vehicle_color'
+		];
+		$.each(read_only_fields, function (i, f) {
+			if (me.frm.fields_dict[f]) {
+				me.frm.set_df_property(f, "read_only", me.frm.doc.applies_to_vehicle ? 1 : 0);
+			}
+		});
+	},
+
 	create_duplicate: function() {
 		var me = this;
 		return new Promise(resolve => {
@@ -210,6 +226,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		this.get_applies_to_details();
 	},
 	applies_to_vehicle: function () {
+		this.set_applies_to_read_only();
 		this.get_applies_to_details();
 	},
 	vehicle_owner: function () {
