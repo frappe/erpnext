@@ -41,7 +41,7 @@ def make_custom_fields():
 	is_zero_rated = dict(fieldname='is_zero_rated', label='Is Zero Rated',
 		fieldtype='Check', fetch_from='item_code.is_zero_rated', insert_after='description',
 		print_hide=1)
-	
+
 	is_exempt = dict(fieldname='is_exempt', label='Is Exempt',
 		fieldtype='Check', fetch_from='item_code.is_exempt', insert_after='is_zero_rated',
 		print_hide=1)
