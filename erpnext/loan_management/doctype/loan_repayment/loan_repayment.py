@@ -321,74 +321,79 @@ class LoanRepayment(AccountsController):
 		else:
 			remarks = _("Repayment against Loan: ") + self.against_loan
 
-		if not loan_details.repay_from_salary:
-			if self.total_penalty_paid:
-				gle_map.append(
-					self.get_gl_dict({
-						"account": loan_details.loan_account,
-						"against": loan_details.payment_account,
-						"debit": self.total_penalty_paid,
-						"debit_in_account_currency": self.total_penalty_paid,
-						"against_voucher_type": "Loan",
-						"against_voucher": self.against_loan,
-						"remarks": _("Penalty against loan:") + self.against_loan,
-						"cost_center": self.cost_center,
-						"party_type": self.applicant_type,
-						"party": self.applicant,
-						"posting_date": getdate(self.posting_date)
-					})
-				)
+		if self.repay_from_salary:
+			payment_account = self.payroll_payable_account
+		else:
+			payment_account = loan_details.payment_account
 
-				gle_map.append(
-					self.get_gl_dict({
-						"account": loan_details.penalty_income_account,
-						"against": loan_details.payment_account,
-						"credit": self.total_penalty_paid,
-						"credit_in_account_currency": self.total_penalty_paid,
-						"against_voucher_type": "Loan",
-						"against_voucher": self.against_loan,
-						"remarks": _("Penalty against loan:") + self.against_loan,
-						"cost_center": self.cost_center,
-						"posting_date": getdate(self.posting_date)
-					})
-				)
-
-			gle_map.append(
-				self.get_gl_dict({
-					"account": loan_details.payment_account,
-					"against": loan_details.loan_account + ", " + loan_details.interest_income_account
-							+ ", " + loan_details.penalty_income_account,
-					"debit": self.amount_paid,
-					"debit_in_account_currency": self.amount_paid,
-					"against_voucher_type": "Loan",
-					"against_voucher": self.against_loan,
-					"remarks": remarks,
-					"cost_center": self.cost_center,
-					"posting_date": getdate(self.posting_date)
-				})
-			)
-
+		if self.total_penalty_paid:
 			gle_map.append(
 				self.get_gl_dict({
 					"account": loan_details.loan_account,
-					"party_type": loan_details.applicant_type,
-					"party": loan_details.applicant,
 					"against": loan_details.payment_account,
-					"credit": self.amount_paid,
-					"credit_in_account_currency": self.amount_paid,
+					"debit": self.total_penalty_paid,
+					"debit_in_account_currency": self.total_penalty_paid,
 					"against_voucher_type": "Loan",
 					"against_voucher": self.against_loan,
-					"remarks": remarks,
+					"remarks": _("Penalty against loan:") + self.against_loan,
+					"cost_center": self.cost_center,
+					"party_type": self.applicant_type,
+					"party": self.applicant,
+					"posting_date": getdate(self.posting_date)
+				})
+			)
+
+			gle_map.append(
+				self.get_gl_dict({
+					"account": loan_details.penalty_income_account,
+					"against": payment_account,
+					"credit": self.total_penalty_paid,
+					"credit_in_account_currency": self.total_penalty_paid,
+					"against_voucher_type": "Loan",
+					"against_voucher": self.against_loan,
+					"remarks": _("Penalty against loan:") + self.against_loan,
 					"cost_center": self.cost_center,
 					"posting_date": getdate(self.posting_date)
 				})
 			)
 
-			if gle_map:
-				make_gl_entries(gle_map, cancel=cancel, adv_adj=adv_adj, merge_entries=False)
+		gle_map.append(
+			self.get_gl_dict({
+				"account": payment_account,
+				"against": loan_details.loan_account + ", " + loan_details.interest_income_account
+						+ ", " + loan_details.penalty_income_account,
+				"debit": self.amount_paid,
+				"debit_in_account_currency": self.amount_paid,
+				"against_voucher_type": "Loan",
+				"against_voucher": self.against_loan,
+				"remarks": remarks,
+				"cost_center": self.cost_center,
+				"posting_date": getdate(self.posting_date)
+			})
+		)
+
+		gle_map.append(
+			self.get_gl_dict({
+				"account": loan_details.loan_account,
+				"party_type": loan_details.applicant_type,
+				"party": loan_details.applicant,
+				"against": payment_account,
+				"credit": self.amount_paid,
+				"credit_in_account_currency": self.amount_paid,
+				"against_voucher_type": "Loan",
+				"against_voucher": self.against_loan,
+				"remarks": remarks,
+				"cost_center": self.cost_center,
+				"posting_date": getdate(self.posting_date)
+			})
+		)
+
+		if gle_map:
+			make_gl_entries(gle_map, cancel=cancel, adv_adj=adv_adj, merge_entries=False)
 
 def create_repayment_entry(loan, applicant, company, posting_date, loan_type,
-	payment_type, interest_payable, payable_principal_amount, amount_paid, penalty_amount=None):
+	payment_type, interest_payable, payable_principal_amount, amount_paid, penalty_amount=None,
+	payroll_payable_account=None):
 
 	lr = frappe.get_doc({
 		"doctype": "Loan Repayment",
@@ -401,7 +406,8 @@ def create_repayment_entry(loan, applicant, company, posting_date, loan_type,
 		"interest_payable": interest_payable,
 		"payable_principal_amount": payable_principal_amount,
 		"amount_paid": amount_paid,
-		"loan_type": loan_type
+		"loan_type": loan_type,
+		"payroll_payable_account": payroll_payable_account
 	}).insert()
 
 	return lr
