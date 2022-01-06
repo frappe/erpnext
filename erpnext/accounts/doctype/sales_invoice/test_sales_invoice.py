@@ -19,6 +19,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_comp
 from erpnext.accounts.utils import PaymentEntryUnlinkError
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from erpnext.controllers.accounts_controller import update_invoice_status
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.regional.india.utils import get_ewb_data
@@ -2357,6 +2358,41 @@ class TestSalesInvoice(unittest.TestCase):
 		pe.submit()
 		si.reload()
 		self.assertEqual(si.status, "Paid")
+
+	def test_update_invoice_status(self):
+		today = nowdate()
+
+		# Sales Invoice without Payment Schedule
+		si = create_sales_invoice(posting_date=add_days(today, -5))
+
+		# Sales Invoice with Payment Schedule
+		si_with_payment_schedule = create_sales_invoice(do_not_submit=True)
+		si_with_payment_schedule.extend("payment_schedule", [
+			{
+				"due_date": add_days(today, -5),
+				"invoice_portion": 50,
+				"payment_amount": si_with_payment_schedule.grand_total / 2
+			},
+			{
+				"due_date": add_days(today, 5),
+				"invoice_portion": 50,
+				"payment_amount": si_with_payment_schedule.grand_total / 2
+			}
+		])
+		si_with_payment_schedule.submit()
+
+
+		for invoice in (si, si_with_payment_schedule):
+			invoice.db_set("status", "Unpaid")
+			update_invoice_status()
+			invoice.reload()
+			self.assertEqual(invoice.status, "Overdue")
+
+			invoice.db_set("status", "Unpaid and Discounted")
+			update_invoice_status()
+			invoice.reload()
+			self.assertEqual(invoice.status, "Overdue and Discounted")
+
 
 	def test_sales_commission(self):
 		si = frappe.copy_doc(test_records[0])
