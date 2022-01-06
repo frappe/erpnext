@@ -489,6 +489,6 @@ def validate_active_employee(employee: str, on_date: Optional[str] = None):
 		"Employee", employee, ("relieving_date", "status")
 	)
 
-	if (on_date and relieving_date and relieving_date < getdate(on_date)) or status == "Inactive":
+	if status == "Inactive" and (not relieving_date or (on_date and relieving_date and relieving_date < getdate(on_date)))
 		frappe.throw(_("Transaction cannot be created for inactive Employee {0}.").format(
 			get_link_to_form("Employee", employee)), InactiveEmployeeStatusError)
