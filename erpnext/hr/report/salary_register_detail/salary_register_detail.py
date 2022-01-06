@@ -36,6 +36,8 @@ def execute(filters=None):
 						value_component = sdd.amount
 				
 				row += [value_component]
+			# else:
+			# 	row += [0]
 
 		row += [ss.gross_pay]
 
@@ -47,16 +49,26 @@ def execute(filters=None):
 					if coldata.name == sdd.salary_component:
 						value_component = sdd.amount
 				
-				row += [value_component]		
+				row += [value_component]	
+			# else:
+			# 	row += [0]	
 
 		row += [ss.total_deduction, ss.net_pay]
 
 		data.append(row)
 	
-	row = ["ELABORADO POR:","","","","","","",""]
+	row = ["ELABORADO POR:"]
+
+	for column in columns:
+		row += [""]
+
 	data.append(row)
 
-	row = ["REVISADO POR:","","","","","","",""]
+	row = ["REVISADO POR:"]
+	
+	for column in columns:
+		row += [""]
+
 	data.append(row)
 
 	return columns, data
