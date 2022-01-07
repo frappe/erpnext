@@ -9,6 +9,7 @@ def get_data():
 			'Stock Entry': 'delivery_note_no',
 			'Quality Inspection': 'reference_name',
 			'Auto Repeat': 'reference_document',
+			'Purchase Receipt':'inter_company_reference'
 		},
 		'internal_links': {
 			'Sales Order': ['items', 'against_sales_order'],
@@ -20,7 +21,7 @@ def get_data():
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Sales Order', 'Shipment', 'Quality Inspection']
+				'items': ['Sales Order', 'Shipment', 'Quality Inspection','Purchase Receipt']
 			},
 			{
 				'label': _('Returns'),

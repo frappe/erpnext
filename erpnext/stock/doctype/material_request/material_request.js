@@ -229,14 +229,6 @@ frappe.ui.form.on('Material Request', {
 					() => frm.events.update_status(frm, 'Stopped'));
 
 			}
-			if (frm.doc.material_request_type === "Material Transfer"  && frm.doc.internal_transfer) {
-				frm.add_custom_button(__('Delivery Note'), function() {
-					frappe.model.open_mapped_doc({
-						method: "erpnext.stock.doctype.material_request.material_request.make_delivery_note",
-						frm: frm
-					});
-				}, __("Create"))
-			}
 		}
 
 		if (frm.doc.docstatus===0) {
