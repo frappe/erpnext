@@ -107,6 +107,7 @@
   "shipping_rule",
   "section_break_41",
   "taxes",
+  "has_stin",
   "sec_tax_breakup",
   "other_charges_calculation",
   "tax_exclusive_totals_section",
@@ -1685,12 +1686,18 @@
   {
    "fieldname": "column_break_54",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "has_stin",
+   "fieldtype": "Check",
+   "label": "Apply Taxes"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2022-01-07 12:21:10.418172",
+ "modified": "2022-01-07 12:36:29.233284",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

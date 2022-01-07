@@ -530,10 +530,11 @@ def get_project_details(project, doctype):
 		'vehicle_last_odometer',
 		'service_advisor', 'service_manager',
 		'insurance_company', 'insurance_loss_no', 'insurance_policy_no',
-		'insurance_surveyor', 'insurance_surveyor_company'
+		'insurance_surveyor', 'insurance_surveyor_company',
+		'has_stin',
 	]
 	for f in fieldnames:
-		if f in ['customer', 'bill_to', 'vehicle_owner'] and doctype not in sales_doctypes:
+		if f in ['customer', 'bill_to', 'vehicle_owner', 'has_stin'] and doctype not in sales_doctypes:
 			continue
 		if f in ['customer', 'bill_to'] and not project.get(f):
 			continue

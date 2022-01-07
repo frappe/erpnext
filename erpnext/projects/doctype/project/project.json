@@ -28,6 +28,7 @@
   "customer_details_section",
   "customer",
   "customer_name",
+  "has_stin",
   "column_break_14",
   "bill_to",
   "bill_to_name",
@@ -603,11 +604,17 @@
   {
    "fieldname": "col_break_applies_to",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "has_stin",
+   "fieldtype": "Check",
+   "label": "Apply Taxes"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2021-12-05 01:13:12.653997",
+ "modified": "2022-01-07 13:12:45.044768",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
