@@ -4,12 +4,7 @@
 
 import frappe
 from frappe import _, scrub
-<<<<<<< HEAD
-from frappe.utils import cint
-=======
 from frappe.utils import cint, flt
-from six import iteritems
->>>>>>> 1d270dca05 (fix: Show GL balance in Accounts Receivable and payable summary)
 
 from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
@@ -41,14 +36,10 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		party_advance_amount = get_partywise_advanced_payment_amount(self.party_type,
 			self.filters.report_date, self.filters.show_future_payments, self.filters.company) or {}
 
-<<<<<<< HEAD
-		for party, party_dict in self.party_total.items():
-=======
 		if self.filters.show_gl_balance:
 			gl_balance_map = get_gl_balance(self.filters.report_date)
 
 		for party, party_dict in iteritems(self.party_total):
->>>>>>> 1d270dca05 (fix: Show GL balance in Accounts Receivable and payable summary)
 			if party_dict.outstanding == 0:
 				continue
 
