@@ -10,13 +10,13 @@ def get_data():
 			'Asset': 'purchase_receipt',
 			'Landed Cost Voucher': 'receipt_document',
 			'Auto Repeat': 'reference_document',
-			'Purchase Receipt': 'return_against',
-			'Delivery Note':'inter_company_reference'
+			'Purchase Receipt': 'return_against'
 		},
 		'internal_links': {
 			'Purchase Order': ['items', 'purchase_order'],
 			'Project': ['items', 'project'],
 			'Quality Inspection': ['items', 'quality_inspection'],
+			'Delivery Note':['items','inter_company_reference']
 		},
 		'transactions': [
 			{
@@ -25,7 +25,7 @@ def get_data():
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Purchase Order', 'Quality Inspection', 'Project','Delivery Note']
+				'items': ['Purchase Order', 'Quality Inspection', 'Project']
 			},
 			{
 				'label': _('Returns'),
