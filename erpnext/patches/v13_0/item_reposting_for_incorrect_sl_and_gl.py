@@ -12,7 +12,6 @@ def execute():
 			("stock", "purchase_receipt_item"),
 			("stock", "delivery_note_item"),
 			("stock", "packed_item"),
-			("stock", "stock_ledger_entry"),
 			("accounts", "sales_invoice_item"),
 			("accounts", "purchase_invoice_item"),
 			("buying", "purchase_receipt_item_supplied")
