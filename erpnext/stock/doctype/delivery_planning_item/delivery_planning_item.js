@@ -19,7 +19,68 @@ frappe.ui.form.on('Delivery Planning Item', {
 						}
 					});
 		}
+		// new filed
+
+		if(frm.doc.sorce_warehouse){
+			frm.call({
+				doc : frm.doc,
+				method : "get_batch_no",
+				callback : function(r){
+					if(r.message){
+						console.log("this are the batchs ", r.message)
+					}
+				} 
+			});
+		}
+
+		frm.set_query("batch_no", function() {
+			return {
+				filters: [
+					["item", "=",  frm.doc.item_code],
+					["expiry_date", ">=", frm.doc.delivery_date],
+					["disabled","=", 0]
+				]
+			};
+		});
+
+		// this.frm.set_query("batch_no", function() {
+		// 	return frm.set_query_for_batch(frm);
+		// });
+	
+		// cur_frm.add_fetch(item_code, batch_number, batch_no);
 	},
+
+	// set_query_for_batch: function(frm) {
+	// 	// Show item's batches in the dropdown of batch no
+	// 	console.log(" Set set_query_for_batch")
+	// 	var me = this;
+	// 	var item = frm.doc.item_code;
+
+	// 	if(!item) {
+	// 		frappe.throw(__("Please enter Item Code to get batch no"));
+	// 	} else if (doc.doctype == "Purchase Receipt" ||
+	// 		(doc.doctype == "Purchase Invoice" && doc.update_stock)) {
+	// 		return {
+	// 			filters: {'item': item}
+	// 		}
+	// 	} else {
+	// 		let filters = {
+	// 			'item_code': item,
+	// 			'posting_date': me.frm.doc.posting_date || frappe.datetime.nowdate(),
+	// 		}
+
+	// 		if (doc.is_return) {
+	// 			filters["is_return"] = 1;
+	// 		}
+
+	// 		if (frm.doc.sorce_warehouse) filters["warehouse"] = frm.doc.sorce_warehouse;
+
+	// 		return {
+	// 			query : "erpnext.controllers.queries.get_batch_no",
+	// 			filters: filters
+	// 		}
+	// 	}
+	// },
 	
 
 	sorce_warehouse: function(frm){
@@ -40,6 +101,7 @@ frappe.ui.form.on('Delivery Planning Item', {
 					});
 		}
 	},
+
 
 	validate : function(frm) {
 		if (frm.doc.customer && frm.doc.qty_to_deliver && frm.doc.uom && frm.doc.item_name){

@@ -646,6 +646,7 @@ class DeliveryPlanning(Document):
 													"item_dname",
 													"qty_to_deliver",
 													"docstatus",
+													"batch_no",
 													"item_dname"]
 											)
 
@@ -657,7 +658,8 @@ class DeliveryPlanning(Document):
 					if i.item_dname:
 						so_item = frappe.get_doc("Sales Order Item", i.item_dname)
 
-						dnote.append('items', {
+						if i.batch_no:
+							dnote.append('items', {
 							'item_code': i.item_code,
 							'warehouse': i.sorce_warehouse,
 							'qty': i.qty_to_deliver,
@@ -666,8 +668,21 @@ class DeliveryPlanning(Document):
 							'rate': so_item.rate,
 							'stock_uom': so_item.stock_uom,
 							'conversion_factor': i.conversion_factor,
-							'against_sales_order': i.sales_order
-						})
+							'against_sales_order': i.sales_order,
+							'batch_no' : i.batch_no
+							})
+						else:	
+							dnote.append('items', {
+								'item_code': i.item_code,
+								'warehouse': i.sorce_warehouse,
+								'qty': i.qty_to_deliver,
+								'stock_qty': i.qty_to_deliver,
+								'uom': so_item.uom,
+								'rate': so_item.rate,
+								'stock_uom': so_item.stock_uom,
+								'conversion_factor': i.conversion_factor,
+								'against_sales_order': i.sales_order
+							})
 
 					else: 
 							dnote.append('items', {

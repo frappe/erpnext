@@ -19,10 +19,11 @@
   "d_status",
   "column_break_9",
   "sales_order",
-  "sorce_warehouse",
   "postal_code",
   "planned_date",
   "delivery_date",
+  "sorce_warehouse",
+  "batch_no",
   "current_stock",
   "available_stock",
   "approved",
@@ -377,12 +378,18 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Full Delivery Name"
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Link",
+   "label": "Batch No",
+   "options": "Batch"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-21 18:43:08.258835",
+ "modified": "2022-01-07 15:56:47.924940",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Planning Item",
