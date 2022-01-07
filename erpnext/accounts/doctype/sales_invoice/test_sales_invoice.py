@@ -2547,8 +2547,9 @@ class TestSalesInvoice(unittest.TestCase):
 		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
 		acc_settings.book_deferred_entries_via_journal_entry = 0
 		acc_settings.submit_journal_entriessubmit_journal_entries = 0
-		acc_settings.acc_frozen_upto = None
 		acc_settings.save()
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', add_days(getdate(), 1))
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
