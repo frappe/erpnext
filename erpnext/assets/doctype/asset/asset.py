@@ -609,12 +609,13 @@ class Asset(AccountsController):
 	def get_fixed_asset_account(self):
 		fixed_asset_account = get_asset_category_account('fixed_asset_account', None, self.name, None, self.asset_category, self.company)
 		if not fixed_asset_account:
-			frappe.throw(_("Set {0} in asset category {1} for company {2}")
-				.format(
+			frappe.throw(
+				_("Set {0} in asset category {1} for company {2}").format(
 					frappe.bold("Fixed Asset Account"),
 					frappe.bold(self.asset_category),
-					frappe.bold(self.company)
-				), title=_("Account not Found")
+					frappe.bold(self.company),
+				),
+				title=_("Account not Found"),
 			)
 
 	def get_cwip_account(self):
