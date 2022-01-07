@@ -12,6 +12,7 @@
   "title",
   "material_request_type",
   "manufacturing_staging",
+  "internal_transfer",
   "transfer_status",
   "customer",
   "status",
@@ -338,13 +339,19 @@
    "fieldtype": "Table",
    "label": "Work Order Detail",
    "options": "Material Request Work Order"
+  },
+  {
+   "default": "0",
+   "fieldname": "internal_transfer",
+   "fieldtype": "Check",
+   "label": "Internal Transfer"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-17 20:16:12.737743",
+ "modified": "2022-01-07 14:28:20.563647",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",

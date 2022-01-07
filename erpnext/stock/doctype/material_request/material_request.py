@@ -472,6 +472,31 @@ def make_request_for_quotation(source_name, target_doc=None):
 	return doclist
 
 @frappe.whitelist()
+def make_delivery_note(source_name, target_doc=None):
+	doclist = get_mapped_doc("Material Request", source_name, {
+		"Material Request": {
+			"doctype": "Delivery Note",
+			"validation": {
+				"docstatus": ["=", 1],
+			}
+		},
+		"Material Request Item": {
+			"doctype": "Delivery Note Item",
+			"field_map": [
+				["name", "material_request_item"],
+				["parent", "material_request"],
+				["uom", "stock_uom"],
+				["uom", "uom"],
+				["sales_order", "sales_order"],
+				["sales_order_item", "sales_order_item"]
+			],
+			
+		}
+	}, target_doc)
+
+	return doclist
+
+@frappe.whitelist()
 def make_purchase_order_based_on_supplier(source_name, target_doc=None, args=None):
 	mr = source_name
 
