@@ -388,6 +388,106 @@ class TestPickList(ERPNextTestCase):
 		for expected_item, created_item in zip(expected_items, pl.locations):
 			_compare_dicts(expected_item, created_item)
 
+	def test_multiple_dn_creation(self):
+
+		sales_order_1 = frappe.get_doc({
+				'doctype': 'Sales Order',
+				'customer': '_Test Customer',
+				'company': '_Test Company',
+				'main_warehouse': '_Test Warehouse - _TC',
+				'items': [{
+					'item_code': '_Test Item',
+					'qty': 1,
+					'conversion_factor': 1,
+					'delivery_date': frappe.utils.today()
+				}],
+			}).insert()
+		sales_order_1.submit()
+
+		sales_order_2 = frappe.get_doc({
+				'doctype': 'Sales Order',
+				'customer': '_Test Customer 1',
+				'company': '_Test Company',
+				'main_warehouse': '_Test Warehouse - _TC',
+				'items': [{
+					'item_code': '_Test Item 2',
+					'qty': 1,
+					'conversion_factor': 1,
+					'delivery_date': frappe.utils.today()
+				},
+				],
+			}).insert()
+		sales_order_2.submit()
+
+		pick_list = frappe.get_doc({
+			'doctype': 'Pick List',
+			'company': '_Test Company',
+			'items_based_on': 'Sales Order',
+			'purpose': 'Delivery',
+			'picker':'P001',
+			'locations': [{
+				'item_code': '_Test Item ',
+				'qty': 1,
+				'stock_qty': 1,
+				'conversion_factor': 1,
+				'sales_order': sales_order_1.name,
+				'sales_order_item': sales_order_1.items[0].name ,
+			}, {
+				'item_code': '_Test Item 2',
+				'qty': 1,
+				'stock_qty': 1,
+				'conversion_factor': 1,
+				'sales_order': sales_order_2.name,
+				'sales_order_item': sales_order_2.items[0].name ,
+			}
+			]
+		})
+		pick_list.set_item_locations()
+		pick_list.submit()
+
+		create_delivery_note(pick_list.name)
+
+		for dn in frappe.get_all("Delivery Note",filters={"pick_list":pick_list.name,"customer":"_Test Customer"},fields={"name"}):
+			for dn_item in frappe.get_doc("Delivery Note",dn.name).get("items"):
+				self.assertEqual(dn_item.item_code, '_Test Item')
+				self.assertEqual(dn_item.against_sales_order,sales_order_1.name)
+
+		for dn in frappe.get_all("Delivery Note",filters={"pick_list":pick_list.name,"customer":"_Test Customer 1"},fields={"name"}):
+			for dn_item in frappe.get_doc("Delivery Note",dn.name).get("items"):
+				self.assertEqual(dn_item.item_code, '_Test Item 2')
+				self.assertEqual(dn_item.against_sales_order,sales_order_2.name)
+
+		#test DN creation without so
+		pick_list_1 = frappe.get_doc({
+			'doctype': 'Pick List',
+			'company': '_Test Company',
+			'purpose': 'Delivery',
+			'picker':'P001',
+			'locations': [{
+				'item_code': '_Test Item ',
+				'qty': 1,
+				'stock_qty': 1,
+				'conversion_factor': 1,
+			}, {
+				'item_code': '_Test Item 2',
+				'qty': 2,
+				'stock_qty': 2,
+				'conversion_factor': 1,
+			}
+			]
+		})
+		pick_list_1.set_item_locations()
+		pick_list_1.submit()
+
+		create_delivery_note(pick_list_1.name)
+
+		for dn in frappe.get_all("Delivery Note",filters={"pick_list":pick_list_1.name},fields={"name"}):
+			for dn_item in frappe.get_doc("Delivery Note",dn.name).get("items"):
+				if dn_item.item_code == '_Test Item':
+					self.assertEqual(dn_item.qty,1)
+				if dn_item.item_code == '_Test Item 2':
+					self.assertEqual(dn_item.qty,2)
+
 	# def test_pick_list_skips_items_in_expired_batch(self):
 	# 	pass
 

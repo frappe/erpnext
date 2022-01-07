@@ -385,10 +385,16 @@ def create_delivery_note(source_name, target_doc=None):
 	for key,keydata in groupby(sales_orders,key=itemgetter(0)):
 		sales_dict[key] = set([d[1] for d in keydata])
 
-	delivery_note = create_dn_with_so(sales_dict,pick_list)
+	if sales_dict:
+		delivery_note = create_dn_with_so(sales_dict,pick_list)
 
-	# Create a DN for items without sales orders as well
-	if not delivery_note:
+	is_item_wo_so = 0
+	for n in pick_list.locations :
+		if not n.sales_order:
+			is_item_wo_so = 1
+			break;
+	if is_item_wo_so == 1:
+		# Create a DN for items without sales orders as well
 		delivery_note = create_dn_wo_so(pick_list)
 
 	frappe.msgprint('Delivery Note(s) created for the Pick List!')
@@ -405,7 +411,7 @@ def create_dn_wo_so(pick_list):
 				'parent': '',
 			}
 		}
-		map_pl_locations(pick_list,item_table_mapper_without_so,delivery_note,None)
+		map_pl_locations(pick_list,item_table_mapper_without_so,delivery_note)
 		delivery_note.insert(ignore_mandatory = True)
 
 		return delivery_note
@@ -431,7 +437,7 @@ def create_dn_with_so(sales_dict,pick_list):
 			break;
 		if delivery_note:
 			# map all items of all sales orders of that customer
-			for so in sales_dict[customer]:		
+			for so in sales_dict[customer]:
 				map_pl_locations(pick_list,item_table_mapper,delivery_note,so)
 			delivery_note.insert(ignore_mandatory = True)
 
@@ -445,7 +451,7 @@ def map_pl_locations(pick_list,item_mapper,delivery_note,sales_order = None):
 				sales_order_item = frappe.get_cached_doc('Sales Order Item', {'name':location.sales_order_item})
 			else:
 				sales_order_item = None
-			
+
 			source_doc, table_mapper = [sales_order_item, item_mapper] if sales_order_item \
 				else [location, item_mapper]
 
@@ -458,12 +464,12 @@ def map_pl_locations(pick_list,item_mapper,delivery_note,sales_order = None):
 				dn_item.serial_no = location.serial_no
 
 				update_delivery_note_item(source_doc, dn_item, delivery_note)
-
 	set_delivery_note_missing_values(delivery_note)
 
 	delivery_note.pick_list = pick_list.name
+	delivery_note.company = pick_list.company
 	delivery_note.customer = frappe.get_value("Sales Order",sales_order,"customer")
-	
+
 
 @frappe.whitelist()
 def create_stock_entry(pick_list):
