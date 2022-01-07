@@ -16,6 +16,7 @@ def get_data():
 			'Purchase Order': ['items', 'purchase_order'],
 			'Project': ['items', 'project'],
 			'Quality Inspection': ['items', 'quality_inspection'],
+			'Delivery Note':'inter_company_reference'
 		},
 		'transactions': [
 			{
@@ -24,7 +25,7 @@ def get_data():
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Purchase Order', 'Quality Inspection', 'Project']
+				'items': ['Purchase Order', 'Quality Inspection', 'Project','Delivery Note']
 			},
 			{
 				'label': _('Returns'),
