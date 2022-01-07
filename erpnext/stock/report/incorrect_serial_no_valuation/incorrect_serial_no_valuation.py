@@ -73,7 +73,7 @@ def get_stock_ledger_entries(report_filters):
 	fields = ['name', 'voucher_type', 'voucher_no', 'item_code', 'serial_no as serial_nos', 'actual_qty',
 		'posting_date', 'posting_time', 'company', 'warehouse', '(stock_value_difference / actual_qty) as valuation_rate']
 
-	filters = {'serial_no': ("is", "set")}
+	filters = {'serial_no': ("is", "set"), "is_cancelled": 0}
 
 	if report_filters.get('item_code'):
 		filters['item_code'] = report_filters.get('item_code')
