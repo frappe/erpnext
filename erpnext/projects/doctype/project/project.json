@@ -1,7 +1,7 @@
 {
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:project_name",
+ "autoname": "naming_series:",
  "creation": "2013-03-07 11:55:07",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -9,16 +9,17 @@
  "field_order": [
   "naming_series",
   "title",
+  "project_number",
   "project_name",
-  "status",
   "project_template",
   "copied_from",
   "column_break_5",
+  "status",
   "is_active",
-  "percent_complete",
   "column_break_10",
   "priority",
   "percent_complete_method",
+  "percent_complete",
   "more_info",
   "project_type",
   "more_info_cb_1",
@@ -91,10 +92,9 @@
   {
    "fieldname": "project_name",
    "fieldtype": "Data",
-   "label": "Project Name",
+   "label": "Project Title",
    "oldfieldtype": "Data",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "default": "Open",
@@ -186,6 +186,7 @@
    "options": "Department"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -457,6 +458,7 @@
    "label": "Message"
   },
   {
+   "default": "PROJ-",
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "hidden": 1,
@@ -465,7 +467,6 @@
    "set_only_once": 1
   },
   {
-   "default": "{customer_name}",
    "fieldname": "title",
    "fieldtype": "Data",
    "hidden": 1,
@@ -582,6 +583,7 @@
    "options": "Customer"
   },
   {
+   "allow_in_quick_entry": 1,
    "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
@@ -610,11 +612,20 @@
    "fieldname": "has_stin",
    "fieldtype": "Check",
    "label": "Apply Taxes"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "project_number",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Project Number",
+   "no_copy": 1,
+   "set_only_once": 1
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2022-01-07 13:12:45.044768",
+ "modified": "2022-01-07 13:52:38.960941",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

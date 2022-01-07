@@ -154,9 +154,9 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 
 				me.frm.add_custom_button(__("Kanban Board"), () => {
 					frappe.call('erpnext.projects.doctype.project.project.create_kanban_board_if_not_exists', {
-						project: me.frm.doc.project_name
+						project: me.frm.doc.name
 					}).then(() => {
-						frappe.set_route('List', 'Task', 'Kanban', me.frm.doc.project_name);
+						frappe.set_route('List', 'Task', 'Kanban', me.frm.doc.name);
 					});
 				}, __("Tasks"));
 			}

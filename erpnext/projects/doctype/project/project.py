@@ -12,6 +12,7 @@ from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 from erpnext.stock.get_item_details import get_applies_to_details
+from frappe.model.naming import set_name_by_naming_series
 from six import string_types
 from frappe.model.document import Document
 
@@ -22,7 +23,14 @@ force_applies_to_fields = ("vehicle_chassis_no", "vehicle_engine_no", "vehicle_l
 
 class Project(Document):
 	def get_feed(self):
-		return '{0}: {1}'.format(_(self.status), frappe.safe_decode(self.project_name))
+		return '{0}: {1}'.format(_(self.status), frappe.safe_decode(self.project_name or self.name))
+
+	def autoname(self):
+		project_naming_by = frappe.defaults.get_global_default('project_naming_by')
+		if project_naming_by == 'Project Name':
+			self.name = self.project_name
+		else:
+			set_name_by_naming_series(self, 'project_number')
 
 	def onload(self):
 		self.set_onload('activity_summary', frappe.db.sql('''select activity_type,
@@ -43,10 +51,21 @@ class Project(Document):
 		self.validate_applies_to()
 		self.update_percent_complete()
 		self.send_welcome_email()
+		self.set_title()
 
 	def on_update(self):
 		if 'Vehicles' in frappe.get_active_domains():
 			self.update_odometer()
+
+	def set_title(self):
+		if self.project_name:
+			self.title = self.project_name
+			if self.customer_name or self.customer:
+				self.title += " ({0})".format(self.customer_name or self.customer)
+		elif self.customer_name or self.customer:
+			self.title = self.customer_name or self.customer
+		else:
+			self.title = self.name
 
 	def update_odometer(self):
 		from erpnext.vehicles.doctype.vehicle_log.vehicle_log import make_odometer_log
