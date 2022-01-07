@@ -746,14 +746,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		}
 	},
 
-<<<<<<< HEAD
 	set_total_amount_to_default_mop: function() {
-		var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
-=======
-	set_total_amount_to_default_mop() {
 		let grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 		let base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
->>>>>>> 9d3a5c3184 (fix: Inconsistency in calculating outstanding amount)
 
 		if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
 			var total_amount_to_pay = flt((grand_total - this.frm.doc.total_advance
