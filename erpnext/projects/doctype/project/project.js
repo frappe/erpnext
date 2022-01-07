@@ -163,10 +163,12 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 
 			me.frm.add_custom_button(__('Duplicate Project with Tasks'), () => me.create_duplicate(), __("Tasks"));
 
-			if (frappe.model.can_write("Sales Invoice")) {
-				me.frm.add_custom_button(__("Sales Invoice"), function () {
-					me.make_sales_invoice()
-				}, __("Create"));
+			if (frappe.model.can_create("Sales Invoice")) {
+				me.frm.add_custom_button(__("Sales Invoice"), () => me.make_sales_invoice(), __("Create"));
+			}
+
+			if (frappe.model.can_create("Vehicle Log") && me.frm.doc.applies_to_vehicle) {
+				me.frm.add_custom_button(__("Odometer Log"), () => me.make_odometer_log(), __("Create"));
 			}
 		}
 	},
@@ -337,7 +339,45 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 				}
 			}
 		});
-	}
+	},
+
+	make_odometer_log: function () {
+		var me = this;
+		if (!me.frm.doc.applies_to_vehicle) {
+			return;
+		}
+
+		var dialog = new frappe.ui.Dialog({
+			title: __("Vehicle Odometer Log"),
+			fields: [
+				{"fieldtype": "Int", "label": __("New Odometer Reading"), "fieldname": "new_odometer", "reqd": 1},
+				{"fieldtype": "Int", "label": __("Previous Odometer Reading"), "fieldname": "previous_odometer",
+					"default": me.frm.doc.vehicle_last_odometer, "read_only": 1},
+				{"fieldtype": "Date", "label": __("Reading Date"), "fieldname": "date", "default": "Today"},
+			]
+		});
+
+		dialog.set_primary_action(__("Create"), function () {
+			var values = dialog.get_values();
+			return frappe.call({
+				method: "erpnext.vehicles.doctype.vehicle_log.vehicle_log.make_odometer_log",
+				args: {
+					"vehicle": me.frm.doc.applies_to_vehicle,
+					"odometer": cint(values.new_odometer),
+					"date": values.date,
+					"project": me.frm.doc.name,
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						dialog.hide();
+						me.frm.reload_doc();
+					}
+				}
+			});
+		});
+
+		dialog.show();
+	},
 });
 
 $.extend(cur_frm.cscript, new erpnext.projects.ProjectController({frm: cur_frm}));

@@ -501,7 +501,7 @@ def get_vehicle_odometer(vehicle, date=None, project=None, ascending=False):
 		filters['date'] = ['<=', getdate(date)]
 
 	asc_or_desc = "asc" if ascending else "desc"
-	order_by = "date {0}, creation {0}".format(asc_or_desc)
+	order_by = "date {0}, odometer {0}".format(asc_or_desc)
 
 	odometer = frappe.get_all("Vehicle Log", filters=filters, fields=['odometer'], order_by=order_by, limit_page_length=1)
 

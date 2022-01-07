@@ -509,7 +509,7 @@ class VehicleTransactionController(StockController):
 		if self.meta.has_field('vehicle_log') and cint(self.get('vehicle_odometer')):
 			if not odometer_log_exists(self.vehicle, self.vehicle_odometer):
 				vehicle_log = make_odometer_log(self.vehicle, self.vehicle_odometer,
-					date=self.get('posting_date') or self.get('transaction_date'))
+					date=self.get('posting_date') or self.get('transaction_date'), project=self.get('project'))
 				self.db_set('vehicle_log', vehicle_log)
 
 	def cancel_odometer_log(self):
