@@ -432,7 +432,7 @@ class SellingController(StockController):
 	def set_gross_profit(self):
 		if self.doctype == "Sales Order":
 			for item in self.items:
-				item.gross_profit = flt(((item.base_rate - item.valuation_rate) * item.stock_qty), self.precision("amount", item))
+				item.gross_profit = flt(((item.base_net_rate - item.valuation_rate) * item.stock_qty), self.precision("amount", item))
 
 	def validate_bill_to(self):
 		if not self.meta.get_field('bill_to'):
