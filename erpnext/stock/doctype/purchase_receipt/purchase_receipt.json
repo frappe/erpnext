@@ -1150,14 +1150,8 @@
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
- "links": [
-  {
-   "group": "Reference",
-   "link_doctype": "Delivery Note",
-   "link_fieldname": "inter_company_reference"
-  }
- ],
- "modified": "2022-01-07 15:30:42.573823",
+ "links": [],
+ "modified": "2022-01-07 15:42:31.317517",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
