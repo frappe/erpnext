@@ -272,6 +272,7 @@ class Project(Document):
 								content=content.format(*messages))
 				user.welcome_email_sent = 1
 
+
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
 	return dict(frappe.db.sql('''select unix_timestamp(from_time), count(*)
@@ -306,6 +307,7 @@ def get_list_context(context=None):
 		"row_template": "templates/includes/projects/project_row.html"
 	}
 
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
@@ -338,6 +340,7 @@ def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 def get_cost_center_name(project):
 	return frappe.db.get_value("Project", project, "cost_center")
 
+
 def hourly_reminder():
 	fields = ["from_time", "to_time"]
 	projects = get_projects_for_collect_progress("Hourly", fields)
@@ -347,10 +350,12 @@ def hourly_reminder():
 			get_time(nowtime()) <= get_time(project.to_time)):
 			send_project_update_email_to_users(project.name)
 
+
 def project_status_update_reminder():
 	daily_reminder()
 	twice_daily_reminder()
 	weekly_reminder()
+
 
 def daily_reminder():
 	fields = ["daily_time_to_send"]
@@ -359,6 +364,7 @@ def daily_reminder():
 	for project in projects:
 		if allow_to_make_project_update(project.name, project.get("daily_time_to_send"), "Daily"):
 			send_project_update_email_to_users(project.name)
+
 
 def twice_daily_reminder():
 	fields = ["first_email", "second_email"]
@@ -369,6 +375,7 @@ def twice_daily_reminder():
 		for d in fields:
 			if allow_to_make_project_update(project.name, project.get(d), "Twicely"):
 				send_project_update_email_to_users(project.name)
+
 
 def weekly_reminder():
 	fields = ["day_to_send", "weekly_time_to_send"]
@@ -381,6 +388,7 @@ def weekly_reminder():
 
 		if allow_to_make_project_update(project.name, project.get("weekly_time_to_send"), "Weekly"):
 			send_project_update_email_to_users(project.name)
+
 
 def allow_to_make_project_update(project, time, frequency):
 	data = frappe.db.sql(""" SELECT name from `tabProject Update`
@@ -424,11 +432,13 @@ def create_duplicate_project(prev_doc, project_name):
 
 	project.db_set('project_template', prev_doc.get('project_template'))
 
+
 def get_projects_for_collect_progress(frequency, fields):
 	fields.extend(["name"])
 
 	return frappe.get_all("Project", fields = fields,
 		filters = {'collect_progress': 1, 'frequency': frequency, 'status': 'Open'})
+
 
 def send_project_update_email_to_users(project):
 	doc = frappe.get_doc('Project', project)
@@ -457,6 +467,7 @@ def send_project_update_email_to_users(project):
 		reply_to=incoming_email_account
 	)
 
+
 def collect_project_status():
 	for data in frappe.get_all("Project Update",
 		{'date': today(), 'sent': 0}):
@@ -484,6 +495,7 @@ def collect_project_status():
 
 			doc.save(ignore_permissions=True)
 
+
 def send_project_status_email_to_users():
 	yesterday = add_days(today(), -1)
 
@@ -507,6 +519,7 @@ def send_project_status_email_to_users():
 
 		doc.db_set('sent', 1)
 
+
 @frappe.whitelist()
 def create_kanban_board_if_not_exists(project):
 	from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
@@ -515,6 +528,7 @@ def create_kanban_board_if_not_exists(project):
 		quick_kanban_board('Task', project, 'status')
 
 	return True
+
 
 @frappe.whitelist()
 def set_project_status(project, status):
@@ -532,6 +546,7 @@ def set_project_status(project, status):
 
 	project.status = status
 	project.save()
+
 
 @frappe.whitelist()
 def get_project_details(project, doctype):
@@ -565,6 +580,7 @@ def get_project_details(project, doctype):
 			out['party_name'] = project.get(f)
 
 	return out
+
 
 @frappe.whitelist()
 def make_against_project(project_name, dt):
@@ -649,10 +665,18 @@ def get_sales_invoice(project_name):
 	for d in sales_orders:
 		target_doc = invoice_from_sales_order(d.name, target_doc=target_doc)
 
+	# Remove Taxes (so they are reloaded)
+	target_doc.taxes_and_charges = None
+	target_doc.taxes = []
+
 	# Set Project Details
 	project_details = get_project_details(project, "Sales Invoice")
 	for k, v in project_details.items():
 		if target_doc.meta.has_field(k):
 			target_doc.set(k, v)
+
+	target_doc.run_method("set_missing_values")
+	target_doc.run_method("append_taxes_from_master")
+	target_doc.run_method("calculate_taxes_and_totals")
 
 	return target_doc
