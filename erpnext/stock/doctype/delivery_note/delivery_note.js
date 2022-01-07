@@ -14,11 +14,12 @@ frappe.ui.form.on("Delivery Note", {
 			'Sales Invoice': 'Sales Invoice',
 			'Delivery Note': 'Delivery Return',
 			'Auto Repeat': 'Subscription',
+			'Delivery Trip': 'Delivery Trip',
 		};
 
 		frm.set_indicator_formatter('item_code', function(doc) {
 			if (doc.docstatus === 0) {
-				if (!doc.is_stock_item && !doc.is_fixed_asset) {
+				if (!doc.is_stock_item) {
 					return "blue";
 				} else if (!doc.actual_qty) {
 					return "red";

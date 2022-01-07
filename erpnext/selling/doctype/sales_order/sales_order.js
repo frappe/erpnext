@@ -23,7 +23,7 @@ frappe.ui.form.on("Sales Order", {
 		// formatter for material request item
 		frm.set_indicator_formatter('item_code', function(doc) {
 			if (doc.docstatus === 0) {
-				if (!doc.is_stock_item && !doc.is_fixed_asset) {
+				if (!doc.is_stock_item) {
 					return "blue";
 				} else if (!doc.actual_qty) {
 					return "red";
