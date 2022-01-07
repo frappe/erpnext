@@ -864,6 +864,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								() => me.toggle_conversion_factor(item),
 								() => me.conversion_factor(doc, cdt, cdn, true),
 								() => me.show_hide_select_batch_button && me.show_hide_select_batch_button(),
+								() => me.set_skip_delivery_note && me.set_skip_delivery_note(),
 								() => me.remove_pricing_rule(item),
 								() => {
 									if (item.apply_rule_on_other_items) {

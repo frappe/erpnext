@@ -50,8 +50,8 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).validate()
 		self.set_skip_delivery_note()
 		self.validate_delivery_date()
-		self.validate_project_customer()
 		self.validate_po()
+		self.validate_project_customer()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_for_items()
@@ -73,6 +73,9 @@ class SalesOrder(SellingController):
 		self.set_purchase_status()
 		self.set_status()
 		self.set_title()
+
+	def before_submit(self):
+		self.validate_delivery_date_required()
 
 	def on_submit(self):
 		self.check_credit_limit()
@@ -145,7 +148,7 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).validate_with_previous_doc({
 			"Quotation": {
 				"ref_dn_field": "quotation",
-				"compare_fields": [["company", "="]]
+				"compare_fields": [["company", "="], ["order_type", "="]]
 			}
 		})
 
@@ -160,15 +163,6 @@ class SalesOrder(SellingController):
 				doc.set_ordered_status(update=True)
 				doc.update_opportunity()
 				doc.notify_update()
-
-	def set_skip_delivery_note(self):
-		has_deliverable = False
-		for d in self.items:
-			if d.is_stock_item or d.is_fixed_asset:
-				has_deliverable = True
-				break
-
-		self.skip_delivery_note = cint(not has_deliverable)
 
 	def set_delivery_status(self, update=False, update_modified=True):
 		data = self.get_delivery_status_data()
@@ -400,6 +394,15 @@ class SalesOrder(SellingController):
 			self.validate_completed_qty('billed_amt', 'amount', self.items,
 				allowance_type='billing', from_doctype=from_doctype, row_names=row_names)
 
+	def set_skip_delivery_note(self):
+		has_deliverable = False
+		for d in self.items:
+			if d.is_stock_item or d.is_fixed_asset:
+				has_deliverable = True
+				break
+
+		self.skip_delivery_note = cint(not has_deliverable)
+
 	def validate_po(self):
 		# validate p.o date v/s delivery date
 		if self.po_date and not self.skip_delivery_note:
@@ -430,18 +433,9 @@ class SalesOrder(SellingController):
 			where pbi.parent = %s and pbi.item_code = i.name and i.is_stock_item = 1""", product_bundle))
 		return ret
 
-	def validate_sales_mntc_quotation(self):
-		for d in self.get('items'):
-			if d.quotation:
-				res = frappe.db.sql("select name from `tabQuotation` where name=%s and order_type = %s",
-					(d.quotation, self.order_type))
-				if not res:
-					frappe.msgprint(_("Quotation {0} not of type {1}")
-						.format(d.quotation, self.order_type))
-
 	def validate_delivery_date(self):
 		if self.order_type == 'Sales' and not self.skip_delivery_note:
-			delivery_date_list = [d.delivery_date for d in self.get("items") if d.delivery_date]
+			delivery_date_list = [getdate(d.delivery_date) for d in self.get("items") if d.delivery_date]
 			max_delivery_date = max(delivery_date_list) if delivery_date_list else None
 			if not self.delivery_date:
 				self.delivery_date = max_delivery_date
@@ -454,10 +448,11 @@ class SalesOrder(SellingController):
 							indicator='orange', title=_('Warning'))
 				if getdate(self.delivery_date) != getdate(max_delivery_date):
 					self.delivery_date = max_delivery_date
-			else:
-				frappe.throw(_("Please enter Delivery Date"))
 
-		self.validate_sales_mntc_quotation()
+	def validate_delivery_date_required(self):
+		if self.order_type == 'Sales' and not self.skip_delivery_note:
+			if not self.delivery_date:
+				frappe.throw(_("Please enter Expected Delivery Date"))
 
 	def validate_warehouse(self):
 		super(SalesOrder, self).validate_warehouse()
