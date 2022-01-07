@@ -2509,6 +2509,9 @@ class TestSalesInvoice(unittest.TestCase):
 		si.save()
 		si.submit()
 
+		acc_settings.acc_frozen_upto = '2019-01-31'
+		acc_settings.save()
+
 		pda1 = frappe.get_doc(dict(
 			doctype='Process Deferred Accounting',
 			posting_date=nowdate(),
@@ -2522,8 +2525,8 @@ class TestSalesInvoice(unittest.TestCase):
 		pda1.submit()
 
 		expected_gle = [
-			["Sales - _TC", 0.0, 2089.89, "2019-01-31"],
-			[deferred_account, 2089.89, 0.0, "2019-01-31"],
+			["Sales - _TC", 0.0, 2089.89, "2019-01-28"],
+			[deferred_account, 2089.89, 0.0, "2019-01-28"],
 			["Sales - _TC", 0.0, 1887.64, "2019-02-28"],
 			[deferred_account, 1887.64, 0.0, "2019-02-28"],
 			["Sales - _TC", 0.0, 2022.47, "2019-03-15"],
@@ -2544,6 +2547,7 @@ class TestSalesInvoice(unittest.TestCase):
 		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
 		acc_settings.book_deferred_entries_via_journal_entry = 0
 		acc_settings.submit_journal_entriessubmit_journal_entries = 0
+		acc_settings.acc_frozen_upto = None
 		acc_settings.save()
 
 def get_sales_invoice_for_e_invoice():
