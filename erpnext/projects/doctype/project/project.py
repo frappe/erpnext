@@ -653,7 +653,7 @@ def make_against_project(project_name, dt):
 
 
 @frappe.whitelist()
-def get_sales_invoice(project_name):
+def get_sales_invoice(project_name, depreciation_type=None):
 	from erpnext.controllers.queries import _get_delivery_notes_to_be_billed
 	from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice as invoice_from_delivery_note
 	from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice as invoice_from_sales_order
@@ -698,6 +698,16 @@ def get_sales_invoice(project_name):
 	for k, v in project_details.items():
 		if target_doc.meta.has_field(k):
 			target_doc.set(k, v)
+
+	# Depreciation billing case
+	if project.default_depreciation_percentage or project.non_standard_depreciation and depreciation_type:
+		target_doc.depreciation_type = depreciation_type
+		if depreciation_type == "Depreciation Amount Only":
+			target_doc.bill_to = target_doc.customer
+		elif depreciation_type == "After Depreciation Amount":
+			if not project.bill_to and project.insurance_company:
+				target_doc.bill_to = project.insurance_company
+
 
 	# Insurance Company Fetch Values
 	target_doc.update(get_fetch_values(target_doc.doctype, 'insurance_company', target_doc.insurance_company))

@@ -127,6 +127,11 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	setup_make_methods: function () {
 		var me = this;
 
+		me.frm.custom_make_buttons = {
+			'Sales Invoice': 'Sales Invoice',
+			'Vehicle Log': 'Odometer Log',
+		};
+
 		var make_method_doctypes = [
 			'Maintenance Visit', 'Warranty Claim', 'Quality Inspection', 'Timesheet',
 		];
@@ -332,10 +337,46 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	},
 
 	make_sales_invoice: function () {
+		var me = this;
+		me.frm.check_if_unsaved();
+
+		if (me.frm.doc.default_depreciation_percentage || (me.frm.doc.non_standard_depreciation || []).length) {
+			var html = `
+<div class="text-center">
+	<button type="button" class="btn btn-primary btn-bill-customer">${__("Bill Depreciation Amount Only to <b>Customer (User)</b>")}</button>
+	<br/><br/>
+	<button type="button" class="btn btn-primary btn-bill-insurance">${__("Bill After Depreciation Amount to <b>Insurance Company</b>")}</button>
+</div>
+`;
+
+			var dialog = new frappe.ui.Dialog({
+				title: __("Depreciation Invoice"),
+				fields: [
+					{fieldtype: "HTML", options: html}
+				],
+			});
+
+			dialog.show();
+
+			$('.btn-bill-customer', dialog.$wrapper).click(function () {
+				dialog.hide();
+				me._make_sales_invoice('Depreciation Amount Only');
+			});
+			$('.btn-bill-insurance', dialog.$wrapper).click(function () {
+				dialog.hide();
+				me._make_sales_invoice('After Depreciation Amount');
+			});
+		} else {
+			me._make_sales_invoice();
+		}
+	},
+
+	_make_sales_invoice: function (depreciation_type) {
 		return frappe.call({
 			method: "erpnext.projects.doctype.project.project.get_sales_invoice",
 			args: {
 				"project_name": this.frm.doc.name,
+				"depreciation_type": depreciation_type,
 			},
 			callback: function (r) {
 				if (!r.exc) {
