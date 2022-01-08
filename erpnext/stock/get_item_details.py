@@ -1444,7 +1444,7 @@ def get_applies_to_details(args, for_validate=False):
 
 	# Vehicle Details
 	# Get Vehicle Details from Project if Vehicle is the same in Transaction and Project
-	if project and cstr(project.applies_to_vehicle) == cstr(args.applies_to_vehicle):
+	if project and project.applies_to_vehicle and project.applies_to_vehicle == args.applies_to_vehicle:
 		out.vehicle_chassis_no = project.vehicle_chassis_no
 		out.vehicle_engine_no = project.vehicle_engine_no
 		out.vehicle_license_plate = project.vehicle_license_plate

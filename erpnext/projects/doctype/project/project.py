@@ -708,7 +708,6 @@ def get_sales_invoice(project_name, depreciation_type=None):
 			if not project.bill_to and project.insurance_company:
 				target_doc.bill_to = project.insurance_company
 
-
 	# Insurance Company Fetch Values
 	target_doc.update(get_fetch_values(target_doc.doctype, 'insurance_company', target_doc.insurance_company))
 
