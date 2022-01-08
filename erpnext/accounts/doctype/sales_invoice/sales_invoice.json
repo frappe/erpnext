@@ -19,7 +19,6 @@
   "po_no",
   "po_date",
   "vehicle_registration_order",
-  "depreciation_type",
   "is_return",
   "return_against",
   "reopen_order",
@@ -77,9 +76,11 @@
   "sec_insurance",
   "insurance_company",
   "insurance_company_name",
+  "default_depreciation_percentage",
   "col_break_insurance",
   "insurance_policy_no",
   "insurance_loss_no",
+  "depreciation_type",
   "col_break_insurance2",
   "insurance_surveyor",
   "insurance_surveyor_company",
@@ -2233,12 +2234,18 @@
   {
    "fieldname": "column_break_68",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "insurance_company",
+   "fieldname": "default_depreciation_percentage",
+   "fieldtype": "Percent",
+   "label": "Default Depreciation (%)"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-12-30 17:43:44.734800",
+ "modified": "2022-01-08 01:53:54.200648",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

@@ -815,6 +815,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							vehicle: item.vehicle,
 							batch_no: item.batch_no,
 							set_warehouse: me.frm.doc.set_warehouse,
+							default_depreciation_percentage: me.frm.doc.default_depreciation_percentage,
 							warehouse: item.warehouse,
 							customer: me.frm.doc.customer || me.frm.doc.party_name,
 							quotation_to: me.frm.doc.quotation_to,

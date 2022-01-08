@@ -13,6 +13,7 @@ from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_e
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 from erpnext.stock.get_item_details import get_applies_to_details
 from frappe.model.naming import set_name_by_naming_series
+from frappe.model.utils import get_fetch_values
 from six import string_types
 from frappe.model.document import Document
 
@@ -49,6 +50,7 @@ class Project(Document):
 
 		self.update_costing()
 		self.validate_applies_to()
+		self.validate_depreciation()
 		self.update_percent_complete()
 		self.send_welcome_email()
 		self.set_title()
@@ -104,6 +106,30 @@ class Project(Document):
 
 		from erpnext.vehicles.utils import format_vehicle_fields
 		format_vehicle_fields(self)
+
+	def validate_depreciation(self):
+		if not self.insurance_company:
+			self.default_depreciation_percentage = 0
+			self.non_standard_depreciation = []
+			return
+
+		if flt(self.default_depreciation_percentage) > 100:
+			frappe.throw(_("Default Depreciation Rate cannot be greater than 100%"))
+		elif flt(self.default_depreciation_percentage) < 0:
+			frappe.throw(_("Default Depreciation Rate cannot be negative"))
+
+		item_codes_visited = set()
+		for d in self.non_standard_depreciation:
+			if flt(d.depreciation_percentage) > 100:
+				frappe.throw(_("Row #{0}: Depreciation Rate cannot be greater than 100%").format(d.idx))
+			elif flt(d.depreciation_percentage) < 0:
+				frappe.throw(_("Row #{0}: Depreciation Rate cannot be negative").format(d.idx))
+
+			if d.depreciation_item_code in item_codes_visited:
+				frappe.throw(_("Row #{0}: Duplicate Non Standard Depreciation row for Item {1}")
+					.format(d.idx, frappe.bold(d.depreciation_item_code)))
+
+			item_codes_visited.add(d.depreciation_item_code)
 
 	def copy_from_template(self):
 		'''
@@ -565,10 +591,12 @@ def get_project_details(project, doctype):
 		'service_advisor', 'service_manager',
 		'insurance_company', 'insurance_loss_no', 'insurance_policy_no',
 		'insurance_surveyor', 'insurance_surveyor_company',
-		'has_stin',
+		'has_stin', 'default_depreciation_percentage',
 	]
+	sales_only_fields = ['customer', 'bill_to', 'vehicle_owner', 'has_stin', 'default_depreciation_percentage']
+
 	for f in fieldnames:
-		if f in ['customer', 'bill_to', 'vehicle_owner', 'has_stin'] and doctype not in sales_doctypes:
+		if f in sales_only_fields and doctype not in sales_doctypes:
 			continue
 		if f in ['customer', 'bill_to'] and not project.get(f):
 			continue
@@ -584,8 +612,6 @@ def get_project_details(project, doctype):
 
 @frappe.whitelist()
 def make_against_project(project_name, dt):
-	from frappe.model.utils import get_fetch_values
-
 	project = frappe.get_doc("Project", project_name)
 	doc = frappe.new_doc(dt)
 
@@ -648,7 +674,6 @@ def get_sales_invoice(project_name):
 	# Get Delivery Notes
 	delivery_note_filters = filters.copy()
 	delivery_note_filters['is_return'] = 0
-
 	delivery_notes = _get_delivery_notes_to_be_billed(filters=delivery_note_filters)
 	for d in delivery_notes:
 		target_doc = invoice_from_delivery_note(d.name, target_doc=target_doc)
@@ -660,7 +685,6 @@ def get_sales_invoice(project_name):
 		"per_completed": ["<", 99.99],
 	}
 	sales_order_filters.update(filters)
-
 	sales_orders = frappe.get_all("Sales Order", filters=sales_order_filters)
 	for d in sales_orders:
 		target_doc = invoice_from_sales_order(d.name, target_doc=target_doc)
@@ -675,8 +699,36 @@ def get_sales_invoice(project_name):
 		if target_doc.meta.has_field(k):
 			target_doc.set(k, v)
 
+	# Insurance Company Fetch Values
+	target_doc.update(get_fetch_values(target_doc.doctype, 'insurance_company', target_doc.insurance_company))
+
+	# Missing Values and Forced Values
 	target_doc.run_method("set_missing_values")
+
+	# Set Depreciation Rates
+	set_depreciation_in_invoice_items(target_doc, project)
+
+	# Tax Table
 	target_doc.run_method("append_taxes_from_master")
+
+	# Calcualte Taxes and Totals
 	target_doc.run_method("calculate_taxes_and_totals")
 
 	return target_doc
+
+
+def set_depreciation_in_invoice_items(target_doc, project):
+	non_standard_depreciation_items = {}
+	for d in project.non_standard_depreciation:
+		if d.depreciation_item_code:
+			non_standard_depreciation_items[d.depreciation_item_code] = flt(d.depreciation_percentage)
+
+	for d in target_doc.get('items'):
+		if d.is_stock_item:
+			if not flt(d.depreciation_percentage):
+				if d.item_code in non_standard_depreciation_items:
+					d.depreciation_percentage = non_standard_depreciation_items[d.item_code]
+				else:
+					d.depreciation_percentage = flt(project.default_depreciation_percentage)
+		else:
+			d.depreciation_percentage = 0

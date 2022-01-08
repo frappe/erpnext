@@ -61,6 +61,11 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 				filters: filters
 			};
 		});
+
+		// depreciation item
+		me.frm.set_query('depreciation_item_code', 'non_standard_depreciation', () => erpnext.queries.item({
+			is_stock_item: 1,
+		}));
 	},
 
 	setup_route_options: function () {

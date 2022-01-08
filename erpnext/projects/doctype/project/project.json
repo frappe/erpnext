@@ -47,6 +47,9 @@
   "col_break_insurance2",
   "insurance_surveyor",
   "insurance_surveyor_company",
+  "depreciation_details_section",
+  "default_depreciation_percentage",
+  "non_standard_depreciation",
   "section_break0",
   "notes",
   "section_break_18",
@@ -636,11 +639,28 @@
   {
    "fieldname": "column_break_61",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_depreciation_percentage",
+   "fieldtype": "Percent",
+   "label": "Default Depreciation (%)"
+  },
+  {
+   "depends_on": "insurance_company",
+   "fieldname": "depreciation_details_section",
+   "fieldtype": "Section Break",
+   "label": "Depreciation Details"
+  },
+  {
+   "fieldname": "non_standard_depreciation",
+   "fieldtype": "Table",
+   "label": "Non Standard Depreciation Rates",
+   "options": "Project Item Depreciation"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2022-01-07 14:11:18.398555",
+ "modified": "2022-01-08 02:55:35.983201",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

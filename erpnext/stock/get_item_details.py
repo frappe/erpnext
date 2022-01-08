@@ -249,7 +249,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		args['material_request_type'] = frappe.db.get_value('Material Request',
 			args.get('name'), 'material_request_type', cache=True)
 
-	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
+	# Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if args.get('doctype') in sales_doctypes:
 		default_uom = item.sales_uom if item.sales_uom else item.stock_uom
 	elif (args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']) or \
@@ -289,6 +289,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"net_rate": 0.0,
 		"net_amount": 0.0,
 		"discount_percentage": 0.0,
+		"depreciation_percentage": get_depreciation_percentage(args, item),
 		"supplier": get_default_supplier(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults, transaction_type_defaults),
 		"update_stock": args.get("update_stock") if args.get('doctype') in ['Sales Invoice', 'Purchase Invoice'] else 0,
 		"delivered_by_supplier": item.delivered_by_supplier if args.get("doctype") in ["Sales Order", "Sales Invoice"] else 0,
@@ -683,6 +684,13 @@ def get_hide_item_code(args, item):
 		item_group_name = item_group.parent_item_group
 
 	return cint(show_item_code != "Yes" if show_item_code else args.get('hide_item_code'))
+
+
+def get_depreciation_percentage(args, item):
+	if item.is_stock_item:
+		return flt(args.get('default_depreciation_percentage'))
+	else:
+		return 0
 
 
 @frappe.whitelist()
