@@ -641,6 +641,13 @@ def get_vehicle_registration_order(source):
 	check_if_doc_exists("Vehicle Registration Order", source.name)
 	target = frappe.new_doc("Vehicle Registration Order")
 	set_next_document_values(source, target)
+
+	for d in source.sales_team:
+		target.append('sales_team', {
+			'sales_person': d.sales_person,
+			'allocated_percentage': d.allocated_percentage,
+		})
+
 	target.run_method("set_missing_values")
 	target.run_method("calculate_totals")
 	return target
