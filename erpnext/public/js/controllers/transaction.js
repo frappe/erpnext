@@ -232,6 +232,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							var customer_changed = false;
 							var prev_bill_to = cstr(frm.doc.bill_to);
 							var prev_customer = cstr(frm.doc.customer);
+							var applies_to_vehicle = null;
 
 							// Set Customer and Bill To first
 							if (r.message.customer) {
@@ -253,6 +254,17 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								delete r.message['bill_to'];
 							}
 
+							// Set Applies to Vehicle Later
+							if (r.message.applies_to_vehicle) {
+								applies_to_vehicle = r.message['applies_to_vehicle'];
+								delete r.message['applies_to_vehicle'];
+								delete r.message['applies_to_item'];
+							// Remove Applies to Vehicle if Applies to Item is given
+							} else if (r.message.applies_to_item && frm.fields_dict.applies_to_vehicle) {
+								frm.doc.applies_to_vehicle = null;
+								frm.refresh_field('applies_to_vehicle');
+							}
+
 							return frappe.run_serially([
 								() => {
 									if (customer_changed) {
@@ -263,13 +275,18 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 										}
 									}
 								},
-								() => frm.set_value(r.message)
+								() => frm.set_value(r.message),
+								() => {
+									if (applies_to_vehicle && frm.fields_dict.applies_to_vehicle) {
+										return frm.set_value("applies_to_vehicle", applies_to_vehicle);
+									}
+								},
 							]);
 						}
 					}
 				});
 			} else {
-				frm.cscript.get_applies_vehicle_odometer();
+				return frm.cscript.get_applies_to_details();
 			}
 		});
 
@@ -507,6 +524,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
+		this.set_applies_to_read_only();
+
 		let scan_barcode_field = this.frm.get_field('scan_barcode');
 		if (scan_barcode_field) {
 			scan_barcode_field.set_value("");
@@ -796,6 +815,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							vehicle: item.vehicle,
 							batch_no: item.batch_no,
 							set_warehouse: me.frm.doc.set_warehouse,
+							default_depreciation_percentage: me.frm.doc.default_depreciation_percentage,
 							warehouse: item.warehouse,
 							customer: me.frm.doc.customer || me.frm.doc.party_name,
 							quotation_to: me.frm.doc.quotation_to,
@@ -845,6 +865,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								() => me.toggle_conversion_factor(item),
 								() => me.conversion_factor(doc, cdt, cdn, true),
 								() => me.show_hide_select_batch_button && me.show_hide_select_batch_button(),
+								() => me.set_skip_delivery_note && me.set_skip_delivery_note(),
 								() => me.remove_pricing_rule(item),
 								() => {
 									if (item.apply_rule_on_other_items) {
@@ -1390,6 +1411,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.get_applies_to_details();
 	},
 	applies_to_vehicle: function () {
+		this.set_applies_to_read_only();
 		this.get_applies_to_details();
 	},
 	vehicle_owner: function () {
@@ -1418,23 +1440,23 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			},
 			callback: function(r) {
 				if(!r.exc) {
-					me.frm.set_value(r.message);
+					return me.frm.set_value(r.message);
 				}
 			}
 		});
 	},
 
-	get_applies_vehicle_odometer: function () {
+	get_applies_to_vehicle_odometer: function () {
 		if (!this.frm.doc.applies_to_vehicle || !this.frm.fields_dict.vehicle_last_odometer) {
 			return;
 		}
 
 		var me = this;
-		var args = this.get_applies_to_args();
 		return frappe.call({
 			method: "erpnext.stock.get_item_details.get_applies_to_vehicle_odometer",
 			args: {
-				args: args
+				vehicle: this.frm.doc.applies_to_vehicle,
+				project: this.frm.doc.project,
 			},
 			callback: function(r) {
 				if(!r.exc) {
@@ -1452,6 +1474,21 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			name: this.frm.doc.name,
 			project: this.frm.doc.project,
 		}
+	},
+
+	set_applies_to_read_only: function() {
+		var me = this;
+		var read_only_fields = [
+			'applies_to_item', 'applies_to_item_name',
+			'vehicle_license_plate', 'vehicle_unregistered',
+			'vehicle_chassis_no', 'vehicle_engine_no',
+			'vehicle_color', 'vehicle_last_odometer',
+		];
+		$.each(read_only_fields, function (i, f) {
+			if (me.frm.fields_dict[f]) {
+				me.frm.set_df_property(f, "read_only", me.frm.doc.applies_to_vehicle ? 1 : 0);
+			}
+		});
 	},
 
 	calculate_net_weight: function(){

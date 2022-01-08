@@ -405,7 +405,7 @@ def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts):
 	return invoice_income_map, invoice_tax_map
 
 def get_invoice_so_dn_map(invoice_list):
-	si_items = frappe.db.sql("""select parent, sales_order, delivery_note, so_detail
+	si_items = frappe.db.sql("""select parent, sales_order, delivery_note, sales_order_item
 		from `tabSales Invoice Item` where parent in (%s)
 		and (ifnull(sales_order, '') != '' or ifnull(delivery_note, '') != '')""" %
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
@@ -421,7 +421,7 @@ def get_invoice_so_dn_map(invoice_list):
 			delivery_note_list = [d.delivery_note]
 		elif d.sales_order:
 			delivery_note_list = frappe.db.sql_list("""select distinct parent from `tabDelivery Note Item`
-				where docstatus=1 and so_detail=%s""", d.so_detail)
+				where docstatus=1 and sales_order_item=%s""", d.sales_order_item)
 
 		if delivery_note_list:
 			invoice_so_dn_map.setdefault(d.parent, frappe._dict()).setdefault("delivery_note", delivery_note_list)

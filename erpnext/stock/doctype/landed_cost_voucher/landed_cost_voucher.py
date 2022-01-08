@@ -17,6 +17,14 @@ import json
 class LandedCostVoucher(AccountsController):
 	def __init__(self, *args, **kwargs):
 		super(LandedCostVoucher, self).__init__(*args, **kwargs)
+		self.status_map = [
+			["Draft", None],
+			["Submitted", "eval:self.docstatus==1"],
+			["Paid", "eval:self.grand_total and self.outstanding_amount <= 0 and self.docstatus==1"],
+			["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
+			["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
+			["Cancelled", "eval:self.docstatus==2"],
+		]
 
 	def validate(self):
 		super(LandedCostVoucher, self).validate()
@@ -46,7 +54,7 @@ class LandedCostVoucher(AccountsController):
 		for pr in self.get("purchase_receipts"):
 			if pr.receipt_document_type and pr.receipt_document:
 				if pr.receipt_document_type == "Purchase Invoice":
-					po_detail_field = "po_detail"
+					po_detail_field = "purchase_order_item"
 				else:
 					po_detail_field = "purchase_order_item"
 

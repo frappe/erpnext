@@ -499,7 +499,7 @@ erpnext.work_order = {
 					erpnext.work_order.stop_work_order(frm, "Stopped");
 				}, __("Status"));
 			} else if (doc.status == 'Stopped') {
-				frm.add_custom_button(__('Re-open'), function() {
+				frm.add_custom_button(__('Re-Open'), function() {
 					erpnext.work_order.stop_work_order(frm, "Resumed");
 				}, __("Status"));
 			}

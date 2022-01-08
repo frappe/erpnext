@@ -617,9 +617,9 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.submit()
 
 		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-1, do_not_submit=True)
-		dn1.items[0].against_sales_order = so.name
-		dn1.items[0].so_detail = so.items[0].name
-		dn1.items[0].dn_detail = dn.items[0].name
+		dn1.items[0].sales_order = so.name
+		dn1.items[0].sales_order_item = so.items[0].name
+		dn1.items[0].delivery_note_item = dn.items[0].name
 		dn1.submit()
 
 		si = make_sales_invoice(dn.name)
@@ -647,7 +647,7 @@ class TestDeliveryNote(unittest.TestCase):
 		si1.submit()
 
 		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-2, do_not_submit=True)
-		dn1.items[0].dn_detail = dn.items[0].name
+		dn1.items[0].delivery_note_item = dn.items[0].name
 		dn1.submit()
 
 		si2 = make_sales_invoice(dn.name)

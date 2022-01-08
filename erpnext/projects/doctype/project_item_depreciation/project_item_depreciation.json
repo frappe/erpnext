@@ -1,0 +1,51 @@
+{
+ "creation": "2022-01-08 02:53:59.921542",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "depreciation_item_code",
+  "depreciation_item_name",
+  "depreciation_percentage"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "depreciation_item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "columns": 6,
+   "fetch_from": "depreciation_item_code.item_name",
+   "fieldname": "depreciation_item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "default": "0",
+   "fieldname": "depreciation_percentage",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Depreciation (%)",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-01-08 02:57:47.992214",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Project Item Depreciation",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

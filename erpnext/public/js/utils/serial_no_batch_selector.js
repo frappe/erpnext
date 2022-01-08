@@ -99,7 +99,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 								conversion_factor: me.item.conversion_factor,
 								item_code: me.item_code,
 								warehouse: me.warehouse_details.name,
-								sales_order_item: me.item.so_detail
+								sales_order_item: me.item.sales_order_item
 							},
 							callback: function (r) {
 								if (r.message) {
@@ -115,7 +115,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 								item_code: me.item_code,
 								batch_no: me.item.batch_no,
 								warehouse: cstr(me.warehouse_details.name),
-								sales_order_item: me.item.so_detail
+								sales_order_item: me.item.sales_order_item
 							}
 						});
 

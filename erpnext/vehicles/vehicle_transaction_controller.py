@@ -331,7 +331,7 @@ class VehicleTransactionController(StockController):
 			vbo = frappe.get_doc("Vehicle Booking Order", doc.vehicle_booking_order)
 			vbo.check_cancelled(throw=True)
 			doc.validate_and_update_booking_vehicle_details(vbo, doc)
-			vbo.update_delivery_status(update=True)
+			vbo.set_delivery_status(update=True)
 			vbo.set_status(update=True)
 			vbo.notify_update()
 
@@ -344,7 +344,7 @@ class VehicleTransactionController(StockController):
 			vbo = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
 			vbo.check_cancelled(throw=True)
 			self.validate_and_update_booking_vehicle_details(vbo, doc)
-			vbo.update_invoice_status(update=True)
+			vbo.set_invoice_status(update=True)
 			vbo.set_status(update=True)
 			vbo.notify_update()
 
@@ -435,14 +435,14 @@ class VehicleTransactionController(StockController):
 		if vehicle_booking_order:
 			vbo = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
 			vbo.check_cancelled(throw=True)
-			vbo.update_registration_status(update=True)
+			vbo.set_registration_status(update=True)
 			vbo.set_status(update=True)
 			vbo.notify_update()
 
 	def update_vehicle_booking_order_transfer_customer(self):
 		if self.get('vehicle_booking_order'):
 			vbo = frappe.get_doc("Vehicle Booking Order", self.vehicle_booking_order)
-			vbo.update_transfer_customer(update=True)
+			vbo.set_transfer_customer(update=True)
 			vbo.notify_update()
 
 	def update_vehicle_invoice(self, doc=None, update_vehicle=True):
@@ -463,9 +463,9 @@ class VehicleTransactionController(StockController):
 			vro = frappe.get_doc("Vehicle Registration Order", vehicle_registration_order)
 
 			if self.doctype in ['Vehicle Invoice', 'Vehicle Invoice Delivery', 'Vehicle Invoice Movement']:
-				vro.update_invoice_status(update=True)
+				vro.set_invoice_status(update=True)
 			elif self.doctype == "Vehicle Registration Receipt":
-				vro.update_registration_receipt_details(update=True)
+				vro.set_registration_receipt_details(update=True)
 
 			vro.set_status(update=True)
 			vro.notify_update()
@@ -509,7 +509,7 @@ class VehicleTransactionController(StockController):
 		if self.meta.has_field('vehicle_log') and cint(self.get('vehicle_odometer')):
 			if not odometer_log_exists(self.vehicle, self.vehicle_odometer):
 				vehicle_log = make_odometer_log(self.vehicle, self.vehicle_odometer,
-					date=self.get('posting_date') or self.get('transaction_date'))
+					date=self.get('posting_date') or self.get('transaction_date'), project=self.get('project'))
 				self.db_set('vehicle_log', vehicle_log)
 
 	def cancel_odometer_log(self):

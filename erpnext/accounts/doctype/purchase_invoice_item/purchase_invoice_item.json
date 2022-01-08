@@ -127,7 +127,7 @@
   "service_end_date",
   "reference",
   "purchase_order",
-  "po_detail",
+  "purchase_order_item",
   "asset_location",
   "bom",
   "item_tax_rate",
@@ -136,9 +136,10 @@
   "include_exploded_items",
   "col_break6",
   "purchase_receipt",
-  "pr_detail",
-  "pi_detail",
+  "purchase_receipt_item",
+  "purchase_invoice_item",
   "debit_note_amount",
+  "returned_qty",
   "asset_category",
   "accounting_dimensions_section",
   "expense_account",
@@ -679,18 +680,6 @@
    "options": "Location"
   },
   {
-   "fieldname": "po_detail",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Purchase Order Item",
-   "no_copy": 1,
-   "oldfieldname": "po_detail",
-   "oldfieldtype": "Data",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "purchase_receipt",
    "fieldtype": "Link",
    "label": "Purchase Receipt",
@@ -711,18 +700,6 @@
    "no_copy": 1,
    "print_hide": 1,
    "report_hide": 1
-  },
-  {
-   "fieldname": "pr_detail",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Purchase Receipt Detail",
-   "no_copy": 1,
-   "oldfieldname": "pr_detail",
-   "oldfieldtype": "Data",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
   },
   {
    "allow_on_submit": 1,
@@ -1157,16 +1134,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "pi_detail",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Against Purchase Invoice Item",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "debit_note_amount",
    "fieldtype": "Currency",
    "hidden": 1,
@@ -1223,11 +1190,54 @@
    "hidden": 1,
    "label": "Force Default Warehouse",
    "read_only": 1
+  },
+  {
+   "fieldname": "purchase_order_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Purchase Order Item",
+   "no_copy": 1,
+   "oldfieldname": "po_detail",
+   "oldfieldtype": "Data",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "purchase_receipt_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Purchase Receipt Item",
+   "no_copy": 1,
+   "oldfieldname": "pr_detail",
+   "oldfieldtype": "Data",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "purchase_invoice_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Purchase Invoice Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:!parent.is_return",
+   "fieldname": "returned_qty",
+   "fieldtype": "Float",
+   "label": "Returned Qty",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-12-14 23:36:29.076683",
+ "modified": "2021-12-21 16:17:23.012622",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

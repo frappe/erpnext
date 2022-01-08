@@ -38,8 +38,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		delivery_note = None
 		if d.delivery_note:
 			delivery_note = d.delivery_note
-		elif d.so_detail:
-			delivery_note = ", ".join(so_dn_map.get(d.so_detail, []))
+		elif d.sales_order_item:
+			delivery_note = ", ".join(so_dn_map.get(d.sales_order_item, []))
 
 		if not delivery_note and d.update_stock:
 			delivery_note = d.parent
@@ -390,7 +390,7 @@ def get_items(filters, additional_query_columns):
 			`tabSales Invoice Item`.cost_center, `tabSales Invoice Item`.stock_qty,
 			`tabSales Invoice Item`.stock_uom, `tabSales Invoice Item`.base_net_rate,
 			`tabSales Invoice Item`.base_net_amount, `tabSales Invoice`.customer_name,
-			`tabSales Invoice`.customer_group, `tabSales Invoice Item`.so_detail,
+			`tabSales Invoice`.customer_group, `tabSales Invoice Item`.sales_order_item,
 			`tabSales Invoice`.update_stock, `tabSales Invoice Item`.uom, `tabSales Invoice Item`.qty {0}
 		from `tabSales Invoice`, `tabSales Invoice Item`
 		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent
@@ -399,18 +399,18 @@ def get_items(filters, additional_query_columns):
 
 def get_delivery_notes_against_sales_order(item_list):
 	so_dn_map = frappe._dict()
-	so_item_rows = list(set([d.so_detail for d in item_list]))
+	so_item_rows = list(set([d.sales_order_item for d in item_list]))
 
 	if so_item_rows:
 		delivery_notes = frappe.db.sql("""
-			select parent, so_detail
+			select parent, sales_order_item
 			from `tabDelivery Note Item`
-			where docstatus=1 and so_detail in (%s)
-			group by so_detail, parent
+			where docstatus=1 and sales_order_item in (%s)
+			group by sales_order_item, parent
 		""" % (', '.join(['%s']*len(so_item_rows))), tuple(so_item_rows), as_dict=1)
 
 		for dn in delivery_notes:
-			so_dn_map.setdefault(dn.so_detail, []).append(dn.parent)
+			so_dn_map.setdefault(dn.sales_order_item, []).append(dn.parent)
 
 	return so_dn_map
 

@@ -1132,13 +1132,13 @@ def get_dn_details(party_type, voucher_nos):
 
 		for si in frappe.db.sql("""
 			select
-				against_sales_invoice as parent, GROUP_CONCAT(parent SEPARATOR ', ') as dn
+				sales_invoice as parent, GROUP_CONCAT(parent SEPARATOR ', ') as dn
 			from
 				`tabDelivery Note Item`
 			where
-				docstatus=1 and against_sales_invoice is not null and against_sales_invoice != ''
-				and against_sales_invoice in (%s)
-				group by against_sales_invoice
+				docstatus=1 and sales_invoice is not null and sales_invoice != ''
+				and sales_invoice in (%s)
+				group by sales_invoice
 			""" %(','.join(['%s'] * len(voucher_nos))), tuple(voucher_nos) , as_dict=1):
 			if si.parent in dn_details:
 				dn_details[si.parent] += ', %s' %(si.dn)

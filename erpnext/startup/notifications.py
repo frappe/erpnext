@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
+
 def get_notification_config():
 	notifications =  { "for_doctype":
 		{
@@ -69,6 +70,11 @@ def get_notification_config():
 			},
 
 			"Vehicle Booking Order": {
+				"status": ("!=", "Completed"),
+				"docstatus": ("<", 2)
+			},
+
+			"Vehicle Registration Order": {
 				"status": ("!=", "Completed"),
 				"docstatus": ("<", 2)
 			},

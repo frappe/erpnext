@@ -36,11 +36,11 @@ class VehicleBookingOrder(VehicleBookingController):
 		self.set_title()
 		self.get_terms_and_conditions()
 
-		self.update_payment_status()
-		self.update_delivery_status()
-		self.update_invoice_status()
-		self.update_registration_status()
-		self.update_transfer_customer()
+		self.set_payment_status()
+		self.set_delivery_status()
+		self.set_invoice_status()
+		self.set_registration_status()
+		self.set_transfer_customer()
 		self.set_status()
 
 	def before_submit(self):
@@ -256,7 +256,7 @@ class VehicleBookingOrder(VehicleBookingController):
 				'supplier_advance': self.supplier_advance
 			})
 
-	def update_payment_status(self, update=False):
+	def set_payment_status(self, update=False):
 		self.calculate_outstanding_amount()
 
 		if self.customer_outstanding > 0:
@@ -287,7 +287,7 @@ class VehicleBookingOrder(VehicleBookingController):
 				'supplier_payment_status': self.supplier_payment_status,
 			})
 
-	def update_delivery_status(self, update=False):
+	def set_delivery_status(self, update=False):
 		vehicle_receipts = None
 		vehicle_deliveries = None
 
@@ -384,7 +384,7 @@ class VehicleBookingOrder(VehicleBookingController):
 		if update:
 			row.db_update()
 
-	def update_invoice_status(self, update=False):
+	def set_invoice_status(self, update=False):
 		vehicle_invoice = None
 
 		if self.vehicle:
@@ -423,7 +423,7 @@ class VehicleBookingOrder(VehicleBookingController):
 				"invoice_issued_for": self.invoice_issued_for,
 			})
 
-	def update_registration_status(self, update=False):
+	def set_registration_status(self, update=False):
 		from erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order import get_vehicle_registration_order
 		from erpnext.vehicles.doctype.vehicle_registration_receipt.vehicle_registration_receipt import get_vehicle_registration_receipt
 
@@ -445,7 +445,7 @@ class VehicleBookingOrder(VehicleBookingController):
 				'registration_status': self.registration_status
 			})
 
-	def update_transfer_customer(self, update=False):
+	def set_transfer_customer(self, update=False):
 		vehicle_transfer_letter = []
 		vehicle_registration_receipt = []
 
@@ -641,6 +641,13 @@ def get_vehicle_registration_order(source):
 	check_if_doc_exists("Vehicle Registration Order", source.name)
 	target = frappe.new_doc("Vehicle Registration Order")
 	set_next_document_values(source, target)
+
+	for d in source.sales_team:
+		target.append('sales_team', {
+			'sales_person': d.sales_person,
+			'allocated_percentage': d.allocated_percentage,
+		})
+
 	target.run_method("set_missing_values")
 	target.run_method("calculate_totals")
 	return target

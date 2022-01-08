@@ -12,4 +12,4 @@ def execute():
 				ifnull(so_detail, "") != "")"""):
 
 		invoice = frappe.get_doc("Sales Invoice", si)
-		invoice.update_qty()
+		invoice.update_previous_doc_status()

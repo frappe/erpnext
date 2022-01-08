@@ -13,40 +13,103 @@ form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
 
+
 class Quotation(SellingController):
+	def __init__(self, *args, **kwargs):
+		super(Quotation, self).__init__(*args, **kwargs)
+		self.status_map = [
+			["Draft", None],
+			["Open", "eval:self.docstatus==1"],
+			["Lost", "eval:self.status=='Lost'"],
+			["Ordered", "has_sales_order_or_invoice"],
+			["Cancelled", "eval:self.docstatus==2"],
+		]
+
+	def validate(self):
+		super(Quotation, self).validate()
+		self.validate_uom_is_integer("stock_uom", "qty")
+		self.validate_quotation_valid_till()
+		self.set_customer_name()
+
+		if self.items:
+			self.with_items = 1
+
+		self.set_ordered_status()
+		self.set_status()
+
+	def on_submit(self):
+		# Check for Approving Authority
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
+			self.company, self.base_grand_total, self)
+
+		# update enquiry status
+		self.update_opportunity()
+		self.update_lead()
+
+	def on_cancel(self):
+		if self.lost_reasons:
+			self.lost_reasons = []
+
+		super(Quotation, self).on_cancel()
+
+		# update enquiry status
+		self.set_status(update=True)
+		self.update_opportunity()
+		self.update_lead()
+
 	def set_indicator(self):
-		if self.docstatus==1:
+		if self.docstatus == 1:
 			self.indicator_color = 'blue'
 			self.indicator_title = 'Submitted'
 		if self.valid_till and getdate(self.valid_till) < getdate(nowdate()):
 			self.indicator_color = 'darkgrey'
 			self.indicator_title = 'Expired'
 
-	def validate(self):
-		super(Quotation, self).validate()
-		self.set_status()
-		self.update_opportunity()
-		self.validate_uom_is_integer("stock_uom", "qty")
-		self.validate_quotation_valid_till()
-		self.set_customer_name()
-		if self.items:
-			self.with_items = 1
+	def set_ordered_status(self, update=False, update_modified=True):
+		ordered_qty_map = self.get_ordered_qty_map()
+		for d in self.items:
+			d.ordered_qty = flt(ordered_qty_map.get(d.name))
+			if update:
+				d.db_set({
+					'ordered_qty': d.ordered_qty,
+				}, update_modified=update_modified)
 
-	def has_sales_order(self):
-		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.name, "docstatus": 1})
+	def get_ordered_qty_map(self):
+		ordered_qty_map = {}
+
+		if self.docstatus == 1:
+			row_names = [d.name for d in self.items]
+
+			if row_names:
+				ordered_qty_map = dict(frappe.db.sql("""
+					select i.quotation_item, sum(i.qty)
+					from `tabSales Order Item` i
+					inner join `tabSales Order` p on p.name = i.parent
+					where p.docstatus = 1 and i.quotation_item in %s
+					group by i.quotation_item
+				""", [row_names]))
+
+			unordered_rows = list(set(row_names) - set(ordered_qty_map.keys()))
+			if unordered_rows:
+				billed_qty_map = dict(frappe.db.sql("""
+					select i.quotation_item, sum(i.qty)
+					from `tabSales Invoice Item` i
+					inner join `tabSales Invoice` p on p.name = i.parent
+					where p.docstatus = 1 and i.quotation_item in %s
+					group by i.quotation_item
+				""", [row_names]))
+
+				for quotation_item, billed_qty in billed_qty_map.items():
+					if quotation_item not in ordered_qty_map:
+						ordered_qty_map[quotation_item] = billed_qty
+
+		return ordered_qty_map
 
 	def update_lead(self):
 		if self.quotation_to == "Lead" and self.party_name:
 			doc = frappe.get_doc("Lead", self.party_name)
 			doc.set_status(update=True)
 			doc.notify_update()
-
-	def set_customer_name(self):
-		if self.party_name and self.quotation_to == 'Customer':
-			self.customer_name = frappe.db.get_value("Customer", self.party_name, "customer_name")
-		elif self.party_name and self.quotation_to == 'Lead':
-			lead_name, company_name = frappe.db.get_value("Lead", self.party_name, ["lead_name", "company_name"])
-			self.customer_name = company_name or lead_name
 
 	def update_opportunity(self):
 		for opportunity in list(set([d.prevdoc_docname for d in self.get("items")])):
@@ -64,8 +127,12 @@ class Quotation(SellingController):
 		opp.set_status(update=True)
 		opp.notify_update()
 
+	def has_sales_order_or_invoice(self):
+		return frappe.db.get_value("Sales Order Item", {"quotation": self.name, "docstatus": 1})\
+			or frappe.db.get_value("Sales Invoice Item", {"quotation": self.name, "docstatus": 1})
+
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
-		if not self.has_sales_order():
+		if not self.has_sales_order_or_invoice():
 			frappe.db.set(self, 'status', 'Lost')
 
 			if detailed_reason:
@@ -81,24 +148,12 @@ class Quotation(SellingController):
 		else:
 			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
 
-	def on_submit(self):
-		# Check for Approving Authority
-		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
-			self.company, self.base_grand_total, self)
-
-		#update enquiry status
-		self.update_opportunity()
-		self.update_lead()
-
-	def on_cancel(self):
-		if self.lost_reasons:
-			self.lost_reasons = []
-		super(Quotation, self).on_cancel()
-
-		#update enquiry status
-		self.set_status(update=True)
-		self.update_opportunity()
-		self.update_lead()
+	def set_customer_name(self):
+		if self.party_name and self.quotation_to == 'Customer':
+			self.customer_name = frappe.get_cached_value("Customer", self.party_name, "customer_name")
+		elif self.party_name and self.quotation_to == 'Lead':
+			lead_name, company_name = frappe.db.get_value("Lead", self.party_name, ["lead_name", "company_name"])
+			self.customer_name = company_name or lead_name
 
 	def print_other_charges(self,docname):
 		print_lst = []
@@ -112,6 +167,7 @@ class Quotation(SellingController):
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.valid_till = None
 
+
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
@@ -124,12 +180,14 @@ def get_list_context(context=None):
 
 	return list_context
 
+
 @frappe.whitelist()
 def make_sales_order(source_name, target_doc=None):
 	quotation = frappe.db.get_value("Quotation", source_name, ["transaction_date", "valid_till"], as_dict = 1)
 	if quotation.valid_till and (quotation.valid_till < quotation.transaction_date or quotation.valid_till < getdate(nowdate())):
 		frappe.throw(_("Validity period of this quotation has ended."))
 	return _make_sales_order(source_name, target_doc)
+
 
 def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	customer = _make_customer(source_name, ignore_permissions)
@@ -163,7 +221,8 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 			"Quotation Item": {
 				"doctype": "Sales Order Item",
 				"field_map": {
-					"parent": "prevdoc_docname"
+					"parent": "quotation",
+					"name": "quotation_item",
 				},
 				"postprocess": update_item
 			},
@@ -185,6 +244,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 
 	return doclist
 
+
 def set_expired_status():
 	frappe.db.sql("""
 		UPDATE
@@ -193,9 +253,11 @@ def set_expired_status():
 			`status` not in ('Ordered', 'Expired', 'Lost', 'Cancelled') AND `valid_till` < %s
 		""", (nowdate()))
 
+
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
 	return _make_sales_invoice(source_name, target_doc)
+
 
 def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	customer = _make_customer(source_name, ignore_permissions)
@@ -227,6 +289,10 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			},
 			"Quotation Item": {
 				"doctype": "Sales Invoice Item",
+				"field_map": {
+					"parent": "quotation",
+					"name": "quotation_item",
+				},
 				"postprocess": update_item
 			},
 			"Sales Taxes and Charges": {
@@ -240,6 +306,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
 	return doclist
+
 
 def _make_customer(source_name, ignore_permissions=False):
 	quotation = frappe.db.get_value("Quotation",

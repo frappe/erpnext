@@ -313,7 +313,8 @@
    "label": "Is Return",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "depends_on": "is_return",
@@ -812,7 +813,7 @@
   },
   {
    "fieldname": "additional_discount_percentage",
-   "fieldtype": "Float",
+   "fieldtype": "Percent",
    "label": "Additional Discount Percentage",
    "print_hide": 1
   },
@@ -977,7 +978,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nTo Bill\nCompleted\nCancelled\nClosed",
+   "options": "\nDraft\nTo Bill\nCompleted\nReturn\nCancelled\nClosed",
    "print_hide": 1,
    "print_width": "150px",
    "read_only": 1,
@@ -1003,7 +1004,7 @@
   {
    "fieldname": "per_billed",
    "fieldtype": "Percent",
-   "label": "% Amount Billed",
+   "label": "% Billed",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
@@ -1152,7 +1153,8 @@
    "depends_on": "is_return",
    "fieldname": "reopen_order",
    "fieldtype": "Check",
-   "label": "Reopen Purchase Order"
+   "label": "Reopen Order",
+   "search_index": 1
   },
   {
    "fieldname": "incoterms",
@@ -1540,7 +1542,7 @@
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
- "modified": "2021-12-07 10:57:13.488273",
+ "modified": "2021-12-30 17:44:03.209703",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

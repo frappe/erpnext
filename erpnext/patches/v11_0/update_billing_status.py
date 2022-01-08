@@ -60,30 +60,22 @@ def execute():
 	for name in si_names:
 		name = name.name
 		doc = frappe.get_doc("Sales Invoice", name)
-		doc.update_status_updater_args()
-		doc.update_prevdoc_status()
+		doc.update_previous_doc_status()
 
 	pi_names = frappe.get_all("Purchase Invoice", {"docstatus": 1})
 	for name in pi_names:
 		name = name.name
 		doc = frappe.get_doc("Purchase Invoice", name)
-		doc.update_status_updater_args()
-		doc.update_prevdoc_status()
+		doc.update_previous_doc_status()
 
 	dn_names = frappe.get_all("Delivery Note", {"docstatus": 1})
 	for name in dn_names:
 		name = name.name
 		doc = frappe.get_doc("Delivery Note", name)
-		doc.update_prevdoc_status()
-		doc.update_billing_status_for_zero_amount("Sales Order", "against_sales_order")
-		if doc.is_return:
-			doc.update_billing_percentage()
+		doc.update_previous_doc_status()
 
 	pr_names = frappe.get_all("Purchase Receipt", {"docstatus": 1})
 	for name in pr_names:
 		name = name.name
 		doc = frappe.get_doc("Purchase Receipt", name)
-		doc.update_prevdoc_status()
-		doc.update_billing_status_for_zero_amount("Purchase Order", "purchase_order")
-		if doc.is_return:
-			doc.update_billing_percentage()
+		doc.update_previous_doc_status()

@@ -19,7 +19,7 @@
   "stock_uom",
   "weight_uom",
   "page_break",
-  "dn_detail"
+  "delivery_note_item"
  ],
  "fields": [
   {
@@ -73,7 +73,7 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Quantity",
+   "label": "Qty",
    "print_width": "100px",
    "reqd": 1,
    "width": "100px"
@@ -116,16 +116,16 @@
    "label": "Page Break"
   },
   {
-   "fieldname": "dn_detail",
+   "fieldname": "delivery_note_item",
    "fieldtype": "Data",
    "hidden": 1,
    "in_list_view": 1,
-   "label": "DN Detail"
+   "label": "Deliver Note Item"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:42:01.176117",
+ "modified": "2021-12-18 18:19:57.077441",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Item",

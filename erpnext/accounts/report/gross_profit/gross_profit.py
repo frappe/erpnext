@@ -49,7 +49,7 @@ class GrossProfitGenerator(object):
 				si.customer, si.customer_name, c.customer_group, c.territory,
 				si_item.item_code, si_item.item_name, si_item.batch_no, si_item.uom,
 				si_item.warehouse, i.item_group, i.brand, i.item_source, 
-				si.update_stock, si_item.dn_detail, si_item.delivery_note,
+				si.update_stock, si_item.delivery_note_item, si_item.delivery_note,
 				si_item.qty, si_item.stock_qty, si_item.conversion_factor, si_item.alt_uom_size,
 				si_item.base_net_amount,
 				si.depreciation_type, si_item.depreciation_percentage,
@@ -549,7 +549,7 @@ def get_item_incoming_rate_data(args):
 		'item_code'
 		'batch_no'
 		'update_stock'
-		'dn_detail'
+		'delivery_note_item'
 	"""
 
 	source_map = {}
@@ -566,8 +566,8 @@ def get_item_incoming_rate_data(args):
 		docstatus = d.get('doc_status') or d.get('docstatus')
 
 		if d.get('item_code') in stock_item_codes and parent_doctype in ('Sales Invoice', 'Delivery Note'):
-			if d.get('dn_detail') and parent_doctype == "Sales Invoice":
-				voucher_detail_no = ('Delivery Note', d.get('dn_detail'))
+			if d.get('delivery_note_item') and parent_doctype == "Sales Invoice":
+				voucher_detail_no = ('Delivery Note', d.get('delivery_note_item'))
 				source_map[i] = ('sle_outgoing_rate', voucher_detail_no)
 			elif docstatus == 1:
 				if row_name and (parent_doctype == "Delivery Note" or d.get('update_stock')):

@@ -103,6 +103,21 @@ def get_data():
 			],
 		},
 		{
+			"label": _("Vehicle Service"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Project",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Log",
+					"dependencies": ["Vehicle"],
+				},
+			],
+		},
+		{
 			"label": _("Masters"),
 			"items": [
 				{

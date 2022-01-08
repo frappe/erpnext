@@ -230,6 +230,29 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.calculate_taxes_and_totals();
 	},
 
+	default_depreciation_percentage: function () {
+		this.set_default_depreciation(this.frm.doc.default_depreciation_percentage);
+	},
+
+	set_default_depreciation: function (default_depreciation_percentage) {
+		var me = this;
+
+		default_depreciation_percentage = flt(default_depreciation_percentage);
+		$.each(me.frm.doc.items || [], function (i, d) {
+			if (d.is_stock_item) {
+				d.depreciation_percentage = default_depreciation_percentage;
+			} else {
+				d.depreciation_percentage = 0;
+			}
+		});
+
+		if (this.frm.doc.docstatus === 0) {
+			me.calculate_taxes_and_totals();
+		} else {
+			me.frm.refresh_field('items');
+		}
+	},
+
 	depreciation_percentage: function () {
 		if (this.frm.doc.docstatus === 0) {
 			this.calculate_taxes_and_totals();
@@ -489,7 +512,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					'warehouse': doc.s_warehouse || doc.warehouse,
 					'qty': flt(doc.qty),
 					'conversion_factor': flt(doc.conversion_factor),
-					'sales_order_item': doc.so_detail
+					'sales_order_item': doc.sales_order_item
 				},
 				callback: function (r) {
 					if (r.message) {

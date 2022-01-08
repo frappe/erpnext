@@ -67,7 +67,7 @@ class TestQuotation(unittest.TestCase):
 		self.assertEqual(sales_order.doctype, "Sales Order")
 		self.assertEqual(len(sales_order.get("items")), 1)
 		self.assertEqual(sales_order.get("items")[0].doctype, "Sales Order Item")
-		self.assertEqual(sales_order.get("items")[0].prevdoc_docname, quotation.name)
+		self.assertEqual(sales_order.get("items")[0].quotation, quotation.name)
 		self.assertEqual(sales_order.customer, "_Test Customer")
 
 		sales_order.delivery_date = "2014-01-01"
@@ -100,7 +100,7 @@ class TestQuotation(unittest.TestCase):
 		self.assertEqual(sales_order.doctype, "Sales Order")
 		self.assertEqual(len(sales_order.get("items")), 1)
 		self.assertEqual(sales_order.get("items")[0].doctype, "Sales Order Item")
-		self.assertEqual(sales_order.get("items")[0].prevdoc_docname, quotation.name)
+		self.assertEqual(sales_order.get("items")[0].quotation, quotation.name)
 		self.assertEqual(sales_order.customer, "_Test Customer")
 
 		sales_order.delivery_date = "2014-01-01"

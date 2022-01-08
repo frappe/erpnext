@@ -10,9 +10,11 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.buying.utils import validate_for_items
 
+
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
+
 
 class SupplierQuotation(BuyingController):
 	def validate(self):
@@ -52,6 +54,7 @@ class SupplierQuotation(BuyingController):
 				"is_child_table": True
 			}
 		})
+
 	def update_rfq_supplier_status(self, include_me):
 		rfq_list = set([])
 		for item in self.items:
@@ -93,6 +96,7 @@ class SupplierQuotation(BuyingController):
 			elif doc_sup.quote_status != _('No Quote'):
 				frappe.db.set_value('Request for Quotation Supplier', doc_sup.name, 'quote_status', quote_status)
 
+
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
@@ -104,6 +108,7 @@ def get_list_context(context=None):
 	})
 
 	return list_context
+
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
@@ -143,6 +148,7 @@ def make_purchase_order(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
 
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):

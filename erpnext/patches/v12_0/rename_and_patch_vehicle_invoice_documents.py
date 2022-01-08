@@ -26,5 +26,5 @@ def execute():
 	vehicles = frappe.get_all("Vehicle")
 	for d in vehicles:
 		doc = frappe.get_doc("Vehicle", d.name)
-		doc.update_invoice_status(update=True, update_modified=False)
+		doc.set_invoice_status(update=True, update_modified=False)
 		doc.clear_cache()

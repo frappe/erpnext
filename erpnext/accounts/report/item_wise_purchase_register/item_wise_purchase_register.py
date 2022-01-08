@@ -42,8 +42,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		purchase_receipt = None
 		if d.purchase_receipt:
 			purchase_receipt = d.purchase_receipt
-		elif d.po_detail:
-			purchase_receipt = ", ".join(po_pr_map.get(d.po_detail, []))
+		elif d.purchase_order_item:
+			purchase_receipt = ", ".join(po_pr_map.get(d.purchase_order_item, []))
 
 		expense_account = d.expense_account or aii_account_map.get(d.company)
 
@@ -320,7 +320,7 @@ def get_items(filters, additional_query_columns):
 			`tabPurchase Invoice`.supplier, `tabPurchase Invoice`.remarks, `tabPurchase Invoice`.base_net_total, `tabPurchase Invoice Item`.`item_code`,
 			`tabPurchase Invoice Item`.`item_name`, `tabPurchase Invoice Item`.`item_group`, `tabPurchase Invoice Item`.description,
 			`tabPurchase Invoice Item`.`project`, `tabPurchase Invoice Item`.`purchase_order`,
-			`tabPurchase Invoice Item`.`purchase_receipt`, `tabPurchase Invoice Item`.`po_detail`,
+			`tabPurchase Invoice Item`.`purchase_receipt`, `tabPurchase Invoice Item`.`purchase_order_item`,
 			`tabPurchase Invoice Item`.`expense_account`, `tabPurchase Invoice Item`.`stock_qty`,
 			`tabPurchase Invoice Item`.`stock_uom`, `tabPurchase Invoice Item`.`base_net_amount`,
 			`tabPurchase Invoice`.`supplier_name`, `tabPurchase Invoice`.`mode_of_payment` {0}
@@ -334,7 +334,7 @@ def get_aii_accounts():
 
 def get_purchase_receipts_against_purchase_order(item_list):
 	po_pr_map = frappe._dict()
-	po_item_rows = list(set([d.po_detail for d in item_list]))
+	po_item_rows = list(set([d.purchase_order_item for d in item_list]))
 
 	if po_item_rows:
 		purchase_receipts = frappe.db.sql("""
@@ -345,6 +345,6 @@ def get_purchase_receipts_against_purchase_order(item_list):
 		""" % (', '.join(['%s']*len(po_item_rows))), tuple(po_item_rows), as_dict=1)
 
 		for pr in purchase_receipts:
-			po_pr_map.setdefault(pr.po_detail, []).append(pr.parent)
+			po_pr_map.setdefault(pr.purchase_order_item, []).append(pr.parent)
 
 	return po_pr_map

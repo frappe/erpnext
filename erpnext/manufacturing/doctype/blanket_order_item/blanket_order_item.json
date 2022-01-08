@@ -37,7 +37,7 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Quantity"
+   "label": "Qty"
   },
   {
    "fieldname": "rate",
@@ -50,7 +50,7 @@
    "fieldname": "ordered_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Ordered Quantity",
+   "label": "Ordered Qty",
    "no_copy": 1,
    "read_only": 1
   },
@@ -65,7 +65,7 @@
   }
  ],
  "istable": 1,
- "modified": "2020-03-03 15:34:46.174053",
+ "modified": "2021-12-18 18:21:11.303180",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Blanket Order Item",

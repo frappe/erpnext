@@ -71,7 +71,7 @@
   "material_request_item",
   "against_stock_entry",
   "ste_detail",
-  "po_detail",
+  "purchase_order_item",
   "column_break_51",
   "reference_purchase_receipt",
   "project"
@@ -498,15 +498,6 @@
    "options": "Project"
   },
   {
-   "fieldname": "po_detail",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "PO Supplied Item",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "default": "0",
    "depends_on": "eval:parent.purpose===\"Repack\" && doc.t_warehouse",
    "fieldname": "set_basic_rate_manually",
@@ -602,11 +593,20 @@
    "fieldtype": "Percent",
    "label": "Cost Percentage",
    "read_only": 1
+  },
+  {
+   "fieldname": "purchase_order_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Purchase Order Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-07-27 13:34:54.138060",
+ "modified": "2021-12-14 23:56:59.371929",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

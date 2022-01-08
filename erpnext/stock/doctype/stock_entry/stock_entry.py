@@ -38,6 +38,7 @@ form_grid_templates = {
 
 force_fields = ["stock_uom", "has_batch_no", "has_serial_no", "is_vehicle", "alt_uom", "alt_uom_size"]
 
+
 class StockEntry(StockController):
 	def get_feed(self):
 		return self.stock_entry_type
@@ -87,9 +88,9 @@ class StockEntry(StockController):
 		self.validate_serialized_batch()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
+		self.set_transferred_status()
 
 	def on_submit(self):
-
 		self.update_stock_ledger()
 
 		update_serial_nos_after_submit(self, "items")
@@ -100,13 +101,12 @@ class StockEntry(StockController):
 		self.make_gl_entries()
 		self.update_cost_in_project()
 		self.validate_reserved_serial_no_consumption()
-		self.update_transferred_qty()
+		self.update_previous_doc_status()
 		self.update_quality_inspection()
 		if self.work_order and self.purpose == "Manufacture":
 			self.update_so_in_serial_number()
 
 	def on_cancel(self):
-
 		if self.purchase_order and self.purpose == "Send to Subcontractor":
 			self.update_purchase_order_supplied_items()
 
@@ -117,8 +117,91 @@ class StockEntry(StockController):
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
 		self.update_cost_in_project()
-		self.update_transferred_qty()
+		self.update_previous_doc_status()
 		self.update_quality_inspection()
+
+	def update_previous_doc_status(self):
+		material_requests = set()
+		material_request_row_names = set()
+		stock_entries = set()
+		stock_entry_row_names = set()
+
+		for d in self.get("items"):
+			if d.material_request:
+				material_requests.add(d.material_request)
+			if d.material_request_item:
+				material_request_row_names.add(d.material_request_item)
+			if d.against_stock_entry:
+				stock_entries.add(d.against_stock_entry)
+			if d.ste_detail:
+				stock_entry_row_names.add(d.ste_detail)
+
+		# Update Material Requests
+		for name in material_requests:
+			doc = frappe.get_doc("Material Request", name)
+
+			if doc.docstatus != 1:
+				frappe.throw(_("{0} is not submitted").format(frappe.get_desk_link("Material Request", name)),
+					frappe.InvalidStatusError)
+
+			if doc.status == "Stopped":
+				frappe.throw(_("{0} is cancelled or stopped").format(frappe.get_desk_link("Material Request", name)),
+					frappe.InvalidStatusError)
+
+			doc.set_completion_status(update=True)
+			doc.validate_ordered_qty(from_doctype=self.doctype, row_names=material_request_row_names)
+			doc.update_requested_qty(material_request_row_names)
+			doc.set_status(update=True)
+			doc.notify_update()
+
+		# Update Send to Warehouse Stock Entries
+		if self.purpose == "Receive at Warehouse":
+			for name in stock_entries:
+				doc = frappe.get_doc("Stock Entry", name)
+				doc.set_transferred_status(update=True)
+				doc.validate_transferred_qty(from_doctype=self.doctype, row_names=stock_entry_row_names)
+				doc.set_status(update=True)
+				doc.notify_update()
+
+	def set_transferred_status(self, update=False, update_modified=True):
+		transferred_qty_map = self.get_transferred_qty_map()
+
+		# update values in rows
+		for d in self.items:
+			d.transferred_qty = flt(transferred_qty_map.get(d.name))
+
+			if update:
+				d.db_set({
+					'transferred_qty': d.transferred_qty,
+				}, update_modified=update_modified)
+
+		# update percentage in parent
+		self.per_transferred = self.calculate_status_percentage('transferred_qty', 'qty', self.items)
+
+		if update:
+			self.db_set({
+				'per_transferred': self.per_transferred,
+			}, update_modified=update_modified)
+
+	def get_transferred_qty_map(self):
+		transferred_qty_map = {}
+
+		if self.docstatus == 1:
+			row_names = [d.name for d in self.items]
+			if row_names:
+				transferred_qty_map = dict(frappe.db.sql("""
+					select i.ste_detail, sum(i.qty)
+					from `tabStock Entry Detail` i
+					inner join `tabStock Entry` p on p.name = i.parent
+					where p.docstatus = 1 and i.ste_detail in %s
+					group by i.ste_detail
+				""", [row_names]))
+
+		return transferred_qty_map
+
+	def validate_transferred_qty(self, from_doctype=None, row_names=None):
+		self.validate_completed_qty('transferred_qty', 'qty', self.items,
+			allowance_type=None, from_doctype=from_doctype, row_names=row_names)
 
 	def auto_select_batches(self):
 		auto_select_and_split_batches(self, 's_warehouse')
@@ -1331,7 +1414,7 @@ class StockEntry(StockController):
 			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
 			se_child.subcontracted_item = item_dict[d].get("main_item_code")
 
-			for field in ["po_detail", "original_item", "description", "item_name"]:
+			for field in ["purchase_order_item", "original_item", "description", "item_name"]:
 				if item_dict[d].get(field):
 					se_child.set(field, item_dict[d].get(field))
 
@@ -1391,7 +1474,7 @@ class StockEntry(StockController):
 					FROM
 						`tabStock Entry Detail` sed, `tabStock Entry` se
 					WHERE
-						(pos.name = sed.po_detail OR sed.subcontracted_item = pos.main_item_code)
+						(pos.name = sed.purchase_order_item OR sed.subcontracted_item = pos.main_item_code)
 						AND sed.docstatus = 1 AND se.name = sed.parent and se.purchase_order = %(po)s
 				), 0)
 			WHERE pos.docstatus = 1 and pos.parent = %(po)s""", {"po": self.purchase_order})
@@ -1429,56 +1512,6 @@ class StockEntry(StockController):
 					if sales_order:
 						frappe.throw(_("Item {0} (Serial No: {1}) cannot be consumed as is reserverd\
 						 to fullfill Sales Order {2}.").format(item.item_code, sr, sales_order))
-
-	def update_transferred_qty(self):
-		if self.purpose == 'Receive at Warehouse':
-			stock_entry_names = []
-			stock_entries = {}
-			stock_entries_child_list = []
-			for d in self.items:
-				if not (d.against_stock_entry and d.ste_detail):
-					continue
-
-				stock_entries_child_list.append(d.ste_detail)
-				transferred_qty = frappe.get_all("Stock Entry Detail", fields = ["sum(qty) as qty"],
-					filters = { 'against_stock_entry': d.against_stock_entry,
-						'ste_detail': d.ste_detail,'docstatus': 1})
-
-				stock_entries[(d.against_stock_entry, d.ste_detail)] = (transferred_qty[0].qty
-					if transferred_qty and transferred_qty[0] else 0.0) or 0.0
-
-				if d.against_stock_entry not in stock_entry_names:
-					stock_entry_names.append(d.against_stock_entry)
-
-			if not stock_entries: return None
-
-			cond = ''
-			for data, transferred_qty in stock_entries.items():
-				cond += """ WHEN (parent = %s and name = %s) THEN %s
-					""" %(frappe.db.escape(data[0]), frappe.db.escape(data[1]), transferred_qty)
-
-			if cond and stock_entries_child_list:
-				frappe.db.sql(""" UPDATE `tabStock Entry Detail`
-					SET
-						transferred_qty = CASE {cond} END
-					WHERE
-						name in ({ste_details}) """.format(cond=cond,
-					ste_details = ','.join(['%s'] * len(stock_entries_child_list))),
-				tuple(stock_entries_child_list))
-
-			args = {
-				'source_dt': 'Stock Entry Detail',
-				'target_field': 'transferred_qty',
-				'target_ref_field': 'qty',
-				'target_dt': 'Stock Entry Detail',
-				'join_field': 'ste_detail',
-				'target_parent_dt': 'Stock Entry',
-				'target_parent_field': 'per_transferred',
-				'source_field': 'qty',
-				'percent_join_field': 'against_stock_entry'
-			}
-
-			self._update_percent_field_in_targets(args, stock_entry_names, update_modified=True)
 
 	def update_quality_inspection(self):
 		if self.inspection_required:

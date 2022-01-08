@@ -348,7 +348,11 @@ class WorkOrder(Document):
 
 	def update_completed_qty_in_material_request(self):
 		if self.material_request:
-			frappe.get_doc("Material Request", self.material_request).update_completed_qty([self.material_request_item])
+			doc = frappe.get_doc("Material Request", self.material_request)
+			doc.set_completion_status(update=True)
+			doc.validate_ordered_qty(from_doctype=self.doctype, row_names=[self.material_request_item])
+			doc.set_status(update=True)
+			doc.notify_update()
 
 	def set_work_order_operations(self):
 		"""Fetch operations from BOM and set in 'Work Order'"""

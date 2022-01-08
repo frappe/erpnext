@@ -168,13 +168,11 @@ class AccountsController(TransactionBase):
 			if not cint(self.get(pos_check_field)) and not self.is_return:
 				self.validate_advance_entries()
 
+			if not self.is_return:
+				self.validate_deferred_start_and_end_date()
+
 		elif self.doctype in ['Landed Cost Voucher'] and cint(self.allocate_advances_automatically):
 			self.set_advances()
-
-			if self.is_return:
-				self.validate_qty()
-			else:
-				self.validate_deferred_start_and_end_date()
 
 		validate_regional(self)
 		if self.doctype != 'Material Request':
@@ -219,7 +217,7 @@ class AccountsController(TransactionBase):
 		if self.doctype in ["Purchase Invoice", "Purchase Receipt"]:
 			self.purchase_orders = list(set(item.purchase_order for item in self.items if item.get('purchase_order')))
 		if self.doctype == "Sales Order":
-			self.quotations = list(set(item.prevdoc_docname for item in self.items if item.get("prevdoc_docname")))
+			self.quotations = list(set(item.quotation for item in self.items if item.get("quotation")))
 		if self.doctype == "Purchase Order":
 			self.supplier_quotations = list(set(item.supplier_quotation for item in self.items if item.get("supplier_quotation")))
 
@@ -524,13 +522,13 @@ class AccountsController(TransactionBase):
 
 	def validate_enabled_taxes_and_charges(self):
 		taxes_and_charges_doctype = self.meta.get_options("taxes_and_charges")
-		if frappe.db.get_value(taxes_and_charges_doctype, self.taxes_and_charges, "disabled"):
+		if frappe.get_cached_value(taxes_and_charges_doctype, self.taxes_and_charges, "disabled"):
 			frappe.throw(_("{0} '{1}' is disabled").format(taxes_and_charges_doctype, self.taxes_and_charges))
 
 	def validate_tax_account_company(self):
 		for d in self.get("taxes"):
 			if d.account_head:
-				tax_account_company = frappe.db.get_value("Account", d.account_head, "company")
+				tax_account_company = frappe.get_cached_value("Account", d.account_head, "company")
 				if tax_account_company != self.company:
 					frappe.throw(_("Row #{0}: Account {1} does not belong to company {2}")
 								 .format(d.idx, d.account_head, self.company))
@@ -700,7 +698,7 @@ class AccountsController(TransactionBase):
 		return res
 
 	def is_inclusive_tax(self):
-		is_inclusive = cint(frappe.db.get_single_value("Accounts Settings", "show_inclusive_tax_in_print"))
+		is_inclusive = cint(frappe.get_cached_value("Accounts Settings", None, "show_inclusive_tax_in_print"))
 
 		if is_inclusive:
 			is_inclusive = 0
@@ -810,44 +808,6 @@ class AccountsController(TransactionBase):
 		elif self.doctype in ["Sales Order", "Purchase Order"]:
 			if frappe.db.get_single_value('Accounts Settings', 'unlink_advance_payment_on_cancelation_of_order'):
 				unlink_ref_doc_from_payment_entries(self, True)
-
-	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
-		from erpnext.controllers.status_updater import get_allowance_for
-		item_allowance = {}
-		global_qty_allowance, global_amount_allowance = None, None
-
-		for item in self.get("items"):
-			if item.get(item_ref_dn):
-				ref_amt = flt(frappe.db.get_value(ref_dt + " Item",
-					item.get(item_ref_dn), based_on), self.precision(based_on, item))
-				if not ref_amt:
-					frappe.msgprint(
-						_("Warning: System will not check overbilling since amount for Item {0} in {1} is zero")
-							.format(item.item_code, ref_dt))
-				else:
-					already_billed = frappe.db.sql("""
-						select sum(%s)
-						from `tab%s`
-						where %s=%s and docstatus=1 and parent != %s
-					""" % (based_on, self.doctype + " Item", item_ref_dn, '%s', '%s'),
-					   (item.get(item_ref_dn), self.name))[0][0]
-
-					total_billed_amt = flt(flt(already_billed) + flt(item.get(based_on)),
-						self.precision(based_on, item))
-
-					allowance, item_allowance, global_qty_allowance, global_amount_allowance = \
-						get_allowance_for(item.item_code, item_allowance, global_qty_allowance, global_amount_allowance, "amount")
-
-					max_allowed_amt = flt(ref_amt * (100 + allowance) / 100)
-
-					if total_billed_amt < 0 and max_allowed_amt < 0:
-						# while making debit note against purchase return entry(purchase receipt) getting overbill error
-						total_billed_amt = abs(total_billed_amt)
-						max_allowed_amt = abs(max_allowed_amt)
-
-					if total_billed_amt - max_allowed_amt > 0.01:
-						frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
-							.format(item.item_code, item.idx, max_allowed_amt))
 
 	def update_item_prices(self):
 		from erpnext.stock.get_item_details import get_price_list_rate, process_args
@@ -1910,6 +1870,7 @@ def get_supplier_block_status(party_name):
 	}
 	return info
 
+
 def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, trans_item):
 	"""
 	Returns a Sales Order Item child item containing the default values
@@ -1955,6 +1916,7 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 	child_item.base_amount = 1 # Initiallize value will update in parent validation
 	return child_item
 
+
 def validate_and_delete_children(parent, data):
 	deleted_children = []
 	updated_item_names = [d.get("docname") for d in data]
@@ -1979,6 +1941,7 @@ def validate_and_delete_children(parent, data):
 
 		d.cancel()
 		d.delete()
+
 
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
@@ -2125,32 +2088,29 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	if parent_doctype == 'Purchase Order':
 		parent.validate_minimum_order_qty()
 		parent.validate_budget()
-		if parent.is_against_so():
-			parent.update_status_updater()
 	else:
 		parent.check_credit_limit()
 	parent.save()
 
 	if parent_doctype == 'Purchase Order':
 		update_last_purchase_rate(parent, is_submit = 1)
-		parent.update_prevdoc_status()
+		parent.update_previous_doc_status()
 		parent.update_requested_qty()
 		parent.update_ordered_qty()
 		parent.update_ordered_and_reserved_qty()
-		parent.update_receiving_percentage()
+		parent.set_receipt_status()
 		if parent.is_subcontracted == "Yes":
 			parent.update_reserved_qty_for_subcontract()
 	else:
 		parent.update_reserved_qty()
 		parent.update_project()
-		parent.update_prevdoc_status('submit')
-		parent.update_delivery_status()
+		parent.update_previous_doc_status('submit')
+		parent.set_delivery_status(update=True)
 
 	parent.reload()
 	validate_workflow_conditions(parent)
 
 	parent.update_blanket_order()
-	parent.update_billing_percentage()
 	parent.set_status()
 
 @erpnext.allow_regional

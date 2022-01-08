@@ -12,6 +12,8 @@ from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 from erpnext.stock.get_item_details import get_applies_to_details
+from frappe.model.naming import set_name_by_naming_series
+from frappe.model.utils import get_fetch_values
 from six import string_types
 from frappe.model.document import Document
 
@@ -22,7 +24,14 @@ force_applies_to_fields = ("vehicle_chassis_no", "vehicle_engine_no", "vehicle_l
 
 class Project(Document):
 	def get_feed(self):
-		return '{0}: {1}'.format(_(self.status), frappe.safe_decode(self.project_name))
+		return '{0}: {1}'.format(_(self.status), frappe.safe_decode(self.project_name or self.name))
+
+	def autoname(self):
+		project_naming_by = frappe.defaults.get_global_default('project_naming_by')
+		if project_naming_by == 'Project Name':
+			self.name = self.project_name
+		else:
+			set_name_by_naming_series(self, 'project_number')
 
 	def onload(self):
 		self.set_onload('activity_summary', frappe.db.sql('''select activity_type,
@@ -41,12 +50,24 @@ class Project(Document):
 
 		self.update_costing()
 		self.validate_applies_to()
+		self.validate_depreciation()
 		self.update_percent_complete()
 		self.send_welcome_email()
+		self.set_title()
 
 	def on_update(self):
 		if 'Vehicles' in frappe.get_active_domains():
 			self.update_odometer()
+
+	def set_title(self):
+		if self.project_name:
+			self.title = self.project_name
+			if self.customer_name or self.customer:
+				self.title += " ({0})".format(self.customer_name or self.customer)
+		elif self.customer_name or self.customer:
+			self.title = self.customer_name or self.customer
+		else:
+			self.title = self.name
 
 	def update_odometer(self):
 		from erpnext.vehicles.doctype.vehicle_log.vehicle_log import make_odometer_log
@@ -85,6 +106,30 @@ class Project(Document):
 
 		from erpnext.vehicles.utils import format_vehicle_fields
 		format_vehicle_fields(self)
+
+	def validate_depreciation(self):
+		if not self.insurance_company:
+			self.default_depreciation_percentage = 0
+			self.non_standard_depreciation = []
+			return
+
+		if flt(self.default_depreciation_percentage) > 100:
+			frappe.throw(_("Default Depreciation Rate cannot be greater than 100%"))
+		elif flt(self.default_depreciation_percentage) < 0:
+			frappe.throw(_("Default Depreciation Rate cannot be negative"))
+
+		item_codes_visited = set()
+		for d in self.non_standard_depreciation:
+			if flt(d.depreciation_percentage) > 100:
+				frappe.throw(_("Row #{0}: Depreciation Rate cannot be greater than 100%").format(d.idx))
+			elif flt(d.depreciation_percentage) < 0:
+				frappe.throw(_("Row #{0}: Depreciation Rate cannot be negative").format(d.idx))
+
+			if d.depreciation_item_code in item_codes_visited:
+				frappe.throw(_("Row #{0}: Duplicate Non Standard Depreciation row for Item {1}")
+					.format(d.idx, frappe.bold(d.depreciation_item_code)))
+
+			item_codes_visited.add(d.depreciation_item_code)
 
 	def copy_from_template(self):
 		'''
@@ -253,6 +298,7 @@ class Project(Document):
 								content=content.format(*messages))
 				user.welcome_email_sent = 1
 
+
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
 	return dict(frappe.db.sql('''select unix_timestamp(from_time), count(*)
@@ -287,6 +333,7 @@ def get_list_context(context=None):
 		"row_template": "templates/includes/projects/project_row.html"
 	}
 
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
@@ -319,6 +366,7 @@ def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 def get_cost_center_name(project):
 	return frappe.db.get_value("Project", project, "cost_center")
 
+
 def hourly_reminder():
 	fields = ["from_time", "to_time"]
 	projects = get_projects_for_collect_progress("Hourly", fields)
@@ -328,10 +376,12 @@ def hourly_reminder():
 			get_time(nowtime()) <= get_time(project.to_time)):
 			send_project_update_email_to_users(project.name)
 
+
 def project_status_update_reminder():
 	daily_reminder()
 	twice_daily_reminder()
 	weekly_reminder()
+
 
 def daily_reminder():
 	fields = ["daily_time_to_send"]
@@ -340,6 +390,7 @@ def daily_reminder():
 	for project in projects:
 		if allow_to_make_project_update(project.name, project.get("daily_time_to_send"), "Daily"):
 			send_project_update_email_to_users(project.name)
+
 
 def twice_daily_reminder():
 	fields = ["first_email", "second_email"]
@@ -350,6 +401,7 @@ def twice_daily_reminder():
 		for d in fields:
 			if allow_to_make_project_update(project.name, project.get(d), "Twicely"):
 				send_project_update_email_to_users(project.name)
+
 
 def weekly_reminder():
 	fields = ["day_to_send", "weekly_time_to_send"]
@@ -362,6 +414,7 @@ def weekly_reminder():
 
 		if allow_to_make_project_update(project.name, project.get("weekly_time_to_send"), "Weekly"):
 			send_project_update_email_to_users(project.name)
+
 
 def allow_to_make_project_update(project, time, frequency):
 	data = frappe.db.sql(""" SELECT name from `tabProject Update`
@@ -405,11 +458,13 @@ def create_duplicate_project(prev_doc, project_name):
 
 	project.db_set('project_template', prev_doc.get('project_template'))
 
+
 def get_projects_for_collect_progress(frequency, fields):
 	fields.extend(["name"])
 
 	return frappe.get_all("Project", fields = fields,
 		filters = {'collect_progress': 1, 'frequency': frequency, 'status': 'Open'})
+
 
 def send_project_update_email_to_users(project):
 	doc = frappe.get_doc('Project', project)
@@ -438,6 +493,7 @@ def send_project_update_email_to_users(project):
 		reply_to=incoming_email_account
 	)
 
+
 def collect_project_status():
 	for data in frappe.get_all("Project Update",
 		{'date': today(), 'sent': 0}):
@@ -465,6 +521,7 @@ def collect_project_status():
 
 			doc.save(ignore_permissions=True)
 
+
 def send_project_status_email_to_users():
 	yesterday = add_days(today(), -1)
 
@@ -488,34 +545,6 @@ def send_project_status_email_to_users():
 
 		doc.db_set('sent', 1)
 
-def update_project_sales_billing():
-	sales_update_frequency = frappe.db.get_single_value("Selling Settings", "sales_update_frequency")
-	if sales_update_frequency == "Each Transaction":
-		return
-	elif (sales_update_frequency == "Monthly" and frappe.utils.now_datetime().day != 1):
-		return
-
-	#Else simply fallback to Daily
-	exists_query = '(SELECT 1 from `tab{doctype}` where docstatus = 1 and project = `tabProject`.name)'
-	project_map = {}
-	for project_details in frappe.db.sql('''
-			SELECT name, 1 as order_exists, null as invoice_exists from `tabProject` where
-			exists {order_exists}
-			union
-			SELECT name, null as order_exists, 1 as invoice_exists from `tabProject` where
-			exists {invoice_exists}
-		'''.format(
-			order_exists=exists_query.format(doctype="Sales Order"),
-			invoice_exists=exists_query.format(doctype="Sales Invoice"),
-		), as_dict=True):
-		project = project_map.setdefault(project_details.name, frappe.get_doc('Project', project_details.name))
-		if project_details.order_exists:
-			project.update_sales_amount()
-		if project_details.invoice_exists:
-			project.update_billed_amount()
-
-	for project in project_map.values():
-		project.save()
 
 @frappe.whitelist()
 def create_kanban_board_if_not_exists(project):
@@ -525,6 +554,7 @@ def create_kanban_board_if_not_exists(project):
 		quick_kanban_board('Task', project, 'status')
 
 	return True
+
 
 @frappe.whitelist()
 def set_project_status(project, status):
@@ -543,6 +573,7 @@ def set_project_status(project, status):
 	project.status = status
 	project.save()
 
+
 @frappe.whitelist()
 def get_project_details(project, doctype):
 	if isinstance(project, string_types):
@@ -559,24 +590,28 @@ def get_project_details(project, doctype):
 		'vehicle_last_odometer',
 		'service_advisor', 'service_manager',
 		'insurance_company', 'insurance_loss_no', 'insurance_policy_no',
-		'insurance_surveyor', 'insurance_surveyor_company'
+		'insurance_surveyor', 'insurance_surveyor_company',
+		'has_stin', 'default_depreciation_percentage',
 	]
-	for f in fieldnames:
-		if f in ['customer', 'bill_to', 'vehicle_owner'] and doctype not in sales_doctypes:
-			continue
-		if project.get(f):
-			out[f] = project.get(f)
+	sales_only_fields = ['customer', 'bill_to', 'vehicle_owner', 'has_stin', 'default_depreciation_percentage']
 
-			if doctype == "Quotation" and f == 'customer':
-				out['quotation_to'] = 'Customer'
-				out['party_name'] = project.get(f)
+	for f in fieldnames:
+		if f in sales_only_fields and doctype not in sales_doctypes:
+			continue
+		if f in ['customer', 'bill_to'] and not project.get(f):
+			continue
+
+		out[f] = project.get(f)
+
+		if doctype == "Quotation" and f == 'customer':
+			out['quotation_to'] = 'Customer'
+			out['party_name'] = project.get(f)
 
 	return out
 
+
 @frappe.whitelist()
 def make_against_project(project_name, dt):
-	from frappe.model.utils import get_fetch_values
-
 	project = frappe.get_doc("Project", project_name)
 	doc = frappe.new_doc(dt)
 
@@ -618,22 +653,17 @@ def make_against_project(project_name, dt):
 
 
 @frappe.whitelist()
-def get_sales_invoice(project_name):
+def get_sales_invoice(project_name, depreciation_type=None):
 	from erpnext.controllers.queries import _get_delivery_notes_to_be_billed
 	from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice as invoice_from_delivery_note
 	from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice as invoice_from_sales_order
 
 	project = frappe.get_doc("Project", project_name)
-	project_details = get_project_details(project, "Sales Invoice")
 
 	# Create Sales Invoice
 	target_doc = frappe.new_doc("Sales Invoice")
 	target_doc.company = project.company
 	target_doc.project = project.name
-
-	for k, v in project_details.items():
-		if target_doc.meta.has_field(k):
-			target_doc.set(k, v)
 
 	filters = {"project": project.name}
 	if project.customer:
@@ -644,7 +674,6 @@ def get_sales_invoice(project_name):
 	# Get Delivery Notes
 	delivery_note_filters = filters.copy()
 	delivery_note_filters['is_return'] = 0
-
 	delivery_notes = _get_delivery_notes_to_be_billed(filters=delivery_note_filters)
 	for d in delivery_notes:
 		target_doc = invoice_from_delivery_note(d.name, target_doc=target_doc)
@@ -656,9 +685,60 @@ def get_sales_invoice(project_name):
 		"per_completed": ["<", 99.99],
 	}
 	sales_order_filters.update(filters)
-
 	sales_orders = frappe.get_all("Sales Order", filters=sales_order_filters)
 	for d in sales_orders:
 		target_doc = invoice_from_sales_order(d.name, target_doc=target_doc)
 
+	# Remove Taxes (so they are reloaded)
+	target_doc.taxes_and_charges = None
+	target_doc.taxes = []
+
+	# Set Project Details
+	project_details = get_project_details(project, "Sales Invoice")
+	for k, v in project_details.items():
+		if target_doc.meta.has_field(k):
+			target_doc.set(k, v)
+
+	# Depreciation billing case
+	if project.default_depreciation_percentage or project.non_standard_depreciation and depreciation_type:
+		target_doc.depreciation_type = depreciation_type
+		if depreciation_type == "Depreciation Amount Only":
+			target_doc.bill_to = target_doc.customer
+		elif depreciation_type == "After Depreciation Amount":
+			if not project.bill_to and project.insurance_company:
+				target_doc.bill_to = project.insurance_company
+
+
+	# Insurance Company Fetch Values
+	target_doc.update(get_fetch_values(target_doc.doctype, 'insurance_company', target_doc.insurance_company))
+
+	# Missing Values and Forced Values
+	target_doc.run_method("set_missing_values")
+
+	# Set Depreciation Rates
+	set_depreciation_in_invoice_items(target_doc, project)
+
+	# Tax Table
+	target_doc.run_method("append_taxes_from_master")
+
+	# Calcualte Taxes and Totals
+	target_doc.run_method("calculate_taxes_and_totals")
+
 	return target_doc
+
+
+def set_depreciation_in_invoice_items(target_doc, project):
+	non_standard_depreciation_items = {}
+	for d in project.non_standard_depreciation:
+		if d.depreciation_item_code:
+			non_standard_depreciation_items[d.depreciation_item_code] = flt(d.depreciation_percentage)
+
+	for d in target_doc.get('items'):
+		if d.is_stock_item:
+			if not flt(d.depreciation_percentage):
+				if d.item_code in non_standard_depreciation_items:
+					d.depreciation_percentage = non_standard_depreciation_items[d.item_code]
+				else:
+					d.depreciation_percentage = flt(project.default_depreciation_percentage)
+		else:
+			d.depreciation_percentage = 0

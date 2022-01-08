@@ -3,35 +3,47 @@
 
 from __future__ import unicode_literals
 import frappe
-
 from frappe.utils import cstr, getdate
-
 from frappe import _
 from erpnext.stock.utils import get_valid_serial_nos
-
 from erpnext.utilities.transaction_base import TransactionBase
+
 
 class InstallationNote(TransactionBase):
 	def __init__(self, *args, **kwargs):
 		super(InstallationNote, self).__init__(*args, **kwargs)
-		self.status_updater = [{
-			'source_dt': 'Installation Note Item',
-			'target_dt': 'Delivery Note Item',
-			'target_field': 'installed_qty',
-			'target_ref_field': 'qty',
-			'join_field': 'prevdoc_detail_docname',
-			'target_parent_dt': 'Delivery Note',
-			'target_parent_field': 'per_installed',
-			'source_field': 'qty',
-			'percent_join_field': 'prevdoc_docname',
-			'status_field': 'installation_status',
-			'keyword': 'Installed',
-			'overflow_type': 'installation'
-		}]
 
 	def validate(self):
 		self.validate_installation_date()
 		self.check_item_table()
+
+	def on_submit(self):
+		self.validate_serial_no()
+		self.update_previous_doc_status()
+		frappe.db.set(self, 'status', 'Submitted')
+
+	def on_cancel(self):
+		self.update_previous_doc_status()
+		frappe.db.set(self, 'status', 'Cancelled')
+
+	def on_update(self):
+		frappe.db.set(self, 'status', 'Draft')
+
+	def update_previous_doc_status(self):
+		delivery_notes = set()
+		delivery_note_row_names = set()
+		for d in self.items:
+			if d.prevdoc_doctype == "Delivery Note":
+				if d.prevdoc_docname:
+					delivery_notes.add(d.prevdoc_docname)
+				if d.prevdoc_detail_docname:
+					delivery_note_row_names.add(d.prevdoc_detail_docname)
+
+		for name in delivery_notes:
+			doc = frappe.get_doc("Delivery Note", name)
+			doc.set_installation_status(update=True)
+			doc.validate_installed_qty(from_doctype=self.doctype, row_names=delivery_note_row_names)
+			doc.notify_update()
 
 	def is_serial_no_added(self, item_code, serial_no):
 		has_serial_no = frappe.db.get_value("Item", item_code, "has_serial_no")
@@ -67,7 +79,6 @@ class InstallationNote(TransactionBase):
 				if prevdoc_s_no:
 					self.is_serial_no_match(sr_list, prevdoc_s_no, d.prevdoc_docname)
 
-
 	def validate_installation_date(self):
 		for d in self.get('items'):
 			if d.prevdoc_docname:
@@ -78,15 +89,3 @@ class InstallationNote(TransactionBase):
 	def check_item_table(self):
 		if not(self.get('items')):
 			frappe.throw(_("Please pull items from Delivery Note"))
-
-	def on_update(self):
-		frappe.db.set(self, 'status', 'Draft')
-
-	def on_submit(self):
-		self.validate_serial_no()
-		self.update_prevdoc_status()
-		frappe.db.set(self, 'status', 'Submitted')
-
-	def on_cancel(self):
-		self.update_prevdoc_status()
-		frappe.db.set(self, 'status', 'Cancelled')

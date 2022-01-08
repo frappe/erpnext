@@ -12,12 +12,12 @@
   "naming_series",
   "customer",
   "customer_name",
-  "received_by_type",
-  "received_by",
-  "column_break1",
-  "remarks",
   "po_no",
   "po_date",
+  "column_break1",
+  "remarks",
+  "received_by_type",
+  "received_by",
   "is_return",
   "reopen_order",
   "return_against",
@@ -101,6 +101,7 @@
   "base_total_discount",
   "taxes_section",
   "taxes_and_charges",
+  "has_stin",
   "column_break_91",
   "tax_category",
   "column_break_39",
@@ -331,7 +332,8 @@
    "label": "Is Return",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "depends_on": "is_return",
@@ -1013,7 +1015,6 @@
    "print_hide": 1
   },
   {
-   "default": "Today",
    "fieldname": "lr_date",
    "fieldtype": "Date",
    "label": "Transport Receipt Date",
@@ -1310,7 +1311,8 @@
    "depends_on": "is_return",
    "fieldname": "reopen_order",
    "fieldtype": "Check",
-   "label": "Reopen Sales Order"
+   "label": "Reopen Order",
+   "search_index": 1
   },
   {
    "fieldname": "transaction_type",
@@ -1683,12 +1685,18 @@
   {
    "fieldname": "column_break_54",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "has_stin",
+   "fieldtype": "Check",
+   "label": "Apply Taxes"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2021-12-05 01:13:52.349834",
+ "modified": "2022-01-07 14:20:42.775253",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

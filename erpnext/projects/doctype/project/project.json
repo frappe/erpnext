@@ -1,7 +1,7 @@
 {
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:project_name",
+ "autoname": "naming_series:",
  "creation": "2013-03-07 11:55:07",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -9,16 +9,17 @@
  "field_order": [
   "naming_series",
   "title",
+  "project_number",
   "project_name",
-  "status",
   "project_template",
   "copied_from",
   "column_break_5",
+  "status",
   "is_active",
-  "percent_complete",
   "column_break_10",
   "priority",
   "percent_complete_method",
+  "percent_complete",
   "more_info",
   "project_type",
   "more_info_cb_1",
@@ -28,6 +29,7 @@
   "customer_details_section",
   "customer",
   "customer_name",
+  "has_stin",
   "column_break_14",
   "bill_to",
   "bill_to_name",
@@ -45,27 +47,33 @@
   "col_break_insurance2",
   "insurance_surveyor",
   "insurance_surveyor_company",
+  "depreciation_details_section",
+  "default_depreciation_percentage",
+  "non_standard_depreciation",
   "section_break0",
   "notes",
   "section_break_18",
   "expected_start_date",
-  "expected_end_date",
-  "column_break_20",
   "actual_start_date",
+  "column_break_20",
+  "expected_end_date",
   "actual_end_date",
+  "column_break_49",
   "actual_time",
   "project_details",
-  "estimated_costing",
+  "total_sales_amount",
+  "total_billed_amount",
+  "column_break_28",
+  "total_billable_amount",
   "total_costing_amount",
+  "column_break_58",
   "total_expense_claim",
   "total_purchase_cost",
-  "company",
-  "column_break_28",
-  "total_sales_amount",
-  "total_billable_amount",
-  "total_billed_amount",
+  "column_break_61",
   "total_consumed_material_cost",
+  "estimated_costing",
   "cost_center",
+  "company",
   "margin",
   "gross_margin",
   "column_break_37",
@@ -90,10 +98,9 @@
   {
    "fieldname": "project_name",
    "fieldtype": "Data",
-   "label": "Project Name",
+   "label": "Project Title",
    "oldfieldtype": "Data",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "default": "Open",
@@ -185,6 +192,7 @@
    "options": "Department"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -456,6 +464,7 @@
    "label": "Message"
   },
   {
+   "default": "PROJ-",
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "hidden": 1,
@@ -464,7 +473,6 @@
    "set_only_once": 1
   },
   {
-   "default": "{customer_name}",
    "fieldname": "title",
    "fieldtype": "Data",
    "hidden": 1,
@@ -581,6 +589,7 @@
    "options": "Customer"
   },
   {
+   "allow_in_quick_entry": 1,
    "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
@@ -603,11 +612,55 @@
   {
    "fieldname": "col_break_applies_to",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "has_stin",
+   "fieldtype": "Check",
+   "label": "Apply Taxes"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "project_number",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Project Number",
+   "no_copy": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "column_break_49",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_58",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_61",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_depreciation_percentage",
+   "fieldtype": "Percent",
+   "label": "Default Depreciation (%)"
+  },
+  {
+   "depends_on": "insurance_company",
+   "fieldname": "depreciation_details_section",
+   "fieldtype": "Section Break",
+   "label": "Depreciation Details"
+  },
+  {
+   "fieldname": "non_standard_depreciation",
+   "fieldtype": "Table",
+   "label": "Non Standard Depreciation Rates",
+   "options": "Project Item Depreciation"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2021-12-05 01:13:12.653997",
+ "modified": "2022-01-08 02:55:35.983201",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

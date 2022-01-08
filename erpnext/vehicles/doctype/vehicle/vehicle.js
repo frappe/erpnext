@@ -5,6 +5,16 @@ frappe.provide("erpnext.vehicles");
 
 erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 	setup: function () {
+		this.setup_queries();
+	},
+
+	refresh: function () {
+		erpnext.hide_company();
+		this.setup_buttons();
+		this.set_cant_change_read_only();
+	},
+
+	setup_queries: function () {
 		var me = this;
 
 		this.frm.set_query("item_code", function() {
@@ -39,9 +49,7 @@ erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 		});
 	},
 
-	refresh: function () {
-		erpnext.hide_company();
-
+	setup_buttons: function () {
 		if(!this.frm.is_new()) {
 			this.frm.add_custom_button(__("View Ledger"), () => {
 				frappe.route_options = {
@@ -52,10 +60,12 @@ erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 				frappe.set_route("query-report", "Stock Ledger");
 			});
 		}
+	},
 
+	set_cant_change_read_only: function () {
 		const cant_change_fields = (this.frm.doc.__onload && this.frm.doc.__onload.cant_change_fields) || {};
 		$.each(cant_change_fields, (fieldname, cant_change) => {
-			this.frm.set_df_property(fieldname, 'read_only', cint(cant_change));
+			this.frm.set_df_property(fieldname, 'read_only', cant_change ? 1 : 0);
 		});
 	},
 

@@ -82,7 +82,7 @@ class VehicleInvoice(VehicleTransactionController):
 	def update_vehicle(self, update_modified=True):
 		if self.vehicle:
 			doc = frappe.get_doc("Vehicle", self.vehicle)
-			doc.update_invoice_status(update=True, update_modified=update_modified)
+			doc.set_invoice_status(update=True, update_modified=update_modified)
 			doc.notify_update()
 
 	def update_copy_delivered(self, update_modified=True):

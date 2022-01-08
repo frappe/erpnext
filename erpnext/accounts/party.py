@@ -224,7 +224,7 @@ def set_price_list(party_details, party, party_type, given_price_list, pos=None)
 		price_list = get_default_price_list(party) or given_price_list
 
 	if price_list:
-		party_details.price_list_currency = frappe.db.get_value("Price List", price_list, "currency", cache=True)
+		party_details.price_list_currency = frappe.get_cached_value("Price List", price_list, "currency")
 
 	party_details["selling_price_list" if party.doctype=="Customer" else "buying_price_list"] = price_list
 
@@ -473,7 +473,7 @@ def validate_due_date(posting_date, due_date, party_type, party, company=None, b
 
 @frappe.whitelist()
 def get_address_tax_category(tax_category=None, billing_address=None, shipping_address=None):
-	addr_tax_category_from = frappe.db.get_single_value("Accounts Settings", "determine_address_tax_category_from")
+	addr_tax_category_from = frappe.get_cached_value("Accounts Settings", None, "determine_address_tax_category_from")
 	if addr_tax_category_from == "Shipping Address":
 		if shipping_address:
 			tax_category = frappe.db.get_value("Address", shipping_address, "tax_category") or tax_category

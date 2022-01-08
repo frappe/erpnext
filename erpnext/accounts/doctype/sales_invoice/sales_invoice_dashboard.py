@@ -6,7 +6,7 @@ def get_data():
 	return {
 		'fieldname': 'sales_invoice',
 		'non_standard_fieldnames': {
-			'Delivery Note': 'against_sales_invoice',
+			'Delivery Note': 'sales_invoice',
 			'Journal Entry': 'reference_name',
 			'Payment Entry': 'reference_name',
 			'Payment Request': 'reference_name',
@@ -16,6 +16,7 @@ def get_data():
 		'internal_links': {
 			'Sales Order': ['items', 'sales_order'],
 			'Delivery Note': ['items', 'delivery_note'],
+			'Quotation': ['items', 'quotation'],
 			'Vehicle': ['items', 'vehicle']
 		},
 		'transactions': [
@@ -25,15 +26,15 @@ def get_data():
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Delivery Note', 'Sales Order', 'Timesheet']
+				'items': ['Delivery Note', 'Sales Order', 'Quotation']
+			},
+			{
+				'label': _('Reference'),
+				'items': ['Timesheet', 'Auto Repeat']
 			},
 			{
 				'label': _('Returns'),
 				'items': ['Sales Invoice']
-			},
-			{
-				'label': _('Subscription'),
-				'items': ['Auto Repeat']
 			},
 		]
 	}

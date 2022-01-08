@@ -22,7 +22,7 @@ from erpnext.controllers.stock_controller import StockController
 class BuyingController(StockController):
 	def __setup__(self):
 		if hasattr(self, "taxes"):
-			self.flags.print_taxes_with_zero_amount = cint(frappe.db.get_single_value("Print Settings",
+			self.flags.print_taxes_with_zero_amount = cint(frappe.get_cached_value("Print Settings", None,
 				 "print_taxes_with_zero_amount"))
 			self.flags.show_inclusive_tax_in_print = self.is_inclusive_tax()
 
@@ -648,19 +648,19 @@ class BuyingController(StockController):
 						})
 
 						purchase_receipt = self.return_against if self.doctype == "Purchase Receipt" else d.get('purchase_receipt')
-						if d.get('pr_detail') and purchase_receipt:
+						if d.get('purchase_receipt_item') and purchase_receipt:
 							sle.dependencies = [{
 								"dependent_voucher_type": "Purchase Receipt",
 								"dependent_voucher_no": purchase_receipt,
-								"dependent_voucher_detail_no": d.pr_detail,
+								"dependent_voucher_detail_no": d.purchase_receipt_item,
 								"dependency_type": "Rate"
 							}]
-						elif self.doctype == "Purchase Invoice" and d.get('pi_detail') and self.get('return_against')\
+						elif self.doctype == "Purchase Invoice" and d.get('purchase_invoice_item') and self.get('return_against')\
 								and frappe.db.get_value("Purchase Invoice", self.return_against, 'update_stock', cache=1):
 							sle.dependencies = [{
 								"dependent_voucher_type": "Purchase Invoice",
 								"dependent_voucher_no": self.return_against,
-								"dependent_voucher_detail_no": d.pi_detail,
+								"dependent_voucher_detail_no": d.purchase_invoice_item,
 								"dependency_type": "Rate"
 							}]
 					else:
@@ -689,8 +689,8 @@ class BuyingController(StockController):
 				and d.purchase_order:
 					po_map.setdefault(d.purchase_order, []).append(d.purchase_order_item)
 
-			elif self.doctype=="Purchase Invoice" and d.purchase_order and d.po_detail:
-				po_map.setdefault(d.purchase_order, []).append(d.po_detail)
+			elif self.doctype=="Purchase Invoice" and d.purchase_order and d.purchase_order_item:
+				po_map.setdefault(d.purchase_order, []).append(d.purchase_order_item)
 
 		for po, po_item_rows in po_map.items():
 			if po and po_item_rows:
@@ -1027,19 +1027,20 @@ def validate_item_type(doc, fieldname, message):
 	if not items:
 		return
 
-	item_list = ", ".join(["%s" % frappe.db.escape(d) for d in items])
-
-	invalid_items = [d[0] for d in frappe.db.sql("""
-		select item_code from tabItem where name in ({0}) and {1}=0
-		""".format(item_list, fieldname), as_list=True)]
+	invalid_items = []
+	for item_code in items:
+		if item_code not in invalid_items:
+			if not frappe.get_cached_value("Item", item_code, fieldname):
+				invalid_items.append(item_code)
 
 	if invalid_items:
-		items = ", ".join([d for d in invalid_items])
-
+		invalid_items_message = ", ".join([frappe.utils.get_link_to_form("Item", item_code) for item_code in invalid_items])
 		if len(invalid_items) > 1:
-			error_message = _("Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master".format(items, message))
+			error_message = _("The following Items {0} are not marked as {1} Item. You can enable them as {1} Item from Item Master")\
+				.format(invalid_items_message, message)
 		else:
-			error_message = _("Following item {0} is not marked as {1} item. You can enable them as {1} item from its Item master".format(items, message))
+			error_message = _("Item {0} is not marked as {1} Item. You can enable them as {1} Item from Item Master")\
+				.format(invalid_items_message, message)
 
 		frappe.throw(error_message)
 

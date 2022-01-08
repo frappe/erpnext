@@ -9,10 +9,12 @@ def get_data():
 			'Stock Entry': 'delivery_note_no',
 			'Quality Inspection': 'reference_name',
 			'Auto Repeat': 'reference_document',
-			'Delivery Note': 'return_against'
+			'Delivery Note': 'return_against',
+			'Installation Note': 'prevdoc_docname',
 		},
 		'internal_links': {
-			'Sales Order': ['items', 'against_sales_order'],
+			'Sales Order': ['items', 'sales_order'],
+			'Quotation': ['items', 'quotation'],
 			'Vehicle': ['items', 'vehicle']
 		},
 		'transactions': [
@@ -22,15 +24,15 @@ def get_data():
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Sales Order', 'Quality Inspection']
+				'items': ['Sales Order', 'Quotation', 'Installation Note']
+			},
+			{
+				'label': _('Reference'),
+				'items': ['Quality Inspection', 'Auto Repeat']
 			},
 			{
 				'label': _('Returns'),
 				'items': ['Delivery Note']
-			},
-			{
-				'label': _('Subscription'),
-				'items': ['Auto Repeat']
 			},
 		]
 	}

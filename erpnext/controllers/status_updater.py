@@ -3,123 +3,19 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, comma_or, nowdate, getdate
+from frappe.utils import flt, cint, comma_or, nowdate, getdate
 from frappe import _
 from frappe.model.document import Document
 
-class OverAllowanceError(frappe.ValidationError): pass
+
+class OverAllowanceError(frappe.ValidationError):
+	pass
+
 
 def validate_status(status, options):
 	if status not in options:
 		frappe.throw(_("Status must be one of {0}").format(comma_or(options)))
 
-status_map = {
-	"Lead": [
-		["Lost Quotation", "has_lost_quotation"],
-		["Opportunity", "has_opportunity"],
-		["Quotation", "has_quotation"],
-		["Converted", "has_customer"],
-	],
-	"Opportunity": [
-		["Lost", "eval:self.status=='Lost'"],
-		["Lost", "has_lost_quotation"],
-		["Quotation", "has_active_quotation"],
-		["Converted", "has_ordered_quotation"],
-		["Closed", "eval:self.status=='Closed'"]
-	],
-	"Quotation": [
-		["Draft", None],
-		["Open", "eval:self.docstatus==1"],
-		["Lost", "eval:self.status=='Lost'"],
-		["Ordered", "has_sales_order"],
-		["Cancelled", "eval:self.docstatus==2"],
-	],
-	"Vehicle Quotation": [
-		["Draft", None],
-		["Open", "eval:self.docstatus==1"],
-		["Lost", "eval:self.status=='Lost'"],
-		["Ordered", "has_vehicle_booking_order"],
-		["Cancelled", "eval:self.docstatus==2"],
-	],
-	"Sales Order": [
-		["Draft", None],
-		["To Deliver and Bill", "eval:self.per_delivered < 100 and self.per_completed < 100 and self.docstatus == 1"],
-		["To Bill", "eval:(self.per_delivered == 100 or self.skip_delivery_note) and self.per_completed < 100 and self.docstatus == 1"],
-		["To Deliver", "eval:self.per_delivered < 100 and self.per_completed == 100 and self.docstatus == 1 and not self.skip_delivery_note"],
-		["Completed", "eval:(self.per_delivered == 100 or self.skip_delivery_note) and self.per_completed == 100 and self.docstatus == 1"],
-		["Cancelled", "eval:self.docstatus==2"],
-		["Closed", "eval:self.status=='Closed'"],
-		["On Hold", "eval:self.status=='On Hold'"],
-	],
-	"Purchase Order": [
-		["Draft", None],
-		["To Receive and Bill", "eval:self.per_received < 100 and self.per_completed < 100 and self.docstatus == 1"],
-		["To Bill", "eval:self.per_received >= 100 and self.per_completed < 100 and self.docstatus == 1"],
-		["To Receive", "eval:self.per_received < 100 and self.per_completed == 100 and self.docstatus == 1"],
-		["Completed", "eval:self.per_received >= 100 and self.per_completed == 100 and self.docstatus == 1"],
-		["Delivered", "eval:self.status=='Delivered'"],
-		["Cancelled", "eval:self.docstatus==2"],
-		["On Hold", "eval:self.status=='On Hold'"],
-		["Closed", "eval:self.status=='Closed'"],
-	],
-	"Delivery Note": [
-		["Draft", None],
-		["To Bill", "eval:self.per_completed < 100 and self.docstatus == 1"],
-		["Completed", "eval:self.per_completed == 100 and self.docstatus == 1"],
-		["Return", "eval:self.is_return and self.docstatus == 1"],
-		["Cancelled", "eval:self.docstatus==2"],
-		["Closed", "eval:self.status=='Closed'"],
-	],
-	"Purchase Receipt": [
-		["Draft", None],
-		["To Bill", "eval:self.per_completed < 100 and self.docstatus == 1"],
-		["Completed", "eval:self.per_completed == 100 and self.docstatus == 1"],
-		["Return", "eval:self.is_return and self.docstatus == 1"],
-		["Cancelled", "eval:self.docstatus==2"],
-		["Closed", "eval:self.status=='Closed'"],
-	],
-	"Material Request": [
-		["Draft", None],
-		["Stopped", "eval:self.status == 'Stopped'"],
-		["Cancelled", "eval:self.docstatus == 2"],
-		["Pending", "eval:self.status != 'Stopped' and self.per_ordered == 0 and self.docstatus == 1"],
-		["Partially Ordered", "eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1"],
-		["Ordered", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
-		["Transferred", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Transfer'"],
-		["Issued", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Issue'"],
-		["Received", "eval:self.status != 'Stopped' and self.per_received == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
-		["Partially Received", "eval:self.status != 'Stopped' and self.per_received > 0 and self.per_received < 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
-		["Manufactured", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Manufacture'"]
-	],
-	"Bank Transaction": [
-		["Unreconciled", "eval:self.docstatus == 1 and self.unallocated_amount>0"],
-		["Reconciled", "eval:self.docstatus == 1 and self.unallocated_amount<=0"]
-	],
-	"Landed Cost Voucher": [
-		["Draft", None],
-		["Submitted", "eval:self.docstatus==1"],
-		["Paid", "eval:self.grand_total and self.outstanding_amount <= 0 and self.docstatus==1"],
-		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
-		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
-		["Cancelled", "eval:self.docstatus==2"],
-	],
-	"Employee Advance": [
-		["Draft", None],
-		["Unpaid", "eval:self.docstatus==1"],
-		["Unclaimed", "eval:self.paid_amount and self.paid_amount == self.advance_amount and self.docstatus==1"],
-		["Claimed", "eval:self.paid_amount and self.balance_amount == 0 and self.docstatus==1"],
-		["Deducted from Salary", "eval:self.paid_amount and self.salary_deduction_amount and self.balance_amount == 0 and self.docstatus==1"],
-		["Cancelled", "eval:self.docstatus==2"],
-	],
-	"Expense Claim": [
-		["Draft", None],
-		["Submitted", "eval:self.docstatus==1"],
-		["Unpaid", "eval:self.approval_status == 'Approved' and self.outstanding_amount > 0 and self.docstatus==1"],
-		["Paid", "eval:self.approval_status == 'Approved' and self.outstanding_amount == 0 and self.docstatus==1"],
-		["Rejected", "eval:self.approval_status == 'Rejected' and self.docstatus==1"],
-		["Cancelled", "eval:self.docstatus==2"],
-	]
-}
 
 class StatusUpdater(Document):
 	"""
@@ -129,288 +25,246 @@ class StatusUpdater(Document):
 		Installation Note: Update Installed Qty, Update Percent Qty and Validate over installation
 	"""
 
-	def update_prevdoc_status(self):
-		self.update_qty()
-		self.validate_qty()
-
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
 			if self.get('amended_from'):
 				self.status = 'Draft'
 			return
 
-		if self.doctype in status_map:
-			_status = self.status
-			if status and update:
-				self.db_set("status", status)
+		if self.get('status_map'):
+			previous_status = self.status
+			if status:
+				self.status = status
+				if update:
+					self.db_set("status", status)
 
-			sl = status_map[self.doctype][:]
+			sl = self.status_map[:]
 			sl.reverse()
-			for s in sl:
-				if not s[1]:
-					self.status = s[0]
+			for s, condition in sl:
+				if not condition:
+					self.status = s
 					break
-				elif s[1].startswith("eval:"):
-					if frappe.safe_eval(s[1][5:], None, { "self": self.as_dict(), "getdate": getdate,
-							"nowdate": nowdate, "get_value": frappe.db.get_value }):
-						self.status = s[0]
+				elif condition.startswith("eval:"):
+					if frappe.safe_eval(condition[5:], None, {"self": self.as_dict(), "getdate": getdate,
+							"nowdate": nowdate, "get_value": frappe.db.get_value}):
+						self.status = s
 						break
-				elif getattr(self, s[1])():
-					self.status = s[0]
+				elif getattr(self, condition)():
+					self.status = s
 					break
 
-			self.add_status_comment(_status)
+			self.add_status_comment(previous_status)
 
 			if update:
-				self.db_set('status', self.status, update_modified = update_modified)
+				self.db_set('status', self.status, update_modified=update_modified)
 
 	def add_status_comment(self, previous_status):
 		if self.status != previous_status and self.status not in ("Cancelled", "Draft"):
 			self.add_comment("Label", _(self.status))
 
-	def validate_qty(self):
-		"""Validates qty at row level"""
-		self.item_allowance = {}
-		self.global_qty_allowance = None
-		self.global_amount_allowance = None
+	def calculate_status_percentage(self, completed_field, reference_field, items=None):
+		if items is None:
+			items = self.get('items', [])
 
-		for args in self.status_updater:
-			if "target_ref_field" not in args:
-				# if target_ref_field is not specified, the programmer does not want to validate qty / amount
-				continue
-
-			# get unique transactions to update
-			for d in self.get_all_children():
-				if hasattr(d, 'qty') and d.qty < 0 and not self.get('is_return'):
-					frappe.throw(_("For an item {0}, quantity must be positive number").format(d.item_code))
-
-				if hasattr(d, 'qty') and d.qty > 0 and self.get('is_return'):
-					frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
-
-				if d.doctype == args['source_dt'] and d.get(args["join_field"]):
-					args['name'] = d.get(args['join_field'])
-
-					if "ignore_overflow" in args:
-						if callable(args['ignore_overflow']):
-							if args['ignore_overflow'](d):
-								continue
-						elif args['ignore_overflow']:
-							continue
-
-					# get all qty where qty > target_field
-					item = frappe.db.sql("""select item_code, `{target_ref_field}`,
-						{target_field}, parenttype, parent from `tab{target_dt}`
-						where `{target_ref_field}` < {target_field}
-						and name=%s and docstatus=1""".format(**args),
-						args['name'], as_dict=1)
-					if item:
-						item = item[0]
-						item['idx'] = d.idx
-						item['target_ref_field'] = args['target_ref_field'].replace('_', ' ')
-
-						# if not item[args['target_ref_field']]:
-						# 	msgprint(_("Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0").format(item.item_code))
-						if args.get('no_allowance'):
-							item['reduce_by'] = item[args['target_field']] - item[args['target_ref_field']]
-							if item['reduce_by'] > .01:
-								self.limits_crossed_error(args, item, "qty")
-
-						elif item[args['target_ref_field']]:
-							self.check_overflow_with_allowance(item, args)
-
-	def check_overflow_with_allowance(self, item, args):
-		"""
-			Checks if there is overflow condering a relaxation allowance
-		"""
-		qty_or_amount = "qty" if "qty" in args['target_ref_field'] else "amount"
-
-		# check if overflow is within allowance
-		allowance, self.item_allowance, self.global_qty_allowance, self.global_amount_allowance = \
-			get_allowance_for(item['item_code'], self.item_allowance,
-				self.global_qty_allowance, self.global_amount_allowance, qty_or_amount)
-
-		overflow_percent = ((item[args['target_field']] - item[args['target_ref_field']]) /
-		 	item[args['target_ref_field']]) * 100
-
-		if overflow_percent - allowance > 0.01:
-			item['max_allowed'] = flt(item[args['target_ref_field']] * (100+allowance)/100)
-			item['reduce_by'] = item[args['target_field']] - item['max_allowed']
-
-			self.limits_crossed_error(args, item, qty_or_amount)
-
-	def limits_crossed_error(self, args, item, qty_or_amount):
-		'''Raise exception for limits crossed'''
-		if qty_or_amount == "qty":
-			action_msg = _('To allow over receipt / delivery, update "Over Receipt/Delivery Allowance" in Stock Settings or the Item.')
+		if items:
+			precision = items[0].precision(reference_field)
 		else:
-			action_msg = _('To allow over billing, update "Over Billing Allowance" in Accounts Settings or the Item.')
+			precision = cint(frappe.db.get_default("float_precision")) or 3
 
-		frappe.throw(_('This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?')
-			.format(
-				frappe.bold(_(item["target_ref_field"].title())),
-				frappe.bold(item["reduce_by"]),
-				frappe.bold(_(args.get('target_dt'))),
-				frappe.bold(_(self.doctype)),
-				frappe.bold(item.get('item_code'))
-			) + '<br><br>' + action_msg, OverAllowanceError, title = _('Limit Crossed'))
+		# Allow both: single and multiple completed qty fieldnames
+		if not isinstance(completed_field, list):
+			completed_field = [completed_field]
 
-	def update_qty(self, update_modified=True):
-		"""Updates qty or amount at row level
+		# Calculate Total Qty and Total Completed Qty
+		total_reference_qty = 0
+		total_completed_qty = 0
+		for row in items:
+			completed_qty = 0
+			for f in completed_field:
+				completed_qty += abs(flt(row.get(f)))
 
-			:param update_modified: If true, updates `modified` and `modified_by` for target parent doc
-		"""
-		for args in self.status_updater:
-			# condition to include current record (if submit or no if cancel)
-			if self.docstatus == 1:
-				args['cond'] = ' or parent="%s"' % self.name.replace('"', '\"')
-			else:
-				args['cond'] = ' and parent!="%s"' % self.name.replace('"', '\"')
+			reference_qty = abs(flt(row.get(reference_field)))
+			completed_qty = min(completed_qty, reference_qty)
 
-			updated_parents = []
-			if "update_children" in args and callable(args['update_children']):
-				updated_parents = args["update_children"](update_modified)
-			elif args.get('update_children', True):
-				self._update_children(args, update_modified)
+			total_reference_qty += reference_qty
+			total_completed_qty += completed_qty
 
-			if "percent_join_field" in args or "percent_join_name" in args:
-				if not updated_parents:
-					if args.get('percent_join_name'):
-						updated_parents.append(args.get('percent_join_name'))
-					elif args.get('percent_join_field'):
-						updated_parents = [d.get(args['percent_join_field']) for d in self.get_all_children(args['source_dt'])]
+		total_reference_qty = flt(total_reference_qty, precision)
+		total_completed_qty = flt(total_completed_qty, precision)
 
-				updated_parents = set(updated_parents)
-				self._update_percent_field_in_targets(args, updated_parents, update_modified)
+		if total_reference_qty:
+			return flt(total_completed_qty / total_reference_qty * 100, 6)
+		else:
+			return None
 
-	def _update_children(self, args, update_modified):
-		"""Update quantities or amount in child table"""
-		for d in self.get_all_children():
-			if d.doctype != args['source_dt']:
-				continue
+	def get_completion_status(self, percentage_field, keyword):
+		percentage = flt(self.get(percentage_field))
+		rounded_percentage = flt(percentage, self.precision(percentage_field))
 
-			self._update_modified(args, update_modified)
+		if rounded_percentage <= 0:
+			status = 'Not'
+		elif rounded_percentage >= 100:
+			status = 'Fully'
+		else:
+			status = 'Partly'
 
-			# updates qty in the child table
-			args['detail_id'] = d.get(args['join_field'])
+		return "{0} {1}".format(status, keyword)
 
-			args['second_source_condition'] = ""
-			if args.get('second_source_dt') and args.get('second_source_field') \
-					and args.get('second_join_field'):
-				if not args.get("second_source_extra_cond"):
-					args["second_source_extra_cond"] = ""
+	def validate_completed_qty(self, completed_field, reference_field, items=None, allowance_type=None,
+			from_doctype=None, row_names=None):
+		items = self.get_rows_for_qty_validation(items, row_names)
+		for row in items:
+			self.validate_completed_qty_for_row(row, completed_field, reference_field, allowance_type, from_doctype)
 
-				args['second_source_condition'] = """ + ifnull((select sum(%(second_source_field)s)
-					from `tab%(second_source_dt)s`
-					where `%(second_join_field)s`="%(detail_id)s"
-					and (`tab%(second_source_dt)s`.docstatus=1) %(second_source_extra_cond)s FOR UPDATE), 0) """ % args
+	def get_rows_for_qty_validation(self, items=None, row_names=None):
+		if items is None:
+			items = self.get('items', [])
 
-			if args['detail_id']:
-				if not args.get("extra_cond"): args["extra_cond"] = ""
+		rows = []
+		for row in items:
+			if row_names is None or row.name in row_names:
+				rows.append(row)
 
-				frappe.db.sql("""update `tab%(target_dt)s`
-					set %(target_field)s = (
-						(select ifnull(sum(%(source_field)s), 0)
-							from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s"
-							and (docstatus=1 %(cond)s) %(extra_cond)s)
-						%(second_source_condition)s
-					)
-					%(update_modified)s
-					where name='%(detail_id)s'""" % args)
+		return rows
 
-	def _update_percent_field_in_targets(self, args, targets, update_modified=True):
-		"""Update percent field in parent transaction"""
-		for name in targets:
-			if name:
-				args['name'] = name
-				self._update_percent_field(args, update_modified)
+	def validate_completed_qty_for_row(self, row, completed_field, reference_field, allowance_type=None, from_doctype=None):
+		# Allow both: single and multiple completed qty fieldnames
+		if not isinstance(completed_field, list):
+			completed_field = [completed_field]
 
-	def _update_percent_field(self, args, update_modified=True):
-		"""Update percent field in parent transaction"""
+		reference_qty = flt(row.get(reference_field))
+		completed_qty = 0
+		for f in completed_field:
+			completed_qty += flt(row.get(f))
 
-		self._update_modified(args, update_modified)
+		difference = completed_qty - reference_qty
+		if not allowance_type:
+			excess_qty = difference
+		else:
+			excess_qty = get_excess_qty_with_allowance(row, completed_field, reference_field, allowance_type)
 
-		if args.get('target_parent_field'):
-			frappe.db.sql("""update `tab%(target_parent_dt)s`
-				set %(target_parent_field)s = round(
-					ifnull((select
-						ifnull(sum(if(abs(%(target_ref_field)s) > abs(%(target_field)s), abs(%(target_field)s), abs(%(target_ref_field)s))), 0)
-						/ sum(abs(%(target_ref_field)s)) * 100
-					from `tab%(target_dt)s` where parent="%(name)s" having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
-					%(update_modified)s
-				where name='%(name)s'""" % args)
+		if reference_qty < 0:
+			excess_qty = -1 * excess_qty
 
-			# update field
-			if args.get('status_field'):
-				frappe.db.sql("""update `tab%(target_parent_dt)s`
-					set %(status_field)s = if(%(target_parent_field)s<0.001,
-						'Not %(keyword)s', if(%(target_parent_field)s>=99.999999,
-						'Fully %(keyword)s', 'Partly %(keyword)s'))
-					where name='%(name)s'""" % args)
+		rounded_excess = flt(excess_qty, row.precision(reference_field))
 
-			if update_modified:
-				target = frappe.get_doc(args["target_parent_dt"], args["name"])
-				target.set_status(update=True)
-				target.notify_update()
+		if rounded_excess > 0:
+			self.limits_crossed_error(row, completed_field, reference_field, allowance_type, excess_qty,
+				from_doctype=from_doctype)
 
-	def _update_modified(self, args, update_modified):
-		args['update_modified'] = ''
-		if update_modified:
-			args['update_modified'] = ', modified = now(), modified_by = {0}'\
-				.format(frappe.db.escape(frappe.session.user))
+	def limits_crossed_error(self, row, completed_field, reference_field, allowance_type,
+			excess_qty=None, from_doctype=None):
+		"""Raise exception for limits crossed"""
+		reference_qty = flt(row.get(reference_field))
 
-	def update_billing_status_for_zero_amount(self, ref_dt, ref_fieldname):
-		zero_amount_refdoc = set([d.get(ref_fieldname) for d in self.get("items", [])
-			if d.get(ref_fieldname) and d.base_net_amount == 0])
+		# Allow both: single and multiple completed qty fieldnames
+		if not isinstance(completed_field, list):
+			completed_field = [completed_field]
 
-		for ref_dn in zero_amount_refdoc:
-			ref_doc_qty = flt(frappe.db.sql("""
-				select ifnull(sum(qty), 0)
-				from `tab{0} Item` i, `tab{0}` p
-				where i.parent = p.name and p.name=%s and p.docstatus=1
-			""".format(ref_dt), ref_dn)[0][0])
+		completed_qty = 0
+		for f in completed_field:
+			completed_qty += flt(row.get(f))
 
-			zero_amount_qty = flt(frappe.db.sql("""
-				select ifnull(sum(qty), 0)
-				from `tab{0} Item` i, `tab{0}` p
-				where i.parent = p.name and {1} = %s and i.base_net_amount = 0 and p.docstatus=1 and p.is_return = 0
-			""".format(self.doctype, ref_fieldname), ref_dn)[0][0])
+		if excess_qty is None:
+			excess_qty = completed_qty - reference_qty
 
-			ref_doc = frappe.get_doc(ref_dt, ref_dn)
-			if zero_amount_qty >= ref_doc_qty:
-				ref_doc.db_set("per_completed", 100)
-			else:
-				ref_doc.update_billing_percentage()
+		formatted_reference_qty = row.get_formatted(reference_field)
+		formatted_completed_qty = frappe.format(completed_qty, df=row.meta.get_field(completed_field[0]), doc=row)
+		formatted_excess = frappe.format(excess_qty, df=row.meta.get_field(reference_field), doc=row)
 
-			ref_doc.set_status(update=True)
+		reference_field_label = row.meta.get_label(reference_field)
 
-def get_allowance_for(item_code, item_allowance={}, global_qty_allowance=None, global_amount_allowance=None, qty_or_amount="qty"):
+		completed_field_label = []
+		for f in completed_field:
+			completed_field_label.append(row.meta.get_label(f))
+		completed_field_label = " + ".join(completed_field_label)
+
+		over_limit_msg = _("{0} for Item {1} is over limit by {2}.").format(
+			frappe.bold(completed_field_label),
+			frappe.bold(row.get('item_code') or row.get('item_name')),
+			frappe.bold(formatted_excess)
+		)
+
+		actual_qty_msg = _("{0} {1} is {2}, however, {3} is {4}").format(
+			frappe.bold(self.doctype),
+			frappe.bold(reference_field_label),
+			frappe.bold(formatted_reference_qty),
+			frappe.bold(completed_field_label),
+			frappe.bold(formatted_completed_qty),
+		)
+
+		from_doctype_msg = ""
+		if from_doctype:
+			from_doctype_msg = _("Are you making a duplicate {0} against the same {1}?").format(
+				frappe.bold(from_doctype),
+				frappe.bold(self.doctype),
+			)
+
+		if not allowance_type:
+			action_msg = ""
+		elif allowance_type == "billing":
+			action_msg = _('To allow Over Billing, update "Over Billing Allowance" in Accounts Settings or the Item.')
+		else:
+			action_msg = _('To allow Over Receipt/Delivery, update "Over Receipt/Delivery Allowance" in Stock Settings or the Item.')
+
+		full_msg = over_limit_msg + "<br>" + actual_qty_msg
+
+		if from_doctype_msg:
+			full_msg += "<br><br>" + from_doctype_msg
+		if action_msg:
+			full_msg += "<br><br>" + action_msg
+
+		frappe.throw(full_msg, OverAllowanceError, title=_('{0} Limit Crossed').format(completed_field_label))
+
+
+def get_allowance_for(allowance_type, item_code=None):
 	"""
 		Returns the allowance for the item, if not set, returns global allowance
 	"""
-	if qty_or_amount == "qty":
-		if item_allowance.get(item_code, frappe._dict()).get("qty"):
-			return item_allowance[item_code].qty, item_allowance, global_qty_allowance, global_amount_allowance
-	else:
-		if item_allowance.get(item_code, frappe._dict()).get("amount"):
-			return item_allowance[item_code].amount, item_allowance, global_qty_allowance, global_amount_allowance
 
-	qty_allowance, over_billing_allowance = \
-		frappe.db.get_value('Item', item_code, ['over_delivery_receipt_allowance', 'over_billing_allowance'])
+	if not allowance_type:
+		return 0
 
-	if qty_or_amount == "qty" and not qty_allowance:
-		if global_qty_allowance == None:
-			global_qty_allowance = flt(frappe.db.get_single_value('Stock Settings', 'over_delivery_receipt_allowance'))
-		qty_allowance = global_qty_allowance
-	elif qty_or_amount == "amount" and not over_billing_allowance:
-		if global_amount_allowance == None:
-			global_amount_allowance = flt(frappe.db.get_single_value('Accounts Settings', 'over_billing_allowance'))
-		over_billing_allowance = global_amount_allowance
+	allowance = 0
+	allowance_field = "over_billing_allowance" if allowance_type == "billing" else "over_delivery_receipt_allowance"
 
-	if qty_or_amount == "qty":
-		allowance = qty_allowance
-		item_allowance.setdefault(item_code, frappe._dict()).setdefault("qty", qty_allowance)
-	else:
-		allowance = over_billing_allowance
-		item_allowance.setdefault(item_code, frappe._dict()).setdefault("amount", over_billing_allowance)
+	if item_code:
+		allowance = flt(frappe.get_cached_value('Item', item_code, allowance_field))
 
-	return allowance, item_allowance, global_qty_allowance, global_amount_allowance
+	if not allowance:
+		if allowance_type == "billing":
+			allowance = flt(frappe.get_cached_value('Accounts Settings', None, 'over_billing_allowance'))
+		else:
+			allowance = flt(frappe.get_cached_value('Stock Settings', None, 'over_delivery_receipt_allowance'))
+
+	return allowance
+
+
+def get_excess_qty_with_allowance(row, completed_field, reference_field, allowance_type):
+	"""
+		Checks if there is overflow condering a relaxation allowance
+	"""
+	reference_qty = flt(row.get(reference_field))
+	if not reference_qty:
+		return 0
+
+	# Allow both: single and multiple completed qty fieldnames
+	if not isinstance(completed_field, list):
+		completed_field = [completed_field]
+
+	completed_qty = 0
+	for f in completed_field:
+		completed_qty += flt(row.get(f))
+
+	difference = completed_qty - reference_qty
+
+	# check if overflow is within allowance
+	allowance = get_allowance_for(allowance_type, item_code=row.get('item_code'))
+	overflow_percent = difference / reference_qty * 100
+
+	excess_qty = 0
+	if overflow_percent - allowance > 0.01:
+		max_allowed = flt(reference_qty * (100 + allowance) / 100)
+		excess_qty = completed_qty - max_allowed
+
+	return excess_qty

@@ -127,11 +127,13 @@
   "has_serial_no",
   "serial_no",
   "col_break5",
+  "quotation",
+  "quotation_item",
   "sales_order",
-  "so_detail",
-  "si_detail",
+  "sales_order_item",
   "delivery_note",
-  "dn_detail",
+  "delivery_note_item",
+  "sales_invoice_item",
   "allow_zero_valuation_rate",
   "planning_section",
   "delivered_qty",
@@ -237,7 +239,7 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Quantity",
+   "label": "Qty",
    "oldfieldname": "qty",
    "oldfieldtype": "Currency"
   },
@@ -723,18 +725,6 @@
    "search_index": 1
   },
   {
-   "fieldname": "so_detail",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Sales Order Item",
-   "no_copy": 1,
-   "oldfieldname": "so_detail",
-   "oldfieldtype": "Data",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "delivery_note",
    "fieldtype": "Link",
    "label": "Delivery Note",
@@ -742,18 +732,6 @@
    "oldfieldname": "delivery_note",
    "oldfieldtype": "Link",
    "options": "Delivery Note",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "dn_detail",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Delivery Note Item",
-   "no_copy": 1,
-   "oldfieldname": "dn_detail",
-   "oldfieldtype": "Data",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -1302,16 +1280,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "si_detail",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Against Sales Invoice Item",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "depends_on": "eval:!parent.is_return",
    "fieldname": "returned_qty",
    "fieldtype": "Float",
@@ -1360,11 +1328,69 @@
    "hidden": 1,
    "label": "Force Default Warehouse",
    "read_only": 1
+  },
+  {
+   "fieldname": "sales_order_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Sales Order Item",
+   "no_copy": 1,
+   "oldfieldname": "so_detail",
+   "oldfieldtype": "Data",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "delivery_note_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Delivery Note Item",
+   "no_copy": 1,
+   "oldfieldname": "dn_detail",
+   "oldfieldtype": "Data",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "sales_invoice_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Sales Invoice Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "quotation",
+   "fieldtype": "Link",
+   "label": "Quotation",
+   "no_copy": 1,
+   "oldfieldname": "sales_order",
+   "oldfieldtype": "Link",
+   "options": "Quotation",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "quotation_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Quotation Item",
+   "no_copy": 1,
+   "oldfieldname": "so_detail",
+   "oldfieldtype": "Data",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-12-14 23:36:21.666686",
+ "modified": "2021-12-31 00:20:54.987056",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

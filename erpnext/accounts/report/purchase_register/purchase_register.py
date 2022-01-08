@@ -224,7 +224,7 @@ def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
 
 def get_invoice_po_pr_map(invoice_list):
 	pi_items = frappe.db.sql("""
-		select parent, purchase_order, purchase_receipt, po_detail, project
+		select parent, purchase_order, purchase_receipt, purchase_order_item, project
 		from `tabPurchase Invoice Item`
 		where parent in (%s)
 	""" % ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
@@ -238,9 +238,9 @@ def get_invoice_po_pr_map(invoice_list):
 		pr_list = None
 		if d.purchase_receipt:
 			pr_list = [d.purchase_receipt]
-		elif d.po_detail:
+		elif d.purchase_order_item:
 			pr_list = frappe.db.sql_list("""select distinct parent from `tabPurchase Receipt Item`
-				where docstatus=1 and purchase_order_item=%s""", d.po_detail)
+				where docstatus=1 and purchase_order_item=%s""", d.purchase_order_item)
 
 		if pr_list:
 			invoice_po_pr_map.setdefault(d.parent, frappe._dict()).setdefault("purchase_receipt", pr_list)

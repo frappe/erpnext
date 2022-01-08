@@ -18,7 +18,7 @@ from erpnext.controllers.stock_controller import StockController
 class SellingController(StockController):
 	def __setup__(self):
 		if hasattr(self, "taxes"):
-			self.flags.print_taxes_with_zero_amount = cint(frappe.db.get_single_value("Print Settings",
+			self.flags.print_taxes_with_zero_amount = cint(frappe.get_cached_value("Print Settings", None,
 				"print_taxes_with_zero_amount"))
 			self.flags.show_inclusive_tax_in_print = self.is_inclusive_tax()
 
@@ -62,7 +62,6 @@ class SellingController(StockController):
 		self.calculate_sales_team_contribution(self.get('base_net_total'))
 
 	def set_missing_values(self, for_validate=False):
-
 		super(SellingController, self).set_missing_values(for_validate)
 
 		# set contact and address details for customer, if they are not mentioned
@@ -180,7 +179,7 @@ class SellingController(StockController):
 			frappe.throw(_("""Row #{}: Selling rate for item {} is lower than its {}. Selling rate should be atleast {}""")
 				.format(idx, item_name, ref_rate_field, rate))
 
-		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
+		if not frappe.get_cached_value("Selling Settings", None, "validate_selling_price"):
 			return
 
 		if hasattr(self, "is_return") and self.is_return:
@@ -204,7 +203,6 @@ class SellingController(StockController):
 				last_valuation_rate_in_sales_uom = last_valuation_rate[0][0] / (it.conversion_factor or 1)
 				if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate_in_sales_uom):
 					throw_message(it.idx, frappe.bold(it.item_name), last_valuation_rate_in_sales_uom, "valuation rate")
-
 
 	def get_item_list(self):
 		il = []
@@ -246,8 +244,8 @@ class SellingController(StockController):
 					'voucher_type': self.doctype,
 					'allow_zero_valuation': d.allow_zero_valuation_rate,
 					'delivery_note': d.get('delivery_note'),
-					'dn_detail': d.get('dn_detail'),
-					'si_detail': d.get('si_detail')
+					'delivery_note_item': d.get('delivery_note_item'),
+					'sales_invoice_item': d.get('sales_invoice_item')
 				}))
 		return il
 
@@ -265,27 +263,27 @@ class SellingController(StockController):
 			where pb.new_item_code = %s and pbi.parent = pb.name and i.name = pbi.item_code and i.is_stock_item = 1""", item_code))
 		return ret
 
-	def get_already_delivered_qty(self, current_docname, so, so_detail):
+	def get_already_delivered_qty(self, current_docname, so, sales_order_item):
 		delivered_via_dn = frappe.db.sql("""select sum(qty) from `tabDelivery Note Item`
-			where so_detail = %s and docstatus = 1
-			and against_sales_order = %s
-			and parent != %s""", (so_detail, so, current_docname))
+			where sales_order_item = %s and docstatus = 1
+			and sales_order = %s
+			and parent != %s""", (sales_order_item, so, current_docname))
 
 		delivered_via_si = frappe.db.sql("""select sum(si_item.qty)
 			from `tabSales Invoice Item` si_item, `tabSales Invoice` si
 			where si_item.parent = si.name and si.update_stock = 1
-			and si_item.so_detail = %s and si.docstatus = 1
+			and si_item.sales_order_item = %s and si.docstatus = 1
 			and si_item.sales_order = %s
-			and si.name != %s""", (so_detail, so, current_docname))
+			and si.name != %s""", (sales_order_item, so, current_docname))
 
 		total_delivered_qty = (flt(delivered_via_dn[0][0]) if delivered_via_dn else 0) \
 			+ (flt(delivered_via_si[0][0]) if delivered_via_si else 0)
 
 		return total_delivered_qty
 
-	def get_so_qty_and_warehouse(self, so_detail):
+	def get_so_qty_and_warehouse(self, sales_order_item):
 		so_item = frappe.db.sql("""select qty, warehouse from `tabSales Order Item`
-			where name = %s and docstatus = 1""", so_detail, as_dict=1)
+			where name = %s and docstatus = 1""", sales_order_item, as_dict=1)
 		so_qty = so_item and flt(so_item[0]["qty"]) or 0.0
 		so_warehouse = so_item and so_item[0]["warehouse"] or ""
 		return so_qty, so_warehouse
@@ -293,18 +291,18 @@ class SellingController(StockController):
 	def check_sales_order_on_hold_or_close(self, ref_fieldname):
 		for d in self.get("items"):
 			if d.get(ref_fieldname):
-				status = frappe.db.get_value("Sales Order", d.get(ref_fieldname), "status")
+				status = frappe.db.get_value("Sales Order", d.get(ref_fieldname), "status", cache=1)
 				if status in ("Closed", "On Hold"):
 					frappe.throw(_("Sales Order {0} is {1}").format(d.get(ref_fieldname), status))
 
 	def update_reserved_qty(self):
 		so_map = {}
 		for d in self.get("items"):
-			if d.so_detail:
-				if self.doctype == "Delivery Note" and d.against_sales_order:
-					so_map.setdefault(d.against_sales_order, []).append(d.so_detail)
+			if d.sales_order_item:
+				if self.doctype == "Delivery Note" and d.sales_order:
+					so_map.setdefault(d.sales_order, []).append(d.sales_order_item)
 				elif self.doctype == "Sales Invoice" and d.sales_order and self.update_stock:
-					so_map.setdefault(d.sales_order, []).append(d.so_detail)
+					so_map.setdefault(d.sales_order, []).append(d.sales_order_item)
 
 		for so, so_item_rows in so_map.items():
 			if so and so_item_rows:
@@ -331,24 +329,24 @@ class SellingController(StockController):
 
 				if cint(self.is_return) and self.docstatus==1:
 					delivery_note = self.return_against if self.doctype == "Delivery Note" else d.get('delivery_note')
-					if d.get('dn_detail') and delivery_note:
+					if d.get('delivery_note_item') and delivery_note:
 						return_dependency = [{
 							"dependent_voucher_type": "Delivery Note",
 							"dependent_voucher_no": delivery_note,
-							"dependent_voucher_detail_no": d.dn_detail,
+							"dependent_voucher_detail_no": d.delivery_note_item,
 							"dependency_type": "Rate"
 						}]
-						return_rate = self.get_incoming_rate_for_sales_return(voucher_detail_no=d.dn_detail,
+						return_rate = self.get_incoming_rate_for_sales_return(voucher_detail_no=d.delivery_note_item,
 							against_document_type="Delivery Note", against_document=delivery_note)
-					elif self.doctype == "Sales Invoice" and d.get('si_detail') and self.get('return_against')\
+					elif self.doctype == "Sales Invoice" and d.get('sales_invoice_item') and self.get('return_against')\
 							and frappe.db.get_value("Sales Invoice", self.return_against, 'update_stock', cache=1):
 						return_dependency = [{
 							"dependent_voucher_type": "Sales Invoice",
 							"dependent_voucher_no": self.return_against,
-							"dependent_voucher_detail_no": d.si_detail,
+							"dependent_voucher_detail_no": d.sales_invoice_item,
 							"dependency_type": "Rate"
 						}]
-						return_rate = self.get_incoming_rate_for_sales_return(voucher_detail_no=d.si_detail,
+						return_rate = self.get_incoming_rate_for_sales_return(voucher_detail_no=d.sales_invoice_item,
 							against_document_type="Sales Invoice", against_document=self.return_against)
 					else:
 						return_rate = self.get_incoming_rate_for_sales_return(item_code=d.item_code,
@@ -420,20 +418,21 @@ class SellingController(StockController):
 
 	def set_po_nos(self):
 		if self.doctype in ("Delivery Note", "Sales Invoice") and hasattr(self, "items"):
-			ref_fieldname = "against_sales_order" if self.doctype == "Delivery Note" else "sales_order"
-			sales_orders = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
+			sales_orders = list(set([d.get('sales_order') for d in self.items if d.get('sales_order')]))
 			if sales_orders:
-				po_nos = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', sales_orders)})
-				po_nos = [d.po_no for d in po_nos]
-
-				po_nos = list(set(filter(lambda po_no: po_no, po_nos)))
+				po_nos = frappe.db.sql_list("""
+					select distinct po_no
+					from `tabSales Order`
+					where name in %s and ifnull(po_no, '') != ''
+					order by transaction_date
+				""", [sales_orders])
 				if po_nos:
 					self.po_no = ', '.join(po_nos)
 
 	def set_gross_profit(self):
 		if self.doctype == "Sales Order":
 			for item in self.items:
-				item.gross_profit = flt(((item.base_rate - item.valuation_rate) * item.stock_qty), self.precision("amount", item))
+				item.gross_profit = flt(((item.base_net_rate - item.valuation_rate) * item.stock_qty), self.precision("amount", item))
 
 	def validate_bill_to(self):
 		if not self.meta.get_field('bill_to'):
@@ -455,7 +454,7 @@ class SellingController(StockController):
 
 	def validate_for_duplicate_items(self):
 		check_list, chk_dupl_itm = [], []
-		if cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
+		if cint(frappe.get_cached_value("Selling Settings", None, "allow_multiple_items")):
 			return
 
 		for d in self.get('items'):
@@ -463,8 +462,8 @@ class SellingController(StockController):
 				e = [d.item_code, d.description, d.warehouse, d.sales_order or d.delivery_note, d.batch_no or '']
 				f = [d.item_code, d.description, d.sales_order or d.delivery_note]
 			elif self.doctype == "Delivery Note":
-				e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
-				f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
+				e = [d.item_code, d.description, d.warehouse, d.sales_order or d.sales_invoice, d.batch_no or '']
+				f = [d.item_code, d.description, d.sales_order or d.sales_invoice]
 			elif self.doctype in ["Sales Order", "Quotation"]:
 				e = [d.item_code, d.description, d.warehouse, '']
 				f = [d.item_code, d.description]
@@ -519,6 +518,17 @@ class SellingController(StockController):
 		if self.get('transaction_type'):
 			if not frappe.get_cached_value("Transaction Type", self.transaction_type, 'selling'):
 				frappe.throw(_("Transaction Type {0} is not allowed for sales transactions").format(frappe.bold(self.transaction_type)))
+
+	def validate_project_customer(self):
+		if self.project and self.customer:
+			res = frappe.db.sql("""
+				select name
+				from `tabProject`
+				where name = %s and (customer = %s or ifnull(customer,'') = '')
+			""", (self.project, self.customer))
+			if not res:
+				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
+
 
 def set_default_income_account_for_item(obj):
 	for d in obj.get("items"):

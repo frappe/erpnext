@@ -11,6 +11,7 @@ from frappe.model.naming import make_autoname
 from erpnext.vehicles.utils import format_vehicle_id
 from six import string_types
 
+
 class Vehicle(Document):
 	_copy_fields = [
 		'company',
@@ -24,7 +25,7 @@ class Vehicle(Document):
 	]
 
 	_sync_fields = [
-		'sales_order', 'is_reserved', 'reserved_customer', 'reserved_customer_name'
+		'item_code', 'sales_order', 'is_reserved', 'reserved_customer', 'reserved_customer_name',
 	]
 
 	def __init__(self, *args, **kwargs):
@@ -48,14 +49,17 @@ class Vehicle(Document):
 	def validate(self):
 		self.validate_item()
 		self.validate_vehicle_id()
-		self.update_reference_from_serial_no()
 		self.copy_image_from_item()
-		self.update_invoice_status()
+
+		self.sync_with_serial_no()
+
+		self.set_invoice_status()
 		self.set_status()
-		self.cant_change()
+
+		self.validate_cant_change()
 
 	def on_update(self):
-		self.update_vehicle_serial_no()
+		self.create_vehicle_serial_no()
 
 		if not self.via_stock_ledger and not self.flags.from_serial_no:
 			self.update_vehicle_booking_order()
@@ -99,12 +103,14 @@ class Vehicle(Document):
 		validate_duplicate_vehicle('engine_no', self.engine_no, exclude=exclude, throw=True)
 		validate_duplicate_vehicle('license_plate', self.license_plate, exclude=exclude, throw=True)
 
-	def update_reference_from_serial_no(self, serial_no_doc=None):
+	def sync_with_serial_no(self, serial_no_doc=None):
 		if not serial_no_doc:
 			serial_no_doc = self.get_serial_no_doc()
 
 		if not serial_no_doc:
 			return
+
+		serial_no_doc.flags.allow_change_item_code = True
 
 		before_values_sync = frappe.db.get_value(self.doctype, self.name, self._sync_fields, as_dict=1)
 		to_sync = any([before_values_sync.get(key) != self.get(key) for key in before_values_sync])
@@ -130,7 +136,7 @@ class Vehicle(Document):
 
 		return serial_no_doc
 
-	def update_vehicle_serial_no(self):
+	def create_vehicle_serial_no(self):
 		if self.flags.from_serial_no:
 			serial_no_doc = frappe.get_cached_doc("Serial No", self.flags.from_serial_no)
 			serial_no_doc.db_set('vehicle', self.name)
@@ -147,7 +153,7 @@ class Vehicle(Document):
 				serial_no_doc.vehicle = self.name
 				serial_no_doc.insert(ignore_permissions=True)
 
-				self.update_reference_from_serial_no(serial_no_doc)
+				self.sync_with_serial_no(serial_no_doc)
 				self.db_update()
 
 	def update_vehicle_booking_order(self):
@@ -162,7 +168,7 @@ class Vehicle(Document):
 			doc.set_vehicle_details(update=True)
 			doc.notify_update()
 
-	def update_invoice_status(self, update=False, update_modified=True):
+	def set_invoice_status(self, update=False, update_modified=True):
 		vehicle_invoice = frappe.db.get_value("Vehicle Invoice", filters={'vehicle': self.name, 'docstatus': 1},
 			fieldname=['status', 'issued_for'], as_dict=1)
 
@@ -189,7 +195,7 @@ class Vehicle(Document):
 		else:
 			self.status = "Active"
 
-	def cant_change(self):
+	def validate_cant_change(self):
 		if self.is_new():
 			return
 
@@ -205,7 +211,12 @@ class Vehicle(Document):
 						.format(frappe.bold(label)))
 
 	def get_cant_change_fields(self):
-		return {'chassis_no': self.stock_ledger_created() or self.vehicle_invoice_created()}
+		ledger_or_invoice_exists = self.stock_ledger_created() or self.vehicle_invoice_created()
+		order_exists = self.vehicle_booking_order_created() or self.vehicle_registration_order_created()
+		return frappe._dict({
+			'item_code': ledger_or_invoice_exists or order_exists,
+			'chassis_no': ledger_or_invoice_exists,
+		})
 
 	def stock_ledger_created(self):
 		if not hasattr(self, '_stock_ledger_created'):
@@ -222,6 +233,16 @@ class Vehicle(Document):
 		if not hasattr(self, '_vehicle_invoice_created'):
 			self._vehicle_invoice_created = frappe.db.exists("Vehicle Invoice", {'vehicle': self.name, 'docstatus': 1})
 		return self._vehicle_invoice_created
+
+	def vehicle_booking_order_created(self):
+		if not hasattr(self, '_vehicle_booking_order_created'):
+			self._vehicle_booking_order_created = frappe.db.exists("Vehicle Booking Order", {'vehicle': self.name, 'docstatus': 1})
+		return self._vehicle_booking_order_created
+
+	def vehicle_registration_order_created(self):
+		if not hasattr(self, '_vehicle_registration_order_created'):
+			self._vehicle_registration_order_created = frappe.db.exists("Vehicle Registration Order", {'vehicle': self.name, 'docstatus': 1})
+		return self._vehicle_registration_order_created
 
 
 def split_vehicle_items_by_qty(doc):
@@ -317,7 +338,7 @@ def set_reserved_vehicles_from_po(source, target):
 		vehicle_map.setdefault(key, []).append(d.name)
 
 	for d in target.items:
-		row_sales_order = source.getone('items', filters={'name': d.get('purchase_order_item') or d.get('po_detail')})
+		row_sales_order = source.getone('items', filters={'name': d.get('purchase_order_item') or d.get('purchase_order_item')})
 		row_sales_order = row_sales_order.sales_order if row_sales_order else ""
 		key = (d.item_code, row_sales_order)
 		if key in vehicle_map:
@@ -480,7 +501,7 @@ def get_vehicle_odometer(vehicle, date=None, project=None, ascending=False):
 		filters['date'] = ['<=', getdate(date)]
 
 	asc_or_desc = "asc" if ascending else "desc"
-	order_by = "date {0}, creation {0}".format(asc_or_desc)
+	order_by = "date {0}, odometer {0}".format(asc_or_desc)
 
 	odometer = frappe.get_all("Vehicle Log", filters=filters, fields=['odometer'], order_by=order_by, limit_page_length=1)
 

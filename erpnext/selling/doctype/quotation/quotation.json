@@ -91,6 +91,7 @@
   "base_total_discount",
   "taxes_section",
   "taxes_and_charges",
+  "has_stin",
   "column_break_82",
   "tax_category",
   "column_break_34",
@@ -674,7 +675,7 @@
   },
   {
    "fieldname": "additional_discount_percentage",
-   "fieldtype": "Float",
+   "fieldtype": "Percent",
    "label": "Additional Discount Percentage",
    "print_hide": 1
   },
@@ -1382,13 +1383,19 @@
   {
    "fieldname": "column_break_43",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "has_stin",
+   "fieldtype": "Check",
+   "label": "Apply Taxes"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2021-12-07 13:33:42.423842",
+ "modified": "2022-01-07 12:36:03.874903",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

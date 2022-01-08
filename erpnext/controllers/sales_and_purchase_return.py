@@ -328,7 +328,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.qty = -1* source_doc.qty
 			target_doc.stock_qty = -1 * source_doc.stock_qty
 			target_doc.purchase_order = source_doc.purchase_order
-			target_doc.pr_detail = source_doc.name
+			target_doc.purchase_receipt_item = source_doc.name
 			target_doc.purchase_order_item = source_doc.purchase_order_item
 			target_doc.rejected_warehouse = source_doc.rejected_warehouse
 		elif doctype == "Purchase Invoice":
@@ -339,17 +339,17 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.purchase_order = source_doc.purchase_order
 			target_doc.purchase_receipt = source_doc.purchase_receipt
 			target_doc.rejected_warehouse = source_doc.rejected_warehouse
-			target_doc.po_detail = source_doc.po_detail
-			target_doc.pr_detail = source_doc.pr_detail
-			target_doc.pi_detail = source_doc.name
+			target_doc.purchase_order_item = source_doc.purchase_order_item
+			target_doc.purchase_receipt_item = source_doc.purchase_receipt_item
+			target_doc.purchase_invoice_item = source_doc.name
 		elif doctype == "Delivery Note":
 			target_doc.qty = -1* (source_doc.qty - source_doc.billed_qty - source_doc.returned_qty)
-			target_doc.against_sales_order = source_doc.against_sales_order
-			target_doc.against_sales_invoice = source_doc.against_sales_invoice
+			target_doc.sales_order = source_doc.sales_order
+			target_doc.sales_invoice = source_doc.sales_invoice
 			target_doc.target_warehouse = source_doc.target_warehouse
-			target_doc.dn_detail = source_doc.name
-			target_doc.so_detail = source_doc.so_detail
-			target_doc.si_detail = source_doc.si_detail
+			target_doc.delivery_note_item = source_doc.name
+			target_doc.sales_order_item = source_doc.sales_order_item
+			target_doc.sales_invoice_item = source_doc.sales_invoice_item
 			target_doc.expense_account = source_doc.expense_account
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
@@ -357,9 +357,9 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.sales_order = source_doc.sales_order
 			target_doc.delivery_note = source_doc.delivery_note
 			target_doc.target_warehouse = source_doc.target_warehouse
-			target_doc.so_detail = source_doc.so_detail
-			target_doc.dn_detail = source_doc.dn_detail
-			target_doc.si_detail = source_doc.name
+			target_doc.sales_order_item = source_doc.sales_order_item
+			target_doc.delivery_note_item = source_doc.delivery_note_item
+			target_doc.sales_invoice_item = source_doc.name
 			target_doc.expense_account = source_doc.expense_account
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return

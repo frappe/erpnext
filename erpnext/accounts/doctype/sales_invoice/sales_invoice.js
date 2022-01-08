@@ -16,7 +16,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.frm.set_indicator_formatter('item_code', function(doc, parent) {
 			if (doc.docstatus === 0) {
 				if (parent.update_stock && !parent.is_return) {
-					if (!doc.actual_qty) {
+					if (!doc.is_stock_item) {
+						return "blue";
+					} else if (!doc.actual_qty) {
 						return "red";
 					} else if (doc.actual_qty < doc.stock_qty) {
 						return "orange";
@@ -134,10 +136,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 
 		// Show buttons only when pos view is active
-		if (cint(doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !doc.is_return) {
-			this.frm.cscript.sales_order_btn();
+		if (cint(doc.docstatus==0) && cur_frm.page.current_view_name!=="pos") {
 			this.frm.cscript.delivery_note_btn();
-			this.frm.cscript.quotation_btn();
+			if (!doc.is_return) {
+				this.frm.cscript.sales_order_btn();
+				this.frm.cscript.quotation_btn();
+			}
 		}
 
 		this.set_default_print_format();

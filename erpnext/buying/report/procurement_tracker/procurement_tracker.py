@@ -240,7 +240,7 @@ def get_mapped_mr_details(conditions):
 def get_mapped_pi_records():
 	return frappe._dict(frappe.db.sql("""
 		SELECT
-			pi_item.po_detail,
+			pi_item.purchase_order_item,
 			pi_item.base_amount
 		FROM `tabPurchase Invoice Item` as pi_item
 		INNER JOIN `tabPurchase Order` as po
@@ -248,7 +248,7 @@ def get_mapped_pi_records():
 		WHERE
 			pi_item.docstatus = 1
 			AND po.status not in ("Closed","Completed","Cancelled")
-			AND pi_item.po_detail IS NOT NULL
+			AND pi_item.purchase_order_item IS NOT NULL
 		"""))
 
 def get_mapped_pr_records():

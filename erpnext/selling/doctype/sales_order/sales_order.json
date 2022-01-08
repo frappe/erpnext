@@ -103,6 +103,7 @@
   "base_total_discount",
   "taxes_section",
   "taxes_and_charges",
+  "has_stin",
   "col_break_120",
   "tax_category",
   "column_break_38",
@@ -324,7 +325,7 @@
    "fieldname": "delivery_date",
    "fieldtype": "Date",
    "in_standard_filter": 1,
-   "label": "Delivery Date",
+   "label": "Expected Delivery Date",
    "no_copy": 1,
    "search_index": 1
   },
@@ -1269,6 +1270,7 @@
    "default": "0",
    "fieldname": "skip_delivery_note",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Skip Delivery Note",
    "print_hide": 1,
    "read_only": 1
@@ -1687,12 +1689,18 @@
   {
    "fieldname": "col_break_applies_to",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "has_stin",
+   "fieldtype": "Check",
+   "label": "Apply Taxes"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2021-12-05 01:56:28.328728",
+ "modified": "2022-01-07 14:20:54.760805",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

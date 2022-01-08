@@ -12,13 +12,16 @@ frappe.ui.form.on("Delivery Note", {
 			'Packing Slip': 'Packing Slip',
 			'Installation Note': 'Installation Note',
 			'Sales Invoice': 'Sales Invoice',
-			'Delivery Note': 'Sales Return',
+			'Delivery Note': 'Delivery Return',
 			'Auto Repeat': 'Subscription',
+			'Delivery Trip': 'Delivery Trip',
 		};
 
 		frm.set_indicator_formatter('item_code', function(doc) {
 			if (doc.docstatus === 0) {
-				if (!doc.actual_qty) {
+				if (!doc.is_stock_item) {
+					return "blue";
+				} else if (!doc.actual_qty) {
 					return "red";
 				} else if (doc.actual_qty < doc.stock_qty) {
 					return "orange";
@@ -186,7 +189,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			// show Make Invoice button only if Delivery Note is not created from Sales Invoice
 			var from_sales_invoice = false;
 			from_sales_invoice = me.frm.doc.items.some(function(item) {
-				return item.against_sales_invoice ? true : false;
+				return item.sales_invoice ? true : false;
 			});
 
 			if(!from_sales_invoice) {
@@ -197,7 +200,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 
 		if (!doc.is_return && doc.status!="Closed") {
 			if (doc.docstatus==1) {
-				this.frm.add_custom_button(__('Sales Return'), function() {
+				this.frm.add_custom_button(__('Delivery Return'), function() {
 					me.make_sales_return() }, __('Create'));
 			}
 
