@@ -548,10 +548,7 @@ def get_columns(filters):
 			"fieldname": "balance",
 			"fieldtype": "Float",
 			"width": 130
-		}
-	]
-
-	columns.extend([
+		},
 		{
 			"label": _("Voucher Type"),
 			"fieldname": "voucher_type",
@@ -585,7 +582,7 @@ def get_columns(filters):
 			"fieldname": "project",
 			"width": 100
 		}
-	])
+	]
 
 	if filters.get("include_dimensions"):
 		for dim in get_accounting_dimensions(as_list = False):
