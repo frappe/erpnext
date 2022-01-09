@@ -51,5 +51,5 @@ projects:
 
 # Any python files modifed but no test files modified
 needs-tests:
-- any: ['**/*.py']
-- all: ['!**/test*.py']
+- any: ['erpnext/**/*.py']
+  all: ['!erpnext/**/test*.py']
