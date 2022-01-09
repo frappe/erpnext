@@ -1,8 +1,5 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
-import unittest
-
 import frappe
 from frappe.utils import add_to_date, flt, now_datetime, nowdate
 
@@ -17,9 +14,10 @@ from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestProductionPlan(unittest.TestCase):
+class TestProductionPlan(ERPNextTestCase):
 	def setUp(self):
 		for item in ['Test Production Item 1', 'Subassembly Item 1',
 			'Raw Material Item 1', 'Raw Material Item 2']:

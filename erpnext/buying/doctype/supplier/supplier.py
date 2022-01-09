@@ -11,7 +11,11 @@ from frappe.contacts.address_and_contact import (
 )
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 
-from erpnext.accounts.party import get_dashboard_info, validate_party_accounts
+from erpnext.accounts.party import (  # noqa
+	get_dashboard_info,
+	get_timeline_data,
+	validate_party_accounts,
+)
 from erpnext.utilities.transaction_base import TransactionBase
 
 

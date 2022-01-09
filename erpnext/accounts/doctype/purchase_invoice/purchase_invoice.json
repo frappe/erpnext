@@ -130,6 +130,7 @@
   "allocate_advances_automatically",
   "get_advances",
   "advances",
+  "advance_tax",
   "payment_schedule_section",
   "payment_terms_template",
   "ignore_default_payment_terms_template",
@@ -1408,13 +1409,21 @@
   {
    "fieldname": "column_break_147",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "advance_tax",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Advance Tax",
+   "options": "Advance Tax",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-12 20:55:16.145651",
+ "modified": "2021-11-25 13:31:02.716727",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

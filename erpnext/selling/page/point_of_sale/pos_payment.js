@@ -18,11 +18,11 @@ erpnext.PointOfSale.Payment = class {
 	prepare_dom() {
 		this.wrapper.append(
 			`<section class="payment-container">
-				<div class="section-label payment-section">Payment Method</div>
+				<div class="section-label payment-section">${__('Payment Method')}</div>
 				<div class="payment-modes"></div>
 				<div class="fields-numpad-container">
 					<div class="fields-section">
-						<div class="section-label">Additional Information</div>
+						<div class="section-label">${__('Additional Information')}</div>
 						<div class="invoice-fields"></div>
 					</div>
 					<div class="number-pad"></div>
@@ -30,7 +30,7 @@ erpnext.PointOfSale.Payment = class {
 				<div class="totals-section">
 					<div class="totals"></div>
 				</div>
-				<div class="submit-order-btn">Complete Order</div>
+				<div class="submit-order-btn">${__("Complete Order")}</div>
 			</section>`
 		);
 		this.$component = this.wrapper.find('.payment-container');
@@ -518,12 +518,12 @@ erpnext.PointOfSale.Payment = class {
 
 		this.$totals.html(
 			`<div class="col">
-				<div class="total-label">Grand Total</div>
+				<div class="total-label">${__('Grand Total')}</div>
 				<div class="value">${format_currency(grand_total, currency)}</div>
 			</div>
 			<div class="seperator-y"></div>
 			<div class="col">
-				<div class="total-label">Paid Amount</div>
+				<div class="total-label">${__('Paid Amount')}</div>
 				<div class="value">${format_currency(paid_amount, currency)}</div>
 			</div>
 			<div class="seperator-y"></div>
