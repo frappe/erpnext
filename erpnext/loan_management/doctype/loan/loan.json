@@ -240,12 +240,14 @@
    "label": "Repayment Schedule"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:doc.is_term_loan == 1",
    "fieldname": "repayment_schedule",
    "fieldtype": "Table",
    "label": "Repayment Schedule",
    "no_copy": 1,
-   "options": "Repayment Schedule"
+   "options": "Repayment Schedule",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_17",
@@ -363,6 +365,7 @@
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

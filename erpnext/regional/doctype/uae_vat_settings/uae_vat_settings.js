@@ -2,7 +2,13 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('UAE VAT Settings', {
-	// refresh: function(frm) {
-
-	// }
+	onload: function(frm) {
+		frm.set_query('account', 'uae_vat_accounts', function() {
+			return {
+				filters: {
+					'company': frm.doc.company
+				}
+			};
+		});
+	}
 });

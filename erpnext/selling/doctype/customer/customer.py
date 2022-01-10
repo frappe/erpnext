@@ -18,7 +18,11 @@ from frappe.model.rename_doc import update_linked_doctypes
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
 
-from erpnext.accounts.party import get_dashboard_info, validate_party_accounts
+from erpnext.accounts.party import (  # noqa
+	get_dashboard_info,
+	get_timeline_data,
+	validate_party_accounts,
+)
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -192,20 +196,19 @@ class Customer(TransactionBase):
 			if not lead.lead_name:
 				frappe.throw(_("Please mention the Lead Name in Lead {0}").format(self.lead_name))
 
-			if lead.company_name:
-				contact_names = frappe.get_all('Dynamic Link', filters={
-									"parenttype":"Contact",
-									"link_doctype":"Lead",
-									"link_name":self.lead_name
-								}, fields=["parent as name"])
+			contact_names = frappe.get_all('Dynamic Link', filters={
+								"parenttype":"Contact",
+								"link_doctype":"Lead",
+								"link_name":self.lead_name
+							}, fields=["parent as name"])
 
-				for contact_name in contact_names:
-					contact = frappe.get_doc('Contact', contact_name.get('name'))
-					if not contact.has_link('Customer', self.name):
-						contact.append('links', dict(link_doctype='Customer', link_name=self.name))
-						contact.save(ignore_permissions=self.flags.ignore_permissions)
+			for contact_name in contact_names:
+				contact = frappe.get_doc('Contact', contact_name.get('name'))
+				if not contact.has_link('Customer', self.name):
+					contact.append('links', dict(link_doctype='Customer', link_name=self.name))
+					contact.save(ignore_permissions=self.flags.ignore_permissions)
 
-			else:
+			if not contact_names:
 				lead.lead_name = lead.lead_name.lstrip().split(" ")
 				lead.first_name = lead.lead_name[0]
 				lead.last_name = " ".join(lead.lead_name[1:])

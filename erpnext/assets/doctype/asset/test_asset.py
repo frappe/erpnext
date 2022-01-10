@@ -409,19 +409,18 @@ class TestDepreciationMethods(AssetSetup):
 			calculate_depreciation = 1,
 			available_for_use_date = "2030-06-06",
 			is_existing_asset = 1,
-			number_of_depreciations_booked = 1,
-			opening_accumulated_depreciation = 40000,
+			number_of_depreciations_booked = 2,
+			opening_accumulated_depreciation = 47095.89,
 			expected_value_after_useful_life = 10000,
-			depreciation_start_date = "2030-12-31",
+			depreciation_start_date = "2032-12-31",
 			total_number_of_depreciations = 3,
 			frequency_of_depreciation = 12
 		)
 
 		self.assertEqual(asset.status, "Draft")
 		expected_schedules = [
-			["2030-12-31", 14246.58, 54246.58],
-			["2031-12-31", 25000.00, 79246.58],
-			["2032-06-06", 10753.42, 90000.00]
+			["2032-12-31", 30000.0, 77095.89],
+			["2033-06-06", 12904.11, 90000.0]
 		]
 		schedules = [[cstr(d.schedule_date), flt(d.depreciation_amount, 2), d.accumulated_depreciation_amount]
 			for d in asset.get("schedules")]
@@ -869,6 +868,72 @@ class TestDepreciationBasics(AssetSetup):
 		self.assertFalse(asset.schedules[1].journal_entry)
 		self.assertFalse(asset.schedules[2].journal_entry)
 
+	def test_depr_entry_posting_when_depr_expense_account_is_an_expense_account(self):
+		"""Tests if the Depreciation Expense Account gets debited and the Accumulated Depreciation Account gets credited when the former's an Expense Account."""
+
+		asset = create_asset(
+			item_code = "Macbook Pro",
+			calculate_depreciation = 1,
+			available_for_use_date = "2019-12-31",
+			depreciation_start_date = "2020-12-31",
+			frequency_of_depreciation = 12,
+			total_number_of_depreciations = 3,
+			expected_value_after_useful_life = 10000,
+			submit = 1
+		)
+
+		post_depreciation_entries(date="2021-06-01")
+		asset.load_from_db()
+
+		je = frappe.get_doc("Journal Entry", asset.schedules[0].journal_entry)
+		accounting_entries = [{"account": entry.account, "debit": entry.debit, "credit": entry.credit} for entry in je.accounts]
+
+		for entry in accounting_entries:
+			if entry["account"] == "_Test Depreciations - _TC":
+				self.assertTrue(entry["debit"])
+				self.assertFalse(entry["credit"])
+			else:
+				self.assertTrue(entry["credit"])
+				self.assertFalse(entry["debit"])
+
+	def test_depr_entry_posting_when_depr_expense_account_is_an_income_account(self):
+		"""Tests if the Depreciation Expense Account gets credited and the Accumulated Depreciation Account gets debited when the former's an Income Account."""
+
+		depr_expense_account = frappe.get_doc("Account", "_Test Depreciations - _TC")
+		depr_expense_account.root_type = "Income"
+		depr_expense_account.parent_account = "Income - _TC"
+		depr_expense_account.save()
+
+		asset = create_asset(
+			item_code = "Macbook Pro",
+			calculate_depreciation = 1,
+			available_for_use_date = "2019-12-31",
+			depreciation_start_date = "2020-12-31",
+			frequency_of_depreciation = 12,
+			total_number_of_depreciations = 3,
+			expected_value_after_useful_life = 10000,
+			submit = 1
+		)
+
+		post_depreciation_entries(date="2021-06-01")
+		asset.load_from_db()
+
+		je = frappe.get_doc("Journal Entry", asset.schedules[0].journal_entry)
+		accounting_entries = [{"account": entry.account, "debit": entry.debit, "credit": entry.credit} for entry in je.accounts]
+
+		for entry in accounting_entries:
+			if entry["account"] == "_Test Depreciations - _TC":
+				self.assertTrue(entry["credit"])
+				self.assertFalse(entry["debit"])
+			else:
+				self.assertTrue(entry["debit"])
+				self.assertFalse(entry["credit"])
+
+		# resetting
+		depr_expense_account.root_type = "Expense"
+		depr_expense_account.parent_account = "Expenses - _TC"
+		depr_expense_account.save()
+
 	def test_clear_depreciation_schedule(self):
 		"""Tests if clear_depreciation_schedule() works as expected."""
 
@@ -889,6 +954,82 @@ class TestDepreciationBasics(AssetSetup):
 		asset.clear_depreciation_schedule()
 
 		self.assertEqual(len(asset.schedules), 1)
+
+	def test_clear_depreciation_schedule_for_multiple_finance_books(self):
+		asset = create_asset(
+			item_code = "Macbook Pro",
+			available_for_use_date = "2019-12-31",
+			do_not_save = 1
+		)
+
+		asset.calculate_depreciation = 1
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 1,
+			"total_number_of_depreciations": 3,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": "2020-01-31"
+		})
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 1,
+			"total_number_of_depreciations": 6,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": "2020-01-31"
+		})
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 3,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": "2020-12-31"
+		})
+		asset.submit()
+
+		post_depreciation_entries(date="2020-04-01")
+		asset.load_from_db()
+
+		asset.clear_depreciation_schedule()
+
+		self.assertEqual(len(asset.schedules), 6)
+
+		for schedule in asset.schedules:
+			if schedule.idx <= 3:
+				self.assertEqual(schedule.finance_book_id, "1")
+			else:
+				self.assertEqual(schedule.finance_book_id, "2")
+
+	def test_depreciation_schedules_are_set_up_for_multiple_finance_books(self):
+		asset = create_asset(
+			item_code = "Macbook Pro",
+			available_for_use_date = "2019-12-31",
+			do_not_save = 1
+		)
+
+		asset.calculate_depreciation = 1
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 3,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": "2020-12-31"
+		})
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 6,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": "2020-12-31"
+		})
+		asset.save()
+
+		self.assertEqual(len(asset.schedules), 9)
+
+		for schedule in asset.schedules:
+			if schedule.idx <= 3:
+				self.assertEqual(schedule.finance_book_id, 1)
+			else:
+				self.assertEqual(schedule.finance_book_id, 2)
 
 	def test_depreciation_entry_cancellation(self):
 		asset = create_asset(

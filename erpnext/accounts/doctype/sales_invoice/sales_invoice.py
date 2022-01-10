@@ -155,6 +155,8 @@ class SalesInvoice(SellingController):
 		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points and not self.is_consolidated:
 			validate_loyalty_points(self, self.loyalty_points)
 
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
 			if d.is_fixed_asset and d.meta.get_field("asset") and d.asset:
@@ -842,8 +844,6 @@ class SalesInvoice(SellingController):
 		self.make_exchange_gain_loss_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
 
-		self.allocate_advance_taxes(gl_entries)
-
 		self.make_item_gl_entries(gl_entries)
 		self.make_discount_gl_entries(gl_entries)
 
@@ -862,11 +862,11 @@ class SalesInvoice(SellingController):
 		# Checked both rounding_adjustment and rounded_total
 		# because rounded_total had value even before introcution of posting GLE based on rounded total
 		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
+		base_grand_total = flt(self.base_rounded_total if (self.base_rounding_adjustment and self.base_rounded_total)
+			else self.base_grand_total, self.precision("base_grand_total"))
+
 		if grand_total and not self.is_internal_transfer():
 			# Didnot use base_grand_total to book rounding loss gle
-			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
-				self.precision("grand_total"))
-
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
@@ -874,8 +874,8 @@ class SalesInvoice(SellingController):
 					"party": self.customer,
 					"due_date": self.due_date,
 					"against": self.against_income_account,
-					"debit": grand_total_in_company_currency,
-					"debit_in_account_currency": grand_total_in_company_currency \
+					"debit": base_grand_total,
+					"debit_in_account_currency": base_grand_total \
 						if self.party_account_currency==self.company_currency else grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
@@ -1049,6 +1049,8 @@ class SalesInvoice(SellingController):
 					frappe.flags.is_reverse_depr_entry = False
 					asset.flags.ignore_validate_update_after_submit = True
 					schedule.journal_entry = None
+					depreciation_amount = self.get_depreciation_amount_in_je(reverse_journal_entry)
+					asset.finance_books[0].value_after_depreciation += depreciation_amount
 					asset.save()
 
 	def get_posting_date_of_sales_invoice(self):
@@ -1070,6 +1072,12 @@ class SalesInvoice(SellingController):
 			return True
 
 		return False
+
+	def get_depreciation_amount_in_je(self, journal_entry):
+		if journal_entry.accounts[0].debit_in_account_currency:
+			return journal_entry.accounts[0].debit_in_account_currency
+		else:
+			return journal_entry.accounts[0].credit_in_account_currency
 
 	@property
 	def enable_discount_accounting(self):

@@ -1,17 +1,15 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
-import unittest
-
 import frappe
 from frappe.test_runner import make_test_records
 
 from erpnext.manufacturing.doctype.job_card.job_card import OperationSequenceError
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestRouting(unittest.TestCase):
+class TestRouting(ERPNextTestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls.item_code = "Test Routing Item - A"

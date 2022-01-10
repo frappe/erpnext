@@ -22,7 +22,11 @@ from erpnext.accounts.report.cash_flow.cash_flow import (
 	get_cash_flow_accounts,
 )
 from erpnext.accounts.report.cash_flow.cash_flow import get_report_summary as get_cash_flow_summary
-from erpnext.accounts.report.financial_statements import get_fiscal_year_data, sort_accounts
+from erpnext.accounts.report.financial_statements import (
+	filter_out_zero_value_rows,
+	get_fiscal_year_data,
+	sort_accounts,
+)
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
 	get_chart_data as get_pl_chart_data,
 )
@@ -265,7 +269,7 @@ def get_columns(companies, filters):
 	return columns
 
 def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, ignore_closing_entries=False):
-	accounts, accounts_by_name = get_account_heads(root_type,
+	accounts, accounts_by_name, parent_children_map = get_account_heads(root_type,
 		companies, filters)
 
 	if not accounts: return []
@@ -293,6 +297,8 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 	accumulate_values_into_parents(accounts, accounts_by_name, companies)
 
 	out = prepare_data(accounts, start_date, end_date, balance_must_be, companies, company_currency, filters)
+
+	out = filter_out_zero_value_rows(out, parent_children_map, show_zero_values=filters.get("show_zero_values"))
 
 	if out:
 		add_total_row(out, root_type, balance_must_be, companies, company_currency)
@@ -364,13 +370,13 @@ def get_account_heads(root_type, companies, filters):
 	accounts = get_accounts(root_type, filters)
 
 	if not accounts:
-		return None, None
+		return None, None, None
 
 	accounts = update_parent_account_names(accounts)
 
 	accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
 
-	return accounts, accounts_by_name
+	return accounts, accounts_by_name, parent_children_map
 
 def update_parent_account_names(accounts):
 	"""Update parent_account_name in accounts list.

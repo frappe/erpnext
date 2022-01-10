@@ -50,6 +50,7 @@ class calculate_taxes_and_totals(object):
 		self.initialize_taxes()
 		self.determine_exclusive_rate()
 		self.calculate_net_total()
+		self.calculate_shipping_charges()
 		self.calculate_taxes()
 		self.manipulate_grand_total_for_inclusive_tax()
 		self.calculate_totals()
@@ -138,6 +139,8 @@ class calculate_taxes_and_totals(object):
 
 				if not item.qty and self.doc.get("is_return"):
 					item.amount = flt(-1 * item.rate, item.precision("amount"))
+				elif not item.qty and self.doc.get("is_debit_note"):
+					item.amount = flt(item.rate, item.precision("amount"))
 				else:
 					item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 
@@ -257,6 +260,11 @@ class calculate_taxes_and_totals(object):
 			self.doc.base_net_total += item.base_net_amount
 
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total"])
+
+	def calculate_shipping_charges(self):
+		if hasattr(self.doc, "shipping_rule") and self.doc.shipping_rule:
+			shipping_rule = frappe.get_doc("Shipping Rule", self.doc.shipping_rule)
+			shipping_rule.apply(self.doc)
 
 	def calculate_taxes(self):
 		if not self.doc.get('is_consolidated'):
@@ -588,13 +596,14 @@ class calculate_taxes_and_totals(object):
 
 		if self.doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
 			grand_total = self.doc.rounded_total or self.doc.grand_total
+			base_grand_total = self.doc.base_rounded_total or self.doc.base_grand_total
+
 			if self.doc.party_account_currency == self.doc.currency:
 				total_amount_to_pay = flt(grand_total - self.doc.total_advance
 					- flt(self.doc.write_off_amount), self.doc.precision("grand_total"))
 			else:
-				total_amount_to_pay = flt(flt(grand_total *
-					self.doc.conversion_rate, self.doc.precision("grand_total")) - self.doc.total_advance
-						- flt(self.doc.base_write_off_amount), self.doc.precision("grand_total"))
+				total_amount_to_pay = flt(flt(base_grand_total, self.doc.precision("base_grand_total")) - self.doc.total_advance
+						- flt(self.doc.base_write_off_amount), self.doc.precision("base_grand_total"))
 
 			self.doc.round_floats_in(self.doc, ["paid_amount"])
 			change_amount = 0

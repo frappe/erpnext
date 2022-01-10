@@ -20,6 +20,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_comp
 from erpnext.accounts.utils import PaymentEntryUnlinkError
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from erpnext.controllers.accounts_controller import update_invoice_status
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.regional.india.utils import get_ewb_data
@@ -1603,28 +1604,12 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si.shipping_rule = shipping_rule.name
 		si.insert()
-
-		shipping_amount = 0.0
-		for condition in shipping_rule.get("conditions"):
-			if not condition.to_value or (flt(condition.from_value) <= si.net_total <= flt(condition.to_value)):
-				shipping_amount = condition.shipping_amount
-
-		shipping_charge = {
-			"doctype": "Sales Taxes and Charges",
-			"category": "Valuation and Total",
-			"charge_type": "Actual",
-			"account_head": shipping_rule.account,
-			"cost_center": shipping_rule.cost_center,
-			"tax_amount": shipping_amount,
-			"description": shipping_rule.name
-		}
-		si.append("taxes", shipping_charge)
 		si.save()
 
 		self.assertEqual(si.net_total, 1250)
 
-		self.assertEqual(si.total_taxes_and_charges, 577.05)
-		self.assertEqual(si.grand_total, 1827.05)
+		self.assertEqual(si.total_taxes_and_charges, 468.85)
+		self.assertEqual(si.grand_total, 1718.85)
 
 
 
@@ -2316,6 +2301,7 @@ class TestSalesInvoice(unittest.TestCase):
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
 			make_customer,
 		)
+		from erpnext.accounts.doctype.party_link.party_link import create_party_link
 		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
 		# create a customer
@@ -2324,13 +2310,7 @@ class TestSalesInvoice(unittest.TestCase):
 		supplier = create_supplier(supplier_name="_Test Common Supplier").name
 
 		# create a party link between customer & supplier
-		# set primary role as supplier
-		party_link = frappe.new_doc("Party Link")
-		party_link.primary_role = "Supplier"
-		party_link.primary_party = supplier
-		party_link.secondary_role = "Customer"
-		party_link.secondary_party = customer
-		party_link.save()
+		party_link = create_party_link("Supplier", supplier, customer)
 
 		# enable common party accounting
 		frappe.db.set_value('Accounts Settings', None, 'enable_common_party_accounting', 1)
@@ -2406,6 +2386,64 @@ class TestSalesInvoice(unittest.TestCase):
 		si.reload()
 		self.assertEqual(si.status, "Paid")
 
+	def test_update_invoice_status(self):
+		today = nowdate()
+
+		# Sales Invoice without Payment Schedule
+		si = create_sales_invoice(posting_date=add_days(today, -5))
+
+		# Sales Invoice with Payment Schedule
+		si_with_payment_schedule = create_sales_invoice(do_not_submit=True)
+		si_with_payment_schedule.extend("payment_schedule", [
+			{
+				"due_date": add_days(today, -5),
+				"invoice_portion": 50,
+				"payment_amount": si_with_payment_schedule.grand_total / 2
+			},
+			{
+				"due_date": add_days(today, 5),
+				"invoice_portion": 50,
+				"payment_amount": si_with_payment_schedule.grand_total / 2
+			}
+		])
+		si_with_payment_schedule.submit()
+
+
+		for invoice in (si, si_with_payment_schedule):
+			invoice.db_set("status", "Unpaid")
+			update_invoice_status()
+			invoice.reload()
+			self.assertEqual(invoice.status, "Overdue")
+
+			invoice.db_set("status", "Unpaid and Discounted")
+			update_invoice_status()
+			invoice.reload()
+			self.assertEqual(invoice.status, "Overdue and Discounted")
+
+
+	def test_sales_commission(self):
+		si = frappe.copy_doc(test_records[0])
+		item = copy.deepcopy(si.get('items')[0])
+		item.update({
+			"qty": 1,
+			"rate": 500,
+			"grant_commission": 1
+		})
+		si.append("items", item)
+
+		# Test valid values
+		for commission_rate, total_commission in ((0, 0), (10, 50), (100, 500)):
+			si.commission_rate = commission_rate
+			si.save()
+			self.assertEqual(si.amount_eligible_for_commission, 500)
+			self.assertEqual(si.total_commission, total_commission)
+
+		# Test invalid values
+		for commission_rate in (101, -1):
+			si.reload()
+			si.commission_rate = commission_rate
+			self.assertRaises(frappe.ValidationError, si.save)
+
 	def test_sales_invoice_submission_post_account_freezing_date(self):
 		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', add_days(getdate(), 1))
 		si = create_sales_invoice(do_not_save=True)
@@ -2417,6 +2455,32 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 
 		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
+
+	def test_over_billing_case_against_delivery_note(self):
+		'''
+			Test a case where duplicating the item with qty = 1 in the invoice
+			allows overbilling even if it is disabled
+		'''
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		over_billing_allowance = frappe.db.get_single_value('Accounts Settings', 'over_billing_allowance')
+		frappe.db.set_value('Accounts Settings', None, 'over_billing_allowance', 0)
+
+		dn = create_delivery_note()
+		dn.submit()
+
+		si = make_sales_invoice(dn.name)
+		# make a copy of first item and add it to invoice
+		item_copy = frappe.copy_doc(si.items[0])
+		si.append('items', item_copy)
+		si.save()
+
+		with self.assertRaises(frappe.ValidationError) as err:
+			si.submit()
+
+		self.assertTrue("cannot overbill" in str(err.exception).lower())
+
+		frappe.db.set_value('Accounts Settings', None, 'over_billing_allowance', over_billing_allowance)
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
