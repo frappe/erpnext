@@ -189,7 +189,8 @@ class DeliveryPlanningItem(Document):
 			dp_item.split_from_item = self.item_dname
 			dp_item.sd_item = self.name
 			dp_item.stock_uom = n_qty
-			dp_item.save(ignore_permissions=True)
+			dp_item.insert(ignore_mandatory=True)
+			# dp_item.save(ignore_permissions=True)
 
 			return 1
 		else: return 0
@@ -340,6 +341,7 @@ def split_function(source_names, n_transporter, n_qty, n_src_warehouse, n_suppli
 		dp_item.split_from_item = doc.item_dname
 		dp_item.sd_item = doc.name
 		dp_item.stock_uom = n_qty
-		dp_item.save(ignore_permissions=True)
+		dp_item.insert(ignore_mandatory=True)
+		# dp_item.save(ignore_permissions=True)
 
 	return 1
