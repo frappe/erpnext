@@ -184,6 +184,7 @@ class DeliveryPlanningItem(Document):
 			dp_item.supplier_dc = n_supplier_dc
 			dp_item.supplier = n_supplier
 			dp_item.uom = self.uom
+			dp_item.batch_no=self.batch_no
 			dp_item.conversion_factor = self.conversion_factor
 			dp_item.is_split = 1
 			dp_item.split_from_item = self.item_dname
