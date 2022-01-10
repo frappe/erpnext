@@ -217,9 +217,14 @@ class WorkOrder(Document):
 		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
 			"overproduction_percentage_for_work_order"))
 
-		manufactured_qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
-			from `tabStock Entry` where work_order=%s and docstatus=1
-			and purpose=%s""", (self.name, "Manufacture"))[0][0])
+		manufactured_qty = flt(frappe.db.get_value("Stock Entry",
+			filters={
+				"work_order": self.name,
+				"docstatus": 1,
+				"purpose": "Manufacture",
+				},
+			fieldname="sum(fg_completed_qty)",
+		))
 
 		allowed_qty = self.qty + (allowance_percentage / 100 * self.qty)
 		if manufactured_qty > allowed_qty:
