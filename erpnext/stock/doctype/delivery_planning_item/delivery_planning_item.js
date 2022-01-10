@@ -205,6 +205,23 @@ frappe.ui.form.on('Delivery Planning Item', {
 
 				},
 				{
+					label: 'Batch',
+					fieldname: 'batch',
+					fieldtype: 'Link',
+					options: "Batch",
+					"get_query": function () {
+						let filters = {
+							'item_code': frm.doc.item_code,
+							'posting_date': frm.doc.planned_date || frappe.datetime.nowdate(),
+							'warehouse': frm.doc.sorce_warehouse
+						}
+						return {
+							query : "erpnext.controllers.queries.get_batch_no",
+							filters: filters
+						}
+					}
+				},
+				{
 					label: 'Supplier delivers to Customer ',
 					fieldname: 'supplier_dc',
 					default: frm.doc.supplier_dc,
