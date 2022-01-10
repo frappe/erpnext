@@ -13,6 +13,7 @@
   "patient_cologne",
   "patient_dob",
   "sale_invoice",
+  "cai_invoce",
   "customer",
   "customer_name",
   "client_name",
@@ -35,7 +36,6 @@
   "reason_for_sale",
   "patient_statement",
   "cai_info_section",
-  "cai",
   "due_date_cai",
   "authorized_range",
   "cashier",
@@ -445,12 +445,6 @@
    "fieldname": "cai_info_section",
    "fieldtype": "Section Break",
    "label": "CAI Info"
-  },
-  {
-   "fieldname": "cai",
-   "fieldtype": "Data",
-   "label": "Cai",
-   "read_only": 1
   },
   {
    "fieldname": "due_date_cai",
@@ -2019,11 +2013,18 @@
    "fieldtype": "Data",
    "label": "Patient Name",
    "read_only": 1
+  },
+  {
+   "fetch_from": "sale_invoice.cai",
+   "fieldname": "cai_invoce",
+   "fieldtype": "Data",
+   "label": "Cai Invoice",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2021-12-01 10:03:37.352428",
+ "modified": "2022-01-10 15:33:25.519715",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cancellation Of Invoices",
