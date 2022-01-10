@@ -3,6 +3,9 @@
 
 import frappe
 from frappe.utils import add_months, cint, flt, now, today
+from hypothesis import given
+from hypothesis import strategies as st
+from hypothesis.core import example
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -22,6 +25,7 @@ from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.utils import get_bin
 from erpnext.tests.utils import ERPNextTestCase, timeout
 
+qty_gen = st.floats(min_value=0.1, max_value=1e6)
 
 class TestWorkOrder(ERPNextTestCase):
 	def setUp(self):
@@ -881,6 +885,30 @@ class TestWorkOrder(ERPNextTestCase):
 		wo2 = make_wo_order_test_record(item=bom.item, bom_no=bom.name, qty=2, skip_transfer=1, do_not_submit=1)
 
 		self.assertEqual(wo1.operations[0].time_in_mins, wo2.operations[0].time_in_mins)
+
+	@given(qty_gen, st.booleans(), st.lists(st.tuples(qty_gen, st.floats(0, 1.0)), min_size=1))
+	@example(42, True, [(10, 1), (20, 1)])
+	@example(42, True, [(10, 0), (20, 1)])
+	def test_manufacturable_qty(self, fg_qty, must_be_whole_num, required_transferred):
+		if must_be_whole_num:
+			fg_qty = cint(fg_qty)
+			if fg_qty == 0:
+				return
+
+		wo = frappe.new_doc("Work Order")  # mock, not required to be saved
+		wo.qty = fg_qty
+		wo.required_items = []
+		for required_qty, percent_transferred in required_transferred:
+			wo.required_items.append(
+				frappe._dict(
+					required_qty=required_qty,
+					transferred_qty=percent_transferred * required_qty
+				)
+			)
+		manufacturable_qty = wo.get_min_manufacturable_qty(round_down=must_be_whole_num)
+		for item in wo.required_items:
+			self.assertGreaterEqual(item.transferred_qty, (item.required_qty/fg_qty) * manufacturable_qty,
+				msg=f"Transferred quantity has to be greated than manufacturable qty for each row\n{wo.required_items}")
 
 
 def update_job_card(job_card):

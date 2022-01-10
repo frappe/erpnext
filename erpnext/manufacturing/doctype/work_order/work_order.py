@@ -217,25 +217,16 @@ class WorkOrder(Document):
 		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
 			"overproduction_percentage_for_work_order"))
 
-		for purpose, fieldname in (
-			("Manufacture", "produced_qty"),
-			("Material Transfer for Manufacture", "material_transferred_for_manufacturing")
-		):
-			if (purpose == 'Material Transfer for Manufacture' and
-				self.operations and self.transfer_material_against == 'Job Card'):
-				continue
+		manufactured_qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
+			from `tabStock Entry` where work_order=%s and docstatus=1
+			and purpose=%s""", (self.name, "Manufacture"))[0][0])
 
-			qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
-				from `tabStock Entry` where work_order=%s and docstatus=1
-				and purpose=%s""", (self.name, purpose))[0][0])
+		allowed_qty = self.qty + (allowance_percentage / 100 * self.qty)
+		if manufactured_qty > allowed_qty:
+			frappe.throw(_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(\
+				self.meta.get_label("produced_qty"), manufactured_qty, allowed_qty, self.name), StockOverProductionError)
 
-			completed_qty = self.qty + (allowance_percentage/100 * self.qty)
-			if qty > completed_qty:
-				frappe.throw(_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(\
-					self.meta.get_label(fieldname), qty, completed_qty, self.name), StockOverProductionError)
-
-			self.db_set(fieldname, qty)
-
+		self.db_set("produced_qty", manufactured_qty)
 
 		if self.sales_order and self.sales_order_item:
 			update_produced_qty_in_so_item(self.sales_order, self.sales_order_item)
@@ -727,6 +718,23 @@ class WorkOrder(Document):
 					})[0][0]
 
 			d.db_set('transferred_qty', flt(transferred_qty), update_modified = False)
+
+		if not (self.operations and self.transfer_material_against == 'Job Card'):
+			self.db_set("material_transferred_for_manufacturing", self.get_min_manufacturable_qty())
+
+	def get_min_manufacturable_qty(self, round_down=False) -> float:
+		"""Get minimum FG quantity that can be manufactured using transferred material."""
+		manufacturable_quantities = []
+		for item in self.required_items:
+			required_per_unit = (item.required_qty / self.qty)
+			manufacturable_quantities.append(item.transferred_qty / required_per_unit)
+
+		manufacturable_qty = min(manufacturable_quantities)
+
+		if round_down or frappe.db.get_value("UOM", self.stock_uom, "must_be_whole_number"):
+			return cint(manufacturable_qty)
+
+		return manufacturable_qty
 
 	def update_consumed_qty_for_required_items(self):
 		'''
