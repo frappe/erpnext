@@ -35,8 +35,10 @@ class CurrencyExchangeSettings(Document):
 			self.append('req_params', {'key': 'symbols', 'value': '{to_currency}'})
 
 	def validate_parameters(self):
-		params = {}
+		if frappe.flags.in_test:
+			return None, None
 
+		params = {}
 		for row in self.req_params:
 			params[row.key] = row.value.format(
 				transaction_date=nowdate(),
@@ -61,6 +63,9 @@ class CurrencyExchangeSettings(Document):
 		return response, value
 
 	def validate_result(self, response, value):
+		if frappe.flags.in_test:
+			return
+
 		try:
 			for key in self.result_key:
 				value = value[str(key.key).format(
