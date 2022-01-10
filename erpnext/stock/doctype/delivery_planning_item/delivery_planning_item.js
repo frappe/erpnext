@@ -140,7 +140,7 @@ frappe.ui.form.on('Delivery Planning Item', {
 					fieldname: 'transporter',
 					fieldtype: 'Link',
 				    options: "Supplier",
-				   
+				    default: frm.doc.transporter,
 				    depends_on: "eval: doc.supplier_dc == 0",
 					mandatory_depends_on : "eval: doc.supplier_dc == 0",
 					onchange: function() {
