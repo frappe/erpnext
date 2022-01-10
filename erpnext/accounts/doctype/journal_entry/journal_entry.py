@@ -1157,9 +1157,8 @@ def make_inter_company_journal_entry(name, voucher_type, company):
 def make_reverse_journal_entry(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 
-	def update_accounts(source, target, source_parent):
-		target.reference_type = "Journal Entry"
-		target.reference_name = source_parent.name
+	def post_process(source, target):
+		target.reversal_of = source.name
 
 	doclist = get_mapped_doc("Journal Entry", source_name, {
 		"Journal Entry": {
@@ -1177,9 +1176,8 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 				"debit": "credit",
 				"credit_in_account_currency": "debit_in_account_currency",
 				"credit": "debit",
-			},
-			"postprocess": update_accounts,
+			}
 		},
-	}, target_doc)
+	}, target_doc, post_process)
 
 	return doclist
