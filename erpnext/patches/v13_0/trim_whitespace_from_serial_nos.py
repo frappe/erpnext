@@ -27,6 +27,7 @@ def execute():
 
 	broken_serial_nos = set()
 
+	# patch SLEs
 	for sle in broken_sles:
 		serial_no_list = get_serial_nos(sle.serial_no)
 		correct_sr_no = "\n".join(serial_no_list)
@@ -40,13 +41,16 @@ def execute():
 	if not broken_serial_nos:
 		return
 
-	broken_sr_no_records = [sr[0] for sr in frappe.db.sql("""
-							select name
-							from `tabSerial No`
-							where status='Active'
-								and coalesce(purchase_document_type, '') = ''
-								and name in %s """, (list(broken_serial_nos),)
-							)]
+	# Patch serial No documents if they don't have purchase info
+	# Purchase info is used for fetching incoming rate
+	broken_sr_no_records = frappe.get_list("Serial No",
+			filters={
+				"status":"Active",
+				"name": ("in", broken_serial_nos),
+				"purchase_document_type": ("is", "not set")
+			},
+			pluck="name",
+		)
 
 	frappe.db.MAX_WRITES_PER_TRANSACTION += len(broken_sr_no_records)
 
