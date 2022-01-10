@@ -921,12 +921,12 @@ class StockEntry(StockController):
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
 			_validate_work_order(pro_doc)
-			pro_doc.run_method("update_status")
+			pro_doc.update_status()
 
 			if self.fg_completed_qty:
-				pro_doc.run_method("update_work_order_qty")
+				pro_doc.update_work_order_qty()
 				if self.purpose == "Manufacture":
-					pro_doc.run_method("update_planned_qty")
+					pro_doc.update_planned_qty()
 					pro_doc.update_batch_produced_qty(self)
 
 			if not pro_doc.operations:
