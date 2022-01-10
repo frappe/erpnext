@@ -30,6 +30,7 @@ erpnext.vehicles.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 				allowed_party_types.push("Customer");
 			} else if (me.frm.doc.payment_type === "Pay") {
 				allowed_party_types.push("Supplier");
+				allowed_party_types.push("Company");
 			}
 
 			return {

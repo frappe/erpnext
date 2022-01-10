@@ -21,6 +21,8 @@ class VehicleBookingPayment(Document):
 		self.validate_vehicle_booking_order()
 		self.validate_deposit_fields()
 		self.validate_duplicate_instruments()
+		self.validate_instrument_no_mandatory()
+		self.validate_bank_mandatory()
 		self.set_undeposited()
 		self.validate_undeposited_instruments()
 		self.update_undeposited_instrument_details()
@@ -63,7 +65,7 @@ class VehicleBookingPayment(Document):
 	def validate_party_type(self):
 		party_types_allowed_map = {
 			"Receive": ['Customer', 'Company'],
-			"Pay": ['Supplier']
+			"Pay": ['Supplier', 'Company']
 		}
 		party_types_allowed = party_types_allowed_map.get(self.payment_type, [])
 
@@ -121,6 +123,7 @@ class VehicleBookingPayment(Document):
 			from `tabVehicle Booking Payment Detail` i
 			inner join `tabVehicle Booking Payment` p on p.name = i.parent
 			where p.docstatus = 1 and p.payment_type = 'Receive' and p.vehicle_booking_order = %s
+				and ifnull(i.instrument_no, '') != ''
 		""", self.vehicle_booking_order, as_dict=1)
 
 		received_map = {}
@@ -136,6 +139,16 @@ class VehicleBookingPayment(Document):
 					frappe.throw(_("{0} {1} is already received in: {2}")
 						.format(d.instrument_type, frappe.bold(d.instrument_no),
 							", ".join([frappe.get_desk_link("Vehicle Booking Payment", name) for name in vbp_names])))
+
+	def validate_instrument_no_mandatory(self):
+		for d in self.instruments:
+			if d.instrument_type != 'Cash' and not d.instrument_no:
+				frappe.throw(_("Row #{0}: Instrument No is mandatory for Instrument Type {1}").format(d.idx, d.instrument_type))
+
+	def validate_bank_mandatory(self):
+		for d in self.instruments:
+			if d.instrument_type != 'Cash' and not d.bank:
+				frappe.throw(_("Row #{0}: Bank is mandatory for Instrument Type {1}").format(d.idx, d.instrument_type))
 
 	def validate_amounts(self):
 		for d in self.instruments:
@@ -261,8 +274,8 @@ def get_party_name(party_type, party, vehicle_booking_order=None):
 
 	party_name = None
 
-	if vehicle_booking_order:
-		if party_type in ["Customer", "Company"]:
+	if vehicle_booking_order and party_type in ['Customer', 'Supplier']:
+		if party_type == "Customer":
 			party_name = frappe.db.get_value("Vehicle Booking Order", vehicle_booking_order, 'customer_name')
 		elif party_type == "Supplier":
 			party_name = frappe.db.get_value("Vehicle Booking Order", vehicle_booking_order, 'supplier_name')
