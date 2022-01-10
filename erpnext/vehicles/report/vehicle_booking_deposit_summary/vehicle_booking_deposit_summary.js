@@ -104,6 +104,12 @@ frappe.query_reports["Vehicle Booking Deposit Summary"] = {
 			options: "Supplier"
 		},
 		{
+			fieldname: "company",
+			label: __("Company"),
+			fieldtype: "Link",
+			options: "Company"
+		},
+		{
 			fieldname: "group_by_1",
 			label: __("Group By Level 1"),
 			fieldtype: "Select",

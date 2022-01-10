@@ -169,7 +169,10 @@ class VehicleBookingDepositSummaryReport(object):
 			conditions.append("dep_m.posting_date <= %(to_date)s")
 
 		if self.filters.supplier:
-			conditions.append("dep_m.party_type = 'Supplier' and dep_m.party = %(party)s")
+			conditions.append("dep_m.party_type = 'Supplier' and dep_m.party = %(supplier)s")
+
+		if self.filters.company:
+			conditions.append("dep_m.party_type = 'Company' and dep_m.party = %(company)s")
 
 		if self.filters.deposit_type:
 			conditions.append("dep_m.deposit_type = %(deposit_type)s")
