@@ -2126,3 +2126,14 @@ def check_if_return_invoice_linked_with_payment_entry(self):
 			message += " " + ", ".join(payment_entries_link) + " "
 			message += _("to unallocate the amount of this Return Invoice before cancelling it.")
 			frappe.throw(message)
+
+@frappe.whitelist()
+def make_sales_order(source_name, target_doc = None):
+	return get_mapped_doc("Sales Invoice", source_name, {
+		"Sales Invoice": {
+			"doctype": "Sales Order",
+		},
+		"Sales Invoice Item": {
+			"doctype": "Sales Order Item",
+		}
+	}, target_doc)

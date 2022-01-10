@@ -77,7 +77,10 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				this.make_payment_entry, __('Create'));
 			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
-
+		if(doc.docstatus<=1 && !doc.is_return) {
+			cur_frm.add_custom_button(__('Sales Order'),
+					this.make_so, __('Create'));
+		}
 		if(doc.docstatus==1 && !doc.is_return) {
 
 			var is_delivered_by_supplier = false;
@@ -162,16 +165,57 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			frm: cur_frm
 		})
 	}
+	after_save(doc) {
+		doc.items.some((row) => {
+			if (!row.against_sales_order) {
+				let d = new frappe.ui.Dialog({
+					title: 'Suggestion',
+					message: __('We recommend creating an invoice against a Sales Order as an ideal practice.\
+                        <br><br>Do you still want to proceed with the creation of this invoice?'),
+					fields: [
+						{
+							fieldtype: 'HTML',
+							options: `<p class="frappe-confirm-message">We recommend creating an invoice against a Sales Order as an ideal practice.\
+							<br>Click <a href= "#">here</a> to create a Sales Order.<br><br>Do you still want to proceed with the creation of this invoice?</p>`
+						}
+					],
+					primary_action_label: 'Yes',
+					primary_action(values) {
+						console.log(values);
+						d.hide();
+					},
+					secondary_action_label: 'No',
+					secondary_action() {
+						d.hide();
+					},
+				});
+				d.$body.find('.frappe-confirm-message').find('a').click(() => {
+					this.make_so();
+				})
+				d.add_custom_checkbox(__('Do you want to save this setting?'))
+				d.show();
+				return
+			}
+		});
+	}
 
 	on_submit(doc, dt, dn) {
 		var me = this;
-
+		console.log('WORKDS????')
 		if (frappe.get_route()[0] != 'Form') {
 			return
 		}
 
 		doc.items.forEach((row) => {
 			if(row.delivery_note) frappe.model.clear_doc("Delivery Note", row.delivery_note)
+		});
+		doc.items.some((row) => {
+			if(!row.against_sales_order) {
+
+
+				d.show();
+				return
+			}
 		});
 	}
 
@@ -380,6 +424,13 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_return",
 			frm: cur_frm
 		})
+	}
+
+	make_so() {
+		frappe.model.open_mapped_doc({
+			method: 'erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_order',
+			frm: cur_frm,
+		});
 	}
 
 	asset(frm, cdt, cdn) {
