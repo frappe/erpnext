@@ -704,6 +704,9 @@ class WorkOrder(Document):
 		'''update transferred qty from submitted stock entries for that item against
 			the work order'''
 
+		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
+			"overproduction_percentage_for_work_order"))
+
 		for d in self.required_items:
 			transferred_qty = frappe.db.sql('''select sum(qty)
 				from `tabStock Entry` entry, `tabStock Entry Detail` detail
@@ -719,8 +722,16 @@ class WorkOrder(Document):
 
 			d.db_set('transferred_qty', flt(transferred_qty), update_modified = False)
 
-		if not (self.operations and self.transfer_material_against == 'Job Card'):
-			self.db_set("material_transferred_for_manufacturing", self.get_min_manufacturable_qty())
+		if (self.operations and self.transfer_material_against == 'Job Card'):
+			return
+
+		total_transferred_qty = self.get_min_manufacturable_qty()
+		self.db_set("material_transferred_for_manufacturing", total_transferred_qty)
+
+		allowed_qty = self.qty + (allowance_percentage / 100 * self.qty)
+		if total_transferred_qty > allowed_qty:
+			frappe.throw(_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(\
+				self.meta.get_label("transferred_qty"), total_transferred_qty, allowed_qty, self.name), StockOverProductionError)
 
 	def get_min_manufacturable_qty(self, round_down=False) -> float:
 		"""Get minimum FG quantity that can be manufactured using transferred material."""

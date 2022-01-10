@@ -908,7 +908,7 @@ class TestWorkOrder(ERPNextTestCase):
 		manufacturable_qty = wo.get_min_manufacturable_qty(round_down=must_be_whole_num)
 		for item in wo.required_items:
 			self.assertGreaterEqual(item.transferred_qty, (item.required_qty/fg_qty) * manufacturable_qty,
-				msg=f"Transferred quantity has to be greated than manufacturable qty for each row\n{wo.required_items}")
+				msg=f"Transferred quantity has to be greater than manufacturable qty for each row\n{wo.required_items}")
 
 
 def update_job_card(job_card):
