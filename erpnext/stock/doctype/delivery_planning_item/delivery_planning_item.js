@@ -23,7 +23,7 @@ frappe.ui.form.on('Delivery Planning Item', {
 			let filters = {
 				'item_code': frm.doc.item_code,
 				'posting_date': frm.doc.planned_date || frappe.datetime.nowdate(),
-				'warehouse': frm.doc.warehouse
+				'warehouse': frm.doc.sorce_warehouse
 			}
 			return {
 				query : "erpnext.controllers.queries.get_batch_no",

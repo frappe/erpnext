@@ -13,6 +13,9 @@ class DeliveryPlanningItem(Document):
 		if not self.transporter and not self.supplier:
 			frappe.throw("Please select Transporter or Supplier")
 
+		if self.qty_to_deliver >= self.available_stock:
+			frappe.throw(" Cannot submit, current warehouse doesn't have sufficient stock for item {0}".format(self.item_code))		
+
 
 	def before_save(self):
 		if not self.is_new() :

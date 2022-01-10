@@ -122,7 +122,8 @@ class DeliveryPlanning(Document):
 			dp_item.planned_date = i.delivery_date
 			dp_item.conversion_factor = i.conversion_factor
 			dp_item.stock_uom = i.stock_uom
-			dp_item.save(ignore_permissions = True);
+			dp_item.insert(ignore_mandatory=True)
+			# dp_item.save(ignore_permissions = True);
 			dp_item.reload()
 			
 			docs = frappe.db.get_all(doctype='Bin',
