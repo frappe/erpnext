@@ -318,3 +318,4 @@ erpnext.patches.v14_0.migrate_crm_settings
 erpnext.patches.v13_0.rename_ksa_qr_field
 erpnext.patches.v13_0.disable_ksa_print_format_for_others # 16-12-2021
 erpnext.patches.v14_0.add_default_exit_questionnaire_notification_template
+erpnext.patches.v13_0.update_exchange_rate_settings

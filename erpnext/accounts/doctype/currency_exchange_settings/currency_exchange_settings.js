@@ -1,9 +1,9 @@
-// Copyright (c) 2021, Wahni Green Technologies Pvt. Ltd. and contributors
+// Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
 frappe.ui.form.on('Currency Exchange Settings', {
 	service_provider: function(frm) {
-		if (frm.doc.service_provider == "Exchangerate.host") {
+		if (frm.doc.service_provider == "exchangerate.host") {
 			let result = ['result'];
 			let params = {
 				date: '{transaction_date}',
@@ -11,7 +11,7 @@ frappe.ui.form.on('Currency Exchange Settings', {
 				to: '{to_currency}'
 			};
 			add_param(frm, "https://api.exchangerate.host/convert", params, result);
-		} else if (frm.doc.service_provider == "Frankfurter.app") {
+		} else if (frm.doc.service_provider == "frankfurter.app") {
 			let result = ['rates', '{to_currency}'];
 			let params = {
 				base: '{from_currency}',
@@ -42,5 +42,4 @@ function add_param(frm, api, params, result) {
 	});
 
 	frm.refresh_fields();
-	frm.save();
 }

@@ -59,13 +59,20 @@ def set_single_defaults():
 				pass
 
 	frappe.db.set_default("date_format", "dd-mm-yyyy")
+
+	setup_currency_exchange()
+
+def setup_currency_exchange():
 	ces = frappe.get_single('Currency Exchange Settings')
 	try:
-		ces.api_endpoint = "https://api.exchangerate.host/convert"
-		ces.append('result_key', {'key': 'result'})
-		ces.append('req_params', {'key': 'date', 'value': '{transaction_date}'})
-		ces.append('req_params', {'key': 'from', 'value': '{from_currency}'})
-		ces.append('req_params', {'key': 'to', 'value': '{to_currency}'})
+		ces.set('result_key', [])
+		ces.set('req_params', [])
+
+		ces.api_endpoint = "https://frankfurter.app/{transaction_date}"
+		ces.append('result_key', {'key': 'rates'})
+		ces.append('result_key', {'key': '{to_currency}'})
+		ces.append('req_params', {'key': 'base', 'value': '{from_currency}'})
+		ces.append('req_params', {'key': 'symbols', 'value': '{to_currency}'})
 		ces.save()
 	except frappe.ValidationError:
 		pass

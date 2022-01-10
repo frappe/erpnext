@@ -100,7 +100,7 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 
 		if not value:
 			import requests
-			settings = frappe.get_single('Currency Exchange Settings')
+			settings = frappe.get_cached_doc('Currency Exchange Settings')
 			req_params = {
 				"transaction_date": transaction_date,
 				"from_currency": from_currency,

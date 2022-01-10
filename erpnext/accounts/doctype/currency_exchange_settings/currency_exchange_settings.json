@@ -1,6 +1,6 @@
 {
  "actions": [],
- "creation": "2021-09-02 14:53:50.923529",
+ "creation": "2022-01-10 13:03:26.237081",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -75,14 +75,14 @@
    "fieldname": "service_provider",
    "fieldtype": "Select",
    "label": "Service Provider",
-   "options": "Exchangerate.host\nFrankfurter.app\nCustom",
+   "options": "frankfurter.app\nexchangerate.host\nCustom",
    "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-11-04 10:27:09.332768",
+ "modified": "2022-01-10 15:51:14.521174",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Currency Exchange Settings",
@@ -97,9 +97,30 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
   }
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
