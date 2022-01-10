@@ -166,13 +166,14 @@ frappe.ui.form.on('Delivery Planning Item', {
 					read_only: 1,
 					depends_on: "eval: doc.supplier_dc == 0",
 					mandatory_depends_on : "eval: doc.supplier_dc == 0",
-					default: "Please select Transporter"
+					default: frm.doc.transporter_name
 				},
 				{
 					label: 'Deliver Date',
 					fieldname: 'delivery_date',
 					fieldtype: 'Date',
-					reqd: 1
+					reqd: 1,
+					default: frm.doc.delivery_date
 				},
 				{
 					label: 'Current Qty To Deliver',
