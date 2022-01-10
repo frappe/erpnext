@@ -212,12 +212,15 @@ class WorkOrder(Document):
 	def update_work_order_qty(self):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
 			based on Stock Entry"""
+		from erpnext.selling.doctype.sales_order.sales_order import update_produced_qty_in_so_item
 
 		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
 			"overproduction_percentage_for_work_order"))
 
-		for purpose, fieldname in (("Manufacture", "produced_qty"),
-			("Material Transfer for Manufacture", "material_transferred_for_manufacturing")):
+		for purpose, fieldname in (
+			("Manufacture", "produced_qty"),
+			("Material Transfer for Manufacture", "material_transferred_for_manufacturing")
+		):
 			if (purpose == 'Material Transfer for Manufacture' and
 				self.operations and self.transfer_material_against == 'Job Card'):
 				continue
@@ -232,13 +235,12 @@ class WorkOrder(Document):
 					self.meta.get_label(fieldname), qty, completed_qty, self.name), StockOverProductionError)
 
 			self.db_set(fieldname, qty)
-			self.set_process_loss_qty()
 
-			from erpnext.selling.doctype.sales_order.sales_order import update_produced_qty_in_so_item
 
-			if self.sales_order and self.sales_order_item:
-				update_produced_qty_in_so_item(self.sales_order, self.sales_order_item)
+		if self.sales_order and self.sales_order_item:
+			update_produced_qty_in_so_item(self.sales_order, self.sales_order_item)
 
+		self.set_process_loss_qty()
 		if self.production_plan:
 			self.update_production_plan_status()
 
