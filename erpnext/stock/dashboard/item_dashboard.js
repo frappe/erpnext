@@ -396,7 +396,7 @@ function append_breakdown(element, item_code, poi_results, boi_results) {
 	let Button = ""
 	if (boi_results.length != 0){
 		Button = `<div style="text-align: center">
-		<button id="backorder-report" class="btn btn-primary">Open backorder report for this item.</button> 
+		<button id="backorder-report" class="btn btn-primary" style="margin-top:20px">Open backorder report for this item.</button> 
 		</div>`
 	}
 	// Add div for canvas
