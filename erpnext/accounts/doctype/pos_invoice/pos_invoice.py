@@ -217,10 +217,9 @@ class POSInvoice(SalesInvoice):
 		error_msg = []
 		for item in self.get("items"):
 			serialized = item.get("has_serial_no")
-			valid_serial_nos = frappe.get_all('Serial No', filters={'item_code':item.get("item_code")}, pluck="name")
-
 			msg = ""
 			if serialized:
+				valid_serial_nos = frappe.get_all('Serial No', filters={'item_code':item.get("item_code")}, pluck="name")
 				invalid_serials = ""
 				for serial_no in item.get('serial_no').split("\n"):
 					if serial_no not in valid_serial_nos:
