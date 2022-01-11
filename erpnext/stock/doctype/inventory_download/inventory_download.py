@@ -14,15 +14,15 @@ class InventoryDownload(Document):
 			self.apply_inventory_download()
 			self.set_valuation_rate()
 
-			for item in self.get("items"):
-				items_bin = frappe.get_all("Bin", ["*"], filters = {"item_code": item.item_code})
+			# for item in self.get("items"):
+			# 	items_bin = frappe.get_all("Bin", ["*"], filters = {"item_code": item.item_code})
 
-				for bin in items_bin:
-					if self.warehouse == bin.warehouse:
-						doc = frappe.get_doc("Bin", bin.name)
-						doc.actual_qty += item.qty
-						doc.db_set('actual_qty', doc.actual_qty, update_modified=False)
-						# self.create_stock_ledger_entry(item, doc.actual_qty, 0)
+			# 	for bin in items_bin:
+			# 		if self.warehouse == bin.warehouse:
+			# 			doc = frappe.get_doc("Bin", bin.name)
+			# 			doc.actual_qty += item.qty
+			# 			doc.db_set('actual_qty', doc.actual_qty, update_modified=False)
+			# 			# self.create_stock_ledger_entry(item, doc.actual_qty, 0)
 	
 	def on_cancel(self):
 		self.delete_bin()
@@ -39,6 +39,7 @@ class InventoryDownload(Document):
 				if bin[0].actual_qty >= item.qty:
 					doc = frappe.get_doc("Bin", bin[0].name)
 					doc.actual_qty -= item.qty
+					doc.db_set('actual_qty', doc.actual_qty, update_modified=False)
 					doc.save()
 				else:
 					frappe.throw(_("There is not enough quantity to download in stock."))
@@ -54,6 +55,7 @@ class InventoryDownload(Document):
 			if len(bin) > 0:
 				doc = frappe.get_doc("Bin", bin[0].name)
 				doc.actual_qty += item.qty
+				doc.db_set('actual_qty', doc.actual_qty, update_modified=False)
 				doc.save()
 			else:
 				frappe.throw(_("This product does not exist in inventory with the selected warehouse."))
