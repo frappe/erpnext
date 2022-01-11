@@ -220,12 +220,12 @@ class POSInvoice(SalesInvoice):
 			serialized = item.get("has_serial_no")
 			msg = ""
 			if serialized:
-				valid_serial_nos = frappe.get_all('Serial No', filters={'item_code':item.get("item_code")}, pluck="name")
+				valid_serial_nos = frappe.get_all('Serial No', filters={'item_code':item.get("item_code"), "status":'Active'}, pluck="name")
 				invalid_serials = ""
 				for serial_no in get_serial_nos(item.get('serial_no')):
 					if serial_no not in valid_serial_nos:
 						invalid_serials = ", " if invalid_serials else "" + invalid_serials + serial_no
-						msg = (_("Row #{}: Following Serial numbers for item {} are <b>invalid</b>: {}").format(item.idx, frappe.bold(item.get("item_code")), frappe.bold(invalid_serials)))
+						msg = (_("Row #{}: Following Serial numbers for item {} are <b>Invalid</b>: {}").format(item.idx, frappe.bold(item.get("item_code")), frappe.bold(invalid_serials)))
 
 			if msg:
 				error_msg.append(msg)
