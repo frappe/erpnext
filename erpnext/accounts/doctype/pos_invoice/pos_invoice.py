@@ -40,6 +40,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_item_cost_centers()
 		self.validate_warehouse()
 		self.validate_serialised_or_batched_item()
+		self.validate_serial_nos()
 		self.validate_stock_availablility()
 		self.validate_return_items_qty()
 		self.validate_non_stock_items()
@@ -205,6 +206,26 @@ class POSInvoice(SalesInvoice):
 							.format(d.idx, item_code))
 			elif serialized and not no_serial_selected and len(serial_nos) != d.qty:
 				msg = (_("Row #{}: You must select {} serial numbers for item {}.").format(d.idx, frappe.bold(cint(d.qty)), item_code))
+
+			if msg:
+				error_msg.append(msg)
+
+		if error_msg:
+			frappe.throw(error_msg, title=_("Invalid Item"), as_list=True)
+
+	def validate_serial_nos(self):
+		error_msg = []
+		for item in self.get("items"):
+			serialized = item.get("has_serial_no")
+			valid_serial_nos = frappe.get_all('Serial No', filters={'item_code':item.get("item_code")}, pluck="name")
+
+			msg = ""
+			if serialized:
+				invalid_serials = ""
+				for serial_no in item.get('serial_no').split("\n"):
+					if serial_no not in valid_serial_nos:
+						invalid_serials = ", " if invalid_serials else "" + invalid_serials + serial_no
+						msg = (_("Row #{}: Following Serial numbers for item {} are <b>invalid</b>: {}").format(item.idx, frappe.bold(item.get("item_code")), frappe.bold(invalid_serials)))
 
 			if msg:
 				error_msg.append(msg)
