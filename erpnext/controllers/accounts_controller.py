@@ -113,7 +113,7 @@ class AccountsController(TransactionBase):
 						_('{0} is blocked so this transaction cannot proceed').format(supplier_name), raise_exception=1)
 
 	def validate(self):
-		if not self.get('is_return'):
+		if not self.get('is_return') and not self.get('is_debit_note'):
 			self.validate_qty_is_not_zero()
 
 		if self.get("_action") and self._action != "update_after_submit":

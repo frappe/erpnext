@@ -102,7 +102,7 @@ class Task(NestedSet):
 			frappe.throw(_("Completed On cannot be greater than Today"))
 
 	def update_depends_on(self):
-		depends_on_tasks = self.depends_on_tasks or ""
+		depends_on_tasks = ""
 		for d in self.depends_on:
 			if d.task and d.task not in depends_on_tasks:
 				depends_on_tasks += d.task + ","
