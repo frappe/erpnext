@@ -72,18 +72,22 @@ class TestVariantSelector(unittest.TestCase):
 		# Only L and M attribute values must be fetched since S is disabled
 		self.assertEqual(len(attr_data[0]["values"]), 2)  # ['Medium', 'Large']
 
-	# def test_next_item_variant_values(self):
-	# 	"""
-	# 		Test if on selecting an attribute value, the next possible values
-	# 		are filtered accordingly.
-	# 		Values that dont apply should not be fetched.
-	# 		E.g.
-	# 		There is a ** Small-Red ** Tshirt. No other colour in this size.
-	# 		On selecting ** Small **, only ** Red ** should be selectable next.
-	# 	"""
-	# 	from erpnext.e_commerce.variant_selector.utils import get_next_attribute_and_values
+	def test_next_item_variant_values(self):
+		"""
+			Test if on selecting an attribute value, the next possible values
+			are filtered accordingly.
+			Values that dont apply should not be fetched.
+			E.g.
+			There is a ** Small-Red ** Tshirt. No other colour in this size.
+			On selecting ** Small **, only ** Red ** should be selectable next.
+		"""
+		from erpnext.e_commerce.variant_selector.utils import get_next_attribute_and_values
 
-	# 	next_values = get_next_attribute_and_values("Test-Tshirt-Temp", selected_attributes={
-	# 		"Colour": "Red"
-	# 	})
-	# 	print(next_values)
+		next_values = get_next_attribute_and_values("Test-Tshirt-Temp", selected_attributes={"Test Size": "Small"})
+		next_colours = next_values["valid_options_for_attributes"]["Test Colour"]
+		filtered_items = next_values["filtered_items"]
+
+		self.assertEqual(len(next_colours), 1)
+		self.assertEqual(next_colours.pop(), "Red")
+		self.assertEqual(len(filtered_items), 1)
+		self.assertEqual(filtered_items.pop(), "Test-Tshirt-Temp-S-R")
