@@ -393,7 +393,12 @@ function append_breakdown(element, item_code, poi_results, boi_results) {
 	}
 	const bo_config = setup(boi_number_data, boi_label_data, boi_backgroundColor, bo_dataset_label, bo_options);
 
-	
+	let Button = ""
+	if (boi_results.length != 0){
+		Button = `<div style="text-align: center">
+		<button id="backorder-report" class="btn btn-primary">Open backorder report for this item.</button> 
+		</div>`
+	}
 	// Add div for canvas
 	let chartDisplay = `<div id="pending-breakdown-${item_code}" width="100%" class="col-sm-12" style="padding: 15px 15px;
 		border-top: 1px solid #d1d8dd; border-left: 6px solid deepskyblue;">
@@ -403,9 +408,7 @@ function append_breakdown(element, item_code, poi_results, boi_results) {
 		<div class="col-sm-6" width="48%">
 			<canvas id="po-${item_code}"></canvas>
 		</div>
-		<div style="text-align: center">
-		<button id="backorder-report" class="btn btn-light">Open backorder report for this item.</button> 
-		</div>
+		${Button}
 
 	</div>`
 
