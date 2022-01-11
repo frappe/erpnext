@@ -63,8 +63,12 @@ def execute(filters=None):
 
 	for item_group in item_groups:
 		items = []
+		total_group = 0
+		for item in products:
+			if item_group == item.item_group:
+				total_group += item.amount
 
-		group_arr = [{'indent': 0.0, "category": item_group}]
+		group_arr = [{'indent': 0.0, "category": item_group, "total_price": total_group}]
 		data.extend(group_arr or [])
 
 		for product in products:
