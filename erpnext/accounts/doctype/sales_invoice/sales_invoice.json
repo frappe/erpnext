@@ -47,12 +47,6 @@
   "tax_cnic",
   "tax_strn",
   "customer_group",
-  "fbr_pos_details_section",
-  "fbr_pos_invoice_no",
-  "is_fbr_pos_invoice",
-  "column_break_46",
-  "fbr_pos_id",
-  "fbr_pos_qrcode",
   "address_and_contact",
   "customer_address",
   "address_display",
@@ -224,6 +218,7 @@
   "base_in_words",
   "column_break_155",
   "outstanding_amount",
+  "sec_fbr_pos_transaction_details",
   "payment_schedule_section",
   "payment_terms_template",
   "payment_schedule",
@@ -2185,45 +2180,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "depends_on": "eval:doc.has_stin",
-   "fieldname": "fbr_pos_details_section",
-   "fieldtype": "Section Break",
-   "hidden": 1,
-   "label": "FBR POS Details"
-  },
-  {
-   "fieldname": "fbr_pos_invoice_no",
-   "fieldtype": "Data",
-   "label": "FBR POS Invoice Number",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "is_fbr_pos_invoice",
-   "fieldtype": "Check",
-   "label": "Is FBR POS Invoice",
-   "no_copy": 1
-  },
-  {
-   "fieldname": "column_break_46",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "fbr_pos_id",
-   "fieldtype": "Int",
-   "label": "FBR POS ID",
-   "no_copy": 1
-  },
-  {
-   "fieldname": "fbr_pos_qrcode",
-   "fieldtype": "Barcode",
-   "hidden": 1,
-   "label": "FBR POS QR Code",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "vehicle_registration_order",
    "fieldtype": "Link",
    "label": "Vehicle Registration Order",
@@ -2240,12 +2196,19 @@
    "fieldname": "default_depreciation_percentage",
    "fieldtype": "Percent",
    "label": "Default Depreciation (%)"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:doc.has_stin && doc.is_fbr_pos_invoice",
+   "fieldname": "sec_fbr_pos_transaction_details",
+   "fieldtype": "Section Break",
+   "label": "FBR POS Transaction Details"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2022-01-08 01:53:54.200648",
+ "modified": "2022-01-11 13:54:18.891496",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

@@ -1037,6 +1037,9 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 				"payment_terms_template": "payment_terms_template",
 				"remarks": "remarks",
 			},
+			"field_no_map": [
+				"has_stin",
+			],
 			"validation": {
 				"docstatus": ["=", 1]
 			}

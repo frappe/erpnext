@@ -283,6 +283,9 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 				"validation": {
 					"docstatus": ["=", 1]
 				},
+				"field_no_map": [
+					"has_stin",
+				],
 				"field_map": {
 					"remarks": "remarks"
 				}

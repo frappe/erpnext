@@ -4,6 +4,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "enable_fbr_pos",
   "post_invoice_data_endpoint",
   "default_fbr_pos_id"
  ],
@@ -17,10 +18,16 @@
    "fieldname": "default_fbr_pos_id",
    "fieldtype": "Int",
    "label": "Default FBR POS ID"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_fbr_pos",
+   "fieldtype": "Check",
+   "label": "Enable FBR POS Integration"
   }
  ],
  "issingle": 1,
- "modified": "2021-11-14 23:19:52.543553",
+ "modified": "2022-01-11 17:28:53.549329",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "FBR POS Settings",

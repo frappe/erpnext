@@ -38,7 +38,7 @@
    "options": "Item Tax"
   }
  ],
- "modified": "2020-10-01 04:40:05.656441",
+ "modified": "2022-01-11 14:02:39.743336",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Customs Tariff Number",
@@ -67,6 +67,7 @@
   }
  ],
  "quick_entry": 1,
+ "search_fields": "description",
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

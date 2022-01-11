@@ -601,6 +601,9 @@ def make_sales_invoice(source_name, target_doc=None):
 				"remarks": "remarks",
 				"vehicle_booking_order": "vehicle_booking_order",
 			},
+			"field_no_map": [
+				"has_stin",
+			],
 			"validation": {
 				"docstatus": ["=", 1]
 			}

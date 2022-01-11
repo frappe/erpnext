@@ -1224,6 +1224,7 @@ class AccountsController(TransactionBase):
 			new_tax_row.tax_amount_after_discount_amount = 0
 			new_tax_row.tax_amount = 0
 			new_tax_row.total = 0
+			new_tax_row.default_rate = flt(tax.rate)
 
 			group_data.taxes[tax.name] = new_tax_row
 
@@ -1244,6 +1245,22 @@ class AccountsController(TransactionBase):
 			else:
 				tax.total = list(group_data.taxes.values())[i-1].total + tax.tax_amount_after_discount_amount
 
+		# get default tax rate
+		default_tax_rate = {}
+		default_tax_item_rates = {}
+		for item in group_data['items']:
+			item_tax_rate = json.loads(item.item_tax_rate or '{}')
+			for tax in group_data.taxes.values():
+				rate = tax.default_rate
+				if tax.account_head in item_tax_rate:
+					rate = flt(item_tax_rate[tax.account_head])
+
+				default_tax_item_rates.setdefault(tax.account_head, []).append(rate)
+
+		for account_head, rate_list in default_tax_item_rates.items():
+			if len(set(rate_list)) == 1:
+				default_tax_rate[account_head] = rate_list[0]
+
 		# calculate tax rates
 		for i, tax in enumerate(group_data.taxes.values()):
 			if tax.charge_type in ('On Previous Row Total', 'On Previous Row Amount'):
@@ -1252,7 +1269,7 @@ class AccountsController(TransactionBase):
 				tax.rate = (tax.tax_amount_after_discount_amount / prev_row_taxable) * 100 if prev_row_taxable else 0
 			else:
 				tax.rate = (tax.tax_amount_after_discount_amount / group_data.taxable_total) * 100 if group_data.taxable_total\
-					else 0
+					else flt(default_tax_rate.get(tax.account_head))
 
 		group_data.taxes = list(group_data.taxes.values())
 
