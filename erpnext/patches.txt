@@ -305,6 +305,7 @@ erpnext.patches.v13_0.add_default_interview_notification_templates
 erpnext.patches.v13_0.enable_scheduler_job_for_item_reposting
 erpnext.patches.v13_0.requeue_failed_reposts
 erpnext.patches.v13_0.update_job_card_status
+erpnext.patches.v13_0.enable_uoms
 erpnext.patches.v12_0.update_production_plan_status
 erpnext.patches.v13_0.healthcare_deprecation_warning
 erpnext.patches.v13_0.item_naming_series_not_mandatory
