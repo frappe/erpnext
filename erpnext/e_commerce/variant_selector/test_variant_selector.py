@@ -39,8 +39,7 @@ class TestVariantSelector(unittest.TestCase):
 		})
 		variant.save()
 
-	@classmethod
-	def tearDownClass(cls):
+	def tearDown(self):
 		frappe.db.rollback()
 
 	def test_item_attributes(self):
@@ -71,6 +70,10 @@ class TestVariantSelector(unittest.TestCase):
 
 		# Only L and M attribute values must be fetched since S is disabled
 		self.assertEqual(len(attr_data[0]["values"]), 2)  # ['Medium', 'Large']
+
+		# teardown
+		small_variant.disabled = 1
+		small_variant.save()
 
 	def test_next_item_variant_values(self):
 		"""
