@@ -112,7 +112,7 @@ class SalesPurchaseDetailsReport(object):
 				i.item_code, i.item_name,
 				i.{qty_field} as qty,
 				i.uom, i.stock_uom, i.alt_uom,
-				i.brand, im.item_group,
+				im.brand, im.item_group,
 				{amount_fields} {party_group_field} {territory_field} {sales_person_field} {contribution_field}
 				{item_cost_center_field} {parent_cost_center_field} {project_field}
 				{stin_field}

@@ -89,7 +89,7 @@ class Analytics(object):
 			self.get_rows()
 
 		elif self.filters.tree_type == 'Brand':
-			self.get_entries("i.brand")
+			self.get_entries("im.brand")
 			self.get_rows()
 
 		elif self.filters.tree_type in ["Customer Group", "Supplier Group", "Territory", "Item Group", "Sales Person"]:
@@ -100,7 +100,7 @@ class Analytics(object):
 			elif self.filters.tree_type == 'Territory':
 				entity_field = "s.territory"
 			elif self.filters.tree_type == 'Item Group':
-				entity_field = "i.item_group"
+				entity_field = "im.item_group"
 			else:
 				entity_field = "sp.sales_person"
 			self.get_entries(entity_field)
