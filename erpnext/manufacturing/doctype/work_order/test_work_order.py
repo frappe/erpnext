@@ -23,7 +23,7 @@ from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.utils import get_bin
-from erpnext.tests.utils import ERPNextTestCase, timeout
+from erpnext.tests.utils import ERPNextTestCase, change_settings, timeout
 
 qty_gen = st.floats(min_value=0.1, max_value=1e6)
 
@@ -612,11 +612,14 @@ class TestWorkOrder(ERPNextTestCase):
 
 		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 0)
 
+	@change_settings("Manufacturing Settings",
+		{
+			"material_consumption": 0,
+			"backflush_raw_materials_based_on": "Material Transferred for Manufacture",
+			"overproduction_percentage_for_work_order": 100,
+		}
+	)
 	def test_extra_material_transfer(self):
-		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 0)
-		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on",
-			"Material Transferred for Manufacture")
-
 		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=4)
 
 		ste_cancel_list = []
@@ -651,8 +654,6 @@ class TestWorkOrder(ERPNextTestCase):
 		ste_cancel_list.reverse()
 		for ste_doc in ste_cancel_list:
 			ste_doc.cancel()
-
-		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on", "BOM")
 
 	def test_make_stock_entry_for_customer_provided_item(self):
 		finished_item = 'Test Item for Make Stock Entry 1'
