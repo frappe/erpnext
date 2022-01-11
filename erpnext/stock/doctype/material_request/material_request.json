@@ -10,6 +10,7 @@
   "naming_series",
   "title",
   "material_request_type",
+  "justification_purchase",
   "customer",
   "column_break_2",
   "schedule_date",
@@ -34,7 +35,8 @@
   "reference",
   "job_card",
   "description_section",
-  "description"
+  "description",
+  "reference_invenvtory"
  ],
  "fields": [
   {
@@ -282,12 +284,25 @@
    "fieldname": "description",
    "fieldtype": "Long Text",
    "label": "Description"
+  },
+  {
+   "fieldname": "reference_invenvtory",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Reference Inventory",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "justification_purchase",
+   "fieldtype": "Link",
+   "label": "Purchase Justification",
+   "options": "Purchase Justification"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
- "modified": "2021-08-17 16:30:38.391864",
+ "modified": "2022-01-11 15:58:36.724407",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
