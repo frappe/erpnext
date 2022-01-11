@@ -105,7 +105,6 @@ erpnext.PointOfSale.Payment = class {
 
 	on_numpad_clicked($btn) {
 		const button_value = $btn.attr('data-button-value');
-		console.log(button_value);
 
 		highlight_numpad_btn($btn);
 		this.numpad_value = button_value === 'delete' ? this.numpad_value.slice(0, -1) : this.numpad_value + button_value;
@@ -161,14 +160,14 @@ erpnext.PointOfSale.Payment = class {
 		});
 
 		frappe.ui.form.on('POS Invoice', 'contact_mobile', (frm) => {
-			if(this.request_for_payment_field != undefined){
+			if (this.request_for_payment_field != undefined) {
 				const contact = frm.doc.contact_mobile;
 				const request_button = $(this.request_for_payment_field.$input[0]);
 				if (contact) {
 					request_button.removeClass('btn-default').addClass('btn-primary');
 				} else {
 					request_button.removeClass('btn-primary').addClass('btn-default');
-				  }
+				}
 			}
 
     });
