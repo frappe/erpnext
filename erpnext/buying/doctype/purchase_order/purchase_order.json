@@ -16,6 +16,7 @@
   "column_break1",
   "transaction_date",
   "schedule_date",
+  "justification_purchase",
   "order_confirmation_no",
   "order_confirmation_date",
   "amended_from",
@@ -1039,12 +1040,18 @@
    "fieldtype": "Link",
    "label": "Tax Category",
    "options": "Tax Category"
+  },
+  {
+   "fieldname": "justification_purchase",
+   "fieldtype": "Link",
+   "label": "Purchase Justification",
+   "options": "Purchase Justification"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2021-08-20 11:10:23.968747",
+ "modified": "2022-01-11 16:02:20.265586",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
