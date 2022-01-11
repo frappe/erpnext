@@ -4,14 +4,16 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate, nowdate, flt, cint
+from frappe.utils import getdate, nowdate, flt, cint, cstr
 from erpnext import get_company_currency
 from frappe.model.meta import get_field_precision
 import json
+import re
 
 
 class FBRInvoiceWiseTaxes(object):
 	def __init__(self, filters=None):
+		self.ntn_regex = re.compile(r'^.......-.$')
 		self.filters = frappe._dict(filters or {})
 		self.filters.from_date = getdate(self.filters.from_date or nowdate())
 		self.filters.to_date = getdate(self.filters.to_date or nowdate())
@@ -52,19 +54,13 @@ class FBRInvoiceWiseTaxes(object):
 				"hide_for_view": 1
 			},
 			{
-				"label": _("Buyer NTN"),
+				"label": _("Registration No"),
 				"fieldtype": "Data",
-				"fieldname": "tax_id",
-				"width": 75
-			},
-			{
-				"label": _("Buyer CNIC"),
-				"fieldtype": "Data",
-				"fieldname": "tax_cnic",
+				"fieldname": "registration_no",
 				"width": 110
 			},
 			{
-				"label": _("Buyer Name"),
+				"label": _("Customer"),
 				"fieldtype": "Link",
 				"fieldname": "party",
 				"options": self.filters.party_type,
@@ -80,13 +76,19 @@ class FBRInvoiceWiseTaxes(object):
 			{
 				"label": _("Buyer Type"),
 				"fieldtype": "Data",
-				"fieldname": "tax_strn",
+				"fieldname": "buyer_type",
 				"width": 90
 			},
 			{
 				"label": _("Sale Origination Province of Supplier"),
 				"fieldtype": "Data",
-				"fieldname": "state",
+				"fieldname": "company_state",
+				"width": 90
+			},
+			{
+				"label": _("Destination of Supply"),
+				"fieldtype": "Data",
+				"fieldname": "customer_state",
 				"editable": 1,
 				"width": 90
 			},
@@ -118,7 +120,7 @@ class FBRInvoiceWiseTaxes(object):
 				"width": 80
 			},
 			{
-				"label": _("HS Code"),
+				"label": _("HS Code Description"),
 				"fieldtype": "Data",
 				"fieldname": "hscode",
 				"width": 80,
@@ -138,20 +140,13 @@ class FBRInvoiceWiseTaxes(object):
 				"width": 50
 			},
 			{
-				"label": _("Description"),
-				"fieldtype": "Data",
-				"fieldname": "description",
-				"width": 80
-			},
-			{
 				"label": _("Quantity"),
 				"fieldtype": "Data",
 				"fieldname": "qty",
-				"width": 80,
-				"hide_for_view": 1
+				"width": 75,
 			},
 			{
-				"label": _("UOM"),
+				"label": _("UoM"),
 				"fieldtype": "Data",
 				"fieldname": "uom",
 				"width": 80,
@@ -165,18 +160,18 @@ class FBRInvoiceWiseTaxes(object):
 				"width": 110
 			},
 			{
-				"label": _("Fixed / notified value or Retail Price"),
-				"fieldtype": "Data",
-				"fieldname": "retail_price",
-				"width": 50,
-				"hide_for_view": 1
-			},
-			{
 				"label": _("Sales Tax/ FED in ST Mode"),
 				"fieldtype": "Currency",
 				"fieldname": "sales_tax",
 				"options": "Company:company:default_currency",
 				"width": 110
+			},
+			{
+				"label": _("Fixed / notified value or Retail Price"),
+				"fieldtype": "Data",
+				"fieldname": "retail_price",
+				"width": 50,
+				"hide_for_view": 1
 			},
 			{
 				"label": _("Extra Tax"),
@@ -186,27 +181,6 @@ class FBRInvoiceWiseTaxes(object):
 				"width": 110,
 			},
 			{
-				"label": _("ST Withheld at Source"),
-				"fieldtype": "Data",
-				"fieldname": "withheld_amount",
-				"width": 80,
-				"hide_for_view": 1
-			},
-			{
-				"label": _("SRO No. / Schedule No."),
-				"fieldtype": "Data",
-				"fieldname": "sro_no",
-				"width": 80,
-				"hide_for_view": 1
-			},
-			{
-				"label": _("Item Sr. No."),
-				"fieldtype": "Data",
-				"fieldname": "item_sr_no",
-				"width": 80,
-				"hide_for_view": 1
-			},
-			{
 				"label": _("Further Tax"),
 				"fieldtype": "Currency",
 				"fieldname": "further_tax",
@@ -214,11 +188,32 @@ class FBRInvoiceWiseTaxes(object):
 				"width": 110
 			},
 			{
-				"label": _("Total Value of Sales"),
+				"label": _("Total Value of Sales (In case of PFAD only)"),
 				"fieldtype": "Currency",
-				"fieldname": "base_total_after_taxes",
+				"fieldname": "total_value_of_sales",
 				"options": "Company:company:default_currency",
 				"width": 110
+			},
+			{
+				"label": _("ST Withheld at Source"),
+				"fieldtype": "Data",
+				"fieldname": "withheld_amount",
+				"width": 80,
+				"hide_for_view": 1
+			},
+			{
+				"label": _("SRO No./ Schedule No."),
+				"fieldtype": "Data",
+				"fieldname": "sro_no",
+				"width": 80,
+				"hide_for_view": 1
+			},
+			{
+				"label": _("Item S. No."),
+				"fieldtype": "Data",
+				"fieldname": "item_sr_no",
+				"width": 80,
+				"hide_for_view": 1
 			},
 		]
 
@@ -248,13 +243,15 @@ class FBRInvoiceWiseTaxes(object):
 			self.invoices = frappe.db.sql("""
 				select
 					i.name as invoice, i.stin, DATE_FORMAT(i.posting_date, '%%d/%%m/%%Y') as posting_date,
-					addr.state, addr.name as address_name,
+					customer_addr.state as customer_state, company_addr.state as company_state,
+					customer_addr.name as customer_address,
 					i.bill_to as party, i.bill_to_name as party_name,
 					c.tax_id, c.tax_cnic, c.tax_strn,
-					cc.tax_description as description, i.conversion_rate
+					cc.tax_description as hscode, i.conversion_rate
 				from `tabSales Invoice` i
 				left join `tabCustomer` c on c.name = i.bill_to
-				left join `tabAddress` addr on addr.name = i.customer_address
+				left join `tabAddress` customer_addr on customer_addr.name = i.customer_address
+				left join `tabAddress` company_addr on company_addr.name = i.company_address
 				left join `tabCost Center` cc on cc.name = i.cost_center
 				where i.docstatus = 1 and i.company = %(company)s and i.posting_date between %(from_date)s and %(to_date)s
 					and ifnull(i.is_return, 0) = 0 and exists(select tax.name from `tabSales Taxes and Charges` tax
@@ -267,14 +264,29 @@ class FBRInvoiceWiseTaxes(object):
 
 		self.invoices_map = {}
 		for d in self.invoices:
+			d.buyer_type = "Registered" if d.tax_strn else "Unregistered"
+			d.sale_type = " Goods at standard rate (default)"
+			d.document_type = "Sale Invoice"
+			d.uom = "Numbers, pieces, units"
+
+			if d.tax_id:
+				d.registration_no = d.tax_id
+				# remove check digit for registration number instead of ntn
+				if self.filters.for_export and d.registration_no and self.ntn_regex.match(d.registration_no):
+					d.registration_no = d.registration_no[:-2]
+			elif d.tax_cnic:
+				d.registration_no = d.tax_cnic
+				if self.filters.for_export and d.registration_no:
+					d.registration_no = d.registration_no.replace('-', '')
+
+			d.has_third_schedule_goods = False
+			d.qty = 0
 			d.base_taxable_total = 0
 			d.base_total_after_taxes = 0
 			d.sales_tax = 0
 			d.extra_tax = 0
 			d.further_tax = 0
-			d.tax_strn = "Registered" if d.tax_strn else "Unregistered"
-			d.sale_type = " Goods at standard rate (default)"
-			d.document_type = "SI"
+
 			self.invoices_map[d.invoice] = frappe._dict({
 				'invoice': d, 'items': [], 'taxes': []
 			})
@@ -283,7 +295,7 @@ class FBRInvoiceWiseTaxes(object):
 
 		if invoice_names:
 			invoice_items = frappe.db.sql("""
-				select i.parent as invoice, i.base_taxable_amount, i.item_tax_detail
+				select i.parent as invoice, i.base_taxable_amount, i.item_tax_detail, i.qty
 				from `tabSales Invoice Item` i
 				where i.parent in %s
 			""", [invoice_names], as_dict=1)
@@ -326,6 +338,9 @@ class FBRInvoiceWiseTaxes(object):
 
 				if has_tax:
 					inv_obj['invoice']['base_taxable_total'] += item.base_taxable_amount
+					inv_obj['invoice']['qty'] += item.qty
+					inv_obj['invoice']['has_third_schedule_goods'] = True
+					inv_obj['invoice']['sale_type'] = '3rd Schedule Goods'
 
 			for tax in inv_obj['taxes']:
 				tax_field = self.get_tax_field(tax.account_head)

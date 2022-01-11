@@ -39,16 +39,16 @@ frappe.query_reports["FBR Sales Tax Report"] = {
 		},
 	],
 	onChange: function(new_value, column, data, rowIndex) {
-		if (column.fieldname == "state" && new_value) {
-			if (!data.address_name) {
-				frappe.throw(__("No address set in Sales Invoice {0}", data.invoice))
+		if (column.fieldname == "customer_state" && new_value) {
+			if (!data.customer_address) {
+				frappe.throw(__("No address set in Sales Invoice {0}", [data.invoice]))
 			}
 
 			return frappe.call({
 				method: "frappe.client.set_value",
 				args: {
 					doctype: "Address",
-					name: data.address_name,
+					name: data.customer_address,
 					fieldname: 'state',
 					value: new_value
 				},
