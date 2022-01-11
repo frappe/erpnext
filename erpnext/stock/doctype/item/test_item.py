@@ -488,7 +488,7 @@ class TestItem(ERPNextTestCase):
 			item_doc.save()
 
 		# Check values saved correctly
-		barcodes = frappe.get_list(
+		barcodes = frappe.get_all(
 			'Item Barcode',
 			fields=['barcode', 'barcode_type'],
 			filters={'parent': item_code})
@@ -531,6 +531,17 @@ class TestItem(ERPNextTestCase):
 			self.assertTrue(one_year_ago <= timestamp <= now)
 			self.assertIsInstance(count, int)
 			self.assertTrue(count >= 0)
+
+	def test_index_creation(self):
+		"check if index is getting created in db"
+
+		indices = frappe.db.sql("show index from tabItem", as_dict=1)
+		expected_columns = {"item_code", "item_name", "item_group", "route"}
+		for index in indices:
+			expected_columns.discard(index.get("Column_name"))
+
+		if expected_columns:
+			self.fail(f"Expected db index on these columns: {', '.join(expected_columns)}")
 
 	def test_attribute_completions(self):
 		expected_attrs = {"Small", "Extra Small", "Extra Large", "Large", "2XL", "Medium"}

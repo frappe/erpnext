@@ -323,10 +323,14 @@ def make_maintenance_visit(source_name, target_doc=None, item_name=None, s_id=No
 		target.maintenance_schedule = source.name
 		target.maintenance_schedule_detail = s_id
 
-	def update_sales(source, target, parent):
+	def update_sales_and_serial(source, target, parent):
 		sales_person = frappe.db.get_value('Maintenance Schedule Detail', s_id, 'sales_person')
 		target.service_person = sales_person
-		target.serial_no = ''
+		serial_nos = get_serial_nos(target.serial_no)
+		if len(serial_nos) == 1:
+			target.serial_no = serial_nos[0]
+		else:
+			target.serial_no = ''
 
 	doclist = get_mapped_doc("Maintenance Schedule", source_name, {
 		"Maintenance Schedule": {
@@ -342,7 +346,7 @@ def make_maintenance_visit(source_name, target_doc=None, item_name=None, s_id=No
 		"Maintenance Schedule Item": {
 			"doctype": "Maintenance Visit Purpose",
 			"condition": lambda doc: doc.item_name == item_name,
-			"postprocess": update_sales
+			"postprocess": update_sales_and_serial
 		}
 	}, target_doc)
 

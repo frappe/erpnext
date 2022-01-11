@@ -15,7 +15,6 @@ Maintenance
 Education
 Regional
 Restaurant
-Agriculture
 ERPNext Integrations
 Non Profit
 Hotels

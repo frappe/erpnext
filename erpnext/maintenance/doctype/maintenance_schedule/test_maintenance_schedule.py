@@ -56,9 +56,14 @@ class TestMaintenanceSchedule(unittest.TestCase):
 
 		ms.submit()
 		s_id = ms.get_pending_data(data_type = "id", item_name = i.item_name, s_date = expected_dates[1])
-		test = make_maintenance_visit(source_name = ms.name, item_name = "_Test Item", s_id = s_id)
+
+		# Check if item is mapped in visit.
+		test_map_visit = make_maintenance_visit(source_name = ms.name, item_name = "_Test Item", s_id = s_id)
+		self.assertEqual(len(test_map_visit.purposes), 1)
+		self.assertEqual(test_map_visit.purposes[0].item_name, "_Test Item")
+
 		visit = frappe.new_doc('Maintenance Visit')
-		visit = test
+		visit = test_map_visit
 		visit.maintenance_schedule = ms.name
 		visit.maintenance_schedule_detail = s_id
 		visit.completion_status = "Partially Completed"

@@ -442,7 +442,7 @@ frappe.ui.form.on("Work Order", {
 	additional_operating_cost: function(frm) {
 		erpnext.work_order.calculate_cost(frm.doc);
 		erpnext.work_order.calculate_total_cost(frm);
-	}
+	},
 });
 
 frappe.ui.form.on("Work Order Item", {

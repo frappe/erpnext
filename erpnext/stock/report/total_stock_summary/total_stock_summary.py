@@ -7,8 +7,9 @@ from frappe import _
 
 
 def execute(filters=None):
-	if not filters: filters = {}
-	validate_filters(filters)
+
+	if not filters:
+		filters = {}
 	columns = get_columns()
 	stock = get_total_stock(filters)
 
@@ -53,9 +54,3 @@ def get_total_stock(filters):
 				ON warehouse.name = ledger.warehouse
 			WHERE
 				ledger.actual_qty != 0 %s""" % (columns, conditions))
-
-def validate_filters(filters):
-	if filters.get("group_by") == 'Company' and \
-		filters.get("company"):
-
-		frappe.throw(_("Please set Company filter blank if Group By is 'Company'"))
