@@ -521,6 +521,41 @@ class TestPOSInvoice(unittest.TestCase):
 		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv2.consolidated_invoice, "rounded_total")
 		self.assertEqual(rounded_total, 400)
 
+	def test_pos_batch_item_qty_validation(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_batch_item_with_batch,
+		)
+		create_batch_item_with_batch('_BATCH ITEM', 'TestBatch 01')
+		item = frappe.get_doc('Item', '_BATCH ITEM')
+		batch = frappe.get_doc('Batch', 'TestBatch 01')
+		batch.submit()
+		item.batch_no = 'TestBatch 01'
+		item.save()
+
+		se = make_stock_entry(target="_Test Warehouse - _TC", item_code="_BATCH ITEM", qty=2, basic_rate=100, batch_no='TestBatch 01')
+
+		pos_inv1 = create_pos_invoice(item=item.name, rate=300, qty=1, do_not_submit=1)
+		pos_inv1.items[0].batch_no = 'TestBatch 01'
+		pos_inv1.save()
+		pos_inv1.submit()
+
+		pos_inv2 = create_pos_invoice(item=item.name, rate=300, qty=2, do_not_submit=1)
+		pos_inv2.items[0].batch_no = 'TestBatch 01'
+		pos_inv2.save()
+
+		self.assertRaises(frappe.ValidationError, pos_inv2.submit)
+
+		#teardown
+		pos_inv1.reload()
+		pos_inv1.cancel()
+		pos_inv1.delete()
+		pos_inv2.reload()
+		pos_inv2.delete()
+		se.cancel()
+		batch.reload()
+		batch.cancel()
+		batch.delete()
+
 def create_pos_invoice(**args):
 	args = frappe._dict(args)
 	pos_profile = None
@@ -557,7 +592,8 @@ def create_pos_invoice(**args):
 		"income_account": args.income_account or "Sales - _TC",
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
-		"serial_no": args.serial_no
+		"serial_no": args.serial_no,
+		"batch_no": args.batch_no
 	})
 
 	if not args.do_not_save:
@@ -570,3 +606,8 @@ def create_pos_invoice(**args):
 		pos_inv.payment_schedule = []
 
 	return pos_inv
+
+def make_batch_item(item_name):
+	from erpnext.stock.doctype.item.test_item import make_item
+	if not frappe.db.exists(item_name):
+		return make_item(item_name, dict(has_batch_no = 1, create_new_batch = 1, is_stock_item=1))

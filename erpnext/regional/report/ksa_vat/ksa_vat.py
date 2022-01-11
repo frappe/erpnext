@@ -20,25 +20,35 @@ def get_columns():
 			"fieldname": "title",
 			"label": _("Title"),
 			"fieldtype": "Data",
-			"width": 300
+			"width": 300,
 		},
 		{
 			"fieldname": "amount",
 			"label": _("Amount (SAR)"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 150,
 		},
 		{
 			"fieldname": "adjustment_amount",
 			"label": _("Adjustment (SAR)"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 150,
 		},
 		{
 			"fieldname": "vat_amount",
 			"label": _("VAT Amount (SAR)"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 150,
+		},
+		{
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Currency",
+			"width": 150,
+			"hidden": 1
 		}
 	]
 
@@ -47,6 +57,8 @@ def get_data(filters):
 
 	# Validate if vat settings exist
 	company = filters.get('company')
+	company_currency = frappe.get_cached_value('Company',  company, "default_currency")
+
 	if frappe.db.exists('KSA VAT Setting', company) is None:
 		url = get_url_to_list('KSA VAT Setting')
 		frappe.msgprint(_('Create <a href="{}">KSA VAT Setting</a> for this company').format(url))
@@ -55,7 +67,7 @@ def get_data(filters):
 	ksa_vat_setting = frappe.get_doc('KSA VAT Setting', company)
 
 	# Sales Heading
-	append_data(data, 'VAT on Sales', '', '', '')
+	append_data(data, 'VAT on Sales', '', '', '', company_currency)
 
 	grand_total_taxable_amount = 0
 	grand_total_taxable_adjustment_amount = 0
@@ -67,7 +79,7 @@ def get_data(filters):
 
 		# Adding results to data
 		append_data(data, vat_setting.title, total_taxable_amount,
-			total_taxable_adjustment_amount, total_tax)
+			total_taxable_adjustment_amount, total_tax, company_currency)
 
 		grand_total_taxable_amount += total_taxable_amount
 		grand_total_taxable_adjustment_amount += total_taxable_adjustment_amount
@@ -75,13 +87,13 @@ def get_data(filters):
 
 	# Sales Grand Total
 	append_data(data, 'Grand Total', grand_total_taxable_amount,
-		grand_total_taxable_adjustment_amount, grand_total_tax)
+		grand_total_taxable_adjustment_amount, grand_total_tax, company_currency)
 
 	# Blank Line
-	append_data(data, '', '', '', '')
+	append_data(data, '', '', '', '', company_currency)
 
 	# Purchase Heading
-	append_data(data, 'VAT on Purchases', '', '', '')
+	append_data(data, 'VAT on Purchases', '', '', '', company_currency)
 
 	grand_total_taxable_amount = 0
 	grand_total_taxable_adjustment_amount = 0
@@ -93,7 +105,7 @@ def get_data(filters):
 
 		# Adding results to data
 		append_data(data, vat_setting.title, total_taxable_amount,
-			total_taxable_adjustment_amount, total_tax)
+			total_taxable_adjustment_amount, total_tax, company_currency)
 
 		grand_total_taxable_amount += total_taxable_amount
 		grand_total_taxable_adjustment_amount += total_taxable_adjustment_amount
@@ -101,7 +113,7 @@ def get_data(filters):
 
 	# Purchase Grand Total
 	append_data(data, 'Grand Total', grand_total_taxable_amount,
-		grand_total_taxable_adjustment_amount, grand_total_tax)
+		grand_total_taxable_adjustment_amount, grand_total_tax, company_currency)
 
 	return data
 
@@ -147,9 +159,10 @@ def get_tax_data_for_each_vat_setting(vat_setting, filters, doctype):
 
 
 
-def append_data(data, title, amount, adjustment_amount, vat_amount):
+def append_data(data, title, amount, adjustment_amount, vat_amount, company_currency):
 	"""Returns data with appended value."""
-	data.append({"title": _(title), "amount": amount, "adjustment_amount": adjustment_amount, "vat_amount": vat_amount})
+	data.append({"title": _(title), "amount": amount, "adjustment_amount": adjustment_amount, "vat_amount": vat_amount,
+		"currency": company_currency})
 
 def get_tax_amount(item_code, account_head, doctype, parent):
 	if doctype == 'Sales Invoice':

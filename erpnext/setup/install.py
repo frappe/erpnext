@@ -60,6 +60,22 @@ def set_single_defaults():
 
 	frappe.db.set_default("date_format", "dd-mm-yyyy")
 
+	setup_currency_exchange()
+
+def setup_currency_exchange():
+	ces = frappe.get_single('Currency Exchange Settings')
+	try:
+		ces.set('result_key', [])
+		ces.set('req_params', [])
+
+		ces.api_endpoint = "https://frankfurter.app/{transaction_date}"
+		ces.append('result_key', {'key': 'rates'})
+		ces.append('result_key', {'key': '{to_currency}'})
+		ces.append('req_params', {'key': 'base', 'value': '{from_currency}'})
+		ces.append('req_params', {'key': 'symbols', 'value': '{to_currency}'})
+		ces.save()
+	except frappe.ValidationError:
+		pass
 
 def create_compact_item_print_custom_field():
 	create_custom_field('Print Settings', {
