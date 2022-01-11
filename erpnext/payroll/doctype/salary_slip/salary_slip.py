@@ -421,8 +421,7 @@ class SalarySlip(TransactionBase):
 			hdoc = frappe.get_doc("Holiday List",cdoc.holiday_list)	
 			doc = frappe.db.sql("""select count(holiday_date) from `tabHoliday` 
 								where parent='{0}' and holiday_date 
-								between '{1}' and '{2}' """.format(hdoc.name,self.start_date,self.end_date),as_dict=1)
-			
+								between '{1}' and '{2}' and weekly_off = 0""".format(hdoc.name,self.start_date,self.end_date),as_dict=1)
 			for i in doc:
 				self.paid_holidays = i.get("count(holiday_date)")
 
@@ -446,27 +445,74 @@ class SalarySlip(TransactionBase):
 		self.compoff=sum(lst)
 		
 		#Weekly_off
+		# cdoc = frappe.get_doc("Employee",self.employee)
+		# if cdoc.holiday_list:
+		# 	hdoc = frappe.get_doc("Holiday List",cdoc.holiday_list)	
+			
+		# 	import datetime
+		# 	import calendar
+		# 	start_date  = getdate(self.start_date )
+		# 	end_date    = getdate(self.end_date)
+		# 	week        = {}
+		# 	for i in range((end_date - start_date).days):
+		# 		day       = calendar.day_name[(start_date + datetime.timedelta(days=i+1)).weekday()]
+		# 		week[day] = week[day] + 1 if day in week else 1
+			
+		# 	for i in week:
+		# 		if i ==hdoc.weekly_off:
+		# 			self.weekly_off = week[i]
 		cdoc = frappe.get_doc("Employee",self.employee)
 		if cdoc.holiday_list:
 			hdoc = frappe.get_doc("Holiday List",cdoc.holiday_list)	
-			
-			import datetime
-			import calendar
-			start_date  = getdate(self.start_date )
-			end_date    = getdate(self.end_date)
-			week        = {}
-			for i in range((end_date - start_date).days):
-				day       = calendar.day_name[(start_date + datetime.timedelta(days=i+1)).weekday()]
-				week[day] = week[day] + 1 if day in week else 1
-			
-			for i in week:
-				if i ==hdoc.weekly_off:
-					self.weekly_off = week[i]
+			doc = frappe.db.sql("""select count(holiday_date) from `tabHoliday` 
+								where parent='{0}' and holiday_date 
+								between '{1}' and '{2}' and weekly_off = 1""".format(hdoc.name,self.start_date,self.end_date),as_dict=1)
+			for i in doc:
+				self.weekly_off = i.get("count(holiday_date)")
+		# ----------------------------- ---------------------------- ---------------------------------
+		date = self.start_date.split('-')
+		cur_month = int(date[1])
+		cur_year = int(date[0])
+		last_date_of_month = calendar.monthrange(cur_year, cur_month)
+		start = datetime(year=cur_year, month=cur_month, day=1).strftime("%Y-%m-%d")
+		end = datetime(year=cur_year, month=cur_month, day=int(last_date_of_month[1])).strftime("%Y-%m-%d")
 
+		all_leave_with_start_date = frappe.db.get_all("Leave Application", {'employee':self.employee, "from_date":['between',[start,end]],'leave_type':['in',['Casual Leave','Sick Leave','Earned Leave','Leave Without Pay']] },['from_date','to_date','total_leave_days'])
+
+		total_leave_list = []
+		for leave in all_leave_with_start_date:
+			to_date_obj = leave.get('to_date')
+			from_date_obj = leave.get('from_date')
+
+			if([from_date_obj.month,from_date_obj.year] == [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] == [cur_month,cur_year]):
+				total_leave_list.append(leave.get('total_leave_days'))
+			if([from_date_obj.month,from_date_obj.year] == [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] != [cur_month,cur_year]):
+				last_day_of_month = calendar.monthrange(cur_year, cur_month)[1]
+				month_date = datetime(cur_year, cur_month, last_day_of_month)
+
+				leaves_in_cur_month = date_diff(month_date,leave.get('from_date')) + 1
+				total_leave_list.append(leaves_in_cur_month)
+
+
+		all_leave_with_end_date = frappe.db.get_all("Leave Application", {'employee':self.employee, "to_date":['between',[start,end]],'leave_type':['in',['Casual Leave','Sick Leave','Earned Leave','Leave Without Pay']] },['from_date','to_date','total_leave_days'])
+		for leave in all_leave_with_end_date:
+			to_date_obj = leave.get('to_date')
+			from_date_obj = leave.get('from_date')
+
+			if([from_date_obj.month,from_date_obj.year] != [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] == [cur_month,cur_year]):
+				first_date_of_month = datetime(cur_year, cur_month, 1)
+				diff = date_diff(to_date_obj,first_date_of_month) + 1
+				total_leave_list.append(diff)
+		sum(total_leave_list)
+		print("total)leave_list", total_leave_list)
 		#present_days
-		self.present_days = self.days_in_month - self.weekly_off - self.paid_holidays
-				
-		
+		if (sum(total_leave_list) == None):
+			self.leave = 0
+			self.present_days = self.days_in_month - self.weekly_off - self.paid_holidays
+		else:
+			self.leave = sum(total_leave_list)
+			self.present_days = self.days_in_month - self.weekly_off - self.paid_holidays - float(self.leave)
+		print("self.leave",self.leave)
 
 	def calculate_lwp_or_ppl_based_on_leave_application(self, holidays, working_days):
 		lwp = 0
@@ -1499,42 +1545,43 @@ class SalarySlip(TransactionBase):
 
 		return period_start_date, period_end_date
 
-	@frappe.whitelist()
-	def get_total_leave_in_current_month(self):
-		date = self.start_date.split('-')
-		cur_month = int(date[1])
-		cur_year = int(date[0])
-		last_date_of_month = calendar.monthrange(cur_year, cur_month)
-		start = datetime(year=cur_year, month=cur_month, day=1).strftime("%Y-%m-%d")
-		end = datetime(year=cur_year, month=cur_month, day=int(last_date_of_month[1])).strftime("%Y-%m-%d")
+	# @frappe.whitelist()
+	# def get_total_leave_in_current_month(self):
+	# 	date = self.start_date.split('-')
+	# 	cur_month = int(date[1])
+	# 	cur_year = int(date[0])
+	# 	last_date_of_month = calendar.monthrange(cur_year, cur_month)
+	# 	start = datetime(year=cur_year, month=cur_month, day=1).strftime("%Y-%m-%d")
+	# 	end = datetime(year=cur_year, month=cur_month, day=int(last_date_of_month[1])).strftime("%Y-%m-%d")
 
-		all_leave_with_start_date = frappe.db.get_all("Leave Application", {'employee':self.employee, "from_date":['between',[start,end]],'leave_type':['in',['Casual Leave','Sick Leave','Earned Leave','Leave Without Pay']] },['from_date','to_date','total_leave_days'])
+	# 	all_leave_with_start_date = frappe.db.get_all("Leave Application", {'employee':self.employee, "from_date":['between',[start,end]],'leave_type':['in',['Casual Leave','Sick Leave','Earned Leave','Leave Without Pay']] },['from_date','to_date','total_leave_days'])
 
-		total_leave_list = []
-		for leave in all_leave_with_start_date:
-			to_date_obj = leave.get('to_date')
-			from_date_obj = leave.get('from_date')
+	# 	total_leave_list = []
+	# 	for leave in all_leave_with_start_date:
+	# 		to_date_obj = leave.get('to_date')
+	# 		from_date_obj = leave.get('from_date')
 
-			if([from_date_obj.month,from_date_obj.year] == [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] == [cur_month,cur_year]):
-				total_leave_list.append(leave.get('total_leave_days'))
-			if([from_date_obj.month,from_date_obj.year] == [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] != [cur_month,cur_year]):
-				last_day_of_month = calendar.monthrange(cur_year, cur_month)[1]
-				month_date = datetime(cur_year, cur_month, last_day_of_month)
+	# 		if([from_date_obj.month,from_date_obj.year] == [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] == [cur_month,cur_year]):
+	# 			total_leave_list.append(leave.get('total_leave_days'))
+	# 		if([from_date_obj.month,from_date_obj.year] == [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] != [cur_month,cur_year]):
+	# 			last_day_of_month = calendar.monthrange(cur_year, cur_month)[1]
+	# 			month_date = datetime(cur_year, cur_month, last_day_of_month)
 
-				leaves_in_cur_month = date_diff(month_date,leave.get('from_date')) + 1
-				total_leave_list.append(leaves_in_cur_month)
+	# 			leaves_in_cur_month = date_diff(month_date,leave.get('from_date')) + 1
+	# 			total_leave_list.append(leaves_in_cur_month)
 
 
-		all_leave_with_end_date = frappe.db.get_all("Leave Application", {'employee':self.employee, "to_date":['between',[start,end]],'leave_type':['in',['Casual Leave','Sick Leave','Earned Leave','Leave Without Pay']] },['from_date','to_date','total_leave_days'])
-		for leave in all_leave_with_end_date:
-			to_date_obj = leave.get('to_date')
-			from_date_obj = leave.get('from_date')
+	# 	all_leave_with_end_date = frappe.db.get_all("Leave Application", {'employee':self.employee, "to_date":['between',[start,end]],'leave_type':['in',['Casual Leave','Sick Leave','Earned Leave','Leave Without Pay']] },['from_date','to_date','total_leave_days'])
+	# 	for leave in all_leave_with_end_date:
+	# 		to_date_obj = leave.get('to_date')
+	# 		from_date_obj = leave.get('from_date')
 
-			if([from_date_obj.month,from_date_obj.year] != [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] == [cur_month,cur_year]):
-				first_date_of_month = datetime(cur_year, cur_month, 1)
-				diff = date_diff(to_date_obj,first_date_of_month) + 1
-				total_leave_list.append(diff)
-		return sum(total_leave_list)
+	# 		if([from_date_obj.month,from_date_obj.year] != [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] == [cur_month,cur_year]):
+	# 			first_date_of_month = datetime(cur_year, cur_month, 1)
+	# 			diff = date_diff(to_date_obj,first_date_of_month) + 1
+	# 			total_leave_list.append(diff)
+	# 	print("total_leave_list", total_leave_list)
+	# 	return sum(total_leave_list)
 	def add_leave_balances(self):
 		self.set('leave_details', [])
 

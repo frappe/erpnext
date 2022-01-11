@@ -187,6 +187,29 @@ frappe.ui.form.on("Salary Slip", {
 				}
 			});
 		}
+		
+		// if(frm.doc.start_date){
+		// 	frappe.call({
+		// 		method: 'get_total_leave_in_current_month',
+		// 		doc:frm.doc,
+				
+		// 		callback: function(r) {
+		// 			console.log("****************",r.message)
+		// 			if (r.message === undefined) {
+		// 				frm.set_value('leave', 2);
+		// 			} else {
+		// 				frm.set_value('leave', r.message);
+		// 			}
+		// 			console.log("present days",frm.doc.present_days);
+		// 			console.log(frm.doc.leave);
+		// 			frm.set_value('present_days', frm.doc.present_days-frm.doc.leave);
+		// 			frm.refresh_field("present_days");
+		// 			frm.refresh_field("leave");
+		// 			console.log("Leave1", frm.doc.leave)
+		// 		}
+		// 	});
+		// }
+		
 		if (frm.doc.start_date){
 			frappe.call({
 				method: 'set_days',
@@ -197,24 +220,10 @@ frappe.ui.form.on("Salary Slip", {
 					frm.refresh_field("compoff");
 					frm.refresh_field("weekly_off");
 					frm.refresh_field("present_days");
-
-				}
-			});
-		}
-		if(frm.doc.start_date){
-			frappe.call({
-				method: 'get_total_leave_in_current_month',
-				doc:frm.doc,
-				
-				callback: function(r) {
-					console.log("****************",r.message)
-					frm.set_value('leave', r.message);
-					frm.refresh_field("leave");
 				}
 			});
 		}
 	},
-
 
 	salary_slip_based_on_timesheet: function(frm) {
 		frm.trigger("toggle_fields");

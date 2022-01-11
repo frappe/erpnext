@@ -683,22 +683,22 @@
    "read_only": 1
   },
   {
-   "fieldname": "present_days",
-   "fieldtype": "Int",
-   "label": "Present Days",
-   "read_only": 1
-  },
-  {
    "fieldname": "encashment_days",
    "fieldtype": "Int",
    "label": "Encashment Days"
+  },
+  {
+   "fieldname": "present_days",
+   "fieldtype": "Data",
+   "label": "Present Days",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-27 15:37:07.238483",
+ "modified": "2022-01-11 11:51:06.838679",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
