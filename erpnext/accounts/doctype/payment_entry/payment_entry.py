@@ -1707,11 +1707,11 @@ def set_paid_amount_and_received_amount(dt, party_account_currency, bank, outsta
 	return paid_amount, received_amount
 
 def apply_early_payment_discount(paid_amount, received_amount, doc):
+	total_discount = 0
 	eligible_for_payments = ['Sales Order', 'Sales Invoice', 'Purchase Order', 'Purchase Invoice']
 	has_payment_schedule = hasattr(doc, 'payment_schedule') and doc.payment_schedule
 
 	if doc.doctype in eligible_for_payments and has_payment_schedule:
-		total_discount = 0
 		for term in doc.payment_schedule:
 			if not term.discounted_amount and term.discount and getdate(nowdate()) <= term.discount_date:
 				if term.discount_type == 'Percentage':
