@@ -214,6 +214,7 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(error_msg, title=_("Invalid Item"), as_list=True)
 
 	def validate_serial_nos(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		error_msg = []
 		for item in self.get("items"):
 			serialized = item.get("has_serial_no")
@@ -221,7 +222,7 @@ class POSInvoice(SalesInvoice):
 			if serialized:
 				valid_serial_nos = frappe.get_all('Serial No', filters={'item_code':item.get("item_code")}, pluck="name")
 				invalid_serials = ""
-				for serial_no in item.get('serial_no').split("\n"):
+				for serial_no in get_serial_nos(item.get('serial_no')):
 					if serial_no not in valid_serial_nos:
 						invalid_serials = ", " if invalid_serials else "" + invalid_serials + serial_no
 						msg = (_("Row #{}: Following Serial numbers for item {} are <b>invalid</b>: {}").format(item.idx, frappe.bold(item.get("item_code")), frappe.bold(invalid_serials)))
