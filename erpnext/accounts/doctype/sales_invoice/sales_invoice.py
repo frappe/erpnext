@@ -2132,6 +2132,9 @@ def make_sales_order(source_name, target_doc = None):
 	return get_mapped_doc("Sales Invoice", source_name, {
 		"Sales Invoice": {
 			"doctype": "Sales Order",
+			"field_map": {
+				"name": "Sales Invoice Reference"
+			}
 		},
 		"Sales Invoice Item": {
 			"doctype": "Sales Order Item",

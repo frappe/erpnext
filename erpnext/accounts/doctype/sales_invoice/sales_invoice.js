@@ -167,21 +167,22 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 	}
 	after_save(doc) {
 		doc.items.some((row) => {
-			if (!row.against_sales_order) {
+			if (!row.sales_order) {
 				let d = new frappe.ui.Dialog({
 					title: 'Suggestion',
-					message: __('We recommend creating an invoice against a Sales Order as an ideal practice.\
-                        <br><br>Do you still want to proceed with the creation of this invoice?'),
 					fields: [
 						{
 							fieldtype: 'HTML',
-							options: `<p class="frappe-confirm-message">We recommend creating an invoice against a Sales Order as an ideal practice.\
-							<br>Click <a href= "#">here</a> to create a Sales Order.<br><br>Do you still want to proceed with the creation of this invoice?</p>`
+							options: `<p class="frappe-confirm-message">\
+							${__("We recommend creating an invoice against a Sales Order as an ideal practice.")}\
+							<br>${__("Click")}<a href= "#"> ${__("here")} </a>${__("to create a Sales Order.")}<br><br>\
+							${__("Do you still want to proceed with the creation of this invoice?")}</p>`
 						}
 					],
 					primary_action_label: 'Yes',
 					primary_action(values) {
-						console.log(values);
+						console.log(values.save_setting)
+						values.save_setting && frappe.db.set_value('Selling Settings', 'Selling Settings', 'so_required', 'Yes');
 						d.hide();
 					},
 					secondary_action_label: 'No',

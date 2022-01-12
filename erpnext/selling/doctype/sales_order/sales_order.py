@@ -184,6 +184,8 @@ class SalesOrder(SellingController):
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 			update_coupon_code_count(self.coupon_code,'used')
+		if self.sales_invoice_reference :
+			self.link_sales_order_and_invoice()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
@@ -416,6 +418,12 @@ class SalesOrder(SellingController):
 			if not item.ensure_delivery_based_on_produced_serial_no and \
 				item.item_code in reserved_items:
 				frappe.throw(_("Cannot ensure delivery by Serial No as Item {0} is added with and without Ensure Delivery by Serial No.").format(item.item_code))
+
+	def link_sales_order_and_invoice(self):
+		si = frappe.get_doc('Sales Invoice', self.sales_invoice_reference)
+		for si_item in si.items:
+			si_item.sales_order = self.name
+		si.save()
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

@@ -3,7 +3,7 @@
  "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
- "creation": "2013-06-18 12:39:59",
+ "creation": "2022-01-05 12:08:00.561125",
  "doctype": "DocType",
  "document_type": "Document",
  "editable_grid": 1,
@@ -144,7 +144,8 @@
   "to_date",
   "column_break_108",
   "auto_repeat",
-  "update_auto_repeat_reference"
+  "update_auto_repeat_reference",
+  "sales_invoice_reference"
  ],
  "fields": [
   {
@@ -1514,13 +1515,20 @@
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
    "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice_reference",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Sales Invoice Reference",
+   "options": "Sales Invoice"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-05 12:16:40.775704",
+ "modified": "2022-01-12 12:02:46.534884",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1594,6 +1602,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "customer",
  "title_field": "customer_name",
  "track_changes": 1,
