@@ -176,13 +176,16 @@ class TransactionBase(StatusUpdater):
 			"""
 		child_table_values = set()
 
+		# ignore scrap item wh difference and empty source/target wh
+		# in Manufacture Entry
+		if self.get("purpose") and self.get("purpose") == "Manufacture":
+			return
+
 		for row in self.get(child_table):
 			child_table_values.add(row.get(child_table_field))
 
 		if len(child_table_values) > 1:
 			self.set(default_field, None)
-		else:
-			self.set(default_field, list(child_table_values)[0])
 
 def delete_events(ref_type, ref_name):
 	events = frappe.db.sql_list(""" SELECT
