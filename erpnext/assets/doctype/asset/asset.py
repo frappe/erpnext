@@ -575,7 +575,8 @@ class Asset(AccountsController):
 		asset_bought_with_invoice = (purchase_document == self.purchase_invoice)
 		fixed_asset_account = self.get_fixed_asset_account()
 
-		cwip_account = self.get_cwip_account()
+		cwip_enabled = is_cwip_accounting_enabled(self.asset_category)
+		cwip_account = self.get_cwip_account(cwip_enabled=cwip_enabled)
 
 		query = """SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s"""
 		if asset_bought_with_invoice:
@@ -618,13 +619,13 @@ class Asset(AccountsController):
 				title=_("Account not Found"),
 			)
 
-	def get_cwip_account(self):
+	def get_cwip_account(self, cwip_enabled=False):
 		cwip_account = None
 		try:
 			cwip_account = get_asset_account("capital_work_in_progress_account", self.name, self.asset_category, self.company)
 		except Exception:
 			# if no cwip account found in category or company and "cwip is enabled" then raise else silently pass
-			if is_cwip_accounting_enabled(self.asset_category):
+			if cwip_enabled:
 				raise
 
 		return cwip_account
