@@ -147,9 +147,9 @@
   }
  ],
  "istable": 1,
- "modified": "2022-01-12 12:04:05.811989",
+ "modified": "2022-01-12 13:16:45.685577",
  "modified_by": "Administrator",
- "module": "Accounts",
+ "module": "ERPNext Integrations",
  "name": "FBR POS Invoice Item",
  "owner": "Administrator",
  "permissions": [],
