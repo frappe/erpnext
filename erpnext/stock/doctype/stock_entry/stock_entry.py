@@ -8,6 +8,7 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, comma_or, cstr, flt, format_time, formatdate, getdate, nowdate
 
 import erpnext
@@ -109,8 +110,12 @@ class StockEntry(StockController):
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
 		self.validate_putaway_capacity()
-		self.reset_default_field_value("from_warehouse", "items", "s_warehouse")
-		self.reset_default_field_value("to_warehouse", "items", "t_warehouse")
+
+		if not self.get("purpose") == "Manufacture":
+			# ignore scrap item wh difference and empty source/target wh
+			# in Manufacture Entry
+			self.reset_default_field_value("from_warehouse", "items", "s_warehouse")
+			self.reset_default_field_value("to_warehouse", "items", "t_warehouse")
 
 	def on_submit(self):
 		self.update_stock_ledger()
@@ -1283,21 +1288,28 @@ class StockEntry(StockController):
 		if not self.pro_doc:
 			self.set_work_order_details()
 
-		scrap_items = frappe.db.sql('''
-			SELECT
-				JCSI.item_code, JCSI.item_name, SUM(JCSI.stock_qty) as stock_qty, JCSI.stock_uom, JCSI.description
-			FROM
-				`tabJob Card` JC, `tabJob Card Scrap Item` JCSI
-			WHERE
-				JCSI.parent = JC.name AND JC.docstatus = 1
-				AND JCSI.item_code IS NOT NULL AND JC.work_order = %s
-			GROUP BY
-				JCSI.item_code, JCSI.item_name, JCSI.stock_uom, JCSI.description
-		''', self.work_order, as_dict=1)
-
-		pending_qty = flt(self.pro_doc.qty) - flt(self.pro_doc.produced_qty)
-		if pending_qty <=0:
+		if not self.pro_doc.operations:
 			return []
+
+		job_card = frappe.qb.DocType('Job Card')
+		job_card_scrap_item = frappe.qb.DocType('Job Card Scrap Item')
+
+		scrap_items = (
+			frappe.qb.from_(job_card)
+			.select(
+				Sum(job_card_scrap_item.stock_qty).as_('stock_qty'),
+				job_card_scrap_item.item_code, job_card_scrap_item.item_name,
+				job_card_scrap_item.description, job_card_scrap_item.stock_uom)
+			.join(job_card_scrap_item)
+			.on(job_card_scrap_item.parent == job_card.name)
+			.where(
+				(job_card_scrap_item.item_code.isnotnull())
+				& (job_card.work_order == self.work_order)
+				& (job_card.docstatus == 1))
+			.groupby(job_card_scrap_item.item_code)
+		).run(as_dict=1)
+
+		pending_qty = flt(self.get_completed_job_card_qty()) - flt(self.pro_doc.produced_qty)
 
 		used_scrap_items = self.get_used_scrap_items()
 		for row in scrap_items:
@@ -1311,6 +1323,9 @@ class StockEntry(StockController):
 				row.stock_qty = frappe.utils.ceil(row.stock_qty)
 
 		return scrap_items
+
+	def get_completed_job_card_qty(self):
+		return flt(min([d.completed_qty for d in self.pro_doc.operations]))
 
 	def get_used_scrap_items(self):
 		used_scrap_items = defaultdict(float)
