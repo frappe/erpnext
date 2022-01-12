@@ -176,11 +176,6 @@ class TransactionBase(StatusUpdater):
 			"""
 		child_table_values = set()
 
-		# ignore scrap item wh difference and empty source/target wh
-		# in Manufacture Entry
-		if self.get("purpose") and self.get("purpose") == "Manufacture":
-			return
-
 		for row in self.get(child_table):
 			child_table_values.add(row.get(child_table_field))
 
