@@ -105,6 +105,17 @@ frappe.ui.form.on("Sales Order", {
 			}
 		});
 	},
+	before_submit:function(frm){
+		frm.call({
+			method:"get_commision",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+				frm.refresh_field("total_commission")
+			}
+		});
+	},
 
 	delivery_date: function(frm) {
 		$.each(frm.doc.items || [], function(i, d) {
