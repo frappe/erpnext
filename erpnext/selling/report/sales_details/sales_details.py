@@ -64,6 +64,14 @@ class SalesPurchaseDetailsReport(object):
 
 		self.filters.party_type = party_type
 
+		self.show_party_name = False
+		if self.filters.party_type == "Customer":
+			if frappe.defaults.get_global_default('cust_master_name') == "Naming Series":
+				self.show_party_name = True
+		if self.filters.party_type == "Supplier":
+			if frappe.defaults.get_global_default('supp_master_name') == "Naming Series":
+				self.show_party_name = True
+
 		self.get_entries()
 		self.get_itemised_taxes()
 		self.prepare_data()
@@ -209,6 +217,7 @@ class SalesPurchaseDetailsReport(object):
 				scrub(self.filters.party_type) + "_name": d.party_name,
 				"party_name": d.party_name,
 				"disable_item_formatter": cint(self.show_item_name),
+				"disable_party_name_formatter": cint(self.show_party_name),
 			})
 
 			if "Group by Item" in [self.filters.group_by_1, self.filters.group_by_2, self.filters.group_by_3]:
@@ -265,7 +274,10 @@ class SalesPurchaseDetailsReport(object):
 
 		averageif_fields = self.tax_rate_fields
 
-		totals = {"disable_item_formatter": cint(self.show_item_name)}
+		totals = {
+			"disable_item_formatter": cint(self.show_item_name),
+			"disable_party_name_formatter": cint(self.show_party_name)
+		}
 
 		# Copy grouped by into total row
 		for f, g in iteritems(grouped_by):
@@ -293,7 +305,7 @@ class SalesPurchaseDetailsReport(object):
 						totals[f] = v
 
 			if 'voucher_no' in grouped_by:
-				fields_to_copy = ['date', 'sales_person', 'territory']
+				fields_to_copy = ['date', 'sales_person', 'territory', 'party', 'party_name']
 				for f in fields_to_copy:
 					if f in data[0]:
 						totals[f] = data[0][f]
@@ -468,26 +480,18 @@ class SalesPurchaseDetailsReport(object):
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 	def get_columns(self):
-		show_party_name = False
-		if self.filters.party_type == "Customer":
-			if frappe.defaults.get_global_default('cust_master_name') == "Naming Series":
-				show_party_name = True
-		if self.filters.party_type == "Supplier":
-			if frappe.defaults.get_global_default('supp_master_name') == "Naming Series":
-				show_party_name = True
-
 		party_field = {
 			"label": _(self.filters.party_type),
 			"fieldtype": "Link",
 			"fieldname": "party",
 			"options": self.filters.party_type,
-			"width": 80 if show_party_name else 180
+			"width": 80 if self.show_party_name else 150
 		}
 		party_name_field = {
 			"label": _(self.filters.party_type) + " Name",
 			"fieldtype": "Data",
 			"fieldname": "party_name",
-			"width": 180
+			"width": 150
 		}
 
 		if len(self.group_by) > 1:
@@ -497,13 +501,13 @@ class SalesPurchaseDetailsReport(object):
 					"fieldtype": "Dynamic Link",
 					"fieldname": "reference",
 					"options": "doc_type",
-					"width": 300
+					"width": 250
 				},
 				{
 					"label": _("Type"),
 					"fieldtype": "Data",
 					"fieldname": "doc_type",
-					"width": 110
+					"width": 90
 				},
 				{
 					"label": _("Item Name"),
@@ -523,9 +527,8 @@ class SalesPurchaseDetailsReport(object):
 					"width": 140
 				})
 
-			if "Group by Customer" not in group_list and "Group by Supplier" not in group_list:
-				columns.append(party_field)
-			if show_party_name:
+			columns.append(party_field)
+			if self.show_party_name:
 				columns.append(party_name_field)
 
 			columns += [
@@ -562,7 +565,7 @@ class SalesPurchaseDetailsReport(object):
 				})
 
 			columns.append(party_field)
-			if show_party_name:
+			if self.show_party_name:
 				columns.append(party_name_field)
 
 			columns += [
