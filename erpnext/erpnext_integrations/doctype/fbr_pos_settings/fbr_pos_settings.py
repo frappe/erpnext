@@ -11,8 +11,10 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 invoice_custom_fields = [
 	# At the top
+	{"label": "FBR POS InvoiceNumber", "fieldname": "fbr_pos_invoice_no", "fieldtype": "Data",
+		"insert_after": "stin", "read_only": 1, "no_copy": 1},
 	{"label": "Is FBR POS Invoice", "fieldname": "is_fbr_pos_invoice", "fieldtype": "Check",
-		"insert_after": "has_stin", "default": 1, "no_copy": 1},
+		"insert_after": "has_stin", "default": 1, "read_only": 1, "no_copy": 1, "depends_on": "eval:doc.has_stin && !doc.fbr_pos_invoice_no"},
 
 	# In FBR POS Transaction Details Section
 	{"label": "FBR POSID", "fieldname": "fbr_pos_id", "fieldtype": "Int",
@@ -47,13 +49,9 @@ invoice_custom_fields = [
 		"options": "Company:company:default_currency",
 		"insert_after": "fbr_pos_further_tax", "read_only": 1, "no_copy": 1},
 
-	{"label": "", "fieldname": "cb_fbr_pos_3", "fieldtype": "Column Break",
-		"insert_after": "fbr_pos_total_tax_charged"},
-
-	{"label": "FBR POS InvoiceNumber", "fieldname": "fbr_pos_invoice_no", "fieldtype": "Data",
-		"insert_after": "cb_fbr_pos_3", "read_only": 1, "no_copy": 1},
+	# Hidden Fields
 	{"label": "FBR POS QR Code", "fieldname": "fbr_pos_qrcode", "fieldtype": "Barcode",
-		"insert_after": "fbr_pos_invoice_no", "read_only": 1, "hidden": 1, "no_copy": 1},
+		"insert_after": "fbr_pos_total_bill_amount", "read_only": 1, "hidden": 1, "no_copy": 1},
 	{"label": "FBR POS JSON Data", "fieldname": "fbr_pos_json_data", "fieldtype": "Code",
 		"insert_after": "fbr_pos_qrcode", "read_only": 1, "hidden": 1, "no_copy": 1},
 
@@ -77,7 +75,7 @@ class FBRPOSSettings(Document):
 			setup_fbr_pos_fields()
 		else:
 			check_can_disable_fbr_pos()
-			disable_fbr_pos_fields()
+			remove_fbr_pos_fields()
 
 
 def setup_fbr_pos_fields():
@@ -86,7 +84,7 @@ def setup_fbr_pos_fields():
 	})
 
 
-def disable_fbr_pos_fields():
+def remove_fbr_pos_fields():
 	for custom_field_detail in invoice_custom_fields:
 		custom_field_name = frappe.db.get_value('Custom Field',
 			dict(dt="Sales Invoice", fieldname=custom_field_detail.get('fieldname')))

@@ -349,7 +349,7 @@ def push_invoice_data(data):
 				.format(errors, response_html))
 
 		if response_code != '100':
-			frappe.throw(_("An invalid response received while generating <b>FBR POS Invoice</b>{0}")
+			frappe.throw(_("Received an invalid response while generating <b>FBR POS Invoice</b>{0}")
 				.format(response_html))
 
 		if not invoice_number or invoice_number == 'Not Available':
