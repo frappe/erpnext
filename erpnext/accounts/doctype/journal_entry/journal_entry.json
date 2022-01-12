@@ -13,6 +13,7 @@
   "voucher_type",
   "naming_series",
   "finance_book",
+  "reversal_of",
   "tax_withholding_category",
   "column_break1",
   "from_template",
@@ -515,13 +516,21 @@
    "fieldname": "apply_tds",
    "fieldtype": "Check",
    "label": "Apply Tax Withholding Amount "
+  },
+  {
+   "depends_on": "eval:doc.docstatus",
+   "fieldname": "reversal_of",
+   "fieldtype": "Link",
+   "label": "Reversal Of",
+   "options": "Journal Entry",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-09 15:31:14.484029",
+ "modified": "2022-01-04 13:39:36.485954",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

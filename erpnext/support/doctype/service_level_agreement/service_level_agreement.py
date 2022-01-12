@@ -853,7 +853,7 @@ def get_user_time(user, to_string=False):
 @frappe.whitelist()
 def get_sla_doctypes():
 	doctypes = []
-	data = frappe.get_list('Service Level Agreement',
+	data = frappe.get_all('Service Level Agreement',
 		{'enabled': 1},
 		['document_type'],
 		distinct=1
