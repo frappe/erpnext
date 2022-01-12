@@ -7,6 +7,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.model.naming import append_number_if_name_exists
 from frappe.utils import validate_email_address
 
 from erpnext.hr.doctype.interview.interview import get_interviewers
@@ -21,10 +22,11 @@ class JobApplicant(Document):
 			self.get("__onload").job_offer = job_offer[0].name
 
 	def autoname(self):
-		keys = filter(None, (self.applicant_name, self.email_id, self.job_title))
-		if not keys:
-			frappe.throw(_("Name or Email is mandatory"), frappe.NameError)
-		self.name = " - ".join(keys)
+		self.name = self.email_id
+
+		# applicant can apply more than once for a different job title or reapply
+		if frappe.db.exists("Job Applicant", self.name):
+			self.name = append_number_if_name_exists("Job Applicant", self.name)
 
 	def validate(self):
 		if self.email_id:
