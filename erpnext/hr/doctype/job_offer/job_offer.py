@@ -26,7 +26,7 @@ class JobOffer(Document):
 
 	def validate_vacancies(self):
 		old_doc = self.get_doc_before_save()
-		if old_doc.status == self.status:
+		if old_doc and old_doc.status == self.status:
 			return
 
 		staffing_plan = get_staffing_plan_detail(self.designation, self.company, self.offer_date)
