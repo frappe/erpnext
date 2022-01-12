@@ -1,0 +1,160 @@
+{
+ "creation": "2022-01-10 18:48:27.187152",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "fbr_pos_item_code",
+  "fbr_pos_item_name",
+  "column_break_3",
+  "fbr_pos_invoice_type",
+  "fbr_pos_pct_code",
+  "section_break_6",
+  "fbr_pos_quantity",
+  "fbr_pos_sale_value",
+  "fbr_pos_discount",
+  "column_break_10",
+  "fbr_pos_tax_rate",
+  "fbr_pos_tax_charged",
+  "fbr_pos_further_tax",
+  "column_break_14",
+  "fbr_pos_total_amount",
+  "fbr_pos_item_reference"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "fbr_pos_item_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "ItemCode",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "fbr_pos_item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "ItemName",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fbr_pos_invoice_type",
+   "fieldtype": "Data",
+   "label": "InvoiceType",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "fbr_pos_pct_code",
+   "fieldtype": "Data",
+   "label": "PCTCode",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "fbr_pos_quantity",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Quantity",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "fbr_pos_sale_value",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "SaleValue",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "fbr_pos_discount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Discount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "fbr_pos_tax_rate",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "TaxRate",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "fbr_pos_tax_charged",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "TaxCharged",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "fbr_pos_further_tax",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "FurtherTax",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "fbr_pos_total_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "TotalAmount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fbr_pos_item_reference",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "FBR POS Item Reference",
+   "no_copy": 1,
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-01-12 12:04:05.811989",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "FBR POS Invoice Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
