@@ -21,6 +21,10 @@ class JobOffer(Document):
 		if job_offer and job_offer != self.name:
 			frappe.throw(_("Job Offer: {0} is already for Job Applicant: {1}").format(frappe.bold(job_offer), frappe.bold(self.job_applicant)))
 
+	def on_update_after_submit(self):
+		if self.status != 'Rejected':
+			self.validate_vacancies()
+
 	def validate_vacancies(self):
 		staffing_plan = get_staffing_plan_detail(self.designation, self.company, self.offer_date)
 		check_vacancies = frappe.get_single("HR Settings").check_vacancies
