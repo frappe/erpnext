@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -127,7 +125,7 @@ def get_student_guardians(student):
 
 	:param student: Student.
 	"""
-	guardians = frappe.get_list("Student Guardian", fields=["guardian"] ,
+	guardians = frappe.get_all("Student Guardian", fields=["guardian"] ,
 		filters={"parent": student})
 	return guardians
 
@@ -139,10 +137,10 @@ def get_student_group_students(student_group, include_inactive=0):
 	:param student_group: Student Group.
 	"""
 	if include_inactive:
-		students = frappe.get_list("Student Group Student", fields=["student", "student_name"] ,
+		students = frappe.get_all("Student Group Student", fields=["student", "student_name"] ,
 			filters={"parent": student_group}, order_by= "group_roll_number")
 	else:
-		students = frappe.get_list("Student Group Student", fields=["student", "student_name"] ,
+		students = frappe.get_all("Student Group Student", fields=["student", "student_name"] ,
 			filters={"parent": student_group, "active": 1}, order_by= "group_roll_number")
 	return students
 
@@ -166,7 +164,7 @@ def get_fee_components(fee_structure):
 	:param fee_structure: Fee Structure.
 	"""
 	if fee_structure:
-		fs = frappe.get_list("Fee Component", fields=["fees_category", "description", "amount"] , filters={"parent": fee_structure}, order_by= "idx")
+		fs = frappe.get_all("Fee Component", fields=["fees_category", "description", "amount"] , filters={"parent": fee_structure}, order_by= "idx")
 		return fs
 
 
@@ -177,7 +175,7 @@ def get_fee_schedule(program, student_category=None):
 	:param program: Program.
 	:param student_category: Student Category
 	"""
-	fs = frappe.get_list("Program Fee", fields=["academic_term", "fee_structure", "due_date", "amount"] ,
+	fs = frappe.get_all("Program Fee", fields=["academic_term", "fee_structure", "due_date", "amount"] ,
 		filters={"parent": program, "student_category": student_category }, order_by= "idx")
 	return fs
 
@@ -222,7 +220,7 @@ def get_assessment_criteria(course):
 
 	:param Course: Course
 	"""
-	return frappe.get_list("Course Assessment Criteria", \
+	return frappe.get_all("Course Assessment Criteria",
 		fields=["assessment_criteria", "weightage"], filters={"parent": course}, order_by= "idx")
 
 
@@ -255,7 +253,7 @@ def get_assessment_details(assessment_plan):
 
 	:param Assessment Plan: Assessment Plan
 	"""
-	return frappe.get_list("Assessment Plan Criteria", \
+	return frappe.get_all("Assessment Plan Criteria",
 		fields=["assessment_criteria", "maximum_score", "docstatus"], filters={"parent": assessment_plan}, order_by= "idx")
 
 

@@ -1,8 +1,6 @@
 # Copyright (c) 2015, Web Notes Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 import click
 import frappe
 from frappe.commands import get_site, pass_context

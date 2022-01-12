@@ -1,10 +1,8 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
-from six import iteritems
 
 
 def execute(filters=None):
@@ -21,9 +19,9 @@ def execute(filters=None):
 		for d in frappe.get_all(doctype, fields=["parent", "item_code"]):
 			all_boms.setdefault(d.parent, []).append(d.item_code)
 
-		for parent, items in iteritems(all_boms):
+		for parent, items in all_boms.items():
 			valid = True
-			for key, item in iteritems(filters):
+			for key, item in filters.items():
 				if key != "search_sub_assemblies":
 					if item and item not in items:
 						valid = False

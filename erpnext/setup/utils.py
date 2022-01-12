@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -54,6 +53,7 @@ def before_tests():
 
 	frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 0)
 	enable_all_roles_and_domains()
+	set_defaults_for_tests()
 
 	frappe.db.commit()
 
@@ -100,21 +100,34 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 
 		if not value:
 			import requests
-			api_url = "https://api.exchangerate.host/convert"
-			response = requests.get(api_url, params={
-				"date": transaction_date,
-				"from": from_currency,
-				"to": to_currency
-			})
+			settings = frappe.get_cached_doc('Currency Exchange Settings')
+			req_params = {
+				"transaction_date": transaction_date,
+				"from_currency": from_currency,
+				"to_currency": to_currency
+			}
+			params = {}
+			for row in settings.req_params:
+				params[row.key] = format_ces_api(row.value, req_params)
+			response = requests.get(format_ces_api(settings.api_endpoint, req_params), params=params)
 			# expire in 6 hours
 			response.raise_for_status()
-			value = response.json()["result"]
+			value = response.json()
+			for res_key in settings.result_key:
+				value = value[format_ces_api(str(res_key.key), req_params)]
 			cache.setex(name=key, time=21600, value=flt(value))
 		return flt(value)
 	except Exception:
 		frappe.log_error(title="Get Exchange Rate")
 		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually").format(from_currency, to_currency, transaction_date))
 		return 0.0
+
+def format_ces_api(data, param):
+	return data.format(
+		transaction_date=param.get("transaction_date"),
+		to_currency=param.get("to_currency"),
+		from_currency=param.get("from_currency")
+	)
 
 def enable_all_roles_and_domains():
 	""" enable all roles and domain for testing """
@@ -127,6 +140,14 @@ def enable_all_roles_and_domains():
 	frappe.get_single('Domain Settings').set_active_domains(\
 		[d.name for d in domains])
 	add_all_roles_to('Administrator')
+
+def set_defaults_for_tests():
+	from frappe.utils.nestedset import get_root_of
+
+	selling_settings = frappe.get_single("Selling Settings")
+	selling_settings.customer_group = get_root_of("Customer Group")
+	selling_settings.territory = get_root_of("Territory")
+	selling_settings.save()
 
 
 def insert_record(records):

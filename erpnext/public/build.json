@@ -1,13 +1,9 @@
 {
 	"css/erpnext.css": [
 		"public/less/erpnext.less",
-		"public/less/hub.less",
 		"public/scss/call_popup.scss",
 		"public/scss/point-of-sale.scss",
 		"public/scss/hierarchy_chart.scss"
-	],
-	"css/marketplace.css": [
-		"public/less/hub.less"
 	],
 	"js/erpnext-web.min.js": [
 		"public/js/website_utils.js",
@@ -16,9 +12,6 @@
 	"css/erpnext-web.css": [
 		"public/scss/website.scss",
 		"public/scss/shopping_cart.scss"
-	],
-	"js/marketplace.min.js": [
-		"public/js/hub/marketplace.js"
 	],
 	"js/erpnext.min.js": [
 		"public/js/conf.js",
@@ -41,7 +34,6 @@
 		"public/js/utils/supplier_quick_entry.js",
 		"public/js/education/student_button.html",
 		"public/js/education/assessment_result_tool.html",
-		"public/js/hub/hub_factory.js",
 		"public/js/call_popup/call_popup.js",
 		"public/js/utils/dimension_tree_filter.js",
 		"public/js/telephony.js",

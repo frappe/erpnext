@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt, nowdate
 
 import erpnext
@@ -43,24 +42,34 @@ class EmployeeAdvance(Document):
 			self.status = "Cancelled"
 
 	def set_total_advance_paid(self):
-		paid_amount = frappe.db.sql("""
-			select ifnull(sum(debit), 0) as paid_amount
-			from `tabGL Entry`
-			where against_voucher_type = 'Employee Advance'
-				and against_voucher = %s
-				and party_type = 'Employee'
-				and party = %s
-		""", (self.name, self.employee), as_dict=1)[0].paid_amount
+		gle = frappe.qb.DocType("GL Entry")
 
-		return_amount = frappe.db.sql("""
-			select ifnull(sum(credit), 0) as return_amount
-			from `tabGL Entry`
-			where against_voucher_type = 'Employee Advance'
-				and voucher_type != 'Expense Claim'
-				and against_voucher = %s
-				and party_type = 'Employee'
-				and party = %s
-		""", (self.name, self.employee), as_dict=1)[0].return_amount
+		paid_amount = (
+			frappe.qb.from_(gle)
+				.select(Sum(gle.debit).as_("paid_amount"))
+				.where(
+					(gle.against_voucher_type == 'Employee Advance')
+					& (gle.against_voucher == self.name)
+					& (gle.party_type == 'Employee')
+					& (gle.party == self.employee)
+					& (gle.docstatus == 1)
+					& (gle.is_cancelled == 0)
+				)
+			).run(as_dict=True)[0].paid_amount or 0
+
+		return_amount = (
+			frappe.qb.from_(gle)
+				.select(Sum(gle.credit).as_("return_amount"))
+				.where(
+					(gle.against_voucher_type == 'Employee Advance')
+					& (gle.voucher_type != 'Expense Claim')
+					& (gle.against_voucher == self.name)
+					& (gle.party_type == 'Employee')
+					& (gle.party == self.employee)
+					& (gle.docstatus == 1)
+					& (gle.is_cancelled == 0)
+				)
+			).run(as_dict=True)[0].return_amount or 0
 
 		if paid_amount != 0:
 			paid_amount = flt(paid_amount) / flt(self.exchange_rate)

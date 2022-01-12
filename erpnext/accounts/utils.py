@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 from json import loads
 
@@ -11,7 +9,6 @@ import frappe.defaults
 from frappe import _, throw
 from frappe.model.meta import get_field_precision
 from frappe.utils import cint, cstr, flt, formatdate, get_number_format_info, getdate, now, nowdate
-from six import string_types
 
 import erpnext
 
@@ -450,7 +447,8 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 
 	# new row with references
 	new_row = journal_entry.append("accounts")
-	new_row.update(jv_detail.as_dict().copy())
+
+	new_row.update((frappe.copy_doc(jv_detail)).as_dict())
 
 	new_row.set(d["dr_or_cr"], d["allocated_amount"])
 	new_row.set('debit' if d['dr_or_cr'] == 'debit_in_account_currency' else 'credit',
@@ -796,7 +794,7 @@ def get_children(doctype, parent, company, is_root=False):
 @frappe.whitelist()
 def get_account_balances(accounts, company):
 
-	if isinstance(accounts, string_types):
+	if isinstance(accounts, str):
 		accounts = loads(accounts)
 
 	if not accounts:

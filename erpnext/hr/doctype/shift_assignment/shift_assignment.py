@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 from datetime import datetime, timedelta
 
@@ -21,8 +19,8 @@ class ShiftAssignment(Document):
 		validate_active_employee(self.employee)
 		self.validate_overlapping_dates()
 
-		if self.end_date and self.end_date <= self.start_date:
-			frappe.throw(_("End Date must not be lesser than Start Date"))
+		if self.end_date:
+			self.validate_from_to_dates('start_date', 'end_date')
 
 	def validate_overlapping_dates(self):
 		if not self.name:

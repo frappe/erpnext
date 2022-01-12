@@ -8,6 +8,7 @@
 [![CI](https://github.com/frappe/erpnext/actions/workflows/server-tests.yml/badge.svg?branch=develop)](https://github.com/frappe/erpnext/actions/workflows/server-tests.yml)
 [![Open Source Helpers](https://www.codetriage.com/frappe/erpnext/badges/users.svg)](https://www.codetriage.com/frappe/erpnext)
 [![codecov](https://codecov.io/gh/frappe/erpnext/branch/develop/graph/badge.svg?token=0TwvyUg3I5)](https://codecov.io/gh/frappe/erpnext)
+[![docker pulls](https://img.shields.io/docker/pulls/frappe/erpnext-worker.svg)](https://hub.docker.com/r/frappe/erpnext-worker)
 
 [https://erpnext.com](https://erpnext.com)
 
@@ -54,14 +55,6 @@ Use docker to deploy ERPNext in production or for development of [Frappe](https:
 The Easy Way: our install script for bench will install all dependencies (e.g. MariaDB). See https://github.com/frappe/bench for more details.
 
 New passwords will be created for the ERPNext "Administrator" user, the MariaDB root user, and the frappe user (the script displays the passwords and saves them to ~/frappe_passwords.txt).
-
-### Virtual Image
-
-You can download a virtual image to run ERPNext in a virtual machine on your local system.
-
-- [ERPNext Download](http://erpnext.com/download)
-
-System and user credentials are listed on the download page.
 
 ---
 

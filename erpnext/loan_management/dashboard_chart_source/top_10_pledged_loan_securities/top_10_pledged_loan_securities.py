@@ -1,11 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe.utils.dashboard import cache_source
-from six import iteritems
 
 from erpnext.loan_management.report.applicant_wise_loan_security_exposure.applicant_wise_loan_security_exposure import (
 	get_loan_security_details,
@@ -54,14 +52,14 @@ def get_data(chart_name = None, chart = None, no_cache = None, filters = None, f
 		GROUP BY p.loan_security
 	""".format(conditions=conditions), filters, as_list=1))
 
-	for security, qty in iteritems(pledges):
+	for security, qty in pledges.items():
 		current_pledges.setdefault(security, qty)
 		current_pledges[security] -= unpledges.get(security, 0.0)
 
 	sorted_pledges = dict(sorted(current_pledges.items(), key=lambda item: item[1], reverse=True))
 
 	count = 0
-	for security, qty in iteritems(sorted_pledges):
+	for security, qty in sorted_pledges.items():
 		values.append(qty * loan_security_details.get(security, {}).get('latest_price', 0))
 		labels.append(security)
 		count +=1

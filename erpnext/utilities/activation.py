@@ -1,11 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from six import iteritems
 
 import erpnext
 
@@ -46,7 +44,7 @@ def get_level():
 		"Work Order": 5
 	}
 
-	for doctype, min_count in iteritems(doctypes):
+	for doctype, min_count in doctypes.items():
 		count = frappe.db.count(doctype)
 		if count > min_count:
 			activation_level += 1

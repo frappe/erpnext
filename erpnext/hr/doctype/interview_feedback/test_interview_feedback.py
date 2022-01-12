@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import unittest
 
@@ -61,7 +59,7 @@ class TestInterviewFeedback(unittest.TestCase):
 		}, 'average_rating')
 
 		# 1. average should be reflected in Interview Detail.
-		self.assertEqual(avg_on_interview_detail, round(feedback_1.average_rating))
+		self.assertEqual(avg_on_interview_detail, feedback_1.average_rating)
 
 		'''For Second Interviewer Feedback'''
 		interviewer = interview.interview_details[1].interviewer

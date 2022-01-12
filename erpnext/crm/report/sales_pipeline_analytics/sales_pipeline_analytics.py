@@ -9,7 +9,6 @@ import pandas
 from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.utils import cint, flt
-from six import iteritems
 
 from erpnext.setup.utils import get_exchange_rate
 
@@ -295,7 +294,7 @@ class SalesPipelineAnalytics(object):
 
 	def append_data(self, pipeline_by, period_by):
 		self.data = []
-		for pipeline,period_data in iteritems(self.periodic_data):
+		for pipeline,period_data in self.periodic_data.items():
 			row = {pipeline_by : pipeline}
 			for info in self.query_result:
 				if self.filters.get('range') == 'Monthly':

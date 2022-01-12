@@ -704,59 +704,9 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
-  },
-  {
-   "dependencies": "Stock Ledger Entry",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Stock and Account Value Comparison",
-   "link_count": 0,
-   "link_to": "Stock and Account Value Comparison",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Incorrect Data Report",
-   "link_count": 0,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Incorrect Serial No Qty and Valuation",
-   "link_count": 0,
-   "link_to": "Incorrect Serial No Valuation",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Incorrect Balance Qty After Transaction",
-   "link_count": 0,
-   "link_to": "Incorrect Balance Qty After Transaction",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Stock and Account Value Comparison",
-   "link_count": 0,
-   "link_to": "Stock and Account Value Comparison",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:16:02.361519",
+ "modified": "2021-11-23 04:34:00.420870",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",

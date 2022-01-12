@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cstr, getdate
@@ -69,6 +68,8 @@ def set_default_settings(args):
 
 	hr_settings.send_interview_feedback_reminder = 1
 	hr_settings.feedback_reminder_notification_template = _("Interview Feedback Reminder")
+
+	hr_settings.exit_questionnaire_notification_template = _("Exit Questionnaire Notification")
 	hr_settings.save()
 
 def set_no_copy_fields_in_variant_settings():

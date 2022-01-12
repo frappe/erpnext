@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies and contributors
 # For license information, please see license.txt
 
 
-from __future__ import unicode_literals
 
 from json import dumps, loads
 
@@ -143,6 +141,9 @@ def verify_transaction(**kwargs):
 	transaction_response = frappe._dict(kwargs["Body"]["stkCallback"])
 
 	checkout_id = getattr(transaction_response, "CheckoutRequestID", "")
+	if not isinstance(checkout_id, str):
+		frappe.throw(_("Invalid Checkout Request ID"))
+
 	integration_request = frappe.get_doc("Integration Request", checkout_id)
 	transaction_data = frappe._dict(loads(integration_request.data))
 	total_paid = 0 # for multiple integration request made against a pos invoice
@@ -233,6 +234,9 @@ def process_balance_info(**kwargs):
 	account_balance_response = frappe._dict(kwargs["Result"])
 
 	conversation_id = getattr(account_balance_response, "ConversationID", "")
+	if not isinstance(conversation_id, str):
+		frappe.throw(_("Invalid Conversation ID"))
+
 	request = frappe.get_doc("Integration Request", conversation_id)
 
 	if request.status == "Completed":

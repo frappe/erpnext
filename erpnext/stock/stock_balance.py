@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import print_function, unicode_literals
 
 import frappe
 from frappe.utils import cstr, flt, nowdate, nowtime
@@ -161,7 +160,7 @@ def get_ordered_qty(item_code, warehouse):
 def get_planned_qty(item_code, warehouse):
 	planned_qty = frappe.db.sql("""
 		select sum(qty - produced_qty) from `tabWork Order`
-		where production_item = %s and fg_warehouse = %s and status not in ("Stopped", "Completed")
+		where production_item = %s and fg_warehouse = %s and status not in ("Stopped", "Completed", "Closed")
 		and docstatus=1 and qty > produced_qty""", (item_code, warehouse))
 
 	return flt(planned_qty[0][0]) if planned_qty else 0

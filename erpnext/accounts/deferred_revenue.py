@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import frappe
 from frappe import _
 from frappe.email import sendmail_to_system_managers
@@ -376,12 +374,13 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 			frappe.db.commit()
 		except Exception as e:
 			if frappe.flags.in_test:
+				traceback = frappe.get_traceback()
+				frappe.log_error(title=_('Error while processing deferred accounting for Invoice {0}').format(doc.name), message=traceback)
 				raise e
 			else:
 				frappe.db.rollback()
 				traceback = frappe.get_traceback()
-				frappe.log_error(message=traceback)
-
+				frappe.log_error(title=_('Error while processing deferred accounting for Invoice {0}').format(doc.name), message=traceback)
 				frappe.flags.deferred_accounting_error = True
 
 def send_mail(deferred_process):
@@ -448,10 +447,12 @@ def book_revenue_via_journal_entry(doc, credit_account, debit_account, against,
 
 		if submit:
 			journal_entry.submit()
+
+		frappe.db.commit()
 	except Exception:
 		frappe.db.rollback()
 		traceback = frappe.get_traceback()
-		frappe.log_error(message=traceback)
+		frappe.log_error(title=_('Error while processing deferred accounting for Invoice {0}').format(doc.name), message=traceback)
 
 		frappe.flags.deferred_accounting_error = True
 

@@ -3,7 +3,6 @@
 
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -109,9 +108,32 @@ def cleanup_packing_list(doc, parent_items):
 
 	packed_items = doc.get("packed_items")
 	doc.set("packed_items", [])
+
 	for d in packed_items:
 		if d not in delete_list:
-			doc.append("packed_items", d)
+			add_item_to_packing_list(doc, d)
+
+def add_item_to_packing_list(doc, packed_item):
+	doc.append("packed_items", {
+		'parent_item': packed_item.parent_item,
+		'item_code': packed_item.item_code,
+		'item_name': packed_item.item_name,
+		'uom': packed_item.uom,
+		'qty': packed_item.qty,
+		'rate': packed_item.rate,
+		'conversion_factor': packed_item.conversion_factor,
+		'description': packed_item.description,
+		'warehouse': packed_item.warehouse,
+		'batch_no': packed_item.batch_no,
+		'actual_batch_qty': packed_item.actual_batch_qty,
+		'serial_no': packed_item.serial_no,
+		'target_warehouse': packed_item.target_warehouse,
+		'actual_qty': packed_item.actual_qty,
+		'projected_qty': packed_item.projected_qty,
+		'incoming_rate': packed_item.incoming_rate,
+		'prevdoc_doctype': packed_item.prevdoc_doctype,
+		'parent_detail_docname': packed_item.parent_detail_docname
+	})
 
 def update_product_bundle_price(doc, parent_items):
 	"""Updates the prices of Product Bundles based on the rates of the Items in the bundle."""
@@ -129,7 +151,8 @@ def update_product_bundle_price(doc, parent_items):
 		else:
 			update_parent_item_price(doc, parent_items[parent_items_index][0], bundle_price)
 
-			bundle_price = 0
+			bundle_item_rate = bundle_item.rate if bundle_item.rate else 0
+			bundle_price = bundle_item.qty * bundle_item_rate
 			parent_items_index += 1
 
 	# for the last product bundle

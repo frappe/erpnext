@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 import math
@@ -12,7 +10,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, flt, rounded
-from six import string_types
 
 from erpnext.loan_management.doctype.loan.loan import (
 	get_monthly_repayment_amount,
@@ -83,7 +80,7 @@ class LoanApplication(Document):
 
 		if self.is_term_loan:
 			if self.repayment_method == "Repay Over Number of Periods":
-				self.repayment_amount = get_monthly_repayment_amount(self.repayment_method, self.loan_amount, self.rate_of_interest, self.repayment_periods)
+				self.repayment_amount = get_monthly_repayment_amount(self.loan_amount, self.rate_of_interest, self.repayment_periods)
 
 			if self.repayment_method == "Repay Fixed Amount per Period":
 				monthly_interest_rate = flt(self.rate_of_interest) / (12 *100)
@@ -192,7 +189,7 @@ def create_pledge(loan_application, loan=None):
 #This is a sandbox method to get the proposed pledges
 @frappe.whitelist()
 def get_proposed_pledge(securities):
-	if isinstance(securities, string_types):
+	if isinstance(securities, str):
 		securities = json.loads(securities)
 
 	proposed_pledges = {

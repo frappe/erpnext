@@ -110,7 +110,8 @@
   "enq_det",
   "supplier_quotation",
   "opportunity",
-  "lost_reasons"
+  "lost_reasons",
+  "competitors"
  ],
  "fields": [
   {
@@ -946,17 +947,25 @@
    "label": "Bundle Items",
    "options": "fa fa-suitcase",
    "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "competitors",
+   "fieldtype": "Table MultiSelect",
+   "label": "Competitors",
+   "options": "Competitor Detail",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "max_attachments": 1,
- "modified": "2021-08-27 20:10:07.864951",
+ "modified": "2021-11-30 01:33:21.106073",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

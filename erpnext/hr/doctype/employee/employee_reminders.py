@@ -157,6 +157,8 @@ def get_employees_having_an_event_today(event_type):
 			AND
 				MONTH({condition_column}) = MONTH(%(today)s)
 			AND
+				YEAR({condition_column}) < YEAR(%(today)s)
+			AND
 				`status` = 'Active'
 		""",
 		"postgres": f"""
@@ -166,6 +168,8 @@ def get_employees_having_an_event_today(event_type):
 				DATE_PART('day', {condition_column}) = date_part('day', %(today)s)
 			AND
 				DATE_PART('month', {condition_column}) = date_part('month', %(today)s)
+			AND
+				DATE_PART('year', {condition_column}) < date_part('year', %(today)s)
 			AND
 				"status" = 'Active'
 		""",

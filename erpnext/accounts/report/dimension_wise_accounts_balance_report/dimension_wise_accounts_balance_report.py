@@ -1,12 +1,10 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
 from frappe.utils import cstr, flt
-from six import itervalues
 
 import erpnext
 from erpnext.accounts.report.financial_statements import (
@@ -108,7 +106,7 @@ def set_gl_entries_by_account(dimension_items_list, filters, account, gl_entries
 
 def format_gl_entries(gl_entries_by_account, accounts_by_name, dimension_items_list):
 
-	for entries in itervalues(gl_entries_by_account):
+	for entries in gl_entries_by_account.values():
 		for entry in entries:
 			d = accounts_by_name.get(entry.account)
 			if not d:

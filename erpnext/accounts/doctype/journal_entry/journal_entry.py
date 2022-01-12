@@ -1,14 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
 import frappe
 from frappe import _, msgprint, scrub
 from frappe.utils import cint, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
-from six import iteritems, string_types
 
 import erpnext
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
@@ -58,7 +56,10 @@ class JournalEntry(AccountsController):
 		if not frappe.flags.in_import:
 			self.validate_total_debit_and_credit()
 
-		self.validate_against_jv()
+		if not frappe.flags.is_reverse_depr_entry:
+			self.validate_against_jv()
+			self.validate_stock_accounts()
+
 		self.validate_reference_doc()
 		if self.docstatus == 0:
 			self.set_against_account()
@@ -69,7 +70,6 @@ class JournalEntry(AccountsController):
 		self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
 		self.validate_inter_company_accounts()
-		self.validate_stock_accounts()
 
 		if self.docstatus == 0:
 			self.apply_tax_withholding()
@@ -115,7 +115,7 @@ class JournalEntry(AccountsController):
 				if d.reference_type in ("Sales Order", "Purchase Order", "Employee Advance"):
 					advance_paid.setdefault(d.reference_type, []).append(d.reference_name)
 
-		for voucher_type, order_list in iteritems(advance_paid):
+		for voucher_type, order_list in advance_paid.items():
 			for voucher_no in list(set(order_list)):
 				frappe.get_doc(voucher_type, voucher_no).set_total_advance_paid()
 
@@ -430,7 +430,7 @@ class JournalEntry(AccountsController):
 
 	def validate_orders(self):
 		"""Validate totals, closed and docstatus for orders"""
-		for reference_name, total in iteritems(self.reference_totals):
+		for reference_name, total in self.reference_totals.items():
 			reference_type = self.reference_types[reference_name]
 			account = self.reference_accounts[reference_name]
 
@@ -461,7 +461,7 @@ class JournalEntry(AccountsController):
 
 	def validate_invoices(self):
 		"""Validate totals and docstatus for invoices"""
-		for reference_name, total in iteritems(self.reference_totals):
+		for reference_name, total in self.reference_totals.items():
 			reference_type = self.reference_types[reference_name]
 
 			if (reference_type in ("Sales Invoice", "Purchase Invoice") and
@@ -1006,7 +1006,7 @@ def get_outstanding(args):
 	if not frappe.has_permission("Account"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
-	if isinstance(args, string_types):
+	if isinstance(args, str):
 		args = json.loads(args)
 
 	company_currency = erpnext.get_company_currency(args.get("company"))
@@ -1157,9 +1157,8 @@ def make_inter_company_journal_entry(name, voucher_type, company):
 def make_reverse_journal_entry(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 
-	def update_accounts(source, target, source_parent):
-		target.reference_type = "Journal Entry"
-		target.reference_name = source_parent.name
+	def post_process(source, target):
+		target.reversal_of = source.name
 
 	doclist = get_mapped_doc("Journal Entry", source_name, {
 		"Journal Entry": {
@@ -1177,9 +1176,8 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 				"debit": "credit",
 				"credit_in_account_currency": "debit_in_account_currency",
 				"credit": "debit",
-			},
-			"postprocess": update_accounts,
+			}
 		},
-	}, target_doc)
+	}, target_doc, post_process)
 
 	return doclist

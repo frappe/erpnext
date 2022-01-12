@@ -1,12 +1,10 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
 from frappe.utils import flt, getdate
-from six import iteritems
 
 
 def execute(filters=None):
@@ -111,7 +109,7 @@ class EmployeeHoursReport:
 
 		self.data = []
 
-		for emp, data in iteritems(self.stats_by_employee):
+		for emp, data in self.stats_by_employee.items():
 			row = frappe._dict()
 			row['employee'] = emp
 			row.update(data)
@@ -181,7 +179,7 @@ class EmployeeHoursReport:
 
 	def calculate_utilizations(self):
 		TOTAL_HOURS = flt(self.standard_working_hours * self.day_span, 2)
-		for emp, data in iteritems(self.stats_by_employee):
+		for emp, data in self.stats_by_employee.items():
 			data['total_hours'] = TOTAL_HOURS
 			data['untracked_hours'] = flt(TOTAL_HOURS - data['billed_hours'] - data['non_billed_hours'], 2)
 

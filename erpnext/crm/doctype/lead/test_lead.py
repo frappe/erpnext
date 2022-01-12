@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import unittest
 
@@ -23,6 +22,17 @@ class TestLead(unittest.TestCase):
 		customer.company = "_Test Company"
 		customer.customer_group = "_Test Customer Group"
 		customer.insert()
+
+		#check whether lead contact is carried forward to the customer.
+		contact = frappe.db.get_value('Dynamic Link', {
+			"parenttype": "Contact",
+			"link_doctype": "Lead",
+			"link_name": customer.lead_name,
+		}, "parent")
+
+		if contact:
+			contact_doc = frappe.get_doc("Contact", contact)
+			self.assertEqual(contact_doc.has_link(customer.doctype, customer.name), True)
 
 	def test_make_customer_from_organization(self):
 		from erpnext.crm.doctype.lead.lead import make_customer

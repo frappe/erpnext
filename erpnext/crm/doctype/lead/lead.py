@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -9,9 +8,9 @@ from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import (
-	cint,
 	comma_and,
 	cstr,
+	get_link_to_form,
 	getdate,
 	has_gravatar,
 	nowdate,
@@ -39,11 +38,7 @@ class Lead(SellingController):
 		self.check_email_id_is_unique()
 		self.validate_email_id()
 		self.validate_contact_date()
-		self._prev = frappe._dict({
-			"contact_date": frappe.db.get_value("Lead", self.name, "contact_date") if (not cint(self.is_new())) else None,
-			"ends_on": frappe.db.get_value("Lead", self.name, "ends_on") if (not cint(self.is_new())) else None,
-			"contact_by": frappe.db.get_value("Lead", self.name, "contact_by") if (not cint(self.is_new())) else None,
-		})
+		self.set_prev()
 
 	def set_full_name(self):
 		if self.first_name:
@@ -75,6 +70,16 @@ class Lead(SellingController):
 		self.add_calendar_event()
 		self.update_prospects()
 
+	def set_prev(self):
+		if self.is_new():
+			self._prev = frappe._dict({
+				"contact_date": None,
+				"ends_on": None,
+				"contact_by": None
+			})
+		else:
+			self._prev = frappe.db.get_value("Lead", self.name, ["contact_date", "ends_on", "contact_by"], as_dict=1)
+
 	def before_insert(self):
 		self.contact_doc = self.create_contact()
 
@@ -92,13 +97,14 @@ class Lead(SellingController):
 			self.contact_doc.save()
 
 	def add_calendar_event(self, opts=None, force=False):
-		super(Lead, self).add_calendar_event({
-			"owner": self.lead_owner,
-			"starts_on": self.contact_date,
-			"ends_on": self.ends_on or "",
-			"subject": ('Contact ' + cstr(self.lead_name)),
-			"description": ('Contact ' + cstr(self.lead_name)) + (self.contact_by and ('. By : ' + cstr(self.contact_by)) or '')
-		}, force)
+		if frappe.db.get_single_value('CRM Settings', 'create_event_on_next_contact_date'):
+			super(Lead, self).add_calendar_event({
+				"owner": self.lead_owner,
+				"starts_on": self.contact_date,
+				"ends_on": self.ends_on or "",
+				"subject": ('Contact ' + cstr(self.lead_name)),
+				"description": ('Contact ' + cstr(self.lead_name)) + (self.contact_by and ('. By : ' + cstr(self.contact_by)) or '')
+			}, force)
 
 	def update_prospects(self):
 		prospects = frappe.get_all('Prospect Lead', filters={'lead': self.name}, fields=['parent'])
@@ -109,12 +115,13 @@ class Lead(SellingController):
 	def check_email_id_is_unique(self):
 		if self.email_id:
 			# validate email is unique
-			duplicate_leads = frappe.get_all("Lead", filters={"email_id": self.email_id, "name": ["!=", self.name]})
-			duplicate_leads = [lead.name for lead in duplicate_leads]
+			if not frappe.db.get_single_value('CRM Settings', 'allow_lead_duplication_based_on_emails'):
+				duplicate_leads = frappe.get_all("Lead", filters={"email_id": self.email_id, "name": ["!=", self.name]})
+				duplicate_leads = [frappe.bold(get_link_to_form('Lead', lead.name)) for lead in duplicate_leads]
 
-			if duplicate_leads:
-				frappe.throw(_("Email Address must be unique, already exists for {0}")
-					.format(comma_and(duplicate_leads)), frappe.DuplicateEntryError)
+				if duplicate_leads:
+					frappe.throw(_("Email Address must be unique, already exists for {0}")
+						.format(comma_and(duplicate_leads)), frappe.DuplicateEntryError)
 
 	def on_trash(self):
 		frappe.db.sql("""update `tabIssue` set lead='' where lead=%s""", self.name)
@@ -173,41 +180,42 @@ class Lead(SellingController):
 		self.title = self.company_name or self.lead_name
 
 	def create_contact(self):
-		if not self.lead_name:
-			self.set_full_name()
-			self.set_lead_name()
+		if frappe.db.get_single_value('CRM Settings', 'auto_creation_of_contact'):
+			if not self.lead_name:
+				self.set_full_name()
+				self.set_lead_name()
 
-		contact = frappe.new_doc("Contact")
-		contact.update({
-			"first_name": self.first_name or self.lead_name,
-			"last_name": self.last_name,
-			"salutation": self.salutation,
-			"gender": self.gender,
-			"designation": self.designation,
-			"company_name": self.company_name,
-		})
-
-		if self.email_id:
-			contact.append("email_ids", {
-				"email_id": self.email_id,
-				"is_primary": 1
+			contact = frappe.new_doc("Contact")
+			contact.update({
+				"first_name": self.first_name or self.lead_name,
+				"last_name": self.last_name,
+				"salutation": self.salutation,
+				"gender": self.gender,
+				"designation": self.designation,
+				"company_name": self.company_name,
 			})
 
-		if self.phone:
-			contact.append("phone_nos", {
-				"phone": self.phone,
-				"is_primary_phone": 1
-			})
+			if self.email_id:
+				contact.append("email_ids", {
+					"email_id": self.email_id,
+					"is_primary": 1
+				})
 
-		if self.mobile_no:
-			contact.append("phone_nos", {
-				"phone": self.mobile_no,
-				"is_primary_mobile_no":1
-			})
+			if self.phone:
+				contact.append("phone_nos", {
+					"phone": self.phone,
+					"is_primary_phone": 1
+				})
 
-		contact.insert(ignore_permissions=True)
+			if self.mobile_no:
+				contact.append("phone_nos", {
+					"phone": self.mobile_no,
+					"is_primary_mobile_no":1
+				})
 
-		return contact
+			contact.insert(ignore_permissions=True)
+
+			return contact
 
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):

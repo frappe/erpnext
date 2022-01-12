@@ -1,13 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
-from six import iteritems
 
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
@@ -18,6 +15,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_multi_mode_option,
 )
 from erpnext.accounts.party import get_due_date, get_party_account
+from erpnext.stock.doctype.batch.batch import get_batch_qty, get_pos_reserved_batch_qty
 from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
 
 
@@ -127,8 +125,25 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(_("Row #{}: Serial No. {} has already been transacted into another POS Invoice. Please select valid serial no.")
 						.format(item.idx, bold_invalid_serial_nos), title=_("Item Unavailable"))
 		elif invalid_serial_nos:
-			frappe.throw(_("Row #{}: Serial Nos. {} has already been transacted into another POS Invoice. Please select valid serial no.")
+			frappe.throw(_("Row #{}: Serial Nos. {} have already been transacted into another POS Invoice. Please select valid serial no.")
 						.format(item.idx, bold_invalid_serial_nos), title=_("Item Unavailable"))
+
+	def validate_pos_reserved_batch_qty(self, item):
+		filters = {"item_code": item.item_code, "warehouse": item.warehouse, "batch_no":item.batch_no}
+
+		available_batch_qty = get_batch_qty(item.batch_no, item.warehouse, item.item_code)
+		reserved_batch_qty = get_pos_reserved_batch_qty(filters)
+
+		bold_item_name = frappe.bold(item.item_name)
+		bold_extra_batch_qty_needed = frappe.bold(abs(available_batch_qty - reserved_batch_qty - item.qty))
+		bold_invalid_batch_no = frappe.bold(item.batch_no)
+
+		if (available_batch_qty - reserved_batch_qty) == 0:
+			frappe.throw(_("Row #{}: Batch No. {} of item {} has no stock available. Please select valid batch no.")
+						.format(item.idx, bold_invalid_batch_no, bold_item_name), title=_("Item Unavailable"))
+		elif (available_batch_qty - reserved_batch_qty - item.qty) < 0:
+			frappe.throw(_("Row #{}: Batch No. {} of item {} has less than required stock available, {} more required")
+						.format(item.idx, bold_invalid_batch_no, bold_item_name, bold_extra_batch_qty_needed), title=_("Item Unavailable"))
 
 	def validate_delivered_serial_nos(self, item):
 		serial_nos = get_serial_nos(item.serial_no)
@@ -152,6 +167,8 @@ class POSInvoice(SalesInvoice):
 			if d.serial_no:
 				self.validate_pos_reserved_serial_nos(d)
 				self.validate_delivered_serial_nos(d)
+			elif d.batch_no:
+				self.validate_pos_reserved_batch_qty(d)
 			else:
 				if allow_negative_stock:
 					return
@@ -336,7 +353,6 @@ class POSInvoice(SalesInvoice):
 			if not for_validate and not self.customer:
 				self.customer = profile.customer
 
-			self.ignore_pricing_rule = profile.ignore_pricing_rule
 			self.account_for_change_amount = profile.get('account_for_change_amount') or self.account_for_change_amount
 			self.set_warehouse = profile.get('warehouse') or self.set_warehouse
 
@@ -366,7 +382,7 @@ class POSInvoice(SalesInvoice):
 			for item in self.get("items"):
 				if item.get('item_code'):
 					profile_details = get_pos_profile_item_details(profile.get("company"), frappe._dict(item.as_dict()), profile)
-					for fname, val in iteritems(profile_details):
+					for fname, val in profile_details.items():
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
 
@@ -526,9 +542,8 @@ def make_sales_return(source_name, target_doc=None):
 def make_merge_log(invoices):
 	import json
 
-	from six import string_types
 
-	if isinstance(invoices, string_types):
+	if isinstance(invoices, str):
 		invoices = json.loads(invoices)
 
 	if len(invoices) == 0:

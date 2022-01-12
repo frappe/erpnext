@@ -4,7 +4,6 @@
 # ERPNext - web based ERP (http://erpnext.com)
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -12,7 +11,6 @@ import frappe
 from frappe import _, msgprint
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
-from six import string_types
 
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
@@ -81,6 +79,9 @@ class MaterialRequest(BuyingController):
 		# self.validate_qty_against_so()
 		# NOTE: Since Item BOM and FG quantities are combined, using current data, it cannot be validated
 		# Though the creation of Material Request from a Production Plan can be rethought to fix this
+
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
 
 	def set_title(self):
 		'''Set title as comma separated list of items'''
@@ -275,7 +276,7 @@ def update_status(name, status):
 def make_purchase_order(source_name, target_doc=None, args=None):
 	if args is None:
 		args = {}
-	if isinstance(args, string_types):
+	if isinstance(args, str):
 		args = json.loads(args)
 
 	def postprocess(source, target_doc):
@@ -502,7 +503,8 @@ def make_stock_entry(source_name, target_doc=None):
 			"field_map": {
 				"name": "material_request_item",
 				"parent": "material_request",
-				"uom": "stock_uom"
+				"uom": "stock_uom",
+				"job_card_item": "job_card_item"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.ordered_qty < doc.stock_qty

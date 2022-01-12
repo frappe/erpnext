@@ -1,7 +1,6 @@
 # Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _

@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt"
 
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe.utils import cint
@@ -23,7 +22,7 @@ def boot_session(bootinfo):
 			'customer_group')
 		bootinfo.sysdefaults.allow_stale = cint(frappe.db.get_single_value('Accounts Settings',
 			'allow_stale'))
-		bootinfo.sysdefaults.quotation_valid_till = cint(frappe.db.get_single_value('Selling Settings',
+		bootinfo.sysdefaults.quotation_valid_till = cint(frappe.db.get_single_value('CRM Settings',
 			'default_valid_till'))
 
 		# if no company, show a dialog box to create a new company

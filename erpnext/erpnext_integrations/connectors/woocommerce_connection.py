@@ -1,6 +1,3 @@
-
-from __future__ import unicode_literals
-
 import base64
 import hashlib
 import hmac
@@ -22,8 +19,7 @@ def verify_request():
 	)
 
 	if frappe.request.data and \
-		frappe.get_request_header("X-Wc-Webhook-Signature") and \
-		not sig == bytes(frappe.get_request_header("X-Wc-Webhook-Signature").encode()):
+		not sig == frappe.get_request_header("X-Wc-Webhook-Signature", "").encode():
 			frappe.throw(_("Unverified Webhook Data"))
 	frappe.set_user(woocommerce_settings.creation_user)
 

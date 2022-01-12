@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 from math import ceil
@@ -11,7 +9,6 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.utils import date_diff, flt, formatdate, get_datetime, getdate
-from six import string_types
 
 
 class LeavePolicyAssignment(Document):
@@ -59,9 +56,7 @@ class LeavePolicyAssignment(Document):
 						leave_policy_detail.leave_type, leave_policy_detail.annual_allocation,
 						leave_type_details, date_of_joining
 					)
-
-				leave_allocations[leave_policy_detail.leave_type] = {"name": leave_allocation, "leaves": new_leaves_allocated}
-
+					leave_allocations[leave_policy_detail.leave_type] = {"name": leave_allocation, "leaves": new_leaves_allocated}
 			self.db_set("leaves_allocated", 1)
 			return leave_allocations
 
@@ -133,6 +128,8 @@ class LeavePolicyAssignment(Document):
 			monthly_earned_leave = get_monthly_earned_leave(new_leaves_allocated,
 				leave_type_details.get(leave_type).earned_leave_frequency, leave_type_details.get(leave_type).rounding)
 			new_leaves_allocated = monthly_earned_leave * months_passed
+		else:
+			new_leaves_allocated = 0
 
 		return new_leaves_allocated
 
@@ -140,10 +137,10 @@ class LeavePolicyAssignment(Document):
 @frappe.whitelist()
 def create_assignment_for_multiple_employees(employees, data):
 
-	if isinstance(employees, string_types):
+	if isinstance(employees, str):
 		employees= json.loads(employees)
 
-	if isinstance(data, string_types):
+	if isinstance(data, str):
 		data = frappe._dict(json.loads(data))
 
 	docs_name = []

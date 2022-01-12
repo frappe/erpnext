@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import frappe
 
 from erpnext.setup.setup_wizard.operations.install_fixtures import add_sale_stages

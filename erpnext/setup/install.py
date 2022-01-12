@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import print_function, unicode_literals
 
 import frappe
 from frappe import _
@@ -9,7 +8,6 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 from frappe.installer import update_site_config
 from frappe.utils import cint
-from six import iteritems
 
 from erpnext.accounts.doctype.cash_flow_mapper.default_cash_flow_mapper import DEFAULT_MAPPERS
 from erpnext.setup.default_energy_point_rules import get_default_energy_point_rules
@@ -62,6 +60,22 @@ def set_single_defaults():
 
 	frappe.db.set_default("date_format", "dd-mm-yyyy")
 
+	setup_currency_exchange()
+
+def setup_currency_exchange():
+	ces = frappe.get_single('Currency Exchange Settings')
+	try:
+		ces.set('result_key', [])
+		ces.set('req_params', [])
+
+		ces.api_endpoint = "https://frankfurter.app/{transaction_date}"
+		ces.append('result_key', {'key': 'rates'})
+		ces.append('result_key', {'key': '{to_currency}'})
+		ces.append('req_params', {'key': 'base', 'value': '{from_currency}'})
+		ces.append('req_params', {'key': 'symbols', 'value': '{to_currency}'})
+		ces.save()
+	except frappe.ValidationError:
+		pass
 
 def create_compact_item_print_custom_field():
 	create_custom_field('Print Settings', {
@@ -174,12 +188,12 @@ def add_non_standard_user_types():
 	user_types = get_user_types_data()
 
 	user_type_limit = {}
-	for user_type, data in iteritems(user_types):
+	for user_type, data in user_types.items():
 		user_type_limit.setdefault(frappe.scrub(user_type), 10)
 
 	update_site_config('user_type_doctype_limit', user_type_limit)
 
-	for user_type, data in iteritems(user_types):
+	for user_type, data in user_types.items():
 		create_custom_role(data)
 		create_user_type(user_type, data)
 
@@ -229,7 +243,7 @@ def create_user_type(user_type, data):
 	doc.save(ignore_permissions=True)
 
 def create_role_permissions_for_doctype(doc, data):
-	for doctype, perms in iteritems(data.get('doctypes')):
+	for doctype, perms in data.get('doctypes').items():
 		args = {'document_type': doctype}
 		for perm in perms:
 			args[perm] = 1

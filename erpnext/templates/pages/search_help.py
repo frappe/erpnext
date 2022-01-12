@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import frappe
 import requests
 from frappe import _
@@ -7,7 +5,6 @@ from frappe.utils import sanitize_html
 from frappe.utils.global_search import search
 from html2text import html2text
 from jinja2 import utils
-from six import text_type
 
 
 def get_context(context):
@@ -77,7 +74,7 @@ def prepare_api_results(api, topics_data):
 	for topic in topics_data:
 		route = api.base_url + '/' + (api.post_route  + '/' if api.post_route else "")
 		for key in api.post_route_key_list.split(','):
-			route += text_type(topic[key])
+			route += str(topic[key])
 
 		results.append(frappe._dict({
 			'title': topic[api.post_title_key],

@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import datetime
 
@@ -192,9 +190,8 @@ def get_expected_skill_set(interview_round):
 def create_interview_feedback(data, interview_name, interviewer, job_applicant):
 	import json
 
-	from six import string_types
 
-	if isinstance(data, string_types):
+	if isinstance(data, str):
 		data = frappe._dict(json.loads(data))
 
 	if frappe.session.user != interviewer:

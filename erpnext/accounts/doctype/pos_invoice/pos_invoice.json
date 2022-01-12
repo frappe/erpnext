@@ -171,6 +171,7 @@
   "sales_team_section_break",
   "sales_partner",
   "column_break10",
+  "amount_eligible_for_commission",
   "commission_rate",
   "total_commission",
   "section_break2",
@@ -1561,16 +1562,23 @@
    "label": "Coupon Code",
    "options": "Coupon Code",
    "print_hide": 1
+  },
+  {
+   "fieldname": "amount_eligible_for_commission",
+   "fieldtype": "Currency",
+   "label": "Amount Eligible for Commission",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-27 20:12:57.306772",
+ "modified": "2021-10-05 12:11:53.871828",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
  "name_case": "Title Case",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

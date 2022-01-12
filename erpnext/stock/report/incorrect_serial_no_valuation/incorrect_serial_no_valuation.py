@@ -5,7 +5,6 @@ import copy
 
 import frappe
 from frappe import _
-from six import iteritems
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -43,7 +42,7 @@ def get_incorrect_serial_nos(serial_nos_data):
 
 	total_value = frappe._dict({'qty': 0, 'valuation_rate': 0, 'serial_no': frappe.bold(_('Balance'))})
 
-	for serial_no, data in iteritems(serial_nos_data):
+	for serial_no, data in serial_nos_data.items():
 		total_dict = frappe._dict({'qty': 0, 'valuation_rate': 0, 'serial_no': frappe.bold(_('Total'))})
 
 		if check_incorrect_serial_data(data, total_dict):
@@ -74,7 +73,7 @@ def get_stock_ledger_entries(report_filters):
 	fields = ['name', 'voucher_type', 'voucher_no', 'item_code', 'serial_no as serial_nos', 'actual_qty',
 		'posting_date', 'posting_time', 'company', 'warehouse', '(stock_value_difference / actual_qty) as valuation_rate']
 
-	filters = {'serial_no': ("is", "set")}
+	filters = {'serial_no': ("is", "set"), "is_cancelled": 0}
 
 	if report_filters.get('item_code'):
 		filters['item_code'] = report_filters.get('item_code')

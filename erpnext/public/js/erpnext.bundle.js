@@ -18,7 +18,6 @@ import "./utils/customer_quick_entry";
 import "./utils/supplier_quick_entry";
 import "./education/student_button.html";
 import "./education/assessment_result_tool.html";
-import "./hub/hub_factory";
 import "./call_popup/call_popup";
 import "./utils/dimension_tree_filter";
 import "./telephony";
