@@ -335,15 +335,25 @@ class DeliveryNote(SellingController):
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
 	# Billed against Sales Order directly
-	billed_against_so = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item`
-		where so_detail=%s and (dn_detail is null or dn_detail = '') and docstatus=1""", so_detail)
+	billed_against_so = frappe.db.sql("""select sum(si_item.amount)
+		from `tabSales Invoice Item` si_item, `tabSales Invoice` si
+		where
+			si_item.parent = si.name
+			and si_item.so_detail=%s
+			and (si_item.dn_detail is null or si_item.dn_detail = '')
+			and si_item.docstatus=1
+			and si.update_stock = 0
+		""", so_detail)
 	billed_against_so = billed_against_so and billed_against_so[0][0] or 0
 
 	# Get all Delivery Note Item rows against the Sales Order Item row
-	dn_details = frappe.db.sql("""select dn_item.name, dn_item.amount, dn_item.si_detail, dn_item.parent
+	dn_details = frappe.db.sql("""select dn_item.name, dn_item.amount, dn_item.si_detail, dn_item.parent, dn_item.stock_qty, dn_item.returned_qty
 		from `tabDelivery Note Item` dn_item, `tabDelivery Note` dn
-		where dn.name=dn_item.parent and dn_item.so_detail=%s
-			and dn.docstatus=1 and dn.is_return = 0
+		where
+			dn.name = dn_item.parent
+			and dn_item.so_detail=%s
+			and dn.docstatus=1
+			and dn.is_return = 0
 		order by dn.posting_date asc, dn.posting_time asc, dn.name asc""", so_detail, as_dict=1)
 
 	updated_dn = []
@@ -362,7 +372,11 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 
 		# Distribute billed amount directly against SO between DNs based on FIFO
 		if billed_against_so and billed_amt_agianst_dn < dnd.amount:
-			pending_to_bill = flt(dnd.amount) - billed_amt_agianst_dn
+			if dnd.returned_qty:
+				pending_to_bill = flt(dnd.amount) * (dnd.stock_qty - dnd.returned_qty) / dnd.stock_qty
+			else:
+				pending_to_bill = flt(dnd.amount)
+			pending_to_bill -= billed_amt_agianst_dn
 			if pending_to_bill <= billed_against_so:
 				billed_amt_agianst_dn += pending_to_bill
 				billed_against_so -= pending_to_bill
