@@ -38,8 +38,8 @@ class SalesOrder(SellingController):
 	def __init__(self, *args, **kwargs):
 		super(SalesOrder, self).__init__(*args, **kwargs)
 
-	def before_save(self):
-		self.get_commision()
+	# def before_save(self):
+		# self.get_commision()
 
 	def validate(self):
 		super(SalesOrder, self).validate()
