@@ -618,6 +618,7 @@ class Asset(AccountsController):
 				),
 				title=_("Account not Found"),
 			)
+		return fixed_asset_account
 
 	def get_cwip_account(self, cwip_enabled=False):
 		cwip_account = None
