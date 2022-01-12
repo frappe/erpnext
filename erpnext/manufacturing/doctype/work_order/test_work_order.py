@@ -870,9 +870,6 @@ class TestWorkOrder(ERPNextTestCase):
 			close_work_order(wo_order, "Closed")
 			self.assertEqual(wo_order.get('status'), "Closed")
 
-<<<<<<< HEAD
-def update_job_card(job_card):
-=======
 	def test_fix_time_operations(self):
 		bom = frappe.get_doc({
 			"doctype": "BOM",
@@ -911,10 +908,9 @@ def update_job_card(job_card):
 
 		self.assertEqual(wo1.operations[0].time_in_mins, wo2.operations[0].time_in_mins)
 
-
 def update_job_card(job_card, jc_qty=None):
 	employee = frappe.db.get_value('Employee', {'status': 'Active'}, 'name')
->>>>>>> 8f0b2fa90e (fix: incorrect scrap item qty)
+
 	job_card_doc = frappe.get_doc('Job Card', job_card)
 	job_card_doc.set('scrap_items', [
 		{
@@ -938,7 +934,6 @@ def update_job_card(job_card, jc_qty=None):
 	})
 
 	job_card_doc.submit()
-
 
 def get_scrap_item_details(bom_no):
 	scrap_items = {}
