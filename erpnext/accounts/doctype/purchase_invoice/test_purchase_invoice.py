@@ -986,7 +986,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi = make_purchase_invoice(item=item.name, qty=1, rate=100, do_not_save=True)
 		pi.set_posting_time = 1
-		pi.posting_date = '2019-03-15'
+		pi.posting_date = '2019-01-10'
 		pi.items[0].enable_deferred_expense = 1
 		pi.items[0].service_start_date = "2019-01-10"
 		pi.items[0].service_end_date = "2019-03-15"
@@ -1236,7 +1236,7 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 def update_tax_witholding_category(company, account):
 	from erpnext.accounts.utils import get_fiscal_year
 
-	fiscal_year = get_fiscal_year(fiscal_year='2021')
+	fiscal_year = get_fiscal_year(date=nowdate())
 
 	if not frappe.db.get_value('Tax Withholding Rate',
 		{'parent': 'TDS - 194 - Dividends - Individual', 'from_date': ('>=', fiscal_year[1]),

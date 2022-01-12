@@ -17,7 +17,9 @@
   "column_break_9",
   "create_event_on_next_contact_date_opportunity",
   "quotation_section",
-  "default_valid_till"
+  "default_valid_till",
+  "section_break_13",
+  "carry_forward_communication_and_comments"
  ],
  "fields": [
   {
@@ -85,13 +87,25 @@
    "fieldname": "quotation_section",
    "fieldtype": "Section Break",
    "label": "Quotation"
+  },
+  {
+   "fieldname": "section_break_13",
+   "fieldtype": "Section Break",
+   "label": "Other Settings"
+  },
+  {
+   "default": "0",
+   "description": "All the Comments and Emails will be copied from one document to another newly created document(Lead -> Opportunity -> Quotation) throughout the CRM documents.",
+   "fieldname": "carry_forward_communication_and_comments",
+   "fieldtype": "Check",
+   "label": "Carry Forward Communication and Comments"
   }
  ],
  "icon": "fa fa-cog",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-11-03 10:00:36.883496",
+ "modified": "2021-12-20 12:51:38.894252",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM Settings",
@@ -103,6 +117,26 @@
    "print": 1,
    "read": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Master Manager",
    "share": 1,
    "write": 1
   }

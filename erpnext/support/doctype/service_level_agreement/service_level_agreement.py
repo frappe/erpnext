@@ -476,7 +476,7 @@ def update_response_and_resolution_metrics(doc, apply_sla_for_resolution):
 	priority = get_response_and_resolution_duration(doc)
 	start_date_time = get_datetime(doc.get("service_level_agreement_creation") or doc.creation)
 	set_response_by(doc, start_date_time, priority)
-	if apply_sla_for_resolution:
+	if apply_sla_for_resolution and not doc.get('on_hold_since'): # resolution_by is reset if on hold
 		set_resolution_by(doc, start_date_time, priority)
 
 
@@ -623,9 +623,6 @@ def reset_resolution_metrics(doc):
 
 	if doc.meta.has_field("user_resolution_time"):
 		doc.user_resolution_time = None
-
-	if doc.meta.has_field("agreement_status"):
-		doc.agreement_status = "First Response Due"
 
 
 # called via hooks on communication update
@@ -856,7 +853,7 @@ def get_user_time(user, to_string=False):
 @frappe.whitelist()
 def get_sla_doctypes():
 	doctypes = []
-	data = frappe.get_list('Service Level Agreement',
+	data = frappe.get_all('Service Level Agreement',
 		{'enabled': 1},
 		['document_type'],
 		distinct=1

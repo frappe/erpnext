@@ -370,7 +370,7 @@ def get_account_heads(root_type, companies, filters):
 	accounts = get_accounts(root_type, filters)
 
 	if not accounts:
-		return None, None
+		return None, None, None
 
 	accounts = update_parent_account_names(accounts)
 

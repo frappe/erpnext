@@ -33,7 +33,6 @@ def install(country=None):
 		{ 'doctype': 'Domain', 'domain': 'Services'},
 		{ 'doctype': 'Domain', 'domain': 'Education'},
 		{ 'doctype': 'Domain', 'domain': 'Healthcare'},
-		{ 'doctype': 'Domain', 'domain': 'Agriculture'},
 		{ 'doctype': 'Domain', 'domain': 'Non Profit'},
 
 		# ensure at least an empty Address Template exists for this Country
@@ -354,7 +353,8 @@ def add_uom_data():
 				"doctype": "UOM",
 				"uom_name": _(d.get("uom_name")),
 				"name": _(d.get("uom_name")),
-				"must_be_whole_number": d.get("must_be_whole_number")
+				"must_be_whole_number": d.get("must_be_whole_number"),
+				"enabled": 1,
 			}).db_insert()
 
 	# bootstrap uom conversion factors

@@ -148,7 +148,7 @@ def make_company():
 	company.company_name = "_Test Opening Invoice Company"
 	company.abbr = "_TOIC"
 	company.default_currency = "INR"
-	company.country = "India"
+	company.country = "Pakistan"
 	company.insert()
 	return company
 

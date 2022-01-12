@@ -3,10 +3,13 @@
 
 import frappe
 
+from erpnext.regional.saudi_arabia.setup import add_print_formats
+
 
 def execute():
 	company = frappe.get_all('Company', filters = {'country': 'Saudi Arabia'})
 	if company:
+		add_print_formats()
 		return
 
 	if frappe.db.exists('DocType', 'Print Format'):
