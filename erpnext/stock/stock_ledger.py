@@ -263,7 +263,7 @@ def repost_future_sle(
 
 def validate_item_warehouse(args):
 	for field in ["item_code", "warehouse", "posting_date", "posting_time"]:
-		if not args.get(field):
+		if args.get(field) in [None, ""]:
 			validation_msg = f"The field {frappe.unscrub(field)} is required for the reposting"
 			frappe.throw(_(validation_msg))
 
