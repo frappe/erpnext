@@ -192,10 +192,11 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-09-29 23:06:10.904260",
+ "modified": "2022-01-12 16:28:53.196881",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Job Applicant",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -210,10 +211,11 @@
    "write": 1
   }
  ],
- "search_fields": "applicant_name",
+ "search_fields": "applicant_name, email_id, job_title, phone_number",
  "sender_field": "email_id",
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "subject_field": "notes",
  "title_field": "applicant_name"
 }
