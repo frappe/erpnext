@@ -24,7 +24,7 @@ class JobApplicant(Document):
 	def autoname(self):
 		self.name = self.email_id
 
-		# applicant can apply more than once for a different job title
+		# applicant can apply more than once for a different job title or reapply
 		if frappe.db.exists("Job Applicant", self.name):
 			self.name = append_number_if_name_exists("Job Applicant", self.name)
 
