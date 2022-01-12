@@ -111,8 +111,12 @@ class StockEntry(StockController):
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
 		self.validate_putaway_capacity()
-		self.reset_default_field_value("from_warehouse", "items", "s_warehouse")
-		self.reset_default_field_value("to_warehouse", "items", "t_warehouse")
+
+		if not self.get("purpose") == "Manufacture":
+			# ignore scrap item wh difference and empty source/target wh
+			# in Manufacture Entry
+			self.reset_default_field_value("from_warehouse", "items", "s_warehouse")
+			self.reset_default_field_value("to_warehouse", "items", "t_warehouse")
 
 	def on_submit(self):
 		self.update_stock_ledger()
