@@ -17,17 +17,14 @@ class TestEmployeeOnboarding(unittest.TestCase):
 	def test_employee_onboarding_incomplete_task(self):
 		if frappe.db.exists('Employee Onboarding', {'employee_name': 'Test Researcher'}):
 			frappe.delete_doc('Employee Onboarding', {'employee_name': 'Test Researcher'})
-		_set_up()
-		applicant = get_job_applicant()
-
-<<<<<<< HEAD
-		job_offer = create_job_offer(job_applicant=applicant.name)
-		job_offer.submit()
-=======
+		frappe.db.sql("delete from `tabEmployee Onboarding`")
 		project = "Employee Onboarding : test@researcher.com"
 		frappe.db.sql("delete from tabProject where name=%s", project)
 		frappe.db.sql("delete from tabTask where project=%s", project)
->>>>>>> 5cda4ea39f (fix: autoname generated for Job Applicant is too long (#29260))
+		applicant = get_job_applicant()
+
+		job_offer = create_job_offer(job_applicant=applicant.name)
+		job_offer.submit()
 
 		onboarding = frappe.new_doc('Employee Onboarding')
 		onboarding.job_applicant = applicant.name
@@ -47,13 +44,8 @@ class TestEmployeeOnboarding(unittest.TestCase):
 		onboarding.insert()
 		onboarding.submit()
 
-<<<<<<< HEAD
 		project_name = frappe.db.get_value("Project", onboarding.project, "project_name")
-		self.assertEqual(project_name, 'Employee Onboarding : Test Researcher - test@researcher.com')
-=======
-		project_name = frappe.db.get_value('Project', onboarding.project, 'project_name')
 		self.assertEqual(project_name, 'Employee Onboarding : test@researcher.com')
->>>>>>> 5cda4ea39f (fix: autoname generated for Job Applicant is too long (#29260))
 
 		# don't allow making employee if onboarding is not complete
 		self.assertRaises(IncompleteTaskError, make_employee, onboarding.name)
