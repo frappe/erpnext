@@ -192,14 +192,8 @@ class Asset(AccountsController):
 			self.validate_asset_finance_books(finance_book)
 
 			# value_after_depreciation - current Asset value
-<<<<<<< HEAD
-			if self.docstatus == 1 and d.value_after_depreciation:
-				value_after_depreciation = flt(d.value_after_depreciation)
-=======
 			if self.docstatus == 1 and finance_book.value_after_depreciation:
-				value_after_depreciation = (flt(finance_book.value_after_depreciation) -
-					flt(self.opening_accumulated_depreciation))
->>>>>>> 059d1f3b74 (fix: Rename  loop variable)
+				value_after_depreciation = flt(finance_book.value_after_depreciation)
 			else:
 				value_after_depreciation = (flt(self.gross_purchase_amount) -
 					flt(self.opening_accumulated_depreciation))
@@ -248,15 +242,9 @@ class Asset(AccountsController):
 					break
 
 				# For first row
-<<<<<<< HEAD
 				if has_pro_rata and not self.opening_accumulated_depreciation and n==0:
-					depreciation_amount, days, months = self.get_pro_rata_amt(d, depreciation_amount,
-						self.available_for_use_date, d.depreciation_start_date)
-=======
-				if has_pro_rata and n==0:
 					depreciation_amount, days, months = self.get_pro_rata_amt(finance_book, depreciation_amount,
 						self.available_for_use_date, finance_book.depreciation_start_date)
->>>>>>> 059d1f3b74 (fix: Rename  loop variable)
 
 					# For first depr schedule date will be the start date
 					# so monthly schedule date is calculated by removing month difference between use date and start date
@@ -267,11 +255,7 @@ class Asset(AccountsController):
 					if not self.flags.increase_in_asset_life:
 						# In case of increase_in_asset_life, the self.to_date is already set on asset_repair submission
 						self.to_date = add_months(self.available_for_use_date,
-<<<<<<< HEAD
-							(n + self.number_of_depreciations_booked) * cint(d.frequency_of_depreciation))
-=======
-							n * cint(finance_book.frequency_of_depreciation))
->>>>>>> 059d1f3b74 (fix: Rename  loop variable)
+							(n + self.number_of_depreciations_booked) * cint(finance_book.frequency_of_depreciation))
 
 					depreciation_amount_without_pro_rata = depreciation_amount
 
