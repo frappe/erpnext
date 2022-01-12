@@ -1,11 +1,10 @@
 frappe.views.calendar["Course Schedule"] = {
 	field_map: {
-		// from_datetime and to_datetime don't exist as docfields but are used in onload
-		"start": "from_datetime",
-		"end": "to_datetime",
+		"start": "from_time",
+		"end": "to_time",
 		"id": "name",
 		"title": "course",
-		"allDay": "allDay"
+		"allDay": "allDay",
 	},
 	gantt: false,
 	order_by: "schedule_date",
