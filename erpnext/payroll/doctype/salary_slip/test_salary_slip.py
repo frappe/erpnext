@@ -171,6 +171,7 @@ class TestSalarySlip(unittest.TestCase):
 		salary_slip.end_date = month_end_date
 		salary_slip.save()
 		salary_slip.submit()
+		salary_slip.reload()
 
 		no_of_days = self.get_no_of_days()
 		days_in_month = no_of_days[0]
@@ -379,7 +380,7 @@ class TestSalarySlip(unittest.TestCase):
 		make_salary_structure("Test Loan Repayment Salary Structure", "Monthly", employee=applicant, currency='INR',
 			payroll_period=payroll_period)
 
-		frappe.db.sql("delete from tabLoan")
+		frappe.db.sql("delete from tabLoan where applicant = 'test_loan_repayment_salary_slip@salary.com'")
 		loan = create_loan(applicant, "Car Loan", 11000, "Repay Over Number of Periods", 20, posting_date=add_months(nowdate(), -1))
 		loan.repay_from_salary = 1
 		loan.submit()

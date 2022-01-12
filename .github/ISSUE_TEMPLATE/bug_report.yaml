@@ -25,20 +25,6 @@ body:
       required: true
 
   - type: dropdown
-    id: version
-    attributes:
-      label: Version
-      description: Affected versions.
-      multiple: true
-      options:
-        - v12
-        - v13
-        - v14
-        - develop
-    validations:
-      required: true
-
-  - type: dropdown
     id: module
     attributes:
       label: Module
@@ -54,6 +40,7 @@ body:
         - HR
         - projects
         - support
+        - CRM
         - assets
         - integrations
         - quality
@@ -62,6 +49,7 @@ body:
         - agriculture
         - education
         - non-profit
+        - other
     validations:
       required: true
 
@@ -86,7 +74,7 @@ body:
         - manual install
         - FrappeCloud
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: logs
@@ -95,12 +83,7 @@ body:
       description: Please copy and paste any relevant log output. This will be automatically formatted.
       render: shell
 
-
-  - type: checkboxes
-    id: terms
+  - type: markdown
     attributes:
-      label: Code of Conduct
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/frappe/erpnext/blob/develop/CODE_OF_CONDUCT.md)
-      options:
-        - label: I agree to follow this project's Code of Conduct
-          required: true
+      value: |
+        By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/frappe/erpnext/blob/develop/CODE_OF_CONDUCT.md)
