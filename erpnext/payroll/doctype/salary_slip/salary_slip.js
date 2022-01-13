@@ -220,6 +220,7 @@ frappe.ui.form.on("Salary Slip", {
 					frm.refresh_field("compoff");
 					frm.refresh_field("weekly_off");
 					frm.refresh_field("present_days");
+					frm.refresh_field("leave");
 				}
 			});
 		}
