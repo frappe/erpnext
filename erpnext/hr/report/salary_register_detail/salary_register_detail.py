@@ -19,8 +19,13 @@ def execute(filters=None):
 		Employee = frappe.get_all("Salary Structure Assignment", ["name", "employee","employee_name", "base"], filters = {"employee": ss.employee})
 
 		salary_detail = frappe.get_all("Salary Detail", ["name", "salary_component", "amount"], filters = {"parent":ss.name})
-		
-		row = [ss.employee_name, ss.payment_days, Employee[0].base]
+
+		row = [ss.employee_name, ss.payment_days]
+
+		if len(Employee) > 0:		
+			row += [Employee[0].base]
+		else:
+			row += [0]
 
 		for sc in salary_components_Earning:
 			salarydetail = frappe.get_all("Salary Detail", ["name", "salary_component", "amount"], filters = {"salary_component":sc.name})
@@ -31,6 +36,8 @@ def execute(filters=None):
 						value_component = sdd.amount
 				
 				row += [value_component]
+			# else:
+			# 	row += [0]
 
 		row += [ss.gross_pay]
 
@@ -42,11 +49,27 @@ def execute(filters=None):
 					if coldata.name == sdd.salary_component:
 						value_component = sdd.amount
 				
-				row += [value_component]		
+				row += [value_component]	
+			# else:
+			# 	row += [0]	
 
 		row += [ss.total_deduction, ss.net_pay]
 
 		data.append(row)
+	
+	row = ["ELABORADO POR:"]
+
+	for column in columns:
+		row += [""]
+
+	data.append(row)
+
+	row = ["REVISADO POR:"]
+	
+	for column in columns:
+		row += [""]
+
+	data.append(row)
 
 	return columns, data
 

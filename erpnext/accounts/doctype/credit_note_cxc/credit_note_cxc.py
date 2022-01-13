@@ -17,6 +17,7 @@ class CreditNoteCXC(Document):
 		if self.docstatus == 1:
 			self.verificate_amount()
 			self.update_accounts_status()
+			self.apply_gl_entry()
 
 	def calculate_total(self):
 		if not self.get("references"):
@@ -108,6 +109,9 @@ class CreditNoteCXC(Document):
 		if len(cai) == 0:
 			frappe.throw(_("This secuence no assing cai"))
 		current_value = self.get_current(cai[0].prefix)
+
+		if current_value == None:
+			current_value = 0
 
 		now = datetime.now()
 
@@ -216,3 +220,75 @@ class CreditNoteCXC(Document):
 					if str(date) == str(sum_dates1):
 						frappe.msgprint(_("This CAI expires in {} days.".format(i)))
 						break
+	
+	def apply_gl_entry(self):
+		currentDateTime = datetime.now()
+		date = currentDateTime.date()
+		year = date.strftime("%Y")
+
+		fecha_inicial = '01-01-{}'.format(year)
+		fecha_final = '31-12-{}'.format(year)
+		fecha_i = datetime.strptime(fecha_inicial, '%d-%m-%Y')
+		fecha_f = datetime.strptime(fecha_final, '%d-%m-%Y')
+
+		fiscal_year = frappe.get_all("Fiscal Year", ["*"], filters = {"year_start_date": [">=", fecha_i], "year_end_date": ["<=", fecha_f]})
+
+		doc = frappe.new_doc("GL Entry")
+		doc.posting_date = self.posting_date
+		doc.transaction_date = None
+		doc.account = self.account_to_debit
+		doc.party_type = "Customer"
+		doc.party = self.customer
+		doc.cost_center = self.cost_center
+		doc.debit = self.amount_total
+		doc.credit = 0
+		doc.account_currency = self.currency
+		doc.debit_in_account_currency = self.amount_total
+		doc.credit_in_account_currency = 0
+		doc.against = self.account_to_credit
+		doc.against_voucher_type = self.doctype
+		doc.against_voucher = self.name
+		doc.voucher_type =  self.doctype
+		doc.voucher_no = self.name
+		doc.voucher_detail_no = None
+		doc.project = None
+		doc.remarks = 'No Remarks'
+		doc.is_opening = "No"
+		doc.is_advance = "No"
+		doc.fiscal_year = fiscal_year[0].name
+		doc.company = self.company
+		doc.finance_book = None
+		doc.to_rename = 1
+		doc.due_date = None
+		# doc.docstatus = 1
+		doc.insert()
+
+		doc = frappe.new_doc("GL Entry")
+		doc.posting_date = self.posting_date
+		doc.transaction_date = None
+		doc.account = self.account_to_credit
+		doc.party_type = "Customer"
+		doc.party = self.customer
+		doc.cost_center = self.cost_center
+		doc.debit = 0
+		doc.credit = self.amount_total
+		doc.account_currency = self.currency
+		doc.debit_in_account_currency = 0
+		doc.credit_in_account_currency = self.amount_total
+		doc.against = self.account_to_debit
+		doc.against_voucher_type = self.doctype
+		doc.against_voucher = self.name
+		doc.voucher_type =  self.doctype
+		doc.voucher_no = self.name
+		doc.voucher_detail_no = None
+		doc.project = None
+		doc.remarks = 'No Remarks'
+		doc.is_opening = "No"
+		doc.is_advance = "No"
+		doc.fiscal_year = fiscal_year[0].name
+		doc.company = self.company
+		doc.finance_book = None
+		doc.to_rename = 1
+		doc.due_date = None
+		# doc.docstatus = 1
+		doc.insert()

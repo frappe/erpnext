@@ -57,6 +57,21 @@ def get_data():
 					"dependencies": ["Item", "Customer"],
 				},
 				{
+					"type": "doctype",
+					"name": "Price List Schedule",
+					"description": _("Assign Price List Schedule."),
+				},
+				{
+                    "type": "doctype",
+                    "name": "Delivery Area",
+                    "onboard": 1,
+                },
+				{
+                    "type": "doctype",
+                    "name": "Dispatch Control",
+                    "onboard": 1,
+                },
+				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Territory Target Variance (Item Group-Wise)",
@@ -222,6 +237,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Type Price List",
+					"doctype": "Price List",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Customer Acquisition and Loyalty",
 					"doctype": "Customer",
 					"icon": "fa fa-bar-chart",
@@ -231,6 +252,20 @@ def get_data():
 					"is_query_report": True,
 					"name": "Sold Products",
 					"doctype": "Sold Products",
+                    "dependencies": ["Sales Invoice"]
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Products Sold Categories",
+					"doctype": "Sold Products",
+                    "dependencies": ["Sales Invoice"]
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Products Sold Sorted By Categories",
+					"doctype": "Products Sold Sorted By Categories",
                     "dependencies": ["Sales Invoice"]
 				},
 				{
@@ -339,6 +374,22 @@ def get_data():
 					"is_query_report": True,
 					"name": "Sale for day",
 					"doctype": "Sales Invoice"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Discount Reason Sales",
+					"doctype": "Sales Invoice"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales For Discount Reason",
+					"doctype": "Sales Invoice"
+				},
+				{
+					"type": "doctype",
+					"name": "Sales For User"
 				},
 				{
 					"type": "report",

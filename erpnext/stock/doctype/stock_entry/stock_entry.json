@@ -35,10 +35,14 @@
   "from_warehouse",
   "source_warehouse_address",
   "source_address_display",
+  "reference",
   "cb0",
   "to_warehouse",
   "target_warehouse_address",
   "target_address_display",
+  "patient",
+  "patient_name",
+  "inventory_requisition",
   "sb0",
   "scan_barcode",
   "items",
@@ -74,7 +78,9 @@
   "total_amount",
   "job_card",
   "amended_from",
-  "credit_note"
+  "credit_note",
+  "description_section",
+  "description"
  ],
  "fields": [
   {
@@ -293,7 +299,6 @@
   {
    "fieldname": "from_warehouse",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Default Source Warehouse",
    "no_copy": 1,
@@ -322,7 +327,6 @@
   {
    "fieldname": "to_warehouse",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Default Target Warehouse",
    "no_copy": 1,
@@ -622,12 +626,53 @@
    "label": "Pick List",
    "options": "Pick List",
    "read_only": 1
+  },
+  {
+   "fieldname": "description_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Long Text",
+   "label": "Description"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "reference",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Reference",
+   "options": "Requisition Reference"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient",
+   "options": "Patient"
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "inventory_requisition",
+   "fieldtype": "Link",
+   "label": "Inventory Requisition",
+   "options": "Inventory Requisition",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2019-09-27 14:38:20.801420",
+ "modified": "2022-01-13 15:25:46.554981",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

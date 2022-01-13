@@ -32,6 +32,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Inventory Download",
+					"onboard": 1,
+					"dependencies": ["Item"],
+				},
+				{
+					"type": "doctype",
 					"name": "Pick List",
 					"onboard": 1,
 					"dependencies": ["Item"],
@@ -96,6 +102,12 @@ def get_data():
 					"name": "Item Price Stock",
 					"doctype": "Item",
 					"dependencies": ["Item"],
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Type Price List",
+					"doctype": "Price List"
 				}
 			]
 		},
@@ -280,6 +292,12 @@ def get_data():
 					"name": "Stock Analytics",
 					"doctype": "Stock Entry",
 					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Inventory Download",
+					"doctype": "Inventory Download"
 				},
 				{
 					"type": "report",

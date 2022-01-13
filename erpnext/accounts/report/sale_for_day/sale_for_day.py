@@ -9,7 +9,7 @@ import datetime
 
 def execute(filters=None):
 	if not filters: filters = {}
-	columns = [_("Date") + "::240", _("Serie") + "::240", _("Range") + "::240", _("Exempts Sales") + ":Currency:120", _("Exonerated") + ":Currency:120", _("Taxed Sales 15%") + ":Currency:120", _("I.S.V 15%") + ":Currency:120", _("Taxed Sales 18%") + ":Currency:120", _("I.S.V 18%") + ":Currency:120", _("Total") + ":Currency:120"]
+	columns = [_("Date") + "::240", _("Serie") + "::240", _("Range") + "::240", _("Gross Amount") + ":Currency:120", _("Exempts Sales") + ":Currency:120", _("Exonerated") + ":Currency:120", _("Taxed Sales 15%") + ":Currency:120", _("I.S.V 15%") + ":Currency:120", _("Taxed Sales 18%") + ":Currency:120", _("I.S.V 18%") + ":Currency:120", _("Partial Discount") + ":Currency:120" ,_("Discount Amount") + ":Currency:120", _("Total") + ":Currency:120"]
 	data = return_data(filters)
 	return columns, data
 
@@ -23,7 +23,7 @@ def return_data(filters):
 	split_serie = serie.split("-")
 	serie_final = ("{}-{}-{}").format(split_serie[0],split_serie[1],split_serie[2])
 
-	salary_slips = frappe.get_all("Sales Invoice", ["name", "status","naming_series", "creation_date", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total"], filters = conditions,  order_by = "name asc")
+	salary_slips = frappe.get_all("Sales Invoice", ["name", "status","naming_series", "creation_date", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total", "discount_amount", "partial_discount", "total"], filters = conditions,  order_by = "name asc")
 
 	date_actual = from_date
 
@@ -45,38 +45,44 @@ def return_data(filters):
 		creation_date = "-".join(reversed(split_date))		
 		initial_range = ""
 		final_range = ""
-		authorized_range = ""
 		total_exempt = 0
+		gross = 0
 		total_exonerated = 0
 		taxed_sales15 = 0
 		isv15 = 0
 		taxed_sales18 = 0
 		isv18 = 0
 		cont = 0
+		partial_discount = 0
+		discount_amount = 0
+		grand_total = 0
 
 		for salary_slip in salary_slips:
-			date_validate = salary_slip.creation_date.strftime('%Y-%m-%d')
+			date_validate = salary_slip.posting_date.strftime('%Y-%m-%d')
 			if date == date_validate and salary_slip.status != "Return":
 				if cont == 0:
 					split_initial_range = salary_slip.name.split("-")
 					initial_range = split_initial_range[3]
 
 				total_exempt += salary_slip.total_exempt
+				gross += salary_slip.total
 				total_exonerated += salary_slip.total_exonerated
 				taxed_sales15 += salary_slip.taxed_sales15
 				isv15 += salary_slip.isv15
 				taxed_sales18 += salary_slip.taxed_sales18
 				isv18 = salary_slip.isv18
 				authorized_range = salary_slip.authorized_range
+				partial_discount += salary_slip.partial_discount
+				discount_amount += salary_slip.discount_amount
+				grand_total += salary_slip.grand_total
 
 				split_final_range = salary_slip.name.split("-")
 				final_range = split_final_range[3]
 				cont += 1
 		
-		grand_total = taxed_sales15 + isv15 + taxed_sales18 + isv18 + total_exempt
 		final_range = "{}-{}".format(initial_range, final_range)
 
-		row = [creation_date, serie_final, final_range, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
+		row = [creation_date, serie_final, final_range, gross, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, partial_discount, discount_amount, grand_total]
 		data.append(row)
 
 	return data
@@ -85,7 +91,7 @@ def return_filters(filters, from_date, to_date):
 	conditions = ''	
 
 	conditions += "{"
-	conditions += '"creation_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
+	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
 	conditions += ', "naming_series": "{}"'.format(filters.get("prefix"))
 	conditions += ', "company": "{}"'.format(filters.get("company"))
 	conditions += '}'

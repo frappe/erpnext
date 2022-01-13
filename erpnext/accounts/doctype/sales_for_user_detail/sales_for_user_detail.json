@@ -1,0 +1,110 @@
+{
+ "creation": "2021-11-15 17:00:53.687295",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "date",
+  "serie",
+  "range",
+  "gross",
+  "exempts_sales",
+  "exonerated",
+  "taxed_sales_15",
+  "isv15",
+  "taxed_sales_18",
+  "isv18",
+  "partial_discount",
+  "discount",
+  "total"
+ ],
+ "fields": [
+  {
+   "fieldname": "date",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Date"
+  },
+  {
+   "fieldname": "serie",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Serie"
+  },
+  {
+   "fieldname": "range",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Range"
+  },
+  {
+   "fieldname": "exempts_sales",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Exempts Sales"
+  },
+  {
+   "fieldname": "exonerated",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Exonerated"
+  },
+  {
+   "fieldname": "taxed_sales_15",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Taxed Sales 15%"
+  },
+  {
+   "fieldname": "isv15",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "I.S.V 15%"
+  },
+  {
+   "fieldname": "taxed_sales_18",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Taxed Sales 18%"
+  },
+  {
+   "fieldname": "isv18",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "I.S.V 18%"
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total"
+  },
+  {
+   "fieldname": "partial_discount",
+   "fieldtype": "Currency",
+   "label": "Partial Discount"
+  },
+  {
+   "fieldname": "discount",
+   "fieldtype": "Currency",
+   "label": "Discount"
+  },
+  {
+   "fieldname": "gross",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Gross"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-12-23 11:14:02.200716",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Sales For User Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

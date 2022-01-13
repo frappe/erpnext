@@ -3,6 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+import erpnext
 import frappe
 from frappe import _, msgprint, throw
 from frappe.utils import getdate, nowdate
@@ -16,6 +17,7 @@ class SupplierRetention(Document):
 		if self.docstatus == 1:
 			self.calculate_retention()
 			self.update_accounts_status()
+			self.apply_gl_entry()
 
 	def calculate_percentage_and_references(self):
 		if self.get("reasons"):
@@ -34,16 +36,25 @@ class SupplierRetention(Document):
 	
 	def calculate_retention(self):
 		for document in self.get("references"):
-			total = document.net_total * (self.percentage_total/100)
-			sales_invoice = frappe.get_doc("Purchase Invoice", document.reference_name)
-			sales_invoice.outstanding_amount -= total
-			sales_invoice.save()
+			total = document.net_total * (self.percentage_total/100)			
+
+			if document.reference_doctype == "Purchase Invoice":
+				sales_invoice = frappe.get_doc("Purchase Invoice", document.reference_name)
+				outstanding_amount = sales_invoice.outstanding_amount
+				outstanding_amount -= total
+				sales_invoice.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+
+			if document.reference_doctype == "Supplier Documents":
+				supllier_document = frappe.get_doc("Supplier Documents", document.reference_name)
+				outstanding_amount = supllier_document.outstanding_amount
+				outstanding_amount -= total
+				supllier_document.db_set('outstanding_amount', outstanding_amount, update_modified=False)
 	
 	def update_accounts_status(self):
 		supplier = frappe.get_doc("Supplier", self.supplier)
 		if supplier:
-			supplier.credit += self.total_withheld
-			supplier.remaining_balance -= self.total_withheld
+			supplier.credit -= self.total_withheld
+			supplier.remaining_balance += self.total_withheld
 			supplier.save()
 
 	def assign_cai(self):
@@ -51,6 +62,9 @@ class SupplierRetention(Document):
 		if len(cai) == 0:
 			frappe.throw(_("This secuence no assing cai"))
 		current_value = self.get_current(cai[0].prefix)
+
+		if current_value == None:
+			current_value = 0
 
 		now = datetime.now()
 
@@ -159,3 +173,85 @@ class SupplierRetention(Document):
 					if str(date) == str(sum_dates1):
 						frappe.msgprint(_("This CAI expires in {} days.".format(i)))
 						break
+	
+	def apply_gl_entry(self):
+		currentDateTime = datetime.now()
+		date = currentDateTime.date()
+		year = date.strftime("%Y")
+
+		fecha_inicial = '01-01-{}'.format(year)
+		fecha_final = '31-12-{}'.format(year)
+		fecha_i = datetime.strptime(fecha_inicial, '%d-%m-%Y')
+		fecha_f = datetime.strptime(fecha_final, '%d-%m-%Y')
+
+		fiscal_year = frappe.get_all("Fiscal Year", ["*"], filters = {"year_start_date": [">=", fecha_i], "year_end_date": ["<=", fecha_f]})
+
+		company = frappe.get_doc("Company", self.company)
+
+		account_to_debit = company.default_payable_account
+
+		reason_porcentage = frappe.get_all("Reason And Percentage", ["reason"], filters = {"parent": self.name})
+
+		reason_retention = frappe.get_doc("Reason For Retention", reason_porcentage[0].reason)
+
+		account_to_credit = reason_retention.account
+
+		doc = frappe.new_doc("GL Entry")
+		doc.posting_date = self.posting_date
+		doc.transaction_date = None
+		doc.account = account_to_debit
+		doc.party_type = "Supplier"
+		doc.party = self.supplier
+		doc.cost_center = company.cost_center
+		doc.debit = self.total_withheld
+		doc.credit = 0
+		doc.account_currency = self.currency
+		doc.debit_in_account_currency = self.total_withheld
+		doc.credit_in_account_currency = None
+		doc.against = account_to_credit
+		doc.against_voucher_type = self.doctype
+		doc.against_voucher = self.name
+		doc.voucher_type =  self.doctype
+		doc.voucher_no = self.name
+		doc.voucher_detail_no = None
+		doc.project = None
+		doc.remarks = 'No Remarks'
+		doc.is_opening = "No"
+		doc.is_advance = "No"
+		doc.fiscal_year = fiscal_year[0].name
+		doc.company = self.company
+		doc.finance_book = None
+		doc.to_rename = 1
+		doc.due_date = None
+		# doc.docstatus = 1
+		doc.insert()
+
+		doc = frappe.new_doc("GL Entry")
+		doc.posting_date = self.posting_date
+		doc.transaction_date = None
+		doc.account = account_to_credit
+		doc.party_type = "Supplier"
+		doc.party = self.supplier
+		doc.cost_center = company.cost_center
+		doc.debit = 0
+		doc.credit = self.total_withheld
+		doc.account_currency = self.currency
+		doc.debit_in_account_currency = 0
+		doc.credit_in_account_currency = self.total_withheld
+		doc.against = account_to_debit
+		doc.against_voucher_type = self.doctype
+		doc.against_voucher = self.name
+		doc.voucher_type =  self.doctype
+		doc.voucher_no = self.name
+		doc.voucher_detail_no = None
+		doc.project = None
+		doc.remarks = 'No Remarks'
+		doc.is_opening = "No"
+		doc.is_advance = "No"
+		doc.fiscal_year = fiscal_year[0].name
+		doc.company = self.company
+		doc.finance_book = None
+		doc.to_rename = 1
+		doc.due_date = None
+		# doc.docstatus = 1
+		doc.insert()

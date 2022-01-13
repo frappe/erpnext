@@ -8,7 +8,9 @@
   "naming_series",
   "party_type",
   "customer",
+  "company",
   "rtn",
+  "currency",
   "column_break_1",
   "posting_date",
   "due_date",
@@ -70,20 +72,17 @@
    "fieldname": "due_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Due Date",
-   "reqd": 1
+   "label": "Due Date"
   },
   {
    "fieldname": "cai",
    "fieldtype": "Data",
-   "label": "Cai",
-   "reqd": 1
+   "label": "Cai"
   },
   {
    "fieldname": "transaction_number",
    "fieldtype": "Data",
-   "label": "Transaction Numer",
-   "reqd": 1
+   "label": "Transaction Number"
   },
   {
    "fieldname": "amended_from",
@@ -102,7 +101,7 @@
    "fieldname": "reasons",
    "fieldtype": "Table",
    "label": "Reasons",
-   "options": "Reason And Percentage",
+   "options": "Customer Reason And Percentage",
    "reqd": 1
   },
   {
@@ -110,7 +109,7 @@
    "fieldname": "references",
    "fieldtype": "Table",
    "label": "References",
-   "options": "Withholding Reference",
+   "options": "Reference Customer Retention",
    "reqd": 1
   },
   {
@@ -132,10 +131,24 @@
    "label": "Total References",
    "options": "Currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-05-27 10:13:18.681575",
+ "modified": "2021-12-30 14:23:50.706465",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Customer Retention",

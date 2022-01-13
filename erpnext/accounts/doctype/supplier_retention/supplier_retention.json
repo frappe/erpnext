@@ -9,9 +9,12 @@
   "party_type",
   "supplier",
   "rtn",
+  "currency",
   "column_break_1",
   "posting_date",
   "due_date",
+  "company",
+  "company_rtn",
   "cai_info_section",
   "cai",
   "due_date_cai",
@@ -151,13 +154,34 @@
   {
    "fieldname": "total_references",
    "fieldtype": "Currency",
-   "label": "Total References",
+   "label": "Total Base",
    "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "company.tax_id",
+   "fieldname": "company_rtn",
+   "fieldtype": "Data",
+   "label": "Company RTN",
    "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-05-27 10:36:52.090269",
+ "modified": "2021-12-07 15:02:30.731194",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Supplier Retention",

@@ -132,6 +132,13 @@ class Customer(TransactionBase):
 		if self.sales_team:
 			if sum([member.allocated_percentage or 0 for member in self.sales_team]) != 100:
 				frappe.throw(_("Total contribution percentage should be equal to 100"))
+	
+	def verificate_quantity_id(self, value, field, qty):
+		if not value.isdigit():
+			frappe.throw(_("Only numbers are allowed in {} field".format(field)))
+
+		if len(value) != qty:
+			frappe.throw(_("{} must have {} characters.".format(field, qty)))
 
 	def check_customer_group_change(self):
 		frappe.flags.customer_group_changed = False

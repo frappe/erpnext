@@ -12,22 +12,11 @@ frappe.query_reports["Sales Book"] = {
 			reqd: 1
 		},
 		{
-			fieldname:"branch_office",
-			label: __("Branch Office"),
+			fieldname:"prefix",
+			label: __("Prefix"),
 			fieldtype: "Link",
-			options: "GSucursal",
-		},
-		{
-			fieldname:"cashier",
-			label: __("Cashier"),
-			fieldtype: "Link",
-			options: "GPos",
-		},
-		{
-			fieldname:"type_document",
-			label: __("Type Document"),
-			fieldtype: "Link",
-			options: "GType Document",
+			options: "Prefix sales for days",
+			reqd: 1
 		},
 		{
 			fieldname: "from_date",

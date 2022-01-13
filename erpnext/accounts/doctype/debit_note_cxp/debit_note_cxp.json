@@ -15,6 +15,8 @@
   "due_date",
   "party_type",
   "reason_debit_note",
+  "company",
+  "company_rtn",
   "section_break_1",
   "references",
   "total_references",
@@ -28,7 +30,13 @@
   "isv_15",
   "isv_18",
   "amount_total",
-  "amended_from"
+  "amended_from",
+  "sectionaccount",
+  "account_to_debit",
+  "currency",
+  "columnaccount",
+  "account_to_credit",
+  "cost_center"
  ],
  "fields": [
   {
@@ -96,7 +104,7 @@
    "fetch_if_empty": 1,
    "fieldname": "rtn",
    "fieldtype": "Data",
-   "label": "RTN",
+   "label": "Supplier RTN",
    "read_only": 1
   },
   {
@@ -135,7 +143,7 @@
   {
    "fieldname": "transaction_number",
    "fieldtype": "Data",
-   "label": "Transaction Numer",
+   "label": "Transaction Number",
    "reqd": 1
   },
   {
@@ -154,8 +162,7 @@
    "fieldname": "taxes",
    "fieldtype": "Table",
    "label": "Taxes",
-   "options": "Multiple Taxes",
-   "reqd": 1
+   "options": "Multiple Taxes"
   },
   {
    "fieldname": "section_break_3",
@@ -189,10 +196,61 @@
    "label": "Total Exempt",
    "options": "Currency",
    "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "company.tax_id",
+   "fieldname": "company_rtn",
+   "fieldtype": "Data",
+   "label": "Company RTN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sectionaccount",
+   "fieldtype": "Section Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "account_to_debit",
+   "fieldtype": "Link",
+   "label": "Account To Debit",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "columnaccount",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "account_to_credit",
+   "fieldtype": "Link",
+   "label": "Account To Credit",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-05-21 16:25:20.213684",
+ "modified": "2021-12-09 15:50:04.028779",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Debit Note CXP",

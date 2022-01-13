@@ -13,8 +13,26 @@ class CashierClosing(Document):
 		self.validate_time()
 
 	def before_save(self):
+		self.calculate_cash()
 		self.get_outstanding()
 		self.make_calculations()
+	
+	def calculate_cash(self):
+		entry = frappe.db.sql("""
+			select sum(amount)
+			from `tabCash Entry`
+			where date=%s and hour>=%s and hour<=%s and user=%s and docstatus=1
+		""", (self.date, self.from_time, self.time, self.user))
+
+		self.cash_entry_amount = flt(entry[0][0] if entry else 0)
+
+		withdrawal = frappe.db.sql("""
+			select sum(amount)
+			from `tabCash Withdrawal`
+			where date=%s and hour>=%s and hour<=%s and user=%s and docstatus=1
+		""", (self.date, self.from_time, self.time, self.user))
+
+		self.cash_withdrawal_amount = flt(withdrawal[0][0] if withdrawal else 0)
 
 	def get_outstanding(self):
 		values = frappe.db.sql("""
@@ -29,7 +47,7 @@ class CashierClosing(Document):
 		for i in self.payments:
 			total += flt(i.amount)
 
-		self.net_amount = total + self.outstanding_amount + self.expense - self.custody + self.returns
+		self.net_amount = total + self.outstanding_amount + self.expense - self.custody + self.returns + self.cash_entry_amount - self.cash_withdrawal_amount
 
 	def validate_time(self):
 		if self.from_time >= self.time:

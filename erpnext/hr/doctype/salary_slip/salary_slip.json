@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "creation": "2013-01-10 16:34:15",
  "doctype": "DocType",
@@ -17,8 +16,10 @@
   "journal_entry",
   "payroll_entry",
   "company",
+  "company_rtn",
   "company_logo",
   "letter_head",
+  "confidential",
   "section_break_10",
   "salary_slip_based_on_timesheet",
   "start_date",
@@ -302,6 +303,7 @@
    "label": "Deduct Tax For Unsubmitted Tax Exemption Proof"
   },
   {
+   "depends_on": "confidential",
    "fieldname": "earning_deduction",
    "fieldtype": "Section Break",
    "label": "Earning & Deduction",
@@ -338,6 +340,7 @@
    "options": "Salary Detail"
   },
   {
+   "depends_on": "confidential",
    "fieldname": "totals",
    "fieldtype": "Section Break",
    "oldfieldtype": "Section Break"
@@ -371,6 +374,7 @@
    "label": "Loan repayment"
   },
   {
+   "depends_on": "confidential",
    "fieldname": "loans",
    "fieldtype": "Table",
    "label": "Employee Loan",
@@ -379,6 +383,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "confidential",
    "fieldname": "section_break_43",
    "fieldtype": "Section Break"
   },
@@ -411,6 +416,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "confidential",
    "fieldname": "net_pay_info",
    "fieldtype": "Section Break",
    "label": "net pay info"
@@ -438,6 +444,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "confidential",
    "fieldname": "section_break_55",
    "fieldtype": "Section Break"
   },
@@ -467,13 +474,26 @@
    "fieldname": "company_logo",
    "fieldtype": "Data",
    "label": "Image"
+  },
+  {
+   "fetch_from": "company.tax_id",
+   "fieldname": "company_rtn",
+   "fieldtype": "Data",
+   "label": "Company RTN",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "confidential",
+   "fieldtype": "Check",
+   "label": "Confidential",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-01-27 16:47:25.545365",
+ "modified": "2021-12-20 16:03:59.119715",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Slip",

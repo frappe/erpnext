@@ -8,7 +8,9 @@
   "naming_series",
   "party_type",
   "customer",
-  "rtn",
+  "customer_rtn",
+  "company",
+  "company_rtn",
   "column_break_1",
   "posting_date",
   "due_date",
@@ -30,7 +32,13 @@
   "isv_15",
   "isv_18",
   "amount_total",
-  "amended_from"
+  "amended_from",
+  "sectionaccount",
+  "account_to_debit",
+  "currency",
+  "columnaccount",
+  "account_to_credit",
+  "cost_center"
  ],
  "fields": [
   {
@@ -39,7 +47,7 @@
    "fieldtype": "Select",
    "label": "Series",
    "no_copy": 1,
-   "options": "CN-CXC-.YYYY.-",
+   "options": "SSM 000-002-06-########\nDMD 000-002-06-########",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -51,14 +59,6 @@
    "label": "Customer",
    "options": "Customer",
    "reqd": 1
-  },
-  {
-   "fetch_from": "customer.rtn",
-   "fetch_if_empty": 1,
-   "fieldname": "rtn",
-   "fieldtype": "Data",
-   "label": "RTN",
-   "read_only": 1
   },
   {
    "fieldname": "column_break_1",
@@ -202,10 +202,68 @@
    "label": "Total Exempt",
    "options": "Currency",
    "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "company.tax_id",
+   "fieldname": "company_rtn",
+   "fieldtype": "Data",
+   "label": "Company RTN",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.rtn",
+   "fieldname": "customer_rtn",
+   "fieldtype": "Data",
+   "label": "Customer RTN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sectionaccount",
+   "fieldtype": "Section Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "account_to_debit",
+   "fieldtype": "Link",
+   "label": "Account To Debit",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "columnaccount",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "account_to_credit",
+   "fieldtype": "Link",
+   "label": "Account To Credit",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-05-24 16:21:54.682032",
+ "modified": "2021-12-09 15:57:13.399745",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Credit Note CXC",

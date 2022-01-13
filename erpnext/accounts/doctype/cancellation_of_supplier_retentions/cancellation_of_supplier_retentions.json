@@ -1,0 +1,121 @@
+{
+ "autoname": "CSR-.YYYY.-.#####",
+ "creation": "2021-12-22 13:56:09.722230",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "supplier_retention",
+  "supplier",
+  "supplier_rtn",
+  "column1",
+  "company",
+  "posting_date",
+  "section1",
+  "percentage_total",
+  "total_base",
+  "total_withheld",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "supplier_retention",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier Retention",
+   "options": "Supplier Retention",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "supplier_retention.supplier",
+   "fieldname": "supplier",
+   "fieldtype": "Data",
+   "label": "Supplier",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "supplier_retention.rtn",
+   "fieldname": "supplier_rtn",
+   "fieldtype": "Data",
+   "label": "Supplier RTN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section1",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "fetch_from": "supplier_retention.total_references",
+   "fieldname": "total_base",
+   "fieldtype": "Currency",
+   "label": "Total Base",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "supplier_retention.total_withheld",
+   "fieldname": "total_withheld",
+   "fieldtype": "Currency",
+   "label": "Total Withheld",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Cancellation Of Supplier Retentions",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "supplier_retention.percentage_total",
+   "fieldname": "percentage_total",
+   "fieldtype": "Currency",
+   "label": "Percentage Total",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-12-22 14:12:38.812769",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Cancellation Of Supplier Retentions",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

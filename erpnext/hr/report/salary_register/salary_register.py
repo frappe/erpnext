@@ -34,11 +34,22 @@ def execute(filters=None):
 		
 		row = [ss.employee_name, ss.payment_days]
 
-		row += [Employee[0].base, ss.gross_pay]
+		if len(Employee) > 0:
+			row += [Employee[0].base]
+		else:
+			row += [0]
+		
+		row += [ss.gross_pay]
 
 		row += [ss.total_deduction, ss.net_pay]
 
 		data.append(row)
+	
+	row = ["ELABORADO POR:", "","","","",""]
+	data.append(row)
+
+	row = ["REVISADO POR:", "","","","",""]
+	data.append(row)
 
 	return columns, data
 
@@ -52,9 +63,14 @@ def get_columns(salary_slips):
 	]
 	"""
 	columns = [
-		_("Employee Name") + "::140", _("Payment Days") + ":Float:120", _("Salary Base") + ":Currency:120",
+		_("Employee Name") + "::140", _("Payment Days") + "::140", _("Salary Base") + ":Currency:120",
 		_("Gross Pay") + ":Currency:120", _("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"
 	]
+
+	# columns = [
+	# 	_("Employee Name") + "::140", _("Payment Days") + "::140", _("Salary Base") + "::140",
+	# 	_("Gross Pay") + "::140", _("Total Deduction") + "::140", _("Net Pay") + ":::140"
+	# ]
 
 	salary_components = {_("Earning"): [], _("Deduction"): []}
 

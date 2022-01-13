@@ -10,6 +10,8 @@
   "general_data",
   "patient_statement",
   "customer",
+  "patient",
+  "patient_name",
   "columna_general",
   "company",
   "reason_for_sale",
@@ -19,6 +21,12 @@
   "total",
   "total_advance",
   "outstanding_balance",
+  "total_sale_invoice",
+  "column_total",
+  "cash_total_medical_fees",
+  "bank_check_total_medical_fees",
+  "total_medical_fees",
+  "total_without_medical_fees",
   "discount",
   "discount_check",
   "discount_amount",
@@ -26,7 +34,9 @@
   "total_discount",
   "contact_section",
   "customer_address",
-  "phone_number"
+  "phone_number",
+  "patient_dni",
+  "patient_age"
  ],
  "fields": [
   {
@@ -161,13 +171,76 @@
   {
    "depends_on": "discount_check",
    "fieldname": "total_discount",
-   "fieldtype": "Currency",
+   "fieldtype": "Data",
    "label": "Total With Discount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_total",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_medical_fees",
+   "fieldtype": "Currency",
+   "label": "total medical fees",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cash_total_medical_fees",
+   "fieldtype": "Currency",
+   "label": "Cash Total Medical Fees",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_check_total_medical_fees",
+   "fieldtype": "Currency",
+   "label": "Bank Check Total Medical Fees",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_sale_invoice",
+   "fieldtype": "Currency",
+   "label": "Total Sale Invoice",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "patient_statement.patient",
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Patient",
+   "options": "Patient"
+  },
+  {
+   "fetch_from": "patient_statement.patient_dni",
+   "fieldname": "patient_dni",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Patient DNI"
+  },
+  {
+   "fetch_from": "patient_statement.age",
+   "fieldname": "patient_age",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Patient Age"
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_without_medical_fees",
+   "fieldtype": "Data",
+   "label": "Total Without Medical Fees",
    "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-06-29 14:56:41.311661",
+ "modified": "2021-11-24 11:44:50.453929",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",

@@ -45,6 +45,24 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Return credit notes",
+					"description": _("Return credit notes."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Cancellation Of Invoices",
+					"description": _("Cancellation Of Invoices"),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Customer Documents",
+					"description": _("Customer Documents"),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "Customer Retention",
 					"description": _("Customer Retention Database."),
 					"onboard": 1,
@@ -126,8 +144,20 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Supplier Documents",
+					"description": _("Supplier Documents"),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "Supplier Retention",
 					"description": _("Supplier Retention Database."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Cancellation Of Supplier Retentions",
+					"description": _("Cancellation Of Supplier Retentions"),
 					"onboard": 1,
 				},
 				{
@@ -220,6 +250,30 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Bank Statement"),
+			"items": [
+				{
+					"type": "doctype",
+					"label": _("Bank"),
+					"name": "Bank",
+				},
+				{
+					"type": "doctype",
+					"label": _("Bank Account"),
+					"name": "Bank Account",
+				},
+				{
+					"type": "doctype",
+					"name": "Bank Statement Transaction Entry",
+				},
+				{
+					"type": "doctype",
+					"label": _("Bank Statement Settings"),
+					"name": "Bank Statement Settings",
+				},
+			]
+		},
+		{
 			"label": _("Banking and Payments"),
 			"items": [
 				{
@@ -259,6 +313,47 @@ def get_data():
 					"type": "doctype",
 					"name": "Cheque Print Template",
 					"description": _("Setup cheque dimensions for printing")
+				},
+			]
+		},
+		{
+			"label": _("Bank Transactions"),
+			"items": [
+				{
+              		"type": "doctype",
+              		"name": "Bank Transactions",
+              		"label": _("Bank Transactions"),
+              		"description": _("This option is for create new bank transactions."),
+            	},
+            	{
+              		"type": "doctype",
+              		"name": "Bank reconciliations",
+              		"label": _("Bank reconciliations"),
+              		"description": _("Create Bank reconciliations"),
+            	},
+            	{
+              		"type": "doctype",
+              		"name": "Reconciled balances",
+              		"label": _("Reconciled balances"),
+              		"description": _("Create Reconciled balances"),
+            	},
+				{
+					"type": "report",
+					"name": "Credit Note Transaction",
+					"doctype": "Bank Transactions",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Debit Note Transaction",
+					"doctype": "Bank Transactions",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Bank Check Transaction",
+					"doctype": "Bank Transactions",
+					"is_query_report": True,
 				},
 			]
 		},
@@ -364,6 +459,12 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Trial Balance",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Ledger",
 					"doctype": "GL Entry",
 					"is_query_report": True,
 				},
@@ -476,30 +577,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Bank Statement"),
-			"items": [
-				{
-					"type": "doctype",
-					"label": _("Bank"),
-					"name": "Bank",
-				},
-				{
-					"type": "doctype",
-					"label": _("Bank Account"),
-					"name": "Bank Account",
-				},
-				{
-					"type": "doctype",
-					"name": "Bank Statement Transaction Entry",
-				},
-				{
-					"type": "doctype",
-					"label": _("Bank Statement Settings"),
-					"name": "Bank Statement Settings",
-				},
-			]
-		},
-		{
 			"label": _("Profitability"),
 			"items": [
 				{
@@ -567,6 +644,18 @@ def get_data():
 					"is_query_report": True,
 					"name": "Address And Contacts",
 					"doctype": "Address"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Discount Per Invoice",
+					"doctype": "Sales Invoice"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Advances Applied",
+					"doctype": "Payment Entry"
 				},
 				{
 					"type": "doctype",

@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:08",
@@ -14,6 +13,7 @@
   "quotation_to",
   "party_name",
   "customer_name",
+  "patient",
   "column_break1",
   "amended_from",
   "company",
@@ -930,14 +930,18 @@
    "fieldtype": "Currency",
    "label": "Total product deduction",
    "read_only": 1
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Data",
+   "label": "Patient"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
- "links": [],
  "max_attachments": 1,
- "modified": "2020-02-03 17:06:18.326368",
+ "modified": "2021-11-10 13:18:03.719163",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

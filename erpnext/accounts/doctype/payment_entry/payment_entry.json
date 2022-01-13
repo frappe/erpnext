@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2016-06-01 14:38:51.012597",
@@ -9,20 +8,25 @@
   "type_of_payment",
   "naming_series",
   "payment_type",
+  "reason_payment",
   "payment_order_status",
+  "user",
   "column_break_5",
   "posting_date",
   "company",
+  "company_rtn",
   "mode_of_payment",
   "party_section",
   "party_type",
   "party",
   "party_name",
+  "party_rtn",
   "column_break_11",
   "bank_account",
   "party_bank_account",
   "contact_person",
   "contact_email",
+  "reconciled",
   "payment_accounts_section",
   "party_balance",
   "paid_from",
@@ -111,7 +115,7 @@
    "bold": 1,
    "default": "Today",
    "fieldname": "posting_date",
-   "fieldtype": "Date",
+   "fieldtype": "Datetime",
    "in_list_view": 1,
    "label": "Posting Date",
    "reqd": 1
@@ -573,11 +577,43 @@
    "label": "Status",
    "options": "\nDraft\nSubmitted\nCancelled",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "reconciled",
+   "fieldtype": "Check",
+   "label": "Reconciled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Data",
+   "label": "User",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "party.rtn",
+   "fieldname": "party_rtn",
+   "fieldtype": "Data",
+   "label": "Party RTN",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.tax_id",
+   "fieldname": "company_rtn",
+   "fieldtype": "Data",
+   "label": "Company RTN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reason_payment",
+   "fieldtype": "Select",
+   "label": "Reason For Payment",
+   "options": "Advance\nAdvancement\nCancellation"
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2020-03-26 22:32:30.625920",
+ "modified": "2021-12-28 15:04:55.136108",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

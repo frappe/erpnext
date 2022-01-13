@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint, throw
 from frappe.model.document import Document
+from datetime import datetime, timedelta, date
 
 class CustomerRetention(Document):
 	def validate(self):
@@ -13,6 +14,8 @@ class CustomerRetention(Document):
 		if self.docstatus == 1:
 			self.calculate_retention()
 			self.update_accounts_status()
+			self.apply_gl_entry()
+			self.apply_changes_sales_invoice()
 
 	def calculate_percentage_and_references(self):
 		if self.get("reasons"):
@@ -56,3 +59,94 @@ class CustomerRetention(Document):
 	def before_naming(self):
 		if self.docstatus == 0:
 			self.create_daily_summary_series()
+	
+	def apply_gl_entry(self):
+		currentDateTime = datetime.now()
+		date = currentDateTime.date()
+		year = date.strftime("%Y")
+
+		fecha_inicial = '01-01-{}'.format(year)
+		fecha_final = '31-12-{}'.format(year)
+		fecha_i = datetime.strptime(fecha_inicial, '%d-%m-%Y')
+		fecha_f = datetime.strptime(fecha_final, '%d-%m-%Y')
+
+		fiscal_year = frappe.get_all("Fiscal Year", ["*"], filters = {"year_start_date": [">=", fecha_i], "year_end_date": ["<=", fecha_f]})
+
+		company = frappe.get_doc("Company", self.company)
+
+		account_to_debit = company.default_payable_account
+
+		reason_porcentage = frappe.get_all("Customer Reason And Percentage", ["reason"], filters = {"parent": self.name})
+
+		reason_retention = frappe.get_doc("Customer Reason For Retention", reason_porcentage[0].reason)
+
+		account_to_credit = reason_retention.account
+
+		doc = frappe.new_doc("GL Entry")
+		doc.posting_date = self.posting_date
+		doc.transaction_date = None
+		doc.account = account_to_debit
+		doc.party_type = "Customer"
+		doc.party = self.customer
+		doc.cost_center = company.cost_center
+		doc.debit = self.total_withheld
+		doc.credit = 0
+		doc.account_currency = self.currency
+		doc.debit_in_account_currency = self.total_withheld
+		doc.credit_in_account_currency = None
+		doc.against = account_to_credit
+		doc.against_voucher_type = self.doctype
+		doc.against_voucher = self.name
+		doc.voucher_type =  self.doctype
+		doc.voucher_no = self.name
+		doc.voucher_detail_no = None
+		doc.project = None
+		doc.remarks = 'No Remarks'
+		doc.is_opening = "No"
+		doc.is_advance = "No"
+		doc.fiscal_year = fiscal_year[0].name
+		doc.company = self.company
+		doc.finance_book = None
+		doc.to_rename = 1
+		doc.due_date = None
+		# doc.docstatus = 1
+		doc.insert()
+
+		doc = frappe.new_doc("GL Entry")
+		doc.posting_date = self.posting_date
+		doc.transaction_date = None
+		doc.account = account_to_credit
+		doc.party_type = "Customer"
+		doc.party = self.customer
+		doc.cost_center = company.cost_center
+		doc.debit = 0
+		doc.credit = self.total_withheld
+		doc.account_currency = self.currency
+		doc.debit_in_account_currency = 0
+		doc.credit_in_account_currency = self.total_withheld
+		doc.against = account_to_debit
+		doc.against_voucher_type = self.doctype
+		doc.against_voucher = self.name
+		doc.voucher_type =  self.doctype
+		doc.voucher_no = self.name
+		doc.voucher_detail_no = None
+		doc.project = None
+		doc.remarks = 'No Remarks'
+		doc.is_opening = "No"
+		doc.is_advance = "No"
+		doc.fiscal_year = fiscal_year[0].name
+		doc.company = self.company
+		doc.finance_book = None
+		doc.to_rename = 1
+		doc.due_date = None
+		# doc.docstatus = 1
+		doc.insert()
+	
+	def apply_changes_sales_invoice(self):
+		references = frappe.get_all("Reference Customer Retention", ["*"], filters = {"parent": self.name})
+
+		for reference in references:
+			if reference.reference_doctype == "Sales Invoice":
+				doc = frappe.get_doc("Sales Invoice", reference.reference_name)
+				outstanding = doc.outstanding_amount - reference.net_total
+				doc.db_set('outstanding_amount', outstanding, update_modified=False)

@@ -1,0 +1,139 @@
+{
+ "autoname": "DIS-CONT-.YYYY.-.########",
+ "creation": "2021-08-20 11:03:46.148909",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sale_invoice",
+  "delivery_area",
+  "creation_date",
+  "column",
+  "patient_name",
+  "customer",
+  "section",
+  "items",
+  "status",
+  "amended_from",
+  "ready",
+  "unready"
+ ],
+ "fields": [
+  {
+   "fieldname": "sale_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sale Invoice",
+   "options": "Sales Invoice",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "sale_invoice.customer",
+   "fieldname": "customer",
+   "fieldtype": "Data",
+   "label": "Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_area",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Delivery Area",
+   "options": "Delivery Area",
+   "reqd": 1
+  },
+  {
+   "fieldname": "creation_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Creation Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Dispatch Control Detail",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "\nDraft\nOn Hold\nTo Ready and Unready\nTo Unready\nTo Ready\nCompleted\nCancelled\nClosed\nDelivered",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Dispatch Control",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "ready",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "% Ready",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "unready",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "% Unready",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "sale_invoice.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-11-03 09:28:24.884914",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Dispatch Control",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

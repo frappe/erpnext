@@ -127,6 +127,9 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				on_customer_change: (customer) => {
 					this.frm.set_value('customer', customer);
 				},
+				on_patient_change: (patient) => {
+					this.frm.set_value('patient', patient);
+				},
 				on_field_change: (item_code, field, value, batch_no) => {
 					this.update_item_in_cart(item_code, field, value, batch_no);
 				},
@@ -444,9 +447,13 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 			$(this.frm.msgbox.body).find('.btn-default').on('click', () => {
 				this.frm.msgbox.hide();
-				this.make_new_invoice();
+				this.refresh_invoice();
 			})
 		}
+	}
+
+	refresh_invoice() {
+		location.reload();
 	}
 
 	change_pos_profile() {
@@ -663,6 +670,19 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.page.add_menu_item(__('Change POS Profile'), function() {
 			me.change_pos_profile();
 		});
+
+		this.page.add_menu_item(__('Cash Entry'), function() {
+			frappe.set_route('List', 'Cash Entry');
+		});
+
+		this.page.add_menu_item(__('Cash Withdrawal'), function() {
+			frappe.set_route('List', 'Cash Withdrawal');
+		});
+		this.page.add_menu_item(__('Payment Of Hospital Bill Advances'), function() {
+			frappe.set_route('List', 'Advance Statement/');
+		});
+
+
 		this.page.add_menu_item(__('Close the POS'), function() {
 			var voucher = frappe.model.get_new_doc('POS Closing Voucher');
 			voucher.pos_profile = me.frm.doc.pos_profile;
@@ -690,7 +710,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 		if (this.frm.doc.docstatus == 1) {
 			this.page.set_primary_action(__("New"), () => {
-				this.make_new_invoice();
+				this.refresh_invoice();
 			});
 			this.page.add_menu_item(__("Email"), () => {
 				this.frm.email_doc();
@@ -714,6 +734,10 @@ class POSCart {
 	make() {
 		this.make_dom();
 		this.make_customer_field();
+		if (frappe.boot.active_domains.includes("Healthcare")){
+			this.make_patient_field()
+			this.make_patient_name_field()
+		}
 		this.make_loyalty_points();
 		this.make_numpad();
 	}
@@ -722,6 +746,10 @@ class POSCart {
 		this.wrapper.append(`
 			<div class="pos-cart">
 				<div class="customer-field">
+				</div>
+				<div class="patient-field">
+				</div>
+				<div class="patient-name-field">
 				</div>
 				<div class="cart-wrapper">
 					<div class="list-item-table">
@@ -949,6 +977,60 @@ class POSCart {
 		this.customer_field.set_value(this.frm.doc.customer);
 	}
 
+	make_pos_field() {
+		this.pos_field = frappe.ui.form.make_control({
+			df: {
+				fieldtype: 'Data',
+				label: 'POS',
+				fieldname: 'pos',
+				read_only: 1,
+				default: this.frm.doc.pos_profile,
+			},
+			parent: this.wrapper.find('.pos-field'),
+			render_input: true
+		});
+
+		this.pos_field.set_value(this.frm.doc.pos_profile,);
+	}
+
+	make_patient_field() {
+		this.patient_field = frappe.ui.form.make_control({
+			df: {
+				fieldtype: 'Link',
+				label: 'Patient',
+				fieldname: 'patient',
+				options: 'Patient',
+				onchange: () => {
+					this.events.on_patient_change(this.patient_field.get_value());
+					this.events.get_loyalty_details();
+					this.add_patient_name();
+				}
+			},
+			parent: this.wrapper.find('.patient-field'),
+			render_input: true
+		});
+
+		this.patient_field.set_value(this.frm.doc.patient);
+		// this.patient_name.set_value(this.frm.doc.patient_name);
+	}
+
+	make_patient_name_field() {
+		this.patient_name = frappe.ui.form.make_control({
+			df: {
+				fetch_from: "patient.patient_name",
+				fieldtype: 'Data',
+				label: 'Patient Name',
+				fieldname: 'patient_name',
+				read_only: 1
+			},
+			parent: this.wrapper.find('.patient-name-field'),
+			render_input: true
+		});
+	}
+
+	add_patient_name() {
+		this.patient_name.set_value(this.frm.doc.patient_name);
+	}
 
 	make_loyalty_points() {
 		this.available_loyalty_points = frappe.ui.form.make_control({
@@ -1804,6 +1886,32 @@ class Payment {
 				}
 			},
 			{
+				fieldtype: 'Currency',
+				label: __("Additional Discount Amount"),
+				options: me.frm.doc.currency,
+				fieldname: "discount_amount",
+				default: me.frm.doc.discount_amount,
+				onchange: () => {
+					me.update_cur_frm_value('discount_amount', () => {
+						frappe.flags.discount_amount = false;
+						me.update_discount_amount()
+					});
+				}
+			},
+			{
+				fieldtype: 'Currency',
+				label: __("Additional Discount Percentage"),
+				options: me.frm.doc.currency,
+				fieldname: "additional_discount_percentage",
+				default: me.frm.doc.additional_discount_percentage,
+				onchange: () => {
+					me.update_cur_frm_value('additional_discount_percentage', () => {
+						frappe.flags.additional_discount_percentage = false;
+						me.update_additional_discount_percentage()
+					});
+				}
+			},
+			{
 				fieldtype: 'Column Break',
 			},
 			{
@@ -1820,6 +1928,30 @@ class Payment {
 				}
 			},
 			{
+				fieldtype: 'Link',
+				label: __("Discount Reason"),
+				options: "Reason For Discount",
+				fieldname: "discount_reason",
+				default: me.frm.doc.discount_reason,
+				onchange: () => {
+					me.update_cur_frm_value('discount_reason', () => {
+						frappe.flags.discount_reason = false;
+					});
+				}
+			},
+			{
+				fieldtype: 'Currency',
+				label: __("Total With Discount"),
+				options: me.frm.doc.currency,
+				fieldname: "total_with_discount",
+				default: me.frm.doc.currency,
+				onchange: () => {
+					me.update_cur_frm_value('total_with_discount', () => {
+						frappe.flags.total_with_discount = false;
+					});
+				}
+			},
+			{
 				fieldtype: 'Section Break',
 			},
 			{
@@ -1830,6 +1962,22 @@ class Payment {
 				default: me.frm.doc.paid_amount,
 				read_only: 1
 			},
+			// {
+			// 	fieldtype: 'Currency',
+			// 	label: __("Taxed Sales15"),
+			// 	options: me.frm.doc.currency,
+			// 	fieldname: "taxed_sales15",
+			// 	default: me.frm.doc.taxed_sales15,
+			// 	read_only: 1
+			// },
+			// {
+			// 	fieldtype: 'Currency',
+			// 	label: __("ISV 15%"),
+			// 	options: me.frm.doc.currency,
+			// 	fieldname: "isv15",
+			// 	default: me.frm.doc.isv15,
+			// 	read_only: 1
+			// },
 			{
 				fieldtype: 'Column Break',
 			},
@@ -1841,6 +1989,22 @@ class Payment {
 				default: me.frm.doc.outstanding_amount,
 				read_only: 1
 			},
+			// {
+			// 	fieldtype: 'Currency',
+			// 	label: __("Taxed Sales18"),
+			// 	options: me.frm.doc.currency,
+			// 	fieldname: "taxed_sales18",
+			// 	default: me.frm.doc.taxed_sales18,
+			// 	read_only: 1
+			// },
+			// {
+			// 	fieldtype: 'Currency',
+			// 	label: __("ISV 18%"),
+			// 	options: me.frm.doc.currency,
+			// 	fieldname: "isv18",
+			// 	default: me.frm.doc.isv18,
+			// 	read_only: 1
+			// },
 		]);
 
 		return fields;
@@ -1852,6 +2016,10 @@ class Payment {
 		frappe.flags.loyalty_points = true;
 		frappe.flags.redeem_loyalty_points = true;
 		frappe.flags.payment_method = true;
+		frappe.flags.discount_amount = true;
+		frappe.flags.discount_reason = true;
+		frappe.flags.additional_discount_percentage = true;
+		frappe.flags.total_with_discount = true;
 	}
 
 	update_cur_frm_value(fieldname, callback) {
@@ -1879,17 +2047,32 @@ class Payment {
 			});
 	}
 
+	update_discount_amount() {
+		this.dialog.set_value("discount_amount", this.frm.doc.discount_amount);
+		this.update_change_amount();
+	}
+
+	update_additional_discount_percentage() {
+		this.dialog.set_value("additional_discount_percentage", this.frm.doc.additional_discount_percentage);
+		this.update_change_amount();
+	}
+
 	update_change_amount() {
 		this.dialog.set_value("change_amount", this.frm.doc.change_amount);
 		this.show_paid_amount();
+		this.update_total_with_discount()
 	}
 
 	update_write_off_amount() {
 		this.dialog.set_value("write_off_amount", this.frm.doc.write_off_amount);
 	}
 
+	update_total_with_discount() {
+		this.dialog.set_value("total_with_discount", this.frm.doc.paid_amount);
+	}
+
+
 	show_paid_amount() {
-		this.dialog.set_value("paid_amount", this.frm.doc.paid_amount);
 		this.dialog.set_value("outstanding_amount", this.frm.doc.outstanding_amount);
 	}
 

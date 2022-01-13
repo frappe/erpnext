@@ -31,6 +31,7 @@ from six import iteritems
 from datetime import datetime, timedelta, date
 from frappe.model.naming import parse_naming_series
 from frappe.utils.data import money_in_words
+from datetime import datetime
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -194,15 +195,19 @@ class SalesInvoice(SellingController):
 					self.set_new_row_item(item, product_price[0].price_list_rate, amount, 0)
 					frappe.delete_doc('Sales Invoice Item', item.name)
 
+	def calculate_insurance(self):
+		self.total_insurance_deduction = self.excesses + self.deductible + self.ineligible_expenses + self.co_pay20
+		self.deduction_grand_total = self.grand_total - self.total_insurance_deduction
 
 	def validate(self):
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
 		self.discount_product()
+		self.calculate_insurance()
 
 		if self.docstatus == 0:
 			self.caculate_items_amount()
-			self.set_cost_center()
+			# self.set_cost_center()
 
 		if not self.is_pos:
 			self.so_dn_required()
@@ -272,12 +277,101 @@ class SalesInvoice(SellingController):
 		self.exonerated_value()
 		if self.docstatus == 1:
 			self.update_accounts_status()
+			if self.is_pos:
+				self.allow_credit_pos()
+			# self.create_dispatch_control()
 
 		# if self.docstatus == 0:
 		# 	self.validate_camps()
 
 		# if self.docstatus == 0:
 		# 	self.assign_cai()
+	
+	def allow_credit_pos(self):
+		pos_profile = frappe.get_all("POS Profile", ["allow_credit"], filters = {"name": self.pos_profile})
+
+		if self.outstanding_amount > 0:
+			if pos_profile[0].allow_credit == 0:
+				frappe.throw(_("It is not allowed to give credit at this point of sale"))
+
+	def create_dispatch_control(self):
+		products = frappe.get_all("Sales Invoice Item", ["item_code", "qty"], filters = {"parent": self.name})
+
+		areas = frappe.get_all("Delivery Area", ["name"])
+
+		for area in areas:
+			products_dispatch = []
+			area_details = frappe.get_all("Delivery Area Detail", ["item"], filters = {"parent": area.name})
+			for product in products:
+				for areadetail in area_details:
+					if product.item_code == areadetail.item:
+						pro = [product.item_code, product.qty]
+						products_dispatch.append(pro)
+			
+			if len(products_dispatch) > 0:
+				doc = frappe.new_doc('Dispatch Control')
+				doc.sale_invoice = self.name
+				doc.delivery_area = area.name
+				doc.creation_date = datetime.now()
+				for list_product in products_dispatch:
+					row = doc.append("items", {
+					'item': list_product[0],
+					'qty': list_product[1]
+					})
+				doc.insert()
+
+	def assing_price_list(self):
+		day_in = datetime.today().weekday()
+		day = ""
+
+		if day_in == 0:
+			day = "Lunes"
+		elif day_in == 1:
+			day = "Martes"
+		elif day_in == 2:
+			day = "Miercoles"
+		elif day_in == 3:
+			day = "Jueves"
+		elif day_in == 4:
+			day = "Viernes"
+		elif day_in == 5:
+			day = "Sábado"
+		elif day_in == 6:
+			day = "Domingo"
+
+		price_list_schedule_detail = frappe.get_all("Price List Schedule Detail", ["price_list"], filters = {"day": day, "start_time": ["<=", self.posting_time], "final_hour": [">=", self.posting_time], "company":self.company})
+
+		if len(price_list_schedule_detail) > 0:
+			self.set('selling_price_list', price_list_schedule_detail[0].price_list)
+	
+	def assing_price_list_pos(self):
+		day_in = datetime.today().weekday()
+		day = ""
+		price_list = ""
+
+		if day_in == 0:
+			day = "Lunes"
+		elif day_in == 1:
+			day = "Martes"
+		elif day_in == 2:
+			day = "Miercoles"
+		elif day_in == 3:
+			day = "Jueves"
+		elif day_in == 4:
+			day = "Viernes"
+		elif day_in == 5:
+			day = "Sábado"
+		elif day_in == 6:
+			day = "Domingo"
+
+		company = self.company
+
+		price_list_schedule_detail = frappe.get_all("Price List Schedule Detail", ["price_list"], filters = {"day": day, "start_time": ["<=", self.posting_time], "final_hour": [">=", self.posting_time], "company":self.company})
+
+		if len(price_list_schedule_detail) > 0:
+			price_list = price_list_schedule_detail[0].price_list
+
+		return price_list
 
 	def calculated_taxes(self):
 		taxed15 = 0
@@ -286,6 +380,7 @@ class SalesInvoice(SellingController):
 		exonerated = 0
 		taxed_sales15 = 0
 		taxed_sales18 = 0
+		outstanding_amount = 0
 
 		if self.taxes_and_charges:
 					if self.exonerated == 1:
@@ -354,7 +449,12 @@ class SalesInvoice(SellingController):
 			else:
 				self.grand_total = self.total
 		
-		self.outstanding_amount = self.grand_total - self.total_advance
+		if self.is_pos and self.change_amount > 0:
+			outstanding_amount = 0
+			self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+		else:
+			self.outstanding_amount = self.grand_total - self.total_advance
+		
 		self.rounded_total = self.grand_total
 		self.in_words = money_in_words(self.grand_total)
 
@@ -410,6 +510,8 @@ class SalesInvoice(SellingController):
 
 	def assign_cai(self):
 		user = frappe.session.user
+
+		# user_name = frappe.get_all("User", ["first_name"], filters = {"email": user})
 
 		cai = frappe.get_all("CAI", ["initial_number", "final_number", "name_cai", "cai", "issue_deadline", "prefix"], filters = { "status": "Active", "prefix": self.naming_series})
 
@@ -798,6 +900,9 @@ class SalesInvoice(SellingController):
 		self.set_paid_amount()
 		self.exonerated_value()
 		self.calculated_taxes()
+		if self.docstatus == 1:
+			self.create_dispatch_control()
+		self.reload()
 
 	def set_paid_amount(self):
 		paid_amount = 0.0
@@ -859,7 +964,15 @@ class SalesInvoice(SellingController):
 				self.company_address = pos.get("company_address")
 
 			if not customer_price_list:
-				self.set('selling_price_list', pos.get('selling_price_list'))
+				price_list = self.assing_price_list_pos()
+
+				if price_list != "":
+					doc = frappe.get_doc('POS Profile', pos.get('name'))
+					doc.selling_price_list = price_list
+					doc.save()
+					self.set('selling_price_list', price_list)
+				else:
+					self.set('selling_price_list', pos.get("selling_price_list"))
 
 			if not for_validate:
 				self.update_stock = cint(pos.get("update_stock"))
@@ -1162,8 +1275,8 @@ class SalesInvoice(SellingController):
 
 		self.make_customer_gl_entry(gl_entries)
 
-		if self.exonerated and self.account_head == None:
-			frappe.throw(_("You need to fill the account head field"))
+		# if self.exonerated and self.account_head == None:
+		# 	frappe.throw(_("You need to fill the account head field"))
 
 		self.make_tax_gl_entries(gl_entries)
 
@@ -1174,7 +1287,7 @@ class SalesInvoice(SellingController):
 
 		self.make_loyalty_point_redemption_gle(gl_entries)
 		self.make_pos_gl_entries(gl_entries)
-		self.make_gle_for_change_amount(gl_entries)
+		# self.make_gle_for_change_amount(gl_entries)
 
 		self.make_write_off_gl_entry(gl_entries)
 		self.make_gle_for_rounding_adjustment(gl_entries)
@@ -1295,14 +1408,19 @@ class SalesInvoice(SellingController):
 			for payment_mode in self.payments:
 				if payment_mode.amount:
 					# POS, make payment entries
+					if payment_mode.mode_of_payment == "Efectivo":
+						amount = payment_mode.base_amount - self.change_amount
+					else:
+						amount = payment_mode.base_amount
+						
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": self.debit_to,
 							"party_type": "Customer",
 							"party": self.customer,
 							"against": payment_mode.account,
-							"credit": payment_mode.base_amount,
-							"credit_in_account_currency": payment_mode.base_amount \
+							"credit": amount,
+							"credit_in_account_currency": amount \
 								if self.party_account_currency==self.company_currency \
 								else payment_mode.amount,
 							"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
@@ -1316,8 +1434,8 @@ class SalesInvoice(SellingController):
 						self.get_gl_dict({
 							"account": payment_mode.account,
 							"against": self.customer,
-							"debit": payment_mode.base_amount,
-							"debit_in_account_currency": payment_mode.base_amount \
+							"debit": amount,
+							"debit_in_account_currency": amount \
 								if payment_mode_account_currency==self.company_currency \
 								else payment_mode.amount,
 							"cost_center": self.cost_center

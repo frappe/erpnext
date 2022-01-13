@@ -20,7 +20,7 @@ def get_data():
 				'items': ['Customer', 'Supplier']
 			},
 			{
-				'items': ['Bank Guarantee']
+				'items': ['Bank Guarantee', 'Bank Transactions']
 			},
 			{
 				'items': ['Journal Entry']

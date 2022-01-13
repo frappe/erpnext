@@ -168,6 +168,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Confidential Payroll",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "Assignment Salary Component",
 					"dependencies": ["Payroll Entry"]
 				},

@@ -18,6 +18,7 @@
   "item_group",
   "category_for_purchase",
   "category_for_sale",
+  "delivery_area",
   "is_item_from_hub",
   "stock_uom",
   "column_break0",
@@ -37,6 +38,7 @@
   "image",
   "section_break_11",
   "brand",
+  "active_component",
   "description",
   "sb_barcodes",
   "barcodes",
@@ -69,6 +71,7 @@
   "attributes",
   "defaults",
   "item_defaults",
+  "default_company",
   "purchase_details",
   "is_purchase_item",
   "purchase_uom",
@@ -1058,6 +1061,24 @@
    "fieldtype": "Link",
    "label": "Tax Detail",
    "options": "Tax Detail"
+  },
+  {
+   "fieldname": "active_component",
+   "fieldtype": "Small Text",
+   "label": "Active Component"
+  },
+  {
+   "fieldname": "delivery_area",
+   "fieldtype": "Link",
+   "label": "Delivery Area",
+   "options": "Delivery Area"
+  },
+  {
+   "fieldname": "default_company",
+   "fieldtype": "Link",
+   "label": "Default Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "has_web_view": 1,
@@ -1065,7 +1086,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2021-04-15 10:58:35.329255",
+ "modified": "2021-12-03 15:15:34.729610",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -1119,7 +1140,7 @@
    "role": "Manufacturing User"
   }
  ],
- "search_fields": "item_name,description,item_group,customer_code",
+ "search_fields": "item_name,description,item_group,customer_code,active_component",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
  "sort_field": "idx desc,modified desc",

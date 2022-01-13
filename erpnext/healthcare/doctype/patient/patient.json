@@ -16,8 +16,9 @@
   "naming_series",
   "patient_name",
   "sex",
-  "blood_group",
   "dob",
+  "dni",
+  "blood_group",
   "age_html",
   "status",
   "image",
@@ -26,6 +27,7 @@
   "report_preference",
   "mobile",
   "email",
+  "cologne",
   "phone",
   "disabled",
   "sb_relation",
@@ -51,7 +53,8 @@
   "more_info",
   "patient_details",
   "ac_sb",
-  "default_currency"
+  "default_currency",
+  "age"
  ],
  "fields": [
   {
@@ -103,7 +106,6 @@
    "reqd": 1
   },
   {
-   "bold": 1,
    "fieldname": "blood_group",
    "fieldtype": "Select",
    "label": "Blood Group",
@@ -154,8 +156,7 @@
    "ignore_user_permissions": 1,
    "label": "Customer",
    "options": "Customer",
-   "reqd": 1,
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "fieldname": "report_preference",
@@ -343,12 +344,37 @@
    "label": "Default Currency",
    "options": "Currency",
    "print_hide": 1
+  },
+  {
+   "fieldname": "dni",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "DNI",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "cologne",
+   "fieldtype": "Link",
+   "label": "Cologne",
+   "options": "Cologne"
+  },
+  {
+   "fieldname": "age",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Age"
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
  "max_attachments": 50,
- "modified": "2021-06-23 14:35:33.619341",
+ "modified": "2021-12-09 15:14:41.191480",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
@@ -406,7 +432,7 @@
  ],
  "quick_entry": 1,
  "restrict_to_domain": "Healthcare",
- "search_fields": "patient_name,mobile,email,phone",
+ "search_fields": "patient_name,mobile,email,phone,dni",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",

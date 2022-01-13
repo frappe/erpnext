@@ -44,6 +44,7 @@ class PaymentEntry(AccountsController):
 			self.party_account_currency = self.paid_to_account_currency
 
 	def validate(self):
+		self.user = frappe.session.user
 		self.setup_party_account_field()
 		self.set_missing_values()
 		self.validate_payment_type()
@@ -64,6 +65,33 @@ class PaymentEntry(AccountsController):
 		self.set_status()
 		if self.docstatus == 1:
 			self.update_accounts_status()
+			self.paid_supplier_documents()
+			self.paid_customer_documents()
+			self.calculate_diferred_account()
+
+	def calculate_diferred_account(self):
+		if self.bank_account != None:
+			doc = frappe.get_doc("Bank Account", self.bank_account)
+			if self.payment_type == "Receive":
+				doc.deferred_credits += self.paid_amount
+			if self.payment_type == "Pay":
+				doc.deferred_debits += self.paid_amount
+		
+			doc.current_balance = doc.deferred_credits - doc.deferred_debits
+		
+			doc.save()
+	
+	def calculate_diferred_account_cancel(self):
+		if self.bank_account != None:
+			doc = frappe.get_doc("Bank Account", self.bank_account)
+			if self.payment_type == "Receive":
+				doc.deferred_credits -= self.paid_amount
+			if self.payment_type == "Pay":
+				doc.deferred_debits -= self.paid_amount
+		
+			doc.current_balance = doc.deferred_credits - doc.deferred_debits
+		
+			doc.save()
 
 	def on_submit(self):
 		self.setup_party_account_field()
@@ -84,9 +112,26 @@ class PaymentEntry(AccountsController):
 		self.update_expense_claim()
 		self.delink_advance_entry_references()
 		self.set_status()
+		self.calculate_diferred_account_cancel()
 
 	def update_outstanding_amounts(self):
 		self.set_missing_ref_details(force=True)
+
+	def paid_supplier_documents(self):
+		documents = frappe.get_all("Payment Entry Reference", ["reference_doctype", "reference_name"], filters = {"parent": self.name})
+
+		for document in documents:
+			if document.reference_doctype == "Supplier Documents":
+				doc = frappe.get_doc("Supplier Documents", document.reference_name)
+				doc.db_set('status', "Paid", update_modified=False)
+	
+	def paid_customer_documents(self):
+		documents = frappe.get_all("Payment Entry Reference", ["reference_doctype", "reference_name"], filters = {"parent": self.name})
+
+		for document in documents:
+			if document.reference_doctype == "Customer Documents":
+				doc = frappe.get_doc("Customer Documents", document.reference_name)
+				doc.db_set('status', "Paid", update_modified=False)
 
 	def update_accounts_status(self):
 		if self.party_type == "Customer":
@@ -229,9 +274,9 @@ class PaymentEntry(AccountsController):
 		if self.party_type == "Student":
 			valid_reference_doctypes = ("Fees")
 		elif self.party_type == "Customer":
-			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry", "Debit Note CXC")
+			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry", "Debit Note CXC", "Customer Documents")
 		elif self.party_type == "Supplier":
-			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Journal Entry")
+			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Journal Entry", "Supplier Documents", "Credit Note CXP")
 		elif self.party_type == "Employee":
 			valid_reference_doctypes = ("Expense Claim", "Journal Entry", "Employee Advance")
 
@@ -864,9 +909,13 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			elif ref_doc.doctype == "Employee Advance":
 				total_amount = ref_doc.advance_amount
 			elif ref_doc.doctype == "Debit Note CXC":
-				total_amount = ref_doc.amount
+				total_amount = ref_doc.total
+			elif ref_doc.doctype == "Customer Documents":
+				total_amount = ref_doc.total
 			elif ref_doc.doctype == "Credit Note CXP":
-				total_amount = ref_doc.amount
+				total_amount = ref_doc.total
+			elif ref_doc.doctype == "Supplier Documents":
+				total_amount = ref_doc.total
 			else:
 				total_amount = ref_doc.base_grand_total
 			exchange_rate = 1
@@ -878,7 +927,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			exchange_rate = ref_doc.get("conversion_rate") or \
 				get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 
-		if reference_doctype in ("Sales Invoice", "Purchase Invoice", "Debit Note CXC", "Credit Note CXP"):
+		if reference_doctype in ("Sales Invoice", "Purchase Invoice", "Debit Note CXC", "Customer Documents", "Credit Note CXP", "Supplier Documents"):
 			outstanding_amount = ref_doc.get("outstanding_amount")
 			bill_no = ref_doc.get("bill_no")
 		elif reference_doctype == "Expense Claim":

@@ -13,6 +13,8 @@
   "posting_date",
   "due_date",
   "reason_debit_note",
+  "company",
+  "company_rtn",
   "cai_info_section",
   "cai",
   "due_date_cai",
@@ -21,7 +23,6 @@
   "total_exempt",
   "taxes",
   "section_break_2",
-  "company",
   "affects_sale_book",
   "affects_sales_month",
   "column_break_2",
@@ -29,7 +30,13 @@
   "isv_15",
   "total",
   "outstanding_amount",
-  "amended_from"
+  "amended_from",
+  "sectionaccount",
+  "account_to_debit",
+  "currency",
+  "columnaccount",
+  "account_to_credit",
+  "cost_center"
  ],
  "fields": [
   {
@@ -38,7 +45,7 @@
    "fieldtype": "Select",
    "label": "Series",
    "no_copy": 1,
-   "options": "DN-CXC-.YYYY.-",
+   "options": "000-002-07-.########",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -145,7 +152,6 @@
    "label": "Company",
    "options": "Company",
    "print_hide": 1,
-   "read_only": 1,
    "remember_last_selected_value": 1,
    "reqd": 1
   },
@@ -203,10 +209,54 @@
    "label": "Total",
    "options": "Currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "sectionaccount",
+   "fieldtype": "Section Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "account_to_debit",
+   "fieldtype": "Link",
+   "label": "Account To Debit",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "columnaccount",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "account_to_credit",
+   "fieldtype": "Link",
+   "label": "Account To Credit",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "company.tax_id",
+   "fieldname": "company_rtn",
+   "fieldtype": "Data",
+   "label": "Company RTN",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-05-24 16:33:09.978351",
+ "modified": "2021-12-16 13:38:26.021455",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Debit Note CXC",

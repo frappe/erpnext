@@ -1,12 +1,12 @@
 {
- "actions": [],
  "autoname": "field:reason",
  "creation": "2020-04-03 12:57:19.358309",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "reason"
+  "reason",
+  "accounts"
  ],
  "fields": [
   {
@@ -16,10 +16,16 @@
    "label": "Reason",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "accounts",
+   "fieldtype": "Table",
+   "label": "Accounts",
+   "options": "Mode of Payment Account",
+   "reqd": 1
   }
  ],
- "links": [],
- "modified": "2020-04-03 13:13:32.990931",
+ "modified": "2021-12-30 14:12:55.781128",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Reason For Discount",

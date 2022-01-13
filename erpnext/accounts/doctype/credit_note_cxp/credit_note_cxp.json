@@ -27,7 +27,13 @@
   "isv_15",
   "total",
   "outstanding_amount",
-  "amended_from"
+  "amended_from",
+  "sectionaccount",
+  "account_to_debit",
+  "currency",
+  "columnaccount",
+  "account_to_credit",
+  "cost_center"
  ],
  "fields": [
   {
@@ -190,10 +196,47 @@
    "label": "Amount Total",
    "options": "Currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "sectionaccount",
+   "fieldtype": "Section Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "account_to_debit",
+   "fieldtype": "Link",
+   "label": "Account To Debit",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "columnaccount",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "account_to_credit",
+   "fieldtype": "Link",
+   "label": "Account To Credit",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-05-24 16:27:12.581548",
+ "modified": "2021-12-09 16:01:56.235136",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Credit Note CXP",

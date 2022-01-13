@@ -35,6 +35,7 @@ def return_filters(filters):
 	conditions = ''
 
 	conditions += "{"
+	conditions += '"docstatus": 1, '
 	if filters.get("payroll_entry"): conditions += '"payroll_entry": "{}"'.format(filters.get("payroll_entry"))
 	if filters.get("salary_component"): conditions += ', "salary_component": "{}"'.format(filters.get("salary_component"))
 	conditions += '}'

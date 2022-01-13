@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint, throw
 from frappe.model.document import Document
+from datetime import datetime, timedelta, date
 
 class DebitNoteCXP(Document):
 	def validate(self):
@@ -14,6 +15,7 @@ class DebitNoteCXP(Document):
 		if self.docstatus == 1:
 			self.verificate_amount()
 			self.update_accounts_status()
+			self.apply_gl_entry()
 
 	def calculate_total(self):
 		if not self.get("references"):
@@ -45,8 +47,10 @@ class DebitNoteCXP(Document):
 							self.amount_total = total_base + self.total_exempt + self.isv_18
 	
 	def calculate_isv(self):
+		self.isv_15 = 0
+		self.isv_18 = 0
 		for taxes_list in self.get("taxes"):
-			item_tax_template = frappe.get_all("Item Tax Template", ["name"], filters = {"name": taxes_list.isv})
+			item_tax_template = frappe.get_all("Item Tax Template", ["name"], filters = {"name": taxes_list.isv_template})
 			for tax_template in item_tax_template:
 				tax_details = frappe.get_all("Item Tax Template Detail", ["name", "tax_rate"], filters = {"parent": tax_template.name})
 				for tax in tax_details:
@@ -93,3 +97,75 @@ class DebitNoteCXP(Document):
 			supplier.debit += self.amount_total
 			supplier.remaining_balance += self.amount_total
 			supplier.save()
+	
+	def apply_gl_entry(self):
+		currentDateTime = datetime.now()
+		date = currentDateTime.date()
+		year = date.strftime("%Y")
+
+		fecha_inicial = '01-01-{}'.format(year)
+		fecha_final = '31-12-{}'.format(year)
+		fecha_i = datetime.strptime(fecha_inicial, '%d-%m-%Y')
+		fecha_f = datetime.strptime(fecha_final, '%d-%m-%Y')
+
+		fiscal_year = frappe.get_all("Fiscal Year", ["*"], filters = {"year_start_date": [">=", fecha_i], "year_end_date": ["<=", fecha_f]})
+
+		doc = frappe.new_doc("GL Entry")
+		doc.posting_date = self.posting_date
+		doc.transaction_date = None
+		doc.account = self.account_to_debit
+		doc.party_type = "Supplier"
+		doc.party = self.supplier
+		doc.cost_center = self.cost_center
+		doc.debit = self.amount_total
+		doc.credit = 0
+		doc.account_currency = self.currency
+		doc.debit_in_account_currency = self.amount_total
+		doc.credit_in_account_currency = 0
+		doc.against = self.account_to_credit
+		doc.against_voucher_type = self.doctype
+		doc.against_voucher = self.name
+		doc.voucher_type =  self.doctype
+		doc.voucher_no = self.name
+		doc.voucher_detail_no = None
+		doc.project = None
+		doc.remarks = 'No Remarks'
+		doc.is_opening = "No"
+		doc.is_advance = "No"
+		doc.fiscal_year = fiscal_year[0].name
+		doc.company = self.company
+		doc.finance_book = None
+		doc.to_rename = 1
+		doc.due_date = None
+		# doc.docstatus = 1
+		doc.insert()
+
+		doc = frappe.new_doc("GL Entry")
+		doc.posting_date = self.posting_date
+		doc.transaction_date = None
+		doc.account = self.account_to_credit
+		doc.party_type = "Supplier"
+		doc.party = self.supplier
+		doc.cost_center = self.cost_center
+		doc.debit = 0
+		doc.credit = self.amount_total
+		doc.account_currency = self.currency
+		doc.debit_in_account_currency = 0
+		doc.credit_in_account_currency = self.amount_total
+		doc.against = self.account_to_debit
+		doc.against_voucher_type = self.doctype
+		doc.against_voucher = self.name
+		doc.voucher_type =  self.doctype
+		doc.voucher_no = self.name
+		doc.voucher_detail_no = None
+		doc.project = None
+		doc.remarks = 'No Remarks'
+		doc.is_opening = "No"
+		doc.is_advance = "No"
+		doc.fiscal_year = fiscal_year[0].name
+		doc.company = self.company
+		doc.finance_book = None
+		doc.to_rename = 1
+		doc.due_date = None
+		# doc.docstatus = 1
+		doc.insert()

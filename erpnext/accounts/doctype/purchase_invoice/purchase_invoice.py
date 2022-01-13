@@ -114,6 +114,8 @@ class PurchaseInvoice(BuyingController):
 		return self.on_hold and (not self.release_date or self.release_date > getdate(nowdate()))
 
 	def validate(self):
+		self.transaction_number = self.bill_no
+		
 		if not self.is_opening:
 			self.is_opening = 'No'
 

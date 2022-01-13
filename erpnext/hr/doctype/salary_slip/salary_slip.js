@@ -5,6 +5,10 @@ cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('time_sheet', 'total_hours', 'working_hours');
 
 frappe.ui.form.on("Salary Slip", {
+	before_load: function(frm) {
+		frm.events.confidential(frm);
+	},
+
 	setup: function(frm) {
 		$.each(["earnings", "deductions"], function(i, table_fieldname) {
 			frm.get_field(table_fieldname).grid.editable_fields = [
@@ -125,6 +129,13 @@ frappe.ui.form.on("Salary Slip", {
 			callback: function(r, rt) {
 				frm.refresh();
 			}
+		});
+	},
+
+	confidential: function(frm) {
+		return frappe.call({
+			method: "confidentials",
+			doc: frm.doc
 		});
 	}
 })

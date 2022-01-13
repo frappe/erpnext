@@ -1,0 +1,186 @@
+{
+ "allow_rename": 1,
+ "creation": "2021-11-15 16:31:35.478533",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "start_date",
+  "final_date",
+  "prefix",
+  "company",
+  "column1",
+  "start_hour",
+  "final_hour",
+  "user",
+  "section1",
+  "details",
+  "section2",
+  "total_cash",
+  "total_cards",
+  "total_advances_applied",
+  "total_no_monetary",
+  "total_income",
+  "column2",
+  "total_credit",
+  "total_utility",
+  "total_invoice",
+  "total_operations",
+  "total_exempt_sales"
+ ],
+ "fields": [
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "final_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "FInal Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "start_hour",
+   "fieldtype": "Time",
+   "hidden": 1,
+   "label": "Start Hour"
+  },
+  {
+   "fieldname": "final_hour",
+   "fieldtype": "Time",
+   "hidden": 1,
+   "label": "FInal Hour"
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "label": "User",
+   "options": "User"
+  },
+  {
+   "fieldname": "section1",
+   "fieldtype": "Section Break",
+   "label": "Data"
+  },
+  {
+   "fieldname": "total_cash",
+   "fieldtype": "Currency",
+   "label": "Total Cash",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_cards",
+   "fieldtype": "Currency",
+   "label": "Total Cards",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_advances_applied",
+   "fieldtype": "Currency",
+   "label": "Total Advances Applied",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_no_monetary",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Total No Monetary",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "total_income",
+   "fieldtype": "Currency",
+   "label": "Total Income",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_credit",
+   "fieldtype": "Currency",
+   "label": "Total Credit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_utility",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Total Utility",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "total_invoice",
+   "fieldtype": "Int",
+   "label": "(F) Total Invoices ",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_operations",
+   "fieldtype": "Int",
+   "label": "Total Operations",
+   "read_only": 1
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Table",
+   "label": "Sales For Customer Detail",
+   "options": "Sales For User Detail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "prefix",
+   "fieldtype": "Link",
+   "label": "Prefix",
+   "options": "Prefix sales for days"
+  },
+  {
+   "fieldname": "total_exempt_sales",
+   "fieldtype": "Currency",
+   "label": "Total Exempt Sales",
+   "read_only": 1
+  }
+ ],
+ "modified": "2021-12-23 11:15:16.126999",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Sales For User",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

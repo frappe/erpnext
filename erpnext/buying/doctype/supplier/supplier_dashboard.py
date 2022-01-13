@@ -36,5 +36,9 @@ def get_data():
 				'label': _('Retention'),
 				'items': ['Supplier Retention']
 			},
+			{
+				'label': _('Documents'),
+				'items': ['Supplier Documents']
+			},
 		]
 	}

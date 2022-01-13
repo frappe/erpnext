@@ -1,0 +1,145 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2021-07-28 15:49:06.699405",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "creation_date",
+  "reason_for_download",
+  "responsable",
+  "authorized",
+  "company",
+  "warehouse",
+  "download_area",
+  "items",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Series",
+   "options": "INV-DOW-.YYYY.-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "creation_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Creation Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Inventory Download Detail",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reason_for_download",
+   "fieldtype": "Link",
+   "label": "Reason For Download",
+   "options": "Reason For Download",
+   "reqd": 1
+  },
+  {
+   "fieldname": "responsable",
+   "fieldtype": "Data",
+   "label": "Responsable",
+   "reqd": 1
+  },
+  {
+   "fieldname": "authorized",
+   "fieldtype": "Data",
+   "label": "Authorized",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Inventory Download",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "download_area",
+   "fieldtype": "Link",
+   "label": "Download Area",
+   "options": "Download Area",
+   "reqd": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-12-30 14:31:52.625275",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Inventory Download",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Descarga de inventario",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Crear+validar descargas de inventario",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
