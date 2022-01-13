@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Point Of Sale\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings &amp; Configurations\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Loyalty Program\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Opening &amp; Closing\",\"col\":4}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Point Of Sale\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings & Configurations\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Loyalty Program\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Opening & Closing\",\"col\":4}}]",
  "creation": "2020-03-02 17:18:32.505616",
  "docstatus": 0,
  "doctype": "Workspace",
