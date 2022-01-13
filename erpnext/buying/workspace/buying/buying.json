@@ -5,7 +5,7 @@
    "label": "Purchase Order Trends"
   }
  ],
- "content": "[{\"type\":\"onboarding\",\"data\":{\"onboarding_name\":\"Buying\",\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Purchase Order Trends\",\"col\":12}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Material Request\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Order\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Analytics\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Order Analysis\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Buying\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Supplier\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Supplier Scorecard\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Key Reports\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Other Reports\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Regional\",\"col\":4}}]",
+ "content": "[{\"type\":\"onboarding\",\"data\":{\"onboarding_name\":\"Buying\",\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Purchase Order Trends\",\"col\":12}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Material Request\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Order\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Analytics\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Order Analysis\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Buying\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Items & Pricing\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Supplier\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Supplier Scorecard\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Key Reports\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Other Reports\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Regional\",\"col\":4}}]",
  "creation": "2020-01-28 11:50:26.195467",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -77,6 +77,14 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Items & Pricing",
+   "link_count": 0,
+   "onboard": 0,
+   "type": "Card Break"
   },
   {
    "dependencies": "",
