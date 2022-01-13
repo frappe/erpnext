@@ -233,6 +233,13 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Item-wise Purchase History By Purchase Justification",
+					"reference_doctype": "Item",
+					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Material Requests for which Supplier Quotations are not created",
 					"reference_doctype": "Material Request"
 				},
