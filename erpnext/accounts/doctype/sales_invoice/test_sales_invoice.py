@@ -2459,7 +2459,7 @@ class TestSalesInvoice(unittest.TestCase):
 		deferred_account = create_account(account_name="Deferred Revenue",
 			parent_account="Current Liabilities - _TC", company="_Test Company")
 
-		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		acc_settings = frappe.get_single('Accounts Settings')
 		acc_settings.book_deferred_entries_via_journal_entry = 1
 		acc_settings.submit_journal_entries = 1
 		acc_settings.save()
@@ -2474,7 +2474,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si.set_posting_time = 1
 		si.posting_date = '2019-01-01'
-		si.debit_to = '_Test Receivable USD - _TC'
+		# si.debit_to = '_Test Receivable USD - _TC'
 		si.items[0].enable_deferred_revenue = 1
 		si.items[0].service_start_date = "2019-01-01"
 		si.items[0].service_end_date = "2019-03-30"
@@ -2482,8 +2482,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.save()
 		si.submit()
 
-		acc_settings.acc_frozen_upto = '2019-01-31'
-		acc_settings.save()
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', getdate('2019-01-31'))
 
 		pda1 = frappe.get_doc(dict(
 			doctype='Process Deferred Accounting',
@@ -2517,12 +2516,12 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_gle[i][2], gle.debit)
 			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
-		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		acc_settings = frappe.get_single('Accounts Settings')
 		acc_settings.book_deferred_entries_via_journal_entry = 0
 		acc_settings.submit_journal_entriessubmit_journal_entries = 0
 		acc_settings.save()
 
-		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', add_days(getdate(), 1))
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', getdate('2019-01-31'))
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
