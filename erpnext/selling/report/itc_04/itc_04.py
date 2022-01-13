@@ -216,7 +216,7 @@ def get_data(filters):
 				data2['description_of_goods']=row.description
 				data2['unique_quantity_code'] = row.stock_uom
 				data2['quantity'] = row.transfer_qty
-				
+
 				data.append(data2)
 		return data
 
