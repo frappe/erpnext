@@ -85,8 +85,11 @@ class StockEntry(StockController):
 		self.validate_warehouse()
 		self.validate_work_order()
 		self.validate_bom()
-		self.mark_finished_and_scrap_items()
-		self.validate_finished_goods()
+
+		if self.purpose in ("Manufacture", "Repack"):
+			self.mark_finished_and_scrap_items()
+			self.validate_finished_goods()
+
 		self.validate_with_material_request()
 		self.validate_batch()
 		self.validate_inspection()
@@ -705,26 +708,25 @@ class StockEntry(StockController):
 				validate_bom_no(item_code, d.bom_no)
 
 	def mark_finished_and_scrap_items(self):
-		if self.purpose in ("Repack", "Manufacture"):
-			if any([d.item_code for d in self.items if (d.is_finished_item and d.t_warehouse)]):
-				return
+		if any([d.item_code for d in self.items if (d.is_finished_item and d.t_warehouse)]):
+			return
 
-			finished_item = self.get_finished_item()
+		finished_item = self.get_finished_item()
 
-			if not finished_item and self.purpose == "Manufacture":
-				# In case of independent Manufacture entry, don't auto set
-				# user must decide and set
-				return
+		if not finished_item and self.purpose == "Manufacture":
+			# In case of independent Manufacture entry, don't auto set
+			# user must decide and set
+			return
 
-			for d in self.items:
-				if d.t_warehouse and not d.s_warehouse:
-					if self.purpose=="Repack" or d.item_code == finished_item:
-						d.is_finished_item = 1
-					else:
-						d.is_scrap_item = 1
+		for d in self.items:
+			if d.t_warehouse and not d.s_warehouse:
+				if self.purpose=="Repack" or d.item_code == finished_item:
+					d.is_finished_item = 1
 				else:
-					d.is_finished_item = 0
-					d.is_scrap_item = 0
+					d.is_scrap_item = 1
+			else:
+				d.is_finished_item = 0
+				d.is_scrap_item = 0
 
 	def get_finished_item(self):
 		finished_item = None
