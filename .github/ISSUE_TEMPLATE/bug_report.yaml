@@ -40,6 +40,7 @@ body:
         - HR
         - projects
         - support
+        - CRM
         - assets
         - integrations
         - quality
@@ -48,6 +49,7 @@ body:
         - agriculture
         - education
         - non-profit
+        - other
     validations:
       required: true
 

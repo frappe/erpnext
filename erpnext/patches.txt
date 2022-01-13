@@ -279,6 +279,7 @@ erpnext.patches.v13_0.add_custom_field_for_south_africa #2
 erpnext.patches.v13_0.update_recipient_email_digest
 erpnext.patches.v13_0.shopify_deprecation_warning
 erpnext.patches.v13_0.remove_bad_selling_defaults
+erpnext.patches.v13_0.trim_whitespace_from_serial_nos
 erpnext.patches.v13_0.migrate_stripe_api
 erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
 erpnext.patches.v13_0.einvoicing_deprecation_warning
@@ -304,6 +305,7 @@ erpnext.patches.v13_0.add_default_interview_notification_templates
 erpnext.patches.v13_0.enable_scheduler_job_for_item_reposting
 erpnext.patches.v13_0.requeue_failed_reposts
 erpnext.patches.v13_0.update_job_card_status
+erpnext.patches.v13_0.enable_uoms
 erpnext.patches.v12_0.update_production_plan_status
 erpnext.patches.v13_0.healthcare_deprecation_warning
 erpnext.patches.v13_0.item_naming_series_not_mandatory
@@ -322,3 +324,4 @@ execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings'
 erpnext.patches.v14_0.set_payroll_cost_centers
 erpnext.patches.v13_0.agriculture_deprecation_warning
 erpnext.patches.v14_0.delete_agriculture_doctypes
+erpnext.patches.v13_0.update_exchange_rate_settings
