@@ -60,6 +60,8 @@ class PayrollEntry(Document):
 	def on_cancel(self):
 		frappe.delete_doc("Salary Slip", frappe.db.sql_list("""select name from `tabSalary Slip`
 			where payroll_entry=%s """, (self.name)))
+		self.db_set("salary_slips_created", 0)
+		self.db_set("salary_slips_submitted", 0)
 
 	def get_emp_list(self):
 		"""
