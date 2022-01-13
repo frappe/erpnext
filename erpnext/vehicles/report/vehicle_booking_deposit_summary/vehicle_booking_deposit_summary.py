@@ -171,8 +171,8 @@ class VehicleBookingDepositSummaryReport(object):
 		if self.filters.supplier:
 			conditions.append("dep_m.party_type = 'Supplier' and dep_m.party = %(supplier)s")
 
-		if self.filters.company:
-			conditions.append("dep_m.party_type = 'Company' and dep_m.party = %(company)s")
+		if self.filters.deposit_company:
+			conditions.append("dep_m.party_type = 'Company' and dep_m.party = %(deposit_company)s")
 
 		if self.filters.deposit_type:
 			conditions.append("dep_m.deposit_type = %(deposit_type)s")
