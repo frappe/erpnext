@@ -2474,7 +2474,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si.set_posting_time = 1
 		si.posting_date = '2019-01-01'
-		# si.debit_to = '_Test Receivable USD - _TC'
+		si.debit_to = '_Test Receivable USD - _TC'
 		si.items[0].enable_deferred_revenue = 1
 		si.items[0].service_start_date = "2019-01-01"
 		si.items[0].service_end_date = "2019-03-30"
@@ -2521,7 +2521,7 @@ class TestSalesInvoice(unittest.TestCase):
 		acc_settings.submit_journal_entriessubmit_journal_entries = 0
 		acc_settings.save()
 
-		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', getdate('2019-01-31'))
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
