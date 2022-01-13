@@ -40,7 +40,7 @@ class Gstr1Report(object):
 			port_code,
 			shipping_bill_number,
 			shipping_bill_date,
-			reason_for_issuing_document
+			reason_for_issuing_document,
 			company_gstin
 		"""
 
@@ -98,32 +98,32 @@ class Gstr1Report(object):
 		nil_exempt_output = [
 			{
 				"description": "Inter-State supplies to registered persons",
-				"nil_rate": 0.0,
+				"nil_rated": 0.0,
 				"exempted": 0.0,
 				"non_gst": 0.0
 			},
 			{
 				"description": "Intra-State supplies to registered persons",
-				"nil_rate": 0.0,
+				"nil_rated": 0.0,
 				"exempted": 0.0,
 				"non_gst": 0.0
 			},
 			{
 				"description": "Inter-State supplies to unregistered persons",
-				"nil_rate": 0.0,
+				"nil_rated": 0.0,
 				"exempted": 0.0,
 				"non_gst": 0.0
 			},
 			{
-				"description": "Intra-State supplies to registered persons",
-				"nil_rate": 0.0,
+				"description": "Intra-State supplies to unregistered persons",
+				"nil_rated": 0.0,
 				"exempted": 0.0,
 				"non_gst": 0.0
 			}
 		]
 
 		for invoice, details in self.nil_exempt_non_gst.items():
-			invoice_detail = self.invoice.get(invoice)
+			invoice_detail = self.invoices.get(invoice)
 			if invoice_detail.get('gst_category') in ("Registered Regular", "Deemed Export", "SEZ"):
 				if is_inter_state(invoice_detail):
 					nil_exempt_output[0]["nil_rated"] += details[0]
@@ -387,21 +387,24 @@ class Gstr1Report(object):
 					self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, items.keys())
 
 	def get_columns(self):
-		self.tax_columns = [
-			{
-				"fieldname": "rate",
-				"label": "Rate",
-				"fieldtype": "Int",
-				"width": 60
-			},
-			{
-				"fieldname": "taxable_value",
-				"label": "Taxable Value",
-				"fieldtype": "Currency",
-				"width": 100
-			}
-		]
 		self.other_columns = []
+		self.tax_columns = []
+
+		if self.filters.get("type_of_business") != "NIL Rated":
+			self.tax_columns = [
+				{
+					"fieldname": "rate",
+					"label": "Rate",
+					"fieldtype": "Int",
+					"width": 60
+				},
+				{
+					"fieldname": "taxable_value",
+					"label": "Taxable Value",
+					"fieldtype": "Currency",
+					"width": 100
+				}
+			]
 
 		if self.filters.get("type_of_business") ==  "B2B":
 			self.invoice_columns = [
@@ -773,10 +776,10 @@ class Gstr1Report(object):
 		elif self.filters.get("type_of_business") == "NIL Rated":
 			self.invoice_columns = [
 				{
-					"fieldname": "descripton",
+					"fieldname": "description",
 					"label": "Description",
 					"fieldtype": "Data",
-					"width": 120
+					"width": 420
 				},
 				{
 					"fieldname": "nil_rated",
@@ -859,6 +862,11 @@ def get_json(filters, report_name, data):
 
 		out = get_advances_json(res, gstin)
 		gst_json["at"] = out
+
+	elif filters["type_of_business"] == "NIL Rated":
+		res = report_data[:-1]
+		out = get_exempted_json(res)
+		gst_json["nil"] = out
 
 	return {
 		'report_name': report_name,
@@ -1069,6 +1077,36 @@ def get_cdnr_unreg_json(res, gstin):
 			inv_item["itms"].append(get_rate_and_tax_details(item, gstin))
 
 		out.append(inv_item)
+
+	return out
+
+def get_exempted_json(data):
+	out = {
+		"inv": [
+			{
+				"sply_ty": "INTRB2B"
+			},
+			{
+				"sply_ty": "INTRAB2B"
+			},
+			{
+				"sply_ty": "INTRB2C"
+			},
+			{
+				"sply_ty": "INTRAB2C"
+			}
+		]
+	}
+
+	for i, v in enumerate(data):
+		if data[i].get('nil_rated'):
+			out['inv'][i]['nil_amt'] = data[i]['nil_rated']
+
+		if data[i].get('exempted'):
+			out['inv'][i]['expt_amt'] = data[i]['exempted']
+
+		if data[i].get('non_gst'):
+			out['inv'][i]['ngsup_amt'] = data[i]['non_gst']
 
 	return out
 
