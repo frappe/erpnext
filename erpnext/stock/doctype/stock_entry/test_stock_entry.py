@@ -228,7 +228,7 @@ class TestStockEntry(ERPNextTestCase):
 		mtn.cancel()
 
 	def test_repack_multiple_fg(self):
-		"Test `is_finsihed_item` for one item repacked into two items."
+		"Test `is_finished_item` for one item repacked into two items."
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=100, basic_rate=100)
 
 		repack = frappe.copy_doc(test_records[3])
@@ -238,7 +238,6 @@ class TestStockEntry(ERPNextTestCase):
 		repack.items[0].qty = 100.0
 		repack.items[0].transfer_qty = 100.0
 		repack.items[1].qty = 50.0
-		repack.items[1].basic_rate = 200
 
 		repack.append("items", {
 			"conversion_factor": 1.0,
@@ -259,6 +258,14 @@ class TestStockEntry(ERPNextTestCase):
 
 		self.assertEqual(repack.items[1].is_finished_item, 1)
 		self.assertEqual(repack.items[2].is_finished_item, 1)
+
+		repack.items[1].is_finished_item = 0
+		repack.items[2].is_finished_item = 0
+
+		# must raise error if 0 fg in repack entry
+		self.assertRaises(FinishedGoodError, repack.validate_finished_goods)
+
+		repack.delete() # teardown
 
 	def test_repack_no_change_in_valuation(self):
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
