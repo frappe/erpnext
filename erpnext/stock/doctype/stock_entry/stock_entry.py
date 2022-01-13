@@ -737,9 +737,9 @@ class StockEntry(StockController):
 
 	def validate_finished_goods(self):
 		"""
-			1. Check if FG exists
-			2. Check if Multiple FG Items are present
-			3. Check FG Item and Qty against WO if present
+			1. Check if FG exists (mfg, repack)
+			2. Check if Multiple FG Items are present (mfg)
+			3. Check FG Item and Qty against WO if present (mfg)
 		"""
 		production_item, wo_qty, finished_items = None, 0, []
 
@@ -752,8 +752,9 @@ class StockEntry(StockController):
 		for d in self.get('items'):
 			if d.is_finished_item:
 				if not self.work_order:
+					# Independent MFG Entry/ Repack Entry, no WO to match against
 					finished_items.append(d.item_code)
-					continue # Independent Manufacture Entry, no WO to match against
+					continue
 
 				if d.item_code != production_item:
 					frappe.throw(_("Finished Item {0} does not match with Work Order {1}")
@@ -766,19 +767,17 @@ class StockEntry(StockController):
 
 				finished_items.append(d.item_code)
 
-		if len(set(finished_items)) > 1:
+		if not finished_items:
 			frappe.throw(
-				msg=_("Multiple items cannot be marked as finished item"),
-				title=_("Note"),
-				exc=FinishedGoodError
+				msg=_("There must be atleast 1 Finished Good in this Stock Entry").format(self.name),
+				title=_("Missing Finished Good"), exc=FinishedGoodError
 			)
 
 		if self.purpose == "Manufacture":
-			if not finished_items:
+			if len(set(finished_items)) > 1:
 				frappe.throw(
-					msg=_("There must be atleast 1 Finished Good in this Stock Entry").format(self.name),
-					title=_("Missing Finished Good"),
-					exc=FinishedGoodError
+					msg=_("Multiple items cannot be marked as finished item"),
+					title=_("Note"), exc=FinishedGoodError
 				)
 
 			allowance_percentage = flt(
