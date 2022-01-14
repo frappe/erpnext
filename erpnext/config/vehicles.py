@@ -66,19 +66,17 @@ def get_data():
 			],
 		},
 		{
-			"label": _("Vehicle Documents"),
+			"label": _("Vehicle Service"),
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Vehicle Invoice",
+					"name": "Project",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
-					"name": "Vehicle Invoice Delivery",
-				},
-				{
-					"type": "doctype",
-					"name": "Vehicle Invoice Movement",
+					"name": "Vehicle Log",
+					"dependencies": ["Vehicle"],
 				},
 			],
 		},
@@ -103,17 +101,19 @@ def get_data():
 			],
 		},
 		{
-			"label": _("Vehicle Service"),
+			"label": _("Vehicle Documents"),
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Project",
-					"onboard": 1,
+					"name": "Vehicle Invoice",
 				},
 				{
 					"type": "doctype",
-					"name": "Vehicle Log",
-					"dependencies": ["Vehicle"],
+					"name": "Vehicle Invoice Delivery",
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Invoice Movement",
 				},
 			],
 		},
