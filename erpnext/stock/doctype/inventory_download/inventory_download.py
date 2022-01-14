@@ -14,8 +14,8 @@ class InventoryDownload(Document):
 			self.apply_inventory_download()
 			self.set_valuation_rate()
 
-			for item in self.get("items"):
-				items_bin = frappe.get_all("Bin", ["*"], filters = {"item_code": item.item_code})
+			# for item in self.get("items"):
+			# 	items_bin = frappe.get_all("Bin", ["*"], filters = {"item_code": item.item_code})
 
 				# for bin in items_bin:
 				# 	if self.warehouse == bin.warehouse:
