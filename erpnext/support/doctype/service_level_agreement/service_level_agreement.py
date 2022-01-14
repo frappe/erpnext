@@ -265,9 +265,15 @@ def get_active_service_level_agreement_for(doc):
 		]
 
 	customer = doc.get('customer')
-	or_filters.append(
-		["Service Level Agreement", "entity", "in", [customer] + get_customer_group(customer) + get_customer_territory(customer)]
-	)
+	if customer:
+		or_filters.extend([
+			["Service Level Agreement", "entity", "in", [customer] + get_customer_group(customer) + get_customer_territory(customer)],
+			["Service Level Agreement", "entity_type", "is", "not set"]
+		])
+	else:
+		or_filters.append(
+			["Service Level Agreement", "entity_type", "is", "not set"]
+		)
 
 	default_sla_filter = filters + [["Service Level Agreement", "default_service_level_agreement", "=", 1]]
 	default_sla = frappe.get_all("Service Level Agreement", filters=default_sla_filter,
@@ -379,10 +385,16 @@ def apply(doc, method=None):
 	sla = get_active_service_level_agreement_for(doc)
 
 	if not sla:
-		doc.service_level_agreement = None
+		remove_sla_if_applied()
 		return
 
 	process_sla(doc, sla)
+
+
+def remove_sla_if_applied(doc):
+	doc.service_level_agreement = None
+	doc.response_by = None
+	doc.resolution_by = None
 
 
 def process_sla(doc, sla):
