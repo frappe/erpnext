@@ -163,7 +163,7 @@ frappe.ui.form.on("Salary Slip", {
 		frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields, false);
 		frm.trigger("set_dynamic_labels");
 
-		if(frm.doc.start_date){
+		if(frm.doc.start_date) {
 			frappe.call({
 				method: 'get_payroll',
 				doc:frm.doc,
@@ -174,8 +174,7 @@ frappe.ui.form.on("Salary Slip", {
 					}
 				}
 			});
-		}
-		if(frm.doc.start_date){
+
 			frappe.call({
 				method: 'leave_type_encasement_days',
 				doc:frm.doc,
@@ -186,31 +185,7 @@ frappe.ui.form.on("Salary Slip", {
 					}
 				}
 			});
-		}
 		
-		// if(frm.doc.start_date){
-		// 	frappe.call({
-		// 		method: 'get_total_leave_in_current_month',
-		// 		doc:frm.doc,
-				
-		// 		callback: function(r) {
-		// 			console.log("****************",r.message)
-		// 			if (r.message === undefined) {
-		// 				frm.set_value('leave', 2);
-		// 			} else {
-		// 				frm.set_value('leave', r.message);
-		// 			}
-		// 			console.log("present days",frm.doc.present_days);
-		// 			console.log(frm.doc.leave);
-		// 			frm.set_value('present_days', frm.doc.present_days-frm.doc.leave);
-		// 			frm.refresh_field("present_days");
-		// 			frm.refresh_field("leave");
-		// 			console.log("Leave1", frm.doc.leave)
-		// 		}
-		// 	});
-		// }
-		
-		if (frm.doc.start_date){
 			frappe.call({
 				method: 'set_days',
 				doc:frm.doc,
