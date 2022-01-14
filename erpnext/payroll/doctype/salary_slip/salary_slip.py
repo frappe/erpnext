@@ -513,6 +513,7 @@ class SalarySlip(TransactionBase):
 			self.leave = sum(total_leave_list)
 			self.present_days = self.days_in_month - self.weekly_off - self.paid_holidays - float(self.leave)
 		print("self.leave",self.leave)
+		return True
 
 	def calculate_lwp_or_ppl_based_on_leave_application(self, holidays, working_days):
 		lwp = 0
