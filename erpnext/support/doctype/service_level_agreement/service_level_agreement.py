@@ -385,7 +385,7 @@ def apply(doc, method=None):
 	sla = get_active_service_level_agreement_for(doc)
 
 	if not sla:
-		remove_sla_if_applied()
+		remove_sla_if_applied(doc)
 		return
 
 	process_sla(doc, sla)
