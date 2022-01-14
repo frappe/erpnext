@@ -46,12 +46,26 @@ class TestWebsiteItem(unittest.TestCase):
 				]
 			})
 		elif self._testMethodName in WEBITEM_PRICE_TESTS:
+			create_user_and_customer_if_not_exists("test_contact_customer@example.com", "_Test Contact For _Test Customer")
 			create_regular_web_item()
 			make_web_item_price(item_code="Test Mobile Phone")
+
+			# Note: When testing web item pricing rule logged-in user pricing rule must differ from guest pricing rule or test will falsely pass.
+			#	  This is because make_web_pricing_rule creates a pricing rule "selling": 1, without specifying "applicable_for". Therefor,
+			#	  when testing for logged-in user the test will get the previous pricing rule because "selling" is still true.
+			#
+			#     I've attempted to mitigate this by setting applicable_for=Customer, and customer=Guest however, this only results in PermissionError failing the test.
 			make_web_pricing_rule(
 				title="Test Pricing Rule for Test Mobile Phone",
 				item_code="Test Mobile Phone",
 				selling=1)
+			make_web_pricing_rule(
+				title="Test Pricing Rule for Test Mobile Phone (Customer)",
+				item_code="Test Mobile Phone",
+				selling=1,
+				discount_percentage="25",
+				applicable_for="Customer",
+				customer="_Test Customer")
 
 	def test_index_creation(self):
 		"Check if index is getting created in db."
@@ -188,22 +202,27 @@ class TestWebsiteItem(unittest.TestCase):
 
 		# price and pricing rule added via setUp
 
+		# login as customer with pricing rule
+		frappe.set_user("test_contact_customer@example.com")
+
 		# check if price and slashed price is fetched correctly
 		frappe.local.shopping_cart_settings = None
 		data = get_product_info_for_website(item_code, skip_quotation_creation=True)
 		self.assertTrue(bool(data.product_info["price"]))
 
 		price_object = data.product_info["price"]
-		self.assertEqual(price_object.get("discount_percent"), 10)
-		self.assertEqual(price_object.get("price_list_rate"), 900)
+		self.assertEqual(price_object.get("discount_percent"), 25)
+		self.assertEqual(price_object.get("price_list_rate"), 750)
 		self.assertEqual(price_object.get("formatted_mrp"), "₹ 1,000.00")
-		self.assertEqual(price_object.get("formatted_price"), "₹ 900.00")
-		self.assertEqual(price_object.get("formatted_discount_percent"), "10%")
+		self.assertEqual(price_object.get("formatted_price"), "₹ 750.00")
+		self.assertEqual(price_object.get("formatted_discount_percent"), "25%")
 
-		# disable show price
+		# switch to admin and disable show price
+		frappe.set_user("Administrator")
 		setup_e_commerce_settings({"show_price": 0})
 
-		# price should not be fetched
+		# price should not be fetched for logged in user.
+		frappe.set_user("test_contact_customer@example.com")
 		frappe.local.shopping_cart_settings = None
 		data = get_product_info_for_website(item_code, skip_quotation_creation=True)
 		self.assertFalse(bool(data.product_info["price"]))
@@ -485,10 +504,34 @@ def make_web_pricing_rule(**kwargs):
 			"discount_percentage": kwargs.get("discount_percentage") or 10,
 			"company": kwargs.get("company") or "_Test Company",
 			"currency": kwargs.get("currency") or "INR",
-			"for_price_list": kwargs.get("price_list") or "_Test Price List India"
+			"for_price_list": kwargs.get("price_list") or "_Test Price List India",
+			"applicable_for": kwargs.get("applicable_for") or "",
+			"customer": kwargs.get("customer") or "",
 		})
 		pricing_rule.insert()
 	else:
 		pricing_rule = frappe.get_doc("Pricing Rule", {"title": title})
 
 	return pricing_rule
+
+
+def create_user_and_customer_if_not_exists(email, first_name = None):
+	if frappe.db.exists("User", email):
+		return
+
+	frappe.get_doc({
+		"doctype": "User",
+		"user_type": "Website User",
+		"email": email,
+		"send_welcome_email": 0,
+		"first_name": first_name or email.split("@")[0]
+	}).insert(ignore_permissions=True)
+
+	contact = frappe.get_last_doc("Contact", filters={"email_id": email})
+	link = contact.append('links', {})
+	link.link_doctype = "Customer"
+	link.link_name = "_Test Customer"
+	link.link_title = "_Test Customer"
+	contact.save()
+
+test_dependencies = ["Price List", "Item Price", "Customer", "Contact", "Item"]
