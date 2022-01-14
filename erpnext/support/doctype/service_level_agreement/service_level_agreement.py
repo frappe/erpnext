@@ -379,6 +379,7 @@ def apply(doc, method=None):
 	sla = get_active_service_level_agreement_for(doc)
 
 	if not sla:
+		doc.service_level_agreement = None
 		return
 
 	process_sla(doc, sla)
