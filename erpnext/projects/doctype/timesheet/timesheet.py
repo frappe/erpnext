@@ -145,9 +145,9 @@ class Timesheet(Document):
 		if not (data.from_time and data.hours):
 			return
 
-		_to_date = add_to_date(data.from_time, hours=data.hours, as_datetime=True)
-		if not data.to_time == _to_date:
-			data.to_time = _to_date
+		_to_time = add_to_date(data.from_time, hours=data.hours, as_datetime=True)
+		if data.to_time != _to_time:
+			data.to_time = _to_time
 
 	def validate_overlap(self, data):
 		settings = frappe.get_single('Projects Settings')
