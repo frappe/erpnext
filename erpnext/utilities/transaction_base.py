@@ -181,8 +181,6 @@ class TransactionBase(StatusUpdater):
 
 		if len(child_table_values) > 1:
 			self.set(default_field, None)
-		else:
-			self.set(default_field, list(child_table_values)[0])
 
 def delete_events(ref_type, ref_name):
 	events = frappe.db.sql_list(""" SELECT
