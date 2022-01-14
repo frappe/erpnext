@@ -61,4 +61,4 @@ def execute():
 		}
 		records = frappe.get_all('Custom Field', filters=filters, pluck='name')
 		for record in records:
-			frappe.delete_doc('Custom Field', record)
+			frappe.delete_doc('Custom Field', record, ignore_missing=True, force=True)
