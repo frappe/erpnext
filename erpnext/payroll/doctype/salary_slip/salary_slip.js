@@ -163,44 +163,44 @@ frappe.ui.form.on("Salary Slip", {
 		frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields, false);
 		frm.trigger("set_dynamic_labels");
 
-		frm.add_custom_button(__('Calculate leave fields'), function () {
-			if(frm.doc.start_date) {
-				frappe.call({
-					method: 'get_payroll',
-					doc:frm.doc,
-					callback: function(r) {
-						if(r.message) {
-						frm.set_value('months_of_service_in_payment_period', r.message);
-						frm.refresh_field("months_of_service_in_payment_period");
-						}
-					}
-				});
+		// frm.add_custom_button(__('Calculate leave fields'), function () {
+		// 	if(frm.doc.start_date) {
+		// 		frappe.call({
+		// 			method: 'get_payroll',
+		// 			doc:frm.doc,
+		// 			callback: function(r) {
+		// 				if(r.message) {
+		// 				frm.set_value('months_of_service_in_payment_period', r.message);
+		// 				frm.refresh_field("months_of_service_in_payment_period");
+		// 				}
+		// 			}
+		// 		});
 	
-				// frappe.call({
-				// 	method: 'leave_type_encasement_days',
-				// 	doc:frm.doc,
-				// 	callback: function(r) {
-				// 		if(r.message) {
-				// 		frm.set_value('encashment_days', r.message);
-				// 		frm.refresh_field("encashment_days");
-				// 		}
-				// 	}
-				// });
+		// 		// frappe.call({
+		// 		// 	method: 'leave_type_encasement_days',
+		// 		// 	doc:frm.doc,
+		// 		// 	callback: function(r) {
+		// 		// 		if(r.message) {
+		// 		// 		frm.set_value('encashment_days', r.message);
+		// 		// 		frm.refresh_field("encashment_days");
+		// 		// 		}
+		// 		// 	}
+		// 		// });
 			
-				frappe.call({
-					method: 'set_days',
-					doc:frm.doc,
-					callback: function(r) {
-						frm.refresh_field("days_in_month");
-						frm.refresh_field("paid_holidays");
-						frm.refresh_field("compoff");
-						frm.refresh_field("weekly_off");
-						frm.refresh_field("present_days");
-						frm.refresh_field("leave");
-					}
-				});
-			}
-		});
+		// 		frappe.call({
+		// 			method: 'set_days',
+		// 			doc:frm.doc,
+		// 			callback: function(r) {
+		// 				frm.refresh_field("days_in_month");
+		// 				frm.refresh_field("paid_holidays");
+		// 				frm.refresh_field("compoff");
+		// 				frm.refresh_field("weekly_off");
+		// 				frm.refresh_field("present_days");
+		// 				frm.refresh_field("leave");
+		// 			}
+		// 		});
+		// 	}
+		// });
 		
 	},
 

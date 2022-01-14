@@ -406,8 +406,8 @@ class SalarySlip(TransactionBase):
 				num_months=flt(days/7,precision=0)
 				return num_months
 			
-	@frappe.whitelist()
-	def set_days(self):
+	# @frappe.whitelist()
+	def after_insert(self):
 		#days_in_month
 		from calendar import monthrange
 		a = getdate(self.start_date).year
