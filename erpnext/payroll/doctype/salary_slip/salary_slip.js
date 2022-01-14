@@ -164,17 +164,18 @@ frappe.ui.form.on("Salary Slip", {
 		frm.trigger("set_dynamic_labels");
 
 		// frm.add_custom_button(__('Calculate leave fields'), function () {
-		// 	if(frm.doc.start_date) {
-		// 		frappe.call({
-		// 			method: 'get_payroll',
-		// 			doc:frm.doc,
-		// 			callback: function(r) {
-		// 				if(r.message) {
-		// 				frm.set_value('months_of_service_in_payment_period', r.message);
-		// 				frm.refresh_field("months_of_service_in_payment_period");
-		// 				}
-		// 			}
-		// 		});
+			if(frm.doc.start_date) {
+				frappe.call({
+					method: 'get_payroll',
+					doc:frm.doc,
+					callback: function(r) {
+						if(r.message) {
+						frm.set_value('months_of_service_in_payment_period', r.message);
+						frm.refresh_field("months_of_service_in_payment_period");
+						}
+					}
+				});
+			}
 	
 		// 		// frappe.call({
 		// 		// 	method: 'leave_type_encasement_days',
