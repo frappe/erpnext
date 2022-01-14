@@ -30,6 +30,9 @@ class BankTransactions(Document):
 		if self.docstatus == 0:
 			self.set_transaction_data()
 
+			if self.created_by == None:
+				self.created_by = frappe.session.user
+
 		if self.docstatus == 1:
 			self.docstatus = 3
 			self.status = "Transit"
