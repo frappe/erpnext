@@ -74,6 +74,7 @@ class SalarySlip(TransactionBase):
 
 
 	def validate(self):
+		self.get_days()
 		self.status = self.get_status()
 		validate_active_employee(self.employee)
 		self.validate_dates()
@@ -407,7 +408,7 @@ class SalarySlip(TransactionBase):
 				return num_months
 			
 	# @frappe.whitelist()
-	def after_insert(self):
+	def get_days(self):
 		#days_in_month
 		from calendar import monthrange
 		a = getdate(self.start_date).year
