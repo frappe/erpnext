@@ -4,7 +4,6 @@ import frappe
 from frappe.model.db_query import DatabaseQuery
 import pdb
 
-
 # @frappe.whitelist()
 # def get_data(item_code=None, warehouse=None, item_group=None, brand=None,
 # 	start=0, sort_by='actual_qty', sort_order='desc', limit_page_length=20):
