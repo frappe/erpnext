@@ -179,6 +179,7 @@ DocType: Soil Analysis,(Ca+Mg)/K,(Ca + Mg) / K
 DocType: Delivery Stop,Contact Information,Información del contacto
 apps/erpnext/erpnext/public/js/hub/pages/Search.vue,Search for anything ...,Busca cualquier cosa ...
 DocType: Company,Phone No,Teléfono No.
+DocType: Company,Default Credit Account,Cuenta de Crédito por defecto.
 DocType: Delivery Trip,Initial Email Notification Sent,Notificación Inicial de Correo Electrónico Enviada
 DocType: Bank Statement Settings,Statement Header Mapping,Encabezado del enunciado
 ,Sales Partners Commission,Comisiones de socios de ventas
