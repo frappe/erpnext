@@ -29,6 +29,7 @@ from erpnext.support.doctype.issue.issue import get_holidays
 
 class ServiceLevelAgreement(Document):
 	def validate(self):
+		self.validate_selected_doctype()
 		self.validate_doc()
 		self.validate_status_field()
 		self.check_priorities()
@@ -105,6 +106,23 @@ class ServiceLevelAgreement(Document):
 		}):
 			frappe.throw(_("Service Level Agreement for {0} {1} already exists.").format(
 				frappe.bold(self.entity_type), frappe.bold(self.entity)))
+
+	def validate_selected_doctype(self):
+		invalid_doctypes = list(frappe.model.core_doctypes_list)
+		invalid_doctypes.extend(['Cost Center', 'Company'])
+		valid_document_types = frappe.get_all('DocType', {
+			'issingle': 0,
+			'istable': 0,
+			'is_submittable': 0,
+			'name': ['not in', invalid_doctypes],
+			'module': ['not in', ["Email", "Core", "Custom", "Event Streaming", "Social", "Data Migration", "Geo", "Desk"]]
+		}, pluck="name")
+
+		if self.document_type not in valid_document_types:
+			frappe.throw(
+				msg=_("Please select valid document type."),
+				title=_("Invalid Document Type")
+			)
 
 	def validate_status_field(self):
 		meta = frappe.get_meta(self.document_type)
