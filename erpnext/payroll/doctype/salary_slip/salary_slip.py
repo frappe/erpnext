@@ -429,7 +429,7 @@ class SalarySlip(TransactionBase):
 					self.paid_holidays = i.get("count(holiday_date)")
 
 		#Comp_off
-		if not self.comp_off:
+		if not self.compoff:
 			comp_off = frappe.db.sql("""select name from `tabCompensatory Leave Request`
 									where employee= '{0}' and  docstatus=1 and work_from_date 
 									between '{1}' and '{2}' and work_end_date between '{3}'and '{4}' """.format(self.employee,self.start_date,self.end_date,self.start_date,self.end_date),as_dict=1)
