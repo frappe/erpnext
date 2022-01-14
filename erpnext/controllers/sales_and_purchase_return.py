@@ -5,9 +5,11 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
 from frappe.model.meta import get_field_precision
-from frappe.utils import flt, get_datetime, format_datetime
+from frappe.utils import flt, cint, get_datetime, format_datetime
+
 
 class StockOverReturnError(frappe.ValidationError): pass
+
 
 def validate_return(doc):
 	if not doc.meta.get_field("is_return") or not doc.is_return:
@@ -16,6 +18,7 @@ def validate_return(doc):
 	if doc.return_against:
 		validate_return_against(doc)
 		validate_returned_items(doc)
+
 
 def validate_return_against(doc):
 	if not frappe.db.exists(doc.doctype, doc.return_against):
@@ -43,6 +46,7 @@ def validate_return_against(doc):
 		if doc.meta.get_field("transaction_type") and doc.transaction_type != ref_doc.transaction_type:
 			frappe.throw(_("Transaction Type must be the same as {0} {1} ({2})")
 				.format(doc.doctype, doc.return_against, ref_doc.transaction_type))
+
 
 def validate_returned_items(doc):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -138,6 +142,7 @@ def validate_returned_items(doc):
 	if not items_returned:
 		frappe.throw(_("Atleast one item should be entered with negative quantity in return document"))
 
+
 def validate_quantity(doc, args, ref, valid_items, already_returned_items):
 	fields = ['stock_qty']
 	if doc.doctype in ['Purchase Receipt', 'Purchase Invoice']:
@@ -172,6 +177,7 @@ def validate_quantity(doc, args, ref, valid_items, already_returned_items):
 				frappe.throw(_("Row # {0}: Cannot return more than {1} for Item {2}")
 					.format(args.idx, max_returnable_qty, args.item_code), StockOverReturnError)
 
+
 def get_ref_item_dict(valid_items, ref_item_row):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -202,6 +208,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 		item_dict["batch_no"].append(ref_item_row.batch_no)
 
 	return valid_items
+
 
 def get_already_returned_items(doc):
 	fields = ['qty', 'stock_qty', 'received_qty', 'rejected_qty']
@@ -265,18 +272,31 @@ def get_already_returned_items(doc):
 
 	return items
 
+
 def make_return_doc(doctype, source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
-	company = frappe.db.get_value("Delivery Note", source_name, "company")
-	default_warehouse_for_sales_return = frappe.db.get_value("Company", company, "default_warehouse_for_sales_return")
+
 	def set_missing_values(source, target):
 		doc = frappe.get_doc(target)
+
+		# Return Fields
+		doc.ignore_pricing_rule = 1
 		doc.is_return = 1
 		doc.return_against = source.name
-		doc.ignore_pricing_rule = 1
+
+		# Default Return Warehouse
+		default_warehouse_for_sales_return = frappe.get_cached_value("Company", source.company,
+			"default_warehouse_for_sales_return")
 		doc.set_warehouse = default_warehouse_for_sales_return or source.set_warehouse
+
+		# Return Options
+		if frappe.flags.args:
+			if doctype in ('Sales Invoice', 'Purchase Invoice') and frappe.flags.args.update_stock:
+				doc.update_stock = cint(frappe.flags.args.update_stock == "Yes")
+			if frappe.flags.args.reopen_order:
+				doc.reopen_order = cint(frappe.flags.args.reopen_order == "Yes")
+
 		if doctype == "Sales Invoice":
-			doc.update_stock = 1
 			doc.is_pos = source.is_pos
 
 			# look for Print Heading "Credit Note"
@@ -284,7 +304,6 @@ def make_return_doc(doctype, source_name, target_doc=None):
 				doc.select_print_heading = frappe.db.get_value("Print Heading", _("Credit Note"))
 
 		elif doctype == "Purchase Invoice":
-			doc.update_stock = 1
 			# look for Print Heading "Debit Note"
 			doc.select_print_heading = frappe.db.get_value("Print Heading", _("Debit Note"))
 
@@ -321,20 +340,25 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		doc.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
-		target_doc.qty = -1* source_doc.qty
+		default_warehouse_for_sales_return = frappe.get_cached_value("Company", source_parent.company,
+			"default_warehouse_for_sales_return")
+
+		target_doc.qty = -1 * source_doc.qty
+
 		if doctype == "Purchase Receipt":
-			target_doc.received_qty = -1* source_doc.received_qty
-			target_doc.rejected_qty = -1* source_doc.rejected_qty
+			target_doc.received_qty = -1 * source_doc.received_qty
+			target_doc.rejected_qty = -1 * source_doc.rejected_qty
 			target_doc.qty = -1* source_doc.qty
 			target_doc.stock_qty = -1 * source_doc.stock_qty
 			target_doc.purchase_order = source_doc.purchase_order
 			target_doc.purchase_receipt_item = source_doc.name
 			target_doc.purchase_order_item = source_doc.purchase_order_item
 			target_doc.rejected_warehouse = source_doc.rejected_warehouse
+
 		elif doctype == "Purchase Invoice":
-			target_doc.received_qty = -1* source_doc.received_qty
-			target_doc.rejected_qty = -1* source_doc.rejected_qty
-			target_doc.qty = -1* source_doc.qty
+			target_doc.received_qty = -1 * source_doc.received_qty
+			target_doc.rejected_qty = -1 * source_doc.rejected_qty
+			target_doc.qty = -1 * source_doc.qty
 			target_doc.stock_qty = -1 * source_doc.stock_qty
 			target_doc.purchase_order = source_doc.purchase_order
 			target_doc.purchase_receipt = source_doc.purchase_receipt
@@ -342,6 +366,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.purchase_order_item = source_doc.purchase_order_item
 			target_doc.purchase_receipt_item = source_doc.purchase_receipt_item
 			target_doc.purchase_invoice_item = source_doc.name
+
 		elif doctype == "Delivery Note":
 			target_doc.qty = -1* (source_doc.qty - source_doc.billed_qty - source_doc.returned_qty)
 			target_doc.sales_order = source_doc.sales_order
@@ -353,6 +378,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.expense_account = source_doc.expense_account
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
+
 		elif doctype == "Sales Invoice":
 			target_doc.sales_order = source_doc.sales_order
 			target_doc.delivery_note = source_doc.delivery_note
@@ -379,7 +405,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 				"to_warehouse": "to_warehouse"
 			}
 		},
-		doctype +" Item": {
+		doctype + " Item": {
 			"doctype": doctype + " Item",
 			"field_map": {
 				"serial_no": "serial_no",

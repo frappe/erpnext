@@ -94,7 +94,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
 				cur_frm.add_custom_button(__('Return / Credit Note'),
-					this.make_sales_return, __('Create'));
+					() => this.make_sales_return(), __('Create'));
 				cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
 
@@ -407,10 +407,54 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	make_sales_return: function() {
+		var me = this;
+		var has_stock_item = me.frm.doc.items.some(d => d.is_stock_item);
+		var has_order = me.frm.doc.items.some(d => d.sales_order || d.delivery_note);
+
+		if (has_stock_item || has_order) {
+			var fields = [];
+			if (has_stock_item) {
+				fields.push({
+					"label" : "Update Stock",
+					"description": "If 'Yes', then stock will be returned along with party balance",
+					"fieldname": "update_stock",
+					"fieldtype": "Select",
+					"options": "\nYes\nNo",
+					"reqd": 1,
+				});
+			}
+			if (has_order) {
+				fields.push({
+					"label" : "Reopen Sales Order / Delivery Note",
+					"description": "If 'Yes', Sales Orders and Delivery Notes will be reopened for billing again",
+					"fieldname": "reopen_order",
+					"fieldtype": "Select",
+					"options": "\nYes\nNo",
+					"reqd": 1,
+				});
+			}
+
+			var dialog = new frappe.ui.Dialog({
+				title: __('Credit Note Options'),
+				fields: fields,
+				primary_action: function() {
+					var options = dialog.get_values();
+					me._make_sales_return(options);
+				},
+				primary_action_label: __('Create')
+			});
+			dialog.show();
+		} else {
+			this._make_sales_return();
+		}
+	},
+
+	_make_sales_return: function (options) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_return",
-			frm: cur_frm
-		})
+			frm: this.frm,
+			args: options,
+		});
 	},
 
 	asset: function(frm, cdt, cdn) {
