@@ -101,15 +101,14 @@ def make_company(company_name, abbr):
 	else:
 		company = frappe.get_doc("Company", company_name)
 
+	company.company_name_in_arabic = company_name
+	company.tax_id = "1234567890"
 	company.create_default_warehouses()
 
 	if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": company.name}):
 		company.create_default_cost_center()
 
-	company.company_name_in_arabic = company_name
-	company.tax_id = "1234567890"
 	company.save()
-	return company
 
 
 def make_customer():
