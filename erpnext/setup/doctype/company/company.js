@@ -79,14 +79,11 @@ frappe.ui.form.on("Company", {
 	},
 
 	refresh: function(frm) {
-		if(!frm.doc.__islocal) {
-			frm.doc.abbr && frm.set_df_property("abbr", "read_only", 1);
-			frm.set_df_property("parent_company", "read_only", 1);
-			disbale_coa_fields(frm);
-		}
+		frm.toggle_display('address_html', !frm.is_new());
 
-		frm.toggle_display('address_html', !frm.doc.__islocal);
-		if(!frm.doc.__islocal) {
+		if (!frm.is_new()) {
+			frm.doc.abbr && frm.set_df_property("abbr", "read_only", 1);
+			disbale_coa_fields(frm);
 			frappe.contacts.render_address_and_contact(frm);
 
 			frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Company'}
@@ -216,6 +213,9 @@ erpnext.company.setup_queries = function(frm) {
 		["default_payroll_payable_account", {"root_type": "Liability"}],
 		["round_off_account", {"root_type": "Expense"}],
 		["write_off_account", {"root_type": "Expense"}],
+		["default_deferred_expense_account", {}],
+		["default_deferred_revenue_account", {}],
+		["default_expense_claim_payable_account", {}],
 		["default_discount_account", {}],
 		["discount_allowed_account", {"root_type": "Expense"}],
 		["discount_received_account", {"root_type": "Income"}],

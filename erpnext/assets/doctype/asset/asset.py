@@ -583,7 +583,17 @@ class Asset(AccountsController):
 		return purchase_document
 
 	def get_fixed_asset_account(self):
-		return get_asset_category_account('fixed_asset_account', None, self.name, None, self.asset_category, self.company)
+		fixed_asset_account = get_asset_category_account('fixed_asset_account', None, self.name, None, self.asset_category, self.company)
+		if not fixed_asset_account:
+			frappe.throw(
+				_("Set {0} in asset category {1} for company {2}").format(
+					frappe.bold("Fixed Asset Account"),
+					frappe.bold(self.asset_category),
+					frappe.bold(self.company),
+				),
+				title=_("Account not Found"),
+			)
+		return fixed_asset_account
 
 	def get_cwip_account(self, cwip_enabled=False):
 		cwip_account = None
