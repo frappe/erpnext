@@ -7,10 +7,6 @@ import frappe
 from frappe.utils import add_months, nowdate
 
 from erpnext.regional.report.ksa_vat.ksa_vat import get_data
-from erpnext.regional.report.uae_vat_201.test_uae_vat_201 import (
-	make_customer,
-	make_item,
-)
 from erpnext.regional.saudi_arabia.wizard.operations.setup_ksa_vat_setting import (
 	create_ksa_vat_setting,
 )
@@ -116,6 +112,32 @@ def make_company(company_name, abbr):
 	return company
 
 
+def make_customer():
+	if not frappe.db.exists("Customer", "_Test KSA Customer"):
+		customer = frappe.get_doc({
+			"doctype": "Customer",
+			"customer_name": "_Test KSA Customer",
+			"customer_type": "Company",
+		})
+		customer.insert()
+
+
+def make_item(item_code, properties=None):
+	if not frappe.db.exists("Item", item_code):
+		item = frappe.get_doc({
+			"doctype": "Item",
+			"item_code": item_code,
+			"item_name": item_code,
+			"description": item_code,
+			"item_group": "Products"
+		})
+
+		if properties:
+			item.update(properties)
+
+		item.insert()
+
+
 def generate_sales_invoices():
 	# Create invoices
 	create_sales_invoice(rate=500, qty=5, item_tax_template="KSA VAT 5% - _TCKV")
@@ -136,7 +158,7 @@ def create_sales_invoice(**args):
 	si.posting_date = args.posting_date or nowdate()
 
 	si.company = args.company or "_Test Company KSA VAT"
-	si.customer = args.customer or "_Test UAE Customer"
+	si.customer = args.customer or "_Test KSA Customer"
 	si.debit_to = args.debit_to or "Debtors - _TCKV"
 	si.update_stock = args.update_stock or 0
 	si.is_pos = args.is_pos or 0
