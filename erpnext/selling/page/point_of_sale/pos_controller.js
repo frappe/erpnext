@@ -643,7 +643,7 @@ erpnext.PointOfSale.Controller = class {
 				message: __('Item Code: {0} is not available under warehouse {1}.', [bold_item_code, bold_warehouse])
 			})
 		} else if (available_qty < qty_needed) {
-			frappe.show_alert({
+			frappe.throw({
 				message: __('Stock quantity not enough for Item Code: {0} under warehouse {1}. Available quantity {2}.', [bold_item_code, bold_warehouse, bold_available_qty]),
 				indicator: 'orange'
 			});
