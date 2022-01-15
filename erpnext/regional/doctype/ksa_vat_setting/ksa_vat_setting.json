@@ -7,6 +7,12 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
+  "zero_sales",
+  "exempt_sales",
+  "column_break_4",
+  "zero_purchase",
+  "exempt_purchase",
+  "section_break_7",
   "ksa_vat_sales_accounts",
   "ksa_vat_purchase_accounts"
  ],
@@ -33,10 +39,46 @@
    "label": "KSA VAT Purchase Accounts",
    "options": "KSA VAT Purchase Account",
    "reqd": 1
+  },
+  {
+   "default": "Zero rated domestic sales",
+   "fieldname": "zero_sales",
+   "fieldtype": "Data",
+   "label": "Title - Zero VAT Sales",
+   "reqd": 1
+  },
+  {
+   "default": "Exempted sales",
+   "fieldname": "exempt_sales",
+   "fieldtype": "Data",
+   "label": "Title - VAT Exempt Sales",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Zero rated purchases",
+   "fieldname": "zero_purchase",
+   "fieldtype": "Data",
+   "label": "Title - Zero VAT Purchase",
+   "reqd": 1
+  },
+  {
+   "default": "Exempted purchases",
+   "fieldname": "exempt_purchase",
+   "fieldtype": "Data",
+   "label": "Title - VAT Exempt Purchase",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
   }
  ],
  "links": [],
- "modified": "2021-08-26 04:29:06.499378",
+ "modified": "2022-01-06 10:26:23.315654",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "KSA VAT Setting",
