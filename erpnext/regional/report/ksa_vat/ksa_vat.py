@@ -57,7 +57,7 @@ def get_data(filters):
 
 	# Validate if vat settings exist
 	company = filters.get('company')
-	company_currency = frappe.get_cached_value('Company',  company, "default_currency")
+	company_currency = frappe.get_cached_value('Company', company, "default_currency")
 	if frappe.db.exists('KSA VAT Setting', company) is None:
 		url = get_url_to_list('KSA VAT Setting')
 		frappe.msgprint(_('Create <a href="{}">KSA VAT Setting</a> for this company').format(url))
