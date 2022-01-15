@@ -1,9 +1,14 @@
+import json
 import unittest
 
+import frappe
 from hypothesis import given
 from hypothesis import strategies as st
 
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation, _round_off_if_near_zero
+from erpnext.tests.utils import ERPNextTestCase
 
 qty_gen = st.floats(min_value=-1e6, max_value=1e6)
 value_gen = st.floats(min_value=1, max_value=1e6)
@@ -284,3 +289,64 @@ class TestLIFOValuation(unittest.TestCase):
 				total_value -= sum(q * r for q, r in consumed)
 			self.assertTotalQty(total_qty)
 			self.assertTotalValue(total_value)
+
+class TestLIFOValuationSLE(ERPNextTestCase):
+	ITEM_CODE = "_Test LIFO item"
+	WAREHOUSE = "_Test Warehouse - _TC"
+
+	@classmethod
+	def setUpClass(cls) -> None:
+		super().setUpClass()
+		make_item(cls.ITEM_CODE, {"valuation_method": "LIFO"})
+
+	def _make_stock_entry(self, qty, rate=None):
+		kwargs = {
+			"item_code": self.ITEM_CODE,
+			"from_warehouse" if qty < 0 else "to_warehouse": self.WAREHOUSE,
+			"rate": rate,
+			"qty": abs(qty),
+		}
+		return make_stock_entry(**kwargs)
+
+	def assertStockQueue(self, se, expected_queue):
+		sle_name = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": se.name, "is_cancelled": 0, "voucher_type": "Stock Entry"})
+		sle = frappe.get_doc("Stock Ledger Entry", sle_name)
+
+		stock_queue = json.loads(sle.stock_queue)
+
+		total_qty, total_value = LIFOValuation(stock_queue).get_total_stock_and_value()
+		self.assertEqual(sle.qty_after_transaction, total_qty)
+		self.assertEqual(sle.stock_value, total_value)
+
+		if total_qty > 0:
+			self.assertEqual(stock_queue, expected_queue)
+
+
+	def test_lifo_values(self):
+
+		in1 = self._make_stock_entry(1, 1)
+		self.assertStockQueue(in1, [[1, 1]])
+
+		in2 = self._make_stock_entry(2, 2)
+		self.assertStockQueue(in2, [[1, 1], [2, 2]])
+
+		out1 = self._make_stock_entry(-1)
+		self.assertStockQueue(out1, [[1, 1], [1, 2]])
+
+		in3 = self._make_stock_entry(3, 3)
+		self.assertStockQueue(in3, [[1, 1], [1, 2], [3, 3]])
+
+		out2 = self._make_stock_entry(-4)
+		self.assertStockQueue(out2, [[1, 1]])
+
+		in4 = self._make_stock_entry(4, 4)
+		self.assertStockQueue(in4, [[1, 1], [4,4]])
+
+		out3 = self._make_stock_entry(-5)
+		self.assertStockQueue(out3, [])
+
+		in5 = self._make_stock_entry(5, 5)
+		self.assertStockQueue(in5, [[5, 5]])
+
+		out5 = self._make_stock_entry(-5)
+		self.assertStockQueue(out5, [])
