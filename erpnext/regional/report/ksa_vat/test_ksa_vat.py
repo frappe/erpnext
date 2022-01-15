@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from unittest import TestCase
@@ -18,14 +18,15 @@ from erpnext.regional.saudi_arabia.wizard.operations.setup_ksa_vat_setting impor
 class TestKSAVAT(TestCase):
 	def setUp(self):
 		si = frappe.qb.DocType('Sales Invoice')
-		frappe.qb.from_(si).delete().where(si.company == "_Test Company KSA VAT")
+		frappe.qb.from_(si).delete().where(si.company == "_Test Company KSA VAT").run()
 
 		# Enable purchase tests after https://github.com/frappe/erpnext/pull/29175 is merged
 		# pi = frappe.qb.DocType('Purchase Invoice')
-		# frappe.qb.from_(pi).delete().where(pi.company == "_Test Company KSA VAT")
+		# frappe.qb.from_(pi).delete().where(pi.company == "_Test Company KSA VAT").run()
 
 		make_company("_Test Company KSA VAT", "_TCKV")
-		create_ksa_vat_setting("_Test Company KSA VAT")
+		if frappe.db.exists('KSA VAT Setting', "_Test Company KSA VAT") is None:
+			create_ksa_vat_setting("_Test Company KSA VAT")
 
 		make_customer()
 		# make_supplier()
@@ -54,30 +55,30 @@ class TestKSAVAT(TestCase):
 			},
 			{
 				"title": "Standard rated Sales",
-				"amount": 2500,
-				"adjustment_amount": -50,
-				"vat_amount": 125,
+				"amount": 2500.00,
+				"adjustment_amount": -1000.00,
+				"vat_amount": 75.00,
 				"currency": "SAR"
 			},
 			{
 				"title": "Zero rated domestic sales",
-				"amount": 500,
-				"adjustment_amount": -100,
-				"vat_amount": 0,
+				"amount": 500.00,
+				"adjustment_amount": -100.00,
+				"vat_amount": 00.0,
 				"currency": "SAR"
 			},
 			{
 				"title": "Exempted sales",
-				"amount": 1000,
-				"adjustment_amount": -600,
-				"vat_amount": 0,
+				"amount": 1000.00,
+				"adjustment_amount": -600.00,
+				"vat_amount": 0.00,
 				"currency": "SAR"
 			},
 			{
 				"title": "Grand Total",
-				"amount": 4000,
-				"adjustment_amount": -750,
-				"vat_amount": 125,
+				"amount": 4000.00,
+				"adjustment_amount": -1700.00,
+				"vat_amount": 75.00,
 				"currency": "SAR"
 			},
 		]
@@ -96,7 +97,7 @@ def make_company(company_name, abbr):
 			"company_name": company_name,
 			"abbr": abbr,
 			"default_currency": "SAR",
-			"country": "Kingdom of Saudi Arabia",
+			"country": "Saudi Arabia",
 			"create_chart_of_accounts_based_on": "Standard Template",
 		})
 		company.insert()
@@ -108,18 +109,20 @@ def make_company(company_name, abbr):
 	if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": company.name}):
 		company.create_default_cost_center()
 
+	company.company_name_in_arabic = company_name
+	company.tax_id = "1234567890"
 	company.save()
 	return company
 
 
 def generate_sales_invoices():
 	# Create invoices
-	create_sales_invoice(rate=500, qty=5, item_tax_template="KSA VAT 5%")
+	create_sales_invoice(rate=500, qty=5, item_tax_template="KSA VAT 5% - _TCKV")
 	create_sales_invoice(item_code="_Test KSA VAT Zero Rated Item", qty=5)
 	create_sales_invoice(item_code="_Test KSA VAT Exempt Item", rate=200, qty=5)
 
 	# Create returns
-	create_sales_invoice(is_return=1, rate=500, qty=-2, item_tax_template="KSA VAT 5%")
+	create_sales_invoice(is_return=1, rate=500, qty=-2, item_tax_template="KSA VAT 5% - _TCKV")
 	create_sales_invoice(is_return=1, item_code="_Test KSA VAT Zero Rated Item", qty=-1)
 	create_sales_invoice(is_return=1, item_code="_Test KSA VAT Exempt Item", rate=200, qty=-3)
 
@@ -155,7 +158,7 @@ def create_sales_invoice(**args):
 		"stock_uom": args.uom or "Nos",
 		"rate": args.rate if args.get("rate") is not None else 100,
 		"price_list_rate": args.price_list_rate if args.get("price_list_rate") is not None else 100,
-		"item_tax_template": args.item_tax_template,
+		"item_tax_template": args.item_tax_template or None,
 		"income_account": args.income_account or "Sales - _TCKV",
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TCKV",
 		"discount_account": args.discount_account or None,
