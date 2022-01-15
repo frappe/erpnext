@@ -3,6 +3,11 @@
 
 import frappe
 from frappe import _
+import json
+from datetime import date
+
+from frappe.utils import flt, formatdate, getdate
+from six import iteritems
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -266,3 +271,36 @@ def get_conditions(filters):
 	if filters.gstin_of_manufacturer:
 		conditions['gstin_of_manufacturer'] = filters.gstin_of_manufacturer
 	return conditions
+
+
+
+@frappe.whitelist()
+def get_json(filters, report_name, data):
+	filters = json.loads(filters)
+	report_data = json.loads(data)
+	# gstin = get_company_gstin_number(filters.get("company"), filters.get("company_address"))
+
+	# fp = "%02d%s" % (getdate(filters["to_date"]).month, getdate(filters["to_date"]).year)
+	#
+	# gst_json = {"version": "GST3.0.4",
+	# 	"hash": "hash", "gstin": gstin, "fp": fp}
+
+	# res = {}
+
+
+	return {
+		'report_name': report_name,
+		'report': filters['report'],
+		'data': report_data
+	}
+
+
+
+@frappe.whitelist()
+def download_json_file():
+	''' download json content in a file '''
+	data = frappe._dict(frappe.local.form_dict)
+	frappe.response['filename'] = frappe.scrub("{0} {1}".format(data['report_name'], data['report'])) + '.json'
+	frappe.response['filecontent'] = data['data']
+	frappe.response['content_type'] = 'application/json'
+	frappe.response['type'] = 'download'
