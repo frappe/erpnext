@@ -144,7 +144,8 @@ def get_tax_data(data, settings, filters, doctype, company_currency):
 			stac.base_tax_amount,
 			stac.item_wise_tax_detail,
 			doc.is_return
-		).where(doc.docstatus == 1).where(doc.company == filters.get("company"))\
+		)\
+		.where(doc.docstatus == 1).where(doc.company == filters.get("company"))\
 		.where(doc.posting_date >= filters.get("from_date"))\
 		.where(doc.posting_date <= filters.get("to_date")).run(as_dict=True)
 
