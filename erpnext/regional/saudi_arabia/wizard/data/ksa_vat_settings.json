@@ -6,7 +6,7 @@
                 "title": "Standard rated Sales",
                 "item_tax_template": "KSA VAT 5%",
                 "account": "VAT 5%"
-            },
+            }
         ]
     },
     {
@@ -21,7 +21,7 @@
                 "title": "Imports subject to VAT paid at customs",
                 "item_tax_template": "KSA Excise 50%",
                 "account": "Excise 50%"
-            },
+            }
         ]
     }
 ]
