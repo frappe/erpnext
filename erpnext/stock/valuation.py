@@ -3,7 +3,7 @@ from typing import Callable, List, NewType, Optional, Tuple
 
 from frappe.utils import flt
 
-StockBin = NewType("FifoBin", List[float])
+StockBin = NewType("StockBin", List[float])  # [[qty, rate], ...]
 
 # Indexes of values inside FIFO bin 2-tuple
 QTY = 0
@@ -164,11 +164,12 @@ class LIFOValuation(BinWiseValuation):
 	Stack is implemented using "bins" of [qty, rate].
 
 	ref: https://en.wikipedia.org/wiki/FIFO_and_LIFO_accounting
+	Implementation detail: appends and pops both at end of list.
 	"""
 
 	# specifying the attributes to save resources
 	# ref: https://docs.python.org/3/reference/datamodel.html#slots
-	__slots__ = ["queue",]
+	__slots__ = ["stack",]
 
 	def __init__(self, state: Optional[List[StockBin]]):
 		self.stack: List[StockBin] = state if state is not None else []
@@ -183,8 +184,26 @@ class LIFOValuation(BinWiseValuation):
 
 			args:
 				qty: new quantity to add
-				rate: incoming rate of new quantity"""
-		pass
+				rate: incoming rate of new quantity.
+
+			Behaviour of this is same as FIFO valuation.
+		"""
+		if not len(self.stack):
+			self.stack.append([0, 0])
+
+		# last row has the same rate, merge new bin.
+		if self.stack[-1][RATE] == rate:
+			self.stack[-1][QTY] += qty
+		else:
+			# Item has a positive balance qty, add new entry
+			if self.stack[-1][QTY] > 0:
+				self.stack.append([qty, rate])
+			else:  # negative balance qty
+				qty = self.stack[-1][QTY] + qty
+				if qty > 0:  # new balance qty is positive
+					self.stack[-1] = [qty, rate]
+				else:  # new balance qty is still negative, maintain same rate
+					self.stack[-1][QTY] = qty
 
 
 	def remove_stock(
@@ -194,10 +213,41 @@ class LIFOValuation(BinWiseValuation):
 
 		args:
 			qty: quantity to remove
-			rate: outgoing rate
+			rate: outgoing rate - ignored. Kept for backwards compatibility.
 			rate_generator: function to be called if stack is not found and rate is required.
 		"""
-		pass
+		if not rate_generator:
+			rate_generator = lambda : 0.0  # noqa
+
+		consumed_bins = []
+		while qty:
+			if not len(self.stack):
+				# rely on rate generator.
+				self.stack.append([0, rate_generator()])
+
+			# start at the end.
+			index = -1
+
+			stock_bin = self.stack[index]
+			if qty >= stock_bin[QTY]:
+				# consume current bin
+				qty = _round_off_if_near_zero(qty - stock_bin[QTY])
+				to_consume = self.stack.pop(index)
+				consumed_bins.append(list(to_consume))
+
+				if not self.stack and qty:
+					# stock finished, qty still remains to be withdrawn
+					# negative stock, keep in as a negative bin
+					self.stack.append([-qty, outgoing_rate or stock_bin[RATE]])
+					consumed_bins.append([qty, outgoing_rate or stock_bin[RATE]])
+					break
+			else:
+				# qty found in current bin consume it and exit
+				stock_bin[QTY] = _round_off_if_near_zero(stock_bin[QTY] - qty)
+				consumed_bins.append([qty, stock_bin[RATE]])
+				qty = 0
+
+		return consumed_bins
 
 
 def _round_off_if_near_zero(number: float, precision: int = 7) -> float:
