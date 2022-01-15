@@ -161,7 +161,7 @@ def get_tax_data(data, settings, filters, doctype, company_currency):
 						tax_details[acc]["taxable_amount"] += item_wise[x][1]*100/item_wise[x][0]
 			else:
 				for x in item_wise:
-					if item_wise[x][1] > 0.0:
+					if item_wise[x][1] < 0.0:
 						tax_details[acc]["adjustment_amount"] += item_wise[x][1]*100/item_wise[x][0]
 
 	gt_tax_amt, gt_adj_amt, gt_tax = 0, 0, 0
