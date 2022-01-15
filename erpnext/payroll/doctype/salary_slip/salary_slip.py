@@ -1448,7 +1448,7 @@ class SalarySlip(TransactionBase):
 						encashment_date between '{1}' and '{2}' and docstatus=1  """.format(self.employee,
 																							self.start_date,
 																							self.end_date), as_dict=1)
-			
+
 			self.encashment_days = sick_leave[0]['result']
 
 			# doc = frappe.db.sql("""select sum(encashable_days) from `tabLeave Encashment`  where employee = '{0}' and
