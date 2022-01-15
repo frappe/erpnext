@@ -138,16 +138,16 @@ def get_tax_data(data, settings, filters, doctype, company_currency):
 	# Fetch All Invoices
 	doc = frappe.qb.DocType(doctype)
 	stac = frappe.qb.DocType('Sales Taxes and Charges')
-	invoices = frappe.qb.from_(doc).inner_join(stac).on(stac.parent == doc.name)\
-		.select(
-			stac.account_head,
-			stac.base_tax_amount,
-			stac.item_wise_tax_detail,
-			doc.is_return
-		)\
-		.where(doc.docstatus == 1).where(doc.company == filters.get("company"))\
-		.where(doc.posting_date >= filters.get("from_date"))\
-		.where(doc.posting_date <= filters.get("to_date")).run(as_dict=True)
+	invoices = frappe.qb.from_(doc).inner_join(stac).on(stac.parent == doc.name)
+	invoices = invoices.select(
+		stac.account_head,
+		stac.base_tax_amount,
+		stac.item_wise_tax_detail,
+		doc.is_return
+	)
+	invoices = invoices.where(doc.docstatus == 1).where(doc.company == filters.get("company"))
+	invoices = invoices.where(doc.posting_date >= filters.get("from_date"))
+	invoices = invoices.where(doc.posting_date <= filters.get("to_date")).run(as_dict=True)
 
 	for inv in invoices:
 		acc = inv["account_head"]
