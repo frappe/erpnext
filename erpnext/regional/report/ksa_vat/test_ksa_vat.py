@@ -10,9 +10,10 @@ from erpnext.regional.report.ksa_vat.ksa_vat import get_data
 from erpnext.regional.report.uae_vat_201.test_uae_vat_201 import (
 	make_customer,
 	make_item,
-	# make_supplier,
 )
-from erpnext.regional.saudi_arabia.wizard.operations.setup_ksa_vat_setting import create_ksa_vat_setting
+from erpnext.regional.saudi_arabia.wizard.operations.setup_ksa_vat_setting import (
+	create_ksa_vat_setting,
+)
 
 
 class TestKSAVAT(TestCase):
@@ -175,7 +176,7 @@ def create_sales_invoice(**args):
 		"account_head": "VAT 5% - _TCKV",
 		"cost_center": "Main - _TCKV",
 		"description": "VAT 5% @ 5.0",
-		"rate": None
+		"rate": 0.00
 	})
 
 	if not args.do_not_save:
