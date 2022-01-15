@@ -1,15 +1,54 @@
+from abc import ABC, abstractmethod, abstractproperty
 from typing import Callable, List, NewType, Optional, Tuple
 
 from frappe.utils import flt
 
-FifoBin = NewType("FifoBin", List[float])
+StockBin = NewType("FifoBin", List[float])
 
 # Indexes of values inside FIFO bin 2-tuple
 QTY = 0
 RATE = 1
 
 
-class FIFOValuation:
+class BinWiseValuation(ABC):
+
+	@abstractmethod
+	def add_stock(self, qty: float, rate: float) -> None:
+		pass
+
+	@abstractmethod
+	def remove_stock(
+		self, qty: float, outgoing_rate: float = 0.0, rate_generator: Callable[[], float] = None
+	) -> List[StockBin]:
+		pass
+
+	@abstractproperty
+	def state(self) -> List[StockBin]:
+		pass
+
+	def get_total_stock_and_value(self) -> Tuple[float, float]:
+		total_qty = 0.0
+		total_value = 0.0
+
+		for qty, rate in self.state:
+			total_qty += flt(qty)
+			total_value += flt(qty) * flt(rate)
+
+		return _round_off_if_near_zero(total_qty), _round_off_if_near_zero(total_value)
+
+	def __repr__(self):
+		return str(self.state)
+
+	def __iter__(self):
+		return iter(self.state)
+
+	def __eq__(self, other):
+		if isinstance(other, list):
+			return self.state == other
+		return type(self) == type(other) and self.state == other.state
+
+
+class FIFOValuation(BinWiseValuation):
 	"""Valuation method where a queue of all the incoming stock is maintained.
 
 	New stock is added at end of the queue.
@@ -24,33 +63,13 @@ class FIFOValuation:
 	# ref: https://docs.python.org/3/reference/datamodel.html#slots
 	__slots__ = ["queue",]
 
-	def __init__(self, state: Optional[List[FifoBin]]):
-		self.queue: List[FifoBin] = state if state is not None else []
+	def __init__(self, state: Optional[List[StockBin]]):
+		self.queue: List[StockBin] = state if state is not None else []
 
-	def __repr__(self):
-		return str(self.queue)
-
-	def __iter__(self):
-		return iter(self.queue)
-
-	def __eq__(self, other):
-		if isinstance(other, list):
-			return self.queue == other
-		return self.queue == other.queue
-
-	def get_state(self) -> List[FifoBin]:
+	@property
+	def state(self) -> List[StockBin]:
 		"""Get current state of queue."""
 		return self.queue
-
-	def get_total_stock_and_value(self) -> Tuple[float, float]:
-		total_qty = 0.0
-		total_value = 0.0
-
-		for qty, rate in self.queue:
-			total_qty += flt(qty)
-			total_value += flt(qty) * flt(rate)
-
-		return _round_off_if_near_zero(total_qty), _round_off_if_near_zero(total_value)
 
 	def add_stock(self, qty: float, rate: float) -> None:
 		"""Update fifo queue with new stock.
@@ -78,7 +97,7 @@ class FIFOValuation:
 
 	def remove_stock(
 		self, qty: float, outgoing_rate: float = 0.0, rate_generator: Callable[[], float] = None
-	) -> List[FifoBin]:
+	) -> List[StockBin]:
 		"""Remove stock from the queue and return popped bins.
 
 		args:
@@ -134,6 +153,51 @@ class FIFOValuation:
 				qty = 0
 
 		return consumed_bins
+
+
+class LIFOValuation(BinWiseValuation):
+	"""Valuation method where a *stack* of all the incoming stock is maintained.
+
+	New stock is added at top of the stack.
+	Qty consumption happens on Last In First Out basis.
+
+	Stack is implemented using "bins" of [qty, rate].
+
+	ref: https://en.wikipedia.org/wiki/FIFO_and_LIFO_accounting
+	"""
+
+	# specifying the attributes to save resources
+	# ref: https://docs.python.org/3/reference/datamodel.html#slots
+	__slots__ = ["queue",]
+
+	def __init__(self, state: Optional[List[StockBin]]):
+		self.stack: List[StockBin] = state if state is not None else []
+
+	@property
+	def state(self) -> List[StockBin]:
+		"""Get current state of stack."""
+		return self.stack
+
+	def add_stock(self, qty: float, rate: float) -> None:
+		"""Update lifo stack with new stock.
+
+			args:
+				qty: new quantity to add
+				rate: incoming rate of new quantity"""
+		pass
+
+
+	def remove_stock(
+		self, qty: float, outgoing_rate: float = 0.0, rate_generator: Callable[[], float] = None
+	) -> List[StockBin]:
+		"""Remove stock from the stack and return popped bins.
+
+		args:
+			qty: quantity to remove
+			rate: outgoing rate
+			rate_generator: function to be called if stack is not found and rate is required.
+		"""
+		pass
 
 
 def _round_off_if_near_zero(number: float, precision: int = 7) -> float:

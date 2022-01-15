@@ -723,7 +723,7 @@ class update_entries_after(object):
 
 		stock_qty, stock_value = fifo_queue.get_total_stock_and_value()
 
-		self.wh_data.stock_queue = fifo_queue.get_state()
+		self.wh_data.stock_queue = fifo_queue.state
 		self.wh_data.stock_value = stock_value
 		if stock_qty:
 			self.wh_data.valuation_rate = stock_value / stock_qty
