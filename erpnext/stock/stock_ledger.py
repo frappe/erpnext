@@ -647,6 +647,7 @@ class update_entries_after(object):
 				where
 					company = %s
 					and actual_qty > 0
+					and is_cancelled = 0
 					and (serial_no = %s
 						or serial_no like %s
 						or serial_no like %s
@@ -902,6 +903,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 			item_code = %s
 			AND warehouse = %s
 			AND valuation_rate >= 0
+			AND is_cancelled = 0
 			AND NOT (voucher_no = %s AND voucher_type = %s)
 		order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse, voucher_no, voucher_type))
 
@@ -912,6 +914,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 			where
 				item_code = %s
 				AND valuation_rate > 0
+				AND is_cancelled = 0
 				AND NOT(voucher_no = %s AND voucher_type = %s)
 			order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, voucher_no, voucher_type))
 
