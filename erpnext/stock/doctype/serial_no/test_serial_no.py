@@ -8,6 +8,7 @@
 import frappe
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
@@ -175,6 +176,24 @@ class TestSerialNo(ERPNextTestCase):
 		self.assertEqual(sn_doc.company, "_Test Company")
 		self.assertEqual(sn_doc.warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(sn_doc.purchase_document_no, se.name)
+
+	def test_auto_creation_of_serial_no(self):
+		"""
+			Test if auto created Serial No excludes existing serial numbers
+		"""
+		item_code = make_item("_Test Auto Serial Item ", {
+			"has_serial_no": 1,
+			"serial_no_series": "XYZ.###"
+		}).item_code
+
+		# Reserve XYZ005
+		pr_1 = make_purchase_receipt(item_code=item_code, qty=1, serial_no="XYZ005")
+		# XYZ005 is already used and will throw an error if used again
+		pr_2 = make_purchase_receipt(item_code=item_code, qty=10)
+
+		self.assertEqual(get_serial_nos(pr_1.get("items")[0].serial_no)[0], "XYZ005")
+		for serial_no in get_serial_nos(pr_2.get("items")[0].serial_no):
+			self.assertNotEqual(serial_no, "XYZ005")
 
 	def test_serial_no_sanitation(self):
 		"Test if Serial No input is sanitised before entering the DB."

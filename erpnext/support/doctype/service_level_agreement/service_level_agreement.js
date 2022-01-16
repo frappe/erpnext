@@ -111,6 +111,7 @@ frappe.ui.form.on('Service Level Agreement', {
 				filters: [
 					['DocType', 'issingle', '=', 0],
 					['DocType', 'istable', '=', 0],
+					['DocType', 'is_submittable', '=', 0],
 					['DocType', 'name', 'not in', invalid_doctypes],
 					['DocType', 'module', 'not in', ["Email", "Core", "Custom", "Event Streaming", "Social", "Data Migration", "Geo", "Desk"]]
 				]
