@@ -24,4 +24,3 @@ def execute():
 
 	for row in buying:
 		frappe.delete_doc('KSA VAT Purchase Account', row)
-		
