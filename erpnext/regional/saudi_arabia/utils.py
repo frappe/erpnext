@@ -14,7 +14,7 @@ from erpnext import get_region
 def create_qr_code(doc, method=None):
 	if frappe.flags.in_test:
 		return
-	
+
 	region = get_region(doc.company)
 	if region not in ['Saudi Arabia']:
 		return
