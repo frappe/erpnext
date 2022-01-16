@@ -101,7 +101,6 @@ def make_company(company_name, abbr):
 	else:
 		company = frappe.get_doc("Company", company_name)
 
-	company.company_name_in_arabic = company_name
 	company.tax_id = "1234567890"
 	company.create_default_warehouses()
 
@@ -138,6 +137,7 @@ def make_item(item_code, properties=None):
 
 
 def generate_sales_invoices():
+	frappe.db.set_value('Company', '_Test Company KSA VAT', 'company_name_in_arabic', '_Test Company KSA VAT')
 	# Create invoices
 	create_sales_invoice(rate=500, qty=5, item_tax_template="KSA VAT 5% - _TCKV")
 	create_sales_invoice(item_code="_Test KSA VAT Zero Rated Item", qty=5)
