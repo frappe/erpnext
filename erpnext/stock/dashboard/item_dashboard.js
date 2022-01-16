@@ -396,7 +396,7 @@ function append_breakdown(element, item_code, poi_results, boi_results) {
 	let Button = ""
 	if (boi_results.length != 0){
 		Button = `<div style="text-align: center">
-		<button id="backorder-report" class="btn btn-primary" style="margin-top:20px">Open Backorder  Analytics for this item in a new tab.</button> 
+		<button id="backorder-report" class="btn btn-primary" style="margin-top:20px">Open Backorder Analytics for this item.</button> 
 		</div>`
 	}
 	// Add div for canvas
@@ -424,8 +424,7 @@ function append_breakdown(element, item_code, poi_results, boi_results) {
 		$row.append(empty_display)
 	}
 	$("#backorder-report" ).click(function() {
-		let url = 'https://d.erpnext.naturalmeds.co.nz/desk#query-report/Backorder Analytics?item_code='+item_code
-		window.open(url, '_blank');
+		window.location = 'https://d.erpnext.naturalmeds.co.nz/desk#query-report/Backorder Analytics?item_code='+item_code;
 	});
 	// Render the chart using our configuration
 	$.getScript("https://cdn.jsdelivr.net/npm/chart.js").done(function(){
