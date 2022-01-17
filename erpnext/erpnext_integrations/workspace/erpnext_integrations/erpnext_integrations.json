@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Marketplace\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Payments\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Marketplace\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Payments\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
  "creation": "2020-08-20 19:30:48.138801",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -36,17 +36,6 @@
    "label": "Amazon MWS Settings",
    "link_count": 0,
    "link_to": "Amazon MWS Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Shopify Settings",
-   "link_count": 0,
-   "link_to": "Shopify Settings",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -112,7 +101,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:15:58.740247",
+ "modified": "2022-01-13 17:35:35.508718",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "ERPNext Integrations",
@@ -121,7 +110,7 @@
  "public": 1,
  "restrict_to_domain": "",
  "roles": [],
- "sequence_id": 10,
+ "sequence_id": 10.0,
  "shortcuts": [],
  "title": "ERPNext Integrations"
 }
