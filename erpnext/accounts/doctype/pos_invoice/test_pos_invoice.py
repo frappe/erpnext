@@ -326,7 +326,6 @@ class TestPOSInvoice(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, pos2.submit)
 
 	def test_invalid_serial_no_validation(self):
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item(company='_Test Company',
