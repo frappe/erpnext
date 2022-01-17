@@ -947,10 +947,6 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 	locations = get_available_item_locations(item.get("item_code"),
 		warehouses, item.get("quantity"), company, ignore_validation=True)
 
-	if not locations:
-		new_mr_items.append(item)
-		return
-
 	required_qty = item.get("quantity")
 	for d in locations:
 		if required_qty <=0: return
@@ -970,8 +966,8 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 
 	if required_qty:
 		stock_uom, purchase_uom = frappe.db.get_value(
-			'Item', 
-			item['item_code'], 
+			'Item',
+			item['item_code'],
 			['stock_uom', 'purchase_uom']
 		)
 
