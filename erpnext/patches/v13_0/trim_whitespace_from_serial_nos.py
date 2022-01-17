@@ -9,13 +9,15 @@ def execute():
 			from `tabStock Ledger Entry`
 			where
 				is_cancelled = 0
-				and (serial_no like %s or serial_no like %s or serial_no like %s or serial_no like %s)
+				and ( serial_no like %s or serial_no like %s or serial_no like %s or serial_no like %s
+					or serial_no = %s )
 			""",
 			(
 				" %",    # leading whitespace
 				"% ",    # trailing whitespace
 				"%\n %", # leading whitespace on newline
 				"% \n%", # trailing whitespace on newline
+				"\n",    # just new line
 			),
 			as_dict=True,
 		)
