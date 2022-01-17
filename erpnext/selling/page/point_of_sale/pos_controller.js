@@ -681,7 +681,7 @@ erpnext.PointOfSale.Controller = class {
 			},
 			callback(res) {
 				if (!me.item_stock_map[item_code])
-					me.item_stock_map[item_code] = {}
+					me.item_stock_map[item_code] = {};
 				me.item_stock_map[item_code][warehouse] = res.message[0];
 			}
 		});
