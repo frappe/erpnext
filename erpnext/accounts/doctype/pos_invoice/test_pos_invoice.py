@@ -339,8 +339,8 @@ class TestPOSInvoice(unittest.TestCase):
 
 		pos.get('items')[0].has_serial_no = 1
 		pos.get('items')[0].serial_no = serial_nos
-		pos.insert()
-		self.assertRaises(frappe.ValidationError, pos.submit)
+
+		self.assertRaises(frappe.ValidationError, pos.insert)
 
 	def test_delivered_serialized_item_transaction(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
