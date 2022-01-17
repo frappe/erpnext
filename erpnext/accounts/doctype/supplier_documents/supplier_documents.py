@@ -19,7 +19,7 @@ class SupplierDocuments(Document):
 			self.update_accounts_status()
 			self.grand_total = self.outstanding_amount
 			self.db_set('grand_total', self.outstanding_amount, update_modified=False)
-			self.apply_gl_entry()
+			# self.apply_gl_entry()
 		
 	def on_load(self):
 		self.validate_status()
