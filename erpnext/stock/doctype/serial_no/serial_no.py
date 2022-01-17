@@ -421,9 +421,15 @@ def update_serial_nos(sle, item_det):
 def get_auto_serial_nos(serial_no_series, qty):
 	serial_nos = []
 	for i in range(cint(qty)):
-		serial_nos.append(make_autoname(serial_no_series, "Serial No"))
+		serial_nos.append(get_new_serial_number(serial_no_series))
 
 	return "\n".join(serial_nos)
+
+def get_new_serial_number(series):
+	sr_no = make_autoname(series, "Serial No")
+	if frappe.db.exists("Serial No", sr_no):
+		sr_no = get_new_serial_number(series)
+	return sr_no
 
 def auto_make_serial_nos(args):
 	serial_nos = get_serial_nos(args.get('serial_no'))

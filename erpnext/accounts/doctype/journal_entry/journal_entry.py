@@ -397,13 +397,14 @@ class JournalEntry(AccountsController):
 						debit_or_credit = 'Debit' if d.debit else 'Credit'
 						party_account = get_deferred_booking_accounts(d.reference_type, d.reference_detail_no,
 							debit_or_credit)
+						against_voucher = ['', against_voucher[1]]
 					else:
 						if d.reference_type == "Sales Invoice":
 							party_account = get_party_account_based_on_invoice_discounting(d.reference_name) or against_voucher[1]
 						else:
 							party_account = against_voucher[1]
 
-					if (against_voucher[0] != d.party or party_account != d.account):
+					if (against_voucher[0] != cstr(d.party) or party_account != d.account):
 						frappe.throw(_("Row {0}: Party / Account does not match with {1} / {2} in {3} {4}")
 							.format(d.idx, field_dict.get(d.reference_type)[0], field_dict.get(d.reference_type)[1],
 								d.reference_type, d.reference_name))
@@ -468,13 +469,22 @@ class JournalEntry(AccountsController):
 
 	def set_against_account(self):
 		accounts_debited, accounts_credited = [], []
-		for d in self.get("accounts"):
-			if flt(d.debit > 0): accounts_debited.append(d.party or d.account)
-			if flt(d.credit) > 0: accounts_credited.append(d.party or d.account)
+		if self.voucher_type in ('Deferred Revenue', 'Deferred Expense'):
+			for d in self.get('accounts'):
+				if d.reference_type == 'Sales Invoice':
+					field = 'customer'
+				else:
+					field = 'supplier'
 
-		for d in self.get("accounts"):
-			if flt(d.debit > 0): d.against_account = ", ".join(list(set(accounts_credited)))
-			if flt(d.credit > 0): d.against_account = ", ".join(list(set(accounts_debited)))
+				d.against_account = frappe.db.get_value(d.reference_type, d.reference_name, field)
+		else:
+			for d in self.get("accounts"):
+				if flt(d.debit > 0): accounts_debited.append(d.party or d.account)
+				if flt(d.credit) > 0: accounts_credited.append(d.party or d.account)
+
+			for d in self.get("accounts"):
+				if flt(d.debit > 0): d.against_account = ", ".join(list(set(accounts_credited)))
+				if flt(d.credit > 0): d.against_account = ", ".join(list(set(accounts_debited)))
 
 	def validate_debit_credit_amount(self):
 		for d in self.get('accounts'):
