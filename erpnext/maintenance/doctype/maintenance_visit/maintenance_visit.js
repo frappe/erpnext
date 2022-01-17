@@ -13,7 +13,7 @@ frappe.ui.form.on('Maintenance Visit', {
 		if (frm.doc.maintenance_type === "Scheduled") {
 			let item_code = frm.doc.purposes[0].item_code;
 			frappe.call({
-				method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.update_serial_nos",
+				method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.get_serial_nos_from_schedule",
 				args: {
 					schedule: frm.doc.maintenance_schedule,
 					item_code: item_code
@@ -35,6 +35,15 @@ frappe.ui.form.on('Maintenance Visit', {
 						}
 					};
 				});
+			});
+		} else {
+			frm.set_query('serial_no', 'purposes', (frm, cdt, cdn) => {
+				let row = locals[cdt][cdn];
+				return {
+					filters: {
+						'item_code': row.item_code
+					}
+				};
 			});
 		}
 		if (!frm.doc.status) {
