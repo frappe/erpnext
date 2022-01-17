@@ -1526,7 +1526,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 
 	if dt in ['Purchase Order', 'Sales Order', 'Sales Invoice', 'Purchase Invoice']:
 		pe.project = (doc.get('project') or
-					  reduce(lambda prev,cur: prev or cur, [x.get('project') for x in doc.get('items')], None)) # get first non-empty project from items
+			reduce(lambda prev,cur: prev or cur, [x.get('project') for x in doc.get('items')], None)) # get first non-empty project from items
 
 	if pe.party_type in ["Customer", "Supplier"]:
 		bank_account = get_party_bank_account(pe.party_type, pe.party)
