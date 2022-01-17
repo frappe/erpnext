@@ -305,7 +305,7 @@ class MaintenanceSchedule(TransactionBase):
 					return schedule.name
 
 @frappe.whitelist()
-def update_serial_nos(item_code, schedule=None):
+def get_serial_nos_from_schedule(item_code, schedule=None):
 	serial_nos = []
 	if schedule:
 		serial_nos = frappe.db.get_value('Maintenance Schedule Item', {
