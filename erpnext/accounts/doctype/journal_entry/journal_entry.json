@@ -19,6 +19,7 @@
   "2_add_edit_gl_entries",
   "accounts",
   "section_break99",
+  "supplier_document",
   "cheque_no",
   "cheque_date",
   "user_remark",
@@ -497,12 +498,20 @@
    "fieldtype": "Link",
    "label": "Bank Transactions",
    "options": "Bank Transactions"
+  },
+  {
+   "fieldname": "supplier_document",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Supplier Document",
+   "options": "Supplier Documents",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
- "modified": "2021-09-30 11:05:39.240203",
+ "modified": "2022-01-17 14:45:34.350263",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
