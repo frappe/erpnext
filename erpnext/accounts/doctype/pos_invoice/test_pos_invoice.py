@@ -325,6 +325,22 @@ class TestPOSInvoice(unittest.TestCase):
 		pos2.insert()
 		self.assertRaises(frappe.ValidationError, pos2.submit)
 
+	def test_invalid_serial_no_validation(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+
+		se = make_serialized_item(company='_Test Company',
+			target_warehouse="Stores - _TC", cost_center='Main - _TC', expense_account='Cost of Goods Sold - _TC')
+
+		pos = create_pos_invoice(company='_Test Company', debit_to='Debtors - _TC',
+			account_for_change_amount='Cash - _TC', warehouse='Stores - _TC', income_account='Sales - _TC',
+			expense_account='Cost of Goods Sold - _TC', cost_center='Main - _TC',
+			item=se.get("items")[0].item_code, rate=1000, do_not_save=1)
+		pos.get('items')[0].serial_no = 'ABCD00015\nABCD00016wrong'
+		pos.insert()
+
+		self.assertRaises(frappe.ValidationError, pos.submit)
+
 	def test_delivered_serialized_item_transaction(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
