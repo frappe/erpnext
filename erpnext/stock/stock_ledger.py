@@ -105,6 +105,7 @@ def get_args_for_future_sle(row):
 
 def validate_serial_no(sle):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 	for sn in get_serial_nos(sle.serial_no):
 		args = copy.deepcopy(sle)
 		args.serial_no = sn
@@ -415,6 +416,8 @@ class update_entries_after(object):
 		return sorted(entries_to_fix, key=lambda k: k['timestamp'])
 
 	def process_sle(self, sle):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 		# previous sle data for this warehouse
 		self.wh_data = self.data[sle.warehouse]
 
@@ -429,7 +432,7 @@ class update_entries_after(object):
 		if not self.args.get("sle_id"):
 			self.get_dynamic_incoming_outgoing_rate(sle)
 
-		if sle.serial_no:
+		if get_serial_nos(sle.serial_no):
 			self.get_serialized_values(sle)
 			self.wh_data.qty_after_transaction += flt(sle.actual_qty)
 			if sle.voucher_type == "Stock Reconciliation":
@@ -441,8 +444,9 @@ class update_entries_after(object):
 				# assert
 				self.wh_data.valuation_rate = sle.valuation_rate
 				self.wh_data.qty_after_transaction = sle.qty_after_transaction
-				self.wh_data.stock_queue = [[self.wh_data.qty_after_transaction, self.wh_data.valuation_rate]]
 				self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(self.wh_data.valuation_rate)
+				if self.valuation_method != "Moving Average":
+					self.wh_data.stock_queue = [[self.wh_data.qty_after_transaction, self.wh_data.valuation_rate]]
 			else:
 				if self.valuation_method == "Moving Average":
 					self.get_moving_average_values(sle)
@@ -595,9 +599,9 @@ class update_entries_after(object):
 			incoming_rate = self.wh_data.valuation_rate
 
 		stock_value_change = 0
-		if incoming_rate:
+		if actual_qty > 0:
 			stock_value_change = actual_qty * incoming_rate
-		elif actual_qty < 0:
+		else:
 			# In case of delivery/stock issue, get average purchase rate
 			# of serial nos of current entry
 			if not sle.is_cancelled:
@@ -639,6 +643,7 @@ class update_entries_after(object):
 				where
 					company = %s
 					and actual_qty > 0
+					and is_cancelled = 0
 					and (serial_no = %s
 						or serial_no like %s
 						or serial_no like %s
@@ -942,6 +947,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 			item_code = %s
 			AND warehouse = %s
 			AND valuation_rate >= 0
+			AND is_cancelled = 0
 			AND NOT (voucher_no = %s AND voucher_type = %s)
 		order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse, voucher_no, voucher_type))
 
@@ -952,6 +958,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 			where
 				item_code = %s
 				AND valuation_rate > 0
+				AND is_cancelled = 0
 				AND NOT(voucher_no = %s AND voucher_type = %s)
 			order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, voucher_no, voucher_type))
 
