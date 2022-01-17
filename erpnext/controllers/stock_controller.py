@@ -17,7 +17,7 @@ from erpnext.accounts.general_ledger import (
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock import get_warehouse_account_map
-from erpnext.stock.stock_ledger import get_items_to_be_repost, get_valuation_rate
+from erpnext.stock.stock_ledger import get_items_to_be_repost
 
 
 class QualityInspectionRequiredError(frappe.ValidationError): pass
@@ -111,17 +111,6 @@ class StockController(AccountsController):
 
 						self.check_expense_account(item_row)
 
-						# If the item does not have the allow zero valuation rate flag set
-						# and ( valuation rate not mentioned in an incoming entry
-						# or incoming entry not found while delivering the item),
-						# try to pick valuation rate from previous sle or Item master and update in SLE
-						# Otherwise, throw an exception
-
-						if not sle.stock_value_difference and self.doctype != "Stock Reconciliation" \
-							and not item_row.get("allow_zero_valuation_rate"):
-
-							sle = self.update_stock_ledger_entries(sle)
-
 						# expense account/ target_warehouse / source_warehouse
 						if item_row.get('target_warehouse'):
 							warehouse = item_row.get('target_warehouse')
@@ -163,26 +152,6 @@ class StockController(AccountsController):
 			frappe.flags.debit_field_precision = frappe.get_precision("GL Entry", "debit_in_account_currency")
 
 		return frappe.flags.debit_field_precision
-
-	def update_stock_ledger_entries(self, sle):
-		sle.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
-			self.doctype, self.name, currency=self.company_currency, company=self.company)
-
-		sle.stock_value = flt(sle.qty_after_transaction) * flt(sle.valuation_rate)
-		sle.stock_value_difference = flt(sle.actual_qty) * flt(sle.valuation_rate)
-
-		if sle.name:
-			frappe.db.sql("""
-				update
-					`tabStock Ledger Entry`
-				set
-					stock_value = %(stock_value)s,
-					valuation_rate = %(valuation_rate)s,
-					stock_value_difference = %(stock_value_difference)s
-				where
-					name = %(name)s""", (sle))
-
-		return sle
 
 	def get_voucher_details(self, default_expense_account, default_cost_center, sle_map):
 		if self.doctype == "Stock Reconciliation":
