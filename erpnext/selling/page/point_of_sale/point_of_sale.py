@@ -24,7 +24,7 @@ def search_by_term(search_term, warehouse, price_list):
 			["name as item_code", "item_name", "description", "stock_uom", "image as item_image", "is_stock_item"],
 			as_dict=1)
 
-		item_stock_qty = get_stock_availability(item_code, warehouse)
+		item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
 		price_list_rate, currency = frappe.db.get_value('Item Price', {
 				'price_list': price_list,
 				'item_code': item_code
@@ -111,7 +111,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		for item in items_data:
 			item_code = item.item_code
 			item_price = item_prices.get(item_code) or {}
-			item_stock_qty = get_stock_availability(item_code, warehouse)
+			item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
 
 			row = {}
 			row.update(item)

@@ -175,7 +175,7 @@ class POSInvoice(SalesInvoice):
 				if allow_negative_stock:
 					return
 
-				available_stock = get_stock_availability(d.item_code, d.warehouse)
+				available_stock, is_stock_item = get_stock_availability(d.item_code, d.warehouse)
 
 				item_code, warehouse, qty = frappe.bold(d.item_code), frappe.bold(d.warehouse), frappe.bold(d.qty)
 				if flt(available_stock) <= 0:
@@ -485,15 +485,17 @@ class POSInvoice(SalesInvoice):
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):
 	if frappe.db.get_value('Item', item_code, 'is_stock_item'):
+		is_stock_item = True
 		bin_qty = get_bin_qty(item_code, warehouse)
 		pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
-		return bin_qty - pos_sales_qty
+		return bin_qty - pos_sales_qty, is_stock_item
 	else:
+		is_stock_item = False
 		if frappe.db.exists('Product Bundle', item_code):
-			return get_bundle_availability(item_code, warehouse)
+			return get_bundle_availability(item_code, warehouse), is_stock_item
 		else:
 			# Is a service item
-			return 0
+			return 0, is_stock_item
 
 
 def get_bundle_availability(bundle_item_code, warehouse):

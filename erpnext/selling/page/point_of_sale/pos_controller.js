@@ -630,23 +630,24 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	async check_stock_availability(item_row, qty_needed, warehouse) {
-		const available_qty = (await this.get_available_stock(item_row.item_code, warehouse)).message;
+		const resp = (await this.get_available_stock(item_row.item_code, warehouse)).message;
+		const available_qty = resp[0];
+		const is_stock_item = resp[1];
 
 		frappe.dom.unfreeze();
 		const bold_item_code = item_row.item_code.bold();
 		const bold_warehouse = warehouse.bold();
 		const bold_available_qty = available_qty.toString().bold()
 		if (!(available_qty > 0)) {
-			frappe.db.get_value('Item', item_row.item_code, 'is_stock_item').then(({message}) => {
-				const is_service_item = message.is_stock_item;
-				if (!is_service_item) return;
-
+			if (is_stock_item) {
 				frappe.model.clear_doc(item_row.doctype, item_row.name);
 				frappe.throw({
 					title: __("Not Available"),
 					message: __('Item Code: {0} is not available under warehouse {1}.', [bold_item_code, bold_warehouse])
 				});
-			});
+			} else {
+				return;
+			}
 		} else if (available_qty < qty_needed) {
 			frappe.throw({
 				message: __('Stock quantity not enough for Item Code: {0} under warehouse {1}. Available quantity {2}.', [bold_item_code, bold_warehouse, bold_available_qty]),
@@ -681,7 +682,7 @@ erpnext.PointOfSale.Controller = class {
 			callback(res) {
 				if (!me.item_stock_map[item_code])
 					me.item_stock_map[item_code] = {}
-				me.item_stock_map[item_code][warehouse] = res.message;
+				me.item_stock_map[item_code][warehouse] = res.message[0];
 			}
 		});
 	}
