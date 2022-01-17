@@ -531,16 +531,6 @@ class BOM(WebsiteGenerator):
 				row.hour_rate = (hour_rate / flt(self.conversion_rate)
 					if self.conversion_rate and hour_rate else hour_rate)
 
-			if self.routing:
-				time_in_mins = flt(frappe.db.get_value("BOM Operation", {
-						"workstation": row.workstation,
-						"operation": row.operation,
-						"parent": self.routing
-				}, ["time_in_mins"]))
-
-				if time_in_mins:
-					row.time_in_mins = time_in_mins
-
 		if row.hour_rate and row.time_in_mins:
 			row.base_hour_rate = flt(row.hour_rate) * flt(self.conversion_rate)
 			row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0

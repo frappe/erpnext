@@ -350,7 +350,8 @@ def add_uom_data():
 				"doctype": "UOM",
 				"uom_name": _(d.get("uom_name")),
 				"name": _(d.get("uom_name")),
-				"must_be_whole_number": d.get("must_be_whole_number")
+				"must_be_whole_number": d.get("must_be_whole_number"),
+				"enabled": 1,
 			}).db_insert()
 
 	# bootstrap uom conversion factors
