@@ -606,9 +606,9 @@ class update_entries_after(object):
 			incoming_rate = self.wh_data.valuation_rate
 
 		stock_value_change = 0
-		if incoming_rate:
+		if actual_qty > 0:
 			stock_value_change = actual_qty * incoming_rate
-		elif actual_qty < 0:
+		else:
 			# In case of delivery/stock issue, get average purchase rate
 			# of serial nos of current entry
 			if not sle.is_cancelled:
