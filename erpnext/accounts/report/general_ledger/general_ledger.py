@@ -449,9 +449,11 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 
 			elif group_by_voucher_consolidated:
 				keylist = [gle.get("voucher_type"), gle.get("voucher_no"), gle.get("account")]
-				for dim in accounting_dimensions:
-					keylist.append(gle.get(dim))
-				keylist.append(gle.get("cost_center"))
+				if filters.get("include_dimensions"):
+					for dim in accounting_dimensions:
+						keylist.append(gle.get(dim))
+					keylist.append(gle.get("cost_center"))
+
 				key = tuple(keylist)
 				if key not in consolidated_gle:
 					consolidated_gle.setdefault(key, gle)
@@ -595,14 +597,14 @@ def get_columns(filters):
 				"fieldname": dim.fieldname,
 				"width": 100
 			})
-
-	columns.extend([
-		{
+		columns.append({
 			"label": _("Cost Center"),
 			"options": "Cost Center",
 			"fieldname": "cost_center",
 			"width": 100
-		},
+		})
+
+	columns.extend([
 		{
 			"label": _("Against Voucher Type"),
 			"fieldname": "against_voucher_type",

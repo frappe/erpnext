@@ -143,7 +143,7 @@ class Patient(Document):
 		age = self.age
 		if not age:
 			return
-		age_str = str(age.years) + ' ' + _("Years(s)") + ' ' + str(age.months) + ' ' + _("Month(s)") + ' ' + str(age.days) + ' ' + _("Day(s)")
+		age_str = str(age.years) + ' ' + _("Year(s)") + ' ' + str(age.months) + ' ' + _("Month(s)") + ' ' + str(age.days) + ' ' + _("Day(s)")
 		return age_str
 
 	@frappe.whitelist()
