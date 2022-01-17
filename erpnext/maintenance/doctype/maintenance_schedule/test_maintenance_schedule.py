@@ -7,8 +7,8 @@ import frappe
 from frappe.utils.data import add_days, formatdate, today
 
 from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
+	get_serial_nos_from_schedule,
 	make_maintenance_visit,
-	update_serial_nos,
 )
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
@@ -93,7 +93,7 @@ class TestMaintenanceSchedule(unittest.TestCase):
 		s_item = ms.schedules[0]
 		mv = make_maintenance_visit(source_name=ms.name, item_name=item_code, s_id=s_item.name)
 		mvi = mv.purposes[0]
-		serial_nos = update_serial_nos(mvi.item_name, ms.name)
+		serial_nos = get_serial_nos_from_schedule(mvi.item_name, ms.name)
 		self.assertEqual(serial_nos, None)
 
 		# With serial no. set in schedule -> returns serial nos.
@@ -104,7 +104,7 @@ class TestMaintenanceSchedule(unittest.TestCase):
 		s_item = ms.schedules[0]
 		mv = make_maintenance_visit(source_name=ms.name, item_name=item_code, s_id=s_item.name)
 		mvi = mv.purposes[0]
-		serial_nos = update_serial_nos(mvi.item_name, ms.name)
+		serial_nos = get_serial_nos_from_schedule(mvi.item_name, ms.name)
 		self.assertEqual(serial_nos, ["TEST001", "TEST002"])
 
 		frappe.db.rollback()
