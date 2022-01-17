@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdate
+from frappe.utils import cint, cstr, flt, get_datetime, get_link_to_form, getdate, now, nowdate
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
@@ -1098,22 +1098,27 @@ def get_future_sle_with_negative_qty(args):
 
 
 def get_future_sle_with_negative_batch_qty(args):
-	return frappe.db.sql("""
-		with batch_ledger as (
-			select
-				posting_date, posting_time, voucher_type, voucher_no,
-				sum(actual_qty) over (order by posting_date, posting_time, creation) as cumulative_total
-			from `tabStock Ledger Entry`
-			where
-				item_code = %(item_code)s
-				and warehouse = %(warehouse)s
-				and batch_no=%(batch_no)s
-				and is_cancelled = 0
-			order by posting_date, posting_time, creation
-		)
-		select * from batch_ledger
+	batch_ledger = frappe.db.sql("""
+		select
+			posting_date, posting_time, voucher_type, voucher_no, actual_qty
+		from `tabStock Ledger Entry`
 		where
-			cumulative_total < 0.0
-			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
-		limit 1
+			item_code = %(item_code)s
+			and warehouse = %(warehouse)s
+			and batch_no=%(batch_no)s
+			and is_cancelled = 0
+		order by timestamp(posting_date, posting_time), creation
 	""", args, as_dict=1)
+
+	cumulative_total = 0.0
+	current_posting_datetime = get_datetime(str(args.posting_date) + " " + str(args.posting_time))
+	for entry in batch_ledger:
+		cumulative_total += entry.actual_qty
+		if cumulative_total > -1e-6:
+			continue
+
+		if (get_datetime(str(args.posting_date) + " " + str(args.posting_time))
+				>= current_posting_datetime):
+
+			entry.cumulative_total = cumulative_total
+			return [entry]
