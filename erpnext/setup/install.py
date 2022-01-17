@@ -189,7 +189,7 @@ def add_non_standard_user_types():
 
 	user_type_limit = {}
 	for user_type, data in user_types.items():
-		user_type_limit.setdefault(frappe.scrub(user_type), 10)
+		user_type_limit.setdefault(frappe.scrub(user_type), 20)
 
 	update_site_config('user_type_doctype_limit', user_type_limit)
 
@@ -204,15 +204,34 @@ def get_user_types_data():
 			'apply_user_permission_on': 'Employee',
 			'user_id_field': 'user_id',
 			'doctypes': {
-				'Salary Slip': ['read'],
+				# masters
+				'Holiday List': ['read'],
+				'Expense Claim Type': ['read'],
 				'Employee': ['read', 'write'],
+				# payroll
+				'Salary Slip': ['read'],
+				'Employee Benefit Application': ['read', 'write', 'create', 'delete'],
+				# expenses
 				'Expense Claim': ['read', 'write', 'create', 'delete'],
+				'Employee Advance': ['read', 'write', 'create', 'delete'],
+				# leave and attendance
 				'Leave Application': ['read', 'write', 'create', 'delete'],
 				'Attendance Request': ['read', 'write', 'create', 'delete'],
 				'Compensatory Leave Request': ['read', 'write', 'create', 'delete'],
+				# tax
 				'Employee Tax Exemption Declaration': ['read', 'write', 'create', 'delete'],
 				'Employee Tax Exemption Proof Submission': ['read', 'write', 'create', 'delete'],
-				'Timesheet': ['read', 'write', 'create', 'delete', 'submit', 'cancel', 'amend']
+				# projects
+				'Timesheet': ['read', 'write', 'create', 'delete', 'submit', 'cancel', 'amend'],
+				# trainings
+				'Training Program': ['read'],
+				'Training Feedback': ['read', 'write', 'create', 'delete', 'submit', 'cancel', 'amend'],
+				# shifts
+				'Shift Request': ['read', 'write', 'create', 'delete', 'submit', 'cancel', 'amend'],
+				# misc
+				'Employee Grievance': ['read', 'write', 'create', 'delete'],
+				'Employee Referral': ['read', 'write', 'create', 'delete'],
+				'Travel Request': ['read', 'write', 'create', 'delete']
 			}
 		}
 	}
