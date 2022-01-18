@@ -30,18 +30,41 @@ class EmployeeAdvance(Document):
 	def on_cancel(self):
 		self.ignore_linked_doctypes = "GL Entry"
 
-	def set_status(self):
+	def set_status(self, update=False):
+		precision = self.precision("paid_amount")
+		total_amount = flt(flt(self.claimed_amount) + flt(self.return_amount), precision)
+		status = None
+
 		if self.docstatus == 0:
-			self.status = "Draft"
-		if self.docstatus == 1:
-			if self.claimed_amount and flt(self.claimed_amount) == flt(self.paid_amount):
-				self.status = "Claimed"
-			elif self.paid_amount and self.advance_amount == flt(self.paid_amount):
-				self.status = "Paid"
+			status = "Draft"
+		elif self.docstatus == 1:
+			if flt(self.claimed_amount) > 0 and flt(self.claimed_amount, precision) == flt(
+				self.paid_amount, precision
+			):
+				status = "Claimed"
+			elif flt(self.return_amount) > 0 and flt(self.return_amount, precision) == flt(
+				self.paid_amount, precision
+			):
+				status = "Returned"
+			elif (
+				flt(self.claimed_amount) > 0
+				and (flt(self.return_amount) > 0)
+				and total_amount == flt(self.paid_amount, precision)
+			):
+				status = "Partly Claimed and Returned"
+			elif flt(self.paid_amount) > 0 and flt(self.advance_amount, precision) == flt(
+				self.paid_amount, precision
+			):
+				status = "Paid"
 			else:
-				self.status = "Unpaid"
+				status = "Unpaid"
 		elif self.docstatus == 2:
-			self.status = "Cancelled"
+			status = "Cancelled"
+
+		if update:
+			self.db_set("status", status)
+		else:
+			self.status = status
 
 	def set_total_advance_paid(self):
 		gle = frappe.qb.DocType("GL Entry")
@@ -89,8 +112,7 @@ class EmployeeAdvance(Document):
 
 		self.db_set("paid_amount", paid_amount)
 		self.db_set("return_amount", return_amount)
-		self.set_status()
-		frappe.db.set_value("Employee Advance", self.name, "status", self.status)
+		self.set_status(update=True)
 
 	def update_claimed_amount(self):
 		claimed_amount = (
@@ -112,8 +134,7 @@ class EmployeeAdvance(Document):
 
 		frappe.db.set_value("Employee Advance", self.name, "claimed_amount", flt(claimed_amount))
 		self.reload()
-		self.set_status()
-		frappe.db.set_value("Employee Advance", self.name, "status", self.status)
+		self.set_status(update=True)
 
 
 @frappe.whitelist()
