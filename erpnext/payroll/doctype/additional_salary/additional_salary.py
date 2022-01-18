@@ -124,6 +124,8 @@ class AdditionalSalary(Document):
 				return_amount += self.amount
 
 			frappe.db.set_value("Employee Advance", self.ref_docname, "return_amount", return_amount)
+			advance = frappe.get_doc("Employee Advance", self.ref_docname)
+			advance.set_status(update=True)
 
 	def update_employee_referral(self, cancel=False):
 		if self.ref_doctype == "Employee Referral":
