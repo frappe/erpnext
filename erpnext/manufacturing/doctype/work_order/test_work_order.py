@@ -321,6 +321,8 @@ class TestWorkOrder(ERPNextTestCase):
 			target="_Test Warehouse - _TC", qty=10, basic_rate=1000.0)
 
 		s = frappe.get_doc(make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 3))
+		for item in s.items:
+			item.qty *= 1.5
 		s.insert()
 		self.assertRaises(StockOverProductionError, s.submit)
 
