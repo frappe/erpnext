@@ -286,6 +286,7 @@ def make_return_entry(
 			"party_type": "Employee",
 			"party": employee,
 			"is_advance": "Yes",
+			"cost_center": erpnext.get_default_cost_center(company),
 		},
 	)
 
@@ -303,6 +304,7 @@ def make_return_entry(
 			"account_currency": bank_cash_account.account_currency,
 			"account_type": bank_cash_account.account_type,
 			"exchange_rate": flt(exchange_rate) if bank_cash_account.account_currency == currency else 1,
+			"cost_center": erpnext.get_default_cost_center(company),
 		},
 	)
 

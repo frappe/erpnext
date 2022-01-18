@@ -12,8 +12,13 @@ from erpnext.hr.doctype.employee_advance.employee_advance import (
 	EmployeeAdvanceOverPayment,
 	create_return_through_additional_salary,
 	make_bank_entry,
+	make_return_entry,
 )
 from erpnext.hr.doctype.expense_claim.expense_claim import get_advances
+from erpnext.hr.doctype.expense_claim.test_expense_claim import (
+	get_payable_account,
+	make_expense_claim,
+)
 from erpnext.payroll.doctype.salary_component.test_salary_component import create_salary_component
 from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
@@ -53,9 +58,79 @@ class TestEmployeeAdvance(unittest.TestCase):
 		self.assertEqual(advance.paid_amount, 0)
 		self.assertEqual(advance.status, "Unpaid")
 
+	def test_claimed_and_returned_status(self):
+		# Claimed Status check, full amount claimed
+		payable_account = get_payable_account("_Test Company")
+		claim = make_expense_claim(
+			payable_account, 1000, 1000, "_Test Company", "Travel Expenses - _TC", do_not_submit=True
+		)
+
+		advance = make_employee_advance(claim.employee)
+		pe = make_payment_entry(advance)
+		pe.submit()
+
+		claim = get_advances_for_claim(claim, advance.name)
+		claim.save()
+		claim.submit()
+
+		advance.reload()
+		self.assertEqual(advance.claimed_amount, 1000)
+		self.assertEqual(advance.status, "Claimed")
+
+		# cancel claim; status should be Paid
+		claim.cancel()
+		advance.reload()
+		self.assertEqual(advance.claimed_amount, 0)
+		self.assertEqual(advance.status, "Paid")
+
+		# Partly Claimed and Returned status check
+		# 500 Claimed, 500 Returned
+		claim = make_expense_claim(
+			payable_account, 500, 500, "_Test Company", "Travel Expenses - _TC", do_not_submit=True
+		)
+
+		advance = make_employee_advance(claim.employee)
+		pe = make_payment_entry(advance)
+		pe.submit()
+
+		claim = get_advances_for_claim(claim, advance.name, amount=500)
+		claim.save()
+		claim.submit()
+
+		advance.reload()
+		self.assertEqual(advance.claimed_amount, 500)
+		self.assertEqual(advance.status, "Paid")
+
+		entry = make_return_entry(
+			employee=advance.employee,
+			company=advance.company,
+			employee_advance_name=advance.name,
+			return_amount=flt(advance.paid_amount - advance.claimed_amount),
+			advance_account=advance.advance_account,
+			mode_of_payment=advance.mode_of_payment,
+			currency=advance.currency,
+			exchange_rate=advance.exchange_rate,
+		)
+
+		entry = frappe.get_doc(entry)
+		entry.insert()
+		entry.submit()
+
+		advance.reload()
+		self.assertEqual(advance.return_amount, 500)
+		self.assertEqual(advance.status, "Partly Claimed and Returned")
+
+		# Cancel return entry; status should change to Paid
+		entry.cancel()
+		advance.reload()
+		self.assertEqual(advance.return_amount, 0)
+		self.assertEqual(advance.status, "Paid")
+
 	def test_repay_unclaimed_amount_from_salary(self):
 		employee_name = make_employee("_T@employe.advance")
 		advance = make_employee_advance(employee_name, {"repay_unclaimed_amount_from_salary": 1})
+		pe = make_payment_entry(advance)
+		pe.submit()
 
 		args = {"type": "Deduction"}
 		create_salary_component("Advance Salary - Deduction", **args)
@@ -85,11 +160,13 @@ class TestEmployeeAdvance(unittest.TestCase):
 
 		advance.reload()
 		self.assertEqual(advance.return_amount, 1000)
+		self.assertEqual(advance.status, "Returned")
 
 		# update advance return amount on additional salary cancellation
 		additional_salary.cancel()
 		advance.reload()
 		self.assertEqual(advance.return_amount, 700)
+		self.assertEqual(advance.status, "Paid")
 
 	def tearDown(self):
 		frappe.db.rollback()
