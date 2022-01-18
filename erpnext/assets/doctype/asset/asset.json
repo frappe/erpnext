@@ -35,6 +35,7 @@
   "available_for_use_date",
   "column_break_23",
   "gross_purchase_amount",
+  "asset_quantity",
   "purchase_date",
   "section_break_23",
   "calculate_depreciation",
@@ -480,6 +481,12 @@
    "fieldname": "section_break_36",
    "fieldtype": "Section Break",
    "label": "Finance Books"
+  },
+  {
+   "fieldname": "asset_quantity",
+   "fieldtype": "Int",
+   "label": "Asset Quantity",
+   "read_only": 1
   }
  ],
  "idx": 72,
@@ -502,10 +509,11 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2021-06-24 14:58:51.097908",
+ "modified": "2022-01-18 12:57:36.741192",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -542,6 +550,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "asset_name",
  "track_changes": 1
 }
