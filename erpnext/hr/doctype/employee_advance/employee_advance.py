@@ -233,7 +233,8 @@ def make_return_entry(employee, company, employee_advance_name, return_amount,  
 		'reference_name': employee_advance_name,
 		'party_type': 'Employee',
 		'party': employee,
-		'is_advance': 'Yes'
+		'is_advance': 'Yes',
+		'cost_center': erpnext.get_default_cost_center(company)
 	})
 
 	bank_amount = flt(return_amount) if bank_cash_account.account_currency==currency \
@@ -244,7 +245,8 @@ def make_return_entry(employee, company, employee_advance_name, return_amount,  
 		"debit_in_account_currency": bank_amount,
 		"account_currency": bank_cash_account.account_currency,
 		"account_type": bank_cash_account.account_type,
-		"exchange_rate": flt(exchange_rate) if bank_cash_account.account_currency == currency else 1
+		"exchange_rate": flt(exchange_rate) if bank_cash_account.account_currency == currency else 1,
+		"cost_center": erpnext.get_default_cost_center(company)
 	})
 
 	return je.as_dict()
