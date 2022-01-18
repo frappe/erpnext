@@ -1360,6 +1360,14 @@ class SalesInvoice(SellingController):
 				else:
 					income_account = (item.income_account
 						if (not item.enable_deferred_revenue or self.is_return) else item.deferred_revenue_account)
+					
+					if self.outstanding_amount > 0:
+						company = frappe.get_doc("Company", self.company)
+
+						if company.default_credit_account == None:
+							frappe.throw(_("Assign Credit Account by default in the company"))
+						else:
+							income_account = company.default_credit_account
 
 					account_currency = get_account_currency(income_account)
 					gl_entries.append(
