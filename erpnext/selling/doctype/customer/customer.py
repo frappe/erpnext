@@ -179,15 +179,15 @@ class Customer(TransactionBase):
 	def link_lead_address_contact(self):
 		if self.lead_name:
 			# assign lead address to customer (if already not set)
-			linked_contacts_and_addresses = frappe.get_all('Dynamic Link', filters=[
-						["parenttype", "in", ["Contact", "Address"]],
-						["link_doctype", "=", "Lead"],
-						["link_name", "=", self.lead_name]
-					], fields=[
-						"parent as name",
-						"parenttype as doctype"
-						]
-				)
+			linked_contacts_and_addresses = frappe.get_all(
+				"Dynamic Link",
+				filters=[
+					["parenttype", "in", ["Contact", "Address"]],
+					["link_doctype", "=", "Lead"],
+					["link_name", "=", self.lead_name],
+				],
+				fields=["parent as name", "parenttype as doctype"],
+			)
 
 			for row in linked_contacts_and_addresses:
 				linked_doc = frappe.get_doc(row.doctype, row.name)
