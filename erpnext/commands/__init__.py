@@ -1,5 +1,5 @@
-# Copyright (c) 2015, Web Notes Technologies Pvt. Ltd. and Contributors
-# MIT License. See license.txt
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# GPL v3 License. See license.txt
 
 import click
 
