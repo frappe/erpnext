@@ -17,10 +17,42 @@ from erpnext.stock.doctype.item.test_item import create_item
 class TestDeferredRevenueAndExpense(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
-		clear_old_entries()
+		clear_accounts_and_items()
 		create_company()
+		self.maxDiff = None
+
+	def clear_old_entries(self):
+		sinv = qb.DocType("Sales Invoice")
+		sinv_item = qb.DocType("Sales Invoice Item")
+		pinv = qb.DocType("Purchase Invoice")
+		pinv_item = qb.DocType("Purchase Invoice Item")
+
+		# delete existing invoices with deferred items
+		deferred_invoices = (
+			qb.from_(sinv)
+			.join(sinv_item)
+			.on(sinv.name == sinv_item.parent)
+			.select(sinv.name)
+			.where(sinv_item.enable_deferred_revenue == 1)
+			.run()
+		)
+		if deferred_invoices:
+			qb.from_(sinv).delete().where(sinv.name.isin(deferred_invoices)).run()
+
+		deferred_invoices = (
+			qb.from_(pinv)
+			.join(pinv_item)
+			.on(pinv.name == pinv_item.parent)
+			.select(pinv.name)
+			.where(pinv_item.enable_deferred_expense == 1)
+			.run()
+		)
+		if deferred_invoices:
+			qb.from_(pinv).delete().where(pinv.name.isin(deferred_invoices)).run()
 
 	def test_deferred_revenue(self):
+		self.clear_old_entries()
+
 		# created deferred expense accounts, if not found
 		deferred_revenue_account = create_account(
 			account_name="Deferred Revenue",
@@ -108,6 +140,8 @@ class TestDeferredRevenueAndExpense(unittest.TestCase):
 		self.assertEqual(report.period_total, expected)
 
 	def test_deferred_expense(self):
+		self.clear_old_entries()
+
 		# created deferred expense accounts, if not found
 		deferred_expense_account = create_account(
 			account_name="Deferred Expense",
@@ -209,15 +243,11 @@ def create_company():
 		company.insert()
 
 
-def clear_old_entries():
+def clear_accounts_and_items():
 	item = qb.DocType("Item")
 	account = qb.DocType("Account")
 	customer = qb.DocType("Customer")
 	supplier = qb.DocType("Supplier")
-	sinv = qb.DocType("Sales Invoice")
-	sinv_item = qb.DocType("Sales Invoice Item")
-	pinv = qb.DocType("Purchase Invoice")
-	pinv_item = qb.DocType("Purchase Invoice Item")
 
 	qb.from_(account).delete().where(
 		(account.account_name == "Deferred Revenue")
@@ -228,26 +258,3 @@ def clear_old_entries():
 	).run()
 	qb.from_(customer).delete().where(customer.customer_name == "_Test Customer DR").run()
 	qb.from_(supplier).delete().where(supplier.supplier_name == "_Test Furniture Supplier").run()
-
-	# delete existing invoices with deferred items
-	deferred_invoices = (
-		qb.from_(sinv)
-		.join(sinv_item)
-		.on(sinv.name == sinv_item.parent)
-		.select(sinv.name)
-		.where(sinv_item.enable_deferred_revenue == 1)
-		.run()
-	)
-	if deferred_invoices:
-		qb.from_(sinv).delete().where(sinv.name.isin(deferred_invoices)).run()
-
-	deferred_invoices = (
-		qb.from_(pinv)
-		.join(pinv_item)
-		.on(pinv.name == pinv_item.parent)
-		.select(pinv.name)
-		.where(pinv_item.enable_deferred_expense == 1)
-		.run()
-	)
-	if deferred_invoices:
-		qb.from_(pinv).delete().where(pinv.name.isin(deferred_invoices)).run()
