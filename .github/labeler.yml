@@ -1,53 +1,53 @@
 accounts:
-- 'erpnext/accounts/*'
-- 'erpnext/controllers/accounts_controller.py'
-- 'erpnext/controllers/taxes_and_totals.py'
+- erpnext/accounts/*
+- erpnext/controllers/accounts_controller.py
+- erpnext/controllers/taxes_and_totals.py
 
 stock:
-- 'erpnext/stock/*'
-- 'erpnext/controllers/stock_controller.py'
-- 'erpnext/controllers/item_variant.py'
+- erpnext/stock/*
+- erpnext/controllers/stock_controller.py
+- erpnext/controllers/item_variant.py
 
 assets:
-- 'erpnext/assets/*'
+- erpnext/assets/*
 
 regional:
-- 'erpnext/regional/*'
+- erpnext/regional/*
 
 selling:
-- 'erpnext/selling/*'
-- 'erpnext/controllers/selling_controller.py'
+- erpnext/selling/*
+- erpnext/controllers/selling_controller.py
 
 buying:
-- 'erpnext/buying/*'
-- 'erpnext/controllers/buying_controller.py'
+- erpnext/buying/*
+- erpnext/controllers/buying_controller.py
 
 support:
-- 'erpnext/support/*'
+- erpnext/support/*
 
 POS:
-- 'pos*'
+- pos*
 
 ecommerce:
-- 'erpnext/e_commerce/*'
+- erpnext/e_commerce/*
 
 maintenance:
-- 'erpnext/maintenance/*'
+- erpnext/maintenance/*
 
 manufacturing:
-- 'erpnext/manufacturing/*'
+- erpnext/manufacturing/*
 
 crm:
-- 'erpnext/crm/*'
+- erpnext/crm/*
 
 HR:
-- 'erpnext/hr/*'
+- erpnext/hr/*
 
 payroll:
-- 'erpnext/payroll*'
+- erpnext/payroll*
 
 projects:
-- 'erpnext/projects/*'
+- erpnext/projects/*
 
 # Any python files modifed but no test files modified
 needs-tests:

@@ -353,7 +353,6 @@ class POSInvoice(SalesInvoice):
 			if not for_validate and not self.customer:
 				self.customer = profile.customer
 
-			self.ignore_pricing_rule = profile.ignore_pricing_rule
 			self.account_for_change_amount = profile.get('account_for_change_amount') or self.account_for_change_amount
 			self.set_warehouse = profile.get('warehouse') or self.set_warehouse
 

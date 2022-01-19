@@ -29,6 +29,7 @@ from erpnext.support.doctype.issue.issue import get_holidays
 
 class ServiceLevelAgreement(Document):
 	def validate(self):
+		self.validate_selected_doctype()
 		self.validate_doc()
 		self.validate_status_field()
 		self.check_priorities()
@@ -105,6 +106,23 @@ class ServiceLevelAgreement(Document):
 		}):
 			frappe.throw(_("Service Level Agreement for {0} {1} already exists.").format(
 				frappe.bold(self.entity_type), frappe.bold(self.entity)))
+
+	def validate_selected_doctype(self):
+		invalid_doctypes = list(frappe.model.core_doctypes_list)
+		invalid_doctypes.extend(['Cost Center', 'Company'])
+		valid_document_types = frappe.get_all('DocType', {
+			'issingle': 0,
+			'istable': 0,
+			'is_submittable': 0,
+			'name': ['not in', invalid_doctypes],
+			'module': ['not in', ["Email", "Core", "Custom", "Event Streaming", "Social", "Data Migration", "Geo", "Desk"]]
+		}, pluck="name")
+
+		if self.document_type not in valid_document_types:
+			frappe.throw(
+				msg=_("Please select valid document type."),
+				title=_("Invalid Document Type")
+			)
 
 	def validate_status_field(self):
 		meta = frappe.get_meta(self.document_type)
@@ -247,9 +265,15 @@ def get_active_service_level_agreement_for(doc):
 		]
 
 	customer = doc.get('customer')
-	or_filters.append(
-		["Service Level Agreement", "entity", "in", [customer] + get_customer_group(customer) + get_customer_territory(customer)]
-	)
+	if customer:
+		or_filters.extend([
+			["Service Level Agreement", "entity", "in", [customer] + get_customer_group(customer) + get_customer_territory(customer)],
+			["Service Level Agreement", "entity_type", "is", "not set"]
+		])
+	else:
+		or_filters.append(
+			["Service Level Agreement", "entity_type", "is", "not set"]
+		)
 
 	default_sla_filter = filters + [["Service Level Agreement", "default_service_level_agreement", "=", 1]]
 	default_sla = frappe.get_all("Service Level Agreement", filters=default_sla_filter,
@@ -361,9 +385,16 @@ def apply(doc, method=None):
 	sla = get_active_service_level_agreement_for(doc)
 
 	if not sla:
+		remove_sla_if_applied(doc)
 		return
 
 	process_sla(doc, sla)
+
+
+def remove_sla_if_applied(doc):
+	doc.service_level_agreement = None
+	doc.response_by = None
+	doc.resolution_by = None
 
 
 def process_sla(doc, sla):
@@ -670,7 +701,7 @@ def on_communication_update(doc, status):
 	update_response_and_resolution_metrics(parent, for_resolution)
 	update_agreement_status(parent, for_resolution)
 
-	parent.save()
+	parent.save(ignore_permissions=True)
 
 
 def reset_expected_response_and_resolution(doc):
@@ -853,7 +884,7 @@ def get_user_time(user, to_string=False):
 @frappe.whitelist()
 def get_sla_doctypes():
 	doctypes = []
-	data = frappe.get_list('Service Level Agreement',
+	data = frappe.get_all('Service Level Agreement',
 		{'enabled': 1},
 		['document_type'],
 		distinct=1
