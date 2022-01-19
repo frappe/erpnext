@@ -913,51 +913,57 @@ def split_asset(asset_name, split_qty):
 	asset = frappe.get_doc("Asset", asset_name)
 	split_qty = cint(split_qty)
 
-	if split_qty >= asset.qty:
+	if split_qty >= asset.asset_quantity:
 		frappe.throw(_("Split qty cannot be grater than or equal to asset qty"))
 
-	remaining_qty = asset.qty - split_qty
+	remaining_qty = asset.asset_quantity - split_qty
 
-	# Update gross purchase amount
-	new_gross_purchase_amount = flt((asset.gross_purchase_amount * split_qty) / asset.qty)
-	remaining_gross_purchase_amount = flt((asset.gross_purchase_amount * split_qty) / asset.qty)
-
-	new_asset = create_new_asset_after_split(asset, new_gross_purchase_amount, split_qty)
-	update_existing_asset(asset, remaining_gross_purchase_amount, remaining_qty)
+	new_asset = create_new_asset_after_split(asset, split_qty)
+	update_existing_asset(asset, remaining_qty)
 
 	return new_asset
 
-def update_existing_asset(asset, remaingin_gross_purchase_amount, remaining_qty):
+def update_existing_asset(asset, remaining_qty):
+	remaining_gross_purchase_amount = flt((asset.gross_purchase_amount * remaining_qty) / asset.asset_quantity)
+	opening_accumulated_depreciation = flt((asset.opening_accumulated_depreciation * remaining_qty) / asset.asset_quantity)
+
 	frappe.db.set_value("Asset", asset.name, {
-		'gross_purchase_amount': remaingin_gross_purchase_amount,
-		'qty': remaining_qty
+		'opening_accumulated_depreciation': opening_accumulated_depreciation,
+		'gross_purchase_amount': remaining_gross_purchase_amount,
+		'asset_quantity': remaining_qty
 	})
 
 	for finance_book in asset.get('finance_books'):
-		value_after_depreciation = flt((finance_book.value_after_depreciation * remaining_qty)/asset.qty)
+		value_after_depreciation = flt((finance_book.value_after_depreciation * remaining_qty)/asset.asset_quantity)
+		expected_value_after_useful_life = flt((finance_book.expected_value_after_useful_life * remaining_qty)/asset.asset_quantity)
 		frappe.db.set_value('Asset Finance Book', finance_book.name, 'value_after_depreciation', value_after_depreciation)
+		frappe.db.set_value('Asset Finance Book', finance_book.name, 'expected_value_after_useful_life', expected_value_after_useful_life)
 
 	accumulated_depreciation = 0
 
 	for term in asset.get('schedules'):
-		depreciation_amount = flt((term.depreciation_amount * remaining_qty)/asset.qty)
+		depreciation_amount = flt((term.depreciation_amount * remaining_qty)/asset.asset_quantity)
 		frappe.db.set_value('Depreciation Schedule', term.name, 'depreciation_amount', depreciation_amount)
 		accumulated_depreciation += depreciation_amount
-		frappe.db.set_value('Depreciation Schedule', term.name, 'accumulated_depreciation_amount', depreciation_amount)
+		frappe.db.set_value('Depreciation Schedule', term.name, 'accumulated_depreciation_amount', accumulated_depreciation)
 
-def create_new_asset_after_split(asset, new_gross_purchase_amount, split_qty):
+def create_new_asset_after_split(asset, split_qty):
 	new_asset = frappe.copy_doc(asset)
+	new_gross_purchase_amount = flt((asset.gross_purchase_amount * split_qty) / asset.asset_quantity)
+	opening_accumulated_depreciation = flt((asset.opening_accumulated_depreciation * split_qty) / asset.asset_quantity)
 
 	new_asset.gross_purchase_amount = new_gross_purchase_amount
-	new_asset.qty = split_qty
+	new_asset.opening_accumulated_depreciation = opening_accumulated_depreciation
+	new_asset.asset_quantity = split_qty
 	new_asset.split_from = asset.name
 	accumulated_depreciation = 0
 
 	for finance_book in new_asset.get('finance_books'):
-		finance_book.value_after_depreciation = flt((finance_book.value_after_depreciation * split_qty)/asset.qty)
+		finance_book.value_after_depreciation = flt((finance_book.value_after_depreciation * split_qty)/asset.asset_quantity)
+		finance_book.expected_value_after_useful_life = flt((finance_book.expected_value_after_useful_life * split_qty)/asset.asset_quantity)
 
 	for term in new_asset.get('schedules'):
-		depreciation_amount = flt((term.depreciation_amount * split_qty)/asset.qty)
+		depreciation_amount = flt((term.depreciation_amount * split_qty)/asset.asset_quantity)
 		term.depreciation_amount = depreciation_amount
 		accumulated_depreciation += depreciation_amount
 		term.accumulated_depreciation_amount = accumulated_depreciation
@@ -975,6 +981,7 @@ def create_new_asset_after_split(asset, new_gross_purchase_amount, split_qty):
 def add_reference_in_jv_on_split(entry_name, new_asset_name, old_asset_name, depreciation_amount):
 	journal_entry = frappe.get_doc('Journal Entry', entry_name)
 	entries_to_add = []
+	idx = len(journal_entry.get('accounts')) + 1
 
 	for account in journal_entry.get('accounts'):
 		if account.reference_name == old_asset_name:
@@ -996,6 +1003,9 @@ def add_reference_in_jv_on_split(entry_name, new_asset_name, old_asset_name, dep
 		elif entry.debit:
 			entry.debit = depreciation_amount
 			entry.debit_in_account_currency = entry.exchange_rate * depreciation_amount
+
+		entry.idx = idx
+		idx += 1
 
 		journal_entry.append('accounts', entry)
 

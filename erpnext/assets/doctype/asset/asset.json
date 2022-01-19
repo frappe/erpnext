@@ -24,7 +24,6 @@
   "asset_category",
   "location",
   "split_from",
-  "qty",
   "custodian",
   "department",
   "disposal_date",
@@ -37,6 +36,7 @@
   "available_for_use_date",
   "column_break_23",
   "gross_purchase_amount",
+  "asset_quantity",
   "purchase_date",
   "section_break_23",
   "calculate_depreciation",
@@ -484,16 +484,16 @@
    "label": "Finance Books"
   },
   {
-   "fieldname": "qty",
-   "fieldtype": "Int",
-   "label": "Qty"
-  },
-  {
    "fieldname": "split_from",
    "fieldtype": "Link",
    "label": "Split From",
    "options": "Asset",
    "read_only": 1
+  },
+  {
+   "fieldname": "asset_quantity",
+   "fieldtype": "Int",
+   "label": "Asset Quantity"
   }
  ],
  "idx": 72,
@@ -516,7 +516,7 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2022-01-18 09:15:34.238601",
+ "modified": "2022-01-19 01:36:51.361485",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
