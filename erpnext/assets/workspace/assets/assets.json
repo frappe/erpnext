@@ -5,7 +5,7 @@
    "label": "Asset Value Analytics"
   }
  ],
- "content": "[{\"type\": \"onboarding\", \"data\": {\"onboarding_name\":\"Assets\", \"col\": 12}}, {\"type\": \"chart\", \"data\": {\"chart_name\": \"Asset Value Analytics\", \"col\": 12}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Asset\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Asset Category\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Fixed Asset Register\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Assets\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Maintenance\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "content": "[{\"type\":\"onboarding\",\"data\":{\"onboarding_name\":\"Assets\",\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Asset Value Analytics\",\"col\":12}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Asset\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Asset Category\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Fixed Asset Register\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Assets\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Maintenance\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
  "creation": "2020-03-02 15:43:27.634865",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -172,7 +172,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:15:54.839453",
+ "modified": "2022-01-13 17:25:41.730628",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Assets",
@@ -181,7 +181,7 @@
  "public": 1,
  "restrict_to_domain": "",
  "roles": [],
- "sequence_id": 4,
+ "sequence_id": 4.0,
  "shortcuts": [
   {
    "label": "Asset",
