@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Video\", \"col\": 4}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Video\",\"col\":4}}]",
  "creation": "2020-09-10 12:21:22.335307",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -40,7 +40,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:16:03.350805",
+ "modified": "2022-01-13 17:50:10.067510",
  "modified_by": "Administrator",
  "module": "Utilities",
  "name": "Utilities",
@@ -49,7 +49,7 @@
  "public": 1,
  "restrict_to_domain": "",
  "roles": [],
- "sequence_id": 30,
+ "sequence_id": 30.0,
  "shortcuts": [],
  "title": "Utilities"
 }
