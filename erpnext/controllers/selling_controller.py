@@ -204,7 +204,7 @@ class SellingController(StockController):
 		valuation_rate_map = {}
 
 		for item in self.items:
-			if not item.item_code:
+			if not item.item_code or item.is_free_item:
 				continue
 
 			last_purchase_rate, is_stock_item = frappe.get_cached_value(
@@ -251,7 +251,7 @@ class SellingController(StockController):
 			valuation_rate_map[(rate.item_code, rate.warehouse)] = rate.valuation_rate
 
 		for item in self.items:
-			if not item.item_code:
+			if not item.item_code or item.is_free_item:
 				continue
 
 			last_valuation_rate = valuation_rate_map.get(
