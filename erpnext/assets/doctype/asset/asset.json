@@ -486,7 +486,7 @@
    "fieldname": "asset_quantity",
    "fieldtype": "Int",
    "label": "Asset Quantity",
-   "read_only": 1
+   "read_only_depends_on": "eval:!doc.is_existing_asset"
   }
  ],
  "idx": 72,
