@@ -142,7 +142,7 @@ class Customer(TransactionBase):
 			self.update_lead_status()
 
 		if self.flags.is_new_doc:
-			self.create_lead_address_contact()
+			self.link_lead_address_and_contact()
 
 		self.update_customer_groups()
 
@@ -176,7 +176,7 @@ class Customer(TransactionBase):
 		if self.lead_name:
 			frappe.db.set_value("Lead", self.lead_name, "status", "Converted")
 
-	def create_lead_address_contact(self):
+	def link_lead_address_and_contact(self):
 		if self.lead_name:
 			# assign lead address and contact to customer (if already not set)
 			linked_contacts_and_addresses = frappe.get_all(
