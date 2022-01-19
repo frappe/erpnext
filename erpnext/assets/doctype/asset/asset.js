@@ -332,7 +332,7 @@ frappe.ui.form.on('Asset', {
 		const fields = [
 			{
 				fieldname: 'split_qty',
-				fieldtype:'Int',
+				fieldtype: 'Int',
 				label: __('Split Qty'),
 				reqd: 1
 			}
