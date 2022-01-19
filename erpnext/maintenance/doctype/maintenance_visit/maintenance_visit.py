@@ -18,6 +18,10 @@ class MaintenanceVisit(TransactionBase):
 			if d.serial_no and not frappe.db.exists("Serial No", d.serial_no):
 				frappe.throw(_("Serial No {0} does not exist").format(d.serial_no))
 
+	def validate_purpose_table(self):
+		if not self.purposes:
+			frappe.throw(_("Add Items in the Purpose Table"), title="Purposes Required")
+
 	def validate_maintenance_date(self):
 		if self.maintenance_type == "Scheduled" and self.maintenance_schedule_detail:
 			item_ref = frappe.db.get_value('Maintenance Schedule Detail', self.maintenance_schedule_detail, 'item_reference')
@@ -29,6 +33,7 @@ class MaintenanceVisit(TransactionBase):
 	def validate(self):
 		self.validate_serial_no()
 		self.validate_maintenance_date()
+		self.validate_purpose_table()
 
 	def update_completion_status(self):
 		if self.maintenance_schedule_detail:
