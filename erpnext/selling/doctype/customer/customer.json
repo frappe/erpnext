@@ -4,40 +4,26 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2013-06-11 14:26:44",
+ "creation": "2022-01-17 14:29:37.327197",
  "description": "Buyer of Goods and Services.",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
+  "basic_info_tab",
   "basic_info",
   "naming_series",
   "salutation",
   "customer_name",
   "gender",
   "customer_type",
-  "tax_withholding_category",
-  "default_bank_account",
   "lead_name",
   "opportunity_name",
   "image",
   "column_break0",
-  "account_manager",
   "customer_group",
   "territory",
-  "tax_id",
-  "tax_category",
-  "so_required",
-  "dn_required",
   "disabled",
-  "is_internal_customer",
-  "represents_company",
-  "allowed_to_transact_section",
-  "companies",
-  "currency_and_price_list",
-  "default_currency",
-  "column_break_14",
-  "default_price_list",
   "address_contacts",
   "address_html",
   "website",
@@ -50,11 +36,26 @@
   "column_break_26",
   "customer_primary_address",
   "primary_address",
+  "accounting_tab",
+  "taxation_section",
+  "tax_id",
+  "column_break_37",
+  "tax_category",
+  "tax_withholding_category",
   "default_receivable_accounts",
+  "default_bank_account",
   "accounts",
+  "credit_limit_tab",
+  "currency_and_price_list",
+  "default_currency",
+  "column_break_14",
+  "default_price_list",
   "credit_limit_section",
   "payment_terms",
   "credit_limits",
+  "column_break_38",
+  "loyalty_program",
+  "loyalty_program_tier",
   "more_info",
   "customer_details",
   "column_break_45",
@@ -62,15 +63,25 @@
   "industry",
   "language",
   "is_frozen",
-  "column_break_38",
-  "loyalty_program",
-  "loyalty_program_tier",
+  "settings_tab",
+  "dn_required",
+  "so_required",
+  "inter_company_setup_section",
+  "is_internal_customer",
+  "column_break_31",
+  "represents_company",
+  "allowed_to_transact_section",
+  "companies",
+  "sales_team_tab",
   "sales_team_section_break",
   "default_sales_partner",
   "default_commission_rate",
+  "column_break_65",
+  "account_manager",
   "sales_team_section",
   "sales_team",
-  "customer_pos_id"
+  "customer_pos_id",
+  "dashboard_tab"
  ],
  "fields": [
   {
@@ -229,7 +240,6 @@
    "options": "Allowed To Transact With"
   },
   {
-   "collapsible": 1,
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
    "label": "Currency and Price List"
@@ -334,7 +344,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "default_receivable_accounts",
    "fieldtype": "Section Break",
    "label": "Accounting"
@@ -347,7 +356,6 @@
    "options": "Party Account"
   },
   {
-   "collapsible": 1,
    "fieldname": "credit_limit_section",
    "fieldtype": "Section Break",
    "label": "Credit Limit and Payment Terms"
@@ -398,7 +406,6 @@
    "label": "Is Frozen"
   },
   {
-   "collapsible": 1,
    "fieldname": "column_break_38",
    "fieldtype": "Section Break",
    "label": "Loyalty Points"
@@ -418,7 +425,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "collapsible_depends_on": "default_sales_partner",
    "fieldname": "sales_team_section_break",
    "fieldtype": "Section Break",
@@ -443,7 +449,6 @@
    "oldfieldtype": "Currency"
   },
   {
-   "collapsible": 1,
    "collapsible_depends_on": "sales_team",
    "fieldname": "sales_team_section",
    "fieldtype": "Section Break",
@@ -498,6 +503,59 @@
    "no_copy": 1,
    "options": "Opportunity",
    "print_hide": 1
+  },
+  {
+   "fieldname": "basic_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "Basic Info"
+  },
+  {
+   "fieldname": "taxation_section",
+   "fieldtype": "Section Break",
+   "label": "Taxation"
+  },
+  {
+   "fieldname": "inter_company_setup_section",
+   "fieldtype": "Section Break",
+   "label": "Inter Company Setup"
+  },
+  {
+   "fieldname": "accounting_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounting"
+  },
+  {
+   "fieldname": "column_break_37",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "credit_limit_tab",
+   "fieldtype": "Tab Break",
+   "label": "Commercials"
+  },
+  {
+   "fieldname": "sales_team_tab",
+   "fieldtype": "Tab Break",
+   "label": "Sales Team"
+  },
+  {
+   "fieldname": "column_break_65",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dashboard_tab",
+   "fieldtype": "Tab Break",
+   "label": "Dashboard",
+   "show_dashboard": 1
+  },
+  {
+   "fieldname": "settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Settings"
   }
  ],
  "icon": "fa fa-user",
@@ -511,7 +569,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2021-10-20 22:07:52.485809",
+ "modified": "2022-01-19 12:58:26.231804",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -595,6 +653,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "title_field": "customer_name",
  "track_changes": 1
 }
