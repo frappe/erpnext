@@ -464,6 +464,30 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Diary book",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Balance Sheet Accounts",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Statement Of Income",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Provider Account Statement",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
 					"name": "Ledger",
 					"doctype": "GL Entry",
 					"is_query_report": True,
