@@ -7,7 +7,7 @@ import frappe
 from frappe.utils import add_days, add_months, cstr, flt, get_last_day, getdate, nowdate
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.assets.doctype.asset.asset import make_sales_invoice
+from erpnext.assets.doctype.asset.asset import make_sales_invoice, split_asset
 from erpnext.assets.doctype.asset.depreciation import (
 	post_depreciation_entries,
 	restore_asset,
@@ -28,9 +28,9 @@ class AssetSetup(unittest.TestCase):
 		make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
 		frappe.db.sql("delete from `tabTax Rule`")
 
-	@classmethod
-	def tearDownClass(cls):
-		frappe.db.rollback()
+	# @classmethod
+	# def tearDownClass(cls):
+	# 	frappe.db.rollback()
 
 class TestAsset(AssetSetup):
 	def test_asset_category_is_fetched(self):
@@ -221,6 +221,22 @@ class TestAsset(AssetSetup):
 
 		si.cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Partially Depreciated")
+
+	def test_asset_splitting(self):
+		asset = create_asset(
+			calculate_depreciation = 1,
+			qty=10,
+			available_for_use_date = '2020-01-01',
+			purchase_date = '2020-01-01',
+			expected_value_after_useful_life = 0,
+			total_number_of_depreciations = 5,
+			frequency_of_depreciation = 10,
+			depreciation_start_date = '2021-01-01',
+			submit = 1
+		)
+
+		post_depreciation_entries(date="2021-01-01")
+		split_asset(asset.name, 5)
 
 	def test_expense_head(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
@@ -1089,7 +1105,8 @@ def create_asset(**args):
 		"available_for_use_date": args.available_for_use_date or "2020-06-06",
 		"location": args.location or "Test Location",
 		"asset_owner": args.asset_owner or "Company",
-		"is_existing_asset": args.is_existing_asset or 1
+		"is_existing_asset": args.is_existing_asset or 1,
+		"qty": args.get("qty") or 1
 	})
 
 	if asset.calculate_depreciation:
