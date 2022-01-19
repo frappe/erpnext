@@ -50,14 +50,6 @@ frappe.ui.form.on('Maintenance Visit', {
 			frm.set_value({ status: 'Draft' });
 		}
 		if (frm.doc.__islocal) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-			frm.doc.maintenance_type == 'Unscheduled' && frm.clear_table("purposes");
-=======
-			frm.clear_table("purposes");
->>>>>>> 4f52b86d7e (refactor: update_serial_no function and code cleanup)
-=======
->>>>>>> b98c61f2a7 (refactor: moved purpose table mandatory check to server)
 			frm.set_value({ mntc_date: frappe.datetime.get_today() });
 		}
 	},
