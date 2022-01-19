@@ -108,6 +108,7 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 
 		leave_policy = frappe.get_doc({
 			"doctype": "Leave Policy",
+			"title": "Test Leave Policy",
 			"leave_policy_details": [{"leave_type": leave_type.name, "annual_allocation": 6}]
 		}).insert()
 
