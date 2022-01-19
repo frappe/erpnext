@@ -705,7 +705,7 @@ class calculate_taxes_and_totals(object):
 		default_mode_of_payment = frappe.db.get_value('POS Payment Method',
 			{'parent': self.doc.pos_profile, 'default': 1}, ['mode_of_payment'], as_dict=1)
 
-		if default_mode_of_payment:
+		if not self.doc.payments and default_mode_of_payment:
 			self.doc.payments = []
 			self.doc.append('payments', {
 				'mode_of_payment': default_mode_of_payment.mode_of_payment,
