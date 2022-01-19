@@ -5,24 +5,40 @@
 frappe.query_reports["ITC-04"] = {
 	"filters": [
 		{
-			fieldname: "gstin_of_manufacturer",
-			label: __("GSTIN of Manufacturer"),
-			fieldtype: "Data",
-			default: "",
-			reqd: 0
+			"fieldname": "company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+			"reqd": 1,
+			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
-			"fieldname":"from_date",
-			"label": __("Start Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.add_months(frappe.datetime.nowdate(), -12),
+			"fieldname": "company_address",
+			"label": __("Address"),
+			"fieldtype": "Link",
+			"options": "Address",
+			"get_query": function () {
+				var company = frappe.query_report.get_filter_value('company');
+				if (company) {
+					return {
+						"query": 'frappe.contacts.doctype.address.address.address_query',
+						"filters": { link_doctype: 'Company', link_name: company }
+					};
+				}
+			}
+		},
+		{
+			"fieldname":"fiscal_year",
+			"label": __("Fiscal Year"),
+			"fieldtype": "Link",
+			"options":"Fiscal Year",
 			"reqd": 1
 		},
 		{
-			"fieldname":"to_date",
-			"label": __("End Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.nowdate(),
+			"fieldname":"q_return",
+			"label": __("Return"),
+			"fieldtype": "Select",
+			"options": ['Apr-Jun','July-Sept','Oct-Dec','Jan-March'],
 			"reqd": 1
 		},
 		{
