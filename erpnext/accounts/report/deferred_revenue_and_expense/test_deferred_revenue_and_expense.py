@@ -232,6 +232,91 @@ class TestDeferredRevenueAndExpense(unittest.TestCase):
 		]
 		self.assertEqual(report.period_total, expected)
 
+	def test_zero_months(self):
+		self.clear_old_entries()
+		# created deferred expense accounts, if not found
+		deferred_revenue_account = create_account(
+			account_name="Deferred Revenue",
+			parent_account="Current Liabilities - _CD",
+			company="_Test Company DR",
+		)
+
+		acc_settings = frappe.get_doc("Accounts Settings", "Accounts Settings")
+		acc_settings.book_deferred_entries_based_on = "Months"
+		acc_settings.save()
+
+		customer = frappe.new_doc("Customer")
+		customer.customer_name = "_Test Customer DR"
+		customer.type = "Individual"
+		customer.insert()
+
+		item = create_item(
+			"_Test Internet Subscription",
+			is_stock_item=0,
+			warehouse="All Warehouses - _CD",
+			company="_Test Company DR",
+		)
+		item.enable_deferred_revenue = 1
+		item.deferred_revenue_account = deferred_revenue_account
+		item.no_of_months = 0
+		item.save()
+
+		si = create_sales_invoice(
+			item=item.name,
+			company="_Test Company DR",
+			customer="_Test Customer DR",
+			debit_to="Debtors - _CD",
+			posting_date="2021-05-01",
+			parent_cost_center="Main - _CD",
+			cost_center="Main - _CD",
+			do_not_submit=True,
+			rate=300,
+			price_list_rate=300,
+		)
+		si.items[0].enable_deferred_revenue = 1
+		si.items[0].deferred_revenue_account = deferred_revenue_account
+		si.items[0].income_account = "Sales - _CD"
+		si.save()
+		si.submit()
+
+		pda = frappe.get_doc(
+			dict(
+				doctype="Process Deferred Accounting",
+				posting_date=nowdate(),
+				start_date="2021-05-01",
+				end_date="2021-08-01",
+				type="Income",
+				company="_Test Company DR",
+			)
+		)
+		pda.insert()
+		pda.submit()
+
+		# execute report
+		fiscal_year = frappe.get_doc("Fiscal Year", frappe.defaults.get_user_default("fiscal_year"))
+		self.filters = frappe._dict(
+			{
+				"company": frappe.defaults.get_user_default("Company"),
+				"filter_based_on": "Date Range",
+				"period_start_date": "2021-05-01",
+				"period_end_date": "2021-08-01",
+				"from_fiscal_year": fiscal_year.year,
+				"to_fiscal_year": fiscal_year.year,
+				"periodicity": "Monthly",
+				"type": "Revenue",
+				"with_upcoming_postings": False,
+			}
+		)
+
+		report = Deferred_Revenue_and_Expense_Report(filters=self.filters)
+		report.run()
+		expected = [
+			{"key": "may_2021", "total": 300.0, "actual": 300.0},
+			{"key": "jun_2021", "total": 0, "actual": 0},
+			{"key": "jul_2021", "total": 0, "actual": 0},
+			{"key": "aug_2021", "total": 0, "actual": 0},
+		]
+		self.assertEqual(report.period_total, expected)
 
 def create_company():
 	company = frappe.db.exists("Company", "_Test Company DR")
