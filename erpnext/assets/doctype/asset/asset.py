@@ -37,6 +37,7 @@ class Asset(AccountsController):
 		self.validate_asset_values()
 		self.validate_asset_and_reference()
 		self.validate_item()
+		self.validate_cost_center()
 		self.set_missing_values()
 		self.prepare_depreciation_data()
 		self.validate_gross_and_purchase_amount()
@@ -95,6 +96,19 @@ class Asset(AccountsController):
 			frappe.throw(_("Item {0} must be a Fixed Asset Item").format(self.item_code))
 		elif item.is_stock_item:
 			frappe.throw(_("Item {0} must be a non-stock item").format(self.item_code))
+
+	def validate_cost_center(self):
+		if not self.cost_center: return
+
+		cost_center_company = frappe.db.get_value('Cost Center', self.cost_center, 'company')
+		if cost_center_company != self.company:
+			frappe.throw(
+				_("Selected Cost Center {} doesn't belongs to {}").format(
+					frappe.bold(self.cost_center),
+					frappe.bold(self.company)
+				),
+				title=_("Invalid Cost Center")
+			)
 
 	def validate_in_use_date(self):
 		if not self.available_for_use_date:
