@@ -950,7 +950,7 @@ class StockEntry(StockController):
 			(self.company, args.get('item_code'), nowdate()), as_dict = 1)
 
 		if not item:
-			frappe.throw(_("Item {0} is not active or end of life has been reached").format(args.get("item_code")))
+			frappe.throw(_("Item {0} is disabled or end of life has been reached").format(args.get("item_code")))
 
 		item = item[0]
 		item_group_defaults = get_item_group_defaults(item.name, self.company)
