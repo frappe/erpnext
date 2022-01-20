@@ -20,3 +20,13 @@ def execute():
 		doctypes = frappe.get_all("DocType", {"module": module, "custom": 0}, pluck='name')
 		for doctype in doctypes:
 			frappe.delete_doc("DocType", doctype, ignore_missing=True)
+
+	custom_fields = [
+		{"dt": "Sales Invoice", "fieldname": "restaurant"},
+		{"dt": "Sales Invoice", "fieldname": "restaurant_table"},
+		{"dt": "Price List", "fieldname": "restaurant_menu"},
+	]
+
+	for field in custom_fields:
+		custom_field = frappe.db.get_value("Custom Field", field)
+		frappe.delete_doc("Custom Field", custom_field, ignore_missing=True)
