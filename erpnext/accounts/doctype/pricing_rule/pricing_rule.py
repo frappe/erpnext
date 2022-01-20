@@ -249,7 +249,8 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 		"free_item_data": [],
 		"parent": args.parent,
 		"parenttype": args.parenttype,
-		"child_docname": args.get('child_docname')
+		"child_docname": args.get('child_docname'),
+		"price_list_rate": args.get('price_list_rate')
 	})
 
 	if args.ignore_pricing_rule or not args.item_code:
@@ -403,6 +404,7 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
 			if pricing_rule.rate_or_discount == 'Discount Percentage':
 				item_details.discount_percentage = 0.0
 				item_details.discount_amount = 0.0
+				item_details.rate = item_details.get('price_list_rate', 0)
 
 			if pricing_rule.rate_or_discount == 'Discount Amount':
 				item_details.discount_amount = 0.0
