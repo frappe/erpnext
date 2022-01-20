@@ -6,6 +6,7 @@ import unittest
 
 import frappe
 from frappe.utils import to_timedelta, today
+from frappe.utils.data import add_to_date
 
 from erpnext.education.utils import OverlapError
 
@@ -38,6 +39,11 @@ class TestCourseSchedule(unittest.TestCase):
 
 		make_course_schedule_test_record(from_time= cs1.from_time, to_time= cs1.to_time,
 			student_group="Course-TC102-2014-2015 (_Test Academic Term)", instructor="_Test Instructor 2", room=frappe.get_all("Room")[1].name)
+
+	def test_update_schedule_date(self):
+		doc = make_course_schedule_test_record(schedule_date= add_to_date(today(), days=1))
+		doc.schedule_date = add_to_date(doc.schedule_date, days=1)
+		doc.save()
 
 def make_course_schedule_test_record(**args):
 	args = frappe._dict(args)

@@ -27,8 +27,7 @@ class RepostItemValuation(Document):
 			self.item_code = None
 			self.warehouse = None
 
-		self.allow_negative_stock = self.allow_negative_stock or \
-				cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+		self.allow_negative_stock = 1
 
 	def set_company(self):
 		if self.based_on == "Transaction":
