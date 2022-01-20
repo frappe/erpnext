@@ -397,7 +397,7 @@ def create_delivery_note(source_name, target_doc=None):
 		# Create a DN for items without sales orders as well
 		delivery_note = create_dn_wo_so(pick_list)
 
-	frappe.msgprint('Delivery Note(s) created for the Pick List!')
+	frappe.msgprint(_('Delivery Note(s) created for the Pick List'))
 	return delivery_note
 
 def create_dn_wo_so(pick_list):
