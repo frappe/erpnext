@@ -4,8 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.model.meta import get_field_precision
-from frappe.utils import flt
+
 
 def execute(filters=None):
 	data = get_data(filters)
