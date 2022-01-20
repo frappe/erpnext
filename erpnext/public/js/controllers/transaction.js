@@ -1443,7 +1443,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						"item_code": d.item_code,
 						"pricing_rules": d.pricing_rules,
 						"parenttype": d.parenttype,
-						"parent": d.parent
+						"parent": d.parent,
+						"price_list_rate": d.price_list_rate
 					})
 				}
 			});
