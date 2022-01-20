@@ -444,6 +444,18 @@ def auto_make_serial_nos(args):
 		message = _("The following serial numbers were created: <br><br> {0}").format(get_items_html(form_links, item_code))
 		frappe.msgprint(message, multiple_title)
 
+	# Add rollback watcher to remove misleading message that
+	# "serial nos are created" in case of future failures.
+	def _remove_misleading_messages():
+		import frappe
+
+		msg_log = frappe.local.message_log
+		if msg_log:
+			frappe.local.message_log = msg_log[-1:]
+
+	rollback_watcher = frappe._dict(on_rollback=_remove_misleading_messages)
+	frappe.local.rollback_observers.append(rollback_watcher)
+
 def get_items_html(serial_nos, item_code):
 	body = ', '.join(serial_nos)
 	return '''<details><summary>
