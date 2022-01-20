@@ -20,14 +20,14 @@ frappe.query_reports["BOM Operations Time"] = {
 			"fieldname": "bom_id",
 			"label": __("BOM ID"),
 			"fieldtype": "MultiSelectList",
-			"width": "80",
+			"width": "100",
 			"options": "BOM",
 			"get_data": function(txt) {
 				return frappe.db.get_link_options("BOM", txt);
 			},
 			"get_query": () =>{
 				return {
-					filters: { "docstatus": 1, "is_active": 1 }
+					filters: { "docstatus": 1, "is_active": 1, "with_operations": 1 }
 				}
 			}
 		},
