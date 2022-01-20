@@ -146,6 +146,13 @@ def get_columns(filters):
 				"width": 140
 			},
 			{
+				"label": _("Nature of Job Work Done"),
+				"fieldtype": "Data",
+				"fieldname": "nature_of_job_work_done",
+				"default": "Mixing/Heating",
+				"width": 140
+			},
+			{
 				"label": _("Description Of Goods"),
 				"fieldtype": "Data",
 				"fieldname": "description_of_goods",
@@ -229,13 +236,14 @@ def get_data(filters,conditions):
 		query = """ select se.name as name from `tabStock Entry` se, `tabPurchase Order` po
 		 						where se.purchase_order = po.name and se.docstatus = 1 and
 		 						se.stock_entry_type = "Send to Subcontractor" and
-		 						se.posting_date between {0} and {1} """.format(s_d,m_d)
+		 						se.posting_date between {0} and {1}
+		 						and se.company = '{2}' """.format(s_d,m_d,filters.get('company'))
 
 		if filters.get('company_address'):
 			query+= """ and po.billing_address = '{0}' """.format(filters.get('company_address'))
 
 		se = frappe.db.sql(query,as_dict=1)
-		
+
 		for name in se:
 			se_doc = frappe.get_doc("Stock Entry",name.name)
 			po_doc = frappe.get_doc("Purchase Order",se_doc.purchase_order)
@@ -308,46 +316,46 @@ def get_data(filters,conditions):
 				data.append(data2)
 		return data
 
-	# elif filters.report == "ITC-05 A":
-	# 	data = []
-	# 	pr = frappe.db.get_all("Purchase Receipt", fields=['name'],
-	# 						   filters={'docstatus': ['=', 1]})
-	#
-	# 	for name in pr:
-	# 		pr_doc = frappe.get_doc("Purchase Receipt", name.name)
-	#
-	# 		for row in pr_doc.items:
-	# 			global po_name
-	# 			po_name = row.purchase_order
-	# 			break
-	#
-	# 		for row in pr_doc.supplied_items:
-	# 			data2 = {}
-	# 			if po_name:
-	# 				po_doc = frappe.get_doc("Purchase Order",po_name)
-	# 				data2['original_challan_number_issued_by_principal'] = po_doc.name
-	# 				data2['original_challan_date_issued_by_principal'] = po_doc.transaction_date
-	# 			data2['challan_number_issued_by_job_worker'] = pr_doc.name
-	# 			data2['challan_date_issued_by_job_worker'] = pr_doc.posting_date
-	# 			supp_details = frappe.db.sql(""" select adds.gstin as gstin_of_job_worker,
-	# 															adds.state as state, supp.gst_category as job_workers_type
-	# 															from `tabSupplier` supp
-	# 															INNER JOIN `tabDynamic Link` dl
-	# 															on dl.link_name = supp.name
-	# 															INNER JOIN `tabAddress` adds
-	# 															on dl.parent = adds.name
-	# 															where supp.name = %(supp)s """,
-	# 										 {'supp': pr_doc.supplier}, as_dict=1)
-	# 			dic2 = supp_details[0]
-	# 			for key, value in dic2.items():
-	# 				data2[key] = value
-	#
-	# 			rm_item_obj = frappe.get_doc("Item", row.rm_item_code)
-	# 			data2['description_of_goods'] = rm_item_obj.description
-	# 			data2['unique_quantity_code'] = row.stock_uom
-	# 			data2['quantity'] = row.consumed_qty
-	# 			data.append(data2)
-	# 	return data
+	elif filters.report == "ITC-05 A":
+		data = []
+		pr = frappe.db.get_all("Purchase Receipt", fields=['name'],
+							   filters={'docstatus': ['=', 1]})
+
+		for name in pr:
+			pr_doc = frappe.get_doc("Purchase Receipt", name.name)
+
+			for row in pr_doc.items:
+				global po_name
+				po_name = row.purchase_order
+				break
+
+			for row in pr_doc.supplied_items:
+				data2 = {}
+				if po_name:
+					po_doc = frappe.get_doc("Purchase Order",po_name)
+					data2['original_challan_number_issued_by_principal'] = po_doc.name
+					data2['original_challan_date_issued_by_principal'] = po_doc.transaction_date
+				data2['challan_number_issued_by_job_worker'] = pr_doc.name
+				data2['challan_date_issued_by_job_worker'] = pr_doc.posting_date
+				supp_details = frappe.db.sql(""" select adds.gstin as gstin_of_job_worker,
+																adds.state as state, supp.gst_category as job_workers_type
+																from `tabSupplier` supp
+																INNER JOIN `tabDynamic Link` dl
+																on dl.link_name = supp.name
+																INNER JOIN `tabAddress` adds
+																on dl.parent = adds.name
+																where supp.name = %(supp)s """,
+											 {'supp': pr_doc.supplier}, as_dict=1)
+				dic2 = supp_details[0]
+				for key, value in dic2.items():
+					data2[key] = value
+
+				rm_item_obj = frappe.get_doc("Item", row.rm_item_code)
+				data2['description_of_goods'] = rm_item_obj.description
+				data2['unique_quantity_code'] = row.stock_uom
+				data2['quantity'] = row.consumed_qty
+				data.append(data2)
+		return data
 
 # def get_conditions(filters):
 # 	conditions = {}
