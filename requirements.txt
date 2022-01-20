@@ -1,6 +1,6 @@
 # frappe   # https://github.com/frappe/frappe is installed during bench-init
 gocardless-pro~=1.22.0
-googlemaps  # used in ERPNext, but dependency is defined in Frappe
+googlemaps
 pandas~=1.1.5
 plaid-python~=7.2.1
 pycountry~=20.7.3

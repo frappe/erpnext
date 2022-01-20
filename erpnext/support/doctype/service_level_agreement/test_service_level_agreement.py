@@ -244,6 +244,13 @@ class TestServiceLevelAgreement(unittest.TestCase):
 		applied_sla = frappe.db.get_value('Lead', lead.name, 'service_level_agreement')
 		self.assertEqual(applied_sla, lead_sla.name)
 
+		# check if SLA is removed if condition fails
+		lead.reload()
+		lead.source = None
+		lead.save()
+		applied_sla = frappe.db.get_value('Lead', lead.name, 'service_level_agreement')
+		self.assertFalse(applied_sla)
+
 	def tearDown(self):
 		for d in frappe.get_all("Service Level Agreement"):
 			frappe.delete_doc("Service Level Agreement", d.name, force=1)
