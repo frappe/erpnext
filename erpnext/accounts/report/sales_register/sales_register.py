@@ -39,7 +39,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 		warehouse = list(set(invoice_cc_wh_map.get(inv.name, {}).get("warehouse", [])))
 
 		row = [
-			inv.name, inv.posting_date, inv.customer, inv.customer_name
+			inv.name, inv.posting_date, inv.customer, inv.customer_name, inv.patient_name
 		]
 
 		if additional_query_columns:
@@ -85,7 +85,7 @@ def get_columns(invoice_list, additional_table_columns):
 	"""return columns based on filters"""
 	columns = [
 		_("Invoice") + ":Link/Sales Invoice:120", _("Posting Date") + ":Date:80",
-		_("Customer") + ":Link/Customer:120", _("Customer Name") + "::120"
+		_("Customer") + ":Link/Customer:120", _("Customer Name") + "::120", _("Patient Name") + "::120"
 	]
 
 	if additional_table_columns:
@@ -185,7 +185,7 @@ def get_invoices(filters, additional_query_columns):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select name, posting_date, debit_to, project, customer,
-		customer_name, owner, remarks, territory, tax_id, customer_group,
+		customer_name, patient_name, owner, remarks, territory, tax_id, customer_group,
 		base_net_total, base_grand_total, base_rounded_total, outstanding_amount {0}
 		from `tabSales Invoice`
 		where docstatus = 1 %s order by posting_date desc, name desc""".format(additional_query_columns or '') %
