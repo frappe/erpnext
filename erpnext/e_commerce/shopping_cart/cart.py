@@ -41,7 +41,7 @@ def get_cart_quotation(doc=None):
 
 	if not doc.customer_address and addresses:
 		update_cart_address("billing", addresses[0].name)
-
+	print("doc>>", doc, type(doc))
 	return {
 		"doc": decorate_quotation_doc(doc),
 		"shipping_addresses": get_shipping_addresses(party),
@@ -275,10 +275,25 @@ def guess_territory():
 
 def decorate_quotation_doc(doc):
 	for d in doc.get("items", []):
+		item_code = d.item_code
+		fields = ["web_item_name", "thumbnail", "website_image", "description", "route"]
+
+		# Variant Item
+		if not frappe.db.exists("Website Item", {"item_code": item_code}):
+			variant_data = frappe.db.get_values(
+				"Item",
+				filters={"item_code": item_code},
+				fieldname=["variant_of", "item_name"],
+				as_dict=True
+			)[0]
+			item_code = variant_data.variant_of
+			d.website_item_name = variant_data.item_name
+			fields = fields[1:]
+
 		d.update(frappe.db.get_value(
 			"Website Item",
-			{"item_code": d.item_code},
-			["web_item_name", "thumbnail", "website_image", "description", "route"],
+			{"item_code": item_code},
+			fields,
 			as_dict=True)
 		)
 
