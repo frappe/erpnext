@@ -408,6 +408,14 @@ class AccountsController(TransactionBase):
 								if item_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
 
+							elif ret.get("pricing_rule_removed") and value is not None \
+								and fieldname in [
+									'discount_percentage', 'discount_amount', 'rate',
+									'margin_rate_or_amount', 'margin_type', 'remove_free_item'
+								]:
+								# reset pricing rule fields if pricing_rule_removed
+								item.set(fieldname, value)
+
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
 						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
 

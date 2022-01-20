@@ -424,6 +424,7 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
 			item_details.applied_on_items = ','.join(items)
 
 	item_details.pricing_rules = ''
+	item_details.pricing_rule_removed = True
 
 	return item_details
 
