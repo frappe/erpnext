@@ -120,13 +120,27 @@ class SellingController(StockController):
 			self.in_words = money_in_words(amount, self.currency)
 
 	def calculate_commission(self):
-		if self.meta.get_field("commission_rate"):
-			self.round_floats_in(self, ["base_net_total", "commission_rate"])
-			if self.commission_rate > 100.0:
-				throw(_("Commission rate cannot be greater than 100"))
+		if not self.meta.get_field("commission_rate"):
+			return
 
-			self.total_commission = flt(self.base_net_total * self.commission_rate / 100.0,
-				self.precision("total_commission"))
+		self.round_floats_in(
+			self, ("amount_eligible_for_commission", "commission_rate")
+		)
+
+		if not (0 <= self.commission_rate <= 100.0):
+			throw("{} {}".format(
+				_(self.meta.get_label("commission_rate")),
+				_("must be between 0 and 100"),
+			))
+
+		self.amount_eligible_for_commission = sum(
+			item.base_net_amount for item in self.items if item.grant_commission
+		)
+
+		self.total_commission = flt(
+			self.amount_eligible_for_commission * self.commission_rate / 100.0,
+			self.precision("total_commission")
+		)
 
 	def calculate_contribution(self):
 		if not self.meta.get_field("sales_team"):
@@ -138,7 +152,7 @@ class SellingController(StockController):
 			self.round_floats_in(sales_person)
 
 			sales_person.allocated_amount = flt(
-				self.base_net_total * sales_person.allocated_percentage / 100.0,
+				self.amount_eligible_for_commission * sales_person.allocated_percentage / 100.0,
 				self.precision("allocated_amount", sales_person))
 
 			if sales_person.commission_rate:
@@ -371,7 +385,7 @@ class SellingController(StockController):
 				# Get incoming rate based on original item cost based on valuation method
 				qty = flt(d.get('stock_qty') or d.get('actual_qty'))
 
-				if not d.incoming_rate:
+				if not (self.get("is_return") and d.incoming_rate):
 					d.incoming_rate = get_incoming_rate({
 						"item_code": d.item_code,
 						"warehouse": d.warehouse,

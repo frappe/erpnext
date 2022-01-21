@@ -10,6 +10,8 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 from frappe.model.document import Document
 from frappe.utils import cint
 
+from erpnext.stock.utils import check_pending_reposting
+
 
 class AccountsSettings(Document):
 	def on_update(self):
@@ -25,6 +27,7 @@ class AccountsSettings(Document):
 		self.validate_stale_days()
 		self.enable_payment_schedule_in_print()
 		self.toggle_discount_accounting_fields()
+		self.validate_pending_reposts()
 
 	def validate_stale_days(self):
 		if not self.allow_stale and cint(self.stale_days) <= 0:
@@ -56,3 +59,8 @@ class AccountsSettings(Document):
 				make_property_setter(doctype, "additional_discount_account", "mandatory_depends_on", "", "Code", validate_fields_for_doctype=False)
 
 		make_property_setter("Item", "default_discount_account", "hidden", not(enable_discount_accounting), "Check", validate_fields_for_doctype=False)
+
+
+	def validate_pending_reposts(self):
+		if self.acc_frozen_upto:
+			check_pending_reposting(self.acc_frozen_upto)

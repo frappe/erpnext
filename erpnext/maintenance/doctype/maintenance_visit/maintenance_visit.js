@@ -2,51 +2,50 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.maintenance");
-var serial_nos = [];
 frappe.ui.form.on('Maintenance Visit', {
-	refresh: function (frm) {
-		//filters for serial_no based on item_code
-		frm.set_query('serial_no', 'purposes', function (frm, cdt, cdn) {
-			let item = locals[cdt][cdn];
-			if (serial_nos) {
-				return {
-					filters: {
-						'item_code': item.item_code,
-						'name': ["in", serial_nos]
-					}
-				};
-			} else {
-				return {
-					filters: {
-						'item_code': item.item_code
-					}
-				};
-			}
-		});
-	},
 	setup: function (frm) {
 		frm.set_query('contact_person', erpnext.queries.contact_query);
 		frm.set_query('customer_address', erpnext.queries.address_query);
 		frm.set_query('customer', erpnext.queries.customer);
 	},
-	onload: function (frm, cdt, cdn) {
-		let item = locals[cdt][cdn];
+	onload: function (frm) {
+		// filters for serial no based on item code
 		if (frm.doc.maintenance_type === "Scheduled") {
-			const schedule_id = item.purposes[0].prevdoc_detail_docname || frm.doc.maintenance_schedule_detail;
+			let item_code = frm.doc.purposes[0].item_code;
 			frappe.call({
-				method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.update_serial_nos",
+				method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.get_serial_nos_from_schedule",
 				args: {
-					s_id: schedule_id
-				},
-				callback: function (r) {
-					serial_nos = r.message;
+					schedule: frm.doc.maintenance_schedule,
+					item_code: item_code
 				}
+			}).then((r) => {
+				let serial_nos = r.message;
+				frm.set_query('serial_no', 'purposes', () => {
+					if (serial_nos.length > 0) {
+						return {
+							filters: {
+								'item_code': item_code,
+								'name': ["in", serial_nos]
+							}
+						};
+					}
+					return {
+						filters: {
+							'item_code': item_code
+						}
+					};
+				});
+			});
+		} else {
+			frm.set_query('serial_no', 'purposes', (frm, cdt, cdn) => {
+				let row = locals[cdt][cdn];
+				return {
+					filters: {
+						'item_code': row.item_code
+					}
+				};
 			});
 		}
-		else {
-			frm.clear_table("purposes");
-		}
-
 		if (!frm.doc.status) {
 			frm.set_value({ status: 'Draft' });
 		}
@@ -63,7 +62,6 @@ frappe.ui.form.on('Maintenance Visit', {
 	contact_person: function (frm) {
 		erpnext.utils.get_contact_details(frm);
 	}
-
 })
 
 // TODO commonify this code

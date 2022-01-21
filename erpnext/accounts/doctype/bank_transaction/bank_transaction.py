@@ -102,7 +102,7 @@ def get_total_allocated_amount(payment_entry):
 		AND
 			bt.docstatus = 1""", (payment_entry.payment_document, payment_entry.payment_entry), as_dict=True)
 
-def get_paid_amount(payment_entry, currency):
+def get_paid_amount(payment_entry, currency, bank_account):
 	if payment_entry.payment_document in ["Payment Entry", "Sales Invoice", "Purchase Invoice"]:
 
 		paid_amount_field = "paid_amount"
@@ -115,7 +115,7 @@ def get_paid_amount(payment_entry, currency):
 			payment_entry.payment_entry, paid_amount_field)
 
 	elif payment_entry.payment_document == "Journal Entry":
-		return frappe.db.get_value(payment_entry.payment_document, payment_entry.payment_entry, "total_credit")
+		return frappe.db.get_value('Journal Entry Account', {'parent': payment_entry.payment_entry, 'account': bank_account}, "sum(credit_in_account_currency)")
 
 	elif payment_entry.payment_document == "Expense Claim":
 		return frappe.db.get_value(payment_entry.payment_document, payment_entry.payment_entry, "total_amount_reimbursed")

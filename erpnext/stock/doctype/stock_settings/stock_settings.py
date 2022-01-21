@@ -11,6 +11,8 @@ from frappe.model.document import Document
 from frappe.utils import cint
 from frappe.utils.html_utils import clean_html
 
+from erpnext.stock.utils import check_pending_reposting
+
 
 class StockSettings(Document):
 	def validate(self):
@@ -36,6 +38,7 @@ class StockSettings(Document):
 		self.validate_warehouses()
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
+		self.validate_pending_reposts()
 
 	def validate_warehouses(self):
 		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
@@ -63,6 +66,11 @@ class StockSettings(Document):
 			and not int(self.db_get('clean_description_html') or 0):
 			# changed to text
 			frappe.enqueue('erpnext.stock.doctype.stock_settings.stock_settings.clean_all_descriptions', now=frappe.flags.in_test)
+
+	def validate_pending_reposts(self):
+		if self.stock_frozen_upto:
+			check_pending_reposting(self.stock_frozen_upto)
+
 
 	def on_update(self):
 		self.toggle_warehouse_field_for_inter_warehouse_transfer()

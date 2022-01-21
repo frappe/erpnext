@@ -94,10 +94,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 22:38:20.332316",
+ "modified": "2022-01-19 12:52:19.850710",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Incentive",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -136,8 +137,10 @@
    "write": 1
   }
  ],
+ "search_fields": "employee_name",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "employee_name",
  "track_changes": 1
 }

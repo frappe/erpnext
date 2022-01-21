@@ -530,16 +530,6 @@ class BOM(WebsiteGenerator):
 				row.hour_rate = (hour_rate / flt(self.conversion_rate)
 					if self.conversion_rate and hour_rate else hour_rate)
 
-			if self.routing:
-				time_in_mins = flt(frappe.db.get_value("BOM Operation", {
-						"workstation": row.workstation,
-						"operation": row.operation,
-						"parent": self.routing
-				}, ["time_in_mins"]))
-
-				if time_in_mins:
-					row.time_in_mins = time_in_mins
-
 		if row.hour_rate and row.time_in_mins:
 			row.base_hour_rate = flt(row.hour_rate) * flt(self.conversion_rate)
 			row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
@@ -922,7 +912,7 @@ def validate_bom_no(item, bom_no):
 				rm_item_exists = True
 		if bom.item.lower() == item.lower() or \
 			bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower():
- 				rm_item_exists = True
+				rm_item_exists = True
 		if not rm_item_exists:
 			frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
 
