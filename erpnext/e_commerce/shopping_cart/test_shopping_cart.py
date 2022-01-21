@@ -9,8 +9,13 @@ from frappe.utils import add_months, nowdate
 
 from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule
 from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
-from erpnext.e_commerce.shopping_cart.cart import _get_cart_quotation, get_cart_quotation, get_party, update_cart
-from erpnext.tests.utils import create_test_contact_and_address, change_settings
+from erpnext.e_commerce.shopping_cart.cart import (
+	_get_cart_quotation,
+	get_cart_quotation,
+	get_party,
+	update_cart,
+)
+from erpnext.tests.utils import change_settings, create_test_contact_and_address
 
 # test_dependencies = ['Payment Terms Template']
 
@@ -136,8 +141,7 @@ class TestShoppingCart(unittest.TestCase):
 		"default_customer_group": "_Test Customer Group",
 		"price_list": "_Test Price List India",
 		"show_price": 1
-		}
-	)
+	})
 	def test_add_item_variant_without_web_item_to_cart(self):
 		"Test adding Variants having no Website Items in cart via Template Web Item."
 		from erpnext.controllers.item_variant import create_variant
