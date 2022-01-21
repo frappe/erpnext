@@ -19,22 +19,10 @@ frappe.query_reports["Products Sold Sorted By Categories"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"from_time",
-			"label": __("From Time"),
-			"fieldtype": "Time",
-			"reqd": 1
-		},
-		{
-			"fieldname":"to_time",
-			"label": __("To Time"),
-			"fieldtype": "Time",
-			"reqd": 1
-		},
-		{
-			"fieldname":"prefix",
-			"label": __("Prefix"),
+			"fieldname":"company",
+			"label": __("Company"),
 			"fieldtype": "Link",
-			"options": "Prefix sales for days",
+			"options": "Company",
 			"reqd": 1
 		},
 		{
