@@ -313,6 +313,7 @@ erpnext.patches.v14_0.delete_healthcare_doctypes
 erpnext.patches.v13_0.update_category_in_ltds_certificate
 erpnext.patches.v13_0.create_pan_field_for_india #2
 erpnext.patches.v14_0.delete_hub_doctypes
+erpnext.patches.v13_0.update_maintenance_schedule_field_in_visit
 erpnext.patches.v13_0.create_ksa_vat_custom_fields # 07-01-2022
 erpnext.patches.v14_0.rename_ongoing_status_in_sla_documents
 erpnext.patches.v14_0.migrate_crm_settings
@@ -324,6 +325,8 @@ execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings'
 erpnext.patches.v14_0.set_payroll_cost_centers
 erpnext.patches.v13_0.agriculture_deprecation_warning
 erpnext.patches.v14_0.delete_agriculture_doctypes
+erpnext.patches.v13_0.hospitality_deprecation_warning
+erpnext.patches.v14_0.delete_hospitality_doctypes # 20-01-2022
 erpnext.patches.v13_0.update_exchange_rate_settings
 erpnext.patches.v14_0.rearrange_company_fields
 erpnext.patches.v14_0.update_leave_notification_template
