@@ -10,7 +10,9 @@ def execute():
 	)
 
 	for module, doctype in module_doctypes:
-		if not frappe.db.has_column(doctype, "is_cancelled"):
+		if (not frappe.db.has_column(doctype, "is_cancelled")
+			or frappe.db.get_column_type(doctype, "is_cancelled").lower() == "int(1)"
+		):
 			continue
 
 		frappe.db.sql("""
