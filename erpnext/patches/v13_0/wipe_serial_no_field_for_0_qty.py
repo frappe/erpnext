@@ -2,7 +2,14 @@ import frappe
 
 
 def execute():
-	sr_item = frappe.qb.DocType("Stock Reconciliation Item")
+
+	doctype = "Stock Reconciliation Item"
+
+	if not frappe.db.has_column(doctype, "current_serial_no"):
+		# nothing to fix if column doesn't exist
+		return
+
+	sr_item = frappe.qb.DocType(doctype)
 
 	(frappe.qb
 		.update(sr_item)
