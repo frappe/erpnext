@@ -14,6 +14,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	},
 
 	refresh: function () {
+		this.set_dynamic_link();
 		this.setup_route_options();
 		this.setup_naming_series();
 		erpnext.hide_company();
@@ -31,6 +32,9 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		if (me.frm.fields_dict.vehicle_owner) {
 			me.frm.set_query('vehicle_owner', 'erpnext.controllers.queries.customer_query');
 		}
+
+		me.frm.set_query('contact_person', erpnext.queries.contact_query);
+		me.frm.set_query('customer_address', erpnext.queries.address_query);
 
 		if(me.frm.fields_dict.insurance_company) {
 			me.frm.set_query("insurance_company", function(doc) {
@@ -66,6 +70,10 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		me.frm.set_query('depreciation_item_code', 'non_standard_depreciation', () => erpnext.queries.item({
 			is_stock_item: 1,
 		}));
+	},
+
+	set_dynamic_link: function () {
+		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'};
 	},
 
 	setup_route_options: function () {
@@ -200,7 +208,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 			'applies_to_item', 'applies_to_item_name',
 			'vehicle_license_plate', 'vehicle_unregistered',
 			'vehicle_chassis_no', 'vehicle_engine_no',
-			'vehicle_color'
+			'vehicle_color', 'vehicle_warranty_no',
 		];
 		$.each(read_only_fields, function (i, f) {
 			if (me.frm.fields_dict[f]) {
@@ -231,6 +239,39 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		frappe.confirm(__('Set Project and all Tasks to status {0}?', [status.bold()]), () => {
 			frappe.xcall('erpnext.projects.doctype.project.project.set_project_status',
 				{project: me.frm.doc.name, status: status}).then(() => { /* page will auto reload */ });
+		});
+	},
+
+	customer: function () {
+		this.get_customer_details();
+	},
+
+	customer_address: function() {
+		erpnext.utils.get_address_display(this.frm, "customer_address");
+	},
+
+	contact_person: function() {
+		erpnext.utils.get_contact_details(this.frm);
+	},
+
+	get_customer_details: function () {
+		var me = this;
+
+		return frappe.call({
+			method: "erpnext.projects.doctype.project.project.get_customer_details",
+			args: {
+				args: {
+					doctype: me.frm.doc.doctype,
+					company: me.frm.doc.company,
+					customer: me.frm.doc.customer,
+					bill_to: me.frm.doc.bill_to,
+				}
+			},
+			callback: function (r) {
+				if (r.message && !r.exc) {
+					me.frm.set_value(r.message);
+				}
+			}
 		});
 	},
 

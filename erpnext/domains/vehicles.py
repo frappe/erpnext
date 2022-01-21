@@ -1,6 +1,32 @@
 from __future__ import unicode_literals
 from copy import deepcopy
 
+
+def insert_field_after(after_fieldname, new_field, field_list):
+	new_field['insert_after'] = after_fieldname
+
+	after_field_index = -1
+	next_field = None
+	for i, f in enumerate(field_list):
+		if f.get('fieldname') == after_fieldname:
+			after_field_index = i
+		if f.get('insert_after') == after_fieldname:
+			next_field = f
+
+	if after_field_index != -1:
+		field_list.insert(after_field_index + 1, new_field)
+	if next_field:
+		next_field['insert_after'] = new_field['fieldname']
+
+
+def get_field(fieldname, field_list):
+	for f in field_list:
+		if f.get('fieldname') == fieldname:
+			return f
+
+	return None
+
+
 # Vehicle Details
 applies_to_fields = [
 	{"label": "Applies to Model", "fieldname": "applies_to_variant_of", "fieldtype": "Link", "options": "Item",
@@ -30,17 +56,26 @@ applies_to_fields = [
 	{"label": "Vehicle Color", "fieldname": "vehicle_color", "fieldtype": "Link", "options": "Vehicle Color",
 		"insert_after": "col_break_vehicle_2", "read_only": 0, "fetch_from": ""},
 	{"label": "Odometer Reading", "fieldname": "vehicle_last_odometer", "fieldtype": "Int",
-		"insert_after": "vehicle_color", "read_only": 0, "fetch_from": "", "no_copy": 1},
+		"insert_after": "vehicle_color", "read_only": 0, "fetch_from": "", "no_copy": 0},
 ]
 
-applies_to_project_fields = deepcopy(applies_to_fields)
-project_first_odometer = {"label": "Odometer Reading (First)", "fieldname": "vehicle_first_odometer", "fieldtype": "Int",
-	"insert_after": "vehicle_color"}
-applies_to_project_fields.append(project_first_odometer)
 
-project_last_odometer = [f for f in applies_to_project_fields if f['fieldname'] == 'vehicle_last_odometer'][0]
-project_last_odometer.update({"label": "Odometer Reading (Last)", "fetch_from": "",
-	"insert_after": "vehicle_first_odometer"})
+# Applies to Project Fields
+applies_to_project_fields = deepcopy(applies_to_fields)
+
+project_first_odometer = {"label": "Odometer Reading (First)", "fieldname": "vehicle_first_odometer", "fieldtype": "Int"}
+insert_field_after('vehicle_color', project_first_odometer, applies_to_project_fields)
+get_field('vehicle_last_odometer', applies_to_project_fields).update({"label": "Odometer Reading (Last)",
+	"fetch_from": ""})
+
+vehicle_warranty_no = {"label": "Warranty Book No", "fieldname": "vehicle_warranty_no", "fieldtype": "Data",
+	"insert_after": "cb_warranty_1"}
+applies_to_project_fields.append(vehicle_warranty_no)
+
+fqr_no = {"label": "FQR No", "fieldname": "fqr_no", "fieldtype": "Data", "no_copy": 1,
+	"insert_after": "cb_warranty_2"}
+applies_to_project_fields.append(fqr_no)
+
 
 # Vehicle Owner
 vehicle_owner_fields = [
@@ -157,6 +192,9 @@ common_properties = [
 
 	[('Sales Invoice', 'Quotation', 'Project'),
 		{"fieldname": "sec_insurance", "property": "hidden", "value": 0}],
+
+	[('Project',),
+		{"fieldname": "sec_warranty", "property": "hidden", "value": 0}],
 
 	[('Item', 'Item Group', 'Brand', 'Item Source'),
 		{"fieldname": "is_vehicle", "property": "hidden", "value": 0}],

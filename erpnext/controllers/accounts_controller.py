@@ -35,7 +35,7 @@ force_party_fields = ("customer_name", "bill_to_name", "supplier_name",
 	"tax_id", "tax_cnic", "tax_strn")
 
 force_applies_to_fields = ("vehicle_chassis_no", "vehicle_engine_no", "vehicle_license_plate", "vehicle_unregistered",
-	"vehicle_color", "vehicle_last_odometer", "applies_to_item", "vehicle_owner_name")
+	"vehicle_color", "vehicle_last_odometer", "applies_to_item", "vehicle_owner_name", "vehicle_warranty_no")
 
 merge_items_sum_fields = ['qty', 'stock_qty', 'alt_uom_qty', 'total_weight',
 	'amount', 'taxable_amount', 'net_amount', 'total_discount', 'amount_before_discount',

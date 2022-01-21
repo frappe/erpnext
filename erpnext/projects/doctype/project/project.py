@@ -6,8 +6,7 @@ import frappe
 import erpnext
 from frappe import _
 from email_reply_parser import EmailReplyParser
-from frappe.utils import (flt, getdate, get_url, now, cstr,
-	nowtime, get_time, today, get_datetime, add_days)
+from frappe.utils import flt, get_url, cstr, nowtime, get_time, today, get_datetime, add_days
 from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
@@ -15,13 +14,19 @@ from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 from erpnext.stock.get_item_details import get_applies_to_details
 from frappe.model.naming import set_name_by_naming_series
 from frappe.model.utils import get_fetch_values
-from six import string_types
+from frappe.contacts.doctype.address.address import get_address_display, get_default_address
+from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
 from frappe.model.document import Document
+from six import string_types
 import json
 
 
 force_applies_to_fields = ("vehicle_chassis_no", "vehicle_engine_no", "vehicle_license_plate", "vehicle_unregistered",
-	"vehicle_color", "applies_to_item", "vehicle_owner_name")
+	"vehicle_color", "applies_to_item", "vehicle_owner_name", "vehicle_warranty_no")
+
+force_customer_fields = ("customer_name",
+	"tax_id", "tax_cnic", "tax_strn", "tax_status",
+	"address_display", "contact_display", "contact_phone", "contact_mobile", "contact_email")
 
 
 class Project(Document):
@@ -45,17 +50,14 @@ class Project(Document):
 
 	def before_print(self):
 		self.onload()
-
 		self.company_address_doc = erpnext.get_company_address(self)
-
-		self.stock_data, self.parts_data, self.lubricants_data = get_stock_items(self.name, self.company)
-		self.service_data, self.labour_data, self.sublet_data = get_service_items(self.name, self.company)
-		self.totals_data = get_totals_data([self.stock_data, self.service_data])
+		self.get_billing_data()
 
 	def validate(self):
 		if not self.is_new():
 			self.copy_from_template()
 
+		self.set_missing_values()
 		self.update_costing()
 		self.validate_applies_to()
 		self.validate_depreciation()
@@ -67,6 +69,11 @@ class Project(Document):
 		if 'Vehicles' in frappe.get_active_domains():
 			self.update_odometer()
 
+	def after_insert(self):
+		self.copy_from_template()
+		if self.sales_order:
+			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
+
 	def set_title(self):
 		if self.project_name:
 			self.title = self.project_name
@@ -76,6 +83,30 @@ class Project(Document):
 			self.title = self.customer_name or self.customer
 		else:
 			self.title = self.name
+
+	def set_missing_values(self):
+		self.update_customer_details()
+		self.update_applies_to_details()
+
+	def update_customer_details(self):
+		args = self.as_dict()
+		customer_details = get_customer_details(args)
+
+		for k, v in customer_details.items():
+			if self.meta.has_field(k) and not self.get(k) or k in force_customer_fields:
+				self.set(k, v)
+
+	def update_applies_to_details(self):
+		args = self.as_dict()
+		applies_to_details = get_applies_to_details(args, for_validate=True)
+
+		for k, v in applies_to_details.items():
+			if self.meta.has_field(k) and not self.get(k) or k in force_applies_to_fields:
+				self.set(k, v)
+
+	def validate_applies_to(self):
+		from erpnext.vehicles.utils import format_vehicle_fields
+		format_vehicle_fields(self)
 
 	def update_odometer(self):
 		from erpnext.vehicles.doctype.vehicle_log.vehicle_log import make_odometer_log
@@ -96,24 +127,14 @@ class Project(Document):
 				reload = True
 
 			if reload:
-				self.vehicle_first_odometer, self.vehicle_last_odometer = self.db_get(['vehicle_first_odometer', 'vehicle_last_odometer'])
+				self.vehicle_first_odometer, self.vehicle_last_odometer = self.db_get(['vehicle_first_odometer',
+					'vehicle_last_odometer'])
 			else:
 				odo = get_project_odometer(self.name, self.applies_to_vehicle)
 				self.db_set({
 					"vehicle_first_odometer": odo.vehicle_first_odometer,
 					"vehicle_last_odometer": odo.vehicle_last_odometer,
 				})
-
-	def validate_applies_to(self):
-		args = self.as_dict()
-		applies_to_details = get_applies_to_details(args, for_validate=True)
-
-		for k, v in applies_to_details.items():
-			if self.meta.has_field(k) and not self.get(k) or k in force_applies_to_fields:
-				self.set(k, v)
-
-		from erpnext.vehicles.utils import format_vehicle_fields
-		format_vehicle_fields(self)
 
 	def validate_depreciation(self):
 		if not self.insurance_company:
@@ -168,25 +189,11 @@ class Project(Document):
 					task_weight = task.task_weight
 				)).insert()
 
-	def is_row_updated(self, row, existing_task_data, fields):
-		if self.get("__islocal") or not existing_task_data: return True
-
-		d = existing_task_data.get(row.task_id, {})
-
-		for field in fields:
-			if row.get(field) != d.get(field):
-				return True
-
 	def update_project(self):
 		'''Called externally by Task'''
 		self.update_percent_complete()
 		self.update_costing()
 		self.db_update()
-
-	def after_insert(self):
-		self.copy_from_template()
-		if self.sales_order:
-			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
 	def update_percent_complete(self):
 		if self.percent_complete_method == "Manual":
@@ -229,6 +236,11 @@ class Project(Document):
 
 		else:
 			self.status = "Open"
+
+	def get_billing_data(self):
+		self.stock_data, self.parts_data, self.lubricants_data = get_stock_items(self.name, self.company)
+		self.service_data, self.labour_data, self.sublet_data = get_service_items(self.name, self.company)
+		self.totals_data = get_totals_data([self.stock_data, self.service_data])
 
 	def update_costing(self):
 		from_time_sheet = frappe.db.sql("""select
@@ -745,6 +757,43 @@ def set_project_status(project, status):
 
 	project.status = status
 	project.save()
+
+
+@frappe.whitelist()
+def get_customer_details(args):
+	if isinstance(args, string_types):
+		args = json.loads(args)
+
+	args = frappe._dict(args)
+	out = frappe._dict()
+
+	customer = frappe._dict()
+	if args.customer:
+		customer = frappe.get_cached_doc("Customer", args.customer)
+
+	out.customer_name = customer.customer_name
+
+	# Tax IDs
+	out.tax_id = customer.tax_id
+	out.tax_cnic = customer.tax_cnic
+	out.tax_strn = customer.tax_strn
+	out.tax_status = customer.tax_status
+
+	# Customer Address
+	out.customer_address = args.customer_address
+	if not out.customer_address and customer.name:
+		out.customer_address = get_default_address("Customer", customer.name)
+
+	out.address_display = get_address_display(out.customer_address)
+
+	# Contact
+	out.contact_person = args.contact_person
+	if not out.contact_person and customer.name:
+		out.contact_person = get_default_contact("Customer", customer.name)
+
+	out.update(get_contact_details(out.contact_person))
+
+	return out
 
 
 @frappe.whitelist()

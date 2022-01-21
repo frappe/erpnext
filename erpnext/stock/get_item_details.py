@@ -1451,6 +1451,7 @@ def get_applies_to_details(args, for_validate=False):
 		out.vehicle_unregistered = project.vehicle_unregistered
 		out.vehicle_color = project.vehicle_color
 		out.vehicle_last_odometer = project.vehicle_last_odometer
+		out.vehicle_warranty_no = project.vehicle_warranty_no
 
 	# Otherwise get it from the Vehicle
 	elif vehicle:
@@ -1459,6 +1460,7 @@ def get_applies_to_details(args, for_validate=False):
 		out.vehicle_license_plate = vehicle.license_plate
 		out.vehicle_unregistered = vehicle.unregistered
 		out.vehicle_color = vehicle.color
+		out.vehicle_warranty_no = vehicle.warranty_no
 
 		if args.doctype != "Project":
 			out.vehicle_last_odometer = get_applies_to_vehicle_odometer(args.applies_to_vehicle)
