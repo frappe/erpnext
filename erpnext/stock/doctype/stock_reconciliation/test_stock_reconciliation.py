@@ -6,7 +6,7 @@
 
 
 import frappe
-from frappe.utils import add_days, flt, nowdate, nowtime, random_string
+from frappe.utils import add_days, cstr, flt, nowdate, nowtime, random_string
 
 from erpnext.accounts.utils import get_stock_and_account_balance
 from erpnext.stock.doctype.item.test_item import create_item
@@ -439,8 +439,8 @@ class TestStockReconciliation(ERPNextTestCase):
 		self.assertRaises(frappe.ValidationError, sr.submit)
 
 	def test_serial_no_cancellation(self):
-
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
 		item = create_item("Stock-Reco-Serial-Item-9", is_stock_item=1)
 		if not item.has_serial_no:
 			item.has_serial_no = 1
@@ -464,6 +464,31 @@ class TestStockReconciliation(ERPNextTestCase):
 				filters={"item_code": item_code, "warehouse": warehouse, "status": "Active"})
 
 		self.assertEqual(len(active_sr_no), 10)
+
+
+	def test_serial_no_creation_and_inactivation(self):
+		item = create_item("_TestItemCreatedWithStockReco", is_stock_item=1)
+		if not item.has_serial_no:
+			item.has_serial_no = 1
+			item.save()
+
+		item_code = item.name
+		warehouse = "_Test Warehouse - _TC"
+
+		sr = create_stock_reconciliation(item_code=item.name, warehouse=warehouse,
+				serial_no="SR-CREATED-SR-NO", qty=1, do_not_submit=True, rate=100)
+		sr.save()
+		self.assertEqual(cstr(sr.items[0].current_serial_no), "")
+		sr.submit()
+
+		active_sr_no = frappe.get_all("Serial No",
+				filters={"item_code": item_code, "warehouse": warehouse, "status": "Active"})
+		self.assertEqual(len(active_sr_no), 1)
+
+		sr.cancel()
+		active_sr_no = frappe.get_all("Serial No",
+				filters={"item_code": item_code, "warehouse": warehouse, "status": "Active"})
+		self.assertEqual(len(active_sr_no), 0)
 
 
 def create_batch_item_with_batch(item_name, batch_id):
