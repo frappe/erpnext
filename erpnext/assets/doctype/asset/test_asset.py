@@ -976,6 +976,82 @@ class TestDepreciationBasics(AssetSetup):
 
 		self.assertEqual(len(asset.schedules), 1)
 
+	def test_clear_depreciation_schedule_for_multiple_finance_books(self):
+		asset = create_asset(
+			item_code = "Macbook Pro",
+			available_for_use_date = "2019-12-31",
+			do_not_save = 1
+		)
+
+		asset.calculate_depreciation = 1
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 1,
+			"total_number_of_depreciations": 3,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": "2020-01-31"
+		})
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 1,
+			"total_number_of_depreciations": 6,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": "2020-01-31"
+		})
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 3,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": "2020-12-31"
+		})
+		asset.submit()
+
+		post_depreciation_entries(date="2020-04-01")
+		asset.load_from_db()
+
+		asset.clear_depreciation_schedule()
+
+		self.assertEqual(len(asset.schedules), 6)
+
+		for schedule in asset.schedules:
+			if schedule.idx <= 3:
+				self.assertEqual(schedule.finance_book_id, "1")
+			else:
+				self.assertEqual(schedule.finance_book_id, "2")
+
+	def test_depreciation_schedules_are_set_up_for_multiple_finance_books(self):
+		asset = create_asset(
+			item_code = "Macbook Pro",
+			available_for_use_date = "2019-12-31",
+			do_not_save = 1
+		)
+
+		asset.calculate_depreciation = 1
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 3,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": "2020-12-31"
+		})
+		asset.append("finance_books", {
+			"depreciation_method": "Straight Line",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 6,
+			"expected_value_after_useful_life": 10000,
+			"depreciation_start_date": "2020-12-31"
+		})
+		asset.save()
+
+		self.assertEqual(len(asset.schedules), 9)
+
+		for schedule in asset.schedules:
+			if schedule.idx <= 3:
+				self.assertEqual(schedule.finance_book_id, 1)
+			else:
+				self.assertEqual(schedule.finance_book_id, 2)
+
 	def test_depreciation_entry_cancellation(self):
 		asset = create_asset(
 			item_code = "Macbook Pro",
