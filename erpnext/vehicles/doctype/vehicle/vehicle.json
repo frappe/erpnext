@@ -503,7 +503,7 @@
   {
    "fieldname": "insurance_policy_no",
    "fieldtype": "Data",
-   "label": "Insurance Policy No"
+   "label": "Insurance Policy #"
   },
   {
    "fieldname": "insurance_start_date",
@@ -594,7 +594,7 @@
   {
    "fieldname": "warranty_no",
    "fieldtype": "Data",
-   "label": "Warranty Number"
+   "label": "Warranty Book No"
   },
   {
    "fieldname": "column_break_40",
@@ -715,7 +715,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2022-01-06 12:52:23.826804",
+ "modified": "2022-01-20 16:52:46.511318",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

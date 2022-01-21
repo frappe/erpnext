@@ -556,12 +556,12 @@
   {
    "fieldname": "insurance_policy_no",
    "fieldtype": "Data",
-   "label": "Policy #"
+   "label": "Insurance Policy #"
   },
   {
    "fieldname": "insurance_loss_no",
    "fieldtype": "Data",
-   "label": "Loss #"
+   "label": "Insurance Loss #"
   },
   {
    "fieldname": "col_break_insurance2",

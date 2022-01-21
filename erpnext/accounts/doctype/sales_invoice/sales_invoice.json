@@ -2035,7 +2035,7 @@
   {
    "fieldname": "insurance_policy_no",
    "fieldtype": "Data",
-   "label": "Policy #"
+   "label": "Insurance Policy #"
   },
   {
    "fieldname": "col_break_insurance2",
@@ -2044,7 +2044,7 @@
   {
    "fieldname": "insurance_loss_no",
    "fieldtype": "Data",
-   "label": "Loss #"
+   "label": "Insurance Loss #"
   },
   {
    "fieldname": "insurance_surveyor",
@@ -2208,7 +2208,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2022-01-11 13:54:18.891496",
+ "modified": "2022-01-20 14:01:55.541249",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

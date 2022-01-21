@@ -664,14 +664,14 @@
   {
    "fieldname": "vehicle_warranty_no",
    "fieldtype": "Data",
-   "label": "Warranty Number",
+   "label": "Warranty Book No",
    "no_copy": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-12-30 17:43:12.278040",
+ "modified": "2022-01-20 16:53:15.784808",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Delivery",
