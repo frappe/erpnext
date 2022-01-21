@@ -169,6 +169,9 @@ class TestShoppingCart(unittest.TestCase):
 
 		self.assertEqual(doc.get("items")[0].item_name, "Test-Tshirt-Temp-S-R")
 
+		# test if items are rendered without error
+		frappe.render_template("templates/includes/cart/cart_items.html", cart)
+
 	def create_tax_rule(self):
 		tax_rule = frappe.get_test_records("Tax Rule")[0]
 		try:

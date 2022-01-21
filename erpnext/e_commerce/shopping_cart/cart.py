@@ -288,7 +288,7 @@ def decorate_quotation_doc(doc):
 			)[0]
 			item_code = variant_data.variant_of
 			fields = fields[1:]
-			d.website_item_name = variant_data.item_name
+			d.web_item_name = variant_data.item_name
 
 			if variant_data.image: # get image from variant or template web item
 				d.thumbnail = variant_data.image
