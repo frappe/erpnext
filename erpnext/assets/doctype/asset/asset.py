@@ -376,7 +376,9 @@ class Asset(AccountsController):
 
 		if from_date:
 			return from_date
-		return self.available_for_use_date
+
+		# since depr for available_for_use_date is not yet booked
+		return add_days(self.available_for_use_date, -1)
 
 	# if it returns True, depreciation_amount will not be equal for the first and last rows
 	def check_is_pro_rata(self, row):
