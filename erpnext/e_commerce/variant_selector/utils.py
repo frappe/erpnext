@@ -2,7 +2,7 @@ import frappe
 from frappe.utils import cint
 
 from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import (
-	get_shopping_cart_settings
+	get_shopping_cart_settings,
 )
 from erpnext.e_commerce.shopping_cart.cart import _set_price_list
 from erpnext.e_commerce.variant_selector.item_variants_cache import ItemVariantsCacheManager

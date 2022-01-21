@@ -93,15 +93,12 @@ class TestVariantSelector(ERPNextTestCase):
 		"default_customer_group": "_Test Customer Group",
 		"price_list": "_Test Price List India",
 		"show_price": 1
-		}
-	)
+	})
 	def test_exact_match_with_price(self):
 		"""
 			Test price fetching and matching of variant without Website Item
 		"""
-		from erpnext.e_commerce.doctype.website_item.test_website_item import (
-			make_web_item_price,
-		)
+		from erpnext.e_commerce.doctype.website_item.test_website_item import make_web_item_price
 
 		make_web_item_price(item_code="Test-Tshirt-Temp-S-R", price_list_rate=100)
 		next_values = get_next_attribute_and_values(
