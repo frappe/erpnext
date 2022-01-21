@@ -4,23 +4,22 @@ import frappe
 
 from erpnext.controllers.item_variant import create_variant
 from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
+from erpnext.e_commerce.variant_selector.utils import get_next_attribute_and_values
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 test_dependencies = ["Item"]
 
-class TestVariantSelector(unittest.TestCase):
+class TestVariantSelector(ERPNextTestCase):
 
-	def setUp(self) -> None:
-		self.template_item = make_item("Test-Tshirt-Temp", {
+	@classmethod
+	def setUpClass(cls):
+		template_item = make_item("Test-Tshirt-Temp", {
 			"has_variant": 1,
 			"variant_based_on": "Item Attribute",
 			"attributes": [
-				{
-					"attribute": "Test Size"
-				},
-				{
-					"attribute": "Test Colour"
-				}
+				{"attribute": "Test Size"},
+				{"attribute": "Test Colour"}
 			]
 		})
 
@@ -28,19 +27,16 @@ class TestVariantSelector(unittest.TestCase):
 		for size in ("Large", "Medium",):
 			for colour in ("Red", "Green",):
 				variant = create_variant("Test-Tshirt-Temp", {
-					"Test Size": size,
-					"Test Colour": colour
+					"Test Size": size, "Test Colour": colour
 				})
 				variant.save()
 
 		variant = create_variant("Test-Tshirt-Temp", {
-			"Test Size": "Small",
-			"Test Colour": "Red"
+			"Test Size": "Small", "Test Colour": "Red"
 		})
 		variant.save()
 
-	def tearDown(self):
-		frappe.db.rollback()
+		make_website_item(template_item) # publish template not variants
 
 	def test_item_attributes(self):
 		"""
@@ -50,8 +46,6 @@ class TestVariantSelector(unittest.TestCase):
 			Attribute selection must not be linked to Website Items.
 		"""
 		from erpnext.e_commerce.variant_selector.utils import get_attributes_and_values
-
-		make_website_item(self.template_item) # publish template not variants
 
 		attr_data = get_attributes_and_values("Test-Tshirt-Temp")
 
@@ -72,7 +66,7 @@ class TestVariantSelector(unittest.TestCase):
 		self.assertEqual(len(attr_data[0]["values"]), 2)  # ['Medium', 'Large']
 
 		# teardown
-		small_variant.disabled = 1
+		small_variant.disabled = 0
 		small_variant.save()
 
 	def test_next_item_variant_values(self):
@@ -84,8 +78,6 @@ class TestVariantSelector(unittest.TestCase):
 			There is a ** Small-Red ** Tshirt. No other colour in this size.
 			On selecting ** Small **, only ** Red ** should be selectable next.
 		"""
-		from erpnext.e_commerce.variant_selector.utils import get_next_attribute_and_values
-
 		next_values = get_next_attribute_and_values("Test-Tshirt-Temp", selected_attributes={"Test Size": "Small"})
 		next_colours = next_values["valid_options_for_attributes"]["Test Colour"]
 		filtered_items = next_values["filtered_items"]
@@ -94,3 +86,31 @@ class TestVariantSelector(unittest.TestCase):
 		self.assertEqual(next_colours.pop(), "Red")
 		self.assertEqual(len(filtered_items), 1)
 		self.assertEqual(filtered_items.pop(), "Test-Tshirt-Temp-S-R")
+
+	@change_settings("E Commerce Settings",{
+		"company": "_Test Company",
+		"enabled": 1,
+		"default_customer_group": "_Test Customer Group",
+		"price_list": "_Test Price List India",
+		"show_price": 1
+		}
+	)
+	def test_exact_match_with_price(self):
+		"""
+			Test price fetching and matching of variant without Website Item
+		"""
+		from erpnext.e_commerce.doctype.website_item.test_website_item import (
+			make_web_item_price,
+		)
+
+		make_web_item_price(item_code="Test-Tshirt-Temp-S-R", price_list_rate=100)
+		next_values = get_next_attribute_and_values(
+			"Test-Tshirt-Temp",
+			selected_attributes={"Test Size": "Small", "Test Colour": "Red"}
+		)
+		price_info = next_values["product_info"]["price"]
+
+		self.assertEqual(next_values["exact_match"][0],"Test-Tshirt-Temp-S-R")
+		self.assertEqual(next_values["exact_match"][0],"Test-Tshirt-Temp-S-R")
+		self.assertEqual(price_info["price_list_rate"], 100.0)
+		self.assertEqual(price_info["formatted_price_sales_uom"], "₹ 100.00")
