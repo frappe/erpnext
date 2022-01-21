@@ -243,8 +243,9 @@ class Asset(AccountsController):
 
 				# For first row
 				if has_pro_rata and not self.opening_accumulated_depreciation and n==0:
+					from_date = add_days(self.available_for_use_date, -1) # needed to calc depr amount for available_for_use_date too
 					depreciation_amount, days, months = self.get_pro_rata_amt(finance_book, depreciation_amount,
-						self.available_for_use_date, finance_book.depreciation_start_date)
+						from_date, finance_book.depreciation_start_date)
 
 					# For first depr schedule date will be the start date
 					# so monthly schedule date is calculated by removing month difference between use date and start date
