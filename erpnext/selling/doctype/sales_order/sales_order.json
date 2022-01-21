@@ -145,7 +145,8 @@
   "column_break_108",
   "auto_repeat",
   "update_auto_repeat_reference",
-  "sales_invoice_reference"
+  "sales_invoice_reference",
+  "delivery_note_reference"
  ],
  "fields": [
   {
@@ -1518,17 +1519,22 @@
   },
   {
    "fieldname": "sales_invoice_reference",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "hidden": 1,
-   "label": "Sales Invoice Reference",
-   "options": "Sales Invoice"
+   "label": "Sales Invoice Reference"
+  },
+  {
+   "fieldname": "delivery_note_reference",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Delivery Note Reference"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-12 12:02:46.534884",
+ "modified": "2022-01-21 14:42:46.596404",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

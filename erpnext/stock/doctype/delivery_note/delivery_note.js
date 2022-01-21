@@ -112,7 +112,50 @@ frappe.ui.form.on("Delivery Note", {
 				}, __('Create'));
 			}
 		}
+	},
+
+	after_save(frm) {
+		frm.doc.items.some((row) => {
+			if (!row.against_sales_order) {
+				let d = new frappe.ui.Dialog({
+					title: 'Suggestion',
+					fields: [
+						{
+							fieldtype: 'HTML',
+							options: `<p class="frappe-confirm-message">\
+							${__("We recommend creating a Delivery Note against a Sales Order as an ideal practice.")}\
+							<br>${__("Click")}<a href= "#"> ${__("here")} </a>${__("to create a Sales Order.")}<br><br>\
+							${__("Do you still want to proceed with the creation of this Delivery Note?")}</p>`
+						}
+					],
+					primary_action_label: 'Yes',
+					primary_action(values) {
+						console.log(values.save_setting)
+						values.save_setting && frappe.db.set_value('Selling Settings', 'Selling Settings', 'so_required', 'Yes');
+						d.hide();
+					},
+					secondary_action_label: 'No',
+					secondary_action() {
+						d.hide();
+					},
+				});
+				d.$body.find('.frappe-confirm-message').find('a').click(() => {
+					frm.events.make_so_dn(frm);
+				})
+				d.add_custom_checkbox(__('Do you want to save this setting?'))
+				d.show();
+				return
+			}
+		});
+	},
+
+	make_so_dn() {
+		frappe.model.open_mapped_doc({
+			method: 'erpnext.stock.doctype.delivery_note.delivery_note.make_sales_order_dn',
+			frm: me.frm,
+		});
 	}
+
 });
 
 frappe.ui.form.on("Delivery Note Item", {
@@ -193,7 +236,10 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 						frm: me.frm
 					}) }, __('Create'));
 			}
-
+			if(doc.docstatus<=1 && !doc.is_return) {
+				this.frm.add_custom_button(__('Sales Order'),
+				this.frm.events.make_so_dn, __('Create'));
+			}
 			if (!doc.__islocal && doc.docstatus==1) {
 				this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}

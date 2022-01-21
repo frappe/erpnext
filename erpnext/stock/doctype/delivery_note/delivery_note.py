@@ -760,3 +760,22 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+@frappe.whitelist()
+def make_sales_order_dn(source_name, target_doc = None):
+	def update_reference(source, target, source_parent):
+		target.delivery_note_reference = source.name
+
+	return get_mapped_doc("Delivery Note", source_name, {
+		"Delivery Note": {
+			"doctype": "Sales Order",
+			"field_map": {
+				"posting_date": "delivery_date"
+			},
+			"postprocess": update_reference
+		},
+		"Delivery Note Item": {
+			"doctype": "Sales Order Item",
+		}
+	}, target_doc)
+

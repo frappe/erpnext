@@ -184,8 +184,8 @@ class SalesOrder(SellingController):
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 			update_coupon_code_count(self.coupon_code,'used')
-		if self.sales_invoice_reference :
-			self.link_sales_order_and_invoice()
+		if self.sales_invoice_reference or self.delivery_note_reference:
+			self.link_sales_order_to_inv_and_dn()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
@@ -419,11 +419,23 @@ class SalesOrder(SellingController):
 				item.item_code in reserved_items:
 				frappe.throw(_("Cannot ensure delivery by Serial No as Item {0} is added with and without Ensure Delivery by Serial No.").format(item.item_code))
 
-	def link_sales_order_and_invoice(self):
-		si = frappe.get_doc('Sales Invoice', self.sales_invoice_reference)
-		for si_item in si.items:
-			si_item.sales_order = self.name
-		si.save()
+	def link_sales_order_to_inv_and_dn(self):
+		if self.sales_invoice_reference:
+			si = frappe.get_doc('Sales Invoice', self.sales_invoice_reference)
+			for si_item in si.items:
+				si_item.sales_order = self.name
+			si.save()
+		elif self.delivery_note_reference:
+			so_details = {item.item_code:item.name for item in self.items}
+			dn = frappe.get_doc('Delivery Note', self.delivery_note_reference)
+
+			for dn_item in dn.items:
+				dn_item.against_sales_order = self.name
+			dn.save()
+
+			for dn_item in dn.items:
+				frappe.db.set_value('Delivery Note Item', dn_item.name, 'so_detail', so_details[dn_item.item_code])
+
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
