@@ -1,7 +1,10 @@
 import frappe
 from frappe.utils import cint
 
-from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import get_shopping_cart_settings
+from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import (
+	get_shopping_cart_settings
+)
+from erpnext.e_commerce.shopping_cart.cart import _set_price_list
 from erpnext.e_commerce.variant_selector.item_variants_cache import ItemVariantsCacheManager
 from erpnext.utilities.product import get_price
 
@@ -202,9 +205,10 @@ def get_item_variant_price_dict(item_code, cart_settings):
 		# Show Price if logged in.
 		# If not logged in, check if price is hidden for guest.
 		if not is_guest or not cart_settings.hide_price_for_guest:
+			price_list = _set_price_list(cart_settings, None)
 			price = get_price(
 				item_code,
-				cart_settings.price_list, #TODO
+				price_list,
 				cart_settings.default_customer_group,
 				cart_settings.company
 			)
