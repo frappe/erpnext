@@ -30,12 +30,17 @@ def execute(filters=None):
 		bal = flt(credit_limit) - flt(outstanding_amt)
 
 		if customer_naming_type == "Naming Series":
-			row = [d.name, d.customer_name, credit_limit, outstanding_amt, bal,
-				d.bypass_credit_limit_check, d.is_frozen,
-          d.disabled]
+			row = [
+				d.name, d.customer_name, credit_limit,
+				outstanding_amt, bal, d.bypass_credit_limit_check,
+				d.is_frozen, d.disabled
+			]
 		else:
-			row = [d.name, credit_limit, outstanding_amt, bal,
-          d.bypass_credit_limit_check, d.is_frozen, d.disabled]
+			row = [
+				d.name, credit_limit, outstanding_amt, bal,
+				d.bypass_credit_limit_check, d.is_frozen,
+				d.disabled
+			]
 
 		if credit_limit:
 			data.append(row)
