@@ -53,7 +53,8 @@ frappe.query_reports["GSTR-1"] = {
 				{ "value": "CDNR-REG", "label": __("Credit/Debit Notes (Registered) - 9B") },
 				{ "value": "CDNR-UNREG", "label": __("Credit/Debit Notes (Unregistered) - 9B") },
 				{ "value": "EXPORT", "label": __("Export Invoice - 6A") },
-				{ "value": "Advances", "label": __("Tax Liability (Advances Received) - 11A(1), 11A(2)") }
+				{ "value": "Advances", "label": __("Tax Liability (Advances Received) - 11A(1), 11A(2)") },
+				{ "value": "NIL Rated", "label": __("NIL RATED/EXEMPTED Invoices") }
 			],
 			"default": "B2B"
 		}
