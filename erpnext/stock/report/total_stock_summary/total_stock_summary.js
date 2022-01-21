@@ -37,5 +37,12 @@ frappe.query_reports["Total Stock Summary"] = {
 			"default": frappe.defaults.get_user_default("Company"),
 			"reqd": 1
 		},
+		{
+			"fieldname": "brand",
+			"label": __("Brand"),
+			"fieldtype": "Link",
+			"width": "80",
+			"options": "Brand"
+		}
 	]
 }
