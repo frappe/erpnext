@@ -134,6 +134,29 @@ class TestAsset(AssetSetup):
 		pr.cancel()
 		self.assertEqual(asset.docstatus, 2)
 
+	def test_purchase_of_grouped_asset(self):
+		create_fixed_asset_item("Rack", is_grouped_asset=1)
+		pr = make_purchase_receipt(item_code="Rack", qty=3, rate=100000.0, location="Test Location")
+
+		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
+		asset = frappe.get_doc('Asset', asset_name)
+		self.assertEqual(asset.asset_quantity, 3)
+		asset.calculate_depreciation = 1
+
+		month_end_date = get_last_day(nowdate())
+		purchase_date = nowdate() if nowdate() != month_end_date else add_days(nowdate(), -15)
+
+		asset.available_for_use_date = purchase_date
+		asset.purchase_date = purchase_date
+		asset.append("finance_books", {
+			"expected_value_after_useful_life": 10000,
+			"depreciation_method": "Straight Line",
+			"total_number_of_depreciations": 3,
+			"frequency_of_depreciation": 10,
+			"depreciation_start_date": month_end_date
+		})
+		asset.submit()
+
 	def test_is_fixed_asset_set(self):
 		asset = create_asset(is_existing_asset = 1)
 		doc = frappe.new_doc('Purchase Invoice')
@@ -1212,13 +1235,13 @@ def create_asset_category():
 	})
 	asset_category.insert()
 
-def create_fixed_asset_item():
+def create_fixed_asset_item(item_code=None, auto_create_assets=1, is_grouped_asset=0):
 	meta = frappe.get_meta('Asset')
 	naming_series = meta.get_field("naming_series").options.splitlines()[0] or 'ACC-ASS-.YYYY.-'
 	try:
-		frappe.get_doc({
+		item = frappe.get_doc({
 			"doctype": "Item",
-			"item_code": "Macbook Pro",
+			"item_code": item_code or "Macbook Pro",
 			"item_name": "Macbook Pro",
 			"description": "Macbook Pro Retina Display",
 			"asset_category": "Computers",
@@ -1226,11 +1249,14 @@ def create_fixed_asset_item():
 			"stock_uom": "Nos",
 			"is_stock_item": 0,
 			"is_fixed_asset": 1,
-			"auto_create_assets": 1,
+			"auto_create_assets": auto_create_assets,
+			"is_grouped_asset": is_grouped_asset,
 			"asset_naming_series": naming_series
-		}).insert()
+		})
+		item.insert()
 	except frappe.DuplicateEntryError:
 		pass
+	return item
 
 def set_depreciation_settings_in_company():
 	company = frappe.get_doc("Company", "_Test Company")
