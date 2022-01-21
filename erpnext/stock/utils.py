@@ -420,12 +420,12 @@ def is_reposting_item_valuation_in_progress():
 		frappe.msgprint(_("Item valuation reposting in progress. Report might show incorrect item valuation."), alert=1)
 
 
-def calculate_mapped_packed_items_return(self):
-	parent_items = set([item.parent_item for item in self.packed_items])
-	doc = frappe.get_doc(self.doctype, self.return_against)
-	for d_item, item in zip(doc.items, self.items):
+def calculate_mapped_packed_items_return(return_doc):
+	parent_items = set([item.parent_item for item in return_doc.packed_items])
+	against_doc = frappe.get_doc(return_doc.doctype, return_doc.return_against)
+	for d_item, item in zip(against_doc.items, return_doc.items):
 		if d_item.item_code in parent_items:
-			for p_item, d_p_item in zip(self.packed_items, doc.packed_items):
+			for p_item, d_p_item in zip(return_doc.packed_items, against_doc.packed_items):
 				p_item.parent_detail_docname = item.name
 				p_item.qty = (d_p_item.qty / d_item.qty) * item.qty
 
