@@ -129,7 +129,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 
 		me.frm.custom_make_buttons = {
 			'Sales Invoice': 'Sales Invoice',
-			'Vehicle Log': 'Odometer Log',
+			'Vehicle Log': 'Update Odometer',
 		};
 
 		var make_method_doctypes = [
@@ -173,12 +173,12 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 
 			me.frm.add_custom_button(__('Duplicate Project with Tasks'), () => me.create_duplicate(), __("Tasks"));
 
-			if (frappe.model.can_create("Sales Invoice")) {
-				me.frm.add_custom_button(__("Sales Invoice"), () => me.make_sales_invoice(), __("Create"));
+			if (frappe.model.can_create("Vehicle Log") && me.frm.doc.applies_to_vehicle) {
+				me.frm.add_custom_button(__("Update Odometer"), () => me.make_odometer_log(), __("Vehicle"));
 			}
 
-			if (frappe.model.can_create("Vehicle Log") && me.frm.doc.applies_to_vehicle) {
-				me.frm.add_custom_button(__("Odometer Log"), () => me.make_odometer_log(), __("Create"));
+			if (frappe.model.can_create("Sales Invoice")) {
+				me.frm.add_custom_button(__("Sales Invoice"), () => me.make_sales_invoice(), __("Create"));
 			}
 		}
 	},

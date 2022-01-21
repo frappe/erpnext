@@ -17,6 +17,7 @@
   "vehicle_allocation_periodicity",
   "column_break_8",
   "dealership_code",
+  "service_section",
   "registration_section",
   "registration_customer_account",
   "registration_agent_account",
@@ -244,11 +245,16 @@
    "fieldtype": "Link",
    "label": "Registration Transaction Type",
    "options": "Transaction Type"
+  },
+  {
+   "fieldname": "service_section",
+   "fieldtype": "Section Break",
+   "label": "Service"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2021-11-26 11:15:03.604432",
+ "modified": "2022-01-19 15:11:07.510773",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",

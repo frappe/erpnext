@@ -5,6 +5,8 @@
  "engine": "InnoDB",
  "field_order": [
   "project_naming_by",
+  "sublet_item_group",
+  "lubricants_item_group",
   "column_break_2",
   "ignore_workstation_time_overlap",
   "ignore_user_time_overlap",
@@ -40,10 +42,22 @@
   {
    "fieldname": "column_break_2",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sublet_item_group",
+   "fieldtype": "Link",
+   "label": "Sublet Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "lubricants_item_group",
+   "fieldtype": "Link",
+   "label": "Lubricants Item Group",
+   "options": "Item Group"
   }
  ],
  "issingle": 1,
- "modified": "2020-03-03 15:37:44.454647",
+ "modified": "2022-01-19 17:03:26.091561",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects Settings",

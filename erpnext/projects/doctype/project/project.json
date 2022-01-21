@@ -51,6 +51,7 @@
   "default_depreciation_percentage",
   "non_standard_depreciation",
   "section_break0",
+  "voice_of_customer",
   "notes",
   "section_break_18",
   "expected_start_date",
@@ -655,11 +656,16 @@
    "fieldtype": "Table",
    "label": "Non Standard Depreciation Rates",
    "options": "Project Item Depreciation"
+  },
+  {
+   "fieldname": "voice_of_customer",
+   "fieldtype": "Data",
+   "label": "Voice of Customer"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2022-01-08 15:30:10.812411",
+ "modified": "2022-01-18 15:24:02.666650",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

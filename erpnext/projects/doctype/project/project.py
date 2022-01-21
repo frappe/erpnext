@@ -3,9 +3,10 @@
 
 from __future__ import unicode_literals
 import frappe
+import erpnext
 from frappe import _
 from email_reply_parser import EmailReplyParser
-from frappe.utils import (flt, getdate, get_url, now,
+from frappe.utils import (flt, getdate, get_url, now, cstr,
 	nowtime, get_time, today, get_datetime, add_days)
 from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
@@ -16,6 +17,7 @@ from frappe.model.naming import set_name_by_naming_series
 from frappe.model.utils import get_fetch_values
 from six import string_types
 from frappe.model.document import Document
+import json
 
 
 force_applies_to_fields = ("vehicle_chassis_no", "vehicle_engine_no", "vehicle_license_plate", "vehicle_unregistered",
@@ -43,6 +45,12 @@ class Project(Document):
 
 	def before_print(self):
 		self.onload()
+
+		self.company_address_doc = erpnext.get_company_address(self)
+
+		self.stock_data, self.parts_data, self.lubricants_data = get_stock_items(self.name, self.company)
+		self.service_data, self.labour_data, self.sublet_data = get_service_items(self.name, self.company)
+		self.totals_data = get_totals_data([self.stock_data, self.service_data])
 
 	def validate(self):
 		if not self.is_new():
@@ -297,6 +305,171 @@ class Project(Document):
 				frappe.sendmail(user.user, subject=_("Project Collaboration Invitation"),
 								content=content.format(*messages))
 				user.welcome_email_sent = 1
+
+
+def get_stock_items(project, company):
+	dn_data = frappe.db.sql("""
+		select p.name,
+			p.posting_date, p.posting_time, i.idx,
+			i.item_code, i.item_name, i.description, i.item_group,
+			i.qty, i.uom,
+			i.net_amount, i.base_net_amount,
+			i.item_tax_detail
+		from `tabDelivery Note Item` i
+		inner join `tabDelivery Note` p on p.name = i.parent
+		where p.docstatus = 1 and i.is_stock_item = 1
+			and p.project = %s
+	""", project, as_dict=1)
+
+	so_data = frappe.db.sql("""
+		select p.name,
+			p.transaction_date, i.idx,
+			i.item_code, i.item_name, i.description, i.item_group,
+			i.qty - i.delivered_qty as qty, i.qty as ordered_qty, i.uom,
+			i.net_amount * (i.qty - i.delivered_qty) / i.qty as net_amount,
+			i.base_net_amount * (i.qty - i.delivered_qty) / i.qty as base_net_amount,
+			i.item_tax_detail
+		from `tabSales Order Item` i
+		inner join `tabSales Order` p on p.name = i.parent
+		where p.docstatus = 1 and i.is_stock_item = 1 and i.delivered_qty < i.qty and i.qty > 0 and p.status != 'Closed'
+			and p.project = %s
+	""", project, as_dict=1)
+
+	stock_data = get_items_data_template()
+	parts_data = get_items_data_template()
+	lubricants_data = get_items_data_template()
+
+	lubricants_item_group = frappe.get_cached_value("Projects Settings", None, "lubricants_item_group")
+	lubricants_item_groups = []
+	if lubricants_item_group:
+		lubricants_item_groups = frappe.get_all("Item Group", {"name": ["subtree of", lubricants_item_group]})
+		lubricants_item_groups = [d.name for d in lubricants_item_groups]
+
+	for d in dn_data + so_data:
+		stock_data['items'].append(d)
+
+		if d.item_group in lubricants_item_groups:
+			lubricants_data['items'].append(d.copy())
+		else:
+			parts_data['items'].append(d.copy())
+
+	stock_data['items'] = sorted(stock_data['items'], key=lambda d: (cstr(d.posting_date), cstr(d.posting_time), d.idx))
+	parts_data['items'] = sorted(parts_data['items'], key=lambda d: (cstr(d.posting_date), cstr(d.posting_time), d.idx))
+	lubricants_data['items'] = sorted(lubricants_data['items'], key=lambda d: (cstr(d.posting_date), cstr(d.posting_time), d.idx))
+
+	get_item_taxes(stock_data, company)
+	post_process_items_data(stock_data)
+
+	get_item_taxes(parts_data, company)
+	post_process_items_data(parts_data)
+
+	get_item_taxes(lubricants_data, company)
+	post_process_items_data(lubricants_data)
+
+	return stock_data, parts_data, lubricants_data
+
+
+def get_service_items(project, company):
+	so_data = frappe.db.sql("""
+		select p.name, p.transaction_date,
+			i.item_code, i.item_name, i.description, i.item_group,
+			i.qty, i.uom,
+			i.net_amount, i.base_net_amount,
+			i.item_tax_detail
+		from `tabSales Order Item` i
+		inner join `tabSales Order` p on p.name = i.parent
+		where p.docstatus = 1 and i.is_stock_item = 0 and i.is_fixed_asset = 0
+			and p.project = %s
+		order by p.transaction_date, p.creation, i.idx
+	""", project, as_dict=1)
+
+	service_data = get_items_data_template()
+	labour_data = get_items_data_template()
+	sublet_data = get_items_data_template()
+
+	sublet_item_group = frappe.get_cached_value("Projects Settings", None, "sublet_item_group")
+	sublet_item_groups = []
+	if sublet_item_group:
+		sublet_item_groups = frappe.get_all("Item Group", {"name": ["subtree of", sublet_item_group]})
+		sublet_item_groups = [d.name for d in sublet_item_groups]
+
+	for d in so_data:
+		service_data['items'].append(d)
+
+		if d.item_group in sublet_item_groups:
+			sublet_data['items'].append(d.copy())
+		else:
+			labour_data['items'].append(d.copy())
+
+	get_item_taxes(service_data, company)
+	post_process_items_data(service_data)
+
+	get_item_taxes(labour_data, company)
+	post_process_items_data(labour_data)
+
+	get_item_taxes(sublet_data, company)
+	post_process_items_data(sublet_data)
+
+	return service_data, labour_data, sublet_data
+
+
+def get_totals_data(items_dataset):
+	totals_data = frappe._dict({
+		'sales_tax_total': 0,
+		'service_tax_total': 0,
+		'taxes_total': 0,
+		'net_total': 0,
+		'grand_total': 0,
+	})
+	for data in items_dataset:
+		totals_data.net_total += flt(data.net_total)
+
+		totals_data.sales_tax_total += flt(data.sales_tax_total)
+		totals_data.service_tax_total += flt(data.service_tax_total)
+
+	totals_data.taxes_total += totals_data.sales_tax_total + totals_data.service_tax_total
+	totals_data.grand_total += totals_data.net_total + totals_data.taxes_total
+
+	return totals_data
+
+def get_items_data_template():
+	return frappe._dict({
+		'total_qty': 0,
+		'net_total': 0,
+		'base_net_total': 0,
+		'sales_tax_total': 0,
+		'service_tax_total': 0,
+		'items': [],
+	})
+
+
+def get_item_taxes(data, company):
+	sales_tax_account = frappe.get_cached_value('Company', company, "sales_tax_account")
+	service_tax_account = frappe.get_cached_value('Company', company, "service_tax_account")
+
+	for d in data['items']:
+		d.setdefault('sales_tax_amount', 0)
+		d.setdefault('service_tax_amount', 0)
+
+		if sales_tax_account or service_tax_account:
+			item_tax_detail = json.loads(d.item_tax_detail or '{}')
+			for tax_row_name, amount in item_tax_detail.items():
+				tax_account = frappe.db.get_value("Sales Taxes and Charges", tax_row_name, 'account_head', cache=1)
+				if tax_account:
+					if tax_account in sales_tax_account:
+						d.sales_tax_amount += flt(amount)
+					if tax_account in service_tax_account:
+						d.service_tax_amount += flt(amount)
+
+
+def post_process_items_data(data):
+	for i, d in enumerate(data['items']):
+		d.idx = i + 1
+		data.total_qty += d.qty
+		data.net_total += d.net_amount
+		data.base_net_total += d.base_net_amount
+		data.sales_tax_total += d.sales_tax_amount
+		data.service_tax_total += d.service_tax_amount
 
 
 def get_timeline_data(doctype, name):
