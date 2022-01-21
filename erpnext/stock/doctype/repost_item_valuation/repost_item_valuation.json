@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "REPOST-ITEM-VAL-.######",
- "creation": "2020-10-22 22:27:07.742161",
+ "creation": "2022-01-11 15:03:38.273179",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -129,7 +129,7 @@
    "reqd": 1
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "allow_negative_stock",
    "fieldtype": "Check",
    "label": "Allow Negative Stock"
@@ -177,7 +177,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-24 02:18:10.524560",
+ "modified": "2022-01-18 10:57:33.450907",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",
@@ -227,5 +227,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

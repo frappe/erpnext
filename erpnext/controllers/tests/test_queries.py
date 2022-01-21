@@ -1,6 +1,8 @@
 import unittest
 from functools import partial
 
+import frappe
+
 from erpnext.controllers import queries
 
 
@@ -85,3 +87,6 @@ class TestQueries(unittest.TestCase):
 
 		wh = query(filters=[["Bin", "item_code", "=", "_Test Item"]])
 		self.assertGreaterEqual(len(wh), 1)
+
+	def test_default_uoms(self):
+		self.assertGreaterEqual(frappe.db.count("UOM", {"enabled": 1}), 10)

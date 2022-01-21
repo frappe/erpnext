@@ -1146,15 +1146,17 @@ class SalarySlip(TransactionBase):
 			})
 
 	def make_loan_repayment_entry(self):
+		payroll_payable_account = get_payroll_payable_account(self.company, self.payroll_entry)
 		for loan in self.loans:
-			repayment_entry = create_repayment_entry(loan.loan, self.employee,
-				self.company, self.posting_date, loan.loan_type, "Regular Payment", loan.interest_amount,
-				loan.principal_amount, loan.total_payment)
+			if loan.total_payment:
+				repayment_entry = create_repayment_entry(loan.loan, self.employee,
+					self.company, self.posting_date, loan.loan_type, "Regular Payment", loan.interest_amount,
+					loan.principal_amount, loan.total_payment, payroll_payable_account=payroll_payable_account)
 
-			repayment_entry.save()
-			repayment_entry.submit()
+				repayment_entry.save()
+				repayment_entry.submit()
 
-			frappe.db.set_value("Salary Slip Loan", loan.name, "loan_repayment_entry", repayment_entry.name)
+				frappe.db.set_value("Salary Slip Loan", loan.name, "loan_repayment_entry", repayment_entry.name)
 
 	def cancel_loan_repayment_entry(self):
 		for loan in self.loans:
@@ -1388,3 +1390,11 @@ def get_salary_component_data(component):
 		],
 		as_dict=1,
 	)
+
+def get_payroll_payable_account(company, payroll_entry):
+	if payroll_entry:
+		payroll_payable_account = frappe.db.get_value('Payroll Entry', payroll_entry, 'payroll_payable_account')
+	else:
+		payroll_payable_account = frappe.db.get_value('Company', company, 'default_payroll_payable_account')
+
+	return payroll_payable_account
