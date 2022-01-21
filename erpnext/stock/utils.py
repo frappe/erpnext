@@ -423,11 +423,13 @@ def is_reposting_item_valuation_in_progress():
 def calculate_mapped_packed_items_return(return_doc):
 	parent_items = set([item.parent_item for item in return_doc.packed_items])
 	against_doc = frappe.get_doc(return_doc.doctype, return_doc.return_against)
-	for d_item, item in zip(against_doc.items, return_doc.items):
-		if d_item.item_code in parent_items:
-			for p_item, d_p_item in zip(return_doc.packed_items, against_doc.packed_items):
-				p_item.parent_detail_docname = item.name
-				p_item.qty = (d_p_item.qty / d_item.qty) * item.qty
+
+	for original_bundle, returned_bundle in zip(against_doc.items, return_doc.items):
+		if original_bundle.item_code in parent_items:
+			for returned_packed_item, original_packed_item in zip(return_doc.packed_items, against_doc.packed_items):
+				if returned_packed_item.parent_item == original_bundle.item_code:
+					returned_packed_item.parent_detail_docname = returned_bundle.name
+					returned_packed_item.qty = (original_packed_item.qty / original_bundle.qty) * returned_bundle.qty
 
 
 def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool:
