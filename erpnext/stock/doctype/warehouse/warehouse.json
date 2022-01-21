@@ -1,23 +1,25 @@
 {
  "actions": [],
  "allow_import": 1,
- "creation": "2013-03-07 18:50:32",
+ "creation": "2022-01-17 14:33:03.844367",
  "description": "A logical Warehouse against which stock entries are made.",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
+  "primary_details_tab",
   "warehouse_detail",
   "warehouse_name",
-  "column_break_3",
-  "warehouse_type",
-  "parent_warehouse",
-  "default_in_transit_warehouse",
   "is_group",
-  "column_break_4",
+  "parent_warehouse",
   "account",
+  "column_break_4",
   "company",
+  "warehouse_type",
+  "default_in_transit_warehouse",
   "disabled",
+  "address_and_contact_tab",
+  "column_break_3",
   "address_and_contact",
   "address_html",
   "column_break_10",
@@ -41,7 +43,7 @@
   {
    "fieldname": "warehouse_detail",
    "fieldtype": "Section Break",
-   "label": "Warehouse Detail",
+   "label": "Warehouse Details",
    "oldfieldtype": "Section Break"
   },
   {
@@ -113,9 +115,9 @@
    "label": "Contact HTML"
   },
   {
-   "collapsible": 1,
    "fieldname": "warehouse_contact_info",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Warehouse Contact Info"
   },
   {
@@ -129,6 +131,7 @@
   {
    "fieldname": "phone_no",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Phone No",
    "oldfieldname": "phone_no",
    "oldfieldtype": "Int",
@@ -137,6 +140,7 @@
   {
    "fieldname": "mobile_no",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Mobile No",
    "oldfieldname": "mobile_no",
    "oldfieldtype": "Int",
@@ -150,6 +154,7 @@
   {
    "fieldname": "address_line_1",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Address Line 1",
    "oldfieldname": "address_line_1",
    "oldfieldtype": "Data"
@@ -157,6 +162,7 @@
   {
    "fieldname": "address_line_2",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Address Line 2",
    "oldfieldname": "address_line_2",
    "oldfieldtype": "Data"
@@ -164,6 +170,7 @@
   {
    "fieldname": "city",
    "fieldtype": "Data",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "City",
    "oldfieldname": "city",
@@ -172,6 +179,7 @@
   {
    "fieldname": "state",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "State",
    "oldfieldname": "state",
    "oldfieldtype": "Select"
@@ -179,6 +187,7 @@
   {
    "fieldname": "pin",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "PIN",
    "oldfieldname": "pin",
    "oldfieldtype": "Int"
@@ -191,6 +200,7 @@
   },
   {
    "bold": 1,
+   "depends_on": "doc.is_group==1",
    "fieldname": "parent_warehouse",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -238,13 +248,23 @@
    "fieldtype": "Link",
    "label": "Default In-Transit Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "fieldname": "address_and_contact_tab",
+   "fieldtype": "Tab Break",
+   "label": "Address and Contact"
+  },
+  {
+   "fieldname": "primary_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Primary Details"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2021-12-03 04:40:06.414630",
+ "modified": "2022-01-21 15:03:13.203368",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",
@@ -301,5 +321,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "warehouse_name"
 }

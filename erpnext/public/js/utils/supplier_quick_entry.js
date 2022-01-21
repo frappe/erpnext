@@ -19,12 +19,22 @@ frappe.ui.form.SupplierQuickEntryForm = class SupplierQuickEntryForm extends fra
 				collapsible: 1
 			},
 			{
-				label: __("Email Id"),
-				fieldname: "email_id",
+				label: __("First Name"),
+				fieldname: "first_name",
+				fieldtype: "Data"
+			},
+			{
+				label: __("Last Name"),
+				fieldname: "last_name",
 				fieldtype: "Data"
 			},
 			{
 				fieldtype: "Column Break"
+			},
+			{
+				label: __("Email Id"),
+				fieldname: "email_id",
+				fieldtype: "Data"
 			},
 			{
 				label: __("Mobile Number"),

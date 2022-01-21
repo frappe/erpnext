@@ -19,14 +19,14 @@
    "role": "Item Manager"
   }
  ],
- "creation": "2021-11-22 12:19:15.888642",
+ "creation": "2022-01-17 14:32:00.105782",
  "docstatus": 0,
  "doctype": "Module Onboarding",
  "documentation_url": "https://docs.erpnext.com/docs/v13/user/manual/en/setting-up/company-setup",
  "idx": 0,
  "is_complete": 0,
- "modified": "2021-12-15 14:23:52.460913",
- "modified_by": "Administrator",
+ "modified": "2022-01-19 17:12:38.197196",
+ "modified_by": "umair@frappe.io",
  "module": "Setup",
  "name": "Home",
  "owner": "Administrator",

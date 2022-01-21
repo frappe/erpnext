@@ -150,6 +150,7 @@
    "oldfieldtype": "Link",
    "options": "Lead",
    "print_hide": 1,
+   "read_only": 1,
    "report_hide": 1
   },
   {
@@ -502,7 +503,8 @@
    "label": "From Opportunity",
    "no_copy": 1,
    "options": "Opportunity",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "basic_info_tab",
@@ -569,7 +571,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-01-19 12:58:26.231804",
+ "modified": "2022-01-21 15:49:32.033227",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

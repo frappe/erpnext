@@ -611,7 +611,8 @@ def get_credit_limit(customer, company):
 def make_contact(args, is_primary_contact=1):
 	contact = frappe.get_doc({
 		'doctype': 'Contact',
-		'first_name': args.get('name'),
+		'first_name': args.get('first_name') or args.get('name'),
+		'last_name': args.get('last_name'),
 		'is_primary_contact': is_primary_contact,
 		'links': [{
 			'link_doctype': args.get('doctype'),
