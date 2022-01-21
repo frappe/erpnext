@@ -5,23 +5,12 @@
 import frappe
 from frappe import _
 from frappe.utils import add_days, flt, get_datetime_str, nowdate
+from frappe.utils.nestedset import get_ancestors_of, get_root_of  # noqa
 
+# required for backward compatibility
+from frappe.utils.nestedset import get_ancestors_of, get_root_of  # noqa
 from erpnext import get_default_company
 
-
-def get_root_of(doctype):
-	"""Get root element of a DocType with a tree structure"""
-	result = frappe.db.sql_list("""select name from `tab%s`
-		where lft=1 and rgt=(select max(rgt) from `tab%s` where docstatus < 2)""" %
-		(doctype, doctype))
-	return result[0] if result else None
-
-def get_ancestors_of(doctype, name):
-	"""Get ancestor elements of a DocType with a tree structure"""
-	lft, rgt = frappe.db.get_value(doctype, name, ["lft", "rgt"])
-	result = frappe.db.sql_list("""select name from `tab%s`
-		where lft<%s and rgt>%s order by lft desc""" % (doctype, "%s", "%s"), (lft, rgt))
-	return result or []
 
 def before_tests():
 	frappe.clear_cache()
@@ -142,8 +131,6 @@ def enable_all_roles_and_domains():
 	add_all_roles_to('Administrator')
 
 def set_defaults_for_tests():
-	from frappe.utils.nestedset import get_root_of
-
 	selling_settings = frappe.get_single("Selling Settings")
 	selling_settings.customer_group = get_root_of("Customer Group")
 	selling_settings.territory = get_root_of("Territory")
