@@ -25,10 +25,16 @@ frappe.query_reports["Payment Entry CXP"] = {
 			"options": "Supplier"
 		},
 		{
-			"fieldname":"reason",
-			"label": __("Reason Debit Note"),
+			"fieldname":"reason_payment",
+			"label": __("Reason For Payment"),
+			"fieldtype": "Select",
+			"options": "Advance\nAdvancement\nCancellation"
+		},
+		{
+			"fieldname":"mode_of_payment",
+			"label": __("Mode of Payment"),
 			"fieldtype": "Link",
-			"options": "Reason Debit And Credit Note"
+			"options": "Mode of Payment"
 		},
 		{
 			"fieldname":"company",

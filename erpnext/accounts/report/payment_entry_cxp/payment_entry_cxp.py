@@ -9,21 +9,20 @@ import datetime
 
 def execute(filters=None):
 	if not filters: filters = {}
-	columns = [_("Date") + "::240", _("Serie") + "::240", _("Supplier") + "::240", _("CAI") + "::240", _("Transaction Number") + "::240", _("Company") + "::240", _("Reason Debit Note") + "::240",  _("Total References") + ":Currency:120", _("Total Exempt") + ":Currency:120", _("Isv 18%") + ":Currency:120",_("Isv 15%") + ":Currency:120",_("Amount Total") + ":Currency:120"]
+	columns = [_("Date") + "::240", _("Serie") + "::240", _("Customer") + "::240", _("Party RTN") + "::240", _("Company") + "::240", _("Reason Payment") + "::240",  _("Paid Amount") + ":Currency:120", _("Total Allocated Amount") + ":Currency:120",_("Unallocated Amount") + ":Currency:120",_("Difference Amount (Company Currency)") + ":Currency:120", _("Cheque/Reference No") + "::240", _("Cheque/Reference Date") + "::240", _("Created By") + "::240"]
 	data = return_data(filters)
 	return columns, data
 
 def return_data(filters):
 	data = []
-	dates = []
 	if filters.get("from_date"): from_date = filters.get("from_date")
 	if filters.get("to_date"): to_date = filters.get("to_date")
 	conditions = return_filters(filters, from_date, to_date)
 
-	registers = frappe.get_all("Debit Note CXP", ["*"], filters = conditions,  order_by = "name asc")
+	registers = frappe.get_all("Payment Entry", ["*"], filters = conditions,  order_by = "name asc")
 
 	for register in registers:
-		row = [register.posting_date, register.name, register.supplier, register.cai, register.transaction_number, register.company, register.reason_debit_note, register.total_references, register.total_exempt, register.isv_18, register.isv_15, register.total_amount]
+		row = [register.posting_date, register.name, register.party_name, register.party_rtn, register.company, register.reason_payment, register.paid_amount, register.total_allocated_amount, register.unallocated_amount, register.difference_amount, register.reference_no, register.reference_date, register.user]
 		data.append(row)
 
 	return data
@@ -32,10 +31,12 @@ def return_filters(filters, from_date, to_date):
 	conditions = ''	
 
 	conditions += "{"
-	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
+	conditions += '"party_type": "Supplier"'
+	conditions += ', "posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
 	conditions += ', "company": "{}"'.format(filters.get("company"))
-	if filters.get("supplier"): conditions += ', "supplier": "{}"'.format(filters.get("supplier"))
-	if filters.get("reason"): conditions += ', "reason_debit_note": "{}"'.format(filters.get("reason"))
+	if filters.get("supplier"): conditions += ', "party_name": "{}"'.format(filters.get("supplier"))
+	if filters.get("reason_payment"): conditions += ', "reason_payment": "{}"'.format(filters.get("reason_payment"))
+	if filters.get("mode_of_payment"): conditions += ', "mode_of_payment": "{}"'.format(filters.get("mode_of_payment"))
 	conditions += '}'
 
 	return conditions
