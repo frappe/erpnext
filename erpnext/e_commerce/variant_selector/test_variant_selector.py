@@ -100,6 +100,7 @@ class TestVariantSelector(ERPNextTestCase):
 		"""
 		from erpnext.e_commerce.doctype.website_item.test_website_item import make_web_item_price
 
+		frappe.set_user("Administrator")
 		make_web_item_price(item_code="Test-Tshirt-Temp-S-R", price_list_rate=100)
 		next_values = get_next_attribute_and_values(
 			"Test-Tshirt-Temp",
