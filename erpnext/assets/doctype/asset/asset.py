@@ -36,6 +36,7 @@ class Asset(AccountsController):
 		self.validate_asset_values()
 		self.validate_asset_and_reference()
 		self.validate_item()
+		self.validate_cost_center()
 		self.set_missing_values()
 		self.prepare_depreciation_data()
 		self.validate_gross_and_purchase_amount()
@@ -94,6 +95,19 @@ class Asset(AccountsController):
 			frappe.throw(_("Item {0} must be a Fixed Asset Item").format(self.item_code))
 		elif item.is_stock_item:
 			frappe.throw(_("Item {0} must be a non-stock item").format(self.item_code))
+
+	def validate_cost_center(self):
+		if not self.cost_center: return
+
+		cost_center_company = frappe.db.get_value('Cost Center', self.cost_center, 'company')
+		if cost_center_company != self.company:
+			frappe.throw(
+				_("Selected Cost Center {} doesn't belongs to {}").format(
+					frappe.bold(self.cost_center),
+					frappe.bold(self.company)
+				),
+				title=_("Invalid Cost Center")
+			)
 
 	def validate_in_use_date(self):
 		if not self.available_for_use_date:
@@ -242,8 +256,9 @@ class Asset(AccountsController):
 
 				# For first row
 				if has_pro_rata and not self.opening_accumulated_depreciation and n==0:
+					from_date = add_days(self.available_for_use_date, -1) # needed to calc depr amount for available_for_use_date too
 					depreciation_amount, days, months = self.get_pro_rata_amt(finance_book, depreciation_amount,
-						self.available_for_use_date, finance_book.depreciation_start_date)
+						from_date, finance_book.depreciation_start_date)
 
 					# For first depr schedule date will be the start date
 					# so monthly schedule date is calculated by removing month difference between use date and start date
@@ -374,7 +389,9 @@ class Asset(AccountsController):
 
 		if from_date:
 			return from_date
-		return self.available_for_use_date
+
+		# since depr for available_for_use_date is not yet booked
+		return add_days(self.available_for_use_date, -1)
 
 	# if it returns True, depreciation_amount will not be equal for the first and last rows
 	def check_is_pro_rata(self, row):
@@ -608,7 +625,17 @@ class Asset(AccountsController):
 		return purchase_document
 
 	def get_fixed_asset_account(self):
-		return get_asset_category_account('fixed_asset_account', None, self.name, None, self.asset_category, self.company)
+		fixed_asset_account = get_asset_category_account('fixed_asset_account', None, self.name, None, self.asset_category, self.company)
+		if not fixed_asset_account:
+			frappe.throw(
+				_("Set {0} in asset category {1} for company {2}").format(
+					frappe.bold("Fixed Asset Account"),
+					frappe.bold(self.asset_category),
+					frappe.bold(self.company),
+				),
+				title=_("Account not Found"),
+			)
+		return fixed_asset_account
 
 	def get_cwip_account(self, cwip_enabled=False):
 		cwip_account = None
