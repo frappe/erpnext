@@ -3,10 +3,13 @@ import unittest
 import frappe
 
 from erpnext.controllers.item_variant import create_variant
+from erpnext.e_commerce.doctype.e_commerce_settings.test_e_commerce_settings import (
+	setup_e_commerce_settings,
+)
 from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
 from erpnext.e_commerce.variant_selector.utils import get_next_attribute_and_values
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.tests.utils import ERPNextTestCase, change_settings
+from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ["Item"]
 
@@ -87,13 +90,6 @@ class TestVariantSelector(ERPNextTestCase):
 		self.assertEqual(len(filtered_items), 1)
 		self.assertEqual(filtered_items.pop(), "Test-Tshirt-Temp-S-R")
 
-	@change_settings("E Commerce Settings",{
-		"company": "_Test Company",
-		"enabled": 1,
-		"default_customer_group": "_Test Customer Group",
-		"price_list": "_Test Price List India",
-		"show_price": 1
-	})
 	def test_exact_match_with_price(self):
 		"""
 			Test price fetching and matching of variant without Website Item
@@ -101,11 +97,20 @@ class TestVariantSelector(ERPNextTestCase):
 		from erpnext.e_commerce.doctype.website_item.test_website_item import make_web_item_price
 
 		frappe.set_user("Administrator")
+		setup_e_commerce_settings({
+			"company": "_Test Company",
+			"enabled": 1,
+			"default_customer_group": "_Test Customer Group",
+			"price_list": "_Test Price List India",
+			"show_price": 1
+		})
+
 		make_web_item_price(item_code="Test-Tshirt-Temp-S-R", price_list_rate=100)
 		next_values = get_next_attribute_and_values(
 			"Test-Tshirt-Temp",
 			selected_attributes={"Test Size": "Small", "Test Colour": "Red"}
 		)
+		print(">>>>", next_values)
 		price_info = next_values["product_info"]["price"]
 
 		self.assertEqual(next_values["exact_match"][0],"Test-Tshirt-Temp-S-R")
