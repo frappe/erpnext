@@ -105,9 +105,7 @@ def get_conditions(filters, from_date, to_date):
 
 	conditions += "{"
 	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
-	conditions += ', "posting_time": [">=", "{}"]'.format(filters.get("from_time"))
-	conditions += ', "posting_time": ["<=", "{}"]'.format(filters.get("to_time"))
-	conditions += ', "naming_series": "{}"'.format(filters.get("prefix"))
+	conditions += ', "company": "{}"'.format(filters.get("company"))
 	if filters.get("user"):
 		conditions += ', "cashier": "{}"'.format(filters.get("user"))
 	conditions += '}'
