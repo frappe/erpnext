@@ -124,7 +124,7 @@ frappe.ui.form.on("Delivery Note", {
 							fieldtype: 'HTML',
 							options: `<p class="frappe-confirm-message">\
 							${__("We recommend creating a Delivery Note against a Sales Order as an ideal practice.")}\
-							<br>${__("Click")}<a href= "#"> ${__("here")} </a>${__("to create a Sales Order.")}<br><br>\
+							<br>${__("Click")}<a href= "#"> <b>${__("here")}</b> </a>${__("to create a Sales Order.")}<br><br>\
 							${__("Do you still want to proceed with the creation of this Delivery Note?")}</p>`
 						}
 					],

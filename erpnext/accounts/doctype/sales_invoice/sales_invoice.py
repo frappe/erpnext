@@ -2129,12 +2129,13 @@ def check_if_return_invoice_linked_with_payment_entry(self):
 
 @frappe.whitelist()
 def make_sales_order(source_name, target_doc = None):
+	def update_reference(source, target, source_parent):
+		target.sales_invoice_reference = source.name
+
 	return get_mapped_doc("Sales Invoice", source_name, {
 		"Sales Invoice": {
 			"doctype": "Sales Order",
-			"field_map": {
-				"name": "Sales Invoice Reference"
-			}
+			"postprocess": update_reference
 		},
 		"Sales Invoice Item": {
 			"doctype": "Sales Order Item",

@@ -420,13 +420,17 @@ class SalesOrder(SellingController):
 				frappe.throw(_("Cannot ensure delivery by Serial No as Item {0} is added with and without Ensure Delivery by Serial No.").format(item.item_code))
 
 	def link_sales_order_to_inv_and_dn(self):
+		so_details = {item.item_code:item.name for item in self.items}
 		if self.sales_invoice_reference:
 			si = frappe.get_doc('Sales Invoice', self.sales_invoice_reference)
 			for si_item in si.items:
 				si_item.sales_order = self.name
 			si.save()
+
+			for si_item in si.items:
+				frappe.db.set_value('Sales Invoice Item', si_item.name, 'so_detail', so_details[si_item.item_code])
+
 		elif self.delivery_note_reference:
-			so_details = {item.item_code:item.name for item in self.items}
 			dn = frappe.get_doc('Delivery Note', self.delivery_note_reference)
 
 			for dn_item in dn.items:
@@ -435,7 +439,6 @@ class SalesOrder(SellingController):
 
 			for dn_item in dn.items:
 				frappe.db.set_value('Delivery Note Item', dn_item.name, 'so_detail', so_details[dn_item.item_code])
-
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

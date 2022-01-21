@@ -175,7 +175,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 							fieldtype: 'HTML',
 							options: `<p class="frappe-confirm-message">\
 							${__("We recommend creating an invoice against a Sales Order as an ideal practice.")}\
-							<br>${__("Click")}<a href= "#"> ${__("here")} </a>${__("to create a Sales Order.")}<br><br>\
+							<br>${__("Click")}<a href= "#"> <b>${__("here")}</b> </a>${__("to create a Sales Order.")}<br><br>\
 							${__("Do you still want to proceed with the creation of this invoice?")}</p>`
 						}
 					],
@@ -427,7 +427,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		})
 	}
 
-	make_so() {
+make_so() {
 		frappe.model.open_mapped_doc({
 			method: 'erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_order',
 			frm: cur_frm,
