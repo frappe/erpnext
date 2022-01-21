@@ -4,6 +4,7 @@
 import unittest
 
 import frappe
+from frappe.utils import format_date
 from frappe.utils.data import add_days, formatdate, today
 
 from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
@@ -82,6 +83,13 @@ class TestMaintenanceSchedule(unittest.TestCase):
 
 		#checks if visit status is back updated in schedule
 		self.assertTrue(ms.schedules[1].completion_status, "Partially Completed")
+		self.assertEqual(format_date(visit.mntc_date), format_date(ms.schedules[1].actual_date))
+
+		#checks if visit status is updated on cancel
+		visit.cancel()
+		ms.reload()
+		self.assertTrue(ms.schedules[1].completion_status, "Pending")
+		self.assertEqual(ms.schedules[1].actual_date, None)
 
 	def test_serial_no_filters(self):
 		# Without serial no. set in schedule -> returns None
