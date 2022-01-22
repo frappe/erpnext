@@ -59,10 +59,14 @@
   "column_break_23",
   "lr_no",
   "more_info_section",
+  "vehicle_checklist_html",
+  "column_break_48",
   "vehicle_odometer",
   "vehicle_log",
-  "column_break_48",
-  "vehicle_warranty_no"
+  "fuel_level",
+  "keys",
+  "vehicle_warranty_no",
+  "vehicle_checklist"
  ],
  "fields": [
   {
@@ -401,7 +405,7 @@
   {
    "fieldname": "more_info_section",
    "fieldtype": "Section Break",
-   "label": "More Info"
+   "label": "Readings & Checklist"
   },
   {
    "fieldname": "column_break_48",
@@ -457,12 +461,37 @@
   {
    "fieldname": "column_break_22",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_checklist",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Vehicle Checklist",
+   "options": "Vehicle Checklist Item"
+  },
+  {
+   "fieldname": "vehicle_checklist_html",
+   "fieldtype": "HTML",
+   "label": "Vehicle Checklist"
+  },
+  {
+   "fieldname": "fuel_level",
+   "fieldtype": "Percent",
+   "label": "Fuel Level (%)",
+   "no_copy": 1,
+   "precision": "0"
+  },
+  {
+   "fieldname": "keys",
+   "fieldtype": "Int",
+   "label": "Keys",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-01-20 16:53:21.192801",
+ "modified": "2022-01-22 03:16:27.268278",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Receipt",

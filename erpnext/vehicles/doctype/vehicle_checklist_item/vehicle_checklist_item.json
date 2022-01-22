@@ -1,0 +1,43 @@
+{
+ "creation": "2022-01-22 01:23:04.488781",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "checklist_item",
+  "checklist_item_checked",
+  "is_custom_checklist_item"
+ ],
+ "fields": [
+  {
+   "fieldname": "checklist_item",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Checklist Item",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "checklist_item_checked",
+   "fieldtype": "Check",
+   "label": "Checklist Item Checked"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_custom_checklist_item",
+   "fieldtype": "Check",
+   "label": "Is Custom Checklist Item"
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-01-22 14:06:57.660110",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Checklist Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

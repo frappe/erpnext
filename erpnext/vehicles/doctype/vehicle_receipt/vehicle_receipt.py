@@ -9,12 +9,16 @@ from erpnext.vehicles.vehicle_transaction_controller import VehicleTransactionCo
 
 class VehicleReceipt(VehicleTransactionController):
 	def get_feed(self):
-		if self.get('customer'):
+		if self.get('customer') and self.get('supplier'):
 			return _("For {0} | {1}").format(self.get("customer_name") or self.get('customer'),
 				self.get("item_name") or self.get("item_code"))
 		else:
-			return _("From {0} | {1}").format(self.get("suplier_name") or self.get('supplier'),
+			return _("From {0} | {1}").format(self.get("suplier_name") or self.get('supplier') or self.get("customer_name") or self.get('customer'),
 				self.get("item_name") or self.get("item_code"))
+
+	def set_missing_values(self, doc=None, for_validate=False):
+		super(VehicleReceipt, self).set_missing_values(doc, for_validate)
+		self.set_missing_checklist()
 
 	def validate(self):
 		super(VehicleReceipt, self).validate()
@@ -44,3 +48,15 @@ class VehicleReceipt(VehicleTransactionController):
 		if self.get('transporter') and not self.get('lr_no'):
 			frappe.throw(_("Transport Receipt No (Bilty) is mandatory when receiving from Transporter"))
 
+	def set_missing_checklist(self):
+		if not self.vehicle_checklist:
+			checklist = get_vehicle_checklist_default_items()
+			for d in checklist:
+				self.append("vehicle_checklist", {'checklist_item': d.checklist_item, 'checklist_item_checked': 0})
+
+
+@frappe.whitelist()
+def get_vehicle_checklist_default_items():
+	vehicles_settings = frappe.get_cached_doc("Vehicles Settings", None)
+	checklist_items = [d.checklist_item for d in vehicles_settings.vehicle_checklist_items]
+	return checklist_items
