@@ -566,6 +566,7 @@ def make_sales_invoice(source_name, target_doc=None):
 			return get_pending_qty(source) > 0
 
 	def update_item(source_doc, target_doc, source_parent):
+		target_doc.project = source_parent.get('project')
 		target_doc.qty = get_pending_qty(source_doc)
 		target_doc.delivered_qty = source_doc.qty
 

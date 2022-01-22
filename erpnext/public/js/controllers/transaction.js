@@ -220,6 +220,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		});
 
 		frappe.ui.form.on(this.frm.doctype,"project", function(frm) {
+			if (frm.doc.bill_multiple_projects && frm.doc.project) {
+				frm.doc.project = null;
+				frm.refresh_field('project');
+			}
 			if (frm.doc.project) {
 				return frappe.call({
 					method: 'erpnext.projects.doctype.project.project.get_project_details',

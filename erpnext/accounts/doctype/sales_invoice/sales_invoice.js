@@ -210,8 +210,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					source_doctype: "Sales Order",
 					target: me.frm,
 					setters: {
-						customer: me.frm.doc.customer || undefined,
-						project: me.frm.doc.project || undefined,
+						customer: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.customer || undefined,
+						project: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.project || undefined,
 					},
 					columns: ['customer_name', 'project'],
 					get_query_filters: {
@@ -237,13 +237,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						label: __('Customer'),
 						options: 'Customer',
 						fieldname: 'party_name',
-						default: me.frm.doc.customer,
+						default: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.customer,
 					},{
 						fieldtype: 'Link',
 						label: __('Project'),
 						options: 'Project',
 						fieldname: 'project',
-						default: me.frm.doc.project || undefined,
+						default: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.project || undefined,
 					}],
 					columns: ['customer_name', 'project'],
 					get_query_filters: {
@@ -266,8 +266,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					target: me.frm,
 					date_field: "posting_date",
 					setters: {
-						customer: me.frm.doc.customer || undefined,
-						project: me.frm.doc.project || undefined,
+						customer: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.customer || undefined,
+						project: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.project || undefined,
 					},
 					columns: ['customer_name', 'project'],
 					get_query: function() {
@@ -395,7 +395,19 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 	set_dynamic_labels: function() {
 		this.hide_fields(this.frm.doc);
+		this.set_project_read_only();
 		this._super();
+	},
+
+	bill_multiple_projects: function () {
+		this.set_project_read_only();
+		if (this.frm.doc.bill_multiple_projects) {
+			this.frm.set_value("project", null);
+		}
+	},
+
+	set_project_read_only: function () {
+		this.frm.set_df_property('project', 'read_only', cint(this.frm.doc.bill_multiple_projects));
 	},
 
 	items_on_form_rendered: function() {

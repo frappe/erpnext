@@ -274,6 +274,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.run_method("set_due_date")
 
 	def update_item(obj, target, source_parent):
+		target.project = source_parent.get('project')
 		target.cost_center = None
 		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
 

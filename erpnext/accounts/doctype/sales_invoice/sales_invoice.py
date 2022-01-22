@@ -536,6 +536,9 @@ class SalesInvoice(SellingController):
 	def set_missing_values(self, for_validate=False):
 		pos = self.set_pos_fields(for_validate)
 
+		if self.bill_multiple_projects:
+			self.project = None
+
 		if not self.debit_to:
 			self.debit_to = get_party_account("Customer", self.customer, self.company,
 				transaction_type=self.get('transaction_type'))
@@ -704,10 +707,17 @@ class SalesInvoice(SellingController):
 			and amount = 0""", self.name)
 
 	def validate_with_previous_doc(self):
+		sales_order_compare = [["company", "="], ["currency", "="]]
+		delivery_note_compare = [["company", "="], ["currency", "="]]
+
+		if not self.get('bill_multiple_projects'):
+			sales_order_compare += [["customer", "="], ["project", "="]]
+			delivery_note_compare += [["customer", "="], ["project", "="]]
+
 		super(SalesInvoice, self).validate_with_previous_doc({
 			"Sales Order": {
 				"ref_dn_field": "sales_order",
-				"compare_fields": [["customer", "="], ["company", "="], ["project", "="], ["currency", "="]]
+				"compare_fields": sales_order_compare
 			},
 			"Sales Order Item": {
 				"ref_dn_field": "sales_order_item",
@@ -717,7 +727,7 @@ class SalesInvoice(SellingController):
 			},
 			"Delivery Note": {
 				"ref_dn_field": "delivery_note",
-				"compare_fields": [["customer", "="], ["company", "="], ["project", "="], ["currency", "="]]
+				"compare_fields": delivery_note_compare
 			},
 			"Delivery Note Item": {
 				"ref_dn_field": "delivery_note_item",
@@ -730,6 +740,22 @@ class SalesInvoice(SellingController):
 				"compare_fields": [["company", "="]]
 			},
 		})
+
+		if not self.get('project'):
+			super(SalesInvoice, self).validate_with_previous_doc({
+				"Delivery Note": {
+					"ref_dn_field": "delivery_note",
+					"compare_fields": [["project", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True
+				},
+				"Sales Order": {
+					"ref_dn_field": "sales_order",
+					"compare_fields": [["project", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True
+				},
+			})
 
 		if not self.is_return and cint(frappe.get_cached_value('Selling Settings', None, 'maintain_same_sales_rate')):
 			self.validate_rate_with_reference_doc([

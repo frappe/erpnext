@@ -1001,6 +1001,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		return get_pending_qty(source)
 
 	def update_item(source, target, source_parent):
+		target.project = source_parent.get('project')
 		target.qty = get_pending_qty(source)
 
 	def postprocess(source, target):

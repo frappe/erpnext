@@ -19,6 +19,7 @@
   "po_no",
   "po_date",
   "vehicle_registration_order",
+  "bill_multiple_projects",
   "is_return",
   "return_against",
   "reopen_order",
@@ -2203,12 +2204,18 @@
    "fieldname": "sec_fbr_pos_transaction_details",
    "fieldtype": "Section Break",
    "label": "FBR POS Transaction Details"
+  },
+  {
+   "default": "0",
+   "fieldname": "bill_multiple_projects",
+   "fieldtype": "Check",
+   "label": "Bill Multiple Projects"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2022-01-20 14:01:55.541249",
+ "modified": "2022-01-22 15:21:06.131959",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
