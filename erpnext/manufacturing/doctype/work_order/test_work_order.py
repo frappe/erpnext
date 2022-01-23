@@ -870,6 +870,96 @@ class TestWorkOrder(ERPNextTestCase):
 			close_work_order(wo_order, "Closed")
 			self.assertEqual(wo_order.get('status'), "Closed")
 
+<<<<<<< HEAD
+=======
+	def test_fix_time_operations(self):
+		bom = frappe.get_doc({
+			"doctype": "BOM",
+			"item": "_Test FG Item 2",
+			"is_active": 1,
+			"is_default": 1,
+			"quantity": 1.0,
+			"with_operations": 1,
+			"operations": [
+				{
+					"operation": "_Test Operation 1",
+					"description": "_Test",
+					"workstation": "_Test Workstation 1",
+					"time_in_mins": 60,
+					"operating_cost": 140,
+					"fixed_time": 1
+				}
+			],
+			"items": [
+				{
+					"amount": 5000.0,
+					"doctype": "BOM Item",
+					"item_code": "_Test Item",
+					"parentfield": "items",
+					"qty": 1.0,
+					"rate": 5000.0,
+				},
+			],
+		})
+		bom.save()
+		bom.submit()
+
+
+		wo1 = make_wo_order_test_record(item=bom.item, bom_no=bom.name, qty=1, skip_transfer=1, do_not_submit=1)
+		wo2 = make_wo_order_test_record(item=bom.item, bom_no=bom.name, qty=2, skip_transfer=1, do_not_submit=1)
+
+		self.assertEqual(wo1.operations[0].time_in_mins, wo2.operations[0].time_in_mins)
+
+	def test_partial_manufacture_entries(self):
+		cancel_stock_entry = []
+
+		frappe.db.set_value("Manufacturing Settings", None,
+			"backflush_raw_materials_based_on", "Material Transferred for Manufacture")
+
+		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=100)
+		ste1 = test_stock_entry.make_stock_entry(item_code="_Test Item",
+			target="_Test Warehouse - _TC", qty=120, basic_rate=5000.0)
+		ste2 = test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC", qty=240, basic_rate=1000.0)
+
+		cancel_stock_entry.extend([ste1.name, ste2.name])
+
+		sm = frappe.get_doc(make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 100))
+		for row in sm.get('items'):
+			if row.get('item_code') == '_Test Item':
+				row.qty = 110
+
+		sm.submit()
+		cancel_stock_entry.append(sm.name)
+
+		s = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 90))
+		for row in s.get('items'):
+			if row.get('item_code') == '_Test Item':
+				self.assertEqual(row.get('qty'), 100)
+		s.submit()
+		cancel_stock_entry.append(s.name)
+
+		s1 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 5))
+		for row in s1.get('items'):
+			if row.get('item_code') == '_Test Item':
+				self.assertEqual(row.get('qty'), 5)
+		s1.submit()
+		cancel_stock_entry.append(s1.name)
+
+		s2 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 5))
+		for row in s2.get('items'):
+			if row.get('item_code') == '_Test Item':
+				self.assertEqual(row.get('qty'), 5)
+
+		cancel_stock_entry.reverse()
+		for ste in cancel_stock_entry:
+			doc = frappe.get_doc("Stock Entry", ste)
+			doc.cancel()
+
+		frappe.db.set_value("Manufacturing Settings", None,
+			"backflush_raw_materials_based_on", "BOM")
+
+>>>>>>> f8d232ac26 (fix: incorrect raw materials quantity in manufacture stock entry)
 def update_job_card(job_card, jc_qty=None):
 	employee = frappe.db.get_value('Employee', {'status': 'Active'}, 'name')
 
