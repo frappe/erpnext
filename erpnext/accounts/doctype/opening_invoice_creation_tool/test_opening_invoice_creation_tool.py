@@ -7,11 +7,12 @@ import frappe
 from frappe.cache_manager import clear_doctype_cache
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
+from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
+	create_dimension,
+)
 from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import (
 	get_temporary_opening_account,
 )
-
-from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import create_dimension
 
 test_dependencies = ["Customer", "Supplier", "Accounting Dimension"]
 
