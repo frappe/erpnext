@@ -178,7 +178,6 @@ erpnext.patches.v12_0.set_updated_purpose_in_pick_list
 erpnext.patches.v12_0.set_default_payroll_based_on
 erpnext.patches.v12_0.repost_stock_ledger_entries_for_target_warehouse
 erpnext.patches.v12_0.update_end_date_and_status_in_email_campaign
-erpnext.patches.v13_0.validate_options_for_data_field
 erpnext.patches.v13_0.move_tax_slabs_from_payroll_period_to_income_tax_slab #123
 erpnext.patches.v12_0.fix_quotation_expired_status
 erpnext.patches.v12_0.update_appointment_reminder_scheduler_entry
@@ -306,6 +305,7 @@ erpnext.patches.v13_0.shopify_deprecation_warning
 erpnext.patches.v13_0.add_custom_field_for_south_africa #2
 erpnext.patches.v13_0.rename_discharge_ordered_date_in_ip_record
 erpnext.patches.v13_0.remove_bad_selling_defaults
+erpnext.patches.v13_0.trim_whitespace_from_serial_nos  # 16-01-2022
 erpnext.patches.v13_0.migrate_stripe_api
 erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
 execute:frappe.reload_doc("erpnext_integrations", "doctype", "TaxJar Settings")
@@ -331,6 +331,7 @@ erpnext.patches.v13_0.enable_scheduler_job_for_item_reposting
 erpnext.patches.v13_0.requeue_failed_reposts
 erpnext.patches.v13_0.fetch_thumbnail_in_website_items
 erpnext.patches.v13_0.update_job_card_status
+erpnext.patches.v13_0.enable_uoms
 erpnext.patches.v12_0.update_production_plan_status
 erpnext.patches.v13_0.item_naming_series_not_mandatory
 erpnext.patches.v13_0.update_category_in_ltds_certificate
@@ -339,3 +340,5 @@ erpnext.patches.v13_0.rename_ksa_qr_field
 erpnext.patches.v13_0.disable_ksa_print_format_for_others # 16-12-2021
 erpnext.patches.v13_0.update_tax_category_for_rcm
 erpnext.patches.v13_0.convert_to_website_item_in_item_card_group_template
+erpnext.patches.v13_0.agriculture_deprecation_warning
+erpnext.patches.v13_0.update_maintenance_schedule_field_in_visit
