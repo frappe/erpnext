@@ -9,8 +9,13 @@ from frappe.utils import add_months, nowdate
 
 from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule
 from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
-from erpnext.e_commerce.shopping_cart.cart import _get_cart_quotation, get_party, update_cart
-from erpnext.tests.utils import create_test_contact_and_address
+from erpnext.e_commerce.shopping_cart.cart import (
+	_get_cart_quotation,
+	get_cart_quotation,
+	get_party,
+	update_cart,
+)
+from erpnext.tests.utils import change_settings, create_test_contact_and_address
 
 
 class TestShoppingCart(unittest.TestCase):
@@ -34,6 +39,7 @@ class TestShoppingCart(unittest.TestCase):
 			make_website_item(frappe.get_cached_doc("Item",  "_Test Item 2"))
 
 	def tearDown(self):
+		frappe.db.rollback()
 		frappe.set_user("Administrator")
 		self.disable_shopping_cart()
 
@@ -127,6 +133,43 @@ class TestShoppingCart(unittest.TestCase):
 		self.assertEqual(quotation.total_taxes_and_charges, 1000.0)
 
 		self.remove_test_quotation(quotation)
+
+	@change_settings("E Commerce Settings",{
+		"company": "_Test Company",
+		"enabled": 1,
+		"default_customer_group": "_Test Customer Group",
+		"price_list": "_Test Price List India",
+		"show_price": 1
+	})
+	def test_add_item_variant_without_web_item_to_cart(self):
+		"Test adding Variants having no Website Items in cart via Template Web Item."
+		from erpnext.controllers.item_variant import create_variant
+		from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		template_item = make_item("Test-Tshirt-Temp", {
+			"has_variant": 1,
+			"variant_based_on": "Item Attribute",
+			"attributes": [
+				{"attribute": "Test Size"},
+				{"attribute": "Test Colour"}
+			]
+		})
+		variant = create_variant("Test-Tshirt-Temp", {
+			"Test Size": "Small", "Test Colour": "Red"
+		})
+		variant.save()
+		make_website_item(template_item) # publish template not variant
+
+		update_cart("Test-Tshirt-Temp-S-R", 1)
+
+		cart = get_cart_quotation() # test if cart page gets data without errors
+		doc = cart.get("doc")
+
+		self.assertEqual(doc.get("items")[0].item_name, "Test-Tshirt-Temp-S-R")
+
+		# test if items are rendered without error
+		frappe.render_template("templates/includes/cart/cart_items.html", cart)
 
 	def create_tax_rule(self):
 		tax_rule = frappe.get_test_records("Tax Rule")[0]
