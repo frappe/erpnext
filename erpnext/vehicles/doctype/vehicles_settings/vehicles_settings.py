@@ -3,8 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-# import frappe
+import frappe
+from erpnext.vehicles.vehicle_checklist import validate_duplicate_checklist_items
 from frappe.model.document import Document
 
+
 class VehiclesSettings(Document):
-	pass
+	def validate(self):
+		validate_duplicate_checklist_items(self.vehicle_checklist_items)
