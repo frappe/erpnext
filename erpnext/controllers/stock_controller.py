@@ -84,6 +84,11 @@ class StockController(AccountsController):
 				# remove extra whitespace and store one serial no on each line
 				row.serial_no = clean_serial_no_string(row.serial_no)
 
+		for row in self.get('packed_items') or []:
+			if hasattr(row, "serial_no") and row.serial_no:
+				# remove extra whitespace and store one serial no on each line
+				row.serial_no = clean_serial_no_string(row.serial_no)
+
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
 
