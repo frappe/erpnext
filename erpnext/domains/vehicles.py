@@ -30,57 +30,56 @@ def get_field(fieldname, field_list):
 # Vehicle Details
 applies_to_fields = [
 	{"label": "Applies to Model", "fieldname": "applies_to_variant_of", "fieldtype": "Link", "options": "Item",
-		"insert_after": "sec_applies_to", "in_standard_filter": 1, "hidden": 1, "read_only": 1, "fetch_from": "applies_to_item.variant_of"},
+		"insert_after": "sec_applies_to", "in_standard_filter": 1, "hidden": 1, "read_only": 1,
+		"fetch_from": "applies_to_item.variant_of"},
 	{"label": "Applies to Model Name", "fieldname": "applies_to_variant_of_name", "fieldtype": "Data",
 		"insert_after": "applies_to_variant_of", "hidden": 1, "read_only": 1, "fetch_from": "applies_to_variant_of.item_name"},
 
 	{"label": "Applies to Vehicle", "fieldname": "applies_to_vehicle", "fieldtype": "Link", "options": "Vehicle",
 		"insert_after": "applies_to_variant_of_name", "in_standard_filter": 1},
 
-	{"label": "License Plate", "fieldname": "vehicle_license_plate", "fieldtype": "Data", "depends_on": "eval:!doc.vehicle_unregistered",
-		"insert_after": "applies_to_item_name", "read_only": 0, "fetch_from": ""},
-	{"label": "Is Unregistered", "fieldname": "vehicle_unregistered", "fieldtype": "Check", "depends_on": "eval:!doc.vehicle_license_plate || doc.vehicle_unregistered",
-		"insert_after": "vehicle_license_plate", "read_only": 0, "fetch_from": ""},
+	{"label": "License Plate", "fieldname": "vehicle_license_plate", "fieldtype": "Data",
+		"insert_after": "applies_to_item_name", "depends_on": "eval:!doc.vehicle_unregistered"},
+	{"label": "Is Unregistered", "fieldname": "vehicle_unregistered", "fieldtype": "Check",
+		"insert_after": "vehicle_license_plate", "depends_on": "eval:!doc.vehicle_license_plate || doc.vehicle_unregistered"},
 
 	{"label": "", "fieldname": "col_break_vehicle_1", "fieldtype": "Column Break",
 		"insert_after": "vehicle_unregistered"},
 
 	{"label": "Chassis No", "fieldname": "vehicle_chassis_no", "fieldtype": "Data",
-		"insert_after": "col_break_vehicle_1", "read_only": 0, "fetch_from": ""},
+		"insert_after": "col_break_vehicle_1"},
 	{"label": "Engine No", "fieldname": "vehicle_engine_no", "fieldtype": "Data",
-		"insert_after": "vehicle_chassis_no", "read_only": 0, "fetch_from": ""},
+		"insert_after": "vehicle_chassis_no"},
 
 	{"label": "", "fieldname": "col_break_vehicle_2", "fieldtype": "Column Break",
 		"insert_after": "vehicle_engine_no"},
 
 	{"label": "Vehicle Color", "fieldname": "vehicle_color", "fieldtype": "Link", "options": "Vehicle Color",
-		"insert_after": "col_break_vehicle_2", "read_only": 0, "fetch_from": ""},
+		"insert_after": "col_break_vehicle_2"},
 	{"label": "Odometer Reading", "fieldname": "vehicle_last_odometer", "fieldtype": "Int",
-		"insert_after": "vehicle_color", "read_only": 0, "fetch_from": "", "no_copy": 0},
+		"insert_after": "vehicle_color"},
 ]
 
-
-# Applies to Project Fields
+# Applies to Project / Project Vehicle Fields
 applies_to_project_fields = deepcopy(applies_to_fields)
 
 project_first_odometer = {"label": "Odometer Reading (First)", "fieldname": "vehicle_first_odometer", "fieldtype": "Int"}
 insert_field_after('vehicle_color', project_first_odometer, applies_to_project_fields)
-get_field('vehicle_last_odometer', applies_to_project_fields).update({"label": "Odometer Reading (Last)",
-	"fetch_from": ""})
+get_field('vehicle_last_odometer', applies_to_project_fields).update({"label": "Odometer Reading (Last)"})
 
-vehicle_warranty_no = {"label": "Warranty Book No", "fieldname": "vehicle_warranty_no", "fieldtype": "Data",
-	"insert_after": "cb_warranty_1"}
-applies_to_project_fields.append(vehicle_warranty_no)
 
-fqr_no = {"label": "FQR No", "fieldname": "fqr_no", "fieldtype": "Data", "no_copy": 1,
-	"insert_after": "cb_warranty_2"}
-applies_to_project_fields.append(fqr_no)
+applies_to_project_fields += [
+	{"label": "Warranty Book No", "fieldname": "vehicle_warranty_no", "fieldtype": "Data",
+		"insert_after": "cb_warranty_1"},
+	{"label": "FQR No", "fieldname": "fqr_no", "fieldtype": "Data", "no_copy": 1,
+		"insert_after": "cb_warranty_2"},
+]
 
 
 # Vehicle Owner
 vehicle_owner_fields = [
 	{"label": "Vehicle Owner", "fieldname": "vehicle_owner", "fieldtype": "Link", "options": "Customer",
-		"insert_after": "", "in_standard_filter": 0, "fetch_from": "", "read_only": 0},
+		"insert_after": ""},
 	{"label": "Vehicle Owner Name", "fieldname": "vehicle_owner_name", "fieldtype": "Data",
 		"insert_after": "vehicle_owner", "fetch_from": "vehicle_owner.customer_name", "read_only": 1,
 		"depends_on": "eval:doc.vehicle_owner && doc.vehicle_owner_name != doc.vehicle_owner"},
