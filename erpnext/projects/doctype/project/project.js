@@ -3,6 +3,8 @@
 
 frappe.provide('erpnext.projects');
 
+{% include 'erpnext/vehicles/vehicle_checklist.js' %};
+
 erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	setup: function() {
 		this.setup_make_methods();
@@ -22,6 +24,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		this.setup_buttons();
 		this.set_applies_to_read_only();
 		this.toggle_vehicle_odometer_fields();
+		this.make_vehicle_checklist();
 	},
 
 	setup_queries: function () {
@@ -337,6 +340,35 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 					}
 				}
 			});
+		}
+	},
+
+	vehicle_checklist: function () {
+		this.make_vehicle_checklist();
+	},
+	vehicle_checklist_add: function () {
+		this.make_vehicle_checklist();
+	},
+	vehicle_checklist_remove: function () {
+		this.make_vehicle_checklist();
+	},
+	checklist_item: function () {
+		this.make_vehicle_checklist();
+	},
+	checklist_item_checked: function () {
+		this.refresh_checklist();
+	},
+
+	make_vehicle_checklist: function () {
+		if (this.frm.fields_dict.vehicle_checklist_html) {
+			this.frm.vehicle_checklist_editor = erpnext.vehicles.make_vehicle_checklist(this.frm,
+				this.frm.fields_dict.vehicle_checklist_html.wrapper);
+		}
+	},
+
+	refresh_checklist: function () {
+		if (this.frm.vehicle_checklist_editor) {
+			this.frm.vehicle_checklist_editor.make();
 		}
 	},
 

@@ -6,7 +6,7 @@ import frappe
 import erpnext
 from frappe import _
 from email_reply_parser import EmailReplyParser
-from frappe.utils import flt, get_url, cstr, nowtime, get_time, today, get_datetime, add_days
+from frappe.utils import flt, cint, get_url, cstr, nowtime, get_time, today, get_datetime, add_days
 from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
@@ -18,6 +18,7 @@ from frappe.contacts.doctype.address.address import get_address_display, get_def
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
 from frappe.model.document import Document
 from six import string_types
+from erpnext.vehicles.vehicle_checklist import get_default_vehicle_checklist_items, set_missing_checklist
 import json
 
 
@@ -46,11 +47,14 @@ class Project(Document):
 			from `tabTimesheet Detail` where project=%s and docstatus < 2 group by activity_type
 			order by total_hours desc''', self.name, as_dict=True))
 
+		self.set_onload('default_vehicle_checklist_items', get_default_vehicle_checklist_items())
+
 		self.update_costing()
 
 	def before_print(self):
 		self.onload()
 		self.company_address_doc = erpnext.get_company_address(self)
+		self.set_missing_checklist()
 		self.get_billing_data()
 
 	def validate(self):
@@ -60,6 +64,7 @@ class Project(Document):
 		self.set_missing_values()
 		self.update_costing()
 		self.validate_applies_to()
+		self.validate_readings()
 		self.validate_depreciation()
 		self.update_percent_complete()
 		self.send_welcome_email()
@@ -87,6 +92,7 @@ class Project(Document):
 	def set_missing_values(self):
 		self.update_customer_details()
 		self.update_applies_to_details()
+		self.set_missing_checklist()
 
 	def update_customer_details(self):
 		args = self.as_dict()
@@ -103,6 +109,18 @@ class Project(Document):
 		for k, v in applies_to_details.items():
 			if self.meta.has_field(k) and not self.get(k) or k in force_applies_to_fields:
 				self.set(k, v)
+
+	def set_missing_checklist(self):
+		if self.meta.has_field('vehicle_checklist'):
+			set_missing_checklist(self)
+
+	def validate_readings(self):
+		if self.meta.has_field('fuel_level'):
+			if flt(self.fuel_level) < 0 or flt(self.fuel_level) > 100:
+				frappe.throw(_("Fuel Level must be between 0% and 100%"))
+		if self.meta.has_field('keys'):
+			if cint(self.keys) < 0:
+				frappe.throw(_("No of Keys cannot be negative"))
 
 	def validate_applies_to(self):
 		from erpnext.vehicles.utils import format_vehicle_fields

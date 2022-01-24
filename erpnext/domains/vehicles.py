@@ -56,17 +56,27 @@ applies_to_fields = [
 
 	{"label": "Vehicle Color", "fieldname": "vehicle_color", "fieldtype": "Link", "options": "Vehicle Color",
 		"insert_after": "col_break_vehicle_2"},
-	{"label": "Odometer Reading", "fieldname": "vehicle_last_odometer", "fieldtype": "Int",
-		"insert_after": "vehicle_color"},
 ]
 
-# Applies to Project / Project Vehicle Fields
+# Vehicle Odometer field in transactions but not project
 applies_to_project_fields = deepcopy(applies_to_fields)
 
-project_first_odometer = {"label": "Odometer Reading (First)", "fieldname": "vehicle_first_odometer", "fieldtype": "Int"}
-insert_field_after('vehicle_color', project_first_odometer, applies_to_project_fields)
-get_field('vehicle_last_odometer', applies_to_project_fields).update({"label": "Odometer Reading (Last)"})
+vehicle_last_odometer = {"label": "Odometer Reading", "fieldname": "vehicle_last_odometer", "fieldtype": "Int"}
+insert_field_after('vehicle_color', vehicle_last_odometer, applies_to_fields)
 
+# Additional Project Vehicle Fields
+project_vehicle_status = {"label": "Vehicle Status", "fieldname": "vehicle_status", "fieldtype": "Select",
+	"options": "Not Received\nReceived\nDelivered", "default": "Not Received",
+	"read_only": 1, "no_copy": 1}
+insert_field_after('vehicle_color', project_vehicle_status, applies_to_project_fields)
+
+project_vehicle_warehouse = {"label": "Vehicle Warehouse", "fieldname": "vehicle_warehouse",
+	"fieldtype": "Link", "options": "Warehouse"}
+insert_field_after('vehicle_status', project_vehicle_warehouse, applies_to_project_fields)
+
+project_vehicle_readings_section = {"label": "Vehicle Readings & Checklist",
+	"fieldname": "sec_vehicle_status", "fieldtype": "Section Break", "collapsible": 0}
+insert_field_after('vehicle_warehouse', project_vehicle_readings_section, applies_to_project_fields)
 
 applies_to_project_fields += [
 	{"label": "Warranty Book No", "fieldname": "vehicle_warranty_no", "fieldtype": "Data",
@@ -75,6 +85,33 @@ applies_to_project_fields += [
 		"insert_after": "cb_warranty_2"},
 ]
 
+# Project Vehicle Status Fields
+project_vehicle_reading_fields = [
+	{"label": "Odometer Reading (First)", "fieldname": "vehicle_first_odometer", "fieldtype": "Int",
+		"insert_after": "sec_vehicle_status", "no_copy": 1},
+	{"label": "Vehicle Received Date/Time", "fieldname": "vehicle_received_dt", "fieldtype": "Datetime",
+		"insert_after": "vehicle_first_odometer", "no_copy": 1},
+	{"label": "Odometer Reading (Last)", "fieldname": "vehicle_last_odometer", "fieldtype": "Int",
+		"insert_after": "vehicle_received_dt", "no_copy": 1},
+	{"label": "Vehicle Delivered Date/Time", "fieldname": "vehicle_delivered_dt", "fieldtype": "Datetime",
+		"insert_after": "vehicle_last_odometer", "no_copy": 1},
+
+	{"label": "", "fieldname": "cb_vehicle_status_1", "fieldtype": "Column Break",
+		"insert_after": "vehicle_delivered_dt"},
+
+	{"label": "Fuel Level (%)", "fieldname": "fuel_level", "fieldtype": "Percent", "precision": 0,
+		"insert_after": "cb_vehicle_status_1", "no_copy": 1},
+	{"label": "No of Keys", "fieldname": "keys", "fieldtype": "Int",
+		"insert_after": "fuel_level"},
+
+	{"label": "", "fieldname": "cb_vehicle_status_2", "fieldtype": "Column Break",
+		"insert_after": "keys"},
+
+	{"label": "Vehicle Checklist", "fieldname": "vehicle_checklist_html", "fieldtype": "HTML",
+		"insert_after": "cb_vehicle_status_2"},
+	{"label": "Vehicle Checklist", "fieldname": "vehicle_checklist", "fieldtype": "Table", "options": "Vehicle Checklist Item",
+		"insert_after": "vehicle_checklist_html", "hidden": 1},
+]
 
 # Vehicle Owner
 vehicle_owner_fields = [
@@ -149,6 +186,8 @@ item_fields = [
 for d in applies_to_fields:
 	d['translatable'] = 0
 for d in applies_to_project_fields:
+	d['translatable'] = 0
+for d in project_vehicle_reading_fields:
 	d['translatable'] = 0
 for d in vehicle_owner_fields:
 	d['translatable'] = 0
@@ -233,7 +272,7 @@ data = {
 		"Purchase Receipt": applies_to_fields,
 		"Purchase Invoice": applies_to_fields,
 		"Material Request": applies_to_fields + material_request_service_person_fields,
-		"Project": project_vehicle_owner_fields + applies_to_project_fields + service_person_fields,
+		"Project": project_vehicle_owner_fields + applies_to_project_fields + service_person_fields + project_vehicle_reading_fields,
 		"Journal Entry": accounting_dimension_fields,
 		"Journal Entry Account": accounting_dimension_table_fields,
 		"Payment Entry": accounting_dimension_fields,
