@@ -15,9 +15,7 @@ Portal
 Maintenance
 Education
 Regional
-Restaurant
 ERPNext Integrations
-Hotels
 Quality Management
 Communication
 Loan Management

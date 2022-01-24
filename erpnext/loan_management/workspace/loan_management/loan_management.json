@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Loan Application\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Loan\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dashboard\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Loan\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Loan Processes\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Disbursement and Repayment\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Loan Security\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Loan Application\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Loan\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Loan\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Loan Processes\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Disbursement and Repayment\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Loan Security\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
  "creation": "2020-03-12 16:35:55.299820",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -238,7 +238,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:18:13.350905",
+ "modified": "2022-01-13 17:39:16.790152",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loans",
@@ -247,7 +247,7 @@
  "public": 1,
  "restrict_to_domain": "",
  "roles": [],
- "sequence_id": 16,
+ "sequence_id": 16.0,
  "shortcuts": [
   {
    "color": "Green",

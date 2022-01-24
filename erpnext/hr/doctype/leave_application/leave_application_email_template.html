@@ -23,3 +23,8 @@
 			<td>{{status}}</td>
 		</tr>
 	</table>
+
+	{% set doc_link = frappe.utils.get_url_to_form('Leave Application', name) %}
+
+	<br><br>
+	<a class="btn btn-primary" href="{{ doc_link }}" target="_blank">{{ _('Open Now') }}</a>
