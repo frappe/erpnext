@@ -870,46 +870,6 @@ class TestWorkOrder(ERPNextTestCase):
 			close_work_order(wo_order, "Closed")
 			self.assertEqual(wo_order.get('status'), "Closed")
 
-<<<<<<< HEAD
-=======
-	def test_fix_time_operations(self):
-		bom = frappe.get_doc({
-			"doctype": "BOM",
-			"item": "_Test FG Item 2",
-			"is_active": 1,
-			"is_default": 1,
-			"quantity": 1.0,
-			"with_operations": 1,
-			"operations": [
-				{
-					"operation": "_Test Operation 1",
-					"description": "_Test",
-					"workstation": "_Test Workstation 1",
-					"time_in_mins": 60,
-					"operating_cost": 140,
-					"fixed_time": 1
-				}
-			],
-			"items": [
-				{
-					"amount": 5000.0,
-					"doctype": "BOM Item",
-					"item_code": "_Test Item",
-					"parentfield": "items",
-					"qty": 1.0,
-					"rate": 5000.0,
-				},
-			],
-		})
-		bom.save()
-		bom.submit()
-
-
-		wo1 = make_wo_order_test_record(item=bom.item, bom_no=bom.name, qty=1, skip_transfer=1, do_not_submit=1)
-		wo2 = make_wo_order_test_record(item=bom.item, bom_no=bom.name, qty=2, skip_transfer=1, do_not_submit=1)
-
-		self.assertEqual(wo1.operations[0].time_in_mins, wo2.operations[0].time_in_mins)
-
 	def test_partial_manufacture_entries(self):
 		cancel_stock_entry = []
 
@@ -959,7 +919,6 @@ class TestWorkOrder(ERPNextTestCase):
 		frappe.db.set_value("Manufacturing Settings", None,
 			"backflush_raw_materials_based_on", "BOM")
 
->>>>>>> f8d232ac26 (fix: incorrect raw materials quantity in manufacture stock entry)
 def update_job_card(job_card, jc_qty=None):
 	employee = frappe.db.get_value('Employee', {'status': 'Active'}, 'name')
 
