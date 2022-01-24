@@ -77,17 +77,12 @@ class StockController(AccountsController):
 						.format(d.idx, get_link_to_form("Batch", d.get("batch_no"))))
 
 	def clean_serial_nos(self):
+		from erpnext.stock.doctype.serial_no.serial_no import clean_serial_no_string
+
 		for row in self.get("items"):
 			if hasattr(row, "serial_no") and row.serial_no:
-				# replace commas by linefeed
-				row.serial_no = row.serial_no.replace(",", "\n")
-
-				# strip preceeding and succeeding spaces for each SN
-				# (SN could have valid spaces in between e.g. SN - 123 - 2021)
-				serial_no_list = row.serial_no.split("\n")
-				serial_no_list = [sn.strip() for sn in serial_no_list]
-
-				row.serial_no = "\n".join(serial_no_list)
+				# remove extra whitespace and store one serial no on each line
+				row.serial_no = clean_serial_no_string(row.serial_no)
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
