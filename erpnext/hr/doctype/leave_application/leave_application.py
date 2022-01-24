@@ -176,6 +176,11 @@ class LeaveApplication(Document):
 			# if leave type does not include holidays within leaves as leaves
 			if date in holiday_dates:
 				if attendance_name:
+					# cancel and delete existing attendance for holidays
+					attendance = frappe.get_doc("Attendance", attendance_name)
+					attendance.flags.ignore_permissions = True
+					if attendance.docstatus == 1:
+						attendance.cancel()
 					frappe.delete_doc("Attendance", attendance_name, force=1)
 				continue
 
