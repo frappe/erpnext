@@ -9,6 +9,7 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 
 from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
 	create_dimension,
+	disable_dimension,
 )
 from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import (
 	get_temporary_opening_account,
@@ -20,6 +21,7 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 	def setUp(self):
 		if not frappe.db.exists("Company", "_Test Opening Invoice Company"):
 			make_company()
+		create_dimension()
 
 	def make_invoices(self, invoice_type="Sales", company=None, party_1=None, party_2=None, invoice_number=None, department=None):
 		doc = frappe.get_single("Opening Invoice Creation Tool")
@@ -110,8 +112,6 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 			doc.cancel()
 
 	def test_opening_invoice_with_accounting_dimension(self):
-		# new dimensions department and location are created
-		create_dimension()
 		invoices = self.make_invoices(invoice_type="Sales", company="_Test Opening Invoice Company", department='Sales - _TOIC')
 
 		expected_value = {
@@ -120,6 +120,9 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 			1: ["_Test Customer 1", 250, "Overdue", "Sales - _TOIC"],
 		}
 		self.check_expected_values(invoices, expected_value, invoice_type="Sales")
+
+	def tearDown(self):
+		disable_dimension()
 
 def get_opening_invoice_creation_dict(**args):
 	party = "Customer" if args.get("invoice_type", "Sales") == "Sales" else "Supplier"
