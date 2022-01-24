@@ -484,14 +484,14 @@
   {
    "fieldname": "keys",
    "fieldtype": "Int",
-   "label": "Keys",
+   "label": "No of Keys",
    "no_copy": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-01-22 03:16:27.268278",
+ "modified": "2022-01-24 14:02:22.708367",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Receipt",
