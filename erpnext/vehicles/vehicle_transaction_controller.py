@@ -58,10 +58,25 @@ class VehicleTransactionController(StockController):
 			self.set_missing_values()
 
 	def set_missing_values(self, doc=None, for_validate=False):
+		self.set_project_details(doc, for_validate)
 		self.set_vehicle_booking_order_details(doc, for_validate=for_validate)
 		self.set_vehicle_details(doc, for_validate=for_validate)
 		self.set_item_details(doc, for_validate=for_validate)
 		self.set_customer_details(for_validate=for_validate)
+
+	def set_project_details(self, doc=None, for_validate=False):
+		args = self.as_dict()
+		if doc:
+			args.update(doc.as_dict())
+			args.doctype = self.doctype
+			args.name = self.name
+		else:
+			doc = self
+
+		project_details = get_project_details(args)
+		for k, v in project_details.items():
+			if doc.meta.has_field(k) and (not doc.get(k) or k in force_fields) and k not in dont_update_if_missing:
+				doc.set(k, v)
 
 	def set_vehicle_booking_order_details(self, doc=None, for_validate=False):
 		args = self.as_dict()
@@ -171,13 +186,13 @@ class VehicleTransactionController(StockController):
 			if vehicle_item_code != doc.item_code:
 				frappe.throw(_("Vehicle {0} is not {1}").format(doc.vehicle, frappe.bold(doc.item_name or doc.item_code)))
 
-			if doc.meta.has_field('vehicle_booking_order') and not doc.get('vehicle_booking_order'):
-				already_booked = get_vehicle_booking_order_from_vehicle(doc.vehicle, {
-					'status': ['not in', ['Completed', 'Cancelled Booking']]
-				})
-				if already_booked:
-					frappe.throw(_("Vehicle {0} is already booked against {1}. Please set Vehicle Booking Order to use this vehicle.")
-						.format(doc.vehicle, frappe.get_desk_link("Vehicle Booking Order", already_booked)))
+			# if doc.meta.has_field('vehicle_booking_order') and not doc.get('vehicle_booking_order'):
+			# 	already_booked = get_vehicle_booking_order_from_vehicle(doc.vehicle, {
+			# 		'status': ['not in', ['Completed', 'Cancelled Booking']]
+			# 	})
+			# 	if already_booked:
+			# 		frappe.throw(_("Vehicle {0} is already booked against {1}. Please set Vehicle Booking Order to use this vehicle.")
+			# 			.format(doc.vehicle, frappe.get_desk_link("Vehicle Booking Order", already_booked)))
 
 		if doc.meta.has_field('serial_no'):
 			doc.serial_no = doc.vehicle
@@ -697,6 +712,56 @@ def get_vehicle_booking_order_details(args):
 		out.sales_team = vbo_sales_team
 
 	return out
+
+
+@frappe.whitelist()
+def get_project_details(args):
+	if isinstance(args, string_types):
+		args = json.loads(args)
+
+	args = frappe._dict(args)
+
+	project_details = frappe._dict()
+	if args.project:
+		project_details = frappe.db.get_value("Project", args.project,
+			[
+				'customer', 'customer_name', 'contact_person', 'customer_address',
+				'applies_to_vehicle', 'applies_to_item', 'vehicle_warehouse',
+				'fuel_level', 'keys', 'vehicle_first_odometer', 'vehicle_last_odometer',
+			], as_dict=1)
+
+	out = frappe._dict()
+
+	if project_details:
+		if project_details.customer:
+			out.customer = project_details.customer
+			out.customer_address = project_details.customer_address
+			out.contact_person = project_details.contact_person
+
+		if project_details.applies_to_vehicle:
+			out.vehicle = project_details.applies_to_vehicle
+			out.item_code = project_details.applies_to_item
+		elif project_details.applies_to_item:
+			out.vehicle = None
+			out.item_code = project_details.applies_to_item
+
+		if args.doctype == "Vehicle Receipt":
+			if project_details.vehicle_warehouse:
+				out.warehouse = project_details.vehicle_warehouse
+
+			out.fuel_level = project_details.fuel_level
+			out.keys = project_details.get('keys')
+			out.vehicle_odometer = project_details.vehicle_last_odometer or project_details.vehicle_first_odometer or 0
+
+	if project_details and args.doctype and frappe.get_meta(args.doctype).has_field('vehicle_checklist'):
+		vehicle_checklist = frappe.get_all("Vehicle Checklist Item",
+			fields=['checklist_item', 'checklist_item_checked', 'is_custom_checklist_item'],
+			filters={"parenttype": "Project", "parent": args.project})
+		if vehicle_checklist:
+			out.vehicle_checklist = vehicle_checklist
+
+	return out
+
 
 
 @frappe.whitelist()

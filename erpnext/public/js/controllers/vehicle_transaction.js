@@ -183,6 +183,14 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 		this.get_vehicle_booking_order_details(doc);
 	},
 
+	project: function (doc, cdt, cdn) {
+		doc = this.frm.doc;
+		if (cdt && cdn) {
+			doc = frappe.get_doc(cdt, cdn);
+		}
+		this.get_project_details(doc);
+	},
+
 	get_customer_details: function () {
 		var me = this;
 
@@ -224,6 +232,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 					customer: me.frm.doc.customer,
 					supplier: me.frm.doc.supplier,
 					vehicle_booking_order: doc.vehicle_booking_order,
+					project: doc.project,
 					vehicle: doc.vehicle,
 					posting_date: me.frm.doc.posting_date || me.frm.doc.transaction_date,
 					issued_for: me.frm.doc.issued_for,
@@ -233,6 +242,43 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 				if (r.message && !r.exc) {
 					if (doc == me.frm.doc) {
 						me.frm.set_value(r.message);
+					} else {
+						frappe.model.set_value(doc.doctype, doc.name, r.message);
+					}
+				}
+			}
+		});
+	},
+
+	get_project_details: function (doc) {
+		var me = this;
+		if (!doc) {
+			doc = me.frm.doc;
+		}
+
+		return frappe.call({
+			method: "erpnext.vehicles.vehicle_transaction_controller.get_project_details",
+			args: {
+				args: {
+					doctype: me.frm.doc.doctype,
+					company: me.frm.doc.company,
+					customer: me.frm.doc.customer,
+					supplier: me.frm.doc.supplier,
+					project: doc.project,
+					vehicle_booking_order: doc.vehicle_booking_order,
+					vehicle: doc.vehicle,
+					posting_date: me.frm.doc.posting_date || me.frm.doc.transaction_date,
+					issued_for: me.frm.doc.issued_for,
+				}
+			},
+			callback: function (r) {
+				if (r.message && !r.exc) {
+					if (doc == me.frm.doc) {
+						me.frm.set_value(r.message).then(() => {
+							if (r.message.vehicle_checklist) {
+								me.frm.trigger('vehicle_checklist');
+							}
+						});
 					} else {
 						frappe.model.set_value(doc.doctype, doc.name, r.message);
 					}
