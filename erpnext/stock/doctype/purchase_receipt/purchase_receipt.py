@@ -119,8 +119,9 @@ class PurchaseReceipt(BuyingController):
 					if row.consumed_qty > 0:
 						row.qty_to_be_consumed = row.consumed_qty
 				if row.qty_to_be_consumed:
-					if row.consumed_qty != row.qty_to_be_consumed:
+					if row.consumed_qty != row.qty_to_be_consumed and row.loss_qty != 0:
 						row.consumed_qty = row.qty_to_be_consumed + row.loss_qty
+
 
 		self.po_required()
 		self.validate_with_previous_doc()

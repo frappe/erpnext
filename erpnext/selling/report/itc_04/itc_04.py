@@ -324,45 +324,58 @@ def get_data(filters,conditions):
 		for name in pr:
 			print("pr----------------------------------------", name)
 			pr_doc = frappe.get_doc("Purchase Receipt", name.pr_name)
-			se_doc = frappe.get_doc("Stock Entry",name.se_name)
+			dist_pr_batch = frappe.db.sql(""" select distinct(batch_no) as batch_no
+											   from `tabPurchase Receipt Item Supplied`
+			 								   where parent = '{0}' and qty_to_be_consumed = 0 """.format(name.pr_name),as_dict=1)
+			print("-------------------dist_pr_batch",dist_pr_batch)
+			se_doc = frappe.get_doc("Stock Entry", name.se_name)
+			se_doc_batch_count = 0
+			for res in dist_pr_batch:
+				if res['batch_no']:
+					se_doc = frappe.get_doc("Stock Entry",name.se_name)
+					se_batch_count = frappe.db.sql(""" select count(*) as total from `tabStock Entry Detail`
+															where parent = '{0}' and batch_no = '{1}' """.format(name.se_name,res['batch_no']),as_dict=1)
+					se_doc_batch_count += se_batch_count[0]['total']
+					print("--------------------------se_doc_batch_count",se_batch_count)
+			if se_doc_batch_count == 0:
+				for row in pr_doc.items:
+					if row.is_subcontracted == "Yes":
+						global jw_challan_number, jw_challan_date, nature_of_job_work_done
+						jw_challan_number = row.challan_number_issues_by_job_worker
+						jw_challan_date = row.challan_date_issues_by_job_worker
+						nature_of_job_work_done = row.nature_of_job_work_done
+						break
 
-			for row in pr_doc.items:
-				if row.is_subcontracted == "Yes":
-					global jw_challan_number, jw_challan_date, nature_of_job_work_done
-					jw_challan_number = row.challan_number_issues_by_job_worker
-					jw_challan_date = row.challan_date_issues_by_job_worker
-					nature_of_job_work_done = row.nature_of_job_work_done
-					break
+				for row in pr_doc.supplied_items:
+					if row.qty_to_be_consumed > 0:
+						data2 = {}
+						if name.po_name:
+							po_doc = frappe.get_doc("Purchase Order",name.po_name)
+							data2['original_challan_number_issued_by_principal'] = se_doc.name
+							data2['original_challan_date_issued_by_principal'] = se_doc.posting_date
+						data2['challan_number_issued_by_job_worker'] = jw_challan_number if jw_challan_number else ""
+						data2['challan_date_issued_by_job_worker'] = jw_challan_date if jw_challan_date else ""
+						supp_details = frappe.db.sql(""" select adds.gstin as gstin_of_job_worker,
+														adds.state as state, supp.gst_category as job_workers_type
+														from `tabSupplier` supp
+														INNER JOIN `tabDynamic Link` dl
+														on dl.link_name = supp.name
+														INNER JOIN `tabAddress` adds
+														on dl.parent = adds.name
+														where supp.name = %(supp)s """,
+													 {'supp': pr_doc.supplier}, as_dict=1)
+						dic2 = supp_details[0]
+						for key, value in dic2.items():
+							data2[key] = value
 
-			for row in pr_doc.supplied_items:
-				data2 = {}
-				if name.po_name:
-					po_doc = frappe.get_doc("Purchase Order",name.po_name)
-					data2['original_challan_number_issued_by_principal'] = se_doc.name
-					data2['original_challan_date_issued_by_principal'] = se_doc.posting_date
-				data2['challan_number_issued_by_job_worker'] = jw_challan_number if jw_challan_number else ""
-				data2['challan_date_issued_by_job_worker'] = jw_challan_date if jw_challan_date else ""
-				supp_details = frappe.db.sql(""" select adds.gstin as gstin_of_job_worker,
-																adds.state as state, supp.gst_category as job_workers_type
-																from `tabSupplier` supp
-																INNER JOIN `tabDynamic Link` dl
-																on dl.link_name = supp.name
-																INNER JOIN `tabAddress` adds
-																on dl.parent = adds.name
-																where supp.name = %(supp)s """,
-											 {'supp': pr_doc.supplier}, as_dict=1)
-				dic2 = supp_details[0]
-				for key, value in dic2.items():
-					data2[key] = value
-
-				rm_item_obj = frappe.get_doc("Item", row.rm_item_code)
-				data2['description_of_goods'] = rm_item_obj.description
-				data2['unique_quantity_code'] = row.stock_uom
-				data2['quantity'] = row.consumed_qty
-				data2['losses_uqc'] = row.stock_uom
-				data2['losses_quantity'] = row.loss_qty
-				data2['nature_of_job_work_done'] = nature_of_job_work_done
-				data.append(data2)
+						rm_item_obj = frappe.get_doc("Item", row.rm_item_code)
+						data2['description_of_goods'] = rm_item_obj.description
+						data2['unique_quantity_code'] = row.stock_uom
+						data2['quantity'] = row.qty_to_be_consumed
+						data2['losses_uqc'] = row.stock_uom
+						data2['losses_quantity'] = row.loss_qty
+						data2['nature_of_job_work_done'] = nature_of_job_work_done
+						data.append(data2)
 		return data
 
 # def get_conditions(filters):
