@@ -48,7 +48,7 @@ frappe.ui.form.on("Purchase Receipt", {
 		});
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
-		
+
 	},
 
 	refresh: function(frm) {
@@ -78,6 +78,7 @@ frappe.ui.form.on("Purchase Receipt", {
 
 		frm.events.add_custom_buttons(frm);
 	},
+
 
 	add_custom_buttons: function(frm) {
 		if (frm.doc.docstatus == 0) {
@@ -110,7 +111,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.refresh_field("items")
 			}
 		});
@@ -121,7 +122,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -135,7 +136,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -149,7 +150,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -163,7 +164,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -177,7 +178,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
 				frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -191,7 +192,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
 				frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -205,7 +206,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
 				frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -217,6 +218,8 @@ frappe.ui.form.on("Purchase Receipt", {
 		frm.trigger("toggle_display_account_head");
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
+
+
 
 	toggle_display_account_head: function(frm) {
 		var enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company)

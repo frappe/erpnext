@@ -99,6 +99,8 @@ class PurchaseReceipt(BuyingController):
 		if self.get("items") and self.apply_putaway_rule and not self.get("is_return"):
 			apply_putaway_rule(self.doctype, self.get("items"), self.company)
 
+
+
 	def validate(self):
 		self.validate_posting_time()
 		super(PurchaseReceipt, self).validate()
@@ -107,6 +109,18 @@ class PurchaseReceipt(BuyingController):
 			self.make_batches('warehouse')
 		else:
 			self.set_status()
+
+		if self._action == "save":
+			for row in self.supplied_items:
+				if row.qty_to_be_consumed:
+					if row.consumed_qty > 0 and row.qty_to_be_consumed <= 0 and self.is_new():
+						row.qty_to_be_consumed = row.consumed_qty
+				elif not row.qty_to_be_consumed and self.is_new():
+					if row.consumed_qty > 0:
+						row.qty_to_be_consumed = row.consumed_qty
+				if row.qty_to_be_consumed:
+					if row.consumed_qty != row.qty_to_be_consumed:
+						row.consumed_qty = row.qty_to_be_consumed + row.loss_qty
 
 		self.po_required()
 		self.validate_with_previous_doc()
@@ -122,6 +136,15 @@ class PurchaseReceipt(BuyingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
+		self.validate_challan_number_issue_by_job_worker()
+
+	def validate_challan_number_issue_by_job_worker(self):
+		for row in self.items:
+			print("row.nature_of_job_work_done -------------",row.nature_of_job_work_done )
+			str_nature = row.nature_of_job_work_done
+			if row.is_subcontracted == "Yes" and not row.challan_number_issues_by_job_worker and not row.challan_date_issues_by_job_worker and not str_nature:
+					frappe.throw("Challan Number Issues by Job Worker, Challan Date Issues by Job Worker"
+								 "and Nature of Job Work Done Is Mandatory at row "+str(row.idx))
 
 
 	def validate_cwip_accounts(self):
@@ -604,7 +627,7 @@ class PurchaseReceipt(BuyingController):
 							for j in doc.taxes:
 								if self.tax_category==j.tax_category:
 									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template						
+										i.item_tax_template=j.item_tax_template
 			if sup.tax_category:
 				if self.tax_category:
 					for i in self.items:
@@ -616,7 +639,7 @@ class PurchaseReceipt(BuyingController):
 										i.item_tax_template=j.item_tax_template
 				self.tax_category=sup.tax_category
 			return self.tax_category
-			
+
 	def update_status(self, status):
 		self.set_status(update=True, status=status)
 		self.notify_update()
