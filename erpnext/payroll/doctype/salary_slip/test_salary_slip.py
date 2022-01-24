@@ -999,6 +999,8 @@ def make_leave_application(employee, from_date, to_date, leave_type, company=Non
 	))
 	leave_application.submit()
 
+	return leave_application
+
 def setup_test():
 	make_earning_salary_component(setup=True, company_list=["_Test Company"])
 	make_deduction_salary_component(setup=True, company_list=["_Test Company"])
