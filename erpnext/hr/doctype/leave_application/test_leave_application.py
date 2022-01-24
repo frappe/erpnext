@@ -16,8 +16,6 @@ from frappe.utils import (
 	nowdate,
 )
 
-import erpnext
-from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.leave_allocation.test_leave_allocation import create_leave_allocation
 from erpnext.hr.doctype.leave_application.leave_application import (
