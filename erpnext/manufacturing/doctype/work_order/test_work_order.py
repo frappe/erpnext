@@ -879,6 +879,7 @@ class TestWorkOrder(ERPNextTestCase):
 		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=100)
 		ste1 = test_stock_entry.make_stock_entry(item_code="_Test Item",
 			target="_Test Warehouse - _TC", qty=120, basic_rate=5000.0)
+
 		ste2 = test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
 			target="_Test Warehouse - _TC", qty=240, basic_rate=1000.0)
 
@@ -896,6 +897,7 @@ class TestWorkOrder(ERPNextTestCase):
 		for row in s.get('items'):
 			if row.get('item_code') == '_Test Item':
 				self.assertEqual(row.get('qty'), 100)
+
 		s.submit()
 		cancel_stock_entry.append(s.name)
 
