@@ -21,8 +21,8 @@ def validate_duplicate_checklist_items(checklist_items):
 def set_missing_checklist(doc):
 	if not doc.vehicle_checklist:
 		checklist = get_default_vehicle_checklist_items()
-		for d in checklist:
-			doc.append("vehicle_checklist", {'checklist_item': d.checklist_item, 'checklist_item_checked': 0})
+		for item in checklist:
+			doc.append("vehicle_checklist", {'checklist_item': item, 'checklist_item_checked': 0})
 
 
 def clear_empty_checklist(doc):

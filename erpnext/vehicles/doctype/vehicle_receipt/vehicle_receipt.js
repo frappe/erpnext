@@ -9,7 +9,7 @@ erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehicleTransactionC
 	refresh: function () {
 		this._super();
 		this.show_stock_ledger();
-		this.make_checklist();
+		this.make_vehicle_checklist();
 	},
 
 	setup_queries: function () {
@@ -53,20 +53,23 @@ erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehicleTransactionC
 		});
 	},
 
+	vehicle_checklist: function () {
+		this.make_vehicle_checklist();
+	},
 	vehicle_checklist_add: function () {
-		this.refresh_checklist();
+		this.make_vehicle_checklist();
 	},
 	vehicle_checklist_remove: function () {
-		this.refresh_checklist();
+		this.make_vehicle_checklist();
 	},
 	checklist_item: function () {
-		this.refresh_checklist();
+		this.make_vehicle_checklist();
 	},
 	checklist_item_checked: function () {
 		this.refresh_checklist();
 	},
 
-	make_checklist: function () {
+	make_vehicle_checklist: function () {
 		this.frm.vehicle_checklist_editor = erpnext.vehicles.make_vehicle_checklist(this.frm,
 			this.frm.fields_dict.vehicle_checklist_html.wrapper);
 	},
