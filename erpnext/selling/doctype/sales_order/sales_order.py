@@ -1003,6 +1003,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	def update_item(source, target, source_parent):
 		target.project = source_parent.get('project')
 		target.qty = get_pending_qty(source)
+		target.depreciation_percentage = None
 
 	def postprocess(source, target):
 		split_vehicle_items_by_qty(target)

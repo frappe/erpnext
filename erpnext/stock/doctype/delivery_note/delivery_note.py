@@ -569,6 +569,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		target_doc.project = source_parent.get('project')
 		target_doc.qty = get_pending_qty(source_doc)
 		target_doc.delivered_qty = source_doc.qty
+		target_doc.depreciation_percentage = None
 
 		if source_doc.serial_no and source_parent.per_billed > 0:
 			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,

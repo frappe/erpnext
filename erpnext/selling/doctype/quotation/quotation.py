@@ -277,6 +277,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.project = source_parent.get('project')
 		target.cost_center = None
 		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
+		target.depreciation_percentage = None
 
 	doclist = get_mapped_doc("Quotation", source_name, {
 			"Quotation": {
