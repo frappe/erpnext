@@ -17,7 +17,7 @@ def transaction_processing(data, from_doctype, to_doctype):
 
 	if length_of_data > 10:
 		frappe.msgprint(
-			_("Started a background job to create {1} {0}".format(to_doctype, length_of_data))
+			_("Started a background job to create {1} {0}").format(to_doctype, length_of_data)
 		)
 		frappe.enqueue(
 			job,
