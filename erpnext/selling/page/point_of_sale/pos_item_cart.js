@@ -337,7 +337,7 @@ erpnext.PointOfSale.ItemCart = class {
 	fetch_customer_details(customer) {
 		if (customer) {
 			return new Promise((resolve) => {
-				frappe.db.get_value('Customer', customer, ["email_id", "mobile_no", "image", "loyalty_program"]).then(({ message }) => {
+				frappe.db.get_value('Customer', customer, ["email_id", "mobile_no", "image", "loyalty_program", "default_currency"]).then(({ message }) => {
 					const { loyalty_program } = message;
 					// if loyalty program then fetch loyalty points too
 					if (loyalty_program) {

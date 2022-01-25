@@ -32,7 +32,7 @@ erpnext.PointOfSale.Controller = class {
 			{
 				fieldname: "opening_amount", fieldtype: "Currency",
 				in_list_view: 1, label: "Opening Amount",
-				options: "company:company_currency",
+				options: "currency",
 				change: function () {
 					dialog.fields_dict.balance_details.df.data.some(d => {
 						if (d.idx == this.doc.idx) {
@@ -42,19 +42,27 @@ erpnext.PointOfSale.Controller = class {
 						}
 					});
 				}
-			}
+			},
+			{
+				fieldname: "currency", fieldtype: "Data",
+				in_list_view: 0, label: "Currency"
+			},
 		];
-		const fetch_pos_payment_methods = () => {
+		const fetch_pos_payment_methods = async function() {
 			const pos_profile = dialog.fields_dict.pos_profile.get_value();
 			if (!pos_profile) return;
-			frappe.db.get_doc("POS Profile", pos_profile).then(({ payments }) => {
-				dialog.fields_dict.balance_details.df.data = [];
-				payments.forEach(pay => {
-					const { mode_of_payment } = pay;
-					dialog.fields_dict.balance_details.df.data.push({ mode_of_payment, opening_amount: '0' });
-				});
-				dialog.fields_dict.balance_details.grid.refresh();
-			});
+			
+			const { payments, company } = await frappe.db.get_doc("POS Profile", pos_profile);
+			dialog.fields_dict.balance_details.df.data = [];
+			const addPaymentMode = async function(pay) {
+				const { mode_of_payment } = pay;
+				const mop = await frappe.db.get_doc("Mode of Payment", mode_of_payment)
+				const acct = mop.accounts.filter(a => a.company === company)[0].default_account
+				const curr = await frappe.db.get_value("Account", acct, "account_currency");
+				dialog.fields_dict.balance_details.df.data.push({ mode_of_payment, opening_amount: '0', currency: curr.message.account_currency});
+				dialog.fields_dict.balance_details.grid.refresh(); 
+			}
+			payments.forEach(addPaymentMode);
 		}
 		const dialog = new frappe.ui.Dialog({
 			title: __('Create POS Opening Entry'),
@@ -122,6 +130,10 @@ erpnext.PointOfSale.Controller = class {
 		frappe.db.get_doc("POS Profile", this.pos_profile).then((profile) => {
 			Object.assign(this.settings, profile);
 			this.settings.customer_groups = profile.customer_groups.map(group => group.customer_group);
+			this.currency_list().then((list) => {
+				this.currencies = list;
+				this.prepare_menu();
+			});
 			this.make_app();
 		});
 	}
@@ -164,6 +176,14 @@ erpnext.PointOfSale.Controller = class {
 
 		this.page.add_menu_item(__("Open Form View"), this.open_form_view.bind(this), false, 'Ctrl+F');
 
+		if (this.currencies?.length == 2) {
+			const alt_currency = this.currencies[0] === this.frm.doc.currency ? this.currencies[1] : this.currencies[0];
+			this.page.add_menu_item(__("Change Currency to ") + alt_currency, this.currency_update.bind(this, alt_currency), false, 'Ctrl+M');
+		}
+		else if (this.currencies?.length > 2) {
+			this.page.add_menu_item(__("Change Currency..."), this.currency_dialog.bind(this), false, 'Ctrl+M');
+		}
+		
 		this.page.add_menu_item(__("Toggle Recent Orders"), this.toggle_recent_order.bind(this), false, 'Ctrl+O');
 
 		this.page.add_menu_item(__("Save as Draft"), this.save_draft_invoice.bind(this), false, 'Ctrl+S');
@@ -254,6 +274,7 @@ erpnext.PointOfSale.Controller = class {
 
 				customer_details_updated: (details) => {
 					this.customer_details = details;
+					this.currency_update(details.default_currency);
 					// will add/remove LP payment method
 					this.payment.render_loyalty_points_payment_mode();
 				}
@@ -437,6 +458,7 @@ erpnext.PointOfSale.Controller = class {
 			() => this.set_pos_profile_data(),
 			() => this.set_pos_profile_status(),
 			() => this.cart.load_invoice(),
+			() => this.prepare_menu(),
 			() => frappe.dom.unfreeze()
 		]);
 	}
@@ -692,6 +714,55 @@ erpnext.PointOfSale.Controller = class {
 			field_control.set_focus();
 			value != "" && field_control.set_value(value);
 		}
+	}
+
+	async currency_list() {
+		var currencies = [this.settings.currency];
+		// fetch the currencies of each mode of payment listed in the 
+		const accts = await Promise.all(this.settings.payments.map(async (payment) => {
+			const mode = await frappe.db.get_doc("Mode of Payment", payment.mode_of_payment)
+			var company_account = mode["accounts"].filter((acct) => {
+				return acct.company == this.settings.company
+			})
+			return await frappe.db.get_value("Account", company_account[0].default_account, "account_currency")
+		}));
+
+		accts.forEach((acct) => {
+			if (currencies.indexOf(acct.message.account_currency) === -1) {
+				currencies.push(acct.message.account_currency)
+			}
+		});
+		return currencies
+	}
+
+	async currency_dialog() {
+		frappe.dom.freeze();
+		var currencies = [...this.currencies];
+
+		// remove currently active currency from list
+		const index = currencies.indexOf(this.frm.doc.currency)
+		currencies.splice(index, 1);
+
+		frappe.prompt([
+			{
+				label: "Currency",
+				fieldname: "currency",
+				fieldtype: "Select",
+				options: currencies.join("\n"),
+				default: currencies[0]
+			}
+		], (values) => this.currency_update(values.currency));
+		frappe.dom.unfreeze()
+	}
+
+	async currency_update(currency) {
+		frappe.dom.freeze();
+		await this.frm.set_value({"currency": currency, "account_for_change_amount": ""});
+		await new Promise(resolve => setTimeout(resolve, 1000));
+		await this.frm.call("reset_mode_of_payments");
+		this.payment.render_payment_section();
+		this.prepare_menu();
+		frappe.dom.unfreeze();
 	}
 
 	remove_item_from_cart() {

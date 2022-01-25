@@ -76,7 +76,8 @@ frappe.ui.form.on('POS Closing Entry', {
 					frm.add_child("payment_reconciliation", {
 						mode_of_payment: detail.mode_of_payment,
 						opening_amount: detail.opening_amount,
-						expected_amount: detail.opening_amount
+						expected_amount: detail.opening_amount,
+						currency: detail.currency
 					});
 				})
 			});
@@ -112,8 +113,8 @@ frappe.ui.form.on('POS Closing Entry', {
 
 		for (let row of frm.doc.pos_transactions) {
 			frappe.db.get_doc("POS Invoice", row.pos_invoice).then(doc => {
-				frm.doc.grand_total += flt(doc.grand_total);
-				frm.doc.net_total += flt(doc.net_total);
+				frm.doc.grand_total += flt(doc.base_grand_total);
+				frm.doc.net_total += flt(doc.base_net_total);
 				frm.doc.total_quantity += flt(doc.total_qty);
 				refresh_payments(doc, frm);
 				refresh_taxes(doc, frm);
@@ -134,8 +135,8 @@ frappe.ui.form.on('POS Closing Entry Detail', {
 function set_form_data(data, frm) {
 	data.forEach(d => {
 		add_to_pos_transaction(d, frm);
-		frm.doc.grand_total += flt(d.grand_total);
-		frm.doc.net_total += flt(d.net_total);
+		frm.doc.grand_total += flt(d.base_grand_total);
+		frm.doc.net_total += flt(d.base_net_total);
 		frm.doc.total_quantity += flt(d.total_qty);
 		refresh_payments(d, frm);
 		refresh_taxes(d, frm);
@@ -147,7 +148,8 @@ function add_to_pos_transaction(d, frm) {
 		pos_invoice: d.name,
 		posting_date: d.posting_date,
 		grand_total: d.grand_total,
-		customer: d.customer
+		customer: d.customer,
+		currency: d.currency
 	})
 }
 
@@ -175,12 +177,12 @@ function refresh_taxes(d, frm) {
 	d.taxes.forEach(t => {
 		const tax = frm.doc.taxes.find(tx => tx.account_head === t.account_head && tx.rate === t.rate);
 		if (tax) {
-			tax.amount += flt(t.tax_amount);
+			tax.amount += flt(t.base_tax_amount);
 		} else {
 			frm.add_child("taxes", {
 				account_head: t.account_head,
 				rate: t.rate,
-				amount: t.tax_amount
+				amount: t.base_tax_amount
 			})
 		}
 	})

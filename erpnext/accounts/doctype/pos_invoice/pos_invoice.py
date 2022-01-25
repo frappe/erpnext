@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 
+from itertools import accumulate
 import frappe
 from frappe import _
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
@@ -12,7 +13,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	SalesInvoice,
 	get_bank_cash_account,
 	get_mode_of_payment_info,
-	update_multi_mode_option,
+	get_mode_of_payments_info,
 )
 from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.stock.doctype.batch.batch import get_batch_qty, get_pos_reserved_batch_qty
@@ -261,6 +262,10 @@ class POSInvoice(SalesInvoice):
 			frappe.db.get_value("Account", self.account_for_change_amount, "company") != self.company:
 			frappe.throw(_("The selected change account {} doesn't belongs to Company {}.").format(self.account_for_change_amount, self.company))
 
+		# verify that change account matches invoice currency
+		if self.change_amount and self.currency != frappe.db.get_value("Account", self.account_for_change_amount, "account_currency"):
+			frappe.throw(_("Change Account does not match invoice currency"))
+
 	def validate_change_amount(self):
 		grand_total = flt(self.rounded_total) or flt(self.grand_total)
 		base_grand_total = flt(self.base_rounded_total) or flt(self.base_grand_total)
@@ -370,7 +375,7 @@ class POSInvoice(SalesInvoice):
 				)
 				customer_group_price_list = frappe.db.get_value("Customer Group", customer_group, 'default_price_list')
 				selling_price_list = customer_price_list or customer_group_price_list or profile.get('selling_price_list')
-				if customer_currency != profile.get('currency'):
+				if customer_currency and customer_currency != profile.get('currency'):
 					self.set('currency', customer_currency)
 
 			else:
@@ -395,8 +400,8 @@ class POSInvoice(SalesInvoice):
 			if self.taxes_and_charges and not len(self.get("taxes")):
 				self.set_taxes()
 
-		if not self.account_for_change_amount:
-			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
+		# if not self.account_for_change_amount:
+		# 	self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
 		return profile
 
@@ -580,3 +585,26 @@ def add_return_modes(doc, pos_profile):
 		if pos_payment_method.allow_in_returns and not [d for d in doc.get('payments') if d.mode_of_payment == mode_of_payment]:
 			payment_mode = get_mode_of_payment_info(mode_of_payment, doc.company)
 			append_payment(payment_mode[0])
+
+def update_multi_mode_option(doc, pos_profile):
+	def append_payment(payment_mode):
+		payment = doc.append('payments', {})
+		payment.default = payment_mode.default
+		payment.mode_of_payment = payment_mode.mop
+		payment.account = payment_mode.default_account
+		payment.type = payment_mode.type
+
+	doc.set('payments', [])
+	invalid_modes = []
+	mode_of_payments = [d.mode_of_payment for d in pos_profile.get('payments')]
+	mode_of_payments_info = get_mode_of_payments_info(mode_of_payments, doc.company)
+
+	for row in pos_profile.get('payments'):
+		acct = frappe.db.get_value("Mode of Payment Account", {"parent": row.mode_of_payment, "company": doc.company}, "default_account")
+		if frappe.db.get_value("Account", acct, "account_currency") == doc.currency:
+			payment_mode = mode_of_payments_info.get(row.mode_of_payment)
+			if not payment_mode:
+				invalid_modes.append(get_link_to_form("Mode of Payment", row.mode_of_payment))
+				continue
+			payment_mode.default = row.default			
+			append_payment(payment_mode)
