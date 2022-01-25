@@ -115,6 +115,7 @@ frappe.ui.form.on("Delivery Note", {
 	},
 
 	after_save(frm) {
+		if(frm.doc.docstatus) return;
 		frm.doc.items.some((row) => {
 			if (!row.against_sales_order) {
 				let d = new frappe.ui.Dialog({
@@ -130,7 +131,6 @@ frappe.ui.form.on("Delivery Note", {
 					],
 					primary_action_label: 'Yes',
 					primary_action(values) {
-						console.log(values.save_setting)
 						values.save_setting && frappe.db.set_value('Selling Settings', 'Selling Settings', 'so_required', 'Yes');
 						d.hide();
 					},
@@ -144,7 +144,6 @@ frappe.ui.form.on("Delivery Note", {
 				})
 				d.add_custom_checkbox(__('Do you want to save this setting?'))
 				d.show();
-				return
 			}
 		});
 	},
@@ -236,7 +235,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 						frm: me.frm
 					}) }, __('Create'));
 			}
-			if(doc.docstatus<=1 && !doc.is_return) {
+			if(doc.docstatus==0 && !doc.is_return) {
 				this.frm.add_custom_button(__('Sales Order'),
 				this.frm.events.make_so_dn, __('Create'));
 			}

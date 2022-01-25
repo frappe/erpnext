@@ -77,7 +77,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				this.make_payment_entry, __('Create'));
 			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
-		if(doc.docstatus<=1 && !doc.is_return) {
+		if(doc.docstatus==0 && !doc.is_return) {
 			cur_frm.add_custom_button(__('Sales Order'),
 					this.make_so, __('Create'));
 		}
@@ -166,6 +166,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		})
 	}
 	after_save(doc) {
+		if (doc.docstatus) return;
 		doc.items.some((row) => {
 			if (!row.sales_order) {
 				let d = new frappe.ui.Dialog({
@@ -181,7 +182,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 					],
 					primary_action_label: 'Yes',
 					primary_action(values) {
-						console.log(values.save_setting)
 						values.save_setting && frappe.db.set_value('Selling Settings', 'Selling Settings', 'so_required', 'Yes');
 						d.hide();
 					},
@@ -195,14 +195,12 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				})
 				d.add_custom_checkbox(__('Do you want to save this setting?'))
 				d.show();
-				return
 			}
 		});
 	}
 
 	on_submit(doc, dt, dn) {
 		var me = this;
-		console.log('WORKDS????')
 		if (frappe.get_route()[0] != 'Form') {
 			return
 		}
