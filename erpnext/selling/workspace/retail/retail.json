@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Point Of Sale\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Settings & Configurations\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Loyalty Program\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Opening & Closing\", \"col\": 4}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Point Of Sale\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings & Configurations\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Loyalty Program\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Opening & Closing\",\"col\":4}}]",
  "creation": "2020-03-02 17:18:32.505616",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -14,7 +14,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Settings & Configurations",
-   "link_count": 0,
+   "link_count": 2,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -44,7 +44,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loyalty Program",
-   "link_count": 0,
+   "link_count": 2,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -74,7 +74,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Opening & Closing",
-   "link_count": 0,
+   "link_count": 2,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -101,7 +101,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:16:01.840989",
+ "modified": "2022-01-13 18:07:56.711095",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Retail",
@@ -110,7 +110,7 @@
  "public": 1,
  "restrict_to_domain": "Retail",
  "roles": [],
- "sequence_id": 22,
+ "sequence_id": 22.0,
  "shortcuts": [
   {
    "doc_view": "",

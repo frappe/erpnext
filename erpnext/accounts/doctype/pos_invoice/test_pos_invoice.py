@@ -556,6 +556,37 @@ class TestPOSInvoice(unittest.TestCase):
 		batch.cancel()
 		batch.delete()
 
+	def test_ignore_pricing_rule(self):
+		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
+
+		item_price = frappe.get_doc({
+			'doctype': 'Item Price',
+			'item_code': '_Test Item',
+			'price_list': '_Test Price List',
+			'price_list_rate': '450',
+		})
+		item_price.insert()
+		pr = make_pricing_rule(selling=1, priority=5, discount_percentage=10)
+		pr.save()
+		pos_inv = create_pos_invoice(qty=1, do_not_submit=1)
+		pos_inv.items[0].rate = 300
+		pos_inv.save()
+		self.assertEquals(pos_inv.items[0].discount_percentage, 10)
+		# rate shouldn't change
+		self.assertEquals(pos_inv.items[0].rate, 405)
+
+		pos_inv.ignore_pricing_rule = 1
+		pos_inv.items[0].rate = 300
+		pos_inv.save()
+		self.assertEquals(pos_inv.ignore_pricing_rule, 1)
+		# rate should change since pricing rules are ignored
+		self.assertEquals(pos_inv.items[0].rate, 300)
+
+		item_price.delete()
+		pos_inv.delete()
+		pr.delete()
+
+
 def create_pos_invoice(**args):
 	args = frappe._dict(args)
 	pos_profile = None
