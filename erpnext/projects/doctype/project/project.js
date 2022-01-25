@@ -22,6 +22,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		erpnext.hide_company();
 		this.setup_web_link();
 		this.setup_buttons();
+		this.set_cant_change_read_only();
 		this.set_applies_to_read_only();
 		this.toggle_vehicle_odometer_fields();
 		this.make_vehicle_checklist();
@@ -210,6 +211,13 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		}
 	},
 
+	set_cant_change_read_only: function () {
+		const cant_change_fields = (this.frm.doc.__onload && this.frm.doc.__onload.cant_change_fields) || {};
+		$.each(cant_change_fields, (fieldname, cant_change) => {
+			this.frm.set_df_property(fieldname, 'read_only', cant_change ? 1 : 0);
+		});
+	},
+
 	set_applies_to_read_only: function() {
 		var me = this;
 		var read_only_fields = [
@@ -218,9 +226,12 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 			'vehicle_chassis_no', 'vehicle_engine_no',
 			'vehicle_color', 'vehicle_warranty_no',
 		];
+
+		var read_only = me.frm.doc.applies_to_vehicle || me.frm.doc.vehicle_status != "Not Received" ? 1 : 0;
+
 		$.each(read_only_fields, function (i, f) {
 			if (me.frm.fields_dict[f]) {
-				me.frm.set_df_property(f, "read_only", me.frm.doc.applies_to_vehicle ? 1 : 0);
+				me.frm.set_df_property(f, "read_only", read_only);
 			}
 		});
 	},
@@ -366,8 +377,10 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 
 	make_vehicle_checklist: function () {
 		if (this.frm.fields_dict.vehicle_checklist_html) {
+			var is_read_only = cint(this.frm.doc.__onload && this.frm.doc.__onload.cant_change_fields && this.frm.doc.__onload.cant_change_fields.vehicle_checklist);
+
 			this.frm.vehicle_checklist_editor = erpnext.vehicles.make_vehicle_checklist(this.frm,
-				this.frm.fields_dict.vehicle_checklist_html.wrapper);
+				this.frm.fields_dict.vehicle_checklist_html.wrapper, is_read_only);
 		}
 	},
 

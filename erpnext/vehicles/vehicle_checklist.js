@@ -1,10 +1,10 @@
 frappe.provide("erpnext.vehicles");
 
-erpnext.vehicles.make_vehicle_checklist = function (frm, wrapper) {
+erpnext.vehicles.make_vehicle_checklist = function (frm, wrapper, read_only) {
 	$(wrapper).empty();
 	$(`<label class="control-label">Checklist</label>`).appendTo(wrapper);
 	var checklist_area = $('<div></div>').appendTo(wrapper);
-	return new erpnext.vehicles.VehicleChecklistEditor(frm, checklist_area);
+	return new erpnext.vehicles.VehicleChecklistEditor(frm, checklist_area, read_only);
 };
 
 erpnext.vehicles.VehicleChecklistEditor = Class.extend({

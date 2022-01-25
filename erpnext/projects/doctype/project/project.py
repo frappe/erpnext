@@ -48,6 +48,7 @@ class Project(Document):
 			order by total_hours desc''', self.name, as_dict=True))
 
 		self.set_onload('default_vehicle_checklist_items', get_default_vehicle_checklist_items())
+		self.set_onload('cant_change_fields', self.get_cant_change_fields())
 
 		self.set_costing()
 
@@ -62,11 +63,13 @@ class Project(Document):
 			self.copy_from_template()
 
 		self.set_missing_values()
-		self.set_costing()
 		self.validate_applies_to()
 		self.validate_readings()
 		self.validate_depreciation()
+		self.set_costing()
 		self.set_percent_complete()
+		self.validate_cant_change()
+
 		self.send_welcome_email()
 		self.set_title()
 
@@ -88,6 +91,31 @@ class Project(Document):
 			self.title = self.customer_name or self.customer
 		else:
 			self.title = self.name
+
+	def validate_cant_change(self):
+		if self.is_new():
+			return
+
+		fields = self.get_cant_change_fields()
+		cant_change_fields = [f for f, cant_change in fields.items() if cant_change and self.meta.get_field(f) and self.meta.get_field(f).fieldtype != 'Table']
+
+		if cant_change_fields:
+			previous_values = frappe.db.get_value(self.doctype, self.name, cant_change_fields, as_dict=1)
+			for f, old_value in previous_values.items():
+				if cstr(self.get(f)) != cstr(old_value):
+					label = self.meta.get_label(f)
+					frappe.throw(_("Cannot change {0}")
+						.format(frappe.bold(label)))
+
+	def get_cant_change_fields(self):
+		vehicle_received = self.get('vehicle_status') and self.get('vehicle_status') != 'Not Received'
+		return frappe._dict({
+			'applies_to_vehicle': vehicle_received,
+			'fuel_level': vehicle_received,
+			'keys': vehicle_received,
+			'vehicle_warehouse': vehicle_received,
+			'vehicle_checklist': vehicle_received,
+		})
 
 	def set_missing_values(self):
 		self.set_customer_details()
