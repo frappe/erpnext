@@ -23,7 +23,7 @@ class SalesForUser(Document):
 		split_serie = serie.split("-")
 		serie_final = ("{}-{}-{}").format(split_serie[0],split_serie[1],split_serie[2])
 
-		salary_slips = frappe.get_all("Sales Invoice", ["name","outstanding_amount", "total_advance", "creation", "status","naming_series", "creation_date", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total", "partial_discount", "discount_amount", "total"], filters = condition,  order_by = "name asc")
+		salary_slips = frappe.get_all("Sales Invoice", ["*"], filters = condition,  order_by = "name asc")
 
 		date_actual = self.start_date
 
@@ -105,6 +105,7 @@ class SalesForUser(Document):
 			partial_discount = 0
 			grand_total = 0
 			gross = 0
+			change_amount = 0
 
 			for salary_slip in salary_slips:
 				date_validate = salary_slip.creation.strftime('%Y-%m-%d %H:%M:%S')
@@ -128,6 +129,7 @@ class SalesForUser(Document):
 					grand_total += salary_slip.grand_total
 					isv18 = salary_slip.isv18
 					authorized_range = salary_slip.authorized_range
+					change_amount += salary_slip.paid_amount - salary_slip.change_amount
 
 					split_final_range = salary_slip.name.split("-")
 					final_range = split_final_range[3]
@@ -169,6 +171,7 @@ class SalesForUser(Document):
 			self.total_exempt_sales += grand_total
 
 		self.total_cash = cash
+		self.actual_cash = change_amount
 		self.total_cards = cards
 		self.total_advances_applied = advances
 		total_income = cash + cards + total_monetary
