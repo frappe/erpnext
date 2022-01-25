@@ -200,6 +200,11 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 			var last_odometer_read_only = !cint(this.frm.doc.vehicle_first_odometer)
 				|| cint(this.frm.doc.vehicle_last_odometer) !== cint(this.frm.doc.vehicle_first_odometer);
 
+			if (!this.frm.doc.applies_to_vehicle) {
+				first_odometer_read_only = 0;
+				last_odometer_read_only = 0;
+			}
+
 			this.frm.set_df_property("vehicle_first_odometer", "read_only", first_odometer_read_only);
 			this.frm.set_df_property("vehicle_last_odometer", "read_only", last_odometer_read_only);
 		}
