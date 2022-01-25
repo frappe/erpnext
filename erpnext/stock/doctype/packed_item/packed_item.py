@@ -16,37 +16,72 @@ from erpnext.stock.get_item_details import get_item_details
 class PackedItem(Document):
 	pass
 
+def make_packing_list(doc):
+	"""make packing list for Product Bundle item"""
+	if doc.get("_action") and doc._action == "update_after_submit":
+		return
+
+	if not doc.is_new():
+		reset_packing_list_if_deleted_items_exist(doc)
+
+	parent_items = []
+	for item in doc.get("items"):
+		if frappe.db.exists("Product Bundle", {"new_item_code": item.item_code}):
+			for bundle_item in get_product_bundle_items(item.item_code):
+				update_packing_list_item(
+					doc=doc, packing_item_code=bundle_item.item_code,
+					qty=flt(bundle_item.qty) * flt(item.stock_qty),
+					main_item_row=item, description=bundle_item.description
+				)
+
+			if [item.item_code, item.name] not in parent_items:
+				parent_items.append([item.item_code, item.name])
+
+	if frappe.db.get_single_value("Selling Settings", "editable_bundle_item_rates"):
+		update_product_bundle_price(doc, parent_items)
+
+def reset_packing_list_if_deleted_items_exist(doc):
+	doc_before_save = doc.get_doc_before_save()
+	items_are_deleted = len(doc_before_save.get("items")) != len(doc.get("items"))
+
+	if items_are_deleted:
+		doc.set("packed_items", [])
+
 def get_product_bundle_items(item_code):
-	return frappe.db.sql("""select t1.item_code, t1.qty, t1.uom, t1.description
-		from `tabProduct Bundle Item` t1, `tabProduct Bundle` t2
-		where t2.new_item_code=%s and t1.parent = t2.name order by t1.idx""", item_code, as_dict=1)
+	product_bundle = frappe.qb.DocType("Product Bundle")
+	product_bundle_item = frappe.qb.DocType("Product Bundle Item")
 
-def get_packing_item_details(item, company):
-	return frappe.db.sql("""
-		select i.item_name, i.is_stock_item, i.description, i.stock_uom, id.default_warehouse
-		from `tabItem` i LEFT JOIN `tabItem Default` id ON id.parent=i.name and id.company=%s
-		where i.name = %s""",
-		(company, item), as_dict = 1)[0]
-
-def get_bin_qty(item, warehouse):
-	det = frappe.db.sql("""select actual_qty, projected_qty from `tabBin`
-		where item_code = %s and warehouse = %s""", (item, warehouse), as_dict = 1)
-	return det and det[0] or frappe._dict()
+	query = (
+		frappe.qb.from_(product_bundle_item)
+		.join(product_bundle).on(product_bundle_item.parent == product_bundle.name)
+		.select(
+			product_bundle_item.item_code,
+			product_bundle_item.qty,
+			product_bundle_item.uom,
+			product_bundle_item.description
+		).where(
+			product_bundle.new_item_code == item_code
+		).orderby(
+			product_bundle_item.idx
+		)
+	)
+	return query.run(as_dict=True)
 
 def update_packing_list_item(doc, packing_item_code, qty, main_item_row, description):
+	old_packed_items_map = None
+
 	if doc.amended_from:
 		old_packed_items_map = get_old_packed_item_details(doc.packed_items)
-	else:
-		old_packed_items_map = False
+
 	item = get_packing_item_details(packing_item_code, doc.company)
 
 	# check if exists
 	exists = 0
 	for d in doc.get("packed_items"):
-		if d.parent_item == main_item_row.item_code and d.item_code == packing_item_code:
-			if d.parent_detail_docname != main_item_row.name:
-				d.parent_detail_docname = main_item_row.name
-
+		if (d.parent_item == main_item_row.item_code and
+			d.item_code == packing_item_code and
+			d.parent_detail_docname == main_item_row.name
+		):
 			pi, exists = d, 1
 			break
 
@@ -69,7 +104,7 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 		pi.batch_no = cstr(main_item_row.get("batch_no"))
 	if not pi.target_warehouse:
 		pi.target_warehouse = main_item_row.get("target_warehouse")
-	bin = get_bin_qty(packing_item_code, pi.warehouse)
+	bin = get_packed_item_bin_qty(packing_item_code, pi.warehouse)
 	pi.actual_qty = flt(bin.get("actual_qty"))
 	pi.projected_qty = flt(bin.get("projected_qty"))
 	if old_packed_items_map and old_packed_items_map.get((packing_item_code, main_item_row.item_code)):
@@ -77,41 +112,23 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 		pi.serial_no = old_packed_items_map.get((packing_item_code, main_item_row.item_code))[0].serial_no
 		pi.warehouse = old_packed_items_map.get((packing_item_code, main_item_row.item_code))[0].warehouse
 
-def make_packing_list(doc):
-	"""make packing list for Product Bundle item"""
-	if doc.get("_action") and doc._action == "update_after_submit": return
+def get_packing_item_details(item, company):
+	return frappe.db.sql("""
+		select i.item_name, i.is_stock_item, i.description, i.stock_uom, id.default_warehouse
+		from `tabItem` i LEFT JOIN `tabItem Default` id ON id.parent=i.name and id.company=%s
+		where i.name = %s""",
+		(company, item), as_dict = 1)[0]
 
-	parent_items = []
-	for d in doc.get("items"):
-		if frappe.db.get_value("Product Bundle", {"new_item_code": d.item_code}):
-			for i in get_product_bundle_items(d.item_code):
-				update_packing_list_item(doc, i.item_code, flt(i.qty)*flt(d.stock_qty), d, i.description)
+def get_packed_item_bin_qty(item, warehouse):
+	det = frappe.db.sql("""select actual_qty, projected_qty from `tabBin`
+		where item_code = %s and warehouse = %s""", (item, warehouse), as_dict = 1)
+	return det and det[0] or frappe._dict()
 
-			if [d.item_code, d.name] not in parent_items:
-				parent_items.append([d.item_code, d.name])
-
-	cleanup_packing_list(doc, parent_items)
-
-	if frappe.db.get_single_value("Selling Settings", "editable_bundle_item_rates"):
-		update_product_bundle_price(doc, parent_items)
-
-def cleanup_packing_list(doc, parent_items):
-	"""Remove all those child items which are no longer present in main item table"""
-	delete_list = []
-	for d in doc.get("packed_items"):
-		if [d.parent_item, d.parent_detail_docname] not in parent_items:
-			# mark for deletion from doclist
-			delete_list.append(d)
-
-	if not delete_list:
-		return doc
-
-	packed_items = doc.get("packed_items")
-	doc.set("packed_items", [])
-
-	for d in packed_items:
-		if d not in delete_list:
-			add_item_to_packing_list(doc, d)
+def get_old_packed_item_details(old_packed_items):
+	old_packed_items_map = {}
+	for items in old_packed_items:
+		old_packed_items_map.setdefault((items.item_code ,items.parent_item), []).append(items.as_dict())
+	return old_packed_items_map
 
 def add_item_to_packing_list(doc, packed_item):
 	doc.append("packed_items", {
@@ -165,15 +182,12 @@ def update_parent_item_price(doc, parent_item_code, bundle_price):
 	current_parent_item_price = parent_item_doc.amount
 	if current_parent_item_price != bundle_price:
 		parent_item_doc.amount = bundle_price
-		update_parent_item_rate(parent_item_doc, bundle_price)
-
-def update_parent_item_rate(parent_item_doc, bundle_price):
-	parent_item_doc.rate = bundle_price/parent_item_doc.qty
+		parent_item_doc.rate = bundle_price/(parent_item_doc.qty or 1)
 
 @frappe.whitelist()
 def get_items_from_product_bundle(args):
-	args = json.loads(args)
-	items = []
+	args, items = json.loads(args), []
+
 	bundled_items = get_product_bundle_items(args["item_code"])
 	for item in bundled_items:
 		args.update({
@@ -187,8 +201,3 @@ def get_items_from_product_bundle(args):
 def on_doctype_update():
 	frappe.db.add_index("Packed Item", ["item_code", "warehouse"])
 
-def get_old_packed_item_details(old_packed_items):
-	old_packed_items_map = {}
-	for items in old_packed_items:
-		old_packed_items_map.setdefault((items.item_code ,items.parent_item), []).append(items.as_dict())
-	return old_packed_items_map
