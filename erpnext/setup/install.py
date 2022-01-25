@@ -206,7 +206,6 @@ def get_user_types_data():
 			'doctypes': {
 				# masters
 				'Holiday List': ['read'],
-				'Expense Claim Type': ['read'],
 				'Employee': ['read', 'write'],
 				# payroll
 				'Salary Slip': ['read'],

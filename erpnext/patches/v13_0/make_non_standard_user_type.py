@@ -16,7 +16,7 @@ def execute():
 		],
 		'hr': [
 			'Employee', 'Expense Claim', 'Leave Application', 'Attendance Request', 'Compensatory Leave Request',
-			'Holiday List', 'Expense Claim Type', 'Employee Advance', 'Training Program', 'Training Feedback',
+			'Holiday List', 'Employee Advance', 'Training Program', 'Training Feedback',
 			'Shift Request', 'Employee Grievance', 'Employee Referral', 'Travel Request'
 		]
 	}
