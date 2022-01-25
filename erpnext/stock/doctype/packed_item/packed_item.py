@@ -42,7 +42,10 @@ def make_packing_list(doc):
 
 def reset_packing_list_if_deleted_items_exist(doc):
 	doc_before_save = doc.get_doc_before_save()
-	items_are_deleted = len(doc_before_save.get("items")) != len(doc.get("items"))
+	if doc_before_save:
+		items_are_deleted = len(doc_before_save.get("items")) != len(doc.get("items"))
+	else:
+		items_are_deleted = True
 
 	if items_are_deleted:
 		doc.set("packed_items", [])
@@ -112,17 +115,34 @@ def update_packing_list_item(doc, packing_item_code, qty, main_item_row, descrip
 		pi.serial_no = old_packed_items_map.get((packing_item_code, main_item_row.item_code))[0].serial_no
 		pi.warehouse = old_packed_items_map.get((packing_item_code, main_item_row.item_code))[0].warehouse
 
-def get_packing_item_details(item, company):
-	return frappe.db.sql("""
-		select i.item_name, i.is_stock_item, i.description, i.stock_uom, id.default_warehouse
-		from `tabItem` i LEFT JOIN `tabItem Default` id ON id.parent=i.name and id.company=%s
-		where i.name = %s""",
-		(company, item), as_dict = 1)[0]
+def get_packing_item_details(item_code, company):
+	item = frappe.qb.DocType("Item")
+	item_default = frappe.qb.DocType("Item Default")
+	query = (
+		frappe.qb.from_(item)
+		.left_join(item_default)
+		.on(
+			(item_default.parent == item.name)
+			& (item_default.company == company)
+		).select(
+			item.item_name, item.is_stock_item,
+			item.description, item.stock_uom,
+			item_default.default_warehouse
+		).where(
+			item.name == item_code
+		)
+	)
+	return query.run(as_dict=True)[0]
 
 def get_packed_item_bin_qty(item, warehouse):
-	det = frappe.db.sql("""select actual_qty, projected_qty from `tabBin`
-		where item_code = %s and warehouse = %s""", (item, warehouse), as_dict = 1)
-	return det and det[0] or frappe._dict()
+	bin_data = frappe.db.get_values(
+		"Bin",
+		fieldname=["actual_qty", "projected_qty"],
+		filters={"item_code": item, "warehouse": warehouse},
+		as_dict=True
+	)
+
+	return bin_data[0] if bin_data else {}
 
 def get_old_packed_item_details(old_packed_items):
 	old_packed_items_map = {}
