@@ -167,10 +167,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-02 15:05:57.396398",
+ "modified": "2022-01-19 12:54:37.306145",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Gratuity",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -198,6 +199,9 @@
    "write": 1
   }
  ],
+ "search_fields": "employee_name",
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "employee_name"
 }
