@@ -51,6 +51,20 @@ erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehicleTransactionC
 				filters: filters
 			};
 		});
+
+		this.frm.set_query("project", function() {
+			var filters = {};
+
+			if (cint(me.frm.doc.is_return)) {
+				filters['vehicle_status'] = 'Received';
+			} else {
+				filters['vehicle_status'] = 'Not Received';
+			}
+
+			return {
+				filters: filters
+			};
+		});
 	},
 
 	vehicle_checklist: function () {

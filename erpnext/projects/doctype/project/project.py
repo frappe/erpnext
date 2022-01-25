@@ -63,6 +63,7 @@ class Project(Document):
 			self.copy_from_template()
 
 		self.set_missing_values()
+		self.set_vehicle_status()
 		self.validate_applies_to()
 		self.validate_readings()
 		self.validate_depreciation()
@@ -315,6 +316,56 @@ class Project(Document):
 		self.update_sales_amount()
 		self.update_billed_amount()
 		self.calculate_gross_margin()
+
+	def set_vehicle_status(self, update=False):
+		if not self.meta.has_field('vehicle_status'):
+			return
+
+		vehicle_receipts = None
+		vehicle_deliveries = None
+
+		if self.get('applies_to_vehicle'):
+			vehicle_receipts = frappe.db.get_all("Vehicle Receipt",
+				{"project": self.name, "vehicle": self.applies_to_vehicle, "docstatus": 1},
+				['name', 'timestamp(posting_date, posting_time) as posting_dt', 'is_return',
+					'fuel_level', '`keys`'],
+				order_by="posting_date, posting_time, creation")
+			vehicle_deliveries = frappe.db.get_all("Vehicle Delivery",
+				{"project": self.name, "vehicle": self.applies_to_vehicle, "docstatus": 1},
+				['name', 'timestamp(posting_date, posting_time) as posting_dt', 'is_return'],
+				order_by="posting_date, posting_time, creation")
+
+		vehicle_receipt = frappe._dict()
+		vehicle_delivery = frappe._dict()
+
+		if vehicle_receipts and not vehicle_receipts[-1].get('is_return'):
+			vehicle_receipt = vehicle_receipts[-1]
+
+		if vehicle_deliveries and not vehicle_deliveries[-1].get('is_return'):
+			vehicle_delivery = vehicle_deliveries[-1]
+
+		self.vehicle_received_dt = vehicle_receipt.posting_dt
+		self.vehicle_delivered_dt = vehicle_delivery.posting_dt
+
+		if vehicle_receipt:
+			self.fuel_level = vehicle_receipt.fuel_level
+			self.keys = vehicle_receipt.get('keys')
+
+		if not vehicle_receipt:
+			self.vehicle_status = "Not Received"
+		elif not vehicle_delivery:
+			self.vehicle_status = "Received"
+		else:
+			self.vehicle_status = "Delivered"
+
+		if update:
+			self.db_set({
+				"vehicle_received_dt": self.vehicle_received_dt,
+				"vehicle_delivered_dt": self.vehicle_delivered_dt,
+				"vehicle_status": self.vehicle_status,
+				"fuel_level": flt(self.fuel_level),
+				"keys": cint(self.get('keys')),
+			})
 
 	def calculate_gross_margin(self):
 		expense_amount = (flt(self.total_costing_amount) + flt(self.total_expense_claim)

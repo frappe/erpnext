@@ -40,11 +40,14 @@ class VehicleReceipt(VehicleTransactionController):
 		self.update_vehicle_warranty_no()
 		self.make_odometer_log()
 		self.update_vehicle_booking_order_delivery()
+		self.update_project_vehicle_status()
+		self.update_project_vehicle_checklist()
 
 	def on_cancel(self):
 		self.update_stock_ledger()
 		self.cancel_odometer_log()
 		self.update_vehicle_booking_order_delivery()
+		self.update_project_vehicle_status()
 
 	def set_missing_values(self, doc=None, for_validate=False):
 		super(VehicleReceipt, self).set_missing_values(doc, for_validate)
@@ -63,3 +66,18 @@ class VehicleReceipt(VehicleTransactionController):
 			frappe.throw(_("Fuel Level must be between 0% and 100%"))
 		if cint(self.keys) < 0:
 			frappe.throw(_("No of Keys cannot be negative"))
+
+	def update_project_vehicle_checklist(self):
+		if self.get('project') and self.get('vehicle_checklist'):
+			frappe.db.sql("""
+				delete from `tabVehicle Checklist Item`
+				where parenttype = 'Project' and parentfield = 'vehicle_checklist' and parent = %s
+			""", self.project)
+
+			for d in self.vehicle_checklist:
+				project_checklist_row = frappe.copy_doc(d)
+				project_checklist_row.docstatus = 0
+				project_checklist_row.parenttype = 'Project'
+				project_checklist_row.parentfield = 'vehicle_checklist'
+				project_checklist_row.parent = self.project
+				project_checklist_row.db_insert()

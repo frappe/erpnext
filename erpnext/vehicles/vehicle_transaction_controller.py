@@ -485,6 +485,15 @@ class VehicleTransactionController(StockController):
 			vro.set_status(update=True)
 			vro.notify_update()
 
+	def update_project_vehicle_status(self, doc=None):
+		if not doc:
+			doc = self
+
+		if doc.get('project'):
+			project = frappe.get_doc("Project", doc.project)
+			project.set_vehicle_status(update=True)
+			project.notify_update()
+
 	def update_vehicle_party_details(self):
 		if self.get('vehicle'):
 			sr_no = frappe.get_doc("Serial No", self.vehicle)
@@ -745,13 +754,13 @@ def get_project_details(args):
 			out.vehicle = None
 			out.item_code = project_details.applies_to_item
 
+		out.fuel_level = project_details.fuel_level
+		out['keys'] = project_details.get('keys')
+		out.vehicle_odometer = project_details.vehicle_last_odometer or project_details.vehicle_first_odometer or 0
+
 		if args.doctype == "Vehicle Receipt":
 			if project_details.vehicle_warehouse:
 				out.warehouse = project_details.vehicle_warehouse
-
-			out.fuel_level = project_details.fuel_level
-			out.keys = project_details.get('keys')
-			out.vehicle_odometer = project_details.vehicle_last_odometer or project_details.vehicle_first_odometer or 0
 
 	if project_details and args.doctype and frappe.get_meta(args.doctype).has_field('vehicle_checklist'):
 		vehicle_checklist = frappe.get_all("Vehicle Checklist Item",
