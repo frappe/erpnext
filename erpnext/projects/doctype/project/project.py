@@ -49,7 +49,7 @@ class Project(Document):
 
 		self.set_onload('default_vehicle_checklist_items', get_default_vehicle_checklist_items())
 
-		self.update_costing()
+		self.set_costing()
 
 	def before_print(self):
 		self.onload()
@@ -62,11 +62,11 @@ class Project(Document):
 			self.copy_from_template()
 
 		self.set_missing_values()
-		self.update_costing()
+		self.set_costing()
 		self.validate_applies_to()
 		self.validate_readings()
 		self.validate_depreciation()
-		self.update_percent_complete()
+		self.set_percent_complete()
 		self.send_welcome_email()
 		self.set_title()
 
@@ -90,11 +90,11 @@ class Project(Document):
 			self.title = self.name
 
 	def set_missing_values(self):
-		self.update_customer_details()
-		self.update_applies_to_details()
+		self.set_customer_details()
+		self.set_applies_to_details()
 		self.set_missing_checklist()
 
-	def update_customer_details(self):
+	def set_customer_details(self):
 		args = self.as_dict()
 		customer_details = get_customer_details(args)
 
@@ -102,7 +102,7 @@ class Project(Document):
 			if self.meta.has_field(k) and not self.get(k) or k in force_customer_fields:
 				self.set(k, v)
 
-	def update_applies_to_details(self):
+	def set_applies_to_details(self):
 		args = self.as_dict()
 		applies_to_details = get_applies_to_details(args, for_validate=True)
 
@@ -209,11 +209,12 @@ class Project(Document):
 
 	def update_project(self):
 		'''Called externally by Task'''
-		self.update_percent_complete()
-		self.update_costing()
+		self.set_percent_complete()
+		self.set_costing()
 		self.db_update()
+		self.notify_update()
 
-	def update_percent_complete(self):
+	def set_percent_complete(self):
 		if self.percent_complete_method == "Manual":
 			if self.status == "Completed":
 				self.percent_complete = 100
@@ -260,7 +261,7 @@ class Project(Document):
 		self.service_data, self.labour_data, self.sublet_data = get_service_items(self.name, self.company)
 		self.totals_data = get_totals_data([self.stock_data, self.service_data])
 
-	def update_costing(self):
+	def set_costing(self):
 		from_time_sheet = frappe.db.sql("""select
 			sum(costing_amount) as costing_amount,
 			sum(billing_amount) as billing_amount,
