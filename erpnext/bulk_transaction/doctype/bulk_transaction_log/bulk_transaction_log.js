@@ -13,7 +13,7 @@ frappe.ui.form.on('Bulk Transaction Log', {
 					frappe.show_alert(__("Retrying Failed Transactions"), 5);
 				});
 			}
-		);
+			);
 		});
 	}
 });

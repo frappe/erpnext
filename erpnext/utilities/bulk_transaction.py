@@ -152,7 +152,7 @@ def update_logger(doc_name, e, from_doctype, to_doctype, status, restarted=0):
 def show_job_status(failed_history, deserialized_data, to_doctype):
 	if not failed_history:
 		frappe.msgprint(
-			_("Creation of {0} successfull".format(to_doctype)),
+			_("Creation of {0} successfull").format(to_doctype),
 			title="Successfull",
 			indicator="green",
 		)
@@ -160,9 +160,9 @@ def show_job_status(failed_history, deserialized_data, to_doctype):
 	if len(failed_history) != 0 and len(failed_history) < len(deserialized_data):
 		frappe.msgprint(
 			_("""Creation of {0} partially successfull.
-				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>""".format(
+				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>""").format(
 				to_doctype
-			)),
+			),
 			title="Partially Successfull",
 			indicator="orange",
 		)
@@ -170,9 +170,9 @@ def show_job_status(failed_history, deserialized_data, to_doctype):
 	if len(failed_history) == len(deserialized_data):
 		frappe.msgprint(
 			_("""Creation of {0} failed.
-				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>""".format(
+				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>""").format(
 				to_doctype
-			)),
+			),
 			title="Failed",
 			indicator="red",
 		)
