@@ -117,7 +117,8 @@ def make_closing_entry_from_opening(opening_entry):
 		payments.append(frappe._dict({
 			'mode_of_payment': detail.mode_of_payment,
 			'opening_amount': detail.opening_amount,
-			'expected_amount': detail.opening_amount
+			'expected_amount': detail.opening_amount,
++			'currency': detail.currency
 		}))
 
 	for d in invoices:
@@ -127,19 +128,19 @@ def make_closing_entry_from_opening(opening_entry):
 			'grand_total': d.grand_total,
 			'customer': d.customer
 		}))
-		closing_entry.grand_total += flt(d.grand_total)
-		closing_entry.net_total += flt(d.net_total)
+		closing_entry.grand_total += flt(d.base_grand_total)
+		closing_entry.net_total += flt(d.base_net_total)
 		closing_entry.total_quantity += flt(d.total_qty)
 
 		for t in d.taxes:
 			existing_tax = [tx for tx in taxes if tx.account_head == t.account_head and tx.rate == t.rate]
 			if existing_tax:
-				existing_tax[0].amount += flt(t.tax_amount);
+				existing_tax[0].amount += flt(t.base_tax_amount);
 			else:
 				taxes.append(frappe._dict({
 					'account_head': t.account_head,
 					'rate': t.rate,
-					'amount': t.tax_amount
+					'amount': t.base_tax_amount
 				}))
 
 		for p in d.payments:

@@ -261,6 +261,16 @@ def get_invoice_customer_map(pos_invoices):
 
 	return pos_invoice_customer_map
 
+def get_invoice_currency_map(pos_invoices):
+	# pos_invoice_currency_map = { 'Currency 1': [{}, {}, {}], 'Currency 2' : [{}] }
+	pos_invoice_currency_map = {}
+	for invoice in pos_invoices:
+		currency = invoice.get('currency')
+		pos_invoice_currency_map.setdefault(currency, [])
+		pos_invoice_currency_map[currency].append(invoice)
+
+	return pos_invoice_currency_map
+
 def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
 	invoices = pos_invoices or (closing_entry and closing_entry.get('pos_transactions'))
 	if frappe.flags.in_test and not invoices:
@@ -289,15 +299,18 @@ def unconsolidate_pos_invoices(closing_entry):
 
 def create_merge_logs(invoice_by_customer, closing_entry=None):
 	try:
-		for customer, invoices in invoice_by_customer.items():
-			merge_log = frappe.new_doc('POS Invoice Merge Log')
-			merge_log.posting_date = getdate(closing_entry.get('posting_date')) if closing_entry else nowdate()
-			merge_log.customer = customer
-			merge_log.pos_closing_entry = closing_entry.get('name') if closing_entry else None
+		for customer, customer_invoices in invoice_by_customer.items():
+			# separate invoices by currency
+			customer_currency_map = get_invoice_currency_map(customer_invoices)
+			for currency, invoices in customer_currency_map.items():
+				merge_log = frappe.new_doc('POS Invoice Merge Log')
+				merge_log.posting_date = getdate(closing_entry.get('posting_date')) if closing_entry else nowdate()
+				merge_log.customer = customer
+				merge_log.pos_closing_entry = closing_entry.get('name') if closing_entry else None
 
-			merge_log.set('pos_invoices', invoices)
-			merge_log.save(ignore_permissions=True)
-			merge_log.submit()
+				merge_log.set('pos_invoices', invoices)
+				merge_log.save(ignore_permissions=True)
+				merge_log.submit()
 
 		if closing_entry:
 			closing_entry.set_status(update=True, status='Submitted')
