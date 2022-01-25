@@ -166,7 +166,7 @@ class POSInvoice(SalesInvoice):
 			if not frappe.db.exists('Serial No', serial_no):
 				invalid_serials = invalid_serials + (", " if invalid_serials else "") + serial_no
 		msg = (_("Row #{}: Following Serial numbers for item {} are <b>Invalid</b>: {}").format(item.idx, frappe.bold(item.get("item_code")), frappe.bold(invalid_serials)))
-		if msg:
+		if invalid_serials:
 			error_msg.append(msg)
 
 		if error_msg:
