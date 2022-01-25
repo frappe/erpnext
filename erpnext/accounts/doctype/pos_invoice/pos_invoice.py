@@ -214,24 +214,42 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(error_msg, title=_("Invalid Item"), as_list=True)
 
 	def validate_serial_nos(self):
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.doctype.serial_no.serial_no import auto_fetch_serial_number, get_serial_nos
 		error_msg = []
 		for item in self.get("items"):
 			serialized = item.get("has_serial_no")
-			msg = ""
+			msg, already_transacted_error = "", ""
 			if serialized:
-				valid_serial_nos = frappe.get_all('Serial No', filters={'item_code':item.get("item_code"), "status":'Active'}, pluck="name")
+				valid_serial_nos = auto_fetch_serial_number(item.qty, item.item_code, item.warehouse, posting_date=self.posting_date, for_doctype=self.doctype)
 				invalid_serials = ""
+
 				for serial_no in get_serial_nos(item.get('serial_no')):
+					used_serial_item_idx, used_serial_item_code = self.validate_serial_with_other_cart_items(serial_no, item.idx)
+					if used_serial_item_idx and used_serial_item_code:
+						already_transacted_error = (_("Row #{}: Serial number {} for item {} has already been transacted in this invoice for Row #{} Item {}").format(
+							item.idx, frappe.bold(serial_no), frappe.bold(item.get("item_code")), frappe.bold(used_serial_item_idx), frappe.bold(used_serial_item_code)))
+
 					if serial_no not in valid_serial_nos:
-						invalid_serials = ", " if invalid_serials else "" + invalid_serials + serial_no
+						invalid_serials = invalid_serials + (", " if invalid_serials else "") + serial_no
 						msg = (_("Row #{}: Following Serial numbers for item {} are <b>Invalid</b>: {}").format(item.idx, frappe.bold(item.get("item_code")), frappe.bold(invalid_serials)))
 
 			if msg:
 				error_msg.append(msg)
 
+			if already_transacted_error:
+				error_msg.append(already_transacted_error)
+
 		if error_msg:
 			frappe.throw(error_msg, title=_("Invalid Item"), as_list=True)
+
+	def validate_serial_with_other_cart_items(self, serial_no, index):
+		for item in self.get('items'):
+			if item.idx != index:
+				item_serial_no_list = get_serial_nos(item.get('serial_no'))
+				if serial_no in item_serial_no_list:
+					return item.idx, item.item_code
+		return None, None
+
 
 	def validate_return_items_qty(self):
 		if not self.get("is_return"): return
