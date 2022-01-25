@@ -4,46 +4,21 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2013-01-10 16:34:11",
- "description": "Supplier of Goods or Services.",
+ "creation": "2022-01-17 14:29:36.999863",
+ "description": "Supplier of Goods or Services",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
+  "primary_details_tab",
   "basic_info",
   "naming_series",
   "supplier_name",
-  "country",
-  "default_bank_account",
-  "tax_id",
-  "tax_category",
-  "tax_withholding_category",
-  "is_transporter",
-  "is_internal_supplier",
-  "represents_company",
+  "supplier_group",
   "image",
   "column_break0",
-  "supplier_group",
   "supplier_type",
-  "allow_purchase_invoice_creation_without_purchase_order",
-  "allow_purchase_invoice_creation_without_purchase_receipt",
   "disabled",
-  "warn_rfqs",
-  "warn_pos",
-  "prevent_rfqs",
-  "prevent_pos",
-  "allowed_to_transact_section",
-  "companies",
-  "section_break_7",
-  "default_currency",
-  "column_break_10",
-  "default_price_list",
-  "section_credit_limit",
-  "payment_terms",
-  "cb_21",
-  "on_hold",
-  "hold_type",
-  "release_date",
   "address_contacts",
   "address_html",
   "column_break1",
@@ -55,21 +30,59 @@
   "column_break_44",
   "supplier_primary_address",
   "primary_address",
+  "country",
+  "accounting_tab",
+  "taxation_section",
+  "tax_id",
+  "default_bank_account",
+  "column_break_25",
+  "tax_category",
+  "tax_withholding_category",
   "default_payable_accounts",
   "accounts",
-  "default_tax_withholding_config",
+  "commericals_tab",
+  "section_break_7",
+  "default_currency",
+  "column_break_10",
+  "default_price_list",
+  "section_credit_limit",
+  "payment_terms",
+  "cb_21",
+  "on_hold",
+  "hold_type",
+  "release_date",
   "column_break2",
   "website",
   "supplier_details",
   "column_break_30",
   "language",
-  "is_frozen"
+  "is_frozen",
+  "settings_tab",
+  "allow_purchase_invoice_creation_without_purchase_order",
+  "column_break_50",
+  "allow_purchase_invoice_creation_without_purchase_receipt",
+  "multi_company_section",
+  "is_internal_supplier",
+  "column_break_55",
+  "represents_company",
+  "section_break_57",
+  "allowed_to_transact_section",
+  "companies",
+  "transporter_details_section",
+  "is_transporter",
+  "supplier_scorecard_updates_section",
+  "warn_rfqs",
+  "warn_pos",
+  "column_break_36",
+  "prevent_rfqs",
+  "prevent_pos",
+  "dashboard_tab"
  ],
  "fields": [
   {
    "fieldname": "basic_info",
    "fieldtype": "Section Break",
-   "label": "Name and Type",
+   "label": "Supplier and Type",
    "oldfieldtype": "Section Break",
    "options": "fa fa-user"
   },
@@ -230,7 +243,6 @@
    "options": "Allowed To Transact With"
   },
   {
-   "collapsible": 1,
    "fieldname": "section_break_7",
    "fieldtype": "Section Break",
    "label": "Currency and Price List"
@@ -255,7 +267,6 @@
    "options": "Price List"
   },
   {
-   "collapsible": 1,
    "fieldname": "section_credit_limit",
    "fieldtype": "Section Break",
    "label": "Credit Limit"
@@ -316,7 +327,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "collapsible_depends_on": "accounts",
    "fieldname": "default_payable_accounts",
    "fieldtype": "Section Break",
@@ -330,13 +340,6 @@
    "options": "Party Account"
   },
   {
-   "collapsible": 1,
-   "fieldname": "default_tax_withholding_config",
-   "fieldtype": "Section Break",
-   "label": "Default Tax Withholding Config"
-  },
-  {
-   "collapsible": 1,
    "collapsible_depends_on": "supplier_details",
    "fieldname": "column_break2",
    "fieldtype": "Section Break",
@@ -420,6 +423,72 @@
    "fieldtype": "Link",
    "label": "Supplier Primary Address",
    "options": "Address"
+  },
+  {
+   "fieldname": "primary_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Primary Details"
+  },
+  {
+   "fieldname": "settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Settings"
+  },
+  {
+   "fieldname": "accounting_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounting"
+  },
+  {
+   "fieldname": "commericals_tab",
+   "fieldtype": "Tab Break",
+   "label": "Commericals"
+  },
+  {
+   "fieldname": "supplier_scorecard_updates_section",
+   "fieldtype": "Section Break",
+   "label": "Supplier Scorecard Updates"
+  },
+  {
+   "fieldname": "column_break_36",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "taxation_section",
+   "fieldtype": "Section Break",
+   "label": "Taxation"
+  },
+  {
+   "fieldname": "dashboard_tab",
+   "fieldtype": "Tab Break",
+   "label": "Dashboard",
+   "show_dashboard": 1
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_55",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_57",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "multi_company_section",
+   "fieldtype": "Section Break",
+   "label": "Multi Company"
+  },
+  {
+   "fieldname": "transporter_details_section",
+   "fieldtype": "Section Break",
+   "label": "Transporter Details"
+  },
+  {
+   "fieldname": "column_break_50",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
@@ -432,7 +501,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2021-10-20 22:03:33.147249",
+ "modified": "2022-01-25 18:38:04.835535",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
@@ -497,6 +566,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "title_field": "supplier_name",
  "track_changes": 1
 }

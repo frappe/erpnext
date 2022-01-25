@@ -52,6 +52,7 @@
   "default_price_list",
   "credit_limit_section",
   "payment_terms",
+  "section_break_43",
   "credit_limits",
   "column_break_38",
   "loyalty_program",
@@ -65,6 +66,7 @@
   "is_frozen",
   "settings_tab",
   "dn_required",
+  "column_break_57",
   "so_required",
   "inter_company_setup_section",
   "is_internal_customer",
@@ -87,7 +89,7 @@
   {
    "fieldname": "basic_info",
    "fieldtype": "Section Break",
-   "label": "Name and Type",
+   "label": "Customer and Type",
    "oldfieldtype": "Section Break",
    "options": "fa fa-user"
   },
@@ -509,7 +511,7 @@
   {
    "fieldname": "basic_info_tab",
    "fieldtype": "Tab Break",
-   "label": "Basic Info"
+   "label": "Primary Details"
   },
   {
    "fieldname": "taxation_section",
@@ -558,6 +560,14 @@
    "fieldname": "settings_tab",
    "fieldtype": "Tab Break",
    "label": "Settings"
+  },
+  {
+   "fieldname": "section_break_43",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_57",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
@@ -571,7 +581,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-01-21 15:49:32.033227",
+ "modified": "2022-01-25 18:42:06.179246",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
