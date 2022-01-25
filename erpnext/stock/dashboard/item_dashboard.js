@@ -213,7 +213,14 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, call
 			label: __('Target Warehouse'),
 			fieldtype: 'Link',
 			options: 'Warehouse',
-			reqd: 1
+			reqd: 1,
+			get_query() {
+				return {
+					filters: {
+						is_group: 0
+					}
+				}
+			}
 		},
 		{
 			fieldname: 'qty',
