@@ -332,6 +332,7 @@ let check_and_set_availability = function(frm) {
 
 		d.set_values({
 			'department': frm.doc.department,
+			'practitioner': frm.doc.practitioner,
 			'appointment_date': frm.doc.appointment_date
 		});
 
