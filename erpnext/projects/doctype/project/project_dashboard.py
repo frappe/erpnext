@@ -3,21 +3,21 @@ from frappe import _
 
 def get_data():
 	return {
-		'heatmap': True,
+		'heatmap': False,
 		'heatmap_message': _('This is based on the Time Sheets created against this project'),
 		'fieldname': 'project',
 		'transactions': [
 			{
-				'label': _('Project'),
+				'label': _('Tasks'),
 				'items': ['Task', 'Issue', 'Project Update']
-			},
-			{
-				'label': _('Material'),
-				'items': ['Material Request', 'BOM', 'Stock Entry']
 			},
 			{
 				'label': _('Work Done'),
 				'items': ['Timesheet', 'Maintenance Visit', 'Quality Inspection']
+			},
+			{
+				'label': _('Material'),
+				'items': ['Stock Entry', 'Material Request', 'BOM']
 			},
 			{
 				'label': _('Expenses'),
@@ -32,12 +32,12 @@ def get_data():
 				'items': ['Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
 			},
 			{
-				'label': _('Payment'),
-				'items': ['Payment Entry', 'Journal Entry']
+				'label': _('Vehicle'),
+				'items': ['Vehicle Receipt', 'Vehicle Delivery', 'Vehicle Log']
 			},
 			{
-				'label': _('Reference'),
-				'items': ['Warranty Claim', 'Vehicle Log']
+				'label': _('Accounting'),
+				'items': ['Journal Entry', 'Payment Entry']
 			},
 		]
 	}
