@@ -62,10 +62,10 @@ class TestBulkTransactionLog(unittest.TestCase):
 				self.assertEqual(d.retried, 1)
 
 def create_company():
-	if not frappe.db.exists('Company', 'Test Bulk'):
+	if not frappe.db.exists('Company', '_Test Company'):
 		frappe.get_doc({
 			'doctype': 'Company',
-			'company_name': 'Test Bulk',
+			'company_name': '_Test Company',
 			'country': 'India',
 			'default_currency': 'INR'
 		}).insert()
@@ -90,7 +90,7 @@ def create_item():
 def create_so():
 	so = frappe.new_doc("Sales Order")
 	so.customer = "Bulk Customer"
-	so.company = "Test Bulk"
+	so.company = "_Test Company"
 	so.transaction_date = date.today()
 	so.append("items", {
 		"item_code": "MK",

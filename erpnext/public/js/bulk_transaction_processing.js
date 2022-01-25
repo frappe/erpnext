@@ -23,7 +23,7 @@ $.extend(erpnext.bulk_transaction_processing, {
 					frappe.show_alert("Starting a background job to create {0} {1}", [count_of_rows, to_doctype]);
 				}
 			} else {
-				frappe.msgprint(__("Selected document must be in submitted state !"));
+				frappe.msgprint(__("Selected document must be in submitted state"));
 			}
 		});
 	}

@@ -2,6 +2,7 @@ import json
 from datetime import date, datetime
 
 import frappe
+from frappe import _
 
 
 @frappe.whitelist()
@@ -16,7 +17,7 @@ def transaction_processing(data, from_doctype, to_doctype):
 
 	if length_of_data > 10:
 		frappe.msgprint(
-			"Started a background job to create {1} {0}".format(to_doctype, length_of_data)
+			_("Started a background job to create {1} {0}".format(to_doctype, length_of_data))
 		)
 		frappe.enqueue(
 			job,
@@ -151,27 +152,27 @@ def update_logger(doc_name, e, from_doctype, to_doctype, status, restarted=0):
 def show_job_status(failed_history, deserialized_data, to_doctype):
 	if not failed_history:
 		frappe.msgprint(
-			"Creation of {0} Successfull".format(to_doctype),
+			_("Creation of {0} successfull".format(to_doctype)),
 			title="Successfull",
 			indicator="green",
 		)
 
 	if len(failed_history) != 0 and len(failed_history) < len(deserialized_data):
 		frappe.msgprint(
-			"""Creation of {0} partially Successfull.
+			_("""Creation of {0} partially successfull.
 				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>""".format(
 				to_doctype
-			),
+			)),
 			title="Partially Successfull",
 			indicator="orange",
 		)
 
 	if len(failed_history) == len(deserialized_data):
 		frappe.msgprint(
-			"""Creation of {0} Failed.
+			_("""Creation of {0} failed.
 				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>""".format(
 				to_doctype
-			),
+			)),
 			title="Failed",
 			indicator="red",
 		)

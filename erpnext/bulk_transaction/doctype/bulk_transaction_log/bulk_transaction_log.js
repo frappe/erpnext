@@ -12,10 +12,8 @@ frappe.ui.form.on('Bulk Transaction Log', {
 				}).then(() => {
 					frappe.show_alert(__("Retrying Failed Transactions"), 5);
 				});
-			},
-			()=>{
-
-			});
+			}
+		);
 		});
 	}
 });
