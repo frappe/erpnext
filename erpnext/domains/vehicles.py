@@ -90,11 +90,11 @@ project_vehicle_reading_fields = [
 	{"label": "Odometer Reading (First)", "fieldname": "vehicle_first_odometer", "fieldtype": "Int",
 		"insert_after": "sec_vehicle_status", "no_copy": 1},
 	{"label": "Vehicle Received Date/Time", "fieldname": "vehicle_received_dt", "fieldtype": "Datetime",
-		"insert_after": "vehicle_first_odometer", "no_copy": 1},
+		"insert_after": "vehicle_first_odometer", "read_only": 1, "no_copy": 1},
 	{"label": "Odometer Reading (Last)", "fieldname": "vehicle_last_odometer", "fieldtype": "Int",
 		"insert_after": "vehicle_received_dt", "no_copy": 1},
 	{"label": "Vehicle Delivered Date/Time", "fieldname": "vehicle_delivered_dt", "fieldtype": "Datetime",
-		"insert_after": "vehicle_last_odometer", "no_copy": 1},
+		"insert_after": "vehicle_last_odometer", "read_only": 1, "no_copy": 1},
 
 	{"label": "", "fieldname": "cb_vehicle_status_1", "fieldtype": "Column Break",
 		"insert_after": "vehicle_delivered_dt"},
