@@ -1,3 +1,4 @@
+[pre_model_sync]
 erpnext.patches.v12_0.update_is_cancelled_field
 erpnext.patches.v11_0.rename_production_order_to_work_order
 erpnext.patches.v11_0.refactor_naming_series
@@ -226,7 +227,6 @@ erpnext.patches.v13_0.updates_for_multi_currency_payroll
 erpnext.patches.v13_0.update_reason_for_resignation_in_employee
 execute:frappe.delete_doc("Report", "Quoted Item Comparison")
 erpnext.patches.v13_0.update_member_email_address
-erpnext.patches.v13_0.updates_for_multi_currency_payroll
 erpnext.patches.v13_0.create_leave_policy_assignment_based_on_employee_current_leave_policy
 erpnext.patches.v13_0.update_pos_closing_entry_in_merge_log
 erpnext.patches.v13_0.add_po_to_global_search
@@ -266,7 +266,6 @@ erpnext.patches.v13_0.set_training_event_attendance
 erpnext.patches.v13_0.bill_for_rejected_quantity_in_purchase_invoice
 erpnext.patches.v13_0.rename_issue_status_hold_to_on_hold
 erpnext.patches.v13_0.update_response_by_variance
-erpnext.patches.v13_0.bill_for_rejected_quantity_in_purchase_invoice
 erpnext.patches.v13_0.update_job_card_details
 erpnext.patches.v13_0.update_level_in_bom #1234sswef
 erpnext.patches.v13_0.add_missing_fg_item_for_stock_entry
@@ -279,17 +278,15 @@ erpnext.patches.v13_0.add_custom_field_for_south_africa #2
 erpnext.patches.v13_0.update_recipient_email_digest
 erpnext.patches.v13_0.shopify_deprecation_warning
 erpnext.patches.v13_0.remove_bad_selling_defaults
-erpnext.patches.v13_0.trim_whitespace_from_serial_nos
+erpnext.patches.v13_0.trim_whitespace_from_serial_nos  # 16-01-2022
 erpnext.patches.v13_0.migrate_stripe_api
 erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
 erpnext.patches.v13_0.einvoicing_deprecation_warning
 execute:frappe.reload_doc("erpnext_integrations", "doctype", "TaxJar Settings")
 execute:frappe.reload_doc("erpnext_integrations", "doctype", "Product Tax Category")
-erpnext.patches.v14_0.delete_einvoicing_doctypes
 erpnext.patches.v13_0.custom_fields_for_taxjar_integration          #08-11-2021
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
 erpnext.patches.v13_0.create_gst_payment_entry_fields #27-11-2021
-erpnext.patches.v14_0.delete_shopify_doctypes
 erpnext.patches.v13_0.fix_invoice_statuses
 erpnext.patches.v13_0.replace_supplier_item_group_with_party_specific_item
 erpnext.patches.v13_0.update_dates_in_tax_withholding_category
@@ -312,18 +309,29 @@ erpnext.patches.v13_0.item_naming_series_not_mandatory
 erpnext.patches.v14_0.delete_healthcare_doctypes
 erpnext.patches.v13_0.update_category_in_ltds_certificate
 erpnext.patches.v13_0.create_pan_field_for_india #2
-erpnext.patches.v14_0.delete_hub_doctypes
+erpnext.patches.v13_0.update_maintenance_schedule_field_in_visit
 erpnext.patches.v13_0.create_ksa_vat_custom_fields # 07-01-2022
-erpnext.patches.v14_0.rename_ongoing_status_in_sla_documents
 erpnext.patches.v14_0.migrate_crm_settings
 erpnext.patches.v13_0.rename_ksa_qr_field
+erpnext.patches.v13_0.wipe_serial_no_field_for_0_qty
 erpnext.patches.v13_0.disable_ksa_print_format_for_others # 16-12-2021
-erpnext.patches.v14_0.add_default_exit_questionnaire_notification_template
 erpnext.patches.v13_0.update_tax_category_for_rcm
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
 erpnext.patches.v14_0.set_payroll_cost_centers
 erpnext.patches.v13_0.agriculture_deprecation_warning
-erpnext.patches.v14_0.delete_agriculture_doctypes
+erpnext.patches.v13_0.hospitality_deprecation_warning
 erpnext.patches.v13_0.update_exchange_rate_settings
+erpnext.patches.v13_0.update_asset_quantity_field
+erpnext.patches.v13_0.delete_bank_reconciliation_detail
+
+[post_model_sync]
+erpnext.patches.v14_0.rename_ongoing_status_in_sla_documents
+erpnext.patches.v14_0.add_default_exit_questionnaire_notification_template
+erpnext.patches.v14_0.delete_einvoicing_doctypes
+erpnext.patches.v14_0.delete_shopify_doctypes
+erpnext.patches.v14_0.delete_hub_doctypes
+erpnext.patches.v14_0.delete_hospitality_doctypes # 20-01-2022
+erpnext.patches.v14_0.delete_agriculture_doctypes
 erpnext.patches.v14_0.rearrange_company_fields
 erpnext.patches.v13_0.remove_zero_vat_row_from_ksa_vat_settings
+erpnext.patches.v14_0.update_leave_notification_template

@@ -76,10 +76,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-22 22:55:17.604688",
+ "modified": "2022-01-19 12:58:43.255900",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Other Income",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -129,7 +130,10 @@
   }
  ],
  "quick_entry": 1,
+ "search_fields": "employee_name",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
+ "title_field": "employee_name",
  "track_changes": 1
 }
