@@ -22,21 +22,19 @@ def create_ksa_vat_setting(company):
     for data in account_data:
         if data['type'] == 'Sales Account':
             for row in data['accounts']:
-                item_tax_template = row['item_tax_template']
                 account = row['account']
                 ksa_vat_setting.append('ksa_vat_sales_accounts', {
                     'title': row['title'],
-                    'item_tax_template': f'{item_tax_template} - {company.abbr}',
+                    'rate': row['rate'],
                     'account': f'{account} - {company.abbr}'
                 })
 
         elif data['type'] == 'Purchase Account':
             for row in data['accounts']:
-                item_tax_template = row['item_tax_template']
                 account = row['account']
                 ksa_vat_setting.append('ksa_vat_purchase_accounts', {
                     'title': row['title'],
-                    'item_tax_template': f'{item_tax_template} - {company.abbr}',
+                    'rate': row['rate'],
                     'account': f'{account} - {company.abbr}'
                 })
 

@@ -9,18 +9,8 @@ def execute():
 	if not company:
 		return
 
-	selling = frappe.db.get_all('KSA VAT Sales Account', or_filters=[
-		['title', '=', 'Zero rated domestic sales'],
-		['title', '=', 'Exempted sales'],
-	], pluck='name')
-
-	for row in selling:
-		frappe.delete_doc('KSA VAT Sales Account', row)
-
-	buying = frappe.db.get_all('KSA VAT Purchase Account', or_filters=[
-		['title', '=', 'Zero rated purchases'],
-		['title', '=', 'Exempted purchases'],
-	], pluck='name')
-
-	for row in buying:
-		frappe.delete_doc('KSA VAT Purchase Account', row)
+	from erpnext.regional.saudi_arabia.wizard.operations.setup_ksa_vat_setting import create_ksa_vat_setting
+	settings = frappe.db.get_all('KSA VAT Setting', pluck='name')
+	for row in settings:
+		frappe.delete_doc('KSA VAT Setting', row)
+		create_ksa_vat_setting(row)

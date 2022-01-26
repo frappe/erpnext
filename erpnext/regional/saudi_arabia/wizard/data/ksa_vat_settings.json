@@ -19,7 +19,7 @@
             },
             {
                 "title": "Imports subject to VAT paid at customs",
-                "rate": 5.00,
+                "rate": 50.00,
                 "account": "Excise 50%"
             }
         ]
