@@ -12,6 +12,8 @@ def execute():
 	from erpnext.regional.saudi_arabia.wizard.operations.setup_ksa_vat_setting import (
 		create_ksa_vat_setting,
 	)
+	frappe.reload_doc('regional', 'doctype', 'ksa_vat_setting')
+
 	settings = frappe.db.get_all('KSA VAT Setting', pluck='name')
 	for row in settings:
 		frappe.delete_doc('KSA VAT Setting', row)
