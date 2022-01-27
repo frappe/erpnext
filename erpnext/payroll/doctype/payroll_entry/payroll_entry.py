@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.model.document import Document
+from frappe.query_builder.functions import Coalesce
 from frappe.utils import (
 	DATE_FORMAT,
 	add_days,
@@ -60,6 +61,8 @@ class PayrollEntry(Document):
 	def on_cancel(self):
 		frappe.delete_doc("Salary Slip", frappe.db.sql_list("""select name from `tabSalary Slip`
 			where payroll_entry=%s """, (self.name)))
+		self.db_set("salary_slips_created", 0)
+		self.db_set("salary_slips_submitted", 0)
 
 	def get_emp_list(self):
 		"""
@@ -157,11 +160,20 @@ class PayrollEntry(Document):
 			Returns list of salary slips based on selected criteria
 		"""
 
-		ss_list = frappe.db.sql("""
-			select t1.name, t1.salary_structure, t1.payroll_cost_center from `tabSalary Slip` t1
-			where t1.docstatus = %s and t1.start_date >= %s and t1.end_date <= %s and t1.payroll_entry = %s
-			and (t1.journal_entry is null or t1.journal_entry = "") and ifnull(salary_slip_based_on_timesheet,0) = %s
-		""", (ss_status, self.start_date, self.end_date, self.name, self.salary_slip_based_on_timesheet), as_dict=as_dict)
+		ss = frappe.qb.DocType("Salary Slip")
+		ss_list = (
+			frappe.qb.from_(ss)
+				.select(ss.name, ss.salary_structure)
+				.where(
+					(ss.docstatus == ss_status)
+					& (ss.start_date >= self.start_date)
+					& (ss.end_date <= self.end_date)
+					& (ss.payroll_entry == self.name)
+					& ((ss.journal_entry.isnull()) | (ss.journal_entry == ""))
+					& (Coalesce(ss.salary_slip_based_on_timesheet, 0) == self.salary_slip_based_on_timesheet)
+				)
+		).run(as_dict=as_dict)
+
 		return ss_list
 
 	@frappe.whitelist()
@@ -190,13 +202,20 @@ class PayrollEntry(Document):
 
 	def get_salary_components(self, component_type):
 		salary_slips = self.get_sal_slip_list(ss_status = 1, as_dict = True)
+
 		if salary_slips:
-			salary_components = frappe.db.sql("""
-				select ssd.salary_component, ssd.amount, ssd.parentfield, ss.payroll_cost_center
-				from `tabSalary Slip` ss, `tabSalary Detail` ssd
-				where ss.name = ssd.parent and ssd.parentfield = '%s' and ss.name in (%s)
-			""" % (component_type, ', '.join(['%s']*len(salary_slips))),
-				tuple([d.name for d in salary_slips]), as_dict=True)
+			ss = frappe.qb.DocType("Salary Slip")
+			ssd = frappe.qb.DocType("Salary Detail")
+			salary_components = (
+				frappe.qb.from_(ss)
+					.join(ssd)
+					.on(ss.name == ssd.parent)
+					.select(ssd.salary_component, ssd.amount, ssd.parentfield, ss.salary_structure, ss.employee)
+					.where(
+						(ssd.parentfield == component_type)
+						& (ss.name.isin(tuple([d.name for d in salary_slips])))
+					)
+			).run(as_dict=True)
 
 			return salary_components
 
@@ -204,17 +223,48 @@ class PayrollEntry(Document):
 		salary_components = self.get_salary_components(component_type)
 		if salary_components:
 			component_dict = {}
+			self.employee_cost_centers = {}
 			for item in salary_components:
+				employee_cost_centers = self.get_payroll_cost_centers_for_employee(item.employee, item.salary_structure)
+
 				add_component_to_accrual_jv_entry = True
 				if component_type == "earnings":
-					is_flexible_benefit, only_tax_impact = frappe.db.get_value("Salary Component", item['salary_component'], ['is_flexible_benefit', 'only_tax_impact'])
+					is_flexible_benefit, only_tax_impact = \
+						frappe.get_cached_value("Salary Component",item['salary_component'], ['is_flexible_benefit', 'only_tax_impact'])
 					if is_flexible_benefit == 1 and only_tax_impact ==1:
 						add_component_to_accrual_jv_entry = False
+
 				if add_component_to_accrual_jv_entry:
-					component_dict[(item.salary_component, item.payroll_cost_center)] \
-						= component_dict.get((item.salary_component, item.payroll_cost_center), 0) + flt(item.amount)
+					for cost_center, percentage in employee_cost_centers.items():
+						amount_against_cost_center = flt(item.amount) * percentage / 100
+						component_dict[(item.salary_component, cost_center)] \
+							= component_dict.get((item.salary_component, cost_center), 0) + amount_against_cost_center
+
 			account_details = self.get_account(component_dict = component_dict)
 			return account_details
+
+	def get_payroll_cost_centers_for_employee(self, employee, salary_structure):
+		if not self.employee_cost_centers.get(employee):
+			ss_assignment_name = frappe.db.get_value("Salary Structure Assignment",
+				{"employee": employee, "salary_structure": salary_structure, "docstatus": 1}, 'name')
+
+			if ss_assignment_name:
+				cost_centers = dict(frappe.get_all("Employee Cost Center", {"parent": ss_assignment_name},
+					["cost_center", "percentage"], as_list=1))
+				if not cost_centers:
+					default_cost_center, department = frappe.get_cached_value("Employee", employee, ["payroll_cost_center", "department"])
+					if not default_cost_center and department:
+						default_cost_center = frappe.get_cached_value("Department", department, "payroll_cost_center")
+					if not default_cost_center:
+						default_cost_center = self.cost_center
+
+					cost_centers = {
+						default_cost_center: 100
+					}
+
+				self.employee_cost_centers.setdefault(employee, cost_centers)
+
+		return self.employee_cost_centers.get(employee, {})
 
 	def get_account(self, component_dict = None):
 		account_dict = {}
@@ -350,23 +400,24 @@ class PayrollEntry(Document):
 		currencies = []
 		multi_currency = 0
 		company_currency = erpnext.get_company_currency(self.company)
+		accounting_dimensions = get_accounting_dimensions() or []
 
 		exchange_rate, amount = self.get_amount_and_exchange_rate_for_journal_entry(self.payment_account, je_payment_amount, company_currency, currencies)
-		accounts.append({
+		accounts.append(self.update_accounting_dimensions({
 			"account": self.payment_account,
 			"bank_account": self.bank_account,
 			"credit_in_account_currency": flt(amount, precision),
 			"exchange_rate": flt(exchange_rate),
-		})
+		}, accounting_dimensions))
 
 		exchange_rate, amount = self.get_amount_and_exchange_rate_for_journal_entry(payroll_payable_account, je_payment_amount, company_currency, currencies)
-		accounts.append({
+		accounts.append(self.update_accounting_dimensions({
 			"account": payroll_payable_account,
 			"debit_in_account_currency": flt(amount, precision),
 			"exchange_rate": flt(exchange_rate),
 			"reference_type": self.doctype,
 			"reference_name": self.name
-		})
+		}, accounting_dimensions))
 
 		if len(currencies) > 1:
 				multi_currency = 1

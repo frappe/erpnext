@@ -947,11 +947,8 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 	locations = get_available_item_locations(item.get("item_code"),
 		warehouses, item.get("quantity"), company, ignore_validation=True)
 
-	if not locations:
-		new_mr_items.append(item)
-		return
-
 	required_qty = item.get("quantity")
+	# get available material by transferring to production warehouse
 	for d in locations:
 		if required_qty <=0: return
 
@@ -962,14 +959,34 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 			new_dict.update({
 				"quantity": quantity,
 				"material_request_type": "Material Transfer",
+				"uom": new_dict.get("stock_uom"),  # internal transfer should be in stock UOM
 				"from_warehouse": d.get("warehouse")
 			})
 
 			required_qty -= quantity
 			new_mr_items.append(new_dict)
 
+	# raise purchase request for remaining qty
 	if required_qty:
+		stock_uom, purchase_uom = frappe.db.get_value(
+			'Item',
+			item['item_code'],
+			['stock_uom', 'purchase_uom']
+		)
+
+		if purchase_uom != stock_uom and purchase_uom == item['uom']:
+			conversion_factor = get_uom_conversion_factor(item['item_code'], item['uom'])
+			if not (conversion_factor or frappe.flags.show_qty_in_stock_uom):
+				frappe.throw(_("UOM Conversion factor ({0} -> {1}) not found for item: {2}")
+					.format(purchase_uom, stock_uom, item['item_code']))
+
+			required_qty = required_qty / conversion_factor
+
+		if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):
+			required_qty = ceil(required_qty)
+
 		item["quantity"] = required_qty
+
 		new_mr_items.append(item)
 
 @frappe.whitelist()

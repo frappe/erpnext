@@ -91,7 +91,7 @@ def get_stock_value_difference_list(filtered_entries: FilteredEntries) -> SVDLis
 	voucher_nos = [fe.get('voucher_no') for fe in filtered_entries]
 	svd_list = frappe.get_list(
 		'Stock Ledger Entry', fields=['item_code','stock_value_difference'],
-		filters=[('voucher_no', 'in', voucher_nos)]
+		filters=[('voucher_no', 'in', voucher_nos), ("is_cancelled", "=", 0)]
 	)
 	assign_item_groups_to_svd_list(svd_list)
 	return svd_list

@@ -46,6 +46,7 @@ class TestRouting(ERPNextTestCase):
 		wo_doc.delete()
 
 	def test_update_bom_operation_time(self):
+		"""Update cost shouldn't update routing times."""
 		operations = [
 			{
 				"operation": "Test Operation A",
@@ -85,8 +86,8 @@ class TestRouting(ERPNextTestCase):
 		routing_doc.save()
 		bom_doc.update_cost()
 		bom_doc.reload()
-		self.assertEqual(bom_doc.operations[0].time_in_mins, 90)
-		self.assertEqual(bom_doc.operations[1].time_in_mins, 42.2)
+		self.assertEqual(bom_doc.operations[0].time_in_mins, 30)
+		self.assertEqual(bom_doc.operations[1].time_in_mins, 20)
 
 
 def setup_operations(rows):
