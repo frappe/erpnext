@@ -118,7 +118,7 @@ def make_closing_entry_from_opening(opening_entry):
 			'mode_of_payment': detail.mode_of_payment,
 			'opening_amount': detail.opening_amount,
 			'expected_amount': detail.opening_amount,
-+			'currency': detail.currency
+			'currency': detail.currency
 		}))
 
 	for d in invoices:
