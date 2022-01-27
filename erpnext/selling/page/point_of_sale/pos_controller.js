@@ -150,7 +150,7 @@ erpnext.PointOfSale.Controller = class {
 	make_app() {
 		this.prepare_dom();
 		this.prepare_components();
-		this.prepare_menu();
+		//this.prepare_menu();
 		this.make_new_invoice();
 	}
 
@@ -176,12 +176,14 @@ erpnext.PointOfSale.Controller = class {
 
 		this.page.add_menu_item(__("Open Form View"), this.open_form_view.bind(this), false, 'Ctrl+F');
 
-		if (this.currencies?.length == 2) {
-			const alt_currency = this.currencies[0] === this.frm.doc.currency ? this.currencies[1] : this.currencies[0];
-			this.page.add_menu_item(__("Change Currency to ") + alt_currency, this.currency_update.bind(this, alt_currency), false, 'Ctrl+M');
-		}
-		else if (this.currencies?.length > 2) {
-			this.page.add_menu_item(__("Change Currency..."), this.currency_dialog.bind(this), false, 'Ctrl+M');
+		if(this.frm) {
+			if (this.currencies?.length == 2) {
+				const alt_currency = this.currencies[0] === this.frm.doc?.currency ? this.currencies[1] : this.currencies[0];
+				this.page.add_menu_item(__("Change Currency to ") + alt_currency, this.currency_update.bind(this, alt_currency), false, 'Ctrl+M');
+			}
+			else if (this.currencies?.length > 2) {
+				this.page.add_menu_item(__("Change Currency..."), this.currency_dialog.bind(this), false, 'Ctrl+M');
+			}
 		}
 		
 		this.page.add_menu_item(__("Toggle Recent Orders"), this.toggle_recent_order.bind(this), false, 'Ctrl+O');
@@ -614,7 +616,6 @@ erpnext.PointOfSale.Controller = class {
 					&& (i.rate == rate)
 			);
 		}
-
 		return item_row || {};
 	}
 
