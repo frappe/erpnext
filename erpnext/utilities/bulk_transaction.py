@@ -179,6 +179,18 @@ def show_job_status(failed_history, deserialized_data, to_doctype):
 
 
 def record_exists(log_doc, doc_name, status):
+
+	record = mark_retrired_transaction(log_doc, doc_name)
+
+	if record and status == "Failed":
+		return False
+	elif record and status == "Success":
+		return True
+	else:
+		return True
+
+
+def mark_retrired_transaction(log_doc, doc_name):
 	record = 0
 	for d in log_doc.get("logger_data"):
 		if d.transaction_name == doc_name and d.transaction_status == "Failed":
@@ -187,9 +199,4 @@ def record_exists(log_doc, doc_name, status):
 
 	log_doc.save()
 
-	if record and status == "Failed":
-		return False
-	elif record and status == "Success":
-		return True
-	else:
-		return True
+	return record
