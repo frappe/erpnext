@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 
+from itertools import accumulate
 import frappe
 from frappe import _
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
@@ -373,7 +374,11 @@ class POSInvoice(SalesInvoice):
 				)
 				customer_group_price_list = frappe.db.get_value("Customer Group", customer_group, 'default_price_list')
 				selling_price_list = customer_price_list or customer_group_price_list or profile.get('selling_price_list')
+<<<<<<< HEAD
 				if customer_currency and customer_currency != profile.get('currency') and not self.currency:
+=======
+				if customer_currency and customer_currency != profile.get('currency'):
+>>>>>>> 077b0dedd028c079c88045667f90ba21ea0268fb
 					self.set('currency', customer_currency)
 
 			else:
