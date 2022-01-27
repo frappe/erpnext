@@ -80,7 +80,7 @@ def get_data(conditions, filters):
 			and so.docstatus = 1
 			{conditions}
 		GROUP BY soi.name
-		ORDER BY so.transaction_date ASC
+		ORDER BY so.transaction_date ASC, soi.item_code ASC
 	""".format(conditions=conditions), filters, as_dict=1)
 
 	return data
