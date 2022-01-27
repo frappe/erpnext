@@ -399,9 +399,6 @@ class POSInvoice(SalesInvoice):
 			if self.taxes_and_charges and not len(self.get("taxes")):
 				self.set_taxes()
 
-		# if not self.account_for_change_amount:
-		# 	self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
-
 		return profile
 
 	@frappe.whitelist()
