@@ -67,7 +67,6 @@ calendars = ["Task", "Work Order", "Leave Application", "Sales Order", "Holiday 
 domains = {
 	'Distribution': 'erpnext.domains.distribution',
 	'Education': 'erpnext.domains.education',
-	'Hospitality': 'erpnext.domains.hospitality',
 	'Manufacturing': 'erpnext.domains.manufacturing',
 	'Non Profit': 'erpnext.domains.non_profit',
 	'Retail': 'erpnext.domains.retail',
@@ -579,13 +578,6 @@ global_search_doctypes = {
 		{'doctype': 'Donor Type', 'index': 10},
 		{'doctype': 'Membership Type', 'index': 11}
 	],
-	"Hospitality": [
-		{'doctype': 'Hotel Room', 'index': 0},
-		{'doctype': 'Hotel Room Reservation', 'index': 1},
-		{'doctype': 'Hotel Room Pricing', 'index': 2},
-		{'doctype': 'Hotel Room Package', 'index': 3},
-		{'doctype': 'Hotel Room Type', 'index': 4}
-	]
 }
 
 additional_timeline_content = {
