@@ -333,3 +333,4 @@ erpnext.patches.v14_0.rearrange_company_fields
 erpnext.patches.v14_0.update_leave_notification_template
 erpnext.patches.v13_0.update_asset_quantity_field
 erpnext.patches.v13_0.delete_bank_reconciliation_detail
+erpnext.patches.v14_0.delete_amazon_mws_doctype
