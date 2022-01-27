@@ -331,7 +331,7 @@ frappe.ui.form.on("BOM", {
 			});
 		});
 
-		if (has_template_rm) {
+		if (has_template_rm && has_template_rm.length) {
 			dialog.fields_dict.items.grid.refresh();
 		}
 	},
@@ -467,7 +467,8 @@ var get_bom_material_detail = function(doc, cdt, cdn, scrap_items) {
 				"uom": d.uom,
 				"stock_uom": d.stock_uom,
 				"conversion_factor": d.conversion_factor,
-				"sourced_by_supplier": d.sourced_by_supplier
+				"sourced_by_supplier": d.sourced_by_supplier,
+				"do_not_explode": d.do_not_explode
 			},
 			callback: function(r) {
 				d = locals[cdt][cdn];
@@ -639,6 +640,13 @@ frappe.ui.form.on("BOM Operation", "workstation", function(frm, cdt, cdn) {
 		}
 	});
 });
+
+frappe.ui.form.on("BOM Item", {
+	do_not_explode: function(frm, cdt, cdn) {
+		get_bom_material_detail(frm.doc, cdt, cdn, false);
+	}
+})
+
 
 frappe.ui.form.on("BOM Item", "qty", function(frm, cdt, cdn) {
 	var d = locals[cdt][cdn];

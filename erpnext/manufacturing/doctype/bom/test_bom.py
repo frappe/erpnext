@@ -501,6 +501,24 @@ class TestBOM(FrappeTestCase):
 		bom.submit()
 		self.assertEqual(bom.items[0].rate, 42)
 
+	def test_exclude_exploded_items_from_bom(self):
+		bom_no = get_default_bom()
+		new_bom = frappe.copy_doc(frappe.get_doc("BOM", bom_no))
+		for row in new_bom.items:
+			if row.item_code == "_Test Item Home Desktop Manufactured":
+				self.assertTrue(row.bom_no)
+				row.do_not_explode = True
+
+		new_bom.docstatus = 0
+		new_bom.save()
+		new_bom.load_from_db()
+
+		for row in new_bom.items:
+			if row.item_code == "_Test Item Home Desktop Manufactured" and row.do_not_explode:
+				self.assertFalse(row.bom_no)
+
+		new_bom.delete()
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
