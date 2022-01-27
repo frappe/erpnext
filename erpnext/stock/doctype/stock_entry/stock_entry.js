@@ -834,8 +834,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	toggle_related_fields: function(doc) {
-		this.frm.toggle_enable("from_warehouse", doc.purpose!='Material Receipt');
-		this.frm.toggle_enable("to_warehouse", doc.purpose!='Material Issue');
+		//  #Core Change by Abdul Samad during Development of Batch Revert After Time To Currently Produce Error On custom Js  not working
+		//this.frm.toggle_enable("from_warehouse", doc.purpose!='Material Receipt');
+		//	this.frm.toggle_enable("to_warehouse", doc.purpose!='Material Issue');
 
 		this.frm.fields_dict["items"].grid.set_column_disp("retain_sample", doc.purpose=='Material Receipt');
 		this.frm.fields_dict["items"].grid.set_column_disp("sample_quantity", doc.purpose=='Material Receipt');
