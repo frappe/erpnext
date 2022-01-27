@@ -135,7 +135,7 @@ def make_closing_entry_from_opening(opening_entry):
 		for t in d.taxes:
 			existing_tax = [tx for tx in taxes if tx.account_head == t.account_head and tx.rate == t.rate]
 			if existing_tax:
-				existing_tax[0].amount += flt(t.base_tax_amount);
+				existing_tax[0].amount += flt(t.base_tax_amount)
 			else:
 				taxes.append(frappe._dict({
 					'account_head': t.account_head,

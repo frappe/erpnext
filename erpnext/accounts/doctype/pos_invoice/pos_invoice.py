@@ -1,8 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 # For license information, please see license.txt
 
-
-from itertools import accumulate
 import frappe
 from frappe import _
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
