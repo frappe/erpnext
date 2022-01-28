@@ -1,14 +1,22 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
 from frappe.utils import flt
-from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (get_tax_accounts,
-	get_grand_total, add_total_row, get_display_value, get_group_by_and_display_fields, add_sub_total_row,
-	get_group_by_conditions)
+
+import erpnext
+from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (
+	add_sub_total_row,
+	add_total_row,
+	get_grand_total,
+	get_group_by_and_display_fields,
+	get_group_by_conditions,
+	get_tax_accounts,
+)
 from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import get_item_details
+
 
 def execute(filters=None):
 	return _execute(filters)
@@ -334,7 +342,7 @@ def get_aii_accounts():
 
 def get_purchase_receipts_against_purchase_order(item_list):
 	po_pr_map = frappe._dict()
-	po_item_rows = list(set([d.po_detail for d in item_list]))
+	po_item_rows = list(set(d.po_detail for d in item_list))
 
 	if po_item_rows:
 		purchase_receipts = frappe.db.sql("""

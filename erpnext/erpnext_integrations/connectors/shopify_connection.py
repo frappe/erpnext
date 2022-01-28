@@ -1,14 +1,25 @@
-from __future__ import unicode_literals
+
+import json
+
 import frappe
 from frappe import _
-import json
-from frappe.utils import cstr, cint, nowdate, getdate, flt, get_request_session, get_datetime
+from frappe.utils import cint, cstr, flt, get_datetime, get_request_session, getdate, nowdate
+
+from erpnext.erpnext_integrations.doctype.shopify_log.shopify_log import (
+	dump_request_data,
+	make_shopify_log,
+)
+from erpnext.erpnext_integrations.doctype.shopify_settings.shopify_settings import (
+	get_header,
+	get_shopify_url,
+)
+from erpnext.erpnext_integrations.doctype.shopify_settings.sync_customer import create_customer
+from erpnext.erpnext_integrations.doctype.shopify_settings.sync_product import (
+	sync_item_from_shopify,
+)
 from erpnext.erpnext_integrations.utils import validate_webhooks_request
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
-from erpnext.erpnext_integrations.doctype.shopify_settings.sync_product import sync_item_from_shopify
-from erpnext.erpnext_integrations.doctype.shopify_settings.sync_customer import create_customer
-from erpnext.erpnext_integrations.doctype.shopify_log.shopify_log import make_shopify_log, dump_request_data
-from erpnext.erpnext_integrations.doctype.shopify_settings.shopify_settings import get_shopify_url, get_header
+
 
 @frappe.whitelist(allow_guest=True)
 @validate_webhooks_request("Shopify Settings", 'X-Shopify-Hmac-Sha256', secret_key='shared_secret')
@@ -335,13 +346,13 @@ def get_url(shopify_settings):
 
 	if not last_order_id:
 		if shopify_settings.sync_based_on == 'Date':
-			url = get_shopify_url("admin/api/2020-10/orders.json?limit=250&created_at_min={0}&since_id=0".format(
+			url = get_shopify_url("admin/api/2021-04/orders.json?limit=250&created_at_min={0}&since_id=0".format(
 				get_datetime(shopify_settings.from_date)), shopify_settings)
 		else:
-			url = get_shopify_url("admin/api/2020-10/orders.json?limit=250&since_id={0}".format(
+			url = get_shopify_url("admin/api/2021-04/orders.json?limit=250&since_id={0}".format(
 				shopify_settings.from_order_id), shopify_settings)
 	else:
-		url = get_shopify_url("admin/api/2020-10/orders.json?limit=250&since_id={0}".format(last_order_id), shopify_settings)
+		url = get_shopify_url("admin/api/2021-04/orders.json?limit=250&since_id={0}".format(last_order_id), shopify_settings)
 
 	return url
 
@@ -350,4 +361,3 @@ def is_sync_complete(shopify_settings, order):
 		return getdate(shopify_settings.to_date) < getdate(order.get('created_at'))
 	else:
 		return cstr(order.get('id')) == cstr(shopify_settings.to_order_id)
-

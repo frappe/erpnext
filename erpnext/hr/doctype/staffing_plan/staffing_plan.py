@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
-from frappe.utils import getdate, nowdate, cint, flt
+from frappe.model.document import Document
+from frappe.utils import cint, flt, getdate, nowdate
 from frappe.utils.nestedset import get_descendants_of
+
 
 class SubsidiaryCompanyError(frappe.ValidationError): pass
 class ParentCompanyError(frappe.ValidationError): pass
@@ -39,8 +39,9 @@ class StaffingPlan(Document):
 			detail.current_count = designation_counts['employee_count']
 			detail.current_openings = designation_counts['job_openings']
 
+			detail.total_estimated_cost = 0
 			if detail.number_of_positions > 0:
-				if detail.vacancies > 0 and detail.estimated_cost_per_position:
+				if detail.vacancies and detail.estimated_cost_per_position:
 					detail.total_estimated_cost = cint(detail.vacancies) * flt(detail.estimated_cost_per_position)
 
 			self.total_estimated_budget += detail.total_estimated_cost
@@ -75,12 +76,12 @@ class StaffingPlan(Document):
 		if cint(staffing_plan_detail.vacancies) > cint(parent_plan_details[0].vacancies) or \
 			flt(staffing_plan_detail.total_estimated_cost) > flt(parent_plan_details[0].total_estimated_cost):
 			frappe.throw(_("You can only plan for upto {0} vacancies and budget {1} \
-				for {2} as per staffing plan {3} for parent company {4}."
-				.format(cint(parent_plan_details[0].vacancies),
+				for {2} as per staffing plan {3} for parent company {4}.").format(
+					cint(parent_plan_details[0].vacancies),
 					parent_plan_details[0].total_estimated_cost,
 					frappe.bold(staffing_plan_detail.designation),
 					parent_plan_details[0].name,
-					parent_company)), ParentCompanyError)
+					parent_company), ParentCompanyError)
 
 		#Get vacanices already planned for all companies down the hierarchy of Parent Company
 		lft, rgt = frappe.get_cached_value('Company',  parent_company,  ["lft", "rgt"])
@@ -97,14 +98,14 @@ class StaffingPlan(Document):
 			(flt(parent_plan_details[0].total_estimated_cost) < \
 			(flt(staffing_plan_detail.total_estimated_cost) + flt(all_sibling_details.total_estimated_cost))):
 			frappe.throw(_("{0} vacancies and {1} budget for {2} already planned for subsidiary companies of {3}. \
-				You can only plan for upto {4} vacancies and and budget {5} as per staffing plan {6} for parent company {3}."
-				.format(cint(all_sibling_details.vacancies),
+				You can only plan for upto {4} vacancies and and budget {5} as per staffing plan {6} for parent company {3}.").format(
+					cint(all_sibling_details.vacancies),
 					all_sibling_details.total_estimated_cost,
 					frappe.bold(staffing_plan_detail.designation),
 					parent_company,
 					cint(parent_plan_details[0].vacancies),
 					parent_plan_details[0].total_estimated_cost,
-					parent_plan_details[0].name)))
+					parent_plan_details[0].name))
 
 	def validate_with_subsidiary_plans(self, staffing_plan_detail):
 		#Valdate this plan with all child company plan
@@ -120,11 +121,11 @@ class StaffingPlan(Document):
 			cint(staffing_plan_detail.vacancies) < cint(children_details.vacancies) or \
 			flt(staffing_plan_detail.total_estimated_cost) < flt(children_details.total_estimated_cost):
 			frappe.throw(_("Subsidiary companies have already planned for {1} vacancies at a budget of {2}. \
-				Staffing Plan for {0} should allocate more vacancies and budget for {3} than planned for its subsidiary companies"
-				.format(self.company,
+				Staffing Plan for {0} should allocate more vacancies and budget for {3} than planned for its subsidiary companies").format(
+					self.company,
 					cint(children_details.vacancies),
 					children_details.total_estimated_cost,
-					frappe.bold(staffing_plan_detail.designation))), SubsidiaryCompanyError)
+					frappe.bold(staffing_plan_detail.designation)), SubsidiaryCompanyError)
 
 @frappe.whitelist()
 def get_designation_counts(designation, company):
@@ -152,7 +153,11 @@ def get_designation_counts(designation, company):
 	return employee_counts
 
 @frappe.whitelist()
-def get_active_staffing_plan_details(company, designation, from_date=getdate(nowdate()), to_date=getdate(nowdate())):
+def get_active_staffing_plan_details(company, designation, from_date=None, to_date=None):
+	if from_date is None:
+		from_date = getdate(nowdate())
+	if to_date is None:
+		to_date = getdate(nowdate())
 	if not company or not designation:
 		frappe.throw(_("Please select Company and Designation"))
 

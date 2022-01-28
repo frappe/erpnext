@@ -22,7 +22,15 @@ frappe.query_reports["Stock Ageing"] = {
 			"fieldname":"warehouse",
 			"label": __("Warehouse"),
 			"fieldtype": "Link",
-			"options": "Warehouse"
+			"options": "Warehouse",
+			get_query: () => {
+				const company = frappe.query_report.get_filter_value("company");
+				return {
+					filters: {
+						...company && {company},
+					}
+				};
+			}
 		},
 		{
 			"fieldname":"item_code",

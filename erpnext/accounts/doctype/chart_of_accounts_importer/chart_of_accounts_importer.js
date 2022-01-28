@@ -10,13 +10,17 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 		// make company mandatory
 		frm.set_df_property('company', 'reqd', frm.doc.company ? 0 : 1);
 		frm.set_df_property('import_file_section', 'hidden', frm.doc.company ? 0 : 1);
+
+		if (frm.doc.import_file) {
+			frappe.run_serially([
+				() => generate_tree_preview(frm),
+				() => create_import_button(frm),
+				() => frm.set_df_property('chart_preview', 'hidden', 0)
+			]);
+		}
+
 		frm.set_df_property('chart_preview', 'hidden',
 			$(frm.fields_dict['chart_tree'].wrapper).html()!="" ? 0 : 1);
-
-		// Show import button when file is successfully attached
-		if (frm.page && frm.page.show_import_button) {
-			create_import_button(frm);
-		}
 	},
 
 	download_template: function(frm) {
@@ -77,9 +81,6 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 		if (!frm.doc.import_file) {
 			frm.page.set_indicator("");
 			$(frm.fields_dict['chart_tree'].wrapper).empty(); // empty wrapper on removing file
-		} else {
-			generate_tree_preview(frm);
-			validate_csv_data(frm);
 		}
 	},
 
@@ -104,26 +105,9 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 	}
 });
 
-var validate_csv_data = function(frm) {
-	frappe.call({
-		method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.validate_accounts",
-		args: {file_name: frm.doc.import_file},
-		callback: function(r) {
-			if(r.message && r.message[0]===true) {
-				frm.page["show_import_button"] = true;
-				frm.page["total_accounts"] = r.message[1];
-				frm.trigger("refresh");
-			} else {
-				frm.page.set_indicator(__('Resolve error and upload again.'), 'orange');
-				frappe.throw(__(r.message));
-			}
-		}
-	});
-};
-
 var create_import_button = function(frm) {
 	frm.page.set_primary_action(__("Import"), function () {
-		frappe.call({
+		return frappe.call({
 			method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.import_coa",
 			args: {
 				file_name: frm.doc.import_file,
@@ -132,7 +116,7 @@ var create_import_button = function(frm) {
 			freeze: true,
 			freeze_message: __("Creating Accounts..."),
 			callback: function(r) {
-				if(!r.exc) {
+				if (!r.exc) {
 					clearInterval(frm.page["interval"]);
 					frm.page.set_indicator(__('Import Successful'), 'blue');
 					create_reset_button(frm);
@@ -150,12 +134,33 @@ var create_reset_button = function(frm) {
 	}).addClass('btn btn-primary');
 };
 
+var validate_coa = function(frm) {
+	if (frm.doc.import_file) {
+		let parent = __('All Accounts');
+		return frappe.call({
+			'method': 'erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.get_coa',
+			'args': {
+				file_name: frm.doc.import_file,
+				parent: parent,
+				doctype: 'Chart of Accounts Importer',
+				file_type: frm.doc.file_type,
+				for_validate: 1
+			},
+			callback: function(r) {
+				if (r.message['show_import_button']) {
+					frm.page['show_import_button'] = Boolean(r.message['show_import_button']);
+				}
+			}
+		});
+	}
+};
+
 var generate_tree_preview = function(frm) {
 	let parent = __('All Accounts');
 	$(frm.fields_dict['chart_tree'].wrapper).empty(); // empty wrapper to load new data
 
 	// generate tree structure based on the csv data
-	new frappe.ui.Tree({
+	return new frappe.ui.Tree({
 		parent: $(frm.fields_dict['chart_tree'].wrapper),
 		label: parent,
 		expandable: true,

@@ -3,20 +3,24 @@
 Provide a report and downloadable CSV according to the German DATEV format.
 
 - Query report showing only the columns that contain data, formatted nicely for
-  dispay to the user.
+	dispay to the user.
 - CSV download functionality `download_datev_csv` that provides a CSV file with
-  all required columns. Used to import the data into the DATEV Software.
+	all required columns. Used to import the data into the DATEV Software.
 """
-from __future__ import unicode_literals
 
 import json
+
 import frappe
+from frappe import _
 from six import string_types
 
-from frappe import _
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.regional.germany.utils.datev.datev_csv import zip_and_download, get_datev_csv
-from erpnext.regional.germany.utils.datev.datev_constants import Transactions, DebtorsCreditors, AccountNames
+from erpnext.regional.germany.utils.datev.datev_constants import (
+	AccountNames,
+	DebtorsCreditors,
+	Transactions,
+)
+from erpnext.regional.germany.utils.datev.datev_csv import get_datev_csv, zip_and_download
 
 COLUMNS = [
 	{
@@ -40,6 +44,12 @@ COLUMNS = [
 	{
 		"label": "Gegenkonto (ohne BU-Schlüssel)",
 		"fieldname": "Gegenkonto (ohne BU-Schlüssel)",
+		"fieldtype": "Data",
+		"width": 100
+	},
+	{
+		"label": "BU-Schlüssel",
+		"fieldname": "BU-Schlüssel",
 		"fieldtype": "Data",
 		"width": 100
 	},
@@ -88,6 +98,62 @@ COLUMNS = [
 		"fieldtype": "Dynamic Link",
 		"options": "Beleginfo - Art 2",
 		"width": 150
+	},
+	{
+		"label": "Beleginfo - Art 3",
+		"fieldname": "Beleginfo - Art 3",
+		"fieldtype": "Link",
+		"options": "DocType",
+		"width": 100
+	},
+	{
+		"label": "Beleginfo - Inhalt 3",
+		"fieldname": "Beleginfo - Inhalt 3",
+		"fieldtype": "Dynamic Link",
+		"options": "Beleginfo - Art 3",
+		"width": 150
+	},
+	{
+		"label": "Beleginfo - Art 4",
+		"fieldname": "Beleginfo - Art 4",
+		"fieldtype": "Data",
+		"width": 100
+	},
+	{
+		"label": "Beleginfo - Inhalt 4",
+		"fieldname": "Beleginfo - Inhalt 4",
+		"fieldtype": "Data",
+		"width": 150
+	},
+	{
+		"label": "Beleginfo - Art 5",
+		"fieldname": "Beleginfo - Art 5",
+		"fieldtype": "Data",
+		"width": 150
+	},
+	{
+		"label": "Beleginfo - Inhalt 5",
+		"fieldname": "Beleginfo - Inhalt 5",
+		"fieldtype": "Data",
+		"width": 100
+	},
+	{
+		"label": "Beleginfo - Art 6",
+		"fieldname": "Beleginfo - Art 6",
+		"fieldtype": "Data",
+		"width": 150
+	},
+	{
+		"label": "Beleginfo - Inhalt 6",
+		"fieldname": "Beleginfo - Inhalt 6",
+		"fieldtype": "Date",
+		"width": 100
+	},
+	{
+		"label": "Fälligkeit",
+		"fieldname": "Fälligkeit",
+		"fieldtype": "Date",
+		"width": 100
 	}
 ]
 
@@ -120,10 +186,8 @@ def validate(filters):
 	validate_fiscal_year(from_date, to_date, company)
 
 	if not frappe.db.exists('DATEV Settings', filters.get('company')):
-		frappe.log_error(_('Please create {} for Company {}.').format(
-			'<a href="desk#List/DATEV%20Settings/List">{}</a>'.format(_('DATEV Settings')),
-			frappe.bold(filters.get('company'))
-		))
+		msg = 'Please create DATEV Settings for Company {}'.format(filters.get('company'))
+		frappe.log_error(msg, title='DATEV Settings missing')
 		return False
 
 	return True
@@ -137,6 +201,125 @@ def validate_fiscal_year(from_date, to_date, company):
 
 
 def get_transactions(filters, as_dict=1):
+	def run(params_method, filters):
+		extra_fields, extra_joins, extra_filters = params_method(filters)
+		return run_query(filters, extra_fields, extra_joins, extra_filters, as_dict=as_dict)
+
+	def sort_by(row):
+		# "Belegdatum" is in the fifth column when list format is used
+		return row["Belegdatum" if as_dict else 5]
+
+	type_map = {
+		# specific query methods for some voucher types
+		"Payment Entry": get_payment_entry_params,
+		"Sales Invoice": get_sales_invoice_params,
+		"Purchase Invoice": get_purchase_invoice_params
+	}
+
+	only_voucher_type = filters.get("voucher_type")
+	transactions = []
+
+	for voucher_type, get_voucher_params in type_map.items():
+		if only_voucher_type and only_voucher_type != voucher_type:
+			continue
+
+		transactions.extend(run(params_method=get_voucher_params, filters=filters))
+
+	if not only_voucher_type or only_voucher_type not in type_map:
+		# generic query method for all other voucher types
+		filters["exclude_voucher_types"] = type_map.keys()
+		transactions.extend(run(params_method=get_generic_params, filters=filters))
+
+	return sorted(transactions, key=sort_by)
+
+
+def get_payment_entry_params(filters):
+	extra_fields = """
+		, 'Zahlungsreferenz' as 'Beleginfo - Art 5'
+		, pe.reference_no as 'Beleginfo - Inhalt 5'
+		, 'Buchungstag' as 'Beleginfo - Art 6'
+		, pe.reference_date as 'Beleginfo - Inhalt 6'
+		, '' as 'Fälligkeit'
+	"""
+
+	extra_joins = """
+		LEFT JOIN `tabPayment Entry` pe
+		ON gl.voucher_no = pe.name
+	"""
+
+	extra_filters = """
+		AND gl.voucher_type = 'Payment Entry'
+	"""
+
+	return extra_fields, extra_joins, extra_filters
+
+
+def get_sales_invoice_params(filters):
+	extra_fields = """
+		, '' as 'Beleginfo - Art 5'
+		, '' as 'Beleginfo - Inhalt 5'
+		, '' as 'Beleginfo - Art 6'
+		, '' as 'Beleginfo - Inhalt 6'
+		, si.due_date as 'Fälligkeit'
+	"""
+
+	extra_joins = """
+		LEFT JOIN `tabSales Invoice` si
+		ON gl.voucher_no = si.name
+	"""
+
+	extra_filters = """
+		AND gl.voucher_type = 'Sales Invoice'
+	"""
+
+	return extra_fields, extra_joins, extra_filters
+
+
+def get_purchase_invoice_params(filters):
+	extra_fields = """
+		, 'Lieferanten-Rechnungsnummer' as 'Beleginfo - Art 5'
+		, pi.bill_no as 'Beleginfo - Inhalt 5'
+		, 'Lieferanten-Rechnungsdatum' as 'Beleginfo - Art 6'
+		, pi.bill_date as 'Beleginfo - Inhalt 6'
+		, pi.due_date as 'Fälligkeit'
+	"""
+
+	extra_joins = """
+		LEFT JOIN `tabPurchase Invoice` pi
+		ON gl.voucher_no = pi.name
+	"""
+
+	extra_filters = """
+		AND gl.voucher_type = 'Purchase Invoice'
+	"""
+
+	return extra_fields, extra_joins, extra_filters
+
+
+def get_generic_params(filters):
+	# produce empty fields so all rows will have the same length
+	extra_fields = """
+		, '' as 'Beleginfo - Art 5'
+		, '' as 'Beleginfo - Inhalt 5'
+		, '' as 'Beleginfo - Art 6'
+		, '' as 'Beleginfo - Inhalt 6'
+		, '' as 'Fälligkeit'
+	"""
+	extra_joins = ""
+
+	if filters.get("exclude_voucher_types"):
+		# exclude voucher types that are queried by a dedicated method
+		exclude = "({})".format(', '.join("'{}'".format(key) for key in filters.get("exclude_voucher_types")))
+		extra_filters = "AND gl.voucher_type NOT IN {}".format(exclude)
+
+	# if voucher type filter is set, allow only this type
+	if filters.get("voucher_type"):
+		extra_filters += " AND gl.voucher_type = %(voucher_type)s"
+
+	return extra_fields, extra_joins, extra_filters
+
+
+def run_query(filters, extra_fields, extra_joins, extra_filters, as_dict=1):
 	"""
 	Get a list of accounting entries.
 
@@ -147,8 +330,7 @@ def get_transactions(filters, as_dict=1):
 	filters -- dict of filters to be passed to the sql query
 	as_dict -- return as list of dicts [0,1]
 	"""
-	filter_by_voucher = 'AND gl.voucher_type = %(voucher_type)s' if filters.get('voucher_type') else ''
-	gl_entries = frappe.db.sql("""
+	query = """
 		SELECT
 
 			/* either debit or credit amount; always positive */
@@ -163,25 +345,49 @@ def get_transactions(filters, as_dict=1):
 			/* against number or, if empty, party against number */
 			%(temporary_against_account_number)s as 'Gegenkonto (ohne BU-Schlüssel)',
 
+			/* disable automatic VAT deduction */
+			'40' as 'BU-Schlüssel',
+
 			gl.posting_date as 'Belegdatum',
 			gl.voucher_no as 'Belegfeld 1',
-			LEFT(gl.remarks, 60) as 'Buchungstext',
+			REPLACE(LEFT(gl.remarks, 60), '\n', ' ') as 'Buchungstext',
 			gl.voucher_type as 'Beleginfo - Art 1',
 			gl.voucher_no as 'Beleginfo - Inhalt 1',
 			gl.against_voucher_type as 'Beleginfo - Art 2',
-			gl.against_voucher as 'Beleginfo - Inhalt 2'
+			gl.against_voucher as 'Beleginfo - Inhalt 2',
+			gl.party_type as 'Beleginfo - Art 3',
+			gl.party as 'Beleginfo - Inhalt 3',
+			case gl.party_type when 'Customer' then 'Debitorennummer' when 'Supplier' then 'Kreditorennummer' else NULL end as 'Beleginfo - Art 4',
+			par.debtor_creditor_number as 'Beleginfo - Inhalt 4'
+
+			{extra_fields}
 
 		FROM `tabGL Entry` gl
 
 			/* Kontonummer */
-			left join `tabAccount` acc 
-			on gl.account = acc.name
+			LEFT JOIN `tabAccount` acc
+				ON gl.account = acc.name
 
-		WHERE gl.company = %(company)s 
+			LEFT JOIN `tabParty Account` par
+				ON par.parent = gl.party
+			AND par.parenttype = gl.party_type
+			AND par.company = %(company)s
+
+			{extra_joins}
+
+		WHERE gl.company = %(company)s
 		AND DATE(gl.posting_date) >= %(from_date)s
 		AND DATE(gl.posting_date) <= %(to_date)s
-		{}
-		ORDER BY 'Belegdatum', gl.voucher_no""".format(filter_by_voucher), filters, as_dict=as_dict)
+
+		{extra_filters}
+
+		ORDER BY 'Belegdatum', gl.voucher_no""".format(
+			extra_fields=extra_fields,
+			extra_joins=extra_joins,
+			extra_filters=extra_filters
+		)
+
+	gl_entries = frappe.db.sql(query, filters, as_dict=as_dict)
 
 	return gl_entries
 
@@ -196,40 +402,56 @@ def get_customers(filters):
 	return frappe.db.sql("""
 		SELECT
 
-			acc.account_number as 'Konto',
-			CASE cus.customer_type WHEN 'Company' THEN cus.customer_name ELSE null END as 'Name (Adressatentyp Unternehmen)',
-			CASE cus.customer_type WHEN 'Individual' THEN con.last_name ELSE null END as 'Name (Adressatentyp natürl. Person)',
-			CASE cus.customer_type WHEN 'Individual' THEN con.first_name ELSE null END as 'Vorname (Adressatentyp natürl. Person)',
-			CASE cus.customer_type WHEN 'Individual' THEN '1' WHEN 'Company' THEN '2' ELSE '0' end as 'Adressatentyp',
+			par.debtor_creditor_number as 'Konto',
+			CASE cus.customer_type
+				WHEN 'Company' THEN cus.customer_name
+				ELSE null
+				END as 'Name (Adressatentyp Unternehmen)',
+			CASE cus.customer_type
+				WHEN 'Individual' THEN TRIM(SUBSTR(cus.customer_name, LOCATE(' ', cus.customer_name)))
+				ELSE null
+				END as 'Name (Adressatentyp natürl. Person)',
+			CASE cus.customer_type
+				WHEN 'Individual' THEN SUBSTRING_INDEX(SUBSTRING_INDEX(cus.customer_name, ' ', 1), ' ', -1)
+				ELSE null
+				END as 'Vorname (Adressatentyp natürl. Person)',
+			CASE cus.customer_type
+				WHEN 'Individual' THEN '1'
+				WHEN 'Company' THEN '2'
+				ELSE '0'
+				END as 'Adressatentyp',
 			adr.address_line1 as 'Straße',
 			adr.pincode as 'Postleitzahl',
 			adr.city as 'Ort',
 			UPPER(country.code) as 'Land',
 			adr.address_line2 as 'Adresszusatz',
-			con.email_id as 'E-Mail',
-			coalesce(con.mobile_no, con.phone) as 'Telefon',
+			adr.email_id as 'E-Mail',
+			adr.phone as 'Telefon',
+			adr.fax as 'Fax',
 			cus.website as 'Internet',
 			cus.tax_id as 'Steuernummer'
 
-		FROM `tabParty Account` par
+		FROM `tabCustomer` cus
 
-			left join `tabAccount` acc
-			on acc.name = par.account
+			left join `tabParty Account` par
+			on par.parent = cus.name
+			and par.parenttype = 'Customer'
+			and par.company = %(company)s
 
-			left join `tabCustomer` cus
-			on cus.name = par.parent
+			left join `tabDynamic Link` dyn_adr
+			on dyn_adr.link_name = cus.name
+			and dyn_adr.link_doctype = 'Customer'
+			and dyn_adr.parenttype = 'Address'
 
 			left join `tabAddress` adr
-			on adr.name = cus.customer_primary_address
+			on adr.name = dyn_adr.parent
+			and adr.is_primary_address = '1'
 
 			left join `tabCountry` country
 			on country.name = adr.country
 
-			left join `tabContact` con
-			on con.name = cus.customer_primary_contact
-
-		WHERE par.company = %(company)s
-		AND par.parenttype = 'Customer'""", filters, as_dict=1)
+		WHERE adr.is_primary_address = '1'
+		""", filters, as_dict=1)
 
 
 def get_suppliers(filters):
@@ -242,35 +464,48 @@ def get_suppliers(filters):
 	return frappe.db.sql("""
 		SELECT
 
-			acc.account_number as 'Konto',
-			CASE sup.supplier_type WHEN 'Company' THEN sup.supplier_name ELSE null END as 'Name (Adressatentyp Unternehmen)',
-			CASE sup.supplier_type WHEN 'Individual' THEN con.last_name ELSE null END as 'Name (Adressatentyp natürl. Person)',
-			CASE sup.supplier_type WHEN 'Individual' THEN con.first_name ELSE null END as 'Vorname (Adressatentyp natürl. Person)',
-			CASE sup.supplier_type WHEN 'Individual' THEN '1' WHEN 'Company' THEN '2' ELSE '0' end as 'Adressatentyp',
+			par.debtor_creditor_number as 'Konto',
+			CASE sup.supplier_type
+				WHEN 'Company' THEN sup.supplier_name
+				ELSE null
+				END as 'Name (Adressatentyp Unternehmen)',
+			CASE sup.supplier_type
+				WHEN 'Individual' THEN TRIM(SUBSTR(sup.supplier_name, LOCATE(' ', sup.supplier_name)))
+				ELSE null
+				END as 'Name (Adressatentyp natürl. Person)',
+			CASE sup.supplier_type
+				WHEN 'Individual' THEN SUBSTRING_INDEX(SUBSTRING_INDEX(sup.supplier_name, ' ', 1), ' ', -1)
+				ELSE null
+				END as 'Vorname (Adressatentyp natürl. Person)',
+			CASE sup.supplier_type
+				WHEN 'Individual' THEN '1'
+				WHEN 'Company' THEN '2'
+				ELSE '0'
+				END as 'Adressatentyp',
 			adr.address_line1 as 'Straße',
 			adr.pincode as 'Postleitzahl',
 			adr.city as 'Ort',
 			UPPER(country.code) as 'Land',
 			adr.address_line2 as 'Adresszusatz',
-			con.email_id as 'E-Mail',
-			coalesce(con.mobile_no, con.phone) as 'Telefon',
+			adr.email_id as 'E-Mail',
+			adr.phone as 'Telefon',
+			adr.fax as 'Fax',
 			sup.website as 'Internet',
 			sup.tax_id as 'Steuernummer',
 			case sup.on_hold when 1 then sup.release_date else null end as 'Zahlungssperre bis'
 
-		FROM `tabParty Account` par
+		FROM `tabSupplier` sup
 
-			left join `tabAccount` acc
-			on acc.name = par.account
-
-			left join `tabSupplier` sup
-			on sup.name = par.parent
+			left join `tabParty Account` par
+			on par.parent = sup.name
+			and par.parenttype = 'Supplier'
+			and par.company = %(company)s
 
 			left join `tabDynamic Link` dyn_adr
 			on dyn_adr.link_name = sup.name
 			and dyn_adr.link_doctype = 'Supplier'
 			and dyn_adr.parenttype = 'Address'
-			
+
 			left join `tabAddress` adr
 			on adr.name = dyn_adr.parent
 			and adr.is_primary_address = '1'
@@ -278,17 +513,8 @@ def get_suppliers(filters):
 			left join `tabCountry` country
 			on country.name = adr.country
 
-			left join `tabDynamic Link` dyn_con
-			on dyn_con.link_name = sup.name
-			and dyn_con.link_doctype = 'Supplier'
-			and dyn_con.parenttype = 'Contact'
-
-			left join `tabContact` con
-			on con.name = dyn_con.parent
-			and con.is_primary_contact = '1'
-
-		WHERE par.company = %(company)s
-		AND par.parenttype = 'Supplier'""", filters, as_dict=1)
+		WHERE adr.is_primary_address = '1'
+		""", filters, as_dict=1)
 
 
 def get_account_names(filters):

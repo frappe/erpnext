@@ -11,15 +11,16 @@
   "project",
   "issue",
   "type",
+  "color",
   "is_group",
   "is_template",
   "column_break0",
   "status",
   "priority",
   "task_weight",
-  "completed_by",
-  "color",
   "parent_task",
+  "completed_by",
+  "completed_on",
   "sb_timeline",
   "exp_start_date",
   "expected_time",
@@ -358,6 +359,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval: doc.status == \"Completed\"",
    "fieldname": "completed_by",
    "fieldtype": "Link",
    "label": "Completed By",
@@ -381,6 +383,13 @@
    "fieldname": "duration",
    "fieldtype": "Int",
    "label": "Duration (Days)"
+  },
+  {
+   "depends_on": "eval: doc.status == \"Completed\"",
+   "fieldname": "completed_on",
+   "fieldtype": "Date",
+   "label": "Completed On",
+   "mandatory_depends_on": "eval: doc.status == \"Completed\""
   }
  ],
  "icon": "fa fa-check",
@@ -388,7 +397,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2020-12-28 11:32:58.714991",
+ "modified": "2021-04-16 12:46:51.556741",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

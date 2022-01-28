@@ -1,14 +1,16 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
+
 from erpnext.education.doctype.student_group.student_group import get_students
 
+
 class StudentGroupCreationTool(Document):
+	@frappe.whitelist()
 	def get_courses(self):
 		group_list = []
 
@@ -42,6 +44,7 @@ class StudentGroupCreationTool(Document):
 
 		return group_list
 
+	@frappe.whitelist()
 	def create_student_groups(self):
 		if not self.courses:
 			frappe.throw(_("""No Student Groups created."""))

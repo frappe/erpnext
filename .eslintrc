@@ -147,10 +147,15 @@
 		"Chart": true,
 		"Cypress": true,
 		"cy": true,
+		"describe": true,
+		"expect": true,
 		"it": true,
 		"context": true,
 		"before": true,
 		"beforeEach": true,
-		"onScan": true
+		"onScan": true,
+		"html2canvas": true,
+		"extend_cscript": true,
+		"localforage": true
 	}
 }

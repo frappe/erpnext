@@ -1,12 +1,15 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import add_to_date
-from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
-from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import get_net_profit_loss
+
+from erpnext.accounts.report.financial_statements import get_columns, get_data, get_period_list
+from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
+	get_net_profit_loss,
+)
 
 
 def get_mapper_for(mappers, position):
@@ -32,7 +35,7 @@ def get_accounts_in_mappers(mapping_names):
 		join `tabCash Flow Mapping` cfm on cfma.parent=cfm.name
 		where cfma.parent in (%s)
 		order by cfm.is_working_capital
-	''', (', '.join(['"%s"' % d for d in mapping_names])))
+	''', (', '.join('"%s"' % d for d in mapping_names)))
 
 
 def setup_mappers(mappers):
@@ -83,8 +86,8 @@ def setup_mappers(mappers):
 
 		account_types_labels = sorted(
 			set(
-				[(d['label'], d['is_working_capital'], d['is_income_tax_liability'], d['is_income_tax_expense'])
-					for d in account_types]
+				(d['label'], d['is_working_capital'], d['is_income_tax_liability'], d['is_income_tax_expense'])
+					for d in account_types
 			),
 			key=lambda x: x[1]
 		)
@@ -165,7 +168,7 @@ def add_data_for_operating_activities(
 	if profit_data:
 		profit_data.update({
 			"indent": 1,
-			"parent_account": get_mapper_for(light_mappers, position=0)['section_header']
+			"parent_account": get_mapper_for(light_mappers, position=1)['section_header']
 		})
 		data.append(profit_data)
 		section_data.append(profit_data)
@@ -312,10 +315,10 @@ def add_data_for_other_activities(
 def compute_data(filters, company_currency, profit_data, period_list, light_mappers, full_mapper):
 	data = []
 
-	operating_activities_mapper = get_mapper_for(light_mappers, position=0)
+	operating_activities_mapper = get_mapper_for(light_mappers, position=1)
 	other_mappers = [
-		get_mapper_for(light_mappers, position=1),
-		get_mapper_for(light_mappers, position=2)
+		get_mapper_for(light_mappers, position=2),
+		get_mapper_for(light_mappers, position=3)
 	]
 
 	if operating_activities_mapper:
@@ -375,7 +378,7 @@ def _get_account_type_based_data(filters, account_names, period_list, accumulate
 	total = 0
 	for period in period_list:
 		start_date = get_start_date(period, accumulated_values, company)
-		accounts = ', '.join(['"%s"' % d for d in account_names])
+		accounts = ', '.join('"%s"' % d for d in account_names)
 
 		if opening_balances:
 			date_info = dict(date=start_date)

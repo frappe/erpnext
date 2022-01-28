@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
 
 from ..quality_goal.test_quality_goal import get_quality_goal
 from .quality_review import review
+
 
 class TestQualityReview(unittest.TestCase):
 	def test_review_creation(self):

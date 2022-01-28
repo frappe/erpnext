@@ -1,14 +1,24 @@
 import frappe
-from frappe import _
-from frappe.utils import getdate, get_time, today
-from erpnext.stock.stock_ledger import update_entries_after
+from frappe.utils import get_time, getdate, today
+
 from erpnext.accounts.utils import update_gl_entries_after
+from erpnext.stock.stock_ledger import update_entries_after
+
 
 def execute():
-	for doctype in ('repost_item_valuation', 'stock_entry_detail', 'purchase_receipt_item',
-			'purchase_invoice_item', 'delivery_note_item', 'sales_invoice_item', 'packed_item'):
-		frappe.reload_doc('stock', 'doctype', doctype)
-	frappe.reload_doc('buying', 'doctype', 'purchase_receipt_item_supplied')
+	doctypes_to_reload = [
+			("stock", "repost_item_valuation"),
+			("stock", "stock_entry_detail"),
+			("stock", "purchase_receipt_item"),
+			("stock", "delivery_note_item"),
+			("stock", "packed_item"),
+			("accounts", "sales_invoice_item"),
+			("accounts", "purchase_invoice_item"),
+			("buying", "purchase_receipt_item_supplied")
+		]
+
+	for module, doctype in doctypes_to_reload:
+		frappe.reload_doc(module, 'doctype', doctype)
 
 	reposting_project_deployed_on = get_creation_time()
 	posting_date = getdate(reposting_project_deployed_on)

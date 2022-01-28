@@ -212,15 +212,17 @@
    "read_only": 1
   }
  ],
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-01 10:21:44.413353",
+ "modified": "2021-04-19 18:24:40.119647",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Application",
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
@@ -235,6 +237,7 @@
    "write": 1
   },
   {
+   "amend": 1,
    "create": 1,
    "delete": 1,
    "email": 1,

@@ -33,4 +33,3 @@ QUnit.test("test quotation with margin", function(assert) {
 		() => done()
 	]);
 });
-

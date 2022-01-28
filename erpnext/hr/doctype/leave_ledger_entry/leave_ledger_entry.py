@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
-from frappe.utils import add_days, today, flt, DATE_FORMAT, getdate
+from frappe.model.document import Document
+from frappe.utils import DATE_FORMAT, flt, getdate, today
+
 
 class LeaveLedgerEntry(Document):
 	def validate(self):
@@ -34,8 +34,8 @@ def validate_leave_allocation_against_leave_application(ledger):
 	""", (ledger.employee, ledger.leave_type, ledger.from_date, ledger.to_date))
 
 	if leave_application_records:
-		frappe.throw(_("Leave allocation %s is linked with leave application %s"
-			% (ledger.transaction_name, ', '.join(leave_application_records))))
+		frappe.throw(_("Leave allocation {0} is linked with the Leave Application {1}").format(
+			ledger.transaction_name, ', '.join(leave_application_records)))
 
 def create_leave_ledger_entry(ref_doc, args, submit=True):
 	ledger = frappe._dict(
@@ -52,7 +52,9 @@ def create_leave_ledger_entry(ref_doc, args, submit=True):
 	ledger.update(args)
 
 	if submit:
-		frappe.get_doc(ledger).submit()
+		doc = frappe.get_doc(ledger)
+		doc.flags.ignore_permissions = 1
+		doc.submit()
 	else:
 		delete_ledger_entry(ledger)
 

@@ -1,5 +1,6 @@
 {
  "attach_print": 0,
+ "channel": "Email",
  "condition": "doc.docstatus==1",
  "creation": "2018-05-15 18:52:36.362838",
  "date_changed": "bonus_payment_date",

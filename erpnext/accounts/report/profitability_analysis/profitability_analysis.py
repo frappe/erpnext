@@ -1,11 +1,15 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate, formatdate, cstr
-from erpnext.accounts.report.financial_statements import filter_accounts, filter_out_zero_value_rows
+from frappe.utils import cstr, flt
+
+from erpnext.accounts.report.financial_statements import (
+	filter_accounts,
+	filter_out_zero_value_rows,
+)
 from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
 
 value_fields = ("income", "expense", "gross_profit_loss")
@@ -168,21 +172,24 @@ def get_columns(filters):
 			"label": _("Income"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120
+			"width": 305
+
 		},
 		{
 			"fieldname": "expense",
 			"label": _("Expense"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120
+			"width": 305
+
 		},
 		{
 			"fieldname": "gross_profit_loss",
 			"label": _("Gross Profit / Loss"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120
+			"width": 307
+
 		}
 	]
 

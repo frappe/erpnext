@@ -135,29 +135,53 @@ frappe.ui.form.on('Payroll Entry', {
 		});
 
 		frm.set_query('employee', 'employees', () => {
-			if (!frm.doc.company) {
-				frappe.msgprint(__("Please set a Company"));
-				return []
-			}
-			let filters = {};
-			filters['company'] = frm.doc.company;
-			filters['start_date'] = frm.doc.start_date;
-			filters['end_date'] = frm.doc.end_date;
+			let error_fields = [];
+			let mandatory_fields = ['company', 'payroll_frequency', 'start_date', 'end_date'];
 
-			if (frm.doc.department) {
-				filters['department'] = frm.doc.department;
+			let message = __('Mandatory fields required in {0}', [__(frm.doc.doctype)]);
+
+			mandatory_fields.forEach(field => {
+				if (!frm.doc[field]) {
+					error_fields.push(frappe.unscrub(field));
+				}
+			});
+
+			if (error_fields && error_fields.length) {
+				message = message + '<br><br><ul><li>' + error_fields.join('</li><li>') + "</ul>";
+				frappe.throw({
+					message: message,
+					indicator: 'red',
+					title: __('Missing Fields')
+				});
 			}
-			if (frm.doc.branch) {
-				filters['branch'] = frm.doc.branch;
-			}
-			if (frm.doc.designation) {
-				filters['designation'] = frm.doc.designation;
-			}
+
 			return {
 				query: "erpnext.payroll.doctype.payroll_entry.payroll_entry.employee_query",
-				filters: filters
+				filters: frm.events.get_employee_filters(frm)
+			};
+		});
+	},
+
+	get_employee_filters: function (frm) {
+		let filters = {};
+		filters['salary_slip_based_on_timesheet'] = frm.doc.salary_slip_based_on_timesheet;
+
+		let fields = ['company', 'start_date', 'end_date', 'payroll_frequency', 'payroll_payable_account',
+			'currency', 'department', 'branch', 'designation'];
+
+		fields.forEach(field => {
+			if (frm.doc[field]) {
+				filters[field] = frm.doc[field];
 			}
 		});
+
+		if (frm.doc.employees) {
+			let employees = frm.doc.employees.filter(d => d.employee).map(d => d.employee);
+			if (employees && employees.length) {
+				filters['employees'] = employees;
+			}
+		}
+		return filters;
 	},
 
 	payroll_frequency: function (frm) {
@@ -169,6 +193,16 @@ frappe.ui.form.on('Payroll Entry', {
 	company: function (frm) {
 		frm.events.clear_employee_table(frm);
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		frm.trigger("set_payable_account_and_currency");
+	},
+
+	set_payable_account_and_currency: function (frm) {
+		frappe.db.get_value("Company", {"name": frm.doc.company}, "default_currency", (r) => {
+			frm.set_value('currency', r.default_currency);
+		});
+		frappe.db.get_value("Company", {"name": frm.doc.company}, "default_payroll_payable_account", (r) => {
+			frm.set_value('payroll_payable_account', r.default_payroll_payable_account);
+		});
 	},
 
 	currency: function (frm) {
@@ -342,11 +376,3 @@ let render_employee_attendance = function (frm, data) {
 		})
 	);
 };
-
-frappe.ui.form.on('Payroll Employee Detail', {
-	employee: function(frm) {
-		if (!frm.doc.payroll_frequency) {
-			frappe.throw(__("Please set a Payroll Frequency"));
-		}
-	}
-});

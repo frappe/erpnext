@@ -1,14 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt, get_time
-from frappe.model.document import Document
-from erpnext.accounts.party import get_party_shipping_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
+from frappe.model.document import Document
+from frappe.utils import flt, get_time
+
+from erpnext.accounts.party import get_party_shipping_address
+
 
 class Shipment(Document):
 	def validate(self):
@@ -23,10 +24,10 @@ class Shipment(Document):
 			frappe.throw(_('Please enter Shipment Parcel information'))
 		if self.value_of_goods == 0:
 			frappe.throw(_('Value of goods cannot be 0'))
-		self.status = 'Submitted'
+		self.db_set('status', 'Submitted')
 
 	def on_cancel(self):
-		self.status = 'Cancelled'
+		self.db_set('status', 'Cancelled')
 
 	def validate_weight(self):
 		for parcel in self.shipment_parcel:

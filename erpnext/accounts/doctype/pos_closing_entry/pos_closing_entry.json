@@ -30,6 +30,8 @@
   "total_quantity",
   "column_break_16",
   "taxes",
+  "failure_description_section",
+  "error_message",
   "section_break_14",
   "amended_from"
  ],
@@ -178,8 +180,7 @@
    "fieldname": "pos_transactions",
    "fieldtype": "Table",
    "label": "POS Transactions",
-   "options": "POS Invoice Reference",
-   "reqd": 1
+   "options": "POS Invoice Reference"
   },
   {
    "fieldname": "pos_opening_entry",
@@ -195,7 +196,7 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Status",
-   "options": "Draft\nSubmitted\nQueued\nCancelled",
+   "options": "Draft\nSubmitted\nQueued\nFailed\nCancelled",
    "print_hide": 1,
    "read_only": 1
   },
@@ -203,6 +204,21 @@
    "fieldname": "period_details_section",
    "fieldtype": "Section Break",
    "label": "Period Details"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "error_message",
+   "depends_on": "error_message",
+   "fieldname": "failure_description_section",
+   "fieldtype": "Section Break",
+   "label": "Failure Description"
+  },
+  {
+   "depends_on": "error_message",
+   "fieldname": "error_message",
+   "fieldtype": "Small Text",
+   "label": "Error",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
@@ -212,7 +228,7 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2021-02-01 13:47:20.722104",
+ "modified": "2021-10-20 16:19:25.340565",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",

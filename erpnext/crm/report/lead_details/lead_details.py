@@ -1,9 +1,10 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-from frappe import _
+
 import frappe
+from frappe import _
+
 
 def execute(filters=None):
 	columns, data = get_columns(), get_data(filters)
@@ -107,7 +108,7 @@ def get_columns():
 			"options": "Country",
 			"width": 100
 		},
-		
+
 	]
 	return columns
 
@@ -142,7 +143,7 @@ def get_data(filters):
 			company = %(company)s
 			AND `tabLead`.creation BETWEEN %(from_date)s AND %(to_date)s
 			{conditions}
-		ORDER BY 
+		ORDER BY
 			`tabLead`.creation asc """.format(conditions=get_conditions(filters)), filters, as_dict=1)
 
 def get_conditions(filters) :
@@ -153,6 +154,5 @@ def get_conditions(filters) :
 
 	if filters.get("status"):
 		conditions.append(" and `tabLead`.status=%(status)s")
-	
-	return " ".join(conditions) if conditions else ""
 
+	return " ".join(conditions) if conditions else ""

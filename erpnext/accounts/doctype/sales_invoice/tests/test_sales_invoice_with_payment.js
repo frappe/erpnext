@@ -54,4 +54,3 @@ QUnit.test("test sales Invoice with payment", function(assert) {
 		() => done()
 	]);
 });
-

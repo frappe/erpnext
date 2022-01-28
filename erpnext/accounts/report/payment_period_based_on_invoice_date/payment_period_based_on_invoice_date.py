@@ -1,11 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+from frappe.utils import flt, getdate
+
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
-from frappe.utils import getdate, flt
 
 
 def execute(filters=None):
@@ -40,7 +41,7 @@ def execute(filters=None):
 
 		row = [
 			d.voucher_type, d.voucher_no, d.party_type, d.party, d.posting_date, d.against_voucher,
-			invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks, 
+			invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks,
 			d.age, d.range1, d.range2, d.range3, d.range4
 		]
 

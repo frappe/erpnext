@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
+
 from erpnext.non_profit.doctype.donation.donation import create_donation
+
 
 class TestDonation(unittest.TestCase):
 	def setUp(self):
@@ -39,7 +40,7 @@ class TestDonation(unittest.TestCase):
 		donation.on_payment_authorized()
 		donation.reload()
 
-		self.assertEquals(donation.paid, 1)
+		self.assertEqual(donation.paid, 1)
 		self.assertTrue(frappe.db.exists('Payment Entry', {'reference_no': donation.name}))
 
 

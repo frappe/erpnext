@@ -32,4 +32,3 @@ QUnit.test("test material issue", function(assert) {
 		() => done()
 	]);
 });
-

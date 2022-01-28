@@ -1,11 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import cint, cstr
+from frappe.utils import cint
 from frappe.utils.nestedset import NestedSet
+
 from erpnext.accounts.utils import validate_field_number
 
 
@@ -50,6 +51,7 @@ class CostCenter(NestedSet):
 				frappe.throw(_("{0} is not a group node. Please select a group node as parent cost center").format(
 					frappe.bold(self.parent_cost_center)))
 
+	@frappe.whitelist()
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
 			frappe.throw(_("Cannot convert Cost Center to ledger as it has child nodes"))
@@ -60,6 +62,7 @@ class CostCenter(NestedSet):
 			self.save()
 			return 1
 
+	@frappe.whitelist()
 	def convert_ledger_to_group(self):
 		if cint(self.enable_distributed_cost_center):
 			frappe.throw(_("Cost Center with enabled distributed cost center can not be converted to group"))

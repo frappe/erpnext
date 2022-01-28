@@ -1,18 +1,20 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe
+
 import copy
 import json
 from collections import defaultdict
-from six import string_types
+
+import frappe
 from frappe import _
-from frappe.utils import flt, floor, nowdate, cint
 from frappe.model.document import Document
-from erpnext.stock.utils import get_stock_balance
+from frappe.utils import cint, floor, flt, nowdate
+from six import string_types
+
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.utils import get_stock_balance
+
 
 class PutawayRule(Document):
 	def validate(self):
@@ -97,7 +99,7 @@ def apply_putaway_rule(doctype, items, company, sync=None, purpose=None):
 		at_capacity, rules = get_ordered_putaway_rules(item_code, company, source_warehouse=source_warehouse)
 
 		if not rules:
-			warehouse = source_warehouse or item.warehouse
+			warehouse = source_warehouse or item.get('warehouse')
 			if at_capacity:
 				# rules available, but no free space
 				items_not_accomodated.append([item_code, pending_qty])

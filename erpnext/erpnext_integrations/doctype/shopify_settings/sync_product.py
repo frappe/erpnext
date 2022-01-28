@@ -1,14 +1,18 @@
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+from frappe.utils import cint, cstr, get_request_session
+
 from erpnext import get_default_company
-from frappe.utils import cstr, cint, get_request_session
-from erpnext.erpnext_integrations.doctype.shopify_settings.shopify_settings import get_shopify_url, get_header
+from erpnext.erpnext_integrations.doctype.shopify_settings.shopify_settings import (
+	get_header,
+	get_shopify_url,
+)
 
 shopify_variants_attr_list = ["option1", "option2", "option3"]
 
 def sync_item_from_shopify(shopify_settings, item):
-	url = get_shopify_url("admin/api/2020-04/products/{0}.json".format(item.get("product_id")), shopify_settings)
+	url = get_shopify_url("admin/api/2021-04/products/{0}.json".format(item.get("product_id")), shopify_settings)
 	session = get_request_session()
 
 	try:

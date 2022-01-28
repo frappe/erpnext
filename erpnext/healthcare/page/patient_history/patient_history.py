@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, ESS LLP and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe
+
 import json
+
+import frappe
 from frappe.utils import cint
-from erpnext.healthcare.utils import render_docs_as_html
+
 
 @frappe.whitelist()
 def get_feed(name, document_types=None, date_range=None, start=0, page_length=20):

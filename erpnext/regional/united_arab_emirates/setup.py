@@ -1,13 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
-import frappe, os, json
+import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.permissions import add_permission, update_permission_property
-from erpnext.setup.setup_wizard.operations.taxes_setup import create_sales_tax
+
 from erpnext.payroll.doctype.gratuity_rule.gratuity_rule import get_gratuity_rule
+
 
 def setup(company=None, patch=True):
 	make_custom_fields()
@@ -15,9 +15,6 @@ def setup(company=None, patch=True):
 	add_custom_roles_for_reports()
 	add_permissions()
 	create_gratuity_rule()
-
-	if company:
-		create_sales_tax(company)
 
 def make_custom_fields():
 	is_zero_rated = dict(fieldname='is_zero_rated', label='Is Zero Rated',

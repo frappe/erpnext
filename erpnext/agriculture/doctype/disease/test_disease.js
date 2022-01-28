@@ -36,4 +36,3 @@ QUnit.test("test: Disease", function (assert) {
 	]);
 
 });
-

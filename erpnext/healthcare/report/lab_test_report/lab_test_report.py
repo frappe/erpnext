@@ -1,9 +1,10 @@
 # Copyright (c) 2016, ESS
 # License: See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe import msgprint, _
+from frappe import _, msgprint
+
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -169,7 +170,7 @@ def get_chart_data(data):
 			'labels': labels,
 			'datasets': datasets
 		},
-		'type': 'donut',
+		'type': 'bar',
 		'height': 300,
 	}
 

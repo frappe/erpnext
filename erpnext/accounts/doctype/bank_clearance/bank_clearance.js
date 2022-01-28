@@ -8,7 +8,7 @@ frappe.ui.form.on("Bank Clearance", {
 
 	onload: function(frm) {
 
-		let default_bank_account =  frappe.defaults.get_user_default("Company")? 
+		let default_bank_account =  frappe.defaults.get_user_default("Company")?
 			locals[":Company"][frappe.defaults.get_user_default("Company")]["default_bank_account"]: "";
 		frm.set_value("account", default_bank_account);
 

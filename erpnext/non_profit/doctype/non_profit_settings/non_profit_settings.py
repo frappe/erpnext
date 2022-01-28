@@ -1,14 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.integrations.utils import get_payment_gateway_controller
 from frappe.model.document import Document
 
+
 class NonProfitSettings(Document):
+	@frappe.whitelist()
 	def generate_webhook_secret(self, field="membership_webhook_secret"):
 		key = frappe.generate_hash(length=20)
 		self.set(field, key)
@@ -21,6 +22,7 @@ class NonProfitSettings(Document):
 			_("Webhook Secret")
 		)
 
+	@frappe.whitelist()
 	def revoke_key(self, key):
 		self.set(key, None)
 		self.save()

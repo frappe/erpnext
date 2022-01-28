@@ -1,29 +1,35 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import json
+import unittest
 
 import frappe
-import unittest
-import json
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
+	get_linked_payments,
+	reconcile_vouchers,
+)
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
-from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import reconcile_vouchers, get_linked_payments
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 test_dependencies = ["Item", "Cost Center"]
 
 class TestBankTransaction(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(cls):
 		make_pos_profile()
 		add_transactions()
 		add_vouchers()
 
-	def tearDown(self):
+	@classmethod
+	def tearDownClass(cls):
 		for bt in frappe.get_all("Bank Transaction"):
 			doc = frappe.get_doc("Bank Transaction", bt.name)
-			doc.cancel()
+			if doc.docstatus == 1:
+				doc.cancel()
 			doc.delete()
 
 		# Delete directly in DB to avoid validation errors for countries not allowing deletion
@@ -33,9 +39,6 @@ class TestBankTransaction(unittest.TestCase):
 		# Delete POS Profile
 		frappe.db.sql("delete from `tabPOS Profile`")
 
-		frappe.flags.test_bank_transactions_created = False
-		frappe.flags.test_payments_created = False
-
 	# This test checks if ERPNext is able to provide a linked payment for a bank transaction based on the amount of the bank transaction.
 	def test_linked_payments(self):
 		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="Re 95282925234 FE/000002917 AT171513000281183046 Conrad Electronic"))
@@ -44,8 +47,8 @@ class TestBankTransaction(unittest.TestCase):
 
 	# This test validates a simple reconciliation leading to the clearance of the bank transaction and the payment
 	def test_reconcile(self):
-		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="1512567 BG/000002918 OPSKATTUZWXXX AT776000000098709837 Herr G"))
-		payment = frappe.get_doc("Payment Entry", dict(party="Mr G", paid_amount=1200))
+		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="1512567 BG/000003025 OPSKATTUZWXXX AT776000000098709849 Herr G"))
+		payment = frappe.get_doc("Payment Entry", dict(party="Mr G", paid_amount=1700))
 		vouchers = json.dumps([{
 		"payment_doctype":"Payment Entry",
 		"payment_name":payment.name,
@@ -58,11 +61,16 @@ class TestBankTransaction(unittest.TestCase):
 		clearance_date = frappe.db.get_value("Payment Entry", payment.name, "clearance_date")
 		self.assertTrue(clearance_date is not None)
 
+		bank_transaction.reload()
+		bank_transaction.cancel()
+
+		clearance_date = frappe.db.get_value("Payment Entry", payment.name, "clearance_date")
+		self.assertFalse(clearance_date)
+
 	# Check if ERPNext can correctly filter a linked payments based on the debit/credit amount
 	def test_debit_credit_output(self):
 		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="Auszahlung Karte MC/000002916 AUTOMAT 698769 K002 27.10. 14:07"))
 		linked_payments = get_linked_payments(bank_transaction.name, ['payment_entry', 'exact_match'])
-		print(linked_payments)
 		self.assertTrue(linked_payments[0][3])
 
 	# Check error if already reconciled
@@ -116,10 +124,6 @@ def create_bank_account(bank_name="Citi Bank", account_name="_Test Bank - _TC"):
 		pass
 
 def add_transactions():
-	if frappe.flags.test_bank_transactions_created:
-		return
-
-	frappe.set_user("Administrator")
 	create_bank_account()
 
 	doc = frappe.get_doc({
@@ -172,14 +176,8 @@ def add_transactions():
 	}).insert()
 	doc.submit()
 
-	frappe.flags.test_bank_transactions_created = True
 
 def add_vouchers():
-	if frappe.flags.test_payments_created:
-		return
-
-	frappe.set_user("Administrator")
-
 	try:
 		frappe.get_doc({
 			"doctype": "Supplier",
@@ -272,13 +270,6 @@ def add_vouchers():
 	except frappe.DuplicateEntryError:
 		pass
 
-	si = create_sales_invoice(customer="Fayva", qty=1, rate=109080)
-	pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
-	pe.reference_no = "Fayva Oct 18"
-	pe.reference_date = "2018-10-29"
-	pe.insert()
-	pe.submit()
-
 	mode_of_payment = frappe.get_doc({
 		"doctype": "Mode of Payment",
 		"name": "Cash"
@@ -291,14 +282,12 @@ def add_vouchers():
 		})
 		mode_of_payment.save()
 
-	si = create_sales_invoice(customer="Fayva", qty=1, rate=109080, do_not_submit=1)
+	si = create_sales_invoice(customer="Fayva", qty=1, rate=109080, do_not_save=1)
 	si.is_pos = 1
 	si.append("payments", {
 		"mode_of_payment": "Cash",
 		"account": "_Test Bank - _TC",
 		"amount": 109080
 	})
-	si.save()
+	si.insert()
 	si.submit()
-
-	frappe.flags.test_payments_created = True

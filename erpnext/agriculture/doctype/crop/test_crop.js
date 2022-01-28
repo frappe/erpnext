@@ -105,7 +105,7 @@ QUnit.test("test: Crop", function (assert) {
 				]
 			]}
 		]),
-		// agriculture task list 
+		// agriculture task list
 		() => {
 			assert.equal(cur_frm.doc.name, 'Basil from seed');
 			assert.equal(cur_frm.doc.period, 15);

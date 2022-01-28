@@ -919,7 +919,8 @@
         "minLength": 1,
         "maxLength": 15,
         "pattern": "^([0-9A-Z/-]){1,15}$",
-        "description": "Tranport Document Number"
+        "description": "Tranport Document Number",
+        "validationMsg": "Transport Receipt No is invalid"
       },
       "TransDocDt": {
         "type": "string",

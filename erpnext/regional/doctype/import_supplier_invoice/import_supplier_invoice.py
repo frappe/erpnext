@@ -1,22 +1,21 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
-from decimal import Decimal
-import json
 import re
-import traceback
 import zipfile
-import frappe, erpnext
+
+import dateutil
+import frappe
+from bs4 import BeautifulSoup as bs
 from frappe import _
 from frappe.model.document import Document
-from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+from frappe.utils import flt, get_datetime_str, today
 from frappe.utils.data import format_datetime
-from bs4 import BeautifulSoup as bs
-from frappe.utils import cint, flt, today, nowdate, add_days, get_files_path, get_datetime_str
-import dateutil
 from frappe.utils.file_manager import save_file
+
+import erpnext
+
 
 class ImportSupplierInvoice(Document):
 	def validate(self):
@@ -28,14 +27,19 @@ class ImportSupplierInvoice(Document):
 			self.name = "Import Invoice on " + format_datetime(self.creation)
 
 	def import_xml_data(self):
-		import_file = frappe.get_doc("File", {"file_url": self.zip_file})
+		zip_file = frappe.get_doc("File", {
+			"file_url": self.zip_file,
+			"attached_to_doctype": self.doctype,
+			"attached_to_name": self.name
+		})
+
 		self.publish("File Import", _("Processing XML Files"), 1, 3)
 
 		self.file_count = 0
 		self.purchase_invoices_count = 0
 		self.default_uom = frappe.db.get_value("Stock Settings", fieldname="stock_uom")
 
-		with zipfile.ZipFile(get_full_path(self.zip_file)) as zf:
+		with zipfile.ZipFile(zip_file.get_full_path()) as zf:
 			for file_name in zf.namelist():
 				content = get_file_content(file_name, zf)
 				file_content = bs(content, "xml")
@@ -124,9 +128,9 @@ class ImportSupplierInvoice(Document):
 					if disc_line.find("Percentuale"):
 						invoices_args["total_discount"] += flt((flt(disc_line.Percentuale.text) / 100) * (rate * qty))
 
+	@frappe.whitelist()
 	def process_file_data(self):
-		self.status = "Processing File Data"
-		self.save()
+		self.db_set("status", "Processing File Data", notify=True, commit=True)
 		frappe.enqueue_doc(self.doctype, self.name, "import_xml_data", queue="long", timeout=3600)
 
 	def publish(self, title, message, count, total):
@@ -380,24 +384,3 @@ def create_uom(uom):
 		new_uom.uom_name = uom
 		new_uom.save()
 		return new_uom.uom_name
-
-def get_full_path(file_name):
-	"""Returns file path from given file name"""
-	file_path = file_name
-
-	if "/" not in file_path:
-		file_path = "/files/" + file_path
-
-	if file_path.startswith("/private/files/"):
-		file_path = get_files_path(*file_path.split("/private/files/", 1)[1].split("/"), is_private=1)
-
-	elif file_path.startswith("/files/"):
-		file_path = get_files_path(*file_path.split("/files/", 1)[1].split("/"))
-
-	elif file_path.startswith("http"):
-		pass
-
-	elif not self.file_url:
-		frappe.throw(_("There is some problem with the file url: {0}").format(file_path))
-
-	return file_path

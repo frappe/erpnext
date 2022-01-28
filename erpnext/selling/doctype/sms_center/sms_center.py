@@ -1,17 +1,16 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-
-from frappe.utils import cstr
-from frappe import msgprint, _
-
-from frappe.model.document import Document
-
+from frappe import _, msgprint
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
+from frappe.model.document import Document
+from frappe.utils import cstr
+
 
 class SMSCenter(Document):
+	@frappe.whitelist()
 	def create_receiver_list(self):
 		rec, where_clause = '', ''
 		if self.send_to == 'All Customer Contact':
@@ -73,6 +72,7 @@ class SMSCenter(Document):
 
 		return receiver_nos
 
+	@frappe.whitelist()
 	def send_sms(self):
 		receiver_list = []
 		if not self.message:
@@ -81,4 +81,3 @@ class SMSCenter(Document):
 			receiver_list = self.get_receiver_nos()
 		if receiver_list:
 			send_sms(receiver_list, cstr(self.message))
-

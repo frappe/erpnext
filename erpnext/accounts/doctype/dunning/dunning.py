@@ -1,15 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe
+
 import json
+
+import frappe
+from frappe.utils import cint, flt, getdate
 from six import string_types
-from frappe.utils import getdate, get_datetime, rounded, flt, cint
-from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import days_in_year
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.controllers.accounts_controller import AccountsController
 
 
@@ -25,7 +27,7 @@ class Dunning(AccountsController):
 
 	def validate_amount(self):
 		amounts = calculate_interest_and_amount(
-			self.posting_date, self.outstanding_amount, self.rate_of_interest, self.dunning_fee, self.overdue_days)
+			self.outstanding_amount, self.rate_of_interest, self.dunning_fee, self.overdue_days)
 		if self.interest_amount != amounts.get('interest_amount'):
 			self.interest_amount = flt(amounts.get('interest_amount'), self.precision('interest_amount'))
 		if self.dunning_amount != amounts.get('dunning_amount'):
@@ -86,18 +88,18 @@ def resolve_dunning(doc, state):
 	for reference in doc.references:
 		if reference.reference_doctype == 'Sales Invoice' and reference.outstanding_amount <= 0:
 			dunnings = frappe.get_list('Dunning', filters={
-				'sales_invoice': reference.reference_name, 'status': ('!=', 'Resolved')})
+				'sales_invoice': reference.reference_name, 'status': ('!=', 'Resolved')}, ignore_permissions=True)
 
 			for dunning in dunnings:
 				frappe.db.set_value("Dunning", dunning.name, "status", 'Resolved')
 
-def calculate_interest_and_amount(posting_date, outstanding_amount, rate_of_interest, dunning_fee, overdue_days):
+def calculate_interest_and_amount(outstanding_amount, rate_of_interest, dunning_fee, overdue_days):
 	interest_amount = 0
-	grand_total = 0
+	grand_total = flt(outstanding_amount) + flt(dunning_fee)
 	if rate_of_interest:
 		interest_per_year = flt(outstanding_amount) * flt(rate_of_interest) / 100
-		interest_amount = (interest_per_year * cint(overdue_days)) / 365 
-		grand_total = flt(outstanding_amount) + flt(interest_amount) + flt(dunning_fee)
+		interest_amount = (interest_per_year * cint(overdue_days)) / 365
+		grand_total += flt(interest_amount)
 	dunning_amount = flt(interest_amount) + flt(dunning_fee)
 	return {
 		'interest_amount': interest_amount,

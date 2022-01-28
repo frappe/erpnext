@@ -1,14 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 import frappe.share
 from frappe import _
-from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_datetime, get_link_to_form, date_diff, nowdate
+from frappe.utils import cint, cstr, flt, get_time, now_datetime
+from six import string_types
+
 from erpnext.controllers.status_updater import StatusUpdater
 
-from six import string_types
 
 class UOMMustBeIntegerError(frappe.ValidationError): pass
 
@@ -120,11 +121,11 @@ class TransactionBase(StatusUpdater):
 		buying_doctypes = ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]
 
 		if self.doctype in buying_doctypes:
-			to_disable = "Maintain same rate throughout Purchase cycle"
-			settings_page = "Buying Settings"
+			action = frappe.db.get_single_value("Buying Settings", "maintain_same_rate_action")
+			settings_doc = "Buying Settings"
 		else:
-			to_disable = "Maintain same rate throughout Sales cycle"
-			settings_page = "Selling Settings"
+			action = frappe.db.get_single_value("Selling Settings", "maintain_same_rate_action")
+			settings_doc = "Selling Settings"
 
 		for ref_dt, ref_dn_field, ref_link_field in ref_details:
 			for d in self.get("items"):
@@ -132,17 +133,22 @@ class TransactionBase(StatusUpdater):
 					ref_rate = frappe.db.get_value(ref_dt + " Item", d.get(ref_link_field), "rate")
 
 					if abs(flt(d.rate - ref_rate, d.precision("rate"))) >= .01:
-						frappe.msgprint(_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ")
-							.format(d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate))
-						frappe.throw(_("To allow different rates, disable the {0} checkbox in {1}.")
-							.format(frappe.bold(_(to_disable)),
-							get_link_to_form(settings_page, settings_page, frappe.bold(settings_page))))
+						if action == "Stop":
+							role_allowed_to_override = frappe.db.get_single_value(settings_doc, 'role_to_override_stop_action')
+
+							if role_allowed_to_override not in frappe.get_roles():
+								frappe.throw(_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
+									d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate))
+						else:
+							frappe.msgprint(_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
+								d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate), title=_("Warning"), indicator="orange")
+
 
 	def get_link_filters(self, for_doctype):
 		if hasattr(self, "prev_link_mapper") and self.prev_link_mapper.get(for_doctype):
 			fieldname = self.prev_link_mapper[for_doctype]["fieldname"]
 
-			values = filter(None, tuple([item.as_dict()[fieldname] for item in self.items]))
+			values = filter(None, tuple(item.as_dict()[fieldname] for item in self.items))
 
 			if values:
 				ret = {
@@ -156,6 +162,26 @@ class TransactionBase(StatusUpdater):
 			ret = None
 
 		return ret
+
+	def reset_default_field_value(self, default_field: str, child_table: str, child_table_field: str):
+		""" Reset "Set default X" fields on forms to avoid confusion.
+
+			example:
+				doc = {
+					"set_from_warehouse": "Warehouse A",
+					"items": [{"from_warehouse": "warehouse B"}, {"from_warehouse": "warehouse A"}],
+				}
+				Since this has dissimilar values in child table, the default field will be erased.
+
+				doc.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
+			"""
+		child_table_values = set()
+
+		for row in self.get(child_table):
+			child_table_values.add(row.get(child_table_field))
+
+		if len(child_table_values) > 1:
+			self.set(default_field, None)
 
 def delete_events(ref_type, ref_name):
 	events = frappe.db.sql_list(""" SELECT
@@ -175,7 +201,7 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 	if isinstance(qty_fields, string_types):
 		qty_fields = [qty_fields]
 
-	distinct_uoms = list(set([d.get(uom_field) for d in doc.get_all_children()]))
+	distinct_uoms = list(set(d.get(uom_field) for d in doc.get_all_children()))
 	integer_uoms = list(filter(lambda uom: frappe.db.get_value("UOM", uom,
 		"must_be_whole_number", cache=True) or None, distinct_uoms))
 

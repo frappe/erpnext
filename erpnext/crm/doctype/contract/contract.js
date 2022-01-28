@@ -15,7 +15,7 @@ frappe.ui.form.on("Contract", {
 						let contract_template = r.message.contract_template;
 						frm.set_value("contract_terms", r.message.contract_terms);
 						frm.set_value("requires_fulfilment", contract_template.requires_fulfilment);
-						
+
 						if (frm.doc.requires_fulfilment) {
 							// Populate the fulfilment terms table from a contract template, if any
 							r.message.contract_template.fulfilment_terms.forEach(element => {
@@ -23,7 +23,7 @@ frappe.ui.form.on("Contract", {
 								d.requirement = element.requirement;
 							});
 							frm.refresh_field("fulfilment_terms");
-						}		
+						}
 					}
 				}
 			});

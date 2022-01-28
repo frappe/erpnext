@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe.model.document import Document
-from frappe.utils import flt, today
+from frappe.utils import flt
+
 
 class TherapyPlan(Document):
 	def validate(self):
@@ -33,6 +33,7 @@ class TherapyPlan(Document):
 		self.db_set('total_sessions', total_sessions)
 		self.db_set('total_sessions_completed', total_sessions_completed)
 
+	@frappe.whitelist()
 	def set_therapy_details_from_template(self):
 		# Add therapy types in the child table
 		self.set('therapy_plan_details', [])
@@ -60,8 +61,6 @@ def make_therapy_session(therapy_plan, patient, therapy_type, company, appointme
 	therapy_session.exercises = therapy_type.exercises
 	therapy_session.appointment = appointment
 
-	if frappe.flags.in_test:
-		therapy_session.start_date = today()
 	return therapy_session.as_dict()
 
 

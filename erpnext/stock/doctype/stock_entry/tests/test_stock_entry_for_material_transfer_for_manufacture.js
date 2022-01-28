@@ -31,4 +31,3 @@ QUnit.test("test material Transfer to manufacture", function(assert) {
 		() => done()
 	]);
 });
-

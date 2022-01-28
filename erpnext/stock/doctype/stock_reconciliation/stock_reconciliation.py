@@ -1,16 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
-import frappe.defaults
-from frappe import msgprint, _
-from frappe.utils import cstr, flt, cint
-from erpnext.controllers.stock_controller import StockController
+
+import frappe
+from frappe import _, msgprint
+from frappe.utils import cint, cstr, flt
+
+import erpnext
 from erpnext.accounts.utils import get_company_default
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.utils import get_stock_balance, get_incoming_rate, get_available_serial_nos
+from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_batch_qty
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.utils import get_stock_balance
+
 
 class OpeningEntryAccountError(frappe.ValidationError): pass
 class EmptyStockReconciliationItemsError(frappe.ValidationError): pass
@@ -31,6 +33,7 @@ class StockReconciliation(StockController):
 		self.validate_expense_account()
 		self.validate_customer_provided_item()
 		self.set_zero_value_for_customer_provided_items()
+		self.clean_serial_nos()
 		self.set_total_qty_and_amount()
 		self.validate_putaway_capacity()
 
@@ -72,7 +75,7 @@ class StockReconciliation(StockController):
 
 				if item_dict.get("serial_nos"):
 					item.current_serial_no = item_dict.get("serial_nos")
-					if self.purpose == "Stock Reconciliation":
+					if self.purpose == "Stock Reconciliation" and not item.serial_no:
 						item.serial_no = item.current_serial_no
 
 				item.current_qty = item_dict.get("qty")
@@ -96,7 +99,7 @@ class StockReconciliation(StockController):
 
 	def validate_data(self):
 		def _get_msg(row_num, msg):
-			return _("Row # {0}: ").format(row_num+1) + msg
+			return _("Row # {0}:").format(row_num+1) + " " + msg
 
 		self.validation_messages = []
 		item_warehouse_combinations = []
@@ -158,8 +161,11 @@ class StockReconciliation(StockController):
 			raise frappe.ValidationError(self.validation_messages)
 
 	def validate_item(self, item_code, row):
-		from erpnext.stock.doctype.item.item import validate_end_of_life, \
-			validate_is_stock_item, validate_cancelled_item
+		from erpnext.stock.doctype.item.item import (
+			validate_cancelled_item,
+			validate_end_of_life,
+			validate_is_stock_item,
+		)
 
 		# using try except to catch all validation msgs and display together
 
@@ -167,8 +173,8 @@ class StockReconciliation(StockController):
 			item = frappe.get_doc("Item", item_code)
 
 			# end of life and stock item
-			validate_end_of_life(item_code, item.end_of_life, item.disabled, verbose=0)
-			validate_is_stock_item(item_code, item.is_stock_item, verbose=0)
+			validate_end_of_life(item_code, item.end_of_life, item.disabled)
+			validate_is_stock_item(item_code, item.is_stock_item)
 
 			# item should not be serialized
 			if item.has_serial_no and not row.serial_no and not item.serial_no_series:
@@ -179,10 +185,10 @@ class StockReconciliation(StockController):
 				raise frappe.ValidationError(_("Batch no is required for batched item {0}").format(item_code))
 
 			# docstatus should be < 2
-			validate_cancelled_item(item_code, item.docstatus, verbose=0)
+			validate_cancelled_item(item_code, item.docstatus)
 
 		except Exception as e:
-			self.validation_messages.append(_("Row # ") + ("%d: " % (row.idx)) + cstr(e))
+			self.validation_messages.append(_("Row #") + " " + ("%d: " % (row.idx)) + cstr(e))
 
 	def update_stock_ledger(self):
 		"""	find difference between current and expected entries
@@ -357,6 +363,7 @@ class StockReconciliation(StockController):
 			if row.current_qty:
 				data.actual_qty = -1 * row.current_qty
 				data.qty_after_transaction = flt(row.current_qty)
+				data.previous_qty_after_transaction = flt(row.qty)
 				data.valuation_rate = flt(row.current_valuation_rate)
 				data.stock_value = data.qty_after_transaction * data.valuation_rate
 				data.stock_value_difference = -1 * flt(row.amount_difference)
@@ -388,7 +395,7 @@ class StockReconciliation(StockController):
 				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
 
 			sl_entries.reverse()
-			allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
+			allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
 			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
 
 
@@ -398,23 +405,24 @@ class StockReconciliation(StockController):
 		merge_similar_entries = {}
 
 		for d in sl_entries:
-			if not d.serial_no or d.actual_qty < 0:
+			if not d.serial_no or flt(d.get("actual_qty")) < 0:
 				new_sl_entries.append(d)
 				continue
 
 			key = (d.item_code, d.warehouse)
 			if key not in merge_similar_entries:
+				d.total_amount = (d.actual_qty * d.valuation_rate)
 				merge_similar_entries[key] = d
 			elif d.serial_no:
 				data = merge_similar_entries[key]
 				data.actual_qty += d.actual_qty
 				data.qty_after_transaction += d.qty_after_transaction
 
-				data.valuation_rate = (data.valuation_rate + d.valuation_rate) / data.actual_qty
+				data.total_amount += (d.actual_qty * d.valuation_rate)
+				data.valuation_rate = (data.total_amount) / data.actual_qty
 				data.serial_no += '\n' + d.serial_no
 
-				if data.incoming_rate:
-					data.incoming_rate = (data.incoming_rate + d.incoming_rate) / data.actual_qty
+				data.incoming_rate = (data.total_amount) / data.actual_qty
 
 		for key, value in merge_similar_entries.items():
 			new_sl_entries.append(value)
@@ -469,48 +477,138 @@ class StockReconciliation(StockController):
 	def submit(self):
 		if len(self.items) > 100:
 			msgprint(_("The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage"))
-			self.queue_action('submit')
+			self.queue_action('submit', timeout=2000)
 		else:
 			self._submit()
 
-@frappe.whitelist()
-def get_items(warehouse, posting_date, posting_time, company):
-	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
-	items = frappe.db.sql("""
-		select i.name, i.item_name, bin.warehouse
-		from tabBin bin, tabItem i
-		where i.name=bin.item_code and i.disabled=0 and i.is_stock_item = 1
-		and i.has_variants = 0 and i.has_serial_no = 0 and i.has_batch_no = 0
-		and exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=bin.warehouse)
-	""", (lft, rgt))
+	def cancel(self):
+		if len(self.items) > 100:
+			msgprint(_("The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Submitted stage"))
+			self.queue_action('cancel', timeout=2000)
+		else:
+			self._cancel()
 
-	items += frappe.db.sql("""
-		select i.name, i.item_name, id.default_warehouse
-		from tabItem i, `tabItem Default` id
-		where i.name = id.parent
-			and exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=id.default_warehouse)
-			and i.is_stock_item = 1 and i.has_serial_no = 0 and i.has_batch_no = 0
-			and i.has_variants = 0 and i.disabled = 0 and id.company=%s
-		group by i.name
-	""", (lft, rgt, company))
+@frappe.whitelist()
+def get_items(warehouse, posting_date, posting_time, company, item_code=None, ignore_empty_stock=False):
+	ignore_empty_stock = cint(ignore_empty_stock)
+	items = [frappe._dict({
+		'item_code': item_code,
+		'warehouse': warehouse
+	})]
+
+	if not item_code:
+		items = get_items_for_stock_reco(warehouse, company)
 
 	res = []
-	for d in set(items):
-		stock_bal = get_stock_balance(d[0], d[2], posting_date, posting_time,
-			with_valuation_rate=True)
+	itemwise_batch_data = get_itemwise_batch(warehouse, posting_date, company, item_code)
 
-		if frappe.db.get_value("Item", d[0], "disabled") == 0:
-			res.append({
-				"item_code": d[0],
-				"warehouse": d[2],
-				"qty": stock_bal[0],
-				"item_name": d[1],
-				"valuation_rate": stock_bal[1],
-				"current_qty": stock_bal[0],
-				"current_valuation_rate": stock_bal[1]
-			})
+	for d in items:
+		if d.item_code in itemwise_batch_data:
+			valuation_rate = get_stock_balance(d.item_code, d.warehouse,
+				posting_date, posting_time, with_valuation_rate=True)[1]
+
+			for row in itemwise_batch_data.get(d.item_code):
+				if ignore_empty_stock and not row.qty:
+					continue
+
+				args = get_item_data(row, row.qty, valuation_rate)
+				res.append(args)
+		else:
+			stock_bal = get_stock_balance(d.item_code, d.warehouse, posting_date, posting_time,
+				with_valuation_rate=True , with_serial_no=cint(d.has_serial_no))
+			qty, valuation_rate, serial_no = stock_bal[0], stock_bal[1], stock_bal[2] if cint(d.has_serial_no) else ''
+
+			if ignore_empty_stock and not stock_bal[0]:
+					continue
+
+			args = get_item_data(d, qty, valuation_rate, serial_no)
+
+			res.append(args)
 
 	return res
+
+def get_items_for_stock_reco(warehouse, company):
+	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+	items = frappe.db.sql(f"""
+		select
+			i.name as item_code, i.item_name, bin.warehouse as warehouse, i.has_serial_no, i.has_batch_no
+		from
+			tabBin bin, tabItem i
+		where
+			i.name = bin.item_code
+			and IFNULL(i.disabled, 0) = 0
+			and i.is_stock_item = 1
+			and i.has_variants = 0
+			and exists(
+				select name from `tabWarehouse` where lft >= {lft} and rgt <= {rgt} and name = bin.warehouse
+			)
+	""", as_dict=1)
+
+	items += frappe.db.sql("""
+		select
+			i.name as item_code, i.item_name, id.default_warehouse as warehouse, i.has_serial_no, i.has_batch_no
+		from
+			tabItem i, `tabItem Default` id
+		where
+			i.name = id.parent
+			and exists(
+				select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=id.default_warehouse
+			)
+			and i.is_stock_item = 1
+			and i.has_variants = 0
+			and IFNULL(i.disabled, 0) = 0
+			and id.company = %s
+		group by i.name
+	""", (lft, rgt, company), as_dict=1)
+
+	# remove duplicates
+	# check if item-warehouse key extracted from each entry exists in set iw_keys
+	# and update iw_keys
+	iw_keys = set()
+	items = [item for item in items if [(item.item_code, item.warehouse) not in iw_keys, iw_keys.add((item.item_code, item.warehouse))][0]]
+
+	return items
+
+def get_item_data(row, qty, valuation_rate, serial_no=None):
+	return {
+		'item_code': row.item_code,
+		'warehouse': row.warehouse,
+		'qty': qty,
+		'item_name': row.item_name,
+		'valuation_rate': valuation_rate,
+		'current_qty': qty,
+		'current_valuation_rate': valuation_rate,
+		'current_serial_no': serial_no,
+		'serial_no': serial_no,
+		'batch_no': row.get('batch_no')
+	}
+
+def get_itemwise_batch(warehouse, posting_date, company, item_code=None):
+	from erpnext.stock.report.batch_wise_balance_history.batch_wise_balance_history import execute
+	itemwise_batch_data = {}
+
+	filters = frappe._dict({
+		'warehouse': warehouse,
+		'from_date': posting_date,
+		'to_date': posting_date,
+		'company': company
+	})
+
+	if item_code:
+		filters.item_code = item_code
+
+	columns, data = execute(filters)
+
+	for row in data:
+		itemwise_batch_data.setdefault(row[0], []).append(frappe._dict({
+			'item_code': row[0],
+			'warehouse': warehouse,
+			'qty': row[8],
+			'item_name': row[1],
+			'batch_no': row[4]
+		}))
+
+	return itemwise_batch_data
 
 @frappe.whitelist()
 def get_stock_balance_for(item_code, warehouse,
@@ -519,6 +617,11 @@ def get_stock_balance_for(item_code, warehouse,
 
 	item_dict = frappe.db.get_value("Item", item_code,
 		["has_serial_no", "has_batch_no"], as_dict=1)
+
+	if not item_dict:
+		# In cases of data upload to Items table
+		msg = _("Item {} does not exist.").format(item_code)
+		frappe.throw(msg, title=_("Missing"))
 
 	serial_nos = ""
 	with_serial_no = True if item_dict.get("has_serial_no") else False

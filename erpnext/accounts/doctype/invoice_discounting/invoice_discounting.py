@@ -1,14 +1,20 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, json, erpnext
+
+import json
+
+import frappe
 from frappe import _
-from frappe.utils import flt, getdate, nowdate, add_days
-from erpnext.controllers.accounts_controller import AccountsController
+from frappe.utils import add_days, flt, getdate, nowdate
+
+import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
 from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from erpnext.controllers.accounts_controller import AccountsController
+
 
 class InvoiceDiscounting(AccountsController):
 	def validate(self):
@@ -42,18 +48,18 @@ class InvoiceDiscounting(AccountsController):
 					record.idx, frappe.bold(actual_outstanding), frappe.bold(record.sales_invoice)))
 
 	def calculate_total_amount(self):
-		self.total_amount = sum([flt(d.outstanding_amount) for d in self.invoices])
+		self.total_amount = sum(flt(d.outstanding_amount) for d in self.invoices)
 
 	def on_submit(self):
 		self.update_sales_invoice()
 		self.make_gl_entries()
 
 	def on_cancel(self):
-		self.set_status()
+		self.set_status(cancel=1)
 		self.update_sales_invoice()
 		self.make_gl_entries()
 
-	def set_status(self, status=None):
+	def set_status(self, status=None, cancel=0):
 		if status:
 			self.status = status
 			self.db_set("status", status)
@@ -65,6 +71,9 @@ class InvoiceDiscounting(AccountsController):
 				self.status = "Sanctioned"
 			elif self.docstatus == 2:
 				self.status = "Cancelled"
+
+		if cancel:
+			self.db_set('status', self.status, update_modified = True)
 
 	def update_sales_invoice(self):
 		for d in self.invoices:
@@ -125,6 +134,7 @@ class InvoiceDiscounting(AccountsController):
 
 		make_gl_entries(gl_entries, cancel=(self.docstatus == 2), update_outstanding='No')
 
+	@frappe.whitelist()
 	def create_disbursement_entry(self):
 		je = frappe.new_doc("Journal Entry")
 		je.voucher_type = 'Journal Entry'
@@ -174,6 +184,7 @@ class InvoiceDiscounting(AccountsController):
 
 		return je
 
+	@frappe.whitelist()
 	def close_loan(self):
 		je = frappe.new_doc("Journal Entry")
 		je.voucher_type = 'Journal Entry'

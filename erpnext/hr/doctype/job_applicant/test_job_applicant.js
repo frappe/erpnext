@@ -26,4 +26,3 @@ QUnit.test("Test: Job Opening [HR]", function (assert) {
 		() => done()
 	]);
 });
-

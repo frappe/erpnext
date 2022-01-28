@@ -27,20 +27,26 @@
   "payment_accounts_section",
   "party_balance",
   "paid_from",
+  "paid_from_account_type",
   "paid_from_account_currency",
   "paid_from_account_balance",
   "column_break_18",
   "paid_to",
+  "paid_to_account_type",
   "paid_to_account_currency",
   "paid_to_account_balance",
   "payment_amounts_section",
   "paid_amount",
+  "paid_amount_after_tax",
   "source_exchange_rate",
   "base_paid_amount",
+  "base_paid_amount_after_tax",
   "column_break_21",
   "received_amount",
+  "received_amount_after_tax",
   "target_exchange_rate",
   "base_received_amount",
+  "base_received_amount_after_tax",
   "section_break_14",
   "get_outstanding_invoice",
   "references",
@@ -52,6 +58,16 @@
   "unallocated_amount",
   "difference_amount",
   "write_off_difference_amount",
+  "taxes_and_charges_section",
+  "purchase_taxes_and_charges_template",
+  "sales_taxes_and_charges_template",
+  "column_break_55",
+  "apply_tax_withholding_amount",
+  "tax_withholding_category",
+  "section_break_56",
+  "taxes",
+  "base_total_taxes_and_charges",
+  "total_taxes_and_charges",
   "deductions_or_loss_section",
   "deductions",
   "transaction_references",
@@ -320,6 +336,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "doc.received_amount",
    "fieldname": "base_received_amount",
    "fieldtype": "Currency",
    "label": "Received Amount (Company Currency)",
@@ -424,7 +441,8 @@
    "depends_on": "eval:(doc.paid_from && doc.paid_to)",
    "fieldname": "reference_no",
    "fieldtype": "Data",
-   "label": "Cheque/Reference No"
+   "label": "Cheque/Reference No",
+   "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')"
   },
   {
    "fieldname": "column_break_23",
@@ -436,6 +454,7 @@
    "fieldname": "reference_date",
    "fieldtype": "Date",
    "label": "Cheque/Reference Date",
+   "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')",
    "search_index": 1
   },
   {
@@ -584,15 +603,128 @@
    "fieldname": "custom_remarks",
    "fieldtype": "Check",
    "label": "Custom Remarks"
+  },
+  {
+   "depends_on": "eval:doc.apply_tax_withholding_amount",
+   "fieldname": "tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Category",
+   "mandatory_depends_on": "eval:doc.apply_tax_withholding_amount",
+   "options": "Tax Withholding Category"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.party_type == 'Supplier'",
+   "fieldname": "apply_tax_withholding_amount",
+   "fieldtype": "Check",
+   "label": "Apply Tax Withholding Amount"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "taxes_and_charges_section",
+   "fieldtype": "Section Break",
+   "label": "Taxes and Charges"
+  },
+  {
+   "depends_on": "eval:doc.party_type == 'Supplier'",
+   "fieldname": "purchase_taxes_and_charges_template",
+   "fieldtype": "Link",
+   "label": "Taxes and Charges Template",
+   "options": "Purchase Taxes and Charges Template"
+  },
+  {
+   "depends_on": "eval: doc.party_type == 'Customer'",
+   "fieldname": "sales_taxes_and_charges_template",
+   "fieldtype": "Link",
+   "label": "Taxes and Charges Template",
+   "options": "Sales Taxes and Charges Template"
+  },
+  {
+   "depends_on": "eval: doc.party_type == 'Supplier' || doc.party_type == 'Customer'",
+   "fieldname": "taxes",
+   "fieldtype": "Table",
+   "label": "Advance Taxes and Charges",
+   "options": "Advance Taxes and Charges"
+  },
+  {
+   "fieldname": "base_total_taxes_and_charges",
+   "fieldtype": "Currency",
+   "label": "Total Taxes and Charges (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_taxes_and_charges",
+   "fieldtype": "Currency",
+   "label": "Total Taxes and Charges",
+   "read_only": 1
+  },
+  {
+   "fieldname": "paid_amount_after_tax",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Paid Amount After Tax",
+   "options": "paid_from_account_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_paid_amount_after_tax",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Paid Amount After Tax (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_55",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_56",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "depends_on": "eval:doc.received_amount && doc.payment_type != 'Internal Transfer'",
+   "fieldname": "received_amount_after_tax",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Received Amount After Tax",
+   "options": "paid_to_account_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "doc.received_amount",
+   "fieldname": "base_received_amount_after_tax",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Received Amount After Tax (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "paid_from.account_type",
+   "fieldname": "paid_from_account_type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Paid From Account Type"
+  },
+  {
+   "fetch_from": "paid_to.account_type",
+   "fieldname": "paid_to_account_type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Paid To Account Type"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-08 13:05:16.958866",
+ "modified": "2021-11-24 18:58:24.919764",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

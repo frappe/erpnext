@@ -1,9 +1,14 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import frappe, erpnext, json
+import json
+
+import frappe
 from frappe import _
-from frappe.utils import nowdate, get_first_day, get_last_day, add_months
+from frappe.utils import add_months, nowdate
+
+import erpnext
+
 
 def get_data():
 	return frappe._dict({
@@ -43,7 +48,6 @@ def get_charts():
 	return [{
 		"doctype": "Dashboard Chart",
 		"based_on": "modified",
-		"time_interval": "Yearly",
 		"chart_type": "Sum",
 		"chart_name": _("Produced Quantity"),
 		"name": "Produced Quantity",
@@ -60,7 +64,6 @@ def get_charts():
 	}, {
 		"doctype": "Dashboard Chart",
 		"based_on": "creation",
-		"time_interval": "Yearly",
 		"chart_type": "Sum",
 		"chart_name": _("Completed Operation"),
 		"name": "Completed Operation",

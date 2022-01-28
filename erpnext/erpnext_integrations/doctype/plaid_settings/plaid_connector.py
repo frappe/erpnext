@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import frappe
 import plaid
 import requests
-from plaid.errors import APIError, ItemError, InvalidRequestError
-
-import frappe
 from frappe import _
+from plaid.errors import APIError, InvalidRequestError, ItemError
 
 
 class PlaidConnector():
@@ -50,7 +48,7 @@ class PlaidConnector():
 				"secret": self.settings.plaid_secret,
 				"products": self.products,
 			})
-		
+
 		return args
 
 	def get_link_token(self, update_mode=False):
@@ -99,5 +97,7 @@ class PlaidConnector():
 				response = self.client.Transactions.get(self.access_token, start_date=start_date, end_date=end_date, offset=len(transactions))
 				transactions.extend(response["transactions"])
 			return transactions
+		except ItemError as e:
+			raise e
 		except Exception:
 			frappe.log_error(frappe.get_traceback(), _("Plaid transactions sync error"))

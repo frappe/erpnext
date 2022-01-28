@@ -1,6 +1,7 @@
 import frappe
 from frappe.permissions import add_permission, update_permission_property
 
+
 def execute():
 	company = frappe.get_all('Company', filters = {'country': 'India'})
 	if not company:

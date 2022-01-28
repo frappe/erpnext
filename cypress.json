@@ -1,0 +1,11 @@
+{
+    "baseUrl": "http://test_site:8000",
+    "projectId": "da59y9",
+    "adminPassword": "admin",
+    "defaultCommandTimeout": 20000,
+    "pageLoadTimeout": 15000,
+    "retries": {
+      "runMode": 2,
+      "openMode": 2
+    }
+}

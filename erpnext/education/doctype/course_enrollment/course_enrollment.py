@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
+from functools import reduce
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form
-from functools import reduce
+
 
 class CourseEnrollment(Document):
 	def validate(self):
@@ -41,7 +42,7 @@ class CourseEnrollment(Document):
 			frappe.throw(_("Student is already enrolled via Course Enrollment {0}").format(
 				get_link_to_form("Course Enrollment", enrollment)), title=_('Duplicate Entry'))
 
-	def add_quiz_activity(self, quiz_name, quiz_response, answers, score, status):
+	def add_quiz_activity(self, quiz_name, quiz_response, answers, score, status, time_taken):
 		result = {k: ('Correct' if v else 'Wrong') for k,v in answers.items()}
 		result_data = []
 		for key in answers:
@@ -66,7 +67,8 @@ class CourseEnrollment(Document):
 			"activity_date": frappe.utils.datetime.datetime.now(),
 			"result": result_data,
 			"score": score,
-			"status": status
+			"status": status,
+			"time_taken": time_taken
 			}).insert(ignore_permissions = True)
 
 	def add_activity(self, content_type, content):

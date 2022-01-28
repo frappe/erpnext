@@ -99,4 +99,3 @@ frappe.ui.form.on('Incoming Call Settings', {
 		validate_call_schedule(frm.doc.call_handling_schedule);
 	}
 });
-

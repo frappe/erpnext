@@ -1,6 +1,7 @@
-from __future__ import unicode_literals
-import erpnext.education.utils as utils
+
 import frappe
+
+import erpnext.education.utils as utils
 
 no_cache = 1
 
@@ -35,7 +36,7 @@ def get_contents(topic, course, program):
 				progress.append({'content': content, 'content_type': content.doctype, 'completed': status})
 			elif content.doctype == 'Quiz':
 				if student:
-					status, score, result = utils.check_quiz_completion(content, course_enrollment.name)
+					status, score, result, time_taken = utils.check_quiz_completion(content, course_enrollment.name)
 				else:
 					status = False
 					score = None

@@ -1,45 +1,51 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
-import frappe
 import unittest
 
-test_dependencies = ["Customer", "Supplier"]
+import frappe
+from frappe.cache_manager import clear_doctype_cache
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
-from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import get_temporary_opening_account
+
+from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import (
+	get_temporary_opening_account,
+)
+
+test_dependencies = ["Customer", "Supplier"]
 
 class TestOpeningInvoiceCreationTool(unittest.TestCase):
 	def setUp(self):
 		if not frappe.db.exists("Company", "_Test Opening Invoice Company"):
 			make_company()
 
-	def make_invoices(self, invoice_type="Sales", company=None, party_1=None, party_2=None):
+	def make_invoices(self, invoice_type="Sales", company=None, party_1=None, party_2=None, invoice_number=None):
 		doc = frappe.get_single("Opening Invoice Creation Tool")
 		args = get_opening_invoice_creation_dict(invoice_type=invoice_type, company=company,
-			party_1=party_1, party_2=party_2)
+			party_1=party_1, party_2=party_2, invoice_number=invoice_number)
 		doc.update(args)
 		return doc.make_invoices()
 
 	def test_opening_sales_invoice_creation(self):
 		property_setter = make_property_setter("Sales Invoice", "update_stock", "default", 1, "Check")
-		invoices = self.make_invoices(company="_Test Opening Invoice Company")
+		try:
+			invoices = self.make_invoices(company="_Test Opening Invoice Company")
 
-		self.assertEqual(len(invoices), 2)
-		expected_value = {
-			"keys": ["customer", "outstanding_amount", "status"],
-			0: ["_Test Customer", 300, "Overdue"],
-			1: ["_Test Customer 1", 250, "Overdue"],
-		}
-		self.check_expected_values(invoices, expected_value)
+			self.assertEqual(len(invoices), 2)
+			expected_value = {
+				"keys": ["customer", "outstanding_amount", "status"],
+				0: ["_Test Customer", 300, "Overdue"],
+				1: ["_Test Customer 1", 250, "Overdue"],
+			}
+			self.check_expected_values(invoices, expected_value)
 
-		si = frappe.get_doc("Sales Invoice", invoices[0])
+			si = frappe.get_doc("Sales Invoice", invoices[0])
 
-		# Check if update stock is not enabled
-		self.assertEqual(si.update_stock, 0)
+			# Check if update stock is not enabled
+			self.assertEqual(si.update_stock, 0)
 
-		property_setter.delete()
+		finally:
+			property_setter.delete()
+			clear_doctype_cache("Sales Invoice")
 
 	def check_expected_values(self, invoices, expected_value, invoice_type="Sales"):
 		doctype = "Sales Invoice" if invoice_type == "Sales" else "Purchase Invoice"
@@ -86,6 +92,20 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 		# teardown
 		frappe.db.set_value("Company", company, "default_receivable_account", old_default_receivable_account)
 
+	def test_renaming_of_invoice_using_invoice_number_field(self):
+		company = "_Test Opening Invoice Company"
+		party_1, party_2 = make_customer("Customer A"), make_customer("Customer B")
+		self.make_invoices(company=company, party_1=party_1, party_2=party_2, invoice_number="TEST-NEW-INV-11")
+
+		sales_inv1 = frappe.get_all('Sales Invoice', filters={'customer':'Customer A'})[0].get("name")
+		sales_inv2 = frappe.get_all('Sales Invoice', filters={'customer':'Customer B'})[0].get("name")
+		self.assertEqual(sales_inv1, "TEST-NEW-INV-11")
+
+		#teardown
+		for inv in [sales_inv1, sales_inv2]:
+			doc = frappe.get_doc('Sales Invoice', inv)
+			doc.cancel()
+
 def get_opening_invoice_creation_dict(**args):
 	party = "Customer" if args.get("invoice_type", "Sales") == "Sales" else "Supplier"
 	company = args.get("company", "_Test Company")
@@ -101,7 +121,8 @@ def get_opening_invoice_creation_dict(**args):
 				"item_name": "Opening Item",
 				"due_date": "2016-09-10",
 				"posting_date": "2016-09-05",
-				"temporary_opening_account": get_temporary_opening_account(company)
+				"temporary_opening_account": get_temporary_opening_account(company),
+				"invoice_number": args.get("invoice_number")
 			},
 			{
 				"qty": 2.0,
@@ -110,7 +131,8 @@ def get_opening_invoice_creation_dict(**args):
 				"item_name": "Opening Item",
 				"due_date": "2016-09-10",
 				"posting_date": "2016-09-05",
-				"temporary_opening_account": get_temporary_opening_account(company)
+				"temporary_opening_account": get_temporary_opening_account(company),
+				"invoice_number": None
 			}
 		]
 	})
@@ -126,7 +148,7 @@ def make_company():
 	company.company_name = "_Test Opening Invoice Company"
 	company.abbr = "_TOIC"
 	company.default_currency = "INR"
-	company.country = "India"
+	company.country = "Pakistan"
 	company.insert()
 	return company
 

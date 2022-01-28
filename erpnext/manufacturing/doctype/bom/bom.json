@@ -36,6 +36,9 @@
   "materials_section",
   "inspection_required",
   "quality_inspection_template",
+  "column_break_31",
+  "bom_level",
+  "section_break_33",
   "items",
   "scrap_section",
   "scrap_items",
@@ -193,6 +196,7 @@
   },
   {
    "default": "Work Order",
+   "depends_on": "with_operations",
    "fieldname": "transfer_material_against",
    "fieldtype": "Select",
    "label": "Transfer Material Against",
@@ -233,8 +237,10 @@
    "options": "Price List"
   },
   {
+   "depends_on": "with_operations",
    "fieldname": "operations_section",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "oldfieldtype": "Section Break"
   },
   {
@@ -245,6 +251,7 @@
    "options": "Routing"
   },
   {
+   "depends_on": "with_operations",
    "fieldname": "operations",
    "fieldtype": "Table",
    "label": "Operations",
@@ -430,7 +437,7 @@
    "description": "Item Image (if not slideshow)",
    "fieldname": "website_image",
    "fieldtype": "Attach Image",
-   "label": "Image"
+   "label": "Website Image"
   },
   {
    "allow_on_submit": 1,
@@ -510,6 +517,22 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "bom_level",
+   "fieldtype": "Int",
+   "label": "BOM Level",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_33",
+   "fieldtype": "Section Break",
+   "hide_border": 1
   }
  ],
  "icon": "fa fa-sitemap",
@@ -517,7 +540,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-21 12:29:32.634952",
+ "modified": "2021-11-18 13:04:16.271975",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

@@ -1,16 +1,21 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
 from frappe.utils import getdate
+
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.non_profit.doctype.donation.test_donation import create_donor, create_mode_of_payment, create_donor_type
 from erpnext.non_profit.doctype.donation.donation import create_donation
-from erpnext.non_profit.doctype.membership.test_membership import setup_membership, make_membership
+from erpnext.non_profit.doctype.donation.test_donation import (
+	create_donor,
+	create_donor_type,
+	create_mode_of_payment,
+)
 from erpnext.non_profit.doctype.member.member import create_member
+from erpnext.non_profit.doctype.membership.test_membership import make_membership, setup_membership
+
 
 class TestTaxExemption80GCertificate(unittest.TestCase):
 	def setUp(self):
@@ -49,11 +54,11 @@ class TestTaxExemption80GCertificate(unittest.TestCase):
 		certificate.insert()
 
 		# check company details
-		self.assertEquals(certificate.company_pan_number, 'BBBTI3374C')
-		self.assertEquals(certificate.company_80g_number, 'NQ.CIT(E)I2018-19/DEL-IE28615-27062018/10087')
+		self.assertEqual(certificate.company_pan_number, 'BBBTI3374C')
+		self.assertEqual(certificate.company_80g_number, 'NQ.CIT(E)I2018-19/DEL-IE28615-27062018/10087')
 
 		# check donation details
-		self.assertEquals(certificate.amount, donation.amount)
+		self.assertEqual(certificate.amount, donation.amount)
 
 		duplicate_certificate = create_80g_certificate(args)
 		# duplicate validation
@@ -83,9 +88,9 @@ class TestTaxExemption80GCertificate(unittest.TestCase):
 		certificate.get_payments()
 		certificate.insert()
 
-		self.assertEquals(len(certificate.payments), 1)
-		self.assertEquals(certificate.payments[0].amount, membership.amount)
-		self.assertEquals(certificate.payments[0].invoice_id, invoice.name)
+		self.assertEqual(len(certificate.payments), 1)
+		self.assertEqual(certificate.payments[0].amount, membership.amount)
+		self.assertEqual(certificate.payments[0].invoice_id, invoice.name)
 
 
 def create_80g_certificate(args):

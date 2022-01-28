@@ -1,16 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
-from frappe.utils import today, add_months
+from frappe.utils import add_months, today
+
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 from erpnext.hr.doctype.leave_period.test_leave_period import create_leave_period
-from erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment import create_assignment_for_multiple_employees
-from erpnext.hr.doctype.leave_policy.test_leave_policy import create_leave_policy\
+from erpnext.hr.doctype.leave_policy.test_leave_policy import create_leave_policy
+from erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment import (
+	create_assignment_for_multiple_employees,
+)
+from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
 test_dependencies = ["Leave Type"]
 
@@ -43,10 +45,6 @@ class TestLeaveEncashment(unittest.TestCase):
 
 		salary_structure = make_salary_structure("Salary Structure for Encashment", "Monthly", self.employee,
 			other_details={"leave_encashment_amount_per_day": 50})
-
-		#grant Leaves
-		frappe.get_doc("Leave Policy Assignment", leave_policy_assignments[0]).grant_leave_alloc_for_employee()
-
 
 	def tearDown(self):
 		for dt in ["Leave Period", "Leave Allocation", "Leave Ledger Entry", "Additional Salary", "Leave Encashment", "Salary Structure", "Leave Policy"]:
@@ -88,10 +86,10 @@ class TestLeaveEncashment(unittest.TestCase):
 
 		leave_ledger_entry = frappe.get_all('Leave Ledger Entry', fields='*', filters=dict(transaction_name=leave_encashment.name))
 
-		self.assertEquals(len(leave_ledger_entry), 1)
-		self.assertEquals(leave_ledger_entry[0].employee, leave_encashment.employee)
-		self.assertEquals(leave_ledger_entry[0].leave_type, leave_encashment.leave_type)
-		self.assertEquals(leave_ledger_entry[0].leaves, leave_encashment.encashable_days *  -1)
+		self.assertEqual(len(leave_ledger_entry), 1)
+		self.assertEqual(leave_ledger_entry[0].employee, leave_encashment.employee)
+		self.assertEqual(leave_ledger_entry[0].leave_type, leave_encashment.leave_type)
+		self.assertEqual(leave_ledger_entry[0].leaves, leave_encashment.encashable_days * -1)
 
 		# check if leave ledger entry is deleted on cancellation
 

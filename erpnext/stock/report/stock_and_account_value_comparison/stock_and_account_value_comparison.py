@@ -1,12 +1,14 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
-from erpnext.accounts.utils import get_stock_accounts
-from erpnext.accounts.utils import get_currency_precision
+
+import erpnext
+from erpnext.accounts.utils import get_currency_precision, get_stock_accounts
 from erpnext.stock.doctype.warehouse.warehouse import get_warehouses_based_on_account
+
 
 def execute(filters=None):
 	if not erpnext.is_perpetual_inventory_enabled(filters.company):
@@ -22,6 +24,7 @@ def get_data(report_filters):
 	data = []
 
 	filters = {
+		"is_cancelled": 0,
 		"company": report_filters.company,
 		"posting_date": ("<=", report_filters.as_on_date)
 	}
@@ -34,7 +37,7 @@ def get_data(report_filters):
 		key = (d.voucher_type, d.voucher_no)
 		gl_data = voucher_wise_gl_data.get(key) or {}
 		d.account_value = gl_data.get("account_value", 0)
-		d.difference_value = (d.stock_value - d.account_value)
+		d.difference_value = abs(d.stock_value - d.account_value)
 		if abs(d.difference_value) > 0.1:
 			data.append(d)
 

@@ -1,13 +1,16 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
+
+import json
+import unittest
 
 import frappe
-import unittest
-import json
 from frappe import _
 from frappe.utils import random_string
-from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import get_charts_for_country
+
+from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
+	get_charts_for_country,
+)
 
 test_ignore = ["Account", "Cost Center", "Payment Terms Template", "Salary Component", "Warehouse"]
 test_dependencies = ["Fiscal Year"]
@@ -86,18 +89,64 @@ class TestCompany(unittest.TestCase):
 					self.delete_mode_of_payment(template)
 					frappe.delete_doc("Company", template)
 
-	def test_delete_communication(self):
-		from erpnext.setup.doctype.company.delete_company_transactions import delete_communications
-		company = create_child_company()
-		lead = create_test_lead_in_company(company)
-		communication = create_company_communication("Lead", lead)
-		delete_communications("Lead", "Test Company", "company")
-		self.assertFalse(frappe.db.exists("Communcation", communication))
-		self.assertFalse(frappe.db.exists({"doctype":"Comunication Link", "link_name": communication}))
-
 	def delete_mode_of_payment(self, company):
 		frappe.db.sql(""" delete from `tabMode of Payment Account`
 			where company =%s """, (company))
+
+	def test_basic_tree(self, records=None):
+		min_lft = 1
+		max_rgt = frappe.db.sql("select max(rgt) from `tabCompany`")[0][0]
+
+		if not records:
+			records = test_records[2:]
+
+		for company in records:
+			lft, rgt, parent_company = frappe.db.get_value("Company", company["company_name"],
+				["lft", "rgt", "parent_company"])
+
+			if parent_company:
+				parent_lft, parent_rgt = frappe.db.get_value("Company", parent_company,
+					["lft", "rgt"])
+			else:
+				# root
+				parent_lft = min_lft - 1
+				parent_rgt = max_rgt + 1
+
+			self.assertTrue(lft)
+			self.assertTrue(rgt)
+			self.assertTrue(lft < rgt)
+			self.assertTrue(parent_lft < parent_rgt)
+			self.assertTrue(lft > parent_lft)
+			self.assertTrue(rgt < parent_rgt)
+			self.assertTrue(lft >= min_lft)
+			self.assertTrue(rgt <= max_rgt)
+
+	def get_no_of_children(self, company):
+		def get_no_of_children(companies, no_of_children):
+			children = []
+			for company in companies:
+				children += frappe.db.sql_list("""select name from `tabCompany`
+				where ifnull(parent_company, '')=%s""", company or '')
+
+			if len(children):
+				return get_no_of_children(children, no_of_children + len(children))
+			else:
+				return no_of_children
+
+		return get_no_of_children([company], 0)
+
+	def test_change_parent_company(self):
+		child_company = frappe.get_doc("Company", "_Test Company 5")
+
+		# changing parent of company
+		child_company.parent_company = "_Test Company 3"
+		child_company.save()
+		self.test_basic_tree()
+
+		# move it back
+		child_company.parent_company = "_Test Company 4"
+		child_company.save()
+		self.test_basic_tree()
 
 def create_company_communication(doctype, docname):
 	comm = frappe.get_doc({
@@ -139,4 +188,3 @@ def create_test_lead_in_company(company):
 		lead.company = company
 		lead.save()
 	return lead.name
-

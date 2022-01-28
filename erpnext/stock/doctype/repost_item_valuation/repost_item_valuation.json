@@ -21,7 +21,10 @@
   "allow_zero_rate",
   "amended_from",
   "error_section",
-  "error_log"
+  "error_log",
+  "items_to_be_repost",
+  "distinct_item_and_warehouse",
+  "current_index"
  ],
  "fields": [
   {
@@ -61,7 +64,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Queued\nIn Progress\nCompleted\nFailed",
+   "options": "Queued\nIn Progress\nCompleted\nSkipped\nFailed",
    "read_only": 1
   },
   {
@@ -142,15 +145,43 @@
    "fieldname": "allow_zero_rate",
    "fieldtype": "Check",
    "label": "Allow Zero Rate"
+  },
+  {
+   "fieldname": "items_to_be_repost",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Items to Be Repost",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "distinct_item_and_warehouse",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Distinct Item and Warehouse",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "current_index",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Current Index",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-10 07:52:12.476589",
+ "modified": "2021-11-24 02:18:10.524560",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -176,27 +207,12 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Stock User",
-   "share": 1,
-   "submit": 1,
-   "write": 1
-  },
-  {
-   "cancel": 1,
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
    "role": "Stock Manager",
    "share": 1,
    "submit": 1,
    "write": 1
   },
   {
-   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -204,7 +220,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Accounts User",
+   "role": "Accounts Manager",
    "share": 1,
    "submit": 1,
    "write": 1

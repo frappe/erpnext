@@ -1,11 +1,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
+from frappe import _, throw
 from frappe.utils import cint, cstr
-from frappe import throw, _
 from frappe.utils.nestedset import NestedSet, get_ancestors_of, get_descendants_of
+
+import erpnext
+
 
 class RootNotEditable(frappe.ValidationError): pass
 class BalanceMismatchError(frappe.ValidationError): pass
@@ -13,7 +16,7 @@ class BalanceMismatchError(frappe.ValidationError): pass
 class Account(NestedSet):
 	nsm_parent_field = 'parent_account'
 	def on_update(self):
-		if frappe.local.flags.ignore_on_update:
+		if frappe.local.flags.ignore_update_nsm:
 			return
 		else:
 			super(Account, self).on_update()
@@ -194,7 +197,7 @@ class Account(NestedSet):
 					"company": company,
 					# parent account's currency should be passed down to child account's curreny
 					# if it is None, it picks it up from default company currency, which might be unintended
-					"account_currency": self.account_currency,
+					"account_currency": erpnext.get_company_currency(company),
 					"parent_account": parent_acc_name_map[company]
 				})
 
@@ -205,8 +208,7 @@ class Account(NestedSet):
 				# update the parent company's value in child companies
 				doc = frappe.get_doc("Account", child_account)
 				parent_value_changed = False
-				for field in ['account_type', 'account_currency',
-					'freeze_account', 'balance_must_be']:
+				for field in ['account_type', 'freeze_account', 'balance_must_be']:
 					if doc.get(field) != self.get(field):
 						parent_value_changed = True
 						doc.set(field, self.get(field))
@@ -214,6 +216,7 @@ class Account(NestedSet):
 				if parent_value_changed:
 					doc.save()
 
+	@frappe.whitelist()
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
 			throw(_("Account with child nodes cannot be converted to ledger"))
@@ -224,11 +227,12 @@ class Account(NestedSet):
 			self.save()
 			return 1
 
+	@frappe.whitelist()
 	def convert_ledger_to_group(self):
 		if self.check_gle_exists():
 			throw(_("Account with existing transaction can not be converted to group."))
 		elif self.account_type and not self.flags.exclude_account_type_check:
-			throw(_("Cannot covert to Group because Account Type is selected."))
+			throw(_("Cannot convert to Group because Account Type is selected."))
 		else:
 			self.is_group = 1
 			self.save()

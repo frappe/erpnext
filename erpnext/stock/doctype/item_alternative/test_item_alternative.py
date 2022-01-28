@@ -1,23 +1,35 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
-import frappe, json
-from frappe.utils import flt
-from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
-from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
-from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt, make_rm_stock_entry
-import unittest
 
-class TestItemAlternative(unittest.TestCase):
+import json
+
+import frappe
+from frappe.utils import flt
+
+from erpnext.buying.doctype.purchase_order.purchase_order import (
+	make_purchase_receipt,
+	make_rm_stock_entry,
+)
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
+from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+	create_stock_reconciliation,
+)
+from erpnext.tests.utils import ERPNextTestCase
+
+
+class TestItemAlternative(ERPNextTestCase):
 	def setUp(self):
+		super().setUp()
 		make_items()
 
 	def test_alternative_item_for_subcontract_rm(self):
+		frappe.db.set_value('Buying Settings', None,
+			'backflush_raw_materials_of_subcontract_based_on', 'BOM')
+
 		create_stock_reconciliation(item_code='Alternate Item For A RW 1', warehouse='_Test Warehouse - _TC',
 			qty=5, rate=2000)
 		create_stock_reconciliation(item_code='Test FG A RW 2', warehouse='_Test Warehouse - _TC',
@@ -65,6 +77,8 @@ class TestItemAlternative(unittest.TestCase):
 				status = True
 
 		self.assertEqual(status, True)
+		frappe.db.set_value('Buying Settings', None,
+			'backflush_raw_materials_of_subcontract_based_on', 'Material Transferred for Subcontract')
 
 	def test_alternative_item_for_production_rm(self):
 		create_stock_reconciliation(item_code='Alternate Item For A RW 1',

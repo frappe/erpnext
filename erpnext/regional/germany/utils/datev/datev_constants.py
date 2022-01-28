@@ -455,7 +455,7 @@ ACCOUNT_NAME_COLUMNS = [
 	"Konto",
 	# Account name
 	"Kontenbeschriftung",
-	# Language of the account name 
+	# Language of the account name
 	# "de-DE" or "en-GB"
 	"Sprach-ID"
 ]

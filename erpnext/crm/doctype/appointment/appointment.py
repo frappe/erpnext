@@ -1,18 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
-import urllib
 from collections import Counter
-from datetime import timedelta
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_url, getdate
-from frappe.utils.verified_command import verify_request, get_signed_params
+from frappe.utils.verified_command import get_signed_params
 
 
 class Appointment(Document):
@@ -38,7 +34,7 @@ class Appointment(Document):
 		number_of_agents = frappe.db.get_single_value('Appointment Booking Settings', 'number_of_agents')
 		if not number_of_agents == 0:
 			if (number_of_appointments_in_same_slot >= number_of_agents):
-				frappe.throw('Time slot is not available')
+				frappe.throw(_('Time slot is not available'))
 		# Link lead
 		if not self.party:
 			lead = self.find_lead_by_email()
@@ -75,10 +71,10 @@ class Appointment(Document):
 						subject=_('Appointment Confirmation'))
 		if frappe.session.user == "Guest":
 			frappe.msgprint(
-				'Please check your email to confirm the appointment')
+				_('Please check your email to confirm the appointment'))
 		else :
 			frappe.msgprint(
-				'Appointment was created. But no lead was found. Please check the email to confirm')
+				_('Appointment was created. But no lead was found. Please check the email to confirm'))
 
 	def on_change(self):
 		# Sync Calendar
@@ -91,7 +87,7 @@ class Appointment(Document):
 
 	def set_verified(self, email):
 		if not email == self.customer_email:
-			frappe.throw('Email verification failed.')
+			frappe.throw(_('Email verification failed.'))
 		# Create new lead
 		self.create_lead_and_link()
 		# Remove unverified status
@@ -184,7 +180,7 @@ class Appointment(Document):
 		appointment_event.insert(ignore_permissions=True)
 		self.calendar_event = appointment_event.name
 		self.save(ignore_permissions=True)
-	
+
 	def _get_verify_url(self):
 		verify_route = '/book_appointment/verify'
 		params = {
@@ -235,4 +231,3 @@ def _get_employee_from_user(user):
 		# frappe.db.exists returns a tuple of a tuple
 		return frappe.get_doc('Employee', employee_docname[0][0])
 	return None
-

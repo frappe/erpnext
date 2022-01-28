@@ -13,8 +13,10 @@
   "section_break_6",
   "warehouse",
   "target_warehouse",
+  "conversion_factor",
   "column_break_9",
   "qty",
+  "rate",
   "uom",
   "section_break_9",
   "serial_no",
@@ -209,13 +211,28 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "Conversion Factor"
+  },
+  {
+   "fetch_from": "item_code.valuation_rate",
+   "fetch_if_empty": 1,
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-09-24 09:25:13.050151",
+ "modified": "2021-09-01 15:10:29.646399",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packed Item",

@@ -1,17 +1,20 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
-from frappe.utils import flt
-from frappe.model.meta import get_field_precision
 from frappe.model.document import Document
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.accounts.doctype.account.account import get_account_currency
+from frappe.model.meta import get_field_precision
+from frappe.utils import flt
+
+import erpnext
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 
 class LandedCostVoucher(Document):
+	@frappe.whitelist()
 	def get_items_from_purchase_receipts(self):
 		self.set("items", [])
 		for pr in self.get("purchase_receipts"):
@@ -40,7 +43,7 @@ class LandedCostVoucher(Document):
 
 	def validate(self):
 		self.check_mandatory()
-		self.validate_purchase_receipts()
+		self.validate_receipt_documents()
 		init_landed_taxes_and_totals(self)
 		self.set_total_taxes_and_charges()
 		if not self.get("items"):
@@ -55,14 +58,23 @@ class LandedCostVoucher(Document):
 			frappe.throw(_("Please enter Receipt Document"))
 
 
-	def validate_purchase_receipts(self):
+	def validate_receipt_documents(self):
 		receipt_documents = []
 
 		for d in self.get("purchase_receipts"):
-			if frappe.db.get_value(d.receipt_document_type, d.receipt_document, "docstatus") != 1:
-				frappe.throw(_("Receipt document must be submitted"))
-			else:
-				receipt_documents.append(d.receipt_document)
+			docstatus = frappe.db.get_value(d.receipt_document_type, d.receipt_document, "docstatus")
+			if docstatus != 1:
+				msg = f"Row {d.idx}: {d.receipt_document_type} {frappe.bold(d.receipt_document)} must be submitted"
+				frappe.throw(_(msg), title=_("Invalid Document"))
+
+			if d.receipt_document_type == "Purchase Invoice":
+				update_stock = frappe.db.get_value(d.receipt_document_type, d.receipt_document, "update_stock")
+				if not update_stock:
+					msg = _("Row {0}: Purchase Invoice {1} has no stock impact.").format(d.idx, frappe.bold(d.receipt_document))
+					msg += "<br>" + _("Please create Landed Cost Vouchers against Invoices that have 'Update Stock' enabled.")
+					frappe.throw(msg, title=_("Incorrect Invoice"))
+
+			receipt_documents.append(d.receipt_document)
 
 		for item in self.get("items"):
 			if not item.receipt_document:
@@ -77,7 +89,7 @@ class LandedCostVoucher(Document):
 					.format(item.idx, item.item_code))
 
 	def set_total_taxes_and_charges(self):
-		self.total_taxes_and_charges = sum([flt(d.base_amount) for d in self.get("taxes")])
+		self.total_taxes_and_charges = sum(flt(d.base_amount) for d in self.get("taxes"))
 
 	def set_applicable_charges_on_item(self):
 		if self.get('taxes') and self.distribute_charges_based_on != 'Distribute Manually':
@@ -103,15 +115,15 @@ class LandedCostVoucher(Document):
 		based_on = self.distribute_charges_based_on.lower()
 
 		if based_on != 'distribute manually':
-			total = sum([flt(d.get(based_on)) for d in self.get("items")])
+			total = sum(flt(d.get(based_on)) for d in self.get("items"))
 		else:
 			# consider for proportion while distributing manually
-			total = sum([flt(d.get('applicable_charges')) for d in self.get("items")])
+			total = sum(flt(d.get('applicable_charges')) for d in self.get("items"))
 
 		if not total:
 			frappe.throw(_("Total {0} for all items is zero, may be you should change 'Distribute Charges Based On'").format(based_on))
 
-		total_applicable_charges = sum([flt(d.applicable_charges) for d in self.get("items")])
+		total_applicable_charges = sum(flt(d.applicable_charges) for d in self.get("items"))
 
 		precision = get_field_precision(frappe.get_meta("Landed Cost Item").get_field("applicable_charges"),
 		currency=frappe.get_cached_value('Company',  self.company,  "default_currency"))

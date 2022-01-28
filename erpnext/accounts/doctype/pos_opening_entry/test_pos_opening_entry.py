@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
+
 
 class TestPOSOpeningEntry(unittest.TestCase):
 	pass
@@ -21,8 +21,8 @@ def create_opening_entry(pos_profile, user):
 		balance_details.append(frappe._dict({
 			'mode_of_payment': d.mode_of_payment
 		}))
-	
+
 	entry.set("balance_details", balance_details)
 	entry.submit()
-	
-	return entry.as_dict()	
+
+	return entry.as_dict()

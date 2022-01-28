@@ -1,21 +1,44 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
+
 import unittest
-import erpnext
+
 import frappe
 from dateutil.relativedelta import relativedelta
-from erpnext.accounts.utils import get_fiscal_year, getdate, nowdate
 from frappe.utils import add_months
-from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates, get_end_date
+
+import erpnext
+from erpnext.accounts.utils import get_fiscal_year, getdate, nowdate
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.payroll.doctype.salary_slip.test_salary_slip import get_salary_component_account, \
-		make_earning_salary_component, make_deduction_salary_component, create_account, make_employee_salary_slip
-from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure, create_salary_structure_assignment
-from erpnext.loan_management.doctype.loan.test_loan import create_loan, make_loan_disbursement_entry
-from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_term_loans
+from erpnext.loan_management.doctype.loan.test_loan import (
+	create_loan,
+	create_loan_accounts,
+	create_loan_type,
+	make_loan_disbursement_entry,
+)
+from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
+	process_loan_interest_accrual_for_term_loans,
+)
+from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_end_date, get_start_end_dates
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
+	create_account,
+	get_salary_component_account,
+	make_deduction_salary_component,
+	make_earning_salary_component,
+	make_employee_salary_slip,
+)
+from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
+	create_salary_structure_assignment,
+	make_salary_structure,
+)
+
+test_dependencies = ['Holiday List']
 
 class TestPayrollEntry(unittest.TestCase):
+	@classmethod
+	def setUpClass(cls):
+		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", '_Test Holiday List')
+
 	def setUp(self):
 		for dt in ["Salary Slip", "Salary Component", "Salary Component Account",
 			"Payroll Entry", "Salary Structure", "Salary Structure Assignment", "Payroll Employee Detail", "Additional Salary"]:
@@ -41,6 +64,41 @@ class TestPayrollEntry(unittest.TestCase):
 			make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date, payable_account=company_doc.default_payroll_payable_account,
 				currency=company_doc.default_currency)
 
+	def test_multi_currency_payroll_entry(self): # pylint: disable=no-self-use
+		company = erpnext.get_default_company()
+		employee = make_employee("test_muti_currency_employee@payroll.com", company=company)
+		for data in frappe.get_all('Salary Component', fields = ["name"]):
+			if not frappe.db.get_value('Salary Component Account',
+				{'parent': data.name, 'company': company}, 'name'):
+				get_salary_component_account(data.name)
+
+		company_doc = frappe.get_doc('Company', company)
+		salary_structure = make_salary_structure("_Test Multi Currency Salary Structure", "Monthly", company=company, currency='USD')
+		create_salary_structure_assignment(employee, salary_structure.name, company=company, currency='USD')
+		frappe.db.sql("""delete from `tabSalary Slip` where employee=%s""",(frappe.db.get_value("Employee", {"user_id": "test_muti_currency_employee@payroll.com"})))
+		salary_slip = get_salary_slip("test_muti_currency_employee@payroll.com", "Monthly", "_Test Multi Currency Salary Structure")
+		dates = get_start_end_dates('Monthly', nowdate())
+		payroll_entry = make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date,
+			payable_account=company_doc.default_payroll_payable_account, currency='USD', exchange_rate=70)
+		payroll_entry.make_payment_entry()
+
+		salary_slip.load_from_db()
+
+		payroll_je = salary_slip.journal_entry
+		if payroll_je:
+			payroll_je_doc = frappe.get_doc('Journal Entry', payroll_je)
+
+			self.assertEqual(salary_slip.base_gross_pay, payroll_je_doc.total_debit)
+			self.assertEqual(salary_slip.base_gross_pay, payroll_je_doc.total_credit)
+
+		payment_entry = frappe.db.sql('''
+			Select ifnull(sum(je.total_debit),0) as total_debit, ifnull(sum(je.total_credit),0) as total_credit from `tabJournal Entry` je, `tabJournal Entry Account` jea
+			Where je.name = jea.parent
+			And jea.reference_name = %s
+			''', (payroll_entry.name), as_dict=1)
+
+		self.assertEqual(salary_slip.base_net_pay, payment_entry[0].total_debit)
+		self.assertEqual(salary_slip.base_net_pay, payment_entry[0].total_credit)
 
 	def test_payroll_entry_with_employee_cost_center(self): # pylint: disable=no-self-use
 		for data in frappe.get_all('Salary Component', fields = ["name"]):
@@ -134,14 +192,22 @@ class TestPayrollEntry(unittest.TestCase):
 		salary_structure = "Test Salary Structure for Loan"
 		make_salary_structure(salary_structure, "Monthly", employee=employee_doc.name, company="_Test Company", currency=company_doc.default_currency)
 
+		if not frappe.db.exists("Loan Type", "Car Loan"):
+			create_loan_accounts()
+			create_loan_type("Car Loan", 500000, 8.4,
+				is_term_loan=1,
+				mode_of_payment='Cash',
+				payment_account='Payment Account - _TC',
+				loan_account='Loan Account - _TC',
+				interest_income_account='Interest Income Account - _TC',
+				penalty_income_account='Penalty Income Account - _TC')
+
 		loan = create_loan(applicant, "Car Loan", 280000, "Repay Over Number of Periods", 20, posting_date=add_months(nowdate(), -1))
 		loan.repay_from_salary = 1
 		loan.submit()
 
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=add_months(nowdate(), -1))
-
 		process_loan_interest_accrual_for_term_loans(posting_date=nowdate())
-
 
 		dates = get_start_end_dates('Monthly', nowdate())
 		make_payroll_entry(company="_Test Company", start_date=dates.start_date, payable_account=company_doc.default_payroll_payable_account,

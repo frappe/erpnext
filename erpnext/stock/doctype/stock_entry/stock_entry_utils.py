@@ -1,11 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
-from frappe.utils import cint, flt
 
+import frappe
+from frappe.utils import cint, flt
 from six import string_types
+
+import erpnext
+
 
 @frappe.whitelist()
 def make_stock_entry(**args):
@@ -45,6 +47,8 @@ def make_stock_entry(**args):
 		s.posting_date = args.posting_date
 	if args.posting_time:
 		s.posting_time = args.posting_time
+	if args.inspection_required:
+		s.inspection_required = args.inspection_required
 
 	# map names
 	if args.from_warehouse:

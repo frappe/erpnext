@@ -1,20 +1,24 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, nowdate, flt
-from erpnext.hr.utils import set_employee_name
-from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
-from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
+from frappe.utils import getdate, nowdate
+
 from erpnext.hr.doctype.leave_allocation.leave_allocation import get_unused_leaves
+from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
+from erpnext.hr.utils import set_employee_name, validate_active_employee
+from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import (
+	get_assigned_salary_structure,
+)
+
 
 class LeaveEncashment(Document):
 	def validate(self):
 		set_employee_name(self)
+		validate_active_employee(self.employee)
 		self.get_leave_details_for_encashment()
 		self.validate_salary_structure()
 
@@ -63,6 +67,7 @@ class LeaveEncashment(Document):
 				frappe.db.get_value('Leave Allocation', self.leave_allocation, 'total_leaves_encashed') - self.encashable_days)
 		self.create_leave_ledger_entry(submit=False)
 
+	@frappe.whitelist()
 	def get_leave_details_for_encashment(self):
 		salary_structure = get_assigned_salary_structure(self.employee, self.encashment_date or getdate(nowdate()))
 		if not salary_structure:

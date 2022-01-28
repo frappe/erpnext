@@ -1,14 +1,16 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
-from frappe.utils import today, add_months, add_days
+from frappe.utils import add_days, add_months, today
+
 from erpnext.hr.doctype.attendance_request.test_attendance_request import get_employee
-from erpnext.hr.doctype.leave_period.test_leave_period import create_leave_period
 from erpnext.hr.doctype.leave_application.leave_application import get_leave_balance_on
+from erpnext.hr.doctype.leave_period.test_leave_period import create_leave_period
+
+test_dependencies = ["Employee"]
 
 class TestCompensatoryLeaveRequest(unittest.TestCase):
 	def setUp(self):
@@ -66,19 +68,19 @@ class TestCompensatoryLeaveRequest(unittest.TestCase):
 		filters = dict(transaction_name=compensatory_leave_request.leave_allocation)
 		leave_ledger_entry = frappe.get_all('Leave Ledger Entry', fields='*', filters=filters)
 
-		self.assertEquals(len(leave_ledger_entry), 1)
-		self.assertEquals(leave_ledger_entry[0].employee, compensatory_leave_request.employee)
-		self.assertEquals(leave_ledger_entry[0].leave_type, compensatory_leave_request.leave_type)
-		self.assertEquals(leave_ledger_entry[0].leaves, 1)
+		self.assertEqual(len(leave_ledger_entry), 1)
+		self.assertEqual(leave_ledger_entry[0].employee, compensatory_leave_request.employee)
+		self.assertEqual(leave_ledger_entry[0].leave_type, compensatory_leave_request.leave_type)
+		self.assertEqual(leave_ledger_entry[0].leaves, 1)
 
 		# check reverse leave ledger entry on cancellation
 		compensatory_leave_request.cancel()
 		leave_ledger_entry = frappe.get_all('Leave Ledger Entry', fields='*', filters=filters, order_by = 'creation desc')
 
-		self.assertEquals(len(leave_ledger_entry), 2)
-		self.assertEquals(leave_ledger_entry[0].employee, compensatory_leave_request.employee)
-		self.assertEquals(leave_ledger_entry[0].leave_type, compensatory_leave_request.leave_type)
-		self.assertEquals(leave_ledger_entry[0].leaves, -1)
+		self.assertEqual(len(leave_ledger_entry), 2)
+		self.assertEqual(leave_ledger_entry[0].employee, compensatory_leave_request.employee)
+		self.assertEqual(leave_ledger_entry[0].leave_type, compensatory_leave_request.leave_type)
+		self.assertEqual(leave_ledger_entry[0].leaves, -1)
 
 def get_compensatory_leave_request(employee, leave_date=today()):
 	prev_comp_leave_req = frappe.db.get_value('Compensatory Leave Request',

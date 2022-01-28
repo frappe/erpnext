@@ -1,15 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, json
-from frappe.utils import cstr, flt
-from frappe import _
-from six import string_types
-from erpnext.manufacturing.doctype.bom.bom import get_boms_in_bottom_up_order
-from frappe.model.document import Document
+
+import json
+
 import click
+import frappe
+from frappe import _
+from frappe.model.document import Document
+from frappe.utils import cstr, flt
+from six import string_types
+
+from erpnext.manufacturing.doctype.bom.bom import get_boms_in_bottom_up_order
+
 
 class BOMUpdateTool(Document):
 	def replace_bom(self):
@@ -53,7 +56,9 @@ class BOMUpdateTool(Document):
 			rate=%s, amount=stock_qty*%s where bom_no = %s and docstatus < 2 and parenttype='BOM'""",
 			(self.new_bom, unit_cost, unit_cost, self.current_bom))
 
-	def get_parent_boms(self, bom, bom_list=[]):
+	def get_parent_boms(self, bom, bom_list=None):
+		if bom_list is None:
+			bom_list = []
 		data = frappe.db.sql("""SELECT DISTINCT parent FROM `tabBOM Item`
 			WHERE bom_no = %s AND docstatus < 2 AND parenttype='BOM'""", bom)
 

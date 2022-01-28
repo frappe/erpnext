@@ -1,13 +1,14 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils.data import comma_and
 
+
 def execute(filters=None):
-#	if not filters: filters = {}
+	# if not filters: filters = {}
 	columns = get_columns()
 	summ_data = []
 
@@ -88,7 +89,7 @@ def get_bom_stock(filters):
 			GROUP BY bom_item.item_code""".format(qty_field=qty_field, table=table, conditions=conditions, bom=bom), as_dict=1)
 
 def get_manufacturer_records():
-	details = frappe.get_list('Item Manufacturer', fields = ["manufacturer", "manufacturer_part_no", "parent"])
+	details = frappe.get_all('Item Manufacturer', fields = ["manufacturer", "manufacturer_part_no", "parent"])
 	manufacture_details = frappe._dict()
 	for detail in details:
 		dic = manufacture_details.setdefault(detail.get('parent'), {})

@@ -1,19 +1,19 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe import _
-from six import iteritems
 from email_reply_parser import EmailReplyParser
-from frappe.utils import (flt, getdate, get_url, now,
-	nowtime, get_time, today, get_datetime, add_days)
-from erpnext.controllers.queries import get_filters_cond
+from frappe import _
 from frappe.desk.reportview import get_match_cond
+from frappe.model.document import Document
+from frappe.utils import add_days, flt, get_datetime, get_time, get_url, nowtime, today
+
+from erpnext.controllers.queries import get_filters_cond
+from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
-from frappe.model.document import Document
-from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list
+
 
 class Project(Document):
 	def get_feed(self):
@@ -81,12 +81,18 @@ class Project(Document):
 
 	def calculate_start_date(self, task_details):
 		self.start_date = add_days(self.expected_start_date, task_details.start)
-		self.start_date = update_if_holiday(self.holiday_list, self.start_date)
+		self.start_date = self.update_if_holiday(self.start_date)
 		return self.start_date
 
 	def calculate_end_date(self, task_details):
 		self.end_date = add_days(self.start_date, task_details.duration)
-		return update_if_holiday(self.holiday_list, self.end_date)
+		return self.update_if_holiday(self.end_date)
+
+	def update_if_holiday(self, date):
+		holiday_list = self.holiday_list or get_holiday_list(self.company)
+		while is_holiday(holiday_list, date):
+			date = add_days(date, 1)
+		return date
 
 	def dependency_mapping(self, template_tasks, project_tasks):
 		for template_task in template_tasks:
@@ -134,6 +140,9 @@ class Project(Document):
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
+	def on_trash(self):
+		frappe.db.set_value("Sales Order", {"project": self.name}, "project", "")
+
 	def update_percent_complete(self):
 		if self.percent_complete_method == "Manual":
 			if self.status == "Completed":
@@ -172,9 +181,6 @@ class Project(Document):
 
 		if self.percent_complete == 100:
 			self.status = "Completed"
-
-		else:
-			self.status = "Open"
 
 	def update_costing(self):
 		from_time_sheet = frappe.db.sql("""select
@@ -520,8 +526,9 @@ def update_project_sales_billing():
 def create_kanban_board_if_not_exists(project):
 	from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
 
-	if not frappe.db.exists('Kanban Board', project):
-		quick_kanban_board('Task', project, 'status', project)
+	project = frappe.get_doc('Project', project)
+	if not frappe.db.exists('Kanban Board', project.project_name):
+		quick_kanban_board('Task', project.project_name, 'status', project.name)
 
 	return True
 
@@ -541,9 +548,3 @@ def set_project_status(project, status):
 
 	project.status = status
 	project.save()
-
-def update_if_holiday(holiday_list, date):
-	holiday_list = holiday_list or get_holiday_list()
-	while is_holiday(holiday_list, date):
-		date = add_days(date, 1)
-	return date

@@ -1,12 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
-from frappe.utils import flt
-from frappe import _
 
+import frappe
+from frappe import _
+from frappe.utils import flt
 from frappe.utils.nestedset import NestedSet, get_root_of
+
 
 class Territory(NestedSet):
 	nsm_parent_field = 'parent_territory'

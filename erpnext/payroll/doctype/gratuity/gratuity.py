@@ -1,14 +1,16 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
+from math import floor
+
 import frappe
 from frappe import _, bold
 from frappe.utils import flt, get_datetime, get_link_to_form
+
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
-from math import floor
+
 
 class Gratuity(AccountsController):
 	def validate(self):
@@ -207,7 +209,7 @@ def get_total_applicable_component_amount(employee, applicable_earnings_componen
 	sal_slip  = get_last_salary_slip(employee)
 	if not sal_slip:
 		frappe.throw(_("No Salary Slip is found for Employee: {0}").format(bold(employee)))
-	component_and_amounts = frappe.get_list("Salary Detail",
+	component_and_amounts = frappe.get_all("Salary Detail",
 		filters={
 			"docstatus": 1,
 			'parent': sal_slip,
@@ -242,8 +244,11 @@ def get_salary_structure(employee):
 		order_by = "from_date desc")[0].salary_structure
 
 def get_last_salary_slip(employee):
-	return frappe.get_list("Salary Slip", filters = {
+	salary_slips = frappe.get_list("Salary Slip", filters = {
 			"employee": employee, 'docstatus': 1
 		},
-		order_by = "start_date desc")[0].name
-
+		order_by = "start_date desc"
+	)
+	if not salary_slips:
+		return
+	return salary_slips[0].name

@@ -1,19 +1,21 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import json
 
 import frappe
-from frappe.model.document import Document
 from frappe import _
+from frappe.model.document import Document
 from frappe.utils import flt
 
 from erpnext import get_company_currency
-from erpnext.accounts.utils import get_balance_on
-from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import get_entries, get_amounts_not_reflected_in_system
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_paid_amount
+from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
+	get_amounts_not_reflected_in_system,
+	get_entries,
+)
+from erpnext.accounts.utils import get_balance_on
 
 
 class BankReconciliationTool(Document):
@@ -216,6 +218,8 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 	# updated clear date of all the vouchers based on the bank transaction
 	vouchers = json.loads(vouchers)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
+	company_account = frappe.db.get_value('Bank Account', transaction.bank_account, 'account')
+
 	if transaction.unallocated_amount == 0:
 		frappe.throw(_("This bank transaction is already fully reconciled"))
 	total_amount = 0
@@ -224,7 +228,7 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 		total_amount += get_paid_amount(frappe._dict({
 			'payment_document': voucher['payment_doctype'],
 			'payment_entry': voucher['payment_name'],
-		}), transaction.currency)
+		}), transaction.currency, company_account)
 
 	if total_amount > transaction.unallocated_amount:
 		frappe.throw(_("The Sum Total of Amounts of All Selected Vouchers Should be Less than the Unallocated Amount of the Bank Transaction"))
@@ -259,7 +263,7 @@ def get_linked_payments(bank_transaction_name, document_types = None):
 	return matching
 
 def check_matching(bank_account, company, transaction, document_types):
-	# combine all types of vocuhers
+	# combine all types of vouchers
 	subquery = get_queries(bank_account, company, transaction, document_types)
 	filters = {
 			"amount": transaction.unallocated_amount,
@@ -340,7 +344,13 @@ def get_pe_matching_query(amount_condition, account_from_to, transaction):
 
 def get_je_matching_query(amount_condition, transaction):
 	# get matching journal entry query
+
+	# We have mapping at the bank level
+	# So one bank could have both types of bank accounts like asset and liability
+	# So cr_or_dr should be judged only on basis of withdrawal and deposit and not account type
+	company_account = frappe.get_value("Bank Account", transaction.bank_account, "account")
 	cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
+
 	return f"""
 
 		SELECT
@@ -424,7 +434,7 @@ def get_pi_matching_query(amount_condition):
 
 def get_ec_matching_query(bank_account, company, amount_condition):
 	# get matching Expense Claim query
-	mode_of_payments = [x["parent"] for x in frappe.db.get_list("Mode of Payment Account",
+	mode_of_payments = [x["parent"] for x in frappe.db.get_all("Mode of Payment Account",
 			filters={"default_account": bank_account}, fields=["parent"])]
 	mode_of_payments = '(\'' + '\', \''.join(mode_of_payments) + '\' )'
 	company_currency = get_company_currency(company)

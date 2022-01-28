@@ -1,14 +1,21 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, ESS LLP and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
 import unittest
+
 import frappe
 from frappe.utils import getdate, nowtime
-from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_patient
+
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import (
+	get_income_account,
+	get_receivable_account,
+)
 from erpnext.healthcare.doctype.lab_test.lab_test import create_multiple
-from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account, get_income_account
-from erpnext.healthcare.doctype.patient_medical_record.test_patient_medical_record import create_lab_test_template as create_blood_test_template
+from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_patient
+from erpnext.healthcare.doctype.patient_medical_record.test_patient_medical_record import (
+	create_lab_test_template as create_blood_test_template,
+)
+
 
 class TestLabTest(unittest.TestCase):
 	def test_lab_test_item(self):
@@ -18,7 +25,7 @@ class TestLabTest(unittest.TestCase):
 
 		lab_template.disabled = 1
 		lab_template.save()
-		self.assertEquals(frappe.db.get_value('Item', lab_template.item, 'disabled'), 1)
+		self.assertEqual(frappe.db.get_value('Item', lab_template.item, 'disabled'), 1)
 
 		lab_template.reload()
 
@@ -57,7 +64,7 @@ class TestLabTest(unittest.TestCase):
 
 		# sample collection should not be created
 		lab_test.reload()
-		self.assertEquals(lab_test.sample, None)
+		self.assertEqual(lab_test.sample, None)
 
 	def test_create_lab_tests_from_sales_invoice(self):
 		sales_invoice = create_sales_invoice()

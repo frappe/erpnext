@@ -1,10 +1,11 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe
+
 from frappe import _
+
 from erpnext.accounts.report.non_billed_report import get_ordered_to_be_billed_data
+
 
 def execute(filters=None):
 	columns = get_column()

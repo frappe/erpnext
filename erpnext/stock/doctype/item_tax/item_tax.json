@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2013-02-22 01:28:01",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -6,7 +7,9 @@
  "field_order": [
   "item_tax_template",
   "tax_category",
-  "valid_from"
+  "valid_from",
+  "minimum_net_rate",
+  "maximum_net_rate"
  ],
  "fields": [
   {
@@ -33,11 +36,24 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Valid From"
+  },
+  {
+   "fieldname": "maximum_net_rate",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Maximum Net Rate"
+  },
+  {
+   "fieldname": "minimum_net_rate",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Minimum Net Rate"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-06-25 01:40:28.859752",
+ "links": [],
+ "modified": "2021-06-03 13:20:06.982303",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Tax",

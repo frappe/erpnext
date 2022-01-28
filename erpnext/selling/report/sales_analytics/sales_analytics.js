@@ -141,5 +141,3 @@ frappe.query_reports["Sales Analytics"] = {
 		});
 	},
 }
-
-

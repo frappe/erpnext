@@ -1,12 +1,12 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-import erpnext
 from frappe import _, scrub
 from frappe.utils import getdate, nowdate
 from six import iteritems, itervalues
+
 
 class PartyLedgerSummaryReport(object):
 	def __init__(self, filters=None):
@@ -145,7 +145,7 @@ class PartyLedgerSummaryReport(object):
 		out = []
 		for party, row in iteritems(self.party_data):
 			if row.opening_balance or row.invoiced_amount or row.paid_amount or row.return_amount or row.closing_amount:
-				total_party_adjustment = sum([amount for amount in itervalues(self.party_adjustment_details.get(party, {}))])
+				total_party_adjustment = sum(amount for amount in itervalues(self.party_adjustment_details.get(party, {})))
 				row.paid_amount -= total_party_adjustment
 
 				adjustments = self.party_adjustment_details.get(party, {})

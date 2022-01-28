@@ -1,9 +1,10 @@
 # Copyright (c) 2020, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe.model.utils.rename_field import rename_field
+
 
 def execute():
 	if frappe.db.exists('DocType', 'Issue'):
@@ -37,10 +38,11 @@ def execute():
 
 	if frappe.db.exists('DocType', 'Opportunity'):
 		opportunities = frappe.db.get_all('Opportunity', fields=['name', 'mins_to_first_response'], order_by='creation desc')
-		frappe.reload_doc('crm', 'doctype', 'opportunity')
+		frappe.reload_doctype('Opportunity', force=True)
 		rename_field('Opportunity', 'mins_to_first_response', 'first_response_time')
 
 		# change fieldtype to duration
+		frappe.reload_doc('crm', 'doctype', 'opportunity', force=True)
 		count = 0
 		for entry in opportunities:
 			mins_to_first_response = convert_to_seconds(entry.mins_to_first_response, 'Minutes')
@@ -58,6 +60,8 @@ def execute():
 
 def convert_to_seconds(value, unit):
 	seconds = 0
+	if value == 0:
+		return seconds
 	if unit == 'Hours':
 		seconds = value * 3600
 	if unit == 'Minutes':

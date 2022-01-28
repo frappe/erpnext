@@ -1,23 +1,25 @@
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
-import re
-from past.builtins import cmp
 import functools
 import math
+import re
 
-import frappe, erpnext
-from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
-from erpnext.accounts.utils import get_fiscal_year
+import frappe
 from frappe import _
-from frappe.utils import (flt, getdate, get_first_day, add_months, add_days, formatdate, cstr, cint)
-
+from frappe.utils import add_days, add_months, cint, cstr, flt, formatdate, get_first_day, getdate
+from past.builtins import cmp
 from six import itervalues
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+	get_dimension_with_children,
+)
+from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
+from erpnext.accounts.utils import get_fiscal_year
+
 
 def get_period_list(from_fiscal_year, to_fiscal_year, period_start_date, period_end_date, filter_based_on, periodicity, accumulated_values=False,
 	company=None, reset_period_on_fy_change=True, ignore_fiscal_year=False):
@@ -119,10 +121,10 @@ def validate_fiscal_year(fiscal_year, from_fiscal_year, to_fiscal_year):
 
 def validate_dates(from_date, to_date):
 	if not from_date or not to_date:
-		frappe.throw("From Date and To Date are mandatory")
+		frappe.throw(_("From Date and To Date are mandatory"))
 
 	if to_date < from_date:
-		frappe.throw("To Date cannot be less than From Date")
+		frappe.throw(_("To Date cannot be less than From Date"))
 
 def get_months(start_date, end_date):
 	diff = (12 * end_date.year + end_date.month) - (12 * start_date.year + start_date.month)
@@ -339,7 +341,7 @@ def sort_accounts(accounts, is_root=False, key="name"):
 	"""Sort root types as Asset, Liability, Equity, Income, Expense"""
 
 	def compare_accounts(a, b):
-		if re.split('\W+', a[key])[0].isdigit():
+		if re.split(r'\W+', a[key])[0].isdigit():
 			# if chart of accounts is numbered, then sort by number
 			return cmp(a[key], b[key])
 		elif is_root:
@@ -369,7 +371,7 @@ def set_gl_entries_by_account(
 
 	if accounts:
 		additional_conditions += " and account in ({})"\
-			.format(", ".join([frappe.db.escape(d) for d in accounts]))
+			.format(", ".join(frappe.db.escape(d) for d in accounts))
 
 		gl_filters = {
 			"company": company,
@@ -421,8 +423,7 @@ def set_gl_entries_by_account(
 			{additional_conditions}
 			and posting_date <= %(to_date)s
 			and is_cancelled = 0
-			{distributed_cost_center_query}
-			order by account, posting_date""".format(
+			{distributed_cost_center_query}""".format(
 				additional_conditions=additional_conditions,
 				distributed_cost_center_query=distributed_cost_center_query), gl_filters, as_dict=True) #nosec
 
@@ -523,3 +524,11 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 			})
 
 	return columns
+
+def get_filtered_list_for_consolidated_report(filters, period_list):
+	filtered_summary_list = []
+	for period in period_list:
+		if period == filters.get('company'):
+			filtered_summary_list.append(period)
+
+	return filtered_summary_list

@@ -47,13 +47,13 @@
   "pricing_rules",
   "stock_uom_rate",
   "is_free_item",
+  "grant_commission",
   "section_break_21",
   "net_rate",
   "net_amount",
   "column_break_24",
   "base_net_rate",
   "base_net_amount",
-  "incoming_rate",
   "drop_ship",
   "delivered_by_supplier",
   "accounting",
@@ -63,6 +63,7 @@
   "finance_book",
   "col_break4",
   "expense_account",
+  "discount_account",
   "deferred_revenue",
   "deferred_revenue_account",
   "service_stop_date",
@@ -80,6 +81,7 @@
   "target_warehouse",
   "quality_inspection",
   "batch_no",
+  "incoming_rate",
   "col_break5",
   "allow_zero_valuation_rate",
   "serial_no",
@@ -473,6 +475,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "enable_deferred_revenue",
    "fieldname": "deferred_revenue",
    "fieldtype": "Section Break",
    "label": "Deferred Revenue"
@@ -743,7 +746,6 @@
    "fieldname": "asset",
    "fieldtype": "Link",
    "label": "Asset",
-   "no_copy": 1,
    "options": "Asset"
   },
   {
@@ -806,12 +808,12 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:parent.is_return && parent.update_stock && !parent.return_against",
    "fieldname": "incoming_rate",
    "fieldtype": "Currency",
-   "label": "Incoming Rate",
+   "label": "Incoming Rate (Costing)",
    "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "depends_on": "eval: doc.uom != doc.stock_uom",
@@ -821,15 +823,29 @@
    "no_copy": 1,
    "options": "currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "discount_account",
+   "fieldtype": "Link",
+   "label": "Discount Account",
+   "options": "Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "grant_commission",
+   "fieldtype": "Check",
+   "label": "Grant Commission",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-23 01:05:22.123527",
+ "modified": "2021-10-05 12:24:54.968907",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

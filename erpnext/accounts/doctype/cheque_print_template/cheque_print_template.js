@@ -10,10 +10,10 @@ frappe.ui.form.on('Cheque Print Template', {
 				function() {
 					erpnext.cheque_print.view_cheque_print(frm);
 				}).addClass("btn-primary");
-				
+
 			$(frm.fields_dict.cheque_print_preview.wrapper).empty()
-				
-				
+
+
 			var template = '<div style="position: relative; overflow-x: scroll;">\
 				<div id="cheque_preview" style="width: {{ cheque_width }}cm; \
 					height: {{ cheque_height }}cm;\
@@ -47,9 +47,9 @@ frappe.ui.form.on('Cheque Print Template', {
 						position: absolute;"> Signatory Name </span>\
 				</div>\
 			</div>';
-			
+
 			$(frappe.render(template, frm.doc)).appendTo(frm.fields_dict.cheque_print_preview.wrapper)
-			
+
 			if (frm.doc.scanned_cheque) {
 				$(frm.fields_dict.cheque_print_preview.wrapper).find("#cheque_preview").css('background-image', 'url(' + frm.doc.scanned_cheque + ')');
 			}

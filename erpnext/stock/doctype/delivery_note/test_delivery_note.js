@@ -33,4 +33,3 @@ QUnit.test("test delivery note", function(assert) {
 		() => done()
 	]);
 });
-

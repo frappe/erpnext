@@ -1,6 +1,6 @@
-from __future__ import unicode_literals
 
 import frappe
+
 
 def execute():
 	if not frappe.db.table_exists("Additional Salary"):
@@ -51,4 +51,3 @@ def execute():
 					and parent = %s
 					and salary_component = %s
 			""", (salary["name"], comp_type, salary["salary_slip"], salary["salary_component"]))
-

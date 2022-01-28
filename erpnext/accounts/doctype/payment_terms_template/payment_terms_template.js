@@ -3,6 +3,6 @@
 
 frappe.ui.form.on('Payment Terms Template', {
 	setup: function(frm) {
-		
+
 	}
 });

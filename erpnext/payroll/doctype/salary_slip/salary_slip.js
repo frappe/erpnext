@@ -39,7 +39,10 @@ frappe.ui.form.on("Salary Slip", {
 
 		frm.set_query("employee", function() {
 			return {
-				query: "erpnext.controllers.queries.employee_query"
+				query: "erpnext.controllers.queries.employee_query",
+				filters: {
+					company: frm.doc.company
+				}
 			};
 		});
 	},
@@ -93,27 +96,31 @@ frappe.ui.form.on("Salary Slip", {
 	},
 
 	set_exchange_rate: function(frm, company_currency) {
-		if (frm.doc.currency) {
-			var from_currency = frm.doc.currency;
-			if (from_currency != company_currency) {
-				frm.events.hide_loan_section(frm);
-				frappe.call({
-					method: "erpnext.setup.utils.get_exchange_rate",
-					args: {
-						from_currency: from_currency,
-						to_currency: company_currency,
-					},
-					callback: function(r) {
-						frm.set_value("exchange_rate", flt(r.message));
-						frm.set_df_property("exchange_rate", "hidden", 0);
-						frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
-							+ " = [?] " + company_currency);
-					}
-				});
-			} else {
-				frm.set_value("exchange_rate", 1.0);
-				frm.set_df_property("exchange_rate", "hidden", 1);
-				frm.set_df_property("exchange_rate", "description", "");
+		if (frm.doc.docstatus === 0) {
+			if (frm.doc.currency) {
+				var from_currency = frm.doc.currency;
+				if (from_currency != company_currency) {
+					frm.events.hide_loan_section(frm);
+					frappe.call({
+						method: "erpnext.setup.utils.get_exchange_rate",
+						args: {
+							from_currency: from_currency,
+							to_currency: company_currency,
+						},
+						callback: function(r) {
+							if (r.message) {
+								frm.set_value("exchange_rate", flt(r.message));
+								frm.set_df_property('exchange_rate', 'hidden', 0);
+								frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
+									+ " = [?] " + company_currency);
+							}
+						}
+					});
+				} else {
+					frm.set_value("exchange_rate", 1.0);
+					frm.set_df_property('exchange_rate', 'hidden', 1);
+					frm.set_df_property("exchange_rate", "description", "" );
+				}
 			}
 		}
 	},
@@ -128,15 +135,15 @@ frappe.ui.form.on("Salary Slip", {
 
 	change_form_labels: function(frm, company_currency) {
 		frm.set_currency_labels(["base_hour_rate", "base_gross_pay", "base_total_deduction",
-			"base_net_pay", "base_rounded_total", "base_total_in_words", "base_year_to_date", "base_month_to_date"],
+			"base_net_pay", "base_rounded_total", "base_total_in_words", "base_year_to_date", "base_month_to_date", "gross_base_year_to_date"],
 		company_currency);
 
-		frm.set_currency_labels(["hour_rate", "gross_pay", "total_deduction", "net_pay", "rounded_total", "total_in_words", "year_to_date", "month_to_date"],
+		frm.set_currency_labels(["hour_rate", "gross_pay", "total_deduction", "net_pay", "rounded_total", "total_in_words", "year_to_date", "month_to_date", "gross_year_to_date"],
 			frm.doc.currency);
 
 		// toggle fields
 		frm.toggle_display(["exchange_rate", "base_hour_rate", "base_gross_pay", "base_total_deduction",
-			"base_net_pay", "base_rounded_total", "base_total_in_words", "base_year_to_date", "base_month_to_date"],
+			"base_net_pay", "base_rounded_total", "base_total_in_words", "base_year_to_date", "base_month_to_date", "base_gross_year_to_date"],
 		frm.doc.currency != company_currency);
 	},
 

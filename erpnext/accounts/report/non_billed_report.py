@@ -1,11 +1,12 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe import _
-from erpnext import get_default_currency
 from frappe.model.meta import get_field_precision
+
+from erpnext import get_default_currency
+
 
 def get_ordered_to_be_billed_data(args):
 	doctype, party = args.get('doctype'), args.get('party')

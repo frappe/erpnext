@@ -4,14 +4,21 @@
 # ERPNext - web based ERP (http://erpnext.com)
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, unittest, erpnext
-from frappe.utils import flt, today
-from erpnext.stock.doctype.material_request.material_request \
-	import raise_work_orders, make_stock_entry, make_purchase_order, make_supplier_quotation
-from erpnext.stock.doctype.item.test_item import create_item
 
-class TestMaterialRequest(unittest.TestCase):
+import frappe
+from frappe.utils import flt, today
+
+from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.material_request.material_request import (
+	make_purchase_order,
+	make_stock_entry,
+	make_supplier_quotation,
+	raise_work_orders,
+)
+from erpnext.tests.utils import ERPNextTestCase
+
+
+class TestMaterialRequest(ERPNextTestCase):
 	def test_make_purchase_order(self):
 		mr = frappe.copy_doc(test_records[0]).insert()
 
@@ -328,6 +335,58 @@ class TestMaterialRequest(unittest.TestCase):
 
 		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 + 54.0)
 		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 + 3.0)
+
+	def test_over_transfer_qty_allowance(self):
+		mr = frappe.new_doc('Material Request')
+		mr.company = "_Test Company"
+		mr.scheduled_date = today()
+		mr.append('items',{
+			"item_code": "_Test FG Item",
+			"item_name": "_Test FG Item",
+			"qty": 10,
+			"schedule_date": today(),
+			"uom": "_Test UOM 1",
+			"warehouse": "_Test Warehouse - _TC"
+		})
+
+		mr.material_request_type = "Material Transfer"
+		mr.insert()
+		mr.submit()
+
+		frappe.db.set_value('Stock Settings', None, 'mr_qty_allowance', 20)
+
+		# map a stock entry
+
+		se_doc = make_stock_entry(mr.name)
+		se_doc.update({
+			"posting_date": today(),
+			"posting_time": "00:00",
+		})
+		se_doc.get("items")[0].update({
+			"qty": 13,
+			"transfer_qty": 12.0,
+			"s_warehouse": "_Test Warehouse - _TC",
+			"t_warehouse": "_Test Warehouse 1 - _TC",
+			"basic_rate": 1.0
+		})
+
+		# make available the qty in _Test Warehouse 1 before transfer
+		sr = frappe.new_doc("Stock Reconciliation")
+		sr.company = "_Test Company"
+		sr.purpose = "Opening Stock"
+		sr.append('items', {
+			"item_code": "_Test FG Item",
+			"warehouse": "_Test Warehouse - _TC",
+			"qty": 20,
+			"valuation_rate": 0.01
+		})
+		sr.insert()
+		sr.submit()
+		se = frappe.copy_doc(se_doc)
+		se.insert()
+		self.assertRaises(frappe.ValidationError)
+		se.items[0].qty = 12
+		se.submit()
 
 	def test_completed_qty_for_over_transfer(self):
 		existing_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")

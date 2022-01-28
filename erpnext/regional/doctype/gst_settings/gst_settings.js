@@ -35,6 +35,7 @@ frappe.ui.form.on('GST Settings', {
 			return {
 				filters: {
 					company: row.company,
+					account_type: "Tax",
 					is_group: 0
 				}
 			};

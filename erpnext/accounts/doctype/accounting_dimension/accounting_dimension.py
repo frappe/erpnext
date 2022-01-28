@@ -1,17 +1,16 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe
-from frappe import _
+
 import json
-from frappe.model.document import Document
+
+import frappe
+from frappe import _, scrub
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
-from frappe import scrub
-from frappe.utils import cstr
-from frappe.utils.background_jobs import enqueue
 from frappe.model import core_doctypes_list
+from frappe.model.document import Document
+from frappe.utils import cstr
+
 
 class AccountingDimension(Document):
 	def before_insert(self):
@@ -19,7 +18,7 @@ class AccountingDimension(Document):
 
 	def validate(self):
 		if self.document_type in core_doctypes_list + ('Accounting Dimension', 'Project',
-				'Cost Center', 'Accounting Dimension Detail', 'Company') :
+				'Cost Center', 'Accounting Dimension Detail', 'Company', 'Account') :
 
 			msg = _("Not allowed to create accounting dimension for {0}").format(self.document_type)
 			frappe.throw(msg)
@@ -27,7 +26,7 @@ class AccountingDimension(Document):
 		exists = frappe.db.get_value("Accounting Dimension", {'document_type': self.document_type}, ['name'])
 
 		if exists and self.is_new():
-			frappe.throw("Document Type already used as a dimension")
+			frappe.throw(_("Document Type already used as a dimension"))
 
 		if not self.is_new():
 			self.validate_document_type_change()
@@ -47,9 +46,9 @@ class AccountingDimension(Document):
 
 	def on_trash(self):
 		if frappe.flags.in_test:
-			delete_accounting_dimension(doc=self, queue='long')
+			delete_accounting_dimension(doc=self)
 		else:
-			frappe.enqueue(delete_accounting_dimension, doc=self)
+			frappe.enqueue(delete_accounting_dimension, doc=self, queue='long')
 
 	def set_fieldname_and_label(self):
 		if not self.label:

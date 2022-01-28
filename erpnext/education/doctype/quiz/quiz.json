@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:title",
@@ -12,7 +13,10 @@
   "quiz_configuration_section",
   "passing_score",
   "max_attempts",
-  "grading_basis"
+  "grading_basis",
+  "column_break_7",
+  "is_time_bound",
+  "duration"
  ],
  "fields": [
   {
@@ -58,9 +62,26 @@
    "fieldtype": "Select",
    "label": "Grading Basis",
    "options": "Latest Highest Score\nLatest Attempt"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_time_bound",
+   "fieldtype": "Check",
+   "label": "Is Time-Bound"
+  },
+  {
+   "depends_on": "is_time_bound",
+   "fieldname": "duration",
+   "fieldtype": "Duration",
+   "label": "Duration"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2019-06-12 12:23:57.020508",
+ "links": [],
+ "modified": "2020-12-24 15:41:35.043262",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Quiz",

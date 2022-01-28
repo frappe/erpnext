@@ -1,20 +1,25 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import json
+
 import frappe
 from frappe import _
+from frappe.integrations.utils import get_payment_gateway_controller
 from frappe.model.document import Document
-from frappe.utils import flt, nowdate, get_url
+from frappe.utils import flt, get_url, nowdate
+from frappe.utils.background_jobs import enqueue
+
+from erpnext.accounts.doctype.payment_entry.payment_entry import (
+	get_company_defaults,
+	get_payment_entry,
+)
+from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
 from erpnext.accounts.party import get_party_account, get_party_bank_account
 from erpnext.accounts.utils import get_account_currency
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, get_company_defaults
-from frappe.integrations.utils import get_payment_gateway_controller
-from frappe.utils.background_jobs import enqueue
 from erpnext.erpnext_integrations.stripe_integration import create_stripe_subscription
-from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
+
 
 class PaymentRequest(Document):
 	def validate(self):
@@ -101,7 +106,7 @@ class PaymentRequest(Document):
 
 		controller.validate_transaction_currency(self.currency)
 		controller.request_for_payment(**payment_record)
-	
+
 	def get_request_amount(self):
 		data_of_completed_requests = frappe.get_all("Integration Request", filters={
 			'reference_doctype': self.doctype,
@@ -112,7 +117,7 @@ class PaymentRequest(Document):
 		if not data_of_completed_requests:
 			return self.grand_total
 
-		request_amounts = sum([json.loads(d).get('request_amount') for d in data_of_completed_requests])
+		request_amounts = sum(json.loads(d).get('request_amount') for d in data_of_completed_requests)
 		return request_amounts
 
 	def on_cancel(self):
@@ -286,7 +291,7 @@ class PaymentRequest(Document):
 		if not status:
 			return
 
-		shopping_cart_settings = frappe.get_doc("Shopping Cart Settings")
+		shopping_cart_settings = frappe.get_doc("E Commerce Settings")
 
 		if status in ["Authorized", "Completed"]:
 			redirect_to = None
@@ -436,7 +441,7 @@ def get_gateway_details(args):
 		return get_payment_gateway_account(args.get("payment_gateway_account"))
 
 	if args.order_type == "Shopping Cart":
-		payment_gateway_account = frappe.get_doc("Shopping Cart Settings").payment_gateway_account
+		payment_gateway_account = frappe.get_doc("E Commerce Settings").payment_gateway_account
 		return get_payment_gateway_account(payment_gateway_account)
 
 	gateway_account = get_payment_gateway_account({"is_default": 1})
@@ -492,7 +497,6 @@ def update_payment_req_status(doc, method):
 					status = 'Requested'
 
 			pay_req_doc.db_set('status', status)
-			frappe.db.commit()
 
 def get_dummy_message(doc):
 	return frappe.render_template("""{% if doc.contact_person -%}
@@ -543,3 +547,15 @@ def make_payment_order(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+def validate_payment(doc, method=None):
+	if doc.reference_doctype != "Payment Request" or (
+		frappe.db.get_value(doc.reference_doctype, doc.reference_docname, 'status')
+		!= "Paid"
+	):
+		return
+
+	frappe.throw(
+		_("The Payment Request {0} is already paid, cannot process payment twice")
+		.format(doc.reference_docname)
+	)

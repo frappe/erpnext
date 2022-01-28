@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -9,7 +8,7 @@ import frappe
 from frappe import _, throw
 from frappe.desk.form.assign_to import clear, close_all_assignments
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate, today, flt
+from frappe.utils import add_days, cstr, date_diff, flt, get_link_to_form, getdate, today
 from frappe.utils.nestedset import NestedSet
 
 
@@ -36,6 +35,7 @@ class Task(NestedSet):
 		self.validate_status()
 		self.update_depends_on()
 		self.validate_dependencies_for_template_task()
+		self.validate_completed_on()
 
 	def validate_dates(self):
 		if self.exp_start_date and self.exp_end_date and getdate(self.exp_start_date) > getdate(self.exp_end_date):
@@ -100,8 +100,12 @@ class Task(NestedSet):
 					dependent_task_format = """<a href="#Form/Task/{0}">{0}</a>""".format(task.task)
 					frappe.throw(_("Dependent Task {0} is not a Template Task").format(dependent_task_format))
 
+	def validate_completed_on(self):
+		if self.completed_on and getdate(self.completed_on) > getdate():
+			frappe.throw(_("Completed On cannot be greater than Today"))
+
 	def update_depends_on(self):
-		depends_on_tasks = self.depends_on_tasks or ""
+		depends_on_tasks = ""
 		for d in self.depends_on:
 			if d.task and d.task not in depends_on_tasks:
 				depends_on_tasks += d.task + ","
@@ -227,7 +231,7 @@ def get_project(doctype, txt, searchfield, start, page_len, filters):
 	meta = frappe.get_meta(doctype)
 	searchfields = meta.get_search_fields()
 	search_columns = ", " + ", ".join(searchfields) if searchfields else ''
-	search_cond = " or " + " or ".join([field + " like %(txt)s" for field in searchfields])
+	search_cond = " or " + " or ".join(field + " like %(txt)s" for field in searchfields)
 
 	return frappe.db.sql(""" select name {search_columns} from `tabProject`
 		where %(key)s like %(txt)s

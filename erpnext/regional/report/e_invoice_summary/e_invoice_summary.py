@@ -1,9 +1,10 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+
 
 def execute(filters=None):
 	validate_filters(filters)
@@ -13,8 +14,8 @@ def execute(filters=None):
 
 	return columns, data
 
-def validate_filters(filters={}):
-	filters = frappe._dict(filters)
+def validate_filters(filters=None):
+	filters = frappe._dict(filters or {})
 
 	if not filters.company:
 		frappe.throw(_('{} is mandatory for generating E-Invoice Summary Report').format(_('Company')), title=_('Invalid Filter'))
@@ -26,7 +27,9 @@ def validate_filters(filters={}):
 	if filters.from_date > filters.to_date:
 		frappe.throw(_('From Date must be before To Date'), title=_('Invalid Filter'))
 
-def get_data(filters={}):
+def get_data(filters=None):
+	if not filters:
+		filters = {}
 	query_filters = {
 		'posting_date': ['between', [filters.from_date, filters.to_date]],
 		'einvoice_status': ['is', 'set'],
@@ -54,52 +57,52 @@ def get_columns():
 			"width": 0
 		},
 		{
-			"fieldtype": "Link", 
-			"fieldname": "name", 
+			"fieldtype": "Link",
+			"fieldname": "name",
 			"label": _("Sales Invoice"),
 			"options": "Sales Invoice",
 			"width": 140
 		},
-		{ 
-			"fieldtype": "Data", 
-			"fieldname": "einvoice_status", 
-			"label": _("Status"), 
+		{
+			"fieldtype": "Data",
+			"fieldname": "einvoice_status",
+			"label": _("Status"),
 			"width": 100
 		},
-		{ 
+		{
 			"fieldtype": "Link",
 			"fieldname": "customer",
 			"options": "Customer",
 			"label": _("Customer")
 		},
-		{ 
+		{
 			"fieldtype": "Check",
 			"fieldname": "is_return",
 			"label": _("Is Return"),
 			"width": 85
 		},
 		{
-			"fieldtype": "Data", 
-			"fieldname": "ack_no", 
-			"label": "Ack. No.", 
+			"fieldtype": "Data",
+			"fieldname": "ack_no",
+			"label": "Ack. No.",
 			"width": 145
 		},
-		{ 
-			"fieldtype": "Data", 
-			"fieldname": "ack_date", 
-			"label": "Ack. Date", 
+		{
+			"fieldtype": "Data",
+			"fieldname": "ack_date",
+			"label": "Ack. Date",
 			"width": 165
 		},
 		{
-			"fieldtype": "Data", 
-			"fieldname": "irn", 
+			"fieldtype": "Data",
+			"fieldname": "irn",
 			"label": _("IRN No."),
 			"width": 250
 		},
 		{
 			"fieldtype": "Currency",
-			"options": "Company:company:default_currency", 
-			"fieldname": "base_grand_total", 
+			"options": "Company:company:default_currency",
+			"fieldname": "base_grand_total",
 			"label": _("Grand Total"),
 			"width": 120
 		}

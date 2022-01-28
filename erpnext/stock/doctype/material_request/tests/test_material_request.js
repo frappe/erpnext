@@ -37,4 +37,3 @@ QUnit.test("test material request", function(assert) {
 		() => done()
 	]);
 });
-

@@ -1,16 +1,30 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
-import frappe
+
 import unittest
-from frappe.utils import (nowdate, add_days, get_datetime, get_first_day, get_last_day, date_diff, flt, add_to_date)
-from erpnext.loan_management.doctype.loan.test_loan import (create_loan_type, create_loan_security_price,
-	make_loan_disbursement_entry, create_loan_accounts, create_loan_security_type, create_loan_security, create_demand_loan, create_loan_application)
-from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_demand_loans
-from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import days_in_year
-from erpnext.selling.doctype.customer.test_customer import get_customer_dict
+
+import frappe
+from frappe.utils import add_to_date, date_diff, flt, get_datetime, get_first_day, nowdate
+
+from erpnext.loan_management.doctype.loan.test_loan import (
+	create_demand_loan,
+	create_loan_accounts,
+	create_loan_application,
+	create_loan_security,
+	create_loan_security_price,
+	create_loan_security_type,
+	create_loan_type,
+	make_loan_disbursement_entry,
+)
 from erpnext.loan_management.doctype.loan_application.loan_application import create_pledge
+from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (
+	days_in_year,
+)
+from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
+	process_loan_interest_accrual_for_demand_loans,
+)
+from erpnext.selling.doctype.customer.test_customer import get_customer_dict
+
 
 class TestLoanInterestAccrual(unittest.TestCase):
 	def setUp(self):
@@ -52,7 +66,7 @@ class TestLoanInterestAccrual(unittest.TestCase):
 		process_loan_interest_accrual_for_demand_loans(posting_date=last_date)
 		loan_interest_accural = frappe.get_doc("Loan Interest Accrual", {'loan': loan.name})
 
-		self.assertEquals(flt(loan_interest_accural.interest_amount, 0), flt(accrued_interest_amount, 0))
+		self.assertEqual(flt(loan_interest_accural.interest_amount, 0), flt(accrued_interest_amount, 0))
 
 	def test_accumulated_amounts(self):
 		pledge = [{
@@ -76,7 +90,7 @@ class TestLoanInterestAccrual(unittest.TestCase):
 		process_loan_interest_accrual_for_demand_loans(posting_date=last_date)
 		loan_interest_accrual = frappe.get_doc("Loan Interest Accrual", {'loan': loan.name})
 
-		self.assertEquals(flt(loan_interest_accrual.interest_amount, 0), flt(accrued_interest_amount, 0))
+		self.assertEqual(flt(loan_interest_accrual.interest_amount, 0), flt(accrued_interest_amount, 0))
 
 		next_start_date = '2019-10-31'
 		next_end_date = '2019-11-29'
@@ -90,4 +104,4 @@ class TestLoanInterestAccrual(unittest.TestCase):
 
 		loan_interest_accrual = frappe.get_doc("Loan Interest Accrual", {'loan': loan.name,
 			'process_loan_interest_accrual': process})
-		self.assertEquals(flt(loan_interest_accrual.total_pending_interest_amount, 0), total_pending_interest_amount)
+		self.assertEqual(flt(loan_interest_accrual.total_pending_interest_amount, 0), total_pending_interest_amount)

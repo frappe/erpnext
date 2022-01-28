@@ -15,6 +15,7 @@
  "hide_custom": 0,
  "icon": "accounting",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Accounting",
  "links": [
@@ -444,13 +445,24 @@
    "type": "Link"
   },
   {
+   "dependencies": "GL Entry",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "UAE VAT 201",
+   "link_to": "UAE VAT 201",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
     "dependencies": "GL Entry",
     "hidden": 0,
     "is_query_report": 1,
-    "label": "UAE VAT 201",
-    "link_to": "UAE VAT 201",
+    "label": "KSA VAT Report",
+    "link_to": "KSA VAT",
     "link_type": "Report",
     "onboard": 0,
+    "only_for": "Saudi Arabia",
     "type": "Link"
    },
   {
@@ -587,7 +599,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Bank Statement",
+   "label": "Banking and Payments",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -625,9 +637,9 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Bank Reconciliation",
-   "link_to": "bank-reconciliation",
-   "link_type": "Page",
+   "label": "Bank Reconciliation Tool",
+   "link_to": "Bank Reconciliation Tool",
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   },
@@ -642,21 +654,19 @@
    "type": "Link"
   },
   {
-   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Bank Statement Transaction Entry",
-   "link_to": "Bank Statement Transaction Entry",
+   "label": "Payment Entry",
+   "link_to": "Payment Entry",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   },
   {
-   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Bank Statement Settings",
-   "link_to": "Bank Statement Settings",
+   "label": "Payment Reconciliation",
+   "link_to": "Payment Reconciliation",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -703,6 +713,7 @@
    "is_query_report": 0,
    "label": "Goods and Services Tax (GST India)",
    "onboard": 0,
+   "only_for": "India",
    "type": "Card Break"
   },
   {
@@ -713,6 +724,7 @@
    "link_to": "GST Settings",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -723,6 +735,7 @@
    "link_to": "GST HSN Code",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -733,6 +746,7 @@
    "link_to": "GSTR-1",
    "link_type": "Report",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -743,6 +757,7 @@
    "link_to": "GSTR-2",
    "link_type": "Report",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -753,6 +768,7 @@
    "link_to": "GSTR 3B Report",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -763,6 +779,7 @@
    "link_to": "GST Sales Register",
    "link_type": "Report",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -773,6 +790,7 @@
    "link_to": "GST Purchase Register",
    "link_type": "Report",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -783,6 +801,7 @@
    "link_to": "GST Itemised Sales Register",
    "link_type": "Report",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -793,6 +812,7 @@
    "link_to": "GST Itemised Purchase Register",
    "link_type": "Report",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -803,6 +823,7 @@
    "link_to": "C-Form",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -813,6 +834,7 @@
    "link_to": "Lower Deduction Certificate",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "India",
    "type": "Link"
   },
   {
@@ -1024,6 +1046,16 @@
    "type": "Link"
   },
   {
+    "hidden": 0,
+    "is_query_report": 0,
+    "label": "KSA VAT Setting",
+    "link_to": "KSA VAT Setting",
+    "link_type": "DocType",
+    "onboard": 0,
+    "only_for": "Saudi Arabia",
+    "type": "Link"
+   },
+  {
    "hidden": 0,
    "is_query_report": 0,
    "label": "Profitability",
@@ -1071,7 +1103,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-03-04 00:38:35.349024",
+ "modified": "2021-08-26 13:15:52.872470",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",

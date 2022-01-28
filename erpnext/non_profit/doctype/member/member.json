@@ -26,7 +26,7 @@
   "razorpay_details_section",
   "subscription_id",
   "customer_id",
-  "subscription_activated",
+  "subscription_status",
   "column_break_21",
   "subscription_start",
   "subscription_end"
@@ -152,12 +152,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "fieldname": "subscription_activated",
-   "fieldtype": "Check",
-   "label": "Subscription Activated"
-  },
-  {
    "fieldname": "subscription_start",
    "fieldtype": "Date",
    "label": "Subscription Start "
@@ -166,11 +160,17 @@
    "fieldname": "subscription_end",
    "fieldtype": "Date",
    "label": "Subscription End"
+  },
+  {
+   "fieldname": "subscription_status",
+   "fieldtype": "Select",
+   "label": "Subscription Status",
+   "options": "\nActive\nHalted"
   }
  ],
  "image_field": "image",
  "links": [],
- "modified": "2020-11-09 12:12:10.174647",
+ "modified": "2021-07-11 14:27:26.368039",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Member",

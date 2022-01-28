@@ -1,11 +1,10 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import formatdate
-import itertools
 from frappe import _, get_all
+
 
 def execute(filters=None):
 	columns = [
@@ -95,6 +94,7 @@ def execute(filters=None):
 				"amount": salary.net_pay,
 			}
 			data.append(row)
+
 	return columns, data
 
 def get_bank_accounts():
@@ -116,7 +116,7 @@ def get_payroll_entries(accounts, filters):
 	entries = get_all("Payroll Entry", payroll_filter, ["name", "payment_account"])
 
 	payment_accounts = [d.payment_account for d in entries]
-	set_company_account(payment_accounts, entries)
+	entries = set_company_account(payment_accounts, entries)
 	return entries
 
 def get_salary_slips(payroll_entries):

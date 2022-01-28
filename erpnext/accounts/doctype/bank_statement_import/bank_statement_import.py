@@ -1,24 +1,23 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import csv
 import json
 import re
 
+import frappe
 import openpyxl
+from frappe import _
+from frappe.core.doctype.data_import.data_import import DataImport
+from frappe.core.doctype.data_import.importer import Importer, ImportFile
+from frappe.utils.background_jobs import enqueue
+from frappe.utils.xlsxutils import ILLEGAL_CHARACTERS_RE, handle_html
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
 from six import string_types
 
-import frappe
-from frappe.core.doctype.data_import.importer import Importer, ImportFile
-from frappe.utils.background_jobs import enqueue
-from frappe.utils.xlsxutils import handle_html, ILLEGAL_CHARACTERS_RE
-from frappe import _
-
-from frappe.core.doctype.data_import.data_import import DataImport
+INVALID_VALUES = ("", None)
 
 class BankStatementImport(DataImport):
 	def __init__(self, *args, **kwargs):
@@ -47,6 +46,13 @@ class BankStatementImport(DataImport):
 
 	def start_import(self):
 
+		preview = frappe.get_doc("Bank Statement Import", self.name).get_preview_from_template(
+			self.import_file, self.google_sheets_url
+		)
+
+		if 'Bank Account' not in json.dumps(preview['columns']):
+			frappe.throw(_("Please add the Bank Account column"))
+
 		from frappe.core.page.background_jobs.background_jobs import get_info
 		from frappe.utils.scheduler import is_scheduler_inactive
 
@@ -67,6 +73,7 @@ class BankStatementImport(DataImport):
 				data_import=self.name,
 				bank_account=self.bank_account,
 				import_file_path=self.import_file,
+				google_sheets_url=self.google_sheets_url,
 				bank=self.bank,
 				template_options=self.template_options,
 				now=frappe.conf.developer_mode or frappe.flags.in_test,
@@ -90,18 +97,33 @@ def download_errored_template(data_import_name):
 	data_import = frappe.get_doc("Bank Statement Import", data_import_name)
 	data_import.export_errored_rows()
 
-def start_import(data_import, bank_account, import_file_path, bank, template_options):
+def parse_data_from_template(raw_data):
+	data = []
+
+	for i, row in enumerate(raw_data):
+		if all(v in INVALID_VALUES for v in row):
+			# empty row
+			continue
+
+		data.append(row)
+
+	return data
+
+def start_import(data_import, bank_account, import_file_path, google_sheets_url, bank, template_options):
 	"""This method runs in background job"""
 
 	update_mapping_db(bank, template_options)
 
 	data_import = frappe.get_doc("Bank Statement Import", data_import)
+	file = import_file_path if import_file_path else google_sheets_url
 
-	import_file = ImportFile("Bank Transaction", file = import_file_path, import_type="Insert New Records")
-	data = import_file.raw_data
+	import_file = ImportFile("Bank Transaction", file = file, import_type="Insert New Records")
 
-	add_bank_account(data, bank_account)
-	write_files(import_file, data)
+	data = parse_data_from_template(import_file.raw_data)
+
+	if import_file_path:
+		add_bank_account(data, bank_account)
+		write_files(import_file, data)
 
 	try:
 		i = Importer(data_import.reference_doctype, data_import=data_import)

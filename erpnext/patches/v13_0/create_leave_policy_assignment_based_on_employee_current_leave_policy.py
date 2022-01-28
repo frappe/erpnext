@@ -1,9 +1,9 @@
 # Copyright (c) 2019, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
+
 
 def execute():
     if "leave_policy" in frappe.db.get_table_columns("Employee"):
@@ -74,6 +74,3 @@ def create_assignment(employee, leave_policy, leave_period=None, allocation_exis
 
 def get_employee_with_grade(grade):
     return frappe.get_list("Employee", filters = {"grade": grade})
-
-
-

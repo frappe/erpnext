@@ -1,17 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, ESS LLP and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, nowdate, nowtime, cstr
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import flt, nowdate, nowtime
+
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account
 from erpnext.healthcare.doctype.lab_test.lab_test import create_sample_doc
-from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.get_item_details import get_item_details
-from frappe.model.mapper import get_mapped_doc
+from erpnext.stock.stock_ledger import get_previous_sle
+
 
 class ClinicalProcedure(Document):
 	def validate(self):
@@ -54,6 +55,7 @@ class ClinicalProcedure(Document):
 	def set_title(self):
 		self.title = _('{0} - {1}').format(self.patient_name or self.patient, self.procedure_template)[:100]
 
+	@frappe.whitelist()
 	def complete_procedure(self):
 		if self.consume_stock and self.items:
 			stock_entry = make_stock_entry(self)
@@ -96,6 +98,7 @@ class ClinicalProcedure(Document):
 		if self.consume_stock and self.items:
 			return stock_entry
 
+	@frappe.whitelist()
 	def start_procedure(self):
 		allow_start = self.set_actual_qty()
 		if allow_start:
@@ -116,6 +119,7 @@ class ClinicalProcedure(Document):
 
 		return allow_start
 
+	@frappe.whitelist()
 	def make_material_receipt(self, submit=False):
 		stock_entry = frappe.new_doc('Stock Entry')
 

@@ -12,6 +12,10 @@ frappe.ui.form.on("Company", {
 				}
 			});
 		}
+
+		frm.call('check_if_transactions_exist').then(r => {
+			frm.toggle_enable("default_currency", (!r.message));
+		});
 	},
 	setup: function(frm) {
 		erpnext.company.setup_queries(frm);
@@ -75,26 +79,14 @@ frappe.ui.form.on("Company", {
 	},
 
 	refresh: function(frm) {
-		if(!frm.doc.__islocal) {
-			frm.doc.abbr && frm.set_df_property("abbr", "read_only", 1);
-			frm.set_df_property("parent_company", "read_only", 1);
-			disbale_coa_fields(frm);
-		}
+		frm.toggle_display('address_html', !frm.is_new());
 
-		frm.toggle_display('address_html', !frm.doc.__islocal);
-		if(!frm.doc.__islocal) {
+		if (!frm.is_new()) {
+			frm.doc.abbr && frm.set_df_property("abbr", "read_only", 1);
+			disbale_coa_fields(frm);
 			frappe.contacts.render_address_and_contact(frm);
 
 			frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Company'}
-
-			frm.toggle_enable("default_currency", (frm.doc.__onload &&
-				!frm.doc.__onload.transactions_exist));
-
-			if (frm.has_perm('write')) {
-				frm.add_custom_button(__('Create Tax Template'), function() {
-					frm.trigger("make_default_tax_template");
-				});
-			}
 
 			if (frappe.perm.has_perm("Cost Center", 0, 'read')) {
 				frm.add_custom_button(__('Cost Centers'), function() {
@@ -121,17 +113,21 @@ frappe.ui.form.on("Company", {
 			}
 
 			if (frm.has_perm('write')) {
-				frm.add_custom_button(__('Default Tax Template'), function() {
+				frm.add_custom_button(__('Create Tax Template'), function() {
 					frm.trigger("make_default_tax_template");
-				}, __('Create'));
+				}, __('Manage'));
+			}
+
+			if (frappe.user.has_role('System Manager')) {
+				if (frm.has_perm('write')) {
+					frm.add_custom_button(__('Delete Transactions'), function() {
+						frm.trigger("delete_company_transactions");
+					}, __('Manage'));
+				}
 			}
 		}
 
 		erpnext.company.set_chart_of_accounts_options(frm.doc);
-
-		if (!frappe.user.has_role('System Manager')) {
-			frm.get_field("delete_company_transactions").hide();
-		}
 	},
 
 	make_default_tax_template: function(frm) {
@@ -143,11 +139,6 @@ frappe.ui.form.on("Company", {
 				frappe.msgprint(__("Default tax templates for sales, purchase and items are created."));
 			}
 		})
-	},
-
-	onload_post_render: function(frm) {
-		if(frm.get_field("delete_company_transactions").$input)
-			frm.get_field("delete_company_transactions").$input.addClass("btn-danger");
 	},
 
 	country: function(frm) {
@@ -169,9 +160,9 @@ frappe.ui.form.on("Company", {
 					return;
 				}
 				frappe.call({
-					method: "erpnext.setup.doctype.company.delete_company_transactions.delete_company_transactions",
+					method: "erpnext.setup.doctype.company.company.create_transaction_deletion_request",
 					args: {
-						company_name: data.company_name
+						company: data.company_name
 					},
 					freeze: true,
 					callback: function(r, rt) {
@@ -211,43 +202,6 @@ erpnext.company.set_chart_of_accounts_options = function(doc) {
 	}
 }
 
-cur_frm.cscript.change_abbr = function() {
-	var dialog = new frappe.ui.Dialog({
-		title: "Replace Abbr",
-		fields: [
-			{"fieldtype": "Data", "label": "New Abbreviation", "fieldname": "new_abbr",
-				"reqd": 1 },
-			{"fieldtype": "Button", "label": "Update", "fieldname": "update"},
-		]
-	});
-
-	dialog.fields_dict.update.$input.click(function() {
-		var args = dialog.get_values();
-		if(!args) return;
-		frappe.show_alert(__("Update in progress. It might take a while."));
-		return frappe.call({
-			method: "erpnext.setup.doctype.company.company.enqueue_replace_abbr",
-			args: {
-				"company": cur_frm.doc.name,
-				"old": cur_frm.doc.abbr,
-				"new": args.new_abbr
-			},
-			callback: function(r) {
-				if(r.exc) {
-					frappe.msgprint(__("There were errors."));
-					return;
-				} else {
-					cur_frm.set_value("abbr", args.new_abbr);
-				}
-				dialog.hide();
-				cur_frm.refresh();
-			},
-			btn: this
-		})
-	});
-	dialog.show();
-}
-
 erpnext.company.setup_queries = function(frm) {
 	$.each([
 		["default_bank_account", {"account_type": "Bank"}],
@@ -259,6 +213,9 @@ erpnext.company.setup_queries = function(frm) {
 		["default_payroll_payable_account", {"root_type": "Liability"}],
 		["round_off_account", {"root_type": "Expense"}],
 		["write_off_account", {"root_type": "Expense"}],
+		["default_deferred_expense_account", {}],
+		["default_deferred_revenue_account", {}],
+		["default_expense_claim_payable_account", {}],
 		["default_discount_account", {}],
 		["discount_allowed_account", {"root_type": "Expense"}],
 		["discount_received_account", {"root_type": "Income"}],
@@ -276,7 +233,7 @@ erpnext.company.setup_queries = function(frm) {
 		["expenses_included_in_asset_valuation", {"account_type": "Expenses Included In Asset Valuation"}],
 		["capital_work_in_progress_account", {"account_type": "Capital Work in Progress"}],
 		["asset_received_but_not_billed", {"account_type": "Asset Received But Not Billed"}],
-		["unrealized_profit_loss_account", {"root_type": "Liability"},]
+		["unrealized_profit_loss_account", {"root_type": ["in", ["Liability", "Asset"]]}]
 	], function(i, v) {
 		erpnext.company.set_custom_query(frm, v);
 	});
@@ -320,4 +277,3 @@ var disbale_coa_fields = function(frm, bool=true) {
 	frm.set_df_property("chart_of_accounts", "read_only", bool);
 	frm.set_df_property("existing_company", "read_only", bool);
 }
-

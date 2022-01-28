@@ -2,17 +2,21 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from __future__ import unicode_literals
-import unittest
+
 import frappe
 from frappe.utils import flt
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
-	import get_gl_entries, test_records as pr_test_records, make_purchase_receipt
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.accounts.doctype.account.test_account import get_inventory_account
-from erpnext.accounts.doctype.account.test_account import create_account
 
-class TestLandedCostVoucher(unittest.TestCase):
+from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.assets.doctype.asset.test_asset import create_asset_category, create_fixed_asset_item
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+	get_gl_entries,
+	make_purchase_receipt,
+)
+from erpnext.tests.utils import ERPNextTestCase
+
+
+class TestLandedCostVoucher(ERPNextTestCase):
 	def test_landed_cost_voucher(self):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 
@@ -207,7 +211,10 @@ class TestLandedCostVoucher(unittest.TestCase):
 		self.assertEqual(pr.items[1].landed_cost_voucher_amount, 100)
 
 	def test_multi_currency_lcv(self):
-		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import test_records, save_new_records
+		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
+			save_new_records,
+			test_records,
+		)
 
 		save_new_records(test_records)
 
@@ -250,6 +257,39 @@ class TestLandedCostVoucher(unittest.TestCase):
 			self.assertEqual(entry.credit, amounts[0])
 			self.assertEqual(entry.credit_in_account_currency, amounts[1])
 
+	def test_asset_lcv(self):
+		"Check if LCV for an Asset updates the Assets Gross Purchase Amount correctly."
+		frappe.db.set_value("Company", "_Test Company", "capital_work_in_progress_account", "CWIP Account - _TC")
+
+		if not frappe.db.exists("Asset Category", "Computers"):
+			create_asset_category()
+
+		if not frappe.db.exists("Item", "Macbook Pro"):
+			create_fixed_asset_item()
+
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=50000)
+
+		# check if draft asset was created
+		assets = frappe.db.get_all('Asset', filters={'purchase_receipt': pr.name})
+		self.assertEqual(len(assets), 1)
+
+		lcv = make_landed_cost_voucher(
+			company = pr.company,
+			receipt_document_type = "Purchase Receipt",
+			receipt_document=pr.name,
+			charges=80,
+			expense_account="Expenses Included In Valuation - _TC")
+
+		lcv.save()
+		lcv.submit()
+
+		# lcv updates amount in draft asset
+		self.assertEqual(frappe.db.get_value("Asset", assets[0].name, "gross_purchase_amount"), 50080)
+
+		# tear down
+		lcv.cancel()
+		pr.cancel()
+
 def make_landed_cost_voucher(** args):
 	args = frappe._dict(args)
 	ref_doc = frappe.get_doc(args.receipt_document_type, args.receipt_document)
@@ -268,7 +308,7 @@ def make_landed_cost_voucher(** args):
 
 	lcv.set("taxes", [{
 		"description": "Shipping Charges",
-		"expense_account": "Expenses Included In Valuation - TCP1",
+		"expense_account": args.expense_account or "Expenses Included In Valuation - TCP1",
 		"amount": args.charges
 	}])
 
@@ -311,7 +351,7 @@ def create_landed_cost_voucher(receipt_document_type, receipt_document, company,
 
 def distribute_landed_cost_on_items(lcv):
 	based_on = lcv.distribute_charges_based_on.lower()
-	total = sum([flt(d.get(based_on)) for d in lcv.get("items")])
+	total = sum(flt(d.get(based_on)) for d in lcv.get("items"))
 
 	for item in lcv.get("items"):
 		item.applicable_charges = flt(item.get(based_on)) * flt(lcv.total_taxes_and_charges) / flt(total)

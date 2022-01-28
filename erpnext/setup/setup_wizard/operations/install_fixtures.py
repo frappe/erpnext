@@ -1,14 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
-import frappe, os, json
+import json
+import os
 
+import frappe
 from frappe import _
+from frappe.desk.doctype.global_search_settings.global_search_settings import (
+	update_global_search_doctypes,
+)
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import cstr, getdate
-from frappe.desk.doctype.global_search_settings.global_search_settings import update_global_search_doctypes
+from frappe.utils.nestedset import rebuild_tree
 
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from erpnext.regional.address_template.setup import set_up_address_templates
@@ -259,16 +263,26 @@ def install(country=None):
 	base_path = frappe.get_app_path("erpnext", "hr", "doctype")
 	response = frappe.read_file(os.path.join(base_path, "leave_application/leave_application_email_template.html"))
 
-	records += [{'doctype': 'Email Template', 'name': _("Leave Approval Notification"), 'response': response,\
+	records += [{'doctype': 'Email Template', 'name': _("Leave Approval Notification"), 'response': response,
 		'subject': _("Leave Approval Notification"), 'owner': frappe.session.user}]
 
-	records += [{'doctype': 'Email Template', 'name': _("Leave Status Notification"), 'response': response,\
+	records += [{'doctype': 'Email Template', 'name': _("Leave Status Notification"), 'response': response,
 		'subject': _("Leave Status Notification"), 'owner': frappe.session.user}]
+
+	response = frappe.read_file(os.path.join(base_path, "interview/interview_reminder_notification_template.html"))
+
+	records += [{'doctype': 'Email Template', 'name': _('Interview Reminder'), 'response': response,
+		'subject': _('Interview Reminder'), 'owner': frappe.session.user}]
+
+	response = frappe.read_file(os.path.join(base_path, "interview/interview_feedback_reminder_template.html"))
+
+	records += [{'doctype': 'Email Template', 'name': _('Interview Feedback Reminder'), 'response': response,
+		'subject': _('Interview Feedback Reminder'), 'owner': frappe.session.user}]
 
 	base_path = frappe.get_app_path("erpnext", "stock", "doctype")
 	response = frappe.read_file(os.path.join(base_path, "delivery_trip/dispatch_notification_template.html"))
 
-	records += [{'doctype': 'Email Template', 'name': _("Dispatch Notification"), 'response': response,\
+	records += [{'doctype': 'Email Template', 'name': _("Dispatch Notification"), 'response': response,
 		'subject': _("Your order is out for delivery!"), 'owner': frappe.session.user}]
 
 	# Records for the Supplier Scorecard
@@ -280,15 +294,16 @@ def install(country=None):
 	set_more_defaults()
 	update_global_search_doctypes()
 
-	# path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(country))
-	# if os.path.exists(path.encode("utf-8")):
-	# 	frappe.get_attr("erpnext.regional.{0}.setup.setup_company_independent_fixtures".format(frappe.scrub(country)))()
-
-
 def set_more_defaults():
 	# Do more setup stuff that can be done here with no dependencies
+	update_selling_defaults()
+	update_buying_defaults()
+	update_hr_defaults()
+	add_uom_data()
+	update_item_variant_settings()
+
+def update_selling_defaults():
 	selling_settings = frappe.get_doc("Selling Settings")
-	selling_settings.set_default_customer_group_and_territory()
 	selling_settings.cust_master_name = "Customer Name"
 	selling_settings.so_required = "No"
 	selling_settings.dn_required = "No"
@@ -296,13 +311,7 @@ def set_more_defaults():
 	selling_settings.sales_update_frequency = "Each Transaction"
 	selling_settings.save()
 
-	add_uom_data()
-
-	# set no copy fields of an item doctype to item variant settings
-	doc = frappe.get_doc('Item Variant Settings')
-	doc.set_default_fields()
-	doc.save()
-
+def update_buying_defaults():
 	buying_settings = frappe.get_doc("Buying Settings")
 	buying_settings.supp_master_name = "Supplier Name"
 	buying_settings.po_required = "No"
@@ -311,11 +320,26 @@ def set_more_defaults():
 	buying_settings.allow_multiple_items = 1
 	buying_settings.save()
 
+def update_hr_defaults():
 	hr_settings = frappe.get_doc("HR Settings")
 	hr_settings.emp_created_by = "Naming Series"
 	hr_settings.leave_approval_notification_template = _("Leave Approval Notification")
 	hr_settings.leave_status_notification_template = _("Leave Status Notification")
+
+	hr_settings.send_interview_reminder = 1
+	hr_settings.interview_reminder_template = _("Interview Reminder")
+	hr_settings.remind_before = "00:15:00"
+
+	hr_settings.send_interview_feedback_reminder = 1
+	hr_settings.feedback_reminder_notification_template = _("Interview Feedback Reminder")
+
 	hr_settings.save()
+
+def update_item_variant_settings():
+	# set no copy fields of an item doctype to item variant settings
+	doc = frappe.get_doc('Item Variant Settings')
+	doc.set_default_fields()
+	doc.save()
 
 def add_uom_data():
 	# add UOMs
@@ -326,8 +350,9 @@ def add_uom_data():
 				"doctype": "UOM",
 				"uom_name": _(d.get("uom_name")),
 				"name": _(d.get("uom_name")),
-				"must_be_whole_number": d.get("must_be_whole_number")
-			}).insert(ignore_permissions=True)
+				"must_be_whole_number": d.get("must_be_whole_number"),
+				"enabled": 1,
+			}).db_insert()
 
 	# bootstrap uom conversion factors
 	uom_conversions = json.loads(open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_conversion_data.json")).read())
@@ -336,7 +361,7 @@ def add_uom_data():
 			frappe.get_doc({
 				"doctype": "UOM Category",
 				"category_name": _(d.get("category"))
-			}).insert(ignore_permissions=True)
+			}).db_insert()
 
 		if not frappe.db.exists("UOM Conversion Factor", {"from_uom": _(d.get("from_uom")), "to_uom": _(d.get("to_uom"))}):
 			uom_conversion = frappe.get_doc({
@@ -369,8 +394,8 @@ def add_sale_stages():
 		{"doctype": "Sales Stage", "stage_name": _("Proposal/Price Quote")},
 		{"doctype": "Sales Stage", "stage_name": _("Negotiation/Review")}
 	]
-
-	make_records(records)
+	for sales_stage in records:
+		frappe.get_doc(sales_stage).db_insert()
 
 def install_company(args):
 	records = [
@@ -418,7 +443,13 @@ def install_post_company_fixtures(args=None):
 		{'doctype': 'Department', 'department_name': _('Legal'), 'parent_department': _('All Departments'), 'company': args.company_name},
 	]
 
-	make_records(records)
+	# Make root department with NSM updation
+	make_records(records[:1])
+
+	frappe.local.flags.ignore_update_nsm = True
+	make_records(records[1:])
+	frappe.local.flags.ignore_update_nsm = False
+	rebuild_tree("Department", "parent_department")
 
 
 def install_defaults(args=None):
@@ -432,7 +463,17 @@ def install_defaults(args=None):
 
 	# enable default currency
 	frappe.db.set_value("Currency", args.get("currency"), "enabled", 1)
+	frappe.db.set_value("Stock Settings", None, "email_footer_address", args.get("company_name"))
 
+	set_global_defaults(args)
+	set_active_domains(args)
+	update_stock_settings()
+	update_shopping_cart_settings(args)
+
+	args.update({"set_default": 1})
+	create_bank_account(args)
+
+def set_global_defaults(args):
 	global_defaults = frappe.get_doc("Global Defaults", "Global Defaults")
 	current_fiscal_year = frappe.get_all("Fiscal Year")[0]
 
@@ -445,13 +486,10 @@ def install_defaults(args=None):
 
 	global_defaults.save()
 
-	system_settings = frappe.get_doc("System Settings")
-	system_settings.email_footer_address = args.get("company_name")
-	system_settings.save()
+def set_active_domains(args):
+	frappe.get_single('Domain Settings').set_active_domains(args.get('domains'))
 
-	domain_settings = frappe.get_single('Domain Settings')
-	domain_settings.set_active_domains(args.get('domains'))
-
+def update_stock_settings():
 	stock_settings = frappe.get_doc("Stock Settings")
 	stock_settings.item_naming_by = "Item Code"
 	stock_settings.valuation_method = "FIFO"
@@ -463,48 +501,47 @@ def install_defaults(args=None):
 	stock_settings.set_qty_in_transactions_based_on_serial_no_input = 1
 	stock_settings.save()
 
-	if args.bank_account:
-		company_name = args.company_name
-		bank_account_group =  frappe.db.get_value("Account",
-			{"account_type": "Bank", "is_group": 1, "root_type": "Asset",
-				"company": company_name})
-		if bank_account_group:
-			bank_account = frappe.get_doc({
-				"doctype": "Account",
-				'account_name': args.bank_account,
-				'parent_account': bank_account_group,
-				'is_group':0,
-				'company': company_name,
-				"account_type": "Bank",
-			})
-			try:
-				doc = bank_account.insert()
+def create_bank_account(args):
+	if not args.get('bank_account'):
+		return
 
-				frappe.db.set_value("Company", args.company_name, "default_bank_account", bank_account.name, update_modified=False)
+	company_name = args.get('company_name')
+	bank_account_group =  frappe.db.get_value("Account",
+		{"account_type": "Bank", "is_group": 1, "root_type": "Asset",
+			"company": company_name})
+	if bank_account_group:
+		bank_account = frappe.get_doc({
+			"doctype": "Account",
+			'account_name': args.get('bank_account'),
+			'parent_account': bank_account_group,
+			'is_group':0,
+			'company': company_name,
+			"account_type": "Bank",
+		})
+		try:
+			doc = bank_account.insert()
 
-			except RootNotEditable:
-				frappe.throw(_("Bank account cannot be named as {0}").format(args.bank_account))
-			except frappe.DuplicateEntryError:
-				# bank account same as a CoA entry
-				pass
+			if args.get('set_default'):
+				frappe.db.set_value("Company", args.get('company_name'), "default_bank_account", bank_account.name, update_modified=False)
 
-	# Now, with fixtures out of the way, onto concrete stuff
-	records = [
+			return doc
 
-		# Shopping cart: needs price lists
-		{
-			"doctype": "Shopping Cart Settings",
-			"enabled": 1,
-			'company': args.company_name,
-			# uh oh
-			'price_list': frappe.db.get_value("Price List", {"selling": 1}),
-			'default_customer_group': _("Individual"),
-			'quotation_series': "QTN-",
-		},
-	]
+		except RootNotEditable:
+			frappe.throw(_("Bank account cannot be named as {0}").format(args.get('bank_account')))
+		except frappe.DuplicateEntryError:
+			# bank account same as a CoA entry
+			pass
 
-	make_records(records)
-
+def update_shopping_cart_settings(args):
+	shopping_cart = frappe.get_doc("E Commerce Settings")
+	shopping_cart.update({
+		"enabled": 1,
+		'company': args.company_name,
+		'price_list': frappe.db.get_value("Price List", {"selling": 1}),
+		'default_customer_group': _("Individual"),
+		'quotation_series': "QTN-",
+	})
+	shopping_cart.update_single(shopping_cart.get_valid_dict())
 
 def get_fy_details(fy_start_date, fy_end_date):
 	start_year = getdate(fy_start_date).year

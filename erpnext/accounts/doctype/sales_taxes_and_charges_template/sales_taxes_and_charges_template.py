@@ -1,12 +1,19 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt
 from frappe.model.document import Document
-from erpnext.controllers.accounts_controller import validate_taxes_and_charges, validate_inclusive_tax
+from frappe.utils import flt
+
+from erpnext.controllers.accounts_controller import (
+	validate_account_head,
+	validate_cost_center,
+	validate_inclusive_tax,
+	validate_taxes_and_charges,
+)
+
 
 class SalesTaxesandChargesTemplate(Document):
 	def validate(self):
@@ -39,6 +46,8 @@ def valdiate_taxes_and_charges_template(doc):
 
 	for tax in doc.get("taxes"):
 		validate_taxes_and_charges(tax)
+		validate_account_head(tax, doc)
+		validate_cost_center(tax, doc)
 		validate_inclusive_tax(tax, doc)
 
 def validate_disabled(doc):
@@ -46,5 +55,5 @@ def validate_disabled(doc):
 		frappe.throw(_("Disabled template must not be default template"))
 
 def validate_for_tax_category(doc):
-	if frappe.db.exists(doc.doctype, {"company": doc.company, "tax_category": doc.tax_category, "disabled": 0}):
+	if frappe.db.exists(doc.doctype, {"company": doc.company, "tax_category": doc.tax_category, "disabled": 0, "name": ["!=", doc.name]}):
 		frappe.throw(_("A template with tax category {0} already exists. Only one template is allowed with each tax category").format(frappe.bold(doc.tax_category)))

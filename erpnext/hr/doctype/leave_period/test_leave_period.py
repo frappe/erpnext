@@ -1,10 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
-import frappe, erpnext
 import unittest
+
+import frappe
+
+import erpnext
 
 test_dependencies = ["Employee", "Leave Type", "Leave Policy"]
 

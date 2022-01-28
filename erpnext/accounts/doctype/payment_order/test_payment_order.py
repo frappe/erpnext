@@ -1,14 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
 from frappe.utils import getdate
+
 from erpnext.accounts.doctype.bank_transaction.test_bank_transaction import create_bank_account
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, make_payment_order
+from erpnext.accounts.doctype.payment_entry.payment_entry import (
+	get_payment_entry,
+	make_payment_order,
+)
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
 
 class TestPaymentOrder(unittest.TestCase):
 	def setUp(self):
@@ -31,10 +35,10 @@ class TestPaymentOrder(unittest.TestCase):
 
 		doc = create_payment_order_against_payment_entry(payment_entry, "Payment Entry")
 		reference_doc = doc.get("references")[0]
-		self.assertEquals(reference_doc.reference_name, payment_entry.name)
-		self.assertEquals(reference_doc.reference_doctype, "Payment Entry")
-		self.assertEquals(reference_doc.supplier, "_Test Supplier")
-		self.assertEquals(reference_doc.amount, 250)
+		self.assertEqual(reference_doc.reference_name, payment_entry.name)
+		self.assertEqual(reference_doc.reference_doctype, "Payment Entry")
+		self.assertEqual(reference_doc.supplier, "_Test Supplier")
+		self.assertEqual(reference_doc.amount, 250)
 
 def create_payment_order_against_payment_entry(ref_doc, order_type):
 	payment_order = frappe.get_doc(dict(

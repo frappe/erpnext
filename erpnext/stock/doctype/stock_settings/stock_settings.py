@@ -3,13 +3,16 @@
 
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.model.document import Document
-from frappe.utils.html_utils import clean_html
-from frappe.utils import cint
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.model.document import Document
+from frappe.utils import cint
+from frappe.utils.html_utils import clean_html
+
+from erpnext.stock.utils import check_pending_reposting
+
 
 class StockSettings(Document):
 	def validate(self):
@@ -19,7 +22,7 @@ class StockSettings(Document):
 
 		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
 		set_by_naming_series("Item", "item_code",
-			self.get("item_naming_by")=="Naming Series", hide_name_field=True)
+			self.get("item_naming_by")=="Naming Series", hide_name_field=True, make_mandatory=0)
 
 		stock_frozen_limit = 356
 		submitted_stock_frozen = self.stock_frozen_upto_days or 0
@@ -30,11 +33,12 @@ class StockSettings(Document):
 		# show/hide barcode field
 		for name in ["barcode", "barcodes", "scan_barcode"]:
 			frappe.make_property_setter({'fieldname': name, 'property': 'hidden',
-				'value': 0 if self.show_barcode_field else 1})
+				'value': 0 if self.show_barcode_field else 1}, validate_fields_for_doctype=False)
 
 		self.validate_warehouses()
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
+		self.validate_pending_reposts()
 
 	def validate_warehouses(self):
 		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
@@ -63,14 +67,19 @@ class StockSettings(Document):
 			# changed to text
 			frappe.enqueue('erpnext.stock.doctype.stock_settings.stock_settings.clean_all_descriptions', now=frappe.flags.in_test)
 
+	def validate_pending_reposts(self):
+		if self.stock_frozen_upto:
+			check_pending_reposting(self.stock_frozen_upto)
+
+
 	def on_update(self):
 		self.toggle_warehouse_field_for_inter_warehouse_transfer()
 
 	def toggle_warehouse_field_for_inter_warehouse_transfer(self):
-		make_property_setter("Sales Invoice Item", "target_warehouse", "hidden", 1 - cint(self.allow_from_dn), "Check")
-		make_property_setter("Delivery Note Item", "target_warehouse", "hidden", 1 - cint(self.allow_from_dn), "Check")
-		make_property_setter("Purchase Invoice Item", "from_warehouse", "hidden", 1 - cint(self.allow_from_pr), "Check")
-		make_property_setter("Purchase Receipt Item", "from_warehouse", "hidden", 1 - cint(self.allow_from_pr), "Check")
+		make_property_setter("Sales Invoice Item", "target_warehouse", "hidden", 1 - cint(self.allow_from_dn), "Check", validate_fields_for_doctype=False)
+		make_property_setter("Delivery Note Item", "target_warehouse", "hidden", 1 - cint(self.allow_from_dn), "Check", validate_fields_for_doctype=False)
+		make_property_setter("Purchase Invoice Item", "from_warehouse", "hidden", 1 - cint(self.allow_from_pr), "Check", validate_fields_for_doctype=False)
+		make_property_setter("Purchase Receipt Item", "from_warehouse", "hidden", 1 - cint(self.allow_from_pr), "Check", validate_fields_for_doctype=False)
 
 
 def clean_all_descriptions():

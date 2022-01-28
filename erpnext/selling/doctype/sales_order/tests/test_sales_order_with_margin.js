@@ -35,4 +35,3 @@ QUnit.test("test sales order with margin", function(assert) {
 		() => done()
 	]);
 });
-

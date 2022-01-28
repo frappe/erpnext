@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe import msgprint, _
+from frappe import _, msgprint
+from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
-from frappe.desk.reportview import get_match_cond, get_filters_cond
 from frappe.utils import comma_and, get_link_to_form, getdate
-import erpnext.www.lms as lms
+
 
 class ProgramEnrollment(Document):
 	def validate(self):
@@ -91,6 +90,8 @@ class ProgramEnrollment(Document):
 				(fee, fee) for fee in fee_list]
 			msgprint(_("Fee Records Created - {0}").format(comma_and(fee_list)))
 
+
+	@frappe.whitelist()
 	def get_courses(self):
 		return frappe.db.sql('''select course from `tabProgram Course` where parent = %s and required = 1''', (self.program), as_dict=1)
 
@@ -172,4 +173,3 @@ def get_students(doctype, txt, searchfield, start, page_len, filters):
 			tuple(students + ["%%%s%%" % txt, start, page_len]
 		)
 	)
-

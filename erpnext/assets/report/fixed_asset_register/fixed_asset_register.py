@@ -1,11 +1,17 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import cstr, today, flt, add_years, formatdate, getdate
-from erpnext.accounts.report.financial_statements import get_period_list, get_fiscal_year_data, validate_fiscal_year
+from frappe.utils import cstr, flt, formatdate, getdate
+
+from erpnext.accounts.report.financial_statements import (
+	get_fiscal_year_data,
+	get_period_list,
+	validate_fiscal_year,
+)
+
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
@@ -38,12 +44,13 @@ def get_conditions(filters):
 	if filters.get('cost_center'):
 		conditions["cost_center"] = filters.get('cost_center')
 
-	# In Store assets are those that are not sold or scrapped
-	operand = 'not in'
-	if status not in 'In Location':
-		operand = 'in'
+	if status:
+		# In Store assets are those that are not sold or scrapped
+		operand = 'not in'
+		if status not in 'In Location':
+			operand = 'in'
 
-	conditions['status'] = (operand, ['Sold', 'Scrapped'])
+		conditions['status'] = (operand, ['Sold', 'Scrapped'])
 
 	return conditions
 
@@ -99,7 +106,7 @@ def prepare_chart_data(data, filters):
 	labels_values_map = {}
 	date_field = frappe.scrub(filters.date_based_on)
 
-	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
+	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year,
 		filters.from_date, filters.to_date, filters.filter_based_on, "Monthly", company=filters.company)
 
 	for d in period_list:

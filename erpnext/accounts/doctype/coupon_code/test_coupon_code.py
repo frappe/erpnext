@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
+
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.stock.get_item_details import get_item_details
-from frappe.test_runner import make_test_objects
 
 test_dependencies = ['Item']
 
@@ -41,9 +39,6 @@ def test_create_test_data():
 		"selling_cost_center": "Main - _TC",
 		"income_account": "Sales - _TC"
 		}],
-		"show_in_website": 1,
-		"route":"-test-tesla-car",
-		"website_warehouse": "Stores - _TC"
 		})
 		item.insert()
 	# create test item price
@@ -57,7 +52,7 @@ def test_create_test_data():
 		})
 		item_price.insert()
 	# create test item pricing rule
-	if not frappe.db.exists("Pricing Rule","_Test Pricing Rule for _Test Item"):
+	if not frappe.db.exists("Pricing Rule", {"title": "_Test Pricing Rule for _Test Item"}):
 		item_pricing_rule = frappe.get_doc({
 		"doctype": "Pricing Rule",
 		"title": "_Test Pricing Rule for _Test Item",
@@ -86,14 +81,15 @@ def test_create_test_data():
 		sales_partner.insert()
 	# create test item coupon code
 	if not frappe.db.exists("Coupon Code", "SAVE30"):
+		pricing_rule = frappe.db.get_value("Pricing Rule", {"title": "_Test Pricing Rule for _Test Item"}, ['name'])
 		coupon_code = frappe.get_doc({
-		"doctype": "Coupon Code",
-		"coupon_name":"SAVE30",
-		"coupon_code":"SAVE30",
-		"pricing_rule": "_Test Pricing Rule for _Test Item",
-		"valid_from": "2014-01-01",
-		"maximum_use":1,
-		"used":0
+			"doctype": "Coupon Code",
+			"coupon_name":"SAVE30",
+			"coupon_code":"SAVE30",
+			"pricing_rule": pricing_rule,
+			"valid_from": "2014-01-01",
+			"maximum_use":1,
+			"used":0
 		})
 		coupon_code.insert()
 
@@ -102,7 +98,7 @@ class TestCouponCode(unittest.TestCase):
 		test_create_test_data()
 
 	def tearDown(self):
-		frappe.set_user("Administrator")		
+		frappe.set_user("Administrator")
 
 	def test_sales_order_with_coupon_code(self):
 		frappe.db.set_value("Coupon Code", "SAVE30", "used", 0)
@@ -123,6 +119,3 @@ class TestCouponCode(unittest.TestCase):
 
 		so.submit()
 		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
-
-
-

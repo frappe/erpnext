@@ -19,8 +19,15 @@
   "qty",
   "material_transferred_for_manufacturing",
   "produced_qty",
+  "process_loss_qty",
   "sales_order",
   "project",
+  "serial_no_and_batch_for_finished_good_section",
+  "has_serial_no",
+  "has_batch_no",
+  "column_break_17",
+  "serial_no",
+  "batch_size",
   "settings_section",
   "allow_alternative_item",
   "use_multi_level_bom",
@@ -52,6 +59,7 @@
   "actual_operating_cost",
   "additional_operating_cost",
   "column_break_24",
+  "corrective_operation_cost",
   "total_operating_cost",
   "more_info",
   "description",
@@ -62,6 +70,7 @@
   "sales_order_item",
   "production_plan",
   "production_plan_item",
+  "production_plan_sub_assembly_item",
   "product_bundle_item",
   "amended_from"
  ],
@@ -90,7 +99,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nStopped\nCancelled",
+   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nStopped\nClosed\nCancelled",
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
@@ -173,6 +182,7 @@
    "reqd": 1
   },
   {
+   "default": "1.0",
    "fieldname": "qty",
    "fieldtype": "Float",
    "label": "Qty To Manufacture",
@@ -316,6 +326,7 @@
    "label": "Expected Delivery Date"
   },
   {
+   "collapsible": 1,
    "fieldname": "operations_section",
    "fieldtype": "Section Break",
    "label": "Operations",
@@ -327,7 +338,7 @@
    "fieldname": "transfer_material_against",
    "fieldtype": "Select",
    "label": "Transfer Material Against",
-   "options": "\nWork Order\nJob Card"
+   "options": "Work Order\nJob Card"
   },
   {
    "fieldname": "operations",
@@ -488,6 +499,74 @@
    "fieldtype": "Float",
    "label": "Lead Time",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "serial_no_and_batch_for_finished_good_section",
+   "fieldtype": "Section Break",
+   "label": "Serial No and Batch for Finished Good"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fetch_from": "production_item.has_serial_no",
+   "fieldname": "has_serial_no",
+   "fieldtype": "Check",
+   "label": "Has Serial No",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "production_item.has_batch_no",
+   "fieldname": "has_batch_no",
+   "fieldtype": "Check",
+   "label": "Has Batch No",
+   "read_only": 1
+  },
+  {
+   "depends_on": "has_serial_no",
+   "fieldname": "serial_no",
+   "fieldtype": "Small Text",
+   "label": "Serial Nos",
+   "no_copy": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "has_batch_no",
+   "fieldname": "batch_size",
+   "fieldtype": "Float",
+   "label": "Batch Size"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "From Corrective Job Card",
+   "fieldname": "corrective_operation_cost",
+   "fieldtype": "Currency",
+   "label": "Corrective Operation Cost",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "production_plan_sub_assembly_item",
+   "fieldtype": "Data",
+   "label": "Production Plan Sub-assembly Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.process_loss_qty",
+   "fieldname": "process_loss_qty",
+   "fieldtype": "Float",
+   "label": "Process Loss Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-cogs",
@@ -495,10 +574,12 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-16 13:27:51.116484",
+ "modified": "2021-11-08 17:36:07.016300",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
+ "naming_rule": "By \"Naming Series\" field",
+ "nsm_parent_field": "parent_work_order",
  "owner": "Administrator",
  "permissions": [
   {

@@ -1,22 +1,27 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe
 import json
-from six import iteritems
-from frappe.model.document import Document
+from collections import OrderedDict, defaultdict
+
+import frappe
 from frappe import _
-from collections import OrderedDict
-from frappe.utils import floor, flt, today, cint
-from frappe.model.mapper import get_mapped_doc, map_child_doc
+from frappe.model.document import Document
+from frappe.model.mapper import map_child_doc
+from frappe.utils import cint, floor, flt, today
+from six import iteritems
+
+from erpnext.selling.doctype.sales_order.sales_order import (
+	make_delivery_note as create_delivery_note_from_sales_order,
+)
 from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note as create_delivery_note_from_sales_order
 
 # TODO: Prioritize SO or WO group warehouse
 
 class PickList(Document):
+	def validate(self):
+		self.validate_for_qty()
+
 	def before_save(self):
 		self.set_item_locations()
 
@@ -25,15 +30,17 @@ class PickList(Document):
 			if not frappe.get_cached_value('Item', item.item_code, 'has_serial_no'):
 				continue
 			if not item.serial_no:
-				frappe.throw(_("Row #{0}: {1} does not have any available serial numbers in {2}".format(
-					frappe.bold(item.idx), frappe.bold(item.item_code), frappe.bold(item.warehouse))),
+				frappe.throw(_("Row #{0}: {1} does not have any available serial numbers in {2}").format(
+					frappe.bold(item.idx), frappe.bold(item.item_code), frappe.bold(item.warehouse)),
 					title=_("Serial Nos Required"))
 			if len(item.serial_no.split('\n')) == item.picked_qty:
 				continue
 			frappe.throw(_('For item {0} at row {1}, count of serial numbers does not match with the picked quantity')
 				.format(frappe.bold(item.item_code), frappe.bold(item.idx)), title=_("Quantity Mismatch"))
 
+	@frappe.whitelist()
 	def set_item_locations(self, save=False):
+		self.validate_for_qty()
 		items = self.aggregate_item_qty()
 		self.item_location_map = frappe._dict()
 
@@ -105,6 +112,39 @@ class PickList(Document):
 			self.item_count_map[item_code] += item.stock_qty
 
 		return item_map.values()
+
+	def validate_for_qty(self):
+		if self.purpose == "Material Transfer for Manufacture" \
+				and (self.for_qty is None or self.for_qty == 0):
+			frappe.throw(_("Qty of Finished Goods Item should be greater than 0."))
+
+	def before_print(self, settings=None):
+		if self.get("group_same_items"):
+			self.group_similar_items()
+
+	def group_similar_items(self):
+		group_item_qty = defaultdict(float)
+		group_picked_qty = defaultdict(float)
+
+		for item in self.locations:
+			group_item_qty[(item.item_code, item.warehouse)] +=  item.qty
+			group_picked_qty[(item.item_code, item.warehouse)] += item.picked_qty
+
+		duplicate_list = []
+		for item in self.locations:
+			if (item.item_code, item.warehouse) in group_item_qty:
+				item.qty = group_item_qty[(item.item_code, item.warehouse)]
+				item.picked_qty = group_picked_qty[(item.item_code, item.warehouse)]
+				item.stock_qty = group_item_qty[(item.item_code, item.warehouse)]
+				del group_item_qty[(item.item_code, item.warehouse)]
+			else:
+				duplicate_list.append(item)
+
+		for item in duplicate_list:
+			self.remove(item)
+
+		for idx, item in enumerate(self.locations, start=1):
+			item.idx = idx
 
 
 def validate_item_locations(pick_list):
@@ -229,6 +269,7 @@ def get_available_item_locations_for_batched_item(item_code, from_warehouses, re
 			and sle.`item_code`=%(item_code)s
 			and sle.`company` = %(company)s
 			and batch.disabled = 0
+			and sle.is_cancelled=0
 			and IFNULL(batch.`expiry_date`, '2200-01-01') > %(today)s
 			{warehouse_condition}
 		GROUP BY
@@ -378,9 +419,8 @@ def create_stock_entry(pick_list):
 	else:
 		stock_entry = update_stock_entry_items_with_no_reference(pick_list, stock_entry)
 
-	stock_entry.set_incoming_rate()
 	stock_entry.set_actual_qty()
-	stock_entry.calculate_rate_and_amount(update_finished_item_rate=False)
+	stock_entry.calculate_rate_and_amount()
 
 	return stock_entry.as_dict()
 

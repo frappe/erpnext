@@ -1,16 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.model.document import Document
-from erpnext.crm.doctype.utils import get_scheduled_employees_for_popup, strip_number
 from frappe.contacts.doctype.contact.contact import get_contact_with_phone_number
 from frappe.core.doctype.dynamic_link.dynamic_link import deduplicate_dynamic_links
+from frappe.model.document import Document
 
 from erpnext.crm.doctype.lead.lead import get_lead_with_phone_number
+from erpnext.crm.doctype.utils import get_scheduled_employees_for_popup, strip_number
 
 END_CALL_STATUSES = ['No Answer', 'Completed', 'Busy', 'Failed']
 ONGOING_CALL_STATUSES = ['Ringing', 'In Progress']
@@ -142,7 +141,7 @@ def link_existing_conversations(doc, state):
 			for log in logs:
 				call_log = frappe.get_doc('Call Log', log)
 				call_log.add_link(link_type=doc.doctype, link_name=doc.name)
-				call_log.save()
+				call_log.save(ignore_permissions=True)
 			frappe.db.commit()
 	except Exception:
 		frappe.log_error(title=_('Error during caller information update'))
@@ -173,4 +172,3 @@ def get_linked_call_logs(doctype, docname):
 		})
 
 	return timeline_contents
-

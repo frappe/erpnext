@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
-import frappe
 import unittest
 
+import frappe
+
 from .quality_procedure import add_node
+
 
 class TestQualityProcedure(unittest.TestCase):
 	def test_add_node(self):

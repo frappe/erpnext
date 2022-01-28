@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-02-22 01:28:06",
  "doctype": "DocType",
@@ -8,14 +9,15 @@
  "field_order": [
   "item_code",
   "item_name",
+  "column_break_3",
+  "service_person",
   "serial_no",
+  "section_break_6",
   "description",
   "work_details",
-  "service_person",
   "work_done",
   "prevdoc_doctype",
-  "prevdoc_docname",
-  "prevdoc_detail_docname"
+  "prevdoc_docname"
  ],
  "fields": [
   {
@@ -62,6 +64,8 @@
    "fieldtype": "Section Break"
   },
   {
+   "fetch_from": "prevdoc_detail_docname.sales_person",
+   "fetch_if_empty": 1,
    "fieldname": "service_person",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -83,49 +87,30 @@
   {
    "fieldname": "prevdoc_doctype",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Document Type",
-   "no_copy": 1,
-   "oldfieldname": "prevdoc_doctype",
-   "oldfieldtype": "Data",
-   "options": "DocType",
-   "print_hide": 1,
-   "print_width": "150px",
-   "read_only": 1,
-   "report_hide": 1,
-   "width": "150px"
+   "options": "DocType"
   },
   {
    "fieldname": "prevdoc_docname",
    "fieldtype": "Dynamic Link",
+   "hidden": 1,
    "label": "Against Document No",
-   "no_copy": 1,
-   "oldfieldname": "prevdoc_docname",
-   "oldfieldtype": "Data",
-   "options": "prevdoc_doctype",
-   "print_hide": 1,
-   "print_width": "160px",
-   "read_only": 1,
-   "report_hide": 1,
-   "width": "160px"
+   "options": "prevdoc_doctype"
   },
   {
-   "fieldname": "prevdoc_detail_docname",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Against Document Detail No",
-   "no_copy": 1,
-   "oldfieldname": "prevdoc_detail_docname",
-   "oldfieldtype": "Data",
-   "print_hide": 1,
-   "print_width": "160px",
-   "read_only": 1,
-   "report_hide": 1,
-   "width": "160px"
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-09-18 17:26:09.703215",
+ "links": [],
+ "modified": "2021-05-27 17:47:21.474282",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Visit Purpose",

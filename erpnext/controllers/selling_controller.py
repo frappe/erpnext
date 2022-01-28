@@ -1,22 +1,21 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
-from frappe.utils import cint, flt, cstr, get_link_to_form, nowtime
-from frappe import _, throw
-from erpnext.stock.get_item_details import get_bin_details
-from erpnext.stock.utils import get_incoming_rate
-from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.stock.doctype.item.item import set_item_default
-from frappe.contacts.doctype.address.address import get_address_display
-from erpnext.controllers.accounts_controller import get_taxes_and_charges
 
-from erpnext.controllers.stock_controller import StockController
+import frappe
+from frappe import _, bold, throw
+from frappe.contacts.doctype.address.address import get_address_display
+from frappe.utils import cint, cstr, flt, get_link_to_form, nowtime
+
+from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
+from erpnext.controllers.stock_controller import StockController
+from erpnext.stock.doctype.item.item import set_item_default
+from erpnext.stock.get_item_details import get_bin_details, get_conversion_factor
+from erpnext.stock.utils import get_incoming_rate
+
 
 class SellingController(StockController):
-
 	def get_feed(self):
 		return _("To {0} | {1} {2}").format(self.customer_name, self.currency,
 			self.grand_total)
@@ -121,13 +120,27 @@ class SellingController(StockController):
 			self.in_words = money_in_words(amount, self.currency)
 
 	def calculate_commission(self):
-		if self.meta.get_field("commission_rate"):
-			self.round_floats_in(self, ["base_net_total", "commission_rate"])
-			if self.commission_rate > 100.0:
-				throw(_("Commission rate cannot be greater than 100"))
+		if not self.meta.get_field("commission_rate"):
+			return
 
-			self.total_commission = flt(self.base_net_total * self.commission_rate / 100.0,
-				self.precision("total_commission"))
+		self.round_floats_in(
+			self, ("amount_eligible_for_commission", "commission_rate")
+		)
+
+		if not (0 <= self.commission_rate <= 100.0):
+			throw("{} {}".format(
+				_(self.meta.get_label("commission_rate")),
+				_("must be between 0 and 100"),
+			))
+
+		self.amount_eligible_for_commission = sum(
+			item.base_net_amount for item in self.items if item.grant_commission
+		)
+
+		self.total_commission = flt(
+			self.amount_eligible_for_commission * self.commission_rate / 100.0,
+			self.precision("total_commission")
+		)
 
 	def calculate_contribution(self):
 		if not self.meta.get_field("sales_team"):
@@ -139,12 +152,12 @@ class SellingController(StockController):
 			self.round_floats_in(sales_person)
 
 			sales_person.allocated_amount = flt(
-				self.base_net_total * sales_person.allocated_percentage / 100.0,
+				self.amount_eligible_for_commission * sales_person.allocated_percentage / 100.0,
 				self.precision("allocated_amount", sales_person))
 
 			if sales_person.commission_rate:
 				sales_person.incentives = flt(
-					sales_person.allocated_amount * flt(sales_person.commission_rate) / 100.0, 
+					sales_person.allocated_amount * flt(sales_person.commission_rate) / 100.0,
 					self.precision("incentives", sales_person))
 
 			total += sales_person.allocated_percentage
@@ -169,39 +182,96 @@ class SellingController(StockController):
 
 	def validate_selling_price(self):
 		def throw_message(idx, item_name, rate, ref_rate_field):
-			bold_net_rate = frappe.bold("net rate")
-			msg = (_("""Row #{}: Selling rate for item {} is lower than its {}. Selling {} should be atleast {}""")
-						.format(idx, frappe.bold(item_name), frappe.bold(ref_rate_field), bold_net_rate, frappe.bold(rate)))
-			msg += "<br><br>"
-			msg += (_("""You can alternatively disable selling price validation in {} to bypass this validation.""")
-						.format(get_link_to_form("Selling Settings", "Selling Settings")))
-			frappe.throw(msg, title=_("Invalid Selling Price"))
+			throw(_("""Row #{0}: Selling rate for item {1} is lower than its {2}.
+					Selling {3} should be atleast {4}.<br><br>Alternatively,
+					you can disable selling price validation in {5} to bypass
+					this validation.""").format(
+				idx,
+				bold(item_name),
+				bold(ref_rate_field),
+				bold("net rate"),
+				bold(rate),
+				get_link_to_form("Selling Settings", "Selling Settings"),
+			), title=_("Invalid Selling Price"))
 
-		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
-			return
-		if hasattr(self, "is_return") and self.is_return:
+		if (
+			self.get("is_return")
+			or not frappe.db.get_single_value("Selling Settings", "validate_selling_price")
+		):
 			return
 
-		for it in self.get("items"):
-			if not it.item_code:
+		is_internal_customer = self.get('is_internal_customer')
+		valuation_rate_map = {}
+
+		for item in self.items:
+			if not item.item_code:
 				continue
 
-			last_purchase_rate, is_stock_item = frappe.get_cached_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
-			last_purchase_rate_in_sales_uom = last_purchase_rate * (it.conversion_factor or 1)
-			if flt(it.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
-				throw_message(it.idx, frappe.bold(it.item_name), last_purchase_rate_in_sales_uom, "last purchase rate")
+			last_purchase_rate, is_stock_item = frappe.get_cached_value(
+				"Item", item.item_code, ("last_purchase_rate", "is_stock_item")
+			)
 
-			last_valuation_rate = frappe.db.sql("""
-				SELECT valuation_rate FROM `tabStock Ledger Entry` WHERE item_code = %s
-				AND warehouse = %s AND valuation_rate > 0
-				ORDER BY posting_date DESC, posting_time DESC, creation DESC LIMIT 1
-				""", (it.item_code, it.warehouse))
-			if last_valuation_rate:
-				last_valuation_rate_in_sales_uom = last_valuation_rate[0][0] * (it.conversion_factor or 1)
-				if is_stock_item and flt(it.base_net_rate) < flt(last_valuation_rate_in_sales_uom) \
-					and not self.get('is_internal_customer'):
-					throw_message(it.idx, frappe.bold(it.item_name), last_valuation_rate_in_sales_uom, "valuation rate")
+			last_purchase_rate_in_sales_uom = (
+				last_purchase_rate * (item.conversion_factor or 1)
+			)
 
+			if flt(item.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
+				throw_message(
+					item.idx,
+					item.item_name,
+					last_purchase_rate_in_sales_uom,
+					"last purchase rate"
+				)
+
+			if is_internal_customer or not is_stock_item:
+				continue
+
+			valuation_rate_map[(item.item_code, item.warehouse)] = None
+
+		if not valuation_rate_map:
+			return
+
+		or_conditions = (
+			f"""(item_code = {frappe.db.escape(valuation_rate[0])}
+			and warehouse = {frappe.db.escape(valuation_rate[1])})"""
+			for valuation_rate in valuation_rate_map
+		)
+
+		valuation_rates = frappe.db.sql(f"""
+			select
+				item_code, warehouse, valuation_rate
+			from
+				`tabBin`
+			where
+				({" or ".join(or_conditions)})
+				and valuation_rate > 0
+		""", as_dict=True)
+
+		for rate in valuation_rates:
+			valuation_rate_map[(rate.item_code, rate.warehouse)] = rate.valuation_rate
+
+		for item in self.items:
+			if not item.item_code:
+				continue
+
+			last_valuation_rate = valuation_rate_map.get(
+				(item.item_code, item.warehouse)
+			)
+
+			if not last_valuation_rate:
+				continue
+
+			last_valuation_rate_in_sales_uom = (
+				last_valuation_rate * (item.conversion_factor or 1)
+			)
+
+			if flt(item.base_net_rate) < flt(last_valuation_rate_in_sales_uom):
+				throw_message(
+					item.idx,
+					item.item_name,
+					last_valuation_rate_in_sales_uom,
+					"valuation rate"
+				)
 
 	def get_item_list(self):
 		il = []
@@ -306,7 +376,7 @@ class SellingController(StockController):
 				sales_order.update_reserved_qty(so_item_rows)
 
 	def set_incoming_rate(self):
-		if self.doctype not in ("Delivery Note", "Sales Invoice", "Sales Order"):
+		if self.doctype not in ("Delivery Note", "Sales Invoice"):
 			return
 
 		items = self.get("items") + (self.get("packed_items") or [])
@@ -315,24 +385,31 @@ class SellingController(StockController):
 				# Get incoming rate based on original item cost based on valuation method
 				qty = flt(d.get('stock_qty') or d.get('actual_qty'))
 
-				d.incoming_rate = get_incoming_rate({
-					"item_code": d.item_code,
-					"warehouse": d.warehouse,
-					"posting_date": self.get('posting_date') or self.get('transaction_date'),
-					"posting_time": self.get('posting_time') or nowtime(),
-					"qty": qty if cint(self.get("is_return")) else (-1 * qty),
-					"serial_no": d.get('serial_no'),
-					"company": self.company,
-					"voucher_type": self.doctype,
-					"voucher_no": self.name,
-					"allow_zero_valuation": d.get("allow_zero_valuation")
-				}, raise_error_if_no_rate=False)
+				if not (self.get("is_return") and d.incoming_rate):
+					d.incoming_rate = get_incoming_rate({
+						"item_code": d.item_code,
+						"warehouse": d.warehouse,
+						"posting_date": self.get('posting_date') or self.get('transaction_date'),
+						"posting_time": self.get('posting_time') or nowtime(),
+						"qty": qty if cint(self.get("is_return")) else (-1 * qty),
+						"serial_no": d.get('serial_no'),
+						"company": self.company,
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+						"allow_zero_valuation": d.get("allow_zero_valuation")
+					}, raise_error_if_no_rate=False)
 
 				# For internal transfers use incoming rate as the valuation rate
 				if self.is_internal_transfer():
-					rate = flt(d.incoming_rate * d.conversion_factor, d.precision('rate'))
-					if d.rate != rate:
-						d.rate = rate
+					if d.doctype == "Packed Item":
+						incoming_rate = flt(d.incoming_rate * d.conversion_factor, d.precision('incoming_rate'))
+						if d.incoming_rate != incoming_rate:
+							d.incoming_rate = incoming_rate
+					else:
+						rate = flt(d.incoming_rate * d.conversion_factor, d.precision('rate'))
+						if d.rate != rate:
+							d.rate = rate
+
 						d.discount_percentage = 0
 						d.discount_amount = 0
 						frappe.msgprint(_("Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer")
@@ -428,7 +505,7 @@ class SellingController(StockController):
 		self.po_no = ', '.join(list(set(x.strip() for x in ','.join(po_nos).split(','))))
 
 	def get_po_nos(self, ref_doctype, ref_fieldname, po_nos):
-		doc_list = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
+		doc_list = list(set(d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)))
 		if doc_list:
 			po_nos += [d.po_no for d in frappe.get_all(ref_doctype, 'po_no', filters = {'name': ('in', doc_list)}) if d.get('po_no')]
 
@@ -494,6 +571,12 @@ class SellingController(StockController):
 				warehouse = frappe.bold(d.get("target_warehouse"))
 				frappe.throw(_("Row {0}: Delivery Warehouse ({1}) and Customer Warehouse ({2}) can not be same")
 					.format(d.idx, warehouse, warehouse))
+
+		if not self.get("is_internal_customer") and any(d.get("target_warehouse") for d in items):
+			msg = _("Target Warehouse is set for some items but the customer is not an internal customer.")
+			msg += " " + _("This {} will be treated as material transfer.").format(_(self.doctype))
+			frappe.msgprint(msg, title="Internal Transfer", alert=True)
+
 
 	def validate_items(self):
 		# validate items to see if they have is_sales_item enabled

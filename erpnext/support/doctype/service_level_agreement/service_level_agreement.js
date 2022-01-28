@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Service Level Agreement', {
-	setup: function(frm) {
+	refresh: function(frm) {
 		let allow_statuses = [];
 		const exclude_statuses = ['Open', 'Closed', 'Resolved'];
 
@@ -10,7 +10,9 @@ frappe.ui.form.on('Service Level Agreement', {
 			let statuses = frappe.meta.get_docfield('Issue', 'status', frm.doc.name).options;
 			statuses = statuses.split('\n');
 			allow_statuses = statuses.filter((status) => !exclude_statuses.includes(status));
-			frappe.meta.get_docfield('Pause SLA On Status', 'status', frm.doc.name).options = [''].concat(allow_statuses);
+			frm.fields_dict.pause_sla_on.grid.update_docfield_property(
+				'status', 'options', [''].concat(allow_statuses)
+			);
 		});
 	}
 });

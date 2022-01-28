@@ -106,7 +106,6 @@
    "depends_on": "eval:doc.rate_or_discount==\"Rate\"",
    "fieldname": "rate",
    "fieldtype": "Currency",
-   "in_list_view": 1,
    "label": "Rate"
   },
   {
@@ -137,7 +136,7 @@
    "label": "Threshold for Suggestion"
   },
   {
-   "default": "1",
+   "default": "0",
    "fieldname": "validate_applied_rule",
    "fieldtype": "Check",
    "label": "Validate Applied Rule"
@@ -170,7 +169,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-03-07 11:56:23.424137",
+ "modified": "2021-11-16 00:25:33.843996",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Promotional Scheme Price Discount",

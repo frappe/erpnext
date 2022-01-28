@@ -1,13 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _
-from frappe.utils import getdate, flt, cint
-from erpnext.controllers.accounts_controller import AccountsController
+from frappe.utils import cint, flt, getdate
+
+import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.controllers.accounts_controller import AccountsController
+
 
 class LoanWriteOff(AccountsController):
 	def validate(self):
@@ -84,5 +86,3 @@ class LoanWriteOff(AccountsController):
 		)
 
 		make_gl_entries(gl_entries, cancel=cancel, merge_entries=False)
-
-

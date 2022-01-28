@@ -1,15 +1,22 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
 from frappe.utils import getdate
-from erpnext.hr.doctype.upload_attendance.upload_attendance import get_data
+
+import erpnext
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.upload_attendance.upload_attendance import get_data
+
+test_dependencies = ['Holiday List']
 
 class TestUploadAttendance(unittest.TestCase):
+	@classmethod
+	def setUpClass(cls):
+		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", '_Test Holiday List')
+
 	def test_date_range(self):
 		employee = make_employee("test_employee@company.com")
 		employee_doc = frappe.get_doc("Employee", employee)

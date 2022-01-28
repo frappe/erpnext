@@ -1,16 +1,19 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
+import unittest
 
-import frappe, unittest
+import frappe
+from frappe.utils import add_days, getdate, nowdate
+
+from erpnext.projects.doctype.project_template.test_project_template import make_project_template
+from erpnext.projects.doctype.task.test_task import create_task
+from erpnext.selling.doctype.sales_order.sales_order import make_project as make_project_from_so
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
 test_records = frappe.get_test_records('Project')
 test_ignore = ["Sales Order"]
 
-from erpnext.projects.doctype.project_template.test_project_template import make_project_template
-from erpnext.projects.doctype.project.project import update_if_holiday
-from erpnext.projects.doctype.task.test_task import create_task
-from frappe.utils import getdate, nowdate, add_days
 
 class TestProject(unittest.TestCase):
 	def test_project_with_template_having_no_parent_and_depend_tasks(self):
@@ -32,12 +35,16 @@ class TestProject(unittest.TestCase):
 
 	def test_project_template_having_parent_child_tasks(self):
 		project_name = "Test Project with Template - Tasks with Parent-Child Relation"
+
+		if frappe.db.get_value('Project', {'project_name': project_name}, 'name'):
+			project_name = frappe.db.get_value('Project', {'project_name': project_name}, 'name')
+
 		frappe.db.sql(""" delete from tabTask where project = %s """, project_name)
 		frappe.delete_doc('Project', project_name)
 
 		task1 = task_exists("Test Template Task Parent")
 		if not task1:
-			task1 = create_task(subject="Test Template Task Parent", is_group=1, is_template=1, begin=1, duration=4)
+			task1 = create_task(subject="Test Template Task Parent", is_group=1, is_template=1, begin=1, duration=10)
 
 		task2 = task_exists("Test Template Task Child 1")
 		if not task2:
@@ -52,7 +59,7 @@ class TestProject(unittest.TestCase):
 		tasks = frappe.get_all('Task', ['subject','exp_end_date','depends_on_tasks', 'name', 'parent_task'], dict(project=project.name), order_by='creation asc')
 
 		self.assertEqual(tasks[0].subject, 'Test Template Task Parent')
-		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, 1, 4))
+		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, 1, 10))
 
 		self.assertEqual(tasks[1].subject, 'Test Template Task Child 1')
 		self.assertEqual(getdate(tasks[1].exp_end_date), calculate_end_date(project, 1, 3))
@@ -90,6 +97,21 @@ class TestProject(unittest.TestCase):
 
 		self.assertEqual(len(tasks), 2)
 
+	def test_project_linking_with_sales_order(self):
+		so = make_sales_order()
+		project = make_project_from_so(so.name)
+
+		project.save()
+		self.assertEqual(project.sales_order, so.name)
+
+		so.reload()
+		self.assertEqual(so.project, project.name)
+
+		project.delete()
+
+		so.reload()
+		self.assertFalse(so.project)
+
 def get_project(name, template):
 
 	project = frappe.get_doc(dict(
@@ -97,7 +119,8 @@ def get_project(name, template):
 		project_name = name,
 		status = 'Open',
 		project_template = template.name,
-		expected_start_date = nowdate()
+		expected_start_date = nowdate(),
+		company="_Test Company"
 	)).insert()
 
 	return project
@@ -112,7 +135,8 @@ def make_project(args):
 		doctype = 'Project',
 		project_name = args.project_name,
 		status = 'Open',
-		expected_start_date = args.start_date
+		expected_start_date = args.start_date,
+		company= args.company or '_Test Company'
 	))
 
 	if args.project_template_name:
@@ -131,7 +155,7 @@ def task_exists(subject):
 
 def calculate_end_date(project, start, duration):
 	start = add_days(project.expected_start_date, start)
-	start = update_if_holiday(project.holiday_list, start)
+	start = project.update_if_holiday(start)
 	end = add_days(start, duration)
-	end = update_if_holiday(project.holiday_list, end)
+	end = project.update_if_holiday(end)
 	return getdate(end)

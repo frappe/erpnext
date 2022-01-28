@@ -1,13 +1,17 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
-from frappe.utils import cint, nowdate
-from frappe import throw, _
-from frappe.utils.nestedset import NestedSet
-from erpnext.stock import get_warehouse_account
+
+from collections import defaultdict
+
+import frappe
+from frappe import _, throw
 from frappe.contacts.address_and_contact import load_address_and_contact
+from frappe.utils import cint, flt
+from frappe.utils.nestedset import NestedSet
+
+from erpnext.stock import get_warehouse_account
+
 
 class Warehouse(NestedSet):
 	nsm_parent_field = 'parent_warehouse'
@@ -53,6 +57,7 @@ class Warehouse(NestedSet):
 			throw(_("Child warehouse exists for this warehouse. You can not delete this warehouse."))
 
 		self.update_nsm_model()
+		self.unlink_from_items()
 
 	def check_if_sle_exists(self):
 		return frappe.db.sql("""select name from `tabStock Ledger Entry`
@@ -61,57 +66,6 @@ class Warehouse(NestedSet):
 	def check_if_child_exists(self):
 		return frappe.db.sql("""select name from `tabWarehouse`
 			where parent_warehouse = %s limit 1""", self.name)
-
-	def before_rename(self, old_name, new_name, merge=False):
-		super(Warehouse, self).before_rename(old_name, new_name, merge)
-
-		# Add company abbr if not provided
-		new_warehouse = erpnext.encode_company_abbr(new_name, self.company)
-
-		if merge:
-			if not frappe.db.exists("Warehouse", new_warehouse):
-				frappe.throw(_("Warehouse {0} does not exist").format(new_warehouse))
-
-			if self.company != frappe.db.get_value("Warehouse", new_warehouse, "company"):
-				frappe.throw(_("Both Warehouse must belong to same Company"))
-
-		return new_warehouse
-
-	def after_rename(self, old_name, new_name, merge=False):
-		super(Warehouse, self).after_rename(old_name, new_name, merge)
-
-		new_warehouse_name = self.get_new_warehouse_name_without_abbr(new_name)
-		self.db_set("warehouse_name", new_warehouse_name)
-
-		if merge:
-			self.recalculate_bin_qty(new_name)
-
-	def get_new_warehouse_name_without_abbr(self, name):
-		company_abbr = frappe.get_cached_value('Company',  self.company,  "abbr")
-		parts = name.rsplit(" - ", 1)
-
-		if parts[-1].lower() == company_abbr.lower():
-			name = parts[0]
-
-		return name
-
-	def recalculate_bin_qty(self, new_name):
-		from erpnext.stock.stock_balance import repost_stock
-		frappe.db.auto_commit_on_many_writes = 1
-		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
-
-		repost_stock_for_items = frappe.db.sql_list("""select distinct item_code
-			from tabBin where warehouse=%s""", new_name)
-
-		# Delete all existing bins to avoid duplicate bins for the same item and warehouse
-		frappe.db.sql("delete from `tabBin` where warehouse=%s", new_name)
-
-		for item_code in repost_stock_for_items:
-			repost_stock(item_code, new_name)
-
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
-		frappe.db.auto_commit_on_many_writes = 0
 
 	def convert_to_group_or_ledger(self):
 		if self.is_group:
@@ -137,10 +91,14 @@ class Warehouse(NestedSet):
 			self.save()
 			return 1
 
+	def unlink_from_items(self):
+		frappe.db.sql("""
+				update `tabItem Default`
+				set default_warehouse=NULL
+				where default_warehouse=%s""", self.name)
+
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False):
-	from erpnext.stock.utils import get_stock_value_from_bin
-
 	if is_root:
 		parent = ""
 
@@ -153,12 +111,47 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 
 	warehouses = frappe.get_list(doctype, fields=fields, filters=filters, order_by='name')
 
+	company_currency = ''
+	if company:
+		company_currency = frappe.get_cached_value('Company', company, 'default_currency')
+
+	warehouse_wise_value = get_warehouse_wise_stock_value(company)
+
 	# return warehouses
 	for wh in warehouses:
-		wh["balance"] = get_stock_value_from_bin(warehouse=wh.value)
-		if company:
-			wh["company_currency"] = frappe.db.get_value('Company', company, 'default_currency')
+		wh["balance"] = warehouse_wise_value.get(wh.value)
+		if company_currency:
+			wh["company_currency"] = company_currency
 	return warehouses
+
+def get_warehouse_wise_stock_value(company):
+	warehouses = frappe.get_all('Warehouse',
+		fields = ['name', 'parent_warehouse'], filters = {'company': company})
+	parent_warehouse = {d.name : d.parent_warehouse for d in warehouses}
+
+	filters = {'warehouse': ('in', [data.name for data in warehouses])}
+	bin_data = frappe.get_all('Bin', fields = ['sum(stock_value) as stock_value', 'warehouse'],
+		filters = filters, group_by = 'warehouse')
+
+	warehouse_wise_stock_value = defaultdict(float)
+	for row in bin_data:
+		if not row.stock_value:
+			continue
+
+		warehouse_wise_stock_value[row.warehouse] = row.stock_value
+		update_value_in_parent_warehouse(warehouse_wise_stock_value,
+			parent_warehouse, row.warehouse, row.stock_value)
+
+	return warehouse_wise_stock_value
+
+def update_value_in_parent_warehouse(warehouse_wise_stock_value, parent_warehouse_dict, warehouse, stock_value):
+	parent_warehouse = parent_warehouse_dict.get(warehouse)
+	if not parent_warehouse:
+		return
+
+	warehouse_wise_stock_value[parent_warehouse] += flt(stock_value)
+	update_value_in_parent_warehouse(warehouse_wise_stock_value, parent_warehouse_dict,
+		parent_warehouse, stock_value)
 
 @frappe.whitelist()
 def add_node():

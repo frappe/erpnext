@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import datetime
 
@@ -10,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, get_datetime, get_link_to_form
 
 
@@ -67,7 +66,7 @@ class DeliveryTrip(Document):
 			delete (bool, optional): Defaults to `False`. `True` if driver details need to be emptied, else `False`.
 		"""
 
-		delivery_notes = list(set([stop.delivery_note for stop in self.delivery_stops if stop.delivery_note]))
+		delivery_notes = list(set(stop.delivery_note for stop in self.delivery_stops if stop.delivery_note))
 
 		update_fields = {
 			"driver": self.driver,
@@ -90,6 +89,7 @@ class DeliveryTrip(Document):
 		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
 		frappe.msgprint(_("Delivery Notes {0} updated").format(", ".join(delivery_notes)))
 
+	@frappe.whitelist()
 	def process_route(self, optimize):
 		"""
 		Estimate the arrival times for each stop in the Delivery Trip.
@@ -134,8 +134,8 @@ class DeliveryTrip(Document):
 
 				# Include last leg in the final distance calculation
 				self.uom = self.default_distance_uom
-				total_distance = sum([leg.get("distance", {}).get("value", 0.0)
-					for leg in directions.get("legs")])  # in meters
+				total_distance = sum(leg.get("distance", {}).get("value", 0.0)
+					for leg in directions.get("legs"))  # in meters
 				self.total_distance = total_distance * self.uom_conversion_factor
 			else:
 				idx += len(route) - 1
@@ -393,3 +393,15 @@ def get_driver_email(driver):
 	employee = frappe.db.get_value("Driver", driver, "employee")
 	email = frappe.db.get_value("Employee", employee, "prefered_email")
 	return {"email": email}
+
+@frappe.whitelist()
+def make_expense_claim(source_name, target_doc=None):
+	doc = get_mapped_doc("Delivery Trip", source_name,
+		{"Delivery Trip": {
+			"doctype": "Expense Claim",
+			"field_map": {
+				"name" : "delivery_trip"
+			}
+		}}, target_doc)
+
+	return doc

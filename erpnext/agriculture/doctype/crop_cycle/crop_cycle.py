@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import ast
 
@@ -71,6 +69,7 @@ class CropCycle(Document):
 				"exp_end_date": add_days(start_date, crop_task.get("end_day") - 1)
 			}).insert()
 
+	@frappe.whitelist()
 	def reload_linked_analysis(self):
 		linked_doctypes = ['Soil Texture', 'Soil Analysis', 'Plant Analysis']
 		required_fields = ['location', 'name', 'collection_datetime']
@@ -87,6 +86,7 @@ class CropCycle(Document):
 		frappe.publish_realtime("List of Linked Docs",
 								output, user=frappe.session.user)
 
+	@frappe.whitelist()
 	def append_to_child(self, obj_to_append):
 		for doctype in obj_to_append:
 			for doc_name in set(obj_to_append[doctype]):

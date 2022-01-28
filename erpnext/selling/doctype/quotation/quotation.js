@@ -18,6 +18,8 @@ frappe.ui.form.on('Quotation', {
 			}
 		});
 
+		frm.set_df_property('packed_items', 'cannot_add_rows', true);
+		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
 	},
 
 	refresh: function(frm) {

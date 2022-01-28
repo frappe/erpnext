@@ -8,7 +8,7 @@ frappe.ui.form.on('Accounting Dimension Filter', {
 		}
 
 		let help_content =
-			`<table class="table table-bordered" style="background-color: #f9f9f9;">
+			`<table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 				<tr><td>
 					<p>
 						<i class="fa fa-hand-right"></i>

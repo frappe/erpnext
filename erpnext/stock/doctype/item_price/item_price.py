@@ -1,10 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import getdate
 
 
 class ItemPriceDuplicateItem(frappe.ValidationError):
@@ -26,7 +27,7 @@ class ItemPrice(Document):
 
 	def validate_dates(self):
 		if self.valid_from and self.valid_upto:
-			if self.valid_from > self.valid_upto:
+			if getdate(self.valid_from) > getdate(self.valid_upto):
 				frappe.throw(_("Valid From Date must be lesser than Valid Upto Date."))
 
 	def update_price_list_details(self):

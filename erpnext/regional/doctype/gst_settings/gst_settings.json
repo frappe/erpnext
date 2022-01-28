@@ -6,8 +6,10 @@
  "engine": "InnoDB",
  "field_order": [
   "gst_summary",
-  "column_break_2",
+  "gst_tax_settings_section",
   "round_off_gst_values",
+  "column_break_4",
+  "hsn_wise_tax_breakup",
   "gstin_email_sent_on",
   "section_break_4",
   "gst_accounts",
@@ -17,37 +19,23 @@
   {
    "fieldname": "gst_summary",
    "fieldtype": "HTML",
-   "label": "GST Summary",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "column_break_2",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "GST Summary"
   },
   {
    "fieldname": "gstin_email_sent_on",
    "fieldtype": "Date",
    "label": "GSTIN Email Sent On",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "section_break_4",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "gst_accounts",
    "fieldtype": "Table",
    "label": "GST Accounts",
-   "options": "GST Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "GST Account"
   },
   {
    "default": "250000",
@@ -56,24 +44,35 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "B2C Limit",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "default": "0",
    "description": "Enabling this option will round off individual GST components in all the Invoices",
    "fieldname": "round_off_gst_values",
    "fieldtype": "Check",
-   "label": "Round Off GST Values",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Round Off GST Values"
+  },
+  {
+   "default": "0",
+   "fieldname": "hsn_wise_tax_breakup",
+   "fieldtype": "Check",
+   "label": "Tax Breakup Table Based On HSN Code"
+  },
+  {
+   "fieldname": "gst_tax_settings_section",
+   "fieldtype": "Section Break",
+   "label": "GST Tax Settings"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-01-28 17:19:47.969260",
+ "modified": "2021-10-11 18:10:14.242614",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "GST Settings",
@@ -83,4 +82,4 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1
-   }
+}

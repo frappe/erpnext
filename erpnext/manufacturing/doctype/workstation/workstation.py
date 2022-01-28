@@ -1,14 +1,23 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from erpnext.support.doctype.issue.issue import get_holidays
-from frappe.utils import (flt, cint, getdate, formatdate,
-	comma_and, time_diff_in_seconds, to_timedelta, add_days)
 from frappe.model.document import Document
-from dateutil.parser import parse
+from frappe.utils import (
+	add_days,
+	cint,
+	comma_and,
+	flt,
+	formatdate,
+	getdate,
+	time_diff_in_seconds,
+	to_timedelta,
+)
+
+from erpnext.support.doctype.issue.issue import get_holidays
+
 
 class WorkstationHolidayError(frappe.ValidationError): pass
 class NotInWorkingHoursError(frappe.ValidationError): pass
@@ -39,7 +48,8 @@ class Workstation(Document):
 
 	def update_bom_operation(self):
 		bom_list = frappe.db.sql("""select DISTINCT parent from `tabBOM Operation`
-			where workstation = %s""", self.name)
+			where workstation = %s and parenttype = 'routing' """, self.name)
+
 		for bom_no in bom_list:
 			frappe.db.sql("""update `tabBOM Operation` set hour_rate = %s
 				where parent = %s and workstation = %s""",
@@ -71,7 +81,7 @@ def check_if_within_operating_hours(workstation, operation, from_datetime, to_da
 def is_within_operating_hours(workstation, operation, from_datetime, to_datetime):
 	operation_length = time_diff_in_seconds(to_datetime, from_datetime)
 	workstation = frappe.get_doc("Workstation", workstation)
-	
+
 	if not workstation.working_hours:
 		return
 

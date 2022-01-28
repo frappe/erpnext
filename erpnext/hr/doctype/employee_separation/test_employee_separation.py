@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
 
 test_dependencies = ["Employee Onboarding"]
 
@@ -18,7 +17,7 @@ class TestEmployeeSeparation(unittest.TestCase):
 			'activity_name': 'Deactivate Employee',
 			'role': 'HR User'
 		})
-		separation.status = 'Pending'
+		separation.boarding_status = 'Pending'
 		separation.insert()
 		separation.submit()
 		self.assertEqual(separation.docstatus, 1)

@@ -1,14 +1,22 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import unittest
 
 import frappe
+from frappe.utils.data import (
+	add_days,
+	add_months,
+	add_to_date,
+	date_diff,
+	flt,
+	get_date_str,
+	nowdate,
+)
+
 from erpnext.accounts.doctype.subscription.subscription import get_prorata_factor
-from frappe.utils.data import (nowdate, add_days, add_to_date, add_months, date_diff, flt, get_date_str,
-	get_first_day, get_last_day)
+
+test_dependencies = ("UOM", "Item Group", "Item")
 
 def create_plan():
 	if not frappe.db.exists('Subscription Plan', '_Test Plan Name'):
@@ -52,16 +60,38 @@ def create_plan():
 		plan.billing_interval_count = 3
 		plan.insert()
 
+	if not frappe.db.exists('Subscription Plan', '_Test Plan Multicurrency'):
+		plan = frappe.new_doc('Subscription Plan')
+		plan.plan_name = '_Test Plan Multicurrency'
+		plan.item = '_Test Non Stock Item'
+		plan.price_determination = "Fixed Rate"
+		plan.cost = 50
+		plan.currency = 'USD'
+		plan.billing_interval = 'Month'
+		plan.billing_interval_count = 1
+		plan.insert()
+
+def create_parties():
 	if not frappe.db.exists('Supplier', '_Test Supplier'):
 		supplier = frappe.new_doc('Supplier')
 		supplier.supplier_name = '_Test Supplier'
 		supplier.supplier_group = 'All Supplier Groups'
 		supplier.insert()
 
-class TestSubscription(unittest.TestCase):
+	if not frappe.db.exists('Customer', '_Test Subscription Customer'):
+		customer = frappe.new_doc('Customer')
+		customer.customer_name = '_Test Subscription Customer'
+		customer.billing_currency = 'USD'
+		customer.append('accounts', {
+			'company': '_Test Company',
+			'account': '_Test Receivable USD - _TC'
+		})
+		customer.insert()
 
+class TestSubscription(unittest.TestCase):
 	def setUp(self):
 		create_plan()
+		create_parties()
 
 	def test_create_subscription_with_trial_with_correct_period(self):
 		subscription = frappe.new_doc('Subscription')
@@ -631,4 +661,21 @@ class TestSubscription(unittest.TestCase):
 		subscription.process()
 		self.assertEqual(len(subscription.invoices), 1)
 
+	def test_multicurrency_subscription(self):
+		subscription = frappe.new_doc('Subscription')
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Subscription Customer'
+		subscription.generate_invoice_at_period_start = 1
+		subscription.company = '_Test Company'
+		# select subscription start date as '2018-01-15'
+		subscription.start_date = '2018-01-01'
+		subscription.append('plans', {'plan': '_Test Plan Multicurrency', 'qty': 1})
+		subscription.save()
 
+		subscription.process()
+		self.assertEqual(len(subscription.invoices), 1)
+		self.assertEqual(subscription.status, 'Unpaid')
+
+		# Check the currency of the created invoice
+		currency = frappe.db.get_value('Sales Invoice', subscription.invoices[0].invoice, 'currency')
+		self.assertEqual(currency, 'USD')

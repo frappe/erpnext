@@ -1,0 +1,21 @@
+<div class="patient-history-sidebar">
+    <div class="patient-image-container">
+		{% if patient_image %}
+			<div class="patient-image" src={{patient_image}} style="background-image: url(\'{%= patient_image %}\')"></div>
+		{% endif %}
+    </div>
+    <div class="patient-intro">
+		{% if patient_name %}
+		<p class="patient-name bold">{{patient_name}}</p>
+		{% endif %}
+		{% if patient_gender %}
+		<p class="patient-gender text-muted">{%=__("Gender: ") %} {{patient_gender}}</p>
+		{% endif %}
+		{% if patient_mobile %}
+		<p class="patient-mobile text-muted">{%=__("Contact: ") %} {{patient_mobile}}</p>
+		{% endif %}
+	</div>
+    <div class="patient-details">
+    </div>
+</div>
+

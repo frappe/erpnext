@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -70,7 +69,7 @@ def get_stock_ledger_entries(filters):
 	return frappe.db.sql("""
 		select item_code, batch_no, warehouse, posting_date, sum(actual_qty) as actual_qty
 		from `tabStock Ledger Entry`
-		where docstatus < 2 and ifnull(batch_no, '') != '' %s
+		where is_cancelled = 0 and docstatus < 2 and ifnull(batch_no, '') != '' %s
 		group by voucher_no, batch_no, item_code, warehouse
 		order by item_code, warehouse""" %
 		conditions, as_dict=1)

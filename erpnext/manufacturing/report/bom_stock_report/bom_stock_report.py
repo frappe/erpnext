@@ -1,9 +1,10 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -70,12 +71,12 @@ def get_bom_stock(filters):
 					ON bom_item.item_code = ledger.item_code
 				{conditions}
 			WHERE
-				bom_item.parent = '{bom}' and bom_item.parenttype='BOM'
+				bom_item.parent = {bom} and bom_item.parenttype='BOM'
 
 			GROUP BY bom_item.item_code""".format(
 				qty_field=qty_field,
 				table=table,
 				conditions=conditions,
-				bom=bom,
+				bom=frappe.db.escape(bom),
 				qty_to_produce=qty_to_produce or 1)
 			)

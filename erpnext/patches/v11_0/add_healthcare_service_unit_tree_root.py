@@ -1,6 +1,7 @@
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+
 
 def execute():
 	""" assign lft and rgt appropriately """
@@ -18,4 +19,3 @@ def execute():
 			'is_group': 1,
 			'company': company
 		}).insert(ignore_permissions=True)
-

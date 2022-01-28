@@ -1,19 +1,21 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, get_link_to_form, getdate, nowtime
-from erpnext.stock.utils import get_latest_stock_qty
+from frappe.utils import flt, get_link_to_form
+
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account
+from erpnext.stock.utils import get_latest_stock_qty
+
 
 class InpatientMedicationEntry(Document):
 	def validate(self):
 		self.validate_medication_orders()
 
+	@frappe.whitelist()
 	def get_medication_orders(self):
 		# pull inpatient medication orders based on selected filters
 		orders = get_pending_medication_orders(self)

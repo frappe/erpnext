@@ -1,22 +1,26 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
+from datetime import datetime, timedelta
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, now_datetime, nowdate
+from frappe.utils import cstr, getdate, now_datetime, nowdate
+
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
-from datetime import timedelta, datetime
+from erpnext.hr.utils import validate_active_employee
+
 
 class ShiftAssignment(Document):
 	def validate(self):
+		validate_active_employee(self.employee)
 		self.validate_overlapping_dates()
 
-		if self.end_date and self.end_date <= self.start_date:
-			frappe.throw(_("End Date must not be lesser than Start Date"))
+		if self.end_date:
+			self.validate_from_to_dates('start_date', 'end_date')
 
 	def validate_overlapping_dates(self):
 		if not self.name:
@@ -133,7 +137,7 @@ def get_shift_type_timing(shift_types):
 	return shift_timing_map
 
 
-def get_employee_shift(employee, for_date=nowdate(), consider_default_shift=False, next_shift_direction=None):
+def get_employee_shift(employee, for_date=None, consider_default_shift=False, next_shift_direction=None):
 	"""Returns a Shift Type for the given employee on the given date. (excluding the holidays)
 
 	:param employee: Employee for which shift is required.
@@ -141,6 +145,8 @@ def get_employee_shift(employee, for_date=nowdate(), consider_default_shift=Fals
 	:param consider_default_shift: If set to true, default shift is taken when no shift assignment is found.
 	:param next_shift_direction: One of: None, 'forward', 'reverse'. Direction to look for next shift if shift not found on given date.
 	"""
+	if for_date is None:
+		for_date = nowdate()
 	default_shift = frappe.db.get_value('Employee', employee, 'default_shift')
 	shift_type_name = None
 	shift_assignment_details = frappe.db.get_value('Shift Assignment', {'employee':employee, 'start_date':('<=', for_date), 'docstatus': '1', 'status': "Active"}, ['shift_type', 'end_date'])
@@ -194,9 +200,11 @@ def get_employee_shift(employee, for_date=nowdate(), consider_default_shift=Fals
 	return get_shift_details(shift_type_name, for_date)
 
 
-def get_employee_shift_timings(employee, for_timestamp=now_datetime(), consider_default_shift=False):
+def get_employee_shift_timings(employee, for_timestamp=None, consider_default_shift=False):
 	"""Returns previous shift, current/upcoming shift, next_shift for the given timestamp and employee
 	"""
+	if for_timestamp is None:
+		for_timestamp = now_datetime()
 	# write and verify a test case for midnight shift.
 	prev_shift = curr_shift = next_shift = None
 	curr_shift = get_employee_shift(employee, for_timestamp.date(), consider_default_shift, 'forward')
@@ -214,7 +222,7 @@ def get_employee_shift_timings(employee, for_timestamp=now_datetime(), consider_
 	return prev_shift, curr_shift, next_shift
 
 
-def get_shift_details(shift_type_name, for_date=nowdate()):
+def get_shift_details(shift_type_name, for_date=None):
 	"""Returns Shift Details which contain some additional information as described below.
 	'shift_details' contains the following keys:
 		'shift_type' - Object of DocType Shift Type,
@@ -228,6 +236,8 @@ def get_shift_details(shift_type_name, for_date=nowdate()):
 	"""
 	if not shift_type_name:
 		return None
+	if not for_date:
+		for_date = nowdate()
 	shift_type = frappe.get_doc('Shift Type', shift_type_name)
 	start_datetime = datetime.combine(for_date, datetime.min.time()) + shift_type.start_time
 	for_date = for_date + timedelta(days=1) if shift_type.start_time > shift_type.end_time else for_date

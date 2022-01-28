@@ -50,7 +50,7 @@
   {
    "fieldname": "max_leaves_allowed",
    "fieldtype": "Int",
-   "label": "Max Leaves Allowed"
+   "label": "Maximum Leave Allocation Allowed"
   },
   {
    "fieldname": "applicable_after",
@@ -61,7 +61,7 @@
    "fieldname": "max_continuous_days_allowed",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Maximum Continuous Days Applicable",
+   "label": "Maximum Consecutive Leaves Allowed",
    "oldfieldname": "max_days_allowed",
    "oldfieldtype": "Data"
   },
@@ -87,6 +87,7 @@
   },
   {
    "default": "0",
+   "description": "These leaves are holidays permitted by the company however, availing it is optional for an Employee.",
    "fieldname": "is_optional_leave",
    "fieldtype": "Check",
    "label": "Is Optional Leave"
@@ -205,6 +206,7 @@
   },
   {
    "depends_on": "eval:doc.is_ppl == 1",
+   "description": "For a day of leave taken, if you still pay (say) 50% of the daily salary, then enter 0.50 in this field.",
    "fieldname": "fraction_of_daily_salary_per_leave",
    "fieldtype": "Float",
    "label": "Fraction of Daily Salary per Leave",
@@ -214,7 +216,7 @@
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2021-03-02 11:22:33.776320",
+ "modified": "2021-10-02 11:59:40.503359",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Type",
@@ -248,5 +250,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }

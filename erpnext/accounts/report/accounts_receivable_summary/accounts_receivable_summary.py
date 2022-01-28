@@ -1,13 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _, scrub
-from frappe.utils import flt, cint
+from frappe.utils import cint, flt
+from six import iteritems
+
 from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
-from six import iteritems
+
 
 def execute(filters=None):
 	args = {
@@ -35,6 +37,9 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		party_advance_amount = get_partywise_advanced_payment_amount(self.party_type,
 			self.filters.report_date, self.filters.show_future_payments, self.filters.company) or {}
 
+		if self.filters.show_gl_balance:
+			gl_balance_map = get_gl_balance(self.filters.report_date)
+
 		for party, party_dict in iteritems(self.party_total):
 			if party_dict.outstanding == 0:
 				continue
@@ -53,6 +58,10 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			# In AR/AP, advance shown in paid columns,
 			# but in summary report advance shown in separate column
 			row.paid -= row.advance
+
+			if self.filters.show_gl_balance:
+				row.gl_balance = gl_balance_map.get(party)
+				row.diff = flt(row.outstanding) - flt(row.gl_balance)
 
 			self.data.append(row)
 
@@ -82,6 +91,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			"range3": 0.0,
 			"range4": 0.0,
 			"range5": 0.0,
+			"total_due": 0.0,
 			"sales_person": []
 		}))
 
@@ -112,6 +122,10 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		self.add_column(_(credit_debit_label), fieldname='credit_note')
 		self.add_column(_('Outstanding Amount'), fieldname='outstanding')
 
+		if self.filters.show_gl_balance:
+			self.add_column(_('GL Balance'), fieldname='gl_balance')
+			self.add_column(_('Difference'), fieldname='diff')
+
 		self.setup_ageing_columns()
 
 		if self.party_type == "Customer":
@@ -135,3 +149,10 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			"{range3}-{range4}".format(range3=cint(self.filters["range3"])+ 1, range4=self.filters["range4"]),
 			"{range4}-{above}".format(range4=cint(self.filters["range4"])+ 1, above=_("Above"))]):
 				self.add_column(label=label, fieldname='range' + str(i+1))
+
+		# Add column for total due amount
+		self.add_column(label="Total Amount Due", fieldname='total_due')
+
+def get_gl_balance(report_date):
+	return frappe._dict(frappe.db.get_all("GL Entry", fields=['party', 'sum(debit -  credit)'],
+		filters={'posting_date': ("<=", report_date), 'is_cancelled': 0}, group_by='party', as_list=1))

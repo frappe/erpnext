@@ -1,19 +1,18 @@
-from __future__ import unicode_literals
-import frappe, re, json
+
+import json
+import re
+
+import frappe
 from frappe import _
-import erpnext
-from frappe.utils import cstr, flt, cint, date_diff, nowdate, round_based_on_smallest_currency_fraction, money_in_words, getdate
-from erpnext.regional.india import states, state_numbers
-from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
+from frappe.model.utils import get_fetch_values
+from frappe.utils import cint, cstr, date_diff, flt, getdate, nowdate
+from six import string_types
+
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
+from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
 from erpnext.hr.utils import get_salary_assignment
 from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
-from erpnext.regional.india import number_state_mapping
-from six import string_types
-from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.accounts.utils import get_account_currency
-from frappe.model.utils import get_fetch_values
-
+from erpnext.regional.india import number_state_mapping, state_numbers, states
 
 GST_INVOICE_NUMBER_FORMAT = re.compile(r"^[a-zA-Z0-9\-/]+$")   #alphanumeric and - /
 GSTIN_FORMAT = re.compile("^[0-9]{2}[A-Z]{4}[0-9A-Z]{1}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[1-9A-Z]{1}[0-9A-Z]{1}$")
@@ -29,12 +28,13 @@ def validate_gstin_for_india(doc, method):
 
 	gst_category = []
 
-	if len(doc.links):
-		link_doctype = doc.links[0].get("link_doctype")
-		link_name = doc.links[0].get("link_name")
+	if hasattr(doc, 'gst_category'):
+		if len(doc.links):
+			link_doctype = doc.links[0].get("link_doctype")
+			link_name = doc.links[0].get("link_name")
 
-		if link_doctype in ["Customer", "Supplier"]:
-			gst_category = frappe.db.get_value(link_doctype, {'name': link_name}, ['gst_category'])
+			if link_doctype in ["Customer", "Supplier"]:
+				gst_category = frappe.db.get_value(link_doctype, {'name': link_name}, ['gst_category'])
 
 	doc.gstin = doc.gstin.upper().strip()
 	if not doc.gstin or doc.gstin == 'NA':
@@ -69,7 +69,8 @@ def validate_pan_for_india(doc, method):
 		frappe.throw(_("Invalid PAN No. The input you've entered doesn't match the format of PAN."))
 
 def validate_tax_category(doc, method):
-	if doc.get('gst_state') and frappe.db.get_value('Tax Category', {'gst_state': doc.gst_state, 'is_inter_state': doc.is_inter_state}):
+	if doc.get('gst_state') and frappe.db.get_value('Tax Category', {'gst_state': doc.gst_state, 'is_inter_state': doc.is_inter_state,
+		'is_reverse_charge': doc.is_reverse_charge}):
 		if doc.is_inter_state:
 			frappe.throw(_("Inter State tax category for GST State {0} already exists").format(doc.gst_state))
 		else:
@@ -78,10 +79,9 @@ def validate_tax_category(doc, method):
 def update_gst_category(doc, method):
 	for link in doc.links:
 		if link.link_doctype in ['Customer', 'Supplier']:
-			if doc.get('gstin'):
-				frappe.db.sql("""
-					UPDATE `tab{0}` SET gst_category = %s WHERE name = %s AND gst_category = 'Unregistered'
-				""".format(link.link_doctype), ("Registered Regular", link.link_name)) #nosec
+			meta = frappe.get_meta(link.link_doctype)
+			if doc.get('gstin') and meta.has_field('gst_category'):
+				frappe.db.set_value(link.link_doctype, {'name': link.link_name, 'gst_category': 'Unregistered'}, 'gst_category', 'Registered Regular')
 
 def set_gst_state_and_state_number(doc):
 	if not doc.gst_state:
@@ -112,12 +112,13 @@ def validate_gstin_check_digit(gstin, label='GSTIN'):
 		frappe.throw(_("""Invalid {0}! The check digit validation has failed. Please ensure you've typed the {0} correctly.""").format(label))
 
 def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
-	if frappe.get_meta(item_doctype).has_field('gst_hsn_code'):
+	hsn_wise_in_gst_settings = frappe.db.get_single_value('GST Settings','hsn_wise_tax_breakup')
+	if frappe.get_meta(item_doctype).has_field('gst_hsn_code') and hsn_wise_in_gst_settings:
 		return [_("HSN/SAC"), _("Taxable Amount")] + tax_accounts
 	else:
 		return [_("Item"), _("Taxable Amount")] + tax_accounts
 
-def get_itemised_tax_breakup_data(doc, account_wise=False):
+def get_itemised_tax_breakup_data(doc, account_wise=False, hsn_wise=False):
 	itemised_tax = get_itemised_tax(doc.taxes, with_tax_account=account_wise)
 
 	itemised_taxable_amount = get_itemised_taxable_amount(doc.items)
@@ -125,28 +126,32 @@ def get_itemised_tax_breakup_data(doc, account_wise=False):
 	if not frappe.get_meta(doc.doctype + " Item").has_field('gst_hsn_code'):
 		return itemised_tax, itemised_taxable_amount
 
-	item_hsn_map = frappe._dict()
-	for d in doc.items:
-		item_hsn_map.setdefault(d.item_code or d.item_name, d.get("gst_hsn_code"))
+	hsn_wise_in_gst_settings = frappe.db.get_single_value('GST Settings','hsn_wise_tax_breakup')
+
+	tax_breakup_hsn_wise = hsn_wise or hsn_wise_in_gst_settings
+	if tax_breakup_hsn_wise:
+		item_hsn_map = frappe._dict()
+		for d in doc.items:
+			item_hsn_map.setdefault(d.item_code or d.item_name, d.get("gst_hsn_code"))
 
 	hsn_tax = {}
 	for item, taxes in itemised_tax.items():
-		hsn_code = item_hsn_map.get(item)
-		hsn_tax.setdefault(hsn_code, frappe._dict())
+		item_or_hsn = item if not tax_breakup_hsn_wise else item_hsn_map.get(item)
+		hsn_tax.setdefault(item_or_hsn, frappe._dict())
 		for tax_desc, tax_detail in taxes.items():
 			key = tax_desc
 			if account_wise:
 				key = tax_detail.get('tax_account')
-			hsn_tax[hsn_code].setdefault(key, {"tax_rate": 0, "tax_amount": 0})
-			hsn_tax[hsn_code][key]["tax_rate"] = tax_detail.get("tax_rate")
-			hsn_tax[hsn_code][key]["tax_amount"] += tax_detail.get("tax_amount")
+			hsn_tax[item_or_hsn].setdefault(key, {"tax_rate": 0, "tax_amount": 0})
+			hsn_tax[item_or_hsn][key]["tax_rate"] = tax_detail.get("tax_rate")
+			hsn_tax[item_or_hsn][key]["tax_amount"] += tax_detail.get("tax_amount")
 
 	# set taxable amount
 	hsn_taxable_amount = frappe._dict()
 	for item in itemised_taxable_amount:
-		hsn_code = item_hsn_map.get(item)
-		hsn_taxable_amount.setdefault(hsn_code, 0)
-		hsn_taxable_amount[hsn_code] += itemised_taxable_amount.get(item)
+		item_or_hsn = item if not tax_breakup_hsn_wise else item_hsn_map.get(item)
+		hsn_taxable_amount.setdefault(item_or_hsn, 0)
+		hsn_taxable_amount[item_or_hsn] += itemised_taxable_amount.get(item)
 
 	return hsn_tax, hsn_taxable_amount
 
@@ -204,29 +209,17 @@ def get_regional_address_details(party_details, doctype, company):
 
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
 		master_doctype = "Sales Taxes and Charges Template"
-
-		get_tax_template_for_sez(party_details, master_doctype, company, 'Customer')
-		get_tax_template_based_on_category(master_doctype, company, party_details)
-
-		if party_details.get('taxes_and_charges'):
-			return party_details
-
-		if not party_details.company_gstin:
-			return party_details
+		tax_template_by_category = get_tax_template_based_on_category(master_doctype, company, party_details)
 
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		master_doctype = "Purchase Taxes and Charges Template"
-		get_tax_template_for_sez(party_details, master_doctype, company, 'Supplier')
-		get_tax_template_based_on_category(master_doctype, company, party_details)
+		tax_template_by_category = get_tax_template_based_on_category(master_doctype, company, party_details)
 
-		if party_details.get('taxes_and_charges'):
-			return party_details
-
-		if not party_details.supplier_gstin:
-			return party_details
+	if tax_template_by_category:
+		party_details['taxes_and_charges'] = tax_template_by_category
+		return party_details
 
 	if not party_details.place_of_supply: return party_details
-
 	if not party_details.company_gstin: return party_details
 
 	if ((doctype in ("Sales Invoice", "Delivery Note", "Sales Order") and party_details.company_gstin
@@ -238,6 +231,7 @@ def get_regional_address_details(party_details, doctype, company):
 
 	if not default_tax:
 		return party_details
+
 	party_details["taxes_and_charges"] = default_tax
 	party_details.taxes = get_taxes_and_charges(master_doctype, default_tax)
 
@@ -254,6 +248,9 @@ def is_internal_transfer(party_details, doctype):
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		destination_gstin = party_details.supplier_gstin
 
+	if not destination_gstin or party_details.gstin:
+		return False
+
 	if party_details.gstin == destination_gstin:
 		return True
 	else:
@@ -266,13 +263,11 @@ def get_tax_template_based_on_category(master_doctype, company, party_details):
 	default_tax = frappe.db.get_value(master_doctype, {'company': company, 'tax_category': party_details.get('tax_category')},
 		'name')
 
-	if default_tax:
-		party_details["taxes_and_charges"] = default_tax
-		party_details.taxes = get_taxes_and_charges(master_doctype, default_tax)
+	return default_tax
 
 def get_tax_template(master_doctype, company, is_inter_state, state_code):
 	tax_categories = frappe.get_all('Tax Category', fields = ['name', 'is_inter_state', 'gst_state'],
-		filters = {'is_inter_state': is_inter_state})
+		filters = {'is_inter_state': is_inter_state, 'is_reverse_charge': 0})
 
 	default_tax = ''
 
@@ -282,20 +277,6 @@ def get_tax_template(master_doctype, company, is_inter_state, state_code):
 			default_tax = frappe.db.get_value(master_doctype,
 				{'company': company, 'disabled': 0, 'tax_category': tax_category.name}, 'name')
 	return default_tax
-
-def get_tax_template_for_sez(party_details, master_doctype, company, party_type):
-
-	gst_details = frappe.db.get_value(party_type, {'name': party_details.get(frappe.scrub(party_type))},
-			['gst_category', 'export_type'], as_dict=1)
-
-	if gst_details:
-		if gst_details.gst_category == 'SEZ' and gst_details.export_type == 'With Payment of Tax':
-			default_tax = frappe.db.get_value(master_doctype, {"company": company, "is_inter_state":1, "disabled":0,
-				"gst_state": number_state_mapping[party_details.company_gstin[:2]]})
-
-			party_details["taxes_and_charges"] = default_tax
-			party_details.taxes = get_taxes_and_charges(master_doctype, default_tax)
-
 
 def calculate_annual_eligible_hra_exemption(doc):
 	basic_component, hra_component = frappe.db.get_value('Company',  doc.company,  ["basic_component", "hra_component"])
@@ -448,14 +429,16 @@ def get_ewb_data(dt, dn):
 		company_address = frappe.get_doc('Address', doc.company_address)
 		billing_address = frappe.get_doc('Address', doc.customer_address)
 
+		#added dispatch address
+		dispatch_address = frappe.get_doc('Address', doc.dispatch_address_name) if doc.dispatch_address_name else company_address
 		shipping_address = frappe.get_doc('Address', doc.shipping_address_name)
 
-		data = get_address_details(data, doc, company_address, billing_address)
+		data = get_address_details(data, doc, company_address, billing_address, dispatch_address)
 
 		data.itemList = []
 		data.totalValue = doc.total
 
-		data = get_item_list(data, doc)
+		data = get_item_list(data, doc, hsn_wise=True)
 
 		disable_rounded = frappe.db.get_single_value('Global Defaults', 'disable_rounded_total')
 		data.totInvValue = doc.grand_total if disable_rounded else doc.rounded_total
@@ -490,7 +473,7 @@ def get_ewb_data(dt, dn):
 		ewaybills.append(data)
 
 	data = {
-		'version': '1.0.1118',
+		'version': '1.0.0421',
 		'billLists': ewaybills
 	}
 
@@ -517,7 +500,7 @@ def download_ewb_json():
 
 		if not isinstance(docname, list):
 			# removes characters not allowed in a filename (https://stackoverflow.com/a/38766141/4767738)
-			filename_prefix = re.sub('[^\w_.)( -]', '', docname)
+			filename_prefix = re.sub(r'[^\w_.)( -]', '', docname)
 
 	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(filename_prefix, frappe.utils.random_string(5))
 
@@ -536,10 +519,10 @@ def get_gstins_for_company(company):
 			`tabDynamic Link`.link_name = %(company)s""", {"company": company})
 	return company_gstins
 
-def get_address_details(data, doc, company_address, billing_address):
+def get_address_details(data, doc, company_address, billing_address, dispatch_address):
 	data.fromPincode = validate_pincode(company_address.pincode, 'Company Address')
-	data.fromStateCode = data.actualFromStateCode = validate_state_code(
-		company_address.gst_state_number, 'Company Address')
+	data.fromStateCode = validate_state_code(company_address.gst_state_number, 'Company Address')
+	data.actualFromStateCode = validate_state_code(dispatch_address.gst_state_number, 'Dispatch Address')
 
 	if not doc.billing_address_gstin or len(doc.billing_address_gstin) < 15:
 		data.toGstin = 'URP'
@@ -566,7 +549,7 @@ def get_address_details(data, doc, company_address, billing_address):
 
 	return data
 
-def get_item_list(data, doc):
+def get_item_list(data, doc, hsn_wise=False):
 	for attr in ['cgstValue', 'sgstValue', 'igstValue', 'cessValue', 'OthValue']:
 		data[attr] = 0
 
@@ -578,18 +561,18 @@ def get_item_list(data, doc):
 		'cess_account': ['cessRate', 'cessValue']
 	}
 	item_data_attrs = ['sgstRate', 'cgstRate', 'igstRate', 'cessRate', 'cessNonAdvol']
-	hsn_wise_charges, hsn_taxable_amount = get_itemised_tax_breakup_data(doc, account_wise=True)
-	for hsn_code, taxable_amount in hsn_taxable_amount.items():
+	hsn_wise_charges, hsn_taxable_amount = get_itemised_tax_breakup_data(doc, account_wise=True, hsn_wise=hsn_wise)
+	for item_or_hsn, taxable_amount in hsn_taxable_amount.items():
 		item_data = frappe._dict()
-		if not hsn_code:
+		if not item_or_hsn:
 			frappe.throw(_('GST HSN Code does not exist for one or more items'))
-		item_data.hsnCode = int(hsn_code)
+		item_data.hsnCode = int(item_or_hsn) if hsn_wise else item_or_hsn
 		item_data.taxableAmount = taxable_amount
 		item_data.qtyUnit = ""
 		for attr in item_data_attrs:
 			item_data[attr] = 0
 
-		for account, tax_detail in hsn_wise_charges.get(hsn_code, {}).items():
+		for account, tax_detail in hsn_wise_charges.get(item_or_hsn, {}).items():
 			account_type = gst_accounts.get(account, '')
 			for tax_acc, attrs in tax_map.items():
 				if account_type == tax_acc:
@@ -697,13 +680,22 @@ def validate_state_code(state_code, address):
 		return int(state_code)
 
 @frappe.whitelist()
-def get_gst_accounts(company, account_wise=False):
+def get_gst_accounts(company=None, account_wise=False, only_reverse_charge=0, only_non_reverse_charge=0):
+	filters={"parent": "GST Settings"}
+
+	if company:
+		filters.update({'company': company})
+	if only_reverse_charge:
+		filters.update({'is_reverse_charge_account': 1})
+	elif only_non_reverse_charge:
+		filters.update({'is_reverse_charge_account': 0})
+
 	gst_accounts = frappe._dict()
 	gst_settings_accounts = frappe.get_all("GST Account",
-		filters={"parent": "GST Settings", "company": company},
+		filters=filters,
 		fields=["cgst_account", "sgst_account", "igst_account", "cess_account"])
 
-	if not gst_settings_accounts and not frappe.flags.in_test:
+	if not gst_settings_accounts and not frappe.flags.in_test and not frappe.flags.in_migrate:
 		frappe.throw(_("Please set GST Accounts in GST Settings"))
 
 	for d in gst_settings_accounts:
@@ -715,101 +707,72 @@ def get_gst_accounts(company, account_wise=False):
 
 	return gst_accounts
 
-def update_grand_total_for_rcm(doc, method):
+def validate_reverse_charge_transaction(doc, method):
 	country = frappe.get_cached_value('Company', doc.company, 'country')
 
 	if country != 'India':
 		return
 
-	gst_tax, base_gst_tax = get_gst_tax_amount(doc)
-
-	if not base_gst_tax:
-		return
+	base_gst_tax = 0
+	base_reverse_charge_booked = 0
 
 	if doc.reverse_charge == 'Y':
-		doc.taxes_and_charges_added -= gst_tax
-		doc.total_taxes_and_charges -= gst_tax
-		doc.base_taxes_and_charges_added -= base_gst_tax
-		doc.base_total_taxes_and_charges -= base_gst_tax
+		gst_accounts = get_gst_accounts(doc.company, only_reverse_charge=1)
+		reverse_charge_accounts = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
+			+ gst_accounts.get('igst_account')
 
-		update_totals(gst_tax, base_gst_tax, doc)
-
-def update_totals(gst_tax, base_gst_tax, doc):
-	doc.base_grand_total -= base_gst_tax
-	doc.grand_total -= gst_tax
-
-	if doc.meta.get_field("rounded_total"):
-		if doc.is_rounded_total_disabled():
-			doc.outstanding_amount = doc.grand_total
-		else:
-			doc.rounded_total = round_based_on_smallest_currency_fraction(doc.grand_total,
-				doc.currency, doc.precision("rounded_total"))
-
-			doc.rounding_adjustment += flt(doc.rounded_total - doc.grand_total,
-				doc.precision("rounding_adjustment"))
-
-			doc.outstanding_amount = doc.rounded_total or doc.grand_total
-
-	doc.in_words = money_in_words(doc.grand_total, doc.currency)
-	doc.base_in_words = money_in_words(doc.base_grand_total, erpnext.get_company_currency(doc.company))
-	doc.set_payment_schedule()
-
-def make_regional_gl_entries(gl_entries, doc):
-	country = frappe.get_cached_value('Company', doc.company, 'country')
-
-	if country != 'India':
-		return gl_entries
-
-	gst_tax, base_gst_tax = get_gst_tax_amount(doc)
-
-	if not base_gst_tax:
-		return gl_entries
-
-	if doc.reverse_charge == 'Y':
-		gst_accounts = get_gst_accounts(doc.company)
-		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
+		gst_accounts = get_gst_accounts(doc.company, only_non_reverse_charge=1)
+		non_reverse_charge_accounts = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
 			+ gst_accounts.get('igst_account')
 
 		for tax in doc.get('taxes'):
-			if tax.category not in ("Total", "Valuation and Total"):
-				continue
+			if tax.account_head in non_reverse_charge_accounts:
+				if tax.add_deduct_tax == 'Add':
+					base_gst_tax += tax.base_tax_amount_after_discount_amount
+				else:
+					base_gst_tax += tax.base_tax_amount_after_discount_amount
+			elif tax.account_head in reverse_charge_accounts:
+				if tax.add_deduct_tax == 'Add':
+					base_reverse_charge_booked += tax.base_tax_amount_after_discount_amount
+				else:
+					base_reverse_charge_booked += tax.base_tax_amount_after_discount_amount
 
-			dr_or_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
-			if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
-				account_currency = get_account_currency(tax.account_head)
+		if base_gst_tax != base_reverse_charge_booked:
+			msg = _("Booked reverse charge is not equal to applied tax amount")
+			msg += "<br>"
+			msg += _("Please refer {gst_document_link} to learn more about how to setup and create reverse charge invoice").format(
+				gst_document_link='<a href="https://docs.erpnext.com/docs/user/manual/en/regional/india/gst-setup">GST Documentation</a>')
 
-				gl_entries.append(doc.get_gl_dict(
-					{
-						"account": tax.account_head,
-						"cost_center": tax.cost_center,
-						"posting_date": doc.posting_date,
-						"against": doc.supplier,
-						dr_or_cr: tax.base_tax_amount_after_discount_amount,
-						dr_or_cr + "_in_account_currency": tax.base_tax_amount_after_discount_amount \
-							if account_currency==doc.company_currency \
-							else tax.tax_amount_after_discount_amount
-					}, account_currency, item=tax)
-				)
+			frappe.throw(msg)
 
-	return gl_entries
+def update_itc_availed_fields(doc, method):
+	country = frappe.get_cached_value('Company', doc.company, 'country')
 
-def get_gst_tax_amount(doc):
-	gst_accounts = get_gst_accounts(doc.company)
-	gst_account_list = gst_accounts.get('cgst_account', []) + gst_accounts.get('sgst_account', []) \
-		+ gst_accounts.get('igst_account', [])
+	if country != 'India':
+		return
 
-	base_gst_tax = 0
-	gst_tax = 0
+	# Initialize values
+	doc.itc_integrated_tax = doc.itc_state_tax = doc.itc_central_tax = doc.itc_cess_amount = 0
+	gst_accounts = get_gst_accounts(doc.company, only_non_reverse_charge=1)
 
 	for tax in doc.get('taxes'):
-		if tax.category not in ("Total", "Valuation and Total"):
-			continue
+		if tax.account_head in gst_accounts.get('igst_account', []):
+			doc.itc_integrated_tax += flt(tax.base_tax_amount_after_discount_amount)
+		if tax.account_head in gst_accounts.get('sgst_account', []):
+			doc.itc_state_tax += flt(tax.base_tax_amount_after_discount_amount)
+		if tax.account_head in gst_accounts.get('cgst_account', []):
+			doc.itc_central_tax += flt(tax.base_tax_amount_after_discount_amount)
+		if tax.account_head in gst_accounts.get('cess_account', []):
+			doc.itc_cess_amount += flt(tax.base_tax_amount_after_discount_amount)
 
-		if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
-			base_gst_tax += tax.base_tax_amount_after_discount_amount
-			gst_tax += tax.tax_amount_after_discount_amount
+def update_place_of_supply(doc, method):
+	country = frappe.get_cached_value('Company', doc.company, 'country')
+	if country != 'India':
+		return
 
-	return gst_tax, base_gst_tax
+	address = frappe.db.get_value("Address", doc.get('customer_address'), ["gst_state", "gst_state_number"], as_dict=1)
+	if address and address.gst_state and address.gst_state_number:
+		doc.place_of_supply = cstr(address.gst_state_number) + "-" + cstr(address.gst_state)
 
 @frappe.whitelist()
 def get_regional_round_off_accounts(company, account_list):
@@ -825,8 +788,11 @@ def get_regional_round_off_accounts(company, account_list):
 		return
 
 	gst_accounts = get_gst_accounts(company)
-	gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
-		+ gst_accounts.get('igst_account')
+
+	gst_account_list = []
+	for account in ['cgst_account', 'sgst_account', 'igst_account']:
+		if account in gst_accounts:
+			gst_account_list += gst_accounts.get(account)
 
 	account_list.extend(gst_account_list)
 
@@ -860,12 +826,8 @@ def update_taxable_values(doc, method):
 				considered_rows.append(prev_row_id)
 
 	for item in doc.get('items'):
-		if doc.apply_discount_on == 'Grand Total' and doc.discount_amount:
-			proportionate_value = item.base_amount if doc.base_total else item.qty
-			total_value = doc.base_total if doc.base_total else doc.total_qty
-		else:
-			proportionate_value = item.base_net_amount if doc.base_net_total else item.qty
-			total_value = doc.base_net_total if doc.base_net_total else doc.total_qty
+		proportionate_value = item.base_net_amount if doc.base_net_total else item.qty
+		total_value = doc.base_net_total if doc.base_net_total else doc.total_qty
 
 		applicable_charges = flt(flt(proportionate_value * (flt(additional_taxes) / flt(total_value)),
 			item.precision('taxable_value')))
@@ -876,3 +838,59 @@ def update_taxable_values(doc, method):
 	if total_charges != additional_taxes:
 		diff = additional_taxes - total_charges
 		doc.get('items')[item_count - 1].taxable_value += diff
+
+def get_depreciation_amount(asset, depreciable_value, row):
+	if row.depreciation_method in ("Straight Line", "Manual"):
+		# if the Depreciation Schedule is being prepared for the first time
+		if not asset.flags.increase_in_asset_life:
+			depreciation_amount = (flt(asset.gross_purchase_amount) -
+				flt(row.expected_value_after_useful_life)) / flt(row.total_number_of_depreciations)
+
+		# if the Depreciation Schedule is being modified after Asset Repair
+		else:
+			depreciation_amount = (flt(row.value_after_depreciation) -
+				flt(row.expected_value_after_useful_life)) / (date_diff(asset.to_date, asset.available_for_use_date) / 365)
+
+	else:
+		rate_of_depreciation = row.rate_of_depreciation
+		# if its the first depreciation
+		if depreciable_value == asset.gross_purchase_amount:
+			if row.finance_book and frappe.db.get_value('Finance Book', row.finance_book, 'for_income_tax'):
+				# as per IT act, if the asset is purchased in the 2nd half of fiscal year, then rate is divided by 2
+				diff = date_diff(row.depreciation_start_date, asset.available_for_use_date)
+				if diff <= 180:
+					rate_of_depreciation = rate_of_depreciation / 2
+					frappe.msgprint(
+						_('As per IT Act, the rate of depreciation for the first depreciation entry is reduced by 50%.'))
+
+		depreciation_amount = flt(depreciable_value * (flt(rate_of_depreciation) / 100))
+
+	return depreciation_amount
+
+def set_item_tax_from_hsn_code(item):
+	if not item.taxes and item.gst_hsn_code:
+		hsn_doc = frappe.get_doc("GST HSN Code", item.gst_hsn_code)
+
+		for tax in hsn_doc.taxes:
+			item.append('taxes', {
+				'item_tax_template': tax.item_tax_template,
+				'tax_category': tax.tax_category,
+				'valid_from': tax.valid_from
+			})
+
+def delete_gst_settings_for_company(doc, method):
+	if doc.country != 'India':
+		return
+
+	gst_settings = frappe.get_doc("GST Settings")
+	records_to_delete = []
+
+	for d in reversed(gst_settings.get('gst_accounts')):
+		if d.company == doc.name:
+			records_to_delete.append(d)
+
+	for d in records_to_delete:
+		gst_settings.remove(d)
+
+	gst_settings.save()
+

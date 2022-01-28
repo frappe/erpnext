@@ -1,8 +1,8 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.add_fetch('employee','employee_name','employee_name');
-cur_frm.add_fetch('employee','company','company');
+cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
+cur_frm.add_fetch('employee', 'company', 'company');
 
 frappe.ui.form.on("Leave Application", {
 	setup: function(frm) {
@@ -19,7 +19,6 @@ frappe.ui.form.on("Leave Application", {
 		frm.set_query("employee", erpnext.queries.employee);
 	},
 	onload: function(frm) {
-
 		// Ignore cancellation of doctype on cancel all.
 		frm.ignore_doctypes_on_cancel_all = ["Leave Ledger Entry"];
 
@@ -42,9 +41,9 @@ frappe.ui.form.on("Leave Application", {
 	},
 
 	validate: function(frm) {
-		if (frm.doc.from_date == frm.doc.to_date && frm.doc.half_day == 1){
+		if (frm.doc.from_date == frm.doc.to_date && frm.doc.half_day == 1) {
 			frm.doc.half_day_date = frm.doc.from_date;
-		}else if (frm.doc.half_day == 0){
+		} else if (frm.doc.half_day == 0) {
 			frm.doc.half_day_date = "";
 		}
 		frm.toggle_reqd("half_day_date", frm.doc.half_day == 1);
@@ -79,14 +78,14 @@ frappe.ui.form.on("Leave Application", {
 				__("Allocated Leaves")
 			);
 			frm.dashboard.show();
-			let allowed_leave_types =  Object.keys(leave_details);
+			let allowed_leave_types = Object.keys(leave_details);
 
 			// lwps should be allowed, lwps don't have any allocation
 			allowed_leave_types = allowed_leave_types.concat(lwps);
 
-			frm.set_query('leave_type', function(){
+			frm.set_query('leave_type', function() {
 				return {
-					filters : [
+					filters: [
 						['leave_type_name', 'in', allowed_leave_types]
 					]
 				};
@@ -99,7 +98,7 @@ frappe.ui.form.on("Leave Application", {
 			frm.trigger("calculate_total_days");
 		}
 		cur_frm.set_intro("");
-		if(frm.doc.__islocal && !in_list(frappe.user_roles, "Employee")) {
+		if (frm.doc.__islocal && !in_list(frappe.user_roles, "Employee")) {
 			frm.set_intro(__("Fill the form and save it"));
 		}
 
@@ -118,7 +117,7 @@ frappe.ui.form.on("Leave Application", {
 	},
 
 	leave_approver: function(frm) {
-		if(frm.doc.leave_approver){
+		if (frm.doc.leave_approver) {
 			frm.set_value("leave_approver_name", frappe.user.full_name(frm.doc.leave_approver));
 		}
 	},
@@ -131,12 +130,10 @@ frappe.ui.form.on("Leave Application", {
 		if (frm.doc.half_day) {
 			if (frm.doc.from_date == frm.doc.to_date) {
 				frm.set_value("half_day_date", frm.doc.from_date);
-			}
-			else {
+			} else {
 				frm.trigger("half_day_datepicker");
 			}
-		}
-		else {
+		} else {
 			frm.set_value("half_day_date", "");
 		}
 		frm.trigger("calculate_total_days");
@@ -163,11 +160,11 @@ frappe.ui.form.on("Leave Application", {
 		half_day_datepicker.update({
 			minDate: frappe.datetime.str_to_obj(frm.doc.from_date),
 			maxDate: frappe.datetime.str_to_obj(frm.doc.to_date)
-		})
+		});
 	},
 
 	get_leave_balance: function(frm) {
-		if(frm.doc.docstatus==0 && frm.doc.employee && frm.doc.leave_type && frm.doc.from_date && frm.doc.to_date) {
+		if (frm.doc.docstatus === 0 && frm.doc.employee && frm.doc.leave_type && frm.doc.from_date && frm.doc.to_date) {
 			return frappe.call({
 				method: "erpnext.hr.doctype.leave_application.leave_application.get_leave_balance_on",
 				args: {
@@ -177,11 +174,10 @@ frappe.ui.form.on("Leave Application", {
 					leave_type: frm.doc.leave_type,
 					consider_all_leaves_in_the_allocation_period: true
 				},
-				callback: function(r) {
+				callback: function (r) {
 					if (!r.exc && r.message) {
 						frm.set_value('leave_balance', r.message);
-					}
-					else {
+					} else {
 						frm.set_value('leave_balance', "0");
 					}
 				}
@@ -190,12 +186,12 @@ frappe.ui.form.on("Leave Application", {
 	},
 
 	calculate_total_days: function(frm) {
-		if(frm.doc.from_date && frm.doc.to_date && frm.doc.employee && frm.doc.leave_type) {
+		if (frm.doc.from_date && frm.doc.to_date && frm.doc.employee && frm.doc.leave_type) {
 
 			var from_date = Date.parse(frm.doc.from_date);
 			var to_date = Date.parse(frm.doc.to_date);
 
-			if(to_date < from_date){
+			if (to_date < from_date) {
 				frappe.msgprint(__("To Date cannot be less than From Date"));
 				frm.set_value('to_date', '');
 				return;
@@ -222,7 +218,7 @@ frappe.ui.form.on("Leave Application", {
 	},
 
 	set_leave_approver: function(frm) {
-		if(frm.doc.employee) {
+		if (frm.doc.employee) {
 			// server call is done to include holidays in leave days calculations
 			return frappe.call({
 				method: 'erpnext.hr.doctype.leave_application.leave_application.get_leave_approver',
@@ -238,3 +234,36 @@ frappe.ui.form.on("Leave Application", {
 		}
 	}
 });
+
+frappe.tour["Leave Application"] = [
+	{
+		fieldname: "employee",
+		title: "Employee",
+		description: __("Select the Employee.")
+	},
+	{
+		fieldname: "leave_type",
+		title: "Leave Type",
+		description: __("Select type of leave the employee wants to apply for, like Sick Leave, Privilege Leave, Casual Leave, etc.")
+	},
+	{
+		fieldname: "from_date",
+		title: "From Date",
+		description: __("Select the start date for your Leave Application.")
+	},
+	{
+		fieldname: "to_date",
+		title: "To Date",
+		description: __("Select the end date for your Leave Application.")
+	},
+	{
+		fieldname: "half_day",
+		title: "Half Day",
+		description: __("To apply for a Half Day check 'Half Day' and select the Half Day Date")
+	},
+	{
+		fieldname: "leave_approver",
+		title: "Leave Approver",
+		description: __("Select your Leave Approver i.e. the person who approves or rejects your leaves.")
+	}
+];

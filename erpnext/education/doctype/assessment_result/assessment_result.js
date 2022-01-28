@@ -6,7 +6,8 @@ frappe.ui.form.on('Assessment Result', {
 		if (!frm.doc.__islocal) {
 			frm.trigger('setup_chart');
 		}
-		frm.set_df_property('details', 'read_only', 1);
+
+		frm.get_field('details').grid.cannot_add_rows = true;
 
 		frm.set_query('course', function() {
 			return {

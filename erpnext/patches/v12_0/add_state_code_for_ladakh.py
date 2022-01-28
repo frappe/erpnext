@@ -1,5 +1,7 @@
 import frappe
+
 from erpnext.regional.india import states
+
 
 def execute():
 
@@ -11,6 +13,7 @@ def execute():
 
 	# Update options in gst_state custom fields
 	for field in custom_fields:
-		gst_state_field = frappe.get_doc('Custom Field', field)
-		gst_state_field.options = '\n'.join(states)
-		gst_state_field.save()
+		if frappe.db.exists('Custom Field', field):
+			gst_state_field = frappe.get_doc('Custom Field', field)
+			gst_state_field.options = '\n'.join(states)
+			gst_state_field.save()

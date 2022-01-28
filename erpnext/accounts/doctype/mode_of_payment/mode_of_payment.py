@@ -1,11 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
 
-from frappe.model.document import Document
+import frappe
 from frappe import _
+from frappe.model.document import Document
+
 
 class ModeofPayment(Document):
 	def validate(self):
@@ -39,4 +39,3 @@ class ModeofPayment(Document):
 				message = "POS Profile " + frappe.bold(", ".join(pos_profiles)) + " contains \
 					Mode of Payment " + frappe.bold(str(self.name)) + ". Please remove them to disable this mode."
 				frappe.throw(_(message), title="Not Allowed")
-

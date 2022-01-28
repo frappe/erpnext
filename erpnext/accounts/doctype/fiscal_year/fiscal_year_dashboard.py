@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 
 from frappe import _
 
@@ -13,7 +12,7 @@ def get_data():
 			},
 			{
 				'label': _('References'),
-				'items': ['Period Closing Voucher', 'Tax Withholding Category']
+				'items': ['Period Closing Voucher']
 			},
 			{
 				'label': _('Target Details'),
