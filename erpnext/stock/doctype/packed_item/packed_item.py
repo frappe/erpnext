@@ -18,8 +18,9 @@ class PackedItem(Document):
 
 
 def make_packing_list(doc):
-	"""make packing list for Product Bundle item"""
-	if doc.get("_action") and doc._action == "update_after_submit": return
+	"Make/Update packing list for Product Bundle Item."
+	if doc.get("_action") and doc._action == "update_after_submit":
+		return
 
 	parent_items, reset = [], False
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
@@ -27,18 +28,21 @@ def make_packing_list(doc):
 	if not doc.is_new():
 		reset = reset_packing_list_if_deleted_items_exist(doc)
 
-	for item in doc.get("items"):
-		if frappe.db.exists("Product Bundle", {"new_item_code": item.item_code}):
-			for bundle_item in get_product_bundle_items(item.item_code):
+	for item_row in doc.get("items"):
+		if frappe.db.exists("Product Bundle", {"new_item_code": item_row.item_code}):
+			for bundle_item in get_product_bundle_items(item_row.item_code):
 				pi_row = add_packed_item_row(
 					doc=doc, packing_item=bundle_item,
-					main_item_row=item, packed_items_table=stale_packed_items_table,
+					main_item_row=item_row, packed_items_table=stale_packed_items_table,
 					reset=reset
 				)
-				update_packed_item_details(bundle_item, pi_row, item, doc)
+				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
+				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data)
+				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc)
+				update_packed_item_from_cancelled_doc(item_row, bundle_item, pi_row, doc)
 
-			if [item.item_code, item.name] not in parent_items:
-				parent_items.append([item.item_code, item.name])
+			if [item_row.item_code, item_row.name] not in parent_items:
+				parent_items.append([item_row.item_code, item_row.name])
 
 	if frappe.db.get_single_value("Selling Settings", "editable_bundle_item_rates"):
 		update_product_bundle_price(doc, parent_items)
@@ -47,6 +51,8 @@ def get_indexed_packed_items_table(doc):
 	"""
 		Create dict from stale packed items table like:
 		{(Parent Item 1, Bundle Item 1, ae4b5678): {...}, (key): {value}}
+
+		Use: to quickly retrieve/check if row existed in table instead of looping n times
 	"""
 	indexed_table = {}
 	for packed_item in doc.get("packed_items"):
@@ -131,30 +137,24 @@ def get_packed_item_details(item_code, company):
 	)
 	return query.run(as_dict=True)[0]
 
-def update_packed_item_details(packing_item, pi_row, main_item_row, doc):
-	"Update additional packed item row details."
-	item = get_packed_item_details(packing_item.item_code, doc.company)
-
-	prev_doc_packed_items_map = None
-	if doc.amended_from:
-		prev_doc_packed_items_map = get_cancelled_doc_packed_item_details(doc.packed_items)
-
+def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data):
 	pi_row.parent_item = main_item_row.item_code
 	pi_row.parent_detail_docname = main_item_row.name
 	pi_row.item_code = packing_item.item_code
-	pi_row.item_name = item.item_name
-	pi_row.uom = item.stock_uom
+	pi_row.item_name = item_data.item_name
+	pi_row.uom = item_data.stock_uom
 	pi_row.qty = flt(packing_item.qty) * flt(main_item_row.stock_qty)
 	pi_row.conversion_factor = main_item_row.conversion_factor
 
 	if not pi_row.description:
 		pi_row.description = packing_item.get("description")
 
-	if not pi_row.warehouse and not doc.amended_from:
-		pi_row.warehouse = (main_item_row.warehouse if ((doc.get('is_pos') or item.is_stock_item \
-			or not item.default_warehouse) and main_item_row.warehouse) else item.default_warehouse)
-
+def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data, doc):
 	# TODO batch_no, actual_batch_qty, incoming_rate
+	if not pi_row.warehouse and not doc.amended_from:
+		fetch_warehouse = (doc.get('is_pos') or item_data.is_stock_item or not item_data.default_warehouse)
+		pi_row.warehouse = (main_item_row.warehouse if (fetch_warehouse and main_item_row.warehouse)
+			else item_data.default_warehouse)
 
 	if not pi_row.target_warehouse:
 		pi_row.target_warehouse = main_item_row.get("target_warehouse")
@@ -162,6 +162,12 @@ def update_packed_item_details(packing_item, pi_row, main_item_row, doc):
 	bin = get_packed_item_bin_qty(packing_item.item_code, pi_row.warehouse)
 	pi_row.actual_qty = flt(bin.get("actual_qty"))
 	pi_row.projected_qty = flt(bin.get("projected_qty"))
+
+def update_packed_item_from_cancelled_doc(main_item_row, packing_item, pi_row, doc):
+	"Update packed item row details from cancelled doc into amended doc."
+	prev_doc_packed_items_map = None
+	if doc.amended_from:
+		prev_doc_packed_items_map = get_cancelled_doc_packed_item_details(doc.packed_items)
 
 	if prev_doc_packed_items_map and prev_doc_packed_items_map.get((packing_item.item_code, main_item_row.item_code)):
 		prev_doc_row = prev_doc_packed_items_map.get((packing_item.item_code, main_item_row.item_code))
@@ -216,6 +222,9 @@ def update_parent_item_price(doc, parent_item_code, bundle_price):
 		parent_item_doc.amount = bundle_price
 		parent_item_doc.rate = bundle_price/(parent_item_doc.qty or 1)
 
+def on_doctype_update():
+	frappe.db.add_index("Packed Item", ["item_code", "warehouse"])
+
 
 @frappe.whitelist()
 def get_items_from_product_bundle(row):
@@ -231,6 +240,5 @@ def get_items_from_product_bundle(row):
 
 	return items
 
-def on_doctype_update():
-	frappe.db.add_index("Packed Item", ["item_code", "warehouse"])
-
+# TODO
+# rewrite price calculation logic, theres so much redundancy and bad logic
