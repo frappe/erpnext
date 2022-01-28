@@ -852,6 +852,34 @@ class TestStockEntry(ERPNextTestCase):
 		self.assertEqual(se.get("items")[0].allow_zero_valuation_rate, 1)
 		self.assertEqual(se.get("items")[0].amount, 0)
 
+	def test_zero_incoming_rate(self):
+		""" Make sure incoming rate of 0 is allowed while consuming.
+
+			qty  | rate | valuation rate
+			 1   | 100  | 100
+			 1   | 0    | 50
+			-1   | 100  | 0
+			-1   | 0  <--- assert this
+		"""
+		item_code = "_TestZeroVal"
+		warehouse = "_Test Warehouse - _TC"
+		create_item('_TestZeroVal')
+		_receipt = make_stock_entry(item_code=item_code, qty=1, to_warehouse=warehouse, rate=100)
+		receipt2 = make_stock_entry(item_code=item_code, qty=1, to_warehouse=warehouse, rate=0, do_not_save=True)
+		receipt2.items[0].allow_zero_valuation_rate = 1
+		receipt2.save()
+		receipt2.submit()
+
+		issue = make_stock_entry(item_code=item_code, qty=1, from_warehouse=warehouse)
+
+		value_diff = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": issue.name, "voucher_type": "Stock Entry"}, "stock_value_difference")
+		self.assertEqual(value_diff, -100)
+
+		issue2 = make_stock_entry(item_code=item_code, qty=1, from_warehouse=warehouse)
+		value_diff = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": issue2.name, "voucher_type": "Stock Entry"}, "stock_value_difference")
+		self.assertEqual(value_diff, 0)
+
+
 	def test_gle_for_opening_stock_entry(self):
 		mr = make_stock_entry(item_code="_Test Item", target="Stores - TCP1",
 			company="_Test Company with perpetual inventory", qty=50, basic_rate=100,

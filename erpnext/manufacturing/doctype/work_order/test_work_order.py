@@ -870,6 +870,57 @@ class TestWorkOrder(ERPNextTestCase):
 			close_work_order(wo_order, "Closed")
 			self.assertEqual(wo_order.get('status'), "Closed")
 
+	def test_partial_manufacture_entries(self):
+		cancel_stock_entry = []
+
+		frappe.db.set_value("Manufacturing Settings", None,
+			"backflush_raw_materials_based_on", "Material Transferred for Manufacture")
+
+		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=100)
+		ste1 = test_stock_entry.make_stock_entry(item_code="_Test Item",
+			target="_Test Warehouse - _TC", qty=120, basic_rate=5000.0)
+
+		ste2 = test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC", qty=240, basic_rate=1000.0)
+
+		cancel_stock_entry.extend([ste1.name, ste2.name])
+
+		sm = frappe.get_doc(make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 100))
+		for row in sm.get('items'):
+			if row.get('item_code') == '_Test Item':
+				row.qty = 110
+
+		sm.submit()
+		cancel_stock_entry.append(sm.name)
+
+		s = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 90))
+		for row in s.get('items'):
+			if row.get('item_code') == '_Test Item':
+				self.assertEqual(row.get('qty'), 100)
+
+		s.submit()
+		cancel_stock_entry.append(s.name)
+
+		s1 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 5))
+		for row in s1.get('items'):
+			if row.get('item_code') == '_Test Item':
+				self.assertEqual(row.get('qty'), 5)
+		s1.submit()
+		cancel_stock_entry.append(s1.name)
+
+		s2 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 5))
+		for row in s2.get('items'):
+			if row.get('item_code') == '_Test Item':
+				self.assertEqual(row.get('qty'), 5)
+
+		cancel_stock_entry.reverse()
+		for ste in cancel_stock_entry:
+			doc = frappe.get_doc("Stock Entry", ste)
+			doc.cancel()
+
+		frappe.db.set_value("Manufacturing Settings", None,
+			"backflush_raw_materials_based_on", "BOM")
+
 def update_job_card(job_card, jc_qty=None):
 	employee = frappe.db.get_value('Employee', {'status': 'Active'}, 'name')
 

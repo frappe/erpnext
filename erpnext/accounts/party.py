@@ -59,7 +59,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 		frappe.throw(_("Not permitted for {0}").format(party), frappe.PermissionError)
 
 	party = frappe.get_doc(party_type, party)
-	currency = party.default_currency if party.get("default_currency") else get_company_currency(company)
+	currency = party.get("default_currency") or currency or get_company_currency(company)
 
 	party_address, shipping_address = set_address_details(party_details, party, party_type, doctype, company, party_address, company_address, shipping_address)
 	set_contact_details(party_details, party, party_type)
