@@ -10,7 +10,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from erpnext.stock.get_item_details import get_item_details
+from erpnext.stock.get_item_details import get_item_details, get_price_list_rate
 
 
 class PackedItem(Document):
@@ -22,7 +22,9 @@ def make_packing_list(doc):
 	if doc.get("_action") and doc._action == "update_after_submit":
 		return
 
-	parent_items, reset = [], False
+	parent_items_price, reset = {}, False
+	set_price_from_children = frappe.db.get_single_value("Selling Settings", "editable_bundle_item_rates")
+
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
 
 	if not doc.is_new():
@@ -39,13 +41,14 @@ def make_packing_list(doc):
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
 				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data)
 				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc)
+				update_packed_item_price_data(pi_row, item_data, doc)
 				update_packed_item_from_cancelled_doc(item_row, bundle_item, pi_row, doc)
 
-			if [item_row.item_code, item_row.name] not in parent_items:
-				parent_items.append([item_row.item_code, item_row.name])
+				if set_price_from_children: # create/update bundle item wise price dict
+					update_product_bundle_rate(parent_items_price, pi_row)
 
-	if frappe.db.get_single_value("Selling Settings", "editable_bundle_item_rates"):
-		update_product_bundle_price(doc, parent_items)
+	if parent_items_price:
+		set_product_bundle_rate_amount(doc, parent_items_price) # set price in bundle item
 
 def get_indexed_packed_items_table(doc):
 	"""
@@ -66,8 +69,13 @@ def reset_packing_list_if_deleted_items_exist(doc):
 	reset_table = False
 
 	if doc_before_save:
-		# reset table if items were deleted
-		reset_table = len(doc_before_save.get("items")) > len(doc.get("items"))
+		# reset table if:
+		# 1. items were deleted
+		# 2. if bundle item replaced by another item (same no. of items but different items)
+		# we maintain list to maintain repeated item rows as well
+		items_before_save = [item.item_code for item in doc_before_save.get("items")]
+		items_after_save = [item.item_code for item in doc.get("items")]
+		reset_table = items_before_save != items_after_save
 	else:
 		reset_table = True # reset if via Update Items (cannot determine action)
 
@@ -130,6 +138,7 @@ def get_packed_item_details(item_code, company):
 		).select(
 			item.item_name, item.is_stock_item,
 			item.description, item.stock_uom,
+			item.valuation_rate,
 			item_default.default_warehouse
 		).where(
 			item.name == item_code
@@ -163,6 +172,22 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 	pi_row.actual_qty = flt(bin.get("actual_qty"))
 	pi_row.projected_qty = flt(bin.get("projected_qty"))
 
+def update_packed_item_price_data(pi_row, item_data, doc):
+	"Set price as per price list or from the Item master."
+	if pi_row.rate:
+		return
+
+	item_doc = frappe.get_cached_doc("Item", pi_row.item_code)
+	row_data = pi_row.as_dict().copy()
+	row_data.update({
+		"company": doc.get("company"),
+		"price_list": doc.get("selling_price_list"),
+		"currency": doc.get("currency")
+	})
+	rate = get_price_list_rate(row_data, item_doc).get("price_list_rate")
+
+	pi_row.rate = rate or item_data.get("valuation_rate") or 0.0
+
 def update_packed_item_from_cancelled_doc(main_item_row, packing_item, pi_row, doc):
 	"Update packed item row details from cancelled doc into amended doc."
 	prev_doc_packed_items_map = None
@@ -191,36 +216,27 @@ def get_cancelled_doc_packed_item_details(old_packed_items):
 		prev_doc_packed_items_map.setdefault((items.item_code ,items.parent_item), []).append(items.as_dict())
 	return prev_doc_packed_items_map
 
-def update_product_bundle_price(doc, parent_items):
-	"""Updates the prices of Product Bundles based on the rates of the Items in the bundle."""
-	if not doc.get('items'):
-		return
+def update_product_bundle_rate(parent_items_price, pi_row):
+	"""
+		Update the price dict of Product Bundles based on the rates of the Items in the bundle.
 
-	parent_items_index = 0
-	bundle_price = 0
+		Stucture:
+		{(Bundle Item 1, ae56fgji): 150.0, (Bundle Item 2, bc78fkjo): 200.0}
+	"""
+	key = (pi_row.parent_item, pi_row.parent_detail_docname)
+	rate = parent_items_price.get(key)
+	if not rate:
+		parent_items_price[key] = 0.0
 
-	for bundle_item in doc.get("packed_items"):
-		if parent_items[parent_items_index][0] == bundle_item.parent_item:
-			bundle_item_rate = bundle_item.rate if bundle_item.rate else 0
-			bundle_price += bundle_item.qty * bundle_item_rate
-		else:
-			update_parent_item_price(doc, parent_items[parent_items_index][0], bundle_price)
+	parent_items_price[key] += flt(pi_row.rate)
 
-			bundle_item_rate = bundle_item.rate if bundle_item.rate else 0
-			bundle_price = bundle_item.qty * bundle_item_rate
-			parent_items_index += 1
-
-	# for the last product bundle
-	if doc.get("packed_items"):
-		update_parent_item_price(doc, parent_items[parent_items_index][0], bundle_price)
-
-def update_parent_item_price(doc, parent_item_code, bundle_price):
-	parent_item_doc = doc.get('items', {'item_code': parent_item_code})[0]
-
-	current_parent_item_price = parent_item_doc.amount
-	if current_parent_item_price != bundle_price:
-		parent_item_doc.amount = bundle_price
-		parent_item_doc.rate = bundle_price/(parent_item_doc.qty or 1)
+def set_product_bundle_rate_amount(doc, parent_items_price):
+	"Set cumulative rate and amount in bundle item."
+	for item in doc.get("items"):
+		bundle_rate = parent_items_price.get((item.item_code, item.name))
+		if bundle_rate and bundle_rate != item.rate:
+			item.rate = bundle_rate
+			item.amount = flt(bundle_rate * item.qty)
 
 def on_doctype_update():
 	frappe.db.add_index("Packed Item", ["item_code", "warehouse"])
@@ -239,6 +255,3 @@ def get_items_from_product_bundle(row):
 		items.append(get_item_details(row))
 
 	return items
-
-# TODO
-# rewrite price calculation logic, theres so much redundancy and bad logic
