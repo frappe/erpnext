@@ -341,3 +341,4 @@ erpnext.patches.v14_0.delete_agriculture_doctypes
 erpnext.patches.v14_0.rearrange_company_fields
 erpnext.patches.v14_0.update_leave_notification_template
 erpnext.patches.v14_0.restore_einvoice_fields
+erpnext.patches.v13_0.update_sane_transfer_against
