@@ -5,7 +5,16 @@ import unittest
 
 import frappe
 from frappe.permissions import clear_user_permissions_for_doctype
-from frappe.utils import add_days, add_months, getdate, nowdate
+from frappe.utils import (
+	add_days,
+	add_months,
+	get_first_day,
+	get_last_day,
+	get_year_ending,
+	get_year_start,
+	getdate,
+	nowdate,
+)
 
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.leave_allocation.test_leave_allocation import create_leave_allocation
@@ -19,6 +28,10 @@ from erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment import (
 	create_assignment_for_multiple_employees,
 )
 from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
+	make_holiday_list,
+	make_leave_application,
+)
 
 test_dependencies = ["Leave Allocation", "Leave Block List", "Employee"]
 
@@ -61,13 +74,15 @@ class TestLeaveApplication(unittest.TestCase):
 		for dt in ["Leave Application", "Leave Allocation", "Salary Slip", "Leave Ledger Entry"]:
 			frappe.db.sql("DELETE FROM `tab%s`" % dt) #nosec
 
+		frappe.set_user("Administrator")
+
 	@classmethod
 	def setUpClass(cls):
 		set_leave_approver()
 		frappe.db.sql("delete from tabAttendance where employee='_T-Employee-00001'")
 
 	def tearDown(self):
-		frappe.set_user("Administrator")
+		frappe.db.rollback()
 
 	def _clear_roles(self):
 		frappe.db.sql("""delete from `tabHas Role` where parent in
@@ -105,6 +120,72 @@ class TestLeaveApplication(unittest.TestCase):
 		dates = [d.attendance_date for d in attendance]
 		for d in ('2018-01-01', '2018-01-02', '2018-01-03'):
 			self.assertTrue(getdate(d) in dates)
+
+	def test_attendance_for_include_holidays(self):
+		# Case 1: leave type with 'Include holidays within leaves as leaves' enabled
+		frappe.delete_doc_if_exists("Leave Type", "Test Include Holidays", force=1)
+		leave_type = frappe.get_doc(dict(
+			leave_type_name="Test Include Holidays",
+			doctype="Leave Type",
+			include_holiday=True
+		)).insert()
+
+		date = getdate()
+		make_allocation_record(leave_type=leave_type.name, from_date=get_year_start(date), to_date=get_year_ending(date))
+
+		holiday_list = make_holiday_list()
+		frappe.db.set_value("Company", "_Test Company", "default_holiday_list", holiday_list)
+		first_sunday = get_first_sunday(holiday_list)
+
+		leave_application = make_leave_application("_T-Employee-00001", first_sunday, add_days(first_sunday, 3), leave_type.name)
+		leave_application.reload()
+		self.assertEqual(leave_application.total_leave_days, 4)
+		self.assertEqual(frappe.db.count('Attendance', {'leave_application': leave_application.name}), 4)
+
+		leave_application.cancel()
+
+	def test_attendance_update_for_exclude_holidays(self):
+		# Case 2: leave type with 'Include holidays within leaves as leaves' disabled
+		frappe.delete_doc_if_exists("Leave Type", "Test Do Not Include Holidays", force=1)
+		leave_type = frappe.get_doc(dict(
+			leave_type_name="Test Do Not Include Holidays",
+			doctype="Leave Type",
+			include_holiday=False
+		)).insert()
+
+		date = getdate()
+		make_allocation_record(leave_type=leave_type.name, from_date=get_year_start(date), to_date=get_year_ending(date))
+
+		holiday_list = make_holiday_list()
+		frappe.db.set_value("Company", "_Test Company", "default_holiday_list", holiday_list)
+		first_sunday = get_first_sunday(holiday_list)
+
+		# already marked attendance on a holiday should be deleted in this case
+		config = {
+			"doctype": "Attendance",
+			"employee": "_T-Employee-00001",
+			"status": "Present"
+		}
+		attendance_on_holiday = frappe.get_doc(config)
+		attendance_on_holiday.attendance_date = first_sunday
+		attendance_on_holiday.save()
+
+		# already marked attendance on a non-holiday should be updated
+		attendance = frappe.get_doc(config)
+		attendance.attendance_date = add_days(first_sunday, 3)
+		attendance.save()
+
+		leave_application = make_leave_application("_T-Employee-00001", first_sunday, add_days(first_sunday, 3), leave_type.name)
+		leave_application.reload()
+		# holiday should be excluded while marking attendance
+		self.assertEqual(leave_application.total_leave_days, 3)
+		self.assertEqual(frappe.db.count("Attendance", {"leave_application": leave_application.name}), 3)
+
+		# attendance on holiday deleted
+		self.assertFalse(frappe.db.exists("Attendance", attendance_on_holiday.name))
+
+		# attendance on non-holiday updated
+		self.assertEqual(frappe.db.get_value("Attendance", attendance.name, "status"), "On Leave")
 
 	def test_block_list(self):
 		self._clear_roles()
@@ -241,7 +322,13 @@ class TestLeaveApplication(unittest.TestCase):
 		leave_period = get_leave_period()
 		today = nowdate()
 		holiday_list = 'Test Holiday List for Optional Holiday'
-		optional_leave_date = add_days(today, 7)
+		employee = get_employee()
+
+		default_holiday_list = make_holiday_list()
+		frappe.db.set_value("Company", "_Test Company", "default_holiday_list", default_holiday_list)
+		first_sunday = get_first_sunday(default_holiday_list)
+
+		optional_leave_date = add_days(first_sunday, 1)
 
 		if not frappe.db.exists('Holiday List', holiday_list):
 			frappe.get_doc(dict(
@@ -253,7 +340,6 @@ class TestLeaveApplication(unittest.TestCase):
 					dict(holiday_date = optional_leave_date, description = 'Test')
 				]
 			)).insert()
-		employee = get_employee()
 
 		frappe.db.set_value('Leave Period', leave_period.name, 'optional_holiday_list', holiday_list)
 		leave_type = 'Test Optional Type'
@@ -266,7 +352,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		allocate_leaves(employee, leave_period, leave_type, 10)
 
-		date = add_days(today, 6)
+		date = add_days(first_sunday, 2)
 
 		leave_application = frappe.get_doc(dict(
 			doctype = 'Leave Application',
@@ -443,6 +529,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		leave_policy = frappe.get_doc({
 			"doctype": "Leave Policy",
+			"title": "Test Leave Policy",
 			"leave_policy_details": [{"leave_type": leave_type, "annual_allocation": 6}]
 		}).insert()
 
@@ -636,13 +723,13 @@ def create_carry_forwarded_allocation(employee, leave_type):
 			carry_forward=1)
 		leave_allocation.submit()
 
-def make_allocation_record(employee=None, leave_type=None):
+def make_allocation_record(employee=None, leave_type=None, from_date=None, to_date=None):
 	allocation = frappe.get_doc({
 		"doctype": "Leave Allocation",
 		"employee": employee or "_T-Employee-00001",
 		"leave_type": leave_type or "_Test Leave Type",
-		"from_date": "2013-01-01",
-		"to_date": "2019-12-31",
+		"from_date": from_date or "2013-01-01",
+		"to_date": to_date or "2019-12-31",
 		"new_leaves_allocated": 30
 	})
 
@@ -691,3 +778,16 @@ def allocate_leaves(employee, leave_period, leave_type, new_leaves_allocated, el
 	}).insert()
 
 	allocate_leave.submit()
+
+
+def get_first_sunday(holiday_list):
+	month_start_date = get_first_day(nowdate())
+	month_end_date = get_last_day(nowdate())
+	first_sunday = frappe.db.sql("""
+		select holiday_date from `tabHoliday`
+		where parent = %s
+			and holiday_date between %s and %s
+		order by holiday_date
+	""", (holiday_list, month_start_date, month_end_date))[0][0]
+
+	return first_sunday

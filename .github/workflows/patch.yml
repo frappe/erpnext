@@ -34,7 +34,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.8
 
       - name: Setup Node
         uses: actions/setup-node@v2
@@ -80,6 +80,9 @@ jobs:
 
       - name: Install
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
+        env:
+          DB: mariadb
+          TYPE: server
 
       - name: Run Patch Tests
         run: |

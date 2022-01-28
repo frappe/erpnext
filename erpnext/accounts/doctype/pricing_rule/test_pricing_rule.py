@@ -166,7 +166,7 @@ class TestPricingRule(unittest.TestCase):
 					"item_group": "Products",
 				},
 				{
-					"item_group": "Seed",
+					"item_group": "_Test Item Group",
 				},
 			],
 			"selling": 1,
@@ -650,7 +650,7 @@ def make_pricing_rule(**args):
 		"rate": args.rate or 0.0,
 		"margin_rate_or_amount": args.margin_rate_or_amount or 0.0,
 		"condition": args.condition or '',
-		"priority": 1,
+		"priority": args.priority or 1,
 		"discount_amount": args.discount_amount or 0.0,
 		"apply_multiple_pricing_rules": args.apply_multiple_pricing_rules or 0
 	})
@@ -675,6 +675,8 @@ def make_pricing_rule(**args):
 	applicable_for = doc.applicable_for.replace(' ', '_').lower()
 	if args.get(applicable_for):
 		doc.db_set(applicable_for, args.get(applicable_for))
+
+	return doc
 
 def setup_pricing_rule_data():
 	if not frappe.db.exists('Campaign', '_Test Campaign'):
