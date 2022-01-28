@@ -81,7 +81,6 @@ def get_data():
 					"type": "report",
 					"name": "Payment Entry CXC",
 					"doctype": "Debit Note CXC",
-					"is_query_report": True
 				},
 				{
 					"type": "report",
@@ -174,8 +173,7 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Payment Entry CXP",
-					"doctype": "Debit Note CXP",
-					"is_query_report": True
+					"doctype": "Debit Note CXP"
 				},
 				{
 					"type": "report",
@@ -364,6 +362,12 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Bank Check Transaction",
+					"doctype": "Bank Transactions",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Bank Deposit",
 					"doctype": "Bank Transactions",
 					"is_query_report": True,
 				},
