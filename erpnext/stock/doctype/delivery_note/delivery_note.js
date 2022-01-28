@@ -115,36 +115,48 @@ frappe.ui.form.on("Delivery Note", {
 	},
 
 	after_save(frm) {
-		if(frm.doc.docstatus) return;
-		frm.doc.items.some((row) => {
-			if (!row.against_sales_order) {
-				let d = new frappe.ui.Dialog({
-					title: 'Suggestion',
-					fields: [
-						{
-							fieldtype: 'HTML',
-							options: `<p class="frappe-confirm-message">\
-							${__("We recommend creating a Delivery Note against a Sales Order as an ideal practice.")}\
-							<br>${__("Click")}<a href= "#"> <b>${__("here")}</b> </a>${__("to create a Sales Order.")}<br><br>\
-							${__("Do you still want to proceed with the creation of this Delivery Note?")}</p>`
-						}
-					],
-					primary_action_label: 'Yes',
-					primary_action(values) {
-						values.save_setting && frappe.db.set_value('Selling Settings', 'Selling Settings', 'so_required', 'Yes');
-						d.hide();
-					},
-					secondary_action_label: 'No',
-					secondary_action() {
-						d.hide();
-					},
-				});
-				d.$body.find('.frappe-confirm-message').find('a').click(() => {
-					frm.events.make_so_dn(frm);
-				})
-				d.add_custom_checkbox(__('Do you want to save this setting?'))
-				d.show();
-			}
+		frappe.db.get_value('Customer', frm.doc.customer, 'so_required_dn', (r) => {
+			if(frm.doc.docstatus || r.so_required_dn) return;
+			frm.doc.items.some((row) => {
+				if (!row.against_sales_order) {
+					let settings_change_dialog = erpnext.utils.get_dialog_message(
+						'Delivery Note', 'Sales Order', frm.doc.customer, 'Selling');
+					let d = new frappe.ui.Dialog({
+						title: 'Suggestion',
+						indicator: 'blue',
+						fields: [
+							{
+								fieldtype: 'HTML',
+								options: `<p class="frappe-confirm-message">\
+								${__("We recommend creating a Delivery Note against a Sales Order as an ideal practice.")}\
+								<br><br>${__("Do you want to create a Sales Order?")}</p>`
+							}
+						],
+						primary_action_label: 'Yes',
+						primary_action() {
+							frm.events.make_so_dn(frm);
+							d.hide();
+						},
+						secondary_action_label: 'No',
+						secondary_action() {
+							d.hide();
+							frappe.db.set_value('Customer', frm.doc.customer, 'so_required_dn', 1);
+							settings_change_dialog.show();
+						},
+					});
+					d.$body.find('.frappe-confirm-message').find('a').click(() => {
+						frm.events.make_so_dn(frm);
+					})
+					settings_change_dialog.$body.find('.settings-message').find('a.customer').click(() => {
+						frappe.set_route('Form', 'Customer', frm.doc.customer)
+					})
+					settings_change_dialog.$body.find('.settings-message').find('a.settings').click(() => {
+						frappe.set_route('Form', 'Selling Settings')
+					})
+					d.show();
+					return
+				}
+			});
 		});
 	},
 

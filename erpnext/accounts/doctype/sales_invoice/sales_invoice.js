@@ -166,36 +166,48 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		})
 	}
 	after_save(doc) {
-		if (doc.docstatus) return;
-		doc.items.some((row) => {
-			if (!row.sales_order) {
-				let d = new frappe.ui.Dialog({
-					title: 'Suggestion',
-					fields: [
-						{
-							fieldtype: 'HTML',
-							options: `<p class="frappe-confirm-message">\
-							${__("We recommend creating an invoice against a Sales Order as an ideal practice.")}\
-							<br>${__("Click")}<a href= "#"> <b>${__("here")}</b> </a>${__("to create a Sales Order.")}<br><br>\
-							${__("Do you still want to proceed with the creation of this invoice?")}</p>`
-						}
-					],
-					primary_action_label: 'Yes',
-					primary_action(values) {
-						values.save_setting && frappe.db.set_value('Selling Settings', 'Selling Settings', 'so_required', 'Yes');
-						d.hide();
-					},
-					secondary_action_label: 'No',
-					secondary_action() {
-						d.hide();
-					},
-				});
-				d.$body.find('.frappe-confirm-message').find('a').click(() => {
-					this.make_so();
-				})
-				d.add_custom_checkbox(__('Do you want to save this setting?'))
-				d.show();
-			}
+		frappe.db.get_value('Customer', doc.customer, 'so_required', (r) => {
+			if (doc.docstatus || r.so_required) return;
+			doc.items.some((row) => {
+				if (!row.sales_order) {
+					let settings_change_dialog = erpnext.utils.get_dialog_message(
+							'Sales Invoice', 'Sales Order', doc.customer, 'Selling');
+					let d = new frappe.ui.Dialog({
+						title: 'Suggestion',
+						indicator: 'blue',
+						fields: [
+							{
+								fieldtype: 'HTML',
+								options: `<p class="frappe-confirm-message">\
+								${__("We recommend creating an invoice against a Sales Order as an ideal practice.")}\
+								<br><br>${__("Do you want to create a Sales Order?")}</p>`
+							}
+						],
+						primary_action_label: 'Yes',
+						primary_action(values) {
+							this.make_so();
+							d.hide();
+						},
+						secondary_action_label: 'No',
+						secondary_action() {
+							d.hide();
+							frappe.db.set_value('Customer', doc.customer, 'so_required', 1);
+							settings_change_dialog.show();
+						},
+					});
+					d.$body.find('.frappe-confirm-message').find('a').click(() => {
+						this.make_so();
+					})
+					settings_change_dialog.$body.find('.settings-message').find('a.customer').click(() => {
+						frappe.set_route('Form', 'Customer', doc.customer)
+					})
+					settings_change_dialog.$body.find('.settings-message').find('a.settings').click(() => {
+						frappe.set_route('Form', 'Selling Settings')
+					})
+					d.show();
+					return
+				}
+			});
 		});
 	}
 
@@ -425,7 +437,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		})
 	}
 
-make_so() {
+	make_so() {
 		frappe.model.open_mapped_doc({
 			method: 'erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_order',
 			frm: cur_frm,

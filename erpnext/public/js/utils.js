@@ -316,8 +316,26 @@ $.extend(erpnext.utils, {
 			}
 			frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
 		});
-	}
+	},
 
+	get_dialog_message: function(source_doctype, target_doctype, customer, module_name) {
+		let d = new frappe.ui.Dialog({
+			title: __("Message"),
+			indicator: "blue",
+			fields: [
+				{
+					fieldtype: 'HTML',
+					options: `<p class="frappe-confirm-message settings-message">\
+					${__("You can now create a {} without a {} for Customer {}\
+					<br><br> You can also change this globally in {}", [source_doctype, target_doctype,
+						`<b><a class="customer" href="#">${__("{}", [customer])}</a></b>`,
+						`<b><a class="settings" href="#">${__("{} Settings", [module_name])}</b>`])}
+					</p>`
+				}
+			],
+		});
+		return d;
+	}
 });
 
 erpnext.utils.select_alternate_items = function(opts) {
@@ -948,3 +966,4 @@ function attach_selector_button(inner_text, append_loction, context, grid_row) {
 		context.show_serial_batch_selector(grid_row.frm, grid_row.doc, "", "", true);
 	});
 }
+
