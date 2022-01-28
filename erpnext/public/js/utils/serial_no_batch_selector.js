@@ -592,6 +592,6 @@ function check_can_calculate_pending_qty(me) {
 		&& doc.fg_completed_qty
 		&& erpnext.stock.bom
 		&& erpnext.stock.bom.name === doc.bom_no;
-	const itemChecks = !!item;
+	const itemChecks = !!item  && !item.allow_alternative_item;
 	return docChecks && itemChecks;
 }
