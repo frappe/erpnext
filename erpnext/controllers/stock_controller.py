@@ -40,7 +40,10 @@ class StockController(AccountsController):
 		if self.docstatus == 2:
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
-		if cint(erpnext.is_perpetual_inventory_enabled(self.company)):
+		provisional_accounting_for_non_stock_items = \
+			cint(frappe.db.get_value('Company', self.company, 'enable_provisional_accounting_for_non_stock_items'))
+
+		if cint(erpnext.is_perpetual_inventory_enabled(self.company)) or provisional_accounting_for_non_stock_items:
 			warehouse_account = get_warehouse_account_map(self.company)
 
 			if self.docstatus==1:
