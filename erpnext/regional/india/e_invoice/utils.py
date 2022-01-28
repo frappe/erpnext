@@ -2,8 +2,6 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-
 import base64
 import io
 import json
@@ -14,7 +12,6 @@ import traceback
 
 import frappe
 import jwt
-import six
 from frappe import _, bold
 from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.integrations.utils import make_get_request, make_post_request
@@ -39,7 +36,7 @@ from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
 
 @frappe.whitelist()
 def validate_eligibility(doc):
-	if isinstance(doc, six.string_types):
+	if isinstance(doc, str):
 		doc = json.loads(doc)
 
 	invalid_doctype = doc.get('doctype') != 'Sales Invoice'
@@ -507,7 +504,7 @@ def show_link_to_error_log(invoice, einvoice):
 	)
 
 def log_error(data=None):
-	if isinstance(data, six.string_types):
+	if isinstance(data, str):
 		data = json.loads(data)
 
 	seperator = "--" * 50
