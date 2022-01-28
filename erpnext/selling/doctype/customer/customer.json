@@ -4,7 +4,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2013-06-11 14:26:44",
+ "creation": "2022-01-05 12:08:01.677152",
  "description": "Buyer of Goods and Services.",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -29,6 +29,7 @@
   "tax_category",
   "so_required",
   "dn_required",
+  "so_required_dn",
   "disabled",
   "is_internal_customer",
   "represents_company",
@@ -498,6 +499,12 @@
    "no_copy": 1,
    "options": "Opportunity",
    "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "so_required_dn",
+   "fieldtype": "Check",
+   "label": "Allow Delivery Note Creation Without Sales Order"
   }
  ],
  "icon": "fa fa-user",
@@ -511,7 +518,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2021-10-20 22:07:52.485809",
+ "modified": "2022-01-28 16:19:01.836369",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -595,6 +602,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "title_field": "customer_name",
  "track_changes": 1
 }
