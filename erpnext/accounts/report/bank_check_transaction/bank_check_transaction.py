@@ -32,7 +32,6 @@ def return_filters(filters, from_date, to_date):
 
 	conditions += "{"
 	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
-	conditions += ', "company": "{}"'.format(filters.get("company"))
 	conditions += ', "mode_of_payment": "Cheque"'
 	conditions += ', "paid_to": "{}"'.format(filters.get("account"))
 	# conditions += ', "docstatus": 1'

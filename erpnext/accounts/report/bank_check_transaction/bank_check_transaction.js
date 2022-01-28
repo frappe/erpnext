@@ -24,13 +24,6 @@ frappe.query_reports["Bank Check Transaction"] = {
 			"fieldtype": "Link",
 			"options": "Account",
 			"reqd": 1
-		},
-		{
-			"fieldname":"company",
-			"label": __("Company"),
-			"fieldtype": "Link",
-			"options": "Company",
-			"reqd": 1
 		}
 	]
 };
