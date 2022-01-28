@@ -345,3 +345,4 @@ erpnext.patches.v13_0.agriculture_deprecation_warning
 erpnext.patches.v13_0.update_maintenance_schedule_field_in_visit
 erpnext.patches.v13_0.hospitality_deprecation_warning
 erpnext.patches.v13_0.delete_bank_reconciliation_detail
+erpnext.patches.v13_0.update_sane_transfer_against
