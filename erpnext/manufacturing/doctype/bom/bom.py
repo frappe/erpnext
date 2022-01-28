@@ -149,6 +149,7 @@ class BOM(WebsiteGenerator):
 		self.set_bom_material_details()
 		self.set_bom_scrap_items_detail()
 		self.validate_materials()
+		self.validate_transfer_against()
 		self.set_routing_operations()
 		self.validate_operations()
 		self.calculate_cost()
@@ -681,6 +682,12 @@ class BOM(WebsiteGenerator):
 
 			if act_pbom and act_pbom[0][0]:
 				frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
+
+	def validate_transfer_against(self):
+		if not self.with_operations:
+			self.transfer_material_against = "Work Order"
+		if not self.transfer_material_against and not self.is_new():
+			frappe.throw(_("Setting {} is required").format(self.meta.get_label("transfer_material_against")), title=_("Missing value"))
 
 	def set_routing_operations(self):
 		if self.routing and self.with_operations and not self.operations:

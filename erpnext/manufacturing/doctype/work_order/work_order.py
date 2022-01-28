@@ -65,12 +65,14 @@ class WorkOrder(Document):
 		self.validate_warehouse_belongs_to_company()
 		self.calculate_operating_cost()
 		self.validate_qty()
+		self.validate_transfer_against()
 		self.validate_operation_time()
 		self.status = self.get_status()
 
 		validate_uom_is_integer(self, "stock_uom", ["qty", "produced_qty"])
 
 		self.set_required_items(reset_only_qty = len(self.get("required_items")))
+
 
 	def validate_sales_order(self):
 		if self.sales_order:
@@ -620,6 +622,16 @@ class WorkOrder(Document):
 	def validate_qty(self):
 		if not self.qty > 0:
 			frappe.throw(_("Quantity to Manufacture must be greater than 0."))
+
+	def validate_transfer_against(self):
+		if not self.docstatus == 1:
+			# let user configure operations until they're ready to submit
+			return
+		if not self.operations:
+			self.transfer_material_against = "Work Order"
+		if not self.transfer_material_against:
+			frappe.throw(_("Setting {} is required").format(self.meta.get_label("transfer_material_against")), title=_("Missing value"))
+
 
 	def validate_operation_time(self):
 		for d in self.operations:
