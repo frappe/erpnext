@@ -21,7 +21,7 @@ def get_data():
 			},
 			{
 				'label': _('Lifecycle'),
-				'items': ['Employee Transfer', 'Employee Promotion', 'Employee Grievance']
+				'items': ['Employee Onboarding', 'Employee Transfer', 'Employee Promotion', 'Employee Grievance']
 			},
 			{
 				'label': _('Exit'),
