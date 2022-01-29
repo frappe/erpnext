@@ -5,7 +5,7 @@ frappe.ui.form.on('Campaign', {
 	refresh: function(frm) {
 		erpnext.toggle_naming_series();
 
-		if (frm.doc.__islocal) {
+		if (frm.is_new()) {
 			frm.toggle_display("naming_series", frappe.boot.sysdefaults.campaign_naming_by=="Naming Series");
 		} else {
 			cur_frm.add_custom_button(__("View Leads"), function() {
