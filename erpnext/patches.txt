@@ -325,8 +325,4 @@ erpnext.patches.v14_0.set_payroll_cost_centers
 erpnext.patches.v13_0.agriculture_deprecation_warning
 erpnext.patches.v14_0.delete_agriculture_doctypes
 erpnext.patches.v13_0.update_exchange_rate_settings
-<<<<<<< HEAD
-=======
-erpnext.patches.v14_0.rearrange_company_fields
 erpnext.patches.v14_0.update_leave_notification_template
->>>>>>> b07c1f3bf1 (feat: add link to leave application in leave notification (#29316))
