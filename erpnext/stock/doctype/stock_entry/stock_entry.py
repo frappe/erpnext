@@ -1446,14 +1446,15 @@ class StockEntry(StockController):
 							qty = req_qty_each * flt(self.fg_completed_qty)
 
 			elif backflushed_materials.get(item.item_code):
+				precision = frappe.get_precision("Stock Entry Detail", "qty")
 				for d in backflushed_materials.get(item.item_code):
-					if d.get(item.warehouse):
+					if d.get(item.warehouse) > 0:
 						if (qty > req_qty):
-							qty = (qty/trans_qty) * flt(self.fg_completed_qty)
+							qty = ((flt(qty, precision) - flt(d.get(item.warehouse), precision))
+								/ (flt(trans_qty, precision) - flt(produced_qty, precision))
+							) * flt(self.fg_completed_qty)
 
-						if consumed_qty and frappe.db.get_single_value("Manufacturing Settings",
-							"material_consumption"):
-							qty -= consumed_qty
+							d[item.warehouse] -= qty
 
 			if cint(frappe.get_cached_value('UOM', item.stock_uom, 'must_be_whole_number')):
 				qty = frappe.utils.ceil(qty)

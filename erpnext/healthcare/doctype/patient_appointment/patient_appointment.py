@@ -388,7 +388,8 @@ def get_available_slots(practitioner_doc, date):
 					fields=['name', 'appointment_time', 'duration', 'status'])
 
 				slot_details.append({'slot_name': slot_name, 'service_unit': schedule_entry.service_unit, 'avail_slot': available_slots,
-					'appointments': appointments,  'allow_overlap': allow_overlap, 'service_unit_capacity': service_unit_capacity})
+					'appointments': appointments,  'allow_overlap': allow_overlap, 'service_unit_capacity': service_unit_capacity,
+					'practitioner_name': practitioner_doc.practitioner_name})
 
 	return slot_details
 

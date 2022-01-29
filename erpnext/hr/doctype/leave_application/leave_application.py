@@ -22,6 +22,7 @@ from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
 from erpnext.hr.utils import (
+	get_holiday_dates_for_employee,
 	get_leave_period,
 	set_employee_name,
 	share_doc_with_approver,
@@ -159,33 +160,57 @@ class LeaveApplication(Document):
 				.format(formatdate(future_allocation[0].from_date), future_allocation[0].name))
 
 	def update_attendance(self):
-		if self.status == "Approved":
-			for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
-				date = dt.strftime("%Y-%m-%d")
-				status = "Half Day" if self.half_day_date and getdate(date) == getdate(self.half_day_date) else "On Leave"
-				attendance_name = frappe.db.exists('Attendance', dict(employee = self.employee,
-					attendance_date = date, docstatus = ('!=', 2)))
+		if self.status != "Approved":
+			return
 
+		holiday_dates = []
+		if not frappe.db.get_value("Leave Type", self.leave_type, "include_holiday"):
+			holiday_dates = get_holiday_dates_for_employee(self.employee, self.from_date, self.to_date)
+
+		for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
+			date = dt.strftime("%Y-%m-%d")
+			attendance_name = frappe.db.exists("Attendance", dict(employee = self.employee,
+				attendance_date = date, docstatus = ('!=', 2)))
+
+			# don't mark attendance for holidays
+			# if leave type does not include holidays within leaves as leaves
+			if date in holiday_dates:
 				if attendance_name:
-					# update existing attendance, change absent to on leave
-					doc = frappe.get_doc('Attendance', attendance_name)
-					if doc.status != status:
-						doc.db_set('status', status)
-						doc.db_set('leave_type', self.leave_type)
-						doc.db_set('leave_application', self.name)
-				else:
-					# make new attendance and submit it
-					doc = frappe.new_doc("Attendance")
-					doc.employee = self.employee
-					doc.employee_name = self.employee_name
-					doc.attendance_date = date
-					doc.company = self.company
-					doc.leave_type = self.leave_type
-					doc.leave_application = self.name
-					doc.status = status
-					doc.flags.ignore_validate = True
-					doc.insert(ignore_permissions=True)
-					doc.submit()
+					# cancel and delete existing attendance for holidays
+					attendance = frappe.get_doc("Attendance", attendance_name)
+					attendance.flags.ignore_permissions = True
+					if attendance.docstatus == 1:
+						attendance.cancel()
+					frappe.delete_doc("Attendance", attendance_name, force=1)
+				continue
+
+			self.create_or_update_attendance(attendance_name, date)
+
+	def create_or_update_attendance(self, attendance_name, date):
+		status = "Half Day" if self.half_day_date and getdate(date) == getdate(self.half_day_date) else "On Leave"
+
+		if attendance_name:
+			# update existing attendance, change absent to on leave
+			doc = frappe.get_doc('Attendance', attendance_name)
+			if doc.status != status:
+				doc.db_set({
+					'status': status,
+					'leave_type': self.leave_type,
+					'leave_application': self.name
+				})
+		else:
+			# make new attendance and submit it
+			doc = frappe.new_doc("Attendance")
+			doc.employee = self.employee
+			doc.employee_name = self.employee_name
+			doc.attendance_date = date
+			doc.company = self.company
+			doc.leave_type = self.leave_type
+			doc.leave_application = self.name
+			doc.status = status
+			doc.flags.ignore_validate = True
+			doc.insert(ignore_permissions=True)
+			doc.submit()
 
 	def cancel_attendance(self):
 		if self.docstatus == 2:

@@ -356,6 +356,36 @@ class TestBOM(ERPNextTestCase):
 		self.assertTrue(0 < len(filtered) <= 3, msg="Item filtering showing excessive results")
 
 
+	def test_valid_transfer_defaults(self):
+		bom_with_op = frappe.db.get_value("BOM", {"item": "_Test FG Item 2", "with_operations": 1, "is_active": 1})
+		bom = frappe.copy_doc(frappe.get_doc("BOM", bom_with_op), ignore_no_copy=False)
+
+		# test defaults
+		bom.docstatus = 0
+		bom.transfer_material_against = None
+		bom.insert()
+		self.assertEqual(bom.transfer_material_against, "Work Order")
+
+		bom.reload()
+		bom.transfer_material_against = None
+		with self.assertRaises(frappe.ValidationError):
+			bom.save()
+		bom.reload()
+
+		# test saner default
+		bom.transfer_material_against = "Job Card"
+		bom.with_operations = 0
+		bom.save()
+		self.assertEqual(bom.transfer_material_against, "Work Order")
+
+		# test no value on existing doc
+		bom.transfer_material_against = None
+		bom.with_operations = 0
+		bom.save()
+		self.assertEqual(bom.transfer_material_against, "Work Order")
+		bom.delete()
+
+
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
 
