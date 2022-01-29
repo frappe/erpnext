@@ -948,6 +948,7 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 		warehouses, item.get("quantity"), company, ignore_validation=True)
 
 	required_qty = item.get("quantity")
+	# get available material by transferring to production warehouse
 	for d in locations:
 		if required_qty <=0: return
 
@@ -958,12 +959,14 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 			new_dict.update({
 				"quantity": quantity,
 				"material_request_type": "Material Transfer",
+				"uom": new_dict.get("stock_uom"),  # internal transfer should be in stock UOM
 				"from_warehouse": d.get("warehouse")
 			})
 
 			required_qty -= quantity
 			new_mr_items.append(new_dict)
 
+	# raise purchase request for remaining qty
 	if required_qty:
 		stock_uom, purchase_uom = frappe.db.get_value(
 			'Item',
