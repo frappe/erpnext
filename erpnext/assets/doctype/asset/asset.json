@@ -493,7 +493,8 @@
   {
    "fieldname": "asset_quantity",
    "fieldtype": "Int",
-   "label": "Asset Quantity"
+   "label": "Asset Quantity",
+   "read_only_depends_on": "eval:!doc.is_existing_asset"
   }
  ],
  "idx": 72,
@@ -516,7 +517,7 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2022-01-19 01:36:51.361485",
+ "modified": "2022-01-20 12:57:36.741192",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
