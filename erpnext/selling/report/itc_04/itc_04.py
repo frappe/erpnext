@@ -229,79 +229,79 @@ def get_con(filters):
 
 
 def get_data(filters,conditions):
-	# if filters.report == "ITC-04":
-	# 	data = []
-	# 	s_d = "'"+conditions['start_date']+"'"
-	# 	m_d = "'"+conditions['end_date']+"'"
-	# 	query = """ select se.name as name from `tabStock Entry` se, `tabPurchase Order` po
-	# 	 						where se.purchase_order = po.name and se.docstatus = 1 and
-	# 	 						se.stock_entry_type = "Send to Subcontractor" and
-	# 	 						se.posting_date between {0} and {1}
-	# 	 						and se.company = '{2}' """.format(s_d,m_d,filters.get('company'))
-	#
-	# 	if filters.get('company_address'):
-	# 		query+= """ and po.billing_address = '{0}' """.format(filters.get('company_address'))
-	#
-	# 	se = frappe.db.sql(query,as_dict=1)
-	#
-	# 	for name in se:
-	# 		se_doc = frappe.get_doc("Stock Entry",name.name)
-	# 		po_doc = frappe.get_doc("Purchase Order",se_doc.purchase_order)
-	# 		tax_cat = po_doc.tax_category
-	#
-	# 		for row in se_doc.items:
-	# 			itm_obj = frappe.get_doc("Item",row.item_code)
-	# 			sgst, cgst, igst,cess = None, None, None, None
-	# 			for c_row in itm_obj.taxes:
-	# 				if c_row.tax_category == tax_cat:
-	# 					tax_temp_obj = frappe.get_doc("Item Tax Template",c_row.item_tax_template)
-	# 					for tax_row in tax_temp_obj.taxes:
-	#
-	# 						gst_s = frappe.get_single("GST Settings")
-	#
-	# 						for gst_row in gst_s.gst_accounts:
-	# 							if gst_row.cgst_account == tax_row.tax_type:
-	# 								cgst = tax_row.tax_rate
-	# 							elif gst_row.sgst_account == tax_row.tax_type:
-	# 								sgst = tax_row.tax_rate
-	# 							elif gst_row.igst_account == tax_row.tax_type:
-	# 								igst = tax_row.tax_rate
-	# 							elif gst_row.cess_account == tax_row.tax_type:
-	# 								cess = tax_row.tax_rate
-	# 			data2 = {}
-	# 			data2['challan_number'] = se_doc.name
-	# 			data2['challan_date'] = se_doc.posting_date
-	# 			data2['types_of_goods'] = "Inputs"
-	# 			supp_details = frappe.db.sql(""" select adds.gstin as gstin_of_job_worker,
-	# 											concat(adds.gst_state_number,'-',adds.gst_state ) as state,
-	# 										 CASE
-	# 										 When supp.gst_category != "SEZ"
-	# 										 Then "Non-SEZ"
-	# 										 Else "SEZ"
-	# 										 End as job_workers_type
-	# 											from `tabSupplier` supp
-	# 											INNER JOIN `tabDynamic Link` dl
-	# 											on dl.link_name = supp.name
-	# 											INNER JOIN `tabAddress` adds
-	# 											on dl.parent = adds.name
-	# 											where supp.name = %(supp)s """, {'supp':po_doc.supplier}, as_dict=1)
-	# 			if supp_details:
-	# 				dic2 = supp_details[0]
-	# 				for key,value in dic2.items():
-	# 					data2[key] = value
-	# 			else:
-	# 				frappe.throw("Supplier Address Should Be There")
-	#
-	# 			data2['description_of_goods']=row.description
-	# 			data2['unique_quantity_code'] = row.stock_uom
-	# 			data2['quantity'] = row.transfer_qty
-	# 			data2['taxable_value'] = row.basic_amount
-	# 			data2['integrated_tax_rate'] = igst if igst else 0
-	# 			data2['central_tax_rate'] = cgst if cgst else 0
-	# 			data2['state_ut_tax_rate'] = sgst if sgst else 0
-	# 			data2['cess'] = cess if cess else 0
-	# 			data.append(data2)
-	# 	return data
+	if filters.report == "ITC-04":
+		data = []
+		s_d = "'"+conditions['start_date']+"'"
+		m_d = "'"+conditions['end_date']+"'"
+		query = """ select se.name as name from `tabStock Entry` se, `tabPurchase Order` po
+		 						where se.purchase_order = po.name and se.docstatus = 1 and
+		 						se.stock_entry_type = "Send to Subcontractor" and
+		 						se.posting_date between {0} and {1}
+		 						and se.company = '{2}' """.format(s_d,m_d,filters.get('company'))
+
+		if filters.get('company_address'):
+			query+= """ and po.billing_address = '{0}' """.format(filters.get('company_address'))
+
+		se = frappe.db.sql(query,as_dict=1)
+
+		for name in se:
+			se_doc = frappe.get_doc("Stock Entry",name.name)
+			po_doc = frappe.get_doc("Purchase Order",se_doc.purchase_order)
+			tax_cat = po_doc.tax_category
+
+			for row in se_doc.items:
+				itm_obj = frappe.get_doc("Item",row.item_code)
+				sgst, cgst, igst,cess = None, None, None, None
+				for c_row in itm_obj.taxes:
+					if c_row.tax_category == tax_cat:
+						tax_temp_obj = frappe.get_doc("Item Tax Template",c_row.item_tax_template)
+						for tax_row in tax_temp_obj.taxes:
+
+							gst_s = frappe.get_single("GST Settings")
+
+							for gst_row in gst_s.gst_accounts:
+								if gst_row.cgst_account == tax_row.tax_type:
+									cgst = tax_row.tax_rate
+								elif gst_row.sgst_account == tax_row.tax_type:
+									sgst = tax_row.tax_rate
+								elif gst_row.igst_account == tax_row.tax_type:
+									igst = tax_row.tax_rate
+								elif gst_row.cess_account == tax_row.tax_type:
+									cess = tax_row.tax_rate
+				data2 = {}
+				data2['challan_number'] = se_doc.name
+				data2['challan_date'] = se_doc.posting_date
+				data2['types_of_goods'] = "Inputs"
+				supp_details = frappe.db.sql(""" select adds.gstin as gstin_of_job_worker,
+												concat(adds.gst_state_number,'-',adds.gst_state ) as state,
+											 CASE
+											 When supp.gst_category != "SEZ"
+											 Then "Non-SEZ"
+											 Else "SEZ"
+											 End as job_workers_type
+												from `tabSupplier` supp
+												INNER JOIN `tabDynamic Link` dl
+												on dl.link_name = supp.name
+												INNER JOIN `tabAddress` adds
+												on dl.parent = adds.name
+												where supp.name = %(supp)s """, {'supp':po_doc.supplier}, as_dict=1)
+				if supp_details:
+					dic2 = supp_details[0]
+					for key,value in dic2.items():
+						data2[key] = value
+				else:
+					frappe.throw("Supplier Address Should Be There")
+
+				data2['description_of_goods']=row.description
+				data2['unique_quantity_code'] = row.stock_uom
+				data2['quantity'] = row.transfer_qty
+				data2['taxable_value'] = row.basic_amount
+				data2['integrated_tax_rate'] = igst if igst else 0
+				data2['central_tax_rate'] = cgst if cgst else 0
+				data2['state_ut_tax_rate'] = sgst if sgst else 0
+				data2['cess'] = cess if cess else 0
+				data.append(data2)
+		return data
 
 	if filters.report == "ITC-05 A":
 		data = []
