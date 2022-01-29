@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Prospect', {
 	refresh (frm) {
-		frappe.dynamic_link = { doc: frm.doc, fieldname: "name", doctype: frm.doctype }
+		frappe.dynamic_link = { doc: frm.doc, fieldname: "name", doctype: frm.doctype };
 
 		if (!frm.is_new() && frappe.boot.user.can_create.includes("Customer")) {
 			frm.add_custom_button(__("Customer"), function() {
