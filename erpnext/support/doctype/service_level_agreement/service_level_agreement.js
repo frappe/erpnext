@@ -22,10 +22,41 @@ frappe.ui.form.on('Service Level Agreement', {
 	refresh: function(frm) {
 		frm.trigger('fetch_status_fields');
 		frm.trigger('toggle_resolution_fields');
+		frm.trigger('default_service_level_agreement');
+		frm.trigger('entity');
+	},
+
+	default_service_level_agreement: function(frm) {
+		const field = frm.get_field('default_service_level_agreement');
+		if (frm.doc.default_service_level_agreement) {
+			field.set_description(__('SLA will be applied on every {0}', [frm.doc.document_type]));
+		} else {
+			field.set_description(__('Enable to apply SLA on every {0}', [frm.doc.document_type]));
+		}
 	},
 
 	document_type: function(frm) {
 		frm.trigger('fetch_status_fields');
+		frm.trigger('default_service_level_agreement');
+	},
+
+	entity_type: function(frm) {
+		frm.set_value('entity', undefined);
+	},
+
+	entity: function(frm) {
+		const field = frm.get_field('entity');
+		if (frm.doc.entity) {
+			const and_descendants = frm.doc.entity_type != 'Customer' ? ' ' + __('or its descendants') : '';
+			field.set_description(
+				__('SLA will be applied if {1} is set as {2}{3}', [
+					frm.doc.document_type, frm.doc.entity_type,
+					frm.doc.entity, and_descendants
+				])
+			);
+		} else {
+			field.set_description('');
+		}
 	},
 
 	fetch_status_fields: function(frm) {
@@ -80,6 +111,7 @@ frappe.ui.form.on('Service Level Agreement', {
 				filters: [
 					['DocType', 'issingle', '=', 0],
 					['DocType', 'istable', '=', 0],
+					['DocType', 'is_submittable', '=', 0],
 					['DocType', 'name', 'not in', invalid_doctypes],
 					['DocType', 'module', 'not in', ["Email", "Core", "Custom", "Event Streaming", "Social", "Data Migration", "Geo", "Desk"]]
 				]

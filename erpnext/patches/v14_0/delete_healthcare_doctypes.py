@@ -47,3 +47,18 @@ def execute():
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
 
 	frappe.delete_doc("Module Def", "Healthcare", ignore_missing=True, force=True)
+
+	custom_fields = {
+		'Sales Invoice': ['patient', 'patient_name', 'ref_practitioner'],
+		'Sales Invoice Item': ['reference_dt', 'reference_dn'],
+		'Stock Entry': ['inpatient_medication_entry'],
+		'Stock Entry Detail': ['patient', 'inpatient_medication_entry_child'],
+	}
+	for doc, fields in custom_fields.items():
+		filters = {
+			'dt': doc,
+			'fieldname': ['in', fields]
+		}
+		records = frappe.get_all('Custom Field', filters=filters, pluck='name')
+		for record in records:
+			frappe.delete_doc('Custom Field', record, ignore_missing=True, force=True)

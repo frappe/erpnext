@@ -142,7 +142,7 @@ class Customer(TransactionBase):
 			self.update_lead_status()
 
 		if self.flags.is_new_doc:
-			self.create_lead_address_contact()
+			self.link_lead_address_and_contact()
 
 		self.update_customer_groups()
 
@@ -176,63 +176,24 @@ class Customer(TransactionBase):
 		if self.lead_name:
 			frappe.db.set_value("Lead", self.lead_name, "status", "Converted")
 
-	def create_lead_address_contact(self):
+	def link_lead_address_and_contact(self):
 		if self.lead_name:
-			# assign lead address to customer (if already not set)
-			address_names = frappe.get_all('Dynamic Link', filters={
-								"parenttype":"Address",
-								"link_doctype":"Lead",
-								"link_name":self.lead_name
-							}, fields=["parent as name"])
+			# assign lead address and contact to customer (if already not set)
+			linked_contacts_and_addresses = frappe.get_all(
+				"Dynamic Link",
+				filters=[
+					["parenttype", "in", ["Contact", "Address"]],
+					["link_doctype", "=", "Lead"],
+					["link_name", "=", self.lead_name],
+				],
+				fields=["parent as name", "parenttype as doctype"],
+			)
 
-			for address_name in address_names:
-				address = frappe.get_doc('Address', address_name.get('name'))
-				if not address.has_link('Customer', self.name):
-					address.append('links', dict(link_doctype='Customer', link_name=self.name))
-					address.save(ignore_permissions=self.flags.ignore_permissions)
-
-			lead = frappe.db.get_value("Lead", self.lead_name, ["company_name", "lead_name", "email_id", "phone", "mobile_no", "gender", "salutation"], as_dict=True)
-
-			if not lead.lead_name:
-				frappe.throw(_("Please mention the Lead Name in Lead {0}").format(self.lead_name))
-
-			if lead.company_name:
-				contact_names = frappe.get_all('Dynamic Link', filters={
-									"parenttype":"Contact",
-									"link_doctype":"Lead",
-									"link_name":self.lead_name
-								}, fields=["parent as name"])
-
-				for contact_name in contact_names:
-					contact = frappe.get_doc('Contact', contact_name.get('name'))
-					if not contact.has_link('Customer', self.name):
-						contact.append('links', dict(link_doctype='Customer', link_name=self.name))
-						contact.save(ignore_permissions=self.flags.ignore_permissions)
-
-			else:
-				lead.lead_name = lead.lead_name.lstrip().split(" ")
-				lead.first_name = lead.lead_name[0]
-				lead.last_name = " ".join(lead.lead_name[1:])
-
-				# create contact from lead
-				contact = frappe.new_doc('Contact')
-				contact.first_name = lead.first_name
-				contact.last_name = lead.last_name
-				contact.gender = lead.gender
-				contact.salutation = lead.salutation
-				contact.email_id = lead.email_id
-				contact.phone = lead.phone
-				contact.mobile_no = lead.mobile_no
-				contact.is_primary_contact = 1
-				contact.append('links', dict(link_doctype='Customer', link_name=self.name))
-				if lead.email_id:
-					contact.append('email_ids', dict(email_id=lead.email_id, is_primary=1))
-				if lead.mobile_no:
-					contact.append('phone_nos', dict(phone=lead.mobile_no, is_primary_mobile_no=1))
-				contact.flags.ignore_permissions = self.flags.ignore_permissions
-				contact.autoname()
-				if not frappe.db.exists("Contact", contact.name):
-					contact.insert()
+			for row in linked_contacts_and_addresses:
+				linked_doc = frappe.get_doc(row.doctype, row.name)
+				if not linked_doc.has_link('Customer', self.name):
+					linked_doc.append('links', dict(link_doctype='Customer', link_name=self.name))
+					linked_doc.save(ignore_permissions=self.flags.ignore_permissions)
 
 	def validate_name_with_customer_group(self):
 		if frappe.db.exists("Customer Group", self.name):

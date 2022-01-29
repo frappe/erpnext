@@ -5,9 +5,9 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cstr, formatdate, get_datetime, getdate, nowdate
+from frappe.utils import cint, cstr, formatdate, get_datetime, getdate, nowdate
 
-from erpnext.hr.utils import validate_active_employee
+from erpnext.hr.utils import get_holiday_dates_for_employee, validate_active_employee
 
 
 class Attendance(Document):
@@ -171,7 +171,7 @@ def get_month_map():
 		})
 
 @frappe.whitelist()
-def get_unmarked_days(employee, month):
+def get_unmarked_days(employee, month, exclude_holidays=0):
 	import calendar
 	month_map = get_month_map()
 
@@ -191,6 +191,11 @@ def get_unmarked_days(employee, month):
 	])
 
 	marked_days = [get_datetime(record.attendance_date) for record in records]
+	if cint(exclude_holidays):
+		holiday_dates = get_holiday_dates_for_employee(employee, month_start, month_end)
+		holidays = [get_datetime(record) for record in holiday_dates]
+		marked_days.extend(holidays)
+
 	unmarked_days = []
 
 	for date in dates_of_month:

@@ -492,18 +492,20 @@ class Item(WebsiteGenerator):
 		context.shopping_cart = get_product_info_for_website(self.name, skip_quotation_creation=True)
 
 	def add_default_uom_in_conversion_factor_table(self):
-		uom_conv_list = [d.uom for d in self.get("uoms")]
-		if self.stock_uom not in uom_conv_list:
-			ch = self.append('uoms', {})
-			ch.uom = self.stock_uom
-			ch.conversion_factor = 1
+		if not self.is_new() and self.has_value_changed("stock_uom"):
+			self.uoms = []
+			frappe.msgprint(
+				_("Successfully changed Stock UOM, please redefine conversion factors for new UOM."),
+				alert=True,
+			)
 
-		to_remove = []
-		for d in self.get("uoms"):
-			if d.conversion_factor == 1 and d.uom != self.stock_uom:
-				to_remove.append(d)
+		uoms_list = [d.uom for d in self.get("uoms")]
 
-		[self.remove(d) for d in to_remove]
+		if self.stock_uom not in uoms_list:
+			self.append("uoms", {
+				"uom": self.stock_uom,
+				"conversion_factor": 1
+			})
 
 	def update_show_in_website(self):
 		if self.disabled:
@@ -599,14 +601,6 @@ class Item(WebsiteGenerator):
 						if not ean.is_valid(item_barcode.barcode):
 							frappe.throw(_("Barcode {0} is not a valid {1} code").format(
 								item_barcode.barcode, item_barcode.barcode_type), InvalidBarcode)
-
-					if item_barcode.barcode != item_barcode.name:
-						# if barcode is getting updated , the row name has to reset.
-						# Delete previous old row doc and re-enter row as if new to reset name in db.
-						item_barcode.set("__islocal", True)
-						item_barcode_entry_name = item_barcode.name
-						item_barcode.name = None
-						frappe.delete_doc("Item Barcode", item_barcode_entry_name)
 
 	def validate_warehouse_for_reorder(self):
 		'''Validate Reorder level table for duplicate and conditional mandatory'''
@@ -724,7 +718,6 @@ class Item(WebsiteGenerator):
 
 	def recalculate_bin_qty(self, new_name):
 		from erpnext.stock.stock_balance import repost_stock
-		frappe.db.auto_commit_on_many_writes = 1
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
@@ -738,7 +731,6 @@ class Item(WebsiteGenerator):
 			repost_stock(new_name, warehouse)
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
-		frappe.db.auto_commit_on_many_writes = 0
 
 	@frappe.whitelist()
 	def copy_specification_from_item_group(self):

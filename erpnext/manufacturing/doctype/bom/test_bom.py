@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import unittest
 from collections import deque
 from functools import partial
 
@@ -18,10 +17,11 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.tests.test_subcontracting import set_backflush_based_on
+from erpnext.tests.utils import ERPNextTestCase
 
 test_records = frappe.get_test_records('BOM')
 
-class TestBOM(unittest.TestCase):
+class TestBOM(ERPNextTestCase):
 	def setUp(self):
 		if not frappe.get_value('Item', '_Test Item'):
 			make_test_records('Item')
@@ -384,6 +384,53 @@ class TestBOM(unittest.TestCase):
 
 		self.assertNotEqual(len(test_items), len(filtered), msg="Item filtering showing excessive results")
 		self.assertTrue(0 < len(filtered) <= 3, msg="Item filtering showing excessive results")
+
+	def test_exclude_exploded_items_from_bom(self):
+		bom_no = get_default_bom()
+		new_bom = frappe.copy_doc(frappe.get_doc('BOM', bom_no))
+		for row in new_bom.items:
+			if row.item_code == '_Test Item Home Desktop Manufactured':
+				self.assertTrue(row.bom_no)
+				row.do_not_explode = True
+
+		new_bom.docstatus = 0
+		new_bom.save()
+		new_bom.load_from_db()
+
+		for row in new_bom.items:
+			if row.item_code == '_Test Item Home Desktop Manufactured' and row.do_not_explode:
+				self.assertFalse(row.bom_no)
+
+		new_bom.delete()
+
+	def test_valid_transfer_defaults(self):
+		bom_with_op = frappe.db.get_value("BOM", {"item": "_Test FG Item 2", "with_operations": 1, "is_active": 1})
+		bom = frappe.copy_doc(frappe.get_doc("BOM", bom_with_op), ignore_no_copy=False)
+
+		# test defaults
+		bom.docstatus = 0
+		bom.transfer_material_against = None
+		bom.insert()
+		self.assertEqual(bom.transfer_material_against, "Work Order")
+
+		bom.reload()
+		bom.transfer_material_against = None
+		with self.assertRaises(frappe.ValidationError):
+			bom.save()
+		bom.reload()
+
+		# test saner default
+		bom.transfer_material_against = "Job Card"
+		bom.with_operations = 0
+		bom.save()
+		self.assertEqual(bom.transfer_material_against, "Work Order")
+
+		# test no value on existing doc
+		bom.transfer_material_against = None
+		bom.with_operations = 0
+		bom.save()
+		self.assertEqual(bom.transfer_material_against, "Work Order")
+		bom.delete()
 
 
 def get_default_bom(item_code="_Test FG Item 2"):

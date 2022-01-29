@@ -277,8 +277,10 @@ def get_custom_fields():
 	inter_state_gst_field = [
 		dict(fieldname='is_inter_state', label='Is Inter State',
 			fieldtype='Check', insert_after='disabled', print_hide=1),
+		dict(fieldname='is_reverse_charge', label='Is Reverse Charge', fieldtype='Check',
+			insert_after='is_inter_state', print_hide=1),
 		dict(fieldname='tax_category_column_break', fieldtype='Column Break',
-			insert_after='is_inter_state'),
+			insert_after='is_reverse_charge'),
 		dict(fieldname='gst_state', label='Source State', fieldtype='Select',
 			options='\n'.join(states), insert_after='company')
 	]
@@ -565,16 +567,16 @@ def get_custom_fields():
 				fieldtype='Link', options='Salary Component', insert_after='basic_component'),
 			dict(fieldname='hra_column_break', fieldtype='Column Break', insert_after='hra_component'),
 			dict(fieldname='arrear_component', label='Arrear Component',
-				fieldtype='Link', options='Salary Component', insert_after='hra_component'),
+				fieldtype='Link', options='Salary Component', insert_after='hra_column_break'),
 			dict(fieldname='non_profit_section', label='Non Profit Settings',
-				fieldtype='Section Break', insert_after='asset_received_but_not_billed', collapsible=1),
+				fieldtype='Section Break', insert_after='arrear_component', collapsible=1),
 			dict(fieldname='company_80g_number', label='80G Number',
 				fieldtype='Data', insert_after='non_profit_section'),
 			dict(fieldname='with_effect_from', label='80G With Effect From',
 				fieldtype='Date', insert_after='company_80g_number'),
 			dict(fieldname='non_profit_column_break', fieldtype='Column Break', insert_after='with_effect_from'),
 			dict(fieldname='pan_details', label='PAN Number',
-				fieldtype='Data', insert_after='with_effect_from')
+				fieldtype='Data', insert_after='non_profit_column_break')
 		],
 		'Employee Tax Exemption Declaration':[
 			dict(fieldname='hra_section', label='HRA Exemption',

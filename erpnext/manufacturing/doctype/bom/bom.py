@@ -149,6 +149,7 @@ class BOM(WebsiteGenerator):
 		self.set_bom_material_details()
 		self.set_bom_scrap_items_detail()
 		self.validate_materials()
+		self.validate_transfer_against()
 		self.set_routing_operations()
 		self.validate_operations()
 		self.calculate_cost()
@@ -203,6 +204,10 @@ class BOM(WebsiteGenerator):
 		for item in self.get("items"):
 			self.validate_bom_currency(item)
 
+			item.bom_no = ''
+			if not item.do_not_explode:
+				item.bom_no = item.bom_no
+
 			ret = self.get_bom_material_detail({
 				"company": self.company,
 				"item_code": item.item_code,
@@ -214,8 +219,10 @@ class BOM(WebsiteGenerator):
 				"uom": item.uom,
 				"stock_uom": item.stock_uom,
 				"conversion_factor": item.conversion_factor,
-				"sourced_by_supplier": item.sourced_by_supplier
+				"sourced_by_supplier": item.sourced_by_supplier,
+				"do_not_explode": item.do_not_explode
 			})
+
 			for r in ret:
 				if not item.get(r):
 					item.set(r, ret[r])
@@ -266,6 +273,9 @@ class BOM(WebsiteGenerator):
 			 'include_item_in_manufacturing': cint(args.get('transfer_for_manufacture')),
 			 'sourced_by_supplier'		: args.get('sourced_by_supplier', 0)
 		}
+
+		if args.get('do_not_explode'):
+			ret_item['bom_no'] = ''
 
 		return ret_item
 
@@ -530,16 +540,6 @@ class BOM(WebsiteGenerator):
 				row.hour_rate = (hour_rate / flt(self.conversion_rate)
 					if self.conversion_rate and hour_rate else hour_rate)
 
-			if self.routing:
-				time_in_mins = flt(frappe.db.get_value("BOM Operation", {
-						"workstation": row.workstation,
-						"operation": row.operation,
-						"parent": self.routing
-				}, ["time_in_mins"]))
-
-				if time_in_mins:
-					row.time_in_mins = time_in_mins
-
 		if row.hour_rate and row.time_in_mins:
 			row.base_hour_rate = flt(row.hour_rate) * flt(self.conversion_rate)
 			row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
@@ -690,6 +690,12 @@ class BOM(WebsiteGenerator):
 
 			if act_pbom and act_pbom[0][0]:
 				frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
+
+	def validate_transfer_against(self):
+		if not self.with_operations:
+			self.transfer_material_against = "Work Order"
+		if not self.transfer_material_against and not self.is_new():
+			frappe.throw(_("Setting {} is required").format(self.meta.get_label("transfer_material_against")), title=_("Missing value"))
 
 	def set_routing_operations(self):
 		if self.routing and self.with_operations and not self.operations:
@@ -922,7 +928,7 @@ def validate_bom_no(item, bom_no):
 				rm_item_exists = True
 		if bom.item.lower() == item.lower() or \
 			bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower():
- 				rm_item_exists = True
+				rm_item_exists = True
 		if not rm_item_exists:
 			frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
 

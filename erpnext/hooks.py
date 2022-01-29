@@ -65,10 +65,8 @@ webform_list_context = "erpnext.controllers.website_list_for_contact.get_webform
 calendars = ["Task", "Work Order", "Leave Application", "Sales Order", "Holiday List", "Course Schedule"]
 
 domains = {
-	'Agriculture': 'erpnext.domains.agriculture',
 	'Distribution': 'erpnext.domains.distribution',
 	'Education': 'erpnext.domains.education',
-	'Hospitality': 'erpnext.domains.hospitality',
 	'Manufacturing': 'erpnext.domains.manufacturing',
 	'Non Profit': 'erpnext.domains.non_profit',
 	'Retail': 'erpnext.domains.retail',
@@ -234,7 +232,7 @@ doc_events = {
 	},
 	"Communication": {
 		"on_update": [
-			"erpnext.support.doctype.service_level_agreement.service_level_agreement.update_hold_time",
+			"erpnext.support.doctype.service_level_agreement.service_level_agreement.on_communication_update",
 			"erpnext.support.doctype.issue.issue.set_first_response_time"
 		]
 	},
@@ -264,6 +262,9 @@ doc_events = {
 			"erpnext.regional.india.utils.validate_document_name",
 			"erpnext.regional.india.utils.update_taxable_values"
 		]
+	},
+	"POS Invoice": {
+		"on_submit": ["erpnext.regional.saudi_arabia.utils.create_qr_code"]
 	},
 	"Purchase Invoice": {
 		"validate": [
@@ -340,8 +341,7 @@ scheduler_events = {
 		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
 		"erpnext.projects.doctype.project.project.hourly_reminder",
 		"erpnext.projects.doctype.project.project.collect_project_status",
-		"erpnext.hr.doctype.shift_type.shift_type.process_auto_attendance_for_all_shifts",
-		"erpnext.support.doctype.service_level_agreement.service_level_agreement.set_service_level_agreement_variance"
+		"erpnext.hr.doctype.shift_type.shift_type.process_auto_attendance_for_all_shifts"
 	],
 	"hourly_long": [
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries"
@@ -372,7 +372,7 @@ scheduler_events = {
 		"erpnext.selling.doctype.quotation.quotation.set_expired_status",
 		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status",
 		"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_auto_email",
-		"erpnext.non_profit.doctype.membership.membership.set_expired_status"
+		"erpnext.non_profit.doctype.membership.membership.set_expired_status",
 		"erpnext.hr.doctype.interview.interview.send_daily_feedback_reminder"
 	],
 	"daily_long": [
@@ -565,18 +565,6 @@ global_search_doctypes = {
 		{'doctype': 'Assessment Code', 'index': 39},
 		{'doctype': 'Discussion', 'index': 40},
 	],
-	"Agriculture": [
-		{'doctype': 'Weather', 'index': 1},
-		{'doctype': 'Soil Texture', 'index': 2},
-		{'doctype': 'Water Analysis', 'index': 3},
-		{'doctype': 'Soil Analysis', 'index': 4},
-		{'doctype': 'Plant Analysis', 'index': 5},
-		{'doctype': 'Agriculture Analysis Criteria', 'index': 6},
-		{'doctype': 'Disease', 'index': 7},
-		{'doctype': 'Crop', 'index': 8},
-		{'doctype': 'Fertilizer', 'index': 9},
-		{'doctype': 'Crop Cycle', 'index': 10}
-	],
 	"Non Profit": [
 		{'doctype': 'Certified Consultant', 'index': 1},
 		{'doctype': 'Certification Application', 'index': 2},
@@ -590,13 +578,6 @@ global_search_doctypes = {
 		{'doctype': 'Donor Type', 'index': 10},
 		{'doctype': 'Membership Type', 'index': 11}
 	],
-	"Hospitality": [
-		{'doctype': 'Hotel Room', 'index': 0},
-		{'doctype': 'Hotel Room Reservation', 'index': 1},
-		{'doctype': 'Hotel Room Pricing', 'index': 2},
-		{'doctype': 'Hotel Room Package', 'index': 3},
-		{'doctype': 'Hotel Room Type', 'index': 4}
-	]
 }
 
 additional_timeline_content = {

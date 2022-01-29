@@ -327,7 +327,8 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"against_blanket_order": args.get("against_blanket_order"),
 		"bom_no": item.get("default_bom"),
 		"weight_per_unit": args.get("weight_per_unit") or item.get("weight_per_unit"),
-		"weight_uom": args.get("weight_uom") or item.get("weight_uom")
+		"weight_uom": args.get("weight_uom") or item.get("weight_uom"),
+		"grant_commission": item.get("grant_commission")
 	})
 
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
@@ -1096,7 +1097,7 @@ def apply_price_list(args, as_doc=False):
 		}
 
 def apply_price_list_on_item(args):
-	item_doc = frappe.get_doc("Item", args.item_code)
+	item_doc = frappe.db.get_value("Item", args.item_code, ['name', 'variant_of'], as_dict=1)
 	item_details = get_price_list_rate(args, item_doc)
 
 	item_details.update(get_pricing_rule_for_item(args, item_details.price_list_rate))
