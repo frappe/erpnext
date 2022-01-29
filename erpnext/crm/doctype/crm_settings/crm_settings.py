@@ -8,4 +8,3 @@ from frappe.model.document import Document
 class CRMSettings(Document):
 	def validate(self):
 		frappe.db.set_default("campaign_naming_by", self.get("campaign_naming_by", ""))
-		
