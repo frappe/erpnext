@@ -486,7 +486,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 					"options": "Competitor Detail"
 				},
 				{
-					"fieldtype": "Text",
+					"fieldtype": "Small Text",
 					"label": __("Detailed Reason"),
 					"fieldname": "detailed_reason"
 				},
