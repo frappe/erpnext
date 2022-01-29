@@ -59,11 +59,7 @@ class TestInterviewFeedback(unittest.TestCase):
 		}, 'average_rating')
 
 		# 1. average should be reflected in Interview Detail.
-<<<<<<< HEAD
-		self.assertEqual(avg_on_interview_detail, round(feedback_1.average_rating))
-=======
 		self.assertEqual(flt(avg_on_interview_detail, 2), flt(feedback_1.average_rating, 2))
->>>>>>> d98290bfb9 (test: get interview details for applicant dashboard)
 
 		'''For Second Interviewer Feedback'''
 		interviewer = interview.interview_details[1].interviewer
