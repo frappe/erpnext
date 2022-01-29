@@ -3,7 +3,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2016-03-01 17:01:27.920130",
+ "creation": "2022-01-18 02:26:55.975005",
  "doctype": "DocType",
  "document_type": "Document",
  "engine": "InnoDB",
@@ -23,6 +23,7 @@
   "asset_name",
   "asset_category",
   "location",
+  "split_from",
   "custodian",
   "department",
   "disposal_date",
@@ -35,6 +36,7 @@
   "available_for_use_date",
   "column_break_23",
   "gross_purchase_amount",
+  "asset_quantity",
   "purchase_date",
   "section_break_23",
   "calculate_depreciation",
@@ -480,6 +482,19 @@
    "fieldname": "section_break_36",
    "fieldtype": "Section Break",
    "label": "Finance Books"
+  },
+  {
+   "fieldname": "split_from",
+   "fieldtype": "Link",
+   "label": "Split From",
+   "options": "Asset",
+   "read_only": 1
+  },
+  {
+   "fieldname": "asset_quantity",
+   "fieldtype": "Int",
+   "label": "Asset Quantity",
+   "read_only_depends_on": "eval:!doc.is_existing_asset"
   }
  ],
  "idx": 72,
@@ -502,10 +517,11 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2021-06-24 14:58:51.097908",
+ "modified": "2022-01-20 12:57:36.741192",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -542,6 +558,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "asset_name",
  "track_changes": 1
 }
