@@ -156,8 +156,12 @@ class BOM(WebsiteGenerator):
 		self.update_stock_qty()
 		self.validate_scrap_items()
 		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate = False, save=False)
+<<<<<<< HEAD
 		self.set_bom_level()
 
+=======
+		self.validate_scrap_items()
+>>>>>>> 157b4b33fe (refactor!: dynamically compute bom_level)
 
 	def get_context(self, context):
 		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
@@ -704,6 +708,12 @@ class BOM(WebsiteGenerator):
 				if not d.batch_size or d.batch_size <= 0:
 					d.batch_size = 1
 
+<<<<<<< HEAD
+=======
+	def get_tree_representation(self) -> BOMTree:
+		"""Get a complete tree representation preserving order of child items."""
+		return BOMTree(self.name)
+>>>>>>> 157b4b33fe (refactor!: dynamically compute bom_level)
 
 	def validate_scrap_items(self):
 		for item in self.scrap_items:
