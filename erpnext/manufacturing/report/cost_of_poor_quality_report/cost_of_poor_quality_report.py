@@ -3,46 +3,65 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
 
 
 def execute(filters=None):
-	columns, data = [], []
+	return get_columns(filters), get_data(filters)
 
-	columns = get_columns(filters)
-	data = get_data(filters)
-
-	return columns, data
 
 def get_data(report_filters):
 	data = []
 	operations = frappe.get_all("Operation", filters = {"is_corrective_operation": 1})
 	if operations:
-		operations = [d.name for d in operations]
-		fields = ["production_item as item_code", "item_name", "work_order", "operation",
-			"workstation", "total_time_in_mins", "name", "hour_rate", "serial_no", "batch_no"]
+		if report_filters.get('operation'):
+			operations = [report_filters.get('operation')]
+		else:
+			operations = [d.name for d in operations]
 
-		filters = get_filters(report_filters, operations)
+		job_card = frappe.qb.DocType("Job Card")
 
-		job_cards = frappe.get_all("Job Card", fields = fields,
-			filters = filters)
+		operating_cost = ((job_card.hour_rate) * (job_card.total_time_in_mins) / 60.0).as_('operating_cost')
+		item_code = (job_card.production_item).as_('item_code')
 
-		for row in job_cards:
-			row.operating_cost = flt(row.hour_rate) * (flt(row.total_time_in_mins) / 60.0)
-			data.append(row)
+		query = (frappe.qb
+					.from_(job_card)
+					.select(job_card.name, job_card.work_order, item_code, job_card.item_name,
+						job_card.operation, job_card.serial_no, job_card.batch_no,
+						job_card.workstation, job_card.total_time_in_mins, job_card.hour_rate,
+						operating_cost)
+					.where(
+						(job_card.docstatus == 1)
+						& (job_card.is_corrective_job_card == 1))
+					.groupby(job_card.name)
+				)
 
+		query = append_filters(query, report_filters, operations, job_card)
+		data = query.run(as_dict=True)
 	return data
 
-def get_filters(report_filters, operations):
-	filters = {"docstatus": 1, "operation": ("in", operations), "is_corrective_job_card": 1}
-	for field in ["name", "work_order", "operation", "workstation", "company", "serial_no", "batch_no", "production_item"]:
-		if report_filters.get(field):
-			if field != 'serial_no':
-				filters[field] = report_filters.get(field)
-			else:
-				filters[field] = ('like', '% {} %'.format(report_filters.get(field)))
+def append_filters(query, report_filters, operations, job_card):
+	"""Append optional filters to query builder. """
 
-	return filters
+	for field in ("name", "work_order", "operation", "workstation",
+			"company", "serial_no", "batch_no", "production_item"):
+		if report_filters.get(field):
+			if field == 'serial_no':
+				query = query.where(job_card[field].like('%{}%'.format(report_filters.get(field))))
+			elif field == 'operation':
+				query = query.where(job_card[field].isin(operations))
+			else:
+				query = query.where(job_card[field] == report_filters.get(field))
+
+	if report_filters.get('from_date') or report_filters.get('to_date'):
+		job_card_time_log = frappe.qb.DocType("Job Card Time Log")
+
+		query = query.join(job_card_time_log).on(job_card.name == job_card_time_log.parent)
+		if report_filters.get('from_date'):
+			query = query.where(job_card_time_log.from_time >= report_filters.get('from_date'))
+		if report_filters.get('to_date'):
+			query = query.where(job_card_time_log.to_time <= report_filters.get('to_date'))
+
+	return query
 
 def get_columns(filters):
 	return [
