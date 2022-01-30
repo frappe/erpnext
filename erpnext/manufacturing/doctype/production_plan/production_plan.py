@@ -560,9 +560,11 @@ class ProductionPlan(Document):
 			get_sub_assembly_items(row.bom_no, bom_data, row.planned_qty)
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
 
-	def set_sub_assembly_items_based_on_level(self, row, bom_data, manufacturing_type=None):
-		bom_data = sorted(bom_data, key = lambda i: i.bom_level, reverse=True)
+		self.sub_assembly_items.sort(key= lambda d: d.bom_level, reverse=True)
+		for idx, row in enumerate(self.sub_assembly_items, start=1):
+			row.idx = idx
 
+	def set_sub_assembly_items_based_on_level(self, row, bom_data, manufacturing_type=None):
 		for data in bom_data:
 			data.qty = data.stock_qty
 			data.production_plan_item = row.name
