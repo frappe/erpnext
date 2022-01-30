@@ -1,5 +1,6 @@
 [pre_model_sync]
 erpnext.patches.v12_0.update_is_cancelled_field
+erpnext.patches.v13_0.add_bin_unique_constraint
 erpnext.patches.v11_0.rename_production_order_to_work_order
 erpnext.patches.v11_0.refactor_naming_series
 erpnext.patches.v11_0.refactor_autoname_naming
