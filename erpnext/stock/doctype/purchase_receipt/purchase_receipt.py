@@ -895,3 +895,18 @@ def get_item_account_wise_additional_cost(purchase_document):
 						account.base_amount * item.get(based_on_field) / total_item_cost
 
 	return item_account_wise_cost
+
+@frappe.whitelist()
+def make_purchase_order(source_name, target_doc = None):
+	def update_reference(source, target, source_parent):
+		target.purchase_receipt_reference = source.name
+
+	return get_mapped_doc("Purchase Receipt", source_name, {
+		"Purchase Receipt": {
+			"doctype": "Purchase Order",
+			"postprocess": update_reference
+		},
+		"Purchase Receipt Item": {
+			"doctype": "Purchase Order Item",
+		}
+	}, target_doc)

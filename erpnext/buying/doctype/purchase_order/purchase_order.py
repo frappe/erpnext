@@ -275,6 +275,9 @@ class PurchaseOrder(BuyingController):
 
 		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
 
+		if self.purchase_invoice_reference or self.purchase_receipt_reference:
+			self.link_purchase_order_to_receipt_or_invoice()
+
 	def on_cancel(self):
 		super(PurchaseOrder, self).on_cancel()
 
@@ -357,6 +360,27 @@ class PurchaseOrder(BuyingController):
 			self.db_set("per_received", flt(received_qty/total_qty) * 100, update_modified=False)
 		else:
 			self.db_set("per_received", 0, update_modified=False)
+
+	def link_purchase_order_to_receipt_or_invoice(self):
+		po_details = {item.item_code:item.name for item in self.items}
+		if self.purchase_invoice_reference:
+			pi = frappe.get_doc('Purchase Invoice', self.purchase_invoice_reference)
+			for pi_item in pi.items:
+				pi_item.purchase_order = self.name
+			pi.save()
+
+			for pi_item in pi.items:
+				frappe.db.set_value('Purchase Invoice Item', pi_item.name, 'po_detail', po_details[pi_item.item_code])
+
+		elif self.purchase_receipt_reference:
+			pr = frappe.get_doc('Purchase Receipt', self.purchase_receipt_reference)
+
+			for pr_item in pr.items:
+				pr_item.purchase_order = self.name
+			pr.save()
+
+			for pr_item in pr.items:
+				frappe.db.set_value('Purchase Receipt Item', pr_item.name, 'purchase_order_item', po_details[pr_item.item_code])
 
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor= 1.0):
 	"""get last purchase rate for an item"""

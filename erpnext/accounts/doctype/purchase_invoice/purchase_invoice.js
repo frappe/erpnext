@@ -381,6 +381,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			frm: cur_frm
 		})
 	}
+
 };
 
 cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
@@ -541,6 +542,16 @@ frappe.ui.form.on("Purchase Invoice", {
 				frm.events.make_purchase_receipt(frm);
 			}, __('Create'));
 		}
+		if(frm.doc.docstatus==0) {
+			frm.doc.items.some((row) => {
+				if(!row.po_detail) {
+					frm.add_custom_button(__('Purchase Order'), () => {
+						frm.events.make_po(frm);
+					}, __('Create'));
+					return
+				}
+			});
+		}
 
 		if (frm.doc.docstatus == 1 && frm.doc.per_received > 0) {
 			frm.add_custom_button(__('Purchase Receipt'), () => {
@@ -606,4 +617,57 @@ frappe.ui.form.on("Purchase Invoice", {
 			});
 		}
 	},
+	after_save(frm) {
+		frappe.db.get_value('Supplier', frm.doc.supplier, 'allow_purchase_invoice_creation_without_purchase_order', (r) => {
+			if(frm.doc.docstatus || r.allow_purchase_invoice_creation_without_purchase_order) return;
+			frm.doc.items.some((row) => {
+				if (!row.purchase_order) {
+					let settings_change_dialog = erpnext.utils.get_dialog_message(
+						'Purchase Invoice', 'Purchase Order', 'Buying', false, frm.doc.supplier);
+					let d = new frappe.ui.Dialog({
+						title: 'Suggestion',
+						indicator: 'blue',
+						fields: [
+							{
+								fieldtype: 'HTML',
+								options: `<p class="frappe-confirm-message">\
+								${__("We recommend creating a Purchase Invoice against a Purchase Order as an ideal practice.")}\
+								<br><br>${__("Do you want to create a Purchase Order?")}</p>`
+							}
+						],
+						primary_action_label: 'Yes',
+						primary_action() {
+							frm.events.make_po(frm);
+							d.hide();
+						},
+						secondary_action_label: 'No',
+						secondary_action() {
+							d.hide();
+							frappe.db.set_value(
+								'Supplier', frm.doc.supplier, 'allow_purchase_invoice_creation_without_purchase_order', 1);
+							settings_change_dialog.show();
+						},
+					});
+					d.$body.find('.frappe-confirm-message').find('a').click(() => {
+						frm.events.make_po(frm);
+					})
+					settings_change_dialog.$body.find('.settings-message').find('a.customer_supplier').click(() => {
+						frappe.set_route('Form', 'Supplier', frm.doc.supplier)
+					})
+					settings_change_dialog.$body.find('.settings-message').find('a.settings').click(() => {
+						frappe.set_route('Form', 'Buying Settings')
+					})
+					d.show();
+					return
+				}
+			});
+		});
+	},
+
+	make_po: function(frm) {
+		frappe.model.open_mapped_doc({
+			method: 'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_purchase_order',
+			frm: frm,
+		});
+	}
 })

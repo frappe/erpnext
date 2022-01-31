@@ -247,7 +247,6 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 	apply_putaway_rule() {
 		if (this.frm.doc.apply_putaway_rule) erpnext.apply_putaway_rule(this.frm);
 	}
-
 };
 
 // for backward compatibility: combine new and previous states
@@ -302,6 +301,62 @@ frappe.ui.form.on("Purchase Receipt", "is_subcontracted", function(frm) {
 		erpnext.buying.get_default_bom(frm);
 	}
 	frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
+});
+
+frappe.ui.form.on("Purchase Receipt", {
+	after_save(frm) {
+		frappe.db.get_value('Supplier', frm.doc.supplier, 'allow_purchase_receipt_creation_without_purchase_order', (r) => {
+			if(frm.doc.docstatus || r.allow_purchase_receipt_creation_without_purchase_order) return;
+			frm.doc.items.some((row) => {
+				if (!row.purchase_order) {
+					let settings_change_dialog = erpnext.utils.get_dialog_message(
+						'Purchase Receipt', 'Purchase Order', 'Buying', false, frm.doc.supplier);
+					let d = new frappe.ui.Dialog({
+						title: 'Suggestion',
+						indicator: 'blue',
+						fields: [
+							{
+								fieldtype: 'HTML',
+								options: `<p class="frappe-confirm-message">\
+								${__("We recommend creating a Purchase Receipt against a Purchase Order as an ideal practice.")}\
+								<br><br>${__("Do you want to create a Purchase Order?")}</p>`
+							}
+						],
+						primary_action_label: 'Yes',
+						primary_action() {
+							frm.events.make_po(frm);
+							d.hide();
+						},
+						secondary_action_label: 'No',
+						secondary_action() {
+							d.hide();
+							frappe.db.set_value(
+								'Supplier', frm.doc.supplier, 'allow_purchase_receipt_creation_without_purchase_order', 1);
+							settings_change_dialog.show();
+						},
+					});
+					d.$body.find('.frappe-confirm-message').find('a').click(() => {
+						frm.events.make_po(frm);
+					})
+					settings_change_dialog.$body.find('.settings-message').find('a.customer_supplier').click(() => {
+						frappe.set_route('Form', 'Supplier', frm.doc.supplier)
+					})
+					settings_change_dialog.$body.find('.settings-message').find('a.settings').click(() => {
+						frappe.set_route('Form', 'Buying Settings')
+					})
+					d.show();
+					return
+				}
+			});
+		});
+	},
+
+	make_po: function(frm) {
+		frappe.model.open_mapped_doc({
+			method: 'erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_order',
+			frm: frm,
+		});
+	}
 });
 
 frappe.ui.form.on('Purchase Receipt Item', {

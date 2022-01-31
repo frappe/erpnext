@@ -138,7 +138,9 @@
   "party_account_currency",
   "is_internal_supplier",
   "represents_company",
-  "inter_company_order_reference"
+  "inter_company_order_reference",
+  "purchase_receipt_reference",
+  "purchase_invoice_reference"
  ],
  "fields": [
   {
@@ -1138,16 +1140,29 @@
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category"
+  },
+  {
+   "fieldname": "purchase_receipt_reference",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Purchase Receipt Reference"
+  },
+  {
+   "fieldname": "purchase_invoice_reference",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Purchase Invoice Reference"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-28 13:10:47.955401",
+ "modified": "2022-01-27 11:40:31.821221",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1194,6 +1209,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "supplier",
  "title_field": "supplier_name",
  "track_changes": 1

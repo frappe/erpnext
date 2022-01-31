@@ -4,7 +4,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2013-01-10 16:34:11",
+ "creation": "2022-01-05 12:07:57.718470",
  "description": "Supplier of Goods or Services.",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -27,6 +27,7 @@
   "supplier_type",
   "allow_purchase_invoice_creation_without_purchase_order",
   "allow_purchase_invoice_creation_without_purchase_receipt",
+  "allow_purchase_receipt_creation_without_purchase_order",
   "disabled",
   "warn_rfqs",
   "warn_pos",
@@ -420,6 +421,12 @@
    "fieldtype": "Link",
    "label": "Supplier Primary Address",
    "options": "Address"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_purchase_receipt_creation_without_purchase_order",
+   "fieldtype": "Check",
+   "label": "Allow Purchase Receipt Creation Without Purchase Order"
   }
  ],
  "icon": "fa fa-user",
@@ -432,7 +439,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2021-10-20 22:03:33.147249",
+ "modified": "2022-01-31 11:03:47.281910",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
@@ -497,6 +504,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "title_field": "supplier_name",
  "track_changes": 1
 }

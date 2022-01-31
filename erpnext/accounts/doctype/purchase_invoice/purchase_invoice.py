@@ -1391,3 +1391,18 @@ def make_purchase_receipt(source_name, target_doc=None):
 	}, target_doc)
 
 	return doc
+
+@frappe.whitelist()
+def make_purchase_order(source_name, target_doc = None):
+	def update_reference(source, target, source_parent):
+		target.purchase_invoice_reference = source.name
+
+	return get_mapped_doc("Purchase Invoice", source_name, {
+		"Purchase Invoice": {
+			"doctype": "Purchase Order",
+			"postprocess": update_reference
+		},
+		"Purchase Invoice Item": {
+			"doctype": "Purchase Order Item",
+		}
+	}, target_doc)
