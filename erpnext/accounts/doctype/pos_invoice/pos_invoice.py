@@ -159,6 +159,20 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(_("Row #{}: Serial No. {} has already been transacted into another Sales Invoice. Please select valid serial no.")
 						.format(item.idx, bold_delivered_serial_nos), title=_("Item Unavailable"))
 
+	def validate_invalid_serial_nos(self, item):
+		serial_nos = get_serial_nos(item.serial_no)
+		error_msg = []
+		invalid_serials, msg = "", ""
+		for serial_no in serial_nos:
+			if not frappe.db.exists('Serial No', serial_no):
+				invalid_serials = invalid_serials + (", " if invalid_serials else "") + serial_no
+		msg = (_("Row #{}: Following Serial numbers for item {} are <b>Invalid</b>: {}").format(item.idx, frappe.bold(item.get("item_code")), frappe.bold(invalid_serials)))
+		if invalid_serials:
+			error_msg.append(msg)
+
+		if error_msg:
+			frappe.throw(error_msg, title=_("Invalid Item"), as_list=True)
+
 	def validate_stock_availablility(self):
 		if self.is_return or self.docstatus != 1:
 			return
@@ -168,6 +182,7 @@ class POSInvoice(SalesInvoice):
 			if d.serial_no:
 				self.validate_pos_reserved_serial_nos(d)
 				self.validate_delivered_serial_nos(d)
+				self.validate_invalid_serial_nos(d)
 			elif d.batch_no:
 				self.validate_pos_reserved_batch_qty(d)
 			else:
