@@ -505,11 +505,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		}
 	},
 
-<<<<<<< HEAD
-	make_delivery_note: function() {
-=======
-	make_delivery_note(delivery_dates) {
->>>>>>> a73ad6759d (fix(sales order): incorrect no. of items fetched while creating dn)
+	make_delivery_note: function(delivery_dates) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
 			frm: this.frm,
