@@ -1674,6 +1674,8 @@ class StockEntry(StockController):
 			for d in self.get("items"):
 				item_code = d.get('original_item') or d.get('item_code')
 				reserve_warehouse = item_wh.get(item_code)
+				if not (reserve_warehouse and item_code):
+					continue
 				stock_bin = get_bin(item_code, reserve_warehouse)
 				stock_bin.update_reserved_qty_for_sub_contracting()
 
