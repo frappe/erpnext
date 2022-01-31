@@ -341,6 +341,18 @@ def get_data():
               		"label": _("Bank reconciliations"),
               		"description": _("Create Bank reconciliations"),
             	},
+				{
+              		"type": "doctype",
+              		"name": "Cancel Bank Checks",
+              		"label": _("Cancel Bank Checks"),
+              		"description": _("This option is for create new Cancel Bank Checks."),
+            	},
+				{
+              		"type": "doctype",
+              		"name": "Correlative Of Bank Checks",
+              		"label": _("Correlative Of Bank Checks"),
+              		"description": _("This option is for create new Correlative Of Bank Checks."),
+            	},
             	{
               		"type": "doctype",
               		"name": "Reconciled balances",
