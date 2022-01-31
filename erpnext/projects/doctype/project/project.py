@@ -493,6 +493,19 @@ def get_service_items(project, company):
 		order by p.transaction_date, p.creation, i.idx
 	""", project, as_dict=1)
 
+	sinv_data = frappe.db.sql("""
+		select p.name, p.posting_date as transaction_date,
+			i.item_code, i.item_name, i.description, i.item_group,
+			i.qty, i.uom,
+			i.net_amount, i.base_net_amount,
+			i.item_tax_detail
+		from `tabSales Invoice Item` i
+		inner join `tabSales Invoice` p on p.name = i.parent
+		where p.docstatus = 1 and i.is_stock_item = 0 and i.is_fixed_asset = 0 and ifnull(i.sales_order, '') = ''
+			and p.project = %s
+		order by p.posting_date, p.creation, i.idx
+	""", project, as_dict=1)
+
 	service_data = get_items_data_template()
 	labour_data = get_items_data_template()
 	sublet_data = get_items_data_template()
@@ -503,7 +516,7 @@ def get_service_items(project, company):
 		sublet_item_groups = frappe.get_all("Item Group", {"name": ["subtree of", sublet_item_group]})
 		sublet_item_groups = [d.name for d in sublet_item_groups]
 
-	for d in so_data:
+	for d in so_data + sinv_data:
 		service_data['items'].append(d)
 
 		if d.item_group in sublet_item_groups:
