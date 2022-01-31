@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.utils import add_months, cint, flt, now, today
+from frappe.utils import add_days, add_months, cint, flt, now, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -12,6 +12,7 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	OverProductionError,
 	StockOverProductionError,
 	close_work_order,
+	make_job_card,
 	make_stock_entry,
 	stop_unstop,
 )
@@ -804,6 +805,34 @@ class TestWorkOrder(ERPNextTestCase):
 			if row.is_scrap_item:
 				self.assertEqual(row.qty, 1)
 
+		# Partial Job Card 1 with qty 10
+		wo_order = make_wo_order_test_record(item=item, company=company, planned_start_date=add_days(now(), 60), qty=20, skip_transfer=1)
+		job_card = frappe.db.get_value('Job Card', {'work_order': wo_order.name}, 'name')
+		update_job_card(job_card, 10)
+
+		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
+		for row in stock_entry.items:
+			if row.is_scrap_item:
+				self.assertEqual(row.qty, 2)
+
+		# Partial Job Card 2 with qty 10
+		operations = []
+		wo_order.load_from_db()
+		for row in wo_order.operations:
+			n_dict = row.as_dict()
+			n_dict['qty'] = 10
+			n_dict['pending_qty'] = 10
+			operations.append(n_dict)
+
+		make_job_card(wo_order.name, operations)
+		job_card = frappe.db.get_value('Job Card', {'work_order': wo_order.name, 'docstatus': 0}, 'name')
+		update_job_card(job_card, 10)
+
+		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
+		for row in stock_entry.items:
+			if row.is_scrap_item:
+				self.assertEqual(row.qty, 2)
+
 	def test_close_work_order(self):
 		items = ['Test FG Item for Closed WO', 'Test RM Item 1 for Closed WO',
 			'Test RM Item 2 for Closed WO']
@@ -882,8 +911,57 @@ class TestWorkOrder(ERPNextTestCase):
 
 		self.assertEqual(wo1.operations[0].time_in_mins, wo2.operations[0].time_in_mins)
 
+	def test_partial_manufacture_entries(self):
+		cancel_stock_entry = []
 
-def update_job_card(job_card):
+		frappe.db.set_value("Manufacturing Settings", None,
+			"backflush_raw_materials_based_on", "Material Transferred for Manufacture")
+
+		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=100)
+		ste1 = test_stock_entry.make_stock_entry(item_code="_Test Item",
+			target="_Test Warehouse - _TC", qty=120, basic_rate=5000.0)
+		ste2 = test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC", qty=240, basic_rate=1000.0)
+
+		cancel_stock_entry.extend([ste1.name, ste2.name])
+
+		sm = frappe.get_doc(make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 100))
+		for row in sm.get('items'):
+			if row.get('item_code') == '_Test Item':
+				row.qty = 110
+
+		sm.submit()
+		cancel_stock_entry.append(sm.name)
+
+		s = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 90))
+		for row in s.get('items'):
+			if row.get('item_code') == '_Test Item':
+				self.assertEqual(row.get('qty'), 100)
+		s.submit()
+		cancel_stock_entry.append(s.name)
+
+		s1 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 5))
+		for row in s1.get('items'):
+			if row.get('item_code') == '_Test Item':
+				self.assertEqual(row.get('qty'), 5)
+		s1.submit()
+		cancel_stock_entry.append(s1.name)
+
+		s2 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 5))
+		for row in s2.get('items'):
+			if row.get('item_code') == '_Test Item':
+				self.assertEqual(row.get('qty'), 5)
+
+		cancel_stock_entry.reverse()
+		for ste in cancel_stock_entry:
+			doc = frappe.get_doc("Stock Entry", ste)
+			doc.cancel()
+
+		frappe.db.set_value("Manufacturing Settings", None,
+			"backflush_raw_materials_based_on", "BOM")
+
+def update_job_card(job_card, jc_qty=None):
+	employee = frappe.db.get_value('Employee', {'status': 'Active'}, 'name')
 	job_card_doc = frappe.get_doc('Job Card', job_card)
 	job_card_doc.set('scrap_items', [
 		{
@@ -896,8 +974,12 @@ def update_job_card(job_card):
 		},
 	])
 
+	if jc_qty:
+		job_card_doc.for_quantity = jc_qty
+
 	job_card_doc.append('time_logs', {
 		'from_time': now(),
+		'employee': employee,
 		'time_in_mins': 60,
 		'completed_qty': job_card_doc.for_quantity
 	})

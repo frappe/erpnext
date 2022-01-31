@@ -5,9 +5,6 @@ from frappe import _
 
 
 def execute():
-	frappe.reload_doc("email", "doctype", "email_template")
-	frappe.reload_doc("hr", "doctype", "hr_settings")
-
 	template = frappe.db.exists("Email Template", _("Exit Questionnaire Notification"))
 	if not template:
 		base_path = frappe.get_app_path("erpnext", "hr", "doctype")

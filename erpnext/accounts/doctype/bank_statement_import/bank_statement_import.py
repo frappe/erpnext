@@ -16,6 +16,7 @@ from frappe.utils.xlsxutils import ILLEGAL_CHARACTERS_RE, handle_html
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
 
+INVALID_VALUES = ("", None)
 
 class BankStatementImport(DataImport):
 	def __init__(self, *args, **kwargs):
@@ -95,6 +96,18 @@ def download_errored_template(data_import_name):
 	data_import = frappe.get_doc("Bank Statement Import", data_import_name)
 	data_import.export_errored_rows()
 
+def parse_data_from_template(raw_data):
+	data = []
+
+	for i, row in enumerate(raw_data):
+		if all(v in INVALID_VALUES for v in row):
+			# empty row
+			continue
+
+		data.append(row)
+
+	return data
+
 def start_import(data_import, bank_account, import_file_path, google_sheets_url, bank, template_options):
 	"""This method runs in background job"""
 
@@ -104,7 +117,8 @@ def start_import(data_import, bank_account, import_file_path, google_sheets_url,
 	file = import_file_path if import_file_path else google_sheets_url
 
 	import_file = ImportFile("Bank Transaction", file = file, import_type="Insert New Records")
-	data = import_file.raw_data
+
+	data = parse_data_from_template(import_file.raw_data)
 
 	if import_file_path:
 		add_bank_account(data, bank_account)
