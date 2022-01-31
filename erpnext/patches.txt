@@ -251,6 +251,7 @@ erpnext.patches.v13_0.rename_membership_settings_to_non_profit_settings
 erpnext.patches.v13_0.setup_gratuity_rule_for_india_and_uae
 erpnext.patches.v13_0.setup_uae_vat_fields
 execute:frappe.db.set_value('System Settings', None, 'app_name', 'ERPNext')
+erpnext.patches.v12_0.add_company_link_to_einvoice_settings
 erpnext.patches.v12_0.create_taxable_value_field
 erpnext.patches.v12_0.add_gst_category_in_delivery_note
 erpnext.patches.v12_0.purchase_receipt_status
@@ -290,7 +291,6 @@ erpnext.patches.v13_0.migrate_stripe_api
 erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
 execute:frappe.reload_doc("erpnext_integrations", "doctype", "TaxJar Settings")
 execute:frappe.reload_doc("erpnext_integrations", "doctype", "Product Tax Category")
-erpnext.patches.v14_0.delete_einvoicing_doctypes
 erpnext.patches.v13_0.custom_fields_for_taxjar_integration          #08-11-2021
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
 erpnext.patches.v13_0.create_gst_payment_entry_fields #27-11-2021
@@ -328,27 +328,7 @@ erpnext.patches.v13_0.update_tax_category_for_rcm
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
 erpnext.patches.v14_0.set_payroll_cost_centers
 erpnext.patches.v13_0.agriculture_deprecation_warning
-<<<<<<< HEAD
-=======
-erpnext.patches.v13_0.hospitality_deprecation_warning
-erpnext.patches.v13_0.update_exchange_rate_settings
-erpnext.patches.v13_0.update_asset_quantity_field
-erpnext.patches.v13_0.delete_bank_reconciliation_detail
-
-[post_model_sync]
-erpnext.patches.v14_0.rename_ongoing_status_in_sla_documents
-erpnext.patches.v14_0.add_default_exit_questionnaire_notification_template
-erpnext.patches.v14_0.delete_shopify_doctypes
-erpnext.patches.v14_0.delete_hub_doctypes
-erpnext.patches.v14_0.delete_hospitality_doctypes # 20-01-2022
->>>>>>> c5782b0e71 (revert: "refactor!: drop e-invoicing integration from erpnext (#26940)")
 erpnext.patches.v14_0.delete_agriculture_doctypes
 erpnext.patches.v13_0.update_exchange_rate_settings
 erpnext.patches.v14_0.update_leave_notification_template
-<<<<<<< HEAD
 erpnext.patches.v14_0.restore_einvoice_fields
-=======
-erpnext.patches.v14_0.restore_einvoice_fields
-erpnext.patches.v13_0.update_sane_transfer_against
-erpnext.patches.v12_0.add_company_link_to_einvoice_settings
->>>>>>> b8802a3315 (fix: patch order)
