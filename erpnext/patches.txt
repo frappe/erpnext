@@ -341,3 +341,4 @@ erpnext.patches.v14_0.update_leave_notification_template
 erpnext.patches.v14_0.restore_einvoice_fields
 erpnext.patches.v13_0.update_sane_transfer_against
 erpnext.patches.v12_0.add_company_link_to_einvoice_settings
+erpnext.patches.v14_0.migrate_cost_center_allocations
