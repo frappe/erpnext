@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import today
 
+
 def execute():
 	for dt in ("cost_center_allocation", "cost_center_allocation_percentage"):
 		frappe.reload_doc('accounts', 'doctype', dt)
@@ -22,7 +23,6 @@ def create_new_cost_center_allocation_records(cc_allocations):
 				"cost_center": child_cc,
 				"percentage": percentage
 			}))
-		
 		cca.save()
 		cca.submit()
 

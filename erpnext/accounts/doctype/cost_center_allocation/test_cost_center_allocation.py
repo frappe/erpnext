@@ -1,13 +1,21 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import frappe
 import unittest
-from frappe.utils import today, add_days
+
+import frappe
+from frappe.utils import add_days, today
+
 from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+from erpnext.accounts.doctype.cost_center_allocation.cost_center_allocation import (
+	InvalidChildCostCenter,
+	InvalidDateError,
+	InvalidMainCostCenter,
+	MainCostCenterCantBeChild,
+	WrongPercentageAllocation,
+)
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
-from erpnext.accounts.doctype.cost_center_allocation.cost_center_allocation import (MainCostCenterCantBeChild, 
-	InvalidMainCostCenter, InvalidChildCostCenter, WrongPercentageAllocation, InvalidDateError)
+
 
 class TestCostCenterAllocation(unittest.TestCase):
 	def setUp(self):
@@ -22,7 +30,7 @@ class TestCostCenterAllocation(unittest.TestCase):
 				"Sub Cost Center 2 - _TC": 40
 			}
 		)
-		
+
 		jv = make_journal_entry("_Test Cash - _TC", "Sales - _TC", 100,
 			cost_center = "Main Cost Center 1 - _TC", submit=True)
 
@@ -77,14 +85,13 @@ class TestCostCenterAllocation(unittest.TestCase):
 				"Sub Cost Center 2 - _TC": 100
 			}, save=False
 		)
-		
+
 		self.assertRaises(InvalidMainCostCenter, cca2.save)
 
 		cca1.cancel()
-		
-		
+
 	def test_if_child_cost_center_has_any_allocation_record(self):
-		# Check if any child cost center is used as main cost center in any other existing allocation 
+		# Check if any child cost center is used as main cost center in any other existing allocation
 		cca1 = create_cost_center_allocation("_Test Company", "Main Cost Center 1 - _TC",
 			{
 				"Sub Cost Center 1 - _TC": 60,
@@ -98,7 +105,7 @@ class TestCostCenterAllocation(unittest.TestCase):
 				"Sub Cost Center 1 - _TC": 40
 			}, save=False
 		)
-		
+
 		self.assertRaises(InvalidChildCostCenter, cca2.save)
 
 		cca1.cancel()
@@ -128,7 +135,6 @@ class TestCostCenterAllocation(unittest.TestCase):
 		self.assertRaises(InvalidDateError, cca.save)
 
 		jv.cancel()
-		
 
 def create_cost_center_allocation(company, main_cost_center, allocation_percentages,
 		valid_from=None, valid_upto=None, save=True, submit=True):

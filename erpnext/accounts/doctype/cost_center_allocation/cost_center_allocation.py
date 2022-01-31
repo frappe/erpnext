@@ -58,11 +58,9 @@ class CostCenterAllocation(Document):
 
 		if future_allocation:
 			frappe.msgprint(_("Another Cost Center Allocation record {0} applicable from {1}, hence this allocation will be applicable upto {2}")
-				.format(
-					frappe.bold(future_allocation.name),
-					frappe.bold(format_date(future_allocation.valid_from)),
-					frappe.bold(format_date(add_days(future_allocation.valid_from, -1)))
-				), title=_("Warning!"), indicator="orange", alert=1
+				.format(frappe.bold(future_allocation.name), frappe.bold(format_date(future_allocation.valid_from)),
+				frappe.bold(format_date(add_days(future_allocation.valid_from, -1)))),
+				title=_("Warning!"), indicator="orange", alert=1
 			)
 
 	def validate_main_cost_center(self):

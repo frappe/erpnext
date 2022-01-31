@@ -4,7 +4,6 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint
 from frappe.utils.nestedset import NestedSet
 
 from erpnext.accounts.utils import validate_field_number

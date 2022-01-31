@@ -9,7 +9,7 @@ frappe.ui.form.on('Cost Center Allocation', {
 				"company": frm.doc.company
 			});
 		}
-		
+
 		frm.set_query('main_cost_center', function() {
 			return {
 				filters: filters

@@ -2,8 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import frappe
 import copy
+
+import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
 from frappe.utils import cint, cstr, flt, formatdate, getdate, now
@@ -101,7 +102,7 @@ def get_cost_center_allocation_data(company, posting_date):
 	for d in records:
 		cc_allocation.setdefault(d.main_cost_center, frappe._dict())\
 			.setdefault(d.cost_center, d.percentage)
-	
+
 	return cc_allocation
 
 def merge_similar_entries(gl_map, precision=None):
