@@ -4,7 +4,6 @@
 
 from __future__ import unicode_literals
 from os import truncate
-from tkinter.messagebox import NO
 import frappe
 from frappe.model.document import Document
 from frappe import _
