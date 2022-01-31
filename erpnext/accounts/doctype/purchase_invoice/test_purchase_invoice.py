@@ -1229,10 +1229,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 		provisional_account = create_account(account_name="Provision Account",
 			parent_account="Current Liabilities - _TC", company="_Test Company")
 
-		frappe.db.set_value("Company", "_Test Company", {
-			"enable_provisional_accounting_for_non_stock_items": 1,
-			"default_provisional_account": provisional_account
-		})
+		company = frappe.get_doc('Company', '_Test Company')
+		company.enable_provisional_accounting_for_non_stock_items = 1
+		company.default_provisional_account = provisional_account
+		company.save()
 
 		pr = make_purchase_receipt(item_code="_Test Non Stock Item", posting_date=add_days(nowdate(), -2))
 
@@ -1260,9 +1260,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		check_gl_entries(self, pr.name, expected_gle_for_purchase_receipt, pr.posting_date)
 
-		frappe.db.set_value("Company", "_Test Company", {
-			"enable_provisional_accounting_for_non_stock_items": 0
-		})
+		company.enable_provisional_accounting_for_non_stock_items = 0
+		company.save()
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 	gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
