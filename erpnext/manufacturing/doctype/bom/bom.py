@@ -732,20 +732,6 @@ class BOM(WebsiteGenerator):
 		"""Get a complete tree representation preserving order of child items."""
 		return BOMTree(self.name)
 
-	def set_bom_level(self, update=False):
-		levels = []
-
-		self.bom_level = 0
-		for row in self.items:
-			if row.bom_no:
-				levels.append(frappe.get_cached_value("BOM", row.bom_no, "bom_level") or 0)
-
-		if levels:
-			self.bom_level = max(levels) + 1
-
-		if update:
-			self.db_set("bom_level", self.bom_level)
-
 def get_bom_item_rate(args, bom_doc):
 	if bom_doc.rm_cost_as_per == 'Valuation Rate':
 		rate = get_valuation_rate(args) * (args.get("conversion_factor") or 1)
