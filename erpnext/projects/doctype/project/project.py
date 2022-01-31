@@ -579,10 +579,14 @@ def get_item_taxes(data, company):
 			for tax_row_name, amount in item_tax_detail.items():
 				tax_account = frappe.db.get_value("Sales Taxes and Charges", tax_row_name, 'account_head', cache=1)
 				if tax_account:
+					tax_amount = flt(amount)
+					if flt(d.ordered_qty):
+						tax_amount = tax_amount * flt(d.qty) / flt(d.ordered_qty)
+
 					if tax_account in sales_tax_account:
-						d.sales_tax_amount += flt(amount)
+						d.sales_tax_amount += tax_amount
 					if tax_account in service_tax_account:
-						d.service_tax_amount += flt(amount)
+						d.service_tax_amount += tax_amount
 
 
 def post_process_items_data(data):
