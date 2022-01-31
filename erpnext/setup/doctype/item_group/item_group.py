@@ -107,6 +107,10 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 	def delete_child_item_groups_key(self):
 		frappe.cache().hdel("child_item_groups", self.name)
 
+	def validate_item_group_defaults(self):
+		from erpnext.stock.doctype.item.item import validate_item_default_company_links
+		validate_item_default_company_links(self.item_group_defaults)
+
 def get_child_groups_for_website(item_group_name, immediate=False):
 	"""Returns child item groups *excluding* passed group."""
 	item_group = frappe.get_cached_value("Item Group", item_group_name, ["lft", "rgt"], as_dict=1)
