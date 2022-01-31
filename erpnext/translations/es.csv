@@ -8086,3 +8086,30 @@ DocType: Account,Cash,Efectivo
 DocType: Sales Invoice,Unpaid and Discounted,Sin pagar y con descuento
 DocType: Employee,Short biography for website and other publications.,Breve biografía para la página web y otras publicaciones.
 DocType: Sales Invoice,Client Name,Nombre del cliente
+DocType: Dispatch Control,Dispatch Control,Control de Entrega
+DocType: Dispatch Control,Sale Invoice,Factura de Venta
+DocType: Dispatch Control,Delivery Area,Area de Entrega
+DocType: Reason For Discount,Reason For Discount,Razón de Descuento
+DocType: Type Price List,Type Price List,Reporte de Lista de Precio
+DocType: Sold Products,Sold Products,Reporte de Productos Vendidos
+DocType: Sales Book,Sales Book,Reporte Libro de Venta
+DocType: Sale for day,Sale for day,Reporte Ventas del día
+DocType: Discount Reason Sales,Discount Reason Sales,Reporte Ventas por descuento
+DocType: Sales For Discount Reason,Sales For Discount Reason,Reporte Ventas por razon de descuento totalizado
+DocType: Sales For Discount Reason,Sales For Discount Reason,Reporte Ventas por razon de descuento totalizado
+DocType: Sales For User,Sales For User,Reporte de ventas por usuario
+DocType: Daily summary,Daily summary,Reporte de resumen diario
+DocType: Detailed sales book per transaction,Detailed sales book per transaction,Reporte Libro de venta detallado por transacción
+DocType: Inventory Download,Inventory Download,Descargas de Inventario
+DocType: Inventory Download,Reason For Download,Razón de Descarga
+DocType: Inventory Download,Download Area,Area de Descarga
+DocType: Material Request Details,Material Request Details,Detalle de requisición de materiales
+DocType: Shopping Book,Shopping Book,Reporte Libro de compras
+DocType: Orden de compra (OC),Purchase Justification,Justificación de compra
+DocType: Item-wise Purchase History By Purchase Justification,Item-wise Purchase History By Purchase Justification,Justificación de compra
+DocType: Advance Statement,Advance Statement,Anticipos a la cuenta
+DocType: Advance Statement,Type Pay Advance,Tipo de anticipo
+DocType: Patient statement,Account Statement,Status de la cuenta
+DocType: Return Advance Statement,Way to pay,Forma de Pago
+DocType: Account Statement Payment,Cash Total Medical Fees,Total de honorarios medicos en efectivo
+DocType: Account Statement Payment,Bank Check Total Medical Fees
