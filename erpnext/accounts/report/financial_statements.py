@@ -388,13 +388,14 @@ def set_gl_entries_by_account(
 				})
 
 		gl_entries = frappe.db.sql("""
-			select posting_date, account, debit, credit, is_opening, fiscal_year, 
+			select posting_date, account, debit, credit, is_opening, fiscal_year,
 				debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
 			where company=%(company)s
 			{additional_conditions}
 			and posting_date <= %(to_date)s
-			and is_cancelled = 0
-		""".format(additional_conditions=additional_conditions), gl_filters, as_dict=True) #nosec
+			and is_cancelled = 0""".format(
+			additional_conditions=additional_conditions), gl_filters, as_dict=True
+		)
 
 		if filters and filters.get('presentation_currency'):
 			convert_to_presentation_currency(gl_entries, get_currency(filters), filters.get('company'))

@@ -34,11 +34,11 @@ class TestCostCenterAllocation(unittest.TestCase):
 		gle = frappe.qb.DocType("GL Entry")
 		gl_entries = (
 			frappe.qb.from_(gle)
-				.select(gle.cost_center, gle.debit, gle.credit)
-				.where(gle.voucher_type == 'Journal Entry')
-				.where(gle.voucher_no == jv.name)
-				.where(gle.account == 'Sales - _TC')
-				.orderby(gle.cost_center)
+			.select(gle.cost_center, gle.debit, gle.credit)
+			.where(gle.voucher_type == 'Journal Entry')
+			.where(gle.voucher_no == jv.name)
+			.where(gle.account == 'Sales - _TC')
+			.orderby(gle.cost_center)
 		).run(as_dict=1)
 
 		self.assertTrue(gl_entries)
@@ -57,8 +57,8 @@ class TestCostCenterAllocation(unittest.TestCase):
 			{
 				"Sub Cost Center 1 - _TC": 60,
 				"Main Cost Center 1 - _TC": 40
-			}
-		, save=False)
+			}, save=False
+		)
 
 		self.assertRaises(MainCostCenterCantBeChild, cca.save)
 
@@ -75,8 +75,8 @@ class TestCostCenterAllocation(unittest.TestCase):
 		cca2 = create_cost_center_allocation("_Test Company", "Sub Cost Center 1 - _TC",
 			{
 				"Sub Cost Center 2 - _TC": 100
-			}
-		, save=False)
+			}, save=False
+		)
 		
 		self.assertRaises(InvalidMainCostCenter, cca2.save)
 
@@ -96,8 +96,8 @@ class TestCostCenterAllocation(unittest.TestCase):
 			{
 				"Main Cost Center 1 - _TC": 60,
 				"Sub Cost Center 1 - _TC": 40
-			}
-		, save=False)
+			}, save=False
+		)
 		
 		self.assertRaises(InvalidChildCostCenter, cca2.save)
 
@@ -108,8 +108,8 @@ class TestCostCenterAllocation(unittest.TestCase):
 			{
 				"Sub Cost Center 1 - _TC": 40,
 				"Sub Cost Center 2 - _TC": 40
-			}
-		, save=False)
+			}, save=False
+		)
 		self.assertRaises(WrongPercentageAllocation, cca.save)
 
 	def test_valid_from_based_on_existing_gle(self):
@@ -122,8 +122,8 @@ class TestCostCenterAllocation(unittest.TestCase):
 			{
 				"Sub Cost Center 1 - _TC": 60,
 				"Sub Cost Center 2 - _TC": 40
-			}
-		, valid_from=add_days(today(), -1), save=False)
+			}, valid_from=add_days(today(), -1), save=False
+		)
 
 		self.assertRaises(InvalidDateError, cca.save)
 

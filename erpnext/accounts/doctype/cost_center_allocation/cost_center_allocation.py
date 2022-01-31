@@ -4,7 +4,8 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, format_date, add_days
+from frappe.utils import add_days, format_date, getdate
+
 
 class MainCostCenterCantBeChild(frappe.ValidationError):
 	pass
@@ -32,7 +33,7 @@ class CostCenterAllocation(Document):
 			frappe.throw(_("Total percentage against cost centers should be 100"), WrongPercentageAllocation)
 
 	def validate_from_date_based_on_existing_gle(self):
-		# Check if GLE exists against the main cost center 
+		# Check if GLE exists against the main cost center
 		# If exists ensure from date is set after posting date of last GLE
 
 		last_gle_date = frappe.db.get_value("GL Entry",
@@ -47,7 +48,7 @@ class CostCenterAllocation(Document):
 	def validate_backdated_allocation(self):
 		# Check if there are any future existing allocation records against the main cost center
 		# If exists, warn the user about it
-		
+
 		future_allocation = frappe.db.get_value("Cost Center Allocation", filters = {
 			"main_cost_center": self.main_cost_center,
 			"valid_from": (">=", self.valid_from),
@@ -82,7 +83,7 @@ class CostCenterAllocation(Document):
 
 	def validate_child_cost_centers(self):
 		# Check if child cost center is used as main cost center in any existing allocation
-		main_cost_centers = [d.main_cost_center for d in 
+		main_cost_centers = [d.main_cost_center for d in
 			frappe.get_all("Cost Center Allocation", {'docstatus': 1}, 'main_cost_center')]
 
 		for d in self.allocation_percentages:

@@ -35,9 +35,9 @@ def get_existing_cost_center_allocations():
 
 	records = (
 		frappe.qb.from_(par)
-			.inner_join(child).on(par.name == child.parent)
-			.select(par.name, child.cost_center, child.percentage_allocation)
-			.where(par.enable_distributed_cost_center == 1)
+		.inner_join(child).on(par.name == child.parent)
+		.select(par.name, child.cost_center, child.percentage_allocation)
+		.where(par.enable_distributed_cost_center == 1)
 	).run(as_dict=True)
 
 	cc_allocations = frappe._dict()

@@ -52,6 +52,9 @@ def validate_accounting_period(gl_map):
 			.format(frappe.bold(accounting_periods[0].name)), ClosedAccountingPeriod)
 
 def process_gl_map(gl_map, merge_entries=True, precision=None):
+	if not gl_map:
+		return []
+
 	gl_map = distribute_gl_based_on_cost_center_allocation(gl_map, precision)
 
 	if merge_entries:
@@ -86,8 +89,7 @@ def get_cost_center_allocation_data(company, posting_date):
 	child = frappe.qb.DocType("Cost Center Allocation Percentage")
 
 	records = (
-		frappe.qb.from_(par)
-			.inner_join(child).on(par.name == child.parent)
+		frappe.qb.from_(par).inner_join(child).on(par.name == child.parent)
 		.select(par.main_cost_center, child.cost_center, child.percentage)
 		.where(par.docstatus == 1)
 		.where(par.company == company)
