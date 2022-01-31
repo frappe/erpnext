@@ -3,6 +3,9 @@ import frappe
 
 
 def execute():
+	frappe.reload_doctype('Maintenance Visit')
+	frappe.reload_doctype('Maintenance Visit Purpose')
+
 	# Updates the Maintenance Schedule link to fetch serial nos
 	from frappe.query_builder.functions import Coalesce
 	mvp = frappe.qb.DocType('Maintenance Visit Purpose')
