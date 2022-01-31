@@ -10,6 +10,7 @@ import frappe.defaults
 from frappe import _
 from frappe.cache_manager import clear_defaults_cache
 from frappe.contacts.address_and_contact import load_address_and_contact
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.utils import cint, formatdate, get_timestamp, today
 from frappe.utils.nestedset import NestedSet
 
@@ -192,6 +193,9 @@ class Company(NestedSet):
 			if cint(self.enable_provisional_accounting_for_non_stock_items) == 1 and not self.default_provisional_account:
 				frappe.throw(_("Set default {0} account for non stock items").format(
 					frappe.bold('Provisional Account')))
+
+			make_property_setter("Purchase Receipt Item", "provisional_expense_account", "hidden",
+				not self.enable_provisional_accounting_for_non_stock_items, "Check", validate_fields_for_doctype=False)
 
 	def check_country_change(self):
 		frappe.flags.country_change = False

@@ -113,6 +113,7 @@ class PurchaseReceipt(BuyingController):
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_cwip_accounts()
+		self.validate_provisional_expense_account()
 
 		self.check_on_hold_or_closed_status()
 
@@ -133,6 +134,19 @@ class PurchaseReceipt(BuyingController):
 				cwip_account = get_asset_account("capital_work_in_progress_account", asset_category = item.asset_category, \
 					company = self.company)
 				break
+
+	def validate_provisional_expense_account(self):
+		provisional_accounting_for_non_stock_items = \
+				cint(frappe.db.get_value('Company', self.company, 'enable_provisional_accounting_for_non_stock_items'))
+
+		default_provisional_account = self.get_company_default("default_provisional_account")
+
+		stock_items = self.get_stock_items()
+
+		if provisional_accounting_for_non_stock_items:
+			for item in self.get('items'):
+				if item.item_code not in stock_items and not item.provisional_expense_account:
+					item.provisional_expense_account = default_provisional_account
 
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc({
@@ -433,8 +447,8 @@ class PurchaseReceipt(BuyingController):
 				"\n".join(warehouse_with_no_account))
 
 	def add_provisional_gl_entry(self, item, gl_entries, posting_date, reverse=0):
-		default_provisional_account = self.get_company_default("default_provisional_account")
-		credit_currency = get_account_currency(default_provisional_account)
+		provisional_expense_account = item.get('provisional_expense_account')
+		credit_currency = get_account_currency(provisional_expense_account)
 		debit_currency = get_account_currency(item.expense_account)
 		expense_account = item.expense_account
 		remarks = self.get("remarks") or _("Accounting Entry for Service")
@@ -442,11 +456,12 @@ class PurchaseReceipt(BuyingController):
 
 		if reverse:
 			multiplication_factor = -1
-			expense_account = frappe.db.get_value('Purchase Receipt Item', {'name': item.get('pr_detail')}, ['expense_account'])
+			expense_account, provisional_expense_account = frappe.db.get_value('Purchase Receipt Item', {'name': item.get('pr_detail')},
+				['expense_account', 'provisional_expense_account'])
 
 		self.add_gl_entry(
 			gl_entries=gl_entries,
-			account=default_provisional_account,
+			account=provisional_expense_account,
 			cost_center=item.cost_center,
 			debit=0.0,
 			credit=multiplication_factor * item.amount,
@@ -465,7 +480,7 @@ class PurchaseReceipt(BuyingController):
 			debit=multiplication_factor * item.amount,
 			credit=0.0,
 			remarks=remarks,
-			against_account=default_provisional_account,
+			against_account=provisional_expense_account,
 			account_currency = debit_currency,
 			project=item.project,
 			voucher_detail_no=item.name,
