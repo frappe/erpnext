@@ -83,17 +83,17 @@ frappe.ui.form.on("Delivery Note", {
 		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
 	},
 
-	before_save:function(frm){
-		frm.call({
-			method:"get_commision",
-			doc:frm.doc,
-			callback: function(r)
-			{
+	// before_save:function(frm){
+	// 	frm.call({
+	// 		method:"get_commision",
+	// 		doc:frm.doc,
+	// 		callback: function(r)
+	// 		{
 
-				frm.refresh_field("total_commission")
-			}
-		});
-	},
+	// 			frm.refresh_field("total_commission")
+	// 		}
+	// 	});
+	// },
 	tax_category:function(frm){
 		frm.call({
 			method:"calculate_taxes",

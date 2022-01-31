@@ -122,6 +122,7 @@ class DeliveryNote(SellingController):
 	def validate(self):
 		self.validate_posting_time()
 		super(DeliveryNote, self).validate()
+		self.get_commision()
 		self.set_status()
 		self.so_required()
 		self.validate_proj_cust()

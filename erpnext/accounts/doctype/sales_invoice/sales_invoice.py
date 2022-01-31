@@ -68,8 +68,6 @@ class SalesInvoice(SellingController):
 			'overflow_type': 'billing'
 		}]
 
-	def before_save(self):
-		self.get_commision()
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
@@ -95,7 +93,7 @@ class SalesInvoice(SellingController):
 	def validate(self):
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
-
+		self.get_commision()
 		if not self.is_pos:
 			self.so_dn_required()
 
