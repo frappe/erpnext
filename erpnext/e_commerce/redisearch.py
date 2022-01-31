@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.utils.redis_wrapper import RedisWrapper
-from redisearch import (Client, AutoCompleter, Suggestion, IndexDefinition, TextField, TagField)
+from redisearch import AutoCompleter, Client, IndexDefinition, Suggestion, TagField, TextField
 
 WEBSITE_ITEM_INDEX = 'website_items_index'
 WEBSITE_ITEM_KEY_PREFIX = 'website_item:'

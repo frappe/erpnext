@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-import frappe
 import unittest
 
+import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 
-from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.e_commerce.doctype.e_commerce_settings.test_e_commerce_settings import (
+	setup_e_commerce_settings,
+)
+from erpnext.e_commerce.doctype.item_review.item_review import (
+	UnverifiedReviewer,
+	add_item_review,
+	get_item_reviews,
+)
 from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
-from erpnext.e_commerce.doctype.item_review.item_review import get_item_reviews, \
-	add_item_review, UnverifiedReviewer
 from erpnext.e_commerce.shopping_cart.cart import get_party
-from erpnext.e_commerce.doctype.e_commerce_settings.test_e_commerce_settings import setup_e_commerce_settings
+from erpnext.stock.doctype.item.test_item import make_item
 
 class TestItemReview(unittest.TestCase):
 	def setUp(self):

@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
+
+from erpnext.controllers.item_variant import create_variant
+from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import (
+	get_shopping_cart_settings,
+)
+from erpnext.e_commerce.doctype.e_commerce_settings.test_e_commerce_settings import (
+	setup_e_commerce_settings,
+)
+from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
+from erpnext.e_commerce.shopping_cart.product_info import get_product_info_for_website
 from erpnext.stock.doctype.item.item import DataValidationError
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
-from erpnext.controllers.item_variant import create_variant
-from erpnext.e_commerce.doctype.e_commerce_settings.test_e_commerce_settings import setup_e_commerce_settings
-from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import get_shopping_cart_settings
-from erpnext.e_commerce.shopping_cart.product_info import get_product_info_for_website
 
 WEBITEM_DESK_TESTS = ("test_website_item_desk_item_sync", "test_publish_variant_and_template")
 WEBITEM_PRICE_TESTS = ('test_website_item_price_for_logged_in_user', 'test_website_item_price_for_guest_user')

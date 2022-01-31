@@ -3,12 +3,17 @@
 
 import frappe
 
-from erpnext.e_commerce.shopping_cart.cart import _get_cart_quotation, _set_price_list
 from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import (
 	get_shopping_cart_settings,
-	show_quantity_in_website
+	show_quantity_in_website,
 )
-from erpnext.utilities.product import get_price, get_web_item_qty_in_stock, get_non_stock_item_status
+from erpnext.e_commerce.shopping_cart.cart import _get_cart_quotation, _set_price_list
+from erpnext.utilities.product import (
+	get_non_stock_item_status,
+	get_price,
+	get_web_item_qty_in_stock,
+)
+
 
 @frappe.whitelist(allow_guest=True)
 def get_product_info_for_website(item_code, skip_quotation_creation=False):

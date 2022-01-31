@@ -1,8 +1,8 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 import frappe
-from frappe import _dict
 from frappe.utils import floor
+
 
 class ProductFiltersBuilder:
 	def __init__(self, item_group=None):

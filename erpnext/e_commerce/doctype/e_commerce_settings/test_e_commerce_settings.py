@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
-import frappe
 import unittest
 
-from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import ShoppingCartSetupError
+import frappe
+
+from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import (
+	ShoppingCartSetupError,
+)
+
 
 class TestECommerceSettings(unittest.TestCase):
 	def setUp(self):
@@ -22,8 +25,9 @@ class TestECommerceSettings(unittest.TestCase):
 		cart_settings.price_list = "_Test Price List Rest of the World"
 		self.assertRaises(ShoppingCartSetupError, cart_settings.validate_exchange_rates_exist)
 
-		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import test_records as \
-			currency_exchange_records
+		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
+			test_records as currency_exchange_records,
+		)
 		frappe.get_doc(currency_exchange_records[0]).insert()
 		cart_settings.validate_exchange_rates_exist()
 

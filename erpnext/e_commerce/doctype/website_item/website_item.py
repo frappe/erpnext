@@ -2,27 +2,28 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import frappe
-import json
 import itertools
-from frappe import _
+import json
 
-from frappe.website.website_generator import WebsiteGenerator
-from frappe.utils import cstr, random_string, cint, flt
+import frappe
+from frappe import _
+from frappe.utils import cint, cstr, flt, random_string
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
+from frappe.website.website_generator import WebsiteGenerator
 
 from erpnext.e_commerce.doctype.item_review.item_review import get_item_reviews
 from erpnext.e_commerce.redisearch import (
+	delete_item_from_index,
 	insert_item_to_index,
 	update_index_for_item,
-	delete_item_from_index
 )
 from erpnext.e_commerce.shopping_cart.cart import _set_price_list
 from erpnext.setup.doctype.item_group.item_group import (
 	get_parent_item_groups,
-	invalidate_cache_for
+	invalidate_cache_for,
 )
 from erpnext.utilities.product import get_price
+
 
 class WebsiteItem(WebsiteGenerator):
 	website = frappe._dict(
