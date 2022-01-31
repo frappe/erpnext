@@ -3,11 +3,10 @@
 
 import frappe
 from frappe.utils import flt
-from erpnext.e_commerce.shopping_cart.product_info import get_product_info_for_website
-from erpnext.e_commerce.doctype.item_review.item_review import get_customer
-from erpnext.utilities.product import get_non_stock_item_status
 
+from erpnext.e_commerce.doctype.item_review.item_review import get_customer
 from erpnext.e_commerce.shopping_cart.product_info import get_product_info_for_website
+from erpnext.utilities.product import get_non_stock_item_status
 
 
 class ProductQuery:

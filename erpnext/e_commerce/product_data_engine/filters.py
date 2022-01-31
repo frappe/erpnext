@@ -9,8 +9,8 @@
 =======
 >>>>>>> 335a237383 (chore: Re-organise files,remove T&C modal in cart):erpnext/e_commerce/product_data_engine/filters.py
 import frappe
-from frappe import _dict
 from frappe.utils import floor
+
 
 class ProductFiltersBuilder:
 	def __init__(self, item_group=None):

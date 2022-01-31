@@ -1,13 +1,16 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import frappe
 import unittest
 
-from erpnext.e_commerce.product_data_engine.query import ProductQuery
-from erpnext.e_commerce.product_data_engine.filters import ProductFiltersBuilder
+import frappe
+
+from erpnext.e_commerce.doctype.e_commerce_settings.test_e_commerce_settings import (
+	setup_e_commerce_settings,
+)
 from erpnext.e_commerce.doctype.website_item.test_website_item import create_regular_web_item
-from erpnext.e_commerce.doctype.e_commerce_settings.test_e_commerce_settings import setup_e_commerce_settings
+from erpnext.e_commerce.product_data_engine.filters import ProductFiltersBuilder
+from erpnext.e_commerce.product_data_engine.query import ProductQuery
 
 test_dependencies = ["Item", "Item Group"]
 
@@ -201,7 +204,10 @@ class TestProductDataEngine(unittest.TestCase):
 
 	def test_product_list_discount_filter_builder(self):
 		"Test if discount filters are fetched correctly."
-		from erpnext.e_commerce.doctype.website_item.test_website_item import make_web_item_price, make_web_pricing_rule
+		from erpnext.e_commerce.doctype.website_item.test_website_item import (
+			make_web_item_price,
+			make_web_pricing_rule,
+		)
 
 		item_code = "Test 12I Laptop"
 		make_web_item_price(item_code=item_code)
@@ -234,7 +240,10 @@ class TestProductDataEngine(unittest.TestCase):
 
 	def test_product_list_with_discount_filters(self):
 		"Test if discount filters are applied correctly."
-		from erpnext.e_commerce.doctype.website_item.test_website_item import make_web_item_price, make_web_pricing_rule
+		from erpnext.e_commerce.doctype.website_item.test_website_item import (
+			make_web_item_price,
+			make_web_pricing_rule,
+		)
 
 		field_filters = {"discount": [10]}
 
@@ -322,9 +331,9 @@ class TestProductDataEngine(unittest.TestCase):
 
 def create_variant_web_item():
 	"Create Variant and Template Website Items."
-	from erpnext.stock.doctype.item.test_item import make_item
 	from erpnext.controllers.item_variant import create_variant
 	from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
+	from erpnext.stock.doctype.item.test_item import make_item
 
 	make_item("Test Web Item", {
 		"has_variant": 1,

@@ -1,8 +1,9 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import frappe
 import unittest
+
+import frappe
 
 from erpnext.e_commerce.api import get_product_filter_data
 from erpnext.e_commerce.doctype.website_item.test_website_item import create_regular_web_item

@@ -11,6 +11,7 @@ from frappe.utils import cint, flt, fmt_money, getdate, nowdate
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 
+
 def get_web_item_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 	in_stock, stock_qty = 0, ''
 	template_item_code, is_stock_item = frappe.db.get_value("Item", item_code, ["variant_of", "is_stock_item"])

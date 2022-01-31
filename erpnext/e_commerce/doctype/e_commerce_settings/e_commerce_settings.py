@@ -11,11 +11,16 @@
 =======
 >>>>>>> eef9cf152f (chore: Drive E-commerce via Website Item)
 import frappe
-from frappe.utils import comma_and, flt
-from frappe import _, msgprint
+from frappe import _
 from frappe.model.document import Document
-from frappe.utils import unique
-from erpnext.e_commerce.redisearch import create_website_items_index, get_indexable_web_fields, is_search_module_loaded
+from frappe.utils import comma_and, flt, unique
+
+from erpnext.e_commerce.redisearch import (
+	create_website_items_index,
+	get_indexable_web_fields,
+	is_search_module_loaded,
+)
+
 
 class ShoppingCartSetupError(frappe.ValidationError): pass
 
