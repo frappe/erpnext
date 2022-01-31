@@ -560,9 +560,11 @@ class ProductionPlan(Document):
 			get_sub_assembly_items(row.bom_no, bom_data, row.planned_qty)
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
 
-	def set_sub_assembly_items_based_on_level(self, row, bom_data, manufacturing_type=None):
-		bom_data = sorted(bom_data, key = lambda i: i.bom_level)
+		self.sub_assembly_items.sort(key= lambda d: d.bom_level, reverse=True)
+		for idx, row in enumerate(self.sub_assembly_items, start=1):
+			row.idx = idx
 
+	def set_sub_assembly_items_based_on_level(self, row, bom_data, manufacturing_type=None):
 		for data in bom_data:
 			data.qty = data.stock_qty
 			data.production_plan_item = row.name
@@ -949,6 +951,7 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 		warehouses, item.get("quantity"), company, ignore_validation=True)
 
 	required_qty = item.get("quantity")
+	# get available material by transferring to production warehouse
 	for d in locations:
 		if required_qty <=0: return
 
@@ -959,12 +962,14 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 			new_dict.update({
 				"quantity": quantity,
 				"material_request_type": "Material Transfer",
+				"uom": new_dict.get("stock_uom"),  # internal transfer should be in stock UOM
 				"from_warehouse": d.get("warehouse")
 			})
 
 			required_qty -= quantity
 			new_mr_items.append(new_dict)
 
+	# raise purchase request for remaining qty
 	if required_qty:
 		stock_uom, purchase_uom = frappe.db.get_value(
 			'Item',
@@ -1002,9 +1007,6 @@ def get_sub_assembly_items(bom_no, bom_data, to_produce_qty, indent=0):
 	for d in data:
 		if d.expandable:
 			parent_item_code = frappe.get_cached_value("BOM", bom_no, "item")
-			bom_level = (frappe.get_cached_value("BOM", d.value, "bom_level")
-				if d.value else 0)
-
 			stock_qty = (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
 			bom_data.append(frappe._dict({
 				'parent_item_code': parent_item_code,
@@ -1015,7 +1017,7 @@ def get_sub_assembly_items(bom_no, bom_data, to_produce_qty, indent=0):
 				'uom': d.stock_uom,
 				'bom_no': d.value,
 				'is_sub_contracted_item': d.is_sub_contracted_item,
-				'bom_level': bom_level,
+				'bom_level': indent,
 				'indent': indent,
 				'stock_qty': stock_qty
 			}))
