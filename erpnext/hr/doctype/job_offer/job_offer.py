@@ -78,6 +78,7 @@ def make_employee(source_name, target_doc=None):
 				"doctype": "Employee",
 				"field_map": {
 					"applicant_name": "employee_name",
+					"offer_date": "scheduled_confirmation_date"
 				}}
 		}, target_doc, set_missing_values)
 	return doc
