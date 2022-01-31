@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 from os import truncate
+from tkinter.messagebox import NO
 import frappe
 from frappe.model.document import Document
 from frappe import _
@@ -37,6 +38,9 @@ class BankTransactions(Document):
 			self.docstatus = 3
 			self.status = "Transit"
 			self.calculate_diferred_account()
+
+		if self.check and self.no_bank_check == None:
+			self.no_bank_check = self.insert_numeration_for_check()
 
 	def verified_check(self, arg=None):		
 		if self.debit_note:
@@ -139,3 +143,29 @@ class BankTransactions(Document):
 	
 	def on_cancel(self):
 		self.calculate_diferred_account_cancel()
+	
+	def insert_numeration_for_check(self):
+		correlative = frappe.get_doc("Correlative Of Bank Checks", self.bank_account)
+
+		if correlative == None:
+			frappe.throw(_("This bank account does not have a check correlative assigned."))
+
+		actual = correlative.current_numbering + 1
+
+		actual_string = str(actual)
+
+		actual_len = len(actual_string)
+
+		cont = correlative.number_of_digits - actual_len
+
+		actual_correlative = ""
+
+		for number in range(cont):
+			actual_correlative += "0"
+		
+		actual_correlative += actual_string
+
+		correlative.current_numbering = actual
+		correlative.save()
+
+		return actual_correlative
