@@ -139,11 +139,10 @@ class PurchaseReceipt(BuyingController):
 		provisional_accounting_for_non_stock_items = \
 				cint(frappe.db.get_value('Company', self.company, 'enable_provisional_accounting_for_non_stock_items'))
 
-		default_provisional_account = self.get_company_default("default_provisional_account")
-
-		stock_items = self.get_stock_items()
-
 		if provisional_accounting_for_non_stock_items:
+			default_provisional_account = self.get_company_default("default_provisional_account")
+			stock_items = self.get_stock_items()
+
 			for item in self.get('items'):
 				if item.item_code not in stock_items and not item.provisional_expense_account:
 					item.provisional_expense_account = default_provisional_account
