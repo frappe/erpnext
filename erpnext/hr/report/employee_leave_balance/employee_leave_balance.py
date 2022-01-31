@@ -6,8 +6,9 @@ from itertools import groupby
 
 import frappe
 from frappe import _
-from frappe.utils import add_days
+from frappe.utils import add_days, date_diff, getdate
 
+from erpnext.hr.doctype.leave_allocation.leave_allocation import get_previous_allocation
 from erpnext.hr.doctype.leave_application.leave_application import (
 	get_leave_balance_on,
 	get_leaves_for_period,
@@ -46,27 +47,27 @@ def get_columns():
 		'label': _('Opening Balance'),
 		'fieldtype': 'float',
 		'fieldname': 'opening_balance',
-		'width': 130,
+		'width': 150,
 	}, {
-		'label': _('Leave Allocated'),
+		'label': _('New Leave(s) Allocated'),
 		'fieldtype': 'float',
 		'fieldname': 'leaves_allocated',
-		'width': 130,
+		'width': 200,
 	}, {
-		'label': _('Leave Taken'),
+		'label': _('Leave(s) Taken'),
 		'fieldtype': 'float',
 		'fieldname': 'leaves_taken',
-		'width': 130,
+		'width': 150,
 	}, {
-		'label': _('Leave Expired'),
+		'label': _('Leave(s) Expired'),
 		'fieldtype': 'float',
 		'fieldname': 'leaves_expired',
-		'width': 130,
+		'width': 150,
 	}, {
 		'label': _('Closing Balance'),
 		'fieldtype': 'float',
 		'fieldname': 'closing_balance',
-		'width': 130,
+		'width': 150,
 	}]
 
 	return columns
@@ -108,10 +109,9 @@ def get_data(filters):
 				leaves_taken = get_leaves_for_period(employee.name, leave_type,
 					filters.from_date, filters.to_date) * -1
 
-				new_allocation, expired_leaves = get_allocated_and_expired_leaves(filters.from_date, filters.to_date, employee.name, leave_type)
-
-
-				opening = get_leave_balance_on(employee.name, leave_type, add_days(filters.from_date, -1)) #allocation boundary condition
+				new_allocation, expired_leaves, carry_forwarded_leaves = get_allocated_and_expired_leaves(
+					filters.from_date, filters.to_date, employee.name, leave_type)
+				opening = get_opening_balance(employee.name, leave_type, filters, carry_forwarded_leaves)
 
 				row.leaves_allocated = new_allocation
 				row.leaves_expired = expired_leaves - leaves_taken if expired_leaves - leaves_taken > 0 else 0
@@ -124,6 +124,55 @@ def get_data(filters):
 				data.append(row)
 
 	return data
+
+
+def get_opening_balance(employee, leave_type, filters, carry_forwarded_leaves):
+	# allocation boundary condition
+	# opening balance is the closing leave balance 1 day before the filter start date
+	opening_balance_date = add_days(filters.from_date, -1)
+	allocation = get_previous_allocation(filters.from_date, leave_type, employee)
+
+	if allocation and allocation.get("to_date") and opening_balance_date and \
+		getdate(allocation.get("to_date")) == getdate(opening_balance_date):
+		# if opening balance date is same as the previous allocation's expiry
+		# then opening balance should only consider carry forwarded leaves
+		opening_balance = carry_forwarded_leaves
+	else:
+		# else directly get closing leave balance on the previous day
+		opening_balance = get_closing_balance_on(opening_balance_date, employee, leave_type, filters)
+
+	return opening_balance
+
+
+def get_closing_balance_on(date, employee, leave_type, filters):
+	closing_balance = get_leave_balance_on(employee, leave_type, date)
+	leave_allocation = get_leave_allocation_for_date(employee, leave_type, date)
+	if leave_allocation:
+		# if balance is greater than the days remaining for leave allocation's end date
+		# then balance should be = remaining days
+		remaining_days = date_diff(leave_allocation[0].to_date, filters.from_date) + 1
+		if remaining_days < closing_balance:
+			closing_balance = remaining_days
+
+	return closing_balance
+
+
+def get_leave_allocation_for_date(employee, leave_type, date):
+	allocation = frappe.qb.DocType('Leave Allocation')
+	records = (
+		frappe.qb.from_(allocation)
+			.select(
+				allocation.name, allocation.to_date
+			).where(
+				(allocation.docstatus == 1)
+				& (allocation.employee == employee)
+				& (allocation.leave_type == leave_type)
+				& ((allocation.from_date <= date) & (allocation.to_date >= date))
+			)
+	).run(as_dict=True)
+
+	return records
+
 
 def get_conditions(filters):
 	conditions={
@@ -139,6 +188,7 @@ def get_conditions(filters):
 		conditions['department'] = filters.get('department')
 
 	return conditions
+
 
 def get_department_leave_approver_map(department=None):
 
@@ -171,39 +221,55 @@ def get_department_leave_approver_map(department=None):
 
 	return approvers
 
+
 def get_allocated_and_expired_leaves(from_date, to_date, employee, leave_type):
-
-	from frappe.utils import getdate
-
 	new_allocation = 0
 	expired_leaves = 0
+	carry_forwarded_leaves = 0
 
-	records= frappe.db.sql("""
-		SELECT
-			employee, leave_type, from_date, to_date, leaves, transaction_name,
-			transaction_type, is_carry_forward, is_expired
-		FROM `tabLeave Ledger Entry`
-		WHERE employee=%(employee)s AND leave_type=%(leave_type)s
-			AND docstatus=1
-			AND transaction_type = 'Leave Allocation'
-			AND (from_date between %(from_date)s AND %(to_date)s
-				OR to_date between %(from_date)s AND %(to_date)s
-				OR (from_date < %(from_date)s AND to_date > %(to_date)s))
-	""", {
-		"from_date": from_date,
-		"to_date": to_date,
-		"employee": employee,
-		"leave_type": leave_type
-	}, as_dict=1)
+	records = get_leave_ledger_entries(from_date, to_date, employee, leave_type)
 
 	for record in records:
 		if record.to_date < getdate(to_date):
 			expired_leaves += record.leaves
 
-		if record.from_date >= getdate(from_date):
-			new_allocation += record.leaves
+		# new allocation records with `is_expired=1` are created when leave expires
+		# these new records should not be considered, else it leads to negative leave balance
+		if record.is_expired:
+			continue
 
-	return new_allocation, expired_leaves
+		if record.from_date >= getdate(from_date):
+			if record.is_carry_forward:
+				carry_forwarded_leaves += record.leaves
+			else:
+				new_allocation += record.leaves
+
+	return new_allocation, expired_leaves, carry_forwarded_leaves
+
+
+def get_leave_ledger_entries(from_date, to_date, employee, leave_type):
+	ledger = frappe.qb.DocType('Leave Ledger Entry')
+	records = (
+		frappe.qb.from_(ledger)
+			.select(
+				ledger.employee, ledger.leave_type, ledger.from_date, ledger.to_date,
+				ledger.leaves, ledger.transaction_name, ledger.transaction_type,
+				ledger.is_carry_forward, ledger.is_expired
+			).where(
+				(ledger.docstatus == 1)
+				& (ledger.transaction_type == 'Leave Allocation')
+				& (ledger.employee == employee)
+				& (ledger.leave_type == leave_type)
+				& (
+					(ledger.from_date[from_date: to_date])
+					| (ledger.to_date[from_date: to_date])
+					| ((ledger.from_date < from_date) & (ledger.to_date > to_date))
+				)
+			)
+	).run(as_dict=True)
+
+	return records
+
 
 def get_chart_data(data):
 	labels = []
@@ -223,6 +289,7 @@ def get_chart_data(data):
 	}
 
 	return chart
+
 
 def get_dataset_for_chart(employee_data, datasets, labels):
 	leaves = []
