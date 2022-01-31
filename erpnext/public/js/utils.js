@@ -318,20 +318,19 @@ $.extend(erpnext.utils, {
 		});
 	},
 
-	get_dialog_message: function(source_doctype, target_doctype, customer, module_name) {
+	get_dialog_message: function(source_doctype, target_doctype, module_name, customer, supplier) {
+		let customer_supplier_type = "Customer";
+		if (!customer) customer_supplier_type = "Supplier";
+		let customer_supplier = customer ? customer_supplier_type == "Customer" : supplier;
+		let message = __("You can now create a {} without a {} for {} <b><a class='customer' href='#'>{}</a></b><br><br> You can also change this globally in <b><a class='settings' href='#'>{} Settings</a></b>", [source_doctype, target_doctype, customer_supplier_type, customer_supplier, module_name]);
 		let d = new frappe.ui.Dialog({
 			title: __("Message"),
 			indicator: "blue",
 			fields: [
 				{
-					fieldtype: 'HTML',
-					options: `<p class="frappe-confirm-message settings-message">\
-					${__("You can now create a {} without a {} for Customer {}\
-					<br><br> You can also change this globally in {}", [source_doctype, target_doctype,
-						`<b><a class="customer" href="#">${__("{}", [customer])}</a></b>`,
-						`<b><a class="settings" href="#">${__("{} Settings", [module_name])}</b>`])}
-					</p>`
-				}
+					fieldtype: "HTML",
+					options: `<p class="frappe-confirm-message settings-message">${message}</p>`
+			  }
 			],
 		});
 		return d;

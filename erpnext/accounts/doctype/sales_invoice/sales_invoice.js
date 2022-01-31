@@ -171,7 +171,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			doc.items.some((row) => {
 				if (!row.sales_order) {
 					let settings_change_dialog = erpnext.utils.get_dialog_message(
-							'Sales Invoice', 'Sales Order', doc.customer, 'Selling');
+							'Sales Invoice', 'Sales Order', 'Selling', doc.customer, false);
 					let d = new frappe.ui.Dialog({
 						title: 'Suggestion',
 						indicator: 'blue',
@@ -198,7 +198,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 					d.$body.find('.frappe-confirm-message').find('a').click(() => {
 						this.make_so();
 					})
-					settings_change_dialog.$body.find('.settings-message').find('a.customer').click(() => {
+					settings_change_dialog.$body.find('.settings-message').find('a.customer_supplier').click(() => {
 						frappe.set_route('Form', 'Customer', doc.customer)
 					})
 					settings_change_dialog.$body.find('.settings-message').find('a.settings').click(() => {

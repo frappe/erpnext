@@ -120,7 +120,7 @@ frappe.ui.form.on("Delivery Note", {
 			frm.doc.items.some((row) => {
 				if (!row.against_sales_order) {
 					let settings_change_dialog = erpnext.utils.get_dialog_message(
-						'Delivery Note', 'Sales Order', frm.doc.customer, 'Selling');
+						'Delivery Note', 'Sales Order', 'Selling', frm.doc.customer, false);
 					let d = new frappe.ui.Dialog({
 						title: 'Suggestion',
 						indicator: 'blue',
@@ -147,7 +147,7 @@ frappe.ui.form.on("Delivery Note", {
 					d.$body.find('.frappe-confirm-message').find('a').click(() => {
 						frm.events.make_so_dn(frm);
 					})
-					settings_change_dialog.$body.find('.settings-message').find('a.customer').click(() => {
+					settings_change_dialog.$body.find('.settings-message').find('a.customer_supplier').click(() => {
 						frappe.set_route('Form', 'Customer', frm.doc.customer)
 					})
 					settings_change_dialog.$body.find('.settings-message').find('a.settings').click(() => {
