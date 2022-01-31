@@ -6,12 +6,16 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate, format_date, add_days
 
-class MainCostCenterCantBeChild(frappe.ValidationError): pass
-class InvalidMainCostCenter(frappe.ValidationError): pass
-class InvalidChildCostCenter(frappe.ValidationError): pass
-class WrongPercentageAllocation(frappe.ValidationError): pass
-class InvalidDateError(frappe.ValidationError): pass
-
+class MainCostCenterCantBeChild(frappe.ValidationError):
+	pass
+class InvalidMainCostCenter(frappe.ValidationError):
+	pass
+class InvalidChildCostCenter(frappe.ValidationError):
+	pass
+class WrongPercentageAllocation(frappe.ValidationError):
+	pass
+class InvalidDateError(frappe.ValidationError):
+	pass
 
 class CostCenterAllocation(Document):
 	def validate(self):
@@ -25,7 +29,7 @@ class CostCenterAllocation(Document):
 		total_percentage = sum([d.percentage for d in self.get("allocation_percentages", [])])
 
 		if total_percentage != 100:
-				frappe.throw(_("Total percentage against cost centers should be 100"), WrongPercentageAllocation)
+			frappe.throw(_("Total percentage against cost centers should be 100"), WrongPercentageAllocation)
 
 	def validate_from_date_based_on_existing_gle(self):
 		# Check if GLE exists against the main cost center 

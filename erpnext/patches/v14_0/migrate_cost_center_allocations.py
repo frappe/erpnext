@@ -6,7 +6,8 @@ def execute():
 		frappe.reload_doc('accounts', 'doctype', dt)
 
 	cc_allocations = get_existing_cost_center_allocations()
-	create_new_cost_center_allocation_records(cc_allocations)
+	if cc_allocations:
+		create_new_cost_center_allocation_records(cc_allocations)
 
 	frappe.delete_doc('DocType', 'Distributed Cost Center', ignore_missing=True)
 
@@ -25,8 +26,10 @@ def create_new_cost_center_allocation_records(cc_allocations):
 		cca.save()
 		cca.submit()
 
-
 def get_existing_cost_center_allocations():
+	if not frappe.get_meta("Cost Center").has_field("enable_distributed_cost_center"):
+		return
+
 	par = frappe.qb.DocType("Cost Center")
 	child = frappe.qb.DocType("Distributed Cost Center")
 
