@@ -360,8 +360,7 @@ class DeliveryNote(SellingController):
 								if j.commision_formula:
 									data=eval(j.commision_formula)
 									tot.append(data)
-									self.total_commission=sum(tot)
-
+				self.total_commission=sum(tot)
 	@frappe.whitelist()
 	def calculate_taxes(self):
 		if self.customer:

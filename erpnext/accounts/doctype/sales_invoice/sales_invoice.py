@@ -295,8 +295,7 @@ class SalesInvoice(SellingController):
 								if j.commision_formula:
 									data=eval(j.commision_formula)
 									tot.append(data)
-									self.total_commission=sum(tot)
-
+				self.total_commission=sum(tot)
 
 		self.process_common_party_accounting()
 
