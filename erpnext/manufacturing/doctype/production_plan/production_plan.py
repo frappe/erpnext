@@ -560,9 +560,11 @@ class ProductionPlan(Document):
 			get_sub_assembly_items(row.bom_no, bom_data, row.planned_qty)
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
 
-	def set_sub_assembly_items_based_on_level(self, row, bom_data, manufacturing_type=None):
-		bom_data = sorted(bom_data, key = lambda i: i.bom_level)
+		self.sub_assembly_items.sort(key= lambda d: d.bom_level, reverse=True)
+		for idx, row in enumerate(self.sub_assembly_items, start=1):
+			row.idx = idx
 
+	def set_sub_assembly_items_based_on_level(self, row, bom_data, manufacturing_type=None):
 		for data in bom_data:
 			data.qty = data.stock_qty
 			data.production_plan_item = row.name
@@ -1005,9 +1007,6 @@ def get_sub_assembly_items(bom_no, bom_data, to_produce_qty, indent=0):
 	for d in data:
 		if d.expandable:
 			parent_item_code = frappe.get_cached_value("BOM", bom_no, "item")
-			bom_level = (frappe.get_cached_value("BOM", d.value, "bom_level")
-				if d.value else 0)
-
 			stock_qty = (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
 			bom_data.append(frappe._dict({
 				'parent_item_code': parent_item_code,
@@ -1018,7 +1017,7 @@ def get_sub_assembly_items(bom_no, bom_data, to_produce_qty, indent=0):
 				'uom': d.stock_uom,
 				'bom_no': d.value,
 				'is_sub_contracted_item': d.is_sub_contracted_item,
-				'bom_level': bom_level,
+				'bom_level': indent,
 				'indent': indent,
 				'stock_qty': stock_qty
 			}))
