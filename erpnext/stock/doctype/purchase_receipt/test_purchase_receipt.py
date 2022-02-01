@@ -1331,6 +1331,7 @@ class TestPurchaseReceipt(ERPNextTestCase):
 		self.assertEqual(pr.status, "To Bill")
 		self.assertAlmostEqual(pr.per_billed, 50.0, places=2)
 
+<<<<<<< HEAD
 	def test_service_item_purchase_with_perpetual_inventory(self):
 		company = '_Test Company with perpetual inventory'
 		service_item = '_Test Non Stock Item'
@@ -1355,10 +1356,31 @@ class TestPurchaseReceipt(ERPNextTestCase):
 		item_row_with_diff_rate = frappe.copy_doc(pr.items[0])
 		item_row_with_diff_rate.rate = 100
 		pr.append('items', item_row_with_diff_rate)
+=======
+	def test_purchase_receipt_with_exchange_rate_difference(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
+			make_purchase_receipt as create_purchase_receipt,
+		)
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+			make_purchase_invoice as create_purchase_invoice,
+		)
+
+		pi = create_purchase_invoice(company="_Test Company with perpetual inventory",
+			cost_center = "Main - TCP1",
+			warehouse = "Stores - TCP1",
+			expense_account ="_Test Account Cost for Goods Sold - TCP1",
+			currency = "USD", conversion_rate = 70)
+
+		pr = create_purchase_receipt(pi.name)
+		pr.conversion_rate = 80
+		pr.items[0].purchase_invoice = pi.name
+		pr.items[0].purchase_invoice_item = pi.items[0].name
+>>>>>>> 528c71382f (feat: Provisional accounting for expenses (#29451))
 
 		pr.save()
 		pr.submit()
 
+<<<<<<< HEAD
 		item_one_gl_entry = frappe.db.get_all("GL Entry", {
 			'voucher_type': pr.doctype,
 			'voucher_no': pr.name,
@@ -1383,6 +1405,26 @@ class TestPurchaseReceipt(ERPNextTestCase):
 			'enable_perpetual_inventory_for_non_stock_items', before_test_value
 		)
 
+=======
+		# Get exchnage gain and loss account
+		exchange_gain_loss_account = frappe.db.get_value(
+			'Company', pr.company, 'exchange_gain_loss_account'
+		)
+
+		# fetching the latest GL Entry with exchange gain and loss account account
+		amount = frappe.db.get_value(
+			'GL Entry',
+			{
+				'account': exchange_gain_loss_account,
+				'voucher_no': pr.name
+			},
+			'credit'
+		)
+		discrepancy_caused_by_exchange_rate_diff = abs(pi.items[0].base_net_amount - pr.items[0].base_net_amount)
+
+		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
+
+>>>>>>> 528c71382f (feat: Provisional accounting for expenses (#29451))
 	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
