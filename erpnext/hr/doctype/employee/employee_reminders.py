@@ -51,7 +51,7 @@ def send_advance_holiday_reminders(frequency):
 			raise_exception=False
 		)
 
-		if not (holidays is None):
+		if holidays:
 			send_holidays_reminder_in_advance(employee, holidays)
 
 def send_holidays_reminder_in_advance(employee, holidays):
