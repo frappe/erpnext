@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import json
 from datetime import datetime
+from erpnext.accounts.party import get_partywise_advanced_payment_amount
 import frappe
 import frappe.utils
 from frappe import _
@@ -28,6 +29,11 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
 
+from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
+from six import iteritems
+from frappe import _, scrub
+
+
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
@@ -40,6 +46,107 @@ class SalesOrder(SellingController):
 
 	# def before_save(self):
 		# self.get_commision()
+
+	# start Of Cutom Code For Button Update Party Balance
+	args = {
+		"party_type": "Customer",
+		"naming_by": ["Selling Settings", "cust_master_name"],
+	}
+	filters1 = {}
+	party_type = "Customer"
+
+	@frappe.whitelist()
+	def on_update_party_balance(self):
+		self.filters1['company'] =  self.company
+		self.filters1['report_date'] =  self.transaction_date
+		self.filters1['ageing_based_on'] = "Due Date"
+		self.filters1['range1'] = 30
+		self.filters1['range2'] = 60
+		self.filters1['range3'] = 90
+		self.filters1['range4'] = 120
+		self.filters1['customer'] = self.customer	
+		self.show_future_payments = 0
+		entry  = self.get_data1(self.args)
+	
+		return entry
+
+		#  Accounts receivable summary 
+	def get_data1(self, args):
+		self.data1 = []
+		
+		self.party_naming_by = frappe.db.get_value(self.args.get("naming_by")[0], None, self.args.get("naming_by")[1])
+
+		self.receivables = ReceivablePayableReport(self.filters1).run(args)[1]
+
+		self.get_party_total(args)
+
+		party_advance_amount = get_partywise_advanced_payment_amount(self.party_type,
+			self.transaction_date, self.show_future_payments, self.company) or {}
+		
+		for party, party_dict in iteritems(self.party_total):
+			if party_dict.outstanding == 0:
+				continue
+
+			row = frappe._dict()
+
+			row.party = party
+			if self.party_naming_by == "Naming Series":
+				row.party_name = frappe.get_cached_value(self.party_type, party, scrub(self.party_type) + "_name")
+
+			row.update(party_dict)
+
+			# Advance against party
+			row.advance = party_advance_amount.get(party, 0)
+
+			# In AR/AP, advance shown in paid columns,
+			# but in summary report advance shown in separate column
+			row.paid -= row.advance
+
+			self.data1.append(row)
+			
+		return self.data1
+
+	def get_party_total(self, args):
+		self.party_total = frappe._dict()
+
+		for d in self.receivables:
+			self.init_party_total(d)
+
+			# Add all amount columns
+			for k in list(self.party_total[d.party]):
+				if k not in ["currency", "sales_person"]:
+
+					self.party_total[d.party][k] += d.get(k, 0.0)
+
+			# set territory, customer_group, sales person etc
+			# self.set_party_details(d)
+
+	def init_party_total(self, row):
+		self.party_total.setdefault(row.party, frappe._dict({
+			"invoiced": 0.0,
+			"paid": 0.0,
+			"credit_note": 0.0,
+			"outstanding": 0.0,
+			"range1": 0.0,
+			"range2": 0.0,
+			"range3": 0.0,
+			"range4": 0.0,
+			"range5": 0.0,
+			"total_due": 0.0,
+			"sales_person": []
+		}))		
+
+	def set_party_details(self, row):
+		self.party_total[row.party].currency = row.currency
+
+		for key in ('territory', 'customer_group', 'supplier_group'):
+			if row.get(key):
+				self.party_total[row.party][key] = row.get(key)
+
+		if row.sales_person:
+			self.party_total[row.party].sales_person.append(row.sales_person)
+
+	# End of Update Party Balance
 
 	def validate(self):
 		super(SalesOrder, self).validate()
