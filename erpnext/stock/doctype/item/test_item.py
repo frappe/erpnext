@@ -537,7 +537,7 @@ class TestItem(ERPNextTestCase):
 		"check if index is getting created in db"
 
 		indices = frappe.db.sql("show index from tabItem", as_dict=1)
-		expected_columns = {"item_code", "item_name", "item_group", "route"}
+		expected_columns = {"item_code", "item_name", "item_group"}
 		for index in indices:
 			expected_columns.discard(index.get("Column_name"))
 
