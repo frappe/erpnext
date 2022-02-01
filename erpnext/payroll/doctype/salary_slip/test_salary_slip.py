@@ -82,7 +82,17 @@ class TestSalarySlip(unittest.TestCase):
 
 		#Gross pay calculation based on attendances
 		gross_pay = 78000 - ((78000 / (days_in_month - no_of_holidays)) * flt(ss.leave_without_pay + ss.absent_days))
+		
 		self.assertEqual(ss.gross_pay, gross_pay)
+		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Leave")
+
+	def test_payment_days_for_mid_joinee(self):
+		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Attendance")
+		frappe.db.set_value("Payroll Settings", None, "consider_unmarked_attendance_as", "Absent")
+
+		no_of_days = self.get_no_of_days()
+		days_in_month, no_of_holidays = no_of_days[0], no_of_days[1]
+		month_start_date, month_end_date = get_first_day(nowdate()), get_last_day(nowdate())
 
 		new_emp_id = make_employee("test_payment_days_based_on_joining_date@salary.com")
 		joining_date, relieving_date = add_days(month_start_date, 3), add_days(month_end_date, -5)
@@ -92,7 +102,6 @@ class TestSalarySlip(unittest.TestCase):
 			"status": "Left"
 		})
 
-		frappe.db.set_value("Payroll Settings", None, "consider_unmarked_attendance_as", "Absent")
 		for days in range(date_diff(relieving_date, joining_date)):
 			mark_attendance(new_emp_id, add_days(joining_date, days), 'Present', ignore_validate=True)
 
