@@ -21,6 +21,7 @@ from frappe.utils.make_random import get_random
 
 import erpnext
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.hr.doctype.attendance.attendance import mark_attendance
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.leave_allocation.test_leave_allocation import create_leave_allocation
 from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
@@ -41,7 +42,6 @@ class TestSalarySlip(unittest.TestCase):
 		frappe.set_user("Administrator")
 
 	def test_payment_days_based_on_attendance(self):
-		from erpnext.hr.doctype.attendance.attendance import mark_attendance
 		no_of_days = self.get_no_of_days()
 
 		# Payroll based on attendance
@@ -82,7 +82,7 @@ class TestSalarySlip(unittest.TestCase):
 
 		#Gross pay calculation based on attendances
 		gross_pay = 78000 - ((78000 / (days_in_month - no_of_holidays)) * flt(ss.leave_without_pay + ss.absent_days))
-		
+
 		self.assertEqual(ss.gross_pay, gross_pay)
 		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Leave")
 
