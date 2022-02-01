@@ -26,8 +26,7 @@ def get_exploded_items(bom, data, indent=0, qty=1):
 			'item_code': item.item_code,
 			'item_name': item.item_name,
 			'indent': indent,
-			'bom_level': (frappe.get_cached_value("BOM", item.bom_no, "bom_level")
-				if item.bom_no else ""),
+			'bom_level': indent,
 			'bom': item.bom_no,
 			'qty': item.qty * qty,
 			'uom': item.uom,
@@ -73,7 +72,7 @@ def get_columns():
 		},
 		{
 			"label": "BOM Level",
-			"fieldtype": "Data",
+			"fieldtype": "Int",
 			"fieldname": "bom_level",
 			"width": 100
 		},
