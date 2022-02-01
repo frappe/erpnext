@@ -24,5 +24,9 @@ def get_data():
 				'label': _('Purchase'),
 				'items': ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
 			},
+			{
+				'label': _('Payment'),
+				'items': ['Payment Entry']
+			},
 		]
 	}
