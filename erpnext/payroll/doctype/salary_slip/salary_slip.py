@@ -939,8 +939,8 @@ class SalarySlip(TransactionBase):
 
 		# If recurring period end date is beyond the payroll period,
 		# last day of payroll period should be considered for recurring period calculation
-		if getdate(to_date) > getdate(payroll_period.year_end_date):
-			to_date = getdate(payroll_period.year_end_date)
+		if getdate(to_date) > getdate(payroll_period.end_date):
+			to_date = getdate(payroll_period.end_date)
 
 		future_recurring_period = ((to_date.year - from_date.year) * 12) + (to_date.month - from_date.month)
 
