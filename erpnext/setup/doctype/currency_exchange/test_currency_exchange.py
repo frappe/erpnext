@@ -62,8 +62,13 @@ def patched_requests_get(*args, **kwargs):
 		if kwargs['params'].get('date') and kwargs['params'].get('from') and kwargs['params'].get('to'):
 			if test_exchange_values.get(kwargs['params']['date']):
 				return PatchResponse({'result': test_exchange_values[kwargs['params']['date']]}, 200)
+	elif args[0].startswith("https://frankfurter.app") and kwargs.get('params'):
+		if kwargs['params'].get('base') and kwargs['params'].get('symbols'):
+			date = args[0].replace("https://frankfurter.app/", "")
+			if test_exchange_values.get(date):
+				return PatchResponse({'rates': {kwargs['params'].get('symbols'): test_exchange_values.get(date)}}, 200)
 
-	return PatchResponse({'result': None}, 404)
+	return PatchResponse({'rates': None}, 404)
 
 @mock.patch('requests.get', side_effect=patched_requests_get)
 class TestCurrencyExchange(unittest.TestCase):
@@ -101,6 +106,41 @@ class TestCurrencyExchange(unittest.TestCase):
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-20", "for_buying")
 		self.assertFalse(exchange_rate == 60)
 		self.assertEqual(flt(exchange_rate, 3), 65.1)
+
+	def test_exchange_rate_via_exchangerate_host(self, mock_get):
+		save_new_records(test_records)
+
+		# Update Currency Exchange Rate
+		settings = frappe.get_single("Currency Exchange Settings")
+		settings.service_provider = 'exchangerate.host'
+		settings.save()
+
+		# Update exchange
+		frappe.db.set_value("Accounts Settings", None, "allow_stale", 1)
+
+		# Start with allow_stale is True
+		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-01", "for_buying")
+		self.assertEqual(flt(exchange_rate, 3), 60.0)
+
+		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-15", "for_buying")
+		self.assertEqual(exchange_rate, 65.1)
+
+		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-30", "for_selling")
+		self.assertEqual(exchange_rate, 62.9)
+
+		# Exchange rate as on 15th Dec, 2015
+		self.clear_cache()
+		exchange_rate = get_exchange_rate("USD", "INR", "2015-12-15", "for_selling")
+		self.assertFalse(exchange_rate == 60)
+		self.assertEqual(flt(exchange_rate, 3), 66.999)
+
+		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-20", "for_buying")
+		self.assertFalse(exchange_rate == 60)
+		self.assertEqual(flt(exchange_rate, 3), 65.1)
+
+		settings = frappe.get_single("Currency Exchange Settings")
+		settings.service_provider = 'frankfurter.app'
+		settings.save()
 
 	def test_exchange_rate_strict(self, mock_get):
 		# strict currency settings
