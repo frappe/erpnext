@@ -53,11 +53,13 @@ def send_advance_holiday_reminders(frequency):
 			raise_exception=False
 		)
 
-		if holidays:
-			send_holidays_reminder_in_advance(employee, holidays)
+		send_holidays_reminder_in_advance(employee, holidays)
 
 
 def send_holidays_reminder_in_advance(employee, holidays):
+	if not holidays:
+		return
+
 	employee_doc = frappe.get_doc('Employee', employee)
 	employee_email = get_employee_email(employee_doc)
 	frequency = frappe.db.get_single_value("HR Settings", "frequency")
@@ -258,5 +260,5 @@ def send_work_anniversary_reminder(recipients, reminder_text, anniversary_person
 			anniversary_persons=anniversary_persons,
 			message=message,
 		),
-		header=_("🎊️🎊️ Work Anniversary Reminder 🎊️🎊️")
+		header=_("Work Anniversary Reminder")
 	)
