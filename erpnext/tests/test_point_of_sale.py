@@ -16,9 +16,12 @@ class TestPointOfSale(ERPNextTestCase):
 		"""
 
 		pos_profile = make_pos_profile()
-		item1 = make_item("Test Stock Item", {"is_stock_item": 1})
+		item1 = make_item("Test Search Stock Item", {"is_stock_item": 1})
 		make_stock_entry(
-			item_code="Test Stock Item", qty=10, to_warehouse="_Test Warehouse - _TC", rate=500
+			item_code="Test Search Stock Item",
+			qty=10,
+			to_warehouse="_Test Warehouse - _TC",
+			rate=500,
 		)
 
 		result = get_items(
@@ -27,24 +30,24 @@ class TestPointOfSale(ERPNextTestCase):
 			price_list=None,
 			item_group=item1.item_group,
 			pos_profile=pos_profile.name,
-			search_term="Test Stock Item",
+			search_term="Test Search Stock Item",
 		)
 		filtered_items = result.get("items")
 
 		self.assertEqual(len(filtered_items), 1)
-		self.assertEqual(filtered_items[0]["item_code"], "Test Stock Item")
+		self.assertEqual(filtered_items[0]["item_code"], item1.item_code)
 		self.assertEqual(filtered_items[0]["actual_qty"], 10)
 
-		item2 = make_item("Test Service Item", {"is_stock_item": 0})
+		item2 = make_item("Test Search Service Item", {"is_stock_item": 0})
 		result = get_items(
 			start=0,
 			page_length=20,
 			price_list=None,
 			item_group=item2.item_group,
 			pos_profile=pos_profile.name,
-			search_term="Test Service Item",
+			search_term="Test Search Service Item",
 		)
 		filtered_items = result.get("items")
 
 		self.assertEqual(len(filtered_items), 1)
-		self.assertEqual(filtered_items[0]["item_code"], "Test Service Item")
+		self.assertEqual(filtered_items[0]["item_code"], item2.item_code)
