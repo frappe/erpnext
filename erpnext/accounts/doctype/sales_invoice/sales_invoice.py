@@ -2139,5 +2139,6 @@ def make_sales_order(source_name, target_doc = None):
 		},
 		"Sales Invoice Item": {
 			"doctype": "Sales Order Item",
+			"condition": lambda row: not row.so_detail
 		}
 	}, target_doc)

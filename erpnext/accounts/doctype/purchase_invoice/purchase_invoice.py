@@ -1404,5 +1404,6 @@ def make_purchase_order(source_name, target_doc = None):
 		},
 		"Purchase Invoice Item": {
 			"doctype": "Purchase Order Item",
+			"condition": lambda row: not row.po_detail
 		}
 	}, target_doc)

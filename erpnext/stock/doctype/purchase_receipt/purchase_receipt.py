@@ -908,5 +908,6 @@ def make_purchase_order(source_name, target_doc = None):
 		},
 		"Purchase Receipt Item": {
 			"doctype": "Purchase Order Item",
+			"condition": lambda row: not row.purchase_order_item
 		}
 	}, target_doc)

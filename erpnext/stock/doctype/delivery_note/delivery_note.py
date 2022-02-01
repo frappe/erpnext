@@ -776,6 +776,7 @@ def make_sales_order_dn(source_name, target_doc = None):
 		},
 		"Delivery Note Item": {
 			"doctype": "Sales Order Item",
+			"condition": lambda row: not row.so_detail
 		}
 	}, target_doc)
 
