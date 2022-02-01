@@ -2141,14 +2141,15 @@ def get_mode_of_payments_info(mode_of_payments, company):
 			`tabMode of Payment Account` mpa,`tabMode of Payment` mp
 		where
 			mpa.parent = mp.name and
-			mpa.company = %s and
+			mpa.company = '{0}' and
 			mp.enabled = 1 and
-			mp.name in (%s)
+			mp.name in {1}
 		group by
 			mp.name
-		""", (company, mode_of_payments), as_dict=1)
+		""".format(company,tuple(mode_of_payments)), as_dict=1)
 
 	return {row.get('mop'): row for row in data}
+
 
 def get_mode_of_payment_info(mode_of_payment, company):
 	return frappe.db.sql("""
