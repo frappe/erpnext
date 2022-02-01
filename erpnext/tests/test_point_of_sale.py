@@ -2,8 +2,6 @@
 # MIT License. See license.txt
 
 
-import frappe
-
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.selling.page.point_of_sale.point_of_sale import get_items
 from erpnext.stock.doctype.item.test_item import make_item
