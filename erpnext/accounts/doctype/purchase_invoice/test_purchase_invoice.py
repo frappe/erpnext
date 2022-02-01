@@ -11,12 +11,17 @@ from frappe.utils import add_days, cint, flt, getdate, nowdate, today
 import erpnext
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.controllers.accounts_controller import get_payment_terms
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.exceptions import InvalidCurrency
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+	make_purchase_invoice as create_purchase_invoice_from_receipt,
+)
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	get_taxes,
 	make_purchase_receipt,
@@ -1124,8 +1129,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 	def test_purchase_invoice_advance_taxes(self):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-		from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
 		# create a new supplier to test
 		supplier = create_supplier(supplier_name = '_Test TDS Advance Supplier',
@@ -1197,6 +1200,45 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		payment_entry.load_from_db()
 		self.assertEqual(payment_entry.taxes[0].allocated_amount, 0)
+
+	def test_provisional_accounting_entry(self):
+		item = create_item("_Test Non Stock Item", is_stock_item=0)
+		provisional_account = create_account(account_name="Provision Account",
+			parent_account="Current Liabilities - _TC", company="_Test Company")
+
+		company = frappe.get_doc('Company', '_Test Company')
+		company.enable_provisional_accounting_for_non_stock_items = 1
+		company.default_provisional_account = provisional_account
+		company.save()
+
+		pr = make_purchase_receipt(item_code="_Test Non Stock Item", posting_date=add_days(nowdate(), -2))
+
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.set_posting_time = 1
+		pi.posting_date = add_days(pr.posting_date, -1)
+		pi.items[0].expense_account = 'Cost of Goods Sold - _TC'
+		pi.save()
+		pi.submit()
+
+		# Check GLE for Purchase Invoice
+		expected_gle = [
+			['Cost of Goods Sold - _TC', 250, 0, add_days(pr.posting_date, -1)],
+			['Creditors - _TC', 0, 250, add_days(pr.posting_date, -1)]
+		]
+
+		check_gl_entries(self, pi.name, expected_gle, pi.posting_date)
+
+		expected_gle_for_purchase_receipt = [
+			["Provision Account - _TC", 250, 0, pr.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 0, 250, pr.posting_date],
+			["Provision Account - _TC", 0, 250, pi.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 250, 0, pi.posting_date]
+		]
+
+		check_gl_entries(self, pr.name, expected_gle_for_purchase_receipt, pr.posting_date)
+
+		company.enable_provisional_accounting_for_non_stock_items = 0
+		company.save()
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 	gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
