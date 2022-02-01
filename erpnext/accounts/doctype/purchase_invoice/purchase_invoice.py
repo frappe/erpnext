@@ -543,17 +543,12 @@ class PurchaseInvoice(BuyingController):
 			if d.category in ('Valuation', 'Total and Valuation')
 			and flt(d.base_tax_amount_after_discount_amount)]
 
-<<<<<<< HEAD
-=======
-		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
-
 		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
 		provisional_accounting_for_non_stock_items = cint(frappe.db.get_value('Company', self.company, \
 			'enable_provisional_accounting_for_non_stock_items'))
 
 		purchase_receipt_doc_map = {}
 
->>>>>>> 528c71382f (feat: Provisional accounting for expenses (#29451))
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
 				account_currency = get_account_currency(item.expense_account)

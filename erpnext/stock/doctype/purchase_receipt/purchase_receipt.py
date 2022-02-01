@@ -266,21 +266,10 @@ class PurchaseReceipt(BuyingController):
 		return process_gl_map(gl_entries)
 
 	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
-<<<<<<< HEAD
-		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
-		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
-		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
-		auto_accounting_for_non_stock_items = cint(frappe.db.get_value('Company', self.company, 'enable_perpetual_inventory_for_non_stock_items'))
-=======
-		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
-			get_purchase_document_details,
-		)
-
 		if erpnext.is_perpetual_inventory_enabled(self.company):
 			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 			landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
->>>>>>> 528c71382f (feat: Provisional accounting for expenses (#29451))
 
 		warehouse_with_no_account = []
 		stock_items = self.get_stock_items()
