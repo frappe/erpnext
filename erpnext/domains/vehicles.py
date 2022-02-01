@@ -83,6 +83,11 @@ applies_to_project_fields += [
 		"insert_after": "cb_warranty_1"},
 	{"label": "FQR No", "fieldname": "fqr_no", "fieldtype": "Data", "no_copy": 1,
 		"insert_after": "cb_warranty_2"},
+
+	{"label": "Is Periodic Maintenance", "fieldname": "is_periodic_maintenance", "fieldtype": "Check",
+		"insert_after": "previous_project"},
+	{"label": "Is General Repair", "fieldname": "is_general_repair", "fieldtype": "Check",
+		"insert_after": "is_periodic_maintenance"},
 ]
 
 # Project Vehicle Status Fields
@@ -258,6 +263,7 @@ data = {
 		{"doctype": "Sales Invoice", "fieldname": "bill_multiple_projects", "property": "label", "value": "Bill Multiple Repair Orders"},
 		{"doctype": "Project", "fieldname": "bill_to", "property": "hidden", "value": 0},
 		{"doctype": "Project", "fieldname": "sec_warranty", "property": "hidden", "value": 0},
+		{"doctype": "Project", "fieldname": "previous_project", "property": "label", "value": "Previous Repair Order"},
 		{"doctype": "Delivery Note", "fieldname": "received_by_type", "property": "default", "value": "Employee"},
 		{"doctype": "Payment Terms Template", "fieldname": "include_in_vehicle_booking", "property": "hidden", "value": 0},
 		{"doctype": "Transaction Type", "fieldname": "vehicle_booking_defaults_section", "property": "hidden", "value": 0},

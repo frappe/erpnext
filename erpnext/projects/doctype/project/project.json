@@ -31,6 +31,8 @@
   "column_break_22",
   "expected_delivery_date",
   "expected_delivery_time",
+  "column_break_25",
+  "previous_project",
   "section_break0",
   "description",
   "customer_details_section",
@@ -678,7 +680,7 @@
   },
   {
    "fieldname": "voice_of_customer",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "Voice of Customer"
   },
   {
@@ -832,11 +834,22 @@
    "hidden": 1,
    "label": "CNIC",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "previous_project",
+   "fieldtype": "Link",
+   "label": "Previous Project",
+   "no_copy": 1,
+   "options": "Project"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2022-01-21 14:16:33.022352",
+ "modified": "2022-02-01 12:57:37.541160",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
