@@ -137,15 +137,12 @@ class PurchaseReceipt(BuyingController):
 
 	def validate_provisional_expense_account(self):
 		provisional_accounting_for_non_stock_items = \
-				cint(frappe.db.get_value('Company', self.company, 'enable_provisional_accounting_for_non_stock_items'))
+			cint(frappe.db.get_value('Company', self.company, 'enable_provisional_accounting_for_non_stock_items'))
 
 		if provisional_accounting_for_non_stock_items:
 			default_provisional_account = self.get_company_default("default_provisional_account")
-			stock_items = self.get_stock_items()
-
-			for item in self.get('items'):
-				if item.item_code not in stock_items and not item.provisional_expense_account:
-					item.provisional_expense_account = default_provisional_account
+			if not self.provisional_expense_account:
+				self.provisional_expense_account = default_provisional_account
 
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc({
@@ -446,7 +443,7 @@ class PurchaseReceipt(BuyingController):
 				"\n".join(warehouse_with_no_account))
 
 	def add_provisional_gl_entry(self, item, gl_entries, posting_date, reverse=0):
-		provisional_expense_account = item.get('provisional_expense_account')
+		provisional_expense_account = self.get('provisional_expense_account')
 		credit_currency = get_account_currency(provisional_expense_account)
 		debit_currency = get_account_currency(item.expense_account)
 		expense_account = item.expense_account
@@ -455,8 +452,7 @@ class PurchaseReceipt(BuyingController):
 
 		if reverse:
 			multiplication_factor = -1
-			expense_account, provisional_expense_account = frappe.db.get_value('Purchase Receipt Item', {'name': item.get('pr_detail')},
-				['expense_account', 'provisional_expense_account'])
+			expense_account = frappe.db.get_value('Purchase Receipt Item', {'name': item.get('pr_detail')}, ['expense_account'])
 
 		self.add_gl_entry(
 			gl_entries=gl_entries,

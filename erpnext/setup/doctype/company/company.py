@@ -194,7 +194,7 @@ class Company(NestedSet):
 				frappe.throw(_("Set default {0} account for non stock items").format(
 					frappe.bold('Provisional Account')))
 
-			make_property_setter("Purchase Receipt Item", "provisional_expense_account", "hidden",
+			make_property_setter("Purchase Receipt", "provisional_expense_account", "hidden",
 				not self.enable_provisional_accounting_for_non_stock_items, "Check", validate_fields_for_doctype=False)
 
 	def check_country_change(self):
