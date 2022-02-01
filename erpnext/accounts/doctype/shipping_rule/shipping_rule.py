@@ -71,7 +71,8 @@ class ShippingRule(Document):
 		if doc.currency != doc.company_currency:
 			shipping_amount = flt(shipping_amount / doc.conversion_rate, 2)
 
-		self.add_shipping_rule_to_tax_table(doc, shipping_amount)
+		if shipping_amount:
+			self.add_shipping_rule_to_tax_table(doc, shipping_amount)
 
 	def get_shipping_amount_from_rules(self, value):
 		for condition in self.get("conditions"):
