@@ -325,7 +325,7 @@ class TestLeaveApplication(unittest.TestCase):
 		employee = get_employee()
 
 		default_holiday_list = make_holiday_list()
-		frappe.db.set_value("Company", "_Test Company", "default_holiday_list", default_holiday_list)
+		frappe.db.set_value("Company", employee.company, "default_holiday_list", default_holiday_list)
 		first_sunday = get_first_sunday(default_holiday_list)
 
 		optional_leave_date = add_days(first_sunday, 1)
