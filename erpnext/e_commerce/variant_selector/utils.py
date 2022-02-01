@@ -1,7 +1,12 @@
 import frappe
 from frappe.utils import cint
 
+from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import (
+	get_shopping_cart_settings,
+)
+from erpnext.e_commerce.shopping_cart.cart import _set_price_list
 from erpnext.e_commerce.variant_selector.item_variants_cache import ItemVariantsCacheManager
+from erpnext.utilities.product import get_price
 
 
 def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
@@ -143,14 +148,13 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 	filtered_items_count = len(filtered_items)
 
 	# get product info if exact match
-	from erpnext.e_commerce.shopping_cart.product_info import get_product_info_for_website
+	# from erpnext.e_commerce.shopping_cart.product_info import get_product_info_for_website
 	if exact_match:
-		data = get_product_info_for_website(exact_match[0])
-		product_info = data.product_info
+		cart_settings = get_shopping_cart_settings()
+		product_info = get_item_variant_price_dict(exact_match[0], cart_settings)
+
 		if product_info:
-			product_info["allow_items_not_in_stock"] = cint(data.cart_settings.allow_items_not_in_stock)
-		if not data.cart_settings.show_price:
-			product_info = None
+			product_info["allow_items_not_in_stock"] = cint(cart_settings.allow_items_not_in_stock)
 	else:
 		product_info = None
 
@@ -194,4 +198,21 @@ def get_item_attributes(item_code):
 			a.optional = True
 
 	return attributes
+
+def get_item_variant_price_dict(item_code, cart_settings):
+	if cart_settings.enabled and cart_settings.show_price:
+		is_guest = frappe.session.user == "Guest"
+		# Show Price if logged in.
+		# If not logged in, check if price is hidden for guest.
+		if not is_guest or not cart_settings.hide_price_for_guest:
+			price_list = _set_price_list(cart_settings, None)
+			price = get_price(
+				item_code,
+				price_list,
+				cart_settings.default_customer_group,
+				cart_settings.company
+			)
+			return {"price": price}
+
+	return None
 

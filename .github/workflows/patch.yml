@@ -5,8 +5,13 @@ on:
     paths-ignore:
       - '**.js'
       - '**.md'
+    types: [opened, unlabeled, synchronize, reopened]
   workflow_dispatch:
 
+
+concurrency:
+  group: patch-mariadb-v13-${{ github.event.number }}
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -25,6 +30,11 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
 
     steps:
+      - name: Check for merge conficts label
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'conflicts') }}
+        run: |
+          echo "Remove merge conflicts and remove conflict label to run CI"
+          exit 1
       - name: Clone
         uses: actions/checkout@v2
 

@@ -33,6 +33,7 @@
    "oldfieldtype": "Link",
    "options": "Warehouse",
    "read_only": 1,
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -46,6 +47,7 @@
    "oldfieldtype": "Link",
    "options": "Item",
    "read_only": 1,
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -169,10 +171,11 @@
  "idx": 1,
  "in_create": 1,
  "links": [],
- "modified": "2021-03-30 23:09:39.572776",
+ "modified": "2022-01-30 17:04:54.715288",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Bin",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -200,5 +203,6 @@
  "quick_entry": 1,
  "search_fields": "item_code,warehouse",
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "states": []
 }

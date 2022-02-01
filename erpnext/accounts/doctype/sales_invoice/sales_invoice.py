@@ -45,6 +45,7 @@ from erpnext.setup.doctype.company.company import update_company_current_month_s
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
+from erpnext.stock.utils import calculate_mapped_packed_items_return
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -745,8 +746,11 @@ class SalesInvoice(SellingController):
 
 	def update_packing_list(self):
 		if cint(self.update_stock) == 1:
-			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-			make_packing_list(self)
+			if cint(self.is_return) and self.return_against:
+				calculate_mapped_packed_items_return(self)
+			else:
+				from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+				make_packing_list(self)
 		else:
 			self.set('packed_items', [])
 
@@ -1256,14 +1260,14 @@ class SalesInvoice(SellingController):
 	def update_billing_status_in_dn(self, update_modified=True):
 		updated_delivery_notes = []
 		for d in self.get("items"):
-			if d.dn_detail:
+			if d.so_detail:
+				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
+			elif d.dn_detail:
 				billed_amt = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item`
 					where dn_detail=%s and docstatus=1""", d.dn_detail)
 				billed_amt = billed_amt and billed_amt[0][0] or 0
 				frappe.db.set_value("Delivery Note Item", d.dn_detail, "billed_amt", billed_amt, update_modified=update_modified)
 				updated_delivery_notes.append(d.delivery_note)
-			elif d.so_detail:
-				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
 
 		for dn in set(updated_delivery_notes):
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
