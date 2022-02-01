@@ -123,11 +123,10 @@ class TestEmployeeReminders(unittest.TestCase):
 		self.assertTrue("Subject: Birthday Reminder" in email_queue[0].message)
 
 	def test_work_anniversary_reminders(self):
-		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from tabEmployee limit 1")[0])
-		employee.date_of_joining = "1998" + frappe.utils.nowdate()[4:]
-		employee.company_email = "test@example.com"
-		employee.company = "_Test Company"
-		employee.save()
+		make_employee("test_work_anniversary@gmail.com",
+			date_of_joining="1998" + frappe.utils.nowdate()[4:],
+			company="_Test Company",
+		)
 
 		from erpnext.hr.doctype.employee.employee_reminders import (
 			get_employees_having_an_event_today,
@@ -135,7 +134,12 @@ class TestEmployeeReminders(unittest.TestCase):
 		)
 
 		employees_having_work_anniversary = get_employees_having_an_event_today('work_anniversary')
-		self.assertTrue(employees_having_work_anniversary.get("_Test Company"))
+		employees = employees_having_work_anniversary.get("_Test Company") or []
+		user_ids = []
+		for entry in employees:
+			user_ids.append(entry.user_id)
+
+		self.assertTrue("test_work_anniversary@gmail.com" in user_ids)
 
 		hr_settings = frappe.get_doc("HR Settings", "HR Settings")
 		hr_settings.send_work_anniversary_reminders = 1
@@ -145,6 +149,22 @@ class TestEmployeeReminders(unittest.TestCase):
 
 		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
 		self.assertTrue("Subject: Work Anniversary Reminder" in email_queue[0].message)
+
+	def test_work_anniversary_reminder_not_sent_for_0_years(self):
+		make_employee("test_work_anniversary_2@gmail.com",
+			date_of_joining=getdate(),
+			company="_Test Company",
+		)
+
+		from erpnext.hr.doctype.employee.employee_reminders import get_employees_having_an_event_today
+
+		employees_having_work_anniversary = get_employees_having_an_event_today('work_anniversary')
+		employees = employees_having_work_anniversary.get("_Test Company") or []
+		user_ids = []
+		for entry in employees:
+			user_ids.append(entry.user_id)
+
+		self.assertTrue("test_work_anniversary_2@gmail.com" not in user_ids)
 
 	def test_send_holidays_reminder_in_advance(self):
 		setup_hr_settings('Weekly')
