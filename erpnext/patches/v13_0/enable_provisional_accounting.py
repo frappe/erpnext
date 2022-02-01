@@ -15,5 +15,5 @@ def execute():
 	).where(
 		company.enable_perpetual_inventory_for_non_stock_items == 1
 	).where(
-		company.service_received_but_not_billed != ""
+		company.service_received_but_not_billed.isnotnull()
 	).run()
