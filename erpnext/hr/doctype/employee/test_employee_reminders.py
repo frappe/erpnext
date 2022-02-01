@@ -64,6 +64,7 @@ class TestEmployeeReminders(unittest.TestCase):
 		test_employee_2.save()
 
 		cls.test_employee_2 = test_employee_2
+		cls.holiday_list_2 = test_holiday_list
 
 	@classmethod
 	def get_test_holiday_dates(cls):
@@ -190,38 +191,50 @@ class TestEmployeeReminders(unittest.TestCase):
 
 		setup_hr_settings('Monthly')
 
-		# disable emp 2
-		frappe.db.set_value('Employee', self.test_employee_2.name, 'status', 'Left')
+		# disable emp 2, set same holiday list
+		frappe.db.set_value('Employee', self.test_employee_2.name, {
+			'status': 'Left',
+			'holiday_list': self.test_employee.holiday_list
+		})
 
 		send_reminders_in_advance_monthly()
 		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
 		self.assertTrue(len(email_queue) > 0)
 
-		# non-active employees should not be recipients
+		# even though emp 2 has holiday, non-active employees should not be recipients
 		recipients = frappe.db.get_all('Email Queue Recipient', pluck='recipient')
 		self.assertTrue(self.test_employee_2.user_id not in recipients)
 
 		# teardown: enable emp 2
-		frappe.db.set_value('Employee', self.test_employee_2.name, 'status', 'Active')
+		frappe.db.set_value('Employee', self.test_employee_2.name, {
+			'status': 'Left',
+			'holiday_list': self.holiday_list_2
+		})
 
 	def test_advance_holiday_reminders_weekly(self):
 		from erpnext.hr.doctype.employee.employee_reminders import send_reminders_in_advance_weekly
 
 		setup_hr_settings('Weekly')
 
-		# disable emp 2
-		frappe.db.set_value('Employee', self.test_employee_2.name, 'status', 'Left')
+		# disable emp 2, set same holiday list
+		frappe.db.set_value('Employee', self.test_employee_2.name, {
+			'status': 'Left',
+			'holiday_list': self.test_employee.holiday_list
+		})
 
 		send_reminders_in_advance_weekly()
 		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
 		self.assertTrue(len(email_queue) > 0)
 
-		# non-active employees should not be recipients
+		# even though emp 2 has holiday, non-active employees should not be recipients
 		recipients = frappe.db.get_all('Email Queue Recipient', pluck='recipient')
 		self.assertTrue(self.test_employee_2.user_id not in recipients)
 
 		# teardown: enable emp 2
-		frappe.db.set_value('Employee', self.test_employee_2.name, 'status', 'Active')
+		frappe.db.set_value('Employee', self.test_employee_2.name, {
+			'status': 'Left',
+			'holiday_list': self.holiday_list_2
+		})
 
 	def test_reminder_not_sent_if_no_holdays(self):
 		setup_hr_settings('Monthly')
