@@ -345,8 +345,8 @@ erpnext.patches.v13_0.agriculture_deprecation_warning
 erpnext.patches.v13_0.update_maintenance_schedule_field_in_visit
 erpnext.patches.v13_0.hospitality_deprecation_warning
 erpnext.patches.v13_0.delete_bank_reconciliation_detail
-<<<<<<< HEAD
 erpnext.patches.v13_0.update_sane_transfer_against
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
 erpnext.patches.v13_0.update_sane_transfer_against
@@ -368,3 +368,6 @@ erpnext.patches.v12_0.add_company_link_to_einvoice_settings
 erpnext.patches.v14_0.migrate_cost_center_allocations
 >>>>>>> 528c71382f (feat: Provisional accounting for expenses (#29451))
 >>>>>>> a54c84728f (feat: Provisional accounting for expenses (#29451))
+=======
+erpnext.patches.v13_0.enable_provisional_accounting
+>>>>>>> aa16a4bb5f (chore: Resolve conflicts)

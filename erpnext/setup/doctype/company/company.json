@@ -721,8 +721,6 @@
    "fieldtype": "Link",
    "label": "Repair and Maintenance Account",
    "options": "Account"
-<<<<<<< HEAD
-=======
   },
   {
    "fieldname": "section_break_28",
@@ -742,7 +740,6 @@
    "label": "Default Provisional Account",
    "no_copy": 1,
    "options": "Account"
->>>>>>> 528c71382f (feat: Provisional accounting for expenses (#29451))
   }
  ],
  "icon": "fa fa-building",
@@ -750,11 +747,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2021-12-02 14:52:08.187233",
-=======
  "modified": "2022-01-25 10:33:16.826067",
->>>>>>> 528c71382f (feat: Provisional accounting for expenses (#29451))
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
