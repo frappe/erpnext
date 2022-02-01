@@ -503,11 +503,7 @@
    "link_fieldname": "asset"
   }
  ],
-<<<<<<< HEAD
- "modified": "2021-06-24 14:58:51.097908",
-=======
  "modified": "2022-01-30 20:19:24.680027",
->>>>>>> 319322228a (fix: fetch image form item (#29523))
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
