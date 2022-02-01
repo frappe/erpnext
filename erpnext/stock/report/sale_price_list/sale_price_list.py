@@ -58,7 +58,7 @@ def return_columns(filters):
 	columns = [_("Item Name") + "::240"]
 
 	for list in lists:
-		columns += [_(list.name) + ":currency:120"]
+		columns += [_(list.name) + ":Currency:120"]
 		columns_list.append(list.name)
 
 	return columns, columns_list
