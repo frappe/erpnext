@@ -543,8 +543,7 @@ class PurchaseInvoice(BuyingController):
 			if d.category in ('Valuation', 'Total and Valuation')
 			and flt(d.base_tax_amount_after_discount_amount)]
 
-		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
-		provisional_accounting_for_non_stock_items = cint(frappe.db.get_value('Company', self.company, \
+		provisional_accounting_for_non_stock_items = cint(frappe.db.get_value('Company', self.company,
 			'enable_provisional_accounting_for_non_stock_items'))
 
 		purchase_receipt_doc_map = {}
