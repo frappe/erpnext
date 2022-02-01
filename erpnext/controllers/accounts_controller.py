@@ -1319,6 +1319,9 @@ class AccountsController(TransactionBase):
 				payment_schedule['discount_type'] = schedule.discount_type
 				payment_schedule['discount'] = schedule.discount
 
+			if not schedule.invoice_portion:
+				payment_schedule['payment_amount'] = schedule.payment_amount
+
 			self.append("payment_schedule", payment_schedule)
 
 	def set_due_date(self):
