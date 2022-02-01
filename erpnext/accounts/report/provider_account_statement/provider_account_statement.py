@@ -9,7 +9,56 @@ import datetime
 
 def execute(filters=None):
 	if not filters: filters = {}
-	columns = [_("Date") + "::240", _("Supplier") + "::240",  _("Voucher Type") + "::240",  _("Voucher No.") + "::240",  _("Invoice Amount") + ":Currency:120", _("Amount paid") + ":Currency:120", _("Outstanding Amount") + ":Currency:120", _("Currency") + "::240"]
+	columns = [
+		{
+			"label": _("Date"),
+			"fieldname": "date",
+			"fieldtype": "Date",
+			"width": 240
+		},
+		{
+			"label": _("Supplier"),
+			"fieldname": "supplier",
+			"fieldtype": "Link",
+			"options": "Supplier",
+			"width": 240
+		},
+		{
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"width": 240
+		},
+		{
+			"label": _("Voucher No"),
+			"fieldname": "voucher_no",
+			"fieldtype": "Dynamic Link",
+			"options": "voucher_type",
+			"width": 240
+		},
+		{
+			"label": _("Invoice Amount"),
+			"fieldname": "invoice_amount",
+			"fieldtype": "Currency",
+			"width": 120
+		},
+		{
+			"label": _("Amount paid"),
+			"fieldname": "amount_paid",
+			"fieldtype": "Currency",
+			"width": 120
+		},
+		{
+			"label": _("Outstanding Amount"),
+			"fieldname": "outstanding_amount",
+			"fieldtype": "Currency",
+			"width": 120
+		},
+		{
+			"label": _("Currency"),
+			"fieldname": "currency",
+			"width": 240
+		},
+	]
 	data = return_data(filters)
 	return columns, data
 
