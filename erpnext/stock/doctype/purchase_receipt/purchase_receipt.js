@@ -79,6 +79,17 @@ frappe.ui.form.on("Purchase Receipt", {
 
 	add_custom_buttons: function(frm) {
 		if (frm.doc.docstatus == 0) {
+			if(!frm.doc.is_return) {
+				frm.doc.items.some((row) => {
+					if(!row.po_detail) {
+						frm.add_custom_button(__('Purchase Order'), () => {
+							frm.events.make_po();
+						}, __('Create'));
+						return
+					}
+				});
+			}
+
 			frm.add_custom_button(__('Purchase Invoice'), function () {
 				if (!frm.doc.supplier) {
 					frappe.throw({
@@ -324,7 +335,7 @@ frappe.ui.form.on("Purchase Receipt", {
 						],
 						primary_action_label: 'Yes',
 						primary_action() {
-							frm.events.make_po(frm);
+							frm.events.make_po();
 							d.hide();
 						},
 						secondary_action_label: 'No',
@@ -335,9 +346,6 @@ frappe.ui.form.on("Purchase Receipt", {
 							settings_change_dialog.show();
 						},
 					});
-					d.$body.find('.frappe-confirm-message').find('a').click(() => {
-						frm.events.make_po(frm);
-					})
 					settings_change_dialog.$body.find('.settings-message').find('a.customer_supplier').click(() => {
 						frappe.set_route('Form', 'Supplier', frm.doc.supplier)
 					})
@@ -351,10 +359,10 @@ frappe.ui.form.on("Purchase Receipt", {
 		});
 	},
 
-	make_po: function(frm) {
+	make_po: function() {
 		frappe.model.open_mapped_doc({
 			method: 'erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_order',
-			frm: frm,
+			frm: me.frm,
 		});
 	}
 });

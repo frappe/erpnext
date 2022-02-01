@@ -134,7 +134,7 @@ frappe.ui.form.on("Delivery Note", {
 						],
 						primary_action_label: 'Yes',
 						primary_action() {
-							frm.events.make_so_dn(frm);
+							frm.events.make_so_dn();
 							d.hide();
 						},
 						secondary_action_label: 'No',
@@ -144,9 +144,6 @@ frappe.ui.form.on("Delivery Note", {
 							settings_change_dialog.show();
 						},
 					});
-					d.$body.find('.frappe-confirm-message').find('a').click(() => {
-						frm.events.make_so_dn(frm);
-					})
 					settings_change_dialog.$body.find('.settings-message').find('a.customer_supplier').click(() => {
 						frappe.set_route('Form', 'Customer', frm.doc.customer)
 					})
@@ -248,8 +245,13 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 					}) }, __('Create'));
 			}
 			if(doc.docstatus==0 && !doc.is_return) {
-				this.frm.add_custom_button(__('Sales Order'),
-				this.frm.events.make_so_dn, __('Create'));
+				doc.items.some((row) => {
+					if (!row.so_detail) {
+						this.frm.add_custom_button(__('Sales Order'),
+							this.frm.events.make_so_dn, __('Create'));
+						return;
+					}
+				});
 			}
 			if (!doc.__islocal && doc.docstatus==1) {
 				this.frm.page.set_inner_btn_group_as_primary(__('Create'));

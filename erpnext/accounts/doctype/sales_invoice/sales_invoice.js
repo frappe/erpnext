@@ -77,10 +77,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				this.make_payment_entry, __('Create'));
 			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
-		if(doc.docstatus==0 && !doc.is_return) {
-			cur_frm.add_custom_button(__('Sales Order'),
-					this.make_so, __('Create'));
-		}
+
 		if(doc.docstatus==1 && !doc.is_return) {
 
 			var is_delivered_by_supplier = false;
@@ -157,6 +154,16 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				}, __('Create'));
 			}
 		}
+
+		if(doc.docstatus==0 && !doc.is_return) {
+			doc.items.some((row) => {
+				if (!row.so_detail) {
+					this.frm.add_custom_button(__('Sales Order'),
+						this.frm.events.make_so, __('Create'));
+					return;
+				}
+			});
+		}
 	}
 
 	make_maintenance_schedule() {
@@ -164,51 +171,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_maintenance_schedule",
 			frm: cur_frm
 		})
-	}
-	after_save(doc) {
-		frappe.db.get_value('Customer', doc.customer, 'so_required', (r) => {
-			if (doc.docstatus || r.so_required) return;
-			doc.items.some((row) => {
-				if (!row.sales_order) {
-					let settings_change_dialog = erpnext.utils.get_dialog_message(
-							'Sales Invoice', 'Sales Order', 'Selling', doc.customer, false);
-					let d = new frappe.ui.Dialog({
-						title: 'Suggestion',
-						indicator: 'blue',
-						fields: [
-							{
-								fieldtype: 'HTML',
-								options: `<p class="frappe-confirm-message">\
-								${__("We recommend creating an invoice against a Sales Order as an ideal practice.")}\
-								<br><br>${__("Do you want to create a Sales Order?")}</p>`
-							}
-						],
-						primary_action_label: 'Yes',
-						primary_action(values) {
-							this.make_so();
-							d.hide();
-						},
-						secondary_action_label: 'No',
-						secondary_action() {
-							d.hide();
-							frappe.db.set_value('Customer', doc.customer, 'so_required', 1);
-							settings_change_dialog.show();
-						},
-					});
-					d.$body.find('.frappe-confirm-message').find('a').click(() => {
-						this.make_so();
-					})
-					settings_change_dialog.$body.find('.settings-message').find('a.customer_supplier').click(() => {
-						frappe.set_route('Form', 'Customer', doc.customer)
-					})
-					settings_change_dialog.$body.find('.settings-message').find('a.settings').click(() => {
-						frappe.set_route('Form', 'Selling Settings')
-					})
-					d.show();
-					return
-				}
-			});
-		});
 	}
 
 	on_submit(doc, dt, dn) {
@@ -435,13 +397,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_return",
 			frm: cur_frm
 		})
-	}
-
-	make_so() {
-		frappe.model.open_mapped_doc({
-			method: 'erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_order',
-			frm: cur_frm,
-		});
 	}
 
 	asset(frm, cdt, cdn) {
@@ -1065,6 +1020,56 @@ frappe.ui.form.on('Sales Invoice', {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_dunning",
 			frm: frm
+		});
+	},
+
+	after_save(frm) {
+		frappe.db.get_value('Customer', frm.doc.customer, 'so_required', (r) => {
+			if (frm.doc.docstatus || r.so_required) return;
+			frm.doc.items.some((row) => {
+				if (!row.sales_order) {
+					let settings_change_dialog = erpnext.utils.get_dialog_message(
+							'Sales Invoice', 'Sales Order', 'Selling', frm.doc.customer, false)	;
+					let d = new frappe.ui.Dialog({
+						title: 'Suggestion',
+						indicator: 'blue',
+						fields: [
+							{
+								fieldtype: 'HTML',
+								options: `<p class="frappe-confirm-message">\
+								${__("We recommend creating an invoice against a Sales Order as an ideal practice.")}\
+								<br><br>${__("Do you want to create a Sales Order?")}</p>`
+							}
+						],
+						primary_action_label: 'Yes',
+						primary_action() {
+							frm.events.make_so();
+							d.hide();
+						},
+						secondary_action_label: 'No',
+						secondary_action() {
+							d.hide();
+							frappe.db.set_value('Customer', frm.doc.customer, 'so_required', 1);
+							settings_change_dialog.show();
+						},
+					});
+					settings_change_dialog.$body.find('.settings-message').find('a.customer_supplier').click(() => {
+						frappe.set_route('Form', 'Customer', frm.doc.customer)
+					})
+					settings_change_dialog.$body.find('.settings-message').find('a.settings').click(() => {
+						frappe.set_route('Form', 'Selling Settings')
+					})
+					d.show();
+					return
+				}
+			});
+		});
+	},
+
+	make_so() {
+		frappe.model.open_mapped_doc({
+			method: 'erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_order',
+			frm: me.frm,
 		});
 	}
 });

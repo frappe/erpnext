@@ -537,20 +537,20 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	add_custom_buttons: function(frm) {
-		if (frm.doc.per_received < 100) {
-			frm.add_custom_button(__('Purchase Receipt'), () => {
-				frm.events.make_purchase_receipt(frm);
-			}, __('Create'));
-		}
 		if(frm.doc.docstatus==0) {
 			frm.doc.items.some((row) => {
 				if(!row.po_detail) {
 					frm.add_custom_button(__('Purchase Order'), () => {
-						frm.events.make_po(frm);
+						frm.events.make_po();
 					}, __('Create'));
 					return
 				}
 			});
+		}
+		if (frm.doc.per_received < 100) {
+			frm.add_custom_button(__('Purchase Receipt'), () => {
+				frm.events.make_purchase_receipt(frm);
+			}, __('Create'));
 		}
 
 		if (frm.doc.docstatus == 1 && frm.doc.per_received > 0) {
@@ -637,7 +637,7 @@ frappe.ui.form.on("Purchase Invoice", {
 						],
 						primary_action_label: 'Yes',
 						primary_action() {
-							frm.events.make_po(frm);
+							frm.events.make_po();
 							d.hide();
 						},
 						secondary_action_label: 'No',
@@ -648,9 +648,6 @@ frappe.ui.form.on("Purchase Invoice", {
 							settings_change_dialog.show();
 						},
 					});
-					d.$body.find('.frappe-confirm-message').find('a').click(() => {
-						frm.events.make_po(frm);
-					})
 					settings_change_dialog.$body.find('.settings-message').find('a.customer_supplier').click(() => {
 						frappe.set_route('Form', 'Supplier', frm.doc.supplier)
 					})
@@ -664,10 +661,10 @@ frappe.ui.form.on("Purchase Invoice", {
 		});
 	},
 
-	make_po: function(frm) {
+	make_po: function() {
 		frappe.model.open_mapped_doc({
 			method: 'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_purchase_order',
-			frm: frm,
+			frm: me.frm,
 		});
 	}
 })

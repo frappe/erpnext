@@ -320,9 +320,12 @@ $.extend(erpnext.utils, {
 
 	get_dialog_message: function(source_doctype, target_doctype, module_name, customer, supplier) {
 		let customer_supplier_type = "Customer";
-		if (!customer) customer_supplier_type = "Supplier";
-		let customer_supplier = customer ? customer_supplier_type == "Customer" : supplier;
-		let message = __("You can now create a {} without a {} for {} <b><a class='customer' href='#'>{}</a></b><br><br> You can also change this globally in <b><a class='settings' href='#'>{} Settings</a></b>", [source_doctype, target_doctype, customer_supplier_type, customer_supplier, module_name]);
+		let customer_supplier = customer;
+		if (!customer) {
+			customer_supplier_type = "Supplier";
+			customer_supplier = supplier;
+		}
+		let message = __("You can now create a {} without a {} for {} <b><a class='customer_supplier' href='#'>{}</a></b><br><br> You can also change this globally in <b><a class='settings' href='#'>{} Settings</a></b>", [source_doctype, target_doctype, customer_supplier_type, customer_supplier, module_name]);
 		let d = new frappe.ui.Dialog({
 			title: __("Message"),
 			indicator: "blue",
