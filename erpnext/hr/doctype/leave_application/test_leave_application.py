@@ -168,11 +168,13 @@ class TestLeaveApplication(unittest.TestCase):
 		}
 		attendance_on_holiday = frappe.get_doc(config)
 		attendance_on_holiday.attendance_date = first_sunday
+		attendance_on_holiday.flags.ignore_validate = True
 		attendance_on_holiday.save()
 
 		# already marked attendance on a non-holiday should be updated
 		attendance = frappe.get_doc(config)
 		attendance.attendance_date = add_days(first_sunday, 3)
+		attendance.flags.ignore_validate = True
 		attendance.save()
 
 		leave_application = make_leave_application(employee.name, first_sunday, add_days(first_sunday, 3), leave_type.name)
