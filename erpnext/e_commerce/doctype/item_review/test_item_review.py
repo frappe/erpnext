@@ -18,6 +18,7 @@ from erpnext.e_commerce.doctype.website_item.website_item import make_website_it
 from erpnext.e_commerce.shopping_cart.cart import get_party
 from erpnext.stock.doctype.item.test_item import make_item
 
+
 class TestItemReview(unittest.TestCase):
 	def setUp(self):
 		item = make_item("Test Mobile Phone")
