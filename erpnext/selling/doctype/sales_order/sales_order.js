@@ -61,6 +61,24 @@ frappe.ui.form.on("Sales Order", {
 			});
 		}
 	},
+
+// New Code To Fetch Unpaid From Customer
+	update_party_balance: function(frm){
+		frappe.call({
+			method: 'on_update_party_balance',
+			doc: frm.doc,
+			callback: function(r) {
+				// frm.reload_doc();
+				if (r.message){
+					// console.log(" this is call from Commited", r.message[0].outstanding)
+
+					frm.set_value("_party_balance", r.message[0].outstanding)
+					frm.refresh_field("_party_balance")
+				}
+			}
+		})
+	},
+
 	onload: function(frm,cdt,cdn) {
 		if (!frm.doc.transaction_date){
 			frm.set_value('transaction_date', frappe.datetime.get_today())
