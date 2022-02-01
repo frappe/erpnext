@@ -50,5 +50,3 @@ class TestPointOfSale(ERPNextTestCase):
 
 		self.assertEqual(len(filtered_items), 1)
 		self.assertEqual(filtered_items[0]["item_code"], "Test Service Item")
-
-		frappe.db.rollback()
