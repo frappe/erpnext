@@ -78,7 +78,13 @@ frappe.ui.form.on('Job Card', {
 			if (frm.doc.work_order) {
 				frappe.db.get_value('Work Order', frm.doc.work_order,
 					'status').then((r) => {
+						console.log(r.message);
 					if (r.message.status == 'In Process' || r.message.status == 'Completed') {
+						frappe.db.get_value('Work Order', frm.doc.work_order,
+							'skip_transfer').then((r) => {
+								console.log(r.message);
+							});
+						console.log(r.message);
 						frm.trigger("prepare_timer_buttons");
 					}
 				});
