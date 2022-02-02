@@ -36,7 +36,8 @@ class CustomerRetention(Document):
 		for document in self.get("references"):
 			total = document.net_total * (self.percentage_total/100)
 			sales_invoice = frappe.get_doc("Sales Invoice", document.reference_name)
-			sales_invoice.outstanding_amount -= total
+			# sales_invoice.outstanding_amount -= total
+			sales_invoice.outstanding_amount = document.net_total - total
 			sales_invoice.save()
 	
 	def update_accounts_status(self):
@@ -148,5 +149,5 @@ class CustomerRetention(Document):
 		for reference in references:
 			if reference.reference_doctype == "Sales Invoice":
 				doc = frappe.get_doc("Sales Invoice", reference.reference_name)
-				outstanding = doc.outstanding_amount - reference.net_total
+				outstanding = doc.outstanding_amount
 				doc.db_set('outstanding_amount', outstanding, update_modified=False)
