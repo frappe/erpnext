@@ -1,12 +1,13 @@
 {
  "actions": [],
- "creation": "2020-03-19 12:34:01.500390",
+ "allow_rename": 1,
+ "creation": "2022-01-13 20:07:30.096306",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "cost_center",
-  "percentage_allocation"
+  "percentage"
  ],
  "fields": [
   {
@@ -18,23 +19,23 @@
    "reqd": 1
   },
   {
-   "fieldname": "percentage_allocation",
-   "fieldtype": "Float",
+   "fieldname": "percentage",
+   "fieldtype": "Percent",
    "in_list_view": 1,
-   "label": "Percentage Allocation",
+   "label": "Percentage (%)",
    "reqd": 1
   }
  ],
+ "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-03-19 12:54:43.674655",
+ "modified": "2022-02-01 22:22:31.589523",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Distributed Cost Center",
+ "name": "Cost Center Allocation Percentage",
  "owner": "Administrator",
  "permissions": [],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "track_changes": 1
+ "states": []
 }

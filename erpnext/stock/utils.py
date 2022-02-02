@@ -176,13 +176,7 @@ def get_latest_stock_balance():
 def get_bin(item_code, warehouse):
 	bin = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
 	if not bin:
-		bin_obj = frappe.get_doc({
-			"doctype": "Bin",
-			"item_code": item_code,
-			"warehouse": warehouse,
-		})
-		bin_obj.flags.ignore_permissions = 1
-		bin_obj.insert()
+		bin_obj = _create_bin(item_code, warehouse)
 	else:
 		bin_obj = frappe.get_doc('Bin', bin, for_update=True)
 	bin_obj.flags.ignore_permissions = True
@@ -192,16 +186,24 @@ def get_or_make_bin(item_code: str , warehouse: str) -> str:
 	bin_record = frappe.db.get_value('Bin', {'item_code': item_code, 'warehouse': warehouse})
 
 	if not bin_record:
-		bin_obj = frappe.get_doc({
-			"doctype": "Bin",
-			"item_code": item_code,
-			"warehouse": warehouse,
-		})
+		bin_obj = _create_bin(item_code, warehouse)
+		bin_record = bin_obj.name
+	return bin_record
+
+def _create_bin(item_code, warehouse):
+	"""Create a bin and take care of concurrent inserts."""
+
+	bin_creation_savepoint = "create_bin"
+	try:
+		frappe.db.savepoint(bin_creation_savepoint)
+		bin_obj = frappe.get_doc(doctype="Bin", item_code=item_code, warehouse=warehouse)
 		bin_obj.flags.ignore_permissions = 1
 		bin_obj.insert()
-		bin_record = bin_obj.name
+	except frappe.UniqueValidationError:
+		frappe.db.rollback(save_point=bin_creation_savepoint)  # preserve transaction in postgres
+		bin_obj = frappe.get_last_doc("Bin", {"item_code": item_code, "warehouse": warehouse})
 
-	return bin_record
+	return bin_obj
 
 def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	"""WARNING: This function is deprecated. Inline this function instead of using it."""
