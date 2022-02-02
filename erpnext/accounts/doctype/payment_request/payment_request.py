@@ -435,7 +435,7 @@ def get_existing_payment_request_amount(ref_dt, ref_dn):
 	""", (ref_dt, ref_dn))
 	return flt(existing_payment_request_amount[0][0]) if existing_payment_request_amount else 0
 
-def get_gateway_details(args):
+def get_gateway_details(args): # nosemgrep
 	"""return gateway and payment account of default payment gateway"""
 	if args.get("payment_gateway_account"):
 		return get_payment_gateway_account(args.get("payment_gateway_account"))
