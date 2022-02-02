@@ -325,7 +325,7 @@ def make_reverse_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 				"voucher_type": voucher_type,
 				"voucher_no": voucher_no,
 				"is_cancelled": 0
-			})
+			}, for_update=True)
 
 	if gl_entries:
 		validate_accounting_period(gl_entries)
