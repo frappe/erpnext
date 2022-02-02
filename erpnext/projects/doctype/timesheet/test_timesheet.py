@@ -5,7 +5,7 @@ import datetime
 import unittest
 
 import frappe
-from frappe.utils import add_months, now_datetime, nowdate
+from frappe.utils import add_months, add_to_date, now_datetime, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.hr.doctype.employee.test_employee import make_employee
@@ -150,6 +150,27 @@ class TestTimesheet(unittest.TestCase):
 
 		settings.ignore_employee_time_overlap = initial_setting
 		settings.save()
+
+	def test_to_time(self):
+		emp = make_employee("test_employee_6@salary.com")
+		from_time = now_datetime()
+
+		timesheet = frappe.new_doc("Timesheet")
+		timesheet.employee = emp
+		timesheet.append(
+			'time_logs',
+			{
+				"billable": 1,
+				"activity_type": "_Test Activity Type",
+				"from_time": from_time,
+				"hours": 2,
+				"company": "_Test Company"
+			}
+		)
+		timesheet.save()
+
+		to_time = timesheet.time_logs[0].to_time
+		self.assertEqual(to_time, add_to_date(from_time, hours=2, as_datetime=True))
 
 
 def make_salary_structure_for_timesheet(employee, company=None):

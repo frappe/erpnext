@@ -5,11 +5,11 @@
 import csv
 import math
 import time
+from io import StringIO
 
 import dateutil
 import frappe
 from frappe import _
-from six import StringIO
 
 import erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_api as mws
 
