@@ -461,7 +461,7 @@ class update_entries_after(object):
 					self.wh_data.qty_after_transaction += flt(sle.actual_qty)
 					self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(self.wh_data.valuation_rate)
 				else:
-					self.update_fifo_lifo_values(sle)
+					self.update_queue_values(sle)
 					self.wh_data.qty_after_transaction += flt(sle.actual_qty)
 
 		# rounding as per precision
@@ -701,7 +701,7 @@ class update_entries_after(object):
 						sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
 						currency=erpnext.get_company_currency(sle.company), company=sle.company)
 
-	def update_fifo_lifo_values(self, sle):
+	def update_queue_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
 		actual_qty = flt(sle.actual_qty)
 		outgoing_rate = flt(sle.outgoing_rate)
