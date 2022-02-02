@@ -761,6 +761,21 @@ def get_sales_orders(self):
 		bom_item = self.get_bom_item() or bom_item
 		item_filter += " and so_item.item_code = %(item_code)s"
 
+	if hasattr(self, "sort_by"):
+		separator = ","
+		sort_by = []
+		for d in self.sort_by:
+			print(d.order)
+			if d.order == "Ascending":
+				sort_by.append("so." + frappe.scrub(d.option) + " asc")
+			elif d.order == "Descending":
+				sort_by.append("so." + frappe.scrub(d.option) + " desc")
+			else:
+				sort_by.append("so." + frappe.scrub(d.option))
+		query_param = separator.join(sort_by)
+	else:
+		query_param = "null"
+
 	open_so = frappe.db.sql(f"""
 		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
 		from `tabSales Order` so, `tabSales Order Item` so_item
@@ -774,6 +789,7 @@ def get_sales_orders(self):
 					where pi.parent = so.name and pi.parent_item = so_item.item_code
 						and exists (select name from `tabBOM` bom where bom.item=pi.item_code
 							and bom.is_active = 1)))
+		order by {query_param}
 		""", self.as_dict(), as_dict=1)
 
 	return open_so

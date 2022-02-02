@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "naming_series:",
- "creation": "2017-10-29 11:53:09.523362",
+ "creation": "2022-01-27 13:39:56.211863",
  "doctype": "DocType",
  "document_type": "Document",
  "engine": "InnoDB",
@@ -22,6 +22,8 @@
   "to_date",
   "from_delivery_date",
   "to_delivery_date",
+  "sort_by_section",
+  "sort_by",
   "sales_orders_detail",
   "get_sales_orders",
   "sales_orders",
@@ -370,16 +372,29 @@
    "fieldname": "to_delivery_date",
    "fieldtype": "Date",
    "label": "To Delivery Date"
+  },
+  {
+   "fieldname": "sort_by",
+   "fieldtype": "Table",
+   "options": "Order Sorting"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval: doc.get_items_from == \"Sales Order\"",
+   "fieldname": "sort_by_section",
+   "fieldtype": "Section Break",
+   "label": "Sort By"
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-06 18:35:59.642232",
+ "modified": "2022-02-02 12:30:12.961084",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -397,5 +412,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "states": []
 }
