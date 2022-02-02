@@ -74,19 +74,21 @@ frappe.ui.form.on('Job Card', {
 			(frm.doc.for_quantity > frm.doc.total_completed_qty || !frm.doc.for_quantity)
 			&& (frm.doc.items || !frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)) {
 
-			//if Job Card is link to Work Order, the job card must not be able to start if Work Order in "Started" status yet
+			//if Job Card is link to Work Order, the job card must not be able to start if Work Order not "Started"
+			// and if stock mvt for WIP is required
 			if (frm.doc.work_order) {
 				frappe.db.get_value('Work Order', frm.doc.work_order,
-					'status').then((r) => {
-						console.log(r.message);
-					if (r.message.status == 'In Process' || r.message.status == 'Completed') {
-						frappe.db.get_value('Work Order', frm.doc.work_order,
-							'skip_transfer').then((r) => {
-								console.log(r.message);
-							});
-						console.log(r.message);
-						frm.trigger("prepare_timer_buttons");
-					}
+					'skip_transfer').then((r) => {
+						if (r.message.skip_transfer !== 1 ) {
+							frappe.db.get_value('Work Order', frm.doc.work_order,
+							'status').then((r) => {
+									if (r.message.status == 'In Process' || r.message.status == 'Completed') {
+										frm.trigger("prepare_timer_buttons");
+									}
+							})
+						} else {
+							frm.trigger("prepare_timer_buttons");
+						}
 				});
 			} else {
 				frm.trigger("prepare_timer_buttons");
