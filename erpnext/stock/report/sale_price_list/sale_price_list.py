@@ -30,14 +30,15 @@ def return_data(filters, lists):
 		
 		data.append(row)
 	else:
-		items = frappe.get_all("Item", ["*"])
+		filters_item = filters_items(filters)
+		items = frappe.get_all("Item", ["*"], filters = filters_item)
 
 		for item in items:
 			name = item.item_code + ":" + item.item_name
 			row = [name]
 
 			for list in lists:
-				condition_items = conditions_items(item.item_code, list)
+				condition_items = conditions_items(filters, item.item_code, list)
 				items = frappe.get_all("Item Price", ["*"], filters = condition_items)
 				
 				if len(items) > 0:
@@ -82,12 +83,23 @@ def conditions_item(filters, list):
 
 	return conditions
 
-def conditions_items(item_code, list):
+def conditions_items(filters, item_code, list):
 	conditions = ''	
 
 	conditions += "{"
 	conditions += '"price_list": "{}"'.format(list)	
 	conditions += ', "item_code": "{}"'.format(item_code)
+	conditions += '}'
+
+	return conditions
+
+def filters_items(filters):
+	conditions = ''	
+
+	conditions += "{"
+	conditions += '"company": "{}"'.format(filters.get("company"))
+	if filters.get("item_group"): conditions += ', "item_group": "{}"'.format(filters.get("item_group"))
+	if filters.get("category_for_sale"): conditions += ', "category_for_sale": "{}"'.format(filters.get("category_for_sale"))
 	conditions += '}'
 
 	return conditions
