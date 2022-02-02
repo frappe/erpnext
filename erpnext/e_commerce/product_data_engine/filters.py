@@ -99,18 +99,14 @@ class ProductFiltersBuilder:
 		if not attributes:
 			return []
 
-		result = frappe.db.sql(
-			"""
-			select
-				distinct attribute, attribute_value
-			from
-				`tabItem Variant Attribute`
-			where
-				attribute in %(attributes)s
-				and attribute_value is not null
-		""",
-			{"attributes": attributes},
-			as_dict=1,
+		result = frappe.get_all(
+			"Item Variant Attribute",
+			filters={
+				"attribute": ["in", attributes],
+				"attribute_value": ["is", "set"]
+			},
+			fields=["attribute", "attribute_value"],
+			distinct=True
 		)
 
 		attribute_value_map = {}

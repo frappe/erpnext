@@ -57,7 +57,7 @@ def remove_from_wishlist(item_code):
 				"parent": frappe.session.user
 			}
 		)
-		frappe.db.commit()
+		frappe.db.commit() # nosemgrep
 
 		wishlist_items = frappe.db.get_values(
 			"Wishlist Item",
