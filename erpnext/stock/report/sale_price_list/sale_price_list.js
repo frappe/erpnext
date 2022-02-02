@@ -5,10 +5,29 @@
 frappe.query_reports["Sale Price List"] = {
 	"filters": [
 		{
+			"fieldname": "company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+			"reqd": 1
+		},
+		{
 			"fieldname": "item_code",
 			"label": __("Item"),
 			"fieldtype": "Link",
-			"options": "Item",
-		}
+			"options": "Item"
+		},
+		{
+			"fieldname": "item_group",
+			"label": __("Item Group"),
+			"fieldtype": "Link",
+			"options": "Item Group"
+		},
+		{
+			"fieldname": "category_for_sale",
+			"label": __("Category for sale"),
+			"fieldtype": "Link",
+			"options": "Category for sale"
+		},
 	]
 };

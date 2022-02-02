@@ -12,7 +12,7 @@ def execute(filters=None):
 	columns = [
 		_("Item Code") + "::120", _("Item Name") + "::200", _("Quantity") + "::60", _("Total Sale") + ":Currency:110", _("Gross Amount") + ":Currency:110",
 		_("Discounts") + ":Currency:110", _("ISV") + ":Currency:110", _("Costo") + ":Currency:110",
-		_("Utility") + ":Currency:110", _("% Utility") + "::55"
+		_("Utility") + ":Currency:110"
 	]
 
 	# Declarate array
@@ -41,8 +41,6 @@ def execute(filters=None):
 				discount = invoice_item.discount_amount * invoice_item.qty
 				utility = invoice_item.amount - rate_purchase
 				# utility = invoice_item.amount - utility_initial
-				percentage = utility / invoice_item.amount * 100
-				percentage_round = round(percentage)
 
 				acc = 0
 				if len(registers) > 0:
@@ -56,7 +54,6 @@ def execute(filters=None):
 							select[6] += taxes_calculate
 							select[7] += rate_purchase
 							select[8] += utility
-							select[9] += percentage_round
 							acc -= 1
 					
 						if acc == len(registers):
@@ -69,8 +66,7 @@ def execute(filters=None):
 								discount,
 								taxes_calculate,
 								rate_purchase,
-								utility,
-								percentage_round
+								utility
 							]
 							registers.append(json)
 							break
@@ -84,14 +80,12 @@ def execute(filters=None):
 						discount,
 						taxes_calculate,
 						rate_purchase,
-						utility,
-						percentage_round
+						utility
 					]
 					registers.append(new)
 
 	for reg in registers:
-		percentage = "{}%".format(reg[9])
-		row = [reg[0], reg[1], reg[2], reg[3], reg[4], reg[5], reg[6], reg[7], reg[8], percentage]
+		row = [reg[0], reg[1], reg[2], reg[3], reg[4], reg[5], reg[6], reg[7], reg[8]]
 		data.append(row)
 	return columns, data
 
