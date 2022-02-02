@@ -34,13 +34,13 @@
 }
 
 .website-list {
-    background-color: var(--fg-color);
-    padding: 0 var(--padding-lg);
-    border-radius: var(--border-radius-md);
+	background-color: var(--fg-color);
+	padding: 0 var(--padding-lg);
+	border-radius: var(--border-radius-md);
 
 	@media screen and (max-width: 567px) {
-    	margin-left: -2rem;
-    }	
+		margin-left: -2rem;
+	}
 
 	&.result {
 		border-bottom: 1px solid var(--border-color);
