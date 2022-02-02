@@ -333,23 +333,24 @@ def make_reverse_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		set_as_cancel(gl_entries[0]['voucher_type'], gl_entries[0]['voucher_no'])
 
 		for entry in gl_entries:
-			entry['name'] = None
-			debit = entry.get('debit', 0)
-			credit = entry.get('credit', 0)
+			new_gle = copy.deepcopy(entry)
+			new_gle['name'] = None
+			debit = new_gle.get('debit', 0)
+			credit = new_gle.get('credit', 0)
 
-			debit_in_account_currency = entry.get('debit_in_account_currency', 0)
-			credit_in_account_currency = entry.get('credit_in_account_currency', 0)
+			debit_in_account_currency = new_gle.get('debit_in_account_currency', 0)
+			credit_in_account_currency = new_gle.get('credit_in_account_currency', 0)
 
-			entry['debit'] = credit
-			entry['credit'] = debit
-			entry['debit_in_account_currency'] = credit_in_account_currency
-			entry['credit_in_account_currency'] = debit_in_account_currency
+			new_gle['debit'] = credit
+			new_gle['credit'] = debit
+			new_gle['debit_in_account_currency'] = credit_in_account_currency
+			new_gle['credit_in_account_currency'] = debit_in_account_currency
 
-			entry['remarks'] = "On cancellation of " + entry['voucher_no']
-			entry['is_cancelled'] = 1
+			new_gle['remarks'] = "On cancellation of " + new_gle['voucher_no']
+			new_gle['is_cancelled'] = 1
 
-			if entry['debit'] or entry['credit']:
-				make_entry(entry, adv_adj, "Yes")
+			if new_gle['debit'] or new_gle['credit']:
+				make_entry(new_gle, adv_adj, "Yes")
 
 
 def check_freezing_date(posting_date, adv_adj=False):
