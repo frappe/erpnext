@@ -149,12 +149,12 @@ class BOM(WebsiteGenerator):
 		self.set_bom_material_details()
 		self.set_bom_scrap_items_detail()
 		self.validate_materials()
+		self.validate_transfer_against()
 		self.set_routing_operations()
 		self.validate_operations()
 		self.calculate_cost()
 		self.update_stock_qty()
 		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate = False, save=False)
-		self.set_bom_level()
 		self.validate_scrap_items()
 
 	def get_context(self, context):
@@ -203,6 +203,10 @@ class BOM(WebsiteGenerator):
 		for item in self.get("items"):
 			self.validate_bom_currency(item)
 
+			item.bom_no = ''
+			if not item.do_not_explode:
+				item.bom_no = item.bom_no
+
 			ret = self.get_bom_material_detail({
 				"company": self.company,
 				"item_code": item.item_code,
@@ -214,8 +218,10 @@ class BOM(WebsiteGenerator):
 				"uom": item.uom,
 				"stock_uom": item.stock_uom,
 				"conversion_factor": item.conversion_factor,
-				"sourced_by_supplier": item.sourced_by_supplier
+				"sourced_by_supplier": item.sourced_by_supplier,
+				"do_not_explode": item.do_not_explode
 			})
+
 			for r in ret:
 				if not item.get(r):
 					item.set(r, ret[r])
@@ -266,6 +272,9 @@ class BOM(WebsiteGenerator):
 			 'include_item_in_manufacturing': cint(args.get('transfer_for_manufacture')),
 			 'sourced_by_supplier'		: args.get('sourced_by_supplier', 0)
 		}
+
+		if args.get('do_not_explode'):
+			ret_item['bom_no'] = ''
 
 		return ret_item
 
@@ -530,16 +539,6 @@ class BOM(WebsiteGenerator):
 				row.hour_rate = (hour_rate / flt(self.conversion_rate)
 					if self.conversion_rate and hour_rate else hour_rate)
 
-			if self.routing:
-				time_in_mins = flt(frappe.db.get_value("BOM Operation", {
-						"workstation": row.workstation,
-						"operation": row.operation,
-						"parent": self.routing
-				}, ["time_in_mins"]))
-
-				if time_in_mins:
-					row.time_in_mins = time_in_mins
-
 		if row.hour_rate and row.time_in_mins:
 			row.base_hour_rate = flt(row.hour_rate) * flt(self.conversion_rate)
 			row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
@@ -691,6 +690,12 @@ class BOM(WebsiteGenerator):
 			if act_pbom and act_pbom[0][0]:
 				frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
 
+	def validate_transfer_against(self):
+		if not self.with_operations:
+			self.transfer_material_against = "Work Order"
+		if not self.transfer_material_against and not self.is_new():
+			frappe.throw(_("Setting {} is required").format(self.meta.get_label("transfer_material_against")), title=_("Missing value"))
+
 	def set_routing_operations(self):
 		if self.routing and self.with_operations and not self.operations:
 			self.get_routing()
@@ -709,20 +714,6 @@ class BOM(WebsiteGenerator):
 	def get_tree_representation(self) -> BOMTree:
 		"""Get a complete tree representation preserving order of child items."""
 		return BOMTree(self.name)
-
-	def set_bom_level(self, update=False):
-		levels = []
-
-		self.bom_level = 0
-		for row in self.items:
-			if row.bom_no:
-				levels.append(frappe.get_cached_value("BOM", row.bom_no, "bom_level") or 0)
-
-		if levels:
-			self.bom_level = max(levels) + 1
-
-		if update:
-			self.db_set("bom_level", self.bom_level)
 
 	def validate_scrap_items(self):
 		for item in self.scrap_items:

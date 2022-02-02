@@ -65,10 +65,8 @@ webform_list_context = "erpnext.controllers.website_list_for_contact.get_webform
 calendars = ["Task", "Work Order", "Leave Application", "Sales Order", "Holiday List", "Course Schedule"]
 
 domains = {
-	'Agriculture': 'erpnext.domains.agriculture',
 	'Distribution': 'erpnext.domains.distribution',
 	'Education': 'erpnext.domains.education',
-	'Hospitality': 'erpnext.domains.hospitality',
 	'Manufacturing': 'erpnext.domains.manufacturing',
 	'Non Profit': 'erpnext.domains.non_profit',
 	'Retail': 'erpnext.domains.retail',
@@ -445,6 +443,7 @@ regional_overrides = {
 		'erpnext.controllers.taxes_and_totals.get_regional_round_off_accounts': 'erpnext.regional.india.utils.get_regional_round_off_accounts',
 		'erpnext.hr.utils.calculate_annual_eligible_hra_exemption': 'erpnext.regional.india.utils.calculate_annual_eligible_hra_exemption',
 		'erpnext.hr.utils.calculate_hra_exemption_for_period': 'erpnext.regional.india.utils.calculate_hra_exemption_for_period',
+		'erpnext.controllers.accounts_controller.validate_einvoice_fields': 'erpnext.regional.india.e_invoice.utils.validate_einvoice_fields',
 		'erpnext.assets.doctype.asset.asset.get_depreciation_amount': 'erpnext.regional.india.utils.get_depreciation_amount',
 		'erpnext.stock.doctype.item.item.set_item_tax_from_hsn_code': 'erpnext.regional.india.utils.set_item_tax_from_hsn_code'
 	},
@@ -567,18 +566,6 @@ global_search_doctypes = {
 		{'doctype': 'Assessment Code', 'index': 39},
 		{'doctype': 'Discussion', 'index': 40},
 	],
-	"Agriculture": [
-		{'doctype': 'Weather', 'index': 1},
-		{'doctype': 'Soil Texture', 'index': 2},
-		{'doctype': 'Water Analysis', 'index': 3},
-		{'doctype': 'Soil Analysis', 'index': 4},
-		{'doctype': 'Plant Analysis', 'index': 5},
-		{'doctype': 'Agriculture Analysis Criteria', 'index': 6},
-		{'doctype': 'Disease', 'index': 7},
-		{'doctype': 'Crop', 'index': 8},
-		{'doctype': 'Fertilizer', 'index': 9},
-		{'doctype': 'Crop Cycle', 'index': 10}
-	],
 	"Non Profit": [
 		{'doctype': 'Certified Consultant', 'index': 1},
 		{'doctype': 'Certification Application', 'index': 2},
@@ -592,13 +579,6 @@ global_search_doctypes = {
 		{'doctype': 'Donor Type', 'index': 10},
 		{'doctype': 'Membership Type', 'index': 11}
 	],
-	"Hospitality": [
-		{'doctype': 'Hotel Room', 'index': 0},
-		{'doctype': 'Hotel Room Reservation', 'index': 1},
-		{'doctype': 'Hotel Room Pricing', 'index': 2},
-		{'doctype': 'Hotel Room Package', 'index': 3},
-		{'doctype': 'Hotel Room Type', 'index': 4}
-	]
 }
 
 additional_timeline_content = {
