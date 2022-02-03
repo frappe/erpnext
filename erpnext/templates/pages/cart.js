@@ -1,9 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-// js inside blog page
-
-// shopping cart
+// JS exclusive to /cart page
 frappe.provide("erpnext.e_commerce.shopping_cart");
 var shopping_cart = erpnext.e_commerce.shopping_cart;
 
