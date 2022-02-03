@@ -215,11 +215,14 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
 		row["has_value"] = has_value
 		data.append(row)
 
-		# if d.indent == 0:
-		# 	total_debit = d.debit
-		# 	total_credit = d.credit
+		if d.indent == 0:
+			total_debit += d.debit
+			total_credit += d.credit
 
-	data.extend([{},total_row])
+	row_total = {"account": "Total", "parent_account": None, "indent": 0, "from_date": None, "to_date": None, "currency": None, "account_name": "Total", "debit": total_debit, "credit": total_credit}
+	data.append(row_total)
+
+	# data.extend([{},total_row])
 
 	
 
@@ -227,8 +230,6 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
 	# 	if d.indent == 0:
 	# 		total_debit = d.debit
 	# 		total_credit = d.credit
-	
-	# row_total = ["Total",]
 
 	return data
 
