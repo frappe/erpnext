@@ -1,6 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
-
+import "../../../../frappe/frappe/public/js/controls.bundle";
+import "../../../../frappe/frappe/public/js/dialog.bundle";
 // js inside blog page
 
 // shopping cart
