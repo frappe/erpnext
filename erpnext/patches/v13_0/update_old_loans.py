@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 import frappe
 from frappe import _
 from frappe.model.naming import make_autoname
@@ -16,16 +16,17 @@ from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_
 def execute():
 
 	# Create a penalty account for loan types
+	docs_to_reload = {
+		'loan_management': ['loan_type', 'loan', 'repayment_schedule', 
+			'process_loan_interest_accrual', 'loan_repayment', 'loan_repayment_detail',
+			'loan_interest_accrual'],
+		'accounts': ['gl_entry', 'journal_entry_account', 'applicable_on_account',
+			'allowed_dimension', 'accounting_dimension_filter']
+	}
 
-	frappe.reload_doc('loan_management', 'doctype', 'loan_type')
-	frappe.reload_doc('loan_management', 'doctype', 'loan')
-	frappe.reload_doc('loan_management', 'doctype', 'repayment_schedule')
-	frappe.reload_doc('loan_management', 'doctype', 'process_loan_interest_accrual')
-	frappe.reload_doc('loan_management', 'doctype', 'loan_repayment')
-	frappe.reload_doc('loan_management', 'doctype', 'loan_repayment_detail')
-	frappe.reload_doc('loan_management', 'doctype', 'loan_interest_accrual')
-	frappe.reload_doc('accounts', 'doctype', 'gl_entry')
-	frappe.reload_doc('accounts', 'doctype', 'journal_entry_account')
+	for module in docs_to_reload:
+		for doctype in docs_to_reload[module]:
+			frappe.reload_doc(module, 'doctype', doctype)
 
 	updated_loan_types = []
 	loans_to_close = []
