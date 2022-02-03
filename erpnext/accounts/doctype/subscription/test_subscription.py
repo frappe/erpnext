@@ -679,3 +679,28 @@ class TestSubscription(unittest.TestCase):
 		# Check the currency of the created invoice
 		currency = frappe.db.get_value('Sales Invoice', subscription.invoices[0].invoice, 'currency')
 		self.assertEqual(currency, 'USD')
+
+	def test_subscription_recovery(self):
+		"""Test if Subscription recovers when start/end date run out of sync with created invoices."""
+		subscription = frappe.new_doc("Subscription")
+		subscription.party_type = "Customer"
+		subscription.party = "_Test Subscription Customer"
+		subscription.company = "_Test Company"
+		subscription.start_date = "2021-12-01"
+		subscription.generate_new_invoices_past_due_date = 1
+		subscription.append("plans", {"plan": "_Test Plan Name", "qty": 1})
+		subscription.submit_invoice = 0
+		subscription.save()
+
+		# create invoices for the first two moths
+		subscription.process()
+		subscription.process()
+		self.assertEqual(len(subscription.invoices), 2)
+
+		# remove most recent invoice
+		subscription.invoices.pop()
+		subscription.save()
+
+		# recreate most recent invoice
+		subscription.process()
+		self.assertEqual(len(subscription.invoices), 2)
