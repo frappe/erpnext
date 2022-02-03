@@ -42,10 +42,8 @@
   "items",
   "section_break_32",
   "base_total",
-  "base_grand_total",
   "column_break_33",
   "total",
-  "grand_total",
   "contact_info",
   "customer_address",
   "address_display",
@@ -476,21 +474,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "base_grand_total",
-   "fieldtype": "Currency",
-   "label": "Grand Total (Company Currency)",
-   "options": "Company:company:default_currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "grand_total",
-   "fieldtype": "Currency",
-   "label": "Grand Total",
-   "options": "currency",
-   "read_only": 1
-  },
-  {
    "fieldname": "lost_detail_section",
    "fieldtype": "Section Break",
    "label": "Lost Reasons"
@@ -510,7 +493,7 @@
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2021-10-21 12:04:30.151379",
+ "modified": "2022-01-29 19:32:26.382896",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
@@ -547,6 +530,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "subject_field": "title",
  "timeline_field": "party_name",
  "title_field": "title",

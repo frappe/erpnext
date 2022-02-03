@@ -40,7 +40,10 @@ class StockController(AccountsController):
 		if self.docstatus == 2:
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
-		if cint(erpnext.is_perpetual_inventory_enabled(self.company)):
+		provisional_accounting_for_non_stock_items = \
+			cint(frappe.db.get_value('Company', self.company, 'enable_provisional_accounting_for_non_stock_items'))
+
+		if cint(erpnext.is_perpetual_inventory_enabled(self.company)) or provisional_accounting_for_non_stock_items:
 			warehouse_account = get_warehouse_account_map(self.company)
 
 			if self.docstatus==1:
@@ -77,17 +80,17 @@ class StockController(AccountsController):
 						.format(d.idx, get_link_to_form("Batch", d.get("batch_no"))))
 
 	def clean_serial_nos(self):
+		from erpnext.stock.doctype.serial_no.serial_no import clean_serial_no_string
+
 		for row in self.get("items"):
 			if hasattr(row, "serial_no") and row.serial_no:
-				# replace commas by linefeed
-				row.serial_no = row.serial_no.replace(",", "\n")
+				# remove extra whitespace and store one serial no on each line
+				row.serial_no = clean_serial_no_string(row.serial_no)
 
-				# strip preceeding and succeeding spaces for each SN
-				# (SN could have valid spaces in between e.g. SN - 123 - 2021)
-				serial_no_list = row.serial_no.split("\n")
-				serial_no_list = [sn.strip() for sn in serial_no_list]
-
-				row.serial_no = "\n".join(serial_no_list)
+		for row in self.get('packed_items') or []:
+			if hasattr(row, "serial_no") and row.serial_no:
+				# remove extra whitespace and store one serial no on each line
+				row.serial_no = clean_serial_no_string(row.serial_no)
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
