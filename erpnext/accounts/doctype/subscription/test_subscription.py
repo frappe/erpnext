@@ -695,7 +695,11 @@ class TestSubscription(unittest.TestCase):
 		# create invoices for the first two moths
 		subscription.process()
 		subscription.process()
+		frappe.db.commit()
+
 		self.assertEqual(len(subscription.invoices), 2)
+		self.assertEqual(frappe.db.get_value("Sales Invoice", subscription.invoices[0], "from_date"), "2021-12-01")
+		self.assertEqual(frappe.db.get_value("Sales Invoice", subscription.invoices[1], "from_date"), "2022-01-01")
 
 		# remove most recent invoice
 		subscription.invoices.pop()
@@ -703,4 +707,8 @@ class TestSubscription(unittest.TestCase):
 
 		# recreate most recent invoice
 		subscription.process()
+		frappe.db.commit()
+
 		self.assertEqual(len(subscription.invoices), 2)
+		self.assertEqual(frappe.db.get_value("Sales Invoice", subscription.invoices[0], "from_date"), "2021-12-01")
+		self.assertEqual(frappe.db.get_value("Sales Invoice", subscription.invoices[1], "from_date"), "2022-01-01")
