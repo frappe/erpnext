@@ -1,9 +1,9 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 
