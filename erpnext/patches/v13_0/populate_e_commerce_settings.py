@@ -28,10 +28,10 @@ def execute():
 		query = (
 			frappe.qb.from_(singles)
 			.select(
-				singles.field, singles.value
+				singles["field"], singles.value
 			).where(
 				(singles.doctype == doctype)
-				& (singles.field in fields)
+				& (singles["field"].isin(fields))
 			)
 		)
 		data = query.run(as_dict=True)
