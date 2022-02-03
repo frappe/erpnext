@@ -1,7 +1,6 @@
 import "./website_utils";
 import "./wishlist";
 import "./shopping_cart";
-import "./cart";
 import "./customer_reviews";
 import "../../e_commerce/product_ui/list";
 import "../../e_commerce/product_ui/views";
