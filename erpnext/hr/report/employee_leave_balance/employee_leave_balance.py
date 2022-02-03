@@ -230,13 +230,13 @@ def get_allocated_and_expired_leaves(from_date, to_date, employee, leave_type):
 	records = get_leave_ledger_entries(from_date, to_date, employee, leave_type)
 
 	for record in records:
-		if record.to_date < getdate(to_date):
-			expired_leaves += record.leaves
-
 		# new allocation records with `is_expired=1` are created when leave expires
 		# these new records should not be considered, else it leads to negative leave balance
 		if record.is_expired:
 			continue
+
+		if record.to_date < getdate(to_date):
+			expired_leaves += record.leaves
 
 		if record.from_date >= getdate(from_date):
 			if record.is_carry_forward:
