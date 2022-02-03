@@ -292,7 +292,9 @@ $.extend(shopping_cart, {
 });
 
 frappe.ready(function() {
-	$(".cart-icon").hide();
+	if (window.location.pathname === "/cart") {
+		$(".cart-icon").hide();
+	}
 	shopping_cart.parent = $(".cart-container");
 	shopping_cart.bind_events();
 });
