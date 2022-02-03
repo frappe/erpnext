@@ -78,6 +78,7 @@ frappe.ui.form.on('Asset', {
 		frappe.ui.form.trigger("Asset", "is_existing_asset");
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
 		frm.events.make_schedules_editable(frm);
+		frm.trigger("toggle_make_depreciation_entry");
 
 		if (frm.doc.docstatus==1) {
 			if (in_list(["Submitted", "Partially Depreciated", "Fully Depreciated"], frm.doc.status)) {
@@ -138,6 +139,18 @@ frappe.ui.form.on('Asset', {
 			frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
 			frm.set_df_property('depreciation_start_date', 'reqd', 1, frm.doc.name, 'finance_books');
 			frm.refresh_field('finance_books');
+		}
+	},
+
+	toggle_make_depreciation_entry: function(frm) {
+		if (frm.doc.calculate_depreciation){
+			if (in_list(["Submitted", "Partially Depreciated"], frm.doc.status)){
+				frm.fields_dict['schedules'].grid.set_column_disp('make_depreciation_entry', true);
+			} else {
+				frm.fields_dict['schedules'].grid.set_column_disp('make_depreciation_entry', false);
+			}
+
+			frm.refresh_field('schedules');
 		}
 	},
 
