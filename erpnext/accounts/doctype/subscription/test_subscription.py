@@ -695,7 +695,7 @@ class TestSubscription(unittest.TestCase):
 		# create invoices for the first two moths
 		subscription.process()
 		subscription.process()
-		frappe.db.commit()
+		frappe.db.commit() # commit needed to query invoice dates // nosemgrep
 
 		self.assertEqual(len(subscription.invoices), 2)
 		self.assertEqual(frappe.db.get_value("Sales Invoice", subscription.invoices[0], "from_date"), "2021-12-01")
@@ -707,7 +707,7 @@ class TestSubscription(unittest.TestCase):
 
 		# recreate most recent invoice
 		subscription.process()
-		frappe.db.commit()
+		frappe.db.commit() # commit needed to query invoice dates // nosemgrep
 
 		self.assertEqual(len(subscription.invoices), 2)
 		self.assertEqual(frappe.db.get_value("Sales Invoice", subscription.invoices[0], "from_date"), "2021-12-01")
