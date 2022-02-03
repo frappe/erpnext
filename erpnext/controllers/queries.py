@@ -249,6 +249,9 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				del filters['customer']
 			else:
 				del filters['supplier']
+		else:
+			filters.pop('customer', None)
+			filters.pop('supplier', None)
 
 
 	description_cond = ''
