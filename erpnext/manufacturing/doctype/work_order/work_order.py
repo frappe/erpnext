@@ -449,7 +449,7 @@ class WorkOrder(Document):
 
 	def update_ordered_qty(self):
 		if self.production_plan and self.production_plan_item:
-			qty = frappe.get_value("Production Plan Item", self.production_plan_item, "ordered_qty")
+			qty = frappe.get_value("Production Plan Item", self.production_plan_item, "ordered_qty") or 0.0
 
 			if self.docstatus == 1:
 				qty += self.qty
