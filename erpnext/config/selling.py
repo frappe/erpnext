@@ -257,6 +257,13 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Group of Products Sold",
+					"doctype": "Sales Invoice",
+                    "dependencies": ["Sales Invoice"]
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Products Sold Categories",
 					"doctype": "Sold Products",
                     "dependencies": ["Sales Invoice"]
