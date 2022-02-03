@@ -481,7 +481,8 @@ def get_allocation_expiry(employee, leave_type, to_date, from_date):
 			'leave_type': leave_type,
 			'is_carry_forward': 1,
 			'transaction_type': 'Leave Allocation',
-			'to_date': ['between', (from_date, to_date)]
+			'to_date': ['between', (from_date, to_date)],
+			'docstatus': 1
 		},fields=['to_date'])
 	return expiry[0]['to_date'] if expiry else None
 
@@ -648,18 +649,18 @@ def get_remaining_leaves(allocation, leaves_taken, date, expiry):
 
 	return _get_remaining_leaves(total_leaves, allocation.to_date)
 
-def get_leaves_for_period(employee, leave_type, from_date, to_date, do_not_skip_expired_leaves=False):
+def get_leaves_for_period(employee, leave_type, from_date, to_date, skip_expired_leaves=True):
 	leave_entries = get_leave_entries(employee, leave_type, from_date, to_date)
 	leave_days = 0
 
 	for leave_entry in leave_entries:
 		inclusive_period = leave_entry.from_date >= getdate(from_date) and leave_entry.to_date <= getdate(to_date)
 
-		if  inclusive_period and leave_entry.transaction_type == 'Leave Encashment':
+		if inclusive_period and leave_entry.transaction_type == 'Leave Encashment':
 			leave_days += leave_entry.leaves
 
 		elif inclusive_period and leave_entry.transaction_type == 'Leave Allocation' and leave_entry.is_expired \
-			and (do_not_skip_expired_leaves or not skip_expiry_leaves(leave_entry, to_date)):
+			and not skip_expired_leaves:
 			leave_days += leave_entry.leaves
 
 		elif leave_entry.transaction_type == 'Leave Application':
@@ -681,11 +682,6 @@ def get_leaves_for_period(employee, leave_type, from_date, to_date, do_not_skip_
 
 	return leave_days
 
-def skip_expiry_leaves(leave_entry, date):
-	''' Checks whether the expired leaves coincide with the to_date of leave balance check.
-		This allows backdated leave entry creation for non carry forwarded allocation '''
-	end_date = frappe.db.get_value("Leave Allocation", {'name': leave_entry.transaction_name}, ['to_date'])
-	return True if end_date == date and not leave_entry.is_carry_forward else False
 
 def get_leave_entries(employee, leave_type, from_date, to_date):
 	''' Returns leave entries between from_date and to_date. '''
