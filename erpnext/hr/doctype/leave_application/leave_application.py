@@ -30,11 +30,13 @@ from erpnext.hr.utils import (
 	validate_active_employee,
 )
 
+from typing import Dict
 
 class LeaveDayBlockedError(frappe.ValidationError): pass
 class OverlapError(frappe.ValidationError): pass
 class AttendanceAlreadyMarkedError(frappe.ValidationError): pass
 class NotAnOptionalHoliday(frappe.ValidationError): pass
+class InsufficientLeaveBalanceError(frappe.ValidationError): pass
 
 from frappe.model.document import Document
 
@@ -261,15 +263,18 @@ class LeaveApplication(Document):
 				frappe.throw(_("The day(s) on which you are applying for leave are holidays. You need not apply for leave."))
 
 			if not is_lwp(self.leave_type):
-				self.leave_balance = get_leave_balance_on(self.employee, self.leave_type, self.from_date, self.to_date,
-					consider_all_leaves_in_the_allocation_period=True)
-				if self.status != "Rejected" and (self.leave_balance < self.total_leave_days or not self.leave_balance):
+				leave_balance = get_leave_balance_on(self.employee, self.leave_type, self.from_date, self.to_date,
+					consider_all_leaves_in_the_allocation_period=True, for_consumption=True)
+				self.leave_balance = leave_balance.get("leave_balance")
+				leave_balance_for_consumption = leave_balance.get("leave_balance_for_consumption")
+
+				if self.status != "Rejected" and (leave_balance_for_consumption < self.total_leave_days or not leave_balance_for_consumption):
 					if frappe.db.get_value("Leave Type", self.leave_type, "allow_negative"):
-						frappe.msgprint(_("Note: There is not enough leave balance for Leave Type {0}")
-							.format(self.leave_type))
+						frappe.msgprint(_("Insufficient leave balance for Leave Type {0}")
+							.format(frappe.bold(self.leave_type)), title=_("Warning"), indicator="orange")
 					else:
-						frappe.throw(_("There is not enough leave balance for Leave Type {0}")
-							.format(self.leave_type))
+						frappe.throw(_("Insufficient leave balance for Leave Type {0}")
+							.format(self.leave_type), InsufficientLeaveBalanceError, title=_("Insufficient Balance"))
 
 	def validate_leave_overlap(self):
 		if not self.name:
@@ -426,7 +431,7 @@ class LeaveApplication(Document):
 		if self.status != 'Approved' and submit:
 			return
 
-		expiry_date = get_allocation_expiry(self.employee, self.leave_type,
+		expiry_date = get_allocation_expiry_for_cf_leaves(self.employee, self.leave_type,
 			self.to_date, self.from_date)
 
 		lwp = frappe.db.get_value("Leave Type", self.leave_type, "is_lwp")
@@ -473,7 +478,7 @@ class LeaveApplication(Document):
 			create_leave_ledger_entry(self, args, submit)
 
 
-def get_allocation_expiry(employee, leave_type, to_date, from_date):
+def get_allocation_expiry_for_cf_leaves(employee, leave_type, to_date, from_date):
 	''' Returns expiry of carry forward allocation in leave ledger entry '''
 	expiry =  frappe.get_all("Leave Ledger Entry",
 		filters={
@@ -545,7 +550,8 @@ def get_leave_details(employee, date):
 	return ret
 
 @frappe.whitelist()
-def get_leave_balance_on(employee, leave_type, date, to_date=None, consider_all_leaves_in_the_allocation_period=False):
+def get_leave_balance_on(employee, leave_type, date, to_date=None,
+	consider_all_leaves_in_the_allocation_period=False, for_consumption=False):
 	'''
 		Returns leave balance till date
 		:param employee: employee name
@@ -553,6 +559,11 @@ def get_leave_balance_on(employee, leave_type, date, to_date=None, consider_all_
 		:param date: date to check balance on
 		:param to_date: future date to check for allocation expiry
 		:param consider_all_leaves_in_the_allocation_period: consider all leaves taken till the allocation end date
+		:param for_consumption: flag to check if leave balance is required for consumption or display
+			eg: employee has leave balance = 10 but allocation is expiring in 1 day so employee can only consume 1 leave
+			in this case leave_balance = 10 but leave_balance_for_consumption = 1
+			if True, returns a dict eg: {'leave_balance': 10, 'leave_balance_for_consumption': 1}
+			else, returns leave_balance (in this case 10)
 	'''
 
 	if not to_date:
@@ -562,11 +573,17 @@ def get_leave_balance_on(employee, leave_type, date, to_date=None, consider_all_
 	allocation = allocation_records.get(leave_type, frappe._dict())
 
 	end_date = allocation.to_date if consider_all_leaves_in_the_allocation_period else date
-	expiry = get_allocation_expiry(employee, leave_type, to_date, date)
+	cf_expiry = get_allocation_expiry_for_cf_leaves(employee, leave_type, to_date, date)
 
 	leaves_taken = get_leaves_for_period(employee, leave_type, allocation.from_date, end_date)
 
-	return get_remaining_leaves(allocation, leaves_taken, date, expiry)
+	remaining_leaves = get_remaining_leaves(allocation, leaves_taken, date, cf_expiry)
+
+	if for_consumption:
+		return remaining_leaves
+	else:
+		return remaining_leaves.get('leave_balance')
+
 
 def get_leave_allocation_records(employee, date, leave_type=None):
 	"""Returns the total allocated leaves and carry forwarded leaves based on ledger entries"""
@@ -629,25 +646,34 @@ def get_pending_leaves_for_period(employee, leave_type, from_date, to_date):
 		}, fields=['SUM(total_leave_days) as leaves'])[0]
 	return leaves['leaves'] if leaves['leaves'] else 0.0
 
-def get_remaining_leaves(allocation, leaves_taken, date, expiry):
-	''' Returns minimum leaves remaining after comparing with remaining days for allocation expiry '''
+def get_remaining_leaves(allocation, leaves_taken, date, cf_expiry) -> Dict[str, float]:
+	'''Returns a dict of leave_balance and leave_balance_for_consumption
+	leave_balance returns the available leave balance
+	leave_balance_for_consumption returns the minimum leaves remaining after comparing with remaining days for allocation expiry
+	'''
 	def _get_remaining_leaves(remaining_leaves, end_date):
-
+		''' Returns minimum leaves remaining after comparing with remaining days for allocation expiry '''
 		if remaining_leaves > 0:
 			remaining_days = date_diff(end_date, date) + 1
 			remaining_leaves = min(remaining_days, remaining_leaves)
 
 		return remaining_leaves
 
-	total_leaves = flt(allocation.total_leaves_allocated) + flt(leaves_taken)
+	leave_balance = leave_balance_for_consumption = flt(allocation.total_leaves_allocated) + flt(leaves_taken)
 
-	if expiry and allocation.unused_leaves:
-		remaining_leaves = flt(allocation.unused_leaves) + flt(leaves_taken)
-		remaining_leaves = _get_remaining_leaves(remaining_leaves, expiry)
+	# balance for carry forwarded leaves
+	if cf_expiry and allocation.unused_leaves:
+		cf_leaves = flt(allocation.unused_leaves) + flt(leaves_taken)
+		remaining_cf_leaves = _get_remaining_leaves(cf_leaves, cf_expiry)
 
-		total_leaves = flt(allocation.new_leaves_allocated) + flt(remaining_leaves)
+		leave_balance = flt(allocation.new_leaves_allocated) + flt(cf_leaves)
+		leave_balance_for_consumption = flt(allocation.new_leaves_allocated) + flt(remaining_cf_leaves)
 
-	return _get_remaining_leaves(total_leaves, allocation.to_date)
+	remaining_leaves = _get_remaining_leaves(leave_balance_for_consumption, allocation.to_date)
+	return {
+		'leave_balance': leave_balance,
+		'leave_balance_for_consumption': remaining_leaves
+	}
 
 def get_leaves_for_period(employee, leave_type, from_date, to_date, skip_expired_leaves=True):
 	leave_entries = get_leave_entries(employee, leave_type, from_date, to_date)
