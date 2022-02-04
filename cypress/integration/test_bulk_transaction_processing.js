@@ -39,6 +39,6 @@ describe("Bulk Transaction Processing", () => {
 		cy.get(".modal-content > .modal-footer > .standard-actions")
 			.contains("Yes")
 			.click({ force: true });
-		cy.contains("Creation of Sales Invoice Successfull");
+		cy.contains("Creation of Sales Invoice successful");
 	});
 });

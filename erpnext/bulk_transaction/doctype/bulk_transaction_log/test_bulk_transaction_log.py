@@ -99,8 +99,7 @@ def create_so():
 		"rate": 80,
 	})
 
-	so.flags.ignore_validate = True
-	so.insert(ignore_mandatory=True)
+	so.insert()
 	so.submit()
 
 	return so.name

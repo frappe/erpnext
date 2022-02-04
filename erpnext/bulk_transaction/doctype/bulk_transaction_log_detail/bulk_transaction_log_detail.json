@@ -18,52 +18,62 @@
  "fields": [
   {
    "fieldname": "transaction_name",
-   "fieldtype": "Data",
+   "fieldtype": "Dynamic Link",
    "in_list_view": 1,
-   "label": "Name"
+   "label": "Name",
+   "options": "from_doctype"
   },
   {
    "fieldname": "transaction_status",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Status"
+   "label": "Status",
+   "read_only": 1
   },
   {
    "fieldname": "error_description",
    "fieldtype": "Long Text",
-   "label": "Error Description"
+   "label": "Error Description",
+   "read_only": 1
   },
   {
    "fieldname": "from_doctype",
-   "fieldtype": "Data",
-   "label": "From Doctype"
+   "fieldtype": "Link",
+   "label": "From Doctype",
+   "options": "DocType",
+   "read_only": 1
   },
   {
    "fieldname": "to_doctype",
-   "fieldtype": "Data",
-   "label": "To Doctype"
+   "fieldtype": "Link",
+   "label": "To Doctype",
+   "options": "DocType",
+   "read_only": 1
   },
   {
    "fieldname": "date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Date "
+   "label": "Date ",
+   "read_only": 1
   },
   {
    "fieldname": "time",
    "fieldtype": "Time",
-   "label": "Time"
+   "label": "Time",
+   "read_only": 1
   },
   {
    "fieldname": "retried",
    "fieldtype": "Int",
-   "label": "Retried"
+   "label": "Retried",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-12-02 16:55:13.684803",
+ "modified": "2022-02-03 19:57:31.650359",
  "modified_by": "Administrator",
  "module": "Bulk Transaction",
  "name": "Bulk Transaction Log Detail",
@@ -71,5 +81,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

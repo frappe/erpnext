@@ -13,7 +13,8 @@
   {
    "fieldname": "log_date",
    "fieldtype": "Date",
-   "label": "Log Date"
+   "label": "Log Date",
+   "read_only": 1
   },
   {
    "fieldname": "logger_data",
@@ -24,7 +25,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-23 16:10:43.622245",
+ "modified": "2022-02-03 17:23:02.935325",
  "modified_by": "Administrator",
  "module": "Bulk Transaction",
  "name": "Bulk Transaction Log",
@@ -45,5 +46,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

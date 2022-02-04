@@ -45,10 +45,9 @@ def job(deserialized_data, from_doctype, to_doctype):
 			frappe.db.rollback(save_point="before_creation_state")
 			failed_history.append(e)
 			failed.append(e)
-			update_logger(doc_name, e, from_doctype, to_doctype, status="Failed")
-
+			update_logger(doc_name, e, from_doctype, to_doctype, status="Failed", log_date=str(date.today()))
 		if not failed:
-			update_logger(doc_name, None, from_doctype, to_doctype, status="Success")
+			update_logger(doc_name, None, from_doctype, to_doctype, status="Success", log_date=str(date.today()))
 
 	show_job_status(failed_history, deserialized_data, to_doctype)
 
@@ -106,12 +105,12 @@ def task(doc_name, from_doctype, to_doctype):
 	obj.insert(ignore_mandatory=True)
 
 
-def check_logger_doc_exists():
-	return frappe.db.exists("Bulk Transaction Log", str(date.today()))
+def check_logger_doc_exists(log_date):
+	return frappe.db.exists("Bulk Transaction Log", log_date)
 
 
-def get_logger_doc():
-	return frappe.get_doc("Bulk Transaction Log", str(date.today()))
+def get_logger_doc(log_date):
+	return frappe.get_doc("Bulk Transaction Log", log_date)
 
 
 def create_logger_doc():
@@ -135,13 +134,13 @@ def append_data_to_logger(log_doc, doc_name, error, from_doctype, to_doctype, st
 	row.retried = restarted
 
 
-def update_logger(doc_name, e, from_doctype, to_doctype, status, restarted=0):
-	if not check_logger_doc_exists():
+def update_logger(doc_name, e, from_doctype, to_doctype, status, log_date=None, restarted=0):
+	if not check_logger_doc_exists(log_date):
 		log_doc = create_logger_doc()
 		append_data_to_logger(log_doc, doc_name, e, from_doctype, to_doctype, status, restarted)
 		log_doc.insert()
 	else:
-		log_doc = get_logger_doc()
+		log_doc = get_logger_doc(log_date)
 		if record_exists(log_doc, doc_name, status):
 			append_data_to_logger(
 				log_doc, doc_name, e, from_doctype, to_doctype, status, restarted
@@ -152,18 +151,18 @@ def update_logger(doc_name, e, from_doctype, to_doctype, status, restarted=0):
 def show_job_status(failed_history, deserialized_data, to_doctype):
 	if not failed_history:
 		frappe.msgprint(
-			_("Creation of {0} successfull").format(to_doctype),
-			title="Successfull",
+			_("Creation of {0} successful").format(to_doctype),
+			title="Successful",
 			indicator="green",
 		)
 
 	if len(failed_history) != 0 and len(failed_history) < len(deserialized_data):
 		frappe.msgprint(
-			_("""Creation of {0} partially successfull.
+			_("""Creation of {0} partially successful.
 				Check <b><a href="/app/bulk-transaction-log">Bulk Transaction Log</a></b>""").format(
 				to_doctype
 			),
-			title="Partially Successfull",
+			title="Partially successful",
 			indicator="orange",
 		)
 
