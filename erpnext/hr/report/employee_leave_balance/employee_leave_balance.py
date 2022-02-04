@@ -138,40 +138,10 @@ def get_opening_balance(employee, leave_type, filters, carry_forwarded_leaves):
 		# then opening balance should only consider carry forwarded leaves
 		opening_balance = carry_forwarded_leaves
 	else:
-		# else directly get closing leave balance on the previous day
-		opening_balance = get_closing_balance_on(opening_balance_date, employee, leave_type, filters)
+		# else directly get leave balance on the previous day
+		opening_balance = get_leave_balance_on(employee, leave_type, opening_balance_date)
 
 	return opening_balance
-
-
-def get_closing_balance_on(date, employee, leave_type, filters):
-	closing_balance = get_leave_balance_on(employee, leave_type, date)
-	leave_allocation = get_leave_allocation_for_date(employee, leave_type, date)
-	if leave_allocation:
-		# if balance is greater than the days remaining for leave allocation's end date
-		# then balance should be = remaining days
-		remaining_days = date_diff(leave_allocation[0].to_date, filters.from_date) + 1
-		if remaining_days < closing_balance:
-			closing_balance = remaining_days
-
-	return closing_balance
-
-
-def get_leave_allocation_for_date(employee, leave_type, date):
-	allocation = frappe.qb.DocType('Leave Allocation')
-	records = (
-		frappe.qb.from_(allocation)
-			.select(
-				allocation.name, allocation.to_date
-			).where(
-				(allocation.docstatus == 1)
-				& (allocation.employee == employee)
-				& (allocation.leave_type == leave_type)
-				& ((allocation.from_date <= date) & (allocation.to_date >= date))
-			)
-	).run(as_dict=True)
-
-	return records
 
 
 def get_conditions(filters):
@@ -191,28 +161,24 @@ def get_conditions(filters):
 
 
 def get_department_leave_approver_map(department=None):
-
 	# get current department and all its child
 	department_list = frappe.get_list('Department',
-						filters={
-							'disabled': 0
-						},
-						or_filters={
-							'name': department,
-							'parent_department': department
-						},
-						fields=['name'],
-						pluck='name'
-					)
+		filters={'disabled': 0},
+		or_filters={
+			'name': department,
+			'parent_department': department
+		},
+		pluck='name'
+	)
 	# retrieve approvers list from current department and from its subsequent child departments
 	approver_list = frappe.get_all('Department Approver',
-						filters={
-							'parentfield': 'leave_approvers',
-							'parent': ('in', department_list)
-						},
-						fields=['parent', 'approver'],
-						as_list=1
-					)
+		filters={
+			'parentfield': 'leave_approvers',
+			'parent': ('in', department_list)
+		},
+		fields=['parent', 'approver'],
+		as_list=True
+	)
 
 	approvers = {}
 
