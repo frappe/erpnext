@@ -492,7 +492,7 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Diary book",
+					"name": "Daily Books",
 					"doctype": "GL Entry",
 					"is_query_report": True,
 				},
