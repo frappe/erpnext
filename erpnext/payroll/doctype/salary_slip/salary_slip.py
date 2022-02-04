@@ -380,7 +380,7 @@ class SalarySlip(TransactionBase):
 				AND (t2.is_lwp = 1 or t2.is_ppl = 1)
 				AND t1.docstatus = 1
 				AND t1.employee = %(employee)s
-				AND coalesce(t1.salary_slip, '') = ''
+				AND ifnull(t1.salary_slip, '') = ''
 				AND CASE
 					WHEN (t2.include_holiday != 1)
 						THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date

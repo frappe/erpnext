@@ -61,7 +61,7 @@ def get_price_list():
 	rate = {}
 
 	price_list = frappe.db.sql("""select ip.item_code, ip.buying, ip.selling,
-		concat(coalesce(cu.symbol,ip.currency), " ", round(ip.price_list_rate,2), " - ", ip.price_list) as price
+		concat(ifnull(cu.symbol,ip.currency), " ", round(ip.price_list_rate,2), " - ", ip.price_list) as price
 		from `tabItem Price` ip, `tabPrice List` pl, `tabCurrency` cu
 		where ip.price_list=pl.name and pl.currency=cu.name and pl.enabled=1""", as_dict=1)
 

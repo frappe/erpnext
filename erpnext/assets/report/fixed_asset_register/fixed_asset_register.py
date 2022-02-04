@@ -143,7 +143,7 @@ def get_finance_book_value_map(filters):
 			parentfield='schedules'
 			AND schedule_date<=%s
 			AND journal_entry IS NOT NULL
-			AND coalesce(finance_book, '')=%s
+			AND ifnull(finance_book, '')=%s
 		GROUP BY parent''', (date, cstr(filters.finance_book or ''))))
 
 def get_purchase_receipt_supplier_map():

@@ -264,8 +264,8 @@ def get_count_on(account, fieldname, date):
 			else:
 				dr_or_cr = "debit" if fieldname == "invoiced_amount" else "credit"
 				cr_or_dr = "credit" if fieldname == "invoiced_amount" else "debit"
-				select_fields = "coalesce(sum(credit-debit),0)" \
-					if fieldname == "invoiced_amount" else "coalesce(sum(debit-credit),0)"
+				select_fields = "ifnull(sum(credit-debit),0)" \
+					if fieldname == "invoiced_amount" else "ifnull(sum(debit-credit),0)"
 
 				if ((not gle.against_voucher) or (gle.against_voucher_type in ["Sales Order", "Purchase Order"]) or
 				(gle.against_voucher==gle.voucher_no and gle.get(dr_or_cr) > 0)):
@@ -525,7 +525,7 @@ def unlink_ref_doc_from_payment_entries(ref_doc):
 		set against_voucher_type=null, against_voucher=null,
 		modified=%s, modified_by=%s
 		where against_voucher_type=%s and against_voucher=%s
-		and voucher_no != coalesce(against_voucher, '')""",
+		and voucher_no != ifnull(against_voucher, '')""",
 		(now(), frappe.session.user, ref_doc.doctype, ref_doc.name))
 
 	if ref_doc.doctype in ("Sales Invoice", "Purchase Invoice"):
@@ -678,7 +678,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 	invoice_list = frappe.db.sql("""
 		select
 			voucher_no, voucher_type, posting_date, due_date,
-			coalesce(sum({dr_or_cr}), 0) as invoice_amount,
+			ifnull(sum({dr_or_cr}), 0) as invoice_amount,
 			account_currency as currency
 		from
 			`tabGL Entry`
@@ -702,7 +702,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 
 	payment_entries = frappe.db.sql("""
 		select against_voucher_type, against_voucher,
-			coalesce(sum({payment_dr_or_cr}), 0) as payment_amount
+			ifnull(sum({payment_dr_or_cr}), 0) as payment_amount
 		from `tabGL Entry`
 		where party_type = %(party_type)s and party = %(party)s
 			and account = %(account)s
@@ -774,7 +774,7 @@ def get_children(doctype, parent, company, is_root=False):
 	]
 	filters = [['docstatus', '<', 2]]
 
-	filters.append(['coalesce(`{0}`,"")'.format(parent_fieldname), '=', '' if is_root else parent])
+	filters.append(['ifnull(`{0}`,"")'.format(parent_fieldname), '=', '' if is_root else parent])
 
 	if is_root:
 		fields += ['root_type', 'report_type', 'account_currency'] if doctype == 'Account' else []

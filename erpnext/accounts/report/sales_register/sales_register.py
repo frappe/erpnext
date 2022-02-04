@@ -264,7 +264,7 @@ def get_columns(invoice_list, additional_table_columns):
 		unrealized_profit_loss_accounts = frappe.db.sql_list("""SELECT distinct unrealized_profit_loss_account
 			from `tabSales Invoice` where docstatus = 1 and name in (%s)
 			and is_internal_customer = 1
-			and coalesce(unrealized_profit_loss_account, '') != ''
+			and ifnull(unrealized_profit_loss_account, '') != ''
 			order by unrealized_profit_loss_account""" %
 			', '.join(['%s']*len(invoice_list)), tuple(inv.name for inv in invoice_list))
 
@@ -354,27 +354,27 @@ def get_conditions(filters):
 	if filters.get("mode_of_payment"):
 		conditions += """ and exists(select name from `tabSales Invoice Payment`
 			 where parent=`tabSales Invoice`.name
-			 	and coalesce(`tabSales Invoice Payment`.mode_of_payment, '') = %(mode_of_payment)s)"""
+			 	and ifnull(`tabSales Invoice Payment`.mode_of_payment, '') = %(mode_of_payment)s)"""
 
 	if filters.get("cost_center"):
 		conditions +=  """ and exists(select name from `tabSales Invoice Item`
 			 where parent=`tabSales Invoice`.name
-			 	and coalesce(`tabSales Invoice Item`.cost_center, '') = %(cost_center)s)"""
+			 	and ifnull(`tabSales Invoice Item`.cost_center, '') = %(cost_center)s)"""
 
 	if filters.get("warehouse"):
 		conditions +=  """ and exists(select name from `tabSales Invoice Item`
 			 where parent=`tabSales Invoice`.name
-			 	and coalesce(`tabSales Invoice Item`.warehouse, '') = %(warehouse)s)"""
+			 	and ifnull(`tabSales Invoice Item`.warehouse, '') = %(warehouse)s)"""
 
 	if filters.get("brand"):
 		conditions +=  """ and exists(select name from `tabSales Invoice Item`
 			 where parent=`tabSales Invoice`.name
-			 	and coalesce(`tabSales Invoice Item`.brand, '') = %(brand)s)"""
+			 	and ifnull(`tabSales Invoice Item`.brand, '') = %(brand)s)"""
 
 	if filters.get("item_group"):
 		conditions +=  """ and exists(select name from `tabSales Invoice Item`
 			 where parent=`tabSales Invoice`.name
-			 	and coalesce(`tabSales Invoice Item`.item_group, '') = %(item_group)s)"""
+			 	and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s)"""
 
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
@@ -389,9 +389,9 @@ def get_conditions(filters):
 					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
 						filters.get(dimension.fieldname))
 
-					conditions += common_condition + "and coalesce(`tabSales Invoice Item`.{0}, '') in %({0})s)".format(dimension.fieldname)
+					conditions += common_condition + "and ifnull(`tabSales Invoice Item`.{0}, '') in %({0})s)".format(dimension.fieldname)
 				else:
-					conditions += common_condition + "and coalesce(`tabSales Invoice Item`.{0}, '') in (%({0})s))".format(dimension.fieldname)
+					conditions += common_condition + "and ifnull(`tabSales Invoice Item`.{0}, '') in (%({0})s))".format(dimension.fieldname)
 
 	return conditions
 
@@ -456,7 +456,7 @@ def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts):
 def get_invoice_so_dn_map(invoice_list):
 	si_items = frappe.db.sql("""select parent, sales_order, delivery_note, so_detail
 		from `tabSales Invoice Item` where parent in (%s)
-		and (coalesce(sales_order, '') != '' or coalesce(delivery_note, '') != '')""" %
+		and (ifnull(sales_order, '') != '' or ifnull(delivery_note, '') != '')""" %
 		', '.join(['%s']*len(invoice_list)), tuple(inv.name for inv in invoice_list), as_dict=1)
 
 	invoice_so_dn_map = {}
@@ -480,7 +480,7 @@ def get_invoice_so_dn_map(invoice_list):
 def get_invoice_cc_wh_map(invoice_list):
 	si_items = frappe.db.sql("""select parent, cost_center, warehouse
 		from `tabSales Invoice Item` where parent in (%s)
-		and (coalesce(cost_center, '') != '' or coalesce(warehouse, '') != '')""" %
+		and (ifnull(cost_center, '') != '' or ifnull(warehouse, '') != '')""" %
 		', '.join(['%s']*len(invoice_list)), tuple(inv.name for inv in invoice_list), as_dict=1)
 
 	invoice_cc_wh_map = {}

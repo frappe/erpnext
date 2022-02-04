@@ -74,7 +74,7 @@ class TaxRule(Document):
 		for d in filters:
 			if conds:
 				conds += " and "
-			conds += """coalesce({0}, '') = {1}""".format(d, frappe.db.escape(cstr(filters[d])))
+			conds += """ifnull({0}, '') = {1}""".format(d, frappe.db.escape(cstr(filters[d])))
 
 		if self.from_date and self.to_date:
 			conds += """ and ((from_date > '{from_date}' and from_date < '{to_date}') or
@@ -149,7 +149,7 @@ def get_tax_template(posting_date, args):
 	conditions = ["""(from_date is null or from_date <= '{0}')
 		and (to_date is null or to_date >= '{1}')""".format(a, b)]
 
-	conditions.append("coalesce(tax_category, '') = {0}".format(frappe.db.escape(cstr(args.get("tax_category")))))
+	conditions.append("ifnull(tax_category, '') = {0}".format(frappe.db.escape(cstr(args.get("tax_category")))))
 	if 'tax_category' in args.keys():
 		del args['tax_category']
 
@@ -159,9 +159,9 @@ def get_tax_template(posting_date, args):
 		elif key == 'customer_group':
 			if not value: value = get_root_of("Customer Group")
 			customer_group_condition = get_customer_group_condition(value)
-			conditions.append("coalesce({0}, '') in ('', {1})".format(key, customer_group_condition))
+			conditions.append("ifnull({0}, '') in ('', {1})".format(key, customer_group_condition))
 		else:
-			conditions.append("coalesce({0}, '') in ('', {1})".format(key, frappe.db.escape(cstr(value))))
+			conditions.append("ifnull({0}, '') in ('', {1})".format(key, frappe.db.escape(cstr(value))))
 
 	tax_rule = frappe.db.sql("""select * from `tabTax Rule`
 		where {0}""".format(" and ".join(conditions)), as_dict = True)

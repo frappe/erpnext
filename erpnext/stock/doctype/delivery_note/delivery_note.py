@@ -179,7 +179,7 @@ class DeliveryNote(SellingController):
 		if self.project and self.customer:
 			res = frappe.db.sql("""select name from `tabProject`
 				where name = %s and (customer = %s or
-					coalesce(customer,'')='')""", (self.project, self.customer))
+					ifnull(customer,'')='')""", (self.project, self.customer))
 			if not res:
 				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
 

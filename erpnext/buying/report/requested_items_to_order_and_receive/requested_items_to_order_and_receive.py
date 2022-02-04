@@ -58,12 +58,12 @@ def get_data(filters, conditions):
 			mr.transaction_date as date,
 			mr_item.schedule_date as required_date,
 			mr_item.item_code as item_code,
-			sum(coalesce(mr_item.stock_qty, 0)) as qty,
-			coalesce(mr_item.stock_uom, '') as uom,
-			sum(coalesce(mr_item.ordered_qty, 0)) as ordered_qty,
-			sum(coalesce(mr_item.received_qty, 0)) as received_qty,
-			(sum(coalesce(mr_item.stock_qty, 0)) - sum(coalesce(mr_item.received_qty, 0))) as qty_to_receive,
-			(sum(coalesce(mr_item.stock_qty, 0)) - sum(coalesce(mr_item.ordered_qty, 0))) as qty_to_order,
+			sum(ifnull(mr_item.stock_qty, 0)) as qty,
+			ifnull(mr_item.stock_uom, '') as uom,
+			sum(ifnull(mr_item.ordered_qty, 0)) as ordered_qty,
+			sum(ifnull(mr_item.received_qty, 0)) as received_qty,
+			(sum(ifnull(mr_item.stock_qty, 0)) - sum(ifnull(mr_item.received_qty, 0))) as qty_to_receive,
+			(sum(ifnull(mr_item.stock_qty, 0)) - sum(ifnull(mr_item.ordered_qty, 0))) as qty_to_order,
 			mr_item.item_name as item_name,
 			mr_item.description as "description",
 			mr.company as company
@@ -77,7 +77,7 @@ def get_data(filters, conditions):
 			{conditions}
 		group by mr.name, mr_item.item_code
 		having
-			sum(coalesce(mr_item.ordered_qty, 0)) < sum(coalesce(mr_item.stock_qty, 0))
+			sum(ifnull(mr_item.ordered_qty, 0)) < sum(ifnull(mr_item.stock_qty, 0))
 		order by mr.transaction_date, mr.schedule_date""".format(conditions=conditions), as_dict=1)
 
 	return data

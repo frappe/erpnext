@@ -157,7 +157,7 @@ def get_points_earned(self):
 		returned_amount = frappe.db.sql("""
 			select sum(grand_total)
 			from `tabSales Invoice`
-			where docstatus=1 and is_return=1 and coalesce(return_against, '')=%s
+			where docstatus=1 and is_return=1 and ifnull(return_against, '')=%s
 		""", self.name)
 		return abs(flt(returned_amount[0][0])) if returned_amount else 0
 

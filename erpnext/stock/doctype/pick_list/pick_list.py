@@ -271,7 +271,7 @@ def get_available_item_locations_for_batched_item(item_code, from_warehouses, re
 			and sle.`company` = %(company)s
 			and batch.disabled = 0
 			and sle.is_cancelled=0
-			and coalesce(batch.`expiry_date`, '2200-01-01') > %(today)s
+			and ifnull(batch.`expiry_date`, '2200-01-01') > %(today)s
 			{warehouse_condition}
 		GROUP BY
 			`warehouse`,
@@ -280,7 +280,7 @@ def get_available_item_locations_for_batched_item(item_code, from_warehouses, re
 			`expiry_date`,
 			batch.`creation`
 		HAVING SUM(sle.`actual_qty`) > 0
-		ORDER BY coalesce(batch.`expiry_date`, '2200-01-01'), batch.`creation`
+		ORDER BY ifnull(batch.`expiry_date`, '2200-01-01'), batch.`creation`
 	""".format(warehouse_condition=warehouse_condition), { #nosec
 		'item_code': item_code,
 		'company': company,

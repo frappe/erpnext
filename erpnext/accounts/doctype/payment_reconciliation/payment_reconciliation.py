@@ -107,7 +107,7 @@ class PaymentReconciliation(Document):
 			WHERE
 				(doc.name = gl.against_voucher or doc.name = gl.voucher_no)
 				and doc.{party_type_field} = %(party)s
-				and doc.is_return = 1 and coalesce(doc.return_against, "") = ""
+				and doc.is_return = 1 and ifnull(doc.return_against, "") = ""
 				and gl.against_voucher_type = %(voucher_type)s
 				and doc.docstatus = 1 and gl.party = %(party)s
 				and gl.party_type = %(party_type)s and gl.account = %(account)s

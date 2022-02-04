@@ -18,7 +18,7 @@ class GSTSettings(Document):
 		data = frappe._dict()
 		data.total_addresses = frappe.db.sql('''select count(*) from tabAddress where country = "India"''')
 		data.total_addresses_with_gstin = frappe.db.sql('''select distinct count(*)
-			from tabAddress where country = "India" and coalesce(gstin, '')!='' ''')
+			from tabAddress where country = "India" and ifnull(gstin, '')!='' ''')
 		self.set_onload('data', data)
 
 	def validate(self):
@@ -53,7 +53,7 @@ def send_reminder():
 def send_gstin_reminder_to_all_parties():
 	parties = []
 	for address_name in frappe.db.sql('''select name
-		from tabAddress where country = "India" and coalesce(gstin, '')='' '''):
+		from tabAddress where country = "India" and ifnull(gstin, '')='' '''):
 		address = frappe.get_doc('Address', address_name[0])
 		for link in address.links:
 			party = frappe.get_doc(link.link_doctype, link.link_name)

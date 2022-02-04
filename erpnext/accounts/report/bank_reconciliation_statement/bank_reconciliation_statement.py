@@ -127,8 +127,8 @@ def get_entries(filters):
 			`tabJournal Entry Account` jvd, `tabJournal Entry` jv
 		where jvd.parent = jv.name and jv.docstatus=1
 			and jvd.account = %(account)s and jv.posting_date <= %(report_date)s
-			and coalesce(jv.clearance_date, '4000-01-01') > %(report_date)s
-			and coalesce(jv.is_opening, 'No') = 'No'""", filters, as_dict=1)
+			and ifnull(jv.clearance_date, '4000-01-01') > %(report_date)s
+			and ifnull(jv.is_opening, 'No') = 'No'""", filters, as_dict=1)
 
 	payment_entries = frappe.db.sql("""
 		select
@@ -136,13 +136,13 @@ def get_entries(filters):
 			reference_no, reference_date as ref_date,
 			if(paid_to=%(account)s, received_amount, 0) as debit,
 			if(paid_from=%(account)s, paid_amount, 0) as credit,
-			posting_date, coalesce(party,if(paid_from=%(account)s,paid_to,paid_from)) as against_account, clearance_date,
+			posting_date, ifnull(party,if(paid_from=%(account)s,paid_to,paid_from)) as against_account, clearance_date,
 			if(paid_to=%(account)s, paid_to_account_currency, paid_from_account_currency) as account_currency
 		from `tabPayment Entry`
 		where
 			(paid_from=%(account)s or paid_to=%(account)s) and docstatus=1
 			and posting_date <= %(report_date)s
-			and coalesce(clearance_date, '4000-01-01') > %(report_date)s
+			and ifnull(clearance_date, '4000-01-01') > %(report_date)s
 	""", filters, as_dict=1)
 
 	pos_entries = []
@@ -156,7 +156,7 @@ def get_entries(filters):
 			where
 				sip.account=%(account)s and si.docstatus=1 and sip.parent = si.name
 				and account.name = sip.account and si.posting_date <= %(report_date)s and
-				coalesce(sip.clearance_date, '4000-01-01') > %(report_date)s
+				ifnull(sip.clearance_date, '4000-01-01') > %(report_date)s
 			order by
 				si.posting_date ASC, si.name DESC
 		""", filters, as_dict=1)
@@ -170,7 +170,7 @@ def get_amounts_not_reflected_in_system(filters):
 		from `tabJournal Entry Account` jvd, `tabJournal Entry` jv
 		where jvd.parent = jv.name and jv.docstatus=1 and jvd.account=%(account)s
 		and jv.posting_date > %(report_date)s and jv.clearance_date <= %(report_date)s
-		and coalesce(jv.is_opening, 'No') = 'No' """, filters)
+		and ifnull(jv.is_opening, 'No') = 'No' """, filters)
 
 	je_amount = flt(je_amount[0][0]) if je_amount else 0.0
 

@@ -992,7 +992,7 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 		FROM `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail
 		WHERE jv_detail.parent = jv.name
 			AND jv_detail.account = %(account)s
-			AND COALESCE(jv_detail.party, '') = %(party)s
+			AND ifnull(jv_detail.party, '') = %(party)s
 			AND (
 				jv_detail.reference_type IS NULL
 				OR jv_detail.reference_type = ''

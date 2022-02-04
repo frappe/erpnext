@@ -72,7 +72,7 @@ def convert_deferred_expense_to_expense(deferred_process, start_date=None, end_d
 		from `tabPurchase Invoice Item` item, `tabPurchase Invoice` p
 		where item.service_start_date<=%s and item.service_end_date>=%s
 		and item.enable_deferred_expense = 1 and item.parent=p.name
-		and item.docstatus = 1 and coalesce(item.amount, 0) > 0
+		and item.docstatus = 1 and ifnull(item.amount, 0) > 0
 		{0}
 	'''.format(conditions), (end_date, start_date)) #nosec
 
@@ -98,7 +98,7 @@ def convert_deferred_revenue_to_income(deferred_process, start_date=None, end_da
 		from `tabSales Invoice Item` item, `tabSales Invoice` p
 		where item.service_start_date<=%s and item.service_end_date>=%s
 		and item.enable_deferred_revenue = 1 and item.parent=p.name
-		and item.docstatus = 1 and coalesce(item.amount, 0) > 0
+		and item.docstatus = 1 and ifnull(item.amount, 0) > 0
 		{0}
 	'''.format(conditions), (end_date, start_date)) #nosec
 

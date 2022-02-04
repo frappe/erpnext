@@ -287,7 +287,7 @@ class StatusUpdater(Document):
 				if not args.get("second_source_extra_cond"):
 					args["second_source_extra_cond"] = ""
 
-				args['second_source_condition'] = frappe.db.sql(""" select coalesce((select sum(%(second_source_field)s)
+				args['second_source_condition'] = frappe.db.sql(""" select ifnull((select sum(%(second_source_field)s)
 					from `tab%(second_source_dt)s`
 					where `%(second_join_field)s`='%(detail_id)s'
 					and (`tab%(second_source_dt)s`.docstatus=1)
@@ -297,7 +297,7 @@ class StatusUpdater(Document):
 				if not args.get("extra_cond"): args["extra_cond"] = ""
 
 				args["source_dt_value"] = frappe.db.sql("""
-						(select coalesce(sum(%(source_field)s), 0)
+						(select ifnull(sum(%(source_field)s), 0)
 							from `tab%(source_dt)s` where `%(join_field)s`='%(detail_id)s'
 							and (docstatus=1 %(cond)s) %(extra_cond)s)
 				""" % args)[0][0] or 0.0
@@ -333,8 +333,8 @@ class StatusUpdater(Document):
 		if args.get('target_parent_field'):
 			frappe.db.sql("""update `tab%(target_parent_dt)s`
 				set %(target_parent_field)s = round(
-					coalesce((select
-						coalesce(sum(case when abs(%(target_ref_field)s) > abs(%(target_field)s) then abs(%(target_field)s) else abs(%(target_ref_field)s) end), 0)
+					ifnull((select
+						ifnull(sum(case when abs(%(target_ref_field)s) > abs(%(target_field)s) then abs(%(target_field)s) else abs(%(target_ref_field)s) end), 0)
 						/ sum(abs(%(target_ref_field)s)) * 100
 					from `tab%(target_dt)s` where parent='%(name)s' having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
 					%(update_modified)s
@@ -402,10 +402,10 @@ class StatusUpdater(Document):
 
 	def update_billing_status(self, zero_amount_refdoc, ref_dt, ref_fieldname):
 		for ref_dn in zero_amount_refdoc:
-			ref_doc_qty = flt(frappe.db.sql("""select coalesce(sum(qty), 0) from `tab%s Item`
+			ref_doc_qty = flt(frappe.db.sql("""select ifnull(sum(qty), 0) from `tab%s Item`
 				where parent=%s""" % (ref_dt, '%s'), (ref_dn))[0][0])
 
-			billed_qty = flt(frappe.db.sql("""select coalesce(sum(qty), 0)
+			billed_qty = flt(frappe.db.sql("""select ifnull(sum(qty), 0)
 				from `tab%s Item` where %s=%s and docstatus=1""" %
 				(self.doctype, ref_fieldname, '%s'), (ref_dn))[0][0])
 

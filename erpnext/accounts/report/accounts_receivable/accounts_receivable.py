@@ -673,7 +673,7 @@ class ReceivablePayableReport(object):
 			values.append(self.filters.company)
 
 		if self.filters.finance_book:
-			conditions.append("coalesce(finance_book, '') in (%s, '')")
+			conditions.append("ifnull(finance_book, '') in (%s, '')")
 			values.append(self.filters.finance_book)
 
 		if self.filters.get(party_type_field):

@@ -414,7 +414,7 @@ class JobCard(Document):
 				FROM `tabJob Card` jc, `tabJob Card Time Log` jctl
 				WHERE
 					jctl.parent = jc.name and jc.work_order = %s and jc.operation_id = %s
-					and jc.docstatus = 1 and coalesce(jc.is_corrective_job_card, 0) = 0
+					and jc.docstatus = 1 and ifnull(jc.is_corrective_job_card, 0) = 0
 			""", (self.work_order, self.operation_id), as_dict=1)
 
 		for data in wo.operations:
@@ -730,7 +730,7 @@ def get_job_details(start, end, filters=None):
 	conditions = get_filters_cond("Job Card", filters, [])
 
 	job_cards = frappe.db.sql(""" SELECT `tabJob Card`.name, `tabJob Card`.work_order,
-			`tabJob Card`.status, coalesce(`tabJob Card`.remarks, ''),
+			`tabJob Card`.status, ifnull(`tabJob Card`.remarks, ''),
 			min(`tabJob Card Time Log`.from_time) as from_time,
 			max(`tabJob Card Time Log`.to_time) as to_time
 		FROM `tabJob Card` , `tabJob Card Time Log`

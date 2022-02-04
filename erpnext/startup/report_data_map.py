@@ -101,7 +101,7 @@ data_map = {
 			"(qty - ordered_qty) as qty"],
 		"from": "`tabMaterial Request Item` item, `tabMaterial Request` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'",
-			"coalesce(warehouse, '')!=''", "qty > ordered_qty"],
+			"ifnull(warehouse, '')!=''", "qty > ordered_qty"],
 		"links": {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"]
@@ -112,7 +112,7 @@ data_map = {
 			"(qty - received_qty)*conversion_factor as qty"],
 		"from": "`tabPurchase Order Item` item, `tabPurchase Order` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'",
-			"coalesce(warehouse, '')!=''", "qty > received_qty"],
+			"ifnull(warehouse, '')!=''", "qty > received_qty"],
 		"links": {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"]
@@ -123,7 +123,7 @@ data_map = {
 		"columns": ["item.name as name", "item_code", "(qty - delivered_qty)*conversion_factor as qty", "warehouse"],
 		"from": "`tabSales Order Item` item, `tabSales Order` main",
 		"conditions": ["item.parent = main.name", "main.docstatus=1", "main.status != 'Stopped'",
-			"coalesce(warehouse, '')!=''", "qty > delivered_qty"],
+			"ifnull(warehouse, '')!=''", "qty > delivered_qty"],
 		"links": {
 			"item_code": ["Item", "name"],
 			"warehouse": ["Warehouse", "name"]
@@ -162,7 +162,7 @@ data_map = {
 	},
 	"Sales Invoice Item": {
 		"columns": ["name", "parent", "item_code", "stock_qty as qty", "base_net_amount"],
-		"conditions": ["docstatus=1", "coalesce(parent, '')!=''"],
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
 			"parent": ["Sales Invoice", "name"],
@@ -180,7 +180,7 @@ data_map = {
 	},
 	"Sales Order Item[Sales Analytics]": {
 		"columns": ["name", "parent", "item_code", "stock_qty as qty", "base_net_amount"],
-		"conditions": ["docstatus=1", "coalesce(parent, '')!=''"],
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
 			"parent": ["Sales Order", "name"],
@@ -198,7 +198,7 @@ data_map = {
 	},
 	"Delivery Note Item[Sales Analytics]": {
 		"columns": ["name", "parent", "item_code", "stock_qty as qty", "base_net_amount"],
-		"conditions": ["docstatus=1", "coalesce(parent, '')!=''"],
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
 			"parent": ["Delivery Note", "name"],
@@ -230,7 +230,7 @@ data_map = {
 	},
 	"Purchase Invoice Item": {
 		"columns": ["name", "parent", "item_code", "stock_qty as qty", "base_net_amount"],
-		"conditions": ["docstatus=1", "coalesce(parent, '')!=''"],
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
 			"parent": ["Purchase Invoice", "name"],
@@ -248,7 +248,7 @@ data_map = {
 	},
 	"Purchase Order Item[Purchase Analytics]": {
 		"columns": ["name", "parent", "item_code", "stock_qty as qty", "base_net_amount"],
-		"conditions": ["docstatus=1", "coalesce(parent, '')!=''"],
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
 			"parent": ["Purchase Order", "name"],
@@ -266,7 +266,7 @@ data_map = {
 	},
 	"Purchase Receipt Item[Purchase Analytics]": {
 		"columns": ["name", "parent", "item_code", "stock_qty as qty", "base_net_amount"],
-		"conditions": ["docstatus=1", "coalesce(parent, '')!=''"],
+		"conditions": ["docstatus=1", "ifnull(parent, '')!=''"],
 		"order_by": "parent",
 		"links": {
 			"parent": ["Purchase Receipt", "name"],

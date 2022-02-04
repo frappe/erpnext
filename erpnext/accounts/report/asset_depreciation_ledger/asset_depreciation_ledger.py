@@ -14,7 +14,7 @@ def execute(filters=None):
 def get_data(filters):
 	data = []
 	depreciation_accounts = frappe.db.sql_list(""" select name from tabAccount
-		where coalesce(account_type, '') = 'Depreciation' """)
+		where ifnull(account_type, '') = 'Depreciation' """)
 
 	filters_data = [["company", "=", filters.get('company')],
 		["posting_date", ">=", filters.get('from_date')],

@@ -76,10 +76,10 @@ class SalesOrder(SellingController):
 		if self.po_no and self.customer and not self.skip_delivery_note:
 			so = frappe.db.multisql({
 				'mariadb': """select name from `tabSales Order`
-				where coalesce(po_no, '') = %s and name != %s and docstatus < 2
+				where ifnull(po_no, '') = %s and name != %s and docstatus < 2
 				and customer = %s""",
 				'postgres': """select name from `tabSales Order`
-				where coalesce(po_no, '') = '{po_no}' and name != '{name}' and docstatus < 2
+				where ifnull(po_no, '') = '{po_no}' and name != '{name}' and docstatus < 2
 				and customer = '{customer}'""".format(po_no = self.po_no, name = self.name, customer = self.customer)}, (self.po_no, self.name, self.customer))
 			if so and so[0][0] and not cint(frappe.db.get_single_value("Selling Settings",
 				"allow_against_multiple_purchase_orders")):
@@ -131,7 +131,7 @@ class SalesOrder(SellingController):
 	def validate_proj_cust(self):
 		if self.project and self.customer_name:
 			res = frappe.db.sql("""select name from `tabProject` where name = %s
-				and (customer = %s or coalesce(customer,'')='')""",
+				and (customer = %s or ifnull(customer,'')='')""",
 					(self.project, self.customer))
 			if not res:
 				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
@@ -745,7 +745,7 @@ def get_events(start, end, filters=None):
 			`tabSales Order`, `tabSales Order Item`
 		where `tabSales Order`.name = `tabSales Order Item`.parent
 			and `tabSales Order`.skip_delivery_note = 0
-			and (coalesce(`tabSales Order Item`.delivery_date, '0000-00-00')!= '0000-00-00') \
+			and (ifnull(`tabSales Order Item`.delivery_date, '0000-00-00')!= '0000-00-00') \
 			and (`tabSales Order Item`.delivery_date between %(start)s and %(end)s)
 			and `tabSales Order`.docstatus < 2
 			{conditions}

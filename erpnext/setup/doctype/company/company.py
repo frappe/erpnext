@@ -505,7 +505,7 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 		from
 			`tab{doctype}` comp
 		where
-			coalesce(parent_company, "")={parent}
+			ifnull(parent_company, "")={parent}
 		""".format(
 			doctype = doctype,
 			parent=frappe.db.escape(parent)
@@ -647,7 +647,7 @@ def get_default_company_address(name, sort_key='is_primary_address', existing_ad
 			`tabAddress` addr, `tabDynamic Link` dl
 		WHERE
 			dl.parent = addr.name and dl.link_doctype = 'Company' and
-			dl.link_name = %s and coalesce(addr.disabled, 0) = 0
+			dl.link_name = %s and ifnull(addr.disabled, 0) = 0
 		""" %(sort_key, '%s'), (name)) #nosec
 
 	if existing_address:

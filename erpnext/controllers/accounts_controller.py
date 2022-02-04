@@ -1614,11 +1614,11 @@ def get_advance_journal_entries(party_type, party, party_account, amount_field,
 
 	conditions = []
 	if include_unallocated:
-		conditions.append("coalesce(t2.reference_name, '')=''")
+		conditions.append("ifnull(t2.reference_name, '')=''")
 
 	if order_list:
 		order_condition = ', '.join(['%s'] * len(order_list))
-		conditions.append(" (t2.reference_type = '{0}' and coalesce(t2.reference_name, '') in ({1}))" \
+		conditions.append(" (t2.reference_type = '{0}' and ifnull(t2.reference_name, '') in ({1}))" \
 						  .format(order_doctype, order_condition))
 
 	reference_condition = " and (" + " or ".join(conditions) + ")" if conditions else ""

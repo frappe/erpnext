@@ -640,7 +640,7 @@ class BOM(WebsiteGenerator):
 				bom_item.rate,
 				bom_item.include_item_in_manufacturing,
 				bom_item.sourced_by_supplier,
-				bom_item.stock_qty / coalesce(bom.quantity, 1) AS qty_consumed_per_unit
+				bom_item.stock_qty / ifnull(bom.quantity, 1) AS qty_consumed_per_unit
 			FROM `tabBOM Explosion Item` bom_item, `tabBOM` bom
 			WHERE
 				bom_item.parent = bom.name
@@ -819,11 +819,11 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				bom_item.item_code,
 				bom_item.idx,
 				item.item_name,
-				sum(bom_item.{qty_field}/coalesce(bom.quantity, 1)) * %(qty)s as qty,
+				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * %(qty)s as qty,
 				item.image,
 				bom.project,
 				bom_item.rate,
-				sum(bom_item.{qty_field}/coalesce(bom.quantity, 1)) * bom_item.rate * %(qty)s as amount,
+				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * bom_item.rate * %(qty)s as amount,
 				item.stock_uom,
 				item.item_group,
 				item.allow_alternative_item,
@@ -840,7 +840,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 			where
 				bom_item.docstatus < 2
 				and bom.name = %(bom)s
-				and coalesce(item.has_variants, 0) = 0
+				and ifnull(item.has_variants, 0) = 0
 				and item.is_stock_item in (1, {is_stock_item})
 				{where_conditions}
 				group by bom_item.item_code, bom_item.idx, item.item_name, item.image, bom.project, bom_item.rate, item.stock_uom, item.item_group, item.allow_alternative_item, item_default.default_warehouse, item_default.expense_account, item_default.buying_cost_center {select_columns}
@@ -972,7 +972,7 @@ def get_boms_in_bottom_up_order(bom_no=None):
 		bom_list = frappe.db.sql_list("""select name from `tabBOM` bom
 			where docstatus=1 and is_active=1
 				and not exists(select bom_no from `tabBOM Item`
-					where parent=bom.name and coalesce(bom_no, '')!='')""")
+					where parent=bom.name and ifnull(bom_no, '')!='')""")
 
 	while(count < len(bom_list)):
 		for child_bom in _get_parent(bom_list[count]):

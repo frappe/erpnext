@@ -55,7 +55,7 @@ def get_warehouse_account(warehouse, warehouse_account=None):
 					account from `tabWarehouse`
 				where
 					lft <= %s and rgt >= %s and company = %s
-					and account is not null and coalesce(account, '') !=''
+					and account is not null and ifnull(account, '') !=''
 				order by lft desc limit 1""", (warehouse.lft, warehouse.rgt, warehouse.company), as_list=1)
 
 			account = account[0][0] if account else None

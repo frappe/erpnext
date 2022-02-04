@@ -62,11 +62,11 @@ def get_data(conditions, filters):
 			po.status, po.supplier, poi.item_code,
 			poi.qty, poi.received_qty,
 			(poi.qty - poi.received_qty) AS pending_qty,
-			coalesce(pii.qty, 0) as billed_qty,
+			ifnull(pii.qty, 0) as billed_qty,
 			poi.base_amount as amount,
 			(poi.received_qty * poi.base_rate) as received_qty_amount,
-			(poi.billed_amt * coalesce(po.conversion_rate, 1)) as billed_amount,
-			(poi.base_amount - (poi.billed_amt * coalesce(po.conversion_rate, 1))) as pending_amount,
+			(poi.billed_amt * ifnull(po.conversion_rate, 1)) as billed_amount,
+			(poi.base_amount - (poi.billed_amt * ifnull(po.conversion_rate, 1))) as pending_amount,
 			po.set_warehouse as warehouse,
 			po.company, poi.name
 		FROM

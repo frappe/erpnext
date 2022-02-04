@@ -49,7 +49,7 @@ class CForm(Document):
 				('%s', '%s', ', '.join(['%s'] * len(inv))), tuple([self.name, self.modified] + inv))
 
 			frappe.db.sql("""update `tabSales Invoice` set c_form_no = null, modified = %s
-				where name not in (%s) and coalesce(c_form_no, '') = %s""" %
+				where name not in (%s) and ifnull(c_form_no, '') = %s""" %
 				('%s', ', '.join(['%s']*len(inv)), '%s'), tuple([self.modified] + inv + [self.name]))
 		else:
 			frappe.throw(_("Please enter atleast 1 invoice in the table"))

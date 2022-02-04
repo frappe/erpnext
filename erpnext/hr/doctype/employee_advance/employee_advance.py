@@ -91,7 +91,7 @@ class EmployeeAdvance(Document):
 
 	def update_claimed_amount(self):
 		claimed_amount = frappe.db.sql("""
-			SELECT sum(coalesce(allocated_amount, 0))
+			SELECT sum(ifnull(allocated_amount, 0))
 			FROM `tabExpense Claim Advance` eca, `tabExpense Claim` ec
 			WHERE
 				eca.employee_advance = %s

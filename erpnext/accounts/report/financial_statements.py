@@ -155,7 +155,7 @@ def get_data(
 
 	gl_entries_by_account = {}
 	for root in frappe.db.sql("""select lft, rgt from tabAccount
-			where root_type=%s and coalesce(parent_account, '') = ''""", root_type, as_dict=1):
+			where root_type=%s and ifnull(parent_account, '') = ''""", root_type, as_dict=1):
 
 		set_gl_entries_by_account(
 			company,
@@ -412,7 +412,7 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
 	if ignore_closing_entries:
-		additional_conditions.append("coalesce(voucher_type, '')!='Period Closing Voucher'")
+		additional_conditions.append("ifnull(voucher_type, '')!='Period Closing Voucher'")
 
 	if from_date:
 		additional_conditions.append("posting_date >= %(from_date)s")

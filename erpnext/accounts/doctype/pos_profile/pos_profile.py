@@ -151,7 +151,7 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 			on
 				pf.name = pfu.parent
 			where
-				coalesce(pfu.user, '') = ''
+				ifnull(pfu.user, '') = ''
 				and pf.company = %(company)s
 				and pf.name like %(txt)s
 				and pf.disabled = 0""", args)

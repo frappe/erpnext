@@ -126,9 +126,9 @@ def validate_expense_against_budget(args):
 			budget_records = frappe.db.sql("""
 				select
 					b.{budget_against_field} as budget_against, ba.budget_amount, b.monthly_distribution,
-					coalesce(b.applicable_on_material_request, 0) as for_material_request,
-					coalesce(applicable_on_purchase_order, 0) as for_purchase_order,
-					coalesce(applicable_on_booking_actual_expenses,0) as for_actual_expenses,
+					ifnull(b.applicable_on_material_request, 0) as for_material_request,
+					ifnull(applicable_on_purchase_order, 0) as for_purchase_order,
+					ifnull(applicable_on_booking_actual_expenses,0) as for_actual_expenses,
 					b.action_if_annual_budget_exceeded, b.action_if_accumulated_monthly_budget_exceeded,
 					b.action_if_annual_budget_exceeded_on_mr, b.action_if_accumulated_monthly_budget_exceeded_on_mr,
 					b.action_if_annual_budget_exceeded_on_po, b.action_if_accumulated_monthly_budget_exceeded_on_po
@@ -214,7 +214,7 @@ def get_requested_amount(args, budget):
 	item_code = args.get('item_code')
 	condition = get_other_condition(args, budget, 'Material Request')
 
-	data = frappe.db.sql(""" select coalesce((sum(child.stock_qty - child.ordered_qty) * rate), 0) as amount
+	data = frappe.db.sql(""" select ifnull((sum(child.stock_qty - child.ordered_qty) * rate), 0) as amount
 		from `tabMaterial Request Item` child, `tabMaterial Request` parent
 		where parent.name = child.parent and
 		child.item_code = %s and parent.docstatus = 1 and child.stock_qty > child.ordered_qty and {0} and
@@ -227,7 +227,7 @@ def get_ordered_amount(args, budget):
 	item_code = args.get('item_code')
 	condition = get_other_condition(args, budget, 'Purchase Order')
 
-	data = frappe.db.sql(""" select coalesce(sum(child.amount - child.billed_amt), 0) as amount
+	data = frappe.db.sql(""" select ifnull(sum(child.amount - child.billed_amt), 0) as amount
 		from `tabPurchase Order Item` child, `tabPurchase Order` parent where
 		parent.name = child.parent and child.item_code = %s and parent.docstatus = 1 and child.amount > child.billed_amt
 		and parent.status != 'Closed' and {0}""".format(condition), item_code, as_list=1)

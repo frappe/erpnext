@@ -172,7 +172,7 @@ class PartyLedgerSummaryReport(object):
 			from `tabGL Entry` gle
 			{join}
 			where
-				gle.docstatus < 2 and gle.is_cancelled = 0 and gle.party_type=%(party_type)s and coalesce(gle.party, '') != ''
+				gle.docstatus < 2 and gle.is_cancelled = 0 and gle.party_type=%(party_type)s and ifnull(gle.party, '') != ''
 				and gle.posting_date <= %(to_date)s {conditions}
 			order by gle.posting_date
 		""".format(join=join, join_field=join_field, conditions=conditions), self.filters, as_dict=True)
@@ -184,7 +184,7 @@ class PartyLedgerSummaryReport(object):
 			conditions.append("gle.company=%(company)s")
 
 		if self.filters.finance_book:
-			conditions.append("coalesce(finance_book,'') in (%(finance_book)s, '')")
+			conditions.append("ifnull(finance_book,'') in (%(finance_book)s, '')")
 
 		if self.filters.get("party"):
 			conditions.append("party=%(party)s")
@@ -254,7 +254,7 @@ class PartyLedgerSummaryReport(object):
 					and gle.posting_date between %(from_date)s and %(to_date)s and gle.docstatus < 2
 				) and (voucher_type, voucher_no) in (
 					select voucher_type, voucher_no from `tabGL Entry` gle
-					where gle.party_type=%(party_type)s and coalesce(party, '') != ''
+					where gle.party_type=%(party_type)s and ifnull(party, '') != ''
 					and gle.posting_date between %(from_date)s and %(to_date)s and gle.docstatus < 2 {conditions}
 				)
 		""".format(conditions=conditions, income_or_expense=income_or_expense), self.filters, as_dict=True)

@@ -129,7 +129,7 @@ def get_columns(invoice_list, additional_table_columns):
 
 		unrealized_profit_loss_accounts = frappe.db.sql_list("""SELECT distinct unrealized_profit_loss_account
 			from `tabPurchase Invoice` where docstatus = 1 and name in (%s)
-			and coalesce(unrealized_profit_loss_account, '') != ''
+			and ifnull(unrealized_profit_loss_account, '') != ''
 			order by unrealized_profit_loss_account""" %
 			', '.join(['%s']*len(invoice_list)), tuple(inv.name for inv in invoice_list))
 
@@ -156,22 +156,22 @@ def get_conditions(filters):
 	if filters.get("from_date"): conditions += " and posting_date>=%(from_date)s"
 	if filters.get("to_date"): conditions += " and posting_date<=%(to_date)s"
 
-	if filters.get("mode_of_payment"): conditions += " and coalesce(mode_of_payment, '') = %(mode_of_payment)s"
+	if filters.get("mode_of_payment"): conditions += " and ifnull(mode_of_payment, '') = %(mode_of_payment)s"
 
 	if filters.get("cost_center"):
 		conditions +=  """ and exists(select name from `tabPurchase Invoice Item`
 			 where parent=`tabPurchase Invoice`.name
-			 	and coalesce(`tabPurchase Invoice Item`.cost_center, '') = %(cost_center)s)"""
+			 	and ifnull(`tabPurchase Invoice Item`.cost_center, '') = %(cost_center)s)"""
 
 	if filters.get("warehouse"):
 		conditions +=  """ and exists(select name from `tabPurchase Invoice Item`
 			 where parent=`tabPurchase Invoice`.name
-			 	and coalesce(`tabPurchase Invoice Item`.warehouse, '') = %(warehouse)s)"""
+			 	and ifnull(`tabPurchase Invoice Item`.warehouse, '') = %(warehouse)s)"""
 
 	if filters.get("item_group"):
 		conditions +=  """ and exists(select name from `tabPurchase Invoice Item`
 			 where parent=`tabPurchase Invoice`.name
-			 	and coalesce(`tabPurchase Invoice Item`.item_group, '') = %(item_group)s)"""
+			 	and ifnull(`tabPurchase Invoice Item`.item_group, '') = %(item_group)s)"""
 
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
@@ -186,9 +186,9 @@ def get_conditions(filters):
 					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
 						filters.get(dimension.fieldname))
 
-					conditions += common_condition + "and coalesce(`tabPurchase Invoice Item`.{0}, '') in %({0})s)".format(dimension.fieldname)
+					conditions += common_condition + "and ifnull(`tabPurchase Invoice Item`.{0}, '') in %({0})s)".format(dimension.fieldname)
 				else:
-					conditions += common_condition + "and coalesce(`tabPurchase Invoice Item`.{0}, '') in (%({0})s))".format(dimension.fieldname)
+					conditions += common_condition + "and ifnull(`tabPurchase Invoice Item`.{0}, '') in (%({0})s))".format(dimension.fieldname)
 
 	return conditions
 

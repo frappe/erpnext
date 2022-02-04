@@ -780,7 +780,7 @@ class SalesInvoice(SellingController):
 
 	def get_warehouse(self):
 		user_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`
-			where coalesce(user,'') = %s and company = %s""", (frappe.session['user'], self.company))
+			where ifnull(user,'') = %s and company = %s""", (frappe.session['user'], self.company))
 		warehouse = user_pos_profile[0][1] if user_pos_profile else None
 
 		if not warehouse:
@@ -1401,7 +1401,7 @@ class SalesInvoice(SellingController):
 		returned_amount = frappe.db.sql("""
 			select sum(grand_total)
 			from `tabSales Invoice`
-			where docstatus=1 and is_return=1 and coalesce(return_against, '')=%s
+			where docstatus=1 and is_return=1 and ifnull(return_against, '')=%s
 		""", self.name)
 		return abs(flt(returned_amount[0][0])) if returned_amount else 0
 

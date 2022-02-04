@@ -343,17 +343,17 @@ def get_conditions(filters):
 	if filters.get("mode_of_payment"):
 		conditions += """ and exists(select name from `tabSales Invoice Payment`
 			where parent=`tabSales Invoice`.name
-				and coalesce(`tabSales Invoice Payment`.mode_of_payment, '') = %(mode_of_payment)s)"""
+				and ifnull(`tabSales Invoice Payment`.mode_of_payment, '') = %(mode_of_payment)s)"""
 
 	if filters.get("warehouse"):
-		conditions +=  """and coalesce(`tabSales Invoice Item`.warehouse, '') = %(warehouse)s"""
+		conditions +=  """and ifnull(`tabSales Invoice Item`.warehouse, '') = %(warehouse)s"""
 
 
 	if filters.get("brand"):
-		conditions +=  """and coalesce(`tabSales Invoice Item`.brand, '') = %(brand)s"""
+		conditions +=  """and ifnull(`tabSales Invoice Item`.brand, '') = %(brand)s"""
 
 	if filters.get("item_group"):
-		conditions +=  """and coalesce(`tabSales Invoice Item`.item_group, '') = %(item_group)s"""
+		conditions +=  """and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s"""
 
 	if not filters.get("group_by"):
 		conditions += "ORDER BY `tabSales Invoice`.posting_date desc, `tabSales Invoice Item`.item_group desc"

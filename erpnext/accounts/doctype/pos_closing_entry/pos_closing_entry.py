@@ -87,7 +87,7 @@ def get_pos_invoices(start, end, pos_profile, user):
 	from
 		`tabPOS Invoice`
 	where
-		owner = %s and docstatus = 1 and pos_profile = %s and coalesce(consolidated_invoice,'') = ''
+		owner = %s and docstatus = 1 and pos_profile = %s and ifnull(consolidated_invoice,'') = ''
 	""",
 	'postgres': """
 	select
@@ -95,7 +95,7 @@ def get_pos_invoices(start, end, pos_profile, user):
 	from
 		`tabPOS Invoice`
 	where
-		owner = %s and docstatus = 1 and pos_profile = %s and coalesce(consolidated_invoice,'') = ''
+		owner = %s and docstatus = 1 and pos_profile = %s and ifnull(consolidated_invoice,'') = ''
 	"""}, (user, pos_profile), as_dict=1)
 
 	data = list(filter(lambda d: get_datetime(start) <= get_datetime(d.timestamp) <= get_datetime(end), data))

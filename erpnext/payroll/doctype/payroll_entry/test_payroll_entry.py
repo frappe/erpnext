@@ -92,7 +92,7 @@ class TestPayrollEntry(unittest.TestCase):
 			self.assertEqual(salary_slip.base_gross_pay, payroll_je_doc.total_credit)
 
 		payment_entry = frappe.db.sql('''
-			Select coalesce(sum(je.total_debit),0) as total_debit, coalesce(sum(je.total_credit),0) as total_credit from `tabJournal Entry` je, `tabJournal Entry Account` jea
+			Select ifnull(sum(je.total_debit),0) as total_debit, ifnull(sum(je.total_credit),0) as total_credit from `tabJournal Entry` je, `tabJournal Entry Account` jea
 			Where je.name = jea.parent
 			And jea.reference_name = %s
 			''', (payroll_entry.name), as_dict=1)

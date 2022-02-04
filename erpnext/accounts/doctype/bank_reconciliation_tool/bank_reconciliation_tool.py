@@ -337,7 +337,7 @@ def get_pe_matching_query(amount_condition, account_from_to, transaction):
 		paid_amount {amount_condition} %(amount)s
 		AND docstatus = 1
 		AND payment_type IN (%(payment_type)s, 'Internal Transfer')
-		AND coalesce(cast(clearance_date as char), '') = ''
+		AND ifnull(cast(clearance_date as char), '') = ''
 		AND {account_from_to} = %(bank_account)s
 	ORDER BY modified
 	"""
@@ -435,7 +435,7 @@ def get_pi_matching_query(amount_condition):
 			paid_amount {amount_condition} %(amount)s
 			AND docstatus = 1
 			AND is_paid = 1
-			AND coalesce(cast(clearance_date as text), '') = ""
+			AND ifnull(cast(clearance_date as text), '') = ""
 			AND cash_bank_account  = %(bank_account)s
 		ORDER BY modified
 	"""
@@ -465,7 +465,7 @@ def get_ec_matching_query(bank_account, company, amount_condition):
 			total_sanctioned_amount {amount_condition} %(amount)s
 			AND docstatus = 1
 			AND is_paid = 1
-			AND coalesce(clearance_date, '') = ""
+			AND ifnull(clearance_date, '') = ""
 			AND mode_of_payment in {mode_of_payments}
 		ORDER BY modified
 	"""

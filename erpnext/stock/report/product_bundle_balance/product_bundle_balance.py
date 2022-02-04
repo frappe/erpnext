@@ -96,7 +96,7 @@ def get_items(filters):
 		select item.name as item_code, item.item_name, pb.description, item.item_group, item.brand, item.stock_uom
 		from `tabItem` item
 		inner join `tabProduct Bundle` pb on pb.new_item_code = item.name
-		where coalesce(item.disabled, 0) = 0 {0}
+		where ifnull(item.disabled, 0) = 0 {0}
 	""".format(conditions), filters, as_dict=1)  # nosec
 
 	parent_items = []

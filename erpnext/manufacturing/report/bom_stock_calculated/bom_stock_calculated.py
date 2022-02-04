@@ -75,8 +75,8 @@ def get_bom_stock(filters):
 				bom_item.item_code,
 				bom_item.description,
 				bom_item.{qty_field},
-				coalesce(sum(ledger.actual_qty), 0) as actual_qty,
-				coalesce(sum(FLOOR(ledger.actual_qty / bom_item.{qty_field})), 0) as to_build
+				ifnull(sum(ledger.actual_qty), 0) as actual_qty,
+				ifnull(sum(FLOOR(ledger.actual_qty / bom_item.{qty_field})), 0) as to_build
 			FROM
 				{table} AS bom_item
 				LEFT JOIN `tabBin` AS ledger

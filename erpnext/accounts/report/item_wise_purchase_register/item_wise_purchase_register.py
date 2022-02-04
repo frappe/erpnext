@@ -300,7 +300,7 @@ def get_conditions(filters):
 		("item_code", " and `tabPurchase Invoice Item`.item_code = %(item_code)s"),
 		("from_date", " and `tabPurchase Invoice`.posting_date>=%(from_date)s"),
 		("to_date", " and `tabPurchase Invoice`.posting_date<=%(to_date)s"),
-		("mode_of_payment", " and coalesce(mode_of_payment, '') = %(mode_of_payment)s")):
+		("mode_of_payment", " and ifnull(mode_of_payment, '') = %(mode_of_payment)s")):
 			if filters.get(opts[0]):
 				conditions += opts[1]
 

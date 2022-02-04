@@ -292,7 +292,7 @@ def get_children(doctype, parent, task=None, project=None, is_root=False):
 		# via expand child
 		filters.append(['parent_task', '=', parent])
 	else:
-		filters.append(['coalesce(`parent_task`, "")', '=', ''])
+		filters.append(['ifnull(`parent_task`, "")', '=', ''])
 
 	if project:
 		filters.append(['project', '=', project])

@@ -107,8 +107,8 @@ def get_opening_balances(filters):
 		select party, sum(debit) as opening_debit, sum(credit) as opening_credit
 		from `tabGL Entry`
 		where company=%(company)s
-			and coalesce(party_type, '') = %(party_type)s and coalesce(party, '') != ''
-			and (posting_date < %(from_date)s or coalesce(is_opening, 'No') = 'Yes')
+			and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
+			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
 			{account_filter}
 		group by party""".format(account_filter=account_filter), {
 			"company": filters.company,
@@ -133,9 +133,9 @@ def get_balances_within_period(filters):
 		select party, sum(debit) as debit, sum(credit) as credit
 		from `tabGL Entry`
 		where company=%(company)s
-			and coalesce(party_type, '') = %(party_type)s and coalesce(party, '') != ''
+			and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
 			and posting_date >= %(from_date)s and posting_date <= %(to_date)s
-			and coalesce(is_opening, 'No') = 'No'
+			and ifnull(is_opening, 'No') = 'No'
 			{account_filter}
 		group by party""".format(account_filter=account_filter), {
 			"company": filters.company,

@@ -66,7 +66,7 @@ class Gratuity(AccountsController):
 
 	def set_total_advance_paid(self):
 		paid_amount = frappe.db.sql("""
-			select coalesce(sum(debit_in_account_currency), 0) as paid_amount
+			select ifnull(sum(debit_in_account_currency), 0) as paid_amount
 			from `tabGL Entry`
 			where against_voucher_type = 'Gratuity'
 				and against_voucher = %s

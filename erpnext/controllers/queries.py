@@ -53,7 +53,7 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 
 	return frappe.db.sql("""select {fields} from `tabLead`
 		where docstatus < 2
-			and coalesce(status, '') != 'Converted'
+			and ifnull(status, '') != 'Converted'
 			and ({key} like %(txt)s
 				or lead_name like %(txt)s
 				or company_name like %(txt)s)
@@ -268,7 +268,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			where tabItem.docstatus < 2
 				and tabItem.disabled=0
 				and tabItem.has_variants=0
-				and (tabItem.end_of_life > %(today)s or coalesce(tabItem.end_of_life, '0000-00-00')='0000-00-00')
+				and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
 				and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
 					{description_cond})
 				{fcond} {mcond}
@@ -350,7 +350,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	cond = ''
 	if filters and filters.get('customer'):
 		cond = """(`tabProject`.customer = %s or
-			coalesce(`tabProject`.customer,"")="") and""" %(frappe.db.escape(filters.get("customer")))
+			ifnull(`tabProject`.customer,"")="") and""" %(frappe.db.escape(filters.get("customer")))
 
 	fields = get_fields("Project", ["name", "project_name"])
 	searchfields = frappe.get_meta("Project").get_search_fields()
@@ -636,14 +636,14 @@ def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
 	filter_dict = get_doctype_wise_filters(filters)
 
 	query = """select `tabWarehouse`.name,
-		CONCAT_WS(' : ', 'Actual Qty', coalesce(round(`tabBin`.actual_qty, 2), 0 )) actual_qty
+		CONCAT_WS(' : ', 'Actual Qty', ifnull(round(`tabBin`.actual_qty, 2), 0 )) actual_qty
 		from `tabWarehouse`
 		left join `tabBin`
 		on `tabBin`.warehouse = `tabWarehouse`.name {bin_conditions}
 		where
 			`tabWarehouse`.`{key}` like {txt}
 			{fcond} {mcond}
-		order by coalesce(`tabBin`.actual_qty, 0) desc
+		order by ifnull(`tabBin`.actual_qty, 0) desc
 		limit
 			{page_len} offset {start}
 		""".format(

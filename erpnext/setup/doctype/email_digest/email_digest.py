@@ -410,7 +410,7 @@ class EmailDigest(Document):
 	def get_sales_orders_to_bill(self):
 		"""Get value not billed"""
 
-		value, count = frappe.db.sql("""select coalesce((sum(grand_total)) - (sum(grand_total*per_billed/100)),0),
+		value, count = frappe.db.sql("""select ifnull((sum(grand_total)) - (sum(grand_total*per_billed/100)),0),
                     count(*) from `tabSales Order`
 					where (transaction_date <= %(to_date)s) and billing_status != "Fully Billed" and company = %(company)s
 					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date, "company": self.company})[0]
@@ -435,7 +435,7 @@ class EmailDigest(Document):
 	def get_sales_orders_to_deliver(self):
 		"""Get value not delivered"""
 
-		value, count = frappe.db.sql("""select coalesce((sum(grand_total)) - (sum(grand_total*per_delivered/100)),0),
+		value, count = frappe.db.sql("""select ifnull((sum(grand_total)) - (sum(grand_total*per_delivered/100)),0),
 					count(*) from `tabSales Order`
 					where (transaction_date <= %(to_date)s) and delivery_status != "Fully Delivered" and company = %(company)s
 					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date, "company": self.company})[0]
@@ -460,7 +460,7 @@ class EmailDigest(Document):
 	def get_purchase_orders_to_receive(self):
 		"""Get value not received"""
 
-		value, count = frappe.db.sql("""select coalesce((sum(grand_total))-(sum(grand_total*per_received/100)),0),
+		value, count = frappe.db.sql("""select ifnull((sum(grand_total))-(sum(grand_total*per_received/100)),0),
                     count(*) from `tabPurchase Order`
 					where (transaction_date <= %(to_date)s) and per_received < 100 and company = %(company)s
 					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date, "company": self.company})[0]
@@ -485,7 +485,7 @@ class EmailDigest(Document):
 	def get_purchase_orders_to_bill(self):
 		"""Get purchase not billed"""
 
-		value, count = frappe.db.sql("""select coalesce((sum(grand_total)) - (sum(grand_total*per_billed/100)),0),
+		value, count = frappe.db.sql("""select ifnull((sum(grand_total)) - (sum(grand_total*per_billed/100)),0),
                     count(*) from `tabPurchase Order`
 					where (transaction_date <= %(to_date)s) and per_billed < 100 and company = %(company)s
 					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date, "company": self.company})[0]
@@ -618,8 +618,8 @@ class EmailDigest(Document):
 
 	def get_summary_of_pending(self, doc_type, fieldname, getfield):
 
-		value, count, billed_value, delivered_value = frappe.db.sql("""select coalesce(sum(grand_total),0), count(*),
-			coalesce(sum(grand_total*per_billed/100),0), coalesce(sum(grand_total*{0}/100),0)  from `tab{1}`
+		value, count, billed_value, delivered_value = frappe.db.sql("""select ifnull(sum(grand_total),0), count(*),
+			ifnull(sum(grand_total*per_billed/100),0), ifnull(sum(grand_total*{0}/100),0)  from `tab{1}`
 			where (transaction_date <= %(to_date)s)
 			and status not in ('Closed','Cancelled', 'Completed')
 			and company = %(company)s """.format(getfield, doc_type),
@@ -635,12 +635,12 @@ class EmailDigest(Document):
 
 	def get_summary_of_pending_quotations(self, fieldname):
 
-		value, count = frappe.db.sql("""select coalesce(sum(grand_total),0), count(*) from `tabQuotation`
+		value, count = frappe.db.sql("""select ifnull(sum(grand_total),0), count(*) from `tabQuotation`
 			where (transaction_date <= %(to_date)s)
 			and company = %(company)s
 			and status not in ('Ordered','Cancelled', 'Lost') """,{"to_date": self.future_to_date, "company": self.company})[0]
 
-		last_value = frappe.db.sql("""select coalesce(sum(grand_total),0) from `tabQuotation`
+		last_value = frappe.db.sql("""select ifnull(sum(grand_total),0) from `tabQuotation`
 			where (transaction_date <= %(to_date)s)
 			and company = %(company)s
 			and status not in ('Ordered','Cancelled', 'Lost') """,{"to_date": self.past_to_date, "company": self.company})[0][0]

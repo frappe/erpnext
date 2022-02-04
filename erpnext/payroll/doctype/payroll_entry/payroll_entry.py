@@ -494,7 +494,7 @@ def get_sal_struct(company, currency, salary_slip_based_on_timesheet, condition)
 			is_active = 'Yes'
 			and company = %(company)s
 			and currency = %(currency)s and
-			coalesce(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s
+			ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s
 			{condition}""".format(condition=condition),
 		{"company": company, "currency": currency, "salary_slip_based_on_timesheet": salary_slip_based_on_timesheet})
 
@@ -508,8 +508,8 @@ def get_filter_condition(filters):
 
 def get_joining_relieving_condition(start_date, end_date):
 	cond = """
-		and coalesce(t1.date_of_joining, '1900-01-01') <= '%(end_date)s'
-		and coalesce(t1.relieving_date, '2199-12-31') >= '%(start_date)s'
+		and ifnull(t1.date_of_joining, '1900-01-01') <= '%(end_date)s'
+		and ifnull(t1.relieving_date, '2199-12-31') >= '%(start_date)s'
 	""" % {"start_date": start_date, "end_date": end_date}
 	return cond
 

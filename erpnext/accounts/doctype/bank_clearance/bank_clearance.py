@@ -38,7 +38,7 @@ class BankClearance(Document):
 			where
 				t2.parent = t1.name and t2.account = %(account)s and t1.docstatus=1
 				and t1.posting_date >= %(from)s and t1.posting_date <= %(to)s
-				and coalesce(t1.is_opening, 'No') = 'No' {condition}
+				and ifnull(t1.is_opening, 'No') = 'No' {condition}
 			group by t2.account, t1.name
 			order by t1.posting_date ASC, t1.name DESC
 		""".format(condition=mdb_condition),
@@ -53,7 +53,7 @@ class BankClearance(Document):
 			where
 				t2.parent = t1.name and t2.account = %(account)s and t1.docstatus=1
 				and t1.posting_date >= %(from)s and t1.posting_date <= %(to)s
-				and coalesce(t1.is_opening, 'No') = 'No' {condition}
+				and ifnull(t1.is_opening, 'No') = 'No' {condition}
 			group by t2.account, t1.name
 			order by t1.posting_date ASC, t1.name DESC
 		""".format(condition=pg_condition)
@@ -70,7 +70,7 @@ class BankClearance(Document):
 				reference_no as cheque_number, reference_date as cheque_date,
 				if(paid_from=%(account)s, paid_amount, 0) as credit,
 				if(paid_from=%(account)s, 0, received_amount) as debit,
-				posting_date, coalesce(party,if(paid_from=%(account)s,paid_to,paid_from)) as against_account, clearance_date,
+				posting_date, ifnull(party,if(paid_from=%(account)s,paid_to,paid_from)) as against_account, clearance_date,
 				if(paid_to=%(account)s, paid_to_account_currency, paid_from_account_currency) as account_currency
 			from `tabPayment Entry`
 			where
@@ -86,7 +86,7 @@ class BankClearance(Document):
 				reference_no as cheque_number, reference_date as cheque_date,
 				if(paid_from=%(account)s, paid_amount, 0) as credit,
 				if(paid_from=%(account)s, 0, received_amount) as debit,
-				posting_date, coalesce(party,if(paid_from=%(account)s,paid_to,paid_from)) as against_account, clearance_date,
+				posting_date, ifnull(party,if(paid_from=%(account)s,paid_to,paid_from)) as against_account, clearance_date,
 				if(paid_to=%(account)s, paid_to_account_currency, paid_from_account_currency) as account_currency
 			from `tabPayment Entry`
 			where

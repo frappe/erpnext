@@ -110,7 +110,7 @@ def get_data(filters):
 				interview.reference_document_name.as_('questionnaire'), fnf.name.as_('full_and_final_statement'))
 			.distinct()
 			.where(
-				(fn.Coalesce(fn.Cast(employee.relieving_date, 'char'), '') != '')
+				(fn.ifnull(fn.Cast(employee.relieving_date, 'char'), '') != '')
 				& ((interview.name.isnull()) | ((interview.name.isnotnull()) & (interview.docstatus != 2)))
 				& ((fnf.name.isnull()) | ((fnf.name.isnotnull()) & (fnf.docstatus != 2)))
 			).orderby(employee.relieving_date, order=Order.asc)

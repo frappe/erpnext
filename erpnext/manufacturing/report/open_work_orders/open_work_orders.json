@@ -12,7 +12,7 @@
  "module": "Manufacturing", 
  "name": "Open Work Orders", 
  "owner": "Administrator", 
- "query": "SELECT\n  `tabWork Order`.name as \"Work Order:Link/Work Order:200\",\n  `tabWork Order`.creation as \"Date:Date:120\",\n  `tabWork Order`.production_item as \"Item:Link/Item:150\",\n  `tabWork Order`.qty as \"To Produce:Int:100\",\n  `tabWork Order`.produced_qty as \"Produced:Int:100\",\n  `tabWork Order`.company as \"Company:Link/Company:\"\nFROM\n  `tabWork Order`\nWHERE\n  `tabWork Order`.docstatus=1\n  AND coalesce(`tabWork Order`.produced_qty,0) < `tabWork Order`.qty\n  AND NOT EXISTS (SELECT name from `tabStock Entry` where work_order =`tabWork Order`.name) ", 
+ "query": "SELECT\n  `tabWork Order`.name as \"Work Order:Link/Work Order:200\",\n  `tabWork Order`.creation as \"Date:Date:120\",\n  `tabWork Order`.production_item as \"Item:Link/Item:150\",\n  `tabWork Order`.qty as \"To Produce:Int:100\",\n  `tabWork Order`.produced_qty as \"Produced:Int:100\",\n  `tabWork Order`.company as \"Company:Link/Company:\"\nFROM\n  `tabWork Order`\nWHERE\n  `tabWork Order`.docstatus=1\n  AND ifnull(`tabWork Order`.produced_qty,0) < `tabWork Order`.qty\n  AND NOT EXISTS (SELECT name from `tabStock Entry` where work_order =`tabWork Order`.name) ", 
  "ref_doctype": "Work Order", 
  "report_name": "Open Work Orders", 
  "report_type": "Query Report", 

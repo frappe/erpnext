@@ -56,7 +56,7 @@ class TestItem(unittest.TestCase):
 			children = []
 			for ig in item_groups:
 				children += frappe.db.sql_list("""select name from `tabItem Group`
-				where coalesce(parent_item_group, '')=%s""", ig or '')
+				where ifnull(parent_item_group, '')=%s""", ig or '')
 
 			if len(children):
 				return get_no_of_children(children, no_of_children + len(children))

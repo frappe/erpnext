@@ -24,12 +24,12 @@ def get_item_list(wo_list, filters):
 
 			item_list = frappe.db.sql("""SELECT
 					bom_item.item_code as item_code,
-					coalesce(ledger.actual_qty*bom.quantity/bom_item.stock_qty,0) as build_qty
+					ifnull(ledger.actual_qty*bom.quantity/bom_item.stock_qty,0) as build_qty
 				FROM
 					`tabBOM` as bom, `tabBOM Item` AS bom_item
 					LEFT JOIN `tabBin` AS ledger
 						ON bom_item.item_code = ledger.item_code
-						AND ledger.warehouse = coalesce(%(warehouse)s,%(filterhouse)s)
+						AND ledger.warehouse = ifnull(%(warehouse)s,%(filterhouse)s)
 				WHERE
 					bom.name = bom_item.parent
 					and bom_item.item_code = %(item_code)s

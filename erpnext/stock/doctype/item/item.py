@@ -417,7 +417,7 @@ class Item(Document):
 
 		for dt in ("Sales Taxes and Charges", "Purchase Taxes and Charges"):
 			for d in frappe.db.sql("""select name, item_wise_tax_detail from `tab{0}`
-					where coalesce(item_wise_tax_detail, '') != ''""".format(dt), as_dict=1):
+					where ifnull(item_wise_tax_detail, '') != ''""".format(dt), as_dict=1):
 
 				item_wise_tax_detail = json.loads(d.item_wise_tax_detail)
 				if isinstance(item_wise_tax_detail, dict) and old_name in item_wise_tax_detail:

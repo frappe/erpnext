@@ -35,7 +35,7 @@ def get_project_details():
 
 def get_purchased_items_cost():
 	pr_items = frappe.db.sql("""select project, sum(base_net_amount) as amount
-		from `tabPurchase Receipt Item` where coalesce(project, '') != ''
+		from `tabPurchase Receipt Item` where ifnull(project, '') != ''
 		and docstatus = 1 group by project""", as_dict=1)
 
 	pr_item_map = {}
@@ -47,8 +47,8 @@ def get_purchased_items_cost():
 def get_issued_items_cost():
 	se_items = frappe.db.sql("""select se.project, sum(se_item.amount) as amount
 		from `tabStock Entry` se, `tabStock Entry Detail` se_item
-		where se.name = se_item.parent and se.docstatus = 1 and coalesce(se_item.t_warehouse, '') = ''
-		and coalesce(se.project, '') != '' group by se.project""", as_dict=1)
+		where se.name = se_item.parent and se.docstatus = 1 and ifnull(se_item.t_warehouse, '') = ''
+		and ifnull(se.project, '') != '' group by se.project""", as_dict=1)
 
 	se_item_map = {}
 	for item in se_items:
@@ -59,13 +59,13 @@ def get_issued_items_cost():
 def get_delivered_items_cost():
 	dn_items = frappe.db.sql("""select dn.project, sum(dn_item.base_net_amount) as amount
 		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
-		where dn.name = dn_item.parent and dn.docstatus = 1 and coalesce(dn.project, '') != ''
+		where dn.name = dn_item.parent and dn.docstatus = 1 and ifnull(dn.project, '') != ''
 		group by dn.project""", as_dict=1)
 
 	si_items = frappe.db.sql("""select si.project, sum(si_item.base_net_amount) as amount
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
 		where si.name = si_item.parent and si.docstatus = 1 and si.update_stock = 1
-		and si.is_pos = 1 and coalesce(si.project, '') != ''
+		and si.is_pos = 1 and ifnull(si.project, '') != ''
 		group by si.project""", as_dict=1)
 
 

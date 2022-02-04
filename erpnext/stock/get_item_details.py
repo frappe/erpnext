@@ -737,9 +737,9 @@ def get_item_price(args, item_code, ignore_party=False):
 
 	conditions = """where item_code=%(item_code)s
 		and price_list=%(price_list)s
-		and coalesce(uom, '') in ('', %(uom)s)"""
+		and ifnull(uom, '') in ('', %(uom)s)"""
 
-	conditions += "and coalesce(batch_no, '') in ('', %(batch_no)s)"
+	conditions += "and ifnull(batch_no, '') in ('', %(batch_no)s)"
 
 	if not ignore_party:
 		if args.get("customer"):
@@ -751,15 +751,15 @@ def get_item_price(args, item_code, ignore_party=False):
 
 	if args.get('transaction_date'):
 		conditions += """ and %(transaction_date)s between
-			coalesce(valid_from, '2000-01-01') and coalesce(valid_upto, '2500-12-31')"""
+			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
 
 	if args.get('posting_date'):
 		conditions += """ and %(posting_date)s between
-			coalesce(valid_from, '2000-01-01') and coalesce(valid_upto, '2500-12-31')"""
+			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
 
 	return frappe.db.sql(""" select name, price_list_rate, uom
 		from `tabItem Price` {conditions}
-		order by valid_from desc, coalesce(batch_no, '') desc, uom desc """.format(conditions=conditions), args)
+		order by valid_from desc, ifnull(batch_no, '') desc, uom desc """.format(conditions=conditions), args)
 
 def get_price_list_rate_for(args, item_code):
 	"""
@@ -944,13 +944,13 @@ def get_serial_nos_by_fifo(args, sales_order=None):
 			'mariadb':
 				"""select name from `tabSerial No`
 			where item_code=%(item_code)s and warehouse=%(warehouse)s and
-			sales_order=coalesce(%(sales_order)s, sales_order)
+			sales_order=ifnull(%(sales_order)s, sales_order)
 			order by timestamp(purchase_date, purchase_time)
 			asc limit %(qty)s""",
 			'postgres':
 				"""select name from `tabSerial No`
 			where item_code=%(item_code)s and warehouse=%(warehouse)s and
-			sales_order=coalesce(%(sales_order)s, sales_order)
+			sales_order=ifnull(%(sales_order)s, sales_order)
 			order by cast(concat(purchase_date, ' ', purchase_time) as timestamp)
 			asc limit %(qty)s"""
 			},{

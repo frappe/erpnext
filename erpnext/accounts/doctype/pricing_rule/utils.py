@@ -122,7 +122,7 @@ def _get_pricing_rules(apply_on, args, values):
 
 	if not args.price_list: args.price_list = None
 
-	conditions += " and coalesce(`tabPricing Rule`.for_price_list, '') in (%(price_list)s, '')"
+	conditions += " and ifnull(`tabPricing Rule`.for_price_list, '') in (%(price_list)s, '')"
 	values["price_list"] = args.get("price_list")
 
 	pricing_rules = frappe.db.sql("""select `tabPricing Rule`.*,
@@ -182,7 +182,7 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 
 		if parent_groups:
 			if allow_blank: parent_groups.append('')
-			condition = "coalesce({table}.{field}, '') in ({parent_groups})".format(
+			condition = "ifnull({table}.{field}, '') in ({parent_groups})".format(
 				table=table,
 				field=field,
 				parent_groups=", ".join(frappe.db.escape(d) for d in parent_groups)
@@ -194,10 +194,10 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 def get_other_conditions(conditions, values, args):
 	for field in ["company", "customer", "supplier", "campaign", "sales_partner"]:
 		if args.get(field):
-			conditions += " and coalesce(`tabPricing Rule`.{0}, '') in (%({1})s, '')".format(field, field)
+			conditions += " and ifnull(`tabPricing Rule`.{0}, '') in (%({1})s, '')".format(field, field)
 			values[field] = args.get(field)
 		else:
-			conditions += " and coalesce(`tabPricing Rule`.{0}, '') = ''".format(field)
+			conditions += " and ifnull(`tabPricing Rule`.{0}, '') = ''".format(field)
 
 	for parenttype in ["Customer Group", "Territory", "Supplier Group"]:
 		group_condition = _get_tree_conditions(args, parenttype, '`tabPricing Rule`')
@@ -205,8 +205,8 @@ def get_other_conditions(conditions, values, args):
 			conditions += " and " + group_condition
 
 	if args.get("transaction_date"):
-		conditions += """ and %(transaction_date)s between coalesce(`tabPricing Rule`.valid_from, '2000-01-01')
-			and coalesce(`tabPricing Rule`.valid_upto, '2500-12-31')"""
+		conditions += """ and %(transaction_date)s between ifnull(`tabPricing Rule`.valid_from, '2000-01-01')
+			and ifnull(`tabPricing Rule`.valid_upto, '2500-12-31')"""
 		values['transaction_date'] = args.get('transaction_date')
 
 	return conditions
