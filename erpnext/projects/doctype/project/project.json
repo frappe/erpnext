@@ -81,6 +81,10 @@
   "depreciation_details_section",
   "default_depreciation_percentage",
   "non_standard_depreciation",
+  "items_section",
+  "service_items_html",
+  "stock_items_html",
+  "sales_summary_html",
   "section_break_18",
   "expected_start_date",
   "actual_start_date",
@@ -845,11 +849,33 @@
    "label": "Previous Project",
    "no_copy": 1,
    "options": "Project"
+  },
+  {
+   "fieldname": "service_items_html",
+   "fieldtype": "HTML",
+   "label": "Service Items HTML"
+  },
+  {
+   "fieldname": "stock_items_html",
+   "fieldtype": "HTML",
+   "label": "Stock Items HTML"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Items and Totals"
+  },
+  {
+   "fieldname": "sales_summary_html",
+   "fieldtype": "HTML",
+   "label": "Sales Summary HTML"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2022-02-01 12:57:37.541160",
+ "modified": "2022-02-03 23:11:31.481270",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

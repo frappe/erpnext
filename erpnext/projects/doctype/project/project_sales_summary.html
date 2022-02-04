@@ -1,0 +1,47 @@
+<table class="table table-bordered" style="font-size: 9pt; width: auto; margin: 0 auto;">
+	<thead>
+		<tr>
+			<th colspan="3" class="text-center">Summary</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		<tr>
+			<td>{{ _("Services Net Amount") }}</td>
+			<td class="text-right">{{ frappe.format(doc.sales_data.service_items.net_total, df=frappe.get_meta("Sales Invoice").get_field("net_total")) }}</td>
+			<td class="text-right"></td>
+		</tr>
+
+		<tr>
+			<td>{{ _("Materials Net Amount") }}</td>
+			<td class="text-right">{{ frappe.format(doc.sales_data.stock_items.net_total, df=frappe.get_meta("Sales Invoice").get_field("net_total")) }}</td>
+			<td class="text-right"></td>
+		</tr>
+
+		<tr>
+			<td><b>{{ _("Net Total") }}</b></td>
+			<td class="text-right"></td>
+			<td class="text-right">{{ frappe.format(doc.sales_data.totals.net_total, df=frappe.get_meta("Sales Invoice").get_field("net_total")) }}</td>
+		</tr>
+
+		{% for tax_account, tax_amount in doc.sales_data.totals.taxes.items() %}
+		<tr>
+			<td>{{ tax_account }}</td>
+			<td class="text-right">{{ frappe.format(tax_amount, df=frappe.get_meta("Sales Invoice").get_field("total_taxes_and_charges")) }}</td>
+			<td class="text-right"></td>
+		</tr>
+		{% endfor %}
+
+		<tr>
+			<td><b>{{ _("Taxes and Charges") }}</b></td>
+			<td class="text-right"></td>
+			<td class="text-right">{{ frappe.format(doc.sales_data.totals.total_taxes_and_charges, df=frappe.get_meta("Sales Invoice").get_field("total_taxes_and_charges")) }}</td>
+		</tr>
+
+		<tr>
+			<th>{{ _("Grand Total") }}</th>
+			<td class="text-right"></td>
+			<th class="text-right">{{ frappe.format(doc.sales_data.totals.grand_total, df=frappe.get_meta("Sales Invoice").get_field("grand_total")) }}</th>
+		</tr>
+	</tbody>
+</table>

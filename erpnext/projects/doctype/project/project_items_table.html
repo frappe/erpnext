@@ -1,0 +1,102 @@
+<h5>
+	{{ title }}
+</h5>
+
+{% set colspan = 8 %}
+{% if show_uom %}
+	{% set colspan = colspan + 1 %}
+{% endif %}
+{% if show_delivery_note %}
+	{% set colspan = colspan + 1 %}
+{% endif %}
+
+<div style="overflow-x: auto;">
+<table class="table table-bordered" style="font-size: 8pt; margin: 0;">
+	<thead>
+		<tr>
+			<th class="text-center">#</th>
+			<th>{{ _("Date") }}</th>
+			<th>{{ _("Item Code") }}</th>
+			<th>{{ _("Description") }}</th>
+			<th class="text-right">{{ _("Qty") }}</th>
+			{% if show_uom %}<th>{{ _("UOM") }}</th>{% endif %}
+			<th class="text-right">{{ _("Rate") }}</th>
+			<th class="text-right">{{ _("Amount") }}</th>
+			{% if show_delivery_note %}<th>{{ _("Delivery Note") }}</th>{% endif %}
+			<th>{{ _("Sales Order") }}</th>
+		</tr>
+	</thead>
+	<tbody>
+	{% for d in data['items'] %}
+		<tr>
+			<td class="text-center">
+				{{ d.idx }}
+			</td>
+			<td class="text-center">
+				{{ frappe.format(d.posting_date or d.transaction_date, df=frappe.get_meta("Sales Invoice").get_field("posting_date")) }}
+			</td>
+			<td>
+				{{ frappe.utils.get_link_to_form('Item', d.item_code, target='_blank') }}
+			</td>
+			<td>
+				{% if frappe.utils.strip_html(frappe.utils.cstr(d.description)).strip() %}
+					{{ frappe.format(d.description, df=frappe.get_meta("Sales Invoice Item").get_field("description")) }}
+				{% else %}
+					{{ d.item_name }}
+				{% endif %}
+			</td>
+			<td class="text-right">
+				{{ frappe.format(d.qty, df=frappe.get_meta("Sales Invoice Item").get_field("qty")) }}
+			</td>
+			{% if show_uom %}
+			<td>
+				{{ d.uom }}
+			</td>
+			{% endif %}
+			<td class="text-right">
+				{{ frappe.format(d.net_rate, df=frappe.get_meta("Sales Invoice Item").get_field("rate")) }}
+			</td>
+			<td class="text-right">
+				{{ frappe.format(d.net_amount, df=frappe.get_meta("Sales Invoice Item").get_field("amount")) }}
+			</td>
+			{% if show_delivery_note %}
+			<td>
+				{{ frappe.utils.get_link_to_form('Delivery Note', d.delivery_note, target='_blank') if d.delivery_note else '' }}
+			</td>
+			{% endif %}
+			<td>
+				{{ frappe.utils.get_link_to_form('Sales Order', d.sales_order, target='_blank') if d.sales_order else '' }}
+			</td>
+		</tr>
+	{% endfor %}
+
+	{% if not data['items'] %}
+		<tr>
+			<td colspan="{{ colspan }}" class="text-center text-muted">No Items</td>
+		</tr>
+	{% endif %}
+
+	</tbody>
+
+	{% if data['items'] %}
+	<tfoot>
+		<tr style="font-weight: bold;">
+			<td></td>
+			<td></td>
+			<td></td>
+			<td>{{ _("Total") }}</td>
+			<td class="text-right">
+				{{ frappe.format(data.total_qty, df=frappe.get_meta("Sales Invoice").get_field("total_qty")) }}
+			</td>
+			{% if show_uom %}<td></td>{% endif %}
+			<td></td>
+			<td class="text-right">
+				{{ frappe.format(data.net_total, df=frappe.get_meta("Sales Invoice").get_field("net_total")) }}
+			</td>
+			{% if show_delivery_note %}<td></td>{% endif %}
+			<td></td>
+		</tr>
+	</tfoot>
+	{% endif %}
+</table>
+</div>

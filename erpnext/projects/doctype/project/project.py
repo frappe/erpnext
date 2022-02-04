@@ -31,6 +31,10 @@ force_customer_fields = ("customer_name",
 
 
 class Project(Document):
+	def __init__(self, *args, **kwargs):
+		super(Project, self).__init__(*args, **kwargs)
+		self.sales_data = frappe._dict()
+
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), frappe.safe_decode(self.project_name or self.name))
 
@@ -52,11 +56,16 @@ class Project(Document):
 
 		self.set_costing()
 
+		self.get_project_sales_data()
+		self.set_sales_data_html_onload()
+
 	def before_print(self):
 		self.onload()
+
 		self.company_address_doc = erpnext.get_company_address(self)
+
 		self.set_missing_checklist()
-		self.get_billing_data()
+		self.get_sales_invoice_names()
 
 	def validate(self):
 		if not self.is_new():
@@ -285,10 +294,46 @@ class Project(Document):
 		else:
 			self.status = "Open"
 
-	def get_billing_data(self):
-		self.stock_data, self.parts_data, self.lubricants_data = get_stock_items(self.name, self.company)
-		self.service_data, self.labour_data, self.sublet_data = get_service_items(self.name, self.company)
-		self.totals_data = get_totals_data([self.stock_data, self.service_data])
+	def set_sales_data_html_onload(self):
+		currency = erpnext.get_company_currency(self.company)
+
+		stock_items_html = frappe.render_template("erpnext/projects/doctype/project/project_items_table.html",
+			{"doc": self, "data": self.sales_data.stock_items, "currency": currency,
+				"title": _("Materials"), "show_delivery_note": True, "show_uom": True})
+		service_items_html = frappe.render_template("erpnext/projects/doctype/project/project_items_table.html",
+			{"doc": self, "data": self.sales_data.service_items, "currency": currency,
+				"title": _("Services"), "show_delivery_note": False, "show_uom": False})
+
+		sales_summary_html = frappe.render_template("erpnext/projects/doctype/project/project_sales_summary.html",
+			{"doc": self, "currency": currency})
+
+		self.set_onload('stock_items_html', stock_items_html)
+		self.set_onload('service_items_html', service_items_html)
+		self.set_onload('sales_summary_html', sales_summary_html)
+
+	def get_project_sales_data(self):
+		self.sales_data.stock_items, self.sales_data.part_items, self.sales_data.lubricant_items = get_stock_items(self.name, self.company)
+		self.sales_data.service_items, self.sales_data.labour_items, self.sales_data.sublet_items = get_service_items(self.name, self.company)
+		self.sales_data.totals = get_totals_data([self.sales_data.stock_items, self.sales_data.service_items])
+
+	def get_sales_invoice_names(self):
+		# Invoices
+		invoices = frappe.get_all("Sales Invoice", {"project": self.name, "docstatus": 1},
+			order_by="posting_date desc, posting_time desc")
+		invoices = [d.name for d in invoices]
+
+		invoice_items = frappe.db.sql_list("""
+			select distinct inv.name
+			from `tabSales Invoice Item` item
+			inner join `tabSales Invoice` inv on inv.name = item.parent
+			where inv.docstatus = 1 and item.project = %s
+			order by posting_date desc, posting_time desc
+		""", self.name)
+
+		self.sales_data.invoices = invoices
+		for name in invoice_items:
+			if name not in self.sales_data.invoices:
+				self.sales_data.invoices.append(name)
 
 	def set_costing(self):
 		from_time_sheet = frappe.db.sql("""select
@@ -419,11 +464,12 @@ class Project(Document):
 
 def get_stock_items(project, company):
 	dn_data = frappe.db.sql("""
-		select p.name,
+		select p.name as delivery_note, i.sales_order,
 			p.posting_date, p.posting_time, i.idx,
 			i.item_code, i.item_name, i.description, i.item_group,
 			i.qty, i.uom,
 			i.net_amount, i.base_net_amount,
+			i.net_rate, i.base_net_rate,
 			i.item_tax_detail
 		from `tabDelivery Note Item` i
 		inner join `tabDelivery Note` p on p.name = i.parent
@@ -432,12 +478,13 @@ def get_stock_items(project, company):
 	""", project, as_dict=1)
 
 	so_data = frappe.db.sql("""
-		select p.name,
+		select p.name as sales_order,
 			p.transaction_date, i.idx,
 			i.item_code, i.item_name, i.description, i.item_group,
 			i.qty - i.delivered_qty as qty, i.qty as ordered_qty, i.uom,
 			i.net_amount * (i.qty - i.delivered_qty) / i.qty as net_amount,
 			i.base_net_amount * (i.qty - i.delivered_qty) / i.qty as base_net_amount,
+			i.net_rate, i.base_net_rate,
 			i.item_tax_detail
 		from `tabSales Order Item` i
 		inner join `tabSales Order` p on p.name = i.parent
@@ -481,10 +528,12 @@ def get_stock_items(project, company):
 
 def get_service_items(project, company):
 	so_data = frappe.db.sql("""
-		select p.name, p.transaction_date,
+		select p.name as sales_order,
+			p.transaction_date,
 			i.item_code, i.item_name, i.description, i.item_group,
 			i.qty, i.uom,
 			i.net_amount, i.base_net_amount,
+			i.net_rate, i.base_net_rate,
 			i.item_tax_detail
 		from `tabSales Order Item` i
 		inner join `tabSales Order` p on p.name = i.parent
@@ -494,17 +543,19 @@ def get_service_items(project, company):
 	""", project, as_dict=1)
 
 	sinv_data = frappe.db.sql("""
-		select p.name, p.posting_date as transaction_date,
+		select p.name as sales_invoice, i.delivery_note, i.sales_order,
+			p.posting_date as transaction_date,
 			i.item_code, i.item_name, i.description, i.item_group,
 			i.qty, i.uom,
 			i.net_amount, i.base_net_amount,
+			i.net_rate, i.base_net_rate,
 			i.item_tax_detail
 		from `tabSales Invoice Item` i
 		inner join `tabSales Invoice` p on p.name = i.parent
 		where p.docstatus = 1 and i.is_stock_item = 0 and i.is_fixed_asset = 0 and ifnull(i.sales_order, '') = ''
-			and p.project = %s
+			and (p.project = %s or i.project = %s)
 		order by p.posting_date, p.creation, i.idx
-	""", project, as_dict=1)
+	""", [project, project], as_dict=1)
 
 	service_data = get_items_data_template()
 	labour_data = get_items_data_template()
@@ -536,25 +587,6 @@ def get_service_items(project, company):
 	return service_data, labour_data, sublet_data
 
 
-def get_totals_data(items_dataset):
-	totals_data = frappe._dict({
-		'sales_tax_total': 0,
-		'service_tax_total': 0,
-		'taxes_total': 0,
-		'net_total': 0,
-		'grand_total': 0,
-	})
-	for data in items_dataset:
-		totals_data.net_total += flt(data.net_total)
-
-		totals_data.sales_tax_total += flt(data.sales_tax_total)
-		totals_data.service_tax_total += flt(data.service_tax_total)
-
-	totals_data.taxes_total += totals_data.sales_tax_total + totals_data.service_tax_total
-	totals_data.grand_total += totals_data.net_total + totals_data.taxes_total
-
-	return totals_data
-
 def get_items_data_template():
 	return frappe._dict({
 		'total_qty': 0,
@@ -562,6 +594,8 @@ def get_items_data_template():
 		'base_net_total': 0,
 		'sales_tax_total': 0,
 		'service_tax_total': 0,
+		'other_taxes_and_charges': 0,
+		'taxes': {},
 		'items': [],
 	})
 
@@ -571,8 +605,10 @@ def get_item_taxes(data, company):
 	service_tax_account = frappe.get_cached_value('Company', company, "service_tax_account")
 
 	for d in data['items']:
+		d.setdefault('taxes', {})
 		d.setdefault('sales_tax_amount', 0)
 		d.setdefault('service_tax_amount', 0)
+		d.setdefault('other_taxes_and_charges', 0)
 
 		if sales_tax_account or service_tax_account:
 			item_tax_detail = json.loads(d.item_tax_detail or '{}')
@@ -583,10 +619,15 @@ def get_item_taxes(data, company):
 					if flt(d.ordered_qty):
 						tax_amount = tax_amount * flt(d.qty) / flt(d.ordered_qty)
 
+					d.taxes.setdefault(tax_account, 0)
+					d.taxes[tax_account] += tax_amount
+
 					if tax_account in sales_tax_account:
 						d.sales_tax_amount += tax_amount
-					if tax_account in service_tax_account:
+					elif tax_account in service_tax_account:
 						d.service_tax_amount += tax_amount
+					else:
+						d.other_taxes_and_charges += tax_amount
 
 
 def post_process_items_data(data):
@@ -597,6 +638,39 @@ def post_process_items_data(data):
 		data.base_net_total += d.base_net_amount
 		data.sales_tax_total += d.sales_tax_amount
 		data.service_tax_total += d.service_tax_amount
+		data.other_taxes_and_charges += d.other_taxes_and_charges
+
+		for tax_account, tax_amount in d.taxes.items():
+			data.taxes.setdefault(tax_account, 0)
+			data.taxes[tax_account] += tax_amount
+
+
+def get_totals_data(items_dataset):
+	totals_data = frappe._dict({
+		'taxes': {},
+		'sales_tax_total': 0,
+		'service_tax_total': 0,
+		'other_taxes_and_charges': 0,
+		'total_taxes_and_charges': 0,
+		'net_total': 0,
+		'grand_total': 0,
+	})
+	for data in items_dataset:
+		totals_data.net_total += flt(data.net_total)
+
+		totals_data.sales_tax_total += flt(data.sales_tax_total)
+		totals_data.service_tax_total += flt(data.service_tax_total)
+		totals_data.other_taxes_and_charges += flt(data.other_taxes_and_charges)
+
+		for tax_account, tax_amount in data.taxes.items():
+			totals_data.taxes.setdefault(tax_account, 0)
+			totals_data.taxes[tax_account] += tax_amount
+
+			totals_data.total_taxes_and_charges += tax_amount
+
+	totals_data.grand_total += totals_data.net_total + totals_data.total_taxes_and_charges
+
+	return totals_data
 
 
 def get_timeline_data(doctype, name):
@@ -920,6 +994,7 @@ def get_project_details(project, doctype):
 
 	out = {}
 	fieldnames = [
+		'company',
 		'customer', 'bill_to', 'vehicle_owner',
 		'applies_to_item', 'applies_to_vehicle',
 		'vehicle_chassis_no', 'vehicle_engine_no',

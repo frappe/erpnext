@@ -26,6 +26,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		this.set_applies_to_read_only();
 		this.toggle_vehicle_odometer_fields();
 		this.make_vehicle_checklist();
+		this.set_sales_data_html();
 	},
 
 	setup_queries: function () {
@@ -388,6 +389,12 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		if (this.frm.vehicle_checklist_editor) {
 			this.frm.vehicle_checklist_editor.make();
 		}
+	},
+
+	set_sales_data_html: function () {
+		this.frm.get_field("stock_items_html").$wrapper.html(this.frm.doc.__onload && this.frm.doc.__onload.stock_items_html || '');
+		this.frm.get_field("service_items_html").$wrapper.html(this.frm.doc.__onload && this.frm.doc.__onload.service_items_html || '');
+		this.frm.get_field("sales_summary_html").$wrapper.html(this.frm.doc.__onload && this.frm.doc.__onload.sales_summary_html || '');
 	},
 
 	collect_progress: function() {
