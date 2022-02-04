@@ -431,6 +431,24 @@ class TestBOM(ERPNextTestCase):
 		bom.save()
 		self.assertEqual(bom.transfer_material_against, "Work Order")
 
+	def test_scrap_items(self):
+		fg_item1, fg_item2, bom_item = create_process_loss_bom_items()
+
+		bom_doc = create_bom_with_process_loss_item(
+			fg_item1, bom_item, bom_qty=10, scrap_percent=10.9
+		)
+		bom_doc.save()
+		bom_doc.reload()
+		self.assertEqual(bom_doc.scrap_items[0].stock_qty, 1.0)
+
+		bom_doc = create_bom_with_process_loss_item(
+			fg_item2, bom_item, bom_qty=10, scrap_percent=10
+		)
+		bom_doc.save()
+		bom_doc.reload()
+		print(bom_doc.scrap_items[0].stock_qty)
+		self.assertEqual(bom_doc.scrap_items[0].stock_qty, 1.0)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
@@ -504,26 +522,28 @@ def reset_item_valuation_rate(item_code, warehouse_list=None, qty=None, rate=Non
 		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=qty, rate=rate)
 
 def create_bom_with_process_loss_item(
-		fg_item, bom_item, scrap_qty, scrap_rate, fg_qty=2, is_process_loss=1):
+		fg_item, bom_item, scrap_qty=0, scrap_rate=0, fg_qty=2, is_process_loss=1, bom_qty=1, scrap_percent=0):
 	bom_doc = frappe.new_doc("BOM")
 	bom_doc.item = fg_item.item_code
 	bom_doc.quantity = fg_qty
 	bom_doc.append("items", {
 		"item_code": bom_item.item_code,
-		"qty": 1,
+		"qty": bom_qty,
 		"uom": bom_item.stock_uom,
 		"stock_uom": bom_item.stock_uom,
-		"rate": 100.0
+		"rate": 100.0,
+		"scrap": scrap_percent
 	})
-	bom_doc.append("scrap_items", {
-		"item_code": fg_item.item_code,
-		"qty": scrap_qty,
-		"stock_qty": scrap_qty,
-		"uom": fg_item.stock_uom,
-		"stock_uom": fg_item.stock_uom,
-		"rate": scrap_rate,
-		"is_process_loss": is_process_loss
-	})
+	if not scrap_percent:
+		bom_doc.append("scrap_items", {
+			"item_code": fg_item.item_code,
+			"qty": scrap_qty,
+			"stock_qty": scrap_qty,
+			"uom": fg_item.stock_uom,
+			"stock_uom": fg_item.stock_uom,
+			"rate": scrap_rate,
+			"is_process_loss": is_process_loss
+		})
 	bom_doc.currency = "INR"
 	return bom_doc
 
