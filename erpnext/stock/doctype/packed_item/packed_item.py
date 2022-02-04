@@ -27,8 +27,7 @@ def make_packing_list(doc):
 
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
 
-	if not doc.is_new():
-		reset = reset_packing_list_if_deleted_items_exist(doc)
+	reset = reset_packing_list(doc)
 
 	for item_row in doc.get("items"):
 		if frappe.db.exists("Product Bundle", {"new_item_code": item_row.item_code}):
@@ -64,20 +63,24 @@ def get_indexed_packed_items_table(doc):
 
 	return indexed_table
 
-def reset_packing_list_if_deleted_items_exist(doc):
-	doc_before_save = doc.get_doc_before_save()
+def reset_packing_list(doc):
+	"Conditionally reset the table and return if it was reset or not."
 	reset_table = False
+	doc_before_save = doc.get_doc_before_save()
 
 	if doc_before_save:
 		# reset table if:
 		# 1. items were deleted
 		# 2. if bundle item replaced by another item (same no. of items but different items)
-		# we maintain list to maintain repeated item rows as well
+		# we maintain list to track recurring item rows as well
 		items_before_save = [item.item_code for item in doc_before_save.get("items")]
 		items_after_save = [item.item_code for item in doc.get("items")]
 		reset_table = items_before_save != items_after_save
 	else:
-		reset_table = True # reset if via Update Items (cannot determine action)
+		# reset: if via Update Items OR
+		# if new mapped doc with packed items set (SO -> DN)
+		# (cannot determine action)
+		reset_table = True
 
 	if reset_table:
 		doc.set("packed_items", [])
