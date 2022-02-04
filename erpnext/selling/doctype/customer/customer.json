@@ -93,6 +93,7 @@
    "depends_on": "eval:doc.customer_type!='Company'",
    "fieldname": "salutation",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Salutation",
    "options": "Salutation"
   },
@@ -112,6 +113,7 @@
    "depends_on": "eval:doc.customer_type != 'Company'",
    "fieldname": "gender",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Gender",
    "options": "Gender"
   },
@@ -128,12 +130,14 @@
   {
    "fieldname": "default_bank_account",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Default Company Bank Account",
    "options": "Bank Account"
   },
   {
    "fieldname": "lead_name",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "From Lead",
    "no_copy": 1,
    "oldfieldname": "lead_name",
@@ -157,19 +161,21 @@
   {
    "fieldname": "account_manager",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Account Manager",
    "options": "User"
   },
   {
+   "default": "Individual",
    "fieldname": "customer_group",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Customer Group",
    "oldfieldname": "customer_group",
    "oldfieldtype": "Link",
    "options": "Customer Group",
-   "reqd": 1,
    "search_index": 1
   },
   {
@@ -187,11 +193,13 @@
   {
    "fieldname": "tax_id",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Tax ID"
   },
   {
    "fieldname": "tax_category",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Tax Category",
    "options": "Tax Category"
   },
@@ -199,18 +207,21 @@
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Disabled"
   },
   {
    "default": "0",
    "fieldname": "is_internal_customer",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Internal Customer"
   },
   {
    "depends_on": "is_internal_customer",
    "fieldname": "represents_company",
    "fieldtype": "Link",
+   "hidden": 1,
    "ignore_user_permissions": 1,
    "label": "Represents Company",
    "options": "Company",
@@ -220,12 +231,14 @@
    "depends_on": "represents_company",
    "fieldname": "allowed_to_transact_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Allowed To Transact With"
   },
   {
    "depends_on": "represents_company",
    "fieldname": "companies",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Allowed To Transact With",
    "options": "Allowed To Transact With"
   },
@@ -478,28 +491,33 @@
    "default": "0",
    "fieldname": "so_required",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Allow Sales Invoice Creation Without Sales Order"
   },
   {
    "default": "0",
    "fieldname": "dn_required",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Allow Sales Invoice Creation Without Delivery Note"
   },
   {
    "fieldname": "pan",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "PAN"
   },
   {
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category"
   },
   {
    "fieldname": "opportunity_name",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "From Opportunity",
    "no_copy": 1,
    "options": "Opportunity",
@@ -517,7 +535,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2021-09-06 17:38:54.196663",
+ "modified": "2022-02-04 07:24:22.076340",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

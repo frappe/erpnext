@@ -17,16 +17,16 @@
   "variant_of",
   "item_name",
   "item_group",
+  "standard_rate",
+  "brand",
   "is_item_from_hub",
   "stock_uom",
-  "column_break0",
   "disabled",
   "allow_alternative_item",
   "is_stock_item",
   "include_item_in_manufacturing",
   "opening_stock",
   "valuation_rate",
-  "standard_rate",
   "is_fixed_asset",
   "auto_create_assets",
   "asset_category",
@@ -35,7 +35,6 @@
   "over_billing_allowance",
   "image",
   "section_break_11",
-  "brand",
   "description",
   "sb_barcodes",
   "barcodes",
@@ -156,6 +155,7 @@
    "description": "If item is a variant of another item then description, image, pricing, taxes etc will be set from the template unless explicitly specified",
    "fieldname": "variant_of",
    "fieldtype": "Link",
+   "hidden": 1,
    "ignore_user_permissions": 1,
    "in_standard_filter": 1,
    "label": "Variant Of",
@@ -192,6 +192,7 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "is_item_from_hub",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Item from Hub",
    "read_only": 1
   },
@@ -206,19 +207,17 @@
    "reqd": 1
   },
   {
-   "fieldname": "column_break0",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Disabled"
   },
   {
    "default": "0",
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Allow Alternative Item"
   },
   {
@@ -236,6 +235,7 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "include_item_in_manufacturing",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Include Item In Manufacturing"
   },
   {
@@ -243,12 +243,14 @@
    "depends_on": "eval:(doc.__islocal&&doc.is_stock_item && !doc.has_serial_no && !doc.has_batch_no)",
    "fieldname": "opening_stock",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Opening Stock"
   },
   {
    "depends_on": "is_stock_item",
    "fieldname": "valuation_rate",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Valuation Rate"
   },
   {
@@ -262,6 +264,7 @@
    "default": "0",
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Fixed Asset",
    "set_only_once": 1
   },
@@ -269,6 +272,7 @@
    "depends_on": "is_fixed_asset",
    "fieldname": "asset_category",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Asset Category",
    "mandatory_depends_on": "is_fixed_asset",
    "options": "Asset Category"
@@ -277,6 +281,7 @@
    "depends_on": "is_fixed_asset",
    "fieldname": "asset_naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Asset Naming Series"
   },
   {
@@ -529,6 +534,7 @@
    "options": "Item Variant Attribute"
   },
   {
+   "collapsible": 1,
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "defaults",
    "fieldtype": "Section Break",
@@ -900,6 +906,7 @@
    "depends_on": "eval:!doc.__islocal && !doc.is_fixed_asset",
    "fieldname": "over_delivery_receipt_allowance",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Over Delivery/Receipt Allowance (%)",
    "oldfieldname": "tolerance",
    "oldfieldtype": "Currency"
@@ -908,6 +915,7 @@
    "depends_on": "eval:!doc.__islocal && !doc.is_fixed_asset",
    "fieldname": "over_billing_allowance",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Over Billing Allowance (%)"
   },
   {
@@ -915,6 +923,7 @@
    "depends_on": "is_fixed_asset",
    "fieldname": "auto_create_assets",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Auto Create Assets on Purchase"
   },
   {
@@ -955,7 +964,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-14 04:13:16.857534",
+ "modified": "2022-02-04 08:12:56.834418",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
