@@ -1,10 +1,10 @@
 import base64
 import hashlib
 import hmac
+from urllib.parse import urlparse
 
 import frappe
 from frappe import _
-from six.moves.urllib.parse import urlparse
 
 from erpnext import get_default_company
 

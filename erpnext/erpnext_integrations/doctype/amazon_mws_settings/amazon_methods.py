@@ -5,11 +5,11 @@
 import csv
 import math
 import time
+from io import StringIO
 
 import dateutil
 import frappe
 from frappe import _
-from six import StringIO
 
 import erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_api as mws
 
@@ -149,7 +149,6 @@ def create_item_code(amazon_item_json, sku):
 	item.description = amazon_item_json.Product.AttributeSets.ItemAttributes.Title
 	item.brand = new_brand
 	item.manufacturer = new_manufacturer
-	item.web_long_description = amazon_item_json.Product.AttributeSets.ItemAttributes.Title
 
 	item.image = amazon_item_json.Product.AttributeSets.ItemAttributes.SmallImage.URL
 

@@ -14,10 +14,15 @@ class IncompleteTaskError(frappe.ValidationError): pass
 class EmployeeOnboarding(EmployeeBoardingController):
 	def validate(self):
 		super(EmployeeOnboarding, self).validate()
+		self.set_employee()
 		self.validate_duplicate_employee_onboarding()
 
+	def set_employee(self):
+		if not self.employee:
+			self.employee = frappe.db.get_value('Employee', {'job_applicant': self.job_applicant}, 'name')
+
 	def validate_duplicate_employee_onboarding(self):
-		emp_onboarding = frappe.db.exists("Employee Onboarding", {"job_applicant": self.job_applicant})
+		emp_onboarding = frappe.db.exists("Employee Onboarding", {"job_applicant": self.job_applicant, "docstatus": ("!=", 2)})
 		if emp_onboarding and emp_onboarding != self.name:
 			frappe.throw(_("Employee Onboarding: {0} already exists for Job Applicant: {1}").format(frappe.bold(emp_onboarding), frappe.bold(self.job_applicant)))
 
