@@ -38,28 +38,7 @@ class TestBulkTransactionLog(unittest.TestCase):
 				self.assertEqual(d.to_doctype, "Sales Invoice")
 				self.assertEqual(d.retried, 0)
 
-	def test_bypass_failing_transaction(self):
-		so_name = create_so()
-		data = [{"name": "SAL_ORD_12345"}, {"name": so_name}]
-		transaction_processing(data, "Sales Order", "Sales Invoice")
 
-		doc = frappe.get_doc("Bulk Transaction Log", str(date.today()))
-		for d in doc.get("logger_data"):
-			if d.get('transaction_name') == data[0]["name"]:
-				self.assertEqual(d.get('transaction_status'), "Failed")
-
-			if d.get('transaction_name') == data[1]["name"]:
-				self.assertEqual(d.get('transaction_status'), "Success")
-
-	def test_retry_failing_transaction(self):
-		data = [{"name": "SAL_ORD_12345"}]
-		transaction_processing(data, "Sales Order", "Sales Invoice")
-		retry_failing_transaction()
-		doc = frappe.get_doc("Bulk Transaction Log", str(date.today()))
-		for d in doc.get("logger_data"):
-			if d.get('transaction_name') == data[0]["name"]:
-				self.assertEqual(d.get('transaction_status'), "Failed")
-				self.assertEqual(d.retried, 1)
 
 def create_company():
 	if not frappe.db.exists('Company', '_Test Company'):
@@ -87,19 +66,19 @@ def create_item():
 			"item_group": "Products"
 		}).insert()
 
-def create_so():
-	so = frappe.new_doc("Sales Order")
-	so.customer = "Bulk Customer"
-	so.company = "_Test Company"
-	so.transaction_date = date.today()
-	so.append("items", {
+def create_so(intent=None):
+    so = frappe.new_doc("Sales Order")
+    so.customer = "Bulk Customer"
+    so.company = "_Test Company"
+    so.transaction_date = date.today()
+
+    so.set_warehouse = "Finished Goods - _TC"
+    so.append("items", {
 		"item_code": "MK",
 		"delivery_date": date.today(),
 		"qty": 10,
 		"rate": 80,
 	})
-
-	so.insert()
-	so.submit()
-
-	return so.name
+    so.insert()
+    so.submit()
+    return so.name
