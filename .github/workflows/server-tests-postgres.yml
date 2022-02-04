@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-       container: [1, 2, 3]
+       container: [1]
 
     name: Python Unit Tests
 
