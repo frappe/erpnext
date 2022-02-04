@@ -347,6 +347,100 @@ class TestProductionPlan(ERPNextTestCase):
 
 		frappe.db.rollback()
 
+	def test_subassmebly_sorting(self):
+		""" Test subassembly sorting in case of multiple items with nested BOMs"""
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		prefix = "_TestLevel_"
+		boms = {
+			"Assembly": {
+				"SubAssembly1": {"ChildPart1": {}, "ChildPart2": {},},
+				"SubAssembly2": {"ChildPart3": {}},
+				"SubAssembly3": {"SubSubAssy1": {"ChildPart4": {}}},
+				"ChildPart5": {},
+				"ChildPart6": {},
+				"SubAssembly4": {"SubSubAssy2": {"ChildPart7": {}}},
+			},
+			"MegaDeepAssy": {
+				"SecretSubassy": {"SecretPart": {"VerySecret" : { "SuperSecret": {"Classified": {}}}},},
+																# ^ assert that this is
+																# first item in subassy table
+			}
+		}
+		create_nested_bom(boms, prefix=prefix)
+
+		items = [prefix + item_code for item_code in boms.keys()]
+		plan = create_production_plan(item_code=items[0], do_not_save=True)
+		plan.append("po_items", {
+			'use_multi_level_bom': 1,
+			'item_code': items[1],
+			'bom_no': frappe.db.get_value('Item', items[1], 'default_bom'),
+			'planned_qty': 1,
+			'planned_start_date': now_datetime()
+		})
+		plan.get_sub_assembly_items()
+
+		bom_level_order = [d.bom_level for d in plan.sub_assembly_items]
+		self.assertEqual(bom_level_order, sorted(bom_level_order, reverse=True))
+		# lowest most level of subassembly should be first
+		self.assertIn("SuperSecret", plan.sub_assembly_items[0].production_item)
+
+	def test_multiple_work_order_for_production_plan_item(self):
+		def create_work_order(item, pln, qty):
+			# Get Production Items
+			items_data = pln.get_production_items()
+
+			# Update qty
+			items_data[(item, None, None)]["qty"] = qty
+
+			# Create and Submit Work Order for each item in items_data
+			for key, item in items_data.items():
+				if pln.sub_assembly_items:
+					item['use_multi_level_bom'] = 0
+
+				wo_name = pln.create_work_order(item)
+				wo_doc = frappe.get_doc("Work Order", wo_name)
+				wo_doc.update({
+					'wip_warehouse': 'Work In Progress - _TC',
+					'fg_warehouse': 'Finished Goods - _TC'
+				})
+				wo_doc.submit()
+				wo_list.append(wo_name)
+
+		item = "Test Production Item 1"
+		raw_materials = ["Raw Material Item 1", "Raw Material Item 2"]
+
+		# Create BOM
+		bom = make_bom(item=item, raw_materials=raw_materials)
+
+		# Create Production Plan
+		pln = create_production_plan(item_code=bom.item, planned_qty=10)
+
+		# All the created Work Orders
+		wo_list = []
+
+		# Create and Submit 1st Work Order for 5 qty
+		create_work_order(item, pln, 5)
+		pln.reload()
+		self.assertEqual(pln.po_items[0].ordered_qty, 5)
+
+		# Create and Submit 2nd Work Order for 3 qty
+		create_work_order(item, pln, 3)
+		pln.reload()
+		self.assertEqual(pln.po_items[0].ordered_qty, 8)
+
+		# Cancel 1st Work Order
+		wo1 = frappe.get_doc("Work Order", wo_list[0])
+		wo1.cancel()
+		pln.reload()
+		self.assertEqual(pln.po_items[0].ordered_qty, 3)
+
+		# Cancel 2nd Work Order
+		wo2 = frappe.get_doc("Work Order", wo_list[1])
+		wo2.cancel()
+		pln.reload()
+		self.assertEqual(pln.po_items[0].ordered_qty, 0)
+
 def create_production_plan(**args):
 	args = frappe._dict(args)
 

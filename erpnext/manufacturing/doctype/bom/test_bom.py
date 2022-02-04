@@ -430,6 +430,7 @@ class TestBOM(ERPNextTestCase):
 		bom.with_operations = 0
 		bom.save()
 		self.assertEqual(bom.transfer_material_against, "Work Order")
+		bom.delete()
 
 	def test_scrap_items(self):
 		fg_item1, fg_item2, bom_item = create_process_loss_bom_items()
