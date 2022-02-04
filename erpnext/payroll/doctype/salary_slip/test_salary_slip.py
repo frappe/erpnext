@@ -147,7 +147,7 @@ class TestSalarySlip(unittest.TestCase):
 		# Payroll based on attendance
 		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Attendance")
 
-		emp = make_employee("test_employee_timesheet@salary.com", company="_Test Company")
+		emp = make_employee("test_employee_timesheet@salary.com", company="_Test Company", holiday_list="Salary Slip Test Holiday List")
 		frappe.db.set_value("Employee", emp, {"relieving_date": None, "status": "Active"})
 
 		# mark attendance
@@ -993,6 +993,8 @@ def make_leave_application(employee, from_date, to_date, leave_type, company=Non
 		leave_approver = 'test@example.com'
 	))
 	leave_application.submit()
+
+	return leave_application
 
 def setup_test():
 	make_earning_salary_component(setup=True, company_list=["_Test Company"])

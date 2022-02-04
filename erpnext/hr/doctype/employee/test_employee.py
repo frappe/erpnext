@@ -36,7 +36,7 @@ class TestEmployee(unittest.TestCase):
 		employee_doc.reload()
 
 		make_holiday_list()
-		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Slip Test Holiday List")
+		frappe.db.set_value("Company", employee_doc.company, "default_holiday_list", "Salary Slip Test Holiday List")
 
 		frappe.db.sql("""delete from `tabSalary Structure` where name='Test Inactive Employee Salary Slip'""")
 		salary_structure = make_salary_structure("Test Inactive Employee Salary Slip", "Monthly",

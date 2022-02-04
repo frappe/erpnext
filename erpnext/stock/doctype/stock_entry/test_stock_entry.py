@@ -227,9 +227,47 @@ class TestStockEntry(ERPNextTestCase):
 
 		mtn.cancel()
 
-	def test_repack_no_change_in_valuation(self):
-		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
+	def test_repack_multiple_fg(self):
+		"Test `is_finished_item` for one item repacked into two items."
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=100, basic_rate=100)
 
+		repack = frappe.copy_doc(test_records[3])
+		repack.posting_date = nowdate()
+		repack.posting_time = nowtime()
+
+		repack.items[0].qty = 100.0
+		repack.items[0].transfer_qty = 100.0
+		repack.items[1].qty = 50.0
+
+		repack.append("items", {
+			"conversion_factor": 1.0,
+			"cost_center": "_Test Cost Center - _TC",
+			"doctype": "Stock Entry Detail",
+			"expense_account": "Stock Adjustment - _TC",
+			"basic_rate": 150,
+			"item_code": "_Test Item 2",
+			"parentfield": "items",
+			"qty": 50.0,
+			"stock_uom": "_Test UOM",
+			"t_warehouse": "_Test Warehouse - _TC",
+			"transfer_qty": 50.0,
+			"uom": "_Test UOM"
+		})
+		repack.set_stock_entry_type()
+		repack.insert()
+
+		self.assertEqual(repack.items[1].is_finished_item, 1)
+		self.assertEqual(repack.items[2].is_finished_item, 1)
+
+		repack.items[1].is_finished_item = 0
+		repack.items[2].is_finished_item = 0
+
+		# must raise error if 0 fg in repack entry
+		self.assertRaises(FinishedGoodError, repack.validate_finished_goods)
+
+		repack.delete() # teardown
+
+	def test_repack_no_change_in_valuation(self):
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC",
 			qty=50, basic_rate=100)
@@ -813,6 +851,34 @@ class TestStockEntry(ERPNextTestCase):
 			qty=4, to_warehouse = "_Test Warehouse - _TC")
 		self.assertEqual(se.get("items")[0].allow_zero_valuation_rate, 1)
 		self.assertEqual(se.get("items")[0].amount, 0)
+
+	def test_zero_incoming_rate(self):
+		""" Make sure incoming rate of 0 is allowed while consuming.
+
+			qty  | rate | valuation rate
+			 1   | 100  | 100
+			 1   | 0    | 50
+			-1   | 100  | 0
+			-1   | 0  <--- assert this
+		"""
+		item_code = "_TestZeroVal"
+		warehouse = "_Test Warehouse - _TC"
+		create_item('_TestZeroVal')
+		_receipt = make_stock_entry(item_code=item_code, qty=1, to_warehouse=warehouse, rate=100)
+		receipt2 = make_stock_entry(item_code=item_code, qty=1, to_warehouse=warehouse, rate=0, do_not_save=True)
+		receipt2.items[0].allow_zero_valuation_rate = 1
+		receipt2.save()
+		receipt2.submit()
+
+		issue = make_stock_entry(item_code=item_code, qty=1, from_warehouse=warehouse)
+
+		value_diff = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": issue.name, "voucher_type": "Stock Entry"}, "stock_value_difference")
+		self.assertEqual(value_diff, -100)
+
+		issue2 = make_stock_entry(item_code=item_code, qty=1, from_warehouse=warehouse)
+		value_diff = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": issue2.name, "voucher_type": "Stock Entry"}, "stock_value_difference")
+		self.assertEqual(value_diff, 0)
+
 
 	def test_gle_for_opening_stock_entry(self):
 		mr = make_stock_entry(item_code="_Test Item", target="Stores - TCP1",

@@ -132,12 +132,16 @@ class EmployeeBoardingController(Document):
 
 	def on_cancel(self):
 		# delete task project
-		for task in frappe.get_all('Task', filters={'project': self.project}):
+		project = self.project
+		for task in frappe.get_all('Task', filters={'project': project}):
 			frappe.delete_doc('Task', task.name, force=1)
-		frappe.delete_doc('Project', self.project, force=1)
+		frappe.delete_doc('Project', project, force=1)
 		self.db_set('project', '')
 		for activity in self.activities:
 			activity.db_set('task', '')
+
+		frappe.msgprint(_('Linked Project {} and Tasks deleted.').format(
+			project), alert=True, indicator='blue')
 
 
 @frappe.whitelist()

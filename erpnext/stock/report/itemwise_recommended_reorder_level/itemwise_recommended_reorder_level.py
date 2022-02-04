@@ -76,6 +76,7 @@ def get_consumed_items(condition):
 			on sle.voucher_no = se.name
 		where
 			actual_qty < 0
+			and is_cancelled = 0
 			and voucher_type not in ('Delivery Note', 'Sales Invoice')
 			%s
 		group by item_code""" % condition, as_dict=1)

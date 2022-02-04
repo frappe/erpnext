@@ -167,8 +167,13 @@ class AccountsController(TransactionBase):
 
 		validate_regional(self)
 
+		validate_einvoice_fields(self)
+
 		if self.doctype != 'Material Request':
 			apply_pricing_rule_on_transaction(self)
+
+	def before_cancel(self):
+		validate_einvoice_fields(self)
 
 	def on_trash(self):
 		# delete sl and gl entries on deletion of transaction
@@ -185,8 +190,6 @@ class AccountsController(TransactionBase):
 					frappe.throw(_("Row #{0}: Service Start Date cannot be greater than Service End Date").format(d.idx))
 				elif getdate(self.posting_date) > getdate(d.service_end_date):
 					frappe.throw(_("Row #{0}: Service End Date cannot be before Invoice Posting Date").format(d.idx))
-				elif getdate(self.posting_date) > getdate(d.service_start_date):
-					frappe.throw(_("Row #{0}: Service Start Date cannot be before Invoice Posting Date").format(d.idx))
 
 	def validate_invoice_documents_schedule(self):
 		self.validate_payment_schedule_dates()
@@ -2154,4 +2157,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 @erpnext.allow_regional
 def validate_regional(doc):
+	pass
+
+@erpnext.allow_regional
+def validate_einvoice_fields(doc):
 	pass

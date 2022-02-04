@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, getdate, time_diff_in_hours
+from frappe.utils import add_to_date, flt, getdate, time_diff_in_hours
 
 from erpnext.controllers.queries import get_match_cond
 from erpnext.hr.utils import validate_active_employee
@@ -136,9 +136,18 @@ class Timesheet(Document):
 
 	def validate_time_logs(self):
 		for data in self.get('time_logs'):
+			self.set_to_time(data)
 			self.validate_overlap(data)
 			self.set_project(data)
 			self.validate_project(data)
+
+	def set_to_time(self, data):
+		if not (data.from_time and data.hours):
+			return
+
+		_to_time = add_to_date(data.from_time, hours=data.hours, as_datetime=True)
+		if data.to_time != _to_time:
+			data.to_time = _to_time
 
 	def validate_overlap(self, data):
 		settings = frappe.get_single('Projects Settings')

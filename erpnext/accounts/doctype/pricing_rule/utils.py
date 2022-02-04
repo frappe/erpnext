@@ -73,7 +73,7 @@ def sorted_by_priority(pricing_rules, args, doc=None):
 	for key in sorted(pricing_rule_dict):
 		pricing_rules_list.extend(pricing_rule_dict.get(key))
 
-	return pricing_rules_list or pricing_rules
+	return pricing_rules_list
 
 def filter_pricing_rule_based_on_condition(pricing_rules, doc=None):
 	filtered_pricing_rules = []

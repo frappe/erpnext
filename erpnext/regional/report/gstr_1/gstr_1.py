@@ -40,7 +40,8 @@ class Gstr1Report(object):
 			port_code,
 			shipping_bill_number,
 			shipping_bill_date,
-			reason_for_issuing_document
+			reason_for_issuing_document,
+			company_gstin
 		"""
 
 	def run(self):
@@ -62,6 +63,8 @@ class Gstr1Report(object):
 			self.get_b2c_data()
 		elif self.filters.get("type_of_business") == "Advances":
 			self.get_advance_data()
+		elif self.filters.get("type_of_business") == "NIL Rated":
+			self.get_nil_rated_invoices()
 		elif self.invoices:
 			for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 				invoice_details = self.invoices.get(inv)
@@ -90,6 +93,57 @@ class Gstr1Report(object):
 		for key, value in advances_data.items():
 			row= [key[0], key[1], value[0], value[1]]
 			self.data.append(row)
+
+	def get_nil_rated_invoices(self):
+		nil_exempt_output = [
+			{
+				"description": "Inter-State supplies to registered persons",
+				"nil_rated": 0.0,
+				"exempted": 0.0,
+				"non_gst": 0.0
+			},
+			{
+				"description": "Intra-State supplies to registered persons",
+				"nil_rated": 0.0,
+				"exempted": 0.0,
+				"non_gst": 0.0
+			},
+			{
+				"description": "Inter-State supplies to unregistered persons",
+				"nil_rated": 0.0,
+				"exempted": 0.0,
+				"non_gst": 0.0
+			},
+			{
+				"description": "Intra-State supplies to unregistered persons",
+				"nil_rated": 0.0,
+				"exempted": 0.0,
+				"non_gst": 0.0
+			}
+		]
+
+		for invoice, details in self.nil_exempt_non_gst.items():
+			invoice_detail = self.invoices.get(invoice)
+			if invoice_detail.get('gst_category') in ("Registered Regular", "Deemed Export", "SEZ"):
+				if is_inter_state(invoice_detail):
+					nil_exempt_output[0]["nil_rated"] += details[0]
+					nil_exempt_output[0]["exempted"] += details[1]
+					nil_exempt_output[0]["non_gst"] += details[2]
+				else:
+					nil_exempt_output[1]["nil_rated"] += details[0]
+					nil_exempt_output[1]["exempted"] += details[1]
+					nil_exempt_output[1]["non_gst"] += details[2]
+			else:
+				if is_inter_state(invoice_detail):
+					nil_exempt_output[2]["nil_rated"] += details[0]
+					nil_exempt_output[2]["exempted"] += details[1]
+					nil_exempt_output[2]["non_gst"] += details[2]
+				else:
+					nil_exempt_output[3]["nil_rated"] += details[0]
+					nil_exempt_output[3]["exempted"] += details[1]
+					nil_exempt_output[3]["non_gst"] += details[2]
+
+		self.data = nil_exempt_output
 
 	def get_b2c_data(self):
 		b2cs_output = {}
@@ -240,10 +294,11 @@ class Gstr1Report(object):
 	def get_invoice_items(self):
 		self.invoice_items = frappe._dict()
 		self.item_tax_rate = frappe._dict()
+		self.nil_exempt_non_gst = {}
 
 		items = frappe.db.sql("""
-			select item_code, parent, taxable_value, base_net_amount, item_tax_rate
-			from `tab%s Item`
+			select item_code, parent, taxable_value, base_net_amount, item_tax_rate, is_nil_exempt,
+			is_non_gst from `tab%s Item`
 			where parent in (%s)
 		""" % (self.doctype, ', '.join(['%s']*len(self.invoices))), tuple(self.invoices), as_dict=1)
 
@@ -259,6 +314,16 @@ class Gstr1Report(object):
 				for account, rate in item_tax_rate.items():
 					tax_rate_dict = self.item_tax_rate.setdefault(d.parent, {}).setdefault(d.item_code, [])
 					tax_rate_dict.append(rate)
+
+			if d.is_nil_exempt:
+				self.nil_exempt_non_gst.setdefault(d.parent, [0.0, 0.0, 0.0])
+				if item_tax_rate:
+					self.nil_exempt_non_gst[d.parent][0] += d.get('taxable_value', 0)
+				else:
+					self.nil_exempt_non_gst[d.parent][1] += d.get('taxable_value', 0)
+			elif d.is_non_gst:
+				self.nil_exempt_non_gst.setdefault(d.parent, [0.0, 0.0, 0.0])
+				self.nil_exempt_non_gst[d.parent][2] += d.get('taxable_value', 0)
 
 	def get_items_based_on_tax_rate(self):
 		self.tax_details = frappe.db.sql("""
@@ -322,21 +387,24 @@ class Gstr1Report(object):
 					self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, items.keys())
 
 	def get_columns(self):
-		self.tax_columns = [
-			{
-				"fieldname": "rate",
-				"label": "Rate",
-				"fieldtype": "Int",
-				"width": 60
-			},
-			{
-				"fieldname": "taxable_value",
-				"label": "Taxable Value",
-				"fieldtype": "Currency",
-				"width": 100
-			}
-		]
 		self.other_columns = []
+		self.tax_columns = []
+
+		if self.filters.get("type_of_business") != "NIL Rated":
+			self.tax_columns = [
+				{
+					"fieldname": "rate",
+					"label": "Rate",
+					"fieldtype": "Int",
+					"width": 60
+				},
+				{
+					"fieldname": "taxable_value",
+					"label": "Taxable Value",
+					"fieldtype": "Currency",
+					"width": 100
+				}
+			]
 
 		if self.filters.get("type_of_business") ==  "B2B":
 			self.invoice_columns = [
@@ -705,6 +773,33 @@ class Gstr1Report(object):
 						"width": 100
 				}
 			]
+		elif self.filters.get("type_of_business") == "NIL Rated":
+			self.invoice_columns = [
+				{
+					"fieldname": "description",
+					"label": "Description",
+					"fieldtype": "Data",
+					"width": 420
+				},
+				{
+					"fieldname": "nil_rated",
+					"label": "Nil Rated",
+					"fieldtype": "Currency",
+					"width": 200
+				},
+				{
+					"fieldname": "exempted",
+					"label": "Exempted",
+					"fieldtype": "Currency",
+					"width": 200
+				},
+				{
+					"fieldname": "non_gst",
+					"label": "Non GST",
+					"fieldtype": "Currency",
+					"width": 200
+				}
+			]
 
 		self.columns = self.invoice_columns + self.tax_columns + self.other_columns
 
@@ -767,6 +862,11 @@ def get_json(filters, report_name, data):
 
 		out = get_advances_json(res, gstin)
 		gst_json["at"] = out
+
+	elif filters["type_of_business"] == "NIL Rated":
+		res = report_data[:-1]
+		out = get_exempted_json(res)
+		gst_json["nil"] = out
 
 	return {
 		'report_name': report_name,
@@ -980,6 +1080,36 @@ def get_cdnr_unreg_json(res, gstin):
 
 	return out
 
+def get_exempted_json(data):
+	out = {
+		"inv": [
+			{
+				"sply_ty": "INTRB2B"
+			},
+			{
+				"sply_ty": "INTRAB2B"
+			},
+			{
+				"sply_ty": "INTRB2C"
+			},
+			{
+				"sply_ty": "INTRAB2C"
+			}
+		]
+	}
+
+	for i, v in enumerate(data):
+		if data[i].get('nil_rated'):
+			out['inv'][i]['nil_amt'] = data[i]['nil_rated']
+
+		if data[i].get('exempted'):
+			out['inv'][i]['expt_amt'] = data[i]['exempted']
+
+		if data[i].get('non_gst'):
+			out['inv'][i]['ngsup_amt'] = data[i]['non_gst']
+
+	return out
+
 def get_invoice_type_for_cdnr(row):
 	if row.get('gst_category') == 'SEZ':
 		if row.get('export_type') == 'WPAY':
@@ -1064,3 +1194,9 @@ def download_json_file():
 	frappe.response['filecontent'] = data['data']
 	frappe.response['content_type'] = 'application/json'
 	frappe.response['type'] = 'download'
+
+def is_inter_state(invoice_detail):
+	if invoice_detail.place_of_supply.split("-")[0] != invoice_detail.company_gstin[:2]:
+		return True
+	else:
+		return False
