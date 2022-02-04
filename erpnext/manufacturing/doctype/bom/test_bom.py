@@ -447,7 +447,6 @@ class TestBOM(ERPNextTestCase):
 		)
 		bom_doc.save()
 		bom_doc.reload()
-		print(bom_doc.scrap_items[0].stock_qty)
 		self.assertEqual(bom_doc.scrap_items[0].stock_qty, 1.0)
 
 
