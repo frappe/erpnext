@@ -6,12 +6,23 @@ on:
       - '**.js'
       - '**.md'
       - '**.html'
-  workflow_dispatch:
   push:
     branches: [ develop ]
     paths-ignore:
       - '**.js'
       - '**.md'
+  workflow_dispatch:
+    inputs:
+      user:
+        description: 'user'
+        required: true
+        default: 'frappe'
+        type: string
+      branch:
+        description: 'Branch name'
+        default: 'develop'
+        required: false
+        type: string
 
 concurrency:
   group: server-mariadb-develop-${{ github.event.number }}
@@ -95,6 +106,8 @@ jobs:
         env:
           DB: mariadb
           TYPE: server
+          FRAPPE_USER: ${{ github.event.inputs.user }}
+          FRAPPE_BRANCH: ${{ github.event.inputs.branch }}
 
       - name: Run Tests
         run: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --use-orchestrator --with-coverage
