@@ -25,10 +25,9 @@ function query(frm) {
 			log_date: frm.doc.log_date
 		}
 	}).then((r) => {
-		if(r.message) {
+		if (r.message) {
 			frm.remove_custom_button("Retry Failed Transactions");
-		}
-		else {
+		} else {
 			frappe.show_alert(__("Retrying Failed Transactions"), 5);
 		}
 	});

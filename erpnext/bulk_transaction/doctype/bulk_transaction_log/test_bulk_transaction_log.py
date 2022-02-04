@@ -6,9 +6,6 @@ from datetime import date
 
 import frappe
 
-from erpnext.bulk_transaction.doctype.bulk_transaction_log.bulk_transaction_log import (
-	retry_failing_transaction,
-)
 from erpnext.utilities.bulk_transaction import transaction_processing
 
 
@@ -67,18 +64,18 @@ def create_item():
 		}).insert()
 
 def create_so(intent=None):
-    so = frappe.new_doc("Sales Order")
-    so.customer = "Bulk Customer"
-    so.company = "_Test Company"
-    so.transaction_date = date.today()
+	so = frappe.new_doc("Sales Order")
+	so.customer = "Bulk Customer"
+	so.company = "_Test Company"
+	so.transaction_date = date.today()
 
-    so.set_warehouse = "Finished Goods - _TC"
-    so.append("items", {
+	so.set_warehouse = "Finished Goods - _TC"
+	so.append("items", {
 		"item_code": "MK",
 		"delivery_date": date.today(),
 		"qty": 10,
 		"rate": 80,
 	})
-    so.insert()
-    so.submit()
-    return so.name
+	so.insert()
+	so.submit()
+	return so.name
