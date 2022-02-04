@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from typing import Dict
 
 import frappe
 from frappe import _
@@ -29,13 +30,13 @@ from erpnext.hr.utils import (
 	validate_active_employee,
 )
 
-from typing import Dict
 
 class LeaveDayBlockedError(frappe.ValidationError): pass
 class OverlapError(frappe.ValidationError): pass
 class AttendanceAlreadyMarkedError(frappe.ValidationError): pass
 class NotAnOptionalHoliday(frappe.ValidationError): pass
-class InsufficientLeaveBalanceError(frappe.ValidationError): pass
+class InsufficientLeaveBalanceError(frappe.ValidationError):
+	pass
 
 from frappe.model.document import Document
 
