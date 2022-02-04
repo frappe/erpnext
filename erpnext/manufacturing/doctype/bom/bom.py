@@ -141,6 +141,7 @@ class BOM(WebsiteGenerator):
 		if not self.company:
 			frappe.throw(_("Please select a Company first."), title=_("Mandatory"))
 
+		self.add_scrap_items()
 		self.validate_scrap_item_qty()
 		self.clear_operations()
 		self.validate_main_item()
@@ -404,6 +405,30 @@ class BOM(WebsiteGenerator):
 
 		if items_in_msg:
 			frappe.msgprint("Scrap rounded down since it cannot be a fraction for Item(s): " + ", ".join(map(str, items_in_msg)), alert=True, indicator="orange")
+
+	def add_scrap_items(self):
+		for item in self.get("items"):
+			if item.scrap:
+				doc = None
+
+				for scrap_item in self.scrap_items:
+					if scrap_item.item_code == item.item_code:
+						doc = scrap_item
+						break
+
+				if not doc:
+					scrap_item_qty = (item.qty / 100) * item.scrap
+					base_rate = item.base_rate or 0.0
+					self.append("scrap_items", {
+						"item_code": item.item_code,
+						"item_name": item.item_name,
+						"stock_qty": scrap_item_qty,
+						"rate": item.rate,
+						"amount": scrap_item_qty * item.rate,
+						"stock_uom": item.stock_uom,
+						"base_rate": base_rate,
+						"base_amount": scrap_item_qty * base_rate
+					})
 
 	def clear_operations(self):
 		if not self.with_operations:
