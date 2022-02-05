@@ -535,8 +535,11 @@ class PurchaseInvoice(BuyingController):
 
 		voucher_wise_stock_value = {}
 		if self.update_stock:
-			for d in frappe.get_all('Stock Ledger Entry',
-				fields = ["voucher_detail_no", "stock_value_difference", "warehouse"], filters={'voucher_no': self.name}):
+			stock_ledger_entries = frappe.get_all("Stock Ledger Entry",
+				fields = ["voucher_detail_no", "stock_value_difference", "warehouse"],
+				filters={"voucher_no": self.name, "voucher_type": self.doctype, "is_cancelled": 0}
+			)
+			for d in stock_ledger_entries:
 				voucher_wise_stock_value.setdefault((d.voucher_detail_no, d.warehouse), d.stock_value_difference)
 
 		valuation_tax_accounts = [d.account_head for d in self.get("taxes")
