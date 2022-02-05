@@ -2,9 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+from socket import timeout
 import frappe, erpnext
 import frappe.defaults
-from frappe import _
+from frappe import _, enqueue
 from frappe.utils import cstr, cint, flt, comma_or, getdate, nowdate, formatdate, format_time, get_link_to_form
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError, get_valuation_rate
@@ -94,7 +95,8 @@ class StockEntry(StockController):
 		self.validate_purchase_order()
 		if self.purchase_order and self.purpose == "Send to Subcontractor":
 			self.update_purchase_order_supplied_items()
-		self.make_gl_entries()
+		enqueue(self.make_gl_entries, queue='short', timeout=2500, now=True)
+		#self.make_gl_entries()
 		self.update_cost_in_project()
 		self.validate_reserved_serial_no_consumption()
 		self.update_transferred_qty()
