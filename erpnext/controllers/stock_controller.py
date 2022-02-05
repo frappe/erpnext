@@ -184,8 +184,8 @@ class StockController(AccountsController):
 	def get_items_and_warehouses(self):
 		items, warehouses = [], []
 
-		if hasattr(self, "items"):
-			item_doclist = self.get("items")
+		if hasattr(self, "items") or hasattr(self, "packed_items"):
+			item_doclist = (self.get("items") or []) + (self.get("packed_items") or [])
 		elif self.doctype == "Stock Reconciliation":
 			item_doclist = []
 			data = json.loads(self.reconciliation_json)
