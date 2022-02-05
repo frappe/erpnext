@@ -417,7 +417,9 @@ def get_monthly_earned_leave(annual_leaves, frequency, rounding):
 
 
 def is_earned_leave_already_allocated(allocation, annual_allocation):
-	from erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment import get_leave_type_details
+	from erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment import (
+		get_leave_type_details,
+	)
 
 	leave_type_details = get_leave_type_details()
 	date_of_joining = frappe.db.get_value("Employee", allocation.employee, "date_of_joining")
