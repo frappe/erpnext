@@ -125,7 +125,7 @@ class LoanRepayment(AccountsController):
 
 	def update_paid_amount(self):
 		loan = frappe.get_value("Loan", self.against_loan, ['total_amount_paid', 'total_principal_paid',
-			'status', 'is_secured_loan', 'total_payment', 'loan_amount', 'total_interest_payable',
+			'status', 'is_secured_loan', 'total_payment', 'loan_amount', 'disbursed_amount', 'total_interest_payable',
 			'written_off_amount'], as_dict=1)
 
 		loan.update({
