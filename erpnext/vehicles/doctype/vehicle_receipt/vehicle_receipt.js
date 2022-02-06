@@ -90,7 +90,7 @@ erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehicleTransactionC
 
 	refresh_checklist: function () {
 		if (this.frm.vehicle_checklist_editor) {
-			this.frm.vehicle_checklist_editor.make();
+			this.frm.vehicle_checklist_editor.render_checklist();
 		}
 	},
 });

@@ -24,9 +24,9 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 
 		var checklist_items = me.get_checklist_items();
 		if (checklist_items && checklist_items.length) {
-			me.make();
+			me.render_checklist();
 		} else {
-			me.load_items_and_make();
+			me.load_items_and_render();
 		}
 
 		me.bind();
@@ -39,7 +39,7 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 		this.empty_checklist_container.empty();
 	},
 
-	load_items_and_make: function () {
+	load_items_and_render: function () {
 		var me = this;
 		frappe.call({
 			method: "erpnext.vehicles.vehicle_checklist.get_default_vehicle_checklist_items",
@@ -48,6 +48,7 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 					me.default_checklist_items = r.message;
 
 					if (me.can_write()) {
+						me.frm.clear_table('vehicle_checklist');
 						$.each(r.message || [], function (i, item) {
 							me.frm.add_child('vehicle_checklist', {
 								"checklist_item": item,
@@ -55,13 +56,13 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 							});
 						});
 					}
-					me.make();
+					me.render_checklist();
 				}
 			}
 		});
 	},
 
-	make: function() {
+	render_checklist: function() {
 		var me = this;
 		this.clear();
 
@@ -122,8 +123,11 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 	},
 
 	make_buttons: function () {
-		$(`<button type="button" class="btn btn-light btn-sm add-checklist-item">
+		$(`<button type="button" class="btn btn-light btn-sm add-checklist-item" style="margin-right: 5px;">
 			${__('Add Checklist Item')}
+		</button>`).appendTo(this.buttons_container);
+		$(`<button type="button" class="btn btn-light btn-sm reset-checklist">
+			${__('Reset Checklist')}
 		</button>`).appendTo(this.buttons_container);
 	},
 
@@ -159,6 +163,10 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 
 		me.checklist_wrapper.on("click", ".remove-checklist-item", function () {
 			me.on_remove_checklist_item(this);
+		});
+
+		me.buttons_container.on("click", ".reset-checklist", function () {
+			me.on_reset_checklist();
 		});
 	},
 
@@ -196,7 +204,7 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 					"is_custom_checklist_item": 1
 				});
 
-				me.make();
+				me.render_checklist();
 				me.frm.dirty();
 			}
 		});
@@ -213,9 +221,13 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 				d.idx = i + 1;
 			});
 
-			me.make();
+			me.render_checklist();
 			me.frm.dirty();
 		}
+	},
+
+	on_reset_checklist: function () {
+		frappe.confirm(__("Are you sure you want to reset the vehicle checklist?"), () => this.load_items_and_render());
 	},
 
 	get_checklist_items: function () {

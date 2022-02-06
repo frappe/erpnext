@@ -765,7 +765,8 @@ def get_project_details(args):
 	if project_details and args.doctype and frappe.get_meta(args.doctype).has_field('vehicle_checklist'):
 		vehicle_checklist = frappe.get_all("Vehicle Checklist Item",
 			fields=['checklist_item', 'checklist_item_checked', 'is_custom_checklist_item'],
-			filters={"parenttype": "Project", "parent": args.project})
+			filters={"parenttype": "Project", "parent": args.project},
+			order_by="idx")
 		if vehicle_checklist:
 			out.vehicle_checklist = vehicle_checklist
 
