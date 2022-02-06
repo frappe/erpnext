@@ -237,7 +237,7 @@ def generate_leave_encashment():
 
 		create_leave_encashment(leave_allocation=leave_allocation)
 
-def allocate_earned_leaves():
+def allocate_earned_leaves(ignore_duplicates=False):
 	'''Allocate earned leaves to Employees'''
 	e_leave_types = get_earned_leaves()
 	today = getdate()
@@ -265,9 +265,9 @@ def allocate_earned_leaves():
 				from_date  = frappe.db.get_value("Employee", allocation.employee, "date_of_joining")
 
 			if check_effective_date(from_date, today, e_leave_type.earned_leave_frequency, e_leave_type.based_on_date_of_joining_date):
-				update_previous_leave_allocation(allocation, annual_allocation, e_leave_type)
+				update_previous_leave_allocation(allocation, annual_allocation, e_leave_type, ignore_duplicates)
 
-def update_previous_leave_allocation(allocation, annual_allocation, e_leave_type):
+def update_previous_leave_allocation(allocation, annual_allocation, e_leave_type, ignore_duplicates=False):
 		earned_leaves = get_monthly_earned_leave(annual_allocation, e_leave_type.earned_leave_frequency, e_leave_type.rounding)
 
 		allocation = frappe.get_doc('Leave Allocation', allocation.name)
@@ -279,7 +279,7 @@ def update_previous_leave_allocation(allocation, annual_allocation, e_leave_type
 		if new_allocation != allocation.total_leaves_allocated:
 			today_date = today()
 
-			if not is_earned_leave_already_allocated(allocation, annual_allocation):
+			if ignore_duplicates or not is_earned_leave_already_allocated(allocation, annual_allocation):
 				allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
 				create_additional_leave_ledger_entry(allocation, earned_leaves, today_date)
 
