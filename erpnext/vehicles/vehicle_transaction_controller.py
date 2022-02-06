@@ -759,8 +759,11 @@ def get_project_details(args):
 		out.vehicle_odometer = project_details.vehicle_last_odometer or project_details.vehicle_first_odometer or 0
 
 		if args.doctype == "Vehicle Receipt":
+			default_service_warehouse = frappe.get_cached_value("Vehicles Settings", None, "default_service_warehouse")
 			if project_details.vehicle_warehouse:
 				out.warehouse = project_details.vehicle_warehouse
+			elif default_service_warehouse:
+				out.warehouse = default_service_warehouse
 
 	if project_details and args.doctype and frappe.get_meta(args.doctype).has_field('vehicle_checklist'):
 		vehicle_checklist = frappe.get_all("Vehicle Checklist Item",

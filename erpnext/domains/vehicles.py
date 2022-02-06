@@ -70,13 +70,9 @@ project_vehicle_status = {"label": "Vehicle Status", "fieldname": "vehicle_statu
 	"read_only": 1, "no_copy": 1}
 insert_field_after('vehicle_color', project_vehicle_status, applies_to_project_fields)
 
-project_vehicle_warehouse = {"label": "Vehicle Warehouse", "fieldname": "vehicle_warehouse",
-	"fieldtype": "Link", "options": "Warehouse"}
-insert_field_after('vehicle_status', project_vehicle_warehouse, applies_to_project_fields)
-
 project_vehicle_readings_section = {"label": "Vehicle Readings & Checklist",
 	"fieldname": "sec_vehicle_status", "fieldtype": "Section Break", "collapsible": 0}
-insert_field_after('vehicle_warehouse', project_vehicle_readings_section, applies_to_project_fields)
+insert_field_after('vehicle_status', project_vehicle_readings_section, applies_to_project_fields)
 
 applies_to_project_fields += [
 	{"label": "Warranty Book No", "fieldname": "vehicle_warranty_no", "fieldtype": "Data",
@@ -100,12 +96,18 @@ project_vehicle_reading_fields = [
 		"insert_after": "vehicle_received_dt", "no_copy": 1},
 	{"label": "Vehicle Delivered Date/Time", "fieldname": "vehicle_delivered_dt", "fieldtype": "Datetime",
 		"insert_after": "vehicle_last_odometer", "read_only": 1, "no_copy": 1},
+	{"label": "Receive Vehicle", "fieldname": "receive_vehicle_btn", "fieldtype": "Button",
+		"insert_after": "vehicle_delivered_dt", "hidden": 1},
+	{"label": "Deliver Vehicle", "fieldname": "deliver_vehicle_btn", "fieldtype": "Button",
+		"insert_after": "receive_vehicle_btn", "hidden": 1},
 
 	{"label": "", "fieldname": "cb_vehicle_status_1", "fieldtype": "Column Break",
-		"insert_after": "vehicle_delivered_dt"},
+		"insert_after": "deliver_vehicle_btn"},
 
+	{"label": "Vehicle Warehouse", "fieldname": "vehicle_warehouse", "fieldtype": "Link", "options": "Warehouse",
+		"insert_after": "cb_vehicle_status_1"},
 	{"label": "Fuel Level (%)", "fieldname": "fuel_level", "fieldtype": "Percent", "precision": 0,
-		"insert_after": "cb_vehicle_status_1", "no_copy": 1},
+		"insert_after": "vehicle_warehouse", "no_copy": 1},
 	{"label": "No of Keys", "fieldname": "keys", "fieldtype": "Int",
 		"insert_after": "fuel_level"},
 

@@ -158,6 +158,13 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	setup_buttons: function() {
 		var me = this;
 
+		if (me.frm.fields_dict.receive_vehicle_btn) {
+			me.frm.set_df_property('receive_vehicle_btn', 'hidden', 1);
+		}
+		if (me.frm.fields_dict.deliver_vehicle_btn) {
+			me.frm.set_df_property('receive_vehicle_btn', 'hidden', 1);
+		}
+
 		if (!me.frm.is_new()) {
 			me.frm.add_custom_button(__('Completed'), () => {
 				me.set_status('Completed');
@@ -186,8 +193,24 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 
 			me.frm.add_custom_button(__('Duplicate Project with Tasks'), () => me.create_duplicate(), __("Tasks"));
 
-			if (frappe.model.can_create("Vehicle Log") && me.frm.doc.applies_to_vehicle) {
-				me.frm.add_custom_button(__("Update Odometer"), () => me.make_odometer_log(), __("Vehicle"));
+			if (me.frm.doc.applies_to_vehicle) {
+				if (frappe.model.can_create("Vehicle Receipt") && me.frm.doc.vehicle_status == "Not Received") {
+					me.frm.add_custom_button(__("Receive Vehicle"), () => me.receive_vehicle_btn(), __("Vehicle"));
+					if (me.frm.fields_dict.receive_vehicle_btn) {
+						me.frm.set_df_property('receive_vehicle_btn', 'hidden', 0);
+					}
+				}
+
+				if (frappe.model.can_create("Vehicle Delivery") && me.frm.doc.vehicle_status == "Received") {
+					me.frm.add_custom_button(__("Deliver Vehicle"), () => me.deliver_vehicle_btn(), __("Vehicle"));
+					if (me.frm.fields_dict.deliver_vehicle_btn) {
+						me.frm.set_df_property('deliver_vehicle_btn', 'hidden', 0);
+					}
+				}
+
+				if (frappe.model.can_create("Vehicle Log")) {
+					me.frm.add_custom_button(__("Update Odometer"), () => me.make_odometer_log(), __("Vehicle"));
+				}
 			}
 
 			if (frappe.model.can_create("Sales Invoice")) {
@@ -397,6 +420,13 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		this.frm.get_field("sales_summary_html").$wrapper.html(this.frm.doc.__onload && this.frm.doc.__onload.sales_summary_html || '');
 	},
 
+	receive_vehicle_btn: function () {
+		this.make_vehicle_receipt();
+	},
+	deliver_vehicle_btn: function () {
+		this.make_vehicle_delivery();
+	},
+
 	collect_progress: function() {
 		this.frm.set_df_property("message", "reqd", this.frm.doc.collect_progress);
 	},
@@ -475,6 +505,38 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 			args: {
 				"project_name": this.frm.doc.name,
 				"depreciation_type": depreciation_type,
+			},
+			callback: function (r) {
+				if (!r.exc) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				}
+			}
+		});
+	},
+
+	make_vehicle_receipt: function () {
+		this.frm.check_if_unsaved();
+		return frappe.call({
+			method: "erpnext.projects.doctype.project.project.get_vehicle_receipt",
+			args: {
+				"project": this.frm.doc.name
+			},
+			callback: function (r) {
+				if (!r.exc) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				}
+			}
+		});
+	},
+
+	make_vehicle_delivery: function () {
+		this.frm.check_if_unsaved();
+		return frappe.call({
+			method: "erpnext.projects.doctype.project.project.get_vehicle_delivery",
+			args: {
+				"project": this.frm.doc.name
 			},
 			callback: function (r) {
 				if (!r.exc) {

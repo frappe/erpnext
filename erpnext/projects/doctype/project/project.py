@@ -393,6 +393,7 @@ class Project(Document):
 		self.vehicle_delivered_dt = vehicle_delivery.posting_dt
 
 		if vehicle_receipt:
+			self.vehicle_warehouse = frappe.db.get_value("Vehicle", self.applies_to_vehicle, "warehouse")
 			self.fuel_level = vehicle_receipt.fuel_level
 			self.keys = vehicle_receipt.get('keys')
 
@@ -407,9 +408,10 @@ class Project(Document):
 			self.db_set({
 				"vehicle_received_dt": self.vehicle_received_dt,
 				"vehicle_delivered_dt": self.vehicle_delivered_dt,
-				"vehicle_status": self.vehicle_status,
+				"vehicle_warehouse": self.vehicle_warehouse,
 				"fuel_level": flt(self.fuel_level),
 				"keys": cint(self.get('keys')),
+				"vehicle_status": self.vehicle_status,
 			})
 
 	def calculate_gross_margin(self):
@@ -1136,6 +1138,46 @@ def get_sales_invoice(project_name, depreciation_type=None):
 	target_doc.run_method("calculate_taxes_and_totals")
 
 	return target_doc
+
+
+@frappe.whitelist()
+def get_vehicle_receipt(project):
+	doc = frappe.get_doc("Project", project)
+	check_if_doc_exists("Vehicle Receipt", doc.name, {'docstatus': 0, 'is_return': 0})
+	target = frappe.new_doc("Vehicle Receipt")
+	set_vehicle_transaction_values(doc, target)
+	target.run_method("set_missing_values")
+	return target
+
+
+@frappe.whitelist()
+def get_vehicle_delivery(project):
+	doc = frappe.get_doc("Project", project)
+	check_if_doc_exists("Vehicle Delivery", doc.name, {'docstatus': 0, 'is_return': 0})
+	target = frappe.new_doc("Vehicle Delivery")
+	set_vehicle_transaction_values(doc, target)
+	target.run_method("set_missing_values")
+	return target
+
+
+def set_vehicle_transaction_values(source, target):
+	if not source.applies_to_vehicle:
+		frappe.throw(_("Please set Vehicle first"))
+
+	target.company = source.company
+	target.project = source.name
+	target.item_code = source.applies_to_item
+	target.vehicle = source.applies_to_vehicle
+
+
+def check_if_doc_exists(doctype, project, filters=None):
+	filter_args = filters or {}
+	filters = {"project": project, "docstatus": ["<", 2]}
+	filters.update(filter_args)
+
+	existing = frappe.db.get_value(doctype, filters)
+	if existing:
+		frappe.throw(_("{0} already exists").format(frappe.get_desk_link(doctype, existing)))
 
 
 def set_depreciation_in_invoice_items(target_doc, project):
