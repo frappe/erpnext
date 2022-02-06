@@ -1,10 +1,13 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from frappe.utils import add_to_date, nowdate
+
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestCase, change_settings
 
@@ -13,6 +16,7 @@ class TestPackedItem(ERPNextTestCase):
 	"Test impact on Packed Items table in various scenarios."
 	@classmethod
 	def setUpClass(cls) -> None:
+		super().setUpClass()
 		cls.bundle = "_Test Product Bundle X"
 		cls.bundle_items = ["_Test Bundle Item 1", "_Test Bundle Item 2"]
 		make_item(cls.bundle, {"is_stock_item": 0})
@@ -123,3 +127,32 @@ class TestPackedItem(ERPNextTestCase):
 		self.assertEqual(len(dn.packed_items), 4)
 		self.assertEqual(dn.packed_items[2].qty, 6)
 		self.assertEqual(dn.packed_items[3].qty, 6)
+
+	def test_reposting_packed_items(self):
+		warehouse = "Stores - TCP1"
+		company = "_Test Company with perpetual inventory"
+
+		today = nowdate()
+		yesterday = add_to_date(today, days=-1, as_string=True)
+
+		for item in self.bundle_items:
+			make_stock_entry(item_code=item, to_warehouse=warehouse, qty=10, rate=100, posting_date=today)
+
+		so = make_sales_order(item_code = self.bundle, qty=1, company=company, warehouse=warehouse)
+
+		dn = make_delivery_note(so.name)
+		dn.save()
+		dn.submit()
+
+		gles = get_gl_entries(dn.doctype, dn.name)
+		credit_before_repost = sum(gle.credit for gle in gles)
+
+		# backdated stock entry
+		for item in self.bundle_items:
+			make_stock_entry(item_code=item, to_warehouse=warehouse, qty=10, rate=200, posting_date=yesterday)
+
+		# assert correct reposting
+		gles = get_gl_entries(dn.doctype, dn.name)
+		credit_after_reposting = sum(gle.credit for gle in gles)
+		self.assertNotEqual(credit_before_repost, credit_after_reposting)
+		self.assertAlmostEqual(credit_after_reposting, 2 * credit_before_repost)
