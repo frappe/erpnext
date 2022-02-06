@@ -95,14 +95,17 @@ class StockEntry(StockController):
 		self.validate_purchase_order()
 		if self.purchase_order and self.purpose == "Send to Subcontractor":
 			self.update_purchase_order_supplied_items()
-		enqueue(StockController.make_gl_entries, self=self, queue='short')
-		#self.make_gl_entries()
 		self.update_cost_in_project()
 		self.validate_reserved_serial_no_consumption()
 		self.update_transferred_qty()
 		self.update_quality_inspection()
 		if self.work_order and self.purpose == "Manufacture":
 			self.update_so_in_serial_number()
+		stock_gl = frappe.new_doc('Stock GL Queue')
+		stock_gl.stock_entry = self.name
+		stock_gl.save()
+		#enqueue(StockEntry.make_gl_entries, self=self, queue='short')
+		#self.make_gl_entries()
 
 	def on_cancel(self):
 
@@ -1359,7 +1362,7 @@ class StockEntry(StockController):
 						'reference_type': reference_type,
 						'reference_name': reference_name
 					})
-
+	
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
 	if isinstance(items, string_types):

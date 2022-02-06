@@ -65,7 +65,6 @@ class StockController(AccountsController):
 
 		sle_map = self.get_stock_ledger_details()
 		voucher_details = self.get_voucher_details(default_expense_account, default_cost_center, sle_map)
-
 		gl_list = []
 		warehouse_with_no_account = []
 
@@ -89,7 +88,7 @@ class StockController(AccountsController):
 							and not item_row.get("allow_zero_valuation_rate"):
 
 							sle = self.update_stock_ledger_entries(sle)
-
+						
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse]["account"],
 							"against": item_row.expense_account,
@@ -118,7 +117,7 @@ class StockController(AccountsController):
 			for wh in warehouse_with_no_account:
 				if frappe.db.get_value("Warehouse", wh, "company"):
 					frappe.throw(_("Warehouse {0} is not linked to any account, please mention the account in  the warehouse record or set default inventory account in company {1}.").format(wh, self.company))
-
+		
 		return process_gl_map(gl_list)
 
 	def update_stock_ledger_entries(self, sle):

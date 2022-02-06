@@ -1,0 +1,13 @@
+{
+ "creation": "2021-09-28 19:46:17.506033",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart Source",
+ "idx": 0,
+ "modified": "2021-09-28 19:46:17.506033",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Manufacturing",
+ "owner": "Administrator",
+ "source_name": "Manufacturing",
+ "timeseries": 0
+}

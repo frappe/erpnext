@@ -197,6 +197,8 @@
    "width": "60px"
   },
   {
+   "fetch_from": "item_code.stock_uom",
+   "fetch_if_empty": 1,
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "label": "Stock UOM",
@@ -214,6 +216,8 @@
    "print_hide": 1
   },
   {
+   "fetch_from": "item_code.stock_uom",
+   "fetch_if_empty": 1,
    "fieldname": "uom",
    "fieldtype": "Link",
    "label": "UOM",
@@ -711,7 +715,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-04-07 18:35:17.558928",
+ "modified": "2021-10-25 13:13:05.328882",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
