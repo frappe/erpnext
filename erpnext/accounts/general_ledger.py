@@ -319,13 +319,18 @@ def make_reverse_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 	"""
 
 	if not gl_entries:
-		gl_entries = frappe.get_all("GL Entry",
-			fields = ["*"],
-			filters = {
-				"voucher_type": voucher_type,
-				"voucher_no": voucher_no,
-				"is_cancelled": 0
-			}, for_update=True)
+		gl_entry = frappe.qb.DocType("GL Entry")
+		gl_entries = (frappe.qb.from_(
+			gl_entry
+		).select(
+			'*'
+		).where(
+			gl_entry.voucher_type == voucher_type
+		).where(
+			gl_entry.voucher_no == voucher_no
+		).where(
+			gl_entry.is_cancelled == 0
+		).for_update()).run(as_dict=1)
 
 	if gl_entries:
 		validate_accounting_period(gl_entries)
