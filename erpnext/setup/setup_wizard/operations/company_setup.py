@@ -29,10 +29,10 @@ def create_fiscal_year_and_company(args):
 			'domain': args.get('domains')[0]
 		}).insert()
 
-def enable_shopping_cart(args):
+def enable_shopping_cart(args): # nosemgrep
 	# Needs price_lists
 	frappe.get_doc({
-		"doctype": "Shopping Cart Settings",
+		"doctype": "E Commerce Settings",
 		"enabled": 1,
 		'company': args.get('company_name')	,
 		'price_list': frappe.db.get_value("Price List", {"selling": 1}),
