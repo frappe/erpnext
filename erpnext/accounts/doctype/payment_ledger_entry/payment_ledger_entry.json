@@ -1,0 +1,115 @@
+{
+ "actions": [],
+ "autoname": "format:PLE-{YYYY}-{######}",
+ "creation": "2022-02-07 13:53:59.723506",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "voucher_type",
+  "voucher_no",
+  "against_voucher_type",
+  "against_voucher_no",
+  "voucher_detail_no",
+  "amount",
+  "posting_date",
+  "is_cancelled"
+ ],
+ "fields": [
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Voucher Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "against_voucher_type",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Against Voucher Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "against_voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Against Voucher No",
+   "options": "against_voucher_type"
+  },
+  {
+   "fieldname": "voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "Voucher Detail No"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Voucher No",
+   "options": "voucher_type"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Datetime",
+   "label": "Posting Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cancelled",
+   "fieldtype": "Check",
+   "label": "Is Cancelled"
+  }
+ ],
+ "icon": "fa fa-list",
+ "in_create": 1,
+ "links": [],
+ "modified": "2022-03-29 15:38:38.856488",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Payment Ledger Entry",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Auditor",
+   "share": 1
+  }
+ ],
+ "search_fields": "voucher_no, against_voucher_no",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
