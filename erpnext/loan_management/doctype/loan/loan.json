@@ -371,11 +371,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2021-10-20 08:28:16.796105",
-=======
  "modified": "2022-01-25 16:29:16.325501",
->>>>>>> c68c70f8bc (feat: Refund entry against loans)
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
