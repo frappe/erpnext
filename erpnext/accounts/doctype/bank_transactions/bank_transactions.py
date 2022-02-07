@@ -38,8 +38,8 @@ class BankTransactions(Document):
 			self.status = "Transit"
 			self.calculate_diferred_account()
 
-		if self.check and self.no_bank_check == None:
-			self.no_bank_check = self.insert_numeration_for_check()
+		# if self.check and self.no_bank_check == None:
+		# 	self.no_bank_check = self.insert_numeration_for_check()
 
 	def verified_check(self, arg=None):		
 		if self.debit_note:
