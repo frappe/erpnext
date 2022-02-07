@@ -80,14 +80,23 @@ def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def get_pos_invoices(start, end, pos_profile, user):
-	data = frappe.db.sql("""
+	data = frappe.db.multisql({
+	'mariadb': """
 	select
 		name, timestamp(posting_date, posting_time) as "timestamp"
 	from
 		`tabPOS Invoice`
 	where
 		owner = %s and docstatus = 1 and pos_profile = %s and ifnull(consolidated_invoice,'') = ''
-	""", (user, pos_profile), as_dict=1)
+	""",
+	'postgres': """
+	select
+		name, (posting_date + posting_time) as "timestamp"
+	from
+		`tabPOS Invoice`
+	where
+		owner = %s and docstatus = 1 and pos_profile = %s and ifnull(consolidated_invoice,'') = ''
+	"""}, (user, pos_profile), as_dict=1)
 
 	data = list(filter(lambda d: get_datetime(start) <= get_datetime(d.timestamp) <= get_datetime(end), data))
 	# need to get taxes and payments so can't avoid get_doc

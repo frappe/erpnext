@@ -647,7 +647,7 @@ def get_held_invoices(party_type, party):
 
 	if party_type == 'Supplier':
 		held_invoices = frappe.db.sql(
-			'select name from `tabPurchase Invoice` where release_date IS NOT NULL and release_date > CURDATE()',
+			'select name from `tabPurchase Invoice` where release_date IS NOT NULL and release_date > CURRENT_DATE',
 			as_dict=1
 		)
 		held_invoices = set(d['name'] for d in held_invoices)
@@ -960,14 +960,22 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 		condition += " and company = %s"
 		values.append(company)
 
-	future_stock_vouchers = frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
+	future_stock_vouchers = frappe.db.multisql({
+		'mariadb': """select distinct sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle
 		where
 			timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s)
 			and is_cancelled = 0
 			{condition}
 		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc for update""".format(condition=condition),
-		tuple([posting_date, posting_time] + values), as_dict=True)
+		'postgres': """select distinct sle.voucher_type, sle.voucher_no, (sle.posting_date + sle.posting_time), creation
+		from `tabStock Ledger Entry` sle
+		where
+			sle.posting_date + sle.posting_time >= %s::date + %s::time
+			and is_cancelled = 0
+			{condition}
+		order by (sle.posting_date + sle.posting_time) asc, creation asc""".format(condition=condition)
+		}, tuple([posting_date, posting_time] + values), as_dict=True)
 
 	return [(d.voucher_type, d.voucher_no) for d in future_stock_vouchers]
 

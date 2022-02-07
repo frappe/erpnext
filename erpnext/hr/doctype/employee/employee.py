@@ -254,11 +254,18 @@ class Employee(NestedSet):
 
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
-	return dict(frappe.db.sql('''select unix_timestamp(attendance_date), count(*)
+	return dict(frappe.db.multisql(
+		{'mariadb': '''select extract(epoch from attendance_date), count(*)
 		from `tabAttendance` where employee=%s
-			and attendance_date > date_sub(curdate(), interval 1 year)
+			and attendance_date > date_sub(CURRENT_DATE, interval 1 year)
 			and status in ('Present', 'Half Day')
-			group by attendance_date''', name))
+			group by attendance_date'''
+			,'postgres': '''select extract(epoch from attendance_date), count(*)
+		from `tabAttendance` where employee=%s
+			and attendance_date > (CURRENT_DATE - interval 1 year)
+			and status in ('Present', 'Half Day')
+			group by attendance_date'''
+			}, name))
 
 @frappe.whitelist()
 def get_retirement_date(date_of_birth=None):

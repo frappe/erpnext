@@ -599,13 +599,12 @@ class WorkOrder(Document):
 			if actual_end_dates:
 				self.actual_end_date = max(actual_end_dates)
 		else:
-			data = frappe.get_all("Stock Entry",
-				fields = ["timestamp(posting_date, posting_time) as posting_datetime"],
-				filters = {
-					"work_order": self.name,
-					"purpose": ("in", ["Material Transfer for Manufacture", "Manufacture"])
-				}
-			)
+			data = frappe.db.multisql({
+				'mariadb': """select timestamp(posting_date, posting_time) as posting_datetime from `tabStock Entry`
+				 	where work_order = '{name}' and purpose in ('Material Transfer for Manufacture', 'Manufacture')""".format(name = self.name),
+				'postgres': """select (posting_date + posting_time) as posting_datetime from `tabStock Entry`
+				 	where work_order = '{name}' and purpose in ('Material Transfer for Manufacture', 'Manufacture')""".format(name = self.name)
+			}, as_dict = 1)
 
 			if data and len(data):
 				dates = [d.posting_datetime for d in data]
@@ -736,7 +735,7 @@ class WorkOrder(Document):
 				from `tabStock Entry` entry, `tabStock Entry Detail` detail
 				where
 					entry.work_order = %(name)s
-					and entry.purpose = "Material Transfer for Manufacture"
+					and entry.purpose = 'Material Transfer for Manufacture'
 					and entry.docstatus = 1
 					and detail.parent = entry.name
 					and (detail.item_code = %(item)s or detail.original_item = %(item)s)''', {
@@ -761,8 +760,8 @@ class WorkOrder(Document):
 					`tabStock Entry Detail` detail
 				WHERE
 					entry.work_order = %(name)s
-						AND (entry.purpose = "Material Consumption for Manufacture"
-							OR entry.purpose = "Manufacture")
+						AND (entry.purpose = 'Material Consumption for Manufacture'
+							OR entry.purpose = 'Manufacture')
 						AND entry.docstatus = 1
 						AND detail.parent = entry.name
 						AND detail.s_warehouse IS NOT null
@@ -823,14 +822,23 @@ def get_bom_operations(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def get_item_details(item, project = None, skip_bom_info=False):
-	res = frappe.db.sql("""
+	res = frappe.db.multisql({
+		'mariadb': """
 		select stock_uom, description, item_name, allow_alternative_item,
 			include_item_in_manufacturing
 		from `tabItem`
 		where disabled=0
 			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %s)
 			and name=%s
-	""", (nowdate(), item), as_dict=1)
+	""",
+	'postgres': """
+		select stock_uom, description, item_name, allow_alternative_item,
+			include_item_in_manufacturing
+		from `tabItem`
+		where disabled=0
+			and (end_of_life is null or end_of_life > %s)
+			and name=%s
+	"""}, (nowdate(), item), as_dict=1)
 
 	if not res:
 		return {}

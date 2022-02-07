@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import datetime
 import json
 from datetime import timedelta
 
@@ -171,8 +172,13 @@ def auto_close_tickets():
 	"""Auto-close replied support tickets after 7 days"""
 	auto_close_after_days = frappe.db.get_value("Support Settings", "Support Settings", "close_issue_after_days") or 7
 
-	issues = frappe.db.sql(""" select name from tabIssue where status='Replied' and
-		modified<DATE_SUB(CURDATE(), INTERVAL %s DAY) """, (auto_close_after_days), as_dict=True)
+	issues = frappe.db.multisql({
+		'mariadb': """ select name from tabIssue where status='Replied' and
+		modified<DATE_SUB(CURRENT_DATE, INTERVAL %s DAY) """,
+		'postgres': """ select name from `tabIssue` where status='Replied' and
+		modified < (CURRENT_DATE - INTERVAL '%s DAY') """
+
+		}, (auto_close_after_days), as_dict=True)
 
 	for issue in issues:
 		doc = frappe.get_doc("Issue", issue.get("name"))
@@ -302,7 +308,10 @@ def get_working_hours(date, support_hours):
 		weekday = frappe.utils.get_weekday(date)
 		for day in support_hours:
 			if day.workday == weekday:
-				return day.start_time, day.end_time
+    			#postgres stores start and end time as datetime.time, mariadb as timedelta
+				start_time = get_time_in_timedelta(day.start_time) if isinstance(day.start_time, datetime.time) else day.start_time
+				end_time = get_time_in_timedelta(day.end_time) if isinstance(day.end_time, datetime.time) else day.end_time
+				return start_time, end_time
 
 def is_work_day(date, support_hours):
 	weekday = frappe.utils.get_weekday(date)

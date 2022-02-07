@@ -254,17 +254,27 @@ def get_carry_forwarded_leaves(employee, leave_type, date, carry_forward=None):
 	return unused_leaves
 
 def get_unused_leaves(employee, leave_type, from_date, to_date):
+
+	from_date = from_date if from_date else '1900-01-01'
+	to_date = to_date if to_date else '3000-01-01'
 	''' Returns unused leaves between the given period while skipping leave allocation expiry '''
-	leaves = frappe.get_all("Leave Ledger Entry", filters={
-		'employee': employee,
-		'leave_type': leave_type,
-		'from_date': ('>=', from_date),
-		'to_date': ('<=', to_date)
-		}, or_filters={
-			'is_expired': 0,
-			'is_carry_forward': 1
-		}, fields=['sum(leaves) as leaves'])
-	return flt(leaves[0]['leaves'])
+	leaves = frappe.db.multisql({
+	'mariadb': """
+	select sum(leaves) as leaves
+	from `tabLeave Ledger Entry`
+	where employee = %s and leave_type = %s and from_date >= %s and to_date <= %s
+	and (is_expired = 0 or is_carry_forward = 1)
+	""".format(employee = employee, leave_type = leave_type, from_date = from_date, to_date = to_date),
+	'postgres': """
+	select sum(leaves) as leaves
+	from `tabLeave Ledger Entry`
+	where employee = '{employee}' and leave_type = '{leave_type}' and from_date >= to_date(cast('{from_date}' as text), 'YYYY-MM-DD') and to_date <= to_date(cast('{to_date}' as text), 'YYYY-MM-DD')
+	and (is_expired = 0 or is_carry_forward = 1)
+
+	""".format(employee = employee, leave_type = leave_type, from_date = from_date, to_date = to_date)
+	}, (employee,leave_type, from_date, to_date), as_dict = 1)
+
+	return flt(leaves[0]['leaves']) if leaves else 0.0
 
 def validate_carry_forward(leave_type):
 	if not frappe.db.get_value("Leave Type", leave_type, "is_carry_forward"):

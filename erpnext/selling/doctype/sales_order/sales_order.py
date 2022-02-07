@@ -74,9 +74,13 @@ class SalesOrder(SellingController):
 						.format(d.idx))
 
 		if self.po_no and self.customer and not self.skip_delivery_note:
-			so = frappe.db.sql("select name from `tabSales Order` \
-				where ifnull(po_no, '') = %s and name != %s and docstatus < 2\
-				and customer = %s", (self.po_no, self.name, self.customer))
+			so = frappe.db.multisql({
+				'mariadb': """select name from `tabSales Order`
+				where ifnull(po_no, '') = %s and name != %s and docstatus < 2
+				and customer = %s""",
+				'postgres': """select name from `tabSales Order`
+				where ifnull(po_no, '') = '{po_no}' and name != '{name}' and docstatus < 2
+				and customer = '{customer}'""".format(po_no = self.po_no, name = self.name, customer = self.customer)}, (self.po_no, self.name, self.customer))
 			if so and so[0][0] and not cint(frappe.db.get_single_value("Selling Settings",
 				"allow_against_multiple_purchase_orders")):
 				frappe.msgprint(_("Warning: Sales Order {0} already exists against Customer's Purchase Order {1}").format(so[0][0], self.po_no))
@@ -237,8 +241,10 @@ class SalesOrder(SellingController):
 
 	def check_modified_date(self):
 		mod_db = frappe.db.get_value("Sales Order", self.name, "modified")
-		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" %
-			( mod_db, cstr(self.modified)))
+		date_diff = frappe.db.multisql({
+			'mariadb': "select TIMEDIFF('%s', '%s')" % ( mod_db, cstr(self.modified)),
+			'postgres': "select '%s'::date - '%s'::date" % ( mod_db, cstr(self.modified))
+			})
 		if date_diff and date_diff[0][0]:
 			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name))
 
@@ -729,7 +735,8 @@ def get_events(start, end, filters=None):
 	from frappe.desk.calendar import get_event_conditions
 	conditions = get_event_conditions("Sales Order", filters)
 
-	data = frappe.db.sql("""
+	data = frappe.db.multisql({
+		'mariadb': """
 		select
 			distinct `tabSales Order`.name, `tabSales Order`.customer_name, `tabSales Order`.status,
 			`tabSales Order`.delivery_status, `tabSales Order`.billing_status,
@@ -742,7 +749,22 @@ def get_events(start, end, filters=None):
 			and (`tabSales Order Item`.delivery_date between %(start)s and %(end)s)
 			and `tabSales Order`.docstatus < 2
 			{conditions}
-		""".format(conditions=conditions), {
+		""".format(conditions=conditions),
+		'postgres': """
+		select
+			distinct `tabSales Order`.name, `tabSales Order`.customer_name, `tabSales Order`.status,
+			`tabSales Order`.delivery_status, `tabSales Order`.billing_status,
+			`tabSales Order Item`.delivery_date
+		from
+			`tabSales Order`, `tabSales Order Item`
+		where `tabSales Order`.name = `tabSales Order Item`.parent
+			and `tabSales Order`.skip_delivery_note = 0
+			and `tabSales Order Item`.delivery_date is not null \
+			and (`tabSales Order Item`.delivery_date between %(start)s and %(end)s)
+			and `tabSales Order`.docstatus < 2
+			{conditions}
+		""".format(conditions=conditions)
+		}, {
 			"start": start,
 			"end": end
 		}, as_dict=True, update={"allDay": 0})

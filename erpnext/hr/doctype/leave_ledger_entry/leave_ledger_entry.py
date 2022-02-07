@@ -64,11 +64,12 @@ def delete_ledger_entry(ledger):
 		validate_leave_allocation_against_leave_application(ledger)
 
 	expired_entry = get_previous_expiry_ledger_entry(ledger)
+	expired_entry = expired_entry[0] if expired_entry else expired_entry
 	frappe.db.sql("""DELETE
 		FROM `tabLeave Ledger Entry`
 		WHERE
-			`transaction_name`=%s
-			OR `name`=%s""", (ledger.transaction_name, expired_entry))
+			`transaction_name`= '{transaction_name}'
+			OR `name`in {expired_entry}""".format(transaction_name = ledger.transaction_name, expired_entry = "('" + ",".join(expired_entry) + "')"))
 
 def get_previous_expiry_ledger_entry(ledger):
 	''' Returns the expiry ledger entry having same creation date as the ledger entry to be cancelled '''
@@ -80,14 +81,26 @@ def get_previous_expiry_ledger_entry(ledger):
 
 	creation_date = creation_date.strftime(DATE_FORMAT) if creation_date else ''
 
-	return frappe.db.get_value("Leave Ledger Entry", filters={
-		'creation': ('like', creation_date+"%"),
-		'employee': ledger.employee,
-		'leave_type': ledger.leave_type,
-		'is_expired': 1,
-		'docstatus': 1,
-		'is_carry_forward': 0
-	}, fieldname=['name'])
+	return frappe.db.multisql({
+		'mariadb': """
+	select name from `tabLeave Ledger Entry`
+		where creation like '{creation_date}%'
+		and employee = '{employee}'
+		and leave_type = '{leave_type}'
+		and is_expired = 1
+		and docstatus = 1
+		and is_carry_forward = 0
+	""".format(creation_date = creation_date, employee = ledger.employee, leave_type = ledger.leave_type),
+	'postgres': """
+	select name from `tabLeave Ledger Entry`
+		where cast(creation as text) like cast('{creation_date}%' as text)
+		and employee = '{employee}'
+		and leave_type = '{leave_type}'
+		and is_expired = 1
+		and docstatus = 1
+		and is_carry_forward = 0
+	""".format(creation_date = creation_date, employee = ledger.employee, leave_type = ledger.leave_type)
+	}, as_list = 1)
 
 def process_expired_allocation():
 	''' Check if a carry forwarded allocation has expired and create a expiry ledger entry
@@ -105,7 +118,8 @@ def process_expired_allocation():
 	leave_type = [record[0] for record in leave_type_records] or ['']
 
 	# fetch non expired leave ledger entry of transaction_type allocation
-	expire_allocation = frappe.db.sql("""
+	expire_allocation = frappe.db.multisql({
+		'mariadb': """
 		SELECT
 			leaves, to_date, employee, leave_type,
 			is_carry_forward, transaction_name as name, transaction_type
@@ -120,10 +134,30 @@ def process_expired_allocation():
 					AND docstatus = 1
 					AND (
 						is_carry_forward=l.is_carry_forward
-						OR (is_carry_forward = 0 AND leave_type not in %s)
+						OR (is_carry_forward = 0 AND leave_type not in {leave_type})
 			)))
 			AND transaction_type = 'Leave Allocation'
-			AND to_date < %s""", (leave_type, today()), as_dict=1)
+			AND to_date < '{today}'""".format(leave_type = "('" + ",".join(leave_type) + "')", today= today()),
+			'postgres': """
+		SELECT
+			leaves, to_date, employee, leave_type,
+			is_carry_forward, transaction_name as name, transaction_type
+		FROM `tabLeave Ledger Entry` l
+		WHERE (NOT EXISTS
+			(SELECT name
+				FROM `tabLeave Ledger Entry`
+				WHERE
+					transaction_name = l.transaction_name
+					AND transaction_type = 'Leave Allocation'
+					AND name<>l.name
+					AND docstatus = 1
+					AND (
+						is_carry_forward=l.is_carry_forward
+						OR (is_carry_forward = 0 AND leave_type not in {leave_type})
+			)))
+			AND transaction_type = 'Leave Allocation'
+			AND to_date < to_date(cast('{today}' as text), 'YYYY-MM-DD')""".format(leave_type = "('" + ",".join(leave_type) + "')", today= today())
+			}, as_dict=1)
 
 	if expire_allocation:
 		create_expiry_ledger_entry(expire_allocation)
@@ -138,13 +172,24 @@ def create_expiry_ledger_entry(allocations):
 
 def get_remaining_leaves(allocation):
 	''' Returns remaining leaves from the given allocation '''
-	return frappe.db.get_value("Leave Ledger Entry",
-		filters={
-			'employee': allocation.employee,
-			'leave_type': allocation.leave_type,
-			'to_date': ('<=', allocation.to_date),
-			'docstatus': 1
-		}, fieldname=['SUM(leaves)'])
+
+	return frappe.db.multisql({
+		'mariadb':"""
+	select sum(leaves) from
+	`tabLeave Ledger Entry`
+	where employee = '{employee}'
+	and leave_type = '{leave_type}'
+	and  to_date <= '{to_date}'
+	and docstatus = 1""".format(employee = allocation.employee, leave_type = allocation.leave_type, to_date = allocation.to_date),
+	'postgres': """
+	select sum(leaves) from
+	`tabLeave Ledger Entry`
+	where employee = '{employee}'
+	and leave_type = '{leave_type}'
+	and  to_date <= to_date(cast('{to_date}' as text), 'YYYY-MM-DD')
+	and docstatus = 1""".format(employee = allocation.employee, leave_type = allocation.leave_type, to_date = allocation.to_date)
+
+	})
 
 @frappe.whitelist()
 def expire_allocation(allocation, expiry_date=None):

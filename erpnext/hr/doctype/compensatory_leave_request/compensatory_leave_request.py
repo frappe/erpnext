@@ -34,13 +34,24 @@ class CompensatoryLeaveRequest(Document):
 			frappe.throw(_("Leave Type is madatory"))
 
 	def validate_attendance(self):
-		attendance = frappe.get_all('Attendance',
-			filters={
-				'attendance_date': ['between', (self.work_from_date, self.work_end_date)],
-				'status': 'Present',
-				'docstatus': 1,
-				'employee': self.employee
-			}, fields=['attendance_date', 'status'])
+		attendance = frappe.db.multisql({
+		'mariadb': """
+		select attendance_date, status
+		from `tabAttendance`
+		where attendance_date between %s and %s
+		and status = 'Present'
+		and docstatus = 1
+		and employee = %s
+		""".format(work_from_date = self.work_from_date, work_end_date = self.work_end_date, employee = self.employee),
+		'postgres': """
+		select attendance_date, status
+		from `tabAttendance`
+		where attendance_date between to_date(cast('{work_from_date}' as text), 'YYYY-MM-DD') and to_date(cast('{work_end_date}' as text), 'YYYY-MM-DD')
+		and status = 'Present'
+		and docstatus = 1
+		and employee = '{employee}'
+		""".format(work_from_date = self.work_from_date, work_end_date = self.work_end_date, employee = self.employee),
+		}, (self.work_from_date, self.work_end_date, self.employee))
 
 		if len(attendance) < date_diff(self.work_end_date, self.work_from_date) + 1:
 			frappe.throw(_("You are not present all day(s) between compensatory leave request days"))

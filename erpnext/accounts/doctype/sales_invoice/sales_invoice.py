@@ -2033,8 +2033,8 @@ def get_all_mode_of_payments(doc):
 	{'company': doc.company}, as_dict=1)
 
 def get_mode_of_payments_info(mode_of_payments, company):
-	data = frappe.db.sql(
-		"""
+	data = frappe.db.multisql({
+		'mariadb':"""
 		select
 			mpa.default_account, mpa.parent as mop, mp.type as type
 		from
@@ -2045,8 +2045,21 @@ def get_mode_of_payments_info(mode_of_payments, company):
 			mp.enabled = 1 and
 			mp.name in %s
 		group by
-			mp.name
-		""", (company, mode_of_payments), as_dict=1)
+			mp.name, mpa.default_account, mpa.parent, mp.type
+		""",
+		'postgres': """
+		select
+			mpa.default_account, mpa.parent as mop, mp.type as type
+		from
+			`tabMode of Payment Account` mpa,`tabMode of Payment` mp
+		where
+			mpa.parent = mp.name and
+			mpa.company = '{company}' and
+			mp.enabled = 1 and
+			mp.name in {mode_of_payments}
+		group by
+			mp.name, mpa.default_account, mpa.parent, mp.type
+		""".format(company = company, mode_of_payments = "('" + ",".join(mode_of_payments) + "')")}, (company, mode_of_payments), as_dict=1)
 
 	return {row.get('mop'): row for row in data}
 

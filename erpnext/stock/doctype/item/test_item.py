@@ -5,7 +5,7 @@
 import json
 
 import frappe
-from frappe.test_runner import make_test_objects
+from frappe.test_runner import make_test_objects, make_test_records_for_doctype
 
 from erpnext.controllers.item_variant import (
 	InvalidItemAttributeValueError,
@@ -265,7 +265,18 @@ class TestItem(ERPNextTestCase):
 
 	def test_make_item_variant(self):
 		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
-
+		make_test_objects("Item Attribute")
+		make_test_objects("Item Attribute Value")
+		if not frappe.db.get_value('Item Attribute Value',
+			{'parent': 'Test Size', 'attribute_value': 'Large'}, 'name'):
+			#item_attribute = frappe.get_doc('Item Attribute', 'Test Size')
+			item_attribute_value = frappe.new_doc("Item Attribute Value")
+			item_attribute_value.attribute_value = 'Large'
+			item_attribute_value.abbr = 'L'
+			item_attribute_value.attribute = 'Test Size'
+			item_attribute_value.parent = 'Test Size'
+			item_attribute_value.parenttype = 'Item Attribute'
+			item_attribute_value.save()
 		variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
 		variant.save()
 
@@ -317,7 +328,7 @@ class TestItem(ERPNextTestCase):
 		frappe.delete_doc_if_exists("Item Attribute", "Test Item Length")
 
 		frappe.db.sql('''delete from `tabItem Variant Attribute`
-			where attribute="Test Item Length"''')
+			where attribute='Test Item Length' ''')
 
 		frappe.flags.attribute_values = None
 
@@ -353,6 +364,15 @@ class TestItem(ERPNextTestCase):
 			],
 			"has_variants": 1
 		})
+
+		if not frappe.db.get_value('Item Attribute Value',
+			{'parent': 'Test Size', 'attribute_value': 'Large'}, 'name'):
+			item_attribute = frappe.get_doc('Item Attribute', 'Test Size')
+			item_attribute.append('item_attribute_values', {
+				'attribute_value' : 'Large',
+				'abbr': 'L'
+			})
+			item_attribute.save()
 
 		variant = create_variant("_Test Numeric Template Item",
 			{"Test Size": "Large", "Test Item Length": 1.1})
@@ -535,7 +555,22 @@ class TestItem(ERPNextTestCase):
 	def test_index_creation(self):
 		"check if index is getting created in db"
 
-		indices = frappe.db.sql("show index from tabItem", as_dict=1)
+		indices = frappe.db.multisql({
+			'mariadb': "show index from tabItem",
+			'postgres': """select a.attname as "Column_name"
+						from
+    						pg_class t,
+							pg_class i,
+							pg_index ix,
+							pg_attribute a
+						where
+							t.oid = ix.indrelid
+							and i.oid = ix.indexrelid
+							and a.attrelid = t.oid
+							and a.attnum = ANY(ix.indkey)
+							and t.relkind = 'r'
+						"""
+			}, as_dict=1)
 		expected_columns = {"item_code", "item_name", "item_group"}
 		for index in indices:
 			expected_columns.discard(index.get("Column_name"))
@@ -615,6 +650,15 @@ def set_item_variant_settings(fields):
 	doc.save()
 
 def make_item_variant():
+	if not frappe.db.get_value('Item Attribute Value',
+		{'parent': 'Test Size', 'attribute_value': 'Small'}, 'name'):
+		item_attribute_value = frappe.new_doc("Item Attribute Value")
+		item_attribute_value.attribute_value = 'Small'
+		item_attribute_value.abbr = 'S'
+		item_attribute_value.attribute = 'Test Size'
+		item_attribute_value.parent = 'Test Size'
+		item_attribute_value.parenttype = 'Item Attribute'
+		item_attribute_value.save()
 	if not frappe.db.exists("Item", "_Test Variant Item-S"):
 		variant = create_variant("_Test Variant Item", """{"Test Size": "Small"}""")
 		variant.item_code = "_Test Variant Item-S"

@@ -414,7 +414,7 @@ class JobCard(Document):
 				FROM `tabJob Card` jc, `tabJob Card Time Log` jctl
 				WHERE
 					jctl.parent = jc.name and jc.work_order = %s and jc.operation_id = %s
-					and jc.docstatus = 1 and IFNULL(jc.is_corrective_job_card, 0) = 0
+					and jc.docstatus = 1 and ifnull(jc.is_corrective_job_card, 0) = 0
 			""", (self.work_order, self.operation_id), as_dict=1)
 
 		for data in wo.operations:
@@ -434,10 +434,24 @@ class JobCard(Document):
 		wo.save()
 
 	def get_current_operation_data(self):
-		return frappe.get_all('Job Card',
-			fields = ["sum(total_time_in_mins) as time_in_mins", "sum(total_completed_qty) as completed_qty"],
-			filters = {"docstatus": 1, "work_order": self.work_order, "operation_id": self.operation_id,
-				"is_corrective_job_card": 0})
+		return frappe.db.multisql({
+			'mariadb': """
+		select sum(total_time_in_mins) as time_in_mins, sum(total_completed_qty) as completed_qty
+		from `tabJob Card`
+		where docstatus = 1
+		and work_order = '{work_order}'
+		and operation_id = '{operation_id}'
+		and is_corrective_job_card = 0
+		""".format(work_order = self.work_order, operation_id = self.operation_id),
+		'postgres': """
+		select sum(total_time_in_mins) as time_in_mins, sum(total_completed_qty) as completed_qty
+		from `tabJob Card`
+		where docstatus = 1
+		and work_order = '{work_order}'
+		and operation_id = '{operation_id}'
+		and is_corrective_job_card = 0
+		""".format(work_order = self.work_order, operation_id = self.operation_id)
+		}, as_dict = 1)
 
 	def set_transferred_qty_in_job_card(self, ste_doc):
 		for row in ste_doc.items:
@@ -461,12 +475,22 @@ class JobCard(Document):
 
 		if self.items:
 			# sum of 'For Quantity' of Stock Entries against JC
-			self.transferred_qty = frappe.db.get_value('Stock Entry', {
-				'job_card': self.name,
-				'work_order': self.work_order,
-				'docstatus': 1,
-				'purpose': 'Material Transfer for Manufacture'
-			}, 'sum(fg_completed_qty)') or 0
+			self.transferred_qty = frappe.db.multisql({
+				'mariadb': """
+			select sum(fg_completed_qty) from `tabStock Entry`
+			where job_card = '{name}'
+			and work_order = '{work_order}'
+			and docstatus = 1
+			and purpose = 'Material Transfer for Manufacture'
+			""".format(name = self.name, work_order = self.work_order),
+			'postgres': """
+			select sum(fg_completed_qty) from `tabStock Entry`
+			where job_card = '{name}'
+			and work_order = '{work_order}'
+			and docstatus = 1
+			and purpose = 'Material Transfer for Manufacture'
+			""".format(name = self.name, work_order = self.work_order)
+			})[0][0] or 0
 
 		self.db_set("transferred_qty", self.transferred_qty)
 
@@ -481,8 +505,20 @@ class JobCard(Document):
 						break
 
 				if completed:
-					job_cards = frappe.get_all('Job Card', filters = {'work_order': self.work_order,
-						'docstatus': ('!=', 2)}, fields = 'sum(transferred_qty) as qty', group_by='operation_id')
+					job_cards = frappe.db.multisql({
+					'mariadb': """select sum(transferred_qty) as qty
+					from `tabJob Card`
+					where work_order = '{work_order}'
+					and docstatus != 2
+					group by operation_id
+					""".format(work_order = self.work_order),
+					'postgres': """select sum(transferred_qty) as qty
+					from `tabJob Card`
+					where work_order = '{work_order}'
+					and docstatus != 2
+					group by operation_id
+					""".format(work_order = self.work_order)
+					}, as_dict = 1)
 
 					if job_cards:
 						qty = min(d.qty for d in job_cards)

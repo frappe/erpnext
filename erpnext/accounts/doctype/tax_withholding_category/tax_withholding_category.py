@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, getdate
 
 
@@ -327,24 +328,27 @@ def get_deducted_tax(taxable_vouchers, tax_details):
 
 def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 	tds_amount = 0
-	invoice_filters = {
-		'name': ('in', vouchers),
-		'docstatus': 1,
-		'apply_tds': 1
-	}
 
-	field = 'sum(net_total)'
+	invoice_filters = """and docstatus = 1"""
+
+	if not cint(tax_details.consider_party_ledger_amount):
+		invoice_filters += " and apply_tds = 1"
+
+	pi = frappe.qb.DocType("Purchase Invoice")
+	jea = frappe.qb.DocType("Journal Entry Account")
 
 	if cint(tax_details.consider_party_ledger_amount):
-		invoice_filters.pop('apply_tds', None)
-		field = 'sum(grand_total)'
+		supp_credit_amt = frappe.qb.from_(pi).select(Sum(pi.grand_total)).where((pi.docstatus == 1)
+		& (pi.name.isin(vouchers))).run()[0][0] or 0.0
 
-	supp_credit_amt = frappe.db.get_value('Purchase Invoice', invoice_filters, field) or 0.0
+	else:
+		supp_credit_amt = frappe.qb.from_(pi).select(Sum(pi.net_total)).where((pi.docstatus == 1)
+		& (pi.name.isin(vouchers))
+		& (pi.apply_tds == 1)).run()[0][0] or 0.0
 
-	supp_jv_credit_amt = frappe.db.get_value('Journal Entry Account', {
-		'parent': ('in', vouchers), 'docstatus': 1,
-		'party': ('in', parties), 'reference_type': ('!=', 'Purchase Invoice')
-	}, 'sum(credit_in_account_currency)') or 0.0
+	supp_jv_credit_amt = frappe.qb.from_(jea).select(Sum(jea.credit_in_account_currency)).where((jea.party.isin(parties))
+	& (jea.parent.isin(vouchers))
+	& (jea.reference_type != 'Purchase Invoice')).run()[0][0] or 0.0
 
 	supp_credit_amt += supp_jv_credit_amt
 	supp_credit_amt += inv.net_total
@@ -359,7 +363,8 @@ def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 		if (cumulative_threshold and supp_credit_amt >= cumulative_threshold) and cint(tax_details.tax_on_excess_amount):
 			# Get net total again as TDS is calculated on net total
 			# Grand is used to just check for threshold breach
-			net_total = frappe.db.get_value('Purchase Invoice', invoice_filters, 'sum(net_total)') or 0.0
+			net_total = frappe.db.sql("""select sum(net_total) from `tabPurchase Invoice` where 1=1 {invoice_filters}""".format(invoice_filters = invoice_filters), as_list = 1) or 0.0
+			net_total = net_total[0][0] if any(isinstance(i, list) for i in net_total) and net_total[0][0] else 0.0
 			net_total += inv.net_total
 			supp_credit_amt = net_total - cumulative_threshold
 
@@ -376,32 +381,30 @@ def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 
 def get_tcs_amount(parties, inv, tax_details, vouchers, adv_vouchers):
 	tcs_amount = 0
+	gle = frappe.qb.DocType("GL Entry")
 
 	# sum of debit entries made from sales invoices
-	invoiced_amt = frappe.db.get_value('GL Entry', {
-		'is_cancelled': 0,
-		'party': ['in', parties],
-		'company': inv.company,
-		'voucher_no': ['in', vouchers],
-	}, 'sum(debit)') or 0.0
+	invoiced_amt = (frappe.qb.from_(gle).select(Sum(gle.debit)).where(
+		(gle.is_cancelled == 0)
+		& (gle.party.isin(parties))
+		& (gle.company == inv.company)
+		& (gle.voucher_no.isin(vouchers)))).run()[0][0] or 0.0
 
 	# sum of credit entries made from PE / JV with unset 'against voucher'
-	advance_amt = frappe.db.get_value('GL Entry', {
-		'is_cancelled': 0,
-		'party': ['in', parties],
-		'company': inv.company,
-		'voucher_no': ['in', adv_vouchers],
-	}, 'sum(credit)') or 0.0
+	advance_amt = (frappe.qb.from_(gle).select(Sum(gle.credit)).where(
+		(gle.is_cancelled == 0)
+		& (gle.party.isin(parties))
+		& (gle.company == inv.company)
+		& (gle.voucher_no.isin(vouchers)))).run()[0][0] or 0.0
 
 	# sum of credit entries made from sales invoice
-	credit_note_amt = sum(frappe.db.get_all('GL Entry', {
-		'is_cancelled': 0,
-		'credit': ['>', 0],
-		'party': ['in', parties],
-		'posting_date': ['between', (tax_details.from_date, tax_details.to_date)],
-		'company': inv.company,
-		'voucher_type': 'Sales Invoice',
-	}, pluck='credit'))
+	credit_note_amt = (frappe.qb.from_(gle).select(Sum(gle.credit)).where(
+		(gle.is_cancelled == 0)
+		& (gle.credit > 0)
+		& (gle.party.isin(parties))
+		& (gle.posting_date[tax_details.from_date:tax_details.to_date])
+		& (gle.company == inv.company)
+		& (gle.voucher_type == 'Sales Invoice'))).run()[0][0] or 0.0
 
 	cumulative_threshold = tax_details.get('cumulative_threshold', 0)
 
@@ -439,18 +442,27 @@ def get_tds_amount_from_ldc(ldc, parties, pan_no, tax_details, posting_date, net
 
 def get_debit_note_amount(suppliers, from_date, to_date, company=None):
 
-	filters = {
-		'supplier': ['in', suppliers],
-		'is_return': 1,
-		'docstatus': 1,
-		'posting_date': ['between', (from_date, to_date)]
-	}
-	fields = ['abs(sum(net_total)) as net_total']
+	debit_note_amt = frappe.db.multisql({
+	'mariadb': """
+	select abs(sum(net_total)) as net_total
+	from `tabPurchase Invoice`
+	where supplier in %s
+	and is_return = 1
+	and docstatus = 1
+	and posting_date between %s and %s
+	""",
+	'postgres': """
+	select abs(sum(net_total)) as net_total
+	from `tabPurchase Invoice`
+	where supplier in {suppliers}
+	and is_return = 1
+	and docstatus = 1
+	and posting_date >= to_date(cast({from_date} as text), 'YYYY-MM-DD')
+	and posting_date <= to_date(cast({to_date} as text), 'YYYY-MM-DD')
+	""".format(suppliers = "('" + "','".join(suppliers) + "')", from_date = from_date,  to_date = to_date)
+	}, (suppliers,from_date, to_date), as_dict =1 )[0].get('net_total') or 0.0
 
-	if company:
-		filters['company'] = company
-
-	return frappe.get_all('Purchase Invoice', filters, fields)[0].get('net_total') or 0.0
+	return debit_note_amt
 
 def get_ltds_amount(current_amount, deducted_amount, certificate_limit, rate, tax_details):
 	if current_amount < (certificate_limit - deducted_amount):

@@ -85,14 +85,13 @@ class QualityInspection(Document):
 			if self.reference_type and self.reference_name:
 				conditions = ""
 				if self.batch_no and self.docstatus == 1:
-					conditions += " and t1.batch_no = %s"
-					args.append(self.batch_no)
+					conditions += " and t1.batch_no = '" + self.batch_no + "'"
 
 				if self.docstatus == 2: # if cancel, then remove qi link wherever same name
-					conditions += " and t1.quality_inspection = %s"
-					args.append(self.name)
+					conditions += " and t1.quality_inspection = '" + self.name + "'"
 
-				frappe.db.sql("""
+				frappe.db.multisql({
+				'mariadb': """
 					UPDATE
 						`tab{child_doc}` t1, `tab{parent_doc}` t2
 					SET
@@ -103,7 +102,41 @@ class QualityInspection(Document):
 						and t1.parent = t2.name
 						{conditions}
 				""".format(parent_doc=self.reference_type, child_doc=doctype, conditions=conditions),
-					args)
+				'postgres': """
+					UPDATE
+						`tab{child_doc}` t1
+					SET
+						quality_inspection = '{quality_inspection}'
+					FROM
+							`tab{parent_doc}` t2
+					WHERE
+						t1.parent = '{reference_name}'
+						and t1.item_code = '{item_code}'
+						and t1.parent = t2.name
+						{conditions}
+				""".format(parent_doc=self.reference_type, child_doc=doctype, conditions=conditions, quality_inspection = args[0], reference_name = args[2], item_code = args[3])
+				}, args)
+
+				# Postgres does not support two table updates without using cte
+				# split into two transactions to simplify
+				frappe.db.multisql({
+					'mariadb': """
+					 SELECT 1 FROM DUAL WHERE false
+				""",
+				'postgres': """
+					UPDATE
+						`tab{parent_doc}` t2
+					SET
+						modified = '{modified}'
+					FROM
+						`tab{child_doc}` t1
+					WHERE
+						t1.parent = '{reference_name}'
+						and t1.item_code = '{item_code}'
+						and t1.parent = t2.name
+						{conditions}
+				""".format(parent_doc=self.reference_type, child_doc=doctype, conditions=conditions, modified = args[1], reference_name = args[2], item_code = args[3])
+				})
 
 	def inspect_and_set_status(self):
 		for reading in self.readings:
@@ -206,7 +239,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 					FROM `tab{doc}`
 					WHERE parent=%(parent)s and docstatus < 2 and item_code like %(txt)s
 					{qi_condition} {cond} {mcond}
-					ORDER BY item_code limit {start}, {page_len}
+					ORDER BY item_code limit {page_len} offset {start}
 				""".format(doc=filters.get('from'),
 					cond = cond, mcond = mcond, start = start,
 					page_len = page_len, qi_condition = qi_condition),
@@ -219,7 +252,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 					WHERE name = %(reference_name)s and docstatus < 2 and production_item like %(txt)s
 					{qi_condition} {cond} {mcond}
 					ORDER BY production_item
-					LIMIT {start}, {page_len}
+					LIMIT {page_len} offset {start}
 				""".format(doc=filters.get("from"),
 					cond = cond, mcond = mcond, start = start,
 					page_len = page_len, qi_condition = qi_condition),

@@ -62,13 +62,22 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 		values.append(item_code)
 		condition += " AND item_code = %s"
 
-	stock_ledger_entries = frappe.db.sql("""
+	stock_ledger_entries = frappe.db.multisql({
+		'mariadb': """
 		SELECT item_code, stock_value, name, warehouse
 		FROM `tabStock Ledger Entry` sle
 		WHERE posting_date <= %s {0}
 			and is_cancelled = 0
 		ORDER BY timestamp(posting_date, posting_time) DESC, creation DESC
-	""".format(condition), values, as_dict=1)
+	""".format(condition),
+	'postgres': """
+		SELECT item_code, stock_value, name, warehouse
+		FROM `tabStock Ledger Entry` sle
+		WHERE posting_date <= %s {0}
+			and is_cancelled = 0
+		ORDER BY (posting_date + posting_time) DESC, creation DESC
+	""".format(condition)
+	}, values, as_dict=1)
 
 	sle_map = {}
 	for sle in stock_ledger_entries:
@@ -115,7 +124,7 @@ def get_serial_nos_data_after_transactions(args):
 	serial_nos = set()
 	args = frappe._dict(args)
 	sle = frappe.qb.DocType('Stock Ledger Entry')
-	Timestamp = CustomFunction('timestamp', ['date', 'time'])
+	Timestamp = CustomFunction('concat', ['date', 'string', 'time'])
 
 	stock_ledger_entries = frappe.qb.from_(
 		sle
@@ -124,7 +133,7 @@ def get_serial_nos_data_after_transactions(args):
 	).where(
 		(sle.item_code == args.item_code)
 		& (sle.warehouse == args.warehouse)
-		& (Timestamp(sle.posting_date, sle.posting_time) < Timestamp(args.posting_date, args.posting_time))
+		& (Timestamp(sle.posting_date, ' ', sle.posting_time) < Timestamp(args.posting_date, ' ', args.posting_time))
 		& (sle.is_cancelled == 0)
 	).orderby(
 		sle.posting_date, sle.posting_time, sle.creation
@@ -366,10 +375,16 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 		row[key] = value
 
 def get_available_serial_nos(args):
-	return frappe.db.sql(""" SELECT name from `tabSerial No`
+	return frappe.db.multisql( {
+		'mariadb':""" SELECT name from `tabSerial No`
 		WHERE item_code = %(item_code)s and warehouse = %(warehouse)s
 		 and timestamp(purchase_date, purchase_time) <= timestamp(%(posting_date)s, %(posting_time)s)
-	""", args, as_dict=1)
+	""",
+	'postgres':""" SELECT name from `tabSerial No`
+		WHERE item_code = %(item_code)s and warehouse = %(warehouse)s
+		 and (purchase_date + purchase_time) <= (%(posting_date)s + %(posting_time)s)
+	"""
+	}, args, as_dict=1)
 
 def add_additional_uom_columns(columns, result, include_uom, conversion_factors):
 	if not include_uom or not conversion_factors:
@@ -404,7 +419,7 @@ def add_additional_uom_columns(columns, result, include_uom, conversion_factors)
 		result[row_idx] = row
 
 def get_incoming_outgoing_rate_for_cancel(item_code, voucher_type, voucher_no, voucher_detail_no):
-	outgoing_rate = frappe.db.sql("""SELECT abs(stock_value_difference / actual_qty)
+	outgoing_rate = frappe.db.sql("""SELECT CASE WHEN actual_qty = 0 THEN 0 ELSE abs(stock_value_difference / actual_qty) END
 		FROM `tabStock Ledger Entry`
 		WHERE voucher_type = %s and voucher_no = %s
 			and item_code = %s and voucher_detail_no = %s

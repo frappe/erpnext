@@ -135,13 +135,21 @@ class Loan(AccountsController):
 
 	def link_loan_security_pledge(self):
 		if self.is_secured_loan and self.loan_application:
-			maximum_loan_value = frappe.db.get_value('Loan Security Pledge',
-				{
-					'loan_application': self.loan_application,
-					'status': 'Requested'
-				},
-				'sum(maximum_loan_value)'
-			)
+			maximum_loan_value = frappe.db.multisql({
+			'mariadb': """
+				select sum(maximum_loan_value)
+				from `tabLoan Security Pledge`
+				where loan_application = '{loan_application}'
+				and status = 'Requested'
+			""".format(loan_application = self.loan_application),
+			'postgres': """
+				select sum(maximum_loan_value)
+				from `tabLoan Security Pledge`
+				where loan_application = '{loan_application}'
+				and status = 'Requested'
+			""".format(loan_application = self.loan_application)
+			}, as_list = 1)
+			maximum_loan_value = maximum_loan_value[0][0] if any(isinstance(i, list) for i in maximum_loan_value) and maximum_loan_value[0][0] else maximum_loan_value
 
 			if maximum_loan_value:
 				frappe.db.sql("""
@@ -175,8 +183,13 @@ def get_total_loan_amount(applicant_type, applicant, company):
 		fields=["status", "total_payment", "disbursed_amount", "total_interest_payable", "total_principal_paid",
 			"written_off_amount"])
 
-	interest_amount = flt(frappe.db.get_value("Loan Interest Accrual", {"applicant_type": applicant_type,
-		"company": company, "applicant": applicant, "docstatus": 1}, "sum(interest_amount - paid_interest_amount)"))
+	interest_amount = flt(frappe.db.sql("""
+		select sum(interest_amount - paid_interest_amount)
+		from `tabLoan Interest Accrual`
+		where applicant_type = '{applicant_type}'
+		and company = '{company}'
+		and applicant = '{applicant}'
+		""".format(applicant_type = applicant_type, company = company, applicant = applicant)))
 
 	for loan in loan_details:
 		if loan.status in ("Disbursed", "Loan Closure Requested"):

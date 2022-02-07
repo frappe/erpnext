@@ -759,7 +759,7 @@ def get_item_price(args, item_code, ignore_party=False):
 
 	return frappe.db.sql(""" select name, price_list_rate, uom
 		from `tabItem Price` {conditions}
-		order by valid_from desc, batch_no desc, uom desc """.format(conditions=conditions), args)
+		order by valid_from desc, ifnull(batch_no, '') desc, uom desc """.format(conditions=conditions), args)
 
 def get_price_list_rate_for(args, item_code):
 	"""
@@ -940,25 +940,42 @@ def get_pos_profile(company, pos_profile=None, user=None):
 
 def get_serial_nos_by_fifo(args, sales_order=None):
 	if frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo"):
-		return "\n".join(frappe.db.sql_list("""select name from `tabSerial No`
+		serial_nos = frappe.db.multisql({
+			'mariadb':
+				"""select name from `tabSerial No`
 			where item_code=%(item_code)s and warehouse=%(warehouse)s and
-			sales_order=IF(%(sales_order)s IS NULL, sales_order, %(sales_order)s)
+			sales_order=ifnull(%(sales_order)s, sales_order)
 			order by timestamp(purchase_date, purchase_time)
 			asc limit %(qty)s""",
-			{
+			'postgres':
+				"""select name from `tabSerial No`
+			where item_code=%(item_code)s and warehouse=%(warehouse)s and
+			sales_order=ifnull(%(sales_order)s, sales_order)
+			order by cast(concat(purchase_date, ' ', purchase_time) as timestamp)
+			asc limit %(qty)s"""
+			},{
 				"item_code": args.item_code,
 				"warehouse": args.warehouse,
 				"qty": abs(cint(args.stock_qty)),
 				"sales_order": sales_order
-			}))
+			}, as_list = 1)
+
+		return "\n".join(serial_nos[0]) if any(isinstance(i, list) for i in serial_nos) else "\n".join(serial_nos)
 
 def get_serial_no_batchwise(args, sales_order=None):
 	if frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo"):
-		return "\n".join(frappe.db.sql_list("""select name from `tabSerial No`
+		return "\n".join(frappe.db.multisql({
+			'mariadb': """select name from `tabSerial No`
 			where item_code=%(item_code)s and warehouse=%(warehouse)s and
 			sales_order=IF(%(sales_order)s IS NULL, sales_order, %(sales_order)s)
 			and batch_no=IF(%(batch_no)s IS NULL, batch_no, %(batch_no)s) order
-			by timestamp(purchase_date, purchase_time) asc limit %(qty)s""", {
+			by timestamp(purchase_date, purchase_time) asc limit %(qty)s""",
+			'postgres': """select name from `tabSerial No`
+			where item_code=%(item_code)s and warehouse=%(warehouse)s and
+			sales_order=IF(%(sales_order)s IS NULL, sales_order, %(sales_order)s)
+			and batch_no=IF(%(batch_no)s IS NULL, batch_no, %(batch_no)s) order
+			by cast(concat(purchase_date, ' ', purchase_time) as timestamp) asc limit %(qty)s""",
+			}, {
 				"item_code": args.item_code,
 				"warehouse": args.warehouse,
 				"batch_no": args.batch_no,

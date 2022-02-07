@@ -48,17 +48,24 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		pcv = self.make_period_closing_voucher()
 		surplus_account = pcv.closing_account_head
 
-		expected_gle = (
+		expected_gle = [
 			('Cost of Goods Sold - TPC', 0.0, 600.0),
 			(surplus_account, 600.0, 400.0),
 			('Sales - TPC', 400.0, 0.0)
-		)
+		]
 
-		pcv_gle = frappe.db.sql("""
-			select account, debit, credit from `tabGL Entry` where voucher_no=%s order by account
-		""", (pcv.name))
+		pcv_gle = frappe.db.multisql({
+		'mariadb': """
+			select account, debit, credit
+			from `tabGL Entry` where voucher_no=%s
+			order by account
+		""",
+		'postgres': """select account, debit, credit
+			from `tabGL Entry` where voucher_no='{name}'
+			order by account
+		""".format(name = pcv.name)}, (pcv.name))
 
-		self.assertEqual(pcv_gle, expected_gle)
+		self.assertEqual(list(pcv_gle), expected_gle)
 
 	def test_cost_center_wise_posting(self):
 		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
@@ -91,21 +98,25 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		pcv.save()
 		pcv.submit()
 		surplus_account = pcv.closing_account_head
-
-		expected_gle = (
+		expected_gle = [
 			(surplus_account, 0.0, 400.0, cost_center1),
 			(surplus_account, 0.0, 200.0, cost_center2),
 			('Sales - TPC', 400.0, 0.0, cost_center1),
 			('Sales - TPC', 200.0, 0.0, cost_center2),
-		)
+		]
 
-		pcv_gle = frappe.db.sql("""
+		pcv_gle = frappe.db.multisql({
+		'mariadb': """
 			select account, debit, credit, cost_center
 			from `tabGL Entry` where voucher_no=%s
 			order by account, cost_center
-		""", (pcv.name))
+		""",
+		'postgres': """select account, debit, credit, cost_center
+			from `tabGL Entry` where voucher_no='{name}'
+			order by account, cost_center
+		""".format(name = pcv.name)}, (pcv.name))
 
-		self.assertEqual(pcv_gle, expected_gle)
+		self.assertEqual(list(pcv_gle), expected_gle)
 
 	def test_period_closing_with_finance_book_entries(self):
 		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
@@ -137,20 +148,25 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		pcv = self.make_period_closing_voucher()
 		surplus_account = pcv.closing_account_head
 
-		expected_gle = (
+		expected_gle = [
 			(surplus_account, 0.0, 400.0, None),
 			(surplus_account, 0.0, 400.0, jv.finance_book),
 			('Sales - TPC', 400.0, 0.0, None),
 			('Sales - TPC', 400.0, 0.0, jv.finance_book)
-		)
+		]
 
-		pcv_gle = frappe.db.sql("""
+		pcv_gle = frappe.db.multisql({
+			'mariadb': """
 			select account, debit, credit, finance_book
 			from `tabGL Entry` where voucher_no=%s
-			order by account, finance_book
-		""", (pcv.name))
-
-		self.assertEqual(pcv_gle, expected_gle)
+			order by replace(account, '_', ''), finance_book
+		""",
+		'postgres': """
+			select account, debit, credit, finance_book
+			from `tabGL Entry` where voucher_no='{name}'
+			order by replace(account, '_', ''), finance_book desc
+		""".format(name = pcv.name)}, (pcv.name))
+		self.assertEqual(list(pcv_gle), expected_gle)
 
 	def make_period_closing_voucher(self, submit=True):
 		surplus_account = create_account()

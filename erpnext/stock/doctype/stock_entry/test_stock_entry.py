@@ -38,9 +38,12 @@ def get_sle(**args):
 		condition += "`{0}`=%s".format(key)
 		values.append(value)
 
-	return frappe.db.sql("""select * from `tabStock Ledger Entry` %s
+	return frappe.db.multisql({
+		'mariadb': """select * from `tabStock Ledger Entry` %s
 		order by timestamp(posting_date, posting_time) desc, creation desc limit 1"""% condition,
-		values, as_dict=1)
+		'postgres': """select * from `tabStock Ledger Entry` %s
+		order by (posting_date + posting_time) desc, creation desc limit 1"""% condition
+		}, values, as_dict=1)
 
 class TestStockEntry(ERPNextTestCase):
 	def tearDown(self):
@@ -112,10 +115,8 @@ class TestStockEntry(ERPNextTestCase):
 
 	def _test_auto_material_request(self, item_code, material_request_type="Purchase", warehouse="_Test Warehouse - _TC"):
 		variant = frappe.get_doc("Item", item_code)
-
 		projected_qty, actual_qty = frappe.db.get_value("Bin", {"item_code": item_code,
 			"warehouse": warehouse}, ["projected_qty", "actual_qty"]) or [0, 0]
-
 		# stock entry reqd for auto-reorder
 		create_stock_reconciliation(item_code=item_code, warehouse=warehouse,
 			qty = actual_qty + abs(projected_qty) + 10, rate=100)

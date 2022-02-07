@@ -226,15 +226,24 @@ def get_returned_qty_map_for_row(row_name, doctype):
 		if doctype == "Purchase Receipt":
 			fields += ["sum(abs(`tab{0}`.received_stock_qty)) as received_stock_qty".format(child_doctype)]
 
-	data = frappe.db.get_list(doctype,
-		fields = fields,
-		filters = [
-			[doctype, "docstatus", "=", 1],
-			[doctype, "is_return", "=", 1],
-			[child_doctype, reference_field, "=", row_name]
-	])
+	select_fields = ",".join(fields)
+	data = frappe.db.multisql({
+		'mariadb': """
+	select {select_fields}
+	from `tab{doctype}`
+	left join `tab{child_doctype}`
+	on `tab{child_doctype}`.parent = `tab{doctype}`.name
+	where `tab{doctype}`.docstatus = 1 and `tab{doctype}`.is_return = 1 and `tab{child_doctype}`.{reference_field} = '{r_n}'
+	""".format(select_fields = select_fields, doctype = doctype, child_doctype = child_doctype, reference_field = reference_field, r_n = row_name),
+	'postgres': """
+	select {select_fields}
+	from `tab{doctype}`
+	left join `tab{child_doctype}` on `tab{child_doctype}`.parent = `tab{doctype}`.name
+	where `tab{doctype}`.docstatus = 1 and `tab{doctype}`.is_return = 1 and `tab{child_doctype}`.{reference_field} = '{r_n}'
+	""".format(select_fields = select_fields, doctype = doctype, child_doctype = child_doctype, reference_field = reference_field, r_n = row_name)
+	}, as_dict = 1)
 
-	return data[0]
+	return data[0] if data else {}
 
 def make_return_doc(doctype, source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc

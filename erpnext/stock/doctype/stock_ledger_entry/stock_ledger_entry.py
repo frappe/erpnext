@@ -51,9 +51,14 @@ class StockLedgerEntry(Document):
 
 	def calculate_batch_qty(self):
 		if self.batch_no:
-			batch_qty = frappe.db.get_value("Stock Ledger Entry",
-				{"docstatus": 1, "batch_no": self.batch_no, "is_cancelled": 0},
-				"sum(actual_qty)") or 0
+			batch_qty = frappe.db.sql("""select sum(actual_qty) from `tabStock Ledger Entry`
+			where docstatus=1 and batch_no = %s
+			and is_cancelled=0""",(self.batch_no), as_list=1)
+			if batch_qty:
+    				batch_qty = batch_qty[0][0] if batch_qty[0][0] else 0
+			else:
+    				batch_qty = 0
+
 			frappe.db.set_value("Batch", self.batch_no, "batch_qty", batch_qty)
 
 	def validate_mandatory(self):
@@ -138,11 +143,17 @@ class StockLedgerEntry(Document):
 		if authorized_role:
 			authorized_users = get_users(authorized_role)
 			if authorized_users and frappe.session.user not in authorized_users:
-				last_transaction_time = frappe.db.sql("""
+				last_transaction_time = frappe.db.multisql({
+					'mariadb': """
 					select MAX(timestamp(posting_date, posting_time)) as posting_time
 					from `tabStock Ledger Entry`
 					where docstatus = 1 and is_cancelled = 0 and item_code = %s
-					and warehouse = %s""", (self.item_code, self.warehouse))[0][0]
+					and warehouse = %s""",
+					'postgres': """
+					select MAX(posting_date + posting_time) as posting_time
+					from `tabStock Ledger Entry`
+					where docstatus = 1 and is_cancelled = 0 and item_code = %s
+					and warehouse = %s"""}, (self.item_code, self.warehouse))[0][0]
 
 				cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
 

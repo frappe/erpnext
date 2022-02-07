@@ -17,7 +17,13 @@ class Vehicle(Document):
 
 def get_timeline_data(doctype, name):
 	'''Return timeline for vehicle log'''
-	return dict(frappe.db.sql('''select unix_timestamp(date), count(*)
+	return dict(frappe.db.multisql({
+		'mariadb': '''select unix_timestamp(date), count(*)
 	from `tabVehicle Log` where license_plate=%s
-	and date > date_sub(curdate(), interval 1 year)
-	group by date''', name))
+	and date > date_sub(CURRENT_DATE, interval 1 year)
+	group by date''',
+	'postgres': '''select extract(epoch from date), count(*)
+	from `tabVehicle Log` where license_plate=%s
+	and date > (current_date - 'interval 1 year')
+	group by date''',
+	}, name))

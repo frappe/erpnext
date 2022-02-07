@@ -432,7 +432,7 @@ class Item(Document):
 			FROM `tabStock Reconciliation Item`
 			WHERE item_code = %s and docstatus = 1
 			GROUP By item_code, warehouse, parent
-			HAVING records > 1
+			HAVING COUNT(*) > 1
 		""", new_name, as_dict=1)
 
 		if not records: return
@@ -788,12 +788,21 @@ def make_item_price(item, price_list_name, item_price):
 def get_timeline_data(doctype, name):
 	"""get timeline data based on Stock Ledger Entry. This is displayed as heatmap on the item page."""
 
-	items = frappe.db.sql("""select unix_timestamp(posting_date), count(*)
-							from `tabStock Ledger Entry`
-							where item_code=%s and posting_date > date_sub(curdate(), interval 1 year)
-							group by posting_date""", name)
-
-	return dict(items)
+	items = frappe.db.multisql({
+		'mariadb': """select unix_timestamp(posting_date), count(*)
+			from `tabStock Ledger Entry`
+			where item_code=%s and posting_date > date_sub(CURRENT_DATE, interval 1 year)
+			group by posting_date""",
+		'postgres': """select extract(epoch from posting_date), count(*)
+			from `tabStock Ledger Entry`
+			where item_code=%s and posting_date > (current_date - interval '1 year')
+			group by posting_date"""
+							}, name)
+	# postgres returns the timestamps as floats instead of ints
+	converted_items = []
+	for item in items:
+			converted_items.append((int(item[0]), item[1])) if item else converted_items.append(item)
+	return dict(converted_items)
 
 
 
@@ -926,7 +935,7 @@ def check_stock_uom_with_bin(item, stock_uom):
 			frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.").format(item))
 
 	bin_list = frappe.db.sql("""
-			select * from tabBin where item_code = %s
+			select * from `tabBin` where item_code = %s
 				and (reserved_qty > 0 or ordered_qty > 0 or indented_qty > 0 or planned_qty > 0)
 				and stock_uom != %s
 			""", (item, stock_uom), as_dict=1)
@@ -935,7 +944,7 @@ def check_stock_uom_with_bin(item, stock_uom):
 		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You need to either cancel the linked documents or create a new Item.").format(item))
 
 	# No SLE or documents against item. Bin UOM can be changed safely.
-	frappe.db.sql("""update tabBin set stock_uom=%s where item_code=%s""", (stock_uom, item))
+	frappe.db.sql("""update `tabBin` set stock_uom=%s where item_code=%s""", (stock_uom, item))
 
 
 def get_item_defaults(item_code, company):
@@ -1030,6 +1039,7 @@ def update_variants(variants, template, publish_progress=True):
 		variant.save()
 		if publish_progress:
 			frappe.publish_progress(count / total * 100, title=_("Updating Variants..."))
+
 
 @erpnext.allow_regional
 def set_item_tax_from_hsn_code(item):

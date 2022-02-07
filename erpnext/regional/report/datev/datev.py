@@ -233,11 +233,11 @@ def get_transactions(filters, as_dict=1):
 
 def get_payment_entry_params(filters):
 	extra_fields = """
-		, 'Zahlungsreferenz' as 'Beleginfo - Art 5'
-		, pe.reference_no as 'Beleginfo - Inhalt 5'
-		, 'Buchungstag' as 'Beleginfo - Art 6'
-		, pe.reference_date as 'Beleginfo - Inhalt 6'
-		, '' as 'Fälligkeit'
+		, 'Zahlungsreferenz' as "Beleginfo - Art 5"
+		, pe.reference_no as "Beleginfo - Inhalt 5"
+		, 'Buchungstag' as "Beleginfo - Art 6"
+		, pe.reference_date as "Beleginfo - Inhalt 6"
+		, '' as "Fälligkeit"
 	"""
 
 	extra_joins = """
@@ -254,11 +254,11 @@ def get_payment_entry_params(filters):
 
 def get_sales_invoice_params(filters):
 	extra_fields = """
-		, '' as 'Beleginfo - Art 5'
-		, '' as 'Beleginfo - Inhalt 5'
-		, '' as 'Beleginfo - Art 6'
-		, '' as 'Beleginfo - Inhalt 6'
-		, si.due_date as 'Fälligkeit'
+		, '' as "Beleginfo - Art 5"
+		, '' as "Beleginfo - Inhalt 5"
+		, '' as "Beleginfo - Art 6"
+		, '' as "Beleginfo - Inhalt 6"
+		, si.due_date as "Fälligkeit"
 	"""
 
 	extra_joins = """
@@ -275,11 +275,11 @@ def get_sales_invoice_params(filters):
 
 def get_purchase_invoice_params(filters):
 	extra_fields = """
-		, 'Lieferanten-Rechnungsnummer' as 'Beleginfo - Art 5'
-		, pi.bill_no as 'Beleginfo - Inhalt 5'
-		, 'Lieferanten-Rechnungsdatum' as 'Beleginfo - Art 6'
-		, pi.bill_date as 'Beleginfo - Inhalt 6'
-		, pi.due_date as 'Fälligkeit'
+		, 'Lieferanten-Rechnungsnummer' as "Beleginfo - Art 5"
+		, pi.bill_no as "Beleginfo - Inhalt 5"
+		, 'Lieferanten-Rechnungsdatum' as "Beleginfo - Art 6"
+		, pi.bill_date as "Beleginfo - Inhalt 6"
+		, pi.due_date as "Fälligkeit"
 	"""
 
 	extra_joins = """
@@ -297,11 +297,11 @@ def get_purchase_invoice_params(filters):
 def get_generic_params(filters):
 	# produce empty fields so all rows will have the same length
 	extra_fields = """
-		, '' as 'Beleginfo - Art 5'
-		, '' as 'Beleginfo - Inhalt 5'
-		, '' as 'Beleginfo - Art 6'
-		, '' as 'Beleginfo - Inhalt 6'
-		, '' as 'Fälligkeit'
+		, '' as "Beleginfo - Art 5"
+		, '' as "Beleginfo - Inhalt 5"
+		, '' as "Beleginfo - Art 6"
+		, '' as "Beleginfo - Inhalt 6"
+		, '' as "Fälligkeit"
 	"""
 	extra_joins = ""
 
@@ -332,31 +332,31 @@ def run_query(filters, extra_fields, extra_joins, extra_filters, as_dict=1):
 		SELECT
 
 			/* either debit or credit amount; always positive */
-			case gl.debit when 0 then gl.credit else gl.debit end as 'Umsatz (ohne Soll/Haben-Kz)',
+			case gl.debit when 0 then gl.credit else gl.debit end as "Umsatz (ohne Soll/Haben-Kz)",
 
 			/* 'H' when credit, 'S' when debit */
-			case gl.debit when 0 then 'H' else 'S' end as 'Soll/Haben-Kennzeichen',
+			case gl.debit when 0 then 'H' else 'S' end as "Soll/Haben-Kennzeichen",
 
 			/* account number or, if empty, party account number */
-			acc.account_number as 'Konto',
+			acc.account_number as "Konto",
 
 			/* against number or, if empty, party against number */
-			%(temporary_against_account_number)s as 'Gegenkonto (ohne BU-Schlüssel)',
+			%(temporary_against_account_number)s as "Gegenkonto (ohne BU-Schlüssel)",
 
 			/* disable automatic VAT deduction */
-			'40' as 'BU-Schlüssel',
+			'40' as "BU-Schlüssel",
 
-			gl.posting_date as 'Belegdatum',
-			gl.voucher_no as 'Belegfeld 1',
-			REPLACE(LEFT(gl.remarks, 60), '\n', ' ') as 'Buchungstext',
-			gl.voucher_type as 'Beleginfo - Art 1',
-			gl.voucher_no as 'Beleginfo - Inhalt 1',
-			gl.against_voucher_type as 'Beleginfo - Art 2',
-			gl.against_voucher as 'Beleginfo - Inhalt 2',
-			gl.party_type as 'Beleginfo - Art 3',
-			gl.party as 'Beleginfo - Inhalt 3',
-			case gl.party_type when 'Customer' then 'Debitorennummer' when 'Supplier' then 'Kreditorennummer' else NULL end as 'Beleginfo - Art 4',
-			par.debtor_creditor_number as 'Beleginfo - Inhalt 4'
+			gl.posting_date as "Belegdatum",
+			gl.voucher_no as "Belegfeld 1",
+			REPLACE(LEFT(gl.remarks, 60), '\n', ' ') as "Buchungstext",
+			gl.voucher_type as "Beleginfo - Art 1",
+			gl.voucher_no as "Beleginfo - Inhalt 1",
+			gl.against_voucher_type as "Beleginfo - Art 2",
+			gl.against_voucher as "Beleginfo - Inhalt 2",
+			gl.party_type as "Beleginfo - Art 3",
+			gl.party as "Beleginfo - Inhalt 3",
+			case gl.party_type when 'Customer' then 'Debitorennummer' when 'Supplier' then 'Kreditorennummer' else NULL end as "Beleginfo - Art 4",
+			par.debtor_creditor_number as "Beleginfo - Inhalt 4"
 
 			{extra_fields}
 
@@ -379,7 +379,7 @@ def run_query(filters, extra_fields, extra_joins, extra_filters, as_dict=1):
 
 		{extra_filters}
 
-		ORDER BY 'Belegdatum', gl.voucher_no""".format(
+		ORDER BY "Belegdatum", gl.voucher_no""".format(
 			extra_fields=extra_fields,
 			extra_joins=extra_joins,
 			extra_filters=extra_filters
@@ -397,37 +397,38 @@ def get_customers(filters):
 	Arguments:
 	filters -- dict of filters to be passed to the sql query
 	"""
-	return frappe.db.sql("""
+	return frappe.db.multisql({
+		'mariadb': """
 		SELECT
 
-			par.debtor_creditor_number as 'Konto',
+			par.debtor_creditor_number as "Konto",
 			CASE cus.customer_type
 				WHEN 'Company' THEN cus.customer_name
 				ELSE null
-				END as 'Name (Adressatentyp Unternehmen)',
+				END as "Name (Adressatentyp Unternehmen)",
 			CASE cus.customer_type
 				WHEN 'Individual' THEN TRIM(SUBSTR(cus.customer_name, LOCATE(' ', cus.customer_name)))
 				ELSE null
-				END as 'Name (Adressatentyp natürl. Person)',
+				END as "Name (Adressatentyp natürl. Person)",
 			CASE cus.customer_type
 				WHEN 'Individual' THEN SUBSTRING_INDEX(SUBSTRING_INDEX(cus.customer_name, ' ', 1), ' ', -1)
 				ELSE null
-				END as 'Vorname (Adressatentyp natürl. Person)',
+				END as "Vorname (Adressatentyp natürl. Person)",
 			CASE cus.customer_type
 				WHEN 'Individual' THEN '1'
 				WHEN 'Company' THEN '2'
 				ELSE '0'
-				END as 'Adressatentyp',
-			adr.address_line1 as 'Straße',
-			adr.pincode as 'Postleitzahl',
-			adr.city as 'Ort',
-			UPPER(country.code) as 'Land',
-			adr.address_line2 as 'Adresszusatz',
-			adr.email_id as 'E-Mail',
-			adr.phone as 'Telefon',
-			adr.fax as 'Fax',
-			cus.website as 'Internet',
-			cus.tax_id as 'Steuernummer'
+				END as "Adressatentyp",
+			adr.address_line1 as "Straße",
+			adr.pincode as "Postleitzahl",
+			adr.city as "Ort",
+			UPPER(country.code) as "Land",
+			adr.address_line2 as "Adresszusatz",
+			adr.email_id as "E-Mail",
+			adr.phone as "Telefon",
+			adr.fax as "Fax",
+			cus.website as "Internet",
+			cus.tax_id as "Steuernummer"
 
 		FROM `tabCustomer` cus
 
@@ -449,7 +450,61 @@ def get_customers(filters):
 			on country.name = adr.country
 
 		WHERE adr.is_primary_address = '1'
-		""", filters, as_dict=1)
+		""",
+		'postgres': """
+		SELECT
+
+			par.debtor_creditor_number as "Konto",
+			CASE cus.customer_type
+				WHEN 'Company' THEN cus.customer_name
+				ELSE null
+				END as "Name (Adressatentyp Unternehmen)",
+			CASE cus.customer_type
+				WHEN 'Individual' THEN TRIM(SUBSTR(cus.customer_name, LOCATE(' ', cus.customer_name)))
+				ELSE null
+				END as "Name (Adressatentyp natürl. Person)",
+			CASE cus.customer_type
+				WHEN 'Individual' THEN reverse(split_part(reverse(split_part(cus.customer_name, ' ', 1)), ' ', 1))
+				ELSE null
+				END as "Vorname (Adressatentyp natürl. Person)",
+			CASE cus.customer_type
+				WHEN 'Individual' THEN '1'
+				WHEN 'Company' THEN '2'
+				ELSE '0'
+				END as "Adressatentyp",
+			adr.address_line1 as "Straße",
+			adr.pincode as "Postleitzahl",
+			adr.city as "Ort",
+			UPPER(country.code) as "Land",
+			adr.address_line2 as "Adresszusatz",
+			adr.email_id as "E-Mail",
+			adr.phone as "Telefon",
+			adr.fax as "Fax",
+			cus.website as "Internet",
+			cus.tax_id as "Steuernummer"
+
+		FROM `tabCustomer` cus
+
+			left join `tabParty Account` par
+			on par.parent = cus.name
+			and par.parenttype = 'Customer'
+			and par.company = %(company)s
+
+			left join `tabDynamic Link` dyn_adr
+			on dyn_adr.link_name = cus.name
+			and dyn_adr.link_doctype = 'Customer'
+			and dyn_adr.parenttype = 'Address'
+
+			left join `tabAddress` adr
+			on adr.name = dyn_adr.parent
+			and adr.is_primary_address = '1'
+
+			left join `tabCountry` country
+			on country.name = adr.country
+
+		WHERE adr.is_primary_address = '1'
+		"""
+		}, filters, as_dict=1)
 
 
 def get_suppliers(filters):
@@ -459,38 +514,39 @@ def get_suppliers(filters):
 	Arguments:
 	filters -- dict of filters to be passed to the sql query
 	"""
-	return frappe.db.sql("""
+	return frappe.db.multisql({
+		'mariadb': """
 		SELECT
 
-			par.debtor_creditor_number as 'Konto',
+			par.debtor_creditor_number as "Konto",
 			CASE sup.supplier_type
 				WHEN 'Company' THEN sup.supplier_name
 				ELSE null
-				END as 'Name (Adressatentyp Unternehmen)',
+				END as "Name (Adressatentyp Unternehmen)",
 			CASE sup.supplier_type
 				WHEN 'Individual' THEN TRIM(SUBSTR(sup.supplier_name, LOCATE(' ', sup.supplier_name)))
 				ELSE null
-				END as 'Name (Adressatentyp natürl. Person)',
+				END as "Name (Adressatentyp natürl. Person)",
 			CASE sup.supplier_type
 				WHEN 'Individual' THEN SUBSTRING_INDEX(SUBSTRING_INDEX(sup.supplier_name, ' ', 1), ' ', -1)
 				ELSE null
-				END as 'Vorname (Adressatentyp natürl. Person)',
+				END as "Vorname (Adressatentyp natürl. Person)",
 			CASE sup.supplier_type
 				WHEN 'Individual' THEN '1'
 				WHEN 'Company' THEN '2'
 				ELSE '0'
-				END as 'Adressatentyp',
-			adr.address_line1 as 'Straße',
-			adr.pincode as 'Postleitzahl',
-			adr.city as 'Ort',
-			UPPER(country.code) as 'Land',
-			adr.address_line2 as 'Adresszusatz',
-			adr.email_id as 'E-Mail',
-			adr.phone as 'Telefon',
-			adr.fax as 'Fax',
-			sup.website as 'Internet',
-			sup.tax_id as 'Steuernummer',
-			case sup.on_hold when 1 then sup.release_date else null end as 'Zahlungssperre bis'
+				END as "Adressatentyp",
+			adr.address_line1 as "Straße",
+			adr.pincode as "Postleitzahl",
+			adr.city as "Ort",
+			UPPER(country.code) as "Land",
+			adr.address_line2 as "Adresszusatz",
+			adr.email_id as "E-Mail",
+			adr.phone as "Telefon",
+			adr.fax as "Fax",
+			sup.website as "Internet",
+			sup.tax_id as "Steuernummer",
+			case sup.on_hold when 1 then sup.release_date else null end as "Zahlungssperre bis"
 
 		FROM `tabSupplier` sup
 
@@ -512,16 +568,71 @@ def get_suppliers(filters):
 			on country.name = adr.country
 
 		WHERE adr.is_primary_address = '1'
-		""", filters, as_dict=1)
+		""",
+		'postgres': """
+		SELECT
+
+			par.debtor_creditor_number as "Konto",
+			CASE sup.supplier_type
+				WHEN 'Company' THEN sup.supplier_name
+				ELSE null
+				END as "Name (Adressatentyp Unternehmen)",
+			CASE sup.supplier_type
+				WHEN 'Individual' THEN TRIM(SUBSTR(sup.supplier_name, LOCATE(' ', sup.supplier_name)))
+				ELSE null
+				END as "Name (Adressatentyp natürl. Person)",
+			CASE sup.supplier_type
+				WHEN 'Individual' THEN reverse(split_part(reverse(split_part(sup.supplier_name, ' ', 1)), ' ', 1))
+				ELSE null
+				END as "Vorname (Adressatentyp natürl. Person)",
+			CASE sup.supplier_type
+				WHEN 'Individual' THEN '1'
+				WHEN 'Company' THEN '2'
+				ELSE '0'
+				END as "Adressatentyp",
+			adr.address_line1 as "Straße",
+			adr.pincode as "Postleitzahl",
+			adr.city as "Ort",
+			UPPER(country.code) as "Land",
+			adr.address_line2 as "Adresszusatz",
+			adr.email_id as "E-Mail",
+			adr.phone as "Telefon",
+			adr.fax as "Fax",
+			sup.website as "Internet",
+			sup.tax_id as "Steuernummer",
+			case sup.on_hold when 1 then sup.release_date else null end as "Zahlungssperre bis"
+
+		FROM `tabSupplier` sup
+
+			left join `tabParty Account` par
+			on par.parent = sup.name
+			and par.parenttype = 'Supplier'
+			and par.company = %(company)s
+
+			left join `tabDynamic Link` dyn_adr
+			on dyn_adr.link_name = sup.name
+			and dyn_adr.link_doctype = 'Supplier'
+			and dyn_adr.parenttype = 'Address'
+
+			left join `tabAddress` adr
+			on adr.name = dyn_adr.parent
+			and adr.is_primary_address = '1'
+
+			left join `tabCountry` country
+			on country.name = adr.country
+
+		WHERE adr.is_primary_address = '1'
+		"""
+		}, filters, as_dict=1)
 
 
 def get_account_names(filters):
 	return frappe.db.sql("""
 		SELECT
 
-			account_number as 'Konto',
-			LEFT(account_name, 40) as 'Kontenbeschriftung',
-			'de-DE' as 'Sprach-ID'
+			account_number as "Konto",
+			LEFT(account_name, 40) as "Kontenbeschriftung",
+			'de-DE' as "Sprach-ID"
 
 		FROM `tabAccount`
 		WHERE company = %(company)s

@@ -522,24 +522,33 @@ def get_timeline_data(doctype, name):
 def get_dashboard_info(party_type, party, loyalty_program=None):
 	current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
 
-	doctype = "Sales Invoice" if party_type=="Customer" else "Purchase Invoice"
+	doctype = "`tabSales Invoice`" if party_type=="Customer" else "`tabPurchase Invoice`"
+	doctype_adjusted = "Sales Invoice" if party_type=="Customer" else "Purchase Invoice"
 
-	companies = frappe.get_all(doctype, filters={
+	companies = frappe.get_all(doctype_adjusted, filters={
 		'docstatus': 1,
 		party_type.lower(): party
 	}, distinct=1, fields=['company'])
-
 	company_wise_info = []
 
-	company_wise_grand_total = frappe.get_all(doctype,
-		filters={
-			'docstatus': 1,
-			party_type.lower(): party,
-			'posting_date': ('between', [current_fiscal_year.year_start_date, current_fiscal_year.year_end_date])
-			},
-			group_by="company",
-			fields=["company", "sum(grand_total) as grand_total", "sum(base_grand_total) as base_grand_total"]
-		)
+	party_type_lower = party_type.lower()
+	company_wise_grand_total = frappe.db.multisql({
+	'mariadb': """
+	select company, sum(grand_total) as grand_total, sum(base_grand_total) as base_grand_total
+	from {doctype}
+	where docstatus = 1
+	and {party_type} = '{party}'
+	and posting_date between '{start_date}' and '{end_date}'
+	""".format(doctype = doctype, party_type = party_type_lower, party = party, start_date = current_fiscal_year.year_start_date, end_date = current_fiscal_year.year_end_date),
+	'postgres': """
+	select company, sum(grand_total) as grand_total, sum(base_grand_total) as base_grand_total
+	from {doctype}
+	where docstatus = 1
+	and {party_type} = '{party}'
+	and posting_date between to_date(cast({start_date} as text), 'YYYY-MM-DD') and to_date(cast({end_date} as text), 'YYYY-MM-DD')
+	group by company
+	""".format(doctype = doctype, party_type = party_type_lower, party = party, start_date = current_fiscal_year.year_start_date, end_date = current_fiscal_year.year_end_date)
+	}, as_dict = 1)
 
 	loyalty_point_details = []
 
@@ -613,15 +622,15 @@ def get_party_shipping_address(doctype, name):
 	:return: String
 	"""
 	out = frappe.db.sql(
-		'SELECT dl.parent '
-		'from `tabDynamic Link` dl join `tabAddress` ta on dl.parent=ta.name '
-		'where '
-		'dl.link_doctype=%s '
-		'and dl.link_name=%s '
-		'and dl.parenttype="Address" '
-		'and ifnull(ta.disabled, 0) = 0 and'
-		'(ta.address_type="Shipping" or ta.is_shipping_address=1) '
-		'order by ta.is_shipping_address desc, ta.address_type desc limit 1',
+		'''select dl.parent
+		from `tabDynamic Link` dl join `tabAddress` ta on dl.parent=ta.name
+		where
+		dl.link_doctype=%s
+		and dl.link_name=%s
+		and dl.parenttype='Address'
+		and ifnull(ta.disabled, 0) = 0 and
+		(ta.address_type='Shipping' or ta.is_shipping_address=1)
+		order by ta.is_shipping_address desc, ta.address_type desc limit 1''',
 		(doctype, name)
 	)
 	if out:
@@ -659,11 +668,11 @@ def get_default_contact(doctype, name):
 	out = frappe.db.sql("""
 			SELECT dl.parent, c.is_primary_contact, c.is_billing_contact
 			FROM `tabDynamic Link` dl
-			INNER JOIN tabContact c ON c.name = dl.parent
+			INNER JOIN `tabContact` c ON c.name = dl.parent
 			WHERE
 				dl.link_doctype=%s AND
 				dl.link_name=%s AND
-				dl.parenttype = "Contact"
+				dl.parenttype = 'Contact'
 			ORDER BY is_primary_contact DESC, is_billing_contact DESC
 		""", (doctype, name))
 	if out:

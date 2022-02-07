@@ -940,14 +940,22 @@ class StockEntry(StockController):
 
 	@frappe.whitelist()
 	def get_item_details(self, args=None, for_update=False):
-		item = frappe.db.sql("""select i.name, i.stock_uom, i.description, i.image, i.item_name, i.item_group,
+		item = frappe.db.multisql({
+			'mariadb': """select i.name, i.stock_uom, i.description, i.image, i.item_name, i.item_group,
 				i.has_batch_no, i.sample_quantity, i.has_serial_no, i.allow_alternative_item,
 				id.expense_account, id.buying_cost_center
 			from `tabItem` i LEFT JOIN `tabItem Default` id ON i.name=id.parent and id.company=%s
 			where i.name=%s
 				and i.disabled=0
 				and (i.end_of_life is null or i.end_of_life='0000-00-00' or i.end_of_life > %s)""",
-			(self.company, args.get('item_code'), nowdate()), as_dict = 1)
+			'postgres': """select i.name, i.stock_uom, i.description, i.image, i.item_name, i.item_group,
+				i.has_batch_no, i.sample_quantity, i.has_serial_no, i.allow_alternative_item,
+				id.expense_account, id.buying_cost_center
+			from `tabItem` i LEFT JOIN `tabItem Default` id ON i.name=id.parent and id.company=%s
+			where i.name=%s
+				and i.disabled=0
+				and (i.end_of_life is null or i.end_of_life > %s)"""
+		},(self.company, args.get('item_code'), nowdate()), as_dict = 1)
 
 		if not item:
 			frappe.throw(_("Item {0} is not active or end of life has been reached").format(args.get("item_code")))
@@ -1384,7 +1392,7 @@ class StockEntry(StockController):
 			where
 				se.name = sed.parent and se.docstatus=1 and se.purpose='Material Transfer for Manufacture'
 				and se.work_order= %s and ifnull(sed.t_warehouse, '') != ''
-			group by sed.item_code, sed.t_warehouse
+			group by sed.item_code, sed.t_warehouse, sed.item_name, sed.original_item, sed.description, sed.stock_uom, sed.expense_account, sed.cost_center
 		""", self.work_order, as_dict=1)
 
 		materials_already_backflushed = frappe.db.sql("""
