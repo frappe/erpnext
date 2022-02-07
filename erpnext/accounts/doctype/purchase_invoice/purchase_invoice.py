@@ -537,8 +537,11 @@ class PurchaseInvoice(BuyingController):
 
 		voucher_wise_stock_value = {}
 		if self.update_stock:
-			for d in frappe.get_all('Stock Ledger Entry',
-				fields = ["voucher_detail_no", "stock_value_difference", "warehouse"], filters={'voucher_no': self.name}):
+			stock_ledger_entries = frappe.get_all("Stock Ledger Entry",
+				fields = ["voucher_detail_no", "stock_value_difference", "warehouse"],
+				filters={"voucher_no": self.name, "voucher_type": self.doctype, "is_cancelled": 0}
+			)
+			for d in stock_ledger_entries:
 				voucher_wise_stock_value.setdefault((d.voucher_detail_no, d.warehouse), d.stock_value_difference)
 
 		valuation_tax_accounts = [d.account_head for d in self.get("taxes")
@@ -548,6 +551,10 @@ class PurchaseInvoice(BuyingController):
 		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
 
 		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+		provisional_accounting_for_non_stock_items = cint(frappe.db.get_value('Company', self.company, \
+			'enable_provisional_accounting_for_non_stock_items'))
+
+		purchase_receipt_doc_map = {}
 
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
@@ -643,19 +650,23 @@ class PurchaseInvoice(BuyingController):
 					else:
 						amount = flt(item.base_net_amount + item.item_tax_amount, item.precision("base_net_amount"))
 
-					auto_accounting_for_non_stock_items = cint(frappe.db.get_value('Company', self.company, 'enable_perpetual_inventory_for_non_stock_items'))
-
-					if auto_accounting_for_non_stock_items:
-						service_received_but_not_billed_account = self.get_company_default("service_received_but_not_billed")
-
+					if provisional_accounting_for_non_stock_items:
 						if item.purchase_receipt:
+							provisional_account = self.get_company_default("default_provisional_account")
+							purchase_receipt_doc = purchase_receipt_doc_map.get(item.purchase_receipt)
+
+							if not purchase_receipt_doc:
+								purchase_receipt_doc = frappe.get_doc("Purchase Receipt", item.purchase_receipt)
+								purchase_receipt_doc_map[item.purchase_receipt] = purchase_receipt_doc
+
 							# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
 							expense_booked_in_pr = frappe.db.get_value('GL Entry', {'is_cancelled': 0,
 								'voucher_type': 'Purchase Receipt', 'voucher_no': item.purchase_receipt, 'voucher_detail_no': item.pr_detail,
-								'account':service_received_but_not_billed_account}, ['name'])
+								'account':provisional_account}, ['name'])
 
 							if expense_booked_in_pr:
-								expense_account = service_received_but_not_billed_account
+								# Intentionally passing purchase invoice item to handle partial billing
+								purchase_receipt_doc.add_provisional_gl_entry(item, gl_entries, self.posting_date, reverse=1)
 
 					if not self.is_internal_transfer():
 						gl_entries.append(self.get_gl_dict({

@@ -70,9 +70,18 @@ class BuyingController(StockController, Subcontracting):
 
 		# set contact and address details for supplier, if they are not mentioned
 		if getattr(self, "supplier", None):
-			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions,
-			doctype=self.doctype, company=self.company, party_address=self.supplier_address, shipping_address=self.get('shipping_address'),
-			fetch_payment_terms_template= not self.get('ignore_default_payment_terms_template')))
+			self.update_if_missing(
+				get_party_details(
+					self.supplier,
+					party_type="Supplier",
+					doctype=self.doctype,
+					company=self.company,
+					party_address=self.get("supplier_address"),
+					shipping_address=self.get('shipping_address'),
+					fetch_payment_terms_template= not self.get('ignore_default_payment_terms_template'),
+					ignore_permissions=self.flags.ignore_permissions
+				)
+			)
 
 		self.set_missing_item_details(for_validate)
 
@@ -554,10 +563,13 @@ class BuyingController(StockController, Subcontracting):
 					# Check for asset naming series
 					if item_data.get('asset_naming_series'):
 						created_assets = []
-
-						for qty in range(cint(d.qty)):
-							asset = self.make_asset(d)
+						if item_data.get('is_grouped_asset'):
+							asset = self.make_asset(d, is_grouped_asset=True)
 							created_assets.append(asset)
+						else:
+							for qty in range(cint(d.qty)):
+								asset = self.make_asset(d)
+								created_assets.append(asset)
 
 						if len(created_assets) > 5:
 							# dont show asset form links if more than 5 assets are created
@@ -580,14 +592,18 @@ class BuyingController(StockController, Subcontracting):
 		for message in messages:
 			frappe.msgprint(message, title="Success", indicator="green")
 
-	def make_asset(self, row):
+	def make_asset(self, row, is_grouped_asset=False):
 		if not row.asset_location:
 			frappe.throw(_("Row {0}: Enter location for the asset item {1}").format(row.idx, row.item_code))
 
 		item_data = frappe.db.get_value('Item',
 			row.item_code, ['asset_naming_series', 'asset_category'], as_dict=1)
 
-		purchase_amount = flt(row.base_rate + row.item_tax_amount)
+		if is_grouped_asset:
+			purchase_amount = flt(row.base_amount + row.item_tax_amount)
+		else:
+			purchase_amount = flt(row.base_rate + row.item_tax_amount)
+
 		asset = frappe.get_doc({
 			'doctype': 'Asset',
 			'item_code': row.item_code,
@@ -601,6 +617,7 @@ class BuyingController(StockController, Subcontracting):
 			'calculate_depreciation': 1,
 			'purchase_receipt_amount': purchase_amount,
 			'gross_purchase_amount': purchase_amount,
+			'asset_quantity': row.qty if is_grouped_asset else 0,
 			'purchase_receipt': self.name if self.doctype == 'Purchase Receipt' else None,
 			'purchase_invoice': self.name if self.doctype == 'Purchase Invoice' else None
 		})
@@ -687,7 +704,7 @@ class BuyingController(StockController, Subcontracting):
 
 def get_asset_item_details(asset_items):
 	asset_items_data = {}
-	for d in frappe.get_all('Item', fields = ["name", "auto_create_assets", "asset_naming_series"],
+	for d in frappe.get_all('Item', fields = ["name", "auto_create_assets", "asset_naming_series", "is_grouped_asset"],
 		filters = {'name': ('in', asset_items)}):
 		asset_items_data.setdefault(d.name, d)
 

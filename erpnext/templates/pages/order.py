@@ -1,13 +1,10 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
 import frappe
 from frappe import _
 
-from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import (
-	show_attachments,
-)
+from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import show_attachments
 
 
 def get_context(context):
@@ -25,7 +22,7 @@ def get_context(context):
 	context.payment_ref = frappe.db.get_value("Payment Request",
 		{"reference_name": frappe.form_dict.name}, "name")
 
-	context.enabled_checkout = frappe.get_doc("Shopping Cart Settings").enable_checkout
+	context.enabled_checkout = frappe.get_doc("E Commerce Settings").enable_checkout
 
 	default_print_format = frappe.db.get_value('Property Setter', dict(property='default_print_format', doc_type=frappe.form_dict.doctype), "value")
 	if default_print_format:
