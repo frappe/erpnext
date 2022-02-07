@@ -679,6 +679,29 @@ class TestLoan(unittest.TestCase):
 		loan.load_from_db()
 		self.assertEqual(loan.status, "Loan Closure Requested")
 
+	def test_loan_repayment_against_partially_disbursed_loan(self):
+		pledge = [{
+			"loan_security": "Test Security 1",
+			"qty": 4000.00
+		}]
+
+		loan_application = create_loan_application('_Test Company', self.applicant2, 'Demand Loan', pledge)
+		create_pledge(loan_application)
+
+		loan = create_demand_loan(self.applicant2, "Demand Loan", loan_application, posting_date='2019-10-01')
+		loan.submit()
+
+		first_date = '2019-10-01'
+		last_date = '2019-10-30'
+
+		make_loan_disbursement_entry(loan.name, loan.loan_amount/2, disbursement_date=first_date)
+
+		loan.load_from_db()
+
+		self.assertEqual(loan.status, "Partially Disbursed")
+		create_repayment_entry(loan.name, self.applicant2, add_days(last_date, 5),
+			flt(loan.loan_amount/3))
+
 	def test_loan_amount_write_off(self):
 		pledge = [{
 			"loan_security": "Test Security 1",
