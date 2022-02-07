@@ -42,16 +42,17 @@ class TestLoan(unittest.TestCase):
 		create_loan_type("Personal Loan", 500000, 8.4,
 			is_term_loan=1,
 			mode_of_payment='Cash',
+			disbursement_account='Disbursement Account - _TC',
 			payment_account='Payment Account - _TC',
 			loan_account='Loan Account - _TC',
 			interest_income_account='Interest Income Account - _TC',
 			penalty_income_account='Penalty Income Account - _TC')
 
-		create_loan_type("Stock Loan", 2000000, 13.5, 25, 1, 5, 'Cash', 'Payment Account - _TC', 'Loan Account - _TC',
-			'Interest Income Account - _TC', 'Penalty Income Account - _TC')
+		create_loan_type("Stock Loan", 2000000, 13.5, 25, 1, 5, 'Cash', 'Disbursement Account - _TC',
+			'Payment Account - _TC', 'Loan Account - _TC', 'Interest Income Account - _TC', 'Penalty Income Account - _TC')
 
-		create_loan_type("Demand Loan", 2000000, 13.5, 25, 0, 5, 'Cash', 'Payment Account - _TC', 'Loan Account - _TC',
-			'Interest Income Account - _TC', 'Penalty Income Account - _TC')
+		create_loan_type("Demand Loan", 2000000, 13.5, 25, 0, 5, 'Cash', 'Disbursement Account - _TC',
+			'Payment Account - _TC', 'Loan Account - _TC', 'Interest Income Account - _TC', 'Penalty Income Account - _TC')
 
 		create_loan_security_type()
 		create_loan_security()
@@ -790,6 +791,18 @@ def create_loan_accounts():
 			"account_type": "Bank",
 		}).insert(ignore_permissions=True)
 
+	if not frappe.db.exists("Account", "Disbursement Account - _TC"):
+		frappe.get_doc({
+			"doctype": "Account",
+			"company": "_Test Company",
+			"account_name": "Disbursement Account",
+			"root_type": "Asset",
+			"report_type": "Balance Sheet",
+			"currency": "INR",
+			"parent_account": "Bank Accounts - _TC",
+			"account_type": "Bank",
+		}).insert(ignore_permissions=True)
+
 	if not frappe.db.exists("Account", "Interest Income Account - _TC"):
 		frappe.get_doc({
 			"doctype": "Account",
@@ -815,7 +828,7 @@ def create_loan_accounts():
 		}).insert(ignore_permissions=True)
 
 def create_loan_type(loan_name, maximum_loan_amount, rate_of_interest, penalty_interest_rate=None, is_term_loan=None, grace_period_in_days=None,
-	mode_of_payment=None, payment_account=None, loan_account=None, interest_income_account=None, penalty_income_account=None,
+	mode_of_payment=None, disbursement_account=None, payment_account=None, loan_account=None, interest_income_account=None, penalty_income_account=None,
 	repayment_method=None, repayment_periods=None):
 
 	if not frappe.db.exists("Loan Type", loan_name):
@@ -829,6 +842,7 @@ def create_loan_type(loan_name, maximum_loan_amount, rate_of_interest, penalty_i
 			"penalty_interest_rate": penalty_interest_rate,
 			"grace_period_in_days": grace_period_in_days,
 			"mode_of_payment": mode_of_payment,
+			"disbursement_account": disbursement_account,
 			"payment_account": payment_account,
 			"loan_account": loan_account,
 			"interest_income_account": interest_income_account,
