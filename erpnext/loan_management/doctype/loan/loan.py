@@ -11,6 +11,7 @@ from frappe.utils import add_months, flt, get_last_day, getdate, now_datetime, n
 from six import string_types
 
 import erpnext
+from erpnext.accounts.doctype.journal_entry.journal_entry import get_payment_entry
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts
 from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import (
@@ -234,16 +235,14 @@ def request_loan_closure(loan, posting_date=None):
 	loan_type = frappe.get_value('Loan', loan, 'loan_type')
 	write_off_limit = frappe.get_value('Loan Type', loan_type, 'write_off_amount')
 
-	# checking greater than 0 as there may be some minor precision error
-	if not pending_amount:
-		frappe.db.set_value('Loan', loan, 'status', 'Loan Closure Requested')
-	elif pending_amount < write_off_limit:
+	if pending_amount and abs(pending_amount) < write_off_limit:
 		# Auto create loan write off and update status as loan closure requested
 		write_off = make_loan_write_off(loan)
 		write_off.submit()
-		frappe.db.set_value('Loan', loan, 'status', 'Loan Closure Requested')
-	else:
+	elif pending_amount > 0:
 		frappe.throw(_("Cannot close loan as there is an outstanding of {0}").format(pending_amount))
+
+	frappe.db.set_value('Loan', loan, 'status', 'Loan Closure Requested')
 
 @frappe.whitelist()
 def get_loan_application(loan_application):
@@ -402,3 +401,38 @@ def add_single_month(date):
 		return get_last_day(add_months(date, 1))
 	else:
 		return add_months(date, 1)
+
+@frappe.whitelist()
+def make_refund_jv(loan, amount=0, reference_number=None, reference_date=None, submit=0):
+	loan_details = frappe.db.get_value('Loan', loan, ['applicant_type', 'applicant',
+		'loan_account', 'payment_account', 'posting_date', 'company', 'name',
+		'total_payment', 'total_principal_paid'], as_dict=1)
+
+	loan_details.doctype = 'Loan'
+	loan_details[loan_details.applicant_type.lower()] = loan_details.applicant
+
+	if not amount:
+		amount = flt(loan_details.total_principal_paid - loan_details.total_payment)
+
+		if amount < 0:
+			frappe.throw(_('No excess amount pending for refund'))
+
+	refund_jv = get_payment_entry(loan_details, {
+		"party_type": loan_details.applicant_type,
+		"party_account": loan_details.loan_account,
+		"amount_field_party": 'debit_in_account_currency',
+		"amount_field_bank": 'credit_in_account_currency',
+		"amount": amount,
+		"bank_account": loan_details.payment_account
+	})
+
+	if reference_number:
+		refund_jv.cheque_no = reference_number
+
+	if reference_date:
+		refund_jv.cheque_date = reference_date
+
+	if submit:
+		refund_jv.submit()
+
+	return refund_jv
