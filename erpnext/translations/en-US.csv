@@ -45,3 +45,6 @@ DocType: Employee,Cheque,Check
 DocType: Cheque Print Template,Cheque Height,Check Height
 DocType: Cheque Print Template,Cheque Width,Check Width
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +135,Wire Transfer,Wire Transfer
+
+Buying,Purchase,
+Stock,Inventory,
