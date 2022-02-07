@@ -122,7 +122,7 @@ class LoanDisbursement(AccountsController):
 		gle_map.append(
 			self.get_gl_dict({
 				"account": loan_details.loan_account,
-				"against": loan_details.payment_account,
+				"against": loan_details.disbursement_account,
 				"debit": self.disbursed_amount,
 				"debit_in_account_currency": self.disbursed_amount,
 				"against_voucher_type": "Loan",
@@ -137,7 +137,7 @@ class LoanDisbursement(AccountsController):
 
 		gle_map.append(
 			self.get_gl_dict({
-				"account": loan_details.payment_account,
+				"account": loan_details.disbursement_account,
 				"against": loan_details.loan_account,
 				"credit": self.disbursed_amount,
 				"credit_in_account_currency": self.disbursed_amount,
