@@ -342,15 +342,9 @@ erpnext.patches.v13_0.disable_ksa_print_format_for_others # 16-12-2021
 erpnext.patches.v13_0.update_tax_category_for_rcm
 erpnext.patches.v13_0.convert_to_website_item_in_item_card_group_template
 erpnext.patches.v13_0.agriculture_deprecation_warning
-<<<<<<< HEAD
 erpnext.patches.v13_0.update_maintenance_schedule_field_in_visit
 erpnext.patches.v13_0.hospitality_deprecation_warning
 erpnext.patches.v13_0.delete_bank_reconciliation_detail
 erpnext.patches.v13_0.update_sane_transfer_against
 erpnext.patches.v13_0.enable_provisional_accounting
-
-=======
-erpnext.patches.v14_0.delete_agriculture_doctypes
-erpnext.patches.v13_0.update_exchange_rate_settings
 erpnext.patches.v13_0.update_disbursement_account
->>>>>>> c68c70f8bc (feat: Refund entry against loans)
