@@ -428,7 +428,12 @@ def is_earned_leave_already_allocated(allocation, annual_allocation):
 	leaves_for_passed_months = assignment.get_leaves_for_passed_months(allocation.leave_type,
 		annual_allocation, leave_type_details, date_of_joining)
 
-	if allocation.total_leaves_allocated >= leaves_for_passed_months:
+	# exclude carry-forwarded leaves while checking for leave allocation for passed months
+	num_allocations = allocation.total_leaves_allocated
+	if allocation.unused_leaves:
+		num_allocations -= allocation.unused_leaves
+
+	if num_allocations >= leaves_for_passed_months:
 		return True
 	return False
 
