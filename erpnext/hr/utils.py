@@ -377,10 +377,10 @@ def allocate_earned_leaves(ignore_duplicates=False):
 
 			from_date=allocation.from_date
 
-			if e_leave_type.based_on_date_of_joining_date:
+			if e_leave_type.based_on_date_of_joining:
 				from_date  = frappe.db.get_value("Employee", allocation.employee, "date_of_joining")
 
-			if check_effective_date(from_date, today, e_leave_type.earned_leave_frequency, e_leave_type.based_on_date_of_joining_date):
+			if check_effective_date(from_date, today, e_leave_type.earned_leave_frequency, e_leave_type.based_on_date_of_joining):
 				update_previous_leave_allocation(allocation, annual_allocation, e_leave_type, ignore_duplicates)
 
 def update_previous_leave_allocation(allocation, annual_allocation, e_leave_type, ignore_duplicates=False):
@@ -421,10 +421,13 @@ def is_earned_leave_already_allocated(allocation, annual_allocation):
 		get_leave_type_details,
 	)
 
+	assignment = frappe.get_doc("Leave Policy Assignment", allocation.leave_policy_assignment)
+	if assignment.assignment_based_on == "Joining Date":
+		return False
+
 	leave_type_details = get_leave_type_details()
 	date_of_joining = frappe.db.get_value("Employee", allocation.employee, "date_of_joining")
 
-	assignment = frappe.get_doc("Leave Policy Assignment", allocation.leave_policy_assignment)
 	leaves_for_passed_months = assignment.get_leaves_for_passed_months(allocation.leave_type,
 		annual_allocation, leave_type_details, date_of_joining)
 
@@ -459,7 +462,7 @@ def create_additional_leave_ledger_entry(allocation, leaves, date):
 	allocation.unused_leaves = 0
 	allocation.create_leave_ledger_entry()
 
-def check_effective_date(from_date, to_date, frequency, based_on_date_of_joining_date):
+def check_effective_date(from_date, to_date, frequency, based_on_date_of_joining):
 	import calendar
 
 	from dateutil import relativedelta
@@ -470,7 +473,7 @@ def check_effective_date(from_date, to_date, frequency, based_on_date_of_joining
 	#last day of month
 	last_day =  calendar.monthrange(to_date.year, to_date.month)[1]
 
-	if (from_date.day == to_date.day and based_on_date_of_joining_date) or (not based_on_date_of_joining_date and to_date.day == last_day):
+	if (from_date.day == to_date.day and based_on_date_of_joining) or (not based_on_date_of_joining and to_date.day == last_day):
 		if frequency == "Monthly":
 			return True
 		elif frequency == "Quarterly" and rd.months % 3:
