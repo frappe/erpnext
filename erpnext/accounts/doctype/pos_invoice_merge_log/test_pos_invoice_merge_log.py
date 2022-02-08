@@ -158,6 +158,7 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 		Round off error in consolidated invoice creation if POS Invoice has inclusive tax
 		'''
 		frappe.db.sql("delete from `tabPOS Invoice`")
+		frappe.db.set_value('Stock Settings', None, 'allow_negative_stock', 1)
 
 		try:
 			init_user_and_profile()
@@ -205,12 +206,14 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			frappe.set_user("Administrator")
 			frappe.db.sql("delete from `tabPOS Profile`")
 			frappe.db.sql("delete from `tabPOS Invoice`")
+			frappe.db.set_value('Stock Settings', None, 'allow_negative_stock', 0)
 
 	def test_consolidation_round_off_error_2(self):
 		'''
 		Test the same case as above but with an Unpaid POS Invoice
 		'''
 		frappe.db.sql("delete from `tabPOS Invoice`")
+		frappe.db.set_value('Stock Settings', None, 'allow_negative_stock', 1)
 
 		try:
 			init_user_and_profile()
@@ -265,3 +268,4 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			frappe.set_user("Administrator")
 			frappe.db.sql("delete from `tabPOS Profile`")
 			frappe.db.sql("delete from `tabPOS Invoice`")
+			frappe.db.set_value('Stock Settings', None, 'allow_negative_stock', 0)
