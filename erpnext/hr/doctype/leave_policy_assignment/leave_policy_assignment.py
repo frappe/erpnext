@@ -9,6 +9,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.utils import date_diff, flt, formatdate, get_datetime, get_last_day, getdate
+from six import string_types
 
 
 class LeavePolicyAssignment(Document):
