@@ -13,62 +13,60 @@ def get_columns():
 			"fieldname": "name",
 			"fieldtype": "Link",
 			"options": "Sales Order",
-			"read_only": 1,
 		},
 		{
-			"label": _("Submitted"),
+			"label": _("Posting Date"),
 			"fieldname": "submitted",
 			"fieldtype": "Date",
-			"read_only": 1
 		},
 		{
 			"label": _("Payment Term"),
 			"fieldname": "payment_term",
 			"fieldtype": "Data",
-			"read_only": 1
 		},
 		{
 			"label": _("Description"),
 			"fieldname": "description",
 			"fieldtype": "Data",
-			"read_only": 1
 		},
 		{
 			"label": _("Due Date"),
 			"fieldname": "due_date",
 			"fieldtype": "Date",
-			"read_only": 1
 		},
 		{
 			"label": _("Invoice Portion"),
 			"fieldname": "invoice_portion",
 			"fieldtype": "Percent",
-			"read_only": 1,
 		},
 		{
 			"label": _("Payment Amount"),
 			"fieldname": "payment_amount",
 			"fieldtype": "Currency",
-			"read_only": 1,
+			"options": "currency",
 		},
 		{
 			"label": _("Paid Amount"),
 			"fieldname": "paid_amount",
 			"fieldtype": "Currency",
-			"read_only": 1
+			"options": "currency",
 		},
 		{
 			"label": _("Invoices"),
 			"fieldname": "invoices",
 			"fieldtype": "Link",
 			"options": "Sales Invoice",
-			"read_only": 1,
 		},
 		{
 			"label": _("Status"),
 			"fieldname": "status",
 			"fieldtype": "Data",
-			"read_only": 1
+		},
+		{
+			"label": _("Currency"),
+			"fieldname": "currency",
+			"fieldtype": "Currency",
+			"hidden": 1
 		}
 	]
 	return columns
@@ -152,12 +150,13 @@ def get_so_with_invoices(filters):
 	return sorders, invoices
 
 
-def set_payment_terms_statuses(sales_orders, invoices):
+def set_payment_terms_statuses(sales_orders, invoices, filters):
 	"""
 	compute status for payment terms with associated sales invoice using FIFO
 	"""
 
 	for so in sales_orders:
+		so.currency = frappe.get_cached_value('Company', filters.get('company'), 'default_currency')
 		for inv in [x for x in invoices if x.sales_order == so.name and x.invoice_amount > 0]:
 			if so.payment_amount - so.paid_amount > 0:
 				amount = so.payment_amount - so.paid_amount
@@ -200,7 +199,7 @@ def prepare_chart(s_orders):
 def execute(filters=None):
 	columns = get_columns()
 	sales_orders, so_invoices = get_so_with_invoices(filters)
-	sales_orders, so_invoices = set_payment_terms_statuses(sales_orders, so_invoices)
+	sales_orders, so_invoices = set_payment_terms_statuses(sales_orders, so_invoices, filters)
 
 	prepare_chart(sales_orders)
 
