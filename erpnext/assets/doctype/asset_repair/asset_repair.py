@@ -272,7 +272,7 @@ def get_valuation_rate(item_code, warehouse):
 	)
 
 	if last_valuation_rate:
-		return last_valuation_rate
+		return last_valuation_rate[0]
 	else:
 		valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate")
 

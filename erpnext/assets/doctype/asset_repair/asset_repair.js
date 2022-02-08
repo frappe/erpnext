@@ -79,7 +79,7 @@ frappe.ui.form.on('Asset Repair Consumed Item', {
 			},
 			callback: function(r) {
 				if(r.message) {
-					frappe.model.set_value(cdt, cdn, 'valuation_rate', r.message[0]);
+					frappe.model.set_value(cdt, cdn, 'valuation_rate', r.message);
 				}
 			}
 		});
