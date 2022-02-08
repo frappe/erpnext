@@ -288,9 +288,6 @@ class PurchaseReceipt(BuyingController):
 						{"voucher_type": "Purchase Receipt", "voucher_no": self.name,
 						"voucher_detail_no": d.name, "warehouse": d.warehouse, "is_cancelled": 0}, "stock_value_difference")
 
-					if not stock_value_diff:
-						continue
-
 					warehouse_account_name = warehouse_account[d.warehouse]["account"]
 					warehouse_account_currency = warehouse_account[d.warehouse]["account_currency"]
 					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get("account")
