@@ -52,7 +52,7 @@ class Bin(Document):
 						& (wo_item.parent == wo.name)
 						& (wo.docstatus == 1)
 						& (wo_item.source_warehouse == self.warehouse)
-						& (wo.status.notin(["Stopped", "Completed"]))
+						& (wo.status.notin(["Stopped", "Completed", "Closed"]))
 						& ((wo_item.required_qty > wo_item.transferred_qty)
 							| (wo_item.required_qty > wo_item.consumed_qty))
 					)
