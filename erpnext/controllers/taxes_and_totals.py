@@ -106,6 +106,9 @@ class calculate_taxes_and_totals(object):
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)
 
 	def calculate_item_values(self):
+		if self.doc.get('is_consolidated'):
+			return
+
 		if not self.discount_amount_applied:
 			for item in self.doc.get("items"):
 				self.doc.round_floats_in(item)
