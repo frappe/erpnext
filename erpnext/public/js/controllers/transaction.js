@@ -2288,7 +2288,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				() => this.frm.doc.ignore_pricing_rule=1,
 				() => me.ignore_pricing_rule(),
 				() => this.frm.doc.ignore_pricing_rule=0,
-				() => me.apply_pricing_rule()
+				() => me.apply_pricing_rule(),
+				() => this.frm.save()
 			]);
 		} else {
 			frappe.run_serially([
