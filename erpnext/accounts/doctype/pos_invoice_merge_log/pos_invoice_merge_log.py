@@ -96,7 +96,6 @@ class POSInvoiceMergeLog(Document):
 		pos_invoice_grand_total = sum(d.grand_total for d in data)
 
 		if abs(pos_invoice_grand_total - invoice.grand_total) < 1:
-
 			invoice.write_off_amount += -1 * (pos_invoice_grand_total - invoice.grand_total)
 			invoice.save()
 
