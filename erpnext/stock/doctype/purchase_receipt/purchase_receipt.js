@@ -315,47 +315,49 @@ frappe.ui.form.on("Purchase Receipt", "is_subcontracted", function(frm) {
 });
 
 frappe.ui.form.on("Purchase Receipt", {
-	after_save(frm) {
-		frappe.db.get_value('Supplier', frm.doc.supplier, 'allow_purchase_receipt_creation_without_purchase_order', (r) => {
-			if(frm.doc.docstatus || r.allow_purchase_receipt_creation_without_purchase_order) return;
-			frm.doc.items.some((row) => {
-				if (!row.purchase_order) {
-					let settings_change_dialog = erpnext.utils.get_dialog_message(
-						'Purchase Receipt', 'Purchase Order', 'Buying', false, frm.doc.supplier);
-					let d = new frappe.ui.Dialog({
-						title: 'Suggestion',
-						indicator: 'blue',
-						fields: [
-							{
-								fieldtype: 'HTML',
-								options: `<p class="frappe-confirm-message">\
-								${__("We recommend creating a Purchase Receipt against a Purchase Order as an ideal practice.")}\
-								<br><br>${__("Do you want to create a Purchase Order?")}</p>`
-							}
-						],
-						primary_action_label: 'Yes',
-						primary_action() {
-							frm.events.make_po();
-							d.hide();
+	supplier(frm) {
+		if (!frm.doc.supplier) {
+			return
+		}
+		frappe.call({
+			method: "erpnext.accounts.utils.check_open_pos",
+			args: {
+				supplier: frm.doc.supplier,
+				doctype: "Purchase Receipt"
+			},
+			callback: function(r) {
+				if (!r.message) {
+					frappe.call({
+						method: "erpnext.accounts.utils.check_permissions_so_po_required",
+						args: {
+							doctype: "Purchase Order",
+							module_settings: "Buying Settings"
 						},
-						secondary_action_label: 'No',
-						secondary_action() {
-							d.hide();
-							frappe.db.set_value(
-								'Supplier', frm.doc.supplier, 'allow_purchase_receipt_creation_without_purchase_order', 1);
-							settings_change_dialog.show();
-						},
-					});
-					settings_change_dialog.$body.find('.settings-message').find('a.customer_supplier').click(() => {
-						frappe.set_route('Form', 'Supplier', frm.doc.supplier)
+						callback: function(r) {
+							let msg_dialog = frappe.msgprint({
+								message: __('Purchase Order is required to create a Purchase Receipt'),
+								indicator: 'red',
+								primary_action: {
+									action: () => {
+										erpnext.route_to_new_purchase_order({
+											"customer": frm.doc.supplier,
+											"perm": r.message.perm_so_po
+										})
+									},
+									label: __("Create Purchase Order"),
+								},
+								custom_action: {
+									action: () => {
+										msg_dialog.hide();
+										erpnext.change_buying_setting_po_required({"perm": r.message.perm_setting});
+									},
+									label: __("Change this setting"),
+								},
+							});
+						}
 					})
-					settings_change_dialog.$body.find('.settings-message').find('a.settings').click(() => {
-						frappe.set_route('Form', 'Buying Settings')
-					})
-					d.show();
-					return
 				}
-			});
+			}
 		});
 	},
 

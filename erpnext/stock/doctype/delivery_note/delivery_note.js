@@ -121,7 +121,8 @@ frappe.ui.form.on("Delivery Note", {
 		frappe.call({
 			method: "erpnext.accounts.utils.check_open_sos",
 			args: {
-				customer: frm.doc.customer
+				customer: frm.doc.customer,
+				doctype: "Delivery Note"
 			},
 			callback: function(r) {
 				if (!r.message) {

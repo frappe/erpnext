@@ -154,7 +154,22 @@ class PurchaseReceipt(BuyingController):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
 			for d in self.get('items'):
 				if not d.purchase_order:
-					frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
+					msg = _("Purchase Order number required for Item {0}").format(d.item_code)
+					from erpnext.accounts.utils import (
+						check_permissions_so_po_required,
+						so_required_settings_message,
+					)
+					perms = check_permissions_so_po_required('Purchase Order', 'Buying Settings')
+					so_required_settings_message(msg, primary_action={
+						'label': _('Create Purchase Order'),
+						'client_action': 'erpnext.route_to_new_purchase_order',
+						'args': {"supplier": self.supplier, "perm": perms['perm_so_po']}
+					},
+					custom_action={
+						'label': _('Change this setting'),
+						'client_action': 'erpnext.change_buying_setting_po_required',
+						'args': {"perm": perms['perm_setting']}
+					})
 
 	def get_already_received_qty(self, po, po_detail):
 		qty = frappe.db.sql("""select sum(qty) from `tabPurchase Receipt Item`

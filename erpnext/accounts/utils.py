@@ -1122,8 +1122,7 @@ def so_required_settings_message(msg, primary_action, custom_action):
 
 @frappe.whitelist()
 def check_open_sos(customer, doctype=None):
-	print(doctype)
-	if doctype == 'Sales Invoice':
+	if doctype == 'Sales Invoice' and frappe.db.get_value('Customer', customer, 'so_required'):
 		return True
 	if frappe.db.get_all('Sales Order', filters={
 		'customer': customer,
@@ -1131,10 +1130,39 @@ def check_open_sos(customer, doctype=None):
 		'status': 'To Deliver and Bill'}):
 		return True
 
-	elif frappe.db.get_all('Sales Order', filters={
+	elif doctype == 'Sales Invoice' and frappe.db.get_all('Sales Order', filters={
 		'customer': customer,
 		'docstatus': 1,
 		'status': 'To Bill'}):
+		return True
+
+	elif doctype == 'Delivery Note' and frappe.db.get_all('Sales Order', filters={
+		'customer': customer,
+		'docstatus': 1,
+		'status': 'To Receive'}):
+		return True
+
+@frappe.whitelist()
+def check_open_pos(supplier, doctype=None):
+	if doctype == 'Purchase Invoice' and frappe.db.get_value(
+		'Supplier', supplier, 'allow_purchase_invoice_creation_without_purchase_order'):
+		return True
+	if frappe.db.get_all('Purchase Order', filters={
+		'supplier': supplier,
+		'docstatus': 1,
+		'status': 'To Receive and Bill'}):
+		return True
+
+	elif doctype == 'Purchase Invoice' and frappe.db.get_all('Purchase Order', filters={
+		'supplier': supplier,
+		'docstatus': 1,
+		'status': 'To Bill'}):
+		return True
+
+	elif doctype == 'Purchase Receipt' and frappe.db.get_all('Purchase Order', filters={
+		'supplier': supplier,
+		'docstatus': 1,
+		'status': 'To Receive'}):
 		return True
 
 @frappe.whitelist()
