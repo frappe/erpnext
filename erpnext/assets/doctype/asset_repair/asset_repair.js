@@ -68,6 +68,23 @@ frappe.ui.form.on('Asset Repair', {
 });
 
 frappe.ui.form.on('Asset Repair Consumed Item', {
+	item_code: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+
+		frappe.call ({
+			method: "erpnext.assets.doctype.asset_repair.asset_repair.get_valuation_rate",
+			args: {
+				"item_code": row.item_code,
+				"warehouse": frm.doc.warehouse
+			},
+			callback: function(r) {
+				if(r.message) {
+					frappe.model.set_value(cdt, cdn, 'valuation_rate', r.message[0]);
+				}
+			}
+		});
+	},
+
 	consumed_quantity: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, 'total_value', row.consumed_quantity * row.valuation_rate);

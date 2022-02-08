@@ -256,3 +256,36 @@ class AssetRepair(AccountsController):
 def get_downtime(failure_date, completion_date):
 	downtime = time_diff_in_hours(completion_date, failure_date)
 	return round(downtime, 2)
+
+@frappe.whitelist()
+def get_valuation_rate(item_code, warehouse):
+	last_valuation_rate = frappe.get_all(
+		"Stock Ledger Entry",
+		filters = {
+			"item_code": item_code,
+			"warehouse": warehouse,
+			"valuation_rate": [">=", 0],
+			"docstatus": ["<", 2]
+		},
+		pluck = "valuation_rate",
+		order_by = "posting_date desc, posting_time desc, name desc"
+	)
+
+	if last_valuation_rate:
+		return last_valuation_rate
+	else:
+		valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate")
+
+		if not valuation_rate:
+			# try Item Standard rate
+			valuation_rate = frappe.db.get_value("Item", item_code, "standard_rate")
+
+			if not valuation_rate:
+				# try in price list
+				valuation_rate = frappe.db.get_value(
+					"Item Price",
+					dict(item_code=item_code, buying=1),
+					"price_list_rate"
+				)
+
+		return valuation_rate
