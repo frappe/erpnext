@@ -346,7 +346,7 @@ class LoanRepayment(AccountsController):
 			gle_map.append(
 				self.get_gl_dict({
 					"account": loan_details.penalty_income_account,
-					"against": payment_account,
+					"against": loan_details.loan_account,
 					"credit": self.total_penalty_paid,
 					"credit_in_account_currency": self.total_penalty_paid,
 					"against_voucher_type": "Loan",
@@ -368,7 +368,9 @@ class LoanRepayment(AccountsController):
 				"against_voucher": self.against_loan,
 				"remarks": remarks,
 				"cost_center": self.cost_center,
-				"posting_date": getdate(self.posting_date)
+				"posting_date": getdate(self.posting_date),
+				"party_type": loan_details.applicant_type if self.repay_from_salary else '',
+				"party": loan_details.applicant if self.repay_from_salary else ''
 			})
 		)
 
