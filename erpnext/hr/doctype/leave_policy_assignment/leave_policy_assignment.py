@@ -8,12 +8,7 @@ from math import ceil
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-<<<<<<< HEAD
-from frappe.utils import date_diff, flt, formatdate, get_datetime, getdate
-from six import string_types
-=======
 from frappe.utils import date_diff, flt, formatdate, get_datetime, get_last_day, getdate
->>>>>>> 25c7f850b1 (fix: earned leaves not allocated if assignment is created on month-end)
 
 
 class LeavePolicyAssignment(Document):
