@@ -138,4 +138,7 @@ def build_cache(item_code):
 def enqueue_build_cache(item_code):
 	if frappe.cache().hget('item_cache_build_in_progress', item_code):
 		return
-	frappe.enqueue(build_cache, item_code=item_code, queue='long')
+	frappe.enqueue(
+		"erpnext.e_commerce.variant_selector.item_variants_cache.build_cache",
+		item_code=item_code, queue='long'
+	)
