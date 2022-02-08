@@ -3,6 +3,7 @@
 
 {% include 'erpnext/selling/sales_common.js' %};
 frappe.provide("erpnext.accounts");
+frappe.provide("website")
 
 
 erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends erpnext.selling.SellingController {
@@ -1023,46 +1024,49 @@ frappe.ui.form.on('Sales Invoice', {
 		});
 	},
 
-	after_save(frm) {
-		frappe.db.get_value('Customer', frm.doc.customer, 'so_required', (r) => {
-			if (frm.doc.docstatus || r.so_required) return;
-			frm.doc.items.some((row) => {
-				if (!row.sales_order) {
-					let settings_change_dialog = erpnext.utils.get_dialog_message(
-							'Sales Invoice', 'Sales Order', 'Selling', frm.doc.customer, false)	;
-					let d = new frappe.ui.Dialog({
-						title: 'Suggestion',
-						indicator: 'blue',
-						fields: [
-							{
-								fieldtype: 'HTML',
-								options: `<p class="frappe-confirm-message">\
-								${__("We recommend creating an invoice against a Sales Order as an ideal practice.")}\
-								<br><br>${__("Do you want to create a Sales Order?")}</p>`
-							}
-						],
-						primary_action_label: 'Yes',
-						primary_action() {
-							frm.events.make_so();
-							d.hide();
+	customer(frm) {
+		if (!frm.doc.customer) {
+			return
+		}
+		frappe.call({
+			method: "erpnext.accounts.utils.check_open_sos",
+			args: {
+				customer: frm.doc.customer,
+				doctype: "Sales Invoice"
+			},
+			callback: function(r) {
+				if (!r.message) {
+					frappe.call({
+						method: "erpnext.accounts.utils.check_permissions_so_po_required",
+						args: {
+							doctype: "Sales Order",
+							module_settings: "Selling Settings"
 						},
-						secondary_action_label: 'No',
-						secondary_action() {
-							d.hide();
-							frappe.db.set_value('Customer', frm.doc.customer, 'so_required', 1);
-							settings_change_dialog.show();
-						},
-					});
-					settings_change_dialog.$body.find('.settings-message').find('a.customer_supplier').click(() => {
-						frappe.set_route('Form', 'Customer', frm.doc.customer)
+						callback: function(r) {
+							let msg_dialog = frappe.msgprint({
+								message: __('Sales Order is required to create a Sales Invoice'),
+								indicator: 'red',
+								primary_action: {
+									action: () => {
+										erpnext.route_to_new_sales_order({
+											"customer": frm.doc.customer,
+											"perm": r.message.perm_so_po
+										})
+									},
+									label: __("Create Sales Order"),
+								},
+								custom_action: {
+									action: () => {
+										msg_dialog.hide();
+										erpnext.change_selling_setting_so_required({"perm": r.message.perm_setting});
+									},
+									label: __("Change this setting"),
+								},
+							});
+						}
 					})
-					settings_change_dialog.$body.find('.settings-message').find('a.settings').click(() => {
-						frappe.set_route('Form', 'Selling Settings')
-					})
-					d.show();
-					return
 				}
-			});
+			}
 		});
 	},
 

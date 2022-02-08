@@ -114,46 +114,45 @@ frappe.ui.form.on("Delivery Note", {
 		}
 	},
 
-	after_save(frm) {
-		frappe.db.get_value('Customer', frm.doc.customer, 'so_required_dn', (r) => {
-			if(frm.doc.docstatus || r.so_required_dn) return;
-			frm.doc.items.some((row) => {
-				if (!row.against_sales_order) {
-					let settings_change_dialog = erpnext.utils.get_dialog_message(
-						'Delivery Note', 'Sales Order', 'Selling', frm.doc.customer, false);
-					let d = new frappe.ui.Dialog({
-						title: 'Suggestion',
-						indicator: 'blue',
-						fields: [
-							{
-								fieldtype: 'HTML',
-								options: `<p class="frappe-confirm-message">\
-								${__("We recommend creating a Delivery Note against a Sales Order as an ideal practice.")}\
-								<br><br>${__("Do you want to create a Sales Order?")}</p>`
-							}
-						],
-						primary_action_label: 'Yes',
-						primary_action() {
-							frm.events.make_so_dn();
-							d.hide();
+	customer(frm) {
+		if (!frm.doc.customer) {
+			return
+		}
+		frappe.call({
+			method: "erpnext.accounts.utils.check_open_sos",
+			args: {
+				customer: frm.doc.customer
+			},
+			callback: function(r) {
+				if (!r.message) {
+					frappe.call({
+						method: "erpnext.accounts.utils.check_permissions_so_po_required",
+						args: {
+							doctype: "Sales Order",
+							module_settings: "Selling Settings"
 						},
-						secondary_action_label: 'No',
-						secondary_action() {
-							d.hide();
-							frappe.db.set_value('Customer', frm.doc.customer, 'so_required_dn', 1);
-							settings_change_dialog.show();
-						},
-					});
-					settings_change_dialog.$body.find('.settings-message').find('a.customer_supplier').click(() => {
-						frappe.set_route('Form', 'Customer', frm.doc.customer)
+						callback: function(r) {
+							let msg_dialog = frappe.msgprint({
+								message: __('Sales Order is required to create a Sales Invoice'),
+								indicator: 'red',
+								primary_action: {
+									action: () => {
+										erpnext.route_to_new_sales_order({"customer": frm.doc.customer, "perm": r.message.perm_so_po})
+									},
+									label: __("Create Sales Order"),
+								},
+								custom_action: {
+									action: () => {
+										msg_dialog.hide();
+										erpnext.change_selling_setting_so_required({"perm": r.message.perm_setting});
+									},
+									label: __("Change this setting"),
+								},
+							});
+						}
 					})
-					settings_change_dialog.$body.find('.settings-message').find('a.settings').click(() => {
-						frappe.set_route('Form', 'Selling Settings')
-					})
-					d.show();
-					return
 				}
-			});
+			}
 		});
 	},
 

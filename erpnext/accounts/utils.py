@@ -6,7 +6,7 @@ from json import loads
 
 import frappe
 import frappe.defaults
-from frappe import _, throw
+from frappe import _, msgprint, throw
 from frappe.model.meta import get_field_precision
 from frappe.utils import cint, cstr, flt, formatdate, get_number_format_info, getdate, now, nowdate
 
@@ -1116,3 +1116,36 @@ def check_and_delete_linked_reports(report):
 	if icons:
 		for icon in icons:
 			frappe.delete_doc("Desktop Icon", icon)
+
+def so_required_settings_message(msg, primary_action, custom_action):
+	msgprint(msg, primary_action=primary_action, custom_action=custom_action, raise_exception=1)
+
+@frappe.whitelist()
+def check_open_sos(customer, doctype=None):
+	print(doctype)
+	if doctype == 'Sales Invoice':
+		return True
+	if frappe.db.get_all('Sales Order', filters={
+		'customer': customer,
+		'docstatus': 1,
+		'status': 'To Deliver and Bill'}):
+		return True
+
+	elif frappe.db.get_all('Sales Order', filters={
+		'customer': customer,
+		'docstatus': 1,
+		'status': 'To Bill'}):
+		return True
+
+@frappe.whitelist()
+def check_permissions_so_po_required(doctype, module_settings):
+	perm_setting, perm_so_po = True, True
+	if not frappe.has_permission(module_settings, "write"):
+		perm_setting = False
+	if not frappe.has_permission(doctype, "create"):
+		perm_so_po = False
+	return {"perm_setting": perm_setting, "perm_so_po": perm_so_po}
+
+
+
+

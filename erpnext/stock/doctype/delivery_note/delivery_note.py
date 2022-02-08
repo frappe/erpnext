@@ -114,7 +114,22 @@ class DeliveryNote(SellingController):
 		if frappe.db.get_value("Selling Settings", None, 'so_required') == 'Yes':
 			for d in self.get('items'):
 				if not d.against_sales_order:
-					frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
+					from erpnext.accounts.utils import (
+						check_permissions_so_po_required,
+						so_required_settings_message,
+					)
+					perms = check_permissions_so_po_required('Sales Order', 'Selling Settings')
+					msg = _("Sales Order required for Item {0}").format(d.item_code)
+					so_required_settings_message(msg, primary_action={
+						'label': _('Create Sales Order'),
+						'client_action': 'erpnext.route_to_new_sales_order',
+						'args': {"customer": self.customer, "perm": perms['perm_so_po']}
+					},
+					custom_action={
+						'label': _('Change this setting'),
+						'client_action': 'erpnext.change_selling_setting_so_required',
+						'args': {"perm": perms['perm_setting']}
+					})
 
 	def validate(self):
 		self.validate_posting_time()

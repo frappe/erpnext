@@ -97,6 +97,23 @@ $.extend(erpnext, {
 				cur_frm.save();
 			}
 		});
+	},
+	route_to_new_sales_order: (args) => {
+		if (!args.perm) {
+			frappe.throw(__("Not permitted"), frappe.PermissionError)
+		}
+		frappe.new_doc('Sales Order', {'customer':args.customer});
+	},
+	change_selling_setting_so_required: (args) => {
+		if (!args.perm) {
+			frappe.throw(__("Not permitted"), frappe.PermissionError)
+		}
+		frappe.db.set_value('Selling Settings', 'Selling Settings', 'so_required', "Yes").then((r) => {
+			if(!r.exc && r.message) {
+				frappe.msgprint(__('Sales Order is not required to create Sales Invoice & Delivery Note.'),
+					title=__('Settings Updated'));
+			}
+		});
 	}
 });
 
