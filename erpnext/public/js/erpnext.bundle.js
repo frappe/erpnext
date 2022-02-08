@@ -22,5 +22,6 @@ import "./call_popup/call_popup";
 import "./utils/dimension_tree_filter";
 import "./telephony";
 import "./templates/call_link.html";
+import "./bulk_transaction_processing";
 
 // import { sum } from 'frappe/public/utils/util.js'

@@ -385,6 +385,61 @@ class TestProductionPlan(ERPNextTestCase):
 		# lowest most level of subassembly should be first
 		self.assertIn("SuperSecret", plan.sub_assembly_items[0].production_item)
 
+	def test_multiple_work_order_for_production_plan_item(self):
+		def create_work_order(item, pln, qty):
+			# Get Production Items
+			items_data = pln.get_production_items()
+
+			# Update qty
+			items_data[(item, None, None)]["qty"] = qty
+
+			# Create and Submit Work Order for each item in items_data
+			for key, item in items_data.items():
+				if pln.sub_assembly_items:
+					item['use_multi_level_bom'] = 0
+
+				wo_name = pln.create_work_order(item)
+				wo_doc = frappe.get_doc("Work Order", wo_name)
+				wo_doc.update({
+					'wip_warehouse': 'Work In Progress - _TC',
+					'fg_warehouse': 'Finished Goods - _TC'
+				})
+				wo_doc.submit()
+				wo_list.append(wo_name)
+
+		item = "Test Production Item 1"
+		raw_materials = ["Raw Material Item 1", "Raw Material Item 2"]
+
+		# Create BOM
+		bom = make_bom(item=item, raw_materials=raw_materials)
+
+		# Create Production Plan
+		pln = create_production_plan(item_code=bom.item, planned_qty=10)
+
+		# All the created Work Orders
+		wo_list = []
+
+		# Create and Submit 1st Work Order for 5 qty
+		create_work_order(item, pln, 5)
+		pln.reload()
+		self.assertEqual(pln.po_items[0].ordered_qty, 5)
+
+		# Create and Submit 2nd Work Order for 3 qty
+		create_work_order(item, pln, 3)
+		pln.reload()
+		self.assertEqual(pln.po_items[0].ordered_qty, 8)
+
+		# Cancel 1st Work Order
+		wo1 = frappe.get_doc("Work Order", wo_list[0])
+		wo1.cancel()
+		pln.reload()
+		self.assertEqual(pln.po_items[0].ordered_qty, 3)
+
+		# Cancel 2nd Work Order
+		wo2 = frappe.get_doc("Work Order", wo_list[1])
+		wo2.cancel()
+		pln.reload()
+		self.assertEqual(pln.po_items[0].ordered_qty, 0)
 
 def create_production_plan(**args):
 	args = frappe._dict(args)
