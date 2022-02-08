@@ -28,8 +28,23 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 
 class ProductionPlan(Document):
 	def validate(self):
+		self.set_pending_qty_in_row_without_reference()
 		self.calculate_total_planned_qty()
 		self.set_status()
+
+	def set_pending_qty_in_row_without_reference(self):
+		"Set Pending Qty in independent rows (not from SO or MR)."
+		if self.docstatus > 0: # set only to initialise value before submit
+			return
+
+		for item in self.po_items:
+			if not item.get("sales_order") or not item.get("material_request"):
+				item.pending_qty = item.planned_qty
+
+	def calculate_total_planned_qty(self):
+		self.total_planned_qty = 0
+		for d in self.po_items:
+			self.total_planned_qty += flt(d.planned_qty)
 
 	def validate_data(self):
 		for d in self.get('po_items'):
@@ -262,11 +277,6 @@ class ProductionPlan(Document):
 						'sales_order_item': so_detail['sales_order_item'],
 						'qty': so_detail['qty']
 				})
-
-	def calculate_total_planned_qty(self):
-		self.total_planned_qty = 0
-		for d in self.po_items:
-			self.total_planned_qty += flt(d.planned_qty)
 
 	def calculate_total_produced_qty(self):
 		self.total_produced_qty = 0
