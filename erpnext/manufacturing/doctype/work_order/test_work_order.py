@@ -700,7 +700,8 @@ class TestWorkOrder(ERPNextTestCase):
 		wo = make_wo_order_test_record(item=item_name, qty=1, source_warehouse=source_warehouse,
 			company=company)
 
-		self.assertRaises(frappe.ValidationError, make_stock_entry, wo.name, 'Material Transfer for Manufacture')
+		stock_entry = frappe.get_doc(make_stock_entry(wo.name, 'Material Transfer for Manufacture'))
+		self.assertRaises(frappe.ValidationError, stock_entry.save)
 
 	def test_wo_completion_with_pl_bom(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import (
