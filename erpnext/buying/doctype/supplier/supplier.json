@@ -27,7 +27,6 @@
   "supplier_type",
   "allow_purchase_invoice_creation_without_purchase_order",
   "allow_purchase_invoice_creation_without_purchase_receipt",
-  "allow_purchase_receipt_creation_without_purchase_order",
   "disabled",
   "warn_rfqs",
   "warn_pos",
@@ -421,12 +420,6 @@
    "fieldtype": "Link",
    "label": "Supplier Primary Address",
    "options": "Address"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_purchase_receipt_creation_without_purchase_order",
-   "fieldtype": "Check",
-   "label": "Allow Purchase Receipt Creation Without Purchase Order"
   }
  ],
  "icon": "fa fa-user",
@@ -439,7 +432,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-01-31 11:03:47.281910",
+ "modified": "2022-02-08 16:30:10.740245",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

@@ -29,7 +29,6 @@
   "tax_category",
   "so_required",
   "dn_required",
-  "so_required_dn",
   "disabled",
   "is_internal_customer",
   "represents_company",
@@ -499,12 +498,6 @@
    "no_copy": 1,
    "options": "Opportunity",
    "print_hide": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "so_required_dn",
-   "fieldtype": "Check",
-   "label": "Allow Delivery Note Creation Without Sales Order"
   }
  ],
  "icon": "fa fa-user",
@@ -518,7 +511,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-01-28 16:19:01.836369",
+ "modified": "2022-02-08 16:27:30.828757",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
