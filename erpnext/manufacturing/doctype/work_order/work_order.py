@@ -630,6 +630,18 @@ class WorkOrder(Document):
 	def validate_qty(self):
 		if not self.qty > 0:
 			frappe.throw(_("Quantity to Manufacture must be greater than 0."))
+		
+		if self.production_plan and self.production_plan_item:
+			qty_dict = frappe.db.get_value("Production Plan Item", self.production_plan_item, ["planned_qty", "ordered_qty"], as_dict=1)
+
+			allowance_qty =flt(frappe.db.get_single_value("Manufacturing Settings",
+			"overproduction_percentage_for_work_order"))/100 * qty_dict.get("planned_qty", 0)
+
+			max_qty = qty_dict.get("planned_qty", 0) + allowance_qty - qty_dict.get("ordered_qty", 0)
+
+			if self.qty > max_qty:
+				frappe.throw(_("Cannot produce more than {0} items for {1}")
+				.format(max_qty, self.production_item), OverProductionError)
 
 	def validate_transfer_against(self):
 		if not self.docstatus == 1:
