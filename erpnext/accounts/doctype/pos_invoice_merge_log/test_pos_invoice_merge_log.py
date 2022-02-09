@@ -12,6 +12,7 @@ from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_inv
 from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 	consolidate_pos_invoices,
 )
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
 class TestPOSInvoiceMergeLog(unittest.TestCase):
@@ -146,6 +147,135 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			tax_rate2, amount2 = item_wise_tax_detail.get('_Test Item 2')
 			self.assertEqual(tax_rate2, 5)
 			self.assertEqual(amount2, 5)
+		finally:
+			frappe.set_user("Administrator")
+			frappe.db.sql("delete from `tabPOS Profile`")
+			frappe.db.sql("delete from `tabPOS Invoice`")
+
+
+	def test_consolidation_round_off_error_1(self):
+		'''
+		Test round off error in consolidated invoice creation if POS Invoice has inclusive tax
+		'''
+
+		frappe.db.sql("delete from `tabPOS Invoice`")
+
+		try:
+			make_stock_entry(
+				to_warehouse="_Test Warehouse - _TC",
+				item_code="_Test Item",
+				rate=8000,
+				qty=10,
+			)
+
+			init_user_and_profile()
+
+			inv = create_pos_invoice(qty=3, rate=10000, do_not_save=True)
+			inv.append("taxes", {
+				"account_head": "_Test Account VAT - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"doctype": "Sales Taxes and Charges",
+				"rate": 7.5,
+				"included_in_print_rate": 1
+			})
+			inv.append('payments', {
+				'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 30000
+			})
+			inv.insert()
+			inv.submit()
+
+			inv2 = create_pos_invoice(qty=3, rate=10000, do_not_save=True)
+			inv2.append("taxes", {
+				"account_head": "_Test Account VAT - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"doctype": "Sales Taxes and Charges",
+				"rate": 7.5,
+				"included_in_print_rate": 1
+			})
+			inv2.append('payments', {
+				'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 30000
+			})
+			inv2.insert()
+			inv2.submit()
+
+			consolidate_pos_invoices()
+
+			inv.load_from_db()
+			consolidated_invoice = frappe.get_doc('Sales Invoice', inv.consolidated_invoice)
+			self.assertEqual(consolidated_invoice.outstanding_amount, 0)
+			self.assertEqual(consolidated_invoice.status, 'Paid')
+
+		finally:
+			frappe.set_user("Administrator")
+			frappe.db.sql("delete from `tabPOS Profile`")
+			frappe.db.sql("delete from `tabPOS Invoice`")
+
+	def test_consolidation_round_off_error_2(self):
+		'''
+		Test the same case as above but with an Unpaid POS Invoice
+		'''
+		frappe.db.sql("delete from `tabPOS Invoice`")
+
+		try:
+			make_stock_entry(
+				to_warehouse="_Test Warehouse - _TC",
+				item_code="_Test Item",
+				rate=8000,
+				qty=10,
+			)
+
+			init_user_and_profile()
+
+			inv = create_pos_invoice(qty=6, rate=10000, do_not_save=True)
+			inv.append("taxes", {
+				"account_head": "_Test Account VAT - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"doctype": "Sales Taxes and Charges",
+				"rate": 7.5,
+				"included_in_print_rate": 1
+			})
+			inv.append('payments', {
+				'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 60000
+			})
+			inv.insert()
+			inv.submit()
+
+			inv2 = create_pos_invoice(qty=6, rate=10000, do_not_save=True)
+			inv2.append("taxes", {
+				"account_head": "_Test Account VAT - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"doctype": "Sales Taxes and Charges",
+				"rate": 7.5,
+				"included_in_print_rate": 1
+			})
+			inv2.append('payments', {
+				'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 60000
+			})
+			inv2.insert()
+			inv2.submit()
+
+			inv3 = create_pos_invoice(qty=3, rate=600, do_not_save=True)
+			inv3.append('payments', {
+				'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 1000
+			})
+			inv3.insert()
+			inv3.submit()
+
+			consolidate_pos_invoices()
+
+			inv.load_from_db()
+			consolidated_invoice = frappe.get_doc('Sales Invoice', inv.consolidated_invoice)
+			self.assertEqual(consolidated_invoice.outstanding_amount, 800)
+			self.assertNotEqual(consolidated_invoice.status, 'Paid')
+
 		finally:
 			frappe.set_user("Administrator")
 			frappe.db.sql("delete from `tabPOS Profile`")
