@@ -1826,7 +1826,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 	def update_item_details(source_doc, target_doc, source_parent):
 		target_doc.grant_commission = frappe.get_value("Item", target_doc.item_code, 'grant_commission')
-
 	
 	item_field_map = {
 		"doctype": target_doctype + " Item",
