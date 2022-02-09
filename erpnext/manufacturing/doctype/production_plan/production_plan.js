@@ -399,6 +399,15 @@ frappe.ui.form.on('Production Plan', {
 		message = title;
 		frm.dashboard.add_progress(__('Status'), bars, message);
 	},
+
+	get_items_from: function(frm) {
+		if (frm.doc.get_items_from === "Sales Order") {
+			frm.fields_dict.sort_by.grid.update_docfield_property("option", "options", ["Delivery Date", "Grand Total"]);
+		}
+		if (frm.doc.get_items_from === "Material Request") {
+			frm.fields_dict.sort_by.grid.update_docfield_property("option", "options", ["Schedule Date"]);
+		}
+	}
 });
 
 frappe.ui.form.on("Production Plan Item", {
@@ -461,6 +470,19 @@ frappe.ui.form.on("Production Plan Sales Order", {
 	}
 });
 
+// frappe.ui.form.on("Order Sorting", {
+// 	sort_by_add(frm, cdt, cdn) {
+// 		if (frm.doc.get_items_from === "Sales Order") {
+// 			frm.fields_dict.sort_by.grid.update_docfield_property("option", "options", ["Delivery Date", "Grand Total"]);
+// 		}
+// 		if (frm.doc.get_items_from === "Material Request") {
+// 			frm.fields_dict.sort_by.grid.update_docfield_property("option", "options", ["Schedule Date"]);
+// 		}
+
+// 	}
+// })
+
+
 cur_frm.fields_dict['sales_orders'].grid.get_field("sales_order").get_query = function() {
 	return{
 		filters: [
@@ -501,3 +523,5 @@ frappe.tour['Production Plan'] = [
 		description: __("To add subcontracted Item's raw materials if include exploded items is disabled.")
 	}
 ];
+
+

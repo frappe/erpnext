@@ -77,22 +77,19 @@ class ProductionPlan(Document):
 		if self.item_code:
 			item_filter += " and mr_item.item_code = %(item)s"
 
-		pending_mr = frappe.db.sql("""
-			select distinct mr.name, mr.transaction_date
+		query_param = get_order_by_columns(self)
+
+		pending_mr = frappe.db.sql(f"""
+			select distinct mr.name, mr.transaction_date, mr.schedule_date
 			from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
 			where mr_item.parent = mr.name
 				and mr.material_request_type = "Manufacture"
 				and mr.docstatus = 1 and mr.status != "Stopped" and mr.company = %(company)s
-				and mr_item.qty > ifnull(mr_item.ordered_qty,0) {0} {1}
+				and mr_item.qty > ifnull(mr_item.ordered_qty,0) {mr_filter} {item_filter}
 				and (exists (select name from `tabBOM` bom where bom.item=mr_item.item_code
 					and bom.is_active = 1))
-			""".format(mr_filter, item_filter), {
-				"from_date": self.from_date,
-				"to_date": self.to_date,
-				"warehouse": self.warehouse,
-				"item": self.item_code,
-				"company": self.company
-			}, as_dict=1)
+			order by {query_param}
+			""", self.as_dict(), as_dict=1)
 
 		self.add_mr_in_table(pending_mr)
 
@@ -761,20 +758,7 @@ def get_sales_orders(self):
 		bom_item = self.get_bom_item() or bom_item
 		item_filter += " and so_item.item_code = %(item_code)s"
 
-	if hasattr(self, "sort_by"):
-		separator = ","
-		sort_by = []
-		for d in self.sort_by:
-			print(d.order)
-			if d.order == "Ascending":
-				sort_by.append("so." + frappe.scrub(d.option) + " asc")
-			elif d.order == "Descending":
-				sort_by.append("so." + frappe.scrub(d.option) + " desc")
-			else:
-				sort_by.append("so." + frappe.scrub(d.option))
-		query_param = separator.join(sort_by)
-	else:
-		query_param = "null"
+	query_param = get_order_by_columns(self)
 
 	open_so = frappe.db.sql(f"""
 		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
@@ -1040,3 +1024,27 @@ def get_sub_assembly_items(bom_no, bom_data, to_produce_qty, indent=0):
 
 			if d.value:
 				get_sub_assembly_items(d.value, bom_data, stock_qty, indent=indent+1)
+
+
+def get_order_by_columns(self):
+	if hasattr(self, "sort_by"):
+		get_items_from = {
+			"Sales Order": "so.",
+			"Material Request": "mr."
+		}[self.get_items_from]
+
+		order_by = {
+			"Ascending": " asc",
+			"Descending": " desc"
+		}
+		separator = ","
+		sort_by = []
+		for d in self.sort_by:
+			if d.order:
+				sort_by.append(get_items_from + frappe.scrub(d.option) + order_by[d.order])
+			else:
+				sort_by.append(get_items_from + frappe.scrub(d.option))
+		query_param = separator.join(sort_by)
+	else:
+		query_param = "null"
+	return query_param

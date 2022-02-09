@@ -14,21 +14,21 @@
    "fieldname": "option",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Option",
-   "options": "Delivery Date\nGrand Total"
+   "label": "Parameters",
+   "options": "Delivery Date\nGrand Total\nSchedule Date"
   },
   {
    "fieldname": "order",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Order",
+   "label": "Sorting Order",
    "options": "Ascending\nDescending"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-02-02 12:01:09.827991",
+ "modified": "2022-02-09 13:10:38.662992",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Order Sorting",
