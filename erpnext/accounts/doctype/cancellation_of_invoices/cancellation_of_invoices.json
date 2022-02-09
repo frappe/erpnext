@@ -33,6 +33,7 @@
   "posting_time",
   "set_posting_time",
   "due_date",
+  "issuance_deadline",
   "reason_for_sale",
   "patient_statement",
   "cai_info_section",
@@ -2020,11 +2021,16 @@
    "fieldtype": "Data",
    "label": "Cai Invoice",
    "read_only": 1
+  },
+  {
+   "fieldname": "issuance_deadline",
+   "fieldtype": "Date",
+   "label": "Issuance Deadline"
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2022-01-10 15:33:25.519715",
+ "modified": "2022-02-09 14:54:51.253172",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cancellation Of Invoices",

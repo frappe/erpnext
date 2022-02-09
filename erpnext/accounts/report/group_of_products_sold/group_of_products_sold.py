@@ -14,7 +14,7 @@ def execute(filters=None):
 
 def _execute(filters=None, additional_table_columns=None, additional_query_columns=None):
 	if not filters: filters = {}
-	filters.update({"from_date": filters.get("date_range") and filters.get("date_range")[0], "to_date": filters.get("date_range") and filters.get("date_range")[1]})
+	filters.update({"from_date": filters.get("from_date"), "to_date": filters.get("to_date")})
 	columns = get_columns(additional_table_columns)
 
 	company_currency = frappe.get_cached_value('Company',  filters.get("company"),  "default_currency")
