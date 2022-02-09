@@ -383,7 +383,7 @@ class Gstr1Report(object):
 		for invoice, items in self.invoice_items.items():
 			if invoice not in self.items_based_on_tax_rate and invoice not in unidentified_gst_accounts_invoice \
 				and self.invoices.get(invoice, {}).get('export_type') == "Without Payment of Tax" \
-				and self.invoices.get(invoice, {}).get('gst_category') in ["Overseas", "SEZ"]:
+				and self.invoices.get(invoice, {}).get('gst_category') in ("Overseas", "SEZ"):
 					self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, items.keys())
 
 	def get_columns(self):
@@ -889,7 +889,7 @@ def get_b2b_json(res, gstin):
 			inv_item = get_basic_invoice_detail(invoice[0])
 			inv_item["pos"] = "%02d" % int(invoice[0]["place_of_supply"].split('-')[0])
 			inv_item["rchrg"] = invoice[0]["reverse_charge"]
-			inv_item["inv_typ"] = get_invoice_type_registered(invoice[0])
+			inv_item["inv_typ"] = get_invoice_type(invoice[0])
 
 			if inv_item["pos"]=="00": continue
 			inv_item["itms"] = []
@@ -1044,7 +1044,7 @@ def get_cdnr_reg_json(res, gstin):
 				"ntty": invoice[0]["document_type"],
 				"pos": "%02d" % int(invoice[0]["place_of_supply"].split('-')[0]),
 				"rchrg": invoice[0]["reverse_charge"],
-				"inv_typ": get_invoice_type_registered(invoice[0])
+				"inv_typ": get_invoice_type(invoice[0])
 			}
 
 			inv_item["itms"] = []
@@ -1069,7 +1069,7 @@ def get_cdnr_unreg_json(res, gstin):
 			"val": abs(flt(items[0]["invoice_value"])),
 			"ntty": items[0]["document_type"],
 			"pos": "%02d" % int(items[0]["place_of_supply"].split('-')[0]),
-			"typ": get_invoice_type_for_cdnrur(items[0])
+			"typ": get_invoice_type(items[0])
 		}
 
 		inv_item["itms"] = []
@@ -1110,29 +1110,21 @@ def get_exempted_json(data):
 
 	return out
 
-def get_invoice_type_registered(row):
-	if row.get('gst_category') == 'SEZ':
-		if row.get('export_type') == 'WPAY':
-			invoice_type = 'SEWP'
-		else:
-			invoice_type = 'SEWOP'
-	elif row.get('gst_category') == 'Deemed Export':
-		invoice_type = 'DE'
-	elif row.get('gst_category') in ['Registered Regular', 'Registered Composition']:
-		invoice_type = 'R'
+def get_invoice_type(row):
+	gst_category = row.get('gst_category')
 
-	return invoice_type
+	if gst_category == 'SEZ':
+		return 'SEWP' if row.get('export_type') == 'WPAY' else 'SEWOP'
 
-def get_invoice_type_for_cdnrur(row):
-	if row.get('gst_category') == 'Overseas':
-		if row.get('export_type') == 'WPAY':
-			invoice_type = 'EXPWP'
-		else:
-			invoice_type = 'EXPWOP'
-	elif row.get('gst_category') == 'Unregistered':
-		invoice_type = 'B2CL'
+	if gst_category == 'Overseas':
+		return 'EXPWP' if row.get('export_type') == 'WPAY' else 'EXPWOP'
 
-	return invoice_type
+	return ({
+		'Deemed Export': 'DE',
+		'Registered Regular': 'R',
+		'Registered Composition': 'R',
+		'Unregistered': 'B2CL'
+	}).get(gst_category)
 
 def get_basic_invoice_detail(row):
 	return {
