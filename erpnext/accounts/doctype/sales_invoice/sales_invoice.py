@@ -1705,7 +1705,6 @@ def get_inter_company_details(doc, doctype):
 	if doctype in ["Sales Invoice", "Sales Order", "Delivery Note"]:
 		parties = frappe.db.get_all("Supplier", fields=["name"], filters={"disabled": 0, "is_internal_supplier": 1, "represents_company": doc.company})
 		company = frappe.get_cached_value("Customer", doc.customer, "represents_company")
-
 		if not parties:
 			frappe.throw(_('No Supplier found for Inter Company Transactions which represents company {0}').format(frappe.bold(doc.company)))
 
@@ -1822,8 +1821,13 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				doctype=target_doc.doctype, party_address=target_doc.customer_address,
 				company_address=target_doc.company_address, shipping_address_name=target_doc.shipping_address_name)
 
+	def update_item_details(source_doc, target_doc, source_parent):
+		target_doc.grant_commission = frappe.get_value("Item", target_doc.item_code, 'grant_commission')
+
+	
 	item_field_map = {
 		"doctype": target_doctype + " Item",
+		"postprocess": update_item_details,
 		"field_no_map": [
 			"income_account",
 			"expense_account",
@@ -1831,7 +1835,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			"warehouse"
 		],
 		"field_map": {
-			'rate': 'rate',
+			'rate': 'rate'
 		}
 	}
 
@@ -1861,7 +1865,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		doctype +" Item": item_field_map
 
 	}, target_doc, set_missing_values)
-
+	
 	return doclist
 
 def set_purchase_references(doc):
