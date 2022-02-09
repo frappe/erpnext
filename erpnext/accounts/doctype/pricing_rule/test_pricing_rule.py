@@ -630,7 +630,6 @@ class TestPricingRule(unittest.TestCase):
 		for doc in [si, si1]:
 			doc.delete()
 
-<<<<<<< HEAD
 	def test_multiple_pricing_rules_with_min_qty(self):
 		make_pricing_rule(discount_percentage=20, selling=1, priority=1, min_qty=4,
 			apply_multiple_pricing_rules=1, title="_Test Pricing Rule with Min Qty - 1")
@@ -650,7 +649,7 @@ class TestPricingRule(unittest.TestCase):
 
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule with Min Qty - 1")
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule with Min Qty - 2")
-=======
+
 	def test_remove_pricing_rule(self):
 		item = make_item("Water Flask")
 		make_item_price("Water Flask", "_Test Price List", 100)
@@ -691,7 +690,6 @@ class TestPricingRule(unittest.TestCase):
 		frappe.get_doc("Item Price", {"item_code": "Water Flask"}).delete()
 		item.delete()
 
->>>>>>> b8c41e3030 (test: item price on remove pricing rule)
 
 test_dependencies = ["Campaign"]
 
