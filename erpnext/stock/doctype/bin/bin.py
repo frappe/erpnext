@@ -32,6 +32,7 @@ class Bin(Document):
 		'''Update qty reserved for production from Production Item tables
 			in open work orders'''
 <<<<<<< HEAD
+<<<<<<< HEAD
 		self.reserved_qty_for_production = frappe.db.sql('''
 			SELECT
 				SUM(CASE WHEN ifnull(skip_transfer, 0) = 0 THEN
@@ -72,6 +73,11 @@ class Bin(Document):
 					)
 		).run()[0][0] or 0.0
 >>>>>>> 6a8b7eeffe (fix: Reserved for Production calculation considered closed work orders)
+=======
+		from erpnext.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
+
+		self.reserved_qty_for_production = get_reserved_qty_for_production(self.item_code, self.warehouse)
+>>>>>>> a8bf3a3f0d (refactor: move reserve quantity computation to work order)
 
 		self.set_projected_qty()
 
