@@ -1122,7 +1122,7 @@ def so_required_settings_message(msg, primary_action, custom_action):
 
 @frappe.whitelist()
 def check_open_sos(customer, doctype=None):
-	if frappe.db.get_single_value('Selling Settings', 'so_required'):
+	if frappe.db.get_single_value('Selling Settings', 'so_required') == 'No':
 		return True
 	elif doctype == 'Sales Invoice' and frappe.db.get_value('Customer', customer, 'so_required'):
 		return True
@@ -1147,7 +1147,7 @@ def check_open_sos(customer, doctype=None):
 
 @frappe.whitelist()
 def check_open_pos(supplier, doctype=None):
-	if frappe.db.get_single_value('Buying Settings', 'po_required'):
+	if frappe.db.get_single_value('Buying Settings', 'po_required') == 'No':
 		return True
 	elif doctype == 'Purchase Invoice' and frappe.db.get_value(
 		'Supplier', supplier, 'allow_purchase_invoice_creation_without_purchase_order'):

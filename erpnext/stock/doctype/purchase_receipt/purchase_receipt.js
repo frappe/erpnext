@@ -337,6 +337,7 @@ frappe.ui.form.on("Purchase Receipt", {
 							let msg_dialog = frappe.msgprint({
 								message: __('Purchase Order is required to create a Purchase Receipt'),
 								indicator: 'red',
+								title: __('Purchase Order Required'),
 								primary_action: {
 									action: () => {
 										erpnext.route_to_new_purchase_order({

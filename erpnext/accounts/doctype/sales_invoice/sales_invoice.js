@@ -1045,6 +1045,7 @@ frappe.ui.form.on('Sales Invoice', {
 						callback: function(r) {
 							let msg_dialog = frappe.msgprint({
 								message: __('Sales Order is required to create a Sales Invoice'),
+								title: __("Sales Order Required"),
 								indicator: 'red',
 								primary_action: {
 									action: () => {

@@ -136,6 +136,7 @@ frappe.ui.form.on("Delivery Note", {
 							let msg_dialog = frappe.msgprint({
 								message: __('Sales Order is required to create a Sales Invoice'),
 								indicator: 'red',
+								title: __('Sales Order Required'),
 								primary_action: {
 									action: () => {
 										erpnext.route_to_new_sales_order({"customer": frm.doc.customer, "perm": r.message.perm_so_po})
