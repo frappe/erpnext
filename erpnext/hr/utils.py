@@ -237,7 +237,7 @@ def generate_leave_encashment():
 
 		create_leave_encashment(leave_allocation=leave_allocation)
 
-def allocate_earned_leaves():
+def allocate_earned_leaves(ignore_duplicates=False):
 	'''Allocate earned leaves to Employees'''
 	e_leave_types = get_earned_leaves()
 	today = getdate()
@@ -265,9 +265,9 @@ def allocate_earned_leaves():
 				from_date  = frappe.db.get_value("Employee", allocation.employee, "date_of_joining")
 
 			if check_effective_date(from_date, today, e_leave_type.earned_leave_frequency, e_leave_type.based_on_date_of_joining_date):
-				update_previous_leave_allocation(allocation, annual_allocation, e_leave_type)
+				update_previous_leave_allocation(allocation, annual_allocation, e_leave_type, ignore_duplicates)
 
-def update_previous_leave_allocation(allocation, annual_allocation, e_leave_type):
+def update_previous_leave_allocation(allocation, annual_allocation, e_leave_type, ignore_duplicates=False):
 		earned_leaves = get_monthly_earned_leave(annual_allocation, e_leave_type.earned_leave_frequency, e_leave_type.rounding)
 
 		allocation = frappe.get_doc('Leave Allocation', allocation.name)
@@ -277,9 +277,12 @@ def update_previous_leave_allocation(allocation, annual_allocation, e_leave_type
 			new_allocation = e_leave_type.max_leaves_allowed
 
 		if new_allocation != allocation.total_leaves_allocated:
-			allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
 			today_date = today()
-			create_additional_leave_ledger_entry(allocation, earned_leaves, today_date)
+
+			if ignore_duplicates or not is_earned_leave_already_allocated(allocation, annual_allocation):
+				allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
+				create_additional_leave_ledger_entry(allocation, earned_leaves, today_date)
+
 
 def get_monthly_earned_leave(annual_leaves, frequency, rounding):
 	earned_leaves = 0.0
@@ -295,6 +298,28 @@ def get_monthly_earned_leave(annual_leaves, frequency, rounding):
 				earned_leaves = round(earned_leaves)
 
 	return earned_leaves
+
+
+def is_earned_leave_already_allocated(allocation, annual_allocation):
+	from erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment import (
+		get_leave_type_details,
+	)
+
+	leave_type_details = get_leave_type_details()
+	date_of_joining = frappe.db.get_value("Employee", allocation.employee, "date_of_joining")
+
+	assignment = frappe.get_doc("Leave Policy Assignment", allocation.leave_policy_assignment)
+	leaves_for_passed_months = assignment.get_leaves_for_passed_months(allocation.leave_type,
+		annual_allocation, leave_type_details, date_of_joining)
+
+	# exclude carry-forwarded leaves while checking for leave allocation for passed months
+	num_allocations = allocation.total_leaves_allocated
+	if allocation.unused_leaves:
+		num_allocations -= allocation.unused_leaves
+
+	if num_allocations >= leaves_for_passed_months:
+		return True
+	return False
 
 
 def get_leave_allocations(date, leave_type):
