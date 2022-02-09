@@ -20,6 +20,12 @@ frappe.query_reports["Provider Account Statement"] = {
 			"fieldtype": "Link",
 			"options": "Supplier",
 			"reqd": 1
+		},
+		{
+			"fieldname":"company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company"
 		}
 	]
 };
