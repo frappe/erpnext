@@ -341,6 +341,7 @@ erpnext.patches.v13_0.wipe_serial_no_field_for_0_qty
 erpnext.patches.v13_0.disable_ksa_print_format_for_others # 16-12-2021
 erpnext.patches.v13_0.update_tax_category_for_rcm
 erpnext.patches.v13_0.convert_to_website_item_in_item_card_group_template
+<<<<<<< HEAD
 erpnext.patches.v13_0.agriculture_deprecation_warning
 erpnext.patches.v13_0.update_maintenance_schedule_field_in_visit
 erpnext.patches.v13_0.hospitality_deprecation_warning
@@ -348,3 +349,8 @@ erpnext.patches.v13_0.delete_bank_reconciliation_detail
 erpnext.patches.v13_0.update_sane_transfer_against
 erpnext.patches.v13_0.enable_provisional_accounting
 erpnext.patches.v13_0.update_disbursement_account
+=======
+erpnext.patches.v13_0.shopping_cart_to_ecommerce
+erpnext.patches.v13_0.update_disbursement_account
+erpnext.patches.v13_0.update_reserved_qty_closed_wo
+>>>>>>> e134524532 (fix: patch existing bins)
