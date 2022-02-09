@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import json
+
 import frappe
 from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
@@ -930,6 +932,10 @@ def get_item_account_wise_additional_cost(purchase_document):
 # API method to created consolidated Purchase Invoice against multiple receipts
 @frappe.whitelist()
 def create_consolidated_purchase_invoice(purchase_receipts, save=0, submit=0):
+
+	if isinstance(purchase_receipts, (str,)):
+		purchase_receipts = json.loads(purchase_receipts)
+
 	target_doc = None
 	for purchase_receipt in purchase_receipts:
 		target_doc = make_purchase_invoice(purchase_receipt, target_doc)
