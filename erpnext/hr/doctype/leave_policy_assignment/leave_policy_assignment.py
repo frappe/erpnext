@@ -8,7 +8,7 @@ from math import ceil
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-from frappe.utils import date_diff, flt, formatdate, get_datetime, getdate
+from frappe.utils import date_diff, flt, formatdate, get_datetime, get_last_day, getdate
 
 
 class LeavePolicyAssignment(Document):
@@ -108,8 +108,8 @@ class LeavePolicyAssignment(Document):
 	def get_leaves_for_passed_months(self, leave_type, new_leaves_allocated, leave_type_details, date_of_joining):
 		from erpnext.hr.utils import get_monthly_earned_leave
 
-		current_month = get_datetime().month
-		current_year = get_datetime().year
+		current_month = get_datetime(frappe.flags.current_date).month or get_datetime().month
+		current_year = get_datetime(frappe.flags.current_date).year or get_datetime().year
 
 		from_date = frappe.db.get_value("Leave Period", self.leave_period, "from_date")
 		if getdate(date_of_joining) > getdate(from_date):
@@ -119,10 +119,14 @@ class LeavePolicyAssignment(Document):
 		from_date_year = get_datetime(from_date).year
 
 		months_passed = 0
+
 		if current_year == from_date_year and current_month > from_date_month:
 			months_passed = current_month - from_date_month
+			months_passed = add_current_month_if_applicable(months_passed)
+
 		elif current_year > from_date_year:
 			months_passed = (12 - from_date_month) + current_month
+			months_passed = add_current_month_if_applicable(months_passed)
 
 		if months_passed > 0:
 			monthly_earned_leave = get_monthly_earned_leave(new_leaves_allocated,
@@ -132,6 +136,17 @@ class LeavePolicyAssignment(Document):
 			new_leaves_allocated = 0
 
 		return new_leaves_allocated
+
+
+def add_current_month_if_applicable(months_passed):
+	date = getdate(frappe.flags.current_date) or getdate()
+	last_day_of_month = get_last_day(date)
+
+	# if its the last day of the month, then that month should also be considered
+	if last_day_of_month == date:
+		months_passed += 1
+
+	return months_passed
 
 
 @frappe.whitelist()
