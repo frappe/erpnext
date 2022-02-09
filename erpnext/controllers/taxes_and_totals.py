@@ -653,7 +653,7 @@ class calculate_taxes_and_totals(object):
 		base_grand_total = self.doc.base_rounded_total or self.doc.base_grand_total
 
 		if self.doc.doctype == "Sales Invoice" \
-			and self.doc.paid_amount > grand_total  and not self.doc.is_return \
+			and self.doc.paid_amount > grand_total and not self.doc.is_return \
 			and any(d.type == "Cash" for d in self.doc.payments):
 
 			self.doc.change_amount = flt(self.doc.paid_amount - grand_total +

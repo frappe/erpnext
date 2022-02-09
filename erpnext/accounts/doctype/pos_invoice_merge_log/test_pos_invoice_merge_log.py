@@ -12,6 +12,7 @@ from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_inv
 from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 	consolidate_pos_invoices,
 )
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
 class TestPOSInvoiceMergeLog(unittest.TestCase):
@@ -156,11 +157,17 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 		'''
 		Test round off error in consolidated invoice creation if POS Invoice has inclusive tax
 		'''
+
 		frappe.db.sql("delete from `tabPOS Invoice`")
-		allow_negative_stock = frappe.db.get_value('Stock Settings', None, 'allow_negative_stock')
-		frappe.db.set_value('Stock Settings', None, 'allow_negative_stock', 1)
 
 		try:
+			make_stock_entry(
+				to_warehouse="_Test Warehouse - _TC",
+				item_code="_Test Item",
+				rate=8000,
+				qty=10,
+			)
+
 			init_user_and_profile()
 
 			inv = create_pos_invoice(qty=3, rate=10000, do_not_save=True)
@@ -206,17 +213,21 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			frappe.set_user("Administrator")
 			frappe.db.sql("delete from `tabPOS Profile`")
 			frappe.db.sql("delete from `tabPOS Invoice`")
-			frappe.db.set_value('Stock Settings', None, 'allow_negative_stock', allow_negative_stock)
 
 	def test_consolidation_round_off_error_2(self):
 		'''
 		Test the same case as above but with an Unpaid POS Invoice
 		'''
 		frappe.db.sql("delete from `tabPOS Invoice`")
-		allow_negative_stock = frappe.db.get_value('Stock Settings', None, 'allow_negative_stock')
-		frappe.db.set_value('Stock Settings', None, 'allow_negative_stock', 1)
 
 		try:
+			make_stock_entry(
+				to_warehouse="_Test Warehouse - _TC",
+				item_code="_Test Item",
+				rate=8000,
+				qty=10,
+			)
+
 			init_user_and_profile()
 
 			inv = create_pos_invoice(qty=6, rate=10000, do_not_save=True)
@@ -269,4 +280,3 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			frappe.set_user("Administrator")
 			frappe.db.sql("delete from `tabPOS Profile`")
 			frappe.db.sql("delete from `tabPOS Invoice`")
-			frappe.db.set_value('Stock Settings', None, 'allow_negative_stock', allow_negative_stock)
