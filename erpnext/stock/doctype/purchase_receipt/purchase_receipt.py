@@ -857,3 +857,17 @@ def get_item_account_wise_additional_cost(purchase_document):
 						account.base_amount * item.get(based_on_field) / total_item_cost
 
 	return item_account_wise_cost
+
+# API method to created consolidated Purchase Invoice against multiple receipts
+@frappe.whitelist()
+def create_consolidated_purchase_invoice(purchase_receipts, save=0, submit=0):
+	target_doc = None
+	for purchase_receipt in purchase_receipts:
+		target_doc = make_purchase_invoice(purchase_receipt, target_doc)
+
+	if save:
+		target_doc.save()
+		if submit:
+			target_doc.submit()
+
+	return target_doc
