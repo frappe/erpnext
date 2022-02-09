@@ -3,7 +3,7 @@ import frappe
 from erpnext.stock.utils import get_bin
 
 
-def execute(self):
+def execute():
 
 	wo = frappe.qb.DocType("Work Order")
 	wo_item = frappe.qb.DocType("Work Order Item")
@@ -18,7 +18,7 @@ def execute(self):
 				& (wo.docstatus == 1)
 				& (wo.source_warehouse.notnull())
 			)
-	).run(debug=True)
+	).run()
 
 	for item_code, warehouse in incorrect_item_wh:
 		if not (item_code and warehouse):

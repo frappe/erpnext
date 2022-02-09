@@ -31,54 +31,9 @@ class Bin(Document):
 	def update_reserved_qty_for_production(self):
 		'''Update qty reserved for production from Production Item tables
 			in open work orders'''
-<<<<<<< HEAD
-<<<<<<< HEAD
-		self.reserved_qty_for_production = frappe.db.sql('''
-			SELECT
-				SUM(CASE WHEN ifnull(skip_transfer, 0) = 0 THEN
-					item.required_qty - item.transferred_qty
-				ELSE
-					item.required_qty - item.consumed_qty END)
-				END
-			FROM `tabWork Order` pro, `tabWork Order Item` item
-			WHERE
-				item.item_code = %s
-				and item.parent = pro.name
-				and pro.docstatus = 1
-				and item.source_warehouse = %s
-				and pro.status not in ("Stopped", "Completed")
-				and (item.required_qty > item.transferred_qty or item.required_qty > item.consumed_qty)
-		''', (self.item_code, self.warehouse))[0][0]
-=======
-
-		wo = frappe.qb.DocType("Work Order")
-		wo_item = frappe.qb.DocType("Work Order Item")
-
-		self.reserved_qty_for_production = (
-				frappe.qb
-					.from_(wo)
-					.from_(wo_item)
-					.select(Sum(Case()
-							.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
-							.else_(wo_item.required_qty - wo_item.consumed_qty))
-						)
-					.where(
-						(wo_item.item_code == self.item_code)
-						& (wo_item.parent == wo.name)
-						& (wo.docstatus == 1)
-						& (wo_item.source_warehouse == self.warehouse)
-						& (wo.status.notin(["Stopped", "Completed", "Closed"]))
-						& ((wo_item.required_qty > wo_item.transferred_qty)
-							| (wo_item.required_qty > wo_item.consumed_qty))
-					)
-		).run()[0][0] or 0.0
->>>>>>> 6a8b7eeffe (fix: Reserved for Production calculation considered closed work orders)
-=======
 		from erpnext.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
 
 		self.reserved_qty_for_production = get_reserved_qty_for_production(self.item_code, self.warehouse)
->>>>>>> a8bf3a3f0d (refactor: move reserve quantity computation to work order)
-
 		self.set_projected_qty()
 
 		self.db_set('reserved_qty_for_production', flt(self.reserved_qty_for_production))
