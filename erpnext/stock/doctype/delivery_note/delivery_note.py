@@ -608,7 +608,18 @@ def make_packing_slip(source_name, target_doc=None):
 			"validation": {
 				"docstatus": ["=", 0]
 			}
+		},
+
+		"Delivery Note Item": {
+			"doctype": "Packing Slip Item",
+			"field_map": {
+				"item_code": "item_code",
+				"item_name": "item_name",
+				"description": "description",
+				"qty": "qty",
+			}
 		}
+
 	}, target_doc)
 
 	return doclist
