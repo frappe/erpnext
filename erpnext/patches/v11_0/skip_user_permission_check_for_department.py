@@ -1,4 +1,3 @@
-
 import frappe
 from frappe.desk.form.linked_with import get_linked_doctypes
 

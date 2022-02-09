@@ -195,7 +195,6 @@ class Customer(TransactionBase):
 					linked_doc.append('links', dict(link_doctype='Customer', link_name=self.name))
 					linked_doc.save(ignore_permissions=self.flags.ignore_permissions)
 
-
 	def validate_name_with_customer_group(self):
 		if frappe.db.exists("Customer Group", self.name):
 			frappe.throw(_("A Customer Group exists with same name please change the Customer name or rename the Customer Group"), frappe.NameError)

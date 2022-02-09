@@ -29,6 +29,9 @@ class TestWorkOrder(ERPNextTestCase):
 		self.warehouse = '_Test Warehouse 2 - _TC'
 		self.item = '_Test Item'
 
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def check_planned_qty(self):
 
 		planned0 = frappe.db.get_value("Bin", {"item_code": "_Test FG Item",
@@ -700,8 +703,7 @@ class TestWorkOrder(ERPNextTestCase):
 		wo = make_wo_order_test_record(item=item_name, qty=1, source_warehouse=source_warehouse,
 			company=company)
 
-		stock_entry = frappe.get_doc(make_stock_entry(wo.name, 'Material Transfer for Manufacture'))
-		self.assertRaises(frappe.ValidationError, stock_entry.save)
+		self.assertRaises(frappe.ValidationError, make_stock_entry, wo.name, 'Material Transfer for Manufacture')
 
 	def test_wo_completion_with_pl_bom(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import (
@@ -871,6 +873,44 @@ class TestWorkOrder(ERPNextTestCase):
 			close_work_order(wo_order, "Closed")
 			self.assertEqual(wo_order.get('status'), "Closed")
 
+	def test_fix_time_operations(self):
+		bom = frappe.get_doc({
+			"doctype": "BOM",
+			"item": "_Test FG Item 2",
+			"is_active": 1,
+			"is_default": 1,
+			"quantity": 1.0,
+			"with_operations": 1,
+			"operations": [
+				{
+					"operation": "_Test Operation 1",
+					"description": "_Test",
+					"workstation": "_Test Workstation 1",
+					"time_in_mins": 60,
+					"operating_cost": 140,
+					"fixed_time": 1
+				}
+			],
+			"items": [
+				{
+					"amount": 5000.0,
+					"doctype": "BOM Item",
+					"item_code": "_Test Item",
+					"parentfield": "items",
+					"qty": 1.0,
+					"rate": 5000.0,
+				},
+			],
+		})
+		bom.save()
+		bom.submit()
+
+
+		wo1 = make_wo_order_test_record(item=bom.item, bom_no=bom.name, qty=1, skip_transfer=1, do_not_submit=1)
+		wo2 = make_wo_order_test_record(item=bom.item, bom_no=bom.name, qty=2, skip_transfer=1, do_not_submit=1)
+
+		self.assertEqual(wo1.operations[0].time_in_mins, wo2.operations[0].time_in_mins)
+
 	def test_partial_manufacture_entries(self):
 		cancel_stock_entry = []
 
@@ -880,7 +920,6 @@ class TestWorkOrder(ERPNextTestCase):
 		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=100)
 		ste1 = test_stock_entry.make_stock_entry(item_code="_Test Item",
 			target="_Test Warehouse - _TC", qty=120, basic_rate=5000.0)
-
 		ste2 = test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
 			target="_Test Warehouse - _TC", qty=240, basic_rate=1000.0)
 
@@ -898,7 +937,6 @@ class TestWorkOrder(ERPNextTestCase):
 		for row in s.get('items'):
 			if row.get('item_code') == '_Test Item':
 				self.assertEqual(row.get('qty'), 100)
-
 		s.submit()
 		cancel_stock_entry.append(s.name)
 
@@ -924,7 +962,6 @@ class TestWorkOrder(ERPNextTestCase):
 
 def update_job_card(job_card, jc_qty=None):
 	employee = frappe.db.get_value('Employee', {'status': 'Active'}, 'name')
-
 	job_card_doc = frappe.get_doc('Job Card', job_card)
 	job_card_doc.set('scrap_items', [
 		{
@@ -948,6 +985,7 @@ def update_job_card(job_card, jc_qty=None):
 	})
 
 	job_card_doc.submit()
+
 
 def get_scrap_item_details(bom_no):
 	scrap_items = {}

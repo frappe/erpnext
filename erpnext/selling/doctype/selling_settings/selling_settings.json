@@ -11,11 +11,6 @@
   "customer_group",
   "column_break_4",
   "territory",
-  "crm_settings_section",
-  "campaign_naming_by",
-  "default_valid_till",
-  "column_break_9",
-  "close_opportunity_after_days",
   "item_price_settings_section",
   "selling_price_list",
   "maintain_same_rate_action",
@@ -44,13 +39,6 @@
    "options": "Customer Name\nNaming Series\nAuto Name"
   },
   {
-   "fieldname": "campaign_naming_by",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Campaign Naming By",
-   "options": "Campaign Name\nNaming Series\nAuto Name"
-  },
-  {
    "fieldname": "customer_group",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -72,16 +60,8 @@
    "options": "Price List"
   },
   {
-   "default": "15",
-   "description": "Auto close Opportunity after the no. of days mentioned above",
-   "fieldname": "close_opportunity_after_days",
-   "fieldtype": "Int",
-   "label": "Close Opportunity After Days"
-  },
-  {
-   "fieldname": "default_valid_till",
-   "fieldtype": "Data",
-   "label": "Default Quotation Validity Days"
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "so_required",
@@ -120,7 +100,7 @@
    "default": "0",
    "fieldname": "allow_multiple_items",
    "fieldtype": "Check",
-   "label": "Allow Item to Be Added Multiple Times in a Transaction"
+   "label": "Allow Item to be Added Multiple Times in a Transaction"
   },
   {
    "default": "0",
@@ -157,16 +137,6 @@
    "options": "Role"
   },
   {
-   "fieldname": "column_break_15",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "editable_bundle_item_rates",
-   "fieldtype": "Check",
-   "label": "Calculate Product Bundle Price based on Child Items' Rates"
-  },
-  {
    "fieldname": "customer_defaults_section",
    "fieldtype": "Section Break",
    "label": "Customer Defaults"
@@ -176,23 +146,24 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "crm_settings_section",
-   "fieldtype": "Section Break",
-   "label": "CRM Settings"
-  },
-  {
-   "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "item_price_settings_section",
    "fieldtype": "Section Break",
    "label": "Item Price Settings"
   },
   {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "sales_transactions_settings_section",
    "fieldtype": "Section Break",
    "label": "Transaction Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "editable_bundle_item_rates",
+   "fieldtype": "Check",
+   "label": "Calculate Product Bundle Price based on Child Items' Rates"
   }
  ],
  "icon": "fa fa-cog",
@@ -200,7 +171,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-14 22:05:06.139820",
+ "modified": "2021-09-13 12:32:17.004404",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

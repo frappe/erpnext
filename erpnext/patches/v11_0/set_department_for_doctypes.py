@@ -1,4 +1,3 @@
-
 import frappe
 
 # Set department value based on employee value

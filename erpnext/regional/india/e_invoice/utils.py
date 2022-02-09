@@ -1,6 +1,6 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
-
 
 import base64
 import io
@@ -12,7 +12,6 @@ import traceback
 
 import frappe
 import jwt
-import six
 from frappe import _, bold
 from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.integrations.utils import make_get_request, make_post_request
@@ -37,7 +36,7 @@ from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
 
 @frappe.whitelist()
 def validate_eligibility(doc):
-	if isinstance(doc, six.string_types):
+	if isinstance(doc, str):
 		doc = json.loads(doc)
 
 	invalid_doctype = doc.get('doctype') != 'Sales Invoice'
@@ -410,13 +409,17 @@ def validate_totals(einvoice):
 	if abs(flt(value_details['IgstVal']) - total_item_igst_value) > 1:
 		frappe.throw(_('IGST value of all items is not equal to total IGST value. Please review taxes for any correction.'))
 
-	if abs(flt(value_details['TotInvVal']) + flt(value_details['Discount']) - flt(value_details['OthChrg']) - total_item_value) > 1:
+	if abs(
+		flt(value_details['TotInvVal']) + flt(value_details['Discount']) -
+		flt(value_details['OthChrg']) - flt(value_details['RndOffAmt']) -
+		total_item_value
+	) > 1:
 		frappe.throw(_('Total Value of the items is not equal to the Invoice Grand Total. Please check item taxes / discounts for any correction.'))
 
 	calculated_invoice_value = \
 			flt(value_details['AssVal']) + flt(value_details['CgstVal']) \
 			+ flt(value_details['SgstVal']) + flt(value_details['IgstVal']) \
-			+ flt(value_details['OthChrg']) - flt(value_details['Discount'])
+			+ flt(value_details['OthChrg']) + flt(value_details['RndOffAmt']) - flt(value_details['Discount'])
 
 	if abs(flt(value_details['TotInvVal']) - calculated_invoice_value) > 1:
 		frappe.throw(_('Total Item Value + Taxes - Discount is not equal to the Invoice Grand Total. Please check taxes / discounts for any correction.'))
@@ -501,7 +504,7 @@ def show_link_to_error_log(invoice, einvoice):
 	)
 
 def log_error(data=None):
-	if isinstance(data, six.string_types):
+	if isinstance(data, str):
 		data = json.loads(data)
 
 	seperator = "--" * 50
@@ -951,6 +954,8 @@ class GSPConnector():
 		return errors
 
 	def raise_error(self, raise_exception=False, errors=None):
+		if errors is None:
+			errors = []
 		title = _('E Invoice Request Failed')
 		if errors:
 			frappe.throw(errors, title=title, as_list=1)
@@ -965,7 +970,7 @@ class GSPConnector():
 
 	def set_einvoice_data(self, res):
 		enc_signed_invoice = res.get('SignedInvoice')
-		dec_signed_invoice = jwt.decode(enc_signed_invoice, verify=False)['data']
+		dec_signed_invoice = jwt.decode(enc_signed_invoice, options={"verify_signature": False})['data']
 
 		self.invoice.irn = res.get('Irn')
 		self.invoice.ewaybill = res.get('EwbNo')

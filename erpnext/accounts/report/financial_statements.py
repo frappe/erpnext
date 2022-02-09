@@ -1,4 +1,3 @@
-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
@@ -10,8 +9,6 @@ import re
 import frappe
 from frappe import _
 from frappe.utils import add_days, add_months, cint, cstr, flt, formatdate, get_first_day, getdate
-from past.builtins import cmp
-from six import itervalues
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
@@ -189,7 +186,7 @@ def get_appropriate_currency(company, filters=None):
 
 def calculate_values(
 		accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy):
-	for entries in itervalues(gl_entries_by_account):
+	for entries in gl_entries_by_account.values():
 		for entry in entries:
 			d = accounts_by_name.get(entry.account)
 			if not d:
@@ -345,7 +342,7 @@ def sort_accounts(accounts, is_root=False, key="name"):
 	def compare_accounts(a, b):
 		if re.split(r'\W+', a[key])[0].isdigit():
 			# if chart of accounts is numbered, then sort by number
-			return cmp(a[key], b[key])
+			return int(a[key] > b[key]) - int(a[key] < b[key])
 		elif is_root:
 			if a.report_type != b.report_type and a.report_type == "Balance Sheet":
 				return -1
@@ -357,7 +354,7 @@ def sort_accounts(accounts, is_root=False, key="name"):
 				return -1
 		else:
 			# sort by key (number) or name
-			return cmp(a[key], b[key])
+			return int(a[key] > b[key]) - int(a[key] < b[key])
 		return 1
 
 	accounts.sort(key = functools.cmp_to_key(compare_accounts))
@@ -392,42 +389,15 @@ def set_gl_entries_by_account(
 					key: value
 				})
 
-		distributed_cost_center_query = ""
-		if filters and filters.get('cost_center'):
-			distributed_cost_center_query = """
-			UNION ALL
-			SELECT posting_date,
-				account,
-				debit*(DCC_allocation.percentage_allocation/100) as debit,
-				credit*(DCC_allocation.percentage_allocation/100) as credit,
-				is_opening,
-				fiscal_year,
-				debit_in_account_currency*(DCC_allocation.percentage_allocation/100) as debit_in_account_currency,
-				credit_in_account_currency*(DCC_allocation.percentage_allocation/100) as credit_in_account_currency,
-				account_currency
-			FROM `tabGL Entry`,
-			(
-				SELECT parent, sum(percentage_allocation) as percentage_allocation
-				FROM `tabDistributed Cost Center`
-				WHERE cost_center IN %(cost_center)s
-				AND parent NOT IN %(cost_center)s
-				GROUP BY parent
-			) as DCC_allocation
-			WHERE company=%(company)s
-			{additional_conditions}
-			AND posting_date <= %(to_date)s
-			AND is_cancelled = 0
-			AND cost_center = DCC_allocation.parent
-			""".format(additional_conditions=additional_conditions.replace("and cost_center in %(cost_center)s ", ''))
-
-		gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
+		gl_entries = frappe.db.sql("""
+			select posting_date, account, debit, credit, is_opening, fiscal_year,
+				debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
 			where company=%(company)s
 			{additional_conditions}
 			and posting_date <= %(to_date)s
-			and is_cancelled = 0
-			{distributed_cost_center_query}""".format(
-				additional_conditions=additional_conditions,
-				distributed_cost_center_query=distributed_cost_center_query), gl_filters, as_dict=True) #nosec
+			and is_cancelled = 0""".format(
+			additional_conditions=additional_conditions), gl_filters, as_dict=True
+		)
 
 		if filters and filters.get('presentation_currency'):
 			convert_to_presentation_currency(gl_entries, get_currency(filters), filters.get('company'))

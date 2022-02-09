@@ -1,13 +1,11 @@
-# coding: utf-8
-
 import datetime
 import zipfile
 from csv import QUOTE_NONNUMERIC
+from io import BytesIO
 
 import frappe
 import pandas as pd
 from frappe import _
-from six import BytesIO
 
 from .datev_constants import DataCategory
 
@@ -45,7 +43,7 @@ def get_datev_csv(data, filters, csv_class):
 
 	data = result.to_csv(
 		# Reason for str(';'): https://github.com/pandas-dev/pandas/issues/6035
-		sep=str(';'),
+		sep=';',
 		# European decimal seperator
 		decimal=',',
 		# Windows "ANSI" encoding

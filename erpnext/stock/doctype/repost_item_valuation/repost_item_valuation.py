@@ -13,7 +13,7 @@ from erpnext.accounts.utils import (
 	check_if_stock_and_account_balance_synced,
 	update_gl_entries_after,
 )
-from erpnext.stock.stock_ledger import get_items_to_be_repost, repost_future_sle
+from erpnext.stock.stock_ledger import repost_future_sle
 
 
 class RepostItemValuation(Document):
@@ -122,8 +122,8 @@ def repost(doc):
 
 def repost_sl_entries(doc):
 	if doc.based_on == 'Transaction':
-		repost_future_sle(doc=doc, voucher_type=doc.voucher_type, voucher_no=doc.voucher_no,
-			allow_negative_stock=doc.allow_negative_stock, via_landed_cost_voucher=doc.via_landed_cost_voucher)
+		repost_future_sle(voucher_type=doc.voucher_type, voucher_no=doc.voucher_no,
+			allow_negative_stock=doc.allow_negative_stock, via_landed_cost_voucher=doc.via_landed_cost_voucher, doc=doc)
 	else:
 		repost_future_sle(args=[frappe._dict({
 			"item_code": doc.item_code,
@@ -138,20 +138,13 @@ def repost_gl_entries(doc):
 
 	if doc.based_on == 'Transaction':
 		ref_doc = frappe.get_doc(doc.voucher_type, doc.voucher_no)
-		doc_items, doc_warehouses = ref_doc.get_items_and_warehouses()
-
-		sles = get_items_to_be_repost(doc.voucher_type, doc.voucher_no)
-		sle_items = [sle.item_code for sle in sles]
-		sle_warehouse = [sle.warehouse for sle in sles]
-
-		items = list(set(doc_items).union(set(sle_items)))
-		warehouses = list(set(doc_warehouses).union(set(sle_warehouse)))
+		items, warehouses = ref_doc.get_items_and_warehouses()
 	else:
 		items = [doc.item_code]
 		warehouses = [doc.warehouse]
 
 	update_gl_entries_after(doc.posting_date, doc.posting_time,
-		for_warehouses=warehouses, for_items=items, company=doc.company)
+		warehouses, items, company=doc.company)
 
 def notify_error_to_stock_managers(doc, traceback):
 	recipients = get_users_with_role("Stock Manager")

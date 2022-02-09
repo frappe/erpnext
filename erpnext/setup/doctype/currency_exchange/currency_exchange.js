@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-$.extend(cur_frm.cscript, {
+extend_cscript(cur_frm.cscript, {
 	onload: function() {
 		if(cur_frm.doc.__islocal) {
 			cur_frm.set_value("to_currency", frappe.defaults.get_global_default("currency"));

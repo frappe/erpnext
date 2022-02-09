@@ -26,7 +26,6 @@ from frappe.utils import (
 	getdate,
 	nowdate,
 )
-from six import iteritems
 
 import erpnext
 from erpnext import get_company_currency
@@ -514,7 +513,7 @@ def get_timeline_data(doctype, name):
 
 	timeline_items = dict(data)
 
-	for date, count in iteritems(timeline_items):
+	for date, count in timeline_items.items():
 		timestamp = get_timestamp(date)
 		out.update({ timestamp: count })
 

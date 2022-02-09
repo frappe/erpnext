@@ -110,7 +110,8 @@
   "enq_det",
   "supplier_quotation",
   "opportunity",
-  "lost_reasons"
+  "lost_reasons",
+  "competitors"
  ],
  "fields": [
   {
@@ -946,6 +947,14 @@
    "label": "Bundle Items",
    "options": "fa fa-suitcase",
    "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "competitors",
+   "fieldtype": "Table MultiSelect",
+   "label": "Competitors",
+   "options": "Competitor Detail",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-shopping-cart",
@@ -956,6 +965,7 @@
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

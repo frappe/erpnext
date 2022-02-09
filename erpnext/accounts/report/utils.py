@@ -1,4 +1,3 @@
-
 import frappe
 from frappe.utils import flt, formatdate, get_datetime_str
 

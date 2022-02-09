@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import functools
 import json
 import os
 
@@ -14,7 +13,6 @@ from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.utils import cint, formatdate, get_timestamp, today
 from frappe.utils.nestedset import NestedSet
-from past.builtins import cmp
 
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_charges
@@ -431,7 +429,7 @@ def install_country_fixtures(company, country):
 			frappe.get_attr(module_name)(company, False)
 		except Exception as e:
 			frappe.log_error()
-			frappe.throw(_("Failed to setup defaults for country {0}. Please contact support@erpnext.com").format(frappe.bold(country)))
+			frappe.throw(_("Failed to setup defaults for country {0}. Please contact support.").format(frappe.bold(country)))
 
 
 def update_company_current_month_sales(company):
@@ -599,7 +597,7 @@ def get_default_company_address(name, sort_key='is_primary_address', existing_ad
 			return existing_address
 
 	if out:
-		return sorted(out, key = functools.cmp_to_key(lambda x,y: cmp(y[1], x[1])))[0][0]
+		return min(out, key=lambda x: x[1])[0]  # find min by sort_key
 	else:
 		return None
 

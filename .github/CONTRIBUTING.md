@@ -23,7 +23,7 @@ If your issue is not clear or does not meet the guidelines, then it will be clos
 1. **Steps to Reproduce:** The bug report must have a list of steps needed to reproduce a bug. If we cannot reproduce it, then we cannot solve it.
 1. **Version Number:** Please add the version number in your report. Often a bug is fixed in the latest version
 1. **Clear Title:** Add a clear subject to your bug report like "Unable to submit Purchase Order without Basic Rate" instead of just "Cannot Submit"
-1. **Screenshots:** Screenshots are a great way of communicating the issues. Try adding annotations or using LiceCAP to take a screencast in `gif`.
+1. **Screenshots:** Screenshots are a great way of communicating issues. Try adding annotations or using LiceCAP to take a screencast in `gif`.
 
 ### Feature Request Guidelines
 

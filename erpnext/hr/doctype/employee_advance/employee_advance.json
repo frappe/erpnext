@@ -204,6 +204,7 @@
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Advance",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

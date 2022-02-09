@@ -1,4 +1,3 @@
-
 import frappe
 from frappe import _
 from frappe.utils.nestedset import rebuild_tree

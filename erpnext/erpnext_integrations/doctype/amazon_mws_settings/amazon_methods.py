@@ -5,11 +5,11 @@
 import csv
 import math
 import time
+from io import StringIO
 
 import dateutil
 import frappe
 from frappe import _
-from six import StringIO
 
 import erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_api as mws
 
@@ -30,7 +30,7 @@ def get_products_details():
 
 			#Get ASIN Codes
 			string_io = StringIO(frappe.safe_decode(listings_response.original))
-			csv_rows = list(csv.reader(string_io, delimiter=str('\t')))
+			csv_rows = list(csv.reader(string_io, delimiter='\t'))
 			asin_list = list(set([row[1] for row in csv_rows[1:]]))
 			#break into chunks of 10
 			asin_chunked_list = list(chunks(asin_list, 10))

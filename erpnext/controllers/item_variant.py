@@ -8,7 +8,6 @@ import json
 import frappe
 from frappe import _
 from frappe.utils import cstr, flt
-from six import string_types
 
 
 class ItemVariantExistsError(frappe.ValidationError): pass
@@ -30,7 +29,7 @@ def get_variant(template, args=None, variant=None, manufacturer=None,
 		return make_variant_based_on_manufacturer(item_template, manufacturer,
 			manufacturer_part_no)
 	else:
-		if isinstance(args, string_types):
+		if isinstance(args, str):
 			args = json.loads(args)
 
 		if not args:
@@ -54,7 +53,7 @@ def make_variant_based_on_manufacturer(template, manufacturer, manufacturer_part
 	return variant
 
 def validate_item_variant_attributes(item, args=None):
-	if isinstance(item, string_types):
+	if isinstance(item, str):
 		item = frappe.get_doc('Item', item)
 
 	if not args:
@@ -156,7 +155,7 @@ def find_variant(template, args, variant_item_code=None):
 
 @frappe.whitelist()
 def create_variant(item, args):
-	if isinstance(args, string_types):
+	if isinstance(args, str):
 		args = json.loads(args)
 
 	template = frappe.get_doc("Item", item)
@@ -179,7 +178,7 @@ def create_variant(item, args):
 @frappe.whitelist()
 def enqueue_multiple_variant_creation(item, args):
 	# There can be innumerable attribute combinations, enqueue
-	if isinstance(args, string_types):
+	if isinstance(args, str):
 		variants = json.loads(args)
 	total_variants = 1
 	for key in variants:
@@ -196,7 +195,7 @@ def enqueue_multiple_variant_creation(item, args):
 
 def create_multiple_variants(item, args):
 	count = 0
-	if isinstance(args, string_types):
+	if isinstance(args, str):
 		args = json.loads(args)
 
 	args_set = generate_keyed_value_combinations(args)
@@ -264,7 +263,7 @@ def copy_attributes_to_variant(item, variant):
 	# copy non no-copy fields
 
 	exclude_fields = ["naming_series", "item_code", "item_name", "published_in_website",
-		"opening_stock", "variant_of", "valuation_rate", "has_variants", "attributes"]
+		"opening_stock", "variant_of", "valuation_rate"]
 
 	if item.variant_based_on=='Manufacturer':
 		# don't copy manufacturer values if based on part no

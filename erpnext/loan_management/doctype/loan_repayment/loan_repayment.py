@@ -5,7 +5,6 @@
 import frappe
 from frappe import _
 from frappe.utils import add_days, cint, date_diff, flt, get_datetime, getdate
-from six import iteritems
 
 import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
@@ -126,7 +125,7 @@ class LoanRepayment(AccountsController):
 
 	def update_paid_amount(self):
 		loan = frappe.get_value("Loan", self.against_loan, ['total_amount_paid', 'total_principal_paid',
-			'status', 'is_secured_loan', 'total_payment', 'loan_amount', 'disbursed_amount', 'total_interest_payable',
+			'status', 'is_secured_loan', 'total_payment', 'loan_amount', 'total_interest_payable',
 			'written_off_amount'], as_dict=1)
 
 		loan.update({
@@ -154,7 +153,7 @@ class LoanRepayment(AccountsController):
 
 	def mark_as_unpaid(self):
 		loan = frappe.get_value("Loan", self.against_loan, ['total_amount_paid', 'total_principal_paid',
-			'status', 'is_secured_loan', 'total_payment', 'loan_amount', 'disbursed_amount', 'total_interest_payable',
+			'status', 'is_secured_loan', 'total_payment', 'loan_amount', 'total_interest_payable',
 			'written_off_amount'], as_dict=1)
 
 		no_of_repayments = len(self.repayment_details)
@@ -232,7 +231,7 @@ class LoanRepayment(AccountsController):
 		idx = 1
 
 		if interest_paid > 0:
-			for lia, amounts in iteritems(repayment_details.get('pending_accrual_entries', [])):
+			for lia, amounts in repayment_details.get('pending_accrual_entries', []).items():
 				interest_amount = 0
 				if amounts['interest_amount'] <= interest_paid:
 					interest_amount = amounts['interest_amount']
@@ -261,7 +260,7 @@ class LoanRepayment(AccountsController):
 
 	def allocate_principal_amount_for_term_loans(self, interest_paid, repayment_details, updated_entries):
 		if interest_paid > 0:
-			for lia, amounts in iteritems(repayment_details.get('pending_accrual_entries', [])):
+			for lia, amounts in repayment_details.get('pending_accrual_entries', []).items():
 				paid_principal = 0
 				if amounts['payable_principal_amount'] <= interest_paid:
 					paid_principal = amounts['payable_principal_amount']

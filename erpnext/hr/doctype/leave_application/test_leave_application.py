@@ -531,6 +531,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		leave_policy = frappe.get_doc({
 			"doctype": "Leave Policy",
+			"title": "Test Leave Policy",
 			"leave_policy_details": [{"leave_type": leave_type, "annual_allocation": 6}]
 		}).insert()
 
@@ -545,7 +546,7 @@ class TestLeaveApplication(unittest.TestCase):
 		from erpnext.hr.utils import allocate_earned_leaves
 		i = 0
 		while(i<14):
-			allocate_earned_leaves(ignore_duplicates=True)
+			allocate_earned_leaves()
 			i += 1
 		self.assertEqual(get_leave_balance_on(employee.name, leave_type, nowdate()), 6)
 
@@ -553,7 +554,7 @@ class TestLeaveApplication(unittest.TestCase):
 		frappe.db.set_value('Leave Type', leave_type, 'max_leaves_allowed', 0)
 		i = 0
 		while(i<6):
-			allocate_earned_leaves(ignore_duplicates=True)
+			allocate_earned_leaves()
 			i += 1
 		self.assertEqual(get_leave_balance_on(employee.name, leave_type, nowdate()), 9)
 

@@ -17,84 +17,7 @@ frappe.ui.form.on("Issue", {
 				if (r && r.allow_resetting_service_level_agreement == "0") {
 					frm.set_df_property("reset_service_level_agreement", "hidden", 1);
 				}
-		});
-
-		if (frm.doc.service_level_agreement) {
-			frappe.call({
-				method: "erpnext.support.doctype.service_level_agreement.service_level_agreement.get_service_level_agreement_filters",
-				args: {
-					name: frm.doc.service_level_agreement,
-					customer: frm.doc.customer
-				},
-				callback: function (r) {
-					if (r && r.message) {
-						frm.set_query("priority", function() {
-							return {
-								filters: {
-									"name": ["in", r.message.priority],
-								}
-							};
-						});
-						frm.set_query("service_level_agreement", function() {
-							return {
-								filters: {
-									"name": ["in", r.message.service_level_agreements],
-								}
-							};
-						});
-					}
-				}
 			});
-		}
-	},
-
-	refresh: function(frm) {
-
-		// alert messages
-		if (frm.doc.status !== "Closed" && frm.doc.service_level_agreement
-			&& frm.doc.agreement_status === "Ongoing") {
-			frappe.call({
-				"method": "frappe.client.get",
-				args: {
-					doctype: "Service Level Agreement",
-					name: frm.doc.service_level_agreement
-				},
-				callback: function(data) {
-					let statuses = data.message.pause_sla_on;
-					const hold_statuses = [];
-					$.each(statuses, (_i, entry) => {
-						hold_statuses.push(entry.status);
-					});
-					if (hold_statuses.includes(frm.doc.status)) {
-						frm.dashboard.clear_headline();
-						let message = { "indicator": "orange", "msg": __("SLA is on hold since {0}", [moment(frm.doc.on_hold_since).fromNow(true)]) };
-						frm.dashboard.set_headline_alert(
-							'<div class="row">' +
-							'<div class="col-xs-12">' +
-							'<span class="indicator whitespace-nowrap ' + message.indicator + '"><span>' + message.msg + '</span></span> ' +
-							'</div>' +
-							'</div>'
-						);
-					} else {
-						set_time_to_resolve_and_response(frm);
-					}
-				}
-			});
-		} else if (frm.doc.service_level_agreement) {
-			frm.dashboard.clear_headline();
-
-			let agreement_status = (frm.doc.agreement_status == "Fulfilled") ?
-				{ "indicator": "green", "msg": "Service Level Agreement has been fulfilled" } :
-				{ "indicator": "red", "msg": "Service Level Agreement Failed" };
-
-			frm.dashboard.set_headline_alert(
-				'<div class="row">' +
-				'<div class="col-xs-12">' +
-				'<span class="indicator whitespace-nowrap ' + agreement_status.indicator + '"><span class="hidden-xs">' + agreement_status.msg + '</span></span> ' +
-				'</div>' +
-				'</div>'
-			);
-		}
 
 		// buttons
 		if (frm.doc.status !== "Closed") {
@@ -140,7 +63,7 @@ frappe.ui.form.on("Issue", {
 					message: __("Resetting Service Level Agreement.")
 				});
 
-				frm.call("reset_service_level_agreement", {
+				frappe.call("erpnext.support.doctype.service_level_agreement.service_level_agreement.reset_service_level_agreement", {
 					reason: values.reason,
 					user: frappe.session.user_email
 				}, () => {
@@ -223,43 +146,3 @@ frappe.ui.form.on("Issue", {
 		// }
 	},
 });
-
-function set_time_to_resolve_and_response(frm) {
-	frm.dashboard.clear_headline();
-
-	var time_to_respond = get_status(frm.doc.response_by_variance);
-	if (!frm.doc.first_responded_on && frm.doc.agreement_status === "Ongoing") {
-		time_to_respond = get_time_left(frm.doc.response_by, frm.doc.agreement_status);
-	}
-
-	var time_to_resolve = get_status(frm.doc.resolution_by_variance);
-	if (!frm.doc.resolution_date && frm.doc.agreement_status === "Ongoing") {
-		time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_status);
-	}
-
-	frm.dashboard.set_headline_alert(
-		'<div class="row">' +
-			'<div class="col-xs-12 col-sm-6">' +
-				'<span class="indicator whitespace-nowrap '+ time_to_respond.indicator +'"><span>Time to Respond: '+ time_to_respond.diff_display +'</span></span> ' +
-			'</div>' +
-			'<div class="col-xs-12 col-sm-6">' +
-				'<span class="indicator whitespace-nowrap '+ time_to_resolve.indicator +'"><span>Time to Resolve: '+ time_to_resolve.diff_display +'</span></span> ' +
-			'</div>' +
-		'</div>'
-	);
-}
-
-function get_time_left(timestamp, agreement_status) {
-	const diff = moment(timestamp).diff(moment());
-	const diff_display = diff >= 44500 ? moment.duration(diff).humanize() : "Failed";
-	let indicator = (diff_display == "Failed" && agreement_status != "Fulfilled") ? "red" : "green";
-	return {"diff_display": diff_display, "indicator": indicator};
-}
-
-function get_status(variance) {
-	if (variance > 0) {
-		return {"diff_display": "Fulfilled", "indicator": "green"};
-	} else {
-		return {"diff_display": "Failed", "indicator": "red"};
-	}
-}

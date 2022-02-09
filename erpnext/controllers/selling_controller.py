@@ -74,8 +74,7 @@ class SellingController(StockController):
 				doctype=self.doctype, company=self.company,
 				posting_date=self.get('posting_date'),
 				fetch_payment_terms_template=fetch_payment_terms_template,
-				party_address=self.customer_address, shipping_address=self.shipping_address_name,
-				company_address=self.get('company_address'))
+				party_address=self.customer_address, shipping_address=self.shipping_address_name)
 			if not self.meta.get_field("sales_team"):
 				party_details.pop("sales_team")
 			self.update_if_missing(party_details)
@@ -205,7 +204,7 @@ class SellingController(StockController):
 		valuation_rate_map = {}
 
 		for item in self.items:
-			if not item.item_code:
+			if not item.item_code or item.is_free_item:
 				continue
 
 			last_purchase_rate, is_stock_item = frappe.get_cached_value(
@@ -252,7 +251,7 @@ class SellingController(StockController):
 			valuation_rate_map[(rate.item_code, rate.warehouse)] = rate.valuation_rate
 
 		for item in self.items:
-			if not item.item_code:
+			if not item.item_code or item.is_free_item:
 				continue
 
 			last_valuation_rate = valuation_rate_map.get(

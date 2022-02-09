@@ -1,4 +1,3 @@
-
 DEFAULT_MAPPERS = [
     {
         'doctype': 'Cash Flow Mapper',

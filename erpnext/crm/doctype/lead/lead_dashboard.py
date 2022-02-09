@@ -1,5 +1,3 @@
-
-
 def get_data():
 	return {
 		'fieldname': 'lead',
@@ -12,7 +10,7 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'items': ['Opportunity', 'Quotation']
+				'items': ['Opportunity', 'Quotation', 'Prospect']
 			},
 		]
 	}

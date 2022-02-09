@@ -114,15 +114,15 @@ frappe.ui.form.on("Purchase Receipt", {
 	}
 });
 
-erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
-	setup: function(doc) {
+erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extends erpnext.buying.BuyingController {
+	setup(doc) {
 		this.setup_posting_date_time_check();
-		this._super(doc);
-	},
+		super.setup(doc);
+	}
 
-	refresh: function() {
+	refresh() {
 		var me = this;
-		this._super();
+		super.refresh();
 		if(this.frm.doc.docstatus > 0) {
 			this.show_stock_ledger();
 			//removed for temporary
@@ -201,31 +201,31 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		}
 
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
-	},
+	}
 
-	make_purchase_invoice: function() {
+	make_purchase_invoice() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
 			frm: cur_frm
 		})
-	},
+	}
 
-	make_purchase_return: function() {
+	make_purchase_return() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_return",
 			frm: cur_frm
 		})
-	},
+	}
 
-	close_purchase_receipt: function() {
+	close_purchase_receipt() {
 		cur_frm.cscript.update_status("Closed");
-	},
+	}
 
-	reopen_purchase_receipt: function() {
+	reopen_purchase_receipt() {
 		cur_frm.cscript.update_status("Submitted");
-	},
+	}
 
-	make_retention_stock_entry: function() {
+	make_retention_stock_entry() {
 		frappe.call({
 			method: "erpnext.stock.doctype.stock_entry.stock_entry.move_sample_to_retention_warehouse",
 			args:{
@@ -242,16 +242,16 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 				}
 			}
 		});
-	},
+	}
 
-	apply_putaway_rule: function() {
+	apply_putaway_rule() {
 		if (this.frm.doc.apply_putaway_rule) erpnext.apply_putaway_rule(this.frm);
 	}
 
-});
+};
 
 // for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new erpnext.stock.PurchaseReceiptController({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.stock.PurchaseReceiptController({frm: cur_frm}));
 
 cur_frm.cscript.update_status = function(status) {
 	frappe.ui.form.is_saving = true;

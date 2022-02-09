@@ -104,10 +104,11 @@
  "icon": "fa fa-wrench",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-03 13:49:39.114976",
+ "modified": "2021-11-24 19:15:24.357187",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Operation",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {

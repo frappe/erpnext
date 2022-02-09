@@ -8,7 +8,6 @@
 import frappe
 from frappe import _
 from frappe.utils import flt
-from six import iteritems
 
 from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, get_average_age
 from erpnext.stock.report.stock_balance.stock_balance import (
@@ -56,7 +55,7 @@ def execute(filters=None):
 
 
 	# sum bal_qty by item
-	for (item, item_group), wh_balance in iteritems(item_balance):
+	for (item, item_group), wh_balance in item_balance.items():
 		if not item_ageing.get(item):  continue
 
 		total_stock_value = sum(item_value[(item, item_group)])

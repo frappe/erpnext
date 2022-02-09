@@ -2,9 +2,6 @@ import frappe
 
 
 def execute():
-	if not frappe.get_meta("Company").has_field("enable_perpetual_inventory_for_non_stock_items"):
-		return
-
 	frappe.reload_doc("setup", "doctype", "company")
 
 	company = frappe.qb.DocType("Company")

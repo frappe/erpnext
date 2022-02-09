@@ -1,4 +1,3 @@
-
 import frappe
 from frappe.utils.nestedset import get_root_of
 

@@ -10,6 +10,7 @@ from frappe.contacts.doctype.address.address import (
 class ERPNextAddress(Address):
 	def validate(self):
 		self.validate_reference()
+		self.update_compnay_address()
 		super(ERPNextAddress, self).validate()
 
 	def link_address(self):
@@ -18,6 +19,11 @@ class ERPNextAddress(Address):
 			return
 
 		return super(ERPNextAddress, self).link_address()
+
+	def update_compnay_address(self):
+		for link in self.get('links'):
+			if link.link_doctype == 'Company':
+				self.is_your_company_address = 1
 
 	def validate_reference(self):
 		if self.is_your_company_address and not [

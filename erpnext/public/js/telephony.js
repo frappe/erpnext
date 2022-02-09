@@ -1,6 +1,6 @@
-frappe.ui.form.ControlData = frappe.ui.form.ControlData.extend( {
+frappe.ui.form.ControlData = class ControlData extends frappe.ui.form.ControlData  {
 	make_input() {
-		this._super();
+		super.make_input();
 		if (this.df.options == 'Phone') {
 			this.setup_phone();
 		}
@@ -13,7 +13,7 @@ frappe.ui.form.ControlData = frappe.ui.form.ControlData.extend( {
 				}
 			});
 		}
-	},
+	}
 	setup_phone() {
 		if (frappe.phone_call.handler) {
 			let control = this.df.read_only ? '.control-value' : '.control-input';
@@ -30,4 +30,4 @@ frappe.ui.form.ControlData = frappe.ui.form.ControlData.extend( {
 				});
 		}
 	}
-});
+};

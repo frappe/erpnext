@@ -16,7 +16,7 @@ class SellingSettings(Document):
 		self.toggle_editable_rate_for_bundle_items()
 
 	def validate(self):
-		for key in ["cust_master_name", "campaign_naming_by", "customer_group", "territory",
+		for key in ["cust_master_name", "customer_group", "territory",
 			"maintain_same_sales_rate", "editable_price_list_rate", "selling_price_list"]:
 				frappe.db.set_default(key, self.get(key, ""))
 

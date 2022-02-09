@@ -5,7 +5,6 @@
 import frappe
 from frappe import _
 from frappe.utils import add_days, getdate, today
-from six import iteritems
 
 import erpnext
 from erpnext.accounts.utils import get_stock_and_account_balance
@@ -66,7 +65,7 @@ def get_data(report_filters):
 		voucher_wise_dict.setdefault((d.item_code, d.warehouse), []).append(d)
 
 	closing_date = add_days(from_date, -1)
-	for key, stock_data in iteritems(voucher_wise_dict):
+	for key, stock_data in voucher_wise_dict.items():
 		prev_stock_value = get_stock_value_on(posting_date = closing_date, item_code=key[0], warehouse =key[1])
 		for data in stock_data:
 			expected_stock_value = prev_stock_value + data.stock_value_difference

@@ -1,4 +1,3 @@
-
 import frappe
 
 from erpnext.utilities.doctype.video.video import get_id_from_url

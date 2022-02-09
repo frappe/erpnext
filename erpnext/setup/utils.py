@@ -29,21 +29,21 @@ def before_tests():
 	from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
 	if not frappe.get_list("Company"):
 		setup_complete({
-			"currency"			:"USD",
-			"full_name"			:"Test User",
-			"company_name"		:"Wind Power LLC",
-			"timezone"			:"America/New_York",
-			"company_abbr"		:"WP",
-			"industry"			:"Manufacturing",
-			"country"			:"United States",
-			"fy_start_date"		:"2011-01-01",
-			"fy_end_date"		:"2011-12-31",
-			"language"			:"english",
-			"company_tagline"	:"Testing",
-			"email"				:"test@erpnext.com",
-			"password"			:"test",
+			"currency"          :"USD",
+			"full_name"         :"Test User",
+			"company_name"      :"Wind Power LLC",
+			"timezone"          :"America/New_York",
+			"company_abbr"      :"WP",
+			"industry"          :"Manufacturing",
+			"country"           :"United States",
+			"fy_start_date"     :"2021-01-01",
+			"fy_end_date"       :"2021-12-31",
+			"language"          :"english",
+			"company_tagline"   :"Testing",
+			"email"             :"test@erpnext.com",
+			"password"          :"test",
 			"chart_of_accounts" : "Standard",
-			"domains"			: ["Manufacturing"],
+			"domains"           : ["Manufacturing"],
 		})
 
 	frappe.db.sql("delete from `tabLeave Allocation`")
@@ -100,21 +100,34 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 
 		if not value:
 			import requests
-			api_url = "https://api.exchangerate.host/convert"
-			response = requests.get(api_url, params={
-				"date": transaction_date,
-				"from": from_currency,
-				"to": to_currency
-			})
+			settings = frappe.get_cached_doc('Currency Exchange Settings')
+			req_params = {
+				"transaction_date": transaction_date,
+				"from_currency": from_currency,
+				"to_currency": to_currency
+			}
+			params = {}
+			for row in settings.req_params:
+				params[row.key] = format_ces_api(row.value, req_params)
+			response = requests.get(format_ces_api(settings.api_endpoint, req_params), params=params)
 			# expire in 6 hours
 			response.raise_for_status()
-			value = response.json()["result"]
+			value = response.json()
+			for res_key in settings.result_key:
+				value = value[format_ces_api(str(res_key.key), req_params)]
 			cache.setex(name=key, time=21600, value=flt(value))
 		return flt(value)
 	except Exception:
 		frappe.log_error(title="Get Exchange Rate")
 		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually").format(from_currency, to_currency, transaction_date))
 		return 0.0
+
+def format_ces_api(data, param):
+	return data.format(
+		transaction_date=param.get("transaction_date"),
+		to_currency=param.get("to_currency"),
+		from_currency=param.get("from_currency")
+	)
 
 def enable_all_roles_and_domains():
 	""" enable all roles and domain for testing """

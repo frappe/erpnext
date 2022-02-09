@@ -7,7 +7,6 @@ import unittest
 import frappe
 from frappe.permissions import add_user_permission, remove_user_permission
 from frappe.utils import flt, nowdate, nowtime
-from six import iteritems
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.item.test_item import (
@@ -34,7 +33,7 @@ from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 def get_sle(**args):
 	condition, values = "", []
-	for key, value in iteritems(args):
+	for key, value in args.items():
 		condition += " and " if condition else " where "
 		condition += "`{0}`=%s".format(key)
 		values.append(value)
@@ -999,6 +998,38 @@ class TestStockEntry(ERPNextTestCase):
 		distributed_costs = [d.additional_cost for d in se.items]
 		self.assertEqual([40.0, 60.0], distributed_costs)
 
+	def test_independent_manufacture_entry(self):
+		"Test FG items and incoming rate calculation in Maniufacture Entry without WO or BOM linked."
+		se = frappe.get_doc(
+			doctype="Stock Entry",
+			purpose="Manufacture",
+			stock_entry_type="Manufacture",
+			company="_Test Company",
+			items=[
+				frappe._dict(item_code="_Test Item", qty=1, basic_rate=200, s_warehouse="_Test Warehouse - _TC"),
+				frappe._dict(item_code="_Test FG Item", qty=4, t_warehouse="_Test Warehouse 1 - _TC")
+			]
+		)
+		# SE must have atleast one FG
+		self.assertRaises(FinishedGoodError, se.save)
+
+		se.items[0].is_finished_item = 1
+		se.items[1].is_finished_item = 1
+		# SE cannot have multiple FGs
+		self.assertRaises(FinishedGoodError, se.save)
+
+		se.items[0].is_finished_item = 0
+		se.save()
+
+		# Check if FG cost is calculated based on RM total cost
+		# RM total cost = 200, FG rate = 200/4(FG qty) =  50
+		self.assertEqual(se.items[1].basic_rate, 50)
+		self.assertEqual(se.value_difference, 0.0)
+		self.assertEqual(se.total_incoming_value, se.total_outgoing_value)
+
+		# teardown
+		se.delete()
+
 	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_future_negative_sle(self):
 		# Initialize item, batch, warehouse, opening qty
@@ -1075,38 +1106,6 @@ class TestStockEntry(ERPNextTestCase):
 				batch_no=batch_nos[1],
 				posting_date='2021-09-02', # backdated consumption of 2nd batch
 				purpose='Material Issue')
-
-	def test_independent_manufacture_entry(self):
-		"Test FG items and incoming rate calculation in Maniufacture Entry without WO or BOM linked."
-		se = frappe.get_doc(
-			doctype="Stock Entry",
-			purpose="Manufacture",
-			stock_entry_type="Manufacture",
-			company="_Test Company",
-			items=[
-				frappe._dict(item_code="_Test Item", qty=1, basic_rate=200, s_warehouse="_Test Warehouse - _TC"),
-				frappe._dict(item_code="_Test FG Item", qty=4, t_warehouse="_Test Warehouse 1 - _TC")
-			]
-		)
-		# SE must have atleast one FG
-		self.assertRaises(FinishedGoodError, se.save)
-
-		se.items[0].is_finished_item = 1
-		se.items[1].is_finished_item = 1
-		# SE cannot have multiple FGs
-		self.assertRaises(FinishedGoodError, se.save)
-
-		se.items[0].is_finished_item = 0
-		se.save()
-
-		# Check if FG cost is calculated based on RM total cost
-		# RM total cost = 200, FG rate = 200/4(FG qty) =  50
-		self.assertEqual(se.items[1].basic_rate, 50)
-		self.assertEqual(se.value_difference, 0.0)
-		self.assertEqual(se.total_incoming_value, se.total_outgoing_value)
-
-		# teardown
-		se.delete()
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)

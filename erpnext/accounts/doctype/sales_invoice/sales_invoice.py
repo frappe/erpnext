@@ -18,7 +18,6 @@ from frappe.utils import (
 	getdate,
 	nowdate,
 )
-from six import iteritems
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
@@ -39,7 +38,6 @@ from erpnext.assets.doctype.asset.depreciation import (
 	make_depreciation_entry,
 )
 from erpnext.controllers.selling_controller import SellingController
-from erpnext.healthcare.utils import manage_invoice_submit_cancel
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.stock.doctype.batch.batch import set_batch_nos
@@ -262,13 +260,6 @@ class SalesInvoice(SellingController):
 		if self.redeem_loyalty_points and not self.is_consolidated and self.loyalty_points:
 			self.apply_loyalty_points()
 
-		# Healthcare Service Invoice.
-		domain_settings = frappe.get_doc('Domain Settings')
-		active_domains = [d.domain for d in domain_settings.active_domains]
-
-		if "Healthcare" in active_domains:
-			manage_invoice_submit_cancel(self, "on_submit")
-
 		self.process_common_party_accounting()
 
 	def validate_pos_return(self):
@@ -353,12 +344,6 @@ class SalesInvoice(SellingController):
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
-		# Healthcare Service Invoice.
-		domain_settings = frappe.get_doc('Domain Settings')
-		active_domains = [d.domain for d in domain_settings.active_domains]
-
-		if "Healthcare" in active_domains:
-			manage_invoice_submit_cancel(self, "on_cancel")
 		self.unlink_sales_invoice_from_timesheets()
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
 
@@ -552,7 +537,7 @@ class SalesInvoice(SellingController):
 			for item in self.get("items"):
 				if item.get('item_code'):
 					profile_details = get_pos_profile_item_details(pos, frappe._dict(item.as_dict()), pos, update_data=True)
-					for fname, val in iteritems(profile_details):
+					for fname, val in profile_details.items():
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
 
@@ -587,10 +572,7 @@ class SalesInvoice(SellingController):
 			frappe.throw(msg, title=_("Invalid Account"))
 
 		if self.customer and account.account_type != "Receivable":
-			msg = _("Please ensure {} account {} is a Receivable account.").format(
-				frappe.bold("Debit To"),
-				frappe.bold(self.debit_to)
-			) + " "
+			msg = _("Please ensure {} account is a Receivable account.").format(frappe.bold("Debit To")) + " "
 			msg += _("Change the account type to Receivable or select a different account.")
 			frappe.throw(msg, title=_("Invalid Account"))
 
@@ -661,7 +643,7 @@ class SalesInvoice(SellingController):
 			return
 
 		prev_doc_field_map = {'Sales Order': ['so_required', 'is_pos'],'Delivery Note': ['dn_required', 'update_stock']}
-		for key, value in iteritems(prev_doc_field_map):
+		for key, value in prev_doc_field_map.items():
 			if frappe.db.get_single_value('Selling Settings', value[0]) == 'Yes':
 
 				if frappe.get_value('Customer', self.customer, value[0]):
@@ -909,8 +891,10 @@ class SalesInvoice(SellingController):
 			)
 
 	def make_tax_gl_entries(self, gl_entries):
+		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+
 		for tax in self.get("taxes"):
-			amount, base_amount = self.get_tax_amounts(tax, self.enable_discount_accounting)
+			amount, base_amount = self.get_tax_amounts(tax, enable_discount_accounting)
 
 			if flt(tax.base_tax_amount_after_discount_amount):
 				account_currency = get_account_currency(tax.account_head)
@@ -941,6 +925,8 @@ class SalesInvoice(SellingController):
 
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
+		enable_discount_accounting = cint(frappe.db.get_single_value('Accounts Settings', 'enable_discount_accounting'))
+
 		for item in self.get("items"):
 			if flt(item.base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
@@ -975,7 +961,7 @@ class SalesInvoice(SellingController):
 						income_account = (item.income_account
 							if (not item.enable_deferred_revenue or self.is_return) else item.deferred_revenue_account)
 
-						amount, base_amount = self.get_amount_and_base_amount(item, self.enable_discount_accounting)
+						amount, base_amount = self.get_amount_and_base_amount(item, enable_discount_accounting)
 
 						account_currency = get_account_currency(income_account)
 						gl_entries.append(
@@ -1263,14 +1249,14 @@ class SalesInvoice(SellingController):
 	def update_billing_status_in_dn(self, update_modified=True):
 		updated_delivery_notes = []
 		for d in self.get("items"):
-			if d.so_detail:
-				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
-			elif d.dn_detail:
+			if d.dn_detail:
 				billed_amt = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item`
 					where dn_detail=%s and docstatus=1""", d.dn_detail)
 				billed_amt = billed_amt and billed_amt[0][0] or 0
 				frappe.db.set_value("Delivery Note Item", d.dn_detail, "billed_amt", billed_amt, update_modified=update_modified)
 				updated_delivery_notes.append(d.delivery_note)
+			elif d.so_detail:
+				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
 
 		for dn in set(updated_delivery_notes):
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
@@ -1458,45 +1444,6 @@ class SalesInvoice(SellingController):
 			points_to_redeem -= redeemed_points
 			if points_to_redeem < 1: # since points_to_redeem is integer
 				break
-
-	# Healthcare
-	@frappe.whitelist()
-	def set_healthcare_services(self, checked_values):
-		self.set("items", [])
-		from erpnext.stock.get_item_details import get_item_details
-		for checked_item in checked_values:
-			item_line = self.append("items", {})
-			price_list, price_list_currency = frappe.db.get_values("Price List", {"selling": 1}, ['name', 'currency'])[0]
-			args = {
-				'doctype': "Sales Invoice",
-				'item_code': checked_item['item'],
-				'company': self.company,
-				'customer': frappe.db.get_value("Patient", self.patient, "customer"),
-				'selling_price_list': price_list,
-				'price_list_currency': price_list_currency,
-				'plc_conversion_rate': 1.0,
-				'conversion_rate': 1.0
-			}
-			item_details = get_item_details(args)
-			item_line.item_code = checked_item['item']
-			item_line.qty = 1
-			if checked_item['qty']:
-				item_line.qty = checked_item['qty']
-			if checked_item['rate']:
-				item_line.rate = checked_item['rate']
-			else:
-				item_line.rate = item_details.price_list_rate
-			item_line.amount = float(item_line.rate) * float(item_line.qty)
-			if checked_item['income_account']:
-				item_line.income_account = checked_item['income_account']
-			if checked_item['dt']:
-				item_line.reference_dt = checked_item['dt']
-			if checked_item['dn']:
-				item_line.reference_dn = checked_item['dn']
-			if checked_item['description']:
-				item_line.description = checked_item['description']
-
-		self.set_missing_values(for_validate = True)
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():

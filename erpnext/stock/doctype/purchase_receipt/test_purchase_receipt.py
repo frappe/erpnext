@@ -4,11 +4,9 @@
 
 import json
 import unittest
-from collections import defaultdict
 
 import frappe
 from frappe.utils import add_days, cint, cstr, flt, today
-from six import iteritems
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -18,7 +16,7 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchas
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError, get_serial_nos
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import SerialNoExistsInFutureTransaction
-from erpnext.tests.utils import ERPNextTestCase, change_settings
+from erpnext.tests.utils import ERPNextTestCase
 
 
 class TestPurchaseReceipt(ERPNextTestCase):
@@ -432,27 +430,23 @@ class TestPurchaseReceipt(ERPNextTestCase):
 		item_code = "_Test Subcontracted FG Item 1"
 		make_subcontracted_item(item_code=item_code)
 
-		po = create_purchase_order(
-			item_code=item_code,
-			qty=1, include_exploded_items=0,
-			is_subcontracted="Yes",
-			supplier_warehouse="_Test Warehouse 1 - _TC"
-		)
+		po = create_purchase_order(item_code=item_code, qty=1, include_exploded_items=0,
+			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		# stock raw materials in a warehouse before transfer
-		se1 = make_stock_entry(
+		make_stock_entry(
 			target="_Test Warehouse - _TC",
-			item_code="Test Extra Item 1",
+			item_code = "Test Extra Item 1",
 			qty=10, basic_rate=100
 		)
-		se2 = make_stock_entry(
+		make_stock_entry(
 			target="_Test Warehouse - _TC",
-			item_code="_Test FG Item",
+			item_code = "_Test FG Item",
 			qty=1, basic_rate=100
 		)
-		se3 = make_stock_entry(
+		make_stock_entry(
 			target="_Test Warehouse - _TC",
-			item_code="Test Extra Item 2",
+			item_code = "Test Extra Item 2",
 			qty=1, basic_rate=100
 		)
 
@@ -485,21 +479,7 @@ class TestPurchaseReceipt(ERPNextTestCase):
 
 		pr1.submit()
 		self.assertRaises(frappe.ValidationError, pr2.submit)
-
-		pr1.cancel()
-		se.cancel()
-		se1.cancel()
-		se2.cancel()
-		se3.cancel()
-		po.reload()
-		pr2.load_from_db()
-
-		if pr2.docstatus == 1 and frappe.db.get_value('Stock Ledger Entry',
-			{'voucher_no': pr2.name, 'is_cancelled': 0}, 'name'):
-			pr2.cancel()
-
-			po.load_from_db()
-			po.cancel()
+		frappe.db.rollback()
 
 	def test_serial_no_supplier(self):
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
@@ -711,7 +691,7 @@ class TestPurchaseReceipt(ERPNextTestCase):
 	def test_purchase_return_for_serialized_items(self):
 		def _check_serial_no_values(serial_no, field_values):
 			serial_no = frappe.get_doc("Serial No", serial_no)
-			for field, value in iteritems(field_values):
+			for field, value in field_values.items():
 				self.assertEqual(cstr(serial_no.get(field)), value)
 
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -1060,8 +1040,8 @@ class TestPurchaseReceipt(ERPNextTestCase):
 		pr1.items[0].purchase_receipt_item = pr.items[0].name
 		pr1.submit()
 
-		pi = make_purchase_invoice(pr.name)
-		self.assertEqual(pi.items[0].qty, 3)
+		pi1 = make_purchase_invoice(pr.name)
+		self.assertEqual(pi1.items[0].qty, 3)
 
 		pr1.cancel()
 		pr.reload()
@@ -1332,6 +1312,46 @@ class TestPurchaseReceipt(ERPNextTestCase):
 		self.assertEqual(pr.status, "To Bill")
 		self.assertAlmostEqual(pr.per_billed, 50.0, places=2)
 
+	def test_purchase_receipt_with_exchange_rate_difference(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
+			make_purchase_receipt as create_purchase_receipt,
+		)
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+			make_purchase_invoice as create_purchase_invoice,
+		)
+
+		pi = create_purchase_invoice(company="_Test Company with perpetual inventory",
+			cost_center = "Main - TCP1",
+			warehouse = "Stores - TCP1",
+			expense_account ="_Test Account Cost for Goods Sold - TCP1",
+			currency = "USD", conversion_rate = 70)
+
+		pr = create_purchase_receipt(pi.name)
+		pr.conversion_rate = 80
+		pr.items[0].purchase_invoice = pi.name
+		pr.items[0].purchase_invoice_item = pi.items[0].name
+
+		pr.save()
+		pr.submit()
+
+		# Get exchnage gain and loss account
+		exchange_gain_loss_account = frappe.db.get_value(
+			'Company', pr.company, 'exchange_gain_loss_account'
+		)
+
+		# fetching the latest GL Entry with exchange gain and loss account account
+		amount = frappe.db.get_value(
+			'GL Entry',
+			{
+				'account': exchange_gain_loss_account,
+				'voucher_no': pr.name
+			},
+			'credit'
+		)
+		discrepancy_caused_by_exchange_rate_diff = abs(pi.items[0].base_net_amount - pr.items[0].base_net_amount)
+
+		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
+
 	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
@@ -1347,7 +1367,6 @@ class TestPurchaseReceipt(ERPNextTestCase):
 		)
 
 		automatically_fetch_payment_terms()
-
 
 		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
 		create_payment_terms_template()
@@ -1367,36 +1386,6 @@ class TestPurchaseReceipt(ERPNextTestCase):
 		compare_payment_schedules(self, po, pi)
 
 		automatically_fetch_payment_terms(enable=0)
-
-	@change_settings("Stock Settings", {"allow_negative_stock": 1})
-	def test_neg_to_positive(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-
-		item_code = "_TestNegToPosItem"
-		warehouse = "Stores - TCP1"
-		company = "_Test Company with perpetual inventory"
-		account = "Stock Received But Not Billed - TCP1"
-
-		make_item(item_code)
-		se = make_stock_entry(item_code=item_code, from_warehouse=warehouse, qty=50, do_not_save=True, rate=0)
-		se.items[0].allow_zero_valuation_rate = 1
-		se.save()
-		se.submit()
-
-		pr = make_purchase_receipt(
-			qty=50,
-			rate=1,
-			item_code=item_code,
-			warehouse=warehouse,
-			get_taxes_and_charges=True,
-			company=company,
-		)
-		gles = get_gl_entries(pr.doctype, pr.name)
-
-		for gle in gles:
-			if gle.account == account:
-				self.assertEqual(gle.credit, 50)
-
 
 def get_sl_entries(voucher_type, voucher_no):
 	return frappe.db.sql(""" select actual_qty, warehouse, stock_value_difference

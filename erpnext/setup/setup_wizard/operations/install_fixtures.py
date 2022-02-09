@@ -33,7 +33,6 @@ def install(country=None):
 		{ 'doctype': 'Domain', 'domain': 'Services'},
 		{ 'doctype': 'Domain', 'domain': 'Education'},
 		{ 'doctype': 'Domain', 'domain': 'Healthcare'},
-		{ 'doctype': 'Domain', 'domain': 'Agriculture'},
 		{ 'doctype': 'Domain', 'domain': 'Non Profit'},
 
 		# ensure at least an empty Address Template exists for this Country
@@ -201,7 +200,6 @@ def install(country=None):
 		{'doctype': "Party Type", "party_type": "Student", "account_type": "Receivable"},
 		{'doctype': "Party Type", "party_type": "Donor", "account_type": "Receivable"},
 
-		{'doctype': "Opportunity Type", "name": "Hub"},
 		{'doctype': "Opportunity Type", "name": _("Sales")},
 		{'doctype': "Opportunity Type", "name": _("Support")},
 		{'doctype': "Opportunity Type", "name": _("Maintenance")},
@@ -278,6 +276,11 @@ def install(country=None):
 
 	records += [{'doctype': 'Email Template', 'name': _('Interview Feedback Reminder'), 'response': response,
 		'subject': _('Interview Feedback Reminder'), 'owner': frappe.session.user}]
+
+	response = frappe.read_file(os.path.join(base_path, 'exit_interview/exit_questionnaire_notification_template.html'))
+
+	records += [{'doctype': 'Email Template', 'name': _('Exit Questionnaire Notification'), 'response': response,
+		'subject': _('Exit Questionnaire Notification'), 'owner': frappe.session.user}]
 
 	base_path = frappe.get_app_path("erpnext", "stock", "doctype")
 	response = frappe.read_file(os.path.join(base_path, "delivery_trip/dispatch_notification_template.html"))
@@ -449,7 +452,6 @@ def install_post_company_fixtures(args=None):
 	frappe.local.flags.ignore_update_nsm = True
 	make_records(records[1:])
 	frappe.local.flags.ignore_update_nsm = False
-
 	rebuild_tree("Department", "parent_department")
 
 
@@ -533,7 +535,7 @@ def create_bank_account(args):
 			# bank account same as a CoA entry
 			pass
 
-def update_shopping_cart_settings(args):
+def update_shopping_cart_settings(args): # nosemgrep
 	shopping_cart = frappe.get_doc("E Commerce Settings")
 	shopping_cart.update({
 		"enabled": 1,

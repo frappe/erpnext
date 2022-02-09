@@ -9,7 +9,6 @@ import frappe.defaults
 from frappe import _, throw
 from frappe.model.meta import get_field_precision
 from frappe.utils import cint, cstr, flt, formatdate, get_number_format_info, getdate, now, nowdate
-from six import string_types
 
 import erpnext
 
@@ -579,7 +578,7 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 
 @frappe.whitelist()
 def get_company_default(company, fieldname, ignore_validation=False):
-	value = frappe.get_cached_value('Company', company, fieldname)
+	value = frappe.get_cached_value('Company',  company,  fieldname)
 
 	if not ignore_validation and not value:
 		throw(_("Please set default {0} in Company {1}")
@@ -795,7 +794,7 @@ def get_children(doctype, parent, company, is_root=False):
 @frappe.whitelist()
 def get_account_balances(accounts, company):
 
-	if isinstance(accounts, string_types):
+	if isinstance(accounts, str):
 		accounts = loads(accounts)
 
 	if not accounts:

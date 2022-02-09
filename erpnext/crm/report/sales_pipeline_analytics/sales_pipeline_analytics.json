@@ -1,0 +1,29 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2021-07-01 17:29:09.530787",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2021-07-01 17:45:17.612861",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Sales Pipeline Analytics",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Opportunity",
+ "report_name": "Sales Pipeline Analytics",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Sales Manager"
+  }
+ ]
+}

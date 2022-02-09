@@ -5,14 +5,14 @@
 frappe.provide("erpnext.accounts");
 
 
-erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
-	setup: function(doc) {
+erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends erpnext.selling.SellingController {
+	setup(doc) {
 		this.setup_posting_date_time_check();
-		this._super(doc);
-	},
-
-	company: function() {
+		super.setup(doc);
+	}
+	company() {
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+
 		let me = this;
 		if (this.frm.doc.company) {
 			frappe.call({
@@ -28,11 +28,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				},
 			});
 		}
-	},
-
-	onload: function() {
+	}
+	onload() {
 		var me = this;
-		this._super();
+		super.onload();
 
 		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice', 'Timesheet', 'POS Invoice Merge Log', 'POS Closing Entry'];
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
@@ -52,11 +51,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 		erpnext.queries.setup_warehouse_query(this.frm);
 		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
-	},
+	}
 
-	refresh: function(doc, dt, dn) {
+	refresh(doc, dt, dn) {
 		const me = this;
-		this._super();
+		super.refresh();
 		if(cur_frm.msgbox && cur_frm.msgbox.$wrapper.is(":visible")) {
 			// hide new msgbox
 			cur_frm.msgbox.hide();
@@ -155,28 +154,28 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}, __('Create'));
 			}
 		}
-	},
+	}
 
-	make_maintenance_schedule: function() {
+	make_maintenance_schedule() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_maintenance_schedule",
 			frm: cur_frm
 		})
-	},
+	}
 
-	on_submit: function(doc, dt, dn) {
+	on_submit(doc, dt, dn) {
 		var me = this;
 
 		if (frappe.get_route()[0] != 'Form') {
 			return
 		}
 
-		$.each(doc["items"], function(i, row) {
+		doc.items.forEach((row) => {
 			if(row.delivery_note) frappe.model.clear_doc("Delivery Note", row.delivery_note)
-		})
-	},
+		});
+	}
 
-	set_default_print_format: function() {
+	set_default_print_format() {
 		// set default print format to POS type or Credit Note
 		if(cur_frm.doc.is_pos) {
 			if(cur_frm.pos_print_format) {
@@ -197,9 +196,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				cur_frm.meta._default_print_format = null;
 			}
 		}
-	},
+	}
 
-	sales_order_btn: function() {
+	sales_order_btn() {
 		var me = this;
 		this.$sales_order_btn = this.frm.add_custom_button(__('Sales Order'),
 			function() {
@@ -218,9 +217,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					}
 				})
 			}, __("Get Items From"));
-	},
+	}
 
-	quotation_btn: function() {
+	quotation_btn() {
 		var me = this;
 		this.$quotation_btn = this.frm.add_custom_button(__('Quotation'),
 			function() {
@@ -242,9 +241,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					}
 				})
 			}, __("Get Items From"));
-	},
+	}
 
-	delivery_note_btn: function() {
+	delivery_note_btn() {
 		var me = this;
 		this.$delivery_note_btn = this.frm.add_custom_button(__('Delivery Note'),
 			function() {
@@ -270,12 +269,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					}
 				});
 			}, __("Get Items From"));
-	},
+	}
 
-	tc_name: function() {
+	tc_name() {
 		this.get_terms();
-	},
-	customer: function() {
+	}
+	customer() {
 		if (this.frm.doc.is_pos){
 			var pos_profile = this.frm.doc.pos_profile;
 		}
@@ -306,16 +305,16 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			});
 		}
-	},
+	}
 
-	make_inter_company_invoice: function() {
+	make_inter_company_invoice() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_inter_company_purchase_invoice",
 			frm: me.frm
 		});
-	},
+	}
 
-	debit_to: function() {
+	debit_to() {
 		var me = this;
 		if(this.frm.doc.debit_to) {
 			me.frm.call({
@@ -333,12 +332,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			});
 		}
-	},
+	}
 
-	allocated_amount: function() {
+	allocated_amount() {
 		this.calculate_total_advance();
 		this.frm.refresh_fields();
-	},
+	}
 
 	write_off_outstanding_amount_automatically() {
 		if (cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
@@ -351,39 +350,39 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		this.calculate_outstanding_amount(false);
 		this.frm.refresh_fields();
-	},
+	}
 
-	write_off_amount: function() {
+	write_off_amount() {
 		this.set_in_company_currency(this.frm.doc, ["write_off_amount"]);
 		this.write_off_outstanding_amount_automatically();
-	},
+	}
 
-	items_add: function(doc, cdt, cdn) {
+	items_add(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("items", row, ["income_account", "discount_account", "cost_center"]);
-	},
+	}
 
-	set_dynamic_labels: function() {
-		this._super();
+	set_dynamic_labels() {
+		super.set_dynamic_labels();
 		this.frm.events.hide_fields(this.frm)
-	},
+	}
 
-	items_on_form_rendered: function() {
+	items_on_form_rendered() {
 		erpnext.setup_serial_or_batch_no();
-	},
+	}
 
-	packed_items_on_form_rendered: function(doc, grid_row) {
+	packed_items_on_form_rendered(doc, grid_row) {
 		erpnext.setup_serial_or_batch_no();
-	},
+	}
 
-	make_sales_return: function() {
+	make_sales_return() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_return",
 			frm: cur_frm
 		})
-	},
+	}
 
-	asset: function(frm, cdt, cdn) {
+	asset(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if(row.asset) {
 			frappe.call({
@@ -397,18 +396,18 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			})
 		}
-	},
+	}
 
-	is_pos: function(frm){
+	is_pos(frm){
 		this.set_pos_data();
-	},
+	}
 
-	pos_profile: function() {
+	pos_profile() {
 		this.frm.doc.taxes = []
 		this.set_pos_data();
-	},
+	}
 
-	set_pos_data: function() {
+	set_pos_data() {
 		if(this.frm.doc.is_pos) {
 			this.frm.set_value("allocate_advances_automatically", 0);
 			if(!this.frm.doc.company) {
@@ -438,13 +437,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}
 		}
 		else this.frm.trigger("refresh");
-	},
+	}
 
-	amount: function(){
+	amount(){
 		this.write_off_outstanding_amount_automatically()
-	},
+	}
 
-	change_amount: function(){
+	change_amount(){
 		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
 			this.calculate_write_off_amount();
 		}else {
@@ -453,30 +452,30 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 
 		this.frm.refresh_fields();
-	},
+	}
 
-	loyalty_amount: function(){
+	loyalty_amount(){
 		this.calculate_outstanding_amount();
 		this.frm.refresh_field("outstanding_amount");
 		this.frm.refresh_field("paid_amount");
 		this.frm.refresh_field("base_paid_amount");
-	},
+	}
 
 	currency() {
 		var me = this;
-		this._super();
+		super.currency();
 		if (this.frm.doc.timesheets) {
 			this.frm.doc.timesheets.forEach((d) => {
 				let row = frappe.get_doc(d.doctype, d.name)
 				set_timesheet_detail_rate(row.doctype, row.name, me.frm.doc.currency, row.timesheet_detail)
 			});
-			frm.trigger("calculate_timesheet_totals");
+			this.frm.trigger("calculate_timesheet_totals");
 		}
 	}
-});
+};
 
 // for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_frm}));
 
 cur_frm.cscript['Make Delivery Note'] = function() {
 	frappe.model.open_mapped_doc({
@@ -1008,13 +1007,11 @@ frappe.ui.form.on('Sales Invoice', {
 	}
 });
 
-
 frappe.ui.form.on("Sales Invoice Timesheet", {
 	timesheets_remove(frm) {
 		frm.trigger("calculate_timesheet_totals");
 	}
 });
-
 
 var set_timesheet_detail_rate = function(cdt, cdn, currency, timelog) {
 	frappe.call({
@@ -1061,276 +1058,3 @@ var select_loyalty_program = function(frm, loyalty_programs) {
 
 	dialog.show();
 }
-
-// Healthcare
-var get_healthcare_services_to_invoice = function(frm) {
-	var me = this;
-	let selected_patient = '';
-	var dialog = new frappe.ui.Dialog({
-		title: __("Get Items from Healthcare Services"),
-		fields:[
-			{
-				fieldtype: 'Link',
-				options: 'Patient',
-				label: 'Patient',
-				fieldname: "patient",
-				reqd: true
-			},
-			{ fieldtype: 'Section Break'	},
-			{ fieldtype: 'HTML', fieldname: 'results_area' }
-		]
-	});
-	var $wrapper;
-	var $results;
-	var $placeholder;
-	dialog.set_values({
-		'patient': frm.doc.patient
-	});
-	dialog.fields_dict["patient"].df.onchange = () => {
-		var patient = dialog.fields_dict.patient.input.value;
-		if(patient && patient!=selected_patient){
-			selected_patient = patient;
-			var method = "erpnext.healthcare.utils.get_healthcare_services_to_invoice";
-			var args = {patient: patient, company: frm.doc.company};
-			var columns = (["service", "reference_name", "reference_type"]);
-			get_healthcare_items(frm, true, $results, $placeholder, method, args, columns);
-		}
-		else if(!patient){
-			selected_patient = '';
-			$results.empty();
-			$results.append($placeholder);
-		}
-	}
-	$wrapper = dialog.fields_dict.results_area.$wrapper.append(`<div class="results"
-		style="border: 1px solid #d1d8dd; border-radius: 3px; height: 300px; overflow: auto;"></div>`);
-	$results = $wrapper.find('.results');
-	$placeholder = $(`<div class="multiselect-empty-state">
-				<span class="text-center" style="margin-top: -40px;">
-					<i class="fa fa-2x fa-heartbeat text-extra-muted"></i>
-					<p class="text-extra-muted">No billable Healthcare Services found</p>
-				</span>
-			</div>`);
-	$results.on('click', '.list-item--head :checkbox', (e) => {
-		$results.find('.list-item-container .list-row-check')
-			.prop("checked", ($(e.target).is(':checked')));
-	});
-	set_primary_action(frm, dialog, $results, true);
-	dialog.show();
-};
-
-var get_healthcare_items = function(frm, invoice_healthcare_services, $results, $placeholder, method, args, columns) {
-	var me = this;
-	$results.empty();
-	frappe.call({
-		method: method,
-		args: args,
-		callback: function(data) {
-			if(data.message){
-				$results.append(make_list_row(columns, invoice_healthcare_services));
-				for(let i=0; i<data.message.length; i++){
-					$results.append(make_list_row(columns, invoice_healthcare_services, data.message[i]));
-				}
-			}else {
-				$results.append($placeholder);
-			}
-		}
-	});
-}
-
-var make_list_row= function(columns, invoice_healthcare_services, result={}) {
-	var me = this;
-	// Make a head row by default (if result not passed)
-	let head = Object.keys(result).length === 0;
-	let contents = ``;
-	columns.forEach(function(column) {
-		contents += `<div class="list-item__content ellipsis">
-			${
-				head ? `<span class="ellipsis">${__(frappe.model.unscrub(column))}</span>`
-
-				:(column !== "name" ? `<span class="ellipsis">${__(result[column])}</span>`
-					: `<a class="list-id ellipsis">
-						${__(result[column])}</a>`)
-			}
-		</div>`;
-	})
-
-	let $row = $(`<div class="list-item">
-		<div class="list-item__content" style="flex: 0 0 10px;">
-			<input type="checkbox" class="list-row-check" ${result.checked ? 'checked' : ''}>
-		</div>
-		${contents}
-	</div>`);
-
-	$row = list_row_data_items(head, $row, result, invoice_healthcare_services);
-	return $row;
-};
-
-var set_primary_action= function(frm, dialog, $results, invoice_healthcare_services) {
-	var me = this;
-	dialog.set_primary_action(__('Add'), function() {
-		let checked_values = get_checked_values($results);
-		if(checked_values.length > 0){
-			if(invoice_healthcare_services) {
-				frm.set_value("patient", dialog.fields_dict.patient.input.value);
-			}
-			frm.set_value("items", []);
-			add_to_item_line(frm, checked_values, invoice_healthcare_services);
-			dialog.hide();
-		}
-		else{
-			if(invoice_healthcare_services){
-				frappe.msgprint(__("Please select Healthcare Service"));
-			}
-			else{
-				frappe.msgprint(__("Please select Drug"));
-			}
-		}
-	});
-};
-
-var get_checked_values= function($results) {
-	return $results.find('.list-item-container').map(function() {
-		let checked_values = {};
-		if ($(this).find('.list-row-check:checkbox:checked').length > 0 ) {
-			checked_values['dn'] = $(this).attr('data-dn');
-			checked_values['dt'] = $(this).attr('data-dt');
-			checked_values['item'] = $(this).attr('data-item');
-			if($(this).attr('data-rate') != 'undefined'){
-				checked_values['rate'] = $(this).attr('data-rate');
-			}
-			else{
-				checked_values['rate'] = false;
-			}
-			if($(this).attr('data-income-account') != 'undefined'){
-				checked_values['income_account'] = $(this).attr('data-income-account');
-			}
-			else{
-				checked_values['income_account'] = false;
-			}
-			if($(this).attr('data-qty') != 'undefined'){
-				checked_values['qty'] = $(this).attr('data-qty');
-			}
-			else{
-				checked_values['qty'] = false;
-			}
-			if($(this).attr('data-description') != 'undefined'){
-				checked_values['description'] = $(this).attr('data-description');
-			}
-			else{
-				checked_values['description'] = false;
-			}
-			return checked_values;
-		}
-	}).get();
-};
-
-var get_drugs_to_invoice = function(frm) {
-	var me = this;
-	let selected_encounter = '';
-	var dialog = new frappe.ui.Dialog({
-		title: __("Get Items from Prescriptions"),
-		fields:[
-			{ fieldtype: 'Link', options: 'Patient', label: 'Patient', fieldname: "patient", reqd: true },
-			{ fieldtype: 'Link', options: 'Patient Encounter', label: 'Patient Encounter', fieldname: "encounter", reqd: true,
-				description:'Quantity will be calculated only for items which has "Nos" as UoM. You may change as required for each invoice item.',
-				get_query: function(doc) {
-					return {
-						filters: {
-							patient: dialog.get_value("patient"),
-							company: frm.doc.company,
-							docstatus: 1
-						}
-					};
-				}
-			},
-			{ fieldtype: 'Section Break' },
-			{ fieldtype: 'HTML', fieldname: 'results_area' }
-		]
-	});
-	var $wrapper;
-	var $results;
-	var $placeholder;
-	dialog.set_values({
-		'patient': frm.doc.patient,
-		'encounter': ""
-	});
-	dialog.fields_dict["encounter"].df.onchange = () => {
-		var encounter = dialog.fields_dict.encounter.input.value;
-		if(encounter && encounter!=selected_encounter){
-			selected_encounter = encounter;
-			var method = "erpnext.healthcare.utils.get_drugs_to_invoice";
-			var args = {encounter: encounter};
-			var columns = (["drug_code", "quantity", "description"]);
-			get_healthcare_items(frm, false, $results, $placeholder, method, args, columns);
-		}
-		else if(!encounter){
-			selected_encounter = '';
-			$results.empty();
-			$results.append($placeholder);
-		}
-	}
-	$wrapper = dialog.fields_dict.results_area.$wrapper.append(`<div class="results"
-		style="border: 1px solid #d1d8dd; border-radius: 3px; height: 300px; overflow: auto;"></div>`);
-	$results = $wrapper.find('.results');
-	$placeholder = $(`<div class="multiselect-empty-state">
-				<span class="text-center" style="margin-top: -40px;">
-					<i class="fa fa-2x fa-heartbeat text-extra-muted"></i>
-					<p class="text-extra-muted">No Drug Prescription found</p>
-				</span>
-			</div>`);
-	$results.on('click', '.list-item--head :checkbox', (e) => {
-		$results.find('.list-item-container .list-row-check')
-			.prop("checked", ($(e.target).is(':checked')));
-	});
-	set_primary_action(frm, dialog, $results, false);
-	dialog.show();
-};
-
-var list_row_data_items = function(head, $row, result, invoice_healthcare_services) {
-	if(invoice_healthcare_services){
-		head ? $row.addClass('list-item--head')
-			: $row = $(`<div class="list-item-container"
-				data-dn= "${result.reference_name}" data-dt= "${result.reference_type}" data-item= "${result.service}"
-				data-rate = ${result.rate}
-				data-income-account = "${result.income_account}"
-				data-qty = ${result.qty}
-				data-description = "${result.description}">
-				</div>`).append($row);
-	}
-	else{
-		head ? $row.addClass('list-item--head')
-			: $row = $(`<div class="list-item-container"
-				data-item= "${result.drug_code}"
-				data-qty = ${result.quantity}
-				data-description = "${result.description}">
-				</div>`).append($row);
-	}
-	return $row
-};
-
-var add_to_item_line = function(frm, checked_values, invoice_healthcare_services){
-	if(invoice_healthcare_services){
-		frappe.call({
-			doc: frm.doc,
-			method: "set_healthcare_services",
-			args:{
-				checked_values: checked_values
-			},
-			callback: function() {
-				frm.trigger("validate");
-				frm.refresh_fields();
-			}
-		});
-	}
-	else{
-		for(let i=0; i<checked_values.length; i++){
-			var si_item = frappe.model.add_child(frm.doc, 'Sales Invoice Item', 'items');
-			frappe.model.set_value(si_item.doctype, si_item.name, 'item_code', checked_values[i]['item']);
-			frappe.model.set_value(si_item.doctype, si_item.name, 'qty', 1);
-			if(checked_values[i]['qty'] > 1){
-				frappe.model.set_value(si_item.doctype, si_item.name, 'qty', parseFloat(checked_values[i]['qty']));
-			}
-		}
-		frm.refresh_fields();
-	}
-};

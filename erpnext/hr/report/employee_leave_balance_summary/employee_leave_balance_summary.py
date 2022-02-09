@@ -47,7 +47,7 @@ def get_data(filters, leave_types):
 	user = frappe.session.user
 	conditions = get_conditions(filters)
 
-	active_employees = frappe.get_all("Employee",
+	active_employees = frappe.get_list("Employee",
 		filters=conditions,
 		fields=["name", "employee_name", "department", "user_id", "leave_approver"])
 

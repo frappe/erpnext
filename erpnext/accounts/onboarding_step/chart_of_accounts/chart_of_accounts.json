@@ -1,10 +1,10 @@
 {
- "action": "Go to Page",
- "action_label": "View Chart of Accounts",
+ "action": "Watch Video",
+ "action_label": "Learn more about Chart of Accounts",
  "callback_message": "You can continue with the onboarding after exploring this page",
  "callback_title": "Awesome Work",
  "creation": "2020-05-13 19:58:20.928127",
- "description": "# Chart Of Accounts\n\nThe Chart of Accounts is the blueprint of the accounts in your organization.\nIt is a tree view of the names of the Accounts (Ledgers and Groups) that a Company requires to manage its books of accounts. ERPNext sets up a simple chart of accounts for each Company you create, but you can modify it according to your needs and legal requirements.\n\nFor each company, Chart of Accounts signifies the way to classify the accounting entries, mostly\nbased on statutory (tax, compliance to government regulations) requirements.\n\nThere's a brief video tutorial about chart of accounts in the next step.",
+ "description": "# Chart Of Accounts\n\nERPNext sets up a simple chart of accounts for each Company you create, but you can modify it according to business and legal requirements.",
  "docstatus": 0,
  "doctype": "Onboarding Step",
  "idx": 0,
@@ -12,7 +12,7 @@
  "is_complete": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2020-10-30 14:35:59.474920",
+ "modified": "2021-08-13 11:46:25.878506",
  "modified_by": "Administrator",
  "name": "Chart of Accounts",
  "owner": "Administrator",
@@ -21,5 +21,6 @@
  "show_form_tour": 0,
  "show_full_form": 0,
  "title": "Review Chart of Accounts",
- "validate_action": 0
+ "validate_action": 0,
+ "video_url": "https://www.youtube.com/embed/AcfMCT7wLLo"
 }

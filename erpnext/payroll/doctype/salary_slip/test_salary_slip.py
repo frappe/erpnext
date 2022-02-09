@@ -192,7 +192,6 @@ class TestSalarySlip(unittest.TestCase):
 			create_salary_structure_assignment,
 		)
 
-		no_of_days = self.get_no_of_days()
 		# Payroll based on attendance
 		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Attendance")
 
@@ -218,9 +217,6 @@ class TestSalarySlip(unittest.TestCase):
 		# make salary slip and assert payment days
 		ss = make_salary_slip_for_payment_days_dependency_test("test_payment_days_based_component@salary.com", salary_structure.name)
 		self.assertEqual(ss.absent_days, 1)
-
-		days_in_month = no_of_days[0]
-		no_of_holidays = no_of_days[1]
 
 		ss.reload()
 		payment_days_based_comp_amount = 0
@@ -374,7 +370,6 @@ class TestSalarySlip(unittest.TestCase):
 		create_loan_type("Car Loan", 500000, 8.4,
 			is_term_loan=1,
 			mode_of_payment='Cash',
-			disbursement_account='Disbursement Account - _TC',
 			payment_account='Payment Account - _TC',
 			loan_account='Loan Account - _TC',
 			interest_income_account='Interest Income Account - _TC',
@@ -667,7 +662,6 @@ def make_employee_salary_slip(user, payroll_frequency, salary_structure=None):
 
 	if not salary_structure:
 		salary_structure = payroll_frequency + " Salary Structure Test for Salary Slip"
-
 
 	employee = frappe.db.get_value("Employee",
 					{
@@ -1019,7 +1013,7 @@ def setup_test():
 def make_holiday_list():
 	fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company())
 	holiday_list = frappe.db.exists("Holiday List", "Salary Slip Test Holiday List")
-	if not frappe.db.get_value("Holiday List", "Salary Slip Test Holiday List"):
+	if not holiday_list:
 		holiday_list = frappe.get_doc({
 			"doctype": "Holiday List",
 			"holiday_list_name": "Salary Slip Test Holiday List",
@@ -1102,13 +1096,14 @@ def make_salary_structure_for_payment_days_based_component_dependency():
 	return salary_structure_doc
 
 def make_salary_slip_for_payment_days_dependency_test(employee, salary_structure):
-	employee = frappe.db.get_value("Employee", {
-			"user_id": employee
-		},
+	employee = frappe.db.get_value(
+		"Employee",
+		{"user_id": employee},
 		["name", "company", "employee_name"],
-		as_dict=True)
+		as_dict=True
+	)
 
-	salary_slip_name = frappe.db.get_value("Salary Slip", {"employee": frappe.db.get_value("Employee", {"user_id": employee})})
+	salary_slip_name = frappe.db.get_value("Salary Slip", {"employee": employee.name})
 
 	if not salary_slip_name:
 		salary_slip = make_salary_slip(salary_structure, employee=employee.name)

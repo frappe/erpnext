@@ -11,7 +11,6 @@ import frappe
 from frappe import _, msgprint
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
-from six import string_types
 
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
@@ -277,7 +276,7 @@ def update_status(name, status):
 def make_purchase_order(source_name, target_doc=None, args=None):
 	if args is None:
 		args = {}
-	if isinstance(args, string_types):
+	if isinstance(args, str):
 		args = json.loads(args)
 
 	def postprocess(source, target_doc):

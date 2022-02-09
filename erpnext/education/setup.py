@@ -3,7 +3,6 @@
 
 
 import frappe
-
 from erpnext.setup.utils import insert_record
 
 

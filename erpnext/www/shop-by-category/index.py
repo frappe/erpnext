@@ -56,30 +56,22 @@ def get_category_records(categories):
 	categorical_data = {}
 	for category in categories:
 		if category == "item_group":
-			categorical_data["item_group"] = frappe.db.sql("""
-				Select
-					name, parent_item_group, is_group, image, route
-				from
-					`tabItem Group`
-				where
-					parent_item_group = 'All Item Groups'
-					and show_in_website = 1
-				""",
-				as_dict=1)
+			categorical_data["item_group"] = frappe.db.get_all(
+				"Item Group",
+				filters={
+					"parent_item_group": "All Item Groups",
+					"show_in_website": 1
+				},
+				fields=["name", "parent_item_group", "is_group", "image", "route"],
+				as_dict=True
+			)
 		else:
 			doctype = frappe.unscrub(category)
 			fields = ["name"]
 			if frappe.get_meta(doctype, cached=True).get_field("image"):
 				fields += ["image"]
 
-			categorical_data[category] = frappe.db.sql(
-				f"""
-					Select
-						{",".join(fields)}
-					from
-						`tab{doctype}`
-				""",
-				as_dict=1)
+			categorical_data[category] = frappe.db.get_all(doctype, fields=fields, as_dict=True)
 
 	return categorical_data
 

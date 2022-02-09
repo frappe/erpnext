@@ -5,7 +5,6 @@
 import frappe
 from frappe import _, scrub
 from frappe.utils import add_days, add_to_date, flt, getdate
-from six import iteritems
 
 from erpnext.accounts.utils import get_fiscal_year
 
@@ -226,7 +225,7 @@ class Analytics(object):
 		self.data = []
 		self.get_periodic_data()
 
-		for entity, period_data in iteritems(self.entity_periodic_data):
+		for entity, period_data in self.entity_periodic_data.items():
 			row = {
 				"entity": entity,
 				"entity_name": self.entity_names.get(entity) if hasattr(self, 'entity_names') else None

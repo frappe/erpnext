@@ -1,4 +1,3 @@
-
 # ERPNext - web based ERP (http://erpnext.com)
 # Copyright (C) 2012 Frappe Technologies Pvt Ltd
 #

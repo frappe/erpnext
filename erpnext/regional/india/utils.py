@@ -1,4 +1,3 @@
-
 import json
 import re
 
@@ -6,7 +5,6 @@ import frappe
 from frappe import _
 from frappe.model.utils import get_fetch_values
 from frappe.utils import cint, cstr, date_diff, flt, getdate, nowdate
-from six import string_types
 
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
@@ -62,7 +60,7 @@ def validate_gstin_for_india(doc, method):
 				.format(doc.gst_state_number), title=_("Invalid GSTIN"))
 
 def validate_pan_for_india(doc, method):
-	if doc.get('country') != 'India' or not doc.pan:
+	if doc.get('country') != 'India' or not doc.get('pan'):
 		return
 
 	if not PAN_NUMBER_FORMAT.match(doc.pan):
@@ -194,7 +192,7 @@ def get_place_of_supply(party_details, doctype):
 
 @frappe.whitelist()
 def get_regional_address_details(party_details, doctype, company):
-	if isinstance(party_details, string_types):
+	if isinstance(party_details, str):
 		party_details = json.loads(party_details)
 		party_details = frappe._dict(party_details)
 
@@ -437,7 +435,7 @@ def get_ewb_data(dt, dn):
 		data = get_address_details(data, doc, company_address, billing_address, dispatch_address)
 
 		data.itemList = []
-		data.totalValue = doc.total
+		data.totalValue = doc.net_total
 
 		data = get_item_list(data, doc, hsn_wise=True)
 
@@ -782,7 +780,7 @@ def get_regional_round_off_accounts(company, account_list):
 	if country != 'India':
 		return
 
-	if isinstance(account_list, string_types):
+	if isinstance(account_list, str):
 		account_list = json.loads(account_list)
 
 	if not frappe.db.get_single_value('GST Settings', 'round_off_gst_values'):
@@ -894,4 +892,3 @@ def delete_gst_settings_for_company(doc, method):
 		gst_settings.remove(d)
 
 	gst_settings.save()
-

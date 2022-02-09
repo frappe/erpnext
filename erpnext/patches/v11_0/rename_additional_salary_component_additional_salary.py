@@ -1,4 +1,3 @@
-
 import frappe
 
 # this patch should have been included with this PR https://github.com/frappe/erpnext/pull/14302

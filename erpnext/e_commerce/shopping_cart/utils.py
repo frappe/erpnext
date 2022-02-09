@@ -1,7 +1,6 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 import frappe
-import frappe.defaults
 
 from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import is_cart_enabled
 

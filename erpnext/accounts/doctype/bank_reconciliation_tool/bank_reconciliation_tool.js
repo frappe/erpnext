@@ -14,12 +14,8 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 		});
 	},
 
-	onload: function (frm) {
-		frm.trigger('bank_account');
-	},
-
 	refresh: function (frm) {
-		frappe.require("assets/js/bank-reconciliation-tool.min.js", () =>
+		frappe.require("bank-reconciliation-tool.bundle.js", () =>
 			frm.trigger("make_reconciliation_tool")
 		);
 		frm.upload_statement_button = frm.page.set_secondary_action(
@@ -55,7 +51,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 	bank_account: function (frm) {
 		frappe.db.get_value(
 			"Bank Account",
-			frm.doc.bank_account,
+			frm.bank_account,
 			"account",
 			(r) => {
 				frappe.db.get_value(

@@ -1,4 +1,3 @@
-
 import frappe
 from frappe.model.db_query import DatabaseQuery
 from frappe.utils import cint, flt

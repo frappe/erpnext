@@ -4,13 +4,6 @@
 
 {% block header %}<h3 class="shopping-cart-header mt-2 mb-6">{{ _("Shopping Cart") }}</h1>{% endblock %}
 
-<!--
-{% block script %}
-<script>{% include "templates/includes/cart.js" %}</script>
-{% endblock %}
--->
-
-
 {% block header_actions %}
 {% endblock %}
 
@@ -133,9 +126,7 @@
 
 {% block base_scripts %}
 <!-- js should be loaded in body! -->
-<script type="text/javascript" src="/assets/frappe/js/lib/jquery/jquery.min.js"></script>
-<script type="text/javascript" src="/assets/js/frappe-web.min.js"></script>
-<script type="text/javascript" src="/assets/js/control.min.js"></script>
-<script type="text/javascript" src="/assets/js/dialog.min.js"></script>
-<script type="text/javascript" src="/assets/js/bootstrap-4-web.min.js"></script>
+{{ include_script("frappe-web.bundle.js") }}
+{{ include_script("controls.bundle.js") }}
+{{ include_script("dialog.bundle.js") }}
 {% endblock %}

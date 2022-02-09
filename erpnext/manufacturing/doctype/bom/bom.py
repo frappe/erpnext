@@ -154,8 +154,8 @@ class BOM(WebsiteGenerator):
 		self.validate_operations()
 		self.calculate_cost()
 		self.update_stock_qty()
-		self.validate_scrap_items()
 		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate = False, save=False)
+		self.validate_scrap_items()
 
 	def get_context(self, context):
 		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
@@ -203,6 +203,10 @@ class BOM(WebsiteGenerator):
 		for item in self.get("items"):
 			self.validate_bom_currency(item)
 
+			item.bom_no = ''
+			if not item.do_not_explode:
+				item.bom_no = item.bom_no
+
 			ret = self.get_bom_material_detail({
 				"company": self.company,
 				"item_code": item.item_code,
@@ -214,8 +218,10 @@ class BOM(WebsiteGenerator):
 				"uom": item.uom,
 				"stock_uom": item.stock_uom,
 				"conversion_factor": item.conversion_factor,
-				"sourced_by_supplier": item.sourced_by_supplier
+				"sourced_by_supplier": item.sourced_by_supplier,
+				"do_not_explode": item.do_not_explode
 			})
+
 			for r in ret:
 				if not item.get(r):
 					item.set(r, ret[r])
@@ -266,6 +272,9 @@ class BOM(WebsiteGenerator):
 			 'include_item_in_manufacturing': cint(args.get('transfer_for_manufacture')),
 			 'sourced_by_supplier'		: args.get('sourced_by_supplier', 0)
 		}
+
+		if args.get('do_not_explode'):
+			ret_item['bom_no'] = ''
 
 		return ret_item
 
@@ -702,6 +711,10 @@ class BOM(WebsiteGenerator):
 				if not d.batch_size or d.batch_size <= 0:
 					d.batch_size = 1
 
+	def get_tree_representation(self) -> BOMTree:
+		"""Get a complete tree representation preserving order of child items."""
+		return BOMTree(self.name)
+
 	def validate_scrap_items(self):
 		for item in self.scrap_items:
 			msg = ""
@@ -727,10 +740,6 @@ class BOM(WebsiteGenerator):
 
 			if msg:
 				frappe.throw(msg, title=_("Note"))
-
-	def get_tree_representation(self) -> BOMTree:
-		"""Get a complete tree representation preserving order of child items."""
-		return BOMTree(self.name)
 
 def get_bom_item_rate(args, bom_doc):
 	if bom_doc.rm_cost_as_per == 'Valuation Rate':
@@ -904,7 +913,7 @@ def validate_bom_no(item, bom_no):
 				rm_item_exists = True
 		if bom.item.lower() == item.lower() or \
 			bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower():
- 				rm_item_exists = True
+				rm_item_exists = True
 		if not rm_item_exists:
 			frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
 

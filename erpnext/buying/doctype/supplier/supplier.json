@@ -25,7 +25,6 @@
   "column_break0",
   "supplier_group",
   "supplier_type",
-  "pan",
   "allow_purchase_invoice_creation_without_purchase_order",
   "allow_purchase_invoice_creation_without_purchase_receipt",
   "disabled",
@@ -175,11 +174,6 @@
    "label": "Supplier Type",
    "options": "Company\nIndividual",
    "reqd": 1
-  },
-  {
-   "fieldname": "pan",
-   "fieldtype": "Data",
-   "label": "PAN"
   },
   {
    "fieldname": "language",
@@ -438,11 +432,12 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2021-09-06 17:37:56.522233",
+ "modified": "2021-10-20 22:03:33.147249",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
  "name_case": "Title Case",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

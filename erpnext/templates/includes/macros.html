@@ -339,7 +339,7 @@
 		<div class="filter-options">
 			{% for attr_value in attribute.item_attribute_values %}
 			<div class="checkbox">
-				<label>
+				<label data-value="{{ attr_value }}">
 					<input type="checkbox"
 						class="product-filter attribute-filter"
 						id="{{ attr_value }}"

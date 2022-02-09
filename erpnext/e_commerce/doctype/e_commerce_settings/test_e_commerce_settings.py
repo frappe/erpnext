@@ -1,6 +1,6 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
 import unittest
 
 import frappe
@@ -31,15 +31,17 @@ class TestECommerceSettings(unittest.TestCase):
 
 	# 	cart_settings = self.get_cart_settings()
 	# 	cart_settings.price_list = "_Test Price List Rest of the World"
-	# 	self.assertRaises(ShoppingCartSetupError, cart_settings.validate_price_list_exchange_rate)
+	# 	self.assertRaises(ShoppingCartSetupError, cart_settings.validate_exchange_rates_exist)
 
-	# 	from erpnext.setup.doctype.currency_exchange.test_currency_exchange import test_records as \
-	# 		currency_exchange_records
+	# 	from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
+	# 		test_records as currency_exchange_records,
+	# 	)
 	# 	frappe.get_doc(currency_exchange_records[0]).insert()
-	# 	cart_settings.validate_price_list_exchange_rate()
+	# 	cart_settings.validate_exchange_rates_exist()
 
 	def test_tax_rule_validation(self):
 		frappe.db.sql("update `tabTax Rule` set use_for_shopping_cart = 0")
+		frappe.db.commit() # nosemgrep
 
 		cart_settings = self.get_cart_settings()
 		cart_settings.enabled = 1

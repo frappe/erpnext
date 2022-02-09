@@ -3,7 +3,6 @@
 
 import json
 from collections import defaultdict
-from typing import List, Tuple
 
 import frappe
 from frappe import _
@@ -182,28 +181,33 @@ class StockController(AccountsController):
 
 			return details
 
-	def get_items_and_warehouses(self) -> Tuple[List[str], List[str]]:
-		"""Get list of items and warehouses affected by a transaction"""
+	def get_items_and_warehouses(self):
+		items, warehouses = [], []
 
-		if not (hasattr(self, "items") or hasattr(self, "packed_items")):
-			return [], []
+		if hasattr(self, "items"):
+			item_doclist = self.get("items")
+		elif self.doctype == "Stock Reconciliation":
+			item_doclist = []
+			data = json.loads(self.reconciliation_json)
+			for row in data[data.index(self.head_row)+1:]:
+				d = frappe._dict(zip(["item_code", "warehouse", "qty", "valuation_rate"], row))
+				item_doclist.append(d)
 
-		item_rows = (self.get("items") or []) + (self.get("packed_items") or [])
+		if item_doclist:
+			for d in item_doclist:
+				if d.item_code and d.item_code not in items:
+					items.append(d.item_code)
 
-		items = {d.item_code for d in item_rows if d.item_code}
+				if d.get("warehouse") and d.warehouse not in warehouses:
+					warehouses.append(d.warehouse)
 
-		warehouses = set()
-		for d in item_rows:
-			if d.get("warehouse"):
-				warehouses.add(d.warehouse)
+				if self.doctype == "Stock Entry":
+					if d.get("s_warehouse") and d.s_warehouse not in warehouses:
+						warehouses.append(d.s_warehouse)
+					if d.get("t_warehouse") and d.t_warehouse not in warehouses:
+						warehouses.append(d.t_warehouse)
 
-			if self.doctype == "Stock Entry":
-				if d.get("s_warehouse"):
-					warehouses.add(d.s_warehouse)
-				if d.get("t_warehouse"):
-					warehouses.add(d.t_warehouse)
-
-		return list(items), list(warehouses)
+		return items, warehouses
 
 	def get_stock_ledger_details(self):
 		stock_ledger = {}
@@ -215,7 +219,7 @@ class StockController(AccountsController):
 			from
 				`tabStock Ledger Entry`
 			where
-				voucher_type=%s and voucher_no=%s and is_cancelled = 0
+				voucher_type=%s and voucher_no=%s
 		""", (self.doctype, self.name), as_dict=True)
 
 		for sle in stock_ledger_entries:

@@ -17,6 +17,7 @@ from erpnext.e_commerce.shopping_cart.cart import (
 )
 from erpnext.tests.utils import change_settings, create_test_contact_and_address
 
+# test_dependencies = ['Payment Terms Template']
 
 class TestShoppingCart(unittest.TestCase):
 	"""

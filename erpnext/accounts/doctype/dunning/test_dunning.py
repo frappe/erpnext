@@ -43,7 +43,6 @@ class TestDunning(unittest.TestCase):
 		self.assertEqual(round(amounts.get('dunning_amount'), 2), 20)
 		self.assertEqual(round(amounts.get('grand_total'), 2), 120)
 
-
 	def test_gl_entries(self):
 		dunning = create_dunning()
 		dunning.submit()

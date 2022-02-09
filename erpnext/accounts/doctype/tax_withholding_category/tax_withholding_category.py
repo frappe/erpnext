@@ -11,6 +11,7 @@ from frappe.utils import cint, getdate
 class TaxWithholdingCategory(Document):
 	def validate(self):
 		self.validate_dates()
+		self.validate_accounts()
 		self.validate_thresholds()
 
 	def validate_dates(self):
@@ -22,6 +23,14 @@ class TaxWithholdingCategory(Document):
 			# validate overlapping of dates
 			if last_date and getdate(d.to_date) < getdate(last_date):
 				frappe.throw(_("Row #{0}: Dates overlapping with other row").format(d.idx))
+
+	def validate_accounts(self):
+		existing_accounts = []
+		for d in self.get('accounts'):
+			if d.get('account') in existing_accounts:
+				frappe.throw(_("Account {0} added multiple times").format(frappe.bold(d.get('account'))))
+
+			existing_accounts.append(d.get('account'))
 
 	def validate_thresholds(self):
 		for d in self.get('rates'):
@@ -399,7 +408,7 @@ def get_tcs_amount(parties, inv, tax_details, vouchers, adv_vouchers):
 	current_invoice_total = get_invoice_total_without_tcs(inv, tax_details)
 	total_invoiced_amt = current_invoice_total + invoiced_amt + advance_amt - credit_note_amt
 
-	if ((cumulative_threshold and total_invoiced_amt >= cumulative_threshold)):
+	if (cumulative_threshold and total_invoiced_amt >= cumulative_threshold):
 		chargeable_amt = total_invoiced_amt - cumulative_threshold
 		tcs_amount = chargeable_amt * tax_details.rate / 100 if chargeable_amt > 0 else 0
 

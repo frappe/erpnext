@@ -1,16 +1,16 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-erpnext.StockGridReport = frappe.views.TreeGridReport.extend({
-	get_item_warehouse: function(warehouse, item) {
+erpnext.StockGridReport = class StockGridReport extends frappe.views.TreeGridReport {
+	get_item_warehouse(warehouse, item) {
 		if(!this.item_warehouse[item]) this.item_warehouse[item] = {};
 		if(!this.item_warehouse[item][warehouse]) this.item_warehouse[item][warehouse] = {
 			balance_qty: 0.0, balance_value: 0.0, fifo_stack: []
 		};
 		return this.item_warehouse[item][warehouse];
-	},
+	}
 
-	get_value_diff: function(wh, sl, is_fifo) {
+	get_value_diff(wh, sl, is_fifo) {
 		// value
 		if(sl.qty > 0) {
 			// incoming - rate is given
@@ -59,8 +59,8 @@ erpnext.StockGridReport = frappe.views.TreeGridReport.extend({
 		wh.balance_qty += sl.qty;
 		wh.balance_value += value_diff;
 		return value_diff;
-	},
-	get_fifo_value_diff: function(wh, sl) {
+	}
+	get_fifo_value_diff(wh, sl) {
 		// get exact rate from fifo stack
 		var fifo_stack = (wh.fifo_stack || []).reverse();
 		var fifo_value_diff = 0.0;
@@ -89,9 +89,9 @@ erpnext.StockGridReport = frappe.views.TreeGridReport.extend({
 		// reset the updated stack
 		wh.fifo_stack = fifo_stack.reverse();
 		return -fifo_value_diff;
-	},
+	}
 
-	get_serialized_value_diff: function(sl) {
+	get_serialized_value_diff(sl) {
 		var me = this;
 
 		var value_diff = 0.0;
@@ -103,9 +103,9 @@ erpnext.StockGridReport = frappe.views.TreeGridReport.extend({
 		});
 
 		return value_diff;
-	},
+	}
 
-	get_serialized_buying_rates: function() {
+	get_serialized_buying_rates() {
 		var serialized_buying_rates = {};
 
 		if (frappe.report_dump.data["Serial No"]) {
@@ -115,5 +115,5 @@ erpnext.StockGridReport = frappe.views.TreeGridReport.extend({
 		}
 
 		return serialized_buying_rates;
-	},
-});
+	}
+};

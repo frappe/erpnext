@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 import frappe
@@ -53,9 +53,7 @@ def get_product_data(search=None, start=0, limit=12):
 	# order by
 	query += """ ORDER BY ranking desc, modified desc limit %s, %s""" % (cint(start), cint(limit))
 
-	return frappe.db.sql(query, {
-		"search": search
-	}, as_dict=1)
+	return frappe.db.sql(query, {"search": search}, as_dict=1) # nosemgrep
 
 @frappe.whitelist(allow_guest=True)
 def search(query):

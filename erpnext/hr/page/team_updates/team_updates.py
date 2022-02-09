@@ -1,4 +1,3 @@
-
 import frappe
 from email_reply_parser import EmailReplyParser
 

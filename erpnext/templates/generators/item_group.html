@@ -73,4 +73,18 @@
 		</div>
 	</div>
 </div>
+
+<script>
+	frappe.ready(() => {
+		$('.btn-prev, .btn-next').click((e) => {
+			const $btn = $(e.target);
+			$btn.prop('disabled', true);
+			const start = $btn.data('start');
+			let query_params = frappe.utils.get_query_params();
+			query_params.start = start;
+			let path = window.location.pathname + '?' + frappe.utils.get_url_from_dict(query_params);
+			window.location.href = path;
+		});
+	});
+</script>
 {% endblock %}

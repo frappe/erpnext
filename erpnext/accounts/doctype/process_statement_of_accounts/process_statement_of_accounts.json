@@ -291,6 +291,7 @@
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {

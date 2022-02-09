@@ -1,4 +1,3 @@
-
 import frappe
 
 import erpnext.education.utils as utils

@@ -10,7 +10,7 @@ from frappe.test_runner import make_test_records
 from frappe.utils import cstr, flt
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-from erpnext.manufacturing.doctype.bom.bom import item_query
+from erpnext.manufacturing.doctype.bom.bom import item_query, make_variant_bom
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
@@ -250,6 +250,58 @@ class TestBOM(ERPNextTestCase):
 		supplied_items = sorted([d.rm_item_code for d in po.supplied_items])
 		self.assertEqual(bom_items, supplied_items)
 
+	def test_bom_tree_representation(self):
+		bom_tree = {
+			"Assembly": {
+				"SubAssembly1": {"ChildPart1": {}, "ChildPart2": {},},
+				"SubAssembly2": {"ChildPart3": {}},
+				"SubAssembly3": {"SubSubAssy1": {"ChildPart4": {}}},
+				"ChildPart5": {},
+				"ChildPart6": {},
+				"SubAssembly4": {"SubSubAssy2": {"ChildPart7": {}}},
+			}
+		}
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+		created_tree = parent_bom.get_tree_representation()
+
+		reqd_order = level_order_traversal(bom_tree)[1:] # skip first item
+		created_order = created_tree.level_order_traversal()
+
+		self.assertEqual(len(reqd_order), len(created_order))
+
+		for reqd_item, created_item in zip(reqd_order, created_order):
+			self.assertEqual(reqd_item, created_item.item_code)
+
+	def test_generated_variant_bom(self):
+		from erpnext.controllers.item_variant import create_variant
+
+		template_item = make_item(
+			"_TestTemplateItem", {"has_variants": 1, "attributes": [{"attribute": "Test Size"},]}
+		)
+		variant = create_variant(template_item.item_code, {"Test Size": "Large"})
+		variant.insert(ignore_if_duplicate=True)
+
+		bom_tree = {
+			template_item.item_code: {
+				"SubAssembly1": {"ChildPart1": {}, "ChildPart2": {},},
+				"ChildPart5": {},
+			}
+		}
+		template_bom = create_nested_bom(bom_tree, prefix="")
+		variant_bom = make_variant_bom(
+			template_bom.name, template_bom.name, variant.item_code, variant_items=[]
+		)
+		variant_bom.save()
+
+		reqd_order = template_bom.get_tree_representation().level_order_traversal()
+		created_order = variant_bom.get_tree_representation().level_order_traversal()
+
+		self.assertEqual(len(reqd_order), len(created_order))
+
+		for reqd_item, created_item in zip(reqd_order, created_order):
+			self.assertEqual(reqd_item.item_code, created_item.item_code)
+			self.assertEqual(reqd_item.qty, created_item.qty)
+			self.assertEqual(reqd_item.exploded_qty, created_item.exploded_qty)
 
 	def test_bom_recursion_1st_level(self):
 		"""BOM should not allow BOM item again in child"""
@@ -324,28 +376,6 @@ class TestBOM(ERPNextTestCase):
 		# FG Items in Scrap/Loss Table should have Is Process Loss set
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
 
-	def test_bom_tree_representation(self):
-		bom_tree = {
-			"Assembly": {
-				"SubAssembly1": {"ChildPart1": {}, "ChildPart2": {},},
-				"SubAssembly2": {"ChildPart3": {}},
-				"SubAssembly3": {"SubSubAssy1": {"ChildPart4": {}}},
-				"ChildPart5": {},
-				"ChildPart6": {},
-				"SubAssembly4": {"SubSubAssy2": {"ChildPart7": {}}},
-			}
-		}
-		parent_bom = create_nested_bom(bom_tree, prefix="")
-		created_tree = parent_bom.get_tree_representation()
-
-		reqd_order = level_order_traversal(bom_tree)[1:] # skip first item
-		created_order = created_tree.level_order_traversal()
-
-		self.assertEqual(len(reqd_order), len(created_order))
-
-		for reqd_item, created_item in zip(reqd_order, created_order):
-			self.assertEqual(reqd_item, created_item.item_code)
-
 	def test_bom_item_query(self):
 		query = partial(item_query, doctype="Item", txt="", searchfield="name", start=0, page_len=20, filters={"is_stock_item": 1})
 
@@ -355,6 +385,23 @@ class TestBOM(ERPNextTestCase):
 		self.assertNotEqual(len(test_items), len(filtered), msg="Item filtering showing excessive results")
 		self.assertTrue(0 < len(filtered) <= 3, msg="Item filtering showing excessive results")
 
+	def test_exclude_exploded_items_from_bom(self):
+		bom_no = get_default_bom()
+		new_bom = frappe.copy_doc(frappe.get_doc('BOM', bom_no))
+		for row in new_bom.items:
+			if row.item_code == '_Test Item Home Desktop Manufactured':
+				self.assertTrue(row.bom_no)
+				row.do_not_explode = True
+
+		new_bom.docstatus = 0
+		new_bom.save()
+		new_bom.load_from_db()
+
+		for row in new_bom.items:
+			if row.item_code == '_Test Item Home Desktop Manufactured' and row.do_not_explode:
+				self.assertFalse(row.bom_no)
+
+		new_bom.delete()
 
 	def test_valid_transfer_defaults(self):
 		bom_with_op = frappe.db.get_value("BOM", {"item": "_Test FG Item 2", "with_operations": 1, "is_active": 1})

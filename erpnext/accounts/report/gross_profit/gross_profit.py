@@ -283,8 +283,6 @@ class GrossProfitGenerator(object):
 		new_row.gross_profit = flt(new_row.base_amount - new_row.buying_amount, self.currency_precision)
 		new_row.gross_profit_percent = flt(((new_row.gross_profit / new_row.base_amount) * 100.0), self.currency_precision) \
 			if new_row.base_amount else 0
-		new_row.buying_rate = flt(new_row.buying_amount / flt(new_row.qty), self.float_precision) if flt(new_row.qty) else 0
-		new_row.base_rate = flt(new_row.base_amount / flt(new_row.qty), self.float_precision) if flt(new_row.qty) else 0
 
 	def add_to_totals(self, new_row):
 		for key in self.totals:

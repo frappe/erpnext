@@ -2,18 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import json
-import os
-
-import frappe
+import frappe, os, json
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.permissions import add_permission, update_permission_property
-from frappe.utils import today
-
-from erpnext.accounts.utils import FiscalYearError, get_fiscal_year
 from erpnext.regional.india import states
-
+from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
+from frappe.utils import today
 
 def setup(company=None, patch=True):
 	# Company independent fixtures should be called only once at the first company setup
@@ -468,6 +463,26 @@ def get_custom_fields():
 		}
 	]
 
+	payment_entry_fields = [
+		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break', insert_after='deductions',
+			print_hide=1, collapsible=1),
+		dict(fieldname='company_address', label='Company Address', fieldtype='Link', insert_after='gst_section',
+			print_hide=1, options='Address'),
+		dict(fieldname='company_gstin', label='Company GSTIN',
+			fieldtype='Data', insert_after='company_address',
+			fetch_from='company_address.gstin', print_hide=1, read_only=1),
+		dict(fieldname='place_of_supply', label='Place of Supply',
+			fieldtype='Data', insert_after='company_gstin',
+			print_hide=1, read_only=1),
+		dict(fieldname='gst_column_break', fieldtype='Column Break',
+				insert_after='place_of_supply'),
+		dict(fieldname='customer_address', label='Customer Address', fieldtype='Link', insert_after='gst_column_break',
+			print_hide=1, options='Address', depends_on = 'eval:doc.party_type == "Customer"'),
+		dict(fieldname='customer_gstin', label='Customer GSTIN',
+			fieldtype='Data', insert_after='customer_address',
+			fetch_from='customer_address.gstin', print_hide=1, read_only=1)
+	]
+
 	si_einvoice_fields = [
 		dict(fieldname='irn', label='IRN', fieldtype='Data', read_only=1, insert_after='customer', no_copy=1, print_hide=1,
 			depends_on='eval:in_list(["Registered Regular", "SEZ", "Overseas", "Deemed Export"], doc.gst_category) && doc.irn_cancelled === 0'),
@@ -506,26 +521,6 @@ def get_custom_fields():
 
 		dict(fieldname='failure_description', label='E-Invoice Failure Description', fieldtype='Code', options='JSON',
 			hidden=1, insert_after='einvoice_status', no_copy=1, print_hide=1, read_only=1)
-	]
-
-	payment_entry_fields = [
-		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break', insert_after='deductions',
-			print_hide=1, collapsible=1),
-		dict(fieldname='company_address', label='Company Address', fieldtype='Link', insert_after='gst_section',
-			print_hide=1, options='Address'),
-		dict(fieldname='company_gstin', label='Company GSTIN',
-			fieldtype='Data', insert_after='company_address',
-			fetch_from='company_address.gstin', print_hide=1, read_only=1),
-		dict(fieldname='place_of_supply', label='Place of Supply',
-			fieldtype='Data', insert_after='company_gstin',
-			print_hide=1, read_only=1),
-		dict(fieldname='gst_column_break', fieldtype='Column Break',
-				insert_after='place_of_supply'),
-		dict(fieldname='customer_address', label='Customer Address', fieldtype='Link', insert_after='gst_column_break',
-			print_hide=1, options='Address', depends_on = 'eval:doc.party_type == "Customer"'),
-		dict(fieldname='customer_gstin', label='Customer GSTIN',
-			fieldtype='Data', insert_after='customer_address',
-			fetch_from='customer_address.gstin', print_hide=1, read_only=1)
 	]
 
 	custom_fields = {
@@ -612,16 +607,18 @@ def get_custom_fields():
 				fieldtype='Link', options='Salary Component', insert_after='hra_section'),
 			dict(fieldname='hra_component', label='HRA Component',
 				fieldtype='Link', options='Salary Component', insert_after='basic_component'),
+			dict(fieldname='hra_column_break', fieldtype='Column Break', insert_after='hra_component'),
 			dict(fieldname='arrear_component', label='Arrear Component',
-				fieldtype='Link', options='Salary Component', insert_after='hra_component'),
+				fieldtype='Link', options='Salary Component', insert_after='hra_column_break'),
 			dict(fieldname='non_profit_section', label='Non Profit Settings',
-				fieldtype='Section Break', insert_after='asset_received_but_not_billed', collapsible=1),
+				fieldtype='Section Break', insert_after='arrear_component', collapsible=1),
 			dict(fieldname='company_80g_number', label='80G Number',
 				fieldtype='Data', insert_after='non_profit_section'),
 			dict(fieldname='with_effect_from', label='80G With Effect From',
 				fieldtype='Date', insert_after='company_80g_number'),
+			dict(fieldname='non_profit_column_break', fieldtype='Column Break', insert_after='with_effect_from'),
 			dict(fieldname='pan_details', label='PAN Number',
-				fieldtype='Data', insert_after='with_effect_from')
+				fieldtype='Data', insert_after='non_profit_column_break')
 		],
 		'Employee Tax Exemption Declaration':[
 			dict(fieldname='hra_section', label='HRA Exemption',
@@ -661,10 +658,16 @@ def get_custom_fields():
 		],
 		'Supplier': [
 			{
+				'fieldname': 'pan',
+				'label': 'PAN',
+				'fieldtype': 'Data',
+				'insert_after': 'supplier_type'
+			},
+			{
 				'fieldname': 'gst_transporter_id',
 				'label': 'GST Transporter ID',
 				'fieldtype': 'Data',
-				'insert_after': 'supplier_type',
+				'insert_after': 'pan',
 				'depends_on': 'eval:doc.is_transporter'
 			},
 			{
@@ -687,10 +690,16 @@ def get_custom_fields():
 		],
 		'Customer': [
 			{
+				'fieldname': 'pan',
+				'label': 'PAN',
+				'fieldtype': 'Data',
+				'insert_after': 'customer_type'
+			},
+			{
 				'fieldname': 'gst_category',
 				'label': 'GST Category',
 				'fieldtype': 'Select',
-				'insert_after': 'customer_type',
+				'insert_after': 'pan',
 				'options': 'Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
 				'default': 'Unregistered'
 			},

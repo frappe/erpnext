@@ -7,7 +7,6 @@ import datetime
 import frappe
 from frappe import _
 from frappe.utils import flt, formatdate
-from six import iteritems
 
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
 
@@ -30,25 +29,13 @@ def execute(filters=None):
 		dimension_items = cam_map.get(dimension)
 		if dimension_items:
 			data = get_final_data(dimension, dimension_items, filters, period_month_ranges, data, 0)
-		else:
-			DCC_allocation = frappe.db.sql('''SELECT parent, sum(percentage_allocation) as percentage_allocation
-				FROM `tabDistributed Cost Center`
-				WHERE cost_center IN %(dimension)s
-				AND parent NOT IN %(dimension)s
-				GROUP BY parent''',{'dimension':[dimension]})
-			if DCC_allocation:
-				filters['budget_against_filter'] = [DCC_allocation[0][0]]
-				ddc_cam_map = get_dimension_account_month_map(filters)
-				dimension_items = ddc_cam_map.get(DCC_allocation[0][0])
-				if dimension_items:
-					data = get_final_data(dimension, dimension_items, filters, period_month_ranges, data, DCC_allocation[0][1])
 
 	chart = get_chart_data(filters, columns, data)
 
 	return columns, data, None, chart
 
 def get_final_data(dimension, dimension_items, filters, period_month_ranges, data, DCC_allocation):
-	for account, monthwise_data in iteritems(dimension_items):
+	for account, monthwise_data in dimension_items.items():
 		row = [dimension, account]
 		totals = [0, 0, 0]
 		for year in get_fiscal_years(filters):

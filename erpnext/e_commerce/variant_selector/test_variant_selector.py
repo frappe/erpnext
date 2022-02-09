@@ -1,5 +1,3 @@
-import unittest
-
 import frappe
 
 from erpnext.controllers.item_variant import create_variant

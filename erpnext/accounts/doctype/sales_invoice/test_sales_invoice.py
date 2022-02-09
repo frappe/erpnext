@@ -8,10 +8,11 @@ import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.model.naming import make_autoname
 from frappe.utils import add_days, flt, getdate, nowdate
-from six import iteritems
 
+import erpnext
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import WarehouseMissingError
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 	unlink_payment_on_cancel_of_invoice,
 )
@@ -344,7 +345,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# check if item values are calculated
 		for i, d in enumerate(si.get("items")):
-			for k, v in iteritems(expected_values[i]):
+			for k, v in expected_values[i].items():
 				self.assertEqual(d.get(k), v)
 
 		# check net total
@@ -647,7 +648,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# check if item values are calculated
 		for i, d in enumerate(si.get("items")):
-			for key, val in iteritems(expected_values[i]):
+			for key, val in expected_values[i].items():
 				self.assertEqual(d.get(key), val)
 
 		# check net total
@@ -1121,15 +1122,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_gle_made_when_asset_is_returned(self):
 		create_asset_data()
-
-		pi = frappe.new_doc('Purchase Invoice')
-		pi.supplier = '_Test Supplier'
-		pi.append('items', {
-			'item_code': 'Macbook Pro',
-			'qty': 1
-		})
-		pi.set_missing_values()
-
 		asset = create_asset(item_code="Macbook Pro")
 
 		si = create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000)
@@ -1888,6 +1880,89 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
+	def test_inter_company_transaction_without_default_warehouse(self):
+		"Check mapping (expense account) of inter company SI to PI in absence of default warehouse."
+		# setup
+		old_negative_stock = frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+
+		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled('_Test Company 1')
+		frappe.local.enable_perpetual_inventory['_Test Company 1'] = 1
+
+		frappe.db.set_value("Company", '_Test Company 1', "stock_received_but_not_billed", "Stock Received But Not Billed - _TC1")
+		frappe.db.set_value("Company", '_Test Company 1', "expenses_included_in_valuation", "Expenses Included In Valuation - _TC1")
+
+
+		if not frappe.db.exists("Customer", "_Test Internal Customer"):
+			customer = frappe.get_doc({
+				"customer_group": "_Test Customer Group",
+				"customer_name": "_Test Internal Customer",
+				"customer_type": "Individual",
+				"doctype": "Customer",
+				"territory": "_Test Territory",
+				"is_internal_customer": 1,
+				"represents_company": "_Test Company 1"
+			})
+
+			customer.append("companies", {
+				"company": "Wind Power LLC"
+			})
+
+			customer.insert()
+
+		if not frappe.db.exists("Supplier", "_Test Internal Supplier"):
+			supplier = frappe.get_doc({
+				"supplier_group": "_Test Supplier Group",
+				"supplier_name": "_Test Internal Supplier",
+				"doctype": "Supplier",
+				"is_internal_supplier": 1,
+				"represents_company": "Wind Power LLC"
+			})
+
+			supplier.append("companies", {
+				"company": "_Test Company 1"
+			})
+
+			supplier.insert()
+
+		# begin test
+		si = create_sales_invoice(
+			company = "Wind Power LLC",
+			customer = "_Test Internal Customer",
+			debit_to = "Debtors - WP",
+			warehouse = "Stores - WP",
+			income_account = "Sales - WP",
+			expense_account = "Cost of Goods Sold - WP",
+			cost_center = "Main - WP",
+			currency = "USD",
+			update_stock = 1,
+			do_not_save = 1
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.submit()
+
+		target_doc = make_inter_company_transaction("Sales Invoice", si.name)
+
+		# in absence of warehouse Stock Received But Not Billed is set as expense account while mapping
+		# mapping is not obstructed
+		self.assertIsNone(target_doc.items[0].warehouse)
+		self.assertEqual(target_doc.items[0].expense_account, "Stock Received But Not Billed - _TC1")
+
+		target_doc.items[0].update({"cost_center": "Main - _TC1"})
+
+		# missing warehouse is validated on save, after mapping
+		self.assertRaises(WarehouseMissingError, target_doc.save)
+
+		target_doc.items[0].update({"warehouse": "Stores - _TC1"})
+		target_doc.save()
+
+		# after warehouse is set, linked account or default inventory account is set
+		self.assertEqual(target_doc.items[0].expense_account, 'Stock In Hand - _TC1')
+
+		# tear down
+		frappe.local.enable_perpetual_inventory['_Test Company 1'] = old_perpetual_inventory
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", old_negative_stock)
+
 	def test_sle_for_target_warehouse(self):
 		se = make_stock_entry(
 			item_code="138-CMS Shoe",
@@ -2510,11 +2585,11 @@ def get_sales_invoice_for_e_invoice():
 
 	return si
 
-
 def make_test_address_for_ewaybill():
 	if not frappe.db.exists('Address', '_Test Address for Eway bill-Billing'):
 		address = frappe.get_doc({
 			"address_line1": "_Test Address Line 1",
+			"address_line2": "_Test Address Line 2",
 			"address_title": "_Test Address for Eway bill",
 			"address_type": "Billing",
 			"city": "_Test City",
@@ -2536,11 +2611,12 @@ def make_test_address_for_ewaybill():
 
 		address.save()
 
-	if not frappe.db.exists('Address', '_Test Customer-Address for Eway bill-Shipping'):
+	if not frappe.db.exists('Address', '_Test Customer-Address for Eway bill-Billing'):
 		address = frappe.get_doc({
 			"address_line1": "_Test Address Line 1",
+			"address_line2": "_Test Address Line 2",
 			"address_title": "_Test Customer-Address for Eway bill",
-			"address_type": "Shipping",
+			"address_type": "Billing",
 			"city": "_Test City",
 			"state": "Test State",
 			"country": "India",
@@ -2560,9 +2636,34 @@ def make_test_address_for_ewaybill():
 
 		address.save()
 
+	if not frappe.db.exists('Address', '_Test Customer-Address for Eway bill-Shipping'):
+		address = frappe.get_doc({
+			"address_line1": "_Test Address Line 1",
+			"address_line2": "_Test Address Line 2",
+			"address_title": "_Test Customer-Address for Eway bill",
+			"address_type": "Shipping",
+			"city": "_Test City",
+			"state": "Test State",
+			"country": "India",
+			"doctype": "Address",
+			"is_primary_address": 1,
+			"phone": "+910000000000",
+			"gst_state": "Maharashtra",
+			"gst_state_number": "27",
+			"pincode": "410098"
+		}).insert()
+
+		address.append("links", {
+			"link_doctype": "Customer",
+			"link_name": "_Test Customer"
+		})
+
+		address.save()
+
 	if not frappe.db.exists('Address', '_Test Dispatch-Address for Eway bill-Shipping'):
 		address = frappe.get_doc({
 			"address_line1": "_Test Dispatch Address Line 1",
+			"address_line2": "_Test Dispatch Address Line 2",
 			"address_title": "_Test Dispatch-Address for Eway bill",
 			"address_type": "Shipping",
 			"city": "_Test City",
@@ -2576,11 +2677,6 @@ def make_test_address_for_ewaybill():
 			"gst_state_number": "07",
 			"pincode": "1100101"
 		}).insert()
-
-		address.append("links", {
-			"link_doctype": "Company",
-			"link_name": "_Test Company"
-		})
 
 		address.save()
 
@@ -2621,7 +2717,8 @@ def make_sales_invoice_for_ewaybill():
 
 	si.distance = 2000
 	si.company_address = "_Test Address for Eway bill-Billing"
-	si.customer_address = "_Test Customer-Address for Eway bill-Shipping"
+	si.customer_address = "_Test Customer-Address for Eway bill-Billing"
+	si.shipping_address_name = "_Test Customer-Address for Eway bill-Shipping"
 	si.dispatch_address_name = "_Test Dispatch-Address for Eway bill-Shipping"
 	si.vehicle_no = "KA12KA1234"
 	si.gst_category = "Registered Regular"
@@ -2690,9 +2787,9 @@ def create_sales_invoice(**args):
 		"price_list_rate": args.price_list_rate if args.get("price_list_rate") is not None else 100,
 		"income_account": args.income_account or "Sales - _TC",
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
-		"asset": args.asset or None,
 		"discount_account": args.discount_account or None,
 		"discount_amount": args.discount_amount or 0,
+		"asset": args.asset or None,
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_no": args.serial_no,
 		"conversion_factor": 1,

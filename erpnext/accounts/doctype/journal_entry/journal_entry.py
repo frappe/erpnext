@@ -7,7 +7,6 @@ import json
 import frappe
 from frappe import _, msgprint, scrub
 from frappe.utils import cint, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
-from six import iteritems, string_types
 
 import erpnext
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
@@ -86,6 +85,7 @@ class JournalEntry(AccountsController):
 		self.update_expense_claim()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
+		self.update_status_for_full_and_final_statement()
 		check_if_stock_and_account_balance_synced(self.posting_date,
 			self.company, self.doctype, self.name)
 
@@ -103,6 +103,7 @@ class JournalEntry(AccountsController):
 		self.unlink_inter_company_jv()
 		self.unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
+		self.update_status_for_full_and_final_statement()
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -114,9 +115,18 @@ class JournalEntry(AccountsController):
 				if d.reference_type in ("Sales Order", "Purchase Order", "Employee Advance"):
 					advance_paid.setdefault(d.reference_type, []).append(d.reference_name)
 
-		for voucher_type, order_list in iteritems(advance_paid):
+		for voucher_type, order_list in advance_paid.items():
 			for voucher_no in list(set(order_list)):
 				frappe.get_doc(voucher_type, voucher_no).set_total_advance_paid()
+
+	def update_status_for_full_and_final_statement(self):
+		for entry in self.accounts:
+			if entry.reference_type == "Full and Final Statement":
+				if self.docstatus == 1:
+					frappe.db.set_value("Full and Final Statement", entry.reference_name, "status", "Paid")
+				elif self.docstatus == 2:
+					frappe.db.set_value("Full and Final Statement", entry.reference_name, "status", "Unpaid")
+
 
 	def validate_inter_company_accounts(self):
 		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_journal_entry_reference:
@@ -421,7 +431,7 @@ class JournalEntry(AccountsController):
 
 	def validate_orders(self):
 		"""Validate totals, closed and docstatus for orders"""
-		for reference_name, total in iteritems(self.reference_totals):
+		for reference_name, total in self.reference_totals.items():
 			reference_type = self.reference_types[reference_name]
 			account = self.reference_accounts[reference_name]
 
@@ -452,7 +462,7 @@ class JournalEntry(AccountsController):
 
 	def validate_invoices(self):
 		"""Validate totals and docstatus for invoices"""
-		for reference_name, total in iteritems(self.reference_totals):
+		for reference_name, total in self.reference_totals.items():
 			reference_type = self.reference_types[reference_name]
 
 			if (reference_type in ("Sales Invoice", "Purchase Invoice") and
@@ -1006,7 +1016,7 @@ def get_outstanding(args):
 	if not frappe.has_permission("Account"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
-	if isinstance(args, string_types):
+	if isinstance(args, str):
 		args = json.loads(args)
 
 	company_currency = erpnext.get_company_currency(args.get("company"))

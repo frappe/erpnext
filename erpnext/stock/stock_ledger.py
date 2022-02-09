@@ -7,8 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
-from frappe.utils import cint, cstr, flt, get_datetime, get_link_to_form, getdate, now, nowdate
-from six import iteritems
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdate
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
@@ -17,6 +16,7 @@ from erpnext.stock.utils import (
 	get_or_make_bin,
 	get_valuation_method,
 )
+from erpnext.stock.valuation import FIFOValuation
 
 
 class NegativeStockError(frappe.ValidationError): pass
@@ -160,7 +160,7 @@ def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	sle.submit()
 	return sle
 
-def repost_future_sle(args=None, doc=None, voucher_type=None, voucher_no=None, allow_negative_stock=None, via_landed_cost_voucher=False):
+def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negative_stock=None, via_landed_cost_voucher=False, doc=None):
 	if not args and voucher_type and voucher_no:
 		args = get_items_to_be_repost(voucher_type, voucher_no, doc)
 
@@ -168,19 +168,21 @@ def repost_future_sle(args=None, doc=None, voucher_type=None, voucher_no=None, a
 
 	i = get_current_index(doc) or 0
 	while i < len(args):
+		validate_item_warehouse(args[i])
+
 		obj = update_entries_after({
-			"item_code": args[i].get('item_code'),
-			"warehouse": args[i].get('warehouse'),
-			"posting_date": args[i].get('posting_date'),
-			"posting_time": args[i].get('posting_time'),
-			"creation": args[i].get("creation"),
-			"distinct_item_warehouses": distinct_item_warehouses
+			'item_code': args[i].get('item_code'),
+			'warehouse': args[i].get('warehouse'),
+			'posting_date': args[i].get('posting_date'),
+			'posting_time': args[i].get('posting_time'),
+			'creation': args[i].get('creation'),
+			'distinct_item_warehouses': distinct_item_warehouses
 		}, allow_negative_stock=allow_negative_stock, via_landed_cost_voucher=via_landed_cost_voucher)
 
 		distinct_item_warehouses[(args[i].get('item_code'), args[i].get('warehouse'))].reposting_status = True
 
 		if obj.new_items_found:
-			for item_wh, data in iteritems(distinct_item_warehouses):
+			for item_wh, data in distinct_item_warehouses.items():
 				if ('args_idx' not in data and not data.reposting_status) or (data.sle_changed and data.reposting_status):
 					data.args_idx = len(args)
 					args.append(data.sle)
@@ -195,6 +197,12 @@ def repost_future_sle(args=None, doc=None, voucher_type=None, voucher_no=None, a
 
 	if doc and args:
 		update_args_in_repost_item_valuation(doc, i, args, distinct_item_warehouses)
+
+def validate_item_warehouse(args):
+	for field in ['item_code', 'warehouse', 'posting_date', 'posting_time']:
+		if not args.get(field):
+			validation_msg = f'The field {frappe.unscrub(args.get(field))} is required for the reposting'
+			frappe.throw(_(validation_msg))
 
 def update_args_in_repost_item_valuation(doc, index, args, distinct_item_warehouses):
 	frappe.db.set_value(doc.doctype, doc.name, {
@@ -453,9 +461,8 @@ class update_entries_after(object):
 					self.wh_data.qty_after_transaction += flt(sle.actual_qty)
 					self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(self.wh_data.valuation_rate)
 				else:
-					self.get_fifo_values(sle)
+					self.update_fifo_values(sle)
 					self.wh_data.qty_after_transaction += flt(sle.actual_qty)
-					self.wh_data.stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in self.wh_data.stock_queue))
 
 		# rounding as per precision
 		self.wh_data.stock_value = flt(self.wh_data.stock_value, self.precision)
@@ -694,86 +701,38 @@ class update_entries_after(object):
 						sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
 						currency=erpnext.get_company_currency(sle.company), company=sle.company)
 
-	def get_fifo_values(self, sle):
+	def update_fifo_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
 		actual_qty = flt(sle.actual_qty)
 		outgoing_rate = flt(sle.outgoing_rate)
 
+		fifo_queue = FIFOValuation(self.wh_data.stock_queue)
 		if actual_qty > 0:
-			if not self.wh_data.stock_queue:
-				self.wh_data.stock_queue.append([0, 0])
-
-			# last row has the same rate, just updated the qty
-			if self.wh_data.stock_queue[-1][1]==incoming_rate:
-				self.wh_data.stock_queue[-1][0] += actual_qty
-			else:
-				# Item has a positive balance qty, add new entry
-				if self.wh_data.stock_queue[-1][0] > 0:
-					self.wh_data.stock_queue.append([actual_qty, incoming_rate])
-				else: # negative balance qty
-					qty = self.wh_data.stock_queue[-1][0] + actual_qty
-					if qty > 0: # new balance qty is positive
-						self.wh_data.stock_queue[-1] = [qty, incoming_rate]
-					else: # new balance qty is still negative, maintain same rate
-						self.wh_data.stock_queue[-1][0] = qty
+			fifo_queue.add_stock(qty=actual_qty, rate=incoming_rate)
 		else:
-			qty_to_pop = abs(actual_qty)
-			while qty_to_pop:
-				if not self.wh_data.stock_queue:
-					# Get valuation rate from last sle if exists or from valuation rate field in item master
-					allow_zero_valuation_rate = self.check_if_allow_zero_valuation_rate(sle.voucher_type, sle.voucher_detail_no)
-					if not allow_zero_valuation_rate:
-						_rate = get_valuation_rate(sle.item_code, sle.warehouse,
-							sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
-							currency=erpnext.get_company_currency(sle.company), company=sle.company)
-					else:
-						_rate = 0
-
-					self.wh_data.stock_queue.append([0, _rate])
-
-				index = None
-				if outgoing_rate > 0:
-					# Find the entry where rate matched with outgoing rate
-					for i, v in enumerate(self.wh_data.stock_queue):
-						if v[1] == outgoing_rate:
-							index = i
-							break
-
-					# If no entry found with outgoing rate, collapse stack
-					if index is None:  # nosemgrep
-						new_stock_value = sum((d[0]*d[1] for d in self.wh_data.stock_queue)) - qty_to_pop*outgoing_rate
-						new_stock_qty = sum((d[0] for d in self.wh_data.stock_queue)) - qty_to_pop
-						self.wh_data.stock_queue = [[new_stock_qty, new_stock_value/new_stock_qty if new_stock_qty > 0 else outgoing_rate]]
-						break
+			def rate_generator() -> float:
+				allow_zero_valuation_rate = self.check_if_allow_zero_valuation_rate(sle.voucher_type, sle.voucher_detail_no)
+				if not allow_zero_valuation_rate:
+					return get_valuation_rate(sle.item_code, sle.warehouse,
+						sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
+						currency=erpnext.get_company_currency(sle.company), company=sle.company)
 				else:
-					index = 0
+					return 0.0
 
-				# select first batch or the batch with same rate
-				batch = self.wh_data.stock_queue[index]
-				if qty_to_pop >= batch[0]:
-					# consume current batch
-					qty_to_pop = _round_off_if_near_zero(qty_to_pop - batch[0])
-					self.wh_data.stock_queue.pop(index)
-					if not self.wh_data.stock_queue and qty_to_pop:
-						# stock finished, qty still remains to be withdrawn
-						# negative stock, keep in as a negative batch
-						self.wh_data.stock_queue.append([-qty_to_pop, outgoing_rate or batch[1]])
-						break
+			fifo_queue.remove_stock(qty=abs(actual_qty), outgoing_rate=outgoing_rate, rate_generator=rate_generator)
 
-				else:
-					# qty found in current batch
-					# consume it and exit
-					batch[0] = batch[0] - qty_to_pop
-					qty_to_pop = 0
+		stock_qty, stock_value = fifo_queue.get_total_stock_and_value()
 
-		stock_value = _round_off_if_near_zero(sum((flt(batch[0]) * flt(batch[1]) for batch in self.wh_data.stock_queue)))
-		stock_qty = _round_off_if_near_zero(sum((flt(batch[0]) for batch in self.wh_data.stock_queue)))
-
+		self.wh_data.stock_queue = fifo_queue.get_state()
+		self.wh_data.stock_value = stock_value
 		if stock_qty:
-			self.wh_data.valuation_rate = stock_value / flt(stock_qty)
+			self.wh_data.valuation_rate = stock_value / stock_qty
+
 
 		if not self.wh_data.stock_queue:
 			self.wh_data.stock_queue.append([0, sle.incoming_rate or sle.outgoing_rate or self.wh_data.valuation_rate])
+
+
 
 	def check_if_allow_zero_valuation_rate(self, voucher_type, voucher_detail_no):
 		ref_item_dt = ""
@@ -800,7 +759,7 @@ class update_entries_after(object):
 
 	def raise_exceptions(self):
 		msg_list = []
-		for warehouse, exceptions in iteritems(self.exceptions):
+		for warehouse, exceptions in self.exceptions.items():
 			deficiency = min(e["diff"] for e in exceptions)
 
 			if ((exceptions[0]["voucher_type"], exceptions[0]["voucher_no"]) in
@@ -1139,37 +1098,22 @@ def get_future_sle_with_negative_qty(args):
 
 
 def get_future_sle_with_negative_batch_qty(args):
-	batch_ledger = frappe.db.sql("""
-		select
-			posting_date, posting_time, voucher_type, voucher_no, actual_qty
-		from `tabStock Ledger Entry`
+	return frappe.db.sql("""
+		with batch_ledger as (
+			select
+				posting_date, posting_time, voucher_type, voucher_no,
+				sum(actual_qty) over (order by posting_date, posting_time, creation) as cumulative_total
+			from `tabStock Ledger Entry`
+			where
+				item_code = %(item_code)s
+				and warehouse = %(warehouse)s
+				and batch_no=%(batch_no)s
+				and is_cancelled = 0
+			order by posting_date, posting_time, creation
+		)
+		select * from batch_ledger
 		where
-			item_code = %(item_code)s
-			and warehouse = %(warehouse)s
-			and batch_no=%(batch_no)s
-			and is_cancelled = 0
-		order by timestamp(posting_date, posting_time), creation
+			cumulative_total < 0.0
+			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
+		limit 1
 	""", args, as_dict=1)
-
-	cumulative_total = 0.0
-	current_posting_datetime = get_datetime(str(args.posting_date) + " " + str(args.posting_time))
-	for entry in batch_ledger:
-		cumulative_total += entry.actual_qty
-		if cumulative_total > -1e-6:
-			continue
-
-		if (get_datetime(str(entry.posting_date) + " " + str(entry.posting_time))
-				>= current_posting_datetime):
-
-			entry.cumulative_total = cumulative_total
-			return [entry]
-
-
-def _round_off_if_near_zero(number: float, precision: int = 6) -> float:
-	""" Rounds off the number to zero only if number is close to zero for decimal
-		specified in precision. Precision defaults to 6.
-	"""
-	if abs(0.0 - flt(number)) < (1.0 / (10**precision)):
-		return 0.0
-
-	return flt(number)

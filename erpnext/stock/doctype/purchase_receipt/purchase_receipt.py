@@ -7,7 +7,6 @@ from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, flt, getdate, nowdate
-from six import iteritems
 
 import erpnext
 from erpnext.accounts.utils import get_account_currency
@@ -266,6 +265,10 @@ class PurchaseReceipt(BuyingController):
 		return process_gl_map(gl_entries)
 
 	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
+			get_purchase_document_details,
+		)
+
 		if erpnext.is_perpetual_inventory_enabled(self.company):
 			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 			landed_cost_entries = get_item_account_wise_additional_cost(self.name)
@@ -276,12 +279,17 @@ class PurchaseReceipt(BuyingController):
 		provisional_accounting_for_non_stock_items = \
 				cint(frappe.db.get_value('Company', self.company, 'enable_provisional_accounting_for_non_stock_items'))
 
+		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
+
 		for d in self.get("items"):
 			if d.item_code in stock_items and flt(d.valuation_rate) and flt(d.qty):
 				if warehouse_account.get(d.warehouse):
 					stock_value_diff = frappe.db.get_value("Stock Ledger Entry",
 						{"voucher_type": "Purchase Receipt", "voucher_no": self.name,
 						"voucher_detail_no": d.name, "warehouse": d.warehouse, "is_cancelled": 0}, "stock_value_difference")
+
+					if not stock_value_diff:
+						continue
 
 					warehouse_account_name = warehouse_account[d.warehouse]["account"]
 					warehouse_account_currency = warehouse_account[d.warehouse]["account_currency"]
@@ -331,9 +339,42 @@ class PurchaseReceipt(BuyingController):
 							account_currency=credit_currency,
 							item=d)
 
+						# check if the exchange rate has changed
+						if d.get('purchase_invoice'):
+							if exchange_rate_map[d.purchase_invoice] and \
+								self.conversion_rate != exchange_rate_map[d.purchase_invoice] and \
+								d.net_rate == net_rate_map[d.purchase_invoice_item]:
+
+								discrepancy_caused_by_exchange_rate_difference = (d.qty * d.net_rate) * \
+									(exchange_rate_map[d.purchase_invoice] - self.conversion_rate)
+
+								self.add_gl_entry(
+									gl_entries=gl_entries,
+									account=account,
+									cost_center=d.cost_center,
+									debit=0.0,
+									credit=discrepancy_caused_by_exchange_rate_difference,
+									remarks=remarks,
+									against_account=self.supplier,
+									debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
+									account_currency=credit_currency,
+									item=d)
+
+								self.add_gl_entry(
+									gl_entries=gl_entries,
+									account=self.get_company_default("exchange_gain_loss_account"),
+									cost_center=d.cost_center,
+									debit=discrepancy_caused_by_exchange_rate_difference,
+									credit=0.0,
+									remarks=remarks,
+									against_account=self.supplier,
+									debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
+									account_currency=credit_currency,
+									item=d)
+
 					# Amount added through landed-cos-voucher
 					if d.landed_cost_voucher_amount and landed_cost_entries:
-						for account, amount in iteritems(landed_cost_entries[(d.item_code, d.name)]):
+						for account, amount in landed_cost_entries[(d.item_code, d.name)].items():
 							account_currency = get_account_currency(account)
 							credit_amount = (flt(amount["base_amount"]) if (amount["base_amount"] or
 								account_currency!=self.company_currency) else flt(amount["amount"]))
