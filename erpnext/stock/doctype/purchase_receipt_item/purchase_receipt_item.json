@@ -979,7 +979,7 @@
   {
    "depends_on": "eval:doc.is_subcontracted",
    "fieldname": "challan_number_issues_by_job_worker",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "label": "Challan Number Issues by Job Worker"
   },
   {
@@ -1005,7 +1005,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-01-21 13:13:11.092245",
+ "modified": "2022-02-07 14:58:36.543960",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

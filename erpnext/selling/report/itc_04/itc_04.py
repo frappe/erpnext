@@ -220,6 +220,12 @@ def get_con(filters):
 		elif filters.get('q_return') == "Jan-March":
 			start_date = fiscal_yr[1]+'-01-01'
 			end_date = fiscal_yr[1]+'-03-31'
+		elif filters.get('q_return') == "Apr-Sept":
+			start_date = fiscal_yr[0]+'-04-01'
+			end_date = fiscal_yr[0]+'-09-30'
+		elif filters.get('q_return') == "Oct-March":
+			start_date = fiscal_yr[0]+'-10-01'
+			end_date = fiscal_yr[1]+'-03-31'	
 		date_dict['start_date'] = start_date
 		date_dict['end_date'] = end_date
 

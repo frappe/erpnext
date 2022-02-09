@@ -38,7 +38,8 @@ frappe.query_reports["ITC-04"] = {
 			"fieldname":"q_return",
 			"label": __("Return"),
 			"fieldtype": "Select",
-			"options": ['Apr-Jun','July-Sept','Oct-Dec','Jan-March'],
+			// "options": ['Apr-Jun','July-Sept','Oct-Dec','Jan-March', 'First Half', 'Second Half'],
+			"options": ['Apr-Sept', 'Oct-March'],
 			"reqd": 1
 		},
 		{

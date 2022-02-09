@@ -66,6 +66,7 @@
   "pricing_rules",
   "raw_material_details",
   "get_current_stock",
+  "get_items",
   "supplied_items",
   "taxes_charges_section",
   "tax_category",
@@ -1145,13 +1146,18 @@
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
+  },
+  {
+   "fieldname": "get_items",
+   "fieldtype": "Button",
+   "label": "Get Items"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-07 15:42:31.317517",
+ "modified": "2022-02-07 16:19:02.347034",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

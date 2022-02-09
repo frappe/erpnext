@@ -21,6 +21,55 @@ form_grid_templates = {
 }
 
 class PurchaseReceipt(BuyingController):
+
+	# New Code for Kroslink TASK TASK-2022-00015, Field challan_number_issues_by_job_worker
+
+	@frappe.whitelist()
+	def on_get_items_button(self, po):
+		print(" this is on get items click")
+
+	@frappe.whitelist()
+	def to_button_hide(self, po):
+		a = frappe.get_value("Puchase Order", po, "is_subcontracted")
+		s = frappe.get_value("Supplier", self.supplier, "is_internal_supplier")
+		if a == "Yes" and s == 1:
+			return True
+
+	@frappe.whitelist()
+	def on_challan_date(self, item):
+		print("THi i new deu daye")
+		due_date = frappe.db.sql("""
+								Select si.due_date from `tabSales Invoice Item` soi , `tabSales Invoice` si
+								Where soi.parent = si.name and soi.name = '{0}'	""".format(item))
+
+		return due_date
+
+	# New Code for Kroslink TASK TASK-2022-00015, Field challan_number_issues_by_job_worker
+	@frappe.whitelist()
+	def on_challan_number(self, item_code):
+		print("this is Inside on_challan_number")
+		new_company = frappe.get_value("Supplier", self.supplier, 'represents_company')
+
+		new_code = (frappe.get_value("Item", item_code, "intercompany_item") or item_code)
+
+		print(" new cm , new code", new_company, new_code)
+		soi = frappe.db.sql("""
+			select soi.name from `tabSales Invoice Item` soi , `tabSales Invoice` si
+				Where soi.parent = si.name
+				AND si.docstatus = 1
+				AND soi.item_code = "{0}"
+				AND si.company = "{1}"
+				AND si.represents_company = "{2}"
+		""".format(new_code, new_company, self.company), as_dict = 1)
+		new_soi = []
+		for s in soi:
+			new_soi.append(s["name"])
+			print(s)
+		print("soi", soi, new_soi)
+
+		
+		return soi
+
 	def __init__(self, *args, **kwargs):
 		super(PurchaseReceipt, self).__init__(*args, **kwargs)
 		self.status_updater = [{
