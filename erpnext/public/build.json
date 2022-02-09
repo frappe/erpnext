@@ -39,7 +39,8 @@
 		"public/js/utils/dimension_tree_filter.js",
 		"public/js/telephony.js",
 		"public/js/templates/call_link.html",
-		"public/js/templates/node_card.html"
+		"public/js/templates/node_card.html",
+		"public/js/bulk_transaction_processing.js"
 	],
 	"js/item-dashboard.min.js": [
 		"stock/dashboard/item_dashboard.html",

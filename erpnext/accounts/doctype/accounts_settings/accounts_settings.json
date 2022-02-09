@@ -7,35 +7,30 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "accounts_transactions_settings_section",
-  "over_billing_allowance",
-  "role_allowed_to_over_bill",
-  "credit_controller",
-  "make_payment_via_journal_entry",
-  "column_break_11",
-  "check_supplier_invoice_uniqueness",
+  "invoice_and_billing_tab",
+  "enable_features_section",
   "unlink_payment_on_cancellation_of_invoice",
-  "automatically_fetch_payment_terms",
-  "delete_linked_ledger_entries",
-  "book_asset_depreciation_entry_automatically",
   "unlink_advance_payment_on_cancelation_of_order",
+  "column_break_13",
+  "delete_linked_ledger_entries",
+  "invoicing_features_section",
+  "check_supplier_invoice_uniqueness",
+  "automatically_fetch_payment_terms",
+  "column_break_17",
   "enable_common_party_accounting",
-  "post_change_gl_entries",
   "enable_discount_accounting",
-  "tax_settings_section",
-  "determine_address_tax_category_from",
-  "column_break_19",
-  "add_taxes_from_item_tax_template",
-  "period_closing_settings_section",
-  "acc_frozen_upto",
-  "frozen_accounts_modifier",
-  "column_break_4",
+  "report_setting_section",
+  "use_custom_cash_flow",
   "deferred_accounting_settings_section",
   "book_deferred_entries_based_on",
   "column_break_18",
   "automatically_process_deferred_accounting_entry",
   "book_deferred_entries_via_journal_entry",
   "submit_journal_entries",
+  "tax_settings_section",
+  "determine_address_tax_category_from",
+  "column_break_19",
+  "add_taxes_from_item_tax_template",
   "print_settings",
   "show_inclusive_tax_in_print",
   "column_break_12",
@@ -43,8 +38,25 @@
   "currency_exchange_section",
   "allow_stale",
   "stale_days",
-  "report_settings_sb",
-  "use_custom_cash_flow"
+  "invoicing_settings_tab",
+  "accounts_transactions_settings_section",
+  "over_billing_allowance",
+  "column_break_11",
+  "role_allowed_to_over_bill",
+  "credit_controller",
+  "make_payment_via_journal_entry",
+  "pos_tab",
+  "pos_setting_section",
+  "post_change_gl_entries",
+  "assets_tab",
+  "asset_settings_section",
+  "book_asset_depreciation_entry_automatically",
+  "closing_settings_tab",
+  "period_closing_settings_section",
+  "acc_frozen_upto",
+  "column_break_25",
+  "frozen_accounts_modifier",
+  "report_settings_sb"
  ],
  "fields": [
   {
@@ -71,10 +83,6 @@
    "options": "Billing Address\nShipping Address"
   },
   {
-   "fieldname": "column_break_4",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "credit_controller",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -83,6 +91,7 @@
   },
   {
    "default": "0",
+   "description": "Enabling ensure each Sales Invoice has a unique value in Supplier Invoice No. field",
    "fieldname": "check_supplier_invoice_uniqueness",
    "fieldtype": "Check",
    "label": "Check Supplier Invoice Number Uniqueness"
@@ -168,7 +177,7 @@
    "description": "Only select this if you have set up the Cash Flow Mapper documents",
    "fieldname": "use_custom_cash_flow",
    "fieldtype": "Check",
-   "label": "Use Custom Cash Flow Format"
+   "label": "Enable Custom Cash Flow Format"
   },
   {
    "default": "0",
@@ -241,7 +250,7 @@
   {
    "fieldname": "accounts_transactions_settings_section",
    "fieldtype": "Section Break",
-   "label": "Transactions Settings"
+   "label": "Credit Limit Settings"
   },
   {
    "fieldname": "column_break_11",
@@ -272,9 +281,72 @@
   },
   {
    "default": "0",
+   "description": "Learn about <a href=\"https://docs.erpnext.com/docs/v13/user/manual/en/accounts/articles/common_party_accounting#:~:text=Common%20Party%20Accounting%20in%20ERPNext,Invoice%20against%20a%20primary%20Supplier.\">Common Party</a>",
    "fieldname": "enable_common_party_accounting",
    "fieldtype": "Check",
    "label": "Enable Common Party Accounting"
+  },
+  {
+   "fieldname": "enable_features_section",
+   "fieldtype": "Section Break",
+   "label": "Invoice Cancellation"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "asset_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Asset Settings"
+  },
+  {
+   "fieldname": "invoicing_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Credit Limits"
+  },
+  {
+   "fieldname": "assets_tab",
+   "fieldtype": "Tab Break",
+   "label": "Assets"
+  },
+  {
+   "fieldname": "closing_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounts Closing"
+  },
+  {
+   "fieldname": "pos_setting_section",
+   "fieldtype": "Section Break",
+   "label": "POS Setting"
+  },
+  {
+   "fieldname": "invoice_and_billing_tab",
+   "fieldtype": "Tab Break",
+   "label": "Invoice and Billing"
+  },
+  {
+   "fieldname": "invoicing_features_section",
+   "fieldtype": "Section Break",
+   "label": "Invoicing Features"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pos_tab",
+   "fieldtype": "Tab Break",
+   "label": "POS"
+  },
+  {
+   "fieldname": "report_setting_section",
+   "fieldtype": "Section Break",
+   "label": "Report Setting"
   }
  ],
  "icon": "icon-cog",
@@ -282,7 +354,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-10-11 17:42:36.427699",
+ "modified": "2022-02-04 12:32:36.805652",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
@@ -309,5 +381,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "track_changes": 1
 }
