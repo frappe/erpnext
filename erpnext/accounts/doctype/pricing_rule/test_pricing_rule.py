@@ -630,6 +630,26 @@ class TestPricingRule(unittest.TestCase):
 		for doc in [si, si1]:
 			doc.delete()
 
+	def test_multiple_pricing_rules_with_min_qty(self):
+		make_pricing_rule(discount_percentage=20, selling=1, priority=1, min_qty=4,
+			apply_multiple_pricing_rules=1, title="_Test Pricing Rule with Min Qty - 1")
+		make_pricing_rule(discount_percentage=10, selling=1, priority=2, min_qty=4,
+			apply_multiple_pricing_rules=1, title="_Test Pricing Rule with Min Qty - 2")
+
+		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 1", qty=1, currency="USD")
+		item = si.items[0]
+		item.stock_qty = 1
+		si.save()
+		self.assertFalse(item.discount_percentage)
+		item.qty = 5
+		item.stock_qty = 5
+		si.save()
+		self.assertEqual(item.discount_percentage, 30)
+		si.delete()
+
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule with Min Qty - 1")
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule with Min Qty - 2")
+
 test_dependencies = ["Campaign"]
 
 def make_pricing_rule(**args):

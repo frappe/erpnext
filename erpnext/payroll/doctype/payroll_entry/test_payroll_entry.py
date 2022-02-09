@@ -197,6 +197,7 @@ class TestPayrollEntry(unittest.TestCase):
 			create_loan_type("Car Loan", 500000, 8.4,
 				is_term_loan=1,
 				mode_of_payment='Cash',
+				disbursement_account='Disbursement Account - _TC',
 				payment_account='Payment Account - _TC',
 				loan_account='Loan Account - _TC',
 				interest_income_account='Interest Income Account - _TC',

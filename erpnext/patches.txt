@@ -1,4 +1,5 @@
 erpnext.patches.v12_0.update_is_cancelled_field
+erpnext.patches.v13_0.add_bin_unique_constraint
 erpnext.patches.v11_0.rename_production_order_to_work_order
 erpnext.patches.v11_0.refactor_naming_series
 erpnext.patches.v11_0.refactor_autoname_naming
@@ -291,7 +292,6 @@ erpnext.patches.v13_0.set_training_event_attendance
 erpnext.patches.v13_0.rename_issue_status_hold_to_on_hold
 erpnext.patches.v13_0.bill_for_rejected_quantity_in_purchase_invoice
 erpnext.patches.v13_0.update_job_card_details
-erpnext.patches.v13_0.update_level_in_bom #1234sswef
 erpnext.patches.v13_0.create_gst_payment_entry_fields #27-11-2021
 erpnext.patches.v13_0.add_missing_fg_item_for_stock_entry
 erpnext.patches.v13_0.update_subscription_status_in_memberships
@@ -337,8 +337,14 @@ erpnext.patches.v13_0.item_naming_series_not_mandatory
 erpnext.patches.v13_0.update_category_in_ltds_certificate
 erpnext.patches.v13_0.create_ksa_vat_custom_fields
 erpnext.patches.v13_0.rename_ksa_qr_field
+erpnext.patches.v13_0.wipe_serial_no_field_for_0_qty
 erpnext.patches.v13_0.disable_ksa_print_format_for_others # 16-12-2021
 erpnext.patches.v13_0.update_tax_category_for_rcm
 erpnext.patches.v13_0.convert_to_website_item_in_item_card_group_template
 erpnext.patches.v13_0.agriculture_deprecation_warning
 erpnext.patches.v13_0.update_maintenance_schedule_field_in_visit
+erpnext.patches.v13_0.hospitality_deprecation_warning
+erpnext.patches.v13_0.delete_bank_reconciliation_detail
+erpnext.patches.v13_0.update_sane_transfer_against
+erpnext.patches.v13_0.enable_provisional_accounting
+erpnext.patches.v13_0.update_disbursement_account
