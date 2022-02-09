@@ -295,6 +295,10 @@ class GSTR3BReport(Document):
 		inter_state_supply_details = {}
 
 		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
+			gst_category = self.invoice_detail_map.get(inv, {}).get('gst_category')
+			place_of_supply = self.invoice_detail_map.get(inv, {}).get('place_of_supply') or '00-Other Territory'
+			export_type = self.invoice_detail_map.get(inv, {}).get('export_type')
+
 			for rate, items in items_based_on_rate.items():
 				for item_code, taxable_value in self.invoice_items.get(inv).items():
 					if item_code in items:
@@ -302,9 +306,8 @@ class GSTR3BReport(Document):
 							self.report_dict['sup_details']['osup_nil_exmp']['txval'] += taxable_value
 						elif item_code in self.is_non_gst:
 							self.report_dict['sup_details']['osup_nongst']['txval'] += taxable_value
-						elif rate == 0:
+						elif rate == 0 or (gst_category == 'Overseas' and export_type == 'Without Payment of Tax'):
 							self.report_dict['sup_details']['osup_zero']['txval'] += taxable_value
-							#self.report_dict['sup_details']['osup_zero'][key] += tax_amount
 						else:
 							if inv in self.cgst_sgst_invoices:
 								tax_rate = rate/2
@@ -314,9 +317,6 @@ class GSTR3BReport(Document):
 							else:
 								self.report_dict['sup_details']['osup_det']['iamt'] += (taxable_value * rate /100)
 								self.report_dict['sup_details']['osup_det']['txval'] += taxable_value
-
-								gst_category = self.invoice_detail_map.get(inv, {}).get('gst_category')
-								place_of_supply = self.invoice_detail_map.get(inv, {}).get('place_of_supply') or '00-Other Territory'
 
 								if gst_category in ['Unregistered', 'Registered Composition', 'UIN Holders'] and \
 								self.gst_details.get("gst_state") != place_of_supply.split("-")[1]:
