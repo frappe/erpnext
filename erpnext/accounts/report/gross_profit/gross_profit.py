@@ -371,20 +371,37 @@ class GrossProfitGenerator(object):
 		return self.average_buying_rate[item_code]
 
 	def get_last_purchase_rate(self, item_code, row):
-		condition = ''
-		if row.project:
-			condition += " AND a.project=%s" % (frappe.db.escape(row.project))
-		elif row.cost_center:
-			condition += " AND a.cost_center=%s" % (frappe.db.escape(row.cost_center))
-		if self.filters.to_date:
-			condition += " AND modified='%s'" % (self.filters.to_date)
+		purchase_invoice = frappe.qb.DocType("Purchase Invoice")
+		purchase_invoice_item = frappe.qb.DocType("Purchase Invoice Item")
 
-		last_purchase_rate = frappe.db.sql("""
-		select (a.base_rate / a.conversion_factor)
-		from `tabPurchase Invoice Item` a
-		where a.item_code = %s and a.docstatus=1
-		{0}
-		order by a.modified desc limit 1""".format(condition), item_code)
+		query = (frappe.qb.from_(purchase_invoice_item)
+			.inner_join(
+				purchase_invoice
+			).on(
+				purchase_invoice.name == purchase_invoice_item.parent
+			).select(
+				purchase_invoice_item.base_rate / purchase_invoice_item.conversion_factor
+			).where(
+				purchase_invoice.docstatus == 1
+			).where(
+				purchase_invoice.posting_date <= self.filters.to_date
+			).where(
+				purchase_invoice_item.item_code == item_code
+			))
+
+		if row.project:
+			query.where(
+				purchase_invoice_item.item_code == row.project
+			)
+
+		if row.cost_center:
+			query.where(
+				purchase_invoice_item.cost_center == row.cost_center
+			)
+
+		query.orderby(purchase_invoice.posting_date, order=frappe.qb.desc)
+		query.limit(1)
+		last_purchase_rate = query.run()
 
 		return flt(last_purchase_rate[0][0]) if last_purchase_rate else 0
 
