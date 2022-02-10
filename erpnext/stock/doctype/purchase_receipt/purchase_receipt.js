@@ -71,6 +71,7 @@ frappe.ui.form.on("Purchase Receipt", {
 
 	refresh: function(frm) {
 		// new code for TASK - TASK-2022-00015
+		//  To unhide new button on Material  
 		var for_challan_number_date = 0
 		var po =  frm.doc.items[0].purchase_order
 		if (po){

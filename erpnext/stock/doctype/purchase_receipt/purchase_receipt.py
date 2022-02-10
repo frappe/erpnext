@@ -26,8 +26,76 @@ class PurchaseReceipt(BuyingController):
 
 	@frappe.whitelist()
 	def on_get_items_button(self, po):
-		print(" this is on get items click")
 
+		# s_company = frappe.db.get_value("Supplier", self.supplier, )
+		print(" this is on get items click")
+		# 1st get item_code , challan_number_issues_by_job_worker (name of soi) 
+		pr_items = frappe.db.get_all("Purchase Receipt Item", {"parent": self.name}, ['item_code', 'challan_number_issues_by_job_worker'])
+		for i in pr_items:
+			# 2nd Getting Batch no from SOI
+			if i.challan_number_issues_by_job_worker:
+				soi_item = frappe.db.get_value("Sales Invoice Item", i.challan_number_issues_by_job_worker, ['item_code', 'batch_no', 'sales_order'])
+				# 3rd From Sales invoice to Sales Order and Sales Order to Work Order
+				# Send Type 
+			
+				if soi_item:
+					soi_so = frappe.db.get("Work Order", { "Sales Order": soi_item.sales_order,
+					"production_item": soi_item.item_code, "company": self.represents_company },["name"])
+					# 4 WOrkorder to Stock Entrt of Above Work Order and Get its name 
+					if soi_so: 
+						se_wo_man = frappe.get_all("Stock Entry", {"work_order" :soi_so.name, "stock_entry_type": "Manufacture"}, ["name"])
+						
+						# from Stock Entry Get Stock Items with above item and batch no matching above and get its parent
+						for won in se_wo_man:
+							if se_wo_man:
+								se_man = frappe.get_value("Stock Entry Detail",{"item_code" : soi_item.item_code, 
+								'batch_no': soi_item.batch_no},	["parent"])
+
+								# 6 Get Stock Entry of above WO where ENtry Typer
+								if se_man :
+									se_mat_con = frappe.get_value("Stock Entry", 
+									{'work_order': soi_so.name, 'stock_entry_type': 'Material Consumption for Manufacture'}, ["name"])
+									
+									if se_mat_con:
+										se_mat_con_entry = frappe.get_value("Stock Entry Detail", se_mat_con.name,["*"])
+
+										if se_mat_con_entry:
+											for sei in se_mat_con_entry:
+													self.append("Purchase Receipt Item Supplied",{
+												"item_code" : sei.item_code,
+												"stock_uom" : sei.stock_uom,
+												"qty_required" : sei.qty,
+												"qty_to_be_consumned" : sei.qty,
+												"rate" : sei.basic_rate,
+												"amount" : sei.amount,
+
+											})
+
+					# 4th Getting Stock Entry Item of above Stock Entry
+
+					
+					# if se_man:
+					# 	se_man_item = frappe.get_value("Stock Entry", se_man.parent, ["work_order"])
+					# 	# 5th Getting getting Material Consumption name from above Stock Enter 
+					# 	if se_man_item:
+					# 		se_mat_con = frappe.get_value("Stock Entry",
+					# 		{"work_order": se_man_item, "stock_entry_type": "Material Consumption for Manufacture"},
+					# 		["name"])
+					# 		# 6th Getting Stock Entry Detail child Table 
+					# 		if se_mat_con:
+					# 			se_detail = frappe.db.get_all("Stock Entry Detail", {'parent': se_mat_con},["*"])
+					# 			for sei in se_detail:
+					# 				# Addind Item Purchase Receipt Item Supplied
+					# 				self.append("Purchase Receipt Item Supplied",{
+					# 					"item_code" : sei.item_code,
+					# 					"stock_uom" : sei.stock_uom,
+					# 					"qty_required" : sei.qty,
+					# 					"qty_to_be_consumned" : sei.qty,
+					# 					"rate" : sei.basic_rate,
+					# 					"amount" : sei.amount,
+
+					# 				})
+					
 	@frappe.whitelist()
 	def to_button_hide(self, po):
 		a = frappe.get_value("Puchase Order", po, "is_subcontracted")
