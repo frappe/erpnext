@@ -74,7 +74,6 @@ class WorkOrder(Document):
 
 		self.set_required_items(reset_only_qty = len(self.get("required_items")))
 
-
 	def validate_sales_order(self):
 		if self.sales_order:
 			self.check_sales_order_on_hold_or_close()
@@ -544,7 +543,7 @@ class WorkOrder(Document):
 				if node.is_bom:
 					operations.extend(_get_operations(node.name, qty=node.exploded_qty))
 
-		bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity")
+		bom_qty = frappe.get_cached_value("BOM", self.bom_no, "quantity")
 		operations.extend(_get_operations(self.bom_no, qty=1.0/bom_qty))
 
 		for correct_index, operation in enumerate(operations, start=1):
@@ -625,7 +624,7 @@ class WorkOrder(Document):
 			frappe.delete_doc("Job Card", d.name)
 
 	def validate_production_item(self):
-		if frappe.db.get_value("Item", self.production_item, "has_variants"):
+		if frappe.get_cached_value("Item", self.production_item, "has_variants"):
 			frappe.throw(_("Work Order cannot be raised against a Item Template"), ItemHasVariantError)
 
 		if self.production_item:
