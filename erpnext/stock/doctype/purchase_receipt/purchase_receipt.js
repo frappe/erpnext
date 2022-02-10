@@ -62,7 +62,9 @@ frappe.ui.form.on("Purchase Receipt", {
 				// frm.refresh_field("get_items")
 				if (r.message){
 				console.log("this is buttom", r.message)
+				frm.refresh_field("supplied_items")
 				}
+				else console.log("Nothis ins ")
 			}
 		});
 	},
@@ -480,7 +482,7 @@ frappe.ui.form.on('Purchase Receipt Item', {
 					console.log(" THIS IS DATA FROM SOI", r.message)
 					for(i; i < r.message.length; i++) {
 						b.push(r.message[i].name);
-						console.log(" THIS IS DATA FROM SOI", r.message[i])
+						console.log(" THIS IS DATA FROM SOI", r.message[i], r.message[i].name)
 						frm.fields_dict.items.grid.update_docfield_property(
 							'challan_number_issues_by_job_worker',
 							'options',
