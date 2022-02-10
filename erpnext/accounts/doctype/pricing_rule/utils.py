@@ -569,6 +569,36 @@ def apply_pricing_rule_for_free_items(doc, pricing_rule_args, set_missing_values
 			if not items or (args.get('item_code'), args.get('pricing_rules')) not in items:
 				doc.append('items', args)
 
+	reset_free_items(doc)
+
+def reset_free_items(doc):
+	pricing_rules = []
+	remove_items = []
+
+	for row in doc.items:
+		if not row.pricing_rules:
+			continue
+
+		if not row.is_free_item:
+			pricing_rules.extend(get_applied_pricing_rules(row.pricing_rules))
+
+		elif row.is_free_item:
+			for rule in get_applied_pricing_rules(row.pricing_rules):
+				if rule not in pricing_rules:
+					remove_items.append(row.name)
+				elif row.name in remove_items:
+					remove_items.remove(row.name)
+
+	if not remove_items:
+		return
+
+	items = []
+	for item_row in doc.items:
+		if item_row.name not in remove_items:
+			items.append(item_row)
+
+	doc.items = items
+
 def get_pricing_rule_items(pr_doc):
 	apply_on_data = []
 	apply_on = frappe.scrub(pr_doc.get('apply_on'))

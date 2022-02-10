@@ -1620,10 +1620,40 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}
 		}
 
+		me.reset_free_items();
 		me.frm.refresh_field('items');
 		me.apply_rule_on_other_items(items_rule_dict);
-
 		me.calculate_taxes_and_totals();
+	}
+
+	reset_free_items() {
+		let non_free_items = this.frm.doc.items.filter(d => !d.is_free_item && d.pricing_rules) || [];
+		let remove_free_items = [];
+
+		this.frm.doc.items.forEach(row => {
+			if (row.is_free_item && row.pricing_rules) {
+				non_free_items.forEach(non_free_item => {
+					if (row.pricing_rules && !in_list(
+						this.parse_json(non_free_item.pricing_rules), this.parse_json(row.pricing_rules))) {
+						remove_free_items.push(row.name);
+					} else if (row.name in remove_free_items) {
+						remove_free_items.pop(row.name);
+					}
+				});
+			}
+		});
+
+		if (remove_free_items && remove_free_items.length) {
+			this.frm.doc.items = this.frm.doc.items.filter(d => !in_list(remove_free_items, d.name));
+		}
+	}
+
+	parse_json(parm) {
+		if (parm.includes('[')) {
+			return JSON.parse(parm);
+		}
+
+		return parm;
 	}
 
 	apply_rule_on_other_items(args) {
