@@ -186,11 +186,10 @@ class POSInvoiceMergeLog(Document):
 				if not found:
 					payments.append(payment)
 
-			if doc.rounding_adjustment or doc.base_rounding_adjustment:
-				rounding_adjustment += doc.rounding_adjustment
-				rounded_total += doc.rounded_total
-				base_rounding_adjustment += doc.base_rounding_adjustment
-				base_rounded_total += doc.base_rounded_total
+			rounding_adjustment += doc.rounding_adjustment
+			rounded_total += doc.rounded_total
+			base_rounding_adjustment += doc.base_rounding_adjustment
+			base_rounded_total += doc.base_rounded_total
 
 
 		if loyalty_points_sum:
