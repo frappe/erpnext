@@ -51,16 +51,16 @@ erpnext.PointOfSale.Controller = class {
 		const fetch_pos_payment_methods = async function() {
 			const pos_profile = dialog.fields_dict.pos_profile.get_value();
 			if (!pos_profile) return;
-			
+
 			const { payments, company } = await frappe.db.get_doc("POS Profile", pos_profile);
 			dialog.fields_dict.balance_details.df.data = [];
 			const addPaymentMode = async function(pay) {
 				const { mode_of_payment } = pay;
-				const mop = await frappe.db.get_doc("Mode of Payment", mode_of_payment)
-				const acct = mop.accounts.filter(a => a.company === company)[0].default_account
+				const mop = await frappe.db.get_doc("Mode of Payment", mode_of_payment);
+				const acct = mop.accounts.filter(a => a.company === company)[0].default_account;
 				const curr = await frappe.db.get_value("Account", acct, "account_currency");
 				dialog.fields_dict.balance_details.df.data.push({ mode_of_payment, opening_amount: '0', currency: curr.message.account_currency});
-				dialog.fields_dict.balance_details.grid.refresh(); 
+				dialog.fields_dict.balance_details.grid.refresh();
 			}
 			payments.forEach(addPaymentMode);
 		}
@@ -185,7 +185,7 @@ erpnext.PointOfSale.Controller = class {
 				this.page.add_menu_item(__("Change Currency..."), this.currency_dialog.bind(this), false, 'Ctrl+M');
 			}
 		}
-		
+
 		this.page.add_menu_item(__("Toggle Recent Orders"), this.toggle_recent_order.bind(this), false, 'Ctrl+O');
 
 		this.page.add_menu_item(__("Save as Draft"), this.save_draft_invoice.bind(this), false, 'Ctrl+S');
@@ -725,7 +725,7 @@ erpnext.PointOfSale.Controller = class {
 
 	async currency_list() {
 		var currencies = [this.settings.currency];
-		// fetch the currencies of each mode of payment listed in the 
+		// fetch the currencies of each mode of payment listed in the POS Profile
 		const accts = await Promise.all(this.settings.payments.map(async (payment) => {
 			const mode = await frappe.db.get_doc("Mode of Payment", payment.mode_of_payment)
 			var company_account = mode["accounts"].filter((acct) => {

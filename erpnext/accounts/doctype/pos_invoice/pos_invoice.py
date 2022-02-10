@@ -614,5 +614,5 @@ def update_multi_mode_option(doc, pos_profile):
 			if not payment_mode:
 				invalid_modes.append(get_link_to_form("Mode of Payment", row.mode_of_payment))
 				continue
-			payment_mode.default = row.default			
+			payment_mode.default = row.default
 			append_payment(payment_mode)
