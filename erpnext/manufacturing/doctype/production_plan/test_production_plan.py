@@ -1,8 +1,5 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
-import unittest
-
 import frappe
 from frappe.utils import add_to_date, flt, now_datetime, nowdate
 
@@ -17,9 +14,10 @@ from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestProductionPlan(unittest.TestCase):
+class TestProductionPlan(ERPNextTestCase):
 	def setUp(self):
 		for item in ['Test Production Item 1', 'Subassembly Item 1',
 			'Raw Material Item 1', 'Raw Material Item 2']:
@@ -348,6 +346,45 @@ class TestProductionPlan(unittest.TestCase):
 		self.assertEqual(pln.po_items[0].bom_no, parent_bom.name)
 
 		frappe.db.rollback()
+
+	def test_subassmebly_sorting(self):
+		""" Test subassembly sorting in case of multiple items with nested BOMs"""
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		prefix = "_TestLevel_"
+		boms = {
+			"Assembly": {
+				"SubAssembly1": {"ChildPart1": {}, "ChildPart2": {},},
+				"SubAssembly2": {"ChildPart3": {}},
+				"SubAssembly3": {"SubSubAssy1": {"ChildPart4": {}}},
+				"ChildPart5": {},
+				"ChildPart6": {},
+				"SubAssembly4": {"SubSubAssy2": {"ChildPart7": {}}},
+			},
+			"MegaDeepAssy": {
+				"SecretSubassy": {"SecretPart": {"VerySecret" : { "SuperSecret": {"Classified": {}}}},},
+																# ^ assert that this is
+																# first item in subassy table
+			}
+		}
+		create_nested_bom(boms, prefix=prefix)
+
+		items = [prefix + item_code for item_code in boms.keys()]
+		plan = create_production_plan(item_code=items[0], do_not_save=True)
+		plan.append("po_items", {
+			'use_multi_level_bom': 1,
+			'item_code': items[1],
+			'bom_no': frappe.db.get_value('Item', items[1], 'default_bom'),
+			'planned_qty': 1,
+			'planned_start_date': now_datetime()
+		})
+		plan.get_sub_assembly_items()
+
+		bom_level_order = [d.bom_level for d in plan.sub_assembly_items]
+		self.assertEqual(bom_level_order, sorted(bom_level_order, reverse=True))
+		# lowest most level of subassembly should be first
+		self.assertIn("SuperSecret", plan.sub_assembly_items[0].production_item)
+
 
 def create_production_plan(**args):
 	args = frappe._dict(args)

@@ -172,10 +172,15 @@ class ProductionPlanReport(object):
 
 		self.purchase_details = {}
 
-		for d in frappe.get_all("Purchase Order Item",
+		purchased_items = frappe.get_all("Purchase Order Item",
 			fields=["item_code", "min(schedule_date) as arrival_date", "qty as arrival_qty", "warehouse"],
-			filters = {"item_code": ("in", self.item_codes), "warehouse": ("in", self.warehouses)},
-			group_by = "item_code, warehouse"):
+			filters={
+				"item_code": ("in", self.item_codes),
+				"warehouse": ("in", self.warehouses),
+				"docstatus": 1,
+			},
+			group_by = "item_code, warehouse")
+		for d in purchased_items:
 			key = (d.item_code, d.warehouse)
 			if key not in self.purchase_details:
 				self.purchase_details.setdefault(key, d)

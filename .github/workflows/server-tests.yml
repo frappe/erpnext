@@ -5,12 +5,17 @@ on:
     paths-ignore:
       - '**.js'
       - '**.md'
+    types: [opened, unlabeled, synchronize, reopened]
   workflow_dispatch:
   push:
     branches: [ develop ]
     paths-ignore:
       - '**.js'
       - '**.md'
+
+concurrency:
+  group: server-mariadb-v13-${{ github.event.number }}
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -35,6 +40,12 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
 
     steps:
+      - name: Check for merge conficts label
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'conflicts') }}
+        run: |
+          echo "Remove merge conflicts and remove conflict label to run CI"
+          exit 1
+
       - name: Clone
         uses: actions/checkout@v2
 
@@ -89,39 +100,8 @@ jobs:
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
 
       - name: Run Tests
-        run: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --use-orchestrator --with-coverage
+        run: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --use-orchestrator
         env:
           TYPE: server
           CI_BUILD_ID: ${{ github.run_id }}
           ORCHESTRATOR_URL: http://test-orchestrator.frappe.io
-
-      - name: Upload Coverage Data
-        run: |
-          cp ~/frappe-bench/sites/.coverage ${GITHUB_WORKSPACE}
-          cd ${GITHUB_WORKSPACE}
-          pip3 install coverage==5.5
-          pip3 install coveralls==3.0.1
-          coveralls
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COVERALLS_FLAG_NAME: run-${{ matrix.container }}
-          COVERALLS_SERVICE_NAME: ${{ github.event_name == 'pull_request' && 'github' || 'github-actions' }}
-          COVERALLS_PARALLEL: true
-
-  coveralls:
-    name: Coverage Wrap Up
-    needs: test
-    container: python:3-slim
-    runs-on: ubuntu-18.04
-    steps:
-      - name: Clone
-        uses: actions/checkout@v2
-
-      - name: Coveralls Finished
-        run: |
-          cd ${GITHUB_WORKSPACE}
-          pip3 install coverage==5.5
-          pip3 install coveralls==3.0.1
-          coveralls --finish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

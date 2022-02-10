@@ -1,6 +1,5 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-import unittest
 
 import frappe
 from frappe.utils import random_string
@@ -12,9 +11,10 @@ from erpnext.manufacturing.doctype.job_card.job_card import (
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestJobCard(unittest.TestCase):
+class TestJobCard(ERPNextTestCase):
 	def setUp(self):
 		make_bom_for_jc_tests()
 

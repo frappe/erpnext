@@ -117,6 +117,7 @@
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Policy Assignment",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -164,5 +165,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
+ "title_field": "employee_name",
  "track_changes": 1
 }

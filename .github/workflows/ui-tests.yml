@@ -6,6 +6,10 @@ on:
       - '**.md'
   workflow_dispatch:
 
+concurrency:
+  group: ui-v13-${{ github.event.number }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-18.04

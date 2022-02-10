@@ -50,6 +50,7 @@ def get_stock_ledger_entries(filters):
 
 def add_invariant_check_fields(sles):
 	balance_qty = 0.0
+	balance_stock_value = 0.0
 	for idx, sle in enumerate(sles):
 		queue = json.loads(sle.stock_queue)
 
@@ -60,6 +61,7 @@ def add_invariant_check_fields(sles):
 			fifo_value += qty * rate
 
 		balance_qty += sle.actual_qty
+		balance_stock_value += sle.stock_value_difference
 		if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no:
 			balance_qty = sle.qty_after_transaction
 
@@ -70,6 +72,7 @@ def add_invariant_check_fields(sles):
 			sle.stock_value / sle.qty_after_transaction if sle.qty_after_transaction else None
 		)
 		sle.expected_qty_after_transaction = balance_qty
+		sle.stock_value_from_diff = balance_stock_value
 
 		# set difference fields
 		sle.difference_in_qty = sle.qty_after_transaction - sle.expected_qty_after_transaction
@@ -81,6 +84,7 @@ def add_invariant_check_fields(sles):
 		sle.valuation_diff = (
 			sle.valuation_rate - sle.balance_value_by_qty if sle.balance_value_by_qty else None
 		)
+		sle.diff_value_diff = sle.stock_value_from_diff - sle.stock_value
 
 		if idx > 0:
 			sle.fifo_stock_diff = sle.fifo_stock_value - sles[idx - 1].fifo_stock_value
@@ -191,11 +195,20 @@ def get_columns():
 			"fieldtype": "Float",
 			"label": "D - E",
 		},
-
 		{
 			"fieldname": "stock_value_difference",
 			"fieldtype": "Float",
 			"label": "(F) Stock Value Difference",
+		},
+		{
+			"fieldname": "stock_value_from_diff",
+			"fieldtype": "Float",
+			"label": "Balance Stock Value using (F)",
+		},
+		{
+			"fieldname": "diff_value_diff",
+			"fieldtype": "Float",
+			"label": "K - D",
 		},
 		{
 			"fieldname": "fifo_stock_diff",
