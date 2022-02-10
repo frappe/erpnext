@@ -191,10 +191,10 @@ erpnext.PointOfSale.ItemCart = class {
 			this.numpad_value = '';
 		});
 
-		this.$component.on('click', '.checkout-btn', function() {
+		this.$component.on('click', '.checkout-btn', async function() {
 			if ($(this).attr('style').indexOf('--blue-500') == -1) return;
 
-			me.events.checkout();
+			await me.events.checkout();
 			me.toggle_checkout_btn(false);
 
 			me.allow_discount_change && me.$add_discount_elem.removeClass("d-none");
@@ -985,6 +985,7 @@ erpnext.PointOfSale.ItemCart = class {
 		$(frm.wrapper).off('refresh-fields');
 		$(frm.wrapper).on('refresh-fields', () => {
 			if (frm.doc.items.length) {
+				this.$cart_items_wrapper.html('');
 				frm.doc.items.forEach(item => {
 					this.update_item_html(item);
 				});

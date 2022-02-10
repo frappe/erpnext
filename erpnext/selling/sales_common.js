@@ -499,7 +499,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 					method: 'declare_enquiry_lost',
 					args: {
 						'lost_reasons_list': values.lost_reason,
-						'competitors': values.competitors,
+						'competitors': values.competitors ? values.competitors : [],
 						'detailed_reason': values.detailed_reason
 					},
 					callback: function(r) {

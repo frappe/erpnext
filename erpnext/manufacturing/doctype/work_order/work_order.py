@@ -8,6 +8,8 @@ from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	cint,
 	date_diff,
@@ -449,7 +451,13 @@ class WorkOrder(Document):
 
 	def update_ordered_qty(self):
 		if self.production_plan and self.production_plan_item:
-			qty = self.qty if self.docstatus == 1 else 0
+			qty = frappe.get_value("Production Plan Item", self.production_plan_item, "ordered_qty") or 0.0
+
+			if self.docstatus == 1:
+				qty += self.qty
+			elif self.docstatus == 2:
+				qty -= self.qty
+
 			frappe.db.set_value('Production Plan Item',
 				self.production_plan_item, 'ordered_qty', qty)
 
@@ -1169,3 +1177,27 @@ def create_pick_list(source_name, target_doc=None, for_qty=None):
 	doc.set_item_locations()
 
 	return doc
+
+def get_reserved_qty_for_production(item_code: str, warehouse: str) -> float:
+	"""Get total reserved quantity for any item in specified warehouse"""
+	wo = frappe.qb.DocType("Work Order")
+	wo_item = frappe.qb.DocType("Work Order Item")
+
+	return (
+	frappe.qb
+		.from_(wo)
+		.from_(wo_item)
+		.select(Sum(Case()
+				.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
+				.else_(wo_item.required_qty - wo_item.consumed_qty))
+			)
+		.where(
+			(wo_item.item_code == item_code)
+			& (wo_item.parent == wo.name)
+			& (wo.docstatus == 1)
+			& (wo_item.source_warehouse == warehouse)
+			& (wo.status.notin(["Stopped", "Completed", "Closed"]))
+			& ((wo_item.required_qty > wo_item.transferred_qty)
+				| (wo_item.required_qty > wo_item.consumed_qty))
+		)
+	).run()[0][0] or 0.0
