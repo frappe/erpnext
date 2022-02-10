@@ -293,6 +293,9 @@ erpnext.patches.v13_0.custom_fields_for_taxjar_integration          #08-11-2021
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
 erpnext.patches.v13_0.create_gst_payment_entry_fields #27-11-2021
 erpnext.patches.v13_0.fix_invoice_statuses
+erpnext.patches.v13_0.create_website_items #30-09-2021
+erpnext.patches.v13_0.populate_e_commerce_settings
+erpnext.patches.v13_0.make_homepage_products_website_items
 erpnext.patches.v13_0.replace_supplier_item_group_with_party_specific_item
 erpnext.patches.v13_0.update_dates_in_tax_withholding_category
 erpnext.patches.v14_0.update_opportunity_currency_fields
@@ -314,6 +317,7 @@ erpnext.patches.v13_0.item_naming_series_not_mandatory
 erpnext.patches.v14_0.delete_healthcare_doctypes
 erpnext.patches.v13_0.update_category_in_ltds_certificate
 erpnext.patches.v13_0.create_pan_field_for_india #2
+erpnext.patches.v13_0.fetch_thumbnail_in_website_items
 erpnext.patches.v13_0.update_maintenance_schedule_field_in_visit
 erpnext.patches.v13_0.create_ksa_vat_custom_fields # 07-01-2022
 erpnext.patches.v14_0.migrate_crm_settings
@@ -343,3 +347,7 @@ erpnext.patches.v14_0.restore_einvoice_fields
 erpnext.patches.v13_0.update_sane_transfer_against
 erpnext.patches.v12_0.add_company_link_to_einvoice_settings
 erpnext.patches.v14_0.migrate_cost_center_allocations
+erpnext.patches.v13_0.convert_to_website_item_in_item_card_group_template
+erpnext.patches.v13_0.shopping_cart_to_ecommerce
+erpnext.patches.v13_0.update_disbursement_account
+erpnext.patches.v13_0.update_reserved_qty_closed_wo
