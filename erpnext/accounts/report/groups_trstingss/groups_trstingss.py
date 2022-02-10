@@ -14,20 +14,12 @@ def execute(filters=None):
 
 def _execute(filters=None, additional_table_columns=None, additional_query_columns=None):
 	if not filters: filters = {}
-	filters.update({"from_date": filters.get("date_range") and filters.get("date_range")[0], "to_date": filters.get("date_range") and filters.get("date_range")[1]})
+	filters.update({"from_date": filters.get("from_date"), "to_date": filters.get("to_date")})
 	columns = get_columns(additional_table_columns)
 
 	company_currency = frappe.get_cached_value('Company',  filters.get("company"),  "default_currency")
 
 	item_list = get_items(filters, additional_query_columns)
-	if item_list:
-		itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency)
-	columns.append({
-		"fieldname": "currency",
-		"label": _("Currency"),
-		"fieldtype": "Data",
-		"width": 80
-	})
 	mode_of_payments = get_mode_of_payments(set([d.parent for d in item_list]))
 	so_dn_map = get_delivery_notes_against_sales_order(item_list)
 
@@ -41,16 +33,22 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 
 	data = []
 	for group in groups:
+		qty = 0
+		base_net_rate = 0
+		base_net_amount = 0
 		for d in item_list:
 			if d.item_group == group:
-				row = [d.item_group, d.qty, d.rate, d.amount]
-
-				data.append(row)
+				qty += d.qty
+				base_net_rate += d.base_net_rate
+				base_net_amount += d.base_net_amount
+				
+		row = [group, qty, base_net_rate, base_net_amount]
+		data.append(row)
 
 	return columns, data
 
 def get_columns(additional_table_columns):
-	columns = [_("Item Group") + ":Link/Item Group:100", _("Qty") + ":Float:120", _("Rate") + ":Currency/currency:120",_("Amount") + ":Currency/currency:120"]
+	columns = [_("Item Group") + ":Link/Item Group:100", _("Qty") + ":Int:120", _("Rate") + ":Currency/currency:120",_("Amount") + ":Currency/currency:120"]
 
 	return columns
 
@@ -93,7 +91,29 @@ def get_items(filters, additional_query_columns):
 	if additional_query_columns:
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
 
-	return frappe.db.sql("""
+	if filters.get("serie"):
+		list = frappe.db.sql("""
+		select
+			`tabSales Invoice Item`.name, `tabSales Invoice Item`.parent,
+			`tabSales Invoice`.posting_date, `tabSales Invoice`.debit_to,
+			`tabSales Invoice`.project, `tabSales Invoice`.customer, `tabSales Invoice`.remarks,
+			`tabSales Invoice`.territory, `tabSales Invoice`.company, `tabSales Invoice`.base_net_total,
+			`tabSales Invoice Item`.item_code, `tabSales Invoice Item`.item_name,
+			`tabSales Invoice Item`.item_group, `tabSales Invoice Item`.description, `tabSales Invoice Item`.sales_order,
+			`tabSales Invoice Item`.delivery_note, `tabSales Invoice Item`.income_account,
+			`tabSales Invoice Item`.cost_center, `tabSales Invoice Item`.stock_qty,
+			`tabSales Invoice Item`.stock_uom, `tabSales Invoice Item`.base_net_rate,
+			`tabSales Invoice Item`.base_net_amount, `tabSales Invoice`.customer_name,
+			`tabSales Invoice`.customer_group, `tabSales Invoice Item`.so_detail,
+			`tabSales Invoice`.update_stock, `tabSales Invoice Item`.uom, `tabSales Invoice Item`.qty {0}
+		from `tabSales Invoice`, `tabSales Invoice Item`
+		where `tabSales Invoice`.name = {1}
+			and `tabSales Invoice`.docstatus = 1 %s %s
+		order by `tabSales Invoice`.posting_date desc, `tabSales Invoice Item`.item_code desc
+		""".format(additional_query_columns or '', filters.get("serie")) % (conditions, match_conditions), filters, as_dict=1)
+		return list
+	else:
+		list = frappe.db.sql("""
 		select
 			`tabSales Invoice Item`.name, `tabSales Invoice Item`.parent,
 			`tabSales Invoice`.posting_date, `tabSales Invoice`.debit_to,
@@ -112,6 +132,7 @@ def get_items(filters, additional_query_columns):
 			and `tabSales Invoice`.docstatus = 1 %s %s
 		order by `tabSales Invoice`.posting_date desc, `tabSales Invoice Item`.item_code desc
 		""".format(additional_query_columns or '') % (conditions, match_conditions), filters, as_dict=1)
+		return list
 
 def get_delivery_notes_against_sales_order(item_list):
 	so_dn_map = frappe._dict()
