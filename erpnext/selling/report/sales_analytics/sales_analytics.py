@@ -222,14 +222,25 @@ class Analytics(object):
 
 		if self.filters.get("cost_center"):
 			self.filters.cost_center = get_cost_centers_with_children(self.filters.get("cost_center"))
-			conditions.append("i.cost_center in %(cost_center)s")
+
+			if frappe.get_meta(self.filters.doctype + " Item").has_field("cost_center") and frappe.get_meta(self.filters.doctype).has_field("cost_center"):
+				conditions.append("IF(s.cost_center IS NULL or s.cost_center = '', i.cost_center, s.cost_center) in %(cost_center)s")
+			elif frappe.get_meta(self.filters.doctype + " Item").has_field("cost_center"):
+				conditions.append("i.cost_center in %(cost_center)s")
+			elif frappe.get_meta(self.filters.doctype).has_field("cost_center"):
+				conditions.append("s.cost_center in %(cost_center)s")
 
 		if self.filters.get("project"):
 			if isinstance(self.filters.project, string_types):
 				self.filters.project = cstr(self.filters.get("project")).strip()
 				self.filters.project = [d.strip() for d in self.filters.project.split(',') if d]
-			conditions.append("i.project in %(project)s" if frappe.get_meta(self.filters.doctype + " Item").has_field("project")
-				else "s.project in %(project)s")
+
+			if frappe.get_meta(self.filters.doctype + " Item").has_field("project") and frappe.get_meta(self.filters.doctype).has_field("project"):
+				conditions.append("IF(s.project IS NULL or s.project = '', i.project, s.project) in %(project)s")
+			elif frappe.get_meta(self.filters.doctype + " Item").has_field("project"):
+				conditions.append("i.project in %(project)s")
+			elif frappe.get_meta(self.filters.doctype).has_field("project"):
+				conditions.append("s.project in %(project)s")
 
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 

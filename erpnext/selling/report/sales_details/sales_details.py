@@ -98,8 +98,10 @@ class SalesPurchaseDetailsReport(object):
 		parent_cost_center_field = ", s.cost_center as parent_cost_center" if frappe.get_meta(self.filters.doctype).has_field("cost_center")\
 			else ""
 
-		project_field = ", i.project" if frappe.get_meta(self.filters.doctype + " Item").has_field("project")\
-			else ", s.project"
+		item_project_field = ", i.project as item_project" if frappe.get_meta(self.filters.doctype + " Item").has_field("project")\
+			else ""
+		parent_project_field = ", s.project as parent_project" if frappe.get_meta(self.filters.doctype).has_field("project")\
+			else ""
 
 		party_group_field = ", s.customer_group as party_group, 'Customer Group' as party_group_dt" if self.filters.party_type == "Customer"\
 			else ", sup.supplier_group as party_group, 'Supplier Group' as party_group_dt"
@@ -122,7 +124,8 @@ class SalesPurchaseDetailsReport(object):
 				i.uom, i.stock_uom, i.alt_uom,
 				im.brand, im.item_group,
 				{amount_fields} {party_group_field} {territory_field} {sales_person_field} {contribution_field}
-				{item_cost_center_field} {parent_cost_center_field} {project_field}
+				{item_cost_center_field} {parent_cost_center_field}
+				{item_project_field} {parent_project_field}
 				{stin_field}
 			from `tab{doctype} Item` i
 			inner join `tab{doctype}` s on i.parent = s.name
@@ -149,7 +152,8 @@ class SalesPurchaseDetailsReport(object):
 			sales_person_join=sales_person_join,
 			item_cost_center_field=item_cost_center_field,
 			parent_cost_center_field=parent_cost_center_field,
-			project_field=project_field,
+			item_project_field=item_project_field,
+			parent_project_field=parent_project_field,
 			supplier_join=supplier_join,
 			is_opening_condition=is_opening_condition,
 			filter_conditions=filter_conditions
@@ -213,7 +217,7 @@ class SalesPurchaseDetailsReport(object):
 				"group": d.item_group,
 				"brand": d.brand,
 				"cost_center": d.parent_cost_center or d.item_cost_center,
-				"project": d.project,
+				"project": d.item_project or d.parent_project,
 				scrub(self.filters.party_type) + "_name": d.party_name,
 				"party_name": d.party_name,
 				"disable_item_formatter": cint(self.show_item_name),
@@ -474,8 +478,13 @@ class SalesPurchaseDetailsReport(object):
 			if isinstance(self.filters.project, string_types):
 				self.filters.project = cstr(self.filters.get("project")).strip()
 				self.filters.project = [d.strip() for d in self.filters.project.split(',') if d]
-			conditions.append("i.project in %(project)s" if frappe.get_meta(self.filters.doctype + " Item").has_field("project")
-				else "s.project in %(project)s")
+
+			if frappe.get_meta(self.filters.doctype + " Item").has_field("project") and frappe.get_meta(self.filters.doctype).has_field("project"):
+				conditions.append("IF(s.project IS NULL or s.project = '', i.project, s.project) in %(project)s")
+			elif frappe.get_meta(self.filters.doctype + " Item").has_field("project"):
+				conditions.append("i.project in %(project)s")
+			elif frappe.get_meta(self.filters.doctype).has_field("project"):
+				conditions.append("s.project in %(project)s")
 
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 

@@ -7,7 +7,7 @@ from frappe import _, scrub, unscrub
 from frappe.utils import flt, cstr, getdate, nowdate, cint
 from frappe.desk.query_report import group_report_data
 from six import string_types
-import json
+from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 
 
 def execute(filters=None):
@@ -45,8 +45,10 @@ class GrossProfitGenerator(object):
 		self.data = frappe.db.sql("""
 			select
 				si.name as parent, si_item.parenttype, si_item.name, si_item.idx, si.docstatus,
-				si.posting_date, si.posting_time, si.transaction_type, si.project, si_item.cost_center,
+				si.posting_date, si.posting_time, si.transaction_type,
 				si.customer, si.customer_name, c.customer_group, c.territory,
+				si.project as parent_project, si_item.project as item_project,
+				si.cost_center as parent_cost_center, si_item.cost_center as item_cost_center,
 				si_item.item_code, si_item.item_name, si_item.batch_no, si_item.uom,
 				si_item.warehouse, i.item_group, i.brand, i.item_source, 
 				si.update_stock, si_item.delivery_note_item, si_item.delivery_note,
@@ -77,6 +79,9 @@ class GrossProfitGenerator(object):
 				d['reference'] = d.item_code
 
 			d["disable_item_formatter"] = cint(self.show_item_name)
+
+			d["project"] = d.item_project or d.parent_project
+			d["cost_center"] = d.parent_cost_center or d.item_cost_center
 
 			if d.depreciation_type:
 				self.has_depreciation = True
@@ -245,11 +250,15 @@ class GrossProfitGenerator(object):
 		if self.filters.get("transaction_type"):
 			conditions.append("si.transaction_type = %(transaction_type)s")
 
-		if self.filters.get("project"):
-			conditions.append("si.project = %(project)s")
-
 		if self.filters.get("cost_center"):
-			conditions.append("si.cost_center = %(cost_center)s")
+			self.filters.cost_center = get_cost_centers_with_children(self.filters.get("cost_center"))
+			conditions.append("IF(si.cost_center IS NULL or si.cost_center = '', si_item.cost_center, si.cost_center) in %(cost_center)s")
+
+		if self.filters.get("project"):
+			if isinstance(self.filters.project, string_types):
+				self.filters.project = cstr(self.filters.get("project")).strip()
+				self.filters.project = [d.strip() for d in self.filters.project.split(',') if d]
+			conditions.append("IF(si.project IS NULL or si.project = '', si_item.project, si.project) in %(project)s")
 
 		if self.filters.get("sales_person"):
 			lft, rgt = frappe.db.get_value("Sales Person", self.filters.sales_person, ["lft", "rgt"])
@@ -484,6 +493,13 @@ class GrossProfitGenerator(object):
 				"fieldname": "batch_no",
 				"options": "Batch",
 				"width": 140
+			},
+			{
+				"label": _("Project"),
+				"fieldtype": "Link",
+				"fieldname": "project",
+				"options": "Project",
+				"width": 100
 			},
 		]
 		if self.filters.sales_person:
