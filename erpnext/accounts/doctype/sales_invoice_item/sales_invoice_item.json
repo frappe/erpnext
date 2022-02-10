@@ -841,6 +841,7 @@
   {
    "fieldname": "new_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "New Name",
    "unique": 1
   }
@@ -848,7 +849,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-02-10 12:25:41.823222",
+ "modified": "2022-02-10 13:07:39.258912",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
