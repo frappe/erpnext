@@ -342,6 +342,7 @@ class ProductionPlan(Document):
 
 	def get_production_items(self):
 		item_dict = {}
+
 		for d in self.po_items:
 			item_details = {
 				"production_item"		: d.item_code,
@@ -358,12 +359,12 @@ class ProductionPlan(Document):
 				"production_plan"       : self.name,
 				"production_plan_item"  : d.name,
 				"product_bundle_item"	: d.product_bundle_item,
-				"planned_start_date"    : d.planned_start_date
+				"planned_start_date"    : d.planned_start_date,
+				"project"               : self.project
 			}
 
-			item_details.update({
-				"project": self.project or frappe.db.get_value("Sales Order", d.sales_order, "project")
-			})
+			if not item_details['project'] and d.sales_order:
+				item_details['project'] = frappe.get_cached_value("Sales Order", d.sales_order, "project")
 
 			if self.get_items_from == "Material Request":
 				item_details.update({
@@ -381,38 +382,58 @@ class ProductionPlan(Document):
 
 	@frappe.whitelist()
 	def make_work_order(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import get_default_warehouse
+
 		wo_list, po_list = [], []
 		subcontracted_po = {}
+		default_warehouses = get_default_warehouse()
 
-		self.validate_data()
-		self.make_work_order_for_finished_goods(wo_list)
-		self.make_work_order_for_subassembly_items(wo_list, subcontracted_po)
+		self.make_work_order_for_finished_goods(wo_list, default_warehouses)
+		self.make_work_order_for_subassembly_items(wo_list, subcontracted_po, default_warehouses)
 		self.make_subcontracted_purchase_order(subcontracted_po, po_list)
 		self.show_list_created_message('Work Order', wo_list)
 		self.show_list_created_message('Purchase Order', po_list)
 
-	def make_work_order_for_finished_goods(self, wo_list):
+	def make_work_order_for_finished_goods(self, wo_list, default_warehouses):
 		items_data = self.get_production_items()
 
 		for key, item in items_data.items():
 			if self.sub_assembly_items:
 				item['use_multi_level_bom'] = 0
 
+			set_default_warehouses(item, default_warehouses)
 			work_order = self.create_work_order(item)
 			if work_order:
 				wo_list.append(work_order)
 
-	def make_work_order_for_subassembly_items(self, wo_list, subcontracted_po):
+	def make_work_order_for_subassembly_items(self, wo_list, subcontracted_po, default_warehouses):
 		for row in self.sub_assembly_items:
 			if row.type_of_manufacturing == 'Subcontract':
 				subcontracted_po.setdefault(row.supplier, []).append(row)
 				continue
 
-			args = {}
-			self.prepare_args_for_sub_assembly_items(row, args)
-			work_order = self.create_work_order(args)
+			work_order_data = {
+				'wip_warehouse': default_warehouses.get('wip_warehouse'),
+				'fg_warehouse': default_warehouses.get('fg_warehouse')
+			}
+
+			self.prepare_data_for_sub_assembly_items(row, work_order_data)
+			work_order = self.create_work_order(work_order_data)
 			if work_order:
 				wo_list.append(work_order)
+
+	def prepare_data_for_sub_assembly_items(self, row, wo_data):
+		for field in ["production_item", "item_name", "qty", "fg_warehouse",
+			"description", "bom_no", "stock_uom", "bom_level",
+			"production_plan_item", "schedule_date"]:
+			if row.get(field):
+				wo_data[field] = row.get(field)
+
+		wo_data.update({
+			"use_multi_level_bom": 0,
+			"production_plan": self.name,
+			"production_plan_sub_assembly_item": row.name
+		})
 
 	def make_subcontracted_purchase_order(self, subcontracted_po, purchase_orders):
 		if not subcontracted_po:
@@ -424,7 +445,7 @@ class ProductionPlan(Document):
 			po.schedule_date = getdate(po_list[0].schedule_date) if po_list[0].schedule_date else nowdate()
 			po.is_subcontracted = 'Yes'
 			for row in po_list:
-				args = {
+				po_data = {
 					'item_code': row.production_item,
 					'warehouse': row.fg_warehouse,
 					'production_plan_sub_assembly_item': row.name,
@@ -434,9 +455,9 @@ class ProductionPlan(Document):
 
 				for field in ['schedule_date', 'qty', 'uom', 'stock_uom', 'item_name',
 					'description', 'production_plan_item']:
-					args[field] = row.get(field)
+					po_data[field] = row.get(field)
 
-				po.append('items', args)
+				po.append('items', po_data)
 
 			po.set_missing_values()
 			po.flags.ignore_mandatory = True
@@ -453,24 +474,9 @@ class ProductionPlan(Document):
 			doc_list = [get_link_to_form(doctype, p) for p in doc_list]
 			msgprint(_("{0} created").format(comma_and(doc_list)))
 
-	def prepare_args_for_sub_assembly_items(self, row, args):
-		for field in ["production_item", "item_name", "qty", "fg_warehouse",
-			"description", "bom_no", "stock_uom", "bom_level",
-			"production_plan_item", "schedule_date"]:
-			args[field] = row.get(field)
-
-		args.update({
-			"use_multi_level_bom": 0,
-			"production_plan": self.name,
-			"production_plan_sub_assembly_item": row.name
-		})
-
 	def create_work_order(self, item):
-		from erpnext.manufacturing.doctype.work_order.work_order import (
-			OverProductionError,
-			get_default_warehouse,
-		)
-		warehouse = get_default_warehouse()
+		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
+
 		wo = frappe.new_doc("Work Order")
 		wo.update(item)
 		wo.planned_start_date = item.get('planned_start_date') or item.get('schedule_date')
@@ -479,11 +485,11 @@ class ProductionPlan(Document):
 			wo.fg_warehouse = item.get("warehouse")
 
 		wo.set_work_order_operations()
+		wo.set_required_items()
 
-		if not wo.fg_warehouse:
-			wo.fg_warehouse = warehouse.get('fg_warehouse')
 		try:
 			wo.flags.ignore_mandatory = True
+			wo.flags.ignore_validate = True
 			wo.insert()
 			return wo.name
 		except OverProductionError:
@@ -1024,3 +1030,8 @@ def get_sub_assembly_items(bom_no, bom_data, to_produce_qty, indent=0):
 
 			if d.value:
 				get_sub_assembly_items(d.value, bom_data, stock_qty, indent=indent+1)
+
+def set_default_warehouses(row, default_warehouses):
+	for field in ['wip_warehouse', 'fg_warehouse']:
+		if not row.get(field):
+			row[field] = default_warehouses.get(field)
