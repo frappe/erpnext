@@ -285,7 +285,7 @@ class ProductionPlan(Document):
 
 		self.db_set("total_produced_qty", self.total_produced_qty, update_modified=False)
 
-	def update_produced_qty(self, produced_qty, production_plan_item):
+	def update_produced_pending_qty(self, produced_qty, production_plan_item):
 		for data in self.po_items:
 			if data.name == production_plan_item:
 				data.produced_qty = produced_qty
