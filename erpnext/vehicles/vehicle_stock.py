@@ -33,7 +33,10 @@ class VehicleStockReport(object):
 			self.filters.exclude_in_stock = 1
 			self.filters.exclude_dispatched = 1
 
-	def run(self):
+	def run(self, report_domain="Sales"):
+		self.filters.report_domain = report_domain or "Sales"
+
+		self.get_service_warehouses()
 		self.get_item_data()
 		self.get_stock_ledger_entries()
 		self.process_sle()
@@ -42,6 +45,7 @@ class VehicleStockReport(object):
 		self.get_vehicle_receipt_delivery_data()
 		self.get_vehicle_invoice_data()
 		self.get_booking_data()
+		self.get_project_data()
 		self.prepare_data()
 
 		columns = self.get_columns()
@@ -92,39 +96,45 @@ class VehicleStockReport(object):
 			vehicle_dict.qty = flt(vehicle_dict.qty + sle.actual_qty, 0)
 
 			# Receiving and Delivery
-			if sle.actual_qty > 0:
-				vehicle_dict.received_date = sle.posting_date
-				vehicle_dict.received_dt = sle.voucher_type
-				vehicle_dict.received_dn = sle.voucher_no
+			if sle.voucher_type != 'Vehicle Movement':
+				if sle.actual_qty > 0:
+					vehicle_dict.received_date = sle.posting_date
+					vehicle_dict.received_dt = sle.voucher_type
+					vehicle_dict.received_dn = sle.voucher_no
 
-				vehicle_dict.delivery_date = None
-				vehicle_dict.delivery_dt = None
-				vehicle_dict.delivery_dn = None
-			else:
-				vehicle_dict.delivery_date = sle.posting_date
-				vehicle_dict.delivery_dt = sle.voucher_type
-				vehicle_dict.delivery_dn = sle.voucher_no
+					vehicle_dict.delivery_date = None
+					vehicle_dict.delivery_dt = None
+					vehicle_dict.delivery_dn = None
+				else:
+					vehicle_dict.delivery_date = sle.posting_date
+					vehicle_dict.delivery_dt = sle.voucher_type
+					vehicle_dict.delivery_dn = sle.voucher_no
 
 			# Project
 			if sle.actual_qty > 0 or (sle.actual_qty < 0 and not vehicle_dict.project):
 				vehicle_dict.project = sle.project
 
 			# Move to delivered vehicles
-			if vehicle_dict.qty <= 0:
+			if vehicle_dict.qty <= 0 and sle.voucher_type != 'Vehicle Movement':
 				del vehicles_in_stock[key]
 				vehicles_delivered.append(vehicle_dict)
 
 		self.data = []
 
+		# Delivered Vehicles
 		if not self.filters.get('exclude_delivered'):
 			for vehicle_dict in vehicles_delivered:
-				if not vehicle_dict.delivery_date or not self.filters.from_date\
-						or getdate(vehicle_dict.delivery_date) >= getdate(self.filters.from_date):
+				in_date_range = not vehicle_dict.delivery_date or not self.filters.from_date\
+					or getdate(vehicle_dict.delivery_date) >= getdate(self.filters.from_date)
+
+				if in_date_range and self.is_in_report_domain(vehicle_dict):
 					self.data.append(vehicle_dict)
 
+		# In Stock Vehicles
 		if not self.filters.get('exclude_in_stock'):
 			for vehicle_dict in vehicles_in_stock.values():
-				self.data.append(vehicle_dict)
+				if self.is_in_report_domain(vehicle_dict):
+					self.data.append(vehicle_dict)
 
 	def prepare_data(self):
 		for d in self.data:
@@ -242,6 +252,13 @@ class VehicleStockReport(object):
 				d.delivery_period = booking_data.get('delivery_period')
 				d.delivery_due_date = booking_data.get('delivery_date')
 
+			# Project Data
+			if d.project and d.project in self.project_data:
+				project_data = self.project_data[d.project]
+				d.customer = d.customer or project_data.get('customer')
+				d.customer_name = d.customer_name or project_data.get('customer_name')
+				d.contact_number = d.contact_number or project_data.get('contact_mobile') or project_data.get('contact_phone')
+
 			# Invoice Receipt Data
 			if d.vehicle in self.vehicle_invoice_receipt_data:
 				invoice_data = self.vehicle_invoice_receipt_data[d.vehicle]
@@ -274,7 +291,8 @@ class VehicleStockReport(object):
 					d.status = "In Stock"
 					d.status_color = "#743ee2"
 				elif d.project:
-					d.status = "For Repair"
+					d.status = "In Workshop"
+					d.status_color = "orange"
 				else:
 					d.status = "Open Stock"
 					d.status_color = "purple" if d.vehicle_booking_order else "blue"
@@ -308,35 +326,35 @@ class VehicleStockReport(object):
 
 	def filter_rows(self, data):
 		if self.filters.customer:
-			data = [d for d in self.data if d.customer == self.filters.customer]
+			data = [d for d in data if d.customer == self.filters.customer]
 		if self.filters.financer:
-			data = [d for d in self.data if d.financer == self.filters.financer]
+			data = [d for d in data if d.financer == self.filters.financer]
 		if self.filters.vehicle_owner:
-			data = [d for d in self.data if (d.financer == self.filters.vehicle_owner if d.is_leased else d.customer == self.filters.vehicle_owner)]
+			data = [d for d in data if (d.financer == self.filters.vehicle_owner if d.is_leased else d.customer == self.filters.vehicle_owner)]
 		if self.filters.broker:
-			data = [d for d in self.data if d.broker == self.filters.broker]
+			data = [d for d in data if d.broker == self.filters.broker]
 
 		if self.filters.supplier:
-			data = [d for d in self.data if d.supplier == self.filters.supplier]
+			data = [d for d in data if d.supplier == self.filters.supplier]
 
 		if self.filters.vehicle_booking_order:
-			data = [d for d in self.data if d.vehicle_booking_order == self.filters.vehicle_booking_order]
+			data = [d for d in data if d.vehicle_booking_order == self.filters.vehicle_booking_order]
 
 		if self.filters.vehicle_color:
-			data = [d for d in self.data if d.color == self.filters.vehicle_color]
+			data = [d for d in data if d.color == self.filters.vehicle_color]
 
 		if self.filters.invoice_status == "Invoice In Hand and Delivered":
-			data = [d for d in self.data if d.invoice_received_date or d.invoice_delivery_date]
+			data = [d for d in data if d.invoice_received_date or d.invoice_delivery_date]
 		elif self.filters.invoice_status == "Invoice In Hand":
-			data = [d for d in self.data if d.invoice_received_date and not d.invoice_delivery_date]
+			data = [d for d in data if d.invoice_received_date and not d.invoice_delivery_date]
 		elif self.filters.invoice_status == "Invoice Issued":
 			was_issued = lambda d: d.invoice_issue_date and getdate(d.invoice_issue_date) >= getdate(d.invoice_received_date)
 			was_returned = lambda d: d.invoice_issue_date and d.invoice_return_date and getdate(d.invoice_return_date) >= getdate(d.invoice_issue_date)
-			data = [d for d in self.data if was_issued(d) and not was_returned(d)]
+			data = [d for d in data if was_issued(d) and not was_returned(d)]
 		elif self.filters.invoice_status == "Invoice Delivered":
-			data = [d for d in self.data if d.invoice_delivery_date]
+			data = [d for d in data if d.invoice_delivery_date]
 		elif self.filters.invoice_status == "Invoice Not Received":
-			data = [d for d in self.data if not d.invoice_received_date and not d.invoice_delivery_date]
+			data = [d for d in data if not d.invoice_received_date and not d.invoice_delivery_date]
 
 		return data
 
@@ -456,7 +474,7 @@ class VehicleStockReport(object):
 		return self.vehicle_data
 
 	def get_dispatched_vehicles(self):
-		if self.filters.get('exclude_dispatched'):
+		if self.filters.get('exclude_dispatched') or self.filters.report_domain != "Sales":
 			return
 
 		vehicle_names = list(set([d.vehicle for d in self.vehicle_stock_map.values()]))
@@ -524,9 +542,16 @@ class VehicleStockReport(object):
 				self.vehicle_delivery_data[d.name] = d
 
 	def get_vehicle_invoice_data(self):
+		self.vehicle_invoice_receipt_data = {}
+		self.vehicle_invoice_movement_data = {}
+		self.vehicle_invoice_delivery_data = {}
+
+		if self.filters.report_domain != 'Sales':
+			return
+
 		vehicle_names = list(set([d.vehicle for d in self.data]))
 		if not vehicle_names:
-			return {}
+			return
 
 		args = self.filters.copy()
 		args['vehicle_names'] = vehicle_names
@@ -541,7 +566,6 @@ class VehicleStockReport(object):
 			where docstatus = 1 and vehicle in %(vehicle_names)s {0}
 		""".format(date_condition), args, as_dict=1)
 
-		self.vehicle_invoice_receipt_data = {}
 		for d in receipt_data:
 			self.vehicle_invoice_receipt_data[d.vehicle] = d
 
@@ -553,7 +577,6 @@ class VehicleStockReport(object):
 			order by trn.posting_date, trn.creation
 		""".format(date_condition), args, as_dict=1)
 
-		self.vehicle_invoice_movement_data = {}
 		for d in movement_data:
 			self.vehicle_invoice_movement_data.setdefault(d.vehicle, []).append(d)
 
@@ -564,7 +587,6 @@ class VehicleStockReport(object):
 			order by posting_date desc, creation desc
 		""".format(date_condition), args, as_dict=1)
 
-		self.vehicle_invoice_delivery_data = {}
 		for d in delivery_data:
 			self.vehicle_invoice_delivery_data[d.vehicle] = d
 
@@ -574,7 +596,7 @@ class VehicleStockReport(object):
 
 		vehicle_names = list(set([d.vehicle for d in self.data]))
 		if not vehicle_names:
-			return {}
+			return
 
 		data = frappe.db.sql("""
 			select name, vehicle, vehicle_receipt,
@@ -590,6 +612,28 @@ class VehicleStockReport(object):
 		for d in data:
 			self.booking_by_booking_data[d.name] = d
 			self.booking_by_vehicle_data[d.vehicle] = d
+
+	def get_project_data(self):
+		self.project_data = {}
+
+		if self.filters.report_domain != 'Service':
+			return
+
+		project_names = list(set([d.project for d in self.data if d.get('project')]))
+		if not project_names:
+			return
+
+		data = frappe.db.sql("""
+			select name, applies_to_vehicle,
+				customer, customer_name,
+				vehicle_owner, vehicle_owner_name,
+				contact_mobile, contact_phone
+			from `tabProject`
+			where name in %s
+		""", [project_names], as_dict=1)
+
+		for d in data:
+			self.project_data[d.name] = d
 
 	def get_item_conditions(self):
 		conditions = []
@@ -626,8 +670,39 @@ class VehicleStockReport(object):
 
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
+	def get_service_warehouses(self):
+		self.service_warehouses = []
+
+		self.filters.service_warehouse_group = frappe.get_cached_value("Vehicles Settings", None, 'service_warehouse_group')
+
+		if self.filters.service_warehouse_group:
+			service_warehouses = frappe.get_all("Warehouse", {'name': ['subtree of', self.filters.service_warehouse_group]})
+			self.service_warehouses = [d.name for d in service_warehouses]
+
+		if not self.filters.service_warehouse_group and self.filters.report_domain == "Service":
+			frappe.throw(_("Please set 'Service Warehouse Group' in {0}")
+				.format(frappe.get_desk_link("Vehicles Settings", "Vehicles Settings")))
+
+		return self.service_warehouses
+
+	def is_in_report_domain(self, row):
+		if self.filters.report_domain == "Service":
+			return row.get('project') or not self.is_in_excluded_warehouse(row.warehouse)
+		else:
+			return row.get('vehicle_booking_order') or not self.is_in_excluded_warehouse(row.warehouse)
+
+	def is_in_excluded_warehouse(self, warehouse):
+		if self.filters.report_domain == "Service":
+			if warehouse not in self.service_warehouses:
+				return True
+		else:
+			if warehouse in self.service_warehouses:
+				return True
+
+		return False
+
 	def get_columns(self):
-		return [
+		columns = [
 			{"label": _("Vehicle"), "fieldname": "vehicle", "fieldtype": "Link", "options": "Vehicle", "width": 100},
 			{"label": _("Variant Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 120},
 			# {"label": _("Variant Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 150},
@@ -637,28 +712,42 @@ class VehicleStockReport(object):
 			{"label": _("Reg No"), "fieldname": "license_plate", "fieldtype": "Data", "width": 70},
 			{"label": _("Odometer"), "fieldname": "odometer", "fieldtype": "Int", "width": 60},
 			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 100},
-			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 105},
-			{"label": _("Delivery Period"), "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 110},
+			{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100,
+				"report_domain": "Service"},
+			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 105,
+				"report_domain": "Sales"},
+			{"label": _("Delivery Period"), "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 110,
+				"report_domain": "Sales"},
 			{"label": _("Customer Name"), "fieldname": "customer_name", "fieldtype": "Data", "width": 150},
-			{"label": _("User/Lessee Name"), "fieldname": "user_name", "fieldtype": "Data", "width": 130},
+			{"label": _("User/Lessee Name"), "fieldname": "user_name", "fieldtype": "Data", "width": 130,
+				"report_domain": "Sales"},
 			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
 			{"label": _("Delivered To"), "fieldname": "delivered_to", "fieldtype": "Data", "width": 110},
-			{"label": _("Broker Name"), "fieldname": "broker_name", "fieldtype": "Data", "width": 110},
-			{"label": _("Supplier"), "fieldname": "supplier_name", "fieldtype": "Data", "width": 110},
+
+			{"label": _("Broker Name"), "fieldname": "broker_name", "fieldtype": "Data", "width": 110,
+				"report_domain": "Sales"},
+			{"label": _("Supplier"), "fieldname": "supplier_name", "fieldtype": "Data", "width": 110,
+				"report_domain": "Sales"},
 			{"label": _("Receipt Remarks"), "fieldname": "receipt_remarks", "fieldtype": "Data", "width": 150},
 			{"label": _("Transporter"), "fieldname": "transporter_name", "fieldtype": "Data", "width": 110},
 			{"label": _("Bilty"), "fieldname": "lr_no", "fieldtype": "Data", "width": 70},
-			{"label": _("Invoice"), "fieldname": "bill_no", "fieldtype": "Data", "width": 80},
-			{"label": _("Inv Status"), "fieldname": "invoice_status", "fieldtype": "Data", "width": 80},
-			{"label": _("Dispatched"), "fieldname": "dispatch_date", "fieldtype": "Date", "width": 85},
+			{"label": _("Invoice"), "fieldname": "bill_no", "fieldtype": "Data", "width": 80,
+				"report_domain": "Sales"},
+			{"label": _("Inv Status"), "fieldname": "invoice_status", "fieldtype": "Data", "width": 80,
+				"report_domain": "Sales"},
+			{"label": _("Dispatched"), "fieldname": "dispatch_date", "fieldtype": "Date", "width": 85,
+				"report_domain": "Sales"},
 			{"label": _("Received"), "fieldname": "received_date", "fieldtype": "Date", "width": 80},
 			{"label": _("Delivered"), "fieldname": "delivery_date", "fieldtype": "Date", "width": 80},
 			{"label": _("Receipt Document"), "fieldname": "received_dn", "fieldtype": "Dynamic Link", "options": "received_dt", "width": 100},
 			{"label": _("Delivery Document"), "fieldname": "delivery_dn", "fieldtype": "Dynamic Link", "options": "delivery_dt", "width": 100},
-			{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},
+			{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100,
+				"report_domain": "Sales"},
+			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 105,
+				"report_domain": "Service"},
 			{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 150},
 		]
 
+		columns = [c for c in columns if not c.get('report_domain') or c.get('report_domain') == self.filters.report_domain]
 
-def execute(filters=None):
-	return VehicleStockReport(filters).run()
+		return columns

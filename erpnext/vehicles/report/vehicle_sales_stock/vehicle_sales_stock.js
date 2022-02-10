@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Vehicle Stock"] = {
+frappe.query_reports["Vehicle Sales Stock"] = {
 	filters: [
 		{
 			fieldname: "status",

@@ -78,6 +78,14 @@ def get_data():
 					"name": "Vehicle Log",
 					"dependencies": ["Vehicle"],
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicles In Workshop",
+					"doctype": "Vehicle",
+					"dependencies": ["Vehicle"],
+					"onboard": 1,
+				},
 			],
 		},
 		{
@@ -154,7 +162,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Vehicle Stock",
+					"name": "Vehicle Sales Stock",
 					"doctype": "Vehicle",
 					"dependencies": ["Vehicle"],
 					"onboard": 1,
