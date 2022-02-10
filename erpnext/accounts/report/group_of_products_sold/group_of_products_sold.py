@@ -91,7 +91,29 @@ def get_items(filters, additional_query_columns):
 	if additional_query_columns:
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
 
-	return frappe.db.sql("""
+	if filters.get("serie"):
+		list = frappe.db.sql("""
+		select
+			`tabSales Invoice Item`.name, `tabSales Invoice Item`.parent,
+			`tabSales Invoice`.posting_date, `tabSales Invoice`.debit_to,
+			`tabSales Invoice`.project, `tabSales Invoice`.customer, `tabSales Invoice`.remarks,
+			`tabSales Invoice`.territory, `tabSales Invoice`.company, `tabSales Invoice`.base_net_total,
+			`tabSales Invoice Item`.item_code, `tabSales Invoice Item`.item_name,
+			`tabSales Invoice Item`.item_group, `tabSales Invoice Item`.description, `tabSales Invoice Item`.sales_order,
+			`tabSales Invoice Item`.delivery_note, `tabSales Invoice Item`.income_account,
+			`tabSales Invoice Item`.cost_center, `tabSales Invoice Item`.stock_qty,
+			`tabSales Invoice Item`.stock_uom, `tabSales Invoice Item`.base_net_rate,
+			`tabSales Invoice Item`.base_net_amount, `tabSales Invoice`.customer_name,
+			`tabSales Invoice`.customer_group, `tabSales Invoice Item`.so_detail,
+			`tabSales Invoice`.update_stock, `tabSales Invoice Item`.uom, `tabSales Invoice Item`.qty {0}
+		from `tabSales Invoice`, `tabSales Invoice Item`
+		where `tabSales Invoice`.name = {1}
+			and `tabSales Invoice`.docstatus = 1 %s %s
+		order by `tabSales Invoice`.posting_date desc, `tabSales Invoice Item`.item_code desc
+		""".format(additional_query_columns or '', filters.get("serie")) % (conditions, match_conditions), filters, as_dict=1)
+		return list
+	else:
+		list = frappe.db.sql("""
 		select
 			`tabSales Invoice Item`.name, `tabSales Invoice Item`.parent,
 			`tabSales Invoice`.posting_date, `tabSales Invoice`.debit_to,
@@ -110,6 +132,7 @@ def get_items(filters, additional_query_columns):
 			and `tabSales Invoice`.docstatus = 1 %s %s
 		order by `tabSales Invoice`.posting_date desc, `tabSales Invoice Item`.item_code desc
 		""".format(additional_query_columns or '') % (conditions, match_conditions), filters, as_dict=1)
+		return list
 
 def get_delivery_notes_against_sales_order(item_list):
 	so_dn_map = frappe._dict()
