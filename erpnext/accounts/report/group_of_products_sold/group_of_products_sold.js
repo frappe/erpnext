@@ -26,6 +26,12 @@ frappe.query_reports["Group of Products Sold"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
+			"fieldname":"serie",
+			"label": __("Serie"),
+			"fieldtype": "Link",
+			"options": "Sales Invoice"
+		},
+		{
 			"fieldname":"mode_of_payment",
 			"label": __("Mode of Payment"),
 			"fieldtype": "Link",
