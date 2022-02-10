@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 import json
-import unittest
 
 import frappe
 import frappe.permissions
@@ -22,12 +21,14 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 )
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestSalesOrder(unittest.TestCase):
+class TestSalesOrder(ERPNextTestCase):
 
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		cls.unlink_setting = int(frappe.db.get_value("Accounts Settings", "Accounts Settings",
 			"unlink_advance_payment_on_cancelation_of_order"))
 
@@ -36,6 +37,7 @@ class TestSalesOrder(unittest.TestCase):
 		# reset config to previous state
 		frappe.db.set_value("Accounts Settings", "Accounts Settings",
 			"unlink_advance_payment_on_cancelation_of_order", cls.unlink_setting)
+		super().tearDownClass()
 
 	def tearDown(self):
 		frappe.set_user("Administrator")

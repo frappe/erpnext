@@ -60,6 +60,8 @@ class PayrollEntry(Document):
 	def on_cancel(self):
 		frappe.delete_doc("Salary Slip", frappe.db.sql_list("""select name from `tabSalary Slip`
 			where payroll_entry=%s """, (self.name)))
+		self.db_set("salary_slips_created", 0)
+		self.db_set("salary_slips_submitted", 0)
 
 	def get_emp_list(self):
 		"""
@@ -350,23 +352,24 @@ class PayrollEntry(Document):
 		currencies = []
 		multi_currency = 0
 		company_currency = erpnext.get_company_currency(self.company)
+		accounting_dimensions = get_accounting_dimensions() or []
 
 		exchange_rate, amount = self.get_amount_and_exchange_rate_for_journal_entry(self.payment_account, je_payment_amount, company_currency, currencies)
-		accounts.append({
+		accounts.append(self.update_accounting_dimensions({
 			"account": self.payment_account,
 			"bank_account": self.bank_account,
 			"credit_in_account_currency": flt(amount, precision),
 			"exchange_rate": flt(exchange_rate),
-		})
+		}, accounting_dimensions))
 
 		exchange_rate, amount = self.get_amount_and_exchange_rate_for_journal_entry(payroll_payable_account, je_payment_amount, company_currency, currencies)
-		accounts.append({
+		accounts.append(self.update_accounting_dimensions({
 			"account": payroll_payable_account,
 			"debit_in_account_currency": flt(amount, precision),
 			"exchange_rate": flt(exchange_rate),
 			"reference_type": self.doctype,
 			"reference_name": self.name
-		})
+		}, accounting_dimensions))
 
 		if len(currencies) > 1:
 				multi_currency = 1

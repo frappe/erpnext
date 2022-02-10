@@ -24,7 +24,7 @@ def set_cart_count(quotation=None):
 	if cint(frappe.db.get_singles_value("E Commerce Settings", "enabled")):
 		if not quotation:
 			quotation = _get_cart_quotation()
-		cart_count = cstr(len(quotation.get("items")))
+		cart_count = cstr(cint(quotation.get("total_qty")))
 
 		if hasattr(frappe.local, "cookie_manager"):
 			frappe.local.cookie_manager.set_cookie("cart_count", cart_count)
@@ -276,10 +276,29 @@ def guess_territory():
 
 def decorate_quotation_doc(doc):
 	for d in doc.get("items", []):
+		item_code = d.item_code
+		fields = ["web_item_name", "thumbnail", "website_image", "description", "route"]
+
+		# Variant Item
+		if not frappe.db.exists("Website Item", {"item_code": item_code}):
+			variant_data = frappe.db.get_values(
+				"Item",
+				filters={"item_code": item_code},
+				fieldname=["variant_of", "item_name", "image"],
+				as_dict=True
+			)[0]
+			item_code = variant_data.variant_of
+			fields = fields[1:]
+			d.web_item_name = variant_data.item_name
+
+			if variant_data.image: # get image from variant or template web item
+				d.thumbnail = variant_data.image
+				fields = fields[2:]
+
 		d.update(frappe.db.get_value(
 			"Website Item",
-			{"item_code": d.item_code},
-			["web_item_name", "thumbnail", "website_image", "description", "route"],
+			{"item_code": item_code},
+			fields,
 			as_dict=True)
 		)
 

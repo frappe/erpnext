@@ -67,7 +67,8 @@ def get_data(conditions, filters):
 			(soi.billed_amt * IFNULL(so.conversion_rate, 1)) as billed_amount,
 			(soi.base_amount - (soi.billed_amt * IFNULL(so.conversion_rate, 1))) as pending_amount,
 			soi.warehouse as warehouse,
-			so.company, soi.name
+			so.company, soi.name,
+			soi.description as description
 		FROM
 			`tabSales Order` so,
 			`tabSales Order Item` soi
@@ -79,7 +80,7 @@ def get_data(conditions, filters):
 			and so.docstatus = 1
 			{conditions}
 		GROUP BY soi.name
-		ORDER BY so.transaction_date ASC
+		ORDER BY so.transaction_date ASC, soi.item_code ASC
 	""".format(conditions=conditions), filters, as_dict=1)
 
 	return data
@@ -177,6 +178,12 @@ def get_columns(filters):
 			"fieldname": "item_code",
 			"fieldtype": "Link",
 			"options": "Item",
+			"width": 100
+		})
+		columns.append({
+			"label":_("Description"),
+			"fieldname": "description",
+			"fieldtype": "Small Text",
 			"width": 100
 		})
 
