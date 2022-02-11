@@ -201,6 +201,21 @@ class TestWorkOrder(ERPNextTestCase):
 		self.assertEqual(cint(bin1_on_end_production.reserved_qty_for_production),
 			cint(bin1_on_start_production.reserved_qty_for_production))
 
+	def test_reserved_qty_for_production_closed(self):
+
+		wo1 = make_wo_order_test_record(item="_Test FG Item", qty=2,
+			source_warehouse=self.warehouse)
+		item = wo1.required_items[0].item_code
+		bin_before = get_bin(item, self.warehouse)
+		bin_before.update_reserved_qty_for_production()
+
+		make_wo_order_test_record(item="_Test FG Item", qty=2,
+			source_warehouse=self.warehouse)
+		close_work_order(wo1.name, "Closed")
+
+		bin_after = get_bin(item, self.warehouse)
+		self.assertEqual(bin_before.reserved_qty_for_production, bin_after.reserved_qty_for_production)
+
 	def test_backflush_qty_for_overpduction_manufacture(self):
 		cancel_stock_entry = []
 		allow_overproduction("overproduction_percentage_for_work_order", 30)
