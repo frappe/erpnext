@@ -285,7 +285,7 @@ class SalesInvoice(SellingController):
 				filters={ invoice_or_credit_note: self.name },
 				pluck="pos_closing_entry"
 			)
-			if pos_closing_entry:
+			if pos_closing_entry and pos_closing_entry[0]:
 				msg = _("To cancel a {} you need to cancel the POS Closing Entry {}.").format(
 					frappe.bold("Consolidated Sales Invoice"),
 					get_link_to_form("POS Closing Entry", pos_closing_entry[0])
