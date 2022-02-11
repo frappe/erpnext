@@ -12,7 +12,6 @@ from frappe.utils import date_diff, flt, formatdate, get_last_day, getdate
 
 
 class LeavePolicyAssignment(Document):
-
 	def validate(self):
 		self.validate_policy_assignment_overlap()
 		self.set_dates()
