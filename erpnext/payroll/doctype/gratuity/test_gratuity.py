@@ -18,14 +18,12 @@ from erpnext.regional.united_arab_emirates.setup import create_gratuity_rule
 
 test_dependencies = ["Salary Component", "Salary Slip", "Account"]
 class TestGratuity(unittest.TestCase):
-	@classmethod
-	def setUpClass(cls):
+	def setUp(self):
+		frappe.db.delete("Gratuity")
+		frappe.db.delete("Additional Salary", {"ref_doctype": "Gratuity"})
+
 		make_earning_salary_component(setup=True, test_tax=True, company_list=['_Test Company'])
 		make_deduction_salary_component(setup=True, test_tax=True, company_list=['_Test Company'])
-
-	def setUp(self):
-		frappe.db.sql("DELETE FROM `tabGratuity`")
-		frappe.db.sql("DELETE FROM `tabAdditional Salary` WHERE ref_doctype = 'Gratuity'")
 
 	def test_get_last_salary_slip_should_return_none_for_new_employee(self):
 		new_employee = make_employee("new_employee@salary.com", company='_Test Company')
@@ -120,8 +118,8 @@ class TestGratuity(unittest.TestCase):
 		self.assertEqual(flt(gratuity.paid_amount,2), flt(gratuity.amount, 2))
 
 	def tearDown(self):
-		frappe.db.sql("DELETE FROM `tabGratuity`")
-		frappe.db.sql("DELETE FROM `tabAdditional Salary` WHERE ref_doctype = 'Gratuity'")
+		frappe.db.rollback()
+
 
 def get_gratuity_rule(name):
 	rule = frappe.db.exists("Gratuity Rule", name)
