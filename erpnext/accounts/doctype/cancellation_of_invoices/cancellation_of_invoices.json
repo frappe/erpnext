@@ -448,18 +448,21 @@
    "label": "CAI Info"
   },
   {
+   "fetch_from": "sale_invoice.due_date_cai",
    "fieldname": "due_date_cai",
    "fieldtype": "Date",
    "label": "Due Date CAI",
    "read_only": 1
   },
   {
+   "fetch_from": "sale_invoice.authorized_range",
    "fieldname": "authorized_range",
    "fieldtype": "Data",
    "label": "Authorized Range",
    "read_only": 1
   },
   {
+   "fetch_from": "sale_invoice.cashier",
    "fieldname": "cashier",
    "fieldtype": "Data",
    "label": "Cashier",
@@ -2030,7 +2033,7 @@
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2022-02-09 14:54:51.253172",
+ "modified": "2022-02-11 13:45:47.498610",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cancellation Of Invoices",
