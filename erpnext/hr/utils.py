@@ -421,13 +421,10 @@ def is_earned_leave_already_allocated(allocation, annual_allocation):
 		get_leave_type_details,
 	)
 
-	assignment = frappe.get_doc("Leave Policy Assignment", allocation.leave_policy_assignment)
-	if assignment.assignment_based_on == "Joining Date":
-		return False
-
 	leave_type_details = get_leave_type_details()
 	date_of_joining = frappe.db.get_value("Employee", allocation.employee, "date_of_joining")
 
+	assignment = frappe.get_doc("Leave Policy Assignment", allocation.leave_policy_assignment)
 	leaves_for_passed_months = assignment.get_leaves_for_passed_months(allocation.leave_type,
 		annual_allocation, leave_type_details, date_of_joining)
 

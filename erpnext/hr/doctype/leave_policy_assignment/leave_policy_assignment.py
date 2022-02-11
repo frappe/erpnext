@@ -149,7 +149,7 @@ def add_current_month_if_applicable(months_passed, date_of_joining, based_on_doj
 	if based_on_doj:
 		# if leave type allocation is based on DOJ, and the date of assignment creation is same as DOJ,
 		# then the month should be considered
-		if date == date_of_joining:
+		if date.day == date_of_joining.day:
 			months_passed += 1
 	else:
 		last_day_of_month = get_last_day(date)
