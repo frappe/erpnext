@@ -8,12 +8,8 @@ from math import ceil
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-<<<<<<< HEAD
-from frappe.utils import date_diff, flt, formatdate, get_datetime, get_last_day, getdate
-from six import string_types
-=======
 from frappe.utils import date_diff, flt, formatdate, get_last_day, getdate
->>>>>>> c7be9ef5d2 (fix: consider leaves for past months if assignment is based on joining date too)
+from six import string_types
 
 
 class LeavePolicyAssignment(Document):
