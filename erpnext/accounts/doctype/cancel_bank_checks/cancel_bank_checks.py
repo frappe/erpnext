@@ -17,6 +17,7 @@ class CancelBankChecks(Document):
 		doc = frappe.get_doc("Bank Transactions", self.check)
 		doc.db_set('docstatus', 2, update_modified = False)
 		doc.db_set('status', "Cancelled", update_modified = False)
+		doc.db_set('cancel', 1, update_modified = False)
 	
 	def update_journal_entry(self):
 		journals = frappe.get_all("Journal Entry", ["*"], filters = {"bank_transaction": self.check})
