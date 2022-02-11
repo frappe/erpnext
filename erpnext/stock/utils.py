@@ -206,16 +206,6 @@ def _create_bin(item_code, warehouse):
 
 	return bin_obj
 
-def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
-	"""WARNING: This function is deprecated. Inline this function instead of using it."""
-	from erpnext.stock.doctype.bin.bin import update_stock
-	is_stock_item = frappe.get_cached_value('Item', args.get("item_code"), 'is_stock_item')
-	if is_stock_item:
-		bin_name = get_or_make_bin(args.get("item_code"), args.get("warehouse"))
-		update_stock(bin_name, args, allow_negative_stock, via_landed_cost_voucher)
-	else:
-		frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
-
 @frappe.whitelist()
 def get_incoming_rate(args, raise_error_if_no_rate=True):
 	"""Get Incoming Rate based on valuation method"""
