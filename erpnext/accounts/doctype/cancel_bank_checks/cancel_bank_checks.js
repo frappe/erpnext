@@ -8,7 +8,7 @@ frappe.ui.form.on('Cancel Bank Checks', {
 	onload: function(frm) {
 		cur_frm.fields_dict['check'].get_query = function(doc, cdt, cdn) {
 			return {
-				filters:{'check': 1, 'status': ["!=","Reconciled"]}
+				filters:{'check': 1, 'cancel': 0, 'status': ["!=","Reconciled"], 'bank_account': doc.bank_account}
 			}
 		}
 	}

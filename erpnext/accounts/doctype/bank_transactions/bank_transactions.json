@@ -53,7 +53,8 @@
   "date_data",
   "amount_data",
   "amended_from",
-  "created_by"
+  "created_by",
+  "cancel"
  ],
  "fields": [
   {
@@ -343,10 +344,17 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Created By"
+  },
+  {
+   "default": "0",
+   "fieldname": "cancel",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Cancel"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-02-07 10:37:37.311366",
+ "modified": "2022-02-11 13:56:18.912197",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transactions",
