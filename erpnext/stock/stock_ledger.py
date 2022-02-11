@@ -3,6 +3,7 @@
 
 import copy
 import json
+from typing import Optional
 
 import frappe
 from frappe import _
@@ -268,11 +269,10 @@ class update_entries_after(object):
 		self.verbose = verbose
 		self.allow_zero_rate = allow_zero_rate
 		self.via_landed_cost_voucher = via_landed_cost_voucher
-		self.allow_negative_stock = allow_negative_stock \
-			or cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+		self.item_code = args.get("item_code")
+		self.allow_negative_stock = allow_negative_stock or is_negative_stock_allowed(item_code=self.item_code)
 
 		self.args = frappe._dict(args)
-		self.item_code = args.get("item_code")
 		if self.args.sle_id:
 			self.args['name'] = self.args.sle_id
 
@@ -1049,10 +1049,7 @@ def get_datetime_limit_condition(detail):
 		)"""
 
 def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
-	allow_negative_stock = cint(allow_negative_stock) \
-		or cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
-
-	if allow_negative_stock:
+	if allow_negative_stock or is_negative_stock_allowed(item_code=args.item_code):
 		return
 	if not (args.actual_qty < 0 or args.voucher_type == "Stock Reconciliation"):
 		return
@@ -1121,3 +1118,11 @@ def get_future_sle_with_negative_batch_qty(args):
 			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
 		limit 1
 	""", args, as_dict=1)
+
+
+def is_negative_stock_allowed(*, item_code: Optional[str] = None) -> bool:
+	if cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock", cache=True)):
+		return True
+	if item_code and cint(frappe.db.get_value("Item", item_code, "allow_negative_stock", cache=True)):
+		return True
+	return False
