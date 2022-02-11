@@ -22,7 +22,9 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 		for doctype in ["Leave Period", "Leave Application", "Leave Allocation", "Leave Policy Assignment", "Leave Ledger Entry"]:
 			frappe.db.delete(doctype)
 
-		self.employee = get_employee()
+		employee = get_employee()
+		self.original_doj = employee.date_of_joining
+		self.employee = employee
 
 	def test_grant_leaves(self):
 		leave_period = get_leave_period()
@@ -192,7 +194,6 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 		}).submit()
 
 		# joining date set to 2 months back
-		doj = self.employee.date_of_joining
 		self.employee.date_of_joining = get_first_day(add_months(getdate(), -2))
 		self.employee.save()
 
@@ -218,15 +219,11 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 			"total_leaves_allocated")
 		self.assertEqual(leaves_allocated, 3)
 
-		# reset DOJ
-		frappe.db.set_value("Employee", self.employee.name, "date_of_joining", doj)
-
 	def test_grant_leaves_on_doj_for_earned_leaves_based_on_leave_period(self):
 		# tests leave alloc based on leave period for earned leaves with "based on doj" configuration in leave type
 		leave_period, leave_policy = setup_leave_period_and_policy(get_first_day(add_months(getdate(), -2)), based_on_doj=True)
 
 		# joining date set to 2 months back
-		doj = self.employee.date_of_joining
 		self.employee.date_of_joining = get_first_day(add_months(getdate(), -2))
 		self.employee.save()
 
@@ -256,9 +253,6 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 		}, "total_leaves_allocated")
 		self.assertEqual(leaves_allocated, 3)
 
-		# reset DOJ
-		frappe.db.set_value("Employee", self.employee.name, "date_of_joining", doj)
-
 	def test_grant_leaves_on_doj_for_earned_leaves_based_on_joining_date(self):
 		# tests leave alloc based on joining date for earned leaves with "based on doj" configuration in leave type
 		leave_type = create_earned_leave_type("Test Earned Leave", based_on_doj=True)
@@ -270,7 +264,6 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 
 		# joining date set to 2 months back
 		# leave should be allocated for current month too since this day is same as the joining day
-		doj = self.employee.date_of_joining
 		self.employee.date_of_joining = get_first_day(add_months(getdate(), -2))
 		self.employee.save()
 
@@ -296,11 +289,10 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 			"total_leaves_allocated")
 		self.assertEqual(leaves_allocated, 3)
 
-		# reset DOJ
-		frappe.db.set_value("Employee", self.employee.name, "date_of_joining", doj)
-
 	def tearDown(self):
 		frappe.db.rollback()
+		frappe.db.set_value("Employee", self.employee.name, "date_of_joining", self.original_doj)
+		frappe.flags.current_date = None
 
 
 def create_earned_leave_type(leave_type, based_on_doj=False):
