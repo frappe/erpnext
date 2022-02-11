@@ -5,6 +5,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "bank_account",
   "check",
   "section1",
   "no_bank_check",
@@ -13,7 +14,6 @@
   "colum1",
   "amount",
   "amount_of",
-  "bank_account",
   "amended_from"
  ],
  "fields": [
@@ -67,12 +67,12 @@
    "read_only": 1
   },
   {
-   "fetch_from": "check.bank_account",
    "fieldname": "bank_account",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Bank Account",
    "options": "Bank Account",
-   "read_only": 1
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -85,7 +85,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-01-31 15:20:23.753245",
+ "modified": "2022-02-11 13:59:30.563782",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cancel Bank Checks",
@@ -104,7 +104,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Groups_trstingss"] = {
+frappe.query_reports["Provider Withholding Vouchers"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
@@ -23,31 +23,7 @@ frappe.query_reports["Groups_trstingss"] = {
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": frappe.defaults.get_user_default("Company")
-		},
-		{
-			"fieldname":"serie",
-			"label": __("Serie"),
-			"fieldtype": "Link",
-			"options": "Sales Invoice"
-		},
-		{
-			"fieldname":"mode_of_payment",
-			"label": __("Mode of Payment"),
-			"fieldtype": "Link",
-			"options": "Mode of Payment"
-		},
-		{
-			"fieldname":"warehouse",
-			"label": __("Warehouse"),
-			"fieldtype": "Link",
-			"options": "Warehouse"
-		},
-		{
-			"fieldname":"brand",
-			"label": __("Brand"),
-			"fieldtype": "Link",
-			"options": "Brand"
+			"reqd": 1
 		}
 	]
 };

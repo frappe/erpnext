@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Group of Products Sold"] = {
+frappe.query_reports["Group Of Products Solds"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
@@ -30,24 +30,6 @@ frappe.query_reports["Group of Products Sold"] = {
 			"label": __("Serie"),
 			"fieldtype": "Link",
 			"options": "Sales Invoice"
-		},
-		{
-			"fieldname":"mode_of_payment",
-			"label": __("Mode of Payment"),
-			"fieldtype": "Link",
-			"options": "Mode of Payment"
-		},
-		{
-			"fieldname":"warehouse",
-			"label": __("Warehouse"),
-			"fieldtype": "Link",
-			"options": "Warehouse"
-		},
-		{
-			"fieldname":"brand",
-			"label": __("Brand"),
-			"fieldtype": "Link",
-			"options": "Brand"
 		}
 	]
 };
