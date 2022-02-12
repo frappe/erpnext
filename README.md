@@ -40,12 +40,6 @@ ERPNext is built on the [Frappe Framework](https://github.com/frappe/frappe), a 
 
 ---
 
-<div align="center">
-    <a href="https://frappecloud.com/deploy?apps=frappe,erpnext&source=erpnext_readme">
-        <img src=".github/try-on-f-cloud-button.svg" height="40">
-    </a>
-</div>
-
 ### Containerized Installation
 
 Use docker to deploy ERPNext in production or for development of [Frappe](https://github.com/frappe/frappe) apps. See https://github.com/frappe/frappe_docker for more details.
