@@ -172,7 +172,7 @@ class GrossProfitGenerator(object):
 			buying_amount = 0
 
 		for row in reversed(self.si_list):
-			if self.skip_row(row, self.product_bundles):
+			if self.skip_row(row):
 				continue
 
 			row.base_amount = flt(row.base_net_amount, self.currency_precision)
@@ -278,7 +278,7 @@ class GrossProfitGenerator(object):
 			self.returned_invoices.setdefault(inv.return_against, frappe._dict())\
 				.setdefault(inv.item_code, []).append(inv)
 
-	def skip_row(self, row, product_bundles):
+	def skip_row(self, row):
 		if self.filters.get("group_by") != "Invoice":
 			if not row.get(scrub(self.filters.get("group_by", ""))):
 				return True
