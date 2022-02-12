@@ -125,7 +125,7 @@ class TestPayrollEntry(unittest.TestCase):
 
 		if not frappe.db.exists("Account", "_Test Payroll Payable - _TC"):
 				create_account(account_name="_Test Payroll Payable",
-					company="_Test Company", parent_account="Current Liabilities - _TC")
+					company="_Test Company", parent_account="Current Liabilities - _TC", account_type="Payable")
 
 		if not frappe.db.get_value("Company", "_Test Company", "default_payroll_payable_account") or \
 			frappe.db.get_value("Company", "_Test Company", "default_payroll_payable_account") != "_Test Payroll Payable - _TC":

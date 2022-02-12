@@ -731,7 +731,7 @@ def get_salary_component_account(sal_comp, company_list=None):
 			})
 			sal_comp.save()
 
-def create_account(account_name, company, parent_account):
+def create_account(account_name, company, parent_account, account_type=None):
 	company_abbr = frappe.get_cached_value('Company',  company,  'abbr')
 	account = frappe.db.get_value("Account", account_name + " - " + company_abbr)
 	if not account:
