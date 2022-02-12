@@ -41,6 +41,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		me.frm.set_query('contact_person', erpnext.queries.contact_query);
 		me.frm.set_query('customer_address', erpnext.queries.address_query);
 		me.frm.set_query('shipping_address_name', erpnext.queries.address_query);
+		me.frm.set_query('dispatch_address_name', erpnext.queries.dispatch_address_query);
 
 
 		if(this.frm.fields_dict.selling_price_list) {
@@ -485,7 +486,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 					"options": "Competitor Detail"
 				},
 				{
-					"fieldtype": "Text",
+					"fieldtype": "Small Text",
 					"label": __("Detailed Reason"),
 					"fieldname": "detailed_reason"
 				},
@@ -498,7 +499,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 					method: 'declare_enquiry_lost',
 					args: {
 						'lost_reasons_list': values.lost_reason,
-						'competitors': values.competitors,
+						'competitors': values.competitors ? values.competitors : [],
 						'detailed_reason': values.detailed_reason
 					},
 					callback: function(r) {

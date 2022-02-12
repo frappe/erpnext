@@ -105,10 +105,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 22:43:28.363644",
+ "modified": "2022-01-19 12:57:37.898953",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Retention Bonus",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -163,7 +164,10 @@
    "share": 1
   }
  ],
+ "search_fields": "employee_name",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
+ "title_field": "employee_name",
  "track_changes": 1
 }

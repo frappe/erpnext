@@ -55,7 +55,8 @@ def get_stock_ledger_entries(filters):
 	return frappe.db.sql("""select item_code, batch_no, warehouse,
 		posting_date, actual_qty
 		from `tabStock Ledger Entry`
-		where docstatus < 2 and ifnull(batch_no, '') != '' %s order by item_code, warehouse""" %
+		where is_cancelled = 0
+		and docstatus < 2 and ifnull(batch_no, '') != '' %s order by item_code, warehouse""" %
 		conditions, as_dict=1)
 
 def get_item_warehouse_batch_map(filters, float_precision):

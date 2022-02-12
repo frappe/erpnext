@@ -6,6 +6,7 @@ import json
 
 import frappe
 from frappe.test_runner import make_test_objects
+from frappe.utils import add_days, today
 
 from erpnext.controllers.item_variant import (
 	InvalidItemAttributeValueError,
@@ -536,7 +537,7 @@ class TestItem(ERPNextTestCase):
 		"check if index is getting created in db"
 
 		indices = frappe.db.sql("show index from tabItem", as_dict=1)
-		expected_columns = {"item_code", "item_name", "item_group", "route"}
+		expected_columns = {"item_code", "item_name", "item_group"}
 		for index in indices:
 			expected_columns.discard(index.get("Column_name"))
 
@@ -584,6 +585,16 @@ class TestItem(ERPNextTestCase):
 		except frappe.ValidationError as e:
 			self.fail(f"UoM change not allowed even though no SLE / BIN with positive qty exists: {e}")
 
+	def test_erasure_of_old_conversions(self):
+		item = create_item("_item change uom")
+		item.stock_uom = "Gram"
+		item.append("uoms", frappe._dict(uom="Box", conversion_factor=2))
+		item.save()
+		item.reload()
+		item.stock_uom = "Nos"
+		item.save()
+		self.assertEqual(len(item.uoms), 1)
+
 	def test_validate_stock_item(self):
 		self.assertRaises(frappe.ValidationError, validate_is_stock_item, "_Test Non Stock Item")
 
@@ -597,6 +608,45 @@ class TestItem(ERPNextTestCase):
 		item = frappe.new_doc("Item")
 		item.item_group = "All Item Groups"
 		item.save()  # if item code saved without item_code then series worked
+
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_item_wise_negative_stock(self):
+		""" When global settings are disabled check that item that allows
+		negative stock can still consume material in all known stock
+		transactions that consume inventory."""
+		from erpnext.stock.stock_ledger import is_negative_stock_allowed
+
+		item = make_item("_TestNegativeItemSetting", {"allow_negative_stock": 1, "valuation_rate": 100})
+		self.assertTrue(is_negative_stock_allowed(item_code=item.name))
+
+		self.consume_item_code_with_differet_stock_transactions(item_code=item.name)
+
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_backdated_negative_stock(self):
+		""" same as test above but backdated entries """
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		item = make_item("_TestNegativeItemSetting", {"allow_negative_stock": 1, "valuation_rate": 100})
+
+		# create a future entry so all new entries are backdated
+		make_stock_entry(qty=1, item_code=item.name, target="_Test Warehouse - _TC", posting_date = add_days(today(), 5))
+		self.consume_item_code_with_differet_stock_transactions(item_code=item.name)
+
+
+	def consume_item_code_with_differet_stock_transactions(self, item_code, warehouse="_Test Warehouse - _TC"):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		typical_args = {"item_code": item_code, "warehouse": warehouse}
+
+		create_delivery_note(**typical_args)
+		create_sales_invoice(update_stock=1, **typical_args)
+		make_stock_entry(item_code=item_code, source=warehouse, qty=1, purpose="Material Issue")
+		make_stock_entry(item_code=item_code, source=warehouse, target="Stores - _TC", qty=1)
+		# standalone return
+		make_purchase_receipt(is_return=True, qty=-1, **typical_args)
+
 
 
 def set_item_variant_settings(fields):
