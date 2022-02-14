@@ -19,7 +19,14 @@
   "cb0",
   "country",
   "default_letter_head",
+  "tax_id",
+  "domain",
   "company_logo",
+  "section_break_28",
+  "create_chart_of_accounts_based_on",
+  "column_break_26",
+  "existing_company",
+  "chart_of_accounts",
   "company_info",
   "phone_no",
   "email",
@@ -32,16 +39,9 @@
   "date_of_establishment",
   "company_description",
   "column_break1",
-  "tax_id",
   "date_of_commencement",
-  "domain",
   "registration_details",
   "settings",
-  "section_break_28",
-  "create_chart_of_accounts_based_on",
-  "column_break_26",
-  "existing_company",
-  "chart_of_accounts",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
   "enable_provisional_accounting_for_non_stock_items",
@@ -52,9 +52,6 @@
   "default_provisional_account",
   "expenses_included_in_valuation",
   "default_in_transit_warehouse",
-  "budget_detail",
-  "exception_budget_approver_role",
-  "company_defaults_tab",
   "sales_settings",
   "default_buying_terms",
   "sales_monthly_history",
@@ -107,6 +104,8 @@
   "depreciation_cost_center",
   "capital_work_in_progress_account",
   "asset_received_but_not_billed",
+  "budget_detail",
+  "exception_budget_approver_role",
   "dashboard_tab",
   "registration_info",
   "lft",
@@ -117,7 +116,6 @@
   {
    "fieldname": "details",
    "fieldtype": "Section Break",
-   "label": "Name & Address",
    "oldfieldtype": "Section Break"
   },
   {
@@ -183,7 +181,7 @@
   {
    "fieldname": "sales_settings",
    "fieldtype": "Section Break",
-   "label": "Buying & Selling Settings"
+   "label": "Buying & Selling Defaults"
   },
   {
    "fieldname": "sales_monthly_history",
@@ -230,7 +228,7 @@
   {
    "fieldname": "default_letter_head",
    "fieldtype": "Link",
-   "label": "Default Letter Head",
+   "label": "Letter Head",
    "options": "Letter Head"
   },
   {
@@ -243,7 +241,8 @@
    "fieldname": "default_warehouse_for_sales_return",
    "fieldtype": "Link",
    "label": "Default Warehouse for Sales Return",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "column_break_10",
@@ -305,7 +304,8 @@
    "no_copy": 1,
    "oldfieldname": "default_bank_account",
    "oldfieldtype": "Link",
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -314,7 +314,8 @@
    "ignore_user_permissions": 1,
    "label": "Default Cash Account",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -325,13 +326,15 @@
    "no_copy": 1,
    "oldfieldname": "receivables_group",
    "oldfieldtype": "Link",
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "round_off_account",
    "fieldtype": "Link",
    "label": "Round Off Account",
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "round_off_cost_center",
@@ -343,19 +346,22 @@
    "fieldname": "write_off_account",
    "fieldtype": "Link",
    "label": "Write Off Account",
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "exchange_gain_loss_account",
    "fieldtype": "Link",
    "label": "Exchange Gain / Loss Account",
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "unrealized_exchange_gain_loss_account",
    "fieldtype": "Link",
    "label": "Unrealized Exchange Gain/Loss Account",
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "column_break0",
@@ -379,14 +385,16 @@
    "no_copy": 1,
    "oldfieldname": "payables_group",
    "oldfieldtype": "Link",
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "default_employee_advance_account",
    "fieldtype": "Link",
    "label": "Default Employee Advance Account",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -395,7 +403,8 @@
    "ignore_user_permissions": 1,
    "label": "Default Cost of Goods Sold Account",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -404,7 +413,8 @@
    "ignore_user_permissions": 1,
    "label": "Default Income Account",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -413,7 +423,8 @@
    "ignore_user_permissions": 1,
    "label": "Default Deferred Revenue Account",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -422,7 +433,8 @@
    "ignore_user_permissions": 1,
    "label": "Default Deferred Expense Account",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -431,7 +443,8 @@
    "ignore_user_permissions": 1,
    "label": "Default Payroll Payable Account",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -440,7 +453,8 @@
    "ignore_user_permissions": 1,
    "label": "Default Expense Claim Payable Account",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -482,7 +496,8 @@
    "fieldname": "default_inventory_account",
    "fieldtype": "Link",
    "label": "Default Inventory Account",
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "depends_on": "eval:doc.enable_perpetual_inventory==1",
@@ -491,7 +506,8 @@
    "ignore_user_permissions": 1,
    "label": "Stock Adjustment Account",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "column_break_32",
@@ -504,7 +520,8 @@
    "ignore_user_permissions": 1,
    "label": "Stock Received But Not Billed",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "depends_on": "eval:doc.enable_perpetual_inventory==1",
@@ -513,21 +530,24 @@
    "ignore_user_permissions": 1,
    "label": "Expenses Included In Valuation",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "accumulated_depreciation_account",
    "fieldtype": "Link",
    "label": "Accumulated Depreciation Account",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "depreciation_expense_account",
    "fieldtype": "Link",
    "label": "Depreciation Expense Account",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "series_for_depreciation_entry",
@@ -538,7 +558,8 @@
    "fieldname": "expenses_included_in_asset_valuation",
    "fieldtype": "Link",
    "label": "Expenses Included In Asset Valuation",
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "column_break_40",
@@ -549,7 +570,8 @@
    "fieldtype": "Link",
    "label": "Gain/Loss Account on Asset Disposal",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "depreciation_cost_center",
@@ -562,18 +584,22 @@
    "fieldname": "capital_work_in_progress_account",
    "fieldtype": "Link",
    "label": "Capital Work In Progress Account",
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "asset_received_but_not_billed",
    "fieldtype": "Link",
    "label": "Asset Received But Not Billed",
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
+   "depends_on":"eval:!doc.__islocal",
+   "collapsible": 1,
    "fieldname": "budget_detail",
    "fieldtype": "Section Break",
-   "label": "Budget Detail"
+   "label": "Budget Defaults"
   },
   {
    "fieldname": "exception_budget_approver_role",
@@ -695,19 +721,22 @@
    "fieldname": "default_in_transit_warehouse",
    "fieldtype": "Link",
    "label": "Default In-Transit Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "unrealized_profit_loss_account",
    "fieldtype": "Link",
    "label": "Unrealized Profit / Loss Account",
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "default_discount_account",
    "fieldtype": "Link",
    "label": "Default Payment Discount Account",
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "hr_settings_section",
@@ -719,6 +748,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "collapsible": 1,
    "fieldname": "fixed_asset_defaults",
    "fieldtype": "Section Break",
@@ -728,7 +758,8 @@
    "fieldname": "repair_and_maintenance_account",
    "fieldtype": "Link",
    "label": "Repair and Maintenance Account",
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   },
   {
    "fieldname": "section_break_28",
@@ -762,12 +793,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "company_defaults_tab",
-   "fieldtype": "Tab Break",
-   "label": "Defaults"
-  },
-  {
+   "collapsible": 1,
    "fieldname": "deferred_accounting_defaults_section",
    "fieldtype": "Section Break",
    "label": "Deferred Accounting Defaults"
@@ -798,7 +824,8 @@
    "ignore_user_permissions": 1,
    "label": "Default Provisional Account",
    "no_copy": 1,
-   "options": "Account"
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.__islocal"
   }
  ],
  "icon": "fa fa-building",
