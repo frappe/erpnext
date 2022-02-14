@@ -27,6 +27,7 @@
   "supplier_primary_contact",
   "mobile_no",
   "email_id",
+  "website",
   "column_break_44",
   "supplier_primary_address",
   "primary_address",
@@ -34,11 +35,11 @@
   "accounting_tab",
   "taxation_section",
   "tax_id",
-  "default_bank_account",
   "column_break_25",
   "tax_category",
   "tax_withholding_category",
   "default_payable_accounts",
+  "default_bank_account",
   "accounts",
   "commericals_tab",
   "section_break_7",
@@ -52,12 +53,12 @@
   "hold_type",
   "release_date",
   "column_break2",
-  "website",
   "supplier_details",
   "column_break_30",
   "language",
   "is_frozen",
   "settings_tab",
+  "section_break_44",
   "allow_purchase_invoice_creation_without_purchase_order",
   "column_break_50",
   "allow_purchase_invoice_creation_without_purchase_receipt",
@@ -385,8 +386,7 @@
   },
   {
    "fieldname": "primary_address_and_contact_detail_section",
-   "fieldtype": "Section Break",
-   "label": "Primary Address and Contact Detail"
+   "fieldtype": "Section Break"
   },
   {
    "description": "Reselect, if the chosen contact is edited after save",
@@ -398,14 +398,16 @@
   {
    "fetch_from": "supplier_primary_contact.mobile_no",
    "fieldname": "mobile_no",
-   "fieldtype": "Read Only",
-   "label": "Mobile No"
+   "fieldtype": "Data",
+   "label": "Mobile No",
+   "read_only": 1
   },
   {
    "fetch_from": "supplier_primary_contact.email_id",
    "fieldname": "email_id",
-   "fieldtype": "Read Only",
-   "label": "Email Id"
+   "fieldtype": "Data",
+   "label": "Email Id",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_44",
@@ -489,6 +491,11 @@
   {
    "fieldname": "column_break_50",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_44",
+   "fieldtype": "Section Break",
+   "label": "Invoicing"
   }
  ],
  "icon": "fa fa-user",
