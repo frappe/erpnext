@@ -138,7 +138,7 @@ class TestProductionPlan(ERPNextTestCase):
 		"""
 		- Disable 'ignore_existing_ordered_qty'.
 		- Test if MR Planning table avoids pulling Raw Material Qty as it is in stock for
-		  non exploded BOM.
+		non exploded BOM.
 		"""
 		sr1 = create_stock_reconciliation(item_code="Raw Material Item 1",
 			target="_Test Warehouse - _TC", qty=1, rate=130)
@@ -506,11 +506,11 @@ class TestProductionPlan(ERPNextTestCase):
 		)
 
 		make_stock_entry(item_code="Raw Material Item 1",
-			target="_Test Warehouse - _TC",
+			target="Work In Progress - _TC",
 			qty=2, basic_rate=100
 		)
 		make_stock_entry(item_code="Raw Material Item 2",
-			target="_Test Warehouse - _TC",
+			target="Work In Progress - _TC",
 			qty=2, basic_rate=100
 		)
 
@@ -552,6 +552,15 @@ class TestProductionPlan(ERPNextTestCase):
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 		from erpnext.manufacturing.doctype.work_order.work_order import (
 			make_stock_entry as make_se_from_wo,
+		)
+
+		make_stock_entry(item_code="Raw Material Item 1",
+			target="Work In Progress - _TC",
+			qty=2, basic_rate=100
+		)
+		make_stock_entry(item_code="Raw Material Item 2",
+			target="Work In Progress - _TC",
+			qty=2, basic_rate=100
 		)
 
 		pln = create_production_plan(
