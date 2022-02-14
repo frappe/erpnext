@@ -18,7 +18,7 @@ REPORT_FILTER_TEST_CASES: List[Tuple[ReportName, ReportFilters]] = [
 	("BOM Operations Time", {}),
 	("BOM Stock Calculated", {"bom": frappe.get_last_doc("BOM").name, "qty_to_make": 2}),
 	("BOM Stock Report", {"bom": frappe.get_last_doc("BOM").name, "qty_to_produce": 2}),
-	("Cost of Poor Quality Report", {}),
+	("Cost of Poor Quality Report", {"item": "_Test Item", "serial_no": "00"}),
 	("Downtime Analysis", {}),
 	(
 		"Exponential Smoothing Forecasting",

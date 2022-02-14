@@ -3,7 +3,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:company_name",
- "creation": "2022-01-17 14:29:51.330749",
+ "creation": "2022-01-25 10:29:55.938239",
  "description": "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -44,12 +44,12 @@
   "chart_of_accounts",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
-  "enable_perpetual_inventory_for_non_stock_items",
+  "enable_provisional_accounting_for_non_stock_items",
   "default_inventory_account",
   "stock_adjustment_account",
   "column_break_32",
   "stock_received_but_not_billed",
-  "service_received_but_not_billed",
+  "default_provisional_account",
   "expenses_included_in_valuation",
   "default_in_transit_warehouse",
   "budget_detail",
@@ -692,21 +692,6 @@
    "options": "Terms and Conditions"
   },
   {
-   "depends_on": "eval:doc.enable_perpetual_inventory_for_non_stock_items==1",
-   "fieldname": "service_received_but_not_billed",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Service Received But Not Billed",
-   "no_copy": 1,
-   "options": "Account"
-  },
-  {
-   "default": "0",
-   "fieldname": "enable_perpetual_inventory_for_non_stock_items",
-   "fieldtype": "Check",
-   "label": "Enable Perpetual Inventory For Non Stock Items"
-  },
-  {
    "fieldname": "default_in_transit_warehouse",
    "fieldtype": "Link",
    "label": "Default In-Transit Warehouse",
@@ -800,6 +785,20 @@
   {
    "fieldname": "column_break_80",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_provisional_accounting_for_non_stock_items",
+   "fieldtype": "Check",
+   "label": "Enable Provisional Accounting For Non Stock Items"
+  },
+  {
+   "fieldname": "default_provisional_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Default Provisional Account",
+   "no_copy": 1,
+   "options": "Account"
   }
  ],
  "icon": "fa fa-building",
@@ -807,7 +806,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2022-01-21 15:55:12.191110",
+ "modified": "2022-02-14 15:55:12.191110",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

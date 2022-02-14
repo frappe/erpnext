@@ -1,11 +1,11 @@
 import datetime
 import zipfile
 from csv import QUOTE_NONNUMERIC
+from io import BytesIO
 
 import frappe
 import pandas as pd
 from frappe import _
-from six import BytesIO
 
 from .datev_constants import DataCategory
 

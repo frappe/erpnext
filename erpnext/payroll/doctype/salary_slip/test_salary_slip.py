@@ -147,7 +147,7 @@ class TestSalarySlip(unittest.TestCase):
 		# Payroll based on attendance
 		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Attendance")
 
-		emp = make_employee("test_employee_timesheet@salary.com", company="_Test Company")
+		emp = make_employee("test_employee_timesheet@salary.com", company="_Test Company", holiday_list="Salary Slip Test Holiday List")
 		frappe.db.set_value("Employee", emp, {"relieving_date": None, "status": "Active"})
 
 		# mark attendance
@@ -370,6 +370,7 @@ class TestSalarySlip(unittest.TestCase):
 		create_loan_type("Car Loan", 500000, 8.4,
 			is_term_loan=1,
 			mode_of_payment='Cash',
+			disbursement_account='Disbursement Account - _TC',
 			payment_account='Payment Account - _TC',
 			loan_account='Loan Account - _TC',
 			interest_income_account='Interest Income Account - _TC',
@@ -725,7 +726,7 @@ def get_salary_component_account(sal_comp, company_list=None):
 			})
 			sal_comp.save()
 
-def create_account(account_name, company, parent_account):
+def create_account(account_name, company, parent_account, account_type=None):
 	company_abbr = frappe.get_cached_value('Company',  company,  'abbr')
 	account = frappe.db.get_value("Account", account_name + " - " + company_abbr)
 	if not account:
@@ -993,6 +994,8 @@ def make_leave_application(employee, from_date, to_date, leave_type, company=Non
 		leave_approver = 'test@example.com'
 	))
 	leave_application.submit()
+
+	return leave_application
 
 def setup_test():
 	make_earning_salary_component(setup=True, company_list=["_Test Company"])

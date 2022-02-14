@@ -2100,6 +2100,54 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(data['billLists'][0]['actualFromStateCode'],7)
 		self.assertEqual(data['billLists'][0]['fromStateCode'],27)
 
+	def test_einvoice_submission_without_irn(self):
+		# init
+		einvoice_settings = frappe.get_doc('E Invoice Settings')
+		einvoice_settings.enable = 1
+		einvoice_settings.applicable_from = nowdate()
+		einvoice_settings.append('credentials', {
+			'company': '_Test Company',
+			'gstin': '27AAECE4835E1ZR',
+			'username': 'test',
+			'password': 'test'
+		})
+		einvoice_settings.save()
+
+		country = frappe.flags.country
+		frappe.flags.country = 'India'
+
+		si = make_sales_invoice_for_ewaybill()
+		self.assertRaises(frappe.ValidationError, si.submit)
+
+		si.irn = 'test_irn'
+		si.submit()
+
+		# reset
+		einvoice_settings = frappe.get_doc('E Invoice Settings')
+		einvoice_settings.enable = 0
+		frappe.flags.country = country
+
+	def test_einvoice_json(self):
+		from erpnext.regional.india.e_invoice.utils import make_einvoice, validate_totals
+
+		si = get_sales_invoice_for_e_invoice()
+		si.discount_amount = 100
+		si.save()
+
+		einvoice = make_einvoice(si)
+		self.assertTrue(einvoice['EwbDtls'])
+		validate_totals(einvoice)
+
+		si.apply_discount_on = 'Net Total'
+		si.save()
+		einvoice = make_einvoice(si)
+		validate_totals(einvoice)
+
+		[d.set('included_in_print_rate', 1) for d in si.taxes]
+		si.save()
+		einvoice = make_einvoice(si)
+		validate_totals(einvoice)
+
 	def test_item_tax_net_range(self):
 		item = create_item("T Shirt")
 
@@ -2192,9 +2240,9 @@ class TestSalesInvoice(unittest.TestCase):
 		asset.load_from_db()
 
 		expected_values = [
-			["2020-06-30", 1311.48, 1311.48],
-			["2021-06-30", 20000.0, 21311.48],
-			["2021-09-30", 5041.1, 26352.58]
+			["2020-06-30", 1366.12, 1366.12],
+			["2021-06-30", 20000.0, 21366.12],
+			["2021-09-30", 5041.1, 26407.22]
 		]
 
 		for i, schedule in enumerate(asset.schedules):
@@ -2242,12 +2290,12 @@ class TestSalesInvoice(unittest.TestCase):
 		asset.load_from_db()
 
 		expected_values = [
-			["2020-06-30", 1311.48, 1311.48, True],
-			["2021-06-30", 20000.0, 21311.48, True],
-			["2022-06-30", 20000.0, 41311.48, False],
-			["2023-06-30", 20000.0, 61311.48, False],
-			["2024-06-30",  20000.0, 81311.48,  False],
-			["2025-06-06",  18688.52,  100000.0, False]
+			["2020-06-30", 1366.12, 1366.12, True],
+			["2021-06-30", 20000.0, 21366.12, True],
+			["2022-06-30", 20000.0, 41366.12, False],
+			["2023-06-30", 20000.0, 61366.12, False],
+			["2024-06-30",  20000.0, 81366.12,  False],
+			["2025-06-06",  18633.88,  100000.0, False]
 		]
 
 		for i, schedule in enumerate(asset.schedules):
