@@ -2,12 +2,13 @@
 # For license information, please see license.txt
 
 
+from urllib.parse import urlparse
+
 import frappe
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe.model.document import Document
 from frappe.utils.nestedset import get_root_of
-from six.moves.urllib.parse import urlparse
 
 
 class WoocommerceSettings(Document):

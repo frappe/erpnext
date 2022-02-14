@@ -167,7 +167,7 @@ def get_columns():
 		{
 			"fieldname": "stock_queue",
 			"fieldtype": "Data",
-			"label": "FIFO Queue",
+			"label": "FIFO/LIFO Queue",
 		},
 
 		{

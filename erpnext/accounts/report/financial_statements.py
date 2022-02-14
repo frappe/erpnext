@@ -282,7 +282,8 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 	total_row = {
 		"account_name": _("Total {0} ({1})").format(_(root_type), _(balance_must_be)),
 		"account": _("Total {0} ({1})").format(_(root_type), _(balance_must_be)),
-		"currency": company_currency
+		"currency": company_currency,
+		"opening_balance": 0.0
 	}
 
 	for row in out:
@@ -294,6 +295,7 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 
 			total_row.setdefault("total", 0.0)
 			total_row["total"] += flt(row["total"])
+			total_row["opening_balance"] += row["opening_balance"]
 			row["total"] = ""
 
 	if "total" in total_row:
@@ -387,42 +389,15 @@ def set_gl_entries_by_account(
 					key: value
 				})
 
-		distributed_cost_center_query = ""
-		if filters and filters.get('cost_center'):
-			distributed_cost_center_query = """
-			UNION ALL
-			SELECT posting_date,
-				account,
-				debit*(DCC_allocation.percentage_allocation/100) as debit,
-				credit*(DCC_allocation.percentage_allocation/100) as credit,
-				is_opening,
-				fiscal_year,
-				debit_in_account_currency*(DCC_allocation.percentage_allocation/100) as debit_in_account_currency,
-				credit_in_account_currency*(DCC_allocation.percentage_allocation/100) as credit_in_account_currency,
-				account_currency
-			FROM `tabGL Entry`,
-			(
-				SELECT parent, sum(percentage_allocation) as percentage_allocation
-				FROM `tabDistributed Cost Center`
-				WHERE cost_center IN %(cost_center)s
-				AND parent NOT IN %(cost_center)s
-				GROUP BY parent
-			) as DCC_allocation
-			WHERE company=%(company)s
-			{additional_conditions}
-			AND posting_date <= %(to_date)s
-			AND is_cancelled = 0
-			AND cost_center = DCC_allocation.parent
-			""".format(additional_conditions=additional_conditions.replace("and cost_center in %(cost_center)s ", ''))
-
-		gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
+		gl_entries = frappe.db.sql("""
+			select posting_date, account, debit, credit, is_opening, fiscal_year,
+				debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
 			where company=%(company)s
 			{additional_conditions}
 			and posting_date <= %(to_date)s
-			and is_cancelled = 0
-			{distributed_cost_center_query}""".format(
-				additional_conditions=additional_conditions,
-				distributed_cost_center_query=distributed_cost_center_query), gl_filters, as_dict=True) #nosec
+			and is_cancelled = 0""".format(
+			additional_conditions=additional_conditions), gl_filters, as_dict=True
+		)
 
 		if filters and filters.get('presentation_currency'):
 			convert_to_presentation_currency(gl_entries, get_currency(filters), filters.get('company'))
