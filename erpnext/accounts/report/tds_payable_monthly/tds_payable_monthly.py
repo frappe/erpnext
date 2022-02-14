@@ -184,7 +184,8 @@ def get_tds_docs(filters):
 	payment_entries = []
 	journal_entries = []
 	tax_category_map = {}
-	or_filters={}
+	or_filters = {}
+	bank_accounts = frappe.get_all('Account', {'is_group': 0, 'account_type': 'Bank'}, pluck="name")
 
 	tds_accounts = frappe.get_all("Tax Withholding Account", {'company': filters.get('company')},
 		pluck="account")
@@ -192,11 +193,13 @@ def get_tds_docs(filters):
 	query_filters = {
 		"account": ("in", tds_accounts),
 		"posting_date": ("between", [filters.get("from_date"), filters.get("to_date")]),
-		"is_cancelled": 0
+		"is_cancelled": 0,
+		"against": ("not in", bank_accounts)
 	}
 
 	if filters.get("supplier"):
 		del query_filters["account"]
+		del query_filters["against"]
 		or_filters = {
 			"against": filters.get('supplier'),
 			"party": filters.get('supplier')
