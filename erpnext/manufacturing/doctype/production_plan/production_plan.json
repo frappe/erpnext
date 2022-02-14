@@ -379,6 +379,8 @@
    "options": "Order Sorting"
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.is__local",
    "depends_on": "eval: doc.get_items_from",
    "fieldname": "sort_by_section",
    "fieldtype": "Section Break",
@@ -389,7 +391,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-09 16:34:46.764537",
+ "modified": "2022-02-14 13:06:48.764776",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
