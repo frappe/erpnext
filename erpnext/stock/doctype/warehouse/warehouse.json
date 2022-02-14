@@ -7,7 +7,6 @@
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
-  "primary_details_tab",
   "warehouse_detail",
   "warehouse_name",
   "is_group",
@@ -18,8 +17,6 @@
   "warehouse_type",
   "default_in_transit_warehouse",
   "disabled",
-  "address_and_contact_tab",
-  "column_break_3",
   "address_and_contact",
   "address_html",
   "column_break_10",
@@ -43,7 +40,7 @@
   {
    "fieldname": "warehouse_detail",
    "fieldtype": "Section Break",
-   "label": "Warehouse Details",
+   "label": "Primary Details",
    "oldfieldtype": "Section Break"
   },
   {
@@ -248,16 +245,6 @@
    "fieldtype": "Link",
    "label": "Default In-Transit Warehouse",
    "options": "Warehouse"
-  },
-  {
-   "fieldname": "address_and_contact_tab",
-   "fieldtype": "Tab Break",
-   "label": "Address and Contact"
-  },
-  {
-   "fieldname": "primary_details_tab",
-   "fieldtype": "Tab Break",
-   "label": "Primary Details"
   }
  ],
  "icon": "fa fa-building",
