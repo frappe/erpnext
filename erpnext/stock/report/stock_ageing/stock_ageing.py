@@ -252,6 +252,7 @@ class FIFOSlots:
 			key, fifo_queue, transferred_item_key = self.__init_key_stores(d)
 
 			if d.voucher_type == "Stock Reconciliation":
+				# get difference in qty shift as actual qty
 				prev_balance_qty = self.item_details[key].get("qty_after_transaction", 0)
 				d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
 
@@ -264,12 +265,16 @@ class FIFOSlots:
 
 			self.__update_balances(d, key)
 
+		if not self.filters.get("show_warehouse_wise_stock"):
+			# (Item 1, WH 1), (Item 1, WH 2) => (Item 1)
+			self.item_details = self.__aggregate_details_by_item(self.item_details)
+
 		return self.item_details
 
 	def __init_key_stores(self, row: Dict) -> Tuple:
 		"Initialise keys and FIFO Queue."
 
-		key = (row.name, row.warehouse) if self.filters.get('show_warehouse_wise_stock') else row.name
+		key = (row.name, row.warehouse)
 		self.item_details.setdefault(key, {"details": row, "fifo_queue": []})
 		fifo_queue = self.item_details[key]["fifo_queue"]
 
@@ -337,6 +342,27 @@ class FIFOSlots:
 			self.item_details[key]["total_qty"] += row.actual_qty
 
 		self.item_details[key]["has_serial_no"] = row.has_serial_no
+
+	def __aggregate_details_by_item(self, wh_wise_data: Dict) -> Dict:
+		"Aggregate Item-Wh wise data into single Item entry."
+		item_aggregated_data = {}
+		for key,row in wh_wise_data.items():
+			item = key[0]
+			if not item_aggregated_data.get(item):
+				item_aggregated_data.setdefault(item, {
+					"details": frappe._dict(),
+					"fifo_queue": [],
+					"qty_after_transaction": 0.0,
+					"total_qty": 0.0
+				})
+			item_row = item_aggregated_data.get(item)
+			item_row["details"].update(row["details"])
+			item_row["fifo_queue"].extend(row["fifo_queue"])
+			item_row["qty_after_transaction"] += flt(row["qty_after_transaction"])
+			item_row["total_qty"] += flt(row["total_qty"])
+			item_row["has_serial_no"] = row["has_serial_no"]
+
+		return item_aggregated_data
 
 	def __get_stock_ledger_entries(self) -> List[Dict]:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
