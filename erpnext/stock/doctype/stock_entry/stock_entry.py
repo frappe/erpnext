@@ -433,9 +433,10 @@ class StockEntry(StockController):
 				)
 
 	def set_actual_qty(self):
-		allow_negative_stock = cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
+		from erpnext.stock.stock_ledger import is_negative_stock_allowed
 
 		for d in self.get('items'):
+			allow_negative_stock = is_negative_stock_allowed(item_code=d.item_code)
 			previous_sle = get_previous_sle({
 				"item_code": d.item_code,
 				"warehouse": d.s_warehouse or d.t_warehouse,
