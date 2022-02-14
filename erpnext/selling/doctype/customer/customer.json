@@ -15,9 +15,9 @@
   "naming_series",
   "salutation",
   "customer_name",
+  "lead_name",
   "gender",
   "customer_type",
-  "lead_name",
   "opportunity_name",
   "image",
   "column_break0",
@@ -26,7 +26,6 @@
   "disabled",
   "address_contacts",
   "address_html",
-  "website",
   "column_break1",
   "contact_html",
   "primary_address_and_contact_detail",
@@ -36,6 +35,7 @@
   "column_break_26",
   "customer_primary_address",
   "primary_address",
+  "website",
   "accounting_tab",
   "taxation_section",
   "tax_id",
@@ -65,6 +65,7 @@
   "language",
   "is_frozen",
   "settings_tab",
+  "section_break_44",
   "dn_required",
   "column_break_57",
   "so_required",
@@ -89,7 +90,6 @@
   {
    "fieldname": "basic_info",
    "fieldtype": "Section Break",
-   "label": "Customer and Type",
    "oldfieldtype": "Section Break",
    "options": "fa fa-user"
   },
@@ -305,10 +305,8 @@
    "read_only": 1
   },
   {
-   "description": "Select, to make the customer searchable with these fields",
    "fieldname": "primary_address_and_contact_detail",
-   "fieldtype": "Section Break",
-   "label": "Primary Address and Contact Detail"
+   "fieldtype": "Section Break"
   },
   {
    "description": "Reselect, if the chosen contact is edited after save",
@@ -320,14 +318,16 @@
   {
    "fetch_from": "customer_primary_contact.mobile_no",
    "fieldname": "mobile_no",
-   "fieldtype": "Read Only",
-   "label": "Mobile No"
+   "fieldtype": "Data",
+   "label": "Mobile No",
+   "read_only": 1
   },
   {
    "fetch_from": "customer_primary_contact.email_id",
    "fieldname": "email_id",
-   "fieldtype": "Read Only",
-   "label": "Email Id"
+   "fieldtype": "Data",
+   "label": "Email Id",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_26",
@@ -564,6 +564,11 @@
   {
    "fieldname": "section_break_43",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_44",
+   "fieldtype": "Section Break",
+   "label": "Invoicing"
   },
   {
    "fieldname": "column_break_57",
