@@ -1,0 +1,31 @@
+{{
+    "SlNo": "{item.sr_no}",
+    "PrdDesc": "{item.description}",
+    "IsServc": "{item.is_service_item}",
+    "HsnCd": "{item.gst_hsn_code}",
+    "Barcde": "{item.barcode}",
+    "Unit": "{item.uom}",
+    "Qty": "{item.qty}",
+    "FreeQty": "{item.free_qty}",
+    "UnitPrice": "{item.unit_rate}",
+    "TotAmt": "{item.gross_amount}",
+    "Discount": "{item.discount_amount}",
+    "AssAmt": "{item.taxable_value}",
+    "PrdSlNo": "{item.serial_no}",
+    "GstRt": "{item.tax_rate}",
+    "IgstAmt": "{item.igst_amount}",
+    "CgstAmt": "{item.cgst_amount}",
+    "SgstAmt": "{item.sgst_amount}",
+    "CesRt": "{item.cess_rate}",
+    "CesAmt": "{item.cess_amount}",
+    "CesNonAdvlAmt": "{item.cess_nadv_amount}",
+    "StateCesRt": "{item.state_cess_rate}",
+    "StateCesAmt": "{item.state_cess_amount}",
+    "StateCesNonAdvlAmt": "{item.state_cess_nadv_amount}",
+    "OthChrg": "{item.other_charges}",
+    "TotItemVal": "{item.total_value}",
+    "BchDtls": {{
+        "Nm": "{item.batch_no}",
+        "ExpDt": "{item.batch_expiry_date}"
+    }}
+}}

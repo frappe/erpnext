@@ -9,6 +9,7 @@ from frappe import _
 from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
 
 import erpnext
+from erpnext.stock.valuation import FIFOValuation, LIFOValuation
 
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
@@ -176,13 +177,7 @@ def get_latest_stock_balance():
 def get_bin(item_code, warehouse):
 	bin = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
 	if not bin:
-		bin_obj = frappe.get_doc({
-			"doctype": "Bin",
-			"item_code": item_code,
-			"warehouse": warehouse,
-		})
-		bin_obj.flags.ignore_permissions = 1
-		bin_obj.insert()
+		bin_obj = _create_bin(item_code, warehouse)
 	else:
 		bin_obj = frappe.get_doc('Bin', bin, for_update=True)
 	bin_obj.flags.ignore_permissions = True
@@ -192,26 +187,24 @@ def get_or_make_bin(item_code: str , warehouse: str) -> str:
 	bin_record = frappe.db.get_value('Bin', {'item_code': item_code, 'warehouse': warehouse})
 
 	if not bin_record:
-		bin_obj = frappe.get_doc({
-			"doctype": "Bin",
-			"item_code": item_code,
-			"warehouse": warehouse,
-		})
-		bin_obj.flags.ignore_permissions = 1
-		bin_obj.insert()
+		bin_obj = _create_bin(item_code, warehouse)
 		bin_record = bin_obj.name
-
 	return bin_record
 
-def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
-	"""WARNING: This function is deprecated. Inline this function instead of using it."""
-	from erpnext.stock.doctype.bin.bin import update_stock
-	is_stock_item = frappe.get_cached_value('Item', args.get("item_code"), 'is_stock_item')
-	if is_stock_item:
-		bin_name = get_or_make_bin(args.get("item_code"), args.get("warehouse"))
-		update_stock(bin_name, args, allow_negative_stock, via_landed_cost_voucher)
-	else:
-		frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
+def _create_bin(item_code, warehouse):
+	"""Create a bin and take care of concurrent inserts."""
+
+	bin_creation_savepoint = "create_bin"
+	try:
+		frappe.db.savepoint(bin_creation_savepoint)
+		bin_obj = frappe.get_doc(doctype="Bin", item_code=item_code, warehouse=warehouse)
+		bin_obj.flags.ignore_permissions = 1
+		bin_obj.insert()
+	except frappe.UniqueValidationError:
+		frappe.db.rollback(save_point=bin_creation_savepoint)  # preserve transaction in postgres
+		bin_obj = frappe.get_last_doc("Bin", {"item_code": item_code, "warehouse": warehouse})
+
+	return bin_obj
 
 @frappe.whitelist()
 def get_incoming_rate(args, raise_error_if_no_rate=True):
@@ -226,10 +219,10 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 	else:
 		valuation_method = get_valuation_method(args.get("item_code"))
 		previous_sle = get_previous_sle(args)
-		if valuation_method == 'FIFO':
+		if valuation_method in ('FIFO', 'LIFO'):
 			if previous_sle:
 				previous_stock_queue = json.loads(previous_sle.get('stock_queue', '[]') or '[]')
-				in_rate = get_fifo_rate(previous_stock_queue, args.get("qty") or 0) if previous_stock_queue else 0
+				in_rate = _get_fifo_lifo_rate(previous_stock_queue, args.get("qty") or 0, valuation_method) if previous_stock_queue else 0
 		elif valuation_method == 'Moving Average':
 			in_rate = previous_sle.get('valuation_rate') or 0
 
@@ -259,29 +252,25 @@ def get_valuation_method(item_code):
 
 def get_fifo_rate(previous_stock_queue, qty):
 	"""get FIFO (average) Rate from Queue"""
-	if flt(qty) >= 0:
-		total = sum(f[0] for f in previous_stock_queue)
-		return sum(flt(f[0]) * flt(f[1]) for f in previous_stock_queue) / flt(total) if total else 0.0
-	else:
-		available_qty_for_outgoing, outgoing_cost = 0, 0
-		qty_to_pop = abs(flt(qty))
-		while qty_to_pop and previous_stock_queue:
-			batch = previous_stock_queue[0]
-			if 0 < batch[0] <= qty_to_pop:
-				# if batch qty > 0
-				# not enough or exactly same qty in current batch, clear batch
-				available_qty_for_outgoing += flt(batch[0])
-				outgoing_cost += flt(batch[0]) * flt(batch[1])
-				qty_to_pop -= batch[0]
-				previous_stock_queue.pop(0)
-			else:
-				# all from current batch
-				available_qty_for_outgoing += flt(qty_to_pop)
-				outgoing_cost += flt(qty_to_pop) * flt(batch[1])
-				batch[0] -= qty_to_pop
-				qty_to_pop = 0
+	return _get_fifo_lifo_rate(previous_stock_queue, qty, "FIFO")
 
-		return outgoing_cost / available_qty_for_outgoing
+def get_lifo_rate(previous_stock_queue, qty):
+	"""get LIFO (average) Rate from Queue"""
+	return _get_fifo_lifo_rate(previous_stock_queue, qty, "LIFO")
+
+
+def _get_fifo_lifo_rate(previous_stock_queue, qty, method):
+	ValuationKlass = LIFOValuation if method == "LIFO" else FIFOValuation
+
+	stock_queue = ValuationKlass(previous_stock_queue)
+	if flt(qty) >= 0:
+		total_qty, total_value = stock_queue.get_total_stock_and_value()
+		return total_value / total_qty if total_qty else 0.0
+	else:
+		popped_bins = stock_queue.remove_stock(abs(flt(qty)))
+
+		total_qty, total_value = ValuationKlass(popped_bins).get_total_stock_and_value()
+		return total_value / total_qty if total_qty else 0.0
 
 def get_valid_serial_nos(sr_nos, qty=0, item_code=''):
 	"""split serial nos, validate and return list of valid serial nos"""

@@ -167,8 +167,13 @@ class AccountsController(TransactionBase):
 
 		validate_regional(self)
 
+		validate_einvoice_fields(self)
+
 		if self.doctype != 'Material Request':
 			apply_pricing_rule_on_transaction(self)
+
+	def before_cancel(self):
+		validate_einvoice_fields(self)
 
 	def on_trash(self):
 		# delete sl and gl entries on deletion of transaction
@@ -401,6 +406,22 @@ class AccountsController(TransactionBase):
 
 								if item_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
+
+							elif (
+								ret.get("pricing_rule_removed")
+								and value is not None
+								and fieldname
+								in [
+									"discount_percentage",
+									"discount_amount",
+									"rate",
+									"margin_rate_or_amount",
+									"margin_type",
+									"remove_free_item",
+								]
+							):
+								# reset pricing rule fields if pricing_rule_removed
+								item.set(fieldname, value)
 
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
 						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
@@ -1313,6 +1334,9 @@ class AccountsController(TransactionBase):
 				payment_schedule['discount_type'] = schedule.discount_type
 				payment_schedule['discount'] = schedule.discount
 
+			if not schedule.invoice_portion:
+				payment_schedule['payment_amount'] = schedule.payment_amount
+
 			self.append("payment_schedule", payment_schedule)
 
 	def set_due_date(self):
@@ -2150,4 +2174,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 @erpnext.allow_regional
 def validate_regional(doc):
+	pass
+
+@erpnext.allow_regional
+def validate_einvoice_fields(doc):
 	pass
