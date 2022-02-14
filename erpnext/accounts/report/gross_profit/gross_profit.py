@@ -282,8 +282,8 @@ class GrossProfitGenerator(object):
 		if self.filters.get("group_by") != "Invoice":
 			if not row.get(scrub(self.filters.get("group_by", ""))):
 				return True
-		elif row.get("is_return") == 1:
-			return True
+
+		return False
 
 	def get_buying_amount_from_product_bundle(self, row, product_bundle):
 		buying_amount = 0.0
