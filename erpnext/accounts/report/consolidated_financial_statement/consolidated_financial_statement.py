@@ -421,11 +421,9 @@ def get_accounts(root_type, companies):
 	added_accounts = []
 
 	for company in companies:
-		for account in  frappe.db.sql(""" select name, is_group, company,
-				parent_account, lft, rgt, root_type, report_type, account_name, account_number
-			from
-				`tabAccount` where company = %s and root_type = %s
-			""" , (company, root_type), as_dict=1):
+		for account in frappe.get_all("Account", fields=["name", "is_group", "company",
+			"parent_account", "lft", "rgt", "root_type", "report_type", "account_name", "account_number"],
+			filters={"company": company, "root_type": root_type}):
 			if account.account_name not in added_accounts:
 				accounts.append(account)
 				added_accounts.append(account.account_name)
