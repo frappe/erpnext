@@ -286,10 +286,11 @@ class FIFOSlots:
 	def __compute_incoming_stock(self, row: Dict, fifo_queue: List, transfer_key: Tuple, serial_nos: List):
 		"Update FIFO Queue on inward stock."
 
-		if self.transferred_item_details.get(transfer_key):
-			# inward/outward from same voucher, item & warehouse
-			slot = self.transferred_item_details[transfer_key].pop(0)
-			fifo_queue.append(slot)
+		transfer_data = self.transferred_item_details.get(transfer_key)
+		if transfer_data:
+			# [Repack] inward/outward from same voucher, item & warehouse
+			# consume transfer data and add stock to fifo queue
+			self.__adjust_incoming_transfer_qty(transfer_data, fifo_queue, row)
 		else:
 			if not serial_nos:
 				if fifo_queue and flt(fifo_queue[0][0]) < 0:
@@ -332,6 +333,27 @@ class FIFOSlots:
 				slot[0] = flt(slot[0]) - qty_to_pop
 				self.transferred_item_details[transfer_key].append([qty_to_pop, slot[1]])
 				qty_to_pop = 0
+
+	def __adjust_incoming_transfer_qty(self, transfer_data: Dict, fifo_queue: List, row: Dict):
+		"Add previously removed stock back to FIFO Queue."
+		transfer_qty_to_pop = flt(row.actual_qty)
+		first_bucket_qty = transfer_data[0][0]
+		first_bucket_date = transfer_data[0][1]
+
+		while transfer_qty_to_pop:
+			if transfer_data and 0 > first_bucket_qty <= transfer_qty_to_pop:
+				# bucket qty is not enough, consume whole
+				transfer_qty_to_pop -= first_bucket_qty
+				slot = transfer_data.pop(0)
+				fifo_queue.append(slot)
+			elif not transfer_data:
+				# transfer bucket is empty, extra incoming qty
+				fifo_queue.append([transfer_qty_to_pop, row.posting_date])
+			else:
+				# ample bucket qty to consume
+				first_bucket_qty -= transfer_qty_to_pop
+				fifo_queue.append([transfer_qty_to_pop, first_bucket_date])
+				transfer_qty_to_pop = 0
 
 	def __update_balances(self, row: Dict, key: Union[Tuple, str]):
 		self.item_details[key]["qty_after_transaction"] = row.qty_after_transaction
