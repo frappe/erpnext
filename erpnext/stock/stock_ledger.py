@@ -447,6 +447,8 @@ class update_entries_after(object):
 				self.wh_data.qty_after_transaction = sle.qty_after_transaction
 
 			self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(self.wh_data.valuation_rate)
+		elif sle.batch_no and frappe.db.get_value("Batch", sle.batch_no, "use_batchwise_valuation", cache=True):
+			self.update_batched_values(sle)
 		else:
 			if sle.voucher_type=="Stock Reconciliation" and not sle.batch_no:
 				# assert
@@ -480,6 +482,7 @@ class update_entries_after(object):
 
 		if not self.args.get("sle_id"):
 			self.update_outgoing_rate_on_transaction(sle)
+
 
 	def validate_negative_stock(self, sle):
 		"""
@@ -736,7 +739,22 @@ class update_entries_after(object):
 		if not self.wh_data.stock_queue:
 			self.wh_data.stock_queue.append([0, sle.incoming_rate or sle.outgoing_rate or self.wh_data.valuation_rate])
 
+	def update_batched_values(self, sle):
+		incoming_rate = flt(sle.incoming_rate)
+		actual_qty = flt(sle.actual_qty)
 
+		self.wh_data.qty_after_transaction += actual_qty
+
+		if actual_qty > 0:
+			stock_value_difference = incoming_rate * actual_qty
+			self.wh_data.stock_value += stock_value_difference
+		else:
+			outgoing_rate = _get_batch_outgoing_rate(item_code=sle.item_code, warehouse=sle.warehouse, batch_no=sle.batch_no, posting_date=sle.posting_date, posting_time=sle.posting_time, creation=sle.creation)
+			stock_value_difference = outgoing_rate * actual_qty
+			self.wh_data.stock_value += stock_value_difference
+
+		if self.wh_data.qty_after_transaction:
+			self.wh_data.valuation_rate = self.wh_data.stock_value / self.wh_data.qty_after_transaction
 
 	def check_if_allow_zero_valuation_rate(self, voucher_type, voucher_detail_no):
 		ref_item_dt = ""
@@ -896,6 +914,40 @@ def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 		{'voucher_detail_no': voucher_detail_no, 'name': ['!=', excluded_sle]},
 		['item_code', 'warehouse', 'posting_date', 'posting_time', 'timestamp(posting_date, posting_time) as timestamp'],
 		as_dict=1)
+
+def _get_batch_outgoing_rate(item_code, warehouse, batch_no, posting_date, posting_time, creation):
+
+	batch_details = frappe.db.sql("""
+		select sum(stock_value_difference) as batch_value, sum(actual_qty) as batch_qty
+		from `tabStock Ledger Entry`
+		where
+			item_code = %(item_code)s
+			and warehouse = %(warehouse)s
+			and batch_no = %(batch_no)s
+			and is_cancelled = 0
+			and (
+				timestamp(posting_date, posting_time) < timestamp(%(posting_date)s, %(posting_time)s)
+				or (
+					timestamp(posting_date, posting_time) = timestamp(%(posting_date)s, %(posting_time)s)
+					and creation < %(creation)s
+				)
+			)
+		""",
+		{
+			"item_code": item_code,
+			"warehouse": warehouse,
+			"batch_no": batch_no,
+			"posting_date": posting_date,
+			"posting_time": posting_time,
+			"creation": creation,
+		},
+		as_dict=True
+	)
+
+	if batch_details and batch_details[0].batch_qty:
+		return batch_details[0].batch_value / batch_details[0].batch_qty
+
+
 
 def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	allow_zero_rate=False, currency=None, company=None, raise_error_if_no_rate=True):

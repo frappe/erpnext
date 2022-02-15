@@ -7,6 +7,7 @@ from frappe.utils import cint, flt
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.stock.doctype.batch.batch import UnableToSelectBatchError, get_batch_no, get_batch_qty
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
 from erpnext.tests.utils import ERPNextTestCase
 
@@ -299,6 +300,51 @@ class TestBatch(ERPNextTestCase):
 		args.update({'batch_no': batch3})
 		details = get_item_details(args)
 		self.assertEqual(details.get('price_list_rate'), 400)
+
+
+	def test_basic_batch_wise_valuation(self, batch_qty = 100):
+		item_code = "_TestBatchWiseVal"
+		warehouse = "_Test Warehouse - _TC"
+		self.make_batch_item(item_code)
+
+		rates = [42, 420]
+
+		batches = {}
+		for rate in rates:
+			se = make_stock_entry(item_code=item_code, qty=10, rate=rate, target=warehouse)
+			batches[se.items[0].batch_no] = rate
+
+		LOW, HIGH = list(batches.keys())
+
+		# consume things out of order
+		consumption_plan = [
+			(HIGH, 1),
+			(LOW, 2),
+			(HIGH, 2),
+			(HIGH, 4),
+			(LOW, 6),
+		]
+
+		stock_value = sum(rates) * 10
+		qty_after_transaction = 20
+		for batch, qty in consumption_plan:
+			# consume out of order
+			se = make_stock_entry(item_code=item_code, source=warehouse, qty=qty, batch_no=batch)
+
+			sle = frappe.get_last_doc("Stock Ledger Entry", {"is_cancelled": 0, "voucher_no": se.name})
+
+			stock_value_difference = sle.actual_qty * batches[sle.batch_no]
+			self.assertAlmostEqual(sle.stock_value_difference, stock_value_difference)
+
+			stock_value += stock_value_difference
+			self.assertAlmostEqual(sle.stock_value, stock_value)
+
+			qty_after_transaction += sle.actual_qty
+			self.assertAlmostEqual(sle.qty_after_transaction, qty_after_transaction)
+			self.assertAlmostEqual(sle.valuation_rate, stock_value / qty_after_transaction)
+
+			self.assertEqual(sle.stock_queue, [])  # queues don't apply on batched items
+
 
 def create_batch(item_code, rate, create_item_price_for_batch):
 	pi = make_purchase_invoice(company="_Test Company",
