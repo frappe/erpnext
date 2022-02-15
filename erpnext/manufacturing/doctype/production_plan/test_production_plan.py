@@ -4,6 +4,7 @@ import frappe
 from frappe.utils import add_to_date, flt, now_datetime, nowdate
 
 from erpnext.controllers.item_variant import create_variant
+from erpnext.erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 	get_sales_orders,
@@ -414,26 +415,29 @@ class TestProductionPlan(ERPNextTestCase):
 		bom = make_bom(item=item, raw_materials=raw_materials)
 
 		# Create Production Plan
-		pln = create_production_plan(item_code=bom.item, planned_qty=10)
+		pln = create_production_plan(item_code=bom.item, planned_qty=5)
 
 		# All the created Work Orders
 		wo_list = []
 
-		# Create and Submit 1st Work Order for 5 qty
-		create_work_order(item, pln, 5)
+		# Create and Submit 1st Work Order for 3 qty
+		create_work_order(item, pln, 3)
+		pln.reload()
+		self.assertEqual(pln.po_items[0].ordered_qty, 3)
+
+		# Create and Submit 2nd Work Order for 2 qty
+		create_work_order(item, pln, 2)
 		pln.reload()
 		self.assertEqual(pln.po_items[0].ordered_qty, 5)
 
-		# Create and Submit 2nd Work Order for 3 qty
-		create_work_order(item, pln, 3)
-		pln.reload()
-		self.assertEqual(pln.po_items[0].ordered_qty, 8)
+		# Overproduction
+		self.assertRaises(OverProductionError, create_work_order, item=item, pln=pln, qty=2)
 
 		# Cancel 1st Work Order
 		wo1 = frappe.get_doc("Work Order", wo_list[0])
 		wo1.cancel()
 		pln.reload()
-		self.assertEqual(pln.po_items[0].ordered_qty, 3)
+		self.assertEqual(pln.po_items[0].ordered_qty, 2)
 
 		# Cancel 2nd Work Order
 		wo2 = frappe.get_doc("Work Order", wo_list[1])
