@@ -99,7 +99,7 @@
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Default Valuation Method",
-   "options": "FIFO\nMoving Average"
+   "options": "FIFO\nMoving Average\nLIFO"
   },
   {
    "description": "The percentage you are allowed to receive or deliver more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed to receive 110 units.",
@@ -346,7 +346,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-02-04 15:33:43.692736",
+ "modified": "2022-02-05 15:33:43.692736",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
