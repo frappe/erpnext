@@ -34,6 +34,8 @@ def make_depreciation_entry(asset_name, date=None):
 		date = today()
 
 	asset = frappe.get_doc("Asset", asset_name)
+	validate_asset(asset)
+
 	fixed_asset_account, accumulated_depreciation_account, depreciation_expense_account = \
 		get_depreciation_accounts(asset)
 
@@ -100,6 +102,10 @@ def make_depreciation_entry(asset_name, date=None):
 	asset.set_status()
 
 	return asset
+
+def validate_asset(asset):
+	if asset.status not in ['Submitted', 'Partially Depreciated']:
+		frappe.throw(_("Cannot depreciate {0} Asset").format(asset.status))
 
 def get_depreciation_accounts(asset):
 	fixed_asset_account = accumulated_depreciation_account = depreciation_expense_account = None
