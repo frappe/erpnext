@@ -13,7 +13,7 @@ from frappe.utils import call_hook_method, cint, flt, get_url
 
 
 class GoCardlessSettings(Document):
-	supported_currencies = ["EUR", "DKK", "GBP", "SEK"]
+	supported_currencies = ["EUR", "DKK", "GBP", "SEK", "AUD", "NZD", "CAD", "USD"]
 
 	def validate(self):
 		self.initialize_client()
@@ -80,7 +80,7 @@ class GoCardlessSettings(Document):
 
 	def validate_transaction_currency(self, currency):
 		if currency not in self.supported_currencies:
-			frappe.throw(_("Please select another payment method. Stripe does not support transactions in currency '{0}'").format(currency))
+			frappe.throw(_("Please select another payment method. Go Cardless does not support transactions in currency '{0}'").format(currency))
 
 	def get_payment_url(self, **kwargs):
 		return get_url("./integrations/gocardless_checkout?{0}".format(urlencode(kwargs)))
