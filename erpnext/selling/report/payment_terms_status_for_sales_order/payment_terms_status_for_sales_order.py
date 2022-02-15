@@ -157,25 +157,20 @@ def set_payment_terms_statuses(sales_orders, invoices, filters):
 
 	for so in sales_orders:
 		so.currency = frappe.get_cached_value('Company', filters.get('company'), 'default_currency')
+		so.invoices = ""
 		for inv in [x for x in invoices if x.sales_order == so.name and x.invoice_amount > 0]:
 			if so.base_payment_amount - so.paid_amount > 0:
 				amount = so.base_payment_amount - so.paid_amount
 				if inv.invoice_amount >= amount:
 					inv.invoice_amount -= amount
 					so.paid_amount += amount
-					if so.invoices:
-						so.invoices = so.invoices + "," + inv.invoice
-					else:
-						so.invoices = inv.invoice
+					so.invoices += "," + inv.invoice
 					so.status = "Completed"
 					break
 				else:
 					so.paid_amount += inv.invoice_amount
 					inv.invoice_amount = 0
-					if so.invoices:
-						so.invoices = so.invoices + "," + inv.invoice
-					else:
-						so.invoices = inv.invoice
+					so.invoices += "," + inv.invoice
 					so.status = "Partly Paid"
 
 	return sales_orders, invoices
