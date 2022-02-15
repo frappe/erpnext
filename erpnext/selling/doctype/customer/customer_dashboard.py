@@ -53,5 +53,9 @@ def get_data():
 				'label': _('Retention'),
 				'items': ['Customer Retention']
 			},
+			{
+				'label': _('Documents'),
+				'items': ['Customer Documents']
+			},
 		]
 	}
