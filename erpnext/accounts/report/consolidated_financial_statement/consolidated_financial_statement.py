@@ -354,9 +354,6 @@ def accumulate_values_into_parents(accounts, accounts_by_name, companies):
 		if d.parent_account:
 			account = d.parent_account_name
 
-			# if not accounts_by_name.get(account):
-			# 	continue
-
 			for company in companies:
 				accounts_by_name[account][company] = \
 					accounts_by_name[account].get(company, 0.0) + d.get(company, 0.0)
