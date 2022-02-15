@@ -15,8 +15,8 @@ test_dependencies = ["Sales Order", "Item", "Sales Invoice", "Payment Terms Temp
 
 
 class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
-	def test_payment_terms_status(self):
-
+	def create_payment_terms_template(self):
+		# create template for 50-50 payments
 		template = None
 		if frappe.db.exists("Payment Terms Template", "_Test 50-50"):
 			template = frappe.get_doc("Payment Terms Template", "_Test 50-50")
@@ -46,8 +46,10 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
 				}
 			)
 			template.insert()
+		self.template = template
 
-		# item = create_item(item_code="_Test Excavator", is_stock_item=0, valuation_rate=1000000)
+	def test_payment_terms_status(self):
+		self.create_payment_terms_template()
 		item = create_item(item_code="_Test Excavator", is_stock_item=0)
 		so = make_sales_order(
 			transaction_date="2021-06-15",
@@ -58,16 +60,19 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
 			do_not_save=True,
 		)
 		so.po_no = ""
-		so.payment_terms_template = template.name
+		so.taxes_and_charges = ""
+		so.taxes = ""
+		so.payment_terms_template = self.template.name
 		so.save()
 		so.submit()
 
 		# make invoice with 60% of the total sales order value
 		sinv = make_sales_invoice(so.name)
+		sinv.taxes_and_charges = ""
+		sinv.taxes = ""
 		sinv.items[0].qty = 6
 		sinv.insert()
 		sinv.submit()
-
 		columns, data, message, chart = execute(
 			{
 				"company": "_Test Company",
@@ -86,9 +91,10 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
 				"description": "_Test 50-50",
 				"due_date": datetime.date(2021, 6, 30),
 				"invoice_portion": 50.0,
-				"payment_amount": 500000.0,
+				"currency": "INR",
+				"base_payment_amount": 500000.0,
 				"paid_amount": 500000.0,
-				"invoices": sinv.name,
+				"invoices": ","+sinv.name,
 			},
 			{
 				"name": so.name,
@@ -98,10 +104,13 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
 				"description": "_Test 50-50",
 				"due_date": datetime.date(2021, 7, 15),
 				"invoice_portion": 50.0,
-				"payment_amount": 500000.0,
+				"currency": "INR",
+				"base_payment_amount": 500000.0,
 				"paid_amount": 100000.0,
-				"invoices": sinv.name,
+				"invoices": ","+sinv.name,
 			},
 		]
+		self.assertEqual(data, expected_value)
+
 
 		self.assertEqual(data, expected_value)
