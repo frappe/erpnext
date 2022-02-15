@@ -112,5 +112,87 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
 		]
 		self.assertEqual(data, expected_value)
 
+	def create_exchange_rate(self, date):
+		# make an entry in Currency Exchange list. serves as a static exchange rate
+		if frappe.db.exists({'doctype': "Currency Exchange",'date': date,'from_currency': 'USD', 'to_currency':'INR'}):
+			return
+		else:
+			doc = frappe.get_doc({
+				'doctype': "Currency Exchange",
+				'date': date,
+				'from_currency': 'USD',
+				'to_currency': frappe.get_cached_value("Company", '_Test Company','default_currency'),
+				'exchange_rate': 70,
+				'for_buying': True,
+				'for_selling': True
+			})
+			doc.insert()
 
+	def test_alternate_currency(self):
+		transaction_date = "2021-06-15"
+		self.create_payment_terms_template()
+		self.create_exchange_rate(transaction_date)
+		item = create_item(item_code="_Test Excavator", is_stock_item=0)
+		so = make_sales_order(
+			transaction_date=transaction_date,
+			currency="USD",
+			delivery_date=add_days(transaction_date, -30),
+			item=item.item_code,
+			qty=10,
+			rate=10000,
+			do_not_save=True,
+		)
+		so.po_no = ""
+		so.taxes_and_charges = ""
+		so.taxes = ""
+		so.payment_terms_template = self.template.name
+		so.save()
+		so.submit()
+
+		# make invoice with 60% of the total sales order value
+		sinv = make_sales_invoice(so.name)
+		sinv.currency = "USD"
+		sinv.taxes_and_charges = ""
+		sinv.taxes = ""
+		sinv.items[0].qty = 6
+		sinv.insert()
+		sinv.submit()
+		columns, data, message, chart = execute(
+			{
+				"company": "_Test Company",
+				"period_start_date": "2021-06-01",
+				"period_end_date": "2021-06-30",
+				"sales_order": [so.name],
+			}
+		)
+
+		# report defaults to company currency.
+		expected_value = [
+			{
+				"name": so.name,
+				"submitted": datetime.date(2021, 6, 15),
+				"status": "Completed",
+				"payment_term": None,
+				"description": "_Test 50-50",
+				"due_date": datetime.date(2021, 6, 30),
+				"invoice_portion": 50.0,
+				"currency": frappe.get_cached_value("Company", '_Test Company','default_currency'),
+				"base_payment_amount": 3500000.0,
+				"paid_amount": 3500000.0,
+				"invoices": ","+sinv.name,
+			},
+			{
+				"name": so.name,
+				"submitted": datetime.date(2021, 6, 15),
+				"status": "Partly Paid",
+				"payment_term": None,
+				"description": "_Test 50-50",
+				"due_date": datetime.date(2021, 7, 15),
+				"invoice_portion": 50.0,
+				"currency": frappe.get_cached_value("Company", '_Test Company','default_currency'),
+				"base_payment_amount": 3500000.0,
+				"paid_amount": 700000.0,
+				"invoices": ","+sinv.name,
+			},
+		]
 		self.assertEqual(data, expected_value)
