@@ -479,11 +479,12 @@ def get_emp_list(sal_struct, cond, end_date, payroll_payable_account):
 		""" % cond, {"sal_struct": tuple(sal_struct), "from_date": end_date, "payroll_payable_account": payroll_payable_account}, as_dict=True)
 
 def remove_payrolled_employees(emp_list, start_date, end_date):
+	new_emp_list = []
 	for employee_details in emp_list:
-		if frappe.db.exists("Salary Slip", {"employee": employee_details.employee, "start_date": start_date, "end_date": end_date, "docstatus": 1}):
-			emp_list.remove(employee_details)
+		if not frappe.db.exists("Salary Slip", {"employee": employee_details.employee, "start_date": start_date, "end_date": end_date, "docstatus": 1}):
+			new_emp_list.append(employee_details)
 
-	return emp_list
+	return new_emp_list
 
 @frappe.whitelist()
 def get_start_end_dates(payroll_frequency, start_date=None, company=None):

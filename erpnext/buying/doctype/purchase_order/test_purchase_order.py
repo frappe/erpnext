@@ -682,17 +682,18 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		bin1 = frappe.db.get_value("Bin",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
-			fieldname=["reserved_qty_for_sub_contract", "projected_qty"], as_dict=1)
+			fieldname=["reserved_qty_for_sub_contract", "projected_qty", "modified"], as_dict=1)
 
 		# Submit PO
 		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
 
 		bin2 = frappe.db.get_value("Bin",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
-			fieldname=["reserved_qty_for_sub_contract", "projected_qty"], as_dict=1)
+			fieldname=["reserved_qty_for_sub_contract", "projected_qty", "modified"], as_dict=1)
 
 		self.assertEqual(bin2.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract + 10)
 		self.assertEqual(bin2.projected_qty, bin1.projected_qty - 10)
+		self.assertNotEqual(bin1.modified, bin2.modified)
 
 		# Create stock transfer
 		rm_item = [{"item_code":"_Test FG Item","rm_item_code":"_Test Item","item_name":"_Test Item",

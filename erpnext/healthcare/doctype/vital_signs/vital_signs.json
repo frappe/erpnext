@@ -51,7 +51,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "inpatient_record.patient",
    "fieldname": "patient",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -259,7 +258,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-17 22:23:24.632286",
+ "modified": "2022-01-20 12:30:07.515185",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Vital Signs",

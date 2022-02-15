@@ -1271,6 +1271,30 @@ class TestSalesOrder(ERPNextTestCase):
 
 		automatically_fetch_payment_terms(enable=0)
 
+	def test_zero_amount_sales_order_billing_status(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		so = make_sales_order(uom="Nos", do_not_save=1)
+		so.items[0].rate = 0
+		so.save()
+		so.submit()
+
+		self.assertEqual(so.net_total, 0)
+		self.assertEqual(so.billing_status, 'Not Billed')
+
+		si = create_sales_invoice(qty=10, do_not_save=1)
+		si.price_list = '_Test Price List'
+		si.items[0].rate = 0
+		si.items[0].price_list_rate = 0
+		si.items[0].sales_order = so.name
+		si.items[0].so_detail = so.items[0].name
+		si.save()
+		si.submit()
+
+		self.assertEqual(si.net_total, 0)
+		so.load_from_db()
+		self.assertEqual(so.billing_status, 'Fully Billed')
+
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.automatically_fetch_payment_terms = enable

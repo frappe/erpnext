@@ -85,11 +85,19 @@ class POSInvoiceMergeLog(Document):
 		sales_invoice.set_posting_time = 1
 		sales_invoice.posting_date = getdate(self.posting_date)
 		sales_invoice.save()
+		self.write_off_fractional_amount(sales_invoice, data)
 		sales_invoice.submit()
 
 		self.consolidated_invoice = sales_invoice.name
 
 		return sales_invoice.name
+
+	def write_off_fractional_amount(self, invoice, data):
+		pos_invoice_grand_total = sum(d.grand_total for d in data)
+
+		if abs(pos_invoice_grand_total - invoice.grand_total) < 1:
+			invoice.write_off_amount += -1 * (pos_invoice_grand_total - invoice.grand_total)
+			invoice.save()
 
 	def process_merging_into_credit_note(self, data):
 		credit_note = self.get_new_sales_invoice()
@@ -103,6 +111,7 @@ class POSInvoiceMergeLog(Document):
 		# TODO: return could be against multiple sales invoice which could also have been consolidated?
 		# credit_note.return_against = self.consolidated_invoice
 		credit_note.save()
+		self.write_off_fractional_amount(credit_note, data)
 		credit_note.submit()
 
 		self.consolidated_credit_note = credit_note.name
@@ -136,9 +145,15 @@ class POSInvoiceMergeLog(Document):
 						i.uom == item.uom and i.net_rate == item.net_rate and i.warehouse == item.warehouse):
 						found = True
 						i.qty = i.qty + item.qty
+						i.amount = i.amount + item.net_amount
+						i.net_amount = i.amount
+						i.base_amount = i.base_amount + item.base_net_amount
+						i.base_net_amount = i.base_amount
 
 				if not found:
 					item.rate = item.net_rate
+					item.amount = item.net_amount
+					item.base_amount = item.base_net_amount
 					item.price_list_rate = 0
 					si_item = map_child_doc(item, invoice, {"doctype": "Sales Invoice Item"})
 					items.append(si_item)
@@ -170,6 +185,7 @@ class POSInvoiceMergeLog(Document):
 						found = True
 				if not found:
 					payments.append(payment)
+
 			rounding_adjustment += doc.rounding_adjustment
 			rounded_total += doc.rounded_total
 			base_rounding_adjustment += doc.base_rounding_adjustment

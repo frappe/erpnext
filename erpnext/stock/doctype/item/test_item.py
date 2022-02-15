@@ -573,6 +573,16 @@ class TestItem(ERPNextTestCase):
 		except frappe.ValidationError as e:
 			self.fail(f"UoM change not allowed even though no SLE / BIN with positive qty exists: {e}")
 
+	def test_erasure_of_old_conversions(self):
+		item = create_item("_item change uom")
+		item.stock_uom = "Gram"
+		item.append("uoms", frappe._dict(uom="Box", conversion_factor=2))
+		item.save()
+		item.reload()
+		item.stock_uom = "Nos"
+		item.save()
+		self.assertEqual(len(item.uoms), 1)
+
 	def test_validate_stock_item(self):
 		self.assertRaises(frappe.ValidationError, validate_is_stock_item, "_Test Non Stock Item")
 
