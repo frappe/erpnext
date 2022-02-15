@@ -121,7 +121,21 @@ class BOM(WebsiteGenerator):
 		else:
 			idx = 1
 
-		name = 'BOM-' + self.item + ('-%.3i' % idx)
+		prefix = self.doctype
+		suffix = "%.3i" % idx
+		bom_name = prefix + "-" + self.item + "-" + suffix
+
+		if len(bom_name) <= 140:
+			name = bom_name
+		else:
+			# since max characters for name is 140, remove enough characters from the
+			# item name to fit the prefix, suffix and the separators
+			truncated_length = 140 - (len(prefix) + len(suffix) + 2)
+			truncated_item_name = self.item[:truncated_length]
+			# if a partial word is found after truncate, remove the extra characters
+			truncated_item_name = truncated_item_name.rsplit(" ", 1)[0]
+			name = prefix + "-" + truncated_item_name + "-" + suffix
+
 		if frappe.db.exists("BOM", name):
 			conflicting_bom = frappe.get_doc("BOM", name)
 
