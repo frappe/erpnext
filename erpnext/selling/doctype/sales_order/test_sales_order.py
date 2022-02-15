@@ -1297,10 +1297,10 @@ class TestSalesOrder(ERPNextTestCase):
 
 	def test_so_back_updated_from_wo_via_mr(self):
 		"SO -> MR (Manufacture) -> WO. Test if WO Qty is updated in SO."
-		from erpnext.stock.doctype.material_request.material_request import raise_work_orders
 		from erpnext.manufacturing.doctype.work_order.work_order import (
 			make_stock_entry as make_se_from_wo,
 		)
+		from erpnext.stock.doctype.material_request.material_request import raise_work_orders
 
 		so = make_sales_order(item_list=[{"item_code": "_Test FG Item","qty": 2, "rate":100}])
 
