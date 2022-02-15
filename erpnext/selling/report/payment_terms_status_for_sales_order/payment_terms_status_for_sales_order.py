@@ -41,7 +41,7 @@ def get_columns():
 		},
 		{
 			"label": _("Payment Amount"),
-			"fieldname": "payment_amount",
+			"fieldname": "base_payment_amount",
 			"fieldtype": "Currency",
 			"options": "currency",
 		},
@@ -113,7 +113,7 @@ def get_so_with_invoices(filters):
 			ps.description,
 			ps.due_date,
 			ps.invoice_portion,
-			ps.payment_amount,
+			ps.base_payment_amount,
 			ps.paid_amount,
 		)
 		.where(
@@ -141,7 +141,7 @@ def get_so_with_invoices(filters):
 			.on(si.name == sii.parent)
 			.inner_join(soi)
 			.on(soi.name == sii.so_detail)
-			.select(sii.sales_order, sii.parent.as_("invoice"), si.base_net_total.as_("invoice_amount"))
+			.select(sii.sales_order, sii.parent.as_("invoice"), si.base_grand_total.as_("invoice_amount"))
 			.where((sii.sales_order.isin([x.name for x in sorders])) & (si.docstatus == 1))
 			.groupby(sii.parent)
 		)
@@ -158,8 +158,8 @@ def set_payment_terms_statuses(sales_orders, invoices, filters):
 	for so in sales_orders:
 		so.currency = frappe.get_cached_value('Company', filters.get('company'), 'default_currency')
 		for inv in [x for x in invoices if x.sales_order == so.name and x.invoice_amount > 0]:
-			if so.payment_amount - so.paid_amount > 0:
-				amount = so.payment_amount - so.paid_amount
+			if so.base_payment_amount - so.paid_amount > 0:
+				amount = so.base_payment_amount - so.paid_amount
 				if inv.invoice_amount >= amount:
 					inv.invoice_amount -= amount
 					so.paid_amount += amount
@@ -187,7 +187,7 @@ def prepare_chart(s_orders):
 			"data": {
 				"labels": [term.payment_term for term in s_orders],
 				"datasets": [
-					{"name": "Payment Amount", "values": [x.payment_amount for x in s_orders],},
+					{"name": "Payment Amount", "values": [x.base_payment_amount for x in s_orders],},
 					{"name": "Paid Amount", "values": [x.paid_amount for x in s_orders],},
 				],
 			},
