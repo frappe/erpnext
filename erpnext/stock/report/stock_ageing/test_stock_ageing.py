@@ -236,6 +236,159 @@ class TestStockAgeing(ERPNextTestCase):
 		item_wh_balances = [item_wh_wise_slots.get(i).get("qty_after_transaction") for i in item_wh_wise_slots]
 		self.assertEqual(sum(item_wh_balances), item_result["qty_after_transaction"])
 
+	def test_repack_entry_same_item_split_rows(self):
+		"""
+		Split consumption rows and have single repacked item row (same warehouse).
+		Ledger:
+		Item	| Qty | Voucher
+		------------------------
+		Item 1  | 500 | 001
+		Item 1  | -50 | 002 (repack)
+		Item 1  | -50 | 002 (repack)
+		Item 1  | 100 | 002 (repack)
+
+		Case most likely for batch items. Test time bucket computation.
+		"""
+		sle = [
+			frappe._dict( # stock up item
+				name="Flask Item",
+				actual_qty=500, qty_after_transaction=500,
+				warehouse="WH 1",
+				posting_date="2021-12-03", voucher_type="Stock Entry",
+				voucher_no="001",
+				has_serial_no=False, serial_no=None
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=(-50), qty_after_transaction=450,
+				warehouse="WH 1",
+				posting_date="2021-12-04", voucher_type="Stock Entry",
+				voucher_no="002",
+				has_serial_no=False, serial_no=None
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=(-50), qty_after_transaction=400,
+				warehouse="WH 1",
+				posting_date="2021-12-04", voucher_type="Stock Entry",
+				voucher_no="002",
+				has_serial_no=False, serial_no=None
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=100, qty_after_transaction=500,
+				warehouse="WH 1",
+				posting_date="2021-12-04", voucher_type="Stock Entry",
+				voucher_no="002",
+				has_serial_no=False, serial_no=None
+			),
+		]
+		slots = FIFOSlots(self.filters, sle).generate()
+		item_result = slots["Flask Item"]
+		queue = item_result["fifo_queue"]
+
+		self.assertEqual(item_result["total_qty"], 500.0)
+		self.assertEqual(queue[0][0], 400.0)
+		self.assertEqual(queue[1][0], 100.0)
+		# check if time buckets add up to balance qty
+		self.assertEqual(sum([i[0] for i in queue]), 500.0)
+
+	def test_repack_entry_same_item_overconsume(self):
+		"""
+		Over consume item and have less repacked item qty (same warehouse).
+		Ledger:
+		Item	| Qty  | Voucher
+		------------------------
+		Item 1  | 500  | 001
+		Item 1  | -100 | 002 (repack)
+		Item 1  | 50   | 002 (repack)
+
+		Case most likely for batch items. Test time bucket computation.
+		"""
+		sle = [
+			frappe._dict( # stock up item
+				name="Flask Item",
+				actual_qty=500, qty_after_transaction=500,
+				warehouse="WH 1",
+				posting_date="2021-12-03", voucher_type="Stock Entry",
+				voucher_no="001",
+				has_serial_no=False, serial_no=None
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=(-100), qty_after_transaction=400,
+				warehouse="WH 1",
+				posting_date="2021-12-04", voucher_type="Stock Entry",
+				voucher_no="002",
+				has_serial_no=False, serial_no=None
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=50, qty_after_transaction=450,
+				warehouse="WH 1",
+				posting_date="2021-12-04", voucher_type="Stock Entry",
+				voucher_no="002",
+				has_serial_no=False, serial_no=None
+			),
+		]
+		slots = FIFOSlots(self.filters, sle).generate()
+		item_result = slots["Flask Item"]
+		queue = item_result["fifo_queue"]
+
+		self.assertEqual(item_result["total_qty"], 450.0)
+		self.assertEqual(queue[0][0], 400.0)
+		self.assertEqual(queue[1][0], 50.0)
+		# check if time buckets add up to balance qty
+		self.assertEqual(sum([i[0] for i in queue]), 450.0)
+
+	def test_repack_entry_same_item_overproduce(self):
+		"""
+		Under consume item and have more repacked item qty (same warehouse).
+		Ledger:
+		Item	| Qty  | Voucher
+		------------------------
+		Item 1  | 500  | 001
+		Item 1  | -50  | 002 (repack)
+		Item 1  | 100  | 002 (repack)
+
+		Case most likely for batch items. Test time bucket computation.
+		"""
+		sle = [
+			frappe._dict( # stock up item
+				name="Flask Item",
+				actual_qty=500, qty_after_transaction=500,
+				warehouse="WH 1",
+				posting_date="2021-12-03", voucher_type="Stock Entry",
+				voucher_no="001",
+				has_serial_no=False, serial_no=None
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=(-50), qty_after_transaction=450,
+				warehouse="WH 1",
+				posting_date="2021-12-04", voucher_type="Stock Entry",
+				voucher_no="002",
+				has_serial_no=False, serial_no=None
+			),
+			frappe._dict(
+				name="Flask Item",
+				actual_qty=100, qty_after_transaction=550,
+				warehouse="WH 1",
+				posting_date="2021-12-04", voucher_type="Stock Entry",
+				voucher_no="002",
+				has_serial_no=False, serial_no=None
+			),
+		]
+		slots = FIFOSlots(self.filters, sle).generate()
+		item_result = slots["Flask Item"]
+		queue = item_result["fifo_queue"]
+
+		self.assertEqual(item_result["total_qty"], 550.0)
+		self.assertEqual(queue[0][0], 450.0)
+		self.assertEqual(queue[1][0], 100.0)
+		# check if time buckets add up to balance qty
+		self.assertEqual(sum([i[0] for i in queue]), 550.0)
+
 def generate_item_and_item_wh_wise_slots(filters, sle):
 	"Return results with and without 'show_warehouse_wise_stock'"
 	item_wise_slots = FIFOSlots(filters, sle).generate()
