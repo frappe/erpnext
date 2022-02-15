@@ -167,7 +167,8 @@ class OpeningInvoiceCreationTool(Document):
 			"is_pos": 0,
 			"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice",
 			"update_stock": 0,
-			"invoice_number": row.invoice_number
+			"invoice_number": row.invoice_number,
+			"disable_rounded_total": 1
 		})
 
 		accounting_dimension = get_accounting_dimensions()

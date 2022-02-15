@@ -351,3 +351,4 @@ erpnext.patches.v13_0.convert_to_website_item_in_item_card_group_template
 erpnext.patches.v13_0.shopping_cart_to_ecommerce
 erpnext.patches.v13_0.update_disbursement_account
 erpnext.patches.v13_0.update_reserved_qty_closed_wo
+erpnext.patches.v14_0.delete_amazon_mws_doctype
