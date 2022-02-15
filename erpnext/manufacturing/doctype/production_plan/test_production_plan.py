@@ -4,12 +4,12 @@ import frappe
 from frappe.utils import add_to_date, flt, now_datetime, nowdate
 
 from erpnext.controllers.item_variant import create_variant
-from erpnext.erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 	get_sales_orders,
 	get_warehouse_list,
 )
+from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
