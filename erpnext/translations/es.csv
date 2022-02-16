@@ -8112,4 +8112,71 @@ DocType: Advance Statement,Type Pay Advance,Tipo de anticipo
 DocType: Patient statement,Account Statement,Status de la cuenta
 DocType: Return Advance Statement,Way to pay,Forma de Pago
 DocType: Account Statement Payment,Cash Total Medical Fees,Total de honorarios medicos en efectivo
-DocType: Account Statement Payment,Bank Check Total Medical Fees
+DocType: Account Statement Payment,Bank Check Total Medical Fees,Total de honorarios medicos en cheque
+DocType: Patient Warehouse,Patient Warehouse,Bodega del paciente
+DocType: Cancellation Of Invoices,Cancellation Of Invoices,Anulación de facturas
+DocType: Cancellation Of Invoices,Reason For Cancellation,Razón de anulación
+DocType: Account Statement Payment,Account Statement Payment,Estado de cuenta
+DocType: Account Statement Payment,Outstanding Balance,Saldo pendiente
+DocType: Account Statement Payment,Total Sale Invoice,Total de la cuenta hospitalaria
+DocType: Account Statement Payment,total medical fees,Total honorarios medicos
+DocType: Account Statement Payment,Total Without Medical Fees,Total sin honorarios medicos
+DocType: Payment Of Honorarium,Payment Of Honorarium,Reporte de Honorarios Medicos
+DocType: Account Status Items,Account Status Items,Reporte detalle de la cuenta hospitalaria
+DocType: Patient Medical Fees,Patient Medical Fees,Reporte de honorarios medicos por paciente
+DocType: History Account Status,History Account Status,Reporte historial de la cuenta hospitalaria
+DocType: General report of hospital accounts,General report of hospital accounts,Reporte general de la cuenta hospitalaria
+DocType: Advance Statement For Hours,Advance Statement For Hours,Reporte anticipos a la cuenta
+DocType: Credit Note CXC,Credit Note CXC,Nota de crédito CXC
+DocType: Return credit notes,Return credit notes,Retorno de Nota de crédito CXC
+DocType: Sales Invoice,INSURANCE PLAN,Plan de seguro médico
+DocType: Sales Invoice,Excesses,Excedente
+DocType: Sales Invoice,Deductible,Deducible
+DocType: Sales Invoice,Ineligible expenses,Gastos no elegibles
+DocType: Sales Invoice,Co-Pay 20%,Co-Pago 20%
+DocType: Customer Documents,Document number,Numero de documento
+DocType: Customer Documents,Type Transaction,Tipo de transacción
+DocType: Customer Documents,Account To Debit,Cuenta de débito
+DocType: Customer Documents,Account To Credit,Cuenta de credito
+DocType: Customer Documents,Total Exempt,Total Exento
+DocType: Customer Documents,Affects Sales Book,Afectar el libro de ventas
+DocType: Customer Documents,Affects Sales Month,Afectar ventas mensuales
+DocType: Customer Documents,Affects Sales Month,Afectar ventas mensuales
+DocType: Payment Entry,Reason For Payment,Tipo de pago
+DocType: Customer Retention,Transaction Number,Numero de transación
+DocType: Accounts Receivable,Accounts Receivable,Reporte de Cuentas por cobrar
+DocType: Supplier Documents,Type Transaction,Tipo de transacción
+DocType: Supplier Documents,Transaction Number,Numero de transacción
+DocType: Supplier Documents,Total Exempt,Total
+DocType: Supplier Retention,Company RTN,RTN de la compañia
+DocType: Supplier Retention,Reasons,Razones
+DocType: Supplier Retention,Reason For Retention,Tipo de retención
+DocType: Supplier Retention,Transaction Number,Numero de transacción
+DocType: Cancellation Of Supplier Retentions,Cancellation Of Supplier Retentions,Anulación de retenciones
+DocType: Payment Entry CXC,Payment Entry CXC,Reporte de entradas de pago CxC
+DocType: Payment Entry CXP,Payment Entry CXP,Reporte de entradas de pago CxP
+DocType: Accounts Payable,Accounts Payable,Reporte de cuentas por pagar
+DocType: Accounts Payable Summary,Accounts Payable Summary,Reporte de Balance de cuentas por pagar
+DocType: Purchase Register,Purchase Register,Reporte de registro de compras
+DocType: Item-wise Purchase Register,Item-wise Purchase Register,Reporte detalle de compras
+DocType: Purchase Order Items To Be Billed,Purchase Order Items To Be Billed,Reporte de O/C por pagar
+DocType: Received Items To Be Billed,Purchase Order Items To Be Billed,Reporte de O/C por pagar
+DocType: Bank Transactions,Bank Transactions,Transacciones de Bancos
+DocType: Bank Transactions,Bank Check,Cheque bancario
+DocType: Bank Transactions,Bank deposit,Deposito bancario
+DocType: Bank Transactions,No. Bank Check,No. de Cheque
+DocType: Bank Transactions,Check Date,Fecha del cheque
+DocType: Bank Transactions,The Amount Of,La cantidad de
+DocType: Bank reconciliations,Bank reconciliations,Conciliaciones bancarias
+DocType: Bank reconciliations,Bank reconciliations Detail,Detalle conciliaciones bancarias
+DocType: Bank reconciliations,Payment Entry Detail,Detalle de entrada de pago
+DocType: Cancel Bank Checks,Cancel Bank Checks,Anulació de Cheques
+DocType: Bank Deposit,Bank Deposit,Reporte de cheques de banco
+DocType: Credit Note Transaction,Credit Note Transaction,Reporte de notas de credito
+DocType: Debit Note Transaction,Debit Note Transaction,Reporte de notas de debito
+DocType: Price List Schedule,Price List Schedule,Programación de lista de precios
+DocType: Daily Books,Daily Books, Reporte de Libro diario
+DocType: Balance Sheet Accounts,Balance Sheet Accounts, Reporte de Balance General
+DocType: Statement Of Income,Statement Of Income, Reporte de Estado de Resultado
+DocType: Provider Account Statement,Provider Account Statement, Reporte de Estado de cuenta de proveedor
+DocType: Sale Price List,Sale Price List,Reporte Precios de productos

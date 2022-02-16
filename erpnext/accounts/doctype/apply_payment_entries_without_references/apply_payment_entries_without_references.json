@@ -1,0 +1,122 @@
+{
+ "autoname": "ACC-PAY-WIT-.YYYY.-.#####",
+ "creation": "2022-02-16 09:54:54.780265",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "payment_entry",
+  "paid_amount",
+  "current_unallocated_amount",
+  "current_total_allocated_amount",
+  "section",
+  "references",
+  "total_amount",
+  "section_2",
+  "total_allocated_amount",
+  "column",
+  "unallocated_amount",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Payment Entry",
+   "options": "Payment Entry",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Apply Payment Entries Without References",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "payment_entry.unallocated_amount",
+   "fieldname": "current_unallocated_amount",
+   "fieldtype": "Currency",
+   "label": "Current Unallocated Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "references",
+   "fieldtype": "Table",
+   "label": "References",
+   "options": "Apply Payment Entries Without References Detail",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_allocated_amount",
+   "fieldtype": "Currency",
+   "label": "Total Allocated Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "unallocated_amount",
+   "fieldtype": "Currency",
+   "label": "Unallocated Amount",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "payment_entry.paid_amount",
+   "fieldname": "paid_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Amount",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "payment_entry.total_allocated_amount",
+   "fieldname": "current_total_allocated_amount",
+   "fieldtype": "Currency",
+   "label": "Current Total Allocated Amount",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2022-02-16 11:50:41.594712",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Apply Payment Entries Without References",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
