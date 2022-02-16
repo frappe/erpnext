@@ -6,6 +6,7 @@ import random
 import unittest
 
 import frappe
+from frappe.model.document import Document
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -692,20 +693,25 @@ def make_employee_salary_slip(user, payroll_frequency, salary_structure=None):
 
 def make_salary_component(salary_components, test_tax, company_list=None):
 	for salary_component in salary_components:
-		if not frappe.db.exists('Salary Component', salary_component["salary_component"]):
-			if test_tax:
-				if salary_component["type"] == "Earning":
-					salary_component["is_tax_applicable"] = 1
-				elif salary_component["salary_component"] == "TDS":
-					salary_component["variable_based_on_taxable_salary"] = 1
-					salary_component["amount_based_on_formula"] = 0
-					salary_component["amount"] = 0
-					salary_component["formula"] = ""
-					salary_component["condition"] = ""
-			salary_component["doctype"] = "Salary Component"
-			salary_component["salary_component_abbr"] = salary_component["abbr"]
-			frappe.get_doc(salary_component).insert()
-		get_salary_component_account(salary_component["salary_component"], company_list)
+		if frappe.db.exists('Salary Component', salary_component["salary_component"]):
+			continue
+
+		if test_tax:
+			if salary_component["type"] == "Earning":
+				salary_component["is_tax_applicable"] = 1
+			elif salary_component["salary_component"] == "TDS":
+				salary_component["variable_based_on_taxable_salary"] = 1
+				salary_component["amount_based_on_formula"] = 0
+				salary_component["amount"] = 0
+				salary_component["formula"] = ""
+				salary_component["condition"] = ""
+
+		salary_component["salary_component_abbr"] = salary_component["abbr"]
+		doc = frappe.new_doc("Salary Component")
+		doc.update(salary_component)
+		doc.insert()
+
+		get_salary_component_account(doc, company_list)
 
 def get_salary_component_account(sal_comp, company_list=None):
 	company = erpnext.get_default_company()
@@ -713,7 +719,9 @@ def get_salary_component_account(sal_comp, company_list=None):
 	if company_list and company not in company_list:
 		company_list.append(company)
 
-	sal_comp = frappe.get_doc("Salary Component", sal_comp)
+	if not isinstance(sal_comp, Document):
+		sal_comp = frappe.get_doc("Salary Component", sal_comp)
+
 	if not sal_comp.get("accounts"):
 		for d in company_list:
 			company_abbr = frappe.get_cached_value('Company', d, 'abbr')
