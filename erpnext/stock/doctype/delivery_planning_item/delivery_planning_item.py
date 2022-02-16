@@ -282,7 +282,7 @@ def reject_function(source_names):
 
 # split_function
 @frappe.whitelist()
-def split_function(source_names, n_transporter, n_qty, n_src_warehouse, n_supplier_dc, n_supplier, n_date):
+def split_function(source_names, n_transporter, n_qty, n_src_warehouse, n_supplier_dc, n_supplier, n_date, batch_no):
 	dpi = ""
 	names = list(source_names.split(","))
 	for name in names:
@@ -342,6 +342,7 @@ def split_function(source_names, n_transporter, n_qty, n_src_warehouse, n_suppli
 		dp_item.split_from_item = doc.item_dname
 		dp_item.sd_item = doc.name
 		dp_item.stock_uom = n_qty
+		dp_item.batch_no = batch_no
 		dp_item.insert(ignore_mandatory=True)
 		# dp_item.save(ignore_permissions=True)
 

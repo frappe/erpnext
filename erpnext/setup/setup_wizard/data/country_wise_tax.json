@@ -1178,11 +1178,13 @@
 			{
 				"title": "Reverse Charge In-State",
 				"is_inter_state": 0,
+				"is_reverse_charge": 1,
 				"gst_state": ""
 			},
 			{
 				"title": "Reverse Charge Out-State",
 				"is_inter_state": 1,
+				"is_reverse_charge": 1,
 				"gst_state": ""
 			},
 			{

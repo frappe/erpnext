@@ -14,6 +14,7 @@ from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
+from erpnext.stock.utils import calculate_mapped_packed_items_return
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -122,6 +123,7 @@ class DeliveryNote(SellingController):
 	def validate(self):
 		self.validate_posting_time()
 		super(DeliveryNote, self).validate()
+		self.get_commision()
 		self.set_status()
 		self.so_required()
 		self.validate_proj_cust()
@@ -132,8 +134,12 @@ class DeliveryNote(SellingController):
 		self.validate_with_previous_doc()
 		self.pick_update_validate()
 
-		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-		make_packing_list(self)
+		# Keeps mapped packed_items in case product bundle is updated.
+		if self.is_return and self.return_against:
+			calculate_mapped_packed_items_return(self)
+		else:
+			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+			make_packing_list(self)
 
 		if self._action != 'submit' and not self.is_return:
 			set_batch_nos(self, 'warehouse', throw=True)
@@ -360,8 +366,7 @@ class DeliveryNote(SellingController):
 								if j.commision_formula:
 									data=eval(j.commision_formula)
 									tot.append(data)
-									self.total_commission=sum(tot)
-
+				self.total_commission=sum(tot)
 	@frappe.whitelist()
 	def calculate_taxes(self):
 		if self.customer:

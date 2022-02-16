@@ -107,6 +107,8 @@
   "terms",
   "bill_no",
   "bill_date",
+  "accounting_details_section",
+  "provisional_expense_account",
   "more_info",
   "project",
   "status",
@@ -1151,6 +1153,19 @@
    "fieldname": "get_items",
    "fieldtype": "Button",
    "label": "Get Items"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "provisional_expense_account",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Provisional Expense Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-truck",
@@ -1161,6 +1176,7 @@
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1221,6 +1237,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "supplier",
  "title_field": "title",
  "track_changes": 1

@@ -61,6 +61,24 @@ frappe.ui.form.on("Sales Order", {
 			});
 		}
 	},
+
+// New Code To Fetch Unpaid From Customer
+	update_party_balance: function(frm){
+		frappe.call({
+			method: 'on_update_party_balance',
+			doc: frm.doc,
+			callback: function(r) {
+				// frm.reload_doc();
+				if (r.message){
+					// console.log(" this is call from Commited", r.message[0].outstanding)
+
+					frm.set_value("_party_balance", r.message[0].outstanding)
+					frm.refresh_field("_party_balance")
+				}
+			}
+		})
+	},
+
 	onload: function(frm,cdt,cdn) {
 		if (!frm.doc.transaction_date){
 			frm.set_value('transaction_date', frappe.datetime.get_today())
@@ -94,17 +112,18 @@ frappe.ui.form.on("Sales Order", {
 		})
 		frm.ignore_doctypes_on_cancel_all = ['Purchase Order'];
 	},
-//	before_save:function(frm){
-//		frm.call({
-//			method:"get_commision",
-//			doc:frm.doc,
-//			callback: function(r)
-//			{
-//
-//				frm.refresh_field("total_commission")
-//			}
-//		});
-//	},
+	// before_save:function(frm){
+	// 	frm.call({
+	// 		method:"get_commision",
+	// 		doc:frm.doc,
+	// 		callback: function(r)
+	// 		{
+
+	// 			frm.refresh_field("total_commission")
+	// 		}
+	// 	});
+	// },
+	
 
 	delivery_date: function(frm) {
 		$.each(frm.doc.items || [], function(i, d) {
@@ -639,12 +658,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	make_delivery_note_based_on_delivery_date: function() {
 		var me = this;
 
-		var delivery_dates = [];
-		$.each(this.frm.doc.items || [], function(i, d) {
-			if(!delivery_dates.includes(d.delivery_date)) {
-				delivery_dates.push(d.delivery_date);
-			}
-		});
+		var delivery_dates = this.frm.doc.items.map(i => i.delivery_date);
+		delivery_dates = [ ...new Set(delivery_dates) ];
 
 		var item_grid = this.frm.fields_dict["items"].grid;
 		if(!item_grid.get_selected().length && delivery_dates.length > 1) {
@@ -682,14 +697,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 				if(!dates) return;
 
-				$.each(dates, function(i, d) {
-					$.each(item_grid.grid_rows || [], function(j, row) {
-						if(row.doc.delivery_date == d) {
-							row.doc.__checked = 1;
-						}
-					});
-				})
-				me.make_delivery_note();
+				me.make_delivery_note(dates);
 				dialog.hide();
 			});
 			dialog.show();
@@ -698,10 +706,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		}
 	},
 
-	make_delivery_note: function() {
+	make_delivery_note: function(delivery_dates) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
-			frm: this.frm
+			frm: this.frm,
+			args: {
+				delivery_dates
+			}
 		})
 	},
 
