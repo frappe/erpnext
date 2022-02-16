@@ -106,6 +106,8 @@ class TestVariantSelector(ERPNextTestCase):
 		})
 
 		make_web_item_price(item_code="Test-Tshirt-Temp-S-R", price_list_rate=100)
+
+		frappe.local.shopping_cart_settings = None # clear cached settings values
 		next_values = get_next_attribute_and_values(
 			"Test-Tshirt-Temp",
 			selected_attributes={"Test Size": "Small", "Test Colour": "Red"}
