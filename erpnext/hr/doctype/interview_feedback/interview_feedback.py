@@ -57,7 +57,6 @@ class InterviewFeedback(Document):
 
 	def update_interview_details(self):
 		doc = frappe.get_doc('Interview', self.interview)
-		total_rating = 0
 
 		if self.docstatus == 2:
 			for entry in doc.interview_details:
@@ -72,10 +71,6 @@ class InterviewFeedback(Document):
 					entry.comments = self.feedback
 					entry.result = self.result
 
-				if entry.average_rating:
-					total_rating += entry.average_rating
-
-		doc.average_rating = flt(total_rating / len(doc.interview_details) if len(doc.interview_details) else 0)
 		doc.save()
 		doc.notify_update()
 

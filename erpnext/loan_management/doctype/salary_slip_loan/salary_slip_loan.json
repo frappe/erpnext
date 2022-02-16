@@ -70,7 +70,6 @@
   {
    "fieldname": "loan_repayment_entry",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Loan Repayment Entry",
    "no_copy": 1,
    "options": "Loan Repayment",
@@ -88,7 +87,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-03-14 20:47:11.725818",
+ "modified": "2022-01-31 14:50:14.823213",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Salary Slip Loan",
@@ -97,5 +96,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

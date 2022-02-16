@@ -7,11 +7,15 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 		frm.set_query("bank_account", function () {
 			return {
 				filters: {
-					company: ["in", frm.doc.company],
+					company: frm.doc.company,
 					'is_company_account': 1
 				},
 			};
 		});
+	},
+
+	onload: function (frm) {
+		frm.trigger('bank_account');
 	},
 
 	refresh: function (frm) {
@@ -51,7 +55,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 	bank_account: function (frm) {
 		frappe.db.get_value(
 			"Bank Account",
-			frm.bank_account,
+			frm.doc.bank_account,
 			"account",
 			(r) => {
 				frappe.db.get_value(

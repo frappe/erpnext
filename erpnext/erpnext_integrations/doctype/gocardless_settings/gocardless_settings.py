@@ -2,13 +2,14 @@
 # For license information, please see license.txt
 
 
+from urllib.parse import urlencode
+
 import frappe
 import gocardless_pro
 from frappe import _
 from frappe.integrations.utils import create_payment_gateway, create_request_log
 from frappe.model.document import Document
 from frappe.utils import call_hook_method, cint, flt, get_url
-from six.moves.urllib.parse import urlencode
 
 
 class GoCardlessSettings(Document):

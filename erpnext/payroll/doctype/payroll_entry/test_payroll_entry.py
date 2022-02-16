@@ -120,20 +120,37 @@ class TestPayrollEntry(unittest.TestCase):
 
 		employee1 = make_employee("test_employee1@example.com", payroll_cost_center="_Test Cost Center - _TC",
 			department="cc - _TC", company="_Test Company")
-		employee2 = make_employee("test_employee2@example.com", payroll_cost_center="_Test Cost Center 2 - _TC",
-			department="cc - _TC", company="_Test Company")
+		employee2 = make_employee("test_employee2@example.com", department="cc - _TC", company="_Test Company")
 
 		if not frappe.db.exists("Account", "_Test Payroll Payable - _TC"):
 				create_account(account_name="_Test Payroll Payable",
-					company="_Test Company", parent_account="Current Liabilities - _TC")
+					company="_Test Company", parent_account="Current Liabilities - _TC", account_type="Payable")
 
 		if not frappe.db.get_value("Company", "_Test Company", "default_payroll_payable_account") or \
 			frappe.db.get_value("Company", "_Test Company", "default_payroll_payable_account") != "_Test Payroll Payable - _TC":
 				frappe.db.set_value("Company", "_Test Company", "default_payroll_payable_account",
 					"_Test Payroll Payable - _TC")
 		currency=frappe.db.get_value("Company", "_Test Company", "default_currency")
+
 		make_salary_structure("_Test Salary Structure 1", "Monthly", employee1, company="_Test Company", currency=currency, test_tax=False)
-		make_salary_structure("_Test Salary Structure 2", "Monthly", employee2, company="_Test Company", currency=currency, test_tax=False)
+		ss = make_salary_structure("_Test Salary Structure 2", "Monthly", employee2, company="_Test Company", currency=currency, test_tax=False)
+
+		# update cost centers in salary structure assignment for employee2
+		ssa = frappe.db.get_value("Salary Structure Assignment",
+			{"employee": employee2, "salary_structure": ss.name, "docstatus": 1}, 'name')
+
+		ssa_doc = frappe.get_doc("Salary Structure Assignment", ssa)
+		ssa_doc.payroll_cost_centers = []
+		ssa_doc.append("payroll_cost_centers", {
+			"cost_center": "_Test Cost Center - _TC",
+			"percentage": 60
+		})
+		ssa_doc.append("payroll_cost_centers", {
+			"cost_center": "_Test Cost Center 2 - _TC",
+			"percentage": 40
+		})
+
+		ssa_doc.save()
 
 		dates = get_start_end_dates('Monthly', nowdate())
 		if not frappe.db.get_value("Salary Slip", {"start_date": dates.start_date, "end_date": dates.end_date}):
@@ -148,10 +165,10 @@ class TestPayrollEntry(unittest.TestCase):
 			""", je)
 			expected_je = (
 				('_Test Payroll Payable - _TC', 'Main - _TC', 0.0, 155600.0),
-				('Salary - _TC', '_Test Cost Center - _TC', 78000.0, 0.0),
-				('Salary - _TC', '_Test Cost Center 2 - _TC', 78000.0, 0.0),
-				('Salary Deductions - _TC', '_Test Cost Center - _TC', 0.0, 200.0),
-				('Salary Deductions - _TC', '_Test Cost Center 2 - _TC', 0.0, 200.0)
+				('Salary - _TC', '_Test Cost Center - _TC', 124800.0, 0.0),
+				('Salary - _TC', '_Test Cost Center 2 - _TC', 31200.0, 0.0),
+				('Salary Deductions - _TC', '_Test Cost Center - _TC', 0.0, 320.0),
+				('Salary Deductions - _TC', '_Test Cost Center 2 - _TC', 0.0, 80.0)
 			)
 
 			self.assertEqual(je_entries, expected_je)
@@ -197,6 +214,7 @@ class TestPayrollEntry(unittest.TestCase):
 			create_loan_type("Car Loan", 500000, 8.4,
 				is_term_loan=1,
 				mode_of_payment='Cash',
+				disbursement_account='Disbursement Account - _TC',
 				payment_account='Payment Account - _TC',
 				loan_account='Loan Account - _TC',
 				interest_income_account='Interest Income Account - _TC',

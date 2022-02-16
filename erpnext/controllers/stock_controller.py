@@ -3,6 +3,7 @@
 
 import json
 from collections import defaultdict
+from typing import List, Tuple
 
 import frappe
 from frappe import _
@@ -17,7 +18,7 @@ from erpnext.accounts.general_ledger import (
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock import get_warehouse_account_map
-from erpnext.stock.stock_ledger import get_items_to_be_repost, get_valuation_rate
+from erpnext.stock.stock_ledger import get_items_to_be_repost
 
 
 class QualityInspectionRequiredError(frappe.ValidationError): pass
@@ -40,7 +41,10 @@ class StockController(AccountsController):
 		if self.docstatus == 2:
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
-		if cint(erpnext.is_perpetual_inventory_enabled(self.company)):
+		provisional_accounting_for_non_stock_items = \
+			cint(frappe.db.get_value('Company', self.company, 'enable_provisional_accounting_for_non_stock_items'))
+
+		if cint(erpnext.is_perpetual_inventory_enabled(self.company)) or provisional_accounting_for_non_stock_items:
 			warehouse_account = get_warehouse_account_map(self.company)
 
 			if self.docstatus==1:
@@ -77,17 +81,17 @@ class StockController(AccountsController):
 						.format(d.idx, get_link_to_form("Batch", d.get("batch_no"))))
 
 	def clean_serial_nos(self):
+		from erpnext.stock.doctype.serial_no.serial_no import clean_serial_no_string
+
 		for row in self.get("items"):
 			if hasattr(row, "serial_no") and row.serial_no:
-				# replace commas by linefeed
-				row.serial_no = row.serial_no.replace(",", "\n")
+				# remove extra whitespace and store one serial no on each line
+				row.serial_no = clean_serial_no_string(row.serial_no)
 
-				# strip preceeding and succeeding spaces for each SN
-				# (SN could have valid spaces in between e.g. SN - 123 - 2021)
-				serial_no_list = row.serial_no.split("\n")
-				serial_no_list = [sn.strip() for sn in serial_no_list]
-
-				row.serial_no = "\n".join(serial_no_list)
+		for row in self.get('packed_items') or []:
+			if hasattr(row, "serial_no") and row.serial_no:
+				# remove extra whitespace and store one serial no on each line
+				row.serial_no = clean_serial_no_string(row.serial_no)
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
@@ -110,17 +114,6 @@ class StockController(AccountsController):
 						# from warehouse account
 
 						self.check_expense_account(item_row)
-
-						# If the item does not have the allow zero valuation rate flag set
-						# and ( valuation rate not mentioned in an incoming entry
-						# or incoming entry not found while delivering the item),
-						# try to pick valuation rate from previous sle or Item master and update in SLE
-						# Otherwise, throw an exception
-
-						if not sle.stock_value_difference and self.doctype != "Stock Reconciliation" \
-							and not item_row.get("allow_zero_valuation_rate"):
-
-							sle = self.update_stock_ledger_entries(sle)
 
 						# expense account/ target_warehouse / source_warehouse
 						if item_row.get('target_warehouse'):
@@ -164,26 +157,6 @@ class StockController(AccountsController):
 
 		return frappe.flags.debit_field_precision
 
-	def update_stock_ledger_entries(self, sle):
-		sle.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
-			self.doctype, self.name, currency=self.company_currency, company=self.company)
-
-		sle.stock_value = flt(sle.qty_after_transaction) * flt(sle.valuation_rate)
-		sle.stock_value_difference = flt(sle.actual_qty) * flt(sle.valuation_rate)
-
-		if sle.name:
-			frappe.db.sql("""
-				update
-					`tabStock Ledger Entry`
-				set
-					stock_value = %(stock_value)s,
-					valuation_rate = %(valuation_rate)s,
-					stock_value_difference = %(stock_value_difference)s
-				where
-					name = %(name)s""", (sle))
-
-		return sle
-
 	def get_voucher_details(self, default_expense_account, default_cost_center, sle_map):
 		if self.doctype == "Stock Reconciliation":
 			reconciliation_purpose = frappe.db.get_value(self.doctype, self.name, "purpose")
@@ -209,33 +182,28 @@ class StockController(AccountsController):
 
 			return details
 
-	def get_items_and_warehouses(self):
-		items, warehouses = [], []
+	def get_items_and_warehouses(self) -> Tuple[List[str], List[str]]:
+		"""Get list of items and warehouses affected by a transaction"""
 
-		if hasattr(self, "items"):
-			item_doclist = self.get("items")
-		elif self.doctype == "Stock Reconciliation":
-			item_doclist = []
-			data = json.loads(self.reconciliation_json)
-			for row in data[data.index(self.head_row)+1:]:
-				d = frappe._dict(zip(["item_code", "warehouse", "qty", "valuation_rate"], row))
-				item_doclist.append(d)
+		if not (hasattr(self, "items") or hasattr(self, "packed_items")):
+			return [], []
 
-		if item_doclist:
-			for d in item_doclist:
-				if d.item_code and d.item_code not in items:
-					items.append(d.item_code)
+		item_rows = (self.get("items") or []) + (self.get("packed_items") or [])
 
-				if d.get("warehouse") and d.warehouse not in warehouses:
-					warehouses.append(d.warehouse)
+		items = {d.item_code for d in item_rows if d.item_code}
 
-				if self.doctype == "Stock Entry":
-					if d.get("s_warehouse") and d.s_warehouse not in warehouses:
-						warehouses.append(d.s_warehouse)
-					if d.get("t_warehouse") and d.t_warehouse not in warehouses:
-						warehouses.append(d.t_warehouse)
+		warehouses = set()
+		for d in item_rows:
+			if d.get("warehouse"):
+				warehouses.add(d.warehouse)
 
-		return items, warehouses
+			if self.doctype == "Stock Entry":
+				if d.get("s_warehouse"):
+					warehouses.add(d.s_warehouse)
+				if d.get("t_warehouse"):
+					warehouses.add(d.t_warehouse)
+
+		return list(items), list(warehouses)
 
 	def get_stock_ledger_details(self):
 		stock_ledger = {}
@@ -247,7 +215,7 @@ class StockController(AccountsController):
 			from
 				`tabStock Ledger Entry`
 			where
-				voucher_type=%s and voucher_no=%s
+				voucher_type=%s and voucher_no=%s and is_cancelled = 0
 		""", (self.doctype, self.name), as_dict=True)
 
 		for sle in stock_ledger_entries:
@@ -287,11 +255,7 @@ class StockController(AccountsController):
 		for d in self.items:
 			if not d.batch_no: continue
 
-			serial_nos = [sr.name for sr in frappe.get_all("Serial No",
-				{'batch_no': d.batch_no, 'status': 'Inactive'})]
-
-			if serial_nos:
-				frappe.db.set_value("Serial No", { 'name': ['in', serial_nos] }, "batch_no", None)
+			frappe.db.set_value("Serial No", {"batch_no": d.batch_no, "status": "Inactive"}, "batch_no", None)
 
 			d.batch_no = None
 			d.db_set("batch_no", None)

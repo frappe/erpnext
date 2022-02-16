@@ -194,23 +194,6 @@ class SerialNo(StockController):
 		if sle_exists:
 			frappe.throw(_("Cannot delete Serial No {0}, as it is used in stock transactions").format(self.name))
 
-	def before_rename(self, old, new, merge=False):
-		if merge:
-			frappe.throw(_("Sorry, Serial Nos cannot be merged"))
-
-	def after_rename(self, old, new, merge=False):
-		"""rename serial_no text fields"""
-		for dt in frappe.db.sql("""select parent from tabDocField
-			where fieldname='serial_no' and fieldtype in ('Text', 'Small Text', 'Long Text')"""):
-
-			for item in frappe.db.sql("""select name, serial_no from `tab%s`
-				where serial_no like %s""" % (dt[0], frappe.db.escape('%' + old + '%'))):
-
-				serial_nos = map(lambda i: new if i.upper()==old.upper() else i, item[1].split('\n'))
-				frappe.db.sql("""update `tab%s` set serial_no = %s
-					where name=%s""" % (dt[0], '%s', '%s'),
-					('\n'.join(list(serial_nos)), item[0]))
-
 	def update_serial_no_reference(self, serial_no=None):
 		last_sle = self.get_last_sle(serial_no)
 		self.set_purchase_details(last_sle.get("purchase_sle"))
@@ -419,9 +402,15 @@ def update_serial_nos(sle, item_det):
 def get_auto_serial_nos(serial_no_series, qty):
 	serial_nos = []
 	for i in range(cint(qty)):
-		serial_nos.append(make_autoname(serial_no_series, "Serial No"))
+		serial_nos.append(get_new_serial_number(serial_no_series))
 
 	return "\n".join(serial_nos)
+
+def get_new_serial_number(series):
+	sr_no = make_autoname(series, "Serial No")
+	if frappe.db.exists("Serial No", sr_no):
+		sr_no = get_new_serial_number(series)
+	return sr_no
 
 def auto_make_serial_nos(args):
 	serial_nos = get_serial_nos(args.get('serial_no'))
@@ -475,6 +464,13 @@ def get_serial_nos(serial_no):
 
 	return [s.strip() for s in cstr(serial_no).strip().upper().replace(',', '\n').split('\n')
 		if s.strip()]
+
+def clean_serial_no_string(serial_no: str) -> str:
+	if not serial_no:
+		return ""
+
+	serial_no_list = get_serial_nos(serial_no)
+	return "\n".join(serial_no_list)
 
 def update_args_for_serial_no(serial_no_doc, serial_no, args, is_new=False):
 	for field in ["item_code", "work_order", "company", "batch_no", "supplier", "location"]:
