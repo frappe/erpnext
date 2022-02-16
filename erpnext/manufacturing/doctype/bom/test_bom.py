@@ -432,6 +432,15 @@ class TestBOM(FrappeTestCase):
 		self.assertEqual(bom.transfer_material_against, "Work Order")
 		bom.delete()
 
+	def test_bom_name_length(self):
+		""" test >140 char names"""
+		bom_tree = {
+			"x" * 140 : {
+				" ".join(["abc"] * 35): {}
+			}
+		}
+		create_nested_bom(bom_tree, prefix="")
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
