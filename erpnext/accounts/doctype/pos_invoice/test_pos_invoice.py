@@ -586,23 +586,29 @@ class TestPOSInvoice(unittest.TestCase):
 		item_price.insert()
 		pr = make_pricing_rule(selling=1, priority=5, discount_percentage=10)
 		pr.save()
-		pos_inv = create_pos_invoice(qty=1, do_not_submit=1)
-		pos_inv.items[0].rate = 300
-		pos_inv.save()
-		self.assertEquals(pos_inv.items[0].discount_percentage, 10)
-		# rate shouldn't change
-		self.assertEquals(pos_inv.items[0].rate, 405)
 
-		pos_inv.ignore_pricing_rule = 1
-		pos_inv.items[0].rate = 300
-		pos_inv.save()
-		self.assertEquals(pos_inv.ignore_pricing_rule, 1)
-		# rate should change since pricing rules are ignored
-		self.assertEquals(pos_inv.items[0].rate, 300)
+		try:
+			pos_inv = create_pos_invoice(qty=1, do_not_submit=1)
+			pos_inv.items[0].rate = 300
+			pos_inv.save()
+			self.assertEquals(pos_inv.items[0].discount_percentage, 10)
+			# rate shouldn't change
+			self.assertEquals(pos_inv.items[0].rate, 405)
 
-		item_price.delete()
-		pos_inv.delete()
-		pr.delete()
+			pos_inv.ignore_pricing_rule = 1
+			pos_inv.save()
+			self.assertEquals(pos_inv.ignore_pricing_rule, 1)
+			# rate should reset since pricing rules are ignored
+			self.assertEquals(pos_inv.items[0].rate, 450)
+
+			pos_inv.items[0].rate = 300
+			pos_inv.save()
+			self.assertEquals(pos_inv.items[0].rate, 300)
+
+		finally:
+			item_price.delete()
+			pos_inv.delete()
+			pr.delete()
 
 
 def create_pos_invoice(**args):
