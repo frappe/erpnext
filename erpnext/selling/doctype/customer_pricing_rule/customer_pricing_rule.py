@@ -9,7 +9,7 @@ from frappe.utils import getdate, now_datetime, nowdate
 import json
 class CustomerPricingRule(Document):
 
-	def before_submit(self):
+	def on_submit(self):
 		for i in self.item_details:
 			price_list_rate = frappe.db.get_value("Item Price", {"item_code": i.item, 'price_list':self.for_price_list}, "price_list_rate")
 			list_price = price_list_rate + i.additional_price
