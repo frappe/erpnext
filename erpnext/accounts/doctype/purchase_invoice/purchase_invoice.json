@@ -2,7 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
- "creation": "2013-05-21 16:16:39",
+ "creation": "2022-01-05 12:07:52.876636",
  "doctype": "DocType",
  "document_type": "Document",
  "engine": "InnoDB",
@@ -64,6 +64,7 @@
   "update_stock",
   "scan_barcode",
   "items",
+  "serial_items",
   "pricing_rule_details",
   "pricing_rules",
   "raw_materials_supplied",
@@ -1417,13 +1418,19 @@
    "label": "Advance Tax",
    "options": "Advance Tax",
    "read_only": 1
+  },
+  {
+   "fieldname": "serial_items",
+   "fieldtype": "Table",
+   "label": "Serial Items",
+   "options": "Serial Number Item"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-25 13:31:02.716727",
+ "modified": "2022-02-16 11:36:14.615505",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
@@ -1483,6 +1490,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "supplier",
  "title_field": "title",
  "track_changes": 1
