@@ -103,7 +103,7 @@ class StockEntry(StockController):
 			self.update_so_in_serial_number()
 		stock_gl = frappe.new_doc('Stock GL Queue')
 		stock_gl.stock_entry = self.name
-		stock_gl.save()
+		stock_gl.save(ignore_permissions=True)
 		#enqueue(StockEntry.make_gl_entries, self=self, queue='short')
 		#self.make_gl_entries()
 
