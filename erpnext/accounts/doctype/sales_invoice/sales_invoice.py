@@ -45,6 +45,7 @@ from erpnext.setup.doctype.company.company import update_company_current_month_s
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
+from erpnext.stock.utils import calculate_mapped_packed_items_return
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -67,6 +68,17 @@ class SalesInvoice(SellingController):
 			'keyword': 'Billed',
 			'overflow_type': 'billing'
 		}]
+
+	#new code to add data in new_name hidden field 
+
+	def after_insert_1(self):
+		for i in self.items:
+			print("i")
+			a = i.new_name = self.name + "-" +i.item_code	
+		
+
+	def before_save(self):
+		self.get_commision()
 
 
 	def set_indicator(self):
@@ -91,9 +103,14 @@ class SalesInvoice(SellingController):
 	# 	self.set_last_sales_invoice()
 
 	def validate(self):
+
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
+
+		self.after_insert_1()
+
 		self.get_commision()
+
 		if not self.is_pos:
 			self.so_dn_required()
 
@@ -218,6 +235,18 @@ class SalesInvoice(SellingController):
 		set_account_for_mode_of_payment(self)
 
 	def on_submit(self):
+		
+		# Code for Child name change
+
+		# if self.items:
+		# 	for i in self.items:	
+		# 		print(" this is oochild", i.name, i.new_name)
+		# 		frappe.db.sql("""
+		# 			UPDATE `tabSales Invoice Item`
+		# 			SET name = '{0}'
+		# 			WHERE name = '{1}'; 
+		# 		""".format(i.new_name,i.name ))
+
 		self.validate_pos_paid_amount()
 
 		if not self.auto_repeat:
@@ -798,8 +827,11 @@ class SalesInvoice(SellingController):
 
 	def update_packing_list(self):
 		if cint(self.update_stock) == 1:
-			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-			make_packing_list(self)
+			if cint(self.is_return) and self.return_against:
+				calculate_mapped_packed_items_return(self)
+			else:
+				from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+				make_packing_list(self)
 		else:
 			self.set('packed_items', [])
 
@@ -932,11 +964,11 @@ class SalesInvoice(SellingController):
 		# Checked both rounding_adjustment and rounded_total
 		# because rounded_total had value even before introcution of posting GLE based on rounded total
 		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
+		base_grand_total = flt(self.base_rounded_total if (self.base_rounding_adjustment and self.base_rounded_total)
+			else self.base_grand_total, self.precision("base_grand_total"))
+
 		if grand_total and not self.is_internal_transfer():
 			# Didnot use base_grand_total to book rounding loss gle
-			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
-				self.precision("grand_total"))
-
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
@@ -944,8 +976,8 @@ class SalesInvoice(SellingController):
 					"party": self.customer,
 					"due_date": self.due_date,
 					"against": self.against_income_account,
-					"debit": grand_total_in_company_currency,
-					"debit_in_account_currency": grand_total_in_company_currency \
+					"debit": base_grand_total,
+					"debit_in_account_currency": base_grand_total \
 						if self.party_account_currency==self.company_currency else grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,

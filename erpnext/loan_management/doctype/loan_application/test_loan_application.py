@@ -15,7 +15,7 @@ from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
 class TestLoanApplication(unittest.TestCase):
 	def setUp(self):
 		create_loan_accounts()
-		create_loan_type("Home Loan", 500000, 9.2, 0, 1, 0, 'Cash', 'Payment Account - _TC', 'Loan Account - _TC',
+		create_loan_type("Home Loan", 500000, 9.2, 0, 1, 0, 'Cash', 'Disbursement Account - _TC', 'Payment Account - _TC', 'Loan Account - _TC',
 			'Interest Income Account - _TC', 'Penalty Income Account - _TC', 'Repay Over Number of Periods', 18)
 		self.applicant = make_employee("kate_loan@loan.com", "_Test Company")
 		make_salary_structure("Test Salary Structure Loan", "Monthly", employee=self.applicant, currency='INR')

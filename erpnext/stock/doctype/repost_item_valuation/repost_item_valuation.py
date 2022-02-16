@@ -27,8 +27,7 @@ class RepostItemValuation(Document):
 			self.item_code = None
 			self.warehouse = None
 
-		self.allow_negative_stock = self.allow_negative_stock or \
-				cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+		self.allow_negative_stock = 1
 
 	def set_company(self):
 		if self.based_on == "Transaction":
@@ -46,7 +45,7 @@ class RepostItemValuation(Document):
 			self.db_set('status', self.status)
 
 	def on_submit(self):
-		if not frappe.flags.in_test or self.flags.dont_run_in_test:
+		if not frappe.flags.in_test or self.flags.dont_run_in_test or frappe.flags.dont_execute_stock_reposts:
 			return
 
 		frappe.enqueue(repost, timeout=1800, queue='long',
@@ -97,7 +96,8 @@ def repost(doc):
 			return
 
 		doc.set_status('In Progress')
-		frappe.db.commit()
+		if not frappe.flags.in_test:
+			frappe.db.commit()
 
 		repost_sl_entries(doc)
 		repost_gl_entries(doc)

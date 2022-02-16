@@ -1,17 +1,15 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
-import unittest
-
 import frappe
 from frappe.test_runner import make_test_records
 
 from erpnext.manufacturing.doctype.job_card.job_card import OperationSequenceError
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestRouting(unittest.TestCase):
+class TestRouting(ERPNextTestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls.item_code = "Test Routing Item - A"
@@ -48,6 +46,7 @@ class TestRouting(unittest.TestCase):
 		wo_doc.delete()
 
 	def test_update_bom_operation_time(self):
+		"""Update cost shouldn't update routing times."""
 		operations = [
 			{
 				"operation": "Test Operation A",
@@ -87,8 +86,8 @@ class TestRouting(unittest.TestCase):
 		routing_doc.save()
 		bom_doc.update_cost()
 		bom_doc.reload()
-		self.assertEqual(bom_doc.operations[0].time_in_mins, 90)
-		self.assertEqual(bom_doc.operations[1].time_in_mins, 42.2)
+		self.assertEqual(bom_doc.operations[0].time_in_mins, 30)
+		self.assertEqual(bom_doc.operations[1].time_in_mins, 20)
 
 
 def setup_operations(rows):

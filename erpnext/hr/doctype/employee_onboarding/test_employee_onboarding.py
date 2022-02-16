@@ -17,7 +17,10 @@ class TestEmployeeOnboarding(unittest.TestCase):
 	def test_employee_onboarding_incomplete_task(self):
 		if frappe.db.exists('Employee Onboarding', {'employee_name': 'Test Researcher'}):
 			frappe.delete_doc('Employee Onboarding', {'employee_name': 'Test Researcher'})
-		_set_up()
+		frappe.db.sql("delete from `tabEmployee Onboarding`")
+		project = "Employee Onboarding : test@researcher.com"
+		frappe.db.sql("delete from tabProject where name=%s", project)
+		frappe.db.sql("delete from tabTask where project=%s", project)
 		applicant = get_job_applicant()
 
 		job_offer = create_job_offer(job_applicant=applicant.name)
@@ -42,7 +45,7 @@ class TestEmployeeOnboarding(unittest.TestCase):
 		onboarding.submit()
 
 		project_name = frappe.db.get_value("Project", onboarding.project, "project_name")
-		self.assertEqual(project_name, 'Employee Onboarding : Test Researcher - test@researcher.com')
+		self.assertEqual(project_name, 'Employee Onboarding : test@researcher.com')
 
 		# don't allow making employee if onboarding is not complete
 		self.assertRaises(IncompleteTaskError, make_employee, onboarding.name)
@@ -65,8 +68,8 @@ class TestEmployeeOnboarding(unittest.TestCase):
 		self.assertEqual(employee.employee_name, 'Test Researcher')
 
 def get_job_applicant():
-	if frappe.db.exists('Job Applicant', 'Test Researcher - test@researcher.com'):
-		return frappe.get_doc('Job Applicant', 'Test Researcher - test@researcher.com')
+	if frappe.db.exists('Job Applicant', 'test@researcher.com'):
+		return frappe.get_doc('Job Applicant', 'test@researcher.com')
 	applicant = frappe.new_doc('Job Applicant')
 	applicant.applicant_name = 'Test Researcher'
 	applicant.email_id = 'test@researcher.com'
