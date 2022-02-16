@@ -140,6 +140,7 @@
    "oldfieldname": "status",
    "oldfieldtype": "Select",
    "options": "Lead\nOpen\nReplied\nOpportunity\nQuotation\nLost Quotation\nInterested\nConverted\nDo Not Contact",
+   "read_only": 1,
    "reqd": 1,
    "search_index": 1
   },
@@ -471,7 +472,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2022-02-16 18:49:09.569678",
+ "modified": "2022-02-16 18:55:21.188181",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
