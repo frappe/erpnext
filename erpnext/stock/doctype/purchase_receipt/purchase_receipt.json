@@ -66,6 +66,7 @@
   "pricing_rules",
   "raw_material_details",
   "get_current_stock",
+  "get_items",
   "supplied_items",
   "taxes_charges_section",
   "tax_category",
@@ -1149,6 +1150,11 @@
    "read_only": 1
   },
   {
+   "fieldname": "get_items",
+   "fieldtype": "Button",
+   "label": "Get Items"
+  },
+  {
    "collapsible": 1,
    "fieldname": "accounting_details_section",
    "fieldtype": "Section Break",
@@ -1166,7 +1172,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-01 11:40:52.690984",
+ "modified": "2022-02-07 16:19:02.347034",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
