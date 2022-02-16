@@ -81,24 +81,8 @@ class ItemVariantsCacheManager:
 		)
 		item_variants_data = query.run()
 
-		# item_variants_data = frappe.get_all(
-		# 	'Item Variant Attribute',
-		# 	{'variant_of': parent_item_code},
-		# 	['parent', 'attribute', 'attribute_value'],
-		# 	order_by='name',
-		# 	as_list=1
-		# )
-
-		# disabled_items = set(
-		# 	[i.name for i in frappe.db.get_all('Item', {'disabled': 1})]
-		# )
-
 		attribute_value_item_map = frappe._dict()
 		item_attribute_value_map = frappe._dict()
-
-		# dont consider variants that are disabled
-		# pull all other variants
-		# item_variants_data = [r for r in item_variants_data if r[0] not in disabled_items]
 
 		for row in item_variants_data:
 			item_code, attribute, attribute_value = row
