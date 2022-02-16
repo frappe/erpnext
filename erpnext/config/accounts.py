@@ -74,6 +74,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Apply Payment Entries Without References",
+					"description": _("Assignment payment entries without references.")
+				},
+				{
+					"type": "doctype",
 					"name": "Payment Request",
 					"description": _("Payment Request"),
 				},
@@ -211,6 +216,11 @@ def get_data():
 					"is_query_report": True,
 					"doctype": "Purchase Invoice"
 				},
+				{
+					"type": "report",
+					"name": "Provider Withholding Vouchers",
+					"is_query_report": True
+				}
 			]
 		},
 		{
@@ -358,6 +368,12 @@ def get_data():
               		"name": "Reconciled balances",
               		"label": _("Reconciled balances"),
               		"description": _("Create Reconciled balances"),
+            	},
+				{
+              		"type": "doctype",
+              		"name": "Voided Check",
+              		"label": _("Voided Check"),
+              		"description": _("Create Voided Check"),
             	},
 				{
 					"type": "report",
