@@ -48,10 +48,55 @@ frappe.ui.form.on("Purchase Receipt", {
 		});
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
-		
+
 	},
 
+	// new code for TASK - TASK-2022-00015
+	get_items: function(frm) {
+		console.log(" this is button function")
+		frappe.call({
+			method : 'on_get_items_button',
+			doc:frm.doc,
+			callback: function(r)
+			{
+				// frm.refresh_field("get_items")
+				if (r.message){
+				console.log("this is buttom", r.message)
+				frm.refresh_field("supplied_items")
+				}
+				else console.log("Nothis ins ")
+			}
+		});
+	},
+
+
+
 	refresh: function(frm) {
+		// new code for TASK - TASK-2022-00015
+		//  To unhide new button on Material  
+		var for_challan_number_date = 0
+		var po =  frm.doc.items[0].purchase_order
+		if (po){
+			frappe.call({
+				method : 'to_button_hide',
+				doc:frm.doc,
+				args: {
+					po : po
+				},
+				callback: function(r)
+				{
+					// frm.refresh_field("get_items")
+					console.log("this is buttom")
+					if (r.message){
+						for_challan_number_date = 1
+						frm.set_df_property("get_items", "hidden", 0)
+					}
+				}
+			});
+			
+		}
+		// console.log(" thi uis is_supply_rm", is_supply_rm)
+		// 
 
 		if(frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
@@ -78,6 +123,7 @@ frappe.ui.form.on("Purchase Receipt", {
 
 		frm.events.add_custom_buttons(frm);
 	},
+
 
 	add_custom_buttons: function(frm) {
 		if (frm.doc.docstatus == 0) {
@@ -110,7 +156,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.refresh_field("items")
 			}
 		});
@@ -121,7 +167,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -135,7 +181,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -149,7 +195,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -163,7 +209,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
                 frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -177,7 +223,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
 				frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -191,7 +237,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
 				frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -205,7 +251,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
+
 				frm.set_value("tax_category","");
 				frm.refresh_field("tax_category")
                 frm.set_value("tax_category",r.message);
@@ -217,6 +263,8 @@ frappe.ui.form.on("Purchase Receipt", {
 		frm.trigger("toggle_display_account_head");
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
+
+
 
 	toggle_display_account_head: function(frm) {
 		var enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company)
@@ -417,6 +465,52 @@ frappe.ui.form.on("Purchase Receipt", "is_subcontracted", function(frm) {
 });
 
 frappe.ui.form.on('Purchase Receipt Item', {
+
+	// new code for Kroslink TASK TASK-2022-00015
+
+	form_render:function(frm,cdt,cdn){
+		var child = locals[cdt][cdn];
+		frappe.call({
+			method: 'on_challan_number',
+			doc : frm.doc,	
+			args :{
+				item_code : child.item_code
+			},
+				callback: (r) => {
+					var i = 0;
+					var b=[];
+					console.log(" THIS IS DATA FROM SOI", r.message)
+					for(i; i < r.message.length; i++) {
+						b.push(r.message[i].name);
+						console.log(" THIS IS DATA FROM SOI", r.message[i], r.message[i].name)
+						frm.fields_dict.items.grid.update_docfield_property(
+							'challan_number_issues_by_job_worker',
+							'options',
+							[''].concat(b)
+						); 
+					}
+				}
+			});	
+		
+    },
+
+	challan_number_issues_by_job_worker: function(frm, cdt, cdn){
+		var child = locals[cdt][cdn];
+		console.log(" this is child", child.item_code)
+		frappe.call({
+			method: 'on_challan_date',
+			doc: frm.doc,
+			args:{
+				item : child.challan_number_issues_by_job_worker
+			},
+			callback: (r) =>{
+				console.log("this is r.message", r.message)
+				frappe.model.set_value(cdt, cdn, "challan_date_issues_by_job_worker", r.message[0])
+				
+			}
+		})
+	},
+
 	item_code: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		frappe.db.get_value('Item', {name: d.item_code}, 'sample_quantity', (r) => {
