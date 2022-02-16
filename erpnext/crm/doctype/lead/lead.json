@@ -471,11 +471,12 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2021-08-04 00:24:57.208590",
+ "modified": "2022-02-16 18:49:09.569678",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
  "name_case": "Title Case",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -535,6 +536,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "subject_field": "title",
  "title_field": "title"
 }
