@@ -171,26 +171,35 @@ class Timesheet(Document):
 				.format(args.idx, self.name, existing.name), OverlapError)
 
 	def get_overlap_for(self, fieldname, args, value):
-		cond = "ts.`{0}`".format(fieldname)
-		if fieldname == 'workstation':
-			cond = "tsd.`{0}`".format(fieldname)
+		timesheet = frappe.qb.DocType("Timesheet")
+		timelog = frappe.qb.DocType("Timesheet Detail")
 
-		existing = frappe.db.sql("""select ts.name as name, tsd.from_time as from_time, tsd.to_time as to_time from
-			`tabTimesheet Detail` tsd, `tabTimesheet` ts where {0}=%(val)s and tsd.parent = ts.name and
-			(
-				(%(from_time)s > tsd.from_time and %(from_time)s < tsd.to_time) or
-				(%(to_time)s > tsd.from_time and %(to_time)s < tsd.to_time) or
-				(%(from_time)s <= tsd.from_time and %(to_time)s >= tsd.to_time))
-			and tsd.name!=%(name)s
-			and ts.name!=%(parent)s
-			and ts.docstatus < 2""".format(cond),
-			{
-				"val": value,
-				"from_time": get_datetime(args.from_time),
-				"to_time": get_datetime(args.to_time),
-				"name": args.name or "No Name",
-				"parent": args.parent or "No Name"
-			}, as_dict=True)
+		from_time = get_datetime(args.from_time)
+		to_time = get_datetime(args.to_time)
+
+		query = (
+			frappe.qb.from_(timesheet)
+				.join(timelog)
+				.on(timelog.parent == timesheet.name)
+				.select(timesheet.name.as_('name'), timelog.from_time.as_('from_time'), timelog.to_time.as_('to_time'))
+				.where(
+					(timelog.name != (args.name or "No Name"))
+					& (timesheet.name != (args.parent or "No Name"))
+					& (timesheet.docstatus < 2)
+					& (
+						((from_time > timelog.from_time) & (from_time < timelog.to_time))
+						| ((to_time > timelog.from_time) & (to_time < timelog.to_time))
+						| ((from_time <= timelog.from_time) & (to_time >= timelog.to_time))
+					)
+				)
+		)
+
+		if fieldname == "workstation":
+			query = query.where(timelog[fieldname] == value)
+		else:
+			query = query.where(timesheet[fieldname] == value)
+
+		existing = query.run(as_dict=True)
 
 		if self.check_internal_overlap(fieldname, args):
 			return self
@@ -208,12 +217,13 @@ class Timesheet(Document):
 			args_from_time = get_datetime(args.from_time)
 			args_to_time = get_datetime(args.to_time)
 
-			if (fieldname != 'workstation' or args.get(fieldname) == time_log.get(fieldname)) and \
+			if ((fieldname != 'workstation' or args.get(fieldname) == time_log.get(fieldname)) and
 				args.idx != time_log.idx and (
 					(args_from_time > from_time and args_from_time < to_time)
 					or (args_to_time > from_time and args_to_time < to_time)
 					or (args_from_time <= from_time and args_to_time >= to_time)
-				):
+				)
+			):
 				return True
 		return False
 
