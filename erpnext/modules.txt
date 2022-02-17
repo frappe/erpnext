@@ -20,4 +20,5 @@ Communication
 Loan Management
 Payroll
 Telephony
+Bulk Transaction
 E-commerce
