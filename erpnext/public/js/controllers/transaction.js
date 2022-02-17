@@ -2265,20 +2265,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	coupon_code: function() {
 		var me = this;
-		if (this.frm.doc.coupon_code) {
-			frappe.run_serially([
-				() => this.frm.doc.ignore_pricing_rule=1,
-				() => me.ignore_pricing_rule(),
-				() => this.frm.doc.ignore_pricing_rule=0,
-				() => me.apply_pricing_rule(),
-				() => this.frm.save()
-			]);
-		} else {
-			frappe.run_serially([
-				() => this.frm.doc.ignore_pricing_rule=1,
-				() => me.ignore_pricing_rule()
-			]);
-		}
+		frappe.run_serially([
+			() => this.frm.doc.ignore_pricing_rule=1,
+			() => me.ignore_pricing_rule(),
+			() => this.frm.doc.ignore_pricing_rule=0,
+			() => me.apply_pricing_rule()
+		]);
 	}
 });
 
