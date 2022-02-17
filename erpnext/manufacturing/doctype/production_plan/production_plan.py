@@ -605,7 +605,8 @@ def download_raw_materials(doc, warehouses=None):
 	if isinstance(doc, str):
 		doc = frappe._dict(json.loads(doc))
 
-	item_list = [['Item Code', 'Description', 'Stock UOM', 'Warehouse', 'Required Qty as per BOM',
+	item_list = [['Item Code', 'Item Name', 'Description',
+		'Stock UOM', 'Warehouse', 'Required Qty as per BOM',
 		'Projected Qty', 'Available Qty In Hand', 'Ordered Qty', 'Planned Qty',
 		'Reserved Qty for Production', 'Safety Stock', 'Required Qty']]
 
@@ -614,7 +615,8 @@ def download_raw_materials(doc, warehouses=None):
 	items = get_items_for_material_requests(doc, warehouses=warehouses, get_parent_warehouse_data=True)
 
 	for d in items:
-		item_list.append([d.get('item_code'), d.get('description'), d.get('stock_uom'), d.get('warehouse'),
+		item_list.append([d.get('item_code'), d.get('item_name'),
+			d.get('description'), d.get('stock_uom'), d.get('warehouse'),
 			d.get('required_bom_qty'), d.get('projected_qty'), d.get('actual_qty'), d.get('ordered_qty'),
 			d.get('planned_qty'), d.get('reserved_qty_for_production'), d.get('safety_stock'), d.get('quantity')])
 
