@@ -65,7 +65,20 @@ invoice_custom_fields = [
 		"insert_after": "sec_fbr_pos_item_details", "read_only": 1, "no_copy": 1},
 ]
 
+item_group_custom_fields = [
+	{"label": "PCT Code (Customs Tariff Number)", "fieldname": "customs_tariff_number", "fieldtype": "Link",
+		"options": "Customs Tariff Number",
+		"insert_after": "taxes"},
+]
+
+custom_fields_map = {
+	'Sales Invoice': invoice_custom_fields,
+	'Item Group': item_group_custom_fields,
+}
+
 for d in invoice_custom_fields:
+	d['translatable'] = 0
+for d in item_group_custom_fields:
 	d['translatable'] = 0
 
 
@@ -79,17 +92,16 @@ class FBRPOSSettings(Document):
 
 
 def setup_fbr_pos_fields():
-	create_custom_fields({
-		'Sales Invoice': invoice_custom_fields,
-	})
+	create_custom_fields(custom_fields_map)
 
 
 def remove_fbr_pos_fields():
-	for custom_field_detail in invoice_custom_fields:
-		custom_field_name = frappe.db.get_value('Custom Field',
-			dict(dt="Sales Invoice", fieldname=custom_field_detail.get('fieldname')))
-		if custom_field_name:
-			frappe.delete_doc('Custom Field', custom_field_name)
+	for dt, custom_fields in custom_fields_map:
+		for custom_field_detail in custom_fields:
+			custom_field_name = frappe.db.get_value('Custom Field',
+				dict(dt=dt, fieldname=custom_field_detail.get('fieldname')))
+			if custom_field_name:
+				frappe.delete_doc('Custom Field', custom_field_name)
 
 
 def check_can_disable_fbr_pos():

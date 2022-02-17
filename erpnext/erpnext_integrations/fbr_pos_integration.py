@@ -123,7 +123,7 @@ def calculate_fbr_pos_values(invoice):
 
 		# Item/Transaction Type
 		pos_item.fbr_pos_invoice_type = get_item_invoice_type(item, invoice, as_str=True)
-		pos_item.fbr_pos_pct_code = frappe.get_cached_value("Item", item.item_code, "customs_tariff_number") if item.item_code else ""
+		pos_item.fbr_pos_pct_code = get_item_pct_code(item)
 
 		# Amounts
 		pos_item.fbr_pos_quantity = flt(item.qty, pos_item.precision('fbr_pos_quantity'))
@@ -307,6 +307,29 @@ def get_item_invoice_type(item, invoice, as_str=False):
 		return key
 	else:
 		return values[key]
+
+
+def get_item_pct_code(item):
+	if item.item_code:
+		pct_code = frappe.get_cached_value("Item", item.item_code, "customs_tariff_number")
+		if pct_code:
+			return pct_code
+		else:
+			return get_item_group_pct_code(frappe.get_cached_value("Item", item.item_code, "item_group"))
+	else:
+		return None
+
+
+def get_item_group_pct_code(item_group):
+	current_item_group = item_group
+	while current_item_group:
+		item_group_doc = frappe.get_cached_doc("Item Group", current_item_group)
+		if item_group_doc.customs_tariff_number:
+			return item_group_doc.customs_tariff_number
+
+		current_item_group = item_group_doc.parent_item_group
+
+	return None
 
 
 def get_item_tax_details(item, invoice, account):
