@@ -34,6 +34,13 @@ def execute():
 	for form in forms:
 		frappe.delete_doc("Web Form", form, ignore_missing=True)
 
+	custom_records = [
+		{"doctype": "Party Type", "name": "Member"},
+		{"doctype": "Party Type", "name": "Donor"},
+	]
+	for record in custom_records:
+		frappe.delete_doc(record['doctype'], record['name'], ignore_missing=True)
+
 	custom_fields = {
 		'Member': ['pan_number'],
 		'Donor': ['pan_number'],
