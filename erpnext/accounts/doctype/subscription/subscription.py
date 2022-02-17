@@ -694,3 +694,4 @@ def process_all() -> None:
 			frappe.db.commit()
 		except Exception:
 			frappe.log_error(frappe.get_traceback())
+

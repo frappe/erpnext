@@ -401,7 +401,7 @@ scheduler_events = {
 		"erpnext.crm.doctype.social_media_post.social_media_post.process_scheduled_social_media_posts",
 	],
 	"hourly": [
-		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails',
+		"erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails",
 		"erpnext.accounts.doctype.gl_entry.gl_entry.rename_gle_sle_docs",
 		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
 		"erpnext.projects.doctype.project.project.hourly_reminder",
