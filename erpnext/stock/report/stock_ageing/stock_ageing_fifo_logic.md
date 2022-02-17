@@ -15,6 +15,7 @@ Here, the balance qty is 70.
 50 qty is (today-the 1st) days old
 20 qty is (today-the 2nd) days old
 
+> Note: We generate FIFO slots warehouse wise as stock reconciliations from different warehouses can cause incorrect values.
 ### Calculation of FIFO Slots
 
 #### Case 1: Outward from sufficient balance qty

@@ -30,6 +30,7 @@ issues:
   exemptLabels:
     - valid
     - to-validate
+    - QA
   markComment: >
     This issue has been automatically marked as inactive because it has not had
     recent activity and it wasn't validated by maintainer team. It will be
