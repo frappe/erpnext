@@ -1956,7 +1956,8 @@ def update_bin_on_delete(row, doctype):
 
 		qty_dict["ordered_qty"] = get_ordered_qty(row.item_code, row.warehouse)
 
-	update_bin_qty(row.item_code, row.warehouse, qty_dict)
+	if row.warehouse:
+		update_bin_qty(row.item_code, row.warehouse, qty_dict)
 
 def validate_and_delete_children(parent, data):
 	deleted_children = []
