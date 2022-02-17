@@ -28,6 +28,7 @@ def format_report_data(filters: Filters, item_details: Dict, to_date: str) -> Li
 	"Returns ordered, formatted data with ranges."
 	_func = itemgetter(1)
 	data = []
+	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 
 	for item, item_dict in item_details.items():
 		earliest_age, latest_age = 0, 0
@@ -48,10 +49,13 @@ def format_report_data(filters: Filters, item_details: Dict, to_date: str) -> Li
 		if filters.get("show_warehouse_wise_stock"):
 			row.append(details.warehouse)
 
-		row.extend([item_dict.get("total_qty"), average_age,
+		row.extend([
+			flt(item_dict.get("total_qty"), precision),
+			average_age,
 			range1, range2, range3, above_range3,
 			earliest_age, latest_age,
-			details.stock_uom])
+			details.stock_uom
+		])
 
 		data.append(row)
 
@@ -288,13 +292,14 @@ class FIFOSlots:
 
 		transfer_data = self.transferred_item_details.get(transfer_key)
 		if transfer_data:
-			# [Repack] inward/outward from same voucher, item & warehouse
+			# inward/outward from same voucher, item & warehouse
+			# eg: Repack with same item, Stock reco for batch item
 			# consume transfer data and add stock to fifo queue
 			self.__adjust_incoming_transfer_qty(transfer_data, fifo_queue, row)
 		else:
 			if not serial_nos:
-				if fifo_queue and flt(fifo_queue[0][0]) < 0:
-					# neutralize negative stock by adding positive stock
+				if fifo_queue and flt(fifo_queue[0][0]) <= 0:
+					# neutralize 0/negative stock by adding positive stock
 					fifo_queue[0][0] += flt(row.actual_qty)
 					fifo_queue[0][1] = row.posting_date
 				else:
@@ -325,7 +330,7 @@ class FIFOSlots:
 			elif not fifo_queue:
 				# negative stock, no balance but qty yet to consume
 				fifo_queue.append([-(qty_to_pop), row.posting_date])
-				self.transferred_item_details[transfer_key].append([row.actual_qty, row.posting_date])
+				self.transferred_item_details[transfer_key].append([qty_to_pop, row.posting_date])
 				qty_to_pop = 0
 			else:
 				# qty to pop < slot qty, ample balance
@@ -337,22 +342,28 @@ class FIFOSlots:
 	def __adjust_incoming_transfer_qty(self, transfer_data: Dict, fifo_queue: List, row: Dict):
 		"Add previously removed stock back to FIFO Queue."
 		transfer_qty_to_pop = flt(row.actual_qty)
-		first_bucket_qty = transfer_data[0][0]
-		first_bucket_date = transfer_data[0][1]
+
+		def add_to_fifo_queue(slot):
+			if fifo_queue and flt(fifo_queue[0][0]) <= 0:
+				# neutralize 0/negative stock by adding positive stock
+				fifo_queue[0][0] += flt(slot[0])
+				fifo_queue[0][1] = slot[1]
+			else:
+				fifo_queue.append(slot)
 
 		while transfer_qty_to_pop:
-			if transfer_data and 0 > first_bucket_qty <= transfer_qty_to_pop:
+			if transfer_data and 0 < transfer_data[0][0] <= transfer_qty_to_pop:
 				# bucket qty is not enough, consume whole
-				transfer_qty_to_pop -= first_bucket_qty
-				slot = transfer_data.pop(0)
-				fifo_queue.append(slot)
+				transfer_qty_to_pop -= transfer_data[0][0]
+				add_to_fifo_queue(transfer_data.pop(0))
 			elif not transfer_data:
 				# transfer bucket is empty, extra incoming qty
-				fifo_queue.append([transfer_qty_to_pop, row.posting_date])
+				add_to_fifo_queue([transfer_qty_to_pop, row.posting_date])
+				transfer_qty_to_pop = 0
 			else:
 				# ample bucket qty to consume
-				first_bucket_qty -= transfer_qty_to_pop
-				fifo_queue.append([transfer_qty_to_pop, first_bucket_date])
+				transfer_data[0][0] -= transfer_qty_to_pop
+				add_to_fifo_queue([transfer_qty_to_pop, transfer_data[0][1]])
 				transfer_qty_to_pop = 0
 
 	def __update_balances(self, row: Dict, key: Union[Tuple, str]):
