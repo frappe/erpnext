@@ -409,9 +409,6 @@ class TestProductionPlan(ERPNextTestCase):
 		boms = {
 			"Assembly": {
 				"SubAssembly1": {"ChildPart1": {}, "ChildPart2": {},},
-				"SubAssembly2": {"ChildPart3": {}},
-				"SubAssembly3": {"SubSubAssy1": {"ChildPart4": {}}},
-				"ChildPart5": {},
 				"ChildPart6": {},
 				"SubAssembly4": {"SubSubAssy2": {"ChildPart7": {}}},
 			},
@@ -590,6 +587,20 @@ class TestProductionPlan(ERPNextTestCase):
 		se.cancel()
 		pln.reload()
 		self.assertEqual(pln.po_items[0].pending_qty, 1)
+
+	def test_qty_based_status(self):
+		pp = frappe.new_doc("Production Plan")
+		pp.po_items = [
+			frappe._dict(planned_qty=5, produce_qty=4)
+		]
+		self.assertFalse(pp.all_items_completed())
+
+		pp.po_items = [
+			frappe._dict(planned_qty=5, produce_qty=10),
+			frappe._dict(planned_qty=5, produce_qty=4)
+		]
+		self.assertFalse(pp.all_items_completed())
+
 
 def create_production_plan(**args):
 	"""
