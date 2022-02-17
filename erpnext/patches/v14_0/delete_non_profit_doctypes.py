@@ -30,10 +30,24 @@ def execute():
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
 
-	custom_fields = [
-		{"dt": "Member", "fieldname": "pan_number"},
-		{"dt": "Donor", "fieldname": "pan_number"},
-	]
-	for field in custom_fields:
-		custom_field = frappe.db.get_value("Custom Field", field)
-		frappe.delete_doc("Custom Field", custom_field, ignore_missing=True)
+	forms = ['grant-application', 'certification-application', 'certification-application-usd']
+	for form in forms:
+		frappe.delete_doc("Web Form", form, ignore_missing=True)
+
+	custom_fields = {
+		'Member': ['pan_number'],
+		'Donor': ['pan_number'],
+		'Company': [
+			'non_profit_section', 'company_80g_number', 'with_effect_from',
+			'non_profit_column_break', 'pan_details'
+		],
+	}
+
+	for doc, fields in custom_fields.items():
+		filters = {
+			'dt': doc,
+			'fieldname': ['in', fields]
+		}
+		records = frappe.get_all('Custom Field', filters=filters, pluck='name')
+		for record in records:
+			frappe.delete_doc('Custom Field', record, ignore_missing=True, force=True)
