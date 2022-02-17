@@ -39,7 +39,10 @@ def execute():
 		{"doctype": "Party Type", "name": "Donor"},
 	]
 	for record in custom_records:
-		frappe.delete_doc(record['doctype'], record['name'], ignore_missing=True)
+		try:
+			frappe.delete_doc(record['doctype'], record['name'], ignore_missing=True)
+		except frappe.LinkExistsError:
+			pass
 
 	custom_fields = {
 		'Member': ['pan_number'],
