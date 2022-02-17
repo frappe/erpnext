@@ -332,7 +332,6 @@ scheduler_events = {
 	],
 	"hourly": [
 		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails',
-		"erpnext.accounts.doctype.subscription.subscription.process_all",
 		"erpnext.accounts.doctype.gl_entry.gl_entry.rename_gle_sle_docs",
 		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
 		"erpnext.projects.doctype.project.project.hourly_reminder",
@@ -370,7 +369,8 @@ scheduler_events = {
 		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status",
 		"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_auto_email",
 		"erpnext.non_profit.doctype.membership.membership.set_expired_status",
-		"erpnext.hr.doctype.interview.interview.send_daily_feedback_reminder"
+		"erpnext.hr.doctype.interview.interview.send_daily_feedback_reminder",
+		"erpnext.accounts.doctype.subscription.subscription.process_all",
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.email_digest.email_digest.send",
