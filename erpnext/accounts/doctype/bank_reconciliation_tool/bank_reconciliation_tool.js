@@ -64,6 +64,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 					"account_currency",
 					(r) => {
 						frm.currency = r.account_currency;
+						frm.trigger("render_chart");
 					}
 				);
 			}
@@ -128,7 +129,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 		}
 	},
 
-	render_chart(frm) {
+	render_chart: frappe.utils.debounce((frm) => {
 		frm.cards_manager = new erpnext.accounts.bank_reconciliation.NumberCardManager(
 			{
 				$reconciliation_tool_cards: frm.get_field(
@@ -140,7 +141,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 				currency: frm.currency,
 			}
 		);
-	},
+	}, 500),
 
 	render(frm) {
 		if (frm.doc.bank_account) {
