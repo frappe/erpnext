@@ -4,10 +4,11 @@
 
 
 import frappe
-from frappe.utils import flt
+from frappe.utils import add_to_date, flt, now
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.accounts.utils import update_gl_entries_after
 from erpnext.assets.doctype.asset.test_asset import create_asset_category, create_fixed_asset_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	get_gl_entries,
@@ -28,7 +29,8 @@ class TestLandedCostVoucher(ERPNextTestCase):
 				"voucher_type": pr.doctype,
 				"voucher_no": pr.name,
 				"item_code": "_Test Item",
-				"warehouse": "Stores - TCP1"
+				"warehouse": "Stores - TCP1",
+				"is_cancelled": 0,
 			},
 			fieldname=["qty_after_transaction", "stock_value"], as_dict=1)
 
@@ -41,13 +43,38 @@ class TestLandedCostVoucher(ERPNextTestCase):
 				"voucher_type": pr.doctype,
 				"voucher_no": pr.name,
 				"item_code": "_Test Item",
-				"warehouse": "Stores - TCP1"
+				"warehouse": "Stores - TCP1",
+				"is_cancelled": 0,
 			},
 			fieldname=["qty_after_transaction", "stock_value"], as_dict=1)
 
 		self.assertEqual(last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction)
-
 		self.assertEqual(last_sle_after_landed_cost.stock_value - last_sle.stock_value, 25.0)
+
+		# assert after submit
+		self.assertPurchaseReceiptLCVGLEntries(pr)
+
+		# Mess up cancelled SLE modified timestamp to check
+		# if they aren't effective in any business logic.
+		frappe.db.set_value("Stock Ledger Entry",
+			{
+				"is_cancelled": 1,
+				"voucher_type": pr.doctype,
+				"voucher_no": pr.name
+			},
+			"is_cancelled", 1,
+			modified=add_to_date(now(), hours=1, as_datetime=True, as_string=True)
+		)
+
+		items, warehouses = pr.get_items_and_warehouses()
+		update_gl_entries_after(pr.posting_date, pr.posting_time,
+			warehouses, items, company=pr.company)
+
+		# reassert after reposting
+		self.assertPurchaseReceiptLCVGLEntries(pr)
+
+
+	def assertPurchaseReceiptLCVGLEntries(self, pr):
 
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 
@@ -74,8 +101,8 @@ class TestLandedCostVoucher(ERPNextTestCase):
 
 		for gle in gl_entries:
 			if not gle.get('is_cancelled'):
-				self.assertEqual(expected_values[gle.account][0], gle.debit)
-				self.assertEqual(expected_values[gle.account][1], gle.credit)
+				self.assertEqual(expected_values[gle.account][0], gle.debit, msg=f"incorrect debit for {gle.account}")
+				self.assertEqual(expected_values[gle.account][1], gle.credit, msg=f"incorrect credit for {gle.account}")
 
 
 	def test_landed_cost_voucher_against_purchase_invoice(self):
