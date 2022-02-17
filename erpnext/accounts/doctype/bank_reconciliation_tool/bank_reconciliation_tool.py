@@ -275,6 +275,10 @@ def check_matching(bank_account, company, transaction, document_types):
 		}
 
 	matching_vouchers = []
+
+	matching_vouchers.extend(get_loan_vouchers(bank_account, transaction,
+		document_types, filters))
+
 	for query in subquery:
 		matching_vouchers.extend(
 			frappe.db.sql(query, filters,)
@@ -310,6 +314,74 @@ def get_queries(bank_account, company, transaction, document_types):
 			queries.extend([ec_amount_matching])
 
 	return queries
+
+def get_loan_vouchers(bank_account, transaction, document_types, filters):
+	vouchers = []
+	amount_condition = True if "exact_match" in document_types else False
+
+	if transaction.withdrawal > 0 and "loan_disbursement" in document_types:
+		vouchers.append(get_ld_matching_query(bank_account, amount_condition, filters))
+
+	if transaction.deposit > 0 and "loan_repayment" in document_types:
+		vouchers.append(get_lr_matching_query(bank_account, amount_condition, filters))
+
+def get_ld_matching_query(bank_account, amount_condition, filters):
+	loan_disbursement = frappe.qb.DocType("Loan Disbursement")
+	query = frappe.qb.from_(loan_disbursement).select(
+		loan_disbursement.name,
+		loan_disbursement.disbursed_amount,
+		loan_disbursement.reference_number,
+		loan_disbursement.reference_date,
+		loan_disbursement.applicant_type,
+		loan_disbursement.disbursement_date
+	).where(
+		loan_disbursement.docstatus == 1
+	).where(
+		loan_disbursement.clearance_date.isnull()
+	).where(
+		loan_disbursement.disbursement_account == bank_account
+	)
+
+	if amount_condition:
+		query.where(
+			loan_disbursement.disbursed_amount == filters.get('amount')
+		)
+	else:
+		query.where(
+			loan_disbursement.disbursed_amount <= filters.get('amount')
+		)
+
+	vouchers = query.run(as_dict=1)
+	return vouchers
+
+def get_lr_matching_query(bank_account, amount_condition, filters):
+	loan_repayment = frappe.qb.DocType("Loan Repayment")
+	query = frappe.qb.from_(loan_repayment).select(
+		loan_repayment.name,
+		loan_repayment.paid_amount,
+		loan_repayment.reference_number,
+		loan_repayment.reference_date,
+		loan_repayment.applicant_type,
+		loan_repayment.posting_date
+	).where(
+		loan_repayment.docstatus == 1
+	).where(
+		loan_repayment.clearance_date.isnull()
+	).where(
+		loan_repayment.disbursement_account == bank_account
+	)
+
+	if amount_condition:
+		query.where(
+			loan_repayment.paid_amount == filters.get('amount')
+		)
+	else:
+		query.where(
+			loan_repayment.paid_amount <= filters.get('amount')
+		)
+
+	vouchers = query.run(as_dict=1)
+	return vouchers
 
 def get_pe_matching_query(amount_condition, account_from_to, transaction):
 	# get matching payment entries query
@@ -348,7 +420,6 @@ def get_je_matching_query(amount_condition, transaction):
 	# We have mapping at the bank level
 	# So one bank could have both types of bank accounts like asset and liability
 	# So cr_or_dr should be judged only on basis of withdrawal and deposit and not account type
-	company_account = frappe.get_value("Bank Account", transaction.bank_account, "account")
 	cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
 
 	return f"""
