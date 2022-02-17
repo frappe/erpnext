@@ -2270,8 +2270,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				() => this.frm.doc.ignore_pricing_rule=1,
 				() => me.ignore_pricing_rule(),
 				() => this.frm.doc.ignore_pricing_rule=0,
-				() => me.apply_pricing_rule(),
-				() => this.frm.save()
+				() => me.apply_pricing_rule()
 			]);
 		} else {
 			frappe.run_serially([
