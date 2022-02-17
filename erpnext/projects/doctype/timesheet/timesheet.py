@@ -177,7 +177,7 @@ class Timesheet(Document):
 		from_time = get_datetime(args.from_time)
 		to_time = get_datetime(args.to_time)
 
-		query = (
+		existing = (
 			frappe.qb.from_(timesheet)
 				.join(timelog)
 				.on(timelog.parent == timesheet.name)
@@ -186,20 +186,14 @@ class Timesheet(Document):
 					(timelog.name != (args.name or "No Name"))
 					& (timesheet.name != (args.parent or "No Name"))
 					& (timesheet.docstatus < 2)
+					& (timesheet[fieldname] == value)
 					& (
 						((from_time > timelog.from_time) & (from_time < timelog.to_time))
 						| ((to_time > timelog.from_time) & (to_time < timelog.to_time))
 						| ((from_time <= timelog.from_time) & (to_time >= timelog.to_time))
 					)
 				)
-		)
-
-		if fieldname == "workstation":
-			query = query.where(timelog[fieldname] == value)
-		else:
-			query = query.where(timesheet[fieldname] == value)
-
-		existing = query.run(as_dict=True)
+		).run(as_dict=True)
 
 		if self.check_internal_overlap(fieldname, args):
 			return self
@@ -217,12 +211,10 @@ class Timesheet(Document):
 			args_from_time = get_datetime(args.from_time)
 			args_to_time = get_datetime(args.to_time)
 
-			if ((fieldname != 'workstation' or args.get(fieldname) == time_log.get(fieldname)) and
-				args.idx != time_log.idx and (
-					(args_from_time > from_time and args_from_time < to_time)
-					or (args_to_time > from_time and args_to_time < to_time)
-					or (args_from_time <= from_time and args_to_time >= to_time)
-				)
+			if (args.get(fieldname) == time_log.get(fieldname)) and (args.idx != time_log.idx) and (
+				(args_from_time > from_time and args_from_time < to_time)
+				or (args_to_time > from_time and args_to_time < to_time)
+				or (args_from_time <= from_time and args_to_time >= to_time)
 			):
 				return True
 		return False
