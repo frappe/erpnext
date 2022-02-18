@@ -12,6 +12,7 @@ from frappe.utils import cint, date_diff, flt
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 Filters = frappe._dict
+precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 
 def execute(filters: Filters = None) -> Tuple:
 	to_date = filters["to_date"]
@@ -28,7 +29,6 @@ def format_report_data(filters: Filters, item_details: Dict, to_date: str) -> Li
 	"Returns ordered, formatted data with ranges."
 	_func = itemgetter(1)
 	data = []
-	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 
 	for item, item_dict in item_details.items():
 		earliest_age, latest_age = 0, 0
@@ -83,13 +83,13 @@ def get_range_age(filters: Filters, fifo_queue: List, to_date: str, item_dict: D
 		qty = flt(item[0]) if not item_dict["has_serial_no"] else 1.0
 
 		if age <= filters.range1:
-			range1 += qty
+			range1 = flt(range1 + qty, precision)
 		elif age <= filters.range2:
-			range2 += qty
+			range2 = flt(range2 + qty, precision)
 		elif age <= filters.range3:
-			range3 += qty
+			range3 = flt(range3 + qty, precision)
 		else:
-			above_range3 += qty
+			above_range3 = flt(above_range3 + qty, precision)
 
 	return range1, range2, range3, above_range3
 
