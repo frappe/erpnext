@@ -51,15 +51,15 @@ additional_print_settings = "erpnext.controllers.print_settings.get_print_settin
 
 on_session_creation = [
 	"erpnext.portal.utils.create_customer_or_supplier",
-	"erpnext.shopping_cart.utils.set_cart_count"
+	"erpnext.e_commerce.shopping_cart.utils.set_cart_count"
 ]
-on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
+on_logout = "erpnext.e_commerce.shopping_cart.utils.clear_cart_count"
 
 treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', 'Assessment Group', 'Department']
 
 # website
-update_website_context = ["erpnext.shopping_cart.utils.update_website_context", "erpnext.education.doctype.education_settings.education_settings.update_website_context"]
-my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
+update_website_context = ["erpnext.e_commerce.shopping_cart.utils.update_website_context", "erpnext.education.doctype.education_settings.education_settings.update_website_context"]
+my_account_context = "erpnext.e_commerce.shopping_cart.utils.update_my_account_context"
 webform_list_context = "erpnext.controllers.website_list_for_contact.get_webform_list_context"
 
 calendars = ["Task", "Work Order", "Leave Application", "Sales Order", "Holiday List", "Course Schedule"]
@@ -73,7 +73,7 @@ domains = {
 	'Services': 'erpnext.domains.services',
 }
 
-website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
+website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner",
 	"Job Opening", "Student Admission"]
 
 website_context = {
@@ -237,10 +237,7 @@ doc_events = {
 		]
 	},
 	"Sales Taxes and Charges Template": {
-		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
-	},
-	"Website Settings": {
-		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
+		"on_update": "erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings.validate_cart_settings"
 	},
 	"Tax Category": {
 		"validate": "erpnext.regional.india.utils.validate_tax_category"
@@ -336,7 +333,6 @@ scheduler_events = {
 	"hourly": [
 		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails',
 		"erpnext.accounts.doctype.subscription.subscription.process_all",
-		"erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_settings.schedule_get_order_details",
 		"erpnext.accounts.doctype.gl_entry.gl_entry.rename_gle_sle_docs",
 		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
 		"erpnext.projects.doctype.project.project.hourly_reminder",
@@ -344,7 +340,8 @@ scheduler_events = {
 		"erpnext.hr.doctype.shift_type.shift_type.process_auto_attendance_for_all_shifts"
 	],
 	"hourly_long": [
-		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries"
+		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
+		"erpnext.bulk_transaction.doctype.bulk_transaction_log.bulk_transaction_log.retry_failing_transaction"
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",

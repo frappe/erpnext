@@ -400,6 +400,16 @@ class StatusUpdater(Document):
 			ref_doc = frappe.get_doc(ref_dt, ref_dn)
 
 			ref_doc.db_set("per_billed", per_billed)
+
+			# set billling status
+			if hasattr(ref_doc, 'billing_status'):
+				if ref_doc.per_billed < 0.001:
+					ref_doc.db_set("billing_status", "Not Billed")
+				elif ref_doc.per_billed > 99.999999:
+					ref_doc.db_set("billing_status", "Fully Billed")
+				else:
+					ref_doc.db_set("billing_status", "Partly Billed")
+
 			ref_doc.set_status(update=True)
 
 def get_allowance_for(item_code, item_allowance=None, global_qty_allowance=None, global_amount_allowance=None, qty_or_amount="qty"):
