@@ -1,13 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd.
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
-from frappe import _, scrub
-from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr, now, time_diff_in_seconds
+
 from collections import OrderedDict
+
+import frappe
+from frappe import _, scrub
+from frappe.utils import cint, cstr, flt, getdate, nowdate
+
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+	get_dimension_with_children,
+)
 from erpnext.accounts.utils import get_currency_precision
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
 #  This report gives a summary of all Outstanding Invoices considering the following
 
@@ -99,12 +104,16 @@ class ReceivablePayableReport(object):
 					voucher_no = gle.voucher_no,
 					party = gle.party,
 					posting_date = gle.posting_date,
-					remarks = gle.remarks,
 					account_currency = gle.account_currency,
+					remarks = gle.remarks if self.filters.get("show_remarks") else None,
 					invoiced = 0.0,
 					paid = 0.0,
 					credit_note = 0.0,
-					outstanding = 0.0
+					outstanding = 0.0,
+					invoiced_in_account_currency = 0.0,
+					paid_in_account_currency = 0.0,
+					credit_note_in_account_currency = 0.0,
+					outstanding_in_account_currency = 0.0
 				)
 			self.get_invoices(gle)
 
@@ -145,21 +154,44 @@ class ReceivablePayableReport(object):
 		# gle_balance will be the total "debit - credit" for receivable type reports and
 		# and vice-versa for payable type reports
 		gle_balance = self.get_gle_balance(gle)
+		gle_balance_in_account_currency = self.get_gle_balance_in_account_currency(gle)
+
 		if gle_balance > 0:
 			if gle.voucher_type in ('Journal Entry', 'Payment Entry') and gle.against_voucher:
 				# debit against sales / purchase invoice
 				row.paid -= gle_balance
+				row.paid_in_account_currency -= gle_balance_in_account_currency
 			else:
 				# invoice
 				row.invoiced += gle_balance
+				row.invoiced_in_account_currency += gle_balance_in_account_currency
 		else:
 			# payment or credit note for receivables
 			if self.is_invoice(gle):
 				# stand alone debit / credit note
 				row.credit_note -= gle_balance
+				row.credit_note_in_account_currency -= gle_balance_in_account_currency
 			else:
 				# advance / unlinked payment or other adjustment
 				row.paid -= gle_balance
+				row.paid_in_account_currency -= gle_balance_in_account_currency
+
+		if gle.cost_center:
+			row.cost_center =  str(gle.cost_center)
+
+	def update_sub_total_row(self, row, party):
+		total_row = self.total_row_map.get(party)
+
+		for field in self.get_currency_fields():
+			total_row[field] += row.get(field, 0.0)
+
+	def append_subtotal_row(self, party):
+		sub_total_row = self.total_row_map.get(party)
+
+		if sub_total_row:
+			self.data.append(sub_total_row)
+			self.data.append({})
+			self.update_sub_total_row(sub_total_row, 'Total')
 
 	def update_sub_total_row(self, row, party):
 		total_row = self.total_row_map.get(party)
@@ -209,6 +241,9 @@ class ReceivablePayableReport(object):
 		# as we can use this to filter out invoices without outstanding
 		for key, row in self.voucher_balance.items():
 			row.outstanding = flt(row.invoiced - row.paid - row.credit_note, self.currency_precision)
+			row.outstanding_in_account_currency = flt(row.invoiced_in_account_currency - row.paid_in_account_currency - \
+				row.credit_note_in_account_currency, self.currency_precision)
+
 			row.invoice_grand_total = row.invoiced
 
 			if abs(row.outstanding) >= 1.0/10 ** self.currency_precision:
@@ -365,7 +400,7 @@ class ReceivablePayableReport(object):
 		payment_terms_details = frappe.db.sql("""
 			select
 				si.name, si.party_account_currency, si.currency, si.conversion_rate,
-				ps.due_date, ps.payment_amount, ps.description, ps.paid_amount
+				ps.due_date, ps.payment_term, ps.payment_amount, ps.description, ps.paid_amount, ps.discounted_amount
 			from `tab{0}` si, `tabPayment Schedule` ps
 			where
 				si.name = ps.parent and
@@ -395,14 +430,14 @@ class ReceivablePayableReport(object):
 			"due_date": d.due_date,
 			"invoiced": invoiced,
 			"invoice_grand_total": row.invoiced,
-			"payment_term": d.description,
-			"paid": d.paid_amount,
+			"payment_term": d.description or d.payment_term,
+			"paid": d.paid_amount + d.discounted_amount,
 			"credit_note": 0.0,
-			"outstanding": invoiced - d.paid_amount
+			"outstanding": invoiced - d.paid_amount - d.discounted_amount
 		}))
 
 		if d.paid_amount:
-			row['paid'] -= d.paid_amount
+			row['paid'] -= d.paid_amount + d.discounted_amount
 
 	def allocate_closing_to_term(self, row, term, key):
 		if row[key]:
@@ -525,7 +560,9 @@ class ReceivablePayableReport(object):
 
 	def set_ageing(self, row):
 		if self.filters.ageing_based_on == "Due Date":
-			entry_date = row.due_date
+			# use posting date as a fallback for advances posted via journal and payment entry
+			# when ageing viewed by due date
+			entry_date = row.due_date or row.posting_date
 		elif self.filters.ageing_based_on == "Supplier Invoice Date":
 			entry_date = row.bill_date
 		else:
@@ -536,6 +573,8 @@ class ReceivablePayableReport(object):
 		# ageing buckets should not have amounts if due date is not reached
 		if getdate(entry_date) > getdate(self.filters.report_date):
 			row.range1 = row.range2 = row.range3 = row.range4 = row.range5 = 0.0
+
+		row.total_due = row.range1 + row.range2 + row.range3 + row.range4 + row.range5
 
 	def get_ageing_data(self, entry_date, row):
 		# [0-30, 30-60, 60-90, 90-120, 120-above]
@@ -551,7 +590,7 @@ class ReceivablePayableReport(object):
 			self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4 = 30, 60, 90, 120
 
 		for i, days in enumerate([self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4]):
-			if row.age <= days:
+			if cint(row.age) <= cint(days):
 				index = i
 				break
 
@@ -572,24 +611,37 @@ class ReceivablePayableReport(object):
 		else:
 			date_condition = "AND posting_date <=%s"
 
+		if self.filters.show_future_payments:
+			values.insert(2, self.filters.report_date)
+
+			date_condition = """AND (posting_date <= %s
+				OR (against_voucher IS NULL AND DATE(creation) <= %s))"""
+		else:
+			date_condition = "AND posting_date <=%s"
+
 		select_fields = "debit_in_account_currency as debit, credit_in_account_currency as credit"
 		# if self.filters.get(scrub(self.party_type)):
 		# 	select_fields = "debit_in_account_currency as debit, credit_in_account_currency as credit"
 		# else:
 		# 	select_fields = "debit, credit"
 
+		doc_currency_fields = "debit_in_account_currency, credit_in_account_currency"
+
+		remarks = ", remarks" if self.filters.get("show_remarks") else ""
+
 		self.gl_entries = frappe.db.sql("""
 			select
-				name, posting_date, account, party_type, party, voucher_type, voucher_no,
-				against_voucher_type, against_voucher, account_currency, remarks, {0}
+				name, posting_date, account, party_type, party, voucher_type, voucher_no, cost_center,
+				against_voucher_type, against_voucher, account_currency, {0}, {1} {remarks}
 			from
 				`tabGL Entry`
 			where
 				docstatus < 2
+				and is_cancelled = 0
 				and party_type=%s
 				and (party is not null and party != '')
-				{1} {2} {3}"""
-			.format(select_fields, date_condition, conditions, order_by), values, as_dict=True)
+				{2} {3} {4}"""
+			.format(select_fields, doc_currency_fields, date_condition, conditions, order_by, remarks=remarks), values, as_dict=True)
 
 	def get_sales_invoices_or_customers_based_on_sales_person(self):
 		if self.filters.get("sales_person"):
@@ -710,6 +762,13 @@ class ReceivablePayableReport(object):
 		# get the balance of the GL (debit - credit) or reverse balance based on report type
 		return gle.get(self.dr_or_cr) - self.get_reverse_balance(gle)
 
+	def get_gle_balance_in_account_currency(self, gle):
+		# get the balance of the GL (debit - credit) or reverse balance based on report type
+		return gle.get(self.dr_or_cr + '_in_account_currency') - self.get_reverse_balance_in_account_currency(gle)
+
+	def get_reverse_balance_in_account_currency(self, gle):
+		return gle.get('debit_in_account_currency' if self.dr_or_cr=='credit' else 'credit_in_account_currency')
+
 	def get_reverse_balance(self, gle):
 		# get "credit" balance if report type is "debit" and vice versa
 		return gle.get('debit' if self.dr_or_cr=='credit' else 'credit')
@@ -744,9 +803,14 @@ class ReceivablePayableReport(object):
 			self.add_column(_("Customer Contact"), fieldname='customer_primary_contact',
 				fieldtype='Link', options='Contact')
 
+		self.add_column(label=_('Cost Center'), fieldname='cost_center', fieldtype='Data')
 		self.add_column(label=_('Voucher Type'), fieldname='voucher_type', fieldtype='Data')
 		self.add_column(label=_('Voucher No'), fieldname='voucher_no', fieldtype='Dynamic Link',
 			options='voucher_type', width=180)
+
+		if self.filters.show_remarks:
+			self.add_column(label=_('Remarks'), fieldname='remarks', fieldtype='Text', width=200),
+
 		self.add_column(label='Due Date', fieldtype='Date')
 
 		if self.party_type == "Supplier":
@@ -791,8 +855,6 @@ class ReceivablePayableReport(object):
 		if self.filters.party_type == "Supplier":
 			self.add_column(label=_('Supplier Group'), fieldname='supplier_group', fieldtype='Link',
 				options='Supplier Group')
-
-		self.add_column(label=_('Remarks'), fieldname='remarks', fieldtype='Text', width=200)
 
 	def add_column(self, label, fieldname=None, fieldtype='Currency', options=None, width=120):
 		if not fieldname: fieldname = scrub(label)

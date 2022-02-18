@@ -1,21 +1,23 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
+
+from operator import itemgetter
+
+import frappe
 from frappe import _
-from frappe.utils import flt, cint, getdate, now, date_diff
-from erpnext.stock.utils import add_additional_uom_columns
-from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
-
-from erpnext.stock.report.stock_ageing.stock_ageing import get_fifo_queue, get_average_age
-
+from frappe.utils import cint, date_diff, flt, getdate
 from six import iteritems
 
-def execute(filters=None):
-	if not filters: filters = {}
+import erpnext
+from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, get_average_age
+from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
+from erpnext.stock.utils import add_additional_uom_columns, is_reposting_item_valuation_in_progress
 
-	validate_filters(filters)
+
+def execute(filters=None):
+	is_reposting_item_valuation_in_progress()
+	if not filters: filters = {}
 
 	from_date = filters.get('from_date')
 	to_date = filters.get('to_date')
@@ -32,7 +34,7 @@ def execute(filters=None):
 
 	if filters.get('show_stock_ageing_data'):
 		filters['show_warehouse_wise_stock'] = True
-		item_wise_fifo_queue = get_fifo_queue(filters, sle)
+		item_wise_fifo_queue = FIFOSlots(filters, sle).generate()
 
 	# if no stock ledger entry found return
 	if not sle:
@@ -45,7 +47,7 @@ def execute(filters=None):
 	data = []
 	conversion_factors = {}
 
-	_func = lambda x: x[1]
+	_func = itemgetter(1)
 
 	for (company, item, warehouse) in sorted(iwb_map):
 		if item_map.get(item):
@@ -156,7 +158,7 @@ def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
 	if items:
 		item_conditions_sql = ' and sle.item_code in ({})'\
-			.format(', '.join([frappe.db.escape(i, percent=False) for i in items]))
+			.format(', '.join(frappe.db.escape(i, percent=False) for i in items))
 
 	conditions = get_conditions(filters)
 
@@ -164,10 +166,11 @@ def get_stock_ledger_entries(filters, items):
 		select
 			sle.item_code, warehouse, sle.posting_date, sle.actual_qty, sle.valuation_rate,
 			sle.company, sle.voucher_type, sle.qty_after_transaction, sle.stock_value_difference,
-			sle.item_code as name, sle.voucher_no
+			sle.item_code as name, sle.voucher_no, sle.stock_value, sle.batch_no
 		from
-			`tabStock Ledger Entry` sle force index (posting_sort_index)
+			`tabStock Ledger Entry` sle
 		where sle.docstatus < 2 %s %s
+		and is_cancelled = 0
 		order by sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty""" % #nosec
 		(item_conditions_sql, conditions), as_dict=1)
 
@@ -191,14 +194,16 @@ def get_item_warehouse_map(filters, sle):
 
 		qty_dict = iwb_map[(d.company, d.item_code, d.warehouse)]
 
-		if d.voucher_type == "Stock Reconciliation":
+		if d.voucher_type == "Stock Reconciliation" and not d.batch_no:
 			qty_diff = flt(d.qty_after_transaction) - flt(qty_dict.bal_qty)
 		else:
 			qty_diff = flt(d.actual_qty)
 
 		value_diff = flt(d.stock_value_difference)
 
-		if d.posting_date < from_date:
+		if d.posting_date < from_date or (d.posting_date == from_date
+			and d.voucher_type == "Stock Reconciliation" and
+			frappe.db.get_value("Stock Reconciliation", d.voucher_no, "purpose") == "Opening Stock"):
 			qty_dict.opening_qty += qty_diff
 			qty_dict.opening_val += value_diff
 
@@ -235,12 +240,15 @@ def filter_items_with_no_transactions(iwb_map, float_precision):
 	return iwb_map
 
 def get_items(filters):
+	"Get items based on item code, item group or brand."
 	conditions = []
 	if filters.get("item_code"):
 		conditions.append("item.name=%(item_code)s")
 	else:
 		if filters.get("item_group"):
 			conditions.append(get_item_group_condition(filters.get("item_group")))
+		if filters.get("brand"): # used in stock analytics report
+			conditions.append("item.brand=%(brand)s")
 
 	items = []
 	if conditions:
@@ -251,7 +259,7 @@ def get_items(filters):
 def get_item_details(items, sle, filters):
 	item_details = {}
 	if not items:
-		items = list(set([d.item_code for d in sle]))
+		items = list(set(d.item_code for d in sle))
 
 	if not items:
 		return item_details
@@ -289,15 +297,9 @@ def get_item_reorder_details(items):
 			select parent, warehouse, warehouse_reorder_qty, warehouse_reorder_level
 			from `tabItem Reorder`
 			where parent in ({0})
-		""".format(', '.join([frappe.db.escape(i, percent=False) for i in items])), as_dict=1)
+		""".format(', '.join(frappe.db.escape(i, percent=False) for i in items)), as_dict=1)
 
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
-
-def validate_filters(filters):
-	if not (filters.get("item_code") or filters.get("warehouse")):
-		sle_count = flt(frappe.db.sql("""select count(name) from `tabStock Ledger Entry`""")[0][0])
-		if sle_count > 500000:
-			frappe.throw(_("Please set filter based on Item or Warehouse due to a large amount of entries."))
 
 def get_variants_attributes():
 	'''Return all item variant attributes.'''

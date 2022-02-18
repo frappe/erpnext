@@ -18,7 +18,9 @@
   "get_item_locations",
   "section_break_6",
   "locations",
-  "amended_from"
+  "amended_from",
+  "print_settings_section",
+  "group_same_items"
  ],
  "fields": [
   {
@@ -110,14 +112,28 @@
    "options": "STO-PICK-.YYYY.-",
    "reqd": 1,
    "set_only_once": 1
+  },
+  {
+   "fieldname": "print_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Print Settings"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "group_same_items",
+   "fieldtype": "Check",
+   "label": "Group Same Items",
+   "print_hide": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-17 11:38:41.932875",
+ "modified": "2021-10-05 15:08:40.369957",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

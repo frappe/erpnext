@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 
 from frappe import _
 
@@ -13,7 +12,9 @@ def get_data():
 			'Quotation': 'party_name',
 			'Opportunity': 'party_name',
 			'Medical Objects': 'customer_id',
-			'Sample': 'practitioner_id'
+			'Sample': 'practitioner_id',
+			'Bank Account': 'party',
+			'Subscription': 'party'
 		},
 		'dynamic_links': {
 			'party_name': ['Customer', 'quotation_to']
@@ -45,7 +46,13 @@ def get_data():
 			},
 			{
 				'label': _('Statements'),
-				'items': ['Customer Statements']
+				'items': ['Customer Statements'],
+				'label': _('Payments'),
+				'items': ['Payment Entry', 'Bank Account']
+			},
+			{
+				'label': _('Support'),
+				'items': ['Issue', 'Maintenance Visit', 'Installation Note', 'Warranty Claim']
 			},
 			{
 				'label': 'Testing DB',

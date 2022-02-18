@@ -1,12 +1,13 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import add_days, date_diff
 
 from erpnext.hotels.doctype.hotel_room_reservation.hotel_room_reservation import get_rooms_booked
+
 
 def execute(filters=None):
 	columns = get_columns(filters)

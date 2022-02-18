@@ -1,27 +1,7 @@
-@import "frappe/public/scss/variables";
-
-.product-image img {
-	min-height: 20rem;
-	max-height: 30rem;
-}
 
 .filter-options {
 	max-height: 300px;
 	overflow: auto;
-}
-
-.item-slideshow-image {
-	height: 3rem;
-	width: 3rem;
-	object-fit: contain;
-	padding: 0.5rem;
-	border: 1px solid $border-color;
-	border-radius: 4px;
-	cursor: pointer;
-
-	&:hover, &.active {
-		border-color: $primary;
-	}
 }
 
 .address-card {
@@ -33,7 +13,7 @@
 	}
 
 	&.active {
-		border-color: $primary;
+		border-color: var(--primary);
 
 		.check {
 			display: inline-flex;
@@ -43,10 +23,10 @@
 
 .check {
 	display: inline-flex;
-    padding: 0.25rem;
-    background: $primary;
-    color: white;
-    border-radius: 50%;
+	padding: 0.25rem;
+	background: var(--primary);
+	color: white;
+	border-radius: 50%;
 	font-size: 12px;
 	width: 24px;
 	height: 24px;
@@ -57,12 +37,12 @@
 }
 
 .result {
-	border-bottom: 1px solid $border-color;
+	border-bottom: 1px solid var(--border-color);
 }
 
 .transaction-list-item {
 	padding: 1rem 0;
-	border-top: 1px solid $border-color;
+	border-top: 1px solid var(--border-color);
 	position: relative;
 
 	a.transaction-item-link {
@@ -81,4 +61,10 @@
 
 .place-order-container {
 	text-align: right;
+}
+
+.kb-card {
+	.card-body > .card-title {
+		line-height: 1.3;
+	}
 }

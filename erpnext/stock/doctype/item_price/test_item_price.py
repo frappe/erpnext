@@ -1,16 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import unittest
+
 import frappe
 from frappe.test_runner import make_test_records_for_doctype
-from erpnext.stock.get_item_details import get_price_list_rate_for, process_args
+
 from erpnext.stock.doctype.item_price.item_price import ItemPriceDuplicateItem
+from erpnext.stock.get_item_details import get_price_list_rate_for, process_args
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestItemPrice(unittest.TestCase):
+class TestItemPrice(ERPNextTestCase):
 	def setUp(self):
+		super().setUp()
 		frappe.db.sql("delete from `tabItem Price`")
 		make_test_records_for_doctype("Item Price", force=True)
 
@@ -137,5 +139,24 @@ class TestItemPrice(unittest.TestCase):
 		doc.price_list = "This is not a price list"
 		# Valid price list must already exist
 		self.assertRaises(frappe.ValidationError, doc.save)
+
+	def test_empty_duplicate_validation(self):
+		# Check if none/empty values are not compared during insert validation
+		doc = frappe.copy_doc(test_records[2])
+		doc.customer = None
+		doc.price_list_rate = 21
+		doc.insert()
+
+		args = {
+			"price_list": doc.price_list,
+			"uom": "_Test UOM",
+			"transaction_date": '2017-04-18',
+			"qty": 7
+		}
+
+		price = get_price_list_rate_for(args, doc.item_code)
+		frappe.db.rollback()
+
+		self.assertEqual(price, 21)
 
 test_records = frappe.get_test_records('Item Price')

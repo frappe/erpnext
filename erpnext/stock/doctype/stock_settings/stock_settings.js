@@ -15,3 +15,4 @@ frappe.ui.form.on('Stock Settings', {
 		frm.set_query("sample_retention_warehouse", filters);
 	}
 });
+

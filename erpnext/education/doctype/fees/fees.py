@@ -1,16 +1,16 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-from frappe.model.document import Document
-import frappe, erpnext
+
+import frappe
 from frappe import _
 from frappe.utils import money_in_words
-from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from frappe.utils.csvutils import getlink
+
+import erpnext
+from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+from erpnext.accounts.general_ledger import make_reverse_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.general_ledger import delete_gl_entries
 
 
 class Fees(AccountsController):
@@ -81,7 +81,8 @@ class Fees(AccountsController):
 			frappe.msgprint(_("Payment request {0} created").format(getlink("Payment Request", pr.name)))
 
 	def on_cancel(self):
-		delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+		make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 		# frappe.db.set(self, 'status', 'Cancelled')
 
 

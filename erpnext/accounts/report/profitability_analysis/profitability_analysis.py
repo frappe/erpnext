@@ -1,11 +1,15 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate, formatdate, cstr
-from erpnext.accounts.report.financial_statements import filter_accounts, filter_out_zero_value_rows
+from frappe.utils import cstr, flt
+
+from erpnext.accounts.report.financial_statements import (
+	filter_accounts,
+	filter_out_zero_value_rows,
+)
 from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
 
 value_fields = ("income", "expense", "gross_profit_loss")
@@ -105,6 +109,7 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 
 def prepare_data(accounts, filters, total_row, parent_children_map, based_on):
 	data = []
+	new_accounts = accounts
 	company_currency = frappe.get_cached_value('Company',  filters.get("company"),  "default_currency")
 
 	for d in accounts:
@@ -118,6 +123,19 @@ def prepare_data(accounts, filters, total_row, parent_children_map, based_on):
 			"currency": company_currency,
 			"based_on": based_on
 		}
+		if based_on == 'cost_center':
+			cost_center_doc = frappe.get_doc("Cost Center",d.name)
+			if not cost_center_doc.enable_distributed_cost_center:
+				DCC_allocation = frappe.db.sql("""SELECT parent, sum(percentage_allocation) as percentage_allocation
+					FROM `tabDistributed Cost Center`
+					WHERE cost_center IN %(cost_center)s
+					AND parent NOT IN %(cost_center)s
+					GROUP BY parent""",{'cost_center': [d.name]})
+				if DCC_allocation:
+					for account in new_accounts:
+						if account['name'] == DCC_allocation[0][0]:
+							for value in value_fields:
+								d[value] += account[value]*(DCC_allocation[0][1]/100)
 
 		for key in value_fields:
 			row[key] = flt(d.get(key, 0.0), 3)
@@ -154,21 +172,24 @@ def get_columns(filters):
 			"label": _("Income"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120
+			"width": 305
+
 		},
 		{
 			"fieldname": "expense",
 			"label": _("Expense"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120
+			"width": 305
+
 		},
 		{
 			"fieldname": "gross_profit_loss",
 			"label": _("Gross Profit / Loss"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120
+			"width": 307
+
 		}
 	]
 

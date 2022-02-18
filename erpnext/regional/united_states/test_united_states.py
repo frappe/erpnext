@@ -1,8 +1,10 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
-import frappe
+
 import unittest
+
+import frappe
+
 from erpnext.regional.report.irs_1099.irs_1099 import execute as execute_1099_report
 
 
@@ -26,7 +28,6 @@ class TestUnitedStates(unittest.TestCase):
         make_payment_entry_to_irs_1099_supplier()
         filters = frappe._dict({"fiscal_year": "_Test Fiscal Year 2016", "company": "_Test Company 1"})
         columns, data = execute_1099_report(filters)
-        print(columns, data)
         expected_row = {'supplier': '_US 1099 Test Supplier',
                         'supplier_group': 'Services',
                         'payments': 100.0,

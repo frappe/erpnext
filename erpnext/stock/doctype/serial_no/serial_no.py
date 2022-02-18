@@ -1,17 +1,20 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
+import json
+
 import frappe
-
+from frappe import ValidationError, _
 from frappe.model.naming import make_autoname
-from frappe.utils import cint, cstr, flt, add_days, nowdate, getdate
-from erpnext.stock.get_item_details import get_reserved_qty_for_so
-
-from frappe import _, ValidationError
+from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate
+from six import string_types
+from six.moves import map
 
 from erpnext.controllers.stock_controller import StockController
-from six.moves import map
+from erpnext.stock.get_item_details import get_reserved_qty_for_so
+
+
 class SerialNoCannotCreateDirectError(ValidationError): pass
 class SerialNoCannotCannotChangeError(ValidationError): pass
 class SerialNoNotRequiredError(ValidationError): pass
@@ -153,7 +156,8 @@ class SerialNo(StockController):
 			FROM
 				`tabStock Ledger Entry`
 			WHERE
-				item_code=%s AND company = %s AND ifnull(is_cancelled, 'No')='No'
+				item_code=%s AND company = %s
+				AND is_cancelled = 0
 				AND (serial_no = %s
 					OR serial_no like %s
 					OR serial_no like %s
@@ -161,8 +165,14 @@ class SerialNo(StockController):
 				)
 			ORDER BY
 				posting_date desc, posting_time desc, creation desc""",
-			(self.item_code, self.company,
-				serial_no, serial_no+'\n%', '%\n'+serial_no, '%\n'+serial_no+'\n%'), as_dict=1):
+			(
+				self.item_code, self.company,
+				serial_no,
+				serial_no+'\n%',
+				'%\n'+serial_no,
+				'%\n'+serial_no+'\n%'
+			),
+			as_dict=1):
 				if serial_no.upper() in get_serial_nos(sle.serial_no):
 					if cint(sle.actual_qty) > 0:
 						sle_dict.setdefault("incoming", []).append(sle)
@@ -173,7 +183,7 @@ class SerialNo(StockController):
 
 	def on_trash(self):
 		sl_entries = frappe.db.sql("""select serial_no from `tabStock Ledger Entry`
-			where serial_no like %s and item_code=%s and ifnull(is_cancelled, 'No')='No'""",
+			where serial_no like %s and item_code=%s and is_cancelled=0""",
 			("%%%s%%" % self.name, self.item_code), as_dict=True)
 
 		# Find the exact match
@@ -223,7 +233,7 @@ def validate_serial_no(sle, item_det):
 		if serial_nos:
 			frappe.throw(_("Item {0} is not setup for Serial Nos. Column must be blank").format(sle.item_code),
 				SerialNoNotRequiredError)
-	elif sle.is_cancelled == "No":
+	elif not sle.is_cancelled:
 		if serial_nos:
 			if cint(sle.actual_qty) != flt(sle.actual_qty):
 				frappe.throw(_("Serial No {0} quantity {1} cannot be a fraction").format(sle.item_code, sle.actual_qty))
@@ -238,17 +248,18 @@ def validate_serial_no(sle, item_det):
 			for serial_no in serial_nos:
 				if frappe.db.exists("Serial No", serial_no):
 					sr = frappe.db.get_value("Serial No", serial_no, ["name", "item_code", "batch_no", "sales_order",
-						"delivery_document_no", "delivery_document_type", "warehouse",
-						"purchase_document_no", "company"], as_dict=1)
+						"delivery_document_no", "delivery_document_type", "warehouse", "purchase_document_type",
+						"purchase_document_no", "company", "status"], as_dict=1)
 
 					if sr.item_code!=sle.item_code:
 						if not allow_serial_nos_with_different_item(serial_no, sle):
 							frappe.throw(_("Serial No {0} does not belong to Item {1}").format(serial_no,
 								sle.item_code), SerialNoItemError)
 
-					if cint(sle.actual_qty) > 0 and has_duplicate_serial_no(sr, sle):
-						frappe.throw(_("Serial No {0} has already been received").format(serial_no),
-							SerialNoDuplicateError)
+					if cint(sle.actual_qty) > 0 and has_serial_no_exists(sr, sle):
+						doc_name = frappe.bold(get_link_to_form(sr.purchase_document_type, sr.purchase_document_no))
+						frappe.throw(_("Serial No {0} has already been received in the {1} #{2}")
+							.format(frappe.bold(serial_no), sr.purchase_document_type, doc_name), SerialNoDuplicateError)
 
 					if (sr.delivery_document_no and sle.voucher_type not in ['Stock Entry', 'Stock Reconciliation']
 						and sle.voucher_type == sr.delivery_document_type):
@@ -261,13 +272,16 @@ def validate_serial_no(sle, item_det):
 							frappe.throw(_("Serial No {0} does not belong to Warehouse {1}").format(serial_no,
 								sle.warehouse), SerialNoWarehouseError)
 
+						if not sr.purchase_document_no:
+							frappe.throw(_("Serial No {0} not in stock").format(serial_no), SerialNoNotExistsError)
+
 						if sle.voucher_type in ("Delivery Note", "Sales Invoice"):
 
 							if sr.batch_no and sr.batch_no != sle.batch_no:
 								frappe.throw(_("Serial No {0} does not belong to Batch {1}").format(serial_no,
 									sle.batch_no), SerialNoBatchError)
 
-							if sle.is_cancelled=="No" and not sr.warehouse:
+							if not sle.is_cancelled and not sr.warehouse:
 								frappe.throw(_("Serial No {0} does not belong to any Warehouse")
 									.format(serial_no), SerialNoWarehouseError)
 
@@ -276,8 +290,10 @@ def validate_serial_no(sle, item_det):
 								if sle.voucher_type == "Sales Invoice":
 									if not frappe.db.exists("Sales Invoice Item", {"parent": sle.voucher_no,
 										"item_code": sle.item_code, "sales_order": sr.sales_order}):
-										frappe.throw(_("Cannot deliver Serial No {0} of item {1} as it is reserved \
-											to fullfill Sales Order {2}").format(sr.name, sle.item_code, sr.sales_order))
+										frappe.throw(
+											_("Cannot deliver Serial No {0} of item {1} as it is reserved to fullfill Sales Order {2}")
+											.format(sr.name, sle.item_code, sr.sales_order)
+										)
 								elif sle.voucher_type == "Delivery Note":
 									if not frappe.db.exists("Delivery Note Item", {"parent": sle.voucher_no,
 										"item_code": sle.item_code, "against_sales_order": sr.sales_order}):
@@ -286,8 +302,10 @@ def validate_serial_no(sle, item_det):
 										if not invoice or frappe.db.exists("Sales Invoice Item",
 											{"parent": invoice, "item_code": sle.item_code,
 											"sales_order": sr.sales_order}):
-											frappe.throw(_("Cannot deliver Serial No {0} of item {1} as it is reserved to \
-												fullfill Sales Order {2}").format(sr.name, sle.item_code, sr.sales_order))
+											frappe.throw(
+												_("Cannot deliver Serial No {0} of item {1} as it is reserved to fullfill Sales Order {2}")
+												.format(sr.name, sle.item_code, sr.sales_order)
+											)
 							# if Sales Order reference in Delivery Note or Invoice validate SO reservations for item
 							if sle.voucher_type == "Sales Invoice":
 								sales_order = frappe.db.get_value("Sales Invoice Item", {"parent": sle.voucher_no,
@@ -314,11 +332,35 @@ def validate_serial_no(sle, item_det):
 			frappe.throw(_("Serial Nos Required for Serialized Item {0}").format(sle.item_code),
 				SerialNoRequiredError)
 	elif serial_nos:
+		# SLE is being cancelled and has serial nos
 		for serial_no in serial_nos:
-			sr = frappe.db.get_value("Serial No", serial_no, ["name", "warehouse"], as_dict=1)
-			if sr and cint(sle.actual_qty) < 0 and sr.warehouse != sle.warehouse:
-				frappe.throw(_("Cannot cancel {0} {1} because Serial No {2} does not belong to the warehouse {3}")
-					.format(sle.voucher_type, sle.voucher_no, serial_no, sle.warehouse))
+			check_serial_no_validity_on_cancel(serial_no, sle)
+
+def check_serial_no_validity_on_cancel(serial_no, sle):
+	sr = frappe.db.get_value("Serial No", serial_no, ["name", "warehouse", "company", "status"], as_dict=1)
+	sr_link = frappe.utils.get_link_to_form("Serial No", serial_no)
+	doc_link = frappe.utils.get_link_to_form(sle.voucher_type, sle.voucher_no)
+	actual_qty = cint(sle.actual_qty)
+	is_stock_reco = sle.voucher_type == "Stock Reconciliation"
+	msg = None
+
+	if sr and (actual_qty < 0 or is_stock_reco) and (sr.warehouse and sr.warehouse != sle.warehouse):
+		# receipt(inward) is being cancelled
+		msg = _("Cannot cancel {0} {1} as Serial No {2} does not belong to the warehouse {3}").format(
+			sle.voucher_type, doc_link, sr_link, frappe.bold(sle.warehouse))
+	elif sr and actual_qty > 0 and not is_stock_reco:
+		# delivery is being cancelled, check for warehouse.
+		if sr.warehouse:
+			# serial no is active in another warehouse/company.
+			msg = _("Cannot cancel {0} {1} as Serial No {2} is active in warehouse {3}").format(
+				sle.voucher_type, doc_link, sr_link, frappe.bold(sr.warehouse))
+		elif sr.company != sle.company and sr.status == "Delivered":
+			# serial no is inactive (allowed) or delivered from another company (block).
+			msg = _("Cannot cancel {0} {1} as Serial No {2} does not belong to the company {3}").format(
+				sle.voucher_type, doc_link, sr_link, frappe.bold(sle.company))
+
+	if msg:
+		frappe.throw(msg, title=_("Cannot cancel"))
 
 def validate_material_transfer_entry(sle_doc):
 	sle_doc.update({
@@ -326,38 +368,28 @@ def validate_material_transfer_entry(sle_doc):
 		"skip_serial_no_validaiton": False
 	})
 
-	if (sle_doc.voucher_type == "Stock Entry" and sle_doc.is_cancelled == "No" and
+	if (sle_doc.voucher_type == "Stock Entry" and not sle_doc.is_cancelled and
 		frappe.get_cached_value("Stock Entry", sle_doc.voucher_no, "purpose") == "Material Transfer"):
 		if sle_doc.actual_qty < 0:
 			sle_doc.skip_update_serial_no = True
 		else:
 			sle_doc.skip_serial_no_validaiton = True
 
-def validate_so_serial_no(sr, sales_order,):
+def validate_so_serial_no(sr, sales_order):
 	if not sr.sales_order or sr.sales_order!= sales_order:
-		frappe.throw(_("""Sales Order {0} has reservation for item {1}, you can
-		only deliver reserved {1} against {0}. Serial No {2} cannot
-		be delivered""").format(sales_order, sr.item_code, sr.name))
+		msg = (_("Sales Order {0} has reservation for the item {1}, you can only deliver reserved {1} against {0}.")
+			.format(sales_order, sr.item_code))
 
-def has_duplicate_serial_no(sn, sle):
+		frappe.throw(_("""{0} Serial No {1} cannot be delivered""")
+			.format(msg, sr.name))
+
+def has_serial_no_exists(sn, sle):
 	if (sn.warehouse and not sle.skip_serial_no_validaiton
 		and sle.voucher_type != 'Stock Reconciliation'):
 		return True
 
 	if sn.company != sle.company:
 		return False
-
-	status = False
-	if sn.purchase_document_no:
-		if sle.voucher_type in ['Purchase Receipt', 'Stock Entry', "Purchase Invoice"] and \
-			sn.delivery_document_type not in ['Purchase Receipt', 'Stock Entry', "Purchase Invoice"]:
-			status = True
-
-		if status and sle.voucher_type == 'Stock Entry' and \
-			frappe.db.get_value('Stock Entry', sle.voucher_no, 'purpose') != 'Material Receipt':
-			status = False
-
-	return status
 
 def allow_serial_nos_with_different_item(sle_serial_no, sle):
 	"""
@@ -369,7 +401,7 @@ def allow_serial_nos_with_different_item(sle_serial_no, sle):
 		stock_entry = frappe.get_cached_doc("Stock Entry", sle.voucher_no)
 		if stock_entry.purpose in ("Repack", "Manufacture"):
 			for d in stock_entry.get("items"):
-				if d.serial_no and (d.s_warehouse if sle.is_cancelled=="No" else d.t_warehouse):
+				if d.serial_no and (d.s_warehouse if not sle.is_cancelled else d.t_warehouse):
 					serial_nos = get_serial_nos(d.serial_no)
 					if sle_serial_no in serial_nos:
 						allow_serial_nos = True
@@ -378,7 +410,7 @@ def allow_serial_nos_with_different_item(sle_serial_no, sle):
 
 def update_serial_nos(sle, item_det):
 	if sle.skip_update_serial_no: return
-	if sle.is_cancelled == "No" and not sle.serial_no and cint(sle.actual_qty) > 0 \
+	if not sle.is_cancelled and not sle.serial_no and cint(sle.actual_qty) > 0 \
 			and item_det.has_serial_no == 1 and item_det.serial_no_series:
 		serial_nos = get_auto_serial_nos(item_det.serial_no_series, sle.actual_qty)
 		frappe.db.set(sle, "serial_no", serial_nos)
@@ -389,13 +421,21 @@ def update_serial_nos(sle, item_det):
 def get_auto_serial_nos(serial_no_series, qty):
 	serial_nos = []
 	for i in range(cint(qty)):
-		serial_nos.append(make_autoname(serial_no_series, "Serial No"))
+		serial_nos.append(get_new_serial_number(serial_no_series))
 
 	return "\n".join(serial_nos)
+
+def get_new_serial_number(series):
+	sr_no = make_autoname(series, "Serial No")
+	if frappe.db.exists("Serial No", sr_no):
+		sr_no = get_new_serial_number(series)
+	return sr_no
 
 def auto_make_serial_nos(args):
 	serial_nos = get_serial_nos(args.get('serial_no'))
 	created_numbers = []
+	voucher_type = args.get('voucher_type')
+	item_code = args.get('item_code')
 	for serial_no in serial_nos:
 		is_new = False
 		if frappe.db.exists("Serial No", serial_no):
@@ -408,11 +448,29 @@ def auto_make_serial_nos(args):
 		if is_new:
 			created_numbers.append(sr.name)
 
-	form_links = list(map(lambda d: frappe.utils.get_link_to_form('Serial No', d), created_numbers))
+	form_links = list(map(lambda d: get_link_to_form('Serial No', d), created_numbers))
+
+	# Setting up tranlated title field for all cases
+	singular_title = _("Serial Number Created")
+	multiple_title = _("Serial Numbers Created")
+
+	if voucher_type:
+		multiple_title = singular_title = _("{0} Created").format(voucher_type)
+
 	if len(form_links) == 1:
-		frappe.msgprint(_("Serial No {0} created").format(form_links[0]))
+		frappe.msgprint(_("Serial No {0} Created").format(form_links[0]), singular_title)
 	elif len(form_links) > 0:
-		frappe.msgprint(_("The following serial numbers were created: <br> {0}").format(', '.join(form_links)))
+		message = _("The following serial numbers were created: <br><br> {0}").format(get_items_html(form_links, item_code))
+		frappe.msgprint(message, multiple_title)
+
+def get_items_html(serial_nos, item_code):
+	body = ', '.join(serial_nos)
+	return '''<details><summary>
+		<b>{0}:</b> {1} Serial Numbers <span class="caret"></span>
+	</summary>
+	<div class="small">{2}</div></details>
+	'''.format(item_code, len(serial_nos), body)
+
 
 def get_item_details(item_code):
 	return frappe.db.sql("""select name, has_batch_no, docstatus,
@@ -426,17 +484,21 @@ def get_serial_nos(serial_no):
 	return [s.strip() for s in cstr(serial_no).strip().upper().replace(',', '\n').split('\n')
 		if s.strip()]
 
+def clean_serial_no_string(serial_no: str) -> str:
+	if not serial_no:
+		return ""
+
+	serial_no_list = get_serial_nos(serial_no)
+	return "\n".join(serial_no_list)
+
 def update_args_for_serial_no(serial_no_doc, serial_no, args, is_new=False):
-	serial_no_doc.update({
-		"item_code": args.get("item_code"),
-		"company": args.get("company"),
-		"batch_no": args.get("batch_no"),
-		"via_stock_ledger": args.get("via_stock_ledger") or True,
-		"supplier": args.get("supplier"),
-		"location": args.get("location"),
-		"warehouse": (args.get("warehouse")
-			if args.get("actual_qty", 0) > 0 else None)
-	})
+	for field in ["item_code", "work_order", "company", "batch_no", "supplier", "location"]:
+		if args.get(field):
+			serial_no_doc.set(field, args.get(field))
+
+	serial_no_doc.via_stock_ledger = args.get("via_stock_ledger") or True
+	serial_no_doc.warehouse = (args.get("warehouse")
+		if args.get("actual_qty", 0) > 0 else None)
 
 	if is_new:
 		serial_no_doc.serial_no = serial_no
@@ -518,15 +580,83 @@ def get_delivery_note_serial_no(item_code, qty, delivery_note):
 	return serial_nos
 
 @frappe.whitelist()
-def auto_fetch_serial_number(qty, item_code, warehouse, batch_nos=None):
-	import json
-	filters = {
-		"item_code": item_code,
-		"warehouse": warehouse,
-		"delivery_document_no": "",
-		"sales_invoice": ""
-	}
-	if batch_nos: filters["batch_no"] = ["in", json.loads(batch_nos)]
+def auto_fetch_serial_number(qty, item_code, warehouse, posting_date=None, batch_nos=None, for_doctype=None):
+	filters = { "item_code": item_code, "warehouse": warehouse }
 
-	serial_numbers = frappe.get_list("Serial No", filters=filters, limit=qty, order_by="creation")
-	return [item['name'] for item in serial_numbers]
+	if batch_nos:
+		try:
+			filters["batch_no"] = json.loads(batch_nos) if (type(json.loads(batch_nos)) == list) else [json.loads(batch_nos)]
+		except Exception:
+			filters["batch_no"] = [batch_nos]
+
+	if posting_date:
+		filters["expiry_date"] = posting_date
+
+	serial_numbers = []
+	if for_doctype == 'POS Invoice':
+		reserved_sr_nos = get_pos_reserved_serial_nos(filters)
+		serial_numbers = fetch_serial_numbers(filters, qty, do_not_include=reserved_sr_nos)
+	else:
+		serial_numbers = fetch_serial_numbers(filters, qty)
+
+	return [d.get('name') for d in serial_numbers]
+
+@frappe.whitelist()
+def get_pos_reserved_serial_nos(filters):
+	if isinstance(filters, string_types):
+		filters = json.loads(filters)
+
+	pos_transacted_sr_nos = frappe.db.sql("""select item.serial_no as serial_no
+		from `tabPOS Invoice` p, `tabPOS Invoice Item` item
+		where p.name = item.parent
+		and p.consolidated_invoice is NULL
+		and p.docstatus = 1
+		and item.docstatus = 1
+		and item.item_code = %(item_code)s
+		and item.warehouse = %(warehouse)s
+		and item.serial_no is NOT NULL and item.serial_no != ''
+		""", filters, as_dict=1)
+
+	reserved_sr_nos = []
+	for d in pos_transacted_sr_nos:
+		reserved_sr_nos += get_serial_nos(d.serial_no)
+
+	return reserved_sr_nos
+
+def fetch_serial_numbers(filters, qty, do_not_include=None):
+	if do_not_include is None:
+		do_not_include = []
+	batch_join_selection = ""
+	batch_no_condition = ""
+	batch_nos = filters.get("batch_no")
+	expiry_date = filters.get("expiry_date")
+	if batch_nos:
+		batch_no_condition = """and sr.batch_no in ({}) """.format(', '.join("'%s'" % d for d in batch_nos))
+
+	if expiry_date:
+		batch_join_selection = "LEFT JOIN `tabBatch` batch on sr.batch_no = batch.name "
+		expiry_date_cond = "AND ifnull(batch.expiry_date, '2500-12-31') >= %(expiry_date)s "
+		batch_no_condition += expiry_date_cond
+
+	excluded_sr_nos = ", ".join(["" + frappe.db.escape(sr) + "" for sr in do_not_include]) or "''"
+	serial_numbers = frappe.db.sql("""
+		SELECT sr.name FROM `tabSerial No` sr {batch_join_selection}
+		WHERE
+			sr.name not in ({excluded_sr_nos}) AND
+			sr.item_code = %(item_code)s AND
+			sr.warehouse = %(warehouse)s AND
+			ifnull(sr.sales_invoice,'') = '' AND
+			ifnull(sr.delivery_document_no, '') = ''
+			{batch_no_condition}
+		ORDER BY
+			sr.creation
+		LIMIT
+			{qty}
+		""".format(
+				excluded_sr_nos=excluded_sr_nos,
+				qty=qty or 1,
+				batch_join_selection=batch_join_selection,
+				batch_no_condition=batch_no_condition
+			), filters, as_dict=1)
+
+	return serial_numbers

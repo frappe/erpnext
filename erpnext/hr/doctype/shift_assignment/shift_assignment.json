@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "HR-SHA-.YY.-.MM.-.#####",
  "creation": "2018-04-13 16:25:04.562730",
@@ -8,12 +9,14 @@
  "field_order": [
   "employee",
   "employee_name",
-  "department",
   "shift_type",
+  "status",
   "column_break_3",
   "company",
-  "date",
+  "start_date",
+  "end_date",
   "shift_request",
+  "department",
   "amended_from"
  ],
  "fields": [
@@ -59,12 +62,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Date"
-  },
-  {
    "fieldname": "shift_request",
    "fieldtype": "Link",
    "label": "Shift Request",
@@ -79,10 +76,36 @@
    "options": "Shift Assignment",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Start Date",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Active\nInactive",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-30 15:40:54.418427",
+ "links": [],
+ "modified": "2020-06-15 14:27:54.310773",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Assignment",

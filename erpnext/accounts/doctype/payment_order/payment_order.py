@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import nowdate
-from erpnext.accounts.party import get_party_account
 from frappe.model.document import Document
+from frappe.utils import nowdate
+
+from erpnext.accounts.party import get_party_account
+
 
 class PaymentOrder(Document):
 	def on_submit(self):
@@ -21,10 +22,15 @@ class PaymentOrder(Document):
 		if cancel:
 			status = 'Initiated'
 
-		ref_field = "status" if self.payment_order_type == "Payment Request" else "payment_order_status"
+		if self.payment_order_type == "Payment Request":
+			ref_field = "status"
+			ref_doc_field = frappe.scrub(self.payment_order_type)
+		else:
+			ref_field = "payment_order_status"
+			ref_doc_field = "reference_name"
 
 		for d in self.references:
-			frappe.db.set_value(self.payment_order_type, d.get(frappe.scrub(self.payment_order_type)), ref_field, status)
+			frappe.db.set_value(self.payment_order_type, d.get(ref_doc_field), ref_field, status)
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs

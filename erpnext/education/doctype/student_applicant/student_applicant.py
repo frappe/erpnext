@@ -2,11 +2,12 @@
 # Copyright (c) 2015, Frappe Technologies and contributors
 # For license information, please see license.txt
 
-from __future__ import print_function, unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, add_years, nowdate, date_diff
+from frappe.utils import add_years, date_diff, getdate, nowdate
+
 
 class StudentApplicant(Document):
 	def autoname(self):
@@ -29,10 +30,15 @@ class StudentApplicant(Document):
 		set_name_by_naming_series(self)
 
 	def validate(self):
+		self.validate_dates()
 		self.title = " ".join(filter(None, [self.first_name, self.middle_name, self.last_name]))
 
 		if self.student_admission and self.program and self.date_of_birth:
 			self.validation_from_student_admission()
+
+	def validate_dates(self):
+		if self.date_of_birth and getdate(self.date_of_birth) >= getdate():
+			frappe.throw(_("Date of Birth cannot be greater than today."))
 
 	def on_update_after_submit(self):
 		student = frappe.get_list("Student",  filters= {"student_applicant": self.name})
@@ -44,7 +50,6 @@ class StudentApplicant(Document):
 			frappe.throw(_("Please select Student Admission which is mandatory for the paid student applicant"))
 
 	def validation_from_student_admission(self):
-		
 		student_admission = get_student_admission_data(self.student_admission, self.program)
 
 		if student_admission and student_admission.min_age and \

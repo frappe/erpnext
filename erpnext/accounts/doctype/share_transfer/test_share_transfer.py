@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
+
 from erpnext.accounts.doctype.share_transfer.share_transfer import ShareDontExists
 
 test_dependencies = ["Share Type", "Shareholder"]

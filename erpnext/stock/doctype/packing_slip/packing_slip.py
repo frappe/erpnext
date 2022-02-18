@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -88,9 +87,9 @@ class PackingSlip(Document):
 		rows = [d.item_code for d in self.get("items")]
 
 		# also pick custom fields from delivery note
-		custom_fields = ', '.join(['dni.`{0}`'.format(d.fieldname)
+		custom_fields = ', '.join('dni.`{0}`'.format(d.fieldname)
 			for d in frappe.get_meta("Delivery Note Item").get_custom_fields()
-			if d.fieldtype not in no_value_fields])
+			if d.fieldtype not in no_value_fields)
 
 		if custom_fields:
 			custom_fields = ', ' + custom_fields
@@ -152,6 +151,7 @@ class PackingSlip(Document):
 
 		return cint(recommended_case_no[0][0]) + 1
 
+	@frappe.whitelist()
 	def get_items(self):
 		self.set("items", [])
 

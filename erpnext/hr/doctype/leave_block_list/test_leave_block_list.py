@@ -1,12 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
-import frappe
 import unittest
 
+import frappe
 from frappe.utils import getdate
+
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
+
 
 class TestLeaveBlockList(unittest.TestCase):
 	def tearDown(self):

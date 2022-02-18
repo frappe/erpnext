@@ -21,7 +21,7 @@
 				{% elif frappe.utils.getdate(doc.admission_start_date) > today %}
 					blue"> Application will open
 				{% else %}
-					darkgrey
+					gray
 				{% endif  %}
 	        </span>
 		</div>
@@ -43,31 +43,35 @@
 				<thead>
 					<tr class="active">
 						<th style="width: 90px">Program/Std.</th>
-						<th style="width: 170px">Minumum Age</th>
-						<th style="width: 170px">Maximum Age</th>
+						<th style="width: 180px">Description</th>
+						<th style="width: 100px">Minumum Age</th>
+						<th style="width: 100px">Maximum Age</th>
 						<th style="width: 100px">Application Fee</th>
+						{%- if doc.enable_admission_application and frappe.utils.getdate(doc.admission_start_date) <= today -%}
+							<th style="width: 120px"></th>
+						{% endif %}
 					</tr>
 				</thead>
 				<tbody>
 					{% for row in program_details %}
 						<tr>
 							<td>{{ row.program }}</td>
+							<td><div class="text-muted">{{ row.description if row.description else '' }}</div></td>
 							<td>{{ row.min_age }}</td>
 							<td>{{ row.max_age }}</td>
 							<td>{{ row.application_fee }}</td>
+							{%- if doc.enable_admission_application and frappe.utils.getdate(doc.admission_start_date) <= today -%}
+							<td>
+								<a class='btn btn-sm btn-primary' href='/student-applicant?new=1&student_admission={{doc.name}}&program={{row.program}}&academic_year={{academic_year}}'>
+									{{ _("Apply Now") }}
+								</a>
+							</td>
+							{% endif %}
 						</tr>
 					{% endfor %}
 				</tbody>
 			</table>
 		</div>
-	{% endif %}
-	{%- if doc.enable_admission_application -%}
-		<br>
-		<p>
-			<a class='btn btn-primary'
-			href='/student-applicant?new=1&student_admission={{doc.name}}'>
-			{{ _("Apply Now") }}</a>
-		</p>
 	{% endif %}
 
 {% endblock %}

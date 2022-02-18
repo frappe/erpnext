@@ -1,12 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
 
-from frappe.utils import cint, cstr, flt, nowdate, comma_and, date_diff
-from frappe import msgprint, _
+import frappe
+from frappe import _, msgprint
 from frappe.model.document import Document
+from frappe.utils import cint, comma_and, cstr, flt
+
 
 class LeaveControlPanel(Document):
 	def get_employees(self):
@@ -29,6 +29,7 @@ class LeaveControlPanel(Document):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(f)))
 		self.validate_from_to_dates('from_date', 'to_date')
 
+	@frappe.whitelist()
 	def allocate_leave(self):
 		self.validate_values()
 		leave_allocated_for = []
@@ -50,7 +51,7 @@ class LeaveControlPanel(Document):
 				la.docstatus = 1
 				la.save()
 				leave_allocated_for.append(d[0])
-			except:
+			except Exception:
 				pass
 		if leave_allocated_for:
 			msgprint(_("Leaves Allocated Successfully for {0}").format(comma_and(leave_allocated_for)))

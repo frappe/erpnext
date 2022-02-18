@@ -1,15 +1,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
 
+import frappe
+from frappe import _
 from frappe.utils import cstr, getdate
 
-from frappe import _
 from erpnext.stock.utils import get_valid_serial_nos
-
 from erpnext.utilities.transaction_base import TransactionBase
+
 
 class InstallationNote(TransactionBase):
 	def __init__(self, *args, **kwargs):

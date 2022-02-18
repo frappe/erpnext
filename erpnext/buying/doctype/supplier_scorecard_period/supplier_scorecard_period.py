@@ -1,14 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe import throw, _
+from frappe import _, throw
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+
 import erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable as variable_functions
-from erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria import get_variables
+from erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria import (
+	get_variables,
+)
+
 
 class SupplierScorecardPeriod(Document):
 
@@ -43,7 +46,7 @@ class SupplierScorecardPeriod(Document):
 			try:
 				crit.score = min(crit.max_score, max( 0 ,frappe.safe_eval(self.get_eval_statement(crit.formula),  None, {'max':max, 'min': min})))
 			except Exception:
-				frappe.throw(_("Could not solve criteria score function for {0}. Make sure the formula is valid.".format(crit.criteria_name)),frappe.ValidationError)
+				frappe.throw(_("Could not solve criteria score function for {0}. Make sure the formula is valid.").format(crit.criteria_name),frappe.ValidationError)
 				crit.score = 0
 
 	def calculate_score(self):
@@ -109,4 +112,3 @@ def make_supplier_scorecard(source_name, target_doc=None):
 	}, target_doc, post_process, ignore_permissions=True)
 
 	return doc
-

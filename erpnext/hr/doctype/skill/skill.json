@@ -3,7 +3,7 @@
  "allow_events_in_timeline": 0,
  "allow_guest_to_view": 0,
  "allow_import": 0,
- "allow_rename": 0,
+ "allow_rename": 1,
  "autoname": "field:skill_name",
  "beta": 0,
  "creation": "2019-04-16 09:54:39.486915",
@@ -16,7 +16,7 @@
  "fields": [
   {
    "allow_bulk_edit": 0,
-   "allow_in_quick_entry": 0,
+   "allow_in_quick_entry": 1,
    "allow_on_submit": 0,
    "bold": 0,
    "collapsible": 0,
@@ -46,6 +46,12 @@
    "set_only_once": 0,
    "translatable": 0,
    "unique": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description"
   }
  ],
  "has_web_view": 0,
@@ -56,7 +62,7 @@
  "issingle": 0,
  "istable": 0,
  "max_attachments": 0,
- "modified": "2019-04-16 09:55:00.536328",
+ "modified": "2021-02-26 10:55:00.536328",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Skill",

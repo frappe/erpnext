@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-05-21 16:16:04",
  "doctype": "DocType",
@@ -11,15 +12,17 @@
   "charge_type",
   "row_id",
   "included_in_print_rate",
+  "included_in_paid_amount",
   "col_break1",
   "account_head",
   "description",
+  "section_break_10",
+  "rate",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
-  "section_break_10",
-  "rate",
   "section_break_9",
+  "account_currency",
   "tax_amount",
   "tax_amount_after_discount_amount",
   "total",
@@ -27,8 +30,7 @@
   "base_tax_amount",
   "base_total",
   "base_tax_amount_after_discount_amount",
-  "item_wise_tax_detail",
-  "parenttype"
+  "item_wise_tax_detail"
  ],
  "fields": [
   {
@@ -53,6 +55,7 @@
   },
   {
    "columns": 2,
+   "default": "On Net Total",
    "fieldname": "charge_type",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -197,15 +200,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "parenttype",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Parenttype",
-   "oldfieldname": "parenttype",
-   "oldfieldtype": "Data",
-   "print_hide": 1
-  },
-  {
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -213,15 +207,34 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:['Purchase Taxes and Charges Template', 'Payment Entry'].includes(parent.doctype)",
+   "description": "If checked, the tax amount will be considered as already included in the Paid Amount in Payment Entry",
+   "fieldname": "included_in_paid_amount",
+   "fieldtype": "Check",
+   "label": "Considered In Paid Amount"
+  },
+  {
+   "fetch_from": "account_head.account_currency",
+   "fieldname": "account_currency",
+   "fieldtype": "Link",
+   "label": "Account Currency",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-25 23:08:38.281025",
+ "links": [],
+ "modified": "2021-08-05 20:04:36.618240",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",
  "owner": "Administrator",
  "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
  "track_changes": 1
 }

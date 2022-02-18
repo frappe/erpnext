@@ -44,11 +44,11 @@
   }
  ],
  "links": [],
- "modified": "2020-01-31 12:21:45.975488",
+ "modified": "2020-09-18 17:26:09.703215",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Practitioner Schedule",
- "owner": "rmehta@gmail.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "create": 1,

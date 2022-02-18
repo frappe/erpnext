@@ -10,6 +10,10 @@ frappe.ui.form.on("Job Offer", {
 		});
 	},
 
+	setup: function (frm) {
+		frm.email_field = "applicant_email";
+	},
+
 	select_terms: function (frm) {
 		erpnext.utils.get_terms(frm.doc.select_terms, frm.doc, function (r) {
 			if (!r.exc) {

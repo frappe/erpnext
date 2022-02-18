@@ -1,9 +1,9 @@
 # Copyright (c) 2017, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.utils.nestedset import rebuild_tree
+
 
 def execute():
 	frappe.reload_doc('assets', 'doctype', 'asset_finance_book')

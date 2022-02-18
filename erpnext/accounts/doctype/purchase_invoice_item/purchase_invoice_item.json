@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-05-22 12:43:10",
  "doctype": "DocType",
@@ -7,34 +8,37 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
+  "product_bundle",
   "col_break1",
   "item_name",
   "description_section",
   "description",
-  "item_group",
   "brand",
-  "image_section",
+  "col_break7",
+  "item_group",
   "image",
   "image_view",
-  "manufacture_details",
-  "manufacturer",
-  "column_break_13",
-  "manufacturer_part_no",
   "quantity_and_rate",
   "received_qty",
   "qty",
   "rejected_qty",
-  "stock_uom",
   "col_break2",
   "uom",
   "conversion_factor",
+  "stock_uom",
   "stock_qty",
   "sec_break1",
   "price_list_rate",
-  "discount_percentage",
-  "discount_amount",
   "col_break3",
   "base_price_list_rate",
+  "section_break_26",
+  "margin_type",
+  "margin_rate_or_amount",
+  "rate_with_margin",
+  "column_break_30",
+  "discount_percentage",
+  "discount_amount",
+  "base_rate_with_margin",
   "sec_break2",
   "rate",
   "amount",
@@ -43,6 +47,7 @@
   "base_rate",
   "base_amount",
   "pricing_rules",
+  "stock_uom_rate",
   "is_free_item",
   "section_break_22",
   "net_rate",
@@ -54,21 +59,22 @@
   "item_tax_amount",
   "landed_cost_voucher_amount",
   "rm_supp_cost",
-  "item_weight_details",
-  "weight_per_unit",
-  "total_weight",
-  "column_break_38",
-  "weight_uom",
   "warehouse_section",
   "warehouse",
-  "rejected_warehouse",
+  "from_warehouse",
   "quality_inspection",
-  "batch_no",
-  "col_br_wh",
   "serial_no",
+  "col_br_wh",
+  "rejected_warehouse",
+  "batch_no",
   "rejected_serial_no",
+  "manufacture_details",
+  "manufacturer",
+  "column_break_13",
+  "manufacturer_part_no",
   "accounting",
   "expense_account",
+  "discount_account",
   "col_break5",
   "is_fixed_asset",
   "asset_location",
@@ -91,6 +97,12 @@
   "po_detail",
   "purchase_receipt",
   "pr_detail",
+  "sales_invoice_item",
+  "item_weight_details",
+  "weight_per_unit",
+  "total_weight",
+  "column_break_38",
+  "weight_uom",
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
@@ -163,7 +175,8 @@
   {
    "fieldname": "received_qty",
    "fieldtype": "Float",
-   "label": "Received Qty"
+   "label": "Received Qty",
+   "read_only": 1
   },
   {
    "bold": 1,
@@ -211,7 +224,7 @@
   {
    "fieldname": "stock_qty",
    "fieldtype": "Float",
-   "label": "Stock Qty",
+   "label": "Accepted Qty in Stock UOM",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1
@@ -262,7 +275,7 @@
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Rate ",
+   "label": "Rate",
    "oldfieldname": "import_rate",
    "oldfieldtype": "Currency",
    "options": "currency",
@@ -491,6 +504,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "enable_deferred_expense",
    "fieldname": "deferred_expense_section",
    "fieldtype": "Section Break",
    "label": "Deferred Expense"
@@ -549,20 +563,18 @@
   },
   {
    "fieldname": "brand",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "hidden": 1,
    "label": "Brand",
-   "oldfieldname": "brand",
-   "oldfieldtype": "Data",
+   "options": "Brand",
    "print_hide": 1
   },
   {
+   "fetch_from": "item_code.item_group",
+   "fetch_if_empty": 1,
    "fieldname": "item_group",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Item Group",
-   "oldfieldname": "item_group",
-   "oldfieldtype": "Link",
    "options": "Item Group",
    "print_hide": 1,
    "read_only": 1
@@ -599,6 +611,7 @@
    "oldfieldname": "purchase_order",
    "oldfieldtype": "Link",
    "options": "Purchase Order",
+   "print_hide": 1,
    "read_only": 1,
    "search_index": 1
   },
@@ -721,12 +734,6 @@
   },
   {
    "collapsible": 1,
-   "fieldname": "image_section",
-   "fieldtype": "Section Break",
-   "label": "Image"
-  },
-  {
-   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -736,6 +743,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "manufacture_details",
    "fieldtype": "Section Break",
    "label": "Manufacture"
@@ -760,10 +768,22 @@
    "fetch_from": "item_code.asset_category",
    "fieldname": "asset_category",
    "fieldtype": "Link",
-   "in_preview": 1,
    "label": "Asset Category",
    "options": "Asset Category",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:parent.is_internal_supplier && parent.update_stock",
+   "fieldname": "from_warehouse",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "From Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "col_break7",
+   "fieldtype": "Column Break"
   },
   {
    "depends_on": "eval:parent.update_stock == 1",
@@ -774,14 +794,88 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.uom != doc.stock_uom",
+   "fieldname": "stock_uom_rate",
+   "fieldtype": "Currency",
+   "label": "Rate of Stock UOM",
+   "no_copy": 1,
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice_item",
+   "fieldtype": "Data",
+   "label": "Sales Invoice Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_26",
+   "fieldtype": "Section Break",
+   "label": "Discount and Margin"
+  },
+  {
+   "depends_on": "price_list_rate",
+   "fieldname": "margin_type",
+   "fieldtype": "Select",
+   "label": "Margin Type",
+   "options": "\nPercentage\nAmount",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.margin_type && doc.price_list_rate",
+   "fieldname": "margin_rate_or_amount",
+   "fieldtype": "Float",
+   "label": "Margin Rate or Amount",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.margin_type && doc.price_list_rate && doc.margin_rate_or_amount",
+   "fieldname": "rate_with_margin",
+   "fieldtype": "Currency",
+   "label": "Rate With Margin",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_30",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.margin_type && doc.price_list_rate && doc.margin_rate_or_amount",
+   "fieldname": "base_rate_with_margin",
+   "fieldtype": "Currency",
+   "label": "Rate With Margin (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "discount_account",
+   "fieldtype": "Link",
+   "label": "Discount Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "product_bundle",
+   "fieldtype": "Link",
+   "label": "Product Bundle",
+   "options": "Product Bundle",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-06-30 16:48:01.398356",
+ "links": [],
+ "modified": "2021-11-15 17:04:07.191013",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

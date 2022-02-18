@@ -1,0 +1,162 @@
+{
+ "actions": [],
+ "autoname": "Prompt",
+ "creation": "2020-03-17 16:50:35.564915",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "effective_from",
+  "company",
+  "column_break_3",
+  "currency",
+  "standard_tax_exemption_amount",
+  "allow_tax_exemption",
+  "disabled",
+  "amended_from",
+  "taxable_salary_slabs_section",
+  "slabs",
+  "taxes_and_charges_on_income_tax_section",
+  "other_taxes_and_charges"
+ ],
+ "fields": [
+  {
+   "fieldname": "effective_from",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Effective from",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, Tax Exemption Declaration will be considered for income tax calculation.",
+   "fieldname": "allow_tax_exemption",
+   "fieldtype": "Check",
+   "label": "Allow Tax Exemption"
+  },
+  {
+   "fieldname": "taxable_salary_slabs_section",
+   "fieldtype": "Section Break",
+   "label": "Taxable Salary Slabs"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Income Tax Slab",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "slabs",
+   "fieldtype": "Table",
+   "label": "Taxable Salary Slabs",
+   "options": "Taxable Salary Slab",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "depends_on": "allow_tax_exemption",
+   "fieldname": "standard_tax_exemption_amount",
+   "fieldtype": "Currency",
+   "label": "Standard Tax Exemption Amount",
+   "options": "currency"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "other_taxes_and_charges",
+   "fieldname": "taxes_and_charges_on_income_tax_section",
+   "fieldtype": "Section Break",
+   "label": "Taxes and Charges on Income Tax"
+  },
+  {
+   "fieldname": "other_taxes_and_charges",
+   "fieldtype": "Table",
+   "label": "Other Taxes and Charges",
+   "options": "Income Tax Slab Other Charges"
+  },
+  {
+   "fetch_from": "company.default_currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "reqd": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-03-31 22:42:08.139520",
+ "modified_by": "Administrator",
+ "module": "Payroll",
+ "name": "Income Tax Slab",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

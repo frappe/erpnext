@@ -1,7 +1,14 @@
 
-from __future__ import unicode_literals
-import frappe, base64, hashlib, hmac, json
+
+import base64
+import hashlib
+import hmac
+import json
+
+import frappe
 from frappe import _
+from frappe.utils import cstr
+
 
 import pdb
 import requests
@@ -26,9 +33,7 @@ def verify_request():
 	)
 
 	if frappe.request.data and \
-		frappe.get_request_header("X-Wc-Webhook-Signature") and \
-		not sig == bytes(frappe.get_request_header("X-Wc-Webhook-Signature").encode()):
-			# print("sig" + sig.decode("utf-8"))
+		not sig == frappe.get_request_header("X-Wc-Webhook-Signature", "").encode():
 			frappe.throw(_("Unverified Webhook Data"))
 
 def validate_event_and_status(order_id, event, status):
@@ -303,7 +308,6 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 
 	shipping_total = order.get('shipping_total')
 	shipping_tax = order.get('shipping_tax')
-
 
 
 	# adding handling fee

@@ -1,0 +1,19 @@
+{
+ "action": "Update Settings",
+ "creation": "2020-05-06 15:53:44.667414",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-05-12 18:30:06.323797",
+ "modified_by": "Administrator",
+ "name": "Buying Settings",
+ "owner": "Administrator",
+ "reference_document": "Buying Settings",
+ "show_full_form": 0,
+ "title": "Configure Buying Settings.",
+ "validate_action": 1
+}

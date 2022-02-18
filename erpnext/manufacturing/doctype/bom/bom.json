@@ -36,6 +36,8 @@
   "materials_section",
   "inspection_required",
   "quality_inspection_template",
+  "column_break_31",
+  "section_break_33",
   "items",
   "scrap_section",
   "scrap_items",
@@ -53,6 +55,7 @@
   "section_break_25",
   "description",
   "column_break_27",
+  "has_variants",
   "section_break0",
   "exploded_items",
   "website_section",
@@ -192,6 +195,7 @@
   },
   {
    "default": "Work Order",
+   "depends_on": "with_operations",
    "fieldname": "transfer_material_against",
    "fieldtype": "Select",
    "label": "Transfer Material Against",
@@ -232,8 +236,10 @@
    "options": "Price List"
   },
   {
+   "depends_on": "with_operations",
    "fieldname": "operations_section",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "oldfieldtype": "Section Break"
   },
   {
@@ -244,6 +250,7 @@
    "options": "Routing"
   },
   {
+   "depends_on": "with_operations",
    "fieldname": "operations",
    "fieldtype": "Table",
    "label": "Operations",
@@ -429,7 +436,7 @@
    "description": "Item Image (if not slideshow)",
    "fieldname": "website_image",
    "fieldtype": "Attach Image",
-   "label": "Image"
+   "label": "Website Image"
   },
   {
    "allow_on_submit": 1,
@@ -498,6 +505,26 @@
    "options": "Currency",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item.has_variants",
+   "fieldname": "has_variants",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Has Variants",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_33",
+   "fieldtype": "Section Break",
+   "hide_border": 1
   }
  ],
  "icon": "fa fa-sitemap",
@@ -505,7 +532,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-05 14:29:32.634952",
+ "modified": "2022-01-30 21:27:54.727298",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
@@ -542,5 +569,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

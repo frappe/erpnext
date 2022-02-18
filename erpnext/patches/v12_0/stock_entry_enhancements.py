@@ -2,9 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+
 
 def execute():
 	create_stock_entry_types()
@@ -19,7 +20,7 @@ def create_stock_entry_types():
 
 	for purpose in ["Material Issue", "Material Receipt", "Material Transfer",
 		"Material Transfer for Manufacture", "Material Consumption for Manufacture", "Manufacture",
-		"Repack", "Send to Subcontractor", "Send to Warehouse", "Receive at Warehouse"]:
+		"Repack", "Send to Subcontractor"]:
 
 		ste_type = frappe.get_doc({
 			'doctype': 'Stock Entry Type',

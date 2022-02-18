@@ -9,5 +9,5 @@ DocType: Cheque Print Template,Cheque Width,Nim uxach uk’exwach pwaq
 apps/erpnext/erpnext/hr/doctype/employee/employee.js,Please enter Preferred Contact Email,Taquqxa’n kematz’ib’m uj’el
 DocType: Item,Supplier Items,Q’ataj che uyaik
 ,Stock Ageing,Najtir k’oji’k
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date of Birth cannot be greater than today.,Ler q’ij k’ojik kumaj taj che le q’ij re kamik
+apps/erpnext/erpnext/education/doctype/student/student.py,Date of Birth cannot be greater than today.,Ler q’ij k’ojik kumaj taj che le q’ij re kamik
 apps/erpnext/erpnext/setup/doctype/company/delete_company_transactions.py,Transactions can only be deleted by the creator of the Company,Le uk’exik xaqxu’ kakiw uk’exik le b’anowik le chakulib’al

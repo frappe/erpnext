@@ -1,15 +1,18 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, json
+
+import json
+
+import frappe
 from frappe import _
 from frappe.model.document import Document
-from erpnext.education.api import get_grade
 from frappe.utils.pdf import get_pdf
-from erpnext.education.report.course_wise_assessment_report.course_wise_assessment_report import get_formatted_result
-from erpnext.education.report.course_wise_assessment_report.course_wise_assessment_report import get_child_assessment_groups
+
+from erpnext.education.report.course_wise_assessment_report.course_wise_assessment_report import (
+	get_child_assessment_groups,
+	get_formatted_result,
+)
 
 
 class StudentReportGenerationTool(Document):
@@ -80,7 +83,7 @@ def get_attendance_count(student, academic_year, academic_term=None):
 		from_date, to_date = frappe.db.get_value("Academic Term", academic_term, ["term_start_date", "term_end_date"])
 	if from_date and to_date:
 		attendance = dict(frappe.db.sql('''select status, count(student) as no_of_days
-			from `tabStudent Attendance` where student = %s
+			from `tabStudent Attendance` where student = %s and docstatus = 1
 			and date between %s and %s group by status''',
 			(student, from_date, to_date)))
 		if "Absent" not in attendance.keys():

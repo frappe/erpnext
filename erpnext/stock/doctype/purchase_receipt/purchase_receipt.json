@@ -1,4 +1,6 @@
 {
+ "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -15,10 +17,11 @@
   "supplier_name",
   "supplier_delivery_note",
   "column_break1",
+  "company",
   "posting_date",
   "posting_time",
   "set_posting_time",
-  "company",
+  "apply_putaway_rule",
   "is_return",
   "return_against",
   "section_addresses",
@@ -31,6 +34,8 @@
   "col_break_address",
   "shipping_address",
   "shipping_address_display",
+  "billing_address",
+  "billing_address_display",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -43,16 +48,12 @@
   "set_warehouse",
   "rejected_warehouse",
   "col_break_warehouse",
+  "set_from_warehouse",
   "is_subcontracted",
   "supplier_warehouse",
   "items_section",
   "scan_barcode",
   "items",
-  "pricing_rule_details",
-  "pricing_rules",
-  "get_current_stock",
-  "raw_material_details",
-  "supplied_items",
   "section_break0",
   "total_qty",
   "base_total",
@@ -61,6 +62,11 @@
   "total_net_weight",
   "total",
   "net_total",
+  "pricing_rule_details",
+  "pricing_rules",
+  "raw_material_details",
+  "get_current_stock",
+  "supplied_items",
   "taxes_charges_section",
   "tax_category",
   "shipping_col",
@@ -100,6 +106,8 @@
   "terms",
   "bill_no",
   "bill_date",
+  "accounting_details_section",
+  "provisional_expense_account",
   "more_info",
   "project",
   "status",
@@ -107,17 +115,21 @@
   "range",
   "column_break4",
   "per_billed",
+  "per_returned",
+  "is_internal_supplier",
+  "inter_company_reference",
+  "represents_company",
   "subscription_detail",
   "auto_repeat",
   "printing_settings",
   "letter_head",
-  "select_print_heading",
   "language",
-  "group_same_items",
-  "column_break_97",
-  "other_details",
   "instructions",
+  "column_break_97",
+  "select_print_heading",
+  "other_details",
   "remarks",
+  "group_same_items",
   "transporter_info",
   "transporter_name",
   "column_break5",
@@ -154,7 +166,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "MAT-PRE-.YYYY.-",
+   "options": "MAT-PRE-.YYYY.-\nMAT-PR-RET-.YYYY.-",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -402,6 +414,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "description": "Sets 'Accepted Warehouse' in each row of the items table.",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
    "label": "Accepted Warehouse",
@@ -409,7 +422,7 @@
    "print_hide": 1
   },
   {
-   "description": "Warehouse where you are maintaining stock of rejected items",
+   "description": "Sets 'Rejected Warehouse' in each row of the items table.",
    "fieldname": "rejected_warehouse",
    "fieldtype": "Link",
    "label": "Rejected Warehouse",
@@ -427,7 +440,7 @@
    "default": "No",
    "fieldname": "is_subcontracted",
    "fieldtype": "Select",
-   "label": "Raw Materials Supplied",
+   "label": "Raw Materials Consumed",
    "oldfieldname": "is_subcontracted",
    "oldfieldtype": "Select",
    "options": "No\nYes",
@@ -463,6 +476,7 @@
    "reqd": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "pricing_rule_details",
    "fieldtype": "Section Break",
    "label": "Pricing Rules"
@@ -475,9 +489,10 @@
    "read_only": 1
   },
   {
+   "depends_on": "supplied_items",
    "fieldname": "get_current_stock",
    "fieldtype": "Button",
-   "label": "Get current stock",
+   "label": "Get Current Stock",
    "oldfieldtype": "Button",
    "options": "get_current_stock",
    "print_hide": 1
@@ -487,7 +502,7 @@
    "collapsible_depends_on": "supplied_items",
    "fieldname": "raw_material_details",
    "fieldtype": "Section Break",
-   "label": "Raw Materials Supplied",
+   "label": "Raw Materials Consumed",
    "oldfieldtype": "Section Break",
    "options": "fa fa-table",
    "print_hide": 1,
@@ -496,13 +511,12 @@
   {
    "fieldname": "supplied_items",
    "fieldtype": "Table",
-   "label": "Supplied Items",
+   "label": "Consumed Items",
    "no_copy": 1,
    "oldfieldname": "pr_raw_material_details",
    "oldfieldtype": "Table",
    "options": "Purchase Receipt Item Supplied",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "section_break0",
@@ -749,6 +763,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment (Company Currency)",
@@ -761,6 +776,7 @@
    "fieldname": "base_in_words",
    "fieldtype": "Data",
    "label": "In Words (Company Currency)",
+   "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -791,6 +807,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment",
@@ -813,6 +830,7 @@
    "fieldname": "in_words",
    "fieldtype": "Data",
    "label": "In Words",
+   "length": 240,
    "oldfieldname": "in_words_import",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -884,7 +902,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nTo Bill\nCompleted\nCancelled\nClosed",
+   "options": "\nDraft\nTo Bill\nCompleted\nReturn Issued\nCancelled\nClosed",
    "print_hide": 1,
    "print_width": "150px",
    "read_only": 1,
@@ -923,6 +941,13 @@
    "print_hide": 1,
    "print_width": "50%",
    "width": "50%"
+  },
+  {
+   "description": "Track this Purchase Receipt against any Project",
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   },
   {
    "fieldname": "per_billed",
@@ -1056,26 +1081,95 @@
    "width": "100px"
   },
   {
-   "fieldname": "scan_barcode",
-   "fieldtype": "Data",
-   "label": "Scan Barcode"
+   "default": "0",
+   "fetch_from": "supplier.is_internal_supplier",
+   "fieldname": "is_internal_supplier",
+   "fieldtype": "Check",
+   "label": "Is Internal Supplier",
+   "read_only": 1
   },
   {
-   "description": "Track this Purchase Receipt against any Project",
-   "fieldname": "project",
+   "fieldname": "inter_company_reference",
    "fieldtype": "Link",
-   "label": "Project",
-   "options": "Project"
+   "label": "Inter Company Reference",
+   "no_copy": 1,
+   "options": "Delivery Note",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "scan_barcode",
+   "fieldtype": "Data",
+   "label": "Scan Barcode",
+   "options": "Barcode"
+  },
+  {
+   "fieldname": "billing_address",
+   "fieldtype": "Link",
+   "label": "Select Billing Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "billing_address_display",
+   "fieldtype": "Small Text",
+   "label": "Billing Address",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "apply_putaway_rule",
+   "fieldtype": "Check",
+   "label": "Apply Putaway Rule"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "per_returned",
+   "fieldtype": "Percent",
+   "label": "% Returned",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.is_internal_supplier",
+   "description": "Sets 'From Warehouse' in each row of the items table.",
+   "fieldname": "set_from_warehouse",
+   "fieldtype": "Link",
+   "label": "Set From Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fetch_from": "supplier.represents_company",
+   "fieldname": "represents_company",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Represents Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "provisional_expense_account",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Provisional Expense Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-15 12:49:42.095297",
+ "modified": "2022-02-01 11:40:52.690984",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1136,6 +1230,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "supplier",
  "title_field": "title",
  "track_changes": 1

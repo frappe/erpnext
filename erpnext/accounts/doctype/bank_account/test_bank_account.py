@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-from  frappe import _
-from  frappe import ValidationError
-import unittest
+from frappe import ValidationError
 
 # test_records = frappe.get_test_records('Bank Account')
 
@@ -31,7 +29,7 @@ class TestBankAccount(unittest.TestCase):
 		try:
 			bank_account.validate_iban()
 		except AttributeError:
-			msg = _('BankAccount.validate_iban() failed for empty IBAN')
+			msg = 'BankAccount.validate_iban() failed for empty IBAN'
 			self.fail(msg=msg)
 
 		for iban in valid_ibans:
@@ -39,11 +37,11 @@ class TestBankAccount(unittest.TestCase):
 			try:
 				bank_account.validate_iban()
 			except ValidationError:
-				msg = _('BankAccount.validate_iban() failed for valid IBAN {}'.format(iban))
+				msg = 'BankAccount.validate_iban() failed for valid IBAN {}'.format(iban)
 				self.fail(msg=msg)
 
 		for not_iban in invalid_ibans:
 			bank_account.iban = not_iban
-			msg = _('BankAccount.validate_iban() accepted invalid IBAN {}'.format(not_iban))
+			msg = 'BankAccount.validate_iban() accepted invalid IBAN {}'.format(not_iban)
 			with self.assertRaises(ValidationError, msg=msg):
 				bank_account.validate_iban()

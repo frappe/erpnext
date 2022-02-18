@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2017-10-16 16:45:48.293335",
  "doctype": "DocType",
@@ -13,12 +14,14 @@
   "section_break_3",
   "driver",
   "driver_name",
+  "driver_email",
   "driver_address",
   "total_distance",
   "uom",
   "column_break_4",
   "vehicle",
   "departure_time",
+  "employee",
   "delivery_service_stops",
   "delivery_stops",
   "calculate_arrival_time",
@@ -168,11 +171,25 @@
    "fieldtype": "Link",
    "label": "Driver Address",
    "options": "Address"
+  },
+  {
+   "fieldname": "driver_email",
+   "fieldtype": "Data",
+   "label": "Driver Email",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "driver.employee",
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-01-26 22:37:14.824021",
+ "modified": "2021-04-30 21:21:36.610142",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Trip",

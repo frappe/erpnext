@@ -1,13 +1,15 @@
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils.nestedset import rebuild_tree
 
+
 def execute():
 	frappe.local.lang = frappe.db.get_default("lang") or 'en'
 
-	for doctype in ['department', 'leave_period', 'staffing_plan', 'job_opening', 'payroll_entry']:
+	for doctype in ['department', 'leave_period', 'staffing_plan', 'job_opening']:
 		frappe.reload_doc("hr", "doctype", doctype)
+	frappe.reload_doc("Payroll", "doctype", 'payroll_entry')
 
 	companies = frappe.db.get_all("Company", fields=["name", "abbr"])
 	departments = frappe.db.get_all("Department")

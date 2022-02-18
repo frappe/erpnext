@@ -1,0 +1,26 @@
+{
+ "content": null,
+ "creation": "2020-11-25 12:07:54.056208",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2020-11-25 11:07:54.056208",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "warehouse-capacity-summary",
+ "owner": "Administrator",
+ "page_name": "Warehouse Capacity Summary",
+ "roles": [
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "Stock Manager"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Warehouse Capacity Summary"
+}

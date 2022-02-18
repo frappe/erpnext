@@ -1,22 +1,38 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
-import frappe, erpnext
+import frappe
 from frappe import _, msgprint, scrub
+from frappe.contacts.doctype.address.address import (
+	get_address_display,
+	get_company_address,
+	get_default_address,
+)
+from frappe.contacts.doctype.contact.contact import get_contact_details
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
-from frappe.utils import (add_days, getdate, formatdate, date_diff,
-	add_years, get_timestamp, nowdate, flt, cstr, add_months, get_last_day)
-from frappe.contacts.doctype.address.address import (get_address_display,
-	get_default_address, get_company_address)
-from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
-from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
-from erpnext.accounts.utils import get_fiscal_year
-from erpnext import get_company_currency
+from frappe.utils import (
+	add_days,
+	add_months,
+	add_years,
+	cint,
+	cstr,
+	date_diff,
+	flt,
+	formatdate,
+	get_last_day,
+	get_timestamp,
+	getdate,
+	nowdate,
+)
+from six import iteritems
 
-from six import iteritems, string_types
+import erpnext
+from erpnext import get_company_currency
+from erpnext.accounts.utils import get_fiscal_year
+from erpnext.exceptions import InvalidAccountCurrency, PartyDisabled, PartyFrozen
+
 
 class DuplicatePartyAccountError(frappe.ValidationError): pass
 
@@ -35,16 +51,15 @@ def get_party_details(party=None, account=None, party_type="Customer", company=N
 
 def _get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None,
 	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False,
-	fetch_payment_terms_template=True, party_address=None, company_address=None,shipping_address=None, pos_profile=None):
-
+	fetch_payment_terms_template=True, party_address=None, company_address=None, shipping_address=None, pos_profile=None):
 	party_details = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype))
 	party = party_details[party_type.lower()]
 
-	if not ignore_permissions and not frappe.has_permission(party_type, "read", party):
+	if not ignore_permissions and not (frappe.has_permission(party_type, "read", party) or frappe.has_permission(party_type, "select", party)):
 		frappe.throw(_("Not permitted for {0}").format(party), frappe.PermissionError)
 
 	party = frappe.get_doc(party_type, party)
-	currency = party.default_currency if party.get("default_currency") else get_company_currency(company)
+	currency = party.get("default_currency") or currency or get_company_currency(company)
 
 	party_address, shipping_address = set_address_details(party_details, party, party_type, doctype, company, party_address, company_address, shipping_address)
 	set_contact_details(party_details, party, party_type)
@@ -54,13 +69,15 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	party_details["tax_category"] = get_address_tax_category(party.get("tax_category"),
 		party_address, shipping_address if party_type != "Supplier" else party_address)
 
-	if not party_details.get("taxes_and_charges"):
-		party_details["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company,
-			customer_group=party_details.customer_group, supplier_group=party_details.supplier_group, tax_category=party_details.tax_category,
-			billing_address=party_address, shipping_address=shipping_address)
+	tax_template = set_taxes(party.name, party_type, posting_date, company,
+		customer_group=party_details.customer_group, supplier_group=party_details.supplier_group, tax_category=party_details.tax_category,
+		billing_address=party_address, shipping_address=shipping_address)
 
-	if fetch_payment_terms_template:
-		party_details["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
+	if tax_template:
+		party_details['taxes_and_charges'] = tax_template
+
+	if cint(fetch_payment_terms_template):
+		party_details["payment_terms_template"] = get_payment_terms_template(party.name, party_type, company)
 
 	if not party_details.get("currency"):
 		party_details["currency"] = currency
@@ -69,7 +86,8 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	if party_type=="Customer":
 		party_details["sales_team"] = [{
 			"sales_person": d.sales_person,
-			"allocated_percentage": d.allocated_percentage or None
+			"allocated_percentage": d.allocated_percentage or None,
+			"commission_rate": d.commission_rate
 		} for d in party.get("sales_team")]
 
 	# supplier tax withholding category
@@ -186,7 +204,7 @@ def set_price_list(party_details, party, party_type, given_price_list, pos=None)
 
 
 def set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype):
-	if doctype not in ["Sales Invoice", "Purchase Invoice"]:
+	if doctype not in ["POS Invoice", "Sales Invoice", "Purchase Invoice"]:
 		# not an invoice
 		return {
 			party_type.lower(): party
@@ -205,7 +223,7 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 	return out
 
 @frappe.whitelist()
-def get_party_account(party_type, party, company):
+def get_party_account(party_type, party=None, company=None):
 	"""Returns the account for the given `party`.
 		Will first search in party (Customer / Supplier) record, if not found,
 		will search in group (Customer Group / Supplier Group),
@@ -213,8 +231,11 @@ def get_party_account(party_type, party, company):
 	if not company:
 		frappe.throw(_("Please select a Company"))
 
-	if not party:
-		return
+	if not party and party_type in ['Customer', 'Supplier']:
+		default_account_name = "default_receivable_account" \
+			if party_type=="Customer" else "default_payable_account"
+
+		return frappe.get_cached_value('Company',  company,  default_account_name)
 
 	account = frappe.db.get_value("Party Account",
 		{"parenttype": party_type, "parent": party, "company": company}, "account")
@@ -284,10 +305,11 @@ def validate_party_gle_currency(party_type, party, company, party_account_curren
 	existing_gle_currency = get_party_gle_currency(party_type, party, company)
 
 	if existing_gle_currency and party_account_currency != existing_gle_currency:
-		frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
-			.format(party_type, party, existing_gle_currency), InvalidAccountCurrency)
+		frappe.throw(_("{0} {1} has accounting entries in currency {2} for company {3}. Please select a receivable or payable account with currency {2}.")
+			.format(frappe.bold(party_type), frappe.bold(party), frappe.bold(existing_gle_currency), frappe.bold(company)), InvalidAccountCurrency)
 
 def validate_party_accounts(doc):
+
 	companies = []
 
 	for account in doc.get("accounts"):
@@ -298,15 +320,13 @@ def validate_party_accounts(doc):
 			companies.append(account.company)
 
 		party_account_currency = frappe.db.get_value("Account", account.account, "account_currency", cache=True)
-		existing_gle_currency = get_party_gle_currency(doc.doctype, doc.name, account.company)
 		if frappe.db.get_default("Company"):
 			company_default_currency = frappe.get_cached_value('Company',
 				frappe.db.get_default("Company"),  "default_currency")
 		else:
 			company_default_currency = frappe.db.get_value('Company', account.company, "default_currency")
 
-		if existing_gle_currency and party_account_currency != existing_gle_currency:
-			frappe.throw(_("Accounting entries have already been made in currency {0} for company {1}. Please select a receivable or payable account with currency {0}.").format(existing_gle_currency, account.company))
+		validate_party_gle_currency(doc.doctype, doc.name, account.company, party_account_currency)
 
 		if doc.get("default_currency") and party_account_currency and company_default_currency:
 			if doc.default_currency != party_account_currency and doc.default_currency != company_default_currency:
@@ -319,7 +339,7 @@ def get_due_date(posting_date, party_type, party, company=None, bill_date=None):
 	due_date = None
 	if (bill_date or posting_date) and party:
 		due_date = bill_date or posting_date
-		template_name = get_pyt_term_template(party, party_type, company)
+		template_name = get_payment_terms_template(party, party_type, company)
 
 		if template_name:
 			due_date = get_due_date_from_template(template_name, posting_date, bill_date).strftime("%Y-%m-%d")
@@ -390,7 +410,7 @@ def get_address_tax_category(tax_category=None, billing_address=None, shipping_a
 @frappe.whitelist()
 def set_taxes(party, party_type, posting_date, company, customer_group=None, supplier_group=None, tax_category=None,
 	billing_address=None, shipping_address=None, use_for_shopping_cart=None):
-	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
+	from erpnext.accounts.doctype.tax_rule.tax_rule import get_party_details, get_tax_template
 	args = {
 		party_type.lower(): party,
 		"company": company
@@ -427,7 +447,7 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 
 
 @frappe.whitelist()
-def get_pyt_term_template(party_name, party_type, company=None):
+def get_payment_terms_template(party_name, party_type, company=None):
 	if party_type not in ("Customer", "Supplier"):
 		return
 	template = None
@@ -451,6 +471,10 @@ def get_pyt_term_template(party_name, party_type, company=None):
 	return template
 
 def validate_party_frozen_disabled(party_type, party_name):
+
+	if frappe.flags.ignore_party_validation:
+		return
+
 	if party_type and party_name:
 		if party_type in ("Customer", "Supplier"):
 			party = frappe.get_cached_value(party_type, party_name, ["is_frozen", "disabled"], as_dict=True)
@@ -462,7 +486,7 @@ def validate_party_frozen_disabled(party_type, party_name):
 					frappe.throw(_("{0} {1} is frozen").format(party_type, party_name), PartyFrozen)
 
 		elif party_type == "Employee":
-			if frappe.db.get_value("Employee", party_name, "status") == "Left":
+			if frappe.db.get_value("Employee", party_name, "status") != "Active":
 				frappe.msgprint(_("{0} {1} is not active").format(party_type, party_name), alert=True)
 
 def get_timeline_data(doctype, name):
@@ -547,6 +571,7 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 		select company, sum(debit_in_account_currency) - sum(credit_in_account_currency)
 		from `tabGL Entry`
 		where party_type = %s and party=%s
+		and is_cancelled = 0
 		group by company""", (party_type, party)))
 
 	for d in companies:
@@ -616,14 +641,38 @@ def get_partywise_advanced_payment_amount(party_type, posting_date = None, futur
 			cond = "posting_date <= '{0}'".format(posting_date)
 
 	if company:
-		cond += "and company = '{0}'".format(company)
+		cond += "and company = {0}".format(frappe.db.escape(company))
 
 	data = frappe.db.sql(""" SELECT party, sum({0}) as amount
 		FROM `tabGL Entry`
 		WHERE
 			party_type = %s and against_voucher is null
+			and is_cancelled = 0
 			and {1} GROUP BY party"""
 		.format(("credit_in_account_currency") if party_type == "Customer" else "debit_in_account_currency", cond) , party_type)
 
 	if data:
 		return frappe._dict(data)
+
+def get_default_contact(doctype, name):
+	"""
+		Returns default contact for the given doctype and name.
+		Can be ordered by `contact_type` to either is_primary_contact or is_billing_contact.
+	"""
+	out = frappe.db.sql("""
+			SELECT dl.parent, c.is_primary_contact, c.is_billing_contact
+			FROM `tabDynamic Link` dl
+			INNER JOIN tabContact c ON c.name = dl.parent
+			WHERE
+				dl.link_doctype=%s AND
+				dl.link_name=%s AND
+				dl.parenttype = "Contact"
+			ORDER BY is_primary_contact DESC, is_billing_contact DESC
+		""", (doctype, name))
+	if out:
+		try:
+			return out[0][0]
+		except Exception:
+			return None
+	else:
+		return None

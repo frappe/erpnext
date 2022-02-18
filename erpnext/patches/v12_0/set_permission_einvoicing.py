@@ -1,6 +1,8 @@
 import frappe
-from erpnext.regional.italy.setup import make_custom_fields
 from frappe.permissions import add_permission, update_permission_property
+
+from erpnext.regional.italy.setup import make_custom_fields
+
 
 def execute():
 	company = frappe.get_all('Company', filters = {'country': 'Italy'})

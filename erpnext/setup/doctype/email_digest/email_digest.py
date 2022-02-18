@@ -1,20 +1,34 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
-from frappe import _
-from frappe.utils import (fmt_money, formatdate, format_time, now_datetime,
-	get_url_to_form, get_url_to_list, flt, get_link_to_report, add_to_date, today)
+
 from datetime import timedelta
-from dateutil.relativedelta import relativedelta
-from frappe.core.doctype.user.user import STANDARD_USERS
+
+import frappe
 import frappe.desk.notifications
+from dateutil.relativedelta import relativedelta
+from frappe import _
+from frappe.core.doctype.user.user import STANDARD_USERS
+from frappe.utils import (
+	add_to_date,
+	flt,
+	fmt_money,
+	format_time,
+	formatdate,
+	get_link_to_report,
+	get_url_to_form,
+	get_url_to_list,
+	now_datetime,
+	today,
+)
+
 from erpnext.accounts.utils import get_balance_on, get_count_on, get_fiscal_year
 
 user_specific_content = ["calendar_events", "todo_list"]
 
 from frappe.model.document import Document
+
+
 class EmailDigest(Document):
 	def __init__(self, *args, **kwargs):
 		super(EmailDigest, self).__init__(*args, **kwargs)
@@ -24,6 +38,7 @@ class EmailDigest(Document):
 		self._accounts = {}
 		self.currency = frappe.db.get_value('Company',  self.company,  "default_currency")
 
+	@frappe.whitelist()
 	def get_users(self):
 		"""get list of users"""
 		user_list = frappe.db.sql("""
@@ -41,31 +56,23 @@ class EmailDigest(Document):
 
 		frappe.response['user_list'] = user_list
 
+	@frappe.whitelist()
 	def send(self):
 		# send email only to enabled users
 		valid_users = [p[0] for p in frappe.db.sql("""select name from `tabUser`
 			where enabled=1""")]
-		recipients = list(filter(lambda r: r in valid_users,
-			self.recipient_list.split("\n")))
 
-		original_user = frappe.session.user
-
-		if recipients:
-			for user_id in recipients:
-				frappe.set_user(user_id)
-				frappe.set_user_lang(user_id)
+		if self.recipients:
+			for row in self.recipients:
 				msg_for_this_recipient = self.get_msg_html()
-				if msg_for_this_recipient:
+				if msg_for_this_recipient and row.recipient in valid_users:
 					frappe.sendmail(
-						recipients=user_id,
+						recipients=row.recipient,
 						subject=_("{0} Digest").format(self.frequency),
 						message=msg_for_this_recipient,
 						reference_doctype = self.doctype,
 						reference_name = self.name,
 						unsubscribe_message = _("Unsubscribe from this Email Digest"))
-
-		frappe.set_user(original_user)
-		frappe.set_user_lang(original_user)
 
 	def get_msg_html(self):
 		"""Build email digest content"""
@@ -247,7 +254,7 @@ class EmailDigest(Document):
 				card = cache.get(cache_key)
 
 				if card:
-					card = eval(card)
+					card = frappe.safe_eval(card)
 
 				else:
 					card = frappe._dict(getattr(self, "get_" + key)())
@@ -282,7 +289,7 @@ class EmailDigest(Document):
 						card.value = card.value *-1
 					card.value = self.fmt_money(card.value,False if key in ("bank_balance", "credit_balance") else True)
 
-					cache.setex(cache_key, card, 24 * 60 * 60)
+					cache.set_value(cache_key, card, expires_in_sec=24 * 60 * 60)
 
 				context.cards.append(card)
 
@@ -405,8 +412,8 @@ class EmailDigest(Document):
 
 		value, count = frappe.db.sql("""select ifnull((sum(grand_total)) - (sum(grand_total*per_billed/100)),0),
                     count(*) from `tabSales Order`
-					where (transaction_date <= %(to_date)s) and billing_status != "Fully Billed"
-					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date})[0]
+					where (transaction_date <= %(to_date)s) and billing_status != "Fully Billed" and company = %(company)s
+					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date, "company": self.company})[0]
 
 		label = get_link_to_report('Sales Order', label=self.meta.get_label("sales_orders_to_bill"),
 			report_type="Report Builder",
@@ -430,8 +437,8 @@ class EmailDigest(Document):
 
 		value, count = frappe.db.sql("""select ifnull((sum(grand_total)) - (sum(grand_total*per_delivered/100)),0),
 					count(*) from `tabSales Order`
-					where (transaction_date <= %(to_date)s) and delivery_status != "Fully Delivered"
-					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date})[0]
+					where (transaction_date <= %(to_date)s) and delivery_status != "Fully Delivered" and company = %(company)s
+					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date, "company": self.company})[0]
 
 		label = get_link_to_report('Sales Order', label=self.meta.get_label("sales_orders_to_deliver"),
 			report_type="Report Builder",
@@ -455,8 +462,8 @@ class EmailDigest(Document):
 
 		value, count = frappe.db.sql("""select ifnull((sum(grand_total))-(sum(grand_total*per_received/100)),0),
                     count(*) from `tabPurchase Order`
-					where (transaction_date <= %(to_date)s) and per_received < 100
-					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date})[0]
+					where (transaction_date <= %(to_date)s) and per_received < 100 and company = %(company)s
+					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date, "company": self.company})[0]
 
 		label = get_link_to_report('Purchase Order', label=self.meta.get_label("purchase_orders_to_receive"),
 			report_type="Report Builder",
@@ -480,8 +487,8 @@ class EmailDigest(Document):
 
 		value, count = frappe.db.sql("""select ifnull((sum(grand_total)) - (sum(grand_total*per_billed/100)),0),
                     count(*) from `tabPurchase Order`
-					where (transaction_date <= %(to_date)s) and per_billed < 100
-					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date})[0]
+					where (transaction_date <= %(to_date)s) and per_billed < 100 and company = %(company)s
+					and status not in ('Closed','Cancelled', 'Completed') """, {"to_date": self.future_to_date, "company": self.company})[0]
 
 		label = get_link_to_report('Purchase Order', label=self.meta.get_label("purchase_orders_to_bill"),
 			report_type="Report Builder",
@@ -806,7 +813,6 @@ def get_incomes_expenses_for_period(account, from_date, to_date):
 			val = balance_on_to_date - balance_before_from_date
 		else:
 			last_year_closing_balance = get_balance_on(account, date=fy_start_date - timedelta(days=1))
-			print(fy_start_date - timedelta(days=1), last_year_closing_balance)
 			val = balance_on_to_date + (last_year_closing_balance - balance_before_from_date)
 
 		return val

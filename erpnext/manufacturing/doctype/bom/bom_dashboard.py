@@ -1,5 +1,6 @@
-from __future__ import unicode_literals
+
 from frappe import _
+
 
 def get_data():
 	return {
@@ -23,5 +24,7 @@ def get_data():
 				'label': _('Subcontract'),
 				'items': ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
 			}
-		]
+		],
+		'disable_create_buttons': ["Item", "Purchase Order", "Purchase Receipt",
+			"Purchase Invoice", "Job Card", "Stock Entry", "BOM"]
 	}

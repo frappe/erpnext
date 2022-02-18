@@ -93,5 +93,3 @@ var loadAllStandings = function(frm) {
 		}
 	});
 };
-
-

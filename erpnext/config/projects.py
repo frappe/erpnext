@@ -1,5 +1,6 @@
-from __future__ import unicode_literals
+
 from frappe import _
+
 
 def get_data():
 	return [
@@ -16,13 +17,13 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Task",
-					"route": "#List/Task",
+					"route": "/app/List/Task",
 					"description": _("Project activity / task."),
 					"onboard": 1,
 				},
 				{
 					"type": "report",
-					"route": "#List/Task/Gantt",
+					"route": "/app/List/Task/Gantt",
 					"doctype": "Task",
 					"name": "Gantt Chart",
 					"description": _("Gantt chart of all tasks."),
@@ -97,5 +98,5 @@ def get_data():
 				},
 			]
 		},
-		
+
 	]

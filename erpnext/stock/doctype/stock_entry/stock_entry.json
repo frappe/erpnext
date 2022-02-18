@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-04-09 11:43:55",
@@ -12,7 +13,7 @@
   "stock_entry_type",
   "outgoing_stock_entry",
   "purpose",
-  "company",
+  "add_to_transit",
   "work_order",
   "purchase_order",
   "delivery_note_no",
@@ -20,11 +21,13 @@
   "pick_list",
   "purchase_receipt_no",
   "col2",
+  "company",
   "posting_date",
   "posting_time",
   "set_posting_time",
   "inspection_required",
   "from_bom",
+  "apply_putaway_rule",
   "sb1",
   "bom_no",
   "fg_completed_qty",
@@ -56,15 +59,12 @@
   "supplier_name",
   "supplier_address",
   "address_display",
-  "column_break_39",
-  "customer",
-  "customer_name",
-  "customer_address",
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
   "printing_settings",
   "select_print_heading",
+  "print_settings_col_break",
   "letter_head",
   "more_info",
   "is_opening",
@@ -74,7 +74,8 @@
   "total_amount",
   "job_card",
   "amended_from",
-  "credit_note"
+  "credit_note",
+  "is_return"
  ],
  "fields": [
   {
@@ -83,8 +84,6 @@
    "oldfieldtype": "Section Break"
   },
   {
-   "allow_on_submit": 1,
-   "default": "{purpose}",
    "fieldname": "title",
    "fieldtype": "Data",
    "hidden": 1,
@@ -114,11 +113,12 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.purpose == 'Receive at Warehouse'",
+   "depends_on": "eval:doc.purpose == 'Material Transfer'",
    "fieldname": "outgoing_stock_entry",
    "fieldtype": "Link",
    "label": "Stock Entry (Outward GIT)",
-   "options": "Stock Entry"
+   "options": "Stock Entry",
+   "read_only": 1
   },
   {
    "bold": 1,
@@ -130,7 +130,7 @@
    "label": "Purpose",
    "oldfieldname": "purpose",
    "oldfieldtype": "Select",
-   "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor\nSend to Warehouse\nReceive at Warehouse",
+   "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor",
    "read_only": 1
   },
   {
@@ -291,6 +291,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "description": "Sets 'Source Warehouse' in each row of the items table.",
    "fieldname": "from_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -320,6 +321,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Sets 'Target Warehouse' in each row of the items table.",
    "fieldname": "to_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -351,6 +353,7 @@
   },
   {
    "fieldname": "scan_barcode",
+   "options": "Barcode",
    "fieldtype": "Data",
    "label": "Scan Barcode"
   },
@@ -428,13 +431,13 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "eval: in_list([\"Sales Return\", \"Purchase Return\", \"Send to Subcontractor\"], doc.purpose)",
+   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
    "fieldname": "contact_section",
    "fieldtype": "Section Break",
-   "label": "Customer or Supplier Details"
+   "label": "Supplier Details"
   },
   {
-   "depends_on": "eval:doc.purpose==\"Purchase Return\" || doc.purpose==\"Send to Subcontractor\"",
+   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
    "fieldname": "supplier",
    "fieldtype": "Link",
    "label": "Supplier",
@@ -446,7 +449,7 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval:doc.purpose==\"Purchase Return\" || doc.purpose==\"Send to Subcontractor\"",
+   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
    "fieldname": "supplier_name",
    "fieldtype": "Data",
    "label": "Supplier Name",
@@ -456,7 +459,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.purpose==\"Purchase Return\" || doc.purpose==\"Send to Subcontractor\"",
+   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
    "fieldname": "supplier_address",
    "fieldtype": "Link",
    "label": "Supplier Address",
@@ -469,41 +472,6 @@
    "fieldname": "address_display",
    "fieldtype": "Small Text",
    "label": "Address"
-  },
-  {
-   "fieldname": "column_break_39",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:doc.purpose==\"Sales Return\"",
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "label": "Customer",
-   "no_copy": 1,
-   "oldfieldname": "customer",
-   "oldfieldtype": "Link",
-   "options": "Customer",
-   "print_hide": 1
-  },
-  {
-   "bold": 1,
-   "depends_on": "eval:doc.purpose==\"Sales Return\"",
-   "fieldname": "customer_name",
-   "fieldtype": "Data",
-   "label": "Customer Name",
-   "no_copy": 1,
-   "oldfieldname": "customer_name",
-   "oldfieldtype": "Data",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.purpose==\"Sales Return\"",
-   "fieldname": "customer_address",
-   "fieldtype": "Small Text",
-   "label": "Customer Address",
-   "no_copy": 1,
-   "oldfieldname": "customer_address",
-   "oldfieldtype": "Small Text"
   },
   {
    "collapsible": 1,
@@ -622,12 +590,45 @@
    "label": "Pick List",
    "options": "Pick List",
    "read_only": 1
+  },
+  {
+   "fieldname": "print_settings_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.purpose=='Material Transfer' && !doc.outgoing_stock_entry",
+   "fetch_from": "stock_entry_type.add_to_transit",
+   "fetch_if_empty": 1,
+   "fieldname": "add_to_transit",
+   "fieldtype": "Check",
+   "label": "Add to Transit",
+   "no_copy": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:in_list([\"Material Transfer\", \"Material Receipt\"], doc.purpose)",
+   "fieldname": "apply_putaway_rule",
+   "fieldtype": "Check",
+   "label": "Apply Putaway Rule"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_return",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Return",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "modified": "2019-09-27 14:38:20.801420",
+ "links": [],
+ "modified": "2021-08-20 19:19:31.514846",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

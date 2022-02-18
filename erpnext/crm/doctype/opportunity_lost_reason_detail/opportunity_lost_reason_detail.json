@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2020-07-16 16:11:39.830389",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -16,7 +17,8 @@
   }
  ],
  "istable": 1,
- "modified": "2020-08-12 23:32:55.930406",
+ "links": [],
+ "modified": "2020-07-26 17:58:26.313242",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity Lost Reason Detail",

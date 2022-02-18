@@ -9,7 +9,6 @@ Manufacturing
 Stock
 Support
 Utilities
-Shopping Cart
 Assets
 Portal
 Maintenance
@@ -24,3 +23,7 @@ Hotels
 Hub Node
 Quality Management
 Communication
+Loan Management
+Payroll
+Telephony
+E-commerce

@@ -5,12 +5,6 @@ frappe.provide("erpnext.projects");
 
 frappe.ui.form.on("Task", {
 	setup: function (frm) {
-		frm.set_query("project", function () {
-			return {
-				query: "erpnext.projects.doctype.task.task.get_project"
-			}
-		});
-
 		frm.make_methods = {
 			'Timesheet': () => frappe.model.open_mapped_doc({
 				method: 'erpnext.projects.doctype.task.task.make_timesheet',
@@ -29,10 +23,17 @@ frappe.ui.form.on("Task", {
 				filters: filters
 			};
 		})
-	},
 
-	refresh: function (frm) {
-		frm.set_query("parent_task", { "is_group": 1 });
+		frm.set_query("parent_task", function () {
+			let filters = {
+				"is_group": 1,
+				"name": ["!=", frm.doc.name]
+			};
+			if (frm.doc.project) filters["project"] = frm.doc.project;
+			return {
+				filters: filters
+			}
+		});
 	},
 
 	is_group: function (frm) {
@@ -43,7 +44,10 @@ frappe.ui.form.on("Task", {
 			},
 			callback: function (r) {
 				if (r.message.length > 0) {
-					frappe.msgprint(__(`Cannot convert it to non-group. The following child Tasks exist: ${r.message.join(", ")}.`));
+					let message = __('Cannot convert Task to non-group because the following child Tasks exist: {0}.',
+						[r.message.join(", ")]
+					);
+					frappe.msgprint(message);
 					frm.reload_doc();
 				}
 			}

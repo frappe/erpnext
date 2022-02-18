@@ -4,11 +4,11 @@ frappe.listview_settings['Timesheet'] = {
 		if (doc.status== "Billed") {
 			return [__("Billed"), "green", "status,=," + "Billed"]
 		}
-		
+
 		if (doc.status== "Payslip") {
 			return [__("Payslip"), "green", "status,=," + "Payslip"]
 		}
-		
+
 		if (doc.status== "Completed") {
 			return [__("Completed"), "green", "status,=," + "Completed"]
 		}

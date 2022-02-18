@@ -48,31 +48,24 @@ $.extend(erpnext, {
 		return cint(frappe.boot.sysdefaults.allow_stale);
 	},
 
-	setup_serial_no: function() {
-		var grid_row = cur_frm.open_grid_row();
-		if(!grid_row || !grid_row.grid_form.fields_dict.serial_no ||
-			grid_row.grid_form.fields_dict.serial_no.get_status()!=="Write") return;
+	setup_serial_or_batch_no: function() {
+		let grid_row = cur_frm.open_grid_row();
+		if (!grid_row || !grid_row.grid_form.fields_dict.serial_no ||
+			grid_row.grid_form.fields_dict.serial_no.get_status() !== "Write") return;
 
-		var $btn = $('<button class="btn btn-sm btn-default">'+__("Add Serial No")+'</button>')
-			.appendTo($("<div>")
-				.css({"margin-bottom": "10px", "margin-top": "10px"})
-				.appendTo(grid_row.grid_form.fields_dict.serial_no.$wrapper));
+		frappe.model.get_value('Item', {'name': grid_row.doc.item_code},
+			['has_serial_no', 'has_batch_no'], ({has_serial_no, has_batch_no}) => {
+				Object.assign(grid_row.doc, {has_serial_no, has_batch_no});
 
-		var me = this;
-		$btn.on("click", function() {
-			let callback = '';
-			let on_close = '';
-
-			frappe.model.get_value('Item', {'name':grid_row.doc.item_code}, 'has_serial_no',
-				(data) => {
-					if(data) {
-						grid_row.doc.has_serial_no = data.has_serial_no;
-						me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
-							callback, on_close, true);
-					}
+				if (has_serial_no) {
+					attach_selector_button(__("Add Serial No"),
+						grid_row.grid_form.fields_dict.serial_no.$wrapper, this, grid_row);
+				} else if (has_batch_no) {
+					attach_selector_button(__("Pick Batch No"),
+						grid_row.grid_form.fields_dict.batch_no.$wrapper, this, grid_row);
 				}
-			);
-		});
+			}
+		);
 	},
 
 	route_to_adjustment_jv: (args) => {
@@ -88,6 +81,21 @@ $.extend(erpnext, {
 				child_row.party_type = "" ;
 			});
 			frappe.set_route('Form','Journal Entry', journal_entry.name);
+		});
+	},
+
+	route_to_pending_reposts: (args) => {
+		frappe.set_route('List', 'Repost Item Valuation', args);
+	},
+
+	proceed_save_with_reminders_frequency_change: () => {
+		frappe.ui.hide_open_dialog();
+
+		frappe.call({
+			method: 'erpnext.hr.doctype.hr_settings.hr_settings.set_proceed_with_frequency_change',
+			callback: () => {
+				cur_frm.save();
+			}
 		});
 	}
 });
@@ -194,15 +202,21 @@ $.extend(erpnext.utils, {
 	add_dimensions: function(report_name, index) {
 		let filters = frappe.query_reports[report_name].filters;
 
-		erpnext.dimension_filters.forEach((dimension) => {
-			let found = filters.some(el => el.fieldname === dimension['fieldname']);
+		frappe.call({
+			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
+			callback: function(r) {
+				let accounting_dimensions = r.message[0];
+				accounting_dimensions.forEach((dimension) => {
+					let found = filters.some(el => el.fieldname === dimension['fieldname']);
 
-			if (!found) {
-				filters.splice(index, 0 ,{
-					"fieldname": dimension["fieldname"],
-					"label": __(dimension["label"]),
-					"fieldtype": "Link",
-					"options": dimension["document_type"]
+					if (!found) {
+						filters.splice(index, 0, {
+							"fieldname": dimension["fieldname"],
+							"label": __(dimension["label"]),
+							"fieldtype": "Link",
+							"options": dimension["document_type"]
+						});
+					}
 				});
 			}
 		});
@@ -285,17 +299,15 @@ $.extend(erpnext.utils, {
 			return options[0];
 		}
 	},
-	copy_parent_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname, parent_fieldname) {
-		var d = locals[dt][dn];
-		if(d[parent_fieldname]){
-			var cl = doc[table_fieldname] || [];
-			for(var i = 0; i < cl.length; i++) {
+	overrides_parent_value_in_all_rows: function(doc, dt, dn, table_fieldname, fieldname, parent_fieldname) {
+		if (doc[parent_fieldname]) {
+			let cl = doc[table_fieldname] || [];
+			for (let i = 0; i < cl.length; i++) {
 				cl[i][fieldname] = doc[parent_fieldname];
 			}
+			frappe.refresh_field(table_fieldname);
 		}
-		refresh_field(table_fieldname);
 	},
-
 	create_new_doc: function (doctype, update_fields) {
 		frappe.model.with_doctype(doctype, function() {
 			var new_doc = frappe.model.get_new_doc(doctype);
@@ -418,12 +430,9 @@ erpnext.utils.select_alternate_items = function(opts) {
 					qty = row.qty;
 				}
 				row[item_field] = d.alternate_item;
-				frm.script_manager.trigger(item_field, row.doctype, row.name)
-					.then(() => {
-						frappe.model.set_value(row.doctype, row.name, 'qty', qty);
-						frappe.model.set_value(row.doctype, row.name,
-							opts.original_item_field, d.item_code);
-					});
+				frappe.model.set_value(row.doctype, row.name, 'qty', qty);
+				frappe.model.set_value(row.doctype, row.name, opts.original_item_field, d.item_code);
+				frm.trigger(item_field, row.doctype, row.name);
 			});
 
 			refresh_field(opts.child_docname);
@@ -468,7 +477,50 @@ erpnext.utils.update_child_items = function(opts) {
 		in_list_view: 1,
 		read_only: 0,
 		disabled: 0,
-		label: __('Item Code')
+		label: __('Item Code'),
+		get_query: function() {
+			let filters;
+			if (frm.doc.doctype == 'Sales Order') {
+				filters = {"is_sales_item": 1};
+			} else if (frm.doc.doctype == 'Purchase Order') {
+				if (frm.doc.is_subcontracted == "Yes") {
+					filters = {"is_sub_contracted_item": 1};
+				} else {
+					filters = {"is_purchase_item": 1};
+				}
+			}
+			return {
+				query: "erpnext.controllers.queries.item_query",
+				filters: filters
+			};
+		}
+	}, {
+		fieldtype:'Link',
+		fieldname:'uom',
+		options: 'UOM',
+		read_only: 0,
+		label: __('UOM'),
+		reqd: 1,
+		onchange: function () {
+			frappe.call({
+				method: "erpnext.stock.get_item_details.get_conversion_factor",
+				args: { item_code: this.doc.item_code, uom: this.value },
+				callback: r => {
+					if(!r.exc) {
+						if (this.doc.conversion_factor == r.message.conversion_factor) return;
+
+						const docname = this.doc.docname;
+						dialog.fields_dict.trans_items.df.data.some(doc => {
+							if (doc.docname == docname) {
+								doc.conversion_factor = r.message.conversion_factor;
+								dialog.fields_dict.trans_items.grid.refresh();
+								return true;
+							}
+						})
+					}
+				}
+			});
+		}
 	}, {
 		fieldtype:'Float',
 		fieldname:"qty",
@@ -480,6 +532,7 @@ erpnext.utils.update_child_items = function(opts) {
 	}, {
 		fieldtype:'Currency',
 		fieldname:"rate",
+		options: "currency",
 		default: 0,
 		read_only: 0,
 		in_list_view: 1,
@@ -512,7 +565,7 @@ erpnext.utils.update_child_items = function(opts) {
 				fieldtype: "Table",
 				label: "Items",
 				cannot_add_rows: cannot_add_row,
-				in_place_edit: true,
+				in_place_edit: false,
 				reqd: 1,
 				data: this.data,
 				get_data: () => {
@@ -522,7 +575,7 @@ erpnext.utils.update_child_items = function(opts) {
 			},
 		],
 		primary_action: function() {
-			const trans_items = this.get_values()["trans_items"];
+			const trans_items = this.get_values()["trans_items"].filter((item) => !!item.item_code);
 			frappe.call({
 				method: 'erpnext.controllers.accounts_controller.update_child_qty_rate',
 				freeze: true,
@@ -552,6 +605,7 @@ erpnext.utils.update_child_items = function(opts) {
 			"conversion_factor": d.conversion_factor,
 			"qty": d.qty,
 			"rate": d.rate,
+			"uom": d.uom
 		});
 		this.data = dialog.fields_dict.trans_items.df.data;
 		dialog.fields_dict.trans_items.grid.refresh();
@@ -560,12 +614,7 @@ erpnext.utils.update_child_items = function(opts) {
 }
 
 erpnext.utils.map_current_doc = function(opts) {
-	if(opts.get_query_filters) {
-		opts.get_query = function() {
-			return {filters: opts.get_query_filters};
-		}
-	}
-	var _map = function() {
+	function _map() {
 		if($.isArray(cur_frm.doc.items) && cur_frm.doc.items.length > 0) {
 			// remove first item row if empty
 			if(!cur_frm.doc.items[0].item_code) {
@@ -628,7 +677,7 @@ erpnext.utils.map_current_doc = function(opts) {
 				"method": opts.method,
 				"source_names": opts.source_name,
 				"target_doc": cur_frm.doc,
-				'args': opts.args
+				"args": opts.args
 			},
 			callback: function(r) {
 				if(!r.exc) {
@@ -639,46 +688,92 @@ erpnext.utils.map_current_doc = function(opts) {
 			}
 		});
 	}
-	if(opts.source_doctype) {
-		var d = new frappe.ui.form.MultiSelectDialog({
+
+	let query_args = {};
+	if (opts.get_query_filters) {
+		query_args.filters = opts.get_query_filters;
+	}
+
+	if (opts.get_query_method) {
+		query_args.query = opts.get_query_method;
+	}
+
+	if (query_args.filters || query_args.query) {
+		opts.get_query = () => query_args;
+	}
+
+	if (opts.source_doctype) {
+		const d = new frappe.ui.form.MultiSelectDialog({
 			doctype: opts.source_doctype,
 			target: opts.target,
 			date_field: opts.date_field || undefined,
 			setters: opts.setters,
 			get_query: opts.get_query,
+			add_filters_group: 1,
+			allow_child_item_selection: opts.allow_child_item_selection,
+			child_fieldname: opts.child_fielname,
+			child_columns: opts.child_columns,
+			size: opts.size,
 			action: function(selections, args) {
 				let values = selections;
-				if(values.length === 0){
+				if (values.length === 0) {
 					frappe.msgprint(__("Please select {0}", [opts.source_doctype]))
 					return;
 				}
 				opts.source_name = values;
-				opts.setters = args;
+				if (opts.allow_child_item_selection) {
+					// args contains filtered child docnames
+					opts.args = args;
+				}
 				d.dialog.hide();
 				_map();
 			},
 		});
-	} else if(opts.source_name) {
+
+		return d;
+	}
+
+	if (opts.source_name) {
 		opts.source_name = [opts.source_name];
 		_map();
 	}
 }
 
 frappe.form.link_formatters['Item'] = function(value, doc) {
-	if(doc && doc.item_name && doc.item_name !== value) {
-		return value? value + ': ' + doc.item_name: doc.item_name;
+	if (doc && value && doc.item_name && doc.item_name !== value && doc.item_code === value) {
+		return value + ': ' + doc.item_name;
+	} else if (!value && doc.doctype && doc.item_name) {
+		// format blank value in child table
+		return doc.item_name;
 	} else {
+		// if value is blank in report view or item code and name are the same, return as is
 		return value;
 	}
 }
 
 frappe.form.link_formatters['Employee'] = function(value, doc) {
-	if(doc && doc.employee_name && doc.employee_name !== value) {
-		return value? value + ': ' + doc.employee_name: doc.employee_name;
+	if (doc && value && doc.employee_name && doc.employee_name !== value && doc.employee === value) {
+		return value + ': ' + doc.employee_name;
+	} else if (!value && doc.doctype && doc.employee_name) {
+		// format blank value in child table
+		return doc.employee;
 	} else {
+		// if value is blank in report view or project name and name are the same, return as is
 		return value;
 	}
 }
+
+frappe.form.link_formatters['Project'] = function(value, doc) {
+	if (doc && value && doc.project_name && doc.project_name !== value && doc.project === value) {
+		return value + ': ' + doc.project_name;
+	} else if (!value && doc.doctype && doc.project_name) {
+		// format blank value in child table
+		return doc.project;
+	} else {
+		// if value is blank in report view or project name and name are the same, return as is
+		return value;
+	}
+};
 
 // add description on posting time
 $(document).on('app_ready', function() {
@@ -692,3 +787,14 @@ $(document).on('app_ready', function() {
 		});
 	}
 });
+
+function attach_selector_button(inner_text, append_loction, context, grid_row) {
+	let $btn_div = $("<div>").css({"margin-bottom": "10px", "margin-top": "10px"})
+		.appendTo(append_loction);
+	let $btn = $(`<button class="btn btn-sm btn-default">${inner_text}</button>`)
+		.appendTo($btn_div);
+
+	$btn.on("click", function() {
+		context.show_serial_batch_selector(grid_row.frm, grid_row.doc, "", "", true);
+	});
+}

@@ -1,0 +1,50 @@
+{
+ "allow_roles": [
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ],
+ "creation": "2020-05-13 19:03:32.564049",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/accounts",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2020-10-30 15:41:15.547225",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Accounts",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Chart of Accounts"
+  },
+  {
+   "step": "Setup Taxes"
+  },
+  {
+   "step": "Create a Product"
+  },
+  {
+   "step": "Create a Supplier"
+  },
+  {
+   "step": "Create Your First Purchase Invoice"
+  },
+  {
+   "step": "Create a Customer"
+  },
+  {
+   "step": "Create Your First Sales Invoice"
+  },
+  {
+   "step": "Configure Account Settings"
+  }
+ ],
+ "subtitle": "Accounts, Invoices, Taxation, and more.",
+ "success_message": "The Accounts Module is all set up!",
+ "title": "Let's Set Up Your Accounts and Taxes."
+}

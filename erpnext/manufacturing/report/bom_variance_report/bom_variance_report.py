@@ -1,9 +1,10 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+
 
 def execute(filters=None):
 	columns, data = [], []
@@ -19,7 +20,7 @@ def get_columns(filters):
 			"options": "Work Order",
 			"width": 120
 		}]
-	
+
 	if not filters.get('bom_no'):
 		columns.extend([
 			{

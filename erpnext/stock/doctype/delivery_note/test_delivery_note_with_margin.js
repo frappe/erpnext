@@ -34,4 +34,3 @@ QUnit.test("test delivery note with margin", function(assert) {
 		() => done()
 	]);
 });
-

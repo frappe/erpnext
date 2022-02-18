@@ -1,0 +1,27 @@
+{
+ "add_total_row": 0,
+ "creation": "2020-05-14 16:28:45.743869",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2020-05-14 16:28:45.743869",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Recruitment Analytics",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Staffing Plan",
+ "report_name": "Recruitment Analytics",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "HR Manager"
+  },
+  {
+   "role": "HR User"
+  }
+ ]
+}

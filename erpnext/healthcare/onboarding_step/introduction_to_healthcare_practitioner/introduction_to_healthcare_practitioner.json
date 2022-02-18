@@ -1,0 +1,20 @@
+{
+ "action": "Show Form Tour",
+ "creation": "2020-05-19 10:43:56.231679",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "field": "schedule",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-01-30 00:09:28.807129",
+ "modified_by": "ruchamahabal2@gmail.com",
+ "name": "Introduction to Healthcare Practitioner",
+ "owner": "Administrator",
+ "reference_document": "Healthcare Practitioner",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Introduction to Healthcare Practitioner",
+ "validate_action": 0
+}

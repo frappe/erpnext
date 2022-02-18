@@ -76,6 +76,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 
 		if (args) {
 			args.posting_date = frm.doc.posting_date || frm.doc.transaction_date;
+			args.fetch_payment_terms_template = cint(!frm.doc.ignore_default_payment_terms_template);
 		}
 	}
 	if (!args || !args.party) return;
@@ -225,7 +226,7 @@ erpnext.utils.set_taxes = function(frm, triggered_from_field) {
 	}
 
 	if (!frm.doc.company) {
-		frappe.throw(_("Kindly select the company first"));
+		frappe.throw(__("Kindly select the company first"));
 	}
 
 	frappe.call({
@@ -274,16 +275,22 @@ erpnext.utils.validate_mandatory = function(frm, label, value, trigger_on) {
 	return true;
 }
 
-erpnext.utils.get_shipping_address = function(frm, callback){
+erpnext.utils.get_shipping_address = function(frm, callback) {
 	if (frm.doc.company) {
+		if ((frm.doc.inter_company_order_reference || frm.doc.internal_invoice_reference ||
+			frm.doc.internal_order_reference)) {
+			if (callback) {
+				return callback();
+			}
+		}
 		frappe.call({
-			method: "frappe.contacts.doctype.address.address.get_shipping_address",
+			method: "erpnext.accounts.custom.address.get_shipping_address",
 			args: {
 				company: frm.doc.company,
 				address: frm.doc.shipping_address
 			},
-			callback: function(r){
-				if (r.message){
+			callback: function(r) {
+				if (r.message) {
 					frm.set_value("shipping_address", r.message[0]) //Address title or name
 					frm.set_value("shipping_address_display", r.message[1]) //Address to be displayed on the page
 				}

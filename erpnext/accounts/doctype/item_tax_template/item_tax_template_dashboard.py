@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 
 from frappe import _
 
@@ -20,7 +19,8 @@ def get_data():
 				'items': ['Purchase Invoice', 'Purchase Order', 'Purchase Receipt']
 			},
 			{
-				'items': ['Item']
+				'label': _('Stock'),
+				'items': ['Item Groups', 'Item']
 			}
 		]
 	}

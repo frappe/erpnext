@@ -1,8 +1,12 @@
-from __future__ import unicode_literals
+
 import frappe
-from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_shopping_cart_settings
-from erpnext.shopping_cart.cart import get_debtors_account
 from frappe.utils.nestedset import get_root_of
+
+from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import (
+	get_shopping_cart_settings,
+)
+from erpnext.e_commerce.shopping_cart.cart import get_debtors_account
+
 
 def set_default_role(doc, method):
 	'''Set customer, supplier, student, guardian based on email'''
@@ -88,21 +92,30 @@ def create_customer_or_supplier():
 	party.flags.ignore_mandatory = True
 	party.insert(ignore_permissions=True)
 
+	alternate_doctype = "Customer" if doctype == "Supplier" else "Supplier"
+
+	if party_exists(alternate_doctype, user):
+		# if user is both customer and supplier, alter fullname to avoid contact name duplication
+		fullname +=  "-" + doctype
+
+	create_party_contact(doctype, fullname, user, party.name)
+
+	return party
+
+def create_party_contact(doctype, fullname, user, party_name):
 	contact = frappe.new_doc("Contact")
 	contact.update({
 		"first_name": fullname,
 		"email_id": user
 	})
-	contact.append('links', dict(link_doctype=doctype, link_name=party.name))
+	contact.append('links', dict(link_doctype=doctype, link_name=party_name))
+	contact.append('email_ids', dict(email_id=user))
 	contact.flags.ignore_mandatory = True
 	contact.insert(ignore_permissions=True)
 
-	return party
-
-
 def party_exists(doctype, user):
+	# check if contact exists against party and if it is linked to the doctype
 	contact_name = frappe.db.get_value("Contact", {"email_id": user})
-
 	if contact_name:
 		contact = frappe.get_doc('Contact', contact_name)
 		doctypes = [d.link_doctype for d in contact.links]

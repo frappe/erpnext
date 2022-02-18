@@ -1,11 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
-from frappe.utils import cint, flt
 
+import frappe
+from frappe.utils import cint, flt
 from six import string_types
+
+import erpnext
+
 
 @frappe.whitelist()
 def make_stock_entry(**args):
@@ -45,6 +47,8 @@ def make_stock_entry(**args):
 		s.posting_date = args.posting_date
 	if args.posting_time:
 		s.posting_time = args.posting_time
+	if args.inspection_required:
+		s.inspection_required = args.inspection_required
 
 	# map names
 	if args.from_warehouse:
@@ -53,6 +57,8 @@ def make_stock_entry(**args):
 		args.target = args.to_warehouse
 	if args.item_code:
 		args.item = args.item_code
+	if args.apply_putaway_rule:
+		s.apply_putaway_rule = args.apply_putaway_rule
 
 	if isinstance(args.qty, string_types):
 		if '.' in args.qty:
@@ -118,7 +124,8 @@ def make_stock_entry(**args):
 		"t_warehouse": args.target,
 		"qty": args.qty,
 		"basic_rate": args.rate or args.basic_rate,
-		"conversion_factor": 1.0,
+		"conversion_factor": args.conversion_factor or 1.0,
+		"transfer_qty": flt(args.qty) * (flt(args.conversion_factor) or 1.0),
 		"serial_no": args.serial_no,
 		'batch_no': args.batch_no,
 		'cost_center': args.cost_center,

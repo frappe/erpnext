@@ -1,12 +1,14 @@
-from __future__ import unicode_literals
 
-import frappe, json, os
-from frappe.utils import flt, cstr
-from erpnext.controllers.taxes_and_totals import get_itemised_tax
+import io
+import json
+
+import frappe
 from frappe import _
-from frappe.core.doctype.file.file import remove_file
+from frappe.utils import cstr, flt
+from frappe.utils.file_manager import remove_file
 from six import string_types
-from frappe.desk.form.load import get_attachments
+
+from erpnext.controllers.taxes_and_totals import get_itemised_tax
 from erpnext.regional.italy import state_codes
 
 
@@ -28,20 +30,22 @@ def update_itemised_tax_data(doc):
 
 @frappe.whitelist()
 def export_invoices(filters=None):
-	saved_xmls = []
+	frappe.has_permission('Sales Invoice', throw=True)
 
-	invoices = frappe.get_all("Sales Invoice", filters=get_conditions(filters), fields=["*"])
+	invoices = frappe.get_all(
+		"Sales Invoice",
+		filters=get_conditions(filters),
+		fields=["name", "company_tax_id"]
+	)
 
-	for invoice in invoices:
-		attachments = get_e_invoice_attachments(invoice)
-		saved_xmls += [attachment.file_name for attachment in attachments]
+	attachments = get_e_invoice_attachments(invoices)
 
-	zip_filename = "{0}-einvoices.zip".format(frappe.utils.get_datetime().strftime("%Y%m%d_%H%M%S"))
+	zip_filename = "{0}-einvoices.zip".format(
+		frappe.utils.get_datetime().strftime("%Y%m%d_%H%M%S"))
 
-	download_zip(saved_xmls, zip_filename)
+	download_zip(attachments, zip_filename)
 
 
-@frappe.whitelist()
 def prepare_invoice(invoice, progressive_number):
 	#set company information
 	company = frappe.get_doc("Company", invoice.company)
@@ -53,11 +57,12 @@ def prepare_invoice(invoice, progressive_number):
 	invoice.company_address_data = company_address
 
 	#Set invoice type
-	if invoice.is_return and invoice.return_against:
-		invoice.type_of_document = "TD04" #Credit Note (Nota di Credito)
-		invoice.return_against_unamended =  get_unamended_name(frappe.get_doc("Sales Invoice", invoice.return_against))
-	else:
-		invoice.type_of_document = "TD01" #Sales Invoice (Fattura)
+	if not invoice.type_of_document:
+		if invoice.is_return and invoice.return_against:
+			invoice.type_of_document = "TD04" #Credit Note (Nota di Credito)
+			invoice.return_against_unamended =  get_unamended_name(frappe.get_doc("Sales Invoice", invoice.return_against))
+		else:
+			invoice.type_of_document = "TD01" #Sales Invoice (Fattura)
 
 	#set customer information
 	invoice.customer_data = frappe.get_doc("Customer", invoice.customer)
@@ -98,7 +103,7 @@ def prepare_invoice(invoice, progressive_number):
 def get_conditions(filters):
 	filters = json.loads(filters)
 
-	conditions = {"docstatus": 1}
+	conditions = {"docstatus": 1, "company_tax_id": ("!=", "")}
 
 	if filters.get("company"): conditions["company"] = filters["company"]
 	if filters.get("customer"): conditions["customer"] =  filters["customer"]
@@ -111,23 +116,22 @@ def get_conditions(filters):
 
 	return conditions
 
-#TODO: Use function from frappe once PR #6853 is merged.
+
 def download_zip(files, output_filename):
-	from zipfile import ZipFile
+	import zipfile
 
-	input_files = [frappe.get_site_path('private', 'files', filename) for filename in files]
-	output_path = frappe.get_site_path('private', 'files', output_filename)
+	zip_stream = io.BytesIO()
+	with zipfile.ZipFile(zip_stream, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+		for file in files:
+			file_path = frappe.utils.get_files_path(
+				file.file_name, is_private=file.is_private)
 
-	with ZipFile(output_path, 'w') as output_zip:
-		for input_file in input_files:
-			output_zip.write(input_file, arcname=os.path.basename(input_file))
-
-	with open(output_path, 'rb') as fileobj:
-		filedata = fileobj.read()
+			zip_file.write(file_path, arcname=file.file_name)
 
 	frappe.local.response.filename = output_filename
-	frappe.local.response.filecontent = filedata
+	frappe.local.response.filecontent = zip_stream.getvalue()
 	frappe.local.response.type = "download"
+	zip_stream.close()
 
 def get_invoice_summary(items, taxes):
 	summary_data = frappe._dict()
@@ -252,7 +256,7 @@ def sales_invoice_validate(doc):
 	else:
 		for row in doc.taxes:
 			if row.rate == 0 and row.tax_amount == 0 and not row.tax_exemption_reason:
-				frappe.throw(_("Row {0}: Please set at Tax Exemption Reason in Sales Taxes and Charges".format(row.idx)),
+				frappe.throw(_("Row {0}: Please set at Tax Exemption Reason in Sales Taxes and Charges").format(row.idx),
 					title=_("E-Invoicing Information Missing"))
 
 	for schedule in doc.payment_schedule:
@@ -272,10 +276,10 @@ def sales_invoice_on_submit(doc, method):
 	else:
 		for schedule in doc.payment_schedule:
 			if not schedule.mode_of_payment:
-				frappe.throw(_("Row {0}: Please set the Mode of Payment in Payment Schedule".format(schedule.idx)),
+				frappe.throw(_("Row {0}: Please set the Mode of Payment in Payment Schedule").format(schedule.idx),
 					title=_("E-Invoicing Information Missing"))
 			elif not frappe.db.get_value("Mode of Payment", schedule.mode_of_payment, "mode_of_payment_code"):
-				frappe.throw(_("Row {0}: Please set the correct code on Mode of Payment {1}".format(schedule.idx, schedule.mode_of_payment)),
+				frappe.throw(_("Row {0}: Please set the correct code on Mode of Payment {1}").format(schedule.idx, schedule.mode_of_payment),
 					title=_("E-Invoicing Information Missing"))
 
 	prepare_and_attach_invoice(doc)
@@ -307,23 +311,12 @@ def prepare_and_attach_invoice(doc, replace=False):
 @frappe.whitelist()
 def generate_single_invoice(docname):
 	doc = frappe.get_doc("Sales Invoice", docname)
-
+	frappe.has_permission("Sales Invoice", doc=doc, throw=True)
 
 	e_invoice = prepare_and_attach_invoice(doc, True)
+	return e_invoice.file_url
 
-	return e_invoice.file_name
-
-@frappe.whitelist()
-def download_e_invoice_file(file_name):
-	content = None
-	with open(frappe.get_site_path('private', 'files', file_name), "r") as f:
-		content = f.read()
-
-	frappe.local.response.filename = file_name
-	frappe.local.response.filecontent = content
-	frappe.local.response.type = "download"
-
-#Delete e-invoice attachment on cancel.
+# Delete e-invoice attachment on cancel.
 def sales_invoice_on_cancel(doc, method):
 	if get_company_country(doc.company) not in ['Italy',
 		'Italia', 'Italian Republic', 'Repubblica Italiana']:
@@ -335,16 +328,38 @@ def sales_invoice_on_cancel(doc, method):
 def get_company_country(company):
 	return frappe.get_cached_value('Company', company, 'country')
 
-def get_e_invoice_attachments(invoice):
-	if not invoice.company_tax_id:
-		return []
+def get_e_invoice_attachments(invoices):
+	if not isinstance(invoices, list):
+		if not invoices.company_tax_id:
+			return
+
+		invoices = [invoices]
+
+	tax_id_map = {
+		invoice.name: (
+			invoice.company_tax_id
+			if invoice.company_tax_id.startswith("IT")
+			else "IT" + invoice.company_tax_id
+		) for invoice in invoices
+	}
+
+	attachments = frappe.get_all(
+		"File",
+		fields=("name", "file_name", "attached_to_name", "is_private"),
+		filters= {
+			"attached_to_name": ('in', tax_id_map),
+			"attached_to_doctype": 'Sales Invoice'
+		}
+	)
 
 	out = []
-	attachments = get_attachments(invoice.doctype, invoice.name)
-	company_tax_id = invoice.company_tax_id if invoice.company_tax_id.startswith("IT") else "IT" + invoice.company_tax_id
-
 	for attachment in attachments:
-		if attachment.file_name and attachment.file_name.startswith(company_tax_id) and attachment.file_name.endswith(".xml"):
+		if (
+			attachment.file_name
+			and attachment.file_name.endswith(".xml")
+			and attachment.file_name.startswith(
+				tax_id_map.get(attachment.attached_to_name))
+		):
 			out.append(attachment)
 
 	return out
@@ -355,7 +370,7 @@ def validate_address(address_name):
 
 	for field in fields:
 		if not data.get(field):
-			frappe.throw(_("Please set {0} for address {1}".format(field.replace('-',''), address_name)),
+			frappe.throw(_("Please set {0} for address {1}").format(field.replace('-',''), address_name),
 				title=_("E-Invoicing Information Missing"))
 
 def get_unamended_name(doc):

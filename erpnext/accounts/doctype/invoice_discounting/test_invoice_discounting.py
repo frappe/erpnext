@@ -1,15 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-from frappe.utils import nowdate, add_days, flt
-import unittest
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
+from frappe.utils import add_days, flt, nowdate
+
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_payment_entry_against_invoice
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
+
+
 class TestInvoiceDiscounting(unittest.TestCase):
 	def setUp(self):
 		self.ar_credit = create_account(account_name="_Test Accounts Receivable Credit", parent_account = "Accounts Receivable - _TC", company="_Test Company")
@@ -80,6 +82,7 @@ class TestInvoiceDiscounting(unittest.TestCase):
 			short_term_loan=self.short_term_loan,
 			bank_charges_account=self.bank_charges_account,
 			bank_account=self.bank_account,
+			bank_charges=100
 			)
 
 		je = inv_disc.create_disbursement_entry()
@@ -289,6 +292,7 @@ def create_invoice_discounting(invoices, **args):
 	inv_disc.bank_account=args.bank_account
 	inv_disc.loan_start_date = args.start or nowdate()
 	inv_disc.loan_period = args.period or 30
+	inv_disc.bank_charges = flt(args.bank_charges)
 
 	for d in invoices:
 		inv_disc.append("invoices", {

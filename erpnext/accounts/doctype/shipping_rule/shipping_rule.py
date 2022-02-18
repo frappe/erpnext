@@ -3,11 +3,14 @@
 
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
+
+import frappe
 from frappe import _, msgprint, throw
-from frappe.utils import flt, fmt_money, cint
 from frappe.model.document import Document
+from frappe.utils import flt, fmt_money
+
+import erpnext
+
 
 class OverlappingConditionError(frappe.ValidationError): pass
 class FromGreaterThanToError(frappe.ValidationError): pass
@@ -69,7 +72,8 @@ class ShippingRule(Document):
 			# shipping_amount = flt(shipping_amount / doc.conversion_rate, 2)
 			shipping_amount = flt(shipping_amount, 2)
 
-		self.add_shipping_rule_to_tax_table(doc, shipping_amount)
+		if shipping_amount:
+			self.add_shipping_rule_to_tax_table(doc, shipping_amount)
 
 		# add gst for shipping charges
 		if self.apply_gst:

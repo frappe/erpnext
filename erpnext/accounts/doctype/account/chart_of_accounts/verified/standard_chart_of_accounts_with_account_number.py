@@ -1,8 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 from frappe import _
+
 
 def get():
     return {
@@ -245,6 +246,9 @@ def get():
                     "account_number": "2200"
                 },
                 _("Duties and Taxes"): {
+                    _("TDS Payable"): {
+                        "account_number": "2310"
+                    },
                     "account_type": "Tax",
                     "is_group": 1,
                     "account_number": "2300"

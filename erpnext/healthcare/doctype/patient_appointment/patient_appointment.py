@@ -1,179 +1,299 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, ESS LLP and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe
-from frappe.model.document import Document
-import json
-from frappe.utils import getdate, add_days, get_time
-from frappe import _
+
 import datetime
+import json
+
+import frappe
+from frappe import _
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
+from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import flt, get_link_to_form, get_time, getdate
+
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import (
+	get_income_account,
+	get_receivable_account,
+)
+from erpnext.healthcare.utils import (
+	check_fee_validity,
+	get_service_item_and_practitioner_charge,
+	manage_fee_validity,
+)
 from erpnext.hr.doctype.employee.employee import is_holiday
-from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account,get_income_account
-from erpnext.healthcare.utils import validity_exists, service_item_and_practitioner_charge
+
+
+class MaximumCapacityError(frappe.ValidationError):
+	pass
+class OverlapError(frappe.ValidationError):
+	pass
 
 class PatientAppointment(Document):
-	def on_update(self):
-		today = datetime.date.today()
-		appointment_date = getdate(self.appointment_date)
-
-		# If appointment created for today set as open
-		if today == appointment_date:
-			frappe.db.set_value("Patient Appointment", self.name, "status", "Open")
-			self.reload()
-
 	def validate(self):
+		self.validate_overlaps()
+		self.validate_service_unit()
 		self.set_appointment_datetime()
-		end_time = datetime.datetime.combine(getdate(self.appointment_date), get_time(self.appointment_time)) + datetime.timedelta(minutes=float(self.duration))
-		overlaps = frappe.db.sql("""
-		select
-			name, practitioner, patient, appointment_time, duration
-		from
-			`tabPatient Appointment`
-		where
-			appointment_date=%s and name!=%s and status NOT IN ("Closed", "Cancelled")
-			and (practitioner=%s or patient=%s) and
-			((appointment_time<%s and appointment_time + INTERVAL duration MINUTE>%s) or
-			(appointment_time>%s and appointment_time<%s) or
-			(appointment_time=%s))
-		""", (self.appointment_date, self.name, self.practitioner, self.patient,
-		self.appointment_time, end_time.time(), self.appointment_time, end_time.time(), self.appointment_time))
-
-		if overlaps:
-			frappe.throw(_("""Appointment overlaps with {0}.<br> {1} has appointment scheduled
-			with {2} at {3} having {4} minute(s) duration.""").format(overlaps[0][0], overlaps[0][1], overlaps[0][2], overlaps[0][3], overlaps[0][4]))
+		self.validate_customer_created()
+		self.set_status()
+		self.set_title()
 
 	def set_appointment_datetime(self):
 		self.appointment_datetime = "%s %s" % (self.appointment_date, self.appointment_time or "00:00:00")
 
 	def after_insert(self):
+		self.update_prescription_details()
+		self.set_payment_details()
+		invoice_appointment(self)
+		self.update_fee_validity()
+		send_confirmation_msg(self)
+
+	def set_title(self):
+		self.title = _('{0} with {1}').format(self.patient_name or self.patient,
+			self.practitioner_name or self.practitioner)
+
+	def set_status(self):
+		today = getdate()
+		appointment_date = getdate(self.appointment_date)
+
+		# If appointment is created for today set status as Open else Scheduled
+		if appointment_date == today:
+			self.status = 'Open'
+		elif appointment_date > today:
+			self.status = 'Scheduled'
+
+	def validate_overlaps(self):
+		end_time = datetime.datetime.combine(getdate(self.appointment_date), get_time(self.appointment_time)) \
+			 + datetime.timedelta(minutes=flt(self.duration))
+
+		# all appointments for both patient and practitioner overlapping the duration of this appointment
+		overlapping_appointments = frappe.db.sql("""
+			SELECT
+				name, practitioner, patient, appointment_time, duration, service_unit
+			FROM
+				`tabPatient Appointment`
+			WHERE
+				appointment_date=%(appointment_date)s AND name!=%(name)s AND status NOT IN ("Closed", "Cancelled") AND
+				(practitioner=%(practitioner)s OR patient=%(patient)s) AND
+				((appointment_time<%(appointment_time)s AND appointment_time + INTERVAL duration MINUTE>%(appointment_time)s) OR
+				(appointment_time>%(appointment_time)s AND appointment_time<%(end_time)s) OR
+				(appointment_time=%(appointment_time)s))
+			""",
+			{
+				'appointment_date': self.appointment_date,
+				'name': self.name,
+				'practitioner': self.practitioner,
+				'patient': self.patient,
+				'appointment_time': self.appointment_time,
+				'end_time':end_time.time()
+			},
+			as_dict = True
+		)
+
+		if not overlapping_appointments:
+			return # No overlaps, nothing to validate!
+
+		if self.service_unit: # validate service unit capacity if overlap enabled
+			allow_overlap, service_unit_capacity = frappe.get_value('Healthcare Service Unit', self.service_unit,
+				['overlap_appointments', 'service_unit_capacity'])
+			if allow_overlap:
+				service_unit_appointments = list(filter(lambda appointment: appointment['service_unit'] == self.service_unit and
+					appointment['patient'] != self.patient, overlapping_appointments)) # if same patient already booked, it should be an overlap
+				if len(service_unit_appointments) >= (service_unit_capacity or 1):
+					frappe.throw(_("Not allowed, {} cannot exceed maximum capacity {}")
+						.format(frappe.bold(self.service_unit), frappe.bold(service_unit_capacity or 1)), MaximumCapacityError)
+				else: # service_unit_appointments within capacity, remove from overlapping_appointments
+					overlapping_appointments = [appointment for appointment in overlapping_appointments if appointment not in service_unit_appointments]
+
+		if overlapping_appointments:
+			frappe.throw(_("Not allowed, cannot overlap appointment {}")
+				.format(frappe.bold(', '.join([appointment['name'] for appointment in overlapping_appointments]))), OverlapError)
+
+
+	def validate_service_unit(self):
+		if self.inpatient_record and self.service_unit:
+			from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import (
+				get_current_healthcare_service_unit,
+			)
+
+			is_inpatient_occupancy_unit = frappe.db.get_value('Healthcare Service Unit', self.service_unit,
+				'inpatient_occupancy')
+			service_unit = get_current_healthcare_service_unit(self.inpatient_record)
+			if is_inpatient_occupancy_unit and service_unit != self.service_unit:
+				msg = _('Patient {0} is not admitted in the service unit {1}').format(frappe.bold(self.patient), frappe.bold(self.service_unit)) + '<br>'
+				msg += _('Appointment for service units with Inpatient Occupancy can only be created against the unit where patient has been admitted.')
+				frappe.throw(msg, title=_('Invalid Healthcare Service Unit'))
+
+
+	def set_appointment_datetime(self):
+		self.appointment_datetime = "%s %s" % (self.appointment_date, self.appointment_time or "00:00:00")
+
+	def set_payment_details(self):
+		if frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing'):
+			details = get_service_item_and_practitioner_charge(self)
+			self.db_set('billing_item', details.get('service_item'))
+			if not self.paid_amount:
+				self.db_set('paid_amount', details.get('practitioner_charge'))
+
+	def validate_customer_created(self):
+		if frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing'):
+			if not frappe.db.get_value('Patient', self.patient, 'customer'):
+				msg = _("Please set a Customer linked to the Patient")
+				msg +=  " <b><a href='/app/Form/Patient/{0}'>{0}</a></b>".format(self.patient)
+				frappe.throw(msg, title=_('Customer Not Found'))
+
+	def update_prescription_details(self):
 		if self.procedure_prescription:
-			frappe.db.set_value("Procedure Prescription", self.procedure_prescription, "appointment_booked", True)
+			frappe.db.set_value('Procedure Prescription', self.procedure_prescription, 'appointment_booked', 1)
 			if self.procedure_template:
-				comments = frappe.db.get_value("Procedure Prescription", self.procedure_prescription, "comments")
+				comments = frappe.db.get_value('Procedure Prescription', self.procedure_prescription, 'comments')
 				if comments:
-					frappe.db.set_value("Patient Appointment", self.name, "notes", comments)
-		# Check fee validity exists
-		appointment = self
-		validity_exist = validity_exists(appointment.practitioner, appointment.patient)
-		if validity_exist:
-			fee_validity = frappe.get_doc("Fee Validity", validity_exist[0][0])
+					frappe.db.set_value('Patient Appointment', self.name, 'notes', comments)
 
-			# Check if the validity is valid
-			appointment_date = getdate(appointment.appointment_date)
-			if (fee_validity.valid_till >= appointment_date) and (fee_validity.visited < fee_validity.max_visit):
-				visited = fee_validity.visited + 1
-				frappe.db.set_value("Fee Validity", fee_validity.name, "visited", visited)
-				if fee_validity.ref_invoice:
-					frappe.db.set_value("Patient Appointment", appointment.name, "invoiced", True)
-				frappe.msgprint(_("{0} has fee validity till {1}").format(appointment.patient, fee_validity.valid_till))
+	def update_fee_validity(self):
+		if not frappe.db.get_single_value('Healthcare Settings', 'enable_free_follow_ups'):
+			return
 
-		if frappe.db.get_value("Healthcare Settings", None, "manage_appointment_invoice_automatically") == '1' and \
-			frappe.db.get_value("Patient Appointment", self.name, "invoiced") != 1:
-			invoice_appointment(self)
+		fee_validity = manage_fee_validity(self)
+		if fee_validity:
+			frappe.msgprint(_('{0}: {1} has fee validity till {2}').format(self.patient,
+				frappe.bold(self.patient_name), fee_validity.valid_till))
+
+	@frappe.whitelist()
+	def get_therapy_types(self):
+		if not self.therapy_plan:
+			return
+
+		therapy_types = []
+		doc = frappe.get_doc('Therapy Plan', self.therapy_plan)
+		for entry in doc.therapy_plan_details:
+			therapy_types.append(entry.therapy_type)
+
+		return therapy_types
+
 
 		send_confirmation_msg(self)
 
 @frappe.whitelist()
+def check_payment_fields_reqd(patient):
+	automate_invoicing = frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing')
+	free_follow_ups = frappe.db.get_single_value('Healthcare Settings', 'enable_free_follow_ups')
+	if automate_invoicing:
+		if free_follow_ups:
+			fee_validity = frappe.db.exists('Fee Validity', {'patient': patient, 'status': 'Pending'})
+			if fee_validity:
+				return {'fee_validity': fee_validity}
+		return True
+	return False
+
 def invoice_appointment(appointment_doc):
-	if not appointment_doc.name:
-		return False
-	sales_invoice = frappe.new_doc("Sales Invoice")
-	sales_invoice.customer = frappe.get_value("Patient", appointment_doc.patient, "customer")
+	automate_invoicing = frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing')
+	appointment_invoiced = frappe.db.get_value('Patient Appointment', appointment_doc.name, 'invoiced')
+	enable_free_follow_ups = frappe.db.get_single_value('Healthcare Settings', 'enable_free_follow_ups')
+	if enable_free_follow_ups:
+		fee_validity = check_fee_validity(appointment_doc)
+		if fee_validity and fee_validity.status == 'Completed':
+			fee_validity = None
+		elif not fee_validity:
+			if frappe.db.exists('Fee Validity Reference', {'appointment': appointment_doc.name}):
+				return
+	else:
+		fee_validity = None
+
+	if automate_invoicing and not appointment_invoiced and not fee_validity:
+		create_sales_invoice(appointment_doc)
+
+
+def create_sales_invoice(appointment_doc):
+	sales_invoice = frappe.new_doc('Sales Invoice')
+	sales_invoice.patient = appointment_doc.patient
+	sales_invoice.customer = frappe.get_value('Patient', appointment_doc.patient, 'customer')
 	sales_invoice.appointment = appointment_doc.name
 	sales_invoice.due_date = getdate()
-	sales_invoice.is_pos = True
 	sales_invoice.company = appointment_doc.company
 	sales_invoice.debit_to = get_receivable_account(appointment_doc.company)
 
-	item_line = sales_invoice.append("items")
-	service_item, practitioner_charge = service_item_and_practitioner_charge(appointment_doc)
-	item_line.item_code = service_item
-	item_line.description = "Consulting Charges:  " + appointment_doc.practitioner
-	item_line.income_account = get_income_account(appointment_doc.practitioner, appointment_doc.company)
-	item_line.rate = practitioner_charge
-	item_line.amount = practitioner_charge
-	item_line.qty = 1
-	item_line.reference_dt = "Patient Appointment"
-	item_line.reference_dn = appointment_doc.name
+	item = sales_invoice.append('items', {})
+	item = get_appointment_item(appointment_doc, item)
 
-	payments_line = sales_invoice.append("payments")
-	payments_line.mode_of_payment = appointment_doc.mode_of_payment
-	payments_line.amount = appointment_doc.paid_amount
+	# Add payments if payment details are supplied else proceed to create invoice as Unpaid
+	if appointment_doc.mode_of_payment and appointment_doc.paid_amount:
+		sales_invoice.is_pos = 1
+		payment = sales_invoice.append('payments', {})
+		payment.mode_of_payment = appointment_doc.mode_of_payment
+		payment.amount = appointment_doc.paid_amount
 
-	sales_invoice.set_missing_values(for_validate = True)
-
+	sales_invoice.set_missing_values(for_validate=True)
+	sales_invoice.flags.ignore_mandatory = True
 	sales_invoice.save(ignore_permissions=True)
 	sales_invoice.submit()
-	frappe.msgprint(_("Sales Invoice {0} created as paid".format(sales_invoice.name)), alert=True)
+	frappe.msgprint(_('Sales Invoice {0} created').format(sales_invoice.name), alert=True)
+	frappe.db.set_value('Patient Appointment', appointment_doc.name, {
+		'invoiced': 1,
+		'ref_sales_invoice': sales_invoice.name
+	})
 
-def appointment_cancel(appointment_id):
-	appointment = frappe.get_doc("Patient Appointment", appointment_id)
-	# If invoiced --> fee_validity update with -1 visit
+
+def check_is_new_patient(patient, name=None):
+	filters = {'patient': patient, 'status': ('!=','Cancelled')}
+	if name:
+		filters['name'] = ('!=', name)
+
+	has_previous_appointment = frappe.db.exists('Patient Appointment', filters)
+	return not has_previous_appointment
+
+
+def get_appointment_item(appointment_doc, item):
+	details = get_service_item_and_practitioner_charge(appointment_doc)
+	charge = appointment_doc.paid_amount or details.get('practitioner_charge')
+	item.item_code = details.get('service_item')
+	item.description = _('Consulting Charges: {0}').format(appointment_doc.practitioner)
+	item.income_account = get_income_account(appointment_doc.practitioner, appointment_doc.company)
+	item.cost_center = frappe.get_cached_value('Company', appointment_doc.company, 'cost_center')
+	item.rate = charge
+	item.amount = charge
+	item.qty = 1
+	item.reference_dt = 'Patient Appointment'
+	item.reference_dn = appointment_doc.name
+	return item
+
+
+def cancel_appointment(appointment_id):
+	appointment = frappe.get_doc('Patient Appointment', appointment_id)
 	if appointment.invoiced:
-		sales_invoice = exists_sales_invoice(appointment)
+		sales_invoice = check_sales_invoice_exists(appointment)
 		if sales_invoice and cancel_sales_invoice(sales_invoice):
-			frappe.msgprint(
-				_("Appointment {0} and Sales Invoice {1} cancelled".format(appointment.name, sales_invoice.name))
-			)
+			msg = _('Appointment {0} and Sales Invoice {1} cancelled').format(appointment.name, sales_invoice.name)
 		else:
-			validity = validity_exists(appointment.practitioner, appointment.patient)
-			if validity:
-				fee_validity = frappe.get_doc("Fee Validity", validity[0][0])
-				if appointment_valid_in_fee_validity(appointment, fee_validity.valid_till, True, fee_validity.ref_invoice):
-					visited = fee_validity.visited - 1
-					frappe.db.set_value("Fee Validity", fee_validity.name, "visited", visited)
-					frappe.msgprint(
-						_("Appointment cancelled, Please review and cancel the invoice {0}".format(fee_validity.ref_invoice))
-					)
-				else:
-					frappe.msgprint(_("Appointment cancelled"))
-			else:
-				frappe.msgprint(_("Appointment cancelled"))
+			msg = _('Appointment Cancelled. Please review and cancel the invoice {0}').format(sales_invoice.name)
 	else:
-		frappe.msgprint(_("Appointment cancelled"))
+		fee_validity = manage_fee_validity(appointment)
+		msg = _('Appointment Cancelled.')
+		if fee_validity:
+			msg += _('Fee Validity {0} updated.').format(fee_validity.name)
 
-def appointment_valid_in_fee_validity(appointment, valid_end_date, invoiced, ref_invoice):
-	valid_days = frappe.db.get_value("Healthcare Settings", None, "valid_days")
-	max_visit = frappe.db.get_value("Healthcare Settings", None, "max_visit")
-	valid_start_date = add_days(getdate(valid_end_date), -int(valid_days))
+	frappe.msgprint(msg)
 
-	# Appointments which has same fee validity range with the appointment
-	appointments = frappe.get_list("Patient Appointment",{'patient': appointment.patient, 'invoiced': invoiced,
-	'appointment_date':("<=", getdate(valid_end_date)), 'appointment_date':(">=", getdate(valid_start_date)),
-	'practitioner': appointment.practitioner}, order_by="appointment_date desc", limit=int(max_visit))
-
-	if appointments and len(appointments) > 0:
-		appointment_obj = appointments[len(appointments)-1]
-		sales_invoice = exists_sales_invoice(appointment_obj)
-		if sales_invoice.name == ref_invoice:
-			return True
-	return False
 
 def cancel_sales_invoice(sales_invoice):
-	if frappe.db.get_value("Healthcare Settings", None, "manage_appointment_invoice_automatically") == '1':
+	if frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing'):
 		if len(sales_invoice.items) == 1:
 			sales_invoice.cancel()
 			return True
 	return False
 
-def exists_sales_invoice_item(appointment):
-	return frappe.db.exists(
-		"Sales Invoice Item",
-		{
-			"reference_dt": "Patient Appointment",
-			"reference_dn": appointment.name
-		}
-	)
 
-def exists_sales_invoice(appointment):
-	sales_item_exist = exists_sales_invoice_item(appointment)
-	if sales_item_exist:
-		sales_invoice = frappe.get_doc("Sales Invoice", frappe.db.get_value("Sales Invoice Item", sales_item_exist, "parent"))
+def check_sales_invoice_exists(appointment):
+	sales_invoice = frappe.db.get_value('Sales Invoice Item', {
+		'reference_dt': 'Patient Appointment',
+		'reference_dn': appointment.name
+	}, 'parent')
+
+	if sales_invoice:
+		sales_invoice = frappe.get_doc('Sales Invoice', sales_invoice)
 		return sales_invoice
 	return False
+
 
 @frappe.whitelist()
 def get_availability_data(date, practitioner):
@@ -185,181 +305,187 @@ def get_availability_data(date, practitioner):
 	"""
 
 	date = getdate(date)
-	weekday = date.strftime("%A")
+	weekday = date.strftime('%A')
 
-	available_slots = []
-	slot_details = []
-	practitioner_schedule = None
+	practitioner_doc = frappe.get_doc('Healthcare Practitioner', practitioner)
 
+	check_employee_wise_availability(date, practitioner_doc)
+
+	if practitioner_doc.practitioner_schedules:
+		slot_details = get_available_slots(practitioner_doc, date)
+	else:
+		frappe.throw(_('{0} does not have a Healthcare Practitioner Schedule. Add it in Healthcare Practitioner master').format(
+			practitioner), title=_('Practitioner Schedule Not Found'))
+
+
+	if not slot_details:
+		# TODO: return available slots in nearby dates
+		frappe.throw(_('Healthcare Practitioner not available on {0}').format(weekday), title=_('Not Available'))
+
+	return {'slot_details': slot_details}
+
+
+def check_employee_wise_availability(date, practitioner_doc):
 	employee = None
-
-	practitioner_obj = frappe.get_doc("Healthcare Practitioner", practitioner)
-
-	# Get practitioner employee relation
-	if practitioner_obj.employee:
-		employee = practitioner_obj.employee
-	elif practitioner_obj.user_id:
-		if frappe.db.exists({
-			"doctype": "Employee",
-			"user_id": practitioner_obj.user_id
-			}):
-			employee = frappe.get_doc("Employee", {"user_id": practitioner_obj.user_id}).name
+	if practitioner_doc.employee:
+		employee = practitioner_doc.employee
+	elif practitioner_doc.user_id:
+		employee = frappe.db.get_value('Employee', {'user_id': practitioner_doc.user_id}, 'name')
 
 	if employee:
-		# Check if it is Holiday
+		# check holiday
 		if is_holiday(employee, date):
-			frappe.throw(_("{0} is a company holiday".format(date)))
+			frappe.throw(_('{0} is a holiday'.format(date)), title=_('Not Available'))
 
-		# Check if He/She on Leave
+		# check leave status
 		leave_record = frappe.db.sql("""select half_day from `tabLeave Application`
 			where employee = %s and %s between from_date and to_date
 			and docstatus = 1""", (employee, date), as_dict=True)
 		if leave_record:
 			if leave_record[0].half_day:
-				frappe.throw(_("{0} on Half day Leave on {1}").format(practitioner, date))
+				frappe.throw(_('{0} is on a Half day Leave on {1}').format(practitioner_doc.name, date), title=_('Not Available'))
 			else:
-				frappe.throw(_("{0} on Leave on {1}").format(practitioner, date))
+				frappe.throw(_('{0} is on Leave on {1}').format(practitioner_doc.name, date), title=_('Not Available'))
 
-	# get practitioners schedule
-	if practitioner_obj.practitioner_schedules:
-		for schedule in practitioner_obj.practitioner_schedules:
-			if schedule.schedule:
-				practitioner_schedule = frappe.get_doc("Practitioner Schedule", schedule.schedule)
-			else:
-				frappe.throw(_("{0} does not have a Healthcare Practitioner Schedule. Add it in Healthcare Practitioner master".format(practitioner)))
 
-			if practitioner_schedule:
-				available_slots = []
-				for t in practitioner_schedule.time_slots:
-					if weekday == t.day:
-						available_slots.append(t)
+def get_available_slots(practitioner_doc, date):
+	available_slots = slot_details = []
+	weekday = date.strftime('%A')
+	practitioner = practitioner_doc.name
 
-				if available_slots:
-					appointments = []
+	for schedule_entry in practitioner_doc.practitioner_schedules:
+		validate_practitioner_schedules(schedule_entry, practitioner)
+		practitioner_schedule = frappe.get_doc('Practitioner Schedule', schedule_entry.schedule)
 
-					if schedule.service_unit:
-						slot_name  = schedule.schedule+" - "+schedule.service_unit
-						allow_overlap = frappe.get_value('Healthcare Service Unit', schedule.service_unit, 'overlap_appointments')
-						if allow_overlap:
-							# fetch all appointments to practitioner by service unit
-							appointments = frappe.get_all(
-								"Patient Appointment",
-								filters={"practitioner": practitioner, "service_unit": schedule.service_unit, "appointment_date": date, "status": ["not in",["Cancelled"]]},
-								fields=["name", "appointment_time", "duration", "status"])
-						else:
-							# fetch all appointments to service unit
-							appointments = frappe.get_all(
-								"Patient Appointment",
-								filters={"service_unit": schedule.service_unit, "appointment_date": date, "status": ["not in",["Cancelled"]]},
-								fields=["name", "appointment_time", "duration", "status"])
-					else:
-						slot_name = schedule.schedule
-						# fetch all appointments to practitioner without service unit
-						appointments = frappe.get_all(
-							"Patient Appointment",
-							filters={"practitioner": practitioner, "service_unit": '', "appointment_date": date, "status": ["not in",["Cancelled"]]},
-							fields=["name", "appointment_time", "duration", "status"])
+		if practitioner_schedule and not practitioner_schedule.disabled:
+			available_slots = []
+			for time_slot in practitioner_schedule.time_slots:
+				if weekday == time_slot.day:
+					available_slots.append(time_slot)
 
-					slot_details.append({"slot_name":slot_name, "service_unit":schedule.service_unit,
-						"avail_slot":available_slots, 'appointments': appointments})
+			if available_slots:
+				appointments = []
+				allow_overlap = 0
+				service_unit_capacity = 0
+				# fetch all appointments to practitioner by service unit
+				filters = {
+					'practitioner': practitioner,
+					'service_unit': schedule_entry.service_unit,
+					'appointment_date': date,
+					'status': ['not in',['Cancelled']]
+				}
+
+				if schedule_entry.service_unit:
+					slot_name = f'{schedule_entry.schedule}'
+					allow_overlap, service_unit_capacity = frappe.get_value('Healthcare Service Unit', schedule_entry.service_unit, ['overlap_appointments', 'service_unit_capacity'])
+					if not allow_overlap:
+						# fetch all appointments to service unit
+						filters.pop('practitioner')
+				else:
+					slot_name = schedule_entry.schedule
+					# fetch all appointments to practitioner without service unit
+					filters['practitioner'] = practitioner
+					filters.pop('service_unit')
+
+				appointments = frappe.get_all(
+					'Patient Appointment',
+					filters=filters,
+					fields=['name', 'appointment_time', 'duration', 'status'])
+
+				slot_details.append({'slot_name': slot_name, 'service_unit': schedule_entry.service_unit, 'avail_slot': available_slots,
+					'appointments': appointments,  'allow_overlap': allow_overlap, 'service_unit_capacity': service_unit_capacity,
+					'practitioner_name': practitioner_doc.practitioner_name})
+
+	return slot_details
+
+
+def validate_practitioner_schedules(schedule_entry, practitioner):
+	if schedule_entry.schedule:
+		if not schedule_entry.service_unit:
+			frappe.throw(_('Practitioner {0} does not have a Service Unit set against the Practitioner Schedule {1}.').format(
+				get_link_to_form('Healthcare Practitioner', practitioner), frappe.bold(schedule_entry.schedule)),
+				title=_('Service Unit Not Found'))
 
 	else:
-		frappe.throw(_("{0} does not have a Healthcare Practitioner Schedule. Add it in Healthcare Practitioner master".format(practitioner)))
-
-	if not available_slots and not slot_details:
-		# TODO: return available slots in nearby dates
-		frappe.throw(_("Healthcare Practitioner not available on {0}").format(weekday))
-
-	return {
-		"slot_details": slot_details
-	}
+		frappe.throw(_('Practitioner {0} does not have a Practitioner Schedule assigned.').format(
+			get_link_to_form('Healthcare Practitioner', practitioner)),
+			title=_('Practitioner Schedule Not Found'))
 
 
 @frappe.whitelist()
 def update_status(appointment_id, status):
-	frappe.db.set_value("Patient Appointment", appointment_id, "status", status)
+	frappe.db.set_value('Patient Appointment', appointment_id, 'status', status)
 	appointment_booked = True
-	if status == "Cancelled":
+	if status == 'Cancelled':
 		appointment_booked = False
-		appointment_cancel(appointment_id)
+		cancel_appointment(appointment_id)
 
-	procedure_prescription = frappe.db.get_value("Patient Appointment", appointment_id, "procedure_prescription")
+	procedure_prescription = frappe.db.get_value('Patient Appointment', appointment_id, 'procedure_prescription')
 	if procedure_prescription:
-		frappe.db.set_value("Procedure Prescription", procedure_prescription, "appointment_booked", appointment_booked)
-
-
-@frappe.whitelist()
-def set_open_appointments():
-	today = getdate()
-	frappe.db.sql(
-		"update `tabPatient Appointment` set status='Open' where status = 'Scheduled'"
-		" and appointment_date = %s", today)
-
-
-@frappe.whitelist()
-def set_pending_appointments():
-	today = getdate()
-	frappe.db.sql(
-		"update `tabPatient Appointment` set status='Pending' where status in "
-		"('Scheduled','Open') and appointment_date < %s", today)
+		frappe.db.set_value('Procedure Prescription', procedure_prescription, 'appointment_booked', appointment_booked)
 
 
 def send_confirmation_msg(doc):
-	if frappe.db.get_single_value("Healthcare Settings", "app_con"):
-		message = frappe.db.get_single_value("Healthcare Settings", "app_con_msg")
+	if frappe.db.get_single_value('Healthcare Settings', 'send_appointment_confirmation'):
+		message = frappe.db.get_single_value('Healthcare Settings', 'appointment_confirmation_msg')
 		try:
 			send_message(doc, message)
 		except Exception:
-			frappe.log_error(frappe.get_traceback(), _("Appointment Confirmation Message Not Sent"))
-			frappe.msgprint(_("Appointment Confirmation Message Not Sent"), indicator="orange")
+			frappe.log_error(frappe.get_traceback(), _('Appointment Confirmation Message Not Sent'))
+			frappe.msgprint(_('Appointment Confirmation Message Not Sent'), indicator='orange')
+
 
 @frappe.whitelist()
-def create_encounter(appointment):
-	appointment = frappe.get_doc("Patient Appointment", appointment)
-	encounter = frappe.new_doc("Patient Encounter")
-	encounter.appointment = appointment.name
-	encounter.patient = appointment.patient
-	encounter.practitioner = appointment.practitioner
-	encounter.visit_department = appointment.department
-	encounter.patient_sex = appointment.patient_sex
-	encounter.encounter_date = appointment.appointment_date
-	if appointment.invoiced:
-		encounter.invoiced = True
-	return encounter.as_dict()
+def make_encounter(source_name, target_doc=None):
+	doc = get_mapped_doc('Patient Appointment', source_name, {
+		'Patient Appointment': {
+			'doctype': 'Patient Encounter',
+			'field_map': [
+				['appointment', 'name'],
+				['patient', 'patient'],
+				['practitioner', 'practitioner'],
+				['medical_department', 'department'],
+				['patient_sex', 'patient_sex'],
+				['invoiced', 'invoiced'],
+				['company', 'company']
+			]
+		}
+	}, target_doc)
+	return doc
 
 
-def set_appointment_reminder():
-	if frappe.db.get_single_value("Healthcare Settings", "app_rem"):
-		remind_before = datetime.datetime.strptime(frappe.db.get_single_value("Healthcare Settings", "rem_before"), '%H:%M:%S')
-
+def send_appointment_reminder():
+	if frappe.db.get_single_value('Healthcare Settings', 'send_appointment_reminder'):
+		remind_before = datetime.datetime.strptime(frappe.db.get_single_value('Healthcare Settings', 'remind_before'), '%H:%M:%S')
 		reminder_dt = datetime.datetime.now() + datetime.timedelta(
 			hours=remind_before.hour, minutes=remind_before.minute, seconds=remind_before.second)
 
-		appointment_list = frappe.db.get_all("Patient Appointment", {
-			"appointment_datetime": ["between", (datetime.datetime.now(), reminder_dt)],
-			"reminded": 0,
-			"status": ["!=", "Cancelled"]
+		appointment_list = frappe.db.get_all('Patient Appointment', {
+			'appointment_datetime': ['between', (datetime.datetime.now(), reminder_dt)],
+			'reminded': 0,
+			'status': ['!=', 'Cancelled']
 		})
 
 		for appointment in appointment_list:
 			doc = frappe.get_doc('Patient Appointment', appointment.name)
-			message = frappe.db.get_single_value("Healthcare Settings", "app_rem_msg")
+			message = frappe.db.get_single_value('Healthcare Settings', 'appointment_reminder_msg')
 			send_message(doc, message)
 			frappe.db.set_value('Patient Appointment', doc.name, 'reminded', 1)
 
-
 def send_message(doc, message):
-	patient_mobile = frappe.db.get_value("Patient", doc.patient, "mobile")
+	patient_mobile = frappe.db.get_value('Patient', doc.patient, 'mobile')
 	if patient_mobile:
-		context = {"doc": doc, "alert": doc, "comments": None}
-		if doc.get("_comments"):
-			context["comments"] = json.loads(doc.get("_comments"))
+		context = {'doc': doc, 'alert': doc, 'comments': None}
+		if doc.get('_comments'):
+			context['comments'] = json.loads(doc.get('_comments'))
 
 		# jinja to string convertion happens here
 		message = frappe.render_template(message, context)
 		number = [patient_mobile]
-		send_sms(number, message)
-
+		try:
+			send_sms(number, message)
+		except Exception as e:
+			frappe.msgprint(_('SMS not sent, please check SMS Settings'), alert=True)
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
@@ -370,7 +496,7 @@ def get_events(start, end, filters=None):
 	:param filters: Filters (JSON).
 	"""
 	from frappe.desk.calendar import get_event_conditions
-	conditions = get_event_conditions("Patient Appointment", filters)
+	conditions = get_event_conditions('Patient Appointment', filters)
 
 	data = frappe.db.sql("""
 		select
@@ -392,10 +518,46 @@ def get_events(start, end, filters=None):
 
 	return data
 
+
 @frappe.whitelist()
 def get_procedure_prescribed(patient):
-	return frappe.db.sql("""select pp.name, pp.procedure, pp.parent, ct.practitioner,
-	ct.encounter_date, pp.practitioner, pp.date, pp.department
-	from `tabPatient Encounter` ct, `tabProcedure Prescription` pp
-	where ct.patient=%(patient)s and pp.parent=ct.name and pp.appointment_booked=0
-	order by ct.creation desc""", {"patient": patient})
+	return frappe.db.sql(
+		"""
+			SELECT
+				pp.name, pp.procedure, pp.parent, ct.practitioner,
+				ct.encounter_date, pp.practitioner, pp.date, pp.department
+			FROM
+				`tabPatient Encounter` ct, `tabProcedure Prescription` pp
+			WHERE
+				ct.patient=%(patient)s and pp.parent=ct.name and pp.appointment_booked=0
+			ORDER BY
+				ct.creation desc
+		""", {'patient': patient}
+	)
+
+
+@frappe.whitelist()
+def get_prescribed_therapies(patient):
+	return frappe.db.sql(
+		"""
+			SELECT
+				t.therapy_type, t.name, t.parent, e.practitioner,
+				e.encounter_date, e.therapy_plan, e.medical_department
+			FROM
+				`tabPatient Encounter` e, `tabTherapy Plan Detail` t
+			WHERE
+				e.patient=%(patient)s and t.parent=e.name
+			ORDER BY
+				e.creation desc
+		""", {'patient': patient}
+	)
+
+
+def update_appointment_status():
+	# update the status of appointments daily
+	appointments = frappe.get_all('Patient Appointment', {
+		'status': ('not in', ['Closed', 'Cancelled'])
+	}, as_dict=1)
+
+	for appointment in appointments:
+		frappe.get_doc('Patient Appointment', appointment.name).set_status()

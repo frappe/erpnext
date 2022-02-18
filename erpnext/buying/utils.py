@@ -1,14 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
-from frappe.utils import flt, cstr, cint
-from frappe import _
+
 import json
 
-from erpnext.stock.doctype.item.item import get_last_purchase_details
-from erpnext.stock.doctype.item.item import validate_end_of_life
+import frappe
+from frappe import _
+from frappe.utils import cint, cstr, flt
+
+from erpnext.stock.doctype.item.item import get_last_purchase_details, validate_end_of_life
+
 
 def update_last_purchase_rate(doc, is_submit):
 	"""updates last_purchase_rate in item table for each item"""
@@ -35,9 +36,10 @@ def update_last_purchase_rate(doc, is_submit):
 				frappe.throw(_("UOM Conversion factor is required in row {0}").format(d.idx))
 
 		# update last purchsae rate
-		if last_purchase_rate:
-			frappe.db.sql("""update `tabItem` set last_purchase_rate = %s where name = %s""",
-				(flt(last_purchase_rate), d.item_code))
+		frappe.db.set_value('Item', d.item_code, 'last_purchase_rate', flt(last_purchase_rate))
+
+
+
 
 def validate_for_items(doc):
 	items = []
@@ -101,4 +103,3 @@ def get_linked_material_requests(items):
 			mr_list.append(material_request)
 
 	return mr_list
-

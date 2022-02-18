@@ -41,4 +41,3 @@ QUnit.test("test quotation with additional discount in grand total", function(as
 		() => done()
 	]);
 });
-

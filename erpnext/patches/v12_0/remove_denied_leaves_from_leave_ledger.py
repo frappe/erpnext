@@ -1,9 +1,9 @@
 # Copyright (c) 2018, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import getdate, today
+
 
 def execute():
 	''' Delete leave ledger entry created

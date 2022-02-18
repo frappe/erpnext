@@ -1,11 +1,13 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _, scrub
 from frappe.utils import getdate
-from erpnext.stock.report.stock_analytics.stock_analytics import (get_period_date_ranges, get_period)
+
+from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
+
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -55,32 +57,27 @@ def get_periodic_data(filters, entry):
 				if d.status == 'Completed':
 					if getdate(d.actual_end_date) < getdate(from_date) or getdate(d.modified) < getdate(from_date):
 						periodic_data = update_periodic_data(periodic_data, "Completed", period)
-
 					elif getdate(d.actual_start_date) < getdate(from_date) :
 						periodic_data = update_periodic_data(periodic_data, "Pending", period)
-
 					elif getdate(d.planned_start_date) < getdate(from_date) :
 						periodic_data = update_periodic_data(periodic_data, "Overdue", period)
-						
 					else:
 						periodic_data = update_periodic_data(periodic_data, "Not Started", period)
 
 				elif d.status == 'In Process':
 					if getdate(d.actual_start_date) < getdate(from_date) :
 						periodic_data = update_periodic_data(periodic_data, "Pending", period)
-
 					elif getdate(d.planned_start_date) < getdate(from_date) :
 						periodic_data = update_periodic_data(periodic_data, "Overdue", period)
-
 					else:
 						periodic_data = update_periodic_data(periodic_data, "Not Started", period)
 
 				elif d.status == 'Not Started':
 					if getdate(d.planned_start_date) < getdate(from_date) :
 						periodic_data = update_periodic_data(periodic_data, "Overdue", period)
-
 					else:
 						periodic_data = update_periodic_data(periodic_data, "Not Started", period)
+
 	return periodic_data
 
 def update_periodic_data(periodic_data, status, period):
@@ -144,8 +141,3 @@ def get_chart_data(periodic_data, columns):
 	chart["type"] = "line"
 
 	return chart
-
-
-
-
-

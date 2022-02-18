@@ -1,9 +1,10 @@
 # Copyright (c) 2019, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe.model.utils.rename_field import rename_field
+
 
 def execute():
 	''' Change the fieldname from bank_account_no to bank_account '''

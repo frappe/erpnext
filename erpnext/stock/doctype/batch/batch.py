@@ -1,16 +1,16 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-from six import text_type
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-from frappe.utils import flt, cint, get_link_to_form
-from frappe.utils.jinja import render_template
+from frappe.utils import cint, flt, get_link_to_form
 from frappe.utils.data import add_days
-from six import string_types
+from frappe.utils.jinja import render_template
+from six import text_type
+
 
 class UnableToSelectBatchError(frappe.ValidationError):
 	pass
@@ -93,7 +93,7 @@ class Batch(Document):
 
 			if create_new_batch:
 				if batch_number_series:
-					self.batch_id = make_autoname(batch_number_series)
+					self.batch_id = make_autoname(batch_number_series, doc=self)
 				elif batch_uses_naming_series():
 					self.batch_id = self.get_name_from_naming_series()
 				else:
@@ -162,19 +162,19 @@ def get_batch_qty(batch_no=None, warehouse=None, item_code=None, posting_date=No
 
 		out = float(frappe.db.sql("""select sum(actual_qty)
 			from `tabStock Ledger Entry`
-			where warehouse=%s and batch_no=%s {0}""".format(cond),
+			where is_cancelled = 0 and warehouse=%s and batch_no=%s {0}""".format(cond),
 			(warehouse, batch_no))[0][0] or 0)
 
 	if batch_no and not warehouse:
 		out = frappe.db.sql('''select warehouse, sum(actual_qty) as qty
 			from `tabStock Ledger Entry`
-			where batch_no=%s
+			where is_cancelled = 0 and batch_no=%s
 			group by warehouse''', batch_no, as_dict=1)
 
 	if not batch_no and item_code and warehouse:
 		out = frappe.db.sql('''select batch_no, sum(actual_qty) as qty
 			from `tabStock Ledger Entry`
-			where item_code = %s and warehouse=%s
+			where is_cancelled = 0 and item_code = %s and warehouse=%s
 			group by batch_no''', (item_code, warehouse), as_dict=1)
 
 	return out
@@ -226,13 +226,12 @@ def split_batch(batch_no, item_code, warehouse, qty, new_batch_id=None):
 	return batch.name
 
 
-def set_batch_nos(doc, warehouse_field, throw=False):
+def set_batch_nos(doc, warehouse_field, throw=False, child_table="items"):
 	"""Automatically select `batch_no` for outgoing items in item table"""
-	for d in doc.items:
+	for d in doc.get(child_table):
 		qty = d.get('stock_qty') or d.get('transfer_qty') or d.get('qty') or 0
-		has_batch_no = frappe.db.get_value('Item', d.item_code, 'has_batch_no')
 		warehouse = d.get(warehouse_field, None)
-		if has_batch_no and warehouse and qty > 0:
+		if warehouse and qty > 0 and frappe.db.get_value('Item', d.item_code, 'has_batch_no'):
 			if not d.batch_no:
 				d.batch_no = get_batch_no(d.item_code, warehouse, qty, throw, d.serial_no)
 			else:
@@ -320,11 +319,12 @@ def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 		cond = " and `tabBatch`.name = %s" %(frappe.db.escape(batch[0].batch_no))
 
 	return frappe.db.sql("""
-		select batch_id, sum(`tabStock Ledger Entry`.actual_qty) as qty, expiry_date
+		select batch_id, sum(`tabStock Ledger Entry`.actual_qty) as qty
 		from `tabBatch`
 			join `tabStock Ledger Entry` ignore index (item_code, warehouse)
 				on (`tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no )
 		where `tabStock Ledger Entry`.item_code = %s and `tabStock Ledger Entry`.warehouse = %s
+			and `tabStock Ledger Entry`.is_cancelled = 0
 			and (`tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL) {0}
 		group by batch_id
 		order by `tabBatch`.expiry_date ASC, `tabBatch`.creation ASC
@@ -335,8 +335,40 @@ def validate_serial_no_with_batch(serial_nos, item_code):
 		frappe.throw(_("The serial no {0} does not belong to item {1}")
 			.format(get_link_to_form("Serial No", serial_nos[0]), get_link_to_form("Item", item_code)))
 
-	serial_no_link = ','.join([get_link_to_form("Serial No", sn) for sn in serial_nos])
+	serial_no_link = ','.join(get_link_to_form("Serial No", sn) for sn in serial_nos)
 
 	message = "Serial Nos" if len(serial_nos) > 1 else "Serial No"
 	frappe.throw(_("There is no batch found against the {0}: {1}")
 		.format(message, serial_no_link))
+
+def make_batch(args):
+	if frappe.db.get_value("Item", args.item, "has_batch_no"):
+		args.doctype = "Batch"
+		frappe.get_doc(args).insert().name
+
+@frappe.whitelist()
+def get_pos_reserved_batch_qty(filters):
+	import json
+
+	from frappe.query_builder.functions import Sum
+
+	if isinstance(filters, str):
+		filters = json.loads(filters)
+
+	p = frappe.qb.DocType("POS Invoice").as_("p")
+	item = frappe.qb.DocType("POS Invoice Item").as_("item")
+	sum_qty = Sum(item.qty).as_("qty")
+
+	reserved_batch_qty = frappe.qb.from_(p).from_(item).select(sum_qty).where(
+		(p.name == item.parent) &
+		(p.consolidated_invoice.isnull()) &
+		(p.status != "Consolidated") &
+		(p.docstatus == 1) &
+		(item.docstatus == 1) &
+		(item.item_code == filters.get('item_code')) &
+		(item.warehouse == filters.get('warehouse')) &
+		(item.batch_no == filters.get('batch_no'))
+	).run()
+
+	flt_reserved_batch_qty = flt(reserved_batch_qty[0][0])
+	return flt_reserved_batch_qty

@@ -1,7 +1,9 @@
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+
 from erpnext.setup.utils import insert_record
+
 
 def setup_agriculture():
 	if frappe.get_all('Agriculture Analysis Criteria'):
@@ -426,5 +428,5 @@ def create_agriculture_data():
 			title='Degree Days',
 			standard=1,
 			linked_doctype='Weather')
-	] 
+	]
 	insert_record(records)

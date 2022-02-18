@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
@@ -6,11 +5,16 @@ import json
 import unittest
 
 import frappe
+from frappe.utils.response import json_handler
+
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings import (
-	add_account_subtype, add_account_type, add_bank_accounts,
-	new_bank_transaction, get_plaid_configuration)
-from frappe.utils.response import json_handler
+	add_account_subtype,
+	add_account_type,
+	add_bank_accounts,
+	get_plaid_configuration,
+	new_bank_transaction,
+)
 
 
 class TestPlaidSettings(unittest.TestCase):
@@ -23,14 +27,9 @@ class TestPlaidSettings(unittest.TestCase):
 			doc.cancel()
 			doc.delete()
 
-		for ba in frappe.get_all("Bank Account"):
-			frappe.get_doc("Bank Account", ba.name).delete()
-
-		for at in frappe.get_all("Account Type"):
-			frappe.get_doc("Account Type", at.name).delete()
-
-		for ast in frappe.get_all("Account Subtype"):
-			frappe.get_doc("Account Subtype", ast.name).delete()
+		for doctype in ("Bank Account", "Bank Account Type", "Bank Account Subtype"):
+			for d in frappe.get_all(doctype):
+				frappe.delete_doc(doctype, d.name, force=True)
 
 	def test_plaid_disabled(self):
 		frappe.db.set_value("Plaid Settings", None, "enabled", 0)
@@ -38,11 +37,11 @@ class TestPlaidSettings(unittest.TestCase):
 
 	def test_add_account_type(self):
 		add_account_type("brokerage")
-		self.assertEqual(frappe.get_doc("Account Type", "brokerage").name, "brokerage")
+		self.assertEqual(frappe.get_doc("Bank Account Type", "brokerage").name, "brokerage")
 
 	def test_add_account_subtype(self):
 		add_account_subtype("loan")
-		self.assertEqual(frappe.get_doc("Account Subtype", "loan").name, "loan")
+		self.assertEqual(frappe.get_doc("Bank Account Subtype", "loan").name, "loan")
 
 	def test_default_bank_account(self):
 		if not frappe.db.exists("Bank", "Citi"):

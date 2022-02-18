@@ -24,7 +24,7 @@
 
 		<div v-if="items.length">
 			<h5>
-				{{ item_container_heading }} 
+				{{ item_container_heading }}
 				<small v-if="is_user_registered() && is_own_company">
 					<a class="pull-right" href="#marketplace/featured-items">Customize your Featured Items</a>
 				</small>
@@ -136,7 +136,7 @@ export default {
 				this.init = false;
 				this.profile = data.profile;
 				this.items = data.items;
-				this.item_container_heading = data.is_featured_item? "Features Items":"Popular Items";
+				this.item_container_heading = data.is_featured_item ? __('Featured Items') : __('Popular Items');
 				this.hub_seller = this.items[0].hub_seller;
 				this.recent_seller_reviews = data.recent_seller_reviews;
 				this.seller_product_view_stats = data.seller_product_view_stats;
@@ -147,7 +147,7 @@ export default {
 
 				this.country = __(profile.country);
 				this.site_name = __(profile.site_name);
-				this.joined_when = __(`Joined ${comment_when(profile.creation)}`);
+				this.joined_when = __('Joined {0}', [comment_when(profile.creation)]);
 
 				this.image = profile.logo;
 				this.sections = [
@@ -160,7 +160,7 @@ export default {
 				];
 
 				setTimeout(() => this.init_seller_traffic_chart(), 1);
-				
+
 			});
 		},
 

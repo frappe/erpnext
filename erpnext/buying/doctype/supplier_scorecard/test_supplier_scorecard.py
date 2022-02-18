@@ -1,17 +1,15 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
+
 
 class TestSupplierScorecard(unittest.TestCase):
 
 	def test_create_scorecard(self):
-		delete_test_scorecards()
-		my_doc = make_supplier_scorecard()
-		doc = my_doc.insert()
+		doc = make_supplier_scorecard().insert()
 		self.assertEqual(doc.name, valid_scorecard[0].get("supplier"))
 
 	def test_criteria_weight(self):
@@ -121,7 +119,8 @@ valid_scorecard = [
 			{
 				"weight":100.0,
 				"doctype":"Supplier Scorecard Scoring Criteria",
-				"criteria_name":"Delivery"
+				"criteria_name":"Delivery",
+				"formula": "100"
 			}
 		],
 		"supplier":"_Test Supplier",
@@ -129,4 +128,3 @@ valid_scorecard = [
 		"weighting_function":"{total_score} * max( 0, min ( 1 , (12 - {period_number}) / 12) )"
 	}
 ]
-

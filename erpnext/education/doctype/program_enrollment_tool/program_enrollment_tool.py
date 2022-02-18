@@ -1,19 +1,21 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from erpnext.education.api import enroll_student
 from frappe.utils import cint
+
+from erpnext.education.api import enroll_student
+
 
 class ProgramEnrollmentTool(Document):
 	def onload(self):
 		academic_term_reqd = cint(frappe.db.get_single_value('Education Settings', 'academic_term_reqd'))
 		self.set_onload("academic_term_reqd", academic_term_reqd)
 
+	@frappe.whitelist()
 	def get_students(self):
 		students = []
 		if not self.get_students_from:
@@ -30,7 +32,7 @@ class ProgramEnrollmentTool(Document):
 					.format(condition), self.as_dict(), as_dict=1)
 			elif self.get_students_from == "Program Enrollment":
 				condition2 = 'and student_batch_name=%(student_batch)s' if self.student_batch else " "
-				students = frappe.db.sql('''select student, student_name, student_batch_name from `tabProgram Enrollment`
+				students = frappe.db.sql('''select student, student_name, student_batch_name, student_category from `tabProgram Enrollment`
 					where program=%(program)s and academic_year=%(academic_year)s {0} {1} and docstatus != 2'''
 					.format(condition, condition2), self.as_dict(), as_dict=1)
 
@@ -49,6 +51,7 @@ class ProgramEnrollmentTool(Document):
 		else:
 			frappe.throw(_("No students Found"))
 
+	@frappe.whitelist()
 	def enroll_students(self):
 		total = len(self.students)
 		for i, stud in enumerate(self.students):
@@ -57,6 +60,7 @@ class ProgramEnrollmentTool(Document):
 				prog_enrollment = frappe.new_doc("Program Enrollment")
 				prog_enrollment.student = stud.student
 				prog_enrollment.student_name = stud.student_name
+				prog_enrollment.student_category = stud.student_category
 				prog_enrollment.program = self.new_program
 				prog_enrollment.academic_year = self.new_academic_year
 				prog_enrollment.academic_term = self.new_academic_term

@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
+from frappe.model.document import Document
+
 
 class OverlapError(frappe.ValidationError): pass
 
@@ -39,10 +39,11 @@ class AccountingPeriod(Document):
 			frappe.throw(_("Accounting Period overlaps with {0}")
 				.format(existing_accounting_period[0].get("name")), OverlapError)
 
+	@frappe.whitelist()
 	def get_doctypes_for_closing(self):
 		docs_for_closing = []
 		doctypes = ["Sales Invoice", "Purchase Invoice", "Journal Entry", "Payroll Entry", \
-			"Bank Reconciliation", "Asset", "Stock Entry"]
+			"Bank Clearance", "Asset", "Stock Entry"]
 		closed_doctypes = [{"document_type": doctype, "closed": 1} for doctype in doctypes]
 		for closed_doctype in closed_doctypes:
 			docs_for_closing.append(closed_doctype)

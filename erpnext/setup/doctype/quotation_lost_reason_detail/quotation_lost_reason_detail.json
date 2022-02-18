@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2020-07-14 09:21:44.057724",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -16,7 +17,8 @@
   }
  ],
  "istable": 1,
- "modified": "2020-08-12 23:33:14.490491",
+ "links": [],
+ "modified": "2020-07-26 17:58:56.373775",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Quotation Lost Reason Detail",

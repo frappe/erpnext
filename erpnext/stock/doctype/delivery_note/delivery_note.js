@@ -7,14 +7,16 @@ cur_frm.add_fetch('customer', 'tax_id', 'tax_id');
 
 frappe.provide("erpnext.stock");
 frappe.provide("erpnext.stock.delivery_note");
+frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on("Delivery Note", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
 			'Packing Slip': 'Packing Slip',
 			'Installation Note': 'Installation Note',
-			'Sales Invoice': 'Invoice',
+			'Sales Invoice': 'Sales Invoice',
 			'Stock Entry': 'Return',
+			'Shipment': 'Shipment'
 		},
 		frm.set_indicator_formatter('item_code',
 			function(doc) {
@@ -75,7 +77,10 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		});
 
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 
+		frm.set_df_property('packed_items', 'cannot_add_rows', true);
+		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
 	},
 
 	print_without_amount: function(frm) {
@@ -91,6 +96,21 @@ frappe.ui.form.on("Delivery Note", {
 				})
 			}, __('Create'));
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
+		}
+
+		if (frm.doc.docstatus == 1 && !frm.doc.inter_company_reference) {
+			let internal = me.frm.doc.is_internal_customer;
+			if (internal) {
+				let button_label = (me.frm.doc.company === me.frm.doc.represents_company) ? "Internal Purchase Receipt" :
+					"Inter Company Purchase Receipt";
+
+				me.frm.add_custom_button(button_label, function() {
+					frappe.model.open_mapped_doc({
+						method: 'erpnext.stock.doctype.delivery_note.delivery_note.make_inter_company_purchase_receipt',
+						frm: frm,
+					});
+				}, __('Create'));
+			}
 		}
 	}
 });
@@ -142,11 +162,16 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 								project: me.frm.doc.project || undefined,
 							}
 						})
-					}, __("Get items from"));
+					}, __("Get Items From"));
 			}
 		}
 
 		if (!doc.is_return && doc.status!="Closed") {
+			if(doc.docstatus == 1) {
+				this.frm.add_custom_button(__('Shipment'), function() {
+					me.make_shipment() }, __('Create'));
+			}
+
 			if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1)
 				this.frm.add_custom_button(__('Installation Note'), function() {
 					me.make_installation_note() }, __('Create'));
@@ -174,7 +199,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			}
 		}
 
-		if (doc.docstatus==1) {
+		if (doc.docstatus > 0) {
 			this.show_stock_ledger();
 			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
 				this.show_general_ledger();
@@ -211,6 +236,13 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		}
 	},
 
+	make_shipment: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_shipment",
+			frm: this.frm
+		})
+	},
+
 	make_sales_invoice: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
@@ -244,11 +276,11 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	},
 
 	items_on_form_rendered: function(doc, grid_row) {
-		erpnext.setup_serial_no();
+		erpnext.setup_serial_or_batch_no();
 	},
 
 	packed_items_on_form_rendered: function(doc, grid_row) {
-		erpnext.setup_serial_no();
+		erpnext.setup_serial_or_batch_no();
 	},
 
 	close_delivery_note: function(doc){
@@ -274,15 +306,6 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			}
 		})
 	},
-
-	to_warehouse: function() {
-		let packed_items_table = this.frm.doc["packed_items"];
-		this.autofill_warehouse(this.frm.doc["items"], "target_warehouse", this.frm.doc.to_warehouse);
-		if (packed_items_table && packed_items_table.length) {
-			this.autofill_warehouse(packed_items_table, "target_warehouse", this.frm.doc.to_warehouse);
-		}
-	}
-
 });
 
 $.extend(cur_frm.cscript, new erpnext.stock.DeliveryNoteController({frm: cur_frm}));
@@ -296,6 +319,7 @@ frappe.ui.form.on('Delivery Note', {
 
 	company: function(frm) {
 		frm.trigger("unhide_account_head");
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	unhide_account_head: function(frm) {
@@ -332,3 +356,23 @@ erpnext.stock.delivery_note.set_print_hide = function(doc, cdt, cdn){
 			dn_fields['taxes'].print_hide = 0;
 	}
 }
+
+
+frappe.tour['Delivery Note'] = [
+	{
+		fieldname: "customer",
+		title: __("Customer"),
+		description: __("This field is used to set the 'Customer'.")
+	},
+	{
+		fieldname: "items",
+		title: __("Items"),
+		description: __("This table is used to set details about the 'Item', 'Qty', 'Basic Rate', etc.") + " " +
+		__("Different 'Source Warehouse' and 'Target Warehouse' can be set for each row.")
+	},
+	{
+		fieldname: "set_posting_time",
+		title: __("Edit Posting Date and Time"),
+		description: __("This option can be checked to edit the 'Posting Date' and 'Posting Time' fields.")
+	}
+]

@@ -27,7 +27,7 @@ export default {
 			},
 
 			// Constants
-			empty_state_message: __(`Sorry! I could not find what you were looking for.`)
+			empty_state_message: __('Sorry! We could not find what you were looking for.')
 		};
 	},
 }

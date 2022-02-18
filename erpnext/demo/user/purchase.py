@@ -1,17 +1,23 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
-import frappe, random, json, erpnext
-from frappe.utils.make_random import how_many, get_random
+import json
+import random
+
+import frappe
 from frappe.desk import query_report
-from erpnext.setup.utils import get_exchange_rate
+from frappe.utils.make_random import get_random, how_many
+
+import erpnext
 from erpnext.accounts.party import get_party_account_currency
+from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
+	make_supplier_quotation_from_rfq,
+)
 from erpnext.exceptions import InvalidCurrency
+from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.material_request.material_request import make_request_for_quotation
-from erpnext.buying.doctype.request_for_quotation.request_for_quotation import \
-			 make_supplier_quotation as make_quotation_from_rfq
+
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_purchase_user'))
@@ -44,7 +50,7 @@ def work():
 				rfq = frappe.get_doc('Request for Quotation', rfq.name)
 
 				for supplier in rfq.suppliers:
-					supplier_quotation = make_quotation_from_rfq(rfq.name, supplier.supplier)
+					supplier_quotation = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier.supplier)
 					supplier_quotation.save()
 					supplier_quotation.submit()
 

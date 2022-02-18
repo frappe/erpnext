@@ -27,7 +27,10 @@ erpnext.get_sales_trends_filters = function() {
 				{ "value": "Territory", "label": __("Territory") },
 				{ "value": "Project", "label": __("Project") }
 			],
-			"default": "Item"
+			"default": "Item",
+			"dashboard_config": {
+				"read_only": 1,
+			}
 		},
 		{
 			"fieldname":"group_by",

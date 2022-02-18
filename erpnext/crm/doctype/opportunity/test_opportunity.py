@@ -1,12 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-from frappe.utils import today, random_string
+from frappe.utils import random_string, today
+
 from erpnext.crm.doctype.lead.lead import make_customer
 from erpnext.crm.doctype.opportunity.opportunity import make_quotation
-import unittest
 
 test_records = frappe.get_test_records('Opportunity')
 
@@ -82,7 +83,8 @@ def make_opportunity(**args):
 	if args.with_items:
 		opp_doc.append('items', {
 			"item_code": args.item_code or "_Test Item",
-			"qty": args.qty or 1
+			"qty": args.qty or 1,
+			"uom": "_Test UOM"
 		})
 
 	opp_doc.insert()

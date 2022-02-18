@@ -1,0 +1,114 @@
+{
+ "actions": [],
+ "autoname": "Prompt",
+ "creation": "2020-08-05 19:00:36.103500",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "applicable_earnings_component",
+  "work_experience_calculation_function",
+  "total_working_days_per_year",
+  "column_break_3",
+  "disable",
+  "calculate_gratuity_amount_based_on",
+  "minimum_year_for_gratuity",
+  "gratuity_rules_section",
+  "gratuity_rule_slabs"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "disable",
+   "fieldtype": "Check",
+   "label": "Disable"
+  },
+  {
+   "fieldname": "calculate_gratuity_amount_based_on",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Calculate Gratuity Amount Based On",
+   "options": "Current Slab\nSum of all previous slabs",
+   "reqd": 1
+  },
+  {
+   "description": "Salary components should be part of the Salary Structure.",
+   "fieldname": "applicable_earnings_component",
+   "fieldtype": "Table MultiSelect",
+   "label": "Applicable Earnings Component",
+   "options": "Gratuity Applicable Component",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gratuity_rules_section",
+   "fieldtype": "Section Break",
+   "label": "Gratuity Rules"
+  },
+  {
+   "description": "Leave <b>From</b> and <b>To</b> 0 for no upper and lower limit.",
+   "fieldname": "gratuity_rule_slabs",
+   "fieldtype": "Table",
+   "label": "Current Work Experience",
+   "options": "Gratuity Rule Slab",
+   "reqd": 1
+  },
+  {
+   "default": "Round off Work Experience",
+   "fieldname": "work_experience_calculation_function",
+   "fieldtype": "Select",
+   "label": "Work Experience Calculation method",
+   "options": "Round off Work Experience\nTake Exact Completed Years"
+  },
+  {
+   "default": "365",
+   "fieldname": "total_working_days_per_year",
+   "fieldtype": "Int",
+   "label": "Total working Days Per Year"
+  },
+  {
+   "fieldname": "minimum_year_for_gratuity",
+   "fieldtype": "Int",
+   "label": "Minimum Year for Gratuity"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2020-12-03 17:08:27.891535",
+ "modified_by": "Administrator",
+ "module": "Payroll",
+ "name": "Gratuity Rule",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

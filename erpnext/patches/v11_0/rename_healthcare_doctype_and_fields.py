@@ -1,8 +1,7 @@
-from __future__ import unicode_literals
+
 import frappe
-from frappe.model.rename_doc import rename_doc
 from frappe.model.utils.rename_field import rename_field
-from frappe.modules import scrub, get_doctype_module
+from frappe.modules import get_doctype_module, scrub
 
 field_rename_map = {
 	"Patient Encounter": [
@@ -37,7 +36,7 @@ doc_rename_map = {
 def execute():
 	for dt in doc_rename_map:
 		if frappe.db.exists('DocType', dt):
-			rename_doc('DocType', dt, doc_rename_map[dt], force=True)
+			frappe.rename_doc('DocType', dt, doc_rename_map[dt], force=True)
 
 	for dn in field_rename_map:
 		if frappe.db.exists('DocType', dn):

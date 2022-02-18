@@ -1,11 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import flt
-from erpnext.selling.doctype.customer.customer import get_customer_outstanding, get_credit_limit
+
+from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
+
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -21,19 +23,24 @@ def execute(filters=None):
 		row = []
 
 		outstanding_amt = get_customer_outstanding(d.name, filters.get("company"),
-			ignore_outstanding_sales_order=d.bypass_credit_limit_check_at_sales_order)
+			ignore_outstanding_sales_order=d.bypass_credit_limit_check)
 
 		credit_limit = get_credit_limit(d.name, filters.get("company"))
 
 		bal = flt(credit_limit) - flt(outstanding_amt)
 
 		if customer_naming_type == "Naming Series":
-			row = [d.name, d.customer_name, credit_limit, outstanding_amt, bal,
-				d.bypass_credit_limit_check, d.is_frozen,
-          d.disabled]
+			row = [
+				d.name, d.customer_name, credit_limit,
+				outstanding_amt, bal, d.bypass_credit_limit_check,
+				d.is_frozen, d.disabled
+			]
 		else:
-			row = [d.name, credit_limit, outstanding_amt, bal,
-          d.bypass_credit_limit_check_at_sales_order, d.is_frozen, d.disabled]
+			row = [
+				d.name, credit_limit, outstanding_amt, bal,
+				d.bypass_credit_limit_check, d.is_frozen,
+				d.disabled
+			]
 
 		if credit_limit:
 			data.append(row)
@@ -57,18 +64,18 @@ def get_columns(customer_naming_type):
 	return columns
 
 def get_details(filters):
-	conditions = ""
 
+	sql_query = """SELECT
+						c.name, c.customer_name,
+						ccl.bypass_credit_limit_check,
+						c.is_frozen, c.disabled
+					FROM `tabCustomer` c, `tabCustomer Credit Limit` ccl
+					WHERE
+						c.name = ccl.parent
+						AND ccl.company = %(company)s"""
+
+	# customer filter is optional.
 	if filters.get("customer"):
-		conditions += " AND c.name = '" + filters.get("customer") + "'"
+		sql_query += " AND c.name = %(customer)s"
 
-	return frappe.db.sql("""SELECT
-			c.name, c.customer_name,
-			ccl.bypass_credit_limit_check,
-			c.is_frozen, c.disabled
-		FROM `tabCustomer` c, `tabCustomer Credit Limit` ccl
-		WHERE
-			c.name = ccl.parent
-			AND ccl.company = '{0}'
-			{1}
-	""".format( filters.get("company"),conditions), as_dict=1) #nosec
+	return frappe.db.sql(sql_query, filters, as_dict=1)

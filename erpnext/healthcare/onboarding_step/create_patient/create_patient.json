@@ -1,0 +1,19 @@
+{
+ "action": "Create Entry",
+ "creation": "2020-05-19 10:32:27.648902",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-01-30 00:09:28.786428",
+ "modified_by": "ruchamahabal2@gmail.com",
+ "name": "Create Patient",
+ "owner": "Administrator",
+ "reference_document": "Patient",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Create Patient",
+ "validate_action": 1
+}

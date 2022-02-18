@@ -1,18 +1,17 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
 
-from frappe.model.document import Document
+import frappe
 from frappe import _
+from frappe.model.document import Document
+
 
 class ModeofPayment(Document):
 	def validate(self):
 		self.validate_accounts()
 		self.validate_repeating_companies()
 		self.validate_pos_mode_of_payment()
-	
 	def validate_repeating_companies(self):
 		"""Error when Same Company is entered multiple times in accounts"""
 		accounts_list = []
@@ -31,12 +30,11 @@ class ModeofPayment(Document):
 
 	def validate_pos_mode_of_payment(self):
 		if not self.enabled:
-			pos_profiles = frappe.db.sql("""SELECT sip.parent FROM `tabSales Invoice Payment` sip 
+			pos_profiles = frappe.db.sql("""SELECT sip.parent FROM `tabSales Invoice Payment` sip
 				WHERE sip.parenttype = 'POS Profile' and sip.mode_of_payment = %s""", (self.name))
 			pos_profiles = list(map(lambda x: x[0], pos_profiles))
-			
+
 			if pos_profiles:
 				message = "POS Profile " + frappe.bold(", ".join(pos_profiles)) + " contains \
 					Mode of Payment " + frappe.bold(str(self.name)) + ". Please remove them to disable this mode."
 				frappe.throw(_(message), title="Not Allowed")
-

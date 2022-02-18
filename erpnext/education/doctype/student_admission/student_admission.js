@@ -11,5 +11,12 @@ frappe.ui.form.on('Student Admission', {
 
 	academic_year: function(frm) {
 		frm.trigger("program");
+	},
+
+	admission_end_date: function(frm) {
+		if(frm.doc.admission_end_date && frm.doc.admission_end_date <= frm.doc.admission_start_date){
+			frm.set_value("admission_end_date", "");
+			frappe.throw(__("Admission End Date should be greater than Admission Start Date."));
+		}
 	}
 });

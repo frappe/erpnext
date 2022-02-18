@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies and Contributors
 # See license.txt
-from __future__ import unicode_literals
-from frappe.test_runner import make_test_records
-from erpnext.education.doctype.program.test_program import make_program_and_linked_courses
-from erpnext.education.doctype.course.test_course import make_course
+
+import unittest
 
 import frappe
-import unittest
+
+from erpnext.education.doctype.program.test_program import make_program_and_linked_courses
 
 test_records = frappe.get_test_records('Student')
 class TestStudent(unittest.TestCase):
@@ -41,6 +39,16 @@ class TestStudent(unittest.TestCase):
 		self.assertTrue("_Test Course 1" in course_enrollments.keys())
 		self.assertTrue("_Test Course 2" in course_enrollments.keys())
 		frappe.db.rollback()
+
+	def tearDown(self):
+		for entry in frappe.db.get_all("Course Enrollment"):
+			frappe.delete_doc("Course Enrollment", entry.name)
+
+		for entry in frappe.db.get_all("Program Enrollment"):
+			doc = frappe.get_doc("Program Enrollment", entry.name)
+			doc.cancel()
+			doc.delete()
+
 
 def create_student(student_dict):
 	student = get_student(student_dict['email'])

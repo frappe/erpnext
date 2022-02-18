@@ -1,11 +1,13 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt, cint
+from frappe.utils import cint, flt
+
 from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
+
 
 def execute(filters=None):
 	validate_filters(filters)

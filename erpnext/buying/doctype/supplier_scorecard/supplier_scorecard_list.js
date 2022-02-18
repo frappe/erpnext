@@ -10,7 +10,7 @@ frappe.listview_settings["Supplier Scorecard"] = {
 		if (doc.indicator_color) {
 			return [__(doc.status), doc.indicator_color.toLowerCase(), "status,=," + doc.status];
 		} else {
-			return [__("Unknown"), "darkgrey", "status,=,''"];
+			return [__("Unknown"), "gray", "status,=,''"];
 		}
 	},
 

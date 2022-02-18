@@ -43,6 +43,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				label: __(me.warehouse_details.type),
 				default: typeof me.warehouse_details.name == "string" ? me.warehouse_details.name : '',
 				onchange: function(e) {
+					me.warehouse_details.name = this.get_value();
 
 					if(me.has_batch && !me.has_serial_no) {
 						fields = fields.concat(me.get_batch_fields());
@@ -50,7 +51,6 @@ erpnext.SerialNoBatchSelector = Class.extend({
 						fields = fields.concat(me.get_serial_no_fields());
 					}
 
-					me.warehouse_details.name = this.get_value();
 					var batches = this.layout.fields_dict.batches;
 					if(batches) {
 						batches.grid.df.data = [];
@@ -74,8 +74,17 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				fieldname: 'qty',
 				fieldtype:'Float',
 				read_only: me.has_batch && !me.has_serial_no,
-				label: __(me.has_batch && !me.has_serial_no ? 'Total Qty' : 'Qty'),
-				default: 0
+				label: __(me.has_batch && !me.has_serial_no ? 'Selected Qty' : 'Qty'),
+				default: flt(me.item.stock_qty),
+			},
+			...get_pending_qty_fields(me),
+			{
+				fieldname: 'uom',
+				read_only: 1,
+				fieldtype: 'Link',
+				options: 'UOM',
+				label: __('UOM'),
+				default: me.item.uom
 			},
 			{
 				fieldname: 'auto_fetch_button',
@@ -91,15 +100,22 @@ erpnext.SerialNoBatchSelector = Class.extend({
 							qty: qty,
 							item_code: me.item_code,
 							warehouse: typeof me.warehouse_details.name == "string" ? me.warehouse_details.name : '',
-							batch_no: me.item.batch_no || null
+							batch_no: me.item.batch_no || null,
+							posting_date: me.frm.doc.posting_date || me.frm.doc.transaction_date
 						}
 					});
 
 					numbers.then((data) => {
 						let auto_fetched_serial_numbers = data.message;
 						let records_length = auto_fetched_serial_numbers.length;
+						if (!records_length) {
+							const warehouse = me.dialog.fields_dict.warehouse.get_value().bold();
+							frappe.msgprint(
+								__('Serial numbers unavailable for Item {0} under warehouse {1}. Please try changing warehouse.', [me.item.item_code.bold(), warehouse])
+							);
+						}
 						if (records_length < qty) {
-							frappe.msgprint(`Fetched only ${records_length} serial numbers.`);
+							frappe.msgprint(__('Fetched only {0} available serial numbers.', [records_length]));
 						}
 						let serial_no_list_field = this.dialog.fields_dict.serial_no;
 						numbers = auto_fetched_serial_numbers.join('\n');
@@ -133,6 +149,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 					() => me.update_batch_serial_no_items(),
 					() => {
 						refresh_field("items");
+						refresh_field("packed_items");
 						if (me.callback) {
 							return me.callback(me.item);
 						}
@@ -147,7 +164,6 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			if (this.item.serial_no) {
 				this.dialog.fields_dict.serial_no.set_value(this.item.serial_no);
 			}
-			
 			if (this.has_batch && !this.has_serial_no && d.batch_no) {
 				this.frm.doc.items.forEach(data => {
 					if(data.item_code == d.item_code) {
@@ -165,6 +181,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 		if (this.has_batch && !this.has_serial_no) {
 			this.update_total_qty();
+			this.update_pending_qtys();
 		}
 
 		this.dialog.show();
@@ -184,15 +201,12 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		}
 		if(this.has_batch && !this.has_serial_no) {
 			if(values.batches.length === 0 || !values.batches) {
-				frappe.throw(__("Please select batches for batched item "
-					+ values.item_code));
-				return false;
+				frappe.throw(__("Please select batches for batched item {0}", [values.item_code]));
 			}
 			values.batches.map((batch, i) => {
 				if(!batch.selected_qty || batch.selected_qty === 0 ) {
 					if (!this.show_dialog) {
-						frappe.throw(__("Please select quantity on row " + (i+1)));
-						return false;
+						frappe.throw(__("Please select quantity on row {0}", [i+1]));
 					}
 				}
 			});
@@ -201,9 +215,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		} else {
 			let serial_nos = values.serial_no || '';
 			if (!serial_nos || !serial_nos.replace(/\s/g, '').length) {
-				frappe.throw(__("Please enter serial numbers for serialized item "
-					+ values.item_code));
-				return false;
+				frappe.throw(__("Please enter serial numbers for serialized item {0}", [values.item_code]));
 			}
 			return true;
 		}
@@ -229,7 +241,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				this.map_row_values(row, batch, 'batch_no',
 					'selected_qty', this.values.warehouse);
 			});
-		} 
+		}
 	},
 
 	update_serial_no_item() {
@@ -248,7 +260,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				filters: { 'name': ["in", selected_serial_nos]},
 				fields: ["batch_no", "name"]
 			}).then((data) => {
-				// data = [{batch_no: 'batch-1', name: "SR-001"}, 
+				// data = [{batch_no: 'batch-1', name: "SR-001"},
 				// 	{batch_no: 'batch-2', name: "SR-003"}, {batch_no: 'batch-2', name: "SR-004"}]
 				const batch_serial_map = data.reduce((acc, d) => {
 					if (!acc[d['batch_no']]) acc[d['batch_no']] = [];
@@ -296,6 +308,8 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		} else {
 			row.warehouse = values.warehouse || warehouse;
 		}
+
+		this.frm.dirty();
 	},
 
 	update_total_qty: function() {
@@ -308,7 +322,21 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 		qty_field.set_input(total_qty);
 	},
+	update_pending_qtys: function() {
+		const pending_qty_field = this.dialog.fields_dict.pending_qty;
+		const total_selected_qty_field = this.dialog.fields_dict.total_selected_qty;
 
+		if (!pending_qty_field || !total_selected_qty_field) return;
+
+		const me = this;
+		const required_qty = this.dialog.fields_dict.required_qty.value;
+		const selected_qty = this.dialog.fields_dict.qty.value;
+		const total_selected_qty = selected_qty + calc_total_selected_qty(me);
+		const pending_qty = required_qty - total_selected_qty;
+
+		pending_qty_field.set_input(pending_qty);
+		total_selected_qty_field.set_input(total_selected_qty);
+	},
 	get_batch_fields: function() {
 		var me = this;
 
@@ -350,8 +378,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 							});
 							if (selected_batches.includes(batch_no)) {
 								this.set_value("");
-								frappe.throw(__(`Batch ${batch_no} already selected.`));
-								return;
+								frappe.throw(__('Batch {0} already selected.', [batch_no]));
 							}
 
 							if (me.warehouse_details.name) {
@@ -370,8 +397,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 							} else {
 								this.set_value("");
-								frappe.throw(__(`Please select a warehouse to get available
-									quantities`));
+								frappe.throw(__('Please select a warehouse to get available quantities'));
 							}
 							// e.stopImmediatePropagation();
 						}
@@ -406,13 +432,13 @@ erpnext.SerialNoBatchSelector = Class.extend({
 								parseFloat(available_qty) < parseFloat(selected_qty)) {
 
 								this.set_value('0');
-								frappe.throw(__(`For transfer from source, selected quantity cannot be
-									greater than available quantity`));
+								frappe.throw(__('For transfer from source, selected quantity cannot be greater than available quantity'));
 							} else {
 								this.grid.refresh();
 							}
 
 							me.update_total_qty();
+							me.update_pending_qtys();
 						}
 					},
 				],
@@ -441,6 +467,21 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		if (me.warehouse_details.name) {
 			serial_no_filters['warehouse'] = me.warehouse_details.name;
 		}
+
+		if (me.frm.doc.doctype === 'POS Invoice' && !this.showing_reserved_serial_nos_error) {
+			frappe.call({
+				method: "erpnext.stock.doctype.serial_no.serial_no.get_pos_reserved_serial_nos",
+				args: {
+					filters: {
+						item_code: me.item_code,
+						warehouse: typeof me.warehouse_details.name == "string" ? me.warehouse_details.name : '',
+					}
+				}
+			}).then((data) => {
+				serial_no_filters['name'] = ["not in", data.message[0]]
+			})
+		}
+
 		return [
 			{fieldtype: 'Section Break', label: __('Serial Numbers')},
 			{
@@ -494,3 +535,60 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		];
 	}
 });
+
+function get_pending_qty_fields(me) {
+	if (!check_can_calculate_pending_qty(me)) return [];
+	const { frm: { doc: { fg_completed_qty }}, item: { item_code, stock_qty }} = me;
+	const { qty_consumed_per_unit } = erpnext.stock.bom.items[item_code];
+
+	const total_selected_qty = calc_total_selected_qty(me);
+	const required_qty = flt(fg_completed_qty) * flt(qty_consumed_per_unit);
+	const pending_qty = required_qty - (flt(stock_qty) + total_selected_qty);
+
+	const pending_qty_fields =  [
+		{ fieldtype: 'Section Break', label: __('Pending Quantity') },
+		{
+			fieldname: 'required_qty',
+			read_only: 1,
+			fieldtype: 'Float',
+			label: __('Required Qty'),
+			default: required_qty
+		},
+		{ fieldtype: 'Column Break' },
+		{
+			fieldname: 'total_selected_qty',
+			read_only: 1,
+			fieldtype: 'Float',
+			label: __('Total Selected Qty'),
+			default: total_selected_qty
+		},
+		{ fieldtype: 'Column Break' },
+		{
+			fieldname: 'pending_qty',
+			read_only: 1,
+			fieldtype: 'Float',
+			label: __('Pending Qty'),
+			default: pending_qty
+		},
+	];
+	return pending_qty_fields;
+}
+
+function calc_total_selected_qty(me) {
+	const { frm: { doc: { items }}, item: { name, item_code }} = me;
+	const totalSelectedQty = items
+		.filter( item => ( item.name !== name ) && ( item.item_code === item_code ) )
+		.map( item => flt(item.qty) )
+		.reduce( (i, j) => i + j, 0);
+	return totalSelectedQty;
+}
+
+function check_can_calculate_pending_qty(me) {
+	const { frm: { doc }, item } = me;
+	const docChecks = doc.bom_no
+		&& doc.fg_completed_qty
+		&& erpnext.stock.bom
+		&& erpnext.stock.bom.name === doc.bom_no;
+	const itemChecks = !!item  && !item.allow_alternative_item;
+	return docChecks && itemChecks;
+}

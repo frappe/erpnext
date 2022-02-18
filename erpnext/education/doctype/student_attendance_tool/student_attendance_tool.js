@@ -52,6 +52,8 @@ frappe.ui.form.on('Student Attendance Tool', {
 	},
 
 	date: function(frm) {
+		if (frm.doc.date > frappe.datetime.get_today())
+			frappe.throw(__("Cannot mark attendance for future dates."));
 		frm.trigger("student_group");
 	},
 
@@ -133,8 +135,8 @@ education.StudentsEditor = Class.extend({
 					return !stud.disabled && !stud.checked;
 				});
 
-				frappe.confirm(__("Do you want to update attendance?<br>Present: {0}\
-					<br>Absent: {1}", [students_present.length, students_absent.length]),
+				frappe.confirm(__("Do you want to update attendance? <br> Present: {0} <br> Absent: {1}",
+					[students_present.length, students_absent.length]),
 					function() {	//ifyes
 						if(!frappe.request.ajax_count) {
 							frappe.call({

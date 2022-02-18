@@ -1,13 +1,16 @@
-from __future__ import unicode_literals
 
-import frappe
 import json
 import unittest
 
-from erpnext.stock.doctype.item.test_item import set_item_variant_settings
-from erpnext.controllers.item_variant import copy_attributes_to_variant, make_variant_item_code
-
+import frappe
 from six import string_types
+
+from erpnext.controllers.item_variant import copy_attributes_to_variant, make_variant_item_code
+from erpnext.stock.doctype.item.test_item import set_item_variant_settings
+from erpnext.stock.doctype.quality_inspection.test_quality_inspection import (
+	create_quality_inspection_parameter,
+)
+
 
 class TestItemVariant(unittest.TestCase):
 	def test_tables_in_template_copied_to_variant(self):
@@ -56,6 +59,8 @@ def make_quality_inspection_template():
 
 	qc = frappe.new_doc("Quality Inspection Template")
 	qc.quality_inspection_template_name = qc_template
+
+	create_quality_inspection_parameter("Moisture")
 	qc.append('item_quality_inspection_parameter', {
 		"specification": "Moisture",
 		"value": "&lt; 5%",

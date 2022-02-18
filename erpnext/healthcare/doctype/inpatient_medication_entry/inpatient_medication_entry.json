@@ -1,0 +1,204 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2020-09-25 14:13:20.111906",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "company",
+  "column_break_3",
+  "posting_date",
+  "status",
+  "filters_section",
+  "item_code",
+  "assigned_to_practitioner",
+  "patient",
+  "practitioner",
+  "service_unit",
+  "column_break_11",
+  "from_date",
+  "to_date",
+  "from_time",
+  "to_time",
+  "select_medication_orders_section",
+  "get_medication_orders",
+  "medication_orders",
+  "section_break_18",
+  "update_stock",
+  "warehouse",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "HLC-IME-.YYYY.-"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nDraft\nSubmitted\nPending\nIn Process\nCompleted\nCancelled",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.__islocal",
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code (Drug)",
+   "options": "Item"
+  },
+  {
+   "depends_on": "update_stock",
+   "description": "Warehouse from where medication stock should be consumed",
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Medication Warehouse",
+   "mandatory_depends_on": "update_stock",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient",
+   "options": "Patient"
+  },
+  {
+   "depends_on": "eval:!doc.patient",
+   "fieldname": "service_unit",
+   "fieldtype": "Link",
+   "label": "Healthcare Service Unit",
+   "options": "Healthcare Service Unit"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Inpatient Medication Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "practitioner",
+   "fieldtype": "Link",
+   "label": "Healthcare Practitioner",
+   "options": "Healthcare Practitioner"
+  },
+  {
+   "fieldname": "select_medication_orders_section",
+   "fieldtype": "Section Break",
+   "label": "Medication Orders"
+  },
+  {
+   "fieldname": "medication_orders",
+   "fieldtype": "Table",
+   "label": "Inpatient Medication Orders",
+   "options": "Inpatient Medication Entry Detail",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus!==1",
+   "fieldname": "get_medication_orders",
+   "fieldtype": "Button",
+   "label": "Get Pending Medication Orders",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "assigned_to_practitioner",
+   "fieldtype": "Link",
+   "label": "Assigned To",
+   "options": "User"
+  },
+  {
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break",
+   "label": "Stock Details"
+  },
+  {
+   "default": "1",
+   "fieldname": "update_stock",
+   "fieldtype": "Check",
+   "label": "Update Stock"
+  },
+  {
+   "fieldname": "from_time",
+   "fieldtype": "Time",
+   "label": "From Time"
+  },
+  {
+   "fieldname": "to_time",
+   "fieldtype": "Time",
+   "label": "To Time"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-01-11 12:37:46.749659",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Inpatient Medication Entry",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

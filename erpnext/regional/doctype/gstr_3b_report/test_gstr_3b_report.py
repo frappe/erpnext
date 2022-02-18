@@ -1,21 +1,33 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import json
+import unittest
 
 import frappe
-import unittest
 from frappe.utils import getdate
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.stock.doctype.item.test_item import make_item
-import json
 
 test_dependencies = ["Territory", "Customer Group", "Supplier Group", "Item"]
 
 class TestGSTR3BReport(unittest.TestCase):
-	def test_gstr_3b_report(self):
+	def setUp(self):
+		frappe.set_user("Administrator")
 
+		frappe.db.sql("delete from `tabSales Invoice` where company='_Test Company GST'")
+		frappe.db.sql("delete from `tabPurchase Invoice` where company='_Test Company GST'")
+		frappe.db.sql("delete from `tabGSTR 3B Report` where company='_Test Company GST'")
+
+		make_company()
+		make_item("Milk", properties = {"is_nil_exempt": 1, "standard_rate": 0.000000})
+		set_account_heads()
+		make_customers()
+		make_suppliers()
+
+	def test_gstr_3b_report(self):
 		month_number_mapping = {
 			1: "January",
 			2: "February",
@@ -31,41 +43,104 @@ class TestGSTR3BReport(unittest.TestCase):
 			12: "December"
 		}
 
-		frappe.set_user("Administrator")
-
-		frappe.db.sql("delete from `tabSales Invoice` where company='_Test Company GST'")
-		frappe.db.sql("delete from `tabPurchase Invoice` where company='_Test Company GST'")
-		frappe.db.sql("delete from `tabGSTR 3B Report` where company='_Test Company GST'")
-
-		make_company()
-		make_item("Milk", properties = {"is_nil_exempt": 1, "standard_rate": 0.000000})
-		set_account_heads()
-		make_customers()
-		make_suppliers()
 		make_sales_invoice()
 		create_purchase_invoices()
 
-		if frappe.db.exists("GSTR 3B Report", "GSTR3B-March-2019-_Test Address-Billing"):
-			report = frappe.get_doc("GSTR 3B Report", "GSTR3B-March-2019-_Test Address-Billing")
+		if frappe.db.exists("GSTR 3B Report", "GSTR3B-March-2019-_Test Address GST-Billing"):
+			report = frappe.get_doc("GSTR 3B Report", "GSTR3B-March-2019-_Test Address GST-Billing")
 			report.save()
 		else:
 			report = frappe.get_doc({
 				"doctype": "GSTR 3B Report",
 				"company": "_Test Company GST",
-				"company_address": "_Test Address-Billing",
+				"company_address": "_Test Address GST-Billing",
 				"year": getdate().year,
 				"month": month_number_mapping.get(getdate().month)
 			}).insert()
 
 		output = json.loads(report.json_output)
 
-		self.assertEqual(output["sup_details"]["osup_det"]["iamt"], 36),
-		self.assertEqual(output["sup_details"]["osup_zero"]["iamt"], 18),
+		self.assertEqual(output["sup_details"]["osup_det"]["iamt"], 54)
 		self.assertEqual(output["inter_sup"]["unreg_details"][0]["iamt"], 18),
 		self.assertEqual(output["sup_details"]["osup_nil_exmp"]["txval"], 100),
-		self.assertEqual(output["inward_sup"]["isup_details"][0]["inter"], 250)
+		self.assertEqual(output["inward_sup"]["isup_details"][0]["intra"], 250)
 		self.assertEqual(output["itc_elg"]["itc_avl"][4]["samt"], 22.50)
 		self.assertEqual(output["itc_elg"]["itc_avl"][4]["camt"], 22.50)
+
+	def test_gst_rounding(self):
+		gst_settings = frappe.get_doc('GST Settings')
+		gst_settings.round_off_gst_values = 1
+		gst_settings.save()
+
+		current_country = frappe.flags.country
+		frappe.flags.country = 'India'
+
+		si = create_sales_invoice(company="_Test Company GST",
+			customer = '_Test GST Customer',
+			currency = 'INR',
+			warehouse = 'Finished Goods - _GST',
+			debit_to = 'Debtors - _GST',
+			income_account = 'Sales - _GST',
+			expense_account = 'Cost of Goods Sold - _GST',
+			cost_center = 'Main - _GST',
+			rate=216,
+			do_not_save=1
+		)
+
+		si.append("taxes", {
+			"charge_type": "On Net Total",
+			"account_head": "Output Tax IGST - _GST",
+			"cost_center": "Main - _GST",
+			"description": "IGST @ 18.0",
+			"rate": 18
+		})
+
+		si.save()
+		# Check for 39 instead of 38.88
+		self.assertEqual(si.taxes[0].base_tax_amount_after_discount_amount, 39)
+
+		frappe.flags.country = current_country
+		gst_settings.round_off_gst_values = 1
+		gst_settings.save()
+
+	def test_gst_category_auto_update(self):
+		if not frappe.db.exists("Customer", "_Test GST Customer With GSTIN"):
+			customer = frappe.get_doc({
+				"customer_group": "_Test Customer Group",
+				"customer_name": "_Test GST Customer With GSTIN",
+				"customer_type": "Individual",
+				"doctype": "Customer",
+				"territory": "_Test Territory"
+			}).insert()
+
+			self.assertEqual(customer.gst_category, 'Unregistered')
+
+		if not frappe.db.exists('Address', '_Test GST Category-1-Billing'):
+			address = frappe.get_doc({
+				"address_line1": "_Test Address Line 1",
+				"address_title": "_Test GST Category-1",
+				"address_type": "Billing",
+				"city": "_Test City",
+				"state": "Test State",
+				"country": "India",
+				"doctype": "Address",
+				"is_primary_address": 1,
+				"phone": "+91 0000000000",
+				"gstin": "29AZWPS7135H1ZG",
+				"gst_state": "Karnataka",
+				"gst_state_number": "29"
+			}).insert()
+
+			address.append("links", {
+				"link_doctype": "Customer",
+				"link_name": "_Test GST Customer With GSTIN"
+			})
+
+			address.save()
+
+		customer.load_from_db()
+		self.assertEqual(customer.gst_category, 'Registered Regular')
+
 
 def make_sales_invoice():
 	si = create_sales_invoice(company="_Test Company GST",
@@ -81,7 +156,7 @@ def make_sales_invoice():
 
 	si.append("taxes", {
 			"charge_type": "On Net Total",
-			"account_head": "IGST - _GST",
+			"account_head": "Output Tax IGST - _GST",
 			"cost_center": "Main - _GST",
 			"description": "IGST @ 18.0",
 			"rate": 18
@@ -102,7 +177,7 @@ def make_sales_invoice():
 
 	si1.append("taxes", {
 			"charge_type": "On Net Total",
-			"account_head": "IGST - _GST",
+			"account_head": "Output Tax IGST - _GST",
 			"cost_center": "Main - _GST",
 			"description": "IGST @ 18.0",
 			"rate": 18
@@ -123,7 +198,7 @@ def make_sales_invoice():
 
 	si2.append("taxes", {
 			"charge_type": "On Net Total",
-			"account_head": "IGST - _GST",
+			"account_head": "Output Tax IGST - _GST",
 			"cost_center": "Main - _GST",
 			"description": "IGST @ 18.0",
 			"rate": 18
@@ -145,13 +220,13 @@ def make_sales_invoice():
 	si3.submit()
 
 def create_purchase_invoices():
-
 	pi = make_purchase_invoice(
 			company="_Test Company GST",
 			supplier = '_Test Registered Supplier',
 			currency = 'INR',
 			warehouse = 'Finished Goods - _GST',
 			cost_center = 'Main - _GST',
+			expense_account = 'Cost of Goods Sold - _GST',
 			do_not_save=1,
 		)
 
@@ -159,7 +234,7 @@ def create_purchase_invoices():
 
 	pi.append("taxes", {
 			"charge_type": "On Net Total",
-			"account_head": "CGST - _GST",
+			"account_head": "Input Tax CGST - _GST",
 			"cost_center": "Main - _GST",
 			"description": "CGST @ 9.0",
 			"rate": 9
@@ -167,7 +242,7 @@ def create_purchase_invoices():
 
 	pi.append("taxes", {
 			"charge_type": "On Net Total",
-			"account_head": "SGST - _GST",
+			"account_head": "Input Tax SGST - _GST",
 			"cost_center": "Main - _GST",
 			"description": "SGST @ 9.0",
 			"rate": 9
@@ -181,6 +256,7 @@ def create_purchase_invoices():
 			currency = 'INR',
 			warehouse = 'Finished Goods - _GST',
 			cost_center = 'Main - _GST',
+			expense_account = 'Cost of Goods Sold - _GST',
 			item = "Milk",
 			do_not_save=1
 		)
@@ -190,8 +266,20 @@ def create_purchase_invoices():
 
 	pi1.submit()
 
-def make_suppliers():
+	pi2 = make_purchase_invoice(company="_Test Company GST",
+			customer = '_Test Registered Supplier',
+			currency = 'INR',
+			item = 'Milk',
+			warehouse = 'Finished Goods - _GST',
+			expense_account = 'Cost of Goods Sold - _GST',
+			cost_center = 'Main - _GST',
+			rate=250,
+			qty=1,
+			do_not_save=1
+		)
+	pi2.submit()
 
+def make_suppliers():
 	if not frappe.db.exists("Supplier", "_Test Registered Supplier"):
 		frappe.get_doc({
 			"supplier_group": "_Test Supplier Group",
@@ -255,7 +343,6 @@ def make_suppliers():
 		address.save()
 
 def make_customers():
-
 	if not frappe.db.exists("Customer", "_Test GST Customer"):
 		frappe.get_doc({
 			"customer_group": "_Test Customer Group",
@@ -352,9 +439,9 @@ def make_customers():
 		address.save()
 
 def make_company():
-
 	if frappe.db.exists("Company", "_Test Company GST"):
 		return
+
 	company = frappe.new_doc("Company")
 	company.company_name = "_Test Company GST"
 	company.abbr = "_GST"
@@ -362,10 +449,10 @@ def make_company():
 	company.country = "India"
 	company.insert()
 
-	if not frappe.db.exists('Address', '_Test Address-Billing'):
+	if not frappe.db.exists('Address', '_Test Address GST-Billing'):
 		address = frappe.get_doc({
+			"address_title": "_Test Address GST",
 			"address_line1": "_Test Address Line 1",
-			"address_title": "_Test Address",
 			"address_type": "Billing",
 			"city": "_Test City",
 			"state": "Test State",
@@ -386,11 +473,6 @@ def make_company():
 		address.save()
 
 def set_account_heads():
-
-	from erpnext.accounts.doctype.account.test_account import create_account
-
-	create_account(account_name="Cess", parent_account = "Duties and Taxes - _GST", company="_Test Company GST")
-
 	gst_settings = frappe.get_doc("GST Settings")
 
 	gst_account = frappe.get_all(
@@ -401,10 +483,9 @@ def set_account_heads():
 	if not gst_account:
 		gst_settings.append("gst_accounts", {
 			"company": "_Test Company GST",
-			"cgst_account": "CGST - _GST",
-			"sgst_account": "SGST - _GST",
-			"igst_account": "IGST - _GST",
-			"cess_account": "Cess - _GST"
+			"cgst_account": "Output Tax CGST - _GST",
+			"sgst_account": "Output Tax SGST - _GST",
+			"igst_account": "Output Tax IGST - _GST"
 		})
 
 		gst_settings.save()

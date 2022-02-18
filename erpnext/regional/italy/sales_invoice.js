@@ -11,15 +11,10 @@ erpnext.setup_e_invoice_button = (doctype) => {
 						callback: function(r) {
 							frm.reload_doc();
 							if(r.message) {
-								var w = window.open(
-									frappe.urllib.get_full_url(
-										"/api/method/erpnext.regional.italy.utils.download_e_invoice_file?"
-										+ "file_name=" + r.message
-									)
-								)
-								if (!w) {
-									frappe.msgprint(__("Please enable pop-ups")); return;
-								}
+								open_url_post(frappe.request.url, {
+									cmd: 'frappe.core.doctype.file.file.download_file',
+									file_url: r.message
+								});
 							}
 						}
 					});

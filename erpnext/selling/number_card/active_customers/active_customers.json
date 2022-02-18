@@ -1,0 +1,21 @@
+{
+ "creation": "2020-07-20 20:17:16.653866",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Customer",
+ "dynamic_filters_json": "",
+ "filters_json": "[[\"Customer\",\"disabled\",\"=\",\"0\"]]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Active Customers",
+ "modified": "2020-07-22 14:20:32.268103",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Active Customers",
+ "owner": "Administrator",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Monthly",
+ "type": "Document Type"
+}

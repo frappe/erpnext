@@ -8,7 +8,7 @@ frappe.ui.form.on("Sales Order", {
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery Note',
 			'Pick List': 'Pick List',
-			'Sales Invoice': 'Invoice',
+			'Sales Invoice': 'Sales Invoice',
 			'Material Request': 'Material Request',
 			'Purchase Order': 'Purchase Order',
 			'Project': 'Project',
@@ -34,6 +34,18 @@ frappe.ui.form.on("Sales Order", {
 				}
 			};
 		})
+
+		frm.set_query("bom_no", "items", function(doc, cdt, cdn) {
+			var row = locals[cdt][cdn];
+			return {
+				filters: {
+					"item": row.item_code
+				}
+			}
+		});
+
+		frm.set_df_property('packed_items', 'cannot_add_rows', true);
+		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
 	},
 	refresh: function(frm) {
 		if(frm.doc.docstatus === 1 && frm.doc.status !== 'Closed'
@@ -66,6 +78,8 @@ frappe.ui.form.on("Sales Order", {
 		});
 
 		erpnext.queries.setup_warehouse_query(frm);
+
+		frm.ignore_doctypes_on_cancel_all = ['Purchase Order'];
 	},
 
 	delivery_date: function(frm) {
@@ -140,30 +154,35 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 					this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
 
+					const order_is_a_sale = ["Sales", "Shopping Cart"].indexOf(doc.order_type) !== -1;
+					const order_is_maintenance = ["Maintenance"].indexOf(doc.order_type) !== -1;
+					// order type has been customised then show all the action buttons
+					const order_is_a_custom_sale = ["Sales", "Shopping Cart", "Maintenance"].indexOf(doc.order_type) === -1;
+
 					// delivery note
-					if(flt(doc.per_delivered, 6) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
+					if(flt(doc.per_delivered, 6) < 100 && (order_is_a_sale || order_is_a_custom_sale) && allow_delivery) {
 						this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on_delivery_date(), __('Create'));
 						this.frm.add_custom_button(__('Work Order'), () => this.make_work_order(), __('Create'));
 					}
 
 					// sales invoice
 					if(flt(doc.per_billed, 6) < 100) {
-						this.frm.add_custom_button(__('Invoice'), () => me.make_sales_invoice(), __('Create'));
+						this.frm.add_custom_button(__('Sales Invoice'), () => me.make_sales_invoice(), __('Create'));
 					}
 
 					// material request
-					if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1
-						&& flt(doc.per_delivered, 6) < 100) {
+					if(!doc.order_type || (order_is_a_sale || order_is_a_custom_sale) && flt(doc.per_delivered, 6) < 100) {
 						this.frm.add_custom_button(__('Material Request'), () => this.make_material_request(), __('Create'));
 						this.frm.add_custom_button(__('Request for Raw Materials'), () => this.make_raw_material_request(), __('Create'));
 					}
 
-					// make purchase order
+					// Make Purchase Order
+					if (!this.frm.doc.is_internal_customer) {
 						this.frm.add_custom_button(__('Purchase Order'), () => this.make_purchase_order(), __('Create'));
+					}
 
 					// maintenance
-					if(flt(doc.per_delivered, 2) < 100 &&
-							["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
+					if(flt(doc.per_delivered, 2) < 100 && (order_is_maintenance || order_is_a_custom_sale)) {
 						this.frm.add_custom_button(__('Maintenance Visit'), () => this.make_maintenance_visit(), __('Create'));
 						this.frm.add_custom_button(__('Maintenance Schedule'), () => this.make_maintenance_schedule(), __('Create'));
 					}
@@ -181,16 +200,15 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
 						let me = this;
-						frappe.model.with_doc("Customer", me.frm.doc.customer, () => {
-							let customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
-							let internal = customer.is_internal_customer;
-							let disabled = customer.disabled;
-							if (internal === 1 && disabled === 0) {
-								me.frm.add_custom_button("Inter Company Order", function() {
-									me.make_inter_company_order();
-								}, __('Create'));
-							}
-						});
+						let internal = me.frm.doc.is_internal_customer;
+						if (internal) {
+							let button_label = (me.frm.doc.company === me.frm.doc.represents_company) ? "Internal Purchase Order" :
+								"Inter Company Purchase Order";
+
+							me.frm.add_custom_button(button_label, function() {
+								me.make_inter_company_order();
+							}, __('Create'));
+						}
 					}
 				}
 				// payment request
@@ -224,7 +242,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							status: ["!=", "Lost"]
 						}
 					})
-				}, __("Get items from"));
+				}, __("Get Items From"));
 		}
 
 		this.order_type(doc);
@@ -301,7 +319,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						title: __('Select Items to Manufacture'),
 						fields: fields,
 						primary_action: function() {
-							var data = d.get_values();
+							var data = {items: d.fields_dict.items.grid.get_selected_children()};
 							me.frm.call({
 								method: 'make_work_orders',
 								args: {
@@ -314,9 +332,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 								callback: function(r) {
 									if(r.message) {
 										frappe.msgprint({
-											message: __('Work Orders Created: {0}',
-												[r.message.map(function(d) {
-													return repl('<a href="#Form/Work Order/%(name)s">%(name)s</a>', {name:d})
+											message: __('Work Orders Created: {0}', [r.message.map(function(d) {
+													return repl('<a href="/app/work-order/%(name)s">%(name)s</a>', {name:d})
 												}).join(', ')]),
 											indicator: 'green'
 										})
@@ -425,7 +442,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					callback: function(r) {
 						if(r.message) {
 							frappe.msgprint(__('Material Request {0} submitted.',
-							['<a href="#Form/Material Request/'+r.message.name+'">' + r.message.name+ '</a>']));
+							['<a href="/app/material-request/'+r.message.name+'">' + r.message.name+ '</a>']));
 						}
 						d.hide();
 						me.frm.reload_doc();
@@ -440,12 +457,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	make_delivery_note_based_on_delivery_date: function() {
 		var me = this;
 
-		var delivery_dates = [];
-		$.each(this.frm.doc.items || [], function(i, d) {
-			if(!delivery_dates.includes(d.delivery_date)) {
-				delivery_dates.push(d.delivery_date);
-			}
-		});
+		var delivery_dates = this.frm.doc.items.map(i => i.delivery_date);
+		delivery_dates = [ ...new Set(delivery_dates) ];
 
 		var item_grid = this.frm.fields_dict["items"].grid;
 		if(!item_grid.get_selected().length && delivery_dates.length > 1) {
@@ -483,14 +496,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 				if(!dates) return;
 
-				$.each(dates, function(i, d) {
-					$.each(item_grid.grid_rows || [], function(j, row) {
-						if(row.doc.delivery_date == d) {
-							row.doc.__checked = 1;
-						}
-					});
-				})
-				me.make_delivery_note();
+				me.make_delivery_note(dates);
 				dialog.hide();
 			});
 			dialog.show();
@@ -499,10 +505,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		}
 	},
 
-	make_delivery_note: function() {
+	make_delivery_note: function(delivery_dates) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
-			frm: me.frm
+			frm: this.frm,
+			args: {
+				delivery_dates
+			}
 		})
 	},
 
@@ -542,19 +551,26 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	},
 
 	make_purchase_order: function(){
+		let pending_items = this.frm.doc.items.some((item) =>{
+			let pending_qty = flt(item.stock_qty) - flt(item.ordered_qty);
+			return pending_qty > 0;
+		})
+		if(!pending_items){
+			frappe.throw({message: __("Purchase Order already created for all Sales Order items"), title: __("Note")});
+		}
+
 		var me = this;
 		var dialog = new frappe.ui.Dialog({
-			title: __("For Supplier"),
+			title: __("Select Items"),
 			fields: [
-				{"fieldtype": "Link", "label": __("Supplier"), "fieldname": "supplier", "options":"Supplier",
-				 "description": __("Leave the field empty to make purchase orders for all suppliers"),
-					"get_query": function () {
-						return {
-							query:"erpnext.selling.doctype.sales_order.sales_order.get_supplier",
-							filters: {'parent': me.frm.doc.name}
-						}
-					}},
-					{fieldname: 'items_for_po', fieldtype: 'Table', label: 'Select Items',
+				{
+					"fieldtype": "Check",
+					"label": __("Against Default Supplier"),
+					"fieldname": "against_default_supplier",
+					"default": 0
+				},
+				{
+					fieldname: 'items_for_po', fieldtype: 'Table', label: 'Select Items',
 					fields: [
 						{
 							fieldtype:'Data',
@@ -572,8 +588,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						},
 						{
 							fieldtype:'Float',
-							fieldname:'qty',
-							label: __('Quantity'),
+							fieldname:'pending_qty',
+							label: __('Pending Qty'),
 							read_only: 1,
 							in_list_view:1
 						},
@@ -582,60 +598,97 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							read_only:1,
 							fieldname:'uom',
 							label: __('UOM'),
+							in_list_view:1,
+						},
+						{
+							fieldtype:'Data',
+							fieldname:'supplier',
+							label: __('Supplier'),
+							read_only:1,
 							in_list_view:1
-						}
-					],
-					data: cur_frm.doc.items,
-					get_data: function() {
-						return cur_frm.doc.items
-					}
-				},
-
-				{"fieldtype": "Button", "label": __('Create Purchase Order'), "fieldname": "make_purchase_order", "cssClass": "btn-primary"},
-			]
-		});
-
-		dialog.fields_dict.make_purchase_order.$input.click(function() {
-			var args = dialog.get_values();
-			let selected_items = dialog.fields_dict.items_for_po.grid.get_selected_children()
-			if(selected_items.length == 0) {
-				frappe.throw({message: 'Please select Item form Table', title: __('Message'), indicator:'blue'})
-			}
-			let selected_items_list = []
-			for(let i in selected_items){
-				selected_items_list.push(selected_items[i].item_code)
-			}
-			dialog.hide();
-			return frappe.call({
-				type: "GET",
-				method: "erpnext.selling.doctype.sales_order.sales_order.make_purchase_order",
-				args: {
-					"source_name": me.frm.doc.name,
-					"for_supplier": args.supplier,
-					"selected_items": selected_items_list
-				},
-				freeze: true,
-				callback: function(r) {
-					if(!r.exc) {
-						// var args = dialog.get_values();
-						if (args.supplier){
-							var doc = frappe.model.sync(r.message);
-							frappe.set_route("Form", r.message.doctype, r.message.name);
-						}
-						else{
-							frappe.route_options = {
-								"sales_order": me.frm.doc.name
-							}
-							frappe.set_route("List", "Purchase Order");
-						}
-					}
+						},
+					]
 				}
-			})
+			],
+			primary_action_label: 'Create Purchase Order',
+			primary_action (args) {
+				if (!args) return;
+
+				let selected_items = dialog.fields_dict.items_for_po.grid.get_selected_children();
+				if(selected_items.length == 0) {
+					frappe.throw({message: 'Please select Items from the Table', title: __('Items Required'), indicator:'blue'})
+				}
+
+				dialog.hide();
+
+				var method = args.against_default_supplier ? "make_purchase_order_for_default_supplier" : "make_purchase_order"
+				return frappe.call({
+					method: "erpnext.selling.doctype.sales_order.sales_order." + method,
+					freeze: true,
+					freeze_message: __("Creating Purchase Order ..."),
+					args: {
+						"source_name": me.frm.doc.name,
+						"selected_items": selected_items
+					},
+					freeze: true,
+					callback: function(r) {
+						if(!r.exc) {
+							if (!args.against_default_supplier) {
+								frappe.model.sync(r.message);
+								frappe.set_route("Form", r.message.doctype, r.message.name);
+							}
+							else {
+								frappe.route_options = {
+									"sales_order": me.frm.doc.name
+								}
+								frappe.set_route("List", "Purchase Order");
+							}
+						}
+					}
+				})
+			}
 		});
-		dialog.get_field("items_for_po").grid.only_sortable()
-		dialog.get_field("items_for_po").refresh()
+
+		dialog.fields_dict["against_default_supplier"].df.onchange = () => set_po_items_data(dialog);
+
+		function set_po_items_data (dialog) {
+			var against_default_supplier = dialog.get_value("against_default_supplier");
+			var items_for_po = dialog.get_value("items_for_po");
+
+			if (against_default_supplier) {
+				let items_with_supplier = items_for_po.filter((item) => item.supplier)
+
+				dialog.fields_dict["items_for_po"].df.data = items_with_supplier;
+				dialog.get_field("items_for_po").refresh();
+			} else {
+				let po_items = [];
+				me.frm.doc.items.forEach(d => {
+					let pending_qty = (flt(d.stock_qty) - flt(d.ordered_qty)) / flt(d.conversion_factor);
+					if (pending_qty > 0) {
+						po_items.push({
+							"doctype": "Sales Order Item",
+							"name": d.name,
+							"item_name": d.item_name,
+							"item_code": d.item_code,
+							"pending_qty": pending_qty,
+							"uom": d.uom,
+							"supplier": d.supplier
+						});
+					}
+				});
+
+				dialog.fields_dict["items_for_po"].df.data = po_items;
+				dialog.get_field("items_for_po").refresh();
+			}
+		}
+
+		set_po_items_data(dialog);
+		dialog.get_field("items_for_po").grid.only_sortable();
+		dialog.get_field("items_for_po").refresh();
+		dialog.wrapper.find('.grid-heading-row .grid-row-check').click();
 		dialog.show();
 	},
+
 	hold_sales_order: function(){
 		var me = this;
 		var d = new frappe.ui.Dialog({
@@ -655,7 +708,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						reference_doctype: me.frm.doctype,
 						reference_name: me.frm.docname,
 						content: __('Reason for hold: ')+data.reason_for_hold,
-						comment_email: frappe.session.user
+						comment_email: frappe.session.user,
+						comment_by: frappe.session.user_fullname
 					},
 					callback: function(r) {
 						if(!r.exc) {

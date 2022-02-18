@@ -3,6 +3,18 @@
 
 
 frappe.ui.form.on("Warehouse", {
+	onload: function(frm) {
+		frm.set_query("default_in_transit_warehouse", function() {
+			return {
+				filters:{
+					'warehouse_type' : 'Transit',
+					'is_group': 0,
+					'company': frm.doc.company
+				}
+			};
+		});
+	},
+
 	refresh: function(frm) {
 		frm.toggle_display('warehouse_name', frm.doc.__islocal);
 		frm.toggle_display(['address_html','contact_html'], !frm.doc.__islocal);
@@ -36,11 +48,11 @@ frappe.ui.form.on("Warehouse", {
 			frm.add_custom_button(__('Non-Group to Group'),
 				function() { convert_to_group_or_ledger(frm); }, 'fa fa-retweet', 'btn-default')
 		}
-		
+
 		frm.toggle_enable(['is_group', 'company'], false);
 
 		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Warehouse'};
-		
+
 		frm.fields_dict['parent_warehouse'].get_query = function(doc) {
 			return {
 				filters: {
@@ -71,6 +83,7 @@ function convert_to_group_or_ledger(frm){
 		callback: function(){
 			frm.refresh();
 		}
-		
+
 	})
 }
+

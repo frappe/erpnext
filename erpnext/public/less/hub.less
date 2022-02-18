@@ -32,7 +32,12 @@ body[data-route*="marketplace"] {
 	}
 
 	.hub-image-loading, .hub-image-broken {
-		.img-background();
+		content: " ";
+		position: absolute;
+		left: 0;
+		height: 100%;
+		width: 100%;
+		background-color: var(--bg-light-gray);
 		display: flex;
 		align-items: center;
 		justify-content: center;

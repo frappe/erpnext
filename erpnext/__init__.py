@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-import inspect
-import frappe
-from erpnext.hooks import regional_overrides
-from frappe.utils import getdate
 
-__version__ = '12.13.0'
+import inspect
+
+import frappe
+
+from erpnext.hooks import regional_overrides
+
+__version__ = '13.20.1'
 
 def get_default_company(user=None):
 	'''Get default company for user'''
@@ -56,9 +56,9 @@ def set_perpetual_inventory(enable=1, company=None):
 	company.enable_perpetual_inventory = enable
 	company.save()
 
-def encode_company_abbr(name, company):
+def encode_company_abbr(name, company=None, abbr=None):
 	'''Returns name encoded with company abbreviation'''
-	company_abbr = frappe.get_cached_value('Company',  company,  "abbr")
+	company_abbr = abbr or frappe.get_cached_value('Company',  company,  "abbr")
 	parts = name.rsplit(" - ", 1)
 
 	if parts[-1].lower() != company_abbr.lower():
@@ -109,7 +109,7 @@ def get_region(company=None):
 	'''
 	if company or frappe.flags.company:
 		return frappe.get_cached_value('Company',
-			company or frappe.flags.company,  'country')
+			company or frappe.flags.company, 'country')
 	elif frappe.flags.country:
 		return frappe.flags.country
 	else:
@@ -132,16 +132,10 @@ def allow_regional(fn):
 
 	return caller
 
-def get_last_membership():
+def get_last_membership(member):
 	'''Returns last membership if exists'''
 	last_membership = frappe.get_all('Membership', 'name,to_date,membership_type',
-		dict(member=frappe.session.user, paid=1), order_by='to_date desc', limit=1)
+		dict(member=member, paid=1), order_by='to_date desc', limit=1)
 
-	return last_membership and last_membership[0]
-
-def is_member():
-	'''Returns true if the user is still a member'''
-	last_membership = get_last_membership()
-	if last_membership and getdate(last_membership.to_date) > getdate():
-		return True
-	return False
+	if last_membership:
+		return last_membership[0]

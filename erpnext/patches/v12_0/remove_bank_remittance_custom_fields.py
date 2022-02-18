@@ -1,6 +1,6 @@
-from __future__ import unicode_literals
+
 import frappe
-from erpnext.regional.india.setup import make_custom_fields
+
 
 def execute():
 	frappe.reload_doc("accounts", "doctype", "tax_category")

@@ -1,18 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from erpnext.controllers.status_updater import StatusUpdater
 from frappe.utils import flt
 from six.moves import reduce
-from frappe import _
-import pdb
+
+from erpnext.controllers.status_updater import StatusUpdater
+
 
 class BankTransaction(StatusUpdater):
 	def after_insert(self):
-		self.unallocated_amount = abs(flt(self.credit) - flt(self.debit))
+		self.unallocated_amount = abs(flt(self.withdrawal) - flt(self.deposit))
 
 	def on_submit(self):
 		self.clear_linked_payment_entries()
@@ -23,6 +22,10 @@ class BankTransaction(StatusUpdater):
 		self.clear_linked_payment_entries()
 		self.set_status(update=True)
 
+	def on_cancel(self):
+		self.clear_linked_payment_entries(for_cancel=True)
+		self.set_status(update=True)
+
 	def update_allocations(self):
 		if self.payment_entries:
 			allocated_amount = reduce(lambda x, y: flt(x) + flt(y), [x.allocated_amount for x in self.payment_entries])
@@ -31,44 +34,57 @@ class BankTransaction(StatusUpdater):
 
 		if allocated_amount:
 			frappe.db.set_value(self.doctype, self.name, "allocated_amount", flt(allocated_amount))
-			frappe.db.set_value(self.doctype, self.name, "unallocated_amount", abs(flt(self.credit) - flt(self.debit)) - flt(allocated_amount))
+			frappe.db.set_value(self.doctype, self.name, "unallocated_amount", abs(flt(self.withdrawal) - flt(self.deposit)) - flt(allocated_amount))
 
 		else:
 			frappe.db.set_value(self.doctype, self.name, "allocated_amount", 0)
-			frappe.db.set_value(self.doctype, self.name, "unallocated_amount", abs(flt(self.credit) - flt(self.debit)))
+			frappe.db.set_value(self.doctype, self.name, "unallocated_amount", abs(flt(self.withdrawal) - flt(self.deposit)))
 
-		amount = self.debit or self.credit
+		amount = self.deposit or self.withdrawal
 		if amount == self.allocated_amount:
 			frappe.db.set_value(self.doctype, self.name, "status", "Reconciled")
 
 		self.reload()
 
-	def clear_linked_payment_entries(self):
+	def clear_linked_payment_entries(self, for_cancel=False):
 		for payment_entry in self.payment_entries:
 			if payment_entry.payment_document in ["Payment Entry", "Journal Entry", "Purchase Invoice", "Expense Claim"]:
-				self.clear_simple_entry(payment_entry)
+				self.clear_simple_entry(payment_entry, for_cancel=for_cancel)
 
 			elif payment_entry.payment_document == "Sales Invoice":
-				self.clear_sales_invoice(payment_entry)
-			# allocated_amount = get_total_allocated_amount(payment_entry)
-			# paid_amount = get_paid_amount(payment_entry, self.currency)
+				self.clear_sales_invoice(payment_entry, for_cancel=for_cancel)
 
-			# if paid_amount and allocated_amount:
-			# 	if  flt(allocated_amount[0]["allocated_amount"]) > flt(paid_amount):
-			# 		frappe.throw(_("The total allocated amount ({0}) is greated than the paid amount ({1}).".format(flt(allocated_amount[0]["allocated_amount"]), flt(paid_amount))))
-			# 	else:
-			# 		if payment_entry.payment_document in ["Payment Entry", "Journal Entry", "Purchase Invoice", "Expense Claim"]:
-			# 			self.clear_simple_entry(payment_entry)
+	def clear_simple_entry(self, payment_entry, for_cancel=False):
+		if payment_entry.payment_document == "Payment Entry":
+			if frappe.db.get_value("Payment Entry", payment_entry.payment_entry, "payment_type") == "Internal Transfer":
+				if len(get_reconciled_bank_transactions(payment_entry)) < 2:
+					return
 
-			# 		elif payment_entry.payment_document == "Sales Invoice":
-			# 			self.clear_sales_invoice(payment_entry)
+		clearance_date = self.date if not for_cancel else None
+		frappe.db.set_value(
+			payment_entry.payment_document, payment_entry.payment_entry,
+			"clearance_date", clearance_date)
 
-	def clear_simple_entry(self, payment_entry):
-		frappe.db.set_value(payment_entry.payment_document, payment_entry.payment_entry, "clearance_date", self.date)
+	def clear_sales_invoice(self, payment_entry, for_cancel=False):
+		clearance_date = self.date if not for_cancel else None
+		frappe.db.set_value(
+			"Sales Invoice Payment",
+			dict(
+				parenttype=payment_entry.payment_document,
+				parent=payment_entry.payment_entry
+			),
+			"clearance_date", clearance_date)
 
-	def clear_sales_invoice(self, payment_entry):
-		frappe.db.set_value("Sales Invoice Payment", dict(parenttype=payment_entry.payment_document,
-			parent=payment_entry.payment_entry), "clearance_date", self.date)
+def get_reconciled_bank_transactions(payment_entry):
+	reconciled_bank_transactions = frappe.get_all(
+		'Bank Transaction Payments',
+		filters = {
+			'payment_entry': payment_entry.payment_entry
+		},
+		fields = ['parent']
+	)
+
+	return reconciled_bank_transactions
 
 def get_total_allocated_amount(payment_entry):
 	return frappe.db.sql("""
@@ -86,7 +102,7 @@ def get_total_allocated_amount(payment_entry):
 		AND
 			bt.docstatus = 1""", (payment_entry.payment_document, payment_entry.payment_entry), as_dict=True)
 
-def get_paid_amount(payment_entry, currency):
+def get_paid_amount(payment_entry, currency, bank_account):
 	if payment_entry.payment_document in ["Payment Entry", "Sales Invoice", "Purchase Invoice"]:
 
 		paid_amount_field = "paid_amount"
@@ -99,7 +115,7 @@ def get_paid_amount(payment_entry, currency):
 			payment_entry.payment_entry, paid_amount_field)
 
 	elif payment_entry.payment_document == "Journal Entry":
-		return frappe.db.get_value(payment_entry.payment_document, payment_entry.payment_entry, "total_credit")
+		return frappe.db.get_value('Journal Entry Account', {'parent': payment_entry.payment_entry, 'account': bank_account}, "sum(credit_in_account_currency)")
 
 	elif payment_entry.payment_document == "Expense Claim":
 		return frappe.db.get_value(payment_entry.payment_document, payment_entry.payment_entry, "total_amount_reimbursed")

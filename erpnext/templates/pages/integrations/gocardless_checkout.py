@@ -1,12 +1,16 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
+
+import json
+
 import frappe
 from frappe import _
-from frappe.utils import flt
-import json
-from erpnext.erpnext_integrations.doctype.gocardless_settings.gocardless_settings import gocardless_initialization, get_gateway_controller
-from frappe.utils import get_url
+from frappe.utils import flt, get_url
+
+from erpnext.erpnext_integrations.doctype.gocardless_settings.gocardless_settings import (
+	get_gateway_controller,
+	gocardless_initialization,
+)
 
 no_cache = 1
 
@@ -64,7 +68,7 @@ def check_mandate(data, reference_doctype, reference_docname):
 
 	try:
 		redirect_flow = client.redirect_flows.create(params={
-							"description": _("Pay {0} {1}".format(data['amount'], data['currency'])),
+							"description": _("Pay {0} {1}").format(data['amount'], data['currency']),
 							"session_token": frappe.session.user,
 							"success_redirect_url": success_url,
 							"prefilled_customer": prefilled_customer

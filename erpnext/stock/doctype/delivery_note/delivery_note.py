@@ -1,19 +1,20 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
-import frappe.defaults
-from erpnext.controllers.selling_controller import SellingController
-from erpnext.stock.doctype.batch.batch import set_batch_nos
-from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
 from frappe import _
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import cint, flt
+
+from erpnext.controllers.accounts_controller import get_taxes_and_charges
+from erpnext.controllers.selling_controller import SellingController
+from erpnext.stock.doctype.batch.batch import set_batch_nos
+from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
+from erpnext.stock.utils import calculate_mapped_packed_items_return
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -54,7 +55,7 @@ class DeliveryNote(SellingController):
 			'no_allowance': 1
 		}]
 		if cint(self.is_return):
-			self.status_updater.append({
+			self.status_updater.extend([{
 				'source_dt': 'Delivery Note Item',
 				'target_dt': 'Sales Order Item',
 				'join_field': 'so_detail',
@@ -68,9 +69,21 @@ class DeliveryNote(SellingController):
 					where name=`tabDelivery Note Item`.parent and is_return=1)""",
 				'second_source_extra_cond': """ and exists (select name from `tabSales Invoice`
 					where name=`tabSales Invoice Item`.parent and is_return=1 and update_stock=1)"""
-			})
+			},
+			{
+				'source_dt': 'Delivery Note Item',
+				'target_dt': 'Delivery Note Item',
+				'join_field': 'dn_detail',
+				'target_field': 'returned_qty',
+				'target_parent_dt': 'Delivery Note',
+				'target_parent_field': 'per_returned',
+				'target_ref_field': 'stock_qty',
+				'source_field': '-1 * stock_qty',
+				'percent_join_field_parent': 'return_against'
+			}
+		])
 
-	def before_print(self):
+	def before_print(self, settings=None):
 		def toggle_print_hide(meta, fieldname):
 			df = meta.get_field(fieldname)
 			if self.get("print_without_amount"):
@@ -88,7 +101,7 @@ class DeliveryNote(SellingController):
 			for f in fieldname:
 				toggle_print_hide(self.meta if key == "parent" else item_meta, f)
 
-		super(DeliveryNote, self).before_print()
+		super(DeliveryNote, self).before_print(settings)
 
 	def set_actual_qty(self):
 		for d in self.get('items'):
@@ -116,15 +129,21 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
 
-		if self._action != 'submit' and not self.is_return:
-			set_batch_nos(self, 'warehouse', True)
+		# Keeps mapped packed_items in case product bundle is updated.
+		if self.is_return and self.return_against:
+			calculate_mapped_packed_items_return(self)
+		else:
+			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+			make_packing_list(self)
 
-		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-		make_packing_list(self)
+		if self._action != 'submit' and not self.is_return:
+			set_batch_nos(self, 'warehouse', throw=True)
+			set_batch_nos(self, 'warehouse', throw=True, child_table="packed_items")
 
 		self.update_current_stock()
 
 		if not self.installation_status: self.installation_status = 'Not Installed'
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def validate_with_previous_doc(self):
 		super(DeliveryNote, self).validate_with_previous_doc({
@@ -168,10 +187,8 @@ class DeliveryNote(SellingController):
 		super(DeliveryNote, self).validate_warehouse()
 
 		for d in self.get_item_list():
-			if frappe.db.get_value("Item", d['item_code'], "is_stock_item") == 1:
-				if not d['warehouse']:
-					frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
-
+			if not d['warehouse'] and frappe.db.get_value("Item", d['item_code'], "is_stock_item") == 1:
+				frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
 
 	def update_current_stock(self):
 		if self.get("_action") and self._action != "update_after_submit":
@@ -204,6 +221,7 @@ class DeliveryNote(SellingController):
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()
 		self.make_gl_entries()
+		self.repost_future_sle_and_gle()
 
 	def on_cancel(self):
 		super(DeliveryNote, self).on_cancel()
@@ -221,6 +239,8 @@ class DeliveryNote(SellingController):
 		self.cancel_packing_slips()
 
 		self.make_gl_entries_on_cancel()
+		self.repost_future_sle_and_gle()
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
@@ -248,7 +268,7 @@ class DeliveryNote(SellingController):
 		"""
 			Validate that if packed qty exists, it should be equal to qty
 		"""
-		if not any([flt(d.get('packed_qty')) for d in self.get("items")]):
+		if not any(flt(d.get('packed_qty')) for d in self.get("items")):
 			return
 		has_error = False
 		for d in self.get("items"):
@@ -315,7 +335,7 @@ class DeliveryNote(SellingController):
 			credit_note_link = frappe.utils.get_link_to_form('Sales Invoice', return_invoice.name)
 
 			frappe.msgprint(_("Credit Note {0} has been created automatically").format(credit_note_link))
-		except:
+		except Exception:
 			frappe.throw(_("Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"))
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
@@ -427,7 +447,7 @@ def make_sales_invoice(source_name, target_doc=None):
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = to_make_invoice_qty_map[source_doc.name]
 
-		if source_doc.serial_no and source_parent.per_billed > 0:
+		if source_doc.serial_no and source_parent.per_billed > 0 and not source_parent.is_return:
 			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
 				target_doc.qty, source_parent.name)
 
@@ -486,6 +506,10 @@ def make_sales_invoice(source_name, target_doc=None):
 			"add_if_empty": True
 		}
 	}, target_doc, set_missing_values)
+
+	automatically_fetch_payment_terms = cint(frappe.db.get_single_value('Accounts Settings', 'automatically_fetch_payment_terms'))
+	if automatically_fetch_payment_terms:
+		doc.set_payment_schedule()
 
 	return doc
 
@@ -567,6 +591,70 @@ def make_packing_slip(source_name, target_doc=None):
 
 	return doclist
 
+@frappe.whitelist()
+def make_shipment(source_name, target_doc=None):
+	def postprocess(source, target):
+		user = frappe.db.get_value("User", frappe.session.user, ['email', 'full_name', 'phone', 'mobile_no'], as_dict=1)
+		target.pickup_contact_email = user.email
+		pickup_contact_display = '{}'.format(user.full_name)
+		if user:
+			if user.email:
+				pickup_contact_display += '<br>' + user.email
+			if user.phone:
+				pickup_contact_display += '<br>' + user.phone
+			if user.mobile_no and not user.phone:
+				pickup_contact_display += '<br>' + user.mobile_no
+		target.pickup_contact = pickup_contact_display
+
+		# As we are using session user details in the pickup_contact then pickup_contact_person will be session user
+		target.pickup_contact_person = frappe.session.user
+
+		contact = frappe.db.get_value("Contact", source.contact_person, ['email_id', 'phone', 'mobile_no'], as_dict=1)
+		delivery_contact_display = '{}'.format(source.contact_display)
+		if contact:
+			if contact.email_id:
+				delivery_contact_display += '<br>' + contact.email_id
+			if contact.phone:
+				delivery_contact_display += '<br>' + contact.phone
+			if contact.mobile_no and not contact.phone:
+				delivery_contact_display += '<br>' + contact.mobile_no
+		target.delivery_contact = delivery_contact_display
+
+		if source.shipping_address_name:
+			target.delivery_address_name = source.shipping_address_name
+			target.delivery_address = source.shipping_address
+		elif source.customer_address:
+			target.delivery_address_name = source.customer_address
+			target.delivery_address = source.address_display
+
+	doclist = get_mapped_doc("Delivery Note", source_name, 	{
+		"Delivery Note": {
+			"doctype": "Shipment",
+			"field_map": {
+				"grand_total": "value_of_goods",
+				"company": "pickup_company",
+				"company_address": "pickup_address_name",
+				"company_address_display": "pickup_address",
+				"customer": "delivery_customer",
+				"contact_person": "delivery_contact_name",
+				"contact_email": "delivery_contact_email"
+			},
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Delivery Note Item": {
+			"doctype": "Shipment Delivery Note",
+			"field_map": {
+				"name": "prevdoc_detail_docname",
+				"parent": "prevdoc_docname",
+				"parenttype": "prevdoc_doctype",
+				"base_amount": "grand_total"
+			}
+		}
+	}, target_doc, postprocess)
+
+	return doclist
 
 @frappe.whitelist()
 def make_sales_return(source_name, target_doc=None):
@@ -578,3 +666,102 @@ def make_sales_return(source_name, target_doc=None):
 def update_delivery_note_status(docname, status):
 	dn = frappe.get_doc("Delivery Note", docname)
 	dn.update_status(status)
+
+@frappe.whitelist()
+def make_inter_company_purchase_receipt(source_name, target_doc=None):
+	return make_inter_company_transaction("Delivery Note", source_name, target_doc)
+
+def make_inter_company_transaction(doctype, source_name, target_doc=None):
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+		get_inter_company_details,
+		set_purchase_references,
+		update_address,
+		update_taxes,
+		validate_inter_company_transaction,
+	)
+
+	if doctype == 'Delivery Note':
+		source_doc = frappe.get_doc(doctype, source_name)
+		target_doctype = "Purchase Receipt"
+		source_document_warehouse_field = 'target_warehouse'
+		target_document_warehouse_field = 'from_warehouse'
+	else:
+		source_doc = frappe.get_doc(doctype, source_name)
+		target_doctype = 'Delivery Note'
+		source_document_warehouse_field = 'from_warehouse'
+		target_document_warehouse_field = 'target_warehouse'
+
+	validate_inter_company_transaction(source_doc, doctype)
+	details = get_inter_company_details(source_doc, doctype)
+
+	def set_missing_values(source, target):
+		target.run_method("set_missing_values")
+		set_purchase_references(target)
+
+		if target.doctype == 'Purchase Receipt':
+			master_doctype = 'Purchase Taxes and Charges Template'
+		else:
+			master_doctype = 'Sales Taxes and Charges Template'
+
+		if not target.get('taxes') and target.get('taxes_and_charges'):
+			for tax in get_taxes_and_charges(master_doctype, target.get('taxes_and_charges')):
+				target.append('taxes', tax)
+
+	def update_details(source_doc, target_doc, source_parent):
+		target_doc.inter_company_invoice_reference = source_doc.name
+		if target_doc.doctype == 'Purchase Receipt':
+			target_doc.company = details.get("company")
+			target_doc.supplier = details.get("party")
+			target_doc.buying_price_list = source_doc.selling_price_list
+			target_doc.is_internal_supplier = 1
+			target_doc.inter_company_reference = source_doc.name
+
+			# Invert the address on target doc creation
+			update_address(target_doc, 'supplier_address', 'address_display', source_doc.company_address)
+			update_address(target_doc, 'shipping_address', 'shipping_address_display', source_doc.customer_address)
+
+			update_taxes(target_doc, party=target_doc.supplier, party_type='Supplier', company=target_doc.company,
+				doctype=target_doc.doctype, party_address=target_doc.supplier_address,
+				company_address=target_doc.shipping_address)
+		else:
+			target_doc.company = details.get("company")
+			target_doc.customer = details.get("party")
+			target_doc.company_address = source_doc.supplier_address
+			target_doc.selling_price_list = source_doc.buying_price_list
+			target_doc.is_internal_customer = 1
+			target_doc.inter_company_reference = source_doc.name
+
+			# Invert the address on target doc creation
+			update_address(target_doc, 'company_address', 'company_address_display', source_doc.supplier_address)
+			update_address(target_doc, 'shipping_address_name', 'shipping_address', source_doc.shipping_address)
+			update_address(target_doc, 'customer_address', 'address_display', source_doc.shipping_address)
+
+			update_taxes(target_doc, party=target_doc.customer, party_type='Customer', company=target_doc.company,
+				doctype=target_doc.doctype, party_address=target_doc.customer_address,
+				company_address=target_doc.company_address, shipping_address_name=target_doc.shipping_address_name)
+
+	doclist = get_mapped_doc(doctype, source_name, {
+		doctype: {
+			"doctype": target_doctype,
+			"postprocess": update_details,
+			"field_no_map": [
+				"taxes_and_charges",
+				"set_warehouse"
+			]
+		},
+		doctype +" Item": {
+			"doctype": target_doctype + " Item",
+			"field_map": {
+				source_document_warehouse_field: target_document_warehouse_field,
+				'name': 'delivery_note_item',
+				'batch_no': 'batch_no',
+				'serial_no': 'serial_no'
+			},
+			"field_no_map": [
+				"warehouse"
+			]
+		}
+
+	}, target_doc, set_missing_values)
+
+	return doclist

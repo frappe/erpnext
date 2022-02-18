@@ -1,14 +1,17 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
+from frappe.model.document import Document
 from frappe.utils import flt
 
-from erpnext.controllers.item_variant import (validate_is_incremental,
-	validate_item_attribute_value, InvalidItemAttributeValueError)
+from erpnext.controllers.item_variant import (
+	InvalidItemAttributeValueError,
+	validate_is_incremental,
+	validate_item_attribute_value,
+)
 
 
 class ItemAttributeIncrementError(frappe.ValidationError): pass
@@ -29,9 +32,18 @@ class ItemAttribute(Document):
 		'''Validate that if there are existing items with attributes, they are valid'''
 		attributes_list = [d.attribute_value for d in self.item_attribute_values]
 
-		for item in frappe.db.sql('''select i.name, iva.attribute_value as value
-			from `tabItem Variant Attribute` iva, `tabItem` i where iva.attribute = %s
-			and iva.parent = i.name and i.has_variants = 0''', self.name, as_dict=1):
+		# Get Item Variant Attribute details of variant items
+		items = frappe.db.sql("""
+			select
+				i.name, iva.attribute_value as value
+			from
+				`tabItem Variant Attribute` iva, `tabItem` i
+			where
+				iva.attribute = %(attribute)s
+				and iva.parent = i.name and
+				i.variant_of is not null and i.variant_of != ''""", {"attribute" : self.name}, as_dict=1)
+
+		for item in items:
 			if self.numeric_values:
 				validate_is_incremental(self, self.name, item.value, item.name)
 			else:

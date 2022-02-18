@@ -26,4 +26,3 @@ QUnit.test("test pricing rule", function(assert) {
 		() => done()
 	]);
 });
-

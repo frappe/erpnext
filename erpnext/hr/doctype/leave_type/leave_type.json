@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:leave_type_name",
@@ -14,6 +15,8 @@
   "column_break_3",
   "is_carry_forward",
   "is_lwp",
+  "is_ppl",
+  "fraction_of_daily_salary_per_leave",
   "is_optional_leave",
   "allow_negative",
   "include_holiday",
@@ -24,10 +27,13 @@
   "encashment",
   "allow_encashment",
   "encashment_threshold_days",
+  "column_break_17",
   "earning_component",
   "earned_leave",
   "is_earned_leave",
   "earned_leave_frequency",
+  "column_break_22",
+  "based_on_date_of_joining",
   "rounding"
  ],
  "fields": [
@@ -44,7 +50,7 @@
   {
    "fieldname": "max_leaves_allowed",
    "fieldtype": "Int",
-   "label": "Max Leaves Allowed"
+   "label": "Maximum Leave Allocation Allowed"
   },
   {
    "fieldname": "applicable_after",
@@ -55,7 +61,7 @@
    "fieldname": "max_continuous_days_allowed",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Maximum Continuous Days Applicable",
+   "label": "Maximum Consecutive Leaves Allowed",
    "oldfieldname": "max_days_allowed",
    "oldfieldtype": "Data"
   },
@@ -74,12 +80,14 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.is_ppl == 0",
    "fieldname": "is_lwp",
    "fieldtype": "Check",
    "label": "Is Leave Without Pay"
   },
   {
    "default": "0",
+   "description": "These leaves are holidays permitted by the company however, availing it is optional for an Employee.",
    "fieldname": "is_optional_leave",
    "fieldtype": "Check",
    "label": "Is Optional Leave"
@@ -165,18 +173,50 @@
    "fieldname": "rounding",
    "fieldtype": "Select",
    "label": "Rounding",
-   "options": "0.5\n1.0"
+   "options": "\n0.25\n0.5\n1.0"
   },
   {
    "depends_on": "is_carry_forward",
    "fieldname": "maximum_carry_forwarded_leaves",
    "fieldtype": "Float",
    "label": "Maximum Carry Forwarded Leaves"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_earned_leave",
+   "description": "If checked, leave will be granted on the day of joining every month.",
+   "fieldname": "based_on_date_of_joining",
+   "fieldtype": "Check",
+   "label": "Based On Date Of Joining"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_lwp == 0",
+   "fieldname": "is_ppl",
+   "fieldtype": "Check",
+   "label": "Is Partially Paid Leave"
+  },
+  {
+   "depends_on": "eval:doc.is_ppl == 1",
+   "description": "For a day of leave taken, if you still pay (say) 50% of the daily salary, then enter 0.50 in this field.",
+   "fieldname": "fraction_of_daily_salary_per_leave",
+   "fieldtype": "Float",
+   "label": "Fraction of Daily Salary per Leave",
+   "mandatory_depends_on": "eval:doc.is_ppl == 1"
   }
  ],
  "icon": "fa fa-flag",
  "idx": 1,
- "modified": "2019-09-06 18:48:48.946074",
+ "links": [],
+ "modified": "2021-10-02 11:59:40.503359",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Type",
@@ -210,5 +250,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }

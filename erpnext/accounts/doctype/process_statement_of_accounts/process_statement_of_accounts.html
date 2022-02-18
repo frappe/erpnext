@@ -1,0 +1,109 @@
+<div class="page-break">
+	<div id="header-html" class="hidden-pdf">
+		{% if letter_head %}
+		<div class="letter-head text-center">{{ letter_head.content }}</div>
+		<hr style="height:2px;border-width:0;color:black;background-color:black;">
+		{% endif %}
+	</div>
+	<div id="footer-html" class="visible-pdf">
+		{% if letter_head.footer %}
+		<div class="letter-head-footer">
+			<hr style="border-width:0;color:black;background-color:black;padding-bottom:2px;">
+			{{ letter_head.footer }}
+		</div>
+		{% endif %}
+	</div>
+	<h2 class="text-center">{{ _("STATEMENTS OF ACCOUNTS") }}</h2>
+	<div>
+		<h5 style="float: left;">{{ _("Customer: ") }} <b>{{filters.party[0] }}</b></h5>
+		<h5 style="float: right;">
+			{{ _("Date: ") }}
+			<b>{{ frappe.format(filters.from_date, 'Date')}}
+			{{ _("to") }}
+			{{ frappe.format(filters.to_date, 'Date')}}</b>
+			</h5>
+	</div>
+	<br>
+
+	<table class="table table-bordered">
+		<thead>
+			<tr>
+				<th style="width: 12%">{{ _("Date") }}</th>
+				<th style="width: 15%">{{ _("Reference") }}</th>
+				<th style="width: 25%">{{ _("Remarks") }}</th>
+				<th style="width: 15%">{{ _("Debit") }}</th>
+				<th style="width: 15%">{{ _("Credit") }}</th>
+				<th style="width: 18%">{{ _("Balance (Dr - Cr)") }}</th>
+			</tr>
+		</thead>
+		<tbody>
+		{% for row in data %}
+			<tr>
+			{% if(row.posting_date) %}
+				<td>{{ frappe.format(row.posting_date, 'Date') }}</td>
+				<td>{{ row.voucher_type }}
+					<br>{{ row.voucher_no }}</td>
+				<td>
+					{% if not (filters.party or filters.account)  %}
+						{{ row.party or row.account }}
+						<br>
+					{% endif %}
+
+					{{ _("Against") }}: {{ row.against }}
+					<br>{{ _("Remarks") }}: {{ row.remarks }}
+					{% if row.bill_no %}
+						<br>{{ _("Supplier Invoice No") }}: {{ row.bill_no }}
+					{% endif %}
+					</td>
+					<td style="text-align: right">
+						{{ frappe.utils.fmt_money(row.debit, currency=filters.presentation_currency) }}</td>
+					<td style="text-align: right">
+						{{ frappe.utils.fmt_money(row.credit, currency=filters.presentation_currency) }}</td>
+			{% else %}
+				<td></td>
+				<td></td>
+				<td><b>{{ frappe.format(row.account, {fieldtype: "Link"}) or "&nbsp;" }}</b></td>
+				<td style="text-align: right">
+					{{ row.account and frappe.utils.fmt_money(row.debit, currency=filters.presentation_currency) }}
+				</td>
+				<td style="text-align: right">
+					{{ row.account and frappe.utils.fmt_money(row.credit, currency=filters.presentation_currency) }}
+				</td>
+			{% endif %}
+				<td style="text-align: right">
+					{{ frappe.utils.fmt_money(row.balance, currency=filters.presentation_currency) }}
+				</td>
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+	<br>
+	{% if ageing %}
+	<h4 class="text-center">{{ _("Ageing Report based on ") }} {{ ageing.ageing_based_on }}
+		{{ _("up to " ) }}  {{ frappe.format(filters.to_date, 'Date')}}
+	</h4>
+	<table class="table table-bordered">
+		<thead>
+			<tr>
+				<th style="width: 25%">30 Days</th>
+				<th style="width: 25%">60 Days</th>
+				<th style="width: 25%">90 Days</th>
+				<th style="width: 25%">120 Days</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>{{ frappe.utils.fmt_money(ageing.range1, currency=filters.presentation_currency) }}</td>
+				<td>{{ frappe.utils.fmt_money(ageing.range2, currency=filters.presentation_currency) }}</td>
+				<td>{{ frappe.utils.fmt_money(ageing.range3, currency=filters.presentation_currency) }}</td>
+				<td>{{ frappe.utils.fmt_money(ageing.range4, currency=filters.presentation_currency) }}</td>
+			</tr>
+		</tbody>
+	</table>
+	{% endif %}
+	{% if terms_and_conditions %}
+	<div>
+		{{ terms_and_conditions }}
+	</div>
+	{% endif %}
+</div>

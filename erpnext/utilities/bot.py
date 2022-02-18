@@ -1,12 +1,11 @@
 # Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-from __future__ import unicode_literals
-
-from frappe.utils.bot import BotParser
 
 import frappe
 from frappe import _
+from frappe.utils.bot import BotParser
+
 
 class FindItemBot(BotParser):
 	def get_reply(self):
@@ -26,14 +25,14 @@ class FindItemBot(BotParser):
 					for warehouse in warehouses:
 						qty = frappe.db.get_value("Bin", {'item_code': item[0], 'warehouse': warehouse.name}, 'actual_qty')
 						if qty:
-							out.append(_('{0} units of [{1}](#Form/Item/{1}) found in [{2}](#Form/Warehouse/{2})').format(qty,
+							out.append(_('{0} units of [{1}](/app/Form/Item/{1}) found in [{2}](/app/Form/Warehouse/{2})').format(qty,
 								item[0], warehouse.name))
 							found = True
 
 					if not found:
-						out.append(_('[{0}](#Form/Item/{0}) is out of stock').format(item[0]))
+						out.append(_('[{0}](/app/Form/Item/{0}) is out of stock').format(item[0]))
 
 				return "\n\n".join(out)
 
 			else:
-				return _("Did not find any item called {0}".format(item))
+				return _("Did not find any item called {0}").format(item)

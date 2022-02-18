@@ -6,7 +6,6 @@
  "creation": "2016-08-04 04:42:48.319388",
  "doctype": "DocType",
  "editable_grid": 1,
- "engine": "InnoDB",
  "field_order": [
   "assessment_group_name",
   "is_group",
@@ -64,7 +63,7 @@
  ],
  "is_tree": 1,
  "links": [],
- "modified": "2020-03-18 18:26:07.834596",
+ "modified": "2020-03-18 18:01:14.710416",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Assessment Group",

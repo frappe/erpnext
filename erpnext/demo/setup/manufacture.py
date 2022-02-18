@@ -1,14 +1,17 @@
-from __future__ import unicode_literals
 
-import random, json
+import json
+import random
+
 import frappe
-from frappe.utils import nowdate, add_days
-from erpnext.demo.setup.setup_data import import_json
-from erpnext.demo.domains import data
-
+from frappe.utils import add_days, nowdate
 from six import iteritems
 
+from erpnext.demo.domains import data
+from erpnext.demo.setup.setup_data import import_json
+
+
 def setup_data():
+	import_json("Location")
 	import_json("Asset Category")
 	setup_item()
 	setup_workstation()

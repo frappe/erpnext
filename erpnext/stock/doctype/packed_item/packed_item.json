@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2013-02-22 01:28:00",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -12,8 +13,11 @@
   "section_break_6",
   "warehouse",
   "target_warehouse",
+  "conversion_factor",
   "column_break_9",
   "qty",
+  "rate",
+  "uom",
   "section_break_9",
   "serial_no",
   "column_break_11",
@@ -23,7 +27,7 @@
   "actual_qty",
   "projected_qty",
   "column_break_16",
-  "uom",
+  "incoming_rate",
   "page_break",
   "prevdoc_doctype",
   "parent_detail_docname"
@@ -199,11 +203,34 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "incoming_rate",
+   "fieldtype": "Currency",
+   "label": "Incoming Rate",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "Conversion Factor"
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "istable": 1,
- "modified": "2019-11-26 20:09:59.400960",
+ "links": [],
+ "modified": "2022-01-28 16:03:30.780111",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packed Item",
@@ -211,5 +238,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

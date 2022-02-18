@@ -3,6 +3,9 @@
 
 frappe.ui.form.on('Pick List', {
 	setup: (frm) => {
+		frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.stock_qty === 0) ? "red" : "green"; });
+
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery Note',
 			'Stock Entry': 'Stock Entry',

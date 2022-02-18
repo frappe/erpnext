@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:45",
@@ -13,9 +14,11 @@
   "supplier",
   "supplier_name",
   "column_break1",
-  "transaction_date",
-  "amended_from",
   "company",
+  "transaction_date",
+  "valid_till",
+  "quotation_number",
+  "amended_from",
   "address_section",
   "supplier_address",
   "contact_person",
@@ -33,7 +36,6 @@
   "ignore_pricing_rule",
   "items_section",
   "items",
-  "link_to_mrs",
   "pricing_rule_details",
   "pricing_rules",
   "section_break_22",
@@ -158,6 +160,7 @@
    "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Date",
    "oldfieldname": "transaction_date",
    "oldfieldtype": "Date",
@@ -318,12 +321,6 @@
    "oldfieldtype": "Table",
    "options": "Supplier Quotation Item",
    "reqd": 1
-  },
-  {
-   "depends_on": "eval:doc.docstatus===0 && (doc.items && doc.items.length)",
-   "fieldname": "link_to_mrs",
-   "fieldtype": "Button",
-   "label": "Link to material requests"
   },
   {
    "fieldname": "pricing_rule_details",
@@ -580,6 +577,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment (Company Currency",
@@ -592,6 +590,7 @@
    "fieldname": "base_in_words",
    "fieldtype": "Data",
    "label": "In Words (Company Currency)",
+   "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -623,6 +622,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment",
@@ -641,6 +641,7 @@
    "fieldname": "in_words",
    "fieldtype": "Data",
    "label": "In Words",
+   "length": 240,
    "oldfieldname": "in_words_import",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -760,7 +761,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nSubmitted\nStopped\nCancelled",
+   "options": "\nDraft\nSubmitted\nStopped\nCancelled\nExpired",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1,
@@ -791,16 +792,29 @@
    "options": "Opportunity",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "valid_till",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Valid Till"
+  },
+  {
+   "fieldname": "quotation_number",
+   "fieldtype": "Data",
+   "label": "Quotation Number"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 29,
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-30 19:17:28.208693",
+ "modified": "2021-12-11 06:43:20.924080",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

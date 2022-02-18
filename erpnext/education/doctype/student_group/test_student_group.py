@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies and Contributors
 # See license.txt
-from __future__ import unicode_literals
+
+import unittest
 
 import frappe
-import unittest
+
 import erpnext.education
+
 
 def get_random_group():
 	doc = frappe.get_doc({

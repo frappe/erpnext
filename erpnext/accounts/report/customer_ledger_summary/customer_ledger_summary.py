@@ -1,12 +1,12 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-import erpnext
 from frappe import _, scrub
 from frappe.utils import getdate, nowdate
 from six import iteritems, itervalues
+
 
 class PartyLedgerSummaryReport(object):
 	def __init__(self, filters=None):
@@ -145,7 +145,7 @@ class PartyLedgerSummaryReport(object):
 		out = []
 		for party, row in iteritems(self.party_data):
 			if row.opening_balance or row.invoiced_amount or row.paid_amount or row.return_amount or row.closing_amount:
-				total_party_adjustment = sum([amount for amount in itervalues(self.party_adjustment_details.get(party, {}))])
+				total_party_adjustment = sum(amount for amount in itervalues(self.party_adjustment_details.get(party, {})))
 				row.paid_amount -= total_party_adjustment
 
 				adjustments = self.party_adjustment_details.get(party, {})
@@ -173,7 +173,7 @@ class PartyLedgerSummaryReport(object):
 			from `tabGL Entry` gle
 			{join}
 			where
-				gle.docstatus < 2 and gle.party_type=%(party_type)s and ifnull(gle.party, '') != ''
+				gle.docstatus < 2 and gle.is_cancelled = 0 and gle.party_type=%(party_type)s and ifnull(gle.party, '') != ''
 				and gle.posting_date <= %(to_date)s {conditions}
 			order by gle.posting_date
 		""".format(join=join, join_field=join_field, conditions=conditions), self.filters, as_dict=True)
@@ -248,7 +248,7 @@ class PartyLedgerSummaryReport(object):
 			from
 				`tabGL Entry`
 			where
-				docstatus < 2
+				docstatus < 2 and is_cancelled = 0
 				and (voucher_type, voucher_no) in (
 					select voucher_type, voucher_no from `tabGL Entry` gle, `tabAccount` acc
 					where acc.name = gle.account and acc.account_type = '{income_or_expense}'

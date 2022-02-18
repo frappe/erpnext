@@ -37,5 +37,22 @@ frappe.query_reports["Employee Leave Balance"] = {
 			"fieldtype": "Link",
 			"options": "Employee",
 		}
-	]
+	],
+
+	onload: () => {
+		frappe.call({
+			type: "GET",
+			method: "erpnext.hr.utils.get_leave_period",
+			args: {
+				"from_date": frappe.defaults.get_default("year_start_date"),
+				"to_date": frappe.defaults.get_default("year_end_date"),
+				"company": frappe.defaults.get_user_default("Company")
+			},
+			freeze: true,
+			callback: (data) => {
+				frappe.query_report.set_filter_value("from_date", data.message[0].from_date);
+				frappe.query_report.set_filter_value("to_date", data.message[0].to_date);
+			}
+		});
+	}
 }

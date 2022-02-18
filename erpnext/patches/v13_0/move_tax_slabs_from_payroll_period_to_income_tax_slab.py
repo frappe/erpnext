@@ -1,29 +1,34 @@
 # Copyright (c) 2019, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
-from frappe.model.utils.rename_field import rename_field
+
 
 def execute():
 	if not (frappe.db.table_exists("Payroll Period") and frappe.db.table_exists("Taxable Salary Slab")):
 		return
 
 	for doctype in ("income_tax_slab", "salary_structure_assignment", "employee_other_income", "income_tax_slab_other_charges"):
-		frappe.reload_doc("hr", "doctype", doctype)
+		frappe.reload_doc("Payroll", "doctype", doctype)
 
+
+	standard_tax_exemption_amount_exists = frappe.db.has_column("Payroll Period", "standard_tax_exemption_amount")
+
+	select_fields = "name, start_date, end_date"
+	if standard_tax_exemption_amount_exists:
+		select_fields = "name, start_date, end_date, standard_tax_exemption_amount"
 
 	for company in frappe.get_all("Company"):
 		payroll_periods =  frappe.db.sql("""
 			SELECT
-				name, start_date, end_date, standard_tax_exemption_amount
+				{0}
 			FROM
 				`tabPayroll Period`
 			WHERE company=%s
 			ORDER BY start_date DESC
-		""", company.name, as_dict = 1)
-			
+		""".format(select_fields), company.name, as_dict = 1)
+
 		for i, period in enumerate(payroll_periods):
 			income_tax_slab = frappe.new_doc("Income Tax Slab")
 			income_tax_slab.name = "Tax Slab:" + period.name
@@ -36,7 +41,8 @@ def execute():
 			income_tax_slab.effective_from = period.start_date
 			income_tax_slab.company = company.name
 			income_tax_slab.allow_tax_exemption = 1
-			income_tax_slab.standard_tax_exemption_amount = period.standard_tax_exemption_amount
+			if standard_tax_exemption_amount_exists:
+				income_tax_slab.standard_tax_exemption_amount = period.standard_tax_exemption_amount
 
 			income_tax_slab.flags.ignore_mandatory = True
 			income_tax_slab.submit()
@@ -79,7 +85,7 @@ def execute():
 			try:
 				employee_other_income.submit()
 				migrated.append([proof.employee, proof.payroll_period])
-			except:
+			except Exception:
 				pass
 
 	if not frappe.db.table_exists("Employee Tax Exemption Declaration"):
@@ -101,5 +107,5 @@ def execute():
 
 			try:
 				employee_other_income.submit()
-			except:
+			except Exception:
 				pass

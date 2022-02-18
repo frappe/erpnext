@@ -1,14 +1,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.utils import getdate, flt
+from frappe.utils import flt, getdate
+
 
 def execute(filters=None):
 	if not filters: filters = {}
-	float_preceision = frappe.db.get_default("float_preceision")
+	float_precision = frappe.db.get_default("float_precision")
 
 	condition = get_condition(filters)
 
@@ -25,7 +25,7 @@ def execute(filters=None):
 	data = []
 	for item in items:
 		total_outgoing = flt(consumed_item_map.get(item.name, 0)) + flt(delivered_item_map.get(item.name,0))
-		avg_daily_outgoing = flt(total_outgoing / diff, float_preceision)
+		avg_daily_outgoing = flt(total_outgoing / diff, float_precision)
 		reorder_level = (avg_daily_outgoing * flt(item.lead_time_days)) + flt(item.safety_stock)
 
 		data.append([item.name, item.item_name, item.item_group, item.brand, item.description,
@@ -48,6 +48,7 @@ def get_item_info(filters):
 	conditions = [get_item_group_condition(filters.get("item_group"))]
 	if filters.get("brand"):
 		conditions.append("item.brand=%(brand)s")
+	conditions.append("is_stock_item = 1")
 
 	return frappe.db.sql("""select name, item_name, description, brand, item_group,
 		safety_stock, lead_time_days from `tabItem` item where {}"""
@@ -55,19 +56,32 @@ def get_item_info(filters):
 
 
 def get_consumed_items(condition):
+	purpose_to_exclude = [
+		"Material Transfer for Manufacture",
+		"Material Transfer",
+		"Send to Subcontractor"
+	]
+
+	condition += """
+		and (
+			purpose is NULL
+			or purpose not in ({})
+		)
+	""".format(', '.join(f"'{p}'" for p in purpose_to_exclude))
+	condition = condition.replace("posting_date", "sle.posting_date")
+
 	consumed_items = frappe.db.sql("""
 		select item_code, abs(sum(actual_qty)) as consumed_qty
-		from `tabStock Ledger Entry`
-		where actual_qty < 0
+		from `tabStock Ledger Entry` as sle left join `tabStock Entry` as se
+			on sle.voucher_no = se.name
+		where
+			actual_qty < 0
+			and is_cancelled = 0
 			and voucher_type not in ('Delivery Note', 'Sales Invoice')
 			%s
-		group by item_code
-	""" % condition, as_dict=1)
+		group by item_code""" % condition, as_dict=1)
 
-	consumed_items_map = {}
-	for item in consumed_items:
-		consumed_items_map.setdefault(item.item_code, item.consumed_qty)
-
+	consumed_items_map = {item.item_code : item.consumed_qty for item in consumed_items}
 	return consumed_items_map
 
 def get_delivered_items(condition):

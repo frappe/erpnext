@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
-from frappe import _
 from email_reply_parser import EmailReplyParser
-from erpnext.hr.doctype.employee.employee import is_holiday
+from frappe import _
+from frappe.model.document import Document
 from frappe.utils import global_date_format
 from six import string_types
 
@@ -82,7 +80,7 @@ class DailyWorkSummary(Document):
 							crop=True
 						)
 						d.image = thumbnail_image
-			except:
+			except Exception:
 				d.image = original_image
 
 			if d.sender in did_not_reply:
@@ -97,9 +95,9 @@ class DailyWorkSummary(Document):
 
 		return dict(replies=replies,
 			original_message=dws_group.message,
-			title=_('Work Summary for {0}'.format(
+			title=_('Work Summary for {0}').format(
 				global_date_format(self.creation)
-			)),
+			),
 			did_not_reply=', '.join(did_not_reply) or '',
 			did_not_reply_title=_('No replies from'))
 

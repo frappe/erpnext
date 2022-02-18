@@ -1,10 +1,11 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
-from frappe.utils import flt
+
+import frappe
 from frappe import _
+from frappe.utils import flt
+
 
 def execute(filters=None):
 	columns, data = get_columns(), get_data(filters)
@@ -47,21 +48,22 @@ def get_data(filters):
 
 	for d in gl_entries:
 		asset_data = assets_details.get(d.against_voucher)
-		if not asset_data.get("accumulated_depreciation_amount"):
-			asset_data.accumulated_depreciation_amount = d.debit
-		else:
-			asset_data.accumulated_depreciation_amount += d.debit
+		if asset_data:
+			if not asset_data.get("accumulated_depreciation_amount"):
+				asset_data.accumulated_depreciation_amount = d.debit
+			else:
+				asset_data.accumulated_depreciation_amount += d.debit
 
-		row = frappe._dict(asset_data)
-		row.update({
-			"depreciation_amount": d.debit,
-			"depreciation_date": d.posting_date,
-			"amount_after_depreciation": (flt(row.gross_purchase_amount) -
-				flt(row.accumulated_depreciation_amount)),
-			"depreciation_entry": d.voucher_no
-		})
+			row = frappe._dict(asset_data)
+			row.update({
+				"depreciation_amount": d.debit,
+				"depreciation_date": d.posting_date,
+				"amount_after_depreciation": (flt(row.gross_purchase_amount) -
+					flt(row.accumulated_depreciation_amount)),
+				"depreciation_entry": d.voucher_no
+			})
 
-		data.append(row)
+			data.append(row)
 
 	return data
 

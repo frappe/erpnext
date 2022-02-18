@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import unittest
 
@@ -71,4 +69,4 @@ def check_task_creation():
 
 
 def check_project_creation():
-	return True if frappe.db.exists('Project', 'Basil from seed 2017') else False
+	return True if frappe.db.exists('Project', {'project_name': 'Basil from seed 2017'}) else False

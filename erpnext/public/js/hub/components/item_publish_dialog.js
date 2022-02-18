@@ -3,24 +3,24 @@ function ItemPublishDialog(primary_action, secondary_action) {
 		title: __('Edit Publishing Details'),
 		fields: [
 			{
-				"label": "Item Code",
-				"fieldname": "item_code",
-				"fieldtype": "Data",
-				"read_only": 1
+				label: __('Item Code'),
+				fieldname: 'item_code',
+				fieldtype: 'Data',
+				read_only: 1
 			},
 			{
-				"label": "Hub Category",
-				"fieldname": "hub_category",
-				"fieldtype": "Autocomplete",
-				"options": [],
-				"reqd": 1
+				label: __('Hub Category'),
+				fieldname: 'hub_category',
+				fieldtype: 'Autocomplete',
+				options: [],
+				reqd: 1
 			},
 			{
-				"label": "Images",
-				"fieldname": "image_list",
-				"fieldtype": "MultiSelect",
-				"options": [],
-				"reqd": 1
+				label: __('Images'),
+				fieldname: 'image_list',
+				fieldtype: 'MultiSelect',
+				options: [],
+				reqd: 1
 			}
 		],
 		primary_action_label: primary_action.label || __('Set Details'),
@@ -28,15 +28,12 @@ function ItemPublishDialog(primary_action, secondary_action) {
 		secondary_action: secondary_action.fn
 	});
 
-	hub.call('get_categories')
-		.then(categories => {
-			categories = categories.map(d => d.name);
-			dialog.fields_dict.hub_category.set_data(categories);
-		});
+	hub.call('get_categories').then(categories => {
+		categories = categories.map(d => d.name);
+		dialog.fields_dict.hub_category.set_data(categories);
+	});
 
 	return dialog;
 }
 
-export {
-	ItemPublishDialog
-}
+export { ItemPublishDialog };

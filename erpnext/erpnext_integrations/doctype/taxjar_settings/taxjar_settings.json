@@ -1,0 +1,139 @@
+{
+ "actions": [],
+ "creation": "2017-06-15 08:21:24.624315",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "taxjar_calculate_tax",
+  "is_sandbox",
+  "taxjar_create_transactions",
+  "credentials",
+  "api_key",
+  "cb_keys",
+  "sandbox_api_key",
+  "configuration",
+  "company",
+  "column_break_10",
+  "tax_account_head",
+  "configuration_cb",
+  "shipping_account_head",
+  "section_break_12",
+  "nexus"
+ ],
+ "fields": [
+  {
+   "fieldname": "credentials",
+   "fieldtype": "Section Break",
+   "label": "Credentials"
+  },
+  {
+   "fieldname": "api_key",
+   "fieldtype": "Password",
+   "in_list_view": 1,
+   "label": "Live API Key",
+   "reqd": 1
+  },
+  {
+   "fieldname": "configuration",
+   "fieldtype": "Section Break",
+   "label": "Configuration"
+  },
+  {
+   "fieldname": "tax_account_head",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Tax Account Head",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "shipping_account_head",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Shipping Account Head",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "taxjar_calculate_tax",
+   "fieldname": "is_sandbox",
+   "fieldtype": "Check",
+   "label": "Sandbox Mode"
+  },
+  {
+   "fieldname": "sandbox_api_key",
+   "fieldtype": "Password",
+   "label": "Sandbox API Key"
+  },
+  {
+   "default": "0",
+   "depends_on": "taxjar_calculate_tax",
+   "fieldname": "taxjar_create_transactions",
+   "fieldtype": "Check",
+   "label": "Create TaxJar Transaction"
+  },
+  {
+   "default": "0",
+   "fieldname": "taxjar_calculate_tax",
+   "fieldtype": "Check",
+   "label": "Enable Tax Calculation"
+  },
+  {
+   "fieldname": "cb_keys",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "nexus",
+   "fieldname": "section_break_12",
+   "fieldtype": "Section Break",
+   "label": "Nexus List"
+  },
+  {
+   "fieldname": "nexus",
+   "fieldtype": "Table",
+   "label": "Nexus",
+   "options": "TaxJar Nexus",
+   "read_only": 1
+  },
+  {
+   "fieldname": "configuration_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-11-30 12:17:24.647979",
+ "modified_by": "Administrator",
+ "module": "ERPNext Integrations",
+ "name": "TaxJar Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

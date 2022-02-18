@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, now_datetime, nowdate
+from frappe.utils import getdate, nowdate
 
 
 class Contract(Document):
@@ -28,6 +26,9 @@ class Contract(Document):
 		self.validate_dates()
 		self.update_contract_status()
 		self.update_fulfilment_status()
+
+	def before_submit(self):
+		self.signed_by_company = frappe.session.user
 
 	def before_update_after_submit(self):
 		self.update_contract_status()

@@ -5,7 +5,7 @@ cur_frm.add_fetch('bank_account','account','account');
 cur_frm.add_fetch('bank_account','bank_account_no','bank_account_no');
 cur_frm.add_fetch('bank_account','iban','iban');
 cur_frm.add_fetch('bank_account','branch_code','branch_code');
-cur_frm.add_fetch('bank_account','swift_number','swift_number');
+cur_frm.add_fetch('bank','swift_number','swift_number');
 
 frappe.ui.form.on('Bank Guarantee', {
 	setup: function(frm) {

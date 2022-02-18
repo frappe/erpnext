@@ -1,24 +1,23 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
-import frappe
 import unittest
 
+import frappe
 
-from erpnext.education.doctype.student.test_student import create_student
-from erpnext.education.doctype.student.test_student import get_student
-from erpnext.education.doctype.program.test_program import setup_program
 from erpnext.education.doctype.course_activity.test_course_activity import make_course_activity
+from erpnext.education.doctype.program.test_program import setup_program
+from erpnext.education.doctype.student.test_student import create_student, get_student
+
 
 class TestCourseEnrollment(unittest.TestCase):
 	def setUp(self):
 		setup_program()
 		student = create_student({"first_name": "_Test First", "last_name": "_Test Last", "email": "_test_student_1@example.com"})
 		program_enrollment = student.enroll_in_program("_Test Program")
-		course_enrollment = student.enroll_in_course("_Test Course 1", program_enrollment.name)
-		make_course_activity(course_enrollment.name, "Article", "_Test Article 1-1")
+		course_enrollment = frappe.db.get_value("Course Enrollment",
+			{"course": "_Test Course 1", "student": student.name, "program_enrollment": program_enrollment.name}, 'name')
+		make_course_activity(course_enrollment, "Article", "_Test Article 1-1")
 
 	def test_get_progress(self):
 		student = get_student("_test_student_1@example.com")
@@ -30,5 +29,11 @@ class TestCourseEnrollment(unittest.TestCase):
 		self.assertTrue(finished in progress)
 		frappe.db.rollback()
 
+	def tearDown(self):
+		for entry in frappe.db.get_all("Course Enrollment"):
+			frappe.delete_doc("Course Enrollment", entry.name)
 
-
+		for entry in frappe.db.get_all("Program Enrollment"):
+			doc = frappe.get_doc("Program Enrollment", entry.name)
+			doc.cancel()
+			doc.delete()

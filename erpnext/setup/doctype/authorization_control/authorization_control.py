@@ -1,11 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import cstr, flt, has_common, comma_or
-from frappe import session, _
+from frappe import _, session
+from frappe.utils import comma_or, cstr, flt, has_common
+
 from erpnext.utilities.transaction_base import TransactionBase
+
 
 class AuthorizationControl(TransactionBase):
 	def get_appr_user_role(self, det, doctype_name, total, based_on, condition, item, company):
@@ -76,7 +78,7 @@ class AuthorizationControl(TransactionBase):
 		add_cond = ''
 		auth_value = av_dis
 
-		if val == 1: add_cond += " and system_user = {0}".format(frappe.db.escape(session['user']))
+		if val == 1: add_cond += " and system_user = {}".format(frappe.db.escape(session['user']))
 		elif val == 2: add_cond += " and system_role IN %s" % ("('"+"','".join(frappe.get_roles())+"')")
 		else: add_cond += " and ifnull(system_user,'') = '' and ifnull(system_role,'') = ''"
 
@@ -85,7 +87,7 @@ class AuthorizationControl(TransactionBase):
 			if doc_obj:
 				if doc_obj.doctype == 'Sales Invoice': customer = doc_obj.customer
 				else: customer = doc_obj.customer_name
-				add_cond = " and master_name = {0}".format(frappe.db.escape(customer))
+				add_cond = " and master_name = {}".format(frappe.db.escape(customer))
 		if based_on == 'Itemwise Discount':
 			if doc_obj:
 				for t in doc_obj.get("items"):

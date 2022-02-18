@@ -10,5 +10,11 @@
   "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/frappe/erpnext/issues"
-  }
+  },
+  "devDependencies": {},
+  "dependencies": {
+    "html2canvas": "^1.1.4",
+    "onscan.js": "^1.5.2"
+  },
+  "scripts": {}
 }

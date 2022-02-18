@@ -1,11 +1,10 @@
-from __future__ import unicode_literals
 
-import frappe
 import json
 
+import frappe
 from frappe import _
-from frappe.frappeclient import FrappeClient
 from frappe.desk.form.load import get_attachments
+from frappe.frappeclient import FrappeClient
 from six import string_types
 
 current_user = frappe.session.user
@@ -70,7 +69,7 @@ def map_fields(items):
 	field_mappings = get_field_mappings()
 	table_fields = [d.fieldname for d in frappe.get_meta('Item').get_table_fields()]
 
-	hub_seller_name = frappe.db.get_value('Marketplace Settings' , 'Marketplace Settings', 'hub_seller_name')
+	hub_seller_name = frappe.db.get_value('Marketplace Settings', 'Marketplace Settings', 'hub_seller_name')
 
 	for item in items:
 		for fieldname in table_fields:
@@ -115,10 +114,21 @@ def get_valid_items(search_value=''):
 
 	return valid_items
 
+@frappe.whitelist()
+def update_item(ref_doc, data):
+	data = json.loads(data)
+
+	data.update(dict(doctype='Hub Item', name=ref_doc))
+	try:
+		connection = get_hub_connection()
+		connection.update(data)
+	except Exception as e:
+		frappe.log_error(message=e, title='Hub Sync Error')
 
 @frappe.whitelist()
 def publish_selected_items(items_to_publish):
 	items_to_publish = json.loads(items_to_publish)
+	items_to_update = []
 	if not len(items_to_publish):
 		frappe.throw(_('No items to publish'))
 
@@ -126,12 +136,14 @@ def publish_selected_items(items_to_publish):
 		item_code = item.get('item_code')
 		frappe.db.set_value('Item', item_code, 'publish_in_hub', 1)
 
-		frappe.get_doc({
+		hub_dict = {
 			'doctype': 'Hub Tracked Item',
 			'item_code': item_code,
+			'published': 1,
 			'hub_category': item.get('hub_category'),
 			'image_list': item.get('image_list')
-		}).insert(ignore_if_duplicate=True)
+		}
+		frappe.get_doc(hub_dict).insert(ignore_if_duplicate=True)
 
 	items = map_fields(items_to_publish)
 
@@ -146,6 +158,20 @@ def publish_selected_items(items_to_publish):
 		item_sync_postprocess()
 	except Exception as e:
 		frappe.log_error(message=e, title='Hub Sync Error')
+
+@frappe.whitelist()
+def unpublish_item(item_code, hub_item_name):
+	''' Remove item listing from the marketplace '''
+
+	response = call_hub_method('unpublish_item', {
+		'hub_item_name': hub_item_name
+	})
+
+	if response:
+		frappe.db.set_value('Item', item_code, 'publish_in_hub', 0)
+		frappe.delete_doc('Hub Tracked Item', item_code)
+	else:
+		frappe.throw(_('Unable to update remote activity'))
 
 @frappe.whitelist()
 def get_unregistered_users():

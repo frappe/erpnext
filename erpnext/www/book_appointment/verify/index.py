@@ -1,6 +1,7 @@
 import frappe
-
 from frappe.utils.verified_command import verify_request
+
+
 @frappe.whitelist(allow_guest=True)
 def get_context(context):
 	if not verify_request():

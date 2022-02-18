@@ -1,11 +1,24 @@
-<h3>{{_("Request for Quotation")}}</h3>
+<h4>{{_("Request for Quotation")}}</h4>
+<p>{{ supplier_salutation if supplier_salutation else ''}} {{ supplier_name }},</p>
 <p>{{ message }}</p>
+
+<p>{{_("The Request for Quotation can be accessed by clicking on the following button")}}:</p>
+<p>
+	<button style="border: 1px solid #15c; padding: 6px; border-radius: 5px; background-color: white;">
+		<a href="{{ rfq_link }}" style="color: #15c; text-decoration:none;" target="_blank">Submit your Quotation</a>
+	</button>
+</p><br>
+
+<p>{{_("Regards")}},<br>
+{{ user_fullname }}</p><br>
+
 {% if update_password_link %}
-<p>{{_("Please click on the following link to set your new password")}}:</p>
-<p><a href="{{ update_password_link }}">{{ update_password_link }}</a></p>
-{% else %}
-<p>{{_("The request for quotation can be accessed by clicking on the following link")}}:</p>
-<p><a href="{{ rfq_link }}">Submit your Quotation</a></p>
+
+<p>{{_("Please click on the following button to set your new password")}}:</p>
+<p>
+	<button style="border: 1px solid #15c; padding: 4px; border-radius: 5px; background-color: white;">
+		<a href="{{ update_password_link }}" style="color: #15c; font-size: 12px; text-decoration:none;" target="_blank">{{_("Update Password") }}</a>
+	</button>
+</p>
+
 {% endif %}
-<p>{{_("Thank you")}},<br>
-{{ user_fullname }}</p>

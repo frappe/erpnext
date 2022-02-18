@@ -1,13 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.model.document import Document
 from frappe import _
-from erpnext.education.utils import validate_duplicate_student
+from frappe.model.document import Document
 from frappe.utils import cint
+
+from erpnext.education.utils import validate_duplicate_student
+
 
 class StudentGroup(Document):
 	def validate(self):
@@ -26,6 +27,8 @@ class StudentGroup(Document):
 			frappe.throw(_("Please select Program"))
 
 	def validate_strength(self):
+		if cint(self.max_strength) < 0:
+			frappe.throw(_("""Max strength cannot be less than zero."""))
 		if self.max_strength and len(self.students) > self.max_strength:
 			frappe.throw(_("""Cannot enroll more than {0} students for this student group.""").format(self.max_strength))
 
@@ -34,15 +37,15 @@ class StudentGroup(Document):
 		students = [d.student for d in program_enrollment] if program_enrollment else []
 		for d in self.students:
 			if not frappe.db.get_value("Student", d.student, "enabled") and d.active and not self.disabled:
-				frappe.throw(_("{0} - {1} is inactive student".format(d.group_roll_number, d.student_name)))
+				frappe.throw(_("{0} - {1} is inactive student").format(d.group_roll_number, d.student_name))
 
 			if (self.group_based_on == "Batch") and cint(frappe.defaults.get_defaults().validate_batch)\
 				and d.student not in students:
-				frappe.throw(_("{0} - {1} is not enrolled in the Batch {2}".format(d.group_roll_number, d.student_name, self.batch)))
+				frappe.throw(_("{0} - {1} is not enrolled in the Batch {2}").format(d.group_roll_number, d.student_name, self.batch))
 
 			if (self.group_based_on == "Course") and cint(frappe.defaults.get_defaults().validate_course)\
 				and (d.student not in students):
-				frappe.throw(_("{0} - {1} is not enrolled in the Course {2}".format(d.group_roll_number, d.student_name, self.course)))
+				frappe.throw(_("{0} - {1} is not enrolled in the Course {2}").format(d.group_roll_number, d.student_name, self.course))
 
 	def validate_and_set_child_table_fields(self):
 		roll_numbers = [d.group_roll_number for d in self.students if d.group_roll_number]
@@ -55,7 +58,7 @@ class StudentGroup(Document):
 				max_roll_no += 1
 				d.group_roll_number = max_roll_no
 			if d.group_roll_number in roll_no_list:
-				frappe.throw(_("Duplicate roll number for student {0}".format(d.student_name)))
+				frappe.throw(_("Duplicate roll number for student {0}").format(d.student_name))
 			else:
 				roll_no_list.append(d.group_roll_number)
 
@@ -77,7 +80,7 @@ def get_students(academic_year, group_based_on, academic_term=None, program=None
 		return []
 
 def get_program_enrollment(academic_year, academic_term=None, program=None, batch=None, student_category=None, course=None):
-	
+
 	condition1 = " "
 	condition2 = " "
 	if academic_term:
@@ -93,9 +96,9 @@ def get_program_enrollment(academic_year, academic_term=None, program=None, batc
 		condition2 = ", `tabProgram Enrollment Course` pec"
 
 	return frappe.db.sql('''
-		select 
-			pe.student, pe.student_name 
-		from 
+		select
+			pe.student, pe.student_name
+		from
 			`tabProgram Enrollment` pe {condition2}
 		where
 			pe.academic_year = %(academic_year)s  {condition1}
@@ -126,4 +129,3 @@ def fetch_students(doctype, txt, searchfield, start, page_len, filters):
 			order by idx desc, name
 			limit %s, %s""".format(searchfield),
 			tuple(["%%%s%%" % txt, "%%%s%%" % txt, start, page_len]))
-

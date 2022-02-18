@@ -1,5 +1,6 @@
 import frappe
 
+
 def execute():
 	'''Remove barcodes field from "Copy Fields to Variants" table because barcodes must be unique'''
 

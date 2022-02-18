@@ -1,39 +1,75 @@
+{% from "erpnext/templates/includes/macros.html" import field_filter_section, attribute_filter_section, discount_range_filters %}
 {% extends "templates/web.html" %}
 
-{% block header %}<h1>{{ name }}</h1>{% endblock %}
+{% block header %}
+<div class="mb-6">{{ _(item_group_name) }}</div>
+{% endblock header %}
+
+{% block script %}
+<script type="text/javascript" src="/all-products/index.js"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="item-breadcrumbs small text-muted">
+	{% include "templates/includes/breadcrumbs.html" %}
+</div>
+{% endblock %}
 
 {% block page_content %}
-<div class="item-group-content" itemscope itemtype="http://schema.org/Product">
-	<div>
-		{% if slideshow %}<!-- slideshow -->
-		{% include "templates/includes/slideshow.html" %}
+<div class="item-group-content" itemscope itemtype="http://schema.org/Product"
+	data-item-group="{{ name }}">
+	<div class="item-group-slideshow">
+		{% if slideshow %} <!-- slideshow -->
+			{{ web_block(
+				"Hero Slider",
+				values=slideshow,
+				add_container=0,
+				add_top_padding=0,
+				add_bottom_padding=0,
+			) }}
 		{% endif %}
-		{% if description %}<!-- description -->
-		<div class="mb-3" itemprop="description">{{ description or ""}}</div>
+
+		{% if description %} <!-- description -->
+		<div class="item-group-description text-muted mb-5" itemprop="description">{{ description or ""}}</div>
 		{% endif %}
 	</div>
 	<div class="row">
-		<div class="col-md-8">
-			{% if items %}
-			<div id="search-list">
-				{% for i in range(0, page_length) %}
-					{% if items[i] %}
-						{%- set item = items[i] %}
-						{% include "erpnext/www/all-products/item_row.html" %}
-					{% endif %}
-				{% endfor %}
+		<div id="product-listing" class="col-12 order-2 col-md-9 order-md-2 item-card-group-section">
+			<!-- Products Rendered in all-products/index.js-->
+		</div>
+
+		<div class="col-12 order-1 col-md-3 order-md-1">
+			<div class="collapse d-md-block mr-4 filters-section" id="product-filters">
+				<div class="d-flex justify-content-between align-items-center mb-5 title-section">
+					<div class="mb-4 filters-title" > {{ _('Filters') }} </div>
+					<a class="mb-4 clear-filters" href="/{{ doc.route }}">{{ _('Clear All') }}</a>
+				</div>
+				<!-- field filters -->
+				{{ field_filter_section(field_filters) }}
+
+				<!-- attribute filters -->
+				{{ attribute_filter_section(attribute_filters) }}
+
 			</div>
-			<div class="item-group-nav-buttons">
-				{% if frappe.form_dict.start|int > 0 %}
-				<a class="btn btn-outline-secondary" href="/{{ pathname }}?start={{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</a>
-				{% endif %}
-				{% if items|length > page_length %}
-				<a class="btn btn-outline-secondary" href="/{{ pathname }}?start={{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</a>
-				{% endif %}
-			</div>
-			{% else %}
-			<div class="text-muted">{{ _("No items listed") }}.</div>
-			{% endif %}
+
+			<script>
+				frappe.ready(() => {
+					$('.product-filter-filter').on('keydown', frappe.utils.debounce((e) => {
+						const $input = $(e.target);
+						const keyword = ($input.val() || '').toLowerCase();
+						const $filter_options = $input.next('.filter-options');
+
+						$filter_options.find('.custom-control').show();
+						$filter_options.find('.custom-control').each((i, el) => {
+							const $el = $(el);
+							const value = $el.data('value').toLowerCase();
+							if (!value.includes(keyword)) {
+								$el.hide();
+							}
+						});
+					}, 300));
+				})
+			</script>
 		</div>
 	</div>
 </div>

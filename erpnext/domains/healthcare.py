@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 
 data = {
 	'desktop_icons': [
@@ -48,6 +47,22 @@ data = {
 			{
 				'fieldname': 'reference_dn', 'label': 'Reference Name', 'fieldtype': 'Dynamic Link', 'options': 'reference_dt',
 				'insert_after': 'reference_dt'
+			}
+		],
+		'Stock Entry': [
+			{
+				'fieldname': 'inpatient_medication_entry', 'label': 'Inpatient Medication Entry', 'fieldtype': 'Link', 'options': 'Inpatient Medication Entry',
+				'insert_after': 'credit_note', 'read_only': True
+			}
+		],
+		'Stock Entry Detail': [
+			{
+				'fieldname': 'patient', 'label': 'Patient', 'fieldtype': 'Link', 'options': 'Patient',
+				'insert_after': 'po_detail', 'read_only': True
+			},
+			{
+				'fieldname': 'inpatient_medication_entry_child', 'label': 'Inpatient Medication Entry Child', 'fieldtype': 'Data',
+				'insert_after': 'patient', 'read_only': True
 			}
 		]
 	},

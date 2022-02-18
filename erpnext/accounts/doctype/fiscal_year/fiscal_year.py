@@ -1,17 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe
-from frappe import msgprint, _
-from frappe.utils import getdate, add_days, add_years, cstr
-from dateutil.relativedelta import relativedelta
 
+import frappe
+from dateutil.relativedelta import relativedelta
+from frappe import _, msgprint
 from frappe.model.document import Document
+from frappe.utils import add_days, add_years, cstr, getdate
+
 
 class FiscalYearIncorrectDate(frappe.ValidationError): pass
 
 class FiscalYear(Document):
+	@frappe.whitelist()
 	def set_as_default(self):
 		frappe.db.set_value("Global Defaults", None, "current_fiscal_year", self.name)
 		global_defaults = frappe.get_doc("Global Defaults")
@@ -54,7 +55,7 @@ class FiscalYear(Document):
 	def on_update(self):
 		check_duplicate_fiscal_year(self)
 		frappe.cache().delete_value("fiscal_years")
-	
+
 	def on_trash(self):
 		global_defaults = frappe.get_doc("Global Defaults")
 		if global_defaults.current_fiscal_year == self.name:
@@ -121,12 +122,8 @@ def auto_create_fiscal_year():
 			pass
 
 def get_from_and_to_date(fiscal_year):
-	from_and_to_date_tuple = frappe.db.sql("""select year_start_date, year_end_date
-		from `tabFiscal Year` where name=%s""", (fiscal_year))[0]
-
-	from_and_to_date = {
-		"from_date": from_and_to_date_tuple[0],
-		"to_date": from_and_to_date_tuple[1]
-	}
-
-	return from_and_to_date
+	fields = [
+		"year_start_date as from_date",
+		"year_end_date as to_date"
+	]
+	return frappe.db.get_value("Fiscal Year", fiscal_year, fields, as_dict=1)

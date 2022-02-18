@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2018-07-20 16:38:06.630813",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -10,7 +11,6 @@
   "column_break_4",
   "supplier",
   "payment_request",
-  "payment_entry",
   "mode_of_payment",
   "bank_account_details",
   "bank_account",
@@ -103,17 +103,12 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "payment_entry",
-   "fieldtype": "Link",
-   "label": "Payment Entry",
-   "options": "Payment Entry",
-   "read_only": 1
   }
  ],
+ "index_web_pages_for_search": 1,
  "istable": 1,
- "modified": "2019-05-08 13:56:25.724557",
+ "links": [],
+ "modified": "2020-09-04 08:29:51.014390",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Order Reference",

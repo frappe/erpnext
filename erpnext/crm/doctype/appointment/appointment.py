@@ -1,18 +1,14 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
-import urllib
 from collections import Counter
-from datetime import timedelta
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_url, getdate
-from frappe.utils.verified_command import verify_request, get_signed_params
+from frappe.utils.verified_command import get_signed_params
 
 
 class Appointment(Document):
@@ -24,19 +20,34 @@ class Appointment(Document):
 			return lead_list[0].name
 		return None
 
+	def find_customer_by_email(self):
+		customer_list = frappe.get_list(
+			'Customer', filters={'email_id': self.customer_email}, ignore_permissions=True
+		)
+		if customer_list:
+			return customer_list[0].name
+		return None
+
 	def before_insert(self):
 		number_of_appointments_in_same_slot = frappe.db.count(
 			'Appointment', filters={'scheduled_time': self.scheduled_time})
 		number_of_agents = frappe.db.get_single_value('Appointment Booking Settings', 'number_of_agents')
 		if not number_of_agents == 0:
 			if (number_of_appointments_in_same_slot >= number_of_agents):
-				frappe.throw('Time slot is not available')
+				frappe.throw(_('Time slot is not available'))
 		# Link lead
-		if not self.lead:
-			self.lead = self.find_lead_by_email()
+		if not self.party:
+			lead = self.find_lead_by_email()
+			customer = self.find_customer_by_email()
+			if customer:
+				self.appointment_with = "Customer"
+				self.party = customer
+			else:
+				self.appointment_with = "Lead"
+				self.party = lead
 
 	def after_insert(self):
-		if self.lead:
+		if self.party:
 			# Create Calendar event
 			self.auto_assign()
 			self.create_calendar_event()
@@ -60,10 +71,10 @@ class Appointment(Document):
 						subject=_('Appointment Confirmation'))
 		if frappe.session.user == "Guest":
 			frappe.msgprint(
-				'Please check your email to confirm the appointment')
+				_('Please check your email to confirm the appointment'))
 		else :
 			frappe.msgprint(
-				'Appointment was created. But no lead was found. Please check the email to confirm')
+				_('Appointment was created. But no lead was found. Please check the email to confirm'))
 
 	def on_change(self):
 		# Sync Calendar
@@ -76,7 +87,7 @@ class Appointment(Document):
 
 	def set_verified(self, email):
 		if not email == self.customer_email:
-			frappe.throw('Email verification failed.')
+			frappe.throw(_('Email verification failed.'))
 		# Create new lead
 		self.create_lead_and_link()
 		# Remove unverified status
@@ -89,7 +100,7 @@ class Appointment(Document):
 
 	def create_lead_and_link(self):
 		# Return if already linked
-		if self.lead:
+		if self.party:
 			return
 		lead = frappe.get_doc({
 			'doctype': 'Lead',
@@ -100,7 +111,7 @@ class Appointment(Document):
 		})
 		lead.insert(ignore_permissions=True)
 		# Link lead
-		self.lead = lead.name
+		self.party = lead.name
 
 	def auto_assign(self):
 		from frappe.desk.form.assign_to import add as add_assignemnt
@@ -111,7 +122,7 @@ class Appointment(Document):
 			add_assignemnt({
 				'doctype': self.doctype,
 				'name': self.name,
-				'assign_to': existing_assignee
+				'assign_to': [existing_assignee]
 			})
 			return
 		if self._assign:
@@ -124,19 +135,19 @@ class Appointment(Document):
 				add_assignemnt({
 					'doctype': self.doctype,
 					'name': self.name,
-					'assign_to': agent
+					'assign_to': [agent]
 				})
 			break
 
 	def get_assignee_from_latest_opportunity(self):
-		if not self.lead:
+		if not self.party:
 			return None
-		if not frappe.db.exists('Lead', self.lead):
+		if not frappe.db.exists('Lead', self.party):
 			return None
 		opporutnities = frappe.get_list(
 			'Opportunity',
 			filters={
-				'party_name': self.lead,
+				'party_name': self.party,
 			},
 			ignore_permissions=True,
 			order_by='creation desc')
@@ -159,7 +170,7 @@ class Appointment(Document):
 			'status': 'Open',
 			'type': 'Public',
 			'send_reminder': frappe.db.get_single_value('Appointment Booking Settings', 'email_reminders'),
-			'event_participants': [dict(reference_doctype='Lead', reference_docname=self.lead)]
+			'event_participants': [dict(reference_doctype=self.appointment_with, reference_docname=self.party)]
 		})
 		employee = _get_employee_from_user(self._assign)
 		if employee:
@@ -169,7 +180,7 @@ class Appointment(Document):
 		appointment_event.insert(ignore_permissions=True)
 		self.calendar_event = appointment_event.name
 		self.save(ignore_permissions=True)
-	
+
 	def _get_verify_url(self):
 		verify_route = '/book_appointment/verify'
 		params = {
@@ -220,4 +231,3 @@ def _get_employee_from_user(user):
 		# frappe.db.exists returns a tuple of a tuple
 		return frappe.get_doc('Employee', employee_docname[0][0])
 	return None
-

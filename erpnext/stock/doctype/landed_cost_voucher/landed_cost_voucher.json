@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2014-07-11 11:33:42.547339",
  "doctype": "DocType",
@@ -7,6 +8,9 @@
  "field_order": [
   "naming_series",
   "company",
+  "column_break_2",
+  "posting_date",
+  "section_break_5",
   "purchase_receipts",
   "purchase_receipt_items",
   "get_items_from_purchase_receipts",
@@ -30,7 +34,9 @@
    "options": "MAT-LCV-.YYYY.-",
    "print_hide": 1,
    "reqd": 1,
-   "set_only_once": 1
+   "set_only_once": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "company",
@@ -40,24 +46,32 @@
    "label": "Company",
    "options": "Company",
    "remember_last_selected_value": 1,
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "purchase_receipts",
    "fieldtype": "Table",
    "label": "Purchase Receipts",
    "options": "Landed Cost Purchase Receipt",
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "purchase_receipt_items",
    "fieldtype": "Section Break",
-   "label": "Purchase Receipt Items"
+   "label": "Purchase Receipt Items",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "get_items_from_purchase_receipts",
    "fieldtype": "Button",
-   "label": "Get Items From Purchase Receipts"
+   "label": "Get Items From Purchase Receipts",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "items",
@@ -65,42 +79,56 @@
    "label": "Purchase Receipt Items",
    "no_copy": 1,
    "options": "Landed Cost Item",
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "sec_break1",
    "fieldtype": "Section Break",
-   "label": "Applicable Charges"
+   "label": "Applicable Charges",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "taxes",
    "fieldtype": "Table",
    "label": "Taxes and Charges",
    "options": "Landed Cost Taxes and Charges",
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "section_break_9",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "total_taxes_and_charges",
    "fieldtype": "Currency",
-   "label": "Total Taxes and Charges",
+   "label": "Total Taxes and Charges (Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1,
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "col_break1",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "distribute_charges_based_on",
    "fieldtype": "Select",
    "label": "Distribute Charges Based On",
-   "options": "Qty\nAmount",
-   "reqd": 1
+   "options": "Qty\nAmount\nDistribute Manually",
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "amended_from",
@@ -109,21 +137,51 @@
    "no_copy": 1,
    "options": "Landed Cost Voucher",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "sec_break2",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "landed_cost_help",
    "fieldtype": "HTML",
-   "label": "Landed Cost Help"
+   "label": "Landed Cost Help",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break",
+   "hide_border": 1,
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "icon": "icon-usd",
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "modified": "2019-11-21 15:34:10.846093",
+ "links": [],
+ "modified": "2021-01-25 23:07:30.468423",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Voucher",

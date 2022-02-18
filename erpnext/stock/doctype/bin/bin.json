@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "MAT-BIN-.YYYY.-.#####",
  "creation": "2013-01-10 16:34:25",
  "doctype": "DocType",
@@ -32,6 +33,7 @@
    "oldfieldtype": "Link",
    "options": "Warehouse",
    "read_only": 1,
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -45,6 +47,7 @@
    "oldfieldtype": "Link",
    "options": "Item",
    "read_only": 1,
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -112,7 +115,8 @@
   {
    "fieldname": "reserved_qty_for_sub_contract",
    "fieldtype": "Float",
-   "label": "Reserved Qty for sub contract"
+   "label": "Reserved Qty for sub contract",
+   "read_only": 1
   },
   {
    "fieldname": "ma_rate",
@@ -166,10 +170,12 @@
  "hide_toolbar": 1,
  "idx": 1,
  "in_create": 1,
- "modified": "2019-11-18 18:34:59.456882",
+ "links": [],
+ "modified": "2022-01-30 17:04:54.715288",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Bin",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -196,5 +202,7 @@
  ],
  "quick_entry": 1,
  "search_fields": "item_code,warehouse",
- "sort_order": "ASC"
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "states": []
 }

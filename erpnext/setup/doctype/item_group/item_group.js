@@ -61,6 +61,21 @@ frappe.ui.form.on("Item Group", {
 				frappe.set_route("List", "Item", {"item_group": frm.doc.name});
 			});
 		}
+
+		frappe.model.with_doctype('Item', () => {
+			const item_meta = frappe.get_meta('Item');
+
+			const valid_fields = item_meta.fields.filter(
+				df => ['Link', 'Table MultiSelect'].includes(df.fieldtype) && !df.hidden
+			).map(df => ({ label: df.label, value: df.fieldname }));
+
+			frm.fields_dict.filter_fields.grid.update_docfield_property(
+				'fieldname', 'fieldtype', 'Select'
+			);
+			frm.fields_dict.filter_fields.grid.update_docfield_property(
+				'fieldname', 'options', valid_fields
+			);
+		});
 	},
 
 	set_root_readonly: function(frm) {

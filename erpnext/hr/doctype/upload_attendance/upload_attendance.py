@@ -3,12 +3,16 @@
 
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import cstr, add_days, date_diff, getdate
 from frappe import _
-from frappe.utils.csvutils import UnicodeWriter
 from frappe.model.document import Document
+from frappe.utils import add_days, cstr, date_diff, getdate
+from frappe.utils.csvutils import UnicodeWriter
+
+from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.hr.utils import get_holiday_dates_for_employee
+
 
 class UploadAttendance(Document):
 	pass
@@ -26,7 +30,12 @@ def get_template():
 	w = UnicodeWriter()
 	w = add_header(w)
 
-	w = add_data(w, args)
+	try:
+		w = add_data(w, args)
+	except Exception as e:
+		frappe.clear_messages()
+		frappe.respond_as_web_page("Holiday List Missing", html=e)
+		return
 
 	# write out response as a type csv
 	frappe.response['result'] = cstr(w.getvalue())
@@ -51,6 +60,7 @@ def add_data(w, args):
 def get_data(args):
 	dates = get_dates(args)
 	employees = get_active_employees()
+	holidays = get_holidays_for_employees([employee.name for employee in employees], args["from_date"], args["to_date"])
 	existing_attendance_records = get_existing_attendance_records(args)
 	data = []
 	for date in dates:
@@ -66,6 +76,9 @@ def get_data(args):
 				and getdate(employee.date_of_joining) <= getdate(date) \
 				and getdate(employee.relieving_date) >= getdate(date):
 					existing_attendance = existing_attendance_records[tuple([getdate(date), employee.name])]
+
+			employee_holiday_list = get_holiday_list_for_employee(employee.name)
+
 			row = [
 				existing_attendance and existing_attendance.name or "",
 				employee.name, employee.employee_name, date,
@@ -73,8 +86,21 @@ def get_data(args):
 				existing_attendance and existing_attendance.leave_type or "", employee.company,
 				existing_attendance and existing_attendance.naming_series or get_naming_series(),
 			]
+			if date in holidays[employee_holiday_list]:
+				row[4] =  "Holiday"
 			data.append(row)
+
 	return data
+
+def get_holidays_for_employees(employees, from_date, to_date):
+	holidays = {}
+	for employee in employees:
+		holiday_list = get_holiday_list_for_employee(employee)
+		holiday = get_holiday_dates_for_employee(employee, getdate(from_date), getdate(to_date))
+		if holiday_list not in holidays:
+			holidays[holiday_list] = holiday
+
+	return holidays
 
 def writedata(w, data):
 	for row in data:
@@ -126,6 +152,11 @@ def upload():
 	frappe.enqueue(import_attendances, rows=rows, now=True if len(rows) < 200 else False)
 
 def import_attendances(rows):
+
+	def remove_holidays(rows):
+		rows = [ row for row in rows if row[4] != "Holiday"]
+		return rows
+
 	from frappe.modules import scrub
 
 	rows = list(filter(lambda x: x and any(x), rows))
@@ -135,6 +166,8 @@ def import_attendances(rows):
 	rows = rows[5:]
 	ret = []
 	error = False
+
+	rows = remove_holidays(rows)
 
 	from frappe.utils.csvutils import check_record, import_doc
 

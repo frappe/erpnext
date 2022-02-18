@@ -2,6 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Leave Encashment', {
+	onload: function(frm) {
+		// Ignore cancellation of doctype on cancel all.
+		frm.ignore_doctypes_on_cancel_all = ["Leave Ledger Entry"];
+	},
 	setup: function(frm) {
 		frm.set_query("leave_type", function() {
 			return {
@@ -18,7 +22,12 @@ frappe.ui.form.on('Leave Encashment', {
 		}
 	},
 	employee: function(frm) {
-		frm.trigger("get_leave_details_for_encashment");
+		if (frm.doc.employee) {
+			frappe.run_serially([
+				() => 	frm.trigger('get_employee_currency'),
+				() => 	frm.trigger('get_leave_details_for_encashment')
+			]);
+		}
 	},
 	leave_type: function(frm) {
 		frm.trigger("get_leave_details_for_encashment");
@@ -33,8 +42,23 @@ frappe.ui.form.on('Leave Encashment', {
 				doc: frm.doc,
 				callback: function(r) {
 					frm.refresh_fields();
-					}
+				}
 			});
 		}
-	}
+	},
+
+	get_employee_currency: function(frm) {
+		frappe.call({
+			method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_employee_currency",
+			args: {
+				employee: frm.doc.employee,
+			},
+			callback: function(r) {
+				if (r.message) {
+					frm.set_value('currency', r.message);
+					frm.refresh_fields();
+				}
+			}
+		});
+	},
 });

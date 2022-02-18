@@ -1,12 +1,21 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import cint, cstr
-from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
-from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import get_net_profit_loss
+from six import iteritems
+
+from erpnext.accounts.report.financial_statements import (
+	get_columns,
+	get_data,
+	get_filtered_list_for_consolidated_report,
+	get_period_list,
+)
+from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
+	get_net_profit_loss,
+)
 from erpnext.accounts.utils import get_fiscal_year
 
 
@@ -16,7 +25,8 @@ def execute(filters=None):
 		return execute_custom(filters=filters)
 
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year,
-		filters.periodicity, filters.accumulated_values, filters.company)
+		filters.period_start_date, filters.period_end_date, filters.filter_based_on,
+		filters.periodicity, company=filters.company)
 
 	cash_flow_accounts = get_cash_flow_accounts()
 
@@ -29,6 +39,7 @@ def execute(filters=None):
 	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company)
 
 	data = []
+	summary_data = {}
 	company_currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
 
 	for cash_flow_account in cash_flow_accounts:
@@ -64,14 +75,16 @@ def execute(filters=None):
 			section_data.append(account_data)
 
 		add_total_row_account(data, section_data, cash_flow_account['section_footer'],
-			period_list, company_currency)
+			period_list, company_currency, summary_data, filters)
 
-	add_total_row_account(data, data, _("Net Change in Cash"), period_list, company_currency)
+	add_total_row_account(data, data, _("Net Change in Cash"), period_list, company_currency, summary_data, filters)
 	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 
 	chart = get_chart_data(columns, data)
 
-	return columns, data, None, chart
+	report_summary = get_report_summary(summary_data, company_currency)
+
+	return columns, data, None, chart, report_summary
 
 def get_cash_flow_accounts():
 	operation_accounts = {
@@ -125,9 +138,9 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 	data["total"] = total
 	return data
 
-def get_account_type_based_gl_data(company, start_date, end_date, account_type, filters={}):
+def get_account_type_based_gl_data(company, start_date, end_date, account_type, filters=None):
 	cond = ""
-	filters = frappe._dict(filters)
+	filters = frappe._dict(filters or {})
 
 	if filters.include_default_book_entries:
 		company_fb = frappe.db.get_value("Company", company, 'default_finance_book')
@@ -157,24 +170,49 @@ def get_start_date(period, accumulated_values, company):
 
 	return start_date
 
-def add_total_row_account(out, data, label, period_list, currency, consolidated = False):
+def add_total_row_account(out, data, label, period_list, currency, summary_data, filters, consolidated=False):
 	total_row = {
 		"account_name": "'" + _("{0}").format(label) + "'",
 		"account": "'" + _("{0}").format(label) + "'",
 		"currency": currency
 	}
+
+	summary_data[label] = 0
+
+	# from consolidated financial statement
+	if filters.get('accumulated_in_group_company'):
+		period_list = get_filtered_list_for_consolidated_report(filters, period_list)
+
 	for row in data:
 		if row.get("parent_account"):
 			for period in period_list:
 				key = period if consolidated else period['key']
 				total_row.setdefault(key, 0.0)
 				total_row[key] += row.get(key, 0.0)
+				summary_data[label] += row.get(key)
 
 			total_row.setdefault("total", 0.0)
 			total_row["total"] += row["total"]
 
 	out.append(total_row)
 	out.append({})
+
+
+def get_report_summary(summary_data, currency):
+	report_summary = []
+
+	for label, value in iteritems(summary_data):
+		report_summary.append(
+			{
+				"value": value,
+				"label": label,
+				"datatype": "Currency",
+				"currency": currency
+			}
+		)
+
+	return report_summary
+
 
 def get_chart_data(columns, data):
 	labels = [d.get("label") for d in columns[2:]]

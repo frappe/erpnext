@@ -1,0 +1,32 @@
+{
+ "actions": [],
+ "creation": "2020-04-10 12:23:15.259816",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "body_part"
+ ],
+ "fields": [
+  {
+   "fieldname": "body_part",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Body Part",
+   "options": "Body Part",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-04-10 12:25:23.101749",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Body Part Link",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

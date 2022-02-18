@@ -20,12 +20,12 @@
 <div class="row transaction-subheading">
 	<div class="col-xs-6">
 
-		<span class="indicator {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "darkgrey") }}">
+		<span class="indicator {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "gray") }}">
 			{{ _(doc.get('indicator_title')) or _(doc.status) or _("Submitted") }}
 		</span>
 	</div>
 	<div class="col-xs-6 text-muted text-right small">
-		{{ frappe.utils.formatdate(doc.transaction_date, 'medium') }}
+		{{ frappe.utils.format_date(doc.transaction_date, 'medium') }}
 	</div>
 </div>
 

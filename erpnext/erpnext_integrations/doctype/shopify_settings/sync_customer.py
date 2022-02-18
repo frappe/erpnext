@@ -1,6 +1,7 @@
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
+
 
 def create_customer(shopify_customer, shopify_settings):
 	import frappe.utils.nestedset
@@ -32,10 +33,12 @@ def create_customer(shopify_customer, shopify_settings):
 		raise e
 
 def create_customer_address(customer, shopify_customer):
-	if not shopify_customer.get("addresses"):
-		return
+	addresses = shopify_customer.get("addresses", [])
 
-	for i, address in enumerate(shopify_customer.get("addresses")):
+	if not addresses and "default_address" in shopify_customer:
+		addresses.append(shopify_customer["default_address"])
+
+	for i, address in enumerate(addresses):
 		address_title, address_type = get_address_title_and_type(customer.customer_name, i)
 		try :
 			frappe.get_doc({

@@ -1,0 +1,28 @@
+
+{% if not jQuery.isEmptyObject(data) %}
+<h5 style="margin-top: 20px;"> {{ __("Balance Details") }} </h5>
+<table class="table table-bordered small">
+	<thead>
+		<tr>
+			<th style="width: 20%">{{ __("Account Type") }}</th>
+			<th style="width: 20%" class="text-right">{{ __("Current Balance") }}</th>
+			<th style="width: 20%" class="text-right">{{ __("Available Balance") }}</th>
+			<th style="width: 20%" class="text-right">{{ __("Reserved Balance") }}</th>
+			<th style="width: 20%" class="text-right">{{ __("Uncleared Balance") }}</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for(const [key, value] of Object.entries(data)) { %}
+			<tr>
+				<td> {%= key %} </td>
+				<td class="text-right"> {%= value["current_balance"] %} </td>
+				<td class="text-right"> {%= value["available_balance"] %} </td>
+				<td class="text-right"> {%= value["reserved_balance"] %} </td>
+				<td class="text-right"> {%= value["uncleared_balance"] %} </td>
+			</tr>
+		{% } %}
+	</tbody>
+</table>
+{% else %}
+<p style="margin-top: 30px;"> Account Balance Information Not Available. </p>
+{% endif %}

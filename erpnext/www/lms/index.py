@@ -1,6 +1,7 @@
-from __future__ import unicode_literals
-import erpnext.education.utils as utils
+
 import frappe
+
+import erpnext.education.utils as utils
 
 no_cache = 1
 
@@ -13,4 +14,4 @@ def get_context(context):
 
 
 def get_featured_programs():
-	return utils.get_portal_programs()
+	return utils.get_portal_programs() or []

@@ -49,11 +49,11 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-07-25 05:24:25.881361", 
+ "modified": "2020-09-18 17:26:09.703215", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Industry Type", 
- "owner": "harshada@webnotestech.com", 
+ "owner": "Administrator", 
  "permissions": [
   {
    "amend": 0, 

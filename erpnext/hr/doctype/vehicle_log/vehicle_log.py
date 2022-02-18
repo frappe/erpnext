@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt, cstr
-from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
+from frappe.utils import flt
+
 
 class VehicleLog(Document):
 	def validate(self):
@@ -32,7 +31,7 @@ def make_expense_claim(docname):
 	vehicle_log = frappe.get_doc("Vehicle Log", docname)
 	service_expense = sum([flt(d.expense_amount) for d in vehicle_log.service_detail])
 
-	claim_amount = service_expense + flt(vehicle_log.price)
+	claim_amount = service_expense + (flt(vehicle_log.price) * flt(vehicle_log.fuel_qty) or 1)
 	if not claim_amount:
 		frappe.throw(_("No additional expenses has been added"))
 

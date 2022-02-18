@@ -1,5 +1,6 @@
-from __future__ import unicode_literals
+
 from frappe import _
+
 
 def get_data():
 	return [
@@ -173,7 +174,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Course Schedule",
-					"route": "#List/Course Schedule/Calendar"
+					"route": "/app/List/Course Schedule/Calendar"
 				},
 				{
 					"type": "doctype",

@@ -1,21 +1,25 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
-from __future__ import unicode_literals
 import frappe
-
-from frappe.utils import getdate, validate_email_address, today, add_years, format_datetime, cstr
+from frappe import _, scrub, throw
 from frappe.model.naming import set_name_by_naming_series
-from frappe import throw, _, scrub
-from frappe.permissions import add_user_permission, remove_user_permission, \
-	set_user_permission_if_allowed, has_permission
-from frappe.model.document import Document
-from erpnext.utilities.transaction_base import delete_events
+from frappe.permissions import (
+	add_user_permission,
+	get_doc_permissions,
+	has_permission,
+	remove_user_permission,
+	set_user_permission_if_allowed,
+)
+from frappe.utils import add_years, cstr, getdate, today, validate_email_address
 from frappe.utils.nestedset import NestedSet
-from erpnext.hr.doctype.job_offer.job_offer import get_staffing_plan_detail
 
-class EmployeeUserDisabledError(frappe.ValidationError): pass
-class EmployeeLeftValidationError(frappe.ValidationError): pass
+from erpnext.utilities.transaction_base import delete_events
+
+
+class EmployeeUserDisabledError(frappe.ValidationError):
+	pass
+class InactiveEmployeeStatusError(frappe.ValidationError):
+	pass
 
 class Employee(NestedSet):
 	nsm_parent_field = 'reports_to'
@@ -37,7 +41,7 @@ class Employee(NestedSet):
 
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
-		validate_status(self.status, ["Active", "Temporary Leave", "Left"])
+		validate_status(self.status, ["Active", "Inactive", "Suspended", "Left"])
 
 		self.employee = self.name
 		self.set_employee_name()
@@ -57,16 +61,25 @@ class Employee(NestedSet):
 				remove_user_permission(
 					"Employee", self.name, existing_user_id)
 
+	def after_rename(self, old, new, merge):
+		self.db_set("employee", new)
+
 	def set_employee_name(self):
 		self.employee_name = ' '.join(filter(lambda x: x, [self.first_name, self.middle_name, self.last_name]))
 
 	def validate_user_details(self):
-		data = frappe.db.get_value('User',
-			self.user_id, ['enabled', 'user_image'], as_dict=1)
-		if data.get("user_image"):
-			self.image = data.get("user_image")
-		self.validate_for_enabled_user_id(data.get("enabled", 0))
-		self.validate_duplicate_user_id()
+		if self.user_id:
+			data = frappe.db.get_value("User",
+				self.user_id, ["enabled", "user_image"], as_dict=1)
+
+			if not data:
+				self.user_id = None
+				return
+
+			if data.get("user_image") and self.image == "":
+				self.image = data.get("user_image")
+			self.validate_for_enabled_user_id(data.get("enabled", 0))
+			self.validate_duplicate_user_id()
 
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
@@ -77,6 +90,7 @@ class Employee(NestedSet):
 			self.update_user()
 			self.update_user_permissions()
 		self.reset_employee_emails_cache()
+		self.update_approver_role()
 
 	def update_user_permissions(self):
 		if not self.create_user_permission: return
@@ -88,15 +102,8 @@ class Employee(NestedSet):
 			'user': self.user_id
 		})
 
-		if employee_user_permission_exists: return
-
-		employee_user_permission_exists = frappe.db.exists('User Permission', {
-			'allow': 'Employee',
-			'for_value': self.name,
-			'user': self.user_id
-		})
-
-		if employee_user_permission_exists: return
+		if employee_user_permission_exists:
+			return
 
 		add_user_permission("Employee", self.name, self.user_id)
 		set_user_permission_if_allowed("Company", self.company, self.user_id)
@@ -132,7 +139,7 @@ class Employee(NestedSet):
 				try:
 					frappe.get_doc({
 						"doctype": "File",
-						"file_name": self.image,
+						"file_url": self.image,
 						"attached_to_doctype": "User",
 						"attached_to_name": self.user_id
 					}).insert()
@@ -141,6 +148,17 @@ class Employee(NestedSet):
 					pass
 
 		user.save()
+
+	def update_approver_role(self):
+		if self.leave_approver:
+			user = frappe.get_doc("User", self.leave_approver)
+			user.flags.ignore_permissions = True
+			user.add_roles("Leave Approver")
+
+		if self.expense_approver:
+			user = frappe.get_doc("User", self.expense_approver)
+			user.flags.ignore_permissions = True
+			user.add_roles("Expense Approver")
 
 	def validate_date(self):
 		if self.date_of_birth and getdate(self.date_of_birth) > getdate(today()):
@@ -152,8 +170,8 @@ class Employee(NestedSet):
 		elif self.date_of_retirement and self.date_of_joining and (getdate(self.date_of_retirement) <= getdate(self.date_of_joining)):
 			throw(_("Date Of Retirement must be greater than Date of Joining"))
 
-		elif self.relieving_date and self.date_of_joining and (getdate(self.relieving_date) <= getdate(self.date_of_joining)):
-			throw(_("Relieving Date must be greater than Date of Joining"))
+		elif self.relieving_date and self.date_of_joining and (getdate(self.relieving_date) < getdate(self.date_of_joining)):
+			throw(_("Relieving Date must be greater than or equal to Date of Joining"))
 
 		elif self.contract_end_date and self.date_of_joining and (getdate(self.contract_end_date) <= getdate(self.date_of_joining)):
 			throw(_("Contract End Date must be greater than Date of Joining"))
@@ -164,6 +182,12 @@ class Employee(NestedSet):
 		if self.personal_email:
 			validate_email_address(self.personal_email, True)
 
+	def set_preferred_email(self):
+		preferred_email_field = frappe.scrub(self.prefered_contact_email)
+		if preferred_email_field:
+			preferred_email = self.get(preferred_email_field)
+			self.prefered_email = preferred_email
+
 	def validate_status(self):
 		if self.status == 'Left':
 			reports_to = frappe.db.get_all('Employee',
@@ -172,8 +196,11 @@ class Employee(NestedSet):
 			)
 			if reports_to:
 				link_to_employees = [frappe.utils.get_link_to_form('Employee', employee.name, label=employee.employee_name) for employee in reports_to]
-				throw(_("Employee status cannot be set to 'Left' as following employees are currently reporting to this employee:&nbsp;")
-					+ ', '.join(link_to_employees), EmployeeLeftValidationError)
+				message = _("The following employees are currently still reporting to {0}:").format(frappe.bold(self.employee_name))
+				message += "<br><br><ul><li>" + "</li><li>".join(link_to_employees)
+				message += "</li></ul><br>"
+				message += _("Please make sure the employees above report to another Active employee.")
+				throw(message, InactiveEmployeeStatusError, _("Cannot Relieve Employee"))
 			if not self.relieving_date:
 				throw(_("Please enter relieving date."))
 
@@ -206,7 +233,7 @@ class Employee(NestedSet):
 
 	def validate_preferred_email(self):
 		if self.prefered_contact_email and not self.get(scrub(self.prefered_contact_email)):
-			frappe.msgprint(_("Please enter " + self.prefered_contact_email))
+			frappe.msgprint(_("Please enter {0}").format(self.prefered_contact_email))
 
 	def validate_onboarding_process(self):
 		employee_onboarding = frappe.get_all("Employee Onboarding",
@@ -261,68 +288,8 @@ def update_user_permissions(doc, method):
 		employee = frappe.get_doc("Employee", {"user_id": doc.name})
 		employee.update_user_permissions()
 
-def send_birthday_reminders():
-	"""Send Employee birthday reminders if no 'Stop Birthday Reminders' is not set."""
-	if int(frappe.db.get_single_value("HR Settings", "stop_birthday_reminders") or 0):
-		return
-
-	birthdays = get_employees_who_are_born_today()
-
-	if birthdays:
-		employee_list = frappe.get_all('Employee',
-			fields=['name','employee_name'],
-			filters={'status': 'Active',
-				'company': birthdays[0]['company']
-		 	}
-		)
-		employee_emails = get_employee_emails(employee_list)
-		birthday_names = [name["employee_name"] for name in birthdays]
-		birthday_emails = [email["user_id"] or email["personal_email"] or email["company_email"] for email in birthdays]
-
-		birthdays.append({'company_email': '','employee_name': '','personal_email': '','user_id': ''})
-
-		for e in birthdays:
-			if e['company_email'] or e['personal_email'] or e['user_id']:
-				if len(birthday_names) == 1:
-					continue
-				recipients = e['company_email'] or e['personal_email'] or e['user_id']
-
-
-			else:
-				recipients = list(set(employee_emails) - set(birthday_emails))
-
-			frappe.sendmail(recipients=recipients,
-				subject=_("Birthday Reminder"),
-				message=get_birthday_reminder_message(e, birthday_names),
-				header=['Birthday Reminder', 'green'],
-			)
-
-def get_birthday_reminder_message(employee, employee_names):
-	"""Get employee birthday reminder message"""
-	pattern = "</Li><Br><Li>"
-	message = pattern.join(filter(lambda u: u not in (employee['employee_name']), employee_names))
-	message = message.title()
-
-	if pattern not in message:
-		message = "Today is {0}'s birthday \U0001F603".format(message)
-
-	else:
-		message = "Today your colleagues are celebrating their birthdays \U0001F382<br><ul><strong><li> " + message +"</li></strong></ul>"
-
-	return message
-
-
-def get_employees_who_are_born_today():
-	"""Get Employee properties whose birthday is today."""
-	return frappe.db.get_values("Employee",
-		fieldname=["name", "personal_email", "company", "company_email", "user_id", "employee_name"],
-		filters={
-			"date_of_birth": ("like", "%{}".format(format_datetime(getdate(), "-MM-dd"))),
-			"status": "Active",
-		},
-		as_dict=True
-	)
-
+def get_employee_email(employee_doc):
+	return employee_doc.get("user_id") or employee_doc.get("personal_email") or employee_doc.get("company_email")
 
 def get_holiday_list_for_employee(employee, raise_exception=True):
 	if employee:
@@ -339,17 +306,40 @@ def get_holiday_list_for_employee(employee, raise_exception=True):
 
 	return holiday_list
 
-def is_holiday(employee, date=None, raise_exception=True):
-	'''Returns True if given Employee has an holiday on the given date
-	:param employee: Employee `name`
-	:param date: Date to check. Will check for today if None'''
+def is_holiday(employee, date=None, raise_exception=True, only_non_weekly=False, with_description=False):
+	'''
+	Returns True if given Employee has an holiday on the given date
+		:param employee: Employee `name`
+		:param date: Date to check. Will check for today if None
+		:param raise_exception: Raise an exception if no holiday list found, default is True
+		:param only_non_weekly: Check only non-weekly holidays, default is False
+	'''
 
 	holiday_list = get_holiday_list_for_employee(employee, raise_exception)
 	if not date:
 		date = today()
 
-	if holiday_list:
-		return frappe.get_all('Holiday List', dict(name=holiday_list, holiday_date=date)) and True or False
+	if not holiday_list:
+		return False
+
+	filters = {
+		'parent': holiday_list,
+		'holiday_date': date
+	}
+	if only_non_weekly:
+		filters['weekly_off'] = False
+
+	holidays = frappe.get_all(
+		'Holiday',
+		fields=['description'],
+		filters=filters,
+		pluck='description'
+	)
+
+	if with_description:
+		return len(holidays) > 0, holidays
+
+	return len(holidays) > 0
 
 @frappe.whitelist()
 def deactivate_sales_person(status = None, employee = None):
@@ -392,6 +382,26 @@ def create_user(employee, user = None, email=None):
 	user.insert()
 	return user.name
 
+def get_all_employee_emails(company):
+	'''Returns list of employee emails either based on user_id or company_email'''
+	employee_list = frappe.get_all('Employee',
+		fields=['name','employee_name'],
+		filters={
+			'status': 'Active',
+			'company': company
+		}
+	)
+	employee_emails = []
+	for employee in employee_list:
+		if not employee:
+			continue
+		user, company_email, personal_email = frappe.db.get_value('Employee',
+			employee, ['user_id', 'company_email', 'personal_email'])
+		email = user or company_email or personal_email
+		if email:
+			employee_emails.append(email)
+	return employee_emails
+
 def get_employee_emails(employee_list):
 	'''Returns list of employee emails either based on user_id or company_email'''
 	employee_emails = []
@@ -407,7 +417,11 @@ def get_employee_emails(employee_list):
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False):
-	filters = [['company', '=', company]]
+
+	filters = [['status', '=', 'Active']]
+	if company and company != 'All Companies':
+		filters.append(['company', '=', company])
+
 	fields = ['name as value', 'employee_name as title']
 
 	if is_root:
@@ -428,7 +442,6 @@ def get_children(doctype, parent=None, company=None, is_root=False, is_tree=Fals
 
 	return employees
 
-
 def on_doctype_update():
 	frappe.db.add_index("Employee", ["lft", "rgt"])
 
@@ -439,3 +452,10 @@ def has_user_permission_for_employee(user_name, employee_name):
 		'allow': 'Employee',
 		'for_value': employee_name
 	})
+
+def has_upload_permission(doc, ptype='read', user=None):
+	if not user:
+		user = frappe.session.user
+	if get_doc_permissions(doc, user=user, ptype=ptype).get(ptype):
+		return True
+	return doc.user_id == user

@@ -17,7 +17,7 @@ frappe.ui.form.on('Global Defaults', {
 			method: "frappe.client.get_list",
 			args: {
 				doctype: "UOM Conversion Factor",
-				filters: { "category": "Length" },
+				filters: { "category": __("Length") },
 				fields: ["to_uom"],
 				limit_page_length: 500
 			},

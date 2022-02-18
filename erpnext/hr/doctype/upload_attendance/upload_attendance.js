@@ -24,10 +24,10 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 		}
 		window.location.href = repl(frappe.request.url +
 			'?cmd=%(cmd)s&from_date=%(from_date)s&to_date=%(to_date)s', {
-				cmd: "erpnext.hr.doctype.upload_attendance.upload_attendance.get_template",
-				from_date: this.frm.doc.att_fr_date,
-				to_date: this.frm.doc.att_to_date,
-			});
+			cmd: "erpnext.hr.doctype.upload_attendance.upload_attendance.get_template",
+			from_date: this.frm.doc.att_fr_date,
+			to_date: this.frm.doc.att_to_date,
+		});
 	},
 
 	show_upload() {

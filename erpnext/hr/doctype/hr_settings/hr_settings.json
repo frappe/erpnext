@@ -7,28 +7,36 @@
  "engine": "InnoDB",
  "field_order": [
   "employee_settings",
-  "retirement_age",
   "emp_created_by",
-  "column_break_4",
-  "stop_birthday_reminders",
-  "expense_approver_mandatory_in_expense_claim",
-  "payroll_settings",
-  "include_holidays_in_total_working_days",
-  "disable_rounded_total",
-  "max_working_hours_against_timesheet",
+  "standard_working_hours",
+  "column_break_9",
+  "retirement_age",
+  "reminders_section",
+  "send_birthday_reminders",
   "column_break_11",
-  "email_salary_slip_to_employee",
-  "encrypt_salary_slips_in_emails",
-  "password_policy",
-  "leave_settings",
+  "send_work_anniversary_reminders",
+  "column_break_18",
+  "send_holiday_reminders",
+  "frequency",
+  "leave_and_expense_claim_settings",
+  "send_leave_notification",
   "leave_approval_notification_template",
   "leave_status_notification_template",
-  "column_break_18",
   "leave_approver_mandatory_in_leave_application",
+  "restrict_backdated_leave_application",
+  "role_allowed_to_create_backdated_leave_application",
+  "column_break_29",
+  "expense_approver_mandatory_in_expense_claim",
   "show_leaves_of_all_department_members_in_calendar",
   "auto_leave_encashment",
-  "hiring_settings",
-  "check_vacancies"
+  "hiring_settings_section",
+  "check_vacancies",
+  "send_interview_reminder",
+  "interview_reminder_template",
+  "remind_before",
+  "column_break_4",
+  "send_interview_feedback_reminder",
+  "feedback_reminder_notification_template"
  ],
  "fields": [
   {
@@ -37,17 +45,16 @@
    "label": "Employee Settings"
   },
   {
-   "description": "Enter retirement age in years",
    "fieldname": "retirement_age",
    "fieldtype": "Data",
-   "label": "Retirement Age"
+   "label": "Retirement Age (In Years)"
   },
   {
    "default": "Naming Series",
-   "description": "Employee record is created using selected field. ",
+   "description": "Employee records are created using the selected option",
    "fieldname": "emp_created_by",
    "fieldtype": "Select",
-   "label": "Employee Records to be created by",
+   "label": "Employee Naming By",
    "options": "Naming Series\nEmployee Number\nFull Name"
   },
   {
@@ -55,79 +62,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "description": "Don't send Employee Birthday Reminders",
-   "fieldname": "stop_birthday_reminders",
-   "fieldtype": "Check",
-   "label": "Stop Birthday Reminders"
-  },
-  {
    "default": "1",
    "fieldname": "expense_approver_mandatory_in_expense_claim",
    "fieldtype": "Check",
    "label": "Expense Approver Mandatory In Expense Claim"
-  },
-  {
-   "fieldname": "payroll_settings",
-   "fieldtype": "Section Break",
-   "label": "Payroll Settings"
-  },
-  {
-   "default": "0",
-   "description": "If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day",
-   "fieldname": "include_holidays_in_total_working_days",
-   "fieldtype": "Check",
-   "label": "Include holidays in Total no. of Working Days"
-  },
-  {
-   "fieldname": "max_working_hours_against_timesheet",
-   "fieldtype": "Float",
-   "label": "Max working hours against Timesheet"
-  },
-  {
-   "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "1",
-   "description": "Emails salary slip to employee based on preferred email selected in Employee",
-   "fieldname": "email_salary_slip_to_employee",
-   "fieldtype": "Check",
-   "label": "Email Salary Slip to Employee"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval: doc.email_salary_slip_to_employee == 1;",
-   "description": "The salary slip emailed to the employee will be password protected, the password will be generated based on the password policy.",
-   "fieldname": "encrypt_salary_slips_in_emails",
-   "fieldtype": "Check",
-   "label": "Encrypt Salary Slips in Emails"
-  },
-  {
-   "depends_on": "eval: doc.encrypt_salary_slips_in_emails == 1",
-   "description": "<b>Example:</b> SAL-{first_name}-{date_of_birth.year} <br>This will generate a password like SAL-Jane-1972",
-   "fieldname": "password_policy",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Password Policy"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "leave_settings",
-   "fieldtype": "Section Break",
-   "label": "Leave Settings"
-  },
-  {
-   "fieldname": "leave_approval_notification_template",
-   "fieldtype": "Link",
-   "label": "Leave Approval Notification Template",
-   "options": "Email Template"
-  },
-  {
-   "fieldname": "leave_status_notification_template",
-   "fieldtype": "Link",
-   "label": "Leave Status Notification Template",
-   "options": "Email Template"
   },
   {
    "fieldname": "column_break_18",
@@ -146,8 +84,140 @@
    "label": "Show Leaves Of All Department Members In Calendar"
   },
   {
+   "default": "0",
+   "fieldname": "auto_leave_encashment",
+   "fieldtype": "Check",
+   "label": "Auto Leave Encashment"
+  },
+  {
+   "depends_on": "eval:doc.restrict_backdated_leave_application == 1",
+   "fieldname": "role_allowed_to_create_backdated_leave_application",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Create Backdated Leave Application",
+   "mandatory_depends_on": "eval:doc.restrict_backdated_leave_application == 1",
+   "options": "Role"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_leave_notification",
+   "fieldtype": "Check",
+   "label": "Send Leave Notification"
+  },
+  {
+   "depends_on": "eval: doc.send_leave_notification == 1",
+   "fieldname": "leave_approval_notification_template",
+   "fieldtype": "Link",
+   "label": "Leave Approval Notification Template",
+   "mandatory_depends_on": "eval: doc.send_leave_notification == 1",
+   "options": "Email Template"
+  },
+  {
+   "depends_on": "eval: doc.send_leave_notification == 1",
+   "fieldname": "leave_status_notification_template",
+   "fieldtype": "Link",
+   "label": "Leave Status Notification Template",
+   "mandatory_depends_on": "eval: doc.send_leave_notification == 1",
+   "options": "Email Template"
+  },
+  {
+   "fieldname": "standard_working_hours",
+   "fieldtype": "Int",
+   "label": "Standard Working Hours"
+  },
+  {
    "collapsible": 1,
-   "fieldname": "hiring_settings",
+   "fieldname": "leave_and_expense_claim_settings",
+   "fieldtype": "Section Break",
+   "label": "Leave and Expense Claim Settings"
+  },
+  {
+   "default": "00:15:00",
+   "depends_on": "send_interview_reminder",
+   "fieldname": "remind_before",
+   "fieldtype": "Time",
+   "label": "Remind Before"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "reminders_section",
+   "fieldtype": "Section Break",
+   "label": "Reminders"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_holiday_reminders",
+   "fieldtype": "Check",
+   "label": "Holidays"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_work_anniversary_reminders",
+   "fieldtype": "Check",
+   "label": "Work Anniversaries "
+  },
+  {
+   "default": "Weekly",
+   "depends_on": "eval:doc.send_holiday_reminders",
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "label": "Set the frequency for holiday reminders",
+   "mandatory_depends_on": "send_holiday_reminders",
+   "options": "Weekly\nMonthly"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_birthday_reminders",
+   "fieldtype": "Check",
+   "label": "Birthdays"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_interview_reminder",
+   "fieldtype": "Check",
+   "label": "Send Interview Reminder"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_interview_feedback_reminder",
+   "fieldtype": "Check",
+   "label": "Send Interview Feedback Reminder"
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "send_interview_feedback_reminder",
+   "fieldname": "feedback_reminder_notification_template",
+   "fieldtype": "Link",
+   "label": "Feedback Reminder Notification Template",
+   "mandatory_depends_on": "send_interview_feedback_reminder",
+   "options": "Email Template"
+  },
+  {
+   "depends_on": "send_interview_reminder",
+   "fieldname": "interview_reminder_template",
+   "fieldtype": "Link",
+   "label": "Interview Reminder Notification Template",
+   "mandatory_depends_on": "send_interview_reminder",
+   "options": "Email Template"
+  },
+  {
+   "default": "0",
+   "fieldname": "restrict_backdated_leave_application",
+   "fieldtype": "Check",
+   "label": "Restrict Backdated Leave Application"
+  },
+  {
+   "fieldname": "hiring_settings_section",
    "fieldtype": "Section Break",
    "label": "Hiring Settings"
   },
@@ -156,26 +226,13 @@
    "fieldname": "check_vacancies",
    "fieldtype": "Check",
    "label": "Check Vacancies On Job Offer Creation"
-  },
-  {
-   "default": "0",
-   "fieldname": "auto_leave_encashment",
-   "fieldtype": "Check",
-   "label": "Auto Leave Encashment"
-  },
-  {
-   "default": "0",
-   "description": "If checked, hides and disables Rounded Total field in Salary Slips",
-   "fieldname": "disable_rounded_total",
-   "fieldtype": "Check",
-   "label": "Disable Rounded Total"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2019-12-31 14:28:32.004121",
+ "modified": "2021-10-01 23:46:11.098236",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
@@ -192,5 +249,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "track_changes": 1
 }

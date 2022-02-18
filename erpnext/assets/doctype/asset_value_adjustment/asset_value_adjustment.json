@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2018-05-11 00:22:43.695151",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -7,14 +8,16 @@
   "company",
   "asset",
   "asset_category",
-  "finance_book",
-  "journal_entry",
   "column_break_4",
   "date",
+  "finance_book",
+  "amended_from",
+  "value_details_section",
   "current_asset_value",
   "new_asset_value",
+  "column_break_11",
   "difference_amount",
-  "amended_from",
+  "journal_entry",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break"
@@ -108,10 +111,21 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "value_details_section",
+   "fieldtype": "Section Break",
+   "label": "Value Details"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
   }
  ],
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "modified": "2019-11-22 14:09:25.800375",
+ "links": [],
+ "modified": "2021-01-22 14:10:23.085181",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Value Adjustment",

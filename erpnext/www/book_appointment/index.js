@@ -26,14 +26,14 @@ async function get_global_variables() {
 function setup_timezone_selector() {
     let timezones_element = document.getElementById('appointment-timezone');
     let local_timezone = moment.tz.guess()
-    window.timezones.forEach((timezone) => {
+    window.timezones.forEach(timezone => {
         let opt = document.createElement('option');
         opt.value = timezone;
         if (timezone == local_timezone) {
             opt.selected = true;
         }
         opt.innerHTML = timezone;
-        timezones_element.appendChild(opt);
+        timezones_element.appendChild(opt)
     });
 }
 
@@ -48,7 +48,7 @@ function setup_date_picker() {
 function hide_next_button() {
     let next_button = document.getElementById('next-button');
     next_button.disabled = true;
-    next_button.onclick = () => frappe.msgprint("Please select a date and time");
+    next_button.onclick = () => frappe.msgprint(__("Please select a date and time"));
 }
 
 function show_next_button() {
@@ -63,7 +63,7 @@ function on_date_or_timezone_select() {
     if (date_picker.value === '') {
         clear_time_slots();
         hide_next_button();
-        frappe.throw('Please select a date');
+        frappe.throw(__('Please select a date'));
     }
     window.selected_date = date_picker.value;
     window.selected_timezone = timezone.value;
@@ -181,10 +181,32 @@ function setup_details_page() {
     navigate_to_page(2)
     let date_container = document.getElementsByClassName('date-span')[0];
     let time_container = document.getElementsByClassName('time-span')[0];
+    setup_search_params();
     date_container.innerHTML = moment(window.selected_date).format("MMM Do YYYY");
     time_container.innerHTML = moment(window.selected_time, "HH:mm:ss").format("LT");
 }
 
+function setup_search_params() {
+    let search_params = new URLSearchParams(window.location.search);
+    let customer_name = search_params.get("name")
+    let customer_email = search_params.get("email")
+    let detail = search_params.get("details")
+    if (customer_name) {
+        let name_input = document.getElementById("customer_name");
+        name_input.value = customer_name;
+        name_input.disabled = true;
+    }
+    if(customer_email) {
+        let email_input = document.getElementById("customer_email");
+        email_input.value = customer_email;
+        email_input.disabled = true;
+    }
+    if(detail) {
+        let detail_input = document.getElementById("customer_notes");
+        detail_input.value = detail;
+        detail_input.disabled = true;
+    }
+}
 async function submit() {
     let button = document.getElementById('submit-button');
     button.disabled = true;

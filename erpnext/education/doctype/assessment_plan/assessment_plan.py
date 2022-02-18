@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-from frappe.model.document import Document
+
 import frappe
 from frappe import _
+from frappe.model.document import Document
+
 
 class AssessmentPlan(Document):
 	def validate(self):
@@ -37,7 +37,7 @@ class AssessmentPlan(Document):
 		for d in self.assessment_criteria:
 			max_score += d.maximum_score
 		if self.maximum_assessment_score != max_score:
-			frappe.throw(_("Sum of Scores of Assessment Criteria needs to be {0}.".format(self.maximum_assessment_score)))
+			frappe.throw(_("Sum of Scores of Assessment Criteria needs to be {0}.").format(self.maximum_assessment_score))
 
 	def validate_assessment_criteria(self):
 		assessment_criteria_list = frappe.db.sql_list(''' select apc.assessment_criteria

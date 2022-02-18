@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
 from frappe.utils import nowdate
@@ -18,6 +17,9 @@ class StudentAdmission(WebsiteGenerator):
 	def validate(self):
 		if not self.route:		#pylint: disable=E0203
 			self.route = "admissions/" + "-".join(self.title.split(" "))
+
+		if self.enable_admission_application and not self.program_details:
+			frappe.throw(_("Please add programs to enable admission application."))
 
 	def get_context(self, context):
 		context.no_cache = 1

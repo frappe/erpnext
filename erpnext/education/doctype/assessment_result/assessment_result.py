@@ -1,16 +1,16 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _
-from frappe.utils import flt
 from frappe.model.document import Document
-from erpnext.education.api import get_grade
-from erpnext.education.api import get_assessment_details
+from frappe.utils import flt
 from frappe.utils.csvutils import getlink
+
 import erpnext.education
+from erpnext.education.api import get_assessment_details, get_grade
+
 
 class AssessmentResult(Document):
 	def validate(self):
@@ -41,8 +41,4 @@ class AssessmentResult(Document):
 		assessment_result = frappe.get_list("Assessment Result", filters={"name": ("not in", [self.name]),
 			"student":self.student, "assessment_plan":self.assessment_plan, "docstatus":("!=", 2)})
 		if assessment_result:
-			frappe.throw(_("Assessment Result record {0} already exists.".format(getlink("Assessment Result",assessment_result[0].name))))
-
-
-
-
+			frappe.throw(_("Assessment Result record {0} already exists.").format(getlink("Assessment Result",assessment_result[0].name)))

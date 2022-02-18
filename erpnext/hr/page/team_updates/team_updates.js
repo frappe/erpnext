@@ -36,12 +36,12 @@ frappe.team_updates = {
 				start: me.start
 			},
 			callback: function(r) {
-				if(r.message) {
+				if (r.message && r.message.length > 0) {
 					r.message.forEach(function(d) {
 						me.add_row(d);
 					});
 				} else {
-					frappe.show_alert({message:__('No more updates'), indicator:'darkgrey'});
+					frappe.show_alert({message: __('No more updates'), indicator: 'gray'});
 					me.more.parent().addClass('hidden');
 				}
 			}
@@ -75,6 +75,6 @@ frappe.team_updates = {
 		}
 		me.last_feed_date = date;
 
-		$(frappe.render_template('team_update_row', data)).appendTo(me.body)
+		$(frappe.render_template('team_update_row', data)).appendTo(me.body);
 	}
 }

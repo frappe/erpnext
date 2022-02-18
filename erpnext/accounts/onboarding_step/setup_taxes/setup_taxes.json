@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Make a Sales Tax Template",
+ "creation": "2020-05-13 19:29:43.844463",
+ "description": "# Setting up Taxes\n\nAny sophisticated accounting system, including ERPNext will have automatic tax calculations for your transactions. These calculations are based on user defined rules in compliance to local rules and regulations.\n\nERPNext allows this via *Tax Templates*. These templates can be used in Sales Orders and Sales Invoices. Other types of charges that may apply to your invoices (like shipping, insurance etc.) can also be configured as taxes.\n\nFor Tax Accounts that you want to use in the tax templates, go to:\n\n`> Accounting > Taxes > Sales Taxes and Charges Template`\n\nYou can read more about these templates in our documentation [here](https://docs.erpnext.com/docs/user/manual/en/selling/sales-taxes-and-charges-template)\n",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-10-30 14:54:18.087383",
+ "modified_by": "Administrator",
+ "name": "Setup Taxes",
+ "owner": "Administrator",
+ "reference_document": "Sales Taxes and Charges Template",
+ "show_form_tour": 1,
+ "show_full_form": 1,
+ "title": "Lets create a Tax Template for Sales ",
+ "validate_action": 0
+}

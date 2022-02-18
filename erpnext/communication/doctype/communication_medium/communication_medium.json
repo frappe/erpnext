@@ -1,12 +1,14 @@
 {
+ "actions": [],
  "autoname": "Prompt",
  "creation": "2019-06-05 11:48:30.572795",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "communication_channel",
   "communication_medium_type",
-  "catch_all",
   "column_break_3",
+  "catch_all",
   "provider",
   "disabled",
   "timeslots_section",
@@ -54,9 +56,16 @@
    "fieldtype": "Table",
    "label": "Timeslots",
    "options": "Communication Medium Timeslot"
+  },
+  {
+   "fieldname": "communication_channel",
+   "fieldtype": "Select",
+   "label": "Communication Channel",
+   "options": "\nExotel"
   }
  ],
- "modified": "2019-06-05 11:49:30.769006",
+ "links": [],
+ "modified": "2020-10-27 16:22:08.068542",
  "modified_by": "Administrator",
  "module": "Communication",
  "name": "Communication Medium",

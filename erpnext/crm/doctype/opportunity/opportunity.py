@@ -1,18 +1,19 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe, json
-from frappe.utils import cstr, cint, get_fullname
-from frappe import msgprint, _
+
+import json
+
+import frappe
+from frappe import _
+from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, cstr, get_fullname
+
+from erpnext.accounts.party import get_party_account_currency
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import get_party_account_currency
-from frappe.email.inbox import link_communication_to_document
 
-subject_field = "title"
-sender_field = "contact_email"
 
 class Opportunity(TransactionBase):
 	def after_insert(self):
@@ -32,12 +33,22 @@ class Opportunity(TransactionBase):
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
+		self.map_fields()
 
 		if not self.title:
 			self.title = self.customer_name
 
 		if not self.with_items:
 			self.items = []
+
+	def map_fields(self):
+		for field in self.meta.fields:
+			if not self.get(field.fieldname):
+				try:
+					value = frappe.db.get_value(self.opportunity_from, self.party_name, field.fieldname)
+					frappe.db.set(self, field.fieldname, value)
+				except Exception:
+					continue
 
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""
@@ -88,6 +99,7 @@ class Opportunity(TransactionBase):
 			self.opportunity_from = "Lead"
 			self.party_name = lead_name
 
+	@frappe.whitelist()
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_active_quotation():
 			frappe.db.set(self, 'status', 'Lost')
@@ -122,19 +134,26 @@ class Opportunity(TransactionBase):
 				and q.status not in ('Lost', 'Closed')""", self.name)
 
 	def has_ordered_quotation(self):
-		return frappe.db.sql("""
-			select q.name
-			from `tabQuotation` q, `tabQuotation Item` qi
-			where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s
-			and q.status = 'Ordered'""", self.name)
+		if not self.with_items:
+			return frappe.get_all('Quotation',
+				{
+					'opportunity': self.name,
+					'status': 'Ordered',
+					'docstatus': 1
+				}, 'name')
+		else:
+			return frappe.db.sql("""
+				select q.name
+				from `tabQuotation` q, `tabQuotation Item` qi
+				where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s
+				and q.status = 'Ordered'""", self.name)
 
 	def has_lost_quotation(self):
 		lost_quotation = frappe.db.sql("""
 			select name
 			from `tabQuotation`
-			where  docstatus=1
-				and opportunity =%s
-				and status = 'Lost'
+			where docstatus=1
+				and opportunity =%s and status = 'Lost'
 			""", self.name)
 		if lost_quotation:
 			if self.has_active_quotation():
@@ -244,7 +263,6 @@ def make_quotation(source_name, target_doc=None):
 			"doctype": "Quotation",
 			"field_map": {
 				"opportunity_from": "quotation_to",
-				"opportunity_type": "order_type",
 				"name": "enq_no",
 			}
 		},
@@ -263,6 +281,9 @@ def make_quotation(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_request_for_quotation(source_name, target_doc=None):
+	def update_item(obj, target, source_parent):
+		target.conversion_factor = 1.0
+
 	doclist = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {
 			"doctype": "Request for Quotation"
@@ -273,9 +294,30 @@ def make_request_for_quotation(source_name, target_doc=None):
 				["name", "opportunity_item"],
 				["parent", "opportunity"],
 				["uom", "uom"]
-			]
+			],
+			"postprocess": update_item
 		}
 	}, target_doc)
+
+	return doclist
+
+@frappe.whitelist()
+def make_customer(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.opportunity_name = source.name
+
+		if source.opportunity_from == "Lead":
+			target.lead_name = source.party_name
+
+	doclist = get_mapped_doc("Opportunity", source_name, {
+		"Opportunity": {
+			"doctype": "Customer",
+			"field_map": {
+				"currency": "default_currency",
+				"customer_name": "customer_name"
+			}
+		}
+	}, target_doc, set_missing_values)
 
 	return doclist
 
@@ -341,3 +383,27 @@ def make_opportunity_from_communication(communication, company, ignore_communica
 	link_communication_to_document(doc, "Opportunity", opportunity.name, ignore_communication_links)
 
 	return opportunity.name
+@frappe.whitelist()
+def get_events(start, end, filters=None):
+	"""Returns events for Gantt / Calendar view rendering.
+	:param start: Start date-time.
+	:param end: End date-time.
+	:param filters: Filters (JSON).
+	"""
+	from frappe.desk.calendar import get_event_conditions
+	conditions = get_event_conditions("Opportunity", filters)
+
+	data = frappe.db.sql("""
+		select
+			distinct `tabOpportunity`.name, `tabOpportunity`.customer_name, `tabOpportunity`.opportunity_amount,
+			`tabOpportunity`.title, `tabOpportunity`.contact_date
+		from
+			`tabOpportunity`
+		where
+			(`tabOpportunity`.contact_date between %(start)s and %(end)s)
+			{conditions}
+		""".format(conditions=conditions), {
+			"start": start,
+			"end": end
+		}, as_dict=True, update={"allDay": 0})
+	return data

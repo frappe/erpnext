@@ -1,31 +1,51 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-frappe.require("assets/erpnext/js/financial_statements.js", function() {
-	frappe.query_reports["Vehicle Expenses"] = {
-		"filters": [
-			{
-				"fieldname": "fiscal_year",
-				"label": __("Fiscal Year"),
-				"fieldtype": "Link",
-				"options": "Fiscal Year",
-				"default": frappe.defaults.get_user_default("fiscal_year"),
-				"reqd": 1,
-				"on_change": function(query_report) {
-					var fiscal_year = query_report.get_values().fiscal_year;
-					if (!fiscal_year) {
-						return;
-					}
-					frappe.model.with_doc("Fiscal Year", fiscal_year, function(r) {
-						var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
-
-						frappe.query_report.set_filter({
-							from_date: fy.year_start_date,
-							to_date: fy.year_end_date
-						});
-					});
-				}
-			}
-		]
-	}
-});
-
+frappe.query_reports["Vehicle Expenses"] = {
+	"filters": [
+		{
+			"fieldname": "filter_based_on",
+			"label": __("Filter Based On"),
+			"fieldtype": "Select",
+			"options": ["Fiscal Year", "Date Range"],
+			"default": ["Fiscal Year"],
+			"reqd": 1
+		},
+		{
+			"fieldname": "fiscal_year",
+			"label": __("Fiscal Year"),
+			"fieldtype": "Link",
+			"options": "Fiscal Year",
+			"default": frappe.defaults.get_user_default("fiscal_year"),
+			"depends_on": "eval: doc.filter_based_on == 'Fiscal Year'",
+			"reqd": 1
+		},
+		{
+			"fieldname": "from_date",
+			"label": __("From Date"),
+			"fieldtype": "Date",
+			"reqd": 1,
+			"depends_on": "eval: doc.filter_based_on == 'Date Range'",
+			"default": frappe.datetime.add_months(frappe.datetime.nowdate(), -12)
+		},
+		{
+			"fieldname": "to_date",
+			"label": __("To Date"),
+			"fieldtype": "Date",
+			"reqd": 1,
+			"depends_on": "eval: doc.filter_based_on == 'Date Range'",
+			"default": frappe.datetime.nowdate()
+		},
+		{
+			"fieldname": "vehicle",
+			"label": __("Vehicle"),
+			"fieldtype": "Link",
+			"options": "Vehicle"
+		},
+		{
+			"fieldname": "employee",
+			"label": __("Employee"),
+			"fieldtype": "Link",
+			"options": "Employee"
+		}
+	]
+};

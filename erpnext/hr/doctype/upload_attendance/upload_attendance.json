@@ -229,11 +229,11 @@
  "issingle": 1, 
  "istable": 0, 
  "max_attachments": 1, 
- "modified": "2017-11-14 12:51:34.980103", 
+ "modified": "2020-09-18 17:26:09.703215", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Upload Attendance", 
- "owner": "harshada@webnotestech.com", 
+ "owner": "Administrator", 
  "permissions": [
   {
    "amend": 0, 

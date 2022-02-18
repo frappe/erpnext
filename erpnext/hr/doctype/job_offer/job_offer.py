@@ -1,13 +1,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
-from frappe.utils import cint
+from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe import _
+from frappe.utils import cint
 from frappe.utils.data import get_link_to_form
+
 
 class JobOffer(Document):
 	def onload(self):
@@ -16,6 +17,9 @@ class JobOffer(Document):
 
 	def validate(self):
 		self.validate_vacancies()
+		job_offer = frappe.db.exists("Job Offer",{"job_applicant": self.job_applicant, "docstatus": ["!=", 2]})
+		if job_offer and job_offer != self.name:
+			frappe.throw(_("Job Offer: {0} is already for Job Applicant: {1}").format(frappe.bold(job_offer), frappe.bold(self.job_applicant)))
 
 	def validate_vacancies(self):
 		staffing_plan = get_staffing_plan_detail(self.designation, self.company, self.offer_date)
@@ -37,7 +41,8 @@ class JobOffer(Document):
 		return frappe.get_all("Job Offer", filters={
 				"offer_date": ['between', (from_date, to_date)],
 				"designation": self.designation,
-				"company": self.company
+				"company": self.company,
+				"docstatus": 1
 			}, fields=['name'])
 
 def update_job_applicant(status, job_applicant):
@@ -66,7 +71,8 @@ def get_staffing_plan_detail(designation, company, offer_date):
 @frappe.whitelist()
 def make_employee(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		target.personal_email = frappe.db.get_value("Job Applicant", source.job_applicant, "email_id")
+		target.personal_email, target.first_name = frappe.db.get_value("Job Applicant", \
+			source.job_applicant, ["email_id", "applicant_name"])
 	doc = get_mapped_doc("Job Offer", source_name, {
 			"Job Offer": {
 				"doctype": "Employee",
