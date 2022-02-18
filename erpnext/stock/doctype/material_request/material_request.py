@@ -534,6 +534,7 @@ def raise_work_orders(material_request):
 					"stock_uom": d.stock_uom,
 					"expected_delivery_date": d.schedule_date,
 					"sales_order": d.sales_order,
+					"sales_order_item": d.get("sales_order_item"),
 					"bom_no": get_item_details(d.item_code).bom_no,
 					"material_request": mr.name,
 					"material_request_item": d.name,
