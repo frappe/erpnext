@@ -152,12 +152,26 @@ erpnext.maintenance.MaintenanceSchedule = class MaintenanceSchedule extends frap
 		this.set_no_of_visits(doc, cdt, cdn);
 	}
 
+	serial_no(doc, cdt, cdn) {
+		let me = this;
+		if (doc.docstatus == 0) {
+			me.frm.call('generate_schedule');
+		}
+	}
+
+	sales_person(doc, cdt, cdn) {
+		let me = this;
+		if (doc.docstatus == 0) {
+			me.frm.call('generate_schedule');
+		}
+	}
+
 	set_no_of_visits(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		let me = this;
-		if (item.start_date && item.periodicity) {
+		if (item.start_date && item.periodicity && doc.docstatus == 0) {
 			me.frm.call('validate_end_date_visits');
-
+			me.frm.call('generate_schedule');
 		}
 	}
 };
