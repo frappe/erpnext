@@ -73,7 +73,6 @@
    "in_list_view": 1,
    "label": "Odometer Value (Last)",
    "no_copy": 1,
-   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -147,8 +146,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Fuel Type",
-   "options": "Petrol\nDiesel\nNatural Gas\nElectric",
-   "reqd": 1
+   "options": "Petrol\nDiesel\nNatural Gas\nElectric"
   },
   {
    "fieldname": "uom",
@@ -202,7 +200,7 @@
   }
  ],
  "links": [],
- "modified": "2022-02-04 07:48:43.934570",
+ "modified": "2022-02-04 13:43:58.927474",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Vehicle",
