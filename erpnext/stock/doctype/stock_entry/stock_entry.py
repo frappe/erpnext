@@ -1184,7 +1184,7 @@ class StockEntry(StockController):
 				item_dict[item]["qty"] = 0
 
 		# delete items with 0 qty
-		for item in item_dict.keys():
+		for item in list(item_dict.keys()):
 			if not item_dict[item]["qty"]:
 				del item_dict[item]
 
