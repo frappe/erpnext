@@ -653,10 +653,15 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi = make_purchase_invoice(update_stock=1, posting_date=frappe.utils.nowdate(),
 			posting_time=frappe.utils.nowtime(), cash_bank_account="Cash - TCP1", is_paid=1, company="_Test Company with perpetual inventory", supplier_warehouse="Work In Progress - TCP1", warehouse= "Stores - TCP1", cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1")
 
-		gl_entries = frappe.db.sql("""select account, account_currency, sum(debit) as debit,
+		gl_entries = frappe.db.multisql({
+			'mariadb': """select account, account_currency, sum(debit) as debit,
 				sum(credit) as credit, debit_in_account_currency, credit_in_account_currency
 			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
-			group by account, voucher_no order by account asc;""", pi.name, as_dict=1)
+			group by account, voucher_no order by replace(account, '_', '') asc;""",
+			'postgres': """select account, sum(debit) as debit,
+				sum(credit) as credit
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
+			group by account, voucher_no order by replace(account, '_', '') asc;"""}, pi.name, as_dict=1)
 
 		stock_in_hand_account = get_inventory_account(pi.company, pi.get("items")[0].warehouse)
 		self.assertTrue(gl_entries)

@@ -54,9 +54,16 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			('Sales - TPC', 400.0, 0.0)
 		)
 
-		pcv_gle = frappe.db.sql("""
-			select account, debit, credit from `tabGL Entry` where voucher_no=%s order by account
-		""", (pcv.name))
+		pcv_gle = frappe.db.multisql({
+			'mariadb': """
+			select account, debit, credit
+			from `tabGL Entry` where voucher_no=%s
+			order by account
+		""",
+			'postgres': """select account, debit, credit
+			from `tabGL Entry` where voucher_no='{name}'
+			order by account
+		""".format(name=pcv.name)}, (pcv.name))
 
 		self.assertEqual(pcv_gle, expected_gle)
 
@@ -99,11 +106,16 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			('Sales - TPC', 200.0, 0.0, cost_center2),
 		)
 
-		pcv_gle = frappe.db.sql("""
+		pcv_gle = frappe.db.multisql({
+			'mariadb': """
 			select account, debit, credit, cost_center
 			from `tabGL Entry` where voucher_no=%s
 			order by account, cost_center
-		""", (pcv.name))
+		""",
+			'postgres': """select account, debit, credit, cost_center
+			from `tabGL Entry` where voucher_no='{name}'
+			order by account, cost_center
+		""".format(name=pcv.name)}, (pcv.name))
 
 		self.assertEqual(pcv_gle, expected_gle)
 
@@ -144,12 +156,17 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			('Sales - TPC', 400.0, 0.0, jv.finance_book)
 		)
 
-		pcv_gle = frappe.db.sql("""
+		pcv_gle = frappe.db.multisql({
+			'mariadb': """
 			select account, debit, credit, finance_book
 			from `tabGL Entry` where voucher_no=%s
-			order by account, finance_book
-		""", (pcv.name))
-
+			order by replace(account, '_', ''), finance_book
+		""",
+			'postgres': """
+			select account, debit, credit, finance_book
+			from `tabGL Entry` where voucher_no='{name}'
+			order by replace(account, '_', ''), finance_book desc
+		""".format(name=pcv.name)}, (pcv.name))
 		self.assertEqual(pcv_gle, expected_gle)
 
 	def make_period_closing_voucher(self, submit=True):
