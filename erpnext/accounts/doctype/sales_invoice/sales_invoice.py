@@ -71,10 +71,10 @@ class SalesInvoice(SellingController):
 
 	#new code to add data in new_name hidden field 
 
-	def after_insert_1(self):
-		for i in self.items:
-			print("i")
-			a = i.new_name = self.name + "-" +i.item_code	
+	# def after_insert_1(self):
+	# 	for i in self.items:
+	# 		print("i")
+	# 		a = i.new_name = self.name + "-" +i.item_code	
 		
 
 	def before_save(self):
@@ -107,7 +107,7 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
 
-		self.after_insert_1()
+		# self.after_insert_1()
 
 		self.get_commision()
 
