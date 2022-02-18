@@ -152,14 +152,14 @@ erpnext.maintenance.MaintenanceSchedule = class MaintenanceSchedule extends frap
 		this.set_no_of_visits(doc, cdt, cdn);
 	}
 
-	serial_no(doc, cdt, cdn) {
+	serial_no(doc) {
 		let me = this;
 		if (doc.docstatus == 0) {
 			me.frm.call('generate_schedule');
 		}
 	}
 
-	sales_person(doc, cdt, cdn) {
+	sales_person(doc) {
 		let me = this;
 		if (doc.docstatus == 0) {
 			me.frm.call('generate_schedule');
@@ -170,8 +170,9 @@ erpnext.maintenance.MaintenanceSchedule = class MaintenanceSchedule extends frap
 		var item = frappe.get_doc(cdt, cdn);
 		let me = this;
 		if (item.start_date && item.periodicity && doc.docstatus == 0) {
-			me.frm.call('validate_end_date_visits');
-			me.frm.call('generate_schedule');
+			me.frm.call('validate_end_date_visits').then(() => {
+				me.frm.call('generate_schedule');
+			});
 		}
 	}
 };
