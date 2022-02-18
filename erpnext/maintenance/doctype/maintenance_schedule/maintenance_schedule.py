@@ -200,11 +200,18 @@ class MaintenanceSchedule(TransactionBase):
 	def validate_no_of_visits(self):
 		return len(self.schedules) != sum(d.no_of_visits for d in self.items)
 
+	def validate_serials_updated(self):
+		items_serials = {item.item_code: item.serial_no for item in self.items}
+		schedules_serials = {item.item_code: item.serial_no for item in self.schedules}
+		if items_serials != schedules_serials:
+			self.generate_schedule()
+
 	def validate(self):
 		self.validate_end_date_visits()
 		self.validate_maintenance_detail()
 		self.validate_dates_with_periodicity()
 		self.validate_sales_order()
+		self.validate_serials_updated()
 		if not self.schedules or self.validate_no_of_visits():
 			self.generate_schedule()
 
