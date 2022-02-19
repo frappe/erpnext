@@ -634,7 +634,7 @@ class update_entries_after(object):
 			if not allow_zero_rate:
 				self.wh_data.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 					sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
-					currency=erpnext.get_company_currency(sle.company), company=sle.company)
+					currency=erpnext.get_company_currency(sle.company), company=sle.company, batch_no=sle.batch_no)
 
 	def get_incoming_value_for_serial_nos(self, sle, serial_nos):
 		# get rate from serial nos within same company
@@ -702,7 +702,7 @@ class update_entries_after(object):
 				if not allow_zero_valuation_rate:
 					self.wh_data.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 						sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
-						currency=erpnext.get_company_currency(sle.company), company=sle.company)
+						currency=erpnext.get_company_currency(sle.company), company=sle.company, batch_no=sle.batch_no)
 
 	def update_queue_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
@@ -722,7 +722,7 @@ class update_entries_after(object):
 				if not allow_zero_valuation_rate:
 					return get_valuation_rate(sle.item_code, sle.warehouse,
 						sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
-						currency=erpnext.get_company_currency(sle.company), company=sle.company)
+						currency=erpnext.get_company_currency(sle.company), company=sle.company, batch_no=sle.batch_no)
 				else:
 					return 0.0
 
@@ -950,21 +950,38 @@ def _get_batch_outgoing_rate(item_code, warehouse, batch_no, posting_date, posti
 
 
 def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
-	allow_zero_rate=False, currency=None, company=None, raise_error_if_no_rate=True):
+	allow_zero_rate=False, currency=None, company=None, raise_error_if_no_rate=True, batch_no=None):
 
 	if not company:
 		company =  frappe.get_cached_value("Warehouse", warehouse, "company")
 
+	last_valuation_rate = None
+
+	# Get moving average rate of a specific batch number
+	if warehouse and batch_no and frappe.db.get_value("Batch", batch_no, "use_batchwise_valuation"):
+		last_valuation_rate = frappe.db.sql("""
+			select sum(stock_value_difference) / sum(actual_qty)
+			from `tabStock Ledger Entry`
+			where
+				item_code = %s
+				AND warehouse = %s
+				AND batch_no = %s
+				AND is_cancelled = 0
+				AND NOT (voucher_no = %s AND voucher_type = %s)
+			""",
+			(item_code, warehouse, batch_no, voucher_no, voucher_type))
+
 	# Get valuation rate from last sle for the same item and warehouse
-	last_valuation_rate = frappe.db.sql("""select valuation_rate
-		from `tabStock Ledger Entry` force index (item_warehouse)
-		where
-			item_code = %s
-			AND warehouse = %s
-			AND valuation_rate >= 0
-			AND is_cancelled = 0
-			AND NOT (voucher_no = %s AND voucher_type = %s)
-		order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse, voucher_no, voucher_type))
+	if not last_valuation_rate or last_valuation_rate[0][0] is None:
+		last_valuation_rate = frappe.db.sql("""select valuation_rate
+			from `tabStock Ledger Entry` force index (item_warehouse)
+			where
+				item_code = %s
+				AND warehouse = %s
+				AND valuation_rate >= 0
+				AND is_cancelled = 0
+				AND NOT (voucher_no = %s AND voucher_type = %s)
+			order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse, voucher_no, voucher_type))
 
 	if not last_valuation_rate:
 		# Get valuation rate from last sle for the item against any warehouse
