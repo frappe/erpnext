@@ -633,9 +633,7 @@ class update_entries_after(object):
 		if not self.wh_data.valuation_rate and sle.voucher_detail_no:
 			allow_zero_rate = self.check_if_allow_zero_valuation_rate(sle.voucher_type, sle.voucher_detail_no)
 			if not allow_zero_rate:
-				self.wh_data.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
-					sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
-					currency=erpnext.get_company_currency(sle.company), company=sle.company, batch_no=sle.batch_no)
+				self.wh_data.valuation_rate = self.get_fallback_rate(sle)
 
 	def get_incoming_value_for_serial_nos(self, sle, serial_nos):
 		# get rate from serial nos within same company
@@ -701,9 +699,7 @@ class update_entries_after(object):
 			if not self.wh_data.valuation_rate and sle.voucher_detail_no:
 				allow_zero_valuation_rate = self.check_if_allow_zero_valuation_rate(sle.voucher_type, sle.voucher_detail_no)
 				if not allow_zero_valuation_rate:
-					self.wh_data.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
-						sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
-						currency=erpnext.get_company_currency(sle.company), company=sle.company, batch_no=sle.batch_no)
+					self.wh_data.valuation_rate = self.get_fallback_rate(sle)
 
 	def update_queue_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
@@ -721,9 +717,7 @@ class update_entries_after(object):
 			def rate_generator() -> float:
 				allow_zero_valuation_rate = self.check_if_allow_zero_valuation_rate(sle.voucher_type, sle.voucher_detail_no)
 				if not allow_zero_valuation_rate:
-					return get_valuation_rate(sle.item_code, sle.warehouse,
-						sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
-						currency=erpnext.get_company_currency(sle.company), company=sle.company, batch_no=sle.batch_no)
+					return self.get_fallback_rate(sle)
 				else:
 					return 0.0
 
@@ -770,6 +764,13 @@ class update_entries_after(object):
 			return frappe.db.get_value(ref_item_dt, voucher_detail_no, "allow_zero_valuation_rate")
 		else:
 			return 0
+
+	def get_fallback_rate(self, sle) -> float:
+		"""When exact incoming rate isn't available use any of other "average" rates as fallback.
+			This should only get used for negative stock."""
+		return get_valuation_rate(sle.item_code, sle.warehouse,
+			sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
+			currency=erpnext.get_company_currency(sle.company), company=sle.company, batch_no=sle.batch_no)
 
 	def get_sle_before_datetime(self, args):
 		"""get previous stock ledger entry before current time-bucket"""
