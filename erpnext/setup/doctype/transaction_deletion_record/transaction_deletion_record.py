@@ -177,5 +177,5 @@ def get_doctypes_to_be_ignored():
 		'Party Account', 'Employee', 'Sales Taxes and Charges Template',
 		'Purchase Taxes and Charges Template', 'POS Profile', 'BOM',
 		'Company', 'Bank Account', 'Item Tax Template', 'Mode of Payment',
-		'Item Default', 'Customer', 'Supplier', 'GST Account']
+		'Item Default', 'Customer', 'Supplier']
 	return doctypes_to_be_ignored_list
