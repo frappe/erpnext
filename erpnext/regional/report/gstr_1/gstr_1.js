@@ -73,7 +73,6 @@ frappe.query_reports["GSTR-1"] = {
 				company: filters.company
 			},
 			callback: function(r) {
-				console.log(r.message);
 				frappe.query_report.page.fields_dict.company_gstin.df.options = r.message;
 				frappe.query_report.page.fields_dict.company_gstin.refresh();
 			}
