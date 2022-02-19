@@ -23,7 +23,6 @@ class NegativeStockError(frappe.ValidationError): pass
 class SerialNoExistsInFutureTransaction(frappe.ValidationError):
 	pass
 
-_exceptions = frappe.local('stockledger_exceptions')
 
 def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 	from erpnext.controllers.stock_controller import future_sle_exists
