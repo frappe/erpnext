@@ -397,7 +397,15 @@ class TestStockLedgerEntry(ERPNextTestCase):
 
 		for exp_sle, act_sle in zip(expected_sles, sles):
 			for k, v in exp_sle.items():
-				self.assertEqual(v, act_sle[k], msg=f"{k} doesn't match \n{exp_sle}\n{act_sle}")
+				act_value = act_sle[k]
+				if k == "stock_queue":
+					act_value = json.loads(act_value)
+					if act_value and act_value[0][0] == 0:
+						# ignore empty fifo bins
+						continue
+
+				self.assertEqual(v, act_value, msg=f"{k} doesn't match \n{exp_sle}\n{act_sle}")
+
 
 	def test_batchwise_item_valuation_stock_reco(self):
 		item, warehouses, batches = setup_item_valuation_test()
@@ -587,6 +595,77 @@ class TestStockLedgerEntry(ERPNextTestCase):
 		for details in details_list:
 			check_sle_details_against_expected(*details)
 
+	def test_mixed_valuation_batches(self):
+		item_code, warehouses, batches = setup_item_valuation_test(use_batchwise_valuation=0)
+		warehouse = warehouses[0]
+
+		state = {
+			"qty": 0.0,
+			"stock_value": 0.0
+		}
+		def update_invariants(exp_sles):
+			for sle in exp_sles:
+				state["stock_value"] += sle["stock_value_difference"]
+				state["qty"] += sle["actual_qty"]
+				sle["stock_value"] = state["stock_value"]
+				sle["qty_after_transaction"] = state["qty"]
+			return exp_sles
+
+		old1 = make_stock_entry(item_code=item_code, target=warehouse, batch_no=batches[0],
+				qty=10, rate=10)
+		self.assertSLEs(old1, update_invariants([
+			{"actual_qty": 10, "stock_value_difference": 10*10, "stock_queue": [[10, 10]]},
+		]))
+		old2 = make_stock_entry(item_code=item_code, target=warehouse, batch_no=batches[1],
+				qty=10, rate=20)
+		self.assertSLEs(old2, update_invariants([
+			{"actual_qty": 10, "stock_value_difference": 10*20, "stock_queue": [[10, 10], [10, 20]]},
+		]))
+		old3 = make_stock_entry(item_code=item_code, target=warehouse, batch_no=batches[0],
+				qty=5, rate=15)
+
+		self.assertSLEs(old3, update_invariants([
+			{"actual_qty": 5, "stock_value_difference": 5*15, "stock_queue": [[10, 10], [10, 20], [5, 15]]},
+		]))
+
+		new1 = make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=40)
+		batches.append(new1.items[0].batch_no)
+		# assert old queue remains
+		self.assertSLEs(new1, update_invariants([
+			{"actual_qty": 10, "stock_value_difference": 10*40, "stock_queue": [[10, 10], [10, 20], [5, 15]]},
+		]))
+
+		new2 = make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=42)
+		batches.append(new2.items[0].batch_no)
+		self.assertSLEs(new2, update_invariants([
+			{"actual_qty": 10, "stock_value_difference": 10*42, "stock_queue": [[10, 10], [10, 20], [5, 15]]},
+		]))
+
+		# consume old batch as per FIFO
+		consume_old1 = make_stock_entry(item_code=item_code, source=warehouse, qty=15, batch_no=batches[0])
+		self.assertSLEs(consume_old1, update_invariants([
+			{"actual_qty": -15, "stock_value_difference": -10*10 - 5*20, "stock_queue": [[5, 20], [5, 15]]},
+		]))
+
+		# consume new batch as per batch
+		consume_new2 = make_stock_entry(item_code=item_code, source=warehouse, qty=10, batch_no=batches[-1])
+		self.assertSLEs(consume_new2, update_invariants([
+			{"actual_qty": -10, "stock_value_difference": -10*42, "stock_queue": [[5, 20], [5, 15]]},
+		]))
+
+		# finish all old batches
+		consume_old2 = make_stock_entry(item_code=item_code, source=warehouse, qty=10, batch_no=batches[1])
+		self.assertSLEs(consume_old2, update_invariants([
+			{"actual_qty": -10, "stock_value_difference": -5*20 - 5*15, "stock_queue": []},
+		]))
+
+		# finish all new batches
+		consume_new1 = make_stock_entry(item_code=item_code, source=warehouse, qty=10, batch_no=batches[-2])
+		self.assertSLEs(consume_new1, update_invariants([
+			{"actual_qty": -10, "stock_value_difference": -10*40, "stock_queue": []},
+		]))
+
+
 
 def create_repack_entry(**args):
 	args = frappe._dict(args)
@@ -661,7 +740,7 @@ def setup_item_valuation_test(valuation_method="FIFO", suffix=None, use_batchwis
 
 	item = make_item(
 		f"IV - Test Item {valuation_method} {suffix}",
-		dict(valuation_method=valuation_method, has_batch_no=1)
+		dict(valuation_method=valuation_method, has_batch_no=1, create_new_batch=1)
 	)
 	warehouses = [create_warehouse(f"IV - Test Warehouse {i}") for i in ['J', 'K']]
 	batches = [f"IV - Test Batch {i} {valuation_method} {suffix}" for i in batches_list]
