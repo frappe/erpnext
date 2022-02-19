@@ -8,7 +8,11 @@ from frappe.utils import cint, flt
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.stock.doctype.batch.batch import UnableToSelectBatchError, get_batch_no, get_batch_qty
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+	create_stock_reconciliation,
+)
 from erpnext.stock.get_item_details import get_item_details
+from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.tests.utils import ERPNextTestCase
 
 
@@ -344,6 +348,41 @@ class TestBatch(ERPNextTestCase):
 			self.assertAlmostEqual(sle.valuation_rate, stock_value / qty_after_transaction)
 
 			self.assertEqual(sle.stock_queue, [])  # queues don't apply on batched items
+
+	def test_moving_batch_valuation_rates(self):
+		item_code = "_TestBatchWiseVal"
+		warehouse = "_Test Warehouse - _TC"
+		self.make_batch_item(item_code)
+
+		def assertValuation(expected):
+			actual = get_valuation_rate(item_code, warehouse, "voucher_type", "voucher_no", batch_no=batch_no)
+			self.assertAlmostEqual(actual, expected)
+
+		se = make_stock_entry(item_code=item_code, qty=100, rate=10, target=warehouse)
+		batch_no = se.items[0].batch_no
+		assertValuation(10)
+
+		# consumption should never affect current valuation rate
+		make_stock_entry(item_code=item_code, qty=20, source=warehouse)
+		assertValuation(10)
+
+		make_stock_entry(item_code=item_code, qty=30, source=warehouse)
+		assertValuation(10)
+
+		# 50 * 10 = 500 current value, add more item with higher valuation
+		make_stock_entry(item_code=item_code, qty=50, rate=20, target=warehouse, batch_no=batch_no)
+		assertValuation(15)
+
+		# consuming again shouldn't do anything
+		make_stock_entry(item_code=item_code, qty=20, source=warehouse)
+		assertValuation(15)
+
+		# reset rate with stock reconiliation
+		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=10, rate=25, batch_no=batch_no)
+		assertValuation(25)
+
+		make_stock_entry(item_code=item_code, qty=20, rate=20, target=warehouse, batch_no=batch_no)
+		assertValuation((20 * 20 + 10 * 25) / (10 + 20))
 
 
 def create_batch(item_code, rate, create_item_price_for_batch):
