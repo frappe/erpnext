@@ -279,7 +279,8 @@ class BuyingController(StockController, Subcontracting):
 						"posting_date": self.posting_date,
 						"posting_time": self.posting_time,
 						"qty": -1 * d.consumed_qty,
-						"serial_no": d.serial_no
+						"serial_no": d.serial_no,
+						"batch_no": d.batch_no,
 					})
 
 					if rate > 0:
