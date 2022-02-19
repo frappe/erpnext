@@ -743,12 +743,14 @@ class update_entries_after(object):
 		incoming_rate = flt(sle.incoming_rate)
 		actual_qty = flt(sle.actual_qty)
 
-		self.wh_data.qty_after_transaction += actual_qty
+		self.wh_data.qty_after_transaction = round_off_if_near_zero(self.wh_data.qty_after_transaction + actual_qty)
 
 		if actual_qty > 0:
 			stock_value_difference = incoming_rate * actual_qty
 		else:
-			outgoing_rate = get_batch_incoming_rate(item_code=sle.item_code, warehouse=sle.warehouse, batch_no=sle.batch_no, posting_date=sle.posting_date, posting_time=sle.posting_time, creation=sle.creation)
+			outgoing_rate = get_batch_incoming_rate(item_code=sle.item_code,
+					warehouse=sle.warehouse, batch_no=sle.batch_no, posting_date=sle.posting_date,
+					posting_time=sle.posting_time, creation=sle.creation)
 			if outgoing_rate is None:
 				# This can *only* happen if qty available for the batch is zero.
 				# in such case fall back various other rates.
@@ -757,7 +759,7 @@ class update_entries_after(object):
 				outgoing_rate = self.get_fallback_rate(sle)
 			stock_value_difference = outgoing_rate * actual_qty
 
-		self.wh_data.stock_value += stock_value_difference
+		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + stock_value_difference)
 		if self.wh_data.qty_after_transaction:
 			self.wh_data.valuation_rate = self.wh_data.stock_value / self.wh_data.qty_after_transaction
 
