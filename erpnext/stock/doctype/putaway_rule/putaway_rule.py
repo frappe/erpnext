@@ -64,7 +64,6 @@ def get_available_putaway_capacity(rule):
 	free_space = flt(stock_capacity) - flt(balance_qty)
 	return free_space if free_space > 0 else 0
 
-
 @frappe.whitelist()
 def apply_putaway_rule(doctype, items, company, sync=None, purpose=None):
 	""" Applies Putaway Rule on line items.
@@ -268,3 +267,5 @@ def get_serial_nos_to_allocate(serial_nos, to_allocate):
 		serial_nos[:] = serial_nos[cint(to_allocate):] # pop out allocated serial nos and modify list
 		return "\n".join(allocated_serial_nos) if allocated_serial_nos else ""
 	else: return ""
+
+# 123
