@@ -19,7 +19,7 @@ from erpnext.stock.utils import (
 	get_or_make_bin,
 	get_valuation_method,
 )
-from erpnext.stock.valuation import FIFOValuation, LIFOValuation
+from erpnext.stock.valuation import FIFOValuation, LIFOValuation, round_off_if_near_zero
 
 
 class NegativeStockError(frappe.ValidationError): pass
@@ -465,7 +465,6 @@ class update_entries_after(object):
 					self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(self.wh_data.valuation_rate)
 				else:
 					self.update_queue_values(sle)
-					self.wh_data.qty_after_transaction += flt(sle.actual_qty)
 
 		# rounding as per precision
 		self.wh_data.stock_value = flt(self.wh_data.stock_value, self.precision)
@@ -706,10 +705,14 @@ class update_entries_after(object):
 		actual_qty = flt(sle.actual_qty)
 		outgoing_rate = flt(sle.outgoing_rate)
 
+		self.wh_data.qty_after_transaction = round_off_if_near_zero(self.wh_data.qty_after_transaction + actual_qty)
+
 		if self.valuation_method == "LIFO":
 			stock_queue = LIFOValuation(self.wh_data.stock_queue)
 		else:
 			stock_queue = FIFOValuation(self.wh_data.stock_queue)
+
+		_prev_qty, prev_stock_value = stock_queue.get_total_stock_and_value()
 
 		if actual_qty > 0:
 			stock_queue.add_stock(qty=actual_qty, rate=incoming_rate)
@@ -723,16 +726,18 @@ class update_entries_after(object):
 
 			stock_queue.remove_stock(qty=abs(actual_qty), outgoing_rate=outgoing_rate, rate_generator=rate_generator)
 
-		stock_qty, stock_value = stock_queue.get_total_stock_and_value()
+		_qty, stock_value = stock_queue.get_total_stock_and_value()
+
+		stock_value_difference = stock_value - prev_stock_value
 
 		self.wh_data.stock_queue = stock_queue.state
-		self.wh_data.stock_value = stock_value
-		if stock_qty:
-			self.wh_data.valuation_rate = stock_value / stock_qty
-
+		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + stock_value_difference)
 
 		if not self.wh_data.stock_queue:
 			self.wh_data.stock_queue.append([0, sle.incoming_rate or sle.outgoing_rate or self.wh_data.valuation_rate])
+
+		if self.wh_data.qty_after_transaction:
+			self.wh_data.valuation_rate = self.wh_data.stock_value / self.wh_data.qty_after_transaction
 
 	def update_batched_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
