@@ -749,7 +749,7 @@ class update_entries_after(object):
 			stock_value_difference = incoming_rate * actual_qty
 			self.wh_data.stock_value += stock_value_difference
 		else:
-			outgoing_rate = _get_batch_outgoing_rate(item_code=sle.item_code, warehouse=sle.warehouse, batch_no=sle.batch_no, posting_date=sle.posting_date, posting_time=sle.posting_time, creation=sle.creation)
+			outgoing_rate = get_batch_incoming_rate(item_code=sle.item_code, warehouse=sle.warehouse, batch_no=sle.batch_no, posting_date=sle.posting_date, posting_time=sle.posting_time, creation=sle.creation)
 			stock_value_difference = outgoing_rate * actual_qty
 			self.wh_data.stock_value += stock_value_difference
 
@@ -915,7 +915,7 @@ def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 		['item_code', 'warehouse', 'posting_date', 'posting_time', 'timestamp(posting_date, posting_time) as timestamp'],
 		as_dict=1)
 
-def _get_batch_outgoing_rate(item_code, warehouse, batch_no, posting_date, posting_time, creation):
+def get_batch_incoming_rate(item_code, warehouse, batch_no, posting_date, posting_time, creation=None):
 
 	batch_details = frappe.db.sql("""
 		select sum(stock_value_difference) as batch_value, sum(actual_qty) as batch_qty
@@ -946,7 +946,6 @@ def _get_batch_outgoing_rate(item_code, warehouse, batch_no, posting_date, posti
 
 	if batch_details and batch_details[0].batch_qty:
 		return batch_details[0].batch_value / batch_details[0].batch_qty
-
 
 
 def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
