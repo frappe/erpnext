@@ -250,7 +250,7 @@ class Subscription(Document):
 		if not self.current_invoice_is_past_due():
 			return
 
-		grace_period = cint(frappe.get_value("Subscription Settings", None, "cancel_after_grace"))
+		grace_period = cint(frappe.get_value("Subscription Settings", None, "grace_period"))
 		return getdate(frappe.flags.current_date) >= getdate(
 			add_days(self.current_invoice.due_date, grace_period)
 		)
@@ -609,7 +609,7 @@ class Subscription(Document):
 
 	@property
 	def invoices(self) -> Iterable[Dict]:
-		return frappe.get_all(self.invoice_document_type, filters={"subscription": self.name})
+		return frappe.get_all(self.invoice_document_type, filters={"subscription": self.name}, order_by="from_date asc")
 
 	@staticmethod
 	def is_paid(invoice: Document) -> bool:

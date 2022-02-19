@@ -702,7 +702,7 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(subscription.status, 'Unpaid')
 
 		# Check the currency of the created invoice
-		currency = frappe.db.get_value('Sales Invoice', subscription.invoices[0].invoice, 'currency')
+		currency = frappe.db.get_value('Sales Invoice', subscription.invoices[0].name, 'currency')
 		self.assertEqual(currency, 'USD')
 
 
@@ -719,10 +719,10 @@ class TestSubscription(unittest.TestCase):
 		subscription.save()
 
 		# create invoices for the first two moths
-		frappe.flags.current_date = subscription.current_invoice_end
+		frappe.flags.current_date = "2021-12-31"
 		subscription.process()
 
-		frappe.flags.current_date = subscription.current_invoice_end
+		frappe.flags.current_date = "2022-01-31"
 		subscription.process()
 		frappe.db.commit() # commit needed to query invoice dates // nosemgrep
 
