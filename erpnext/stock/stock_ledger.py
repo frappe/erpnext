@@ -113,7 +113,8 @@ class update_entries_after(object):
 		entries_to_fix = self.get_sle_after_datetime()
 
 		for sle in entries_to_fix:
-			self.process_sle(sle)
+			if sle.qty_after_transaction:
+				self.process_sle(sle)
 
 		if self.exceptions:
 			self.raise_exceptions()
