@@ -751,6 +751,7 @@ class update_entries_after(object):
 			self.wh_data.stock_value += stock_value_difference
 		else:
 			outgoing_rate = get_batch_incoming_rate(item_code=sle.item_code, warehouse=sle.warehouse, batch_no=sle.batch_no, posting_date=sle.posting_date, posting_time=sle.posting_time, creation=sle.creation)
+			# TODO: negative stock handling
 			stock_value_difference = outgoing_rate * actual_qty
 			self.wh_data.stock_value += stock_value_difference
 
