@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import json
+
 import frappe
 from frappe.exceptions import ValidationError
 from frappe.utils import cint, flt
@@ -347,7 +349,7 @@ class TestBatch(ERPNextTestCase):
 			self.assertAlmostEqual(sle.qty_after_transaction, qty_after_transaction)
 			self.assertAlmostEqual(sle.valuation_rate, stock_value / qty_after_transaction)
 
-			self.assertEqual(sle.stock_queue, [])  # queues don't apply on batched items
+			self.assertEqual(json.loads(sle.stock_queue), [])  # queues don't apply on batched items
 
 	def test_moving_batch_valuation_rates(self):
 		item_code = "_TestBatchWiseVal"

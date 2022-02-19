@@ -8,7 +8,9 @@ from typing import Optional
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdate
+from pypika import CustomFunction
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
@@ -24,7 +26,6 @@ class NegativeStockError(frappe.ValidationError): pass
 class SerialNoExistsInFutureTransaction(frappe.ValidationError):
 	pass
 
-_exceptions = frappe.local('stockledger_exceptions')
 
 def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 	from erpnext.controllers.stock_controller import future_sle_exists
@@ -917,32 +918,32 @@ def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 
 def get_batch_incoming_rate(item_code, warehouse, batch_no, posting_date, posting_time, creation=None):
 
-	batch_details = frappe.db.sql("""
-		select sum(stock_value_difference) as batch_value, sum(actual_qty) as batch_qty
-		from `tabStock Ledger Entry`
-		where
-			item_code = %(item_code)s
-			and warehouse = %(warehouse)s
-			and batch_no = %(batch_no)s
-			and is_cancelled = 0
-			and (
-				timestamp(posting_date, posting_time) < timestamp(%(posting_date)s, %(posting_time)s)
-				or (
-					timestamp(posting_date, posting_time) = timestamp(%(posting_date)s, %(posting_time)s)
-					and creation < %(creation)s
-				)
+	Timestamp = CustomFunction('timestamp', ['date', 'time'])
+
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+
+	timestamp_condition = (Timestamp(sle.posting_date, sle.posting_time) < Timestamp(posting_date, posting_time))
+	if creation:
+		timestamp_condition |= (
+				(Timestamp(sle.posting_date, sle.posting_time) == Timestamp(posting_date, posting_time))
+				& (sle.creation < creation)
 			)
-		""",
-		{
-			"item_code": item_code,
-			"warehouse": warehouse,
-			"batch_no": batch_no,
-			"posting_date": posting_date,
-			"posting_time": posting_time,
-			"creation": creation,
-		},
-		as_dict=True
-	)
+
+	batch_details = (
+		frappe.qb
+			.from_(sle)
+			.select(
+				Sum(sle.stock_value_difference).as_("batch_value"),
+				Sum(sle.actual_qty).as_("batch_qty")
+			)
+			.where(
+				(sle.item_code == item_code)
+				& (sle.warehouse == warehouse)
+				& (sle.batch_no == batch_no)
+				& (sle.is_cancelled == 0)
+			)
+			.where(timestamp_condition)
+	).run(as_dict=True)
 
 	if batch_details and batch_details[0].batch_qty:
 		return batch_details[0].batch_value / batch_details[0].batch_qty
