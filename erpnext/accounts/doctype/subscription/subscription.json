@@ -19,6 +19,7 @@
   "trial_period_end",
   "follow_calendar_months",
   "generate_new_invoices_past_due_date",
+  "submit_invoice",
   "column_break_11",
   "current_invoice_start",
   "current_invoice_end",
@@ -35,8 +36,6 @@
   "cb_2",
   "additional_discount_percentage",
   "additional_discount_amount",
-  "sb_3",
-  "submit_invoice",
   "accounting_dimensions_section",
   "cost_center"
  ],
@@ -161,12 +160,6 @@
    "label": "Additional DIscount Amount"
   },
   {
-   "depends_on": "eval:doc.invoices",
-   "fieldname": "sb_3",
-   "fieldtype": "Section Break",
-   "label": "Invoices"
-  },
-  {
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
@@ -246,7 +239,7 @@
    "default": "1",
    "fieldname": "submit_invoice",
    "fieldtype": "Check",
-   "label": "Submit Invoice Automatically"
+   "label": "Submit Generated Invoices"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -262,7 +255,7 @@
    "link_fieldname": "subscription"
   }
  ],
- "modified": "2022-02-17 20:26:13.233636",
+ "modified": "2022-02-18 23:24:57.185054",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",
