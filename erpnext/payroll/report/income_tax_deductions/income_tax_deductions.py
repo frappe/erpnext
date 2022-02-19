@@ -5,8 +5,6 @@
 import frappe
 from frappe import _
 
-import erpnext
-
 
 def execute(filters=None):
 	data = get_data(filters)
@@ -30,14 +28,6 @@ def get_columns(filters):
 			"fieldtype": "Link",
 			"width": 160
 		}]
-
-	if erpnext.get_region() == "India":
-		columns.append({
-			"label": _("PAN Number"),
-			"fieldname": "pan_number",
-			"fieldtype": "Data",
-			"width": 140
-		})
 
 	columns += [{
 			"label": _("Income Tax Component"),
@@ -94,9 +84,6 @@ def get_data(filters):
 
 	data = []
 
-	if erpnext.get_region() == "India":
-		employee_pan_dict = frappe._dict(frappe.db.sql(""" select employee, pan_number from `tabEmployee`"""))
-
 	component_types = frappe.db.sql(""" select name from `tabSalary Component`
 		where is_income_tax_component = 1 """)
 
@@ -117,20 +104,13 @@ def get_data(filters):
 	""" % (conditions , ", ".join(['%s']*len(component_types))), tuple(component_types), as_dict=1)
 
 	for d in entry:
-
-		employee = {
+		data.append({
 			"employee": d.employee,
 			"employee_name": d.employee_name,
 			"it_comp": d.salary_component,
 			"posting_date": d.posting_date,
-			# "pan_number": employee_pan_dict.get(d.employee),
 			"it_amount": d.amount,
 			"gross_pay": d.gross_pay
-		}
-
-		if erpnext.get_region() == "India":
-			employee["pan_number"] = employee_pan_dict.get(d.employee)
-
-		data.append(employee)
+		})
 
 	return data
