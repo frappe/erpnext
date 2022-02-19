@@ -354,10 +354,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 			user.remove_roles("Stock Manager")
 
 	def test_batchwise_item_valuation_moving_average(self):
-		suffix = get_unique_suffix()
-		item, warehouses, batches = setup_item_valuation_test(
-			valuation_method="Moving Average", suffix=suffix
-		)
+		item, warehouses, batches = setup_item_valuation_test(valuation_method="Moving Average")
 
 		# Incoming Entries for Stock Value check
 		pr_entry_list = [
@@ -403,10 +400,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 				self.assertEqual(v, act_sle[k], msg=f"{k} doesn't match \n{exp_sle}\n{act_sle}")
 
 	def test_batchwise_item_valuation_stock_reco(self):
-		suffix = get_unique_suffix()
-		item, warehouses, batches = setup_item_valuation_test(
-			valuation_method="FIFO", suffix=suffix
-		)
+		item, warehouses, batches = setup_item_valuation_test()
 		state = {
 			"stock_value" : 0.0,
 			"qty": 0.0
@@ -449,8 +443,86 @@ class TestStockLedgerEntry(ERPNextTestCase):
 		update_invariants(expected_sles)
 		self.assertSLEs(sr2, expected_sles)
 
+	def test_batch_wise_valuation_across_warehouse(self):
+		item_code, warehouses, batches = setup_item_valuation_test()
+		source = warehouses[0]
+		target = warehouses[1]
+
+		unrelated_batch = make_stock_entry(item_code=item_code, target=source, batch_no=batches[1],
+				qty=5, rate=10)
+		self.assertSLEs(unrelated_batch, [
+			{"actual_qty": 5, "stock_value_difference": 10 * 5},
+		])
+
+		reciept = make_stock_entry(item_code=item_code, target=source, batch_no=batches[0], qty=5, rate=10)
+		self.assertSLEs(reciept, [
+			{"actual_qty": 5, "stock_value_difference": 10 * 5},
+		])
+
+		transfer = make_stock_entry(item_code=item_code, source=source, target=target, batch_no=batches[0], qty=5)
+		self.assertSLEs(transfer, [
+			{"actual_qty": -5, "stock_value_difference": -10 * 5, "warehouse": source},
+			{"actual_qty": 5, "stock_value_difference": 10 * 5, "warehouse": target}
+		])
+
+		backdated_receipt = make_stock_entry(item_code=item_code, target=source, batch_no=batches[0],
+				qty=5, rate=20, posting_date=add_days(today(), -1))
+		self.assertSLEs(backdated_receipt, [
+			{"actual_qty": 5, "stock_value_difference": 20 * 5},
+		])
+
+		# check reposted average rate in *future* transfer
+		self.assertSLEs(transfer, [
+			{"actual_qty": -5, "stock_value_difference": -15 * 5, "warehouse": source, "stock_value": 15 * 5 + 10 * 5},
+			{"actual_qty": 5, "stock_value_difference": 15 * 5, "warehouse": target, "stock_value": 15 * 5}
+		])
+
+		transfer_unrelated = make_stock_entry(item_code=item_code, source=source,
+				target=target, batch_no=batches[1], qty=5)
+		self.assertSLEs(transfer_unrelated, [
+			{"actual_qty": -5, "stock_value_difference": -10 * 5, "warehouse": source, "stock_value": 15 * 5},
+			{"actual_qty": 5, "stock_value_difference": 10 * 5, "warehouse": target, "stock_value": 15 * 5 + 10 * 5}
+		])
+
+	def test_intermediate_average_batch_wise_valuation(self):
+		""" A batch has moving average up until posting time,
+		check if same is respected when backdated entry is inserted in middle"""
+		item_code, warehouses, batches = setup_item_valuation_test()
+		warehouse = warehouses[0]
+
+		batch = batches[0]
+
+		yesterday = make_stock_entry(item_code=item_code, target=warehouse, batch_no=batch,
+				qty=1, rate=10, posting_date=add_days(today(), -1))
+		self.assertSLEs(yesterday, [
+			{"actual_qty": 1, "stock_value_difference": 10},
+		])
+
+		tomorrow = make_stock_entry(item_code=item_code, target=warehouse, batch_no=batches[0],
+				qty=1, rate=30, posting_date=add_days(today(), 1))
+		self.assertSLEs(tomorrow, [
+			{"actual_qty": 1, "stock_value_difference": 30},
+		])
+
+		create_today = make_stock_entry(item_code=item_code, target=warehouse, batch_no=batches[0],
+				qty=1, rate=20)
+		self.assertSLEs(create_today, [
+			{"actual_qty": 1, "stock_value_difference": 20},
+		])
+
+		consume_today = make_stock_entry(item_code=item_code, source=warehouse, batch_no=batches[0],
+				qty=1)
+		self.assertSLEs(consume_today, [
+			{"actual_qty": -1, "stock_value_difference": -15},
+		])
+
+		consume_tomorrow = make_stock_entry(item_code=item_code, source=warehouse, batch_no=batches[0],
+				qty=2, posting_date=add_days(today(), 2))
+		self.assertSLEs(consume_tomorrow, [
+			{"stock_value_difference": -(30 + 15), "stock_value": 0, "qty_after_transaction": 0},
+		])
+
 	def test_legacy_item_valuation_stock_entry(self):
-		suffix = get_unique_suffix()
 		columns = [
 				'stock_value_difference',
 				'stock_value',
@@ -458,9 +530,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 				'qty_after_transaction',
 				'stock_queue',
 		]
-		item, warehouses, batches = setup_item_valuation_test(
-			valuation_method="FIFO", suffix=suffix, use_batchwise_valuation=0
-		)
+		item, warehouses, batches = setup_item_valuation_test(use_batchwise_valuation=0)
 
 		def check_sle_details_against_expected(sle_details, expected_sle_details, detail, columns):
 			for i, (sle_vals, ex_sle_vals) in enumerate(zip(sle_details, expected_sle_details)):
@@ -581,10 +651,13 @@ def create_items():
 
 	return items
 
-def setup_item_valuation_test(valuation_method, suffix, use_batchwise_valuation=1, batches_list=['X', 'Y']):
+def setup_item_valuation_test(valuation_method="FIFO", suffix=None, use_batchwise_valuation=1, batches_list=['X', 'Y']):
 	from erpnext.stock.doctype.batch.batch import make_batch
 	from erpnext.stock.doctype.item.test_item import make_item
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+	if not suffix:
+		suffix = get_unique_suffix()
 
 	item = make_item(
 		f"IV - Test Item {valuation_method} {suffix}",
