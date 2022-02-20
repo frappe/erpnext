@@ -4,17 +4,18 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
 from frappe.model.document import Document
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 
 invoice_custom_fields = [
 	# At the top
 	{"label": "FBR POS InvoiceNumber", "fieldname": "fbr_pos_invoice_no", "fieldtype": "Data",
-		"insert_after": "stin", "read_only": 1, "no_copy": 1},
+		"insert_after": "stin", "read_only": 1, "no_copy": 1, "search_index": 1},
 	{"label": "Is FBR POS Invoice", "fieldname": "is_fbr_pos_invoice", "fieldtype": "Check",
-		"insert_after": "has_stin", "default": 1, "read_only": 1, "no_copy": 1, "depends_on": "eval:doc.has_stin && !doc.fbr_pos_invoice_no"},
+		"insert_after": "has_stin", "default": 1, "read_only": 1, "no_copy": 1, "in_standard_filter": 1,
+		"search_index": 1, "depends_on": "eval:doc.has_stin && !doc.fbr_pos_invoice_no"},
 
 	# In FBR POS Transaction Details Section
 	{"label": "FBR POSID", "fieldname": "fbr_pos_id", "fieldtype": "Int",
@@ -87,12 +88,18 @@ class FBRPOSSettings(Document):
 		if self.enable_fbr_pos:
 			setup_fbr_pos_fields()
 		else:
-			check_can_disable_fbr_pos()
-			remove_fbr_pos_fields()
+			disable_fbr_pos()
 
 
 def setup_fbr_pos_fields():
 	create_custom_fields(custom_fields_map)
+
+
+def disable_fbr_pos():
+	if can_remove_fbr_pos_fields():
+		remove_fbr_pos_fields()
+	else:
+		make_property_setter("Sales Invoice", "is_fbr_pos_invoice", "default", 0, "Check")
 
 
 def remove_fbr_pos_fields():
@@ -104,6 +111,8 @@ def remove_fbr_pos_fields():
 				frappe.delete_doc('Custom Field', custom_field_name)
 
 
-def check_can_disable_fbr_pos():
+def can_remove_fbr_pos_fields():
 	if frappe.db.get_all("Sales Invoice", {'docstatus': 1, 'is_fbr_pos_invoice': 1}, limit=1):
-		frappe.throw(_("Cannot disable FBR POS Integration because FBR POS Invoices are already submitted"))
+		return False
+	else:
+		return True

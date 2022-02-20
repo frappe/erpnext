@@ -12,20 +12,36 @@ def validate_fbr_pos_invoice(invoice):
 	if not invoice.meta.has_field('is_fbr_pos_invoice'):
 		return
 
-	# If no taxes applied, not an FBR POS
-	if not cint(invoice.get('has_stin')):
-		invoice.is_fbr_pos_invoice = 0
-
 	# Reset values for draft
 	if invoice.docstatus == 0:
-		invoice.fbr_pos_invoice_no = None
-		invoice.fbr_pos_qrcode = None
-		invoice.fbr_pos_json_data = None
+		reset_values_for_draft_invoice(invoice)
+
+	# Determine if FBR POS Invoice
+	invoice.is_fbr_pos_invoice = determine_is_fbr_pos(invoice)
+
+	# Calculate FBR POS Invoice and Item Values
+	if cint(invoice.get('is_fbr_pos_invoice')):
+		calculate_fbr_pos_values(invoice)
+
+	# If no FBR POS Items, not an FBR POS
+	if not invoice.get('fbr_pos_items'):
+		invoice.is_fbr_pos_invoice = 0
 
 	if cint(invoice.get('is_fbr_pos_invoice')):
+		# Validate FBR POS
 		validate_is_fbr_pos(invoice)
 	else:
-		validate_not_fbr_pos(invoice)
+		# Not an FBR POS Reset Values
+		reset_values_for_not_fbr_pos(invoice)
+
+
+def determine_is_fbr_pos(invoice):
+	enable_fbr_pos = cint(frappe.get_cached_value("FBR POS Settings", None, "enable_fbr_pos"))
+
+	if enable_fbr_pos and cint(invoice.get('has_stin')):
+		return 1
+	else:
+		return 0
 
 
 def validate_is_fbr_pos(invoice):
@@ -35,10 +51,14 @@ def validate_is_fbr_pos(invoice):
 	if not invoice.get('fbr_pos_id'):
 		invoice.fbr_pos_id = frappe.get_cached_value("FBR POS Settings", None, "default_fbr_pos_id")
 
-	calculate_fbr_pos_values(invoice)
+
+def reset_values_for_draft_invoice(invoice):
+	invoice.fbr_pos_invoice_no = None
+	invoice.fbr_pos_qrcode = None
+	invoice.fbr_pos_json_data = None
 
 
-def validate_not_fbr_pos(invoice):
+def reset_values_for_not_fbr_pos(invoice):
 	invoice.fbr_pos_invoice_no = None
 	invoice.fbr_pos_id = None
 	invoice.fbr_pos_qrcode = None
@@ -57,36 +77,36 @@ def validate_not_fbr_pos(invoice):
 def before_cancel_fbr_pos_invoice(invoice):
 	if not invoice.meta.has_field('is_fbr_pos_invoice'):
 		return
-	if cint(invoice.get('is_fbr_pos_invoice')):
-		frappe.throw(_("Cannot cancel an FBR POS Invoice. Please make a Credit Note instead."))
-
-
-def before_submit_fbr_pos_invoice(invoice):
-	if not invoice.meta.has_field('is_fbr_pos_invoice'):
-		return
-
-	if cint(invoice.get('is_fbr_pos_invoice')) and not invoice.get('fbr_pos_items'):
-		invoice.is_fbr_pos_invoice = 0
-		validate_not_fbr_pos(invoice)
+	if cint(invoice.get('is_fbr_pos_invoice')) and invoice.get('fbr_pos_invoice_no'):
+		frappe.throw(_("Cannot cancel FBR POS Invoice because it is already posted. Please make a Credit Note instead."))
 
 
 def on_submit_fbr_pos_invoice(invoice):
-	if not invoice.meta.has_field('is_fbr_pos_invoice'):
+	ignore_connection_error = cint(frappe.get_cached_value("FBR POS Settings", None, "ignore_connection_error_on_submit"))
+	post_fbr_pos_invoice(invoice, ignore_connection_error=ignore_connection_error)
+
+
+# called by scheduler
+def post_fbr_pos_invoices_without_number():
+	enable_fbr_pos = frappe.db.get_single_value("FBR POS Settings", "enable_fbr_pos")
+	if not cint(enable_fbr_pos):
 		return
-	if not cint(invoice.get('is_fbr_pos_invoice')):
-		return
 
-	invoice_data = get_invoice_data(invoice)
-	json_data = json.dumps(invoice_data)
+	failed_invoices = frappe.db.sql_list("""
+		select name
+		from `tabSales Invoice`
+		where docstatus = 1 and is_fbr_pos_invoice = 1 and (fbr_pos_invoice_no = '' or fbr_pos_invoice_no is null)
+		order by posting_date, posting_time, creation
+		limit 100
+		for update
+	""")
 
-	invoice_number = push_invoice_data(invoice_data)
-	qrcode_svg = get_qrcode_svg(invoice_number)
-
-	invoice.db_set({
-		'fbr_pos_invoice_no': invoice_number,
-		'fbr_pos_qrcode': qrcode_svg,
-		'fbr_pos_json_data': json_data,
-	})
+	for name in failed_invoices:
+		invoice = frappe.get_doc("Sales Invoice", name)
+		try:
+			post_fbr_pos_invoice(invoice)
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), get_error_title(invoice.name))
 
 
 def calculate_fbr_pos_values(invoice):
@@ -347,7 +367,30 @@ def get_item_tax_details(item, invoice, account):
 	return tax_row[0]
 
 
-def push_invoice_data(data):
+def post_fbr_pos_invoice(invoice, ignore_connection_error=False):
+	if not invoice.meta.has_field('is_fbr_pos_invoice'):
+		return
+	if not cint(invoice.get('is_fbr_pos_invoice')):
+		return
+
+	invoice_data = get_invoice_data(invoice)
+	json_data = json.dumps(invoice_data)
+
+	invoice_number = push_invoice_data(invoice_data, ignore_connection_error=ignore_connection_error)
+
+	if invoice_number:
+		qrcode_svg = get_qrcode_svg(invoice_number)
+
+		invoice.db_set({
+			'fbr_pos_invoice_no': invoice_number,
+			'fbr_pos_qrcode': qrcode_svg,
+			'fbr_pos_json_data': json_data,
+		})
+
+		invoice.notify_update()
+
+
+def push_invoice_data(data, ignore_connection_error=False):
 	invoice_number = None
 
 	fbr_pos_settings = frappe.get_cached_doc("FBR POS Settings", None)
@@ -362,7 +405,7 @@ def push_invoice_data(data):
 		headers["Authorization"] = "Bearer {0}".format(auth_token)
 
 	try:
-		r = requests.post(url, json=data, headers=headers)
+		r = requests.post(url, json=data, headers=headers, timeout=10)
 		r.raise_for_status()
 
 		response_json = r.json()
@@ -385,10 +428,29 @@ def push_invoice_data(data):
 		if not invoice_number or invoice_number == 'Not Available':
 			frappe.throw(_("FBR POS Invoice Number was not provided by <b>FBR POS Service</b>"))
 
-	except requests.exceptions.ConnectionError:
-		frappe.throw(_("Could not connect to <b>FBR POS Service</b> at {0}").format(url))
+	except requests.exceptions.ConnectionError as err:
+		if ignore_connection_error:
+			frappe.log_error(frappe.get_traceback(), get_error_title(data.get('USIN')))
+		else:
+			frappe.throw(_("Could not connect to <b>FBR POS Service</b>:<br>{0}").format(err))
+
+	except requests.exceptions.Timeout as err:
+		if ignore_connection_error:
+			frappe.log_error(frappe.get_traceback(), get_error_title(data.get('USIN')))
+		else:
+			frappe.throw(_("Connection to <b>FBR POS Service</b> timed out:<br>{0}").format(err))
+
 	except requests.exceptions.HTTPError as err:
-		frappe.throw(_("An HTTP error occurred while connecting to the <b>FBR POS Service</b>:<br>{0}").format(err))
+		if ignore_connection_error:
+			frappe.log_error(frappe.get_traceback(), get_error_title(data.get('USIN')))
+		else:
+			frappe.throw(_("An HTTP error occurred while connecting to the <b>FBR POS Service</b>:<br>{0}").format(err))
+
+	except requests.exceptions.RequestException as err:
+		if ignore_connection_error:
+			frappe.log_error(frappe.get_traceback(), get_error_title(data.get('USIN')))
+		else:
+			frappe.throw(_("Request to <b>FBR POS Service</b> failed:<br>{0}").format(err))
 
 	return invoice_number
 
@@ -404,3 +466,7 @@ def get_qrcode_svg(invoice_number):
 		stream.close()
 
 	return svg
+
+
+def get_error_title(invoice_name):
+	return "FBR POS Invoice {0} Failed".format(invoice_name)

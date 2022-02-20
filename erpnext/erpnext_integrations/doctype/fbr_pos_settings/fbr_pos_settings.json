@@ -5,9 +5,12 @@
  "engine": "InnoDB",
  "field_order": [
   "enable_fbr_pos",
+  "section_break_2",
+  "default_fbr_pos_id",
+  "ignore_connection_error_on_submit",
+  "column_break_3",
   "post_invoice_data_endpoint",
-  "post_invoice_auth_token",
-  "default_fbr_pos_id"
+  "post_invoice_auth_token"
  ],
  "fields": [
   {
@@ -30,10 +33,25 @@
    "fieldname": "post_invoice_auth_token",
    "fieldtype": "Small Text",
    "label": "Authorization Token"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "1",
+   "description": "If a connection error, invoice will be submitted without an FBR POS Invoice Number. The system will attempt to post invoice data and assign invoice number for failed FBR POS Invoices every hour.",
+   "fieldname": "ignore_connection_error_on_submit",
+   "fieldtype": "Check",
+   "label": "Ignore Connection Error to FBR POS Service on Submit"
   }
  ],
  "issingle": 1,
- "modified": "2022-02-20 16:55:23.712787",
+ "modified": "2022-02-21 00:41:02.675754",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "FBR POS Settings",

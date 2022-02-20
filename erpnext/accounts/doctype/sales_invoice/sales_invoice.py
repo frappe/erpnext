@@ -25,7 +25,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty
 	validate_loyalty_points
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.erpnext_integrations.fbr_pos_integration import validate_fbr_pos_invoice, before_cancel_fbr_pos_invoice,\
-	on_submit_fbr_pos_invoice, before_submit_fbr_pos_invoice
+	on_submit_fbr_pos_invoice
 
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
 
@@ -118,9 +118,6 @@ class SalesInvoice(SellingController):
 
 	def on_update(self):
 		self.set_paid_amount()
-
-	def before_submit(self):
-		before_submit_fbr_pos_invoice(self)
 
 	def on_submit(self):
 		self.validate_pos_paid_amount()
