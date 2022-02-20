@@ -487,6 +487,9 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 	if not previous_sle.get("posting_time"):
 		previous_sle["posting_time"] = "00:00"
 
+	if previous_sle.get("voucher_no"):
+		conditions += " and voucher_no != '"+previous_sle.get('voucher_no')+"' "
+
 	if operator in (">", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"
 
