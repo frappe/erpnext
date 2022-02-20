@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import Criterion, Column
-from frappe.utils import cstr, get_link_to_form, getdate, now_datetime, nowdate
+from frappe.utils import cstr, get_link_to_form, get_datetime, getdate, now_datetime, nowdate
 
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
@@ -172,10 +172,33 @@ def get_shift_type_timing(shift_types):
 
 
 def get_shift_for_time(shifts, for_timestamp):
+	valid_shifts = []
 	for entry in shifts:
 		shift_details = get_shift_details(entry.shift_type, for_date=for_timestamp.date())
-		if shift_details.actual_start <= for_timestamp <= shift_details.actual_end:
-			return shift_details
+
+		if get_datetime(shift_details.actual_start) <= get_datetime(for_timestamp) <= get_datetime(shift_details.actual_end):
+			valid_shifts.append(shift_details)
+
+	valid_shifts.sort(key=lambda x: x['actual_start'])
+
+	if len(valid_shifts) > 1:
+		for i in range(len(valid_shifts) - 1):
+			# comparing 2 consecutive shifts and adjusting start and end times
+			# if they are overlapping within grace period
+			curr_shift = valid_shifts[i]
+			next_shift = valid_shifts[i + 1]
+
+			if curr_shift and next_shift:
+				next_shift.actual_start = curr_shift.end_datetime if next_shift.actual_start < curr_shift.end_datetime else next_shift.actual_start
+				curr_shift.actual_end = next_shift.actual_start if curr_shift.actual_end > next_shift.actual_start else curr_shift.actual_end
+
+			valid_shifts[i] = curr_shift
+			valid_shifts[i + 1] = next_shift
+
+		exact_shift = get_exact_shift(valid_shifts, for_timestamp)
+		return exact_shift and exact_shift[2]
+
+	return valid_shifts and valid_shifts[0]
 
 
 def get_shifts_for_date(employee, for_timestamp):
@@ -251,7 +274,7 @@ def get_prev_or_next_shift(employee, for_timestamp, consider_default_shift, defa
 		sort_order = 'desc' if next_shift_direction == 'reverse' else 'asc'
 		dates = frappe.db.get_all('Shift Assignment',
 			['start_date', 'end_date'],
-			{'employee':employee, 'start_date': (direction, for_timestamp.date()), 'docstatus': '1', "status": "Active"},
+			{'employee': employee, 'start_date': (direction, for_timestamp.date()), 'docstatus': 1, 'status': 'Active'},
 			as_list=True,
 			limit=MAX_DAYS, order_by='start_date ' + sort_order)
 
@@ -259,7 +282,7 @@ def get_prev_or_next_shift(employee, for_timestamp, consider_default_shift, defa
 			for date in dates:
 				if date[1] and date[1] < for_timestamp.date():
 					continue
-				shift_details = get_employee_shift(employee, datetime.combine(date, for_timestamp.time()), consider_default_shift, None)
+				shift_details = get_employee_shift(employee, datetime.combine(date[0], for_timestamp.time()), consider_default_shift, None)
 				if shift_details:
 					break
 
@@ -320,11 +343,15 @@ def get_actual_start_end_datetime_of_shift(employee, for_datetime, consider_defa
 		None is returned if the timestamp is outside any actual shift timings.
 		Shift Details is also returned(current/upcoming i.e. if timestamp not in any actual shift then details of next shift returned)
 	"""
-	actual_shift_start = actual_shift_end = shift_details = None
 	shift_timings_as_per_timestamp = get_employee_shift_timings(employee, for_datetime, consider_default_shift)
+	return get_exact_shift(shift_timings_as_per_timestamp, for_datetime)
+
+
+def get_exact_shift(shifts, for_datetime):
+	actual_shift_start = actual_shift_end = shift_details = None
 	timestamp_list = []
 
-	for shift in shift_timings_as_per_timestamp:
+	for shift in shifts:
 		if shift:
 			timestamp_list.extend([shift.actual_start, shift.actual_end])
 		else:
@@ -337,11 +364,11 @@ def get_actual_start_end_datetime_of_shift(employee, for_datetime, consider_defa
 			break
 
 	if timestamp_index and timestamp_index%2 == 1:
-		shift_details = shift_timings_as_per_timestamp[int((timestamp_index-1)/2)]
+		shift_details = shifts[int((timestamp_index-1)/2)]
 		actual_shift_start = shift_details.actual_start
 		actual_shift_end = shift_details.actual_end
 	elif timestamp_index:
-		shift_details = shift_timings_as_per_timestamp[int(timestamp_index/2)]
+		shift_details = shifts[int(timestamp_index/2)]
 
 	return actual_shift_start, actual_shift_end, shift_details
 
