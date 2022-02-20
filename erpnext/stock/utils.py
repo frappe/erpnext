@@ -261,7 +261,7 @@ def get_valuation_method(item_code):
 	"""get valuation method from item or default"""
 	val_method = frappe.db.get_value('Item', item_code, 'valuation_method', cache=True)
 	if not val_method:
-		val_method = frappe.db.get_value("Stock Settings", None, "valuation_method") or "FIFO"
+		val_method = frappe.db.get_value("Stock Settings", None, "valuation_method", cache=True) or "FIFO"
 	return val_method
 
 def get_fifo_rate(previous_stock_queue, qty):

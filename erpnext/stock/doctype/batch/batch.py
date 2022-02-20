@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form
 from frappe.utils.data import add_days
 from frappe.utils.jinja import render_template
@@ -110,10 +111,14 @@ class Batch(Document):
 
 	def validate(self):
 		self.item_has_batch_enabled()
+		self.set_batchwise_valuation()
 
 	def item_has_batch_enabled(self):
 		if frappe.db.get_value("Item", self.item, "has_batch_no") == 0:
 			frappe.throw(_("The selected item cannot have Batch"))
+
+	def set_batchwise_valuation(self):
+		self.use_batchwise_valuation = int(can_use_batchwise_valuation(self.item))
 
 	def before_save(self):
 		has_expiry_date, shelf_life_in_days = frappe.db.get_value('Item', self.item, ['has_expiry_date', 'shelf_life_in_days'])
@@ -338,3 +343,30 @@ def get_pos_reserved_batch_qty(filters):
 
 	flt_reserved_batch_qty = flt(reserved_batch_qty[0][0])
 	return flt_reserved_batch_qty
+
+def can_use_batchwise_valuation(item_code: str) -> bool:
+	""" Check if item can use batchwise valuation.
+
+	Note: Item with existing moving average batches can't use batchwise valuation
+	until they are exhausted.
+	"""
+	from erpnext.stock.stock_ledger import get_valuation_method
+	batch = frappe.qb.DocType("Batch")
+
+	if get_valuation_method(item_code) != "Moving Average":
+		return True
+
+	batch_qty = (
+		frappe.qb
+			.from_(batch)
+			.select(Sum(batch.batch_qty))
+			.where(
+				(batch.use_batchwise_valuation == 0)
+				& (batch.item == item_code)
+			)
+		).run()
+
+	if batch_qty and batch_qty[0][0]:
+		return False
+
+	return True
