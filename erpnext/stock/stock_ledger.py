@@ -113,8 +113,7 @@ class update_entries_after(object):
 		entries_to_fix = self.get_sle_after_datetime()
 
 		for sle in entries_to_fix:
-			if sle.qty_after_transaction != None:
-				self.process_sle(sle)
+			self.process_sle(sle)
 
 		if self.exceptions:
 			self.raise_exceptions()
@@ -493,17 +492,20 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 	if operator in (">", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"
 
-	return frappe.db.sql("""select *, timestamp(posting_date, posting_time) as "timestamp" from `tabStock Ledger Entry`
-		where item_code = %%(item_code)s
-		and ifnull(is_cancelled, 'No')='No'
-		%(conditions)s
-		order by timestamp(posting_date, posting_time) %(order)s, creation %(order)s
-		%(limit)s %(for_update)s""" % {
-			"conditions": conditions,
-			"limit": limit or "",
-			"for_update": for_update and "for update" or "",
-			"order": order
-		}, previous_sle, as_dict=1, debug=debug)
+	if previous_sle.get('item_code'):
+		return frappe.db.sql("""select *, timestamp(posting_date, posting_time) as "timestamp" from `tabStock Ledger Entry`
+			where item_code = %%(item_code)s
+			and ifnull(is_cancelled, 'No')='No'
+			%(conditions)s
+			order by timestamp(posting_date, posting_time) %(order)s, creation %(order)s
+			%(limit)s %(for_update)s""" % {
+				"conditions": conditions,
+				"limit": limit or "",
+				"for_update": for_update and "for update" or "",
+				"order": order
+			}, previous_sle, as_dict=1, debug=debug)
+	else:
+		return []
 
 def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	allow_zero_rate=False, currency=None, company=None, raise_error_if_no_rate=True):
