@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import Criterion, Column
-from frappe.utils import cstr, get_link_to_form, get_datetime, getdate, now_datetime, nowdate
+from frappe.utils import cstr, get_link_to_form, get_datetime, get_time, getdate, now_datetime, nowdate
 
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
@@ -174,7 +174,7 @@ def get_shift_type_timing(shift_types):
 def get_shift_for_time(shifts, for_timestamp):
 	valid_shifts = []
 	for entry in shifts:
-		shift_details = get_shift_details(entry.shift_type, for_date=for_timestamp.date())
+		shift_details = get_shift_details(entry.shift_type, for_timestamp=for_timestamp)
 
 		if get_datetime(shift_details.actual_start) <= get_datetime(for_timestamp) <= get_datetime(shift_details.actual_end):
 			valid_shifts.append(shift_details)
@@ -245,7 +245,7 @@ def get_employee_shift(employee, for_timestamp=None, consider_default_shift=Fals
 	# if shift assignment is not found, consider default shift
 	default_shift = frappe.db.get_value('Employee', employee, 'default_shift')
 	if not shift_details and consider_default_shift:
-		shift_details = get_shift_details(default_shift, for_timestamp.date())
+		shift_details = get_shift_details(default_shift, for_timestamp)
 
 	# if its a holiday, reset
 	if shift_details and is_holiday_date(employee, shift_details):
@@ -373,7 +373,7 @@ def get_exact_shift(shifts, for_datetime):
 	return actual_shift_start, actual_shift_end, shift_details
 
 
-def get_shift_details(shift_type_name, for_date=None):
+def get_shift_details(shift_type_name, for_timestamp=None):
 	"""Returns Shift Details which contain some additional information as described below.
 	'shift_details' contains the following keys:
 	        'shift_type' - Object of DocType Shift Type,
@@ -383,21 +383,34 @@ def get_shift_details(shift_type_name, for_date=None):
 	        'actual_end' - datetime of shift end after adding 'allow_check_out_after_shift_end_time'(None is returned if this is zero)
 
 	:param shift_type_name: shift type name for which shift_details is required.
-	:param for_date: Date on which shift_details are required
+	:param for_timestamp: DateTime value on which shift_details are required
 	"""
 	if not shift_type_name:
 		return None
-	if not for_date:
-		for_date = nowdate()
-	shift_type = frappe.get_doc("Shift Type", shift_type_name)
-	start_datetime = datetime.combine(for_date, datetime.min.time()) + shift_type.start_time
-	for_date = (
-		for_date + timedelta(days=1) if shift_type.start_time > shift_type.end_time else for_date
-	)
-	end_datetime = datetime.combine(for_date, datetime.min.time()) + shift_type.end_time
-	actual_start = start_datetime - timedelta(
-		minutes=shift_type.begin_check_in_before_shift_start_time
-	)
+	if not for_timestamp:
+		for_timestamp = now_datetime()
+
+	shift_type = frappe.get_doc('Shift Type', shift_type_name)
+	shift_actual_start = shift_type.start_time - timedelta(minutes=shift_type.begin_check_in_before_shift_start_time)
+
+	if shift_type.start_time > shift_type.end_time:
+		# shift spans accross 2 different days
+		if get_time(for_timestamp.time()) >= get_time(shift_actual_start):
+			# if for_timestamp is greater than start time, its in the first day
+			start_datetime = datetime.combine(for_timestamp, datetime.min.time()) + shift_type.start_time
+			for_timestamp = for_timestamp + timedelta(days=1)
+			end_datetime = datetime.combine(for_timestamp, datetime.min.time()) + shift_type.end_time
+		elif get_time(for_timestamp.time()) < get_time(shift_actual_start):
+			# if for_timestamp is less than start time, its in the second day
+			end_datetime = datetime.combine(for_timestamp, datetime.min.time()) + shift_type.end_time
+			for_timestamp = for_timestamp + timedelta(days=-1)
+			start_datetime = datetime.combine(for_timestamp, datetime.min.time()) + shift_type.start_time
+	else:
+		# start and end times fall on the same day
+		start_datetime = datetime.combine(for_timestamp, datetime.min.time()) + shift_type.start_time
+		end_datetime = datetime.combine(for_timestamp, datetime.min.time()) + shift_type.end_time
+
+	actual_start = start_datetime - timedelta(minutes=shift_type.begin_check_in_before_shift_start_time)
 	actual_end = end_datetime + timedelta(minutes=shift_type.allow_check_out_after_shift_end_time)
 
 	return frappe._dict({
