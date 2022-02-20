@@ -348,14 +348,21 @@ def get_item_tax_details(item, invoice, account):
 
 
 def push_invoice_data(data):
-	url = frappe.get_cached_value("FBR POS Settings", None, "post_invoice_data_endpoint")
+	invoice_number = None
+
+	fbr_pos_settings = frappe.get_cached_doc("FBR POS Settings", None)
+
+	url = fbr_pos_settings.post_invoice_data_endpoint
 	if not url:
 		frappe.throw(_("Please set 'Post Invoice Data URL' in FBR POS Settings"))
 
-	invoice_number = None
+	headers = {"Content-Type": "application/json"}
+	auth_token = fbr_pos_settings.post_invoice_auth_token
+	if auth_token:
+		headers["Authorization"] = "Bearer {0}".format(auth_token)
 
 	try:
-		r = requests.post(url, json=data)
+		r = requests.post(url, json=data, headers=headers)
 		r.raise_for_status()
 
 		response_json = r.json()

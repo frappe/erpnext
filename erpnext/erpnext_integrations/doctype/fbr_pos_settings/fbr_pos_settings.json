@@ -6,6 +6,7 @@
  "field_order": [
   "enable_fbr_pos",
   "post_invoice_data_endpoint",
+  "post_invoice_auth_token",
   "default_fbr_pos_id"
  ],
  "fields": [
@@ -24,10 +25,15 @@
    "fieldname": "enable_fbr_pos",
    "fieldtype": "Check",
    "label": "Enable FBR POS Integration"
+  },
+  {
+   "fieldname": "post_invoice_auth_token",
+   "fieldtype": "Small Text",
+   "label": "Authorization Token"
   }
  ],
  "issingle": 1,
- "modified": "2022-01-11 17:28:53.549329",
+ "modified": "2022-02-20 16:55:23.712787",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "FBR POS Settings",
