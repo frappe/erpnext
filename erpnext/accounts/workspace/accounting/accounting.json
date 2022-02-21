@@ -455,16 +455,16 @@
    "type": "Link"
   },
   {
-    "dependencies": "GL Entry",
-    "hidden": 0,
-    "is_query_report": 1,
-    "label": "KSA VAT Report",
-    "link_to": "KSA VAT",
-    "link_type": "Report",
-    "onboard": 0,
-    "only_for": "Saudi Arabia",
-    "type": "Link"
-   },
+   "dependencies": "GL Entry",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "KSA VAT Report",
+   "link_to": "KSA VAT",
+   "link_type": "Report",
+   "onboard": 0,
+   "only_for": "Saudi Arabia",
+   "type": "Link"
+  },
   {
    "hidden": 0,
    "is_query_report": 1,
@@ -1055,15 +1055,15 @@
    "type": "Link"
   },
   {
-    "hidden": 0,
-    "is_query_report": 0,
-    "label": "KSA VAT Setting",
-    "link_to": "KSA VAT Setting",
-    "link_type": "DocType",
-    "onboard": 0,
-    "only_for": "Saudi Arabia",
-    "type": "Link"
-   },
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "KSA VAT Setting",
+   "link_to": "KSA VAT Setting",
+   "link_type": "DocType",
+   "onboard": 0,
+   "only_for": "Saudi Arabia",
+   "type": "Link"
+  },
   {
    "hidden": 0,
    "is_query_report": 0,
@@ -1110,9 +1110,27 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Gross Profit Alternate UOM",
+   "link_to": "Gross Profit Alternate UOM",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Item-wise Sales Register Alternate UOM",
+   "link_to": "Item-wise Sales Register Alternate UOM",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2021-11-10 10:06:37.756305",
+ "modified": "2022-02-21 12:55:17.768043",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
