@@ -176,9 +176,12 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 			}
 			if(doc.status != "Closed") {
 				if (doc.status != "On Hold") {
+					cur_frm.add_custom_button(__('Subcontracting Order'), this.make_subcontracting_order, __('Create'));
+
 					if(flt(doc.per_received) < 100 && allow_receipt) {
 						cur_frm.add_custom_button(__('Purchase Receipt'), this.make_purchase_receipt, __('Create'));
 					}
+
 					if(flt(doc.per_billed) < 100)
 						cur_frm.add_custom_button(__('Purchase Invoice'),
 							this.make_purchase_invoice, __('Create'));
@@ -399,6 +402,14 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 		frappe.model.open_mapped_doc({
 			method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
 			frm: cur_frm
+		})
+	}
+
+	make_subcontracting_order() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.buying.doctype.purchase_order.purchase_order.make_subcontracting_order",
+			frm: cur_frm,
+			freeze_message: __("Creating Subcontracting Order ...")
 		})
 	}
 
