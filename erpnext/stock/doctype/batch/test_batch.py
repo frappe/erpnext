@@ -6,6 +6,7 @@ import json
 import frappe
 from frappe.exceptions import ValidationError
 from frappe.utils import cint, flt
+from frappe.utils.data import add_to_date, getdate
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.stock.doctype.batch.batch import UnableToSelectBatchError, get_batch_no, get_batch_qty
@@ -385,6 +386,25 @@ class TestBatch(ERPNextTestCase):
 
 		make_stock_entry(item_code=item_code, qty=20, rate=20, target=warehouse, batch_no=batch_no)
 		assertValuation((20 * 20 + 10 * 25) / (10 + 20))
+
+
+	def test_update_batch_properties(self):
+		item_code = "_TestBatchWiseVal"
+		self.make_batch_item(item_code)
+
+		se = make_stock_entry(item_code=item_code, qty=100, rate=10, target="_Test Warehouse - _TC")
+		batch_no = se.items[0].batch_no
+		batch = frappe.get_doc("Batch", batch_no)
+
+		expiry_date = add_to_date(batch.manufacturing_date, days=30)
+
+		batch.expiry_date = expiry_date
+		batch.save()
+
+		batch.reload()
+
+		self.assertEqual(getdate(batch.expiry_date), getdate(expiry_date))
+
 
 
 def create_batch(item_code, rate, create_item_price_for_batch):
