@@ -790,6 +790,15 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			};
 		});
 
+		this.frm.set_query("subcontracting_order", function() {
+			return {
+				"filters": {
+					"docstatus": 1,
+					"company": me.frm.doc.company
+				}
+			};
+		});
+
 		if(me.frm.doc.company && erpnext.is_perpetual_inventory_enabled(me.frm.doc.company)) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
 		}
