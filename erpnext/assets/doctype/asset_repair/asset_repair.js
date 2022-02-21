@@ -77,7 +77,7 @@ frappe.ui.form.on('Asset Repair Consumed Item', {
 			'qty': item.consumed_quantity,
 			'serial_no': item.serial_no,
 			'company': frm.doc.company
-		}
+		};
 
 		frappe.call({
 			method: 'erpnext.stock.utils.get_incoming_rate',
