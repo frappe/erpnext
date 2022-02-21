@@ -23,3 +23,6 @@ b147b85e6ac19a9220cd1e2958a6ebd99373283a
 
 # removing six compatibility layer
 8fe5feb6a4372bf5f2dfaf65fca41bbcc25c8ce7
+
+# Change fieldtype of "Is Standard" in Report 
+decc322b88bb84be49cf3d15b879207e66935512
