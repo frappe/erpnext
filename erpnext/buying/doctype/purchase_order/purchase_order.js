@@ -107,7 +107,6 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 		this.frm.custom_make_buttons = {
 			'Purchase Receipt': 'Purchase Receipt',
 			'Purchase Invoice': 'Purchase Invoice',
-			'Stock Entry': 'Material to Supplier',
 			'Payment Entry': 'Payment',
 		}
 
@@ -179,10 +178,6 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 				if (doc.status != "On Hold") {
 					if(flt(doc.per_received) < 100 && allow_receipt) {
 						cur_frm.add_custom_button(__('Purchase Receipt'), this.make_purchase_receipt, __('Create'));
-						if(doc.is_subcontracted==="Yes" && me.has_unsupplied_items()) {
-							cur_frm.add_custom_button(__('Material to Supplier'),
-								function() { me.make_stock_entry(); }, __("Transfer"));
-						}
 					}
 					if(flt(doc.per_billed) < 100)
 						cur_frm.add_custom_button(__('Purchase Invoice'),
