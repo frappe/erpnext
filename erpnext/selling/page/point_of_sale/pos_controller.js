@@ -248,7 +248,7 @@ erpnext.PointOfSale.Controller = class {
 
 				numpad_event: (value, action) => this.update_item_field(value, action),
 
-				checkout: () => this.payment.checkout(),
+				checkout: () => this.save_and_checkout(),
 
 				edit_cart: () => this.payment.edit_cart(),
 
@@ -630,18 +630,24 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	async check_stock_availability(item_row, qty_needed, warehouse) {
-		const available_qty = (await this.get_available_stock(item_row.item_code, warehouse)).message;
+		const resp = (await this.get_available_stock(item_row.item_code, warehouse)).message;
+		const available_qty = resp[0];
+		const is_stock_item = resp[1];
 
 		frappe.dom.unfreeze();
 		const bold_item_code = item_row.item_code.bold();
 		const bold_warehouse = warehouse.bold();
 		const bold_available_qty = available_qty.toString().bold()
 		if (!(available_qty > 0)) {
-			frappe.model.clear_doc(item_row.doctype, item_row.name);
-			frappe.throw({
-				title: __("Not Available"),
-				message: __('Item Code: {0} is not available under warehouse {1}.', [bold_item_code, bold_warehouse])
-			})
+			if (is_stock_item) {
+				frappe.model.clear_doc(item_row.doctype, item_row.name);
+				frappe.throw({
+					title: __("Not Available"),
+					message: __('Item Code: {0} is not available under warehouse {1}.', [bold_item_code, bold_warehouse])
+				});
+			} else {
+				return;
+			}
 		} else if (available_qty < qty_needed) {
 			frappe.throw({
 				message: __('Stock quantity not enough for Item Code: {0} under warehouse {1}. Available quantity {2}.', [bold_item_code, bold_warehouse, bold_available_qty]),
@@ -675,8 +681,8 @@ erpnext.PointOfSale.Controller = class {
 			},
 			callback(res) {
 				if (!me.item_stock_map[item_code])
-					me.item_stock_map[item_code] = {}
-				me.item_stock_map[item_code][warehouse] = res.message;
+					me.item_stock_map[item_code] = {};
+				me.item_stock_map[item_code][warehouse] = res.message[0];
 			}
 		});
 	}
@@ -706,5 +712,10 @@ erpnext.PointOfSale.Controller = class {
 				frappe.dom.unfreeze();
 			})
 			.catch(e => console.log(e));
+	}
+
+	async save_and_checkout() {
+		this.frm.is_dirty() && await this.frm.save();
+		this.payment.checkout();
 	}
 };

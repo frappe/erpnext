@@ -408,6 +408,22 @@ class AccountsController(TransactionBase):
 								if item_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
 
+							elif (
+								ret.get("pricing_rule_removed")
+								and value is not None
+								and fieldname
+								in [
+									"discount_percentage",
+									"discount_amount",
+									"rate",
+									"margin_rate_or_amount",
+									"margin_type",
+									"remove_free_item",
+								]
+							):
+								# reset pricing rule fields if pricing_rule_removed
+								item.set(fieldname, value)
+
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
 						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
 
@@ -1319,6 +1335,9 @@ class AccountsController(TransactionBase):
 				payment_schedule['discount_type'] = schedule.discount_type
 				payment_schedule['discount'] = schedule.discount
 
+			if not schedule.invoice_portion:
+				payment_schedule['payment_amount'] = schedule.payment_amount
+
 			self.append("payment_schedule", payment_schedule)
 
 	def set_due_date(self):
@@ -1937,7 +1956,8 @@ def update_bin_on_delete(row, doctype):
 
 		qty_dict["ordered_qty"] = get_ordered_qty(row.item_code, row.warehouse)
 
-	update_bin_qty(row.item_code, row.warehouse, qty_dict)
+	if row.warehouse:
+		update_bin_qty(row.item_code, row.warehouse, qty_dict)
 
 def validate_and_delete_children(parent, data):
 	deleted_children = []

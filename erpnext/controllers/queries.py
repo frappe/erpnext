@@ -740,6 +740,7 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 
 	item_doc = frappe.get_cached_doc('Item', filters.get('item_code'))
 	item_group = filters.get('item_group')
+	company = filters.get('company')
 	taxes = item_doc.taxes or []
 
 	while item_group:
@@ -748,7 +749,7 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 		item_group = item_group_doc.parent_item_group
 
 	if not taxes:
-		return frappe.db.sql(""" SELECT name FROM `tabItem Tax Template` """)
+		return frappe.get_all('Item Tax Template', filters={'disabled': 0, 'company': company}, as_list=True)
 	else:
 		valid_from = filters.get('valid_from')
 		valid_from = valid_from[1] if isinstance(valid_from, list) else valid_from
@@ -757,7 +758,7 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 			'item_code': filters.get('item_code'),
 			'posting_date': valid_from,
 			'tax_category': filters.get('tax_category'),
-			'company': filters.get('company')
+			'company': company
 		}
 
 		taxes = _get_item_tax_template(args, taxes, for_validate=True)

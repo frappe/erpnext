@@ -344,6 +344,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 
 	args.conversion_factor = out.conversion_factor
 	out.stock_qty = out.qty * out.conversion_factor
+	args.stock_qty = out.stock_qty
 
 	# calculate last purchase rate
 	if args.get('doctype') in purchase_doctypes:

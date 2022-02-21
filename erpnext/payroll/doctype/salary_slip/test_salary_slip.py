@@ -147,7 +147,7 @@ class TestSalarySlip(unittest.TestCase):
 		# Payroll based on attendance
 		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Attendance")
 
-		emp = make_employee("test_employee_timesheet@salary.com", company="_Test Company")
+		emp = make_employee("test_employee_timesheet@salary.com", company="_Test Company", holiday_list="Salary Slip Test Holiday List")
 		frappe.db.set_value("Employee", emp, {"relieving_date": None, "status": "Active"})
 
 		# mark attendance
@@ -731,7 +731,7 @@ def get_salary_component_account(sal_comp, company_list=None):
 			})
 			sal_comp.save()
 
-def create_account(account_name, company, parent_account):
+def create_account(account_name, company, parent_account, account_type=None):
 	company_abbr = frappe.get_cached_value('Company',  company,  'abbr')
 	account = frappe.db.get_value("Account", account_name + " - " + company_abbr)
 	if not account:
