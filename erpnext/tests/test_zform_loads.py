@@ -9,7 +9,8 @@ from frappe.desk.form.load import getdoc
 class TestFormLoads(unittest.TestCase):
 
 	def test_load(self):
-		doctypes = frappe.get_all("DocType", {"istable": 0, "issingle": 0, "is_virtual": 0}, pluck="name")
+		erpnext_modules = frappe.get_all("Module Def", filters={"app_name": "erpnext"}, pluck="name")
+		doctypes = frappe.get_all("DocType", {"istable": 0, "issingle": 0, "is_virtual": 0, "module": ("in", erpnext_modules)}, pluck="name")
 
 		for doctype in doctypes:
 			last_doc = frappe.db.get_value(doctype, {}, "name", order_by="modified desc")
