@@ -117,7 +117,10 @@ class Batch(Document):
 			frappe.throw(_("The selected item cannot have Batch"))
 
 	def set_batchwise_valuation(self):
-		self.use_batchwise_valuation = int(can_use_batchwise_valuation(self.item))
+		from erpnext.stock.stock_ledger import get_valuation_method
+
+		if self.is_new() and get_valuation_method(self.item) != "Moving Average":
+			self.use_batchwise_valuation = 1
 
 	def before_save(self):
 		has_expiry_date, shelf_life_in_days = frappe.db.get_value('Item', self.item, ['has_expiry_date', 'shelf_life_in_days'])
@@ -342,11 +345,3 @@ def get_pos_reserved_batch_qty(filters):
 
 	flt_reserved_batch_qty = flt(reserved_batch_qty[0][0])
 	return flt_reserved_batch_qty
-
-def can_use_batchwise_valuation(item_code: str) -> bool:
-	""" Check if item can use batchwise valuation.
-
-	Note: Moving average valuation method can not use batch_wise_valuation."""
-	from erpnext.stock.stock_ledger import get_valuation_method
-
-	return get_valuation_method(item_code) != "Moving Average"
