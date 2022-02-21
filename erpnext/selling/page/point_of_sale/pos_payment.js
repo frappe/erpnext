@@ -180,14 +180,6 @@ erpnext.PointOfSale.Payment = class {
 						() => frm.save(),
 						() => this.update_totals_section(frm.doc)
 					]);
-				} else {
-					frappe.run_serially([
-						() => frm.doc.ignore_pricing_rule=1,
-						() => frm.trigger('ignore_pricing_rule'),
-						() => frm.doc.ignore_pricing_rule=0,
-						() => frm.save(),
-						() => this.update_totals_section(frm.doc)
-					]);
 				}
 			}
 		});
