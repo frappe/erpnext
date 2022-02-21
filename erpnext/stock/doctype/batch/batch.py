@@ -6,7 +6,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form
 from frappe.utils.data import add_days
 from frappe.utils.jinja import render_template
@@ -347,26 +346,7 @@ def get_pos_reserved_batch_qty(filters):
 def can_use_batchwise_valuation(item_code: str) -> bool:
 	""" Check if item can use batchwise valuation.
 
-	Note: Item with existing moving average batches can't use batchwise valuation
-	until they are exhausted.
-	"""
+	Note: Moving average valuation method can not use batch_wise_valuation."""
 	from erpnext.stock.stock_ledger import get_valuation_method
-	batch = frappe.qb.DocType("Batch")
 
-	if get_valuation_method(item_code) != "Moving Average":
-		return True
-
-	batch_qty = (
-		frappe.qb
-			.from_(batch)
-			.select(Sum(batch.batch_qty))
-			.where(
-				(batch.use_batchwise_valuation == 0)
-				& (batch.item == item_code)
-			)
-		).run()
-
-	if batch_qty and batch_qty[0][0]:
-		return False
-
-	return True
+	return get_valuation_method(item_code) != "Moving Average"

@@ -665,36 +665,6 @@ class TestStockLedgerEntry(ERPNextTestCase):
 			{"actual_qty": -10, "stock_value_difference": -10*40, "stock_queue": []},
 		]))
 
-	def test_mixed_valuation_batches_moving_average(self):
-		item_code, warehouses, batches = setup_item_valuation_test(use_batchwise_valuation=0, valuation_method="Moving Average")
-		warehouse = warehouses[0]
-
-		make_stock_entry(item_code=item_code, target=warehouse, batch_no=batches[0],
-				qty=10, rate=10)
-		make_stock_entry(item_code=item_code, target=warehouse, batch_no=batches[1],
-				qty=10, rate=20)
-		make_stock_entry(item_code=item_code, target=warehouse, batch_no=batches[0],
-				qty=5, rate=15)
-
-		new1 = make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=40)
-		batches.append(new1.items[0].batch_no)
-		new2 = make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=42)
-		batches.append(new2.items[0].batch_no)
-
-		# consume old batch as per FIFO
-		make_stock_entry(item_code=item_code, source=warehouse, qty=15, batch_no=batches[0])
-		# consume new batch as per batch
-		make_stock_entry(item_code=item_code, source=warehouse, qty=10, batch_no=batches[-1])
-		# finish all old batches
-		make_stock_entry(item_code=item_code, source=warehouse, qty=10, batch_no=batches[1])
-
-		# finish all new batches
-		consume_new1 = make_stock_entry(item_code=item_code, source=warehouse, qty=10, batch_no=batches[-2])
-		self.assertSLEs(consume_new1, ([
-			{"stock_value": 0},
-		]))
-
-
 def create_repack_entry(**args):
 	args = frappe._dict(args)
 	repack = frappe.new_doc("Stock Entry")
