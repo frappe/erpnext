@@ -113,17 +113,9 @@ class ShiftType(Document):
 		if not date_of_joining:
 			date_of_joining = employee_creation.date()
 		start_date = max(getdate(self.process_attendance_after), date_of_joining)
-		actual_shift_datetime = get_actual_start_end_datetime_of_shift(
-			employee, get_datetime(self.last_sync_of_checkin), True
-		)
-		last_shift_time = (
-			actual_shift_datetime[0]
-			if actual_shift_datetime[0]
-			else get_datetime(self.last_sync_of_checkin)
-		)
-		prev_shift = get_employee_shift(
-			employee, last_shift_time.date() - timedelta(days=1), True, "reverse"
-		)
+		actual_shift_datetime = get_actual_start_end_datetime_of_shift(employee, get_datetime(self.last_sync_of_checkin), True)
+		last_shift_time = actual_shift_datetime.actual_start if actual_shift_datetime else get_datetime(self.last_sync_of_checkin)
+		prev_shift = get_employee_shift(employee, last_shift_time.date()-timedelta(days=1), True, 'reverse')
 		if prev_shift:
 			end_date = (
 				min(prev_shift.start_datetime.date(), relieving_date)

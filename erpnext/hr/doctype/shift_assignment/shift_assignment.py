@@ -14,6 +14,9 @@ from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 from erpnext.hr.utils import validate_active_employee
 
+from typing import Dict, List
+
+
 class OverlappingShiftError(frappe.ValidationError):
 	pass
 
@@ -171,8 +174,10 @@ def get_shift_type_timing(shift_types):
 	return shift_timing_map
 
 
-def get_shift_for_time(shifts, for_timestamp):
+def get_shift_for_time(shifts: List[Dict], for_timestamp: datetime) -> Dict:
+	"""Returns shift with details for given timestamp"""
 	valid_shifts = []
+
 	for entry in shifts:
 		shift_details = get_shift_details(entry.shift_type, for_timestamp=for_timestamp)
 
@@ -195,13 +200,13 @@ def get_shift_for_time(shifts, for_timestamp):
 			valid_shifts[i] = curr_shift
 			valid_shifts[i + 1] = next_shift
 
-		exact_shift = get_exact_shift(valid_shifts, for_timestamp)
-		return exact_shift and exact_shift[2]
+		return get_exact_shift(valid_shifts, for_timestamp) or {}
 
-	return valid_shifts and valid_shifts[0]
+	return (valid_shifts and valid_shifts[0]) or {}
 
 
-def get_shifts_for_date(employee, for_timestamp):
+def get_shifts_for_date(employee: str, for_timestamp: datetime) -> List[Dict[str, str]]:
+	"""Returns list of shifts with details for given date"""
 	assignment = frappe.qb.DocType('Shift Assignment')
 
 	return (
@@ -222,14 +227,14 @@ def get_shifts_for_date(employee, for_timestamp):
 	).run(as_dict=True)
 
 
-def get_shift_for_timestamp(employee, for_timestamp):
+def get_shift_for_timestamp(employee: str, for_timestamp: datetime) -> Dict:
 	shifts = get_shifts_for_date(employee, for_timestamp)
 	if shifts:
 		return get_shift_for_time(shifts, for_timestamp)
-	return None
+	return {}
 
 
-def get_employee_shift(employee, for_timestamp=None, consider_default_shift=False, next_shift_direction=None):
+def get_employee_shift(employee: str, for_timestamp: datetime = None, consider_default_shift: bool = False, next_shift_direction: str = None) -> Dict:
 	"""Returns a Shift Type for the given employee on the given date. (excluding the holidays)
 
 	:param employee: Employee for which shift is required.
@@ -251,16 +256,18 @@ def get_employee_shift(employee, for_timestamp=None, consider_default_shift=Fals
 	if shift_details and is_holiday_date(employee, shift_details):
 		shift_details = None
 
-	# if no shift is found, find next or prev shift based on direction
+	# if no shift is found, find next or prev shift assignment based on direction
 	if not shift_details and next_shift_direction:
 		shift_details = get_prev_or_next_shift(employee, for_timestamp, consider_default_shift, default_shift, next_shift_direction)
 
-	return shift_details
+	return shift_details or {}
 
 
-def get_prev_or_next_shift(employee, for_timestamp, consider_default_shift, default_shift, next_shift_direction):
+def get_prev_or_next_shift(employee: str, for_timestamp: datetime, consider_default_shift: bool,
+	default_shift: str, next_shift_direction: str) -> Dict:
+	"""Returns a dict of shift details for the next or prev shift based on the next_shift_direction"""
 	MAX_DAYS = 366
-	shift_details = None
+	shift_details = {}
 
 	if consider_default_shift and default_shift:
 		direction = -1 if next_shift_direction == 'reverse' else 1
@@ -286,10 +293,10 @@ def get_prev_or_next_shift(employee, for_timestamp, consider_default_shift, defa
 				if shift_details:
 					break
 
-	return shift_details
+	return shift_details or {}
 
 
-def is_holiday_date(employee, shift_details):
+def is_holiday_date(employee: str, shift_details: Dict) -> bool:
 	holiday_list_name = frappe.db.get_value('Shift Type', shift_details.shift_type.name, 'holiday_list')
 
 	if not holiday_list_name:
@@ -298,7 +305,7 @@ def is_holiday_date(employee, shift_details):
 	return holiday_list_name and is_holiday(holiday_list_name, shift_details.start_datetime.date())
 
 
-def get_employee_shift_timings(employee, for_timestamp=None, consider_default_shift=False):
+def get_employee_shift_timings(employee: str, for_timestamp: datetime = None, consider_default_shift: bool = False) -> List[Dict]:
 	"""Returns previous shift, current/upcoming shift, next_shift for the given timestamp and employee"""
 	if for_timestamp is None:
 		for_timestamp = now_datetime()
@@ -330,18 +337,26 @@ def get_employee_shift_timings(employee, for_timestamp=None, consider_default_sh
 	return prev_shift, curr_shift, next_shift
 
 
-def get_actual_start_end_datetime_of_shift(employee, for_datetime, consider_default_shift=False):
-	"""Takes a datetime and returns the 'actual' start datetime and end datetime of the shift in which the timestamp belongs.
-		Here 'actual' means - taking into account the "begin_check_in_before_shift_start_time" and "allow_check_out_after_shift_end_time".
-		None is returned if the timestamp is outside any actual shift timings.
-		Shift Details are also returned(current/upcoming i.e. if timestamp not in any actual shift then details of next shift returned)
+def get_actual_start_end_datetime_of_shift(employee: str, for_timestamp: datetime, consider_default_shift: bool = False) -> Dict:
 	"""
-	shift_timings_as_per_timestamp = get_employee_shift_timings(employee, for_datetime, consider_default_shift)
-	return get_exact_shift(shift_timings_as_per_timestamp, for_datetime)
+	Params:
+		employee (str): Employee name
+		for_timestamp (datetime, optional): Datetime value of checkin, if not provided considers current datetime
+		consider_default_shift (bool, optional): Flag (defaults to False) to specify whether to consider
+			default shift in employee master if no shift assignment is found
+
+	Returns:
+		dict: Dict containing shift details with actual_start and actual_end datetime values
+			Here 'actual' means taking into account the "begin_check_in_before_shift_start_time" and "allow_check_out_after_shift_end_time".
+			Empty Dict is returned if the timestamp is outside any actual shift timings.
+	"""
+	shift_timings_as_per_timestamp = get_employee_shift_timings(employee, for_timestamp, consider_default_shift)
+	return get_exact_shift(shift_timings_as_per_timestamp, for_timestamp)
 
 
-def get_exact_shift(shifts, for_datetime):
-	actual_shift_start = actual_shift_end = shift_details = None
+def get_exact_shift(shifts: List, for_timestamp: datetime) -> Dict:
+	"""Returns the shift details (dict) for the exact shift in which the 'for_timestamp' value falls among multiple shifts"""
+	shift_details = dict()
 	timestamp_list = []
 
 	for shift in shifts:
@@ -355,9 +370,9 @@ def get_exact_shift(shifts, for_datetime):
 		if not timestamp:
 			continue
 
-		if for_datetime < timestamp:
+		if for_timestamp < timestamp:
 			timestamp_index = index
-		elif for_datetime == timestamp:
+		elif for_timestamp == timestamp:
 			# on timestamp boundary
 			if index%2 == 1:
 				timestamp_index = index
@@ -369,29 +384,28 @@ def get_exact_shift(shifts, for_datetime):
 
 	if timestamp_index and timestamp_index%2 == 1:
 		shift_details = shifts[int((timestamp_index-1)/2)]
-		actual_shift_start = shift_details.actual_start
-		actual_shift_end = shift_details.actual_end
-	elif timestamp_index:
-		shift_details = shifts[int(timestamp_index/2)]
 
-	return actual_shift_start, actual_shift_end, shift_details
+	return shift_details
 
 
-def get_shift_details(shift_type_name, for_timestamp=None):
-	"""Returns Shift Details which contain some additional information as described below.
-	'shift_details' contains the following keys:
-	        'shift_type' - Object of DocType Shift Type,
-	        'start_datetime' - Date and Time of shift start on given date,
-	        'end_datetime' - Date and Time of shift end on given date,
-	        'actual_start' - datetime of shift start after adding 'begin_check_in_before_shift_start_time',
-	        'actual_end' - datetime of shift end after adding 'allow_check_out_after_shift_end_time'(None is returned if this is zero)
+def get_shift_details(shift_type_name: str, for_timestamp: datetime = None) -> Dict:
+	"""
+	Params:
+		shift_type_name (str): shift type name for which shift_details are required.
+		for_timestamp (datetime, optional): Datetime value of checkin, if not provided considers current datetime
 
-	:param shift_type_name: shift type name for which shift_details is required.
-	:param for_timestamp: DateTime value on which shift_details are required
+	Returns:
+		dict: Dict containing shift details with the following data:
+			'shift_type' - Object of DocType Shift Type,
+			'start_datetime' - datetime of shift start on given timestamp,
+			'end_datetime' - datetime of shift end on given timestamp,
+			'actual_start' - datetime of shift start after adding 'begin_check_in_before_shift_start_time',
+			'actual_end' - datetime of shift end after adding 'allow_check_out_after_shift_end_time' (None is returned if this is zero)
 	"""
 	if not shift_type_name:
-		return None
-	if not for_timestamp:
+		return {}
+
+	if for_timestamp is None:
 		for_timestamp = now_datetime()
 
 	shift_type = frappe.get_doc('Shift Type', shift_type_name)
@@ -400,17 +414,18 @@ def get_shift_details(shift_type_name, for_timestamp=None):
 	if shift_type.start_time > shift_type.end_time:
 		# shift spans accross 2 different days
 		if get_time(for_timestamp.time()) >= get_time(shift_actual_start):
-			# if for_timestamp is greater than start time, its in the first day
+			# if for_timestamp is greater than start time, it's within the first day
 			start_datetime = datetime.combine(for_timestamp, datetime.min.time()) + shift_type.start_time
 			for_timestamp = for_timestamp + timedelta(days=1)
 			end_datetime = datetime.combine(for_timestamp, datetime.min.time()) + shift_type.end_time
+
 		elif get_time(for_timestamp.time()) < get_time(shift_actual_start):
-			# if for_timestamp is less than start time, its in the second day
+			# if for_timestamp is less than start time, it's within the second day
 			end_datetime = datetime.combine(for_timestamp, datetime.min.time()) + shift_type.end_time
 			for_timestamp = for_timestamp + timedelta(days=-1)
 			start_datetime = datetime.combine(for_timestamp, datetime.min.time()) + shift_type.start_time
 	else:
-		# start and end times fall on the same day
+		# start and end timings fall on the same day
 		start_datetime = datetime.combine(for_timestamp, datetime.min.time()) + shift_type.start_time
 		end_datetime = datetime.combine(for_timestamp, datetime.min.time()) + shift_type.end_time
 
