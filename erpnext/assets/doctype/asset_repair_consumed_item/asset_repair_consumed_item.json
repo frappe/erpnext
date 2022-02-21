@@ -16,8 +16,7 @@
    "fieldname": "valuation_rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Valuation Rate",
-   "read_only": 1
+   "label": "Valuation Rate"
   },
   {
    "fieldname": "consumed_quantity",
