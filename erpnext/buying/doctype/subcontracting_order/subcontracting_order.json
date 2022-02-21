@@ -9,7 +9,8 @@
   "title",
   "naming_series",
   "amended_from",
-  "purchase_order"
+  "purchase_order",
+  "company"
  ],
  "fields": [
   {
@@ -46,12 +47,19 @@
    "fieldtype": "Link",
    "label": "Purchase Order",
    "options": "Purchase Order"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-21 21:15:06.300882",
+ "modified": "2022-02-21 21:28:44.516473",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Subcontracting Order",
