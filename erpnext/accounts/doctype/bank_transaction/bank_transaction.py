@@ -104,7 +104,6 @@ def get_total_allocated_amount(payment_entry):
 			bt.docstatus = 1""", (payment_entry.payment_document, payment_entry.payment_entry), as_dict=True)
 
 def get_paid_amount(payment_entry, currency, bank_account):
-	print(payment_entry.payment_document, "#@#@#@")
 	if payment_entry.payment_document in ["Payment Entry", "Sales Invoice", "Purchase Invoice"]:
 
 		paid_amount_field = "paid_amount"
