@@ -5,10 +5,14 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, formatdate, get_datetime, getdate, nowdate
+from frappe.utils import cint, cstr, formatdate, get_datetime, get_link_to_form, getdate, nowdate
+from frappe.query_builder import Criterion
 
 from erpnext.hr.utils import get_holiday_dates_for_employee, validate_active_employee
 
+
+class DuplicateAttendanceError(frappe.ValidationError):
+	pass
 
 class Attendance(Document):
 	def validate(self):
@@ -35,22 +39,12 @@ class Attendance(Document):
 			frappe.throw(_("Attendance date can not be less than employee's joining date"))
 
 	def validate_duplicate_record(self):
-		res = frappe.db.sql(
-			"""
-			select name from `tabAttendance`
-			where employee = %s
-				and attendance_date = %s
-				and name != %s
-				and docstatus != 2
-		""",
-			(self.employee, getdate(self.attendance_date), self.name),
-		)
-		if res:
-			frappe.throw(
-				_("Attendance for employee {0} is already marked for the date {1}").format(
-					frappe.bold(self.employee), frappe.bold(self.attendance_date)
-				)
-			)
+		duplicate = get_duplicate_attendance_record(self.employee, self.attendance_date, self.shift, self.name)
+
+		if duplicate:
+			frappe.throw(_("Attendance for employee {0} is already marked for the date {1}: {2}").format(
+				frappe.bold(self.employee), frappe.bold(self.attendance_date), get_link_to_form("Attendance", duplicate[0].name)),
+				title=_("Duplicate Attendance"), exc=DuplicateAttendanceError)
 
 	def validate_employee_status(self):
 		if frappe.db.get_value("Employee", self.employee, "status") == "Inactive":
@@ -103,6 +97,40 @@ class Attendance(Document):
 			frappe.throw(_("Employee {0} is not active or does not exist").format(self.employee))
 
 
+def get_duplicate_attendance_record(employee, attendance_date, shift, name=None):
+	attendance = frappe.qb.DocType("Attendance")
+	query = (
+		frappe.qb.from_(attendance)
+			.select(attendance.name)
+			.where(
+				(attendance.employee == employee)
+				& (attendance.docstatus < 2)
+			)
+	)
+
+	if shift:
+		query = query.where(
+			Criterion.any([
+				Criterion.all([
+					((attendance.shift.isnull()) | (attendance.shift == "")),
+					(attendance.attendance_date == attendance_date)
+				]),
+				Criterion.all([
+					((attendance.shift.isnotnull()) | (attendance.shift != "")),
+					(attendance.attendance_date == attendance_date),
+					(attendance.shift == shift)
+				])
+			])
+		)
+	else:
+		query = query.where((attendance.attendance_date == attendance_date))
+
+	if name:
+		query = query.where(attendance.name != name)
+
+	return query.run(as_dict=True)
+
+
 @frappe.whitelist()
 def get_events(start, end, filters=None):
 	events = []
@@ -139,26 +167,18 @@ def add_attendance(events, start, end, conditions=None):
 		if e not in events:
 			events.append(e)
 
-
-def mark_attendance(
-	employee, attendance_date, status, shift=None, leave_type=None, ignore_validate=False
-):
-	if not frappe.db.exists(
-		"Attendance",
-		{"employee": employee, "attendance_date": attendance_date, "docstatus": ("!=", "2")},
-	):
-		company = frappe.db.get_value("Employee", employee, "company")
-		attendance = frappe.get_doc(
-			{
-				"doctype": "Attendance",
-				"employee": employee,
-				"attendance_date": attendance_date,
-				"status": status,
-				"company": company,
-				"shift": shift,
-				"leave_type": leave_type,
-			}
-		)
+def mark_attendance(employee, attendance_date, status, shift=None, leave_type=None, ignore_validate=False):
+	if not get_duplicate_attendance_record(employee, attendance_date, shift):
+		company = frappe.db.get_value('Employee', employee, 'company')
+		attendance = frappe.get_doc({
+			'doctype': 'Attendance',
+			'employee': employee,
+			'attendance_date': attendance_date,
+			'status': status,
+			'company': company,
+			'shift': shift,
+			'leave_type': leave_type
+		})
 		attendance.flags.ignore_validate = ignore_validate
 		attendance.insert()
 		attendance.submit()
