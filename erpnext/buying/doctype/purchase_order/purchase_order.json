@@ -470,6 +470,7 @@
    "fieldname": "supplier_warehouse",
    "fieldtype": "Link",
    "label": "Supplier Warehouse",
+   "mandatory_depends_on": "eval:doc.is_subcontracted==\"Yes\"",
    "options": "Warehouse"
   },
   {
@@ -1144,7 +1145,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-21 14:21:49.130120",
+ "modified": "2022-02-21 21:25:13.827807",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
