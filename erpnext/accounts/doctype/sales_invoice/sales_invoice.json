@@ -834,8 +834,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Total",
-   "options": "currency",
-   "read_only": 1
+   "options": "currency"
   },
   {
    "fieldname": "net_total",
@@ -2038,7 +2037,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-02-03 15:38:11.971870",
+ "modified": "2022-02-21 16:15:30.505372",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
