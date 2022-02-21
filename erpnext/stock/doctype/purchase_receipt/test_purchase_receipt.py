@@ -1540,6 +1540,7 @@ def make_purchase_receipt(**args):
 		"conversion_factor": args.conversion_factor or 1.0,
 		"stock_qty": flt(qty) * (flt(args.conversion_factor) or 1.0),
 		"serial_no": args.serial_no,
+		"batch_no": args.batch_no,
 		"stock_uom": args.stock_uom or "_Test UOM",
 		"uom": uom,
 		"cost_center": args.cost_center or frappe.get_cached_value('Company',  pr.company,  'cost_center'),

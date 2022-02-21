@@ -719,6 +719,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			'posting_time': posting_time,
 			'qty': item.qty * item.conversion_factor,
 			'serial_no': item.serial_no,
+			'batch_no': item.batch_no,
 			'voucher_type': voucher_type,
 			'company': company,
 			'allow_zero_valuation_rate': item.allow_zero_valuation_rate
