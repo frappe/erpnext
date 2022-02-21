@@ -27,6 +27,7 @@ _exceptions = frappe.local('stockledger_exceptions')
 
 def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 	from erpnext.controllers.stock_controller import future_sle_exists
+	from erpnext.stock.doctype.serial_no.serial_no import get_item_details, update_serial_nos
 	if sl_entries:
 		cancel = sl_entries[0].get("is_cancelled")
 		if cancel:
@@ -53,9 +54,26 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 						sle.voucher_type, sle.voucher_no, sle.voucher_detail_no)
 					sle['outgoing_rate'] = 0.0
 
-			has_serial = frappe.db.get_value('Item', sle.get('item_code'), 'has_serial_no')
-			if sle.get("actual_qty") and has_serial and sle.get("voucher_type")!="Stock Reconciliation":
+			item_det = get_item_details(sle.get('item_code'))
+			sle = frappe._dict(sle)
+			voucher_doc = frappe.get_doc(sle.voucher_type, sle.voucher_no)
+
+			## will handle stock reco later
+			if sle.get("actual_qty") and item_det.has_serial_no and sle.get("voucher_type")!="Stock Reconciliation":
 				serials = sle.serial_no.strip().split('\n')
+
+				if not sle.serial_no and item_det.has_serial_no:
+					sle = update_serial_nos(sle, item_det, return_sle=True)
+					sle_serials = sle.serial_no
+					for item in voucher_doc.items:
+						print('ITEMS', item, sle)
+						if item.item_code == sle.item_code:
+							if item.warehouse == sle.warehouse:
+								frappe.db.set_value(item.doctype, item.name, 'serial_no', sle_serials)
+							elif item.rejected_warehouse == sle.warehouse:
+								frappe.db.set_value(item.doctype, item.name, 'rejected_serial_no', sle_serials)
+							break
+
 				for serial in range(abs(cint(sle['actual_qty']))):
 					new_sle = sle.copy()
 					new_sle['actual_qty'] = 1 if sle['actual_qty'] > 0 else -1
