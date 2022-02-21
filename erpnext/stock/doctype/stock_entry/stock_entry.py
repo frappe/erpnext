@@ -76,7 +76,6 @@ class StockEntry(StockController):
 
 		self.validate_posting_time()
 		self.validate_purpose()
-		self.set_title()
 		self.validate_item()
 		self.validate_customer_provided_item()
 		self.validate_qty()
@@ -434,9 +433,10 @@ class StockEntry(StockController):
 				)
 
 	def set_actual_qty(self):
-		allow_negative_stock = cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
+		from erpnext.stock.stock_ledger import is_negative_stock_allowed
 
 		for d in self.get('items'):
+			allow_negative_stock = is_negative_stock_allowed(item_code=d.item_code)
 			previous_sle = get_previous_sle({
 				"item_code": d.item_code,
 				"warehouse": d.s_warehouse or d.t_warehouse,
@@ -510,7 +510,7 @@ class StockEntry(StockController):
 				d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
 					self.doctype, self.name, d.allow_zero_valuation_rate,
 					currency=erpnext.get_company_currency(self.company), company=self.company,
-					raise_error_if_no_rate=raise_error_if_no_rate)
+					raise_error_if_no_rate=raise_error_if_no_rate, batch_no=d.batch_no)
 
 			d.basic_rate = flt(d.basic_rate, d.precision("basic_rate"))
 			if d.is_process_loss:
@@ -541,6 +541,7 @@ class StockEntry(StockController):
 			"posting_time": self.posting_time,
 			"qty": item.s_warehouse and -1*flt(item.transfer_qty) or flt(item.transfer_qty),
 			"serial_no": item.serial_no,
+			"batch_no": item.batch_no,
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
 			"company": self.company,
@@ -1116,7 +1117,7 @@ class StockEntry(StockController):
 		self.set_actual_qty()
 		self.update_items_for_process_loss()
 		self.validate_customer_provided_item()
-		self.calculate_rate_and_amount()
+		self.calculate_rate_and_amount(raise_error_if_no_rate=False)
 
 	def set_scrap_items(self):
 		if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:
@@ -1445,14 +1446,15 @@ class StockEntry(StockController):
 							qty = req_qty_each * flt(self.fg_completed_qty)
 
 			elif backflushed_materials.get(item.item_code):
+				precision = frappe.get_precision("Stock Entry Detail", "qty")
 				for d in backflushed_materials.get(item.item_code):
-					if d.get(item.warehouse):
+					if d.get(item.warehouse) > 0:
 						if (qty > req_qty):
-							qty = (qty/trans_qty) * flt(self.fg_completed_qty)
+							qty = ((flt(qty, precision) - flt(d.get(item.warehouse), precision))
+								/ (flt(trans_qty, precision) - flt(produced_qty, precision))
+							) * flt(self.fg_completed_qty)
 
-						if consumed_qty and frappe.db.get_single_value("Manufacturing Settings",
-							"material_consumption"):
-							qty -= consumed_qty
+							d[item.warehouse] -= qty
 
 			if cint(frappe.get_cached_value('UOM', item.stock_uom, 'must_be_whole_number')):
 				qty = frappe.utils.ceil(qty)
@@ -1672,6 +1674,8 @@ class StockEntry(StockController):
 			for d in self.get("items"):
 				item_code = d.get('original_item') or d.get('item_code')
 				reserve_warehouse = item_wh.get(item_code)
+				if not (reserve_warehouse and item_code):
+					continue
 				stock_bin = get_bin(item_code, reserve_warehouse)
 				stock_bin.update_reserved_qty_for_sub_contracting()
 
@@ -1831,14 +1835,6 @@ class StockEntry(StockController):
 				used_serial_nos.extend(get_serial_nos(row.serial_no))
 
 		return sorted(list(set(get_serial_nos(self.pro_doc.serial_no)) - set(used_serial_nos)))
-
-	def set_title(self):
-		if frappe.flags.in_import and self.title:
-			# Allow updating title during data import/update
-			return
-
-		self.title = self.purpose
-
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):

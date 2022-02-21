@@ -2,9 +2,10 @@
 # For license information, please see license.txt
 
 
+from functools import reduce
+
 import frappe
 from frappe.utils import flt
-from six.moves import reduce
 
 from erpnext.controllers.status_updater import StatusUpdater
 

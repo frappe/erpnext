@@ -92,6 +92,8 @@ def change_settings(doctype, settings_dict):
 		for key, value in settings_dict.items():
 			setattr(settings, key, value)
 		settings.save()
+		# singles are cached by default, clear to avoid flake
+		frappe.db.value_cache[settings] = {}
 		yield # yield control to calling function
 
 	finally:

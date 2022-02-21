@@ -354,6 +354,24 @@ class TestPOSInvoice(unittest.TestCase):
 		pos2.insert()
 		self.assertRaises(frappe.ValidationError, pos2.submit)
 
+	def test_invalid_serial_no_validation(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+
+		se = make_serialized_item(company='_Test Company',
+			target_warehouse="Stores - _TC", cost_center='Main - _TC', expense_account='Cost of Goods Sold - _TC')
+		serial_nos = se.get("items")[0].serial_no + 'wrong'
+
+		pos = create_pos_invoice(company='_Test Company', debit_to='Debtors - _TC',
+			account_for_change_amount='Cash - _TC', warehouse='Stores - _TC', income_account='Sales - _TC',
+			expense_account='Cost of Goods Sold - _TC', cost_center='Main - _TC',
+			item=se.get("items")[0].item_code, rate=1000, qty=2, do_not_save=1)
+
+		pos.get('items')[0].has_serial_no = 1
+		pos.get('items')[0].serial_no = serial_nos
+		pos.insert()
+
+		self.assertRaises(frappe.ValidationError, pos.submit)
+
 	def test_loyalty_points(self):
 		from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 			get_loyalty_program_details_with_points,
@@ -568,23 +586,29 @@ class TestPOSInvoice(unittest.TestCase):
 		item_price.insert()
 		pr = make_pricing_rule(selling=1, priority=5, discount_percentage=10)
 		pr.save()
-		pos_inv = create_pos_invoice(qty=1, do_not_submit=1)
-		pos_inv.items[0].rate = 300
-		pos_inv.save()
-		self.assertEquals(pos_inv.items[0].discount_percentage, 10)
-		# rate shouldn't change
-		self.assertEquals(pos_inv.items[0].rate, 405)
 
-		pos_inv.ignore_pricing_rule = 1
-		pos_inv.items[0].rate = 300
-		pos_inv.save()
-		self.assertEquals(pos_inv.ignore_pricing_rule, 1)
-		# rate should change since pricing rules are ignored
-		self.assertEquals(pos_inv.items[0].rate, 300)
+		try:
+			pos_inv = create_pos_invoice(qty=1, do_not_submit=1)
+			pos_inv.items[0].rate = 300
+			pos_inv.save()
+			self.assertEquals(pos_inv.items[0].discount_percentage, 10)
+			# rate shouldn't change
+			self.assertEquals(pos_inv.items[0].rate, 405)
 
-		item_price.delete()
-		pos_inv.delete()
-		pr.delete()
+			pos_inv.ignore_pricing_rule = 1
+			pos_inv.save()
+			self.assertEquals(pos_inv.ignore_pricing_rule, 1)
+			# rate should reset since pricing rules are ignored
+			self.assertEquals(pos_inv.items[0].rate, 450)
+
+			pos_inv.items[0].rate = 300
+			pos_inv.save()
+			self.assertEquals(pos_inv.items[0].rate, 300)
+
+		finally:
+			item_price.delete()
+			pos_inv.delete()
+			pr.delete()
 
 
 def create_pos_invoice(**args):

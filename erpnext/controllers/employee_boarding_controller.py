@@ -104,11 +104,11 @@ class EmployeeBoardingController(Document):
 	def get_task_dates(self, activity, holiday_list):
 		start_date = end_date = None
 
-		if activity.begin_on:
+		if activity.begin_on is not None:
 			start_date = add_days(self.boarding_begins_on, activity.begin_on)
 			start_date = self.update_if_holiday(start_date, holiday_list)
 
-			if activity.duration:
+			if activity.duration is not None:
 				end_date = add_days(self.boarding_begins_on, activity.begin_on + activity.duration)
 				end_date = self.update_if_holiday(end_date, holiday_list)
 
@@ -132,12 +132,16 @@ class EmployeeBoardingController(Document):
 
 	def on_cancel(self):
 		# delete task project
-		for task in frappe.get_all('Task', filters={'project': self.project}):
+		project = self.project
+		for task in frappe.get_all('Task', filters={'project': project}):
 			frappe.delete_doc('Task', task.name, force=1)
-		frappe.delete_doc('Project', self.project, force=1)
+		frappe.delete_doc('Project', project, force=1)
 		self.db_set('project', '')
 		for activity in self.activities:
 			activity.db_set('task', '')
+
+		frappe.msgprint(_('Linked Project {} and Tasks deleted.').format(
+			project), alert=True, indicator='blue')
 
 
 @frappe.whitelist()
