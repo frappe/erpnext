@@ -780,16 +780,6 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			return erpnext.queries.item({is_stock_item: 1});
 		};
 
-		this.frm.set_query("purchase_order", function() {
-			return {
-				"filters": {
-					"docstatus": 1,
-					"is_subcontracted": "Yes",
-					"company": me.frm.doc.company
-				}
-			};
-		});
-
 		this.frm.set_query("subcontracting_order", function() {
 			return {
 				"filters": {
@@ -814,7 +804,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			}
 		}
 
-		this.frm.add_fetch("purchase_order", "supplier", "supplier");
+		this.frm.add_fetch("subcontracting_order", "supplier", "supplier");
 
 		frappe.dynamic_link = { doc: this.frm.doc, fieldname: 'supplier', doctype: 'Supplier' }
 		this.frm.set_query("supplier_address", erpnext.queries.address_query)
