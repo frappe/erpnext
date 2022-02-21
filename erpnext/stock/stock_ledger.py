@@ -3,6 +3,7 @@
 
 import copy
 import json
+from typing import Optional
 
 import frappe
 from frappe import _
@@ -16,7 +17,7 @@ from erpnext.stock.utils import (
 	get_or_make_bin,
 	get_valuation_method,
 )
-from erpnext.stock.valuation import FIFOValuation
+from erpnext.stock.valuation import FIFOValuation, LIFOValuation
 
 
 class NegativeStockError(frappe.ValidationError): pass
@@ -268,11 +269,10 @@ class update_entries_after(object):
 		self.verbose = verbose
 		self.allow_zero_rate = allow_zero_rate
 		self.via_landed_cost_voucher = via_landed_cost_voucher
-		self.allow_negative_stock = allow_negative_stock \
-			or cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+		self.item_code = args.get("item_code")
+		self.allow_negative_stock = allow_negative_stock or is_negative_stock_allowed(item_code=self.item_code)
 
 		self.args = frappe._dict(args)
-		self.item_code = args.get("item_code")
 		if self.args.sle_id:
 			self.args['name'] = self.args.sle_id
 
@@ -461,7 +461,7 @@ class update_entries_after(object):
 					self.wh_data.qty_after_transaction += flt(sle.actual_qty)
 					self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(self.wh_data.valuation_rate)
 				else:
-					self.update_fifo_values(sle)
+					self.update_queue_values(sle)
 					self.wh_data.qty_after_transaction += flt(sle.actual_qty)
 
 		# rounding as per precision
@@ -701,14 +701,18 @@ class update_entries_after(object):
 						sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
 						currency=erpnext.get_company_currency(sle.company), company=sle.company)
 
-	def update_fifo_values(self, sle):
+	def update_queue_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
 		actual_qty = flt(sle.actual_qty)
 		outgoing_rate = flt(sle.outgoing_rate)
 
-		fifo_queue = FIFOValuation(self.wh_data.stock_queue)
+		if self.valuation_method == "LIFO":
+			stock_queue = LIFOValuation(self.wh_data.stock_queue)
+		else:
+			stock_queue = FIFOValuation(self.wh_data.stock_queue)
+
 		if actual_qty > 0:
-			fifo_queue.add_stock(qty=actual_qty, rate=incoming_rate)
+			stock_queue.add_stock(qty=actual_qty, rate=incoming_rate)
 		else:
 			def rate_generator() -> float:
 				allow_zero_valuation_rate = self.check_if_allow_zero_valuation_rate(sle.voucher_type, sle.voucher_detail_no)
@@ -719,11 +723,11 @@ class update_entries_after(object):
 				else:
 					return 0.0
 
-			fifo_queue.remove_stock(qty=abs(actual_qty), outgoing_rate=outgoing_rate, rate_generator=rate_generator)
+			stock_queue.remove_stock(qty=abs(actual_qty), outgoing_rate=outgoing_rate, rate_generator=rate_generator)
 
-		stock_qty, stock_value = fifo_queue.get_total_stock_and_value()
+		stock_qty, stock_value = stock_queue.get_total_stock_and_value()
 
-		self.wh_data.stock_queue = fifo_queue.get_state()
+		self.wh_data.stock_queue = stock_queue.state
 		self.wh_data.stock_value = stock_value
 		if stock_qty:
 			self.wh_data.valuation_rate = stock_value / stock_qty
@@ -1045,10 +1049,7 @@ def get_datetime_limit_condition(detail):
 		)"""
 
 def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
-	allow_negative_stock = cint(allow_negative_stock) \
-		or cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
-
-	if allow_negative_stock:
+	if allow_negative_stock or is_negative_stock_allowed(item_code=args.item_code):
 		return
 	if not (args.actual_qty < 0 or args.voucher_type == "Stock Reconciliation"):
 		return
@@ -1117,3 +1118,11 @@ def get_future_sle_with_negative_batch_qty(args):
 			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
 		limit 1
 	""", args, as_dict=1)
+
+
+def is_negative_stock_allowed(*, item_code: Optional[str] = None) -> bool:
+	if cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock", cache=True)):
+		return True
+	if item_code and cint(frappe.db.get_value("Item", item_code, "allow_negative_stock", cache=True)):
+		return True
+	return False

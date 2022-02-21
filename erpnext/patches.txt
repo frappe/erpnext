@@ -329,7 +329,6 @@ execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings'
 erpnext.patches.v14_0.set_payroll_cost_centers
 erpnext.patches.v13_0.agriculture_deprecation_warning
 erpnext.patches.v13_0.hospitality_deprecation_warning
-erpnext.patches.v13_0.update_exchange_rate_settings
 erpnext.patches.v13_0.update_asset_quantity_field
 erpnext.patches.v13_0.delete_bank_reconciliation_detail
 erpnext.patches.v13_0.enable_provisional_accounting
@@ -350,3 +349,7 @@ erpnext.patches.v14_0.migrate_cost_center_allocations
 erpnext.patches.v13_0.convert_to_website_item_in_item_card_group_template
 erpnext.patches.v13_0.shopping_cart_to_ecommerce
 erpnext.patches.v13_0.update_disbursement_account
+erpnext.patches.v13_0.update_reserved_qty_closed_wo
+erpnext.patches.v13_0.update_exchange_rate_settings
+erpnext.patches.v14_0.delete_amazon_mws_doctype
+erpnext.patches.v13_0.set_work_order_qty_in_so_from_mr
