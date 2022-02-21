@@ -104,11 +104,11 @@ class EmployeeBoardingController(Document):
 	def get_task_dates(self, activity, holiday_list):
 		start_date = end_date = None
 
-		if activity.begin_on:
+		if activity.begin_on is not None:
 			start_date = add_days(self.boarding_begins_on, activity.begin_on)
 			start_date = self.update_if_holiday(start_date, holiday_list)
 
-			if activity.duration:
+			if activity.duration is not None:
 				end_date = add_days(self.boarding_begins_on, activity.begin_on + activity.duration)
 				end_date = self.update_if_holiday(end_date, holiday_list)
 
