@@ -354,3 +354,4 @@ erpnext.patches.v13_0.update_exchange_rate_settings
 erpnext.patches.v14_0.delete_amazon_mws_doctype
 erpnext.patches.v13_0.set_work_order_qty_in_so_from_mr
 erpnext.patches.v13_0.update_accounts_in_loan_docs
+erpnext.patches.v14_0.update_batch_valuation_flag
