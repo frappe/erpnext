@@ -8,7 +8,8 @@
  "field_order": [
   "title",
   "naming_series",
-  "amended_from"
+  "amended_from",
+  "subcontracting_order"
  ],
  "fields": [
   {
@@ -48,12 +49,19 @@
    "options": "Subcontracting Receipt",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "subcontracting_order",
+   "fieldtype": "Link",
+   "label": "Subcontracting Order",
+   "options": "Subcontracting Order",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-21 15:05:03.528671",
+ "modified": "2022-02-21 15:26:29.862616",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Subcontracting Receipt",
