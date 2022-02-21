@@ -215,7 +215,7 @@ class StockController(AccountsController):
 			from
 				`tabStock Ledger Entry`
 			where
-				voucher_type=%s and voucher_no=%s
+				voucher_type=%s and voucher_no=%s and is_cancelled = 0
 		""", (self.doctype, self.name), as_dict=True)
 
 		for sle in stock_ledger_entries:

@@ -433,9 +433,10 @@ class StockEntry(StockController):
 				)
 
 	def set_actual_qty(self):
-		allow_negative_stock = cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
+		from erpnext.stock.stock_ledger import is_negative_stock_allowed
 
 		for d in self.get('items'):
+			allow_negative_stock = is_negative_stock_allowed(item_code=d.item_code)
 			previous_sle = get_previous_sle({
 				"item_code": d.item_code,
 				"warehouse": d.s_warehouse or d.t_warehouse,
@@ -509,7 +510,7 @@ class StockEntry(StockController):
 				d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
 					self.doctype, self.name, d.allow_zero_valuation_rate,
 					currency=erpnext.get_company_currency(self.company), company=self.company,
-					raise_error_if_no_rate=raise_error_if_no_rate)
+					raise_error_if_no_rate=raise_error_if_no_rate, batch_no=d.batch_no)
 
 			d.basic_rate = flt(d.basic_rate, d.precision("basic_rate"))
 			if d.is_process_loss:
@@ -540,6 +541,7 @@ class StockEntry(StockController):
 			"posting_time": self.posting_time,
 			"qty": item.s_warehouse and -1*flt(item.transfer_qty) or flt(item.transfer_qty),
 			"serial_no": item.serial_no,
+			"batch_no": item.batch_no,
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
 			"company": self.company,
@@ -1123,7 +1125,7 @@ class StockEntry(StockController):
 		self.set_actual_qty()
 		self.update_items_for_process_loss()
 		self.validate_customer_provided_item()
-		self.calculate_rate_and_amount()
+		self.calculate_rate_and_amount(raise_error_if_no_rate=False)
 
 	def set_scrap_items(self):
 		if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:

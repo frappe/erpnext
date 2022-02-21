@@ -20,45 +20,12 @@ class Bin(Document):
 			+ flt(self.indented_qty) + flt(self.planned_qty) - flt(self.reserved_qty)
 			- flt(self.reserved_qty_for_production) - flt(self.reserved_qty_for_sub_contract))
 
-	def get_first_sle(self):
-		sle = frappe.qb.DocType("Stock Ledger Entry")
-		first_sle = (
-				frappe.qb.from_(sle)
-					.select("*")
-					.where((sle.item_code == self.item_code) & (sle.warehouse == self.warehouse))
-					.orderby(sle.posting_date, sle.posting_time, sle.creation)
-					.limit(1)
-				).run(as_dict=True)
-
-		return first_sle and first_sle[0] or None
-
 	def update_reserved_qty_for_production(self):
 		'''Update qty reserved for production from Production Item tables
 			in open work orders'''
+		from erpnext.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
 
-		wo = frappe.qb.DocType("Work Order")
-		wo_item = frappe.qb.DocType("Work Order Item")
-
-		self.reserved_qty_for_production = (
-				frappe.qb
-					.from_(wo)
-					.from_(wo_item)
-					.select(Sum(Case()
-							.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
-							.else_(wo_item.required_qty - wo_item.consumed_qty))
-						)
-					.where(
-						(wo_item.item_code == self.item_code)
-						& (wo_item.parent == wo.name)
-						& (wo.docstatus == 1)
-						& (wo_item.source_warehouse == self.warehouse)
-						& (wo.status.notin(["Stopped", "Completed"]))
-						& ((wo_item.required_qty > wo_item.transferred_qty)
-							| (wo_item.required_qty > wo_item.consumed_qty))
-					).groupby(wo.skip_transfer)
-		).run()
-
-		self.reserved_qty_for_production = sum( sum(x) for x in self.reserved_qty_for_production) if self.reserved_qty_for_production else 0.0
+		self.reserved_qty_for_production = get_reserved_qty_for_production(self.item_code, self.warehouse)
 
 		self.set_projected_qty()
 
@@ -127,13 +94,6 @@ class Bin(Document):
 def on_doctype_update():
 	frappe.db.add_unique("Bin", ["item_code", "warehouse"], constraint_name="unique_item_warehouse")
 
-
-def update_stock(bin_name, args, allow_negative_stock=False, via_landed_cost_voucher=False):
-	"""WARNING: This function is deprecated. Inline this function instead of using it."""
-	from erpnext.stock.stock_ledger import repost_current_voucher
-
-	repost_current_voucher(args, allow_negative_stock, via_landed_cost_voucher)
-	update_qty(bin_name, args)
 
 def get_bin_details(bin_name):
 	return frappe.db.get_value('Bin', bin_name, ['actual_qty', 'ordered_qty',
