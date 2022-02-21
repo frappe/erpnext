@@ -35,7 +35,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 
 		args = get_args_for_future_sle(sl_entries[0])
 		future_sle_exists(args, sl_entries)
-
+		sle_docs = []
 		for sle in sl_entries:
 			if sle.serial_no:
 				validate_serial_no(sle)
@@ -53,22 +53,32 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 						sle.voucher_type, sle.voucher_no, sle.voucher_detail_no)
 					sle['outgoing_rate'] = 0.0
 
-			if sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
-				sle_doc = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
+			has_serial = frappe.db.get_value('Item', sle.get('item_code'), 'has_serial_no')
+			if sle.get("actual_qty") and has_serial and sle.get("voucher_type")!="Stock Reconciliation":
+				serials = sle.serial_no.strip().split('\n')
+				for serial in range(abs(cint(sle['actual_qty']))):
+					new_sle = sle.copy()
+					new_sle['actual_qty'] = 1 if sle['actual_qty'] > 0 else -1
+					new_sle['serial_no'] = serials.pop() if serials else ''
+					sle_docs.append(make_entry(new_sle, allow_negative_stock, via_landed_cost_voucher))
 
-			args = sle_doc.as_dict()
+			elif sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
+				sle_docs.append(make_entry(sle, allow_negative_stock, via_landed_cost_voucher))
 
-			if sle.get("voucher_type") == "Stock Reconciliation":
-				# preserve previous_qty_after_transaction for qty reposting
-				args.previous_qty_after_transaction = sle.get("previous_qty_after_transaction")
+			for sle_doc in sle_docs:
+				args = sle_doc.as_dict()
 
-			is_stock_item = frappe.get_cached_value('Item', args.get("item_code"), 'is_stock_item')
-			if is_stock_item:
-				bin_name = get_or_make_bin(args.get("item_code"), args.get("warehouse"))
-				repost_current_voucher(args, allow_negative_stock, via_landed_cost_voucher)
-				update_bin_qty(bin_name, args)
-			else:
-				frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
+				if sle.get("voucher_type") == "Stock Reconciliation":
+					# preserve previous_qty_after_transaction for qty reposting
+					args.previous_qty_after_transaction = sle.get("previous_qty_after_transaction")
+
+				is_stock_item = frappe.get_cached_value('Item', args.get("item_code"), 'is_stock_item')
+				if is_stock_item:
+					bin_name = get_or_make_bin(args.get("item_code"), args.get("warehouse"))
+					repost_current_voucher(args, allow_negative_stock, via_landed_cost_voucher)
+					update_bin_qty(bin_name, args)
+				else:
+					frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
 
 def repost_current_voucher(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	if args.get("actual_qty") or args.get("voucher_type") == "Stock Reconciliation":
