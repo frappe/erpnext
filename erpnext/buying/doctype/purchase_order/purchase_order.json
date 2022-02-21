@@ -15,6 +15,7 @@
   "get_items_from_open_material_requests",
   "supplier_name",
   "apply_tds",
+  "is_subcontracted",
   "tax_withholding_category",
   "column_break1",
   "company",
@@ -52,7 +53,6 @@
   "plc_conversion_rate",
   "ignore_pricing_rule",
   "sec_warehouse",
-  "is_subcontracted",
   "col_break_warehouse",
   "supplier_warehouse",
   "before_items_section",
@@ -440,6 +440,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval:doc.is_subcontracted==\"Yes\"",
    "fieldname": "sec_warehouse",
    "fieldtype": "Section Break",
    "label": "Subcontracting"
@@ -461,12 +462,11 @@
    "fieldname": "is_subcontracted",
    "fieldtype": "Select",
    "in_standard_filter": 1,
-   "label": "Supply Raw Materials",
+   "label": "Is Subcontracting Order",
    "options": "No\nYes",
    "print_hide": 1
   },
   {
-   "depends_on": "eval:doc.is_subcontracted==\"Yes\"",
    "fieldname": "supplier_warehouse",
    "fieldtype": "Link",
    "label": "Supplier Warehouse",
@@ -1144,10 +1144,11 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-28 13:10:47.955401",
+ "modified": "2022-02-21 14:21:49.130120",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1194,6 +1195,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "supplier",
  "title_field": "supplier_name",
  "track_changes": 1
