@@ -778,13 +778,15 @@ def setup_item_valuation_test(valuation_method="FIFO", suffix=None, use_batchwis
 			ubw = use_batchwise_valuation
 			if isinstance(use_batchwise_valuation, (list, tuple)):
 				ubw = use_batchwise_valuation[i]
-			make_batch(
-				frappe._dict(
+			batch = frappe.get_doc(frappe._dict(
+					doctype="Batch",
 					batch_id=batch_id,
 					item=item.item_code,
 					use_batchwise_valuation=ubw
 				)
-			)
+			).insert()
+			batch.use_batchwise_valuation = ubw
+			batch.db_update()
 
 	return item.item_code, warehouses, batches
 
