@@ -324,24 +324,17 @@ def get_employee_shift_timings(employee, for_timestamp=None, consider_default_sh
 				else prev_shift.actual_end
 			)
 		if next_shift:
-			next_shift.actual_start = (
-				curr_shift.end_datetime
-				if next_shift.actual_start < curr_shift.end_datetime
-				else next_shift.actual_start
-			)
-			curr_shift.actual_end = (
-				next_shift.actual_start
-				if curr_shift.actual_end > next_shift.actual_start
-				else curr_shift.actual_end
-			)
+			next_shift.actual_start = curr_shift.end_datetime if next_shift.actual_start < curr_shift.end_datetime else next_shift.actual_start
+			curr_shift.actual_end = next_shift.actual_start if curr_shift.actual_end > next_shift.actual_start else curr_shift.actual_end
+
 	return prev_shift, curr_shift, next_shift
 
 
 def get_actual_start_end_datetime_of_shift(employee, for_datetime, consider_default_shift=False):
 	"""Takes a datetime and returns the 'actual' start datetime and end datetime of the shift in which the timestamp belongs.
-		Here 'actual' means - taking in to account the "begin_check_in_before_shift_start_time" and "allow_check_out_after_shift_end_time".
+		Here 'actual' means - taking into account the "begin_check_in_before_shift_start_time" and "allow_check_out_after_shift_end_time".
 		None is returned if the timestamp is outside any actual shift timings.
-		Shift Details is also returned(current/upcoming i.e. if timestamp not in any actual shift then details of next shift returned)
+		Shift Details are also returned(current/upcoming i.e. if timestamp not in any actual shift then details of next shift returned)
 	"""
 	shift_timings_as_per_timestamp = get_employee_shift_timings(employee, for_datetime, consider_default_shift)
 	return get_exact_shift(shift_timings_as_per_timestamp, for_datetime)
@@ -359,8 +352,19 @@ def get_exact_shift(shifts, for_datetime):
 
 	timestamp_index = None
 	for index, timestamp in enumerate(timestamp_list):
-		if timestamp and for_datetime <= timestamp:
+		if not timestamp:
+			continue
+
+		if for_datetime < timestamp:
 			timestamp_index = index
+		elif for_datetime == timestamp:
+			# on timestamp boundary
+			if index%2 == 1:
+				timestamp_index = index
+			else:
+				timestamp_index = index + 1
+
+		if timestamp_index:
 			break
 
 	if timestamp_index and timestamp_index%2 == 1:
