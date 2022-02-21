@@ -11,7 +11,7 @@ def execute():
 	for page in pages:
 		frappe.delete_doc("Page", page, ignore_missing=True, force=True)
 
-	reports = frappe.get_all("Report", {"module": "healthcare", "is_standard": "Yes"}, pluck='name')
+	reports = frappe.get_all("Report", {"module": "healthcare", "is_standard": 1}, pluck='name')
 	for report in reports:
 		frappe.delete_doc("Report", report, ignore_missing=True, force=True)
 

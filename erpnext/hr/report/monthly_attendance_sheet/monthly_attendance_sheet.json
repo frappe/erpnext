@@ -1,27 +1,30 @@
 {
- "add_total_row": 0, 
- "apply_user_permissions": 1, 
- "creation": "2013-05-13 14:04:03", 
- "disabled": 0, 
- "docstatus": 0, 
- "doctype": "Report", 
- "idx": 3, 
- "is_standard": "Yes", 
- "modified": "2017-02-24 20:16:50.550242", 
- "modified_by": "Administrator", 
- "module": "HR", 
- "name": "Monthly Attendance Sheet", 
- "owner": "Administrator", 
- "ref_doctype": "Attendance", 
- "report_name": "Monthly Attendance Sheet", 
- "report_type": "Script Report", 
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2022-02-22 05:03:52.698671",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 3,
+ "is_standard": 1,
+ "modified": "2022-02-22 05:05:59.857850",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Monthly Attendance Sheet",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Attendance",
+ "report_name": "Monthly Attendance Sheet",
+ "report_type": "Script Report",
  "roles": [
   {
    "role": "System Manager"
-  }, 
+  },
   {
    "role": "HR User"
-  }, 
+  },
   {
    "role": "HR Manager"
   }

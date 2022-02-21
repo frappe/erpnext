@@ -279,7 +279,7 @@ def save_custom_report(reference_report, report_name, data):
 	doc = {
 		'doctype': 'Report',
 		'report_name': report_name,
-		'is_standard': 'No',
+		'is_standard': 0,
 		'module': 'Accounts',
 		'json': data
 	}

@@ -6,7 +6,7 @@ def execute():
 
 	frappe.delete_doc("Workspace", "Agriculture", ignore_missing=True, force=True)
 
-	reports = frappe.get_all("Report", {"module": "agriculture", "is_standard": "Yes"}, pluck='name')
+	reports = frappe.get_all("Report", {"module": "agriculture", "is_standard": 1}, pluck="name")
 	for report in reports:
 		frappe.delete_doc("Report", report, ignore_missing=True, force=True)
 
