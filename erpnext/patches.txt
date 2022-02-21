@@ -347,4 +347,4 @@ erpnext.patches.v13_0.hospitality_deprecation_warning
 erpnext.patches.v13_0.delete_bank_reconciliation_detail
 erpnext.patches.v13_0.update_sane_transfer_against
 erpnext.patches.v13_0.enable_provisional_accounting
-erpnext.patches.v13_0.update_disbursement_account
+#erpnext.patches.v13_0.update_disbursement_account
