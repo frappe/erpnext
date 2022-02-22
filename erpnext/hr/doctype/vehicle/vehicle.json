@@ -193,14 +193,13 @@
   },
   {
    "fieldname": "customer",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "in_standard_filter": 1,
-   "label": "Customer",
-   "options": "Customer"
+   "label": "Customer"
   }
  ],
  "links": [],
- "modified": "2022-02-21 14:36:28.637933",
+ "modified": "2022-02-21 22:48:47.274282",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Vehicle",

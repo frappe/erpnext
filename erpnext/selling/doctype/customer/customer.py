@@ -66,6 +66,11 @@ class Customer(TransactionBase):
 		return self.customer_name
 
 	def after_insert(self):
+		'''Customer name autofill in vehicle database for filter in job card'''
+		if self.vehicle:
+			val = frappe.get_doc('Vehicle',self.vehicle)
+			frappe.db.set_value("Vehicle", self.vehicle, "customer", self.customer_name)
+					
 		'''If customer created from Lead, update customer id in quotations, opportunities'''
 		self.update_lead_status()
 
@@ -134,6 +139,11 @@ class Customer(TransactionBase):
 				frappe.bold(self.represents_company)))
 
 	def on_update(self):
+		'''Customer name autofill in vehicle database for additional vehcile for filter in job card'''
+		for d in self.get('customer_vehicle'):
+				if d.ts_license_plate:
+					frappe.db.set_value("Vehicle", d.ts_license_plate, "customer", self.customer_name)
+
 		self.validate_name_with_customer_group()
 		self.create_primary_contact()
 		self.create_primary_address()
