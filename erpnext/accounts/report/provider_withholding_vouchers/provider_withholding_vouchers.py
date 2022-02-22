@@ -9,7 +9,74 @@ import datetime
 
 def execute(filters=None):
 	if not filters: filters = {}
-	columns = [_("Supplier Retention") + "::240", _("Date") + "::240", _("Supplier") + "::240", _("RTN") + "::240", _("CAI") + "::240", _("Due Date") + "::240", _("% Retention") + "::240", _("Type Document") + "::240", _("Document") + "::240", _("Base") + ":Currency:120", _("Amount") + ":Currency:120"]
+	columns = [
+		{
+			"label": _("Supplier Retention"),
+			"fieldname": "supplier_retention",
+			"fieldtype": "Link",
+			"options": "Supplier Retention",
+			"width": 240
+		},
+		{
+			"label": _("Date"),
+			"fieldname": "date",
+			"fieldtype": "Date",
+			"width": 240
+		},
+		{
+			"label": _("Supplier"),
+			"fieldname": "supplier",
+			"width": 240
+		},
+		{
+			"label": _("RTN"),
+			"fieldname": "rtn",
+			"width": 240
+		},
+		{
+			"label": _("CAI"),
+			"fieldname": "cai",
+			"width": 240
+		},
+		{
+			"label": _("Due Date"),
+			"fieldname": "due_date",
+			"fieldtype": "Date",
+			"width": 240
+		},
+		{
+			"label": _("% Retention"),
+			"fieldname": "pocentage_retention",
+			"width": 240
+		},
+		{
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"width": 240
+		},
+		{
+			"label": _("Voucher No"),
+			"fieldname": "voucher_no",
+			"fieldtype": "Dynamic Link",
+			"options": "voucher_type",
+			"width": 240
+		},
+		{
+			"label": _("Base"),
+			"fieldname": "base",
+			"width": 120
+		},
+		{
+			"label": _("Amount"),
+			"fieldname": "amount",
+			"width": 120
+		},
+		{
+			"label": _("Created By"),
+			"fieldname": "created_by",
+			"width": 240
+		},
+	]
 	data = return_data(filters)
 	return columns, data
 
@@ -29,7 +96,7 @@ def return_data(filters):
 			percentage_str = str(retention.percentage_total)
 			percentage = "{}%".format(percentage_str)
 			amount = reference.net_total * (retention.percentage_total/100) 
-			row = [retention.name, retention.posting_date, retention.supplier, retention.rtn, retention.cai, retention.due_date, percentage, reference.reference_doctype, reference.reference_name, reference.net_total, amount]
+			row = [retention.name, retention.posting_date, retention.supplier, retention.rtn, retention.cai, retention.due_date, percentage, reference.reference_doctype, reference.reference_name, reference.net_total, amount, retention.owner]
 			data.append(row)
 
 	return data
