@@ -48,6 +48,7 @@ class BuyingController(StockController, Subcontracting):
 			self.validate_rejected_warehouse()
 			self.validate_accepted_rejected_qty()
 			validate_for_items(self)
+			self.update_serial_items_table()
 
 			#sub-contracting
 			self.validate_for_subcontracting()
@@ -701,6 +702,59 @@ class BuyingController(StockController, Subcontracting):
 			validate_item_type(self, "is_sub_contracted_item", "subcontracted")
 		else:
 			validate_item_type(self, "is_purchase_item", "purchase")
+
+	def update_serial_items_table(self, update = False):
+		# updates the serials if auto created from sle in the document
+		# needs cleanup
+		if self.serial_items and update:
+			for item in self.items:
+				if item.serial_no:
+					for serial in item.serial_no.split('\n'):
+						for serial_item in self.serial_items:
+							if serial_item.item_name == item.item_code and not serial_item.serial_no\
+								and serial_item.type == 'Accepted':
+								serial_item.serial_no = serial.upper()
+								frappe.db.set_value(serial_item.doctype, serial_item.name, 'serial_no', serial.upper())
+								break
+				if item.rejected_serial_no:
+					for serial in item.rejected_serial_no.split('\n'):
+						for serial_item in self.serial_items:
+							if serial_item.item_name == item.item_code and not serial_item.serial_no\
+								and serial_item.type == 'Rejected':
+								serial_item.serial_no = serial.upper()
+								frappe.db.set_value(serial_item.doctype, serial_item.name, 'serial_no', serial.upper())
+								break
+			return
+
+		self.serial_items = {}
+		for item in self.items:
+			has_serial = frappe.db.get_value('Item', item.item_code, 'has_serial_no')
+
+			if has_serial and item.serial_no:
+				accepted_serials = item.serial_no.split('\n')
+				for serial in accepted_serials:
+					row = self.append('serial_items', {})
+					row.item_name = item.item_code
+					row.serial_no = serial
+					row.type = 'Accepted'
+			if has_serial and not item.serial_no:
+				for serial in range(abs(cint(item.qty))):
+					row = self.append('serial_items', {})
+					row.item_name = item.item_code
+					row.type = 'Accepted'
+
+			if has_serial and item.rejected_serial_no:
+				rejected_serials = item.rejected_serial_no.split('\n')
+				for serial in rejected_serials:
+					row = self.append('serial_items', {})
+					row.item_name = item.item_code
+					row.serial_no = serial
+					row.type = 'Rejected'
+			if has_serial and not item.rejected_serial_no:
+				for serial in range(abs(cint(item.rejected_qty))):
+					row = self.append('serial_items', {})
+					row.item_name = item.item_code
+					row.type = 'Rejected'
 
 def get_asset_item_details(asset_items):
 	asset_items_data = {}

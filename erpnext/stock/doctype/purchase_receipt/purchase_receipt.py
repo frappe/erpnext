@@ -210,6 +210,8 @@ class PurchaseReceipt(BuyingController):
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "items")
+		self.reload()
+		self.update_serial_items_table(update=True)
 
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
