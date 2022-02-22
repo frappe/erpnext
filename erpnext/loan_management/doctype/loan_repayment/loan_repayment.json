@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "LM-REP-.####",
- "creation": "2019-09-03 14:44:39.977266",
+ "creation": "2022-01-25 10:30:02.767941",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -13,6 +13,7 @@
   "column_break_3",
   "company",
   "posting_date",
+  "clearance_date",
   "rate_of_interest",
   "payroll_payable_account",
   "is_term_loan",
@@ -37,7 +38,12 @@
   "total_penalty_paid",
   "total_interest_paid",
   "repayment_details",
-  "amended_from"
+  "amended_from",
+  "accounting_details_section",
+  "payment_account",
+  "penalty_income_account",
+  "column_break_36",
+  "loan_account"
  ],
  "fields": [
   {
@@ -260,12 +266,52 @@
    "fieldname": "repay_from_salary",
    "fieldtype": "Check",
    "label": "Repay From Salary"
+  },
+  {
+   "fieldname": "clearance_date",
+   "fieldtype": "Date",
+   "label": "Clearance Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fetch_from": "against_loan.payment_account",
+   "fieldname": "payment_account",
+   "fieldtype": "Link",
+   "label": "Repayment Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_36",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "against_loan.loan_account",
+   "fieldname": "loan_account",
+   "fieldtype": "Link",
+   "label": "Loan Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "against_loan.penalty_income_account",
+   "fieldname": "penalty_income_account",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Penalty Income Account",
+   "options": "Account"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-06 01:51:06.707782",
+ "modified": "2022-02-18 19:10:07.742298",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",

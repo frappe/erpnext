@@ -1107,6 +1107,52 @@ class TestStockEntry(ERPNextTestCase):
 				posting_date='2021-09-02', # backdated consumption of 2nd batch
 				purpose='Material Issue')
 
+	def test_multi_batch_value_diff(self):
+		""" Test value difference on stock entry in case of multi-batch.
+			| Stock entry | batch | qty | rate | value diff on SE             |
+			| ---         | ---   | --- | ---  | ---                          |
+			| receipt     | A     | 1   | 10   | 30                           |
+			| receipt     | B     | 1   | 20   |                              |
+			| issue       | A     | -1  | 10   | -30 (to assert after submit) |
+			| issue       | B     | -1  | 20   |                              |
+		"""
+		from erpnext.stock.doctype.batch.test_batch import TestBatch
+
+		batch_nos = []
+
+		item_code = '_TestMultibatchFifo'
+		TestBatch.make_batch_item(item_code)
+		warehouse = '_Test Warehouse - _TC'
+		receipt = make_stock_entry(
+				item_code=item_code,
+				qty=1,
+				rate=10,
+				to_warehouse=warehouse,
+				purpose='Material Receipt',
+				do_not_save=True
+			)
+		receipt.append("items", frappe.copy_doc(receipt.items[0], ignore_no_copy=False).update({"basic_rate": 20}) )
+		receipt.save()
+		receipt.submit()
+		batch_nos.extend(row.batch_no for row in receipt.items)
+		self.assertEqual(receipt.value_difference, 30)
+
+		issue = make_stock_entry(
+				item_code=item_code,
+				qty=1,
+				from_warehouse=warehouse,
+				purpose='Material Issue',
+				do_not_save=True
+			)
+		issue.append("items", frappe.copy_doc(issue.items[0], ignore_no_copy=False))
+		for row, batch_no in zip(issue.items, batch_nos):
+			row.batch_no = batch_no
+		issue.save()
+		issue.submit()
+
+		issue.reload()  # reload because reposting current voucher updates rate
+		self.assertEqual(issue.value_difference, -30)
+
 def make_serialized_item(**args):
 	args = frappe._dict(args)
 	se = frappe.copy_doc(test_records[0])
