@@ -420,6 +420,7 @@ def get_rate_for_return(voucher_type, voucher_no, item_code, return_against=None
 				"posting_time": sle.get('posting_time'),
 				"qty": sle.actual_qty,
 				"serial_no": sle.get('serial_no'),
+				"batch_no": sle.get("batch_no"),
 				"company": sle.company,
 				"voucher_type": sle.voucher_type,
 				"voucher_no": sle.voucher_no

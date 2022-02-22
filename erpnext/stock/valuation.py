@@ -34,7 +34,7 @@ class BinWiseValuation(ABC):
 			total_qty += flt(qty)
 			total_value += flt(qty) * flt(rate)
 
-		return _round_off_if_near_zero(total_qty), _round_off_if_near_zero(total_value)
+		return round_off_if_near_zero(total_qty), round_off_if_near_zero(total_value)
 
 	def __repr__(self):
 		return str(self.state)
@@ -136,7 +136,7 @@ class FIFOValuation(BinWiseValuation):
 			fifo_bin = self.queue[index]
 			if qty >= fifo_bin[QTY]:
 				# consume current bin
-				qty = _round_off_if_near_zero(qty - fifo_bin[QTY])
+				qty = round_off_if_near_zero(qty - fifo_bin[QTY])
 				to_consume = self.queue.pop(index)
 				consumed_bins.append(list(to_consume))
 
@@ -148,7 +148,7 @@ class FIFOValuation(BinWiseValuation):
 					break
 			else:
 				# qty found in current bin consume it and exit
-				fifo_bin[QTY] = _round_off_if_near_zero(fifo_bin[QTY] - qty)
+				fifo_bin[QTY] = round_off_if_near_zero(fifo_bin[QTY] - qty)
 				consumed_bins.append([qty, fifo_bin[RATE]])
 				qty = 0
 
@@ -231,7 +231,7 @@ class LIFOValuation(BinWiseValuation):
 			stock_bin = self.stack[index]
 			if qty >= stock_bin[QTY]:
 				# consume current bin
-				qty = _round_off_if_near_zero(qty - stock_bin[QTY])
+				qty = round_off_if_near_zero(qty - stock_bin[QTY])
 				to_consume = self.stack.pop(index)
 				consumed_bins.append(list(to_consume))
 
@@ -243,14 +243,14 @@ class LIFOValuation(BinWiseValuation):
 					break
 			else:
 				# qty found in current bin consume it and exit
-				stock_bin[QTY] = _round_off_if_near_zero(stock_bin[QTY] - qty)
+				stock_bin[QTY] = round_off_if_near_zero(stock_bin[QTY] - qty)
 				consumed_bins.append([qty, stock_bin[RATE]])
 				qty = 0
 
 		return consumed_bins
 
 
-def _round_off_if_near_zero(number: float, precision: int = 7) -> float:
+def round_off_if_near_zero(number: float, precision: int = 7) -> float:
 	"""Rounds off the number to zero only if number is close to zero for decimal
 	specified in precision. Precision defaults to 7.
 	"""
