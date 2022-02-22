@@ -11,6 +11,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
@@ -36,15 +37,21 @@ class TestProductionPlan(ERPNextTestCase):
 			if not frappe.db.get_value('BOM', {'item': item}):
 				make_bom(item = item, raw_materials = raw_materials)
 
-	def test_production_plan(self):
+	def test_production_plan_mr_creation(self):
+		"Test if MRs are created for unavailable raw materials."
 		pln = create_production_plan(item_code='Test Production Item 1')
 		self.assertTrue(len(pln.mr_items), 2)
-		pln.make_material_request()
 
-		pln = frappe.get_doc('Production Plan', pln.name)
+		pln.make_material_request()
+		pln.reload()
 		self.assertTrue(pln.status, 'Material Requested')
-		material_requests = frappe.get_all('Material Request Item', fields = ['distinct parent'],
-			filters = {'production_plan': pln.name}, as_list=1)
+
+		material_requests = frappe.get_all(
+			'Material Request Item',
+			fields = ['distinct parent'],
+			filters = {'production_plan': pln.name},
+			as_list=1
+		)
 
 		self.assertTrue(len(material_requests), 2)
 
@@ -66,27 +73,42 @@ class TestProductionPlan(ERPNextTestCase):
 		pln.cancel()
 
 	def test_production_plan_start_date(self):
+		"Test if Work Order has same Planned Start Date as Prod Plan."
 		planned_date = add_to_date(date=None, days=3)
-		plan = create_production_plan(item_code='Test Production Item 1', planned_start_date=planned_date)
+		plan = create_production_plan(
+			item_code='Test Production Item 1',
+			planned_start_date=planned_date
+		)
 		plan.make_work_order()
 
-		work_orders = frappe.get_all('Work Order', fields = ['name', 'planned_start_date'],
-			filters = {'production_plan': plan.name})
+		work_orders = frappe.get_all(
+			'Work Order',
+			fields = ['name', 'planned_start_date'],
+			filters = {'production_plan': plan.name}
+		)
 
 		self.assertEqual(work_orders[0].planned_start_date, planned_date)
 
 		for wo in work_orders:
 			frappe.delete_doc('Work Order', wo.name)
 
-		frappe.get_doc('Production Plan', plan.name).cancel()
+		plan.reload()
+		plan.cancel()
 
 	def test_production_plan_for_existing_ordered_qty(self):
+		"""
+		- Enable 'ignore_existing_ordered_qty'.
+		- Test if MR Planning table pulls Raw Material Qty even if it is in stock.
+		"""
 		sr1 = create_stock_reconciliation(item_code="Raw Material Item 1",
 			target="_Test Warehouse - _TC", qty=1, rate=110)
 		sr2 = create_stock_reconciliation(item_code="Raw Material Item 2",
 			target="_Test Warehouse - _TC", qty=1, rate=120)
 
-		pln = create_production_plan(item_code='Test Production Item 1', ignore_existing_ordered_qty=0)
+		pln = create_production_plan(
+			item_code='Test Production Item 1',
+			ignore_existing_ordered_qty=1
+		)
 		self.assertTrue(len(pln.mr_items), 1)
 		self.assertTrue(flt(pln.mr_items[0].quantity), 1.0)
 
@@ -95,23 +117,39 @@ class TestProductionPlan(ERPNextTestCase):
 		pln.cancel()
 
 	def test_production_plan_with_non_stock_item(self):
-		pln = create_production_plan(item_code='Test Production Item 1', include_non_stock_items=0)
+		"Test if MR Planning table includes Non Stock RM."
+		pln = create_production_plan(
+			item_code='Test Production Item 1',
+			include_non_stock_items=1
+		)
 		self.assertTrue(len(pln.mr_items), 3)
 		pln.cancel()
 
 	def test_production_plan_without_multi_level(self):
-		pln = create_production_plan(item_code='Test Production Item 1', use_multi_level_bom=0)
+		"Test MR Planning table for non exploded BOM."
+		pln = create_production_plan(
+			item_code='Test Production Item 1',
+			use_multi_level_bom=0
+		)
 		self.assertTrue(len(pln.mr_items), 2)
 		pln.cancel()
 
 	def test_production_plan_without_multi_level_for_existing_ordered_qty(self):
+		"""
+		- Disable 'ignore_existing_ordered_qty'.
+		- Test if MR Planning table avoids pulling Raw Material Qty as it is in stock for
+		non exploded BOM.
+		"""
 		sr1 = create_stock_reconciliation(item_code="Raw Material Item 1",
 			target="_Test Warehouse - _TC", qty=1, rate=130)
 		sr2 = create_stock_reconciliation(item_code="Subassembly Item 1",
 			target="_Test Warehouse - _TC", qty=1, rate=140)
 
-		pln = create_production_plan(item_code='Test Production Item 1',
-			use_multi_level_bom=0, ignore_existing_ordered_qty=0)
+		pln = create_production_plan(
+			item_code='Test Production Item 1',
+			use_multi_level_bom=0,
+			ignore_existing_ordered_qty=0
+		)
 		self.assertTrue(len(pln.mr_items), 0)
 
 		sr1.cancel()
@@ -119,6 +157,7 @@ class TestProductionPlan(ERPNextTestCase):
 		pln.cancel()
 
 	def test_production_plan_sales_orders(self):
+		"Test if previously fulfilled SO (with WO) is pulled into Prod Plan."
 		item = 'Test Production Item 1'
 		so = make_sales_order(item_code=item, qty=1)
 		sales_order = so.name
@@ -166,24 +205,25 @@ class TestProductionPlan(ERPNextTestCase):
 		self.assertEqual(sales_orders, [])
 
 	def test_production_plan_combine_items(self):
+		"Test combining FG items in Production Plan."
 		item = 'Test Production Item 1'
-		so = make_sales_order(item_code=item, qty=1)
+		so1 = make_sales_order(item_code=item, qty=1)
 
 		pln = frappe.new_doc('Production Plan')
-		pln.company = so.company
+		pln.company = so1.company
 		pln.get_items_from = 'Sales Order'
 		pln.append('sales_orders', {
-			'sales_order': so.name,
-			'sales_order_date': so.transaction_date,
-			'customer': so.customer,
-			'grand_total': so.grand_total
+			'sales_order': so1.name,
+			'sales_order_date': so1.transaction_date,
+			'customer': so1.customer,
+			'grand_total': so1.grand_total
 		})
-		so = make_sales_order(item_code=item, qty=2)
+		so2 = make_sales_order(item_code=item, qty=2)
 		pln.append('sales_orders', {
-			'sales_order': so.name,
-			'sales_order_date': so.transaction_date,
-			'customer': so.customer,
-			'grand_total': so.grand_total
+			'sales_order': so2.name,
+			'sales_order_date': so2.transaction_date,
+			'customer': so2.customer,
+			'grand_total': so2.grand_total
 		})
 		pln.combine_items = 1
 		pln.get_items()
@@ -214,28 +254,37 @@ class TestProductionPlan(ERPNextTestCase):
 			so_wo_qty = frappe.db.get_value('Sales Order Item', so_item, 'work_order_qty')
 			self.assertEqual(so_wo_qty, 0.0)
 
-		latest_plan = frappe.get_doc('Production Plan', pln.name)
-		latest_plan.cancel()
+		pln.reload()
+		pln.cancel()
 
 	def test_pp_to_mr_customer_provided(self):
-		#Material Request from Production Plan for Customer Provided
+		" Test Material Request from Production Plan for Customer Provided Item."
 		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
 		create_item('Production Item CUST')
+
 		for item, raw_materials in {'Production Item CUST': ['Raw Material Item 1', 'CUST-0987']}.items():
 			if not frappe.db.get_value('BOM', {'item': item}):
 				make_bom(item = item, raw_materials = raw_materials)
 		production_plan = create_production_plan(item_code = 'Production Item CUST')
 		production_plan.make_material_request()
-		material_request = frappe.db.get_value('Material Request Item', {'production_plan': production_plan.name, 'item_code': 'CUST-0987'}, 'parent')
+
+		material_request = frappe.db.get_value(
+			'Material Request Item',
+			{'production_plan': production_plan.name, 'item_code': 'CUST-0987'},
+			'parent'
+		)
 		mr = frappe.get_doc('Material Request', material_request)
+
 		self.assertTrue(mr.material_request_type, 'Customer Provided')
 		self.assertTrue(mr.customer, '_Test Customer')
 
 	def test_production_plan_with_multi_level_bom(self):
-		#|Item Code			|	Qty	|
-		#|Test BOM 1	 		|	1	|
-		#|	Test BOM 2		|	2	|
-		#|		Test BOM 3	|	3	|
+		"""
+		Item Code	|	Qty	|
+		|Test BOM 1	|	1	|
+		|Test BOM 2	|	2	|
+		|Test BOM 3	|	3	|
+		"""
 
 		for item_code in ["Test BOM 1", "Test BOM 2", "Test BOM 3", "Test RM BOM 1"]:
 			create_item(item_code, is_stock_item=1)
@@ -264,15 +313,18 @@ class TestProductionPlan(ERPNextTestCase):
 		pln.make_work_order()
 
 		#last level sub-assembly work order produce qty
-		to_produce_qty = frappe.db.get_value("Work Order",
-			{"production_plan": pln.name, "production_item": "Test BOM 3"}, "qty")
+		to_produce_qty = frappe.db.get_value(
+			"Work Order",
+			{"production_plan": pln.name, "production_item": "Test BOM 3"},
+			"qty"
+		)
 
 		self.assertEqual(to_produce_qty, 18.0)
 		pln.cancel()
 		frappe.delete_doc("Production Plan", pln.name)
 
 	def test_get_warehouse_list_group(self):
-		"""Check if required warehouses are returned"""
+		"Check if required child warehouses are returned."
 		warehouse_json = '[{\"warehouse\":\"_Test Warehouse Group - _TC\"}]'
 
 		warehouses = set(get_warehouse_list(warehouse_json))
@@ -284,6 +336,7 @@ class TestProductionPlan(ERPNextTestCase):
 				msg=f"Following warehouses were expected {', '.join(missing_warehouse)}")
 
 	def test_get_warehouse_list_single(self):
+		"Check if same warehouse is returned in absence of child warehouses."
 		warehouse_json = '[{\"warehouse\":\"_Test Scrap Warehouse - _TC\"}]'
 
 		warehouses = set(get_warehouse_list(warehouse_json))
@@ -292,6 +345,7 @@ class TestProductionPlan(ERPNextTestCase):
 		self.assertEqual(warehouses, expected_warehouses)
 
 	def test_get_sales_order_with_variant(self):
+		"Check if Template BOM is fetched in absence of Variant BOM."
 		rm_item = create_item('PIV_RM', valuation_rate = 100)
 		if not frappe.db.exists('Item', {"item_code": 'PIV'}):
 			item = create_item('PIV', valuation_rate = 100)
@@ -348,7 +402,7 @@ class TestProductionPlan(ERPNextTestCase):
 		frappe.db.rollback()
 
 	def test_subassmebly_sorting(self):
-		""" Test subassembly sorting in case of multiple items with nested BOMs"""
+		"Test subassembly sorting in case of multiple items with nested BOMs."
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 
 		prefix = "_TestLevel_"
@@ -385,8 +439,164 @@ class TestProductionPlan(ERPNextTestCase):
 		# lowest most level of subassembly should be first
 		self.assertIn("SuperSecret", plan.sub_assembly_items[0].production_item)
 
+	def test_multiple_work_order_for_production_plan_item(self):
+		"Test producing Prod Plan (making WO) in parts."
+		def create_work_order(item, pln, qty):
+			# Get Production Items
+			items_data = pln.get_production_items()
+
+			# Update qty
+			items_data[(item, None, None)]["qty"] = qty
+
+			# Create and Submit Work Order for each item in items_data
+			for key, item in items_data.items():
+				if pln.sub_assembly_items:
+					item['use_multi_level_bom'] = 0
+
+				wo_name = pln.create_work_order(item)
+				wo_doc = frappe.get_doc("Work Order", wo_name)
+				wo_doc.update({
+					'wip_warehouse': 'Work In Progress - _TC',
+					'fg_warehouse': 'Finished Goods - _TC'
+				})
+				wo_doc.submit()
+				wo_list.append(wo_name)
+
+		item = "Test Production Item 1"
+		raw_materials = ["Raw Material Item 1", "Raw Material Item 2"]
+
+		# Create BOM
+		bom = make_bom(item=item, raw_materials=raw_materials)
+
+		# Create Production Plan
+		pln = create_production_plan(item_code=bom.item, planned_qty=10)
+
+		# All the created Work Orders
+		wo_list = []
+
+		# Create and Submit 1st Work Order for 5 qty
+		create_work_order(item, pln, 5)
+		pln.reload()
+		self.assertEqual(pln.po_items[0].ordered_qty, 5)
+
+		# Create and Submit 2nd Work Order for 3 qty
+		create_work_order(item, pln, 3)
+		pln.reload()
+		self.assertEqual(pln.po_items[0].ordered_qty, 8)
+
+		# Cancel 1st Work Order
+		wo1 = frappe.get_doc("Work Order", wo_list[0])
+		wo1.cancel()
+		pln.reload()
+		self.assertEqual(pln.po_items[0].ordered_qty, 3)
+
+		# Cancel 2nd Work Order
+		wo2 = frappe.get_doc("Work Order", wo_list[1])
+		wo2.cancel()
+		pln.reload()
+		self.assertEqual(pln.po_items[0].ordered_qty, 0)
+
+	def test_production_plan_pending_qty_with_sales_order(self):
+		"""
+		Test Prod Plan impact via: SO -> Prod Plan -> WO -> SE -> SE (cancel)
+		"""
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_se_from_wo,
+		)
+
+		make_stock_entry(item_code="Raw Material Item 1",
+			target="Work In Progress - _TC",
+			qty=2, basic_rate=100
+		)
+		make_stock_entry(item_code="Raw Material Item 2",
+			target="Work In Progress - _TC",
+			qty=2, basic_rate=100
+		)
+
+		item = 'Test Production Item 1'
+		so = make_sales_order(item_code=item, qty=1)
+
+		pln = create_production_plan(
+			company=so.company,
+			get_items_from="Sales Order",
+			sales_order=so,
+			skip_getting_mr_items=True
+		)
+		self.assertEqual(pln.po_items[0].pending_qty, 1)
+
+		wo = make_wo_order_test_record(
+			item_code=item, qty=1,
+			company=so.company,
+			wip_warehouse='Work In Progress - _TC',
+			fg_warehouse='Finished Goods - _TC',
+			skip_transfer=1,
+			do_not_submit=True
+		)
+		wo.production_plan = pln.name
+		wo.production_plan_item = pln.po_items[0].name
+		wo.submit()
+
+		se = frappe.get_doc(make_se_from_wo(wo.name, "Manufacture", 1))
+		se.submit()
+
+		pln.reload()
+		self.assertEqual(pln.po_items[0].pending_qty, 0)
+
+		se.cancel()
+		pln.reload()
+		self.assertEqual(pln.po_items[0].pending_qty, 1)
+
+	def test_production_plan_pending_qty_independent_items(self):
+		"Test Prod Plan impact if items are added independently (no from SO or MR)."
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_se_from_wo,
+		)
+
+		make_stock_entry(item_code="Raw Material Item 1",
+			target="Work In Progress - _TC",
+			qty=2, basic_rate=100
+		)
+		make_stock_entry(item_code="Raw Material Item 2",
+			target="Work In Progress - _TC",
+			qty=2, basic_rate=100
+		)
+
+		pln = create_production_plan(
+			item_code='Test Production Item 1',
+			skip_getting_mr_items=True
+		)
+		self.assertEqual(pln.po_items[0].pending_qty, 1)
+
+		wo = make_wo_order_test_record(
+			item_code='Test Production Item 1', qty=1,
+			company=pln.company,
+			wip_warehouse='Work In Progress - _TC',
+			fg_warehouse='Finished Goods - _TC',
+			skip_transfer=1,
+			do_not_submit=True
+		)
+		wo.production_plan = pln.name
+		wo.production_plan_item = pln.po_items[0].name
+		wo.submit()
+
+		se = frappe.get_doc(make_se_from_wo(wo.name, "Manufacture", 1))
+		se.submit()
+
+		pln.reload()
+		self.assertEqual(pln.po_items[0].pending_qty, 0)
+
+		se.cancel()
+		pln.reload()
+		self.assertEqual(pln.po_items[0].pending_qty, 1)
 
 def create_production_plan(**args):
+	"""
+	sales_order (obj): Sales Order Doc Object
+	get_items_from (str): Sales Order/Material Request
+	skip_getting_mr_items (bool): Whether or not to plan for new MRs
+	"""
 	args = frappe._dict(args)
 
 	pln = frappe.get_doc({
@@ -394,20 +604,35 @@ def create_production_plan(**args):
 		'company': args.company or '_Test Company',
 		'customer': args.customer or '_Test Customer',
 		'posting_date': nowdate(),
-		'include_non_stock_items': args.include_non_stock_items or 1,
-		'include_subcontracted_items': args.include_subcontracted_items or 1,
-		'ignore_existing_ordered_qty': args.ignore_existing_ordered_qty or 1,
-		'po_items': [{
+		'include_non_stock_items': args.include_non_stock_items or 0,
+		'include_subcontracted_items': args.include_subcontracted_items or 0,
+		'ignore_existing_ordered_qty': args.ignore_existing_ordered_qty or 0,
+		'get_items_from': 'Sales Order'
+	})
+
+	if not args.get("sales_order"):
+		pln.append('po_items', {
 			'use_multi_level_bom': args.use_multi_level_bom or 1,
 			'item_code': args.item_code,
 			'bom_no': frappe.db.get_value('Item', args.item_code, 'default_bom'),
 			'planned_qty': args.planned_qty or 1,
 			'planned_start_date': args.planned_start_date or now_datetime()
-		}]
-	})
-	mr_items = get_items_for_material_requests(pln.as_dict())
-	for d in mr_items:
-		pln.append('mr_items', d)
+		})
+
+	if args.get("get_items_from") == "Sales Order" and args.get("sales_order"):
+		so = args.get("sales_order")
+		pln.append('sales_orders', {
+			'sales_order': so.name,
+			'sales_order_date': so.transaction_date,
+			'customer': so.customer,
+			'grand_total': so.grand_total
+		})
+		pln.get_items()
+
+	if not args.get("skip_getting_mr_items"):
+		mr_items = get_items_for_material_requests(pln.as_dict())
+		for d in mr_items:
+			pln.append('mr_items', d)
 
 	if not args.do_not_save:
 		pln.insert()

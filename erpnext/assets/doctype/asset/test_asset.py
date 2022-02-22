@@ -1131,6 +1131,15 @@ class TestDepreciationBasics(AssetSetup):
 		self.assertEqual(gle, expected_gle)
 		self.assertEqual(asset.get("value_after_depreciation"), 0)
 
+	def test_asset_cost_center(self):
+		asset = create_asset(is_existing_asset = 1, do_not_save=1)
+		asset.cost_center = "Main - WP"
+
+		self.assertRaises(frappe.ValidationError, asset.submit)
+
+		asset.cost_center = "Main - _TC"
+		asset.submit()
+
 def create_asset_data():
 	if not frappe.db.exists("Asset Category", "Computers"):
 		create_asset_category()

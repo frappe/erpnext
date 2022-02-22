@@ -74,39 +74,6 @@ class LoanInterestAccrual(AccountsController):
 				})
 			)
 
-		if self.payable_principal_amount:
-			gle_map.append(
-				self.get_gl_dict({
-					"account": self.loan_account,
-					"party_type": self.applicant_type,
-					"party": self.applicant,
-					"against": self.interest_income_account,
-					"debit": self.payable_principal_amount,
-					"debit_in_account_currency": self.interest_amount,
-					"against_voucher_type": "Loan",
-					"against_voucher": self.loan,
-					"remarks": _("Interest accrued from {0} to {1} against loan: {2}").format(
-						self.last_accrual_date, self.posting_date, self.loan),
-					"cost_center": erpnext.get_default_cost_center(self.company),
-					"posting_date": self.posting_date
-				})
-			)
-
-			gle_map.append(
-				self.get_gl_dict({
-					"account": self.interest_income_account,
-					"against": self.loan_account,
-					"credit": self.payable_principal_amount,
-					"credit_in_account_currency":  self.interest_amount,
-					"against_voucher_type": "Loan",
-					"against_voucher": self.loan,
-					"remarks": ("Interest accrued from {0} to {1} against loan: {2}").format(
-						self.last_accrual_date, self.posting_date, self.loan),
-					"cost_center": erpnext.get_default_cost_center(self.company),
-					"posting_date": self.posting_date
-				})
-			)
-
 		if gle_map:
 			make_gl_entries(gle_map, cancel=cancel, adv_adj=adv_adj)
 
