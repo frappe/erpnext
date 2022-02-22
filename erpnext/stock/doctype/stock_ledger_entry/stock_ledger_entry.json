@@ -2,7 +2,7 @@
  "actions": [],
  "allow_copy": 1,
  "autoname": "MAT-SLE-.YYYY.-.#####",
- "creation": "2013-01-29 19:25:42",
+ "creation": "2022-01-25 11:01:53.528488",
  "doctype": "DocType",
  "document_type": "Other",
  "engine": "InnoDB",
@@ -36,6 +36,8 @@
   "fiscal_year",
   "serial_no",
   "is_cancelled",
+  "skip_update_serial_no",
+  "skip_serial_no_validation",
   "to_rename"
  ],
  "fields": [
@@ -309,6 +311,22 @@
    "label": "Recalculate Incoming/Outgoing Rate",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "skip_update_serial_no",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Skip Update Serial No",
+   "report_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "skip_serial_no_validation",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Skip Serial No Validation",
+   "report_hide": 1
   }
  ],
  "hide_toolbar": 1,
@@ -317,7 +335,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-21 06:25:30.040801",
+ "modified": "2022-02-21 15:06:35.695573",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

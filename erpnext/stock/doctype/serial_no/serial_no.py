@@ -89,7 +89,7 @@ class SerialNo(StockController):
 		self.brand = item.brand
 		self.warranty_period = item.warranty_period
 
-	def set_purchase_details(self, purchase_sle):
+	def set_purchase_details(self, purchase_sle, update=False):
 		if purchase_sle:
 			self.purchase_document_type = purchase_sle.voucher_type
 			self.purchase_document_no = purchase_sle.voucher_no
@@ -104,12 +104,15 @@ class SerialNo(StockController):
 			# If sales return entry
 			if self.purchase_document_type == 'Delivery Note':
 				self.sales_invoice = None
+			if update:
+				self.save()
 		else:
 			for fieldname in ("purchase_document_type", "purchase_document_no",
 				"purchase_date", "purchase_time", "purchase_rate", "supplier", "supplier_name"):
 					self.set(fieldname, None)
 
-	def set_sales_details(self, delivery_sle):
+
+	def set_sales_details(self, delivery_sle, update):
 		if delivery_sle:
 			self.delivery_document_type = delivery_sle.voucher_type
 			self.delivery_document_no = delivery_sle.voucher_no
@@ -122,6 +125,8 @@ class SerialNo(StockController):
 			if self.warranty_period:
 				self.warranty_expiry_date	= add_days(cstr(delivery_sle.posting_date),
 					cint(self.warranty_period))
+			if update:
+				self.save()
 		else:
 			for fieldname in ("delivery_document_type", "delivery_document_no",
 				"delivery_date", "delivery_time", "customer", "customer_name",
@@ -194,16 +199,17 @@ class SerialNo(StockController):
 		if sle_exists:
 			frappe.throw(_("Cannot delete Serial No {0}, as it is used in stock transactions").format(self.name))
 
-	def update_serial_no_reference(self, serial_no=None):
+	def update_serial_no_reference(self, serial_no=None, update=False):
 		last_sle = self.get_last_sle(serial_no)
-		self.set_purchase_details(last_sle.get("purchase_sle"))
-		self.set_sales_details(last_sle.get("delivery_sle"))
+		self.set_purchase_details(last_sle.get("purchase_sle"), update)
+		self.set_sales_details(last_sle.get("delivery_sle"), update)
 		self.set_maintenance_status()
 		self.set_status()
 
 def process_serial_no(sle):
 	item_det = get_item_details(sle.item_code)
-	validate_serial_no(sle, item_det)
+	if not sle.skip_serial_no_validation:
+		validate_serial_no(sle, item_det)
 	if not sle.skip_update_serial_no:
 		update_serial_nos(sle, item_det)
 
@@ -404,7 +410,6 @@ def update_serial_nos(sle, item_det, return_sle=False):
 	if sle.serial_no:
 		auto_make_serial_nos(sle)
 		if return_sle:
-			sle.skip_update_serial_no = True
 			return sle
 
 def get_auto_serial_nos(serial_no_series, qty):
