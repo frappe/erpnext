@@ -2,7 +2,13 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Subcontracting Receipt', {
-	// refresh: function(frm) {
-
-	// }
+	refresh: function (frm) {
+		frm.set_query('subcontracting_order', () => {
+			return {
+				filters: {
+					docstatus: 1,
+				}
+			};
+		});
+	}
 });
