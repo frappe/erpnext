@@ -4,6 +4,8 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder import Order
+from frappe.query_builder.functions import Concat
 
 
 def execute(filters=None):
@@ -113,46 +115,46 @@ def get_columns():
 	return columns
 
 def get_data(filters):
-	return frappe.db.sql("""
-		SELECT
-			`tabLead`.name,
-			`tabLead`.lead_name,
-			`tabLead`.status,
-			`tabLead`.lead_owner,
-			`tabLead`.territory,
-			`tabLead`.source,
-			`tabLead`.email_id,
-			`tabLead`.mobile_no,
-			`tabLead`.phone,
-			`tabLead`.owner,
-			`tabLead`.company,
-			concat_ws(', ',
-				trim(',' from `tabAddress`.address_line1),
-				trim(',' from tabAddress.address_line2)
-			) AS address,
-			`tabAddress`.state,
-			`tabAddress`.pincode,
-			`tabAddress`.country
-		FROM
-			`tabLead` left join `tabDynamic Link` on (
-			`tabLead`.name = `tabDynamic Link`.link_name and
-			`tabDynamic Link`.parenttype = 'Address')
-			left join `tabAddress` on (
-			`tabAddress`.name=`tabDynamic Link`.parent)
-		WHERE
-			company = %(company)s
-			AND `tabLead`.creation BETWEEN %(from_date)s AND %(to_date)s
-			{conditions}
-		ORDER BY
-			`tabLead`.creation asc """.format(conditions=get_conditions(filters)), filters, as_dict=1)
+	lead = frappe.qb.DocType("Lead").as_("lead")
+	address = frappe.qb.DocType("Address").as_("address")
+	dl = frappe.qb.DocType("Dynamic Link").as_("dl")
 
-def get_conditions(filters) :
-	conditions = []
+	query = frappe.qb.from_(lead).left_join(dl).on(
+		(lead.name == dl.link_name) & (dl.parenttype == "Address")
+	).left_join(address).on(
+		address.name == dl.parent
+	).select(
+		lead.name,
+		lead.lead_name,
+		lead.status,
+		lead.lead_owner,
+		lead.territory,
+		lead.source,
+		lead.email_id,
+		lead.mobile_no,
+		lead.phone,
+		lead.owner,
+		lead.company,
+		Concat(address.address_line1, ", ", address.address_line2).as_("address"),
+		address.state,
+		address.pincode,
+		address.country
+	).where(
+		lead.creation[filters.get("from_date"):filters.get("to_date")] & lead.company==filters.get("company")
+	)
 
 	if filters.get("territory"):
-		conditions.append(" and `tabLead`.territory=%(territory)s")
-
+		query.where(
+			lead.territory == filters.get("territory")
+		)
+	
 	if filters.get("status"):
-		conditions.append(" and `tabLead`.status=%(status)s")
+		query.where(
+			lead.territory == filters.get("status")
+		)
 
-	return " ".join(conditions) if conditions else ""
+	result = query.orderby(
+		lead.creation
+	).run(as_dict=True)
+	
+	return result
