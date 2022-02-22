@@ -8,6 +8,15 @@ frappe.ui.form.on('Subcontracting Order', {
 
 			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
+
+		frm.set_query('purchase_order', () => {
+			return {
+				filters: {
+					docstatus: 1,
+					is_subcontracted: 'Yes'
+				}
+			};
+		});
 	},
 });
 
