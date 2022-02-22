@@ -45,7 +45,6 @@ def get_data():
 				'label': _('Pricing'),
 				'items': ['Item Price', 'Pricing Rule']
 			},
-			},
 			{
 				'label': _('Traceability'),
 				'items': ['Serial No', 'Batch']
