@@ -9,7 +9,9 @@
   "title",
   "naming_series",
   "amended_from",
-  "subcontracting_order"
+  "subcontracting_order",
+  "company",
+  "items"
  ],
  "fields": [
   {
@@ -56,12 +58,27 @@
    "label": "Subcontracting Order",
    "options": "Subcontracting Order",
    "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Subcontracting Receipt Item",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-21 15:26:29.862616",
+ "modified": "2022-02-22 13:07:59.448699",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Subcontracting Receipt",

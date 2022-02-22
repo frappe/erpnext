@@ -10,7 +10,8 @@
   "naming_series",
   "amended_from",
   "purchase_order",
-  "company"
+  "company",
+  "items"
  ],
  "fields": [
   {
@@ -54,12 +55,20 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Subcontracting Order Item",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-21 21:28:44.516473",
+ "modified": "2022-02-22 13:03:58.313651",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Subcontracting Order",
