@@ -253,19 +253,19 @@ doc_events = {
 		"on_update": "erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings.validate_cart_settings"
 	},
 	"Tax Category": {
-		"validate": "erpnext.regional.india.utils.validate_tax_category"
+		# "validate": "erpnext.regional.india.utils.validate_tax_category"
 	},
 	"Sales Invoice": {
 		"on_submit": [
 			"erpnext.regional.create_transaction_log",
-			"erpnext.regional.italy.utils.sales_invoice_on_submit",
-			"erpnext.regional.saudi_arabia.utils.create_qr_code",
+			# "erpnext.regional.italy.utils.sales_invoice_on_submit",
+			# "erpnext.regional.saudi_arabia.utils.create_qr_code",
 			"erpnext.erpnext_integrations.taxjar_integration.create_transaction"
 		],
 		"on_cancel": [
-			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
+			# "erpnext.regional.italy.utils.sales_invoice_on_cancel",
 			"erpnext.erpnext_integrations.taxjar_integration.delete_transaction",
-			"erpnext.regional.saudi_arabia.utils.delete_qr_code_file"
+			# "erpnext.regional.saudi_arabia.utils.delete_qr_code_file"
 		],
 		"on_trash": "erpnext.regional.check_deletion_permission",
 		"validate": [
@@ -274,38 +274,38 @@ doc_events = {
 		]
 	},
 	"POS Invoice": {
-		"on_submit": ["erpnext.regional.saudi_arabia.utils.create_qr_code"]
+		# "on_submit": ["erpnext.regional.saudi_arabia.utils.create_qr_code"]
 	},
 	"Purchase Invoice": {
 		"validate": [
-			"erpnext.regional.india.utils.validate_reverse_charge_transaction",
-			"erpnext.regional.india.utils.update_itc_availed_fields",
-			"erpnext.regional.united_arab_emirates.utils.update_grand_total_for_rcm",
-			"erpnext.regional.united_arab_emirates.utils.validate_returns",
-			"erpnext.regional.india.utils.update_taxable_values"
+			# "erpnext.regional.india.utils.validate_reverse_charge_transaction",
+			# "erpnext.regional.india.utils.update_itc_availed_fields",
+			# "erpnext.regional.united_arab_emirates.utils.update_grand_total_for_rcm",
+			# "erpnext.regional.united_arab_emirates.utils.validate_returns",
+			# "erpnext.regional.india.utils.update_taxable_values"
 		]
 	},
 	"Purchase Invoice": {
-		"validate": "erpnext.regional.india.utils.update_grand_total_for_rcm"
+		# "validate": "erpnext.regional.india.utils.update_grand_total_for_rcm"
 	},
 	"Payment Entry": {
-		"validate": "erpnext.regional.india.utils.update_place_of_supply",
+		# "validate": "erpnext.regional.india.utils.update_place_of_supply",
 		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.update_payment_req_status", "erpnext.accounts.doctype.dunning.dunning.resolve_dunning"],
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	'Address': {
 		'validate': [
-			'erpnext.regional.india.utils.validate_gstin_for_india',
-			'erpnext.regional.italy.utils.set_state_code',
-			'erpnext.regional.india.utils.update_gst_category',
+			# 'erpnext.regional.india.utils.validate_gstin_for_india',
+			# 'erpnext.regional.italy.utils.set_state_code',
+			# 'erpnext.regional.india.utils.update_gst_category',
 			'erpnext.healthcare.utils.update_address_links'
 		],
 	},
 	'Supplier': {
-		'validate': 'erpnext.regional.india.utils.validate_pan_for_india'
+		# 'validate': 'erpnext.regional.india.utils.validate_pan_for_india'
 	},
 	('Sales Invoice', 'Sales Order', 'Delivery Note', 'Purchase Invoice', 'Purchase Order', 'Purchase Receipt'): {
-		'validate': ['erpnext.regional.india.utils.set_place_of_supply']
+		# 'validate': ['erpnext.regional.india.utils.set_place_of_supply']
 	},
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
@@ -319,8 +319,8 @@ doc_events = {
 		'validate': ["erpnext.erpnext_integrations.taxjar_integration.set_sales_tax"]
 	},
 	"Company": {
-		"on_trash": ["erpnext.regional.india.utils.delete_gst_settings_for_company",
-			"erpnext.regional.saudi_arabia.utils.delete_vat_settings_for_company"]
+		# "on_trash": ["erpnext.regional.india.utils.delete_gst_settings_for_company",
+		# 	"erpnext.regional.saudi_arabia.utils.delete_vat_settings_for_company"]
 	},
 	"Integration Request": {
 		"validate": "erpnext.accounts.doctype.payment_request.payment_request.validate_payment"
