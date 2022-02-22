@@ -30,48 +30,31 @@ class ShiftType(Document):
 			or not self.last_sync_of_checkin
 		):
 			return
+
 		filters = {
-			"skip_auto_attendance": "0",
-			"attendance": ("is", "not set"),
-			"time": (">=", self.process_attendance_after),
-			"shift_actual_end": ("<", self.last_sync_of_checkin),
-			"shift": self.name,
+			'skip_auto_attendance': 0,
+			'attendance': ('is', 'not set'),
+			'time': ('>=', self.process_attendance_after),
+			'shift_actual_end': ('<', self.last_sync_of_checkin),
+			'shift': self.name
 		}
-		logs = frappe.db.get_list(
-			"Employee Checkin", fields="*", filters=filters, order_by="employee,time"
-		)
-		for key, group in itertools.groupby(
-			logs, key=lambda x: (x["employee"], x["shift_actual_start"])
-		):
+		logs = frappe.db.get_list('Employee Checkin', fields="*", filters=filters, order_by="employee,time")
+
+		for key, group in itertools.groupby(logs, key=lambda x: (x['employee'], x['shift_actual_start'])):
 			single_shift_logs = list(group)
-			(
-				attendance_status,
-				working_hours,
-				late_entry,
-				early_exit,
-				in_time,
-				out_time,
-			) = self.get_attendance(single_shift_logs)
-			mark_attendance_and_link_log(
-				single_shift_logs,
-				attendance_status,
-				key[1].date(),
-				working_hours,
-				late_entry,
-				early_exit,
-				in_time,
-				out_time,
-				self.name,
-			)
+			attendance_status, working_hours, late_entry, early_exit, in_time, out_time = self.get_attendance(single_shift_logs)
+			mark_attendance_and_link_log(single_shift_logs, attendance_status, key[1].date(),
+				working_hours, late_entry, early_exit, in_time, out_time, self.name)
+
 		for employee in self.get_assigned_employee(self.process_attendance_after, True):
 			self.mark_absent_for_dates_with_no_attendance(employee)
 
 	def get_attendance(self, logs):
 		"""Return attendance_status, working_hours, late_entry, early_exit, in_time, out_time
 		for a set of logs belonging to a single shift.
-		Assumtion:
-		        1. These logs belongs to an single shift, single employee and is not in a holiday date.
-		        2. Logs are in chronological order
+		Assumption:
+			1. These logs belongs to a single shift, single employee and it's not in a holiday date.
+			2. Logs are in chronological order
 		"""
 		late_entry = early_exit = False
 		total_working_hours, in_time, out_time = calculate_working_hours(
@@ -115,7 +98,7 @@ class ShiftType(Document):
 		start_date = max(getdate(self.process_attendance_after), date_of_joining)
 		actual_shift_datetime = get_actual_start_end_datetime_of_shift(employee, get_datetime(self.last_sync_of_checkin), True)
 		last_shift_time = actual_shift_datetime.actual_start if actual_shift_datetime else get_datetime(self.last_sync_of_checkin)
-		prev_shift = get_employee_shift(employee, last_shift_time.date()-timedelta(days=1), True, 'reverse')
+		prev_shift = get_employee_shift(employee, last_shift_time - timedelta(days=1), True, 'reverse')
 		if prev_shift:
 			end_date = (
 				min(prev_shift.start_datetime.date(), relieving_date)
@@ -128,8 +111,9 @@ class ShiftType(Document):
 		if not holiday_list_name:
 			holiday_list_name = get_holiday_list_for_employee(employee, False)
 		dates = get_filtered_date_list(employee, start_date, end_date, holiday_list=holiday_list_name)
+
 		for date in dates:
-			shift_details = get_employee_shift(employee, date, True)
+			shift_details = get_employee_shift(employee, get_datetime(date), True)
 			if shift_details and shift_details.shift_type.name == self.name:
 				mark_attendance(employee, date, "Absent", self.name)
 
