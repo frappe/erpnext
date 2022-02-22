@@ -655,7 +655,6 @@ def get_held_invoices(party_type, party):
 
 	return held_invoices
 
-import pdb
 def get_outstanding_invoices(party_type, party, account, condition=None, filters=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
@@ -684,8 +683,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 		from
 			`tabGL Entry`
 		where
-			party_type = %(party_type)s and party = %(party)s
-			and account = %(account)s and {dr_or_cr} > 0
+			party_type = '{party_type}' and party = '{party}'
+			and account = '{account}' and {dr_or_cr} > 0
 			and is_cancelled=0
 			{condition}
 			and ((voucher_type = 'Journal Entry'
