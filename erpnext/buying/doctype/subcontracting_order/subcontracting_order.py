@@ -2,12 +2,24 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
 
 class SubcontractingOrder(Document):
-	pass
+	def validate(self):
+		self.validate_purchase_order()
+
+	def validate_purchase_order(self):
+		if self.get("purchase_order"):
+			po = frappe.get_doc("Purchase Order", self.get("purchase_order"))
+
+			if po.docstatus != 1:
+				frappe.throw(_(f"Please submit Purchase Order {po.name} before proceeding."))
+
+			if po.is_subcontracted != "Yes":
+				frappe.throw(_("Please select a valid Purchase Order that is configured for Subcontracting."))
 
 
 @frappe.whitelist()
