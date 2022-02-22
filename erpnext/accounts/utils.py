@@ -1117,8 +1117,8 @@ def check_and_delete_linked_reports(report):
 		for icon in icons:
 			frappe.delete_doc("Desktop Icon", icon)
 
-def so_required_settings_message(msg, primary_action, custom_action):
-	msgprint(msg, primary_action=primary_action, custom_action=custom_action, raise_exception=1)
+def so_required_settings_message(msg, primary_action, title):
+	msgprint(msg, title, primary_action=primary_action, raise_exception=1)
 
 @frappe.whitelist()
 def check_open_sos(customer, doctype=None):

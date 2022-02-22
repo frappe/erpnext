@@ -100,15 +100,24 @@ $.extend(erpnext, {
 	},
 	route_to_new_sales_order: (args) => {
 		if (!args.perm) {
-			frappe.throw(__("Not permitted"), frappe.PermissionError)
+			args.msg_dialog.hide()
+			setTimeout(() => {
+				frappe.throw(__("Not permitted"), frappe.PermissionError)
+			}, 500);
+		} else {
+			frappe.new_doc('Sales Order', {'customer':args.customer});
 		}
-		frappe.new_doc('Sales Order', {'customer':args.customer});
 	},
 	route_to_new_purchase_order: (args) => {
+		console.log(args)
 		if (!args.perm) {
-			frappe.throw(__("Not permitted"), frappe.PermissionError)
+			args.msg_dialog.hide()
+			setTimeout(() => {
+				frappe.throw(__("Not permitted"), frappe.PermissionError)
+			}, 500);
+		} else {
+			frappe.new_doc('Purchase Order', {'supplier':args.supplier});
 		}
-		frappe.new_doc('Purchase Order', {'supplier':args.supplier});
 	},
 	change_selling_setting_so_required: (args) => {
 		if (!args.perm) {

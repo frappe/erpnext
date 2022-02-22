@@ -328,21 +328,20 @@ class PurchaseInvoice(BuyingController):
 			for d in self.get('items'):
 				if not d.purchase_order:
 					msg = _("Purchase Order Required for item {}").format(frappe.bold(d.item_code))
+					msg += "<br><br>"
+					msg += _("To submit the invoice without purchase order please set {0} as {1} in {2}").format(
+						frappe.bold(_('Purchase Order Required')), frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings'))
 					from erpnext.accounts.utils import (
 						check_permissions_so_po_required,
 						so_required_settings_message,
 					)
 					perms = check_permissions_so_po_required('Purchase Order', 'Buying Settings')
-					so_required_settings_message(msg, primary_action={
+					so_required_settings_message(msg, title=_("Purchase Order Required"), primary_action={
 						'label': _('Create Purchase Order'),
 						'client_action': 'erpnext.route_to_new_purchase_order',
 						'args': {"supplier": self.supplier, "perm": perms['perm_so_po']}
 					},
-					custom_action={
-						'label': _('Change this setting'),
-						'client_action': 'erpnext.change_buying_setting_po_required',
-						'args': {"perm": perms['perm_setting']}
-					})
+)
 
 	def pr_required(self):
 		stock_items = self.get_stock_items()
