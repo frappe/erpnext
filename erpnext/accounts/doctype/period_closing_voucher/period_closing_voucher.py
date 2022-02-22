@@ -12,8 +12,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (get_accounting_dimensions,
-	get_dimension_filters)
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (get_accounting_dimensions)
 
 
 class PeriodClosingVoucher(AccountsController):
