@@ -1280,7 +1280,7 @@ def create_asset(**args):
 
 	if not args.do_not_save:
 		try:
-			asset.save()
+			asset.insert(ignore_if_duplicate=True)
 		except frappe.DuplicateEntryError:
 			pass
 
@@ -1321,7 +1321,7 @@ def create_fixed_asset_item(item_code=None, auto_create_assets=1, is_grouped_ass
 			"is_grouped_asset": is_grouped_asset,
 			"asset_naming_series": naming_series
 		})
-		item.insert()
+		item.insert(ignore_if_duplicate=True)
 	except frappe.DuplicateEntryError:
 		pass
 	return item
