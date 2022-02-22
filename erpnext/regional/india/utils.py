@@ -841,8 +841,15 @@ def get_depreciation_amount(asset, depreciable_value, row):
 	if row.depreciation_method in ("Straight Line", "Manual"):
 		# if the Depreciation Schedule is being prepared for the first time
 		if not asset.flags.increase_in_asset_life:
-			depreciation_amount = (flt(asset.gross_purchase_amount) -
-				flt(row.expected_value_after_useful_life)) / flt(row.total_number_of_depreciations)
+			depreciation_amount = (
+				(
+					flt(row.value_after_depreciation)
+					- flt(row.expected_value_after_useful_life)
+				) / (
+					cint(row.total_number_of_depreciations)
+					- cint(asset.number_of_depreciations_booked)
+				)
+			)
 
 		# if the Depreciation Schedule is being modified after Asset Repair
 		else:
