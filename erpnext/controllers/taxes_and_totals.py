@@ -116,7 +116,7 @@ class calculate_taxes_and_totals(object):
 				if item.discount_percentage == 100:
 					item.rate = 0.0
 				elif item.price_list_rate:
-					if not item.rate or (item.pricing_rules and item.discount_percentage > 0):
+					if item.pricing_rules or item.discount_percentage > 0:
 						item.rate = flt(item.price_list_rate *
 							(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
 						item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
