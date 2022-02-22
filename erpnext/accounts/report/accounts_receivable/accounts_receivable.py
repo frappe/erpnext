@@ -212,6 +212,12 @@ class ReceivablePayableReport(object):
 			if self.filters.show_sales_person and row.sales_team:
 				row.sales_person = ", ".join(row.sales_team)
 				del row['sales_team']
+		
+		if row.voucher_type == 'Customer Documents':
+			document_number = frappe.get_value("Customer Documents", row.voucher_no, 'document_number')
+			row.document_number = document_number
+		else:
+			row.document_number = ''
 
 	def set_delivery_notes(self, row):
 		delivery_notes = self.delivery_notes.get(row.voucher_no, [])
@@ -660,6 +666,7 @@ class ReceivablePayableReport(object):
 		self.add_column(label=_('Voucher Type'), fieldname='voucher_type', fieldtype='Data')
 		self.add_column(label=_('Voucher No'), fieldname='voucher_no', fieldtype='Dynamic Link',
 			options='voucher_type', width=180)
+		self.add_column(label=_('Document Nnumber'), fieldname='document_number', fieldtype='Data', width=180)
 		self.add_column(label='Due Date', fieldtype='Date')
 
 		if self.party_type == "Supplier":
