@@ -24,6 +24,12 @@ frappe.query_reports["Provider Withholding Vouchers"] = {
 			"fieldtype": "Link",
 			"options": "Company",
 			"reqd": 1
+		},
+		{
+			"fieldname":"reason",
+			"label": __("Reason"),
+			"fieldtype": "Link",
+			"options": "Reason For Retention"
 		}
 	]
 };
