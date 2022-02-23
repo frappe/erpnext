@@ -450,6 +450,13 @@ class IncomeTaxComputationReport(object):
 				"fieldtype": "Date"
 			},
 			{
+				"label": _("Income Tax Slab"),
+				"fieldname": "income_tax_slab",
+				"fieldtype": "Link",
+				"options": "Income Tax Slab",
+				"width": "140px"
+			},
+			{
 				"label": _("CTC"),
 				"fieldname": "ctc",
 				"fieldtype": "Currency",
