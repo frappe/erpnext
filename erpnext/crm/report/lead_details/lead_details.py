@@ -4,7 +4,6 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder import Order
 from frappe.query_builder.functions import Concat
 
 
@@ -141,6 +140,8 @@ def get_data(filters):
 		address.country
 	).where(
 		lead.creation[filters.get("from_date"):filters.get("to_date")] & lead.company==filters.get("company")
+	).orderby(
+		lead.creation
 	)
 
 	if filters.get("territory"):
@@ -156,5 +157,5 @@ def get_data(filters):
 	result = query.orderby(
 		lead.creation
 	).run(as_dict=True)
-	
+
 	return result
