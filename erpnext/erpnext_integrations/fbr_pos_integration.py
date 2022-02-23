@@ -135,8 +135,17 @@ def calculate_fbr_pos_values(invoice):
 	# Create Item Row ID Map
 	item_map = {}
 	existing_pos_item_map = {}
+	for d in invoice.items:
+		item_map[d.name] = d
+	for d in invoice.get('fbr_pos_items'):
+		if d.fbr_pos_item_reference:
+			existing_pos_item_map[d.fbr_pos_item_reference] = d
+
+	# Items
+	invoice.fbr_pos_items = []
 	for item in invoice.items:
-		pos_item = invoice.append('fbr_pos_items')
+		existing_pos_item = existing_pos_item_map.get(item.name)
+		pos_item = invoice.append('fbr_pos_items', existing_pos_item)
 
 		# Reference to line item
 		pos_item.fbr_pos_item_reference = item.name
@@ -178,6 +187,9 @@ def calculate_fbr_pos_values(invoice):
 			invoice.fbr_pos_total_bill_amount += pos_item.fbr_pos_total_amount
 		else:
 			invoice.remove(pos_item)
+
+	for i, pos_item in enumerate(invoice.fbr_pos_items):
+		pos_item.idx = i + 1
 
 	# Round Totals
 	invoice.fbr_pos_total_quantity = flt(invoice.fbr_pos_total_quantity, invoice.precision('fbr_pos_total_quantity'))
