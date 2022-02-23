@@ -197,7 +197,10 @@ class ProductQuery:
 			website_item_groups = frappe.db.get_all(
 				"Website Item",
 				fields=self.fields + ["`tabWebsite Item Group`.parent as wig_parent"],
-				filters=[["Website Item Group", "item_group", "=", item_group]]
+				filters=[
+					["Website Item Group", "item_group", "=", item_group],
+					["published", "=", 1]
+				]
 			)
 		return website_item_groups
 

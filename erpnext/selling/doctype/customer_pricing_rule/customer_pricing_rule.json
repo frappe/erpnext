@@ -146,8 +146,9 @@
   }
  ],
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2021-06-05 12:25:46.192677",
+ "modified": "2022-02-23 13:08:35.140086",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer Pricing Rule",

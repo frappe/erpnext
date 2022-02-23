@@ -22,6 +22,8 @@
   "required_qty",
   "col_break3",
   "consumed_qty",
+  "qty_to_be_consumed",
+  "loss_qty",
   "current_stock",
   "secbreak_3",
   "batch_no",
@@ -92,11 +94,10 @@
    "columns": 2,
    "fieldname": "consumed_qty",
    "fieldtype": "Float",
-   "in_list_view": 1,
+   "hidden": 1,
    "label": "Qty to Be Consumed",
    "oldfieldname": "consumed_qty",
-   "oldfieldtype": "Currency",
-   "reqd": 1
+   "oldfieldtype": "Currency"
   },
   {
    "fieldname": "stock_uom",
@@ -202,12 +203,29 @@
    "options": "Purchase Order",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "qty_to_be_consumed",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty to Be Consumed"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "loss_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Loss Qty",
+   "non_negative": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-06-19 19:33:04.431213",
+ "modified": "2022-01-21 12:51:47.387478",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Receipt Item Supplied",

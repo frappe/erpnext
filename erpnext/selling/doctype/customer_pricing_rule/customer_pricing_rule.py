@@ -8,8 +8,7 @@ from frappe.model.document import Document
 from frappe.utils import getdate, now_datetime, nowdate
 import json
 class CustomerPricingRule(Document):
-
-	def before_save(self):
+	def on_submit(self):
 		for i in self.item_details:
 			price_list_rate = frappe.db.get_value("Item Price", {"item_code": i.item, 'price_list':self.for_price_list}, "price_list_rate")
 			list_price = price_list_rate + i.additional_price
@@ -25,6 +24,7 @@ class CustomerPricingRule(Document):
 				doc.customer = self.customer
 				doc.valid_from = self.valid_from
 				doc.valid_upto = self.valid_upto
+				doc.currency=self.currency
 				item_uom = frappe.db.get_value("Item", i.item, "stock_uom")
 				doc.append("items", {
 				"item_code":i.get("item"),
@@ -43,7 +43,7 @@ class CustomerPricingRule(Document):
 				doc.for_price_list = self.for_price_list
 				doc.insert()
 			if pr_doc:
-				if pr_doc.get('title') and not pr_doc.get('customer_pricing_rule_id'):
+				if pr_doc.get('title'):
 					if i.get("type") == "Discount":
 						query = """UPDATE `tabPricing Rule` SET discount_amount = '{0}',rate_or_discount = "Discount Amount",margin_rate_or_amount=0.00 WHERE title = '{1}';""".format(i.get("discount_margin") ,doc_title)	
 					if i.get("type") == "Margin":
@@ -51,14 +51,17 @@ class CustomerPricingRule(Document):
 					
 					frappe.db.sql(query)
 					frappe.db.commit()
-			
+
+	def on_cancel(self):
+		frappe.db.sql("""delete from `tabPricing Rule` where customer_pricing_rule_id ='{0}' """.format(self.name))
+
+
 	def before_insert(self):
-		is_existing_customer = frappe.db.get_value('Customer Pricing Rule', {'customer': self.customer}, 'customer')
+		is_existing_customer = frappe.db.get_value('Customer Pricing Rule', {'customer': self.customer,"docstatus":1}, 'customer')
 		if is_existing_customer == self.customer:
 			msg = "Customer Pricing Rule for {0} already exist".format(self.customer)
 			frappe.throw(msg)
 
-	
 	@frappe.whitelist()
 	def onload_customer_pricing(self):
 		print(" inside py onload_customer_pricing ")
@@ -79,6 +82,7 @@ class CustomerPricingRule(Document):
 				doc.customer = self.customer
 				doc.valid_from = self.valid_from
 				doc.valid_upto = self.valid_upto
+				doc.currency=self.currency
 				item_uom = frappe.db.get_value("Item", i.item, "stock_uom")
 				doc.append("items", {
 				"item_code":i.get("item"),
@@ -97,7 +101,7 @@ class CustomerPricingRule(Document):
 				doc.for_price_list = self.for_price_list
 				doc.insert()
 			if pr_doc:
-				if pr_doc.get('title') and not pr_doc.get('customer_pricing_rule_id'):
+				if pr_doc.get('title'):
 					if i.get("type") == "Discount":
 						query = """UPDATE `tabPricing Rule` SET discount_amount = '{0}',rate_or_discount = "Discount Amount",margin_rate_or_amount=0.00 WHERE title = '{1}';""".format(i.get("discount_margin") ,doc_title)	
 					if i.get("type") == "Margin":

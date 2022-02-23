@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import get_datetime
+from frappe.utils import format_date, get_datetime
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -18,25 +18,34 @@ class MaintenanceVisit(TransactionBase):
 			if d.serial_no and not frappe.db.exists("Serial No", d.serial_no):
 				frappe.throw(_("Serial No {0} does not exist").format(d.serial_no))
 
+	def validate_purpose_table(self):
+		if not self.purposes:
+			frappe.throw(_("Add Items in the Purpose Table"), title="Purposes Required")
+
 	def validate_maintenance_date(self):
 		if self.maintenance_type == "Scheduled" and self.maintenance_schedule_detail:
 			item_ref = frappe.db.get_value('Maintenance Schedule Detail', self.maintenance_schedule_detail, 'item_reference')
 			if item_ref:
 				start_date, end_date = frappe.db.get_value('Maintenance Schedule Item', item_ref, ['start_date', 'end_date'])
 				if get_datetime(self.mntc_date) < get_datetime(start_date) or get_datetime(self.mntc_date) > get_datetime(end_date):
-					frappe.throw(_("Date must be between {0} and {1}").format(start_date, end_date))
+					frappe.throw(_("Date must be between {0} and {1}")
+						.format(format_date(start_date), format_date(end_date)))
+
 
 	def validate(self):
 		self.validate_serial_no()
 		self.validate_maintenance_date()
+		self.validate_purpose_table()
 
-	def update_completion_status(self):
+	def update_status_and_actual_date(self, cancel=False):
+		status = "Pending"
+		actual_date = None
+		if not cancel:
+			status = self.completion_status
+			actual_date = self.mntc_date
 		if self.maintenance_schedule_detail:
-			frappe.db.set_value('Maintenance Schedule Detail', self.maintenance_schedule_detail, 'completion_status', self.completion_status)
-
-	def update_actual_date(self):
-		if self.maintenance_schedule_detail:
-			frappe.db.set_value('Maintenance Schedule Detail', self.maintenance_schedule_detail, 'actual_date', self.mntc_date)
+			frappe.db.set_value('Maintenance Schedule Detail', self.maintenance_schedule_detail, 'completion_status', status)
+			frappe.db.set_value('Maintenance Schedule Detail', self.maintenance_schedule_detail, 'actual_date', actual_date)
 
 	def update_customer_issue(self, flag):
 		if not self.maintenance_schedule:
@@ -97,12 +106,12 @@ class MaintenanceVisit(TransactionBase):
 	def on_submit(self):
 		self.update_customer_issue(1)
 		frappe.db.set(self, 'status', 'Submitted')
-		self.update_completion_status()
-		self.update_actual_date()
+		self.update_status_and_actual_date()
 
 	def on_cancel(self):
 		self.check_if_last_visit()
 		frappe.db.set(self, 'status', 'Cancelled')
+		self.update_status_and_actual_date(cancel=True)
 
 	def on_update(self):
 		pass

@@ -293,6 +293,7 @@ def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 			join `tabStock Ledger Entry` ignore index (item_code, warehouse)
 				on (`tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no )
 		where `tabStock Ledger Entry`.item_code = %s and `tabStock Ledger Entry`.warehouse = %s
+			and `tabStock Ledger Entry`.is_cancelled = 0
 			and (`tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL) {0}
 		group by batch_id
 		order by `tabBatch`.expiry_date ASC, `tabBatch`.creation ASC
@@ -313,3 +314,30 @@ def make_batch(args):
 	if frappe.db.get_value("Item", args.item, "has_batch_no"):
 		args.doctype = "Batch"
 		frappe.get_doc(args).insert().name
+
+@frappe.whitelist()
+def get_pos_reserved_batch_qty(filters):
+	import json
+
+	from frappe.query_builder.functions import Sum
+
+	if isinstance(filters, str):
+		filters = json.loads(filters)
+
+	p = frappe.qb.DocType("POS Invoice").as_("p")
+	item = frappe.qb.DocType("POS Invoice Item").as_("item")
+	sum_qty = Sum(item.qty).as_("qty")
+
+	reserved_batch_qty = frappe.qb.from_(p).from_(item).select(sum_qty).where(
+		(p.name == item.parent) &
+		(p.consolidated_invoice.isnull()) &
+		(p.status != "Consolidated") &
+		(p.docstatus == 1) &
+		(item.docstatus == 1) &
+		(item.item_code == filters.get('item_code')) &
+		(item.warehouse == filters.get('warehouse')) &
+		(item.batch_no == filters.get('batch_no'))
+	).run()
+
+	flt_reserved_batch_qty = flt(reserved_batch_qty[0][0])
+	return flt_reserved_batch_qty
