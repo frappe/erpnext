@@ -129,6 +129,14 @@ class Item(Document):
 		if not self.is_new():
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
 
+		alternate = 0
+		for i in self.uoms:
+			print(" this is i", i.is_alternate_uom)
+			alternate +=  i.is_alternate_uom if i.is_alternate_uom else 0
+		print("thi si alternate", alternate)
+		if alternate > 1:
+			frappe.throw('You can only have one UOM defined as an Alternate UOM for the item')
+
 	def on_update(self):
 		invalidate_cache_for_item(self)
 		self.update_variants()
