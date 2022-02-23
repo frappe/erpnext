@@ -43,7 +43,7 @@ class CustomerPricingRule(Document):
 				doc.for_price_list = self.for_price_list
 				doc.insert()
 			if pr_doc:
-				if pr_doc.get('title') and not pr_doc.get('customer_pricing_rule_id'):
+				if pr_doc.get('title'):
 					if i.get("type") == "Discount":
 						query = """UPDATE `tabPricing Rule` SET discount_amount = '{0}',rate_or_discount = "Discount Amount",margin_rate_or_amount=0.00 WHERE title = '{1}';""".format(i.get("discount_margin") ,doc_title)	
 					if i.get("type") == "Margin":
@@ -51,6 +51,10 @@ class CustomerPricingRule(Document):
 					
 					frappe.db.sql(query)
 					frappe.db.commit()
+
+	def on_cancel(self):
+		frappe.db.sql("""delete from `tabPricing Rule` where customer_pricing_rule_id ='{0}' """.format(self.name))
+
 
 	def before_insert(self):
 		is_existing_customer = frappe.db.get_value('Customer Pricing Rule', {'customer': self.customer,"docstatus":1}, 'customer')
@@ -97,7 +101,7 @@ class CustomerPricingRule(Document):
 				doc.for_price_list = self.for_price_list
 				doc.insert()
 			if pr_doc:
-				if pr_doc.get('title') and not pr_doc.get('customer_pricing_rule_id'):
+				if pr_doc.get('title'):
 					if i.get("type") == "Discount":
 						query = """UPDATE `tabPricing Rule` SET discount_amount = '{0}',rate_or_discount = "Discount Amount",margin_rate_or_amount=0.00 WHERE title = '{1}';""".format(i.get("discount_margin") ,doc_title)	
 					if i.get("type") == "Margin":
