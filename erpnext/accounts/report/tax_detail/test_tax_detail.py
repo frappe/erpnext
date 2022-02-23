@@ -61,7 +61,7 @@ class TestTaxDetail(unittest.TestCase):
 					# Create GL Entries:
 					db_doc.submit()
 				else:
-					db_doc.insert()
+					db_doc.insert(ignore_if_duplicate=True)
 			except frappe.exceptions.DuplicateEntryError:
 				pass
 
