@@ -409,7 +409,7 @@ class IncomeTaxComputationReport(object):
 			"fieldname": fieldname or scrub(label),
 			"fieldtype": fieldtype or "Currency",
 			"options": options,
-			"width": width or "150px"
+			"width": width or "140px"
 		}
 		self.columns.append(col)
 
@@ -420,27 +420,27 @@ class IncomeTaxComputationReport(object):
 				"fieldname": "employee",
 				"fieldtype": "Link",
 				"options": "Employee",
-				"width": "120px"
+				"width": "140px"
 			},
 			{
 				"label": _("Employee Name"),
 				"fieldname": "employee_name",
 				"fieldtype": "Data",
-				"width": "140px"
+				"width": "160px"
 			},
 			{
 				"label": _("Department"),
 				"fieldname": "department",
 				"fieldtype": "Link",
 				"options": "Department",
-				"width": "120px"
+				"width": "140px"
 			},
 			{
 				"label": _("Designation"),
 				"fieldname": "designation",
 				"fieldtype": "Link",
 				"options": "Designation",
-				"width": "120px"
+				"width": "140px"
 			},
 			{
 				"label": _("Date of Joining"),
@@ -451,6 +451,6 @@ class IncomeTaxComputationReport(object):
 				"label": _("CTC"),
 				"fieldname": "ctc",
 				"fieldtype": "Currency",
-				"width": "120px"
+				"width": "140px"
 			},
 		]
