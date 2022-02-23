@@ -397,6 +397,7 @@ class TestItem(ERPNextTestCase):
 		create_item("Test Item inside Bundle")
 		bundle_items = ["Test Item inside Bundle"]
 
+		# make bundles for both items
 		bundle1 = make_product_bundle("Test Item Bundle Item 1", bundle_items, qty=2)
 		make_product_bundle("Test Item Bundle Item 2", bundle_items, qty=2)
 
