@@ -102,7 +102,7 @@ def make_custom_fields():
 		]
 	}
 
-	create_custom_fields(custom_fields, update=True)
+	create_custom_fields(custom_fields, ignore_validate=True, update=True)
 
 def update_regional_tax_settings(country, company):
 	create_ksa_vat_setting(company)
