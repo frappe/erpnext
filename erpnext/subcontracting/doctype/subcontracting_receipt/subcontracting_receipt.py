@@ -15,4 +15,3 @@ class SubcontractingReceipt(Document):
 
 		if sco.docstatus != 1:
 			frappe.throw(_(f"Please submit Subcontracting Order {sco.name} before proceeding."))
-
