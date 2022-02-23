@@ -34,6 +34,12 @@ frappe.query_reports["Income Tax Computation"] = {
 			"fieldtype": "Link",
 			"options": "Department",
 			"width": "100px",
+		},
+		{
+			"fieldname":"consider_tax_exemption_declaration",
+			"label": __("Consider Tax Exemption Declaration"),
+			"fieldtype": "Check",
+			"width": "180px"
 		}
 	]
 };

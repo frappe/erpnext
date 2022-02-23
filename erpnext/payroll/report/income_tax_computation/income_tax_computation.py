@@ -256,7 +256,8 @@ class IncomeTaxComputationReport(object):
 
 		self.employees_with_proofs = []
 		self.get_tax_exemptions("Employee Tax Exemption Proof Submission")
-		self.get_tax_exemptions("Employee Tax Exemption Declaration")
+		if self.filters.consider_tax_exemption_declaration:
+			self.get_tax_exemptions("Employee Tax Exemption Declaration")
 
 	def get_tax_exemptions(self, source):
 		# Get category-wise exmeptions based on submitted proofs or declarations
@@ -311,7 +312,8 @@ class IncomeTaxComputationReport(object):
 
 		self.employees_with_proofs = []
 		self.get_eligible_hra("Employee Tax Exemption Proof Submission")
-		self.get_eligible_hra("Employee Tax Exemption Declaration")
+		if self.filters.consider_tax_exemption_declaration:
+			self.get_eligible_hra("Employee Tax Exemption Declaration")
 
 	def get_eligible_hra(self, source):
 		if source == "Employee Tax Exemption Proof Submission":
