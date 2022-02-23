@@ -1,4 +1,5 @@
 {
+ "_liked_by": "[\"Administrator\"]",
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2022-02-21 14:58:53.790565",
@@ -613,7 +614,7 @@
    "no_copy": 1,
    "oldfieldname": "po_raw_material_details",
    "oldfieldtype": "Table",
-   "options": "Subcontracting Order Item Supplied",
+   "options": "Subcontracting Order Supplied Item",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1138,7 +1139,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-23 13:50:50.026608",
+ "modified": "2022-02-23 17:04:31.141920",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order",

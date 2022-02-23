@@ -186,7 +186,7 @@
  "modified": "2022-02-23 10:31:47.941972",
  "modified_by": "Administrator",
  "module": "Subcontracting",
- "name": "Subcontracting Order Item Supplied",
+ "name": "Subcontracting Order Supplied Item",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
