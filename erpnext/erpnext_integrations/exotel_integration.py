@@ -37,11 +37,24 @@ def handle_end_call(**kwargs):
 
 @frappe.whitelist(allow_guest=True)
 def handle_missed_call(**kwargs):
-	update_call_log(kwargs, "Missed")
+	status = ""
+	CallType = kwargs.get("CallType")
+	DialCallStatus = kwargs.get("DialCallStatus")
+
+	if CallType == "incomplete" and DialCallStatus == "no-answer":
+		status = 'No Answer'
+	elif CallType == "client-hangup" and DialCallStatus == "canceled":
+		status = 'Canceled'
+
+	update_call_log(kwargs, status)
 
 
 def update_call_log(call_payload, status="Ringing", call_log=None):
 	call_log = call_log or get_call_log(call_payload)
+
+	# for a new sid, call_log and get_call_log will be empty so create a new log
+	if not call_log:
+		call_log = create_call_log(call_payload)
 	if call_log:
 		call_log.status = status
 		call_log.to = call_payload.get("DialWhomNumber")
