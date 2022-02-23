@@ -64,11 +64,13 @@ def execute(filters=None):
 		{
 			"label": _("Base"),
 			"fieldname": "base",
+			"fieldtype": "Currency",
 			"width": 120
 		},
 		{
 			"label": _("Amount"),
 			"fieldname": "amount",
+			"fieldtype": "Currency",
 			"width": 120
 		},
 		{
@@ -82,22 +84,40 @@ def execute(filters=None):
 
 def return_data(filters):
 	data = []
-	dates = []
 	if filters.get("from_date"): from_date = filters.get("from_date")
 	if filters.get("to_date"): to_date = filters.get("to_date")
 	conditions = return_filters(filters, from_date, to_date)
 
 	retentions = frappe.get_all("Supplier Retention", ["*"], filters = conditions)
 
-	for retention in retentions:
-		references = frappe.get_all("Withholding Reference", ["*"], filters = {"parent": retention.name})
+	if filters.get("reason"):
+		for retention in retentions:
+			is_reason = False
+			reasons = frappe.get_all("Reason And Percentage", ["*"], filters = {"parent": retention.name})
 
-		for reference in references:
-			percentage_str = str(retention.percentage_total)
-			percentage = "{}%".format(percentage_str)
-			amount = reference.net_total * (retention.percentage_total/100) 
-			row = [retention.name, retention.posting_date, retention.supplier, retention.rtn, retention.cai, retention.due_date, percentage, reference.reference_doctype, reference.reference_name, reference.net_total, amount, retention.owner]
-			data.append(row)
+			for reason in reasons:
+				if reason.reason == filters.get("reason"):
+					is_reason = True
+			
+			if is_reason:
+				data += build_data(retention)
+	else:	
+		for retention in retentions:
+			data += build_data(retention)
+
+	return data
+
+def build_data(retention):
+	data = []
+	
+	references = frappe.get_all("Withholding Reference", ["*"], filters = {"parent": retention.name})
+
+	for reference in references:
+		percentage_str = str(retention.percentage_total)
+		percentage = "{}%".format(percentage_str)
+		amount = reference.net_total * (retention.percentage_total/100) 
+		row = [retention.name, retention.posting_date, retention.supplier, retention.rtn, retention.cai, retention.due_date, percentage, reference.reference_doctype, reference.reference_name, reference.net_total, amount, retention.owner]
+		data.append(row)
 
 	return data
 
