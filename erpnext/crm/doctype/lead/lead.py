@@ -89,6 +89,7 @@ class Lead(SellingController):
 	def update_links(self):
 		# update contact links
 		if self.contact_doc:
+			self.contact_doc.reload()
 			self.contact_doc.append("links", {
 				"link_doctype": "Lead",
 				"link_name": self.name,
