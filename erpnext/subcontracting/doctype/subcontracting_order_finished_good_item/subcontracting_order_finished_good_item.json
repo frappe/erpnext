@@ -845,7 +845,7 @@
  "modified": "2022-02-23 10:29:32.291498",
  "modified_by": "Administrator",
  "module": "Subcontracting",
- "name": "Subcontracting Order Item",
+ "name": "Subcontracting Order Finished Good Item",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],

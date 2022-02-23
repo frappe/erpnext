@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class SubcontractingOrderItem(Document):
+class SubcontractingOrderFinishedGoodItem(Document):
 	pass
