@@ -283,17 +283,21 @@ class IncomeTaxComputationReport(object):
 			if not self.employees[d.employee]["allow_tax_exemption"]:
 				continue
 
-			if d.employee not in self.employees_with_proofs:
-				amount = flt(d.amount)
-				max_eligible_amount = flt(max_exemptions.get(d.exemption_category))
-				if max_eligible_amount and amount > max_eligible_amount:
-					amount = max_eligible_amount
+			if (source=="Employee Tax Exemption Declaration"
+				and d.employee in self.employees_with_proofs):
+					continue
 
-				self.employees[d.employee].setdefault(scrub(d.exemption_category), amount)
-				self.add_to_total_exemption(d.employee, amount)
+			amount = flt(d.amount)
+			max_eligible_amount = flt(max_exemptions.get(d.exemption_category))
+			if max_eligible_amount and amount > max_eligible_amount:
+				amount = max_eligible_amount
 
-			if source == "Employee Tax Exemption Proof Submission":
-				self.employees_with_proofs.append(d.employee)
+			self.employees[d.employee].setdefault(scrub(d.exemption_category), amount)
+			self.add_to_total_exemption(d.employee, amount)
+
+			if (source == "Employee Tax Exemption Proof Submission"
+				and d.employee not in self.employees_with_proofs):
+					self.employees_with_proofs.append(d.employee)
 
 	def get_max_exemptions_based_on_category(self):
 		return dict(frappe.get_all("Employee Tax Exemption Category",
@@ -331,8 +335,6 @@ class IncomeTaxComputationReport(object):
 			if d[0] not in self.employees_with_proofs:
 				self.employees[d[0]].setdefault("hra", d[1])
 				self.add_to_total_exemption(d[0], d[1])
-
-			if source == "Employee Tax Exemption Proof Submission":
 				self.employees_with_proofs.append(d[0])
 
 	def get_standard_tax_exemption(self):
