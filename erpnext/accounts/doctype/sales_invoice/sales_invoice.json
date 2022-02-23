@@ -182,6 +182,7 @@
   "sales_team_section_break",
   "sales_partner",
   "column_break10",
+  "amount_eligible_for_commission",
   "commission_rate",
   "total_commission",
   "section_break2",
@@ -650,7 +651,7 @@
    "hide_seconds": 1,
    "label": "Ignore Pricing Rule",
    "no_copy": 1,
-   "permlevel": 1,
+   "permlevel": 0,
    "print_hide": 1
   },
   {
@@ -2019,6 +2020,12 @@
    "label": "Total Billing Hours",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "amount_eligible_for_commission",
+   "fieldtype": "Currency",
+   "label": "Amount Eligible for Commission",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -2031,7 +2038,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-10-11 20:19:38.667508",
+ "modified": "2021-12-23 20:19:38.667508",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

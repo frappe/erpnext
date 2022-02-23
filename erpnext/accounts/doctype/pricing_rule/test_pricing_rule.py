@@ -630,6 +630,67 @@ class TestPricingRule(unittest.TestCase):
 		for doc in [si, si1]:
 			doc.delete()
 
+	def test_multiple_pricing_rules_with_min_qty(self):
+		make_pricing_rule(discount_percentage=20, selling=1, priority=1, min_qty=4,
+			apply_multiple_pricing_rules=1, title="_Test Pricing Rule with Min Qty - 1")
+		make_pricing_rule(discount_percentage=10, selling=1, priority=2, min_qty=4,
+			apply_multiple_pricing_rules=1, title="_Test Pricing Rule with Min Qty - 2")
+
+		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 1", qty=1, currency="USD")
+		item = si.items[0]
+		item.stock_qty = 1
+		si.save()
+		self.assertFalse(item.discount_percentage)
+		item.qty = 5
+		item.stock_qty = 5
+		si.save()
+		self.assertEqual(item.discount_percentage, 30)
+		si.delete()
+
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule with Min Qty - 1")
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule with Min Qty - 2")
+
+	def test_remove_pricing_rule(self):
+		item = make_item("Water Flask")
+		make_item_price("Water Flask", "_Test Price List", 100)
+
+		pricing_rule_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Water Flask Rule",
+			"apply_on": "Item Code",
+			"price_or_product_discount": "Price",
+			"items": [{
+				"item_code": "Water Flask",
+			}],
+			"selling": 1,
+			"currency": "INR",
+			"rate_or_discount": "Discount Percentage",
+			"discount_percentage": 20,
+			"company": "_Test Company"
+		}
+		rule = frappe.get_doc(pricing_rule_record)
+		rule.insert()
+
+		si = create_sales_invoice(do_not_save=True, item_code="Water Flask")
+		si.selling_price_list = "_Test Price List"
+		si.save()
+
+		self.assertEqual(si.items[0].price_list_rate, 100)
+		self.assertEqual(si.items[0].discount_percentage, 20)
+		self.assertEqual(si.items[0].rate, 80)
+
+		si.ignore_pricing_rule = 1
+		si.save()
+
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[0].rate, 100)
+
+		si.delete()
+		rule.delete()
+		frappe.get_doc("Item Price", {"item_code": "Water Flask"}).delete()
+		item.delete()
+
+
 test_dependencies = ["Campaign"]
 
 def make_pricing_rule(**args):
@@ -652,7 +713,7 @@ def make_pricing_rule(**args):
 		"rate": args.rate or 0.0,
 		"margin_rate_or_amount": args.margin_rate_or_amount or 0.0,
 		"condition": args.condition or '',
-		"priority": 1,
+		"priority": args.priority or 1,
 		"discount_amount": args.discount_amount or 0.0,
 		"apply_multiple_pricing_rules": args.apply_multiple_pricing_rules or 0
 	})
@@ -677,6 +738,8 @@ def make_pricing_rule(**args):
 	applicable_for = doc.applicable_for.replace(' ', '_').lower()
 	if args.get(applicable_for):
 		doc.db_set(applicable_for, args.get(applicable_for))
+
+	return doc
 
 def setup_pricing_rule_data():
 	if not frappe.db.exists('Campaign', '_Test Campaign'):

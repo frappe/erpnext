@@ -255,11 +255,13 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 	enable_check = "enable_deferred_revenue" \
 		if doc.doctype=="Sales Invoice" else "enable_deferred_expense"
 
+	accounts_frozen_upto = frappe.get_cached_value('Accounts Settings', 'None', 'acc_frozen_upto')
+
 	def _book_deferred_revenue_or_expense(item, via_journal_entry, submit_journal_entry, book_deferred_entries_based_on):
 		start_date, end_date, last_gl_entry = get_booking_dates(doc, item, posting_date=posting_date)
 		if not (start_date and end_date): return
 
-		account_currency = get_account_currency(item.expense_account)
+		account_currency = get_account_currency(item.expense_account or item.income_account)
 		if doc.doctype == "Sales Invoice":
 			against, project = doc.customer, doc.project
 			credit_account, debit_account = item.income_account, item.deferred_revenue_account
@@ -279,6 +281,10 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 
 		if not amount:
 			return
+
+		# check if books nor frozen till endate:
+		if getdate(end_date) >= getdate(accounts_frozen_upto):
+			end_date = get_last_day(add_days(accounts_frozen_upto, 1))
 
 		if via_journal_entry:
 			book_revenue_via_journal_entry(doc, credit_account, debit_account, against, amount,
@@ -375,12 +381,13 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 			frappe.db.commit()
 		except Exception as e:
 			if frappe.flags.in_test:
+				traceback = frappe.get_traceback()
+				frappe.log_error(title=_('Error while processing deferred accounting for Invoice {0}').format(doc.name), message=traceback)
 				raise e
 			else:
 				frappe.db.rollback()
 				traceback = frappe.get_traceback()
-				frappe.log_error(message=traceback)
-
+				frappe.log_error(title=_('Error while processing deferred accounting for Invoice {0}').format(doc.name), message=traceback)
 				frappe.flags.deferred_accounting_error = True
 
 def send_mail(deferred_process):
@@ -406,8 +413,6 @@ def book_revenue_via_journal_entry(doc, credit_account, debit_account, against,
 		'account': credit_account,
 		'credit': base_amount,
 		'credit_in_account_currency': amount,
-		'party_type': 'Customer' if doc.doctype == 'Sales Invoice' else 'Supplier',
-		'party': against,
 		'account_currency': account_currency,
 		'reference_name': doc.name,
 		'reference_type': doc.doctype,
@@ -420,8 +425,6 @@ def book_revenue_via_journal_entry(doc, credit_account, debit_account, against,
 		'account': debit_account,
 		'debit': base_amount,
 		'debit_in_account_currency': amount,
-		'party_type': 'Customer' if doc.doctype == 'Sales Invoice' else 'Supplier',
-		'party': against,
 		'account_currency': account_currency,
 		'reference_name': doc.name,
 		'reference_type': doc.doctype,
@@ -447,10 +450,12 @@ def book_revenue_via_journal_entry(doc, credit_account, debit_account, against,
 
 		if submit:
 			journal_entry.submit()
+
+		frappe.db.commit()
 	except Exception:
 		frappe.db.rollback()
 		traceback = frappe.get_traceback()
-		frappe.log_error(message=traceback)
+		frappe.log_error(title=_('Error while processing deferred accounting for Invoice {0}').format(doc.name), message=traceback)
 
 		frappe.flags.deferred_accounting_error = True
 

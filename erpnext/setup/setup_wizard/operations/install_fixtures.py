@@ -304,7 +304,6 @@ def set_more_defaults():
 
 def update_selling_defaults():
 	selling_settings = frappe.get_doc("Selling Settings")
-	selling_settings.set_default_customer_group_and_territory()
 	selling_settings.cust_master_name = "Customer Name"
 	selling_settings.so_required = "No"
 	selling_settings.dn_required = "No"
@@ -351,7 +350,8 @@ def add_uom_data():
 				"doctype": "UOM",
 				"uom_name": _(d.get("uom_name")),
 				"name": _(d.get("uom_name")),
-				"must_be_whole_number": d.get("must_be_whole_number")
+				"must_be_whole_number": d.get("must_be_whole_number"),
+				"enabled": 1,
 			}).db_insert()
 
 	# bootstrap uom conversion factors

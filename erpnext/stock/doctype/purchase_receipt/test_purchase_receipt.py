@@ -4,6 +4,7 @@
 
 import json
 import unittest
+from collections import defaultdict
 
 import frappe
 from frappe.utils import add_days, cint, cstr, flt, today
@@ -17,7 +18,7 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchas
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError, get_serial_nos
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import SerialNoExistsInFutureTransaction
-from erpnext.tests.utils import ERPNextTestCase
+from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 
 class TestPurchaseReceipt(ERPNextTestCase):
@@ -1331,58 +1332,6 @@ class TestPurchaseReceipt(ERPNextTestCase):
 		self.assertEqual(pr.status, "To Bill")
 		self.assertAlmostEqual(pr.per_billed, 50.0, places=2)
 
-	def test_service_item_purchase_with_perpetual_inventory(self):
-		company = '_Test Company with perpetual inventory'
-		service_item = '_Test Non Stock Item'
-
-		before_test_value = frappe.db.get_value(
-			'Company', company, 'enable_perpetual_inventory_for_non_stock_items'
-		)
-		frappe.db.set_value(
-			'Company', company,
-			'enable_perpetual_inventory_for_non_stock_items', 1
-		)
-		srbnb_account = 'Stock Received But Not Billed - TCP1'
-		frappe.db.set_value(
-			'Company', company,
-			'service_received_but_not_billed', srbnb_account
-		)
-
-		pr = make_purchase_receipt(
-			company=company, item=service_item,
-			warehouse='Finished Goods - TCP1', do_not_save=1
-		)
-		item_row_with_diff_rate = frappe.copy_doc(pr.items[0])
-		item_row_with_diff_rate.rate = 100
-		pr.append('items', item_row_with_diff_rate)
-
-		pr.save()
-		pr.submit()
-
-		item_one_gl_entry = frappe.db.get_all("GL Entry", {
-			'voucher_type': pr.doctype,
-			'voucher_no': pr.name,
-			'account': srbnb_account,
-			'voucher_detail_no': pr.items[0].name
-		}, pluck="name")
-
-		item_two_gl_entry = frappe.db.get_all("GL Entry", {
-			'voucher_type': pr.doctype,
-			'voucher_no': pr.name,
-			'account': srbnb_account,
-			'voucher_detail_no': pr.items[1].name
-		}, pluck="name")
-
-		# check if the entries are not merged into one
-		# seperate entries should be made since voucher_detail_no is different
-		self.assertEqual(len(item_one_gl_entry), 1)
-		self.assertEqual(len(item_two_gl_entry), 1)
-
-		frappe.db.set_value(
-			'Company', company,
-			'enable_perpetual_inventory_for_non_stock_items', before_test_value
-		)
-
 	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
@@ -1418,6 +1367,36 @@ class TestPurchaseReceipt(ERPNextTestCase):
 		compare_payment_schedules(self, po, pi)
 
 		automatically_fetch_payment_terms(enable=0)
+
+	@change_settings("Stock Settings", {"allow_negative_stock": 1})
+	def test_neg_to_positive(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item_code = "_TestNegToPosItem"
+		warehouse = "Stores - TCP1"
+		company = "_Test Company with perpetual inventory"
+		account = "Stock Received But Not Billed - TCP1"
+
+		make_item(item_code)
+		se = make_stock_entry(item_code=item_code, from_warehouse=warehouse, qty=50, do_not_save=True, rate=0)
+		se.items[0].allow_zero_valuation_rate = 1
+		se.save()
+		se.submit()
+
+		pr = make_purchase_receipt(
+			qty=50,
+			rate=1,
+			item_code=item_code,
+			warehouse=warehouse,
+			get_taxes_and_charges=True,
+			company=company,
+		)
+		gles = get_gl_entries(pr.doctype, pr.name)
+
+		for gle in gles:
+			if gle.account == account:
+				self.assertEqual(gle.credit, 50)
+
 
 def get_sl_entries(voucher_type, voucher_no):
 	return frappe.db.sql(""" select actual_qty, warehouse, stock_value_difference

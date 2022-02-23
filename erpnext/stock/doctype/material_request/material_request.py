@@ -81,6 +81,9 @@ class MaterialRequest(BuyingController):
 		# NOTE: Since Item BOM and FG quantities are combined, using current data, it cannot be validated
 		# Though the creation of Material Request from a Production Plan can be rethought to fix this
 
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
+
 	def set_title(self):
 		'''Set title as comma separated list of items'''
 		if not self.title:
@@ -531,6 +534,7 @@ def raise_work_orders(material_request):
 					"stock_uom": d.stock_uom,
 					"expected_delivery_date": d.schedule_date,
 					"sales_order": d.sales_order,
+					"sales_order_item": d.get("sales_order_item"),
 					"bom_no": get_item_details(d.item_code).bom_no,
 					"material_request": mr.name,
 					"material_request_item": d.name,

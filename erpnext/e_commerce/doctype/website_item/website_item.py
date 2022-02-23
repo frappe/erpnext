@@ -1,7 +1,6 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import itertools
 import json
 
 import frappe
@@ -11,7 +10,7 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 from frappe.website.website_generator import WebsiteGenerator
 
 from erpnext.e_commerce.doctype.item_review.item_review import get_item_reviews
-from erpnext.e_commerce.redisearch import (
+from erpnext.e_commerce.redisearch_utils import (
 	delete_item_from_index,
 	insert_item_to_index,
 	update_index_for_item,
@@ -203,16 +202,15 @@ class WebsiteItem(WebsiteGenerator):
 		context.body_class = "product-page"
 
 		context.parents = get_parent_item_groups(self.item_group, from_item=True) # breadcumbs
-		self.attributes = frappe.get_all("Item Variant Attribute",
+		self.attributes = frappe.get_all(
+			"Item Variant Attribute",
 			fields=["attribute", "attribute_value"],
-			filters={"parent": self.item_code})
+			filters={"parent": self.item_code}
+		)
 
 		if self.slideshow:
 			context.update(get_slideshow(self))
 
-		self.set_variant_context(context)
-		self.set_attribute_context(context)
-		self.set_disabled_attributes(context)
 		self.set_metatags(context)
 		self.set_shopping_cart_data(context)
 
@@ -236,61 +234,6 @@ class WebsiteItem(WebsiteGenerator):
 			context.recommended_items = self.get_recommended_items(settings)
 
 		return context
-
-	def set_variant_context(self, context):
-		if not self.has_variants:
-			return
-
-		context.no_cache = True
-		variant = frappe.form_dict.variant
-
-		# load variants
-		# also used in set_attribute_context
-		context.variants = frappe.get_all(
-			"Item",
-			filters={
-				"variant_of": self.item_code,
-				"published_in_website": 1
-			},
-			order_by="name asc")
-
-		# the case when the item is opened for the first time from its list
-		if not variant and context.variants:
-			variant = context.variants[0]
-
-		if variant:
-			context.variant = frappe.get_doc("Item", variant)
-			fields = ("website_image", "website_image_alt", "web_long_description", "description",
-				"website_specifications")
-
-			for fieldname in fields:
-				if context.variant.get(fieldname):
-					value = context.variant.get(fieldname)
-					if isinstance(value, list):
-						value = [d.as_dict() for d in value]
-
-					context[fieldname] = value
-
-		if self.slideshow and context.variant and context.variant.slideshow:
-			context.update(get_slideshow(context.variant))
-
-
-	def set_attribute_context(self, context):
-		if not self.has_variants:
-			return
-
-		attribute_values_available = {}
-		context.attribute_values = {}
-		context.selected_attributes = {}
-
-		# load attributes
-		self.set_selected_attributes(context.variants, context, attribute_values_available)
-
-		# filter attributes, order based on attribute table
-		item = frappe.get_cached_doc("Item", self.item_code)
-		self.set_attribute_values(item.attributes, context, attribute_values_available)
-
-		context.variant_info = json.dumps(context.variants)
 
 	def set_selected_attributes(self, variants, context, attribute_values_available):
 		for variant in variants:
@@ -327,50 +270,6 @@ class WebsiteItem(WebsiteGenerator):
 
 					if attr_value.attribute_value in attribute_values_available.get(attr.attribute, []):
 						values.append(attr_value.attribute_value)
-
-	def set_disabled_attributes(self, context):
-		"""Disable selection options of attribute combinations that do not result in a variant"""
-
-		if not self.attributes or not self.has_variants:
-			return
-
-		context.disabled_attributes = {}
-		attributes = [attr.attribute for attr in self.attributes]
-
-		def find_variant(combination):
-			for variant in context.variants:
-				if len(variant.attributes) < len(attributes):
-					continue
-
-				if "combination" not in variant:
-					ref_combination = []
-
-					for attr in variant.attributes:
-						idx = attributes.index(attr.attribute)
-						ref_combination.insert(idx, attr.attribute_value)
-
-					variant["combination"] = ref_combination
-
-				if not (set(combination) - set(variant["combination"])):
-					# check if the combination is a subset of a variant combination
-					# eg. [Blue, 0.5] is a possible combination if exists [Blue, Large, 0.5]
-					return True
-
-		for i, attr in enumerate(self.attributes):
-			if i == 0:
-				continue
-
-			combination_source = []
-
-			# loop through previous attributes
-			for prev_attr in self.attributes[:i]:
-				combination_source.append([context.selected_attributes.get(prev_attr.attribute)])
-
-			combination_source.append(context.attribute_values[attr.attribute])
-
-			for combination in itertools.product(*combination_source):
-				if not find_variant(combination):
-					context.disabled_attributes.setdefault(attr.attribute, []).append(combination[-1])
 
 	def set_metatags(self, context):
 		context.metatags = frappe._dict({})

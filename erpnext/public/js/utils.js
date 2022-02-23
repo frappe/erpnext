@@ -84,6 +84,10 @@ $.extend(erpnext, {
 		});
 	},
 
+	route_to_pending_reposts: (args) => {
+		frappe.set_route('List', 'Repost Item Valuation', args);
+	},
+
 	proceed_save_with_reminders_frequency_change: () => {
 		frappe.ui.hide_open_dialog();
 
@@ -426,12 +430,9 @@ erpnext.utils.select_alternate_items = function(opts) {
 					qty = row.qty;
 				}
 				row[item_field] = d.alternate_item;
-				frm.script_manager.trigger(item_field, row.doctype, row.name)
-					.then(() => {
-						frappe.model.set_value(row.doctype, row.name, 'qty', qty);
-						frappe.model.set_value(row.doctype, row.name,
-							opts.original_item_field, d.item_code);
-					});
+				frappe.model.set_value(row.doctype, row.name, 'qty', qty);
+				frappe.model.set_value(row.doctype, row.name, opts.original_item_field, d.item_code);
+				frm.trigger(item_field, row.doctype, row.name);
 			});
 
 			refresh_field(opts.child_docname);

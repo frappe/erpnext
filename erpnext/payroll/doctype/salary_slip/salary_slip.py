@@ -936,18 +936,23 @@ class SalarySlip(TransactionBase):
 	def get_future_recurring_additional_amount(self, additional_salary, monthly_additional_amount):
 		future_recurring_additional_amount = 0
 		to_date = frappe.db.get_value("Additional Salary", additional_salary, 'to_date')
+
 		# future month count excluding current
-		future_recurring_period = (getdate(to_date).month - getdate(self.start_date).month)
+		from_date, to_date = getdate(self.start_date), getdate(to_date)
+		future_recurring_period = ((to_date.year - from_date.year) * 12) + (to_date.month - from_date.month)
+
 		if future_recurring_period > 0:
 			future_recurring_additional_amount = monthly_additional_amount * future_recurring_period # Used earning.additional_amount to consider the amount for the full month
 		return future_recurring_additional_amount
 
 	def get_amount_based_on_payment_days(self, row, joining_date, relieving_date):
 		amount, additional_amount = row.amount, row.additional_amount
+		timesheet_component = frappe.db.get_value("Salary Structure", self.salary_structure, "salary_component")
+
 		if (self.salary_structure and
 			cint(row.depends_on_payment_days) and cint(self.total_working_days)
 			and not (row.additional_salary and row.default_amount) # to identify overwritten additional salary
-			and (not self.salary_slip_based_on_timesheet or
+			and (row.salary_component != timesheet_component or
 				getdate(self.start_date) < joining_date or
 				(relieving_date and getdate(self.end_date) > relieving_date)
 			)):
@@ -956,7 +961,7 @@ class SalarySlip(TransactionBase):
 			amount = flt((flt(row.default_amount) * flt(self.payment_days)
 				/ cint(self.total_working_days)), row.precision("amount")) + additional_amount
 
-		elif not self.payment_days and not self.salary_slip_based_on_timesheet and cint(row.depends_on_payment_days):
+		elif not self.payment_days and row.salary_component != timesheet_component and cint(row.depends_on_payment_days):
 			amount, additional_amount = 0, 0
 		elif not row.amount:
 			amount = flt(row.default_amount) + flt(row.additional_amount)
@@ -1034,7 +1039,8 @@ class SalarySlip(TransactionBase):
 		data.update({"annual_taxable_earning": annual_taxable_earning})
 		tax_amount = 0
 		for slab in tax_slab.slabs:
-			if slab.condition and not self.eval_tax_slab_condition(slab.condition, data):
+			cond = cstr(slab.condition).strip()
+			if cond and not self.eval_tax_slab_condition(cond, data):
 				continue
 			if not slab.to_amount and annual_taxable_earning >= slab.from_amount:
 				tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction *.01
@@ -1140,15 +1146,17 @@ class SalarySlip(TransactionBase):
 			})
 
 	def make_loan_repayment_entry(self):
+		payroll_payable_account = get_payroll_payable_account(self.company, self.payroll_entry)
 		for loan in self.loans:
-			repayment_entry = create_repayment_entry(loan.loan, self.employee,
-				self.company, self.posting_date, loan.loan_type, "Regular Payment", loan.interest_amount,
-				loan.principal_amount, loan.total_payment)
+			if loan.total_payment:
+				repayment_entry = create_repayment_entry(loan.loan, self.employee,
+					self.company, self.posting_date, loan.loan_type, "Regular Payment", loan.interest_amount,
+					loan.principal_amount, loan.total_payment, payroll_payable_account=payroll_payable_account)
 
-			repayment_entry.save()
-			repayment_entry.submit()
+				repayment_entry.save()
+				repayment_entry.submit()
 
-			frappe.db.set_value("Salary Slip Loan", loan.name, "loan_repayment_entry", repayment_entry.name)
+				frappe.db.set_value("Salary Slip Loan", loan.name, "loan_repayment_entry", repayment_entry.name)
 
 	def cancel_loan_repayment_entry(self):
 		for loan in self.loans:
@@ -1382,3 +1390,11 @@ def get_salary_component_data(component):
 		],
 		as_dict=1,
 	)
+
+def get_payroll_payable_account(company, payroll_entry):
+	if payroll_entry:
+		payroll_payable_account = frappe.db.get_value('Payroll Entry', payroll_entry, 'payroll_payable_account')
+	else:
+		payroll_payable_account = frappe.db.get_value('Company', company, 'default_payroll_payable_account')
+
+	return payroll_payable_account

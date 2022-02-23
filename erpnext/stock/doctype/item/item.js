@@ -380,8 +380,7 @@ $.extend(erpnext.item, {
 		// Show Stock Levels only if is_stock_item
 		if (frm.doc.is_stock_item) {
 			frappe.require('assets/js/item-dashboard.min.js', function() {
-				frm.dashboard.parent.find('.stock-levels').remove();
-				const section = frm.dashboard.add_section('', __("Stock Levels"), 'stock-levels');
+				const section = frm.dashboard.add_section('', __("Stock Levels"));
 				erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
 					parent: section,
 					item_code: frm.doc.name,
@@ -546,7 +545,7 @@ $.extend(erpnext.item, {
 			let selected_attributes = {};
 			me.multiple_variant_dialog.$wrapper.find('.form-column').each((i, col) => {
 				if(i===0) return;
-				let attribute_name = $(col).find('label').html();
+				let attribute_name = $(col).find('label').html().trim();
 				selected_attributes[attribute_name] = [];
 				let checked_opts = $(col).find('.checkbox input');
 				checked_opts.each((i, opt) => {
