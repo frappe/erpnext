@@ -16,7 +16,8 @@ class SubcontractingOrder(Document):
 			po = frappe.get_doc("Purchase Order", self.get("purchase_order"))
 
 			if po.docstatus != 1:
-				frappe.throw(_(f"Please submit Purchase Order {po.name} before proceeding."))
+				msg = f"Please submit Purchase Order {po.name} before proceeding."
+				frappe.throw(_(msg))
 
 			if po.is_subcontracted != "Yes":
 				frappe.throw(_("Please select a valid Purchase Order that is configured for Subcontracting."))

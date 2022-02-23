@@ -14,4 +14,5 @@ class SubcontractingReceipt(Document):
 		sco = frappe.get_doc("Subcontracting Order", self.get("subcontracting_order"))
 
 		if sco.docstatus != 1:
-			frappe.throw(_(f"Please submit Subcontracting Order {sco.name} before proceeding."))
+			msg = f"Please submit Subcontracting Order {sco.name} before proceeding."
+			frappe.throw(_(msg))
