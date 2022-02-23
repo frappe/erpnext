@@ -35,8 +35,6 @@
             "fieldtype": "Link",
             "in_list_view": 1,
             "label": "Item Code",
-            "oldfieldname": "main_item_code",
-            "oldfieldtype": "Data",
             "options": "Item",
             "read_only": 1
         },
@@ -45,8 +43,6 @@
             "fieldtype": "Link",
             "in_list_view": 1,
             "label": "Raw Material Item Code",
-            "oldfieldname": "rm_item_code",
-            "oldfieldtype": "Data",
             "options": "Item",
             "read_only": 1
         },
@@ -62,8 +58,6 @@
             "hidden": 1,
             "in_list_view": 1,
             "label": "BOM Detail No",
-            "oldfieldname": "bom_detail_no",
-            "oldfieldtype": "Data",
             "read_only": 1
         },
         {
@@ -75,8 +69,6 @@
             "fieldtype": "Text Editor",
             "in_global_search": 1,
             "label": "Description",
-            "oldfieldname": "description",
-            "oldfieldtype": "Data",
             "print_width": "300px",
             "read_only": 1,
             "width": "300px"
@@ -85,8 +77,6 @@
             "fieldname": "stock_uom",
             "fieldtype": "Link",
             "label": "Stock Uom",
-            "oldfieldname": "stock_uom",
-            "oldfieldtype": "Data",
             "options": "UOM",
             "read_only": 1
         },
@@ -95,8 +85,6 @@
             "fieldtype": "Float",
             "hidden": 1,
             "label": "Conversion Factor",
-            "oldfieldname": "conversion_factor",
-            "oldfieldtype": "Currency",
             "read_only": 1
         },
         {
@@ -105,8 +93,6 @@
             "hidden": 1,
             "in_list_view": 1,
             "label": "Reference Name",
-            "oldfieldname": "reference_name",
-            "oldfieldtype": "Data",
             "read_only": 1
         },
         {
@@ -117,8 +103,6 @@
             "fieldname": "rate",
             "fieldtype": "Currency",
             "label": "Rate",
-            "oldfieldname": "rate",
-            "oldfieldtype": "Currency",
             "options": "Company:company:default_currency",
             "read_only": 1
         },
@@ -130,8 +114,6 @@
             "fieldname": "amount",
             "fieldtype": "Currency",
             "label": "Amount",
-            "oldfieldname": "amount",
-            "oldfieldtype": "Currency",
             "options": "Company:company:default_currency",
             "read_only": 1
         },
@@ -144,8 +126,6 @@
             "fieldtype": "Float",
             "in_list_view": 1,
             "label": "Available Qty For Consumption",
-            "oldfieldname": "required_qty",
-            "oldfieldtype": "Currency",
             "print_hide": 1,
             "read_only": 1
         },
@@ -159,8 +139,6 @@
             "fieldtype": "Float",
             "in_list_view": 1,
             "label": "Qty to Be Consumed",
-            "oldfieldname": "consumed_qty",
-            "oldfieldtype": "Currency",
             "reqd": 1
         },
         {
@@ -168,8 +146,6 @@
             "fieldtype": "Float",
             "in_list_view": 1,
             "label": "Current Stock",
-            "oldfieldname": "current_stock",
-            "oldfieldtype": "Currency",
             "read_only": 1
         },
         {

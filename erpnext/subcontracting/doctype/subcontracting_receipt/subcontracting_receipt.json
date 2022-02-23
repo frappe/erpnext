@@ -1,5 +1,4 @@
 {
-    "_liked_by": "[\"Administrator\"]",
     "actions": [],
     "autoname": "naming_series:",
     "creation": "2022-02-21 15:03:34.525283",
@@ -144,7 +143,6 @@
         {
             "fieldname": "column_break0",
             "fieldtype": "Column Break",
-            "oldfieldtype": "Column Break",
             "print_width": "50%",
             "width": "50%"
         },
@@ -163,8 +161,6 @@
             "fieldtype": "Select",
             "label": "Series",
             "no_copy": 1,
-            "oldfieldname": "naming_series",
-            "oldfieldtype": "Select",
             "options": "MAT-PRE-.YYYY.-\nMAT-PR-RET-.YYYY.-",
             "print_hide": 1,
             "reqd": 1,
@@ -183,8 +179,6 @@
             "fieldtype": "Link",
             "in_global_search": 1,
             "label": "Supplier",
-            "oldfieldname": "supplier",
-            "oldfieldtype": "Link",
             "options": "Supplier",
             "print_hide": 1,
             "print_width": "150px",
@@ -210,7 +204,6 @@
         {
             "fieldname": "column_break1",
             "fieldtype": "Column Break",
-            "oldfieldtype": "Column Break",
             "print_width": "50%",
             "width": "50%"
         },
@@ -221,8 +214,6 @@
             "in_list_view": 1,
             "label": "Date",
             "no_copy": 1,
-            "oldfieldname": "posting_date",
-            "oldfieldtype": "Date",
             "print_width": "100px",
             "reqd": 1,
             "search_index": 1,
@@ -234,8 +225,6 @@
             "fieldtype": "Time",
             "label": "Posting Time",
             "no_copy": 1,
-            "oldfieldname": "posting_time",
-            "oldfieldtype": "Time",
             "print_hide": 1,
             "print_width": "100px",
             "reqd": 1,
@@ -254,8 +243,6 @@
             "fieldtype": "Link",
             "in_standard_filter": 1,
             "label": "Company",
-            "oldfieldname": "company",
-            "oldfieldtype": "Link",
             "options": "Company",
             "print_hide": 1,
             "print_width": "150px",
@@ -358,8 +345,6 @@
             "fieldname": "currency",
             "fieldtype": "Link",
             "label": "Currency",
-            "oldfieldname": "currency",
-            "oldfieldtype": "Select",
             "options": "Currency",
             "print_hide": 1,
             "reqd": 1
@@ -369,8 +354,6 @@
             "fieldname": "conversion_rate",
             "fieldtype": "Float",
             "label": "Exchange Rate",
-            "oldfieldname": "conversion_rate",
-            "oldfieldtype": "Currency",
             "precision": "9",
             "print_hide": 1,
             "reqd": 1
@@ -378,7 +361,6 @@
         {
             "fieldname": "column_break2",
             "fieldtype": "Column Break",
-            "oldfieldtype": "Column Break",
             "print_width": "50%",
             "width": "50%"
         },
@@ -433,8 +415,6 @@
             "fieldtype": "Link",
             "label": "Rejected Warehouse",
             "no_copy": 1,
-            "oldfieldname": "rejected_warehouse",
-            "oldfieldtype": "Link",
             "options": "Warehouse",
             "print_hide": 1
         },
@@ -447,8 +427,6 @@
             "fieldname": "is_subcontracted",
             "fieldtype": "Select",
             "label": "Raw Materials Consumed",
-            "oldfieldname": "is_subcontracted",
-            "oldfieldtype": "Select",
             "options": "No\nYes",
             "print_hide": 1
         },
@@ -458,8 +436,6 @@
             "fieldtype": "Link",
             "label": "Supplier Warehouse",
             "no_copy": 1,
-            "oldfieldname": "supplier_warehouse",
-            "oldfieldtype": "Link",
             "options": "Warehouse",
             "print_hide": 1,
             "print_width": "50px",
@@ -468,7 +444,6 @@
         {
             "fieldname": "items_section",
             "fieldtype": "Section Break",
-            "oldfieldtype": "Section Break",
             "options": "fa fa-shopping-cart"
         },
         {
@@ -476,8 +451,6 @@
             "fieldname": "items",
             "fieldtype": "Table",
             "label": "Items",
-            "oldfieldname": "subcontracting_receipt_details",
-            "oldfieldtype": "Table",
             "options": "Subcontracting Receipt Item",
             "reqd": 1
         },
@@ -499,7 +472,6 @@
             "fieldname": "get_current_stock",
             "fieldtype": "Button",
             "label": "Get Current Stock",
-            "oldfieldtype": "Button",
             "options": "get_current_stock",
             "print_hide": 1
         },
@@ -509,7 +481,6 @@
             "fieldname": "raw_material_details",
             "fieldtype": "Section Break",
             "label": "Raw Materials Consumed",
-            "oldfieldtype": "Section Break",
             "options": "fa fa-table",
             "print_hide": 1,
             "read_only": 1
@@ -519,15 +490,12 @@
             "fieldtype": "Table",
             "label": "Consumed Items",
             "no_copy": 1,
-            "oldfieldname": "pr_raw_material_details",
-            "oldfieldtype": "Table",
             "options": "Subcontracting Receipt Item Supplied",
             "print_hide": 1
         },
         {
             "fieldname": "section_break0",
-            "fieldtype": "Section Break",
-            "oldfieldtype": "Section Break"
+            "fieldtype": "Section Break"
         },
         {
             "fieldname": "total_qty",
@@ -547,8 +515,6 @@
             "fieldname": "base_net_total",
             "fieldtype": "Currency",
             "label": "Net Total (Company Currency)",
-            "oldfieldname": "net_total",
-            "oldfieldtype": "Currency",
             "options": "Company:company:default_currency",
             "print_hide": 1,
             "print_width": "150px",
@@ -571,8 +537,6 @@
             "fieldname": "net_total",
             "fieldtype": "Currency",
             "label": "Net Total",
-            "oldfieldname": "net_total_import",
-            "oldfieldtype": "Currency",
             "options": "currency",
             "print_hide": 1,
             "read_only": 1
@@ -588,7 +552,6 @@
             "description": "Add / Edit Taxes and Charges",
             "fieldname": "taxes_charges_section",
             "fieldtype": "Section Break",
-            "oldfieldtype": "Section Break",
             "options": "fa fa-money"
         },
         {
@@ -616,8 +579,6 @@
             "fieldname": "taxes_and_charges",
             "fieldtype": "Link",
             "label": "Subcontracting Taxes and Charges Template",
-            "oldfieldname": "subcontracting_other_charges",
-            "oldfieldtype": "Link",
             "options": "Subcontracting Taxes and Charges Template",
             "print_hide": 1
         },
@@ -625,8 +586,6 @@
             "fieldname": "taxes",
             "fieldtype": "Table",
             "label": "Subcontracting Taxes and Charges",
-            "oldfieldname": "subcontracting_tax_details",
-            "oldfieldtype": "Table",
             "options": "Subcontracting Taxes and Charges"
         },
         {
@@ -640,22 +599,18 @@
             "fieldtype": "Long Text",
             "label": "Taxes and Charges Calculation",
             "no_copy": 1,
-            "oldfieldtype": "HTML",
             "print_hide": 1,
             "read_only": 1
         },
         {
             "fieldname": "totals",
             "fieldtype": "Section Break",
-            "oldfieldtype": "Section Break",
             "options": "fa fa-money"
         },
         {
             "fieldname": "base_taxes_and_charges_added",
             "fieldtype": "Currency",
             "label": "Taxes and Charges Added (Company Currency)",
-            "oldfieldname": "other_charges_added",
-            "oldfieldtype": "Currency",
             "options": "Company:company:default_currency",
             "print_hide": 1,
             "read_only": 1
@@ -664,8 +619,6 @@
             "fieldname": "base_taxes_and_charges_deducted",
             "fieldtype": "Currency",
             "label": "Taxes and Charges Deducted (Company Currency)",
-            "oldfieldname": "other_charges_deducted",
-            "oldfieldtype": "Currency",
             "options": "Company:company:default_currency",
             "print_hide": 1,
             "read_only": 1
@@ -674,8 +627,6 @@
             "fieldname": "base_total_taxes_and_charges",
             "fieldtype": "Currency",
             "label": "Total Taxes and Charges (Company Currency)",
-            "oldfieldname": "total_tax",
-            "oldfieldtype": "Currency",
             "options": "Company:company:default_currency",
             "print_hide": 1,
             "read_only": 1
@@ -690,8 +641,6 @@
             "fieldname": "taxes_and_charges_added",
             "fieldtype": "Currency",
             "label": "Taxes and Charges Added",
-            "oldfieldname": "other_charges_added_import",
-            "oldfieldtype": "Currency",
             "options": "currency",
             "print_hide": 1,
             "read_only": 1
@@ -700,8 +649,6 @@
             "fieldname": "taxes_and_charges_deducted",
             "fieldtype": "Currency",
             "label": "Taxes and Charges Deducted",
-            "oldfieldname": "other_charges_deducted_import",
-            "oldfieldtype": "Currency",
             "options": "currency",
             "print_hide": 1,
             "read_only": 1
@@ -762,8 +709,6 @@
             "fieldname": "base_grand_total",
             "fieldtype": "Currency",
             "label": "Grand Total (Company Currency)",
-            "oldfieldname": "grand_total",
-            "oldfieldtype": "Currency",
             "options": "Company:company:default_currency",
             "print_hide": 1,
             "read_only": 1
@@ -783,8 +728,6 @@
             "fieldtype": "Data",
             "label": "In Words (Company Currency)",
             "length": 240,
-            "oldfieldname": "in_words",
-            "oldfieldtype": "Data",
             "print_hide": 1,
             "read_only": 1
         },
@@ -792,8 +735,6 @@
             "fieldname": "base_rounded_total",
             "fieldtype": "Currency",
             "label": "Rounded Total (Company Currency)",
-            "oldfieldname": "rounded_total",
-            "oldfieldtype": "Currency",
             "options": "Company:company:default_currency",
             "print_hide": 1,
             "read_only": 1
@@ -807,8 +748,6 @@
             "fieldtype": "Currency",
             "in_list_view": 1,
             "label": "Grand Total",
-            "oldfieldname": "grand_total_import",
-            "oldfieldtype": "Currency",
             "options": "currency",
             "read_only": 1
         },
@@ -837,8 +776,6 @@
             "fieldtype": "Data",
             "label": "In Words",
             "length": 240,
-            "oldfieldname": "in_words_import",
-            "oldfieldtype": "Data",
             "print_hide": 1,
             "read_only": 1
         },
@@ -854,32 +791,25 @@
             "fieldname": "terms_section_break",
             "fieldtype": "Section Break",
             "label": "Terms and Conditions",
-            "oldfieldtype": "Section Break",
             "options": "fa fa-legal"
         },
         {
             "fieldname": "tc_name",
             "fieldtype": "Link",
             "label": "Terms",
-            "oldfieldname": "tc_name",
-            "oldfieldtype": "Link",
             "options": "Terms and Conditions",
             "print_hide": 1
         },
         {
             "fieldname": "terms",
             "fieldtype": "Text Editor",
-            "label": "Terms and Conditions",
-            "oldfieldname": "terms",
-            "oldfieldtype": "Text Editor"
+            "label": "Terms and Conditions"
         },
         {
             "fieldname": "bill_no",
             "fieldtype": "Data",
             "hidden": 1,
             "label": "Bill No",
-            "oldfieldname": "bill_no",
-            "oldfieldtype": "Data",
             "print_hide": 1
         },
         {
@@ -887,8 +817,6 @@
             "fieldtype": "Date",
             "hidden": 1,
             "label": "Bill Date",
-            "oldfieldname": "bill_date",
-            "oldfieldtype": "Date",
             "print_hide": 1
         },
         {
@@ -896,7 +824,6 @@
             "fieldname": "more_info",
             "fieldtype": "Section Break",
             "label": "More Information",
-            "oldfieldtype": "Section Break",
             "options": "fa fa-file-text"
         },
         {
@@ -906,8 +833,6 @@
             "in_standard_filter": 1,
             "label": "Status",
             "no_copy": 1,
-            "oldfieldname": "status",
-            "oldfieldtype": "Select",
             "options": "\nDraft\nTo Bill\nCompleted\nReturn Issued\nCancelled\nClosed",
             "print_hide": 1,
             "print_width": "150px",
@@ -923,8 +848,6 @@
             "ignore_user_permissions": 1,
             "label": "Amended From",
             "no_copy": 1,
-            "oldfieldname": "amended_from",
-            "oldfieldtype": "Data",
             "options": "Subcontracting Receipt",
             "print_hide": 1,
             "print_width": "150px",
@@ -936,14 +859,11 @@
             "fieldtype": "Data",
             "hidden": 1,
             "label": "Range",
-            "oldfieldname": "range",
-            "oldfieldtype": "Data",
             "print_hide": 1
         },
         {
             "fieldname": "column_break4",
             "fieldtype": "Column Break",
-            "oldfieldtype": "Column Break",
             "print_hide": 1,
             "print_width": "50%",
             "width": "50%"
@@ -997,8 +917,6 @@
             "fieldtype": "Link",
             "label": "Print Heading",
             "no_copy": 1,
-            "oldfieldname": "select_print_heading",
-            "oldfieldtype": "Link",
             "options": "Print Heading",
             "print_hide": 1,
             "report_hide": 1
@@ -1026,7 +944,6 @@
             "fieldtype": "HTML",
             "hidden": 1,
             "label": "Other Details",
-            "oldfieldtype": "HTML",
             "options": "<div class=\"columnHeading\">Other Details</div>",
             "print_hide": 1,
             "print_width": "30%",
@@ -1035,9 +952,7 @@
         {
             "fieldname": "instructions",
             "fieldtype": "Small Text",
-            "label": "Instructions",
-            "oldfieldname": "instructions",
-            "oldfieldtype": "Text"
+            "label": "Instructions"
         },
         {
             "fieldname": "remarks",
@@ -1056,9 +971,7 @@
         {
             "fieldname": "transporter_name",
             "fieldtype": "Data",
-            "label": "Transporter Name",
-            "oldfieldname": "transporter_name",
-            "oldfieldtype": "Data"
+            "label": "Transporter Name"
         },
         {
             "fieldname": "column_break5",
@@ -1071,8 +984,6 @@
             "fieldtype": "Data",
             "label": "Vehicle Number",
             "no_copy": 1,
-            "oldfieldname": "lr_no",
-            "oldfieldtype": "Data",
             "print_width": "100px",
             "width": "100px"
         },
@@ -1081,8 +992,6 @@
             "fieldtype": "Date",
             "label": "Vehicle Date",
             "no_copy": 1,
-            "oldfieldname": "lr_date",
-            "oldfieldtype": "Date",
             "print_width": "100px",
             "width": "100px"
         },

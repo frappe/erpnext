@@ -5,7 +5,6 @@ frappe.ui.form.on('Subcontracting Order', {
 	refresh: function (frm) {
 		if (frm.doc.docstatus == 1) {
 			cur_frm.add_custom_button(__('Subcontracting Receipt'), make_subcontracting_receipt, __('Create'));
-
 			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 
