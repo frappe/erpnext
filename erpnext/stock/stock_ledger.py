@@ -458,6 +458,8 @@ class update_entries_after(object):
 
 		# rounding as per precision
 		self.wh_data.stock_value = flt(self.wh_data.stock_value, self.precision)
+		if not self.wh_data.qty_after_transaction:
+			self.wh_data.stock_value = 0.0
 		stock_value_difference = self.wh_data.stock_value - self.wh_data.prev_stock_value
 		self.wh_data.prev_stock_value = self.wh_data.stock_value
 
