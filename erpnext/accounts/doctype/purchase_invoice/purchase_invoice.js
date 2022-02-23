@@ -657,8 +657,14 @@ frappe.ui.form.on("Purchase Invoice", {
 						}
 					})
 				} else {
-					frm.set_df_property("supplier", "description",
-						__('There are Open Purchase Orders against this supplier. Use "Get Items From" to link one.'));
+					frappe.db.get_single_value('Buying Settings', 'po_required').then(po_required => {
+						if (po_required == 'Yes') {
+							frm.set_df_property("supplier", "description",
+								__('There are Open Purchase Orders against this supplier. Use "Get Items From" to link one.'));
+						} else {
+							frm.set_df_property("supplier", "description", '');
+						}
+					});
 				}
 			}
 		});

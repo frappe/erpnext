@@ -148,8 +148,14 @@ frappe.ui.form.on("Delivery Note", {
 						}
 					})
 				} else {
-					frm.set_df_property("customer", "description",
-						__('There are Open Sales Orders against this customer. Use "Get Items From" to link one.'));
+					frappe.db.get_single_value('Selling Settings', 'so_required').then(so_required => {
+						if (so_required == 'Yes') {
+							frm.set_df_property("customer", "description",
+								__('There are Open Sales Orders against this customer. Use "Get Items From" to link one.'));
+						} else {
+							frm.set_df_property("customer", "description", '');
+						}
+					});
 				}
 			}
 		});
