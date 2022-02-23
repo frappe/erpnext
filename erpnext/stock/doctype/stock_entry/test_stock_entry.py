@@ -691,6 +691,8 @@ class TestStockEntry(ERPNextTestCase):
 		bom_no = frappe.db.get_value("BOM", {"item": "_Test Variant Item",
 			"is_default": 1, "docstatus": 1})
 
+		make_item_variant() # make variant of _Test Variant Item if absent
+
 		work_order = frappe.new_doc("Work Order")
 		work_order.update({
 			"company": "_Test Company",
