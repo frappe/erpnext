@@ -1,0 +1,144 @@
+{
+ "creation": "2022-02-21 01:01:18.696338",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sales_invoice",
+  "fbr_pos_invoice_no",
+  "response_status_code",
+  "column_break_3",
+  "log_type",
+  "error_type",
+  "column_break_7",
+  "request_timestamp",
+  "invoice_data_section",
+  "invoice_data",
+  "section_break_8",
+  "response",
+  "section_break_11",
+  "error"
+ ],
+ "fields": [
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fbr_pos_invoice_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "FBR POS Invoice Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "log_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Log Type",
+   "options": "Success\nError",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_data",
+   "fieldtype": "Code",
+   "label": "Invoice Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "response",
+   "fieldtype": "Code",
+   "label": "Response",
+   "read_only": 1
+  },
+  {
+   "fieldname": "error",
+   "fieldtype": "Code",
+   "label": "Error",
+   "read_only": 1
+  },
+  {
+   "fieldname": "request_timestamp",
+   "fieldtype": "Datetime",
+   "in_standard_filter": 1,
+   "label": "Request Timestamp",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break",
+   "label": "Response"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break",
+   "label": "Error"
+  },
+  {
+   "fieldname": "error_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Error Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "response_status_code",
+   "fieldtype": "Data",
+   "label": "Response HTTP Status Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "invoice_data_section",
+   "fieldtype": "Section Break",
+   "label": "Invoice Data"
+  }
+ ],
+ "in_create": 1,
+ "modified": "2022-02-23 14:02:19.933221",
+ "modified_by": "Administrator",
+ "module": "ERPNext Integrations",
+ "name": "FBR POS Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "sales_invoice",
+ "track_seen": 1
+}

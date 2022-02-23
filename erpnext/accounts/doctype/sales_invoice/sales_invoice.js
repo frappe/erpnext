@@ -73,6 +73,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			this.frm.return_print_format = "Sales Invoice Return";
 		}
 
+		if (doc.docstatus == 1 && cint(doc.is_fbr_pos_invoice) && !doc.fbr_pos_invoice_no && this.frm.has_perm("submit")) {
+			this.frm.add_custom_button(__('Sync FBR POS Invoice'), function () {
+				me.sync_fbr_pos_invoice();
+			});
+		}
+
 		this.show_general_ledger();
 
 		if(doc.update_stock) this.show_stock_ledger();
@@ -157,6 +163,23 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			});
 		}
+	},
+
+	sync_fbr_pos_invoice: function () {
+		var me = this;
+		frappe.call({
+			"method": "erpnext.erpnext_integrations.fbr_pos_integration.sync_fbr_pos_invoice",
+			"args": {
+				"sales_invoice": this.frm.doc.name
+			},
+			"freeze": 1,
+			"freeze_message": __("Syncing with FBR POS Service"),
+			callback: function(r) {
+				if (!r.exc && r.message) {
+					me.frm.reload_doc();
+				}
+			}
+		});
 	},
 
 	make_maintenance_schedule: function() {
