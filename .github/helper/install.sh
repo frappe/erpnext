@@ -8,8 +8,8 @@ sudo apt-get install redis-server libcups2-dev
 
 pip install frappe-bench
 
-frappeuser="ankush"
-frappebranch="now_async"
+frappeuser=${FRAPPE_USER:-"frappe"}
+frappebranch=${FRAPPE_BRANCH:-${GITHUB_BASE_REF:-${GITHUB_REF##*/}}}
 
 git clone "https://github.com/${frappeuser}/frappe" --branch "${frappebranch}" --depth 1
 bench init --skip-assets --frappe-path ~/frappe --python "$(which python)" frappe-bench
