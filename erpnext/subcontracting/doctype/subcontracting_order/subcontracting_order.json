@@ -58,6 +58,8 @@
         "scan_barcode",
         "items_col_break",
         "set_warehouse",
+        "service_items_section",
+        "service_items",
         "items_section",
         "fg_items",
         "sb_last_subcontract",
@@ -506,6 +508,23 @@
             "label": "Set Target Warehouse",
             "options": "Warehouse",
             "print_hide": 1
+        },
+        {
+            "fieldname": "service_items_section",
+            "fieldtype": "Section Break",
+            "hide_border": 1,
+            "oldfieldtype": "Section Break",
+            "options": "fa fa-shopping-cart"
+        },
+        {
+            "allow_bulk_edit": 1,
+            "fieldname": "service_items",
+            "fieldtype": "Table",
+            "label": "Service Items",
+            "oldfieldname": "po_details",
+            "oldfieldtype": "Table",
+            "options": "Subcontracting Order Service Item",
+            "reqd": 1
         },
         {
             "fieldname": "items_section",
