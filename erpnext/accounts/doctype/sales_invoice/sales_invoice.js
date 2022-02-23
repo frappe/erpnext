@@ -1036,6 +1036,7 @@ frappe.ui.form.on('Sales Invoice', {
 			},
 			callback: function(r) {
 				if (!r.message) {
+					frm.set_df_property("customer", "description", '');
 					frappe.call({
 						method: "erpnext.accounts.utils.check_permissions_so_po_required",
 						args: {
@@ -1055,17 +1056,13 @@ frappe.ui.form.on('Sales Invoice', {
 										})
 									},
 									label: __("Create Sales Order"),
-								},
-								custom_action: {
-									action: () => {
-										msg_dialog.hide();
-										erpnext.change_selling_setting_so_required({"perm": r.message.perm_setting});
-									},
-									label: __("Change this setting"),
-								},
+								}
 							});
 						}
 					})
+				} else {
+					frm.set_df_property("customer", "description",
+						__('There are Open Sales Orders against this customer. Use "Get Items From" to link one.'));
 				}
 			}
 		});

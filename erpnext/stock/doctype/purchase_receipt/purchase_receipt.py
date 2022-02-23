@@ -6,7 +6,7 @@ import frappe
 from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, flt, getdate, nowdate
+from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
@@ -154,22 +154,17 @@ class PurchaseReceipt(BuyingController):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
 			for d in self.get('items'):
 				if not d.purchase_order:
-					msg = _("Purchase Order number required for Item {0}").format(d.item_code)
-					from erpnext.accounts.utils import (
-						check_permissions_so_po_required,
-						so_required_settings_message,
-					)
+					msg = _("Purchase Order Required for item {}").format(frappe.bold(d.item_code))
+					msg += "<br><br>"
+					msg += _("To submit the receipt without purchase order please set {0} as {1} in {2}").format(
+						frappe.bold(_('Purchase Order Required')), frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings'))
+					from erpnext.accounts.utils import check_permissions_so_po_required
 					perms = check_permissions_so_po_required('Purchase Order', 'Buying Settings')
-					so_required_settings_message(msg, primary_action={
+					frappe.msgprint(msg, title=_("Purchase Order Required"), primary_action={
 						'label': _('Create Purchase Order'),
 						'client_action': 'erpnext.route_to_new_purchase_order',
 						'args': {"supplier": self.supplier, "perm": perms['perm_so_po']}
-					},
-					custom_action={
-						'label': _('Change this setting'),
-						'client_action': 'erpnext.change_buying_setting_po_required',
-						'args': {"perm": perms['perm_setting']}
-					})
+					}, raise_exception=1)
 
 	def get_already_received_qty(self, po, po_detail):
 		qty = frappe.db.sql("""select sum(qty) from `tabPurchase Receipt Item`

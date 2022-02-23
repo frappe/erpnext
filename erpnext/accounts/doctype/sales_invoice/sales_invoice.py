@@ -648,22 +648,17 @@ class SalesInvoice(SellingController):
 
 				for d in self.get('items'):
 					if (d.item_code and not d.get(key.lower().replace(' ', '_')) and not self.get(value[1])):
-						msg = _("{0} is required for Item {1}").format(key, d.item_code)
-						from erpnext.accounts.utils import (
-							check_permissions_so_po_required,
-							so_required_settings_message,
-						)
+						msg = _("Sales Order Required for item {}").format(frappe.bold(d.item_code))
+						msg += "<br><br>"
+						msg += _("To submit the invoice without sales order please set {0} as {1} in {2}").format(
+							frappe.bold(_('Sales Order Required')), frappe.bold('No'), get_link_to_form('Selling Settings', 'Selling Settings', 'Selling Settings'))
+						from erpnext.accounts.utils import check_permissions_so_po_required
 						perms = check_permissions_so_po_required('Sales Order', 'Selling Settings')
-						so_required_settings_message(msg, primary_action={
+						frappe.msgprint(msg, primary_action={
 							'label': _('Create Sales Order'),
 							'client_action': 'erpnext.route_to_new_sales_order',
 							'args': {"customer": self.customer, "perm": perms['perm_so_po']}
-						},
-						custom_action={
-							'label': _('Change this setting'),
-							'client_action': 'erpnext.change_selling_setting_so_required',
-							'args': {"perm": perms['perm_setting']}
-						})
+						}, raise_exception=1)
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""

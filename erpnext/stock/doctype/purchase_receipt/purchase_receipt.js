@@ -327,6 +327,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			},
 			callback: function(r) {
 				if (!r.message) {
+					frm.set_df_property("supplier", "description", '');
 					frappe.call({
 						method: "erpnext.accounts.utils.check_permissions_so_po_required",
 						args: {
@@ -346,17 +347,13 @@ frappe.ui.form.on("Purchase Receipt", {
 										})
 									},
 									label: __("Create Purchase Order"),
-								},
-								custom_action: {
-									action: () => {
-										msg_dialog.hide();
-										erpnext.change_buying_setting_po_required({"perm": r.message.perm_setting});
-									},
-									label: __("Change this setting"),
-								},
+								}
 							});
 						}
 					})
+				} else {
+					frm.set_df_property("supplier", "description",
+						__('There are Open Purchase Orders against this supplier. Use "Get Items From" to link one.'));
 				}
 			}
 		});

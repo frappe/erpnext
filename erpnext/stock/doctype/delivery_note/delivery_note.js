@@ -126,6 +126,7 @@ frappe.ui.form.on("Delivery Note", {
 			},
 			callback: function(r) {
 				if (!r.message) {
+					frm.set_df_property("customer", "description", '');
 					frappe.call({
 						method: "erpnext.accounts.utils.check_permissions_so_po_required",
 						args: {
@@ -134,7 +135,7 @@ frappe.ui.form.on("Delivery Note", {
 						},
 						callback: function(r) {
 							let msg_dialog = frappe.msgprint({
-								message: __('Sales Order is required to create a Sales Invoice'),
+								message: __('Sales Order is required to create a Delivery Note.'),
 								indicator: 'red',
 								title: __('Sales Order Required'),
 								primary_action: {
@@ -142,17 +143,13 @@ frappe.ui.form.on("Delivery Note", {
 										erpnext.route_to_new_sales_order({"customer": frm.doc.customer, "perm": r.message.perm_so_po})
 									},
 									label: __("Create Sales Order"),
-								},
-								custom_action: {
-									action: () => {
-										msg_dialog.hide();
-										erpnext.change_selling_setting_so_required({"perm": r.message.perm_setting});
-									},
-									label: __("Change this setting"),
-								},
+								}
 							});
 						}
 					})
+				} else {
+					frm.set_df_property("customer", "description",
+						__('There are Open Sales Orders against this customer. Use "Get Items From" to link one.'));
 				}
 			}
 		});

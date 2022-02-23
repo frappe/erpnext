@@ -8,7 +8,7 @@ from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, get_link_to_form
 
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.selling_controller import SellingController
@@ -114,22 +114,17 @@ class DeliveryNote(SellingController):
 		if frappe.db.get_value("Selling Settings", None, 'so_required') == 'Yes':
 			for d in self.get('items'):
 				if not d.against_sales_order:
-					from erpnext.accounts.utils import (
-						check_permissions_so_po_required,
-						so_required_settings_message,
-					)
+					from erpnext.accounts.utils import check_permissions_so_po_required
 					perms = check_permissions_so_po_required('Sales Order', 'Selling Settings')
-					msg = _("Sales Order required for Item {0}").format(d.item_code)
-					so_required_settings_message(msg, primary_action={
+					msg = _("Sales Order Required for item {}").format(frappe.bold(d.item_code))
+					msg += "<br><br>"
+					msg += _("To submit the delivery note without sales order please set {0} as {1} in {2}").format(
+						frappe.bold(_('Sales Order Required')), frappe.bold('No'), get_link_to_form('Selling Settings', 'Selling Settings', 'Selling Settings'))
+					frappe.msgprint(msg, primary_action={
 						'label': _('Create Sales Order'),
 						'client_action': 'erpnext.route_to_new_sales_order',
 						'args': {"customer": self.customer, "perm": perms['perm_so_po']}
-					},
-					custom_action={
-						'label': _('Change this setting'),
-						'client_action': 'erpnext.change_selling_setting_so_required',
-						'args': {"perm": perms['perm_setting']}
-					})
+					}, raise_exception=1)
 
 	def validate(self):
 		self.validate_posting_time()
