@@ -109,16 +109,20 @@ class update_entries_after(object):
 		self.build()
 
 	def build(self):
-		# includes current entry!
-		entries_to_fix = self.get_sle_after_datetime()
+		# # # includes current entry!
+		# entries_to_fix = self.get_sle_after_datetime()
 
-		for sle in entries_to_fix:
-			self.process_sle(sle)
-
+		# for sle in entries_to_fix:
+		# 	self.process_sle(sle)
+        # # check stock entry qty = (I/O Rate) * stock value difference
+		# if self.actual_qty < 0:
+		# 	self.stock_value_difference = self.actual_qty * self.outgoing_rate
+		# else:
+		# 	self.stock_value_difference = self.actual_qty * self.incoming_rate
 		if self.exceptions:
 			self.raise_exceptions()
 
-		self.update_bin()
+		#self.update_bin()
 
 	def update_bin(self):
 		# update bin
