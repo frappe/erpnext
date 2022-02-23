@@ -148,7 +148,7 @@ def get_data(filters):
 		query.where(
 			lead.territory == filters.get("territory")
 		)
-	
+
 	if filters.get("status"):
 		query.where(
 			lead.territory == filters.get("status")
