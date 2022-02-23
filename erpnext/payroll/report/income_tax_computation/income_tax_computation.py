@@ -4,7 +4,7 @@
 import frappe
 from frappe import _, scrub
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_days, flt, getdate
+from frappe.utils import add_days, flt, getdate, rounded
 
 from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates
 from erpnext.payroll.doctype.salary_slip.salary_slip import calculate_tax_by_tax_slab
@@ -254,6 +254,7 @@ class IncomeTaxComputationReport(object):
 		for d in exemption_categories:
 			self.add_column(d.name)
 
+		self.employees_with_proofs = []
 		self.get_tax_exemptions("Employee Tax Exemption Proof Submission")
 		self.get_tax_exemptions("Employee Tax Exemption Declaration")
 
@@ -278,7 +279,6 @@ class IncomeTaxComputationReport(object):
 			.groupby(par.employee, child.exemption_category)
 		).run(as_dict=True)
 
-		self.employees_with_proofs = []
 		for d in records:
 			if not self.employees[d.employee]["allow_tax_exemption"]:
 				continue
@@ -305,6 +305,7 @@ class IncomeTaxComputationReport(object):
 
 		self.add_column("HRA")
 
+		self.employees_with_proofs = []
 		self.get_eligible_hra("Employee Tax Exemption Proof Submission")
 		self.get_eligible_hra("Employee Tax Exemption Declaration")
 
@@ -323,7 +324,6 @@ class IncomeTaxComputationReport(object):
 			fields = ["employee", hra_amount_field], as_list=1
 		)
 
-		self.employees_with_proofs = []
 		for d in records:
 			if not self.employees[d[0]]["allow_tax_exemption"]:
 				continue
@@ -359,6 +359,9 @@ class IncomeTaxComputationReport(object):
 	def get_applicable_tax(self):
 		self.add_column("Applicable Tax")
 
+		is_tax_rounded = frappe.db.get_value("Salary Component",
+			{"variable_based_on_taxable_salary": 1, "disabled": 0}, "round_to_the_nearest_integer")
+
 		for emp, emp_details in self.employees.items():
 			tax_slab = emp_details.get("income_tax_slab")
 			if tax_slab:
@@ -369,6 +372,8 @@ class IncomeTaxComputationReport(object):
 			else:
 				tax_amount = 0.0
 
+			if is_tax_rounded:
+				tax_amount = rounded(tax_amount)
 			emp_details["applicable_tax"] = tax_amount
 
 	def get_total_deducted_tax(self):
