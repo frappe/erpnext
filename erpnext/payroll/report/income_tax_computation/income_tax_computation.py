@@ -71,15 +71,10 @@ class IncomeTaxComputationReport(object):
 			filters = {
 				"name": self.filters.employee
 			}
-		else:
-			if self.filters.department:
-				filters.update({
-					"department": self.filters.department
-				})
-			if self.filters.designation:
-				filters.update({
-					"designation": self.filters.designation
-				})
+		elif self.filters.department:
+			filters.update({
+				"department": self.filters.department
+			})
 
 		return filters, or_filters
 
