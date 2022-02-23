@@ -5,8 +5,8 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, formatdate, get_datetime, get_link_to_form, getdate, nowdate
 from frappe.query_builder import Criterion
+from frappe.utils import cint, cstr, formatdate, get_datetime, get_link_to_form, getdate, nowdate
 
 from erpnext.hr.utils import get_holiday_dates_for_employee, validate_active_employee
 

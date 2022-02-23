@@ -3,18 +3,17 @@
 
 
 from datetime import datetime, timedelta
+from typing import Dict, List
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder import Criterion, Column
-from frappe.utils import cstr, get_link_to_form, get_datetime, get_time, getdate, now_datetime, nowdate
+from frappe.query_builder import Criterion
+from frappe.utils import cstr, get_datetime, get_link_to_form, get_time, getdate, now_datetime
 
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 from erpnext.hr.utils import validate_active_employee
-
-from typing import Dict, List
 
 
 class OverlappingShiftError(frappe.ValidationError):
@@ -374,7 +373,7 @@ def get_exact_shift(shifts: List, for_timestamp: datetime) -> Dict:
 			timestamp_index = index
 		elif for_timestamp == timestamp:
 			# on timestamp boundary
-			if index%2 == 1:
+			if index % 2 == 1:
 				timestamp_index = index
 			else:
 				timestamp_index = index + 1
