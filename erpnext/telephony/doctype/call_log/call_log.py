@@ -32,6 +32,15 @@ class CallLog(Document):
 		if lead:
 			self.add_link(link_type="Lead", link_name=lead)
 
+		# Add Employee Name
+		if self.is_incoming_call():
+			# Taking the last 10 digits of the number
+			emp_number_reversed = (self.get("to"))[-1:-11:-1]
+			emp_number = emp_number_reversed[-1::-1]
+
+			emp_name = frappe.get_all("Employee", filters={"cell_number":["like","%"+emp_number+"%"]}, fields=["first_name", "middle_name", "last_name"])
+			self.employee_call_directed_to = (emp_name[0].get("first_name") or '') + ' ' + (emp_name[0].get("middle_name") or '') + ' ' + (emp_name[0].get("last_name") or '')
+
 	def after_insert(self):
 		self.trigger_call_popup()
 
