@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class SubcontractingReceiptItemSupplied(Document):
+class SubcontractingReceiptSuppliedItem(Document):
 	pass
