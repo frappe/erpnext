@@ -142,7 +142,7 @@ class Employee(NestedSet):
 						"file_url": self.image,
 						"attached_to_doctype": "User",
 						"attached_to_name": self.user_id
-					}).insert()
+					}).insert(ignore_if_duplicate=True)
 				except frappe.DuplicateEntryError:
 					# already exists
 					pass

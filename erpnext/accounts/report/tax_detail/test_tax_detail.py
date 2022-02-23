@@ -61,8 +61,8 @@ class TestTaxDetail(unittest.TestCase):
 					# Create GL Entries:
 					db_doc.submit()
 				else:
-					db_doc.insert()
-				frappe.db.commit()
+					db_doc.insert(ignore_if_duplicate=True)
+          frappe.db.commit()
 			except frappe.exceptions.DuplicateEntryError:
 				pass
 		frappe.db.MAX_WRITES_PER_TRANSACTION = 200_000

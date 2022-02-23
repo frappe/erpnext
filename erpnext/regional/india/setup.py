@@ -60,12 +60,7 @@ def create_hsn_codes(data, code_field):
 		hsn_code.description = d["description"]
 		hsn_code.hsn_code = d[code_field]
 		hsn_code.name = d[code_field]
-		try:
-			frappe.db.savepoint(savepoint)
-			hsn_code.db_insert()
-		except frappe.DuplicateEntryError:
-			frappe.db.rollback(save_point=savepoint)
-			pass
+		hsn_code.db_insert(ignore_if_duplicate=True)
 
 def add_custom_roles_for_reports():
 	for report_name in ('GST Sales Register', 'GST Purchase Register',
