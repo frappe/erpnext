@@ -902,7 +902,7 @@
     "modified": "2022-02-23 10:33:07.209547",
     "modified_by": "Administrator",
     "module": "Subcontracting",
-    "name": "Subcontracting Receipt Item",
+    "name": "Subcontracting Receipt Finished Good Item",
     "naming_rule": "Random",
     "owner": "Administrator",
     "permissions": [],
