@@ -21,7 +21,7 @@ class TestHomepageSection(unittest.TestCase):
 					{'title': 'Card 2', 'subtitle': 'Subtitle 2', 'content': 'This is test card 2', 'image': 'test.jpg'},
 				],
 				'no_of_columns': 3
-			}).insert()
+			}).insert(ignore_if_duplicate=True)
 		except frappe.DuplicateEntryError:
 			pass
 
