@@ -15,7 +15,9 @@ def execute(filters=None):
 
 def return_data(filters):
 	data = []
-	conditions = return_filters(filters)
+	if filters.get("from_date"): from_date = filters.get("from_date")
+	if filters.get("to_date"): to_date = filters.get("to_date")
+	conditions = return_filters(filters, from_date, to_date)
 
 	purchase_orders = frappe.get_all("Purchase Order", ["*"], filters = conditions)
 
@@ -28,11 +30,12 @@ def return_data(filters):
 
 	return data
 
-def return_filters(filters):
+def return_filters(filters, from_date, to_date):
 	conditions = ''	
 
 	conditions += "{"
-	conditions += '"justification_purchase": "{}"'.format(filters.get("purchase_justification"))
+	conditions += '"transaction_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
+	conditions += ', "justification_purchase": "{}"'.format(filters.get("purchase_justification"))
 	conditions += ' ,"docstatus": 1'
 	conditions += '}'
 
