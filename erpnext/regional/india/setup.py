@@ -54,7 +54,6 @@ def add_hsn_sac_codes():
 		frappe.flags.created_hsn_codes = True
 
 def create_hsn_codes(data, code_field):
-	savepoint = "hsn_code_creation"
 	for d in data:
 		hsn_code = frappe.new_doc('GST HSN Code')
 		hsn_code.description = d["description"]
@@ -753,15 +752,14 @@ def make_fixtures(company=None):
 	set_salary_components(docs)
 	set_tds_account(docs, company)
 
-	savepoint = "fixture_setup"
 	for d in docs:
 		try:
-			frappe.db.savepoint(savepoint)
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_permissions = True
 			doc.insert()
-		except (frappe.NameError, frappe.DuplicateEntryError):
-			frappe.db.rollback(save_point=savepoint)
+		except frappe.NameError:
+			frappe.clear_messages()
+		except frappe.DuplicateEntryError:
 			frappe.clear_messages()
 
 	# create records for Tax Withholding Category
