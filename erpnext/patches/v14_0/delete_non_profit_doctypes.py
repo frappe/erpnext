@@ -32,7 +32,7 @@ def execute():
 
 	forms = ['grant-application', 'certification-application', 'certification-application-usd']
 	for form in forms:
-		frappe.delete_doc("Web Form", form, ignore_missing=True)
+		frappe.delete_doc("Web Form", form, ignore_missing=True, force=True)
 
 	custom_records = [
 		{"doctype": "Party Type", "name": "Member"},
