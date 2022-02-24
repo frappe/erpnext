@@ -1066,7 +1066,7 @@ def get_outstanding_reference_documents(args):
 		if d.voucher_type in ("Purchase Invoice"):
 			d["bill_no"] = frappe.db.get_value(d.voucher_type, d.voucher_no, "bill_no")
 
-	# Get all SO / PO which are not fully billed or aginst which full advance not paid
+	# Get all SO / PO which are not fully billed or against which full advance not paid
 	orders_to_be_billed = []
 	if (args.get("party_type") != "Student"):
 		orders_to_be_billed =  get_orders_to_be_billed(args.get("posting_date"),args.get("party_type"),

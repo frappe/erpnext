@@ -175,7 +175,7 @@ class TestShoppingCart(unittest.TestCase):
 	def create_tax_rule(self):
 		tax_rule = frappe.get_test_records("Tax Rule")[0]
 		try:
-			frappe.get_doc(tax_rule).insert()
+			frappe.get_doc(tax_rule).insert(ignore_if_duplicate=True)
 		except (frappe.DuplicateEntryError, ConflictingTaxRule):
 			pass
 
