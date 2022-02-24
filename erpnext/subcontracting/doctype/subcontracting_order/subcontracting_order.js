@@ -29,10 +29,31 @@ frappe.ui.form.on('Subcontracting Order', {
 	},
 });
 
+frappe.ui.form.on('Subcontracting Order Service Item', {
+	item_code(frm, cdt, cdn) {
+		calculate_amount(frm, cdt, cdn);
+	},
+	qty(frm, cdt, cdn) {
+		calculate_amount(frm, cdt, cdn);
+	},
+	rate(frm, cdt, cdn) {
+		calculate_amount(frm, cdt, cdn);
+	},
+});
+
 let make_subcontracting_receipt = () => {
 	frappe.model.open_mapped_doc({
 		method: "erpnext.buying.doctype.subcontracting_order.subcontracting_order.make_subcontracting_receipt",
 		frm: cur_frm,
 		freeze_message: __("Creating Subcontracting Receipt ...")
 	})
+}
+
+let calculate_amount = (frm, cdt, cdn) => {
+	let item = frappe.get_doc(cdt, cdn);
+	if (item.item_code)
+		item.amount = item.rate * item.qty;
+	else
+		item.rate = item.amount = 0.0;
+	frm.refresh_fields();
 }
