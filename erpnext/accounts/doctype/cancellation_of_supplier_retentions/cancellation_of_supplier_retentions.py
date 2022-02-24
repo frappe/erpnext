@@ -43,3 +43,11 @@ class CancellationOfSupplierRetentions(Document):
 	def change_status_retention(self):
 		retention = frappe.get_doc("Supplier Retention", self.supplier_retention)
 		retention.db_set('docstatus', 2, update_modified=False)
+		retention.db_set('total_references', 0, update_modified=False)
+		retention.db_set('total_withheld', 0, update_modified=False)
+
+		references = references = frappe.get_all("Withholding Reference", ["*"], filters = {"parent": self.supplier_retention})
+
+		for reference in references:
+			ref = frappe.get_doc("Withholding Reference", reference.name)
+			ref.db_set('net_total', 0, update_modified=False)
