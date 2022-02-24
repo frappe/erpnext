@@ -28,8 +28,23 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 
 class ProductionPlan(Document):
 	def validate(self):
+		self.set_pending_qty_in_row_without_reference()
 		self.calculate_total_planned_qty()
 		self.set_status()
+
+	def set_pending_qty_in_row_without_reference(self):
+		"Set Pending Qty in independent rows (not from SO or MR)."
+		if self.docstatus > 0: # set only to initialise value before submit
+			return
+
+		for item in self.po_items:
+			if not item.get("sales_order") or not item.get("material_request"):
+				item.pending_qty = item.planned_qty
+
+	def calculate_total_planned_qty(self):
+		self.total_planned_qty = 0
+		for d in self.po_items:
+			self.total_planned_qty += flt(d.planned_qty)
 
 	def validate_data(self):
 		for d in self.get('po_items'):
@@ -263,11 +278,6 @@ class ProductionPlan(Document):
 						'qty': so_detail['qty']
 				})
 
-	def calculate_total_planned_qty(self):
-		self.total_planned_qty = 0
-		for d in self.po_items:
-			self.total_planned_qty += flt(d.planned_qty)
-
 	def calculate_total_produced_qty(self):
 		self.total_produced_qty = 0
 		for d in self.po_items:
@@ -275,10 +285,11 @@ class ProductionPlan(Document):
 
 		self.db_set("total_produced_qty", self.total_produced_qty, update_modified=False)
 
-	def update_produced_qty(self, produced_qty, production_plan_item):
+	def update_produced_pending_qty(self, produced_qty, production_plan_item):
 		for data in self.po_items:
 			if data.name == production_plan_item:
 				data.produced_qty = produced_qty
+				data.pending_qty = flt(data.planned_qty - produced_qty)
 				data.db_update()
 
 		self.calculate_total_produced_qty()
@@ -308,7 +319,7 @@ class ProductionPlan(Document):
 
 		if self.total_produced_qty > 0:
 			self.status = "In Process"
-			if self.check_have_work_orders_completed():
+			if self.all_items_completed():
 				self.status = "Completed"
 
 		if self.status != 'Completed':
@@ -580,21 +591,32 @@ class ProductionPlan(Document):
 
 			self.append("sub_assembly_items", data)
 
-	def check_have_work_orders_completed(self):
-		wo_status = frappe.db.get_list(
+	def all_items_completed(self):
+		all_items_produced = all(flt(d.planned_qty) - flt(d.produced_qty) < 0.000001
+									for d in self.po_items)
+		if not all_items_produced:
+			return False
+
+		wo_status = frappe.get_all(
 			"Work Order",
-			filters={"production_plan": self.name},
+			filters={
+				"production_plan": self.name,
+				"status": ("not in", ["Closed", "Stopped"]),
+				"docstatus": ("<", 2),
+			},
 			fields="status",
-			pluck="status"
+			pluck="status",
 		)
-		return all(s == "Completed" for s in wo_status)
+		all_work_orders_completed = all(s == "Completed" for s in wo_status)
+		return all_work_orders_completed
 
 @frappe.whitelist()
 def download_raw_materials(doc, warehouses=None):
 	if isinstance(doc, str):
 		doc = frappe._dict(json.loads(doc))
 
-	item_list = [['Item Code', 'Description', 'Stock UOM', 'Warehouse', 'Required Qty as per BOM',
+	item_list = [['Item Code', 'Item Name', 'Description',
+		'Stock UOM', 'Warehouse', 'Required Qty as per BOM',
 		'Projected Qty', 'Available Qty In Hand', 'Ordered Qty', 'Planned Qty',
 		'Reserved Qty for Production', 'Safety Stock', 'Required Qty']]
 
@@ -603,7 +625,8 @@ def download_raw_materials(doc, warehouses=None):
 	items = get_items_for_material_requests(doc, warehouses=warehouses, get_parent_warehouse_data=True)
 
 	for d in items:
-		item_list.append([d.get('item_code'), d.get('description'), d.get('stock_uom'), d.get('warehouse'),
+		item_list.append([d.get('item_code'), d.get('item_name'),
+			d.get('description'), d.get('stock_uom'), d.get('warehouse'),
 			d.get('required_bom_qty'), d.get('projected_qty'), d.get('actual_qty'), d.get('ordered_qty'),
 			d.get('planned_qty'), d.get('reserved_qty_for_production'), d.get('safety_stock'), d.get('quantity')])
 

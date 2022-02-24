@@ -1566,13 +1566,12 @@ def validate_taxes_and_charges(tax):
 		tax.rate = None
 
 
-def validate_account_head(tax, doc):
-	company = frappe.get_cached_value('Account',
-		tax.account_head, 'company')
+def validate_account_head(idx, account, company):
+	account_company = frappe.get_cached_value('Account', account, 'company')
 
-	if company != doc.company:
+	if account_company != company:
 		frappe.throw(_('Row {0}: Account {1} does not belong to Company {2}')
-			.format(tax.idx, frappe.bold(tax.account_head), frappe.bold(doc.company)), title=_('Invalid Account'))
+			.format(idx, frappe.bold(account), frappe.bold(company)), title=_('Invalid Account'))
 
 
 def validate_cost_center(tax, doc):
@@ -1955,7 +1954,8 @@ def update_bin_on_delete(row, doctype):
 
 		qty_dict["ordered_qty"] = get_ordered_qty(row.item_code, row.warehouse)
 
-	update_bin_qty(row.item_code, row.warehouse, qty_dict)
+	if row.warehouse:
+		update_bin_qty(row.item_code, row.warehouse, qty_dict)
 
 def validate_and_delete_children(parent, data):
 	deleted_children = []

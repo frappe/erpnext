@@ -83,8 +83,8 @@
   "planned_qty",
   "column_break_69",
   "work_order_qty",
-  "delivered_qty",
   "produced_qty",
+  "delivered_qty",
   "returned_qty",
   "shopping_cart_section",
   "additional_notes",
@@ -701,10 +701,8 @@
    "width": "50px"
   },
   {
-   "description": "For Production",
    "fieldname": "produced_qty",
    "fieldtype": "Float",
-   "hidden": 1,
    "label": "Produced Quantity",
    "oldfieldname": "produced_qty",
    "oldfieldtype": "Currency",
@@ -802,7 +800,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-10-05 12:27:25.014789",
+ "modified": "2022-02-21 13:55:08.883104",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",
@@ -811,5 +809,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
