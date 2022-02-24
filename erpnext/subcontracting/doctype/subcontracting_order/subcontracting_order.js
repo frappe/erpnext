@@ -2,12 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Subcontracting Order', {
-	refresh: function (frm) {
-		if (frm.doc.docstatus == 1) {
-			cur_frm.add_custom_button(__('Subcontracting Receipt'), make_subcontracting_receipt, __('Create'));
-			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
-		}
-
+	setup: function (frm) {
 		frm.set_query('purchase_order', () => {
 			return {
 				filters: {
@@ -16,6 +11,21 @@ frappe.ui.form.on('Subcontracting Order', {
 				}
 			};
 		});
+
+		frm.set_query("item_code", "service_items", () => {
+			return {
+				filters: {
+					is_stock_item: 0
+				}
+			};
+		});
+	},
+
+	refresh: function (frm) {
+		if (frm.doc.docstatus == 1) {
+			cur_frm.add_custom_button(__('Subcontracting Receipt'), make_subcontracting_receipt, __('Create'));
+			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
+		}
 	},
 });
 
