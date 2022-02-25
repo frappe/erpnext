@@ -148,7 +148,7 @@ class CallPopup {
 			},{
 				'fieldtype': 'Section Break',
 				'hide_border': 1,
-			},{
+			}, {
 				'fieldtype': 'Small Text',
 				'label': __('Call Summary'),
 				'fieldname': 'call_summary',
