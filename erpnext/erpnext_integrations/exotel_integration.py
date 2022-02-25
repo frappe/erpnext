@@ -45,6 +45,8 @@ def handle_missed_call(**kwargs):
 		status = 'No Answer'
 	elif CallType == "client-hangup" and DialCallStatus == "canceled":
 		status = 'Canceled'
+	elif CallType == "incomplete" and DialCallStatus == "failed":
+		status = 'Failed'
 
 	update_call_log(kwargs, status)
 

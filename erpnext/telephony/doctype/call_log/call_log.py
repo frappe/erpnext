@@ -104,10 +104,11 @@ def get_employee_name(emp):
 
 
 @frappe.whitelist()
-def add_call_summary(call_log, summary):
-	doc = frappe.get_doc("Call Log", call_log)
-	doc.add_comment("Comment", frappe.bold(_("Call Summary")) + "<br><br>" + summary)
-
+def add_call_summary_and_call_type(call_log, summary, call_type):
+	doc = frappe.get_doc('Call Log', call_log)
+	doc.type_of_call = call_type
+	doc.save()
+	doc.add_comment('Comment', frappe.bold(_('Call Summary')) + '<br><br>' + summary)
 
 def get_employees_with_number(number):
 	number = strip_number(number)
