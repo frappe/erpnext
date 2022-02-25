@@ -38,8 +38,9 @@ class CallLog(Document):
 			emp_number_reversed = (self.get("to"))[-1:-11:-1]
 			emp_number = emp_number_reversed[-1::-1]
 
-			emp_name = frappe.get_all("Employee", filters={"cell_number":["like","%"+emp_number+"%"]}, fields=["first_name", "middle_name", "last_name"])
-			self.employee_call_directed_to = (emp_name[0].get("first_name") or '') + ' ' + (emp_name[0].get("middle_name") or '') + ' ' + (emp_name[0].get("last_name") or '')
+			employee = frappe.get_all("Employee", filters={"cell_number":["like","%"+emp_number+"%"]}, fields=["first_name", "middle_name", "last_name", "user_id"])
+			self.employee_call_directed_to = get_employee_name(employee[0])
+			self.employee_user_id = employee[0].get("user_id") or ''
 
 	def after_insert(self):
 		self.trigger_call_popup()
@@ -93,6 +94,13 @@ class CallLog(Document):
 
 			for email in emails:
 				frappe.publish_realtime("show_call_popup", self, user=email)
+
+def get_employee_name(emp):
+	employee_name = ''
+	for name in ['first_name', 'middle_name', 'last_name']:
+		if emp.get(name):
+			employee_name += (' ' if employee_name else '') + emp.get(name)
+	return employee_name
 
 
 @frappe.whitelist()
