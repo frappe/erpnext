@@ -62,8 +62,7 @@ def get_category_records(categories):
 					"parent_item_group": "All Item Groups",
 					"show_in_website": 1
 				},
-				fields=["name", "parent_item_group", "is_group", "image", "route"],
-				as_dict=True
+				fields=["name", "parent_item_group", "is_group", "image", "route"]
 			)
 		else:
 			doctype = frappe.unscrub(category)
@@ -71,7 +70,7 @@ def get_category_records(categories):
 			if frappe.get_meta(doctype, cached=True).get_field("image"):
 				fields += ["image"]
 
-			categorical_data[category] = frappe.db.get_all(doctype, fields=fields, as_dict=True)
+			categorical_data[category] = frappe.db.get_all(doctype, fields=fields)
 
 	return categorical_data
 
