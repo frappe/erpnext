@@ -28,6 +28,8 @@ _exceptions = frappe.local('stockledger_exceptions')
 def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 	from erpnext.controllers.stock_controller import future_sle_exists
 	from erpnext.stock.doctype.serial_no.serial_no import get_item_details, update_serial_nos
+	from erpnext.stock.doctype.serial_no.serial_no import validate_serial_no as validate_sr_no
+
 
 	if sl_entries:
 		cancel = sl_entries[0].get("is_cancelled")
@@ -58,22 +60,21 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 			item_det = get_item_details(sle.get('item_code'))
 			sle = frappe._dict(sle)
 			voucher_doc = frappe.get_doc(sle.voucher_type, sle.voucher_no)
-
 			## will handle stock reco later
 			if sle.get("actual_qty") and item_det.has_serial_no and sle.get("voucher_type")!="Stock Reconciliation":
 				# for auto creating serials
+				validate_sr_no(sle, item_det)
 				if not sle.serial_no and item_det.has_serial_no and not voucher_doc.is_return:
 					sle = update_serial_nos(sle, item_det, return_sle=True)
-					serials = sle.serial_no.strip().split('\n')
 
-					for item in voucher_doc.items:
-						if item.item_code == sle.item_code:
+					for item in voucher_doc.get('items'):
+						if item.get('item_code') == sle.item_code:
 							if item.warehouse == sle.warehouse:
 								frappe.db.set_value(item.doctype, item.name, 'serial_no', sle.serial_no)
 							elif item.rejected_warehouse == sle.warehouse:
 								frappe.db.set_value(item.doctype, item.name, 'rejected_serial_no', sle.serial_no)
 							break
-
+					serials = sle.serial_no.strip().split('\n')
 					for serial in range(abs(cint(sle['actual_qty']))):
 						new_sle = sle.copy()
 						new_sle['actual_qty'] = 1 if sle['actual_qty'] > 0 else -1
@@ -83,6 +84,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 						sle_docs.append(make_entry(new_sle, allow_negative_stock, via_landed_cost_voucher))
 						sr = frappe.get_doc('Serial No', new_sle['serial_no'])
 						sr.update_serial_no_reference(sr.serial_no, update=True)
+
 				# for manually entered serials
 				elif sle.serial_no:
 					serials = sle.serial_no.strip().split('\n')
