@@ -43,6 +43,7 @@ class CancellationOfSupplierRetentions(Document):
 	def change_status_retention(self):
 		retention = frappe.get_doc("Supplier Retention", self.supplier_retention)
 		retention.db_set('docstatus', 2, update_modified=False)
+		retention.db_set('status', 'Annulled', update_modified=False)
 		retention.db_set('total_references', 0, update_modified=False)
 		retention.db_set('total_withheld', 0, update_modified=False)
 

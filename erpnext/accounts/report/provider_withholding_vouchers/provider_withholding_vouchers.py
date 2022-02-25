@@ -18,6 +18,11 @@ def execute(filters=None):
 			"width": 240
 		},
 		{
+			"label": _("Status"),
+			"fieldname": "status",
+			"width": 240
+		},
+		{
 			"label": _("Date"),
 			"fieldname": "date",
 			"fieldtype": "Date",
@@ -127,7 +132,7 @@ def build_data(retention):
 		if reference.reference_doctype == "Purchase Invoice":
 			bill_no = frappe.get_value("Purchase Invoice", reference.reference_name, "bill_no")
 
-		row = [retention.name, retention.posting_date, retention.supplier, retention.rtn, retention.cai, retention.due_date, percentage, reference.reference_doctype, reference.reference_name, bill_no, reference.net_total, amount, retention.owner]
+		row = [retention.name, retention.status, retention.posting_date, retention.supplier, retention.rtn, retention.cai, retention.due_date, percentage, reference.reference_doctype, reference.reference_name, bill_no, reference.net_total, amount, retention.owner]
 		data.append(row)
 
 	return data
