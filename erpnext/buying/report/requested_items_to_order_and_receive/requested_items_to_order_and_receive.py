@@ -18,10 +18,10 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	conditions = get_conditions(filters)
 
-	#get queried data
+	# get queried data
 	data = get_data(filters, conditions)
 
-	#prepare data for report and chart views
+	# prepare data for report and chart views
 	data, chart_data = prepare_data(data, filters)
 
 	return columns, data, None, chart_data
@@ -74,10 +74,9 @@ def get_data(filters, conditions):
 			and mr.material_request_type = "Purchase"
 			and mr.docstatus = 1
 			and mr.status != "Stopped"
+			and mr.per_received < 100
 			{conditions}
 		group by mr.name, mr_item.item_code
-		having
-			sum(ifnull(mr_item.ordered_qty, 0)) < sum(ifnull(mr_item.stock_qty, 0))
 		order by mr.transaction_date, mr.schedule_date""".format(conditions=conditions), as_dict=1)
 
 	return data
