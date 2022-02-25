@@ -10,6 +10,7 @@
   "from",
   "to",
   "employee_call_directed_to",
+  "employee_user_id",
   "medium",
   "start_time",
   "end_time",
@@ -142,12 +143,18 @@
    "fieldtype": "Data",
    "label": "Employee Call Directed To",
    "read_only": 1
+  },
+  {
+   "fieldname": "employee_user_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Employee User Id"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-23 18:45:06.932571",
+ "modified": "2022-02-23 19:47:04.310577",
  "modified_by": "Administrator",
  "module": "Telephony",
  "name": "Call Log",
