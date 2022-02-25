@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 
+=======
+from frappe import _
+>>>>>>> 16de29a3cb (fix(translation) - correction for translation)
 
 def get_data():
 	return {
@@ -7,7 +11,7 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'label': ['Movement'],
+				'label': _('Movement'),
 				'items': ['Asset Movement']
 			}
 		]
