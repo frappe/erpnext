@@ -22,6 +22,7 @@
   "recording_url",
   "recording_html",
   "section_break_11",
+  "type_of_call",
   "summary",
   "section_break_19",
   "links"
@@ -105,7 +106,8 @@
   },
   {
    "fieldname": "summary",
-   "fieldtype": "Small Text"
+   "fieldtype": "Small Text",
+   "label": "Summary"
   },
   {
    "fieldname": "section_break_11",
@@ -149,12 +151,17 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Employee User Id"
+  },
+  {
+   "fieldname": "type_of_call",
+   "fieldtype": "Data",
+   "label": "Type Of Call"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-23 19:47:04.310577",
+ "modified": "2022-02-25 13:37:48.156501",
  "modified_by": "Administrator",
  "module": "Telephony",
  "name": "Call Log",
