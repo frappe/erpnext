@@ -37,9 +37,11 @@ class CallLog(Document):
 			# Taking the last 10 digits of the number
 			emp_number_reversed = (self.get("to"))[-1:-11:-1]
 			emp_number = emp_number_reversed[-1::-1]
+			employee = frappe.get_all("Employee", filters={
+				"cell_number": ["like", "%"+emp_number+"%"]
+			}, fields=["first_name", "middle_name", "last_name", "user_id"])
 
-			employee = frappe.get_all("Employee", filters={"cell_number":["like","%"+emp_number+"%"]}, fields=["first_name", "middle_name", "last_name", "user_id"])
-			self.employee_call_directed_to = get_employee_name(employee[0])
+			self.call_received_by = get_employee_name(employee[0])
 			self.employee_user_id = employee[0].get("user_id") or ''
 
 	def after_insert(self):

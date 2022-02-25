@@ -141,11 +141,10 @@ class CallPopup {
 				'fieldtype': 'Section Break',
 				'hide_border': 1,
 			}, {
-				'fieldname': 'type_of_call',
-				'label': 'Type Of Call',
-				'fieldtype': 'Select',
-				'options': '\nFrappe Cloud Queries/Plan\nEnterprise Plans\nPartnership\nSupport\nBilling/Renewal\nOpen source / Junk',
-				'default': 'Frappe Cloud Queries/Plan',
+				'fieldname': 'call_type',
+				'label': 'Call Type',
+				'fieldtype': 'Link',
+				'options': 'Telephony Call Type',
 			}, {
 				'fieldtype': 'Section Break',
 				'hide_border': 1,
@@ -158,7 +157,7 @@ class CallPopup {
 				'label': __('Save'),
 				'click': () => {
 					const call_summary = this.call_details.get_value('call_summary');
-					const call_type = this.call_details.get_value('type_of_call');
+					const call_type = this.call_details.get_value('call_type');
 					if (!call_summary) return;
 					frappe.xcall('erpnext.telephony.doctype.call_log.call_log.add_call_summary_and_call_type', {
 						'call_log': this.call_log.name,

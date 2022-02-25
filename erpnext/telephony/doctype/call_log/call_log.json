@@ -9,7 +9,7 @@
   "id",
   "from",
   "to",
-  "employee_call_directed_to",
+  "call_received_by",
   "employee_user_id",
   "medium",
   "start_time",
@@ -140,13 +140,6 @@
    "label": "Call Details"
   },
   {
-   "depends_on": "to",
-   "fieldname": "employee_call_directed_to",
-   "fieldtype": "Data",
-   "label": "Employee Call Directed To",
-   "read_only": 1
-  },
-  {
    "fieldname": "employee_user_id",
    "fieldtype": "Data",
    "hidden": 1,
@@ -156,12 +149,19 @@
    "fieldname": "type_of_call",
    "fieldtype": "Data",
    "label": "Type Of Call"
+  },
+  {
+   "depends_on": "to",
+   "fieldname": "call_received_by",
+   "fieldtype": "Data",
+   "label": "Call Received By",
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-02-25 13:37:48.156501",
+ "modified": "2022-02-25 14:37:48.575230",
  "modified_by": "Administrator",
  "module": "Telephony",
  "name": "Call Log",

@@ -38,14 +38,14 @@ def handle_end_call(**kwargs):
 @frappe.whitelist(allow_guest=True)
 def handle_missed_call(**kwargs):
 	status = ""
-	CallType = kwargs.get("CallType")
-	DialCallStatus = kwargs.get("DialCallStatus")
+	call_type = kwargs.get("CallType")
+	dial_call_status = kwargs.get("DialCallStatus")
 
-	if CallType == "incomplete" and DialCallStatus == "no-answer":
+	if call_type == "incomplete" and dial_call_status == "no-answer":
 		status = 'No Answer'
-	elif CallType == "client-hangup" and DialCallStatus == "canceled":
+	elif call_type == "client-hangup" and dial_call_status == "canceled":
 		status = 'Canceled'
-	elif CallType == "incomplete" and DialCallStatus == "failed":
+	elif call_type == "incomplete" and dial_call_status == "failed":
 		status = 'Failed'
 
 	update_call_log(kwargs, status)
