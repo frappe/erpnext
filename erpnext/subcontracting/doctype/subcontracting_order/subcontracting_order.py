@@ -35,8 +35,14 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None, ignore_permi
 				"docstatus": ["=", 1],
 			}
 		},
-		"Subcontracting Order Item": {
-			"doctype": "Subcontracting Receipt Item",
+		"Subcontracting Order Service Item": {
+			"doctype": "Subcontracting Receipt Service Item",
+		},
+		"Subcontracting Order Finished Good Item": {
+			"doctype": "Subcontracting Receipt Finished Good Item",
+		},
+		"Subcontracting Order Supplied Item": {
+			"doctype": "Subcontracting Receipt Supplied Item",
 		},
 	}
 

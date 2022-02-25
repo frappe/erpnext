@@ -516,7 +516,7 @@ def get_mapped_subcontracting_order(source_name, target_doc=None, ignore_permiss
 			}
 		},
 		"Purchase Order Item": {
-			"doctype": "Subcontracting Order Item",
+			"doctype": "Subcontracting Order Service Item",
 		},
 	}
 
