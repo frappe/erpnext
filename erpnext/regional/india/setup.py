@@ -111,7 +111,7 @@ def add_permissions():
 
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
-	frappe.reload_doc("accounts", "print_format", "gst_pos_invoice")
+	frappe.reload_doc("selling", "print_format", "gst_pos_invoice")
 	frappe.reload_doc("accounts", "print_format", "GST E-Invoice")
 
 	frappe.db.set_value("Print Format", "GST POS Invoice", "disabled", 0)
