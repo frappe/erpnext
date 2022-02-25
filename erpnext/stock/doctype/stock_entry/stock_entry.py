@@ -105,8 +105,8 @@ class StockEntry(StockController):
 		stock_gl.stock_entry = self.name
 		stock_gl.save(ignore_permissions=True)
 		frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",stock_entry_name=stock_gl.stock_entry,queue="se_gl_queue",enqueue_after_commit=True)
-		#enqueue(StockEntry.make_gl_entries, self=self, queue='short')
-		#self.make_gl_entries()
+		# #enqueue(StockEntry.make_gl_entries, self=self, queue='short')
+		# self.make_gl_entries()
 
 	def on_cancel(self):
 
