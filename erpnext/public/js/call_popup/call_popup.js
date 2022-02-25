@@ -146,10 +146,10 @@ class CallPopup {
 				'fieldtype': 'Select',
 				'options': '\nFrappe Cloud Queries/Plan\nEnterprise Plans\nPartnership\nSupport\nBilling/Renewal\nOpen source / Junk',
 				'default': 'Frappe Cloud Queries/Plan',
-			},{
+			}, {
 				'fieldtype': 'Section Break',
 				'hide_border': 1,
-			},{
+			}, {
 				'fieldtype': 'Small Text',
 				'label': __('Call Summary'),
 				'fieldname': 'call_summary',
