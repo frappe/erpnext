@@ -32,7 +32,7 @@ class Department(NestedSet):
 		return new
 
 	def on_update(self):
-		if not frappe.local.flags.ignore_update_nsm:
+		if not frappe.local.flags.ignore_update_nsm or frappe.flags.in_setup_wizard:
 			super(Department, self).on_update()
 
 	def on_trash(self):
