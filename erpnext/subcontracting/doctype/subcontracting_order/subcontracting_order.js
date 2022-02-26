@@ -27,6 +27,16 @@ frappe.ui.form.on('Subcontracting Order', {
 				}
 			};
 		});
+
+		frm.set_query("bom", "fg_items", function (doc, cdt, cdn) {
+			let d = locals[cdt][cdn];
+			return {
+				filters: {
+					item: d.item_code,
+					is_active: 1
+				}
+			};
+		});
 	},
 
 	refresh: function (frm) {
