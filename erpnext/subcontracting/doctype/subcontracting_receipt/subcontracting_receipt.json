@@ -211,7 +211,6 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.is_subcontracted==\"Yes\"",
    "fieldname": "supplier_warehouse",
    "fieldtype": "Link",
    "label": "Supplier Warehouse",

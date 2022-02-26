@@ -72,7 +72,6 @@
             "print_hide": 1
         },
         {
-            "depends_on": "eval:parent.is_subcontracted == 'Yes'",
             "fieldname": "bom",
             "fieldtype": "Link",
             "label": "BOM",
