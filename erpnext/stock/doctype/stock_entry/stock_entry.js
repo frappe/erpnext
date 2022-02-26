@@ -634,7 +634,6 @@ frappe.ui.form.on('Stock Entry Detail', {
 		let item = frappe.get_doc(cdt, cdn);
 		if (item.s_warehouse) {
 			item.allow_zero_valuation_rate = 0;
-			frm.refresh_field("items");
 		}
 	},
 

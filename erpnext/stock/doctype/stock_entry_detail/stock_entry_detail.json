@@ -340,14 +340,13 @@
    "label": "More Information"
   },
   {
-   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "allow_zero_valuation_rate",
    "fieldtype": "Check",
    "label": "Allow Zero Valuation Rate",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only_depends_on": "eval: doc.s_warehouse"
+   "read_only_depends_on": "eval:doc.s_warehouse"
   },
   {
    "allow_on_submit": 1,
@@ -557,7 +556,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-02-07 17:09:45.940179",
+ "modified": "2022-02-26 00:51:24.963653",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",
