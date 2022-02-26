@@ -394,6 +394,27 @@ class TestBOM(ERPNextTestCase):
 		}
 		create_nested_bom(bom_tree, prefix="")
 
+	def test_version_index(self):
+
+		bom = frappe.new_doc("BOM")
+
+		version_index_test_cases = [
+			(1, []),
+			(1, ["BOM#XYZ"]),
+			(2, ["BOM/ITEM/001"]),
+			(2, ["BOM/ITEM/001", "BOM/ITEM/001-1"]),
+			(2, ["BOM-ITEM-001",]),
+			(2, ["BOM-ITEM-001", "BOM-ITEM-001-1"]),
+			(3, ["BOM-ITEM-001", "BOM-ITEM-002", "BOM-ITEM-001-1"]),
+			(4, ["BOM-ITEM-001", "BOM-ITEM-002", "BOM-ITEM-003"]),
+			(2, ["BOM-ITEM-001", "BOM-ITEM-001-1", "BOM-ITEM-001-2"]),
+		]
+
+		for expected_index, existing_boms in version_index_test_cases:
+			with self.subTest():
+				self.assertEqual(expected_index, bom.get_next_version_index(existing_boms),
+						msg=f"Incorrect index for {existing_boms}")
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
