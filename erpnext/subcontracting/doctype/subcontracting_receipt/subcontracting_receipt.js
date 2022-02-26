@@ -18,6 +18,14 @@ frappe.ui.form.on('Subcontracting Receipt', {
 				}
 			};
 		});
+
+		frm.set_query("item_code", "fg_items", () => {
+			return {
+				filters: {
+					is_sub_contracted_item: 1
+				}
+			};
+		});
 	},
 });
 
