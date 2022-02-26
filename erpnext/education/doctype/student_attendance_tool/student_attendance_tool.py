@@ -24,24 +24,24 @@ def get_student_attendance_records(based_on, date=None, student_group=None, cour
 		student_list = frappe.get_all("Student Group Student", fields=["student", "student_name", "group_roll_number"],
 			filters={"parent": student_group, "active": 1}, order_by= "group_roll_number")
 
-	table = frappe.qb.DocType("Student Attendance")
+	StudentAttendance = frappe.qb.DocType("Student Attendance")
 
 	if course_schedule:
 		student_attendance_list = (
-			frappe.qb.from_(table)
-				.select(table.student, table.status)
+			frappe.qb.from_(StudentAttendance)
+				.select(StudentAttendance.student, StudentAttendance.status)
 				.where(
-					(table.course_schedule == course_schedule)
+					(StudentAttendance.course_schedule == course_schedule)
 				)
 			).run(as_dict=True)
 	else:
 		student_attendance_list = (
-			frappe.qb.from_(table)
-				.select(table.student, table.status)
+			frappe.qb.from_(StudentAttendance)
+				.select(StudentAttendance.student, StudentAttendance.status)
 				.where(
-					(table.student_group == student_group)
-					& (table.date == date)
-					& (table.course_schedule == "") | (table.course_schedule.isnull())
+					(StudentAttendance.student_group == student_group)
+					& (StudentAttendance.date == date)
+					& ((StudentAttendance.course_schedule == "") | (StudentAttendance.course_schedule.isnull()))
 				)
 			).run(as_dict=True)
 
