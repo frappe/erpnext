@@ -163,17 +163,32 @@ education.StudentsEditor = Class.extend({
 				);
 			});
 
-		var htmls = students.map(function(student) {
-			return frappe.render_template("student_button", {
-				student: student.student,
-				student_name: student.student_name,
-				group_roll_number: student.group_roll_number,
-				status: student.status
-			})
-		});
+		// make html grid of students
+		let student_html = '';
+		for (let student of students) {
+			student_html += `<div class="col-sm-3">
+					<div class="checkbox">
+						<label>
+							<input
+								type="checkbox"
+								data-group_roll_number="${student.group_roll_number}"
+								data-student="${student.student}"
+								data-student-name="${student.student_name}"
+								class="students-check"
+								${student.status==='Present' ? 'checked' : ''}>
+							${student.group_roll_number} - ${student.student_name}
+						</label>
+					</div>
+				</div>`;
+		}
 
+<<<<<<< HEAD
 		$(htmls.join("")).appendTo(me.wrapper);
 	},
+=======
+		$(student_html).appendTo(me.wrapper);
+	}
+>>>>>>> 1e7df5d0c2 (fix(minor): student attendance tool query fix)
 
 	show_empty_state: function() {
 		$(this.wrapper).html(
