@@ -27,6 +27,7 @@
             "search_index": 1
         },
         {
+            "fetch_from": "item_code.item_name",
             "fieldname": "item_name",
             "fieldtype": "Data",
             "in_list_view": 1,
@@ -47,6 +48,8 @@
             "width": "60px"
         },
         {
+            "fetch_from": "item_code.standard_rate",
+            "depends_on": "item_code",
             "bold": 1,
             "columns": 2,
             "fieldname": "rate",
@@ -72,6 +75,7 @@
             "print_hide": 1
         },
         {
+            "fetch_from": "item_code.default_bom",
             "fieldname": "bom",
             "fieldtype": "Link",
             "label": "BOM",
