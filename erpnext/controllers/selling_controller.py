@@ -339,7 +339,9 @@ class SellingController(StockController):
 					or (cint(self.is_return) and self.docstatus==2)):
 						sl_entries.append(self.get_sl_entries(d, {
 							"actual_qty": -1*flt(d.qty),
-							"incoming_rate": return_rate
+							"incoming_rate": return_rate,
+                            'valuation_rate':return_rate,
+                            'stock_value_diffrence':-1*flt(d.qty*return_rate)
 						}))
 
 				if d.target_warehouse:
@@ -375,7 +377,9 @@ class SellingController(StockController):
 					or (cint(self.is_return) and self.docstatus==1)):
 						sl_entries.append(self.get_sl_entries(d, {
 							"actual_qty": -1*flt(d.qty),
-							"incoming_rate": return_rate
+							"incoming_rate": return_rate,
+                            "valuation_rate":return_rate,
+                            "stock_value_difference":-1*flt(d.qty*return_rate)
 						}))
 		self.make_sl_entries(sl_entries)
 
