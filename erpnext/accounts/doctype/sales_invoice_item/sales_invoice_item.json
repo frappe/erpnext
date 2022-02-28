@@ -850,11 +850,6 @@
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
-<<<<<<< HEAD
  "sort_order": "DESC"
 }
-=======
- "sort_order": "DESC",
- "states": []
-}
->>>>>>> 0373914704 (fix: Commission not applied while making Sales Order from Quotation)
+
