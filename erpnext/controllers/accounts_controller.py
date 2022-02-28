@@ -2121,7 +2121,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	else:
 		parent.update_reserved_qty()
 		parent.update_project()
-		parent.update_previous_doc_status('submit')
+		parent.update_previous_doc_status()
 		parent.set_delivery_status(update=True)
 
 	parent.reload()
