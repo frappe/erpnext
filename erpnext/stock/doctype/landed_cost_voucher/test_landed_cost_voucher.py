@@ -4,6 +4,7 @@
 
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_to_date, flt, now
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
@@ -15,10 +16,9 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	get_gl_entries,
 	make_purchase_receipt,
 )
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestLandedCostVoucher(ERPNextTestCase):
+class TestLandedCostVoucher(FrappeTestCase):
 	def test_landed_cost_voucher(self):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 

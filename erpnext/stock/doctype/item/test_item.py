@@ -6,6 +6,7 @@ import json
 
 import frappe
 from frappe.test_runner import make_test_objects
+from frappe.tests.utils import FrappeTestCase, change_settings
 
 from erpnext.controllers.item_variant import (
 	InvalidItemAttributeValueError,
@@ -24,7 +25,6 @@ from erpnext.stock.doctype.item.item import (
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
-from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]
@@ -55,7 +55,7 @@ def make_item(item_code=None, properties=None):
 
 	return item
 
-class TestItem(ERPNextTestCase):
+class TestItem(FrappeTestCase):
 	def setUp(self):
 		super().setUp()
 		frappe.flags.attribute_values = None
