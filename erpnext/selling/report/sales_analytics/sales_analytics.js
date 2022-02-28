@@ -104,13 +104,12 @@ frappe.query_reports["Sales Analytics"] = {
 					length = data.length;
 
 					var tree_type = frappe.query_report.filters[0].value;
-
 					if(tree_type == "Customer") {
 						row_values = data.slice(4,length-1).map(function (column) {
 							return column.content;
 						})
 					} else if (tree_type == "Item") {
-						row_values = data.slice(5,length-1).map(function (column) {
+						row_values = data.slice(6,length-1).map(function (column) {
 							return column.content;
 						})
 					}
@@ -119,7 +118,7 @@ frappe.query_reports["Sales Analytics"] = {
 							return column.content;
 						})
 					}
-
+					
 					entry = {
 						'name':row_name,
 						'values':row_values
@@ -128,6 +127,7 @@ frappe.query_reports["Sales Analytics"] = {
 					let raw_data = frappe.query_report.chart.data;
 					let new_datasets = raw_data.datasets;
 
+					debugger
 					var found = false;
 
 					for(var i=0; i < new_datasets.length;i++){
@@ -141,7 +141,6 @@ frappe.query_reports["Sales Analytics"] = {
 					if(!found){
 						new_datasets.push(entry);
 					}
-
 					let new_data = {
 						labels: raw_data.labels,
 						datasets: new_datasets
