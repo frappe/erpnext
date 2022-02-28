@@ -145,7 +145,7 @@ class CallPopup {
 				'label': 'Call Type',
 				'fieldtype': 'Link',
 				'options': 'Telephony Call Type',
-			},{
+			}, {
 				'fieldtype': 'Section Break',
 				'hide_border': 1,
 			}, {
