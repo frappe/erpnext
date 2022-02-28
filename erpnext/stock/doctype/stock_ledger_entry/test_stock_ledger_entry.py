@@ -7,6 +7,7 @@ from uuid import uuid4
 
 import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import (
@@ -24,10 +25,9 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.stock_ledger import get_previous_sle
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestStockLedgerEntry(ERPNextTestCase):
+class TestStockLedgerEntry(FrappeTestCase):
 	def setUp(self):
 		items = create_items()
 		reset('Stock Entry')

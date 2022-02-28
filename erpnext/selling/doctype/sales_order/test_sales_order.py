@@ -6,6 +6,7 @@ import json
 import frappe
 import frappe.permissions
 from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
 from erpnext.controllers.accounts_controller import update_child_qty_rate
@@ -27,10 +28,9 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 )
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestSalesOrder(ERPNextTestCase):
+class TestSalesOrder(FrappeTestCase):
 
 	@classmethod
 	def setUpClass(cls):
