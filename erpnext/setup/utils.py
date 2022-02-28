@@ -155,7 +155,7 @@ def insert_record(records):
 		doc = frappe.new_doc(r.get("doctype"))
 		doc.update(r)
 		try:
-			doc.insert(ignore_permissions=True)
+			doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
 		except frappe.DuplicateEntryError as e:
 			# pass DuplicateEntryError and continue
 			if e.args and e.args[0]==doc.doctype and e.args[1]==doc.name:

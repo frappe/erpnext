@@ -1,12 +1,12 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestSupplierScorecardCriteria(unittest.TestCase):
+class TestSupplierScorecardCriteria(FrappeTestCase):
 	def test_variables_exist(self):
 		delete_test_scorecards()
 		for d in test_good_criteria:

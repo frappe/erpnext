@@ -82,7 +82,7 @@ class TallyMigration(Document):
 				"is_private": True
 			})
 			try:
-				f.insert()
+				f.insert(ignore_if_duplicate=True)
 			except frappe.DuplicateEntryError:
 				pass
 			setattr(self, key, f.file_url)
