@@ -66,6 +66,20 @@ def create_test_contact_and_address():
 	contact.add_phone("+91 0000000000", is_primary_phone=True)
 	contact.insert()
 
+	contact_two = frappe.get_doc({
+		"doctype": 'Contact',
+		"first_name": "_Test Contact 2 for _Test Customer",
+		"links": [
+			{
+				"link_doctype": "Customer",
+				"link_name": "_Test Customer"
+			}
+		]
+	})
+	contact_two.add_email("test_contact_two_customer@example.com", is_primary=True)
+	contact_two.add_phone("+92 0000000000", is_primary_phone=True)
+	contact_two.insert()
+
 
 @contextmanager
 def change_settings(doctype, settings_dict):

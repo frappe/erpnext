@@ -7,7 +7,7 @@ from hypothesis import strategies as st
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.valuation import FIFOValuation, LIFOValuation, _round_off_if_near_zero
+from erpnext.stock.valuation import FIFOValuation, LIFOValuation, round_off_if_near_zero
 from erpnext.tests.utils import ERPNextTestCase
 
 qty_gen = st.floats(min_value=-1e6, max_value=1e6)
@@ -113,11 +113,11 @@ class TestFIFOValuation(unittest.TestCase):
 		self.assertTotalQty(0)
 
 	def test_rounding_off_near_zero(self):
-		self.assertEqual(_round_off_if_near_zero(0), 0)
-		self.assertEqual(_round_off_if_near_zero(1), 1)
-		self.assertEqual(_round_off_if_near_zero(-1), -1)
-		self.assertEqual(_round_off_if_near_zero(-1e-8), 0)
-		self.assertEqual(_round_off_if_near_zero(1e-8), 0)
+		self.assertEqual(round_off_if_near_zero(0), 0)
+		self.assertEqual(round_off_if_near_zero(1), 1)
+		self.assertEqual(round_off_if_near_zero(-1), -1)
+		self.assertEqual(round_off_if_near_zero(-1e-8), 0)
+		self.assertEqual(round_off_if_near_zero(1e-8), 0)
 
 	def test_totals(self):
 		self.queue.add_stock(1, 10)
