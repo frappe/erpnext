@@ -521,6 +521,7 @@ def get_leave_details(employee, date):
 			'to_date': ('>=', date),
 			'employee': employee,
 			'leave_type': allocation.leave_type,
+			'docstatus': 1
 		}, 'SUM(total_leaves_allocated)') or 0
 
 		remaining_leaves = get_leave_balance_on(employee, d, date, to_date = allocation.to_date,
@@ -528,13 +529,13 @@ def get_leave_details(employee, date):
 
 		end_date = allocation.to_date
 		leaves_taken = get_leaves_for_period(employee, d, allocation.from_date, end_date) * -1
-		leaves_pending = get_pending_leaves_for_period(employee, d, allocation.from_date, end_date)
+		leaves_pending = get_leaves_pending_approval_for_period(employee, d, allocation.from_date, end_date)
 
 		leave_allocation[d] = {
 			"total_leaves": total_allocated_leaves,
 			"expired_leaves": total_allocated_leaves - (remaining_leaves + leaves_taken),
 			"leaves_taken": leaves_taken,
-			"pending_leaves": leaves_pending,
+			"leaves_pending_approval": leaves_pending,
 			"remaining_leaves": remaining_leaves}
 
 	#is used in set query
@@ -621,7 +622,7 @@ def get_leave_allocation_records(employee, date, leave_type=None):
 		}))
 	return allocated_leaves
 
-def get_pending_leaves_for_period(employee, leave_type, from_date, to_date):
+def get_leaves_pending_approval_for_period(employee, leave_type, from_date, to_date):
 	''' Returns leaves that are pending approval '''
 	leaves = frappe.get_all("Leave Application",
 		filters={
