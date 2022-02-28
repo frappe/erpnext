@@ -110,6 +110,17 @@ class TestRequestforQuotation(unittest.TestCase):
 		self.assertEqual(supplier_quotation.items[0].qty, 5)
 		self.assertEqual(supplier_quotation.items[0].stock_qty, 10)
 
+	def test_make_supplier_quotation_from_portal_with_discount(self):
+		rfq = make_rfq()
+		rfq.get("items")[0].rate = 700
+		rfq.supplier = rfq.suppliers[0].supplier
+		rfq.discount_amount = 100
+		supplier_quotation_name = create_supplier_quotation(rfq)
+
+		supplier_quotation_doc = frappe.get_doc("Supplier Quotation", supplier_quotation_name)
+
+		self.assertEqual(supplier_quotation_doc.discount_amount, 100)
+
 	def test_make_rfq_from_opportunity(self):
 		opportunity = make_opportunity(with_items=1)
 		supplier_data = get_supplier_data()
