@@ -12,6 +12,7 @@ from erpnext.hr.report.employee_leave_balance.employee_leave_balance import (
 
 
 def execute(filters=None):
+	filters = frappe._dict(filters or {})
 	leave_types = frappe.db.sql_list("select name from `tabLeave Type` order by name asc")
 
 	columns = get_columns(leave_types)

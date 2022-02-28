@@ -31,13 +31,13 @@ class TestEmployeeLeaveBalance(unittest.TestCase):
 		frappe.set_user('Administrator')
 
 		self.employee_id = make_employee('test_emp_leave_balance@example.com', company='_Test Company')
-		self.holiday_list = make_holiday_list('_Test Emp Balance Holiday List', get_year_start(getdate()), get_year_ending(getdate()))
 
 		self.date = getdate()
 		self.year_start = getdate(get_year_start(self.date))
 		self.mid_year = add_months(self.year_start, 6)
 		self.year_end = getdate(get_year_ending(self.date))
 
+		self.holiday_list = make_holiday_list('_Test Emp Balance Holiday List', self.year_start, self.year_end)
 
 	def tearDown(self):
 		frappe.db.rollback()
@@ -56,7 +56,7 @@ class TestEmployeeLeaveBalance(unittest.TestCase):
 
 		# 4 days leave
 		first_sunday = get_first_sunday(self.holiday_list, for_date=self.year_start)
-		leave_application = make_leave_application(self.employee_id, first_sunday, add_days(first_sunday, 3), '_Test Leave Type')
+		leave_application = make_leave_application(self.employee_id, add_days(first_sunday, 1), add_days(first_sunday, 4), '_Test Leave Type')
 		leave_application.reload()
 
 		filters = {
@@ -89,7 +89,7 @@ class TestEmployeeLeaveBalance(unittest.TestCase):
 		allocation1 = make_allocation_record(employee=self.employee_id, from_date=self.year_start, to_date=self.year_end)
 		# 4 days leave application in the first allocation
 		first_sunday = get_first_sunday(self.holiday_list, for_date=self.year_start)
-		leave_application = make_leave_application(self.employee_id, first_sunday, add_days(first_sunday, 3), '_Test Leave Type')
+		leave_application = make_leave_application(self.employee_id, add_days(first_sunday, 1), add_days(first_sunday, 4), '_Test Leave Type')
 		leave_application.reload()
 
 		# Case 1: opening balance for first alloc boundary
