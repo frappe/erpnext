@@ -516,8 +516,10 @@ class TestLeaveApplication(unittest.TestCase):
 		leave_type.insert()
 
 		create_carry_forwarded_allocation(employee, leave_type)
+		details = get_leave_balance_on(employee.name, leave_type.name, nowdate(), add_days(nowdate(), 8), for_consumption=True)
 
-		self.assertEqual(get_leave_balance_on(employee.name, leave_type.name, nowdate(), add_days(nowdate(), 8)), 21)
+		self.assertEqual(details.leave_balance_for_consumption, 21)
+		self.assertEqual(details.leave_balance, 30)
 
 	def test_earned_leaves_creation(self):
 
