@@ -433,14 +433,13 @@ def create_price_list_for_batch(item_code, batch, rate):
 def make_new_batch(**args):
 	args = frappe._dict(args)
 
-	try:
+	if frappe.db.exists("Batch", args.batch_id):
+		batch = frappe.get_doc("Batch", args.batch_id)
+	else:
 		batch = frappe.get_doc({
 			"doctype": "Batch",
 			"batch_id": args.batch_id,
 			"item": args.item_code,
 		}).insert()
-
-	except frappe.DuplicateEntryError:
-		batch = frappe.get_doc("Batch", args.batch_id)
 
 	return batch
