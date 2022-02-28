@@ -7,6 +7,7 @@ import unittest
 from collections import defaultdict
 
 import frappe
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cint, cstr, flt, today
 
 import erpnext
@@ -17,10 +18,9 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchas
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError, get_serial_nos
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import SerialNoExistsInFutureTransaction
-from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 
-class TestPurchaseReceipt(ERPNextTestCase):
+class TestPurchaseReceipt(FrappeTestCase):
 	def setUp(self):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 
