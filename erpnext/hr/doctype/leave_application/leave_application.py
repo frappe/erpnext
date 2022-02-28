@@ -660,10 +660,7 @@ def get_remaining_leaves(allocation, leaves_taken, date, cf_expiry) -> Dict[str,
 		leave_balance_for_consumption = flt(allocation.new_leaves_allocated) + flt(remaining_cf_leaves)
 
 	remaining_leaves = _get_remaining_leaves(leave_balance_for_consumption, allocation.to_date)
-	return {
-		'leave_balance': leave_balance,
-		'leave_balance_for_consumption': remaining_leaves
-	}
+	return frappe._dict(leave_balance=leave_balance, leave_balance_for_consumption=remaining_leaves)
 
 def get_leaves_for_period(employee, leave_type, from_date, to_date, skip_expired_leaves=True):
 	leave_entries = get_leave_entries(employee, leave_type, from_date, to_date)
