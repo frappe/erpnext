@@ -1,6 +1,7 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_to_date, nowdate
 
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
@@ -9,10 +10,9 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 
-class TestPackedItem(ERPNextTestCase):
+class TestPackedItem(FrappeTestCase):
 	"Test impact on Packed Items table in various scenarios."
 	@classmethod
 	def setUpClass(cls) -> None:

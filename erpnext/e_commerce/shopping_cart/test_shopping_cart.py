@@ -5,6 +5,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import change_settings
 from frappe.utils import add_months, nowdate
 
 from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule
@@ -15,7 +16,7 @@ from erpnext.e_commerce.shopping_cart.cart import (
 	get_party,
 	update_cart,
 )
-from erpnext.tests.utils import change_settings, create_test_contact_and_address
+from erpnext.tests.utils import create_test_contact_and_address
 
 # test_dependencies = ['Payment Terms Template']
 
