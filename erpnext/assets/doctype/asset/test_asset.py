@@ -7,7 +7,7 @@ import frappe
 from frappe.utils import add_days, add_months, cstr, flt, get_last_day, getdate, nowdate
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.assets.doctype.asset.asset import make_sales_invoice
+from erpnext.assets.doctype.asset.asset import make_sales_invoice, split_asset
 from erpnext.assets.doctype.asset.depreciation import (
 	post_depreciation_entries,
 	restore_asset,
@@ -244,6 +244,57 @@ class TestAsset(AssetSetup):
 
 		si.cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Partially Depreciated")
+
+	def test_asset_splitting(self):
+		asset = create_asset(
+			calculate_depreciation = 1,
+			asset_quantity=10,
+			available_for_use_date = '2020-01-01',
+			purchase_date = '2020-01-01',
+			expected_value_after_useful_life = 0,
+			total_number_of_depreciations = 6,
+			number_of_depreciations_booked = 1,
+			frequency_of_depreciation = 10,
+			depreciation_start_date = '2021-01-01',
+			opening_accumulated_depreciation=20000,
+			gross_purchase_amount=120000,
+			submit = 1
+		)
+
+		post_depreciation_entries(date="2021-01-01")
+
+		self.assertEqual(asset.asset_quantity, 10)
+		self.assertEqual(asset.gross_purchase_amount, 120000)
+		self.assertEqual(asset.opening_accumulated_depreciation, 20000)
+
+		new_asset = split_asset(asset.name, 2)
+		asset.load_from_db()
+
+		self.assertEqual(new_asset.asset_quantity, 2)
+		self.assertEqual(new_asset.gross_purchase_amount, 24000)
+		self.assertEqual(new_asset.opening_accumulated_depreciation, 4000)
+		self.assertEqual(new_asset.split_from, asset.name)
+		self.assertEqual(new_asset.schedules[0].depreciation_amount, 4000)
+		self.assertEqual(new_asset.schedules[1].depreciation_amount, 4000)
+
+		self.assertEqual(asset.asset_quantity, 8)
+		self.assertEqual(asset.gross_purchase_amount, 96000)
+		self.assertEqual(asset.opening_accumulated_depreciation, 16000)
+		self.assertEqual(asset.schedules[0].depreciation_amount, 16000)
+		self.assertEqual(asset.schedules[1].depreciation_amount, 16000)
+
+		journal_entry = asset.schedules[0].journal_entry
+
+		jv = frappe.get_doc('Journal Entry', journal_entry)
+		self.assertEqual(jv.accounts[0].credit_in_account_currency, 16000)
+		self.assertEqual(jv.accounts[1].debit_in_account_currency, 16000)
+		self.assertEqual(jv.accounts[2].credit_in_account_currency, 4000)
+		self.assertEqual(jv.accounts[3].debit_in_account_currency, 4000)
+
+		self.assertEqual(jv.accounts[0].reference_name, asset.name)
+		self.assertEqual(jv.accounts[1].reference_name, asset.name)
+		self.assertEqual(jv.accounts[2].reference_name, new_asset.name)
+		self.assertEqual(jv.accounts[3].reference_name, new_asset.name)
 
 	def test_expense_head(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
@@ -822,8 +873,9 @@ class TestDepreciationBasics(AssetSetup):
 		self.assertRaises(frappe.ValidationError, asset.save)
 
 	def test_number_of_depreciations(self):
-		"""Tests if an error is raised when number_of_depreciations_booked > total_number_of_depreciations."""
+		"""Tests if an error is raised when number_of_depreciations_booked >= total_number_of_depreciations."""
 
+		# number_of_depreciations_booked > total_number_of_depreciations
 		asset = create_asset(
 			item_code = "Macbook Pro",
 			calculate_depreciation = 1,
@@ -837,6 +889,21 @@ class TestDepreciationBasics(AssetSetup):
 		)
 
 		self.assertRaises(frappe.ValidationError, asset.save)
+
+		# number_of_depreciations_booked = total_number_of_depreciations
+		asset_2 = create_asset(
+			item_code = "Macbook Pro",
+			calculate_depreciation = 1,
+			available_for_use_date = "2019-12-31",
+			total_number_of_depreciations = 5,
+			expected_value_after_useful_life = 10000,
+			depreciation_start_date = "2020-07-01",
+			opening_accumulated_depreciation = 10000,
+			number_of_depreciations_booked = 5,
+			do_not_save = 1
+		)
+
+		self.assertRaises(frappe.ValidationError, asset_2.save)
 
 	def test_depreciation_start_date_is_before_purchase_date(self):
 		asset = create_asset(
@@ -1197,7 +1264,8 @@ def create_asset(**args):
 		"available_for_use_date": args.available_for_use_date or "2020-06-06",
 		"location": args.location or "Test Location",
 		"asset_owner": args.asset_owner or "Company",
-		"is_existing_asset": args.is_existing_asset or 1
+		"is_existing_asset": args.is_existing_asset or 1,
+		"asset_quantity": args.get("asset_quantity") or 1
 	})
 
 	if asset.calculate_depreciation:
@@ -1212,7 +1280,7 @@ def create_asset(**args):
 
 	if not args.do_not_save:
 		try:
-			asset.save()
+			asset.insert(ignore_if_duplicate=True)
 		except frappe.DuplicateEntryError:
 			pass
 
@@ -1253,7 +1321,7 @@ def create_fixed_asset_item(item_code=None, auto_create_assets=1, is_grouped_ass
 			"is_grouped_asset": is_grouped_asset,
 			"asset_naming_series": naming_series
 		})
-		item.insert()
+		item.insert(ignore_if_duplicate=True)
 	except frappe.DuplicateEntryError:
 		pass
 	return item

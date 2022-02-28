@@ -18,7 +18,7 @@ REPORT_FILTER_TEST_CASES: List[Tuple[ReportName, ReportFilters]] = [
 	("BOM Operations Time", {}),
 	("BOM Stock Calculated", {"bom": frappe.get_last_doc("BOM").name, "qty_to_make": 2}),
 	("BOM Stock Report", {"bom": frappe.get_last_doc("BOM").name, "qty_to_produce": 2}),
-	("Cost of Poor Quality Report", {}),
+	("Cost of Poor Quality Report", {"item": "_Test Item", "serial_no": "00"}),
 	("Downtime Analysis", {}),
 	(
 		"Exponential Smoothing Forecasting",
@@ -55,10 +55,11 @@ class TestManufacturingReports(unittest.TestCase):
 	def test_execute_all_manufacturing_reports(self):
 		"""Test that all script report in manufacturing modules are executable with supported filters"""
 		for report, filter in REPORT_FILTER_TEST_CASES:
-			execute_script_report(
-				report_name=report,
-				module="Manufacturing",
-				filters=filter,
-				default_filters=DEFAULT_FILTERS,
-				optional_filters=OPTIONAL_FILTERS if filter.get("_optional") else None,
-			)
+			with self.subTest(report=report):
+				execute_script_report(
+					report_name=report,
+					module="Manufacturing",
+					filters=filter,
+					default_filters=DEFAULT_FILTERS,
+					optional_filters=OPTIONAL_FILTERS if filter.get("_optional") else None,
+				)

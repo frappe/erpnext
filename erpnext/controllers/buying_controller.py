@@ -70,9 +70,18 @@ class BuyingController(StockController, Subcontracting):
 
 		# set contact and address details for supplier, if they are not mentioned
 		if getattr(self, "supplier", None):
-			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions,
-			doctype=self.doctype, company=self.company, party_address=self.supplier_address, shipping_address=self.get('shipping_address'),
-			fetch_payment_terms_template= not self.get('ignore_default_payment_terms_template')))
+			self.update_if_missing(
+				get_party_details(
+					self.supplier,
+					party_type="Supplier",
+					doctype=self.doctype,
+					company=self.company,
+					party_address=self.get("supplier_address"),
+					shipping_address=self.get('shipping_address'),
+					fetch_payment_terms_template= not self.get('ignore_default_payment_terms_template'),
+					ignore_permissions=self.flags.ignore_permissions
+				)
+			)
 
 		self.set_missing_item_details(for_validate)
 
@@ -240,6 +249,7 @@ class BuyingController(StockController, Subcontracting):
 						"posting_time": self.get('posting_time'),
 						"qty": -1 * flt(d.get('stock_qty')),
 						"serial_no": d.get('serial_no'),
+						"batch_no": d.get("batch_no"),
 						"company": self.company,
 						"voucher_type": self.doctype,
 						"voucher_no": self.name,
@@ -269,7 +279,8 @@ class BuyingController(StockController, Subcontracting):
 						"posting_date": self.posting_date,
 						"posting_time": self.posting_time,
 						"qty": -1 * d.consumed_qty,
-						"serial_no": d.serial_no
+						"serial_no": d.serial_no,
+						"batch_no": d.batch_no,
 					})
 
 					if rate > 0:
