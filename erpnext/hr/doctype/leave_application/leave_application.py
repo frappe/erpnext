@@ -540,16 +540,14 @@ def get_leave_details(employee, date):
 			"remaining_leaves": remaining_leaves}
 
 	#is used in set query
-	lwps = frappe.get_list("Leave Type", filters = {"is_lwp": 1})
-	lwps = [lwp.name for lwp in lwps]
+	lwp = frappe.get_list("Leave Type", filters={"is_lwp": 1}, pluck="name")
 
-	ret = {
-		'leave_allocation': leave_allocation,
-		'leave_approver': get_leave_approver(employee),
-		'lwps': lwps
+	return {
+		"leave_allocation": leave_allocation,
+		"leave_approver": get_leave_approver(employee),
+		"lwps": lwp
 	}
 
-	return ret
 
 @frappe.whitelist()
 def get_leave_balance_on(employee, leave_type, date, to_date=None,
