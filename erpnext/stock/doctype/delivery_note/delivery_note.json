@@ -3,7 +3,7 @@
  "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
- "creation": "2013-05-24 19:29:09",
+ "creation": "2022-01-05 12:08:11.808587",
  "doctype": "DocType",
  "document_type": "Document",
  "engine": "InnoDB",
@@ -59,6 +59,8 @@
   "items_section",
   "scan_barcode",
   "items",
+  "serials_section",
+  "serial_items",
   "pricing_rule_details",
   "pricing_rules",
   "packing_list",
@@ -1309,13 +1311,25 @@
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "serials_section",
+   "fieldtype": "Section Break",
+   "label": "Serials"
+  },
+  {
+   "fieldname": "serial_items",
+   "fieldtype": "Table",
+   "label": "Serial Items",
+   "options": "Serial Number Item"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-09 14:29:13.428984",
+ "modified": "2022-02-28 11:16:08.100103",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
@@ -1380,6 +1394,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "customer",
  "title_field": "title",
  "track_changes": 1,

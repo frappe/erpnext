@@ -38,6 +38,7 @@ class SellingController(StockController):
 		self.set_customer_address()
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
+		self.update_serial_items_table()
 
 	def set_missing_values(self, for_validate=False):
 
@@ -583,6 +584,19 @@ class SellingController(StockController):
 		# validate items to see if they have is_sales_item enabled
 		from erpnext.controllers.buying_controller import validate_item_type
 		validate_item_type(self, "is_sales_item", "sales")
+
+	def update_serial_items_table(self):
+		self.serial_items = {}
+		for item in self.items:
+			has_serial = frappe.db.get_value('Item', item.item_code, 'has_serial_no')
+
+			if has_serial and item.serial_no:
+				serials = item.serial_no.split('\n')
+				for serial in serials:
+					row = self.append('serial_items', {})
+					row.item_name = item.item_code
+					row.serial_no = serial
+					row.type = 'Accepted'
 
 def set_default_income_account_for_item(obj):
 	for d in obj.get("items"):

@@ -54,6 +54,8 @@
   "items_section",
   "scan_barcode",
   "items",
+  "serials_section_break",
+  "serial_items",
   "section_break0",
   "total_qty",
   "base_total",
@@ -64,8 +66,6 @@
   "net_total",
   "pricing_rule_details",
   "pricing_rules",
-  "serials_section_break",
-  "serial_items",
   "raw_material_details",
   "get_current_stock",
   "supplied_items",
@@ -1166,9 +1166,11 @@
    "fieldname": "serial_items",
    "fieldtype": "Table",
    "label": "Serial Items",
-   "options": "Serial Number Item"
+   "options": "Serial Number Item",
+   "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "serials_section_break",
    "fieldtype": "Section Break",
    "label": "Serials"
@@ -1178,7 +1180,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-22 09:49:31.543132",
+ "modified": "2022-02-28 11:22:12.480063",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
