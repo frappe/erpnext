@@ -3,9 +3,9 @@
 
 
 import json
-import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, flt, getdate, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -27,7 +27,7 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 
-class TestPurchaseOrder(unittest.TestCase):
+class TestPurchaseOrder(FrappeTestCase):
 	def test_make_purchase_receipt(self):
 		po = create_purchase_order(do_not_submit=True)
 		self.assertRaises(frappe.ValidationError, make_purchase_receipt, po.name)
