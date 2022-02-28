@@ -43,7 +43,7 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map):
 			if entry.account in tds_accounts:
 				tds_deducted += (entry.credit - entry.debit)
 
-			total_amount_credited += (entry.credit - entry.debit)
+			total_amount_credited += entry.credit
 
 		if tds_deducted:
 			row = {
