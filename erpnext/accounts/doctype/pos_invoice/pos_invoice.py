@@ -439,7 +439,6 @@ class POSInvoice(SalesInvoice):
 			self.paid_amount = 0
 
 	def set_account_for_mode_of_payment(self):
-		self.payments = [d for d in self.payments if d.amount or d.base_amount or d.default]
 		for pay in self.payments:
 			if not pay.account:
 				pay.account = get_bank_cash_account(pay.mode_of_payment, self.company).get("account")
