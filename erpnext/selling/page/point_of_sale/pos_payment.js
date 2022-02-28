@@ -170,27 +170,6 @@ erpnext.PointOfSale.Payment = class {
     });
 
 		frappe.ui.form.on('POS Invoice', 'coupon_code', (frm) => {
-<<<<<<< HEAD
-			if (!frm.doc.ignore_pricing_rule) {
-				if (frm.doc.coupon_code) {
-					frappe.run_serially([
-						() => frm.doc.ignore_pricing_rule=1,
-						() => frm.trigger('ignore_pricing_rule'),
-						() => frm.doc.ignore_pricing_rule=0,
-						() => frm.trigger('apply_pricing_rule'),
-						() => frm.save(),
-						() => this.update_totals_section(frm.doc)
-					]);
-				} else {
-					frappe.run_serially([
-						() => frm.doc.ignore_pricing_rule=1,
-						() => frm.trigger('ignore_pricing_rule'),
-						() => frm.doc.ignore_pricing_rule=0,
-						() => frm.save(),
-						() => this.update_totals_section(frm.doc)
-					]);
-				}
-=======
 			if (!frm.doc.ignore_pricing_rule && frm.doc.coupon_code) {
 				frappe.run_serially([
 					() => frm.doc.ignore_pricing_rule=1,
@@ -205,7 +184,6 @@ erpnext.PointOfSale.Payment = class {
 					message: __("Ignore Pricing Rule is enabled. Cannot apply coupon code."),
 					indicator: "orange"
 				});
->>>>>>> 81514516f3 (fix(pos): coupon code is applied even if ignore pricing rule is check)
 			}
 		});
 
