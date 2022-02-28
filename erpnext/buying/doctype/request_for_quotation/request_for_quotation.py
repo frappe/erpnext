@@ -297,7 +297,9 @@ def create_supplier_quotation(doc):
 			"terms": doc.get("terms"),
 			"company": doc.get("company"),
 			"currency": doc.get('currency') or get_party_account_currency('Supplier', doc.get('supplier'), doc.get('company')),
-			"buying_price_list": doc.get('buying_price_list') or frappe.db.get_value('Buying Settings', None, 'buying_price_list')
+			"buying_price_list": doc.get('buying_price_list') or frappe.db.get_value('Buying Settings', None, 'buying_price_list'),
+			"additional_discount_percentage": doc.get("additional_discount_percentage"),
+			"discount_amount": doc.get("discount_amount")
 		})
 		add_items(sq_doc, doc.get('supplier'), doc.get('items'))
 		sq_doc.flags.ignore_permissions = True

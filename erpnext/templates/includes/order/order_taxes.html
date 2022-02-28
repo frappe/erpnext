@@ -41,6 +41,19 @@
 	{% endif %}
 {% endif %}
 
+{% if doc.doctype == 'Supplier Quotation' %}
+	{% if doc.discount_amount %}
+		<tr>
+			<td class="text-left total-discount" colspan="1">
+				{{ _("Savings") }}
+			</td>
+			<td class="text-right" colspan="3">
+				{{ frappe.utils.fmt_money((doc.discount_amount),currency=doc.currency) }}
+			</td>
+		</tr>
+	{% endif %}
+{% endif %}
+
 {% if doc.doctype == 'Sales Order' %}
 	{% if doc.coupon_code %}
 		<tr>

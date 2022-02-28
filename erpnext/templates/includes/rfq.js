@@ -19,6 +19,7 @@ rfq = class rfq {
 		this.terms();
 		this.submit_rfq();
 		this.navigate_quotations();
+		this.additional_discount();
 	}
 
 	onfocus_select_all(){
@@ -69,6 +70,7 @@ rfq = class rfq {
 			doc.grand_total += flt(data.amount);
 			$('.tax-grand-total').text(format_number(doc.grand_total, doc.number_format, 2));
 		})
+		me.apply_discount();
 	}
 
 	submit_rfq(){
@@ -89,6 +91,35 @@ rfq = class rfq {
 					}
 				}
 			})
+		})
+	}
+
+	apply_discount() {
+		if (doc.additional_discount_percentage) {
+			doc.discount_amount = (doc.grand_total * flt(doc.additional_discount_percentage)) / 100;
+			$("#discount_amount").val(format_number(doc.discount_amount, doc.number_format, 2));
+		}
+		else if(doc.discount_amount) {
+			doc.additional_discount_percentage = 0.00;
+			$("#additional_discount_percentage").val(format_number(doc.additional_discount_percentage, doc.number_format, 2));
+		}
+		doc.grand_total = doc.grand_total - flt(doc.discount_amount);
+		$('.tax-grand-total').text(format_number(doc.grand_total, doc.number_format, 2));
+	}
+
+	additional_discount() {
+		let me = this;
+		$(".additional_discount_percentage").on("change", function(){
+			doc.additional_discount_percentage = flt($(this).val());
+			$(this).val(format_number(doc.additional_discount_percentage, doc.number_format, 2));
+			me.update_qty_rate();
+		})
+
+		$(".discount_amount").on("change", function(){
+			doc.additional_discount_percentage = 0.00;
+			doc.discount_amount = flt($(this).val());
+			$(this).val(format_number(doc.discount_amount, doc.number_format, 2));
+			me.update_qty_rate();
 		})
 	}
 
