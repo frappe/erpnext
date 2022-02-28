@@ -53,20 +53,23 @@ frappe.ui.form.on("Purchase Receipt", {
 
 	// new code for TASK - TASK-2022-00015
 	get_items: function(frm) {
-		console.log(" this is button function")
-		frappe.call({
-			method : 'on_get_items_button',
-			doc:frm.doc,
-			callback: function(r)
-			{
-				// frm.refresh_field("get_items")
-				if (r.message){
-				console.log("this is buttom", r.message)
-				frm.refresh_field("supplied_items")
+		console.log(" Button Working")
+		if (frm.doc.docstatus != 1){
+			frappe.call({
+				method : 'on_get_items_button',
+				doc:frm.doc,
+				callback: function(r)
+				{
+					// frm.refresh_field("get_items")
+					if (r.message){
+					console.log("this is buttom", r.message)
+					frm.refresh_field("supplied_items")
+					}
+					else console.log("Nothis ins ")
 				}
-				else console.log("Nothis ins ")
-			}
-		});
+			});
+		}
+		else console.log("Cannot Get ITEMS as document already is submitted")
 	},
 
 
@@ -489,6 +492,7 @@ frappe.ui.form.on('Purchase Receipt Item', {
 							[''].concat(b)
 						); 
 					}
+					console.log('thi is select options, ',b)
 				}
 			});	
 		
@@ -497,18 +501,20 @@ frappe.ui.form.on('Purchase Receipt Item', {
 	challan_number_issues_by_job_worker: function(frm, cdt, cdn){
 		var child = locals[cdt][cdn];
 		console.log(" this is child", child.item_code)
-		frappe.call({
-			method: 'on_challan_date',
-			doc: frm.doc,
-			args:{
-				item : child.challan_number_issues_by_job_worker
-			},
-			callback: (r) =>{
-				console.log("this is r.message", r.message)
-				frappe.model.set_value(cdt, cdn, "challan_date_issues_by_job_worker", r.message[0])
-				
-			}
-		})
+		if (child.challan_number_issues_by_job_worker){
+			frappe.call({
+				method: 'on_challan_date',
+				doc: frm.doc,
+				args:{
+					item : child.challan_number_issues_by_job_worker
+				},
+				callback: (r) =>{
+					console.log("this is r.message", r.message)
+					frappe.model.set_value(cdt, cdn, "challan_date_issues_by_job_worker", r.message[0])
+					
+				}
+			})
+		}
 	},
 
 	item_code: function(frm, cdt, cdn) {

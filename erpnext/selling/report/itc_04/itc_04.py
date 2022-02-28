@@ -123,9 +123,10 @@ def get_columns(filters):
 			},
 			{
 				"label": _("Original Challan Number Issued by Principal"),
-				"fieldtype": "Data",
+				"fieldtype": "Link",
 				"fieldname": "original_challan_number_issued_by_principal",
-				"width": 140
+				"width": 140,
+				"options" : "Stock Entry"
 			},
 			{
 				"label": _("Original Challan Date Issued by Principal"),
@@ -180,6 +181,12 @@ def get_columns(filters):
 				"label": _("Losses Quantity"),
 				"fieldtype": "Float",
 				"fieldname": "losses_quantity",
+				"width": 140
+			},
+			{
+				"label": _("To Be Named"),
+				"fieldtype": "Float",
+				"fieldname": "no_name",
 				"width": 140
 			},
 			# {
@@ -340,7 +347,8 @@ def get_data(filters,conditions):
 				if res['batch_no']:
 					se_doc = frappe.get_doc("Stock Entry",name.se_name)
 					se_batch_count = frappe.db.sql(""" select count(*) as total from `tabStock Entry Detail`
-															where parent = '{0}' and batch_no = '{1}' """.format(name.se_name,res['batch_no']),as_dict=1)
+															where parent = '{0}' 
+															and batch_no = '{1}' """.format(name.se_name,res['batch_no']),as_dict=1)
 					se_doc_batch_count += se_batch_count[0]['total']
 					print("--------------------------se_doc_batch_count",se_batch_count)
 			if se_doc_batch_count == 0:

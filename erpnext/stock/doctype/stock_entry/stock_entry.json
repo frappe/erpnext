@@ -15,6 +15,7 @@
   "purpose",
   "material_consumption",
   "reference_challan",
+  "reference_challan_date",
   "get_intercompany_item",
   "transfer",
   "add_to_transit",
@@ -359,9 +360,9 @@
   },
   {
    "fieldname": "scan_barcode",
-   "options": "Barcode",
    "fieldtype": "Data",
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -661,6 +662,7 @@
    "label": "Get Intercompany Item"
   },
   {
+   "default": "0",
    "fieldname": "is_return",
    "fieldtype": "Check",
    "hidden": 1,
@@ -668,6 +670,13 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.stock_entry_type==\"Material Receipt\"",
+   "fetch_from": "reference_challan.posting_date",
+   "fieldname": "reference_challan_date",
+   "fieldtype": "Date",
+   "label": "Reference Challan Date"
   }
  ],
  "icon": "fa fa-file-text",
@@ -675,7 +684,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-20 19:19:31.514846",
+ "modified": "2022-02-24 12:51:37.758424",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
