@@ -20,7 +20,7 @@ from erpnext.tests.utils import ERPNextTestCase
 
 
 class TestProductionPlan(ERPNextTestCase):
-	def setUp(self):
+	def setUp(self) -> None:
 		for item in ['Test Production Item 1', 'Subassembly Item 1',
 			'Raw Material Item 1', 'Raw Material Item 2']:
 			create_item(item, valuation_rate=100)
@@ -37,6 +37,9 @@ class TestProductionPlan(ERPNextTestCase):
 			'Test Non Stock Raw Material']}.items():
 			if not frappe.db.get_value('BOM', {'item': item}):
 				make_bom(item = item, raw_materials = raw_materials)
+
+	def tearDown(self) -> None:
+		frappe.db.rollback()
 
 	def test_production_plan_mr_creation(self):
 		"Test if MRs are created for unavailable raw materials."
@@ -257,6 +260,46 @@ class TestProductionPlan(ERPNextTestCase):
 
 		pln.reload()
 		pln.cancel()
+
+	def test_production_plan_combine_subassembly(self):
+		"""
+		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
+		1) Red-Car -> Wheel (sub assembly) > BOM-WHEEL-001
+		2) Green-Car -> Wheel (sub assembly) > BOM-WHEEL-001
+		"""
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		bom_tree_1 = {
+			"Red-Car": {"Wheel": {"Rubber": {}}}
+		}
+		bom_tree_2 = {
+			"Green-Car": {"Wheel": {"Rubber": {}}}
+		}
+
+		parent_bom_1 = create_nested_bom(bom_tree_1, prefix="")
+		parent_bom_2 = create_nested_bom(bom_tree_2, prefix="")
+
+		# make sure both boms use same subassembly bom
+		subassembly_bom = parent_bom_1.items[0].bom_no
+		frappe.db.set_value("BOM Item", parent_bom_2.items[0].name, "bom_no", subassembly_bom)
+
+		plan = create_production_plan(item_code="Red-Car", use_multi_level_bom=1, do_not_save=True)
+		plan.append("po_items", { # Add Green-Car to Prod Plan
+			'use_multi_level_bom': 1,
+			'item_code': "Green-Car",
+			'bom_no': frappe.db.get_value('Item', "Green-Car", 'default_bom'),
+			'planned_qty': 1,
+			'planned_start_date': now_datetime()
+		})
+		plan.get_sub_assembly_items()
+		self.assertTrue(len(plan.sub_assembly_items), 2)
+
+		plan.combine_sub_items = 1
+		plan.get_sub_assembly_items()
+
+		self.assertTrue(len(plan.sub_assembly_items), 1) # check if sub-assembly items merged
+		self.assertEqual(plan.sub_assembly_items[0].qty, 2.0)
+		self.assertEqual(plan.sub_assembly_items[0].stock_qty, 2.0)
 
 	def test_pp_to_mr_customer_provided(self):
 		" Test Material Request from Production Plan for Customer Provided Item."
