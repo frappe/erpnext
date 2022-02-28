@@ -16,6 +16,8 @@ from erpnext.hr.doctype.leave_application.leave_application import (
 
 
 def execute(filters=None):
+	filters = frappe._dict(filters or {})
+
 	if filters.to_date <= filters.from_date:
 		frappe.throw(_('"From Date" can not be greater than or equal to "To Date"'))
 
@@ -103,7 +105,7 @@ def get_data(filters):
 				or ("HR Manager" in frappe.get_roles(user)):
 				if len(active_employees) > 1:
 					row = frappe._dict()
-				row.employee = employee.name,
+				row.employee = employee.name
 				row.employee_name = employee.employee_name
 
 				leaves_taken = get_leaves_for_period(employee.name, leave_type,
@@ -114,7 +116,7 @@ def get_data(filters):
 				opening = get_opening_balance(employee.name, leave_type, filters, carry_forwarded_leaves)
 
 				row.leaves_allocated = new_allocation
-				row.leaves_expired = expired_leaves - leaves_taken if expired_leaves - leaves_taken > 0 else 0
+				row.leaves_expired = expired_leaves
 				row.opening_balance = opening
 				row.leaves_taken = leaves_taken
 
@@ -202,7 +204,11 @@ def get_allocated_and_expired_leaves(from_date, to_date, employee, leave_type):
 			continue
 
 		if record.to_date < getdate(to_date):
+			# leave allocations ending before to_date, reduce leaves taken within that period
+			# since they are already used, they won't expire
 			expired_leaves += record.leaves
+			expired_leaves += get_leaves_for_period(employee, leave_type,
+					record.from_date, record.to_date)
 
 		if record.from_date >= getdate(from_date):
 			if record.is_carry_forward:

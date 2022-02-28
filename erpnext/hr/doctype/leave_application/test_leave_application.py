@@ -513,7 +513,7 @@ class TestLeaveApplication(unittest.TestCase):
 			leave_type_name="_Test_CF_leave_expiry",
 			is_carry_forward=1,
 			expire_carry_forwarded_leaves_after_days=90)
-		leave_type.submit()
+		leave_type.insert()
 
 		create_carry_forwarded_allocation(employee, leave_type)
 
@@ -734,18 +734,21 @@ def create_carry_forwarded_allocation(employee, leave_type):
 			carry_forward=1)
 		leave_allocation.submit()
 
-def make_allocation_record(employee=None, leave_type=None, from_date=None, to_date=None):
+def make_allocation_record(employee=None, leave_type=None, from_date=None, to_date=None, carry_forward=False, leaves=None):
 	allocation = frappe.get_doc({
 		"doctype": "Leave Allocation",
 		"employee": employee or "_T-Employee-00001",
 		"leave_type": leave_type or "_Test Leave Type",
 		"from_date": from_date or "2013-01-01",
 		"to_date": to_date or "2019-12-31",
-		"new_leaves_allocated": 30
+		"new_leaves_allocated": leaves or 30,
+		"carry_forward": carry_forward
 	})
 
 	allocation.insert(ignore_permissions=True)
 	allocation.submit()
+
+	return allocation
 
 def get_employee():
 	return frappe.get_doc("Employee", "_T-Employee-00001")
