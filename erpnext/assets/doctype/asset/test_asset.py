@@ -834,8 +834,9 @@ class TestDepreciationBasics(AssetSetup):
 		self.assertRaises(frappe.ValidationError, asset.save)
 
 	def test_number_of_depreciations(self):
-		"""Tests if an error is raised when number_of_depreciations_booked > total_number_of_depreciations."""
+		"""Tests if an error is raised when number_of_depreciations_booked >= total_number_of_depreciations."""
 
+		# number_of_depreciations_booked > total_number_of_depreciations
 		asset = create_asset(
 			item_code = "Macbook Pro",
 			calculate_depreciation = 1,
@@ -849,6 +850,21 @@ class TestDepreciationBasics(AssetSetup):
 		)
 
 		self.assertRaises(frappe.ValidationError, asset.save)
+
+		# number_of_depreciations_booked = total_number_of_depreciations
+		asset_2 = create_asset(
+			item_code = "Macbook Pro",
+			calculate_depreciation = 1,
+			available_for_use_date = "2019-12-31",
+			total_number_of_depreciations = 5,
+			expected_value_after_useful_life = 10000,
+			depreciation_start_date = "2020-07-01",
+			opening_accumulated_depreciation = 10000,
+			number_of_depreciations_booked = 5,
+			do_not_save = 1
+		)
+
+		self.assertRaises(frappe.ValidationError, asset_2.save)
 
 	def test_depreciation_start_date_is_before_purchase_date(self):
 		asset = create_asset(
@@ -1225,7 +1241,7 @@ def create_asset(**args):
 
 	if not args.do_not_save:
 		try:
-			asset.save()
+			asset.insert(ignore_if_duplicate=True)
 		except frappe.DuplicateEntryError:
 			pass
 
@@ -1266,7 +1282,7 @@ def create_fixed_asset_item(item_code=None, auto_create_assets=1, is_grouped_ass
 			"is_grouped_asset": is_grouped_asset,
 			"asset_naming_series": naming_series
 		})
-		item.insert()
+		item.insert(ignore_if_duplicate=True)
 	except frappe.DuplicateEntryError:
 		pass
 	return item
