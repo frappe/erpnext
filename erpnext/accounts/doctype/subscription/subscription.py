@@ -327,7 +327,7 @@ class Subscription(Document):
 		self.set_subscription_status()
 
 	def generate_invoice(
-		self, from_date: Optional[bool] = None, to_date: Optional[bool] = None
+		self, from_date: Optional[date] = None, to_date: Optional[date] = None
 	) -> Document:
 		"""
 		Creates a `Invoice` for the `Subscription`, updates `self.invoices` and
@@ -338,7 +338,7 @@ class Subscription(Document):
 		return self.create_invoice(from_date=from_date, to_date=to_date)
 
 	def create_invoice(
-		self, from_date: Optional[bool] = None, to_date: Optional[bool] = None
+		self, from_date: Optional[date] = None, to_date: Optional[date] = None
 	) -> Document:
 		"""
 		Creates a `Invoice`, submits it and returns it
