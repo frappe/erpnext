@@ -250,10 +250,12 @@ class StockReconciliation(StockController):
 						new_sl_entries.append(sle)
 						continue
 					if flt(sle.get('actual_qty')) > 1:
+						# If it needs to auto create serials
 						serials = get_serial_nos(sle.serial_no)
 						item_det = get_item_details(sle.get('item_code'))
 						validate_serial_no(sle, item_det)
 						update_serial_nos(sle, item_det)
+
 						qty_after_transaction = 0
 						for serial in range(len(serials)):
 							qty_after_transaction += 1
@@ -261,8 +263,6 @@ class StockReconciliation(StockController):
 							new_sle.update({
 								'actual_qty': 1,
 								'qty_after_transaction': qty_after_transaction,
-								'incoming_rate': row.valuation_rate,
-								'valuation_rate': row.valuation_rate,
 								'serial_no': serials.pop(),
 								'skip_update_serial_no': 1,
 								'skip_serial_no_validation': 1
@@ -426,9 +426,37 @@ class StockReconciliation(StockController):
 			if has_serial_no:
 				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
 
-			sl_entries.reverse()
+				qty_after_transaction = 0
+				new_sl_entries = []
+				for sle in sl_entries:
+					if not sle.serial_no or flt(sle.get('actual_qty')) > 0:
+						new_sl_entries.append(sle)
+						continue
+					if sle.get('actual_qty') < -1:
+
+						serials = get_serial_nos(sle.serial_no)
+						split_sles = []
+						for serial in range(len(serials)):
+							qty_after_transaction += 1
+							new_sle = sle.copy()
+							new_sle.update({
+								'actual_qty': -1,
+								'qty_after_transaction': qty_after_transaction,
+								'serial_no': serials.pop()
+							})
+							split_sles.append(new_sle)
+						# new_sl_entries breaks the order of the sles after split
+						split_sles.reverse()
+						for d in split_sles:
+							new_sl_entries.append(d)
+						continue
+					new_sl_entries.append(sle)
+
+			new_sl_entries.reverse()
+			for d in new_sl_entries:
+				print('asda-------', d)
 			allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
-			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
+			self.make_sl_entries(new_sl_entries, allow_negative_stock=allow_negative_stock)
 
 
 	def merge_similar_item_serial_nos(self, sl_entries):
