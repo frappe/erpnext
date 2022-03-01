@@ -345,10 +345,10 @@ def get_advances(employee, advance_id=None):
 
 	query = (
 		frappe.qb.from_(advance)
-			.select(
-				advance.name, advance.posting_date, advance.paid_amount,
-				advance.claimed_amount, advance.advance_account
-			)
+		.select(
+			advance.name, advance.posting_date, advance.paid_amount,
+			advance.claimed_amount, advance.advance_account
+		)
 	)
 
 	if not advance_id:
