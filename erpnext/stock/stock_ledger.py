@@ -428,8 +428,8 @@ class update_entries_after(object):
 				return
 
 		# Get dynamic incoming/outgoing rate
-		if not self.args.get("sle_id"):
-			self.get_dynamic_incoming_outgoing_rate(sle)
+		# XXX: performance regression
+		self.get_dynamic_incoming_outgoing_rate(sle)
 
 		if get_serial_nos(sle.serial_no):
 			self.get_serialized_values(sle)
@@ -472,8 +472,8 @@ class update_entries_after(object):
 		sle.doctype="Stock Ledger Entry"
 		frappe.get_doc(sle).db_update()
 
-		if not self.args.get("sle_id"):
-			self.update_outgoing_rate_on_transaction(sle)
+		# XXX: performance regression
+		self.update_outgoing_rate_on_transaction(sle)
 
 	def validate_negative_stock(self, sle):
 		"""
@@ -555,9 +555,8 @@ class update_entries_after(object):
 	def update_rate_on_stock_entry(self, sle, outgoing_rate):
 		frappe.db.set_value("Stock Entry Detail", sle.voucher_detail_no, "basic_rate", outgoing_rate)
 
-		# Update outgoing item's rate, recalculate FG Item's rate and total incoming/outgoing amount
-		if not sle.dependant_sle_voucher_detail_no:
-			self.recalculate_amounts_in_stock_entry(sle.voucher_no)
+		# XXX: performance regression
+		self.recalculate_amounts_in_stock_entry(sle.voucher_no)
 
 	def recalculate_amounts_in_stock_entry(self, voucher_no):
 		stock_entry = frappe.get_doc("Stock Entry", voucher_no, for_update=True)
