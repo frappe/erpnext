@@ -82,7 +82,7 @@ def get_conditions(filters, query, mr, mr_item):
 	if filters.get("from_date") and filters.get("to_date"):
 		query = (
 			query.where(
-				( mr.transaction_date >= filters.get("from_date"))
+				(mr.transaction_date >= filters.get("from_date"))
 				& (mr.transaction_date <= filters.get("to_date"))
 			)
 		)
