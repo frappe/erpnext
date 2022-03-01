@@ -301,6 +301,11 @@ class TestProductionPlan(FrappeTestCase):
 		self.assertEqual(plan.sub_assembly_items[0].qty, 2.0)
 		self.assertEqual(plan.sub_assembly_items[0].stock_qty, 2.0)
 
+		# change warehouse in one row, sub-assemblies should not merge
+		plan.po_items[0].warehouse = "Finished Goods - _TC"
+		plan.get_sub_assembly_items()
+		self.assertTrue(len(plan.sub_assembly_items), 2)
+
 	def test_pp_to_mr_customer_provided(self):
 		" Test Material Request from Production Plan for Customer Provided Item."
 		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
