@@ -84,6 +84,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Advances Applied Customer",
+					"doctype": "Payment Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"name": "Payment Entry CXC",
 					"doctype": "Debit Note CXC",
 				},
@@ -174,6 +180,12 @@ def get_data():
 					"type": "doctype",
 					"name": "Payment Entry",
 					"description": _("Bank/Cash transactions against party or for internal transfer")
+				},
+				{
+					"type": "report",
+					"name": "Advances Applied Supplier",
+					"doctype": "Payment Entry",
+					"is_query_report": True
 				},
 				{
 					"type": "report",
