@@ -3,14 +3,15 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import today, add_days
+from frappe.utils import add_days, today
 
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 from erpnext.buying.report.requested_items_to_order_and_receive.requested_items_to_order_and_receive import (
-	get_data
+	get_data,
 )
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+
 
 class TestRequestedItemsToOrderAndReceive(FrappeTestCase):
 	def setUp(self) -> None:
