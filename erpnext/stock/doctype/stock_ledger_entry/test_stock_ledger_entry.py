@@ -390,7 +390,7 @@ class TestStockLedgerEntry(ERPNextTestCase):
 	def assertSLEs(self, doc, expected_sles, sle_filters=None):
 		""" Compare sorted SLEs, useful for vouchers that create multiple SLEs for same line"""
 
-		filters = {"voucher_no": doc.name, "voucher_type": doc.doctype, "is_cancelled":0}
+		filters = {"voucher_no": doc.name, "voucher_type": doc.doctype, "is_cancelled": 0}
 		if sle_filters:
 			filters.update(sle_filters)
 		sles = frappe.get_all("Stock Ledger Entry", fields=["*"], filters=filters,
@@ -693,7 +693,6 @@ class TestStockLedgerEntry(ERPNextTestCase):
 		transfer = make_stock_entry(item_code=item.name, source=source, target=target, qty=10, do_not_save=True, rate=10)
 		for rate in rates[1:]:
 			row = frappe.copy_doc(transfer.items[0], ignore_no_copy=False)
-			row.basic_rate = rate
 			transfer.append("items", row)
 
 		transfer.save()
@@ -701,6 +700,43 @@ class TestStockLedgerEntry(ERPNextTestCase):
 
 		# same exact queue should be transferred
 		self.assertSLEs(transfer, expected_queues, sle_filters={"warehouse": target})
+
+	def test_fifo_multi_item_repack_consumption(self):
+		rm = make_item("_TestFifoRepackRM")
+		packed = make_item("_TestFifoRepackFinished")
+		warehouse = "_Test Warehouse - _TC"
+
+		rates = [10 * i for i in range(1, 5)]
+
+		receipt = make_stock_entry(item_code=rm.name, target=warehouse, qty=10, do_not_save=True, rate=10)
+		for rate in rates[1:]:
+			row = frappe.copy_doc(receipt.items[0], ignore_no_copy=False)
+			row.basic_rate = rate
+			receipt.append("items", row)
+
+		receipt.save()
+		receipt.submit()
+
+		repack = make_stock_entry(item_code=rm.name, source=warehouse, qty=10,
+				do_not_save=True, rate=10, purpose="Repack")
+		for rate in rates[1:]:
+			row = frappe.copy_doc(repack.items[0], ignore_no_copy=False)
+			repack.append("items", row)
+
+		repack.append("items", {
+			"item_code": packed.name,
+			"t_warehouse": warehouse,
+			"qty": 1,
+			"transfer_qty": 1,
+		})
+
+		repack.save()
+		repack.submit()
+
+		# same exact queue should be transferred
+		self.assertSLEs(repack, [
+			{"incoming_rate": sum(rates) * 10}
+		], sle_filters={"item_code": packed.name})
 
 
 def create_repack_entry(**args):
