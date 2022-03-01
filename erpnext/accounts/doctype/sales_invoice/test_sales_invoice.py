@@ -2404,14 +2404,22 @@ class TestSalesInvoice(unittest.TestCase):
 
 
 	def test_sales_commission(self):
-		si = frappe.copy_doc(test_records[0])
+		si = frappe.copy_doc(test_records[2])
+
+		frappe.db.set_value('Item', si.get('items')[0].item_code, 'grant_commission', 1)
+		frappe.db.set_value('Item', si.get('items')[1].item_code, 'grant_commission', 0)
+
 		item = copy.deepcopy(si.get('items')[0])
 		item.update({
 			"qty": 1,
 			"rate": 500,
-			"grant_commission": 1
 		})
-		si.append("items", item)
+
+		item = copy.deepcopy(si.get('items')[1])
+		item.update({
+			"qty": 1,
+			"rate": 500,
+		})
 
 		# Test valid values
 		for commission_rate, total_commission in ((0, 0), (10, 50), (100, 500)):
