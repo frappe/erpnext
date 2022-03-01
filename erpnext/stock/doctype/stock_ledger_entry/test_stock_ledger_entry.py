@@ -389,10 +389,13 @@ class TestStockLedgerEntry(FrappeTestCase):
 			)
 
 
-	def assertSLEs(self, doc, expected_sles):
+	def assertSLEs(self, doc, expected_sles, sle_filters=None):
 		""" Compare sorted SLEs, useful for vouchers that create multiple SLEs for same line"""
-		sles = frappe.get_all("Stock Ledger Entry", fields=["*"],
-				filters={"voucher_no": doc.name, "voucher_type": doc.doctype, "is_cancelled":0},
+
+		filters = {"voucher_no": doc.name, "voucher_type": doc.doctype, "is_cancelled":0}
+		if sle_filters:
+			filters.update(sle_filters)
+		sles = frappe.get_all("Stock Ledger Entry", fields=["*"], filters=filters,
 			order_by="timestamp(posting_date, posting_time), creation")
 
 		for exp_sle, act_sle in zip(expected_sles, sles):
@@ -664,6 +667,42 @@ class TestStockLedgerEntry(FrappeTestCase):
 		self.assertSLEs(consume_new1, update_invariants([
 			{"actual_qty": -10, "stock_value_difference": -10*40, "stock_queue": []},
 		]))
+
+	def test_fifo_dependent_consumption(self):
+		item = make_item("_TestFifoTransferRates")
+		source = "_Test Warehouse - _TC"
+		target = "Stores - _TC"
+
+		rates = [10 * i for i in range(1, 20)]
+
+		receipt = make_stock_entry(item_code=item.name, target=source, qty=10, do_not_save=True, rate=10)
+		for rate in rates[1:]:
+			row = frappe.copy_doc(receipt.items[0], ignore_no_copy=False)
+			row.basic_rate = rate
+			receipt.append("items", row)
+
+		receipt.save()
+		receipt.submit()
+
+		expected_queues = []
+		for idx, rate in enumerate(rates, start=1):
+			expected_queues.append(
+				{"stock_queue": [[10, 10 * i] for i in range(1, idx + 1)]}
+			)
+		self.assertSLEs(receipt, expected_queues)
+
+		transfer = make_stock_entry(item_code=item.name, source=source, target=target, qty=10, do_not_save=True, rate=10)
+		for rate in rates[1:]:
+			row = frappe.copy_doc(transfer.items[0], ignore_no_copy=False)
+			row.basic_rate = rate
+			transfer.append("items", row)
+
+		transfer.save()
+		transfer.submit()
+
+		# same exact queue should be transferred
+		self.assertSLEs(transfer, expected_queues, sle_filters={"warehouse": target})
+
 
 def create_repack_entry(**args):
 	args = frappe._dict(args)
