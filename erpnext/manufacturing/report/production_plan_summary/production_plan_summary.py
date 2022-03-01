@@ -48,7 +48,7 @@ def get_production_plan_item_details(filters, data, order_details):
 			"qty": row.planned_qty,
 			"document_type": "Work Order",
 			"document_name": work_order or "",
-			"bom_level": frappe.get_cached_value("BOM", row.bom_no, "bom_level"),
+			"bom_level": 0,
 			"produced_qty": order_details.get((work_order, row.item_code), {}).get("produced_qty", 0),
 			"pending_qty": flt(row.planned_qty) - flt(order_details.get((work_order, row.item_code), {}).get("produced_qty", 0))
 		})

@@ -1,9 +1,9 @@
 import zipfile
+from io import BytesIO
 from unittest import TestCase
 
 import frappe
 from frappe.utils import cstr, now_datetime, today
-from six import BytesIO
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.regional.germany.utils.datev.datev_constants import (

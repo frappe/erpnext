@@ -701,7 +701,7 @@ def on_communication_update(doc, status):
 	update_response_and_resolution_metrics(parent, for_resolution)
 	update_agreement_status(parent, for_resolution)
 
-	parent.save()
+	parent.save(ignore_permissions=True)
 
 
 def reset_expected_response_and_resolution(doc):

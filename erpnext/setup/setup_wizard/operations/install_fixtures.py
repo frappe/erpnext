@@ -195,10 +195,8 @@ def install(country=None):
 		{'doctype': "Party Type", "party_type": "Customer", "account_type": "Receivable"},
 		{'doctype': "Party Type", "party_type": "Supplier", "account_type": "Payable"},
 		{'doctype': "Party Type", "party_type": "Employee", "account_type": "Payable"},
-		{'doctype': "Party Type", "party_type": "Member", "account_type": "Receivable"},
 		{'doctype': "Party Type", "party_type": "Shareholder", "account_type": "Payable"},
 		{'doctype': "Party Type", "party_type": "Student", "account_type": "Receivable"},
-		{'doctype': "Party Type", "party_type": "Donor", "account_type": "Receivable"},
 
 		{'doctype': "Opportunity Type", "name": _("Sales")},
 		{'doctype': "Opportunity Type", "name": _("Support")},
@@ -535,8 +533,8 @@ def create_bank_account(args):
 			# bank account same as a CoA entry
 			pass
 
-def update_shopping_cart_settings(args):
-	shopping_cart = frappe.get_doc("Shopping Cart Settings")
+def update_shopping_cart_settings(args): # nosemgrep
+	shopping_cart = frappe.get_doc("E Commerce Settings")
 	shopping_cart.update({
 		"enabled": 1,
 		'company': args.company_name,

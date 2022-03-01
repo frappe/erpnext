@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import copy
+
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
@@ -51,49 +53,57 @@ def validate_accounting_period(gl_map):
 			.format(frappe.bold(accounting_periods[0].name)), ClosedAccountingPeriod)
 
 def process_gl_map(gl_map, merge_entries=True, precision=None):
+	if not gl_map:
+		return []
+
+	gl_map = distribute_gl_based_on_cost_center_allocation(gl_map, precision)
+
 	if merge_entries:
 		gl_map = merge_similar_entries(gl_map, precision)
-	for entry in gl_map:
-		# toggle debit, credit if negative entry
-		if flt(entry.debit) < 0:
-			entry.credit = flt(entry.credit) - flt(entry.debit)
-			entry.debit = 0.0
 
-		if flt(entry.debit_in_account_currency) < 0:
-			entry.credit_in_account_currency = \
-				flt(entry.credit_in_account_currency) - flt(entry.debit_in_account_currency)
-			entry.debit_in_account_currency = 0.0
-
-		if flt(entry.credit) < 0:
-			entry.debit = flt(entry.debit) - flt(entry.credit)
-			entry.credit = 0.0
-
-		if flt(entry.credit_in_account_currency) < 0:
-			entry.debit_in_account_currency = \
-				flt(entry.debit_in_account_currency) - flt(entry.credit_in_account_currency)
-			entry.credit_in_account_currency = 0.0
-
-		update_net_values(entry)
+	gl_map = toggle_debit_credit_if_negative(gl_map)
 
 	return gl_map
 
-def update_net_values(entry):
-	# In some scenarios net value needs to be shown in the ledger
-	# This method updates net values as debit or credit
-	if entry.post_net_value and entry.debit and entry.credit:
-		if entry.debit > entry.credit:
-			entry.debit = entry.debit - entry.credit
-			entry.debit_in_account_currency = entry.debit_in_account_currency \
-				- entry.credit_in_account_currency
-			entry.credit = 0
-			entry.credit_in_account_currency = 0
-		else:
-			entry.credit = entry.credit - entry.debit
-			entry.credit_in_account_currency = entry.credit_in_account_currency \
-				- entry.debit_in_account_currency
+def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None):
+	cost_center_allocation = get_cost_center_allocation_data(gl_map[0]["company"], gl_map[0]["posting_date"])
+	if not cost_center_allocation:
+		return gl_map
 
-			entry.debit = 0
-			entry.debit_in_account_currency = 0
+	new_gl_map = []
+	for d in gl_map:
+		cost_center = d.get("cost_center")
+		if cost_center and cost_center_allocation.get(cost_center):
+			for sub_cost_center, percentage in cost_center_allocation.get(cost_center, {}).items():
+				gle = copy.deepcopy(d)
+				gle.cost_center = sub_cost_center
+				for field in ("debit", "credit", "debit_in_account_currency", "credit_in_company_currency"):
+					gle[field] = flt(flt(d.get(field)) * percentage / 100, precision)
+				new_gl_map.append(gle)
+		else:
+			new_gl_map.append(d)
+
+	return new_gl_map
+
+def get_cost_center_allocation_data(company, posting_date):
+	par = frappe.qb.DocType("Cost Center Allocation")
+	child = frappe.qb.DocType("Cost Center Allocation Percentage")
+
+	records = (
+		frappe.qb.from_(par).inner_join(child).on(par.name == child.parent)
+		.select(par.main_cost_center, child.cost_center, child.percentage)
+		.where(par.docstatus == 1)
+		.where(par.company == company)
+		.where(par.valid_from <= posting_date)
+		.orderby(par.valid_from, order=frappe.qb.desc)
+	).run(as_dict=True)
+
+	cc_allocation = frappe._dict()
+	for d in records:
+		cc_allocation.setdefault(d.main_cost_center, frappe._dict())\
+			.setdefault(d.cost_center, d.percentage)
+
+	return cc_allocation
 
 def merge_similar_entries(gl_map, precision=None):
 	merged_gl_map = []
@@ -144,6 +154,49 @@ def check_if_in_list(gle, gl_map, dimensions=None):
 
 		if same_head:
 			return e
+
+def toggle_debit_credit_if_negative(gl_map):
+	for entry in gl_map:
+		# toggle debit, credit if negative entry
+		if flt(entry.debit) < 0:
+			entry.credit = flt(entry.credit) - flt(entry.debit)
+			entry.debit = 0.0
+
+		if flt(entry.debit_in_account_currency) < 0:
+			entry.credit_in_account_currency = \
+				flt(entry.credit_in_account_currency) - flt(entry.debit_in_account_currency)
+			entry.debit_in_account_currency = 0.0
+
+		if flt(entry.credit) < 0:
+			entry.debit = flt(entry.debit) - flt(entry.credit)
+			entry.credit = 0.0
+
+		if flt(entry.credit_in_account_currency) < 0:
+			entry.debit_in_account_currency = \
+				flt(entry.debit_in_account_currency) - flt(entry.credit_in_account_currency)
+			entry.credit_in_account_currency = 0.0
+
+		update_net_values(entry)
+
+	return gl_map
+
+def update_net_values(entry):
+	# In some scenarios net value needs to be shown in the ledger
+	# This method updates net values as debit or credit
+	if entry.post_net_value and entry.debit and entry.credit:
+		if entry.debit > entry.credit:
+			entry.debit = entry.debit - entry.credit
+			entry.debit_in_account_currency = entry.debit_in_account_currency \
+				- entry.credit_in_account_currency
+			entry.credit = 0
+			entry.credit_in_account_currency = 0
+		else:
+			entry.credit = entry.credit - entry.debit
+			entry.credit_in_account_currency = entry.credit_in_account_currency \
+				- entry.debit_in_account_currency
+
+			entry.debit = 0
+			entry.debit_in_account_currency = 0
 
 def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 	if not from_repost:
@@ -221,7 +274,7 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 				debit_credit_diff += flt(d.credit)
 			round_off_account_exists = True
 
-	if round_off_account_exists and abs(debit_credit_diff) <= (1.0 / (10**precision)):
+	if round_off_account_exists and abs(debit_credit_diff) < (1.0 / (10**precision)):
 		gl_map.remove(round_off_gle)
 		return
 
@@ -266,13 +319,18 @@ def make_reverse_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 	"""
 
 	if not gl_entries:
-		gl_entries = frappe.get_all("GL Entry",
-			fields = ["*"],
-			filters = {
-				"voucher_type": voucher_type,
-				"voucher_no": voucher_no,
-				"is_cancelled": 0
-			})
+		gl_entry = frappe.qb.DocType("GL Entry")
+		gl_entries = (frappe.qb.from_(
+			gl_entry
+		).select(
+			'*'
+		).where(
+			gl_entry.voucher_type == voucher_type
+		).where(
+			gl_entry.voucher_no == voucher_no
+		).where(
+			gl_entry.is_cancelled == 0
+		).for_update()).run(as_dict=1)
 
 	if gl_entries:
 		validate_accounting_period(gl_entries)
@@ -280,23 +338,24 @@ def make_reverse_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		set_as_cancel(gl_entries[0]['voucher_type'], gl_entries[0]['voucher_no'])
 
 		for entry in gl_entries:
-			entry['name'] = None
-			debit = entry.get('debit', 0)
-			credit = entry.get('credit', 0)
+			new_gle = copy.deepcopy(entry)
+			new_gle['name'] = None
+			debit = new_gle.get('debit', 0)
+			credit = new_gle.get('credit', 0)
 
-			debit_in_account_currency = entry.get('debit_in_account_currency', 0)
-			credit_in_account_currency = entry.get('credit_in_account_currency', 0)
+			debit_in_account_currency = new_gle.get('debit_in_account_currency', 0)
+			credit_in_account_currency = new_gle.get('credit_in_account_currency', 0)
 
-			entry['debit'] = credit
-			entry['credit'] = debit
-			entry['debit_in_account_currency'] = credit_in_account_currency
-			entry['credit_in_account_currency'] = debit_in_account_currency
+			new_gle['debit'] = credit
+			new_gle['credit'] = debit
+			new_gle['debit_in_account_currency'] = credit_in_account_currency
+			new_gle['credit_in_account_currency'] = debit_in_account_currency
 
-			entry['remarks'] = "On cancellation of " + entry['voucher_no']
-			entry['is_cancelled'] = 1
+			new_gle['remarks'] = "On cancellation of " + new_gle['voucher_no']
+			new_gle['is_cancelled'] = 1
 
-			if entry['debit'] or entry['credit']:
-				make_entry(entry, adv_adj, "Yes")
+			if new_gle['debit'] or new_gle['credit']:
+				make_entry(new_gle, adv_adj, "Yes")
 
 
 def check_freezing_date(posting_date, adv_adj=False):
