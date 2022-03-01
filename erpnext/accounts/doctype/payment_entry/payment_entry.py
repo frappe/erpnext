@@ -115,11 +115,8 @@ class PaymentEntry(AccountsController):
 
 	def validate_allocated_amount(self):
 		for d in self.get("references"):
-			if (flt(d.allocated_amount)) > 0 and (flt(d.outstanding_amount)) > 0:
+			if (flt(d.allocated_amount))> 0:
 				if flt(d.allocated_amount) > flt(d.outstanding_amount):
-					frappe.throw(_("Row #{0}: Allocated Amount cannot be greater than outstanding amount.").format(d.idx))
-			elif (flt(d.allocated_amount)) > 0 and (flt(d.outstanding_amount)) < 0:
-				if abs(flt(d.allocated_amount)) > abs(flt(d.outstanding_amount)):
 					frappe.throw(_("Row #{0}: Allocated Amount cannot be greater than outstanding amount.").format(d.idx))
 
 	def delink_advance_entry_references(self):
@@ -381,10 +378,10 @@ class PaymentEntry(AccountsController):
 				base_total_allocated_amount += flt(flt(d.allocated_amount) * flt(d.exchange_rate),
 					self.precision("base_paid_amount"))
 
-		# self.total_allocated_amount = abs(total_allocated_amount)
-		# self.base_total_allocated_amount = abs(base_total_allocated_amount)
-		self.total_allocated_amount = total_allocated_amount
-		self.base_total_allocated_amount = base_total_allocated_amount
+		self.total_allocated_amount = abs(total_allocated_amount)
+		self.base_total_allocated_amount = abs(base_total_allocated_amount)
+		# self.total_allocated_amount = total_allocated_amount
+		# self.base_total_allocated_amount = base_total_allocated_amount
 
 	def set_unallocated_amount(self):
 		self.unallocated_amount = 0
