@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import unittest
 
 import frappe
 from frappe.test_runner import make_test_records
@@ -12,8 +11,10 @@ from erpnext.exceptions import PartyDisabled
 test_dependencies = ['Payment Term', 'Payment Terms Template']
 test_records = frappe.get_test_records('Supplier')
 
+from frappe.tests.utils import FrappeTestCase
 
-class TestSupplier(unittest.TestCase):
+
+class TestSupplier(FrappeTestCase):
 	def test_get_supplier_group_details(self):
 		doc = frappe.new_doc("Supplier Group")
 		doc.supplier_group_name = "_Testing Supplier Group"
