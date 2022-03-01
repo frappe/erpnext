@@ -60,7 +60,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 			item_det = get_item_details(sle.get('item_code'))
 			sle = frappe._dict(sle)
 			voucher_doc = frappe.get_doc(sle.voucher_type, sle.voucher_no)
-			## will handle stock reco later
+
 			if sle.get("actual_qty") and item_det.has_serial_no and sle.get("voucher_type")!="Stock Reconciliation":
 				# for auto creating serials
 				validate_sr_no(sle, item_det)
@@ -93,7 +93,6 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 						new_sle['actual_qty'] = 1 if sle['actual_qty'] > 0 else -1
 						new_sle['serial_no'] = serials.pop()
 						sle_docs.append(make_entry(new_sle, allow_negative_stock, via_landed_cost_voucher))
-
 
 			elif sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
 				sle_docs.append(make_entry(sle, allow_negative_stock, via_landed_cost_voucher))

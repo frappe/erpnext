@@ -10,7 +10,12 @@ import erpnext
 from erpnext.accounts.utils import get_company_default
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_batch_qty
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.serial_no.serial_no import (
+	get_item_details,
+	get_serial_nos,
+	update_serial_nos,
+	validate_serial_no,
+)
 from erpnext.stock.utils import get_stock_balance
 
 
@@ -236,14 +241,41 @@ class StockReconciliation(StockController):
 				sl_entries.append(self.get_sle_for_items(row))
 
 		if sl_entries:
+			# to not break merge, will need to split the serials after this
+			new_sl_entries = []
 			if has_serial_no:
 				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
+				for sle in sl_entries:
+					if not sle.serial_no or flt(sle.get('actual_qty')) < 0:
+						new_sl_entries.append(sle)
+						continue
+					if flt(sle.get('actual_qty')) > 1:
+						serials = get_serial_nos(sle.serial_no)
+						item_det = get_item_details(sle.get('item_code'))
+						validate_serial_no(sle, item_det)
+						update_serial_nos(sle, item_det)
+						qty_after_transaction = 0
+						for serial in range(len(serials)):
+							qty_after_transaction += 1
+							new_sle = sle.copy()
+							new_sle.update({
+								'actual_qty': 1,
+								'qty_after_transaction': qty_after_transaction,
+								'incoming_rate': row.valuation_rate,
+								'valuation_rate': row.valuation_rate,
+								'serial_no': serials.pop(),
+								'skip_update_serial_no': 1,
+								'skip_serial_no_validation': 1
+							})
+							new_sl_entries.append(new_sle)
+						continue
+					new_sl_entries.append(sle)
 
 			allow_negative_stock = False
 			if has_batch_no:
 				allow_negative_stock = True
 
-			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
+			self.make_sl_entries(new_sl_entries, allow_negative_stock=allow_negative_stock)
 
 		if has_serial_no and sl_entries:
 			self.update_valuation_rate_for_serial_no()
@@ -253,23 +285,27 @@ class StockReconciliation(StockController):
 
 		serial_nos = get_serial_nos(row.serial_no)
 
-
 		# To issue existing serial nos
 		if row.current_qty and (row.current_serial_no or row.batch_no):
 			args = self.get_sle_for_items(row)
 			args.update({
-				'actual_qty': -1 * row.current_qty,
+				'actual_qty': -1,
 				'serial_no': row.current_serial_no,
 				'batch_no': row.batch_no,
 				'valuation_rate': row.current_valuation_rate
 			})
 
 			if row.current_serial_no:
-				args.update({
-					'qty_after_transaction': 0,
-				})
-
-			sl_entries.append(args)
+				qty_after_transaction = row.current_qty
+				current_serials = get_serial_nos(row.current_serial_no)
+				for serial in range(cint(row.current_qty)):
+					qty_after_transaction -= 1
+					new_args = args.copy()
+					new_args.update({
+						'qty_after_transaction': qty_after_transaction,
+						'serial_no': current_serials.pop()
+					})
+					sl_entries.append(new_args)
 
 		qty_after_transaction = 0
 		for serial_no in serial_nos:
@@ -286,7 +322,6 @@ class StockReconciliation(StockController):
 				# If serial no exists in different warehouse
 
 				warehouse = previous_sle.get("warehouse", '') or row.warehouse
-
 				if not qty_after_transaction:
 					qty_after_transaction = get_stock_balance(row.item_code,
 						warehouse, self.posting_date, self.posting_time)
@@ -300,18 +335,15 @@ class StockReconciliation(StockController):
 					'warehouse': warehouse,
 					'valuation_rate': previous_sle.get("valuation_rate")
 				})
-
 				sl_entries.append(new_args)
 
 		if row.qty:
 			args = self.get_sle_for_items(row)
-
 			args.update({
 				'actual_qty': row.qty,
 				'incoming_rate': row.valuation_rate,
 				'valuation_rate': row.valuation_rate
 			})
-
 			sl_entries.append(args)
 
 		if serial_nos == get_serial_nos(row.current_serial_no):
