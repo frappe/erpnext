@@ -181,7 +181,7 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Status",
-   "options": "\nDraft\nSubmitted\nCancelled\nTransit\nPre-reconciled\nReconciled"
+   "options": "\nDraft\nSubmitted\nCancelled\nTransit\nPre-reconciled\nReconciled\nAnnulled"
   },
   {
    "depends_on": "credit_note",
@@ -354,7 +354,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-02-21 13:55:06.671053",
+ "modified": "2022-02-28 13:52:54.268455",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transactions",

@@ -7,6 +7,7 @@
  "field_order": [
   "bank_account",
   "check",
+  "person_name",
   "section1",
   "no_bank_check",
   "check_date",
@@ -82,10 +83,17 @@
    "options": "Cancel Bank Checks",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "check.person_name",
+   "fieldname": "person_name",
+   "fieldtype": "Data",
+   "label": "Party Name",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-02-11 13:59:30.563782",
+ "modified": "2022-02-28 13:58:29.977005",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cancel Bank Checks",
