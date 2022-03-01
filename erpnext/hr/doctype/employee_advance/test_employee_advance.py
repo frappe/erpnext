@@ -24,6 +24,9 @@ from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_
 
 
 class TestEmployeeAdvance(unittest.TestCase):
+	def setUp(self):
+		frappe.db.delete("Employee Advance")
+
 	def test_paid_amount_and_status(self):
 		employee_name = make_employee("_T@employe.advance")
 		advance = make_employee_advance(employee_name)
@@ -58,8 +61,12 @@ class TestEmployeeAdvance(unittest.TestCase):
 		self.assertEqual(advance.paid_amount, 0)
 		self.assertEqual(advance.status, "Unpaid")
 
-	def test_claimed_and_returned_status(self):
-		# Claimed Status check, full amount claimed
+		advance.cancel()
+		advance.reload()
+		self.assertEqual(advance.status, "Cancelled")
+
+	def test_claimed_status(self):
+		# CLAIMED Status check, full amount claimed
 		payable_account = get_payable_account("_Test Company")
 		claim = make_expense_claim(
 			payable_account, 1000, 1000, "_Test Company", "Travel Expenses - _TC", do_not_submit=True
@@ -77,13 +84,28 @@ class TestEmployeeAdvance(unittest.TestCase):
 		self.assertEqual(advance.claimed_amount, 1000)
 		self.assertEqual(advance.status, "Claimed")
 
+		# advance should not be shown in claims
+		advances = get_advances(claim.employee)
+		advances = [entry.name for entry in advances]
+		self.assertTrue(advance.name not in advances)
+
 		# cancel claim; status should be Paid
 		claim.cancel()
 		advance.reload()
 		self.assertEqual(advance.claimed_amount, 0)
 		self.assertEqual(advance.status, "Paid")
 
-		# Partly Claimed and Returned status check
+	def test_partly_claimed_and_returned_status(self):
+		payable_account = get_payable_account("_Test Company")
+		claim = make_expense_claim(
+			payable_account, 1000, 1000, "_Test Company", "Travel Expenses - _TC", do_not_submit=True
+		)
+
+		advance = make_employee_advance(claim.employee)
+		pe = make_payment_entry(advance)
+		pe.submit()
+
+		# PARTLY CLAIMED AND RETURNED status check
 		# 500 Claimed, 500 Returned
 		claim = make_expense_claim(
 			payable_account, 500, 500, "_Test Company", "Travel Expenses - _TC", do_not_submit=True
@@ -120,11 +142,21 @@ class TestEmployeeAdvance(unittest.TestCase):
 		self.assertEqual(advance.return_amount, 500)
 		self.assertEqual(advance.status, "Partly Claimed and Returned")
 
-		# Cancel return entry; status should change to Paid
+		# advance should not be shown in claims
+		advances = get_advances(claim.employee)
+		advances = [entry.name for entry in advances]
+		self.assertTrue(advance.name not in advances)
+
+		# Cancel return entry; status should change to PAID
 		entry.cancel()
 		advance.reload()
 		self.assertEqual(advance.return_amount, 0)
 		self.assertEqual(advance.status, "Paid")
+
+		# advance should be shown in claims
+		advances = get_advances(claim.employee)
+		advances = [entry.name for entry in advances]
+		self.assertTrue(advance.name in advances)
 
 	def test_repay_unclaimed_amount_from_salary(self):
 		employee_name = make_employee("_T@employe.advance")

@@ -29,6 +29,7 @@ class EmployeeAdvance(Document):
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = "GL Entry"
+		self.set_status(update=True)
 
 	def set_status(self, update=False):
 		precision = self.precision("paid_amount")
