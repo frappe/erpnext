@@ -171,7 +171,7 @@ frappe.ui.form.on("Expense Claim", {
 					['docstatus', '=', 1],
 					['employee', '=', frm.doc.employee],
 					['paid_amount', '>', 0],
-					['status', '!=', 'Claimed']
+					['status', 'not in', ['Claimed', 'Returned', 'Partly Claimed and Returned']]
 				]
 			};
 		});
