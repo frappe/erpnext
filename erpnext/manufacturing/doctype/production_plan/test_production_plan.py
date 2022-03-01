@@ -113,7 +113,7 @@ class TestProductionPlan(FrappeTestCase):
 			item_code='Test Production Item 1',
 			ignore_existing_ordered_qty=1
 		)
-		self.assertTrue(len(pln.mr_items), 1)
+		self.assertTrue(len(pln.mr_items))
 		self.assertTrue(flt(pln.mr_items[0].quantity), 1.0)
 
 		sr1.cancel()
@@ -154,7 +154,7 @@ class TestProductionPlan(FrappeTestCase):
 			use_multi_level_bom=0,
 			ignore_existing_ordered_qty=0
 		)
-		self.assertTrue(len(pln.mr_items))
+		self.assertFalse(len(pln.mr_items))
 
 		sr1.cancel()
 		sr2.cancel()
