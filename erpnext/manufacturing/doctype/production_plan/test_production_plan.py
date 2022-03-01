@@ -154,7 +154,7 @@ class TestProductionPlan(FrappeTestCase):
 			use_multi_level_bom=0,
 			ignore_existing_ordered_qty=0
 		)
-		self.assertTrue(len(pln.mr_items), 0)
+		self.assertTrue(len(pln.mr_items))
 
 		sr1.cancel()
 		sr2.cancel()
@@ -575,6 +575,7 @@ class TestProductionPlan(FrappeTestCase):
 			wip_warehouse='Work In Progress - _TC',
 			fg_warehouse='Finished Goods - _TC',
 			skip_transfer=1,
+			use_multi_level_bom=1,
 			do_not_submit=True
 		)
 		wo.production_plan = pln.name
@@ -619,6 +620,7 @@ class TestProductionPlan(FrappeTestCase):
 			wip_warehouse='Work In Progress - _TC',
 			fg_warehouse='Finished Goods - _TC',
 			skip_transfer=1,
+			use_multi_level_bom=1,
 			do_not_submit=True
 		)
 		wo.production_plan = pln.name
