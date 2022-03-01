@@ -17,6 +17,7 @@ from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_
 from frappe.model.rename_doc import update_linked_doctypes
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
+from frappe.utils import get_link_to_form
 
 from erpnext.accounts.party import (  # noqa
 	get_dashboard_info,
@@ -66,15 +67,26 @@ class Customer(TransactionBase):
 		return self.customer_name
 
 	def after_insert(self):
-		'''Customer name autofill in vehicle database for filter in job card'''
-		if self.vehicle:
-			val = frappe.get_doc('Vehicle',self.vehicle)
-			frappe.db.set_value("Vehicle", self.vehicle, "customer", self.customer_name)
-					
+
 		'''If customer created from Lead, update customer id in quotations, opportunities'''
 		self.update_lead_status()
 
 	def validate(self):
+		'''Customer name autofill in vehicle database for filter in job card'''
+		if self.vehicle:
+			val = frappe.get_doc('Vehicle',self.vehicle)
+			frappe.db.set_value("Vehicle", self.vehicle, "customer", self.customer_name)
+			frappe.db.set_value("Vehicle", self.vehicle, "mobile_number", self.mobile_no)	
+		
+		"""Row 1 auto fill - Tyre team"""
+		if not frappe.db.exists('customer_vehicle', self.vehicle):
+			val = frappe.get_doc("Vehicle",self.vehicle);
+			self.append('customer_vehicle',{'ts_license_plate':self.vehicle,'ts_brand':val.brand,'ts_model':val.model_name});
+	
+		print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+		print(frappe.db.exists('customer_vehicle', self.vehicle))
+	
+				
 		self.flags.is_new_doc = self.is_new()
 		self.flags.old_lead = self.lead_name
 		validate_party_accounts(self)
@@ -139,11 +151,12 @@ class Customer(TransactionBase):
 				frappe.bold(self.represents_company)))
 
 	def on_update(self):
+		
 		'''Customer name autofill in vehicle database for additional vehcile for filter in job card'''
-		for d in self.get('customer_vehicle'):
-				if d.ts_license_plate:
-					frappe.db.set_value("Vehicle", d.ts_license_plate, "customer", self.customer_name)
-
+		# for d in self.get('customer_vehicle'):
+		# 	if self.vehicle:
+		# 		frappe.db.set_value("Customer",d.customer,"Customer",d.ts_license_plate[0]);
+				
 		self.validate_name_with_customer_group()
 		self.create_primary_contact()
 		self.create_primary_address()

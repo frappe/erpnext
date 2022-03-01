@@ -375,7 +375,6 @@
    "print_hide": 1
   },
   {
-   "default": "Today",
    "fieldname": "due_date",
    "fieldtype": "Date",
    "hide_days": 1,
@@ -1018,6 +1017,7 @@
    "fetch_from": "customer.loyalty_program",
    "fieldname": "loyalty_program",
    "fieldtype": "Link",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Loyalty Program",
@@ -2037,7 +2037,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-02-21 16:15:30.505372",
+ "modified": "2022-02-28 14:52:50.675231",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

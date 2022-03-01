@@ -136,7 +136,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "HR-EMP-",
+   "options": ".{first_name}. .{middle_name}. .{last_name}.-.",
    "set_only_once": 1
   },
   {
@@ -151,7 +151,8 @@
    "fieldname": "first_name",
    "fieldtype": "Data",
    "label": "First Name",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   },
   {
    "allow_in_quick_entry": 1,
@@ -174,7 +175,8 @@
    "label": "Full Name",
    "oldfieldname": "employee_name",
    "oldfieldtype": "Data",
-   "read_only": 1
+   "read_only": 1,
+   "unique": 1
   },
   {
    "fetch_from": "user_id.user_image",
@@ -813,7 +815,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2022-02-04 10:53:25.088423",
+ "modified": "2022-02-25 16:03:44.462576",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

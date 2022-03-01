@@ -112,7 +112,7 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		var variant_fields = [{
 			fieldname: "create_variant",
 			fieldtype: "Check",
-			label: __("Create Variant")
+			label: __("Create Variant"),
 		},
 		{
 			fieldname: 'item_template',

@@ -19,6 +19,7 @@
   "chassis_no",
   "vehicle_value",
   "customer",
+  "mobile_number",
   "insurance_details",
   "insurance_company",
   "policy_no",
@@ -39,7 +40,7 @@
   {
    "fieldname": "license_plate",
    "fieldtype": "Data",
-   "label": "License Plate",
+   "label": "Vehicle Number",
    "no_copy": 1,
    "reqd": 1,
    "unique": 1
@@ -196,10 +197,15 @@
    "fieldtype": "Data",
    "in_standard_filter": 1,
    "label": "Customer"
+  },
+  {
+   "fieldname": "mobile_number",
+   "fieldtype": "Data",
+   "label": "Mobile Number"
   }
  ],
  "links": [],
- "modified": "2022-02-21 22:48:47.274282",
+ "modified": "2022-02-28 20:26:14.339062",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Vehicle",

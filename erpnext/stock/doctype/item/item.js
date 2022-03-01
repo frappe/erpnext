@@ -23,26 +23,26 @@ frappe.ui.form.on("Item", {
 	},
 
 	refresh: function(frm) {
-		if (frm.doc.is_stock_item) {
-			frm.add_custom_button(__("Stock Balance"), function() {
-				frappe.route_options = {
-					"item_code": frm.doc.name
-				}
-				frappe.set_route("query-report", "Stock Balance");
-			}, __("View"));
-			frm.add_custom_button(__("Stock Ledger"), function() {
-				frappe.route_options = {
-					"item_code": frm.doc.name
-				}
-				frappe.set_route("query-report", "Stock Ledger");
-			}, __("View"));
-			frm.add_custom_button(__("Stock Projected Qty"), function() {
-				frappe.route_options = {
-					"item_code": frm.doc.name
-				}
-				frappe.set_route("query-report", "Stock Projected Qty");
-			}, __("View"));
-		}
+		// if (frm.doc.is_stock_item) {
+		// 	frm.add_custom_button(__("Stock Balance"), function() {
+		// 		frappe.route_options = {
+		// 			"item_code": frm.doc.name
+		// 		}
+		// 		frappe.set_route("query-report", "Stock Balance");
+		// 	}, __("View"));
+		// 	frm.add_custom_button(__("Stock Ledger"), function() {
+		// 		frappe.route_options = {
+		// 			"item_code": frm.doc.name
+		// 		}
+		// 		frappe.set_route("query-report", "Stock Ledger");
+		// 	}, __("View"));
+		// 	frm.add_custom_button(__("Stock Projected Qty"), function() {
+		// 		frappe.route_options = {
+		// 			"item_code": frm.doc.name
+		// 		}
+		// 		frappe.set_route("query-report", "Stock Projected Qty");
+		// 	}, __("View"));
+		// }
 
 
 		if (frm.doc.is_fixed_asset) {
@@ -89,28 +89,28 @@ frappe.ui.form.on("Item", {
 			erpnext.toggle_naming_series();
 		}
 
-		if (!frm.doc.published_in_website) {
-			frm.add_custom_button(__("Publish in Website"), function() {
-				frappe.call({
-					method: "erpnext.e_commerce.doctype.website_item.website_item.make_website_item",
-					args: {doc: frm.doc},
-					freeze: true,
-					freeze_message: __("Publishing Item ..."),
-					callback: function(result) {
-						frappe.msgprint({
-							message: __("Website Item {0} has been created.",
-								[repl('<a href="/app/website-item/%(item_encoded)s" class="strong">%(item)s</a>', {
-									item_encoded: encodeURIComponent(result.message[0]),
-									item: result.message[1]
-								})]
-							),
-							title: __("Published"),
-							indicator: "green"
-						});
-					}
-				});
-			}, __('Actions'));
-		}
+		// if (!frm.doc.published_in_website) {
+		// 	frm.add_custom_button(__("Publish in Website"), function() {
+		// 		frappe.call({
+		// 			method: "erpnext.e_commerce.doctype.website_item.website_item.make_website_item",
+		// 			args: {doc: frm.doc},
+		// 			freeze: true,
+		// 			freeze_message: __("Publishing Item ..."),
+		// 			callback: function(result) {
+		// 				frappe.msgprint({
+		// 					message: __("Website Item {0} has been created.",
+		// 						[repl('<a href="/app/website-item/%(item_encoded)s" class="strong">%(item)s</a>', {
+		// 							item_encoded: encodeURIComponent(result.message[0]),
+		// 							item: result.message[1]
+		// 						})]
+		// 					),
+		// 					title: __("Published"),
+		// 					indicator: "green"
+		// 				});
+		// 			}
+		// 		});
+		// 	}, __('Actions'));
+		// }
 
 		erpnext.item.edit_prices_button(frm);
 		erpnext.item.toggle_attributes(frm);
@@ -119,23 +119,23 @@ frappe.ui.form.on("Item", {
 			erpnext.item.make_dashboard(frm);
 		}
 
-		frm.add_custom_button(__('Duplicate'), function() {
-			var new_item = frappe.model.copy_doc(frm.doc);
-			// Duplicate item could have different name, causing "copy paste" error.
-			if (new_item.item_name===new_item.item_code) {
-				new_item.item_name = null;
-			}
-			if (new_item.item_code===new_item.description || new_item.item_code===new_item.description) {
-				new_item.description = null;
-			}
-			frappe.set_route('Form', 'Item', new_item.name);
-		});
+		// frm.add_custom_button(__('Duplicate'), function() {
+		// 	var new_item = frappe.model.copy_doc(frm.doc);
+		// 	// Duplicate item could have different name, causing "copy paste" error.
+		// 	if (new_item.item_name===new_item.item_code) {
+		// 		new_item.item_name = null;
+		// 	}
+		// 	if (new_item.item_code===new_item.description || new_item.item_code===new_item.description) {
+		// 		new_item.description = null;
+		// 	}
+		// 	frappe.set_route('Form', 'Item', new_item.name);
+		// });
 
-		if(frm.doc.has_variants) {
-			frm.add_custom_button(__("Item Variant Settings"), function() {
-				frappe.set_route("Form", "Item Variant Settings");
-			}, __("View"));
-		}
+		// if(frm.doc.has_variants) {
+		// 	frm.add_custom_button(__("Item Variant Settings"), function() {
+		// 		frappe.set_route("Form", "Item Variant Settings");
+		// 	}, __("View"));
+		// }
 
 		const stock_exists = (frm.doc.__onload
 			&& frm.doc.__onload.stock_exists) ? 1 : 0;
@@ -394,11 +394,11 @@ $.extend(erpnext.item, {
 		}
 	},
 
-	edit_prices_button: function(frm) {
-		frm.add_custom_button(__("Add / Edit Prices"), function() {
-			frappe.set_route("List", "Item Price", {"item_code": frm.doc.name});
-		}, __("Actions"));
-	},
+	// edit_prices_button: function(frm) {
+	// 	frm.add_custom_button(__("Add / Edit Prices"), function() {
+	// 		frappe.set_route("List", "Item Price", {"item_code": frm.doc.name});
+	// 	}, __("Actions"));
+	// },
 
 	weight_to_validate: function(frm) {
 		if (frm.doc.weight_per_unit && !frm.doc.weight_uom) {

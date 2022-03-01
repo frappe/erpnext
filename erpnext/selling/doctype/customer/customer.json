@@ -15,7 +15,6 @@
   "salutation",
   "customer_name",
   "gender",
-  "customer_type",
   "pan",
   "tax_withholding_category",
   "default_bank_account",
@@ -25,6 +24,7 @@
   "column_break0",
   "account_manager",
   "customer_group",
+  "customer_type",
   "territory",
   "tax_id",
   "tax_category",
@@ -41,7 +41,6 @@
   "default_price_list",
   "address_contacts",
   "address_html",
-  "website",
   "column_break1",
   "contact_html",
   "primary_address_and_contact_detail",
@@ -51,6 +50,8 @@
   "column_break_26",
   "customer_primary_address",
   "primary_address",
+  "website",
+  "view",
   "default_receivable_accounts",
   "accounts",
   "credit_limit_section",
@@ -77,13 +78,14 @@
   {
    "fieldname": "basic_info",
    "fieldtype": "Section Break",
-   "label": "Name and Type",
+   "label": "Customer Details",
    "oldfieldtype": "Section Break",
    "options": "fa fa-user"
   },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "options": "CUST-.YYYY.-",
@@ -246,6 +248,7 @@
    "collapsible": 1,
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Currency and Price List"
   },
   {
@@ -277,6 +280,7 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "address_contacts",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Address and Contact",
    "options": "fa fa-map-marker"
   },
@@ -284,8 +288,8 @@
    "depends_on": "eval: !doc.__islocal",
    "fieldname": "address_html",
    "fieldtype": "HTML",
-   "label": "Address HTML",
-   "read_only": 1
+   "hidden": 1,
+   "label": "Address HTML"
   },
   {
    "fieldname": "website",
@@ -315,19 +319,21 @@
    "description": "Reselect, if the chosen contact is edited after save",
    "fieldname": "customer_primary_contact",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Customer Primary Contact",
    "options": "Contact"
   },
   {
    "fetch_from": "customer_primary_contact.mobile_no",
    "fieldname": "mobile_no",
-   "fieldtype": "Read Only",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "Mobile No"
   },
   {
    "fetch_from": "customer_primary_contact.email_id",
    "fieldname": "email_id",
-   "fieldtype": "Read Only",
+   "fieldtype": "Data",
    "label": "Email Id"
   },
   {
@@ -338,19 +344,20 @@
    "description": "Reselect, if the chosen address is edited after save",
    "fieldname": "customer_primary_address",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Customer Primary Address",
    "options": "Address"
   },
   {
    "fieldname": "primary_address",
-   "fieldtype": "Text",
-   "label": "Primary Address",
-   "read_only": 1
+   "fieldtype": "Small Text",
+   "label": "Primary Address"
   },
   {
    "collapsible": 1,
    "fieldname": "default_receivable_accounts",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Accounting"
   },
   {
@@ -364,6 +371,7 @@
    "collapsible": 1,
    "fieldname": "credit_limit_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Credit Limit and Payment Terms"
   },
   {
@@ -377,6 +385,7 @@
    "collapsible_depends_on": "customer_details",
    "fieldname": "more_info",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "More Information",
    "oldfieldtype": "Section Break",
    "options": "fa fa-file-text"
@@ -415,6 +424,7 @@
    "collapsible": 1,
    "fieldname": "column_break_38",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Loyalty Points"
   },
   {
@@ -436,6 +446,7 @@
    "collapsible_depends_on": "default_sales_partner",
    "fieldname": "sales_team_section_break",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Sales Partner and Commission",
    "oldfieldtype": "Section Break",
    "options": "fa fa-group"
@@ -461,6 +472,7 @@
    "collapsible_depends_on": "sales_team",
    "fieldname": "sales_team_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Sales Team"
   },
   {
@@ -522,6 +534,12 @@
    "no_copy": 1,
    "options": "Opportunity",
    "print_hide": 1
+  },
+  {
+   "depends_on": "eval:!doc.__islocal ",
+   "fieldname": "view",
+   "fieldtype": "Button",
+   "label": "View"
   }
  ],
  "icon": "fa fa-user",
@@ -535,86 +553,14 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-02-22 08:28:35.028073",
+ "modified": "2022-02-28 14:09:07.883827",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
  "name_case": "Title Case",
  "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Sales User",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "permlevel": 1,
-   "read": 1,
-   "role": "Sales User"
-  },
-  {
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Sales Manager"
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "import": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Sales Master Manager",
-   "set_user_permissions": 1,
-   "share": 1,
-   "write": 1
-  },
-  {
-   "permlevel": 1,
-   "read": 1,
-   "role": "Sales Master Manager",
-   "write": 1
-  },
-  {
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Stock User"
-  },
-  {
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Stock Manager"
-  },
-  {
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Accounts User"
-  },
-  {
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Accounts Manager"
-  }
- ],
- "quick_entry": 1,
- "search_fields": "customer_name,customer_group,territory, mobile_no,primary_address",
+ "permissions": [],
+ "search_fields": "customer_name, mobile_no",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",

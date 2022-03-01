@@ -20,19 +20,18 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		{
 			label: __("Email Id"),
 			fieldname: "email_id",
-			fieldtype: "Data"
+			fieldtype: "Data",
+
 		},
 		{
 			fieldtype: "Column Break"
 		},
 		{
 			label: __("Mobile Number"),
-			fieldname: "mobile",
+			fieldname: "mobile_no",
 			fieldtype: "Data",
-			reqd:1
 		},
 		];
-
 		return variant_fields;
 	},
 })
