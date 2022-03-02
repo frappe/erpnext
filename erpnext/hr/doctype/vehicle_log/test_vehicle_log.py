@@ -82,7 +82,7 @@ def get_vehicle(employee_id):
 			"vehicle_value": flt(500000)
 		})
 	try:
-		vehicle.insert()
+		vehicle.insert(ignore_if_duplicate=True)
 	except frappe.DuplicateEntryError:
 		pass
 	return license_plate
