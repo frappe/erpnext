@@ -25,7 +25,11 @@ class PaymentReconciliation(Document):
 	def get_payment_entries(self):
 		order_doctype = "Sales Order" if self.party_type=="Customer" else "Purchase Order"
 		payment_entries = get_advance_payment_entries(self.party_type, self.party,
+<<<<<<< HEAD
 			self.receivable_payable_account, order_doctype, against_all_orders=True, limit=self.limit)
+=======
+			self.receivable_payable_account, order_doctype, against_all_orders=True)
+>>>>>>> bfc195dd8b (Changes to support refactor in frappe pg-poc branch (#15287))
 
 		return payment_entries
 
@@ -177,8 +181,8 @@ class PaymentReconciliation(Document):
 			frappe.throw(_("Please select Allocated Amount, Invoice Type and Invoice Number in atleast one row"))
 
 	def check_condition(self):
-		cond = " and posting_date >= '{0}'".format(frappe.db.escape(self.from_date)) if self.from_date else ""
-		cond += " and posting_date <= '{0}'".format(frappe.db.escape(self.to_date)) if self.to_date else ""
+		cond = " and posting_date >= {0}".format(frappe.db.escape(self.from_date)) if self.from_date else ""
+		cond += " and posting_date <= {0}".format(frappe.db.escape(self.to_date)) if self.to_date else ""
 		dr_or_cr = ("debit_in_account_currency" if erpnext.get_party_account_type(self.party_type) == 'Receivable'
 			else "credit_in_account_currency")
 

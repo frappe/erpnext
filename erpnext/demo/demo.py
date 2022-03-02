@@ -57,6 +57,7 @@ def simulate(domain='Manufacturing', days=100):
 
 	# continue?
 	demo_last_date = frappe.db.get_global('demo_last_date')
+	sys.stdout.write("\rDemo last date is come")
 	if demo_last_date:
 		current_date = frappe.utils.add_days(frappe.utils.getdate(demo_last_date), 1)
 
@@ -85,8 +86,10 @@ def simulate(domain='Manufacturing', days=100):
 
 			if domain=='Manufacturing':
 				manufacturing.work()
+				sys.stdout.write("Domain Manufacturing is active")
 			elif domain=='Education':
 				edu.work()
+				sys.stdout.write("Domain Education is active")
 
 		except:
 			frappe.db.set_global('demo_last_date', current_date)

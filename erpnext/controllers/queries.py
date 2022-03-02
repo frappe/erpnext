@@ -208,9 +208,13 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 		limit %(start)s, %(page_len)s """.format(
 			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
 			mcond=get_match_cond(doctype),
-			key=frappe.db.escape(searchfield)),
+			key=searchfield),
 		{
+<<<<<<< HEAD
 			'txt': "%"+frappe.db.escape(txt)+"%",
+=======
+			'txt': frappe.db.escape('%' + txt + '%'),
+>>>>>>> bfc195dd8b (Changes to support refactor in frappe pg-poc branch (#15287))
 			'_txt': txt.replace("%", ""),
 			'start': start or 0,
 			'page_len': page_len or 20
@@ -354,7 +358,7 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 				{condition} {match_condition}
 			order by idx desc, name"""
 			.format(condition=condition, match_condition=get_match_cond(doctype), key=searchfield), {
-				'txt': "%%%s%%" % frappe.db.escape(txt),
+				'txt': frappe.db.escape('%' + txt + '%'),
 				'company': filters.get("company", "")
 			})
 
@@ -376,10 +380,10 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 			and tabAccount.docstatus!=2
 			and tabAccount.{key} LIKE %(txt)s
 			{condition} {match_condition}"""
-		.format(condition=condition, key=frappe.db.escape(searchfield),
+		.format(condition=condition, key=searchfield,
 			match_condition=get_match_cond(doctype)), {
 			'company': filters.get("company", ""),
-			'txt': "%%%s%%" % frappe.db.escape(txt)
+			'txt': frappe.db.escape('%' + txt + '%')
 		})
 
 
@@ -407,7 +411,7 @@ def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
 			{start}, {page_len}
 		""".format(
 			sub_query=sub_query,
-			key=frappe.db.escape(searchfield),
+			key=searchfield,
 			fcond=get_filters_cond(doctype, filter_dict.get("Warehouse"), conditions),
 			mcond=get_match_cond(doctype),
 			start=start,
@@ -431,9 +435,9 @@ def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 	query = """select batch_id from `tabBatch`
 			where disabled = 0
 			and (expiry_date >= CURDATE() or expiry_date IS NULL)
-			and name like '{txt}'""".format(txt = frappe.db.escape('%{0}%'.format(txt)))
+			and name like {txt}""".format(txt = frappe.db.escape('%{0}%'.format(txt)))
 
 	if filters and filters.get('item'):
-		query += " and item = '{item}'".format(item = frappe.db.escape(filters.get('item')))
+		query += " and item = {item}".format(item = frappe.db.escape(filters.get('item')))
 
 	return frappe.db.sql(query, filters)

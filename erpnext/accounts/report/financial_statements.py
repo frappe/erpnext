@@ -393,11 +393,22 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 			filters.cost_center = get_cost_centers_with_children(filters.cost_center)
 			additional_conditions.append("cost_center in %(cost_center)s")
 
+<<<<<<< HEAD
 		if filters.get("finance_book"):
 			if filters.get("include_default_book_entries"):
 				additional_conditions.append("finance_book in (%(finance_book)s, %(company_fb)s)")
 			else:
 				additional_conditions.append("finance_book in (%(finance_book)s)")
+=======
+		company_finance_book = erpnext.get_default_finance_book(filters.get("company"))
+
+		if not filters.get('finance_book') or (filters.get('finance_book') == company_finance_book):
+			additional_conditions.append("ifnull(finance_book, '') in (%s, '')" %
+				frappe.db.escape(company_finance_book))
+		elif filters.get("finance_book"):
+			additional_conditions.append("ifnull(finance_book, '') = %s " %
+				frappe.db.escape(filters.get("finance_book")))
+>>>>>>> bfc195dd8b (Changes to support refactor in frappe pg-poc branch (#15287))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 

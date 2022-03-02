@@ -75,7 +75,7 @@ class TaxRule(Document):
 		for d in filters:
 			if conds:
 				conds += " and "
-			conds += """ifnull({0}, '') = '{1}'""".format(d, frappe.db.escape(cstr(filters[d])))
+			conds += """ifnull({0}, '') = {1}""".format(d, frappe.db.escape(cstr(filters[d])))
 
 		if self.from_date and self.to_date:
 			conds += """ and ((from_date > '{from_date}' and from_date < '{to_date}') or
@@ -152,7 +152,7 @@ def get_tax_template(posting_date, args):
 			customer_group_condition = get_customer_group_condition(value)
 			conditions.append("ifnull({0}, '') in ('', {1})".format(key, customer_group_condition))
 		else:
-			conditions.append("ifnull({0}, '') in ('', '{1}')".format(key, frappe.db.escape(cstr(value))))
+			conditions.append("ifnull({0}, '') in ('', {1})".format(key, frappe.db.escape(cstr(value))))
 
 	tax_rule = frappe.db.sql("""select * from `tabTax Rule`
 		where {0}""".format(" and ".join(conditions)), as_dict = True)
@@ -180,7 +180,7 @@ def get_tax_template(posting_date, args):
 
 def get_customer_group_condition(customer_group):
 	condition = ""
-	customer_groups = ["'%s'"%(frappe.db.escape(d.name)) for d in get_parent_customer_groups(customer_group)]
+	customer_groups = ["%s"%(frappe.db.escape(d.name)) for d in get_parent_customer_groups(customer_group)]
 	if customer_groups:
 		condition = ",".join(['%s'] * len(customer_groups))%(tuple(customer_groups))
 	return condition

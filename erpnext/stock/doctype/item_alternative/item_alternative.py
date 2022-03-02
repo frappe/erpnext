@@ -36,5 +36,5 @@ def get_alternative_items(doctype, txt, searchfield, start, page_len, filters):
 			and two_way = 1) limit {0}, {1}
 		""".format(start, page_len), {
 			"item_code": frappe.db.escape(filters.get('item_code')),
-			"txt": "%%%s%%" % frappe.db.escape(txt)
+			"txt": frappe.db.escape('%' + txt + '%')
 		})

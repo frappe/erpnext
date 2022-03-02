@@ -10,9 +10,9 @@ def execute():
 
 	frappe.reload_doc("stock", "doctype", "serial_no")
 
-	frappe.db.sql(""" update `tabSales Invoice Item` sii inner join 
+	frappe.db.sql(""" update `tabSales Invoice Item` sii inner join
 		`tabDelivery Note Item` dni on sii.dn_detail=dni.name and  sii.qty=dni.qty
-		set sii.serial_no=dni.serial_no where sii.parent IN (select si.name 
+		set sii.serial_no=dni.serial_no where sii.parent IN (select si.name
 			from `tabSales Invoice` si where si.update_stock=0 and si.docstatus=1)""")
 
 	items = frappe.db.sql(""" select  sii.parent, sii.serial_no from  `tabSales Invoice Item` sii
@@ -26,13 +26,13 @@ def execute():
 		if not sales_invoice or not serial_nos:
 			continue
 
-		serial_nos = ["'%s'"%frappe.db.escape(no) for no in serial_nos.split("\n")]
+		serial_nos = ["{}".format(frappe.db.escape(no)) for no in serial_nos.split("\n")]
 
 		frappe.db.sql("""
-			UPDATE 
+			UPDATE
 				`tabSerial No`
-			SET 
-				sales_invoice='{sales_invoice}'
+			SET
+				sales_invoice={sales_invoice}
 			WHERE
 				name in ({serial_nos})
 			""".format(

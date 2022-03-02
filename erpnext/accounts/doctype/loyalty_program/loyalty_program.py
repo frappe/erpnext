@@ -19,7 +19,7 @@ def get_loyalty_details(customer, loyalty_program, expiry_date=None, company=Non
 
 	condition = ''
 	if company:
-		condition = " and company='%s' " % frappe.db.escape(company)
+		condition = " and company=%s " % frappe.db.escape(company)
 	if not include_expired_entry:
 		condition += " and expiry_date>='%s' " % expiry_date
 

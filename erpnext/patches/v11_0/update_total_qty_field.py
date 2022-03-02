@@ -24,11 +24,19 @@ def execute():
 			GROUP BY parent
 		'''.format(doctype), as_dict = True)
 
+<<<<<<< HEAD
 		# Query to update total_qty might become too big, Update in batches
 		# batch_size is chosen arbitrarily, Don't try too hard to reason about it
 		batch_size = 100000
 		for i in range(0, len(total_qty), batch_size):
 			batch_transactions = total_qty[i:i + batch_size]
+=======
+		when_then = []
+		for d in total_qty:
+			when_then.append("""
+				when dt.name = {0} then {1}
+			""".format(frappe.db.escape(d.get("parent")), d.get("qty")))
+>>>>>>> bfc195dd8b (Changes to support refactor in frappe pg-poc branch (#15287))
 
 			# UPDATE with CASE for some reason cannot use PRIMARY INDEX,
 			# causing all rows to be examined, leading to a very slow update

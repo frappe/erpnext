@@ -104,7 +104,7 @@ class ProductionPlan(Document):
 
 		item_condition = ""
 		if self.item_code:
-			item_condition = ' and so_item.item_code = "{0}"'.format(frappe.db.escape(self.item_code))
+			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
 		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
 			(qty - work_order_qty) * conversion_factor as pending_qty, name
@@ -115,7 +115,7 @@ class ProductionPlan(Document):
 			(", ".join(["%s"] * len(so_list)), item_condition), tuple(so_list), as_dict=1)
 
 		if self.item_code:
-			item_condition = ' and so_item.item_code = "{0}"'.format(frappe.db.escape(self.item_code))
+			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
 		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as warehouse,
 			(((so_item.qty - so_item.work_order_qty) * pi.qty) / so_item.qty)
@@ -139,7 +139,7 @@ class ProductionPlan(Document):
 
 		item_condition = ""
 		if self.item_code:
-			item_condition = " and mr_item.item_code ='{0}'".format(frappe.db.escape(self.item_code))
+			item_condition = " and mr_item.item_code ={0}".format(frappe.db.escape(self.item_code))
 
 		items = frappe.db.sql("""select distinct parent, name, item_code, warehouse,
 			(qty - ordered_qty) as pending_qty
@@ -521,8 +521,12 @@ def get_bin_details(row):
 	conditions = ""
 	warehouse = row.get('source_warehouse') or row.get('default_warehouse')
 	if warehouse:
+<<<<<<< HEAD
 		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
 		conditions = " and exists(select name from `tabWarehouse` where lft >= {0} and rgt <= {1} and name=`tabBin`.warehouse)".format(lft, rgt)
+=======
+		conditions = " and warehouse={0}".format(frappe.db.escape(warehouse))
+>>>>>>> bfc195dd8b (Changes to support refactor in frappe pg-poc branch (#15287))
 
 	item_projected_qty = frappe.db.sql(""" select ifnull(sum(projected_qty),0) as projected_qty,
 		ifnull(sum(actual_qty),0) as actual_qty from `tabBin`
