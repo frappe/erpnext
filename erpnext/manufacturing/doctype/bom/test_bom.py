@@ -449,12 +449,9 @@ class TestBOM(FrappeTestCase):
 			(1, []),
 			(1, ["BOM#XYZ"]),
 			(2, ["BOM/ITEM/001"]),
-			(2, ["BOM/ITEM/001", "BOM/ITEM/001-1"]),
-			(2, ["BOM-ITEM-001",]),
-			(2, ["BOM-ITEM-001", "BOM-ITEM-001-1"]),
-			(3, ["BOM-ITEM-001", "BOM-ITEM-002", "BOM-ITEM-001-1"]),
+			(2, ["BOM-ITEM-001"]),
+			(3, ["BOM-ITEM-001", "BOM-ITEM-002"]),
 			(4, ["BOM-ITEM-001", "BOM-ITEM-002", "BOM-ITEM-003"]),
-			(2, ["BOM-ITEM-001", "BOM-ITEM-001-1", "BOM-ITEM-001-2"]),
 		]
 
 		for expected_index, existing_boms in version_index_test_cases:
