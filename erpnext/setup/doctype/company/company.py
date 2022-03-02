@@ -3,7 +3,6 @@
 
 
 import json
-import os
 
 import frappe
 import frappe.defaults
@@ -422,14 +421,14 @@ def get_name_with_abbr(name, company):
 	return " - ".join(parts)
 
 def install_country_fixtures(company, country):
-	path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(country))
-	if os.path.exists(path.encode("utf-8")):
-		try:
-			module_name = "erpnext.regional.{0}.setup.setup".format(frappe.scrub(country))
-			frappe.get_attr(module_name)(company, False)
-		except Exception as e:
-			frappe.log_error()
-			frappe.throw(_("Failed to setup defaults for country {0}. Please contact support.").format(frappe.bold(country)))
+	try:
+		module_name = "erpnext.regional.{0}.setup.setup".format(frappe.scrub(country))
+		frappe.get_attr(module_name)(company, False)
+	except ImportError:
+		pass
+	except Exception:
+		frappe.log_error()
+		frappe.throw(_("Failed to setup defaults for country {0}. Please contact support.").format(frappe.bold(country)))
 
 
 def update_company_current_month_sales(company):
