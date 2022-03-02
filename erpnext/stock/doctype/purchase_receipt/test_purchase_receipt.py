@@ -234,16 +234,20 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr = make_purchase_receipt(item_code=item.name, qty=2, rate=500)
 		pr.load_from_db()
 
-		serial_nos = frappe.db.get_value(
+		# Each Serial has its own SLE
+		sle_serial_nos = frappe.db.get_values(
 			"Stock Ledger Entry",
 			{
 				"voucher_type": "Purchase Receipt",
 				"voucher_no": pr.name,
 				"item_code": item.name
 			},
-			"serial_no"
+			"serial_no",
+			as_dict=True
 		)
-
+		serial_nos = []
+		for sle in sle_serial_nos:
+			serial_nos.append(sle.serial_no)
 		serial_nos = get_serial_nos(serial_nos)
 
 		self.assertEquals(get_serial_nos(pr.items[0].serial_no), serial_nos)
