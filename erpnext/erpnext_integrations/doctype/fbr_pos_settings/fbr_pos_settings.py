@@ -103,7 +103,7 @@ def disable_fbr_pos():
 
 
 def remove_fbr_pos_fields():
-	for dt, custom_fields in custom_fields_map:
+	for dt, custom_fields in custom_fields_map.items():
 		for custom_field_detail in custom_fields:
 			custom_field_name = frappe.db.get_value('Custom Field',
 				dict(dt=dt, fieldname=custom_field_detail.get('fieldname')))
