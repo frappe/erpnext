@@ -39,7 +39,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 		future_sle_exists(args, sl_entries)
 
 		for sle in sl_entries:
-			if sle.serial_no:
+			if sle.serial_no and not via_landed_cost_voucher:
 				validate_serial_no(sle)
 
 			if cancel:
