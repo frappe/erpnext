@@ -473,34 +473,46 @@ frappe.ui.form.on('Purchase Receipt Item', {
 
 	form_render:function(frm,cdt,cdn){
 		var child = locals[cdt][cdn];
-		frappe.call({
-			method: 'on_challan_number',
-			doc : frm.doc,	
-			args :{
-				item_code : child.item_code
-			},
-				callback: (r) => {
-					var i = 0;
-					var b=[];
-					console.log(" THIS IS DATA FROM SOI", r.message)
-					for(i; i < r.message.length; i++) {
-						b.push(r.message[i].name);
-						console.log(" THIS IS DATA FROM SOI", r.message[i], r.message[i].name)
-						frm.fields_dict.items.grid.update_docfield_property(
-							'challan_number_issues_by_job_worker',
-							'options',
-							[''].concat(b)
-						); 
+		if (child.item_code && frm.doc.is_subcontracted == "Yes") {
+			console.log(" In side child")
+			frappe.call({
+				method: 'on_challan_number',
+				doc : frm.doc,	
+				args :{
+					item_code : child.item_code
+				},
+					callback: (r) => {
+						var i = 0;
+						var b=[];
+						// console.log(" THIS IS DATA FROM SOI", r.message)
+						for(i; i < r.message.length; i++) {
+							b.push(r.message[i].name);
+							// console.log(" THIS IS DATA FROM SOI", r.message[i], r.message[i].name)
+							// frm.fields_dict.items.grid.update_docfield_property(
+							// 	'challan_number_issues_by_job_worker',
+							// 	'options',
+							// 	[''].concat(b)
+							// ); 
+						}
+						console.log('thi is select options, ',b)
+						
+						frm.fields_dict['items'].grid.get_field('challan_number_issues_by_job_worker').get_query = function(frm, cdt, cdn) {
+							console.log(" IN side challan")
+							return{
+								filters: [
+									['name', "in", b]
+								]
+							};
+						}
 					}
-					console.log('thi is select options, ',b)
-				}
+
 			});	
-		
+		}
     },
 
 	challan_number_issues_by_job_worker: function(frm, cdt, cdn){
 		var child = locals[cdt][cdn];
-		console.log(" this is child", child.item_code)
+		// console.log(" this is child", child.item_code)
 		if (child.challan_number_issues_by_job_worker){
 			frappe.call({
 				method: 'on_challan_date',
@@ -509,9 +521,8 @@ frappe.ui.form.on('Purchase Receipt Item', {
 					item : child.challan_number_issues_by_job_worker
 				},
 				callback: (r) =>{
-					console.log("this is r.message", r.message)
-					frappe.model.set_value(cdt, cdn, "challan_date_issues_by_job_worker", r.message[0])
-					
+					// console.log("this is r.message", r.message,  r.message[0].due_date)
+					frappe.model.set_value(cdt, cdn, "challan_date_issues_by_job_worker", r.message[0].due_date)					
 				}
 			})
 		}

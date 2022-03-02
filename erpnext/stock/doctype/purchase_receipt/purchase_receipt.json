@@ -107,8 +107,6 @@
   "terms",
   "bill_no",
   "bill_date",
-  "accounting_details_section",
-  "provisional_expense_account",
   "more_info",
   "project",
   "status",
@@ -1150,33 +1148,20 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.is_subcontracted==\"Yes\"",
    "fieldname": "get_items",
    "fieldtype": "Button",
-   "label": "Get Items"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "accounting_details_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Details"
-  },
-  {
-   "fieldname": "provisional_expense_account",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Provisional Expense Account",
-   "options": "Account"
+   "label": "Get Subcontracted Items"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-07 16:19:02.347034",
+ "modified": "2022-03-02 15:50:21.389814",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1237,7 +1222,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
  "timeline_field": "supplier",
  "title_field": "title",
  "track_changes": 1
