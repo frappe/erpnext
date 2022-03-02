@@ -737,8 +737,15 @@ class BuyingController(StockController, Subcontracting):
 				for serial in accepted_serials:
 					row = self.append('serial_items', {})
 					row.item_name = item.item_code
-					row.serial_no = serial
+					row.serial_no = serial if frappe.db.exists('Serial No',
+						{"name": serial, "warehouse": item.warehouse}) else ""
 					row.type = 'Accepted'
+				if len(accepted_serials) < abs(cint(item.qty)):
+					for auto_serial in range(abs(cint(item.qty))- len(accepted_serials)):
+						row = self.append('serial_items', {})
+						row.item_name = item.item_code
+						row.type = 'Accepted'
+
 			if has_serial and not item.serial_no:
 				for serial in range(abs(cint(item.qty))):
 					row = self.append('serial_items', {})
@@ -750,8 +757,14 @@ class BuyingController(StockController, Subcontracting):
 				for serial in rejected_serials:
 					row = self.append('serial_items', {})
 					row.item_name = item.item_code
-					row.serial_no = serial
+					row.serial_no = serial if frappe.db.exists('Serial No',
+						{"name": serial, "warehouse": item.warehouse}) else ""
 					row.type = 'Rejected'
+				if len(rejected_serials) < abs(cint(item.rejected_qty)):
+					for auto_serial in range(abs(cint(item.rejected_qty))- len(accepted_serials)):
+						row = self.append('serial_items', {})
+						row.item_name = item.item_code
+						row.type = 'Accepted'
 			if has_serial and not item.rejected_serial_no:
 				for serial in range(abs(cint(item.rejected_qty))):
 					row = self.append('serial_items', {})
