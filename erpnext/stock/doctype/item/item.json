@@ -48,6 +48,7 @@
   "warranty_period",
   "weight_per_unit",
   "weight_uom",
+  "allow_negative_stock",
   "reorder_section",
   "reorder_levels",
   "unit_of_measure_conversion",
@@ -907,6 +908,12 @@
    "fieldname": "is_grouped_asset",
    "fieldtype": "Check",
    "label": "Create Grouped Asset"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_negative_stock",
+   "fieldtype": "Check",
+   "label": "Allow Negative Stock"
   }
  ],
  "icon": "fa fa-tag",
@@ -914,7 +921,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-01-18 12:57:54.273202",
+ "modified": "2022-02-11 08:07:46.663220",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
