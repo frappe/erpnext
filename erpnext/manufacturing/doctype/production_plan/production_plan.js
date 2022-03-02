@@ -49,7 +49,7 @@ frappe.ui.form.on('Production Plan', {
 			if (d.item_code) {
 				return {
 					query: "erpnext.controllers.queries.bom",
-					filters:{'item': cstr(d.item_code)}
+					filters:{'item': cstr(d.item_code), 'docstatus': 1}
 				}
 			} else frappe.msgprint(__("Please enter Item first"));
 		}
@@ -232,7 +232,7 @@ frappe.ui.form.on('Production Plan', {
 		});
 	},
 	combine_items: function (frm) {
-		frm.clear_table('prod_plan_references');
+		frm.clear_table("prod_plan_references");
 
 		frappe.call({
 			method: "get_items",
@@ -245,6 +245,13 @@ frappe.ui.form.on('Production Plan', {
 				}
 			}
 		});
+	},
+
+	combine_sub_items: (frm) => {
+		if (frm.doc.sub_assembly_items.length > 0) {
+			frm.clear_table("sub_assembly_items");
+			frm.trigger("get_sub_assembly_items");
+		}
 	},
 
 	get_sub_assembly_items: function(frm) {

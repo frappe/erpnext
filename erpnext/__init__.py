@@ -131,11 +131,3 @@ def allow_regional(fn):
 		return frappe.get_attr(overrides[function_path][-1])(*args, **kwargs)
 
 	return caller
-
-def get_last_membership(member):
-	'''Returns last membership if exists'''
-	last_membership = frappe.get_all('Membership', 'name,to_date,membership_type',
-		dict(member=member, paid=1), order_by='to_date desc', limit=1)
-
-	if last_membership:
-		return last_membership[0]

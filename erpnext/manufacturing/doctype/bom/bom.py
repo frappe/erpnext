@@ -944,7 +944,7 @@ def validate_bom_no(item, bom_no):
 			frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
 
 @frappe.whitelist()
-def get_children(doctype, parent=None, is_root=False, **filters):
+def get_children(parent=None, is_root=False, **filters):
 	if not parent or parent=="BOM":
 		frappe.msgprint(_('Please select a BOM'))
 		return

@@ -36,6 +36,7 @@
   "prod_plan_references",
   "section_break_24",
   "get_sub_assembly_items",
+  "combine_sub_items",
   "sub_assembly_items",
   "material_request_planning",
   "include_non_stock_items",
@@ -340,7 +341,6 @@
   {
    "fieldname": "prod_plan_references",
    "fieldtype": "Table",
-   "hidden": 1,
    "label": "Production Plan Item Reference",
    "options": "Production Plan Item Reference"
   },
@@ -370,16 +370,23 @@
    "fieldname": "to_delivery_date",
    "fieldtype": "Date",
    "label": "To Delivery Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "combine_sub_items",
+   "fieldtype": "Check",
+   "label": "Consolidate Sub Assembly Items"
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-06 18:35:59.642232",
+ "modified": "2022-02-23 17:16:10.629378",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
