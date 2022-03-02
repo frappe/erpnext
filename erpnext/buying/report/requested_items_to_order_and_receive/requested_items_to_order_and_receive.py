@@ -6,7 +6,7 @@ import copy
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum, Coalesce
+from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import date_diff, flt, getdate
 
 
