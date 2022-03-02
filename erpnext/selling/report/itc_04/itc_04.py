@@ -14,7 +14,14 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	conditions = get_con(filters)
 	data = get_data(filters, conditions)
+
+	validate_filters(filters)
+
 	return columns, data
+
+def validate_filters(filters):
+	if filters.report == "ITC-05 B" or filters.report == "ITC-05 C":
+		frappe.throw(" This report is under Development. Please contact your Administrator ")
 
 def get_columns(filters):
 	if filters.report == "ITC-04":
@@ -209,6 +216,8 @@ def get_columns(filters):
 			# },
 		]
 		return columns
+	elif filters.report == "ITC-05 B" or filters.report == "ITC-05 C":	
+		pass
 
 def get_con(filters):
 	date_dict = {}
@@ -391,7 +400,8 @@ def get_data(filters,conditions):
 						data2['nature_of_job_work_done'] = nature_of_job_work_done
 						data.append(data2)
 		return data
-
+	elif filters.report == "ITC-05 B" or filters.report == "ITC-05 C":	
+		pass
 # def get_conditions(filters):
 # 	conditions = {}
 # 	if filters.gstin_of_manufacturer:
@@ -413,7 +423,7 @@ def get_json(filters, report_name, data):
 
 	# res = {}
 
-
+	
 	return {
 		'report_name': report_name,
 		'report': filters['report'],
