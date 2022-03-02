@@ -25,6 +25,16 @@ class SerialNoExistsInFutureTransaction(frappe.ValidationError):
 
 
 def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
+	""" Create SL entries from SL entry dicts
+
+		args:
+			- allow_negative_stock: disable negative stock valiations if true
+			- via_landed_cost_voucher: landed cost voucher cancels and reposts
+			entries of purchase document. This flag is used to identify if
+			cancellation and repost is happening via landed cost voucher, in
+			such cases certain validations need to be ignored (like negative
+					stock)
+	"""
 	from erpnext.controllers.stock_controller import future_sle_exists
 	if sl_entries:
 		cancel = sl_entries[0].get("is_cancelled")
@@ -36,7 +46,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 		future_sle_exists(args, sl_entries)
 
 		for sle in sl_entries:
-			if sle.serial_no:
+			if sle.serial_no and not via_landed_cost_voucher:
 				validate_serial_no(sle)
 
 			if cancel:
