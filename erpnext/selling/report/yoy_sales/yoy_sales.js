@@ -5,80 +5,141 @@
 frappe.query_reports["YoY Sales"] = {
 	"filters": [
 		{
+			fieldname: "tree_type",
+			label: __("Tree Type"),
+			fieldtype: "Select",
+			options: ["Customer Group", "Customer", "Item Group", "Item", "Territory", "Order Type", "Project"],
+			default: "Customer",
+			reqd: 1
+		},
+		{
+			fieldname: "doc_type",
+			label: __("based_on"),
+			fieldtype: "Select",
+			options: ["Sales Order","Delivery Note","Sales Invoice"],
+			default: "Sales Invoice",
+			reqd: 1,
+			hidden: 1
+		},
+		{
+			fieldname: "value_quantity",
+			label: __("Value Or Qty"),
+			fieldtype: "Select",
+			options: [
+				{ "value": "Value", "label": __("Value") },
+				{ "value": "Quantity", "label": __("Quantity") },
+			],
+			default: "Value",
+			reqd: 1
+		},
+		{
+			fieldname: "from_date",
+			label: __("From Date"),
+			fieldtype: "Date",
+			default: frappe.defaults.get_user_default("year_start_date"),
+			reqd: 1
+		},
+		{
+			fieldname:"to_date",
+			label: __("To Date"),
+			fieldtype: "Date",
+			default: frappe.defaults.get_user_default("year_end_date"),
+			reqd: 1
+		},
+		{
 			fieldname: "company",
 			label: __("Company"),
 			fieldtype: "Link",
-			options:"Company",
+			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
 			reqd: 1
 		},
-		// {
-		// 	fieldname: "item_group",
-		// 	label: __("Item Group"),
-		// 	fieldtype: "Link",
-		// 	options:"Item Group",
-		// 	default: "",
-		// 	reqd: 0
-		// },
-		// {
-		// 	fieldname: "item_code",
-		// 	label: __("Item Code"),
-		// 	fieldtype: "Link",
-		// 	options:"Item",
-		// 	default: "",
-		// 	reqd: 0
-		// },
 		{
-			"fieldname":"based_on",
-			"label": __("Based On"),
-			"fieldtype": "Select",
-			"options": [
-				{ "value": "Item", "label": __("Item") },
-				{ "value": "Item Group", "label": __("Item Group") },
-				{ "value": "Customer", "label": __("Customer") },
-				{ "value": "Customer Group", "label": __("Customer Group") },
-				{ "value": "Territory", "label": __("Territory") },
-			],
-			"default": "Item",
-			"dashboard_config": {
-				"read_only": 1,
-			}
-		},
-		{
-			fieldname: "from_year",
-			label: __("From Year"),
-			fieldtype: "Int",
-			// options:["", "Item Group", "Customer", "Customer Group"],
-			default: 2020,
-			reqd: 1
-		},
-		{
-			fieldname: "to_year",
-			label: __("To Year"),
-			fieldtype: "Int",
-			// options:["", "Item Group", "Customer", "Customer Group"],
-			default: 2022,
-			reqd: 1
-		},
-		// {
-		// 	"fieldname":"group_by",
-		// 	"label": __("Group By"),
-		// 	"fieldtype": "Select",
-		// 	"options": [
-		// 		"",
-		// 		{ "value": "Item", "label": __("Item") },
-		// 		{ "value": "Customer", "label": __("Customer") }
-		// 	],
-		// 	"default": ""
-		// },
-		{
-			fieldname: "value",
-			label: __("Value"),
+			fieldname: "range",
+			label: __("Range"),
 			fieldtype: "Select",
-			options:["Qty", "Amount"],
-			default: "Qty",
-			reqd: 0
-		},
-		
-	]
-};
+			options: [
+				{ "value": "Weekly", "label": __("Weekly") },
+				{ "value": "Monthly", "label": __("Monthly") },
+				{ "value": "Quarterly", "label": __("Quarterly") },
+				{ "value": "Yearly", "label": __("Yearly") }
+			],
+			default: "Yearly",
+			reqd: 1,
+			hidden : 1
+		}
+	],
+	after_datatable_render: function(datatable_obj) {
+		$(datatable_obj.wrapper).find(".dt-row-0").find('input[type=checkbox]').click();
+	},
+	get_datatable_options(options) {
+		return Object.assign(options, {
+			checkboxColumn: true,
+			events: {
+				onCheckRow: function (data) {
+					if (!data) return;
+					const data_doctype = $(
+						data[2].html
+					)[0].attributes.getNamedItem("data-doctype").value;
+					const tree_type = frappe.query_report.filters[0].value;
+					if (data_doctype != tree_type) return;
+
+					row_name = data[2].content;
+					length = data.length;
+
+					if (tree_type == "Customer") {
+						row_values = data
+							.slice(4, length - 1)
+							.map(function (column) {
+								return column.content;
+							});
+					} else if (tree_type == "Item") {
+						row_values = data
+							.slice(5, length - 1)
+							.map(function (column) {
+								return column.content;
+							});
+					} else {
+						row_values = data
+							.slice(3, length - 1)
+							.map(function (column) {
+								return column.content;
+							});
+					}
+
+					entry = {
+						name: row_name,
+						values: row_values,
+					};
+
+					let raw_data = frappe.query_report.chart.data;
+					let new_datasets = raw_data.datasets;
+
+					let element_found = new_datasets.some((element, index, array)=>{
+						if(element.name == row_name){
+							array.splice(index, 1)
+							return true
+						}
+						return false
+					})
+
+					if (!element_found) {
+						new_datasets.push(entry);
+					}
+
+					let new_data = {
+						labels: raw_data.labels,
+						datasets: new_datasets,
+					};
+					chart_options = {
+						data: new_data,
+						type: "line",
+					};
+					frappe.query_report.render_chart(chart_options);
+
+					frappe.query_report.raw_chart_data = new_data;
+				},
+			},
+		});
+	},
+}

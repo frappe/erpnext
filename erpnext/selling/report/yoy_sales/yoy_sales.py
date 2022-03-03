@@ -1,423 +1,386 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+
 import frappe
-from frappe import _
+from frappe import _, scrub
+from frappe.utils import add_days, add_to_date, flt, getdate
+from six import iteritems
+
+from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
+	return Analytics(filters).run()
 
+class Analytics(object):
+	def __init__(self, filters=None):
+		self.filters = frappe._dict(filters or {})
+		self.date_field = 'transaction_date' \
+			if self.filters.doc_type in ['Sales Order', 'Purchase Order'] else 'posting_date'
+		self.months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+		self.get_period_date_ranges()
 
-	group_by = ""
-	order_by = ""
+	def run(self):
+		self.get_columns()
+		self.get_data()
+		self.get_chart_data()
 
-	if filters.get("based_on") == "Item":
-		group_by = " Group BY sii.item_code "
+		# Skipping total row for tree-view reports
+		skip_total_row = 0
 
-	if filters.get("based_on") == "Customer" :
-		group_by =" GROUP BY si.customer "
-		
-	if filters.get('based_on')  == "Customer Group":
-		group_by =" GROUP BY si.customer_group "
-		
+		if self.filters.tree_type in ["Supplier Group", "Item Group", "Customer Group", "Territory"]:
+			skip_total_row = 1
 
-	if filters.get('based_on') ==  "Item Group":
-		group_by =" GROUP BY sii.item_group "
-		
-	if filters.get('based_on') == 'Territory' :
-		group_by =" GROUP BY si.territory "
+		return self.columns, self.data, None, None, None, skip_total_row
 
-	# if filters.get('group_by') == "Item":	
-	# 	group_by += "  ,sii.item_code "
+	def get_columns(self):
+		self.columns = [{
+				"label": _(self.filters.tree_type),
+				"options": self.filters.tree_type if self.filters.tree_type != "Order Type" else "",
+				"fieldname": "entity",
+				"fieldtype": "Link" if self.filters.tree_type != "Order Type" else "Data",
+				"width": 140 if self.filters.tree_type != "Order Type" else 200
+			}]
+		if self.filters.tree_type in ["Customer", "Supplier", "Item"]:
+			self.columns.append({
+				"label": _(self.filters.tree_type + " Name"),
+				"fieldname": "entity_name",
+				"fieldtype": "Data",
+				"width": 140
+			})
 
-	# if filters.get('group_by') ==  "Customer":	
-	# 	group_by +=" , si.customer"
-
-	validate_filters(filters)
-	
-	columns=get_columns(filters)
-
-	data = get_data(filters, group_by, order_by)
-
-	return columns, data
-
-def validate_filters(filters):
-
-	frm = filters.get("from_year")
-	to = filters.get("to_year")
-
-
-
-	if len(str(frm)) != 4 or  len(str(to)) != 4 and frm <= 2099 and to <= 2099:
-		frappe.throw(_("Please enter Correct Year"))	
-
-	if frm > to:
-		frappe.throw(_("From Year cannot be greater than To Year"))		
-	
-	group = filters.get("group_by")
-	based = filters.get("based_on")
-
-	# if group == based:
-	# 	frappe.throw(_("Group by and Based on cannot be same"))		
-
-def get_columns(filters):
-	column=[]
-	from_year = filters.get("from_year")
-	to_year = filters.get("to_year")
-
-	years = frappe.db.sql("""
-							Select distinct(year(modified)) as years from `tabSales Invoice Item`
-						""", as_dict= 1)
-
-	if filters.get("based_on") == "Item":
-		lst =[
-				{
-					"label": _("Item Code"),
-					"fieldname": 'item_code',
-					"fieldtype": "Link",
-					"options": "Item",
-					"width": 200
-				},
-				{
-					"fieldname": "item_name",
-					"label": "Item Name",
-					"width": 200,
-					"fieldtype": "Data",
-				},
-		]
-		column.extend(lst)					
-	
-	if filters.get("based_on") == "Customer":
-		lst =[
-			{
-				"fieldname": "customer",
-				"label": "Customer",
-				"width": 200,
+		if self.filters.tree_type == "Item":
+			self.columns.append({
+				"label": _("UOM"),
+				"fieldname": 'stock_uom',
 				"fieldtype": "Link",
-				"options": "Customer"
-			},
-			{
-				"fieldname": "customer_name",
-				"label": "Customer Name",
-				"width": 200,
-				"fieldtype": "Data"
-			}
-		]
-		column.extend(lst)		
+				"options": "UOM",
+				"width": 100
+			})
 
-	if filters.get("based_on") == "Customer Group":
-		lst =[
-			{
-				"fieldname": "customer_group",
-				"label": "Customer Group",
-				"width": 200,
-				"fieldtype": "Link",
-				"options": "Customer Group"
-			},
-		]
-		column.extend(lst)	
+		for end_date in self.periodic_daterange:
+			period = self.get_period(end_date)
+			self.columns.append({
+				"label": _(period),
+				"fieldname": scrub(period),
+				"fieldtype": "Float",
+				"width": 120
+			})
 
-	if filters.get("based_on") == "Item Group":
-		lst =[
-			{
-				"fieldname": "item_group",
-				"label": "Item Group",
-				"width": 200,
-				"fieldtype": "Link",
-				"options": "Item Group"
-			},
-		]
-		column.extend(lst)		
+		self.columns.append({
+			"label": _("Total"),
+			"fieldname": "total",
+			"fieldtype": "Float",
+			"width": 120
+		})
 
-	if filters.get("based_on") == "Territory":
-		lst =[
-			{
-				"fieldname": "territory",
-				"label": "Territory",
-				"width": 200,
-				"fieldtype": "Link",
-				"options": "Territory"
-			},
-		]
-		column.extend(lst)	
+	def get_data(self):
+		if self.filters.tree_type in ["Customer", "Supplier"]:
+			self.get_sales_transactions_based_on_customers_or_suppliers()
+			self.get_rows()
 
-	if filters.get("group_by") == "Item":
-		lst =[
-				{
-					"label": _("Item Code"),
-					"fieldname": 'item_code',
-					"fieldtype": "Link",
-					"options": "Item",
-					"width": 200
-				},
-				{
-					"fieldname": "item_name",
-					"label": "Item Name",
-					"width": 200,
-					"fieldtype": "Data",
-				},
-		]
-		column.extend(lst)
+		elif self.filters.tree_type == 'Item':
+			self.get_sales_transactions_based_on_items()
+			self.get_rows()
 
-	if filters.get("group_by") == "Customer":
-		lst =[
-			{
-				"fieldname": "customer",
-				"label": "Customer",
-				"width": 200,
-				"fieldtype": "Link",
-				"options": "Customer"
-			},
-			{
-				"fieldname": "customer_name",
-				"label": "Customer Name",
-				"width": 200,
-				"fieldtype": "Data"
-			}
-		]
-		column.extend(lst)		
+		elif self.filters.tree_type in ["Customer Group", "Supplier Group", "Territory"]:
+			self.get_sales_transactions_based_on_customer_or_territory_group()
+			self.get_rows_by_group()
 
-	if years :
+		elif self.filters.tree_type == 'Item Group':
+			self.get_sales_transactions_based_on_item_group()
+			self.get_rows_by_group()
 
-		if filters.get("value") == "Qty":
-			for from_year in range (from_year,to_year): 
-				a = from_year
-				b = a + 1
-				lst3 = [
-				
-					{
-						"label": _(str(a) +"-"+ str(b) + "(Qty)"),
-						"fieldname": (str(a) +"-"+ str(b)+ "(Qty)"),
-						"fieldtype": "Read Only",
-						"width": 130
-					}
-				]
-			
-				column.extend(lst3)	
+		elif self.filters.tree_type == "Order Type":
+			if self.filters.doc_type != "Sales Order":
+				self.data = []
+				return
+			self.get_sales_transactions_based_on_order_type()
+			self.get_rows_by_group()
 
-			# lst_2 =[
-						
-			# {
-			# 	"label": _("Total Qty"),
-			# 	"fieldname": 'qty',
-			# 	"fieldtype": "Int",
-			# 	"width": 100
-			# }]	
-			# column.extend(lst_2)
+		elif self.filters.tree_type == "Project":
+			self.get_sales_transactions_based_on_project()
+			self.get_rows()
 
+	def get_sales_transactions_based_on_order_type(self):
+		if self.filters["value_quantity"] == 'Value':
+			value_field = "base_net_total"
 		else:
+			value_field = "total_qty"
 
-			for from_year in range (from_year,to_year): 
-				a = from_year
-				b = a + 1
-				lst3 = [
-					{
-						"label": _(str(a) +"-"+ str(b) + "(Amt)"),
-						"fieldname": (str(a) +"-"+ str(b) + "(Amt)"),
-						"fieldtype": "Currency",
-						"width": 130
-					}
-				]
-	
-				column.extend(lst3)
-			# lst_2 =[
-			# {
-			# 	"label": _("Total Amount"),
-			# 	"fieldname": 'amt',
-			# 	"fieldtype": "Currency",
-			# 	"width": 100
-			# },
-			# ]
-			# column.extend(lst_2)
+		self.entries = frappe.db.sql(""" select s.order_type as entity, s.{value_field} as value_field, s.{date_field}
+			from `tab{doctype}` s where s.docstatus = 1 and s.company = %s and s.{date_field} between %s and %s
+			and ifnull(s.order_type, '') != '' order by s.order_type
+		"""
+		.format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type),
+		(self.filters.company, self.filters.from_date, self.filters.to_date), as_dict=1)
 
+		self.get_teams()
 
-	# lst_2 =[
-						
-	# 		{
-	# 			"label": _("Total Qty"),
-	# 			"fieldname": 'qty',
-	# 			"fieldtype": "Int",
-	# 			"width": 100
-	# 		},
-	# 		{
-	# 			"label": _("Total Amount"),
-	# 			"fieldname": 'qty',
-	# 			"fieldtype": "Int",
-	# 			"width": 100
-	# 		},
-	# ]
-	# column.extend(lst_2)
+	def get_sales_transactions_based_on_customers_or_suppliers(self):
+		if self.filters["value_quantity"] == 'Value':
+			value_field = "base_net_total as value_field"
+		else:
+			value_field = "total_qty as value_field"
 
+		if self.filters.tree_type == 'Customer':
+			entity = "customer as entity"
+			entity_name = "customer_name as entity_name"
+		else:
+			entity = "supplier as entity"
+			entity_name = "supplier_name as entity_name"
 
-	return column	
-
-def get_condition(filters):
-
-	conditions=" "
-	
-	if filters.get("item_code"):
-		conditions += "AND sii.item_code = '%s'" % filters.get('item_code')
-	
-	if filters.get("item_group"):
-		conditions += "AND sii.item_group = '%s'" % filters.get('item_group')
-
-	if filters.get("company"):
-		conditions += "AND si.company = '%s'" % filters.get('company')		
-
-	return conditions
-
-def get_data(filters, group_by, order_by):
-	from_y = filters.get("from_year")
-	to_year = filters.get("to_year")
-	years = frappe.db.sql("""
-							Select distinct(year(modified)) as years from `tabSales Invoice Item`
-						""", as_dict= 1)
-	conditions = get_condition(filters)
-
-	query = "Select "
-
-	if filters.get('based_on') == 'Item' :
-		query += " sii.item_code, sii.item_name, "	
-
-	if filters.get('based_on') == 'Item Group':
-		query += " sii.item_group, "
-
-	if filters.get('based_on') == 'Customer' :
-		query += " si.customer, si.customer_name, "
-
-	if filters.get('based_on') == 'Customer Group' :
-		query += " si.customer_group, "
-
-	if filters.get('based_on') == 'Territory' :
-		query += " si.territory, "
-
-
-
-	if filters.get('group_by') =='Customer' :
-		query += " si.customer, si.customer_name, "
-
-	if filters.get('group_by') == 'Item':
-		query += " sii.item_code, sii.item_name, "				
-
-	if years and filters.get('value') == 'Amount':
-		for from_y in range (from_y,to_year): 
-			a = from_y
-			b = a + 1
-			start_date = str(a) + '-04-01'
-
-			end_date = str(b) + '-03-31'
-			query += """ if (
-			(Select sum(soi1.amount) from `tabSales Invoice Item` soi1 where soi1.item_code =  sii.item_code 
-			and soi1.modified between '{0}' and '{1}') > 0,
-			(Select sum(soi1.amount) from `tabSales Invoice Item` soi1 where soi1.item_code =  sii.item_code 
-			and soi1.modified between '{0}' and '{1}') , 0)
-			as '{2}', 
-			""".format(start_date , end_date, str(str(a) +"-"+ str(b)+ "(Amt)"))
-
-			print(start_date, end_date, query)	
-
-	if years and filters.get('value') == 'Qty':
-		for from_y in range (from_y,to_year): 
-			a = from_y
-			b = a + 1
-			start_date = str(a) + '-04-01'
-
-			end_date = str(b) + '-03-31'
-			query += """ if (
-			(Select sum(soi1.qty) from `tabSales Invoice Item` soi1 where soi1.item_code =  sii.item_code 
-			and soi1.modified between '{0}' and '{1}') > 0,
-			(Select sum(soi1.qty) from `tabSales Invoice Item` soi1 where soi1.item_code =  sii.item_code 
-			and soi1.modified between '{0}' and '{1}') , 0)
-			as '{2}', 
-			""".format(start_date , end_date, str(str(a) +"-"+ str(b)+ "(Qty)"))
-
-			print(start_date, end_date, query)	
-
-	if filters.get('value') == 'Qty':
-		query += " sum(sii.qty) qty, "
-
-	if filters.get('value') == 'Amount':
-		query += " sum(sii.amount) amt, "			
-
-
-	query += """ si.company 
-				from `tabSales Invoice Item` sii ,`tabSales Invoice` si
-				where sii.parent = si.name AND sii.docstatus = 1 AND si.docstatus = 1
-				AND sii.item_code IS NOT NULL
-				{conditions}
-				{groupby}
-				
-				"""
-	result = frappe.db.sql( query.format(conditions=conditions, groupby = group_by),filters, as_dict=1)	
-
-	print("Query", query , conditions, group_by, order_by)						
-
-	# for res in result:
-	# 	print(" this ir result", res)	
-
-	item_details ={}
-	for d in result:
-		if filters.get("based_on") == _("Item"):
-			key = (d.item_code, d.item_name)
-			item_details.setdefault(key, {"details": []})
-			fifo_queue = item_details[key]["details"]
-			fifo_queue.append(d)	
-
-		if filters.get("based_on") == _("Item Group"):
-			key = (d.item_group)
-			item_details.setdefault(key, {"details": []})
-			fifo_queue = item_details[key]["details"]
-			fifo_queue.append(d)	
-
-		if filters.get("based_on") == _("Customer"):
-			key = (d.customer, d.customer_name)
-			item_details.setdefault(key, {"details": []})
-			fifo_queue = item_details[key]["details"]
-			fifo_queue.append(d)
-
-		if filters.get("based_on") == _("Customer Group"):
-			key = (d.customer_group)
-			item_details.setdefault(key, {"details": []})
-			fifo_queue = item_details[key]["details"]
-			fifo_queue.append(d)
-
-		if filters.get("based_on") == _("Territory"):
-			key = (d.territory)
-			item_details.setdefault(key, {"details": []})
-			fifo_queue = item_details[key]["details"]
-			fifo_queue.append(d)			
-
-	f_year = filters.get("from_year")
-	data =[]
-	for key in item_details.keys():
-		
-		for d in item_details[key]['details']:
-			dd = {
-				'item_group' : d.get('item_group'),
-				'item_code' : d.get('item_code'),
-				'item_name' : d.get('item_name'),
-				'customer' : d.get('customer'),
-				'customer_name' : d.get('customer_name'),
-				'customer_group' : d.get('customer_group'),
-				'territory' : d.get('territory'),
-			
-				'years' : d.get('years'),
-				'company' : d.get('company'),
-				
+		self.entries = frappe.get_all(self.filters.doc_type,
+			fields=[entity, entity_name, value_field, self.date_field],
+			filters={
+				"docstatus": 1,
+				"company": self.filters.company,
+				self.date_field: ('between', [self.filters.from_date, self.filters.to_date])
 			}
-			data.append(dd)	
+		)
 
-			for f_year in range (filters.get("from_year"),filters.get("to_year")+1): 
-				a = f_year
-				b = a + 1		
-				if filters.get("value") == "Amount":
-					dd[str(a) +"-"+ str(b) +"(Amt)"] = d.get(str(a) +"-"+ str(b) +'(Amt)')
-								
-					# print("dd",dd)
-				else:	
-					dd[str(a) +"-"+ str(b) +"(Qty)"] = d.get(str(a) +"-"+ str(b) +'(Qty)')
+		self.entity_names = {}
+		for d in self.entries:
+			self.entity_names.setdefault(d.entity, d.entity_name)
 
-	# for d in data :
-	# 	print('data 1 : ', d)		
+	def get_sales_transactions_based_on_items(self):
 
-	return data	
+		if self.filters["value_quantity"] == 'Value':
+			value_field = 'base_amount'
+		else:
+			value_field = 'stock_qty'
+
+		self.entries = frappe.db.sql("""
+			select i.item_code as entity, i.item_name as entity_name, i.stock_uom, i.{value_field} as value_field, s.{date_field}
+			from `tab{doctype} Item` i , `tab{doctype}` s
+			where s.name = i.parent and i.docstatus = 1 and s.company = %s
+			and s.{date_field} between %s and %s
+		"""
+		.format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type),
+		(self.filters.company, self.filters.from_date, self.filters.to_date), as_dict=1)
+
+		self.entity_names = {}
+		for d in self.entries:
+			self.entity_names.setdefault(d.entity, d.entity_name)
+
+	def get_sales_transactions_based_on_customer_or_territory_group(self):
+		if self.filters["value_quantity"] == 'Value':
+			value_field = "base_net_total as value_field"
+		else:
+			value_field = "total_qty as value_field"
+
+		if self.filters.tree_type == 'Customer Group':
+			entity_field = 'customer_group as entity'
+		elif self.filters.tree_type == 'Supplier Group':
+			entity_field = "supplier as entity"
+			self.get_supplier_parent_child_map()
+		else:
+			entity_field = "territory as entity"
+
+		self.entries = frappe.get_all(self.filters.doc_type,
+			fields=[entity_field, value_field, self.date_field],
+			filters={
+				"docstatus": 1,
+				"company": self.filters.company,
+				self.date_field: ('between', [self.filters.from_date, self.filters.to_date])
+			}
+		)
+		self.get_groups()
+
+	def get_sales_transactions_based_on_item_group(self):
+		if self.filters["value_quantity"] == 'Value':
+			value_field = "base_amount"
+		else:
+			value_field = "qty"
+
+		self.entries = frappe.db.sql("""
+			select i.item_group as entity, i.{value_field} as value_field, s.{date_field}
+			from `tab{doctype} Item` i , `tab{doctype}` s
+			where s.name = i.parent and i.docstatus = 1 and s.company = %s
+			and s.{date_field} between %s and %s
+		""".format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type),
+		(self.filters.company, self.filters.from_date, self.filters.to_date), as_dict=1)
+
+		self.get_groups()
+
+	def get_sales_transactions_based_on_project(self):
+		if self.filters["value_quantity"] == 'Value':
+			value_field = "base_net_total as value_field"
+		else:
+			value_field = "total_qty as value_field"
+
+		entity = "project as entity"
+
+		self.entries = frappe.get_all(self.filters.doc_type,
+			fields=[entity, value_field, self.date_field],
+			filters={
+				"docstatus": 1,
+				"company": self.filters.company,
+				"project": ["!=", ""],
+				self.date_field: ('between', [self.filters.from_date, self.filters.to_date])
+			}
+		)
+
+	def get_rows(self):
+		self.data = []
+		self.get_periodic_data()
+
+		for entity, period_data in iteritems(self.entity_periodic_data):
+			row = {
+				"entity": entity,
+				"entity_name": self.entity_names.get(entity) if hasattr(self, 'entity_names') else None
+			}
+			total = 0
+			for end_date in self.periodic_daterange:
+				period = self.get_period(end_date)
+				amount = flt(period_data.get(period, 0.0))
+				row[scrub(period)] = amount
+				total += amount
+
+			row["total"] = total
+
+			if self.filters.tree_type == "Item":
+				row["stock_uom"] = period_data.get("stock_uom")
+
+			self.data.append(row)
+
+	def get_rows_by_group(self):
+		self.get_periodic_data()
+		out = []
+
+		for d in reversed(self.group_entries):
+			row = {
+				"entity": d.name,
+				"indent": self.depth_map.get(d.name)
+			}
+			total = 0
+			for end_date in self.periodic_daterange:
+				period = self.get_period(end_date)
+				amount = flt(self.entity_periodic_data.get(d.name, {}).get(period, 0.0))
+				row[scrub(period)] = amount
+				if d.parent and (self.filters.tree_type != "Order Type" or d.parent == "Order Types"):
+					self.entity_periodic_data.setdefault(d.parent, frappe._dict()).setdefault(period, 0.0)
+					self.entity_periodic_data[d.parent][period] += amount
+				total += amount
+
+			row["total"] = total
+			out = [row] + out
+
+		self.data = out
+
+	def get_periodic_data(self):
+		self.entity_periodic_data = frappe._dict()
+
+		for d in self.entries:
+			if self.filters.tree_type == "Supplier Group":
+				d.entity = self.parent_child_map.get(d.entity)
+			period = self.get_period(d.get(self.date_field))
+			self.entity_periodic_data.setdefault(d.entity, frappe._dict()).setdefault(period, 0.0)
+			self.entity_periodic_data[d.entity][period] += flt(d.value_field)
+
+			if self.filters.tree_type == "Item":
+				self.entity_periodic_data[d.entity]['stock_uom'] = d.stock_uom
+
+	def get_period(self, posting_date):
+		if self.filters.range == 'Weekly':
+			period = "Week " + str(posting_date.isocalendar()[1]) + " " + str(posting_date.year)
+		elif self.filters.range == 'Monthly':
+			period = str(self.months[posting_date.month - 1]) + " " + str(posting_date.year)
+		elif self.filters.range == 'Quarterly':
+			period = "Quarter " + str(((posting_date.month - 1) // 3) + 1) + " " + str(posting_date.year)
+		else:
+			year = get_fiscal_year(posting_date, company=self.filters.company)
+			period = str(year[0])
+		return period
+
+	def get_period_date_ranges(self):
+		from dateutil.relativedelta import MO, relativedelta
+		from_date, to_date = getdate(self.filters.from_date), getdate(self.filters.to_date)
+
+		increment = {
+			"Monthly": 1,
+			"Quarterly": 3,
+			"Half-Yearly": 6,
+			"Yearly": 12
+		}.get(self.filters.range, 1)
+
+		if self.filters.range in ['Monthly', 'Quarterly']:
+			from_date = from_date.replace(day=1)
+		elif self.filters.range == "Yearly":
+			from_date = get_fiscal_year(from_date)[1]
+		else:
+			from_date = from_date + relativedelta(from_date, weekday=MO(-1))
+
+		self.periodic_daterange = []
+		for dummy in range(1, 53):
+			if self.filters.range == "Weekly":
+				period_end_date = add_days(from_date, 6)
+			else:
+				period_end_date = add_to_date(from_date, months=increment, days=-1)
+
+			if period_end_date > to_date:
+				period_end_date = to_date
+
+			self.periodic_daterange.append(period_end_date)
+
+			from_date = add_days(period_end_date, 1)
+			if period_end_date == to_date:
+				break
+
+	def get_groups(self):
+		if self.filters.tree_type == "Territory":
+			parent = 'parent_territory'
+		if self.filters.tree_type == "Customer Group":
+			parent = 'parent_customer_group'
+		if self.filters.tree_type == "Item Group":
+			parent = 'parent_item_group'
+		if self.filters.tree_type == "Supplier Group":
+			parent = 'parent_supplier_group'
+
+		self.depth_map = frappe._dict()
+
+		self.group_entries = frappe.db.sql("""select name, lft, rgt , {parent} as parent
+			from `tab{tree}` order by lft"""
+		.format(tree=self.filters.tree_type, parent=parent), as_dict=1)
+
+		for d in self.group_entries:
+			if d.parent:
+				self.depth_map.setdefault(d.name, self.depth_map.get(d.parent) + 1)
+			else:
+				self.depth_map.setdefault(d.name, 0)
+
+	def get_teams(self):
+		self.depth_map = frappe._dict()
+
+		self.group_entries = frappe.db.sql(""" select * from (select "Order Types" as name, 0 as lft,
+			2 as rgt, '' as parent union select distinct order_type as name, 1 as lft, 1 as rgt, "Order Types" as parent
+			from `tab{doctype}` where ifnull(order_type, '') != '') as b order by lft, name
+		"""
+		.format(doctype=self.filters.doc_type), as_dict=1)
+
+		for d in self.group_entries:
+			if d.parent:
+				self.depth_map.setdefault(d.name, self.depth_map.get(d.parent) + 1)
+			else:
+				self.depth_map.setdefault(d.name, 0)
+
+	def get_supplier_parent_child_map(self):
+		self.parent_child_map = frappe._dict(frappe.db.sql(""" select name, supplier_group from `tabSupplier`"""))
+
+	def get_chart_data(self):
+		length = len(self.columns)
+
+		if self.filters.tree_type in ["Customer", "Supplier"]:
+			labels = [d.get("label") for d in self.columns[2:length - 1]]
+		elif self.filters.tree_type == "Item":
+			labels = [d.get("label") for d in self.columns[3:length - 1]]
+		else:
+			labels = [d.get("label") for d in self.columns[1:length - 1]]
+		self.chart = {
+			"data": {
+				'labels': labels,
+				'datasets': []
+			},
+			"type": "line"
+		}
