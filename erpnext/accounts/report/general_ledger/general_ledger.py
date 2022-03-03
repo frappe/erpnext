@@ -9,6 +9,7 @@ from frappe import _, _dict
 from frappe.utils import cstr, getdate
 from six import iteritems
 
+
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
@@ -478,6 +479,15 @@ def get_result_as_list(data, filters):
 	inv_details = get_supplier_invoice_details()
 
 	for d in data:
+		#Sales Return and Credit issue voucher types
+		d["voucher_type_custom"] = d.voucher_type
+		if d.voucher_type == "Sales Invoice" :
+			si_status = frappe.db.get_value ("Sales Invoice",{"name":d.get('voucher_no')},"status")
+			if si_status == "Credit Note Issued":
+				d['voucher_type_custom'] ="Credit Note"
+			elif si_status == "Return":
+				d['voucher_type_custom'] ="Sales Return"
+
 		if not d.get('posting_date'):
 			balance, balance_in_account_currency = 0, 0
 
@@ -557,6 +567,12 @@ def get_columns(filters):
 		{
 			"label": _("Voucher Type"),
 			"fieldname": "voucher_type",
+			"hidden": 1,
+			"width": 120
+		},
+		{
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type_custom",
 			"width": 120
 		},
 		{
