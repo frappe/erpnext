@@ -1,11 +1,26 @@
 <h2 class="text-center">{%= __("Statement of Account") %}</h2>
 <h4 class="text-center">
+	
+
 	{% if (filters.party_name) { %}
-		{%= filters.party_name %}
-	{% } else if (filters.party && filters.party.length) { %}
-		{%= filters.party %}
-	{% } else if (filters.account) { %}
-		{%= filters.account %}
+		{%= filters.party_name %}  <br>
+	{% } if (filters.party && filters.party.length) { %}
+		{%= filters.party %}<br> 
+	{% } if (filters.account && filters.account.length) { %}
+		{%= filters.account %} <br>
+	{% } %}
+
+	
+	{% if (filters.include_dimensions) { %}   
+		{% if (filters.cost_center && filters.cost_center.length) { %}
+				{%= filters.cost_center %} <br>
+		{% } %}
+		{% if (filters.project && filters.project.length) { %}
+				{%= filters.project %} <br>
+		{% } %}
+		{% if (filters.employee && filters.employee.length) { %}
+				{%= filters.employee %} <br>
+		{% } %}
 	{% } %}
 </h4>
 
@@ -37,7 +52,7 @@
 			<tr>
 			{% if(data[i].posting_date) { %}
 				<td>{%= frappe.datetime.str_to_user(data[i].posting_date) %}</td>
-				<td>{%= data[i].voucher_type %}
+				<td>{%= data[i].voucher_type_custom %}
 					<br>{%= data[i].voucher_no %}</td>
 				<td>
 					{% if(!(filters.party || filters.account)) { %}
