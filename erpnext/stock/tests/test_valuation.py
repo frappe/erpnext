@@ -2,13 +2,13 @@ import json
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from hypothesis import given
 from hypothesis import strategies as st
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation, round_off_if_near_zero
-from erpnext.tests.utils import ERPNextTestCase
 
 qty_gen = st.floats(min_value=-1e6, max_value=1e6)
 value_gen = st.floats(min_value=1, max_value=1e6)
@@ -290,7 +290,7 @@ class TestLIFOValuation(unittest.TestCase):
 			self.assertTotalQty(total_qty)
 			self.assertTotalValue(total_value)
 
-class TestLIFOValuationSLE(ERPNextTestCase):
+class TestLIFOValuationSLE(FrappeTestCase):
 	ITEM_CODE = "_Test LIFO item"
 	WAREHOUSE = "_Test Warehouse - _TC"
 

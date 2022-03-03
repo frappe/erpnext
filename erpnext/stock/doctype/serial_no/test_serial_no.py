@@ -18,11 +18,12 @@ from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 test_dependencies = ["Item"]
 test_records = frappe.get_test_records('Serial No')
 
+from frappe.tests.utils import FrappeTestCase
+
 from erpnext.stock.doctype.serial_no.serial_no import *
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestSerialNo(ERPNextTestCase):
+class TestSerialNo(FrappeTestCase):
 
 	def tearDown(self):
 		frappe.db.rollback()
