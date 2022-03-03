@@ -7,7 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break_5",
-  "campaign_naming_by",
   "allow_lead_duplication_based_on_emails",
   "column_break_4",
   "create_event_on_next_contact_date",
@@ -19,6 +18,9 @@
   "quotation_section",
   "default_valid_till",
   "section_break_13",
+  "campaign_naming_by",
+  "contract_naming_by",
+  "column_break_15",
   "carry_forward_communication_and_comments"
  ],
  "fields": [
@@ -99,13 +101,24 @@
    "fieldname": "carry_forward_communication_and_comments",
    "fieldtype": "Check",
    "label": "Carry Forward Communication and Comments"
+  },
+  {
+   "default": "Party Name",
+   "fieldname": "contract_naming_by",
+   "fieldtype": "Select",
+   "label": "Contract Naming By",
+   "options": "Party Name\nNaming Series"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-cog",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-12-20 12:51:38.894252",
+ "modified": "2022-03-03 12:27:34.835936",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM Settings",
@@ -143,5 +156,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
