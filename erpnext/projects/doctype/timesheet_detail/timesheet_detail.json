@@ -14,12 +14,6 @@
   "to_time",
   "hours",
   "completed",
-  "section_break_7",
-  "completed_qty",
-  "workstation",
-  "column_break_12",
-  "operation",
-  "operation_id",
   "project_details",
   "project",
   "project_name",
@@ -82,43 +76,6 @@
    "fieldname": "completed",
    "fieldtype": "Check",
    "label": "Completed"
-  },
-  {
-   "fieldname": "section_break_7",
-   "fieldtype": "Section Break"
-  },
-  {
-   "depends_on": "eval:parent.work_order",
-   "fieldname": "completed_qty",
-   "fieldtype": "Float",
-   "label": "Completed Qty"
-  },
-  {
-   "depends_on": "eval:parent.work_order",
-   "fieldname": "workstation",
-   "fieldtype": "Link",
-   "label": "Workstation",
-   "options": "Workstation",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_12",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:parent.work_order",
-   "fieldname": "operation",
-   "fieldtype": "Link",
-   "label": "Operation",
-   "options": "Operation",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:parent.work_order",
-   "fieldname": "operation_id",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Operation Id"
   },
   {
    "fieldname": "project_details",
@@ -267,7 +224,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-18 12:19:33.205940",
+ "modified": "2022-02-17 16:53:34.878798",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet Detail",
@@ -275,5 +232,6 @@
  "permissions": [],
  "quick_entry": 1,
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "states": []
 }

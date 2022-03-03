@@ -21,7 +21,8 @@ from frappe.utils import (
 )
 from frappe.utils.csvutils import build_csv_response
 
-from erpnext.manufacturing.doctype.bom.bom import get_children, validate_bom_no
+from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
+from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 
@@ -319,7 +320,7 @@ class ProductionPlan(Document):
 
 		if self.total_produced_qty > 0:
 			self.status = "In Process"
-			if self.check_have_work_orders_completed():
+			if self.all_items_completed():
 				self.status = "Completed"
 
 		if self.status != 'Completed':
@@ -570,17 +571,28 @@ class ProductionPlan(Document):
 
 	@frappe.whitelist()
 	def get_sub_assembly_items(self, manufacturing_type=None):
+		"Fetch sub assembly items and optionally combine them."
 		self.sub_assembly_items = []
+		sub_assembly_items_store = [] # temporary store to process all subassembly items
+
 		for row in self.po_items:
 			bom_data = []
 			get_sub_assembly_items(row.bom_no, bom_data, row.planned_qty)
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
+			sub_assembly_items_store.extend(bom_data)
 
-		self.sub_assembly_items.sort(key= lambda d: d.bom_level, reverse=True)
-		for idx, row in enumerate(self.sub_assembly_items, start=1):
-			row.idx = idx
+		if self.combine_sub_items:
+			# Combine subassembly items
+			sub_assembly_items_store = self.combine_subassembly_items(sub_assembly_items_store)
+
+		sub_assembly_items_store.sort(key= lambda d: d.bom_level, reverse=True) # sort by bom level
+
+		for idx, row in enumerate(sub_assembly_items_store):
+			row.idx = idx + 1
+			self.append("sub_assembly_items", row)
 
 	def set_sub_assembly_items_based_on_level(self, row, bom_data, manufacturing_type=None):
+		"Modify bom_data, set additional details."
 		for data in bom_data:
 			data.qty = data.stock_qty
 			data.production_plan_item = row.name
@@ -589,23 +601,59 @@ class ProductionPlan(Document):
 			data.type_of_manufacturing = manufacturing_type or ("Subcontract" if data.is_sub_contracted_item
 				else "In House")
 
-			self.append("sub_assembly_items", data)
+	def combine_subassembly_items(self, sub_assembly_items_store):
+		"Aggregate if same: Item, Warehouse, Inhouse/Outhouse Manu.g, BOM No."
+		key_wise_data = {}
+		for row in sub_assembly_items_store:
+			key = (
+				row.get("production_item"), row.get("fg_warehouse"),
+				row.get("bom_no"), row.get("type_of_manufacturing")
+			)
+			if key not in key_wise_data:
+				# intialise (item, wh, bom no, man.g type) wise dict
+				key_wise_data[key] = row
+				continue
 
-	def check_have_work_orders_completed(self):
-		wo_status = frappe.db.get_list(
+			existing_row = key_wise_data[key]
+			if existing_row:
+				# if row with same (item, wh, bom no, man.g type) key, merge
+				existing_row.qty += flt(row.qty)
+				existing_row.stock_qty += flt(row.stock_qty)
+				existing_row.bom_level = max(existing_row.bom_level, row.bom_level)
+				continue
+			else:
+				# add row with key
+				key_wise_data[key] = row
+
+		sub_assembly_items_store = [key_wise_data[key] for key in key_wise_data] # unpack into single level list
+		return sub_assembly_items_store
+
+	def all_items_completed(self):
+		all_items_produced = all(flt(d.planned_qty) - flt(d.produced_qty) < 0.000001
+									for d in self.po_items)
+		if not all_items_produced:
+			return False
+
+		wo_status = frappe.get_all(
 			"Work Order",
-			filters={"production_plan": self.name},
+			filters={
+				"production_plan": self.name,
+				"status": ("not in", ["Closed", "Stopped"]),
+				"docstatus": ("<", 2),
+			},
 			fields="status",
-			pluck="status"
+			pluck="status",
 		)
-		return all(s == "Completed" for s in wo_status)
+		all_work_orders_completed = all(s == "Completed" for s in wo_status)
+		return all_work_orders_completed
 
 @frappe.whitelist()
 def download_raw_materials(doc, warehouses=None):
 	if isinstance(doc, str):
 		doc = frappe._dict(json.loads(doc))
 
-	item_list = [['Item Code', 'Description', 'Stock UOM', 'Warehouse', 'Required Qty as per BOM',
+	item_list = [['Item Code', 'Item Name', 'Description',
+		'Stock UOM', 'Warehouse', 'Required Qty as per BOM',
 		'Projected Qty', 'Available Qty In Hand', 'Ordered Qty', 'Planned Qty',
 		'Reserved Qty for Production', 'Safety Stock', 'Required Qty']]
 
@@ -614,7 +662,8 @@ def download_raw_materials(doc, warehouses=None):
 	items = get_items_for_material_requests(doc, warehouses=warehouses, get_parent_warehouse_data=True)
 
 	for d in items:
-		item_list.append([d.get('item_code'), d.get('description'), d.get('stock_uom'), d.get('warehouse'),
+		item_list.append([d.get('item_code'), d.get('item_name'),
+			d.get('description'), d.get('stock_uom'), d.get('warehouse'),
 			d.get('required_bom_qty'), d.get('projected_qty'), d.get('actual_qty'), d.get('ordered_qty'),
 			d.get('planned_qty'), d.get('reserved_qty_for_production'), d.get('safety_stock'), d.get('quantity')])
 
@@ -1019,7 +1068,7 @@ def get_item_data(item_code):
 	}
 
 def get_sub_assembly_items(bom_no, bom_data, to_produce_qty, indent=0):
-	data = get_children('BOM', parent = bom_no)
+	data = get_bom_children(parent=bom_no)
 	for d in data:
 		if d.expandable:
 			parent_item_code = frappe.get_cached_value("BOM", bom_no, "item")

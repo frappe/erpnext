@@ -21,6 +21,7 @@ SLE_FIELDS = (
 	"stock_value",
 	"stock_value_difference",
 	"valuation_rate",
+	"voucher_detail_no",
 )
 
 
@@ -60,10 +61,15 @@ def add_invariant_check_fields(sles):
 			fifo_qty += qty
 			fifo_value += qty * rate
 
+		if sle.actual_qty < 0:
+			sle.consumption_rate = sle.stock_value_difference  / sle.actual_qty
+
 		balance_qty += sle.actual_qty
 		balance_stock_value += sle.stock_value_difference
 		if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no:
-			balance_qty = sle.qty_after_transaction
+			balance_qty = frappe.db.get_value("Stock Reconciliation Item", sle.voucher_detail_no, "qty")
+			if balance_qty is None:
+				balance_qty = sle.qty_after_transaction
 
 		sle.fifo_queue_qty = fifo_qty
 		sle.fifo_stock_value = fifo_value
@@ -89,6 +95,9 @@ def add_invariant_check_fields(sles):
 		if idx > 0:
 			sle.fifo_stock_diff = sle.fifo_stock_value - sles[idx - 1].fifo_stock_value
 			sle.fifo_difference_diff = sle.fifo_stock_diff - sle.stock_value_difference
+
+		if sle.batch_no:
+			sle.use_batchwise_valuation = frappe.db.get_value("Batch", sle.batch_no, "use_batchwise_valuation", cache=True)
 
 	return sles
 
@@ -135,6 +144,11 @@ def get_columns():
 			"options": "Batch",
 		},
 		{
+			"fieldname": "use_batchwise_valuation",
+			"fieldtype": "Check",
+			"label": "Batchwise Valuation",
+		},
+		{
 			"fieldname": "actual_qty",
 			"fieldtype": "Float",
 			"label": "Qty Change",
@@ -145,9 +159,9 @@ def get_columns():
 			"label": "Incoming Rate",
 		},
 		{
-			"fieldname": "outgoing_rate",
+			"fieldname": "consumption_rate",
 			"fieldtype": "Float",
-			"label": "Outgoing Rate",
+			"label": "Consumption Rate",
 		},
 		{
 			"fieldname": "qty_after_transaction",

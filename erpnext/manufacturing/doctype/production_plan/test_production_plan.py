@@ -1,6 +1,7 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_to_date, flt, now_datetime, nowdate
 
 from erpnext.controllers.item_variant import create_variant
@@ -9,16 +10,16 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_sales_orders,
 	get_warehouse_list,
 )
+from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestProductionPlan(ERPNextTestCase):
+class TestProductionPlan(FrappeTestCase):
 	def setUp(self):
 		for item in ['Test Production Item 1', 'Subassembly Item 1',
 			'Raw Material Item 1', 'Raw Material Item 2']:
@@ -36,6 +37,9 @@ class TestProductionPlan(ERPNextTestCase):
 			'Test Non Stock Raw Material']}.items():
 			if not frappe.db.get_value('BOM', {'item': item}):
 				make_bom(item = item, raw_materials = raw_materials)
+
+	def tearDown(self) -> None:
+		frappe.db.rollback()
 
 	def test_production_plan_mr_creation(self):
 		"Test if MRs are created for unavailable raw materials."
@@ -109,7 +113,7 @@ class TestProductionPlan(ERPNextTestCase):
 			item_code='Test Production Item 1',
 			ignore_existing_ordered_qty=1
 		)
-		self.assertTrue(len(pln.mr_items), 1)
+		self.assertTrue(len(pln.mr_items))
 		self.assertTrue(flt(pln.mr_items[0].quantity), 1.0)
 
 		sr1.cancel()
@@ -150,7 +154,7 @@ class TestProductionPlan(ERPNextTestCase):
 			use_multi_level_bom=0,
 			ignore_existing_ordered_qty=0
 		)
-		self.assertTrue(len(pln.mr_items), 0)
+		self.assertFalse(len(pln.mr_items))
 
 		sr1.cancel()
 		sr2.cancel()
@@ -256,6 +260,51 @@ class TestProductionPlan(ERPNextTestCase):
 
 		pln.reload()
 		pln.cancel()
+
+	def test_production_plan_combine_subassembly(self):
+		"""
+		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
+		1) Red-Car -> Wheel (sub assembly) > BOM-WHEEL-001
+		2) Green-Car -> Wheel (sub assembly) > BOM-WHEEL-001
+		"""
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		bom_tree_1 = {
+			"Red-Car": {"Wheel": {"Rubber": {}}}
+		}
+		bom_tree_2 = {
+			"Green-Car": {"Wheel": {"Rubber": {}}}
+		}
+
+		parent_bom_1 = create_nested_bom(bom_tree_1, prefix="")
+		parent_bom_2 = create_nested_bom(bom_tree_2, prefix="")
+
+		# make sure both boms use same subassembly bom
+		subassembly_bom = parent_bom_1.items[0].bom_no
+		frappe.db.set_value("BOM Item", parent_bom_2.items[0].name, "bom_no", subassembly_bom)
+
+		plan = create_production_plan(item_code="Red-Car", use_multi_level_bom=1, do_not_save=True)
+		plan.append("po_items", { # Add Green-Car to Prod Plan
+			'use_multi_level_bom': 1,
+			'item_code': "Green-Car",
+			'bom_no': frappe.db.get_value('Item', "Green-Car", 'default_bom'),
+			'planned_qty': 1,
+			'planned_start_date': now_datetime()
+		})
+		plan.get_sub_assembly_items()
+		self.assertTrue(len(plan.sub_assembly_items), 2)
+
+		plan.combine_sub_items = 1
+		plan.get_sub_assembly_items()
+
+		self.assertTrue(len(plan.sub_assembly_items), 1) # check if sub-assembly items merged
+		self.assertEqual(plan.sub_assembly_items[0].qty, 2.0)
+		self.assertEqual(plan.sub_assembly_items[0].stock_qty, 2.0)
+
+		# change warehouse in one row, sub-assemblies should not merge
+		plan.po_items[0].warehouse = "Finished Goods - _TC"
+		plan.get_sub_assembly_items()
+		self.assertTrue(len(plan.sub_assembly_items), 2)
 
 	def test_pp_to_mr_customer_provided(self):
 		" Test Material Request from Production Plan for Customer Provided Item."
@@ -409,9 +458,6 @@ class TestProductionPlan(ERPNextTestCase):
 		boms = {
 			"Assembly": {
 				"SubAssembly1": {"ChildPart1": {}, "ChildPart2": {},},
-				"SubAssembly2": {"ChildPart3": {}},
-				"SubAssembly3": {"SubSubAssy1": {"ChildPart4": {}}},
-				"ChildPart5": {},
 				"ChildPart6": {},
 				"SubAssembly4": {"SubSubAssy2": {"ChildPart7": {}}},
 			},
@@ -469,26 +515,29 @@ class TestProductionPlan(ERPNextTestCase):
 		bom = make_bom(item=item, raw_materials=raw_materials)
 
 		# Create Production Plan
-		pln = create_production_plan(item_code=bom.item, planned_qty=10)
+		pln = create_production_plan(item_code=bom.item, planned_qty=5)
 
 		# All the created Work Orders
 		wo_list = []
 
-		# Create and Submit 1st Work Order for 5 qty
-		create_work_order(item, pln, 5)
+		# Create and Submit 1st Work Order for 3 qty
+		create_work_order(item, pln, 3)
+		pln.reload()
+		self.assertEqual(pln.po_items[0].ordered_qty, 3)
+
+		# Create and Submit 2nd Work Order for 2 qty
+		create_work_order(item, pln, 2)
 		pln.reload()
 		self.assertEqual(pln.po_items[0].ordered_qty, 5)
 
-		# Create and Submit 2nd Work Order for 3 qty
-		create_work_order(item, pln, 3)
-		pln.reload()
-		self.assertEqual(pln.po_items[0].ordered_qty, 8)
+		# Overproduction
+		self.assertRaises(OverProductionError, create_work_order, item=item, pln=pln, qty=2)
 
 		# Cancel 1st Work Order
 		wo1 = frappe.get_doc("Work Order", wo_list[0])
 		wo1.cancel()
 		pln.reload()
-		self.assertEqual(pln.po_items[0].ordered_qty, 3)
+		self.assertEqual(pln.po_items[0].ordered_qty, 2)
 
 		# Cancel 2nd Work Order
 		wo2 = frappe.get_doc("Work Order", wo_list[1])
@@ -531,6 +580,7 @@ class TestProductionPlan(ERPNextTestCase):
 			wip_warehouse='Work In Progress - _TC',
 			fg_warehouse='Finished Goods - _TC',
 			skip_transfer=1,
+			use_multi_level_bom=1,
 			do_not_submit=True
 		)
 		wo.production_plan = pln.name
@@ -575,6 +625,7 @@ class TestProductionPlan(ERPNextTestCase):
 			wip_warehouse='Work In Progress - _TC',
 			fg_warehouse='Finished Goods - _TC',
 			skip_transfer=1,
+			use_multi_level_bom=1,
 			do_not_submit=True
 		)
 		wo.production_plan = pln.name
@@ -590,6 +641,20 @@ class TestProductionPlan(ERPNextTestCase):
 		se.cancel()
 		pln.reload()
 		self.assertEqual(pln.po_items[0].pending_qty, 1)
+
+	def test_qty_based_status(self):
+		pp = frappe.new_doc("Production Plan")
+		pp.po_items = [
+			frappe._dict(planned_qty=5, produce_qty=4)
+		]
+		self.assertFalse(pp.all_items_completed())
+
+		pp.po_items = [
+			frappe._dict(planned_qty=5, produce_qty=10),
+			frappe._dict(planned_qty=5, produce_qty=4)
+		]
+		self.assertFalse(pp.all_items_completed())
+
 
 def create_production_plan(**args):
 	"""

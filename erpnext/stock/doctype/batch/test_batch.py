@@ -1,17 +1,25 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import json
+
 import frappe
 from frappe.exceptions import ValidationError
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cint, flt
+from frappe.utils.data import add_to_date, getdate
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.stock.doctype.batch.batch import UnableToSelectBatchError, get_batch_no, get_batch_qty
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+	create_stock_reconciliation,
+)
 from erpnext.stock.get_item_details import get_item_details
-from erpnext.tests.utils import ERPNextTestCase
+from erpnext.stock.stock_ledger import get_valuation_rate
 
 
-class TestBatch(ERPNextTestCase):
+class TestBatch(FrappeTestCase):
 	def test_item_has_batch_enabled(self):
 		self.assertRaises(ValidationError, frappe.get_doc({
 			"doctype": "Batch",
@@ -300,6 +308,105 @@ class TestBatch(ERPNextTestCase):
 		details = get_item_details(args)
 		self.assertEqual(details.get('price_list_rate'), 400)
 
+
+	def test_basic_batch_wise_valuation(self, batch_qty = 100):
+		item_code = "_TestBatchWiseVal"
+		warehouse = "_Test Warehouse - _TC"
+		self.make_batch_item(item_code)
+
+		rates = [42, 420]
+
+		batches = {}
+		for rate in rates:
+			se = make_stock_entry(item_code=item_code, qty=10, rate=rate, target=warehouse)
+			batches[se.items[0].batch_no] = rate
+
+		LOW, HIGH = list(batches.keys())
+
+		# consume things out of order
+		consumption_plan = [
+			(HIGH, 1),
+			(LOW, 2),
+			(HIGH, 2),
+			(HIGH, 4),
+			(LOW, 6),
+		]
+
+		stock_value = sum(rates) * 10
+		qty_after_transaction = 20
+		for batch, qty in consumption_plan:
+			# consume out of order
+			se = make_stock_entry(item_code=item_code, source=warehouse, qty=qty, batch_no=batch)
+
+			sle = frappe.get_last_doc("Stock Ledger Entry", {"is_cancelled": 0, "voucher_no": se.name})
+
+			stock_value_difference = sle.actual_qty * batches[sle.batch_no]
+			self.assertAlmostEqual(sle.stock_value_difference, stock_value_difference)
+
+			stock_value += stock_value_difference
+			self.assertAlmostEqual(sle.stock_value, stock_value)
+
+			qty_after_transaction += sle.actual_qty
+			self.assertAlmostEqual(sle.qty_after_transaction, qty_after_transaction)
+			self.assertAlmostEqual(sle.valuation_rate, stock_value / qty_after_transaction)
+
+			self.assertEqual(json.loads(sle.stock_queue), [])  # queues don't apply on batched items
+
+	def test_moving_batch_valuation_rates(self):
+		item_code = "_TestBatchWiseVal"
+		warehouse = "_Test Warehouse - _TC"
+		self.make_batch_item(item_code)
+
+		def assertValuation(expected):
+			actual = get_valuation_rate(item_code, warehouse, "voucher_type", "voucher_no", batch_no=batch_no)
+			self.assertAlmostEqual(actual, expected)
+
+		se = make_stock_entry(item_code=item_code, qty=100, rate=10, target=warehouse)
+		batch_no = se.items[0].batch_no
+		assertValuation(10)
+
+		# consumption should never affect current valuation rate
+		make_stock_entry(item_code=item_code, qty=20, source=warehouse)
+		assertValuation(10)
+
+		make_stock_entry(item_code=item_code, qty=30, source=warehouse)
+		assertValuation(10)
+
+		# 50 * 10 = 500 current value, add more item with higher valuation
+		make_stock_entry(item_code=item_code, qty=50, rate=20, target=warehouse, batch_no=batch_no)
+		assertValuation(15)
+
+		# consuming again shouldn't do anything
+		make_stock_entry(item_code=item_code, qty=20, source=warehouse)
+		assertValuation(15)
+
+		# reset rate with stock reconiliation
+		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=10, rate=25, batch_no=batch_no)
+		assertValuation(25)
+
+		make_stock_entry(item_code=item_code, qty=20, rate=20, target=warehouse, batch_no=batch_no)
+		assertValuation((20 * 20 + 10 * 25) / (10 + 20))
+
+
+	def test_update_batch_properties(self):
+		item_code = "_TestBatchWiseVal"
+		self.make_batch_item(item_code)
+
+		se = make_stock_entry(item_code=item_code, qty=100, rate=10, target="_Test Warehouse - _TC")
+		batch_no = se.items[0].batch_no
+		batch = frappe.get_doc("Batch", batch_no)
+
+		expiry_date = add_to_date(batch.manufacturing_date, days=30)
+
+		batch.expiry_date = expiry_date
+		batch.save()
+
+		batch.reload()
+
+		self.assertEqual(getdate(batch.expiry_date), getdate(expiry_date))
+
+
+
 def create_batch(item_code, rate, create_item_price_for_batch):
 	pi = make_purchase_invoice(company="_Test Company",
 		warehouse= "Stores - _TC", cost_center = "Main - _TC", update_stock=1,
@@ -326,14 +433,13 @@ def create_price_list_for_batch(item_code, batch, rate):
 def make_new_batch(**args):
 	args = frappe._dict(args)
 
-	try:
+	if frappe.db.exists("Batch", args.batch_id):
+		batch = frappe.get_doc("Batch", args.batch_id)
+	else:
 		batch = frappe.get_doc({
 			"doctype": "Batch",
 			"batch_id": args.batch_id,
 			"item": args.item_code,
 		}).insert()
-
-	except frappe.DuplicateEntryError:
-		batch = frappe.get_doc("Batch", args.batch_id)
 
 	return batch
