@@ -17,7 +17,7 @@ frappe.ui.form.on('Routing', {
 	},
 
 	calculate_operating_cost: function(frm, child) {
-		const operating_cost = flt(flt(child.hour_rate) * flt(child.time_in_mins) / 60, 2);
+		const operating_cost = flt(flt(child.hour_rate) * flt(child.time_in_mins) / 60, precision("operating_cost", child));
 		frappe.model.set_value(child.doctype, child.name, "operating_cost", operating_cost);
 	}
 });
