@@ -68,7 +68,6 @@ domains = {
 	'Distribution': 'erpnext.domains.distribution',
 	'Education': 'erpnext.domains.education',
 	'Manufacturing': 'erpnext.domains.manufacturing',
-	'Non Profit': 'erpnext.domains.non_profit',
 	'Retail': 'erpnext.domains.retail',
 	'Services': 'erpnext.domains.services',
 }
@@ -175,7 +174,6 @@ standard_portal_menu_items = [
 	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role":"Student"},
 	{"title": _("Newsletter"), "route": "/newsletters", "reference_doctype": "Newsletter"},
 	{"title": _("Admission"), "route": "/admissions", "reference_doctype": "Student Admission", "role": "Student"},
-	{"title": _("Certification"), "route": "/certification", "reference_doctype": "Certification Application", "role": "Non Profit Portal User"},
 	{"title": _("Material Request"), "route": "/material-requests", "reference_doctype": "Material Request", "role": "Customer"},
 	{"title": _("Appointment Booking"), "route": "/book_appointment"},
 ]
@@ -368,7 +366,6 @@ scheduler_events = {
 		"erpnext.selling.doctype.quotation.quotation.set_expired_status",
 		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status",
 		"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_auto_email",
-		"erpnext.non_profit.doctype.membership.membership.set_expired_status",
 		"erpnext.hr.doctype.interview.interview.send_daily_feedback_reminder",
 		"erpnext.accounts.doctype.subscription.subscription.process_all",
 	],
@@ -562,19 +559,6 @@ global_search_doctypes = {
 		{'doctype': 'Fee Category', 'index': 38},
 		{'doctype': 'Assessment Code', 'index': 39},
 		{'doctype': 'Discussion', 'index': 40},
-	],
-	"Non Profit": [
-		{'doctype': 'Certified Consultant', 'index': 1},
-		{'doctype': 'Certification Application', 'index': 2},
-		{'doctype': 'Volunteer', 'index': 3},
-		{'doctype': 'Membership', 'index': 4},
-		{'doctype': 'Member', 'index': 5},
-		{'doctype': 'Donor', 'index': 6},
-		{'doctype': 'Chapter', 'index': 7},
-		{'doctype': 'Grant Application', 'index': 8},
-		{'doctype': 'Volunteer Type', 'index': 9},
-		{'doctype': 'Donor Type', 'index': 10},
-		{'doctype': 'Membership Type', 'index': 11}
 	],
 }
 

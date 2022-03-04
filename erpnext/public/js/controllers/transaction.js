@@ -525,6 +525,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		item.weight_per_unit = 0;
 		item.weight_uom = '';
+		item.conversion_factor = 0;
 
 		if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
@@ -719,6 +720,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			'posting_time': posting_time,
 			'qty': item.qty * item.conversion_factor,
 			'serial_no': item.serial_no,
+			'batch_no': item.batch_no,
 			'voucher_type': voucher_type,
 			'company': company,
 			'allow_zero_valuation_rate': item.allow_zero_valuation_rate
@@ -2283,13 +2285,17 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	coupon_code() {
-		var me = this;
-		frappe.run_serially([
-			() => this.frm.doc.ignore_pricing_rule=1,
-			() => me.ignore_pricing_rule(),
-			() => this.frm.doc.ignore_pricing_rule=0,
-			() => me.apply_pricing_rule()
-		]);
+		if (this.frm.doc.coupon_code || this.frm._last_coupon_code) {
+			// reset pricing rules if coupon code is set or is unset
+			const _ignore_pricing_rule = this.frm.doc.ignore_pricing_rule;
+			return frappe.run_serially([
+				() => this.frm.doc.ignore_pricing_rule=1,
+				() => this.frm.trigger('ignore_pricing_rule'),
+				() => this.frm.doc.ignore_pricing_rule=_ignore_pricing_rule,
+				() => this.frm.trigger('apply_pricing_rule'),
+				() => this.frm._last_coupon_code = this.frm.doc.coupon_code
+			]);
+		}
 	}
 };
 

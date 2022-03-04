@@ -6,6 +6,7 @@ import json
 
 import frappe
 from frappe.test_runner import make_test_objects
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, today
 
 from erpnext.controllers.item_variant import (
@@ -15,6 +16,7 @@ from erpnext.controllers.item_variant import (
 	get_variant,
 )
 from erpnext.stock.doctype.item.item import (
+	DataValidationError,
 	InvalidBarcode,
 	StockExistsForTemplate,
 	get_item_attribute,
@@ -24,7 +26,6 @@ from erpnext.stock.doctype.item.item import (
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
-from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]
@@ -52,7 +53,7 @@ def make_item(item_code, properties=None):
 
 	return item
 
-class TestItem(ERPNextTestCase):
+class TestItem(FrappeTestCase):
 	def setUp(self):
 		super().setUp()
 		frappe.flags.attribute_values = None
@@ -387,6 +388,26 @@ class TestItem(ERPNextTestCase):
 
 		self.assertTrue(frappe.db.get_value("Bin",
 			{"item_code": "Test Item for Merging 2", "warehouse": "_Test Warehouse 1 - _TC"}))
+
+	def test_item_merging_with_product_bundle(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		create_item("Test Item Bundle Item 1", is_stock_item=False)
+		create_item("Test Item Bundle Item 2", is_stock_item=False)
+		create_item("Test Item inside Bundle")
+		bundle_items = ["Test Item inside Bundle"]
+
+		# make bundles for both items
+		bundle1 = make_product_bundle("Test Item Bundle Item 1", bundle_items, qty=2)
+		make_product_bundle("Test Item Bundle Item 2", bundle_items, qty=2)
+
+		with self.assertRaises(DataValidationError):
+			frappe.rename_doc("Item", "Test Item Bundle Item 1", "Test Item Bundle Item 2", merge=True)
+
+		bundle1.delete()
+		frappe.rename_doc("Item", "Test Item Bundle Item 1", "Test Item Bundle Item 2", merge=True)
+
+		self.assertFalse(frappe.db.exists("Item", "Test Item Bundle Item 1"))
 
 	def test_uom_conversion_factor(self):
 		if frappe.db.exists('Item', 'Test Item UOM'):
