@@ -258,10 +258,13 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			CONCAT("On Order: ", CAST(COALESCE(SUM(tabBin.ordered_qty),0) as int)) as on_order
 			{columns}
 		from 
-			tabItem, tabBin
-		where 
+			tabItem
+		LEFT JOIN
+			tabBin
+		ON
 			tabItem.item_code = tabBin.item_code
-			and tabItem.docstatus < 2
+		where 
+			tabItem.docstatus < 2
 			and tabItem.has_variants=0
 			and tabItem.disabled=0
 			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
@@ -289,7 +292,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				"_txt": txt.replace("%", ""),
 				"start": start,
 				"page_len": page_len
-			}, as_dict=as_dict, debug=1)
+			}, as_dict=as_dict)
 
 
 @frappe.whitelist()
