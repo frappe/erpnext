@@ -5,8 +5,8 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, nowdate
 from frappe.model.naming import set_name_by_naming_series
+from frappe.utils import getdate, nowdate
 
 
 class Contract(Document):
@@ -25,7 +25,7 @@ class Contract(Document):
 				count = len(frappe.get_all("Contract", filters={"name": ["like", "%{}%".format(name)]}))
 				name = "{} - {}".format(name, count)
 
-			self.name = _(name)			
+			self.name = _(name)
 
 	def validate(self):
 		self.validate_dates()
