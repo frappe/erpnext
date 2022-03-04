@@ -245,12 +245,12 @@
  "index_web_pages_for_search": 1,
  "links": [
   {
-   "group": "Purchase",
+   "group": "Buying",
    "link_doctype": "Purchase Invoice",
    "link_fieldname": "subscription"
   },
   {
-   "group": "Sales",
+   "group": "Selling",
    "link_doctype": "Sales Invoice",
    "link_fieldname": "subscription"
   }
