@@ -112,6 +112,7 @@ class StockEntry(StockController):
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
 		self.validate_putaway_capacity()
+		self.update_serial_items_table()
 
 		if not self.get("purpose") == "Manufacture":
 			# ignore scrap item wh difference and empty source/target wh
@@ -123,6 +124,8 @@ class StockEntry(StockController):
 		self.update_stock_ledger()
 
 		update_serial_nos_after_submit(self, "items")
+		self.reload()
+		self.update_serial_items_table(update=True)
 		self.update_work_order()
 		self.validate_purchase_order()
 		self.update_purchase_order_supplied_items()

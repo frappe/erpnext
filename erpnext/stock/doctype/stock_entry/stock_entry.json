@@ -45,6 +45,8 @@
   "scan_barcode",
   "items",
   "get_stock_and_rate",
+  "serials_section",
+  "serial_items",
   "section_break_19",
   "total_incoming_value",
   "column_break_22",
@@ -612,6 +614,19 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "serials_section",
+   "fieldtype": "Section Break",
+   "label": "Serials"
+  },
+  {
+   "fieldname": "serial_items",
+   "fieldtype": "Table",
+   "label": "Serial Items",
+   "options": "Serial Number Item",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -619,7 +634,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-07 12:55:14.614077",
+ "modified": "2022-03-04 12:12:33.392155",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

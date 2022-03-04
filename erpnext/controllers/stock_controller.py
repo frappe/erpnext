@@ -514,6 +514,44 @@ class StockController(AccountsController):
 			else:
 				create_repost_item_valuation_entry(args)
 
+	def update_serial_items_table(self, update = False):
+		# updates the serials if auto created from sle in the document
+		if self.serial_items and update:
+			for item in self.items:
+				if item.serial_no:
+					for serial in item.serial_no.split('\n'):
+						for serial_item in self.serial_items:
+							if serial_item.item_name == item.item_code and not serial_item.serial_no\
+								and serial_item.type == 'Accepted':
+								serial_item.serial_no = serial.upper()
+								frappe.db.set_value(serial_item.doctype, serial_item.name, 'serial_no', serial.upper())
+								break
+			return
+
+		self.serial_items = {}
+		for item in self.items:
+			has_serial = frappe.db.get_value('Item', item.item_code, 'has_serial_no')
+
+			if has_serial and item.serial_no:
+				accepted_serials = item.serial_no.split('\n')
+				for serial in accepted_serials:
+					row = self.append('serial_items', {})
+					row.item_name = item.item_code
+					row.serial_no = serial if frappe.db.exists('Serial No',
+						{"name": serial, "warehouse": item.warehouse}) else ""
+					row.type = 'Accepted'
+				if len(accepted_serials) < abs(cint(item.qty)):
+					for auto_serial in range(abs(cint(item.qty))- len(accepted_serials)):
+						row = self.append('serial_items', {})
+						row.item_name = item.item_code
+						row.type = 'Accepted'
+
+			if has_serial and not item.serial_no:
+				print('THIS IS CALLED')
+				for serial in range(abs(cint(item.qty))):
+					row = self.append('serial_items', {})
+					row.item_name = item.item_code
+					row.type = 'Accepted'
 
 @frappe.whitelist()
 def make_quality_inspections(doctype, docname, items):

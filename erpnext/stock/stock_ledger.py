@@ -71,6 +71,10 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 
 					for item in voucher_doc.get('items'):
 						if item.get('item_code') == sle.item_code:
+							if sle.get("voucher_type")=="Stock Entry":
+								if (item.s_warehouse or item.t_warehouse) == sle.warehouse:
+									frappe.db.set_value(item.doctype, item.name, 'serial_no', sle.serial_no)
+									break
 							if item.warehouse == sle.warehouse:
 								frappe.db.set_value(item.doctype, item.name, 'serial_no', sle.serial_no)
 							elif item.rejected_warehouse == sle.warehouse:
