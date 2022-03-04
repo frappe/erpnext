@@ -14,7 +14,14 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	conditions = get_con(filters)
 	data = get_data(filters, conditions)
+
+	validate_filters(filters)
+
 	return columns, data
+
+def validate_filters(filters):
+	if filters.report == "ITC-05 B" or filters.report == "ITC-05 C":
+		frappe.throw(" This report is under Development. Please contact your Administrator ")
 
 def get_columns(filters):
 	if filters.report == "ITC-04":
@@ -123,9 +130,10 @@ def get_columns(filters):
 			},
 			{
 				"label": _("Original Challan Number Issued by Principal"),
-				"fieldtype": "Data",
+				"fieldtype": "Link",
 				"fieldname": "original_challan_number_issued_by_principal",
-				"width": 140
+				"width": 140,
+				"options" : "Stock Entry"
 			},
 			{
 				"label": _("Original Challan Date Issued by Principal"),
@@ -182,6 +190,12 @@ def get_columns(filters):
 				"fieldname": "losses_quantity",
 				"width": 140
 			},
+			{
+				"label": _("To Be Named"),
+				"fieldtype": "Float",
+				"fieldname": "no_name",
+				"width": 140
+			},
 			# {
 			# 	"label": _("Central Tax Rate In (%)"),
 			# 	"fieldtype": "Data",
@@ -202,6 +216,8 @@ def get_columns(filters):
 			# },
 		]
 		return columns
+	elif filters.report == "ITC-05 B" or filters.report == "ITC-05 C":	
+		pass
 
 def get_con(filters):
 	date_dict = {}
@@ -340,7 +356,8 @@ def get_data(filters,conditions):
 				if res['batch_no']:
 					se_doc = frappe.get_doc("Stock Entry",name.se_name)
 					se_batch_count = frappe.db.sql(""" select count(*) as total from `tabStock Entry Detail`
-															where parent = '{0}' and batch_no = '{1}' """.format(name.se_name,res['batch_no']),as_dict=1)
+															where parent = '{0}' 
+															and batch_no = '{1}' """.format(name.se_name,res['batch_no']),as_dict=1)
 					se_doc_batch_count += se_batch_count[0]['total']
 					print("--------------------------se_doc_batch_count",se_batch_count)
 			if se_doc_batch_count == 0:
@@ -383,7 +400,8 @@ def get_data(filters,conditions):
 						data2['nature_of_job_work_done'] = nature_of_job_work_done
 						data.append(data2)
 		return data
-
+	elif filters.report == "ITC-05 B" or filters.report == "ITC-05 C":	
+		pass
 # def get_conditions(filters):
 # 	conditions = {}
 # 	if filters.gstin_of_manufacturer:
@@ -405,7 +423,7 @@ def get_json(filters, report_name, data):
 
 	# res = {}
 
-
+	
 	return {
 		'report_name': report_name,
 		'report': filters['report'],

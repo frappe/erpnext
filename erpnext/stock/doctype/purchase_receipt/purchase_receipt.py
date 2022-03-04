@@ -107,8 +107,8 @@ class PurchaseReceipt(BuyingController):
 	def on_challan_date(self, item):
 		print("THi i new deu daye")
 		due_date = frappe.db.sql("""
-								Select si.due_date from `tabSales Invoice Item` soi , `tabSales Invoice` si
-								Where soi.parent = si.name and soi.name = '{0}'	""".format(item))
+								Select si.due_date, soi.new_name from `tabSales Invoice Item` soi , `tabSales Invoice` si
+								Where soi.parent = si.name and soi.name = '{0}'	""".format(item), as_dict = 1)
 
 		return due_date
 

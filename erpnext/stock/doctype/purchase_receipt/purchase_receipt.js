@@ -53,20 +53,23 @@ frappe.ui.form.on("Purchase Receipt", {
 
 	// new code for TASK - TASK-2022-00015
 	get_items: function(frm) {
-		console.log(" this is button function")
-		frappe.call({
-			method : 'on_get_items_button',
-			doc:frm.doc,
-			callback: function(r)
-			{
-				// frm.refresh_field("get_items")
-				if (r.message){
-				console.log("this is buttom", r.message)
-				frm.refresh_field("supplied_items")
+		console.log(" Button Working")
+		if (frm.doc.docstatus != 1){
+			frappe.call({
+				method : 'on_get_items_button',
+				doc:frm.doc,
+				callback: function(r)
+				{
+					// frm.refresh_field("get_items")
+					if (r.message){
+					console.log("this is buttom", r.message)
+					frm.refresh_field("supplied_items")
+					}
+					else console.log("Nothis ins ")
 				}
-				else console.log("Nothis ins ")
-			}
-		});
+			});
+		}
+		else console.log("Cannot Get ITEMS as document already is submitted")
 	},
 
 
@@ -470,45 +473,59 @@ frappe.ui.form.on('Purchase Receipt Item', {
 
 	form_render:function(frm,cdt,cdn){
 		var child = locals[cdt][cdn];
-		frappe.call({
-			method: 'on_challan_number',
-			doc : frm.doc,	
-			args :{
-				item_code : child.item_code
-			},
-				callback: (r) => {
-					var i = 0;
-					var b=[];
-					console.log(" THIS IS DATA FROM SOI", r.message)
-					for(i; i < r.message.length; i++) {
-						b.push(r.message[i].name);
-						console.log(" THIS IS DATA FROM SOI", r.message[i], r.message[i].name)
-						frm.fields_dict.items.grid.update_docfield_property(
-							'challan_number_issues_by_job_worker',
-							'options',
-							[''].concat(b)
-						); 
+		if (child.item_code && frm.doc.is_subcontracted == "Yes") {
+			console.log(" In side child")
+			frappe.call({
+				method: 'on_challan_number',
+				doc : frm.doc,	
+				args :{
+					item_code : child.item_code
+				},
+					callback: (r) => {
+						var i = 0;
+						var b=[];
+						// console.log(" THIS IS DATA FROM SOI", r.message)
+						for(i; i < r.message.length; i++) {
+							b.push(r.message[i].name);
+							// console.log(" THIS IS DATA FROM SOI", r.message[i], r.message[i].name)
+							// frm.fields_dict.items.grid.update_docfield_property(
+							// 	'challan_number_issues_by_job_worker',
+							// 	'options',
+							// 	[''].concat(b)
+							// ); 
+						}
+						console.log('thi is select options, ',b)
+						
+						frm.fields_dict['items'].grid.get_field('challan_number_issues_by_job_worker').get_query = function(frm, cdt, cdn) {
+							console.log(" IN side challan")
+							return{
+								filters: [
+									['name', "in", b]
+								]
+							};
+						}
 					}
-				}
+
 			});	
-		
+		}
     },
 
 	challan_number_issues_by_job_worker: function(frm, cdt, cdn){
 		var child = locals[cdt][cdn];
-		console.log(" this is child", child.item_code)
-		frappe.call({
-			method: 'on_challan_date',
-			doc: frm.doc,
-			args:{
-				item : child.challan_number_issues_by_job_worker
-			},
-			callback: (r) =>{
-				console.log("this is r.message", r.message)
-				frappe.model.set_value(cdt, cdn, "challan_date_issues_by_job_worker", r.message[0])
-				
-			}
-		})
+		// console.log(" this is child", child.item_code)
+		if (child.challan_number_issues_by_job_worker){
+			frappe.call({
+				method: 'on_challan_date',
+				doc: frm.doc,
+				args:{
+					item : child.challan_number_issues_by_job_worker
+				},
+				callback: (r) =>{
+					// console.log("this is r.message", r.message,  r.message[0].due_date)
+					frappe.model.set_value(cdt, cdn, "challan_date_issues_by_job_worker", r.message[0].due_date)					
+				}
+			})
+		}
 	},
 
 	item_code: function(frm, cdt, cdn) {

@@ -71,10 +71,10 @@ class SalesInvoice(SellingController):
 
 	#new code to add data in new_name hidden field 
 
-	# def after_insert_1(self):
-	# 	for i in self.items:
-	# 		print("i")
-	# 		a = i.new_name = self.name + "-" +i.item_code	
+	def new_name(self):
+		for i in self.items:
+			print("i")
+			a = i.new_name = self.name + "-" +i.item_code + "-" + str(i.idx)
 		
 
 	def before_save(self):
@@ -100,6 +100,7 @@ class SalesInvoice(SellingController):
 			self.indicator_title = _("Paid")
 
 	# def after_insert(self):
+	# 	self.new_name()
 	# 	self.set_last_sales_invoice()
 
 	def validate(self):
@@ -107,7 +108,7 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
 
-		# self.after_insert_1()
+		self.new_name()
 
 		self.get_commision()
 
@@ -238,14 +239,14 @@ class SalesInvoice(SellingController):
 		
 		# Code for Child name change
 
-		# if self.items:
-		# 	for i in self.items:	
-		# 		print(" this is oochild", i.name, i.new_name)
-		# 		frappe.db.sql("""
-		# 			UPDATE `tabSales Invoice Item`
-		# 			SET name = '{0}'
-		# 			WHERE name = '{1}'; 
-		# 		""".format(i.new_name,i.name ))
+		if self.items:
+			for i in self.items:	
+				print(" this is oochild", i.name, i.new_name)
+				frappe.db.sql("""
+					UPDATE `tabSales Invoice Item`
+					SET name = '{0}'
+					WHERE name = '{1}'; 
+				""".format(i.new_name,i.name ))
 
 		self.validate_pos_paid_amount()
 

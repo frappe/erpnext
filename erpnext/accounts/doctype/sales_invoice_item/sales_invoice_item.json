@@ -1,6 +1,5 @@
 {
  "actions": [],
- "autoname": "field:new_name",
  "creation": "2013-06-04 11:02:19",
  "doctype": "DocType",
  "document_type": "Document",
@@ -841,15 +840,13 @@
   {
    "fieldname": "new_name",
    "fieldtype": "Data",
-   "hidden": 1,
-   "label": "New Name",
-   "unique": 1
+   "label": "New Name"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-02-10 13:07:39.258912",
+ "modified": "2022-03-02 14:34:20.478844",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

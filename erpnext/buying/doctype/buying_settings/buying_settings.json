@@ -17,6 +17,8 @@
   "maintain_same_rate",
   "allow_multiple_items",
   "bill_for_rejected_quantity_in_purchase_invoice",
+  "po_expiry_days",
+  "po_expired_approver",
   "subcontract",
   "backflush_raw_materials_of_subcontract_based_on",
   "column_break_11",
@@ -116,6 +118,17 @@
    "fieldname": "bill_for_rejected_quantity_in_purchase_invoice",
    "fieldtype": "Check",
    "label": "Bill for Rejected Quantity in Purchase Invoice"
+  },
+  {
+   "fieldname": "po_expiry_days",
+   "fieldtype": "Int",
+   "label": "PO Expiry Days"
+  },
+  {
+   "fieldname": "po_expired_approver",
+   "fieldtype": "Link",
+   "label": "PO Expired Approver",
+   "options": "Role"
   }
  ],
  "icon": "fa fa-cog",
@@ -123,7 +136,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-08 19:26:23.548837",
+ "modified": "2022-02-22 18:05:31.329597",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
