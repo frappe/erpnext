@@ -21,7 +21,7 @@ frappe.ui.form.on('Subscription', {
 	},
 
 	refresh: function (frm) {
-		if (frm.is_new()) return
+		if (frm.is_new()) return;
 
 		if (frm.doc.status !== 'Cancelled') {
 			frm.add_custom_button(
@@ -50,7 +50,7 @@ frappe.ui.form.on('Subscription', {
 			() => {
 				frm.call('cancel_subscription').then(r => {
 					if (!r.exec) {
-						frm.reload_doc()
+						frm.reload_doc();
 					}
 				});
 			}
@@ -63,7 +63,7 @@ frappe.ui.form.on('Subscription', {
 			() => {
 				frm.call('restart_subscription').then(r => {
 					if (!r.exec) {
-						frm.reload_doc()
+						frm.reload_doc();
 					}
 				});
 			}
@@ -73,7 +73,7 @@ frappe.ui.form.on('Subscription', {
 	get_subscription_updates: function (frm) {
 		frm.call('process').then(r => {
 			if (!r.exec) {
-				frm.reload_doc()
+				frm.reload_doc();
 			}
 		});
 	}

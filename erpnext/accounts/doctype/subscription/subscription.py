@@ -3,7 +3,7 @@
 
 
 from datetime import datetime
-from typing import Dict, Iterable, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import frappe
 from frappe import _
@@ -41,9 +41,7 @@ class Subscription(Document):
 		# update start just before the subscription doc is created
 		self.update_subscription_period(self.start_date)
 
-	def update_subscription_period(
-		self, date: Optional[Union[datetime, str]] = None, return_date: Optional[bool] = None
-	):
+	def update_subscription_period(self, date: Optional[Union[datetime.date, str]] = None):
 		"""
 		Subscription period is the period to be billed. This method updates the
 		beginning of the billing period and end of the billing period.
@@ -51,25 +49,19 @@ class Subscription(Document):
 		The beginning of the billing period is represented in the doctype as
 		`current_invoice_start` and the end of the billing period is represented
 		as `current_invoice_end`.
-
-		If return_date is True, it wont update the start and end dates.
-		This is implemented to get the dates to check if is_current_invoice_generated
 		"""
-		if not return_date:
-			return_date = False
+		self.current_invoice_start = self.get_current_invoice_start(date)
+		self.current_invoice_end = self.get_current_invoice_end(self.current_invoice_start)
 
+	def _get_subscription_period(self, date: Optional[Union[datetime.date, str]] = None):
 		_current_invoice_start = self.get_current_invoice_start(date)
 		_current_invoice_end = self.get_current_invoice_end(_current_invoice_start)
 
-		if return_date:
-			return _current_invoice_start, _current_invoice_end
-
-		self.current_invoice_start = _current_invoice_start
-		self.current_invoice_end = _current_invoice_end
+		return _current_invoice_start, _current_invoice_end
 
 	def get_current_invoice_start(
-		self, date: Optional[Union[datetime, str]] = None
-	) -> Union[datetime, str]:
+		self, date: Optional[Union[datetime.date, str]] = None
+	) -> Union[datetime.date, str]:
 		"""
 		This returns the date of the beginning of the current billing period.
 		If the `date` parameter is not given , it will be automatically set as today's
@@ -93,8 +85,8 @@ class Subscription(Document):
 		return _current_invoice_start
 
 	def get_current_invoice_end(
-		self, date: Optional[Union[datetime, str]] = None
-	) -> Union[datetime, str]:
+		self, date: Optional[Union[datetime.date, str]] = None
+	) -> Union[datetime.date, str]:
 		"""
 		This returns the date of the end of the current billing period.
 
@@ -138,7 +130,7 @@ class Subscription(Document):
 		return _current_invoice_end
 
 	@staticmethod
-	def validate_plans_billing_cycle(billing_cycle_data: Iterable[Dict]) -> None:
+	def validate_plans_billing_cycle(billing_cycle_data: List[Dict[str, str]]) -> None:
 		"""
 		Makes sure that all `Subscription Plan` in the `Subscription` have the
 		same billing interval
@@ -148,7 +140,7 @@ class Subscription(Document):
 				_("You can only have Plans with the same billing cycle in a Subscription")
 			)
 
-	def get_billing_cycle_and_interval(self) -> Iterable[Dict]:
+	def get_billing_cycle_and_interval(self) -> List[Dict[str, str]]:
 		"""
 		Returns a dict representing the billing interval and cycle for this `Subscription`.
 
@@ -163,7 +155,7 @@ class Subscription(Document):
 			distinct=True,
 		)
 
-	def get_billing_cycle_data(self) -> Dict:
+	def get_billing_cycle_data(self) -> Dict[str, int]:
 		"""
 		Returns dict contain the billing cycle data.
 
@@ -222,7 +214,7 @@ class Subscription(Document):
 		return not self.period_has_passed(self.trial_period_end) and self.is_new_subscription()
 
 	@staticmethod
-	def period_has_passed(end_date) -> bool:
+	def period_has_passed(end_date: Union[str, datetime.date]) -> bool:
 		"""
 		Returns true if the given `end_date` has passed
 		"""
@@ -327,7 +319,9 @@ class Subscription(Document):
 		self.set_subscription_status()
 
 	def generate_invoice(
-		self, from_date: Optional[date] = None, to_date: Optional[date] = None
+		self,
+		from_date: Optional[Union[str, datetime.date]] = None,
+		to_date: Optional[Union[str, datetime.date]] = None,
 	) -> Document:
 		"""
 		Creates a `Invoice` for the `Subscription`, updates `self.invoices` and
@@ -338,7 +332,9 @@ class Subscription(Document):
 		return self.create_invoice(from_date=from_date, to_date=to_date)
 
 	def create_invoice(
-		self, from_date: Optional[date] = None, to_date: Optional[date] = None
+		self,
+		from_date: Optional[Union[str, datetime.date]] = None,
+		to_date: Optional[Union[str, datetime.date]] = None,
 	) -> Document:
 		"""
 		Creates a `Invoice`, submits it and returns it
@@ -440,8 +436,8 @@ class Subscription(Document):
 		return invoice
 
 	def get_items_from_plans(
-		self, plans: Iterable[Dict], prorate: Optional[bool] = None
-	) -> Iterable[Dict]:
+		self, plans: List[Dict[str, str]], prorate: Optional[bool] = None
+	) -> List[Dict]:
 		"""
 		Returns the `Item`s linked to `Subscription Plan`
 		"""
@@ -561,12 +557,12 @@ class Subscription(Document):
 
 	def is_current_invoice_generated(
 		self,
-		_current_start_date: Union[datetime, str] = None,
-		_current_end_date: Union[datetime, str] = None,
+		_current_start_date: Union[datetime.date, str] = None,
+		_current_end_date: Union[datetime.date, str] = None,
 	) -> bool:
 		if not (_current_start_date and _current_end_date):
-			_current_start_date, _current_end_date = self.update_subscription_period(
-				date=add_days(self.current_invoice_end, 1), return_date=True
+			_current_start_date, _current_end_date = self._get_subscription_period(
+				date=add_days(self.current_invoice_end, 1)
 			)
 
 		if self.current_invoice and getdate(_current_start_date) <= getdate(
@@ -608,8 +604,12 @@ class Subscription(Document):
 		self.cancelation_date = nowdate()
 
 	@property
-	def invoices(self) -> Iterable[Dict]:
-		return frappe.get_all(self.invoice_document_type, filters={"subscription": self.name}, order_by="from_date asc")
+	def invoices(self) -> List[Dict]:
+		return frappe.get_all(
+			self.invoice_document_type,
+			filters={"subscription": self.name},
+			order_by="from_date asc",
+		)
 
 	@staticmethod
 	def is_paid(invoice: Document) -> bool:
@@ -675,8 +675,8 @@ def is_prorate() -> int:
 
 
 def get_prorata_factor(
-	period_end: Union[datetime, str],
-	period_start: Union[datetime, str],
+	period_end: Union[datetime.date, str],
+	period_start: Union[datetime.date, str],
 	is_prepaid: Optional[int] = None,
 ) -> Union[int, float]:
 	if is_prepaid:
