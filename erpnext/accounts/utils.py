@@ -747,7 +747,7 @@ def get_held_invoices(party_type, party):
 	"""
 	Returns a list of names Purchase Invoices for the given party that are on hold
 	"""
-	held_invoices = None
+	held_invoices = []
 
 	if party_type == 'Supplier':
 		held_invoices = frappe.db.sql(
