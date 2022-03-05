@@ -26,6 +26,13 @@ class LeaveEncashment(Document):
 		if not self.encashment_date:
 			self.encashment_date = getdate(nowdate())
 
+		salary_structure = get_assigned_salary_structure(self.employee, self.encashment_date or getdate(nowdate()))
+		if not salary_structure:
+			frappe.throw(_("No Salary Structure assigned for Employee {0} on given date {1}").format(self.employee, self.encashment_date))
+		per_day_encashment = frappe.db.get_value('Salary Structure', salary_structure , 'leave_encashment_amount_per_day')
+		self.encashment_amount = self.encashable_days * per_day_encashment if per_day_encashment > 0 else 0	
+
+
 	def validate_salary_structure(self):
 		if not frappe.db.exists('Salary Structure Assignment', {'employee': self.employee}):
 			frappe.throw(_("There is no Salary Structure assigned to {0}. First assign a Salary Stucture.").format(self.employee))
