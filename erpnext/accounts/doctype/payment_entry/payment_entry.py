@@ -934,8 +934,12 @@ class PaymentEntry(AccountsController):
 
 			tax.base_total = tax.total * self.source_exchange_rate
 
-			self.total_taxes_and_charges += current_tax_amount
-			self.base_total_taxes_and_charges += current_tax_amount * self.source_exchange_rate
+			if self.payment_type == 'Pay':
+				self.base_total_taxes_and_charges += flt(current_tax_amount / self.source_exchange_rate)
+				self.total_taxes_and_charges += flt(current_tax_amount / self.target_exchange_rate)
+			else:
+				self.base_total_taxes_and_charges += flt(current_tax_amount / self.target_exchange_rate)
+				self.total_taxes_and_charges += flt(current_tax_amount / self.source_exchange_rate)
 
 		if self.get('taxes'):
 			self.paid_amount_after_tax = self.get('taxes')[-1].base_total
