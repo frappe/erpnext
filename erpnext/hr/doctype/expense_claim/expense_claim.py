@@ -23,10 +23,10 @@ class ExpenseClaim(AccountsController):
 
 	def validate(self):
 		validate_active_employee(self.employee)
-		self.validate_advances()
+		set_employee_name(self)
 		self.validate_sanctioned_amount()
 		self.calculate_total_amount()
-		set_employee_name(self)
+		self.validate_advances()
 		self.set_expense_account(validate=True)
 		self.set_payable_account()
 		self.set_cost_center()
@@ -341,18 +341,27 @@ def get_expense_claim_account(expense_claim_type, company):
 
 @frappe.whitelist()
 def get_advances(employee, advance_id=None):
-	if not advance_id:
-		condition = 'docstatus=1 and employee={0} and paid_amount > 0 and paid_amount > claimed_amount + return_amount'.format(frappe.db.escape(employee))
-	else:
-		condition = 'name={0}'.format(frappe.db.escape(advance_id))
+	advance = frappe.qb.DocType("Employee Advance")
 
-	return frappe.db.sql("""
-		select
-			name, posting_date, paid_amount, claimed_amount, advance_account
-		from
-			`tabEmployee Advance`
-		where {0}
-	""".format(condition), as_dict=1)
+	query = (
+		frappe.qb.from_(advance)
+		.select(
+			advance.name, advance.posting_date, advance.paid_amount,
+			advance.claimed_amount, advance.advance_account
+		)
+	)
+
+	if not advance_id:
+		query = query.where(
+			(advance.docstatus == 1)
+			& (advance.employee == employee)
+			& (advance.paid_amount > 0)
+			& (advance.status.notin(["Claimed", "Returned", "Partly Claimed and Returned"]))
+		)
+	else:
+		query = query.where(advance.name == advance_id)
+
+	return query.run(as_dict=True)
 
 
 @frappe.whitelist()
