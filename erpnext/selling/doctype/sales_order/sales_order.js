@@ -691,10 +691,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		dialog.show();
 	},
 
-<<<<<<< HEAD
-	hold_sales_order: function(){
-=======
-	get_ordered_qty(item, so) {
+	get_ordered_qty: function(item, so) {
 		let ordered_qty = item.ordered_qty;
 		if (so.packed_items) {
 			// calculate ordered qty based on packed items in case of product bundle
@@ -710,10 +707,9 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			}
 		}
 		return ordered_qty;
-	}
+	},
 
-	hold_sales_order(){
->>>>>>> 8005fee656 (feat: update ordered qty for packed items)
+	hold_sales_order: function(){
 		var me = this;
 		var d = new frappe.ui.Dialog({
 			title: __('Reason for Hold'),

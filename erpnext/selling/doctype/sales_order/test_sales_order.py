@@ -921,8 +921,6 @@ class TestSalesOrder(ERPNextTestCase):
 		self.assertEqual(purchase_orders[0].supplier, '_Test Supplier')
 		self.assertEqual(purchase_orders[1].supplier, '_Test Supplier 1')
 
-<<<<<<< HEAD
-=======
 	def test_product_bundles_in_so_are_replaced_with_bundle_items_in_po(self):
 		"""
 			Tests if the the Product Bundles in the Items table of Sales Orders are replaced with
@@ -991,7 +989,6 @@ class TestSalesOrder(ERPNextTestCase):
 		self.assertEqual(so.packed_items[0].ordered_qty, 2)
 		self.assertEqual(so.packed_items[1].ordered_qty, 2)
 
->>>>>>> 8e3f1e306d (test: po updates packed item's ordered_qty)
 	def test_reserved_qty_for_closing_so(self):
 		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
 			fields=["reserved_qty"])
