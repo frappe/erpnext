@@ -320,7 +320,7 @@ class ProductionPlan(Document):
 
 		if self.total_produced_qty > 0:
 			self.status = "In Process"
-			if self.check_have_work_orders_completed():
+			if self.all_items_completed():
 				self.status = "Completed"
 
 		if self.status != 'Completed':
@@ -592,14 +592,24 @@ class ProductionPlan(Document):
 
 			self.append("sub_assembly_items", data)
 
-	def check_have_work_orders_completed(self):
-		wo_status = frappe.db.get_list(
+	def all_items_completed(self):
+		all_items_produced = all(flt(d.planned_qty) - flt(d.produced_qty) < 0.000001
+									for d in self.po_items)
+		if not all_items_produced:
+			return False
+
+		wo_status = frappe.get_all(
 			"Work Order",
-			filters={"production_plan": self.name},
+			filters={
+				"production_plan": self.name,
+				"status": ("not in", ["Closed", "Stopped"]),
+				"docstatus": ("<", 2),
+			},
 			fields="status",
-			pluck="status"
+			pluck="status",
 		)
-		return all(s == "Completed" for s in wo_status)
+		all_work_orders_completed = all(s == "Completed" for s in wo_status)
+		return all_work_orders_completed
 
 @frappe.whitelist()
 def download_raw_materials(doc, warehouses=None):

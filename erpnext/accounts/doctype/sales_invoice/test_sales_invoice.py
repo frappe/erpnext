@@ -1615,6 +1615,56 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account][1], gle.debit)
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
+	def test_rounding_adjustment_3(self):
+		si = create_sales_invoice(do_not_save=True)
+		si.items = []
+		for d in [(1122, 2), (1122.01, 1), (1122.01, 1)]:
+			si.append("items", {
+				"item_code": "_Test Item",
+				"gst_hsn_code": "999800",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": d[1],
+				"rate": d[0],
+				"income_account": "Sales - _TC",
+				"cost_center": "_Test Cost Center - _TC"
+			})
+		for tax_account in ["_Test Account VAT - _TC", "_Test Account Service Tax - _TC"]:
+			si.append("taxes", {
+				"charge_type": "On Net Total",
+				"account_head": tax_account,
+				"description": tax_account,
+				"rate": 6,
+				"cost_center": "_Test Cost Center - _TC",
+				"included_in_print_rate": 1
+			})
+		si.save()
+		si.submit()
+		self.assertEqual(si.net_total, 4007.16)
+		self.assertEqual(si.grand_total, 4488.02)
+		self.assertEqual(si.total_taxes_and_charges, 480.86)
+		self.assertEqual(si.rounding_adjustment, -0.02)
+
+		expected_values = dict((d[0], d) for d in [
+			[si.debit_to, 4488.0, 0.0],
+			["_Test Account Service Tax - _TC", 0.0, 240.43],
+			["_Test Account VAT - _TC", 0.0, 240.43],
+			["Sales - _TC", 0.0, 4007.15],
+			["Round Off - _TC", 0.01, 0]
+		])
+
+		gl_entries = frappe.db.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", si.name, as_dict=1)
+
+		debit_credit_diff = 0
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account][0], gle.account)
+			self.assertEqual(expected_values[gle.account][1], gle.debit)
+			self.assertEqual(expected_values[gle.account][2], gle.credit)
+			debit_credit_diff += (gle.debit - gle.credit)
+
+		self.assertEqual(debit_credit_diff, 0)
+
 	def test_sales_invoice_with_shipping_rule(self):
 		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
 
@@ -2366,14 +2416,22 @@ class TestSalesInvoice(unittest.TestCase):
 
 
 	def test_sales_commission(self):
-		si = frappe.copy_doc(test_records[0])
+		si = frappe.copy_doc(test_records[2])
+
+		frappe.db.set_value('Item', si.get('items')[0].item_code, 'grant_commission', 1)
+		frappe.db.set_value('Item', si.get('items')[1].item_code, 'grant_commission', 0)
+
 		item = copy.deepcopy(si.get('items')[0])
 		item.update({
 			"qty": 1,
 			"rate": 500,
-			"grant_commission": 1
 		})
-		si.append("items", item)
+
+		item = copy.deepcopy(si.get('items')[1])
+		item.update({
+			"qty": 1,
+			"rate": 500,
+		})
 
 		# Test valid values
 		for commission_rate, total_commission in ((0, 0), (10, 50), (100, 500)):

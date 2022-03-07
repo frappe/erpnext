@@ -418,11 +418,12 @@ class Asset(AccountsController):
 	def validate_asset_finance_books(self, row):
 		if flt(row.expected_value_after_useful_life) >= flt(self.gross_purchase_amount):
 			frappe.throw(_("Row {0}: Expected Value After Useful Life must be less than Gross Purchase Amount")
-				.format(row.idx))
+				.format(row.idx), title=_("Invalid Schedule"))
 
 		if not row.depreciation_start_date:
 			if not self.available_for_use_date:
-				frappe.throw(_("Row {0}: Depreciation Start Date is required").format(row.idx))
+				frappe.throw(_("Row {0}: Depreciation Start Date is required")
+					.format(row.idx), title=_("Invalid Schedule"))
 			row.depreciation_start_date = get_last_day(self.available_for_use_date)
 
 		if not self.is_existing_asset:
@@ -440,8 +441,9 @@ class Asset(AccountsController):
 			else:
 				self.number_of_depreciations_booked = 0
 
-			if cint(self.number_of_depreciations_booked) > cint(row.total_number_of_depreciations):
-				frappe.throw(_("Number of Depreciations Booked cannot be greater than Total Number of Depreciations"))
+			if flt(row.total_number_of_depreciations) <= cint(self.number_of_depreciations_booked):
+				frappe.throw(_("Row {0}: Total Number of Depreciations cannot be less than or equal to Number of Depreciations Booked")
+					.format(row.idx), title=_("Invalid Schedule"))
 
 		if row.depreciation_start_date and getdate(row.depreciation_start_date) < getdate(self.purchase_date):
 			frappe.throw(_("Depreciation Row {0}: Next Depreciation Date cannot be before Purchase Date")

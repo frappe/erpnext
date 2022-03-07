@@ -162,6 +162,15 @@ class TestPurchaseReceipt(ERPNextTestCase):
 				qty=abs(existing_bin_qty)
 			)
 
+		existing_bin_qty, existing_bin_stock_value = frappe.db.get_value(
+			"Bin",
+			{
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC"
+			},
+			["actual_qty", "stock_value"]
+		)
+
 		pr = make_purchase_receipt()
 
 		stock_value_difference = frappe.db.get_value(

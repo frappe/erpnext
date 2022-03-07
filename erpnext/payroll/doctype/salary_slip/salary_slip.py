@@ -1265,7 +1265,7 @@ class SalarySlip(TransactionBase):
 			for i, earning in enumerate(self.earnings):
 				if earning.salary_component == salary_component:
 					self.earnings[i].amount = wages_amount
-				self.gross_pay += self.earnings[i].amount
+				self.gross_pay += flt(self.earnings[i].amount, earning.precision("amount"))
 		self.net_pay = flt(self.gross_pay) - flt(self.total_deduction)
 
 	def compute_year_to_date(self):
