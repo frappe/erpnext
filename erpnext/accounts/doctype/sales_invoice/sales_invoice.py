@@ -272,6 +272,9 @@ class SalesInvoice(SellingController):
 		self.process_common_party_accounting()
 
 	def validate_pos_return(self):
+		if self.is_consolidated:
+			# pos return is already validated in pos invoice
+			return
 
 		if self.is_pos and self.is_return:
 			total_amount_in_payments = 0
