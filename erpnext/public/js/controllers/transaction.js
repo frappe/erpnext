@@ -550,6 +550,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						if(!r.exc) {
 							frappe.run_serially([
 								() => {
+									me.apply_pricing_rule(item, true);
+								},
+								() => {
 									var d = locals[cdt][cdn];
 									me.add_taxes_from_item_tax_template(d.item_tax_rate);
 									if (d.free_item_data) {
@@ -1157,18 +1160,18 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 										me.apply_rule_on_other_items({key: item});
 									}
 								},
-								() => {
-									if ($('.modal.fade.in').length == 0){
-										addNewLine()
-									} 
-									function addNewLine(){
-										//Add new row
-										$('div[data-fieldname="items"]').find("button.grid-add-row").click()
-										//Select New Item Code Field
-										$('div[data-fieldname="items"]').find("div.grid-row").last().find('div[data-fieldname="item_code"]').click()
-										$('div[data-fieldname="items"]').find("div.grid-row").last().find('div[data-fieldname="item_code"]').find("input.input-with-feedback").click()
-									}
-								}
+								// () => {
+								// 	if ($('.modal.fade.in').length == 0){
+								// 		addNewLine()
+								// 	} 
+								// 	function addNewLine(){
+								// 		//Add new row
+								// 		$('div[data-fieldname="items"]').find("button.grid-add-row").click()
+								// 		//Select New Item Code Field
+								// 		$('div[data-fieldname="items"]').find("div.grid-row").last().find('div[data-fieldname="item_code"]').click()
+								// 		$('div[data-fieldname="items"]').find("div.grid-row").last().find('div[data-fieldname="item_code"]').find("input.input-with-feedback").click()
+								// 	}
+								// }
 							]);
 						}
 					}
