@@ -1906,6 +1906,7 @@ def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child
 	child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
 	conversion_factor = flt(get_conversion_factor(item.item_code, child_item.uom).get("conversion_factor"))
 	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or conversion_factor
+	child_item.reqd_by_date = trans_item.get('reqd_by_date') or p_doc.reqd_by_date
 
 	if child_doctype == "Purchase Order Item":
 		# Initialized value will update in parent validation
