@@ -46,6 +46,7 @@ class CancellationOfSupplierRetentions(Document):
 		retention.db_set('status', 'Annulled', update_modified=False)
 		retention.db_set('total_references', 0, update_modified=False)
 		retention.db_set('total_withheld', 0, update_modified=False)
+		retention.db_set('percentage_total', 0, update_modified=False)
 
 		references = references = frappe.get_all("Withholding Reference", ["*"], filters = {"parent": self.supplier_retention})
 
