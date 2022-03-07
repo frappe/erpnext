@@ -575,15 +575,20 @@ class BuyingController(StockController):
 							filters["voucher_detail_no"] = d.purchase_receipt_item
 
 						original_incoming_rate = frappe.db.get_value("Stock Ledger Entry", filters, "incoming_rate")
-
+                        # add valuation rate and stock value difference
 						sle.update({
-							"outgoing_rate": original_incoming_rate
+							"outgoing_rate": original_incoming_rate,
+                            "valuation_rate": original_incoming_rate,
+                            "stock_value_difference": flt(pr_qty * original_incoming_rate)
 						})
 					else:
 						val_rate_db_precision = 6 if cint(self.precision("valuation_rate", d)) <= 6 else 9
 						incoming_rate = flt(d.valuation_rate, val_rate_db_precision)
+                        # add valuation rate and stock value difference
 						sle.update({
-							"incoming_rate": incoming_rate
+							"incoming_rate": incoming_rate,
+                            "valuation_rate": incoming_rate,
+                            "stock_value_difference": flt(pr_qty * incoming_rate)
 						})
 					sl_entries.append(sle)
 
