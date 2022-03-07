@@ -311,7 +311,7 @@ def _get_cart_quotation(party=None):
 		party = get_party()
 
 	quotation = frappe.get_all("Quotation", fields=["name"], filters=
-		{"party_name": party.name, "order_type": "Shopping Cart", "docstatus": 0},
+		{"party_name": party.name, "contact_email": frappe.session.user, "order_type": "Shopping Cart", "docstatus": 0},
 		order_by="modified desc", limit_page_length=1)
 
 	if quotation:

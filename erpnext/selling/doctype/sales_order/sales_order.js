@@ -562,6 +562,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		var me = this;
 		var dialog = new frappe.ui.Dialog({
 			title: __("Select Items"),
+			size: "large",
 			fields: [
 				{
 					"fieldtype": "Check",
@@ -663,7 +664,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			} else {
 				let po_items = [];
 				me.frm.doc.items.forEach(d => {
-					let pending_qty = (flt(d.stock_qty) - flt(d.ordered_qty)) / flt(d.conversion_factor);
+					let ordered_qty = me.get_ordered_qty(d, me.frm.doc);
+					let pending_qty = (flt(d.stock_qty) - ordered_qty) / flt(d.conversion_factor);
 					if (pending_qty > 0) {
 						po_items.push({
 							"doctype": "Sales Order Item",
@@ -687,6 +689,24 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		dialog.get_field("items_for_po").refresh();
 		dialog.wrapper.find('.grid-heading-row .grid-row-check').click();
 		dialog.show();
+	},
+
+	get_ordered_qty: function(item, so) {
+		let ordered_qty = item.ordered_qty;
+		if (so.packed_items) {
+			// calculate ordered qty based on packed items in case of product bundle
+			let packed_items = so.packed_items.filter(
+				(pi) => pi.parent_detail_docname == item.name
+			);
+			if (packed_items) {
+				ordered_qty = packed_items.reduce(
+					(sum, pi) => sum + flt(pi.ordered_qty),
+					0
+				);
+				ordered_qty = ordered_qty / packed_items.length;
+			}
+		}
+		return ordered_qty;
 	},
 
 	hold_sales_order: function(){
