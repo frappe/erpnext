@@ -90,9 +90,10 @@ class TestSalarySlip(unittest.TestCase):
 
 	@change_settings("Payroll Settings", {
 		"payroll_based_on": "Attendance",
-		"consider_unmarked_attendance_as": "Absent"
+		"consider_unmarked_attendance_as": "Absent",
+		"include_holidays_in_total_working_days": True
 	})
-	def test_payment_days_for_mid_joinee(self):
+	def test_payment_days_for_mid_joinee_including_holidays(self):
 		from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 
 		no_of_days = self.get_no_of_days()
@@ -107,7 +108,8 @@ class TestSalarySlip(unittest.TestCase):
 		})
 
 		holidays = 0
-		for days in range(date_diff(relieving_date, joining_date)):
+
+		for days in range(date_diff(relieving_date, joining_date) + 1):
 			date = add_days(joining_date, days)
 			if not is_holiday("Salary Slip Test Holiday List", date):
 				mark_attendance(new_emp_id, date, 'Present', ignore_validate=True)
@@ -115,6 +117,41 @@ class TestSalarySlip(unittest.TestCase):
 				holidays += 1
 
 		new_ss = make_employee_salary_slip("test_payment_days_based_on_joining_date@salary.com", "Monthly", "Test Payment Based On Attendence")
+
+		self.assertEqual(new_ss.total_working_days, no_of_days[0])
+		self.assertEqual(new_ss.payment_days, no_of_days[0] - holidays - 8)
+
+	@change_settings("Payroll Settings", {
+		"payroll_based_on": "Attendance",
+		"consider_unmarked_attendance_as": "Absent",
+		"include_holidays_in_total_working_days": False
+	})
+	def test_payment_days_for_mid_joinee_excluding_holidays(self):
+		from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
+
+		no_of_days = self.get_no_of_days()
+		month_start_date, month_end_date = get_first_day(nowdate()), get_last_day(nowdate())
+
+		new_emp_id = make_employee("test_payment_days_based_on_joining_date@salary.com")
+		joining_date, relieving_date = add_days(month_start_date, 3), add_days(month_end_date, -5)
+		frappe.db.set_value("Employee", new_emp_id, {
+			"date_of_joining": joining_date,
+			"relieving_date": relieving_date,
+			"status": "Left"
+		})
+
+		holidays = 0
+
+		for days in range(date_diff(relieving_date, joining_date) + 1):
+			date = add_days(joining_date, days)
+			if not is_holiday("Salary Slip Test Holiday List", date):
+				mark_attendance(new_emp_id, date, 'Present', ignore_validate=True)
+			else:
+				holidays += 1
+
+		new_ss = make_employee_salary_slip("test_payment_days_based_on_joining_date@salary.com", "Monthly", "Test Payment Based On Attendence")
+
+		self.assertEqual(new_ss.total_working_days, no_of_days[0] - no_of_days[1])
 		self.assertEqual(new_ss.payment_days, no_of_days[0] - holidays - 8)
 
 	@change_settings("Payroll Settings", {
