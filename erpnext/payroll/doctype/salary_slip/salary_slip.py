@@ -99,7 +99,7 @@ class SalarySlip(TransactionBase):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
 								format(max_working_hours), alert=True)
 
-		self.leave_type_encasement_days()
+		
 	def set_net_total_in_words(self):
 		doc_currency = self.currency
 		company_currency = erpnext.get_company_currency(self.company)
@@ -377,35 +377,40 @@ class SalarySlip(TransactionBase):
 	@frappe.whitelist()
 	def get_payroll(self):
 		from datetime import date
-		doc=frappe.get_doc("Payroll Period",{"company":self.company})
-		lst=frappe.get_doc("Employee",{"employee":self.employee})
-		a=self.end_date
-		if doc.start_date < lst.date_of_joining <= doc.end_date and self.payroll_frequency=="Monthly":
-			end_date = getdate(a)
-			start_date = getdate(lst.date_of_joining)
-			num_months = (end_date.year - start_date.year) * 12 + (end_date.month+1 - start_date.month)
-			return num_months
-		elif doc.start_date < lst.date_of_joining <= doc.end_date and self.payroll_frequency=="Weekly":
-			end_date = getdate(a)
-			start_date = getdate(lst.date_of_joining)
-			days = abs(start_date-end_date).days
-			num_months=flt(days/7,precision=0)
-			return num_months
-		a=self.end_date
-		b = doc.start_date
-		if self.payroll_frequency=="Monthly":
-			if not doc.start_date < lst.date_of_joining <= doc.end_date:
-				end_date = getdate(a)
-				start_date = getdate(b)
-				num_months = (end_date.year - start_date.year) * 12 + (end_date.month+1 - start_date.month)
-				return num_months
-		if self.payroll_frequency=="Weekly":
-			if not doc.start_date < lst.date_of_joining <= doc.end_date:
-				end_date = getdate(a)
-				start_date = getdate(b)
-				days = abs(start_date-end_date).days
-				num_months=flt(days/7,precision=0)
-				return num_months
+		doc=frappe.db.sql("""select name from `tabPayroll Period` where company="{0}" and start_date<='{1}' and end_date >='{2} limit 1'""".format(self.company,self.start_date,self.start_date),as_dict=1)
+		if doc:
+			for i in doc:
+				doc=frappe.get_doc("Payroll Period",i.get("name"))
+				lst=frappe.get_doc("Employee",{"employee":self.employee})
+				a=doc.start_date
+				if doc.start_date < lst.date_of_joining <= doc.end_date and self.payroll_frequency=="Monthly":
+					end_date = getdate(a)
+					start_date = getdate(lst.date_of_joining)
+					num_months = (end_date.year - start_date.year) * 12 + (end_date.month+1 - start_date.month)
+					return num_months
+				elif doc.start_date < lst.date_of_joining <= doc.end_date and self.payroll_frequency=="Weekly":
+					end_date = getdate(a)
+					start_date = getdate(lst.date_of_joining)
+					days = abs(start_date-end_date).days
+					num_months=flt(days/7,precision=0)
+					print(num_months)
+					return num_months
+				a=self.end_date
+				b = doc.start_date
+				if self.payroll_frequency=="Monthly":
+					if not doc.start_date < lst.date_of_joining <= doc.end_date:
+						end_date = getdate(a)
+						start_date = getdate(b)
+						num_months = (end_date.year - start_date.year) * 12 + (end_date.month+1 - start_date.month)
+						return num_months
+				if self.payroll_frequency=="Weekly":
+					if not doc.start_date < lst.date_of_joining <= doc.end_date:
+						end_date = getdate(a)
+						start_date = getdate(b)
+						days = abs(start_date-end_date).days
+						num_months=flt(days/7,precision=0)
+						print(num_months)
+						return num_months
 
 	@frappe.whitelist()
 	def set_days(self):
@@ -437,35 +442,13 @@ class SalarySlip(TransactionBase):
 			lst=[]
 			for i in comp_off:
 				doc = frappe.get_doc("Compensatory Leave Request",i.get("name"))
-				# a=doc.work_from_date.replace('-',',')
-				# b=doc.work_end_date.replace('-',',')
-				# from datetime import date
-				# work_from_date = date(a)
-				# work_end_date = date(b)
-				# date_difference = date_diff(work_end_date,work_from_date)
 				date_difference = frappe.db.sql("""SELECT DATEDIFF(work_end_date , work_from_date) as date
 												from `tabCompensatory Leave Request` where name = '{0}' """.format(doc.name),as_dict=1)
 				for i in date_difference:
 					lst.append(i.get("date"))
 			self.compoff=sum(lst)
 
-		#Weekly_off
-		# cdoc = frappe.get_doc("Employee",self.employee)
-		# if cdoc.holiday_list:
-		# 	hdoc = frappe.get_doc("Holiday List",cdoc.holiday_list)
-
-		# 	import datetime
-		# 	import calendar
-		# 	start_date  = getdate(self.start_date )
-		# 	end_date    = getdate(self.end_date)
-		# 	week        = {}
-		# 	for i in range((end_date - start_date).days):
-		# 		day       = calendar.day_name[(start_date + datetime.timedelta(days=i+1)).weekday()]
-		# 		week[day] = week[day] + 1 if day in week else 1
-
-		# 	for i in week:
-		# 		if i ==hdoc.weekly_off:
-		# 			self.weekly_off = week[i]
+	
 		if not self.weekly_off:
 			cdoc = frappe.get_doc("Employee",self.employee)
 			if cdoc.holiday_list:
@@ -510,8 +493,7 @@ class SalarySlip(TransactionBase):
 					first_date_of_month = datetime(cur_year, cur_month, 1)
 					diff = date_diff(to_date_obj,first_date_of_month) + 1
 					total_leave_list.append(diff)
-			sum(total_leave_list)
-			print("total)leave_list", total_leave_list)
+			
 			#present_days
 			if (sum(total_leave_list) == None):
 				self.leave = 0
@@ -520,7 +502,6 @@ class SalarySlip(TransactionBase):
 				self.leave = sum(total_leave_list)
 				self.present_days = self.days_in_month - self.weekly_off - self.paid_holidays - float(self.leave)
 			print("self.leave",self.leave)
-		return True
 
 	def calculate_lwp_or_ppl_based_on_leave_application(self, holidays, working_days):
 		lwp = 0
@@ -1452,10 +1433,10 @@ class SalarySlip(TransactionBase):
 	@frappe.whitelist()
 	def leave_type_encasement_days(self):
 		if self.employee and self.start_date and self.end_date:
-			sick_leave = frappe.db.sql("""select sum(encashable_days) as result from `tabLeave Encashment`  where employee = '{0}' and
-						encashment_date between '{1}' and '{2}' and docstatus=1  """.format(self.employee,
-																							self.start_date,
-																							self.end_date), as_dict=1)
+			sick_leave = frappe.db.sql("""select sum(encashable_days) as result 
+			from `tabLeave Encashment`  where employee = '{0}' and
+						encashment_date between '{1}' and '{2}' and docstatus=1 
+						 """.format(self.employee, self.start_date, self.end_date), as_dict=1)
 
 			self.encashment_days = sick_leave[0]['result']
 

@@ -12,7 +12,7 @@ class PriceListGenerator(Document):
 			if res.brand:
 				lst=frappe.get_doc("Brand",res.brand)
 				for i in lst.brand_defaults:
-					if self.company==i.company:
+					if self.company==i.company and self.operating_unit==i.selling_cost_center:
 						res.brand_list_price=i.item_price
 			doc=frappe.get_doc("Item",res.product)
 			if doc.specific_gravity:
@@ -70,6 +70,6 @@ class PriceListGenerator(Document):
 			doc_it.uom=res.uom
 			doc_it.brand=res.brand
 			doc_it.price_list=doc.name
-			doc_it.price_list_rate=res.brand_list_price
+			doc_it.price_list_rate=res.list_priceunit
 			doc_it.save()
 
