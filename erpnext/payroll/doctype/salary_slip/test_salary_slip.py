@@ -259,13 +259,7 @@ class TestSalarySlip(unittest.TestCase):
 			create_salary_structure_assignment,
 		)
 
-<<<<<<< HEAD
 		no_of_days = self.get_no_of_days()
-		# Payroll based on attendance
-		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Attendance")
-
-=======
->>>>>>> 748d5c4873 (fix: wrong payment days in salary slip for employees joining/leaving during mid payroll dates (#29082))
 		salary_structure = make_salary_structure_for_payment_days_based_component_dependency()
 		employee = make_employee("test_payment_days_based_component@salary.com", company="_Test Company")
 
