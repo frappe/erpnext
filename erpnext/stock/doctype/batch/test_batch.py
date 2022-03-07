@@ -5,6 +5,7 @@ import json
 
 import frappe
 from frappe.exceptions import ValidationError
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cint, flt
 from frappe.utils.data import add_to_date, getdate
 
@@ -16,10 +17,9 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 )
 from erpnext.stock.get_item_details import get_item_details
 from erpnext.stock.stock_ledger import get_valuation_rate
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestBatch(ERPNextTestCase):
+class TestBatch(FrappeTestCase):
 	def test_item_has_batch_enabled(self):
 		self.assertRaises(ValidationError, frappe.get_doc({
 			"doctype": "Batch",
