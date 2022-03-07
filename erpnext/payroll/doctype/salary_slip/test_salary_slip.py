@@ -7,6 +7,7 @@ import unittest
 
 import frappe
 from frappe.model.document import Document
+from frappe.tests.utils import change_settings
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -32,7 +33,6 @@ from erpnext.payroll.doctype.employee_tax_exemption_declaration.test_employee_ta
 )
 from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_month_details
 from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
-from erpnext.tests.utils import change_settings
 
 
 class TestSalarySlip(unittest.TestCase):
