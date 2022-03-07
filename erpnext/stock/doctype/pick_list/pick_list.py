@@ -273,9 +273,9 @@ def get_available_item_locations_for_batched_item(item_code, from_warehouses, re
 			and IFNULL(batch.`expiry_date`, '2200-01-01') > %(today)s
 			{warehouse_condition}
 		GROUP BY
-			`warehouse`,
-			`batch_no`,
-			`item_code`
+			sle.`warehouse`,
+			sle.`batch_no`,
+			sle.`item_code`
 		HAVING `qty` > 0
 		ORDER BY IFNULL(batch.`expiry_date`, '2200-01-01'), batch.`creation`
 	""".format(warehouse_condition=warehouse_condition), { #nosec
