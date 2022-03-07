@@ -401,13 +401,7 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Bank Check Transaction",
-					"doctype": "Bank Transactions",
-					"is_query_report": True,
-				},
-				{
-					"type": "report",
-					"name": "Bank Deposit",
+					"name": "Bank Check Of Bank Transactions",
 					"doctype": "Bank Transactions",
 					"is_query_report": True,
 				},
