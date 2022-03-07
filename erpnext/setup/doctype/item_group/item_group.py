@@ -112,7 +112,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		from erpnext.stock.doctype.item.item import validate_item_default_company_links
 		validate_item_default_company_links(self.item_group_defaults)
 
-def get_child_groups_for_website(item_group_name, immediate=False):
+def get_child_groups_for_website(item_group_name, immediate=False, include_self=False):
 	"""Returns child item groups *excluding* passed group."""
 	item_group = frappe.get_cached_value("Item Group", item_group_name, ["lft", "rgt"], as_dict=1)
 	filters = {
@@ -123,6 +123,12 @@ def get_child_groups_for_website(item_group_name, immediate=False):
 
 	if immediate:
 		filters["parent_item_group"] = item_group_name
+
+	if include_self:
+		filters.update({
+			"lft": [">=", item_group.lft],
+			"rgt": ["<=", item_group.rgt]
+		})
 
 	return frappe.get_all(
 		"Item Group",
