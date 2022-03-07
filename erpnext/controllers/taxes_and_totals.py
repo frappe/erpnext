@@ -270,7 +270,8 @@ class calculate_taxes_and_totals(object):
 			shipping_rule.apply(self.doc)
 
 	def calculate_taxes(self):
-		if not self.doc.get('is_consolidated'):
+		rounding_adjustment_computed = self.doc.get('is_consolidated') and self.doc.get('rounding_adjustment')
+		if not rounding_adjustment_computed:
 			self.doc.rounding_adjustment = 0
 
 		# maintain actual tax rate based on idx
@@ -326,7 +327,7 @@ class calculate_taxes_and_totals(object):
 					if i == (len(self.doc.get("taxes")) - 1) and self.discount_amount_applied \
 						and self.doc.discount_amount \
 						and self.doc.apply_discount_on == "Grand Total" \
-						and not self.doc.get('is_consolidated'):
+						and not rounding_adjustment_computed:
 							self.doc.rounding_adjustment = flt(self.doc.grand_total
 								- flt(self.doc.discount_amount) - tax.total,
 								self.doc.precision("rounding_adjustment"))
@@ -465,20 +466,22 @@ class calculate_taxes_and_totals(object):
 					self.doc.total_net_weight += d.total_weight
 
 	def set_rounded_total(self):
-		if not self.doc.get('is_consolidated'):
-			if self.doc.meta.get_field("rounded_total"):
-				if self.doc.is_rounded_total_disabled():
-					self.doc.rounded_total = self.doc.base_rounded_total = 0
-					return
+		if self.doc.get('is_consolidated') and self.doc.get('rounding_adjustment'):
+			return
 
-				self.doc.rounded_total = round_based_on_smallest_currency_fraction(self.doc.grand_total,
-					self.doc.currency, self.doc.precision("rounded_total"))
+		if self.doc.meta.get_field("rounded_total"):
+			if self.doc.is_rounded_total_disabled():
+				self.doc.rounded_total = self.doc.base_rounded_total = 0
+				return
 
-				#if print_in_rate is set, we would have already calculated rounding adjustment
-				self.doc.rounding_adjustment += flt(self.doc.rounded_total - self.doc.grand_total,
-					self.doc.precision("rounding_adjustment"))
+			self.doc.rounded_total = round_based_on_smallest_currency_fraction(self.doc.grand_total,
+				self.doc.currency, self.doc.precision("rounded_total"))
 
-				self._set_in_company_currency(self.doc, ["rounding_adjustment", "rounded_total"])
+			#if print_in_rate is set, we would have already calculated rounding adjustment
+			self.doc.rounding_adjustment += flt(self.doc.rounded_total - self.doc.grand_total,
+				self.doc.precision("rounding_adjustment"))
+
+			self._set_in_company_currency(self.doc, ["rounding_adjustment", "rounded_total"])
 
 	def _cleanup(self):
 		if not self.doc.get('is_consolidated'):
