@@ -1,14 +1,15 @@
 import frappe
 from dateutil.relativedelta import relativedelta
+
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import now_datetime
 
 from erpnext.hr.doctype.attendance.attendance import mark_attendance
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.report.monthly_attendance_sheet.monthly_attendance_sheet import execute
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestMonthlyAttendanceSheet(ERPNextTestCase):
+class TestMonthlyAttendanceSheet(FrappeTestCase):
 	def setUp(self):
 		self.employee = make_employee("test_employee@example.com")
 		frappe.db.delete('Attendance', {'employee': self.employee})
