@@ -316,6 +316,16 @@ class PurchaseOrder(BuyingController):
 			'target_ref_field': 'stock_qty',
 			'source_field': 'stock_qty'
 		})
+		self.status_updater.append({
+			'source_dt': 'Purchase Order Item',
+			'target_dt': 'Packed Item',
+			'target_field': 'ordered_qty',
+			'target_parent_dt': 'Sales Order',
+			'target_parent_field': '',
+			'join_field': 'sales_order_packed_item',
+			'target_ref_field': 'qty',
+			'source_field': 'stock_qty'
+		})
 
 	def update_delivered_qty_in_sales_order(self):
 		"""Update delivered qty in Sales Order for drop ship"""
