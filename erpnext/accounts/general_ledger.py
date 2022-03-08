@@ -221,7 +221,7 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 				debit_credit_diff += flt(d.credit)
 			round_off_account_exists = True
 
-	if round_off_account_exists and abs(debit_credit_diff) <= (1.0 / (10**precision)):
+	if round_off_account_exists and abs(debit_credit_diff) < (1.0 / (10**precision)):
 		gl_map.remove(round_off_gle)
 		return
 
