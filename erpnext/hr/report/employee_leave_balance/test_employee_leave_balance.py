@@ -59,11 +59,11 @@ class TestEmployeeLeaveBalance(unittest.TestCase):
 		leave_application = make_leave_application(self.employee_id, add_days(first_sunday, 1), add_days(first_sunday, 4), '_Test Leave Type')
 		leave_application.reload()
 
-		filters = {
+		filters = frappe._dict({
 			'from_date': allocation1.from_date,
 			'to_date': allocation2.to_date,
 			'employee': self.employee_id
-		}
+		})
 
 		report = execute(filters)
 
@@ -93,30 +93,30 @@ class TestEmployeeLeaveBalance(unittest.TestCase):
 		leave_application.reload()
 
 		# Case 1: opening balance for first alloc boundary
-		filters = {
+		filters = frappe._dict({
 			'from_date': self.year_start,
 			'to_date': self.year_end,
 			'employee': self.employee_id
-		}
+		})
 		report = execute(filters)
 		self.assertEqual(report[1][0].opening_balance, 0)
 
 		# Case 2: opening balance after leave application date
-		filters = {
+		filters = frappe._dict({
 			'from_date': add_days(leave_application.to_date, 1),
 			'to_date': self.year_end,
 			'employee': self.employee_id
-		}
+		})
 		report = execute(filters)
 		self.assertEqual(report[1][0].opening_balance, (allocation1.new_leaves_allocated - leave_application.total_leave_days))
 
 		# Case 3: leave balance shows actual balance and not consumption balance as per remaining days near alloc end date
 		# eg: 3 days left for alloc to end, leave balance should still be 26 and not 3
-		filters = {
+		filters = frappe._dict({
 			'from_date': add_days(self.year_end, -3),
 			'to_date': self.year_end,
 			'employee': self.employee_id
-		}
+		})
 		report = execute(filters)
 		self.assertEqual(report[1][0].opening_balance, (allocation1.new_leaves_allocated - leave_application.total_leave_days))
 
@@ -139,22 +139,22 @@ class TestEmployeeLeaveBalance(unittest.TestCase):
 			carry_forward=True, leave_type=leave_type.name)
 
 		# Case 1: carry forwarded leaves considered in opening balance for second alloc
-		filters = {
+		filters = frappe._dict({
 			'from_date': add_days(self.mid_year, 1),
 			'to_date': self.year_end,
 			'employee': self.employee_id
-		}
+		})
 		report = execute(filters)
 		# available leaves from old alloc
 		opening_balance = allocation1.new_leaves_allocated - leave_application.total_leave_days
 		self.assertEqual(report[1][0].opening_balance, opening_balance)
 
 		# Case 2: opening balance one day after alloc boundary = carry forwarded leaves + new leaves alloc
-		filters = {
+		filters = frappe._dict({
 			'from_date': add_days(self.mid_year, 2),
 			'to_date': self.year_end,
 			'employee': self.employee_id
-		}
+		})
 		report = execute(filters)
 		# available leaves from old alloc
 		opening_balance = allocation2.new_leaves_allocated + (allocation1.new_leaves_allocated - leave_application.total_leave_days)

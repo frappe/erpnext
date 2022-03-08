@@ -3,6 +3,7 @@
 
 
 from itertools import groupby
+from typing import Dict, List, Tuple
 
 import frappe
 from frappe import _
@@ -14,10 +15,9 @@ from erpnext.hr.doctype.leave_application.leave_application import (
 	get_leaves_for_period,
 )
 
+Filters = frappe._dict
 
-def execute(filters=None):
-	filters = frappe._dict(filters or {})
-
+def execute(filters: Filters = None) -> Tuple:
 	if filters.to_date <= filters.from_date:
 		frappe.throw(_('"From Date" can not be greater than or equal to "To Date"'))
 
@@ -26,8 +26,9 @@ def execute(filters=None):
 	charts = get_chart_data(data)
 	return columns, data, None, charts
 
-def get_columns():
-	columns = [{
+
+def get_columns() -> List[Dict]:
+	return [{
 		'label': _('Leave Type'),
 		'fieldtype': 'Link',
 		'fieldname': 'leave_type',
@@ -72,9 +73,8 @@ def get_columns():
 		'width': 150,
 	}]
 
-	return columns
 
-def get_data(filters):
+def get_data(filters: Filters) -> List:
 	leave_types = frappe.db.get_list('Leave Type', pluck='name', order_by='name')
 	conditions = get_conditions(filters)
 
@@ -128,7 +128,7 @@ def get_data(filters):
 	return data
 
 
-def get_opening_balance(employee, leave_type, filters, carry_forwarded_leaves):
+def get_opening_balance(employee: str, leave_type: str, filters: Filters, carry_forwarded_leaves: float) -> float:
 	# allocation boundary condition
 	# opening balance is the closing leave balance 1 day before the filter start date
 	opening_balance_date = add_days(filters.from_date, -1)
@@ -146,7 +146,7 @@ def get_opening_balance(employee, leave_type, filters, carry_forwarded_leaves):
 	return opening_balance
 
 
-def get_conditions(filters):
+def get_conditions(filters: Filters) -> Dict:
 	conditions={
 		'status': 'Active',
 	}
@@ -162,7 +162,7 @@ def get_conditions(filters):
 	return conditions
 
 
-def get_department_leave_approver_map(department=None):
+def get_department_leave_approver_map(department: str = None):
 	# get current department and all its child
 	department_list = frappe.get_list('Department',
 		filters={'disabled': 0},
@@ -190,7 +190,7 @@ def get_department_leave_approver_map(department=None):
 	return approvers
 
 
-def get_allocated_and_expired_leaves(from_date, to_date, employee, leave_type):
+def get_allocated_and_expired_leaves(from_date: str, to_date: str, employee: str, leave_type: str) -> Tuple[float, float, float]:
 	new_allocation = 0
 	expired_leaves = 0
 	carry_forwarded_leaves = 0
@@ -219,7 +219,7 @@ def get_allocated_and_expired_leaves(from_date, to_date, employee, leave_type):
 	return new_allocation, expired_leaves, carry_forwarded_leaves
 
 
-def get_leave_ledger_entries(from_date, to_date, employee, leave_type):
+def get_leave_ledger_entries(from_date: str, to_date: str, employee: str, leave_type: str) -> List[Dict]:
 	ledger = frappe.qb.DocType('Leave Ledger Entry')
 	records = (
 		frappe.qb.from_(ledger)
@@ -243,7 +243,7 @@ def get_leave_ledger_entries(from_date, to_date, employee, leave_type):
 	return records
 
 
-def get_chart_data(data):
+def get_chart_data(data: List) -> Dict:
 	labels = []
 	datasets = []
 	employee_data = data
@@ -263,7 +263,7 @@ def get_chart_data(data):
 	return chart
 
 
-def get_dataset_for_chart(employee_data, datasets, labels):
+def get_dataset_for_chart(employee_data: List, datasets: List, labels: List) -> List:
 	leaves = []
 	employee_data = sorted(employee_data, key=lambda k: k['employee_name'])
 
