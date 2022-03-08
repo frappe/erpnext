@@ -68,9 +68,477 @@
 	},
 
 	"Austria": {
-		"Austria Tax": {
-			"account_name": "VAT",
-			"tax_rate": 20.00
+		"tax_categories": [
+			"Umsatzsteuer",
+			"Vorsteuer"
+		],
+		"chart_of_accounts": {
+			"Einheitskontenrahmen": {
+				"sales_tax_templates": [
+					{
+						"title": "Umsatzsteuer",
+						"tax_category": "Umsatzsteuer",
+						"is_default": 1,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer",
+									"account_number": "3500",
+									"tax_rate": 20.00
+								},
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 10%",
+									"account_number": "3501",
+									"tax_rate": 10.00
+								},
+								"rate": 0.00
+							}
+						]
+					}
+				],
+				"purchase_tax_templates": [
+					{
+						"title": "Vorsteuer",
+						"tax_category": "Vorsteuer",
+						"is_default": 1,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Vorsteuer",
+									"account_number": "2500",
+									"root_type": "Asset",
+									"tax_rate": 20.00
+								},
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Vorsteuer 10%",
+									"account_number": "2501",
+									"root_type": "Asset",
+									"tax_rate": 10.00
+								},
+								"rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Innergemeinschaftlicher Erwerb",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Vorsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "2510",
+									"root_type": "Asset",
+									"tax_rate": 20.00
+								},
+								"add_deduct_tax": "Add"
+							},
+							{
+								"account_head": {
+									"account_name": "Erwerbsteuer (USt aus innergemeinschaftlichem Erwerb)",
+									"account_number": "3510",
+									"root_type": "Liability",
+									"tax_rate": 20.00
+								},
+								"add_deduct_tax": "Deduct"
+							}
+						]
+					},
+					{
+						"title": "Innergemeinschaftlicher Erwerb 10%",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Vorsteuer aus innergemeinschaftlichem Erwerb 10%",
+									"account_number": "2511",
+									"root_type": "Asset",
+									"tax_rate": 10.00
+								},
+								"add_deduct_tax": "Add"
+							},
+							{
+								"account_head": {
+									"account_name": "Erwerbsteuer (USt aus innergemeinschaftlichem Erwerb) 10%",
+									"account_number": "3511",
+									"root_type": "Liability",
+									"tax_rate": 10.00
+								},
+								"add_deduct_tax": "Deduct"
+							}
+						]
+					}
+				],
+				"item_tax_templates": [
+					{
+						"title": "Umsatzsteuer",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer",
+									"account_number": "3500",
+									"tax_rate": 20.00
+								},
+								"tax_rate": 20.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 10%",
+									"account_number": "3501",
+									"tax_rate": 10.00
+								},
+								"tax_rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Umsatzsteuer 10%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer",
+									"account_number": "3500",
+									"tax_rate": 20.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 10%",
+									"account_number": "3501",
+									"tax_rate": 10.00
+								},
+								"tax_rate": 10.00
+							}
+						]
+					},
+					{
+						"title": "Vorsteuer",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Vorsteuer",
+									"account_number": "2500",
+									"root_type": "Asset",
+									"tax_rate": 20.00
+								},
+								"tax_rate": 20.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Vorsteuer 10%",
+									"account_number": "2501",
+									"root_type": "Asset",
+									"tax_rate": 10.00
+								},
+								"tax_rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Vorsteuer 10%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Vorsteuer",
+									"account_number": "2500",
+									"root_type": "Asset",
+									"tax_rate": 20.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Vorsteuer 10%",
+									"account_number": "2501",
+									"root_type": "Asset",
+									"tax_rate": 10.00
+								},
+								"tax_rate": 10.00
+							}
+						]
+					}
+				]
+			},
+			"Standard with Numbers": {
+				"sales_tax_templates": [
+					{
+						"title": "Umsatzsteuer",
+						"tax_category": "Umsatzsteuer",
+						"is_default": 1,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer",
+									"account_number": "2301",
+									"tax_rate": 20.00
+								},
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 10%",
+									"account_number": "2302",
+									"tax_rate": 10.00
+								},
+								"rate": 0.00
+							}
+						]
+					}
+				],
+				"purchase_tax_templates": [
+					{
+						"title": "Vorsteuer",
+						"tax_category": "Vorsteuer",
+						"is_default": 1,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Vorsteuer",
+									"account_number": "1501",
+									"root_type": "Asset",
+									"tax_rate": 20.00
+								},
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Vorsteuer 10%",
+									"account_number": "1502",
+									"root_type": "Asset",
+									"tax_rate": 10.00
+								},
+								"rate": 0.00
+							}
+						]
+					}
+				],
+				"item_tax_templates": [
+					{
+						"title": "Umsatzsteuer",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer",
+									"account_number": "2301",
+									"tax_rate": 20.00
+								},
+								"tax_rate": 20.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 10%",
+									"account_number": "2302",
+									"tax_rate": 10.00
+								},
+								"tax_rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Umsatzsteuer 10%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer",
+									"account_number": "2301",
+									"tax_rate": 20.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 10%",
+									"account_number": "2302",
+									"tax_rate": 10.00
+								},
+								"tax_rate": 10.00
+							}
+						]
+					},
+					{
+						"title": "Vorsteuer",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Vorsteuer",
+									"account_number": "1501",
+									"root_type": "Asset",
+									"tax_rate": 20.00
+								},
+								"tax_rate": 20.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Vorsteuer 10%",
+									"account_number": "1502",
+									"root_type": "Asset",
+									"tax_rate": 10.00
+								},
+								"tax_rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Vorsteuer 10%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Vorsteuer",
+									"account_number": "1501",
+									"root_type": "Asset",
+									"tax_rate": 20.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Vorsteuer 10%",
+									"account_number": "1502",
+									"root_type": "Asset",
+									"tax_rate": 10.00
+								},
+								"tax_rate": 10.00
+							}
+						]
+					}
+				]
+			},
+			"*": {
+				"sales_tax_templates": [
+					{
+						"title": "Umsatzsteuer",
+						"tax_category": "Umsatzsteuer",
+						"is_default": 1,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer",
+									"tax_rate": 20.00
+								},
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer 10%",
+									"tax_rate": 10.00
+								},
+								"rate": 0.00
+							}
+						]
+					}
+				],
+				"purchase_tax_templates": [
+					{
+						"title": "Vorsteuer",
+						"tax_category": "Vorsteuer",
+						"is_default": 1,
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Vorsteuer",
+									"tax_rate": 20.00,
+									"root_type": "Asset"
+								},
+								"rate": 0.00
+							},
+							{
+								"account_head": {
+									"account_name": "Vorsteuer 10%",
+									"root_type": "Asset",
+									"tax_rate": 10.00
+								},
+								"rate": 0.00
+							}
+						]
+					}
+				],
+				"item_tax_templates": [
+					{
+						"title": "Umsatzsteuer",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer",
+									"tax_rate": 20.00
+								},
+								"tax_rate": 20.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 10%",
+									"tax_rate": 10.00
+								},
+								"tax_rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Umsatzsteuer 10%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer",
+									"tax_rate": 20.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Umsatzsteuer 10%",
+									"tax_rate": 10.00
+								},
+								"tax_rate": 10.00
+							}
+						]
+					},
+					{
+						"title": "Vorsteuer",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Vorsteuer",
+									"root_type": "Asset",
+									"tax_rate": 20.00
+								},
+								"tax_rate": 20.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Vorsteuer 10%",
+									"root_type": "Asset",
+									"tax_rate": 10.00
+								},
+								"tax_rate": 0.00
+							}
+						]
+					},
+					{
+						"title": "Vorsteuer 10%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Vorsteuer",
+									"root_type": "Asset",
+									"tax_rate": 20.00
+								},
+								"tax_rate": 0.00
+							},
+							{
+								"tax_type": {
+									"account_name": "Vorsteuer 10%",
+									"root_type": "Asset",
+									"tax_rate": 10.00
+								},
+								"tax_rate": 10.00
+							}
+						]
+					}
+				]
+			}
 		}
 	},
 
