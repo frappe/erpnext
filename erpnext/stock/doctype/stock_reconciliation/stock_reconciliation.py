@@ -270,11 +270,14 @@ class StockReconciliation(StockController):
 							new_sl_entries.append(new_sle)
 						continue
 					new_sl_entries.append(sle)
+			else:
+				new_sl_entries = sl_entries
 
 			allow_negative_stock = False
 			if has_batch_no:
 				allow_negative_stock = True
-
+			if not new_sl_entries:
+				new_sl_entries = sl_entries
 			self.make_sl_entries(new_sl_entries, allow_negative_stock=allow_negative_stock)
 
 		if has_serial_no and sl_entries:
