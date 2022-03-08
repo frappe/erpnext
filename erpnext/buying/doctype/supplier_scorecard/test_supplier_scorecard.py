@@ -1,12 +1,12 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestSupplierScorecard(unittest.TestCase):
+class TestSupplierScorecard(FrappeTestCase):
 
 	def test_create_scorecard(self):
 		doc = make_supplier_scorecard().insert()
