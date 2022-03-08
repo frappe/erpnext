@@ -1040,7 +1040,7 @@ def make_wo_order_test_record(**args):
 	wo_order.scrap_warehouse = args.fg_warehouse or "_Test Scrap Warehouse - _TC"
 	wo_order.company = args.company or "_Test Company"
 	wo_order.stock_uom = args.stock_uom or "_Test UOM"
-	wo_order.use_multi_level_bom=0
+	wo_order.use_multi_level_bom= args.use_multi_level_bom or 0
 	wo_order.skip_transfer=args.skip_transfer or 0
 	wo_order.get_items_and_operations_from_bom()
 	wo_order.sales_order = args.sales_order or None
