@@ -591,7 +591,7 @@ class SellingController(StockController):
 		for item in self.items:
 			has_serial = frappe.db.get_value('Item', item.item_code, 'has_serial_no')
 
-			if has_serial and item.serial_no:
+			if has_serial and item.get('serial_no'):
 				serials = item.serial_no.split('\n')
 				for serial in serials:
 					row = self.append('serial_items', {})

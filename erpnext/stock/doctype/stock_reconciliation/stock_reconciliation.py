@@ -422,12 +422,12 @@ class StockReconciliation(StockController):
 			else:
 				sl_entries.append(self.get_sle_for_items(row))
 
+		new_sl_entries = []
 		if sl_entries:
 			if has_serial_no:
 				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
 
 				qty_after_transaction = 0
-				new_sl_entries = []
 				for sle in sl_entries:
 					if not sle.serial_no or flt(sle.get('actual_qty')) > 0:
 						new_sl_entries.append(sle)
@@ -453,8 +453,6 @@ class StockReconciliation(StockController):
 					new_sl_entries.append(sle)
 
 			new_sl_entries.reverse()
-			for d in new_sl_entries:
-				print('asda-------', d)
 			allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
 			self.make_sl_entries(new_sl_entries, allow_negative_stock=allow_negative_stock)
 

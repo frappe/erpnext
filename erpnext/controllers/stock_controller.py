@@ -539,7 +539,7 @@ class StockController(AccountsController):
 					row = self.append('serial_items', {})
 					row.item_name = item.item_code
 					row.serial_no = serial if frappe.db.exists('Serial No',
-						{"name": serial, "warehouse": item.warehouse}) else ""
+						{"name": serial, "warehouse": item.s_warehouse}) else ""
 					row.type = 'Accepted'
 				if len(accepted_serials) < abs(cint(item.qty)):
 					for auto_serial in range(abs(cint(item.qty))- len(accepted_serials)):
@@ -548,12 +548,11 @@ class StockController(AccountsController):
 						row.type = 'Accepted'
 
 			if has_serial and not item.serial_no:
-				print('THIS IS CALLED')
 				for serial in range(abs(cint(item.qty))):
 					row = self.append('serial_items', {})
 					row.item_name = item.item_code
 					row.type = 'Accepted'
-          
+
 def repost_required_for_queue(doc: StockController) -> bool:
 	"""check if stock document contains repeated item-warehouse with queue based valuation.
 
