@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 
 import unittest
 
-=======
->>>>>>> ce27cdb121 (test: Fix flaky tests (#30107))
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, getdate
