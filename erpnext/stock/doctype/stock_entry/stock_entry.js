@@ -745,7 +745,7 @@ frappe.ui.form.on('Stock Entry', {
 
 	create_batch: function (frm) {
 		console.log(" this is create nbutton")
-		// frm.save()
+		frm.save()
 		frappe.call({
 			method: "create_new_batch_no",
 			doc : frm.doc,
