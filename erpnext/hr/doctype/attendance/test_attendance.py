@@ -97,6 +97,9 @@ class TestAttendance(FrappeTestCase):
 		# date after relieving not in unmarked days
 		self.assertNotIn(add_days(relieving_date, 1), unmarked_days)
 
+	def tearDown(self):
+		frappe.db.rollback()
+
 
 def get_month_name(date):
 	month_number = date.month
