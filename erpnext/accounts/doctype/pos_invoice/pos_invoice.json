@@ -3,7 +3,7 @@
  "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
- "creation": "2020-01-24 15:29:29.933693",
+ "creation": "2022-01-05 12:07:51.292010",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -66,6 +66,8 @@
   "packing_list",
   "packed_items",
   "product_bundle_help",
+  "serials_section",
+  "serial_items",
   "time_sheet_list",
   "timesheets",
   "total_billing_amount",
@@ -1568,12 +1570,25 @@
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "serials_section",
+   "fieldtype": "Section Break",
+   "label": "Serials"
+  },
+  {
+   "fieldname": "serial_items",
+   "fieldtype": "Table",
+   "label": "Serial Items",
+   "options": "Serial Number Item",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-05 12:11:53.871828",
+ "modified": "2022-03-08 20:50:19.139642",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
@@ -1623,6 +1638,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "customer",
  "title_field": "title",
  "track_changes": 1,
