@@ -164,7 +164,7 @@ frappe.ui.form.on("Salary Slip", {
 		frm.trigger("set_dynamic_labels");
 
 		// frm.add_custom_button(__('Calculate leave fields'), function () {
-			if(frm.doc.start_date) {
+			if(frm.doc.start_date && !frm.doc.check) {
 				frappe.call({
 					method: 'get_payroll',
 					doc:frm.doc,
@@ -176,32 +176,34 @@ frappe.ui.form.on("Salary Slip", {
 					}
 				});
 			}
-	
-		// 		// frappe.call({
-		// 		// 	method: 'leave_type_encasement_days',
-		// 		// 	doc:frm.doc,
-		// 		// 	callback: function(r) {
-		// 		// 		if(r.message) {
-		// 		// 		frm.set_value('encashment_days', r.message);
-		// 		// 		frm.refresh_field("encashment_days");
-		// 		// 		}
-		// 		// 	}
-		// 		// });
-			
-		// 		frappe.call({
-		// 			method: 'set_days',
-		// 			doc:frm.doc,
-		// 			callback: function(r) {
-		// 				frm.refresh_field("days_in_month");
-		// 				frm.refresh_field("paid_holidays");
-		// 				frm.refresh_field("compoff");
-		// 				frm.refresh_field("weekly_off");
-		// 				frm.refresh_field("present_days");
-		// 				frm.refresh_field("leave");
-		// 			}
-		// 		});
-		// 	}
-		// });
+		if(frm.doc.start_date && !frm.doc.check){
+			frappe.call({
+				method: 'leave_type_encasement_days',
+				doc:frm.doc,
+				callback: function(r) {
+					if(r.message) {
+					frm.refresh_field("encashment_days");
+					}
+				}
+			});
+		}
+		if(frm.doc.start_date && !frm.doc.check){
+			frappe.call({
+				method: 'set_days',
+				doc:frm.doc,
+				callback: function(r) {
+					if (r.message){
+						frm.refresh_field("days_in_month");
+						frm.refresh_field("paid_holidays");
+						frm.refresh_field("compoff");
+						frm.refresh_field("weekly_off");
+						frm.refresh_field("present_days");
+						frm.refresh_field("leave");
+					}
+					frm.set_value('check', 1);
+				}
+			});
+		}
 		
 	},
 

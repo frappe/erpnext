@@ -92,6 +92,7 @@
   "base_total_in_words",
   "leave_details_section",
   "leave_details",
+  "check",
   "section_break_75",
   "amended_from"
  ],
@@ -692,13 +693,20 @@
    "fieldtype": "Data",
    "label": "Present Days",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "check",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Check"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-11 11:51:06.838679",
+ "modified": "2022-03-07 14:09:34.521042",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",

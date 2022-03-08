@@ -3,6 +3,9 @@
 
 
 import frappe
+from datetime import datetime
+import math
+import calendar
 from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.desk.reportview import get_filters_cond, get_match_cond
@@ -148,9 +151,9 @@ class PayrollEntry(Document):
 				"currency": self.currency
 			})
 			if len(employees) > 30:
-				frappe.enqueue(create_salary_slips_for_employees, timeout=600, employees=employees, args=args)
+				frappe.enqueue(create_salary_slips_for_employees, timeout=600,start_date=self.start_date,end_date=self.end_date,payroll_frequency=self.payroll_frequency,company=self.company,employees=employees, args=args)
 			else:
-				create_salary_slips_for_employees(employees, args, publish_progress=False)
+				create_salary_slips_for_employees(employees, args,start_date=self.start_date,end_date=self.end_date,payroll_frequency=self.payroll_frequency,company=self.company,publish_progress=False)
 				# since this method is called via frm.call this doc needs to be updated manually
 				self.reload()
 
@@ -586,15 +589,156 @@ def payroll_entry_has_bank_entries(name):
 
 	return response
 
-def create_salary_slips_for_employees(employees, args, publish_progress=True):
+def create_salary_slips_for_employees(employees, args,end_date,start_date,payroll_frequency,company,publish_progress=True):
 	salary_slips_exists_for = get_existing_salary_slips(employees, args)
 	count=0
 	salary_slips_not_created = []
 	for emp in employees:
+		from calendar import monthrange
+		a = getdate(start_date).year
+		b = getdate(start_date).month
+		num_days = monthrange(a, b)[1]
+		days_in_month = num_days
+
+		#Paid Holidays
+		paid_holidays=0
+		cdoc = frappe.get_doc("Employee",emp)
+		if cdoc.holiday_list:
+			hdoc = frappe.get_doc("Holiday List",cdoc.holiday_list)
+			doc = frappe.db.sql("""select count(holiday_date) from `tabHoliday`
+								where parent='{0}' and holiday_date
+								between '{1}' and '{2}' and weekly_off = 0""".format(hdoc.name,start_date,end_date),as_dict=1)
+			for i in doc:
+				paid_holidays = i.get("count(holiday_date)")
+
+		#Comp_off
+		
+		comp_off = frappe.db.sql("""select name from `tabCompensatory Leave Request`
+								where employee= '{0}' and  docstatus=1 and work_from_date
+								between '{1}' and '{2}' and work_end_date between '{3}'and '{4}' """.format(emp,start_date,end_date,start_date,end_date),as_dict=1)
+		lst=[]
+		for i in comp_off:
+			doc = frappe.get_doc("Compensatory Leave Request",i.get("name"))
+			date_difference = frappe.db.sql("""SELECT DATEDIFF(work_end_date , work_from_date) as date
+											from `tabCompensatory Leave Request` where name = '{0}' """.format(doc.name),as_dict=1)
+			for i in date_difference:
+				lst.append(i.get("date"))
+		compoff=sum(lst)
+
+	
+		weekly_off=0
+		cdoc = frappe.get_doc("Employee",emp)
+		if cdoc.holiday_list:
+			hdoc = frappe.get_doc("Holiday List",cdoc.holiday_list)
+			doc = frappe.db.sql("""select count(holiday_date) from `tabHoliday`
+								where parent='{0}' and holiday_date
+								between '{1}' and '{2}' and weekly_off = 1""".format(hdoc.name,start_date,end_date),as_dict=1)
+			for i in doc:
+				weekly_off = i.get("count(holiday_date)")
+		# ----------------------------- ---------------------------- ---------------------------------
+		
+		date = start_date.split('-')
+		cur_month = int(date[1])
+		cur_year = int(date[0])
+		last_date_of_month = calendar.monthrange(cur_year, cur_month)
+		start = datetime(year=cur_year, month=cur_month, day=1).strftime("%Y-%m-%d")
+		end = datetime(year=cur_year, month=cur_month, day=int(last_date_of_month[1])).strftime("%Y-%m-%d")
+
+		all_leave_with_start_date = frappe.db.get_all("Leave Application", {'employee':emp, "from_date":['between',[start,end]],'leave_type':['in',['Casual Leave','Sick Leave','Earned Leave','Leave Without Pay']] },['from_date','to_date','total_leave_days'])
+
+		total_leave_list = []
+		for leave in all_leave_with_start_date:
+			to_date_obj = leave.get('to_date')
+			from_date_obj = leave.get('from_date')
+
+			if([from_date_obj.month,from_date_obj.year] == [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] == [cur_month,cur_year]):
+				total_leave_list.append(leave.get('total_leave_days'))
+			if([from_date_obj.month,from_date_obj.year] == [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] != [cur_month,cur_year]):
+				last_day_of_month = calendar.monthrange(cur_year, cur_month)[1]
+				month_date = datetime(cur_year, cur_month, last_day_of_month)
+
+				leaves_in_cur_month = date_diff(month_date,leave.get('from_date')) + 1
+				total_leave_list.append(leaves_in_cur_month)
+
+
+		all_leave_with_end_date = frappe.db.get_all("Leave Application", {'employee':emp, "to_date":['between',[start,end]],'leave_type':['in',['Casual Leave','Sick Leave','Earned Leave','Leave Without Pay']] },['from_date','to_date','total_leave_days'])
+		for leave in all_leave_with_end_date:
+			to_date_obj = leave.get('to_date')
+			from_date_obj = leave.get('from_date')
+
+			if([from_date_obj.month,from_date_obj.year] != [cur_month,cur_year] and [to_date_obj.month,to_date_obj.year] == [cur_month,cur_year]):
+				first_date_of_month = datetime(cur_year, cur_month, 1)
+				diff = date_diff(to_date_obj,first_date_of_month) + 1
+				total_leave_list.append(diff)
+		
+		#present_days
+		leave=0
+		present_days=0
+		if (sum(total_leave_list) == None):
+			leave = 0
+			present_days = days_in_month - weekly_off - paid_holidays
+		else:
+			leave = sum(total_leave_list)
+			present_days = days_in_month - weekly_off - paid_holidays - float(leave)
+
+		
+		sick_leave = frappe.db.sql("""select sum(encashable_days) as result 
+		from `tabLeave Encashment`  where employee = '{0}' and
+					encashment_date between '{1}' and '{2}' and docstatus=1 
+						""".format(emp,start_date,end_date), as_dict=1)
+
+		encashment_days = sick_leave[0]['result']
+
+
+
+		num_months=0
+		from datetime import date
+		doc=frappe.db.sql("""select name from `tabPayroll Period` where company="{0}" and start_date<='{1}' and end_date >='{2} limit 1'""".format(company,start_date,start_date),as_dict=1)
+		if doc:
+			for i in doc:
+				doc=frappe.get_doc("Payroll Period",i.get("name"))
+				lst=frappe.get_doc("Employee",{"employee":emp})
+				a=doc.start_date
+				if doc.start_date < lst.date_of_joining <= doc.end_date and payroll_frequency=="Monthly":
+					end_date_ = getdate(a)
+					start_date_ = getdate(lst.date_of_joining)
+					num_months = (end_date_.year - start_date_.year) * 12 + (end_date_.month+1 - start_date_.month)
+					return num_months
+				elif doc.start_date < lst.date_of_joining <= doc.end_date and payroll_frequency=="Weekly":
+					end_date_ = getdate(a)
+					start_date_ = getdate(lst.date_of_joining)
+					days = abs(start_date_-end_date_).days
+					num_months=flt(days/7,precision=0)
+					print(num_months)
+					return num_months
+				a=end_date
+				b = doc.start_date
+				if payroll_frequency=="Monthly":
+					if not doc.start_date < lst.date_of_joining <= doc.end_date:
+						end_date_ = getdate(a)
+						start_date_ = getdate(b)
+						num_months = (end_date_.year - start_date_.year) * 12 + (end_date_.month+1 - start_date_.month)
+						return num_months
+				if payroll_frequency=="Weekly":
+					if not doc.start_date < lst.date_of_joining <= doc.end_date:
+						end_date_ = getdate(a)
+						start_date_ = getdate(b)
+						days = abs(start_date_-end_date_).days
+						num_months=flt(days/7,precision=0)
+						print(num_months)
+						return num_months
 		if emp not in salary_slips_exists_for:
 			args.update({
 				"doctype": "Salary Slip",
-				"employee": emp
+				"employee": emp,
+				"leave":leave,
+				"present_days":present_days,
+				"weekly_off":weekly_off,
+				"compoff":compoff,
+				"paid_holidays":paid_holidays,
+				"days_in_month":days_in_month,
+				"encashment_days":encashment_days,
+				"months_of_service_in_payment_period":num_months
 			})
 			ss = frappe.get_doc(args)
 			ss.insert()
