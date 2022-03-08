@@ -533,10 +533,10 @@ def get_items_for_stock_reco(warehouse, company):
 		select
 			i.name as item_code, i.item_name, bin.warehouse as warehouse, i.has_serial_no, i.has_batch_no
 		from
-			tabBin bin, tabItem i
+			`tabBin` bin, `tabItem` i
 		where
 			i.name = bin.item_code
-			and IFNULL(i.disabled, 0) = 0
+			and ifnull(i.disabled, 0) = 0
 			and i.is_stock_item = 1
 			and i.has_variants = 0
 			and exists(
@@ -544,11 +544,12 @@ def get_items_for_stock_reco(warehouse, company):
 			)
 	""", as_dict=1)
 
-	items += frappe.db.sql("""
+	items += frappe.db.multisql({
+		'mariadb': """
 		select
 			i.name as item_code, i.item_name, id.default_warehouse as warehouse, i.has_serial_no, i.has_batch_no
 		from
-			tabItem i, `tabItem Default` id
+			`tabItem` i, `tabItem Default` id
 		where
 			i.name = id.parent
 			and exists(
@@ -556,10 +557,27 @@ def get_items_for_stock_reco(warehouse, company):
 			)
 			and i.is_stock_item = 1
 			and i.has_variants = 0
-			and IFNULL(i.disabled, 0) = 0
+			and ifnull(i.disabled, 0) = 0
 			and id.company = %s
 		group by i.name
-	""", (lft, rgt, company), as_dict=1)
+	""",
+		'postgres': """
+		select
+			i.name as item_code, i.item_name, id.default_warehouse as warehouse, i.has_serial_no, i.has_batch_no
+		from
+			`tabItem` i, `tabItem Default` id
+		where
+			i.name = id.parent
+			and exists(
+				select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=id.default_warehouse
+			)
+			and i.is_stock_item = 1
+			and i.has_variants = 0
+			and ifnull(i.disabled, 0) = 0
+			and id.company = %s
+		group by i.name, i.item_name, id.default_warehouse, i.has_serial_no, i.has_batch_no
+	"""
+	}, (lft, rgt, company), as_dict=1)
 
 	# remove duplicates
 	# check if item-warehouse key extracted from each entry exists in set iw_keys

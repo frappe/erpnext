@@ -116,8 +116,10 @@ class MaterialRequest(BuyingController):
 	def check_modified_date(self):
 		mod_db = frappe.db.sql("""select modified from `tabMaterial Request` where name = %s""",
 			self.name)
-		date_diff = frappe.db.sql("""select TIMEDIFF('%s', '%s')"""
-			% (mod_db[0][0], cstr(self.modified)))
+		date_diff = frappe.db.multisql({
+			'mariadb': """select TIMEDIFF('%s', '%s')""" % (mod_db[0][0], cstr(self.modified)),
+			'postgres': """select '%s'::date - '%s'::date""" % (mod_db[0][0], cstr(self.modified))
+		})
 
 		if date_diff and date_diff[0][0]:
 			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(_(self.doctype), self.name))

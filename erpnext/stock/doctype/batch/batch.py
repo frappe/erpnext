@@ -161,14 +161,22 @@ def get_batch_qty(batch_no=None, warehouse=None, item_code=None, posting_date=No
 
 	out = 0
 	if batch_no and warehouse:
-		cond = ""
+		mdb_cond = ""
+		pg_cond = ""
+
 		if posting_date and posting_time:
-			cond = " and timestamp(posting_date, posting_time) <= timestamp('{0}', '{1}')".format(posting_date,
+			pg_cond = " and cast(concat(posting_date, ' ', posting_time) as timestamp) <= cast(concat('{0}', ' ', '{1}') as timestamp)".format(posting_date,
+				posting_time)
+			mdb_cond = " and timestamp(posting_date, posting_time) <= timestamp('{0}', '{1}')".format(posting_date,
 				posting_time)
 
-		out = float(frappe.db.sql("""select sum(actual_qty)
+		out = float(frappe.db.multisql({'mariadb': """select sum(actual_qty)
 			from `tabStock Ledger Entry`
-			where is_cancelled = 0 and warehouse=%s and batch_no=%s {0}""".format(cond),
+			where is_cancelled = 0 and warehouse=%s and batch_no=%s {0}""".format(mdb_cond),
+			'postgres': """select sum(actual_qty)
+			from `tabStock Ledger Entry`
+			where is_cancelled = 0 and warehouse=%s and batch_no=%s {0}""".format(pg_cond),
+			},
 			(warehouse, batch_no))[0][0] or 0)
 
 	if batch_no and not warehouse:
@@ -293,7 +301,8 @@ def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 
 		cond = " and `tabBatch`.name = %s" %(frappe.db.escape(batch[0].batch_no))
 
-	return frappe.db.sql("""
+	return frappe.db.multisql({
+		'mariadb': """
 		select batch_id, sum(`tabStock Ledger Entry`.actual_qty) as qty
 		from `tabBatch`
 			join `tabStock Ledger Entry` ignore index (item_code, warehouse)
@@ -303,7 +312,19 @@ def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 			and (`tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL) {0}
 		group by batch_id
 		order by `tabBatch`.expiry_date ASC, `tabBatch`.creation ASC
-	""".format(cond), (item_code, warehouse), as_dict=True)
+	""".format(cond),
+		'postgres': """
+		select batch_id, sum(`tabStock Ledger Entry`.actual_qty) as qty
+		from `tabBatch`
+			join `tabStock Ledger Entry`
+				on (`tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no )
+		where `tabStock Ledger Entry`.item_code = %s and `tabStock Ledger Entry`.warehouse = %s
+			and `tabStock Ledger Entry`.is_cancelled = 0
+			and (`tabBatch`.expiry_date >= CURRENT_DATE or `tabBatch`.expiry_date IS NULL) {0}
+		group by `tabBatch`.expiry_date, `tabBatch`.creation, batch_id
+		order by `tabBatch`.expiry_date ASC, `tabBatch`.creation ASC
+	""".format(cond)
+	}, (item_code, warehouse), as_dict=True)
 
 def validate_serial_no_with_batch(serial_nos, item_code):
 	if frappe.get_cached_value("Serial No", serial_nos[0], "item_code") != item_code:

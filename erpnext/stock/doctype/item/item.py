@@ -433,7 +433,7 @@ class Item(Document):
 			FROM `tabStock Reconciliation Item`
 			WHERE item_code = %s and docstatus = 1
 			GROUP By item_code, warehouse, parent
-			HAVING records > 1
+			HAVING COUNT(*) > 1
 		""", new_name, as_dict=1)
 
 		if not records: return
@@ -942,7 +942,7 @@ def check_stock_uom_with_bin(item, stock_uom):
 			frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.").format(item))
 
 	bin_list = frappe.db.sql("""
-			select * from tabBin where item_code = %s
+			select * from `tabBin` where item_code = %s
 				and (reserved_qty > 0 or ordered_qty > 0 or indented_qty > 0 or planned_qty > 0)
 				and stock_uom != %s
 			""", (item, stock_uom), as_dict=1)
@@ -951,7 +951,7 @@ def check_stock_uom_with_bin(item, stock_uom):
 		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You need to either cancel the linked documents or create a new Item.").format(item))
 
 	# No SLE or documents against item. Bin UOM can be changed safely.
-	frappe.db.sql("""update tabBin set stock_uom=%s where item_code=%s""", (stock_uom, item))
+	frappe.db.sql("""update `tabBin` set stock_uom=%s where item_code=%s""", (stock_uom, item))
 
 
 def get_item_defaults(item_code, company):

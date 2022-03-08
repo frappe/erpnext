@@ -239,7 +239,7 @@ def get_items_to_be_repost(voucher_type, voucher_no, doc=None):
 		filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
 		fields=["item_code", "warehouse", "posting_date", "posting_time", "creation"],
 		order_by="creation asc",
-		group_by="item_code, warehouse"
+		group_by="item_code, warehouse, posting_date, posting_time, creation"
 	)
 
 def get_distinct_item_warehouse(args=None, doc=None):
@@ -368,9 +368,11 @@ class update_entries_after(object):
 			self.process_sle(sle)
 
 	def get_sle_against_current_voucher(self):
-		self.args['time_format'] = '%H:%i:%s'
+		self.args['time_format_mdb'] = '%H:%i:%s'
+		self.args['time_format_pg'] = 'HH24:MI:SS'
 
-		return frappe.db.sql("""
+		return frappe.db.multisql({
+			'mariadb': """
 			select
 				*, timestamp(posting_date, posting_time) as "timestamp"
 			from
@@ -379,12 +381,27 @@ class update_entries_after(object):
 				item_code = %(item_code)s
 				and warehouse = %(warehouse)s
 				and is_cancelled = 0
-				and timestamp(posting_date, time_format(posting_time, %(time_format)s)) = timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s))
+				and timestamp(posting_date, time_format(posting_time, %(time_format_mdb)s)) = timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format_mdb)s))
 
 			order by
 				creation ASC
 			for update
-		""", self.args, as_dict=1)
+		""",
+			'postgres': """
+			select
+				*, posting_date + posting_time as "timestamp"
+			from
+				`tabStock Ledger Entry`
+			where
+				item_code = %(item_code)s
+				and warehouse = %(warehouse)s
+				and is_cancelled = 0
+				and (posting_date + to_char(posting_time, %(time_format_pg)s)::time) = (%(posting_date)s::date + to_char(%(posting_time)s::time, %(time_format_pg)s)::time)
+
+			order by
+				creation ASC
+			for update
+		"""}, self.args, as_dict=1)
 
 	def get_future_entries_to_fix(self):
 		# includes current entry!
@@ -848,7 +865,8 @@ class update_entries_after(object):
 def get_previous_sle_of_current_voucher(args, exclude_current_voucher=False):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 
-	args['time_format'] = '%H:%i:%s'
+	args['time_format_mdb'] = '%H:%i:%s'
+	args['time_format_pg'] = 'HH24:MI:SS'
 	if not args.get("posting_date"):
 		args["posting_date"] = "1900-01-01"
 	if not args.get("posting_time"):
@@ -859,17 +877,30 @@ def get_previous_sle_of_current_voucher(args, exclude_current_voucher=False):
 		voucher_no = args.get("voucher_no")
 		voucher_condition = f"and voucher_no != '{voucher_no}'"
 
-	sle = frappe.db.sql("""
+	sle = frappe.db.multisql({
+		'mariadb': """
 		select *, timestamp(posting_date, posting_time) as "timestamp"
 		from `tabStock Ledger Entry`
 		where item_code = %(item_code)s
 			and warehouse = %(warehouse)s
 			and is_cancelled = 0
 			{voucher_condition}
-			and timestamp(posting_date, time_format(posting_time, %(time_format)s)) < timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s))
+			and timestamp(posting_date, time_format(posting_time, %(time_format_mdb)s)) < timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format_mdb)s))
 		order by timestamp(posting_date, posting_time) desc, creation desc
 		limit 1
-		for update""".format(voucher_condition=voucher_condition), args, as_dict=1)
+		for update""".format(voucher_condition=voucher_condition),
+		'postgres': """
+		select *, posting_date + posting_time as "timestamp"
+		from `tabStock Ledger Entry`
+		where item_code = %(item_code)s
+			and warehouse = %(warehouse)s
+			and is_cancelled = 0
+			{voucher_condition}
+			and (posting_date + to_char(posting_time, %(time_format_pg)s)::time) < (%(posting_date)s::date + to_char(%(posting_time)s::time, %(time_format_pg)s)::time)
+		order by (posting_date + posting_time) desc, creation desc
+		limit 1
+		for update""".format(voucher_condition=voucher_condition)
+	}, args, as_dict=1)
 
 	return sle[0] if sle else frappe._dict()
 
@@ -894,7 +925,9 @@ def get_previous_sle(args, for_update=False):
 def get_stock_ledger_entries(previous_sle, operator=None,
 	order="desc", limit=None, for_update=False, debug=False, check_serial_no=True):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
-	conditions = " and timestamp(posting_date, posting_time) {0} timestamp(%(posting_date)s, %(posting_time)s)".format(operator)
+
+	conditions = ""
+
 	if previous_sle.get("warehouse"):
 		conditions += " and warehouse = %(warehouse)s"
 	elif previous_sle.get("warehouse_condition"):
@@ -921,7 +954,11 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 	if operator in (">", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"
 
-	return frappe.db.sql("""
+	mdb_conditions = conditions + " and timestamp(posting_date, posting_time) {0} timestamp(%(posting_date)s, %(posting_time)s)".format(operator)
+	pg_conditions = conditions + " and cast(concat(posting_date, ' ', posting_time) as timestamp) {0} cast(concat(%(posting_date)s,' ', %(posting_time)s) as timestamp)".format(operator)
+
+	return frappe.db.multisql({
+		'mariadb': """
 		select *, timestamp(posting_date, posting_time) as "timestamp"
 		from `tabStock Ledger Entry`
 		where item_code = %%(item_code)s
@@ -929,11 +966,25 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 		%(conditions)s
 		order by timestamp(posting_date, posting_time) %(order)s, creation %(order)s
 		%(limit)s %(for_update)s""" % {
-			"conditions": conditions,
+			"conditions": mdb_conditions,
 			"limit": limit or "",
 			"for_update": for_update and "for update" or "",
 			"order": order
-		}, previous_sle, as_dict=1, debug=debug)
+		},
+		'postgres': """
+		select *, (posting_date + posting_time) as "timestamp"
+		from `tabStock Ledger Entry`
+		where item_code = %%(item_code)s
+		and is_cancelled = 0
+		%(conditions)s
+		order by (posting_date + posting_time) %(order)s, creation %(order)s
+		%(limit)s %(for_update)s""" % {
+			"conditions": pg_conditions,
+			"limit": limit or "",
+			"for_update": for_update and "for update" or "",
+			"order": order
+		}
+	}, previous_sle, as_dict=1)
 
 def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 	return frappe.db.get_value('Stock Ledger Entry',

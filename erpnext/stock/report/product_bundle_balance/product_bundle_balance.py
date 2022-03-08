@@ -145,7 +145,8 @@ def get_stock_ledger_entries(filters, items):
 
 	conditions = get_sle_conditions(filters)
 
-	return frappe.db.sql("""
+	return frappe.db.multisql({
+		'mariadb': """
 		select
 			sle.item_code, sle.warehouse, sle.qty_after_transaction, sle.company
 		from
@@ -153,7 +154,17 @@ def get_stock_ledger_entries(filters, items):
 		left join `tabStock Ledger Entry` sle2 on
 			sle.item_code = sle2.item_code and sle.warehouse = sle2.warehouse
 			and (sle.posting_date, sle.posting_time, sle.name) < (sle2.posting_date, sle2.posting_time, sle2.name)
-		where sle2.name is null and sle.docstatus < 2 %s %s""" % (item_conditions_sql, conditions), as_dict=1)  # nosec
+		where sle2.name is null and sle.docstatus < 2 %s %s""" % (item_conditions_sql, conditions),
+		'postgres': """
+		select
+			sle.item_code, sle.warehouse, sle.qty_after_transaction, sle.company
+		from
+			`tabStock Ledger Entry` sle
+		left join `tabStock Ledger Entry` sle2 on
+			sle.item_code = sle2.item_code and sle.warehouse = sle2.warehouse
+			and (sle.posting_date, sle.posting_time, sle.name) < (sle2.posting_date, sle2.posting_time, sle2.name)
+		where sle2.name is null and sle.docstatus < 2 %s %s""" % (item_conditions_sql, conditions)
+	}, as_dict=1)  # nosec
 
 
 def get_parent_item_conditions(filters):

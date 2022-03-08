@@ -72,7 +72,8 @@ class RepostItemValuation(Document):
 			"posting_time": self.posting_time,
 		}
 
-		frappe.db.sql("""
+		frappe.db.multisql({
+			'mariadb': """
 			update `tabRepost Item Valuation`
 			set status = 'Skipped'
 			WHERE item_code = %(item_code)s
@@ -83,6 +84,17 @@ class RepostItemValuation(Document):
 				and status = 'Queued'
 				and based_on = 'Item and Warehouse'
 				""",
+			'postgres': """
+			update `tabRepost Item Valuation`
+			set status = 'Skipped'
+			WHERE item_code = %(item_code)s
+				and warehouse = %(warehouse)s
+				and name != %(name)s
+				and (posting_date::date + posting_time::time) > (%(posting_date)s::date + %(posting_time)s::time)
+				and docstatus = 1
+				and status = 'Queued'
+				and based_on = 'Item and Warehouse'
+				"""},
 			filters
 		)
 
@@ -186,10 +198,16 @@ def repost_entries():
 		check_if_stock_and_account_balance_synced(today(), d.name)
 
 def get_repost_item_valuation_entries():
-	return frappe.db.sql(""" SELECT name from `tabRepost Item Valuation`
+	return frappe.db.multisql({
+		'mariadb': """ SELECT name from `tabRepost Item Valuation`
 		WHERE status in ('Queued', 'In Progress') and creation <= %s and docstatus = 1
 		ORDER BY timestamp(posting_date, posting_time) asc, creation asc
-	""", now(), as_dict=1)
+	""",
+		'postgres': """ SELECT name from `tabRepost Item Valuation`
+		WHERE status in ('Queued', 'In Progress') and creation <= %s and docstatus = 1
+		ORDER BY (posting_date + posting_time) asc, creation asc
+	""",
+	}, now(), as_dict=1)
 
 
 def in_configured_timeslot(repost_settings=None, current_time=None):

@@ -48,7 +48,8 @@ def get_data(report_filters):
 	result = []
 
 	voucher_wise_dict = {}
-	data = frappe.db.sql('''
+	data = frappe.db.multisql({
+		'mariadb': '''
 			SELECT
 				name, posting_date, posting_time, voucher_type, voucher_no,
 				stock_value_difference, stock_value, warehouse, item_code
@@ -59,7 +60,19 @@ def get_data(report_filters):
 				= %s and company = %s
 				and is_cancelled = 0
 			ORDER BY timestamp(posting_date, posting_time) asc, creation asc
-		''', (from_date, report_filters.company), as_dict=1)
+		''',
+		'postgres': '''
+			SELECT
+				name, posting_date, posting_time, voucher_type, voucher_no,
+				stock_value_difference, stock_value, warehouse, item_code
+			FROM
+				`tabStock Ledger Entry`
+			WHERE
+				posting_date
+				= %s and company = %s
+				and is_cancelled = 0
+			ORDER BY (posting_date + posting_time) asc, creation asc
+		'''}, (from_date, report_filters.company), as_dict=1)
 
 	for d in data:
 		voucher_wise_dict.setdefault((d.item_code, d.warehouse), []).append(d)

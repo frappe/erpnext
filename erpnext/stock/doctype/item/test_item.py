@@ -557,7 +557,22 @@ class TestItem(FrappeTestCase):
 	def test_index_creation(self):
 		"check if index is getting created in db"
 
-		indices = frappe.db.sql("show index from tabItem", as_dict=1)
+		indices = frappe.db.multisql({
+			'mariadb': "show index from tabItem",
+			'postgres': """select a.attname as "Column_name"
+						from
+						pg_class t,
+						pg_class i,
+						pg_index ix,
+						pg_attribute a
+					where
+						t.oid = ix.indrelid
+						and i.oid = ix.indexrelid
+						and a.attrelid = t.oid
+						and a.attnum = ANY(ix.indkey)
+						and t.relkind = 'r'
+						"""
+		}, as_dict=1)
 		expected_columns = {"item_code", "item_name", "item_group"}
 		for index in indices:
 			expected_columns.discard(index.get("Column_name"))

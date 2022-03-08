@@ -63,13 +63,22 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 		values.append(item_code)
 		condition += " AND item_code = %s"
 
-	stock_ledger_entries = frappe.db.sql("""
+	stock_ledger_entries = frappe.db.multisql({
+		'mariadb': """
 		SELECT item_code, stock_value, name, warehouse
 		FROM `tabStock Ledger Entry` sle
 		WHERE posting_date <= %s {0}
 			and is_cancelled = 0
 		ORDER BY timestamp(posting_date, posting_time) DESC, creation DESC
-	""".format(condition), values, as_dict=1)
+	""".format(condition),
+		'postgres': """
+		SELECT item_code, stock_value, name, warehouse
+		FROM `tabStock Ledger Entry` sle
+		WHERE posting_date <= %s {0}
+			and is_cancelled = 0
+		ORDER BY (posting_date + posting_time) DESC, creation DESC
+	""".format(condition)
+	}, values, as_dict=1)
 
 	sle_map = {}
 	for sle in stock_ledger_entries:
@@ -367,10 +376,18 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 		row[key] = value
 
 def get_available_serial_nos(args):
-	return frappe.db.sql(""" SELECT name from `tabSerial No`
+	return frappe.db.multisql({
+		'mariadb': """
+		SELECT name from `tabSerial No`
 		WHERE item_code = %(item_code)s and warehouse = %(warehouse)s
-		 and timestamp(purchase_date, purchase_time) <= timestamp(%(posting_date)s, %(posting_time)s)
-	""", args, as_dict=1)
+		and timestamp(purchase_date, purchase_time) <= timestamp(%(posting_date)s, %(posting_time)s)
+		""",
+		'postgres': """
+		SELECT name from `tabSerial No`
+		WHERE item_code = %(item_code)s and warehouse = %(warehouse)s
+		and (purchase_date + purchase_time) <= (%(posting_date)s + %(posting_time)s)
+		"""
+	}, args, as_dict=1)
 
 def add_additional_uom_columns(columns, result, include_uom, conversion_factors):
 	if not include_uom or not conversion_factors:

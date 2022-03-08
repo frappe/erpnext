@@ -138,11 +138,17 @@ class StockLedgerEntry(Document):
 		if authorized_role:
 			authorized_users = get_users(authorized_role)
 			if authorized_users and frappe.session.user not in authorized_users:
-				last_transaction_time = frappe.db.sql("""
+				last_transaction_time = frappe.db.multisql({
+					'mariadb': """
 					select MAX(timestamp(posting_date, posting_time)) as posting_time
 					from `tabStock Ledger Entry`
 					where docstatus = 1 and is_cancelled = 0 and item_code = %s
-					and warehouse = %s""", (self.item_code, self.warehouse))[0][0]
+					and warehouse = %s""",
+					'postgres': """
+					select MAX(posting_date + posting_time) as posting_time
+					from `tabStock Ledger Entry`
+					where docstatus = 1 and is_cancelled = 0 and item_code = %s
+					and warehouse = %s"""}, (self.item_code, self.warehouse))[0][0]
 
 				cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
 

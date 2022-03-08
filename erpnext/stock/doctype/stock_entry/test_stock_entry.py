@@ -38,9 +38,12 @@ def get_sle(**args):
 		condition += "`{0}`=%s".format(key)
 		values.append(value)
 
-	return frappe.db.sql("""select * from `tabStock Ledger Entry` %s
+	return frappe.db.multisql({
+		'mariadb': """select * from `tabStock Ledger Entry` %s
 		order by timestamp(posting_date, posting_time) desc, creation desc limit 1"""% condition,
-		values, as_dict=1)
+		'postgres': """select * from `tabStock Ledger Entry` %s
+		order by (posting_date + posting_time) desc, creation desc limit 1"""% condition
+	}, values, as_dict=1)
 
 class TestStockEntry(FrappeTestCase):
 	def tearDown(self):
