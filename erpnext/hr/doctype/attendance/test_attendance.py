@@ -1,10 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and Contributors
 # See license.txt
 
-import unittest
-
 import frappe
-from frappe.utils import add_days, get_first_day, getdate, nowdate
+from frappe.tests.utils import FrappeTestCase
+from frappe.utils import add_days, get_first_day, getdate, now_datetime, nowdate
 
 from erpnext.hr.doctype.attendance.attendance import (
 	get_month_map,
@@ -16,7 +15,7 @@ from erpnext.hr.doctype.leave_application.test_leave_application import get_firs
 
 test_records = frappe.get_test_records('Attendance')
 
-class TestAttendance(unittest.TestCase):
+class TestAttendance(FrappeTestCase):
 	def test_mark_absent(self):
 		employee = make_employee("test_mark_absent@example.com")
 		date = nowdate()
@@ -74,12 +73,14 @@ class TestAttendance(unittest.TestCase):
 		self.assertNotIn(first_sunday, unmarked_days)
 
 	def test_unmarked_days_as_per_joining_and_relieving_dates(self):
-		first_day = get_first_day(getdate())
+		now = now_datetime()
+		previous_month = now.month - 1
+		first_day = now.replace(day=1).replace(month=previous_month).date()
 
 		doj = add_days(first_day, 1)
 		relieving_date = add_days(first_day, 5)
 		employee = make_employee('test_unmarked_days_as_per_doj@example.com', date_of_joining=doj,
-			date_of_relieving=relieving_date)
+			relieving_date=relieving_date)
 		frappe.db.delete('Attendance', {'employee': employee})
 
 		attendance_date = add_days(first_day, 2)
@@ -95,9 +96,6 @@ class TestAttendance(unittest.TestCase):
 		self.assertNotIn(add_days(doj, -1), unmarked_days)
 		# date after relieving not in unmarked days
 		self.assertNotIn(add_days(relieving_date, 1), unmarked_days)
-
-	def tearDown(self):
-		frappe.db.rollback()
 
 
 def get_month_name(date):
