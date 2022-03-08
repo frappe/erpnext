@@ -921,6 +921,74 @@ class TestSalesOrder(ERPNextTestCase):
 		self.assertEqual(purchase_orders[0].supplier, '_Test Supplier')
 		self.assertEqual(purchase_orders[1].supplier, '_Test Supplier 1')
 
+	def test_product_bundles_in_so_are_replaced_with_bundle_items_in_po(self):
+		"""
+			Tests if the the Product Bundles in the Items table of Sales Orders are replaced with
+			their child items(from the Packed Items table) on creating a Purchase Order from it.
+		"""
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order
+
+		product_bundle = make_item("_Test Product Bundle", {"is_stock_item": 0})
+		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
+		make_item("_Test Bundle Item 2", {"is_stock_item": 1})
+
+		make_product_bundle("_Test Product Bundle",
+			["_Test Bundle Item 1", "_Test Bundle Item 2"])
+
+		so_items = [
+			{
+				"item_code": product_bundle.item_code,
+				"warehouse": "",
+				"qty": 2,
+				"rate": 400,
+				"delivered_by_supplier": 1,
+				"supplier": '_Test Supplier'
+			}
+		]
+
+		so = make_sales_order(item_list=so_items)
+
+		purchase_order = make_purchase_order(so.name, selected_items=so_items)
+
+		self.assertEqual(purchase_order.items[0].item_code, "_Test Bundle Item 1")
+		self.assertEqual(purchase_order.items[1].item_code, "_Test Bundle Item 2")
+
+	def test_purchase_order_updates_packed_item_ordered_qty(self):
+		"""
+			Tests if the packed item's `ordered_qty` is updated with the quantity of the Purchase Order
+		"""
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order
+
+		product_bundle = make_item("_Test Product Bundle", {"is_stock_item": 0})
+		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
+		make_item("_Test Bundle Item 2", {"is_stock_item": 1})
+
+		make_product_bundle("_Test Product Bundle",
+			["_Test Bundle Item 1", "_Test Bundle Item 2"])
+
+		so_items = [
+			{
+				"item_code": product_bundle.item_code,
+				"warehouse": "",
+				"qty": 2,
+				"rate": 400,
+				"delivered_by_supplier": 1,
+				"supplier": '_Test Supplier'
+			}
+		]
+
+		so = make_sales_order(item_list=so_items)
+
+		purchase_order = make_purchase_order(so.name, selected_items=so_items)
+		purchase_order.supplier = "_Test Supplier"
+		purchase_order.set_warehouse = "_Test Warehouse - _TC"
+		purchase_order.save()
+		purchase_order.submit()
+
+		so.reload()
+		self.assertEqual(so.packed_items[0].ordered_qty, 2)
+		self.assertEqual(so.packed_items[1].ordered_qty, 2)
+
 	def test_reserved_qty_for_closing_so(self):
 		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
 			fields=["reserved_qty"])

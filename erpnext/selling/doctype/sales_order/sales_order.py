@@ -923,6 +923,9 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target.stock_qty = (flt(source.stock_qty) - flt(source.ordered_qty))
 		target.project = source_parent.project
 
+	def update_item_for_packed_item(source, target, source_parent):
+		target.qty = flt(source.qty) - flt(source.ordered_qty)
+
 	# po = frappe.get_list("Purchase Order", filters={"sales_order":source_name, "supplier":supplier, "docstatus": ("<", "2")})
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -966,6 +969,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		"Packed Item": {
 			"doctype": "Purchase Order Item",
 			"field_map":  [
+				["name", "sales_order_packed_item"],
 				["parent", "sales_order"],
 				["uom", "uom"],
 				["conversion_factor", "conversion_factor"],
@@ -980,6 +984,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 				"supplier",
 				"pricing_rules"
 			],
+			"postprocess": update_item_for_packed_item,
 			"condition": lambda doc: doc.parent_item in items_to_map
 		}
 	}, target_doc, set_missing_values)

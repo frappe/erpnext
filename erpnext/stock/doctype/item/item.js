@@ -594,7 +594,7 @@ $.extend(erpnext.item, {
 							const increment = r.message.increment;
 
 							let values = [];
-							for(var i = from; i <= to; i += increment) {
+							for(var i = from; i <= to; i = flt(i + increment, 6)) {
 								values.push(i);
 							}
 							attr_val_fields[d.attribute] = values;
