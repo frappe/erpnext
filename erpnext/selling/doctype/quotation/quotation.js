@@ -38,7 +38,6 @@ frappe.ui.form.on('Quotation', {
 	}
 });
 
-<<<<<<< HEAD
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
 		var me = this;
@@ -46,13 +45,6 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 	},
 	party_name: function() {
-=======
-erpnext.selling.QuotationController = class QuotationController extends erpnext.selling.SellingController {
-	onload(doc, dt, dn) {
-		super.onload(doc, dt, dn);
-	}
-	party_name() {
->>>>>>> 3a547cb0d9 (fix: Item discounts for quotation)
 		var me = this;
 		erpnext.utils.get_party_details(this.frm, null, null, function() {
 			me.apply_price_list();
