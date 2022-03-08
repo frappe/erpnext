@@ -188,7 +188,8 @@ class TestStockReconciliation(FrappeTestCase):
 		sle_entries = frappe.get_all('Stock Ledger Entry', filters= {'voucher_no': sr.name},
 			fields = ['name', 'incoming_rate'])
 
-		self.assertEqual(len(sle_entries), 1)
+		# Now every serial would have its own sle - need to test valuation_rate after merge instead?
+		self.assertEqual(len(sle_entries), 4)
 		self.assertEqual(sle_entries[0].incoming_rate, 100)
 
 		to_delete_records.append(sr.name)
