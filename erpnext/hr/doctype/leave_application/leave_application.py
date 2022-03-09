@@ -503,10 +503,18 @@ class LeaveApplication(Document):
 				get_link_to_form("Leave Allocation", alloc_on_from_date.name), get_link_to_form("Leave Allocation", alloc_on_to_date)))
 
 		raise_exception = False if frappe.flags.in_patch else True
+
+		if alloc_on_from_date:
+			first_alloc_end = alloc_on_from_date.to_date
+			second_alloc_start = add_days(alloc_on_from_date.to_date, 1)
+		else:
+			first_alloc_end = add_days(alloc_on_to_date.from_date, -1)
+			second_alloc_start = alloc_on_to_date.from_date
+
 		leaves_in_first_alloc = get_number_of_leave_days(self.employee, self.leave_type,
-			self.from_date, alloc_on_from_date.to_date, self.half_day, self.half_day_date)
+			self.from_date, first_alloc_end, self.half_day, self.half_day_date)
 		leaves_in_second_alloc = get_number_of_leave_days(self.employee, self.leave_type,
-			add_days(alloc_on_from_date.to_date, 1), self.to_date, self.half_day, self.half_day_date)
+			second_alloc_start, self.to_date, self.half_day, self.half_day_date)
 
 		args = dict(
 			is_lwp=lwp,
@@ -516,14 +524,14 @@ class LeaveApplication(Document):
 		if leaves_in_first_alloc:
 			args.update(dict(
 				from_date=self.from_date,
-				to_date=alloc_on_from_date.to_date,
+				to_date=first_alloc_end,
 				leaves=leaves_in_first_alloc * -1
 			))
 			create_leave_ledger_entry(self, args, submit)
 
 		if leaves_in_second_alloc:
 			args.update(dict(
-				from_date=add_days(alloc_on_from_date.to_date, 1),
+				from_date=second_alloc_start,
 				to_date=self.to_date,
 				leaves=leaves_in_second_alloc * -1
 			))
