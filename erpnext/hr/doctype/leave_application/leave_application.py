@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Max, Min, Sum
 from frappe.utils import (
 	add_days,
 	cint,
@@ -494,7 +495,6 @@ def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day 
 			number_of_days = date_diff(to_date, from_date) + .5
 		else:
 			number_of_days = date_diff(to_date, from_date) + 1
-
 	else:
 		number_of_days = date_diff(to_date, from_date) + 1
 
@@ -567,28 +567,39 @@ def get_leave_balance_on(employee, leave_type, date, to_date=None, consider_all_
 	return get_remaining_leaves(allocation, leaves_taken, date, expiry)
 
 def get_leave_allocation_records(employee, date, leave_type=None):
-	''' returns the total allocated leaves and carry forwarded leaves based on ledger entries '''
+	"""Returns the total allocated leaves and carry forwarded leaves based on ledger entries"""
+	Ledger = frappe.qb.DocType("Leave Ledger Entry")
 
-	conditions = ("and leave_type='%s'" % leave_type) if leave_type else ""
-	allocation_details = frappe.db.sql("""
-		SELECT
-			SUM(CASE WHEN is_carry_forward = 1 THEN leaves ELSE 0 END) as cf_leaves,
-			SUM(CASE WHEN is_carry_forward = 0 THEN leaves ELSE 0 END) as new_leaves,
-			MIN(from_date) as from_date,
-			MAX(to_date) as to_date,
-			leave_type
-		FROM `tabLeave Ledger Entry`
-		WHERE
-			from_date <= %(date)s
-			AND to_date >= %(date)s
-			AND docstatus=1
-			AND transaction_type="Leave Allocation"
-			AND employee=%(employee)s
-			AND is_expired=0
-			AND is_lwp=0
-			{0}
-		GROUP BY employee, leave_type
-	""".format(conditions), dict(date=date, employee=employee), as_dict=1) #nosec
+	cf_leave_case = frappe.qb.terms.Case().when(Ledger.is_carry_forward == "1", Ledger.leaves).else_(0)
+	sum_cf_leaves = Sum(cf_leave_case).as_("cf_leaves")
+
+	new_leaves_case = frappe.qb.terms.Case().when(Ledger.is_carry_forward == "0", Ledger.leaves).else_(0)
+	sum_new_leaves = Sum(new_leaves_case).as_("new_leaves")
+
+	query = (
+		frappe.qb.from_(Ledger)
+		.select(
+			sum_cf_leaves,
+			sum_new_leaves,
+			Min(Ledger.from_date).as_("from_date"),
+			Max(Ledger.to_date).as_("to_date"),
+			Ledger.leave_type
+		).where(
+			(Ledger.from_date <= date)
+			& (Ledger.to_date >= date)
+			& (Ledger.docstatus == 1)
+			& (Ledger.transaction_type == "Leave Allocation")
+			& (Ledger.employee == employee)
+			& (Ledger.is_expired == 0)
+			& (Ledger.is_lwp == 0)
+		)
+	)
+
+	if leave_type:
+		query = query.where((Ledger.leave_type == leave_type))
+	query = query.groupby(Ledger.employee, Ledger.leave_type)
+
+	allocation_details = query.run(as_dict=True)
 
 	allocated_leaves = frappe._dict()
 	for d in allocation_details:

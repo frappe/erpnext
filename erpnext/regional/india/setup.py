@@ -53,10 +53,7 @@ def create_hsn_codes(data, code_field):
 		hsn_code.description = d["description"]
 		hsn_code.hsn_code = d[code_field]
 		hsn_code.name = d[code_field]
-		try:
-			hsn_code.db_insert()
-		except frappe.DuplicateEntryError:
-			pass
+		hsn_code.db_insert(ignore_if_duplicate=True)
 
 def add_custom_roles_for_reports():
 	for report_name in ('GST Sales Register', 'GST Purchase Register',
@@ -114,7 +111,7 @@ def add_permissions():
 
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
-	frappe.reload_doc("accounts", "print_format", "gst_pos_invoice")
+	frappe.reload_doc("selling", "print_format", "gst_pos_invoice")
 	frappe.reload_doc("accounts", "print_format", "GST E-Invoice")
 
 	frappe.db.set_value("Print Format", "GST POS Invoice", "disabled", 0)
@@ -610,15 +607,6 @@ def get_custom_fields():
 			dict(fieldname='hra_column_break', fieldtype='Column Break', insert_after='hra_component'),
 			dict(fieldname='arrear_component', label='Arrear Component',
 				fieldtype='Link', options='Salary Component', insert_after='hra_column_break'),
-			dict(fieldname='non_profit_section', label='Non Profit Settings',
-				fieldtype='Section Break', insert_after='arrear_component', collapsible=1),
-			dict(fieldname='company_80g_number', label='80G Number',
-				fieldtype='Data', insert_after='non_profit_section'),
-			dict(fieldname='with_effect_from', label='80G With Effect From',
-				fieldtype='Date', insert_after='company_80g_number'),
-			dict(fieldname='non_profit_column_break', fieldtype='Column Break', insert_after='with_effect_from'),
-			dict(fieldname='pan_details', label='PAN Number',
-				fieldtype='Data', insert_after='non_profit_column_break')
 		],
 		'Employee Tax Exemption Declaration':[
 			dict(fieldname='hra_section', label='HRA Exemption',
@@ -711,22 +699,6 @@ def get_custom_fields():
 				'depends_on':'eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
 				'options': '\nWith Payment of Tax\nWithout Payment of Tax',
 				'mandatory_depends_on': 'eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)'
-			}
-		],
-		'Member': [
-			{
-				'fieldname': 'pan_number',
-				'label': 'PAN Details',
-				'fieldtype': 'Data',
-				'insert_after': 'email_id'
-			}
-		],
-		'Donor': [
-			{
-				'fieldname': 'pan_number',
-				'label': 'PAN Details',
-				'fieldtype': 'Data',
-				'insert_after': 'email'
 			}
 		],
 		'Finance Book': [

@@ -3,15 +3,11 @@
 
 frappe.ui.form.on('Bulk Transaction Log', {
 
-	before_load: function(frm) {
-		query(frm);
-	},
-
 	refresh: function(frm) {
 		frm.disable_save();
 		frm.add_custom_button(__('Retry Failed Transactions'), ()=>{
 			frappe.confirm(__("Retry Failing Transactions ?"), ()=>{
-				query(frm);
+				query(frm, 1);
 			}
 			);
 		});
@@ -25,8 +21,8 @@ function query(frm) {
 			log_date: frm.doc.log_date
 		}
 	}).then((r) => {
-		if (r.message) {
-			frm.remove_custom_button("Retry Failed Transactions");
+		if (r.message === "No Failed Records") {
+			frappe.show_alert(__(r.message), 5);
 		} else {
 			frappe.show_alert(__("Retrying Failed Transactions"), 5);
 		}
