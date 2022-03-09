@@ -143,8 +143,7 @@ class LeaveApplication(Document):
 
 		if not (alloc_on_from_date or alloc_on_to_date):
 			frappe.throw(_("Application period cannot be outside leave allocation period"))
-
-		elif alloc_on_from_date.name != alloc_on_to_date.name:
+		elif self.is_separate_ledger_entry_required(alloc_on_from_date, alloc_on_to_date):
 			frappe.throw(_("Application period cannot be across two allocation records"))
 
 	def get_allocation_based_on_application_dates(self):
@@ -285,12 +284,28 @@ class LeaveApplication(Document):
 				leave_balance_for_consumption = leave_balance.get("leave_balance_for_consumption")
 
 				if self.status != "Rejected" and (leave_balance_for_consumption < self.total_leave_days or not leave_balance_for_consumption):
-					if frappe.db.get_value("Leave Type", self.leave_type, "allow_negative"):
-						frappe.msgprint(_("Insufficient leave balance for Leave Type {0}")
-							.format(frappe.bold(self.leave_type)), title=_("Warning"), indicator="orange")
-					else:
-						frappe.throw(_("Insufficient leave balance for Leave Type {0}")
-							.format(self.leave_type), InsufficientLeaveBalanceError, title=_("Insufficient Balance"))
+					self.show_insufficient_balance_message(leave_balance_for_consumption)
+
+	def show_insufficient_balance_message(self, leave_balance_for_consumption):
+		alloc_on_from_date, alloc_on_to_date = self.get_allocation_based_on_application_dates()
+
+		if frappe.db.get_value("Leave Type", self.leave_type, "allow_negative"):
+			if leave_balance_for_consumption != self.leave_balance:
+				msg = _("Warning: Insufficient leave balance for Leave Type {0} in this allocation.").format(frappe.bold(self.leave_type))
+				msg += "<br><br>"
+				msg += _("Actual leave balance is {0} but only {1} leave(s) can be consumed between {2} (Application Date) and {3} (Allocation Expiry).").format(
+					frappe.bold(self.leave_balance), frappe.bold(leave_balance_for_consumption),
+					frappe.bold(formatdate(self.from_date)),
+					frappe.bold(formatdate(alloc_on_from_date.to_date)))
+				msg += "<br>"
+				msg += _("Remaining leaves would be compensated in the next allocation.")
+			else:
+				msg = _("Warning: Insufficient leave balance for Leave Type {0}.").format(frappe.bold(self.leave_type))
+
+			frappe.msgprint(msg, title=_("Warning"), indicator="orange")
+		else:
+			frappe.throw(_("Insufficient leave balance for Leave Type {0}").format(frappe.bold(self.leave_type)),
+				exc=InsufficientLeaveBalanceError, title=_("Insufficient Balance"))
 
 	def validate_leave_overlap(self):
 		if not self.name:
@@ -471,6 +486,7 @@ class LeaveApplication(Document):
 				create_leave_ledger_entry(self, args, submit)
 
 	def is_separate_ledger_entry_required(self, alloc_on_from_date=None, alloc_on_to_date=None) -> bool:
+		"""Checks if application dates fall in separate allocations"""
 		if ((alloc_on_from_date and not alloc_on_to_date)
 			or (not alloc_on_from_date and alloc_on_to_date)
 			or (alloc_on_from_date and alloc_on_to_date and alloc_on_from_date.name != alloc_on_to_date.name)):
