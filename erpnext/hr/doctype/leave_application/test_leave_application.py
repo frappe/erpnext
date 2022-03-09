@@ -183,6 +183,57 @@ class TestLeaveApplication(unittest.TestCase):
 		frappe.db.set_value("Leave Type", "Test Leave Validation", "allow_negative", True)
 		make_leave_application(employee.name, add_days(first_sunday, 1), add_days(first_sunday, 3), leave_type.name)
 
+	@set_holiday_list('Salary Slip Test Holiday List', '_Test Company')
+	def test_separate_leave_ledger_entry_for_boundary_applications(self):
+		# When application falls in 2 different allocations and Allow Negative is enabled
+		# creates separate leave ledger entries
+		frappe.delete_doc_if_exists("Leave Type", "Test Leave Validation", force=1)
+		leave_type = frappe.get_doc(dict(
+			leave_type_name="Test Leave Validation",
+			doctype="Leave Type",
+			allow_negative=True
+		)).insert()
+
+		employee = get_employee()
+		date = getdate()
+		year_start = getdate(get_year_start(date))
+		year_end = getdate(get_year_ending(date))
+
+		make_allocation_record(leave_type=leave_type.name, from_date=year_start, to_date=year_end)
+		# application across allocations
+
+		# CASE 1: from date has no allocation, to date has an allocation / both dates have allocation
+		application = make_leave_application(employee.name, add_days(year_start, -10), add_days(year_start, 3), leave_type.name)
+
+		# 2 separate leave ledger entries
+		ledgers = frappe.db.get_all("Leave Ledger Entry", {
+			"transaction_type": "Leave Application",
+			"transaction_name": application.name
+		}, ["leaves", "from_date", "to_date"], order_by="from_date")
+		self.assertEqual(len(ledgers), 2)
+
+		self.assertEqual(ledgers[0].from_date, application.from_date)
+		self.assertEqual(ledgers[0].to_date, add_days(year_start, -1))
+
+		self.assertEqual(ledgers[1].from_date, year_start)
+		self.assertEqual(ledgers[1].to_date, application.to_date)
+
+		# CASE 2: from date has an allocation, to date has no allocation
+		application = make_leave_application(employee.name, add_days(year_end, -3), add_days(year_end, 5), leave_type.name)
+
+		# 2 separate leave ledger entries
+		ledgers = frappe.db.get_all("Leave Ledger Entry", {
+			"transaction_type": "Leave Application",
+			"transaction_name": application.name
+		}, ["leaves", "from_date", "to_date"], order_by="from_date")
+		self.assertEqual(len(ledgers), 2)
+
+		self.assertEqual(ledgers[0].from_date, application.from_date)
+		self.assertEqual(ledgers[0].to_date, year_end)
+
+		self.assertEqual(ledgers[1].from_date, add_days(year_end, 1))
+		self.assertEqual(ledgers[1].to_date, application.to_date)
+
 	def test_overwrite_attendance(self):
 		'''check attendance is automatically created on leave approval'''
 		make_allocation_record()
