@@ -20,6 +20,8 @@ from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.holiday_list.test_holiday_list import set_holiday_list
 from erpnext.hr.doctype.leave_allocation.test_leave_allocation import create_leave_allocation
 from erpnext.hr.doctype.leave_application.leave_application import (
+	InsufficientLeaveBalanceError,
+	LeaveAcrossAllocationsError,
 	LeaveDayBlockedError,
 	NotAnOptionalHoliday,
 	OverlapError,
@@ -82,8 +84,16 @@ class TestLeaveApplication(unittest.TestCase):
 		frappe.db.delete("Attendance", {"employee": "_T-Employee-00001"})
 		self.holiday_list = make_holiday_list()
 
+		if not frappe.db.exists("Leave Type", "_Test Leave Type"):
+			frappe.get_doc(dict(
+				leave_type_name="_Test Leave Type",
+				doctype="Leave Type",
+				include_holiday=True
+			)).insert()
+
 	def tearDown(self):
 		frappe.db.rollback()
+		frappe.set_user("Administrator")
 
 	def _clear_roles(self):
 		frappe.db.sql("""delete from `tabHas Role` where parent in
@@ -97,6 +107,81 @@ class TestLeaveApplication(unittest.TestCase):
 		application.from_date = "2013-01-01"
 		application.to_date = "2013-01-05"
 		return application
+
+	@set_holiday_list('Salary Slip Test Holiday List', '_Test Company')
+	def test_validate_application_across_allocations(self):
+		# Test validation for application dates when negative balance is disabled
+		frappe.delete_doc_if_exists("Leave Type", "Test Leave Validation", force=1)
+		leave_type = frappe.get_doc(dict(
+			leave_type_name="Test Leave Validation",
+			doctype="Leave Type",
+			allow_negative=False
+		)).insert()
+
+		employee = get_employee()
+		date = getdate()
+		first_sunday = get_first_sunday(self.holiday_list, for_date=get_year_start(date))
+
+		leave_application = frappe.get_doc(dict(
+			doctype='Leave Application',
+			employee=employee.name,
+			leave_type=leave_type.name,
+			from_date=add_days(first_sunday, 1),
+			to_date=add_days(first_sunday, 4),
+			company="_Test Company",
+			status="Approved",
+			leave_approver = 'test@example.com'
+		))
+		# Application period cannot be outside leave allocation period
+		self.assertRaises(frappe.ValidationError, leave_application.insert)
+
+		make_allocation_record(leave_type=leave_type.name, from_date=get_year_start(date), to_date=get_year_ending(date))
+
+		leave_application = frappe.get_doc(dict(
+			doctype='Leave Application',
+			employee=employee.name,
+			leave_type=leave_type.name,
+			from_date=add_days(first_sunday, -10),
+			to_date=add_days(first_sunday, 1),
+			company="_Test Company",
+			status="Approved",
+			leave_approver = 'test@example.com'
+		))
+
+		# Application period cannot be across two allocation records
+		self.assertRaises(LeaveAcrossAllocationsError, leave_application.insert)
+
+	@set_holiday_list('Salary Slip Test Holiday List', '_Test Company')
+	def test_insufficient_leave_balance_validation(self):
+		# CASE 1: Validation when allow negative is disabled
+		frappe.delete_doc_if_exists("Leave Type", "Test Leave Validation", force=1)
+		leave_type = frappe.get_doc(dict(
+			leave_type_name="Test Leave Validation",
+			doctype="Leave Type",
+			allow_negative=False
+		)).insert()
+
+		employee = get_employee()
+		date = getdate()
+		first_sunday = get_first_sunday(self.holiday_list, for_date=get_year_start(date))
+
+		# allocate 2 leaves, apply for more
+		make_allocation_record(leave_type=leave_type.name, from_date=get_year_start(date), to_date=get_year_ending(date), leaves=2)
+		leave_application = frappe.get_doc(dict(
+			doctype='Leave Application',
+			employee=employee.name,
+			leave_type=leave_type.name,
+			from_date=add_days(first_sunday, 1),
+			to_date=add_days(first_sunday, 3),
+			company="_Test Company",
+			status="Approved",
+			leave_approver = 'test@example.com'
+		))
+		self.assertRaises(InsufficientLeaveBalanceError, leave_application.insert)
+
+		# CASE 2: Allows creating application with a warning message when allow negative is enabled
+		frappe.db.set_value("Leave Type", "Test Leave Validation", "allow_negative", True)
+		make_leave_application(employee.name, add_days(first_sunday, 1), add_days(first_sunday, 3), leave_type.name)
 
 	def test_overwrite_attendance(self):
 		'''check attendance is automatically created on leave approval'''
@@ -591,7 +676,14 @@ class TestLeaveApplication(unittest.TestCase):
 	# test to not consider current leave in leave balance while submitting
 	def test_current_leave_on_submit(self):
 		employee = get_employee()
-		leave_type = 'Sick leave'
+
+		leave_type = 'Sick Leave'
+		if not frappe.db.exists('Leave Type', leave_type):
+			frappe.get_doc(dict(
+				leave_type_name=leave_type,
+				doctype='Leave Type'
+			)).insert()
+
 		allocation = frappe.get_doc(dict(
 			doctype = 'Leave Allocation',
 			employee = employee.name,

@@ -38,6 +38,8 @@ class AttendanceAlreadyMarkedError(frappe.ValidationError): pass
 class NotAnOptionalHoliday(frappe.ValidationError): pass
 class InsufficientLeaveBalanceError(frappe.ValidationError):
 	pass
+class LeaveAcrossAllocationsError(frappe.ValidationError):
+	pass
 
 from frappe.model.document import Document
 
@@ -144,7 +146,7 @@ class LeaveApplication(Document):
 		if not (alloc_on_from_date or alloc_on_to_date):
 			frappe.throw(_("Application period cannot be outside leave allocation period"))
 		elif self.is_separate_ledger_entry_required(alloc_on_from_date, alloc_on_to_date):
-			frappe.throw(_("Application period cannot be across two allocation records"))
+			frappe.throw(_("Application period cannot be across two allocation records"), exc=LeaveAcrossAllocationsError)
 
 	def get_allocation_based_on_application_dates(self):
 		"""Returns allocation name, from and to dates for application dates"""
