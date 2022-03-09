@@ -117,21 +117,32 @@ def update_latest_price_in_all_boms():
 
 
 def replace_bom(args):
-	frappe.db.auto_commit_on_many_writes = 1
-	args = frappe._dict(args)
-
-	doc = frappe.get_doc("BOM Update Tool")
-	doc.current_bom = args.current_bom
-	doc.new_bom = args.new_bom
-	doc.replace_bom()
-
-	frappe.db.auto_commit_on_many_writes = 0
+	try:
+		frappe.db.auto_commit_on_many_writes = 1
+		args = frappe._dict(args)
+		doc = frappe.get_doc("BOM Update Tool")
+		doc.current_bom = args.current_bom
+		doc.new_bom = args.new_bom
+		doc.replace_bom()
+	except Exception:
+		frappe.log_error(
+			msg=frappe.get_traceback(),
+			title=_("BOM Update Tool Error")
+		)
+	finally:
+		frappe.db.auto_commit_on_many_writes = 0
 
 
 def update_cost():
-	frappe.db.auto_commit_on_many_writes = 1
-	bom_list = get_boms_in_bottom_up_order()
-	for bom in bom_list:
-		frappe.get_doc("BOM", bom).update_cost(update_parent=False, from_child_bom=True)
-
-	frappe.db.auto_commit_on_many_writes = 0
+	try:
+		frappe.db.auto_commit_on_many_writes = 1
+		bom_list = get_boms_in_bottom_up_order()
+		for bom in bom_list:
+			frappe.get_doc("BOM", bom).update_cost(update_parent=False, from_child_bom=True)
+	except Exception:
+		frappe.log_error(
+			msg=frappe.get_traceback(),
+			title=_("BOM Update Tool Error")
+		)
+	finally:
+		frappe.db.auto_commit_on_many_writes = 0
