@@ -219,6 +219,7 @@
   },
   {
    "default": "0",
+   "depends_on": "show_in_website",
    "description": "Include Website Items belonging to child Item Groups",
    "fieldname": "include_descendants",
    "fieldtype": "Check",
@@ -231,7 +232,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2022-03-07 09:44:47.561532",
+ "modified": "2022-03-09 12:27:11.055782",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",
