@@ -32,7 +32,7 @@ class PriceListGenerator(Document):
 	def get_cost_volume(self):
 		for res in self.price_details:
 			if res.product:
-				res.list_priceunit = res.brand_list_price + res.addpkg_cost * res.weight
+				res.list_priceunit = (res.brand_list_price + res.addpkg_cost) * res.weight
 				res.list_pricevolume = (res.brand_list_price + res.addpkg_cost)*res.volume
 
 	@frappe.whitelist()
