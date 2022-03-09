@@ -1,3 +1,4 @@
+from frappe import _
 
 
 
@@ -8,7 +9,7 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'label': ['Movement'],
+				'label': _('Movement'),
 				'items': ['Asset Movement']
 			}
 		]
