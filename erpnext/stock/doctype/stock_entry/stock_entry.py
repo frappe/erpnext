@@ -1899,6 +1899,22 @@ class StockEntry(StockController):
 
 		self.title = self.purpose
 
+	# Code for new Button above Items
+	@frappe.whitelist()
+	def create_new_batch_no(self):
+		print(" We are in stock Entry ", self.items)
+		item = self.items
+		if len(item) > 0:
+			for i in item:
+				print(i.item_code)
+				batch = frappe.new_doc("Batch")
+				batch.batch_id = self.name + "*" + i.item_code 
+				batch.item = i.item_code 
+				batch.save()
+				
+				i.batch_no = batch.name
+
+		return True
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):

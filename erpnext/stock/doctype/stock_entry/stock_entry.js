@@ -741,7 +741,23 @@ frappe.ui.form.on('Stock Entry', {
 
 	apply_putaway_rule: function (frm) {
 		if (frm.doc.apply_putaway_rule) erpnext.apply_putaway_rule(frm, frm.doc.purpose);
+	},
+
+	create_batch: function (frm) {
+		console.log(" this is create nbutton")
+		frm.save()
+		frappe.call({
+			method: "create_new_batch_no",
+			doc : frm.doc,
+			callback: function (r) {
+				if (r.message) {
+					console.log(" Success")
+					// frappe.model.set_value(cdt, cdn, r.message);
+				}
+			}
+		});
 	}
+
 });
 
 frappe.ui.form.on('Stock Entry Detail', {

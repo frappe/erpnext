@@ -15,7 +15,6 @@
   "purpose",
   "material_consumption",
   "reference_challan",
-  "reference_challan_date",
   "get_intercompany_item",
   "transfer",
   "add_to_transit",
@@ -51,6 +50,7 @@
   "target_address_display",
   "sb0",
   "scan_barcode",
+  "create_batch",
   "items",
   "get_stock_and_rate",
   "section_break_19",
@@ -672,11 +672,9 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.stock_entry_type==\"Material Receipt\"",
-   "fetch_from": "reference_challan.posting_date",
-   "fieldname": "reference_challan_date",
-   "fieldtype": "Date",
-   "label": "Reference Challan Date"
+   "fieldname": "create_batch",
+   "fieldtype": "Button",
+   "label": "Create Batch"
   }
  ],
  "icon": "fa fa-file-text",
@@ -684,7 +682,8 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-24 12:51:37.758424",
+ "migration_hash": "58b3f7058b28fcdabe8c60f1794ed329",
+ "modified": "2022-03-08 17:47:44.802761",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
