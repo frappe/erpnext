@@ -75,7 +75,8 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 
 			if sle.get("actual_qty") and item_det.has_serial_no and sle.get("voucher_type")!="Stock Reconciliation":
 				# for auto creating serials
-				validate_sr_no(sle, item_det)
+				if not via_landed_cost_voucher:
+					validate_sr_no(sle, item_det)
 				if not sle.serial_no and item_det.has_serial_no and not voucher_doc.is_return:
 					sle = update_serial_nos(sle, item_det, return_sle=True)
 

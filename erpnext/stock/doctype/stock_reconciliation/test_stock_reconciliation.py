@@ -32,7 +32,6 @@ class TestStockReconciliation(FrappeTestCase):
 	def tearDown(self):
 		frappe.flags.dont_execute_stock_reposts = None
 
-
 	def test_reco_for_fifo(self):
 		self._test_reco_sle_gle("FIFO")
 
