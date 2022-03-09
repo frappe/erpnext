@@ -25,14 +25,20 @@ def return_data(filters):
 	categories = []
 
 	for invoice in invoices:
-		items = frappe.get_all("Sales Invoice Item", ["*"], filters = {"parent": invoice.name})
+		serie_number = filters.get("prefix")
 
-		for item in items:
-			products.append(item)
-			if item.item_group in categories:
-				exist = True
-			else:
-				categories.append(item.item_group)
+		split_serie = invoice.naming_series.split('-')
+		serie =  "{}-{}".format(split_serie[0], split_serie[1])		
+
+		if serie_number == serie and invoice.status != "Return":
+			items = frappe.get_all("Sales Invoice Item", ["*"], filters = {"parent": invoice.name})
+
+			for item in items:
+				products.append(item)
+				if item.item_group in categories:
+					exist = True
+				else:
+					categories.append(item.item_group)
 
 	for item_group in categories:
 		group = item_group
@@ -58,6 +64,8 @@ def return_filters(filters, from_date, to_date):
 	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
 	if filters.get("serie"): conditions += ', "name": "{}"'.format(filters.get("serie"))
 	conditions += ', "company": "{}"'.format(filters.get("company"))
+	conditions += ', "posting_time": [">=", "{}"]'.format(filters.get("from_time"))
+	conditions += ', "posting_time": ["<=", "{}"]'.format(filters.get("to_time"))
 	conditions += '}'
 
 	return conditions

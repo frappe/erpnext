@@ -19,6 +19,18 @@ frappe.query_reports["Group Of Products Solds"] = {
 			"reqd": 1
 		},
 		{
+			"fieldname":"from_time",
+			"label": __("From Time"),
+			"fieldtype": "Time",
+			"reqd": 1
+		},
+		{
+			"fieldname":"to_time",
+			"label": __("To Time"),
+			"fieldtype": "Time",
+			"reqd": 1
+		},
+		{
 			"fieldname":"company",
 			"label": __("Company"),
 			"fieldtype": "Link",
@@ -26,10 +38,11 @@ frappe.query_reports["Group Of Products Solds"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
-			"fieldname":"serie",
+			"fieldname":"prefix",
 			"label": __("Serie"),
 			"fieldtype": "Link",
-			"options": "Sales Invoice"
+			"options": "Daily summary series",
+			"reqd": 1
 		}
 	]
 };

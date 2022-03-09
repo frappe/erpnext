@@ -25,6 +25,7 @@ class CustomerDocuments(Document):
 	def calculate_total(self):
 		self.calculate_isv()
 		total_base = 0
+		self.grand_total = self.total
 		if self.total_exempt != None:
 			if not self.get("taxes"):
 				self.total = self.total_exempt
