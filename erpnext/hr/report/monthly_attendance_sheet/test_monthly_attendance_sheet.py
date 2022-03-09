@@ -17,15 +17,14 @@ class TestMonthlyAttendanceSheet(FrappeTestCase):
 	def test_monthly_attendance_sheet_report(self):
 		now = now_datetime()
 		previous_month = now.month - 1
-		month_first = now.replace(day=1).replace(month=previous_month).date()
+		previous_month_first = now.replace(day=1).replace(month=previous_month).date()
 
 		company = frappe.db.get_value('Employee', self.employee, 'company')
-		entries = 7
 
-		for day in range(0, entries*3, 3):
-			mark_attendance(self.employee, month_first + relativedelta(days=day), 'Present')
-			mark_attendance(self.employee, month_first + relativedelta(days=day+1), 'Absent')
-			mark_attendance(self.employee, month_first + relativedelta(days=day+2), 'On Leave')
+		# mark different attendance status on first 3 days of previous month
+		mark_attendance(self.employee, previous_month_first, 'Absent')
+		mark_attendance(self.employee, previous_month_first + relativedelta(days=1), 'Present')
+		mark_attendance(self.employee, previous_month_first + relativedelta(days=2), 'On Leave')
 
 		filters = frappe._dict({
 			'month': previous_month,
@@ -39,7 +38,8 @@ class TestMonthlyAttendanceSheet(FrappeTestCase):
 		present = datasets[1]['values']
 		leaves = datasets[2]['values']
 
+		# ensure correct attendance is reflect on the report
 		self.assertIn(self.employee, employees)
-		self.assertEqual(sum(present), entries)
-		self.assertEqual(sum(absent), entries)
-		self.assertEqual(sum(leaves), entries)
+		self.assertEqual(absent[0], 1)
+		self.assertEqual(present[1], 1)
+		self.assertEqual(leaves[2], 1)
