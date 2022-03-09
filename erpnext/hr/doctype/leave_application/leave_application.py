@@ -138,21 +138,36 @@ class LeaveApplication(Document):
 	def validate_dates_across_allocation(self):
 		if frappe.db.get_value("Leave Type", self.leave_type, "allow_negative"):
 			return
-		def _get_leave_allocation_record(date):
-			allocation = frappe.db.sql("""select name from `tabLeave Allocation`
-				where employee=%s and leave_type=%s and docstatus=1
-				and %s between from_date and to_date""", (self.employee, self.leave_type, date))
 
-			return allocation and allocation[0][0]
+		alloc_on_from_date, alloc_on_to_date = self.get_allocation_based_on_application_dates()
+
+		if not (alloc_on_from_date or alloc_on_to_date):
+			frappe.throw(_("Application period cannot be outside leave allocation period"))
+
+		elif alloc_on_from_date.name != alloc_on_to_date.name:
+			frappe.throw(_("Application period cannot be across two allocation records"))
+
+	def get_allocation_based_on_application_dates(self):
+		"""Returns allocation name, from and to dates for application dates"""
+		def _get_leave_allocation_record(date):
+			LeaveAllocation = frappe.qb.DocType("Leave Allocation")
+			allocation = (
+				frappe.qb.from_(LeaveAllocation)
+				.select(LeaveAllocation.name, LeaveAllocation.from_date, LeaveAllocation.to_date)
+				.where(
+					(LeaveAllocation.employee == self.employee)
+					& (LeaveAllocation.leave_type == self.leave_type)
+					& (LeaveAllocation.docstatus == 1)
+					& ((date >= LeaveAllocation.from_date) & (date <= LeaveAllocation.to_date))
+				)
+			).run(as_dict=True)
+
+			return allocation and allocation[0]
 
 		allocation_based_on_from_date = _get_leave_allocation_record(self.from_date)
 		allocation_based_on_to_date = _get_leave_allocation_record(self.to_date)
 
-		if not (allocation_based_on_from_date or allocation_based_on_to_date):
-			frappe.throw(_("Application period cannot be outside leave allocation period"))
-
-		elif allocation_based_on_from_date != allocation_based_on_to_date:
-			frappe.throw(_("Application period cannot be across two allocation records"))
+		return allocation_based_on_from_date, allocation_based_on_to_date
 
 	def validate_back_dated_application(self):
 		future_allocation = frappe.db.sql("""select name, from_date from `tabLeave Allocation`
@@ -434,49 +449,97 @@ class LeaveApplication(Document):
 
 		expiry_date = get_allocation_expiry_for_cf_leaves(self.employee, self.leave_type,
 			self.to_date, self.from_date)
-
 		lwp = frappe.db.get_value("Leave Type", self.leave_type, "is_lwp")
 
 		if expiry_date:
 			self.create_ledger_entry_for_intermediate_allocation_expiry(expiry_date, submit, lwp)
 		else:
-			raise_exception = True
-			if frappe.flags.in_patch:
-				raise_exception=False
+			alloc_on_from_date, alloc_on_to_date = self.get_allocation_based_on_application_dates()
+			if self.is_separate_ledger_entry_required(alloc_on_from_date, alloc_on_to_date):
+				# required only if negative balance is allowed for leave type
+				# else will be stopped in validation itself
+				self.create_separate_ledger_entries(alloc_on_from_date, alloc_on_to_date, submit, lwp)
+			else:
+				raise_exception = False if frappe.flags.in_patch else True
+				args = dict(
+					leaves=self.total_leave_days * -1,
+					from_date=self.from_date,
+					to_date=self.to_date,
+					is_lwp=lwp,
+					holiday_list=get_holiday_list_for_employee(self.employee, raise_exception=raise_exception) or ''
+				)
+				create_leave_ledger_entry(self, args, submit)
 
-			args = dict(
-				leaves=self.total_leave_days * -1,
+	def is_separate_ledger_entry_required(self, alloc_on_from_date=None, alloc_on_to_date=None) -> bool:
+		if ((alloc_on_from_date and not alloc_on_to_date)
+			or (not alloc_on_from_date and alloc_on_to_date)
+			or (alloc_on_from_date and alloc_on_to_date and alloc_on_from_date.name != alloc_on_to_date.name)):
+			return True
+		return False
+
+	def create_separate_ledger_entries(self, alloc_on_from_date, alloc_on_to_date, submit, lwp):
+		"""Creates separate ledger entries for application period falling into separate allocations"""
+		# for creating separate ledger entries existing allocation periods should be consecutive
+		if submit and alloc_on_from_date and alloc_on_to_date and add_days(alloc_on_from_date.to_date, 1) != alloc_on_to_date.from_date:
+			frappe.throw(_("Leave Application period cannot be across two non-consecutive leave allocations {0} and {1}.").format(
+				get_link_to_form("Leave Allocation", alloc_on_from_date.name), get_link_to_form("Leave Allocation", alloc_on_to_date)))
+
+		raise_exception = False if frappe.flags.in_patch else True
+		leaves_in_first_alloc = get_number_of_leave_days(self.employee, self.leave_type,
+			self.from_date, alloc_on_from_date.to_date, self.half_day, self.half_day_date)
+		leaves_in_second_alloc = get_number_of_leave_days(self.employee, self.leave_type,
+			add_days(alloc_on_from_date.to_date, 1), self.to_date, self.half_day, self.half_day_date)
+
+		args = dict(
+			is_lwp=lwp,
+			holiday_list=get_holiday_list_for_employee(self.employee, raise_exception=raise_exception) or ''
+		)
+
+		if leaves_in_first_alloc:
+			args.update(dict(
 				from_date=self.from_date,
+				to_date=alloc_on_from_date.to_date,
+				leaves=leaves_in_first_alloc * -1
+			))
+			create_leave_ledger_entry(self, args, submit)
+
+		if leaves_in_second_alloc:
+			args.update(dict(
+				from_date=add_days(alloc_on_from_date.to_date, 1),
 				to_date=self.to_date,
+				leaves=leaves_in_second_alloc * -1
+			))
+			create_leave_ledger_entry(self, args, submit)
+
+	def create_ledger_entry_for_intermediate_allocation_expiry(self, expiry_date, submit, lwp):
+		"""Splits leave application into two ledger entries to consider expiry of allocation"""
+		raise_exception = False if frappe.flags.in_patch else True
+
+		leaves = get_number_of_leave_days(self.employee, self.leave_type,
+			self.from_date, expiry_date, self.half_day, self.half_day_date)
+
+		if leaves:
+			args = dict(
+				from_date=self.from_date,
+				to_date=expiry_date,
+				leaves=leaves * -1,
 				is_lwp=lwp,
 				holiday_list=get_holiday_list_for_employee(self.employee, raise_exception=raise_exception) or ''
 			)
 			create_leave_ledger_entry(self, args, submit)
 
-	def create_ledger_entry_for_intermediate_allocation_expiry(self, expiry_date, submit, lwp):
-		''' splits leave application into two ledger entries to consider expiry of allocation '''
-
-		raise_exception = True
-		if frappe.flags.in_patch:
-			raise_exception=False
-
-		args = dict(
-			from_date=self.from_date,
-			to_date=expiry_date,
-			leaves=(date_diff(expiry_date, self.from_date) + 1) * -1,
-			is_lwp=lwp,
-			holiday_list=get_holiday_list_for_employee(self.employee, raise_exception=raise_exception) or ''
-		)
-		create_leave_ledger_entry(self, args, submit)
-
 		if getdate(expiry_date) != getdate(self.to_date):
 			start_date = add_days(expiry_date, 1)
-			args.update(dict(
-				from_date=start_date,
-				to_date=self.to_date,
-				leaves=date_diff(self.to_date, expiry_date) * -1
-			))
-			create_leave_ledger_entry(self, args, submit)
+			leaves = get_number_of_leave_days(self.employee, self.leave_type,
+				start_date, self.to_date, self.half_day, self.half_day_date)
+
+			if leaves:
+				args.update(dict(
+					from_date=start_date,
+					to_date=self.to_date,
+					leaves=leaves * -1
+				))
+				create_leave_ledger_entry(self, args, submit)
 
 
 def get_allocation_expiry_for_cf_leaves(employee, leave_type, to_date, from_date):
