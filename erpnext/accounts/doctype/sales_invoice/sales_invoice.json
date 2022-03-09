@@ -9,7 +9,6 @@
   "customer_section",
   "title",
   "naming_series",
-  "tax_invoice_number",
   "customer",
   "customer_name",
   "tax_id",
@@ -2026,12 +2025,6 @@
    "fieldname": "amount_eligible_for_commission",
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
-   "read_only": 1
-  },
-  {
-   "fieldname": "tax_invoice_number",
-   "fieldtype": "Data",
-   "label": "Tax Invoice Number",
    "read_only": 1
   }
  ],
