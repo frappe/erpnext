@@ -192,7 +192,8 @@ class BOM(WebsiteGenerator):
 		if self.routing:
 			self.set("operations", [])
 			fields = ["sequence_id", "operation", "workstation", "description",
-				"time_in_mins", "batch_size", "operating_cost", "idx", "hour_rate"]
+				"time_in_mins", "batch_size", "operating_cost", "idx", "hour_rate",
+				"set_cost_based_on_bom_qty", "fixed_time"]
 
 			for row in frappe.get_all("BOM Operation", fields = fields,
 				filters = {'parenttype': 'Routing', 'parent': self.routing}, order_by="sequence_id, idx"):
