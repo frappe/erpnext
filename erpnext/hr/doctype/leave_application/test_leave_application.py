@@ -314,7 +314,7 @@ class TestLeaveApplication(unittest.TestCase):
 		attendance.flags.ignore_validate = True
 		attendance.save()
 
-		leave_application = make_leave_application(employee.name, first_sunday, add_days(first_sunday, 3), leave_type.name)
+		leave_application = make_leave_application(employee.name, first_sunday, add_days(first_sunday, 3), leave_type.name, employee.company)
 		leave_application.reload()
 		# holiday should be excluded while marking attendance
 		self.assertEqual(leave_application.total_leave_days, 3)
@@ -325,6 +325,8 @@ class TestLeaveApplication(unittest.TestCase):
 
 		# attendance on non-holiday updated
 		self.assertEqual(frappe.db.get_value("Attendance", attendance.name, "status"), "On Leave")
+
+		frappe.db.set_value("Employee", employee.name, "holiday_list", original_holiday_list)
 
 	def test_block_list(self):
 		self._clear_roles()
@@ -512,6 +514,8 @@ class TestLeaveApplication(unittest.TestCase):
 
 		# check leave balance is reduced
 		self.assertEqual(get_leave_balance_on(employee.name, leave_type, optional_leave_date), 9)
+
+		frappe.db.set_value("Employee", employee.name, "holiday_list", original_holiday_list)
 
 	def test_leaves_allowed(self):
 		employee = get_employee()
