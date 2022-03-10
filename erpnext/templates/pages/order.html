@@ -52,7 +52,7 @@
 
 	<p class="small my-3">
 		{%- set party_name = doc.supplier_name if doc.doctype in ['Supplier Quotation', 'Purchase Invoice', 'Purchase Order'] else doc.customer_name %}
-		<b>{{ party_name }}</b>
+		<b>{{ doc.title }}</b>
 
 		{% if doc.contact_display and doc.contact_display != party_name %}
 			<br>
@@ -68,29 +68,29 @@
 		<!-- items -->
 		<table class="order-item-table w-100 table">
 			<thead class="order-items order-item-header">
-				<th width="60%">
+				<th width="60%" class="ItemName">
 					{{ _("Item") }}
 				</th>
-				<th width="20%" class="text-right">
+				<th width="20%" class="text-right ItemQuantity">
 					{{ _("Quantity") }}
 				</th>
-				<th width="20%" class="text-right">
+				<th width="20%" class="text-right ItemAmount">
 					{{ _("Amount") }}
 				</th>
 			</thead>
 			<tbody>
 			{% for d in doc.items %}
 			<tr class="order-items">
-				<td>
+				<td class="ItemName">
 					{{ item_name_and_description(d) }}
 				</td>
-				<td class="text-right">
+				<td class="text-right ItemQuantity">
 					{{ d.qty }}
 					{% if d.delivered_qty is defined and d.delivered_qty != None %}
 						<p class="text-muted small">{{ _("Delivered") }}&nbsp;{{ d.delivered_qty }}</p>
 					{% endif %}
 				</td>
-				<td class="text-right">
+				<td class="text-right ItemAmount">
 					{{ d.get_formatted("amount")	 }}
 					<p class="text-muted small">{{ _("Rate:") }}&nbsp;{{ d.get_formatted("rate") }}</p>
 				</td>
