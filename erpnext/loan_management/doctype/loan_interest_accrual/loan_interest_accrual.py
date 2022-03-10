@@ -6,7 +6,6 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, cint, date_diff, flt, get_datetime, getdate, nowdate
 
-import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
 
@@ -41,8 +40,11 @@ class LoanInterestAccrual(AccountsController):
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gle_map = []
 
+		cost_center = frappe.db.get_value('Loan', self.loan, 'cost_center')
+
 		if self.interest_amount:
 			gle_map.append(
+<<<<<<< HEAD
 				self.get_gl_dict(
 					{
 						"account": self.loan_account,
@@ -78,6 +80,37 @@ class LoanInterestAccrual(AccountsController):
 						"posting_date": self.posting_date,
 					}
 				)
+=======
+				self.get_gl_dict({
+					"account": self.loan_account,
+					"party_type": self.applicant_type,
+					"party": self.applicant,
+					"against": self.interest_income_account,
+					"debit": self.interest_amount,
+					"debit_in_account_currency": self.interest_amount,
+					"against_voucher_type": "Loan",
+					"against_voucher": self.loan,
+					"remarks": _("Interest accrued from {0} to {1} against loan: {2}").format(
+						self.last_accrual_date, self.posting_date, self.loan),
+					"cost_center": cost_center,
+					"posting_date": self.posting_date
+				})
+			)
+
+			gle_map.append(
+				self.get_gl_dict({
+					"account": self.interest_income_account,
+					"against": self.loan_account,
+					"credit": self.interest_amount,
+					"credit_in_account_currency":  self.interest_amount,
+					"against_voucher_type": "Loan",
+					"against_voucher": self.loan,
+					"remarks": ("Interest accrued from {0} to {1} against loan: {2}").format(
+						self.last_accrual_date, self.posting_date, self.loan),
+					"cost_center": cost_center,
+					"posting_date": self.posting_date
+				})
+>>>>>>> 5d66cc4c4a (fix: Add cost center in loan document)
 			)
 
 		if gle_map:
