@@ -3,8 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-# import frappe
+import frappe
 from frappe.model.document import Document
 
 class VoidedCheck(Document):
-	pass
+	def validate(self):		
+		if self.docstatus == 0:
+			if self.created_by == None:
+				self.created_by = frappe.session.user
