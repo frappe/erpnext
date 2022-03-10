@@ -1,6 +1,5 @@
 import frappe
 from dateutil.relativedelta import relativedelta
-
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import now_datetime
 
