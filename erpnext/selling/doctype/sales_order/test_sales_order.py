@@ -1405,6 +1405,28 @@ class TestSalesOrder(ERPNextTestCase):
 		self.assertEqual(so.items[0].work_order_qty, wo.produced_qty)
 		self.assertEqual(mr.status, "Manufactured")
 
+	def test_sales_order_with_shipping_rule(self):
+		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
+		shipping_rule = create_shipping_rule(shipping_rule_type = "Selling", shipping_rule_name = "Shipping Rule - Sales Invoice Test")
+		sales_order = make_sales_order(do_not_save=True)
+		sales_order.shipping_rule = shipping_rule.name
+
+		sales_order.items[0].qty = 1
+		sales_order.save()
+		self.assertEqual(sales_order.taxes[0].tax_amount, 50)
+
+		sales_order.items[0].qty = 2
+		sales_order.save()
+		self.assertEqual(sales_order.taxes[0].tax_amount, 100)
+
+		sales_order.items[0].qty = 3
+		sales_order.save()
+		self.assertEqual(sales_order.taxes[0].tax_amount, 200)
+
+		sales_order.items[0].qty = 21
+		sales_order.save()
+		self.assertEqual(sales_order.taxes[0].tax_amount, 0)
+
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.automatically_fetch_payment_terms = enable
