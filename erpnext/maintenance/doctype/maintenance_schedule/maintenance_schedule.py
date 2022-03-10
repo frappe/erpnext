@@ -197,23 +197,38 @@ class MaintenanceSchedule(TransactionBase):
 				if chk:
 					throw(_("Maintenance Schedule {0} exists against {1}").format(chk[0][0], d.sales_order))
 
-	def validate_no_of_visits(self):
-		return len(self.schedules) != sum(d.no_of_visits for d in self.items)
-
 	def validate_serials_updated(self):
 		items_serials = {item.item_code: item.serial_no for item in self.items}
 		schedules_serials = {item.item_code: item.serial_no for item in self.schedules}
 		if items_serials != schedules_serials:
 			self.generate_schedule()
 
+	def validate_items_table_change(self):
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+		for prev_item, item in zip(doc_before_save.items, self.items):
+			fields = ['item_code', 'start_date', 'end_date', 'periodicity', 'sales_person', 'no_of_visits']
+			schedule_generated = False
+			for field in fields:
+				b_doc = prev_item.as_dict()
+				doc = item.as_dict()
+				if cstr(b_doc[field]) != cstr(doc[field]):
+					schedule_generated = True
+					self.generate_schedule()
+					break
+			if schedule_generated:
+				break
+
 	def validate(self):
 		self.validate_end_date_visits()
 		self.validate_maintenance_detail()
 		self.validate_dates_with_periodicity()
 		self.validate_sales_order()
-		self.validate_serials_updated()
-		if not self.schedules or self.validate_no_of_visits():
+		self.validate_items_table_change()
+		if not self.schedules:
 			self.generate_schedule()
+		self.validate_serials_updated()
 
 	def on_update(self):
 		frappe.db.set(self, 'status', 'Draft')
