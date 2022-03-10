@@ -326,8 +326,6 @@ class TestLeaveApplication(unittest.TestCase):
 		# attendance on non-holiday updated
 		self.assertEqual(frappe.db.get_value("Attendance", attendance.name, "status"), "On Leave")
 
-		frappe.db.set_value("Employee", employee.name, "holiday_list", original_holiday_list)
-
 	def test_block_list(self):
 		self._clear_roles()
 
@@ -514,8 +512,6 @@ class TestLeaveApplication(unittest.TestCase):
 
 		# check leave balance is reduced
 		self.assertEqual(get_leave_balance_on(employee.name, leave_type, optional_leave_date), 9)
-
-		frappe.db.set_value("Employee", employee.name, "holiday_list", original_holiday_list)
 
 	def test_leaves_allowed(self):
 		employee = get_employee()
