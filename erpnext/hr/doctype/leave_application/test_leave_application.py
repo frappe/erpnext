@@ -133,7 +133,9 @@ class TestLeaveApplication(unittest.TestCase):
 
 		holiday_list = make_holiday_list()
 		employee = get_employee()
-		frappe.db.set_value("Company", employee.company, "default_holiday_list", holiday_list)
+		original_holiday_list = employee.holiday_list
+		frappe.db.set_value("Employee", employee.name, "holiday_list", holiday_list)
+
 		first_sunday = get_first_sunday(holiday_list)
 
 		leave_application = make_leave_application(employee.name, first_sunday, add_days(first_sunday, 3), leave_type.name)
@@ -142,6 +144,8 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertEqual(frappe.db.count('Attendance', {'leave_application': leave_application.name}), 4)
 
 		leave_application.cancel()
+
+		frappe.db.set_value("Employee", employee.name, "holiday_list", original_holiday_list)
 
 	def test_attendance_update_for_exclude_holidays(self):
 		# Case 2: leave type with 'Include holidays within leaves as leaves' disabled
@@ -157,6 +161,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		holiday_list = make_holiday_list()
 		employee = get_employee()
+		original_holiday_list = employee.holiday_list
 		frappe.db.set_value("Employee", employee.name, "holiday_list", holiday_list)
 		first_sunday = get_first_sunday(holiday_list)
 
@@ -188,6 +193,8 @@ class TestLeaveApplication(unittest.TestCase):
 
 		# attendance on non-holiday updated
 		self.assertEqual(frappe.db.get_value("Attendance", attendance.name, "status"), "On Leave")
+
+		frappe.db.set_value("Employee", employee.name, "holiday_list", original_holiday_list)
 
 	def test_block_list(self):
 		self._clear_roles()
@@ -327,6 +334,7 @@ class TestLeaveApplication(unittest.TestCase):
 		employee = get_employee()
 
 		default_holiday_list = make_holiday_list()
+		original_holiday_list = employee.holiday_list
 		frappe.db.set_value("Employee", employee.name, "holiday_list", default_holiday_list)
 		first_sunday = get_first_sunday(default_holiday_list)
 
@@ -377,6 +385,8 @@ class TestLeaveApplication(unittest.TestCase):
 
 		# check leave balance is reduced
 		self.assertEqual(get_leave_balance_on(employee.name, leave_type, optional_leave_date), 9)
+
+		frappe.db.set_value("Employee", employee.name, "holiday_list", original_holiday_list)
 
 	def test_leaves_allowed(self):
 		employee = get_employee()
