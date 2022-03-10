@@ -130,7 +130,8 @@ def repost(doc):
 		doc.set_status('Failed')
 		raise
 	finally:
-		frappe.db.commit()
+		if not frappe.flags.in_test:
+			frappe.db.commit()
 
 def repost_sl_entries(doc):
 	if doc.based_on == 'Transaction':

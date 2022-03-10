@@ -855,11 +855,13 @@ class update_entries_after(object):
 		for warehouse, data in self.data.items():
 			bin_name = get_or_make_bin(self.item_code, warehouse)
 
-			frappe.db.set_value('Bin', bin_name, {
-				"valuation_rate": data.valuation_rate,
+			updated_values = {
 				"actual_qty": data.qty_after_transaction,
 				"stock_value": data.stock_value
-			})
+			}
+			if data.valuation_rate is not None:
+				updated_values["valuation_rate"] = data.valuation_rate
+			frappe.db.set_value('Bin', bin_name, updated_values)
 
 
 def get_previous_sle_of_current_voucher(args, exclude_current_voucher=False):
