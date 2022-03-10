@@ -170,10 +170,7 @@ def get_default_price_list(party):
 		return party.default_price_list
 
 	if party.doctype == "Customer":
-		try:
-			return frappe.get_cached_value("Customer Group", party.customer_group, "default_price_list")
-		except frappe.exceptions.DoesNotExistError:
-			return
+		return frappe.db.get_value("Customer Group", party.customer_group, "default_price_list")
 
 
 def set_price_list(party_details, party, party_type, given_price_list, pos=None):
