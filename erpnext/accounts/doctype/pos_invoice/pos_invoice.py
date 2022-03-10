@@ -172,9 +172,10 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(error_msg, title=_("Invalid Item"), as_list=True)
 
 	def validate_stock_availablility(self):
+		from erpnext.stock.stock_ledger import is_negative_stock_allowed
+
 		if self.is_return or self.docstatus != 1:
 			return
-		allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
 		for d in self.get('items'):
 			is_service_item = not (frappe.db.get_value('Item', d.get('item_code'), 'is_stock_item'))
 			if is_service_item:
@@ -186,7 +187,7 @@ class POSInvoice(SalesInvoice):
 			elif d.batch_no:
 				self.validate_pos_reserved_batch_qty(d)
 			else:
-				if allow_negative_stock:
+				if is_negative_stock_allowed(item_code=d.item_code):
 					return
 
 				available_stock, is_stock_item = get_stock_availability(d.item_code, d.warehouse)
@@ -438,7 +439,6 @@ class POSInvoice(SalesInvoice):
 			self.paid_amount = 0
 
 	def set_account_for_mode_of_payment(self):
-		self.payments = [d for d in self.payments if d.amount or d.base_amount or d.default]
 		for pay in self.payments:
 			if not pay.account:
 				pay.account = get_bank_cash_account(pay.mode_of_payment, self.company).get("account")

@@ -30,7 +30,6 @@ def execute(filters=None):
 	if region != 'United States':
 		return [], []
 
-	data = []
 	columns = get_columns()
 	conditions = ""
 	if filters.supplier_group:

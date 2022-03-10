@@ -5,6 +5,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import change_settings
 from frappe.utils import add_months, nowdate
 
 from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule
@@ -15,7 +16,7 @@ from erpnext.e_commerce.shopping_cart.cart import (
 	get_party,
 	update_cart,
 )
-from erpnext.tests.utils import change_settings, create_test_contact_and_address
+from erpnext.tests.utils import create_test_contact_and_address
 
 # test_dependencies = ['Payment Terms Template']
 
@@ -57,13 +58,19 @@ class TestShoppingCart(unittest.TestCase):
 		return quotation
 
 	def test_get_cart_customer(self):
-		self.login_as_customer()
+		def validate_quotation():
+			# test if quotation with customer is fetched
+			quotation = _get_cart_quotation()
+			self.assertEqual(quotation.quotation_to, "Customer")
+			self.assertEqual(quotation.party_name, "_Test Customer")
+			self.assertEqual(quotation.contact_email, frappe.session.user)
+			return quotation
 
-		# test if quotation with customer is fetched
-		quotation = _get_cart_quotation()
-		self.assertEqual(quotation.quotation_to, "Customer")
-		self.assertEqual(quotation.party_name, "_Test Customer")
-		self.assertEqual(quotation.contact_email, frappe.session.user)
+		self.login_as_customer("test_contact_two_customer@example.com", "_Test Contact 2 For _Test Customer")
+		validate_quotation()
+
+		self.login_as_customer()
+		quotation = validate_quotation()
 
 		return quotation
 
@@ -175,7 +182,7 @@ class TestShoppingCart(unittest.TestCase):
 	def create_tax_rule(self):
 		tax_rule = frappe.get_test_records("Tax Rule")[0]
 		try:
-			frappe.get_doc(tax_rule).insert()
+			frappe.get_doc(tax_rule).insert(ignore_if_duplicate=True)
 		except (frappe.DuplicateEntryError, ConflictingTaxRule):
 			pass
 
@@ -254,10 +261,9 @@ class TestShoppingCart(unittest.TestCase):
 		self.create_user_if_not_exists("test_cart_user@example.com")
 		frappe.set_user("test_cart_user@example.com")
 
-	def login_as_customer(self):
-		self.create_user_if_not_exists("test_contact_customer@example.com",
-			"_Test Contact For _Test Customer")
-		frappe.set_user("test_contact_customer@example.com")
+	def login_as_customer(self, email="test_contact_customer@example.com", name="_Test Contact For _Test Customer"):
+		self.create_user_if_not_exists(email, name)
+		frappe.set_user(email)
 
 	def clear_existing_quotations(self):
 		quotations = frappe.get_all("Quotation", filters={

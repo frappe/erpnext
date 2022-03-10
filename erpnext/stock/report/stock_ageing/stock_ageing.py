@@ -12,6 +12,7 @@ from frappe.utils import cint, date_diff, flt
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 Filters = frappe._dict
+precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 
 def execute(filters: Filters = None) -> Tuple:
 	to_date = filters["to_date"]
@@ -48,10 +49,13 @@ def format_report_data(filters: Filters, item_details: Dict, to_date: str) -> Li
 		if filters.get("show_warehouse_wise_stock"):
 			row.append(details.warehouse)
 
-		row.extend([item_dict.get("total_qty"), average_age,
+		row.extend([
+			flt(item_dict.get("total_qty"), precision),
+			average_age,
 			range1, range2, range3, above_range3,
 			earliest_age, latest_age,
-			details.stock_uom])
+			details.stock_uom
+		])
 
 		data.append(row)
 
@@ -79,13 +83,13 @@ def get_range_age(filters: Filters, fifo_queue: List, to_date: str, item_dict: D
 		qty = flt(item[0]) if not item_dict["has_serial_no"] else 1.0
 
 		if age <= filters.range1:
-			range1 += qty
+			range1 = flt(range1 + qty, precision)
 		elif age <= filters.range2:
-			range2 += qty
+			range2 = flt(range2 + qty, precision)
 		elif age <= filters.range3:
-			range3 += qty
+			range3 = flt(range3 + qty, precision)
 		else:
-			above_range3 += qty
+			above_range3 = flt(above_range3 + qty, precision)
 
 	return range1, range2, range3, above_range3
 
@@ -252,6 +256,7 @@ class FIFOSlots:
 			key, fifo_queue, transferred_item_key = self.__init_key_stores(d)
 
 			if d.voucher_type == "Stock Reconciliation":
+				# get difference in qty shift as actual qty
 				prev_balance_qty = self.item_details[key].get("qty_after_transaction", 0)
 				d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
 
@@ -264,12 +269,16 @@ class FIFOSlots:
 
 			self.__update_balances(d, key)
 
+		if not self.filters.get("show_warehouse_wise_stock"):
+			# (Item 1, WH 1), (Item 1, WH 2) => (Item 1)
+			self.item_details = self.__aggregate_details_by_item(self.item_details)
+
 		return self.item_details
 
 	def __init_key_stores(self, row: Dict) -> Tuple:
 		"Initialise keys and FIFO Queue."
 
-		key = (row.name, row.warehouse) if self.filters.get('show_warehouse_wise_stock') else row.name
+		key = (row.name, row.warehouse)
 		self.item_details.setdefault(key, {"details": row, "fifo_queue": []})
 		fifo_queue = self.item_details[key]["fifo_queue"]
 
@@ -281,14 +290,16 @@ class FIFOSlots:
 	def __compute_incoming_stock(self, row: Dict, fifo_queue: List, transfer_key: Tuple, serial_nos: List):
 		"Update FIFO Queue on inward stock."
 
-		if self.transferred_item_details.get(transfer_key):
+		transfer_data = self.transferred_item_details.get(transfer_key)
+		if transfer_data:
 			# inward/outward from same voucher, item & warehouse
-			slot = self.transferred_item_details[transfer_key].pop(0)
-			fifo_queue.append(slot)
+			# eg: Repack with same item, Stock reco for batch item
+			# consume transfer data and add stock to fifo queue
+			self.__adjust_incoming_transfer_qty(transfer_data, fifo_queue, row)
 		else:
 			if not serial_nos:
-				if fifo_queue and flt(fifo_queue[0][0]) < 0:
-					# neutralize negative stock by adding positive stock
+				if fifo_queue and flt(fifo_queue[0][0]) <= 0:
+					# neutralize 0/negative stock by adding positive stock
 					fifo_queue[0][0] += flt(row.actual_qty)
 					fifo_queue[0][1] = row.posting_date
 				else:
@@ -319,7 +330,7 @@ class FIFOSlots:
 			elif not fifo_queue:
 				# negative stock, no balance but qty yet to consume
 				fifo_queue.append([-(qty_to_pop), row.posting_date])
-				self.transferred_item_details[transfer_key].append([row.actual_qty, row.posting_date])
+				self.transferred_item_details[transfer_key].append([qty_to_pop, row.posting_date])
 				qty_to_pop = 0
 			else:
 				# qty to pop < slot qty, ample balance
@@ -327,6 +338,33 @@ class FIFOSlots:
 				slot[0] = flt(slot[0]) - qty_to_pop
 				self.transferred_item_details[transfer_key].append([qty_to_pop, slot[1]])
 				qty_to_pop = 0
+
+	def __adjust_incoming_transfer_qty(self, transfer_data: Dict, fifo_queue: List, row: Dict):
+		"Add previously removed stock back to FIFO Queue."
+		transfer_qty_to_pop = flt(row.actual_qty)
+
+		def add_to_fifo_queue(slot):
+			if fifo_queue and flt(fifo_queue[0][0]) <= 0:
+				# neutralize 0/negative stock by adding positive stock
+				fifo_queue[0][0] += flt(slot[0])
+				fifo_queue[0][1] = slot[1]
+			else:
+				fifo_queue.append(slot)
+
+		while transfer_qty_to_pop:
+			if transfer_data and 0 < transfer_data[0][0] <= transfer_qty_to_pop:
+				# bucket qty is not enough, consume whole
+				transfer_qty_to_pop -= transfer_data[0][0]
+				add_to_fifo_queue(transfer_data.pop(0))
+			elif not transfer_data:
+				# transfer bucket is empty, extra incoming qty
+				add_to_fifo_queue([transfer_qty_to_pop, row.posting_date])
+				transfer_qty_to_pop = 0
+			else:
+				# ample bucket qty to consume
+				transfer_data[0][0] -= transfer_qty_to_pop
+				add_to_fifo_queue([transfer_qty_to_pop, transfer_data[0][1]])
+				transfer_qty_to_pop = 0
 
 	def __update_balances(self, row: Dict, key: Union[Tuple, str]):
 		self.item_details[key]["qty_after_transaction"] = row.qty_after_transaction
@@ -337,6 +375,27 @@ class FIFOSlots:
 			self.item_details[key]["total_qty"] += row.actual_qty
 
 		self.item_details[key]["has_serial_no"] = row.has_serial_no
+
+	def __aggregate_details_by_item(self, wh_wise_data: Dict) -> Dict:
+		"Aggregate Item-Wh wise data into single Item entry."
+		item_aggregated_data = {}
+		for key,row in wh_wise_data.items():
+			item = key[0]
+			if not item_aggregated_data.get(item):
+				item_aggregated_data.setdefault(item, {
+					"details": frappe._dict(),
+					"fifo_queue": [],
+					"qty_after_transaction": 0.0,
+					"total_qty": 0.0
+				})
+			item_row = item_aggregated_data.get(item)
+			item_row["details"].update(row["details"])
+			item_row["fifo_queue"].extend(row["fifo_queue"])
+			item_row["qty_after_transaction"] += flt(row["qty_after_transaction"])
+			item_row["total_qty"] += flt(row["total_qty"])
+			item_row["has_serial_no"] = row["has_serial_no"]
+
+		return item_aggregated_data
 
 	def __get_stock_ledger_entries(self) -> List[Dict]:
 		sle = frappe.qb.DocType("Stock Ledger Entry")

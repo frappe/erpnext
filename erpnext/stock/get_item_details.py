@@ -6,6 +6,7 @@ import json
 
 import frappe
 from frappe import _, throw
+from frappe.model import child_table_fields, default_fields
 from frappe.model.meta import get_field_precision
 from frappe.utils import add_days, add_months, cint, cstr, flt, getdate
 
@@ -119,7 +120,14 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		out.rate = args.rate or out.price_list_rate
 		out.amount = flt(args.qty) * flt(out.rate)
 
+	out = remove_standard_fields(out)
 	return out
+
+def remove_standard_fields(details):
+	for key in child_table_fields + default_fields:
+		details.pop(key, None)
+	return details
+
 
 def update_stock(args, out):
 	if (args.get("doctype") == "Delivery Note" or
@@ -343,6 +351,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 
 	args.conversion_factor = out.conversion_factor
 	out.stock_qty = out.qty * out.conversion_factor
+	args.stock_qty = out.stock_qty
 
 	# calculate last purchase rate
 	if args.get('doctype') in purchase_doctypes:
@@ -358,7 +367,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			if not out[d[1]]:
 				out[d[1]] = frappe.get_cached_value('Company',  args.company,  d[2]) if d[2] else None
 
-	for fieldname in ("item_name", "item_group", "barcodes", "brand", "stock_uom"):
+	for fieldname in ("item_name", "item_group", "brand", "stock_uom"):
 		out[fieldname] = item.get(fieldname)
 
 	if args.get("manufacturer"):
