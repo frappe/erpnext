@@ -51,7 +51,8 @@ class Interview(Document):
 	def validate_overlap(self):
 		interviewers = [entry.interviewer for entry in self.interview_details] or ['']
 
-		overlaps = frappe.db.sql("""
+		overlaps = frappe.db.multisql({
+			'mariadb': """
 			SELECT interview.name
 			FROM `tabInterview` as interview
 			INNER JOIN `tabInterview Detail` as detail
@@ -61,7 +62,17 @@ class Interview(Document):
 				((from_time < %s and to_time > %s) or
 				(from_time > %s and to_time < %s) or
 				(from_time = %s))
-			""", (self.scheduled_on, self.name, self.job_applicant, interviewers,
+			""",
+			'postgres': """
+			SELECT interview.name
+			FROM `tabInterview` as interview, `tabInterview Detail` as detail
+			WHERE
+				interview.scheduled_on = to_date(cast('{scheduled_on}' as text), 'YYYY-MM-DD') and interview.name != '{name}' and interview.docstatus != 2
+				and (interview.job_applicant = '{job_applicant}' or detail.interviewer IN {interviewers}) and
+				(from_time < TO_TIMESTAMP('{from_time}', 'HH24:MI:SS')::time and to_time > TO_TIMESTAMP('{to_time}', 'HH24:MI:SS')::time) or
+				(from_time > TO_TIMESTAMP('{from_time}', 'HH24:MI:SS')::time and to_time < TO_TIMESTAMP('{to_time}', 'HH24:MI:SS')::time) or
+				(from_time = TO_TIMESTAMP('{from_time}', 'HH24:MI:SS')::time)
+			""".format(scheduled_on = self.scheduled_on, name = self.name, job_applicant = self.job_applicant, interviewers = "('" + ",".join(interviewers) + "')", from_time = self.from_time, to_time = self.to_time)}, (self.scheduled_on, self.name, self.job_applicant, interviewers,
 			self.from_time, self.to_time, self.from_time, self.to_time, self.from_time))
 
 		if overlaps:

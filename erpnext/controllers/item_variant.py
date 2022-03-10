@@ -308,10 +308,16 @@ def make_variant_item_code(template_item_code, template_item_name, variant):
 
 	abbreviations = []
 	for attr in variant.attributes:
-		item_attribute = frappe.db.sql("""select i.numeric_values, v.abbr
+		item_attribute = frappe.db.multisql({
+			'mariadb':"""select i.numeric_values, v.abbr
 			from `tabItem Attribute` i left join `tabItem Attribute Value` v
 				on (i.name=v.parent)
-			where i.name=%(attribute)s and (v.attribute_value=%(attribute_value)s or i.numeric_values = 1)""", {
+			where i.name=%(attribute)s and (v.attribute_value=%(attribute_value)s or i.numeric_values = 1)""",
+			'postgres': """select i.numeric_values, v.abbr
+			from `tabItem Attribute` i left join `tabItem Attribute Value` v
+				on (i.name=v.parent)
+			where i.name='{attribute}' and (v.attribute_value='{attribute_value}' or i.numeric_values = 1)""".format(attribute = attr.attribute, attribute_value = attr.attribute_value)
+			}, {
 				"attribute": attr.attribute,
 				"attribute_value": attr.attribute_value
 			}, as_dict=True)

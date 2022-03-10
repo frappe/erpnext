@@ -1315,7 +1315,8 @@ class SalarySlip(TransactionBase):
 		for key in ('earnings', 'deductions'):
 			for component in self.get(key):
 				year_to_date = 0
-				component_sum = frappe.db.sql("""
+				component_sum = frappe.db.multisql({
+					'mariadb':"""
 					SELECT sum(detail.amount) as sum
 					FROM `tabSalary Detail` as detail
 					INNER JOIN `tabSalary Slip` as salary_slip
@@ -1326,8 +1327,21 @@ class SalarySlip(TransactionBase):
 						AND salary_slip.start_date >= %(period_start_date)s
 						AND salary_slip.end_date < %(period_end_date)s
 						AND salary_slip.name != %(docname)s
-						AND salary_slip.docstatus = 1""",
-						{'employee': self.employee, 'component': component.salary_component, 'period_start_date': period_start_date,
+						AND salary_slip.docstatus = 1
+						""",
+						'postgres':"""
+					SELECT sum(detail.amount) as sum
+					FROM `tabSalary Detail` as detail
+					INNER JOIN `tabSalary Slip` as salary_slip
+					ON detail.parent = salary_slip.name
+					WHERE
+						salary_slip.employee = %(employee)s
+						AND detail.salary_component = %(component)s
+						AND salary_slip.start_date >= %(period_start_date)s
+						AND salary_slip.end_date < %(period_end_date)s
+						AND salary_slip.name != %(docname)s
+						AND salary_slip.docstatus = 1
+						"""},{'employee': self.employee, 'component': component.salary_component, 'period_start_date': period_start_date,
 							'period_end_date': period_end_date, 'docname': self.name}
 				)
 

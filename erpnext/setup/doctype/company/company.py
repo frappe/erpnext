@@ -435,7 +435,8 @@ def install_country_fixtures(company, country):
 def update_company_current_month_sales(company):
 	current_month_year = formatdate(today(), "MM-yyyy")
 
-	results = frappe.db.sql('''
+	results = frappe.db.multisql({
+		'mariadb': '''
 		SELECT
 			SUM(base_grand_total) AS total,
 			DATE_FORMAT(`posting_date`, '%m-%Y') AS month_year
@@ -448,7 +449,20 @@ def update_company_current_month_sales(company):
 		GROUP BY
 			month_year
 	'''.format(current_month_year=current_month_year, company=frappe.db.escape(company)),
-		as_dict = True)
+	'postgres': '''
+		SELECT
+			SUM(base_grand_total) AS total,
+			to_char(`posting_date`, '%m-%Y') AS month_year
+		FROM
+			`tabSales Invoice`
+		WHERE
+			to_char(`posting_date`, 'MM-YYYY') = '{current_month_year}'
+			AND docstatus = 1
+			AND company = {company}
+		GROUP BY
+			month_year
+	'''.format(current_month_year=current_month_year, company=frappe.db.escape(company))
+	}, as_dict = True)
 
 	monthly_total = results[0]['total'] if len(results) > 0 else 0
 

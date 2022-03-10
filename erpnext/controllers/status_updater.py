@@ -370,7 +370,8 @@ class StatusUpdater(Document):
 		if not ref_docs:
 			return
 
-		zero_amount_refdocs = frappe.db.sql_list("""
+		zero_amount_refdocs = frappe.db.multisql({
+		'mariadb': """
 			SELECT
 				name
 			from
@@ -379,7 +380,18 @@ class StatusUpdater(Document):
 				docstatus = 1
 				and base_net_total = 0
 				and name in %(ref_docs)s
-		""".format(ref_dt=ref_dt), {
+		""".format(ref_dt=ref_dt),
+		'postgres': """
+			SELECT
+				name
+			from
+				`tab{ref_dt}`
+			where
+				docstatus = 1
+				and base_net_total = 0
+				and name = ANY(%(ref_docs)s)
+		""".format(ref_dt=ref_dt),
+		}, {
 			'ref_docs': ref_docs
 		})
 

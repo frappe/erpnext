@@ -75,7 +75,8 @@ class GSTR3BReport(Document):
 				d[key] = flt(itc_details.get(itc_type, {}).get(key))
 
 	def get_itc_reversal_entries(self):
-		reversal_entries = frappe.db.sql("""
+		reversal_entries = frappe.db.multisql({
+			'mariadb': """
 			SELECT ja.account, j.reversal_type, sum(credit_in_account_currency) as amount
 			FROM `tabJournal Entry` j, `tabJournal Entry Account` ja
 			where j.docstatus = 1
@@ -84,7 +85,18 @@ class GSTR3BReport(Document):
 			and j.voucher_type = 'Reversal Of ITC'
 			and month(j.posting_date) = %s and year(j.posting_date) = %s
 			and j.company = %s and j.company_gstin = %s
-			GROUP BY ja.account, j.reversal_type""", (self.month_no, self.year, self.company,
+			GROUP BY ja.account, j.reversal_type""",
+			'postgres': """
+			SELECT ja.account, j.reversal_type, sum(credit_in_account_currency) as amount
+			FROM `tabJournal Entry` j, `tabJournal Entry Account` ja
+			where j.docstatus = 1
+			and j.is_opening = 'No'
+			and ja.parent = j.name
+			and j.voucher_type = 'Reversal Of ITC'
+			and to_char(j.posting_date, 'MM')::integer = %s and to_char(j.posting_date, 'YYYY')::integer = %s
+			and j.company = %s and j.company_gstin = %s
+			GROUP BY ja.account, j.reversal_type""",
+			}, (self.month_no, self.year, self.company,
 			self.gst_details.get("gstin")), as_dict=1)
 
 		net_itc = self.report_dict["itc_elg"]["itc_net"]
@@ -101,7 +113,8 @@ class GSTR3BReport(Document):
 					net_itc[key] -= flt(entry.amount)
 
 	def get_itc_details(self):
-		itc_amounts = frappe.db.sql("""
+		itc_amounts = frappe.db.multisql({
+			'mariadb': """
 			SELECT eligibility_for_itc, sum(itc_integrated_tax) as itc_integrated_tax,
 			sum(itc_central_tax) as itc_central_tax,
 			sum(itc_state_tax) as itc_state_tax,
@@ -112,7 +125,19 @@ class GSTR3BReport(Document):
 			and month(posting_date) = %s and year(posting_date) = %s and company = %s
 			and company_gstin = %s
 			GROUP BY eligibility_for_itc
-		""", (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
+		""",
+		'postgres': """
+			SELECT eligibility_for_itc, sum(itc_integrated_tax) as itc_integrated_tax,
+			sum(itc_central_tax) as itc_central_tax,
+			sum(itc_state_tax) as itc_state_tax,
+			sum(itc_cess_amount) as itc_cess_amount
+			FROM `tabPurchase Invoice`
+			WHERE docstatus = 1
+			and is_opening = 'No'
+			and to_char(posting_date, 'MM')::integer = %s and to_char(posting_date, 'YYYY')::integer = %s and company = %s
+			and company_gstin = %s
+			GROUP BY eligibility_for_itc
+		"""}, (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
 
 		itc_details = {}
 		for d in itc_amounts:
@@ -126,7 +151,8 @@ class GSTR3BReport(Document):
 		return itc_details
 
 	def get_inward_nil_exempt(self, state):
-		inward_nil_exempt = frappe.db.sql("""
+		inward_nil_exempt = frappe.db.multisql({
+			'mariadb':"""
 			SELECT p.place_of_supply, sum(i.base_amount) as base_amount, i.is_nil_exempt, i.is_non_gst
 			FROM `tabPurchase Invoice` p , `tabPurchase Invoice Item` i
 			WHERE p.docstatus = 1 and p.name = i.parent
@@ -136,6 +162,16 @@ class GSTR3BReport(Document):
 			month(p.posting_date) = %s and year(p.posting_date) = %s
 			and p.company = %s and p.company_gstin = %s
 			GROUP BY p.place_of_supply, i.is_nil_exempt, i.is_non_gst""",
+			'postgres': """
+			SELECT p.place_of_supply, sum(i.base_amount) as base_amount, i.is_nil_exempt, i.is_non_gst
+			FROM `tabPurchase Invoice` p , `tabPurchase Invoice Item` i
+			WHERE p.docstatus = 1 and p.name = i.parent
+			and p.is_opening = 'No'
+			and p.gst_category != 'Registered Composition'
+			and (i.is_nil_exempt = 1 or i.is_non_gst = 1 or p.gst_category = 'Registered Composition')
+			and to_char(p.posting_date, 'MM')::integer = %s and to_char(p.posting_date, 'YYYY')::integer = %s
+			and p.company = %s and p.company_gstin = %s
+			GROUP BY p.place_of_supply, i.is_nil_exempt, i.is_non_gst"""},
 			(self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
 
 		inward_nil_exempt_details = {
@@ -177,7 +213,8 @@ class GSTR3BReport(Document):
 		if reverse_charge:
 			condition += "AND reverse_charge = 'Y'"
 
-		invoice_details = frappe.db.sql("""
+		invoice_details = frappe.db.multisql({
+			'mariadb': """
 			SELECT
 				name, gst_category, export_type, place_of_supply
 			FROM
@@ -191,7 +228,23 @@ class GSTR3BReport(Document):
 				AND is_opening = 'No'
 				{reverse_charge}
 			ORDER BY name
-		""".format(doctype=doctype, reverse_charge=condition), (self.month_no, self.year,
+		""".format(doctype=doctype, reverse_charge=condition),
+		'postgres': """
+			SELECT
+				name, gst_category, export_type, place_of_supply
+			FROM
+				`tab{doctype}`
+			WHERE
+				docstatus = 1
+				AND to_char(posting_date, 'MM')::integer = %s
+				AND to_char(posting_date, 'YYYY')::integer = %s
+				AND company = %s
+				AND company_gstin = %s
+				AND is_opening = 'No'
+				{reverse_charge}
+			ORDER BY name
+		""".format(doctype=doctype, reverse_charge=condition)
+		}, (self.month_no, self.year,
 			self.company, self.gst_details.get("gstin")), as_dict=1)
 
 		for d in invoice_details:
@@ -404,15 +457,24 @@ class GSTR3BReport(Document):
 				party_type = 'Supplier'
 				party = 'supplier'
 
-			docnames = frappe.db.sql(
-			"""
+			docnames = frappe.db.multisql({
+			'mariadb': """
 				SELECT t1.name FROM `tab{doctype}` t1, `tab{party_type}` t2
 				WHERE t1.docstatus = 1 and t1.is_opening = 'No'
 				and month(t1.posting_date) = %s and year(t1.posting_date) = %s
 				and t1.company = %s and t1.place_of_supply IS NULL and t1.{party} = t2.name and
 				t2.gst_category != 'Overseas'
 			""".format(doctype = doctype, party_type = party_type,
-				party=party) ,(self.month_no, self.year, self.company), as_dict=1) #nosec
+				party=party),
+			'postgres': """
+				SELECT t1.name FROM `tab{doctype}` t1, `tab{party_type}` t2
+				WHERE t1.docstatus = 1 and t1.is_opening = 'No'
+				and to_char(t1.posting_date, 'MM')::integer = %s and to_char(t1.posting_date, 'YYYY')::integer = %s
+				and t1.company = %s and t1.place_of_supply IS NULL and t1.{party} = t2.name and
+				t2.gst_category != 'Overseas'
+			""".format(doctype = doctype, party_type = party_type,
+				party=party)
+				} ,(self.month_no, self.year, self.company), as_dict=1) #nosec
 
 			for d in docnames:
 				missing_field_invoices.append(d.name)

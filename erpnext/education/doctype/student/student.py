@@ -156,9 +156,17 @@ class Student(Document):
 
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
-	return dict(frappe.db.sql('''select unix_timestamp(`date`), count(*)
+	return dict(frappe.db.multisql({
+		'mariadb': '''select unix_timestamp(`date`), count(*)
 		from `tabStudent Attendance` where
 			student=%s
-			and `date` > date_sub(curdate(), interval 1 year)
+			and `date` > date_sub(CURRENT_DATE, interval 1 year)
 			and docstatus = 1 and status = 'Present'
-			group by date''', name))
+			group by date''',
+		'postgres': '''select extract(epoch from `date`), count(*)
+		from `tabStudent Attendance` where
+			student=%s
+			and `date` > (current_date - interval '1 year')
+			and docstatus = 1 and status = 'Present'
+			group by date''',
+			}, name))
