@@ -35,7 +35,7 @@ class ECommerceSettings(Document):
 		if not (self.enable_field_filters and self.filter_fields):
 			return
 
-		item_meta = frappe.get_meta("Item")
+		item_meta = frappe.get_meta("Website Item")
 		valid_fields = [df.fieldname for df in item_meta.fields if df.fieldtype in ["Link", "Table MultiSelect"]]
 
 		for f in self.filter_fields:
