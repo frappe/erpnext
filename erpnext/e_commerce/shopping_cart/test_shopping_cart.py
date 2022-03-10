@@ -5,12 +5,9 @@
 import unittest
 
 import frappe
-<<<<<<< HEAD
-from frappe.utils import add_months, nowdate
-=======
 from frappe.tests.utils import change_settings
 from frappe.utils import add_months, cint, nowdate
->>>>>>> a13e06156b (fix: 'save_quotations_as_draft' checkbox not honoured)
+
 
 from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule
 from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
