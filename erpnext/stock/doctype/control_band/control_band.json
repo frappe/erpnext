@@ -1,0 +1,92 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "CB-.###",
+ "creation": "2022-03-07 16:31:32.942549",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "control_band_name",
+  "control",
+  "ppe",
+  "processing_information"
+ ],
+ "fields": [
+  {
+   "fieldname": "control_band_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "control",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Control",
+   "options": "Elimination\nSubstitution\nEngineering Controls\nWork Practices\nPPE\nNone",
+   "translatable": 1
+  },
+  {
+   "fieldname": "ppe",
+   "fieldtype": "Table",
+   "label": "Personal Protective Equipment",
+   "options": "Personal Protective Equipment"
+  },
+  {
+   "fieldname": "processing_information",
+   "fieldtype": "Text Editor",
+   "label": "Processing Information"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-03-07 17:23:51.128427",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Control Band",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "control_band_name",
+ "track_changes": 1
+}

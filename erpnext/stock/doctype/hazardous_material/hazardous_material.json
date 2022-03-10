@@ -1,0 +1,179 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:item",
+ "creation": "2022-03-07 16:15:45.163909",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "item_name",
+  "column_break_3",
+  "trade_name",
+  "column_break_5",
+  "status",
+  "usage_status_section",
+  "lifecycle",
+  "column_break_9",
+  "introduction_date",
+  "column_break_11",
+  "decommissioning_date",
+  "ghs_hazard_and_precautionary_statements_section",
+  "ghs_hazard_statements",
+  "ghs_precautionary_statements",
+  "company_use_section",
+  "hazardous_material_company_use"
+ ],
+ "fields": [
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fetch_from": "item.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Read Only",
+   "label": "Item Name"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "trade_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Trade Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nFor Approval\nApproved\nReview",
+   "reqd": 1,
+   "translatable": 1
+  },
+  {
+   "fieldname": "usage_status_section",
+   "fieldtype": "Section Break",
+   "label": "Usage Status"
+  },
+  {
+   "fieldname": "lifecycle",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Lifecycle",
+   "options": "Evaluation\nActive use\nPhase-out\nDecommissioned",
+   "reqd": 1,
+   "translatable": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "introduction_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Introduction Date"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "decommissioning_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Decommissioning Date"
+  },
+  {
+   "fieldname": "ghs_hazard_and_precautionary_statements_section",
+   "fieldtype": "Section Break",
+   "label": "GHS Hazard and Precautionary Statements"
+  },
+  {
+   "fieldname": "ghs_hazard_statements",
+   "fieldtype": "Table",
+   "label": "GHS Hazard Statements",
+   "options": "Hazardous Material GHS Hazard Statements"
+  },
+  {
+   "fieldname": "ghs_precautionary_statements",
+   "fieldtype": "Table",
+   "label": "GHS Precautionary Statements",
+   "options": "Hazardous Material GHS Precautionary Statements"
+  },
+  {
+   "fieldname": "company_use_section",
+   "fieldtype": "Section Break",
+   "label": "Company Use"
+  },
+  {
+   "fieldname": "hazardous_material_company_use",
+   "fieldtype": "Table",
+   "label": "Company Use",
+   "options": "Hazardous Material Company Use"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-03-07 16:58:21.287006",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Hazardous Material",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

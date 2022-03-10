@@ -1,0 +1,131 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:code",
+ "creation": "2022-03-07 16:42:40.689396",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "code",
+  "phrase",
+  "hazard_type",
+  "ghs_hazard_pictogram",
+  "image",
+  "control_band",
+  "control",
+  "hazardous_material_ghs_precautionary_statements"
+ ],
+ "fields": [
+  {
+   "fieldname": "code",
+   "fieldtype": "Data",
+   "label": "Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "phrase",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Phrase",
+   "reqd": 1,
+   "translatable": 1
+  },
+  {
+   "fieldname": "hazard_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Hazard Type",
+   "options": "Physical hazard\nHealth hazard\nEnvironmental hazard",
+   "reqd": 1,
+   "translatable": 1
+  },
+  {
+   "fieldname": "ghs_hazard_pictogram",
+   "fieldtype": "Link",
+   "label": "GHS Hazard Pictogram",
+   "options": "GHS Hazard Pictogram"
+  },
+  {
+   "fetch_from": "ghs_hazard_pictogram.pictogram",
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Image",
+   "read_only": 1
+  },
+  {
+   "fieldname": "control_band",
+   "fieldtype": "Link",
+   "label": "Control Band",
+   "options": "Control Band",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "control_band.control",
+   "fieldname": "control",
+   "fieldtype": "Data",
+   "label": "Control",
+   "read_only": 1
+  },
+  {
+   "fieldname": "hazardous_material_ghs_precautionary_statements",
+   "fieldtype": "Table",
+   "label": "Hazardous Material GHS Precautionary Statements",
+   "options": "Hazardous Material GHS Precautionary Statements"
+  }
+ ],
+ "image_field": "image",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-03-07 17:21:30.277457",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "GHS Hazard Statement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "phrase",
+ "track_changes": 1
+}

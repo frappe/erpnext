@@ -82,6 +82,10 @@
   "delivered_by_supplier",
   "column_break2",
   "supplier_items",
+  "hazardous_material",
+  "is_hazardous_material",
+  "control_band",
+  "is_ppe",
   "foreign_trade_details",
   "country_of_origin",
   "column_break_59",
@@ -948,6 +952,30 @@
    "fieldname": "grant_commission",
    "fieldtype": "Check",
    "label": "Grant Commission"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "hazardous_material",
+   "fieldtype": "Section Break",
+   "label": "Hazardous Material"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_hazardous_material",
+   "fieldtype": "Check",
+   "label": " Is Hazardous Material"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "control_band",
+   "fieldtype": "Section Break",
+   "label": "Control Band"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_ppe",
+   "fieldtype": "Check",
+   "label": "Is Personal Protective Equipment (PPE)"
   }
  ],
  "icon": "fa fa-tag",
@@ -955,7 +983,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-14 04:13:16.857534",
+ "modified": "2022-03-09 12:41:15.193459",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
