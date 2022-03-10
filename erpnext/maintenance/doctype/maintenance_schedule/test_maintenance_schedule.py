@@ -136,6 +136,11 @@ class TestMaintenanceSchedule(unittest.TestCase):
 		self.assertEqual(ms.schedules[0].serial_no, "TEST001")
 		self.assertEqual(ms.schedules[0].sales_person, "_Test Sales Person")
 		self.assertEqual(len(ms.schedules), 2)
+		# When user manually deleted a row from schedules table.
+		ms.schedules.pop()
+		self.assertEqual(len(ms.schedules), 1)
+		ms.save()
+		self.assertEqual(len(ms.schedules), 2)
 
 		frappe.db.rollback()
 
