@@ -370,23 +370,24 @@ class TestItem(ERPNextTestCase):
 		variant.save()
 
 	def test_item_merging(self):
-		create_item("Test Item for Merging 1")
-		create_item("Test Item for Merging 2")
+		old = create_item(frappe.generate_hash(length=20)).name
+		new = create_item(frappe.generate_hash(length=20)).name
 
-		make_stock_entry(item_code="Test Item for Merging 1", target="_Test Warehouse - _TC",
+		make_stock_entry(item_code=old, target="_Test Warehouse - _TC",
 			qty=1, rate=100)
-		make_stock_entry(item_code="Test Item for Merging 2", target="_Test Warehouse 1 - _TC",
+		make_stock_entry(item_code=old, target="_Test Warehouse 1 - _TC",
+			qty=1, rate=100)
+		make_stock_entry(item_code=new, target="_Test Warehouse 1 - _TC",
 			qty=1, rate=100)
 
-		frappe.rename_doc("Item", "Test Item for Merging 1", "Test Item for Merging 2", merge=True)
+		frappe.rename_doc("Item", old, new, merge=True)
 
-		self.assertFalse(frappe.db.exists("Item", "Test Item for Merging 1"))
+		self.assertFalse(frappe.db.exists("Item", old))
 
 		self.assertTrue(frappe.db.get_value("Bin",
-			{"item_code": "Test Item for Merging 2", "warehouse": "_Test Warehouse - _TC"}))
-
+			{"item_code": new, "warehouse": "_Test Warehouse - _TC"}))
 		self.assertTrue(frappe.db.get_value("Bin",
-			{"item_code": "Test Item for Merging 2", "warehouse": "_Test Warehouse 1 - _TC"}))
+			{"item_code": new, "warehouse": "_Test Warehouse 1 - _TC"}))
 
 	def test_item_merging_with_product_bundle(self):
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
