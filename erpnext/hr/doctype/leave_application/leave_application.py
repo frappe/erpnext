@@ -495,7 +495,6 @@ def get_number_of_leave_days(employee, leave_type, from_date, to_date, half_day 
 			number_of_days = date_diff(to_date, from_date) + .5
 		else:
 			number_of_days = date_diff(to_date, from_date) + 1
-
 	else:
 		number_of_days = date_diff(to_date, from_date) + 1
 

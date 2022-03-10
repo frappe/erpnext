@@ -39,16 +39,13 @@
 		frappe.call(opts).then(res => {
 			let success_dialog = new frappe.ui.Dialog({
 				title: __('Success'),
-				primary_action_label: __('View Program Content'),
+				primary_action_label: __('OK'),
 				primary_action: function() {
-					window.location.reload();
-				},
-				secondary_action: function() {
 					window.location.reload();
 				}
 			})
 			success_dialog.show();
-			success_dialog.set_message(__('You have successfully enrolled for the program '));
+			success_dialog.set_message(__('You have successfully enrolled for the program.'));
 		})
 	}
 </script>
