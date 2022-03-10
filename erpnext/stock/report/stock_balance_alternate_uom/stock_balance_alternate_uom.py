@@ -234,7 +234,9 @@ def get_item_warehouse_map(filters, sle):
 		qty_dict.bal_val += value_diff
 
 		# new code
-		qty_dict.alternate_qty = flt(qty_dict.bal_qty) * flt(frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'))
+		if frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'):
+			qty_dict.alternate_qty = flt(qty_dict.bal_qty) / flt(frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'))
+		else : 	qty_dict.alternate_qty = 0
 		
 		qty_dict.alternate_uom = frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'uom') 
 

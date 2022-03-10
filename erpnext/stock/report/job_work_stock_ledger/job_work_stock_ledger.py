@@ -14,6 +14,9 @@ from erpnext.stock.utils import (
 
 
 def execute(filters=None):
+
+	validate_filters(filters)
+
 	is_reposting_item_valuation_in_progress()
 	include_uom = filters.get("include_uom")
 	columns = get_columns()
@@ -59,34 +62,30 @@ def execute(filters=None):
 			update_available_serial_nos(available_serial_nos, sle)
 
 		data.append(sle)
+
 		for d in data:
-			
-			d['weight_uom'] = str(frappe.db.get_value("Item", d['item_code'], "weight_uom"))
-			d['alternate_uom'] = frappe.get_value("UOM Conversion Detail", {'parent': d['item_code'] ,'is_alternate_uom': 1 }, 'uom')
-
-			d['weight'] = flt(d['qty_after_transaction']) * flt(frappe.db.get_value("Item",  d.item_code, "weight_per_unit"))
-
-			if frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'):
-				d['alternate_qty'] = flt(d['qty_after_transaction']) / flt(frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'))
-			else :
-				d['alternate_qty'] =0
-			
-			if frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'):
-				d['in_alternate_qty'] = flt(d['in_qty']) / flt(frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'))
-			else : 	d['in_alternate_qty'] = 0
-			
-			if frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'):
-				d['out_alternate_qty'] = flt(d['out_qty']) / flt(frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'))
-			else : d['out_alternate_qty'] = 0	
-			
-			d['in_weight'] = flt(d['in_qty']) * flt(frappe.db.get_value("Item",  d.item_code, "weight_per_unit"))
-			d['out_weight'] = flt(d['out_qty']) * flt(frappe.db.get_value("Item",  d.item_code, "weight_per_unit"))
+			# print(" this is data", d)
+			d['ref_challan'] = frappe.get_value("Stock Entry", d.get('voucher_no'), ['reference_challan'])
 
 		if include_uom:
 			conversion_factors.append(item_detail.conversion_factor)
 
 	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
 	return columns, data
+
+def validate_filters(filters):	
+	
+	if not filters.get('warehouse') :
+		frappe.throw(" Please enter Warehouse")
+
+	if not filters.get('company') :
+		frappe.throw(" Please enter Company")	
+
+	if not filters.get('to_date')	or not filters.get('from_date'):
+		frappe.throw(" Please enter From Date and To Date")	
+
+	if filters.get('to_date') < filters.get('from_date'):
+		frappe.throw("From date should be less than To Date")	
 
 def update_available_serial_nos(available_serial_nos, sle):
 	serial_nos = get_serial_nos(sle.serial_no)
@@ -110,28 +109,15 @@ def update_available_serial_nos(available_serial_nos, sle):
 	sle.balance_serial_no = '\n'.join(existing_serial_no)
 
 def get_columns():
+	
 	columns = [
 		{"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 150},
 		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 100},
 		{"label": _("Item Name"), "fieldname": "item_name", "width": 100},
 		{"label": _("Stock UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 90},
 		{"label": _("In Qty"), "fieldname": "in_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
-
-		{"label": _("In Alternate Qty"), "fieldname": "in_alternate_qty", "fieldtype": "Float", "width": 80},
-		{"label": _("In Weight"), "fieldname": "in_weight", "fieldtype": "Float", "width": 80},
-
 		{"label": _("Out Qty"), "fieldname": "out_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
-
-		{"label": _("Out Alternate Qty"), "fieldname": "out_alternate_qty", "fieldtype": "Float", "width": 80},
-		{"label": _("Out Weight"), "fieldname": "out_weight", "fieldtype": "Float", "width": 80},
-
 		{"label": _("Balance Qty"), "fieldname": "qty_after_transaction", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-
-		{"label": _("Alternate Qty"), "fieldname": "alternate_qty", "fieldtype": "Float", "width": 80},
-		{"label": _("Alternate UOM"), "fieldname": "alternate_uom", "fieldtype": "Link", "options": "UOM", "width": 90},
-		{"label": _("Weight"), "fieldname": "weight", "fieldtype": "Float", "width": 80},
-		{"label": _("Weight UOM"), "fieldname": "weight_uom", "fieldtype": "Link", "options": "UOM", "width": 90},
-
 		{"label": _("Voucher #"), "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 150},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 150},
 		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
@@ -143,6 +129,9 @@ def get_columns():
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
 		{"label": _("Voucher #"), "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 100},
 		{"label": _("Batch"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch", "width": 100},
+
+		{"label": _("Refrence Challan"), "fieldname": "ref_challan", "fieldtype": "Link", "options": "Stock Entry", "width": 100},
+
 		{"label": _("Serial No"), "fieldname": "serial_no", "fieldtype": "Link", "options": "Serial No", "width": 100},
 		{"label": _("Balance Serial No"), "fieldname": "balance_serial_no", "width": 100},
 		{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},
