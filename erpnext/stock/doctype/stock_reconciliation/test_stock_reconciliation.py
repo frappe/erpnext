@@ -6,6 +6,7 @@
 
 
 import frappe
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cstr, flt, nowdate, nowtime, random_string
 
 from erpnext.accounts.utils import get_stock_and_account_balance
@@ -19,10 +20,9 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.utils import get_incoming_rate, get_stock_value_on, get_valuation_method
-from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 
-class TestStockReconciliation(ERPNextTestCase):
+class TestStockReconciliation(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
 		create_batch_or_serial_no_items()
@@ -200,7 +200,6 @@ class TestStockReconciliation(ERPNextTestCase):
 
 	def test_stock_reco_for_batch_item(self):
 		to_delete_records = []
-		to_delete_serial_nos = []
 
 		# Add new serial nos
 		item_code = "Stock-Reco-batch-Item-1"
@@ -208,20 +207,22 @@ class TestStockReconciliation(ERPNextTestCase):
 
 		sr = create_stock_reconciliation(item_code=item_code,
 			warehouse = warehouse, qty=5, rate=200, do_not_submit=1)
-		sr.save(ignore_permissions=True)
+		sr.save()
 		sr.submit()
 
-		self.assertTrue(sr.items[0].batch_no)
+		batch_no = sr.items[0].batch_no
+		self.assertTrue(batch_no)
 		to_delete_records.append(sr.name)
 
 		sr1 = create_stock_reconciliation(item_code=item_code,
-			warehouse = warehouse, qty=6, rate=300, batch_no=sr.items[0].batch_no)
+			warehouse = warehouse, qty=6, rate=300, batch_no=batch_no)
 
 		args = {
 			"item_code": item_code,
 			"warehouse": warehouse,
 			"posting_date": nowdate(),
 			"posting_time": nowtime(),
+			"batch_no": batch_no,
 		}
 
 		valuation_rate = get_incoming_rate(args)
@@ -230,7 +231,7 @@ class TestStockReconciliation(ERPNextTestCase):
 
 
 		sr2 = create_stock_reconciliation(item_code=item_code,
-			warehouse = warehouse, qty=0, rate=0, batch_no=sr.items[0].batch_no)
+			warehouse = warehouse, qty=0, rate=0, batch_no=batch_no)
 
 		stock_value = get_stock_value_on(warehouse, nowdate(), item_code)
 		self.assertEqual(stock_value, 0)
