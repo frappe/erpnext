@@ -157,7 +157,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		holiday_list = make_holiday_list()
 		employee = get_employee()
-		frappe.db.set_value("Company", employee.company, "default_holiday_list", holiday_list)
+		frappe.db.set_value("Employee", employee.name, "holiday_list", holiday_list)
 		first_sunday = get_first_sunday(holiday_list)
 
 		# already marked attendance on a holiday should be deleted in this case
@@ -177,7 +177,7 @@ class TestLeaveApplication(unittest.TestCase):
 		attendance.flags.ignore_validate = True
 		attendance.save()
 
-		leave_application = make_leave_application(employee.name, first_sunday, add_days(first_sunday, 3), leave_type.name)
+		leave_application = make_leave_application(employee.name, first_sunday, add_days(first_sunday, 3), leave_type.name, employee.company)
 		leave_application.reload()
 		# holiday should be excluded while marking attendance
 		self.assertEqual(leave_application.total_leave_days, 3)
@@ -327,7 +327,7 @@ class TestLeaveApplication(unittest.TestCase):
 		employee = get_employee()
 
 		default_holiday_list = make_holiday_list()
-		frappe.db.set_value("Company", employee.company, "default_holiday_list", default_holiday_list)
+		frappe.db.set_value("Employee", employee.name, "holiday_list", default_holiday_list)
 		first_sunday = get_first_sunday(default_holiday_list)
 
 		optional_leave_date = add_days(first_sunday, 1)
