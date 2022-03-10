@@ -208,9 +208,14 @@ def get_already_returned_items(doc):
 
 	return items
 
-def get_returned_qty_map_for_row(return_against, supplier, row_name, doctype):
+def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	child_doctype = doctype + " Item"
 	reference_field = "dn_detail" if doctype == "Delivery Note" else frappe.scrub(child_doctype)
+
+	if doctype in ('Purchase Receipt', 'Purchase Invoice'):
+		party_type = 'supplier'
+	else:
+		party_type = 'customer'
 
 	fields = [
 		"sum(abs(`tab{0}`.qty)) as qty".format(child_doctype),
@@ -231,7 +236,7 @@ def get_returned_qty_map_for_row(return_against, supplier, row_name, doctype):
 		fields = fields,
 		filters = [
 			[doctype, "return_against", "=", return_against],
-			[doctype, "supplier", "=", supplier],
+			[doctype, party_type, "=", party],
 			[doctype, "docstatus", "=", 1],
 			[doctype, "is_return", "=", 1],
 			[child_doctype, reference_field, "=", row_name]
@@ -338,7 +343,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.purchase_invoice_item = source_doc.name
 
 		elif doctype == "Delivery Note":
-			returned_qty_map = get_returned_qty_map_for_row(source_parent.name, source_parent.supplier, source_doc.name, doctype)
+			returned_qty_map = get_returned_qty_map_for_row(source_parent.name, source_parent.customer, source_doc.name, doctype)
 			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get('qty') or 0))
 			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get('stock_qty') or 0))
 
@@ -351,7 +356,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
 		elif doctype == "Sales Invoice" or doctype == "POS Invoice":
-			returned_qty_map = get_returned_qty_map_for_row(source_parent.name, source_parent.supplier, source_doc.name, doctype)
+			returned_qty_map = get_returned_qty_map_for_row(source_parent.name, source_parent.customer, source_doc.name, doctype)
 			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get('qty') or 0))
 			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get('stock_qty') or 0))
 
