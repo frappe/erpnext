@@ -393,6 +393,7 @@ class Item(Document):
 			self.validate_properties_before_merge(new_name)
 			self.validate_duplicate_product_bundles_before_merge(old_name, new_name)
 			self.validate_duplicate_website_item_before_merge(old_name, new_name)
+			self.delete_old_bins(old_name)
 
 	def after_rename(self, old_name, new_name, merge):
 		if merge:
@@ -420,6 +421,9 @@ class Item(Document):
 
 					frappe.db.set_value(dt, d.name, "item_wise_tax_detail",
 											json.dumps(item_wise_tax_detail), update_modified=False)
+
+	def delete_old_bins(self, old_name):
+		frappe.db.delete("Bin", {"item_code": old_name})
 
 	def validate_duplicate_item_in_stock_reconciliation(self, old_name, new_name):
 		records = frappe.db.sql(""" SELECT parent, COUNT(*) as records
@@ -501,11 +505,11 @@ class Item(Document):
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
-		repost_stock_for_warehouses = frappe.db.sql_list("""select distinct warehouse
-			from tabBin where item_code=%s""", new_name)
+		repost_stock_for_warehouses = frappe.get_all("Stock Ledger Entry",
+				"warehouse", filters={"item_code": new_name}, pluck="warehouse", distinct=True)
 
 		# Delete all existing bins to avoid duplicate bins for the same item and warehouse
-		frappe.db.sql("delete from `tabBin` where item_code=%s", new_name)
+		frappe.db.delete("Bin", {"item_code": new_name})
 
 		for warehouse in repost_stock_for_warehouses:
 			repost_stock(new_name, warehouse)
