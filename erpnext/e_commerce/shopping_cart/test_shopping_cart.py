@@ -8,7 +8,6 @@ import frappe
 from frappe.tests.utils import change_settings
 from frappe.utils import add_months, cint, nowdate
 
-
 from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule
 from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
 from erpnext.e_commerce.shopping_cart.cart import (
