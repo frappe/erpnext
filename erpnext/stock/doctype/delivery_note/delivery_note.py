@@ -798,3 +798,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+def on_doctype_update():
+	frappe.db.add_index("Delivery Note", ["customer", "is_return", "return_against"])
