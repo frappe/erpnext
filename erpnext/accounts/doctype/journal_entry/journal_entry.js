@@ -8,6 +8,7 @@ frappe.provide("erpnext.journal_entry");
 frappe.ui.form.on("Journal Entry", {
 	setup: function(frm) {
 		frm.add_fetch("bank_account", "account", "account");
+		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice'];
 	},
 
 	refresh: function(frm) {
@@ -31,7 +32,7 @@ frappe.ui.form.on("Journal Entry", {
 		if(frm.doc.docstatus==1) {
 			frm.add_custom_button(__('Reverse Journal Entry'), function() {
 				return erpnext.journal_entry.reverse_journal_entry(frm);
-			}, __('Make'));
+			}, __('Actions'));
 		}
 
 		if (frm.doc.__islocal) {

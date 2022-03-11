@@ -3,6 +3,7 @@
 
 
 import json
+from functools import reduce
 
 import frappe
 from frappe import ValidationError, _, scrub, throw
@@ -945,8 +946,12 @@ class PaymentEntry(AccountsController):
 
 			tax.base_total = tax.total * self.source_exchange_rate
 
-			self.total_taxes_and_charges += current_tax_amount
-			self.base_total_taxes_and_charges += current_tax_amount * self.source_exchange_rate
+			if self.payment_type == 'Pay':
+				self.base_total_taxes_and_charges += flt(current_tax_amount / self.source_exchange_rate)
+				self.total_taxes_and_charges += flt(current_tax_amount / self.target_exchange_rate)
+			else:
+				self.base_total_taxes_and_charges += flt(current_tax_amount / self.target_exchange_rate)
+				self.total_taxes_and_charges += flt(current_tax_amount / self.source_exchange_rate)
 
 		if self.get('taxes'):
 			self.paid_amount_after_tax = self.get('taxes')[-1].base_total
@@ -1077,7 +1082,7 @@ def get_outstanding_reference_documents(args):
 		if d.voucher_type in ("Purchase Invoice"):
 			d["bill_no"] = frappe.db.get_value(d.voucher_type, d.voucher_no, "bill_no")
 
-	# Get all SO / PO which are not fully billed or aginst which full advance not paid
+	# Get all SO / PO which are not fully billed or against which full advance not paid
 	orders_to_be_billed = []
 	if (args.get("party_type") != "Student"):
 		orders_to_be_billed =  get_orders_to_be_billed(args.get("posting_date"),args.get("party_type"),
@@ -1524,6 +1529,10 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.received_amount = received_amount
 	pe.letter_head = doc.get("letter_head")
 
+	if dt in ['Purchase Order', 'Sales Order', 'Sales Invoice', 'Purchase Invoice']:
+		pe.project = (doc.get('project') or
+			reduce(lambda prev,cur: prev or cur, [x.get('project') for x in doc.get('items')], None)) # get first non-empty project from items
+
 	if pe.party_type in ["Customer", "Supplier"]:
 		bank_account = get_party_bank_account(pe.party_type, pe.party)
 		pe.set("bank_account", bank_account)
@@ -1709,7 +1718,10 @@ def set_paid_amount_and_received_amount(dt, party_account_currency, bank, outsta
 
 def apply_early_payment_discount(paid_amount, received_amount, doc):
 	total_discount = 0
-	if doc.doctype in ['Sales Invoice', 'Purchase Invoice'] and doc.payment_schedule:
+	eligible_for_payments = ['Sales Order', 'Sales Invoice', 'Purchase Order', 'Purchase Invoice']
+	has_payment_schedule = hasattr(doc, 'payment_schedule') and doc.payment_schedule
+
+	if doc.doctype in eligible_for_payments and has_payment_schedule:
 		for term in doc.payment_schedule:
 			if not term.discounted_amount and term.discount and getdate(nowdate()) <= term.discount_date:
 				if term.discount_type == 'Percentage':

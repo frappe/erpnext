@@ -14,6 +14,7 @@ from erpnext.controllers.item_variant import (
 	get_variant,
 )
 from erpnext.stock.doctype.item.item import (
+	DataValidationError,
 	InvalidBarcode,
 	StockExistsForTemplate,
 	get_item_attribute,
@@ -387,6 +388,26 @@ class TestItem(ERPNextTestCase):
 		self.assertTrue(frappe.db.get_value("Bin",
 			{"item_code": "Test Item for Merging 2", "warehouse": "_Test Warehouse 1 - _TC"}))
 
+	def test_item_merging_with_product_bundle(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		create_item("Test Item Bundle Item 1", is_stock_item=False)
+		create_item("Test Item Bundle Item 2", is_stock_item=False)
+		create_item("Test Item inside Bundle")
+		bundle_items = ["Test Item inside Bundle"]
+
+		# make bundles for both items
+		bundle1 = make_product_bundle("Test Item Bundle Item 1", bundle_items, qty=2)
+		make_product_bundle("Test Item Bundle Item 2", bundle_items, qty=2)
+
+		with self.assertRaises(DataValidationError):
+			frappe.rename_doc("Item", "Test Item Bundle Item 1", "Test Item Bundle Item 2", merge=True)
+
+		bundle1.delete()
+		frappe.rename_doc("Item", "Test Item Bundle Item 1", "Test Item Bundle Item 2", merge=True)
+
+		self.assertFalse(frappe.db.exists("Item", "Test Item Bundle Item 1"))
+
 	def test_uom_conversion_factor(self):
 		if frappe.db.exists('Item', 'Test Item UOM'):
 			frappe.delete_doc('Item', 'Test Item UOM')
@@ -572,6 +593,16 @@ class TestItem(ERPNextTestCase):
 			item.save()
 		except frappe.ValidationError as e:
 			self.fail(f"UoM change not allowed even though no SLE / BIN with positive qty exists: {e}")
+
+	def test_erasure_of_old_conversions(self):
+		item = create_item("_item change uom")
+		item.stock_uom = "Gram"
+		item.append("uoms", frappe._dict(uom="Box", conversion_factor=2))
+		item.save()
+		item.reload()
+		item.stock_uom = "Nos"
+		item.save()
+		self.assertEqual(len(item.uoms), 1)
 
 	def test_validate_stock_item(self):
 		self.assertRaises(frappe.ValidationError, validate_is_stock_item, "_Test Non Stock Item")

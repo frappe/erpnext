@@ -14,6 +14,7 @@ from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
+from erpnext.stock.utils import calculate_mapped_packed_items_return
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -128,8 +129,12 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
 
-		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-		make_packing_list(self)
+		# Keeps mapped packed_items in case product bundle is updated.
+		if self.is_return and self.return_against:
+			calculate_mapped_packed_items_return(self)
+		else:
+			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+			make_packing_list(self)
 
 		if self._action != 'submit' and not self.is_return:
 			set_batch_nos(self, 'warehouse', throw=True)
@@ -334,17 +339,31 @@ class DeliveryNote(SellingController):
 			frappe.throw(_("Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"))
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
+	from frappe.query_builder.functions import Sum
+
 	# Billed against Sales Order directly
-	billed_against_so = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item`
-		where so_detail=%s and (dn_detail is null or dn_detail = '') and docstatus=1""", so_detail)
+	si_item = frappe.qb.DocType("Sales Invoice Item").as_("si_item")
+	sum_amount = Sum(si_item.amount).as_("amount")
+
+	billed_against_so = frappe.qb.from_(si_item).select(sum_amount).where(
+		(si_item.so_detail == so_detail) &
+		((si_item.dn_detail.isnull()) | (si_item.dn_detail == '')) &
+		(si_item.docstatus == 1)
+	).run()
 	billed_against_so = billed_against_so and billed_against_so[0][0] or 0
 
 	# Get all Delivery Note Item rows against the Sales Order Item row
-	dn_details = frappe.db.sql("""select dn_item.name, dn_item.amount, dn_item.si_detail, dn_item.parent
-		from `tabDelivery Note Item` dn_item, `tabDelivery Note` dn
-		where dn.name=dn_item.parent and dn_item.so_detail=%s
-			and dn.docstatus=1 and dn.is_return = 0
-		order by dn.posting_date asc, dn.posting_time asc, dn.name asc""", so_detail, as_dict=1)
+	dn = frappe.qb.DocType("Delivery Note").as_("dn")
+	dn_item = frappe.qb.DocType("Delivery Note Item").as_("dn_item")
+
+	dn_details = frappe.qb.from_(dn).from_(dn_item).select(dn_item.name, dn_item.amount, dn_item.si_detail, dn_item.parent).where(
+		(dn.name == dn_item.parent) &
+		(dn_item.so_detail == so_detail) &
+		(dn.docstatus == 1) &
+		(dn.is_return == 0)
+	).orderby(
+		dn.posting_date, dn.posting_time, dn.name
+	).run(as_dict=True)
 
 	updated_dn = []
 	for dnd in dn_details:

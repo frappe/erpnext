@@ -6,7 +6,7 @@ import json
 import frappe
 import frappe.permissions
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-from frappe.utils import add_days, flt, getdate, nowdate
+from frappe.utils import add_days, flt, getdate, nowdate, today
 
 from erpnext.controllers.accounts_controller import update_child_qty_rate
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
@@ -921,6 +921,74 @@ class TestSalesOrder(ERPNextTestCase):
 		self.assertEqual(purchase_orders[0].supplier, '_Test Supplier')
 		self.assertEqual(purchase_orders[1].supplier, '_Test Supplier 1')
 
+	def test_product_bundles_in_so_are_replaced_with_bundle_items_in_po(self):
+		"""
+			Tests if the the Product Bundles in the Items table of Sales Orders are replaced with
+			their child items(from the Packed Items table) on creating a Purchase Order from it.
+		"""
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order
+
+		product_bundle = make_item("_Test Product Bundle", {"is_stock_item": 0})
+		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
+		make_item("_Test Bundle Item 2", {"is_stock_item": 1})
+
+		make_product_bundle("_Test Product Bundle",
+			["_Test Bundle Item 1", "_Test Bundle Item 2"])
+
+		so_items = [
+			{
+				"item_code": product_bundle.item_code,
+				"warehouse": "",
+				"qty": 2,
+				"rate": 400,
+				"delivered_by_supplier": 1,
+				"supplier": '_Test Supplier'
+			}
+		]
+
+		so = make_sales_order(item_list=so_items)
+
+		purchase_order = make_purchase_order(so.name, selected_items=so_items)
+
+		self.assertEqual(purchase_order.items[0].item_code, "_Test Bundle Item 1")
+		self.assertEqual(purchase_order.items[1].item_code, "_Test Bundle Item 2")
+
+	def test_purchase_order_updates_packed_item_ordered_qty(self):
+		"""
+			Tests if the packed item's `ordered_qty` is updated with the quantity of the Purchase Order
+		"""
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order
+
+		product_bundle = make_item("_Test Product Bundle", {"is_stock_item": 0})
+		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
+		make_item("_Test Bundle Item 2", {"is_stock_item": 1})
+
+		make_product_bundle("_Test Product Bundle",
+			["_Test Bundle Item 1", "_Test Bundle Item 2"])
+
+		so_items = [
+			{
+				"item_code": product_bundle.item_code,
+				"warehouse": "",
+				"qty": 2,
+				"rate": 400,
+				"delivered_by_supplier": 1,
+				"supplier": '_Test Supplier'
+			}
+		]
+
+		so = make_sales_order(item_list=so_items)
+
+		purchase_order = make_purchase_order(so.name, selected_items=so_items)
+		purchase_order.supplier = "_Test Supplier"
+		purchase_order.set_warehouse = "_Test Warehouse - _TC"
+		purchase_order.save()
+		purchase_order.submit()
+
+		so.reload()
+		self.assertEqual(so.packed_items[0].ordered_qty, 2)
+		self.assertEqual(so.packed_items[1].ordered_qty, 2)
+
 	def test_reserved_qty_for_closing_so(self):
 		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
 			fields=["reserved_qty"])
@@ -1270,6 +1338,72 @@ class TestSalesOrder(ERPNextTestCase):
 		compare_payment_schedules(self, so, si)
 
 		automatically_fetch_payment_terms(enable=0)
+
+	def test_zero_amount_sales_order_billing_status(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		so = make_sales_order(uom="Nos", do_not_save=1)
+		so.items[0].rate = 0
+		so.save()
+		so.submit()
+
+		self.assertEqual(so.net_total, 0)
+		self.assertEqual(so.billing_status, 'Not Billed')
+
+		si = create_sales_invoice(qty=10, do_not_save=1)
+		si.price_list = '_Test Price List'
+		si.items[0].rate = 0
+		si.items[0].price_list_rate = 0
+		si.items[0].sales_order = so.name
+		si.items[0].so_detail = so.items[0].name
+		si.save()
+		si.submit()
+
+		self.assertEqual(si.net_total, 0)
+		so.load_from_db()
+		self.assertEqual(so.billing_status, 'Fully Billed')
+
+	def test_so_back_updated_from_wo_via_mr(self):
+		"SO -> MR (Manufacture) -> WO. Test if WO Qty is updated in SO."
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_se_from_wo,
+		)
+		from erpnext.stock.doctype.material_request.material_request import raise_work_orders
+
+		so = make_sales_order(item_list=[{"item_code": "_Test FG Item","qty": 2, "rate":100}])
+
+		mr = make_material_request(so.name)
+		mr.material_request_type = "Manufacture"
+		mr.schedule_date = today()
+		mr.submit()
+
+		# WO from MR
+		wo_name = raise_work_orders(mr.name)[0]
+		wo = frappe.get_doc("Work Order", wo_name)
+		wo.wip_warehouse = "Work In Progress - _TC"
+		wo.skip_transfer = True
+
+		self.assertEqual(wo.sales_order, so.name)
+		self.assertEqual(wo.sales_order_item, so.items[0].name)
+
+		wo.submit()
+		make_stock_entry(item_code="_Test Item", # Stock RM
+			target="Work In Progress - _TC",
+			qty=4, basic_rate=100
+		)
+		make_stock_entry(item_code="_Test Item Home Desktop 100", # Stock RM
+			target="Work In Progress - _TC",
+			qty=4, basic_rate=100
+		)
+
+		se = frappe.get_doc(make_se_from_wo(wo.name, "Manufacture", 2))
+		se.submit() # Finish WO
+
+		mr.reload()
+		wo.reload()
+		so.reload()
+		self.assertEqual(so.items[0].work_order_qty, wo.produced_qty)
+		self.assertEqual(mr.status, "Manufactured")
 
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")

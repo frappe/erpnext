@@ -1,51 +1,49 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
-
 import frappe
-from frappe.cache_manager import clear_doctype_cache
-from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
+from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
+	create_dimension,
+	disable_dimension,
+)
 from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import (
 	get_temporary_opening_account,
 )
+from erpnext.tests.utils import ERPNextTestCase
 
-test_dependencies = ["Customer", "Supplier"]
+test_dependencies = ["Customer", "Supplier", "Accounting Dimension"]
 
-class TestOpeningInvoiceCreationTool(unittest.TestCase):
-	def setUp(self):
+class TestOpeningInvoiceCreationTool(ERPNextTestCase):
+	@classmethod
+	def setUpClass(self):
 		if not frappe.db.exists("Company", "_Test Opening Invoice Company"):
 			make_company()
+		create_dimension()
+		return super().setUpClass()
 
-	def make_invoices(self, invoice_type="Sales", company=None, party_1=None, party_2=None, invoice_number=None):
+	def make_invoices(self, invoice_type="Sales", company=None, party_1=None, party_2=None, invoice_number=None, department=None):
 		doc = frappe.get_single("Opening Invoice Creation Tool")
 		args = get_opening_invoice_creation_dict(invoice_type=invoice_type, company=company,
-			party_1=party_1, party_2=party_2, invoice_number=invoice_number)
+			party_1=party_1, party_2=party_2, invoice_number=invoice_number, department=department)
 		doc.update(args)
 		return doc.make_invoices()
 
 	def test_opening_sales_invoice_creation(self):
-		property_setter = make_property_setter("Sales Invoice", "update_stock", "default", 1, "Check")
-		try:
-			invoices = self.make_invoices(company="_Test Opening Invoice Company")
+		invoices = self.make_invoices(company="_Test Opening Invoice Company")
 
-			self.assertEqual(len(invoices), 2)
-			expected_value = {
-				"keys": ["customer", "outstanding_amount", "status"],
-				0: ["_Test Customer", 300, "Overdue"],
-				1: ["_Test Customer 1", 250, "Overdue"],
-			}
-			self.check_expected_values(invoices, expected_value)
+		self.assertEqual(len(invoices), 2)
+		expected_value = {
+			"keys": ["customer", "outstanding_amount", "status"],
+			0: ["_Test Customer", 300, "Overdue"],
+			1: ["_Test Customer 1", 250, "Overdue"],
+		}
+		self.check_expected_values(invoices, expected_value)
 
-			si = frappe.get_doc("Sales Invoice", invoices[0])
+		si = frappe.get_doc("Sales Invoice", invoices[0])
 
-			# Check if update stock is not enabled
-			self.assertEqual(si.update_stock, 0)
-
-		finally:
-			property_setter.delete()
-			clear_doctype_cache("Sales Invoice")
+		# Check if update stock is not enabled
+		self.assertEqual(si.update_stock, 0)
 
 	def check_expected_values(self, invoices, expected_value, invoice_type="Sales"):
 		doctype = "Sales Invoice" if invoice_type == "Sales" else "Purchase Invoice"
@@ -105,6 +103,19 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 		for inv in [sales_inv1, sales_inv2]:
 			doc = frappe.get_doc('Sales Invoice', inv)
 			doc.cancel()
+
+	def test_opening_invoice_with_accounting_dimension(self):
+		invoices = self.make_invoices(invoice_type="Sales", company="_Test Opening Invoice Company", department='Sales - _TOIC')
+
+		expected_value = {
+			"keys": ["customer", "outstanding_amount", "status", "department"],
+			0: ["_Test Customer", 300, "Overdue", "Sales - _TOIC"],
+			1: ["_Test Customer 1", 250, "Overdue", "Sales - _TOIC"],
+		}
+		self.check_expected_values(invoices, expected_value, invoice_type="Sales")
+
+	def tearDown(self):
+		disable_dimension()
 
 def get_opening_invoice_creation_dict(**args):
 	party = "Customer" if args.get("invoice_type", "Sales") == "Sales" else "Supplier"

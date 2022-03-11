@@ -76,9 +76,6 @@ class Task(NestedSet):
 		if flt(self.progress or 0) > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
 
-		if flt(self.progress) == 100:
-			self.status = 'Completed'
-
 		if self.status == 'Completed':
 			self.progress = 100
 
@@ -105,7 +102,7 @@ class Task(NestedSet):
 			frappe.throw(_("Completed On cannot be greater than Today"))
 
 	def update_depends_on(self):
-		depends_on_tasks = self.depends_on_tasks or ""
+		depends_on_tasks = ""
 		for d in self.depends_on:
 			if d.task and d.task not in depends_on_tasks:
 				depends_on_tasks += d.task + ","

@@ -8,6 +8,7 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, comma_or, cstr, flt, format_time, formatdate, getdate, nowdate
 from six import iteritems, itervalues, string_types
 
@@ -76,7 +77,6 @@ class StockEntry(StockController):
 
 		self.validate_posting_time()
 		self.validate_purpose()
-		self.set_title()
 		self.validate_item()
 		self.validate_customer_provided_item()
 		self.validate_qty()
@@ -86,8 +86,11 @@ class StockEntry(StockController):
 		self.validate_warehouse()
 		self.validate_work_order()
 		self.validate_bom()
-		self.mark_finished_and_scrap_items()
-		self.validate_finished_goods()
+
+		if self.purpose in ("Manufacture", "Repack"):
+			self.mark_finished_and_scrap_items()
+			self.validate_finished_goods()
+
 		self.validate_with_material_request()
 		self.validate_batch()
 		self.validate_inspection()
@@ -110,8 +113,12 @@ class StockEntry(StockController):
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
 		self.validate_putaway_capacity()
-		self.reset_default_field_value("from_warehouse", "items", "s_warehouse")
-		self.reset_default_field_value("to_warehouse", "items", "t_warehouse")
+
+		if not self.get("purpose") == "Manufacture":
+			# ignore scrap item wh difference and empty source/target wh
+			# in Manufacture Entry
+			self.reset_default_field_value("from_warehouse", "items", "s_warehouse")
+			self.reset_default_field_value("to_warehouse", "items", "t_warehouse")
 
 	def on_submit(self):
 		self.update_stock_ledger()
@@ -702,26 +709,25 @@ class StockEntry(StockController):
 				validate_bom_no(item_code, d.bom_no)
 
 	def mark_finished_and_scrap_items(self):
-		if self.purpose in ("Repack", "Manufacture"):
-			if any([d.item_code for d in self.items if (d.is_finished_item and d.t_warehouse)]):
-				return
+		if any([d.item_code for d in self.items if (d.is_finished_item and d.t_warehouse)]):
+			return
 
-			finished_item = self.get_finished_item()
+		finished_item = self.get_finished_item()
 
-			if not finished_item and self.purpose == "Manufacture":
-				# In case of independent Manufacture entry, don't auto set
-				# user must decide and set
-				return
+		if not finished_item and self.purpose == "Manufacture":
+			# In case of independent Manufacture entry, don't auto set
+			# user must decide and set
+			return
 
-			for d in self.items:
-				if d.t_warehouse and not d.s_warehouse:
-					if self.purpose=="Repack" or d.item_code == finished_item:
-						d.is_finished_item = 1
-					else:
-						d.is_scrap_item = 1
+		for d in self.items:
+			if d.t_warehouse and not d.s_warehouse:
+				if self.purpose=="Repack" or d.item_code == finished_item:
+					d.is_finished_item = 1
 				else:
-					d.is_finished_item = 0
-					d.is_scrap_item = 0
+					d.is_scrap_item = 1
+			else:
+				d.is_finished_item = 0
+				d.is_scrap_item = 0
 
 	def get_finished_item(self):
 		finished_item = None
@@ -734,9 +740,9 @@ class StockEntry(StockController):
 
 	def validate_finished_goods(self):
 		"""
-			1. Check if FG exists
-			2. Check if Multiple FG Items are present
-			3. Check FG Item and Qty against WO if present
+			1. Check if FG exists (mfg, repack)
+			2. Check if Multiple FG Items are present (mfg)
+			3. Check FG Item and Qty against WO if present (mfg)
 		"""
 		production_item, wo_qty, finished_items = None, 0, []
 
@@ -749,8 +755,9 @@ class StockEntry(StockController):
 		for d in self.get('items'):
 			if d.is_finished_item:
 				if not self.work_order:
+					# Independent MFG Entry/ Repack Entry, no WO to match against
 					finished_items.append(d.item_code)
-					continue # Independent Manufacture Entry, no WO to match against
+					continue
 
 				if d.item_code != production_item:
 					frappe.throw(_("Finished Item {0} does not match with Work Order {1}")
@@ -763,19 +770,17 @@ class StockEntry(StockController):
 
 				finished_items.append(d.item_code)
 
-		if len(set(finished_items)) > 1:
+		if not finished_items:
 			frappe.throw(
-				msg=_("Multiple items cannot be marked as finished item"),
-				title=_("Note"),
-				exc=FinishedGoodError
+				msg=_("There must be atleast 1 Finished Good in this Stock Entry").format(self.name),
+				title=_("Missing Finished Good"), exc=FinishedGoodError
 			)
 
 		if self.purpose == "Manufacture":
-			if not finished_items:
+			if len(set(finished_items)) > 1:
 				frappe.throw(
-					msg=_("There must be atleast 1 Finished Good in this Stock Entry").format(self.name),
-					title=_("Missing Finished Good"),
-					exc=FinishedGoodError
+					msg=_("Multiple items cannot be marked as finished item"),
+					title=_("Note"), exc=FinishedGoodError
 				)
 
 			allowance_percentage = flt(
@@ -1111,7 +1116,7 @@ class StockEntry(StockController):
 		self.set_actual_qty()
 		self.update_items_for_process_loss()
 		self.validate_customer_provided_item()
-		self.calculate_rate_and_amount()
+		self.calculate_rate_and_amount(raise_error_if_no_rate=False)
 
 	def set_scrap_items(self):
 		if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:
@@ -1276,21 +1281,28 @@ class StockEntry(StockController):
 		if not self.pro_doc:
 			self.set_work_order_details()
 
-		scrap_items = frappe.db.sql('''
-			SELECT
-				JCSI.item_code, JCSI.item_name, SUM(JCSI.stock_qty) as stock_qty, JCSI.stock_uom, JCSI.description
-			FROM
-				`tabJob Card` JC, `tabJob Card Scrap Item` JCSI
-			WHERE
-				JCSI.parent = JC.name AND JC.docstatus = 1
-				AND JCSI.item_code IS NOT NULL AND JC.work_order = %s
-			GROUP BY
-				JCSI.item_code
-		''', self.work_order, as_dict=1)
-
-		pending_qty = flt(self.pro_doc.qty) - flt(self.pro_doc.produced_qty)
-		if pending_qty <=0:
+		if not self.pro_doc.operations:
 			return []
+
+		job_card = frappe.qb.DocType('Job Card')
+		job_card_scrap_item = frappe.qb.DocType('Job Card Scrap Item')
+
+		scrap_items = (
+			frappe.qb.from_(job_card)
+			.select(
+				Sum(job_card_scrap_item.stock_qty).as_('stock_qty'),
+				job_card_scrap_item.item_code, job_card_scrap_item.item_name,
+				job_card_scrap_item.description, job_card_scrap_item.stock_uom)
+			.join(job_card_scrap_item)
+			.on(job_card_scrap_item.parent == job_card.name)
+			.where(
+				(job_card_scrap_item.item_code.isnotnull())
+				& (job_card.work_order == self.work_order)
+				& (job_card.docstatus == 1))
+			.groupby(job_card_scrap_item.item_code)
+		).run(as_dict=1)
+
+		pending_qty = flt(self.get_completed_job_card_qty()) - flt(self.pro_doc.produced_qty)
 
 		used_scrap_items = self.get_used_scrap_items()
 		for row in scrap_items:
@@ -1304,6 +1316,9 @@ class StockEntry(StockController):
 				row.stock_qty = frappe.utils.ceil(row.stock_qty)
 
 		return scrap_items
+
+	def get_completed_job_card_qty(self):
+		return flt(min([d.completed_qty for d in self.pro_doc.operations]))
 
 	def get_used_scrap_items(self):
 		used_scrap_items = defaultdict(float)
@@ -1430,14 +1445,15 @@ class StockEntry(StockController):
 							qty = req_qty_each * flt(self.fg_completed_qty)
 
 			elif backflushed_materials.get(item.item_code):
+				precision = frappe.get_precision("Stock Entry Detail", "qty")
 				for d in backflushed_materials.get(item.item_code):
-					if d.get(item.warehouse):
+					if d.get(item.warehouse) > 0:
 						if (qty > req_qty):
-							qty = (qty/trans_qty) * flt(self.fg_completed_qty)
+							qty = ((flt(qty, precision) - flt(d.get(item.warehouse), precision))
+								/ (flt(trans_qty, precision) - flt(produced_qty, precision))
+							) * flt(self.fg_completed_qty)
 
-						if consumed_qty and frappe.db.get_single_value("Manufacturing Settings",
-							"material_consumption"):
-							qty -= consumed_qty
+							d[item.warehouse] -= qty
 
 			if cint(frappe.get_cached_value('UOM', item.stock_uom, 'must_be_whole_number')):
 				qty = frappe.utils.ceil(qty)
@@ -1657,6 +1673,8 @@ class StockEntry(StockController):
 			for d in self.get("items"):
 				item_code = d.get('original_item') or d.get('item_code')
 				reserve_warehouse = item_wh.get(item_code)
+				if not (reserve_warehouse and item_code):
+					continue
 				stock_bin = get_bin(item_code, reserve_warehouse)
 				stock_bin.update_reserved_qty_for_sub_contracting()
 
@@ -1817,14 +1835,6 @@ class StockEntry(StockController):
 				used_serial_nos.extend(get_serial_nos(row.serial_no))
 
 		return sorted(list(set(get_serial_nos(self.pro_doc.serial_no)) - set(used_serial_nos)))
-
-	def set_title(self):
-		if frappe.flags.in_import and self.title:
-			# Allow updating title during data import/update
-			return
-
-		self.title = self.purpose
-
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):

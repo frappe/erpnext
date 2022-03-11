@@ -176,8 +176,8 @@ class PurchaseInvoice(BuyingController):
 
 		if self.supplier and account.account_type != "Payable":
 			frappe.throw(
-				_("Please ensure {} account is a Payable account. Change the account type to Payable or select a different account.")
-				.format(frappe.bold("Credit To")), title=_("Invalid Account")
+				_("Please ensure {} account {} is a Payable account. Change the account type to Payable or select a different account.")
+				.format(frappe.bold("Credit To"), frappe.bold(self.credit_to)), title=_("Invalid Account")
 			)
 
 		self.party_account_currency = account.account_currency
@@ -503,11 +503,11 @@ class PurchaseInvoice(BuyingController):
 		# Checked both rounding_adjustment and rounded_total
 		# because rounded_total had value even before introcution of posting GLE based on rounded total
 		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
+		base_grand_total = flt(self.base_rounded_total if (self.base_rounding_adjustment and self.base_rounded_total)
+			else self.base_grand_total, self.precision("base_grand_total"))
 
 		if grand_total and not self.is_internal_transfer():
 				# Did not use base_grand_total to book rounding loss gle
-				grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
-					self.precision("grand_total"))
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": self.credit_to,
@@ -515,8 +515,8 @@ class PurchaseInvoice(BuyingController):
 						"party": self.supplier,
 						"due_date": self.due_date,
 						"against": self.against_expense_account,
-						"credit": grand_total_in_company_currency,
-						"credit_in_account_currency": grand_total_in_company_currency \
+						"credit": base_grand_total,
+						"credit_in_account_currency": base_grand_total \
 							if self.party_account_currency==self.company_currency else grand_total,
 						"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 						"against_voucher_type": self.doctype,
@@ -535,13 +535,21 @@ class PurchaseInvoice(BuyingController):
 
 		voucher_wise_stock_value = {}
 		if self.update_stock:
-			for d in frappe.get_all('Stock Ledger Entry',
-				fields = ["voucher_detail_no", "stock_value_difference", "warehouse"], filters={'voucher_no': self.name}):
+			stock_ledger_entries = frappe.get_all("Stock Ledger Entry",
+				fields = ["voucher_detail_no", "stock_value_difference", "warehouse"],
+				filters={"voucher_no": self.name, "voucher_type": self.doctype, "is_cancelled": 0}
+			)
+			for d in stock_ledger_entries:
 				voucher_wise_stock_value.setdefault((d.voucher_detail_no, d.warehouse), d.stock_value_difference)
 
 		valuation_tax_accounts = [d.account_head for d in self.get("taxes")
 			if d.category in ('Valuation', 'Total and Valuation')
 			and flt(d.base_tax_amount_after_discount_amount)]
+
+		provisional_accounting_for_non_stock_items = cint(frappe.db.get_value('Company', self.company,
+			'enable_provisional_accounting_for_non_stock_items'))
+
+		purchase_receipt_doc_map = {}
 
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
@@ -637,19 +645,23 @@ class PurchaseInvoice(BuyingController):
 					else:
 						amount = flt(item.base_net_amount + item.item_tax_amount, item.precision("base_net_amount"))
 
-					auto_accounting_for_non_stock_items = cint(frappe.db.get_value('Company', self.company, 'enable_perpetual_inventory_for_non_stock_items'))
-
-					if auto_accounting_for_non_stock_items:
-						service_received_but_not_billed_account = self.get_company_default("service_received_but_not_billed")
-
+					if provisional_accounting_for_non_stock_items:
 						if item.purchase_receipt:
+							provisional_account = self.get_company_default("default_provisional_account")
+							purchase_receipt_doc = purchase_receipt_doc_map.get(item.purchase_receipt)
+
+							if not purchase_receipt_doc:
+								purchase_receipt_doc = frappe.get_doc("Purchase Receipt", item.purchase_receipt)
+								purchase_receipt_doc_map[item.purchase_receipt] = purchase_receipt_doc
+
 							# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
 							expense_booked_in_pr = frappe.db.get_value('GL Entry', {'is_cancelled': 0,
 								'voucher_type': 'Purchase Receipt', 'voucher_no': item.purchase_receipt, 'voucher_detail_no': item.pr_detail,
-								'account':service_received_but_not_billed_account}, ['name'])
+								'account':provisional_account}, ['name'])
 
 							if expense_booked_in_pr:
-								expense_account = service_received_but_not_billed_account
+								# Intentionally passing purchase invoice item to handle partial billing
+								purchase_receipt_doc.add_provisional_gl_entry(item, gl_entries, self.posting_date, reverse=1)
 
 					if not self.is_internal_transfer():
 						gl_entries.append(self.get_gl_dict({

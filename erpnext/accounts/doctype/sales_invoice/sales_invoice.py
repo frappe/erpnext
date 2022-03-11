@@ -45,6 +45,7 @@ from erpnext.setup.doctype.company.company import update_company_current_month_s
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
+from erpnext.stock.utils import calculate_mapped_packed_items_return
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -271,6 +272,9 @@ class SalesInvoice(SellingController):
 		self.process_common_party_accounting()
 
 	def validate_pos_return(self):
+		if self.is_consolidated:
+			# pos return is already validated in pos invoice
+			return
 
 		if self.is_pos and self.is_return:
 			total_amount_in_payments = 0
@@ -293,7 +297,7 @@ class SalesInvoice(SellingController):
 				filters={ invoice_or_credit_note: self.name },
 				pluck="pos_closing_entry"
 			)
-			if pos_closing_entry:
+			if pos_closing_entry and pos_closing_entry[0]:
 				msg = _("To cancel a {} you need to cancel the POS Closing Entry {}.").format(
 					frappe.bold("Consolidated Sales Invoice"),
 					get_link_to_form("POS Closing Entry", pos_closing_entry[0])
@@ -586,7 +590,10 @@ class SalesInvoice(SellingController):
 			frappe.throw(msg, title=_("Invalid Account"))
 
 		if self.customer and account.account_type != "Receivable":
-			msg = _("Please ensure {} account is a Receivable account.").format(frappe.bold("Debit To")) + " "
+			msg = _("Please ensure {} account {} is a Receivable account.").format(
+				frappe.bold("Debit To"),
+				frappe.bold(self.debit_to)
+			) + " "
 			msg += _("Change the account type to Receivable or select a different account.")
 			frappe.throw(msg, title=_("Invalid Account"))
 
@@ -745,8 +752,11 @@ class SalesInvoice(SellingController):
 
 	def update_packing_list(self):
 		if cint(self.update_stock) == 1:
-			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-			make_packing_list(self)
+			if cint(self.is_return) and self.return_against:
+				calculate_mapped_packed_items_return(self)
+			else:
+				from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+				make_packing_list(self)
 		else:
 			self.set('packed_items', [])
 
@@ -879,11 +889,11 @@ class SalesInvoice(SellingController):
 		# Checked both rounding_adjustment and rounded_total
 		# because rounded_total had value even before introcution of posting GLE based on rounded total
 		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
+		base_grand_total = flt(self.base_rounded_total if (self.base_rounding_adjustment and self.base_rounded_total)
+			else self.base_grand_total, self.precision("base_grand_total"))
+
 		if grand_total and not self.is_internal_transfer():
 			# Didnot use base_grand_total to book rounding loss gle
-			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
-				self.precision("grand_total"))
-
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
@@ -891,8 +901,8 @@ class SalesInvoice(SellingController):
 					"party": self.customer,
 					"due_date": self.due_date,
 					"against": self.against_income_account,
-					"debit": grand_total_in_company_currency,
-					"debit_in_account_currency": grand_total_in_company_currency \
+					"debit": base_grand_total,
+					"debit_in_account_currency": base_grand_total \
 						if self.party_account_currency==self.company_currency else grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,

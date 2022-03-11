@@ -24,7 +24,7 @@ def search_by_term(search_term, warehouse, price_list):
 			["name as item_code", "item_name", "description", "stock_uom", "image as item_image", "is_stock_item"],
 			as_dict=1)
 
-		item_stock_qty = get_stock_availability(item_code, warehouse)
+		item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
 		price_list_rate, currency = frappe.db.get_value('Item Price', {
 			'price_list': price_list,
 			'item_code': item_code
@@ -99,7 +99,6 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		), {'warehouse': warehouse}, as_dict=1)
 
 	if items_data:
-		items_data = filter_service_items(items_data)
 		items = [d.item_code for d in items_data]
 		item_prices_data = frappe.get_all("Item Price",
 			fields = ["item_code", "price_list_rate", "currency"],
@@ -112,7 +111,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		for item in items_data:
 			item_code = item.item_code
 			item_price = item_prices.get(item_code) or {}
-			item_stock_qty = get_stock_availability(item_code, warehouse)
+			item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
 
 			row = {}
 			row.update(item)
@@ -143,14 +142,6 @@ def search_for_serial_or_batch_or_barcode_number(search_value):
 		return batch_no_data
 
 	return {}
-
-def filter_service_items(items):
-	for item in items:
-		if not item['is_stock_item']:
-			if not frappe.db.exists('Product Bundle', item['item_code']):
-				items.remove(item)
-
-	return items
 
 def get_conditions(search_term):
 	condition = "("

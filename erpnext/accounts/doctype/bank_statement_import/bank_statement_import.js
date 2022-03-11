@@ -239,7 +239,8 @@ frappe.ui.form.on("Bank Statement Import", {
 					"withdrawal",
 					"description",
 					"reference_number",
-					"bank_account"
+					"bank_account",
+					"currency"
 				],
 			},
 		});
