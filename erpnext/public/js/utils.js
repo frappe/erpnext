@@ -111,28 +111,6 @@ $.extend(erpnext, {
 		} else {
 			frappe.new_doc('Purchase Order', {'supplier':args.supplier});
 		}
-	},
-	change_selling_setting_so_required: (args) => {
-		if (!args.perm) {
-			frappe.throw(__("Not permitted"), frappe.PermissionError)
-		}
-		frappe.db.set_value('Selling Settings', 'Selling Settings', 'so_required', "No").then((r) => {
-			if(!r.exc && r.message) {
-				frappe.msgprint(__('Sales Order is not required to create Sales Invoice & Delivery Note.'),
-					title=__('Settings Updated'));
-			}
-		});
-	},
-	change_buying_setting_po_required: (args) => {
-		if (!args.perm) {
-			frappe.throw(__("Not permitted"), frappe.PermissionError)
-		}
-		frappe.db.set_value('Buying Settings', 'Buying Settings', 'po_required', "No").then((r) => {
-			if(!r.exc && r.message) {
-				frappe.msgprint(__('Purchase Order is not required to create Purchase Invoice & Purchase Receipt.'),
-					title=__('Settings Updated'));
-			}
-		});
 	}
 });
 
