@@ -1035,42 +1035,40 @@ frappe.ui.form.on('Sales Invoice', {
 				doctype: "Sales Invoice"
 			},
 			callback: function(r) {
-				if (!r.message) {
-					frm.set_df_property("customer", "description", '');
 					frappe.call({
 						method: "erpnext.accounts.utils.check_permissions_so_po_required",
 						args: {
 							doctype: "Sales Order",
 							module_settings: "Selling Settings"
 						},
-						callback: function(r) {
-							let msg_dialog = frappe.msgprint({
-								message: __('Sales Order is required to create a Sales Invoice'),
-								title: __("Sales Order Required"),
-								indicator: 'red',
-								primary_action: {
-									action: () => {
-										erpnext.route_to_new_sales_order({
-											"customer": frm.doc.customer,
-											"perm": r.message.perm_so_po
-										})
-									},
-									label: __("Create Sales Order"),
+						callback: function(res) {
+							if (!r.message) {
+								frm.set_df_property("customer", "description", '');
+								let msg_dialog = frappe.msgprint({
+									message: __('Sales Order is required to create a Sales Invoice'),
+									title: __("Sales Order Required"),
+									indicator: 'red',
+									primary_action: {
+										action: () => {
+											erpnext.route_to_new_sales_order({
+												"customer": frm.doc.customer,
+												"perm": res.message.perm_so_po
+											})
+										},
+										label: __("Create Sales Order"),
+									}
+								});
+							} else {
+								if (res.message.so_po_required == 'Yes') {
+									frm.set_df_property("customer", "description",
+										__('There are Open Sales Orders against this customer. Use "Get Items From" to link one.'));
+								} else {
+									frm.set_df_property("customer", "description", '');
 								}
-							});
+							}
 						}
 					})
-				} else {
-					frappe.db.get_single_value('Selling Settings', 'so_required').then(so_required => {
-						if (so_required == 'Yes') {
-							frm.set_df_property("customer", "description",
-								__('There are Open Sales Orders against this customer. Use "Get Items From" to link one.'));
-						} else {
-							frm.set_df_property("customer", "description", '');
-						}
-					});
 				}
-			}
 		});
 	},
 

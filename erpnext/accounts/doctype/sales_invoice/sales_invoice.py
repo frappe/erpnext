@@ -648,13 +648,15 @@ class SalesInvoice(SellingController):
 
 				for d in self.get('items'):
 					if (d.item_code and not d.get(key.lower().replace(' ', '_')) and not self.get(value[1])):
+						from erpnext.accounts.utils import check_permissions_so_po_required
+						perms = check_permissions_so_po_required('Sales Order', 'Selling Settings')
+						module_settings = get_link_to_form('Selling Settings', 'Selling Settings', 'Selling Settings') \
+							if perms['perm_setting'] else frappe.bold('Selling Settings')
 						msg = _("Sales Order Required for item {}").format(frappe.bold(d.item_code))
 						msg += "<br><br>"
 						msg += _("To submit the invoice without sales order please set {0} as {1} in {2}").format(
-							frappe.bold(_('Sales Order Required')), frappe.bold('No'), get_link_to_form('Selling Settings', 'Selling Settings', 'Selling Settings'))
-						from erpnext.accounts.utils import check_permissions_so_po_required
-						perms = check_permissions_so_po_required('Sales Order', 'Selling Settings')
-						frappe.msgprint(msg, primary_action={
+							frappe.bold(_('Sales Order Required')), frappe.bold('No'), module_settings)
+						frappe.msgprint(msg, title=_('Sales Order Required'), primary_action={
 							'label': _('Create Sales Order'),
 							'client_action': 'erpnext.route_to_new_sales_order',
 							'args': {"customer": self.customer, "perm": perms['perm_so_po']}

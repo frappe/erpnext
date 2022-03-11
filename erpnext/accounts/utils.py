@@ -1174,11 +1174,13 @@ def check_open_pos(supplier, doctype=None):
 @frappe.whitelist()
 def check_permissions_so_po_required(doctype, module_settings):
 	perm_setting, perm_so_po = True, True
+	setting_field = 'so_required' if module_settings == 'Selling Settings' else 'po_required'
+	so_po_required = frappe.db.get_singles_value(module_settings, setting_field)
 	if not frappe.has_permission(module_settings, "write"):
 		perm_setting = False
 	if not frappe.has_permission(doctype, "create"):
 		perm_so_po = False
-	return {"perm_setting": perm_setting, "perm_so_po": perm_so_po}
+	return {"perm_setting": perm_setting, "perm_so_po": perm_so_po, "so_po_required": so_po_required}
 
 
 

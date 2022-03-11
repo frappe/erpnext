@@ -326,15 +326,15 @@ frappe.ui.form.on("Purchase Receipt", {
 				doctype: "Purchase Receipt"
 			},
 			callback: function(r) {
-				if (!r.message) {
-					frm.set_df_property("supplier", "description", '');
-					frappe.call({
-						method: "erpnext.accounts.utils.check_permissions_so_po_required",
-						args: {
-							doctype: "Purchase Order",
-							module_settings: "Buying Settings"
-						},
-						callback: function(r) {
+				frappe.call({
+					method: "erpnext.accounts.utils.check_permissions_so_po_required",
+					args: {
+						doctype: "Purchase Order",
+						module_settings: "Buying Settings"
+					},
+					callback: function(res) {
+						if (!r.message) {
+							frm.set_df_property("supplier", "description", '');
 							let msg_dialog = frappe.msgprint({
 								message: __('Purchase Order is required to create a Purchase Receipt'),
 								indicator: 'red',
@@ -343,24 +343,22 @@ frappe.ui.form.on("Purchase Receipt", {
 									action: () => {
 										erpnext.route_to_new_purchase_order({
 											"customer": frm.doc.supplier,
-											"perm": r.message.perm_so_po
+											"perm": res.message.perm_so_po
 										})
 									},
 									label: __("Create Purchase Order"),
 								}
 							});
-						}
-					})
-				} else {
-					frappe.db.get_single_value('Buying Settings', 'po_required').then(po_required => {
-						if (po_required == 'Yes') {
-							frm.set_df_property("supplier", "description",
-								__('There are Open Purchase Orders against this supplier. Use "Get Items From" to link one.'));
 						} else {
-							frm.set_df_property("supplier", "description", '');
+							if (res.message.so_po_required == 'Yes') {
+								frm.set_df_property("supplier", "description",
+									__('There are Open Purchase Orders against this supplier. Use "Get Items From" to link one.'));
+							} else {
+								frm.set_df_property("supplier", "description", '');
+							}
 						}
-					});
-				}
+					}
+				})
 			}
 		});
 	},

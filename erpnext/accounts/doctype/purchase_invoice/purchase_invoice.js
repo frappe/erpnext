@@ -628,45 +628,40 @@ frappe.ui.form.on("Purchase Invoice", {
 				doctype: "Purchase Invoice"
 			},
 			callback: function(r) {
-				if (!r.message) {
-					frm.set_df_property("supplier", "description", '');
-
-					console.log('no open pos')
 					frappe.call({
 						method: "erpnext.accounts.utils.check_permissions_so_po_required",
 						args: {
 							doctype: "Purchase Order",
 							module_settings: "Buying Settings"
 						},
-						callback: function(r) {
-							let msg_dialog = frappe.msgprint({
-								message: __('Purchase Order is required to create a Purchase Invoice'),
-								indicator: 'red',
-								title: __('Purchase Order Required'),
-								primary_action: {
-									action: () => {
-										erpnext.route_to_new_purchase_order({
-											"customer": frm.doc.supplier,
-											"perm": r.message.perm_so_po,
-											"msg_dialog": msg_dialog
-										})
-									},
-									label: __("Create Purchase Order"),
+						callback: function(res) {
+							if (!r.message) {
+								frm.set_df_property("supplier", "description", '');
+								let msg_dialog = frappe.msgprint({
+									message: __('Purchase Order is required to create a Purchase Invoice'),
+									indicator: 'red',
+									title: __('Purchase Order Required'),
+									primary_action: {
+										action: () => {
+											erpnext.route_to_new_purchase_order({
+												"customer": frm.doc.supplier,
+												"perm": res.message.perm_so_po
+											})
+										},
+										label: __("Create Purchase Order"),
+									}
+								});
+							} else {
+								if (res.message.so_po_required == 'Yes') {
+									frm.set_df_property("supplier", "description",
+										__('There are Open Purchase Orders against this supplier. Use "Get Items From" to link one.'));
+								} else {
+									frm.set_df_property("supplier", "description", '');
 								}
-							});
+							}
 						}
 					})
-				} else {
-					frappe.db.get_single_value('Buying Settings', 'po_required').then(po_required => {
-						if (po_required == 'Yes') {
-							frm.set_df_property("supplier", "description",
-								__('There are Open Purchase Orders against this supplier. Use "Get Items From" to link one.'));
-						} else {
-							frm.set_df_property("supplier", "description", '');
-						}
-					});
 				}
-			}
 		});
 	},
 
