@@ -753,7 +753,11 @@ def calculate_amounts(against_loan, posting_date, payment_type=""):
 		amounts['payable_principal_amount'] = amounts['pending_principal_amount']
 		amounts['interest_amount'] += amounts['unaccrued_interest']
 		amounts['payable_amount'] = amounts['payable_principal_amount'] + amounts['interest_amount']
+<<<<<<< HEAD
 		amounts['payable_amount'] = amounts['penalty_amount']
 >>>>>>> 4e92926a52 (fix: incorrect payable amount for loan closure)
+=======
+		amounts['payable_amount'] += amounts['penalty_amount']
+>>>>>>> 8c76a76154 (fix: incorrect payable amount for loan closure)
 
 	return amounts
