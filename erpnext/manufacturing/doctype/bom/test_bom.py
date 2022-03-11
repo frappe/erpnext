@@ -459,6 +459,42 @@ class TestBOM(FrappeTestCase):
 				self.assertEqual(expected_index, bom.get_next_version_index(existing_boms),
 						msg=f"Incorrect index for {existing_boms}")
 
+	def test_bom_versioning(self):
+		bom_tree = {
+			frappe.generate_hash(length=10) : {
+				frappe.generate_hash(length=10): {}
+			}
+		}
+		bom = create_nested_bom(bom_tree, prefix="")
+		self.assertEqual(int(bom.name.split("-")[-1]), 1)
+		original_bom_name = bom.name
+
+		bom.cancel()
+		bom.reload()
+		self.assertEqual(bom.name, original_bom_name)
+
+		# create a new amendment
+		amendment = frappe.copy_doc(bom)
+		amendment.docstatus = 0
+		amendment.amended_from = bom.name
+
+		amendment.save()
+		amendment.submit()
+		amendment.reload()
+
+		self.assertNotEqual(amendment.name, bom.name)
+		# `origname-001-1` version
+		self.assertEqual(int(amendment.name.split("-")[-1]), 1)
+		self.assertEqual(int(amendment.name.split("-")[-2]), 1)
+
+		# create a new version
+		version = frappe.copy_doc(amendment)
+		version.docstatus = 0
+		version.amended_from = None
+		version.save()
+		self.assertNotEqual(amendment.name, version.name)
+		self.assertEqual(int(version.name.split("-")[-1]), 2)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
