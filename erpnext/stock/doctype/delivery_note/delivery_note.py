@@ -13,7 +13,10 @@ from frappe.utils import cint, flt
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.stock.doctype.batch.batch import set_batch_nos
-from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
+from erpnext.stock.doctype.serial_no.serial_no import (
+	get_delivery_note_serial_no,
+	update_serial_nos_after_submit,
+)
 from erpnext.stock.utils import calculate_mapped_packed_items_return
 
 form_grid_templates = {
@@ -220,6 +223,9 @@ class DeliveryNote(SellingController):
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()
+		if self.is_return:
+			update_serial_nos_after_submit(self, "items")
+
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 
