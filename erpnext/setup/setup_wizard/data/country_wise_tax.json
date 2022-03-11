@@ -68,16 +68,11 @@
 	},
 
 	"Austria": {
-		"tax_categories": [
-			"Umsatzsteuer",
-			"Vorsteuer"
-		],
 		"chart_of_accounts": {
 			"Einheitskontenrahmen": {
 				"sales_tax_templates": [
 					{
 						"title": "Umsatzsteuer",
-						"tax_category": "Umsatzsteuer",
 						"is_default": 1,
 						"taxes": [
 							{
@@ -91,7 +86,6 @@
 					},
 					{
 						"title": "Umsatzsteuer 10%",
-						"tax_category": "Umsatzsteuer",
 						"taxes": [
 							{
 								"account_head": {
@@ -106,7 +100,6 @@
 				"purchase_tax_templates": [
 					{
 						"title": "Vorsteuer",
-						"tax_category": "Vorsteuer",
 						"is_default": 1,
 						"taxes": [
 							{
@@ -121,7 +114,6 @@
 					},
 					{
 						"title": "Vorsteuer 10%",
-						"tax_category": "Vorsteuer",
 						"taxes": [
 							{
 								"account_head": {
@@ -283,7 +275,6 @@
 				"sales_tax_templates": [
 					{
 						"title": "Umsatzsteuer",
-						"tax_category": "Umsatzsteuer",
 						"is_default": 1,
 						"taxes": [
 							{
@@ -297,7 +288,6 @@
 					},
 					{
 						"title": "Umsatzsteuer 10%",
-						"tax_category": "Umsatzsteuer",
 						"taxes": [
 							{
 								"account_head": {
@@ -312,7 +302,6 @@
 				"purchase_tax_templates": [
 					{
 						"title": "Vorsteuer",
-						"tax_category": "Vorsteuer",
 						"is_default": 1,
 						"taxes": [
 							{
@@ -327,7 +316,6 @@
 					},
 					{
 						"title": "Vorsteuer 10%",
-						"tax_category": "Vorsteuer",
 						"taxes": [
 							{
 								"account_head": {
@@ -489,7 +477,6 @@
 				"sales_tax_templates": [
 					{
 						"title": "Umsatzsteuer",
-						"tax_category": "Umsatzsteuer",
 						"is_default": 1,
 						"taxes": [
 							{
@@ -502,7 +489,6 @@
 					},
 					{
 						"title": "Umsatzsteuer 10%",
-						"tax_category": "Umsatzsteuer",
 						"taxes": [
 							{
 								"account_head": {
@@ -516,7 +502,6 @@
 				"purchase_tax_templates": [
 					{
 						"title": "Vorsteuer",
-						"tax_category": "Vorsteuer",
 						"is_default": 1,
 						"taxes": [
 							{
@@ -530,7 +515,6 @@
 					},
 					{
 						"title": "Vorsteuer 10%",
-						"tax_category": "Vorsteuer",
 						"taxes": [
 							{
 								"account_head": {
