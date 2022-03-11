@@ -1,6 +1,3 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-# License: GNU General Public License v3. See license.txt
-
 
 import frappe
 from frappe import _
@@ -11,7 +8,6 @@ from erpnext.stock.utils import (
 	is_reposting_item_valuation_in_progress,
 	update_included_uom_in_report,
 )
-
 
 def execute(filters=None):
 
@@ -64,7 +60,6 @@ def execute(filters=None):
 		data.append(sle)
 
 		for d in data:
-			# print(" this is data", d)
 			d['ref_challan'] = frappe.get_value("Stock Entry", d.get('voucher_no'), ['reference_challan'])
 
 		if include_uom:
@@ -129,9 +124,7 @@ def get_columns():
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
 		{"label": _("Voucher #"), "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 100},
 		{"label": _("Batch"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch", "width": 100},
-
 		{"label": _("Refrence Challan"), "fieldname": "ref_challan", "fieldtype": "Link", "options": "Stock Entry", "width": 100},
-
 		{"label": _("Serial No"), "fieldname": "serial_no", "fieldtype": "Link", "options": "Serial No", "width": 100},
 		{"label": _("Balance Serial No"), "fieldname": "balance_serial_no", "width": 100},
 		{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},
@@ -139,7 +132,6 @@ def get_columns():
 	]
 
 	return columns
-
 
 def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
