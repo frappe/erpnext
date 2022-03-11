@@ -158,6 +158,12 @@ def add_standard_navbar_items():
 			'item_type': 'Route',
 			'route': 'https://github.com/frappe/erpnext/issues',
 			'is_standard': 1
+		},
+		{
+			'item_label': 'Frappe Support',
+			'item_type': 'Route',
+			'route': 'https://frappe.io/support',
+			'is_standard': 1
 		}
 	]
 
