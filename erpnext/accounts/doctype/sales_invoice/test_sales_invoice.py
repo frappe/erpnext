@@ -2542,10 +2542,8 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_standalone_serial_no_return(self):
 		si = create_sales_invoice(item_code="_Test Serialized Item With Series", update_stock=True, is_return=True, qty=-1)
-		si.submit()
+		si.reload()
 		self.assertTrue(si.items[0].serial_no)
-
-		return si
 
 
 def get_sales_invoice_for_e_invoice():

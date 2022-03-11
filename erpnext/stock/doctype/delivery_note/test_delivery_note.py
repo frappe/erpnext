@@ -822,6 +822,11 @@ class TestDeliveryNote(ERPNextTestCase):
 
 		automatically_fetch_payment_terms(enable=0)
 
+	def test_standalone_serial_no_return(self):
+		dn = create_delivery_note(item_code="_Test Serialized Item With Series", is_return=True, qty=-1)
+		dn.reload()
+		self.assertTrue(dn.items[0].serial_no)
+
 def create_return_delivery_note(**args):
 	args = frappe._dict(args)
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
