@@ -183,7 +183,7 @@ def get_entries(filters):
 
 		CASE 
 			WHEN dt.status = "Closed" THEN 
-			 ( Select dt_item.%s * conversion_factor from `tabUOM Conversion Detail` 
+			 ( Select dt_item.%s / conversion_factor from `tabUOM Conversion Detail` 
 			 where parent = dt_item.item_code 
 			 and is_alternate_uom = 1)
             ELSE ( Select dt_item.stock_qty / conversion_factor from `tabUOM Conversion Detail` where parent = dt_item.item_code and is_alternate_uom = 1)
