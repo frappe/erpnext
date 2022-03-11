@@ -450,6 +450,16 @@
             "account_type": "Tax",
             "account_number": 2511,
             "tax_rate": 10.0
+          },
+          "Vorsteuer (Reverse Charge)": {
+            "account_type": "Tax",
+            "account_number": 2520,
+            "tax_rate": 20.0
+          },
+          "Vorsteuer (Reverse Charge) 10%": {
+            "account_type": "Tax",
+            "account_number": 2521,
+            "tax_rate": 10.0
           }
         }
       },
@@ -650,6 +660,16 @@
           "Erwerbsteuer (USt aus innergemeinschaftlichem Erwerb) 10%": {
             "account_type": "Tax",
             "account_number": 3511,
+            "tax_rate": 10.0
+          },
+          "Umsatzsteuer (Reverse Charge)": {
+            "account_type": "Tax",
+            "account_number": 3520,
+            "tax_rate": 20.0
+          },
+          "Umsatzsteuer (Reverse Charge) 10%": {
+            "account_type": "Tax",
+            "account_number": 3521,
             "tax_rate": 10.0
           }
         },

@@ -178,6 +178,52 @@
 								"add_deduct_tax": "Deduct"
 							}
 						]
+					},
+					{
+						"title": "Reverse Charge",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Vorsteuer (Reverse Charge)",
+									"account_number": "2520",
+									"root_type": "Asset",
+									"tax_rate": 20.00
+								},
+								"add_deduct_tax": "Add"
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer (Reverse Charge)",
+									"account_number": "3520",
+									"root_type": "Liability",
+									"tax_rate": 20.00
+								},
+								"add_deduct_tax": "Deduct"
+							}
+						]
+					},
+					{
+						"title": "Reverse Charge 10%",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Vorsteuer (Reverse Charge) 10%",
+									"account_number": "2521",
+									"root_type": "Asset",
+									"tax_rate": 10.00
+								},
+								"add_deduct_tax": "Add"
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer (Reverse Charge) 10%",
+									"account_number": "3521",
+									"root_type": "Liability",
+									"tax_rate": 10.00
+								},
+								"add_deduct_tax": "Deduct"
+							}
+						]
 					}
 				],
 				"item_tax_templates": [
@@ -292,6 +338,98 @@
 								}
 							}
 						]
+					},
+					{
+						"title": "Innergemeinschaftlicher Erwerb",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Vorsteuer aus innergemeinschaftlichem Erwerb",
+									"account_number": "1503",
+									"root_type": "Asset",
+									"tax_rate": 20.00
+								},
+								"add_deduct_tax": "Add"
+							},
+							{
+								"account_head": {
+									"account_name": "Erwerbsteuer (USt aus innergemeinschaftlichem Erwerb)",
+									"account_number": "2303",
+									"root_type": "Liability",
+									"tax_rate": 20.00
+								},
+								"add_deduct_tax": "Deduct"
+							}
+						]
+					},
+					{
+						"title": "Innergemeinschaftlicher Erwerb 10%",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Vorsteuer aus innergemeinschaftlichem Erwerb 10%",
+									"account_number": "1504",
+									"root_type": "Asset",
+									"tax_rate": 10.00
+								},
+								"add_deduct_tax": "Add"
+							},
+							{
+								"account_head": {
+									"account_name": "Erwerbsteuer (USt aus innergemeinschaftlichem Erwerb) 10%",
+									"account_number": "2304",
+									"root_type": "Liability",
+									"tax_rate": 10.00
+								},
+								"add_deduct_tax": "Deduct"
+							}
+						]
+					},
+					{
+						"title": "Reverse Charge",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Vorsteuer (Reverse Charge)",
+									"account_number": "1505",
+									"root_type": "Asset",
+									"tax_rate": 20.00
+								},
+								"add_deduct_tax": "Add"
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer (Reverse Charge)",
+									"account_number": "2305",
+									"root_type": "Liability",
+									"tax_rate": 20.00
+								},
+								"add_deduct_tax": "Deduct"
+							}
+						]
+					},
+					{
+						"title": "Reverse Charge 10%",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Vorsteuer (Reverse Charge) 10%",
+									"account_number": "1506",
+									"root_type": "Asset",
+									"tax_rate": 10.00
+								},
+								"add_deduct_tax": "Add"
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer (Reverse Charge) 10%",
+									"account_number": "2306",
+									"root_type": "Liability",
+									"tax_rate": 10.00
+								},
+								"add_deduct_tax": "Deduct"
+							}
+						]
 					}
 				],
 				"item_tax_templates": [
@@ -400,6 +538,90 @@
 									"root_type": "Asset",
 									"tax_rate": 10.00
 								}
+							}
+						]
+					},
+					{
+						"title": "Innergemeinschaftlicher Erwerb",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Vorsteuer aus innergemeinschaftlichem Erwerb",
+									"root_type": "Asset",
+									"tax_rate": 20.00
+								},
+								"add_deduct_tax": "Add"
+							},
+							{
+								"account_head": {
+									"account_name": "Erwerbsteuer (USt aus innergemeinschaftlichem Erwerb)",
+									"root_type": "Liability",
+									"tax_rate": 20.00
+								},
+								"add_deduct_tax": "Deduct"
+							}
+						]
+					},
+					{
+						"title": "Innergemeinschaftlicher Erwerb 10%",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Vorsteuer aus innergemeinschaftlichem Erwerb 10%",
+									"root_type": "Asset",
+									"tax_rate": 10.00
+								},
+								"add_deduct_tax": "Add"
+							},
+							{
+								"account_head": {
+									"account_name": "Erwerbsteuer (USt aus innergemeinschaftlichem Erwerb) 10%",
+									"root_type": "Liability",
+									"tax_rate": 10.00
+								},
+								"add_deduct_tax": "Deduct"
+							}
+						]
+					},
+					{
+						"title": "Reverse Charge",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Vorsteuer (Reverse Charge)",
+									"root_type": "Asset",
+									"tax_rate": 20.00
+								},
+								"add_deduct_tax": "Add"
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer (Reverse Charge)",
+									"root_type": "Liability",
+									"tax_rate": 20.00
+								},
+								"add_deduct_tax": "Deduct"
+							}
+						]
+					},
+					{
+						"title": "Reverse Charge 10%",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Vorsteuer (Reverse Charge) 10%",
+									"root_type": "Asset",
+									"tax_rate": 10.00
+								},
+								"add_deduct_tax": "Add"
+							},
+							{
+								"account_head": {
+									"account_name": "Umsatzsteuer (Reverse Charge) 10%",
+									"root_type": "Liability",
+									"tax_rate": 10.00
+								},
+								"add_deduct_tax": "Deduct"
 							}
 						]
 					}
