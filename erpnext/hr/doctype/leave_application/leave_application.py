@@ -295,12 +295,7 @@ class LeaveApplication(Document):
 			if leave_balance_for_consumption != self.leave_balance:
 				msg = _("Warning: Insufficient leave balance for Leave Type {0} in this allocation.").format(frappe.bold(self.leave_type))
 				msg += "<br><br>"
-				msg += _("Actual leave balance is {0} but only {1} leave(s) can be consumed between {2} (Application Date) and {3} (Allocation Expiry).").format(
-					frappe.bold(self.leave_balance), frappe.bold(leave_balance_for_consumption),
-					frappe.bold(formatdate(self.from_date)),
-					frappe.bold(formatdate(alloc_on_from_date.to_date)))
-				msg += "<br>"
-				msg += _("Remaining leaves would be compensated in the next allocation.")
+				msg += _("Actual balances aren't available because the leave application spans over different leave allocations. You can still apply for leaves which would be compensated during the next allocation.")
 			else:
 				msg = _("Warning: Insufficient leave balance for Leave Type {0}.").format(frappe.bold(self.leave_type))
 

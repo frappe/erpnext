@@ -3,7 +3,7 @@
 
 
 from itertools import groupby
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import frappe
 from frappe import _
@@ -17,7 +17,7 @@ from erpnext.hr.doctype.leave_application.leave_application import (
 
 Filters = frappe._dict
 
-def execute(filters: Filters = None) -> Tuple:
+def execute(filters:  Optional[Filters] = None) -> Tuple:
 	if filters.to_date <= filters.from_date:
 		frappe.throw(_('"From Date" can not be greater than or equal to "To Date"'))
 
@@ -162,7 +162,7 @@ def get_conditions(filters: Filters) -> Dict:
 	return conditions
 
 
-def get_department_leave_approver_map(department: str = None):
+def get_department_leave_approver_map(department: Optional[str] = None):
 	# get current department and all its child
 	department_list = frappe.get_list('Department',
 		filters={'disabled': 0},
