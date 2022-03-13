@@ -29,7 +29,10 @@ from erpnext.tests.utils import ERPNextTestCase, change_settings
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]
 
-def make_item(item_code, properties=None):
+def make_item(item_code=None, properties=None):
+	if not item_code:
+		item_code = frappe.generate_hash(length=16)
+
 	if frappe.db.exists("Item", item_code):
 		return frappe.get_doc("Item", item_code)
 
