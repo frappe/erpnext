@@ -34,10 +34,9 @@ def get_columns(filters):
 			"width": 200
 		},
 		{
-			"label": _("Sales Partner preference"),
-			"options": "Bank Account",
+			"label": _("Sales Partner Rebate preference"),
 			"fieldname": "bank_details",
-			"fieldtype": "Link",
+			"fieldtype": "Data",
 			"width": 200
 		},
 		{
@@ -150,7 +149,7 @@ def get_entries(filters):
 	entries = frappe.db.sql("""
 		SELECT
 			dt.name, dt.customer, dt.territory, dt.{date_field} as posting_date, dt.currency, 
-			if(s.preference = "Refund to Account", s.bank_account, "Apply to RNlabs account") as bank_details,
+			if(s.preference = "Refund to Account", s.bank_account, s.preference) as bank_details,
 			dt_item.item_name, dt.customer_name,
 			dt_item.base_net_rate as rate, dt_item.qty, dt_item.base_net_amount as amount,
 			ROUND(((dt_item.base_net_amount * dt.commission_rate) / 100), 2) as commission,
