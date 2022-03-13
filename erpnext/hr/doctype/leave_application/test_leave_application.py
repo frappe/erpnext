@@ -272,14 +272,7 @@ class TestLeaveApplication(unittest.TestCase):
 		make_allocation_record(leave_type=leave_type.name, from_date=get_year_start(date), to_date=get_year_ending(date))
 
 		employee = get_employee()
-<<<<<<< HEAD
-		original_holiday_list = employee.holiday_list
-		frappe.db.set_value("Employee", employee.name, "holiday_list", holiday_list)
-
-		first_sunday = get_first_sunday(holiday_list)
-=======
 		first_sunday = get_first_sunday(self.holiday_list)
->>>>>>> 3f3b1766c2 (test: get leave details for leave application dashboard)
 
 		leave_application = make_leave_application(employee.name, first_sunday, add_days(first_sunday, 3), leave_type.name)
 		leave_application.reload()
@@ -288,12 +281,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		leave_application.cancel()
 
-<<<<<<< HEAD
-		frappe.db.set_value("Employee", employee.name, "holiday_list", original_holiday_list)
-
-=======
 	@set_holiday_list('Salary Slip Test Holiday List', '_Test Company')
->>>>>>> 3f3b1766c2 (test: get leave details for leave application dashboard)
 	def test_attendance_update_for_exclude_holidays(self):
 		# Case 2: leave type with 'Include holidays within leaves as leaves' disabled
 		frappe.delete_doc_if_exists("Leave Type", "Test Do Not Include Holidays", force=1)
@@ -307,13 +295,7 @@ class TestLeaveApplication(unittest.TestCase):
 		make_allocation_record(leave_type=leave_type.name, from_date=get_year_start(date), to_date=get_year_ending(date))
 
 		employee = get_employee()
-<<<<<<< HEAD
-		original_holiday_list = employee.holiday_list
-		frappe.db.set_value("Employee", employee.name, "holiday_list", holiday_list)
-		first_sunday = get_first_sunday(holiday_list)
-=======
 		first_sunday = get_first_sunday(self.holiday_list)
->>>>>>> 3f3b1766c2 (test: get leave details for leave application dashboard)
 
 		# already marked attendance on a holiday should be deleted in this case
 		config = {
@@ -482,15 +464,7 @@ class TestLeaveApplication(unittest.TestCase):
 		holiday_list = 'Test Holiday List for Optional Holiday'
 		employee = get_employee()
 
-<<<<<<< HEAD
-		default_holiday_list = make_holiday_list()
-		original_holiday_list = employee.holiday_list
-		frappe.db.set_value("Employee", employee.name, "holiday_list", default_holiday_list)
-		first_sunday = get_first_sunday(default_holiday_list)
-
-=======
 		first_sunday = get_first_sunday(self.holiday_list)
->>>>>>> 3f3b1766c2 (test: get leave details for leave application dashboard)
 		optional_leave_date = add_days(first_sunday, 1)
 
 		if not frappe.db.exists('Holiday List', holiday_list):

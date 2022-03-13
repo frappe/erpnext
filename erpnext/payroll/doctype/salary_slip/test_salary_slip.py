@@ -1095,14 +1095,9 @@ def setup_test():
 
 def make_holiday_list(list_name=None, from_date=None, to_date=None):
 	fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company())
-<<<<<<< HEAD
-	holiday_list = frappe.db.exists("Holiday List", "Salary Slip Test Holiday List")
-	if not frappe.db.get_value("Holiday List", "Salary Slip Test Holiday List"):
-=======
 	name = list_name or "Salary Slip Test Holiday List"
 	holiday_list = frappe.db.exists("Holiday List", name)
 	if not holiday_list:
->>>>>>> c050ce49c2 (test: employee leave balance report)
 		holiday_list = frappe.get_doc({
 			"doctype": "Holiday List",
 			"holiday_list_name": name,
