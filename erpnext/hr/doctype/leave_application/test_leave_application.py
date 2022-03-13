@@ -281,7 +281,7 @@ class TestLeaveApplication(unittest.TestCase):
 		first_sunday = get_first_sunday(self.holiday_list)
 >>>>>>> 3f3b1766c2 (test: get leave details for leave application dashboard)
 
-		leave_application = make_leave_application(employee.name, add_days(first_sunday, 1), add_days(first_sunday, 4), leave_type.name)
+		leave_application = make_leave_application(employee.name, first_sunday, add_days(first_sunday, 3), leave_type.name)
 		leave_application.reload()
 		self.assertEqual(leave_application.total_leave_days, 4)
 		self.assertEqual(frappe.db.count('Attendance', {'leave_application': leave_application.name}), 4)
