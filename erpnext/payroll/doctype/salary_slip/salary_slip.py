@@ -1390,7 +1390,7 @@ class SalarySlip(TransactionBase):
 					'total_allocated_leaves': flt(leave_values.get('total_leaves')),
 					'expired_leaves': flt(leave_values.get('expired_leaves')),
 					'used_leaves': flt(leave_values.get('leaves_taken')),
-					'pending_leaves': flt(leave_values.get('pending_leaves')),
+					'pending_leaves': flt(leave_values.get('leaves_pending_approval')),
 					'available_leaves': flt(leave_values.get('remaining_leaves'))
 				})
 

@@ -1062,7 +1062,7 @@ def create_additional_salary(employee, payroll_period, amount):
 	}).submit()
 	return salary_date
 
-def make_leave_application(employee, from_date, to_date, leave_type, company=None):
+def make_leave_application(employee, from_date, to_date, leave_type, company=None, submit=True):
 	leave_application = frappe.get_doc(dict(
 		doctype = 'Leave Application',
 		employee = employee,
@@ -1070,11 +1070,12 @@ def make_leave_application(employee, from_date, to_date, leave_type, company=Non
 		from_date = from_date,
 		to_date = to_date,
 		company = company or erpnext.get_default_company() or "_Test Company",
-		docstatus = 1,
 		status = "Approved",
 		leave_approver = 'test@example.com'
-	))
-	leave_application.submit()
+	)).insert()
+
+	if submit:
+		leave_application.submit()
 
 	return leave_application
 
@@ -1092,15 +1093,16 @@ def setup_test():
 	frappe.db.set_value('HR Settings', None, 'leave_status_notification_template', None)
 	frappe.db.set_value('HR Settings', None, 'leave_approval_notification_template', None)
 
-def make_holiday_list():
+def make_holiday_list(list_name=None, from_date=None, to_date=None):
 	fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company())
-	holiday_list = frappe.db.exists("Holiday List", "Salary Slip Test Holiday List")
-	if not frappe.db.get_value("Holiday List", "Salary Slip Test Holiday List"):
+	name = list_name or "Salary Slip Test Holiday List"
+	holiday_list = frappe.db.exists("Holiday List", name)
+	if not holiday_list:
 		holiday_list = frappe.get_doc({
 			"doctype": "Holiday List",
-			"holiday_list_name": "Salary Slip Test Holiday List",
-			"from_date": fiscal_year[1],
-			"to_date": fiscal_year[2],
+			"holiday_list_name": name,
+			"from_date": from_date or fiscal_year[1],
+			"to_date": to_date or fiscal_year[2],
 			"weekly_off": "Sunday"
 		}).insert()
 		holiday_list.get_weekly_off_dates()

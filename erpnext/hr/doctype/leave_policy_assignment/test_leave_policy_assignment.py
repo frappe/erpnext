@@ -4,7 +4,7 @@
 import unittest
 
 import frappe
-from frappe.utils import add_months, get_first_day, get_last_day, getdate
+from frappe.utils import add_days, add_months, get_first_day, get_last_day, getdate
 
 from erpnext.hr.doctype.leave_application.test_leave_application import (
 	get_employee,
@@ -94,9 +94,12 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 			"leave_policy": leave_policy.name,
 			"leave_period": leave_period.name
 		}
+
+		# second last day of the month
+		# leaves allocated should be 0 since it is an earned leave and allocation happens via scheduler based on set frequency
+		frappe.flags.current_date = add_days(get_last_day(getdate()), -1)
 		leave_policy_assignments = create_assignment_for_multiple_employees([self.employee.name], frappe._dict(data))
 
-		# leaves allocated should be 0 since it is an earned leave and allocation happens via scheduler based on set frequency
 		leaves_allocated = frappe.db.get_value("Leave Allocation", {
 			"leave_policy_assignment": leave_policy_assignments[0]
 		}, "total_leaves_allocated")
