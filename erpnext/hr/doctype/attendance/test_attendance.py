@@ -25,7 +25,9 @@ class TestAttendance(FrappeTestCase):
 		self.assertEqual(attendance, fetch_attendance)
 
 	def test_unmarked_days(self):
-		first_day = get_first_day(getdate())
+		now = now_datetime()
+		previous_month = now.month - 1
+		first_day = now.replace(day=1).replace(month=previous_month).date()
 
 		employee = make_employee('test_unmarked_days@example.com', date_of_joining=add_days(first_day, -1))
 		frappe.db.delete('Attendance', {'employee': employee})
@@ -34,7 +36,7 @@ class TestAttendance(FrappeTestCase):
 		holiday_list = make_holiday_list()
 		frappe.db.set_value('Employee', employee, 'holiday_list', holiday_list)
 
-		first_sunday = get_first_sunday(holiday_list)
+		first_sunday = get_first_sunday(holiday_list, for_date=first_day)
 		mark_attendance(employee, first_day, 'Present')
 		month_name = get_month_name(first_day)
 
@@ -49,7 +51,9 @@ class TestAttendance(FrappeTestCase):
 		self.assertIn(first_sunday, unmarked_days)
 
 	def test_unmarked_days_excluding_holidays(self):
-		first_day = get_first_day(getdate())
+		now = now_datetime()
+		previous_month = now.month - 1
+		first_day = now.replace(day=1).replace(month=previous_month).date()
 
 		employee = make_employee('test_unmarked_days@example.com', date_of_joining=add_days(first_day, -1))
 		frappe.db.delete('Attendance', {'employee': employee})
@@ -58,7 +62,7 @@ class TestAttendance(FrappeTestCase):
 		holiday_list = make_holiday_list()
 		frappe.db.set_value('Employee', employee, 'holiday_list', holiday_list)
 
-		first_sunday = get_first_sunday(holiday_list)
+		first_sunday = get_first_sunday(holiday_list, for_date=first_day)
 		mark_attendance(employee, first_day, 'Present')
 		month_name = get_month_name(first_day)
 
@@ -82,6 +86,10 @@ class TestAttendance(FrappeTestCase):
 		employee = make_employee('test_unmarked_days_as_per_doj@example.com', date_of_joining=doj,
 			relieving_date=relieving_date)
 		frappe.db.delete('Attendance', {'employee': employee})
+
+		from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_holiday_list
+		holiday_list = make_holiday_list()
+		frappe.db.set_value('Employee', employee, 'holiday_list', holiday_list)
 
 		attendance_date = add_days(first_day, 2)
 		mark_attendance(employee, attendance_date, 'Present')
