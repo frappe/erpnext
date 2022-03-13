@@ -65,7 +65,7 @@ class TestEmployeeLeaveBalance(unittest.TestCase):
 		leave_application2.reload()
 
 		filters = frappe._dict({
-			'date': self.date,
+			'date': add_days(leave_application2.to_date, 1),
 			'company': '_Test Company',
 			'employee': self.employee_id
 		})
@@ -100,7 +100,7 @@ class TestEmployeeLeaveBalance(unittest.TestCase):
 
 		# Leave balance should show actual balance, and not "consumption balance as per remaining days", near alloc end date
 		# eg: 3 days left for alloc to end, leave balance should still be 26 and not 3
-		frappe._dict({
+		filters = frappe._dict({
 			'date': add_days(self.year_end, -3),
 			'company': '_Test Company',
 			'employee': self.employee_id
