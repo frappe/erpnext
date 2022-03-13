@@ -214,6 +214,7 @@ class Lead(SellingController):
 				})
 
 			contact.insert(ignore_permissions=True)
+			contact.reload() # load changes by hooks on contact
 
 			return contact
 
