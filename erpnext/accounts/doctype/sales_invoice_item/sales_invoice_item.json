@@ -832,6 +832,7 @@
   },
   {
    "default": "0",
+   "fetch_from": "item_code.grant_commission",
    "fieldname": "grant_commission",
    "fieldtype": "Check",
    "label": "Grant Commission",

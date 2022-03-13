@@ -23,7 +23,7 @@ def validate_filters(filters):
 def get_result(filters, tds_docs, tds_accounts, tax_category_map):
 	supplier_map = get_supplier_pan_map()
 	tax_rate_map = get_tax_rate_map(filters)
-	gle_map = get_gle_map(filters, tds_docs)
+	gle_map = get_gle_map(tds_docs)
 
 	out = []
 	for name, details in gle_map.items():
@@ -43,7 +43,7 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map):
 			if entry.account in tds_accounts:
 				tds_deducted += (entry.credit - entry.debit)
 
-			total_amount_credited += (entry.credit - entry.debit)
+			total_amount_credited += entry.credit
 
 		if tds_deducted:
 			row = {
@@ -78,7 +78,7 @@ def get_supplier_pan_map():
 
 	return supplier_map
 
-def get_gle_map(filters, documents):
+def get_gle_map(documents):
 	# create gle_map of the form
 	# {"purchase_invoice": list of dict of all gle created for this invoice}
 	gle_map = {}
@@ -86,7 +86,7 @@ def get_gle_map(filters, documents):
 	gle = frappe.db.get_all('GL Entry',
 		{
 			"voucher_no": ["in", documents],
-			"credit": (">", 0)
+			"is_cancelled": 0
 		},
 		["credit", "debit", "account", "voucher_no", "posting_date", "voucher_type", "against", "party"],
 	)
@@ -184,21 +184,28 @@ def get_tds_docs(filters):
 	payment_entries = []
 	journal_entries = []
 	tax_category_map = {}
+	or_filters = {}
+	bank_accounts = frappe.get_all('Account', {'is_group': 0, 'account_type': 'Bank'}, pluck="name")
 
 	tds_accounts = frappe.get_all("Tax Withholding Account", {'company': filters.get('company')},
 		pluck="account")
 
 	query_filters = {
-		"credit": ('>', 0),
 		"account": ("in", tds_accounts),
 		"posting_date": ("between", [filters.get("from_date"), filters.get("to_date")]),
-		"is_cancelled": 0
+		"is_cancelled": 0,
+		"against": ("not in", bank_accounts)
 	}
 
-	if filters.get('supplier'):
-		query_filters.update({'against': filters.get('supplier')})
+	if filters.get("supplier"):
+		del query_filters["account"]
+		del query_filters["against"]
+		or_filters = {
+			"against": filters.get('supplier'),
+			"party": filters.get('supplier')
+		}
 
-	tds_docs = frappe.get_all("GL Entry", query_filters, ["voucher_no", "voucher_type", "against", "party"])
+	tds_docs = frappe.get_all("GL Entry", filters=query_filters, or_filters=or_filters, fields=["voucher_no", "voucher_type", "against", "party"])
 
 	for d in tds_docs:
 		if d.voucher_type == "Purchase Invoice":

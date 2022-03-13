@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+import json
+
 import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
 from frappe.utils import add_days, today
@@ -31,6 +33,27 @@ class TestStockLedgerEntry(ERPNextTestCase):
 		# delete SLE and BINs for all items
 		frappe.db.sql("delete from `tabStock Ledger Entry` where item_code in (%s)" % (', '.join(['%s']*len(items))), items)
 		frappe.db.sql("delete from `tabBin` where item_code in (%s)" % (', '.join(['%s']*len(items))), items)
+
+
+	def assertSLEs(self, doc, expected_sles, sle_filters=None):
+		""" Compare sorted SLEs, useful for vouchers that create multiple SLEs for same line"""
+
+		filters = {"voucher_no": doc.name, "voucher_type": doc.doctype, "is_cancelled": 0}
+		if sle_filters:
+			filters.update(sle_filters)
+		sles = frappe.get_all("Stock Ledger Entry", fields=["*"], filters=filters,
+			order_by="timestamp(posting_date, posting_time), creation")
+
+		for exp_sle, act_sle in zip(expected_sles, sles):
+			for k, v in exp_sle.items():
+				act_value = act_sle[k]
+				if k == "stock_queue":
+					act_value = json.loads(act_value)
+					if act_value and act_value[0][0] == 0:
+						# ignore empty fifo bins
+						continue
+
+				self.assertEqual(v, act_value, msg=f"{k} doesn't match \n{exp_sle}\n{act_sle}")
 
 	def test_item_cost_reposting(self):
 		company = "_Test Company"
@@ -348,6 +371,77 @@ class TestStockLedgerEntry(ERPNextTestCase):
 			frappe.db.set_value("Stock Settings", None, "role_allowed_to_create_edit_back_dated_transactions", None)
 			frappe.set_user("Administrator")
 			user.remove_roles("Stock Manager")
+
+	def test_fifo_dependent_consumption(self):
+		item = make_item("_TestFifoTransferRates")
+		source = "_Test Warehouse - _TC"
+		target = "Stores - _TC"
+
+		rates = [10 * i for i in range(1, 20)]
+
+		receipt = make_stock_entry(item_code=item.name, target=source, qty=10, do_not_save=True, rate=10)
+		for rate in rates[1:]:
+			row = frappe.copy_doc(receipt.items[0], ignore_no_copy=False)
+			row.basic_rate = rate
+			receipt.append("items", row)
+
+		receipt.save()
+		receipt.submit()
+
+		expected_queues = []
+		for idx, rate in enumerate(rates, start=1):
+			expected_queues.append(
+				{"stock_queue": [[10, 10 * i] for i in range(1, idx + 1)]}
+			)
+		self.assertSLEs(receipt, expected_queues)
+
+		transfer = make_stock_entry(item_code=item.name, source=source, target=target, qty=10, do_not_save=True, rate=10)
+		for rate in rates[1:]:
+			row = frappe.copy_doc(transfer.items[0], ignore_no_copy=False)
+			transfer.append("items", row)
+
+		transfer.save()
+		transfer.submit()
+
+		# same exact queue should be transferred
+		self.assertSLEs(transfer, expected_queues, sle_filters={"warehouse": target})
+
+	def test_fifo_multi_item_repack_consumption(self):
+		rm = make_item("_TestFifoRepackRM")
+		packed = make_item("_TestFifoRepackFinished")
+		warehouse = "_Test Warehouse - _TC"
+
+		rates = [10 * i for i in range(1, 5)]
+
+		receipt = make_stock_entry(item_code=rm.name, target=warehouse, qty=10, do_not_save=True, rate=10)
+		for rate in rates[1:]:
+			row = frappe.copy_doc(receipt.items[0], ignore_no_copy=False)
+			row.basic_rate = rate
+			receipt.append("items", row)
+
+		receipt.save()
+		receipt.submit()
+
+		repack = make_stock_entry(item_code=rm.name, source=warehouse, qty=10,
+				do_not_save=True, rate=10, purpose="Repack")
+		for rate in rates[1:]:
+			row = frappe.copy_doc(repack.items[0], ignore_no_copy=False)
+			repack.append("items", row)
+
+		repack.append("items", {
+			"item_code": packed.name,
+			"t_warehouse": warehouse,
+			"qty": 1,
+			"transfer_qty": 1,
+		})
+
+		repack.save()
+		repack.submit()
+
+		# same exact queue should be transferred
+		self.assertSLEs(repack, [
+			{"incoming_rate": sum(rates) * 10}
+		], sle_filters={"item_code": packed.name})
 
 
 def create_repack_entry(**args):

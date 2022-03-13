@@ -136,9 +136,15 @@ class POSInvoiceMergeLog(Document):
 						i.uom == item.uom and i.net_rate == item.net_rate and i.warehouse == item.warehouse):
 						found = True
 						i.qty = i.qty + item.qty
+						i.amount = i.amount + item.net_amount
+						i.net_amount = i.amount
+						i.base_amount = i.base_amount + item.base_net_amount
+						i.base_net_amount = i.base_amount
 
 				if not found:
 					item.rate = item.net_rate
+					item.amount = item.net_amount
+					item.base_amount = item.base_net_amount
 					item.price_list_rate = 0
 					si_item = map_child_doc(item, invoice, {"doctype": "Sales Invoice Item"})
 					items.append(si_item)
@@ -170,6 +176,7 @@ class POSInvoiceMergeLog(Document):
 						found = True
 				if not found:
 					payments.append(payment)
+
 			rounding_adjustment += doc.rounding_adjustment
 			rounded_total += doc.rounded_total
 			base_rounding_adjustment += doc.base_rounding_adjustment

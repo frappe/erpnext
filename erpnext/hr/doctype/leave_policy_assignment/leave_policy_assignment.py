@@ -8,12 +8,11 @@ from math import ceil
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-from frappe.utils import date_diff, flt, formatdate, get_datetime, getdate
+from frappe.utils import date_diff, flt, formatdate, get_last_day, getdate
 from six import string_types
 
 
 class LeavePolicyAssignment(Document):
-
 	def validate(self):
 		self.validate_policy_assignment_overlap()
 		self.set_dates()
@@ -95,10 +94,12 @@ class LeavePolicyAssignment(Document):
 			new_leaves_allocated = 0
 
 		elif leave_type_details.get(leave_type).is_earned_leave == 1:
-			if self.assignment_based_on == "Leave Period":
-				new_leaves_allocated = self.get_leaves_for_passed_months(leave_type, new_leaves_allocated, leave_type_details, date_of_joining)
-			else:
+			if not self.assignment_based_on:
 				new_leaves_allocated = 0
+			else:
+				# get leaves for past months if assignment is based on Leave Period / Joining Date
+				new_leaves_allocated = self.get_leaves_for_passed_months(leave_type, new_leaves_allocated, leave_type_details, date_of_joining)
+
 		# Calculate leaves at pro-rata basis for employees joining after the beginning of the given leave period
 		elif getdate(date_of_joining) > getdate(self.effective_from):
 			remaining_period = ((date_diff(self.effective_to, date_of_joining) + 1) / (date_diff(self.effective_to, self.effective_from) + 1))
@@ -109,21 +110,24 @@ class LeavePolicyAssignment(Document):
 	def get_leaves_for_passed_months(self, leave_type, new_leaves_allocated, leave_type_details, date_of_joining):
 		from erpnext.hr.utils import get_monthly_earned_leave
 
-		current_month = get_datetime().month
-		current_year = get_datetime().year
+		current_date = frappe.flags.current_date or getdate()
+		if current_date > getdate(self.effective_to):
+			current_date = getdate(self.effective_to)
 
-		from_date = frappe.db.get_value("Leave Period", self.leave_period, "from_date")
-		if getdate(date_of_joining) > getdate(from_date):
-			from_date = date_of_joining
-
-		from_date_month = get_datetime(from_date).month
-		from_date_year = get_datetime(from_date).year
+		from_date = getdate(self.effective_from)
+		if getdate(date_of_joining) > from_date:
+			from_date = getdate(date_of_joining)
 
 		months_passed = 0
-		if current_year == from_date_year and current_month > from_date_month:
-			months_passed = current_month - from_date_month
-		elif current_year > from_date_year:
-			months_passed = (12 - from_date_month) + current_month
+		based_on_doj = leave_type_details.get(leave_type).based_on_date_of_joining
+
+		if current_date.year == from_date.year and current_date.month >= from_date.month:
+			months_passed = current_date.month - from_date.month
+			months_passed = add_current_month_if_applicable(months_passed, date_of_joining, based_on_doj)
+
+		elif current_date.year > from_date.year:
+			months_passed = (12 - from_date.month) + current_date.month
+			months_passed = add_current_month_if_applicable(months_passed, date_of_joining, based_on_doj)
 
 		if months_passed > 0:
 			monthly_earned_leave = get_monthly_earned_leave(new_leaves_allocated,
@@ -133,6 +137,23 @@ class LeavePolicyAssignment(Document):
 			new_leaves_allocated = 0
 
 		return new_leaves_allocated
+
+
+def add_current_month_if_applicable(months_passed, date_of_joining, based_on_doj):
+	date = getdate(frappe.flags.current_date) or getdate()
+
+	if based_on_doj:
+		# if leave type allocation is based on DOJ, and the date of assignment creation is same as DOJ,
+		# then the month should be considered
+		if date.day == date_of_joining.day:
+			months_passed += 1
+	else:
+		last_day_of_month = get_last_day(date)
+		# if its the last day of the month, then that month should be considered
+		if last_day_of_month == date:
+			months_passed += 1
+
+	return months_passed
 
 
 @frappe.whitelist()
@@ -169,7 +190,7 @@ def create_assignment_for_multiple_employees(employees, data):
 def get_leave_type_details():
 	leave_type_details = frappe._dict()
 	leave_types = frappe.get_all("Leave Type",
-		fields=["name", "is_lwp", "is_earned_leave", "is_compensatory",
+		fields=["name", "is_lwp", "is_earned_leave", "is_compensatory", "based_on_date_of_joining",
 			"is_carry_forward", "expire_carry_forwarded_leaves_after_days", "earned_leave_frequency", "rounding"])
 	for d in leave_types:
 		leave_type_details.setdefault(d.name, d)

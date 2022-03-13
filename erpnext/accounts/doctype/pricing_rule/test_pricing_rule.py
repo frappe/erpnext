@@ -650,6 +650,47 @@ class TestPricingRule(unittest.TestCase):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule with Min Qty - 1")
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule with Min Qty - 2")
 
+	def test_remove_pricing_rule(self):
+		item = make_item("Water Flask")
+		make_item_price("Water Flask", "_Test Price List", 100)
+
+		pricing_rule_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Water Flask Rule",
+			"apply_on": "Item Code",
+			"price_or_product_discount": "Price",
+			"items": [{
+				"item_code": "Water Flask",
+			}],
+			"selling": 1,
+			"currency": "INR",
+			"rate_or_discount": "Discount Percentage",
+			"discount_percentage": 20,
+			"company": "_Test Company"
+		}
+		rule = frappe.get_doc(pricing_rule_record)
+		rule.insert()
+
+		si = create_sales_invoice(do_not_save=True, item_code="Water Flask")
+		si.selling_price_list = "_Test Price List"
+		si.save()
+
+		self.assertEqual(si.items[0].price_list_rate, 100)
+		self.assertEqual(si.items[0].discount_percentage, 20)
+		self.assertEqual(si.items[0].rate, 80)
+
+		si.ignore_pricing_rule = 1
+		si.save()
+
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[0].rate, 100)
+
+		si.delete()
+		rule.delete()
+		frappe.get_doc("Item Price", {"item_code": "Water Flask"}).delete()
+		item.delete()
+
+
 test_dependencies = ["Campaign"]
 
 def make_pricing_rule(**args):
