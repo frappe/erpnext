@@ -333,6 +333,14 @@ class WorkOrder(Document):
 		if not self.batch_size:
 			self.batch_size = total_qty
 
+		batch_auto_creation = frappe.get_cached_value("Item", self.production_item, "create_new_batch")
+		if not batch_auto_creation:
+			frappe.msgprint(
+				_("Batch not created for item {} since it does not have a batch series.")
+					.format(frappe.bold(self.production_item)),
+				alert=True, indicator="orange")
+			return
+
 		while total_qty > 0:
 			qty = self.batch_size
 			if self.batch_size >= total_qty:
