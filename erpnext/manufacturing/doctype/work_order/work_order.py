@@ -647,12 +647,12 @@ class WorkOrder(Document):
 		if self.production_plan and self.production_plan_item:
 			qty_dict = frappe.db.get_value("Production Plan Item", self.production_plan_item, ["planned_qty", "ordered_qty"], as_dict=1)
 
-			allowance_qty =flt(frappe.db.get_single_value("Manufacturing Settings",
+			allowance_qty = flt(frappe.db.get_single_value("Manufacturing Settings",
 			"overproduction_percentage_for_work_order"))/100 * qty_dict.get("planned_qty", 0)
 
 			max_qty = qty_dict.get("planned_qty", 0) + allowance_qty - qty_dict.get("ordered_qty", 0)
 
-			if max_qty < 1:
+			if not max_qty > 0:
 				frappe.throw(_("Cannot produce more item for {0}")
 				.format(self.production_item), OverProductionError)
 			elif self.qty > max_qty:
