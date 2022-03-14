@@ -39,10 +39,10 @@ class PaymentReconciliation(Document):
 		self.add_payment_entries(non_reconciled_payments)
 
 	def get_payment_entries(self):
-		order_doctype = "Sales Order" if self.party_type=="Customer" else "Purchase Order"
+		order_doctype = "Sales Invoice" if self.party_type=="Customer" else "Purchase Order"
 		condition = self.get_conditions(get_payments=True)
 		payment_entries = get_advance_payment_entries(self.party_type, self.party,
-			self.receivable_payable_account, order_doctype, against_all_orders=True, limit=self.payment_limit,
+			self.receivable_payable_account, order_doctype, against_all_orders=False, limit=self.payment_limit,
 			condition=condition)
 
 		return payment_entries
