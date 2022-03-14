@@ -419,7 +419,7 @@ class BOM(WebsiteGenerator):
 
 	def clear_inspection(self):
 		if not self.inspection_required:
-			self.set('quality_inspection_template', None)
+			self.quality_inspection_template = None
 
 	def validate_main_item(self):
 		""" Validate main FG item"""

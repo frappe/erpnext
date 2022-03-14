@@ -6,7 +6,6 @@ from collections import deque
 from functools import partial
 
 import frappe
-from frappe.test_runner import make_test_records
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cstr, flt
 
@@ -20,15 +19,9 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 from erpnext.tests.test_subcontracting import set_backflush_based_on
 
 test_records = frappe.get_test_records('BOM')
+test_dependencies = ["Item", "Quality Inspection Template"]
 
 class TestBOM(FrappeTestCase):
-	def setUp(self):
-		if not frappe.get_value('Item', '_Test Item'):
-			make_test_records('Item')
-
-		if not frappe.get_value('Quality Inspection Template', '_Test Quality Inspection Template'):
-			make_test_records('Quality Inspection_Template')
-
 	def test_get_items(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 		items_dict = get_bom_items_as_dict(bom=get_default_bom(),
@@ -453,17 +446,19 @@ class TestBOM(FrappeTestCase):
 
 	def test_clear_inpection_quality(self):
 
-		bom = frappe.copy_doc(test_records[2])
-		bom.is_active = 0
+		bom = frappe.copy_doc(test_records[2], ignore_no_copy=True)
+		bom.docstatus = 0
+		bom.is_default = 0
 		bom.quality_inspection_template = "_Test Quality Inspection Template"
 		bom.inspection_required = 1
 		bom.save()
+		bom.reload()
 
 		self.assertEqual(bom.quality_inspection_template, '_Test Quality Inspection Template')
 
 		bom.inspection_required = 0
 		bom.save()
-		bom.load_from_db()
+		bom.reload()
 
 		self.assertEqual(bom.quality_inspection_template, None)
 
