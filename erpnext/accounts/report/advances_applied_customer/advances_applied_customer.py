@@ -23,6 +23,11 @@ def execute(filters=None):
 			"width": 240
 		},
 		{
+			"label": _("References Nos"),
+			"fieldname": "references_nos",
+			"width": 240
+		},
+		{
 			"label": _("Payment Type"),
 			"fieldname": "payment_type",
 			"width": 240
@@ -72,7 +77,7 @@ def return_data(filters):
 		else:
 			amount = advance.unallocated_amount
 
-		row = [advance.name, advance.party, advance.payment_type, advance.posting_date, advance.mode_of_payment, advance.party_type, advance.party, amount]
+		row = [advance.name, advance.party, advance.references_nos, advance.payment_type, advance.posting_date, advance.mode_of_payment, advance.party_type, advance.party, amount]
 
 		data.append(row)
 	
