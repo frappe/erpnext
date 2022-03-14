@@ -10,6 +10,7 @@ from erpnext.accounts.doctype.account.test_account import create_account, get_in
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.utils import update_gl_entries_after
 from erpnext.assets.doctype.asset.test_asset import create_asset_category, create_fixed_asset_item
+from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	get_gl_entries,
 	make_purchase_receipt,
@@ -177,6 +178,53 @@ class TestLandedCostVoucher(ERPNextTestCase):
 		self.assertEqual(serial_no.purchase_rate - serial_no_rate, 5.0)
 		self.assertEqual(serial_no.warehouse, "Stores - TCP1")
 
+	def test_serialized_lcv_delivered(self):
+		"""In some cases you'd want to deliver before you can know all the
+		landed costs, this should be allowed for serial nos too.
+
+		Case:
+			- receipt a serial no @ X rate
+			- delivery the serial no @ X rate
+			- add LCV to receipt X + Y
+			- LCV should be successful
+			- delivery should reflect X+Y valuation.
+		"""
+		serial_no = "LCV_TEST_SR_NO"
+		item_code = "_Test Serialized Item"
+		warehouse = "Stores - TCP1"
+
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory",
+				warehouse=warehouse, qty=1, rate=200,
+				item_code=item_code, serial_no=serial_no)
+
+		serial_no_rate = frappe.db.get_value("Serial No", serial_no, "purchase_rate")
+
+		# deliver it before creating LCV
+		dn = create_delivery_note(item_code=item_code,
+				company='_Test Company with perpetual inventory', warehouse='Stores - TCP1',
+				serial_no=serial_no, qty=1, rate=500,
+				cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1")
+
+		charges = 10
+		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company, charges=charges)
+
+		new_purchase_rate = serial_no_rate + charges
+
+		serial_no = frappe.db.get_value("Serial No", serial_no,
+			["warehouse", "purchase_rate"], as_dict=1)
+
+		self.assertEqual(serial_no.purchase_rate, new_purchase_rate)
+
+		stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
+				filters={
+					"voucher_no": dn.name,
+					"voucher_type": dn.doctype,
+					"is_cancelled": 0  # LCV cancels with same name.
+				},
+				fieldname="stock_value_difference")
+
+		# reposting should update the purchase rate in future delivery
+		self.assertEqual(stock_value_difference, -new_purchase_rate)
 
 	def test_landed_cost_voucher_for_odd_numbers (self):
 		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", do_not_save=True)

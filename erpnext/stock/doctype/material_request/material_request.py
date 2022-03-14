@@ -57,14 +57,13 @@ class MaterialRequest(BuyingController):
 				if actual_so_qty and (flt(so_items[so_no][item]) + already_indented > actual_so_qty):
 					frappe.throw(_("Material Request of maximum {0} can be made for Item {1} against Sales Order {2}").format(actual_so_qty - already_indented, item, so_no))
 
-	# Validate
-	# ---------------------
 	def validate(self):
 		super(MaterialRequest, self).validate()
 
 		self.validate_schedule_date()
 		self.check_for_on_hold_or_closed_status('Sales Order', 'sales_order')
 		self.validate_uom_is_integer("uom", "qty")
+		self.validate_material_request_type()
 
 		if not self.status:
 			self.status = "Draft"
@@ -83,6 +82,12 @@ class MaterialRequest(BuyingController):
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
+
+	def validate_material_request_type(self):
+		""" Validate fields in accordance with selected type """
+
+		if self.material_request_type != "Customer Provided":
+			self.customer = None
 
 	def set_title(self):
 		'''Set title as comma separated list of items'''
