@@ -72,7 +72,7 @@ def update_available_serial_nos(available_serial_nos, sle):
 	key = (sle.item_code, sle.warehouse)
 	if key not in available_serial_nos:
 		stock_balance = get_stock_balance_for(sle.item_code, sle.warehouse, sle.date.split(' ')[0],
-			sle.date.split(' ')[1], batch_no=sle.batch_no)
+			sle.date.split(' ')[1])
 		serials = get_serial_nos(stock_balance['serial_nos']) if stock_balance['serial_nos'] else []
 		available_serial_nos.setdefault(key, serials)
 
