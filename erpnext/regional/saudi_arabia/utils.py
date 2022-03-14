@@ -130,7 +130,7 @@ def create_qr_code(doc, method=None):
 def get_vat_amount(doc):
 	vat_settings = frappe.db.get_value('KSA VAT Setting', {'company': doc.company})
 	vat_accounts = []
-	vat_amount  = 0
+	vat_amount = 0
 
 	if vat_settings:
 		vat_settings_doc = frappe.get_doc('KSA VAT Setting', vat_settings)
