@@ -392,7 +392,7 @@ class Analytics(object):
 		if self.filters.tree_type in ["Customer", "Supplier"]:
 			labels = [d.get("label") for d in self.columns[2:length - 1]]
 		elif self.filters.tree_type == "Item":
-			labels = [d.get("label") for d in self.columns[3:length - 1]]
+			labels = [d.get("label") for d in self.columns[4:length - 1]]
 		else:
 			labels = [d.get("label") for d in self.columns[1:length - 1]]
 		self.chart = {

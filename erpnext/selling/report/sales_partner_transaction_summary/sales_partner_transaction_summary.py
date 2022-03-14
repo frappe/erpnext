@@ -26,6 +26,18 @@ def get_columns(filters):
 			"fieldtype": "Link",
 			"width": 100
 		},
+				{
+			"label": _("Sales Partner Email"),
+			"fieldname": "customer_primary_email_address",
+			"fieldtype": "DATA",
+			"width": 200
+		},
+		{
+			"label": _("Sales Partner Rebate preference"),
+			"fieldname": "bank_details",
+			"fieldtype": "Data",
+			"width": 200
+		},
 		{
 			"label": _(filters["doctype"]),
 			"options": filters["doctype"],
@@ -59,13 +71,13 @@ def get_columns(filters):
 			"fieldtype": "Date",
 			"width": 100
 		},
-		{
-			"label": _("Item Code"),
-			"fieldname": "item_code",
-			"fieldtype": "Link",
-			"options": "Item",
-			"width": 120
-		},
+		# {
+		# 	"label": _("Item Code"),
+		# 	"fieldname": "item_code",
+		# 	"fieldtype": "Link",
+		# 	"options": "Item",
+		# 	"width": 120
+		# },
 		{
 			"label": _("Item Name"),
 			"fieldname": "item_name",
@@ -105,25 +117,25 @@ def get_columns(filters):
 			"width": 120
 		},
 
-		{
-			"label": _("Commission Rate %"),
-			"fieldname": "commission_rate",
-			"fieldtype": "Data",
-			"width": 80
-		},
+		# {
+		# 	"label": _("Commission Rate %"),
+		# 	"fieldname": "commission_rate",
+		# 	"fieldtype": "Data",
+		# 	"width": 80
+		# },
 		{
 			"label": _("Commission"),
 			"fieldname": "commission",
 			"fieldtype": "Currency",
 			"width": 120
-		},
-		{
-			"label": _("Currency"),
-			"fieldname": "currency",
-			"fieldtype": "Link",
-			"options": "Currency",
-			"width": 120
 		}
+		# {
+		# 	"label": _("Currency"),
+		# 	"fieldname": "currency",
+		# 	"fieldtype": "Link",
+		# 	"options": "Currency",
+		# 	"width": 120
+		# }
 	]
 
 	return columns
@@ -135,13 +147,17 @@ def get_entries(filters):
 	conditions = get_conditions(filters, date_field)
 	entries = frappe.db.sql("""
 		SELECT
-			dt.name, dt.customer, dt.territory, dt.{date_field} as posting_date, dt.currency,
+			dt.name, dt.customer, dt.territory, dt.{date_field} as posting_date, dt.currency, 
+			if(s.preference = "Refund to Account", s.bank_account, s.preference) as bank_details,
 			dt_item.item_name, dt.customer_name,
 			dt_item.base_net_rate as rate, dt_item.qty, dt_item.base_net_amount as amount,
 			ROUND(((dt_item.base_net_amount * dt.commission_rate) / 100), 2) as commission,
-			dt_item.brand, dt.sales_partner, dt.commission_rate, dt_item.item_group, dt_item.item_code
+			dt_item.brand, dt.sales_partner,dts.customer_primary_email_address, dt.commission_rate, dt_item.item_group, dt_item.item_code
 		FROM
-			`tab{doctype}` dt, `tab{doctype} Item` dt_item
+			`tab{doctype}` dt
+		join `tab{doctype} Item` dt_item on dt_item.parent = dt.name
+		join `tabSales Partner` s on s.name = dt.sales_partner
+		join `tabCustomer` dts on dts.name = s.customer
 		WHERE
 			{cond} and dt.name = dt_item.parent 
 			and dt.docstatus = 1

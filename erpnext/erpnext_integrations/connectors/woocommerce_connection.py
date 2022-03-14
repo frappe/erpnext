@@ -489,8 +489,6 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 	for item in line_items:
 		sku = item.get("sku")
 
-
-
 		# check sku
 		if not sku:
 			frappe.throw(f"SKU is missing for {item.get('name', 'product')}")
@@ -544,11 +542,10 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 			found_item.item_code,
 		)
 
-		if price_list_rate:
+		if item.get("price")> 0 and price_list_rate:
 			discount = (price_list_rate - item.get("price")) / price_list_rate * 100
 		else:
 			discount = 0
-
 
 		validated_item = {
 			"item_code": found_item.item_code,
@@ -558,12 +555,17 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 			"uom": woocommerce_settings.uom or _("Unit"),
 			"qty": item.get("quantity"),
 			"discount_percentage": discount,
-			"rate": item.get("price"),
+			# "rate": item.get("price"),
 			"warehouse": woocommerce_settings.warehouse,
 			"is_stock_item": found_item.is_stock_item,
 			"is_paediatric": is_paediatric,
 			"is_swab": is_swab,
 		}
+
+		if price_list_rate:
+			validated_item['rate'] = price_list_rate
+		else:
+			validated_item['rate'] = item.get("price")
 
 		# check if item is out of stock
 		if found_item.is_stock_item == 1:
