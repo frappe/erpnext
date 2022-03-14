@@ -41,6 +41,7 @@ class StockReconciliation(StockController):
 		self.clean_serial_nos()
 		self.set_total_qty_and_amount()
 		self.validate_putaway_capacity()
+		self.update_serial_items_table()
 
 		if self._action=="submit":
 			self.make_batches('warehouse')
@@ -52,6 +53,8 @@ class StockReconciliation(StockController):
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "items")
+		self.reload()
+		self.update_serial_items_table(update=True)
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
@@ -264,7 +267,6 @@ class StockReconciliation(StockController):
 								'actual_qty': 1,
 								'qty_after_transaction': qty_after_transaction,
 								'serial_no': serials.pop(),
-								'skip_update_serial_no': 1,
 								'skip_serial_no_validation': 1
 							})
 							new_sl_entries.append(new_sle)

@@ -16,6 +16,9 @@
   "set_posting_time",
   "sb9",
   "items",
+  "serials_section",
+  "current_serials",
+  "new_serials",
   "section_break_9",
   "expense_account",
   "column_break_13",
@@ -139,13 +142,33 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "serials_section",
+   "fieldtype": "Section Break",
+   "label": "Serials"
+  },
+  {
+   "fieldname": "current_serials",
+   "fieldtype": "Table",
+   "label": "Current Serials",
+   "options": "Serial Number Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "new_serials",
+   "fieldtype": "Table",
+   "label": "New Serials ",
+   "options": "Serial Number Item",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-upload-alt",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-06 14:28:19.043905",
+ "modified": "2022-03-14 11:12:24.875802",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation",
