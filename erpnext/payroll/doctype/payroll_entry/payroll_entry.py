@@ -671,7 +671,7 @@ def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filte
 				where reference_type="Payroll Entry")
 		order by name limit %(start)s, %(page_len)s"""
 		.format(key=searchfield), {
-			'txt': "%%%s%%" % frappe.db.escape(txt),
+			'txt': "%%%s%%" % txt,
 			'start': start, 'page_len': page_len
 		})
 
