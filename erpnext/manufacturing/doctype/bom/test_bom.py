@@ -26,6 +26,9 @@ class TestBOM(FrappeTestCase):
 		if not frappe.get_value('Item', '_Test Item'):
 			make_test_records('Item')
 
+		if not frappe.get_value('Quality Inspection Template', '_Test Quality Inspection Template'):
+			make_test_records('Quality Inspection_Template')
+
 	def test_get_items(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 		items_dict = get_bom_items_as_dict(bom=get_default_bom(),
@@ -494,6 +497,22 @@ class TestBOM(FrappeTestCase):
 		version.save()
 		self.assertNotEqual(amendment.name, version.name)
 		self.assertEqual(int(version.name.split("-")[-1]), 2)
+
+	def test_clear_inpection_quality(self):
+
+		bom = frappe.copy_doc(test_records[2])
+		bom.is_active = 0
+		bom.quality_inspection_template = "_Test Quality Inspection Template"
+		bom.inspection_required = 1
+		bom.save()
+
+		self.assertEqual(bom.quality_inspection_template, '_Test Quality Inspection Template')
+
+		bom.inspection_required = 0
+		bom.save()
+		bom.load_from_db()
+
+		self.assertEqual(bom.quality_inspection_template, None)
 
 
 def get_default_bom(item_code="_Test FG Item 2"):
