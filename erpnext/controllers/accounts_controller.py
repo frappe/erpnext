@@ -627,7 +627,6 @@ class AccountsController(TransactionBase):
 
 		res = self.get_advance_entries()
 
-		print(res)
 		self.set("advances", [])
 		advance_allocated = 0
 		for d in res:
