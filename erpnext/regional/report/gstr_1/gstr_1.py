@@ -262,8 +262,7 @@ class Gstr1Report(object):
 			("from_date", " and posting_date>=%(from_date)s"),
 			("to_date", " and posting_date<=%(to_date)s"),
 			("company_address", " and company_address=%(company_address)s"),
-			("address_group", " and company_address in {0}".format(tuple(add_lst)))
-			("company_gstin", " and company_gstin=%(company_gstin)s")):
+			("address_group", " and company_address in {0}".format(tuple(add_lst))):
 				if self.filters.get(opts[0]):
 					conditions += opts[1]
 					
