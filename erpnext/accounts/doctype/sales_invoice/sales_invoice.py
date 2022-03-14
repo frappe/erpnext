@@ -1404,12 +1404,19 @@ class SalesInvoice(SellingController):
 		frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", lp_details.tier_name)
 
 	def get_returned_amount(self):
-		returned_amount = frappe.db.sql("""
-			select sum(grand_total)
-			from `tabSales Invoice`
-			where docstatus=1 and is_return=1 and ifnull(return_against, '')=%s
-		""", self.name)
-		return abs(flt(returned_amount[0][0])) if returned_amount else 0
+		from frappe.query_builder.functions import Coalesce, Sum
+		doc = frappe.qb.DocType(self.doctype)
+		returned_amount = (
+			frappe.qb.from_(doc)
+			.select(Sum(doc.grand_total))
+			.where(
+				(doc.docstatus == 1)
+				& (doc.is_return == 1)
+				& (Coalesce(doc.return_against, '') == self.name)
+			)
+		).run()
+
+		return abs(returned_amount[0][0]) if returned_amount[0][0] else 0
 
 	# redeem the loyalty points.
 	def apply_loyalty_points(self):
