@@ -596,7 +596,8 @@ class SellingController(StockController):
 				for serial in serials:
 					row = self.append('serial_items', {})
 					row.item_name = item.item_code
-					row.serial_no = serial
+					row.serial_no = serial if frappe.db.exists('Serial No',
+						{"name": serial, "warehouse": item.warehouse}) else ""
 					row.type = 'Accepted'
 
 def set_default_income_account_for_item(obj):

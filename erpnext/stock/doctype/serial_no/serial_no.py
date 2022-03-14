@@ -89,7 +89,7 @@ class SerialNo(StockController):
 		self.brand = item.brand
 		self.warranty_period = item.warranty_period
 
-	def set_purchase_details(self, purchase_sle, update=False):
+	def set_purchase_details(self, purchase_sle):
 		if purchase_sle:
 			self.purchase_document_type = purchase_sle.voucher_type
 			self.purchase_document_no = purchase_sle.voucher_no
@@ -104,15 +104,13 @@ class SerialNo(StockController):
 			# If sales return entry
 			if self.purchase_document_type == 'Delivery Note':
 				self.sales_invoice = None
-			if update:
-				self.save()
 		else:
 			for fieldname in ("purchase_document_type", "purchase_document_no",
 				"purchase_date", "purchase_time", "purchase_rate", "supplier", "supplier_name"):
 					self.set(fieldname, None)
 
 
-	def set_sales_details(self, delivery_sle, update):
+	def set_sales_details(self, delivery_sle):
 		if delivery_sle:
 			self.delivery_document_type = delivery_sle.voucher_type
 			self.delivery_document_no = delivery_sle.voucher_no
@@ -125,8 +123,6 @@ class SerialNo(StockController):
 			if self.warranty_period:
 				self.warranty_expiry_date	= add_days(cstr(delivery_sle.posting_date),
 					cint(self.warranty_period))
-			if update:
-				self.save()
 		else:
 			for fieldname in ("delivery_document_type", "delivery_document_no",
 				"delivery_date", "delivery_time", "customer", "customer_name",
@@ -199,10 +195,10 @@ class SerialNo(StockController):
 		if sle_exists:
 			frappe.throw(_("Cannot delete Serial No {0}, as it is used in stock transactions").format(self.name))
 
-	def update_serial_no_reference(self, serial_no=None, update=False):
+	def update_serial_no_reference(self, serial_no=None):
 		last_sle = self.get_last_sle(serial_no)
-		self.set_purchase_details(last_sle.get("purchase_sle"), update)
-		self.set_sales_details(last_sle.get("delivery_sle"), update)
+		self.set_purchase_details(last_sle.get("purchase_sle"))
+		self.set_sales_details(last_sle.get("delivery_sle"))
 		self.set_maintenance_status()
 		self.set_status()
 
@@ -405,7 +401,7 @@ def update_serial_nos(sle, item_det, return_sle=False):
 			sle.serial_no = serial_nos
 			validate_serial_no(sle, item_det)
 		else:
-			frappe.db.set(sle, "serial_no", serial_nos)
+			sle.db_set("serial_no", serial_nos)
 			validate_serial_no(sle, item_det)
 	if sle.serial_no:
 		auto_make_serial_nos(sle)
