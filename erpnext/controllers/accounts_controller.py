@@ -627,6 +627,7 @@ class AccountsController(TransactionBase):
 
 		res = self.get_advance_entries()
 
+		print(res)
 		self.set("advances", [])
 		advance_allocated = 0
 		for d in res:
@@ -649,7 +650,7 @@ class AccountsController(TransactionBase):
 				"remarks": d.remarks,
 				"advance_amount": flt(d.amount),
 				"allocated_amount": allocated_amount,
-				"ref_exchange_rate": flt(d.exchange_rate) # exchange_rate of advance entry
+				"ref_exchange_rate": flt(d.reference_exchange_rate) or flt(d.exchange_rate) # exchange_rate of advance entry
 			}
 
 			self.append("advances", advance_row)
@@ -1679,7 +1680,7 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 			select
 				"Payment Entry" as reference_type, t1.name as reference_name,
 				t1.remarks, t2.allocated_amount as amount, t2.name as reference_row,
-				t2.reference_name as against_order, t1.posting_date,
+				t2.reference_name as against_order, t2.exchange_rate as reference_exchange_rate, t1.posting_date,
 				t1.{0} as currency, t1.{4} as exchange_rate
 			from `tabPayment Entry` t1, `tabPayment Entry Reference` t2
 			where
