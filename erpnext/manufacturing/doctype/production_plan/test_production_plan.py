@@ -655,6 +655,17 @@ class TestProductionPlan(FrappeTestCase):
 		]
 		self.assertFalse(pp.all_items_completed())
 
+	def test_production_plan_planned_qty(self):
+		pln = create_production_plan(item_code="_Test FG Item", planned_qty=0.55)
+		pln.make_work_order()
+		work_order = frappe.db.get_value('Work Order', {'production_plan': pln.name}, 'name')
+		wo_doc = frappe.get_doc('Work Order', work_order)
+		wo_doc.update({
+			'wip_warehouse': 'Work In Progress - _TC',
+			'fg_warehouse': 'Finished Goods - _TC'
+		})
+		wo_doc.submit()
+		self.assertEqual(wo_doc.qty, 0.55)
 
 def create_production_plan(**args):
 	"""
