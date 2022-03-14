@@ -133,7 +133,7 @@ def get_vat_amount(doc):
 	vat_amount = 0
 
 	if vat_settings:
-		vat_settings_doc = frappe.get_doc('KSA VAT Setting', vat_settings)
+		vat_settings_doc = frappe.get_cached_doc('KSA VAT Setting', vat_settings)
 
 		for row in vat_settings_doc.get('ksa_vat_sales_accounts'):
 			vat_accounts.append(row.account)
