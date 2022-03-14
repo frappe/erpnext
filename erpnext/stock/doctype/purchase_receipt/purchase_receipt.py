@@ -925,3 +925,6 @@ def get_item_account_wise_additional_cost(purchase_document):
 						account.base_amount * item.get(based_on_field) / total_item_cost
 
 	return item_account_wise_cost
+
+def on_doctype_update():
+	frappe.db.add_index("Purchase Receipt", ["supplier", "is_return", "return_against"])
