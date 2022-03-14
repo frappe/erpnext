@@ -17,7 +17,7 @@ class CustomerDocuments(Document):
 		self.set_status()
 		if self.docstatus == 1:
 			self.update_accounts_status()
-			self.apply_gl_entry()
+			# self.apply_gl_entry()
 
 	def on_load(self):
 		self.validate_status()
