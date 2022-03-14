@@ -68,6 +68,23 @@ class PaymentEntry(AccountsController):
 			self.paid_supplier_documents()
 			self.paid_customer_documents()
 			self.calculate_diferred_account()
+	
+	def on_update(self):
+		if self.docstatus == 0:
+			self.concatenate_reference()
+	
+	def concatenate_reference(self):
+		references = frappe.get_all("Payment Entry Reference", "*", filters = {"parent": self.name})
+
+		reference_nos = ""
+
+		for reference in references:
+			if reference_nos == "":
+				reference_nos = reference.reference_name
+			else:
+				reference_nos = reference_nos + ", " + reference.reference_name
+				
+		self.db_set('references_nos', reference_nos, update_modified=False)
 
 	def calculate_diferred_account(self):
 		if self.bank_account != None:
@@ -451,8 +468,8 @@ class PaymentEntry(AccountsController):
 				frappe.throw(_("Reference No and Reference Date is mandatory for Bank transaction"))
 
 	def set_remarks(self):
-		if self.remarks: return
-
+		# if self.remarks: return
+		self.remarks = ""
 		if self.payment_type=="Internal Transfer":
 			remarks = [_("Amount {0} {1} transferred from {2} to {3}")
 				.format(self.paid_from_account_currency, self.paid_amount, self.paid_from, self.paid_to)]
@@ -471,8 +488,14 @@ class PaymentEntry(AccountsController):
 		if self.payment_type in ["Receive", "Pay"]:
 			for d in self.get("references"):
 				if d.allocated_amount:
-					remarks.append(_("Amount {0} {1} against {2} {3}").format(self.party_account_currency,
-						d.allocated_amount, d.reference_doctype, d.reference_name))
+					if d.bill_no == None:
+						remarks.append(_("Amount {0} {1} against {2} {3}").format(self.party_account_currency,
+							d.allocated_amount, d.reference_doctype, d.reference_name))
+					else:
+						remarks.append(_("Amount {0} {1} against {2} {3} Supplier Invoice No {4}").format(self.party_account_currency,
+							d.allocated_amount, d.reference_doctype, d.reference_name, d.bill_no))
+				
+
 
 		for d in self.get("deductions"):
 			if d.amount:
