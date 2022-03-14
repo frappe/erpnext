@@ -328,9 +328,9 @@ class TestPickList(ERPNextTestCase):
 			'purpose': 'Delivery',
 			'locations': [{
 				'item_code': '_Test Item',
-				'qty': 1,
-				'stock_qty': 5,
-				'conversion_factor': 5,
+				'qty': 10,
+				'stock_qty': 1,
+				'conversion_factor': 0.5,
 				'sales_order': sales_order.name,
 				'sales_order_item': sales_order.items[0].name ,
 			}, {
