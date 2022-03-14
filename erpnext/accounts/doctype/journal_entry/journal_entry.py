@@ -43,6 +43,8 @@ class JournalEntry(AccountsController):
 		self.validate_inter_company_accounts()
 		# if not self.title:
 		# 	self.title = self.get_title()
+		if self.docstatus == 0:
+			self.set_date_transaction()
 		if self.docstatus == 1:
 			self.check_transaction()
 	
@@ -75,10 +77,16 @@ class JournalEntry(AccountsController):
 	
 	def check_transaction(self):
 		if self.bank_transaction != None and self.is_transaction:
-			transaction = frappe.get_all("Bank Transactions", ["name"], filters = {"name": self.bank_transaction})
-			doc_tran = frappe.get_doc("Bank Transactions", transaction[0].name)
+			# transaction = frappe.get_all("Bank Transactions", ["name"], filters = {"name": self.bank_transaction})
+			doc_tran = frappe.get_doc("Bank Transactions", self.bank_transaction)
 			doc_tran.accounting_seat = 1
 			doc_tran.save()
+	
+	def set_date_transaction(self):
+		if self.bank_transaction != None and self.is_transaction:
+			# transaction = frappe.get_all("Bank Transactions", ["name"], filters = {"name": self.bank_transaction})
+			doc_tran = frappe.get_doc("Bank Transactions", self.bank_transaction)
+			self.posting_date =  doc_tran.date_data
 	
 	def uncheck_transaction(self):
 		if self.bank_transaction != None and self.is_transaction:
