@@ -42,7 +42,11 @@ from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timeshe
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
-from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
+from erpnext.stock.doctype.serial_no.serial_no import (
+	get_delivery_note_serial_no,
+	get_serial_nos,
+	update_serial_nos_after_submit,
+)
 from erpnext.stock.utils import calculate_mapped_packed_items_return
 
 form_grid_templates = {
@@ -226,6 +230,9 @@ class SalesInvoice(SellingController):
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		if self.update_stock == 1:
 			self.update_stock_ledger()
+		if self.is_return and self.update_stock:
+			update_serial_nos_after_submit(self, "items")
+
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
@@ -1255,14 +1262,14 @@ class SalesInvoice(SellingController):
 	def update_billing_status_in_dn(self, update_modified=True):
 		updated_delivery_notes = []
 		for d in self.get("items"):
-			if d.so_detail:
-				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
-			elif d.dn_detail:
+			if d.dn_detail:
 				billed_amt = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item`
 					where dn_detail=%s and docstatus=1""", d.dn_detail)
 				billed_amt = billed_amt and billed_amt[0][0] or 0
 				frappe.db.set_value("Delivery Note Item", d.dn_detail, "billed_amt", billed_amt, update_modified=update_modified)
 				updated_delivery_notes.append(d.delivery_note)
+			elif d.so_detail:
+				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
 
 		for dn in set(updated_delivery_notes):
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
