@@ -7,6 +7,8 @@ pull_request_rules:
           - author!=gavindsouza
           - author!=rohitwaghchaure
           - author!=nabinhait
+          - author!=ankush
+          - author!=deepeshgarg007
         - or:
           - base=version-13
           - base=version-12
