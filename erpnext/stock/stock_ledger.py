@@ -96,8 +96,11 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 						new_sle = sle.copy()
 						new_sle['actual_qty'] = 1 if sle['actual_qty'] > 0 else -1
 						new_sle['serial_no'] = serials.pop()
+						new_sle['skip_update_serial_no'] = 1
 						new_sle['skip_serial_no_validation'] = 1
 						sle_docs.append(make_entry(new_sle, allow_negative_stock, via_landed_cost_voucher))
+						sr = frappe.get_doc('Serial No', new_sle['serial_no'])
+						sr.update_serial_no_reference(sr.serial_no, update=True)
 
 				# for manually entered serials
 				elif sle.serial_no:
