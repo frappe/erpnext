@@ -390,7 +390,7 @@ def create_delivery_note(source_name, target_doc=None):
 	for n in pick_list.locations :
 		if not n.sales_order:
 			is_item_wo_so = 1
-			break;
+			break
 	if is_item_wo_so == 1:
 		# Create a DN for items without sales orders as well
 		delivery_note = create_dn_wo_so(pick_list)
@@ -433,7 +433,7 @@ def create_dn_with_so(sales_dict,pick_list):
 				},
 				'condition': lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 			}
-			break;
+			break
 		if delivery_note:
 			# map all items of all sales orders of that customer
 			for so in sales_dict[customer]:
