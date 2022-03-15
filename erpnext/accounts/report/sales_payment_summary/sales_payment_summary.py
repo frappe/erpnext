@@ -239,7 +239,7 @@ def get_mode_of_payment_details(filters):
 			from `tabSales Invoice` a, `tabSales Invoice Payment` b
 			where a.name = b.parent
 			and a.name in ({invoice_list_names})
-			and b.Type = 'Cash'
+			and b.type = 'Cash'
 			and a.base_change_amount > 0
 			group by a.owner, a.posting_date, mode_of_payment""".format(invoice_list_names=invoice_list_names), as_dict=1)
 
