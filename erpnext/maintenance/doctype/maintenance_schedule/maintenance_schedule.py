@@ -203,16 +203,11 @@ class MaintenanceSchedule(TransactionBase):
 			return
 		for prev_item, item in zip(doc_before_save.items, self.items):
 			fields = ['item_code', 'start_date', 'end_date', 'periodicity', 'sales_person', 'no_of_visits', 'serial_no']
-			schedule_generated = False
 			for field in fields:
 				b_doc = prev_item.as_dict()
 				doc = item.as_dict()
 				if cstr(b_doc[field]) != cstr(doc[field]):
-					schedule_generated = True
-					self.generate_schedule()
-					break
-			if schedule_generated:
-				break
+					return True
 
 	def validate_no_of_visits(self):
 		return len(self.schedules) != sum(d.no_of_visits for d in self.items)
@@ -222,8 +217,7 @@ class MaintenanceSchedule(TransactionBase):
 		self.validate_maintenance_detail()
 		self.validate_dates_with_periodicity()
 		self.validate_sales_order()
-		self.validate_items_table_change()
-		if not self.schedules or self.validate_no_of_visits():
+		if not self.schedules or self.validate_items_table_change() or self.validate_no_of_visits():
 			self.generate_schedule()
 
 	def on_update(self):
