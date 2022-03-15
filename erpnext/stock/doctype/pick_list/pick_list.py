@@ -3,6 +3,8 @@
 
 import json
 from collections import OrderedDict, defaultdict
+from itertools import groupby
+from operator import itemgetter
 
 import frappe
 from frappe import _
@@ -377,10 +379,6 @@ def create_delivery_note(source_name, target_doc=None):
 	for d in pick_list.locations:
 		if d.sales_order:
 			sales_orders.append([frappe.db.get_value("Sales Order",d.sales_order,'customer'),d.sales_order])
-	
-	from itertools import groupby
-	from operator import itemgetter
-
 	# Group sales orders by customer
 	for key,keydata in groupby(sales_orders,key=itemgetter(0)):
 		sales_dict[key] = set([d[1] for d in keydata])
