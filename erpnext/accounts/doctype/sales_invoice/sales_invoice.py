@@ -49,7 +49,6 @@ from erpnext.stock.doctype.serial_no.serial_no import (
 	get_serial_nos,
 	update_serial_nos_after_submit,
 )
-from erpnext.stock.utils import calculate_mapped_packed_items_return
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -759,11 +758,8 @@ class SalesInvoice(SellingController):
 
 	def update_packing_list(self):
 		if cint(self.update_stock) == 1:
-			if cint(self.is_return) and self.return_against:
-				calculate_mapped_packed_items_return(self)
-			else:
-				from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-				make_packing_list(self)
+			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+			make_packing_list(self)
 		else:
 			self.set('packed_items', [])
 
