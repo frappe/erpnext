@@ -1002,7 +1002,7 @@ class SalarySlip(TransactionBase):
 
 		# apply rounding
 		if frappe.get_cached_value("Salary Component", row.salary_component, "round_to_the_nearest_integer"):
-			amount, additional_amount = rounded(amount), rounded(additional_amount)
+			amount, additional_amount = rounded(amount or 0), rounded(additional_amount or 0)
 
 		return amount, additional_amount
 
@@ -1279,9 +1279,9 @@ class SalarySlip(TransactionBase):
 	def set_base_totals(self):
 		self.base_gross_pay = flt(self.gross_pay) * flt(self.exchange_rate)
 		self.base_total_deduction = flt(self.total_deduction) * flt(self.exchange_rate)
-		self.rounded_total = rounded(self.net_pay)
+		self.rounded_total = rounded(self.net_pay or 0)
 		self.base_net_pay = flt(self.net_pay) * flt(self.exchange_rate)
-		self.base_rounded_total = rounded(self.base_net_pay)
+		self.base_rounded_total = rounded(self.base_net_pay or 0)
 		self.set_net_total_in_words()
 
 	#calculate total working hours, earnings based on hourly wages and totals
