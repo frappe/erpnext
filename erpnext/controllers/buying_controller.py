@@ -738,7 +738,7 @@ class BuyingController(StockController, Subcontracting):
 					row = self.append('serial_items', {})
 					row.item_name = item.item_code
 					row.serial_no = serial if frappe.db.exists('Serial No',
-						{"name": serial, "warehouse": item.warehouse}) else ""
+						{"name": serial, "status": "Inactive"}) else ""
 					row.type = 'Accepted'
 				if len(accepted_serials) < abs(cint(item.qty)):
 					for auto_serial in range(abs(cint(item.qty))- len(accepted_serials)):
@@ -758,7 +758,7 @@ class BuyingController(StockController, Subcontracting):
 					row = self.append('serial_items', {})
 					row.item_name = item.item_code
 					row.serial_no = serial if frappe.db.exists('Serial No',
-						{"name": serial, "warehouse": item.warehouse}) else ""
+						{"name": serial, "status": "Inactive"}) else ""
 					row.type = 'Rejected'
 				if len(rejected_serials) < abs(cint(item.rejected_qty)):
 					for auto_serial in range(abs(cint(item.rejected_qty))- len(accepted_serials)):
