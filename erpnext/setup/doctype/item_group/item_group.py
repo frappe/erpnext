@@ -133,7 +133,8 @@ def get_child_groups_for_website(item_group_name, immediate=False, include_self=
 	return frappe.get_all(
 		"Item Group",
 		filters=filters,
-		fields=["name", "route"]
+		fields=["name", "route"],
+		order_by="name"
 	)
 
 def get_child_item_groups(item_group_name):
