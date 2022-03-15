@@ -773,8 +773,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			update_purchase_receipt_status,
 		)
 
-		pr = make_purchase_receipt(do_not_submit=True)
-		pr.submit()
+		pr = make_purchase_receipt()
 
 		update_purchase_receipt_status(pr.name, "Closed")
 		self.assertEqual(

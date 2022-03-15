@@ -525,13 +525,16 @@ def update_serial_nos_after_submit(controller, parentfield):
 		if controller.doctype == "Stock Entry":
 			warehouse = d.t_warehouse
 			qty = d.transfer_qty
+		elif controller.doctype in ("Sales Invoice", "Delivery Note"):
+			warehouse = d.warehouse
+			qty = d.stock_qty
 		else:
 			warehouse = d.warehouse
 			qty = (d.qty if controller.doctype == "Stock Reconciliation"
 				else d.stock_qty)
 		for sle in stock_ledger_entries:
 			if sle.voucher_detail_no==d.name:
-				if not accepted_serial_nos_updated and qty and (abs(sle.actual_qty)==qty) \
+				if not accepted_serial_nos_updated and qty and abs(sle.actual_qty) == abs(qty) \
 					and sle.warehouse == warehouse and sle.serial_no != d.serial_no:
 						d.serial_no = sle.serial_no
 						frappe.db.set_value(d.doctype, d.name, "serial_no", sle.serial_no)

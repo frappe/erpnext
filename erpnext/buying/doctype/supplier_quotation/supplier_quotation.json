@@ -72,8 +72,8 @@
   "section_break_46",
   "base_grand_total",
   "base_rounding_adjustment",
-  "base_in_words",
   "base_rounded_total",
+  "base_in_words",
   "column_break4",
   "grand_total",
   "rounding_adjustment",
@@ -635,6 +635,7 @@
    "fieldname": "rounded_total",
    "fieldtype": "Currency",
    "label": "Rounded Total",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -810,7 +811,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-12-11 06:43:20.924080",
+ "modified": "2022-03-14 16:13:20.284572",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
@@ -875,6 +876,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "supplier",
  "title_field": "title"
 }

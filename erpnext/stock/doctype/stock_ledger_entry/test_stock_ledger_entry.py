@@ -739,6 +739,30 @@ class TestStockLedgerEntry(FrappeTestCase):
 			{"incoming_rate": sum(rates) * 10}
 		], sle_filters={"item_code": packed.name})
 
+	def test_negative_fifo_valuation(self):
+		"""
+		When stock goes negative discard FIFO queue.
+		Only pervailing valuation rate should be used for making transactions in such cases.
+		"""
+		item = make_item(properties={"allow_negative_stock": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt = make_stock_entry(item_code=item, target=warehouse, qty=10, rate=10)
+		consume1 = make_stock_entry(item_code=item, source=warehouse, qty=15)
+
+		self.assertSLEs(consume1, [
+			{"stock_value": -5 * 10, "stock_queue": [[-5, 10]]}
+		])
+
+		consume2 = make_stock_entry(item_code=item, source=warehouse, qty=5)
+		self.assertSLEs(consume2, [
+			{"stock_value": -10 * 10, "stock_queue": [[-10, 10]]}
+		])
+
+		receipt2 = make_stock_entry(item_code=item, target=warehouse, qty=15, rate=15)
+		self.assertSLEs(receipt2, [
+			{"stock_queue": [[5, 15]], "stock_value_difference": 175}
+		])
 
 def create_repack_entry(**args):
 	args = frappe._dict(args)
