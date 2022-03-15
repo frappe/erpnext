@@ -1434,6 +1434,15 @@ def create_pick_list(source_name, target_doc=None, for_qty=None):
 
 @frappe.whitelist()
 def make_material_produce(doc_name,partial=0):
+
+	# code commented for issue ISS-2021-2022-00236
+	job_c = frappe.get_all("Job Card", {'work_order': doc_name}, ['*'])
+	if job_c and partial == "0":
+		for jc in job_c:
+			if jc.status != "Completed":
+				frappe.throw(" Please Complete the Job Card ")
+
+
 	wo_doc = frappe.get_doc('Work Order', doc_name)
 	bom = frappe.get_doc('BOM', wo_doc.bom_no)
 	mc = frappe.new_doc("Material Produce")

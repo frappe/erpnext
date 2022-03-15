@@ -221,11 +221,12 @@ frappe.ui.form.on("Work Order", {
 					}
 				});
 
-				if (not_completed && not_completed.length) {
-					frm.add_custom_button(__('Create Job Card'), () => {
-						frm.trigger("make_job_card");
-					}).addClass('btn-primary');
-				}
+				// code commented for issue ISS-2021-2022-00236
+				// if (not_completed && not_completed.length) {
+				// 	frm.add_custom_button(__('Create Job Card'), () => {
+				// 		frm.trigger("make_job_card");
+				// 	}).addClass('btn-primary');
+				// }
 			}
 		}
 
@@ -661,10 +662,12 @@ erpnext.work_order = {
 					frm.add_custom_button(__('Create Pick List'), function() {
 						erpnext.work_order.create_pick_list(frm);
 					});
-					var start_btn = frm.add_custom_button(__('Start'), function() {
-						erpnext.work_order.make_se(frm, 'Material Transfer for Manufacture');
-					});
-					start_btn.addClass('btn-primary');
+
+					//  code commented for issue ISS-2021-2022-00236 
+					// var start_btn = frm.add_custom_button(__('Start'), function() {
+					// 	erpnext.work_order.make_se(frm, 'Material Transfer for Manufacture');
+					// });
+					// start_btn.addClass('btn-primary');
 				}
 			}
 
@@ -704,6 +707,8 @@ erpnext.work_order = {
 					// var finish_btn = frm.add_custom_button(__('Partial'), function() {
 					// 	erpnext.work_order.make_se(frm, 'Manufacture');
 					// },('Finish'));
+					// code for issue ISS-2021-2022-00236
+					if (frm.doc.status != "Completed"){
 					frm.add_custom_button(__('Partial'),function() {
 						frappe.call({
 							method: "erpnext.manufacturing.doctype.work_order.work_order.make_material_produce",
@@ -720,6 +725,7 @@ erpnext.work_order = {
 							}
 						});
 					}, __('Finish'))
+					
 					frm.add_custom_button(__('Complete'),function() {
 						frappe.call({
 							method: "erpnext.manufacturing.doctype.work_order.work_order.make_material_produce",
@@ -734,7 +740,7 @@ erpnext.work_order = {
 								}
 							}
 						});
-					}, __('Finish'))
+					}, __('Finish'))}
 					if(doc.material_transferred_for_manufacturing>=doc.qty) {
 						// all materials transferred for manufacturing, make this primary
 						finish_btn.addClass('btn-primary');
