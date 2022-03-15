@@ -475,10 +475,10 @@ function append_breakdown(element, item_code, poi_results, boi_results) {
 	// Add div for canvas
 	let chartDisplay = `<div id="pending-breakdown-${item_code}" width="100%" class="col-sm-12" style="padding: 15px 15px;
 		border-top: 1px solid #d1d8dd; border-left: 6px solid deepskyblue;">
-		<div class="col-sm-6" width="48%">
+		<div class="col-sm-6" style="width:48%; display:inline-block;">
 			<canvas id="bo-${item_code}"></canvas>
 		</div>
-		<div class="col-sm-6" width="48%">
+		<div class="col-sm-6" style="width:48%; display:inline-block;">
 			<canvas id="po-${item_code}"></canvas>
 		</div>
 		${Button}
