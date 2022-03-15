@@ -2615,6 +2615,65 @@ class TestSalesInvoice(unittest.TestCase):
 
 		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
 
+	def test_advance_payment_against_sales_order(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		customer = create_customer('Overseas Customer', 'USD', '_Test Receivable USD - _TC')
+
+		so = make_sales_order(customer=customer, currency='USD', do_not_save=1)
+		so.conversion_rate = 70
+		so.save()
+		so.submit()
+
+		pe = get_payment_entry('Sales Order', so.name, bank_account='_Test Bank - _TC',
+			party_account='_Test Receivable USD - _TC')
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_amount = so.grand_total
+		pe.paid_from = '_Test Receivable USD - _TC'
+		pe.paid_from_account_currency = 'USD'
+		pe.paid_to_account_currency = 'INR'
+		pe.source_exchange_rate = 75
+		pe.target_exchange_rate = 1
+		pe.received_amount = 75000
+		pe.save()
+
+		if pe.difference_amount:
+			pe.append('deductions', {
+				'account': 'Exchange Gain/Loss - _TC',
+				'cost_center': 'Main - _TC',
+				'amount': pe.difference_amount
+			})
+			pe.save()
+
+		pe.submit()
+
+		# si = make_sales_invoice(so.name)
+		# si.allocate_advances_automatically = 1
+		# si.conversion_rate = 80
+		# si.save()
+		# si.submit()
+
+def create_customer(customer_name,  billing_currency, party_account=None):
+	customer = frappe.db.get_value('Customer', customer_name)
+	if not customer:
+		customer = frappe.get_doc({
+			"customer_group": "_Test Customer Group",
+			"customer_name": customer_name,
+			"customer_type": "Individual",
+			"doctype": "Customer",
+			"territory": "_Test Territory",
+			"default_currency": billing_currency,
+			"accounts": [{
+				"company": "_Test Company",
+				"account": party_account
+			}]
+		}).insert()
+
+	return customer
+
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
 	si.naming_series = 'INV-2020-.#####'

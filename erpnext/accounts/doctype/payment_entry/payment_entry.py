@@ -1472,14 +1472,14 @@ def get_bill_no_and_update_amounts(reference_doctype, ref_doc, total_amount, exc
 
 
 @frappe.whitelist()
-def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=None):
+def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=None, party_account=None):
 	reference_doc = None
 	doc = frappe.get_doc(dt, dn)
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) > 0:
 		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
 
 	party_type = set_party_type(dt)
-	party_account = set_party_account(dt, dn, doc, party_type)
+	party_account = party_account or set_party_account(dt, dn, doc, party_type)
 	party_account_currency = set_party_account_currency(dt, party_account, doc)
 	payment_type = set_payment_type(dt, doc)
 	grand_total, outstanding_amount = set_grand_total_and_outstanding_amount(party_amount, dt, party_account_currency, doc)
