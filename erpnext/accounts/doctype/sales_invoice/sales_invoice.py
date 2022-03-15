@@ -68,15 +68,7 @@ class SalesInvoice(SellingController):
 			'keyword': 'Billed',
 			'overflow_type': 'billing'
 		}]
-
-	#new code to add data in new_name hidden field 
-
-	def new_name(self):
-		for i in self.items:
-			print("i")
-			a = i.new_name = self.name + "-" +i.item_code + "-" + str(i.idx)
 		
-
 	def before_save(self):
 		self.get_commision()
 
@@ -99,17 +91,10 @@ class SalesInvoice(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
-	# def after_insert(self):
-	# 	self.new_name()
-	# 	self.set_last_sales_invoice()
-
 	def validate(self):
 
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
-
-		self.new_name()
-
 		self.get_commision()
 
 		if not self.is_pos:
@@ -236,18 +221,6 @@ class SalesInvoice(SellingController):
 		set_account_for_mode_of_payment(self)
 
 	def on_submit(self):
-		
-		# Code for Child name change
-
-		if self.items:
-			for i in self.items:	
-				print(" this is oochild", i.name, i.new_name)
-				frappe.db.sql("""
-					UPDATE `tabSales Invoice Item`
-					SET name = '{0}'
-					WHERE name = '{1}'; 
-				""".format(i.new_name,i.name ))
-
 		self.validate_pos_paid_amount()
 
 		if not self.auto_repeat:
