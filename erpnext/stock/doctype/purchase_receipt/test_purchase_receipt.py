@@ -1430,6 +1430,99 @@ class TestPurchaseReceipt(FrappeTestCase):
 			if gle.account == account:
 				self.assertEqual(gle.credit, 50)
 
+	def test_for_sle_and_serial_items_in_purchase_reciept(self):
+		from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
+			make_serial_item_with_serial,
+		)
+		item_code = "_Test Serial Item 1"
+		make_serial_item_with_serial(item_code)
+
+		# Testing serial items table updating serial numbers on auto creating.
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=2,
+			rate=500,
+			do_not_submit=True
+		)
+		pr.save()
+		self.assertEquals(len(pr.serial_items), 2)
+		for serial_item in pr.serial_items:
+			self.assertEquals(serial_item.serial_no, None)
+		pr.submit()
+		serials_created = get_serial_nos(pr.items[0].serial_no)
+		# Checking sles created for each serial.
+		sles = frappe.db.get_list("Stock Ledger Entry", {"voucher_no": pr.name}, ["actual_qty", "serial_no"])
+		self.assertEquals(len(sles), 2)
+		for sle, sr_created in zip(sles, serials_created):
+			self.assertEqual(sle.actual_qty, 1)
+			self.assertEqual(sle.serial_no, sr_created)
+		# Checking updates in serial items table.
+		self.assertTrue(pr.items[0].serial_no)
+		self.assertTrue(frappe.db.exists("Serial No",{
+			"item_code": item_code, "warehouse": pr.items[0].warehouse, "name": serials_created[1]}))
+		self.assertEquals(len(serials_created), 2)
+		for serial_item in pr.serial_items:
+			self.assertEquals(serial_item.serial_no, serials_created.pop(0))
+
+		# Testing serial items when manually entering non-existant serials.
+		serials = ["TEST1", "TEST2"]
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=2,
+			rate=500,
+			serial_no='\n'.join(serials),
+			do_not_submit=True
+		)
+		pr.save()
+		self.assertEquals(len(pr.serial_items), 2)
+		for serial_item in pr.serial_items:
+			self.assertFalse(serial_item.serial_no, None)
+		pr.submit()
+		serials_created = get_serial_nos(pr.items[0].serial_no)
+		self.assertTrue(serials_created, serials)
+		self.assertTrue(frappe.db.exists("Serial No",{
+			"item_code": item_code, "warehouse": pr.items[0].warehouse, "name": "TEST2"}))
+		self.assertEquals(len(serials_created), 2)
+		pr.cancel()
+		# Checking sles created for each serial when cancelled.
+		sles = frappe.db.get_list("Stock Ledger Entry",
+			{"voucher_no": pr.name, "is_cancelled": 1}, ["actual_qty", "serial_no"])
+		# sles = frappe._dict(sles)
+		self.assertEquals(len(sles), 4)
+		# Cancel creates sles to reverese the stock in entries.
+		reverse_sle_srs = []
+		for sle in sles[:2]:
+			self.assertEquals(sle.actual_qty, -1)
+			reverse_sle_srs.append(sle.serial_no)
+
+		cancelled_sle_srs = []
+		for sle in sles[2:]:
+			self.assertEquals(sle.actual_qty, 1)
+			cancelled_sle_srs.append(sle.serial_no)
+		self.assertEquals(sorted(reverse_sle_srs), sorted(cancelled_sle_srs))
+
+		# Testing serial items when manually entering existing serials with a non-existant.
+		serials = ["TEST1", "TEST2", "TEST3"]
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=3,
+			rate=500,
+			serial_no='\n'.join(serials),
+			do_not_submit=True
+		)
+		pr.save()
+		self.assertEquals(len(pr.serial_items), 3)
+		serial_items = [serial_item.serial_no for serial_item in pr.serial_items]
+		self.assertEquals(serial_items[:2], serials[:2])
+		# Last row of serial_items is empty because the serial isn't created yet.
+		self.assertFalse(serial_items[-1])
+		pr.submit()
+		self.assertTrue(pr.serial_items[-1].serial_no, "TEST3")
+		self.assertTrue(frappe.db.exists("Serial No",{
+			"item_code": item_code, "warehouse": pr.items[0].warehouse, "name": "TEST3"}))
+
+		frappe.db.rollback()
+
 
 def get_sl_entries(voucher_type, voucher_no):
 	return frappe.db.sql(""" select actual_qty, warehouse, stock_value_difference
