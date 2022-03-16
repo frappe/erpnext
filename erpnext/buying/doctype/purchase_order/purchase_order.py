@@ -402,7 +402,6 @@ def close_or_unclose_purchase_orders(names, status):
 	frappe.local.message_log = []
 
 def set_missing_values(source, target):
-	target.ignore_pricing_rule = 1
 	target.run_method("set_missing_values")
 	target.run_method("calculate_taxes_and_totals")
 

@@ -569,15 +569,12 @@ body.product-page {
 }
 
 .scroll-categories {
-	white-space: nowrap;
-	overflow-x: auto;
-
 	.category-pill {
-		margin: 0px 4px;
 		display: inline-block;
-		padding: 6px 12px;
-		background-color: #ecf5fe;
 		width: fit-content;
+		padding: 6px 12px;
+		margin-bottom: 8px;
+		background-color: #ecf5fe;
 		font-size: 14px;
 		border-radius: 18px;
 		color: var(--blue-500);
