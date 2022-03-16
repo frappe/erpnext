@@ -27,9 +27,9 @@ class PickList(Document):
 		self.set_item_locations()
 
 		# set percentage picked in SO
-		for i in self.get('locations'):
-			if i.sales_order and frappe.db.get_value("Sales Order",i.sales_order,"per_picked") == 100:
-				frappe.throw("Row " + str(i.idx) + " has been picked already!")
+		for location in self.get('locations'):
+			if location.sales_order and frappe.db.get_value("Sales Order",location.sales_order,"per_picked") == 100:
+				frappe.throw("Row " + str(location.idx) + " has been picked already!")
 
 	def before_submit(self):
 		for item in self.locations:
@@ -54,9 +54,9 @@ class PickList(Document):
 
 	def before_cancel(self):
 		#update picked_qty in SO Item on cancel of PL
-		for i in self.get('locations'):
-			if i.sales_order_item:
-				self.update_so(i.sales_order_item,0,i.item_code)
+		for location in self.get('locations'):
+			if location.sales_order_item:
+				self.update_so(location.sales_order_item,0,location.item_code)
 
 	def update_so(self,so_item,picked_qty,item_code):
 		so_doc = frappe.get_doc("Sales Order",frappe.db.get_value("Sales Order Item",so_item,"parent"))
@@ -68,8 +68,12 @@ class PickList(Document):
 
 		frappe.db.set_value("Sales Order Item",so_item,"picked_qty",already_picked+picked_qty)
 
-		total_picked_qty = sum(flt(d.picked_qty) for d in so_doc.get('items')) + picked_qty
-		total_so_qty = sum(flt(d.stock_qty) for d in so_doc.get('items'))
+		total_picked_qty = 0
+		total_so_qty = 0
+		for item in so_doc.get('items'):
+			total_picked_qty += flt(item.picked_qty)
+			total_so_qty += flt(item.stock_qty)
+		total_picked_qty = total_picked_qty	+ picked_qty
 		per_picked = total_picked_qty/total_so_qty * 100
 
 		so_doc.db_set("per_picked", flt(per_picked) ,update_modified=False)
@@ -376,9 +380,9 @@ def create_delivery_note(source_name, target_doc=None):
 	sales_dict = dict()
 	sales_orders = []
 	delivery_note = None
-	for d in pick_list.locations:
-		if d.sales_order:
-			sales_orders.append([frappe.db.get_value("Sales Order",d.sales_order,'customer'),d.sales_order])
+	for location in pick_list.locations:
+		if location.sales_order:
+			sales_orders.append([frappe.db.get_value("Sales Order",location.sales_order,'customer'),location.sales_order])
 	# Group sales orders by customer
 	for key,keydata in groupby(sales_orders,key=itemgetter(0)):
 		sales_dict[key] = set([d[1] for d in keydata])
@@ -387,8 +391,8 @@ def create_delivery_note(source_name, target_doc=None):
 		delivery_note = create_dn_with_so(sales_dict,pick_list)
 
 	is_item_wo_so = 0
-	for n in pick_list.locations :
-		if not n.sales_order:
+	for location in pick_list.locations :
+		if not location.sales_order:
 			is_item_wo_so = 1
 			break
 	if is_item_wo_so == 1:
