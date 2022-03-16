@@ -45,11 +45,21 @@ class RepostItemValuation(Document):
 			self.db_set('status', self.status)
 
 	def on_submit(self):
-		if not frappe.flags.in_test or self.flags.dont_run_in_test or frappe.flags.dont_execute_stock_reposts:
+		"""During tests reposts are executed immediately.
+
+		Exceptions:
+			1. "Repost Item Valuation" document has self.flags.dont_run_in_test
+			2. global flag frappe.flags.dont_execute_stock_reposts is set
+
+			These flags are useful for asserting real time behaviour like quantity updates.
+		"""
+
+		if not frappe.flags.in_test:
+			return
+		if self.flags.dont_run_in_test or frappe.flags.dont_execute_stock_reposts:
 			return
 
-		frappe.enqueue(repost, timeout=1800, queue='long',
-			job_name='repost_sle', now=frappe.flags.in_test, doc=self)
+		repost(self)
 
 	@frappe.whitelist()
 	def restart_reposting(self):
