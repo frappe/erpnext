@@ -21,6 +21,8 @@ class SubcontractingOrder(Document):
 
 			if po.is_subcontracted != "Yes":
 				frappe.throw(_("Please select a valid Purchase Order that is configured for Subcontracting."))
+		else:
+			self.service_items = None
 
 
 @frappe.whitelist()

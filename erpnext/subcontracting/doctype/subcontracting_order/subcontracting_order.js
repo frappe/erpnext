@@ -45,6 +45,12 @@ frappe.ui.form.on('Subcontracting Order', {
 			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 	},
+
+	purchase_order: function (frm) {
+		if (!frm.doc.purchase_order) {
+			frm.set_value("service_items", null);
+		}
+	},
 });
 
 frappe.ui.form.on('Subcontracting Order Service Item', {
