@@ -48,7 +48,8 @@ class BuyingController(StockController, Subcontracting):
 			self.validate_rejected_warehouse()
 			self.validate_accepted_rejected_qty()
 			validate_for_items(self)
-			self.update_serial_items_table()
+			if self.doctype in ['Purchase Receipt', 'Purchase Invoice']:
+				self.update_serial_items_table()
 
 			#sub-contracting
 			self.validate_for_subcontracting()

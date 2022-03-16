@@ -38,7 +38,8 @@ class SellingController(StockController):
 		self.set_customer_address()
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
-		self.update_serial_items_table()
+		if self.doctype in ['Delivery Note', 'Sales Invoice']:
+			self.update_serial_items_table()
 
 	def set_missing_values(self, for_validate=False):
 
