@@ -79,7 +79,7 @@ frappe.ui.form.on('Subcontracting Order Finished Good Item', {
 
 let make_subcontracting_receipt = () => {
 	frappe.model.open_mapped_doc({
-		method: "erpnext.buying.doctype.subcontracting_order.subcontracting_order.make_subcontracting_receipt",
+		method: "erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.make_subcontracting_receipt",
 		frm: cur_frm,
 		freeze_message: __("Creating Subcontracting Receipt ...")
 	})
