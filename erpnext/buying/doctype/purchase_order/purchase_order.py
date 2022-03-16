@@ -499,20 +499,23 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 def make_subcontracting_order(source_name, target_doc=None):
 	return get_mapped_subcontracting_order(source_name, target_doc)
 
-def get_mapped_subcontracting_order(source_name, target_doc=None, ignore_permissions=False):
-	fields = {
+def get_mapped_subcontracting_order(source_name, target_doc=None):
+	doc = get_mapped_doc("Purchase Order", source_name,	{
 		"Purchase Order": {
 			"doctype": "Subcontracting Order",
+			"field_map": {
+			},
 			"validation": {
 				"docstatus": ["=", 1],
 			}
 		},
 		"Purchase Order Item": {
 			"doctype": "Subcontracting Order Service Item",
+			"field_map": {
+			},
 		},
-	}
+	}, target_doc)
 
-	doc = get_mapped_doc("Purchase Order", source_name, fields)
 	return doc
 
 @frappe.whitelist()

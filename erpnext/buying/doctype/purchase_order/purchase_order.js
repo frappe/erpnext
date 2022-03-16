@@ -108,6 +108,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 			'Purchase Receipt': 'Purchase Receipt',
 			'Purchase Invoice': 'Purchase Invoice',
 			'Payment Entry': 'Payment',
+			'Subcontracting Order': 'Subcontracting Order'
 		}
 
 		super.setup();
