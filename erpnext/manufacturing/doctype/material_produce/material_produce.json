@@ -231,8 +231,14 @@
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2021-12-16 11:03:06.916618",
+ "links": [
+  {
+   "group": "Stock",
+   "link_doctype": "Stock Entry",
+   "link_fieldname": "material_produce"
+  }
+ ],
+ "modified": "2022-03-15 15:46:36.580004",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Produce",

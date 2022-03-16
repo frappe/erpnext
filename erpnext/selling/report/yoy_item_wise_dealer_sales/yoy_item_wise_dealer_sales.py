@@ -76,12 +76,12 @@ def get_columns(filters):
 				"fieldname": 'item_code',
 				"fieldtype": "Link",
 				"options": "Item",
-				"width": 200
+				"width": 100
 			},
 			{
 				"fieldname": "item_name",
 				"label": "Item Name",
-				"width": 200,
+				"width": 100,
 				"fieldtype": "Data",
 			},
 		]
@@ -148,12 +148,12 @@ def get_columns(filters):
 					"fieldname": 'item_code',
 					"fieldtype": "Link",
 					"options": "Item",
-					"width": 200
+					"width": 100
 				},
 				{
 					"fieldname": "item_name",
 					"label": "Item Name",
-					"width": 200,
+					"width": 100,
 					"fieldtype": "Data",
 				},
 		]
@@ -189,7 +189,7 @@ def get_columns(filters):
 						"label": _(str(a) +"-"+ str(b) + "(Qty)"),
 						"fieldname": (str(a) +"-"+ str(b)+ "(Qty)"),
 						"fieldtype": "Float",
-						"width": 130
+						"width": 80
 					}
 				]
 			
@@ -201,7 +201,7 @@ def get_columns(filters):
 				"label": _("Total Qty"),
 				"fieldname": 'qty',
 				"fieldtype": "Float",
-				"width": 100
+				"width": 80
 			}]	
 			column.extend(lst_2)
 
@@ -215,7 +215,7 @@ def get_columns(filters):
 						"label": _(str(a) +"-"+ str(b) + "(Amt)"),
 						"fieldname": (str(a) +"-"+ str(b) + "(Amt)"),
 						"fieldtype": "Currency",
-						"width": 130
+						"width": 80
 					}
 				]
 	
@@ -225,7 +225,7 @@ def get_columns(filters):
 				"label": _("Total Amount"),
 				"fieldname": 'amt',
 				"fieldtype": "Currency",
-				"width": 130
+				"width": 80
 			},
 			]
 			column.extend(lst_2)
@@ -301,7 +301,7 @@ def get_data(filters, group_by, order_by):
 			as '{2}', 
 			""".format(start_date , end_date, str(str(a) +"-"+ str(b)+ "(Amt)"))
 
-			print(start_date, end_date, query)	
+			# print(start_date, end_date, query)	
 
 	if years and filters.get('value') == 'Qty':
 		for from_y in range (from_y,to_year): 
@@ -324,7 +324,7 @@ def get_data(filters, group_by, order_by):
 			as '{2}', 
 			""".format(start_date , end_date, str(str(a) +"-"+ str(b)+ "(Qty)"))
 
-			print(start_date, end_date, query)	
+			# print(start_date, end_date, query)	
 
 	if filters.get('value') == 'Qty':
 		query += " sum(sii.qty) qty, "
