@@ -352,6 +352,7 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(sales_order.items[0].conversion_factor, delivery_note.items[0].conversion_factor)
 
 		pick_list.cancel()
+		sales_order.reload()
 		sales_order.cancel()
 		purchase_receipt.cancel()
 
@@ -387,6 +388,49 @@ class TestPickList(FrappeTestCase):
 		]
 		for expected_item, created_item in zip(expected_items, pl.locations):
 			_compare_dicts(expected_item, created_item)
+
+	def test_cancel_PL(self):
+		sales_order_1 = frappe.get_doc({
+				'doctype': 'Sales Order',
+				'customer': '_Test Customer',
+				'company': '_Test Company',
+				'items': [{
+					'item_code': '_Test Item',
+					'qty': 10,
+					'conversion_factor': 1,
+					'delivery_date': frappe.utils.today()
+				}],
+			}).insert()
+		sales_order_1.submit()
+
+		pick_list = frappe.get_doc({
+			'doctype': 'Pick List',
+			'company': '_Test Company',
+			'items_based_on': 'Sales Order',
+			'purpose': 'Delivery',
+			'locations': [{
+				'item_code': '_Test Item ',
+				'qty': 5,
+				'stock_qty': 5,
+				'picked_qty': 5,
+				'conversion_factor': 1,
+				'sales_order': sales_order_1.name,
+				'sales_order_item': sales_order_1.items[0].name ,
+			}
+			]
+		})
+		pick_list.set_item_locations()
+		pick_list.submit()
+
+		self.assertEqual(sales_order_1.items[0].item_code, '_Test Item')
+		self.assertEqual(frappe.db.get_value("Sales Order Item",sales_order_1.items[0].name,'picked_qty'), 5)
+		self.assertEqual(frappe.db.get_value("Sales Order",sales_order_1.name,'per_picked'), 50)
+
+		pick_list.cancel()
+
+		self.assertEqual(sales_order_1.items[0].item_code, '_Test Item')
+		self.assertEqual(frappe.db.get_value("Sales Order Item",sales_order_1.items[0].name,'picked_qty'), 0)
+		self.assertEqual(frappe.db.get_value("Sales Order",sales_order_1.name,'per_picked'),0)
 
 	def test_multiple_dn_creation(self):
 		sales_order_1 = frappe.get_doc({

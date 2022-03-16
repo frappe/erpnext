@@ -28,19 +28,20 @@ class PickList(Document):
 
 		# set percentage picked in SO
 		for location in self.get('locations'):
-			if location.sales_order and frappe.db.get_value("Sales Order",location.sales_order,"per_picked") == 100:
-				frappe.throw("Row " + str(location.idx) + " has been picked already!")
+			if location.sales_order and frappe.db.get_value("Sales Order", location.sales_order, "per_picked") == 100:
+				frappe.throw(_("Row {0}, has been picked already.").format(location.idx))
 
 	def before_submit(self):
+		so_list = []
 		for item in self.locations:
+			if item.sales_order:
+				so_list.append(item.sales_order)
 			# if the user has not entered any picked qty, set it to stock_qty, before submit
 			if item.picked_qty == 0:
 				item.picked_qty = item.stock_qty
-
 			if item.sales_order_item:
 				# update the picked_qty in SO Item
-				self.update_so(item.sales_order_item,item.picked_qty,item.item_code)
-
+				self.update_so(item.sales_order_item, item.picked_qty, item.item_code)
 			if not frappe.get_cached_value('Item', item.item_code, 'has_serial_no'):
 				continue
 			if not item.serial_no:
@@ -51,32 +52,43 @@ class PickList(Document):
 				continue
 			frappe.throw(_('For item {0} at row {1}, count of serial numbers does not match with the picked quantity')
 				.format(frappe.bold(item.item_code), frappe.bold(item.idx)), title=_("Quantity Mismatch"))
+		if so_list:
+			self.update_so_status(set(so_list))
 
 	def before_cancel(self):
+		so_list = []
 		#update picked_qty in SO Item on cancel of PL
 		for location in self.get('locations'):
+			if location.sales_order:
+				so_list.append(location.sales_order)
 			if location.sales_order_item:
-				self.update_so(location.sales_order_item,0,location.item_code)
+				self.update_so(location.sales_order_item, location.picked_qty, location.item_code)
+		if so_list:
+			self.update_so_status(set(so_list))
 
-	def update_so(self,so_item,picked_qty,item_code):
-		so_doc = frappe.get_doc("Sales Order",frappe.db.get_value("Sales Order Item",so_item,"parent"))
-		already_picked,actual_qty = frappe.db.get_value("Sales Order Item",so_item,["picked_qty","qty"])
+	def update_so_status(self,so_list):
+		for so in so_list:
+			total_so_qty, total_picked_qty = 0, 0
+			for item in frappe.get_doc('Sales Order',so).get('items'):
+				total_picked_qty += flt(item.picked_qty)
+				total_so_qty += flt(item.stock_qty)
+
+			per_picked = total_picked_qty / total_so_qty * 100
+			frappe.db.set_value("Sales Order", so, "per_picked", flt(per_picked))
+
+	def update_so(self, so_item, picked_qty, item_code):
+		so_doc = frappe.get_doc("Sales Order", frappe.db.get_value("Sales Order Item", so_item, "parent"))
+		already_picked, actual_qty = frappe.db.get_value("Sales Order Item", so_item, ["picked_qty","qty"])
 
 		if self.docstatus == 1:
-			if (((already_picked + picked_qty)/ actual_qty)*100) > (100 + flt(frappe.db.get_single_value('Stock Settings', 'over_delivery_receipt_allowance'))):
-				frappe.throw('You are picking more than required quantity for ' + item_code + '. Check if there is any other pick list created for '+so_doc.name)
+			if (((already_picked + picked_qty)/ actual_qty) * 100) > (100 + flt(frappe.db.get_single_value('Stock Settings', 'over_delivery_receipt_allowance'))):
+				frappe.throw(_('You are picking more than required quantity for {0}. Check if there is any other pick list created for {1}.').format(item_code, so_doc.name))
+			else:
+				updated_qty = already_picked + picked_qty
+		elif self.docstatus == 2:
+				updated_qty = already_picked - picked_qty
 
-		frappe.db.set_value("Sales Order Item",so_item,"picked_qty",already_picked+picked_qty)
-
-		total_picked_qty = 0
-		total_so_qty = 0
-		for item in so_doc.get('items'):
-			total_picked_qty += flt(item.picked_qty)
-			total_so_qty += flt(item.stock_qty)
-		total_picked_qty=total_picked_qty + picked_qty
-		per_picked = total_picked_qty/total_so_qty * 100
-
-		so_doc.db_set("per_picked", flt(per_picked) ,update_modified=False)
+		frappe.db.set_value("Sales Order Item", so_item, "picked_qty", updated_qty)
 
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):
@@ -382,9 +394,9 @@ def create_delivery_note(source_name, target_doc=None):
 	delivery_note = None
 	for location in pick_list.locations:
 		if location.sales_order:
-			sales_orders.append([frappe.db.get_value("Sales Order",location.sales_order,'customer'),location.sales_order])
+			sales_orders.append([frappe.db.get_value("Sales Order", location.sales_order, 'customer'), location.sales_order])
 	# Group sales orders by customer
-	for key,keydata in groupby(sales_orders,key=itemgetter(0)):
+	for key, keydata in groupby(sales_orders,key = itemgetter(0)):
 		sales_dict[key] = set([d[1] for d in keydata])
 
 	if sales_dict:
@@ -420,8 +432,6 @@ def create_dn_wo_so(pick_list):
 
 
 def create_dn_with_so(sales_dict,pick_list):
-	delivery_note = None
-
 	for customer in sales_dict:
 		for so in sales_dict[customer]:
 			delivery_note = None
@@ -441,12 +451,12 @@ def create_dn_with_so(sales_dict,pick_list):
 		if delivery_note:
 			# map all items of all sales orders of that customer
 			for so in sales_dict[customer]:
-				map_pl_locations(pick_list,item_table_mapper,delivery_note,so)
+				map_pl_locations(pick_list, item_table_mapper, delivery_note, so)
 			delivery_note.insert(ignore_mandatory = True)
 
 	return delivery_note
 
-def map_pl_locations(pick_list,item_mapper,delivery_note,sales_order = None):
+def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order = None):
 
 	for location in pick_list.locations:
 		if location.sales_order == sales_order:
