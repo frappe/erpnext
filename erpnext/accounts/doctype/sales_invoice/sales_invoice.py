@@ -232,7 +232,8 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 		if self.is_return and self.update_stock:
 			update_serial_nos_after_submit(self, "items")
-
+			self.reload()
+			self.update_serial_items_table(update=True)
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()

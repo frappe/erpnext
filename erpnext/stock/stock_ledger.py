@@ -77,7 +77,8 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 				# for auto creating serials
 				if not via_landed_cost_voucher:
 					validate_sr_no(sle, item_det)
-				if not sle.serial_no and item_det.has_serial_no and not voucher_doc.is_return:
+				if not sle.serial_no and item_det.has_serial_no and (not voucher_doc.is_return or
+					(voucher_doc.doctype == "Sales Invoice")):
 					sle = update_serial_nos(sle, item_det, return_sle=True)
 
 					for item in voucher_doc.get('items'):
