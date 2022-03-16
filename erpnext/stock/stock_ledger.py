@@ -105,7 +105,6 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 				# for manually entered serials
 				elif sle.serial_no:
 					serials = sle.serial_no.strip().split('\n')
-					update_serial_nos(sle, item_det)
 					for serial in range(abs(cint(sle['actual_qty']))):
 						new_sle = sle.copy()
 						new_sle['actual_qty'] = 1 if sle['actual_qty'] > 0 else -1
