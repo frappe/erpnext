@@ -11,13 +11,11 @@ from frappe.model.document import Document
 from frappe.utils import cstr, flt
 from six import string_types
 
-from erpnext.manufacturing.doctype.bom.bom import get_boms_in_bottom_up_order
+from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import update_cost
 
 
 class BOMUpdateTool(Document):
 	def replace_bom(self):
-		self.validate_bom()
-
 		unit_cost = get_new_bom_unit_cost(self.new_bom)
 		self.update_new_bom(unit_cost)
 
@@ -43,6 +41,7 @@ class BOMUpdateTool(Document):
 			except Exception:
 				frappe.log_error(frappe.get_traceback())
 
+<<<<<<< HEAD
 	def validate_bom(self):
 		if cstr(self.current_bom) == cstr(self.new_bom):
 			frappe.throw(_("Current BOM and New BOM can not be same"))
@@ -52,6 +51,8 @@ class BOMUpdateTool(Document):
 		):
 			frappe.throw(_("The selected BOMs are not for the same item"))
 
+=======
+>>>>>>> 4283a13e5a (feat: BOM Update Log)
 	def update_new_bom(self, unit_cost):
 		frappe.db.sql(
 			"""update `tabBOM Item` set bom_no=%s,
@@ -93,16 +94,21 @@ def enqueue_replace_bom(args):
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
+<<<<<<< HEAD
 	frappe.enqueue(
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.replace_bom",
 		args=args,
 		timeout=40000,
 	)
+=======
+	create_bom_update_log(boms=args)
+>>>>>>> 4283a13e5a (feat: BOM Update Log)
 	frappe.msgprint(_("Queued for replacing the BOM. It may take a few minutes."))
 
 
 @frappe.whitelist()
 def enqueue_update_cost():
+<<<<<<< HEAD
 	frappe.enqueue(
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_cost", timeout=40000
 	)
@@ -110,11 +116,18 @@ def enqueue_update_cost():
 		_("Queued for updating latest price in all Bill of Materials. It may take a few minutes.")
 	)
 
+=======
+	create_bom_update_log(update_type="Update Cost")
+	frappe.msgprint(_("Queued for updating latest price in all Bill of Materials. It may take a few minutes."))
+>>>>>>> 4283a13e5a (feat: BOM Update Log)
 
-def update_latest_price_in_all_boms():
+
+def auto_update_latest_price_in_all_boms():
+	"Called via hooks.py."
 	if frappe.db.get_single_value("Manufacturing Settings", "update_bom_costs_automatically"):
 		update_cost()
 
+<<<<<<< HEAD
 
 def replace_bom(args):
 	try:
@@ -146,3 +159,16 @@ def update_cost():
 		)
 	finally:
 		frappe.db.auto_commit_on_many_writes = 0
+=======
+def create_bom_update_log(boms=None, update_type="Replace BOM"):
+	"Creates a BOM Update Log that handles the background job."
+	current_bom = boms.get("current_bom") if boms else None
+	new_bom = boms.get("new_bom") if boms else None
+	log_doc = frappe.get_doc({
+		"doctype": "BOM Update Log",
+		"current_bom": current_bom,
+		"new_bom": new_bom,
+		"update_type": update_type
+	})
+	log_doc.submit()
+>>>>>>> 4283a13e5a (feat: BOM Update Log)
