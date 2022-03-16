@@ -1,300 +1,299 @@
 {
-    "actions": [],
-    "autoname": "naming_series:",
-    "creation": "2022-02-21 14:58:53.790565",
-    "doctype": "DocType",
-    "editable_grid": 1,
-    "engine": "InnoDB",
-    "field_order": [
-        "title",
-        "naming_series",
-        "status",
-        "purchase_order",
-        "supplier",
-        "supplier_name",
-        "company",
-        "transaction_date",
-        "schedule_date",
-        "order_confirmation_no",
-        "order_confirmation_date",
-        "amended_from",
-        "supplier_address",
-        "address_display",
-        "contact_person",
-        "contact_display",
-        "contact_mobile",
-        "contact_email",
-        "shipping_address",
-        "shipping_address_display",
-        "billing_address",
-        "billing_address_display",
-        "currency",
-        "supplier_warehouse",
-        "service_items",
-        "fg_items",
-        "total_qty",
-        "base_total",
-        "base_net_total",
-        "raw_material_details"
-    ],
-    "fields": [
-        {
-            "default": "Draft",
-            "fieldname": "status",
-            "fieldtype": "Select",
-            "in_standard_filter": 1,
-            "label": "Status",
-            "no_copy": 1,
-            "options": "\nDraft\nOn Hold\nTo Receive and Bill\nTo Bill\nTo Receive\nCompleted\nCancelled\nClosed\nDelivered",
-            "print_hide": 1,
-            "read_only": 1,
-            "reqd": 1,
-            "search_index": 1
-        },
-        {
-            "allow_on_submit": 1,
-            "default": "{supplier_name}",
-            "fieldname": "title",
-            "fieldtype": "Data",
-            "hidden": 1,
-            "label": "Title",
-            "no_copy": 1,
-            "print_hide": 1
-        },
-        {
-            "fieldname": "naming_series",
-            "fieldtype": "Select",
-            "label": "Series",
-            "no_copy": 1,
-            "options": "PUR-ORD-.YYYY.-",
-            "print_hide": 1,
-            "reqd": 1,
-            "set_only_once": 1
-        },
-        {
-            "fieldname": "purchase_order",
-            "fieldtype": "Link",
-            "label": "Purchase Order",
-            "options": "Purchase Order"
-        },
-        {
-            "bold": 1,
-            "fieldname": "supplier",
-            "fieldtype": "Link",
-            "in_global_search": 1,
-            "in_standard_filter": 1,
-            "label": "Supplier",
-            "options": "Supplier",
-            "print_hide": 1,
-            "reqd": 1,
-            "search_index": 1
-        },
-        {
-            "bold": 1,
-            "fetch_from": "supplier.supplier_name",
-            "fieldname": "supplier_name",
-            "fieldtype": "Data",
-            "in_global_search": 1,
-            "label": "Supplier Name",
-            "read_only": 1
-        },
-        {
-            "fieldname": "company",
-            "fieldtype": "Link",
-            "in_standard_filter": 1,
-            "label": "Company",
-            "options": "Company",
-            "print_hide": 1,
-            "remember_last_selected_value": 1,
-            "reqd": 1
-        },
-        {
-            "default": "Today",
-            "fieldname": "transaction_date",
-            "fieldtype": "Date",
-            "in_list_view": 1,
-            "label": "Date",
-            "reqd": 1,
-            "search_index": 1
-        },
-        {
-            "allow_on_submit": 1,
-            "fieldname": "schedule_date",
-            "fieldtype": "Date",
-            "label": "Required By"
-        },
-        {
-            "allow_on_submit": 1,
-            "depends_on": "eval:doc.docstatus===1",
-            "fieldname": "order_confirmation_no",
-            "fieldtype": "Data",
-            "label": "Order Confirmation No"
-        },
-        {
-            "allow_on_submit": 1,
-            "depends_on": "eval:doc.order_confirmation_no",
-            "fieldname": "order_confirmation_date",
-            "fieldtype": "Date",
-            "label": "Order Confirmation Date"
-        },
-        {
-            "fieldname": "amended_from",
-            "fieldtype": "Link",
-            "ignore_user_permissions": 1,
-            "label": "Amended From",
-            "no_copy": 1,
-            "options": "Subcontracting Order",
-            "print_hide": 1,
-            "read_only": 1
-        },
-        {
-            "fieldname": "supplier_address",
-            "fieldtype": "Link",
-            "label": "Supplier Address",
-            "options": "Address",
-            "print_hide": 1
-        },
-        {
-            "fieldname": "address_display",
-            "fieldtype": "Small Text",
-            "label": "Supplier Address Details",
-            "read_only": 1
-        },
-        {
-            "fieldname": "contact_person",
-            "fieldtype": "Link",
-            "label": "Supplier Contact",
-            "options": "Contact",
-            "print_hide": 1
-        },
-        {
-            "fieldname": "contact_display",
-            "fieldtype": "Small Text",
-            "in_global_search": 1,
-            "label": "Contact Name",
-            "read_only": 1
-        },
-        {
-            "fieldname": "contact_mobile",
-            "fieldtype": "Small Text",
-            "label": "Contact Mobile No",
-            "read_only": 1
-        },
-        {
-            "fieldname": "contact_email",
-            "fieldtype": "Small Text",
-            "label": "Contact Email",
-            "options": "Email",
-            "print_hide": 1,
-            "read_only": 1
-        },
-        {
-            "fieldname": "shipping_address",
-            "fieldtype": "Link",
-            "label": "Company Shipping Address",
-            "options": "Address",
-            "print_hide": 1
-        },
-        {
-            "fieldname": "shipping_address_display",
-            "fieldtype": "Small Text",
-            "label": "Shipping Address Details",
-            "print_hide": 1,
-            "read_only": 1
-        },
-        {
-            "fieldname": "billing_address",
-            "fieldtype": "Link",
-            "label": "Company Billing Address",
-            "options": "Address"
-        },
-        {
-            "fieldname": "billing_address_display",
-            "fieldtype": "Small Text",
-            "label": "Billing Address Details",
-            "read_only": 1
-        },
-        {
-            "fieldname": "currency",
-            "fieldtype": "Link",
-            "label": "Currency",
-            "options": "Currency",
-            "print_hide": 1,
-            "reqd": 1
-        },
-        {
-            "fieldname": "supplier_warehouse",
-            "fieldtype": "Link",
-            "label": "Supplier Warehouse",
-            "options": "Warehouse",
-            "reqd": 1
-        },
-        {
-            "depends_on": "purchase_order",
-            "fieldname": "service_items",
-            "fieldtype": "Table",
-            "label": "Service Items",
-            "mandatory_depends_on": "purchase_order",
-            "options": "Subcontracting Order Service Item",
-            "read_only": 1
-        },
-        {
-            "allow_bulk_edit": 1,
-            "fieldname": "fg_items",
-            "fieldtype": "Table",
-            "label": "Finished Good Items",
-            "options": "Subcontracting Order Finished Good Item",
-            "reqd": 1
-        },
-        {
-            "fieldname": "total_qty",
-            "fieldtype": "Float",
-            "label": "Total Quantity",
-            "read_only": 1
-        },
-        {
-            "fieldname": "base_total",
-            "fieldtype": "Currency",
-            "label": "Total (Company Currency)",
-            "options": "Company:company:default_currency",
-            "print_hide": 1,
-            "read_only": 1
-        },
-        {
-            "fieldname": "base_net_total",
-            "fieldtype": "Currency",
-            "label": "Net Total (Company Currency)",
-            "no_copy": 1,
-            "options": "Company:company:default_currency",
-            "print_hide": 1,
-            "read_only": 1
-        }
-    ],
-    "index_web_pages_for_search": 1,
-    "is_submittable": 1,
-    "links": [],
-    "modified": "2022-02-25 21:47:24.632284",
-    "modified_by": "Administrator",
-    "module": "Subcontracting",
-    "name": "Subcontracting Order",
-    "naming_rule": "By \"Naming Series\" field",
-    "owner": "Administrator",
-    "permissions": [
-        {
-            "create": 1,
-            "delete": 1,
-            "email": 1,
-            "export": 1,
-            "print": 1,
-            "read": 1,
-            "report": 1,
-            "role": "System Manager",
-            "share": 1,
-            "write": 1
-        }
-    ],
-    "sort_field": "modified",
-    "sort_order": "DESC",
-    "states": [],
-    "track_changes": 1
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2022-02-21 14:58:53.790565",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "naming_series",
+  "status",
+  "purchase_order",
+  "supplier",
+  "supplier_name",
+  "company",
+  "transaction_date",
+  "schedule_date",
+  "order_confirmation_no",
+  "order_confirmation_date",
+  "amended_from",
+  "supplier_address",
+  "address_display",
+  "contact_person",
+  "contact_display",
+  "contact_mobile",
+  "contact_email",
+  "shipping_address",
+  "shipping_address_display",
+  "billing_address",
+  "billing_address_display",
+  "currency",
+  "supplier_warehouse",
+  "service_items",
+  "fg_items",
+  "total_qty",
+  "base_total",
+  "base_net_total"
+ ],
+ "fields": [
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nOpen\nPartially Received\nCompleted\nMaterial Transferred\nPartial Material Transferred",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "{supplier_name}",
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "PUR-ORD-.YYYY.-",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "label": "Purchase Order",
+   "options": "Purchase Order"
+  },
+  {
+   "bold": 1,
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_standard_filter": 1,
+   "label": "Supplier",
+   "options": "Supplier",
+   "print_hide": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "bold": 1,
+   "fetch_from": "supplier.supplier_name",
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Supplier Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "print_hide": 1,
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "schedule_date",
+   "fieldtype": "Date",
+   "label": "Required By"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.docstatus===1",
+   "fieldname": "order_confirmation_no",
+   "fieldtype": "Data",
+   "label": "Order Confirmation No"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.order_confirmation_no",
+   "fieldname": "order_confirmation_date",
+   "fieldtype": "Date",
+   "label": "Order Confirmation Date"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Subcontracting Order",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "supplier_address",
+   "fieldtype": "Link",
+   "label": "Supplier Address",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "address_display",
+   "fieldtype": "Small Text",
+   "label": "Supplier Address Details",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_person",
+   "fieldtype": "Link",
+   "label": "Supplier Contact",
+   "options": "Contact",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "contact_display",
+   "fieldtype": "Small Text",
+   "in_global_search": 1,
+   "label": "Contact Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_mobile",
+   "fieldtype": "Small Text",
+   "label": "Contact Mobile No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_email",
+   "fieldtype": "Small Text",
+   "label": "Contact Email",
+   "options": "Email",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "shipping_address",
+   "fieldtype": "Link",
+   "label": "Company Shipping Address",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "shipping_address_display",
+   "fieldtype": "Small Text",
+   "label": "Shipping Address Details",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "billing_address",
+   "fieldtype": "Link",
+   "label": "Company Billing Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "billing_address_display",
+   "fieldtype": "Small Text",
+   "label": "Billing Address Details",
+   "read_only": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "supplier_warehouse",
+   "fieldtype": "Link",
+   "label": "Supplier Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "depends_on": "purchase_order",
+   "fieldname": "service_items",
+   "fieldtype": "Table",
+   "label": "Service Items",
+   "mandatory_depends_on": "purchase_order",
+   "options": "Subcontracting Order Service Item",
+   "read_only": 1
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "fg_items",
+   "fieldtype": "Table",
+   "label": "Finished Good Items",
+   "options": "Subcontracting Order Finished Good Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_qty",
+   "fieldtype": "Float",
+   "label": "Total Quantity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_total",
+   "fieldtype": "Currency",
+   "label": "Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_net_total",
+   "fieldtype": "Currency",
+   "label": "Net Total (Company Currency)",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-03-16 17:03:06.296867",
+ "modified_by": "Administrator",
+ "module": "Subcontracting",
+ "name": "Subcontracting Order",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
 }
