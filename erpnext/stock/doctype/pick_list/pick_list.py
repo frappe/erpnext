@@ -73,7 +73,7 @@ class PickList(Document):
 		for item in so_doc.get('items'):
 			total_picked_qty += flt(item.picked_qty)
 			total_so_qty += flt(item.stock_qty)
-		total_picked_qty = total_picked_qty	+ picked_qty
+		total_picked_qty=total_picked_qty + picked_qty
 		per_picked = total_picked_qty/total_so_qty * 100
 
 		so_doc.db_set("per_picked", flt(per_picked) ,update_modified=False)
