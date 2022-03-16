@@ -33,8 +33,10 @@ frappe.ui.form.on("Rename Tool", {
 					let html = r.message.join("<br>");
 
 					if (r.exc) {
-						r.exc = JSON.parse(r.exc);
-						html += "<br>" + r.exc.join("<br>");
+						r.exc = frappe.utils.parse_json(r.exc);
+						if (Array.isArray(r.exc)) {
+							html += "<br>" + r.exc.join("<br>");
+						}
 					}
 
 					frm.get_field("rename_log").$wrapper.html(html);
