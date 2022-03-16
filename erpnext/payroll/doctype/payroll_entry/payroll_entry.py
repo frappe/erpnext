@@ -600,7 +600,7 @@ def create_salary_slips_for_employees(employees, args,end_date,start_date,payrol
 		b = getdate(start_date).month
 		num_days = monthrange(a, b)[1]
 		days_in_month = num_days
-
+		print("&&&&&&&&&&&&",num_days)
 		#Paid Holidays
 		paid_holidays=0
 		cdoc = frappe.get_doc("Employee",emp)
@@ -689,45 +689,6 @@ def create_salary_slips_for_employees(employees, args,end_date,start_date,payrol
 						""".format(emp,start_date,end_date), as_dict=1)
 
 		encashment_days = sick_leave[0]['result']
-
-
-
-		num_months=0
-		from datetime import date
-		doc=frappe.db.sql("""select name from `tabPayroll Period` where company="{0}" and start_date<='{1}' and end_date >='{2} limit 1'""".format(company,start_date,start_date),as_dict=1)
-		if doc:
-			for i in doc:
-				doc=frappe.get_doc("Payroll Period",i.get("name"))
-				lst=frappe.get_doc("Employee",{"employee":emp})
-				a=doc.start_date
-				if doc.start_date < lst.date_of_joining <= doc.end_date and payroll_frequency=="Monthly":
-					end_date_ = getdate(a)
-					start_date_ = getdate(lst.date_of_joining)
-					num_months = (end_date_.year - start_date_.year) * 12 + (end_date_.month+1 - start_date_.month)
-					return num_months
-				elif doc.start_date < lst.date_of_joining <= doc.end_date and payroll_frequency=="Weekly":
-					end_date_ = getdate(a)
-					start_date_ = getdate(lst.date_of_joining)
-					days = abs(start_date_-end_date_).days
-					num_months=flt(days/7,precision=0)
-					print(num_months)
-					return num_months
-				a=end_date
-				b = doc.start_date
-				if payroll_frequency=="Monthly":
-					if not doc.start_date < lst.date_of_joining <= doc.end_date:
-						end_date_ = getdate(a)
-						start_date_ = getdate(b)
-						num_months = (end_date_.year - start_date_.year) * 12 + (end_date_.month+1 - start_date_.month)
-						return num_months
-				if payroll_frequency=="Weekly":
-					if not doc.start_date < lst.date_of_joining <= doc.end_date:
-						end_date_ = getdate(a)
-						start_date_ = getdate(b)
-						days = abs(start_date_-end_date_).days
-						num_months=flt(days/7,precision=0)
-						print(num_months)
-						return num_months
 		if emp not in salary_slips_exists_for:
 			args.update({
 				"doctype": "Salary Slip",
@@ -738,10 +699,10 @@ def create_salary_slips_for_employees(employees, args,end_date,start_date,payrol
 				"compoff":compoff,
 				"paid_holidays":paid_holidays,
 				"days_in_month":days_in_month,
-				"encashment_days":encashment_days,
-				"months_of_service_in_payment_period":num_months
+				"encashment_days":encashment_days
 			})
 			ss = frappe.get_doc(args)
+			
 			ss.insert()
 			count+=1
 			if publish_progress:
