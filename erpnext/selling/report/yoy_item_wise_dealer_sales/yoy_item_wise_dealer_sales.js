@@ -17,7 +17,31 @@ frappe.query_reports["YoY Item Wise Dealer Sales"] = {
 			label: __("Customer"),
 			fieldtype: "Link",
 			options:"Customer",
-			reqd: 1
+			reqd: 1,
+			on_change: () => {
+				var cust = frappe.query_report.get_filter_value('customer');
+				if (cust) {
+					frappe.db.get_value('Customer', cust, "customer_name", function(value) {
+						frappe.query_report.set_filter_value('customer_name', value["customer_name"]);
+					});
+				} else {
+					frappe.query_report.set_filter_value('customer_name', "");
+				}
+			}
+		},
+		{
+			fieldname: "customer_name",
+			label: __("Customer Name"),
+			fieldtype: "Data",
+			fetch_from: "customer.fullname",
+			read_only: 1
+		},
+		{
+			fieldname: "month",
+			label: __("Mont"),
+			fieldtype: "Data",
+			default: "April to March",
+			read_only: 1
 		},
 		{
 			fieldname: "from_year",
