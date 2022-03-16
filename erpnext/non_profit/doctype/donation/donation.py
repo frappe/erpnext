@@ -128,7 +128,7 @@ def create_donation(donor, payment):
 		'date': getdate(),
 		'amount': flt(payment.amount) / 100, # Convert to rupees from paise
 		'mode_of_payment': payment.method,
-		'razorpay_payment_id': payment.id
+		'payment_id': payment.id
 	}).insert(ignore_mandatory=True)
 
 	donation.submit()
