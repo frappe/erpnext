@@ -42,8 +42,11 @@ from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timeshe
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
-from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
-from erpnext.stock.utils import calculate_mapped_packed_items_return
+from erpnext.stock.doctype.serial_no.serial_no import (
+	get_delivery_note_serial_no,
+	get_serial_nos,
+	update_serial_nos_after_submit,
+)
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -226,6 +229,9 @@ class SalesInvoice(SellingController):
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		if self.update_stock == 1:
 			self.update_stock_ledger()
+		if self.is_return and self.update_stock:
+			update_serial_nos_after_submit(self, "items")
+
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
@@ -263,6 +269,9 @@ class SalesInvoice(SellingController):
 		self.process_common_party_accounting()
 
 	def validate_pos_return(self):
+		if self.is_consolidated:
+			# pos return is already validated in pos invoice
+			return
 
 		if self.is_pos and self.is_return:
 			total_amount_in_payments = 0
@@ -734,11 +743,8 @@ class SalesInvoice(SellingController):
 
 	def update_packing_list(self):
 		if cint(self.update_stock) == 1:
-			if cint(self.is_return) and self.return_against:
-				calculate_mapped_packed_items_return(self)
-			else:
-				from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-				make_packing_list(self)
+			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+			make_packing_list(self)
 		else:
 			self.set('packed_items', [])
 
@@ -1252,14 +1258,14 @@ class SalesInvoice(SellingController):
 	def update_billing_status_in_dn(self, update_modified=True):
 		updated_delivery_notes = []
 		for d in self.get("items"):
-			if d.so_detail:
-				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
-			elif d.dn_detail:
+			if d.dn_detail:
 				billed_amt = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item`
 					where dn_detail=%s and docstatus=1""", d.dn_detail)
 				billed_amt = billed_amt and billed_amt[0][0] or 0
 				frappe.db.set_value("Delivery Note Item", d.dn_detail, "billed_amt", billed_amt, update_modified=update_modified)
 				updated_delivery_notes.append(d.delivery_note)
+			elif d.so_detail:
+				updated_delivery_notes += update_billed_amount_based_on_so(d.so_detail, update_modified)
 
 		for dn in set(updated_delivery_notes):
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
@@ -1401,12 +1407,19 @@ class SalesInvoice(SellingController):
 		frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", lp_details.tier_name)
 
 	def get_returned_amount(self):
-		returned_amount = frappe.db.sql("""
-			select sum(grand_total)
-			from `tabSales Invoice`
-			where docstatus=1 and is_return=1 and ifnull(return_against, '')=%s
-		""", self.name)
-		return abs(flt(returned_amount[0][0])) if returned_amount else 0
+		from frappe.query_builder.functions import Coalesce, Sum
+		doc = frappe.qb.DocType(self.doctype)
+		returned_amount = (
+			frappe.qb.from_(doc)
+			.select(Sum(doc.grand_total))
+			.where(
+				(doc.docstatus == 1)
+				& (doc.is_return == 1)
+				& (Coalesce(doc.return_against, '') == self.name)
+			)
+		).run()
+
+		return abs(returned_amount[0][0]) if returned_amount[0][0] else 0
 
 	# redeem the loyalty points.
 	def apply_loyalty_points(self):
@@ -1647,7 +1660,6 @@ def make_maintenance_schedule(source_name, target_doc=None):
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")

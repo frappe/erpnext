@@ -118,8 +118,7 @@ def make_customer():
 			"customer_type": "Company",
 		})
 		customer.insert()
-	else:
-		customer = frappe.get_doc("Customer", "_Test UAE Customer")
+
 
 def make_supplier():
 	if not frappe.db.exists("Supplier", "_Test UAE Supplier"):
