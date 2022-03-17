@@ -9,7 +9,7 @@
   "amount",
   "invoice_id",
   "column_break_4",
-  "razorpay_payment_id",
+  "payment_id",
   "membership"
  ],
  "fields": [
@@ -36,25 +36,27 @@
    "reqd": 1
   },
   {
-   "fieldname": "razorpay_payment_id",
-   "fieldtype": "Data",
-   "label": "Razorpay Payment ID"
-  },
-  {
    "fieldname": "membership",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Membership",
    "options": "Membership"
   },
   {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "payment_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Payment ID"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-15 16:35:10.777587",
+ "modified": "2022-03-17 11:55:24.621708",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Tax Exemption 80G Certificate Detail",

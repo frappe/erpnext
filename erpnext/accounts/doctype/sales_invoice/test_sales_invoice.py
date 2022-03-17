@@ -2552,6 +2552,12 @@ class TestSalesInvoice(unittest.TestCase):
 
 		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
 
+	def test_standalone_serial_no_return(self):
+		si = create_sales_invoice(item_code="_Test Serialized Item With Series", update_stock=True, is_return=True, qty=-1)
+		si.reload()
+		self.assertTrue(si.items[0].serial_no)
+
+
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
 	si.naming_series = 'INV-2020-.#####'

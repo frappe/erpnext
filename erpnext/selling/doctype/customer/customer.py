@@ -219,7 +219,9 @@ class Customer(TransactionBase):
 			else:
 				company_record.append(limit.company)
 
-			outstanding_amt = get_customer_outstanding(self.name, limit.company)
+			outstanding_amt = get_customer_outstanding(
+				self.name, limit.company, ignore_outstanding_sales_order=limit.bypass_credit_limit_check
+			)
 			if flt(limit.credit_limit) < outstanding_amt:
 				frappe.throw(_("""New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}""").format(outstanding_amt))
 

@@ -6,6 +6,7 @@
 import json
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cstr, flt, nowdate, nowtime
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -35,10 +36,9 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestDeliveryNote(ERPNextTestCase):
+class TestDeliveryNote(FrappeTestCase):
 	def test_over_billing_against_dn(self):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
@@ -386,7 +386,8 @@ class TestDeliveryNote(ERPNextTestCase):
 		self.assertEqual(actual_qty, 25)
 
 		#  return bundled item
-		dn1 = create_return_delivery_note(source_name=dn.name, rate=500, qty=-2)
+		dn1 = create_delivery_note(item_code='_Test Product Bundle Item', is_return=1,
+			return_against=dn.name, qty=-2, rate=500, company=company, warehouse="Stores - TCP1", expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
 
 		# qty after return
 		actual_qty = get_qty_after_transaction(warehouse="Stores - TCP1")
@@ -821,15 +822,6 @@ class TestDeliveryNote(ERPNextTestCase):
 		compare_payment_schedules(self, so, si)
 
 		automatically_fetch_payment_terms(enable=0)
-
-def create_return_delivery_note(**args):
-	args = frappe._dict(args)
-	from erpnext.controllers.sales_and_purchase_return import make_return_doc
-	doc = make_return_doc("Delivery Note", args.source_name, None)
-	doc.items[0].rate = args.rate
-	doc.items[0].qty = args.qty
-	doc.submit()
-	return doc
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

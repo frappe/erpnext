@@ -48,7 +48,7 @@ class JobCard(Document):
 		self.validate_work_order()
 
 	def set_sub_operations(self):
-		if self.operation:
+		if not self.sub_operations and self.operation:
 			self.sub_operations = []
 			for row in frappe.get_all('Sub Operation',
 				filters = {'parent': self.operation}, fields=['operation', 'idx'], order_by='idx'):
