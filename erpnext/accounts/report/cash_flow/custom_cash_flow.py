@@ -30,12 +30,12 @@ def get_mappers_from_db():
 def get_accounts_in_mappers(mapping_names):
 	return frappe.db.sql('''
 		select cfma.name, cfm.label, cfm.is_working_capital, cfm.is_income_tax_liability,
-		cfm.is_income_tax_expense, cfm.is_finance_cost, cfm.is_finance_cost_adjustment
+		cfm.is_income_tax_expense, cfm.is_finance_cost, cfm.is_finance_cost_adjustment, cfma.account
 		from `tabCash Flow Mapping Accounts` cfma
 		join `tabCash Flow Mapping` cfm on cfma.parent=cfm.name
 		where cfma.parent in (%s)
 		order by cfm.is_working_capital
-	''', (', '.join('"%s"' % d for d in mapping_names)))
+	''', (', '.join('%s' % d for d in mapping_names)))
 
 
 def setup_mappers(mappers):
@@ -57,31 +57,31 @@ def setup_mappers(mappers):
 
 		account_types = [
 			dict(
-				name=account[0], label=account[1], is_working_capital=account[2],
+				name=account[0], account_name=account[7], label=account[1], is_working_capital=account[2],
 				is_income_tax_liability=account[3], is_income_tax_expense=account[4]
 			) for account in accounts if not account[3]]
 
 		finance_costs_adjustments = [
 			dict(
-				name=account[0], label=account[1], is_finance_cost=account[5],
+				name=account[0], account_name=account[7], label=account[1], is_finance_cost=account[5],
 				is_finance_cost_adjustment=account[6]
 			) for account in accounts if account[6]]
 
 		tax_liabilities = [
 			dict(
-				name=account[0], label=account[1], is_income_tax_liability=account[3],
+				name=account[0], account_name=account[7], label=account[1], is_income_tax_liability=account[3],
 				is_income_tax_expense=account[4]
 			) for account in accounts if account[3]]
 
 		tax_expenses = [
 			dict(
-				name=account[0], label=account[1], is_income_tax_liability=account[3],
+				name=account[0], account_name=account[7], label=account[1], is_income_tax_liability=account[3],
 				is_income_tax_expense=account[4]
 			) for account in accounts if account[4]]
 
 		finance_costs = [
 			dict(
-				name=account[0], label=account[1], is_finance_cost=account[5])
+				name=account[0], account_name=account[7], label=account[1], is_finance_cost=account[5])
 			for account in accounts if account[5]]
 
 		account_types_labels = sorted(
@@ -124,27 +124,27 @@ def setup_mappers(mappers):
 		)
 
 		for label in account_types_labels:
-			names = [d['name'] for d in account_types if d['label'] == label[0]]
+			names = [d['account_name'] for d in account_types if d['label'] == label[0]]
 			m = dict(label=label[0], names=names, is_working_capital=label[1])
 			mapping['account_types'].append(m)
 
 		for label in fc_adjustment_labels:
-			names = [d['name'] for d in finance_costs_adjustments if d['label'] == label[0]]
+			names = [d['account_name'] for d in finance_costs_adjustments if d['label'] == label[0]]
 			m = dict(label=label[0], names=names)
 			mapping['finance_costs_adjustments'].append(m)
 
 		for label in unique_liability_labels:
-			names = [d['name'] for d in tax_liabilities if d['label'] == label[0]]
+			names = [d['account_name'] for d in tax_liabilities if d['label'] == label[0]]
 			m = dict(label=label[0], names=names, tax_liability=label[1], tax_expense=label[2])
 			mapping['tax_liabilities'].append(m)
 
 		for label in unique_expense_labels:
-			names = [d['name'] for d in tax_expenses if d['label'] == label[0]]
+			names = [d['account_name'] for d in tax_expenses if d['label'] == label[0]]
 			m = dict(label=label[0], names=names, tax_liability=label[1], tax_expense=label[2])
 			mapping['tax_expenses'].append(m)
 
 		for label in unique_finance_costs_labels:
-			names = [d['name'] for d in finance_costs if d['label'] == label[0]]
+			names = [d['account_name'] for d in finance_costs if d['label'] == label[0]]
 			m = dict(label=label[0], names=names, is_finance_cost=label[1])
 			mapping['finance_costs'].append(m)
 
@@ -378,7 +378,7 @@ def _get_account_type_based_data(filters, account_names, period_list, accumulate
 	total = 0
 	for period in period_list:
 		start_date = get_start_date(period, accumulated_values, company)
-		accounts = ', '.join('"%s"' % d for d in account_names)
+		accounts = ', '.join('%s' % d for d in account_names)
 
 		if opening_balances:
 			date_info = dict(date=start_date)
