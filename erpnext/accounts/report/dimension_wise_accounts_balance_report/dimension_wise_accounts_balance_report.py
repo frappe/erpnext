@@ -22,7 +22,6 @@ def execute(filters=None):
 	if not dimension_list:
 		return [], []
 
-	# dimension_items_list = [''.join(d) for d in dimension_items_list]
 	columns = get_columns(dimension_list)
 	data = get_data(filters, dimension_list)
 
