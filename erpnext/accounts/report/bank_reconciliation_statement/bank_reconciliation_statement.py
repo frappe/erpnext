@@ -234,7 +234,7 @@ def get_amounts_not_reflected_in_system(filters):
 
 	pe_amount = flt(pe_amount[0][0]) if pe_amount else 0.0
 
-	loan_amount = get_loan_amount(filters)
+	loan_amount = flt(get_loan_amount(filters))
 
 	return je_amount + pe_amount + loan_amount
 
