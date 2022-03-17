@@ -7,6 +7,7 @@ import frappe
 
 def execute():
     frappe.reload_doc('hr', 'doctype', 'leave_policy_assignment')
+    frappe.reload_doc('hr', 'doctype', 'employee_grade')
     employee_with_assignment = []
     leave_policy = []
 
