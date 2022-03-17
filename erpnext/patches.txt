@@ -10,6 +10,7 @@ erpnext.patches.v4_2.update_requested_and_ordered_qty #2021-03-31
 erpnext.patches.v5_7.update_item_description_based_on_item_master
 erpnext.patches.v4_2.repost_reserved_qty #2021-03-31
 execute:frappe.reload_doc("Payroll", "doctype", "salary_slip")
+erpnext.patches.v8_1.removed_roles_from_gst_report_non_indian_account #16-08-2018
 erpnext.patches.v10_0.fichier_des_ecritures_comptables_for_france
 erpnext.patches.v10_0.rename_price_to_rate_in_pricing_rule
 erpnext.patches.v10_0.set_currency_in_pricing_rule
@@ -271,6 +272,7 @@ execute:frappe.reload_doc("erpnext_integrations", "doctype", "TaxJar Settings")
 execute:frappe.reload_doc("erpnext_integrations", "doctype", "Product Tax Category")
 erpnext.patches.v13_0.custom_fields_for_taxjar_integration          #08-11-2021
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
+erpnext.patches.v13_0.create_gst_payment_entry_fields #27-11-2021
 erpnext.patches.v13_0.fix_invoice_statuses
 erpnext.patches.v13_0.create_website_items #30-09-2021
 erpnext.patches.v13_0.populate_e_commerce_settings
