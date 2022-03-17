@@ -37,6 +37,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	get_gl_entries_on_asset_regain,
 	make_depreciation_entry,
 )
+from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
@@ -111,6 +112,8 @@ class SalesInvoice(SellingController):
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
 		self.validate_item_cost_centers()
+		self.validate_income_account()
+
 		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_invoice_reference)
 
 		if cint(self.is_pos):
@@ -177,6 +180,10 @@ class SalesInvoice(SellingController):
 			cost_center_company = frappe.get_cached_value("Cost Center", item.cost_center, "company")
 			if cost_center_company != self.company:
 				frappe.throw(_("Row #{0}: Cost Center {1} does not belong to company {2}").format(frappe.bold(item.idx), frappe.bold(item.cost_center), frappe.bold(self.company)))
+
+	def validate_income_account(self):
+		for item in self.get('items'):
+			validate_account_head(item.idx, item.income_account, self.company, 'Income')
 
 	def set_tax_withholding(self):
 		tax_withholding_details = get_party_tax_withholding_details(self)
