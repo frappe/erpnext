@@ -1040,7 +1040,6 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 
 	if not allow_zero_rate and not valuation_rate and raise_error_if_no_rate \
 			and cint(erpnext.is_perpetual_inventory_enabled(company)):
-		frappe.local.message_log = []
 		form_link = get_link_to_form("Item", item_code)
 
 		message = _("Valuation Rate for the Item {0}, is required to do accounting entries for {1} {2}.").format(form_link, voucher_type, voucher_no)
