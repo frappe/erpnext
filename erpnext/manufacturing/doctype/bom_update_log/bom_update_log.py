@@ -1,23 +1,27 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
+from typing import Dict, List, Optional
+import click
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cstr
-
-from erpnext.manufacturing.doctype.bom.bom import get_boms_in_bottom_up_order
-
+from frappe.utils import cstr, flt
 from rq.timeouts import JobTimeoutException
 
+from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 
-class BOMMissingError(frappe.ValidationError): pass
+
+class BOMMissingError(frappe.ValidationError):
+	pass
 
 class BOMUpdateLog(Document):
 	def validate(self):
-		self.validate_boms_are_specified()
-		self.validate_same_bom()
-		self.validate_bom_items()
+		if self.update_type == "Replace BOM":
+			self.validate_boms_are_specified()
+			self.validate_same_bom()
+			self.validate_bom_items()
+
 		self.status = "Queued"
 
 	def validate_boms_are_specified(self):
@@ -48,16 +52,88 @@ class BOMUpdateLog(Document):
 				"new_bom": self.new_bom
 			}
 			frappe.enqueue(
-				method="erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.replace_bom",
-				boms=boms, doc=self, timeout=40000
+				method="erpnext.manufacturing.doctype.bom_update_log.bom_update_log.run_bom_job",
+				doc=self, boms=boms, timeout=40000
 			)
 		else:
 			frappe.enqueue(
-				method="erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_cost_queue",
-				doc=self, timeout=40000
+				method="erpnext.manufacturing.doctype.bom_update_log.bom_update_log.run_bom_job",
+				doc=self, update_type="Update Cost", timeout=40000
 			)
 
-def replace_bom(boms, doc):
+def replace_bom(boms: Dict) -> None:
+	"""Replace current BOM with new BOM in parent BOMs."""
+	current_bom = boms.get("current_bom")
+	new_bom = boms.get("new_bom")
+
+	unit_cost = get_new_bom_unit_cost(new_bom)
+	update_new_bom(unit_cost, current_bom, new_bom)
+
+	frappe.cache().delete_key('bom_children')
+	parent_boms = get_parent_boms(new_bom)
+
+	with click.progressbar(parent_boms) as parent_boms:
+		pass
+	for bom in parent_boms:
+		bom_obj = frappe.get_cached_doc('BOM', bom)
+		# this is only used for versioning and we do not want
+		# to make separate db calls by using load_doc_before_save
+		# which proves to be expensive while doing bulk replace
+		bom_obj._doc_before_save = bom_obj
+		bom_obj.update_new_bom(unit_cost, current_bom, new_bom)
+		bom_obj.update_exploded_items()
+		bom_obj.calculate_cost()
+		bom_obj.update_parent_cost()
+		bom_obj.db_update()
+		if bom_obj.meta.get('track_changes') and not bom_obj.flags.ignore_version:
+			bom_obj.save_version()
+
+def update_new_bom(unit_cost: float, current_bom: str, new_bom: str) -> None:
+		bom_item = frappe.qb.DocType("BOM Item")
+		frappe.qb.update(bom_item).set(
+			bom_item.bom_no, new_bom
+		).set(
+			bom_item.rate, unit_cost
+		).set(
+			bom_item.amount, (bom_item.stock_qty * unit_cost)
+		).where(
+			(bom_item.bom_no == current_bom)
+			& (bom_item.docstatus < 2)
+			& (bom_item.parenttype == "BOM")
+		).run()
+
+def get_parent_boms(new_bom: str, bom_list: Optional[List] = None) -> List:
+		bom_list = bom_list or []
+		bom_item = frappe.qb.DocType("BOM Item")
+
+		parents = frappe.qb.from_(bom_item).select(
+			bom_item.parent
+		).where(
+			(bom_item.bom_no == new_bom)
+			& (bom_item.docstatus <2)
+			& (bom_item.parenttype == "BOM")
+		).run(as_dict=True)
+
+		for d in parents:
+			if new_bom == d.parent:
+				frappe.throw(_("BOM recursion: {0} cannot be child of {1}").format(new_bom, d.parent))
+
+			bom_list.append(d.parent)
+			get_parent_boms(d.parent, bom_list)
+
+		return list(set(bom_list))
+
+def get_new_bom_unit_cost(new_bom: str) -> float:
+	bom = frappe.qb.DocType("BOM")
+	new_bom_unitcost = frappe.qb.from_(bom).select(
+		bom.total_cost / bom.quantity
+	).where(
+		bom.name == new_bom
+	).run()
+
+	return flt(new_bom_unitcost[0][0])
+
+def run_bom_job(doc: "BOMUpdateLog", boms: Optional[Dict] = None, update_type: Optional[str] = "Replace BOM") -> None:
 	try:
 		doc.db_set("status", "In Progress")
 		if not frappe.flags.in_test:
@@ -65,18 +141,19 @@ def replace_bom(boms, doc):
 
 		frappe.db.auto_commit_on_many_writes = 1
 
-		args = frappe._dict(boms)
-		doc = frappe.get_doc("BOM Update Tool")
-		doc.current_bom = args.current_bom
-		doc.new_bom = args.new_bom
-		doc.replace_bom()
+		boms = frappe._dict(boms or {})
+
+		if update_type == "Replace BOM":
+			replace_bom(boms)
+		else:
+			update_cost()
 
 		doc.db_set("status", "Completed")
 
 	except (Exception, JobTimeoutException):
 		frappe.db.rollback()
 		frappe.log_error(
-			msg=frappe.get_traceback(),
+			message=frappe.get_traceback(),
 			title=_("BOM Update Tool Error")
 		)
 		doc.db_set("status", "Failed")
@@ -84,34 +161,3 @@ def replace_bom(boms, doc):
 	finally:
 		frappe.db.auto_commit_on_many_writes = 0
 		frappe.db.commit()
-
-def update_cost_queue(doc):
-	try:
-		doc.db_set("status", "In Progress")
-		if not frappe.flags.in_test:
-			frappe.db.commit()
-
-		frappe.db.auto_commit_on_many_writes = 1
-
-		bom_list = get_boms_in_bottom_up_order()
-		for bom in bom_list:
-			frappe.get_doc("BOM", bom).update_cost(update_parent=False, from_child_bom=True)
-
-		doc.db_set("status", "Completed")
-
-	except (Exception, JobTimeoutException):
-		frappe.db.rollback()
-		frappe.log_error(
-			msg=frappe.get_traceback(),
-			title=_("BOM Update Tool Error")
-		)
-		doc.db_set("status", "Failed")
-
-	finally:
-		frappe.db.auto_commit_on_many_writes = 0
-		frappe.db.commit()
-
-def update_cost():
-	bom_list = get_boms_in_bottom_up_order()
-	for bom in bom_list:
-		frappe.get_doc("BOM", bom).update_cost(update_parent=False, from_child_bom=True)
