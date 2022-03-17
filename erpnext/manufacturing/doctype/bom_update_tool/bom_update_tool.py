@@ -8,10 +8,12 @@ if TYPE_CHECKING:
 	from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import BOMUpdateLog
 
 import frappe
-from frappe import _
 from frappe.model.document import Document
+<<<<<<< HEAD
 from frappe.utils import cstr, flt
 from six import string_types
+=======
+>>>>>>> f3715ab382 (fix: Test, Sider and Added button to access log from Tool)
 
 from erpnext.manufacturing.doctype.bom.bom import get_boms_in_bottom_up_order
 

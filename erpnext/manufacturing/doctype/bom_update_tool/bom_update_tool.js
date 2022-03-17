@@ -21,6 +21,10 @@ frappe.ui.form.on('BOM Update Tool', {
 	refresh: function(frm) {
 		frm.disable_save();
 		frm.events.disable_button(frm, "replace");
+
+		frm.add_custom_button(__("View BOM Update Log"), () => {
+			frappe.set_route("List", "BOM Update Log");
+		});
 	},
 
 	disable_button: (frm, field, disable=true) => {
