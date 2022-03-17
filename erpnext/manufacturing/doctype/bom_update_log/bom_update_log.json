@@ -20,16 +20,14 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Current BOM",
-   "options": "BOM",
-   "reqd": 1
+   "options": "BOM"
   },
   {
    "fieldname": "new_bom",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "New BOM",
-   "options": "BOM",
-   "reqd": 1
+   "options": "BOM"
   },
   {
    "fieldname": "column_break_3",
@@ -61,7 +59,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-16 18:25:49.833836",
+ "modified": "2022-03-17 12:21:16.156437",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Update Log",
