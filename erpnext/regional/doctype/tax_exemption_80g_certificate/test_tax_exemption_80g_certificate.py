@@ -39,7 +39,7 @@ class TestTaxExemption80GCertificate(unittest.TestCase):
 		donor = create_donor()
 		create_mode_of_payment()
 		payment = frappe._dict({
-			'amount': 100 # rzp sends data in paise,
+			'amount': 100, # rzp sends data in paise
 			'method': 'Debit Card',
 			'id': 'pay_MeXAmsgeKOhq7O'
 		})
