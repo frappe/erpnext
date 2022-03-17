@@ -411,7 +411,7 @@ class TestSalarySlip(unittest.TestCase):
 	def test_email_salary_slip(self):
 		frappe.db.sql("delete from `tabEmail Queue`")
 
-		make_employee("test_email_salary_slip@salary.com")
+		make_employee("test_email_salary_slip@salary.com", company="_Test Company")
 		ss = make_employee_salary_slip("test_email_salary_slip@salary.com", "Monthly", "Test Salary Slip Email")
 		ss.company = "_Test Company"
 		ss.save()
@@ -1091,18 +1091,19 @@ def setup_test():
 def make_holiday_list(list_name=None, from_date=None, to_date=None):
 	fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company())
 	name = list_name or "Salary Slip Test Holiday List"
-	holiday_list = frappe.db.exists("Holiday List", name)
-	if not holiday_list:
-		holiday_list = frappe.get_doc({
-			"doctype": "Holiday List",
-			"holiday_list_name": name,
-			"from_date": from_date or fiscal_year[1],
-			"to_date": to_date or fiscal_year[2],
-			"weekly_off": "Sunday"
-		}).insert()
-		holiday_list.get_weekly_off_dates()
-		holiday_list.save()
-		holiday_list = holiday_list.name
+
+	frappe.delete_doc_if_exists("Holiday List", name, force=True)
+
+	holiday_list = frappe.get_doc({
+		"doctype": "Holiday List",
+		"holiday_list_name": name,
+		"from_date": from_date or fiscal_year[1],
+		"to_date": to_date or fiscal_year[2],
+		"weekly_off": "Sunday"
+	}).insert()
+	holiday_list.get_weekly_off_dates()
+	holiday_list.save()
+	holiday_list = holiday_list.name
 
 	return holiday_list
 
