@@ -36,7 +36,7 @@ def get_columns(filters):
 	"""return columns based on filters"""
 
 	columns = [_("Item") + ":Link/Item:100"] + [_("Item Name") + "::150"] + [_("Description") + "::150"] + \
-	[_("Warehouse") + ":Link/Warehouse:100"] + [_("Batch") + ":Link/Batch:100"] + [_("Incoming Rate") + ":Float:90"] + [_("Opening Qty") + ":Float:90"] + \
+	[_("Warehouse") + ":Link/Warehouse:100"] + [_("Batch") + ":Link/Batch:100"] + [_("Incoming Rate") + ":Float:120"] + [_("Opening Qty") + ":Float:120"] + \
 	[_("In Qty") + ":Float:80"] + [_("Out Qty") + ":Float:80"] + [_("Balance Qty") + ":Float:90"] + \
 	[_("UOM") + "::90"]
 
