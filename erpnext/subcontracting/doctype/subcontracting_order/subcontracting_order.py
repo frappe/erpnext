@@ -29,10 +29,12 @@ class SubcontractingOrder(Document):
 def make_subcontracting_receipt(source_name, target_doc=None):
 	return get_mapped_subcontracting_receipt(source_name, target_doc)
 
-def get_mapped_subcontracting_receipt(source_name, target_doc=None, ignore_permissions=False):
-	fields = {
+def get_mapped_subcontracting_receipt(source_name, target_doc=None):
+	doc = get_mapped_doc("Subcontracting Order", source_name,	{
 		"Subcontracting Order": {
 			"doctype": "Subcontracting Receipt",
+			"field_map": {
+			},
 			"validation": {
 				"docstatus": ["=", 1],
 			}
@@ -46,7 +48,6 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None, ignore_permi
 		"Subcontracting Order Supplied Item": {
 			"doctype": "Subcontracting Receipt Supplied Item",
 		},
-	}
+	}, target_doc)
 
-	doc = get_mapped_doc("Subcontracting Order", source_name, fields)
 	return doc
