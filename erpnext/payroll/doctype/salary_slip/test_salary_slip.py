@@ -411,7 +411,7 @@ class TestSalarySlip(unittest.TestCase):
 	def test_email_salary_slip(self):
 		frappe.db.sql("delete from `tabEmail Queue`")
 
-		make_employee("test_email_salary_slip@salary.com")
+		make_employee("test_email_salary_slip@salary.com", company="_Test Company")
 		ss = make_employee_salary_slip("test_email_salary_slip@salary.com", "Monthly", "Test Salary Slip Email")
 		ss.company = "_Test Company"
 		ss.save()
