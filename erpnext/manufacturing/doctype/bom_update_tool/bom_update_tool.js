@@ -28,13 +28,13 @@ frappe.ui.form.on('BOM Update Tool', {
 	},
 
 	current_bom: (frm) => {
-		if (frm.doc.current_bom && frm.doc.new_bom){
+		if (frm.doc.current_bom && frm.doc.new_bom) {
 			frm.events.disable_button(frm, "replace", false);
 		}
 	},
 
 	new_bom: (frm) => {
-		if (frm.doc.current_bom && frm.doc.new_bom){
+		if (frm.doc.current_bom && frm.doc.new_bom) {
 			frm.events.disable_button(frm, "replace", false);
 		}
 	},
@@ -72,7 +72,7 @@ frappe.ui.form.on('BOM Update Tool', {
 	},
 
 	confirm_job_start: (frm, log_data) => {
-		let log_link = frappe.utils.get_form_link("BOM Update Log", log_data.name, true)
+		let log_link = frappe.utils.get_form_link("BOM Update Log", log_data.name, true);
 		frappe.msgprint({
 			"message": __(`BOM Updation is queued and may take a few minutes. Check ${log_link} for progress.`),
 			"title": __("BOM Update Initiated"),

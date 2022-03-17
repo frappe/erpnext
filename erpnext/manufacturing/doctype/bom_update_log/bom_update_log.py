@@ -1,8 +1,8 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 from typing import Dict, List, Optional
-import click
 
+import click
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -89,39 +89,39 @@ def replace_bom(boms: Dict) -> None:
 			bom_obj.save_version()
 
 def update_new_bom(unit_cost: float, current_bom: str, new_bom: str) -> None:
-		bom_item = frappe.qb.DocType("BOM Item")
-		frappe.qb.update(bom_item).set(
-			bom_item.bom_no, new_bom
-		).set(
-			bom_item.rate, unit_cost
-		).set(
-			bom_item.amount, (bom_item.stock_qty * unit_cost)
-		).where(
-			(bom_item.bom_no == current_bom)
-			& (bom_item.docstatus < 2)
-			& (bom_item.parenttype == "BOM")
-		).run()
+	bom_item = frappe.qb.DocType("BOM Item")
+	frappe.qb.update(bom_item).set(
+		bom_item.bom_no, new_bom
+	).set(
+		bom_item.rate, unit_cost
+	).set(
+		bom_item.amount, (bom_item.stock_qty * unit_cost)
+	).where(
+		(bom_item.bom_no == current_bom)
+		& (bom_item.docstatus < 2)
+		& (bom_item.parenttype == "BOM")
+	).run()
 
 def get_parent_boms(new_bom: str, bom_list: Optional[List] = None) -> List:
-		bom_list = bom_list or []
-		bom_item = frappe.qb.DocType("BOM Item")
+	bom_list = bom_list or []
+	bom_item = frappe.qb.DocType("BOM Item")
 
-		parents = frappe.qb.from_(bom_item).select(
-			bom_item.parent
-		).where(
-			(bom_item.bom_no == new_bom)
-			& (bom_item.docstatus <2)
-			& (bom_item.parenttype == "BOM")
-		).run(as_dict=True)
+	parents = frappe.qb.from_(bom_item).select(
+		bom_item.parent
+	).where(
+		(bom_item.bom_no == new_bom)
+		& (bom_item.docstatus <2)
+		& (bom_item.parenttype == "BOM")
+	).run(as_dict=True)
 
-		for d in parents:
-			if new_bom == d.parent:
-				frappe.throw(_("BOM recursion: {0} cannot be child of {1}").format(new_bom, d.parent))
+	for d in parents:
+		if new_bom == d.parent:
+			frappe.throw(_("BOM recursion: {0} cannot be child of {1}").format(new_bom, d.parent))
 
-			bom_list.append(d.parent)
-			get_parent_boms(d.parent, bom_list)
+		bom_list.append(d.parent)
+		get_parent_boms(d.parent, bom_list)
 
-		return list(set(bom_list))
+	return list(set(bom_list))
 
 def get_new_bom_unit_cost(new_bom: str) -> float:
 	bom = frappe.qb.DocType("BOM")

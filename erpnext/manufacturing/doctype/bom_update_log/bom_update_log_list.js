@@ -6,7 +6,7 @@ frappe.listview_settings['BOM Update Log'] = {
 			"In Progress": "blue",
 			"Completed": "green",
 			"Failed": "red"
-		}
+		};
 
 		return [__(doc.status), status_map[doc.status], "status,=," + doc.status];
 	}
