@@ -51,6 +51,30 @@ frappe.ui.form.on('Subcontracting Receipt Service Item', {
 	},
 });
 
+frappe.ui.form.on('Subcontracting Receipt Finished Good Item', {
+	item_code(frm, cdt, cdn) {
+		calculate_amount(frm, cdt, cdn);
+	},
+	qty(frm, cdt, cdn) {
+		calculate_amount(frm, cdt, cdn);
+	},
+	rate(frm, cdt, cdn) {
+		calculate_amount(frm, cdt, cdn);
+	},
+});
+
+frappe.ui.form.on('Subcontracting Receipt Supplied Item', {
+	item_code(frm, cdt, cdn) {
+		calculate_amount(frm, cdt, cdn);
+	},
+	qty(frm, cdt, cdn) {
+		calculate_amount(frm, cdt, cdn);
+	},
+	rate(frm, cdt, cdn) {
+		calculate_amount(frm, cdt, cdn);
+	},
+});
+
 let calculate_amount = (frm, cdt, cdn) => {
 	let item = frappe.get_doc(cdt, cdn);
 	if (item.item_code)

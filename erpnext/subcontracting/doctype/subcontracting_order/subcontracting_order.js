@@ -77,6 +77,18 @@ frappe.ui.form.on('Subcontracting Order Finished Good Item', {
 	},
 });
 
+frappe.ui.form.on('Subcontracting Order Supplied Item', {
+	item_code(frm, cdt, cdn) {
+		calculate_amount(frm, cdt, cdn);
+	},
+	qty(frm, cdt, cdn) {
+		calculate_amount(frm, cdt, cdn);
+	},
+	rate(frm, cdt, cdn) {
+		calculate_amount(frm, cdt, cdn);
+	},
+});
+
 let make_subcontracting_receipt = () => {
 	frappe.model.open_mapped_doc({
 		method: "erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.make_subcontracting_receipt",
