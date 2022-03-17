@@ -1,0 +1,33 @@
+{
+ "add_total_row": 0,
+ "creation": "2022-03-17 13:37:11.868509",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2022-03-17 13:37:11.868509",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Comparative Cost Of Products",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Purchase Invoice",
+ "report_name": "Comparative Cost Of Products",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Purchase User"
+  },
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Auditor"
+  }
+ ]
+}
