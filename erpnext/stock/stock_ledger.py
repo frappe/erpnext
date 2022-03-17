@@ -829,7 +829,7 @@ class update_entries_after(object):
 		if msg_list:
 			message = "\n\n".join(msg_list)
 			if self.verbose:
-				frappe.throw(message, NegativeStockError, title='Insufficient Stock')
+				frappe.throw(message, NegativeStockError, title=_('Insufficient Stock'))
 			else:
 				raise NegativeStockError(message)
 
@@ -838,11 +838,13 @@ class update_entries_after(object):
 		for warehouse, data in self.data.items():
 			bin_name = get_or_make_bin(self.item_code, warehouse)
 
-			frappe.db.set_value('Bin', bin_name, {
-				"valuation_rate": data.valuation_rate,
+			updated_values = {
 				"actual_qty": data.qty_after_transaction,
 				"stock_value": data.stock_value
-			})
+			}
+			if data.valuation_rate is not None:
+				updated_values["valuation_rate"] = data.valuation_rate
+			frappe.db.set_value('Bin', bin_name, updated_values)
 
 
 def get_previous_sle_of_current_voucher(args, exclude_current_voucher=False):
@@ -1038,7 +1040,6 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 
 	if not allow_zero_rate and not valuation_rate and raise_error_if_no_rate \
 			and cint(erpnext.is_perpetual_inventory_enabled(company)):
-		frappe.local.message_log = []
 		form_link = get_link_to_form("Item", item_code)
 
 		message = _("Valuation Rate for the Item {0}, is required to do accounting entries for {1} {2}.").format(form_link, voucher_type, voucher_no)
@@ -1157,7 +1158,7 @@ def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 			neg_sle[0]["posting_date"], neg_sle[0]["posting_time"],
 			frappe.get_desk_link(neg_sle[0]["voucher_type"], neg_sle[0]["voucher_no"]))
 
-		frappe.throw(message, NegativeStockError, title='Insufficient Stock')
+		frappe.throw(message, NegativeStockError, title=_('Insufficient Stock'))
 
 
 	if not args.batch_no:
@@ -1171,7 +1172,7 @@ def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 			frappe.get_desk_link('Warehouse', args.warehouse),
 			neg_batch_sle[0]["posting_date"], neg_batch_sle[0]["posting_time"],
 			frappe.get_desk_link(neg_batch_sle[0]["voucher_type"], neg_batch_sle[0]["voucher_no"]))
-		frappe.throw(message, NegativeStockError, title="Insufficient Stock for Batch")
+		frappe.throw(message, NegativeStockError, title=_("Insufficient Stock for Batch"))
 
 
 def get_future_sle_with_negative_qty(args):

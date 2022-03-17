@@ -32,6 +32,8 @@
   "monthly_repayment_amount",
   "repayment_start_date",
   "is_term_loan",
+  "accounting_dimensions_section",
+  "cost_center",
   "account_info",
   "mode_of_payment",
   "disbursement_account",
@@ -366,12 +368,23 @@
    "options": "Account",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-25 16:29:16.325501",
+ "modified": "2022-03-10 11:50:31.957360",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
