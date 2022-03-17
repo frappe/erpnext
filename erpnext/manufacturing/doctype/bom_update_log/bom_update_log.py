@@ -152,11 +152,13 @@ def run_bom_job(doc: "BOMUpdateLog", boms: Optional[Dict] = None, update_type: O
 
 	except (Exception, JobTimeoutException):
 		frappe.db.rollback()
-		frappe.log_error(
+		error_log = frappe.log_error(
 			message=frappe.get_traceback(),
 			title=_("BOM Update Tool Error")
 		)
+
 		doc.db_set("status", "Failed")
+		doc.db_set("error_log", error_log.name)
 
 	finally:
 		frappe.db.auto_commit_on_many_writes = 0

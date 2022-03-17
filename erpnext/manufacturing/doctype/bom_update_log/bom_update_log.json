@@ -12,6 +12,7 @@
   "column_break_3",
   "update_type",
   "status",
+  "error_log",
   "amended_from"
  ],
  "fields": [
@@ -53,13 +54,19 @@
    "options": "BOM Update Log",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "error_log",
+   "fieldtype": "Link",
+   "label": "Error Log",
+   "options": "Error Log"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-17 12:21:16.156437",
+ "modified": "2022-03-17 12:51:28.067900",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Update Log",
