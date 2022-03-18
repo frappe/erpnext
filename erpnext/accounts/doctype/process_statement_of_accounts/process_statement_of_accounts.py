@@ -54,6 +54,7 @@ def get_report_pdf(doc, consolidated=True):
 				'range2': 60,
 				'range3': 90,
 				'range4': 120,
+				'range5': 121,
 				'customer': entry.customer
 			})
 			col1, ageing = get_ageing(ageing_filters)
@@ -81,7 +82,7 @@ def get_report_pdf(doc, consolidated=True):
 			'currency': doc.currency,
 			'cost_center': [cc.cost_center_name for cc in doc.cost_center],
 			'project': [p.project_name for p in doc.project],
-			'show_opening_entries': 0,
+			'show_opening_entries': 1,
 			'include_default_book_entries': 0,
 			'tax_id': tax_id if tax_id else None
 		})

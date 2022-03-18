@@ -13,7 +13,7 @@
 		</div>
 		{% endif %}
 	</div>
-	<h2 class="text-center">{{ _("STATEMENTS OF ACCOUNTS") }}</h2>
+	<h2 class="text-center">{{ filters.company }}<br>{{ _("Statement of Account") }}</h2>
 	<div>
 		<h5 style="float: left;">{{ _("Customer: ") }} <b>{{filters.party[0] }}</b></h5>
 		<h5 style="float: right;">
@@ -25,49 +25,136 @@
 	</div>
 	<br>
 
-	<table class="table table-bordered">
+	{% if filters.company == "NaturalMeds" %}
+		{% set brandColour = '#FF5F4E' %}
+		{% set brandHeader = 'background-color:#FF5F4E!important;color:white!important;' %}
+	{% elif filters.company == "FxMed" %}
+		{% set brandColour = '#266825' %}
+		{% set brandHeader = 'background-color:#266825!important;color:white!important;' %}
+	{% elif filters.company == "RN Labs" %}
+		{% set brandColour = '#323AA8' %}
+		{% set brandHeader = 'background-color:#323AA8!important;color:white!important;' %}
+	{% elif filters.company == "Therahealth" %}
+		{% set brandColour = '#F0AA44' %}
+		{% set brandHeader = 'background-color:#F0AA44!important;color:white!important;' %}
+	{% endif %}
+	<style>
+
+		#statementTable {
+			border: 0px solid #d1d8dd!important;
+  			border-radius: 10px!important;
+			border-collapse: separate !important;
+			border-spacing: 0;
+			min-width: 350px;
+		}
+
+		#statementTable > tbody > tr:last-child > td, #statementTable > tbody > tr:first-child > td, #statementTable > thead > tr > th {
+			color:white!important;
+			font-weight:bold!important;
+			background-color:{{brandColour}}!important;
+		}
+
+		#statementTable > tbody > tr:last-child > td > b, #statementTable > tbody > tr:first-child > td > b {
+			color:white!important;
+		}
+
+		#statementTable tr th,
+		#statementTable tr td {
+			border-right: 1px solid #d1d8dd;
+			border-bottom: 1px solid #d1d8dd;
+			padding: 5px;
+		}
+
+		#statementTable tr th:first-child,
+		#statementTable tr td:first-child {
+			border-left: 1px solid #d1d8dd;
+		}
+		#statementTable tr th:first-child,
+		#statementTable tr td:first-child {
+			border-left: 1px solid #d1d8dd;
+		}
+		#statementTable tr th {
+			text-align: left;
+			border-top: solid 1px #d1d8dd;
+		}
+
+		/* top-left border-radius */
+		#statementTable tr:first-child th:first-child {
+			border-top-left-radius: 10px;
+		}
+
+		/* top-right border-radius */
+		#statementTable tr:first-child th:last-child {
+			border-top-right-radius: 10px;
+		}
+
+		/* bottom-left border-radius */
+		#statementTable tr:last-child td:first-child {
+			border-bottom-left-radius: 10px;
+		}
+
+		/* bottom-right border-radius */
+		#statementTable tr:last-child td:last-child {
+			border-bottom-right-radius: 10px;
+		}
+
+	</style>
+	<table id="statementTable" class="table">
 		<thead>
 			<tr>
-				<th style="width: 12%">{{ _("Date") }}</th>
-				<th style="width: 15%">{{ _("Reference") }}</th>
-				<th style="width: 25%">{{ _("Remarks") }}</th>
-				<th style="width: 15%">{{ _("Debit") }}</th>
-				<th style="width: 15%">{{ _("Credit") }}</th>
-				<th style="width: 18%">{{ _("Balance (Dr - Cr)") }}</th>
+				<th style="width: 8%;">{{ _("Date") }}</th>
+				<th style="width: 15%;">{{ _("Reference") }}</th>
+				<th style="width: 50%;">{{ _("Remarks") }}</th>
+				<th style="width: 8%; text-align:right;">{{ _("Debit") }}</th>
+				<th style="width: 8%; text-align:right;">{{ _("Credit/Payment") }}</th>
+				<th style="width: 11%; text-align:right;">{{ _("Balance (Dr - Cr)") }}</th>
 			</tr>
 		</thead>
 		<tbody>
 		{% for row in data %}
 			<tr>
 			{% if(row.posting_date) %}
-				<td>{{ frappe.format(row.posting_date, 'Date') }}</td>
-				<td>{{ row.voucher_type }}
-					<br>{{ row.voucher_no }}</td>
+				<td>
+					{{ frappe.format(row.posting_date, 'Date') }}</td>
+				<td>
+					{{ row.voucher_no }}
+				</td>
 				<td>
 					{% if not (filters.party or filters.account)  %}
 						{{ row.party or row.account }}
 						<br>
 					{% endif %}
-
-					{{ _("Against") }}: {{ row.against }}
-					<br>{{ _("Remarks") }}: {{ row.remarks }}
+					{% if row.remarks == "No Remarks" %}
+						&nbsp;
+					{% else %}
+						{{ row.remarks }}
+					{% endif %}
 					{% if row.bill_no %}
 						<br>{{ _("Supplier Invoice No") }}: {{ row.bill_no }}
 					{% endif %}
-					</td>
-					<td style="text-align: right">
-						{{ frappe.utils.fmt_money(row.debit, currency=filters.presentation_currency) }}</td>
-					<td style="text-align: right">
-						{{ frappe.utils.fmt_money(row.credit, currency=filters.presentation_currency) }}</td>
+				</td>
+				<td style="text-align: right">
+					{{ frappe.utils.fmt_money(row.debit, currency=filters.presentation_currency) }}</td>
+				<td style="text-align: right">
+					{{ frappe.utils.fmt_money(row.credit, currency=filters.presentation_currency) }}</td>
 			{% else %}
 				<td></td>
 				<td></td>
 				<td><b>{{ frappe.format(row.account, {fieldtype: "Link"}) or "&nbsp;" }}</b></td>
+				
 				<td style="text-align: right">
-					{{ row.account and frappe.utils.fmt_money(row.debit, currency=filters.presentation_currency) }}
+					{% if (row.account == "Opening" or row.account == "Closing (Opening + Total)")  %}
+						&nbsp;
+					{% else %}
+						{{ row.account and frappe.utils.fmt_money(row.debit, currency=filters.presentation_currency) }}
+					{% endif %}
 				</td>
-				<td style="text-align: right">
-					{{ row.account and frappe.utils.fmt_money(row.credit, currency=filters.presentation_currency) }}
+				<td style="text-align: right;">
+					{% if (row.account == "Opening" or row.account == "Closing (Opening + Total)")  %}
+						&nbsp;
+					{% else %}
+						{{ row.account and frappe.utils.fmt_money(row.credit, currency=filters.presentation_currency) }}
+					{% endif %}
 				</td>
 			{% endif %}
 				<td style="text-align: right">
@@ -79,24 +166,26 @@
 	</table>
 	<br>
 	{% if ageing %}
-	<h4 class="text-center">{{ _("Ageing Report based on ") }} {{ ageing.ageing_based_on }}
+	<h4 class="text-center">{{ _("Ageing based on ") }} {{ ageing.ageing_based_on }}
 		{{ _("up to " ) }}  {{ frappe.format(filters.to_date, 'Date')}}
 	</h4>
-	<table class="table table-bordered">
+	<table style="width:50%;margin:auto; border:1px solid #d1d8dd!important; overflow: hidden; border-radius:10px!important;border-collapse: separate !important;" class="table">
 		<thead>
 			<tr>
-				<th style="width: 25%">30 Days</th>
-				<th style="width: 25%">60 Days</th>
-				<th style="width: 25%">90 Days</th>
-				<th style="width: 25%">120 Days</th>
+				<th style="border-radius:10px 0px 0px 0px; width: 20%; text-align:center;{{brandHeader}}">30 Days</th>
+				<th style="width: 20%; text-align:center;{{brandHeader}}">60 Days</th>
+				<th style="width: 20%; text-align:center;{{brandHeader}}">90 Days</th>
+				<th style="width: 20%; text-align:center;{{brandHeader}}">120 Days</th>
+				<th style="border-radius:0px 10px 0px 0px; width: 20%; text-align:center;{{brandHeader}}">120 Days +</th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr>
-				<td>{{ frappe.utils.fmt_money(ageing.range1, currency=filters.presentation_currency) }}</td>
-				<td>{{ frappe.utils.fmt_money(ageing.range2, currency=filters.presentation_currency) }}</td>
-				<td>{{ frappe.utils.fmt_money(ageing.range3, currency=filters.presentation_currency) }}</td>
-				<td>{{ frappe.utils.fmt_money(ageing.range4, currency=filters.presentation_currency) }}</td>
+				<td style="border-right:1px solid white!important; border-radius: 0px 0px 0px 10px!important;text-align:center;">{{ frappe.utils.fmt_money(ageing.range1, currency=filters.presentation_currency) }}</td>
+				<td style="text-align:center;">{{ frappe.utils.fmt_money(ageing.range2, currency=filters.presentation_currency) }}</td>
+				<td style="text-align:center;">{{ frappe.utils.fmt_money(ageing.range3, currency=filters.presentation_currency) }}</td>
+				<td style="text-align:center;">{{ frappe.utils.fmt_money(ageing.range4, currency=filters.presentation_currency) }}</td>
+				<td style="border-left:1px solid white!important;border-radius: 0px 0px 10px 0px!important;text-align:center;">{{ frappe.utils.fmt_money(ageing.range5, currency=filters.presentation_currency) }}</td>
 			</tr>
 		</tbody>
 	</table>
