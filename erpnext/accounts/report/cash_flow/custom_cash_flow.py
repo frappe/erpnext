@@ -4,7 +4,8 @@
 
 import frappe
 from frappe import _
-from frappe.utils import add_to_date
+from frappe.query_builder.functions import Sum
+from frappe.utils import add_to_date, get_date_str
 
 from erpnext.accounts.report.financial_statements import get_columns, get_data, get_period_list
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
@@ -28,15 +29,22 @@ def get_mappers_from_db():
 
 
 def get_accounts_in_mappers(mapping_names):
-	return frappe.db.sql('''
-		select cfma.name, cfm.label, cfm.is_working_capital, cfm.is_income_tax_liability,
-		cfm.is_income_tax_expense, cfm.is_finance_cost, cfm.is_finance_cost_adjustment, cfma.account
-		from `tabCash Flow Mapping Accounts` cfma
-		join `tabCash Flow Mapping` cfm on cfma.parent=cfm.name
-		where cfma.parent in (%s)
-		order by cfm.is_working_capital
-	''', (', '.join('%s' % d for d in mapping_names)))
+	cfm = frappe.qb.DocType('Cash Flow Mapping')
+	cfma = frappe.qb.DocType('Cash Flow Mapping Accounts')
+	result = (
+		frappe.qb
+			.select(
+				cfma.name, cfm.label, cfm.is_working_capital,
+				cfm.is_income_tax_liability, cfm.is_income_tax_expense,
+				cfm.is_finance_cost, cfm.is_finance_cost_adjustment, cfma.account
+			)
+			.from_(cfm)
+			.join(cfma)
+			.on(cfm.name == cfma.parent)
+			.where(cfma.parent.isin(mapping_names))
+		).run()
 
+	return result
 
 def setup_mappers(mappers):
 	cash_flow_accounts = []
@@ -371,14 +379,30 @@ def execute(filters=None):
 
 
 def _get_account_type_based_data(filters, account_names, period_list, accumulated_values, opening_balances=0):
+	if not account_names or not account_names[0] or not type(account_names[0]) == str:
+		# only proceed if account_names is a list of account names
+		return {}
+
 	from erpnext.accounts.report.cash_flow.cash_flow import get_start_date
 
 	company = filters.company
 	data = {}
 	total = 0
+	GLEntry = frappe.qb.DocType('GL Entry')
+	Account = frappe.qb.DocType('Account')
+
 	for period in period_list:
 		start_date = get_start_date(period, accumulated_values, company)
-		accounts = ', '.join('%s' % d for d in account_names)
+
+		account_subquery = (
+			frappe.qb.from_(Account)
+			.where(
+				(Account.name.isin(account_names)) |
+				(Account.parent_account.isin(account_names))
+			)
+			.select(Account.name)
+			.as_("account_subquery")
+		)
 
 		if opening_balances:
 			date_info = dict(date=start_date)
@@ -395,32 +419,31 @@ def _get_account_type_based_data(filters, account_names, period_list, accumulate
 			else:
 				start, end = add_to_date(**date_info), add_to_date(**date_info)
 
-			gl_sum = frappe.db.sql_list("""
-				select sum(credit) - sum(debit)
-				from `tabGL Entry`
-				where company=%s and posting_date >= %s and posting_date <= %s
-					and voucher_type != 'Period Closing Voucher'
-					and account in ( SELECT name FROM tabAccount WHERE name IN (%s)
-					OR parent_account IN (%s))
-			""", (company, start, end, accounts, accounts))
-		else:
-			gl_sum = frappe.db.sql_list("""
-				select sum(credit) - sum(debit)
-				from `tabGL Entry`
-				where company=%s and posting_date >= %s and posting_date <= %s
-					and voucher_type != 'Period Closing Voucher'
-					and account in ( SELECT name FROM tabAccount WHERE name IN (%s)
-					OR parent_account IN (%s))
-			""", (company, start_date if accumulated_values else period['from_date'],
-				period['to_date'], accounts, accounts))
+			start, end = get_date_str(start), get_date_str(end)
 
-		if gl_sum and gl_sum[0]:
-			amount = gl_sum[0]
 		else:
-			amount = 0
+			start, end = start_date if accumulated_values else period['from_date'], period['to_date']
+			start, end = get_date_str(start), get_date_str(end)
 
-		total += amount
-		data.setdefault(period["key"], amount)
+		result = (
+			frappe.qb.from_(GLEntry)
+			.select(Sum(GLEntry.credit) - Sum(GLEntry.debit))
+			.where(
+				(GLEntry.company == company) &
+				(GLEntry.posting_date >= start) &
+				(GLEntry.posting_date <= end) &
+				(GLEntry.voucher_type != 'Period Closing Voucher') &
+				(GLEntry.account.isin(account_subquery))
+			)
+		).run()
+
+		if result and result[0]:
+			gl_sum = result[0][0]
+		else:
+			gl_sum = 0
+
+		total += gl_sum
+		data.setdefault(period["key"], gl_sum)
 
 	data["total"] = total
 	return data
