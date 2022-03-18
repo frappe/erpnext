@@ -170,6 +170,7 @@ class BOM(WebsiteGenerator):
 			frappe.throw(_("Please select a Company first."), title=_("Mandatory"))
 
 		self.clear_operations()
+		self.clear_inspection()
 		self.validate_main_item()
 		self.validate_currency()
 		self.set_conversion_rate()
@@ -424,6 +425,10 @@ class BOM(WebsiteGenerator):
 	def clear_operations(self):
 		if not self.with_operations:
 			self.set('operations', [])
+
+	def clear_inspection(self):
+		if not self.inspection_required:
+			self.quality_inspection_template = None
 
 	def validate_main_item(self):
 		""" Validate main FG item"""

@@ -2615,6 +2615,11 @@ class TestSalesInvoice(unittest.TestCase):
 
 		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
 
+	def test_standalone_serial_no_return(self):
+		si = create_sales_invoice(item_code="_Test Serialized Item With Series", update_stock=True, is_return=True, qty=-1)
+		si.reload()
+		self.assertTrue(si.items[0].serial_no)
+
 	def test_advance_payment_against_sales_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
@@ -2673,6 +2678,7 @@ def create_customer(customer_name,  billing_currency, party_account=None):
 		}).insert()
 
 	return customer
+
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
