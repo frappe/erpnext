@@ -620,9 +620,9 @@ class BuyingController(StockController):
 	def check_for_on_hold_or_closed_status(self, ref_doctype, ref_fieldname):
 		for d in self.get("items"):
 			if d.get(ref_fieldname):
-				status = frappe.db.get_value(ref_doctype, d.get(ref_fieldname), "status")
+				status = frappe.db.get_value(ref_doctype, d.get(ref_fieldname), "status", cache=1)
 				if status in ("Closed", "On Hold"):
-					frappe.throw(_("{0} {1} is {2}").format(ref_doctype,d.get(ref_fieldname), status))
+					frappe.throw(_("{0} {1} is {2}").format(ref_doctype, d.get(ref_fieldname), status))
 
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
 		if not frappe.flags.do_not_update_reserved_qty:
