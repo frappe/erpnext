@@ -100,7 +100,7 @@ erpnext.SerialNoBatchSelector = class SerialNoBatchSelector {
 							qty: qty,
 							item_code: me.item_code,
 							warehouse: typeof me.warehouse_details.name == "string" ? me.warehouse_details.name : '',
-							batch_no: me.item.batch_no || null,
+							batch_nos: me.item.batch_no || null,
 							posting_date: me.frm.doc.posting_date || me.frm.doc.transaction_date
 						}
 					});
