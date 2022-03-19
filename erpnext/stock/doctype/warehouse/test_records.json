@@ -65,7 +65,7 @@
   "company": "_Test Company",
   "doctype": "Warehouse",
   "warehouse_name": "_Test Retain Sample Warehouse",
-  "parent_warehouse": "_Test Warehouse",
+  "parent_warehouse": "_Test Warehouse Group - _TC",
   "is_group": 0
  }
 ]
