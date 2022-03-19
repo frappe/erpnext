@@ -33,6 +33,7 @@
   "service_items",
   "fg_items",
   "total_qty",
+  "supplied_items",
   "base_total",
   "base_net_total"
  ],
@@ -267,12 +268,31 @@
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+    "fieldname": "supplied_items",
+    "fieldtype": "Table",
+    "label": "Supplied Items",
+    "no_copy": 1,
+    "options": "Subcontracting Order Supplied Item",
+    "print_hide": 1,
+    "read_only": 1
+  },
+  {
+    "depends_on": "eval:!doc.__islocal",
+    "fieldname": "per_received",
+    "fieldtype": "Percent",
+    "in_list_view": 1,
+    "label": "% Received",
+    "no_copy": 1,
+    "print_hide": 1,
+    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-16 17:03:06.296867",
+ "modified": "2022-03-19 18:27:15.011211",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order",
