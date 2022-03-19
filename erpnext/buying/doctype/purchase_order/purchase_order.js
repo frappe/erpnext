@@ -53,39 +53,6 @@ frappe.ui.form.on("Purchase Order", {
 		} else {
 			frm.set_value("tax_withholding_category", frm.supplier_tds);
 		}
-	},
-
-	refresh: function(frm) {
-		frm.trigger('get_materials_from_supplier');
-	},
-
-	get_materials_from_supplier: function(frm) {
-		let po_details = [];
-
-		if (frm.doc.supplied_items && (frm.doc.per_received == 100 || frm.doc.status === 'Closed')) {
-			frm.doc.supplied_items.forEach(d => {
-				if (d.total_supplied_qty && d.total_supplied_qty != d.consumed_qty) {
-					po_details.push(d.name)
-				}
-			});
-		}
-
-		if (po_details && po_details.length) {
-			frm.add_custom_button(__('Return of Components'), () => {
-				frm.call({
-					method: 'erpnext.buying.doctype.purchase_order.purchase_order.get_materials_from_supplier',
-					freeze: true,
-					freeze_message: __('Creating Stock Entry'),
-					args: { purchase_order: frm.doc.name, po_details: po_details },
-					callback: function(r) {
-						if (r && r.message) {
-							const doc = frappe.model.sync(r.message);
-							frappe.set_route("Form", doc[0].doctype, doc[0].name);
-						}
-					}
-				});
-			}, __('Create'));
-		}
 	}
 });
 

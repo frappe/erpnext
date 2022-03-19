@@ -44,6 +44,8 @@ frappe.ui.form.on('Subcontracting Order', {
 			cur_frm.add_custom_button(__('Subcontracting Receipt'), make_subcontracting_receipt, __('Create'));
 			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
+
+		frm.trigger('get_materials_from_supplier');
 	},
 
 	purchase_order: function (frm) {
@@ -51,6 +53,35 @@ frappe.ui.form.on('Subcontracting Order', {
 			frm.set_value("service_items", null);
 		}
 	},
+
+	get_materials_from_supplier: function (frm) {
+		let fg_items = [];
+
+		if (frm.doc.supplied_items && (frm.doc.per_received == 100 || frm.doc.status === 'Completed')) {
+			frm.doc.supplied_items.forEach(d => {
+				if (d.total_supplied_qty && d.total_supplied_qty != d.consumed_qty) {
+					fg_items.push(d.name)
+				}
+			});
+		}
+
+		if (fg_items && fg_items.length) {
+			frm.add_custom_button(__('Return of Components'), () => {
+				frm.call({
+					method: 'erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.get_materials_from_supplier',
+					freeze: true,
+					freeze_message: __('Creating Stock Entry...'),
+					args: { subcontracting_order: frm.doc.name, sco_details: fg_items },
+					callback: function (r) {
+						if (r && r.message) {
+							const doc = frappe.model.sync(r.message);
+							frappe.set_route("Form", doc[0].doctype, doc[0].name);
+						}
+					}
+				});
+			}, __('Create'));
+		}
+	}
 });
 
 frappe.ui.form.on('Subcontracting Order Service Item', {
