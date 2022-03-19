@@ -583,8 +583,14 @@ def get_delivery_note_serial_no(item_code, qty, delivery_note):
 	return serial_nos
 
 @frappe.whitelist()
-def auto_fetch_serial_number(qty, item_code, warehouse, posting_date=None, batch_nos=None, for_doctype=None):
+def auto_fetch_serial_number(qty, item_code, warehouse,
+		posting_date=None, batch_nos=None, for_doctype=None, exclude_sr_nos=None):
 	filters = { "item_code": item_code, "warehouse": warehouse }
+
+	if exclude_sr_nos is None:
+		exclude_sr_nos = []
+	else:
+		exclude_sr_nos = get_serial_nos(clean_serial_no_string("\n".join(exclude_sr_nos)))
 
 	if batch_nos:
 		try:
@@ -597,10 +603,9 @@ def auto_fetch_serial_number(qty, item_code, warehouse, posting_date=None, batch
 
 	serial_numbers = []
 	if for_doctype == 'POS Invoice':
-		reserved_sr_nos = get_pos_reserved_serial_nos(filters)
-		serial_numbers = fetch_serial_numbers(filters, qty, do_not_include=reserved_sr_nos)
-	else:
-		serial_numbers = fetch_serial_numbers(filters, qty)
+		exclude_sr_nos.extend(get_pos_reserved_serial_nos(filters))
+
+	serial_numbers = fetch_serial_numbers(filters, qty, do_not_include=exclude_sr_nos)
 
 	return [d.get('name') for d in serial_numbers]
 
