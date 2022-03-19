@@ -282,13 +282,16 @@ def unconsolidate_pos_invoices(closing_entry):
 
 def collect_invocie_by_customers(invoice_by_customer, invoice_by_defualt_customer):
     tmp_ob={}
-    tmp_ob[invoice_by_defualt_customer]=[]
     for customer,invoice in six.iteritems(invoice_by_customer):
         da=frappe.get_doc("Customer", customer).forward_sale
         if(da):
             tmp_ob.update({customer:invoice})
         else:
-            tmp_ob[invoice_by_defualt_customer]+=invoice
+            if(not invoice_by_defualt_customer in tmp_ob.keys()):
+                tmp_ob[invoice_by_defualt_customer]=[]
+                tmp_ob[invoice_by_defualt_customer]+=invoice
+            else:
+                tmp_ob[invoice_by_defualt_customer]+=invoice
     return tmp_ob
 
 def create_merge_logs(invoice_by_customer, closing_entry=None,invoice_by_defualt_customer=None):
