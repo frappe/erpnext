@@ -659,10 +659,7 @@ class TestItem(FrappeTestCase):
 	@change_settings("Stock Settings", {"sample_retention_warehouse": 0})
 	def test_retain_sample(self):
 		frappe.db.set_single_value('Stock Settings', 'sample_retention_warehouse', '_Test Retain Sample Warehouse')
-		item = make_item("_TestRetainSample",
-		                 {'has_batch_no':1,
-		                  'retain_sample':1,
-		                  'sample_quantity' :1})
+		item = make_item("_TestRetainSample", {'has_batch_no': 1, 'retain_sample': 1, 'sample_quantity': 1})
 
 		self.assertEqual(item.has_batch_no, 1)
 		self.assertEqual(item.retain_sample, 1)
