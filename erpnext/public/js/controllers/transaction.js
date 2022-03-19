@@ -233,28 +233,17 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					},
 					callback: function (r) {
 						if (!r.exc) {
-							var customer_changed = false;
-							var prev_bill_to = cstr(frm.doc.bill_to);
-							var prev_customer = cstr(frm.doc.customer);
+							var customer = null;
+							var bill_to = null;
 							var applies_to_vehicle = null;
 
 							// Set Customer and Bill To first
 							if (r.message.customer) {
-								if (frm.fields_dict.customer) {
-									frm.doc.customer = r.message.customer;
-									if (frm.doc.customer != prev_customer) {
-										customer_changed = true;
-									}
-								}
+								customer = r.message.customer;
 								delete r.message['customer'];
 							}
 							if (r.message.bill_to) {
-								if (frm.fields_dict.bill_to) {
-									frm.doc.bill_to = r.message.bill_to;
-									if (frm.doc.bill_to != prev_bill_to) {
-										customer_changed = true;
-									}
-								}
+								bill_to = r.message.bill_to;
 								delete r.message['bill_to'];
 							}
 
@@ -271,12 +260,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 							return frappe.run_serially([
 								() => {
-									if (customer_changed) {
-										if (frm.fields_dict.bill_to) {
-											return frm.trigger('bill_to');
-										} else if (frm.fields_dict.customer) {
-											return frm.trigger('customer');
-										}
+									if (bill_to && frm.fields_dict.bill_to) {
+										frm.doc.customer = customer;
+										return frm.set_value('bill_to', bill_to);
+									} else if (customer && frm.fields_dict.customer) {
+										return frm.set_value('customer', customer);
 									}
 								},
 								() => frm.set_value(r.message),
