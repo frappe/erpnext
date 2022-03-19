@@ -158,9 +158,10 @@ def add_node():
 	frappe.get_doc(args).insert()
 
 @frappe.whitelist()
-def convert_to_group_or_ledger():
-	args = frappe.form_dict
-	return frappe.get_doc("Warehouse", args.docname).convert_to_group_or_ledger()
+def convert_to_group_or_ledger(docname=None):
+	if not docname:
+		docname = frappe.form_dict.docname
+	return frappe.get_doc("Warehouse", docname).convert_to_group_or_ledger()
 
 def get_child_warehouses(warehouse):
 	from frappe.utils.nestedset import get_descendants_of
