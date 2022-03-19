@@ -8,10 +8,14 @@ import frappe
 from frappe import ValidationError, _
 from frappe.model.naming import make_autoname
 <<<<<<< HEAD
+<<<<<<< HEAD
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate
 from six import string_types
 from six.moves import map
 =======
+=======
+from frappe.query_builder.functions import Coalesce
+>>>>>>> 4b695915f4 (refactor: Use QB for serial fetching query)
 from frappe.utils import (
 	add_days,
 	cint,
@@ -649,37 +653,37 @@ def get_pos_reserved_serial_nos(filters):
 def fetch_serial_numbers(filters, qty, do_not_include=None):
 	if do_not_include is None:
 		do_not_include = []
-	batch_join_selection = ""
-	batch_no_condition = ""
+
 	batch_nos = filters.get("batch_no")
 	expiry_date = filters.get("expiry_date")
+	serial_no = frappe.qb.DocType("Serial No")
+
+	query = (
+		frappe.qb
+			.from_(serial_no)
+			.select(serial_no.name)
+			.where(
+				(serial_no.item_code == filters["item_code"])
+				& (serial_no.warehouse == filters["warehouse"])
+				& (Coalesce(serial_no.sales_invoice, "") == "")
+				& (Coalesce(serial_no.delivery_document_no, "") == "")
+			)
+			.orderby(serial_no.creation)
+			.limit(qty or 1)
+	)
+
+	if do_not_include:
+		query = query.where(serial_no.name.notin(do_not_include))
+
 	if batch_nos:
-		batch_no_condition = """and sr.batch_no in ({}) """.format(', '.join("'%s'" % d for d in batch_nos))
+		query = query.where(serial_no.batch_no.isin(batch_nos))
 
 	if expiry_date:
-		batch_join_selection = "LEFT JOIN `tabBatch` batch on sr.batch_no = batch.name "
-		expiry_date_cond = "AND ifnull(batch.expiry_date, '2500-12-31') >= %(expiry_date)s "
-		batch_no_condition += expiry_date_cond
+		batch = frappe.qb.DocType("Batch")
+		query = (query
+			.left_join(batch).on(serial_no.batch_no == batch.name)
+			.where(Coalesce(batch.expiry_date, "4000-12-31") >= expiry_date)
+		)
 
-	excluded_sr_nos = ", ".join(["" + frappe.db.escape(sr) + "" for sr in do_not_include]) or "''"
-	serial_numbers = frappe.db.sql("""
-		SELECT sr.name FROM `tabSerial No` sr {batch_join_selection}
-		WHERE
-			sr.name not in ({excluded_sr_nos}) AND
-			sr.item_code = %(item_code)s AND
-			sr.warehouse = %(warehouse)s AND
-			ifnull(sr.sales_invoice,'') = '' AND
-			ifnull(sr.delivery_document_no, '') = ''
-			{batch_no_condition}
-		ORDER BY
-			sr.creation
-		LIMIT
-			{qty}
-		""".format(
-				excluded_sr_nos=excluded_sr_nos,
-				qty=qty or 1,
-				batch_join_selection=batch_join_selection,
-				batch_no_condition=batch_no_condition
-			), filters, as_dict=1)
-
+	serial_numbers = query.run(as_dict=True)
 	return serial_numbers

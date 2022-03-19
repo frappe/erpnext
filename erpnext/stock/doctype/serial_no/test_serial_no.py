@@ -256,14 +256,17 @@ class TestSerialNo(FrappeTestCase):
 		in1.reload()
 		in2.reload()
 
+		batch1 = in1.items[0].batch_no
+		batch2 = in2.items[0].batch_no
+
 		batch_wise_serials = {
-			in1.items[0].batch_no: get_serial_nos(in1.items[0].serial_no),
-			in2.items[0].batch_no: get_serial_nos(in2.items[0].serial_no)
+			batch1 : get_serial_nos(in1.items[0].serial_no),
+			batch2: get_serial_nos(in2.items[0].serial_no)
 		}
 
 		# Test FIFO
 		first_fetch = auto_fetch_serial_number(5, item_code, warehouse)
-		self.assertEqual(first_fetch, batch_wise_serials[in1.items[0].batch_no])
+		self.assertEqual(first_fetch, batch_wise_serials[batch1])
 
 		# partial FIFO
 		partial_fetch = auto_fetch_serial_number(2, item_code, warehouse)
@@ -286,3 +289,8 @@ class TestSerialNo(FrappeTestCase):
 		all_serials = [sr for sr_list in batch_wise_serials.values() for sr in sr_list]
 		fetched_serials = auto_fetch_serial_number(10, item_code, warehouse, batch_nos=list(batch_wise_serials.keys()))
 		self.assertEqual(sorted(all_serials), fetched_serials)
+
+		# expiry date
+		frappe.db.set_value("Batch", batch1, "expiry_date", "1980-01-01")
+		non_expired_serials = auto_fetch_serial_number(5, item_code, warehouse, posting_date="2021-01-01", batch_nos=batch1)
+		self.assertEqual(non_expired_serials, [])
