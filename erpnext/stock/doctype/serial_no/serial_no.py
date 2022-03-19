@@ -588,7 +588,7 @@ def auto_fetch_serial_number(qty, item_code, warehouse,
 
 	serial_numbers = fetch_serial_numbers(filters, qty, do_not_include=exclude_sr_nos)
 
-	return [d.get('name') for d in serial_numbers]
+	return sorted([d.get('name') for d in serial_numbers])
 
 @frappe.whitelist()
 def get_pos_reserved_serial_nos(filters):
