@@ -85,7 +85,7 @@ class MaterialRequest(BuyingController):
 
 	def before_update_after_submit(self):
 		self.validate_schedule_date()
-		
+
 	def validate_material_request_type(self):
 		""" Validate fields in accordance with selected type """
 
