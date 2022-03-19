@@ -67,7 +67,7 @@
   "reference_section",
   "against_stock_entry",
   "ste_detail",
-  "po_detail",
+  "sco_detail",
   "putaway_rule",
   "column_break_51",
   "reference_purchase_receipt",
@@ -485,10 +485,10 @@
    "options": "Project"
   },
   {
-   "fieldname": "po_detail",
+   "fieldname": "sco_detail",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "PO Supplied Item",
+   "label": "SCO Supplied Item",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
