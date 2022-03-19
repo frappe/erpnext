@@ -46,8 +46,6 @@ class Warehouse(NestedSet):
 			if d['actual_qty'] or d['reserved_qty'] or d['ordered_qty'] or \
 					d['indented_qty'] or d['projected_qty'] or d['planned_qty']:
 				throw(_("Warehouse {0} can not be deleted as quantity exists for Item {1}").format(self.name, d['item_code']))
-			else:
-				frappe.db.delete("Bin", filters={"name": d["name"]})
 
 		if self.check_if_sle_exists():
 			throw(_("Warehouse can not be deleted as stock ledger entry exists for this warehouse."))
@@ -55,6 +53,7 @@ class Warehouse(NestedSet):
 		if self.check_if_child_exists():
 			throw(_("Child warehouse exists for this warehouse. You can not delete this warehouse."))
 
+		frappe.db.delete("Bin", filters={"warehouse": self.name})
 		self.update_nsm_model()
 		self.unlink_from_items()
 
