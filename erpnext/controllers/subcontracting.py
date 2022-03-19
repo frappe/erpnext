@@ -10,9 +10,6 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 class Subcontracting():
 	def set_materials_for_subcontracted_items(self, raw_material_table):
-		if self.doctype == 'Purchase Invoice' and not self.update_stock:
-			return
-
 		self.raw_material_table = raw_material_table
 		self.__identify_change_in_item_table()
 		self.__prepare_supplied_items()
@@ -20,7 +17,7 @@ class Subcontracting():
 
 	def __prepare_supplied_items(self):
 		self.initialized_fields()
-		self.__get_purchase_orders()
+		self.__get_subcontracting_orders()
 		self.__get_pending_qty_to_receive()
 		self.get_available_materials()
 		self.__remove_changed_rows()
@@ -36,19 +33,19 @@ class Subcontracting():
 		self.backflush_based_on = frappe.db.get_single_value("Buying Settings",
 			"backflush_raw_materials_of_subcontract_based_on")
 
-	def __get_purchase_orders(self):
-		self.purchase_orders = []
+	def __get_subcontracting_orders(self):
+		self.subcontracting_orders = []
 
-		if self.doctype == 'Purchase Order':
+		if self.doctype == 'Subcontracting Order':
 			return
 
-		self.purchase_orders = [d.purchase_order for d in self.items if d.purchase_order]
+		self.subcontracting_orders = [d.subcontracting_order for d in self.items if d.subcontracting_order]
 
 	def __identify_change_in_item_table(self):
 		self.__changed_name = []
 		self.__reference_name = []
 
-		if self.doctype == 'Purchase Order' or self.is_new():
+		if self.doctype == 'Subcontracting Order' or self.is_new():
 			self.set(self.raw_material_table, [])
 			return
 
@@ -68,7 +65,7 @@ class Subcontracting():
 
 	def __get_data_before_save(self):
 		item_dict = {}
-		if self.doctype in ['Purchase Receipt', 'Purchase Invoice'] and self._doc_before_save:
+		if self.doctype in ['Subcontracting Receipt'] and self._doc_before_save:
 			for row in self._doc_before_save.get('items'):
 				item_dict[row.name] = (row.item_code, row.qty)
 
@@ -77,25 +74,25 @@ class Subcontracting():
 	def get_available_materials(self):
 		''' Get the available raw materials which has been transferred to the supplier.
 			available_materials = {
-				(item_code, subcontracted_item, purchase_order): {
+				(item_code, subcontracted_item, subcontracting_order): {
 					'qty': 1, 'serial_no': [ABC], 'batch_no': {'batch1': 1}, 'data': item_details
 				}
 			}
 		'''
-		if not self.purchase_orders:
+		if not self.subcontracting_orders:
 			return
 
 		for row in self.__get_transferred_items():
-			key = (row.rm_item_code, row.main_item_code, row.purchase_order)
+			key = (row.rm_item_code, row.main_item_code, row.subcontracting_order)
 
 			if key not in self.available_materials:
 				self.available_materials.setdefault(key, frappe._dict({'qty': 0, 'serial_no': [],
-					'batch_no': defaultdict(float), 'item_details': row, 'po_details': []})
+					'batch_no': defaultdict(float), 'item_details': row, 'sco_details': []})
 				)
 
 			details = self.available_materials[key]
 			details.qty += row.qty
-			details.po_details.append(row.po_detail)
+			details.sco_details.append(row.sco_detail)
 
 			if row.serial_no:
 				details.serial_no.extend(get_serial_nos(row.serial_no))
@@ -106,7 +103,7 @@ class Subcontracting():
 			self.__set_alternative_item_details(row)
 
 		self.__transferred_items = copy.deepcopy(self.available_materials)
-		for doctype in ['Purchase Receipt', 'Purchase Invoice']:
+		for doctype in ['Subcontracting Receipt']:
 			self.__update_consumed_materials(doctype)
 
 	def __update_consumed_materials(self, doctype, return_consumed_items=False):
@@ -116,7 +113,7 @@ class Subcontracting():
 		if not pr_items:
 			return ([], {}) if return_consumed_items else None
 
-		pr_items = {d.name: d.get(self.get('po_field') or 'purchase_order') for d in pr_items}
+		pr_items = {d.name: d.get(self.get('sco_field') or 'subcontracting_order') for d in pr_items}
 		consumed_materials = self.__get_consumed_items(doctype, pr_items.keys())
 
 		if return_consumed_items:
@@ -137,12 +134,12 @@ class Subcontracting():
 				self.available_materials[key]['batch_no'][row.batch_no] -= row.consumed_qty
 
 	def __get_transferred_items(self):
-		fields = ['`tabStock Entry`.`purchase_order`']
+		fields = ['`tabStock Entry`.`subcontracting_order`']
 		alias_dict = {'item_code': 'rm_item_code', 'subcontracted_item': 'main_item_code', 'basic_rate': 'rate'}
 
 		child_table_fields = ['item_code', 'item_name', 'description', 'qty', 'basic_rate', 'amount',
 			'serial_no', 'uom', 'subcontracted_item', 'stock_uom', 'batch_no', 'conversion_factor',
-			's_warehouse', 't_warehouse', 'item_group', 'po_detail']
+			's_warehouse', 't_warehouse', 'item_group', 'sco_detail']
 
 		if self.backflush_based_on == 'BOM':
 			child_table_fields.append('original_item')
@@ -151,25 +148,23 @@ class Subcontracting():
 			fields.append(f'`tabStock Entry Detail`.`{field}` As {alias_dict.get(field, field)}')
 
 		filters = [['Stock Entry', 'docstatus', '=', 1], ['Stock Entry', 'purpose', '=', 'Send to Subcontractor'],
-			['Stock Entry', 'purchase_order', 'in', self.purchase_orders]]
+			['Stock Entry', 'subcontracting_order', 'in', self.subcontracting_orders]]
 
 		return frappe.get_all('Stock Entry', fields = fields, filters=filters)
 
 	def __get_received_items(self, doctype):
 		fields = []
-		self.po_field = 'purchase_order'
+		self.sco_field = 'subcontracting_order'
 
-		for field in ['name', self.po_field, 'parent']:
+		for field in ['name', self.sco_field, 'parent']:
 			fields.append(f'`tab{doctype} Item`.`{field}`')
 
-		filters = [[doctype, 'docstatus', '=', 1], [f'{doctype} Item', self.po_field, 'in', self.purchase_orders]]
-		if doctype == 'Purchase Invoice':
-			filters.append(['Purchase Invoice', 'update_stock', "=", 1])
+		filters = [[doctype, 'docstatus', '=', 1], [f'{doctype} Item', self.sco_field, 'in', self.subcontracting_orders]]
 
 		return frappe.get_all(f'{doctype}', fields = fields, filters = filters)
 
 	def __get_consumed_items(self, doctype, pr_items):
-		return frappe.get_all('Purchase Receipt Item Supplied',
+		return frappe.get_all('Subcontracting Receipt Supplied Item',
 			fields = ['serial_no', 'rm_item_code', 'reference_name', 'batch_no', 'consumed_qty', 'main_item_code'],
 			filters = {'docstatus': 1, 'reference_name': ('in', list(pr_items)), 'parenttype': doctype})
 
@@ -178,14 +173,14 @@ class Subcontracting():
 			self.alternative_item_details[row.get('original_item')] = row
 
 	def __get_pending_qty_to_receive(self):
-		'''Get qty to be received against the purchase order.'''
+		'''Get qty to be received against the Subcontracting Order.'''
 
 		self.qty_to_be_received = defaultdict(float)
 
-		if self.doctype != 'Purchase Order' and self.backflush_based_on != 'BOM' and self.purchase_orders:
-			for row in frappe.get_all('Purchase Order Item',
+		if self.doctype != 'Subcontracting Order' and self.backflush_based_on != 'BOM' and self.subcontracting_orders:
+			for row in frappe.get_all('Subcontracting Order Finished Good Item',
 				fields = ['item_code', '(qty - received_qty) as qty', 'parent', 'name'],
-				filters = {'docstatus': 1, 'parent': ('in', self.purchase_orders)}):
+				filters = {'docstatus': 1, 'parent': ('in', self.subcontracting_orders)}):
 
 				self.qty_to_be_received[(row.item_code, row.parent)] += row.qty
 
@@ -226,11 +221,11 @@ class Subcontracting():
 
 		has_supplied_items = True if self.get(self.raw_material_table) else False
 		for row in self.items:
-			if (self.doctype != 'Purchase Order' and ((self.__changed_name and row.name not in self.__changed_name)
+			if (self.doctype != 'Subcontracting Order' and ((self.__changed_name and row.name not in self.__changed_name)
 				or (has_supplied_items and not self.__changed_name))):
 				continue
 
-			if self.doctype == 'Purchase Order' or self.backflush_based_on == 'BOM':
+			if self.doctype == 'Subcontracting Order' or self.backflush_based_on == 'BOM':
 				for bom_item in self.__get_materials_from_bom(row.item_code, row.bom, row.get('include_exploded_items')):
 					qty = (flt(bom_item.qty_consumed_per_unit) * flt(row.qty) * row.conversion_factor)
 					bom_item.main_item_code = row.item_code
@@ -240,20 +235,20 @@ class Subcontracting():
 
 			elif self.backflush_based_on != 'BOM':
 				for key, transfer_item in self.available_materials.items():
-					if (key[1], key[2]) == (row.item_code, row.purchase_order) and transfer_item.qty > 0:
+					if (key[1], key[2]) == (row.item_code, row.subcontracting_order) and transfer_item.qty > 0:
 						qty = self.__get_qty_based_on_material_transfer(row, transfer_item) or 0
 						transfer_item.qty -= qty
 						self.__add_supplied_item(row, transfer_item.get('item_details'), qty)
 
 				if self.qty_to_be_received:
-					self.qty_to_be_received[(row.item_code, row.purchase_order)] -= row.qty
+					self.qty_to_be_received[(row.item_code, row.subcontracting_order)] -= row.qty
 
 	def __update_reserve_warehouse(self, row, item):
-		if self.doctype == 'Purchase Order':
+		if self.doctype == 'Subcontracting Order':
 			row.reserve_warehouse = (self.set_reserve_warehouse or item.warehouse)
 
 	def __get_qty_based_on_material_transfer(self, item_row, transfer_item):
-		key = (item_row.item_code, item_row.purchase_order)
+		key = (item_row.item_code, item_row.subcontracting_order)
 
 		if self.qty_to_be_received == item_row.qty:
 			return transfer_item.qty
@@ -277,15 +272,15 @@ class Subcontracting():
 		rm_obj = self.append(self.raw_material_table, bom_item)
 		rm_obj.reference_name = item_row.name
 
-		if self.doctype == 'Purchase Order':
+		if self.doctype == 'Subcontracting Order':
 			rm_obj.required_qty = qty
 		else:
 			rm_obj.consumed_qty = 0
-			rm_obj.purchase_order = item_row.purchase_order
+			rm_obj.subcontracting_order = item_row.subcontracting_order
 			self.__set_batch_nos(bom_item, item_row, rm_obj, qty)
 
 	def __set_batch_nos(self, bom_item, item_row, rm_obj, qty):
-		key = (rm_obj.rm_item_code, item_row.item_code, item_row.purchase_order)
+		key = (rm_obj.rm_item_code, item_row.item_code, item_row.subcontracting_order)
 
 		if (self.available_materials.get(key) and self.available_materials[key]['batch_no']):
 			new_rm_obj = None
@@ -314,12 +309,12 @@ class Subcontracting():
 
 	def __set_batch_no_as_per_qty(self, item_row, rm_obj, batch_no, qty):
 		rm_obj.update({'consumed_qty': qty, 'batch_no': batch_no,
-			'required_qty': qty, 'purchase_order': item_row.purchase_order})
+			'required_qty': qty, 'subcontracting_order': item_row.subcontracting_order})
 
 		self.__set_serial_nos(item_row, rm_obj)
 
 	def __set_serial_nos(self, item_row, rm_obj):
-		key = (rm_obj.rm_item_code, item_row.item_code, item_row.purchase_order)
+		key = (rm_obj.rm_item_code, item_row.item_code, item_row.subcontracting_order)
 		if (self.available_materials.get(key) and self.available_materials[key]['serial_no']):
 			used_serial_nos = self.available_materials[key]['serial_no'][0: cint(rm_obj.consumed_qty)]
 			rm_obj.serial_no = '\n'.join(used_serial_nos)
@@ -328,27 +323,27 @@ class Subcontracting():
 			for sn in used_serial_nos:
 				self.available_materials[key]['serial_no'].remove(sn)
 
-	def set_consumed_qty_in_po(self):
-		# Update consumed qty back in the purchase order
+	def set_consumed_qty_in_sco(self):
+		# Update consumed qty back in the subcontracting order
 		if self.is_subcontracted != 'Yes':
 			return
 
-		self.__get_purchase_orders()
+		self.__get_subcontracting_orders()
 		itemwise_consumed_qty = defaultdict(float)
-		for doctype in ['Purchase Receipt', 'Purchase Invoice']:
+		for doctype in ['Subcontracting Receipt']:
 			consumed_items, pr_items = self.__update_consumed_materials(doctype, return_consumed_items=True)
 
 			for row in consumed_items:
 				key = (row.rm_item_code, row.main_item_code, pr_items.get(row.reference_name))
 				itemwise_consumed_qty[key] += row.consumed_qty
 
-		self.__update_consumed_qty_in_po(itemwise_consumed_qty)
+		self.__update_consumed_qty_in_sco(itemwise_consumed_qty)
 
-	def __update_consumed_qty_in_po(self, itemwise_consumed_qty):
+	def __update_consumed_qty_in_sco(self, itemwise_consumed_qty):
 		fields = ['main_item_code', 'rm_item_code', 'parent', 'supplied_qty', 'name']
-		filters = {'docstatus': 1, 'parent': ('in', self.purchase_orders)}
+		filters = {'docstatus': 1, 'parent': ('in', self.subcontracting_orders)}
 
-		for row in frappe.get_all('Purchase Order Item Supplied', fields = fields, filters=filters, order_by='idx'):
+		for row in frappe.get_all('Subcontracting Order Supplied Item', fields = fields, filters=filters, order_by='idx'):
 			key = (row.rm_item_code, row.main_item_code, row.parent)
 			consumed_qty = itemwise_consumed_qty.get(key, 0)
 
@@ -356,16 +351,16 @@ class Subcontracting():
 				consumed_qty = row.supplied_qty
 
 			itemwise_consumed_qty[key] -= consumed_qty
-			frappe.db.set_value('Purchase Order Item Supplied', row.name, 'consumed_qty', consumed_qty)
+			frappe.db.set_value('Subcontracting Order Supplied Item', row.name, 'consumed_qty', consumed_qty)
 
 	def __validate_supplied_items(self):
-		if self.doctype not in ['Purchase Invoice', 'Purchase Receipt']:
+		if self.doctype not in ['Subcontracting Receipt']:
 			return
 
 		for row in self.get(self.raw_material_table):
 			self.__validate_consumed_qty(row)
 
-			key = (row.rm_item_code, row.main_item_code, row.purchase_order)
+			key = (row.rm_item_code, row.main_item_code, row.subcontracting_order)
 			if not self.__transferred_items or not self.__transferred_items.get(key):
 				return
 
@@ -380,8 +375,8 @@ class Subcontracting():
 
 	def __validate_batch_no(self, row, key):
 		if row.get('batch_no') and row.get('batch_no') not in self.__transferred_items.get(key).get('batch_no'):
-			link = get_link_to_form('Purchase Order', row.purchase_order)
-			msg = f'The Batch No {frappe.bold(row.get("batch_no"))} has not supplied against the Purchase Order {link}'
+			link = get_link_to_form('Subcontracting Order', row.subcontracting_order)
+			msg = f'The Batch No {frappe.bold(row.get("batch_no"))} has not supplied against the Subcontracting Order {link}'
 			frappe.throw(_(msg), title=_("Incorrect Batch Consumed"))
 
 	def __validate_serial_no(self, row, key):
@@ -391,6 +386,6 @@ class Subcontracting():
 
 			if incorrect_sn:
 				incorrect_sn = "\n".join(incorrect_sn)
-				link = get_link_to_form('Purchase Order', row.purchase_order)
-				msg = f'The Serial Nos {incorrect_sn} has not supplied against the Purchase Order {link}'
+				link = get_link_to_form('Subcontracting Order', row.subcontracting_order)
+				msg = f'The Serial Nos {incorrect_sn} has not supplied against the Subcontracting Order {link}'
 				frappe.throw(_(msg), title=_("Incorrect Serial Number Consumed"))
