@@ -120,25 +120,34 @@ def get_reserved_qty(item_code, warehouse):
 	return flt(reserved_qty[0][0]) if reserved_qty else 0
 
 def get_indented_qty(item_code, warehouse):
+	no_partial_indent = frappe.get_cached_value("Stock Settings", None, "no_partial_indent")
+
+	if no_partial_indent:
+		qty_condition = "mr.per_ordered = 0 and mr.per_received = 0"
+	else:
+		qty_condition = "mr_item.ordered_qty < mr_item.stock_qty and mr_item.received_qty < mr_item.stock_qty"
+
 	# Ordered Qty is always maintained in stock UOM
 	inward_qty = frappe.db.sql("""
 		select sum(mr_item.stock_qty - mr_item.ordered_qty)
 		from `tabMaterial Request Item` mr_item, `tabMaterial Request` mr
-		where mr_item.item_code=%s and mr_item.warehouse=%s
+		where mr_item.item_code = %s and mr_item.warehouse = %s
 			and mr.material_request_type in ('Purchase', 'Manufacture', 'Customer Provided', 'Material Transfer')
-			and mr_item.stock_qty > mr_item.ordered_qty and mr_item.parent=mr.name
-			and mr.status!='Stopped' and mr.docstatus=1
-	""", (item_code, warehouse))
+			and mr.status != 'Stopped' and mr.docstatus = 1
+			and mr_item.parent = mr.name
+			and ({0})
+	""".format(qty_condition), (item_code, warehouse))
 	inward_qty = flt(inward_qty[0][0]) if inward_qty else 0
 
 	outward_qty = frappe.db.sql("""
 		select sum(mr_item.stock_qty - mr_item.ordered_qty)
 		from `tabMaterial Request Item` mr_item, `tabMaterial Request` mr
-		where mr_item.item_code=%s and mr_item.warehouse=%s
+		where mr_item.item_code = %s and mr_item.warehouse = %s
 			and mr.material_request_type = 'Material Issue'
-			and mr_item.stock_qty > mr_item.ordered_qty and mr_item.parent=mr.name
-			and mr.status!='Stopped' and mr.docstatus=1
-	""", (item_code, warehouse))
+			and mr.status!='Stopped' and mr.docstatus = 1
+			and mr_item.parent=mr.name
+			and ({0})
+	""".format(qty_condition), (item_code, warehouse))
 	outward_qty = flt(outward_qty[0][0]) if outward_qty else 0
 
 	requested_qty = inward_qty - outward_qty

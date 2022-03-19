@@ -29,13 +29,10 @@ class MaterialRequest(BuyingController):
 		self.status_map = [
 			["Draft", None],
 			["Pending", "eval:self.per_ordered == 0 and self.docstatus == 1"],
-			["Partially Ordered", "eval:self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1"],
-			["Ordered", "eval:self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
-			["Transferred", "eval:self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Transfer'"],
-			["Issued", "eval:self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Issue'"],
-			["Received", "eval:self.per_received == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
-			["Partially Received", "eval:self.per_received > 0 and self.per_received < 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
-			["Manufactured", "eval:self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Manufacture'"],
+			["Partially Ordered", "eval:self.per_ordered > 0 and self.docstatus == 1"],
+			["Ordered", "eval:self.per_ordered == 100 and self.docstatus == 1"],
+			["Partially Received", "eval:self.per_received > 0 and self.docstatus == 1"],
+			["Received", "eval:self.per_received == 100 and self.docstatus == 1"],
 			["Stopped", "eval:self.status == 'Stopped'"],
 			["Cancelled", "eval:self.docstatus == 2"],
 		]
@@ -197,10 +194,14 @@ class MaterialRequest(BuyingController):
 
 	def update_requested_qty(self, mr_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
+		no_partial_indent = frappe.get_cached_value("Stock Settings", None, "no_partial_indent")
+
 		item_wh_list = []
 		for d in self.get("items"):
-			if (not mr_item_rows or d.name in mr_item_rows) and [d.item_code, d.warehouse] not in item_wh_list \
-					and frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 and d.warehouse:
+			is_stock_item = frappe.db.get_value("Item", d.item_code, "is_stock_item", cache=1)
+			if (not mr_item_rows or d.name in mr_item_rows or no_partial_indent)\
+					and [d.item_code, d.warehouse] not in item_wh_list\
+					and is_stock_item and d.warehouse:
 				item_wh_list.append([d.item_code, d.warehouse])
 
 		for item_code, warehouse in item_wh_list:
@@ -294,6 +295,7 @@ def set_missing_values(source, target_doc):
 	if target_doc.doctype == "Purchase Order" and getdate(target_doc.schedule_date) < getdate(nowdate()):
 		target_doc.schedule_date = None
 	target_doc.run_method("set_missing_values")
+	target_doc.run_method("append_taxes_from_master")
 	target_doc.run_method("calculate_taxes_and_totals")
 
 
@@ -316,6 +318,8 @@ def update_status(name, status):
 def make_purchase_order(source_name, target_doc=None):
 	def postprocess(source, target_doc):
 		if frappe.flags.args and frappe.flags.args.default_supplier:
+			target_doc.supplier = frappe.flags.args.default_supplier
+
 			# items only for given default supplier
 			supplier_items = []
 			for d in target_doc.items:
@@ -348,7 +352,7 @@ def make_purchase_order(source_name, target_doc=None):
 			"field_map": [
 				["name", "material_request_item"],
 				["parent", "material_request"],
-				["uom", "stock_uom"],
+				["stock_uom", "stock_uom"],
 				["uom", "uom"],
 				["sales_order", "sales_order"],
 				["sales_order_item", "sales_order_item"],
@@ -459,11 +463,21 @@ def get_default_supplier_query(doctype, txt, searchfield, start, page_len, filte
 	for d in doc.items:
 		item_list.append(d.item_code)
 
-	return frappe.db.sql("""select default_supplier
-		from `tabItem Default`
-		where parent in ({0}) and
-		default_supplier IS NOT NULL
-		""".format(', '.join(['%s']*len(item_list))),tuple(item_list))
+	suppliers = []
+	if item_list:
+		suppliers += frappe.db.sql_list("""
+			select distinct default_supplier
+			from `tabItem Default`
+			where parent in %s and ifnull(default_supplier, '') != ''
+		""", [item_list])
+
+		suppliers += frappe.db.sql_list("""
+			select distinct default_supplier
+			from `tabItem`
+			where name in %s and ifnull(default_supplier, '') != ''
+		""", [item_list])
+
+	return [[d] for d in suppliers]
 
 
 @frappe.whitelist()
@@ -540,7 +554,8 @@ def make_stock_entry(source_name, target_doc=None):
 			"field_map": {
 				"name": "material_request_item",
 				"parent": "material_request",
-				"uom": "stock_uom"
+				"stock_uom": "stock_uom",
+				"uom": "uom",
 			},
 			"field_no_map": ['expense_account'],
 			"postprocess": update_item,

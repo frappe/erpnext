@@ -14,7 +14,7 @@
   "customer",
   "customer_name",
   "column_break_8",
-  "set_warehouse",
+  "remarks",
   "requested_by",
   "column_break_2",
   "amended_from",
@@ -28,6 +28,8 @@
   "applies_to_item",
   "col_break_applies_to",
   "applies_to_item_name",
+  "section_break_22",
+  "set_warehouse",
   "items_section",
   "scan_barcode",
   "items",
@@ -196,7 +198,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nSubmitted\nStopped\nCancelled\nPending\nPartially Ordered\nOrdered\nIssued\nTransferred\nReceived",
+   "options": "\nDraft\nSubmitted\nStopped\nPending\nPartially Ordered\nOrdered\nPartially Received\nReceived\nCancelled",
    "print_hide": 1,
    "print_width": "100px",
    "read_only": 1,
@@ -206,6 +208,7 @@
   {
    "fieldname": "per_ordered",
    "fieldtype": "Percent",
+   "in_list_view": 1,
    "label": "% Ordered",
    "no_copy": 1,
    "oldfieldname": "per_ordered",
@@ -376,16 +379,28 @@
   },
   {
    "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
+   "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "label": "Customer Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_22",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "in_standard_filter": 1,
+   "label": "Remarks",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
- "modified": "2021-12-29 16:12:51.844947",
+ "modified": "2022-03-12 18:08:42.316630",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
@@ -471,5 +486,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "title"
+ "title_field": "title",
+ "track_changes": 1,
+ "track_seen": 1
 }

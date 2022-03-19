@@ -5,32 +5,42 @@
  "engine": "InnoDB",
  "field_order": [
   "item_naming_by",
-  "item_group",
-  "stock_uom",
-  "default_warehouse",
-  "sample_retention_warehouse",
   "column_break_4",
   "valuation_method",
-  "over_delivery_receipt_allowance",
-  "action_if_quality_inspection_is_not_submitted",
-  "show_barcode_field",
-  "clean_description_html",
-  "filter_items_by_applicable_to",
-  "enable_dynamic_bundling",
+  "defaults_section",
+  "item_group",
+  "stock_uom",
+  "column_break_9",
+  "default_warehouse",
+  "sample_retention_warehouse",
   "section_break_7",
+  "over_delivery_receipt_allowance",
+  "column_break_12",
   "restrict_amounts_in_report_to_role",
-  "restrict_negative_stock_to_role",
-  "auto_insert_price_list_rate_if_missing",
-  "allow_negative_stock",
+  "action_if_quality_inspection_is_not_submitted",
   "column_break_10",
+  "restrict_negative_stock_to_role",
+  "allow_negative_stock",
+  "options_section",
+  "auto_insert_price_list_rate_if_missing",
   "automatically_set_serial_nos_based_on_fifo",
   "set_qty_in_transactions_based_on_serial_no_input",
+  "column_break_23",
+  "show_barcode_field",
+  "clean_description_html",
+  "column_break_25",
+  "filter_items_by_applicable_to",
+  "enable_dynamic_bundling",
   "auto_material_request",
   "auto_indent",
   "reorder_email_notify",
+  "column_break_32",
+  "no_partial_indent",
   "freeze_stock_entries",
   "stock_frozen_upto",
+  "column_break_29",
   "stock_frozen_upto_days",
+  "column_break_31",
   "stock_auth_role",
   "batch_id_sb",
   "use_naming_series",
@@ -91,7 +101,7 @@
    "default": "Stop",
    "fieldname": "action_if_quality_inspection_is_not_submitted",
    "fieldtype": "Select",
-   "label": "Action if Quality inspection is not submitted",
+   "label": "Action If Quality Inspection Is Not Submitted",
    "options": "Stop\nWarn"
   },
   {
@@ -108,13 +118,14 @@
   },
   {
    "fieldname": "section_break_7",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Permissions"
   },
   {
    "default": "0",
    "fieldname": "auto_insert_price_list_rate_if_missing",
    "fieldtype": "Check",
-   "label": "Auto insert Price List rate if missing"
+   "label": "Auto insert Price List rate If missing"
   },
   {
    "default": "0",
@@ -141,19 +152,19 @@
   {
    "fieldname": "auto_material_request",
    "fieldtype": "Section Break",
-   "label": "Auto Material Request"
+   "label": "Material Request / Auto Reorder"
   },
   {
    "default": "0",
    "fieldname": "auto_indent",
    "fieldtype": "Check",
-   "label": "Raise Material Request when stock reaches re-order level"
+   "label": "Raise Material Request When Stock Reaches Re-Order Level"
   },
   {
    "default": "0",
    "fieldname": "reorder_email_notify",
    "fieldtype": "Check",
-   "label": "Notify by Email on creation of automatic Material Request"
+   "label": "Notify By Email On Creation Of Automatic Material Request"
   },
   {
    "fieldname": "freeze_stock_entries",
@@ -217,12 +228,56 @@
    "fieldname": "enable_dynamic_bundling",
    "fieldtype": "Check",
    "label": "Enable Dynamic Bundling"
+  },
+  {
+   "fieldname": "defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Defaults"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "no_partial_indent",
+   "fieldtype": "Check",
+   "label": "Do Not Consider Partially Completed Material Requests in Requested Qty"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "options_section",
+   "fieldtype": "Section Break",
+   "label": "Options"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_32",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2021-03-09 17:51:00.686951",
+ "modified": "2022-03-20 00:57:21.264162",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
