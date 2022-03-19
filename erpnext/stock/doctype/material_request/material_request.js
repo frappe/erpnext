@@ -97,12 +97,13 @@ frappe.ui.form.on('Material Request', {
 				}
 
 				if (frm.doc.material_request_type === "Material Transfer") {
-					add_create_pick_list_button();
 					frm.add_custom_button(__("Transfer Material"), () => frm.events.make_stock_entry(frm), __('Create'));
+					add_create_pick_list_button();
 				}
 
 				if (frm.doc.material_request_type === "Material Issue") {
 					frm.add_custom_button(__("Issue Material"), () => frm.events.make_stock_entry(frm), __('Create'));
+					add_create_pick_list_button();
 				}
 
 				if (frm.doc.material_request_type === "Customer Provided") {
