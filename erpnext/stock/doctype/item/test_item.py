@@ -656,6 +656,20 @@ class TestItem(FrappeTestCase):
 		make_stock_entry(qty=1, item_code=item.name, target="_Test Warehouse - _TC", posting_date = add_days(today(), 5))
 		self.consume_item_code_with_differet_stock_transactions(item_code=item.name)
 
+	@change_settings("Stock Settings", {"sample_retention_warehouse": 0})
+	def test_retain_sample(self):
+		frappe.db.set_single_value('Stock Settings', 'sample_retention_warehouse', '_Test Retain Sample Warehouse')
+		item = make_item("_TestRetainSample", {'has_batch_no': 1, 'retain_sample': 1, 'sample_quantity': 1})
+
+		self.assertEqual(item.has_batch_no, 1)
+		self.assertEqual(item.retain_sample, 1)
+		self.assertEqual(item.sample_quantity, 1)
+
+		item.has_batch_no = None
+		item.save()
+		self.assertEqual(item.retain_sample, None)
+		self.assertEqual(item.sample_quantity, None)
+		item.delete()
 
 	def consume_item_code_with_differet_stock_transactions(self, item_code, warehouse="_Test Warehouse - _TC"):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
