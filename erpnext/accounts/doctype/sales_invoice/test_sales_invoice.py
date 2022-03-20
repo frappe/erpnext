@@ -2621,11 +2621,11 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(si.items[0].serial_no)
 
 	def test_multi_currency_advance_payment_against_sales_order(self):
-		for conversion_rate in [70, 75, 80]:
-			from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
-			from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
-			from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
+		for conversion_rate in [70, 75, 80]:
 			customer = create_customer('Overseas Customer', 'USD', '_Test Receivable USD - _TC')
 
 			so = make_sales_order(customer=customer, currency='USD', do_not_save=1)
