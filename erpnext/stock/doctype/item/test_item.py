@@ -622,9 +622,8 @@ class TestItem(FrappeTestCase):
 		item.item_group = "All Item Groups"
 		item.save()  # if item code saved without item_code then series worked
 
-	@change_settings("Stock Settings", {"sample_retention_warehouse": 0})
+	@change_settings("Stock Settings", {"sample_retention_warehouse": "_Test Warehouse - _TC"})
 	def test_retain_sample(self):
-		frappe.db.set_single_value('Stock Settings', 'sample_retention_warehouse', '_Test Retain Sample Warehouse')
 		item = make_item("_TestRetainSample", {'has_batch_no': 1, 'retain_sample': 1, 'sample_quantity': 1})
 
 		self.assertEqual(item.has_batch_no, 1)
