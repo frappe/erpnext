@@ -2691,7 +2691,7 @@ def create_customer(customer_name,  billing_currency, party_account=None):
 			}]
 		}).insert()
 
-	return customer
+	return customer.name
 
 
 def get_sales_invoice_for_e_invoice():
