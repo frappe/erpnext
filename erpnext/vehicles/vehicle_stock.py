@@ -285,6 +285,10 @@ class VehicleStockReport(object):
 			# User Name
 			d.user_name = d.lessee_name or d.delivery_customer_name
 
+			# Age
+			if d.received_date:
+				d.age = (getdate(self.filters.to_date) - getdate(d.received_date)).days or 0
+
 			# Stock Status
 			if d.qty > 0:
 				if d.vehicle_booking_order and not d.open_stock:
@@ -712,6 +716,7 @@ class VehicleStockReport(object):
 			{"label": _("Reg No"), "fieldname": "license_plate", "fieldtype": "Data", "width": 70},
 			{"label": _("Odometer"), "fieldname": "odometer", "fieldtype": "Int", "width": 60},
 			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 100},
+			{"label": _("Age"), "fieldname": "age", "fieldtype": "Int", "width": 50},
 			{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100,
 				"report_domain": "Service"},
 			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 105,
