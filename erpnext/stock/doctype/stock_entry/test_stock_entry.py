@@ -1154,6 +1154,67 @@ class TestStockEntry(FrappeTestCase):
 		issue.reload()  # reload because reposting current voucher updates rate
 		self.assertEqual(issue.value_difference, -30)
 
+	def test_for_sle_and_serial_items_in_material_receipt(self):
+		from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
+			make_serial_item_with_serial,
+		)
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		item_code = "_Test Serial Item 1"
+		make_serial_item_with_serial(item_code)
+		warehouse = '_Test Warehouse - _TC'
+		# Testing serial items table updating serial numbers on auto creating.
+		mr = make_stock_entry(
+				item_code=item_code,
+				qty=2,
+				rate=100,
+				to_warehouse=warehouse,
+				purpose='Material Receipt',
+				do_not_save=True
+			)
+		mr.save()
+		self.assertTrue(len(mr.serial_items), 2)
+		for serial_item in mr.serial_items:
+			self.assertEquals(serial_item.serial_no, None)
+		mr.submit()
+		serials_created = get_serial_nos(mr.items[0].serial_no)
+		self.assertEquals(len(serials_created), 2)
+		# Checking sles created for each serial.
+		sles = frappe.db.get_list("Stock Ledger Entry", {"voucher_no": mr.name}, ["actual_qty", "serial_no"])
+		self.assertEquals(len(sles), 2)
+		for sle, sr_created in zip(sles, serials_created):
+			self.assertEqual(sle.actual_qty, 1)
+			self.assertEqual(sle.serial_no, sr_created)
+		# Checking updates in serial items table.
+		self.assertTrue(mr.items[0].serial_no)
+		self.assertTrue(frappe.db.exists("Serial No",{
+			"item_code": item_code, "warehouse": mr.items[0].t_warehouse, "name": serials_created[1]}))
+		self.assertEquals(len(serials_created), 2)
+		for serial_item in mr.serial_items:
+			self.assertEquals(serial_item.serial_no, serials_created.pop(0))
+
+		# Checking sles created for each serial when cancelled.
+		mr.cancel()
+		sles = frappe.db.get_list("Stock Ledger Entry",
+			{"voucher_no": mr.name, "is_cancelled": 1}, ["actual_qty", "serial_no"])
+		self.assertEquals(len(sles), 4)
+		# Cancel creates sles to reverese the stock in entries.
+		reverse_sle_srs = []
+		for sle in sles[:2]:
+			self.assertEquals(sle.actual_qty, -1)
+			reverse_sle_srs.append(sle.serial_no)
+
+		cancelled_sle_srs = []
+		for sle in sles[2:]:
+			self.assertEquals(sle.actual_qty, 1)
+			cancelled_sle_srs.append(sle.serial_no)
+		self.assertEquals(sorted(reverse_sle_srs), sorted(cancelled_sle_srs))
+		# Checks if serial_no status is updated to not inactive.
+		serials = get_serial_nos(mr.items[0].serial_no)
+		self.assertTrue(frappe.db.exists("Serial No",{
+			"item_code": item_code, "status": "Inactive", "name": serials[1]}))
+
+		frappe.db.rollback()
+
 def make_serialized_item(**args):
 	args = frappe._dict(args)
 	se = frappe.copy_doc(test_records[0])
