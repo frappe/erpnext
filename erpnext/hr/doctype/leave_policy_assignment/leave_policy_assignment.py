@@ -8,12 +8,8 @@ from math import ceil
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-<<<<<<< HEAD
-from frappe.utils import date_diff, flt, formatdate, get_last_day, getdate
-from six import string_types
-=======
 from frappe.utils import date_diff, flt, formatdate, get_last_day, get_link_to_form, getdate
->>>>>>> 95568210b2 (fix(ux): warning for disabled carry forwarding in Policy Assignment (#30331))
+from six import string_types
 
 
 class LeavePolicyAssignment(Document):
