@@ -151,7 +151,6 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		if source.referral_sales_partner:
 			target.sales_partner=source.referral_sales_partner
 			target.commission_rate=frappe.get_value('Sales Partner', source.referral_sales_partner, 'commission_rate')
-		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
@@ -226,7 +225,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		if customer:
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
-		target.ignore_pricing_rule = 1
+
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")

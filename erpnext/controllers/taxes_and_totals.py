@@ -37,6 +37,8 @@ class calculate_taxes_and_totals(object):
 			self.set_discount_amount()
 			self.apply_discount_amount()
 
+		self.calculate_shipping_charges()
+
 		if self.doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
 			self.calculate_total_advance()
 
@@ -50,7 +52,6 @@ class calculate_taxes_and_totals(object):
 		self.initialize_taxes()
 		self.determine_exclusive_rate()
 		self.calculate_net_total()
-		self.calculate_shipping_charges()
 		self.calculate_taxes()
 		self.manipulate_grand_total_for_inclusive_tax()
 		self.calculate_totals()
@@ -113,17 +114,24 @@ class calculate_taxes_and_totals(object):
 			for item in self.doc.get("items"):
 				self.doc.round_floats_in(item)
 
+				if not item.rate:
+					item.rate = item.price_list_rate
+
 				if item.discount_percentage == 100:
 					item.rate = 0.0
 				elif item.price_list_rate:
-					if not item.rate or (item.pricing_rules and item.discount_percentage > 0):
+					if item.pricing_rules or abs(item.discount_percentage) > 0:
 						item.rate = flt(item.price_list_rate *
 							(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
-						item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
-					elif item.discount_amount and item.pricing_rules:
+
+						if abs(item.discount_percentage) > 0:
+							item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
+
+					elif item.discount_amount or item.pricing_rules:
 						item.rate =  item.price_list_rate - item.discount_amount
 
-				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item', 'POS Invoice Item', 'Purchase Invoice Item', 'Purchase Order Item', 'Purchase Receipt Item']:
+				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item',
+					'POS Invoice Item', 'Purchase Invoice Item', 'Purchase Order Item', 'Purchase Receipt Item']:
 					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
 					if flt(item.rate_with_margin) > 0:
 						item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
@@ -268,6 +276,8 @@ class calculate_taxes_and_totals(object):
 		if hasattr(self.doc, "shipping_rule") and self.doc.shipping_rule:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.doc.shipping_rule)
 			shipping_rule.apply(self.doc)
+
+			self._calculate()
 
 	def calculate_taxes(self):
 		rounding_adjustment_computed = self.doc.get('is_consolidated') and self.doc.get('rounding_adjustment')
@@ -626,8 +636,14 @@ class calculate_taxes_and_totals(object):
 			self.doc.outstanding_amount = flt(total_amount_to_pay - flt(paid_amount) + flt(change_amount),
 				self.doc.precision("outstanding_amount"))
 
-			if self.doc.doctype == 'Sales Invoice' and self.doc.get('is_pos') and self.doc.get('is_return'):
-			 	self.update_paid_amount_for_return(total_amount_to_pay)
+			if (
+				self.doc.doctype == 'Sales Invoice'
+				and self.doc.get('is_pos')
+				and self.doc.get('is_return')
+				and not self.doc.get('is_consolidated')
+			):
+				self.set_total_amount_to_default_mop(total_amount_to_pay)
+				self.calculate_paid_amount()
 
 	def calculate_paid_amount(self):
 
@@ -707,7 +723,7 @@ class calculate_taxes_and_totals(object):
 	def set_item_wise_tax_breakup(self):
 		self.doc.other_charges_calculation = get_itemised_tax_breakup_html(self.doc)
 
-	def update_paid_amount_for_return(self, total_amount_to_pay):
+	def set_total_amount_to_default_mop(self, total_amount_to_pay):
 		default_mode_of_payment = frappe.db.get_value('POS Payment Method',
 			{'parent': self.doc.pos_profile, 'default': 1}, ['mode_of_payment'], as_dict=1)
 
@@ -718,8 +734,6 @@ class calculate_taxes_and_totals(object):
 				'amount': total_amount_to_pay,
 				'default': 1
 			})
-
-		self.calculate_paid_amount()
 
 def get_itemised_tax_breakup_html(doc):
 	if not doc.taxes:

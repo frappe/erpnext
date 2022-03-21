@@ -1,6 +1,7 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_to_date, flt, now_datetime, nowdate
 
 from erpnext.controllers.item_variant import create_variant
@@ -16,10 +17,9 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestProductionPlan(ERPNextTestCase):
+class TestProductionPlan(FrappeTestCase):
 	def setUp(self):
 		for item in ['Test Production Item 1', 'Subassembly Item 1',
 			'Raw Material Item 1', 'Raw Material Item 2']:
@@ -605,6 +605,17 @@ class TestProductionPlan(ERPNextTestCase):
 		]
 		self.assertFalse(pp.all_items_completed())
 
+	def test_production_plan_planned_qty(self):
+		pln = create_production_plan(item_code="_Test FG Item", planned_qty=0.55)
+		pln.make_work_order()
+		work_order = frappe.db.get_value('Work Order', {'production_plan': pln.name}, 'name')
+		wo_doc = frappe.get_doc('Work Order', work_order)
+		wo_doc.update({
+			'wip_warehouse': 'Work In Progress - _TC',
+			'fg_warehouse': 'Finished Goods - _TC'
+		})
+		wo_doc.submit()
+		self.assertEqual(wo_doc.qty, 0.55)
 
 def create_production_plan(**args):
 	"""

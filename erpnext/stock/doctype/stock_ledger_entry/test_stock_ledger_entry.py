@@ -5,12 +5,10 @@ import json
 
 import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, today
 
-from erpnext.stock.doctype.delivery_note.test_delivery_note import (
-	create_delivery_note,
-	create_return_delivery_note,
-)
+from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 	create_landed_cost_voucher,
@@ -22,10 +20,9 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.stock_ledger import get_previous_sle
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestStockLedgerEntry(ERPNextTestCase):
+class TestStockLedgerEntry(FrappeTestCase):
 	def setUp(self):
 		items = create_items()
 		reset('Stock Entry')
@@ -258,7 +255,8 @@ class TestStockLedgerEntry(ERPNextTestCase):
 		self.assertEqual(outgoing_rate, 100)
 
 		# Return Entry: Qty = -2, Rate = 150
-		return_dn = create_return_delivery_note(source_name=dn.name, rate=150, qty=-2)
+		return_dn = create_delivery_note(is_return=1, return_against=dn.name, item_code=bundled_item, qty=-2, rate=150,
+			company=company, warehouse="Stores - _TC", expense_account="Cost of Goods Sold - _TC", cost_center="Main - _TC")
 
 		# check incoming rate for Return entry
 		incoming_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
@@ -443,6 +441,31 @@ class TestStockLedgerEntry(ERPNextTestCase):
 			{"incoming_rate": sum(rates) * 10}
 		], sle_filters={"item_code": packed.name})
 
+	@change_settings("Stock Settings", {"allow_negative_stock": 1})
+	def test_negative_fifo_valuation(self):
+		"""
+		When stock goes negative discard FIFO queue.
+		Only pervailing valuation rate should be used for making transactions in such cases.
+		"""
+		item = make_item(properties={"allow_negative_stock": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt = make_stock_entry(item_code=item, target=warehouse, qty=10, rate=10)
+		consume1 = make_stock_entry(item_code=item, source=warehouse, qty=15)
+
+		self.assertSLEs(consume1, [
+			{"stock_value": -5 * 10, "stock_queue": [[-5, 10]]}
+		])
+
+		consume2 = make_stock_entry(item_code=item, source=warehouse, qty=5)
+		self.assertSLEs(consume2, [
+			{"stock_value": -10 * 10, "stock_queue": [[-10, 10]]}
+		])
+
+		receipt2 = make_stock_entry(item_code=item, target=warehouse, qty=15, rate=15)
+		self.assertSLEs(receipt2, [
+			{"stock_queue": [[5, 15]], "stock_value_difference": 175}
+		])
 
 def create_repack_entry(**args):
 	args = frappe._dict(args)

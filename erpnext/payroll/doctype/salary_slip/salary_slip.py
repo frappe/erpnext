@@ -308,28 +308,59 @@ class SalarySlip(TransactionBase):
 			if payroll_based_on == "Attendance":
 				self.payment_days -= flt(absent)
 
-			unmarked_days = self.get_unmarked_days()
 			consider_unmarked_attendance_as = frappe.db.get_value("Payroll Settings", None, "consider_unmarked_attendance_as") or "Present"
 
 			if payroll_based_on == "Attendance" and consider_unmarked_attendance_as =="Absent":
+				unmarked_days = self.get_unmarked_days(include_holidays_in_total_working_days)
 				self.absent_days += unmarked_days #will be treated as absent
 				self.payment_days -= unmarked_days
-				if include_holidays_in_total_working_days:
-					for holiday in holidays:
-						if not frappe.db.exists("Attendance", {"employee": self.employee, "attendance_date": holiday, "docstatus": 1 }):
-							self.payment_days += 1
 		else:
 			self.payment_days = 0
 
-	def get_unmarked_days(self):
-		marked_days = frappe.get_all("Attendance", filters = {
-					"attendance_date": ["between", [self.start_date, self.end_date]],
-					"employee": self.employee,
-					"docstatus": 1
-				}, fields = ["COUNT(*) as marked_days"])[0].marked_days
+	def get_unmarked_days(self, include_holidays_in_total_working_days):
+		unmarked_days = self.total_working_days
+		joining_date, relieving_date = frappe.get_cached_value("Employee", self.employee,
+			["date_of_joining", "relieving_date"])
+		start_date = self.start_date
+		end_date = self.end_date
 
-		return self.total_working_days - marked_days
+		if joining_date and (getdate(self.start_date) < joining_date <= getdate(self.end_date)):
+			start_date = joining_date
+			unmarked_days = self.get_unmarked_days_based_on_doj_or_relieving(unmarked_days,
+				include_holidays_in_total_working_days, self.start_date, joining_date)
 
+		if relieving_date and (getdate(self.start_date) <= relieving_date < getdate(self.end_date)):
+			end_date = relieving_date
+			unmarked_days = self.get_unmarked_days_based_on_doj_or_relieving(unmarked_days,
+				include_holidays_in_total_working_days, relieving_date, self.end_date)
+
+		# exclude days for which attendance has been marked
+		unmarked_days -= frappe.get_all("Attendance", filters = {
+			"attendance_date": ["between", [start_date, end_date]],
+			"employee": self.employee,
+			"docstatus": 1
+		}, fields = ["COUNT(*) as marked_days"])[0].marked_days
+
+		return unmarked_days
+
+	def get_unmarked_days_based_on_doj_or_relieving(self, unmarked_days,
+		include_holidays_in_total_working_days, start_date, end_date):
+		"""
+		Exclude days before DOJ or after
+		Relieving Date from unmarked days
+		"""
+		from erpnext.hr.doctype.employee.employee import is_holiday
+
+		if include_holidays_in_total_working_days:
+			unmarked_days -= date_diff(end_date, start_date)
+		else:
+			# exclude only if not holidays
+			for days in range(date_diff(end_date, start_date)):
+				date = add_days(end_date, -days)
+				if not is_holiday(self.employee, date):
+					unmarked_days -= 1
+
+		return unmarked_days
 
 	def get_payment_days(self, joining_date, relieving_date, include_holidays_in_total_working_days):
 		if not joining_date:
@@ -968,7 +999,7 @@ class SalarySlip(TransactionBase):
 
 		# apply rounding
 		if frappe.get_cached_value("Salary Component", row.salary_component, "round_to_the_nearest_integer"):
-			amount, additional_amount = rounded(amount), rounded(additional_amount)
+			amount, additional_amount = rounded(amount or 0), rounded(additional_amount or 0)
 
 		return amount, additional_amount
 
@@ -1245,9 +1276,9 @@ class SalarySlip(TransactionBase):
 	def set_base_totals(self):
 		self.base_gross_pay = flt(self.gross_pay) * flt(self.exchange_rate)
 		self.base_total_deduction = flt(self.total_deduction) * flt(self.exchange_rate)
-		self.rounded_total = rounded(self.net_pay)
+		self.rounded_total = rounded(self.net_pay or 0)
 		self.base_net_pay = flt(self.net_pay) * flt(self.exchange_rate)
-		self.base_rounded_total = rounded(self.base_net_pay)
+		self.base_rounded_total = rounded(self.base_net_pay or 0)
 		self.set_net_total_in_words()
 
 	#calculate total working hours, earnings based on hourly wages and totals
@@ -1359,7 +1390,7 @@ class SalarySlip(TransactionBase):
 					'total_allocated_leaves': flt(leave_values.get('total_leaves')),
 					'expired_leaves': flt(leave_values.get('expired_leaves')),
 					'used_leaves': flt(leave_values.get('leaves_taken')),
-					'pending_leaves': flt(leave_values.get('pending_leaves')),
+					'pending_leaves': flt(leave_values.get('leaves_pending_approval')),
 					'available_leaves': flt(leave_values.get('remaining_leaves'))
 				})
 
