@@ -82,7 +82,11 @@ class TestLeaveApplication(unittest.TestCase):
 		set_leave_approver()
 
 		frappe.db.delete("Attendance", {"employee": "_T-Employee-00001"})
-		self.holiday_list = make_holiday_list()
+		frappe.db.set_value("Employee", "_T-Employee-00001", "holiday_list", "")
+
+		from_date = get_year_start(getdate())
+		to_date = get_year_ending(getdate())
+		self.holiday_list = make_holiday_list(from_date=from_date, to_date=to_date)
 
 		if not frappe.db.exists("Leave Type", "_Test Leave Type"):
 			frappe.get_doc(dict(
@@ -316,6 +320,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		leave_application = make_leave_application(employee.name, first_sunday, add_days(first_sunday, 3), leave_type.name, employee.company)
 		leave_application.reload()
+
 		# holiday should be excluded while marking attendance
 		self.assertEqual(leave_application.total_leave_days, 3)
 		self.assertEqual(frappe.db.count("Attendance", {"leave_application": leave_application.name}), 3)
