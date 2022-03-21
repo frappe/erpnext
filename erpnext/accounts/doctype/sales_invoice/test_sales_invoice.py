@@ -2620,6 +2620,70 @@ class TestSalesInvoice(unittest.TestCase):
 		si.reload()
 		self.assertTrue(si.items[0].serial_no)
 
+	def test_for_sle_and_serial_items_in_sales_invoice(self):
+		from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
+			make_serial_item_with_serial,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		item_code = "_Test Serial Item 1"
+		make_serial_item_with_serial(item_code)
+
+		# Testing serial items table updating serial numbers on auto creating.
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=2,
+			rate=500,
+			do_not_submit=True
+		)
+		pr.save()
+		pr.submit()
+		serials = get_serial_nos(pr.items[0].serial_no)
+		si = create_sales_invoice(
+			item_code=item_code,
+			qty=2,
+			rate=500,
+			serial_no=pr.items[0].serial_no,
+			update_stock=1,
+			do_not_submit=True
+		)
+		self.assertTrue(len(si.serial_items), 2)
+		# Checking updates in serial items table.
+		for serial_item in si.serial_items:
+			self.assertEquals(serial_item.serial_no, serials.pop(0))
+		si.submit()
+		# Checking sles created for each serial.
+		serials = get_serial_nos(si.items[0].serial_no)
+		sles = frappe.db.get_list("Stock Ledger Entry", {"voucher_no": si.name}, ["actual_qty", "serial_no"])
+		self.assertEquals(len(sles), 2)
+		for sle, sr_created in zip(sles, serials):
+			self.assertEqual(sle.actual_qty, -1)
+			self.assertEqual(sle.serial_no, sr_created)
+		# Checks if serial no status is changed.
+		self.assertTrue(frappe.db.exists("Serial No",{
+			"item_code": item_code, "status": "Delivered", "delivery_document_no": si.name, "name": serials[1]}))
+		si.cancel()
+		# Checking sles created for each serial when cancelled.
+		sles = frappe.db.get_list("Stock Ledger Entry",
+			{"voucher_no": si.name, "is_cancelled": 1}, ["actual_qty", "serial_no"])
+		self.assertEquals(len(sles), 4)
+		# Cancel creates sles to reverese the stock in entries.
+		reverse_sle_srs = []
+		for sle in sles[:2]:
+			self.assertEquals(sle.actual_qty, 1)
+			reverse_sle_srs.append(sle.serial_no)
+
+		cancelled_sle_srs = []
+		for sle in sles[2:]:
+			self.assertEquals(sle.actual_qty, -1)
+			cancelled_sle_srs.append(sle.serial_no)
+		self.assertEquals(sorted(reverse_sle_srs), sorted(cancelled_sle_srs))
+		# Checks if serial_no status is updated to not delivered.
+		serials = get_serial_nos(si.items[0].serial_no)
+		self.assertTrue(frappe.db.exists("Serial No",{
+			"item_code": item_code, "status": "Active", "delivery_document_no": None, "name": serials[1]}))
+
+		frappe.db.rollback()
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
