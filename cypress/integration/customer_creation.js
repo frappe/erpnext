@@ -18,6 +18,6 @@ context('Customer', () => {
 		cy.get_field('customer_name', 'Link').should('have.value', 'Lara Schindler');
 		cy.get_field('territory', 'Link').should('have.value', 'All Territories');
 		cy.get('#page-Customer > .page-head > .container > .row > .col > .standard-actions > .primary-action').click();
-        cy.remove_doc('Customer', 'Lara Schindler');
+		cy.remove_doc('Customer', 'Lara Schindler');		
     });
 });
