@@ -60,12 +60,5 @@
   "warehouse_name": "_Test Warehouse Group-C2",
   "is_group": 0,
   "parent_warehouse": "_Test Warehouse Group - _TC"
- },
-  {
-  "company": "_Test Company",
-  "doctype": "Warehouse",
-  "warehouse_name": "_Test Retain Sample Warehouse",
-  "parent_warehouse": "_Test Warehouse Group - _TC",
-  "is_group": 0
  }
 ]
