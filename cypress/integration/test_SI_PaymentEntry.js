@@ -5,7 +5,7 @@ context('Sales Invoice Payment', () => {
 	});
 
 	it('Create Sales Invoice', () => {
-        cy.visit('app/sales-invoice');
+		cy.visit('app/sales-invoice');
         cy.insert_doc(
             "Sales Invoice",
             {
