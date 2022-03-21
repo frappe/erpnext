@@ -172,10 +172,14 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(error_msg, title=_("Invalid Item"), as_list=True)
 
 	def validate_stock_availablility(self):
+		if self.is_return:
+			return
+
+		if self.docstatus.is_draft() and not frappe.db.get_value('POS Profile', self.pos_profile, 'validate_stock_on_save'):
+			return
+
 		from erpnext.stock.stock_ledger import is_negative_stock_allowed
 
-		if self.is_return or self.docstatus != 1:
-			return
 		for d in self.get('items'):
 			is_service_item = not (frappe.db.get_value('Item', d.get('item_code'), 'is_stock_item'))
 			if is_service_item:

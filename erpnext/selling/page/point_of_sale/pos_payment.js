@@ -172,7 +172,7 @@ erpnext.PointOfSale.Payment = class {
 		frappe.ui.form.on('POS Invoice', 'coupon_code', (frm) => {
 			if (frm.doc.coupon_code && !frm.applying_pos_coupon_code) {
 				if (!frm.doc.ignore_pricing_rule) {
-					frm.applying_pos_coupon_code = true
+					frm.applying_pos_coupon_code = true;
 					frappe.run_serially([
 						() => frm.doc.ignore_pricing_rule=1,
 						() => frm.trigger('ignore_pricing_rule'),
