@@ -3,15 +3,15 @@
 
 import frappe
 from frappe.exceptions import ValidationError
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cint, flt
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.stock.doctype.batch.batch import UnableToSelectBatchError, get_batch_no, get_batch_qty
 from erpnext.stock.get_item_details import get_item_details
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestBatch(ERPNextTestCase):
+class TestBatch(FrappeTestCase):
 	def test_item_has_batch_enabled(self):
 		self.assertRaises(ValidationError, frappe.get_doc({
 			"doctype": "Batch",

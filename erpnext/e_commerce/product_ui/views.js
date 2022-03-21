@@ -501,7 +501,7 @@ erpnext.ProductView =  class {
 
 			categories.forEach(category => {
 				sub_group_html += `
-					<a href="${ category.route || '#' }" style="text-decoration: none;">
+					<a href="/${ category.route || '#' }" style="text-decoration: none;">
 						<div class="category-pill">
 							${ category.name }
 						</div>

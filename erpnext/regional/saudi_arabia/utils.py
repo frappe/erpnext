@@ -93,7 +93,7 @@ def create_qr_code(doc, method=None):
 		tlv_array.append(''.join([tag, length, value]))
 
 		# VAT Amount
-		vat_amount = str(doc.total_taxes_and_charges)
+		vat_amount = str(get_vat_amount(doc))
 
 		tag = bytes([5]).hex()
 		length = bytes([len(vat_amount)]).hex()
@@ -130,6 +130,22 @@ def create_qr_code(doc, method=None):
 		doc.db_set('ksa_einv_qr', _file.file_url)
 		doc.notify_update()
 
+def get_vat_amount(doc):
+	vat_settings = frappe.db.get_value('KSA VAT Setting', {'company': doc.company})
+	vat_accounts = []
+	vat_amount = 0
+
+	if vat_settings:
+		vat_settings_doc = frappe.get_cached_doc('KSA VAT Setting', vat_settings)
+
+		for row in vat_settings_doc.get('ksa_vat_sales_accounts'):
+			vat_accounts.append(row.account)
+
+	for tax in doc.get('taxes'):
+		if tax.account_head in vat_accounts:
+			vat_amount += tax.tax_amount
+
+	return vat_amount
 
 def delete_qr_code_file(doc, method=None):
 	region = get_region(doc.company)

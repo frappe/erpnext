@@ -39,6 +39,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this._calculate_taxes_and_totals();
 		this.calculate_discount_amount();
 
+		this.calculate_shipping_charges();
+
 		// Advance calculation applicable to Sales /Purchase Invoice
 		if(in_list(["Sales Invoice", "POS Invoice", "Purchase Invoice"], this.frm.doc.doctype)
 			&& this.frm.doc.docstatus < 2 && !this.frm.doc.is_return) {
@@ -81,7 +83,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.initialize_taxes();
 		this.determine_exclusive_rate();
 		this.calculate_net_total();
-		this.calculate_shipping_charges();
 		this.calculate_taxes();
 		this.manipulate_grand_total_for_inclusive_tax();
 		this.calculate_totals();
@@ -273,6 +274,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total"]);
 		if (frappe.meta.get_docfield(this.frm.doc.doctype, "shipping_rule", this.frm.doc.name)) {
 			this.shipping_rule();
+			this._calculate_taxes_and_totals();
 		}
 	},
 
