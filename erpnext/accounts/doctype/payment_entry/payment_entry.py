@@ -63,11 +63,28 @@ class PaymentEntry(AccountsController):
 		self.validate_allocated_amount()
 		self.ensure_supplier_is_not_blocked()
 		self.set_status()
+		if self.docstatus == 0:
+			self.verificate_bank_check()
+
 		if self.docstatus == 1:
 			self.update_accounts_status()
 			self.paid_supplier_documents()
 			self.paid_customer_documents()
 			self.calculate_diferred_account()
+	
+	def verificate_bank_check(self):
+		bank_transaction = frappe.get_all("Bank Transactions", "*", filters = {"no_bank_check": self.reference_no, "bank_account": self.bank_account})
+		voided_check = frappe.get_all("Voided Check", "*", filters = {"no_bank_check": self.reference_no, "bank_account": self.bank_account})
+		payment_entry = frappe.get_all("Payment Entry", "*", filters = {"reference_no": self.reference_no, "bank_account": self.bank_account})
+
+		if len(bank_transaction) > 0:
+			frappe.throw(_("This bank check number is assigned to bank transaction number {}".format(bank_transaction[0].name)))
+
+		if len(voided_check) > 0:
+			frappe.throw(_("This bank check number is assigned to voided check number {}".format(voided_check[0].name)))
+		
+		if len(payment_entry) > 0 and payment_entry[0].name != self.name:
+			frappe.throw(_("This bank check number is assigned to payment entry number {}".format(payment_entry[0].name)))
 	
 	def on_update(self):
 		if self.docstatus == 0:
