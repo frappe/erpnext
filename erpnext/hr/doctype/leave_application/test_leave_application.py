@@ -936,7 +936,7 @@ def get_leave_period():
 		"company": "_Test Company"
 	})
 	if leave_period_name:
-		return frappe.get_doc("Leave Period", leave_period_name[0][0])
+		return frappe.get_doc("Leave Period", leave_period_name)
 	else:
 		return frappe.get_doc(dict(
 				name = 'Test Leave Period',
