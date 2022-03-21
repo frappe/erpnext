@@ -261,7 +261,7 @@ class TestStockReconciliation(FrappeTestCase):
 		serial_warehouse = "_Test Warehouse for Stock Reco1 - _TC"
 
 		sr = create_stock_reconciliation(item_code=serial_item_code, serial_no=random_string(6),
-			warehouse = serial_warehouse, qty=1, rate=100, do_not_submit=True, purpose='Opening Stock')
+			warehouse = serial_warehouse, qty=1, rate=200, do_not_submit=True, purpose='Opening Stock')
 
 		for i in range(3):
 			sr.append('items', {
@@ -278,9 +278,11 @@ class TestStockReconciliation(FrappeTestCase):
 		sle_entries = frappe.get_all('Stock Ledger Entry', filters= {'voucher_no': sr.name},
 			fields = ['name', 'incoming_rate'])
 
-		# Now every serial would have its own sle - need to test valuation_rate after merge instead?
+		# Now every serial would have its own sle - need to test valuation_rate after merge instead.
+		# The sles are split after merge.
 		self.assertEqual(len(sle_entries), 4)
-		self.assertEqual(sle_entries[0].incoming_rate, 100)
+		for sle in sle_entries:
+			self.assertEqual(sle.incoming_rate, 125)
 
 		to_delete_records.append(sr.name)
 		to_delete_records.reverse()
