@@ -720,7 +720,14 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	async save_and_checkout() {
-		this.frm.is_dirty() && await this.frm.save();
-		this.payment.checkout();
+		if (this.frm.is_dirty()) {
+			// only move to payment section if save is successful
+			frappe.route_hooks.after_save = () => this.payment.checkout();
+			return this.frm.save(
+				null, null, null, () => this.cart.toggle_checkout_btn(true) // show checkout button on error
+			);
+		} else {
+			this.payment.checkout();
+		}
 	}
 };
