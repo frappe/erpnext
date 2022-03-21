@@ -35,7 +35,9 @@
   "total_qty",
   "supplied_items",
   "base_total",
-  "base_net_total"
+  "base_net_total",
+  "apply_tds",
+  "tax_withholding_category"
  ],
  "fields": [
   {
@@ -287,7 +289,20 @@
     "no_copy": 1,
     "print_hide": 1,
     "read_only": 1
-  }
+  },
+  {
+    "default": "0",
+    "fieldname": "apply_tds",
+    "fieldtype": "Check",
+    "label": "Apply Tax Withholding Amount"
+  },
+  {
+    "depends_on": "eval: doc.apply_tds",
+    "fieldname": "tax_withholding_category",
+    "fieldtype": "Link",
+    "label": "Tax Withholding Category",
+    "options": "Tax Withholding Category"
+  } 
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
