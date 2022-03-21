@@ -414,7 +414,12 @@ class Subscription(Document):
 		# Subscription period
 		invoice.from_date = self.current_invoice_start
 		invoice.to_date = self.current_invoice_end
-
+		
+		# Apply advance payment
+		if self.apply_advance_payment:
+			invoice.allocate_advances_automatically = True
+			invoice.set_advances()
+						
 		invoice.flags.ignore_mandatory = True
 
 		invoice.set_missing_values()
