@@ -92,6 +92,23 @@ class TestWarehouse(FrappeTestCase):
 		children = get_children("Warehouse", parent=company, company=company, is_root=True)
 		self.assertTrue(any(wh['value'] == "_Test Warehouse - _TC" for wh in children))
 
+	def test_disabled_warehouse_tree(self):
+		warehouse = create_warehouse('Test Disabled Warehouse', company='_Test Company')
+
+		def validate_disabled_warehouse(warehouse, disabled = 0):
+			warehouse_doc = frappe.get_doc('Warehouse', warehouse)
+			warehouse_doc.disabled = disabled
+			warehouse_doc.save()
+
+			for row in get_children('Warehouse', 'All Warehouses - _TC', '_Test Company'):
+				if row.value == warehouse:
+					return True
+
+		# Non disabled warehouse
+		self.assertTrue(validate_disabled_warehouse(warehouse))
+
+		# Disabled warehouse
+		self.assertFalse(validate_disabled_warehouse(warehouse, disabled=1))
 
 def create_warehouse(warehouse_name, properties=None, company=None):
 	if not company:
