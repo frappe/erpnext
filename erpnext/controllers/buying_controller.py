@@ -12,7 +12,7 @@ from erpnext.accounts.party import get_party_details
 from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.stock_controller import StockController
-from erpnext.controllers.subcontracting import Subcontracting
+from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_incoming_rate
 
@@ -20,7 +20,7 @@ from erpnext.stock.utils import get_incoming_rate
 class QtyMismatchError(ValidationError):
 	pass
 
-class BuyingController(StockController, Subcontracting):
+class BuyingController(StockController, SubcontractingController):
 
 	def get_feed(self):
 		if self.get("supplier_name"):

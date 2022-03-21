@@ -8,7 +8,7 @@ from frappe.utils import cint, flt, get_link_to_form
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
-class Subcontracting():
+class SubcontractingController():
 	def set_materials_for_subcontracted_items(self, raw_material_table):
 		self.raw_material_table = raw_material_table
 		self.__identify_change_in_item_table()
