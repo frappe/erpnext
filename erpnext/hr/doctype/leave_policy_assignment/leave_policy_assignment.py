@@ -8,14 +8,15 @@ from math import ceil
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-from frappe.utils import date_diff, flt, formatdate, get_last_day, getdate
+from frappe.utils import date_diff, flt, formatdate, get_last_day, get_link_to_form, getdate
 from six import string_types
 
 
 class LeavePolicyAssignment(Document):
 	def validate(self):
-		self.validate_policy_assignment_overlap()
 		self.set_dates()
+		self.validate_policy_assignment_overlap()
+		self.warn_about_carry_forwarding()
 
 	def on_submit(self):
 		self.grant_leave_alloc_for_employee()
@@ -38,6 +39,20 @@ class LeavePolicyAssignment(Document):
 		if len(leave_policy_assignments):
 			frappe.throw(_("Leave Policy: {0} already assigned for Employee {1} for period {2} to {3}")
 				.format(bold(self.leave_policy), bold(self.employee), bold(formatdate(self.effective_from)), bold(formatdate(self.effective_to))))
+
+	def warn_about_carry_forwarding(self):
+		if not self.carry_forward:
+			return
+
+		leave_types = get_leave_type_details()
+		leave_policy = frappe.get_doc("Leave Policy", self.leave_policy)
+
+		for policy in leave_policy.leave_policy_details:
+			leave_type = leave_types.get(policy.leave_type)
+			if not leave_type.is_carry_forward:
+				msg = _("Leaves for the Leave Type {0} won't be carry-forwarded since carry-forwarding is disabled.").format(
+						frappe.bold(get_link_to_form("Leave Type", leave_type.name)))
+				frappe.msgprint(msg, indicator="orange", alert=True)
 
 	@frappe.whitelist()
 	def grant_leave_alloc_for_employee(self):
