@@ -494,7 +494,7 @@ class POSInvoice(SalesInvoice):
 		}
 		pr = frappe.db.exists(args)
 		if pr:
-			return frappe.get_doc('Payment Request', pr[0][0])
+			return frappe.get_doc('Payment Request', pr)
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):
