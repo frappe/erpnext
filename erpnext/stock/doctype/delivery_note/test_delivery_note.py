@@ -828,6 +828,70 @@ class TestDeliveryNote(FrappeTestCase):
 		dn.reload()
 		self.assertTrue(dn.items[0].serial_no)
 
+	def test_for_sle_and_serial_items_in_delivery_note(self):
+		from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
+			make_serial_item_with_serial,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		item_code = "_Test Serial Item 1"
+		make_serial_item_with_serial(item_code)
+
+		# Testing serial items table updating serial numbers on auto creating.
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=2,
+			rate=500,
+			do_not_submit=True
+		)
+		pr.save()
+		pr.submit()
+		serials = get_serial_nos(pr.items[0].serial_no)
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=2,
+			rate=500,
+			serial_no=pr.items[0].serial_no,
+			do_not_submit=True
+		)
+		dn.save()
+		self.assertTrue(len(dn.serial_items), 2)
+		# Checking updates in serial items table.
+		for serial_item in dn.serial_items:
+			self.assertEquals(serial_item.serial_no, serials.pop(0))
+		dn.submit()
+		# Checking sles created for each serial.
+		serials = get_serial_nos(dn.items[0].serial_no)
+		sles = frappe.db.get_list("Stock Ledger Entry", {"voucher_no": dn.name}, ["actual_qty", "serial_no"])
+		self.assertEquals(len(sles), 2)
+		for sle, sr_created in zip(sles, serials):
+			self.assertEqual(sle.actual_qty, -1)
+			self.assertEqual(sle.serial_no, sr_created)
+		# Checks if serial no status is changed.
+		self.assertTrue(frappe.db.exists("Serial No",{
+			"item_code": item_code, "status": "Delivered", "delivery_document_no": dn.name, "name": serials[1]}))
+		dn.cancel()
+		# Checking sles created for each serial when cancelled.
+		sles = frappe.db.get_list("Stock Ledger Entry",
+			{"voucher_no": dn.name, "is_cancelled": 1}, ["actual_qty", "serial_no"])
+		self.assertEquals(len(sles), 4)
+		# Cancel creates sles to reverese the stock in entries.
+		reverse_sle_srs = []
+		for sle in sles[:2]:
+			self.assertEquals(sle.actual_qty, 1)
+			reverse_sle_srs.append(sle.serial_no)
+
+		cancelled_sle_srs = []
+		for sle in sles[2:]:
+			self.assertEquals(sle.actual_qty, -1)
+			cancelled_sle_srs.append(sle.serial_no)
+		self.assertEquals(sorted(reverse_sle_srs), sorted(cancelled_sle_srs))
+		# Checks if serial_no status is updated to not delivered.
+		serials = get_serial_nos(dn.items[0].serial_no)
+		self.assertTrue(frappe.db.exists("Serial No",{
+			"item_code": item_code, "status": "Active", "delivery_document_no": None, "name": serials[1]}))
+
+		frappe.db.rollback()
+
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
 	args = frappe._dict(args)
