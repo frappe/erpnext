@@ -124,14 +124,17 @@ class TestMaintenanceSchedule(unittest.TestCase):
 		make_serial_item_with_serial(item_code)
 		ms = make_maintenance_schedule(item_code=item_code, serial_no="TEST001, TEST002")
 		ms.save()
+
 		# Before Save
 		self.assertEqual(ms.schedules[0].serial_no, "TEST001, TEST002")
 		self.assertEqual(ms.schedules[0].sales_person, "Sales Team")
 		self.assertEqual(len(ms.schedules), 4)
+		self.assertFalse(ms.validate_items_table_change())
 		# After Save
 		ms.items[0].serial_no = "TEST001"
 		ms.items[0].sales_person = "_Test Sales Person"
 		ms.items[0].no_of_visits = 2
+		self.assertTrue(ms.validate_items_table_change())
 		ms.save()
 		self.assertEqual(ms.schedules[0].serial_no, "TEST001")
 		self.assertEqual(ms.schedules[0].sales_person, "_Test Sales Person")
