@@ -31,24 +31,6 @@
 			{% endif %}
 		</div>
 
-		<script>
-			frappe.ready(() => {
-				$('.product-filter-filter').on('keydown', frappe.utils.debounce((e) => {
-					const $input = $(e.target);
-					const keyword = ($input.val() || '').toLowerCase();
-					const $filter_options = $input.next('.filter-options');
-
-					$filter_options.find('.custom-control').show();
-					$filter_options.find('.custom-control').each((i, el) => {
-						const $el = $(el);
-						const value = $el.data('value').toLowerCase();
-						if (!value.includes(keyword)) {
-							$el.hide();
-						}
-					});
-				}, 300));
-			})
-		</script>
 	</div>
 </div>
 
