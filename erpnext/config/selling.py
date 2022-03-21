@@ -15,6 +15,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Confidential Customer",
+					"description": _("Confidential Customer."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "Quotation",
 					"description": _("Quotes to Leads or Customers."),
 					"onboard": 1,

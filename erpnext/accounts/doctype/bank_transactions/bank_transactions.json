@@ -79,8 +79,7 @@
    "depends_on": "check",
    "fieldname": "no_bank_check",
    "fieldtype": "Data",
-   "label": "No. Bank Check",
-   "unique": 1
+   "label": "No. Bank Check"
   },
   {
    "depends_on": "check",
@@ -354,7 +353,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-02-28 13:52:54.268455",
+ "modified": "2022-03-21 15:36:53.600006",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transactions",
