@@ -7,17 +7,6 @@ frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on("Purchase Order", {
 	setup: function(frm) {
-
-		frm.set_query("reserve_warehouse", "supplied_items", function() {
-			return {
-				filters: {
-					"company": frm.doc.company,
-					"name": ['!=', frm.doc.supplier_warehouse],
-					"is_group": 0
-				}
-			}
-		});
-
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
 
@@ -27,7 +16,6 @@ frappe.ui.form.on("Purchase Order", {
 				filters: {'company': frm.doc.company}
 			}
 		});
-
 	},
 
 	company: function(frm) {
@@ -585,18 +573,6 @@ cur_frm.fields_dict['items'].grid.get_field('project').get_query = function(doc,
 	return {
 		filters:[
 			['Project', 'status', 'not in', 'Completed, Cancelled']
-		]
-	}
-}
-
-cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn]
-	return {
-		filters: [
-			['BOM', 'item', '=', d.item_code],
-			['BOM', 'is_active', '=', '1'],
-			['BOM', 'docstatus', '=', '1'],
-			['BOM', 'company', '=', doc.company]
 		]
 	}
 }
