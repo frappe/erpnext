@@ -456,6 +456,7 @@ class POSInvoice(SalesInvoice):
 				pay_req = self.get_existing_payment_request(pay)
 				if not pay_req:
 					pay_req = self.get_new_payment_request(pay)
+					pay_req.insert()
 					pay_req.submit()
 				else:
 					pay_req.request_phone_payment()
