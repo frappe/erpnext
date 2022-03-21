@@ -37,6 +37,7 @@
   "additional_discount_amount",
   "sb_3",
   "submit_invoice",
+  "apply_advance_payment",
   "invoices",
   "accounting_dimensions_section",
   "cost_center",
@@ -260,6 +261,12 @@
    "fieldname": "submit_invoice",
    "fieldtype": "Check",
    "label": "Submit Invoice Automatically"
+  }
+  {
+   "default": "1",
+   "fieldname": "apply_advance_payment",
+   "fieldtype": "Check",
+   "label": "Apply Advance Payment Automatically"
   }
  ],
  "index_web_pages_for_search": 1,
