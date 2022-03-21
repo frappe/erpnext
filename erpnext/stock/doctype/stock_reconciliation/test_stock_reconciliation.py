@@ -161,6 +161,97 @@ class TestStockReconciliation(FrappeTestCase):
 			stock_doc = frappe.get_doc("Stock Reconciliation", d)
 			stock_doc.cancel()
 
+	def test_stock_reco_sle_and_serial_item_table(self):
+		from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
+			make_serial_item_with_serial,
+		)
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		item_code = "_Test Serial Item 1"
+		make_serial_item_with_serial(item_code)
+		serial_warehouse = "_Test Warehouse for Stock Reco1 - _TC"
+		serials = ["TEST1", "TEST2", "TEST3"]
+		sr = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse = serial_warehouse,
+			purpose="Stock Reconciliation",
+			qty=3,
+			rate=200,
+			serial_no='\n'.join(serials),
+			do_not_submit=True
+		)
+		sr.save()
+		self.assertEquals(len(sr.current_serials), 0)
+		self.assertEquals(len(sr.new_serials), 3)
+		# No serial no updated since these serials do no exist yet.
+		for serial_item in sr.new_serials:
+			self.assertFalse(serial_item.serial_no)
+		sr.submit()
+		serials_created = get_serial_nos(sr.items[0].serial_no)
+		self.assertEquals(sr.new_serials[-1].serial_no, serials_created[-1])
+
+		# Checking sles created for each serial.
+		sles = frappe.db.get_list("Stock Ledger Entry", {"voucher_no": sr.name}, ["actual_qty", "serial_no"])
+		self.assertEquals(len(sles), 3)
+		for sle, sr_created in zip(sles, serials_created):
+			self.assertEqual(sle.actual_qty, 1)
+			self.assertEqual(sle.serial_no, sr_created)
+		# Checking updates in serial items table.
+		self.assertTrue(frappe.db.exists("Serial No",{
+			"item_code": item_code, "warehouse": sr.items[0].warehouse, "name": serials_created[1]}))
+		for serial_item in sr.new_serials:
+			self.assertEquals(serial_item.serial_no, serials_created.pop(0))
+
+		sr = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse = serial_warehouse,
+			purpose="Stock Reconciliation",
+			qty=2,
+			rate=200,
+			serial_no='\n'.join(serials),
+			do_not_submit=True
+		)
+		sr.save()
+		current_serials = get_serial_nos(sr.items[0].current_serial_no)
+		serials = current_serials.copy()
+		serials.pop()
+		sr.items[0].serial_no = '\n'.join(serials)
+		sr.save()
+		self.assertEquals(len(sr.current_serials), 3)
+		self.assertEquals(len(sr.new_serials), 2)
+		sr.submit()
+		# Checking sles created for each serial.
+		serials_created = get_serial_nos(sr.items[0].serial_no)
+		sles = frappe.db.get_list("Stock Ledger Entry", {"voucher_no": sr.name}, ["name", "actual_qty", "serial_no"])
+		self.assertEquals(len(sles), 5)
+		for sle, serial in zip(sles, serials):
+			self.assertEquals(sle.actual_qty, 1)
+			self.assertEquals(sle.serial_no, serial)
+		for sle, serial in zip(sles[2:], current_serials):
+			self.assertEquals(sle.actual_qty, -1)
+			self.assertEquals(sle.serial_no, serial)
+
+		# Check sles after cancel.
+		sr.cancel()
+		before_cancel_sles = sles.copy()
+		expected_reversed_sles = [sle.name for sle in before_cancel_sles]
+		self.assertEquals(len(expected_reversed_sles), 5)
+		sles = frappe.db.get_list(
+			"Stock Ledger Entry",{
+				"voucher_no": sr.name,
+				"is_cancelled": 1
+			}, ["actual_qty", "serial_no", "name"], order_by="creation")
+		reversed_sles = []
+		new_cancelled_sles_created = []
+		for sle in sles:
+			if sle.name in expected_reversed_sles:
+				reversed_sles.append(sle)
+			else:
+				new_cancelled_sles_created.append(sle)
+
+		self.assertEquals(len(expected_reversed_sles), len(reversed_sles))
+		self.assertEquals(len(new_cancelled_sles_created), 3)
+
+		frappe.db.rollback()
 
 	def test_stock_reco_for_merge_serialized_item(self):
 		to_delete_records = []
