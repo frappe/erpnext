@@ -108,6 +108,7 @@ class Item(Document):
 		self.validate_variant_attributes()
 		self.validate_variant_based_on_change()
 		self.validate_fixed_asset()
+		self.clear_retain_sample()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
 		self.validate_customer_provided_part()
@@ -209,6 +210,13 @@ class Item(Document):
 		if self.retain_sample and not self.has_batch_no:
 			frappe.throw(_("{0} Retain Sample is based on batch, please check Has Batch No to retain sample of item").format(
 				self.item_code))
+
+	def clear_retain_sample(self):
+		if not self.has_batch_no:
+			self.retain_sample = None
+
+		if not self.retain_sample:
+			self.sample_quantity = None
 
 	def add_default_uom_in_conversion_factor_table(self):
 		if not self.is_new() and self.has_value_changed("stock_uom"):
