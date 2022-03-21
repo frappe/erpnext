@@ -231,9 +231,10 @@ def create_purchase_invoice(**args):
 		"taxes": [],
 		"items": [{
 			'doctype': 'Purchase Invoice Item',
-			'item_code': item,
+			'item_code': args.item_code or item,
 			'qty': args.qty or 1,
 			'rate': args.rate or 10000,
+			'serial_no': args.serial_no or "",
 			'cost_center': 'Main - _TC',
 			'expense_account': 'Stock Received But Not Billed - _TC'
 		}]
