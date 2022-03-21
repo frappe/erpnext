@@ -119,10 +119,15 @@ erpnext.PointOfSale.Controller = class {
 			this.allow_negative_stock = flt(message.allow_negative_stock) || false;
 		});
 
-		frappe.db.get_doc("POS Profile", this.pos_profile).then((profile) => {
-			Object.assign(this.settings, profile);
-			this.settings.customer_groups = profile.customer_groups.map(group => group.customer_group);
-			this.make_app();
+		frappe.call({
+			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_pos_profile_data",
+			args: { "pos_profile": this.pos_profile },
+			callback: (res) => {
+				const profile = res.message;
+				Object.assign(this.settings, profile);
+				this.settings.customer_groups = profile.customer_groups.map(group => group.name);
+				this.make_app();
+			}
 		});
 	}
 
