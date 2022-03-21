@@ -12,7 +12,9 @@
         "rate",
         "amount",
         "warehouse",
-        "bom"
+        "bom",
+        "expense_account",
+        "schedule_date"
     ],
     "fields": [
         {
@@ -81,6 +83,24 @@
             "label": "BOM",
             "options": "BOM",
             "print_hide": 1
+        },
+        {
+            "fieldname": "expense_account",
+            "fieldtype": "Link",
+            "label": "Expense Account",
+            "options": "Account",
+            "print_hide": 1
+        },
+        {
+            "allow_on_submit": 1,
+            "bold": 1,
+            "columns": 2,
+            "fieldname": "schedule_date",
+            "fieldtype": "Date",
+            "in_list_view": 1,
+            "label": "Required By",
+            "print_hide": 1,
+            "reqd": 1
         }
     ],
     "idx": 1,
