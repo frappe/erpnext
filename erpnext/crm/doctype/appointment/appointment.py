@@ -229,5 +229,5 @@ def _get_employee_from_user(user):
 		{'doctype': 'Employee', 'user_id': user})
 	if employee_docname:
 		# frappe.db.exists returns a tuple of a tuple
-		return frappe.get_doc('Employee', employee_docname[0][0])
+		return frappe.get_doc('Employee', employee_docname)
 	return None
