@@ -503,8 +503,12 @@ class SalesInvoice(SellingController):
 				frappe.throw(_("Total payments amount can't be greater than {}".format(-invoice_total)))
 
 	def validate_pos_paid_amount(self):
-		if len(self.payments) == 0 and self.is_pos:
-			frappe.throw(_("At least one mode of payment is required for POS invoice."))
+		if self.is_pos:
+			if len(self.payments) == 0:
+				frappe.throw(_("At least one mode of payment is required for POS Invoice"))
+
+			if not flt(self.paid_amount):
+				frappe.throw(_("Paid Amount cannot be zero for POS Invoice"))
 
 	def validate_tax_id_mandatory(self):
 		if self.get('has_stin') and not self.get('tax_id') and not self.get('tax_cnic') and not self.get('tax_strn'):
@@ -823,7 +827,7 @@ class SalesInvoice(SellingController):
 		if self.is_return:
 			if flt(self.paid_amount) + flt(self.write_off_amount) - flt(self.grand_total) > \
 				1.0/(10.0**(self.precision("grand_total") + 1.0)):
-					frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
+					frappe.throw(_("Paid Amount + Write Off Amount can not be greater than Grand Total"))
 
 	def validate_item_code(self):
 		for d in self.get('items'):
