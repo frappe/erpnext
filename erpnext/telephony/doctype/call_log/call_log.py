@@ -35,14 +35,11 @@ class CallLog(Document):
 		# Add Employee Name
 		if self.is_incoming_call():
 			# Taking the last 10 digits of the number
-			emp_number_reversed = (self.get("to"))[-1:-11:-1]
-			emp_number = emp_number_reversed[-1::-1]
-			employee = frappe.get_all("Employee", filters={
-				"cell_number": ["like", "%"+emp_number+"%"]
-			}, fields=["first_name", "middle_name", "last_name", "user_id"])
+			employee_number = strip_number(self.get('to'))
+			employee = get_employees_with_number(self.get("to"))
 
-			self.call_received_by = get_employee_name(employee[0])
-			self.employee_user_id = employee[0].get("user_id") or ''
+			self.call_received_by = employee[0].get("name")
+			self.employee_user_id = employee[0].get("user_id")
 
 	def after_insert(self):
 		self.trigger_call_popup()
@@ -77,7 +74,8 @@ class CallLog(Document):
 	def trigger_call_popup(self):
 		if self.is_incoming_call():
 			scheduled_employees = get_scheduled_employees_for_popup(self.medium)
-			employee_emails = get_employees_with_number(self.to)
+			employees = get_employees_with_number(self.to)
+			employee_emails = [employee.get("user_id") for employee in employees]
 
 			# check if employees with matched number are scheduled to receive popup
 			emails = set(scheduled_employees).intersection(employee_emails)
@@ -117,20 +115,17 @@ def get_employees_with_number(number):
 	if not number:
 		return []
 
-	employee_emails = frappe.cache().hget("employees_with_number", number)
-	if employee_emails:
-		return employee_emails
+	employee_doc_name_and_emails = frappe.cache().hget('employees_with_number', number)
+	if employee_doc_name_and_emails: return employee_doc_name_and_emails
 
-	employees = frappe.get_all(
-		"Employee",
-		filters={"cell_number": ["like", "%{}%".format(number)], "user_id": ["!=", ""]},
-		fields=["user_id"],
-	)
+	employee_doc_name_and_emails = frappe.get_all('Employee', filters={
+		'cell_number': ['like', '%{}%'.format(number)],
+		'user_id': ['!=', '']
+	}, fields=['name', 'user_id'])
 
-	employee_emails = [employee.user_id for employee in employees]
-	frappe.cache().hset("employees_with_number", number, employee_emails)
+	frappe.cache().hset('employees_with_number', number, employee_doc_name_and_emails)
 
-	return employee_emails
+	return employee_doc_name_and_emails
 
 
 def link_existing_conversations(doc, state):
