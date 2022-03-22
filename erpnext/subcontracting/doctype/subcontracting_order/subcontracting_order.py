@@ -14,6 +14,7 @@ from erpnext.controllers.subcontracting_controller import SubcontractingControll
 class SubcontractingOrder(Document, SubcontractingController):
 	def validate(self):
 		self.validate_purchase_order()
+		self.create_raw_materials_supplied()
 
 	def validate_purchase_order(self):
 		if self.get("purchase_order"):
