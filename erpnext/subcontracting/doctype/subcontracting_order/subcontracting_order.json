@@ -39,7 +39,8 @@
   "apply_tds",
   "tax_withholding_category",
   "conversion_rate",
-  "plc_conversion_rate"
+  "plc_conversion_rate",
+  "per_received"
  ],
  "fields": [
   {
@@ -78,8 +79,9 @@
   {
    "fieldname": "purchase_order",
    "fieldtype": "Link",
-   "label": "Purchase Order",
-   "options": "Purchase Order"
+   "label": "Subcontracting Purchase Order",
+   "options": "Purchase Order",
+   "reqd": 1
   },
   {
    "bold": 1,
@@ -274,57 +276,57 @@
    "read_only": 1
   },
   {
-    "fieldname": "supplied_items",
-    "fieldtype": "Table",
-    "label": "Supplied Items",
-    "no_copy": 1,
-    "options": "Subcontracting Order Supplied Item",
-    "print_hide": 1,
-    "read_only": 1
+   "fieldname": "supplied_items",
+   "fieldtype": "Table",
+   "label": "Supplied Items",
+   "no_copy": 1,
+   "options": "Subcontracting Order Supplied Item",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
-    "depends_on": "eval:!doc.__islocal",
-    "fieldname": "per_received",
-    "fieldtype": "Percent",
-    "in_list_view": 1,
-    "label": "% Received",
-    "no_copy": 1,
-    "print_hide": 1,
-    "read_only": 1
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "per_received",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "% Received",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   },
   {
-    "default": "0",
-    "fieldname": "apply_tds",
-    "fieldtype": "Check",
-    "label": "Apply Tax Withholding Amount"
+   "default": "0",
+   "fieldname": "apply_tds",
+   "fieldtype": "Check",
+   "label": "Apply Tax Withholding Amount"
   },
   {
-    "depends_on": "eval: doc.apply_tds",
-    "fieldname": "tax_withholding_category",
-    "fieldtype": "Link",
-    "label": "Tax Withholding Category",
-    "options": "Tax Withholding Category"
+   "depends_on": "eval: doc.apply_tds",
+   "fieldname": "tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Category",
+   "options": "Tax Withholding Category"
   },
   {
-    "fieldname": "conversion_rate",
-    "fieldtype": "Float",
-    "label": "Exchange Rate",
-    "precision": "9",
-    "print_hide": 1,
-    "reqd": 1
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "precision": "9",
+   "print_hide": 1,
+   "reqd": 1
   },
   {
-    "fieldname": "plc_conversion_rate",
-    "fieldtype": "Float",
-    "label": "Price List Exchange Rate",
-    "precision": "9",
-    "print_hide": 1
+   "fieldname": "plc_conversion_rate",
+   "fieldtype": "Float",
+   "label": "Price List Exchange Rate",
+   "precision": "9",
+   "print_hide": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-19 18:27:15.011211",
+ "modified": "2022-03-22 16:20:48.963676",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order",
