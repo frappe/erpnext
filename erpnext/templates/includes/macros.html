@@ -338,13 +338,8 @@
 		{% if attribute.item_attribute_values %}
 		<div class="filter-options">
 			{% for attr_value in attribute.item_attribute_values %}
-<<<<<<< HEAD
-			<div class="checkbox">
-				<label>
-=======
 			<div class="filter-lookup-wrapper checkbox" data-value="{{ attr_value }}">
 				<label data-value="{{ attr_value }}">
->>>>>>> f6e64c2cac (fix: Product Filters Lookup)
 					<input type="checkbox"
 						class="product-filter attribute-filter"
 						id="{{ attr_value }}"
