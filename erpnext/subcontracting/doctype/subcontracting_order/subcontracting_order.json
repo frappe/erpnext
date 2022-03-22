@@ -37,7 +37,9 @@
   "base_total",
   "base_net_total",
   "apply_tds",
-  "tax_withholding_category"
+  "tax_withholding_category",
+  "conversion_rate",
+  "plc_conversion_rate"
  ],
  "fields": [
   {
@@ -302,7 +304,22 @@
     "fieldtype": "Link",
     "label": "Tax Withholding Category",
     "options": "Tax Withholding Category"
-  } 
+  },
+  {
+    "fieldname": "conversion_rate",
+    "fieldtype": "Float",
+    "label": "Exchange Rate",
+    "precision": "9",
+    "print_hide": 1,
+    "reqd": 1
+  },
+  {
+    "fieldname": "plc_conversion_rate",
+    "fieldtype": "Float",
+    "label": "Price List Exchange Rate",
+    "precision": "9",
+    "print_hide": 1
+  }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
