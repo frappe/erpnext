@@ -1018,21 +1018,21 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 	required_qty = item.get("quantity")
 	# get available material by transferring to production warehouse
 	for d in locations:
-		if required_qty <=0: return
+		if required_qty <= 0:
+			return
 
 		new_dict = copy.deepcopy(item)
 		quantity = required_qty if d.get("qty") > required_qty else d.get("qty")
 
-		if required_qty > 0:
-			new_dict.update({
-				"quantity": quantity,
-				"material_request_type": "Material Transfer",
-				"uom": new_dict.get("stock_uom"),  # internal transfer should be in stock UOM
-				"from_warehouse": d.get("warehouse")
-			})
+		new_dict.update({
+			"quantity": quantity,
+			"material_request_type": "Material Transfer",
+			"uom": new_dict.get("stock_uom"),  # internal transfer should be in stock UOM
+			"from_warehouse": d.get("warehouse")
+		})
 
-			required_qty -= quantity
-			new_mr_items.append(new_dict)
+		required_qty -= quantity
+		new_mr_items.append(new_dict)
 
 	# raise purchase request for remaining qty
 	if required_qty:
