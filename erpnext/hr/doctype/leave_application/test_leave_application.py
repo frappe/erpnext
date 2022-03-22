@@ -931,10 +931,7 @@ def set_leave_approver():
 	dept_doc.save(ignore_permissions=True)
 
 def get_leave_period():
-	leave_period_name = frappe.db.exists({
-		"doctype": "Leave Period",
-		"company": "_Test Company"
-	})
+	leave_period_name = frappe.db.get_value("Leave Period", {"company": "_Test Company"})
 	if leave_period_name:
 		return frappe.get_doc("Leave Period", leave_period_name)
 	else:

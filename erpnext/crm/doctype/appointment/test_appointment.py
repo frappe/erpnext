@@ -8,7 +8,7 @@ import frappe
 
 
 def create_test_lead():
-	test_lead = frappe.db.exists({"doctype": "Lead", "email_id": "test@example.com"})
+	test_lead = frappe.db.get_value("Lead", {"email_id": "test@example.com"})
 	if test_lead:
 		return frappe.get_doc("Lead", test_lead)
 	test_lead = frappe.get_doc(
@@ -19,15 +19,6 @@ def create_test_lead():
 
 
 def create_test_appointments():
-	test_appointment = frappe.db.exists(
-		{
-			"doctype": "Appointment",
-			"scheduled_time": datetime.datetime.now(),
-			"email": "test@example.com",
-		}
-	)
-	if test_appointment:
-		return frappe.get_doc("Appointment", test_appointment)
 	test_appointment = frappe.get_doc(
 		{
 			"doctype": "Appointment",
