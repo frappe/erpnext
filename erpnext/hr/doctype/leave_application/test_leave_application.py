@@ -25,6 +25,7 @@ from erpnext.hr.doctype.leave_application.leave_application import (
 	LeaveDayBlockedError,
 	NotAnOptionalHoliday,
 	OverlapError,
+	get_leave_allocation_records,
 	get_leave_balance_on,
 	get_leave_details,
 )
@@ -881,6 +882,27 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertEqual(leave_allocation['leaves_pending_approval'], 1)
 		self.assertEqual(leave_allocation['remaining_leaves'], 26)
 
+	@set_holiday_list('Salary Slip Test Holiday List', '_Test Company')
+	def test_get_leave_allocation_records(self):
+		employee = get_employee()
+		leave_type = create_leave_type(
+			leave_type_name="_Test_CF_leave_expiry",
+			is_carry_forward=1,
+			expire_carry_forwarded_leaves_after_days=90)
+		leave_type.insert()
+
+		leave_alloc = create_carry_forwarded_allocation(employee, leave_type)
+		details = get_leave_allocation_records(employee.name, getdate(), leave_type.name)
+		expected_data = {
+			"from_date": getdate(leave_alloc.from_date),
+			"to_date": getdate(leave_alloc.to_date),
+			"total_leaves_allocated": 30.0,
+			"unused_leaves": 15.0,
+			"new_leaves_allocated": 15.0,
+			"leave_type": leave_type.name
+		}
+		self.assertEqual(details.get(leave_type.name), expected_data)
+
 
 def create_carry_forwarded_allocation(employee, leave_type):
 		# initial leave allocation
@@ -901,6 +923,8 @@ def create_carry_forwarded_allocation(employee, leave_type):
 			to_date=add_days(nowdate(), 100),
 			carry_forward=1)
 		leave_allocation.submit()
+
+		return leave_allocation
 
 def make_allocation_record(employee=None, leave_type=None, from_date=None, to_date=None, carry_forward=False, leaves=None):
 	allocation = frappe.get_doc({
