@@ -200,9 +200,9 @@ def get_mode_of_payment_details(filters):
 	invoice_list_names = ",".join('"' + invoice['name'] + '"' for invoice in invoice_list)
 	if invoice_list:
 		inv_mop_detail = frappe.db.sql("""
-			select t.owner, 
+			select t.owner,
 			       t.posting_date,
-				   t.mode_of_payment, 
+				   t.mode_of_payment,
 				   sum(t.paid_amount) as paid_amount
 			from (
 				select a.owner, a.posting_date,
@@ -230,7 +230,7 @@ def get_mode_of_payment_details(filters):
 				and b.reference_type = "Sales Invoice"
 				and b.reference_name in ({invoice_list_names})
 				group by a.owner, a.posting_date, mode_of_payment
-			) t	 
+			) t
 			group by t.owner, t.posting_date, t.mode_of_payment
 			""".format(invoice_list_names=invoice_list_names), as_dict=1)
 
