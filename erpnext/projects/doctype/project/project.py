@@ -1141,6 +1141,54 @@ def get_sales_invoice(project_name, depreciation_type=None):
 
 
 @frappe.whitelist()
+def get_delivery_note(project_name):
+	from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+
+	project = frappe.get_doc("Project", project_name)
+	project_details = get_project_details(project, "Sales Invoice")
+
+	# Create Sales Invoice
+	target_doc = frappe.new_doc("Delivery Note")
+	target_doc.company = project.company
+	target_doc.project = project.name
+
+	# Set Project Details
+	for k, v in project_details.items():
+		if target_doc.meta.has_field(k):
+			target_doc.set(k, v)
+
+	# Get Sales Orders
+	sales_order_filters = {
+		"docstatus": 1,
+		"status": ["not in", ["Closed", "On Hold"]],
+		"per_delivered": ["<", 99.99],
+		"project": project.name,
+		"customer": project.customer,
+		"company": project.company,
+		"skip_delivery_note": 0,
+	}
+	sales_orders = frappe.get_all("Sales Order", filters=sales_order_filters)
+	for d in sales_orders:
+		target_doc = make_delivery_note(d.name, target_doc=target_doc)
+
+	# Remove Taxes (so they are reloaded)
+	target_doc.taxes_and_charges = None
+	target_doc.taxes = []
+
+	# Set Project Details
+	for k, v in project_details.items():
+		if target_doc.meta.has_field(k):
+			target_doc.set(k, v)
+
+	# Missing Values and Forced Values
+	target_doc.run_method("set_missing_values")
+	target_doc.run_method("append_taxes_from_master")
+	target_doc.run_method("calculate_taxes_and_totals")
+
+	return target_doc
+
+
+@frappe.whitelist()
 def get_vehicle_receipt(project):
 	doc = frappe.get_doc("Project", project)
 	check_if_doc_exists("Vehicle Receipt", doc.name, {'docstatus': 0, 'is_return': 0})
