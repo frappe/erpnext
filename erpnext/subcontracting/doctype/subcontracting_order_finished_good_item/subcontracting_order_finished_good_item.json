@@ -14,7 +14,8 @@
         "warehouse",
         "bom",
         "expense_account",
-        "schedule_date"
+        "schedule_date",
+        "conversion_factor"
     ],
     "fields": [
         {
@@ -101,6 +102,15 @@
             "label": "Required By",
             "print_hide": 1,
             "reqd": 1
+        },
+        {
+            "fieldname": "conversion_factor",
+            "fieldtype": "Float",
+            "label": "UOM Conversion Factor",
+            "print_hide": 1,
+            "print_width": "100px",
+            "reqd": 1,
+            "width": "100px"
         }
     ],
     "idx": 1,
