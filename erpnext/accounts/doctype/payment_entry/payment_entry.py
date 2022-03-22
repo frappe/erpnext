@@ -680,6 +680,7 @@ class PaymentEntry(AccountsController):
 		self.add_tax_gl_entries(gl_entries)
 
 		gl_entries = process_gl_map(gl_entries)
+		print(gl_entries, "$#$#$#")
 		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
 
 	def add_party_gl_entries(self, gl_entries):
@@ -698,7 +699,16 @@ class PaymentEntry(AccountsController):
 				"cost_center": self.cost_center
 			}, item=self)
 
-			dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
+			party_account_type = erpnext.get_party_account_type(self.party_type)
+
+			if party_account_type == 'Receivable' and self.payment_type == 'Receive':
+				dr_or_cr = "credit"
+			elif party_account_type == 'Payable' and self.payment_type == 'Pay':
+				dr_or_cr = "debit"
+			elif party_account_type == 'Receivable' and self.payment_type == 'Pay':
+				dr_or_cr = "debit"
+			elif party_account_type == 'Payable' and self.payment_type == 'Receive':
+				dr_or_cr = "credit"
 
 			for d in self.get("references"):
 				cost_center = self.cost_center
