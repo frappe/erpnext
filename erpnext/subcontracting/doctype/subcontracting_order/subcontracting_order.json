@@ -40,7 +40,8 @@
   "tax_withholding_category",
   "conversion_rate",
   "plc_conversion_rate",
-  "per_received"
+  "per_received",
+  "set_reserve_warehouse"
  ],
  "fields": [
   {
@@ -321,12 +322,19 @@
    "label": "Price List Exchange Rate",
    "precision": "9",
    "print_hide": 1
+  },
+  {
+   "depends_on": "supplied_items",
+   "fieldname": "set_reserve_warehouse",
+   "fieldtype": "Link",
+   "label": "Set Reserve Warehouse",
+   "options": "Warehouse"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-22 16:20:48.963676",
+ "modified": "2022-03-22 21:47:59.606388",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order",
