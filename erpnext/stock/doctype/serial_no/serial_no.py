@@ -614,8 +614,8 @@ def auto_fetch_serial_number(
 		batch_nos = safe_json_loads(batch_nos)
 		if isinstance(batch_nos, list):
 			filters.batch_no = batch_nos
-		elif isinstance(batch_nos, str):
-			filters.batch_no = [batch_nos]
+		else:
+			filters.batch_no = [str(batch_nos)]
 
 	if posting_date:
 		filters.expiry_date = posting_date
