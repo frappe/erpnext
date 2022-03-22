@@ -519,6 +519,8 @@ def make_sales_invoice(source_name, target_doc=None):
 	if automatically_fetch_payment_terms:
 		doc.set_payment_schedule()
 
+	doc.set_onload('ignore_price_list', True)
+
 	return doc
 
 @frappe.whitelist()
