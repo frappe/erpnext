@@ -225,9 +225,7 @@ def _check_agent_availability(agent_email, scheduled_time):
 
 
 def _get_employee_from_user(user):
-	employee_docname = frappe.db.exists(
-		{'doctype': 'Employee', 'user_id': user})
+	employee_docname = frappe.db.get_value('Employee', {'user_id': user})
 	if employee_docname:
-		# frappe.db.exists returns a tuple of a tuple
 		return frappe.get_doc('Employee', employee_docname)
 	return None
