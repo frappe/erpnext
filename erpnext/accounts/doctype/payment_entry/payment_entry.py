@@ -680,7 +680,7 @@ class PaymentEntry(AccountsController):
 		self.add_tax_gl_entries(gl_entries)
 
 		gl_entries = process_gl_map(gl_entries)
-		print(gl_entries, "$#$#$#")
+
 		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
 
 	def add_party_gl_entries(self, gl_entries):
