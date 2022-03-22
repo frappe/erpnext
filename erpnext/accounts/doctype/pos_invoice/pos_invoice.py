@@ -17,7 +17,11 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 )
 from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.stock.doctype.batch.batch import get_batch_qty, get_pos_reserved_batch_qty
-from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
+from erpnext.stock.doctype.serial_no.serial_no import (
+	get_delivered_serial_nos,
+	get_pos_reserved_serial_nos,
+	get_serial_nos,
+)
 
 
 class POSInvoice(SalesInvoice):
@@ -179,12 +183,16 @@ class POSInvoice(SalesInvoice):
 			)
 
 	def validate_delivered_serial_nos(self, item):
+<<<<<<< HEAD
 		serial_nos = get_serial_nos(item.serial_no)
 		delivered_serial_nos = frappe.db.get_list(
 			"Serial No",
 			{"item_code": item.item_code, "name": ["in", serial_nos], "sales_invoice": ["is", "set"]},
 			pluck="name",
 		)
+=======
+		delivered_serial_nos = get_delivered_serial_nos(item.serial_no)
+>>>>>>> f2ae63cbfd (fix(pos): remove returned sr. nos. from pos reserved sr. nos. list)
 
 		if delivered_serial_nos:
 			bold_delivered_serial_nos = frappe.bold(", ".join(delivered_serial_nos))
