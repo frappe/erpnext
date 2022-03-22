@@ -39,7 +39,7 @@ class SubcontractingController():
 		if self.doctype == 'Subcontracting Order':
 			return
 
-		self.subcontracting_orders = [d.subcontracting_order for d in self.items if d.subcontracting_order]
+		self.subcontracting_orders = [d.subcontracting_order for d in self.fg_items if d.subcontracting_order]
 
 	def __identify_change_in_item_table(self):
 		self.__changed_name = []
@@ -53,7 +53,7 @@ class SubcontractingController():
 		if not item_dict:
 			return True
 
-		for n_row in self.items:
+		for n_row in self.fg_items:
 			self.__reference_name.append(n_row.name)
 			if (n_row.name not in item_dict) or (n_row.item_code, n_row.qty) != item_dict[n_row.name]:
 				self.__changed_name.append(n_row.name)
@@ -66,7 +66,7 @@ class SubcontractingController():
 	def __get_data_before_save(self):
 		item_dict = {}
 		if self.doctype in ['Subcontracting Receipt'] and self._doc_before_save:
-			for row in self._doc_before_save.get('items'):
+			for row in self._doc_before_save.get('fg_items'):
 				item_dict[row.name] = (row.item_code, row.qty)
 
 		return item_dict
@@ -109,18 +109,18 @@ class SubcontractingController():
 	def __update_consumed_materials(self, doctype, return_consumed_items=False):
 		'''Deduct the consumed materials from the available materials.'''
 
-		pr_items = self.__get_received_items(doctype)
-		if not pr_items:
+		scr_items = self.__get_received_items(doctype)
+		if not scr_items:
 			return ([], {}) if return_consumed_items else None
 
-		pr_items = {d.name: d.get(self.get('sco_field') or 'subcontracting_order') for d in pr_items}
-		consumed_materials = self.__get_consumed_items(doctype, pr_items.keys())
+		scr_items = {d.name: d.get(self.get('sco_field') or 'subcontracting_order') for d in scr_items}
+		consumed_materials = self.__get_consumed_items(doctype, scr_items.keys())
 
 		if return_consumed_items:
-			return (consumed_materials, pr_items)
+			return (consumed_materials, scr_items)
 
 		for row in consumed_materials:
-			key = (row.rm_item_code, row.main_item_code, pr_items.get(row.reference_name))
+			key = (row.rm_item_code, row.main_item_code, scr_items.get(row.reference_name))
 			if not self.available_materials.get(key):
 				continue
 
@@ -163,10 +163,10 @@ class SubcontractingController():
 
 		return frappe.get_all(f'{doctype}', fields = fields, filters = filters)
 
-	def __get_consumed_items(self, doctype, pr_items):
+	def __get_consumed_items(self, doctype, scr_items):
 		return frappe.get_all('Subcontracting Receipt Supplied Item',
 			fields = ['serial_no', 'rm_item_code', 'reference_name', 'batch_no', 'consumed_qty', 'main_item_code'],
-			filters = {'docstatus': 1, 'reference_name': ('in', list(pr_items)), 'parenttype': doctype})
+			filters = {'docstatus': 1, 'reference_name': ('in', list(scr_items)), 'parenttype': doctype})
 
 	def __set_alternative_item_details(self, row):
 		if row.get('original_item'):
@@ -220,7 +220,7 @@ class SubcontractingController():
 		self.bom_items = {}
 
 		has_supplied_items = True if self.get(self.raw_material_table) else False
-		for row in self.items:
+		for row in self.fg_items:
 			if (self.doctype != 'Subcontracting Order' and ((self.__changed_name and row.name not in self.__changed_name)
 				or (has_supplied_items and not self.__changed_name))):
 				continue
@@ -331,10 +331,10 @@ class SubcontractingController():
 		self.__get_subcontracting_orders()
 		itemwise_consumed_qty = defaultdict(float)
 		for doctype in ['Subcontracting Receipt']:
-			consumed_items, pr_items = self.__update_consumed_materials(doctype, return_consumed_items=True)
+			consumed_items, scr_items = self.__update_consumed_materials(doctype, return_consumed_items=True)
 
 			for row in consumed_items:
-				key = (row.rm_item_code, row.main_item_code, pr_items.get(row.reference_name))
+				key = (row.rm_item_code, row.main_item_code, scr_items.get(row.reference_name))
 				itemwise_consumed_qty[key] += row.consumed_qty
 
 		self.__update_consumed_qty_in_sco(itemwise_consumed_qty)
@@ -390,7 +390,7 @@ class SubcontractingController():
 				msg = f'The Serial Nos {incorrect_sn} has not supplied against the Subcontracting Order {link}'
 				frappe.throw(_(msg), title=_("Incorrect Serial Number Consumed"))
 
-	def create_raw_materials_supplied(self, raw_material_table):
+	def create_raw_materials_supplied(self, raw_material_table="supplied_items"):
 		self.set_materials_for_subcontracted_items(raw_material_table)
 
 		if self.doctype == "Subcontracting Receipt":
