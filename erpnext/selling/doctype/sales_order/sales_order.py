@@ -340,14 +340,20 @@ class SalesOrder(SellingController):
 			if row_names:
 				# Billed By Sales Invoice
 				billed_by_sinv = frappe.db.sql("""
-					select i.sales_order_item, i.qty, i.amount, p.depreciation_type, p.is_return, p.reopen_order
+					select i.sales_order_item, i.qty, i.amount, p.depreciation_type, p.is_return, p.reopen_order,
+						p.customer, p.bill_to, item.bill_only_to_customer
 					from `tabSales Invoice Item` i
 					inner join `tabSales Invoice` p on p.name = i.parent
+					left join `tabItem` item on item.name = i.item_code
 					where p.docstatus = 1 and (p.is_return = 0 or p.reopen_order = 1)
 						and i.sales_order_item in %s
 				""", [row_names], as_dict=1)
 
 				for d in billed_by_sinv:
+					customer = d.bill_to or d.customer
+					if not d.amount and d.bill_only_to_customer and customer != d.bill_only_to_customer:
+						continue
+
 					out.billed_amount_map.setdefault(d.sales_order_item, 0)
 					out.billed_amount_map[d.sales_order_item] += d.amount
 
@@ -1013,6 +1019,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
+		target.run_method("set_item_rate_zero_based_on_customer")
 		target.run_method("calculate_taxes_and_totals")
 
 		if source.company_address:

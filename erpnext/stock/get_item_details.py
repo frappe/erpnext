@@ -784,17 +784,20 @@ def get_price_list_rate(args, item_doc, out):
 		if meta.get_field("currency"):
 			validate_conversion_rate(args, meta)
 
-		price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
+		if args.doctype == "Sales Invoice" and should_bill_item_for_customer_as_zero(item_doc.name, args.bill_to or args.customer):
+			price_list_rate = 0
+		else:
+			price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
 
-		# variant
-		if not price_list_rate and item_doc.variant_of:
-			price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
+			# variant
+			if not price_list_rate and item_doc.variant_of:
+				price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
 
-		# insert in database
-		if not price_list_rate:
-			if args.price_list and args.rate:
-				insert_item_price(args)
-			return {}
+			# insert in database
+			if not price_list_rate:
+				if args.price_list and args.rate:
+					insert_item_price(args)
+				return {}
 
 		out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
 			/ flt(args.conversion_rate)
@@ -803,6 +806,14 @@ def get_price_list_rate(args, item_doc, out):
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
 			out.update(get_last_purchase_details(item_doc.name,
 				args.name, args.conversion_rate))
+
+
+def should_bill_item_for_customer_as_zero(item_code, customer):
+	if not item_code:
+		return False
+
+	bill_only_to_customer = frappe.get_cached_value("Item", item_code, 'bill_only_to_customer')
+	return bill_only_to_customer and customer != bill_only_to_customer
 
 
 def insert_item_price(args):

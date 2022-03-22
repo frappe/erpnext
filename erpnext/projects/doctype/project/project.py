@@ -1073,11 +1073,17 @@ def get_sales_invoice(project_name, depreciation_type=None):
 	from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice as invoice_from_sales_order
 
 	project = frappe.get_doc("Project", project_name)
+	project_details = get_project_details(project, "Sales Invoice")
 
 	# Create Sales Invoice
 	target_doc = frappe.new_doc("Sales Invoice")
 	target_doc.company = project.company
 	target_doc.project = project.name
+
+	# Set Project Details
+	for k, v in project_details.items():
+		if target_doc.meta.has_field(k):
+			target_doc.set(k, v)
 
 	filters = {"project": project.name}
 	if project.customer:
@@ -1108,7 +1114,6 @@ def get_sales_invoice(project_name, depreciation_type=None):
 	target_doc.taxes = []
 
 	# Set Project Details
-	project_details = get_project_details(project, "Sales Invoice")
 	for k, v in project_details.items():
 		if target_doc.meta.has_field(k):
 			target_doc.set(k, v)

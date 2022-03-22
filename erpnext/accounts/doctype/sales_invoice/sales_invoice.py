@@ -1516,6 +1516,15 @@ class SalesInvoice(SellingController):
 			vro.set_status(update=True)
 			vro.notify_update()
 
+	def set_item_rate_zero_based_on_customer(self):
+		from erpnext.stock.get_item_details import should_bill_item_for_customer_as_zero
+		for d in self.items:
+			if should_bill_item_for_customer_as_zero(d.item_code, self.get('bill_to') or self.get('customer')):
+				d.price_list_rate = 0
+				d.rate = 0
+				d.margin_rate_or_amount = 0
+				d.discount_percentage = 0
+
 
 def get_discounting_status(sales_invoice):
 	status = None

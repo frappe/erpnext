@@ -91,8 +91,10 @@
   "default_material_request_type",
   "sec_applicable_to",
   "applicable_to",
-  "column_break_66",
   "applicable_to_all",
+  "column_break_66",
+  "bill_only_to_customer",
+  "bill_only_to_customer_name",
   "reorder_section",
   "reorder_levels",
   "serial_nos_and_batches",
@@ -1176,10 +1178,10 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "applicable_to",
+   "collapsible_depends_on": "eval:(doc.applicable_to && doc.applicable_to.length) || doc.bill_only_to_customer",
    "fieldname": "sec_applicable_to",
    "fieldtype": "Section Break",
-   "label": "Applicable To"
+   "label": "Applicability"
   },
   {
    "fieldname": "applicable_to",
@@ -1267,6 +1269,19 @@
    "fieldname": "quotation_validity_days",
    "fieldtype": "Int",
    "label": "Quotation Validity Days"
+  },
+  {
+   "fieldname": "bill_only_to_customer",
+   "fieldtype": "Link",
+   "label": "Bill Only To Customer",
+   "options": "Customer"
+  },
+  {
+   "fetch_from": "bill_only_to_customer.customer_name",
+   "fieldname": "bill_only_to_customer_name",
+   "fieldtype": "Data",
+   "label": "Bill Only To Customer Name",
+   "read_only": 1
   }
  ],
  "has_web_view": 1,
@@ -1274,7 +1289,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2021-10-28 11:46:30.185893",
+ "modified": "2022-03-22 16:52:04.047943",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

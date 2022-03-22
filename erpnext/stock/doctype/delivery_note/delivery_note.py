@@ -579,6 +579,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
+		target.run_method("set_item_rate_zero_based_on_customer")
 
 		if len(target.get("items")) == 0:
 			frappe.throw(_("All items from Delivery Note {0} have already been invoiced or returned").format(source.name))
