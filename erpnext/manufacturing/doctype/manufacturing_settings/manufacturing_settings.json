@@ -37,9 +37,9 @@
   "staging_details",
   "allowed_consumption_deviation_percentage",
   "allowed_production_deviation_percentage",
-  "add_corrective_operation_cost_in_finished_good_valuation",
   "column_break_23",
-  "make_serial_no_batch_from_work_order"
+  "make_serial_no_batch_from_work_order",
+  "batch_price_list"
  ],
  "fields": [
   {
@@ -235,13 +235,19 @@
    "fieldname": "job_card_excess_transfer",
    "fieldtype": "Check",
    "label": "Allow Excess Material Transfer"
+  },
+  {
+   "fieldname": "batch_price_list",
+   "fieldtype": "Link",
+   "label": "Batch Price List",
+   "options": "Price List"
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-13 22:09:09.401559",
+ "modified": "2022-03-22 12:10:15.175532",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

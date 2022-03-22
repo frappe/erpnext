@@ -71,7 +71,8 @@
   "putaway_rule",
   "column_break_51",
   "reference_purchase_receipt",
-  "job_card_item"
+  "job_card_item",
+  "mrp"
  ],
  "fields": [
   {
@@ -550,20 +551,23 @@
    "fieldname": "is_process_loss",
    "fieldtype": "Check",
    "label": "Is Process Loss"
+  },
+  {
+   "fieldname": "mrp",
+   "fieldtype": "Currency",
+   "label": "MRP"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-02-26 00:51:24.963653",
+ "modified": "2022-03-22 15:15:49.430669",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",
- "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "ASC",
- "states": []
+ "sort_order": "ASC"
 }
