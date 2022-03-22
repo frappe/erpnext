@@ -253,6 +253,7 @@ class TestSerialNo(FrappeTestCase):
 		in1 = make_stock_entry(item_code=item_code, to_warehouse=warehouse, qty=5)
 		in2 = make_stock_entry(item_code=item_code, to_warehouse=warehouse, qty=5)
 
+
 		in1.reload()
 		in2.reload()
 

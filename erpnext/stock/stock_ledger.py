@@ -684,6 +684,8 @@ class update_entries_after(object):
 		new_stock_qty = self.wh_data.qty_after_transaction + actual_qty
 
 		if new_stock_qty > 0:
+			if not self.wh_data.valuation_rate:
+				self.wh_data.valuation_rate = 0
 			new_stock_value = (self.wh_data.qty_after_transaction * self.wh_data.valuation_rate) + stock_value_change
 			if new_stock_value >= 0:
 				# calculate new valuation rate only if stock value is positive
