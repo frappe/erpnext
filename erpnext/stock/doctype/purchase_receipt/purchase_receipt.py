@@ -762,6 +762,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 			frappe.throw(_("All items have already been Invoiced/Returned"))
 
 		doc = frappe.get_doc(target)
+		doc.ignore_pricing_rule = 1
 		doc.payment_terms_template = get_payment_terms_template(source.supplier, "Supplier", source.company)
 		doc.run_method("onload")
 		doc.run_method("set_missing_values")
