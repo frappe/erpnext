@@ -291,6 +291,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"label": _("Account Levels"),
+					"name": "Account Levels",
+				},
+				{
+					"type": "doctype",
 					"label": _("Bank Account"),
 					"name": "Bank Account",
 				},
