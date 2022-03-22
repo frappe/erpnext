@@ -442,6 +442,8 @@ def make_purchase_receipt(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 
+	doc.set_onload('ignore_price_list', True)
+
 	return doc
 
 @frappe.whitelist()
@@ -509,6 +511,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 
 	doc = get_mapped_doc("Purchase Order", source_name,	fields,
 		target_doc, postprocess, ignore_permissions=ignore_permissions)
+	doc.set_onload('ignore_price_list', True)
 
 	return doc
 
