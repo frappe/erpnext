@@ -595,6 +595,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			target.set_advances()
 
 	def set_missing_values(source, target):
+		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
