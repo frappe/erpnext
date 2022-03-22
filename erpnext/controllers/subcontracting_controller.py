@@ -389,3 +389,10 @@ class SubcontractingController():
 				link = get_link_to_form('Subcontracting Order', row.subcontracting_order)
 				msg = f'The Serial Nos {incorrect_sn} has not supplied against the Subcontracting Order {link}'
 				frappe.throw(_(msg), title=_("Incorrect Serial Number Consumed"))
+
+	def create_raw_materials_supplied(self, raw_material_table):
+		self.set_materials_for_subcontracted_items(raw_material_table)
+
+		if self.doctype == "Subcontracting Receipt":
+			for item in self.get("fg_items"):
+				item.rm_supp_cost = 0.0

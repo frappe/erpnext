@@ -51,7 +51,6 @@ class BuyingController(StockController, SubcontractingController):
 
 			#sub-contracting
 			self.validate_for_subcontracting()
-			self.create_raw_materials_supplied("supplied_items")
 			self.set_landed_cost_voucher_amount()
 
 		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
@@ -312,17 +311,6 @@ class BuyingController(StockController, SubcontractingController):
 			for item in self.get("items"):
 				if item.bom:
 					item.bom = None
-
-	def create_raw_materials_supplied(self, raw_material_table):
-		if self.is_subcontracted=="Yes":
-			self.set_materials_for_subcontracted_items(raw_material_table)
-
-		elif self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
-			for item in self.get("items"):
-				item.rm_supp_cost = 0.0
-
-		if self.is_subcontracted == "No" and self.get("supplied_items"):
-			self.set('supplied_items', [])
 
 	@property
 	def sub_contracted_items(self):
