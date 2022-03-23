@@ -12,6 +12,7 @@ from erpnext.controllers.subcontracting_controller import SubcontractingControll
 
 class SubcontractingOrder(SubcontractingController):
 	def validate(self):
+		super(SubcontractingOrder, self).validate()
 		self.validate_purchase_order()
 		self.create_raw_materials_supplied()
 
