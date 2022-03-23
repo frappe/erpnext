@@ -446,3 +446,70 @@ def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool
 			)
 
 	return bool(reposting_pending)
+
+def update_serial_items_table(doc):
+	from frappe.utils import cint
+
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	if doc.doctype == "Stock Reconciliation":
+		doc.current_serials = []
+		doc.new_serials = []
+	else:
+		doc.serial_items = []
+
+	for item in doc.items:
+		has_serial = frappe.db.get_value('Item', item.item_code, 'has_serial_no')
+		filter_args = {"name": "", "status": "Inactive"}
+		filter_args["name"] = ""
+		warehouse_field = "s_warehouse" if doc.doctype == "Stock Entry" else "warehouse"
+		if doc.doctype in ["Delivery Note", "Sales Invoice", "Stock Reconciliation", "Stock Entry"]:
+			filter_args["status"] = "Active"
+			filter_args["warehouse"] = item.get(warehouse_field)
+
+		# For Stock Reco Current Serials
+		if has_serial and item.get("current_serial_no"):
+			current_serials = get_serial_nos(item.current_serial_no)
+			for serial in current_serials:
+				filter_args["name"] = serial
+				row = doc.append("current_serials", {})
+				row.item_name = item.item_code
+				row.serial_no = serial
+				row.type = 'Accepted'
+
+		table_name = "new_serials" if doc.doctype == "Stock Reconciliation" else "serial_items"
+		# Also for Stock Reco new serials table.
+		if has_serial and item.get("serial_no"):
+			accepted_serials = get_serial_nos(item.serial_no)
+			for serial in accepted_serials:
+				filter_args["name"] = serial
+				row = doc.append(table_name, {})
+				row.item_name = item.item_code
+				row.serial_no = serial if frappe.db.exists('Serial No',
+					filter_args) else ""
+				row.type = 'Accepted'
+
+		# In Selling, only in the case of sales invoice return the serials can be auto-created.
+		if has_serial and not item.serial_no and ((doc.doctype in ["Purchase Receipt", "Purchase Invoice", "Stock Entry"])
+			or (doc.doctype == "Sales Invoice" and doc.is_return)):
+			for serial in range(abs(cint(item.qty))):
+				row = doc.append('serial_items', {})
+				row.item_name = item.item_code
+				row.type = 'Accepted'
+
+		if doc.doctype in ["Purchase Receipt", "Purchase Invoice"]:
+			if has_serial and item.rejected_serial_no:
+				rejected_serials = get_serial_nos(item.rejected_serial_no)
+				for serial in rejected_serials:
+					row = doc.append('serial_items', {})
+					row.item_name = item.item_code
+					row.serial_no = serial if frappe.db.exists('Serial No',
+						{"name": serial, "status": "Inactive"}) else ""
+					row.type = 'Rejected'
+
+			if has_serial and not item.rejected_serial_no:
+				for serial in range(abs(cint(item.rejected_qty))):
+					row = doc.append('serial_items', {})
+					row.item_name = item.item_code
+					row.type = 'Rejected'
+

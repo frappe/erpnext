@@ -515,65 +515,6 @@ class StockController(AccountsController):
 			else:
 				create_repost_item_valuation_entry(args)
 
-	def update_serial_items_table(self, update = False):
-		# updates the serials if auto created from sle in the document
-		table_name = "serial_items"
-		warehouse = "s_warehouse"
-		if self.doctype == "Stock Reconciliation":
-			table_name = "new_serials"
-			warehouse = "warehouse"
-		if self.get(table_name) and update:
-			for item in self.items:
-				if item.serial_no:
-					for serial in item.serial_no.split("\n"):
-						for serial_item in self.get(table_name):
-							if serial_item.item_name == item.item_code and not serial_item.serial_no\
-								and serial_item.type == "Accepted":
-								serial_item.serial_no = serial.upper()
-								frappe.db.set_value(serial_item.doctype, serial_item.name, "serial_no", serial.upper())
-								break
-			return
-
-		if self.doctype == "Stock Reconciliation":
-			self.current_serials = {}
-			self.new_serials = {}
-		else:
-			self.serial_items = {}
-
-		for item in self.items:
-			has_serial = frappe.db.get_value("Item", item.item_code, "has_serial_no")
-
-			# Updates current_serials table in stock reco.
-			if has_serial and item.get("current_serial_no"):
-				current_serials = item.current_serial_no.split("\n")
-				for serial in current_serials:
-					row = self.append("current_serials", {})
-					row.item_name = item.item_code
-					row.serial_no = serial if frappe.db.exists("Serial No",
-						{"name": serial, "warehouse": item.get(warehouse)}) else ""
-					row.type = "Accepted"
-
-			# Updates new_serials in stock reco and stock entry serial tables, stock reco has 2 tables(current_serials and new_serials).
-			if has_serial and item.serial_no:
-				accepted_serials = item.serial_no.split("\n")
-				for serial in accepted_serials:
-					row = self.append(table_name, {})
-					row.item_name = item.item_code
-					row.serial_no = serial if frappe.db.exists("Serial No",
-						{"name": serial, "warehouse": item.get(warehouse)}) else ""
-					row.type = "Accepted"
-				if len(accepted_serials) < abs(cint(item.qty)):
-					for auto_serial in range(abs(cint(item.qty))- len(accepted_serials)):
-						row = self.append(table_name, {})
-						row.item_name = item.item_code
-						row.type = "Accepted"
-
-			if has_serial and not item.serial_no:
-				for serial in range(abs(cint(item.qty))):
-					row = self.append(table_name, {})
-					row.item_name = item.item_code
-					row.type = "Accepted"
-
 def repost_required_for_queue(doc: StockController) -> bool:
 	"""check if stock document contains repeated item-warehouse with queue based valuation.
 

@@ -12,7 +12,7 @@ from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.item.item import set_item_default
 from erpnext.stock.get_item_details import get_bin_details, get_conversion_factor
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.utils import get_incoming_rate, update_serial_items_table
 
 
 class SellingController(StockController):
@@ -39,7 +39,7 @@ class SellingController(StockController):
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
 		if self.doctype in ['Delivery Note', 'Sales Invoice']:
-			self.update_serial_items_table()
+			update_serial_items_table(self)
 
 	def set_missing_values(self, for_validate=False):
 
@@ -586,37 +586,6 @@ class SellingController(StockController):
 		# validate items to see if they have is_sales_item enabled
 		from erpnext.controllers.buying_controller import validate_item_type
 		validate_item_type(self, "is_sales_item", "sales")
-
-	def update_serial_items_table(self, update=False):
-		# To update auto-created serials.
-		if self.serial_items and update:
-			for item in self.items:
-				if item.serial_no:
-					for serial in item.serial_no.split('\n'):
-						for serial_item in self.serial_items:
-							if serial_item.item_name == item.item_code and not serial_item.serial_no\
-								and serial_item.type == 'Accepted':
-								serial_item.serial_no = serial.upper()
-								frappe.db.set_value(serial_item.doctype, serial_item.name, 'serial_no', serial.upper())
-								break
-			return
-		self.serial_items = {}
-		for item in self.items:
-			has_serial = frappe.db.get_value('Item', item.item_code, 'has_serial_no')
-
-			if has_serial and item.get('serial_no'):
-				serials = item.serial_no.split('\n')
-				for serial in serials:
-					row = self.append('serial_items', {})
-					row.item_name = item.item_code
-					row.serial_no = serial if frappe.db.exists('Serial No',
-						{"name": serial, "warehouse": item.warehouse}) else ""
-					row.type = 'Accepted'
-			if has_serial and not item.serial_no:
-				for serial in range(abs(cint(item.qty))):
-					row = self.append('serial_items', {})
-					row.item_name = item.item_code
-					row.type = 'Accepted'
 
 def set_default_income_account_for_item(obj):
 	for d in obj.get("items"):

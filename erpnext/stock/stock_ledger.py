@@ -39,8 +39,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 					stock)
 	"""
 	from erpnext.controllers.stock_controller import future_sle_exists
-	from erpnext.stock.doctype.serial_no.serial_no import get_item_details, update_serial_nos
-	from erpnext.stock.doctype.serial_no.serial_no import validate_serial_no as validate_sr_no
+	from erpnext.stock.doctype.serial_no.serial_no import get_item_details
 
 
 	if sl_entries:
@@ -69,49 +68,12 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 						sle.voucher_type, sle.voucher_no, sle.voucher_detail_no)
 					sle['outgoing_rate'] = 0.0
 
+
 			item_det = get_item_details(sle.get('item_code'))
-			sle = frappe._dict(sle)
-			voucher_doc = frappe.get_doc(sle.voucher_type, sle.voucher_no)
 
 			if sle.get("actual_qty") and item_det.has_serial_no and sle.get("voucher_type")!="Stock Reconciliation":
-				# for auto creating serials
-				if not via_landed_cost_voucher:
-					validate_sr_no(sle, item_det)
-				if not sle.serial_no and item_det.has_serial_no and (not voucher_doc.is_return or
-					(voucher_doc.doctype == "Sales Invoice")):
-					sle = update_serial_nos(sle, item_det, return_sle=True)
-
-					for item in voucher_doc.get('items'):
-						if item.get('item_code') == sle.item_code:
-							if sle.get("voucher_type")=="Stock Entry":
-								if (item.s_warehouse or item.t_warehouse) == sle.warehouse:
-									frappe.db.set_value(item.doctype, item.name, 'serial_no', sle.serial_no)
-									break
-							if item.warehouse == sle.warehouse:
-								frappe.db.set_value(item.doctype, item.name, 'serial_no', sle.serial_no)
-							elif item.rejected_warehouse == sle.warehouse:
-								frappe.db.set_value(item.doctype, item.name, 'rejected_serial_no', sle.serial_no)
-							break
-					serials = sle.serial_no.strip().split('\n')
-					for serial in range(abs(cint(sle['actual_qty']))):
-						new_sle = sle.copy()
-						new_sle['actual_qty'] = 1 if sle['actual_qty'] > 0 else -1
-						new_sle['serial_no'] = serials.pop()
-						new_sle['skip_update_serial_no'] = 1
-						new_sle['skip_serial_no_validation'] = 1
-						sle_docs.append(make_entry(new_sle, allow_negative_stock, via_landed_cost_voucher))
-						sr = frappe.get_doc('Serial No', new_sle['serial_no'])
-						sr.update_serial_no_reference(sr.serial_no, update=True)
-
-				# for manually entered serials
-				elif sle.serial_no:
-					serials = sle.serial_no.strip().split('\n')
-					for serial in range(abs(cint(sle['actual_qty']))):
-						new_sle = sle.copy()
-						new_sle['actual_qty'] = 1 if sle['actual_qty'] > 0 else -1
-						new_sle['serial_no'] = serials.pop()
-						new_sle['skip_serial_no_validation'] = 1
-						sle_docs.append(make_entry(new_sle, allow_negative_stock, via_landed_cost_voucher))
+				serial_sle_docs = split_serials_into_seperate_sles(sle, item_det, sle_docs)
+				sle_docs = sle_docs + serial_sle_docs
 
 			elif sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
 				sle_docs.append(make_entry(sle, allow_negative_stock, via_landed_cost_voucher))
@@ -130,6 +92,84 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 					update_bin_qty(bin_name, args)
 				else:
 					frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
+
+def split_serials_into_seperate_sles(sle, item_det, sle_docs, allow_negative_stock=False, via_landed_cost_voucher=False):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, update_serial_nos
+	from erpnext.stock.doctype.serial_no.serial_no import validate_serial_no as validate_sr_no
+
+	sle = frappe._dict(sle)
+	voucher_doc = frappe.get_doc(sle.voucher_type, sle.voucher_no)
+	# for auto creating serials
+	if not via_landed_cost_voucher:
+		validate_sr_no(sle, item_det)
+	if not sle.serial_no and item_det.has_serial_no and (not voucher_doc.is_return or
+		(voucher_doc.doctype == "Sales Invoice" and voucher_doc.is_return)):
+		sle = update_serial_nos(sle, item_det, return_sle=True)
+
+		for item in voucher_doc.get('items'):
+			if item.get('item_code') == sle.item_code:
+				if sle.get("voucher_type")=="Stock Entry":
+					if item.t_warehouse == sle.warehouse:
+						frappe.db.set_value(item.doctype, item.name, 'serial_no', sle.serial_no)
+						map_serials_to_serial_table(voucher_doc, item.item_code, get_serial_nos(sle.serial_no))
+						break
+				if item.warehouse == sle.warehouse:
+					frappe.db.set_value(item.doctype, item.name, 'serial_no', sle.serial_no)
+					map_serials_to_serial_table(voucher_doc, item.item_code, get_serial_nos(sle.serial_no))
+				elif item.rejected_warehouse == sle.warehouse:
+					frappe.db.set_value(item.doctype, item.name, 'rejected_serial_no', sle.serial_no)
+					map_serials_to_serial_table(voucher_doc, item.item_code, get_serial_nos(sle.serial_no), "Rejected")
+				break
+		serials = get_serial_nos(sle.serial_no)
+		for serial in serials:
+			new_sle = sle.copy()
+			new_sle['actual_qty'] = 1 if sle['actual_qty'] > 0 else -1
+			new_sle['serial_no'] = serial
+			new_sle['skip_update_serial_no'] = 1
+			new_sle['skip_serial_no_validation'] = 1
+			sle_docs.append(make_entry(new_sle, allow_negative_stock, via_landed_cost_voucher))
+			sr = frappe.get_doc('Serial No', new_sle['serial_no'])
+			sr.update_serial_no_reference(sr.serial_no, update=True)
+
+	# for manually entered serials
+	elif sle.serial_no:
+		serials = get_serial_nos(sle.serial_no)
+		for serial in serials:
+			new_sle = sle.copy()
+			new_sle['actual_qty'] = 1 if sle['actual_qty'] > 0 else -1
+			new_sle['serial_no'] = serial
+			new_sle['skip_serial_no_validation'] = 1
+			sle_docs.append(make_entry(new_sle, allow_negative_stock, via_landed_cost_voucher))
+		for item in voucher_doc.get("items"):
+			if item.item_code == sle.item_code:
+				serial_type = "Rejected" if sle.warehouse == item.get("rejected_warehouse") else "Accepted"
+
+				updated_serials = {serial_item.serial_no for serial_item in voucher_doc.get("serial_items")
+				if serial_item.item_name == sle.item_code and serial_item.type == serial_type and serial_item.serial_no}
+				to_update_serials = set(serials) - updated_serials
+				map_serials_to_serial_table(voucher_doc, sle.item_code, to_update_serials, serial_type)
+
+	return sle_docs
+
+def map_serials_to_serial_table(voucher_doc, item, serials, serial_type="Accepted"):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	if isinstance(serials, set):
+		serials = list(serials)
+
+	table_name = "serial_items"
+	if voucher_doc.doctype == "Stock Reconciliation":
+		new_serials = get_serial_nos(serials)
+		updated_serials = {new_serial_item.serial_no for new_serial_item in voucher_doc.get("new_serials")
+		if new_serial_item.item_name == item and new_serial_item.serial_no}
+		serials = set(new_serials) - updated_serials
+		serials = list(serials)
+		table_name = "new_serials"
+
+	for serial_item in voucher_doc.get(table_name):
+		if serial_item.item_name == item and serial_item.type == serial_type and not serial_item.serial_no:
+			serial_item.serial_no = serials[0]
+			frappe.db.update(serial_item.doctype, serial_item.name, 'serial_no', serials.pop(0))
 
 def repost_current_voucher(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	if args.get("actual_qty") or args.get("voucher_type") == "Stock Reconciliation":

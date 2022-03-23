@@ -16,7 +16,8 @@ from erpnext.stock.doctype.serial_no.serial_no import (
 	update_serial_nos,
 	validate_serial_no,
 )
-from erpnext.stock.utils import get_stock_balance
+from erpnext.stock.stock_ledger import map_serials_to_serial_table
+from erpnext.stock.utils import get_stock_balance, update_serial_items_table
 
 
 class OpeningEntryAccountError(frappe.ValidationError): pass
@@ -41,7 +42,7 @@ class StockReconciliation(StockController):
 		self.clean_serial_nos()
 		self.set_total_qty_and_amount()
 		self.validate_putaway_capacity()
-		self.update_serial_items_table()
+		update_serial_items_table(self)
 
 		if self._action=="submit":
 			self.make_batches('warehouse')
@@ -53,8 +54,8 @@ class StockReconciliation(StockController):
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "items")
-		self.reload()
-		self.update_serial_items_table(update=True)
+		for item in self.items:
+			map_serials_to_serial_table(self, item.item_code, item.serial_no)
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
@@ -260,13 +261,13 @@ class StockReconciliation(StockController):
 						update_serial_nos(sle, item_det)
 
 						qty_after_transaction = 0
-						for serial in range(len(serials)):
+						for serial in serials:
 							qty_after_transaction += 1
 							new_sle = sle.copy()
 							new_sle.update({
 								'actual_qty': 1,
 								'qty_after_transaction': qty_after_transaction,
-								'serial_no': serials.pop(),
+								'serial_no': serial,
 								'skip_serial_no_validation': 1
 							})
 							new_sl_entries.append(new_sle)
@@ -302,13 +303,13 @@ class StockReconciliation(StockController):
 			if row.current_serial_no:
 				qty_after_transaction = row.current_qty
 				current_serials = get_serial_nos(row.current_serial_no)
-				for serial in range(cint(row.current_qty)):
+				for serial in current_serials:
 					qty_after_transaction -= 1
 					new_args = args.copy()
 					new_args.update({
 						'actual_qty': -1,
 						'qty_after_transaction': qty_after_transaction,
-						'serial_no': current_serials.pop()
+						'serial_no': serial
 					})
 					sl_entries.append(new_args)
 			else:
@@ -443,13 +444,13 @@ class StockReconciliation(StockController):
 
 						serials = get_serial_nos(sle.serial_no)
 						split_sles = []
-						for serial in range(len(serials)):
+						for serial in serials:
 							qty_after_transaction += 1
 							new_sle = sle.copy()
 							new_sle.update({
 								'actual_qty': -1,
 								'qty_after_transaction': qty_after_transaction,
-								'serial_no': serials.pop()
+								'serial_no': serial
 							})
 							split_sles.append(new_sle)
 						# new_sl_entries breaks the order of the sles after split

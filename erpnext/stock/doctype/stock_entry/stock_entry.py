@@ -33,7 +33,7 @@ from erpnext.stock.get_item_details import (
 	get_reserved_qty_for_so,
 )
 from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle, get_valuation_rate
-from erpnext.stock.utils import get_bin, get_incoming_rate
+from erpnext.stock.utils import get_bin, get_incoming_rate, update_serial_items_table
 
 
 class FinishedGoodError(frappe.ValidationError):
@@ -112,20 +112,19 @@ class StockEntry(StockController):
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
 		self.validate_putaway_capacity()
-		self.update_serial_items_table()
 
 		if not self.get("purpose") == "Manufacture":
 			# ignore scrap item wh difference and empty source/target wh
 			# in Manufacture Entry
 			self.reset_default_field_value("from_warehouse", "items", "s_warehouse")
 			self.reset_default_field_value("to_warehouse", "items", "t_warehouse")
+		if self.purpose == "Material Receipt":
+			update_serial_items_table(self)
 
 	def on_submit(self):
 		self.update_stock_ledger()
 
 		update_serial_nos_after_submit(self, "items")
-		self.reload()
-		self.update_serial_items_table(update=True)
 		self.update_work_order()
 		self.validate_purchase_order()
 		self.update_purchase_order_supplied_items()
