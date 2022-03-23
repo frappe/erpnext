@@ -500,16 +500,15 @@ class JobCard(Document):
 			2: "Cancelled"
 		}[self.docstatus or 0]
 
+		if self.for_quantity <= self.transferred_qty:
+			self.status = 'Material Transferred'
+
 		if self.time_logs:
 			self.status = 'Work In Progress'
 
 		if (self.docstatus == 1 and
 			(self.for_quantity <= self.total_completed_qty or not self.items)):
 			self.status = 'Completed'
-
-		if self.status != 'Completed':
-			if self.for_quantity <= self.transferred_qty:
-				self.status = 'Material Transferred'
 
 		if update_status:
 			self.db_set('status', self.status)
