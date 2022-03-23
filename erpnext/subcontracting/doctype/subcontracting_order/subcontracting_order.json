@@ -41,7 +41,8 @@
   "conversion_rate",
   "plc_conversion_rate",
   "per_received",
-  "set_reserve_warehouse"
+  "set_reserve_warehouse",
+  "grand_total"
  ],
  "fields": [
   {
@@ -329,6 +330,14 @@
    "fieldtype": "Link",
    "label": "Set Reserve Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Grand Total",
+   "options": "currency",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
