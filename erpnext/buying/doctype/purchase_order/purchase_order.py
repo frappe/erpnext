@@ -68,7 +68,6 @@ class PurchaseOrder(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()
 		self.validate_minimum_order_qty()
-		self.create_raw_materials_supplied("supplied_items")
 		self.set_received_qty_for_drop_ship_items()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_order_reference)
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")

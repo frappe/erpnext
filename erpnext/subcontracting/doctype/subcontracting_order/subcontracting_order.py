@@ -5,13 +5,12 @@ import json
 
 import frappe
 from frappe import _
-from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 
 
-class SubcontractingOrder(Document, SubcontractingController):
+class SubcontractingOrder(SubcontractingController):
 	def validate(self):
 		self.validate_purchase_order()
 		self.create_raw_materials_supplied()

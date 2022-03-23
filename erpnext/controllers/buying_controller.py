@@ -12,7 +12,6 @@ from erpnext.accounts.party import get_party_details
 from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.stock_controller import StockController
-from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_incoming_rate
 
@@ -20,7 +19,7 @@ from erpnext.stock.utils import get_incoming_rate
 class QtyMismatchError(ValidationError):
 	pass
 
-class BuyingController(StockController, SubcontractingController):
+class BuyingController(StockController):
 
 	def get_feed(self):
 		if self.get("supplier_name"):
@@ -289,43 +288,9 @@ class BuyingController(StockController, SubcontractingController):
 		return supplied_items_cost
 
 	def validate_for_subcontracting(self):
-		if not self.is_subcontracted and self.sub_contracted_items:
-			frappe.throw(_("Please enter 'Is Subcontracted' as Yes or No"))
-
 		if self.is_subcontracted == "Yes":
 			if self.doctype in ["Purchase Receipt", "Purchase Invoice"] and not self.supplier_warehouse:
 				frappe.throw(_("Supplier Warehouse mandatory for sub-contracted {0}").format(self.doctype))
-
-			for item in self.get("items"):
-				if item in self.sub_contracted_items and not item.bom:
-					frappe.throw(_("Please select BOM in BOM field for Item {0}").format(item.item_code))
-
-			if self.doctype != "Purchase Order":
-				return
-
-			for row in self.get("supplied_items"):
-				if not row.reserve_warehouse:
-					msg = f"Reserved Warehouse is mandatory for the Item {frappe.bold(row.rm_item_code)} in Raw Materials supplied"
-					frappe.throw(_(msg))
-		else:
-			for item in self.get("items"):
-				if item.bom:
-					item.bom = None
-
-	@property
-	def sub_contracted_items(self):
-		if not hasattr(self, "_sub_contracted_items"):
-			self._sub_contracted_items = []
-			item_codes = list(set(item.item_code for item in
-				self.get("items")))
-			if item_codes:
-				items = frappe.get_all('Item', filters={
-					'name': ['in', item_codes],
-					'is_sub_contracted_item': 1
-				})
-				self._sub_contracted_items = [item.name for item in items]
-
-		return self._sub_contracted_items
 
 	def set_qty_as_per_stock_uom(self):
 		for d in self.get("items"):

@@ -5,10 +5,27 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, get_link_to_form
 
+from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
-class SubcontractingController():
+class SubcontractingController(BuyingController):
+	def validate(self):
+		self.validate_fg_items()
+		self.validate_reserve_warehouse()
+		self.create_raw_materials_supplied()
+
+	def validate_fg_items(self):
+		for item in self.get("fg_items"):
+			if item in self.sub_contracted_items and not item.bom:
+				frappe.throw(_("Please select BOM in BOM field for Finished Good Item {0}").format(item.item_code))
+
+	def validate_reserve_warehouse(self):
+		for row in self.get("supplied_items"):
+			if not row.reserve_warehouse:
+				msg = f"Reserved Warehouse is mandatory for the Item {frappe.bold(row.rm_item_code)} in Raw Materials supplied"
+				frappe.throw(_(msg))
+
 	def set_materials_for_subcontracted_items(self, raw_material_table):
 		self.raw_material_table = raw_material_table
 		self.identify_change_in_item_table()
@@ -396,3 +413,18 @@ class SubcontractingController():
 		if self.doctype == "Subcontracting Receipt":
 			for item in self.get("fg_items"):
 				item.rm_supp_cost = 0.0
+
+	@property
+	def sub_contracted_items(self):
+		if not hasattr(self, "_sub_contracted_items"):
+			self._sub_contracted_items = []
+			item_codes = list(set(item.item_code for item in
+				self.get("fg_items")))
+			if item_codes:
+				items = frappe.get_all('Item', filters={
+					'name': ['in', item_codes],
+					'is_sub_contracted_item': 1
+				})
+				self._sub_contracted_items = [item.name for item in items]
+
+		return self._sub_contracted_items
