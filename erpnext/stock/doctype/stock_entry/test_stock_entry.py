@@ -1176,12 +1176,13 @@ class TestStockEntry(FrappeTestCase):
 		for serial_item in mr.serial_items:
 			self.assertEquals(serial_item.serial_no, None)
 		mr.submit()
+		mr.reload()
 		serials_created = get_serial_nos(mr.items[0].serial_no)
 		self.assertEquals(len(serials_created), 2)
 		# Checking sles created for each serial.
 		sles = frappe.db.get_list("Stock Ledger Entry", {"voucher_no": mr.name}, ["actual_qty", "serial_no"])
 		self.assertEquals(len(sles), 2)
-		for sle, sr_created in zip(sles, serials_created):
+		for sle, sr_created in zip(sles, serials_created[-1::-1]):
 			self.assertEqual(sle.actual_qty, 1)
 			self.assertEqual(sle.serial_no, sr_created)
 		# Checking updates in serial items table.

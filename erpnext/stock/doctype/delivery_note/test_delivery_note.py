@@ -840,6 +840,7 @@ class TestDeliveryNote(FrappeTestCase):
 		)
 		pr.save()
 		pr.submit()
+		pr.reload()
 		serials = get_serial_nos(pr.items[0].serial_no)
 		dn = create_delivery_note(
 			item_code=item_code,
@@ -858,7 +859,7 @@ class TestDeliveryNote(FrappeTestCase):
 		serials = get_serial_nos(dn.items[0].serial_no)
 		sles = frappe.db.get_list("Stock Ledger Entry", {"voucher_no": dn.name}, ["actual_qty", "serial_no"])
 		self.assertEquals(len(sles), 2)
-		for sle, sr_created in zip(sles, serials):
+		for sle, sr_created in zip(sles, serials[-1::-1]):
 			self.assertEqual(sle.actual_qty, -1)
 			self.assertEqual(sle.serial_no, sr_created)
 		# Checks if serial no status is changed.

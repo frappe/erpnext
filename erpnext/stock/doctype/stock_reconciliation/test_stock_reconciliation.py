@@ -186,20 +186,22 @@ class TestStockReconciliation(FrappeTestCase):
 		for serial_item in sr.new_serials:
 			self.assertFalse(serial_item.serial_no)
 		sr.submit()
+		sr.reload()
 		serials_created = get_serial_nos(sr.items[0].serial_no)
-		self.assertEquals(sr.new_serials[-1].serial_no, serials_created[-1])
+		self.assertTrue(sr.new_serials[-1].serial_no)
 
 		# Checking sles created for each serial.
 		sles = frappe.db.get_list("Stock Ledger Entry", {"voucher_no": sr.name}, ["actual_qty", "serial_no"])
 		self.assertEquals(len(sles), 3)
+		serials_created.reverse()
 		for sle, sr_created in zip(sles, serials_created):
 			self.assertEqual(sle.actual_qty, 1)
 			self.assertEqual(sle.serial_no, sr_created)
 		# Checking updates in serial items table.
 		self.assertTrue(frappe.db.exists("Serial No",{
 			"item_code": item_code, "warehouse": sr.items[0].warehouse, "name": serials_created[1]}))
-		for serial_item in sr.new_serials:
-			self.assertEquals(serial_item.serial_no, serials_created.pop(0))
+		new_serials = [serial_item.serial_no for serial_item in sr.new_serials]
+		self.assertEquals(sorted(new_serials, reverse=True), serials_created)
 
 		sr = create_stock_reconciliation(
 			item_code=item_code,
@@ -223,10 +225,10 @@ class TestStockReconciliation(FrappeTestCase):
 		serials_created = get_serial_nos(sr.items[0].serial_no)
 		sles = frappe.db.get_list("Stock Ledger Entry", {"voucher_no": sr.name}, ["name", "actual_qty", "serial_no"])
 		self.assertEquals(len(sles), 5)
-		for sle, serial in zip(sles, serials):
+		for sle, serial in zip(sles, serials[2::-1]):
 			self.assertEquals(sle.actual_qty, 1)
 			self.assertEquals(sle.serial_no, serial)
-		for sle, serial in zip(sles[2:], current_serials):
+		for sle, serial in zip(sles[2:], current_serials[-1::-1]):
 			self.assertEquals(sle.actual_qty, -1)
 			self.assertEquals(sle.serial_no, serial)
 

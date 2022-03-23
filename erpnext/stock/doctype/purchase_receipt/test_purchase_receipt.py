@@ -1448,11 +1448,12 @@ class TestPurchaseReceipt(FrappeTestCase):
 		for serial_item in pr.serial_items:
 			self.assertEquals(serial_item.serial_no, None)
 		pr.submit()
+		pr.reload()
 		serials_created = get_serial_nos(pr.items[0].serial_no)
 		# Checking sles created for each serial.
 		sles = frappe.db.get_list("Stock Ledger Entry", {"voucher_no": pr.name}, ["actual_qty", "serial_no"])
 		self.assertEquals(len(sles), 2)
-		for sle, sr_created in zip(sles, serials_created):
+		for sle, sr_created in zip(sles, serials_created[-1::-1]):
 			self.assertEqual(sle.actual_qty, 1)
 			self.assertEqual(sle.serial_no, sr_created)
 		# Checking updates in serial items table.
@@ -1477,6 +1478,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		for serial_item in pr.serial_items:
 			self.assertFalse(serial_item.serial_no, None)
 		pr.submit()
+		pr.reload()
 		serials_created = get_serial_nos(pr.items[0].serial_no)
 		self.assertTrue(serials_created, serials)
 		self.assertTrue(frappe.db.exists("Serial No",{
@@ -1516,6 +1518,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		# Last row of serial_items is empty because the serial isn't created yet.
 		self.assertFalse(serial_items[-1])
 		pr.submit()
+		pr.reload()
 		self.assertTrue(pr.serial_items[-1].serial_no, "TEST3")
 		self.assertTrue(frappe.db.exists("Serial No",{
 			"item_code": item_code, "warehouse": pr.items[0].warehouse, "name": "TEST3"}))

@@ -1287,11 +1287,12 @@ class TestPurchaseInvoice(unittest.TestCase):
 		for serial_item in pi.serial_items:
 			self.assertEquals(serial_item.serial_no, None)
 		pi.submit()
+		pi.reload()
 		serials_created = get_serial_nos(pi.items[0].serial_no)
 		# Checking sles created for each serial.
 		sles = frappe.db.get_list("Stock Ledger Entry", {"voucher_no": pi.name}, ["actual_qty", "serial_no"])
 		self.assertEquals(len(sles), 2)
-		for sle, sr_created in zip(sles, serials_created):
+		for sle, sr_created in zip(sles, serials_created[-1::-1]):
 			self.assertEqual(sle.actual_qty, 1)
 			self.assertEqual(sle.serial_no, sr_created)
 		# Checking updates in serial items table.
@@ -1318,6 +1319,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertFalse(serial_item.serial_no, None)
 
 		pi.submit()
+		pi.reload()
 
 		serials_created = get_serial_nos(pi.items[0].serial_no)
 		self.assertTrue(serials_created, serials)
@@ -1328,7 +1330,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# Checking sles created for each serial when cancelled.
 		sles = frappe.db.get_list("Stock Ledger Entry",
 			{"voucher_no": pi.name, "is_cancelled": 1}, ["actual_qty", "serial_no"])
-		# sles = frappe._dict(sles)
 		self.assertEquals(len(sles), 4)
 		# Cancel creates sles to reverese the stock in entries.
 		reverse_sle_srs = []
@@ -1359,6 +1360,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# Last row of serial_items is empty because the serial isn't created yet.
 		self.assertFalse(serial_items[-1])
 		pi.submit()
+		pi.reload()
 		self.assertTrue(pi.serial_items[-1].serial_no, "TEST3")
 		self.assertTrue(frappe.db.exists("Serial No",{
 			"item_code": item_code, "warehouse": pi.items[0].warehouse, "name": "TEST3"}))

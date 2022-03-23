@@ -2638,6 +2638,7 @@ class TestSalesInvoice(unittest.TestCase):
 		)
 		pr.save()
 		pr.submit()
+		pr.reload()
 		serials = get_serial_nos(pr.items[0].serial_no)
 		si = create_sales_invoice(
 			item_code=item_code,
@@ -2649,14 +2650,14 @@ class TestSalesInvoice(unittest.TestCase):
 		)
 		self.assertTrue(len(si.serial_items), 2)
 		# Checking updates in serial items table.
-		for serial_item in si.serial_items:
-			self.assertEquals(serial_item.serial_no, serials.pop(0))
+		for serial_item, serial in zip(si.serial_items, serials):
+			self.assertEquals(serial_item.serial_no, serial)
 		si.submit()
+		si.reload()
 		# Checking sles created for each serial.
-		serials = get_serial_nos(si.items[0].serial_no)
 		sles = frappe.db.get_list("Stock Ledger Entry", {"voucher_no": si.name}, ["actual_qty", "serial_no"])
 		self.assertEquals(len(sles), 2)
-		for sle, sr_created in zip(sles, serials):
+		for sle, sr_created in zip(sles, serials[-1::-1]):
 			self.assertEqual(sle.actual_qty, -1)
 			self.assertEqual(sle.serial_no, sr_created)
 		# Checks if serial no status is changed.
