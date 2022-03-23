@@ -72,6 +72,70 @@ def get_materials_from_supplier(subcontracting_order, sco_details):
 
 	return make_return_stock_entry_for_subcontract(doc.available_materials, doc, sco_details)
 
+def get_item_details(items):
+	item_details = {}
+	for d in frappe.db.sql("""select item_code, description, allow_alternative_item from `tabItem`
+		where name in ({0})""".format(", ".join(["%s"] * len(items))), items, as_dict=1):
+		item_details[d.item_code] = d
+
+	return item_details
+
+@frappe.whitelist()
+def make_rm_stock_entry(subcontracting_order, rm_items):
+	rm_items_list = rm_items
+
+	if isinstance(rm_items, str):
+		rm_items_list = json.loads(rm_items)
+	elif not rm_items:
+		frappe.throw(_("No Items available for transfer"))
+
+	if rm_items_list:
+		fg_items = list(set(d["item_code"] for d in rm_items_list))
+	else:
+		frappe.throw(_("No Items selected for transfer"))
+
+	if subcontracting_order:
+		subcontracting_order = frappe.get_doc("Subcontracting Order", subcontracting_order)
+
+	if fg_items:
+		items = tuple(set(d["rm_item_code"] for d in rm_items_list))
+		item_wh = get_item_details(items)
+
+		stock_entry = frappe.new_doc("Stock Entry")
+		stock_entry.purpose = "Send to Subcontractor"
+		stock_entry.subcontracting_order = subcontracting_order.name
+		stock_entry.supplier = subcontracting_order.supplier
+		stock_entry.supplier_name = subcontracting_order.supplier_name
+		stock_entry.supplier_address = subcontracting_order.supplier_address
+		stock_entry.address_display = subcontracting_order.address_display
+		stock_entry.company = subcontracting_order.company
+		stock_entry.to_warehouse = subcontracting_order.supplier_warehouse
+		stock_entry.set_stock_entry_type()
+
+		for item_code in fg_items:
+			for rm_item_data in rm_items_list:
+				if rm_item_data["item_code"] == item_code:
+					rm_item_code = rm_item_data["rm_item_code"]
+					items_dict = {
+						rm_item_code: {
+							"sco_detail": rm_item_data.get("name"),
+							"item_name": rm_item_data["item_name"],
+							"description": item_wh.get(rm_item_code, {}).get('description', ""),
+							'qty': rm_item_data["qty"],
+							'from_warehouse': rm_item_data["warehouse"],
+							'stock_uom': rm_item_data["stock_uom"],
+							'serial_no': rm_item_data.get('serial_no'),
+							'batch_no': rm_item_data.get('batch_no'),
+							'main_item_code': rm_item_data["item_code"],
+							'allow_alternative_item': item_wh.get(rm_item_code, {}).get('allow_alternative_item')
+						}
+					}
+					stock_entry.add_to_stock_entry_detail(items_dict)
+		return stock_entry.as_dict()
+	else:
+		frappe.throw(_("No Items selected for transfer"))
+	return subcontracting_order.name
+
 def make_return_stock_entry_for_subcontract(available_materials, sco_doc, sco_details):
 	ste_doc = frappe.new_doc('Stock Entry')
 	ste_doc.purpose = 'Material Transfer'
