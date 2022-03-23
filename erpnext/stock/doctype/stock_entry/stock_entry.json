@@ -8,7 +8,6 @@
  "engine": "InnoDB",
  "field_order": [
   "items_section",
-  "title",
   "naming_series",
   "stock_entry_type",
   "outgoing_stock_entry",
@@ -50,6 +49,7 @@
   "target_address_display",
   "sb0",
   "scan_barcode",
+  "create_batch",
   "items",
   "get_stock_and_rate",
   "section_break_19",
@@ -88,14 +88,6 @@
    "fieldname": "items_section",
    "fieldtype": "Section Break",
    "oldfieldtype": "Section Break"
-  },
-  {
-   "fieldname": "title",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Title",
-   "no_copy": 1,
-   "print_hide": 1
   },
   {
    "fieldname": "naming_series",
@@ -359,9 +351,9 @@
   },
   {
    "fieldname": "scan_barcode",
-   "options": "Barcode",
    "fieldtype": "Data",
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -661,6 +653,7 @@
    "label": "Get Intercompany Item"
   },
   {
+   "default": "0",
    "fieldname": "is_return",
    "fieldtype": "Check",
    "hidden": 1,
@@ -668,6 +661,11 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "create_batch",
+   "fieldtype": "Button",
+   "label": "Create Batch"
   }
  ],
  "icon": "fa fa-file-text",
@@ -675,10 +673,12 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-20 19:19:31.514846",
+ "migration_hash": "58b3f7058b28fcdabe8c60f1794ed329",
+ "modified": "2022-03-08 17:47:44.802761",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -745,6 +745,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "title",
+ "states": [],
+ "title_field": "stock_entry_type",
  "track_changes": 1
 }

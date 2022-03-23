@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import os
 import unittest
@@ -74,7 +72,6 @@ class TestDailyWorkSummary(unittest.TestCase):
 			from `tabEmail Queue` as q, `tabEmail Queue Recipient` as r \
 			where q.name = r.parent""", as_dict=1)
 
-		frappe.db.commit()
 
 	def setup_groups(self, hour=None):
 		# setup email to trigger at this hour

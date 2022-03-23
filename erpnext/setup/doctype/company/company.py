@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import functools
 import json
@@ -12,6 +11,7 @@ import frappe.defaults
 from frappe import _
 from frappe.cache_manager import clear_defaults_cache
 from frappe.contacts.address_and_contact import load_address_and_contact
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.utils import cint, formatdate, get_timestamp, today
 from frappe.utils.nestedset import NestedSet
 from past.builtins import cmp
@@ -25,8 +25,8 @@ class Company(NestedSet):
 
 	def onload(self):
 		load_address_and_contact(self, "company")
-		self.get("__onload")["transactions_exist"] = self.check_if_transactions_exist()
 
+	@frappe.whitelist()
 	def check_if_transactions_exist(self):
 		exists = False
 		for doctype in ["Sales Invoice", "Delivery Note", "Sales Order", "Quotation",
@@ -48,8 +48,9 @@ class Company(NestedSet):
 		self.validate_currency()
 		self.validate_coa_input()
 		self.validate_perpetual_inventory()
-		self.validate_perpetual_inventory_for_non_stock_items()
+		self.validate_provisional_account_for_non_stock_items()
 		self.check_country_change()
+		self.check_parent_changed()
 		self.set_chart_of_accounts()
 		self.validate_parent_company()
 
@@ -133,6 +134,10 @@ class Company(NestedSet):
 			self.name in frappe.local.enable_perpetual_inventory:
 			frappe.local.enable_perpetual_inventory[self.name] = self.enable_perpetual_inventory
 
+		if frappe.flags.parent_company_changed:
+			from frappe.utils.nestedset import rebuild_tree
+			rebuild_tree("Company", "parent_company")
+
 		frappe.clear_cache()
 
 	def create_default_warehouses(self):
@@ -185,16 +190,19 @@ class Company(NestedSet):
 				frappe.msgprint(_("Set default inventory account for perpetual inventory"),
 					alert=True, indicator='orange')
 
-	def validate_perpetual_inventory_for_non_stock_items(self):
+	def validate_provisional_account_for_non_stock_items(self):
 		if not self.get("__islocal"):
-			if cint(self.enable_perpetual_inventory_for_non_stock_items) == 1 and not self.service_received_but_not_billed:
-				frappe.throw(_("Set default {0} account for perpetual inventory for non stock items").format(
-					frappe.bold('Service Received But Not Billed')))
+			if cint(self.enable_provisional_accounting_for_non_stock_items) == 1 and not self.default_provisional_account:
+				frappe.throw(_("Set default {0} account for non stock items").format(
+					frappe.bold('Provisional Account')))
+
+			make_property_setter("Purchase Receipt", "provisional_expense_account", "hidden",
+				not self.enable_provisional_accounting_for_non_stock_items, "Check", validate_fields_for_doctype=False)
 
 	def check_country_change(self):
 		frappe.flags.country_change = False
 
-		if not self.get('__islocal') and \
+		if not self.is_new() and \
 			self.country != frappe.get_cached_value('Company',  self.name,  'country'):
 			frappe.flags.country_change = True
 
@@ -388,6 +396,7 @@ class Company(NestedSet):
 		frappe.db.sql("delete from tabEmployee where company=%s", self.name)
 		frappe.db.sql("delete from tabDepartment where company=%s", self.name)
 		frappe.db.sql("delete from `tabTax Withholding Account` where company=%s", self.name)
+		frappe.db.sql("delete from `tabTransaction Deletion Record` where company=%s", self.name)
 
 		# delete tax templates
 		frappe.db.sql("delete from `tabSales Taxes and Charges Template` where company=%s", self.name)
@@ -398,43 +407,12 @@ class Company(NestedSet):
 		if not frappe.db.get_value('GL Entry', {'company': self.name}):
 			frappe.db.sql("delete from `tabProcess Deferred Accounting` where company=%s", self.name)
 
-@frappe.whitelist()
-def enqueue_replace_abbr(company, old, new):
-	kwargs = dict(queue="long", company=company, old=old, new=new)
-	frappe.enqueue('erpnext.setup.doctype.company.company.replace_abbr', **kwargs)
+	def check_parent_changed(self):
+		frappe.flags.parent_company_changed = False
 
-
-@frappe.whitelist()
-def replace_abbr(company, old, new):
-	new = new.strip()
-	if not new:
-		frappe.throw(_("Abbr can not be blank or space"))
-
-	frappe.only_for("System Manager")
-
-	def _rename_record(doc):
-		parts = doc[0].rsplit(" - ", 1)
-		if len(parts) == 1 or parts[1].lower() == old.lower():
-			frappe.rename_doc(dt, doc[0], parts[0] + " - " + new, force=True)
-
-	def _rename_records(dt):
-		# rename is expensive so let's be economical with memory usage
-		doc = (d for d in frappe.db.sql("select name from `tab%s` where company=%s" % (dt, '%s'), company))
-		for d in doc:
-			_rename_record(d)
-	try:
-		frappe.db.auto_commit_on_many_writes = 1
-		frappe.db.set_value("Company", company, "abbr", new)
-		for dt in ["Warehouse", "Account", "Cost Center", "Department",
-				"Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
-			_rename_records(dt)
-			frappe.db.commit()
-
-	except Exception:
-		frappe.log_error(title=_('Abbreviation Rename Error'))
-	finally:
-		frappe.db.auto_commit_on_many_writes = 0
-
+		if not self.is_new() and \
+			self.parent_company != frappe.db.get_value("Company",  self.name,  "parent_company"):
+			frappe.flags.parent_company_changed = True
 
 def get_name_with_abbr(name, company):
 	company_abbr = frappe.get_cached_value('Company',  company,  "abbr")

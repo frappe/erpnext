@@ -1,6 +1,3 @@
-// Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
-// For license information, please see license.txt
-
 frappe.ui.form.on("Work Order", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
@@ -132,6 +129,11 @@ frappe.ui.form.on("Work Order", {
 			});
 			erpnext.work_order.set_default_warehouse(frm);
 		}
+		// code to reload doc 
+		var prev_route = frappe.get_prev_route();
+		if (prev_route[1] == "Additional Item"){
+			location.reload();
+		}
 	},
 	company: function(frm){
 		frappe.call({
@@ -155,6 +157,12 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	refresh: function(frm) {
+
+		// code to reload doc
+		var prev_route = frappe.get_prev_route();
+		if (prev_route[1] == "Additional Item"){
+			location.reload();
+		}
 		frm.set_query("bom_no", function() {
 			return {
 				filters: {
@@ -173,8 +181,11 @@ frappe.ui.form.on("Work Order", {
 		erpnext.work_order.set_custom_buttons(frm);
 		frm.set_intro("");
 
-		if (frm.doc.docstatus === 0 && !frm.doc.__islocal) {
+		if (frm.doc.docstatus === 0 && !frm.is_new()) {
 			frm.set_intro(__("Submit this Work Order for further processing."));
+		} else {
+			frm.trigger("show_progress_for_items");
+			frm.trigger("show_progress_for_operations");
 		}
 		
 		if(frm.doc.status === "Completed" || frm.doc.status === "Closed"){
@@ -200,16 +211,22 @@ frappe.ui.form.on("Work Order", {
 		if (frm.doc.docstatus === 1
 			&& frm.doc.operations && frm.doc.operations.length) {
 
-			const not_completed = frm.doc.operations.filter(d => {
-				if(d.status != 'Completed') {
-					return true;
-				}
-			});
+		if (frm.doc.status != "Closed") {
+			if (frm.doc.docstatus === 1
+				&& frm.doc.operations && frm.doc.operations.length) {
 
-			if(not_completed && not_completed.length) {
-				frm.add_custom_button(__('Create Job Card'), () => {
-					frm.trigger("make_job_card");
-				}).addClass('btn-primary');
+				const not_completed = frm.doc.operations.filter(d => {
+					if (d.status != 'Completed') {
+						return true;
+					}
+				});
+
+				// code commented for issue ISS-2021-2022-00236
+				// if (not_completed && not_completed.length) {
+				// 	frm.add_custom_button(__('Create Job Card'), () => {
+				// 		frm.trigger("make_job_card");
+				// 	}).addClass('btn-primary');
+				// }
 			}
 		}
 
@@ -248,7 +265,7 @@ frappe.ui.form.on("Work Order", {
 
         // }
 
-	},
+	}},
 
 	make_job_card: function(frm) {
 		let qty = 0;
@@ -528,29 +545,6 @@ frappe.ui.form.on("Work Order", {
 		erpnext.work_order.calculate_cost(frm.doc);
 		erpnext.work_order.calculate_total_cost(frm);
 	},
-
-	// actual_fg_weight: function(frm) {
-	// 	frappe.call({
-	// 		method: "yeild_calc",
-	// 		callback: function(r) {
-	// 			if(r.message) {
-	// 				console.log(r.message);
-	// 			}
-	// 		}
-	// 	});
-	// },
-
-	// actual_rm_weight: function(frm) {
-	// 	frappe.call({
-	// 		method: "consumption_dev",
-	// 		callback: function(r) {
-	// 			if(r.message) {
-	// 				frm.reload_doc();
-	// 			}
-	// 		}
-	// 	});
-	// }
-
 });
 
 frappe.ui.form.on("Work Order Item", {
@@ -639,14 +633,22 @@ frappe.ui.form.on("Work Order Operation", {
 erpnext.work_order = {
 	set_custom_buttons: function(frm) {
 		var doc = frm.doc;
-		if (doc.docstatus === 1) {
+		if (doc.docstatus === 1 && doc.status != "Closed") {
+			frm.add_custom_button(__('Close'), function() {
+				frappe.confirm(__("Once the Work Order is Closed. It can't be resumed."),
+					() => {
+						erpnext.work_order.change_work_order_status(frm, "Closed");
+					}
+				);
+			}, __("Status"));
+
 			if (doc.status != 'Stopped' && doc.status != 'Completed') {
 				frm.add_custom_button(__('Stop'), function() {
-					erpnext.work_order.stop_work_order(frm, "Stopped");
+					erpnext.work_order.change_work_order_status(frm, "Stopped");
 				}, __("Status"));
 			} else if (doc.status == 'Stopped') {
 				frm.add_custom_button(__('Re-open'), function() {
-					erpnext.work_order.stop_work_order(frm, "Resumed");
+					erpnext.work_order.change_work_order_status(frm, "Resumed");
 				}, __("Status"));
 			}
 			const show_start_btn = (frm.doc.skip_transfer
@@ -660,10 +662,12 @@ erpnext.work_order = {
 					frm.add_custom_button(__('Create Pick List'), function() {
 						erpnext.work_order.create_pick_list(frm);
 					});
-					var start_btn = frm.add_custom_button(__('Start'), function() {
-						erpnext.work_order.make_se(frm, 'Material Transfer for Manufacture');
-					});
-					start_btn.addClass('btn-primary');
+
+					//  code commented for issue ISS-2021-2022-00236 
+					// var start_btn = frm.add_custom_button(__('Start'), function() {
+					// 	erpnext.work_order.make_se(frm, 'Material Transfer for Manufacture');
+					// });
+					// start_btn.addClass('btn-primary');
 				}
 			}
 
@@ -703,6 +707,8 @@ erpnext.work_order = {
 					// var finish_btn = frm.add_custom_button(__('Partial'), function() {
 					// 	erpnext.work_order.make_se(frm, 'Manufacture');
 					// },('Finish'));
+					// code for issue ISS-2021-2022-00236
+					if (frm.doc.status != "Completed"){
 					frm.add_custom_button(__('Partial'),function() {
 						frappe.call({
 							method: "erpnext.manufacturing.doctype.work_order.work_order.make_material_produce",
@@ -719,6 +725,7 @@ erpnext.work_order = {
 							}
 						});
 					}, __('Finish'))
+					
 					frm.add_custom_button(__('Complete'),function() {
 						frappe.call({
 							method: "erpnext.manufacturing.doctype.work_order.work_order.make_material_produce",
@@ -733,7 +740,7 @@ erpnext.work_order = {
 								}
 							}
 						});
-					}, __('Finish'))
+					}, __('Finish'))}
 					if(doc.material_transferred_for_manufacturing>=doc.qty) {
 						// all materials transferred for manufacturing, make this primary
 						finish_btn.addClass('btn-primary');
@@ -876,9 +883,10 @@ erpnext.work_order = {
 		});
 	},
 
-	stop_work_order: function(frm, status) {
+	change_work_order_status: function(frm, status) {
+		let method_name = status=="Closed" ? "close_work_order" : "stop_unstop";
 		frappe.call({
-			method: "erpnext.manufacturing.doctype.work_order.work_order.stop_unstop",
+			method: `erpnext.manufacturing.doctype.work_order.work_order.${method_name}`,
 			freeze: true,
 			freeze_message: __("Updating Work Order status"),
 			args: {

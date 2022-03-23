@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _, scrub
@@ -20,7 +19,7 @@ def execute(filters=None):
 	data = []
 
 	group_wise_columns = frappe._dict({
-		"invoice": ["parent", "customer", "customer_group", "posting_date","item_code", "item_name","item_group", "brand", "description", \
+		"invoice": ["invoice_or_item", "customer", "customer_group", "posting_date","item_code", "item_name","item_group", "brand", "description",
 			"warehouse", "qty", "base_rate", "buying_rate", "base_amount",
 			"buying_amount", "gross_profit", "gross_profit_percent", "project"],
 		"item_code": ["item_code", "item_name", "brand", "description", "qty", "base_rate",
@@ -78,13 +77,15 @@ def get_data_when_not_grouped_by_invoice(gross_profit_data, filters, group_wise_
 
 		row.append(filters.currency)
 		if idx == len(gross_profit_data.grouped_data)-1:
-			row[0] = frappe.bold("Total")
+			row[0] = "Total"
+
 		data.append(row)
 
 def get_columns(group_wise_columns, filters):
 	columns = []
 	column_map = frappe._dict({
 		"parent": _("Sales Invoice") + ":Link/Sales Invoice:120",
+		"invoice_or_item": _("Sales Invoice") + ":Link/Sales Invoice:120",
 		"posting_date": _("Posting Date") + ":Date:100",
 		"posting_time": _("Posting Time") + ":Data:100",
 		"item_code": _("Item Code") + ":Link/Item:100",
@@ -123,7 +124,7 @@ def get_columns(group_wise_columns, filters):
 
 def get_column_names():
 	return frappe._dict({
-		'parent': 'sales_invoice',
+		'invoice_or_item': 'sales_invoice',
 		'customer': 'customer',
 		'customer_group': 'customer_group',
 		'posting_date': 'posting_date',
@@ -246,19 +247,28 @@ class GrossProfitGenerator(object):
 				self.add_to_totals(new_row)
 			else:
 				for i, row in enumerate(self.grouped[key]):
-					if row.parent in self.returned_invoices \
-							and row.item_code in self.returned_invoices[row.parent]:
-						returned_item_rows = self.returned_invoices[row.parent][row.item_code]
-						for returned_item_row in returned_item_rows:
-							row.qty += flt(returned_item_row.qty)
-							row.base_amount += flt(returned_item_row.base_amount, self.currency_precision)
-						row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
-					if (flt(row.qty) or row.base_amount) and self.is_not_invoice_row(row):
-						row = self.set_average_rate(row)
-						self.grouped_data.append(row)
-					self.add_to_totals(row)
+					if row.indent == 1.0:
+						if row.parent in self.returned_invoices \
+								and row.item_code in self.returned_invoices[row.parent]:
+							returned_item_rows = self.returned_invoices[row.parent][row.item_code]
+							for returned_item_row in returned_item_rows:
+								row.qty += flt(returned_item_row.qty)
+								row.base_amount += flt(returned_item_row.base_amount, self.currency_precision)
+							row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
+						if (flt(row.qty) or row.base_amount):
+							row = self.set_average_rate(row)
+							self.grouped_data.append(row)
+						self.add_to_totals(row)
+
 		self.set_average_gross_profit(self.totals)
-		self.grouped_data.append(self.totals)
+
+		if self.filters.get("group_by") == "Invoice":
+			self.totals.indent = 0.0
+			self.totals.parent_invoice = ""
+			self.totals.invoice_or_item = "Total"
+			self.si_list.append(self.totals)
+		else:
+			self.grouped_data.append(self.totals)
 
 	def is_not_invoice_row(self, row):
 		return (self.filters.get("group_by") == "Invoice" and row.indent != 0.0) or self.filters.get("group_by") != "Invoice"
@@ -449,7 +459,7 @@ class GrossProfitGenerator(object):
 				if not row.indent:
 					row.indent = 1.0
 					row.parent_invoice = row.parent
-					row.parent = row.item_code
+					row.invoice_or_item = row.item_code
 
 					if frappe.db.exists('Product Bundle', row.item_code):
 						self.add_bundle_items(row, index)
@@ -458,7 +468,8 @@ class GrossProfitGenerator(object):
 		return frappe._dict({
 			'parent_invoice': "",
 			'indent': 0.0,
-			'parent': row.parent,
+			'invoice_or_item': row.parent,
+			'parent': None,
 			'posting_date': row.posting_date,
 			'posting_time': row.posting_time,
 			'project': row.project,
@@ -502,7 +513,8 @@ class GrossProfitGenerator(object):
 		return frappe._dict({
 			'parent_invoice': product_bundle.item_code,
 			'indent': product_bundle.indent + 1,
-			'parent': item.item_code,
+			'parent': None,
+			'invoice_or_item': item.item_code,
 			'posting_date': product_bundle.posting_date,
 			'posting_time': product_bundle.posting_time,
 			'project': product_bundle.project,

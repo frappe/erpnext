@@ -28,7 +28,8 @@
   "column_break_15",
   "payments",
   "sec_break2",
-  "allocation"
+  "allocation",
+  "limit"
  ],
  "fields": [
   {
@@ -171,13 +172,19 @@
    "fieldname": "maximum_invoice_amount",
    "fieldtype": "Currency",
    "label": "Maximum Invoice Amount"
+  },
+  {
+   "fieldname": "limit",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "limit"
   }
  ],
  "hide_toolbar": 1,
  "icon": "icon-resize-horizontal",
  "issingle": 1,
  "links": [],
- "modified": "2021-08-30 13:05:51.977861",
+ "modified": "2021-10-28 11:44:56.641513",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",

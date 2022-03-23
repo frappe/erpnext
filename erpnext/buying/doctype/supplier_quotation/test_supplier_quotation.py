@@ -2,14 +2,13 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from __future__ import unicode_literals
 
-import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestPurchaseOrder(unittest.TestCase):
+class TestPurchaseOrder(FrappeTestCase):
 	def test_make_purchase_order(self):
 		from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
 

@@ -55,9 +55,7 @@
   "is_recursive",
   "section_break_23",
   "valid_from",
-  "valid_fromnepal",
   "valid_upto",
-  "valid_uptonepal",
   "col_break1",
   "company",
   "currency",
@@ -580,18 +578,6 @@
    "fieldtype": "Select",
    "label": "Naming Series",
    "options": "PRLE-.####"
-  },
-  {
-   "fieldname": "valid_fromnepal",
-   "fieldtype": "Data",
-   "label": "Valid From(Nepal)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "valid_uptonepal",
-   "fieldtype": "Data",
-   "label": "Valid Upto(Nepal)",
-   "read_only": 1
   }
  ],
  "icon": "fa fa-gift",

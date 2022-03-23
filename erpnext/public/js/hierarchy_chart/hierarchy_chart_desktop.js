@@ -304,12 +304,13 @@ erpnext.HierarchyChart = class {
 	}
 
 	get_child_nodes(node_id) {
+		let me = this;
 		return new Promise(resolve => {
 			frappe.call({
-				method: this.method,
+				method: me.method,
 				args: {
 					parent: node_id,
-					company: this.company
+					company: me.company
 				}
 			}).then(r => resolve(r.message));
 		});
@@ -334,10 +335,12 @@ erpnext.HierarchyChart = class {
 
 			if (child_nodes) {
 				$.each(child_nodes, (_i, data) => {
-					this.add_node(node, data);
-					setTimeout(() => {
-						this.add_connector(node.id, data.id);
-					}, 250);
+					if (!$(`[id="${data.id}"]`).length) {
+						this.add_node(node, data);
+						setTimeout(() => {
+							this.add_connector(node.id, data.id);
+						}, 250);
+					}
 				});
 			}
 		}
@@ -348,12 +351,13 @@ erpnext.HierarchyChart = class {
 	}
 
 	get_all_nodes() {
+		let me = this;
 		return new Promise(resolve => {
 			frappe.call({
 				method: 'erpnext.utilities.hierarchy_chart.get_all_nodes',
 				args: {
-					method: this.method,
-					company: this.company
+					method: me.method,
+					company: me.company
 				},
 				callback: (r) => {
 					resolve(r.message);
@@ -425,8 +429,8 @@ erpnext.HierarchyChart = class {
 
 	add_connector(parent_id, child_id) {
 		// using pure javascript for better performance
-		const parent_node = document.querySelector(`#${parent_id}`);
-		const child_node = document.querySelector(`#${child_id}`);
+		const parent_node = document.getElementById(`${parent_id}`);
+		const child_node = document.getElementById(`${child_id}`);
 
 		let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 

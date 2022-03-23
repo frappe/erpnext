@@ -1,9 +1,6 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-
-import unittest
 
 from frappe.utils import add_months, nowdate
 
@@ -12,9 +9,10 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.selling.report.pending_so_items_for_purchase_request.pending_so_items_for_purchase_request import (
 	execute,
 )
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestPendingSOItemsForPurchaseRequest(unittest.TestCase):
+class TestPendingSOItemsForPurchaseRequest(ERPNextTestCase):
     def test_result_for_partial_material_request(self):
         so = make_sales_order()
         mr=make_material_request(so.name)

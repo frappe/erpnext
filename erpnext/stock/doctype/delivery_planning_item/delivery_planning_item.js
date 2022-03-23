@@ -3,15 +3,35 @@
 
 frappe.ui.form.on('Delivery Planning Item', {
 	
-	// refresh : function(frm){
-	// 	if(frm.doc.docstatus != 1){
-
-	// 		frm.call({
-	// 					doc:frm.doc,
-	// 					method: 'update_stock',	
-	// 				});
-	// 	}
-	// },
+	refresh : function(frm){
+		if(frm.doc.docstatus != 1){
+			frm.call({
+						doc:frm.doc,
+						method: 'update_stock',
+						callback: function(r){
+							if(r.message){
+							console.log("Item stock Updated refresh")	
+							frm.doc.current_stock = r.message.projected_qty
+							frm.refresh_field("current_stock");
+							frm.doc.available_stock = r.message.actual_qty
+							frm.refresh_field("available_stock")
+							}
+						}
+					});
+		}
+		frm.set_query("batch_no", function() {
+			let filters = {
+				'item_code': frm.doc.item_code,
+				'posting_date': frm.doc.planned_date || frappe.datetime.nowdate(),
+				'warehouse': frm.doc.sorce_warehouse
+			}
+			return {
+				query : "erpnext.controllers.queries.get_batch_no",
+				filters: filters
+			}
+		});
+		
+	},
 
 	sorce_warehouse: function(frm){
 		if(frm.doc.docstatus != 1){
@@ -21,6 +41,7 @@ frappe.ui.form.on('Delivery Planning Item', {
 						method: 'update_stock',	
 						callback: function(r){
 							if(r.message)
+							console.log("Item stock Updated sorce_warehouse") 
 							frm.doc.current_stock = r.message.projected_qty
 							frm.refresh_field("current_stock");
 							frm.doc.available_stock = r.message.actual_qty
@@ -31,17 +52,12 @@ frappe.ui.form.on('Delivery Planning Item', {
 		}
 	},
 
-	// before_load: function(frm){
 
-	// 	if(frm.doc.docstatus != 1){
-
-	// 		frm.call({
-	// 					doc:frm.doc,
-	// 					method: 'update_stock',
-						
-	// 				});
-	// 	}
-	// },
+	validate : function(frm) {
+		if (frm.doc.customer && frm.doc.qty_to_deliver && frm.doc.uom && frm.doc.item_name){
+			frm.doc.full_dname = frm.doc.customer+ " " + frm.doc.item_name + " " + frm.doc.qty_to_deliver + " " + frm.doc.uom
+		}
+	},
 
 	qty_to_deliver: function(frm){
 		if(frm.doc.qty_to_deliver > frm.doc.ordered_qty)
@@ -57,13 +73,6 @@ frappe.ui.form.on('Delivery Planning Item', {
 		}
 	},
 
-	// pending_qty: function(frm){
-	// 	frm.set_value({
-			
-	// 		weight_to_deliver: frm.doc.pending_qty * frm.doc.weight_per_unit 
-	// 	})
-	// },
-
 	onload: function(frm){
 
 		if(frm.doc.docstatus != 1){
@@ -72,7 +81,11 @@ frappe.ui.form.on('Delivery Planning Item', {
 								method: 'update_stock',
 								callback: function(r){
 									if(r.message){
-										console.log("Item stock Updated")
+										console.log("Item stock Updated onload")
+										frm.doc.current_stock = r.message.projected_qty
+										frm.refresh_field("current_stock");
+										frm.doc.available_stock = r.message.actual_qty
+										frm.refresh_field("available_stock")
 									}
 								}
 							});
@@ -127,7 +140,7 @@ frappe.ui.form.on('Delivery Planning Item', {
 					fieldname: 'transporter',
 					fieldtype: 'Link',
 				    options: "Supplier",
-				   
+				    default: frm.doc.transporter,
 				    depends_on: "eval: doc.supplier_dc == 0",
 					mandatory_depends_on : "eval: doc.supplier_dc == 0",
 					onchange: function() {
@@ -153,13 +166,14 @@ frappe.ui.form.on('Delivery Planning Item', {
 					read_only: 1,
 					depends_on: "eval: doc.supplier_dc == 0",
 					mandatory_depends_on : "eval: doc.supplier_dc == 0",
-					default: "Please select Transporter"
+					default: frm.doc.transporter_name
 				},
 				{
 					label: 'Deliver Date',
 					fieldname: 'delivery_date',
 					fieldtype: 'Date',
-					reqd: 1
+					reqd: 1,
+					default: frm.doc.delivery_date
 				},
 				{
 					label: 'Current Qty To Deliver',
@@ -189,6 +203,23 @@ frappe.ui.form.on('Delivery Planning Item', {
 					options: "Warehouse",
 					default: frm.doc.sorce_warehouse
 
+				},
+				{
+					label: 'Batch',
+					fieldname: 'batch',
+					fieldtype: 'Link',
+					options: "Batch",
+					"get_query": function () {
+						let filters = {
+							'item_code': frm.doc.item_code,
+							'posting_date': frm.doc.planned_date || frappe.datetime.nowdate(),
+							'warehouse': frm.doc.sorce_warehouse
+						}
+						return {
+							query : "erpnext.controllers.queries.get_batch_no",
+							filters: filters
+						}
+					}
 				},
 				{
 					label: 'Supplier delivers to Customer ',

@@ -129,9 +129,16 @@ class Item(Document):
 		if not self.is_new():
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
 
+		alternate = 0
+		for i in self.uoms:
+			print(" this is i", i.is_alternate_uom)
+			alternate +=  i.is_alternate_uom if i.is_alternate_uom else 0
+		print("thi si alternate", alternate)
+		if alternate > 1:
+			frappe.throw('You can only have one UOM defined as an Alternate UOM for the item')
+
 	def on_update(self):
 		invalidate_cache_for_item(self)
-		self.validate_name_with_item_group()
 		self.update_variants()
 		self.update_item_price()
 		self.update_website_item()
@@ -159,6 +166,8 @@ class Item(Document):
 				"doctype": "Item Price",
 				"price_list": price_list,
 				"item_code": self.name,
+				"uom": self.stock_uom,
+				"brand": self.brand,
 				"currency": erpnext.get_default_currency(),
 				"price_list_rate": self.standard_rate
 			})
@@ -218,18 +227,20 @@ class Item(Document):
 				self.item_code))
 
 	def add_default_uom_in_conversion_factor_table(self):
-		uom_conv_list = [d.uom for d in self.get("uoms")]
-		if self.stock_uom not in uom_conv_list:
-			ch = self.append('uoms', {})
-			ch.uom = self.stock_uom
-			ch.conversion_factor = 1
+		if not self.is_new() and self.has_value_changed("stock_uom"):
+			self.uoms = []
+			frappe.msgprint(
+				_("Successfully changed Stock UOM, please redefine conversion factors for new UOM."),
+				alert=True,
+			)
 
-		to_remove = []
-		for d in self.get("uoms"):
-			if d.conversion_factor == 1 and d.uom != self.stock_uom:
-				to_remove.append(d)
+		uoms_list = [d.uom for d in self.get("uoms")]
 
-		[self.remove(d) for d in to_remove]
+		if self.stock_uom not in uoms_list:
+			self.append("uoms", {
+				"uom": self.stock_uom,
+				"conversion_factor": 1
+			})
 
 	def update_website_item(self):
 		"""Update Website Item if change in Item impacts it."""
@@ -346,14 +357,6 @@ class Item(Document):
 							frappe.throw(_("Barcode {0} is not a valid {1} code").format(
 								item_barcode.barcode, item_barcode.barcode_type), InvalidBarcode)
 
-					if item_barcode.barcode != item_barcode.name:
-						# if barcode is getting updated , the row name has to reset.
-						# Delete previous old row doc and re-enter row as if new to reset name in db.
-						item_barcode.set("__islocal", True)
-						item_barcode_entry_name = item_barcode.name
-						item_barcode.name = None
-						frappe.delete_doc("Item Barcode", item_barcode_entry_name)
-
 	def validate_warehouse_for_reorder(self):
 		'''Validate Reorder level table for duplicate and conditional mandatory'''
 		warehouse = []
@@ -375,16 +378,22 @@ class Item(Document):
 				where item_code = %s and is_cancelled = 0 limit 1""", self.name))
 		return self._stock_ledger_created
 
-	def validate_name_with_item_group(self):
-		# causes problem with tree build
-		if frappe.db.exists("Item Group", self.name):
-			frappe.throw(
-				_("An Item Group exists with same name, please change the item name or rename the item group"))
-
 	def update_item_price(self):
-		frappe.db.sql("""update `tabItem Price` set item_name=%s,
-			item_description=%s, brand=%s where item_code=%s""",
-					(self.item_name, self.description, self.brand, self.name))
+		frappe.db.sql("""
+				UPDATE `tabItem Price`
+				SET
+					item_name=%(item_name)s,
+					item_description=%(item_description)s,
+					brand=%(brand)s
+				WHERE item_code=%(item_code)s
+			""",
+			dict(
+				item_name=self.item_name,
+				item_description=self.description,
+				brand=self.brand,
+				item_code=self.name
+			)
+		)
 
 	def on_trash(self):
 		frappe.db.sql("""delete from tabBin where item_code=%s""", self.name)
@@ -398,11 +407,14 @@ class Item(Document):
 
 		if merge:
 			self.validate_properties_before_merge(new_name)
+			self.validate_duplicate_product_bundles_before_merge(old_name, new_name)
 			self.validate_duplicate_website_item_before_merge(old_name, new_name)
 
 	def after_rename(self, old_name, new_name, merge):
 		if merge:
 			self.validate_duplicate_item_in_stock_reconciliation(old_name, new_name)
+			frappe.msgprint(_("It can take upto few hours for accurate stock values to be visible after merging items."),
+					indicator="orange", title="Note")
 
 		if self.published_in_website:
 			invalidate_cache_for_item(self)
@@ -460,6 +472,20 @@ class Item(Document):
 			msg += ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list])
 			frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
 
+	def validate_duplicate_product_bundles_before_merge(self, old_name, new_name):
+		"Block merge if both old and new items have product bundles."
+		old_bundle = frappe.get_value("Product Bundle",filters={"new_item_code": old_name})
+		new_bundle = frappe.get_value("Product Bundle",filters={"new_item_code": new_name})
+
+		if old_bundle and new_bundle:
+			bundle_link = get_link_to_form("Product Bundle", old_bundle)
+			old_name, new_name = frappe.bold(old_name), frappe.bold(new_name)
+
+			msg = _("Please delete Product Bundle {0}, before merging {1} into {2}").format(
+				bundle_link, old_name, new_name
+			)
+			frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
+
 	def validate_duplicate_website_item_before_merge(self, old_name, new_name):
 		"""
 			Block merge if both old and new items have website items against them.
@@ -477,8 +503,9 @@ class Item(Document):
 
 		old_web_item = [d.get("name") for d in web_items if d.get("item_code") == old_name][0]
 		web_item_link = get_link_to_form("Website Item", old_web_item)
+		old_name, new_name = frappe.bold(old_name), frappe.bold(new_name)
 
-		msg = f"Please delete linked Website Item {frappe.bold(web_item_link)} before merging {old_name} and {new_name}"
+		msg = f"Please delete linked Website Item {frappe.bold(web_item_link)} before merging {old_name} into {new_name}"
 		frappe.throw(_(msg), title=_("Cannot Merge"), exc=DataValidationError)
 
 	def set_last_purchase_rate(self, new_name):
@@ -487,7 +514,6 @@ class Item(Document):
 
 	def recalculate_bin_qty(self, new_name):
 		from erpnext.stock.stock_balance import repost_stock
-		frappe.db.auto_commit_on_many_writes = 1
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
@@ -501,7 +527,6 @@ class Item(Document):
 			repost_stock(new_name, warehouse)
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
-		frappe.db.auto_commit_on_many_writes = 0
 
 	def update_bom_item_desc(self):
 		if self.is_new():

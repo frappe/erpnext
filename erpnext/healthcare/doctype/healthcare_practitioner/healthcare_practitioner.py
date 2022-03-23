@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, ESS LLP and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -78,11 +76,17 @@ def validate_service_item(item, msg):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_practitioner_list(doctype, txt, searchfield, start, page_len, filters=None):
+
+	active_filter = {'status': 'Active'}
+
+	filters = {**active_filter, **filters} if filters else active_filter
+
 	fields = ['name', 'practitioner_name', 'mobile_phone']
 
-	filters = {
-		'name': ('like', '%%%s%%' % txt)
+	text_in = {
+		'name': ('like', '%%%s%%' % txt),
+		'practitioner_name': ('like', '%%%s%%' % txt)
 	}
 
 	return frappe.get_all('Healthcare Practitioner', fields = fields,
-		filters = filters, start=start, page_length=page_len, order_by='name, practitioner_name', as_list=1)
+		filters = filters, or_filters = text_in, start=start, page_length=page_len, order_by='name, practitioner_name', as_list=1)

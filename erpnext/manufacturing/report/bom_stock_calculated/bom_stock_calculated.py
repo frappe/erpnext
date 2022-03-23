@@ -1,7 +1,6 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -90,10 +89,10 @@ def get_bom_stock(filters):
 			GROUP BY bom_item.item_code""".format(qty_field=qty_field, table=table, conditions=conditions, bom=bom), as_dict=1)
 
 def get_manufacturer_records():
-	details = frappe.get_list('Item Manufacturer', fields = ["manufacturer", "manufacturer_part_no", "parent"])
+	details = frappe.get_all('Item Manufacturer', fields = ["manufacturer", "manufacturer_part_no", "item_code"])
 	manufacture_details = frappe._dict()
 	for detail in details:
-		dic = manufacture_details.setdefault(detail.get('parent'), {})
+		dic = manufacture_details.setdefault(detail.get('item_code'), {})
 		dic.setdefault('manufacturer', []).append(detail.get('manufacturer'))
 		dic.setdefault('manufacturer_part', []).append(detail.get('manufacturer_part_no'))
 

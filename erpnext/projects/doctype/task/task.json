@@ -24,12 +24,10 @@
   "completed_on",
   "sb_timeline",
   "exp_start_date",
-  "expected_start_date_nepal",
   "expected_time",
   "start",
   "column_break_11",
   "exp_end_date",
-  "expected_end_date_nepal",
   "progress",
   "duration",
   "is_milestone",
@@ -400,16 +398,6 @@
    "label": "Item Code",
    "mandatory_depends_on": "eval:doc.is_template",
    "options": "Item"
-  },
-  {
-   "fieldname": "expected_start_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Expected Start Date (Nepal)"
-  },
-  {
-   "fieldname": "expected_end_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Expected End Date (Nepal)"
   }
  ],
  "icon": "fa fa-check",

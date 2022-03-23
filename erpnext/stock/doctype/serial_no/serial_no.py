@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -345,7 +344,7 @@ def check_serial_no_validity_on_cancel(serial_no, sle):
 	is_stock_reco = sle.voucher_type == "Stock Reconciliation"
 	msg = None
 
-	if sr and (actual_qty < 0 or is_stock_reco) and sr.warehouse != sle.warehouse:
+	if sr and (actual_qty < 0 or is_stock_reco) and (sr.warehouse and sr.warehouse != sle.warehouse):
 		# receipt(inward) is being cancelled
 		msg = _("Cannot cancel {0} {1} as Serial No {2} does not belong to the warehouse {3}").format(
 			sle.voucher_type, doc_link, sr_link, frappe.bold(sle.warehouse))
@@ -422,9 +421,15 @@ def update_serial_nos(sle, item_det):
 def get_auto_serial_nos(serial_no_series, qty):
 	serial_nos = []
 	for i in range(cint(qty)):
-		serial_nos.append(make_autoname(serial_no_series, "Serial No"))
+		serial_nos.append(get_new_serial_number(serial_no_series))
 
 	return "\n".join(serial_nos)
+
+def get_new_serial_number(series):
+	sr_no = make_autoname(series, "Serial No")
+	if frappe.db.exists("Serial No", sr_no):
+		sr_no = get_new_serial_number(series)
+	return sr_no
 
 def auto_make_serial_nos(args):
 	serial_nos = get_serial_nos(args.get('serial_no'))
@@ -478,6 +483,13 @@ def get_serial_nos(serial_no):
 
 	return [s.strip() for s in cstr(serial_no).strip().upper().replace(',', '\n').split('\n')
 		if s.strip()]
+
+def clean_serial_no_string(serial_no: str) -> str:
+	if not serial_no:
+		return ""
+
+	serial_no_list = get_serial_nos(serial_no)
+	return "\n".join(serial_no_list)
 
 def update_args_for_serial_no(serial_no_doc, serial_no, args, is_new=False):
 	for field in ["item_code", "work_order", "company", "batch_no", "supplier", "location"]:
@@ -611,7 +623,9 @@ def get_pos_reserved_serial_nos(filters):
 
 	return reserved_sr_nos
 
-def fetch_serial_numbers(filters, qty, do_not_include=[]):
+def fetch_serial_numbers(filters, qty, do_not_include=None):
+	if do_not_include is None:
+		do_not_include = []
 	batch_join_selection = ""
 	batch_no_condition = ""
 	batch_nos = filters.get("batch_no")

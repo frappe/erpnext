@@ -4,14 +4,10 @@ import frappe
 import taxjar
 from frappe import _
 from frappe.contacts.doctype.address.address import get_company_address
-from frappe.utils import cint
+from frappe.utils import cint, flt
 
-from erpnext import get_default_company
+from erpnext import get_default_company, get_region
 
-TAX_ACCOUNT_HEAD = frappe.db.get_single_value("TaxJar Settings", "tax_account_head")
-SHIP_ACCOUNT_HEAD = frappe.db.get_single_value("TaxJar Settings", "shipping_account_head")
-TAXJAR_CREATE_TRANSACTIONS = frappe.db.get_single_value("TaxJar Settings", "taxjar_create_transactions")
-TAXJAR_CALCULATE_TAX = frappe.db.get_single_value("TaxJar Settings", "taxjar_calculate_tax")
 SUPPORTED_COUNTRY_CODES = ["AT", "AU", "BE", "BG", "CA", "CY", "CZ", "DE", "DK", "EE", "ES", "FI",
 	"FR", "GB", "GR", "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO",
 	"SE", "SI", "SK", "US"]
@@ -19,6 +15,7 @@ SUPPORTED_STATE_CODES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', '
 	'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE',
 	'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD',
 	'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
+
 
 
 def get_client():
@@ -34,12 +31,14 @@ def get_client():
 	if api_key and api_url:
 		client = taxjar.Client(api_key=api_key, api_url=api_url)
 		client.set_api_config('headers', {
-				'x-api-version': '2020-08-07'
+				'x-api-version': '2022-01-24'
 			})
 		return client
 
 
 def create_transaction(doc, method):
+	TAXJAR_CREATE_TRANSACTIONS = frappe.db.get_single_value("TaxJar Settings", "taxjar_create_transactions")
+
 	"""Create an order transaction in TaxJar"""
 
 	if not TAXJAR_CREATE_TRANSACTIONS:
@@ -50,6 +49,7 @@ def create_transaction(doc, method):
 	if not client:
 		return
 
+	TAX_ACCOUNT_HEAD = frappe.db.get_single_value("TaxJar Settings", "tax_account_head")
 	sales_tax = sum([tax.tax_amount for tax in doc.taxes if tax.account_head == TAX_ACCOUNT_HEAD])
 
 	if not sales_tax:
@@ -78,6 +78,7 @@ def create_transaction(doc, method):
 
 def delete_transaction(doc, method):
 	"""Delete an existing TaxJar order transaction"""
+	TAXJAR_CREATE_TRANSACTIONS = frappe.db.get_single_value("TaxJar Settings", "taxjar_create_transactions")
 
 	if not TAXJAR_CREATE_TRANSACTIONS:
 		return
@@ -91,6 +92,8 @@ def delete_transaction(doc, method):
 
 
 def get_tax_data(doc):
+	SHIP_ACCOUNT_HEAD = frappe.db.get_single_value("TaxJar Settings", "shipping_account_head")
+
 	from_address = get_company_address_details(doc)
 	from_shipping_state = from_address.get("state")
 	from_country_code = frappe.db.get_value("Country", from_address.country, "code")
@@ -103,7 +106,7 @@ def get_tax_data(doc):
 
 	shipping = sum([tax.tax_amount for tax in doc.taxes if tax.account_head == SHIP_ACCOUNT_HEAD])
 
-	line_items = [get_line_item_dict(item) for item in doc.items]
+	line_items = [get_line_item_dict(item, doc.docstatus) for item in doc.items]
 
 	if from_shipping_state not in SUPPORTED_STATE_CODES:
 		from_shipping_state = get_state_code(from_address, 'Company')
@@ -112,20 +115,20 @@ def get_tax_data(doc):
 		to_shipping_state = get_state_code(to_address, 'Shipping')
 
 	tax_dict = {
-		'from_country': from_country_code,
-		'from_zip': from_address.pincode,
-		'from_state': from_shipping_state,
-		'from_city': from_address.city,
-		'from_street': from_address.address_line1,
-		'to_country': to_country_code,
-		'to_zip': to_address.pincode,
-		'to_city': to_address.city,
-		'to_street': to_address.address_line1,
-		'to_state': to_shipping_state,
-		'shipping': shipping,
-		'amount': doc.net_total,
-		'plugin': 'erpnext',
-		'line_items': line_items
+		"from_country": from_country_code,
+		"from_zip": from_address.pincode,
+		"from_state": from_shipping_state,
+		"from_city": from_address.city,
+		"from_street": from_address.address_line1,
+		"to_country": to_country_code,
+		"to_zip": to_address.pincode,
+		"to_city": to_address.city,
+		"to_street": to_address.address_line1,
+		"to_state": to_shipping_state,
+		"shipping": shipping,
+		"amount": doc.net_total,
+		"plugin": "erpnext",
+		"line_items": line_items
 	}
 	return tax_dict
 
@@ -139,16 +142,29 @@ def get_state_code(address, location):
 
 	return state_code
 
-def get_line_item_dict(item):
-	return dict(
+def get_line_item_dict(item, docstatus):
+	tax_dict = dict(
 		id = item.get('idx'),
 		quantity = item.get('qty'),
 		unit_price = item.get('rate'),
 		product_tax_code = item.get('product_tax_category')
 	)
 
+	if docstatus == 1:
+		tax_dict.update({
+			'sales_tax':item.get('tax_collectable')
+		})
+
+	return tax_dict
+
 def set_sales_tax(doc, method):
+	TAX_ACCOUNT_HEAD = frappe.db.get_single_value("TaxJar Settings", "tax_account_head")
+	TAXJAR_CALCULATE_TAX = frappe.db.get_single_value("TaxJar Settings", "taxjar_calculate_tax")
+
 	if not TAXJAR_CALCULATE_TAX:
+		return
+
+	if get_region(doc.company) != 'United States':
 		return
 
 	if not doc.items:
@@ -163,6 +179,9 @@ def set_sales_tax(doc, method):
 		# Remove existing tax rows if address is changed from a taxable state/country
 		setattr(doc, "taxes", [tax for tax in doc.taxes if tax.account_head != TAX_ACCOUNT_HEAD])
 		return
+
+	# check if delivering within a nexus
+	check_for_nexus(doc, tax_dict)
 
 	tax_data = validate_tax_request(tax_dict)
 	if tax_data is not None:
@@ -191,8 +210,22 @@ def set_sales_tax(doc, method):
 
 			doc.run_method("calculate_taxes_and_totals")
 
+def check_for_nexus(doc, tax_dict):
+	TAX_ACCOUNT_HEAD = frappe.db.get_single_value("TaxJar Settings", "tax_account_head")
+	if not frappe.db.get_value('TaxJar Nexus', {'region_code': tax_dict["to_state"]}):
+		for item in doc.get("items"):
+			item.tax_collectable = flt(0)
+			item.taxable_amount = flt(0)
+
+		for tax in doc.taxes:
+			if tax.account_head == TAX_ACCOUNT_HEAD:
+				doc.taxes.remove(tax)
+		return
+
 def check_sales_tax_exemption(doc):
 	# if the party is exempt from sales tax, then set all tax account heads to zero
+	TAX_ACCOUNT_HEAD = frappe.db.get_single_value("TaxJar Settings", "tax_account_head")
+
 	sales_tax_exempted = hasattr(doc, "exempt_from_sales_tax") and doc.exempt_from_sales_tax \
 		or frappe.db.has_column("Customer", "exempt_from_sales_tax") \
 		and frappe.db.get_value("Customer", doc.customer, "exempt_from_sales_tax")
@@ -241,7 +274,7 @@ def get_shipping_address_details(doc):
 	if doc.shipping_address_name:
 		shipping_address = frappe.get_doc("Address", doc.shipping_address_name)
 	elif doc.customer_address:
-		shipping_address = frappe.get_doc("Address", doc.customer_address_name)
+		shipping_address = frappe.get_doc("Address", doc.customer_address)
 	else:
 		shipping_address = get_company_address_details(doc)
 

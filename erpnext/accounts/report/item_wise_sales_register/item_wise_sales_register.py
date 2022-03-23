@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -60,6 +59,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			'item_code': d.item_code,
 			'item_name': item_record.item_name if item_record else d.item_name,
 			'item_group': item_record.item_group if item_record else d.item_group,
+			'batch_no':d.batch_no,
 			'description': d.description,
 			'invoice': d.parent,
 			'posting_date': d.posting_date,
@@ -250,6 +250,13 @@ def get_columns(additional_table_columns, filters):
 
 	columns += [
 		{
+			'label': _('Batch No.'),
+			'fieldname': 'batch_no',
+			'fieldtype': 'Link',
+			'options': 'Batch',
+			'width': 100
+		},
+		{
 			'label': _('Project'),
 			'fieldname': 'project',
 			'fieldtype': 'Link',
@@ -390,7 +397,7 @@ def get_items(filters, additional_query_columns):
 			`tabSales Invoice`.project, `tabSales Invoice`.customer, `tabSales Invoice`.remarks,
 			`tabSales Invoice`.territory, `tabSales Invoice`.company, `tabSales Invoice`.base_net_total,
 			`tabSales Invoice Item`.item_code, `tabSales Invoice Item`.description,
-			`tabSales Invoice Item`.`item_name`, `tabSales Invoice Item`.`item_group`,
+			`tabSales Invoice Item`.`item_name`, `tabSales Invoice Item`.`item_group`,`tabSales Invoice Item`.`batch_no`,
 			`tabSales Invoice Item`.sales_order, `tabSales Invoice Item`.delivery_note,
 			`tabSales Invoice Item`.income_account, `tabSales Invoice Item`.cost_center,
 			`tabSales Invoice Item`.stock_qty, `tabSales Invoice Item`.stock_uom,

@@ -6,6 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
+  "customer",
+  "customer_name",
   "fiscal_year",
   "target_qty",
   "target_amount",
@@ -13,6 +15,7 @@
  ],
  "fields": [
   {
+   "columns": 2,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -24,6 +27,7 @@
    "search_index": 1
   },
   {
+   "columns": 1,
    "fieldname": "fiscal_year",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -36,6 +40,7 @@
    "search_index": 1
   },
   {
+   "columns": 1,
    "fieldname": "target_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -44,6 +49,7 @@
    "oldfieldtype": "Currency"
   },
   {
+   "columns": 1,
    "fieldname": "target_amount",
    "fieldtype": "Float",
    "in_filter": 1,
@@ -54,17 +60,34 @@
    "search_index": 1
   },
   {
+   "columns": 2,
    "description": "<br><br><b>e.g. If qty commission</b><br>\n     <b>Formula</b> : i.total_weight*discount_per_kg <br>\n\n<b>e.g. If amount Commision</b><br>\n           <b>Formula</b> : i.base_amount*discount_percentage<br>\n",
    "fieldname": "commision_formula",
    "fieldtype": "Code",
    "in_list_view": 1,
    "label": "Commision Formula",
    "mandatory_depends_on": "eval:doc.item_code"
+  },
+  {
+   "columns": 2,
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "columns": 1,
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-09-05 20:29:07.091287",
+ "modified": "2021-10-27 18:07:09.467221",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Target Details",

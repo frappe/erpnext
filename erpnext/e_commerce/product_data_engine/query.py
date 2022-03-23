@@ -197,7 +197,10 @@ class ProductQuery:
 			website_item_groups = frappe.db.get_all(
 				"Website Item",
 				fields=self.fields + ["`tabWebsite Item Group`.parent as wig_parent"],
-				filters=[["Website Item Group", "item_group", "=", item_group]]
+				filters=[
+					["Website Item Group", "item_group", "=", item_group],
+					["published", "=", 1]
+				]
 			)
 		return website_item_groups
 
@@ -262,7 +265,7 @@ class ProductQuery:
 		customer = get_customer(silent=True)
 		if customer:
 			quotation = frappe.get_all("Quotation", fields=["name"], filters=
-				{"party_name": customer, "order_type": "Shopping Cart", "docstatus": 0},
+				{"party_name": customer, "contact_email": frappe.session.user, "order_type": "Shopping Cart", "docstatus": 0},
 				order_by="modified desc", limit_page_length=1)
 			if quotation:
 				items = frappe.get_all(

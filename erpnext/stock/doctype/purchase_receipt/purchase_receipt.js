@@ -48,10 +48,58 @@ frappe.ui.form.on("Purchase Receipt", {
 		});
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
-		
+
 	},
 
+	// new code for TASK - TASK-2022-00015
+	get_items: function(frm) {
+		console.log(" Button Working")
+		if (frm.doc.docstatus != 1){
+			frappe.call({
+				method : 'on_get_items_button',
+				doc:frm.doc,
+				callback: function(r)
+				{
+					// frm.refresh_field("get_items")
+					if (r.message){
+					console.log("this is buttom", r.message)
+					frm.refresh_field("supplied_items")
+					}
+					else console.log("Nothis ins ")
+				}
+			});
+		}
+		else console.log("Cannot Get ITEMS as document already is submitted")
+	},
+
+
+
 	refresh: function(frm) {
+		// new code for TASK - TASK-2022-00015
+		//  To unhide new button on Material  
+		var for_challan_number_date = 0
+		var po =  frm.doc.items[0].purchase_order
+		if (po){
+			frappe.call({
+				method : 'to_button_hide',
+				doc:frm.doc,
+				args: {
+					po : po
+				},
+				callback: function(r)
+				{
+					// frm.refresh_field("get_items")
+					console.log("this is buttom")
+					if (r.message){
+						for_challan_number_date = 1
+						frm.set_df_property("get_items", "hidden", 0)
+					}
+				}
+			});
+			
+		}
+		// console.log(" thi uis is_supply_rm", is_supply_rm)
+		// 
 
 		if(frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
@@ -79,6 +127,7 @@ frappe.ui.form.on("Purchase Receipt", {
 		frm.events.add_custom_buttons(frm);
 	},
 
+
 	add_custom_buttons: function(frm) {
 		if (frm.doc.docstatus == 0) {
 			frm.add_custom_button(__('Purchase Invoice'), function () {
@@ -104,11 +153,121 @@ frappe.ui.form.on("Purchase Receipt", {
 			}, __("Get Items From"));
 		}
 	},
+	tax_category:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
 
+                frm.refresh_field("items")
+			}
+		});
+	},
+	shipping_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                frm.refresh_field("tax_category")
+			}
+		});
+	},
+	supplier_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	customer_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	billing_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	branch:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	location:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	cost_center:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
 	company: function(frm) {
 		frm.trigger("toggle_display_account_head");
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
+
+
 
 	toggle_display_account_head: function(frm) {
 		var enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company)
@@ -309,6 +468,66 @@ frappe.ui.form.on("Purchase Receipt", "is_subcontracted", function(frm) {
 });
 
 frappe.ui.form.on('Purchase Receipt Item', {
+
+	// new code for Kroslink TASK TASK-2022-00015
+
+	form_render:function(frm,cdt,cdn){
+		var child = locals[cdt][cdn];
+		if (child.item_code && frm.doc.is_subcontracted == "Yes") {
+			console.log(" In side child")
+			frappe.call({
+				method: 'on_challan_number',
+				doc : frm.doc,	
+				args :{
+					item_code : child.item_code
+				},
+					callback: (r) => {
+						var i = 0;
+						var b=[];
+						// console.log(" THIS IS DATA FROM SOI", r.message)
+						for(i; i < r.message.length; i++) {
+							b.push(r.message[i].name);
+							// console.log(" THIS IS DATA FROM SOI", r.message[i], r.message[i].name)
+							// frm.fields_dict.items.grid.update_docfield_property(
+							// 	'challan_number_issues_by_job_worker',
+							// 	'options',
+							// 	[''].concat(b)
+							// ); 
+						}
+						console.log('thi is select options, ',b)
+						
+						frm.fields_dict['items'].grid.get_field('challan_number_issues_by_job_worker').get_query = function(frm, cdt, cdn) {
+							console.log(" IN side challan")
+							return{
+								filters: [
+									['name', "in", b]
+								]
+							};
+						}
+					}
+
+			});	
+		}
+    },
+
+	challan_number_issues_by_job_worker: function(frm, cdt, cdn){
+		var child = locals[cdt][cdn];
+		// console.log(" this is child", child.item_code)
+		if (child.challan_number_issues_by_job_worker){
+			frappe.call({
+				method: 'on_challan_date',
+				doc: frm.doc,
+				args:{
+					item : child.challan_number_issues_by_job_worker
+				},
+				callback: (r) =>{
+					// console.log("this is r.message", r.message,  r.message[0].due_date)
+					frappe.model.set_value(cdt, cdn, "challan_date_issues_by_job_worker", r.message[0].due_date)					
+				}
+			})
+		}
+	},
+
 	item_code: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		frappe.db.get_value('Item', {name: d.item_code}, 'sample_quantity', (r) => {

@@ -12,14 +12,12 @@
   "purpose",
   "col1",
   "posting_date",
-  "posting_date_nepal",
   "posting_time",
   "set_posting_time",
   "sb9",
   "items",
   "section_break_9",
   "expense_account",
-  "reconciliation_json",
   "column_break_13",
   "difference_amount",
   "amended_from",
@@ -112,15 +110,6 @@
    "options": "Cost Center"
   },
   {
-   "fieldname": "reconciliation_json",
-   "fieldtype": "Long Text",
-   "hidden": 1,
-   "label": "Reconciliation JSON",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_13",
    "fieldtype": "Column Break"
   },
@@ -149,22 +138,17 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "posting_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Posting Date (Nepal)"
   }
  ],
  "icon": "fa fa-upload-alt",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "max_attachments": 1,
- "modified": "2021-09-16 14:35:00.753834",
+ "modified": "2022-02-06 14:28:19.043905",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -183,5 +167,6 @@
  "search_fields": "posting_date",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

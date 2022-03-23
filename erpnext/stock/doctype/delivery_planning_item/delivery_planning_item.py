@@ -13,6 +13,9 @@ class DeliveryPlanningItem(Document):
 		if not self.transporter and not self.supplier:
 			frappe.throw("Please select Transporter or Supplier")
 
+		if self.qty_to_deliver >= self.available_stock:
+			frappe.throw(" Cannot submit, current warehouse doesn't have sufficient stock for item {0}".format(self.item_code))		
+
 
 	def before_save(self):
 		if not self.is_new() :
@@ -49,17 +52,8 @@ class DeliveryPlanningItem(Document):
 			frappe.db.set_value('Sales Order Item', self.split_from_item,
 						{'qty' : pdpi.qty_to_deliver,
 						'stock_qty' : pdpi.qty_to_deliver,
-						'amount' : pdpi.qty_to_deliver * pdpi.rate,
-						})
-			
-			# osoi = frappe.get_doc('Sales Order Item', self.split_from_item)
-			# osoi.qty = pdpi.qty_to_deliver
-			# osoi.stock_qty =  pdpi.qty_to_deliver
-			# osoi.amount = pdpi.qty_to_deliver * pdpi.rate
-			# osoi._action = "save"
-			
-
-			
+						'amount' : pdpi.qty_to_deliver * ref_soi.rate,
+						})		
 
 			# getting length soi for sales order child table items for IDX of new SOI
 			sos = frappe.get_all(doctype = 'Sales Order Item', filters={ 'parent': self.sales_order})
@@ -68,8 +62,8 @@ class DeliveryPlanningItem(Document):
 			soi = frappe.new_doc('Sales Order Item')
 			soi.stock_qty = self.qty_to_deliver
 			soi.idx = len(sos)+1
-			soi.rate = self.rate
-			soi.amount = self.rate * self.qty_to_deliver
+			soi.rate = ref_soi.rate
+			soi.amount = ref_soi.rate * self.qty_to_deliver
 			soi.parentfield = "items"
 			soi.docstatus = 1
 			soi.item_name = self.item_name
@@ -81,9 +75,9 @@ class DeliveryPlanningItem(Document):
 			soi.qty = self.qty_to_deliver
 			soi.delivered_by_supplier = self.supplier_dc
 			soi.supplier = self.supplier
-			soi.uom = self.uom
+			soi.uom = ref_soi.uom
 			soi.warehouse = self.sorce_warehouse
-			soi.conversion_factor = self.conversion_factor
+			soi.conversion_factor = ref_soi.conversion_factor
 			# soi.save(ignore_permissions=True)
 			soi._action = "save"
 			soi.insert()
@@ -190,12 +184,14 @@ class DeliveryPlanningItem(Document):
 			dp_item.supplier_dc = n_supplier_dc
 			dp_item.supplier = n_supplier
 			dp_item.uom = self.uom
+			dp_item.batch_no=self.batch_no
 			dp_item.conversion_factor = self.conversion_factor
 			dp_item.is_split = 1
 			dp_item.split_from_item = self.item_dname
 			dp_item.sd_item = self.name
 			dp_item.stock_uom = n_qty
-			dp_item.save(ignore_permissions=True)
+			dp_item.insert(ignore_mandatory=True)
+			# dp_item.save(ignore_permissions=True)
 
 			return 1
 		else: return 0
@@ -206,20 +202,40 @@ class DeliveryPlanningItem(Document):
 								filters={"warehouse": self.sorce_warehouse,
 										"item_code": self.item_code},
 								fields= ["projected_qty","actual_qty"])
+		print(" ITEM CODE", docs, self.item_code)						
 
-		if(docs):
+		if docs:
 			for doc in docs:	
-				frappe.db.sql("""UPDATE `tabDelivery Planning Item` 
+				if(doc.projected_qty == 0 or doc.actual_qty == 0):
+					
+					frappe.db.sql("""UPDATE `tabDelivery Planning Item` 
+					SET current_stock = 0,
+					available_stock = 0
+					WHERE name = {0} """.format("'"+self.name+"'"))
+					frappe.throw(
+						title='Error',
+						msg='Selected Warehouse does not have stock'
+						)
+				else:	
+					
+					frappe.db.sql("""UPDATE `tabDelivery Planning Item` 
 					SET current_stock = {0},
 					available_stock = {1}
 					WHERE name = {2} """.format(doc.projected_qty, doc.actual_qty, "'"+self.name+"'"))	
 
+					return doc	
+
+		else:
+			frappe.throw(
+						title='Error',
+						msg='Selected Warehouse does not have stock'
+						)
 				# frappe.db.set_value('Delivery Planning Item', self.name, {
 				# 		'available_stock' : doc.actual_qty,
 				# 		'current_stock' : doc.projected_qty
 				# 	})
 		# self.save()
-			return doc			
+					
 
 @frappe.whitelist()
 def approve_function(source_names):
@@ -266,7 +282,7 @@ def reject_function(source_names):
 
 # split_function
 @frappe.whitelist()
-def split_function(source_names, n_transporter, n_qty, n_src_warehouse, n_supplier_dc, n_supplier, n_date):
+def split_function(source_names, n_transporter, n_qty, n_src_warehouse, n_supplier_dc, n_supplier, n_date, batch_no):
 	dpi = ""
 	names = list(source_names.split(","))
 	for name in names:
@@ -326,6 +342,8 @@ def split_function(source_names, n_transporter, n_qty, n_src_warehouse, n_suppli
 		dp_item.split_from_item = doc.item_dname
 		dp_item.sd_item = doc.name
 		dp_item.stock_uom = n_qty
-		dp_item.save(ignore_permissions=True)
+		dp_item.batch_no = batch_no
+		dp_item.insert(ignore_mandatory=True)
+		# dp_item.save(ignore_permissions=True)
 
 	return 1

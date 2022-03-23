@@ -7,9 +7,7 @@
  "field_order": [
   "download_template",
   "att_fr_date",
-  "attendance_from_date_nepal",
   "att_to_date",
-  "attendance_to_date_nepal",
   "get_template",
   "upload_attendance_data",
   "upload_html",
@@ -57,16 +55,6 @@
    "fieldname": "import_log",
    "fieldtype": "HTML",
    "label": "Import Log"
-  },
-  {
-   "fieldname": "attendance_from_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Attendance From Date (Nepal)"
-  },
-  {
-   "fieldname": "attendance_to_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Attendance To Date (Nepal)"
   }
  ],
  "hide_toolbar": 1,

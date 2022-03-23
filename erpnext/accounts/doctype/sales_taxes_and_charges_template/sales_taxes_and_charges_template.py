@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -47,7 +46,7 @@ def valdiate_taxes_and_charges_template(doc):
 
 	for tax in doc.get("taxes"):
 		validate_taxes_and_charges(tax)
-		validate_account_head(tax, doc)
+		validate_account_head(tax.idx, tax.account_head, doc.company)
 		validate_cost_center(tax, doc)
 		validate_inclusive_tax(tax, doc)
 
@@ -56,5 +55,8 @@ def validate_disabled(doc):
 		frappe.throw(_("Disabled template must not be default template"))
 
 def validate_for_tax_category(doc):
+	if not doc.tax_category:
+		return
+
 	if frappe.db.exists(doc.doctype, {"company": doc.company, "tax_category": doc.tax_category, "disabled": 0, "name": ["!=", doc.name]}):
 		frappe.throw(_("A template with tax category {0} already exists. Only one template is allowed with each tax category").format(frappe.bold(doc.tax_category)))

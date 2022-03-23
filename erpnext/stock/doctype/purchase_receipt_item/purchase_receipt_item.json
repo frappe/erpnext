@@ -88,6 +88,10 @@
   "purchase_receipt_item",
   "delivery_note_item",
   "putaway_rule",
+  "is_subcontracted",
+  "challan_number_issues_by_job_worker",
+  "challan_date_issues_by_job_worker",
+  "nature_of_job_work_done",
   "section_break_45",
   "allow_zero_valuation_rate",
   "bom",
@@ -197,6 +201,7 @@
   },
   {
    "bold": 1,
+   "default": "0",
    "fieldname": "received_qty",
    "fieldtype": "Float",
    "label": "Received Quantity",
@@ -204,6 +209,7 @@
    "oldfieldtype": "Currency",
    "print_hide": 1,
    "print_width": "100px",
+   "read_only": 1,
    "reqd": 1,
    "width": "100px"
   },
@@ -219,8 +225,10 @@
    "width": "100px"
   },
   {
+   "columns": 1,
    "fieldname": "rejected_qty",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Rejected Quantity",
    "oldfieldname": "rejected_qty",
    "oldfieldtype": "Currency",
@@ -327,7 +335,7 @@
   },
   {
    "bold": 1,
-   "columns": 3,
+   "columns": 2,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -543,6 +551,7 @@
    "fieldname": "stock_qty",
    "fieldtype": "Float",
    "label": "Accepted Qty in Stock UOM",
+   "no_copy": 1,
    "oldfieldname": "stock_qty",
    "oldfieldtype": "Currency",
    "print_hide": 1,
@@ -882,7 +891,9 @@
    "fieldname": "received_stock_qty",
    "fieldtype": "Float",
    "label": "Received Qty in Stock UOM",
-   "print_hide": 1
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "depends_on": "eval: doc.uom != doc.stock_uom",
@@ -964,12 +975,38 @@
    "label": "Product Bundle",
    "options": "Product Bundle",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.is_subcontracted",
+   "fieldname": "challan_number_issues_by_job_worker",
+   "fieldtype": "Link",
+   "label": "Challan Number Issues by Job Worker",
+   "options": "Sales Invoice Item"
+  },
+  {
+   "depends_on": "eval:doc.is_subcontracted",
+   "fieldname": "challan_date_issues_by_job_worker",
+   "fieldtype": "Date",
+   "label": "Challan Date Issues by Job Worker"
+  },
+  {
+   "fetch_from": "purchase_order.is_subcontracted",
+   "fieldname": "is_subcontracted",
+   "fieldtype": "Data",
+   "label": "Supply Raw Materials",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.is_subcontracted",
+   "fieldname": "nature_of_job_work_done",
+   "fieldtype": "Data",
+   "label": "Nature of Job Work Done"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-01 16:02:40.338597",
+ "modified": "2022-03-02 14:51:18.450127",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

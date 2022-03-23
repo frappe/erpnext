@@ -1,18 +1,16 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
-import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable import (
 	VariablePathNotFound,
 )
 
 
-class TestSupplierScorecardVariable(unittest.TestCase):
+class TestSupplierScorecardVariable(FrappeTestCase):
 	def test_variable_exist(self):
 		for d in test_existing_variables:
 			my_doc = frappe.get_doc("Supplier Scorecard Variable", d.get("name"))

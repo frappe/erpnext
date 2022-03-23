@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -24,19 +23,24 @@ def execute(filters=None):
 		row = []
 
 		outstanding_amt = get_customer_outstanding(d.name, filters.get("company"),
-			ignore_outstanding_sales_order=d.bypass_credit_limit_check_at_sales_order)
+			ignore_outstanding_sales_order=d.bypass_credit_limit_check)
 
 		credit_limit = get_credit_limit(d.name, filters.get("company"))
 
 		bal = flt(credit_limit) - flt(outstanding_amt)
 
 		if customer_naming_type == "Naming Series":
-			row = [d.name, d.customer_name, credit_limit, outstanding_amt, bal,
-				d.bypass_credit_limit_check, d.is_frozen,
-          d.disabled]
+			row = [
+				d.name, d.customer_name, credit_limit,
+				outstanding_amt, bal, d.bypass_credit_limit_check,
+				d.is_frozen, d.disabled
+			]
 		else:
-			row = [d.name, credit_limit, outstanding_amt, bal,
-          d.bypass_credit_limit_check_at_sales_order, d.is_frozen, d.disabled]
+			row = [
+				d.name, credit_limit, outstanding_amt, bal,
+				d.bypass_credit_limit_check, d.is_frozen,
+				d.disabled
+			]
 
 		if credit_limit:
 			data.append(row)

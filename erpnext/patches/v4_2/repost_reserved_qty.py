@@ -1,7 +1,6 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 
@@ -30,9 +29,11 @@ def execute():
 	""")
 
 	for item_code, warehouse in repost_for:
-			update_bin_qty(item_code, warehouse, {
-				"reserved_qty": get_reserved_qty(item_code, warehouse)
-			})
+		if not (item_code and warehouse):
+			continue
+		update_bin_qty(item_code, warehouse, {
+			"reserved_qty": get_reserved_qty(item_code, warehouse)
+		})
 
 	frappe.db.sql("""delete from tabBin
 		where exists(

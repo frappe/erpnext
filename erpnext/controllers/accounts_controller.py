@@ -1,13 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
 import frappe
 from frappe import _, throw
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
+from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -114,7 +114,7 @@ class AccountsController(TransactionBase):
 						_('{0} is blocked so this transaction cannot proceed').format(supplier_name), raise_exception=1)
 
 	def validate(self):
-		if not self.get('is_return'):
+		if not self.get('is_return') and not self.get('is_debit_note'):
 			self.validate_qty_is_not_zero()
 
 		if self.get("_action") and self._action != "update_after_submit":
@@ -147,11 +147,6 @@ class AccountsController(TransactionBase):
 		self.validate_party()
 		self.validate_currency()
 
-		if self.doctype == 'Purchase Invoice':
-			self.calculate_paid_amount()
-			# apply tax withholding only if checked and applicable
-			self.set_tax_withholding()
-
 		if self.doctype in ['Purchase Invoice', 'Sales Invoice']:
 			pos_check_field = "is_pos" if self.doctype=="Sales Invoice" else "is_paid"
 			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
@@ -165,6 +160,11 @@ class AccountsController(TransactionBase):
 				self.validate_deferred_start_and_end_date()
 
 			self.set_inter_company_account()
+
+		if self.doctype == 'Purchase Invoice':
+			self.calculate_paid_amount()
+			# apply tax withholding only if checked and applicable
+			self.set_tax_withholding()
 
 		validate_regional(self)
 
@@ -257,7 +257,12 @@ class AccountsController(TransactionBase):
 		from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 		calculate_taxes_and_totals(self)
 
-		if self.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+		if self.doctype in (
+			'Sales Order',
+			'Delivery Note',
+			'Sales Invoice',
+			'POS Invoice',
+		):
 			self.calculate_commission()
 			self.calculate_contribution()
 
@@ -403,6 +408,22 @@ class AccountsController(TransactionBase):
 								if item_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
 
+							elif (
+								ret.get("pricing_rule_removed")
+								and value is not None
+								and fieldname
+								in [
+									"discount_percentage",
+									"discount_amount",
+									"rate",
+									"margin_rate_or_amount",
+									"margin_type",
+									"remove_free_item",
+								]
+							):
+								# reset pricing rule fields if pricing_rule_removed
+								item.set(fieldname, value)
+
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
 						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
 
@@ -531,7 +552,8 @@ class AccountsController(TransactionBase):
 			'is_opening': self.get("is_opening") or "No",
 			'party_type': None,
 			'party': None,
-			'project': self.get("project")
+			'project': self.get("project"),
+			'post_net_value': args.get('post_net_value')
 		})
 
 		accounting_dimensions = get_accounting_dimensions()
@@ -812,13 +834,44 @@ class AccountsController(TransactionBase):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 
 		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
-			self.update_allocated_advance_taxes_on_cancel()
 			if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
 				unlink_ref_doc_from_payment_entries(self)
 
 		elif self.doctype in ["Sales Order", "Purchase Order"]:
 			if frappe.db.get_single_value('Accounts Settings', 'unlink_advance_payment_on_cancelation_of_order'):
 				unlink_ref_doc_from_payment_entries(self)
+
+			if self.doctype == "Sales Order":
+				self.unlink_ref_doc_from_po()
+
+	def unlink_ref_doc_from_po(self):
+		so_items = []
+		for item in self.items:
+			so_items.append(item.name)
+
+		linked_po = list(set(frappe.get_all(
+			'Purchase Order Item',
+			filters = {
+				'sales_order': self.name,
+				'sales_order_item': ['in', so_items],
+				'docstatus': ['<', 2]
+			},
+			pluck='parent'
+		)))
+
+		if linked_po:
+			frappe.db.set_value(
+				'Purchase Order Item', {
+					'sales_order': self.name,
+					'sales_order_item': ['in', so_items],
+					'docstatus': ['<', 2]
+				},{
+					'sales_order': None,
+					'sales_order_item': None
+				}
+			)
+
+			frappe.msgprint(_("Purchase Orders {0} are un-linked").format("\n".join(linked_po)))
 
 	def get_tax_map(self):
 		tax_map = {}
@@ -827,29 +880,6 @@ class AccountsController(TransactionBase):
 			tax_map[tax.account_head] += tax.tax_amount
 
 		return tax_map
-
-	def update_allocated_advance_taxes_on_cancel(self):
-		if self.get('advances'):
-			tax_accounts = [d.account_head for d in self.get('taxes')]
-			allocated_tax_map = frappe._dict(frappe.get_all('GL Entry', fields=['account', 'sum(credit - debit)'],
-				filters={'voucher_no': self.name, 'account': ('in', tax_accounts)},
-				group_by='account', as_list=1))
-
-			tax_map = self.get_tax_map()
-
-			for pe in self.get('advances'):
-				if pe.reference_type == 'Payment Entry':
-					pe = frappe.get_doc('Payment Entry', pe.reference_name)
-					for tax in pe.get('taxes'):
-						allocated_amount = tax_map.get(tax.account_head) - allocated_tax_map.get(tax.account_head)
-						if allocated_amount > tax.tax_amount:
-							allocated_amount = tax.tax_amount
-
-						if allocated_amount:
-							frappe.db.set_value('Advance Taxes and Charges', tax.name, 'allocated_amount',
-								tax.allocated_amount - allocated_amount)
-							tax_map[tax.account_head] -= allocated_amount
-							allocated_tax_map[tax.account_head] -= allocated_amount
 
 	def get_amount_and_base_amount(self, item, enable_discount_accounting):
 		amount = item.net_amount
@@ -934,58 +964,10 @@ class AccountsController(TransactionBase):
 					}, item=self)
 				)
 
-	def allocate_advance_taxes(self, gl_entries):
-		tax_map = self.get_tax_map()
-		for pe in self.get("advances"):
-			if pe.reference_type == "Payment Entry" and \
-				frappe.db.get_value('Payment Entry', pe.reference_name, 'advance_tax_account'):
-				pe = frappe.get_doc("Payment Entry", pe.reference_name)
-				for tax in pe.get("taxes"):
-					account_currency = get_account_currency(tax.account_head)
-
-					if self.doctype == "Purchase Invoice":
-						dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
-						rev_dr_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
-					else:
-						dr_or_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
-						rev_dr_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
-
-					party = self.supplier if self.doctype == "Purchase Invoice" else self.customer
-					unallocated_amount = tax.tax_amount - tax.allocated_amount
-					if tax_map.get(tax.account_head):
-						amount = tax_map.get(tax.account_head)
-						if amount < unallocated_amount:
-							unallocated_amount = amount
-
-						gl_entries.append(
-							self.get_gl_dict({
-								"account": tax.account_head,
-								"against": party,
-								dr_or_cr: unallocated_amount,
-								dr_or_cr + "_in_account_currency": unallocated_amount
-								if account_currency==self.company_currency
-								else unallocated_amount,
-								"cost_center": tax.cost_center
-							}, account_currency, item=tax))
-
-						gl_entries.append(
-							self.get_gl_dict({
-								"account": pe.advance_tax_account,
-								"against": party,
-								rev_dr_cr: unallocated_amount,
-								rev_dr_cr + "_in_account_currency": unallocated_amount
-								if account_currency==self.company_currency
-								else unallocated_amount,
-								"cost_center": tax.cost_center
-							}, account_currency, item=tax))
-
-						frappe.db.set_value("Advance Taxes and Charges", tax.name, "allocated_amount",
-							tax.allocated_amount + unallocated_amount)
-
-						tax_map[tax.account_head] -= unallocated_amount
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
 		from erpnext.controllers.status_updater import get_allowance_for
+
 		item_allowance = {}
 		global_qty_allowance, global_amount_allowance = None, None
 
@@ -1006,12 +988,7 @@ class AccountsController(TransactionBase):
 						.format(item.item_code, ref_dt), title=_("Warning"), indicator="orange")
 				continue
 
-			already_billed = frappe.db.sql("""
-				select sum(%s)
-				from `tab%s`
-				where %s=%s and docstatus=1 and parent != %s
-			""" % (based_on, self.doctype + " Item", item_ref_dn, '%s', '%s'),
-				(item.get(item_ref_dn), self.name))[0][0]
+			already_billed = self.get_billed_amount_for_item(item, item_ref_dn, based_on)
 
 			total_billed_amt = flt(flt(already_billed) + flt(item.get(based_on)),
 				self.precision(based_on, item))
@@ -1037,15 +1014,52 @@ class AccountsController(TransactionBase):
 
 		if role_allowed_to_over_bill in user_roles and total_overbilled_amt > 0.1:
 			frappe.msgprint(_("Overbilling of {} ignored because you have {} role.")
-					.format(total_overbilled_amt, role_allowed_to_over_bill), title=_("Warning"), indicator="orange")
+					.format(total_overbilled_amt, role_allowed_to_over_bill), indicator="orange", alert=True)
+
+	def get_billed_amount_for_item(self, item, item_ref_dn, based_on):
+		'''
+			Returns Sum of Amount of
+			Sales/Purchase Invoice Items
+			that are linked to `item_ref_dn` (`dn_detail` / `pr_detail`)
+			that are submitted OR not submitted but are under current invoice
+		'''
+
+		from frappe.query_builder import Criterion
+		from frappe.query_builder.functions import Sum
+
+		item_doctype = frappe.qb.DocType(item.doctype)
+		based_on_field = frappe.qb.Field(based_on)
+		join_field = frappe.qb.Field(item_ref_dn)
+
+		result = (
+			frappe.qb.from_(item_doctype)
+			.select(Sum(based_on_field))
+			.where(
+				join_field == item.get(item_ref_dn)
+			).where(
+				Criterion.any([ # select all items from other invoices OR current invoices
+					Criterion.all([ # for selecting items from other invoices
+						item_doctype.docstatus == 1,
+						item_doctype.parent != self.name
+					]),
+					Criterion.all([ # for selecting items from current invoice, that are linked to same reference
+						item_doctype.docstatus == 0,
+						item_doctype.parent == self.name,
+						item_doctype.name != item.name
+					])
+				])
+			)
+		).run()
+
+		return result[0][0] if result else 0
 
 	def throw_overbill_exception(self, item, max_allowed_amt):
 		frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
 			.format(item.item_code, item.idx, max_allowed_amt))
 
-	def get_company_default(self, fieldname):
+	def get_company_default(self, fieldname, ignore_validation=False):
 		from erpnext.accounts.utils import get_company_default
-		return get_company_default(self.company, fieldname)
+		return get_company_default(self.company, fieldname, ignore_validation=ignore_validation)
 
 	def get_stock_items(self):
 		stock_items = []
@@ -1321,6 +1335,9 @@ class AccountsController(TransactionBase):
 				payment_schedule['discount_type'] = schedule.discount_type
 				payment_schedule['discount'] = schedule.discount
 
+			if not schedule.invoice_portion:
+				payment_schedule['payment_amount'] = schedule.payment_amount
+
 			self.append("payment_schedule", payment_schedule)
 
 	def set_due_date(self):
@@ -1359,8 +1376,8 @@ class AccountsController(TransactionBase):
 			total = 0
 			base_total = 0
 			for d in self.get("payment_schedule"):
-				total += flt(d.payment_amount)
-				base_total += flt(d.base_payment_amount)
+				total += flt(d.payment_amount, d.precision("payment_amount"))
+				base_total += flt(d.base_payment_amount, d.precision("base_payment_amount"))
 
 			base_grand_total = self.get("base_rounded_total") or self.base_grand_total
 			grand_total = self.get("rounded_total") or self.grand_total
@@ -1376,8 +1393,9 @@ class AccountsController(TransactionBase):
 				else:
 					grand_total -= self.get("total_advance")
 					base_grand_total = flt(grand_total * self.get("conversion_rate"), self.precision("base_grand_total"))
-			if total != flt(grand_total, self.precision("grand_total")) or \
-				base_total != flt(base_grand_total, self.precision("base_grand_total")):
+
+			if flt(total, self.precision("grand_total")) != flt(grand_total, self.precision("grand_total")) or \
+				flt(base_total, self.precision("base_grand_total")) != flt(base_grand_total, self.precision("base_grand_total")):
 				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
 
 	def is_rounded_total_disabled(self):
@@ -1549,13 +1567,12 @@ def validate_taxes_and_charges(tax):
 		tax.rate = None
 
 
-def validate_account_head(tax, doc):
-	company = frappe.get_cached_value('Account',
-		tax.account_head, 'company')
+def validate_account_head(idx, account, company):
+	account_company = frappe.get_cached_value('Account', account, 'company')
 
-	if company != doc.company:
+	if account_company != company:
 		frappe.throw(_('Row {0}: Account {1} does not belong to Company {2}')
-			.format(tax.idx, frappe.bold(tax.account_head), frappe.bold(doc.company)), title=_('Invalid Account'))
+			.format(idx, frappe.bold(account), frappe.bold(company)), title=_('Invalid Account'))
 
 
 def validate_cost_center(tax, doc):
@@ -1691,17 +1708,69 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 
 def update_invoice_status():
 	"""Updates status as Overdue for applicable invoices. Runs daily."""
-
+	today = getdate()
+	payment_schedule = frappe.qb.DocType("Payment Schedule")
 	for doctype in ("Sales Invoice", "Purchase Invoice"):
-		frappe.db.sql("""
-			update `tab{}` as dt set dt.status = 'Overdue'
-			where dt.docstatus = 1
-				and dt.status != 'Overdue'
-				and dt.outstanding_amount > 0
-				and (dt.grand_total - dt.outstanding_amount) <
-					(select sum(payment_amount) from `tabPayment Schedule` as ps
-						where ps.parent = dt.name and ps.due_date < %s)
-		""".format(doctype), getdate())
+		invoice = frappe.qb.DocType(doctype)
+
+		consider_base_amount = invoice.party_account_currency != invoice.currency
+		payment_amount = (
+			frappe.qb.terms.Case()
+			.when(consider_base_amount, payment_schedule.base_payment_amount)
+			.else_(payment_schedule.payment_amount)
+		)
+
+		payable_amount = (
+			frappe.qb.from_(payment_schedule)
+			.select(Sum(payment_amount))
+			.where(
+				(payment_schedule.parent == invoice.name)
+				& (payment_schedule.due_date < today)
+			)
+		)
+
+		total = (
+			frappe.qb.terms.Case()
+			.when(invoice.disable_rounded_total, invoice.grand_total)
+			.else_(invoice.rounded_total)
+		)
+
+		base_total = (
+			frappe.qb.terms.Case()
+			.when(invoice.disable_rounded_total, invoice.base_grand_total)
+			.else_(invoice.base_rounded_total)
+		)
+
+		total_amount = (
+			frappe.qb.terms.Case()
+			.when(consider_base_amount, base_total)
+			.else_(total)
+		)
+
+		is_overdue = total_amount - invoice.outstanding_amount < payable_amount
+
+		conditions = (
+			(invoice.docstatus == 1)
+			& (invoice.outstanding_amount > 0)
+			& (
+				invoice.status.like("Unpaid%")
+				| invoice.status.like("Partly Paid%")
+			)
+			& (
+				((invoice.is_pos & invoice.due_date < today) | is_overdue)
+				if doctype == "Sales Invoice"
+				else is_overdue
+			)
+		)
+
+		status = (
+			frappe.qb.terms.Case()
+			.when(invoice.status.like("%Discounted"), "Overdue and Discounted")
+			.else_("Overdue")
+		)
+
+		frappe.qb.update(invoice).set("status", status).where(conditions).run()
+
 
 @frappe.whitelist()
 def get_payment_terms(terms_template, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None):
@@ -1886,7 +1955,8 @@ def update_bin_on_delete(row, doctype):
 
 		qty_dict["ordered_qty"] = get_ordered_qty(row.item_code, row.warehouse)
 
-	update_bin_qty(row.item_code, row.warehouse, qty_dict)
+	if row.warehouse:
+		update_bin_qty(row.item_code, row.warehouse, qty_dict)
 
 def validate_and_delete_children(parent, data):
 	deleted_children = []
@@ -2072,6 +2142,11 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			parent.update_status_updater()
 	else:
 		parent.check_credit_limit()
+
+	# reset index of child table
+	for idx, row in enumerate(parent.get(child_docname), start=1):
+		row.idx = idx
+
 	parent.save()
 
 	if parent_doctype == 'Purchase Order':

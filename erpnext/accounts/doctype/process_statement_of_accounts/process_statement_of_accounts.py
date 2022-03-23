@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import copy
 
@@ -75,7 +73,7 @@ def get_report_pdf(doc, consolidated=True):
 			'to_date': doc.to_date,
 			'company': doc.company,
 			'finance_book': doc.finance_book if doc.finance_book else None,
-			'account': doc.account if doc.account else None,
+			'account': [doc.account] if doc.account else None,
 			'party_type': 'Customer',
 			'party': [entry.customer],
 			'presentation_currency': presentation_currency,

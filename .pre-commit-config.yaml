@@ -20,6 +20,9 @@ repos:
     rev: 3.9.2
     hooks:
       - id: flake8
+        additional_dependencies: [
+          'flake8-bugbear',
+        ]
         args: ['--config', '.github/helper/.flake8_strict']
         exclude: ".*setup.py$"
 

@@ -4,7 +4,6 @@
 """
 Import chart of accounts from OpenERP sources
 """
-from __future__ import print_function, unicode_literals
 
 import ast
 import json

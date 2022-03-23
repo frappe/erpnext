@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import datetime
 import unittest
 
 import frappe
-from frappe.utils import add_months, now_datetime, nowdate
+from frappe.utils import add_months, add_to_date, now_datetime, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.hr.doctype.employee.test_employee import make_employee
@@ -35,10 +33,6 @@ class TestTimesheet(unittest.TestCase):
 	def setUp(self):
 		for dt in ["Salary Slip", "Salary Structure", "Salary Structure Assignment", "Timesheet"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
-
-		if not frappe.db.exists("Salary Component", "Timesheet Component"):
-			frappe.get_doc({"doctype": "Salary Component", "salary_component": "Timesheet Component"}).insert()
-
 
 	def test_timesheet_billing_amount(self):
 		emp = make_employee("test_employee_6@salary.com")
@@ -157,10 +151,63 @@ class TestTimesheet(unittest.TestCase):
 		settings.ignore_employee_time_overlap = initial_setting
 		settings.save()
 
+	def test_timesheet_not_overlapping_with_continuous_timelogs(self):
+		emp = make_employee("test_employee_6@salary.com")
+
+		update_activity_type("_Test Activity Type")
+		timesheet = frappe.new_doc("Timesheet")
+		timesheet.employee = emp
+		timesheet.append(
+			'time_logs',
+			{
+				"billable": 1,
+				"activity_type": "_Test Activity Type",
+				"from_time": now_datetime(),
+				"to_time": now_datetime() + datetime.timedelta(hours=3),
+				"company": "_Test Company"
+			}
+		)
+		timesheet.append(
+			'time_logs',
+			{
+				"billable": 1,
+				"activity_type": "_Test Activity Type",
+				"from_time": now_datetime() + datetime.timedelta(hours=3),
+				"to_time": now_datetime() + datetime.timedelta(hours=4),
+				"company": "_Test Company"
+			}
+		)
+
+		timesheet.save() # should not throw an error
+
+	def test_to_time(self):
+		emp = make_employee("test_employee_6@salary.com")
+		from_time = now_datetime()
+
+		timesheet = frappe.new_doc("Timesheet")
+		timesheet.employee = emp
+		timesheet.append(
+			'time_logs',
+			{
+				"billable": 1,
+				"activity_type": "_Test Activity Type",
+				"from_time": from_time,
+				"hours": 2,
+				"company": "_Test Company"
+			}
+		)
+		timesheet.save()
+
+		to_time = timesheet.time_logs[0].to_time
+		self.assertEqual(to_time, add_to_date(from_time, hours=2, as_datetime=True))
+
 
 def make_salary_structure_for_timesheet(employee, company=None):
 	salary_structure_name = "Timesheet Salary Structure Test"
 	frequency = "Monthly"
+
+	if not frappe.db.exists("Salary Component", "Timesheet Component"):
+		frappe.get_doc({"doctype": "Salary Component", "salary_component": "Timesheet Component"}).insert()
 
 	salary_structure = make_salary_structure(salary_structure_name, frequency, company=company, dont_submit=True)
 	salary_structure.salary_component = "Timesheet Component"

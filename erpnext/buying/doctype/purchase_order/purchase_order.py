@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -73,6 +72,7 @@ class PurchaseOrder(BuyingController):
 		self.create_raw_materials_supplied("supplied_items")
 		self.set_received_qty_for_drop_ship_items()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_order_reference)
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def validate_with_previous_doc(self):
 		super(PurchaseOrder, self).validate_with_previous_doc({
@@ -174,6 +174,31 @@ class PurchaseOrder(BuyingController):
 						d.material_request_item, "schedule_date")
 
 
+	@frappe.whitelist()
+	def calculate_taxes(self):
+		if self.supplier:
+			sup = frappe.get_doc("Supplier",self.supplier)
+			if not sup.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						if i.item_code:
+							doc=frappe.get_doc("Item",i.item_code)
+							for j in doc.taxes:
+								if self.tax_category==j.tax_category:
+									if j.item_tax_template:
+										i.item_tax_template=j.item_tax_template						
+			if sup.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						if i.item_code:
+							doc=frappe.get_doc("Item",i.item_code)
+							for j in doc.taxes:
+								if sup.tax_category==j.tax_category:
+									if j.item_tax_template:
+										i.item_tax_template=j.item_tax_template
+				self.tax_category=sup.tax_category
+			return self.tax_category
+			
 	@frappe.whitelist()
 	def get_last_purchase_rate(self):
 		"""get last purchase rates for all items"""
@@ -314,6 +339,16 @@ class PurchaseOrder(BuyingController):
 			'target_parent_field': '',
 			'join_field': 'sales_order_item',
 			'target_ref_field': 'stock_qty',
+			'source_field': 'stock_qty'
+		})
+		self.status_updater.append({
+			'source_dt': 'Purchase Order Item',
+			'target_dt': 'Packed Item',
+			'target_field': 'ordered_qty',
+			'target_parent_dt': 'Sales Order',
+			'target_parent_field': '',
+			'join_field': 'sales_order_packed_item',
+			'target_ref_field': 'qty',
 			'source_field': 'stock_qty'
 		})
 

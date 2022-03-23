@@ -1,7 +1,6 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -21,11 +20,19 @@ def execute(filters=None):
 	for item in sorted(iwb_map):
 		for wh in sorted(iwb_map[item]):
 			for batch in sorted(iwb_map[item][wh]):
-				qty_dict = iwb_map[item][wh][batch]
 
-				data.append([item, item_map[item]["item_name"], item_map[item]["description"], wh, batch,
-					frappe.db.get_value('Batch', batch, 'expiry_date'), qty_dict.expiry_status
-				])
+				qty_dict = iwb_map[item][wh][batch]
+				date_exp = frappe.db.get_value('Batch', batch, 'expiry_date')
+				if date_exp:
+					if not filters.get('expiry_days') and date_exp <= getdate(filters["to_date"]) and date_exp >= getdate(filters["from_date"]):
+						data.append([item, item_map[item]["item_name"], item_map[item]["description"], wh, batch,
+							frappe.db.get_value('Batch', batch, 'expiry_date'), qty_dict.expiry_status
+						])
+					else:
+						if qty_dict.expiry_status <= filters.get('expiry_days') and date_exp <= getdate(filters["to_date"]) and date_exp >= getdate(filters["from_date"]):
+							data.append([item, item_map[item]["item_name"], item_map[item]["description"], wh, batch,
+										 frappe.db.get_value('Batch', batch, 'expiry_date'), qty_dict.expiry_status
+										 ])
 
 
 	return columns, data
@@ -56,7 +63,8 @@ def get_stock_ledger_entries(filters):
 	return frappe.db.sql("""select item_code, batch_no, warehouse,
 		posting_date, actual_qty
 		from `tabStock Ledger Entry`
-		where docstatus < 2 and ifnull(batch_no, '') != '' %s order by item_code, warehouse""" %
+		where is_cancelled = 0
+		and docstatus < 2 and ifnull(batch_no, '') != '' %s order by item_code, warehouse""" %
 		conditions, as_dict=1)
 
 def get_item_warehouse_batch_map(filters, float_precision):

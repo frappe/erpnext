@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
 
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import functools
 import math
@@ -287,7 +285,8 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 	total_row = {
 		"account_name": _("Total {0} ({1})").format(_(root_type), _(balance_must_be)),
 		"account": _("Total {0} ({1})").format(_(root_type), _(balance_must_be)),
-		"currency": company_currency
+		"currency": company_currency,
+		"opening_balance": 0.0
 	}
 
 	for row in out:
@@ -299,6 +298,7 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 
 			total_row.setdefault("total", 0.0)
 			total_row["total"] += flt(row["total"])
+			total_row["opening_balance"] += row["opening_balance"]
 			row["total"] = ""
 
 	if "total" in total_row:
@@ -425,8 +425,7 @@ def set_gl_entries_by_account(
 			{additional_conditions}
 			and posting_date <= %(to_date)s
 			and is_cancelled = 0
-			{distributed_cost_center_query}
-			order by account, posting_date""".format(
+			{distributed_cost_center_query}""".format(
 				additional_conditions=additional_conditions,
 				distributed_cost_center_query=distributed_cost_center_query), gl_filters, as_dict=True) #nosec
 

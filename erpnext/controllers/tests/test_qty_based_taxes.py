@@ -1,4 +1,3 @@
-from __future__ import print_function, unicode_literals
 
 import unittest
 from uuid import uuid4 as _uuid4

@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -74,7 +73,27 @@ def process_gl_map(gl_map, merge_entries=True, precision=None):
 				flt(entry.debit_in_account_currency) - flt(entry.credit_in_account_currency)
 			entry.credit_in_account_currency = 0.0
 
+		update_net_values(entry)
+
 	return gl_map
+
+def update_net_values(entry):
+	# In some scenarios net value needs to be shown in the ledger
+	# This method updates net values as debit or credit
+	if entry.post_net_value and entry.debit and entry.credit:
+		if entry.debit > entry.credit:
+			entry.debit = entry.debit - entry.credit
+			entry.debit_in_account_currency = entry.debit_in_account_currency \
+				- entry.credit_in_account_currency
+			entry.credit = 0
+			entry.credit_in_account_currency = 0
+		else:
+			entry.credit = entry.credit - entry.debit
+			entry.credit_in_account_currency = entry.credit_in_account_currency \
+				- entry.debit_in_account_currency
+
+			entry.debit = 0
+			entry.debit_in_account_currency = 0
 
 def merge_similar_entries(gl_map, precision=None):
 	merged_gl_map = []
@@ -202,7 +221,7 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 				debit_credit_diff += flt(d.credit)
 			round_off_account_exists = True
 
-	if round_off_account_exists and abs(debit_credit_diff) <= (1.0 / (10**precision)):
+	if round_off_account_exists and abs(debit_credit_diff) < (1.0 / (10**precision)):
 		gl_map.remove(round_off_gle)
 		return
 
@@ -293,7 +312,7 @@ def check_freezing_date(posting_date, adv_adj=False):
 		if acc_frozen_upto:
 			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
 			if getdate(posting_date) <= getdate(acc_frozen_upto) \
-					and not frozen_accounts_modifier in frappe.get_roles() or frappe.session.user == 'Administrator':
+					and (frozen_accounts_modifier not in frappe.get_roles() or frappe.session.user == 'Administrator'):
 				frappe.throw(_("You are not authorized to add or update entries before {0}").format(formatdate(acc_frozen_upto)))
 
 def set_as_cancel(voucher_type, voucher_no):

@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -15,6 +14,7 @@ from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
+from erpnext.stock.utils import calculate_mapped_packed_items_return
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -83,6 +83,9 @@ class DeliveryNote(SellingController):
 			}
 		])
 
+	# def before_save(self):
+	# 	self.get_commision()
+
 	def before_print(self, settings=None):
 		def toggle_print_hide(meta, fieldname):
 			df = meta.get_field(fieldname)
@@ -120,6 +123,7 @@ class DeliveryNote(SellingController):
 	def validate(self):
 		self.validate_posting_time()
 		super(DeliveryNote, self).validate()
+		self.get_commision()
 		self.set_status()
 		self.so_required()
 		self.validate_proj_cust()
@@ -130,8 +134,12 @@ class DeliveryNote(SellingController):
 		self.validate_with_previous_doc()
 		self.pick_update_validate()
 
-		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-		make_packing_list(self)
+		# Keeps mapped packed_items in case product bundle is updated.
+		if self.is_return and self.return_against:
+			calculate_mapped_packed_items_return(self)
+		else:
+			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+			make_packing_list(self)
 
 		if self._action != 'submit' and not self.is_return:
 			set_batch_nos(self, 'warehouse', throw=True)
@@ -140,6 +148,7 @@ class DeliveryNote(SellingController):
 		self.update_current_stock()
 
 		if not self.installation_status: self.installation_status = 'Not Installed'
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def validate_with_previous_doc(self):
 		super(DeliveryNote, self).validate_with_previous_doc({
@@ -323,6 +332,7 @@ class DeliveryNote(SellingController):
 				ps.cancel()
 			frappe.msgprint(_("Packing Slip(s) cancelled"))
 
+
 	def update_status(self, status):
 		self.set_status(update=True, status=status)
 		self.notify_update()
@@ -341,20 +351,46 @@ class DeliveryNote(SellingController):
 			dn_doc.update_billing_percentage(update_modified=update_modified)
 
 		self.load_from_db()
-		
+
+
 	@frappe.whitelist()
 	def get_commision(self):
 		tot=[]
 		if self.sales_partner:
 			doc=frappe.get_doc("Sales Partner",self.sales_partner)
-			if self.commission_based_on_target_lines==1: 
+			if self.commission_based_on_target_lines==1:
 				for i in self.items:
 					for j in doc.item_target_details:
 						if i.item_code==j.item_code:
-							if j.commision_formula:
-								data=eval(j.commision_formula)
-								tot.append(data)
-								self.total_commission=sum(tot)	 
+							if self.customer_name==j.customer_name:
+								if j.commision_formula:
+									data=eval(j.commision_formula)
+									tot.append(data)
+				self.total_commission=sum(tot)
+	@frappe.whitelist()
+	def calculate_taxes(self):
+		if self.customer:
+			cus = frappe.get_doc("Customer",self.customer)
+			if not cus.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						if i.item_code:
+							doc=frappe.get_doc("Item",i.item_code)
+							for j in doc.taxes:
+								if self.tax_category==j.tax_category:
+									if j.item_tax_template:
+										i.item_tax_template=j.item_tax_template
+			if cus.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						if i.item_code:
+							doc=frappe.get_doc("Item",i.item_code)
+							for j in doc.taxes:
+								if cus.tax_category==j.tax_category:
+									if j.item_tax_template:
+										i.item_tax_template=j.item_tax_template
+				self.tax_category=cus.tax_category
+			return self.tax_category
 
 	def make_return_invoice(self):
 		try:
@@ -370,17 +406,31 @@ class DeliveryNote(SellingController):
 			frappe.throw(_("Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"))
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
+	from frappe.query_builder.functions import Sum
+
 	# Billed against Sales Order directly
-	billed_against_so = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item`
-		where so_detail=%s and (dn_detail is null or dn_detail = '') and docstatus=1""", so_detail)
+	si_item = frappe.qb.DocType("Sales Invoice Item").as_("si_item")
+	sum_amount = Sum(si_item.amount).as_("amount")
+
+	billed_against_so = frappe.qb.from_(si_item).select(sum_amount).where(
+		(si_item.so_detail == so_detail) &
+		((si_item.dn_detail.isnull()) | (si_item.dn_detail == '')) &
+		(si_item.docstatus == 1)
+	).run()
 	billed_against_so = billed_against_so and billed_against_so[0][0] or 0
 
 	# Get all Delivery Note Item rows against the Sales Order Item row
-	dn_details = frappe.db.sql("""select dn_item.name, dn_item.amount, dn_item.si_detail, dn_item.parent
-		from `tabDelivery Note Item` dn_item, `tabDelivery Note` dn
-		where dn.name=dn_item.parent and dn_item.so_detail=%s
-			and dn.docstatus=1 and dn.is_return = 0
-		order by dn.posting_date asc, dn.posting_time asc, dn.name asc""", so_detail, as_dict=1)
+	dn = frappe.qb.DocType("Delivery Note").as_("dn")
+	dn_item = frappe.qb.DocType("Delivery Note Item").as_("dn_item")
+
+	dn_details = frappe.qb.from_(dn).from_(dn_item).select(dn_item.name, dn_item.amount, dn_item.si_detail, dn_item.parent).where(
+		(dn.name == dn_item.parent) &
+		(dn_item.so_detail == so_detail) &
+		(dn.docstatus == 1) &
+		(dn.is_return == 0)
+	).orderby(
+		dn.posting_date, dn.posting_time, dn.name
+	).run(as_dict=True)
 
 	updated_dn = []
 	for dnd in dn_details:

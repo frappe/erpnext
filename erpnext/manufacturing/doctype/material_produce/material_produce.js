@@ -14,6 +14,17 @@
 frappe.ui.form.on('Material Produce', {
     setup: function(frm){
         apply_filter(frm)
+        frm.set_query('target_warehouse_address', function() {
+			return {
+				filters: {
+					link_doctype: 'Warehouse',
+					link_name: frm.doc.t_warehouse
+				}
+			}
+		});
+    },
+    target_warehouse_address:function(frm){
+        erpnext.utils.get_address_display(frm, 'target_warehouse_address', 'target_warehouse_display', false);
     },
 //    refresh: function(frm){
 //        if(frm.doc.docstatus == 1 && frm.doc.produced == 0)

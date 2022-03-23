@@ -95,6 +95,7 @@
   "sales_details",
   "sales_uom",
   "is_sales_item",
+  "grant_commission",
   "column_break3",
   "max_discount",
   "deferred_revenue",
@@ -129,7 +130,8 @@
   "synced_with_hub",
   "more_information_section",
   "published_in_website",
-  "total_projected_qty"
+  "total_projected_qty",
+  "website_image_alt"
  ],
  "fields": [
   {
@@ -364,8 +366,7 @@
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Valuation Method",
-   "options": "\nFIFO\nMoving Average",
-   "set_only_once": 1
+   "options": "\nFIFO\nMoving Average"
   },
   {
    "depends_on": "is_stock_item",
@@ -386,7 +387,8 @@
    "depends_on": "is_stock_item",
    "fieldname": "weight_per_unit",
    "fieldtype": "Float",
-   "label": "Weight Per Unit"
+   "label": "Weight Per Unit",
+   "mandatory_depends_on": "eval: doc.bom_item_type == 'RM'"
   },
   {
    "depends_on": "eval:doc.is_stock_item",
@@ -992,6 +994,12 @@
    "fieldtype": "Check",
    "label": "Published in Website",
    "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "grant_commission",
+   "fieldtype": "Check",
+   "label": "Grant Commission"
   }
  ],
  "icon": "fa fa-tag",
@@ -999,8 +1007,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "max_attachments": 1,
- "modified": "2021-09-10 12:23:07.277077",
+ "modified": "2022-03-15 15:32:38.457184",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -1067,7 +1074,7 @@
  "search_fields": "item_name,description,item_group,customer_code",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
- "sort_field": "idx desc,modified desc",
+ "sort_field": "modified",
  "sort_order": "DESC",
  "title_field": "item_name",
  "track_changes": 1

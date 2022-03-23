@@ -434,6 +434,24 @@
   },
   {
    "hidden": 0,
+   "is_query_report": 1,
+   "label": "YoY Sales ",
+   "link_to": "YoY Sales",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "YoY Item Wise Dealer Sales",
+   "link_to": "YoY Item Wise Dealer Sales",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
    "is_query_report": 0,
    "label": "Other Reports",
    "onboard": 0,
@@ -561,6 +579,15 @@
   },
   {
    "hidden": 0,
+   "is_query_report": 1,
+   "label": "Sales Person-wise Transaction Summary Alternate UOM",
+   "link_to": "Sales Person-wise Transaction Summary Alternate UOM",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
    "is_query_report": 0,
    "label": "Commission",
    "link_type": "DocType",
@@ -577,7 +604,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-07-23 17:51:56.388547",
+ "modified": "2022-03-05 12:45:26.751123",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",

@@ -6,7 +6,6 @@
  "engine": "InnoDB",
  "field_order": [
   "date",
-  "date_nepal",
   "department",
   "column_break_3",
   "branch",
@@ -67,11 +66,6 @@
    "fieldname": "marked_attendance_html",
    "fieldtype": "HTML",
    "label": "Marked Attendance HTML"
-  },
-  {
-   "fieldname": "date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Date (Nepal)"
   }
  ],
  "hide_toolbar": 1,

@@ -25,7 +25,6 @@
   "assign_to_name",
   "due_date",
   "completion_date",
-  "completion_date_nepal",
   "description",
   "column_break_9",
   "actions_performed",
@@ -169,11 +168,6 @@
    "in_preview": 1,
    "label": "Task Name",
    "read_only": 1
-  },
-  {
-   "fieldname": "completion_date_nepal",
-   "fieldtype": "Data",
-   "label": "Completion Date (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,

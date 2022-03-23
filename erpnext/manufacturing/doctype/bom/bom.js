@@ -93,7 +93,7 @@ frappe.ui.form.on("BOM", {
 			});
 		}
 
-		if(frm.doc.docstatus!=0) {
+		if(frm.doc.docstatus==1) {
 			frm.add_custom_button(__("Work Order"), function() {
 				frm.trigger("make_work_order");
 			}, __("Create"));
@@ -215,7 +215,32 @@ frappe.ui.form.on("BOM", {
 				label: __('Qty To Manufacture'),
 				fieldname: 'qty',
 				reqd: 1,
-				default: 1
+				default: 1,
+				onchange: () => {
+					const { quantity, items: rm } = frm.doc;
+					const variant_items_map = rm.reduce((acc, item) => {
+						acc[item.item_code] = item.qty;
+						return acc;
+					}, {});
+					const mf_qty = cur_dialog.fields_list.filter(
+						(f) => f.df.fieldname === "qty"
+					)[0]?.value;
+					const items = cur_dialog.fields.filter(
+						(f) => f.fieldname === "items"
+					)[0]?.data;
+
+					if (!items) {
+						return;
+					}
+
+					items.forEach((item) => {
+						item.qty =
+							(variant_items_map[item.item_code] * mf_qty) /
+							quantity;
+					});
+
+					cur_dialog.refresh();
+				}
 			});
 		}
 
@@ -655,11 +680,6 @@ frappe.ui.form.on("BOM Item", "items_remove", function(frm) {
 	erpnext.bom.calculate_total(frm.doc);
 });
 
-frappe.ui.form.on("BOM", "with_operations", function(frm) {
-	if(!cint(frm.doc.with_operations)) {
-		frm.set_value("operations", []);
-	}
-});
 
 frappe.ui.form.on("BOM Scrap Item", {
 	item_code(frm, cdt, cdn) {

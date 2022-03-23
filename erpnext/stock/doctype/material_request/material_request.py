@@ -5,9 +5,9 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 import json
-
+import math
 import frappe
 from frappe import _, msgprint
 from frappe.model.mapper import get_mapped_doc
@@ -60,8 +60,6 @@ class MaterialRequest(BuyingController):
 				if actual_so_qty and (flt(so_items[so_no][item]) + already_indented > actual_so_qty):
 					frappe.throw(_("Material Request of maximum {0} can be made for Item {1} against Sales Order {2}").format(actual_so_qty - already_indented, item, so_no))
 
-	# Validate
-	# ---------------------
 	def validate(self):
 		self.set_wo_details()
 		self.validate_item_qty()
@@ -70,6 +68,7 @@ class MaterialRequest(BuyingController):
 		self.validate_schedule_date()
 		self.check_for_on_hold_or_closed_status('Sales Order', 'sales_order')
 		self.validate_uom_is_integer("uom", "qty")
+		self.validate_material_request_type()
 
 		if not self.status:
 			self.status = "Draft"
@@ -86,79 +85,90 @@ class MaterialRequest(BuyingController):
 		# NOTE: Since Item BOM and FG quantities are combined, using current data, it cannot be validated
 		# Though the creation of Material Request from a Production Plan can be rethought to fix this
 
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
+
+	def validate_material_request_type(self):
+		""" Validate fields in accordance with selected type """
+
+		if self.material_request_type != "Customer Provided":
+			self.customer = None
+
 	def set_title(self):
 		'''Set title as comma separated list of items'''
 		if not self.title:
 			items = ', '.join([d.item_name for d in self.items][:3])
 			self.title = _('{0} Request for {1}').format(self.material_request_type, items)[:100]
 	def validate_item_qty(self):
-		c = {}
-		for d in self.items:
-			c.setdefault(d.get('item_code'), []).append(d.get('qty'))
-			result = [{'item_code': k, 'qty': v} for k,v in c.items()]
-		data_set = []
-		for res in result:
-			d = {}
-			qty_sum = 0
-			item_detail = frappe.get_value("Item",{'item_code':res.get('item_code')},['description','stock_uom','item_name','production_item_name','item_name','allowed_in_wo_staging','multi_order_qty','min_order_qty','staging_multiple'],as_dict = True)
-			if item_detail.get('allowed_in_wo_staging') == 'Yes':
-				default_data = frappe.db.get_value('Item Default', {'parent': res.get('item_code')},['buying_cost_center','expense_account','default_warehouse'],as_dict = True)
-				bin_data = frappe.db.get_value('Bin', {'item_code': res.get('item_code')},['projected_qty','actual_qty','valuation_rate'],as_dict = True)
-				d['item_code'] = res.get('item_code')
-				d['desc'] = item_detail.get('description')
-				d['stock_uom'] = item_detail.get('stock_uom')
-				d['item_name'] = item_detail.get('item_name')
-				d['production_item_name'] = item_detail['production_item_name']
-				d['cost_center'] = default_data.get('buying_cost_center')
-				d['expense_account'] = default_data.get('expense_account')
-				d['min_order_qty'] = item_detail.get('min_order_qty')
-				d['projected_qty'] = bin_data.get('projected_qty')
-				d['actual_qty'] = bin_data.get('actual_qty')
-				d['valuation_rate'] = bin_data.get('valuation_rate')
-
-				for r in res.get('qty'):
-					print('r is: ',r)
-					qty_sum +=r
-				if(item_detail.get('staging_multiple') > 0):
-					#round_up_qty=(round(qty/self.staging_multiple),up)*self.staging_multiple
-					round_up_qty = (math.ceil(qty_sum/item_detail.get('staging_multiple'))) * item_detail.get('staging_multiple')
-					d['qty'] = round_up_qty
-				else:
-					d['qty'] = qty_sum
-				d['production_item_name'] = item_detail['production_item_name']
-				d['multi_order_qty'] = item_detail['multi_order_qty']
-				data_set.append(d)
-		self.set('items', [])
-		if(len(data_set) == 0):
-			frappe.throw("There is no item with qty > 0")
-		for item in data_set:
-			stock_uom = frappe.get_value("Item",{'item_code':item.get('item_code')},'stock_uom')
-			if item.get('qty') > 0:
-				self.append('items', {
-					"item_code" : item.get('item_code'),
-					"item_name" : item.get('item_name'),
-					"schedule_date" : today(),
-					"description" : item.get('desc'),
-					"warehouse" : self.set_warehouse,
-					"uom" : item.get('stock_uom'),
-					"cost_center" : item.get('cost_center'),
-					"expense_account" : item.get('expense_account'),
-					"stock_uom" : stock_uom,
-					"multi_order_qty" : item.get('multi_order_qty'),
-					"conversion_factor" : 1,
-					"qty" : item.get('qty'),
-					"production_item_name" : item.get('production_item_name'),
-					"projected_qty" : item.get('projected_qty'),
-					"actual_qty" : item.get('actual_qty'),
-					"rate" : item.get('valuation_rate'),
-					"min_order_qty" : item.get('min_order_qty'),
-					"amount" : item.get('valuation_rate') * item.get('qty'),
-				})
+		if self.manufacturing_staging == 1:
+			c = {}
+			for d in self.items:
+				c.setdefault(d.get('item_code'), []).append(d.get('qty'))
+				result = [{'item_code': k, 'qty': v} for k,v in c.items()]
+			data_set = []
+			for res in result:
+				d = {}
+				qty_sum = 0
+				item_detail = frappe.get_value("Item",{'item_code':res.get('item_code')},['description','stock_uom','item_name','production_item_name','item_name','allowed_in_wo_staging','multi_order_qty','min_order_qty','staging_multiple'],as_dict = True)
+				if item_detail.get('allowed_in_wo_staging') == 'Yes':
+					default_data = frappe.db.get_value('Item Default', {'parent': res.get('item_code')},['buying_cost_center','expense_account','default_warehouse'],as_dict = True)
+					bin_data = frappe.db.get_value('Bin', {'item_code': res.get('item_code')},['projected_qty','actual_qty','valuation_rate'],as_dict = True)
+					d['item_code'] = res.get('item_code')
+					d['desc'] = item_detail.get('description')
+					d['stock_uom'] = item_detail.get('stock_uom')
+					d['item_name'] = item_detail.get('item_name')
+					d['production_item_name'] = item_detail['production_item_name']
+					if default_data:
+						d['cost_center'] = default_data.get('buying_cost_center')
+						d['expense_account'] = default_data.get('expense_account')
+					d['min_order_qty'] = item_detail.get('min_order_qty')
+					if bin_data:
+						d['projected_qty'] = bin_data.get('projected_qty')
+						d['actual_qty'] = bin_data.get('actual_qty')
+						d['valuation_rate'] = bin_data.get('valuation_rate')
+					for r in res.get('qty'):
+						qty_sum +=r
+					if(item_detail.get('staging_multiple') > 0):
+						round_up_qty = (math.ceil(qty_sum/item_detail.get('staging_multiple'))) * item_detail.get('staging_multiple')
+						d['qty'] = round_up_qty
+					else:
+						d['qty'] = qty_sum
+					d['production_item_name'] = item_detail['production_item_name']
+					d['multi_order_qty'] = item_detail['multi_order_qty']
+					data_set.append(d)
+			self.set('items', [])
+			if(len(data_set) == 0):
+				frappe.throw("There is no item with qty > 0")
+			for item in data_set:
+				stock_uom = frappe.get_value("Item",{'item_code':item.get('item_code')},'stock_uom')
+				if item.get('qty') > 0:
+					self.append('items', {
+						"item_code" : item.get('item_code'),
+						"item_name" : item.get('item_name'),
+						"schedule_date" : today(),
+						"description" : item.get('desc'),
+						"warehouse" : self.set_warehouse,
+						"uom" : item.get('stock_uom'),
+						"cost_center" : item.get('cost_center'),
+						"expense_account" : item.get('expense_account'),
+						"stock_uom" : stock_uom,
+						"multi_order_qty" : item.get('multi_order_qty'),
+						"conversion_factor" : 1,
+						"qty" : item.get('qty'),
+						"production_item_name" : item.get('production_item_name'),
+						"projected_qty" : item.get('projected_qty'),
+						"actual_qty" : item.get('actual_qty'),
+						"rate" : item.get('valuation_rate'),
+						"min_order_qty" : item.get('min_order_qty'),
+						"amount" : float(item.get('valuation_rate')) * float(item.get('qty')),
+					})
 
 	def on_submit(self):
 		# frappe.db.set(self, 'status', 'Submitted')
 		self.update_requested_qty()
 		self.update_requested_qty_in_production_plan()
+		# under tetsing create stock entry
+		self.create_stock_entry()
 		if self.material_request_type == 'Purchase':
 			self.validate_budget()
 
@@ -190,7 +200,7 @@ class MaterialRequest(BuyingController):
 
 		if date_diff and date_diff[0][0]:
 			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(_(self.doctype), self.name))
-	
+
 	def update_status(self, status):
 		self.check_modified_date()
 		self.status_can_change(status)
@@ -311,6 +321,31 @@ class MaterialRequest(BuyingController):
 			doc = frappe.get_doc('Production Plan', production_plan)
 			doc.set_status()
 			doc.db_set('status', doc.status)
+
+	def create_stock_entry(self):
+		stock_entry = frappe.new_doc('Stock Entry')
+		stock_entry.purpose = self.material_request_type
+		if self.material_request_type != "Purchase":
+			stock_entry.set_stock_entry_type()
+		stock_entry.from_warehouse = self.set_warehouse
+		stock_entry.company = self.company
+		# cost_center = frappe.get_cached_value('Company', self.company, 'cost_center')
+		# expense_account = get_account(None, 'expense_account', 'Healthcare Settings', self.company)
+		for row in self.items:
+			se_child = stock_entry.append('items')
+			se_child.item_code = row.item_code
+			se_child.item_name = frappe.db.get_value('Item', row.item_code, 'item_name')
+			se_child.uom = frappe.db.get_value('Item', row.item_code, 'stock_uom')
+			se_child.stock_uom = se_child.uom
+			se_child.qty = row.qty
+			# in stock uom
+			se_child.conversion_factor = 1
+			se_child.cost_center = row.cost_center
+			se_child.expense_account = row.expense_account
+			# references
+			# se_child.patient = entry.patient
+			# se_child.inpatient_medication_entry_child = entry.name
+		# stock_entry.save(ignore_permissions=True)
 	@frappe.whitelist()
 	def set_target_warehouse(self):
 		q = "select staging_material_request_warehouse from `tabStaging Details` where company = '{0}'".format(self.company)
@@ -394,7 +429,7 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 
 		return d.ordered_qty < d.stock_qty and child_filter
 
-	doclist = get_mapped_doc("Material Request", source_name, 	{
+	doclist = get_mapped_doc("Material Request", source_name, {
 		"Material Request": {
 			"doctype": "Purchase Order",
 			"validation": {
@@ -421,7 +456,7 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 
 @frappe.whitelist()
 def make_request_for_quotation(source_name, target_doc=None):
-	doclist = get_mapped_doc("Material Request", source_name, 	{
+	doclist = get_mapped_doc("Material Request", source_name, {
 		"Material Request": {
 			"doctype": "Request for Quotation",
 			"validation": {
@@ -601,7 +636,8 @@ def make_stock_entry(source_name, target_doc=None):
 			"field_map": {
 				"name": "material_request_item",
 				"parent": "material_request",
-				"uom": "stock_uom"
+				"uom": "stock_uom",
+				"job_card_item": "job_card_item"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.ordered_qty < doc.stock_qty
@@ -630,6 +666,7 @@ def raise_work_orders(material_request):
 					"stock_uom": d.stock_uom,
 					"expected_delivery_date": d.schedule_date,
 					"sales_order": d.sales_order,
+					"sales_order_item": d.get("sales_order_item"),
 					"bom_no": get_item_details(d.item_code).bom_no,
 					"material_request": mr.name,
 					"material_request_item": d.name,
@@ -697,41 +734,61 @@ def make_material_request(source_name, target_doc=None, ignore_permissions=False
 		qty = flt(itm.get('required_qty') - itm.get('transferred_qty'),float_precision)
 		(qty)
 		is_staging_enabled = cint(frappe.db.get_singles_value('Manufacturing Settings', 'enable_staging'))
+		
 		if is_staging_enabled:
 			staging_warhouse = frappe.get_value("Staging Details",{'company':company},'staging_material_request_warehouse')
 			if staging_warhouse:
 				projected_qty = frappe.get_value('Bin', {'warehouse':staging_warhouse,'item_code':itm.item_code},'projected_qty')
 				if projected_qty:
-					qty = flt(itm.get('transferred_qty')) - flt(itm.get("consumed_qty")) - projected_qty
-					item=frappe.get_doc("Item",itm.get('item_code'))
-					if item.allowed_in_wo_staging=="Yes" and item.staging_multiple > 0:
-						sqty=math.ceil(qty/item.staging_multiple)
-						final_qty=item.staging_multiple*sqty
-						if final_qty > 0:
-							target.qty = final_qty
-		
-		if qty < 0:
-			qty = 0
-		target.qty = qty
+					print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.")
+					print(projected_qty,qty)
+					item = frappe.get_doc("Item", itm.get('item_code'))
+					if projected_qty < 0:
+						target.qty = 0
+					elif item.allowed_in_wo_staging == "Yes" and item.staging_multiple > 0 \
+						and projected_qty < qty:
+						result_qty = math.ceil((qty - projected_qty)/item.staging_multiple)
+						if result_qty > 0:
+							#qty = result_qty
+							target.qty = result_qty
+						else:
+							target.qty = 0
+					elif item.allowed_in_wo_staging == "Yes" and item.staging_multiple > 0 \
+						and projected_qty >=  qty :
+						qty = 0
+						target.qty = 0
+					elif item.allowed_in_wo_staging == "Yes" and not item.staging_multiple > 0 \
+						and projected_qty < qty :
+						result_qty = (qty - projected_qty)
+						qty = result_qty
+						target.qty = result_qty
+					elif item.allowed_in_wo_staging == "Yes" and not item.staging_multiple > 0 \
+						and projected_qty > qty :
+						qty = 0
+						target.qty = 0
+
+		else:
+			if qty < 0:
+				qty = 0
+			target.qty = qty
 		uom = frappe.get_value("Item",{'item_code':itm.get('item_code')},'stock_uom')
 		target.uom = uom
 
 	doclist = get_mapped_doc("Work Order", source_name, {
 		"Work Order": {
-			"doctype": "Material Request",
+			"doctype": "Material Request"
 		},
 		"Work Order Item": {
 			"doctype": "Material Request Item",
 			"field_map": {
-				# "name": "so_detail",
 				"parent": "work_order",
 			},
 			"postprocess": update_item,
-			# "condition": lambda doc: doc.qty and (doc.base_amount==0 or abs(doc.billed_amt) < abs(doc.amount))
-			#"condition": non_zero_qty,
+			"condition": lambda doc: frappe.db.exists("Item",{'name':doc.item_code,"allowed_in_wo_staging":"Yes"})
 		},
-		
+
 	}, target_doc, ignore_permissions=ignore_permissions)
+
 	return doclist
 
 

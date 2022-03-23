@@ -7,7 +7,6 @@ Provide a report and downloadable CSV according to the German DATEV format.
 - CSV download functionality `download_datev_csv` that provides a CSV file with
 	all required columns. Used to import the data into the DATEV Software.
 """
-from __future__ import unicode_literals
 
 import json
 
@@ -351,7 +350,7 @@ def run_query(filters, extra_fields, extra_joins, extra_filters, as_dict=1):
 
 			gl.posting_date as 'Belegdatum',
 			gl.voucher_no as 'Belegfeld 1',
-			LEFT(gl.remarks, 60) as 'Buchungstext',
+			REPLACE(LEFT(gl.remarks, 60), '\n', ' ') as 'Buchungstext',
 			gl.voucher_type as 'Beleginfo - Art 1',
 			gl.voucher_no as 'Beleginfo - Inhalt 1',
 			gl.against_voucher_type as 'Beleginfo - Art 2',

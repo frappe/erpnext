@@ -10,9 +10,7 @@
   "transporter",
   "cb1",
   "delivery_date_from",
-  "delivery_date_from_nepal",
   "delivery_date_to",
-  "deliver_date_to_nepal",
   "cb2",
   "pincode_from",
   "pincode_to",
@@ -125,16 +123,6 @@
   {
    "fieldname": "section_break_16",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "delivery_date_from_nepal",
-   "fieldtype": "Read Only",
-   "label": "Delivery Date From (Nepal)"
-  },
-  {
-   "fieldname": "deliver_date_to_nepal",
-   "fieldtype": "Read Only",
-   "label": "Deliver Date To (Nepal)"
   }
  ],
  "index_web_pages_for_search": 1,

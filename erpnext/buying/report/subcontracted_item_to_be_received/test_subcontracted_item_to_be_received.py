@@ -2,11 +2,10 @@
 # Embedded file name: /Users/anuragmishra/frappe-develop/apps/erpnext/erpnext/buying/report/subcontracted_item_to_be_received/test_subcontracted_item_to_be_received.py
 # Compiled at: 2019-05-06 09:51:46
 # Decompiled by https://python-decompiler.com
-from __future__ import unicode_literals
 
-import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
@@ -16,7 +15,7 @@ from erpnext.buying.report.subcontracted_item_to_be_received.subcontracted_item_
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 
-class TestSubcontractedItemToBeReceived(unittest.TestCase):
+class TestSubcontractedItemToBeReceived(FrappeTestCase):
 
 	def test_pending_and_received_qty(self):
 		po = create_purchase_order(item_code='_Test FG Item', is_subcontracted='Yes')

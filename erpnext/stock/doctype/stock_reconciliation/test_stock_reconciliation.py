@@ -4,12 +4,9 @@
 # ERPNext - web based ERP (http://erpnext.com)
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
-from frappe.utils import add_days, flt, nowdate, nowtime, random_string
+from frappe.utils import add_days, cstr, flt, nowdate, nowtime, random_string
 
 from erpnext.accounts.utils import get_stock_and_account_balance
 from erpnext.stock.doctype.item.test_item import create_item
@@ -22,14 +19,19 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.utils import get_incoming_rate, get_stock_value_on, get_valuation_method
-from erpnext.tests.utils import change_settings
+from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 
-class TestStockReconciliation(unittest.TestCase):
+class TestStockReconciliation(ERPNextTestCase):
 	@classmethod
-	def setUpClass(self):
+	def setUpClass(cls):
 		create_batch_or_serial_no_items()
+		super().setUpClass()
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+
+	def tearDown(self):
+		frappe.flags.dont_execute_stock_reposts = None
+
 
 	def test_reco_for_fifo(self):
 		self._test_reco_sle_gle("FIFO")
@@ -372,7 +374,6 @@ class TestStockReconciliation(unittest.TestCase):
 		"""
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.stock_ledger import NegativeStockError
-		frappe.db.commit()
 
 		item_code = "Backdated-Reco-Cancellation-Item"
 		warehouse = "_Test Warehouse - _TC"
@@ -395,7 +396,38 @@ class TestStockReconciliation(unittest.TestCase):
 		repost_exists = bool(frappe.db.exists("Repost Item Valuation", {"voucher_no": sr.name}))
 		self.assertFalse(repost_exists, msg="Negative stock validation not working on reco cancellation")
 
-		# teardown
+	def test_intermediate_sr_bin_update(self):
+		"""Bin should show correct qty even for backdated entries.
+
+			-------------------------------------------
+			| creation | Var | Doc  | Qty | balance qty
+			-------------------------------------------
+			|  1       | SR  | Reco | 10  | 10     (posting date: today+10)
+			|  3       | SR2 | Reco | 11  | 11     (posting date: today+11)
+			|  2       | DN  | DN   | 5   | 6 <-- assert in BIN  (posting date: today+12)
+		"""
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		# repost will make this test useless, qty should update in realtime without reposts
+		frappe.flags.dont_execute_stock_reposts = True
+		frappe.db.rollback()
+
+		item_code = "Backdated-Reco-Cancellation-Item"
+		warehouse = "_Test Warehouse - _TC"
+		create_item(item_code)
+
+		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=10, rate=100,
+			posting_date=add_days(nowdate(), 10))
+
+		create_delivery_note(item_code=item_code, warehouse=warehouse, qty=5, rate=120,
+			posting_date=add_days(nowdate(), 12))
+		old_bin_qty = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
+
+		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=11, rate=100,
+			posting_date=add_days(nowdate(), 11))
+		new_bin_qty = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
+
+		self.assertEqual(old_bin_qty + 1, new_bin_qty)
 		frappe.db.rollback()
 
 
@@ -405,6 +437,59 @@ class TestStockReconciliation(unittest.TestCase):
 		sr = create_stock_reconciliation(item_code="Testing Batch Item 1", qty=1, rate=100, batch_no="002"
 			, do_not_submit=True)
 		self.assertRaises(frappe.ValidationError, sr.submit)
+
+	def test_serial_no_cancellation(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item = create_item("Stock-Reco-Serial-Item-9", is_stock_item=1)
+		if not item.has_serial_no:
+			item.has_serial_no = 1
+			item.serial_no_series = "SRS9.####"
+			item.save()
+
+		item_code = item.name
+		warehouse = "_Test Warehouse - _TC"
+
+		se1 = make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=700)
+
+		serial_nos = get_serial_nos(se1.items[0].serial_no)
+		# reduce 1 item
+		serial_nos.pop()
+		new_serial_nos = "\n".join(serial_nos)
+
+		sr = create_stock_reconciliation(item_code=item.name, warehouse=warehouse, serial_no=new_serial_nos, qty=9)
+		sr.cancel()
+
+		active_sr_no = frappe.get_all("Serial No",
+				filters={"item_code": item_code, "warehouse": warehouse, "status": "Active"})
+
+		self.assertEqual(len(active_sr_no), 10)
+
+
+	def test_serial_no_creation_and_inactivation(self):
+		item = create_item("_TestItemCreatedWithStockReco", is_stock_item=1)
+		if not item.has_serial_no:
+			item.has_serial_no = 1
+			item.save()
+
+		item_code = item.name
+		warehouse = "_Test Warehouse - _TC"
+
+		sr = create_stock_reconciliation(item_code=item.name, warehouse=warehouse,
+				serial_no="SR-CREATED-SR-NO", qty=1, do_not_submit=True, rate=100)
+		sr.save()
+		self.assertEqual(cstr(sr.items[0].current_serial_no), "")
+		sr.submit()
+
+		active_sr_no = frappe.get_all("Serial No",
+				filters={"item_code": item_code, "warehouse": warehouse, "status": "Active"})
+		self.assertEqual(len(active_sr_no), 1)
+
+		sr.cancel()
+		active_sr_no = frappe.get_all("Serial No",
+				filters={"item_code": item_code, "warehouse": warehouse, "status": "Active"})
+		self.assertEqual(len(active_sr_no), 0)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)

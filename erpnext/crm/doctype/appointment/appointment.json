@@ -7,7 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "scheduled_time",
-  "scheduled_time_nepal",
   "status",
   "customer_details_section",
   "customer_name",
@@ -100,11 +99,6 @@
    "fieldtype": "Dynamic Link",
    "label": "Party",
    "options": "appointment_with"
-  },
-  {
-   "fieldname": "scheduled_time_nepal",
-   "fieldtype": "Read Only",
-   "label": "Scheduled Time (Nepal)"
   }
  ],
  "links": [],

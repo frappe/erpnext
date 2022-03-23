@@ -27,9 +27,7 @@
   "location",
   "column_break_12",
   "start_time",
-  "start_time_nepal",
   "end_time",
-  "end_time_nepal",
   "section_break_15",
   "introduction",
   "section_break_18",
@@ -197,16 +195,6 @@
    "hidden": 1,
    "label": "Employee Emails",
    "options": "Email"
-  },
-  {
-   "fieldname": "start_time_nepal",
-   "fieldtype": "Read Only",
-   "label": "Start Time (Nepal)"
-  },
-  {
-   "fieldname": "end_time_nepal",
-   "fieldtype": "Read Only",
-   "label": "End Time (Nepal)"
   }
  ],
  "is_submittable": 1,

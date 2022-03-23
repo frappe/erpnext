@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _, throw
@@ -10,6 +9,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, flt, getdate, nowdate
 from six import iteritems
 
+import erpnext
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
@@ -22,6 +22,122 @@ form_grid_templates = {
 }
 
 class PurchaseReceipt(BuyingController):
+
+	# New Code for Kroslink TASK TASK-2022-00015, Field challan_number_issues_by_job_worker
+
+	@frappe.whitelist()
+	def on_get_items_button(self, po):
+
+
+		
+		# s_company = frappe.db.get_value("Supplier", self.supplier, )
+		print(" this is on get items click", frappe.get_doc("Purchase Receipt", "MAT-PRE-2022-00022-1").get_signature())
+		count = 0
+		# 1st get item_code , challan_number_issues_by_job_worker (name of soi) 
+		pr_items = frappe.db.get_all("Purchase Receipt Item", {"parent": self.name}, ['item_code', 'challan_number_issues_by_job_worker', 'purchase_order'])
+		print(" got item at 1", pr_items)
+
+		for i in pr_items:
+			sub_com = frappe.get_doc("Stock Entry",{ "purchase_order" : i.purchase_order, "stock_entry_type" : "Send to Subcontractor"})
+			print(" sub com", sub_com.name)
+			# 2nd Getting Batch no from SOIorder
+			if i.challan_number_issues_by_job_worker:
+				soi_item = frappe.db.get_value("Sales Invoice Item", i.challan_number_issues_by_job_worker, ['item_code', 'batch_no', 'sales_order'], as_dict= 1)
+				# 3rd From Sales invoice to Sales Order and Sales Order to Work Order
+				# Send Type 
+				print("soi  details 2", soi_item)
+				if soi_item:
+					soi_so = frappe.db.get_value("Work Order", { "sales_order": soi_item.get('sales_order'),
+					"production_item": soi_item.get("item_code"), "company": self.represents_company },["name"])
+
+					print("soi so 3", soi_so)
+					# 4 WOrkorder to Stock Entrt of Above Work Order and Get its name 
+					if soi_so: 
+						se_wo_man = frappe.get_all("Stock Entry", {"work_order" :soi_so, "stock_entry_type": "Manufacture"}, ["name"])
+						
+						# from Stock Entry Get Stock Items with above item and batch no matching above and get its parent
+						print(" this se_wo_name 4", se_wo_man)
+						if se_wo_man:
+							for won in se_wo_man:
+								print("5 in for ", won)
+							
+								# se_man = frappe.get_all("Stock Entry Detail", {"parent" :won }, ["item_code", "batch_no", "parent"])
+
+								se_man = frappe.get_doc("Stock Entry", won)
+								for i in  se_man.items:
+
+									print(" 6 SE MAN", i)
+									if i.item_code == soi_item.get("item_code") and i.batch_no == soi_item.get("batch_no"):
+
+										se_mat_con = frappe.get_doc("Stock Entry", {'work_order': soi_so, 'stock_entry_type': 'Material Consumption for Manufacture'})
+										print(" 7 this is new se of com for man", se_mat_con.name)
+										if se_mat_con:
+											print("8 se mat com", se_mat_con)
+											se_mat_con_entry = frappe.db.get_all("Stock Entry Detail", {"parent" : se_mat_con.name}, 
+											["item_code", "item_name", "description", "qty", "stock_uom", "conversion_factor", "basic_rate", "amount"])
+											# print("9 se mat com", se_mat_con_entry)
+											if se_mat_con_entry:
+												for sei in se_mat_con_entry:
+													print(' 10 sei', sei)	
+													self.append("supplied_items",{
+													"main_item_code" : sei.item_code,	
+													"rm_item_code" : sei.item_code,
+													"stock_uom" : sei.stock_uom,
+													"required_qty" : sei.qty,
+													"qty_to_be_consumed" : sei.qty,
+													"rate" : sei.basic_rate,
+													"amount" : sei.amount,
+													"item_name" : sei.item_name,
+													"description" : sei.description,
+													 "reference_challan" : sub_com.name
+													})
+													count = count + 1
+
+		if count > 1:
+			return True	
+					
+	@frappe.whitelist()
+	def to_button_hide(self, po):
+		a = frappe.get_value("Puchase Order", po, "is_subcontracted")
+		s = frappe.get_value("Supplier", self.supplier, "is_internal_supplier")
+		if a == "Yes" and s == 1:
+			return True
+
+	@frappe.whitelist()
+	def on_challan_date(self, item):
+		print("THi i new deu daye")
+		due_date = frappe.db.sql("""
+								Select si.due_date, soi.new_name from `tabSales Invoice Item` soi , `tabSales Invoice` si
+								Where soi.parent = si.name and soi.name = '{0}'	""".format(item), as_dict = 1)
+
+		return due_date
+
+	# New Code for Kroslink TASK TASK-2022-00015, Field challan_number_issues_by_job_worker
+	@frappe.whitelist()
+	def on_challan_number(self, item_code):
+		print("this is Inside on_challan_number")
+		new_company = frappe.get_value("Supplier", self.supplier, 'represents_company')
+
+		new_code = (frappe.get_value("Item", item_code, "intercompany_item") or item_code)
+
+		print(" new cm , new code", new_company, new_code)
+		soi = frappe.db.sql("""
+			select soi.name, si.name as si_name from `tabSales Invoice Item` soi , `tabSales Invoice` si
+				Where soi.parent = si.name
+				AND si.docstatus = 1
+				AND soi.item_code = "{0}"
+				AND si.company = "{1}"
+				AND si.represents_company = "{2}"
+		""".format(new_code, new_company, self.company), as_dict = 1)
+		new_soi = []
+		for s in soi:
+			new_soi.append(s["name"])
+			print(s)
+		print("soi", soi, new_soi)
+
+		
+		return soi
+
 	def __init__(self, *args, **kwargs):
 		super(PurchaseReceipt, self).__init__(*args, **kwargs)
 		self.status_updater = [{
@@ -100,6 +216,8 @@ class PurchaseReceipt(BuyingController):
 		if self.get("items") and self.apply_putaway_rule and not self.get("is_return"):
 			apply_putaway_rule(self.doctype, self.get("items"), self.company)
 
+
+
 	def validate(self):
 		self.validate_posting_time()
 		super(PurchaseReceipt, self).validate()
@@ -109,16 +227,43 @@ class PurchaseReceipt(BuyingController):
 		else:
 			self.set_status()
 
+		if self._action == "save":
+			for row in self.supplied_items:
+				if row.qty_to_be_consumed:
+					if row.consumed_qty > 0 and row.qty_to_be_consumed <= 0 and self.is_new():
+						row.qty_to_be_consumed = row.consumed_qty
+				elif not row.qty_to_be_consumed and self.is_new():
+					if row.consumed_qty > 0:
+						row.qty_to_be_consumed = row.consumed_qty
+				if row.qty_to_be_consumed:
+					if row.consumed_qty != row.qty_to_be_consumed and row.loss_qty != 0:
+						row.consumed_qty = row.qty_to_be_consumed + row.loss_qty
+
+
 		self.po_required()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_cwip_accounts()
+		self.validate_provisional_expense_account()
 
 		self.check_on_hold_or_closed_status()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
+
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
+		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
+		self.validate_challan_number_issue_by_job_worker()
+
+	def validate_challan_number_issue_by_job_worker(self):
+		for row in self.items:
+			print("row.nature_of_job_work_done -------------",row.nature_of_job_work_done )
+			str_nature = row.nature_of_job_work_done
+			if row.is_subcontracted == "Yes" and not row.challan_number_issues_by_job_worker and not row.challan_date_issues_by_job_worker and not str_nature:
+					frappe.throw("Challan Number Issues by Job Worker, Challan Date Issues by Job Worker"
+								 "and Nature of Job Work Done Is Mandatory at row "+str(row.idx))
 
 
 	def validate_cwip_accounts(self):
@@ -130,6 +275,15 @@ class PurchaseReceipt(BuyingController):
 				cwip_account = get_asset_account("capital_work_in_progress_account", asset_category = item.asset_category, \
 					company = self.company)
 				break
+
+	def validate_provisional_expense_account(self):
+		provisional_accounting_for_non_stock_items = \
+			cint(frappe.db.get_value('Company', self.company, 'enable_provisional_accounting_for_non_stock_items'))
+
+		if provisional_accounting_for_non_stock_items:
+			default_provisional_account = self.get_company_default("default_provisional_account")
+			if not self.provisional_expense_account:
+				self.provisional_expense_account = default_provisional_account
 
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc({
@@ -252,23 +406,22 @@ class PurchaseReceipt(BuyingController):
 		return process_gl_map(gl_entries)
 
 	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
-		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
-		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
-		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
-		auto_accounting_for_non_stock_items = cint(frappe.db.get_value('Company', self.company, 'enable_perpetual_inventory_for_non_stock_items'))
+		if erpnext.is_perpetual_inventory_enabled(self.company):
+			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
+			landed_cost_entries = get_item_account_wise_additional_cost(self.name)
+			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
 		warehouse_with_no_account = []
 		stock_items = self.get_stock_items()
+		provisional_accounting_for_non_stock_items = \
+				cint(frappe.db.get_value('Company', self.company, 'enable_provisional_accounting_for_non_stock_items'))
 
 		for d in self.get("items"):
 			if d.item_code in stock_items and flt(d.valuation_rate) and flt(d.qty):
 				if warehouse_account.get(d.warehouse):
 					stock_value_diff = frappe.db.get_value("Stock Ledger Entry",
 						{"voucher_type": "Purchase Receipt", "voucher_no": self.name,
-						"voucher_detail_no": d.name, "warehouse": d.warehouse}, "stock_value_difference")
-
-					if not stock_value_diff:
-						continue
+						"voucher_detail_no": d.name, "warehouse": d.warehouse, "is_cancelled": 0}, "stock_value_difference")
 
 					warehouse_account_name = warehouse_account[d.warehouse]["account"]
 					warehouse_account_currency = warehouse_account[d.warehouse]["account_currency"]
@@ -362,7 +515,7 @@ class PurchaseReceipt(BuyingController):
 						if self.is_return or flt(d.item_tax_amount):
 							loss_account = expenses_included_in_valuation
 						else:
-							loss_account = self.get_company_default("default_expense_account")
+							loss_account = self.get_company_default("default_expense_account", ignore_validation=True) or stock_rbnb
 
 						cost_center = d.cost_center or frappe.get_cached_value("Company", self.company, "cost_center")
 
@@ -381,43 +534,58 @@ class PurchaseReceipt(BuyingController):
 				elif d.warehouse not in warehouse_with_no_account or \
 					d.rejected_warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(d.warehouse)
-			elif d.item_code not in stock_items and not d.is_fixed_asset and flt(d.qty) and auto_accounting_for_non_stock_items:
-				service_received_but_not_billed_account = self.get_company_default("service_received_but_not_billed")
-				credit_currency = get_account_currency(service_received_but_not_billed_account)
-				debit_currency = get_account_currency(d.expense_account)
-				remarks = self.get("remarks") or _("Accounting Entry for Service")
-
-				self.add_gl_entry(
-					gl_entries=gl_entries,
-					account=service_received_but_not_billed_account,
-					cost_center=d.cost_center,
-					debit=0.0,
-					credit=d.amount,
-					remarks=remarks,
-					against_account=d.expense_account,
-					account_currency=credit_currency,
-					project=d.project,
-					voucher_detail_no=d.name, item=d)
-
-				self.add_gl_entry(
-					gl_entries=gl_entries,
-					account=d.expense_account,
-					cost_center=d.cost_center,
-					debit=d.amount,
-					credit=0.0,
-					remarks=remarks,
-					against_account=service_received_but_not_billed_account,
-					account_currency = debit_currency,
-					project=d.project,
-					voucher_detail_no=d.name,
-					item=d)
+			elif d.item_code not in stock_items and not d.is_fixed_asset and flt(d.qty) and provisional_accounting_for_non_stock_items:
+				self.add_provisional_gl_entry(d, gl_entries, self.posting_date)
 
 		if warehouse_with_no_account:
 			frappe.msgprint(_("No accounting entries for the following warehouses") + ": \n" +
 				"\n".join(warehouse_with_no_account))
 
+	def add_provisional_gl_entry(self, item, gl_entries, posting_date, reverse=0):
+		provisional_expense_account = self.get('provisional_expense_account')
+		credit_currency = get_account_currency(provisional_expense_account)
+		debit_currency = get_account_currency(item.expense_account)
+		expense_account = item.expense_account
+		remarks = self.get("remarks") or _("Accounting Entry for Service")
+		multiplication_factor = 1
+
+		if reverse:
+			multiplication_factor = -1
+			expense_account = frappe.db.get_value('Purchase Receipt Item', {'name': item.get('pr_detail')}, ['expense_account'])
+
+		self.add_gl_entry(
+			gl_entries=gl_entries,
+			account=provisional_expense_account,
+			cost_center=item.cost_center,
+			debit=0.0,
+			credit=multiplication_factor * item.amount,
+			remarks=remarks,
+			against_account=expense_account,
+			account_currency=credit_currency,
+			project=item.project,
+			voucher_detail_no=item.name,
+			item=item,
+			posting_date=posting_date)
+
+		self.add_gl_entry(
+			gl_entries=gl_entries,
+			account=expense_account,
+			cost_center=item.cost_center,
+			debit=multiplication_factor * item.amount,
+			credit=0.0,
+			remarks=remarks,
+			against_account=provisional_expense_account,
+			account_currency = debit_currency,
+			project=item.project,
+			voucher_detail_no=item.name,
+			item=item,
+			posting_date=posting_date)
+
 	def make_tax_gl_entries(self, gl_entries):
-		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+
+		if erpnext.is_perpetual_inventory_enabled(self.company):
+			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+
 		negative_expense_to_be_booked = sum([flt(d.item_tax_amount) for d in self.get('items')])
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
@@ -474,7 +642,8 @@ class PurchaseReceipt(BuyingController):
 
 	def add_gl_entry(self, gl_entries, account, cost_center, debit, credit, remarks, against_account,
 		debit_in_account_currency=None, credit_in_account_currency=None, account_currency=None,
-		project=None, voucher_detail_no=None, item=None):
+		project=None, voucher_detail_no=None, item=None, posting_date=None):
+
 		gl_entry = {
 			"account": account,
 			"cost_center": cost_center,
@@ -492,6 +661,9 @@ class PurchaseReceipt(BuyingController):
 
 		if credit_in_account_currency:
 			gl_entry.update({"credit_in_account_currency": credit_in_account_currency})
+
+		if posting_date:
+			gl_entry.update({"posting_date": posting_date})
 
 		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
 
@@ -521,6 +693,7 @@ class PurchaseReceipt(BuyingController):
 		# debit cwip account
 		debit_in_account_currency = (base_asset_amount
 			if cwip_account_currency == self.company_currency else asset_amount)
+
 		self.add_gl_entry(
 			gl_entries=gl_entries,
 			account=cwip_account,
@@ -536,6 +709,7 @@ class PurchaseReceipt(BuyingController):
 		# credit arbnb account
 		credit_in_account_currency = (base_asset_amount
 			if asset_rbnb_currency == self.company_currency else asset_amount)
+
 		self.add_gl_entry(
 			gl_entries=gl_entries,
 			account=arbnb_account,
@@ -588,6 +762,31 @@ class PurchaseReceipt(BuyingController):
 		for asset in assets:
 			frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(valuation_rate))
 			frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(valuation_rate))
+
+	@frappe.whitelist()
+	def calculate_taxes(self):
+		if self.supplier:
+			sup = frappe.get_doc("Supplier",self.supplier)
+			if not sup.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						if i.item_code:
+							doc=frappe.get_doc("Item",i.item_code)
+							for j in doc.taxes:
+								if self.tax_category==j.tax_category:
+									if j.item_tax_template:
+										i.item_tax_template=j.item_tax_template
+			if sup.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						if i.item_code:
+							doc=frappe.get_doc("Item",i.item_code)
+							for j in doc.taxes:
+								if sup.tax_category==j.tax_category:
+									if j.item_tax_template:
+										i.item_tax_template=j.item_tax_template
+				self.tax_category=sup.tax_category
+			return self.tax_category
 
 	def update_status(self, status):
 		self.set_status(update=True, status=status)
@@ -803,7 +1002,8 @@ def make_stock_entry(source_name,target_doc=None):
 			"doctype": "Stock Entry Detail",
 			"field_map": {
 				"warehouse": "s_warehouse",
-				"parent": "reference_purchase_receipt"
+				"parent": "reference_purchase_receipt",
+				"batch_no": "batch_no"
 			},
 		},
 	}, target_doc, set_missing_values)

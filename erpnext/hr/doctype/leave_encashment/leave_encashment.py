@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -21,11 +19,19 @@ class LeaveEncashment(Document):
 	def validate(self):
 		set_employee_name(self)
 		validate_active_employee(self.employee)
-		self.get_leave_details_for_encashment()
+		if self.is_new():
+			self.get_leave_details_for_encashment()
 		self.validate_salary_structure()
-
+		self.custom_validate()
 		if not self.encashment_date:
 			self.encashment_date = getdate(nowdate())
+
+		salary_structure = get_assigned_salary_structure(self.employee, self.encashment_date or getdate(nowdate()))
+		if not salary_structure:
+			frappe.throw(_("No Salary Structure assigned for Employee {0} on given date {1}").format(self.employee, self.encashment_date))
+		per_day_encashment = frappe.db.get_value('Salary Structure', salary_structure , 'leave_encashment_amount_per_day')
+		self.encashment_amount = self.encashable_days * per_day_encashment if per_day_encashment > 0 else 0	
+
 
 	def validate_salary_structure(self):
 		if not frappe.db.exists('Salary Structure Assignment', {'employee': self.employee}):
@@ -84,7 +90,10 @@ class LeaveEncashment(Document):
 			frappe.throw(_("No Leaves Allocated to Employee: {0} for Leave Type: {1}").format(self.employee, self.leave_type))
 
 		self.leave_balance = allocation.total_leaves_allocated - allocation.carry_forwarded_leaves_count\
-			- get_unused_leaves(self.employee, self.leave_type, allocation.from_date, self.encashment_date)
+			- abs(get_unused_leaves(self.employee, self.leave_type, allocation.from_date, self.encashment_date))
+
+		# if self.leave_balance:
+		# 	print("-----allocation.total_leaves_allocated", allocation.total_leaves_allocated, "-----carrry",allocation.carry_forwarded_leaves_count)
 
 		encashable_days = self.leave_balance - frappe.db.get_value('Leave Type', self.leave_type, 'encashment_threshold_days')
 		self.encashable_days = encashable_days if encashable_days > 0 else 0
@@ -95,10 +104,32 @@ class LeaveEncashment(Document):
 		self.leave_allocation = allocation.name
 		return True
 
+	def custom_validate(self):
+		allocation = self.get_leave_allocation()
+
+		if not allocation:
+			frappe.throw(
+				_("No Leaves Allocated to Employee: {0} for Leave Type: {1}").format(self.employee, self.leave_type))
+
+		valid_leave_balance = allocation.total_leaves_allocated - allocation.carry_forwarded_leaves_count \
+							 - abs(
+			get_unused_leaves(self.employee, self.leave_type, allocation.from_date, self.encashment_date))
+
+		# if self.leave_balance:
+		# 	print("-----allocation.total_leaves_allocated", allocation.total_leaves_allocated, "-----carrry",allocation.carry_forwarded_leaves_count)
+
+		encashable_days = self.leave_balance - frappe.db.get_value('Leave Type', self.leave_type,
+																   'encashment_threshold_days')
+		valid_encashable_days = encashable_days if encashable_days > 0 else 0
+		if self.encashable_days > valid_encashable_days:
+			frappe.throw("Encashable Days Should Not Be Greter Than "+str(valid_encashable_days))
 	def get_leave_allocation(self):
 		leave_allocation = frappe.db.sql("""select name, to_date, total_leaves_allocated, carry_forwarded_leaves_count from `tabLeave Allocation` where '{0}'
 		between from_date and to_date and docstatus=1 and leave_type='{1}'
 		and employee= '{2}'""".format(self.encashment_date or getdate(nowdate()), self.leave_type, self.employee), as_dict=1) #nosec
+
+		# select name, to_date, total_leaves_allocated, carry_forwarded_leaves_count from `tabLeave Allocation`
+		# where "2021-09-12" between "2021-01-01" and "2021-10-12" and docstatus=1 and leave_type="Casual Leave";
 
 		return leave_allocation[0] if leave_allocation else None
 

@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 import frappe.defaults
@@ -25,7 +24,7 @@ def set_cart_count(quotation=None):
 	if cint(frappe.db.get_singles_value("E Commerce Settings", "enabled")):
 		if not quotation:
 			quotation = _get_cart_quotation()
-		cart_count = cstr(len(quotation.get("items")))
+		cart_count = cstr(cint(quotation.get("total_qty")))
 
 		if hasattr(frappe.local, "cookie_manager"):
 			frappe.local.cookie_manager.set_cookie("cart_count", cart_count)
@@ -201,7 +200,9 @@ def add_new_address(doc):
 def create_lead_for_item_inquiry(lead, subject, message):
 	lead = frappe.parse_json(lead)
 	lead_doc = frappe.new_doc('Lead')
-	lead_doc.update(lead)
+	for fieldname in ("lead_name", "company_name", "email_id", "phone"):
+		lead_doc.set(fieldname, lead.get(fieldname))
+
 	lead_doc.set('lead_owner', '')
 
 	if not frappe.db.exists('Lead Source', 'Product Inquiry'):
@@ -209,6 +210,7 @@ def create_lead_for_item_inquiry(lead, subject, message):
 			'doctype': 'Lead Source',
 			'source_name' : 'Product Inquiry'
 		}).insert(ignore_permissions=True)
+
 	lead_doc.set('source', 'Product Inquiry')
 
 	try:
@@ -274,10 +276,29 @@ def guess_territory():
 
 def decorate_quotation_doc(doc):
 	for d in doc.get("items", []):
+		item_code = d.item_code
+		fields = ["web_item_name", "thumbnail", "website_image", "description", "route"]
+
+		# Variant Item
+		if not frappe.db.exists("Website Item", {"item_code": item_code}):
+			variant_data = frappe.db.get_values(
+				"Item",
+				filters={"item_code": item_code},
+				fieldname=["variant_of", "item_name", "image"],
+				as_dict=True
+			)[0]
+			item_code = variant_data.variant_of
+			fields = fields[1:]
+			d.web_item_name = variant_data.item_name
+
+			if variant_data.image: # get image from variant or template web item
+				d.thumbnail = variant_data.image
+				fields = fields[2:]
+
 		d.update(frappe.db.get_value(
 			"Website Item",
-			{"item_code": d.item_code},
-			["web_item_name", "thumbnail", "website_image", "description", "route"],
+			{"item_code": item_code},
+			fields,
 			as_dict=True)
 		)
 
@@ -290,7 +311,7 @@ def _get_cart_quotation(party=None):
 		party = get_party()
 
 	quotation = frappe.get_all("Quotation", fields=["name"], filters=
-		{"party_name": party.name, "order_type": "Shopping Cart", "docstatus": 0},
+		{"party_name": party.name, "contact_email": frappe.session.user, "order_type": "Shopping Cart", "docstatus": 0},
 		order_by="modified desc", limit_page_length=1)
 
 	if quotation:

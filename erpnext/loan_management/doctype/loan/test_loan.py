@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import unittest
 
@@ -44,16 +42,17 @@ class TestLoan(unittest.TestCase):
 		create_loan_type("Personal Loan", 500000, 8.4,
 			is_term_loan=1,
 			mode_of_payment='Cash',
+			disbursement_account='Disbursement Account - _TC',
 			payment_account='Payment Account - _TC',
 			loan_account='Loan Account - _TC',
 			interest_income_account='Interest Income Account - _TC',
 			penalty_income_account='Penalty Income Account - _TC')
 
-		create_loan_type("Stock Loan", 2000000, 13.5, 25, 1, 5, 'Cash', 'Payment Account - _TC', 'Loan Account - _TC',
-			'Interest Income Account - _TC', 'Penalty Income Account - _TC')
+		create_loan_type("Stock Loan", 2000000, 13.5, 25, 1, 5, 'Cash', 'Disbursement Account - _TC',
+			'Payment Account - _TC', 'Loan Account - _TC', 'Interest Income Account - _TC', 'Penalty Income Account - _TC')
 
-		create_loan_type("Demand Loan", 2000000, 13.5, 25, 0, 5, 'Cash', 'Payment Account - _TC', 'Loan Account - _TC',
-			'Interest Income Account - _TC', 'Penalty Income Account - _TC')
+		create_loan_type("Demand Loan", 2000000, 13.5, 25, 0, 5, 'Cash', 'Disbursement Account - _TC',
+			'Payment Account - _TC', 'Loan Account - _TC', 'Interest Income Account - _TC', 'Penalty Income Account - _TC')
 
 		create_loan_security_type()
 		create_loan_security()
@@ -220,6 +219,14 @@ class TestLoan(unittest.TestCase):
 		self.assertEqual(flt(loan.total_principal_paid, 0), flt(repayment_entry.amount_paid -
 			 penalty_amount - total_interest_paid, 0))
 
+		# Check Repayment Entry cancel
+		repayment_entry.load_from_db()
+		repayment_entry.cancel()
+
+		loan.load_from_db()
+		self.assertEqual(loan.total_principal_paid, 0)
+		self.assertEqual(loan.total_principal_paid, 0)
+
 	def test_loan_closure(self):
 		pledge = [{
 			"loan_security": "Test Security 1",
@@ -296,6 +303,27 @@ class TestLoan(unittest.TestCase):
 
 		self.assertEqual(amounts[0], 11250.00)
 		self.assertEqual(amounts[1], 78303.00)
+
+	def test_repayment_schedule_update(self):
+		loan = create_loan(self.applicant2, "Personal Loan", 200000, "Repay Over Number of Periods", 4,
+			applicant_type='Customer', repayment_start_date='2021-04-30', posting_date='2021-04-01')
+
+		loan.submit()
+
+		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date='2021-04-01')
+
+		process_loan_interest_accrual_for_term_loans(posting_date='2021-05-01')
+		process_loan_interest_accrual_for_term_loans(posting_date='2021-06-01')
+
+		repayment_entry = create_repayment_entry(loan.name, self.applicant2, '2021-06-05', 120000)
+		repayment_entry.submit()
+
+		loan.load_from_db()
+
+		self.assertEqual(flt(loan.get('repayment_schedule')[3].principal_amount, 2), 41369.83)
+		self.assertEqual(flt(loan.get('repayment_schedule')[3].interest_amount, 2), 289.59)
+		self.assertEqual(flt(loan.get('repayment_schedule')[3].total_payment, 2), 41659.41)
+		self.assertEqual(flt(loan.get('repayment_schedule')[3].balance_loan_amount, 2), 0)
 
 	def test_security_shortfall(self):
 		pledges = [{
@@ -652,6 +680,29 @@ class TestLoan(unittest.TestCase):
 		loan.load_from_db()
 		self.assertEqual(loan.status, "Loan Closure Requested")
 
+	def test_loan_repayment_against_partially_disbursed_loan(self):
+		pledge = [{
+			"loan_security": "Test Security 1",
+			"qty": 4000.00
+		}]
+
+		loan_application = create_loan_application('_Test Company', self.applicant2, 'Demand Loan', pledge)
+		create_pledge(loan_application)
+
+		loan = create_demand_loan(self.applicant2, "Demand Loan", loan_application, posting_date='2019-10-01')
+		loan.submit()
+
+		first_date = '2019-10-01'
+		last_date = '2019-10-30'
+
+		make_loan_disbursement_entry(loan.name, loan.loan_amount/2, disbursement_date=first_date)
+
+		loan.load_from_db()
+
+		self.assertEqual(loan.status, "Partially Disbursed")
+		create_repayment_entry(loan.name, self.applicant2, add_days(last_date, 5),
+			flt(loan.loan_amount/3))
+
 	def test_loan_amount_write_off(self):
 		pledge = [{
 			"loan_security": "Test Security 1",
@@ -763,6 +814,18 @@ def create_loan_accounts():
 			"account_type": "Bank",
 		}).insert(ignore_permissions=True)
 
+	if not frappe.db.exists("Account", "Disbursement Account - _TC"):
+		frappe.get_doc({
+			"doctype": "Account",
+			"company": "_Test Company",
+			"account_name": "Disbursement Account",
+			"root_type": "Asset",
+			"report_type": "Balance Sheet",
+			"currency": "INR",
+			"parent_account": "Bank Accounts - _TC",
+			"account_type": "Bank",
+		}).insert(ignore_permissions=True)
+
 	if not frappe.db.exists("Account", "Interest Income Account - _TC"):
 		frappe.get_doc({
 			"doctype": "Account",
@@ -788,7 +851,7 @@ def create_loan_accounts():
 		}).insert(ignore_permissions=True)
 
 def create_loan_type(loan_name, maximum_loan_amount, rate_of_interest, penalty_interest_rate=None, is_term_loan=None, grace_period_in_days=None,
-	mode_of_payment=None, payment_account=None, loan_account=None, interest_income_account=None, penalty_income_account=None,
+	mode_of_payment=None, disbursement_account=None, payment_account=None, loan_account=None, interest_income_account=None, penalty_income_account=None,
 	repayment_method=None, repayment_periods=None):
 
 	if not frappe.db.exists("Loan Type", loan_name):
@@ -802,6 +865,7 @@ def create_loan_type(loan_name, maximum_loan_amount, rate_of_interest, penalty_i
 			"penalty_interest_rate": penalty_interest_rate,
 			"grace_period_in_days": grace_period_in_days,
 			"mode_of_payment": mode_of_payment,
+			"disbursement_account": disbursement_account,
 			"payment_account": payment_account,
 			"loan_account": loan_account,
 			"interest_income_account": interest_income_account,
@@ -940,18 +1004,18 @@ def create_loan_application(company, applicant, loan_type, proposed_pledges, rep
 
 
 def create_loan(applicant, loan_type, loan_amount, repayment_method, repayment_periods,
-	repayment_start_date=None, posting_date=None):
+	applicant_type=None, repayment_start_date=None, posting_date=None):
 
 	loan = frappe.get_doc({
 		"doctype": "Loan",
-		"applicant_type": "Employee",
+		"applicant_type": applicant_type or "Employee",
 		"company": "_Test Company",
 		"applicant": applicant,
 		"loan_type": loan_type,
 		"loan_amount": loan_amount,
 		"repayment_method": repayment_method,
 		"repayment_periods": repayment_periods,
-		"repayment_start_date": nowdate(),
+		"repayment_start_date": repayment_start_date or nowdate(),
 		"is_term_loan": 1,
 		"posting_date": posting_date or nowdate()
 	})

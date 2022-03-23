@@ -204,14 +204,28 @@
    "fieldname": "manual_picking",
    "fieldtype": "Check",
    "label": "Manual Picking"
+  },
+  {
+   "fieldname": "print_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Print Settings"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "group_same_items",
+   "fieldtype": "Check",
+   "label": "Group Same Items",
+   "print_hide": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-01 11:50:20.958460",
+ "modified": "2021-10-05 15:08:40.369957",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

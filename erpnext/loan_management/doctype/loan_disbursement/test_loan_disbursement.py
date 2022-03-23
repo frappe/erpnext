@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import unittest
 
@@ -46,8 +44,8 @@ class TestLoanDisbursement(unittest.TestCase):
 	def setUp(self):
 		create_loan_accounts()
 
-		create_loan_type("Demand Loan", 2000000, 13.5, 25, 0, 5, 'Cash', 'Payment Account - _TC', 'Loan Account - _TC',
-			'Interest Income Account - _TC', 'Penalty Income Account - _TC')
+		create_loan_type("Demand Loan", 2000000, 13.5, 25, 0, 5, 'Cash', 'Disbursement Account - _TC',
+			'Payment Account - _TC', 'Loan Account - _TC', 'Interest Income Account - _TC', 'Penalty Income Account - _TC')
 
 		create_loan_security_type()
 		create_loan_security()

@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "autoname": "field:pricelist_name",
  "creation": "2021-07-04 21:02:09.604422",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -13,6 +14,7 @@
   "currency",
   "end_date",
   "operating_unit",
+  "item_group",
   "section_break_8",
   "price_details",
   "amended_from"
@@ -78,13 +80,20 @@
   {
    "fieldname": "pricelist_name",
    "fieldtype": "Data",
-   "label": "PriceList Name"
+   "label": "PriceList Name",
+   "unique": 1
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-05 14:34:02.226597",
+ "modified": "2022-03-04 16:52:58.871624",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "PriceList Generator",

@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 
@@ -113,7 +111,15 @@ class POSInvoiceMergeLog(Document):
 
 	def merge_pos_invoice_into(self, invoice, data):
 		items, payments, taxes = [], [], []
+
 		loyalty_amount_sum, loyalty_points_sum = 0, 0
+
+		rounding_adjustment, base_rounding_adjustment = 0, 0
+		rounded_total, base_rounded_total = 0, 0
+
+		loyalty_amount_sum, loyalty_points_sum, idx = 0, 0, 1
+
+
 		for doc in data:
 			map_doc(doc, invoice, table_map={ "doctype": invoice.doctype })
 
@@ -130,9 +136,15 @@ class POSInvoiceMergeLog(Document):
 						i.uom == item.uom and i.net_rate == item.net_rate and i.warehouse == item.warehouse):
 						found = True
 						i.qty = i.qty + item.qty
+						i.amount = i.amount + item.net_amount
+						i.net_amount = i.amount
+						i.base_amount = i.base_amount + item.base_net_amount
+						i.base_net_amount = i.base_amount
 
 				if not found:
 					item.rate = item.net_rate
+					item.amount = item.net_amount
+					item.base_amount = item.base_net_amount
 					item.price_list_rate = 0
 					si_item = map_child_doc(item, invoice, {"doctype": "Sales Invoice Item"})
 					items.append(si_item)
@@ -147,6 +159,8 @@ class POSInvoiceMergeLog(Document):
 						found = True
 				if not found:
 					tax.charge_type = 'Actual'
+					tax.idx = idx
+					idx += 1
 					tax.included_in_print_rate = 0
 					tax.tax_amount = tax.tax_amount_after_discount_amount
 					tax.base_tax_amount = tax.base_tax_amount_after_discount_amount
@@ -163,6 +177,12 @@ class POSInvoiceMergeLog(Document):
 				if not found:
 					payments.append(payment)
 
+			rounding_adjustment += doc.rounding_adjustment
+			rounded_total += doc.rounded_total
+			base_rounding_adjustment += doc.base_rounding_adjustment
+			base_rounded_total += doc.base_rounded_total
+
+
 		if loyalty_points_sum:
 			invoice.redeem_loyalty_points = 1
 			invoice.loyalty_points = loyalty_points_sum
@@ -171,6 +191,10 @@ class POSInvoiceMergeLog(Document):
 		invoice.set('items', items)
 		invoice.set('payments', payments)
 		invoice.set('taxes', taxes)
+		invoice.set('rounding_adjustment',rounding_adjustment)
+		invoice.set('base_rounding_adjustment',base_rounding_adjustment)
+		invoice.set('rounded_total',rounded_total)
+		invoice.set('base_rounded_total',base_rounded_total)
 		invoice.additional_discount_percentage = 0
 		invoice.discount_amount = 0.0
 		invoice.taxes_and_charges = None
@@ -246,7 +270,10 @@ def get_invoice_customer_map(pos_invoices):
 	return pos_invoice_customer_map
 
 def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
-	invoices = pos_invoices or (closing_entry and closing_entry.get('pos_transactions')) or get_all_unconsolidated_invoices()
+	invoices = pos_invoices or (closing_entry and closing_entry.get('pos_transactions'))
+	if frappe.flags.in_test and not invoices:
+		invoices = get_all_unconsolidated_invoices()
+
 	invoice_by_customer = get_invoice_customer_map(invoices)
 
 	if len(invoices) >= 10 and closing_entry:

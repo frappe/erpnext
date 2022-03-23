@@ -175,9 +175,7 @@ class TestProductDataEngine(unittest.TestCase):
 
 		filter_engine = ProductFiltersBuilder()
 		attribute_filter = filter_engine.get_attribute_filters()[0]
-		attributes = attribute_filter.item_attribute_values
-
-		attribute_values = [d.attribute_value for d in attributes]
+		attribute_values = attribute_filter.item_attribute_values
 
 		self.assertEqual(attribute_filter.name, "Test Size")
 		self.assertGreater(len(attribute_values), 0)

@@ -4,15 +4,14 @@
 # ERPNext - web based ERP (http://erpnext.com)
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
-
-import unittest
 
 import frappe
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
@@ -20,9 +19,14 @@ test_dependencies = ["Item"]
 test_records = frappe.get_test_records('Serial No')
 
 from erpnext.stock.doctype.serial_no.serial_no import *
+from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestSerialNo(unittest.TestCase):
+class TestSerialNo(ERPNextTestCase):
+
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def test_cannot_create_direct(self):
 		frappe.delete_doc_if_exists("Serial No", "_TCSER0001")
 
@@ -178,6 +182,24 @@ class TestSerialNo(unittest.TestCase):
 		self.assertEqual(sn_doc.warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(sn_doc.purchase_document_no, se.name)
 
+	def test_auto_creation_of_serial_no(self):
+		"""
+			Test if auto created Serial No excludes existing serial numbers
+		"""
+		item_code = make_item("_Test Auto Serial Item ", {
+			"has_serial_no": 1,
+			"serial_no_series": "XYZ.###"
+		}).item_code
+
+		# Reserve XYZ005
+		pr_1 = make_purchase_receipt(item_code=item_code, qty=1, serial_no="XYZ005")
+		# XYZ005 is already used and will throw an error if used again
+		pr_2 = make_purchase_receipt(item_code=item_code, qty=10)
+
+		self.assertEqual(get_serial_nos(pr_1.get("items")[0].serial_no)[0], "XYZ005")
+		for serial_no in get_serial_nos(pr_2.get("items")[0].serial_no):
+			self.assertNotEqual(serial_no, "XYZ005")
+
 	def test_serial_no_sanitation(self):
 		"Test if Serial No input is sanitised before entering the DB."
 		item_code = "_Test Serialized Item"
@@ -185,16 +207,37 @@ class TestSerialNo(unittest.TestCase):
 
 		se = frappe.copy_doc(test_records[0])
 		se.get("items")[0].item_code = item_code
-		se.get("items")[0].qty = 3
-		se.get("items")[0].serial_no = " _TS1, _TS2 , _TS3  "
-		se.get("items")[0].transfer_qty = 3
+		se.get("items")[0].qty = 4
+		se.get("items")[0].serial_no = " _TS1, _TS2 , _TS3  , _TS4 - 2021"
+		se.get("items")[0].transfer_qty = 4
 		se.set_stock_entry_type()
 		se.insert()
 		se.submit()
 
-		self.assertEqual(se.get("items")[0].serial_no, "_TS1\n_TS2\n_TS3")
+		self.assertEqual(se.get("items")[0].serial_no, "_TS1\n_TS2\n_TS3\n_TS4 - 2021")
 
-		frappe.db.rollback()
+	def test_correct_serial_no_incoming_rate(self):
+		""" Check correct consumption rate based on serial no record.
+		"""
+		item_code = "_Test Serialized Item"
+		warehouse = "_Test Warehouse - _TC"
+		serial_nos = ["LOWVALUATION", "HIGHVALUATION"]
 
-	def tearDown(self):
-		frappe.db.rollback()
+		in1 = make_stock_entry(item_code=item_code, to_warehouse=warehouse, qty=1, rate=42,
+				serial_no=serial_nos[0])
+		in2 = make_stock_entry(item_code=item_code, to_warehouse=warehouse, qty=1, rate=113,
+				serial_no=serial_nos[1])
+
+		out = create_delivery_note(item_code=item_code, qty=1, serial_no=serial_nos[0], do_not_submit=True)
+
+		# change serial no
+		out.items[0].serial_no = serial_nos[1]
+		out.save()
+		out.submit()
+
+		value_diff = frappe.db.get_value("Stock Ledger Entry",
+				{"voucher_no": out.name, "voucher_type": "Delivery Note"},
+				"stock_value_difference"
+			)
+		self.assertEqual(value_diff, -113)
+

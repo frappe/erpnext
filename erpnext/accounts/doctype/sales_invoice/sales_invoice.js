@@ -10,10 +10,31 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.setup_posting_date_time_check();
 		this._super(doc);
 	},
-	company: function () {
+
+	company: function() {
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+		let me = this;
+		if (this.frm.doc.company) {
+			frappe.call({
+				method:
+					"erpnext.accounts.party.get_party_account",
+				args: {
+					party_type: 'Customer',
+					party: this.frm.doc.customer,
+					company: this.frm.doc.company
+				},
+				callback: (response) => {
+					if (response) me.frm.set_value("debit_to", response.message);
+				},
+			});
+		}
+
+			frappe.db.get_value('Company', this.frm.doc.company, 'default_receivable_account', (r) => {
+				me.frm.set_value('debit_to', r.default_receivable_account);
+			});
 	},
-	onload: function () {
+
+	onload: function() {
 		var me = this;
 		this._super();
 
@@ -444,12 +465,15 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	currency() {
+		var me = this;
 		this._super();
-		$.each(cur_frm.doc.timesheets, function(i, d) {
-			let row = frappe.get_doc(d.doctype, d.name)
-			set_timesheet_detail_rate(row.doctype, row.name, cur_frm.doc.currency, row.timesheet_detail)
-		});
-		calculate_total_billing_amount(cur_frm)
+		if (this.frm.doc.timesheets) {
+			this.frm.doc.timesheets.forEach((d) => {
+				let row = frappe.get_doc(d.doctype, d.name)
+				set_timesheet_detail_rate(row.doctype, row.name, me.frm.doc.currency, row.timesheet_detail)
+			});
+			frm.trigger("calculate_timesheet_totals");
+		}
 	}
 });
 
@@ -701,17 +725,17 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 		};
 	},
-	before_save:function(frm){
-		frm.call({
-			method:"get_commision",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-				frm.refresh_field("total_commission")
-			}
-		});
-	 },
+//	before_save:function(frm){
+//		frm.call({
+//			method:"get_commision",
+//			doc:frm.doc,
+//			callback: function(r)
+//			{
+//
+//				frm.refresh_field("total_commission")
+//			}
+//		});
+//	 },
 	// When multiple companies are set up. in case company name is changed set default company address
 	company: function (frm) {
 		if (frm.doc.company) {
@@ -730,7 +754,115 @@ frappe.ui.form.on('Sales Invoice', {
 			})
 		}
 	},
+	tax_category:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				frm.refresh_field("tax_category")
+                frm.refresh_field("items")
+			}
+		});
+	},
+	shipping_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
 
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                frm.refresh_field("tax_category")
+			}
+		});
+	},
+	supplier_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	customer_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	company_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	branch:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	location:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	cost_center:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
 	project: function (frm) {
 		if (!frm.doc.is_return) {
 			frm.call({
@@ -991,7 +1123,7 @@ frappe.ui.form.on('Sales Invoice', {
 		}
 
 		if (frm.doc.is_debit_note) {
-			frm.set_df_property('return_against', 'label', 'Adjustment Against');
+			frm.set_df_property('return_against', 'label', __('Adjustment Against'));
 		}
 
 		if (frappe.boot.active_domains.includes("Healthcare")) {
@@ -1001,10 +1133,10 @@ frappe.ui.form.on('Sales Invoice', {
 			if (cint(frm.doc.docstatus == 0) && cur_frm.page.current_view_name !== "pos" && !frm.doc.is_return) {
 				frm.add_custom_button(__('Healthcare Services'), function () {
 					get_healthcare_services_to_invoice(frm);
-				}, "Get Items From");
-				frm.add_custom_button(__('Prescriptions'), function () {
+				},__("Get Items From"));
+				frm.add_custom_button(__('Prescriptions'), function() {
 					get_drugs_to_invoice(frm);
-				}, "Get Items From");
+				},__("Get Items From"));
 			}
 		}
 		else {
@@ -1031,7 +1163,7 @@ frappe.ui.form.on('Sales Invoice', {
 
 
 frappe.ui.form.on("Sales Invoice Timesheet", {
-	timesheets_remove(frm, cdt, cdn) {
+	timesheets_remove(frm) {
 		frm.trigger("calculate_timesheet_totals");
 	}
 })

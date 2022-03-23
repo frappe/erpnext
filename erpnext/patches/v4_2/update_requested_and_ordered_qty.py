@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 
@@ -15,6 +14,8 @@ def execute():
 		union
 		select item_code, warehouse from `tabStock Ledger Entry`) a"""):
 			try:
+				if not (item_code and warehouse):
+					continue
 				count += 1
 				update_bin_qty(item_code, warehouse, {
 					"indented_qty": get_indented_qty(item_code, warehouse),

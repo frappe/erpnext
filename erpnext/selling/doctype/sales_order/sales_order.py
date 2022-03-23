@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import json
 from datetime import datetime
+from erpnext.accounts.party import get_partywise_advanced_payment_amount
 import frappe
 import frappe.utils
 from frappe import _
@@ -28,6 +29,11 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
 
+from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
+from six import iteritems
+from frappe import _, scrub
+
+
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
@@ -38,8 +44,113 @@ class SalesOrder(SellingController):
 	def __init__(self, *args, **kwargs):
 		super(SalesOrder, self).__init__(*args, **kwargs)
 
+	# def before_save(self):
+		# self.get_commision()
+
+	# start Of Cutom Code For Button Update Party Balance
+	args = {
+		"party_type": "Customer",
+		"naming_by": ["Selling Settings", "cust_master_name"],
+	}
+	filters1 = {}
+	party_type = "Customer"
+
+	@frappe.whitelist()
+	def on_update_party_balance(self):
+		self.filters1['company'] =  self.company
+		self.filters1['report_date'] =  self.transaction_date
+		self.filters1['ageing_based_on'] = "Due Date"
+		self.filters1['range1'] = 30
+		self.filters1['range2'] = 60
+		self.filters1['range3'] = 90
+		self.filters1['range4'] = 120
+		self.filters1['customer'] = self.customer	
+		self.show_future_payments = 0
+		entry  = self.get_data1(self.args)
+	
+		return entry
+
+		#  Accounts receivable summary 
+	def get_data1(self, args):
+		self.data1 = []
+		
+		self.party_naming_by = frappe.db.get_value(self.args.get("naming_by")[0], None, self.args.get("naming_by")[1])
+
+		self.receivables = ReceivablePayableReport(self.filters1).run(args)[1]
+
+		self.get_party_total(args)
+
+		party_advance_amount = get_partywise_advanced_payment_amount(self.party_type,
+			self.transaction_date, self.show_future_payments, self.company) or {}
+		
+		for party, party_dict in iteritems(self.party_total):
+			if party_dict.outstanding == 0:
+				continue
+
+			row = frappe._dict()
+
+			row.party = party
+			if self.party_naming_by == "Naming Series":
+				row.party_name = frappe.get_cached_value(self.party_type, party, scrub(self.party_type) + "_name")
+
+			row.update(party_dict)
+
+			# Advance against party
+			row.advance = party_advance_amount.get(party, 0)
+
+			# In AR/AP, advance shown in paid columns,
+			# but in summary report advance shown in separate column
+			row.paid -= row.advance
+
+			self.data1.append(row)
+			
+		return self.data1
+
+	def get_party_total(self, args):
+		self.party_total = frappe._dict()
+
+		for d in self.receivables:
+			self.init_party_total(d)
+
+			# Add all amount columns
+			for k in list(self.party_total[d.party]):
+				if k not in ["currency", "sales_person"]:
+
+					self.party_total[d.party][k] += d.get(k, 0.0)
+
+			# set territory, customer_group, sales person etc
+			# self.set_party_details(d)
+
+	def init_party_total(self, row):
+		self.party_total.setdefault(row.party, frappe._dict({
+			"invoiced": 0.0,
+			"paid": 0.0,
+			"credit_note": 0.0,
+			"outstanding": 0.0,
+			"range1": 0.0,
+			"range2": 0.0,
+			"range3": 0.0,
+			"range4": 0.0,
+			"range5": 0.0,
+			"total_due": 0.0,
+			"sales_person": []
+		}))		
+
+	def set_party_details(self, row):
+		self.party_total[row.party].currency = row.currency
+
+		for key in ('territory', 'customer_group', 'supplier_group'):
+			if row.get(key):
+				self.party_total[row.party][key] = row.get(key)
+
+		if row.sales_person:
+			self.party_total[row.party].sales_person.append(row.sales_person)
+
+	# End of Update Party Balance
+
 	def validate(self):
 		super(SalesOrder, self).validate()
+		self.get_commision()
 		self.validate_delivery_date()
 		self.validate_proj_cust()
 		self.validate_po()
@@ -49,6 +160,7 @@ class SalesOrder(SellingController):
 		self.validate_warehouse()
 		self.validate_drop_ship()
 		self.validate_serial_no_based_delivery()
+		
 		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_order_reference)
 
 		if self.coupon_code:
@@ -63,6 +175,8 @@ class SalesOrder(SellingController):
 
 		if not self.billing_status: self.billing_status = 'Not Billed'
 		if not self.delivery_status: self.delivery_status = 'Not Delivered'
+
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def validate_po(self):
 		# validate p.o date v/s delivery date
@@ -109,7 +223,7 @@ class SalesOrder(SellingController):
 		if self.order_type == 'Sales' and not self.skip_delivery_note:
 			delivery_date_list = [d.delivery_date for d in self.get("items") if d.delivery_date]
 			max_delivery_date = max(delivery_date_list) if delivery_date_list else None
-			if not self.delivery_date:
+			if (max_delivery_date and not self.delivery_date) or (max_delivery_date and getdate(self.delivery_date) != getdate(max_delivery_date)):
 				self.delivery_date = max_delivery_date
 			if self.delivery_date:
 				for d in self.get("items"):
@@ -118,8 +232,6 @@ class SalesOrder(SellingController):
 					if getdate(self.transaction_date) > getdate(d.delivery_date):
 						frappe.msgprint(_("Expected Delivery Date should be after Sales Order Date"),
 							indicator='orange', title=_('Warning'))
-				if getdate(self.delivery_date) != getdate(max_delivery_date):
-					self.delivery_date = max_delivery_date
 			else:
 				frappe.throw(_("Please enter Delivery Date"))
 
@@ -216,6 +328,31 @@ class SalesOrder(SellingController):
 			project = frappe.get_doc("Project", self.project)
 			project.update_sales_amount()
 			project.db_update()
+
+	@frappe.whitelist()
+	def calculate_taxes(self):
+		if self.customer:
+			cus = frappe.get_doc("Customer",self.customer)
+			if not cus.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						if i.item_code:
+							doc=frappe.get_doc("Item",i.item_code)
+							for j in doc.taxes:
+								if self.tax_category==j.tax_category:
+									if j.item_tax_template:
+										i.item_tax_template=j.item_tax_template
+			if cus.tax_category:
+				if self.tax_category:
+					for i in self.items:
+						if i.item_code:
+							doc=frappe.get_doc("Item",i.item_code)
+							for j in doc.taxes:
+								if cus.tax_category==j.tax_category:
+									if j.item_tax_template:
+										i.item_tax_template=j.item_tax_template
+				self.tax_category=cus.tax_category
+			return self.tax_category
 
 	def check_credit_limit(self):
 		# if bypass credit limit check is set to true (1) at sales order level,
@@ -384,14 +521,17 @@ class SalesOrder(SellingController):
 		tot=[]
 		if self.sales_partner:
 			doc=frappe.get_doc("Sales Partner",self.sales_partner)
-			if self.commission_based_on_target_lines==1: 
+			if self.commission_based_on_target_lines==1:
 				for i in self.items:
 					for j in doc.item_target_details:
 						if i.item_code==j.item_code:
-							if j.commision_formula:
-								data=eval(j.commision_formula)
-								tot.append(data)
-								self.total_commission=sum(tot)			
+							if self.customer_name==j.customer_name:
+								if j.commision_formula:
+									data=eval(j.commision_formula)
+									tot.append(data)
+				self.total_commission=sum(tot)
+				# frappe.set_value("Sales Order",self.name, "total_commission",sum(tot))
+
 
 	@frappe.whitelist()
 	def get_work_order_items(self, for_raw_material_request=0):
@@ -625,6 +765,13 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 	}
 
 	if not skip_item_mapping:
+		def condition(doc):
+			# make_mapped_doc sets js `args` into `frappe.flags.args`
+			if frappe.flags.args and frappe.flags.args.delivery_dates:
+				if cstr(doc.delivery_date) not in frappe.flags.args.delivery_dates:
+					return False
+			return abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
+
 		mapper["Sales Order Item"] = {
 			"doctype": "Delivery Note Item",
 			"field_map": {
@@ -633,7 +780,7 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 				"parent": "against_sales_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
+			"condition": condition
 		}
 
 	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
@@ -930,6 +1077,9 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target.stock_qty = (flt(source.stock_qty) - flt(source.ordered_qty))
 		target.project = source_parent.project
 
+	def update_item_for_packed_item(source, target, source_parent):
+		target.qty = flt(source.qty) - flt(source.ordered_qty)
+
 	# po = frappe.get_list("Purchase Order", filters={"sales_order":source_name, "supplier":supplier, "docstatus": ("<", "2")})
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -973,6 +1123,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		"Packed Item": {
 			"doctype": "Purchase Order Item",
 			"field_map":  [
+				["name", "sales_order_packed_item"],
 				["parent", "sales_order"],
 				["uom", "uom"],
 				["conversion_factor", "conversion_factor"],
@@ -987,6 +1138,8 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 				"supplier",
 				"pricing_rules"
 			],
+			"postprocess": update_item_for_packed_item,
+			"condition": lambda doc: doc.parent_item in items_to_map
 		}
 	}, target_doc, set_missing_values)
 
@@ -1039,6 +1192,7 @@ def make_work_orders(items, sales_order, company, project=None):
 			description=i['description']
 		)).insert()
 		work_order.set_work_order_operations()
+		work_order.flags.ignore_mandatory = True
 		work_order.save()
 		out.append(work_order)
 

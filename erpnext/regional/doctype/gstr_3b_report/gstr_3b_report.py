@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import json
 import os
+from warnings import filters
 
 import frappe
 from frappe import _
@@ -298,6 +297,10 @@ class GSTR3BReport(Document):
 		inter_state_supply_details = {}
 
 		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
+			gst_category = self.invoice_detail_map.get(inv, {}).get('gst_category')
+			place_of_supply = self.invoice_detail_map.get(inv, {}).get('place_of_supply') or '00-Other Territory'
+			export_type = self.invoice_detail_map.get(inv, {}).get('export_type')
+
 			for rate, items in items_based_on_rate.items():
 				for item_code, taxable_value in self.invoice_items.get(inv).items():
 					if item_code in items:
@@ -305,9 +308,8 @@ class GSTR3BReport(Document):
 							self.report_dict['sup_details']['osup_nil_exmp']['txval'] += taxable_value
 						elif item_code in self.is_non_gst:
 							self.report_dict['sup_details']['osup_nongst']['txval'] += taxable_value
-						elif rate == 0:
+						elif rate == 0 or (gst_category == 'Overseas' and export_type == 'Without Payment of Tax'):
 							self.report_dict['sup_details']['osup_zero']['txval'] += taxable_value
-							#self.report_dict['sup_details']['osup_zero'][key] += tax_amount
 						else:
 							if inv in self.cgst_sgst_invoices:
 								tax_rate = rate/2
@@ -317,9 +319,6 @@ class GSTR3BReport(Document):
 							else:
 								self.report_dict['sup_details']['osup_det']['iamt'] += (taxable_value * rate /100)
 								self.report_dict['sup_details']['osup_det']['txval'] += taxable_value
-
-								gst_category = self.invoice_detail_map.get(inv, {}).get('gst_category')
-								place_of_supply = self.invoice_detail_map.get(inv, {}).get('place_of_supply') or '00-Other Territory'
 
 								if gst_category in ['Unregistered', 'Registered Composition', 'UIN Holders'] and \
 								self.gst_details.get("gst_state") != place_of_supply.split("-")[1]:
@@ -362,11 +361,23 @@ class GSTR3BReport(Document):
 				self.report_dict["inter_sup"]["uin_details"].append(value)
 
 	def get_company_gst_details(self):
-		gst_details =  frappe.get_all("Address",
+		
+		# changes for address group 
+		if self.address_group:
+			add11 = frappe.get_last_doc("Address Group Item", filters = {"parent": self.address_group})
+			new_address = add11.address
+			gst_details = frappe.get_all("Address",
+			fields=["gstin", "gst_state", "gst_state_number"],
+			filters={
+				"name":new_address
+			})
+
+		else:
+			gst_details =  frappe.get_all("Address",
 			fields=["gstin", "gst_state", "gst_state_number"],
 			filters={
 				"name":self.company_address
-			})
+			})	
 
 		if gst_details:
 			return gst_details[0]

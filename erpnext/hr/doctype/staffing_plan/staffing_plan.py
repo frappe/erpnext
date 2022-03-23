@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from frappe import _
@@ -155,7 +153,11 @@ def get_designation_counts(designation, company):
 	return employee_counts
 
 @frappe.whitelist()
-def get_active_staffing_plan_details(company, designation, from_date=getdate(nowdate()), to_date=getdate(nowdate())):
+def get_active_staffing_plan_details(company, designation, from_date=None, to_date=None):
+	if from_date is None:
+		from_date = getdate(nowdate())
+	if to_date is None:
+		to_date = getdate(nowdate())
 	if not company or not designation:
 		frappe.throw(_("Please select Company and Designation"))
 

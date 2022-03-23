@@ -61,6 +61,24 @@ frappe.ui.form.on("Sales Order", {
 			});
 		}
 	},
+
+// New Code To Fetch Unpaid From Customer
+	update_party_balance: function(frm){
+		frappe.call({
+			method: 'on_update_party_balance',
+			doc: frm.doc,
+			callback: function(r) {
+				// frm.reload_doc();
+				if (r.message){
+					// console.log(" this is call from Commited", r.message[0].outstanding)
+
+					frm.set_value("_party_balance", r.message[0].outstanding)
+					frm.refresh_field("_party_balance")
+				}
+			}
+		})
+	},
+
 	onload: function(frm,cdt,cdn) {
 		if (!frm.doc.transaction_date){
 			frm.set_value('transaction_date', frappe.datetime.get_today())
@@ -92,18 +110,20 @@ frappe.ui.form.on("Sales Order", {
 				}
 			}
 		})
+		frm.ignore_doctypes_on_cancel_all = ['Purchase Order'];
 	},
-	before_save:function(frm){
-		frm.call({
-			method:"get_commision",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-				frm.refresh_field("total_commission")
-			}
-		});
-	 },
+	// before_save:function(frm){
+	// 	frm.call({
+	// 		method:"get_commision",
+	// 		doc:frm.doc,
+	// 		callback: function(r)
+	// 		{
+
+	// 			frm.refresh_field("total_commission")
+	// 		}
+	// 	});
+	// },
+	
 
 	delivery_date: function(frm) {
 		$.each(frm.doc.items || [], function(i, d) {
@@ -111,8 +131,118 @@ frappe.ui.form.on("Sales Order", {
 		});
 		refresh_field("items");
 	},
-	customer: function(frm,cdt,cdn) {
+	tax_category:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.refresh_field("items")
+			}
+		});
+	},
+	shipping_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                frm.refresh_field("tax_category")
+			}
+		});
+	},
+	supplier_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	customer_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	company_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	branch:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	location:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
 	
+	cost_center:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	customer: function(frm,cdt,cdn) {
+
 		frm.call({
 			method:"erpnext.selling.doctype.sales_order.sales_order.get_list",
 			args: {
@@ -155,7 +285,7 @@ function set_filter(frm){
                      }
                         frm.refresh_field("items")
                         console.log("refresh...")
-                        
+
                 }
         });
         }
@@ -391,7 +521,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						title: __('Select Items to Manufacture'),
 						fields: fields,
 						primary_action: function() {
-							var data = d.get_values();
+							var data = {items: d.fields_dict.items.grid.get_selected_children()};
 							me.frm.call({
 								method: 'make_work_orders',
 								args: {
@@ -529,12 +659,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	make_delivery_note_based_on_delivery_date: function() {
 		var me = this;
 
-		var delivery_dates = [];
-		$.each(this.frm.doc.items || [], function(i, d) {
-			if(!delivery_dates.includes(d.delivery_date)) {
-				delivery_dates.push(d.delivery_date);
-			}
-		});
+		var delivery_dates = this.frm.doc.items.map(i => i.delivery_date);
+		delivery_dates = [ ...new Set(delivery_dates) ];
 
 		var item_grid = this.frm.fields_dict["items"].grid;
 		if(!item_grid.get_selected().length && delivery_dates.length > 1) {
@@ -572,14 +698,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 				if(!dates) return;
 
-				$.each(dates, function(i, d) {
-					$.each(item_grid.grid_rows || [], function(j, row) {
-						if(row.doc.delivery_date == d) {
-							row.doc.__checked = 1;
-						}
-					});
-				})
-				me.make_delivery_note();
+				me.make_delivery_note(dates);
 				dialog.hide();
 			});
 			dialog.show();
@@ -588,10 +707,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		}
 	},
 
-	make_delivery_note: function() {
+	make_delivery_note: function(delivery_dates) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
-			frm: this.frm
+			frm: this.frm,
+			args: {
+				delivery_dates
+			}
 		})
 	},
 
@@ -642,6 +764,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		var me = this;
 		var dialog = new frappe.ui.Dialog({
 			title: __("Select Items"),
+			size: "large",
 			fields: [
 				{
 					"fieldtype": "Check",
@@ -743,7 +866,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			} else {
 				let po_items = [];
 				me.frm.doc.items.forEach(d => {
-					let pending_qty = (flt(d.stock_qty) - flt(d.ordered_qty)) / flt(d.conversion_factor);
+					let ordered_qty = me.get_ordered_qty(d, me.frm.doc);
+					let pending_qty = (flt(d.stock_qty) - ordered_qty) / flt(d.conversion_factor);
 					if (pending_qty > 0) {
 						po_items.push({
 							"doctype": "Sales Order Item",
@@ -767,6 +891,24 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		dialog.get_field("items_for_po").refresh();
 		dialog.wrapper.find('.grid-heading-row .grid-row-check').click();
 		dialog.show();
+	},
+
+	get_ordered_qty: function(item, so) {
+		let ordered_qty = item.ordered_qty;
+		if (so.packed_items) {
+			// calculate ordered qty based on packed items in case of product bundle
+			let packed_items = so.packed_items.filter(
+				(pi) => pi.parent_detail_docname == item.name
+			);
+			if (packed_items) {
+				ordered_qty = packed_items.reduce(
+					(sum, pi) => sum + flt(pi.ordered_qty),
+					0
+				);
+				ordered_qty = ordered_qty / packed_items.length;
+			}
+		}
+		return ordered_qty;
 	},
 
 	hold_sales_order: function(){

@@ -14,8 +14,8 @@
   "section_break_6",
   "allocated_amount",
   "unreconciled_amount",
-  "amount",
   "column_break_8",
+  "amount",
   "is_advance",
   "section_break_5",
   "difference_amount",
@@ -127,12 +127,13 @@
    "fieldname": "reference_row",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Reference Row"
+   "label": "Reference Row",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-09-20 17:23:09.455803",
+ "modified": "2021-10-06 11:48:59.616562",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Allocation",

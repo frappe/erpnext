@@ -134,11 +134,11 @@ frappe.ui.form.on('Material Request', {
 	},
 
 	refresh: function(frm) {
+		frm.events.make_custom_buttons(frm);
 		var d = frm.doc.work_order_detail
 		if(d.length > 0){
 			frm.set_df_property("items",'read_only',1)
 		}
-		frm.events.make_custom_buttons(frm);
 		frm.toggle_reqd('customer', frm.doc.material_request_type=="Customer Provided");
 
 		if (frm.doc.docstatus===0 && frm.doc.manufacturing_staging === 1) {
@@ -162,6 +162,7 @@ frappe.ui.form.on('Material Request', {
 		}
 
 	},
+
 	set_from_warehouse: function(frm) {
 		if (frm.doc.material_request_type == "Material Transfer"
 			&& frm.doc.set_from_warehouse) {

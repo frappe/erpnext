@@ -1,12 +1,11 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
-import unittest
 from datetime import datetime
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 from erpnext.buying.report.procurement_tracker.procurement_tracker import execute
@@ -15,7 +14,7 @@ from erpnext.stock.doctype.material_request.test_material_request import make_ma
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 
-class TestProcurementTracker(unittest.TestCase):
+class TestProcurementTracker(FrappeTestCase):
 	def test_result_for_procurement_tracker(self):
 		filters = {
 			'company': '_Test Procurement Company',
@@ -45,7 +44,6 @@ class TestProcurementTracker(unittest.TestCase):
 		pr = make_purchase_receipt(po.name)
 		pr.get("items")[0].cost_center = "Main - _TPC"
 		pr.submit()
-		frappe.db.commit()
 		date_obj = datetime.date(datetime.now())
 
 		po.load_from_db()

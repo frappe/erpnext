@@ -766,6 +766,24 @@
   },
   {
    "hidden": 0,
+   "is_query_report": 1,
+   "label": "Stock Balance Alternate UOM",
+   "link_to": "Stock Balance Alternate UOM",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Stock Ledger Alternate UOM",
+   "link_to": "Stock Ledger Alternate UOM",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
    "is_query_report": 0,
    "label": "Incorrect Data Report",
    "link_type": "DocType",
@@ -800,7 +818,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-13 12:21:03.525637",
+ "modified": "2022-02-22 14:36:13.651256",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",

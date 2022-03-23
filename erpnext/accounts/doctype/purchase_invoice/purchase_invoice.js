@@ -172,7 +172,6 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			'callback': (r) => me.frm.reload_doc()
 		});
 	},
-
 	block_invoice: function() {
 		this.make_comment_dialog_and_block_invoice();
 	},
@@ -534,12 +533,130 @@ frappe.ui.form.on("Purchase Invoice", {
 				}
 			}
 		}
+
+		frm.fields_dict['items'].grid.get_field('discount_account').get_query = function(doc) {
+			return {
+				filters: {
+					'report_type': 'Profit and Loss',
+					'company': doc.company,
+					"is_group": 0
+				}
+			}
+		}
 	},
 
 	refresh: function(frm) {
 		frm.events.add_custom_buttons(frm);
 	},
-
+	tax_category:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+                frm.refresh_field("items")
+			}
+		});
+	},
+	shipping_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                frm.refresh_field("tax_category")
+			}
+		});
+	},
+	supplier_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	customer_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	billing_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	branch:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	location:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	cost_center:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+				
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
 	add_custom_buttons: function(frm) {
 		if (frm.doc.per_received < 100) {
 			frm.add_custom_button(__('Purchase Receipt'), () => {
@@ -595,5 +712,23 @@ frappe.ui.form.on("Purchase Invoice", {
 
 	company: function(frm) {
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+
+		if (frm.doc.company) {
+			frappe.call({
+				method:
+					"erpnext.accounts.party.get_party_account",
+				args: {
+					party_type: 'Supplier',
+					party: frm.doc.supplier,
+					company: frm.doc.company
+				},
+				callback: (response) => {
+					if (response) frm.set_value("credit_to", response.message);
+				},
+			});
+			frappe.db.get_value('Company', frm.doc.company, 'default_payable_account', (r) => {
+				frm.set_value('credit_to', r.default_payable_account);
+			});
+		}
 	},
 })

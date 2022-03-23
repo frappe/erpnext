@@ -5,12 +5,18 @@ on:
     paths-ignore:
       - '**.js'
       - '**.md'
+    types: [opened, unlabeled, synchronize, reopened]
   workflow_dispatch:
 
+
+concurrency:
+  group: patch-mariadb-v13-${{ github.event.number }}
+  cancel-in-progress: true
 
 jobs:
   test:
     runs-on: ubuntu-18.04
+    timeout-minutes: 60
 
     name: Patch Test
 
@@ -24,13 +30,18 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
 
     steps:
+      - name: Check for merge conficts label
+        if: ${{ contains(github.event.pull_request.labels.*.name, 'conflicts') }}
+        run: |
+          echo "Remove merge conflicts and remove conflict label to run CI"
+          exit 1
       - name: Clone
         uses: actions/checkout@v2
 
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.6
+          python-version: 3.7
 
       - name: Setup Node
         uses: actions/setup-node@v2

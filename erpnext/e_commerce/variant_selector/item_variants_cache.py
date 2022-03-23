@@ -44,7 +44,7 @@ class ItemVariantsCacheManager:
 		val = frappe.cache().get_value('ordered_attribute_values_map')
 		if val: return val
 
-		all_attribute_values = frappe.db.get_all('Item Attribute Value',
+		all_attribute_values = frappe.get_all('Item Attribute Value',
 			['attribute_value', 'idx', 'parent'], order_by='idx asc')
 
 		ordered_attribute_values_map = frappe._dict({})
@@ -57,25 +57,32 @@ class ItemVariantsCacheManager:
 	def build_cache(self):
 		parent_item_code = self.item_code
 
-		attributes = [a.attribute for a in frappe.db.get_all('Item Variant Attribute',
-			{'parent': parent_item_code}, ['attribute'], order_by='idx asc')
+		attributes = [
+			a.attribute for a in frappe.get_all(
+				'Item Variant Attribute',
+				{'parent': parent_item_code},
+				['attribute'],
+				order_by='idx asc'
+			)
 		]
 
-		item_variants_data = frappe.db.get_all('Item Variant Attribute',
-			{'variant_of': parent_item_code}, ['parent', 'attribute', 'attribute_value'],
-			order_by='name',
-			as_list=1
+		# Get Variants and tehir Attributes that are not disabled
+		iva = frappe.qb.DocType("Item Variant Attribute")
+		item = frappe.qb.DocType("Item")
+		query = (
+			frappe.qb.from_(iva)
+			.join(item).on(item.name == iva.parent)
+			.select(
+				iva.parent, iva.attribute, iva.attribute_value
+			).where(
+				(iva.variant_of == parent_item_code)
+				& (item.disabled == 0)
+			).orderby(iva.name)
 		)
+		item_variants_data = query.run()
 
-		unpublished_items = set([i.item_code for i in frappe.db.get_all('Website Item', filters={'published': 0}, fields=["item_code"])])
-
-		attribute_value_item_map = frappe._dict({})
-		item_attribute_value_map = frappe._dict({})
-
-		# dont consider variants that are unpublished
-		# (either have no Website Item or are unpublished in Website Item)
-		item_variants_data = [r for r in item_variants_data if r[0] not in unpublished_items]
-		item_variants_data = [r for r in item_variants_data if frappe.db.exists("Website Item", {"item_code": r[0]})]
+		attribute_value_item_map = frappe._dict()
+		item_attribute_value_map = frappe._dict()
 
 		for row in item_variants_data:
 			item_code, attribute, attribute_value = row
@@ -115,4 +122,7 @@ def build_cache(item_code):
 def enqueue_build_cache(item_code):
 	if frappe.cache().hget('item_cache_build_in_progress', item_code):
 		return
-	frappe.enqueue(build_cache, item_code=item_code, queue='long')
+	frappe.enqueue(
+		"erpnext.e_commerce.variant_selector.item_variants_cache.build_cache",
+		item_code=item_code, queue='long'
+	)

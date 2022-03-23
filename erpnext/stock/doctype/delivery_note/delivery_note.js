@@ -83,18 +83,126 @@ frappe.ui.form.on("Delivery Note", {
 		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
 	},
 
-	before_save:function(frm){
+	// before_save:function(frm){
+	// 	frm.call({
+	// 		method:"get_commision",
+	// 		doc:frm.doc,
+	// 		callback: function(r)
+	// 		{
+
+	// 			frm.refresh_field("total_commission")
+	// 		}
+	// 	});
+	// },
+	tax_category:function(frm){
 		frm.call({
-			method:"get_commision",
+			method:"calculate_taxes",
 			doc:frm.doc,
 			callback: function(r)
 			{
-				
-				frm.refresh_field("total_commission")
+
+                frm.refresh_field("items")
 			}
 		});
 	},
+	shipping_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
 
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                frm.refresh_field("tax_category")
+			}
+		});
+	},
+	supplier_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	customer_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	company_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	branch:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	location:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
+	cost_center:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
+
+				frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
 	print_without_amount: function(frm) {
 		erpnext.stock.delivery_note.set_print_hide(frm.doc);
 	},
@@ -127,7 +235,7 @@ frappe.ui.form.on("Delivery Note", {
 
 
 	},
-	
+
 });
 
 frappe.ui.form.on("Delivery Note Item", {

@@ -1,13 +1,13 @@
 # Copyright (c) 2017, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 
 
 def execute():
     frappe.reload_doc("setup", "doctype", "target_detail")
+    frappe.reload_doc("core", "doctype", "prepared_report")
 
     for d in ['Sales Person', 'Sales Partner', 'Territory']:
         frappe.db.sql("""

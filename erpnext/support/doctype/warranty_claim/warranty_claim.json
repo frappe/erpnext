@@ -258,6 +258,7 @@
    "fieldname": "contact_email",
    "fieldtype": "Data",
    "label": "Contact Email",
+   "options": "Email",
    "read_only": 1
   },
   {
@@ -364,7 +365,7 @@
  "icon": "fa fa-bug",
  "idx": 1,
  "links": [],
- "modified": "2021-07-17 12:36:15.296696",
+ "modified": "2021-11-09 17:26:09.703215",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Warranty Claim",

@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import copy
 import json
@@ -11,8 +9,7 @@ from collections import defaultdict
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, floor, flt, nowdate
-from six import string_types
+from frappe.utils import cint, cstr, floor, flt, nowdate
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.utils import get_stock_balance
@@ -77,7 +74,7 @@ def apply_putaway_rule(doctype, items, company, sync=None, purpose=None):
 		purpose: Purpose of Stock Entry
 		sync (optional): Sync with client side only for client side calls
 	"""
-	if isinstance(items, string_types):
+	if isinstance(items, str):
 		items = json.loads(items)
 
 	items_not_accomodated, updated_table = [], []
@@ -145,10 +142,43 @@ def apply_putaway_rule(doctype, items, company, sync=None, purpose=None):
 	if items_not_accomodated:
 		show_unassigned_items_message(items_not_accomodated)
 
-	items[:] = updated_table if updated_table else items # modify items table
+	if updated_table and _items_changed(items, updated_table, doctype):
+		items[:] = updated_table
+		frappe.msgprint(_("Applied putaway rules."), alert=True)
 
 	if sync and json.loads(sync): # sync with client side
 		return items
+
+def _items_changed(old, new, doctype: str) -> bool:
+	""" Check if any items changed by application of putaway rules.
+
+		If not, changing item table can have side effects since `name` items also changes.
+	"""
+	if len(old) != len(new):
+		return True
+
+	old = [frappe._dict(item) if isinstance(item, dict) else item for item in old]
+
+	if doctype == "Stock Entry":
+		compare_keys = ("item_code", "t_warehouse", "transfer_qty", "serial_no")
+		sort_key = lambda item: (item.item_code, cstr(item.t_warehouse),  # noqa
+				flt(item.transfer_qty), cstr(item.serial_no))
+	else:
+		# purchase receipt / invoice
+		compare_keys = ("item_code", "warehouse", "stock_qty", "received_qty", "serial_no")
+		sort_key = lambda item: (item.item_code, cstr(item.warehouse),  # noqa
+				flt(item.stock_qty), flt(item.received_qty), cstr(item.serial_no))
+
+	old_sorted = sorted(old, key=sort_key)
+	new_sorted = sorted(new, key=sort_key)
+
+	# Once sorted by all relevant keys both tables should align if they are same.
+	for old_item, new_item in zip(old_sorted, new_sorted):
+		for key in compare_keys:
+			if old_item.get(key) != new_item.get(key):
+				return True
+	return False
+
 
 def get_ordered_putaway_rules(item_code, company, source_warehouse=None):
 	"""Returns an ordered list of putaway rules to apply on an item."""

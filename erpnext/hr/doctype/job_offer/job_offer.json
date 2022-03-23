@@ -13,7 +13,6 @@
   "column_break_3",
   "status",
   "offer_date",
-  "offer_date_nepal",
   "designation",
   "company",
   "section_break_4",
@@ -157,11 +156,6 @@
    "options": "Job Offer",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "offer_date_nepal",
-   "fieldtype": "Read Only",
-   "label": "Offer Date (Nepal)"
   }
  ],
  "is_submittable": 1,

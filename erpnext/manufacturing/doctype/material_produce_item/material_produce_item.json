@@ -10,6 +10,7 @@
   "item_group",
   "s_warehouse",
   "uom",
+  "mrp",
   "column_break_6",
   "scheduled_qty",
   "qty_produced",
@@ -134,12 +135,18 @@
    "fieldtype": "Currency",
    "label": "Work Order Total Cost",
    "read_only": 1
+  },
+  {
+   "fieldname": "mrp",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "MRP"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-07-01 21:32:50.074601",
+ "modified": "2022-03-22 12:22:38.791046",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Produce Item",

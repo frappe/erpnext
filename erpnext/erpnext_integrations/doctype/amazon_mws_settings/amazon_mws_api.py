@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # Basic interface to Amazon MWS
 # Based on http://code.google.com/p/amazon-mws-python
 # Extended to include finances object
-from __future__ import unicode_literals
 
 import base64
 import hashlib

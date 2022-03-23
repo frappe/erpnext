@@ -393,6 +393,7 @@ frappe.listview_settings['Delivery Planning Item'] = {
 						},
 						depends_on: "eval: doc.supplier_dc == 0",
 						mandatory_depends_on : "eval: doc.supplier_dc == 0",
+						default: doc.transporter
 					},
 					{
 						label: 'Transporter Name',
@@ -401,13 +402,14 @@ frappe.listview_settings['Delivery Planning Item'] = {
 						depends_on: "eval: doc.supplier_dc == 0 ",
 						mandatory_depends_on : "eval: doc.supplier_dc == 0",
 						read_only: 1,
-						default: "Please select Transporter"
+						default: doc.transporter_name
 					},
 					{
 						label: 'Deliver Date',
 						fieldname: 'delivery_date',
 						fieldtype: 'Date',
-						reqd: 1
+						reqd: 1,
+						default : doc.delivery_date	
 					},
 					{
 						label: 'Current Qty To Deliver',
@@ -437,6 +439,23 @@ frappe.listview_settings['Delivery Planning Item'] = {
 						options: "Warehouse",
 						default: doc.sorce_warehouse,
 	
+					},
+					{
+						label: 'Batch',
+						fieldname: 'batch_no',
+						fieldtype: 'Link',
+						options: "Batch",
+						"get_query": function () {
+							let filters = {
+								'item_code': doc.item_code,
+								'posting_date': doc.planned_date || frappe.datetime.nowdate(),
+								'warehouse': doc.sorce_warehouse
+							}
+							return {
+								query : "erpnext.controllers.queries.get_batch_no",
+								filters: filters
+							}
+						}
 					},
 					{
 						label: 'Supplier delivers to Customer ',
@@ -519,7 +538,8 @@ frappe.listview_settings['Delivery Planning Item'] = {
 								"n_src_warehouse" : new_warehouse,
 								"n_supplier_dc" : values.supplier_dc,
 								"n_supplier" : new_supplier,
-								"n_date" : values.delivery_date
+								"n_date" : values.delivery_date,
+								"batch_no" : values.batch_no
 						},
 	
 						callback: function(r){

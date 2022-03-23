@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import unittest
 
@@ -634,6 +632,45 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(flt(expected_account_balance), account_balance)
 		self.assertEqual(flt(expected_party_balance), party_balance)
 		self.assertEqual(flt(expected_party_account_balance), party_account_balance)
+
+	def test_multi_currency_payment_entry_with_taxes(self):
+		payment_entry = create_payment_entry(party='_Test Supplier USD', paid_to = '_Test Payable USD - _TC',
+			save=True)
+		payment_entry.append('taxes', {
+			'account_head': '_Test Account Service Tax - _TC',
+			'charge_type': 'Actual',
+			'tax_amount': 10,
+			'add_deduct_tax': 'Add',
+			'description': 'Test'
+		})
+
+		payment_entry.save()
+		self.assertEqual(payment_entry.base_total_taxes_and_charges, 10)
+		self.assertEqual(flt(payment_entry.total_taxes_and_charges, 2), flt(10 / payment_entry.target_exchange_rate, 2))
+
+def create_payment_entry(**args):
+	payment_entry = frappe.new_doc('Payment Entry')
+	payment_entry.company = args.get('company') or '_Test Company'
+	payment_entry.payment_type = args.get('payment_type') or 'Pay'
+	payment_entry.party_type = args.get('party_type') or 'Supplier'
+	payment_entry.party = args.get('party') or '_Test Supplier'
+	payment_entry.paid_from = args.get('paid_from') or '_Test Bank - _TC'
+	payment_entry.paid_to = args.get('paid_to') or 'Creditors - _TC'
+	payment_entry.paid_amount = args.get('paid_amount') or 1000
+
+	payment_entry.setup_party_account_field()
+	payment_entry.set_missing_values()
+	payment_entry.set_exchange_rate()
+	payment_entry.received_amount = payment_entry.paid_amount / payment_entry.target_exchange_rate
+	payment_entry.reference_no = 'Test001'
+	payment_entry.reference_date = nowdate()
+
+	if args.get('save'):
+		payment_entry.save()
+		if args.get('submit'):
+			payment_entry.submit()
+
+	return payment_entry
 
 def create_payment_terms_template():
 
