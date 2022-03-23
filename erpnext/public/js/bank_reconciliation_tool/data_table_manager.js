@@ -140,7 +140,7 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 			"max-height",
 			"calc(100vh - 400px)"
 		);
-
+		debugger;
 		if (this.transactions.length > 0) {
 			this.$reconciliation_tool_dt.show();
 			this.$no_bank_transactions.hide();
@@ -183,7 +183,7 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 			this.$no_bank_transactions.show();
 		}
 
-		// this.make_dt();
+		this.make_dt();
 		this.get_cleared_balance().then(() => {
 			this.cards_manager.$cards[1].set_value(
 				format_currency(this.cleared_balance),
