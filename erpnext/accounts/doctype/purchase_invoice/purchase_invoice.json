@@ -1424,7 +1424,7 @@
    "fieldname": "serial_items",
    "fieldtype": "Table",
    "label": "Serial Items",
-   "options": "Serial Number Item",
+   "options": "Serial No Item",
    "read_only": 1
   },
   {
@@ -1438,7 +1438,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-28 11:19:23.513208",
+ "modified": "2022-03-23 17:49:58.801166",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

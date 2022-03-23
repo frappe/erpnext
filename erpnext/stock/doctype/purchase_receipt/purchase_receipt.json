@@ -1166,7 +1166,7 @@
    "fieldname": "serial_items",
    "fieldtype": "Table",
    "label": "Serial Items",
-   "options": "Serial Number Item",
+   "options": "Serial No Item",
    "read_only": 1
   },
   {
@@ -1180,7 +1180,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-10 11:40:52.690984",
+ "modified": "2022-03-23 17:50:02.271946",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

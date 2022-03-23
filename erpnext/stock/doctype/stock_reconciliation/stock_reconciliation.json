@@ -153,14 +153,14 @@
    "fieldname": "current_serials",
    "fieldtype": "Table",
    "label": "Current Serials",
-   "options": "Serial Number Item",
+   "options": "Serial No Item",
    "read_only": 1
   },
   {
    "fieldname": "new_serials",
    "fieldtype": "Table",
    "label": "New Serials ",
-   "options": "Serial Number Item",
+   "options": "Serial No Item",
    "read_only": 1
   }
  ],
@@ -168,7 +168,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-14 11:12:24.875802",
+ "modified": "2022-03-23 17:50:00.268933",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation",

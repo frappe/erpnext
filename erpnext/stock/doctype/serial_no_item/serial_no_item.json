@@ -8,7 +8,6 @@
  "field_order": [
   "item_name",
   "serial_no",
-  "item_reference",
   "type"
  ],
  "fields": [
@@ -27,12 +26,6 @@
    "options": "Serial No"
   },
   {
-   "fieldname": "item_reference",
-   "fieldtype": "Data",
-   "label": "Item Reference",
-   "read_only": 1
-  },
-  {
    "fieldname": "type",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -42,10 +35,10 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-02-16 14:39:09.711465",
+ "modified": "2022-03-23 17:51:00.097584",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "Serial Number Item",
+ "name": "Serial No Item",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

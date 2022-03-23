@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class SerialNumberItem(Document):
+class SerialNoItem(Document):
 	pass

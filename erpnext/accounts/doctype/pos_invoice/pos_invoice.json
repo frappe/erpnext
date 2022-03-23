@@ -1581,14 +1581,14 @@
    "fieldname": "serial_items",
    "fieldtype": "Table",
    "label": "Serial Items",
-   "options": "Serial Number Item",
+   "options": "Serial No Item",
    "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-08 20:50:19.139642",
+ "modified": "2022-03-23 17:49:57.257808",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
