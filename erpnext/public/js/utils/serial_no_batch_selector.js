@@ -609,3 +609,5 @@ function check_can_calculate_pending_qty(me) {
 	const itemChecks = !!item  && !item.allow_alternative_item;
 	return docChecks && itemChecks;
 }
+
+//# sourceURL=serial_no_batch_selector.js
