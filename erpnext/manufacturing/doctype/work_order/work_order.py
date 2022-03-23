@@ -1146,6 +1146,10 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 		doc.insert()
 		frappe.msgprint(_("Job card {0} created").format(get_link_to_form("Job Card", doc.name)), alert=True)
 
+	if enable_capacity_planning:
+		# automatically added scheduling rows shouldn't change status to WIP
+		doc.db_set("status", "Open")
+
 	return doc
 
 def get_work_order_operation_data(work_order, operation, workstation):
