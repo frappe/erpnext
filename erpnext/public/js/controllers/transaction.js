@@ -810,6 +810,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							default_depreciation_percentage: me.frm.doc.default_depreciation_percentage,
 							warehouse: item.warehouse,
 							customer: me.frm.doc.customer || me.frm.doc.party_name,
+							bill_to: me.frm.doc.bill_to,
 							quotation_to: me.frm.doc.quotation_to,
 							supplier: me.frm.doc.supplier,
 							currency: me.frm.doc.currency,
@@ -1802,6 +1803,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		return {
 			"items": this._get_item_list(item),
 			"customer": me.frm.doc.customer || me.frm.doc.party_name,
+			"bill_to": me.frm.doc.bill_to,
 			"quotation_to": me.frm.doc.quotation_to,
 			"customer_group": me.frm.doc.customer_group,
 			"territory": me.frm.doc.territory,
@@ -1958,7 +1960,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		var me = this;
 		var args = this._get_args(item);
-		if (!args.items || !args.items.length || args.price_list) {
+		if (!args.items || !args.items.length || !args.price_list) {
 			return;
 		}
 

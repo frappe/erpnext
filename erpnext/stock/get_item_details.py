@@ -296,7 +296,8 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"weight_per_unit":item.weight_per_unit,
 		"weight_uom":item.weight_uom,
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0,
-		"transaction_date": args.get("transaction_date")
+		"transaction_date": args.get("transaction_date"),
+		"bill_only_to_customer": item.bill_only_to_customer,
 	})
 
 	out.update(get_item_defaults_details(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults,
@@ -784,7 +785,7 @@ def get_price_list_rate(args, item_doc, out):
 		if meta.get_field("currency"):
 			validate_conversion_rate(args, meta)
 
-		if args.doctype == "Sales Invoice" and should_bill_item_for_customer_as_zero(item_doc.name, args.bill_to or args.customer):
+		if meta.name == "Sales Invoice" and should_bill_item_for_customer_as_zero(item_doc.name, args.bill_to or args.customer):
 			price_list_rate = 0
 		else:
 			price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
