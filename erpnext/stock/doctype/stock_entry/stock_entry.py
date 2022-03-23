@@ -1900,6 +1900,7 @@ class StockEntry(StockController):
 			se_child.is_process_loss = item_row.get("is_process_loss", 0)
 
 			for field in [
+<<<<<<< HEAD
 				"idx",
 				"po_detail",
 				"original_item",
@@ -1909,6 +1910,11 @@ class StockEntry(StockController):
 				"serial_no",
 				"batch_no",
 				"allow_zero_valuation_rate",
+=======
+				"po_detail", "original_item", "expense_account",
+				"description", "item_name", "serial_no",
+				"batch_no", "allow_zero_valuation_rate"
+>>>>>>> a787ebb732 (fix: Dont set `idx` while adding WO items to Stock Entry)
 			]:
 				if item_row.get(field):
 					se_child.set(field, item_row.get(field))
