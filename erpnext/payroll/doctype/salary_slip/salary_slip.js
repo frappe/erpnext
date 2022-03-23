@@ -49,8 +49,12 @@ frappe.ui.form.on("Salary Slip", {
 	start_date: function(frm) {
 		if (frm.doc.start_date) {
 			frm.trigger("set_end_date");
+			// calculate_leave(frm)
+
+			// console.log("Start-date::::::", frm.doc.start_date)
+			// frm.trigger("salary_slip_value")
 		}
-		
+
 	},
 
 	end_date: function(frm) {
@@ -154,14 +158,14 @@ frappe.ui.form.on("Salary Slip", {
 		frm.set_currency_labels(fields, frm.doc.currency, "earnings");
 		frm.set_currency_labels(fields, frm.doc.currency, "deductions");
 	},
-
-	refresh: function(frm) {
+	refresh:function(frm) {
 		frm.trigger("toggle_fields");
 
 		var salary_detail_fields = ["formula", "abbr", "statistical_component", "variable_based_on_taxable_salary"];
 		frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields, false);
 		frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields, false);
 		frm.trigger("set_dynamic_labels");
+
 
 		// frm.add_custom_button(__('Calculate leave fields'), function () {
 			if(frm.doc.start_date && !frm.doc.check) {
@@ -219,6 +223,8 @@ frappe.ui.form.on("Salary Slip", {
 
 	employee:function(frm) {
 		frm.events.get_emp_and_working_day_details(frm);
+		// calculate_leave(frm)
+		// console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>> function called on employee event")
 	},
 
 	leave_without_pay: function(frm) {
@@ -301,6 +307,7 @@ frappe.ui.form.on('Salary Detail', {
 					doctype: "Salary Component",
 					name: child.salary_component
 				},
+
 				callback: function(data) {
 					if (data.message) {
 						var result = data.message;
@@ -334,3 +341,97 @@ frappe.ui.form.on('Salary Detail', {
 		}
 	}
 });
+
+// not calling but for reference 
+// function calculate_leave(frm){
+// 	if (frm.doc.start_date){
+// 		frappe.call({
+// 			method: 'days',
+// 			doc:frm.doc,
+// 			callback: function(r) {
+// 				if(r.message){
+// 					frm.set_value('present_days', r.message)
+// 					frm.refresh_field("present_days");
+// 				}	
+// 			}
+// 		});
+// 	}
+// 	if(frm.doc.start_date){
+// 		frappe.call({
+// 			method: 'leave_type_encasement_days',
+// 			doc:frm.doc,
+// 			callback: function(r) {
+// 				if(r.message) {
+// 					frm.set_value('encashment_days', r.message);
+// 				frm.refresh_field("encashment_days");
+// 				}
+// 			}
+// 		});
+// 	}
+// 	// call set_days method
+// 	if (frm.doc.start_date){
+// 		frappe.call({
+// 			method: 'set_days',
+// 			doc:frm.doc,
+// 			callback: function(r) {
+// 				if(r.message){
+// 					frm.set_value('days_in_month', r.message)
+// 					frm.refresh_field("days_in_month");
+// 				}
+// 			}
+// 		});
+// 	}
+// 	// call paid_holidays method    
+// 	if (frm.doc.start_date){
+// 		frappe.call({
+// 			method:'paid',
+// 			doc:frm.doc,
+// 			callback: function(r){
+// 				if(r.message){
+// 					frm.set_value('paid_holidays', r.message)
+// 					frm.refresh_field("paid_holidays");
+
+// 				}
+// 			}
+// 		});
+// 	}
+
+// 	// call comp_off method    
+// 	if (frm.doc.start_date){
+// 		frappe.call({
+// 			method: 'comp_off',
+// 			doc:frm.doc,
+// 			callback: function(r) {
+// 				if(r.message){
+// 					frm.set_value('compoff', r.message)
+// 					frm.refresh_field("compoff");
+// 				}
+// 			}
+// 		});
+// 	}
+// 	// call weekly off method    
+// 	if (frm.doc.start_date){
+// 		frappe.call({
+// 			method: 'week_off',
+// 			doc:frm.doc,
+// 			callback: function(r) {
+// 				if(r.message){
+// 					frm.set_value('weekly_off', r.message)
+// 					frm.refresh_field("weekly_off");		
+// 				}
+// 			}
+// 		});
+// 	}
+// 	if(frm.doc.start_date){
+// 		frappe.call({
+// 			method: 'get_total_leave_in_current_month',
+// 			doc:frm.doc,
+// 			callback: function(r) {
+// 				if(r.message){
+// 					frm.set_value('leave', r.message);
+// 					frm.refresh_field("leave");
+// 				}
+// 			}
+// 		});
+// 	}	
+// }

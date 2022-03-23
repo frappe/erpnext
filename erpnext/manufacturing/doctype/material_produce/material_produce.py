@@ -263,6 +263,7 @@ class MaterialProduce(Document):
                         se_item.item_name = itm_doc.item_name
                         se_item.description = itm_doc.description
                         se_item.uom = res.uom
+                        se_item.mrp = res.mrp
                         se_item.stock_uom = res.uom
                         se_item.batch_no = batch_no
                         se_item.expense_account = item_expense_account or expense_account

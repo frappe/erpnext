@@ -130,6 +130,7 @@ class StockEntry(StockController):
 
 		self.make_gl_entries()
 
+		
 		self.repost_future_sle_and_gle()
 		self.update_cost_in_project()
 		self.validate_reserved_serial_no_consumption()
@@ -151,6 +152,22 @@ class StockEntry(StockController):
 			
 		if self.purpose == 'Material Transfer' and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status('Completed')
+
+		
+		manufacture = frappe.get_doc('Manufacturing Settings')
+		if self.stock_entry_type == "Manufacture" and manufacture.batch_price_list:
+			for item in self.stock_entry_detail:
+				doc = frappe.new_doc({
+					'doctype': 'Item Price',
+					'item_code':'item.item_code',
+					'item_name':'item.item_name',
+					'rate':'item.mrp',
+					'uom':'item.uom',
+					'batch_no':'item.batch_no',
+					
+				})
+				doc.insert()
+
 
 
 	def on_cancel(self):
