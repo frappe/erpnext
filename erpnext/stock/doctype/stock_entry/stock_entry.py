@@ -1603,8 +1603,11 @@ class StockEntry(StockController):
 			se_child.is_scrap_item = item_row.get("is_scrap_item", 0)
 			se_child.is_process_loss = item_row.get("is_process_loss", 0)
 
-			for field in ["idx", "po_detail", "original_item", "expense_account",
-				"description", "item_name", "serial_no", "batch_no", "allow_zero_valuation_rate"]:
+			for field in [
+				"po_detail", "original_item", "expense_account",
+				"description", "item_name", "serial_no",
+				"batch_no", "allow_zero_valuation_rate"
+			]:
 				if item_row.get(field):
 					se_child.set(field, item_row.get(field))
 
