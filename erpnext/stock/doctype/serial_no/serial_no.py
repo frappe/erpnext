@@ -828,14 +828,9 @@ def get_delivered_serial_nos(serial_nos):
 
 	SerialNo = frappe.qb.DocType("Serial No")
 	serial_nos = get_serial_nos(serial_nos)
-	query = (
-		frappe.qb
-			.from_(SerialNo)
-			.select(SerialNo.name)
-			.where(
-				(SerialNo.name.isin(serial_nos))
-				& (Coalesce(SerialNo.delivery_document_type, "") != "")
-			)
+	query = frappe.qb.select(SerialNo.name).from_(SerialNo).where(
+		(SerialNo.name.isin(serial_nos))
+		& (Coalesce(SerialNo.delivery_document_type, "") != "")
 	)
 
 	result = query.run()

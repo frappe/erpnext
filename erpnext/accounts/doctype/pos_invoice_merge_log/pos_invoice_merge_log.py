@@ -371,13 +371,16 @@ def split_invoices(invoices):
 	pos_return_docs = [frappe.get_cached_doc("POS Invoice", d.pos_invoice) for d in invoices if d.is_return and d.return_against]
 	for pos_invoice in pos_return_docs:
 		for item in pos_invoice.items:
-			if not item.serial_no: continue
+			if not item.serial_no:
+				continue
 
 			return_against_is_added = any(d for d in _invoices if d.pos_invoice == pos_invoice.return_against)
-			if return_against_is_added: break
+			if return_against_is_added:
+				break
 
 			return_against_is_consolidated = frappe.db.get_value('POS Invoice', pos_invoice.return_against, 'status', cache=True) == 'Consolidated'
-			if return_against_is_consolidated: break
+			if return_against_is_consolidated:
+				break
 
 			pos_invoice_row = [d for d in invoices if d.pos_invoice == pos_invoice.return_against]
 			_invoices.append(pos_invoice_row)
