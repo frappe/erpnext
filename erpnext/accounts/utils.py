@@ -18,7 +18,6 @@ from erpnext.accounts.doctype.account.account import get_account_currency  # noq
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.utils import get_stock_value_on
 
-
 class StockValueAndAccountBalanceOutOfSync(frappe.ValidationError): pass
 class FiscalYearError(frappe.ValidationError): pass
 class PaymentEntryUnlinkError(frappe.ValidationError): pass
@@ -127,7 +126,6 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		party = frappe.form_dict.get("party")
 	if not cost_center and frappe.form_dict.get("cost_center"):
 		cost_center = frappe.form_dict.get("cost_center")
-
 
 	cond = ["is_cancelled=0"]
 	if date:
