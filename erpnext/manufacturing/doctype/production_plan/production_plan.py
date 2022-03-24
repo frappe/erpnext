@@ -64,7 +64,7 @@ class ProductionPlan(Document):
 			Attempt to fix linkages by using temporary names to map final row names.
 		"""
 		new_name_map = {d.temporary_name: d.name for d in self.po_items if d.temporary_name}
-		actual_names = set(new_name_map.values())
+		actual_names = {d.name for d in self.po_items}
 
 		for sub_assy in self.sub_assembly_items:
 			if sub_assy.production_plan_item not in actual_names:
