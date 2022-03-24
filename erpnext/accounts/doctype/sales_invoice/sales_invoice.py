@@ -382,6 +382,7 @@ class SalesInvoice(SellingController):
 		taxed_sales15 = 0
 		taxed_sales18 = 0
 		outstanding_amount = 0
+		grand_total = 0
 
 		if self.taxes_and_charges:
 					if self.exonerated == 1:
@@ -440,10 +441,16 @@ class SalesInvoice(SellingController):
 		self.taxed_sales18 = taxed_sales18
 
 		if self.is_pos:
-			pos = frappe.get_doc("POS", self.pos_profile)
+			pos = frappe.get_doc("POS Profile", self.pos_profile)
 
 			if pos.round_off_discount == 1:
 				discount_amount = math.ceil(self.discount_amount)
+
+				net_total = math.floor(self.net_total)
+				self.db_set('net_total', net_total, update_modified=False)
+
+				rounding_adjustment = math.ceil(self.rounding_adjustment)
+				self.db_set('rounding_adjustment', rounding_adjustment, update_modified=False)
 
 				self.discount_amount = discount_amount
 				self.db_set('discount_amount', discount_amount, update_modified=False)
@@ -459,6 +466,8 @@ class SalesInvoice(SellingController):
 			else:
 				self.grand_total = self.total
 		
+		grand_total = self.grand_total
+		
 		if self.is_pos and self.change_amount > 0:
 			outstanding_amount = 0
 			self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
@@ -469,6 +478,7 @@ class SalesInvoice(SellingController):
 		self.in_words = money_in_words(self.grand_total)
 
 		# if self.status == 'Draft' or self.docstatus == 1:
+		self.db_set('grand_total', grand_total, update_modified=False)
 		self.db_set('isv15', taxed15, update_modified=False)
 		self.db_set('isv18', taxed18, update_modified=False)
 		self.db_set('total_exonerated', exonerated, update_modified=False)
@@ -1349,7 +1359,18 @@ class SalesInvoice(SellingController):
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
 		for item in self.get("items"):
-			if flt(item.base_net_amount, item.precision("base_net_amount")):
+			base_net_amount = 0
+
+			if self.is_pos:
+				pos = frappe.get_doc("POS Profile", self.pos_profile)
+				if pos.round_off_discount == 1:
+					base_net_amount = math.floor(item.base_net_amount)
+				else:
+					base_net_amount = item.base_net_amount
+			else:
+				base_net_amount = item.base_net_amount
+
+			if flt(base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
 					asset = frappe.get_doc("Asset", item.asset)
 
@@ -1359,7 +1380,7 @@ class SalesInvoice(SellingController):
 							.format(item.item_code, item.idx))
 
 					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset,
-						item.base_net_amount, item.finance_book)
+						base_net_amount, item.finance_book)
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
@@ -1384,8 +1405,8 @@ class SalesInvoice(SellingController):
 						self.get_gl_dict({
 							"account": income_account,
 							"against": self.customer,
-							"credit": flt(item.base_net_amount, item.precision("base_net_amount")),
-							"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))
+							"credit": flt(base_net_amount, item.precision("base_net_amount")),
+							"credit_in_account_currency": (flt(base_net_amount, item.precision("base_net_amount"))
 								if account_currency==self.company_currency
 								else flt(item.net_amount, item.precision("net_amount"))),
 							"cost_center": item.cost_center
