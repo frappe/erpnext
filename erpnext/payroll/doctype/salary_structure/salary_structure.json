@@ -58,6 +58,7 @@
    "width": "50%"
   },
   {
+   "allow_on_submit": 1,
    "default": "Yes",
    "fieldname": "is_active",
    "fieldtype": "Select",
@@ -233,10 +234,11 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-14 17:30:20.166932",
+ "modified": "2022-02-03 23:50:10.205676",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Structure",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {
@@ -272,5 +274,6 @@
  ],
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

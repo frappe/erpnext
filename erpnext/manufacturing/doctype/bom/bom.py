@@ -213,7 +213,7 @@ class BOM(WebsiteGenerator):
 	
 	def get_volume(self):
 		if self.fg_specific_gravity>0  and self.bom_weight > 0:
-			self.bom_volume=self.bom_weight/self.fg_specific_gravity
+			self.bom_volume=flt(self.bom_weight)/flt(self.fg_specific_gravity)
 
 	@frappe.whitelist()
 	def get_routing(self):
@@ -932,7 +932,7 @@ def validate_bom_no(item, bom_no):
 				rm_item_exists = True
 		if bom.item.lower() == item.lower() or \
 			bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower():
- 				rm_item_exists = True
+				rm_item_exists = True
 		if not rm_item_exists:
 			frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
 

@@ -305,9 +305,15 @@ class GrossProfitGenerator(object):
 		new_row.gross_profit_percent = flt(((new_row.gross_profit / new_row.base_amount) * 100.0), self.currency_precision) \
 			if new_row.base_amount else 0
 		# new code for 4 columns TASK-2022-00194
-		new_row.alternate_qty = flt(new_row.qty) * flt(frappe.get_value("UOM Conversion Detail", {'parent': new_row.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'))
+		
+		if frappe.get_value("UOM Conversion Detail", {'parent': new_row.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'):
+			new_row.alternate_qty = flt(new_row.qty) / flt(frappe.get_value("UOM Conversion Detail", {'parent': new_row.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'))
+		else : new_row.alternate_qty = 0	
 		new_row.alternate_uom = frappe.get_value("UOM Conversion Detail", {'parent': new_row.item_code ,'is_alternate_uom': 1 }, 'uom')
-		new_row.weight = flt(new_row.qty) * flt(frappe.db.get_value("Item", new_row.item_code, "weight_per_unit"))
+		
+		if frappe.db.get_value("Item", new_row.item_code, "weight_per_unit"):
+			new_row.weight = flt(new_row.qty) * flt(frappe.db.get_value("Item", new_row.item_code, "weight_per_unit"))
+		else : new_row.weight = 0	
 		new_row.weight_uom = frappe.db.get_value("Item", new_row.item_code, "weight_uom")
 
 		new_row.buying_rate = flt(new_row.buying_amount / flt(new_row.qty), self.float_precision) if flt(new_row.qty) else 0

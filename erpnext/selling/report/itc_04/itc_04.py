@@ -166,16 +166,24 @@ def get_columns(filters):
 				"fieldname": "description_of_goods",
 				"width": 140
 			},
+			
+			{
+				"label": _("Quantity"),
+				"fieldtype": "Float",
+				"fieldname": "quantity",
+				"width": 140
+			},
 			{
 				"label": _("Unique Quantity Code (UQC)"),
 				"fieldtype": "Data",
 				"fieldname": "unique_quantity_code",
 				"width": 140
 			},
+			
 			{
-				"label": _("Quantity"),
+				"label": _("Losses Quantity"),
 				"fieldtype": "Float",
-				"fieldname": "quantity",
+				"fieldname": "losses_quantity",
 				"width": 140
 			},
 			{
@@ -184,18 +192,12 @@ def get_columns(filters):
 				"fieldname": "losses_uqc",
 				"width": 190
 			},
-			{
-				"label": _("Losses Quantity"),
-				"fieldtype": "Float",
-				"fieldname": "losses_quantity",
-				"width": 140
-			},
-			{
-				"label": _("To Be Named"),
-				"fieldtype": "Float",
-				"fieldname": "no_name",
-				"width": 140
-			},
+			# {
+			# 	"label": _("To Be Named"),
+			# 	"fieldtype": "Float",
+			# 	"fieldname": "no_name",
+			# 	"width": 140
+			# },
 			# {
 			# 	"label": _("Central Tax Rate In (%)"),
 			# 	"fieldtype": "Data",

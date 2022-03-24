@@ -3,6 +3,7 @@
 
 import json
 from collections import defaultdict
+from typing import List, Tuple
 
 import frappe
 from frappe import _
@@ -181,33 +182,28 @@ class StockController(AccountsController):
 
 			return details
 
-	def get_items_and_warehouses(self):
-		items, warehouses = [], []
+	def get_items_and_warehouses(self) -> Tuple[List[str], List[str]]:
+		"""Get list of items and warehouses affected by a transaction"""
 
-		if hasattr(self, "items"):
-			item_doclist = self.get("items")
-		elif self.doctype == "Stock Reconciliation":
-			item_doclist = []
-			data = json.loads(self.reconciliation_json)
-			for row in data[data.index(self.head_row)+1:]:
-				d = frappe._dict(zip(["item_code", "warehouse", "qty", "valuation_rate"], row))
-				item_doclist.append(d)
+		if not (hasattr(self, "items") or hasattr(self, "packed_items")):
+			return [], []
 
-		if item_doclist:
-			for d in item_doclist:
-				if d.item_code and d.item_code not in items:
-					items.append(d.item_code)
+		item_rows = (self.get("items") or []) + (self.get("packed_items") or [])
 
-				if d.get("warehouse") and d.warehouse not in warehouses:
-					warehouses.append(d.warehouse)
+		items = {d.item_code for d in item_rows if d.item_code}
 
-				if self.doctype == "Stock Entry":
-					if d.get("s_warehouse") and d.s_warehouse not in warehouses:
-						warehouses.append(d.s_warehouse)
-					if d.get("t_warehouse") and d.t_warehouse not in warehouses:
-						warehouses.append(d.t_warehouse)
+		warehouses = set()
+		for d in item_rows:
+			if d.get("warehouse"):
+				warehouses.add(d.warehouse)
 
-		return items, warehouses
+			if self.doctype == "Stock Entry":
+				if d.get("s_warehouse"):
+					warehouses.add(d.s_warehouse)
+				if d.get("t_warehouse"):
+					warehouses.add(d.t_warehouse)
+
+		return list(items), list(warehouses)
 
 	def get_stock_ledger_details(self):
 		stock_ledger = {}
@@ -219,7 +215,7 @@ class StockController(AccountsController):
 			from
 				`tabStock Ledger Entry`
 			where
-				voucher_type=%s and voucher_no=%s
+				voucher_type=%s and voucher_no=%s and is_cancelled = 0
 		""", (self.doctype, self.name), as_dict=True)
 
 		for sle in stock_ledger_entries:
@@ -511,12 +507,40 @@ class StockController(AccountsController):
 			"voucher_no": self.name,
 			"company": self.company
 		})
-		if future_sle_exists(args):
+
+		if future_sle_exists(args) or repost_required_for_queue(self):
 			item_based_reposting =  cint(frappe.db.get_single_value("Stock Reposting Settings", "item_based_reposting"))
 			if item_based_reposting:
 				create_item_wise_repost_entries(voucher_type=self.doctype, voucher_no=self.name)
 			else:
 				create_repost_item_valuation_entry(args)
+
+def repost_required_for_queue(doc: StockController) -> bool:
+	"""check if stock document contains repeated item-warehouse with queue based valuation.
+
+	if queue exists for repeated items then SLEs need to reprocessed in background again.
+	"""
+
+	consuming_sles = frappe.db.get_all("Stock Ledger Entry",
+		filters={
+			"voucher_type": doc.doctype,
+			"voucher_no": doc.name,
+			"actual_qty": ("<", 0),
+			"is_cancelled": 0
+		},
+		fields=["item_code", "warehouse", "stock_queue"]
+	)
+	item_warehouses = [(sle.item_code, sle.warehouse) for sle in consuming_sles]
+
+	unique_item_warehouses = set(item_warehouses)
+
+	if len(unique_item_warehouses) == len(item_warehouses):
+		return False
+
+	for sle in consuming_sles:
+		if sle.stock_queue != "[]":  # using FIFO/LIFO valuation
+			return True
+	return False
 
 
 @frappe.whitelist()

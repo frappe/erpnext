@@ -86,7 +86,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			'cost_center': d.cost_center,
 			'stock_qty': d.stock_qty,
 			'stock_uom': d.stock_uom,
-			'alternate_qty' : flt(d.stock_qty) * flt(frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor')),
+			'alternate_qty' : flt(d.stock_qty) / flt(frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor')) if frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor') else 0,
 			'alternate_uom' : frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'uom'),
 			'weight' : flt(d.stock_qty) * flt(frappe.db.get_value("Item", d.item_code, "weight_per_unit")),
 			'weight_uom' : frappe.db.get_value("Item", d.item_code, "weight_uom")

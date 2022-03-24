@@ -1,0 +1,149 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2021-10-20 17:31:51.610468",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "customer",
+  "customer_name",
+  "sales_invoice",
+  "delivery_note",
+  "carrier",
+  "transport_receipt_no",
+  "column_break_6",
+  "transport_receipt_date",
+  "carrier_tracking",
+  "vehical_no",
+  "weight",
+  "number_of_packages",
+  "weight_for_shipping",
+  "amount"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer ",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "delivery_note",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Delivery Note",
+   "options": "Delivery Note",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "carrier",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Transporter",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "carrier_tracking",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Transporter Tracking",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "vehical_no",
+   "fieldtype": "Data",
+   "label": "Vehical No.",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Quantity",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "number_of_packages",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "No Of Packages",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "weight_for_shipping",
+   "fieldtype": "Float",
+   "label": "Total Net Weight",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
+  },
+  {
+   "columns": 1,
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "transport_receipt_no",
+   "fieldtype": "Data",
+   "label": "Transport Receipt No",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "transport_receipt_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Transport Receipt Date",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-10-30 15:42:02.307986",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Delivery Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -166,8 +166,9 @@ class OpeningInvoiceCreationTool(Document):
 			frappe.scrub(row.party_type): row.party,
 			"is_pos": 0,
 			"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice",
-			"update_stock": 0,
-			"invoice_number": row.invoice_number
+			"update_stock": 0,   # important: https://github.com/frappe/erpnext/pull/23559
+			"invoice_number": row.invoice_number,
+			"disable_rounded_total": 1
 		})
 
 		accounting_dimension = get_accounting_dimensions()

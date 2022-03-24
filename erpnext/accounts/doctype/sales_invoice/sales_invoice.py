@@ -68,15 +68,7 @@ class SalesInvoice(SellingController):
 			'keyword': 'Billed',
 			'overflow_type': 'billing'
 		}]
-
-	#new code to add data in new_name hidden field 
-
-	def new_name(self):
-		for i in self.items:
-			print("i")
-			a = i.new_name = self.name + "-" +i.item_code + "-" + str(i.idx)
 		
-
 	def before_save(self):
 		self.get_commision()
 
@@ -99,17 +91,10 @@ class SalesInvoice(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
-	# def after_insert(self):
-	# 	self.new_name()
-	# 	self.set_last_sales_invoice()
-
 	def validate(self):
 
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
-
-		self.new_name()
-
 		self.get_commision()
 
 		if not self.is_pos:
@@ -236,18 +221,6 @@ class SalesInvoice(SellingController):
 		set_account_for_mode_of_payment(self)
 
 	def on_submit(self):
-		
-		# Code for Child name change
-
-		if self.items:
-			for i in self.items:	
-				print(" this is oochild", i.name, i.new_name)
-				frappe.db.sql("""
-					UPDATE `tabSales Invoice Item`
-					SET name = '{0}'
-					WHERE name = '{1}'; 
-				""".format(i.new_name,i.name ))
-
 		self.validate_pos_paid_amount()
 
 		if not self.auto_repeat:
@@ -353,6 +326,9 @@ class SalesInvoice(SellingController):
 			return self.tax_category
 
 	def validate_pos_return(self):
+		if self.is_consolidated:
+			# pos return is already validated in pos invoice
+			return
 
 		if self.is_pos and self.is_return:
 			total_amount_in_payments = 0
@@ -375,7 +351,7 @@ class SalesInvoice(SellingController):
 				filters={ invoice_or_credit_note: self.name },
 				pluck="pos_closing_entry"
 			)
-			if pos_closing_entry:
+			if pos_closing_entry and pos_closing_entry[0]:
 				msg = _("To cancel a {} you need to cancel the POS Closing Entry {}.").format(
 					frappe.bold("Consolidated Sales Invoice"),
 					get_link_to_form("POS Closing Entry", pos_closing_entry[0])
@@ -668,7 +644,10 @@ class SalesInvoice(SellingController):
 			frappe.throw(msg, title=_("Invalid Account"))
 
 		if self.customer and account.account_type != "Receivable":
-			msg = _("Please ensure {} account is a Receivable account.").format(frappe.bold("Debit To")) + " "
+			msg = _("Please ensure {} account {} is a Receivable account.").format(
+				frappe.bold("Debit To"),
+				frappe.bold(self.debit_to)
+			) + " "
 			msg += _("Change the account type to Receivable or select a different account.")
 			frappe.throw(msg, title=_("Invalid Account"))
 

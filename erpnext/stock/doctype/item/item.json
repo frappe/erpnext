@@ -130,7 +130,8 @@
   "synced_with_hub",
   "more_information_section",
   "published_in_website",
-  "total_projected_qty"
+  "total_projected_qty",
+  "website_image_alt"
  ],
  "fields": [
   {
@@ -386,7 +387,8 @@
    "depends_on": "is_stock_item",
    "fieldname": "weight_per_unit",
    "fieldtype": "Float",
-   "label": "Weight Per Unit"
+   "label": "Weight Per Unit",
+   "mandatory_depends_on": "eval: doc.bom_item_type == 'RM'"
   },
   {
    "depends_on": "eval:doc.is_stock_item",
@@ -1005,7 +1007,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-14 04:13:16.857534",
+ "modified": "2022-03-15 15:32:38.457184",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

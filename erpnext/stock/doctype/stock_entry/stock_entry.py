@@ -77,7 +77,6 @@ class StockEntry(StockController):
 
 		self.validate_posting_time()
 		self.validate_purpose()
-		self.set_title()
 		self.validate_item()
 		self.validate_customer_provided_item()
 		self.validate_qty()
@@ -131,6 +130,7 @@ class StockEntry(StockController):
 
 		self.make_gl_entries()
 
+		
 		self.repost_future_sle_and_gle()
 		self.update_cost_in_project()
 		self.validate_reserved_serial_no_consumption()
@@ -152,6 +152,22 @@ class StockEntry(StockController):
 			
 		if self.purpose == 'Material Transfer' and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status('Completed')
+
+		
+		manufacture = frappe.get_doc('Manufacturing Settings')
+		if self.stock_entry_type == "Manufacture" and manufacture.batch_price_list:
+			for item in self.stock_entry_detail:
+				doc = frappe.new_doc({
+					'doctype': 'Item Price',
+					'item_code':'item.item_code',
+					'item_name':'item.item_name',
+					'rate':'item.mrp',
+					'uom':'item.uom',
+					'batch_no':'item.batch_no',
+					
+				})
+				doc.insert()
+
 
 
 	def on_cancel(self):
@@ -1172,7 +1188,7 @@ class StockEntry(StockController):
 		self.set_actual_qty()
 		self.update_items_for_process_loss()
 		self.validate_customer_provided_item()
-		self.calculate_rate_and_amount()
+		self.calculate_rate_and_amount(raise_error_if_no_rate=False)
 
 	def set_scrap_items(self):
 		if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:
@@ -1899,6 +1915,22 @@ class StockEntry(StockController):
 
 		self.title = self.purpose
 
+	# Code for new Button above Items
+	@frappe.whitelist()
+	def create_new_batch_no(self):
+		print(" We are in stock Entry ", self.items)
+		item = self.items
+		if len(item) > 0:
+			for i in item:
+				print(i.item_code)
+				batch = frappe.new_doc("Batch")
+				batch.batch_id = self.name + "*" + i.item_code 
+				batch.item = i.item_code 
+				batch.save()
+				
+				i.batch_no = batch.name
+
+		return True
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):

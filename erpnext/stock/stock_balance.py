@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe.utils import cstr, flt, nowdate, nowtime
+from frappe.utils import cstr, flt, now, nowdate, nowtime
 
 from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
 from erpnext.stock.utils import update_bin
@@ -175,6 +175,7 @@ def update_bin_qty(item_code, warehouse, qty_dict=None):
 			bin.set(field, flt(value))
 			mismatch = True
 
+	bin.modified = now()
 	if mismatch:
 		bin.set_projected_qty()
 		bin.db_update()

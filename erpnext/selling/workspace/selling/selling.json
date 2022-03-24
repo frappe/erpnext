@@ -443,6 +443,15 @@
   },
   {
    "hidden": 0,
+   "is_query_report": 1,
+   "label": "YoY Item Wise Dealer Sales",
+   "link_to": "YoY Item Wise Dealer Sales",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
    "is_query_report": 0,
    "label": "Other Reports",
    "onboard": 0,
@@ -595,7 +604,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-03-03 12:33:01.332010",
+ "modified": "2022-03-05 12:45:26.751123",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",

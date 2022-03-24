@@ -45,6 +45,7 @@ def get_sle(**args):
 
 class TestStockEntry(ERPNextTestCase):
 	def tearDown(self):
+		frappe.db.rollback()
 		frappe.set_user("Administrator")
 		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", "0")
 
@@ -566,6 +567,7 @@ class TestStockEntry(ERPNextTestCase):
 		st1.set_stock_entry_type()
 		st1.insert()
 		st1.submit()
+		st1.cancel()
 
 		frappe.set_user("Administrator")
 		remove_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
@@ -689,6 +691,8 @@ class TestStockEntry(ERPNextTestCase):
 	def test_variant_work_order(self):
 		bom_no = frappe.db.get_value("BOM", {"item": "_Test Variant Item",
 			"is_default": 1, "docstatus": 1})
+
+		make_item_variant() # make variant of _Test Variant Item if absent
 
 		work_order = frappe.new_doc("Work Order")
 		work_order.update({
@@ -1101,12 +1105,9 @@ class TestStockEntry(ERPNextTestCase):
 
 		# Check if FG cost is calculated based on RM total cost
 		# RM total cost = 200, FG rate = 200/4(FG qty) =  50
-		self.assertEqual(se.items[1].basic_rate, 50)
+		self.assertEqual(se.items[1].basic_rate, flt(se.items[0].basic_rate/4))
 		self.assertEqual(se.value_difference, 0.0)
 		self.assertEqual(se.total_incoming_value, se.total_outgoing_value)
-
-		# teardown
-		se.delete()
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)
