@@ -26,10 +26,10 @@ frappe.query_reports["Credit Invoice"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"terms",
-			"label": __("Payment Terms Template"),
+			"fieldname":"tc_name",
+			"label": __("Terms and Conditions"),
 			"fieldtype": "Link",
-			"options": "Payment Terms Template"
+			"options": "Terms and Conditions"
 		},
 		{
 			"fieldname":"customer",
