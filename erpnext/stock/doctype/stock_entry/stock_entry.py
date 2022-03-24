@@ -160,7 +160,8 @@ class StockEntry(StockController):
 				doc = frappe.new_doc('Item Price')
 				doc.item_code=item.item_code
 				doc.item_name=item.item_name
-				doc.rate=item.mrp
+				doc.price_list=manufacture.batch_price_list
+				doc.price_list_rate=item.mrp
 				doc.uom =item.uom
 				doc.batch_no =item.batch_no
 				doc.valid_from =""
