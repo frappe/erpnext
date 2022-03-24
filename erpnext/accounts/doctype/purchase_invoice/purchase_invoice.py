@@ -548,7 +548,12 @@ class PurchaseInvoice(BuyingController):
 				filters={"voucher_no": self.name, "voucher_type": self.doctype, "is_cancelled": 0}
 			)
 			for d in stock_ledger_entries:
+				if voucher_wise_stock_value.get((d.voucher_detail_no, d.warehouse)):
+					stock_value_difference = voucher_wise_stock_value.get((d.voucher_detail_no, d.warehouse)) + d.stock_value_difference
+					voucher_wise_stock_value[(d.voucher_detail_no, d.warehouse)] =  stock_value_difference
+
 				voucher_wise_stock_value.setdefault((d.voucher_detail_no, d.warehouse), d.stock_value_difference)
+
 
 		valuation_tax_accounts = [d.account_head for d in self.get("taxes")
 			if d.category in ('Valuation', 'Total and Valuation')
