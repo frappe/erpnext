@@ -181,7 +181,7 @@ frappe.ui.form.on('Subcontracting Order Supplied Item', {
 	},
 });
 
-erpnext.buying.SubcontractingOrderController = class SubcontractingOrderController extends erpnext.buying.BuyingController {
+erpnext.buying.SubcontractingOrderController = class SubcontractingOrderController {
 	setup() {
 		this.frm.custom_make_buttons = {
 			'Subcontracting Receipt': 'Subcontracting Receipt',
