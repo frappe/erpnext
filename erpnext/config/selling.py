@@ -234,6 +234,13 @@ def get_data():
 					"onboard": 1,
 				},
 				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Credit Invoice",
+					"doctype": "Sales Invoice",
+					"onboard": 1,
+				},
+				{
 					"type": "page",
 					"name": "sales-funnel",
 					"label": _("Sales Funnel"),
