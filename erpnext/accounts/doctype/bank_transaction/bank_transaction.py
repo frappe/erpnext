@@ -119,7 +119,10 @@ def get_paid_amount(payment_entry, currency, bank_account):
 
 	elif payment_entry.payment_document == "Expense Claim":
 		return frappe.db.get_value(payment_entry.payment_document, payment_entry.payment_entry, "total_amount_reimbursed")
-
+	
+	elif payment_entry.payment_document == "Payment Group":
+		return frappe.db.get_value(payment_entry.payment_document, payment_entry.payment_entry, "total")
+	
 	else:
 		frappe.throw("Please reconcile {0}: {1} manually".format(payment_entry.payment_document, payment_entry.payment_entry))
 
