@@ -793,7 +793,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.frm.set_value('base_paid_amount', flt(base_paid_amount, precision("base_paid_amount")));
 	},
 
-	calculate_change_amount: function(){
+	calculate_change_amount: function() {
 		this.frm.doc.change_amount = 0.0;
 		this.frm.doc.base_change_amount = 0.0;
 		if(in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype)
