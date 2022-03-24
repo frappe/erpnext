@@ -12,7 +12,7 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 class SubcontractingController(BuyingController):
 	def validate(self):
 		self.validate_fg_items()
-		self.validate_reserve_warehouse()
+		self.validate_purchase_order()
 		self.create_raw_materials_supplied()
 
 	def validate_fg_items(self):
@@ -25,6 +25,19 @@ class SubcontractingController(BuyingController):
 			if not row.reserve_warehouse:
 				msg = f"Reserved Warehouse is mandatory for the Item {frappe.bold(row.rm_item_code)} in Raw Materials supplied"
 				frappe.throw(_(msg))
+
+	def validate_purchase_order(self):
+		if self.get("purchase_order"):
+			po = frappe.get_doc("Purchase Order", self.get("purchase_order"))
+
+			if po.docstatus != 1:
+				msg = f"Please submit Purchase Order {po.name} before proceeding."
+				frappe.throw(_(msg))
+
+			if po.is_subcontracted != "Yes":
+				frappe.throw(_("Please select a valid Purchase Order that is configured for Subcontracting."))
+		else:
+			self.service_items = None
 
 	def set_materials_for_subcontracted_items(self, raw_material_table):
 		self.raw_material_table = raw_material_table

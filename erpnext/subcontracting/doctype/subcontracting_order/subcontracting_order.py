@@ -13,22 +13,7 @@ from erpnext.controllers.subcontracting_controller import SubcontractingControll
 class SubcontractingOrder(SubcontractingController):
 	def validate(self):
 		super(SubcontractingOrder, self).validate()
-		self.validate_purchase_order()
-		self.create_raw_materials_supplied()
-
-	def validate_purchase_order(self):
-		if self.get("purchase_order"):
-			po = frappe.get_doc("Purchase Order", self.get("purchase_order"))
-
-			if po.docstatus != 1:
-				msg = f"Please submit Purchase Order {po.name} before proceeding."
-				frappe.throw(_(msg))
-
-			if po.is_subcontracted != "Yes":
-				frappe.throw(_("Please select a valid Purchase Order that is configured for Subcontracting."))
-		else:
-			self.service_items = None
-
+		self.validate_reserve_warehouse()
 
 @frappe.whitelist()
 def make_subcontracting_receipt(source_name, target_doc=None):
