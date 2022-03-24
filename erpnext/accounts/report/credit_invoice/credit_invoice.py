@@ -27,8 +27,6 @@ def execute(filters=None):
 		{
 			"label": _("Patient"),
 			"fieldname": "patient",
-			"fieldtype": "Link",
-			"options": "Patient",
 			"width": 120
 		},
 		{
@@ -63,7 +61,7 @@ def return_data(filters):
 	salary_slips = frappe.get_all("Sales Invoice", ["*"], filters = conditions,  order_by = "name asc")
 
 	for salary_slip in salary_slips:		
-		row = [salary_slip.name, salary_slip.customer, salary_slip.patient, salary_slip.grand_total, salary_slip.status, salary_slip.payment_terms_template]
+		row = [salary_slip.name, salary_slip.customer, salary_slip.patient_name, salary_slip.grand_total, salary_slip.status, salary_slip.payment_terms_template]
 		data.append(row)
 
 	return data
@@ -74,7 +72,7 @@ def return_filters(filters, from_date, to_date):
 	conditions += "{"
 	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
 	conditions += ', "company": "{}"'.format(filters.get("company"))
-	if filters.get("terms"): conditions += ', "payment_terms_template": "{}"'.format(filters.get("terms"))
+	if filters.get("tc_name"): conditions += ', "tc_name": "{}"'.format(filters.get("tc_name"))
 	if filters.get("customer"): conditions += ', "customer": "{}"'.format(filters.get("customer"))
 	conditions += '}'
 
