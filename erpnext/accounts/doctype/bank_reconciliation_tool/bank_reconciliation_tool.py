@@ -17,8 +17,7 @@ from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_s
 	get_entries,
 )
 from erpnext.accounts.utils import get_balance_on
-
-
+import pdb
 class BankReconciliationTool(Document):
 	pass
 
@@ -44,6 +43,7 @@ def get_bank_transactions(bank_account, from_date = None, to_date = None):
 
 @frappe.whitelist()
 def get_account_balance(bank_account, till_date):
+
 	# returns account balance till the specified date
 	account = frappe.db.get_value('Bank Account', bank_account, 'account')
 	filters = frappe._dict({
@@ -66,7 +66,6 @@ def get_account_balance(bank_account, till_date):
 		+ amounts_not_reflected_in_system
 
 	return bank_bal
-
 
 @frappe.whitelist()
 def update_bank_transaction(bank_transaction_name, reference_number, party_type=None, party=None):
@@ -261,12 +260,15 @@ def get_linked_payments(bank_transaction_name, document_types = None):
 		["account", "company"],
 		as_dict=True)[0]
 	(account, company) = (bank_account.account, bank_account.company)
+
 	matching = check_matching(account, company, transaction, document_types)
 	return matching
 
 def check_matching(bank_account, company, transaction, document_types):
 	# combine all types of vouchers
+	
 	subquery = get_queries(bank_account, company, transaction, document_types)
+
 	filters = {
 			"amount": transaction.unallocated_amount,
 			"payment_type" : "Receive" if transaction.deposit > 0 else "Pay",
@@ -301,6 +303,10 @@ def get_queries(bank_account, company, transaction, document_types):
 	if "journal_entry" in document_types:
 		je_amount_matching = get_je_matching_query(amount_condition, transaction)
 		queries.extend([je_amount_matching])
+
+	if "payment_group" in document_types:
+		pg_amount_matching = get_pg_matching_query(amount_condition, transaction)
+		queries.extend([pg_amount_matching])
 
 	if transaction.deposit > 0 and "sales_invoice" in document_types:
 		si_amount_matching =  get_si_matching_query(amount_condition)
@@ -489,6 +495,42 @@ def get_je_matching_query(amount_condition, transaction):
 			AND jea.account = %(bank_account)s
 			AND jea.{cr_or_dr}_in_account_currency {amount_condition} %(amount)s
 			AND je.docstatus = 1
+	"""
+
+def get_pg_matching_query(amount_condition, transaction):
+	# get matching payment groups query
+	
+	if transaction.deposit > 0:
+		currency_field = "paid_to_account_currency as currency"
+	else:
+		currency_field = "paid_from_account_currency as currency"
+	return  f"""
+	SELECT
+		0 AS rank,
+		'Payment Group' as doctype,
+		pg.name,
+		pg.total,
+		pg.name as reference_no,
+		pg.date as reference_date,
+		null as party,
+		null as party_type,
+		pg.date as posting_date,
+		acc.account_currency as currency
+	FROM
+		`tabPayment Group` pg
+	JOIN
+		`tabBank Account` as bankAcc
+	ON
+		bankAcc.name = pg.bank_account
+	JOIN
+		`tabAccount` as acc
+	ON
+		bankAcc.account = acc.name
+	WHERE
+		pg.total {amount_condition} %(amount)s
+		AND pg.docstatus = 1
+		AND ifnull(pg.clearance_date, '') = ""
+		AND bankAcc.account = %(bank_account)s
 	"""
 
 
