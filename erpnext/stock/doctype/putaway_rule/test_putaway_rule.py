@@ -396,6 +396,21 @@ class TestPutawayRule(FrappeTestCase):
 		rule_1.delete()
 		rule_2.delete()
 
+	def test_warehouse_capacity_dashbord(self):
+		from erpnext.stock.dashboard.warehouse_capacity_dashboard import get_data
+
+		item = "_Rice"
+		rule = create_putaway_rule(item_code=item, warehouse=self.warehouse_1, capacity=500,
+			uom="Kg")
+
+		capacities = get_data(warehouse=self.warehouse_1)
+		for capacity in capacities:
+			if capacity.item_code == item and capacity.warehouse == self.warehouse_1:
+				self.assertEqual(capacity.stock_capacity, 500)
+
+		get_data(warehouse=self.warehouse_1)
+		rule.delete()
+
 def create_putaway_rule(**args):
 	args = frappe._dict(args)
 	putaway = frappe.new_doc("Putaway Rule")
