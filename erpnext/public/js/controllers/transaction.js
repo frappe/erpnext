@@ -19,6 +19,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					// if rate is greater than price_list_rate, set margin
 					// or set discount
 					item.discount_percentage = 0;
+					item.discount_amount = 0;
 					item.margin_type = 'Amount';
 					item.margin_rate_or_amount = flt(item.rate - item.price_list_rate,
 						precision("margin_rate_or_amount", item));
@@ -33,6 +34,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			} else {
 				item.discount_percentage = 0.0;
+				item.discount_amount = 0;
 				item.margin_type = '';
 				item.margin_rate_or_amount = 0;
 				item.rate_with_margin = 0;
