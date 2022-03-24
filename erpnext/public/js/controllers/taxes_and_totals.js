@@ -819,7 +819,11 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		this.frm.set_value('base_paid_amount', flt(base_paid_amount, precision("base_paid_amount")));
 	}
 
+<<<<<<< HEAD
 	calculate_change_amount(){
+=======
+	calculate_change_amount: function() {
+>>>>>>> ed38679d22 (fix: Ignore for Purchase Invoices)
 		this.frm.doc.change_amount = 0.0;
 		this.frm.doc.base_change_amount = 0.0;
 		if(in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype)
