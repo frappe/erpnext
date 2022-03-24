@@ -428,6 +428,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Analytical Ledger",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
 					"name": "Customer Ledger Summary",
 					"doctype": "Sales Invoice",
 					"is_query_report": True,

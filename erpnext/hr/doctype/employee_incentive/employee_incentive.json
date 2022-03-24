@@ -13,7 +13,8 @@
   "column_break_5",
   "employee_name",
   "department",
-  "additional_salary"
+  "additional_salary",
+  "confidential"
  ],
  "fields": [
   {
@@ -25,6 +26,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "confidential",
    "fieldname": "incentive_amount",
    "fieldtype": "Currency",
    "label": "Incentive Amount",
@@ -78,10 +80,17 @@
    "label": "Salary Component",
    "options": "Salary Component",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "confidential",
+   "fieldtype": "Check",
+   "label": "Confidential",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-03 16:48:16.822252",
+ "modified": "2022-03-22 15:05:30.357269",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Incentive",
