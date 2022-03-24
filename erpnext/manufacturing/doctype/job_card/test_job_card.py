@@ -169,6 +169,7 @@ class TestJobCard(FrappeTestCase):
 
 		job_card_name = frappe.db.get_value("Job Card", {'work_order': self.work_order.name})
 		job_card = frappe.get_doc("Job Card", job_card_name)
+		self.assertEqual(job_card.status, "Open")
 
 		# fully transfer both RMs
 		transfer_entry_1 = make_stock_entry_from_jc(job_card_name)
