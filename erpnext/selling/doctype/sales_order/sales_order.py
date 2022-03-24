@@ -520,7 +520,6 @@ def make_project(source_name, target_doc=None):
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 	def set_missing_values(source, target):
-		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
@@ -585,6 +584,8 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 
 	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
 
+	target_doc.set_onload('ignore_price_list', True)
+
 	return target_doc
 
 @frappe.whitelist()
@@ -596,7 +597,6 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			target.set_advances()
 
 	def set_missing_values(source, target):
-		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
@@ -665,6 +665,8 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	automatically_fetch_payment_terms = cint(frappe.db.get_single_value('Accounts Settings', 'automatically_fetch_payment_terms'))
 	if automatically_fetch_payment_terms:
 		doclist.set_payment_schedule()
+
+	doclist.set_onload('ignore_price_list', True)
 
 	return doclist
 
