@@ -159,11 +159,11 @@ class StockEntry(StockController):
 			for item in self.items:
 				doc = frappe.new_doc({
 					'doctype': 'Item Price',
-					'item_code':'item.item_code',
-					'item_name':'item.item_name',
-					'rate':'item.mrp',
-					'uom':'item.uom',
-					'batch_no':'item.batch_no',
+					'item_code':item.item_code,
+					'item_name':item.item_name,
+					'rate':item.mrp,
+					'uom':item.uom,
+					'batch_no':item.batch_no,
 					"valid_from":""
 					
 				})
