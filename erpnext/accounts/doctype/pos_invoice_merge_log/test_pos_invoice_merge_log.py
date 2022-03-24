@@ -442,7 +442,7 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			pos_inv2.append('payments', {
 				'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 100
 			})
-			pos_inv.submit()
+			pos_inv2.submit()
 
 			consolidate_pos_invoices()
 
