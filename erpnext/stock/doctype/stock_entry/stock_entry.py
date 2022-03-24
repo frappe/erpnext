@@ -156,7 +156,7 @@ class StockEntry(StockController):
 		
 		manufacture = frappe.get_doc('Manufacturing Settings')
 		if self.stock_entry_type == "Manufacture" and manufacture.batch_price_list:
-			for item in self.stock_entry_detail:
+			for item in self.items:
 				doc = frappe.new_doc({
 					'doctype': 'Item Price',
 					'item_code':'item.item_code',
@@ -164,6 +164,7 @@ class StockEntry(StockController):
 					'rate':'item.mrp',
 					'uom':'item.uom',
 					'batch_no':'item.batch_no',
+					"valid_from":""
 					
 				})
 				doc.insert()
