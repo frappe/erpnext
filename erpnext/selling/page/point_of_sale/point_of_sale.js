@@ -931,7 +931,33 @@ class POSCart {
 	}
 
 	update_grand_total() {
-		debugger
+		frappe.db.get_doc('POS Profile', this.frm.doc.pos_profile)
+    	.then(doc => {
+			debugger
+			if (doc.round_off_discount === 1){
+				var total = Math.floor(this.frm.doc.grand_total)
+				this.frm.doc.grand_total = total
+				this.frm.doc.rounded_total = total
+				this.frm.doc.paid_amount = total
+				this.frm.doc.base_grand_total = total
+				this.frm.doc.base_net_total = total
+				this.frm.doc.base_total = total
+				this.frm.doc.grand_total = total
+				this.frm.doc.net_total = total
+				this.frm.doc.total = total
+			}
+	
+			this.$grand_total.find('.grand-total-value').text(
+				format_currency(this.frm.doc.grand_total, this.frm.currency)
+			);
+	
+			this.$grand_total.find('.rounded-total-value').text(
+				format_currency(this.frm.doc.rounded_total, this.frm.currency)
+			);
+   	 	})
+	}
+
+	update_totals_is_rounding(){
 		var total = Math.floor(this.frm.doc.grand_total)
 		this.frm.doc.grand_total = total
 		this.frm.doc.rounded_total = total
@@ -942,6 +968,17 @@ class POSCart {
 		this.frm.doc.grand_total = total
 		this.frm.doc.net_total = total
 		this.frm.doc.total = total
+
+		this.$grand_total.find('.grand-total-value').text(
+			format_currency(this.frm.doc.grand_total, this.frm.currency)
+		);
+
+		this.$grand_total.find('.rounded-total-value').text(
+			format_currency(this.frm.doc.rounded_total, this.frm.currency)
+		);
+	}
+
+	update_totals_is_not_rounding(){
 		this.$grand_total.find('.grand-total-value').text(
 			format_currency(this.frm.doc.grand_total, this.frm.currency)
 		);
@@ -1158,26 +1195,34 @@ class POSCart {
 	}
 
 	update_item(item) {
-		const item_selector = item.batch_no ?
+		frappe.db.get_doc('POS Profile', this.frm.doc.pos_profile)
+    	.then(doc => {
+			debugger
+			const item_selector = item.batch_no ?
 			`[data-batch-no="${item.batch_no}"]` : `[data-item-code="${escape(item.item_code)}"]`;
 
-		const $item = this.$cart_items.find(item_selector);
+			const $item = this.$cart_items.find(item_selector);
 
-		if(item.qty > 0) {
-			const is_stock_item = this.get_item_details(item.item_code).is_stock_item;
-			const indicator_class = (!is_stock_item || item.actual_qty >= item.qty) ? 'green' : 'red';
-			const remove_class = indicator_class == 'green' ? 'red' : 'green';
-			var itemrate = item.rate;
-			var rate = Math.floor(itemrate);
-			item.rate = rate;
-			$item.find('.quantity input').val(item.qty);
-			$item.find('.discount').text(item.discount_percentage + '%');
-			$item.find('.rate').text(format_currency(item.rate, this.frm.doc.currency));
-			$item.addClass(indicator_class);
-			$item.removeClass(remove_class);
-		} else {
-			$item.remove();
-		}
+			if(item.qty > 0) {
+				const is_stock_item = this.get_item_details(item.item_code).is_stock_item;
+				const indicator_class = (!is_stock_item || item.actual_qty >= item.qty) ? 'green' : 'red';
+				const remove_class = indicator_class == 'green' ? 'red' : 'green';
+				
+				if (doc.round_off_discount === 1){
+					var itemrate = item.rate;
+					var rate = Math.floor(itemrate);
+					item.rate = rate;
+				}
+
+				$item.find('.quantity input').val(item.qty);
+				$item.find('.discount').text(item.discount_percentage + '%');
+				$item.find('.rate').text(format_currency(item.rate, this.frm.doc.currency));
+				$item.addClass(indicator_class);
+				$item.removeClass(remove_class);
+			} else {
+				$item.remove();
+			}
+   	 	})
 	}
 
 	get_item_html(item) {
