@@ -816,7 +816,6 @@ class POSCart {
 
 		let total_item_qty = 0.0;
 		this.frm.set_value("pos_total_qty",total_item_qty);
-
 		this.$discount_amount.find('input:text').val('');
 		this.wrapper.find('.grand-total-value').text(
 			format_currency(this.frm.doc.grand_total, this.frm.currency));
@@ -932,6 +931,17 @@ class POSCart {
 	}
 
 	update_grand_total() {
+		debugger
+		var total = Math.floor(this.frm.doc.grand_total)
+		this.frm.doc.grand_total = total
+		this.frm.doc.rounded_total = total
+		this.frm.doc.paid_amount = total
+		this.frm.doc.base_grand_total = total
+		this.frm.doc.base_net_total = total
+		this.frm.doc.base_total = total
+		this.frm.doc.grand_total = total
+		this.frm.doc.net_total = total
+		this.frm.doc.total = total
 		this.$grand_total.find('.grand-total-value').text(
 			format_currency(this.frm.doc.grand_total, this.frm.currency)
 		);
@@ -1157,7 +1167,9 @@ class POSCart {
 			const is_stock_item = this.get_item_details(item.item_code).is_stock_item;
 			const indicator_class = (!is_stock_item || item.actual_qty >= item.qty) ? 'green' : 'red';
 			const remove_class = indicator_class == 'green' ? 'red' : 'green';
-
+			var itemrate = item.rate;
+			var rate = Math.floor(itemrate);
+			item.rate = rate;
 			$item.find('.quantity input').val(item.qty);
 			$item.find('.discount').text(item.discount_percentage + '%');
 			$item.find('.rate').text(format_currency(item.rate, this.frm.doc.currency));

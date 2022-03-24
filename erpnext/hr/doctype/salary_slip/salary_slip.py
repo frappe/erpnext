@@ -122,6 +122,7 @@ class SalarySlip(TransactionBase):
 			self.end_date = date_details.end_date
 
 	def get_emp_and_leave_details(self):
+		self.confidentials()
 		'''First time, load all the components from salary structure'''
 		if self.employee:
 			self.set("earnings", [])
