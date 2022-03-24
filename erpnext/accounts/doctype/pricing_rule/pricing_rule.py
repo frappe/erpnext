@@ -13,6 +13,8 @@ from frappe.model.document import Document
 from frappe.utils import cint, flt, getdate
 from six import string_types
 
+import pdb
+
 apply_on_dict = {"Item Code": "items",
 	"Item Group": "item_groups", "Brand": "brands"}
 
@@ -253,6 +255,13 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 		"child_docname": args.get('child_docname'),
 	})
 
+	if args.ignore_pricing_rules:
+		if frappe.db.exists(args.doctype, args.name) and args.get("pricing_rules"):
+			item_details.pricing_rules = ''
+			return item_details
+		else:
+			return item_details
+
 	if args.ignore_pricing_rule or not args.item_code:
 		if frappe.db.exists(args.doctype, args.name) and args.get("pricing_rules"):
 			item_details = remove_pricing_rule_for_item(
@@ -264,7 +273,6 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 		return item_details
 
 	update_args_for_pricing_rule(args)
-	# pdb.set_trace()
 
 	pricing_rules = (get_applied_pricing_rules(args.get('pricing_rules'))
 		if for_validate and args.get("pricing_rules") else get_pricing_rules(args, doc))
@@ -406,6 +414,7 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None, ra
 		get_applied_pricing_rules,
 		get_pricing_rule_items,
 	)
+
 	for d in get_applied_pricing_rules(pricing_rules):
 		if not d or not frappe.db.exists("Pricing Rule", d): continue
 		pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
