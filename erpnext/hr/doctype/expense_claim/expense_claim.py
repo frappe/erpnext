@@ -42,10 +42,16 @@ class ExpenseClaim(AccountsController):
 			"2": "Cancelled"
 		}[cstr(self.docstatus or 0)]
 
-		paid_amount = flt(self.total_amount_reimbursed) + flt(self.total_advance_amount)
 		precision = self.precision("grand_total")
-		if (self.is_paid or (flt(self.total_sanctioned_amount) > 0 and self.docstatus == 1
-			and flt(self.grand_total, precision) == flt(paid_amount, precision))) and self.approval_status == 'Approved':
+
+		if (
+			# set as paid
+			self.is_paid
+			# grand total is reimbursed
+			or (flt(self.total_sanctioned_amount) > 0 and self.docstatus == 1 and flt(self.grand_total, precision) == flt(self.total_amount_reimbursed, precision))
+			# grand total (to be paid) is 0 since linked advances already cover the claimed amount
+			or (flt(self.grand_total, precision) == 0)
+		) and self.approval_status == "Approved":
 			status = "Paid"
 		elif flt(self.total_sanctioned_amount) > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
 			status = "Unpaid"
