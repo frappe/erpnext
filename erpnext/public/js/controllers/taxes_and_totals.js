@@ -28,7 +28,10 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		if (item.discount_amount) {
 			item_rate = flt((item.rate_with_margin) - (item.discount_amount), precision('rate', item));
-			// item.discount_percentage = 100 * flt(item.discount_amount) / flt(item.rate_with_margin); //This line was causing discount perc to recalc
+			var discount_percentage = 100 * flt(item.discount_amount) / flt(item.rate_with_margin);
+			if (item.discount_percentage - discount_percentage > 0.02){
+				item.discount_percentage = discount_percentage
+			}
 		}
 
 		frappe.model.set_value(item.doctype, item.name, "rate", item_rate);
