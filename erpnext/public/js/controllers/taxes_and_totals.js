@@ -668,6 +668,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.frm.doc.total_advance = flt(total_allocated_amount, precision("total_advance"));
 
 		this.calculate_outstanding_amount(update_paid_amount);
+		this.calculate_write_off_amount();
 	},
 
 	is_internal_invoice: function() {
@@ -803,26 +804,23 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 				var base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
 
-				this.frm.doc.change_amount = flt(this.frm.doc.paid_amount - grand_total +
-					this.frm.doc.write_off_amount, precision("change_amount"));
+				this.frm.doc.change_amount = flt(this.frm.doc.paid_amount - grand_total,
+					precision("change_amount"));
 
 				this.frm.doc.base_change_amount = flt(this.frm.doc.base_paid_amount -
-					base_grand_total + this.frm.doc.base_write_off_amount,
-					precision("base_change_amount"));
+					base_grand_total, precision("base_change_amount"));
 			}
 		}
 	},
 
-	calculate_write_off_amount: function(){
-		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
+	calculate_write_off_amount: function() {
+		if (this.frm.doc.write_off_outstanding_amount_automatically) {
 			this.frm.doc.write_off_amount = flt(this.frm.doc.grand_total - this.frm.doc.paid_amount
 				+ this.frm.doc.change_amount, precision("write_off_amount"));
-
 			this.frm.doc.base_write_off_amount = flt(this.frm.doc.write_off_amount * this.frm.doc.conversion_rate,
 				precision("base_write_off_amount"));
-		}else{
-			this.frm.doc.paid_amount = 0.0;
 		}
+
 		this.calculate_outstanding_amount(false);
 	}
 });
