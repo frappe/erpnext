@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2022-02-09 14:01:08.443624",
+ "modified": "2022-03-24 12:37:35.768896",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Check Of Bank Transactions",
@@ -19,6 +19,9 @@
  "roles": [
   {
    "role": "System Manager"
+  },
+  {
+   "role": "Reportes de Contabilidad"
   }
  ]
 }
