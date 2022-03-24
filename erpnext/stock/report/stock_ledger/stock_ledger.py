@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import cint, flt
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_stock_balance_for
 from erpnext.stock.utils import (
 	is_reposting_item_valuation_in_progress,
 	update_included_uom_in_report,
@@ -70,7 +71,10 @@ def update_available_serial_nos(available_serial_nos, sle):
 	serial_nos = get_serial_nos(sle.serial_no)
 	key = (sle.item_code, sle.warehouse)
 	if key not in available_serial_nos:
-		available_serial_nos.setdefault(key, [])
+		stock_balance = get_stock_balance_for(sle.item_code, sle.warehouse, sle.date.split(' ')[0],
+			sle.date.split(' ')[1])
+		serials = get_serial_nos(stock_balance['serial_nos']) if stock_balance['serial_nos'] else []
+		available_serial_nos.setdefault(key, serials)
 
 	existing_serial_no = available_serial_nos[key]
 	for sn in serial_nos:
@@ -104,6 +108,7 @@ def get_columns():
 		{"label": _("Incoming Rate"), "fieldname": "incoming_rate", "fieldtype": "Currency", "width": 110, "options": "Company:company:default_currency", "convertible": "rate"},
 		{"label": _("Valuation Rate"), "fieldname": "valuation_rate", "fieldtype": "Currency", "width": 110, "options": "Company:company:default_currency", "convertible": "rate"},
 		{"label": _("Balance Value"), "fieldname": "stock_value", "fieldtype": "Currency", "width": 110, "options": "Company:company:default_currency"},
+		{"label": _("Value Change"), "fieldname": "stock_value_difference", "fieldtype": "Currency", "width": 110, "options": "Company:company:default_currency"},
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
 		{"label": _("Voucher #"), "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 100},
 		{"label": _("Batch"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch", "width": 100},

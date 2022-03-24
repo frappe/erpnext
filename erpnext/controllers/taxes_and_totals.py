@@ -37,6 +37,8 @@ class calculate_taxes_and_totals(object):
 			self.set_discount_amount()
 			self.apply_discount_amount()
 
+		self.calculate_shipping_charges()
+
 		if self.doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
 			self.calculate_total_advance()
 
@@ -50,7 +52,6 @@ class calculate_taxes_and_totals(object):
 		self.initialize_taxes()
 		self.determine_exclusive_rate()
 		self.calculate_net_total()
-		self.calculate_shipping_charges()
 		self.calculate_taxes()
 		self.manipulate_grand_total_for_inclusive_tax()
 		self.calculate_totals()
@@ -106,21 +107,31 @@ class calculate_taxes_and_totals(object):
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)
 
 	def calculate_item_values(self):
+		if self.doc.get('is_consolidated'):
+			return
+
 		if not self.discount_amount_applied:
 			for item in self.doc.get("items"):
 				self.doc.round_floats_in(item)
 
+				if not item.rate:
+					item.rate = item.price_list_rate
+
 				if item.discount_percentage == 100:
 					item.rate = 0.0
 				elif item.price_list_rate:
-					if not item.rate or (item.pricing_rules and item.discount_percentage > 0):
+					if item.pricing_rules or abs(item.discount_percentage) > 0:
 						item.rate = flt(item.price_list_rate *
 							(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
-						item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
-					elif item.discount_amount and item.pricing_rules:
+
+						if abs(item.discount_percentage) > 0:
+							item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
+
+					elif item.discount_amount or item.pricing_rules:
 						item.rate =  item.price_list_rate - item.discount_amount
 
-				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item', 'POS Invoice Item', 'Purchase Invoice Item', 'Purchase Order Item', 'Purchase Receipt Item']:
+				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item',
+					'POS Invoice Item', 'Purchase Invoice Item', 'Purchase Order Item', 'Purchase Receipt Item']:
 					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
 					if flt(item.rate_with_margin) > 0:
 						item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
@@ -139,6 +150,8 @@ class calculate_taxes_and_totals(object):
 
 				if not item.qty and self.doc.get("is_return"):
 					item.amount = flt(-1 * item.rate, item.precision("amount"))
+				elif not item.qty and self.doc.get("is_debit_note"):
+					item.amount = flt(item.rate, item.precision("amount"))
 				else:
 					item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 
@@ -264,8 +277,11 @@ class calculate_taxes_and_totals(object):
 			shipping_rule = frappe.get_doc("Shipping Rule", self.doc.shipping_rule)
 			shipping_rule.apply(self.doc)
 
+			self._calculate()
+
 	def calculate_taxes(self):
-		if not self.doc.get('is_consolidated'):
+		rounding_adjustment_computed = self.doc.get('is_consolidated') and self.doc.get('rounding_adjustment')
+		if not rounding_adjustment_computed:
 			self.doc.rounding_adjustment = 0
 
 		# maintain actual tax rate based on idx
@@ -321,7 +337,7 @@ class calculate_taxes_and_totals(object):
 					if i == (len(self.doc.get("taxes")) - 1) and self.discount_amount_applied \
 						and self.doc.discount_amount \
 						and self.doc.apply_discount_on == "Grand Total" \
-						and not self.doc.get('is_consolidated'):
+						and not rounding_adjustment_computed:
 							self.doc.rounding_adjustment = flt(self.doc.grand_total
 								- flt(self.doc.discount_amount) - tax.total,
 								self.doc.precision("rounding_adjustment"))
@@ -460,20 +476,22 @@ class calculate_taxes_and_totals(object):
 					self.doc.total_net_weight += d.total_weight
 
 	def set_rounded_total(self):
-		if not self.doc.get('is_consolidated'):
-			if self.doc.meta.get_field("rounded_total"):
-				if self.doc.is_rounded_total_disabled():
-					self.doc.rounded_total = self.doc.base_rounded_total = 0
-					return
+		if self.doc.get('is_consolidated') and self.doc.get('rounding_adjustment'):
+			return
 
-				self.doc.rounded_total = round_based_on_smallest_currency_fraction(self.doc.grand_total,
-					self.doc.currency, self.doc.precision("rounded_total"))
+		if self.doc.meta.get_field("rounded_total"):
+			if self.doc.is_rounded_total_disabled():
+				self.doc.rounded_total = self.doc.base_rounded_total = 0
+				return
 
-				#if print_in_rate is set, we would have already calculated rounding adjustment
-				self.doc.rounding_adjustment += flt(self.doc.rounded_total - self.doc.grand_total,
-					self.doc.precision("rounding_adjustment"))
+			self.doc.rounded_total = round_based_on_smallest_currency_fraction(self.doc.grand_total,
+				self.doc.currency, self.doc.precision("rounded_total"))
 
-				self._set_in_company_currency(self.doc, ["rounding_adjustment", "rounded_total"])
+			#if print_in_rate is set, we would have already calculated rounding adjustment
+			self.doc.rounding_adjustment += flt(self.doc.rounded_total - self.doc.grand_total,
+				self.doc.precision("rounding_adjustment"))
+
+			self._set_in_company_currency(self.doc, ["rounding_adjustment", "rounded_total"])
 
 	def _cleanup(self):
 		if not self.doc.get('is_consolidated'):
@@ -594,13 +612,14 @@ class calculate_taxes_and_totals(object):
 
 		if self.doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
 			grand_total = self.doc.rounded_total or self.doc.grand_total
+			base_grand_total = self.doc.base_rounded_total or self.doc.base_grand_total
+
 			if self.doc.party_account_currency == self.doc.currency:
 				total_amount_to_pay = flt(grand_total - self.doc.total_advance
 					- flt(self.doc.write_off_amount), self.doc.precision("grand_total"))
 			else:
-				total_amount_to_pay = flt(flt(grand_total *
-					self.doc.conversion_rate, self.doc.precision("grand_total")) - self.doc.total_advance
-						- flt(self.doc.base_write_off_amount), self.doc.precision("grand_total"))
+				total_amount_to_pay = flt(flt(base_grand_total, self.doc.precision("base_grand_total")) - self.doc.total_advance
+						- flt(self.doc.base_write_off_amount), self.doc.precision("base_grand_total"))
 
 			self.doc.round_floats_in(self.doc, ["paid_amount"])
 			change_amount = 0
@@ -617,7 +636,12 @@ class calculate_taxes_and_totals(object):
 			self.doc.outstanding_amount = flt(total_amount_to_pay - flt(paid_amount) + flt(change_amount),
 				self.doc.precision("outstanding_amount"))
 
-			if self.doc.doctype == 'Sales Invoice' and self.doc.get('is_pos') and self.doc.get('is_return'):
+			if (
+				self.doc.doctype == 'Sales Invoice'
+				and self.doc.get('is_pos')
+				and self.doc.get('is_return')
+				and not self.doc.get('is_consolidated')
+			):
 				self.set_total_amount_to_default_mop(total_amount_to_pay)
 				self.calculate_paid_amount()
 
@@ -644,12 +668,12 @@ class calculate_taxes_and_totals(object):
 	def calculate_change_amount(self):
 		self.doc.change_amount = 0.0
 		self.doc.base_change_amount = 0.0
+		grand_total = self.doc.rounded_total or self.doc.grand_total
+		base_grand_total = self.doc.base_rounded_total or self.doc.base_grand_total
 
 		if self.doc.doctype == "Sales Invoice" \
-			and self.doc.paid_amount > self.doc.grand_total and not self.doc.is_return \
+			and self.doc.paid_amount > grand_total and not self.doc.is_return \
 			and any(d.type == "Cash" for d in self.doc.payments):
-			grand_total = self.doc.rounded_total or self.doc.grand_total
-			base_grand_total = self.doc.base_rounded_total or self.doc.base_grand_total
 
 			self.doc.change_amount = flt(self.doc.paid_amount - grand_total +
 				self.doc.write_off_amount, self.doc.precision("change_amount"))

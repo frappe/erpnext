@@ -3,17 +3,17 @@
 
 import frappe
 from frappe.test_runner import make_test_records
-from frappe.utils import cint
+from frappe.tests.utils import FrappeTestCase
 
 import erpnext
-from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
+from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.tests.utils import ERPNextTestCase
+from erpnext.stock.doctype.warehouse.warehouse import convert_to_group_or_ledger, get_children
 
 test_records = frappe.get_test_records('Warehouse')
 
-class TestWarehouse(ERPNextTestCase):
+class TestWarehouse(FrappeTestCase):
 	def setUp(self):
 		super().setUp()
 		if not frappe.get_value('Item', '_Test Item'):
@@ -32,65 +32,6 @@ class TestWarehouse(ERPNextTestCase):
 		for child_warehouse in child_warehouses:
 			self.assertEqual(p_warehouse.name, child_warehouse.parent_warehouse)
 			self.assertEqual(child_warehouse.is_group, 0)
-
-	def test_warehouse_renaming(self):
-		create_warehouse("Test Warehouse for Renaming 1", company="_Test Company with perpetual inventory")
-		account = get_inventory_account("_Test Company with perpetual inventory", "Test Warehouse for Renaming 1 - TCP1")
-		self.assertTrue(frappe.db.get_value("Warehouse", filters={"account": account}))
-
-		# Rename with abbr
-		if frappe.db.exists("Warehouse", "Test Warehouse for Renaming 2 - TCP1"):
-			frappe.delete_doc("Warehouse", "Test Warehouse for Renaming 2 - TCP1")
-		frappe.rename_doc("Warehouse", "Test Warehouse for Renaming 1 - TCP1", "Test Warehouse for Renaming 2 - TCP1")
-
-		self.assertTrue(frappe.db.get_value("Warehouse",
-			filters={"account": "Test Warehouse for Renaming 1 - TCP1"}))
-
-		# Rename without abbr
-		if frappe.db.exists("Warehouse", "Test Warehouse for Renaming 3 - TCP1"):
-			frappe.delete_doc("Warehouse", "Test Warehouse for Renaming 3 - TCP1")
-
-		frappe.rename_doc("Warehouse", "Test Warehouse for Renaming 2 - TCP1", "Test Warehouse for Renaming 3")
-
-		self.assertTrue(frappe.db.get_value("Warehouse",
-			filters={"account": "Test Warehouse for Renaming 1 - TCP1"}))
-
-		# Another rename with multiple dashes
-		if frappe.db.exists("Warehouse", "Test - Warehouse - Company - TCP1"):
-			frappe.delete_doc("Warehouse", "Test - Warehouse - Company - TCP1")
-		frappe.rename_doc("Warehouse", "Test Warehouse for Renaming 3 - TCP1", "Test - Warehouse - Company")
-
-	def test_warehouse_merging(self):
-		company = "_Test Company with perpetual inventory"
-		create_warehouse("Test Warehouse for Merging 1", company=company,
-			properties={"parent_warehouse": "All Warehouses - TCP1"})
-		create_warehouse("Test Warehouse for Merging 2", company=company,
-			properties={"parent_warehouse": "All Warehouses - TCP1"})
-
-		make_stock_entry(item_code="_Test Item", target="Test Warehouse for Merging 1 - TCP1",
-			qty=1, rate=100, company=company)
-		make_stock_entry(item_code="_Test Item", target="Test Warehouse for Merging 2 - TCP1",
-			qty=1, rate=100, company=company)
-
-		existing_bin_qty = (
-			cint(frappe.db.get_value("Bin",
-				{"item_code": "_Test Item", "warehouse": "Test Warehouse for Merging 1 - TCP1"}, "actual_qty"))
-			+ cint(frappe.db.get_value("Bin",
-				{"item_code": "_Test Item", "warehouse": "Test Warehouse for Merging 2 - TCP1"}, "actual_qty"))
-		)
-
-		frappe.rename_doc("Warehouse", "Test Warehouse for Merging 1 - TCP1",
-			"Test Warehouse for Merging 2 - TCP1", merge=True)
-
-		self.assertFalse(frappe.db.exists("Warehouse", "Test Warehouse for Merging 1 - TCP1"))
-
-		bin_qty = frappe.db.get_value("Bin",
-			{"item_code": "_Test Item", "warehouse": "Test Warehouse for Merging 2 - TCP1"}, "actual_qty")
-
-		self.assertEqual(bin_qty, existing_bin_qty)
-
-		self.assertTrue(frappe.db.get_value("Warehouse",
-			filters={"account": "Test Warehouse for Merging 2 - TCP1"}))
 
 	def test_unlinking_warehouse_from_item_defaults(self):
 		company = "_Test Company"
@@ -123,6 +64,33 @@ class TestWarehouse(ERPNextTestCase):
 					warehouse_ids,
 					f"{item} linked to {item_default.default_warehouse} in {warehouse_ids}."
 				)
+
+	def test_group_non_group_conversion(self):
+
+		warehouse = frappe.get_doc("Warehouse", create_warehouse("TestGroupConversion"))
+
+		convert_to_group_or_ledger(warehouse.name)
+		warehouse.reload()
+		self.assertEqual(warehouse.is_group, 1)
+
+		child = create_warehouse("GroupWHChild", {"parent_warehouse": warehouse.name})
+		# chid exists
+		self.assertRaises(frappe.ValidationError, convert_to_group_or_ledger, warehouse.name)
+		frappe.delete_doc("Warehouse", child)
+
+		convert_to_group_or_ledger(warehouse.name)
+		warehouse.reload()
+		self.assertEqual(warehouse.is_group, 0)
+
+		make_stock_entry(item_code="_Test Item", target=warehouse.name, qty=1)
+		# SLE exists
+		self.assertRaises(frappe.ValidationError, convert_to_group_or_ledger, warehouse.name)
+
+	def test_get_children(self):
+		company = "_Test Company"
+
+		children = get_children("Warehouse", parent=company, company=company, is_root=True)
+		self.assertTrue(any(wh['value'] == "_Test Warehouse - _TC" for wh in children))
 
 
 def create_warehouse(warehouse_name, properties=None, company=None):

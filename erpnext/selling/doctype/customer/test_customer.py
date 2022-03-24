@@ -2,10 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import unittest
-
 import frappe
 from frappe.test_runner import make_test_records
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt
 
 from erpnext.accounts.party import get_due_date
@@ -19,7 +18,7 @@ test_records = frappe.get_test_records('Customer')
 
 
 
-class TestCustomer(unittest.TestCase):
+class TestCustomer(FrappeTestCase):
 	def setUp(self):
 		if not frappe.get_value('Item', '_Test Item'):
 			make_test_records('Item')

@@ -3,13 +3,13 @@
 
 
 import json
-import os
 
 import frappe
 import frappe.defaults
 from frappe import _
 from frappe.cache_manager import clear_defaults_cache
 from frappe.contacts.address_and_contact import load_address_and_contact
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.utils import cint, formatdate, get_timestamp, today
 from frappe.utils.nestedset import NestedSet
 
@@ -22,8 +22,8 @@ class Company(NestedSet):
 
 	def onload(self):
 		load_address_and_contact(self, "company")
-		self.get("__onload")["transactions_exist"] = self.check_if_transactions_exist()
 
+	@frappe.whitelist()
 	def check_if_transactions_exist(self):
 		exists = False
 		for doctype in ["Sales Invoice", "Delivery Note", "Sales Order", "Quotation",
@@ -45,8 +45,9 @@ class Company(NestedSet):
 		self.validate_currency()
 		self.validate_coa_input()
 		self.validate_perpetual_inventory()
-		self.validate_perpetual_inventory_for_non_stock_items()
+		self.validate_provisional_account_for_non_stock_items()
 		self.check_country_change()
+		self.check_parent_changed()
 		self.set_chart_of_accounts()
 		self.validate_parent_company()
 
@@ -130,6 +131,10 @@ class Company(NestedSet):
 			self.name in frappe.local.enable_perpetual_inventory:
 			frappe.local.enable_perpetual_inventory[self.name] = self.enable_perpetual_inventory
 
+		if frappe.flags.parent_company_changed:
+			from frappe.utils.nestedset import rebuild_tree
+			rebuild_tree("Company", "parent_company")
+
 		frappe.clear_cache()
 
 	def create_default_warehouses(self):
@@ -182,16 +187,19 @@ class Company(NestedSet):
 				frappe.msgprint(_("Set default inventory account for perpetual inventory"),
 					alert=True, indicator='orange')
 
-	def validate_perpetual_inventory_for_non_stock_items(self):
+	def validate_provisional_account_for_non_stock_items(self):
 		if not self.get("__islocal"):
-			if cint(self.enable_perpetual_inventory_for_non_stock_items) == 1 and not self.service_received_but_not_billed:
-				frappe.throw(_("Set default {0} account for perpetual inventory for non stock items").format(
-					frappe.bold('Service Received But Not Billed')))
+			if cint(self.enable_provisional_accounting_for_non_stock_items) == 1 and not self.default_provisional_account:
+				frappe.throw(_("Set default {0} account for non stock items").format(
+					frappe.bold('Provisional Account')))
+
+			make_property_setter("Purchase Receipt", "provisional_expense_account", "hidden",
+				not self.enable_provisional_accounting_for_non_stock_items, "Check", validate_fields_for_doctype=False)
 
 	def check_country_change(self):
 		frappe.flags.country_change = False
 
-		if not self.get('__islocal') and \
+		if not self.is_new() and \
 			self.country != frappe.get_cached_value('Company',  self.name,  'country'):
 			frappe.flags.country_change = True
 
@@ -396,6 +404,13 @@ class Company(NestedSet):
 		if not frappe.db.get_value('GL Entry', {'company': self.name}):
 			frappe.db.sql("delete from `tabProcess Deferred Accounting` where company=%s", self.name)
 
+	def check_parent_changed(self):
+		frappe.flags.parent_company_changed = False
+
+		if not self.is_new() and \
+			self.parent_company != frappe.db.get_value("Company",  self.name,  "parent_company"):
+			frappe.flags.parent_company_changed = True
+
 def get_name_with_abbr(name, company):
 	company_abbr = frappe.get_cached_value('Company',  company,  "abbr")
 	parts = name.split(" - ")
@@ -406,14 +421,14 @@ def get_name_with_abbr(name, company):
 	return " - ".join(parts)
 
 def install_country_fixtures(company, country):
-	path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(country))
-	if os.path.exists(path.encode("utf-8")):
-		try:
-			module_name = "erpnext.regional.{0}.setup.setup".format(frappe.scrub(country))
-			frappe.get_attr(module_name)(company, False)
-		except Exception as e:
-			frappe.log_error()
-			frappe.throw(_("Failed to setup defaults for country {0}. Please contact support.").format(frappe.bold(country)))
+	try:
+		module_name = f"erpnext.regional.{frappe.scrub(country)}.setup.setup"
+		frappe.get_attr(module_name)(company, False)
+	except ImportError:
+		pass
+	except Exception:
+		frappe.log_error()
+		frappe.throw(_("Failed to setup defaults for country {0}. Please contact support.").format(frappe.bold(country)))
 
 
 def update_company_current_month_sales(company):

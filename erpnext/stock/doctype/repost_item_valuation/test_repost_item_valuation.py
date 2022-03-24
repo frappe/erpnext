@@ -4,12 +4,14 @@
 import unittest
 
 import frappe
+from frappe.utils import nowdate
 
 from erpnext.controllers.stock_controller import create_item_wise_repost_entries
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
 	in_configured_timeslot,
 )
+from erpnext.stock.utils import PendingRepostingError
 
 
 class TestRepostItemValuation(unittest.TestCase):
@@ -138,3 +140,25 @@ class TestRepostItemValuation(unittest.TestCase):
 		# to avoid breaking other tests accidentaly
 		riv4.set_status("Skipped")
 		riv3.set_status("Skipped")
+
+	def test_stock_freeze_validation(self):
+
+		today = nowdate()
+
+		riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			item_code="_Test Item",
+			warehouse="_Test Warehouse - _TC",
+			based_on="Item and Warehouse",
+			posting_date=today,
+			posting_time="00:01:00",
+		)
+		riv.flags.dont_run_in_test = True # keep it queued
+		riv.submit()
+
+		stock_settings = frappe.get_doc("Stock Settings")
+		stock_settings.stock_frozen_upto = today
+
+		self.assertRaises(PendingRepostingError, stock_settings.save)
+
+		riv.set_status("Skipped")

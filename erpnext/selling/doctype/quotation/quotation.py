@@ -8,6 +8,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, getdate, nowdate
 
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.crm.utils import add_link_in_communication, copy_comments
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -33,6 +34,16 @@ class Quotation(SellingController):
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
+
+	def after_insert(self):
+		if frappe.db.get_single_value("CRM Settings", "carry_forward_communication_and_comments"):
+			if self.opportunity:
+				copy_comments("Opportunity", self.opportunity, self)
+				add_link_in_communication("Opportunity", self.opportunity, self)
+
+			elif self.quotation_to == "Lead" and self.party_name:
+				copy_comments("Lead", self.party_name, self)
+				add_link_in_communication("Lead", self.party_name, self)
 
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
@@ -154,7 +165,6 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		if source.referral_sales_partner:
 			target.sales_partner=source.referral_sales_partner
 			target.commission_rate=frappe.get_value('Sales Partner', source.referral_sales_partner, 'commission_rate')
-		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
@@ -196,6 +206,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
 	# postprocess: fetch shipping address, set missing values
+	doclist.set_onload('ignore_price_list', True)
 
 	return doclist
 
@@ -229,7 +240,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		if customer:
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
-		target.ignore_pricing_rule = 1
+
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
@@ -259,6 +270,8 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			}
 		}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
+	doclist.set_onload('ignore_price_list', True)
+
 	return doclist
 
 def _make_customer(source_name, ignore_permissions=False):
@@ -276,7 +289,7 @@ def _make_customer(source_name, ignore_permissions=False):
 				customer = frappe.get_doc(customer_doclist)
 				customer.flags.ignore_permissions = ignore_permissions
 				if quotation.get("party_name") == "Shopping Cart":
-					customer.customer_group = frappe.db.get_value("Shopping Cart Settings", None,
+					customer.customer_group = frappe.db.get_value("E Commerce Settings", None,
 						"default_customer_group")
 
 				try:

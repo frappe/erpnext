@@ -249,7 +249,7 @@
   {
    "fieldname": "actual_time",
    "fieldtype": "Float",
-   "label": "Actual Time (in hours)",
+   "label": "Actual Time (in Hours via Time Sheet)",
    "read_only": 1
   },
   {
@@ -397,10 +397,11 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2021-04-16 12:46:51.556741",
+ "modified": "2022-01-29 13:58:47.005241",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
+ "naming_rule": "Expression (old style)",
  "nsm_parent_field": "parent_task",
  "owner": "Administrator",
  "permissions": [
@@ -421,6 +422,7 @@
  "show_preview_popup": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "project",
  "title_field": "subject",
  "track_seen": 1

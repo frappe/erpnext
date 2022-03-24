@@ -5,28 +5,17 @@
 import frappe
 from frappe import _
 from frappe.utils import add_days, flt, get_datetime_str, nowdate
+from frappe.utils.data import now_datetime
+from frappe.utils.nestedset import get_ancestors_of, get_root_of  # noqa
 
 from erpnext import get_default_company
 
-
-def get_root_of(doctype):
-	"""Get root element of a DocType with a tree structure"""
-	result = frappe.db.sql_list("""select name from `tab%s`
-		where lft=1 and rgt=(select max(rgt) from `tab%s` where docstatus < 2)""" %
-		(doctype, doctype))
-	return result[0] if result else None
-
-def get_ancestors_of(doctype, name):
-	"""Get ancestor elements of a DocType with a tree structure"""
-	lft, rgt = frappe.db.get_value(doctype, name, ["lft", "rgt"])
-	result = frappe.db.sql_list("""select name from `tab%s`
-		where lft<%s and rgt>%s order by lft desc""" % (doctype, "%s", "%s"), (lft, rgt))
-	return result or []
 
 def before_tests():
 	frappe.clear_cache()
 	# complete setup if missing
 	from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
+	current_year = now_datetime().year
 	if not frappe.get_list("Company"):
 		setup_complete({
 			"currency"          :"USD",
@@ -36,8 +25,8 @@ def before_tests():
 			"company_abbr"      :"WP",
 			"industry"          :"Manufacturing",
 			"country"           :"United States",
-			"fy_start_date"     :"2021-01-01",
-			"fy_end_date"       :"2021-12-31",
+			"fy_start_date"     :f"{current_year}-01-01",
+			"fy_end_date"       :f"{current_year}-12-31",
 			"language"          :"english",
 			"company_tagline"   :"Testing",
 			"email"             :"test@erpnext.com",
@@ -51,8 +40,8 @@ def before_tests():
 	frappe.db.sql("delete from `tabSalary Slip`")
 	frappe.db.sql("delete from `tabItem Price`")
 
-	frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 0)
 	enable_all_roles_and_domains()
+	set_defaults_for_tests()
 
 	frappe.db.commit()
 
@@ -99,21 +88,34 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 
 		if not value:
 			import requests
-			api_url = "https://api.exchangerate.host/convert"
-			response = requests.get(api_url, params={
-				"date": transaction_date,
-				"from": from_currency,
-				"to": to_currency
-			})
+			settings = frappe.get_cached_doc('Currency Exchange Settings')
+			req_params = {
+				"transaction_date": transaction_date,
+				"from_currency": from_currency,
+				"to_currency": to_currency
+			}
+			params = {}
+			for row in settings.req_params:
+				params[row.key] = format_ces_api(row.value, req_params)
+			response = requests.get(format_ces_api(settings.api_endpoint, req_params), params=params)
 			# expire in 6 hours
 			response.raise_for_status()
-			value = response.json()["result"]
+			value = response.json()
+			for res_key in settings.result_key:
+				value = value[format_ces_api(str(res_key.key), req_params)]
 			cache.setex(name=key, time=21600, value=flt(value))
 		return flt(value)
 	except Exception:
 		frappe.log_error(title="Get Exchange Rate")
 		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually").format(from_currency, to_currency, transaction_date))
 		return 0.0
+
+def format_ces_api(data, param):
+	return data.format(
+		transaction_date=param.get("transaction_date"),
+		to_currency=param.get("to_currency"),
+		from_currency=param.get("from_currency")
+	)
 
 def enable_all_roles_and_domains():
 	""" enable all roles and domain for testing """
@@ -127,13 +129,21 @@ def enable_all_roles_and_domains():
 		[d.name for d in domains])
 	add_all_roles_to('Administrator')
 
+def set_defaults_for_tests():
+	selling_settings = frappe.get_single("Selling Settings")
+	selling_settings.customer_group = get_root_of("Customer Group")
+	selling_settings.territory = get_root_of("Territory")
+	selling_settings.save()
+
+	frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 0)
+
 
 def insert_record(records):
 	for r in records:
 		doc = frappe.new_doc(r.get("doctype"))
 		doc.update(r)
 		try:
-			doc.insert(ignore_permissions=True)
+			doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
 		except frappe.DuplicateEntryError as e:
 			# pass DuplicateEntryError and continue
 			if e.args and e.args[0]==doc.doctype and e.args[1]==doc.name:

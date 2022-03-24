@@ -138,6 +138,7 @@ class DeliveryNote(SellingController):
 		self.update_current_stock()
 
 		if not self.installation_status: self.installation_status = 'Not Installed'
+		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def validate_with_previous_doc(self):
 		super(DeliveryNote, self).validate_with_previous_doc({
@@ -333,17 +334,31 @@ class DeliveryNote(SellingController):
 			frappe.throw(_("Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"))
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
+	from frappe.query_builder.functions import Sum
+
 	# Billed against Sales Order directly
-	billed_against_so = frappe.db.sql("""select sum(amount) from `tabSales Invoice Item`
-		where so_detail=%s and (dn_detail is null or dn_detail = '') and docstatus=1""", so_detail)
+	si_item = frappe.qb.DocType("Sales Invoice Item").as_("si_item")
+	sum_amount = Sum(si_item.amount).as_("amount")
+
+	billed_against_so = frappe.qb.from_(si_item).select(sum_amount).where(
+		(si_item.so_detail == so_detail) &
+		((si_item.dn_detail.isnull()) | (si_item.dn_detail == '')) &
+		(si_item.docstatus == 1)
+	).run()
 	billed_against_so = billed_against_so and billed_against_so[0][0] or 0
 
 	# Get all Delivery Note Item rows against the Sales Order Item row
-	dn_details = frappe.db.sql("""select dn_item.name, dn_item.amount, dn_item.si_detail, dn_item.parent
-		from `tabDelivery Note Item` dn_item, `tabDelivery Note` dn
-		where dn.name=dn_item.parent and dn_item.so_detail=%s
-			and dn.docstatus=1 and dn.is_return = 0
-		order by dn.posting_date asc, dn.posting_time asc, dn.name asc""", so_detail, as_dict=1)
+	dn = frappe.qb.DocType("Delivery Note").as_("dn")
+	dn_item = frappe.qb.DocType("Delivery Note Item").as_("dn_item")
+
+	dn_details = frappe.qb.from_(dn).from_(dn_item).select(dn_item.name, dn_item.amount, dn_item.si_detail, dn_item.parent).where(
+		(dn.name == dn_item.parent) &
+		(dn_item.so_detail == so_detail) &
+		(dn.docstatus == 1) &
+		(dn.is_return == 0)
+	).orderby(
+		dn.posting_date, dn.posting_time, dn.name
+	).run(as_dict=True)
 
 	updated_dn = []
 	for dnd in dn_details:
@@ -419,7 +434,6 @@ def make_sales_invoice(source_name, target_doc=None):
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
-		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 
@@ -505,6 +519,8 @@ def make_sales_invoice(source_name, target_doc=None):
 	if automatically_fetch_payment_terms:
 		doc.set_payment_schedule()
 
+	doc.set_onload('ignore_price_list', True)
+
 	return doc
 
 @frappe.whitelist()
@@ -580,7 +596,18 @@ def make_packing_slip(source_name, target_doc=None):
 			"validation": {
 				"docstatus": ["=", 0]
 			}
+		},
+
+		"Delivery Note Item": {
+			"doctype": "Packing Slip Item",
+			"field_map": {
+				"item_code": "item_code",
+				"item_name": "item_name",
+				"description": "description",
+				"qty": "qty",
+			}
 		}
+
 	}, target_doc)
 
 	return doclist
@@ -759,3 +786,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+def on_doctype_update():
+	frappe.db.add_index("Delivery Note", ["customer", "is_return", "return_against"])

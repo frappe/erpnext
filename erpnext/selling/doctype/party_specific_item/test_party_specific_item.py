@@ -1,9 +1,8 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
-
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.controllers.queries import item_query
 
@@ -17,7 +16,7 @@ def create_party_specific_item(**args):
 	psi.based_on_value = args.get('based_on_value')
 	psi.insert()
 
-class TestPartySpecificItem(unittest.TestCase):
+class TestPartySpecificItem(FrappeTestCase):
 	def setUp(self):
 		self.customer = frappe.get_last_doc("Customer")
 		self.supplier = frappe.get_last_doc("Supplier")

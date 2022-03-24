@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt
 
 from erpnext import get_company_currency
@@ -218,6 +219,8 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 	# updated clear date of all the vouchers based on the bank transaction
 	vouchers = json.loads(vouchers)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
+	company_account = frappe.db.get_value('Bank Account', transaction.bank_account, 'account')
+
 	if transaction.unallocated_amount == 0:
 		frappe.throw(_("This bank transaction is already fully reconciled"))
 	total_amount = 0
@@ -226,10 +229,10 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 		total_amount += get_paid_amount(frappe._dict({
 			'payment_document': voucher['payment_doctype'],
 			'payment_entry': voucher['payment_name'],
-		}), transaction.currency)
+		}), transaction.currency, company_account)
 
 	if total_amount > transaction.unallocated_amount:
-		frappe.throw(_("The Sum Total of Amounts of All Selected Vouchers Should be Less than the Unallocated Amount of the Bank Transaction"))
+		frappe.throw(_("The sum total of amounts of all selected vouchers should be less than the unallocated amount of the bank transaction"))
 	account = frappe.db.get_value("Bank Account", transaction.bank_account, "account")
 
 	for voucher in vouchers:
@@ -261,7 +264,7 @@ def get_linked_payments(bank_transaction_name, document_types = None):
 	return matching
 
 def check_matching(bank_account, company, transaction, document_types):
-	# combine all types of vocuhers
+	# combine all types of vouchers
 	subquery = get_queries(bank_account, company, transaction, document_types)
 	filters = {
 			"amount": transaction.unallocated_amount,
@@ -273,6 +276,10 @@ def check_matching(bank_account, company, transaction, document_types):
 		}
 
 	matching_vouchers = []
+
+	matching_vouchers.extend(get_loan_vouchers(bank_account, transaction,
+		document_types, filters))
+
 	for query in subquery:
 		matching_vouchers.extend(
 			frappe.db.sql(query, filters,)
@@ -309,6 +316,114 @@ def get_queries(bank_account, company, transaction, document_types):
 
 	return queries
 
+def get_loan_vouchers(bank_account, transaction, document_types, filters):
+	vouchers = []
+	amount_condition = True if "exact_match" in document_types else False
+
+	if transaction.withdrawal > 0 and "loan_disbursement" in document_types:
+		vouchers.extend(get_ld_matching_query(bank_account, amount_condition, filters))
+
+	if transaction.deposit > 0 and "loan_repayment" in document_types:
+		vouchers.extend(get_lr_matching_query(bank_account, amount_condition, filters))
+
+	return vouchers
+
+def get_ld_matching_query(bank_account, amount_condition, filters):
+	loan_disbursement = frappe.qb.DocType("Loan Disbursement")
+	matching_reference = loan_disbursement.reference_number == filters.get("reference_number")
+	matching_party = loan_disbursement.applicant_type == filters.get("party_type") and \
+			loan_disbursement.applicant == filters.get("party")
+
+	rank = (
+			frappe.qb.terms.Case()
+			.when(matching_reference, 1)
+			.else_(0)
+		)
+
+	rank1 = (
+			frappe.qb.terms.Case()
+			.when(matching_party, 1)
+			.else_(0)
+		)
+
+	query = frappe.qb.from_(loan_disbursement).select(
+		rank + rank1 + 1,
+		ConstantColumn("Loan Disbursement").as_("doctype"),
+		loan_disbursement.name,
+		loan_disbursement.disbursed_amount,
+		loan_disbursement.reference_number,
+		loan_disbursement.reference_date,
+		loan_disbursement.applicant_type,
+		loan_disbursement.disbursement_date
+	).where(
+		loan_disbursement.docstatus == 1
+	).where(
+		loan_disbursement.clearance_date.isnull()
+	).where(
+		loan_disbursement.disbursement_account == bank_account
+	)
+
+	if amount_condition:
+		query.where(
+			loan_disbursement.disbursed_amount == filters.get('amount')
+		)
+	else:
+		query.where(
+			loan_disbursement.disbursed_amount <= filters.get('amount')
+		)
+
+	vouchers = query.run(as_list=True)
+
+	return vouchers
+
+def get_lr_matching_query(bank_account, amount_condition, filters):
+	loan_repayment = frappe.qb.DocType("Loan Repayment")
+	matching_reference = loan_repayment.reference_number == filters.get("reference_number")
+	matching_party = loan_repayment.applicant_type == filters.get("party_type") and \
+			loan_repayment.applicant == filters.get("party")
+
+	rank = (
+			frappe.qb.terms.Case()
+			.when(matching_reference, 1)
+			.else_(0)
+		)
+
+	rank1 = (
+			frappe.qb.terms.Case()
+			.when(matching_party, 1)
+			.else_(0)
+		)
+
+	query = frappe.qb.from_(loan_repayment).select(
+		rank + rank1 + 1,
+		ConstantColumn("Loan Repayment").as_("doctype"),
+		loan_repayment.name,
+		loan_repayment.amount_paid,
+		loan_repayment.reference_number,
+		loan_repayment.reference_date,
+		loan_repayment.applicant_type,
+		loan_repayment.posting_date
+	).where(
+		loan_repayment.docstatus == 1
+	).where(
+		loan_repayment.clearance_date.isnull()
+	).where(
+		loan_repayment.payment_account == bank_account
+	)
+
+	if amount_condition:
+		query.where(
+			loan_repayment.amount_paid == filters.get('amount')
+		)
+	else:
+		query.where(
+			loan_repayment.amount_paid <= filters.get('amount')
+		)
+
+	vouchers = query.run()
+
+	return vouchers
+
 def get_pe_matching_query(amount_condition, account_from_to, transaction):
 	# get matching payment entries query
 	if transaction.deposit > 0:
@@ -343,13 +458,10 @@ def get_pe_matching_query(amount_condition, account_from_to, transaction):
 def get_je_matching_query(amount_condition, transaction):
 	# get matching journal entry query
 
-	company_account = frappe.get_value("Bank Account", transaction.bank_account, "account")
-	root_type = frappe.get_value("Account", company_account, "root_type")
-
-	if root_type == "Liability":
-		cr_or_dr = "debit" if transaction.withdrawal > 0 else "credit"
-	else:
-		cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
+	# We have mapping at the bank level
+	# So one bank could have both types of bank accounts like asset and liability
+	# So cr_or_dr should be judged only on basis of withdrawal and deposit and not account type
+	cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
 
 	return f"""
 
@@ -434,7 +546,7 @@ def get_pi_matching_query(amount_condition):
 
 def get_ec_matching_query(bank_account, company, amount_condition):
 	# get matching Expense Claim query
-	mode_of_payments = [x["parent"] for x in frappe.db.get_list("Mode of Payment Account",
+	mode_of_payments = [x["parent"] for x in frappe.db.get_all("Mode of Payment Account",
 			filters={"default_account": bank_account}, fields=["parent"])]
 	mode_of_payments = '(\'' + '\', \''.join(mode_of_payments) + '\' )'
 	company_currency = get_company_currency(company)

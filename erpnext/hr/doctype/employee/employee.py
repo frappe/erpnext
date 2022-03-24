@@ -68,12 +68,18 @@ class Employee(NestedSet):
 		self.employee_name = ' '.join(filter(lambda x: x, [self.first_name, self.middle_name, self.last_name]))
 
 	def validate_user_details(self):
-		data = frappe.db.get_value('User',
-			self.user_id, ['enabled', 'user_image'], as_dict=1)
-		if data.get("user_image") and self.image == '':
-			self.image = data.get("user_image")
-		self.validate_for_enabled_user_id(data.get("enabled", 0))
-		self.validate_duplicate_user_id()
+		if self.user_id:
+			data = frappe.db.get_value('User',
+				self.user_id, ['enabled', 'user_image'], as_dict=1)
+
+			if not data:
+				self.user_id = None
+				return
+
+			if data.get("user_image") and self.image == '':
+				self.image = data.get("user_image")
+			self.validate_for_enabled_user_id(data.get("enabled", 0))
+			self.validate_duplicate_user_id()
 
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
@@ -96,15 +102,8 @@ class Employee(NestedSet):
 			'user': self.user_id
 		})
 
-		if employee_user_permission_exists: return
-
-		employee_user_permission_exists = frappe.db.exists('User Permission', {
-			'allow': 'Employee',
-			'for_value': self.name,
-			'user': self.user_id
-		})
-
-		if employee_user_permission_exists: return
+		if employee_user_permission_exists:
+			return
 
 		add_user_permission("Employee", self.name, self.user_id)
 		set_user_permission_if_allowed("Company", self.company, self.user_id)
@@ -143,7 +142,7 @@ class Employee(NestedSet):
 						"file_url": self.image,
 						"attached_to_doctype": "User",
 						"attached_to_name": self.user_id
-					}).insert()
+					}).insert(ignore_if_duplicate=True)
 				except frappe.DuplicateEntryError:
 					# already exists
 					pass

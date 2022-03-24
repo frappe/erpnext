@@ -1,11 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
-
-import unittest
-
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -13,7 +10,7 @@ from erpnext.stock.doctype.item.test_item import create_item
 
 test_records = frappe.get_test_records('BOM')
 
-class TestBOMUpdateTool(unittest.TestCase):
+class TestBOMUpdateTool(FrappeTestCase):
 	def test_replace_bom(self):
 		current_bom = "BOM-_Test Item Home Desktop Manufactured-001"
 

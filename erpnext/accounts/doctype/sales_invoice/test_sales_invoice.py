@@ -20,6 +20,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_comp
 from erpnext.accounts.utils import PaymentEntryUnlinkError
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from erpnext.controllers.accounts_controller import update_invoice_status
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.regional.india.utils import get_ewb_data
@@ -1594,6 +1595,56 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account][1], gle.debit)
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
+	def test_rounding_adjustment_3(self):
+		si = create_sales_invoice(do_not_save=True)
+		si.items = []
+		for d in [(1122, 2), (1122.01, 1), (1122.01, 1)]:
+			si.append("items", {
+				"item_code": "_Test Item",
+				"gst_hsn_code": "999800",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": d[1],
+				"rate": d[0],
+				"income_account": "Sales - _TC",
+				"cost_center": "_Test Cost Center - _TC"
+			})
+		for tax_account in ["_Test Account VAT - _TC", "_Test Account Service Tax - _TC"]:
+			si.append("taxes", {
+				"charge_type": "On Net Total",
+				"account_head": tax_account,
+				"description": tax_account,
+				"rate": 6,
+				"cost_center": "_Test Cost Center - _TC",
+				"included_in_print_rate": 1
+			})
+		si.save()
+		si.submit()
+		self.assertEqual(si.net_total, 4007.16)
+		self.assertEqual(si.grand_total, 4488.02)
+		self.assertEqual(si.total_taxes_and_charges, 480.86)
+		self.assertEqual(si.rounding_adjustment, -0.02)
+
+		expected_values = dict((d[0], d) for d in [
+			[si.debit_to, 4488.0, 0.0],
+			["_Test Account Service Tax - _TC", 0.0, 240.43],
+			["_Test Account VAT - _TC", 0.0, 240.43],
+			["Sales - _TC", 0.0, 4007.15],
+			["Round Off - _TC", 0.01, 0]
+		])
+
+		gl_entries = frappe.db.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", si.name, as_dict=1)
+
+		debit_credit_diff = 0
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account][0], gle.account)
+			self.assertEqual(expected_values[gle.account][1], gle.debit)
+			self.assertEqual(expected_values[gle.account][2], gle.credit)
+			debit_credit_diff += (gle.debit - gle.credit)
+
+		self.assertEqual(debit_credit_diff, 0)
+
 	def test_sales_invoice_with_shipping_rule(self):
 		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
 
@@ -1779,47 +1830,6 @@ class TestSalesInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
-
-	def test_deferred_revenue_post_account_freeze_upto_by_admin(self):
-		frappe.set_user("Administrator")
-
-		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
-		frappe.db.set_value('Accounts Settings', None, 'frozen_accounts_modifier', None)
-
-		deferred_account = create_account(account_name="Deferred Revenue",
-			parent_account="Current Liabilities - _TC", company="_Test Company")
-
-		item = create_item("_Test Item for Deferred Accounting")
-		item.enable_deferred_revenue = 1
-		item.deferred_revenue_account = deferred_account
-		item.no_of_months = 12
-		item.save()
-
-		si = create_sales_invoice(item=item.name, posting_date="2019-01-10", do_not_save=True)
-		si.items[0].enable_deferred_revenue = 1
-		si.items[0].service_start_date = "2019-01-10"
-		si.items[0].service_end_date = "2019-03-15"
-		si.items[0].deferred_revenue_account = deferred_account
-		si.save()
-		si.submit()
-
-		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', getdate('2019-01-31'))
-		frappe.db.set_value('Accounts Settings', None, 'frozen_accounts_modifier', 'System Manager')
-
-		pda1 = frappe.get_doc(dict(
-			doctype='Process Deferred Accounting',
-			posting_date=nowdate(),
-			start_date="2019-01-01",
-			end_date="2019-03-31",
-			type="Income",
-			company="_Test Company"
-		))
-
-		pda1.insert()
-		self.assertRaises(frappe.ValidationError, pda1.submit)
-
-		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
-		frappe.db.set_value('Accounts Settings', None, 'frozen_accounts_modifier', None)
 
 	def test_fixed_deferred_revenue(self):
 		deferred_account = create_account(account_name="Deferred Revenue",
@@ -2140,6 +2150,54 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(data['billLists'][0]['actualFromStateCode'],7)
 		self.assertEqual(data['billLists'][0]['fromStateCode'],27)
 
+	def test_einvoice_submission_without_irn(self):
+		# init
+		einvoice_settings = frappe.get_doc('E Invoice Settings')
+		einvoice_settings.enable = 1
+		einvoice_settings.applicable_from = nowdate()
+		einvoice_settings.append('credentials', {
+			'company': '_Test Company',
+			'gstin': '27AAECE4835E1ZR',
+			'username': 'test',
+			'password': 'test'
+		})
+		einvoice_settings.save()
+
+		country = frappe.flags.country
+		frappe.flags.country = 'India'
+
+		si = make_sales_invoice_for_ewaybill()
+		self.assertRaises(frappe.ValidationError, si.submit)
+
+		si.irn = 'test_irn'
+		si.submit()
+
+		# reset
+		einvoice_settings = frappe.get_doc('E Invoice Settings')
+		einvoice_settings.enable = 0
+		frappe.flags.country = country
+
+	def test_einvoice_json(self):
+		from erpnext.regional.india.e_invoice.utils import make_einvoice, validate_totals
+
+		si = get_sales_invoice_for_e_invoice()
+		si.discount_amount = 100
+		si.save()
+
+		einvoice = make_einvoice(si)
+		self.assertTrue(einvoice['EwbDtls'])
+		validate_totals(einvoice)
+
+		si.apply_discount_on = 'Net Total'
+		si.save()
+		einvoice = make_einvoice(si)
+		validate_totals(einvoice)
+
+		[d.set('included_in_print_rate', 1) for d in si.taxes]
+		si.save()
+		einvoice = make_einvoice(si)
+		validate_totals(einvoice)
+
 	def test_item_tax_net_range(self):
 		item = create_item("T Shirt")
 
@@ -2232,9 +2290,9 @@ class TestSalesInvoice(unittest.TestCase):
 		asset.load_from_db()
 
 		expected_values = [
-			["2020-06-30", 1311.48, 1311.48],
-			["2021-06-30", 20000.0, 21311.48],
-			["2021-09-30", 5041.1, 26352.58]
+			["2020-06-30", 1366.12, 1366.12],
+			["2021-06-30", 20000.0, 21366.12],
+			["2021-09-30", 5041.1, 26407.22]
 		]
 
 		for i, schedule in enumerate(asset.schedules):
@@ -2282,12 +2340,12 @@ class TestSalesInvoice(unittest.TestCase):
 		asset.load_from_db()
 
 		expected_values = [
-			["2020-06-30", 1311.48, 1311.48, True],
-			["2021-06-30", 20000.0, 21311.48, True],
-			["2022-06-30", 20000.0, 41311.48, False],
-			["2023-06-30", 20000.0, 61311.48, False],
-			["2024-06-30",  20000.0, 81311.48,  False],
-			["2025-06-06",  18688.52,  100000.0, False]
+			["2020-06-30", 1366.12, 1366.12, True],
+			["2021-06-30", 20000.0, 21366.12, True],
+			["2022-06-30", 20000.0, 41366.12, False],
+			["2023-06-30", 20000.0, 61366.12, False],
+			["2024-06-30",  20000.0, 81366.12,  False],
+			["2025-06-06",  18633.88,  100000.0, False]
 		]
 
 		for i, schedule in enumerate(asset.schedules):
@@ -2385,6 +2443,72 @@ class TestSalesInvoice(unittest.TestCase):
 		si.reload()
 		self.assertEqual(si.status, "Paid")
 
+	def test_update_invoice_status(self):
+		today = nowdate()
+
+		# Sales Invoice without Payment Schedule
+		si = create_sales_invoice(posting_date=add_days(today, -5))
+
+		# Sales Invoice with Payment Schedule
+		si_with_payment_schedule = create_sales_invoice(do_not_submit=True)
+		si_with_payment_schedule.extend("payment_schedule", [
+			{
+				"due_date": add_days(today, -5),
+				"invoice_portion": 50,
+				"payment_amount": si_with_payment_schedule.grand_total / 2
+			},
+			{
+				"due_date": add_days(today, 5),
+				"invoice_portion": 50,
+				"payment_amount": si_with_payment_schedule.grand_total / 2
+			}
+		])
+		si_with_payment_schedule.submit()
+
+
+		for invoice in (si, si_with_payment_schedule):
+			invoice.db_set("status", "Unpaid")
+			update_invoice_status()
+			invoice.reload()
+			self.assertEqual(invoice.status, "Overdue")
+
+			invoice.db_set("status", "Unpaid and Discounted")
+			update_invoice_status()
+			invoice.reload()
+			self.assertEqual(invoice.status, "Overdue and Discounted")
+
+
+	def test_sales_commission(self):
+		si = frappe.copy_doc(test_records[2])
+
+		frappe.db.set_value('Item', si.get('items')[0].item_code, 'grant_commission', 1)
+		frappe.db.set_value('Item', si.get('items')[1].item_code, 'grant_commission', 0)
+
+		item = copy.deepcopy(si.get('items')[0])
+		item.update({
+			"qty": 1,
+			"rate": 500,
+		})
+
+		item = copy.deepcopy(si.get('items')[1])
+		item.update({
+			"qty": 1,
+			"rate": 500,
+		})
+
+		# Test valid values
+		for commission_rate, total_commission in ((0, 0), (10, 50), (100, 500)):
+			si.commission_rate = commission_rate
+			si.save()
+			self.assertEqual(si.amount_eligible_for_commission, 500)
+			self.assertEqual(si.total_commission, total_commission)
+
+		# Test invalid values
+		for commission_rate in (101, -1):
+			si.reload()
+			si.commission_rate = commission_rate
+			self.assertRaises(frappe.ValidationError, si.save)
+
 	def test_sales_invoice_submission_post_account_freezing_date(self):
 		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', add_days(getdate(), 1))
 		si = create_sales_invoice(do_not_save=True)
@@ -2422,6 +2546,80 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue("cannot overbill" in str(err.exception).lower())
 
 		frappe.db.set_value('Accounts Settings', None, 'over_billing_allowance', over_billing_allowance)
+
+	def test_multi_currency_deferred_revenue_via_journal_entry(self):
+		deferred_account = create_account(account_name="Deferred Revenue",
+			parent_account="Current Liabilities - _TC", company="_Test Company")
+
+		acc_settings = frappe.get_single('Accounts Settings')
+		acc_settings.book_deferred_entries_via_journal_entry = 1
+		acc_settings.submit_journal_entries = 1
+		acc_settings.save()
+
+		item = create_item("_Test Item for Deferred Accounting")
+		item.enable_deferred_expense = 1
+		item.deferred_revenue_account = deferred_account
+		item.save()
+
+		si = create_sales_invoice(customer='_Test Customer USD', currency='USD',
+			item=item.name, qty=1, rate=100, conversion_rate=60, do_not_save=True)
+
+		si.set_posting_time = 1
+		si.posting_date = '2019-01-01'
+		si.debit_to = '_Test Receivable USD - _TC'
+		si.items[0].enable_deferred_revenue = 1
+		si.items[0].service_start_date = "2019-01-01"
+		si.items[0].service_end_date = "2019-03-30"
+		si.items[0].deferred_expense_account = deferred_account
+		si.save()
+		si.submit()
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', getdate('2019-01-31'))
+
+		pda1 = frappe.get_doc(dict(
+			doctype='Process Deferred Accounting',
+			posting_date=nowdate(),
+			start_date="2019-01-01",
+			end_date="2019-03-31",
+			type="Income",
+			company="_Test Company"
+		))
+
+		pda1.insert()
+		pda1.submit()
+
+		expected_gle = [
+			["Sales - _TC", 0.0, 2089.89, "2019-01-28"],
+			[deferred_account, 2089.89, 0.0, "2019-01-28"],
+			["Sales - _TC", 0.0, 1887.64, "2019-02-28"],
+			[deferred_account, 1887.64, 0.0, "2019-02-28"],
+			["Sales - _TC", 0.0, 2022.47, "2019-03-15"],
+			[deferred_account, 2022.47, 0.0, "2019-03-15"]
+		]
+
+		gl_entries = gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
+			from `tabGL Entry`
+			where voucher_type='Journal Entry' and voucher_detail_no=%s and posting_date <= %s
+			order by posting_date asc, account asc""", (si.items[0].name, si.posting_date), as_dict=1)
+
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_gle[i][0], gle.account)
+			self.assertEqual(expected_gle[i][1], gle.credit)
+			self.assertEqual(expected_gle[i][2], gle.debit)
+			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+
+		acc_settings = frappe.get_single('Accounts Settings')
+		acc_settings.book_deferred_entries_via_journal_entry = 0
+		acc_settings.submit_journal_entriessubmit_journal_entries = 0
+		acc_settings.save()
+
+		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
+
+	def test_standalone_serial_no_return(self):
+		si = create_sales_invoice(item_code="_Test Serialized Item With Series", update_stock=True, is_return=True, qty=-1)
+		si.reload()
+		self.assertTrue(si.items[0].serial_no)
+
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()

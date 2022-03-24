@@ -60,10 +60,36 @@ frappe.ui.form.on('Asset Repair', {
 		if (frm.doc.repair_status == "Completed") {
 			frm.set_value('completion_date', frappe.datetime.now_datetime());
 		}
+	},
+
+	stock_items_on_form_rendered() {
+		erpnext.setup_serial_or_batch_no();
 	}
 });
 
 frappe.ui.form.on('Asset Repair Consumed Item', {
+	item_code: function(frm, cdt, cdn) {
+		var item = locals[cdt][cdn];
+
+		let item_args = {
+			'item_code': item.item_code,
+			'warehouse': frm.doc.warehouse,
+			'qty': item.consumed_quantity,
+			'serial_no': item.serial_no,
+			'company': frm.doc.company
+		};
+
+		frappe.call({
+			method: 'erpnext.stock.utils.get_incoming_rate',
+			args: {
+				args: item_args
+			},
+			callback: function(r) {
+				frappe.model.set_value(cdt, cdn, 'valuation_rate', r.message);
+			}
+		});
+	},
+
 	consumed_quantity: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, 'total_value', row.consumed_quantity * row.valuation_rate);

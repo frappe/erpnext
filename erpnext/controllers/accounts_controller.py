@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _, throw
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
+from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -112,7 +113,7 @@ class AccountsController(TransactionBase):
 						_('{0} is blocked so this transaction cannot proceed').format(supplier_name), raise_exception=1)
 
 	def validate(self):
-		if not self.get('is_return'):
+		if not self.get('is_return') and not self.get('is_debit_note'):
 			self.validate_qty_is_not_zero()
 
 		if self.get("_action") and self._action != "update_after_submit":
@@ -166,8 +167,13 @@ class AccountsController(TransactionBase):
 
 		validate_regional(self)
 
+		validate_einvoice_fields(self)
+
 		if self.doctype != 'Material Request':
 			apply_pricing_rule_on_transaction(self)
+
+	def before_cancel(self):
+		validate_einvoice_fields(self)
 
 	def on_trash(self):
 		# delete sl and gl entries on deletion of transaction
@@ -250,7 +256,12 @@ class AccountsController(TransactionBase):
 		from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 		calculate_taxes_and_totals(self)
 
-		if self.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+		if self.doctype in (
+			'Sales Order',
+			'Delivery Note',
+			'Sales Invoice',
+			'POS Invoice',
+		):
 			self.calculate_commission()
 			self.calculate_contribution()
 
@@ -395,6 +406,22 @@ class AccountsController(TransactionBase):
 
 								if item_qty != len(get_serial_nos(item.get('serial_no'))):
 									item.set(fieldname, value)
+
+							elif (
+								ret.get("pricing_rule_removed")
+								and value is not None
+								and fieldname
+								in [
+									"discount_percentage",
+									"discount_amount",
+									"rate",
+									"margin_rate_or_amount",
+									"margin_type",
+									"remove_free_item",
+								]
+							):
+								# reset pricing rule fields if pricing_rule_removed
+								item.set(fieldname, value)
 
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field('is_fixed_asset'):
 						item.set('is_fixed_asset', ret.get('is_fixed_asset', 0))
@@ -1307,6 +1334,9 @@ class AccountsController(TransactionBase):
 				payment_schedule['discount_type'] = schedule.discount_type
 				payment_schedule['discount'] = schedule.discount
 
+			if not schedule.invoice_portion:
+				payment_schedule['payment_amount'] = schedule.payment_amount
+
 			self.append("payment_schedule", payment_schedule)
 
 	def set_due_date(self):
@@ -1536,13 +1566,12 @@ def validate_taxes_and_charges(tax):
 		tax.rate = None
 
 
-def validate_account_head(tax, doc):
-	company = frappe.get_cached_value('Account',
-		tax.account_head, 'company')
+def validate_account_head(idx, account, company, context=''):
+	account_company = frappe.get_cached_value('Account', account, 'company')
 
-	if company != doc.company:
-		frappe.throw(_('Row {0}: Account {1} does not belong to Company {2}')
-			.format(tax.idx, frappe.bold(tax.account_head), frappe.bold(doc.company)), title=_('Invalid Account'))
+	if account_company != company:
+		frappe.throw(_('Row {0}: {3} Account {1} does not belong to Company {2}')
+			.format(idx, frappe.bold(account), frappe.bold(company), context), title=_('Invalid Account'))
 
 
 def validate_cost_center(tax, doc):
@@ -1679,57 +1708,68 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 def update_invoice_status():
 	"""Updates status as Overdue for applicable invoices. Runs daily."""
 	today = getdate()
-
+	payment_schedule = frappe.qb.DocType("Payment Schedule")
 	for doctype in ("Sales Invoice", "Purchase Invoice"):
-		frappe.db.sql("""
-			UPDATE `tab{doctype}` invoice SET invoice.status = 'Overdue'
-			WHERE invoice.docstatus = 1
-				AND invoice.status REGEXP '^Unpaid|^Partly Paid'
-				AND invoice.outstanding_amount > 0
-				AND (
-						{or_condition}
-						(
-							(
-								CASE
-									WHEN invoice.party_account_currency = invoice.currency
-									THEN (
-										CASE
-											WHEN invoice.disable_rounded_total
-											THEN invoice.grand_total
-											ELSE invoice.rounded_total
-										END
-									)
-									ELSE (
-										CASE
-											WHEN invoice.disable_rounded_total
-											THEN invoice.base_grand_total
-											ELSE invoice.base_rounded_total
-										END
-									)
-								END
-							) - invoice.outstanding_amount
-						) < (
-							SELECT SUM(
-								CASE
-									WHEN invoice.party_account_currency = invoice.currency
-									THEN ps.payment_amount
-									ELSE ps.base_payment_amount
-								END
-							)
-							FROM `tabPayment Schedule` ps
-							WHERE ps.parent = invoice.name
-								AND ps.due_date < %(today)s
-						)
-					)
-		""".format(
-				doctype=doctype,
-				or_condition=(
-					"invoice.is_pos AND invoice.due_date < %(today)s OR"
-					if doctype == "Sales Invoice"
-					else ""
-				)
-			), {"today": today}
+		invoice = frappe.qb.DocType(doctype)
+
+		consider_base_amount = invoice.party_account_currency != invoice.currency
+		payment_amount = (
+			frappe.qb.terms.Case()
+			.when(consider_base_amount, payment_schedule.base_payment_amount)
+			.else_(payment_schedule.payment_amount)
 		)
+
+		payable_amount = (
+			frappe.qb.from_(payment_schedule)
+			.select(Sum(payment_amount))
+			.where(
+				(payment_schedule.parent == invoice.name)
+				& (payment_schedule.due_date < today)
+			)
+		)
+
+		total = (
+			frappe.qb.terms.Case()
+			.when(invoice.disable_rounded_total, invoice.grand_total)
+			.else_(invoice.rounded_total)
+		)
+
+		base_total = (
+			frappe.qb.terms.Case()
+			.when(invoice.disable_rounded_total, invoice.base_grand_total)
+			.else_(invoice.base_rounded_total)
+		)
+
+		total_amount = (
+			frappe.qb.terms.Case()
+			.when(consider_base_amount, base_total)
+			.else_(total)
+		)
+
+		is_overdue = total_amount - invoice.outstanding_amount < payable_amount
+
+		conditions = (
+			(invoice.docstatus == 1)
+			& (invoice.outstanding_amount > 0)
+			& (
+				invoice.status.like("Unpaid%")
+				| invoice.status.like("Partly Paid%")
+			)
+			& (
+				((invoice.is_pos & invoice.due_date < today) | is_overdue)
+				if doctype == "Sales Invoice"
+				else is_overdue
+			)
+		)
+
+		status = (
+			frappe.qb.terms.Case()
+			.when(invoice.status.like("%Discounted"), "Overdue and Discounted")
+			.else_("Overdue")
+		)
+
+		frappe.qb.update(invoice).set("status", status).where(conditions).run()
+
 
 @frappe.whitelist()
 def get_payment_terms(terms_template, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None):
@@ -1914,7 +1954,8 @@ def update_bin_on_delete(row, doctype):
 
 		qty_dict["ordered_qty"] = get_ordered_qty(row.item_code, row.warehouse)
 
-	update_bin_qty(row.item_code, row.warehouse, qty_dict)
+	if row.warehouse:
+		update_bin_qty(row.item_code, row.warehouse, qty_dict)
 
 def validate_and_delete_children(parent, data):
 	deleted_children = []
@@ -2100,6 +2141,11 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			parent.update_status_updater()
 	else:
 		parent.check_credit_limit()
+
+	# reset index of child table
+	for idx, row in enumerate(parent.get(child_docname), start=1):
+		row.idx = idx
+
 	parent.save()
 
 	if parent_doctype == 'Purchase Order':
@@ -2128,4 +2174,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 @erpnext.allow_regional
 def validate_regional(doc):
+	pass
+
+@erpnext.allow_regional
+def validate_einvoice_fields(doc):
 	pass

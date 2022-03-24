@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2013-03-28 10:35:31",
  "description": "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.",
@@ -17,7 +18,6 @@
   "items",
   "section_break_9",
   "expense_account",
-  "reconciliation_json",
   "column_break_13",
   "difference_amount",
   "amended_from",
@@ -111,15 +111,6 @@
    "options": "Cost Center"
   },
   {
-   "fieldname": "reconciliation_json",
-   "fieldtype": "Long Text",
-   "hidden": 1,
-   "label": "Reconciliation JSON",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_13",
    "fieldtype": "Column Break"
   },
@@ -153,11 +144,12 @@
  "icon": "fa fa-upload-alt",
  "idx": 1,
  "is_submittable": 1,
- "max_attachments": 1,
- "modified": "2020-04-08 17:02:47.196206",
+ "links": [],
+ "modified": "2022-02-06 14:28:19.043905",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -176,5 +168,6 @@
  "search_fields": "posting_date",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

@@ -3,11 +3,22 @@
 
 
 import json
+from typing import List, Optional, Union
 
 import frappe
 from frappe import ValidationError, _
 from frappe.model.naming import make_autoname
-from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate
+from frappe.query_builder.functions import Coalesce
+from frappe.utils import (
+	add_days,
+	cint,
+	cstr,
+	flt,
+	get_link_to_form,
+	getdate,
+	nowdate,
+	safe_json_loads,
+)
 
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.get_item_details import get_reserved_qty_for_so
@@ -193,23 +204,6 @@ class SerialNo(StockController):
 
 		if sle_exists:
 			frappe.throw(_("Cannot delete Serial No {0}, as it is used in stock transactions").format(self.name))
-
-	def before_rename(self, old, new, merge=False):
-		if merge:
-			frappe.throw(_("Sorry, Serial Nos cannot be merged"))
-
-	def after_rename(self, old, new, merge=False):
-		"""rename serial_no text fields"""
-		for dt in frappe.db.sql("""select parent from tabDocField
-			where fieldname='serial_no' and fieldtype in ('Text', 'Small Text', 'Long Text')"""):
-
-			for item in frappe.db.sql("""select name, serial_no from `tab%s`
-				where serial_no like %s""" % (dt[0], frappe.db.escape('%' + old + '%'))):
-
-				serial_nos = map(lambda i: new if i.upper()==old.upper() else i, item[1].split('\n'))
-				frappe.db.sql("""update `tab%s` set serial_no = %s
-					where name=%s""" % (dt[0], '%s', '%s'),
-					('\n'.join(list(serial_nos)), item[0]))
 
 	def update_serial_no_reference(self, serial_no=None):
 		last_sle = self.get_last_sle(serial_no)
@@ -411,7 +405,7 @@ def update_serial_nos(sle, item_det):
 	if not sle.is_cancelled and not sle.serial_no and cint(sle.actual_qty) > 0 \
 			and item_det.has_serial_no == 1 and item_det.serial_no_series:
 		serial_nos = get_auto_serial_nos(item_det.serial_no_series, sle.actual_qty)
-		frappe.db.set(sle, "serial_no", serial_nos)
+		sle.db_set("serial_no", serial_nos)
 		validate_serial_no(sle, item_det)
 	if sle.serial_no:
 		auto_make_serial_nos(sle)
@@ -419,9 +413,15 @@ def update_serial_nos(sle, item_det):
 def get_auto_serial_nos(serial_no_series, qty):
 	serial_nos = []
 	for i in range(cint(qty)):
-		serial_nos.append(make_autoname(serial_no_series, "Serial No"))
+		serial_nos.append(get_new_serial_number(serial_no_series))
 
 	return "\n".join(serial_nos)
+
+def get_new_serial_number(series):
+	sr_no = make_autoname(series, "Serial No")
+	if frappe.db.exists("Serial No", sr_no):
+		sr_no = get_new_serial_number(series)
+	return sr_no
 
 def auto_make_serial_nos(args):
 	serial_nos = get_serial_nos(args.get('serial_no'))
@@ -476,6 +476,13 @@ def get_serial_nos(serial_no):
 	return [s.strip() for s in cstr(serial_no).strip().upper().replace(',', '\n').split('\n')
 		if s.strip()]
 
+def clean_serial_no_string(serial_no: str) -> str:
+	if not serial_no:
+		return ""
+
+	serial_no_list = get_serial_nos(serial_no)
+	return "\n".join(serial_no_list)
+
 def update_args_for_serial_no(serial_no_doc, serial_no, args, is_new=False):
 	for field in ["item_code", "work_order", "company", "batch_no", "supplier", "location"]:
 		if args.get(field):
@@ -520,13 +527,16 @@ def update_serial_nos_after_submit(controller, parentfield):
 		if controller.doctype == "Stock Entry":
 			warehouse = d.t_warehouse
 			qty = d.transfer_qty
+		elif controller.doctype in ("Sales Invoice", "Delivery Note"):
+			warehouse = d.warehouse
+			qty = d.stock_qty
 		else:
 			warehouse = d.warehouse
 			qty = (d.qty if controller.doctype == "Stock Reconciliation"
 				else d.stock_qty)
 		for sle in stock_ledger_entries:
 			if sle.voucher_detail_no==d.name:
-				if not accepted_serial_nos_updated and qty and abs(sle.actual_qty)==qty \
+				if not accepted_serial_nos_updated and qty and abs(sle.actual_qty) == abs(qty) \
 					and sle.warehouse == warehouse and sle.serial_no != d.serial_no:
 						d.serial_no = sle.serial_no
 						frappe.db.set_value(d.doctype, d.name, "serial_no", sle.serial_no)
@@ -565,26 +575,41 @@ def get_delivery_note_serial_no(item_code, qty, delivery_note):
 	return serial_nos
 
 @frappe.whitelist()
-def auto_fetch_serial_number(qty, item_code, warehouse, posting_date=None, batch_nos=None, for_doctype=None):
-	filters = { "item_code": item_code, "warehouse": warehouse }
+def auto_fetch_serial_number(
+		qty: float,
+		item_code: str,
+		warehouse: str,
+		posting_date: Optional[str] = None,
+		batch_nos: Optional[Union[str, List[str]]] = None,
+		for_doctype: Optional[str] = None,
+		exclude_sr_nos: Optional[List[str]] = None
+	) -> List[str]:
+
+	filters = frappe._dict({"item_code": item_code, "warehouse": warehouse})
+
+	if exclude_sr_nos is None:
+		exclude_sr_nos = []
+	else:
+		exclude_sr_nos = safe_json_loads(exclude_sr_nos)
+		exclude_sr_nos = get_serial_nos(clean_serial_no_string("\n".join(exclude_sr_nos)))
 
 	if batch_nos:
-		try:
-			filters["batch_no"] = json.loads(batch_nos) if (type(json.loads(batch_nos)) == list) else [json.loads(batch_nos)]
-		except Exception:
-			filters["batch_no"] = [batch_nos]
+		batch_nos = safe_json_loads(batch_nos)
+		if isinstance(batch_nos, list):
+			filters.batch_no = batch_nos
+		else:
+			filters.batch_no = [str(batch_nos)]
 
 	if posting_date:
-		filters["expiry_date"] = posting_date
+		filters.expiry_date = posting_date
 
 	serial_numbers = []
 	if for_doctype == 'POS Invoice':
-		reserved_sr_nos = get_pos_reserved_serial_nos(filters)
-		serial_numbers = fetch_serial_numbers(filters, qty, do_not_include=reserved_sr_nos)
-	else:
-		serial_numbers = fetch_serial_numbers(filters, qty)
+		exclude_sr_nos.extend(get_pos_reserved_serial_nos(filters))
 
-	return [d.get('name') for d in serial_numbers]
+	serial_numbers = fetch_serial_numbers(filters, qty, do_not_include=exclude_sr_nos)
+
+	return sorted([d.get('name') for d in serial_numbers])
 
 @frappe.whitelist()
 def get_pos_reserved_serial_nos(filters):
@@ -611,37 +636,37 @@ def get_pos_reserved_serial_nos(filters):
 def fetch_serial_numbers(filters, qty, do_not_include=None):
 	if do_not_include is None:
 		do_not_include = []
-	batch_join_selection = ""
-	batch_no_condition = ""
+
 	batch_nos = filters.get("batch_no")
 	expiry_date = filters.get("expiry_date")
+	serial_no = frappe.qb.DocType("Serial No")
+
+	query = (
+		frappe.qb
+			.from_(serial_no)
+			.select(serial_no.name)
+			.where(
+				(serial_no.item_code == filters["item_code"])
+				& (serial_no.warehouse == filters["warehouse"])
+				& (Coalesce(serial_no.sales_invoice, "") == "")
+				& (Coalesce(serial_no.delivery_document_no, "") == "")
+			)
+			.orderby(serial_no.creation)
+			.limit(qty or 1)
+	)
+
+	if do_not_include:
+		query = query.where(serial_no.name.notin(do_not_include))
+
 	if batch_nos:
-		batch_no_condition = """and sr.batch_no in ({}) """.format(', '.join("'%s'" % d for d in batch_nos))
+		query = query.where(serial_no.batch_no.isin(batch_nos))
 
 	if expiry_date:
-		batch_join_selection = "LEFT JOIN `tabBatch` batch on sr.batch_no = batch.name "
-		expiry_date_cond = "AND ifnull(batch.expiry_date, '2500-12-31') >= %(expiry_date)s "
-		batch_no_condition += expiry_date_cond
+		batch = frappe.qb.DocType("Batch")
+		query = (query
+			.left_join(batch).on(serial_no.batch_no == batch.name)
+			.where(Coalesce(batch.expiry_date, "4000-12-31") >= expiry_date)
+		)
 
-	excluded_sr_nos = ", ".join(["" + frappe.db.escape(sr) + "" for sr in do_not_include]) or "''"
-	serial_numbers = frappe.db.sql("""
-		SELECT sr.name FROM `tabSerial No` sr {batch_join_selection}
-		WHERE
-			sr.name not in ({excluded_sr_nos}) AND
-			sr.item_code = %(item_code)s AND
-			sr.warehouse = %(warehouse)s AND
-			ifnull(sr.sales_invoice,'') = '' AND
-			ifnull(sr.delivery_document_no, '') = ''
-			{batch_no_condition}
-		ORDER BY
-			sr.creation
-		LIMIT
-			{qty}
-		""".format(
-				excluded_sr_nos=excluded_sr_nos,
-				qty=qty or 1,
-				batch_join_selection=batch_join_selection,
-				batch_no_condition=batch_no_condition
-			), filters, as_dict=1)
-
+	serial_numbers = query.run(as_dict=True)
 	return serial_numbers

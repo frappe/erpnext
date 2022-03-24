@@ -1,8 +1,8 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import random_string
 
 from erpnext.manufacturing.doctype.job_card.job_card import OperationMismatchError, OverlapError
@@ -14,7 +14,7 @@ from erpnext.manufacturing.doctype.workstation.test_workstation import make_work
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
-class TestJobCard(unittest.TestCase):
+class TestJobCard(FrappeTestCase):
 	def setUp(self):
 		make_bom_for_jc_tests()
 
@@ -169,6 +169,7 @@ class TestJobCard(unittest.TestCase):
 
 		job_card_name = frappe.db.get_value("Job Card", {'work_order': self.work_order.name})
 		job_card = frappe.get_doc("Job Card", job_card_name)
+		self.assertEqual(job_card.status, "Open")
 
 		# fully transfer both RMs
 		transfer_entry_1 = make_stock_entry_from_jc(job_card_name)

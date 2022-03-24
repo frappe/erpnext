@@ -1,9 +1,6 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import copy
-import unittest
-from contextlib import contextmanager
 from typing import Any, Dict, NewType, Optional
 
 import frappe
@@ -11,22 +8,6 @@ from frappe.core.doctype.report.report import get_report_module_dotted_path
 
 ReportFilters = Dict[str, Any]
 ReportName = NewType("ReportName", str)
-
-
-class ERPNextTestCase(unittest.TestCase):
-	"""A sane default test class for ERPNext tests."""
-
-
-	@classmethod
-	def setUpClass(cls) -> None:
-		frappe.db.commit()
-		return super().setUpClass()
-
-	@classmethod
-	def tearDownClass(cls) -> None:
-		frappe.db.rollback()
-		return super().tearDownClass()
-
 
 def create_test_contact_and_address():
 	frappe.db.sql('delete from tabContact')
@@ -65,40 +46,19 @@ def create_test_contact_and_address():
 	contact.add_phone("+91 0000000000", is_primary_phone=True)
 	contact.insert()
 
-
-@contextmanager
-def change_settings(doctype, settings_dict):
-	""" A context manager to ensure that settings are changed before running
-	function and restored after running it regardless of exceptions occured.
-	This is useful in tests where you want to make changes in a function but
-	don't retain those changes.
-	import and use as decorator to cover full function or using `with` statement.
-
-	example:
-	@change_settings("Stock Settings", {"item_naming_by": "Naming Series"})
-	def test_case(self):
-		...
-	"""
-
-	try:
-		settings = frappe.get_doc(doctype)
-		# remember setting
-		previous_settings = copy.deepcopy(settings_dict)
-		for key in previous_settings:
-			previous_settings[key] = getattr(settings, key)
-
-		# change setting
-		for key, value in settings_dict.items():
-			setattr(settings, key, value)
-		settings.save()
-		yield # yield control to calling function
-
-	finally:
-		# restore settings
-		settings = frappe.get_doc(doctype)
-		for key, value in previous_settings.items():
-			setattr(settings, key, value)
-		settings.save()
+	contact_two = frappe.get_doc({
+		"doctype": 'Contact',
+		"first_name": "_Test Contact 2 for _Test Customer",
+		"links": [
+			{
+				"link_doctype": "Customer",
+				"link_name": "_Test Customer"
+			}
+		]
+	})
+	contact_two.add_email("test_contact_two_customer@example.com", is_primary=True)
+	contact_two.add_phone("+92 0000000000", is_primary_phone=True)
+	contact_two.insert()
 
 
 def execute_script_report(
@@ -124,14 +84,19 @@ def execute_script_report(
 	if default_filters is None:
 		default_filters = {}
 
+	test_filters = []
 	report_execute_fn = frappe.get_attr(get_report_module_dotted_path(module, report_name) + ".execute")
 	report_filters = frappe._dict(default_filters).copy().update(filters)
 
-	report_data = report_execute_fn(report_filters)
+	test_filters.append(report_filters)
 
 	if optional_filters:
 		for key, value in optional_filters.items():
-			filter_with_optional_param = report_filters.copy().update({key: value})
-			report_execute_fn(filter_with_optional_param)
+			test_filters.append(report_filters.copy().update({key: value}))
 
-	return report_data
+	for test_filter in test_filters:
+		try:
+			report_execute_fn(test_filter)
+		except Exception:
+			print(f"Report failed to execute with filters: {test_filter}")
+			raise

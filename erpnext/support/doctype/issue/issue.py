@@ -87,11 +87,9 @@ class Issue(Document):
 		if replicated_issue.service_level_agreement:
 			replicated_issue.service_level_agreement_creation = now_datetime()
 			replicated_issue.service_level_agreement = None
-			replicated_issue.agreement_status = "Ongoing"
+			replicated_issue.agreement_status = "First Response Due"
 			replicated_issue.response_by = None
-			replicated_issue.response_by_variance = None
 			replicated_issue.resolution_by = None
-			replicated_issue.resolution_by_variance = None
 			replicated_issue.reset_issue_metrics()
 
 		frappe.get_doc(replicated_issue).insert()
@@ -238,7 +236,7 @@ def is_first_response(issue):
 	return False
 
 def calculate_first_response_time(issue, first_responded_on):
-	issue_creation_date = issue.creation
+	issue_creation_date = issue.service_level_agreement_creation or issue.creation
 	issue_creation_time = get_time_in_seconds(issue_creation_date)
 	first_responded_on_in_seconds = get_time_in_seconds(first_responded_on)
 	support_hours = frappe.get_cached_doc("Service Level Agreement", issue.service_level_agreement).support_and_resolution

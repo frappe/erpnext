@@ -58,7 +58,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 		frappe.throw(_("Not permitted for {0}").format(party), frappe.PermissionError)
 
 	party = frappe.get_doc(party_type, party)
-	currency = party.default_currency if party.get("default_currency") else get_company_currency(company)
+	currency = party.get("default_currency") or currency or get_company_currency(company)
 
 	party_address, shipping_address = set_address_details(party_details, party, party_type, doctype, company, party_address, company_address, shipping_address)
 	set_contact_details(party_details, party, party_type)
@@ -68,10 +68,12 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	party_details["tax_category"] = get_address_tax_category(party.get("tax_category"),
 		party_address, shipping_address if party_type != "Supplier" else party_address)
 
-	if not party_details.get("taxes_and_charges"):
-		party_details["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company,
-			customer_group=party_details.customer_group, supplier_group=party_details.supplier_group, tax_category=party_details.tax_category,
-			billing_address=party_address, shipping_address=shipping_address)
+	tax_template = set_taxes(party.name, party_type, posting_date, company,
+		customer_group=party_details.customer_group, supplier_group=party_details.supplier_group, tax_category=party_details.tax_category,
+		billing_address=party_address, shipping_address=shipping_address)
+
+	if tax_template:
+		party_details['taxes_and_charges'] = tax_template
 
 	if cint(fetch_payment_terms_template):
 		party_details["payment_terms_template"] = get_payment_terms_template(party.name, party_type, company)
@@ -149,7 +151,7 @@ def set_contact_details(party_details, party, party_type):
 
 def set_other_values(party_details, party, party_type):
 	# copy
-	if party_type=="Customer":
+	if party_type == "Customer":
 		to_copy = ["customer_name", "customer_group", "territory", "language"]
 	else:
 		to_copy = ["supplier_name", "supplier_group", "language"]
@@ -168,12 +170,8 @@ def get_default_price_list(party):
 		return party.default_price_list
 
 	if party.doctype == "Customer":
-		price_list =  frappe.get_cached_value("Customer Group",
-			party.customer_group, "default_price_list")
-		if price_list:
-			return price_list
+		return frappe.db.get_value("Customer Group", party.customer_group, "default_price_list")
 
-	return None
 
 def set_price_list(party_details, party, party_type, given_price_list, pos=None):
 	# price list
@@ -305,7 +303,7 @@ def validate_party_gle_currency(party_type, party, company, party_account_curren
 			.format(frappe.bold(party_type), frappe.bold(party), frappe.bold(existing_gle_currency), frappe.bold(company)), InvalidAccountCurrency)
 
 def validate_party_accounts(doc):
-
+	from erpnext.controllers.accounts_controller import validate_account_head
 	companies = []
 
 	for account in doc.get("accounts"):
@@ -327,6 +325,9 @@ def validate_party_accounts(doc):
 		if doc.get("default_currency") and party_account_currency and company_default_currency:
 			if doc.default_currency != party_account_currency and doc.default_currency != company_default_currency:
 				frappe.throw(_("Billing currency must be equal to either default company's currency or party account currency"))
+
+		# validate if account is mapped for same company
+		validate_account_head(account.idx, account.account, account.company)
 
 
 @frappe.whitelist()

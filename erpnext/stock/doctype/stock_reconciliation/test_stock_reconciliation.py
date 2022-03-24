@@ -6,7 +6,8 @@
 
 
 import frappe
-from frappe.utils import add_days, flt, nowdate, nowtime, random_string
+from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.utils import add_days, cstr, flt, nowdate, nowtime, random_string
 
 from erpnext.accounts.utils import get_stock_and_account_balance
 from erpnext.stock.doctype.item.test_item import create_item
@@ -19,15 +20,18 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.utils import get_incoming_rate, get_stock_value_on, get_valuation_method
-from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 
-class TestStockReconciliation(ERPNextTestCase):
+class TestStockReconciliation(FrappeTestCase):
 	@classmethod
-	def setUpClass(self):
-		super().setUpClass()
+	def setUpClass(cls):
 		create_batch_or_serial_no_items()
+		super().setUpClass()
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+
+	def tearDown(self):
+		frappe.flags.dont_execute_stock_reposts = None
+
 
 	def test_reco_for_fifo(self):
 		self._test_reco_sle_gle("FIFO")
@@ -196,7 +200,6 @@ class TestStockReconciliation(ERPNextTestCase):
 
 	def test_stock_reco_for_batch_item(self):
 		to_delete_records = []
-		to_delete_serial_nos = []
 
 		# Add new serial nos
 		item_code = "Stock-Reco-batch-Item-1"
@@ -204,20 +207,22 @@ class TestStockReconciliation(ERPNextTestCase):
 
 		sr = create_stock_reconciliation(item_code=item_code,
 			warehouse = warehouse, qty=5, rate=200, do_not_submit=1)
-		sr.save(ignore_permissions=True)
+		sr.save()
 		sr.submit()
 
-		self.assertTrue(sr.items[0].batch_no)
+		batch_no = sr.items[0].batch_no
+		self.assertTrue(batch_no)
 		to_delete_records.append(sr.name)
 
 		sr1 = create_stock_reconciliation(item_code=item_code,
-			warehouse = warehouse, qty=6, rate=300, batch_no=sr.items[0].batch_no)
+			warehouse = warehouse, qty=6, rate=300, batch_no=batch_no)
 
 		args = {
 			"item_code": item_code,
 			"warehouse": warehouse,
 			"posting_date": nowdate(),
 			"posting_time": nowtime(),
+			"batch_no": batch_no,
 		}
 
 		valuation_rate = get_incoming_rate(args)
@@ -226,7 +231,7 @@ class TestStockReconciliation(ERPNextTestCase):
 
 
 		sr2 = create_stock_reconciliation(item_code=item_code,
-			warehouse = warehouse, qty=0, rate=0, batch_no=sr.items[0].batch_no)
+			warehouse = warehouse, qty=0, rate=0, batch_no=batch_no)
 
 		stock_value = get_stock_value_on(warehouse, nowdate(), item_code)
 		self.assertEqual(stock_value, 0)
@@ -392,6 +397,41 @@ class TestStockReconciliation(ERPNextTestCase):
 		repost_exists = bool(frappe.db.exists("Repost Item Valuation", {"voucher_no": sr.name}))
 		self.assertFalse(repost_exists, msg="Negative stock validation not working on reco cancellation")
 
+	def test_intermediate_sr_bin_update(self):
+		"""Bin should show correct qty even for backdated entries.
+
+			-------------------------------------------
+			| creation | Var | Doc  | Qty | balance qty
+			-------------------------------------------
+			|  1       | SR  | Reco | 10  | 10     (posting date: today+10)
+			|  3       | SR2 | Reco | 11  | 11     (posting date: today+11)
+			|  2       | DN  | DN   | 5   | 6 <-- assert in BIN  (posting date: today+12)
+		"""
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		# repost will make this test useless, qty should update in realtime without reposts
+		frappe.flags.dont_execute_stock_reposts = True
+		frappe.db.rollback()
+
+		item_code = "Backdated-Reco-Cancellation-Item"
+		warehouse = "_Test Warehouse - _TC"
+		create_item(item_code)
+
+		sr = create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=10, rate=100,
+			posting_date=add_days(nowdate(), 10))
+
+		dn = create_delivery_note(item_code=item_code, warehouse=warehouse, qty=5, rate=120,
+			posting_date=add_days(nowdate(), 12))
+		old_bin_qty = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
+
+		sr2 = create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=11, rate=100,
+			posting_date=add_days(nowdate(), 11))
+		new_bin_qty = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
+
+		self.assertEqual(old_bin_qty + 1, new_bin_qty)
+		frappe.db.rollback()
+
+
 	def test_valid_batch(self):
 		create_batch_item_with_batch("Testing Batch Item 1", "001")
 		create_batch_item_with_batch("Testing Batch Item 2", "002")
@@ -400,8 +440,8 @@ class TestStockReconciliation(ERPNextTestCase):
 		self.assertRaises(frappe.ValidationError, sr.submit)
 
 	def test_serial_no_cancellation(self):
-
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
 		item = create_item("Stock-Reco-Serial-Item-9", is_stock_item=1)
 		if not item.has_serial_no:
 			item.has_serial_no = 1
@@ -425,6 +465,31 @@ class TestStockReconciliation(ERPNextTestCase):
 				filters={"item_code": item_code, "warehouse": warehouse, "status": "Active"})
 
 		self.assertEqual(len(active_sr_no), 10)
+
+
+	def test_serial_no_creation_and_inactivation(self):
+		item = create_item("_TestItemCreatedWithStockReco", is_stock_item=1)
+		if not item.has_serial_no:
+			item.has_serial_no = 1
+			item.save()
+
+		item_code = item.name
+		warehouse = "_Test Warehouse - _TC"
+
+		sr = create_stock_reconciliation(item_code=item.name, warehouse=warehouse,
+				serial_no="SR-CREATED-SR-NO", qty=1, do_not_submit=True, rate=100)
+		sr.save()
+		self.assertEqual(cstr(sr.items[0].current_serial_no), "")
+		sr.submit()
+
+		active_sr_no = frappe.get_all("Serial No",
+				filters={"item_code": item_code, "warehouse": warehouse, "status": "Active"})
+		self.assertEqual(len(active_sr_no), 1)
+
+		sr.cancel()
+		active_sr_no = frappe.get_all("Serial No",
+				filters={"item_code": item_code, "warehouse": warehouse, "status": "Active"})
+		self.assertEqual(len(active_sr_no), 0)
 
 
 def create_batch_item_with_batch(item_name, batch_id):

@@ -168,7 +168,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 				{account_type_condition}
 				AND is_group = 0
 				AND company = %(company)s
-				AND account_currency = %(currency)s
+				AND (account_currency = %(currency)s or ifnull(account_currency, '') = '')
 				AND `{searchfield}` LIKE %(txt)s
 				{mcond}
 			ORDER BY idx DESC, name
@@ -249,6 +249,9 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				del filters['customer']
 			else:
 				del filters['supplier']
+		else:
+			filters.pop('customer', None)
+			filters.pop('supplier', None)
 
 
 	description_cond = ''
@@ -539,6 +542,10 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters)
 	dimension_filters = get_dimension_filter_map()
 	dimension_filters = dimension_filters.get((filters.get('dimension'),filters.get('account')))
 	query_filters = []
+	or_filters = []
+	fields = ['name']
+
+	searchfields = frappe.get_meta(doctype).get_search_fields()
 
 	meta = frappe.get_meta(doctype)
 	if meta.is_tree:
@@ -550,8 +557,9 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters)
 	if meta.has_field('company'):
 		query_filters.append(['company', '=', filters.get('company')])
 
-	if txt:
-		query_filters.append([searchfield, 'LIKE', "%%%s%%" % txt])
+	for field in searchfields:
+		or_filters.append([field, 'LIKE', "%%%s%%" % txt])
+		fields.append(field)
 
 	if dimension_filters:
 		if dimension_filters['allow_or_restrict'] == 'Allow':
@@ -566,10 +574,9 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters)
 
 		query_filters.append(['name', query_selector, dimensions])
 
-	output = frappe.get_list(doctype, filters=query_filters)
-	result = [d.name for d in output]
+	output = frappe.get_list(doctype, fields=fields, filters=query_filters, or_filters=or_filters, as_list=1)
 
-	return [(d,) for d in set(result)]
+	return [tuple(d) for d in set(output)]
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
@@ -703,6 +710,7 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 
 	item_doc = frappe.get_cached_doc('Item', filters.get('item_code'))
 	item_group = filters.get('item_group')
+	company = filters.get('company')
 	taxes = item_doc.taxes or []
 
 	while item_group:
@@ -711,7 +719,7 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 		item_group = item_group_doc.parent_item_group
 
 	if not taxes:
-		return frappe.db.sql(""" SELECT name FROM `tabItem Tax Template` """)
+		return frappe.get_all('Item Tax Template', filters={'disabled': 0, 'company': company}, as_list=True)
 	else:
 		valid_from = filters.get('valid_from')
 		valid_from = valid_from[1] if isinstance(valid_from, list) else valid_from
@@ -720,7 +728,7 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 			'item_code': filters.get('item_code'),
 			'posting_date': valid_from,
 			'tax_category': filters.get('tax_category'),
-			'company': filters.get('company')
+			'company': company
 		}
 
 		taxes = _get_item_tax_template(args, taxes, for_validate=True)

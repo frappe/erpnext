@@ -12,6 +12,7 @@ from frappe.utils import add_days, getdate, nowtime
 
 from erpnext.hr.doctype.designation.test_designation import create_designation
 from erpnext.hr.doctype.interview.interview import DuplicateInterviewRoundError
+from erpnext.hr.doctype.job_applicant.job_applicant import get_interview_details
 from erpnext.hr.doctype.job_applicant.test_job_applicant import create_job_applicant
 
 
@@ -70,6 +71,20 @@ class TestInterview(unittest.TestCase):
 		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
 		self.assertTrue("Subject: Interview Feedback Reminder" in email_queue[0].message)
 
+	def test_get_interview_details_for_applicant_dashboard(self):
+		job_applicant = create_job_applicant()
+		interview = create_interview_and_dependencies(job_applicant.name)
+
+		details = get_interview_details(job_applicant.name)
+		self.assertEqual(details.get('stars'), 5)
+		self.assertEqual(details.get('interviews').get(interview.name), {
+			'name': interview.name,
+			'interview_round': interview.interview_round,
+			'expected_average_rating': interview.expected_average_rating * 5,
+			'average_rating': interview.average_rating * 5,
+			'status': 'Pending'
+		})
+
 	def tearDown(self):
 		frappe.db.rollback()
 
@@ -106,7 +121,8 @@ def create_interview_round(name, skill_set, interviewers=[], designation=None, s
 	interview_round = frappe.new_doc("Interview Round")
 	interview_round.round_name = name
 	interview_round.interview_type = create_interview_type()
-	interview_round.expected_average_rating = 4
+	# average rating = 4
+	interview_round.expected_average_rating = 0.8
 	if designation:
 		interview_round.designation = designation
 

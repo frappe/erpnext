@@ -11,11 +11,6 @@
   "customer_group",
   "column_break_4",
   "territory",
-  "crm_settings_section",
-  "campaign_naming_by",
-  "default_valid_till",
-  "column_break_9",
-  "close_opportunity_after_days",
   "item_price_settings_section",
   "selling_price_list",
   "maintain_same_rate_action",
@@ -44,13 +39,6 @@
    "options": "Customer Name\nNaming Series\nAuto Name"
   },
   {
-   "fieldname": "campaign_naming_by",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Campaign Naming By",
-   "options": "Campaign Name\nNaming Series\nAuto Name"
-  },
-  {
    "fieldname": "customer_group",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -70,18 +58,6 @@
    "in_list_view": 1,
    "label": "Default Price List",
    "options": "Price List"
-  },
-  {
-   "default": "15",
-   "description": "Auto close Opportunity after the no. of days mentioned above",
-   "fieldname": "close_opportunity_after_days",
-   "fieldtype": "Int",
-   "label": "Close Opportunity After Days"
-  },
-  {
-   "fieldname": "default_valid_till",
-   "fieldtype": "Data",
-   "label": "Default Quotation Validity Days"
   },
   {
    "fieldname": "column_break_5",
@@ -104,7 +80,7 @@
    "description": "How often should Project and Company be updated based on Sales Transactions?",
    "fieldname": "sales_update_frequency",
    "fieldtype": "Select",
-   "label": "Sales Update Frequency",
+   "label": "Sales Update Frequency in Company and Project",
    "options": "Each Transaction\nDaily\nMonthly",
    "reqd": 1
   },
@@ -170,15 +146,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "crm_settings_section",
-   "fieldtype": "Section Break",
-   "label": "CRM Settings"
-  },
-  {
-   "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "item_price_settings_section",
    "fieldtype": "Section Break",
    "label": "Item Price Settings"
@@ -204,7 +171,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-08 19:38:10.175989",
+ "modified": "2022-02-04 15:41:59.939261",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
@@ -222,5 +189,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

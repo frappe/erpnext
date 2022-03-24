@@ -16,11 +16,11 @@ import "./templates/item_quick_entry.html";
 import "./utils/item_quick_entry";
 import "./utils/customer_quick_entry";
 import "./utils/supplier_quick_entry";
-import "./education/student_button.html";
 import "./education/assessment_result_tool.html";
 import "./call_popup/call_popup";
 import "./utils/dimension_tree_filter";
 import "./telephony";
 import "./templates/call_link.html";
+import "./bulk_transaction_processing";
 
 // import { sum } from 'frappe/public/utils/util.js'

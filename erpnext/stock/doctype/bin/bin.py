@@ -6,7 +6,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, Sum
-from frappe.utils import flt, nowdate
+from frappe.utils import flt
 
 
 class Bin(Document):
@@ -20,43 +20,12 @@ class Bin(Document):
 			+ flt(self.indented_qty) + flt(self.planned_qty) - flt(self.reserved_qty)
 			- flt(self.reserved_qty_for_production) - flt(self.reserved_qty_for_sub_contract))
 
-	def get_first_sle(self):
-		sle = frappe.qb.DocType("Stock Ledger Entry")
-		first_sle = (
-				frappe.qb.from_(sle)
-					.select("*")
-					.where((sle.item_code == self.item_code) & (sle.warehouse == self.warehouse))
-					.orderby(sle.posting_date, sle.posting_time, sle.creation)
-					.limit(1)
-				).run(as_dict=True)
-
-		return first_sle and first_sle[0] or None
-
 	def update_reserved_qty_for_production(self):
 		'''Update qty reserved for production from Production Item tables
 			in open work orders'''
+		from erpnext.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
 
-		wo = frappe.qb.DocType("Work Order")
-		wo_item = frappe.qb.DocType("Work Order Item")
-
-		self.reserved_qty_for_production = (
-				frappe.qb
-					.from_(wo)
-					.from_(wo_item)
-					.select(Case()
-							.when(wo.skip_transfer == 0, Sum(wo_item.required_qty - wo_item.transferred_qty))
-							.else_(Sum(wo_item.required_qty - wo_item.consumed_qty))
-						)
-					.where(
-						(wo_item.item_code == self.item_code)
-						& (wo_item.parent == wo.name)
-						& (wo.docstatus == 1)
-						& (wo_item.source_warehouse == self.warehouse)
-						& (wo.status.notin(["Stopped", "Completed"]))
-						& ((wo_item.required_qty > wo_item.transferred_qty)
-							| (wo_item.required_qty > wo_item.consumed_qty))
-					)
-		).run()[0][0] or 0.0
+		self.reserved_qty_for_production = get_reserved_qty_for_production(self.item_code, self.warehouse)
 
 		self.set_projected_qty()
 
@@ -123,37 +92,8 @@ class Bin(Document):
 		self.db_set('projected_qty', self.projected_qty)
 
 def on_doctype_update():
-	frappe.db.add_index("Bin", ["item_code", "warehouse"])
+	frappe.db.add_unique("Bin", ["item_code", "warehouse"], constraint_name="unique_item_warehouse")
 
-
-def update_stock(bin_name, args, allow_negative_stock=False, via_landed_cost_voucher=False):
-	'''Called from erpnext.stock.utils.update_bin'''
-	update_qty(bin_name, args)
-
-	if args.get("actual_qty") or args.get("voucher_type") == "Stock Reconciliation":
-		from erpnext.stock.stock_ledger import update_entries_after, update_qty_in_future_sle
-
-		if not args.get("posting_date"):
-			args["posting_date"] = nowdate()
-
-		if args.get("is_cancelled") and via_landed_cost_voucher:
-			return
-
-		# Reposts only current voucher SL Entries
-		# Updates valuation rate, stock value, stock queue for current transaction
-		update_entries_after({
-			"item_code": args.get('item_code'),
-			"warehouse": args.get('warehouse'),
-			"posting_date": args.get("posting_date"),
-			"posting_time": args.get("posting_time"),
-			"voucher_type": args.get("voucher_type"),
-			"voucher_no": args.get("voucher_no"),
-			"sle_id": args.get('name'),
-			"creation": args.get('creation')
-		}, allow_negative_stock=allow_negative_stock, via_landed_cost_voucher=via_landed_cost_voucher)
-
-		# update qty in future sle and Validate negative qty
-		update_qty_in_future_sle(args, allow_negative_stock)
 
 def get_bin_details(bin_name):
 	return frappe.db.get_value('Bin', bin_name, ['actual_qty', 'ordered_qty',
@@ -161,13 +101,23 @@ def get_bin_details(bin_name):
 	'reserved_qty_for_sub_contract'], as_dict=1)
 
 def update_qty(bin_name, args):
-	bin_details = get_bin_details(bin_name)
+	from erpnext.controllers.stock_controller import future_sle_exists
 
-	# update the stock values (for current quantities)
-	if args.get("voucher_type")=="Stock Reconciliation":
-		actual_qty = args.get('qty_after_transaction')
-	else:
-		actual_qty = bin_details.actual_qty + flt(args.get("actual_qty"))
+	bin_details = get_bin_details(bin_name)
+	# actual qty is already updated by processing current voucher
+	actual_qty = bin_details.actual_qty
+
+	# actual qty is not up to date in case of backdated transaction
+	if future_sle_exists(args):
+		actual_qty = frappe.db.get_value("Stock Ledger Entry",
+				filters={
+					"item_code": args.get("item_code"),
+					"warehouse": args.get("warehouse"),
+					"is_cancelled": 0
+				},
+				fieldname="qty_after_transaction",
+				order_by="posting_date desc, posting_time desc, creation desc",
+			) or 0.0
 
 	ordered_qty = flt(bin_details.ordered_qty) + flt(args.get("ordered_qty"))
 	reserved_qty = flt(bin_details.reserved_qty) + flt(args.get("reserved_qty"))

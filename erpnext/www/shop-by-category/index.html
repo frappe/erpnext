@@ -1,0 +1,48 @@
+{% extends "templates/web.html" %}
+{% block title %}{{ _('Shop by Category') }}{% endblock %}
+
+{% block head_include %}
+<style>
+	.category-slideshow {
+		margin-bottom: 2rem;
+	}
+	.category-card {
+		height: 300px !important;
+		width: 300px !important;
+		margin: 30px !important;
+	}
+</style>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript" src="/shop-by-category/index.js"></script>
+{% endblock %}
+
+{% block page_content %}
+<div class="shop-by-category-content">
+	<div class="category-slideshow">
+		{% if slideshow %}
+		<!-- slideshow -->
+			{{ web_block(
+				"Hero Slider",
+				values=slideshow,
+				add_container=0,
+				add_top_padding=0,
+				add_bottom_padding=0,
+			) }}
+		{% endif %}
+	</div>
+	<div class="category-tabs">
+		{% if tabs %}
+		<!-- tabs -->
+			{{ web_block(
+				"Section with Tabs",
+				values=tabs,
+				add_container=0,
+				add_top_padding=0,
+				add_bottom_padding=0
+			) }}
+		{% endif %}
+	</div>
+</div>
+{% endblock %}

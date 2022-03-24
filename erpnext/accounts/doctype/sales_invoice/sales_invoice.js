@@ -469,7 +469,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				let row = frappe.get_doc(d.doctype, d.name)
 				set_timesheet_detail_rate(row.doctype, row.name, me.frm.doc.currency, row.timesheet_detail)
 			});
-			frm.trigger("calculate_timesheet_totals");
+			this.frm.trigger("calculate_timesheet_totals");
 		}
 	}
 };
@@ -513,15 +513,6 @@ cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
 			'is_group': 0,
 			'company': doc.company
 		}
-	}
-}
-
-// project name
-//--------------------------
-cur_frm.fields_dict['project'].get_query = function(doc, cdt, cdn) {
-	return{
-		query: "erpnext.controllers.queries.get_project_name",
-		filters: {'customer': doc.customer}
 	}
 }
 
