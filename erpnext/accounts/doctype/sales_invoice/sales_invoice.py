@@ -32,6 +32,7 @@ from datetime import datetime, timedelta, date
 from frappe.model.naming import parse_naming_series
 from frappe.utils.data import money_in_words
 from datetime import datetime
+import math
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -437,6 +438,15 @@ class SalesInvoice(SellingController):
 		self.total_taxes_and_charges = taxed15 + taxed18
 		self.taxed_sales15 = taxed_sales15
 		self.taxed_sales18 = taxed_sales18
+
+		if self.is_pos:
+			pos = frappe.get_doc("POS", self.pos_profile)
+
+			if pos.round_off_discount == 1:
+				discount_amount = math.ceil(self.discount_amount)
+
+				self.discount_amount = discount_amount
+				self.db_set('discount_amount', discount_amount, update_modified=False)
 
 		if self.exonerated == 1:
 			if self.discount_amount:

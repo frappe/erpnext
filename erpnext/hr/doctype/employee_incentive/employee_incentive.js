@@ -2,6 +2,17 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Employee Incentive', {
+	before_load: function(frm) {
+		frm.events.confidential(frm);
+	},
+
+	confidential: function(frm) {
+		return frappe.call({
+			method: "confidentials",
+			doc: frm.doc
+		});
+	},
+	
 	setup: function(frm) {
 		frm.set_query("employee", function() {
 			return {
