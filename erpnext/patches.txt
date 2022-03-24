@@ -360,4 +360,4 @@ erpnext.patches.v14_0.update_batch_valuation_flag
 erpnext.patches.v14_0.delete_non_profit_doctypes
 erpnext.patches.v14_0.update_employee_advance_status
 erpnext.patches.v13_0.add_cost_center_in_loans
-erpnext.patches.v13_0.remove_unknown_links_to_prod_plan_items
+erpnext.patches.v13_0.remove_unknown_links_to_prod_plan_items # 24-03-2022
