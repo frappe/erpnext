@@ -340,6 +340,7 @@ class TestPOSInvoice(unittest.TestCase):
 			item=se.get("items")[0].item_code, rate=1000, do_not_save=1)
 
 		si.get("items")[0].serial_no = serial_nos[0]
+		si.update_stock = 1
 		si.insert()
 		si.submit()
 
