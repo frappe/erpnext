@@ -73,7 +73,11 @@ class TestExpenseClaim(unittest.TestCase):
 		self.assertEqual(expense_claim.status, "Unpaid")
 
 	def test_expense_claim_against_fully_paid_advances(self):
-		from erpnext.hr.doctype.employee_advance.test_employee_advance import get_advances_for_claim, make_employee_advance, make_payment_entry
+		from erpnext.hr.doctype.employee_advance.test_employee_advance import (
+			get_advances_for_claim,
+			make_employee_advance,
+			make_payment_entry,
+		)
 
 		frappe.db.delete("Employee Advance")
 
@@ -96,7 +100,9 @@ class TestExpenseClaim(unittest.TestCase):
 		from erpnext.hr.doctype.employee_advance.test_employee_advance import (
 			get_advances_for_claim,
 			make_employee_advance,
-			make_payment_entry as make_advance_payment
+		)
+		from erpnext.hr.doctype.employee_advance.test_employee_advance import (
+			make_payment_entry as make_advance_payment,
 		)
 
 		frappe.db.delete("Employee Advance")
