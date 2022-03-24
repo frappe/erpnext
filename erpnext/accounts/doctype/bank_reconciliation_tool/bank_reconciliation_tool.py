@@ -237,7 +237,6 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 
 	for voucher in vouchers:
 		gl_entry = frappe.db.get_value("GL Entry", dict(account=account, voucher_type=voucher['payment_doctype'], voucher_no=voucher['payment_name']), ['credit', 'debit'], as_dict=1)
-		gl_entry = frappe.db.get_value("GL Entry", dict(account=account, voucher_type=voucher['payment_doctype'], voucher_no=voucher['payment_name']), ['credit', 'debit'], as_dict=1)
 		if voucher['payment_doctype'] == "Payment Group":
 			allocated_amount = transaction.withdrawal
 		else:

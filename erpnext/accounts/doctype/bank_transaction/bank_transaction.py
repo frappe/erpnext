@@ -48,7 +48,7 @@ class BankTransaction(StatusUpdater):
 
 	def clear_linked_payment_entries(self, for_cancel=False):
 		for payment_entry in self.payment_entries:
-			if payment_entry.payment_document in ["Payment Entry", "Journal Entry", "Purchase Invoice", "Expense Claim"]:
+			if payment_entry.payment_document in ["Payment Entry", "Journal Entry", "Purchase Invoice", "Expense Claim", "Payment Group"]:
 				self.clear_simple_entry(payment_entry, for_cancel=for_cancel)
 
 			elif payment_entry.payment_document == "Sales Invoice":
