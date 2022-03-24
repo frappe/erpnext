@@ -284,9 +284,9 @@ class PurchaseReceipt(BuyingController):
 		for d in self.get("items"):
 			if d.item_code in stock_items and flt(d.valuation_rate) and flt(d.qty):
 				if warehouse_account.get(d.warehouse):
-					stock_value_diff = frappe.db.get_value("Stock Ledger Entry",
+					stock_value_diff = sum(frappe.db.get_values("Stock Ledger Entry",
 						{"voucher_type": "Purchase Receipt", "voucher_no": self.name,
-						"voucher_detail_no": d.name, "warehouse": d.warehouse, "is_cancelled": 0}, "stock_value_difference")
+						"voucher_detail_no": d.name, "warehouse": d.warehouse, "is_cancelled": 0}, "stock_value_difference", as_dict=True, pluck="stock_value_difference"))
 
 					warehouse_account_name = warehouse_account[d.warehouse]["account"]
 					warehouse_account_currency = warehouse_account[d.warehouse]["account_currency"]
