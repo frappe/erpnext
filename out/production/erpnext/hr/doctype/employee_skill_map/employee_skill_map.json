@@ -1,0 +1,88 @@
+{
+ "actions": [],
+ "autoname": "field:employee",
+ "creation": "2019-04-16 10:07:48.303426",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "employee_name",
+  "column_break_3",
+  "designation",
+  "skills_section",
+  "employee_skills",
+  "trainings_section",
+  "trainings"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee",
+   "unique": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Read Only",
+   "label": "Employee Name"
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Read Only",
+   "label": "Designation"
+  },
+  {
+   "fieldname": "skills_section",
+   "fieldtype": "Section Break",
+   "label": "Skills"
+  },
+  {
+   "fieldname": "employee_skills",
+   "fieldtype": "Table",
+   "label": "Employee Skills",
+   "options": "Employee Skill"
+  },
+  {
+   "fieldname": "trainings_section",
+   "fieldtype": "Section Break",
+   "label": "Trainings"
+  },
+  {
+   "fieldname": "trainings",
+   "fieldtype": "Table",
+   "label": "Trainings",
+   "options": "Employee Training"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "links": [],
+ "modified": "2019-12-16 11:31:09.916893",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Employee Skill Map",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "title_field": "employee_name"
+}

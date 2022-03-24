@@ -1,0 +1,115 @@
+{% extends "templates/web.html" %}
+
+{% block title %} {{ title }} {% endblock %}
+
+{% block breadcrumbs %}
+	{% include "templates/includes/breadcrumbs.html" %}
+{% endblock %}
+
+{% block page_content %}
+{% from "erpnext/templates/includes/macros.html" import product_image %}
+{% from "erpnext/templates/includes/macros.html" import media_image %}
+<div class="bom-content" style="margin-top:20px;">
+	<div class="bom-page-content" itemscope itemtype="http://schema.org/Product">
+		<div class="row">
+			<div class="col-sm-12">
+				<h1 itemprop="name" style="margin-top: 0px;">{{ name }}</h1>
+
+				<p class="text-muted">
+				{{ _("Item") }}: <span itemprop="itemName">{{ item_name }}</span></p>
+				<br>
+
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-4">
+				{{ media_image(website_image, item_name, "product-full-image") }}
+				<br>
+			</div>
+			<div class="col-sm-offset-1 col-sm-4">
+				<p>{{ _("Quantity") }}: <span itemprop="productID">{{ quantity }}</span></p>
+					<br>
+			</div>
+		</div>
+
+		{% if show_items -%}
+		<div class="row items" style="margin-top: 40px">
+			<div class="col-md-12">
+				<h3>{{ _("Items") }}</h3>
+				<hr>
+				{% for d in items -%}
+					<div class="row">
+						<div class="col-sm-4">{{ media_image(d.image, d.item_name, "product-full-image") }}</div>
+						<div class="col-sm-4"><div><b>{{ d.item_name }}</b></div>
+							{% if d.item_name != d.item_code -%}
+								<div class="text-muted">{{ d.item_code }}</div>
+							{%- endif %}
+								<br>
+							{{ d.description }}
+						</div>
+                        <div class="col-sm-4">{{ _("Qty") }}: {{ d.qty }}</div>
+					</div>
+					<hr>
+				{%- endfor %}
+			</div>
+		</div>
+		{%- endif %}
+
+        {% if show_operations -%}
+		<div class="row operations" style="margin-top: 40px">
+			<div class="col-md-12">
+				<h3>{{ _("Operations") }}</h3>
+				<hr>
+				{% for d in operations -%}
+					<div class="row">
+						<div class="col-sm-3 bom-spec">{{ media_image(d.image, d.operation, "product-full-image") }}</div>
+						<div class="col-sm-3 bom-spec"><div>{{ d.operation }}</div>
+							<div class="text-muted">{{ d.description }}</div>
+						</div>
+
+						<div class="col-sm-3 bom-spec"><b>{{ _("Workstation") }}</b><br>{{ d.workstation }}</div>
+                        <div class="col-sm-3 bom-spec"><b>{{ _("Time(in mins)") }}</b><br><div class="duration"><span class="duration-bar">
+							<span class="duration-value">{{ d.time_in_mins }}</span></span></div></div>
+					</div>
+					<hr>
+				{%- endfor %}
+			</div>
+		</div>
+		{%- endif %}
+
+		<div class="row" style="margin-top: 30px;">
+			<div class="col-sm-12">
+				<br>
+                    <div class="h6 text-uppercase">{{ _("Description") }}</div>
+                        <div itemprop="description" class="item-desc">
+                        {{ web_long_description or _("No description given") }}</div>
+				<br>
+			</div>
+		</div>
+
+	</div>
+</div>
+<script>
+	frappe.ready(function() {
+		var max_width = $(".duration").width() * 0.8;
+		var durations = [];
+		$(".duration .duration-bar").each(function() {
+			durations.push($(this).find(".duration-value").html());
+		});
+		var max_duration = Math.max(...durations);
+		var width_factor = max_width/max_duration;
+
+		$(".duration .duration-bar").each(function() {
+			var duration = $(this).find(".duration-value").html();
+			$(this).width(duration * width_factor);
+			if($(this).width() < $(this).find(".duration-value").width()) {
+				var html = $($(this).html());
+				html.addClass("duration-bar");
+				html.addClass("bar-outer-text");
+				$(this).find(".duration-value").removeClass("duration-value").addClass("duration-invisible");
+				$(this).closest(".duration").append(html);
+			}
+		});
+	})
+</script>
+{% endblock %}

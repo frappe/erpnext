@@ -1,0 +1,23 @@
+.stopwatch {
+	text-align: center;
+	padding: 1em;
+	padding-bottom: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stopwatch span {
+	display: inline-block;
+	position: relative;
+	font-size: 3em;
+	font-family: menlo;
+}
+
+.stopwatch .colon {
+	margin-top: -8px;
+}
+.playpause {
+	border-right: 1px dashed #fff;
+	border-bottom: 1px dashed #fff;
+}

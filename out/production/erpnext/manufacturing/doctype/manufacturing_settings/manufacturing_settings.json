@@ -1,0 +1,220 @@
+{
+ "actions": [],
+ "creation": "2014-11-27 14:12:07.542534",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "engine": "InnoDB",
+ "field_order": [
+  "raw_materials_consumption_section",
+  "material_consumption",
+  "column_break_3",
+  "backflush_raw_materials_based_on",
+  "capacity_planning",
+  "disable_capacity_planning",
+  "allow_overtime",
+  "allow_production_on_holidays",
+  "column_break_5",
+  "capacity_planning_for_days",
+  "mins_between_operations",
+  "section_break_6",
+  "default_wip_warehouse",
+  "default_fg_warehouse",
+  "column_break_11",
+  "default_scrap_warehouse",
+  "over_production_for_sales_and_work_order_section",
+  "overproduction_percentage_for_sales_order",
+  "column_break_16",
+  "overproduction_percentage_for_work_order",
+  "job_card_section",
+  "add_corrective_operation_cost_in_finished_good_valuation",
+  "column_break_24",
+  "job_card_excess_transfer",
+  "other_settings_section",
+  "update_bom_costs_automatically",
+  "column_break_23",
+  "make_serial_no_batch_from_work_order"
+ ],
+ "fields": [
+  {
+   "fieldname": "capacity_planning",
+   "fieldtype": "Section Break",
+   "label": "Capacity Planning"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.disable_capacity_planning",
+   "description": "Plan time logs outside Workstation working hours",
+   "fieldname": "allow_overtime",
+   "fieldtype": "Check",
+   "label": "Allow Overtime"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.disable_capacity_planning",
+   "fieldname": "allow_production_on_holidays",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Allow Production on Holidays"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "30",
+   "depends_on": "eval:!doc.disable_capacity_planning",
+   "description": "Plan operations X days in advance",
+   "fieldname": "capacity_planning_for_days",
+   "fieldtype": "Int",
+   "label": "Capacity Planning For (Days)"
+  },
+  {
+   "depends_on": "eval:!doc.disable_capacity_planning",
+   "description": "Default: 10 mins",
+   "fieldname": "mins_between_operations",
+   "fieldtype": "Int",
+   "label": "Time Between Operations (Mins)"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break",
+   "label": "Default Warehouses for Production"
+  },
+  {
+   "fieldname": "overproduction_percentage_for_sales_order",
+   "fieldtype": "Percent",
+   "label": "Overproduction Percentage For Sales Order"
+  },
+  {
+   "fieldname": "overproduction_percentage_for_work_order",
+   "fieldtype": "Percent",
+   "label": "Overproduction Percentage For Work Order"
+  },
+  {
+   "default": "BOM",
+   "fieldname": "backflush_raw_materials_based_on",
+   "fieldtype": "Select",
+   "label": "Backflush Raw Materials Based On",
+   "options": "BOM\nMaterial Transferred for Manufacture"
+  },
+  {
+   "default": "0",
+   "description": "Allow material consumptions without immediately manufacturing finished goods against a Work Order",
+   "fieldname": "material_consumption",
+   "fieldtype": "Check",
+   "label": "Allow Continuous Material Consumption"
+  },
+  {
+   "default": "0",
+   "description": "Update BOM cost automatically via scheduler, based on the latest Valuation Rate/Price List Rate/Last Purchase Rate of raw materials",
+   "fieldname": "update_bom_costs_automatically",
+   "fieldtype": "Check",
+   "label": "Update BOM Cost Automatically"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_wip_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Work In Progress Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "default_fg_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Finished Goods Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_capacity_planning",
+   "fieldtype": "Check",
+   "label": "Disable Capacity Planning"
+  },
+  {
+   "fieldname": "default_scrap_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Scrap Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "over_production_for_sales_and_work_order_section",
+   "fieldtype": "Section Break",
+   "label": "Overproduction for Sales and Work Order"
+  },
+  {
+   "fieldname": "raw_materials_consumption_section",
+   "fieldtype": "Section Break",
+   "label": "Raw Materials Consumption"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "other_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Other Settings"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "System will automatically create the serial numbers / batch for the Finished Good on submission of work order",
+   "fieldname": "make_serial_no_batch_from_work_order",
+   "fieldtype": "Check",
+   "label": "Make Serial No / Batch from Work Order"
+  },
+  {
+   "default": "0",
+   "fieldname": "add_corrective_operation_cost_in_finished_good_valuation",
+   "fieldtype": "Check",
+   "label": "Add Corrective Operation Cost in Finished Good Valuation"
+  },
+  {
+   "fieldname": "job_card_section",
+   "fieldtype": "Section Break",
+   "label": "Job Card"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Allow transferring raw materials even after the Required Quantity is fulfilled",
+   "fieldname": "job_card_excess_transfer",
+   "fieldtype": "Check",
+   "label": "Allow Excess Material Transfer"
+  }
+ ],
+ "icon": "icon-wrench",
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-09-13 22:09:09.401559",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Manufacturing Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Manufacturing Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

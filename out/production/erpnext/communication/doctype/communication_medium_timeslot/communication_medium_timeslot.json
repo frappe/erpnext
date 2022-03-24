@@ -1,0 +1,56 @@
+{
+ "creation": "2019-06-05 11:43:38.897272",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "day_of_week",
+  "from_time",
+  "to_time",
+  "employee_group"
+ ],
+ "fields": [
+  {
+   "fieldname": "day_of_week",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Day of Week",
+   "options": "Monday\nTuesday\nWednesday\nThursday\nFriday\nSaturday\nSunday",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "from_time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "From Time",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "to_time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "To Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee Group",
+   "options": "Employee Group",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-06-05 12:19:59.994979",
+ "modified_by": "Administrator",
+ "module": "Communication",
+ "name": "Communication Medium Timeslot",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

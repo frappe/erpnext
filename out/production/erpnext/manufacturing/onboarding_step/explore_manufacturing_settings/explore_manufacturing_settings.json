@@ -1,0 +1,22 @@
+{
+ "action": "Show Form Tour",
+ "action_label": "Take a walk-through of Manufacturing Settings",
+ "creation": "2020-05-19 11:55:11.378374",
+ "description": "# Review Manufacturing Settings\n\nIn ERPNext, the Manufacturing module\u2019s features are configurable as per your business needs. Manufacturing Settings is the place where you can set your preferences for:\n\n- Capacity planning for allocating jobs to workstations\n- Raw-material consumption based on BOM or actual\n- Default values and over-production allowance\n",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 1,
+ "is_skipped": 0,
+ "modified": "2021-08-13 15:59:32.145655",
+ "modified_by": "Administrator",
+ "name": "Explore Manufacturing Settings",
+ "owner": "Administrator",
+ "reference_document": "Manufacturing Settings",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Manufacturing Settings",
+ "validate_action": 0,
+ "video_url": "https://www.youtube.com/watch?v=UVGfzwOOZC4"
+}

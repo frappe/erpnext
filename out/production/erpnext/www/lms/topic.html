@@ -1,0 +1,58 @@
+{% extends "templates/base.html" %}
+{% block title %}{{ topic.name }}{% endblock %}
+{% from "www/lms/macros/hero.html" import hero %}
+{% from "www/lms/macros/card.html" import null_card %}
+
+{% block head_include %}
+	<style>
+		section {
+			padding: 5rem 0 5rem 0;
+		}
+	</style>
+{% endblock %}
+
+
+{% macro card(content, index, length) %}
+<div class="col-sm-4 mb-4 text-left">
+	<a href="/lms/content?program={{ program }}&course={{ course }}&topic={{ topic.name }}&type={{ content.content_type }}&content={{ content.content.name }}" class="no-decoration no-underline">
+	<div class="card h-100">
+		<div class='card-body'>
+			<div class="text-muted">{{ content.content_type or '' }}</div>
+			<h5 class='card-title'>{{ content.content.name }}</h5>
+		</div>
+		{% if has_access %}
+		<div class='card-footer'>
+			{% if content.content_type == 'Quiz' %}
+				{% if content.result == 'Fail' %} <span class="indicator red">{{_('Fail')}} <span class="text-muted">({{ content.score }}/100)</span></span>
+				{% elif content.result == 'Pass' %} <span class="indicator green">{{_('Pass')}} <span class="text-muted">({{ content.score }}/100)</span>
+				{% else %} <span class="indicator blue">{{_('Start')}}</span>
+				{% endif %}
+			{% else %}
+				{% if content.completed %} <span class="indicator green">{{_('Completed')}}</span>
+				{% else %} <span class="indicator blue">{{_('Start')}}</span>
+				{% endif %}
+			{% endif %}
+		</div>
+		{% endif %}
+	</div>
+	</a>
+</div>
+{% endmacro %}
+
+{% block content %}
+<section class="section">
+	{{ hero(topic.topic_name, topic.description, has_access, {'name': 'Course', 'url': '/lms/course?name=' + course +'&program=' + program}) }}
+	<div class='container'>
+		<div class="row mt-5">
+			{% for content in contents %}
+				{{ card(content, loop.index, topic.contents|length) }}
+			{% endfor %}
+			{% if contents %}
+				{% for n in range( (3 - (contents|length)) %3) %}
+					{{ null_card() }}
+				{% endfor %}
+			{% endif %}
+		</div>
+	</div>
+</section>
+{% endblock %}

@@ -1,0 +1,44 @@
+<div class="web-list-item transaction-list-item">
+	{% set today = frappe.utils.getdate(frappe.utils.nowdate()) %}
+	<a href = "{{ doc.route }}/" class="no-underline">
+		<div class="row">
+			<div class="col-sm-4 bold">
+				<span class="indicator
+				{% if frappe.utils.getdate(doc.admission_end_date) == today %}
+					red
+				{% elif frappe.utils.getdate(doc.admission_end_date) > today >= frappe.utils.getdate(doc.admission_start_date)%}
+					green
+				{% elif frappe.utils.getdate(doc.admission_start_date) > today %}
+					blue
+				{% else %}
+					gray
+				{% endif  %}
+				">{{ doc.title }}</span>
+			</div>
+			<div class="col-sm-2 small">
+				<span class="text-muted">
+					Academic Year
+				</span>
+				<div class="text-muted bold">
+					{{ doc.academic_year }}
+				</div>
+			</div>
+			<div class="col-sm-3 small">
+				<span class="text-muted">
+					Starts on
+				</span>
+				<div class="text-muted bold">
+					{{ frappe.format_date(doc.admission_start_date) }}
+				</div>
+			</div>
+			<div class="col-sm-3 small">
+				<span class="text-muted">
+					Ends on
+				</span>
+				<div class=" text-muted bold">
+					{{ frappe.format_date(doc.admission_end_date) }}
+				</div>
+			</div>
+		</div>
+	</a>
+</div>

@@ -1,0 +1,19 @@
+{
+ "add_total_row": 1, 
+ "apply_user_permissions": 1, 
+ "creation": "2017-06-22 11:06:40.836073", 
+ "disabled": 0, 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 0, 
+ "is_standard": "Yes", 
+ "modified": "2017-08-04 15:39:53.123814", 
+ "modified_by": "Administrator", 
+ "module": "Regional", 
+ "name": "GST Purchase Register", 
+ "owner": "Administrator", 
+ "ref_doctype": "Purchase Invoice", 
+ "report_name": "GST Purchase Register", 
+ "report_type": "Script Report", 
+ "roles": []
+}

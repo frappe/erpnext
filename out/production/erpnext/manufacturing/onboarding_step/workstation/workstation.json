@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Let\u2019s create a Workstation",
+ "creation": "2020-05-12 16:14:14.930214",
+ "description": "# Create Workstations\n\nA Workstation stores information regarding the place where the workstation operations are performed. As an example, if you have ten sewing machines doing stitching jobs, each machine will be added as a workstation.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-08-13 15:59:59.634802",
+ "modified_by": "Administrator",
+ "name": "Workstation",
+ "owner": "Administrator",
+ "reference_document": "Workstation",
+ "show_form_tour": 1,
+ "show_full_form": 1,
+ "title": "Workstation",
+ "validate_action": 1
+}

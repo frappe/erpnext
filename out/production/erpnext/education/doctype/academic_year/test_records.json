@@ -1,0 +1,18 @@
+[
+	{
+        "doctype": "Academic Year",
+		"academic_year_name": "2014-2015"
+	},
+	{
+        "doctype": "Academic Year",
+		"academic_year_name": "2015-2016"
+	},
+	{
+        "doctype": "Academic Year",
+		"academic_year_name": "2016-2017"
+	},
+	{
+        "doctype": "Academic Year",
+		"academic_year_name": "2017-2018"
+	}
+]

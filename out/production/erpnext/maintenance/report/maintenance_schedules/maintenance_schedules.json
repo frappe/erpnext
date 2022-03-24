@@ -1,0 +1,17 @@
+{
+ "apply_user_permissions": 1, 
+ "creation": "2013-05-06 14:25:21", 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 1, 
+ "is_standard": "Yes", 
+ "modified": "2014-06-29 08:18:17.144598", 
+ "modified_by": "Administrator", 
+ "module": "Support", 
+ "name": "Maintenance Schedules", 
+ "owner": "Administrator", 
+ "query": "SELECT\n    ms_sch.scheduled_date as \"Schedule Date:Date:120\",\n\tms_sch.item_code as \"Item Code:Link/Item:120\",\n\tms_sch.item_name as \"Item Name::120\",\n\tms_sch.serial_no as \"Serial No::120\",\n\tms_sch.sales_person as \"Sales Person::120\",\n\tms.customer_name as \"Customer:Link/Customer:120\",\n\tms.address_display as \"Customer Address::120\",\n\tms_item.sales_order as \"Sales Order:Link/Sales Order:120\",\n\tms.company as \"Company:Link/Company:120\"\n\t\nFROM\n\t`tabMaintenance Schedule` ms, \n    `tabMaintenance Schedule Detail` ms_sch, \n    `tabMaintenance Schedule Item` ms_item\nWHERE\n\tms.name = ms_sch.parent and ms.name = ms_item.parent and ms.docstatus = 1\nORDER BY\n\tms_sch.scheduled_date asc, ms_sch.item_code asc", 
+ "ref_doctype": "Maintenance Schedule", 
+ "report_name": "Maintenance Schedules", 
+ "report_type": "Query Report"
+}

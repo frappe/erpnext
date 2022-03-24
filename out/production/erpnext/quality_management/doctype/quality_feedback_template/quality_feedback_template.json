@@ -1,0 +1,64 @@
+{
+ "actions": [],
+ "autoname": "field:template",
+ "creation": "2019-05-26 21:17:24.283061",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "template",
+  "sb_00",
+  "parameters"
+ ],
+ "fields": [
+  {
+   "fieldname": "template",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Template Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "parameters",
+   "fieldtype": "Table",
+   "label": "Parameters",
+   "options": "Quality Feedback Template Parameter",
+   "reqd": 1
+  }
+ ],
+ "links": [
+  {
+   "group": "Records",
+   "link_doctype": "Quality Feedback",
+   "link_fieldname": "template"
+  }
+ ],
+ "modified": "2020-10-27 16:18:53.579688",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Feedback Template",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

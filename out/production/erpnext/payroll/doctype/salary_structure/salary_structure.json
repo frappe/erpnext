@@ -1,0 +1,278 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "Prompt",
+ "creation": "2013-03-07 18:50:29",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "letter_head",
+  "column_break1",
+  "is_active",
+  "payroll_frequency",
+  "currency",
+  "is_default",
+  "time_sheet_earning_detail",
+  "salary_slip_based_on_timesheet",
+  "column_break_17",
+  "salary_component",
+  "hour_rate",
+  "leave_encashment_amount_per_day",
+  "max_benefits",
+  "earning_deduction",
+  "earnings",
+  "deductions",
+  "conditions_and_formula_variable_and_example",
+  "net_pay_detail",
+  "total_earning",
+  "total_deduction",
+  "column_break2",
+  "net_pay",
+  "account",
+  "mode_of_payment",
+  "column_break_28",
+  "payment_account",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "letter_head",
+   "fieldtype": "Link",
+   "label": "Letter Head",
+   "options": "Letter Head"
+  },
+  {
+   "fieldname": "column_break1",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Yes",
+   "fieldname": "is_active",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Is Active",
+   "oldfieldname": "is_active",
+   "oldfieldtype": "Select",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "default": "Monthly",
+   "depends_on": "eval:(!doc.salary_slip_based_on_timesheet)",
+   "fieldname": "payroll_frequency",
+   "fieldtype": "Select",
+   "label": "Payroll Frequency",
+   "options": "\nMonthly\nFortnightly\nBimonthly\nWeekly\nDaily"
+  },
+  {
+   "default": "No",
+   "fieldname": "is_default",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Is Default",
+   "no_copy": 1,
+   "options": "Yes\nNo",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "time_sheet_earning_detail",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "salary_slip_based_on_timesheet",
+   "fieldtype": "Check",
+   "label": "Salary Slip Based on Timesheet"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Salary Component for timesheet based payroll.",
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "label": "Salary Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "hour_rate",
+   "fieldtype": "Currency",
+   "label": "Hour Rate",
+   "options": "currency"
+  },
+  {
+   "fieldname": "leave_encashment_amount_per_day",
+   "fieldtype": "Currency",
+   "label": "Leave Encashment Amount Per Day",
+   "options": "currency"
+  },
+  {
+   "fieldname": "max_benefits",
+   "fieldtype": "Currency",
+   "label": "Max Benefits (Amount)",
+   "options": "currency"
+  },
+  {
+   "description": "Salary breakup based on Earning and Deduction.",
+   "fieldname": "earning_deduction",
+   "fieldtype": "Section Break",
+   "oldfieldname": "earning_deduction",
+   "oldfieldtype": "Section Break",
+   "precision": "2"
+  },
+  {
+   "fieldname": "earnings",
+   "fieldtype": "Table",
+   "label": "Earnings",
+   "oldfieldname": "earning_details",
+   "oldfieldtype": "Table",
+   "options": "Salary Detail"
+  },
+  {
+   "fieldname": "deductions",
+   "fieldtype": "Table",
+   "label": "Deductions",
+   "oldfieldname": "deduction_details",
+   "oldfieldtype": "Table",
+   "options": "Salary Detail"
+  },
+  {
+   "fieldname": "net_pay_detail",
+   "fieldtype": "Section Break",
+   "options": "Simple"
+  },
+  {
+   "fieldname": "column_break2",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "total_earning",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Total Earning",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_deduction",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Total Deduction",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "net_pay",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Net Pay",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Section Break",
+   "label": "Account"
+  },
+  {
+   "fieldname": "mode_of_payment",
+   "fieldtype": "Link",
+   "label": "Mode of Payment",
+   "options": "Mode of Payment"
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "payment_account",
+   "fieldtype": "Link",
+   "label": "Payment Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Salary Structure",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "conditions_and_formula_variable_and_example",
+   "fieldtype": "HTML",
+   "label": "Conditions and Formula variable and example"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  }
+ ],
+ "icon": "fa fa-file-text",
+ "idx": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-02-03 23:50:10.205676",
+ "modified_by": "Administrator",
+ "module": "Payroll",
+ "name": "Salary Structure",
+ "naming_rule": "Set by user",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

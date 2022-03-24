@@ -1,0 +1,117 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:title",
+ "creation": "2018-04-16 06:44:48.791312",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "contract_terms",
+  "sb_fulfilment",
+  "requires_fulfilment",
+  "fulfilment_terms",
+  "section_break_6",
+  "contract_template_help"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "unique": 1
+  },
+  {
+   "fieldname": "contract_terms",
+   "fieldtype": "Text Editor",
+   "label": "Contract Terms and Conditions"
+  },
+  {
+   "fieldname": "sb_fulfilment",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "requires_fulfilment",
+   "fieldtype": "Check",
+   "label": "Requires Fulfilment"
+  },
+  {
+   "depends_on": "eval:doc.requires_fulfilment==1",
+   "fieldname": "fulfilment_terms",
+   "fieldtype": "Table",
+   "label": "Fulfilment Terms and Conditions",
+   "options": "Contract Template Fulfilment Terms"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "contract_template_help",
+   "fieldtype": "HTML",
+   "label": "Contract Template Help",
+   "options": "<h4>Contract Template Example</h4>\n\n<pre>Contract for Customer {{ party_name }}\n\n-Valid From : {{ start_date }} \n-Valid To : {{ end_date }}\n</pre>\n\n<h4>How to get fieldnames</h4>\n\n<p>The field names you can use in your Contract Template are the fields in the Contract for which you are creating the template. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Contract)</p>\n\n<h4>Templating</h4>\n\n<p>Templates are compiled using the Jinja Templating Language. To learn more about Jinja, <a class=\"strong\" href=\"http://jinja.pocoo.org/docs/dev/templates/\">read this documentation.</a></p>"
+  }
+ ],
+ "links": [],
+ "modified": "2020-12-07 10:44:22.587047",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Contract Template",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

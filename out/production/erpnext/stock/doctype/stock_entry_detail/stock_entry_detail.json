@@ -1,0 +1,569 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2022-02-05 00:17:49.860824",
+ "doctype": "DocType",
+ "document_type": "Other",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "barcode",
+  "section_break_2",
+  "s_warehouse",
+  "col_break1",
+  "t_warehouse",
+  "sec_break1",
+  "item_code",
+  "item_name",
+  "col_break2",
+  "is_finished_item",
+  "is_scrap_item",
+  "quality_inspection",
+  "is_process_loss",
+  "subcontracted_item",
+  "section_break_8",
+  "description",
+  "column_break_10",
+  "item_group",
+  "image",
+  "image_view",
+  "quantity_section",
+  "qty",
+  "transfer_qty",
+  "retain_sample",
+  "column_break_20",
+  "uom",
+  "stock_uom",
+  "conversion_factor",
+  "sample_quantity",
+  "rates_section",
+  "basic_rate",
+  "additional_cost",
+  "valuation_rate",
+  "allow_zero_valuation_rate",
+  "col_break3",
+  "set_basic_rate_manually",
+  "basic_amount",
+  "amount",
+  "serial_no_batch",
+  "serial_no",
+  "col_break4",
+  "batch_no",
+  "accounting",
+  "expense_account",
+  "accounting_dimensions_section",
+  "cost_center",
+  "project",
+  "dimension_col_break",
+  "more_info",
+  "actual_qty",
+  "transferred_qty",
+  "bom_no",
+  "allow_alternative_item",
+  "col_break6",
+  "material_request",
+  "material_request_item",
+  "original_item",
+  "reference_section",
+  "against_stock_entry",
+  "ste_detail",
+  "po_detail",
+  "putaway_rule",
+  "column_break_51",
+  "reference_purchase_receipt",
+  "job_card_item"
+ ],
+ "fields": [
+  {
+   "fieldname": "barcode",
+   "fieldtype": "Data",
+   "label": "Barcode"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "s_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Source Warehouse",
+   "oldfieldname": "s_warehouse",
+   "oldfieldtype": "Link",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "col_break1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "t_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Target Warehouse",
+   "oldfieldname": "t_warehouse",
+   "oldfieldtype": "Link",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "sec_break1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "label": "Item Code",
+   "oldfieldname": "item_code",
+   "oldfieldtype": "Link",
+   "options": "Item",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "col_break2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Item Name",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break",
+   "label": "Description"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description",
+   "oldfieldname": "description",
+   "oldfieldtype": "Text",
+   "print_width": "300px",
+   "width": "300px"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach",
+   "hidden": 1,
+   "label": "Image"
+  },
+  {
+   "fieldname": "image_view",
+   "fieldtype": "Image",
+   "label": "Image View",
+   "options": "image",
+   "print_hide": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty",
+   "oldfieldname": "qty",
+   "oldfieldtype": "Currency",
+   "reqd": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "basic_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Basic Rate (as per Stock UOM)",
+   "oldfieldname": "incoming_rate",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "basic_amount",
+   "fieldtype": "Currency",
+   "label": "Basic Amount",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "additional_cost",
+   "fieldtype": "Currency",
+   "label": "Additional Cost",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "oldfieldname": "amount",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "valuation_rate",
+   "fieldtype": "Currency",
+   "label": "Valuation Rate",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "oldfieldname": "uom",
+   "oldfieldtype": "Link",
+   "options": "UOM",
+   "reqd": 1
+  },
+  {
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "Conversion Factor",
+   "oldfieldname": "conversion_factor",
+   "oldfieldtype": "Currency",
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "oldfieldname": "stock_uom",
+   "oldfieldtype": "Link",
+   "options": "UOM",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "transfer_qty",
+   "fieldtype": "Float",
+   "label": "Qty as per Stock UOM",
+   "oldfieldname": "transfer_qty",
+   "oldfieldtype": "Currency",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.retain_sample",
+   "fieldname": "retain_sample",
+   "fieldtype": "Check",
+   "label": "Retain Sample",
+   "read_only": 1
+  },
+  {
+   "depends_on": "retain_sample",
+   "fieldname": "sample_quantity",
+   "fieldtype": "Int",
+   "label": "Sample Quantity"
+  },
+  {
+   "fieldname": "serial_no_batch",
+   "fieldtype": "Section Break",
+   "label": "Serial No / Batch",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Small Text",
+   "label": "Serial No",
+   "no_copy": 1,
+   "oldfieldname": "serial_no",
+   "oldfieldtype": "Text"
+  },
+  {
+   "fieldname": "col_break4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Link",
+   "label": "Batch No",
+   "no_copy": 1,
+   "oldfieldname": "batch_no",
+   "oldfieldtype": "Link",
+   "options": "Batch"
+  },
+  {
+   "depends_on": "eval:parent.inspection_required && doc.t_warehouse",
+   "fieldname": "quality_inspection",
+   "fieldtype": "Link",
+   "label": "Quality Inspection",
+   "no_copy": 1,
+   "options": "Quality Inspection"
+  },
+  {
+   "fieldname": "accounting",
+   "fieldtype": "Section Break",
+   "label": "Accounting"
+  },
+  {
+   "depends_on": "eval:cint(erpnext.is_perpetual_inventory_enabled(parent.company))",
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Difference Account",
+   "options": "Account",
+   "print_hide": 1
+  },
+  {
+   "default": ":Company",
+   "depends_on": "eval:cint(erpnext.is_perpetual_inventory_enabled(parent.company))",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_info",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_zero_valuation_rate",
+   "fieldtype": "Check",
+   "label": "Allow Zero Valuation Rate",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only_depends_on": "eval:doc.s_warehouse"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "actual_qty",
+   "fieldtype": "Float",
+   "label": "Actual Qty (at source/target)",
+   "no_copy": 1,
+   "oldfieldname": "actual_qty",
+   "oldfieldtype": "Read Only",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "description": "BOM No. for a Finished Good Item",
+   "fieldname": "bom_no",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "BOM No",
+   "options": "BOM",
+   "print_hide": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "s_warehouse",
+   "fieldname": "allow_alternative_item",
+   "fieldtype": "Check",
+   "label": "Allow Alternative Item",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Material Request used to make this Stock Entry",
+   "fieldname": "material_request",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Material Request",
+   "no_copy": 1,
+   "options": "Material Request",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "material_request_item",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Material Request Item",
+   "no_copy": 1,
+   "options": "Material Request Item",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "original_item",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Original Item",
+   "no_copy": 1,
+   "options": "Item",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:parent.purpose == 'Send to Subcontractor'",
+   "fieldname": "subcontracted_item",
+   "fieldtype": "Link",
+   "label": "Subcontracted Item",
+   "options": "Item"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "against_stock_entry",
+   "fieldtype": "Link",
+   "label": "Against Stock Entry",
+   "no_copy": 1,
+   "options": "Stock Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "ste_detail",
+   "fieldtype": "Data",
+   "label": "Stock Entry Child",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_51",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transferred_qty",
+   "fieldtype": "Float",
+   "label": "Transferred Qty",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Data",
+   "label": "Item Group"
+  },
+  {
+   "fieldname": "reference_purchase_receipt",
+   "fieldtype": "Link",
+   "label": "Reference Purchase Receipt",
+   "options": "Purchase Receipt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "po_detail",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "PO Supplied Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:parent.purpose===\"Repack\" && doc.t_warehouse",
+   "fieldname": "set_basic_rate_manually",
+   "fieldtype": "Check",
+   "label": "Set Basic Rate Manually"
+  },
+  {
+   "depends_on": "eval:in_list([\"Material Transfer\", \"Material Receipt\"], parent.purpose)",
+   "fieldname": "putaway_rule",
+   "fieldtype": "Link",
+   "label": "Putaway Rule",
+   "no_copy": 1,
+   "options": "Putaway Rule",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "quantity_section",
+   "fieldtype": "Section Break",
+   "label": "Quantity"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rates_section",
+   "fieldtype": "Section Break",
+   "label": "Rates"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_scrap_item",
+   "fieldtype": "Check",
+   "label": "Is Scrap Item"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_finished_item",
+   "fieldtype": "Check",
+   "label": "Is Finished Item"
+  },
+  {
+   "fieldname": "job_card_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Job Card Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_process_loss",
+   "fieldtype": "Check",
+   "label": "Is Process Loss"
+  }
+ ],
+ "idx": 1,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-02-26 00:51:24.963653",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Entry Detail",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "states": []
+}

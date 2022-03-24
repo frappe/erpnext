@@ -1,0 +1,30 @@
+<div class="web-list-item transaction-list-item">
+	<a href="/issues?name={{ doc.name }}" class="no-underline">
+		<div class="row py-4">
+			<div class="col-3 d-flex align-items-center">
+				{% set indicator = 'red' if doc.status == 'Open' else 'gray' %}
+				{% set indicator = 'green' if doc.status == 'Closed' else indicator %}
+				<span class="d-inline-flex indicator {{ indicator }}"></span>
+					{{ doc.name }}
+			</div>
+			<div class="col-5 text-muted">
+				{{ doc.subject }}</div>
+			<div class="col-2 d-flex align-items-center text-muted">
+				{% set indicator = 'red' if doc.status == 'Open' else 'gray' %}
+				{% set indicator = 'green' if doc.status == 'Closed' else indicator %}
+				{% set indicator = 'orange' if doc.status == 'Open' and doc.priority == 'Medium' else indicator %}
+				{% set indicator = 'yellow' if doc.status == 'Open' and doc.priority == 'Low' else indicator %}
+				<span class="d-inline-flex indicator {{ indicator }}"></span>
+					{% if doc.status == "Open" %}
+						{{ doc.priority }}
+					{% else %}
+						{{ doc.status }}
+					{%- endif -%}
+				</span>
+			</div>
+			<div class="col-2 text-right text-muted">
+				{{ frappe.format_date(doc.modified) }}
+			</div>
+		</div>
+	</a>
+</div>

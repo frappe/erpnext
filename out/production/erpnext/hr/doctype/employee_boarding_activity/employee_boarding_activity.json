@@ -1,0 +1,108 @@
+{
+ "actions": [],
+ "creation": "2018-05-09 05:37:18.439763",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "activity_name",
+  "user",
+  "role",
+  "begin_on",
+  "duration",
+  "column_break_3",
+  "task",
+  "task_weight",
+  "required_for_employee_creation",
+  "section_break_6",
+  "description"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "activity_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Activity Name",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "depends_on": "eval:!doc.role",
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "User",
+   "options": "User"
+  },
+  {
+   "columns": 1,
+   "depends_on": "eval:!doc.user",
+   "fieldname": "role",
+   "fieldtype": "Link",
+   "label": "Role",
+   "options": "Role"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "task",
+   "fieldtype": "Link",
+   "label": "Task",
+   "no_copy": 1,
+   "options": "Task",
+   "read_only": 1
+  },
+  {
+   "fieldname": "task_weight",
+   "fieldtype": "Float",
+   "label": "Task Weight"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:['Employee Onboarding', 'Employee Onboarding Template'].includes(doc.parenttype)",
+   "description": "Applicable in the case of Employee Onboarding",
+   "fieldname": "required_for_employee_creation",
+   "fieldtype": "Check",
+   "label": "Required for Employee Creation"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description"
+  },
+  {
+   "columns": 2,
+   "fieldname": "duration",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Duration (Days)"
+  },
+  {
+   "columns": 2,
+   "fieldname": "begin_on",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Begin On (Days)"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2022-01-29 14:05:00.543122",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Employee Boarding Activity",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

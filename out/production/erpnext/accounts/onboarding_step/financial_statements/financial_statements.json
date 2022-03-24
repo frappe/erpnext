@@ -1,0 +1,23 @@
+{
+ "action": "View Report",
+ "creation": "2021-07-12 12:08:47.026115",
+ "description": "# Financial Statements\n\nIn ERPNext, you can get crucial financial reports like [Balance Sheet] and [Profit and Loss] statements with a click of a button. You can run in the report for a different period and plot analytics charts premised on statement data. For more reports, check sections like Financial Statements, General Ledger, and Profitability reports.\n\n<b>[Check Accounting reports](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-reports)</b>",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-08-13 11:59:18.767407",
+ "modified_by": "Administrator",
+ "name": "Financial Statements",
+ "owner": "Administrator",
+ "reference_report": "General Ledger",
+ "report_description": "General Ledger",
+ "report_reference_doctype": "GL Entry",
+ "report_type": "Script Report",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Financial Statements",
+ "validate_action": 1
+}

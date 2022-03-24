@@ -1,0 +1,72 @@
+<table class="table table-bordered assessment-result-tool">
+	<thead>
+		<tr>
+			<th style="width: 90px" rowspan="2">Student</th>
+			<th style="width: 170px" rowspan="2">Student Name</th>
+			{% for c in criteria %}
+			<th class="score" style="width: 100px">{{ c.assessment_criteria }}</th>
+			{% endfor %}
+			<th class="score" style="width: 170px" rowspan="2">Comments</th>
+			<th class="score" style="width: 100px">Total Marks</th>
+			<!--criteria-->
+		</tr>
+		<tr>
+			{% for c in criteria %}
+			<th class="score" style="width: 100px">Score ({{ c.maximum_score }})</th>
+			{% endfor %}
+			<th class="score" style="width: 100px">Score ({{max_total_score}})</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for s in students %}
+		<tr
+			{% if(s.assessment_details && s.docstatus && s.docstatus == 1) { %} class="text-muted" {% } %}
+			data-student="{{s.student}}">
+
+			<td>{{ s.student }}</td>
+			<td>{{ s.student_name }}</td>
+			{% for c in criteria %}
+			<td>
+				<span data-student="{{s.student}}" data-criteria="{{c.assessment_criteria}}" class="student-result-grade badge" >
+					{% if(s.assessment_details) { %}
+						{{s.assessment_details[c.assessment_criteria][1]}}
+					{% } %}
+				</span>
+				<input type="number" class="student-result-data" style="width:70%; float:right;"
+					data-max-score="{{c.maximum_score}}"
+					data-criteria="{{c.assessment_criteria}}"
+					data-student="{{s.student}}"
+					{% if(s.assessment_details && s.docstatus && s.docstatus == 1) { %} disabled {% } %}
+					{% if(s.assessment_details) { %}
+						value="{{s.assessment_details[c.assessment_criteria][0]}}"
+					{% } %}/>
+			</td>
+			{% endfor %}
+			<td>
+				<input type="text" class="result-comment" data-student="{{s.student}}"
+				{% if(s.assessment_details && s.docstatus && s.docstatus == 1) { %} disabled {% } %}
+				{% if(s.assessment_details) { %}
+					value="{{s.assessment_details.comment}}"
+				{% } %}
+			</td>
+			<td>
+				<span data-student="{{s.student}}" class="total-score-grade badge" style="width:30%; float:left;">
+				{% if(s.assessment_details) { %}
+				{{s.assessment_details.total_score[1]}}
+				{% } %}
+				</span>
+				<span data-student="{{s.student}}" class="total-score" style="width:60%; float:center;">
+				{% if(s.assessment_details) { %}
+				{{s.assessment_details.total_score[0]}}
+				{% } %}
+				</span>
+				<span data-student="{{s.student}}" class="total-result-link" style="width: 10%; display:{% if(!s.assessment_details) { %}None{% } %}; float:right;">
+					<a class="btn-open no-decoration" title="Open Link" href="/app/Form/Assessment Result/{% if(s.assessment_details) { %}{{s.name}}{% } %}">
+						<i class="octicon octicon-arrow-right"></i>
+					</a>
+				</span>
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>

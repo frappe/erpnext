@@ -1,0 +1,285 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "naming_series:",
+ "creation": "2013-02-20 19:10:38",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "employee",
+  "employee_name",
+  "department",
+  "company",
+  "column_break1",
+  "leave_type",
+  "from_date",
+  "to_date",
+  "section_break_6",
+  "new_leaves_allocated",
+  "carry_forward",
+  "unused_leaves",
+  "total_leaves_allocated",
+  "total_leaves_encashed",
+  "column_break_10",
+  "compensatory_request",
+  "leave_period",
+  "leave_policy",
+  "leave_policy_assignment",
+  "carry_forwarded_leaves_count",
+  "expired",
+  "amended_from",
+  "notes",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "HR-LAL-.YYYY.-",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Employee",
+   "oldfieldname": "employee",
+   "oldfieldtype": "Link",
+   "options": "Employee",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "label": "Employee Name",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break1",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "leave_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Leave Type",
+   "oldfieldname": "leave_type",
+   "oldfieldtype": "Link",
+   "options": "Leave Type",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break",
+   "label": "Allocation"
+  },
+  {
+   "allow_on_submit": 1,
+   "bold": 1,
+   "fieldname": "new_leaves_allocated",
+   "fieldtype": "Float",
+   "label": "New Leaves Allocated"
+  },
+  {
+   "default": "0",
+   "fieldname": "carry_forward",
+   "fieldtype": "Check",
+   "label": "Add unused leaves from previous allocations"
+  },
+  {
+   "depends_on": "carry_forward",
+   "fieldname": "unused_leaves",
+   "fieldtype": "Float",
+   "label": "Unused leaves",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_leaves_allocated",
+   "fieldtype": "Float",
+   "label": "Total Leaves Allocated",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.total_leaves_encashed>0",
+   "fieldname": "total_leaves_encashed",
+   "fieldtype": "Float",
+   "label": "Total Leaves Encashed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "compensatory_request",
+   "fieldtype": "Link",
+   "label": "Compensatory Leave Request",
+   "options": "Compensatory Leave Request",
+   "read_only": 1
+  },
+  {
+   "fieldname": "leave_period",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Leave Period",
+   "options": "Leave Period",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "leave_policy_assignment.leave_policy",
+   "fieldname": "leave_policy",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Leave Policy",
+   "options": "Leave Policy",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "expired",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Expired",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Amended From",
+   "no_copy": 1,
+   "oldfieldname": "amended_from",
+   "oldfieldtype": "Data",
+   "options": "Leave Allocation",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description",
+   "oldfieldname": "reason",
+   "oldfieldtype": "Small Text",
+   "width": "300px"
+  },
+  {
+   "depends_on": "carry_forwarded_leaves_count",
+   "fieldname": "carry_forwarded_leaves_count",
+   "fieldtype": "Float",
+   "label": "Carry Forwarded Leaves",
+   "read_only": 1
+  },
+  {
+   "fieldname": "leave_policy_assignment",
+   "fieldtype": "Link",
+   "label": "Leave Policy Assignment",
+   "options": "Leave Policy Assignment",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  }
+ ],
+ "icon": "fa fa-ok",
+ "idx": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-01-18 19:15:53.262536",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Leave Allocation",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "employee,employee_name,leave_type,total_leaves_allocated",
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "timeline_field": "employee",
+ "title_field": "employee_name"
+}

@@ -1,0 +1,693 @@
+{
+    "country_code": "nl", 
+    "name": "Netherlands - Grootboekschema", 
+    "tree": {
+        "FABRIKAGEREKENINGEN": {
+			"is_group": 1,
+            "root_type": "Expense"
+        }, 
+        "FINANCIELE REKENINGEN, KORTLOPENDE VORDERINGEN EN SCHULDEN": {
+            "Bank": {
+                "RABO Bank": {
+                    "account_type": "Bank"
+                }, 
+                "account_type": "Bank"
+            }, 
+            "KORTLOPENDE SCHULDEN": {
+                "Af te dragen Btw-verlegd": {
+                    "account_type": "Tax"
+                }, 
+                "Afdracht loonheffing": {}, 
+                "Btw af te dragen hoog": {
+                    "account_type": "Tax"
+                }, 
+                "Btw af te dragen laag": {
+                    "account_type": "Tax"
+                }, 
+                "Btw af te dragen overig": {
+                    "account_type": "Tax"
+                }, 
+                "Btw oude jaren": {
+                    "account_type": "Tax"
+                }, 
+                "Btw te vorderen hoog": {
+                    "account_type": "Tax"
+                }, 
+                "Btw te vorderen laag": {
+                    "account_type": "Tax"
+                }, 
+                "Btw te vorderen overig": {
+                    "account_type": "Tax"
+                }, 
+                "Btw-afdracht": {
+                    "account_type": "Tax"
+                }, 
+                "Crediteuren": {
+                    "account_type": "Payable"
+                }, 
+                "Dividend": {}, 
+                "Dividendbelasting": {}, 
+                "Energiekosten 1": {}, 
+                "Investeringsaftrek": {}, 
+                "Loonheffing": {}, 
+                "Overige te betalen posten": {}, 
+                "Pensioenpremies 1": {}, 
+                "Premie WIR": {}, 
+                "Rekening-courant inkoopvereniging": {}, 
+                "Rente": {}, 
+                "Sociale lasten 1": {}, 
+                "Stock Recieved niet gefactureerd": {
+                    "account_type": "Stock Received But Not Billed"
+                }, 
+                "Tanti\u00e8mes 1": {}, 
+                "Te vorderen Btw-verlegd": {
+                    "account_type": "Tax"
+                }, 
+                "Telefoon/telefax 1": {}, 
+                "Termijnen onderh. werk": {}, 
+                "Vakantiedagen": {}, 
+                "Vakantiegeld 1": {}, 
+                "Vakantiezegels": {}, 
+                "Vennootschapsbelasting": {}, 
+                "Vooruit ontvangen bedr.": {}
+            }, 
+            "LIQUIDE MIDDELEN": {
+                "ABN-AMRO bank": {}, 
+                "Bankbetaalkaarten": {}, 
+                "Effecten": {}, 
+                "Girobetaalkaarten": {}, 
+                "Kas": {
+                    "account_type": "Cash"
+                }, 
+                "Kas  valuta": {
+                    "account_type": "Cash"
+                }, 
+                "Kleine kas": {
+                    "account_type": "Cash"
+                }, 
+                "Kruisposten": {}, 
+                "Postbank": {
+                    "account_type": "Cash"
+                }, 
+                "account_type": "Cash"
+            }, 
+            "VORDERINGEN": {
+                "Debiteuren": {
+                    "account_type": "Receivable"
+                }, 
+                "Dubieuze debiteuren": {}, 
+                "Overige vorderingen": {}, 
+                "Rekening-courant directie 1": {}, 
+                "Te ontvangen ziekengeld": {}, 
+                "Voorschotten personeel": {}, 
+                "Vooruitbetaalde kosten": {}, 
+                "Voorziening dubieuze debiteuren": {}
+            }, 
+            "root_type": "Asset"
+        }, 
+        "INDIRECTE KOSTEN": {
+			"is_group": 1,
+            "root_type": "Expense"
+        }, 
+        "KOSTENREKENINGEN": {
+            "AFSCHRIJVINGEN": {
+                "Aanhangwagens": {}, 
+                "Aankoopkosten": {}, 
+                "Aanloopkosten": {}, 
+                "Auteursrechten": {}, 
+                "Bedrijfsgebouwen": {}, 
+                "Bedrijfsinventaris": {
+                    "account_type": "Depreciation"
+                }, 
+                "Drankvergunningen": {}, 
+                "Fabrieksinventaris": {
+                    "account_type": "Depreciation"
+                }, 
+                "Gebouwen": {}, 
+                "Gereedschappen": {}, 
+                "Goodwill": {}, 
+                "Grondverbetering": {}, 
+                "Heftrucks": {}, 
+                "Kantine-inventaris": {}, 
+                "Kantoorinventaris": {
+                    "account_type": "Depreciation"
+                }, 
+                "Kantoormachines": {}, 
+                "Licenties": {}, 
+                "Machines 1": {}, 
+                "Magazijninventaris": {}, 
+                "Octrooien": {}, 
+                "Ontwikkelingskosten": {}, 
+                "Pachtersinvestering": {}, 
+                "Parkeerplaats": {}, 
+                "Personenauto's": {
+                    "account_type": "Depreciation"
+                }, 
+                "Rijwielen en bromfietsen": {}, 
+                "Tonnagevergunningen": {}, 
+                "Verbouwingen": {}, 
+                "Vergunningen": {}, 
+                "Voorraadverschillen": {}, 
+                "Vrachtauto's": {}, 
+                "Winkels": {}, 
+                "Woon-winkelhuis": {}, 
+                "account_type": "Depreciation"
+            }, 
+            "ALGEMENE KOSTEN": {
+                "Accountantskosten": {}, 
+                "Advieskosten": {}, 
+                "Assuranties 1": {}, 
+                "Bankkosten": {}, 
+                "Juridische kosten": {}, 
+                "Overige algemene kosten": {}, 
+                "Toev. Ass. eigen risico": {}
+            }, 
+            "BEDRIJFSKOSTEN": {
+                "Assuranties 2": {}, 
+                "Energie (krachtstroom)": {}, 
+                "Gereedschappen 1": {}, 
+                "Hulpmaterialen 1": {}, 
+                "Huur inventaris": {}, 
+                "Huur machines": {}, 
+                "Leasing invent.operational": {}, 
+                "Leasing mach. operational": {}, 
+                "Onderhoud inventaris": {}, 
+                "Onderhoud machines": {}, 
+                "Ophalen/vervoer afval": {}, 
+                "Overige bedrijfskosten": {}
+            }, 
+            "FINANCIERINGSKOSTEN 1": {
+                "Overige rentebaten": {}, 
+                "Overige rentelasten": {}, 
+                "Rente bankkrediet": {}, 
+                "Rente huurkoopcontracten": {}, 
+                "Rente hypotheek": {}, 
+                "Rente leasecontracten": {}, 
+                "Rente lening o/g": {}, 
+                "Rente lening u/g": {}
+            }, 
+            "HUISVESTINGSKOSTEN": {
+                "Assurantie onroerend goed": {}, 
+                "Belastingen onr. Goed": {}, 
+                "Energiekosten": {}, 
+                "Groot onderhoud onr. Goed": {}, 
+                "Huur": {}, 
+                "Huurwaarde woongedeelte": {}, 
+                "Onderhoud onroerend goed": {}, 
+                "Ontvangen huren": {}, 
+                "Overige huisvestingskosten": {}, 
+                "Pacht": {}, 
+                "Schoonmaakkosten": {}, 
+                "Toevoeging egalisatieres. Groot onderhoud": {}
+            }, 
+            "KANTOORKOSTEN": {
+                "Administratiekosten": {}, 
+                "Contributies/abonnementen": {}, 
+                "Huur kantoorapparatuur": {}, 
+                "Internetaansluiting": {}, 
+                "Kantoorbenodigdh./drukw.": {}, 
+                "Onderhoud kantoorinvent.": {}, 
+                "Overige kantoorkosten": {}, 
+                "Porti": {}, 
+                "Telefoon/telefax": {}
+            }, 
+            "OVERIGE BATEN EN LASTEN": {
+                "Betaalde schadevergoed.": {}, 
+                "Boekverlies vaste activa": {}, 
+                "Boekwinst van vaste activa": {}, 
+                "K.O. regeling OB": {}, 
+                "Kasverschillen": {}, 
+                "Kosten loonbelasting": {}, 
+                "Kosten omzetbelasting": {}, 
+                "Nadelige koersverschillen": {}, 
+                "Naheffing bedrijfsver.": {}, 
+                "Ontvangen schadevergoed.": {}, 
+                "Overige baten": {}, 
+                "Overige lasten": {}, 
+                "Voordelige koersverschil.": {}
+            }, 
+            "PERSONEELSKOSTEN": {
+                "Autokostenvergoeding": {}, 
+                "Bedrijfskleding": {}, 
+                "Belastingvrije uitkeringen": {}, 
+                "Bijzondere beloningen": {}, 
+                "Congressen, seminars en symposia": {}, 
+                "Gereedschapsgeld": {}, 
+                "Geschenken personeel": {}, 
+                "Gratificaties": {}, 
+                "Inhouding pensioenpremies": {}, 
+                "Inhouding sociale lasten": {}, 
+                "Kantinekosten": {}, 
+                "Lonen en salarissen": {}, 
+                "Loonwerk": {}, 
+                "Managementvergoedingen": {}, 
+                "Opleidingskosten": {}, 
+                "Oprenting stamrechtverpl.": {}, 
+                "Overhevelingstoeslag": {}, 
+                "Overige kostenverg.": {}, 
+                "Overige personeelskosten": {}, 
+                "Overige uitkeringen": {}, 
+                "Pensioenpremies": {}, 
+                "Provisie 1": {}, 
+                "Reiskosten": {}, 
+                "Rijwielvergoeding": {}, 
+                "Sociale lasten": {}, 
+                "Tanti\u00e8mes": {}, 
+                "Thuiswerkers": {}, 
+                "Toev. Backservice pens.verpl.": {}, 
+                "Toevoeging pensioenverpl.": {}, 
+                "Uitkering ziekengeld": {}, 
+                "Uitzendkrachten": {}, 
+                "Vakantiebonnen": {}, 
+                "Vakantiegeld": {}, 
+                "Vergoeding studiekosten": {}, 
+                "Wervingskosten personeel": {}
+            }, 
+            "VERKOOPKOSTEN": {
+                "Advertenties": {}, 
+                "Afschrijving dubieuze deb.": {}, 
+                "Beurskosten": {}, 
+                "Etalagekosten": {}, 
+                "Exportkosten": {}, 
+                "Kascorrecties": {}, 
+                "Overige verkoopkosten": {}, 
+                "Provisie": {}, 
+                "Reclame": {}, 
+                "Reis en verblijfkosten": {}, 
+                "Relatiegeschenken": {}, 
+                "Representatiekosten": {}, 
+                "Uitgaande vrachten": {}, 
+                "Veilingkosten": {}, 
+                "Verpakkingsmateriaal 1": {}, 
+                "Websitekosten": {}
+            }, 
+            "VERVOERSKOSTEN": {
+                "Assuranties auto's": {}, 
+                "Brandstoffen": {}, 
+                "Leasing auto's": {}, 
+                "Onderhoud personenauto's": {}, 
+                "Onderhoud vrachtauto's": {}, 
+                "Overige vervoerskosten": {}, 
+                "Priv\u00e9-gebruik auto's": {}, 
+                "Wegenbelasting": {}
+            }, 
+            "root_type": "Expense"
+        }, 
+        "TUSSENREKENINGEN": {
+            "Betaalwijze cadeaubonnen": {
+                "account_type": "Cash"
+            }, 
+            "Betaalwijze chipknip": {
+                "account_type": "Cash"
+            }, 
+            "Betaalwijze contant": {
+                "account_type": "Cash"
+            }, 
+            "Betaalwijze pin": {
+                "account_type": "Cash"
+            }, 
+            "Inkopen Nederland hoog": {
+                "account_type": "Cash"
+            }, 
+            "Inkopen Nederland laag": {
+                "account_type": "Cash"
+            }, 
+            "Inkopen Nederland onbelast": {
+                "account_type": "Cash"
+            }, 
+            "Inkopen Nederland overig": {
+                "account_type": "Cash"
+            }, 
+            "Inkopen Nederland verlegd": {
+                "account_type": "Cash"
+            }, 
+            "Inkopen binnen EU hoog": {
+                "account_type": "Cash"
+            }, 
+            "Inkopen binnen EU laag": {
+                "account_type": "Cash"
+            }, 
+            "Inkopen binnen EU overig": {
+                "account_type": "Cash"
+            }, 
+            "Inkopen buiten EU hoog": {
+                "account_type": "Cash"
+            }, 
+            "Inkopen buiten EU laag": {
+                "account_type": "Cash"
+            }, 
+            "Inkopen buiten EU overig": {
+                "account_type": "Cash"
+            }, 
+            "Kassa 1": {
+                "account_type": "Cash"
+            }, 
+            "Kassa 2": {
+                "account_type": "Cash"
+            }, 
+            "Netto lonen": {
+                "account_type": "Cash"
+            }, 
+            "Tegenrekening Inkopen": {
+                "account_type": "Cash"
+            }, 
+            "Tussenrek. autom. betalingen": {
+                "account_type": "Cash"
+            }, 
+            "Tussenrek. autom. loonbetalingen": {
+                "account_type": "Cash"
+            }, 
+            "Tussenrek. cadeaubonbetalingen": {
+                "account_type": "Cash"
+            }, 
+            "Tussenrekening balans": {
+                "account_type": "Cash"
+            }, 
+            "Tussenrekening chipknip": {
+                "account_type": "Cash"
+            }, 
+            "Tussenrekening correcties": {
+                "account_type": "Cash"
+            }, 
+            "Tussenrekening pin": {
+                "account_type": "Cash"
+            }, 
+            "Vraagposten": {
+                "account_type": "Cash"
+            }, 
+            "root_type": "Asset"
+        }, 
+        "VASTE ACTIVA, EIGEN VERMOGEN, LANGLOPEND VREEMD VERMOGEN EN VOORZIENINGEN": {
+            "EIGEN VERMOGEN": {
+                "Aandelenkapitaal": {
+                    "account_type": "Equity"
+                }, 
+                "Assuranties": {
+                    "account_type": "Equity"
+                }, 
+                "Buitengewone lasten": {
+                    "account_type": "Equity"
+                }, 
+                "Giften": {
+                    "account_type": "Equity"
+                }, 
+                "Huishoudgeld": {
+                    "account_type": "Equity"
+                }, 
+                "Inkomstenbelasting": {
+                    "account_type": "Equity"
+                }, 
+                "Kapitaal": {
+                    "account_type": "Equity"
+                }, 
+                "Overige persoonlijke verplichtingen": {
+                    "account_type": "Equity"
+                }, 
+                "Overige priv\u00e9-uitgaven": {
+                    "account_type": "Equity"
+                }, 
+                "Overige reserves": {
+                    "account_type": "Equity"
+                }, 
+                "Premie lijfrenteverzekeringen": {
+                    "account_type": "Equity"
+                }, 
+                "Premie volksverzekeringen": {
+                    "account_type": "Equity"
+                }, 
+                "Priv\u00e9-gebruik": {
+                    "account_type": "Equity"
+                }, 
+                "Priv\u00e9-opnamen/stortingen": {
+                    "account_type": "Equity"
+                }, 
+                "Vermogensbelasting": {
+                    "account_type": "Equity"
+                }, 
+                "WAO en ziekengeldverzekeringen": {
+                    "account_type": "Equity"
+                }, 
+                "Wettelijke reserves": {
+                    "account_type": "Equity"
+                }
+            }, 
+            "FINANCIELE VASTE ACTIVA EN LANGLOPENDE VORDERINGEN": {
+                "FINANCIELE VASTE ACTIVA": {
+                    "Aandeel inkoopcombinatie": {}, 
+                    "Meerderheidsdeelnemingen": {}, 
+                    "Minderheidsdeelnemingen": {}
+                }, 
+                "LANGLOPENDE VORDERINGEN": {
+                    "Financieringskosten": {}, 
+                    "Financieringskosten huurkoop": {}, 
+                    "Hypotheken u/g 1": {}, 
+                    "Hypotheken u/g 2": {}, 
+                    "Hypotheken u/g 3": {}, 
+                    "Leningen u/g 1": {}, 
+                    "Leningen u/g 2": {}, 
+                    "Leningen u/g 3": {}, 
+                    "Leningen u/g 4": {}, 
+                    "Leningen u/g 5": {}, 
+                    "Vorderingen op deelnemingen": {}, 
+                    "Waarborgsommen": {}
+                }
+            }, 
+            "IMMATERIELE ACTIVA": {
+                "Aanschafwaarde Aanloopkosten": {}, 
+                "Aanschafwaarde Auteursrechten": {}, 
+                "Aanschafwaarde Drankvergunningen": {}, 
+                "Aanschafwaarde Goodwill": {}, 
+                "Aanschafwaarde Octrooien": {}, 
+                "Aanschafwaarde Ontwikkelingskosten": {}, 
+                "Aanschafwaarde Tonnagevergunningen": {}, 
+                "Aanschafwaarde Vergunningen": {}, 
+                "Afschrijving Aanloopkosten": {}, 
+                "Afschrijving Auteursrechten": {}, 
+                "Afschrijving Drankvergunningen": {}, 
+                "Afschrijving Goodwill": {}, 
+                "Afschrijving Licenties": {}, 
+                "Afschrijving Octrooien": {}, 
+                "Afschrijving Ontwikkelingskosten": {}, 
+                "Afschrijving Tonnagevergunningen": {}, 
+                "Afschrijving Vergunningen": {}
+            }, 
+            "LANGLOPENDE SCHULDEN EN AFLOSSINGEN": {
+                "AFLOSSINGEN": {
+                    "Huurkoopverplichtingen": {}, 
+                    "Hypotheek o/g 1": {}, 
+                    "Hypotheek o/g 2": {}, 
+                    "Hypotheek o/g 3": {}, 
+                    "Hypotheek o/g 4": {}, 
+                    "Hypotheek o/g 5": {}, 
+                    "Lease-verplichtingen": {}
+                }, 
+                "LANGLOPENDE SCHULDEN": {
+                    "Huurkoopverplichtingen 1": {}, 
+                    "Hypotheken o/g 1": {}, 
+                    "Hypotheken o/g 2": {}, 
+                    "Hypotheken o/g 3": {}, 
+                    "Hypotheken o/g 4": {}, 
+                    "Hypotheken o/g 5": {}, 
+                    "Lease-verplichtingen 1": {}, 
+                    "Leningen o/g 1": {}, 
+                    "Leningen o/g 2": {}, 
+                    "Leningen o/g 3": {}, 
+                    "Leningen o/g 4": {}, 
+                    "Leningen o/g 5": {}, 
+                    "Rekening-courant directie": {}
+                }
+            }, 
+            "MACHINES EN INVENTARIS": {
+                "INVENTARIS": {
+                    "Aanschafwaarde Bedrijfsinventaris": {}, 
+                    "Aanschafwaarde Fabrieksinventaris": {}, 
+                    "Aanschafwaarde Gereedschappen": {}, 
+                    "Aanschafwaarde Kantine-inventaris": {}, 
+                    "Aanschafwaarde Kantoorinventaris": {}, 
+                    "Aanschafwaarde Kantoormachines": {}, 
+                    "Aanschafwaarde Magazijninventaris": {}, 
+                    "Afschrijving Bedrijfsinventaris": {}, 
+                    "Afschrijving Fabrieksinventaris": {}, 
+                    "Afschrijving Gereedschappen": {}, 
+                    "Afschrijving Kantine-inventaris": {}, 
+                    "Afschrijving Kantoorinventaris": {}, 
+                    "Afschrijving Kantoormachines": {}, 
+                    "Afschrijving Magazijninventaris": {}, 
+                    "account_type": "Stock"
+                }, 
+                "MACHINES": {
+                    "Aanschafwaarde Machines 1": {
+                        "account_type": "Fixed Asset"
+                    }, 
+                    "Aanschafwaarde Machines 2": {}, 
+                    "Aanschafwaarde Machines 3": {}, 
+                    "Aanschafwaarde Machines 4": {}, 
+                    "Aanschafwaarde Machines 5": {}, 
+                    "Afschrijving Machines 1": {
+                        "account_type": "Accumulated Depreciation"
+                    }, 
+                    "Afschrijving Machines 2": {}, 
+                    "Afschrijving Machines 3": {}, 
+                    "Afschrijving Machines 4": {}, 
+                    "Afschrijving Machines 5": {}, 
+                    "account_type": "Fixed Asset"
+                }
+            }, 
+            "ONROERENDE GOEDEREN": {
+                "Aanschafwaarde Aanloopkosten 1": {}, 
+                "Aanschafwaarde Bedrijfsgebouwen": {}, 
+                "Aanschafwaarde Gebouwen": {}, 
+                "Aanschafwaarde Grondverbetering": {}, 
+                "Aanschafwaarde Landerijen": {}, 
+                "Aanschafwaarde Ondergrond gebouwen": {}, 
+                "Aanschafwaarde Pachtersinvesteringen": {}, 
+                "Aanschafwaarde Parkeerplaats": {}, 
+                "Aanschafwaarde Verbouwingen": {}, 
+                "Aanschafwaarde Winkels": {}, 
+                "Aanschafwaarde Woon-winkelhuis": {}, 
+                "Afschrijving Aanloopkosten 1": {}, 
+                "Afschrijving Bedrijfsgebouwen": {}, 
+                "Afschrijving Gebouwen": {}, 
+                "Afschrijving Grondverbetering": {}, 
+                "Afschrijving Pachtersinvesteringen": {}, 
+                "Afschrijving Parkeerplaats": {}, 
+                "Afschrijving Verbouwingen": {}, 
+                "Afschrijving Winkels": {}, 
+                "Afschrijving Woon-winkelhuis": {}
+            }, 
+            "VERVOERMIDDELEN": {
+                "Aanschafwaarde Aanhangwagens": {}, 
+                "Aanschafwaarde Heftrucks": {}, 
+                "Aanschafwaarde Personenauto's": {}, 
+                "Aanschafwaarde Rijwielen en bromfietsen": {}, 
+                "Aanschafwaarde Vrachtauto's": {}, 
+                "Afschrijving Aanhangwagens": {}, 
+                "Afschrijving Heftrucks": {}, 
+                "Afschrijving Personenauto's": {}, 
+                "Afschrijving Rijwielen en bromfietsen": {}, 
+                "Afschrijving Vrachtauto's": {}
+            }, 
+            "VOORZIENINGEN": {
+                "Assurantie eigen risico": {
+                    "account_type": "Equity"
+                }, 
+                "Backservice pensioenverpl.": {
+                    "account_type": "Equity"
+                }, 
+                "Egalisatierekening WIR": {
+                    "account_type": "Equity"
+                }, 
+                "Egalisatieres. grootonderh.": {
+                    "account_type": "Equity"
+                }, 
+                "Garantieverplichtingen": {
+                    "account_type": "Equity"
+                }, 
+                "Latente belastingverpl.": {
+                    "account_type": "Equity"
+                }, 
+                "Pens.voorz. eigen beheer": {
+                    "account_type": "Equity"
+                }, 
+                "Pensioenverplichtingen": {
+                    "account_type": "Equity"
+                }, 
+                "Stamrechtverplichtingen": {
+                    "account_type": "Equity"
+                }, 
+                "Vervangingsreserve": {
+                    "account_type": "Equity"
+                }, 
+                "Voorziening deelnemingen": {
+                    "account_type": "Equity"
+                }
+            }, 
+            "root_type": "Asset"
+        }, 
+        "VERKOOPRESULTATEN": {
+            "Diensten fabric. 0% niet-EU": {}, 
+            "Diensten fabricage 0% EU": {}, 
+            "Diensten fabricage hoog": {}, 
+            "Diensten fabricage laag": {}, 
+            "Diensten fabricage overig": {}, 
+            "Diensten handel 0% EU": {}, 
+            "Diensten handel 0% niet-EU": {}, 
+            "Diensten handel hoog tarief": {}, 
+            "Diensten handel laag tarief": {}, 
+            "Verkopen Fabric. 0% niet-EU": {}, 
+            "Verkopen Handel 0% niet-EU": {}, 
+            "Verkopen fabric. 0 % EU": {}, 
+            "Verkopen fabricage hoog": {}, 
+            "Verkopen fabricage laag": {}, 
+            "Verkopen fabricage overig": {}, 
+            "Verkopen handel 0% EU": {}, 
+            "Verkopen handel hoog": {}, 
+            "Verkopen handel laag": {}, 
+            "Verkopen handel overig": {}, 
+            "Verleende Kredietbep. fabricage": {}, 
+            "Verleende Kredietbep. handel": {}, 
+            "root_type": "Income"
+        }, 
+        "VOORRAAD GEREED PRODUCT EN ONDERHANDEN WERK": {
+            "Betalingskort. crediteuren": {}, 
+            "Garantiekosten": {}, 
+            "Hulpmaterialen": {}, 
+            "Inkomende vrachten": {
+                "account_type": "Expenses Included In Valuation"
+            }, 
+            "Inkoop import buiten EU hoog": {}, 
+            "Inkoop import buiten EU laag": {}, 
+            "Inkoop import buiten EU overig": {}, 
+            "Inkoopbonussen": {}, 
+            "Inkoopkosten": {}, 
+            "Inkoopprovisie": {}, 
+            "Inkopen BTW verlegd": {}, 
+            "Inkopen EU hoog tarief": {}, 
+            "Inkopen EU laag tarief": {}, 
+            "Inkopen EU overig": {}, 
+            "Inkopen hoog": {}, 
+            "Inkopen laag": {}, 
+            "Inkopen nul": {}, 
+            "Inkopen overig": {}, 
+            "Invoerkosten": {}, 
+            "Kosten inkoopvereniging": {}, 
+            "Kostprijs omzet grondstoffen": {
+                "account_type": "Cost of Goods Sold"
+            }, 
+            "Kostprijs omzet handelsgoederen": {}, 
+            "Onttrekking uitgev.garantie": {}, 
+            "Priv\u00e9-gebruik goederen": {}, 
+            "Stock aanpassing": {
+                "account_type": "Stock Adjustment"
+            }, 
+            "Tegenrekening inkoop": {}, 
+            "Toev. Voorz. incour. grondst.": {}, 
+            "Toevoeging garantieverpl.": {}, 
+            "Toevoeging voorz. incour. handelsgoed.": {}, 
+            "Uitbesteed werk": {}, 
+            "Voorz. Incourourant grondst.": {}, 
+            "Voorz.incour. handelsgoed.": {}, 
+            "root_type": "Expense"
+        }, 
+        "VOORRAAD GRONDSTOFFEN, HULPMATERIALEN EN HANDELSGOEDEREN": {
+            "Emballage": {}, 
+            "Gereed product 1": {}, 
+            "Gereed product 2": {}, 
+            "Goederen 1": {}, 
+            "Goederen 2": {}, 
+            "Goederen in consignatie": {}, 
+            "Goederen onderweg": {}, 
+            "Grondstoffen 1": {}, 
+            "Grondstoffen 2": {}, 
+            "Halffabrikaten 1": {}, 
+            "Halffabrikaten 2": {}, 
+            "Hulpstoffen 1": {}, 
+            "Hulpstoffen 2": {}, 
+            "Kantoorbenodigdheden": {}, 
+            "Onderhanden werk": {}, 
+            "Verpakkingsmateriaal": {}, 
+            "Zegels": {}, 
+            "root_type": "Asset"
+        }
+    }
+}

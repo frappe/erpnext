@@ -1,0 +1,3044 @@
+{
+    "country_code": "es", 
+    "name": "Spain - PGCE com\u00fan", 
+    "tree": {
+        "Acreedores y deudores por operaciones comerciales": {
+            "Acreedores varios": {
+                "Acreedores por operaciones en com\u00fan": {
+                    "Acreedores por operaciones en com\u00fan": {
+                        "account_type": "Payable"
+                    }, 
+                    "account_type": "Payable"
+                }, 
+                "Acreedores por prestaciones de servicios": {
+                    "Acreedores por prestaciones de servicios (euros)": {
+                        "Acreedores por prestaciones de servicios (euros)": {
+                            "account_type": "Payable"
+                        }, 
+                        "account_type": "Payable"
+                    }, 
+                    "Acreedores por prestaciones de servicios (moneda extranjera)": {
+                        "Acreedores por prestaciones de servicios (moneda extranjera)": {
+                            "account_type": "Payable"
+                        }, 
+                        "account_type": "Payable"
+                    }, 
+                    "Acreedores por prestaciones de servicios, facturas pendientes de recibir o de formalizar": {
+                        "Acreedores por prestaciones de servicios, facturas pendientes de recibir o de formalizar": {
+                            "account_type": "Payable"
+                        }, 
+                        "account_type": "Payable"
+                    }, 
+                    "account_type": "Payable"
+                }, 
+                "Acreedores, efectos comerciales a pagar": {
+                    "Acreedores, efectos comerciales a pagar": {
+                        "account_type": "Payable"
+                    }, 
+                    "account_type": "Payable"
+                }, 
+                "Beneficiarios, acreedores": {
+                    "Beneficiarios, acreedores": {
+                        "account_type": "Payable"
+                    }, 
+                    "account_type": "Payable"
+                }, 
+                "account_type": "Payable"
+            }, 
+            "Administraciones p\u00fablicas": {
+                "Activos por impuesto diferido": {
+                    "Activos por diferencias temporarias deducibles": {
+                        "Activos por diferencias temporarias deducibles": {}
+                    }, 
+                    "Cr\u00e9dito por p\u00e9rdidas a compensar del ejercicio": {
+                        "Cr\u00e9dito por p\u00e9rdidas a compensar del ejercicio": {}
+                    }, 
+                    "Derechos por deducciones y bonificaciones pendientes de aplicar": {
+                        "Derechos por deducciones y bonificaciones pendientes de aplicar": {}
+                    }
+                }, 
+                "Hacienda P\u00fablica, IVA repercutido": {
+                    "Hacienda P\u00fablica. IVA repercutido": {}
+                }, 
+                "Hacienda P\u00fablica, IVA soportado": {
+                    "Hacienda P\u00fablica. IVA soportado": {}
+                }, 
+                "Hacienda P\u00fablica, acreedora por conceptos fiscales": {
+                    "Hacienda P\u00fablica, acreedora por IVA": {
+                        "Hacienda P\u00fablica, acreedora por IVA": {}
+                    }, 
+                    "Hacienda P\u00fablica, acreedora por impuesto sobre sociedades": {
+                        "Hacienda P\u00fablica, acreedora por impuesto sobre sociedades": {}
+                    }, 
+                    "Hacienda P\u00fablica, acreedora por retenciones practicadas": {
+                        "Hacienda P\u00fablica, acreedora por retenciones practicadas": {}
+                    }, 
+                    "Hacienda P\u00fablica, acreedora por subvenciones a reintegrar": {
+                        "Hacienda P\u00fablica, acreedora por subvenciones a reintegrar": {}
+                    }, 
+                    "Hacienda P\u00fablica, acreedora por subvenciones recibidas en concepto de entidad colaboradora (art.12 Ley de Subvenciones)": {
+                        "Hacienda P\u00fablica, acreedora por subvenciones recibidas en concepto de entidad colaboradora (art.12 Ley de Subvencioens)": {}
+                    }
+                }, 
+                "Hacienda P\u00fablica, deudora por diversos conceptos": {
+                    "Hacienda P\u00fablica, deudora por IVA": {
+                        "Hacienda P\u00fablica, deudora por IVA": {}
+                    }, 
+                    "Hacienda P\u00fablica, deudora por colaboraci\u00f3n en la entrega y distribuci\u00f3n de subvenciones (art.12 Ley de Subvenciones)": {
+                        "Hacienda P\u00fablica, deudora por colaboraci\u00f3n en la entrega y distribuci\u00f3n de subvenciones (art.12 Ley de Subvenciones)": {}
+                    }, 
+                    "Hacienda P\u00fablica, deudora por devoluci\u00f3n de impuestos": {
+                        "Hacienda P\u00fablica, deudora por devoluci\u00f3n de impuestos": {}
+                    }, 
+                    "Hacienda P\u00fablica, deudora por subvenciones concedidas": {
+                        "Hacienda P\u00fablica, deudora por subvenciones concedidas": {}
+                    }
+                }, 
+                "Hacienda P\u00fablica, retenciones y pagos a cuenta": {
+                    "Hacienda P\u00fablica, retenciones y pagos a cuenta": {}
+                }, 
+                "Organismos de la Seguridad Social, acreedores": {
+                    "Organismos de la Seguridad Social, acreedores": {}
+                }, 
+                "Organismos de la Seguridad Social, deudores": {
+                    "Organismos de la Seguridad Social, deudores": {}
+                }, 
+                "Pasivos por diferencias temporarias imponibles": {
+                    "Pasivos por diferencias temporarias imponibles": {}
+                }
+            }, 
+            "Ajustes por periodificaci\u00f3n": {
+                "Gastos anticipados": {
+                    "Gastos anticipados": {
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "Ingresos anticipados": {
+                    "Ingresos anticipados": {
+                        "account_type": "Payable"
+                    }, 
+                    "account_type": "Payable"
+                }
+            }, 
+            "Clientes": {
+                "Anticipos de clientes": {
+                    "Anticipos de clientes": {
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "Clientes": {
+                    "Clientes (euros)": {
+                        "Clientes (euros)": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Clientes (moneda extranjera)": {
+                        "Clientes (moneda extranjera)": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Clientes, facturas pendientes de recibir o de formalizar": {
+                        "Clientes, facturas pendientes de recibir o de formalizar": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "Clientes de dudoso cobro": {
+                    "Clientes de dudoso cobro": {
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "Clientes, efectos comerciales a cobrar": {
+                    "Efectos comerciales descontados": {
+                        "Efectos comerciales descontados": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Efectos comerciales en cartera": {
+                        "Efectos comerciales en cartera": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Efectos comerciales en gesti\u00f3n de cobro": {
+                        "Efectos comerciales en gesti\u00f3n de cobro": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Efectos comerciales impagados": {
+                        "Efectos comerciales impagados": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "Clientes, empresas asociadas": {
+                    "Clientes, empresas asociadas": {
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "Clientes, empresas del grupo": {
+                    "Clientes empresas del grupo (euros)": {
+                        "Clientes empresas del grupo (euros)": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Clientes empresas del grupo (moneda extranjera)": {
+                        "Clientes empresas del grupo (moneda extranjera)": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Clientes empresas del grupo de dudoso cobro": {
+                        "Clientes empresas del grupo de dudoso cobro": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Clientes empresas del grupo, facturas pendientes de formalizar": {
+                        "Clientes empresas del grupo, facturas pendientes de formalizar": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Clientes empresas del grupo, operaciones de factoring": {
+                        "Clientes empresas del grupo, operaciones de factoring": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Efectos comerciales a cobrar, empresas del grupo": {
+                        "Efectos comerciales a cobrar, empresas del grupo": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Envases y embalajes a devolver a clientes, empresas del grupo": {
+                        "Envases y embalajes a devolver a clientes, empresas del grupo": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "Clientes, operaciones de factoring": {
+                    "Clientes, operaciones de factoring": {
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "Clientes, otras partes vinculadas": {
+                    "Clientes, otras partes vinculadas": {
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "Envases y embalajes a devolver por clientes": {
+                    "Envases y embalajes a devolver por clientes": {
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "account_type": "Receivable"
+            }, 
+            "Deterioro de valor de cr\u00e9ditos comerciales y provisiones a corto plazo": {
+                "Deterioro de valor de cr\u00e9ditos por operaciones comerciales": {
+                    "Deterioro de valor de cr\u00e9ditos por operaciones comerciales": {}
+                }, 
+                "Deterioro de valor de cr\u00e9ditos por operaciones comerciales con partes vinculadas": {
+                    "Deterioro de valor de cr\u00e9ditos por operaciones comerciales con empresas asociadas": {
+                        "Deterioro de valor de cr\u00e9ditos por operaciones comerciales con empresas asociadas": {}
+                    }, 
+                    "Deterioro de valor de cr\u00e9ditos por operaciones comerciales con empresas del grupo": {
+                        "Deterioro de valor de cr\u00e9ditos por operaciones comerciales con empresas del grupo": {}
+                    }, 
+                    "Deterioro de valor de cr\u00e9ditos por operaciones comerciales con otras partes vinculadas": {
+                        "Deterioro de valor de cr\u00e9ditos por operaciones comerciales con otras partes vinculadas": {}
+                    }
+                }, 
+                "Deterioro de valor de cr\u00e9ditos por operaciones de la actividad": {
+                    "Deterioro de valor de cr\u00e9ditos por operaciones de la actividad": {}
+                }, 
+                "Provisiones por operaciones comerciales": {
+                    "Provisi\u00f3n para otras operaciones comerciales": {
+                        "Provisi\u00f3n para otras operaciones comerciales": {}
+                    }, 
+                    "Provisi\u00f3n por contratos onerosos": {
+                        "Provisi\u00f3n por contratos onerosos": {}
+                    }
+                }
+            }, 
+            "Deudores varios": {
+                "Deudores": {
+                    "Deudores (euros)": {
+                        "Deudores (euros)": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Deudores (moneda extranjera)": {
+                        "Deudores (moneda extranjera)": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Deudores, facturas pendientes de formalizar": {
+                        "Deudores, facturas pendientes de formalizar": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "Deudores de dudoso cobro": {
+                    "Deudores de dudoso cobro": {
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "Deudores por operaciones en com\u00fan": {
+                    "Deudores por operaciones en com\u00fan": {
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "Deudores, efectos comerciales a cobrar": {
+                    "Deudores, efectos comerciales descontados": {
+                        "Deudores, efectos comerciales descontados": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Deudores, efectos comerciales en cartera": {
+                        "Deudores, efectos comerciales en cartera": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Deudores, efectos comerciales en gesti\u00f3n de cobro": {
+                        "Deudores, efectos comerciales en gesti\u00f3n de cobro": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Deudores, efectos comerciales impagados": {
+                        "Deudores, efectos comerciales impagados": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "Patrocinadores, afiliados y otros deudores": {
+                    "Afiliados": {
+                        "Afiliados": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Otros deudores": {
+                        "Otros deudores": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }, 
+                    "Patrocinadores": {
+                        "Patrocinadores": {
+                            "account_type": "Receivable"
+                        }, 
+                        "account_type": "Receivable"
+                    }
+                }, 
+                "Usuarios, deudores": {
+                    "Usuarios, deudores": {
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "account_type": "Receivable"
+            }, 
+            "Personal": {
+                "Anticipos de remuneraciones": {
+                    "Anticipos de remuneraciones": {
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "Entregas para gastos a justificar": {
+                    "Entregas para gastos a justificar": {
+                        "account_type": "Receivable"
+                    }, 
+                    "account_type": "Receivable"
+                }, 
+                "Remuneraciones mediante sistemas de aportaci\u00f3n definida pendientes de pago": {
+                    "Remuneraciones mediante sistemas de aportaci\u00f3n definida pendientes de pago": {
+                        "account_type": "Payable"
+                    }, 
+                    "account_type": "Payable"
+                }, 
+                "Remuneraciones pendientes de pago": {
+                    "Remuneraciones pendientes de pago": {
+                        "account_type": "Payable"
+                    }, 
+                    "account_type": "Payable"
+                }
+            }, 
+            "Proveedores": {
+                "Anticipos a proveedores": {
+                    "Anticipos a proveedores": {
+                        "account_type": "Payable"
+                    }, 
+                    "account_type": "Payable"
+                }, 
+                "Envases y embalajes a devolver a proveedores": {
+                    "Envases y embalajes a devolver a proveedores": {
+                        "account_type": "Payable"
+                    }, 
+                    "account_type": "Payable"
+                }, 
+                "Proveedores": {
+                    "Proveedores (euros)": {
+                        "Proveedores (euros)": {
+                            "account_type": "Payable"
+                        }, 
+                        "account_type": "Payable"
+                    }, 
+                    "Proveedores (moneda extranjera)": {
+                        "Proveedores (moneda extranjera)": {
+                            "account_type": "Payable"
+                        }, 
+                        "account_type": "Payable"
+                    }, 
+                    "Proveedores, facturas pendientes de recibir o de formalizar": {
+                        "Proveedores, facturas pendientes de recibir o de formalizar": {
+                            "account_type": "Payable"
+                        }, 
+                        "account_type": "Payable"
+                    }, 
+                    "account_type": "Payable"
+                }, 
+                "Proveedores, efectos comerciales a pagar": {
+                    "Proveedores, efectos comerciales a pagar": {
+                        "account_type": "Payable"
+                    }, 
+                    "account_type": "Payable"
+                }, 
+                "Proveedores, empresas asociadas": {
+                    "Proveedores, empresas asociadas": {
+                        "account_type": "Payable"
+                    }, 
+                    "account_type": "Payable"
+                }, 
+                "Proveedores, empresas del grupo": {
+                    "Efectos comerciales a pagar, empresas del grupo": {
+                        "Efectos comerciales a pagar, empresas del grupo": {
+                            "account_type": "Payable"
+                        }, 
+                        "account_type": "Payable"
+                    }, 
+                    "Envases y embalajes a devolver a proveedores, empresas del grupo": {
+                        "Envases y embalajes a devolver a proveedores, empresas del grupo": {
+                            "account_type": "Payable"
+                        }, 
+                        "account_type": "Payable"
+                    }, 
+                    "Proveedores, empresas del grupo (euros)": {
+                        "Proveedores, empresas del grupo (euros)": {
+                            "account_type": "Payable"
+                        }, 
+                        "account_type": "Payable"
+                    }, 
+                    "Proveedores, empresas del grupo (moneda extranjera)": {
+                        "Proveedores, empresas del grupo (moneda extranjera)": {
+                            "account_type": "Payable"
+                        }, 
+                        "account_type": "Payable"
+                    }, 
+                    "Proveedores, empresas del grupo, facturas pendientes de recibir o de formalizar": {
+                        "Proveedores, empresas del grupo, facturas pendientes de recibir o de formalizar": {
+                            "account_type": "Payable"
+                        }, 
+                        "account_type": "Payable"
+                    }, 
+                    "account_type": "Payable"
+                }, 
+                "Proveedores, otras partes vinculadas": {
+                    "Proveedores, otras partes vinculadas": {
+                        "account_type": "Payable"
+                    }, 
+                    "account_type": "Payable"
+                }, 
+                "account_type": "Payable"
+            }, 
+            "root_type": ""
+        }, 
+        "Activo no corriente": {
+            "Amortizaci\u00f3n acumulada del inmovilizado": {
+                "Amortizaci\u00f3n acumulada de las inversiones inmobiliarias": {
+                    "Amortizaci\u00f3n acumulada de las inversiones inmobiliarias": {}
+                }, 
+                "Amortizaci\u00f3n acumulada del inmovilizado intangible": {
+                    "Amortizaci\u00f3n acumulada de aplicaciones inform\u00e1ticas": {
+                        "Amortizaci\u00f3n acumulada de aplicaciones inform\u00e1ticas": {}
+                    }, 
+                    "Amortizaci\u00f3n acumulada de concesiones administrativas": {
+                        "Amortizaci\u00f3n acumulada de concesiones administrativas": {}
+                    }, 
+                    "Amortizaci\u00f3n acumulada de derechos de traspaso": {
+                        "Amortizaci\u00f3n acumulada de derechos de traspaso": {}
+                    }, 
+                    "Amortizaci\u00f3n acumulada de derechos sobre activos cedidos en uso": {
+                        "Amortizaci\u00f3n acumulada de derechos sobre activos cedidos en uso": {}
+                    }, 
+                    "Amortizaci\u00f3n acumulada de desarrollo": {
+                        "Amortizaci\u00f3n acumulada de desarrollo": {}
+                    }, 
+                    "Amortizaci\u00f3n acumulada de investigaci\u00f3n": {
+                        "Amortizaci\u00f3n acumulada de investigaci\u00f3n": {}
+                    }, 
+                    "Amortizaci\u00f3n acumulada de propiedad industrial": {
+                        "Amortizaci\u00f3n acumulada de propiedad industrial": {}
+                    }
+                }, 
+                "Amortizaci\u00f3n acumulada del inmovilizado material": {
+                    "Amortizaci\u00f3n acumulada de construcciones": {
+                        "Amortizaci\u00f3n acumulada de construcciones": {}
+                    }, 
+                    "Amortizaci\u00f3n acumulada de elementos de transporte": {
+                        "Amortizaci\u00f3n acumulada de elementos de transporte": {}
+                    }, 
+                    "Amortizaci\u00f3n acumulada de equipos para proceso de informaci\u00f3n": {
+                        "Amortizaci\u00f3n acumulada de equipos para proceso de informaci\u00f3n": {}
+                    }, 
+                    "Amortizaci\u00f3n acumulada de instalaciones t\u00e9cnicas": {
+                        "Amortizaci\u00f3n acumulada de instalaciones t\u00e9cnicas": {}
+                    }, 
+                    "Amortizaci\u00f3n acumulada de maquinaria": {
+                        "Amortizaci\u00f3n acumulada de maquinaria": {}
+                    }, 
+                    "Amortizaci\u00f3n acumulada de mobiliario": {
+                        "Amortizaci\u00f3n acumulada de mobiliario": {}
+                    }, 
+                    "Amortizaci\u00f3n acumulada de otras instalaciones": {
+                        "Amortizaci\u00f3n acumulada de otras instalaciones": {}
+                    }, 
+                    "Amortizaci\u00f3n acumulada de otro inmovilizado material": {
+                        "Amortizaci\u00f3n acumulada de otro inmovilizado material": {}
+                    }, 
+                    "Amortizaci\u00f3n acumulada de utillaje": {
+                        "Amortizaci\u00f3n acumulada de utillaje": {}
+                    }
+                }, 
+                "Cesiones de uso sin contraprestaci\u00f3n": {
+                    "Cesiones de uso de las inversiones inmobiliarias": {}, 
+                    "Cesiones de uso del inmovilizado intangible": {
+                        "Cesiones de uso del inmovilizado intangible": {}
+                    }, 
+                    "Cesiones de uso del inmovilizado material": {
+                        "Cesiones de uso del inmovilizado material": {}
+                    }
+                }
+            }, 
+            "Deterioro de valor de activos no corrientes": {
+                "Deterioro de  valor de participaciones en el patrimonio neto a largo plazo": {
+                    "Deterioro de  valor de participaciones en el patrimonio neto a largo plazo": {}
+                }, 
+                "Deterioro de valor de bienes": {
+                    "Deterioro de valor de Museos": {
+                        "Deterioro de valor de Museos": {}
+                    }, 
+                    "Deterioro de valor de archivos": {
+                        "Deterioro de valor de archivos": {}
+                    }, 
+                    "Deterioro de valor de bibliotecas": {
+                        "Deterioro de valor de bibliotecas": {}
+                    }, 
+                    "Deterioro de valor de bienes inmuebles del Patrimonio Hist\u00f3rico": {
+                        "Deterioro de valor de bienes del Patrimonio Hist\u00f3rico": {}
+                    }, 
+                    "Deterioro de valor de bienes muebles": {
+                        "Deterioro de valor de bienes muebles": {}
+                    }
+                }, 
+                "Deterioro de valor de cr\u00e9ditos": {
+                    "Deterioro de valor de cr\u00e9ditos": {}
+                }, 
+                "Deterioro de valor de cr\u00e9ditos a partes vinculadas": {
+                    "Deterioro de valor de cr\u00e9ditos a empresas asociadas": {
+                        "Deterioro de valor de cr\u00e9ditos a empresas asociadas": {}
+                    }, 
+                    "Deterioro de valor de cr\u00e9ditos a empresas del grupo": {
+                        "Deterioro de valor de cr\u00e9ditos a empresas del grupo": {}
+                    }, 
+                    "Deterioro de valor de cr\u00e9ditos a otras partes vinculadas": {
+                        "Deterioro de valor de cr\u00e9ditos a otras partes vinculadas": {}
+                    }
+                }, 
+                "Deterioro de valor de las inversiones inmobiliarias": {
+                    "Deterioro de valor de construcciones": {
+                        "Deterioro de valor de construcciones": {}
+                    }, 
+                    "Deterioro de valor de los terrenos y bienes naturales": {
+                        "Deterioro de valor de los terrenos y bienes naturales": {}
+                    }
+                }, 
+                "Deterioro de valor de participaciones en partes vinculadas": {
+                    "Deterioro de valor de participaciones a largo plazo en otras partes vinculadas": {
+                        "Deterioro de valor de participaciones a largo plazo en otras partes vinculadas": {}
+                    }, 
+                    "Deterioro de valor de participaciones en empresas asociadas": {
+                        "Deterioro de valor de participaciones en empresas asociadas": {}
+                    }, 
+                    "Deterioro de valor de participaciones en empresas del grupo": {
+                        "Deterioro de valor de participaciones en empresas del grupo": {}
+                    }
+                }, 
+                "Deterioro de valor de valores representativos de deuda": {
+                    "Deterioro de valor de valores representativos de deuda": {}
+                }, 
+                "Deterioro de valor de valores representativos de deuda de partes vinculadas": {
+                    "Deterioro de valor de valores representativos de deuda de empresas asociadas": {
+                        "Deterioro de valor de valores representativos de deuda de empresas asociadas": {}
+                    }, 
+                    "Deterioro de valor de valores representativos de deuda de empresas del grupo": {
+                        "Deterioro de valor de valores representativos de deuda de empresas del grupo": {}
+                    }, 
+                    "Deterioro de valor de valores representativos de deuda de otras partes vinculadas": {
+                        "Deterioro de valor de valores representativos de deuda de otras partes vinculadas": {}
+                    }
+                }, 
+                "Deterioro de valor del inmovilizado intangible": {
+                    "Deterioro del valor de aplicaciones inform\u00e1ticas": {
+                        "Deterioro del valor de aplicaciones inform\u00e1ticas": {}
+                    }, 
+                    "Deterioro del valor de concesiones administrativas": {
+                        "Deterioro del valor de concesiones administrativas": {}
+                    }, 
+                    "Deterioro del valor de derechos de traspaso": {
+                        "Deterioro del valor de derechos de traspaso": {}
+                    }, 
+                    "Deterioro del valor de desarrollo": {
+                        "Deterioro del valor de desarrollo": {}
+                    }, 
+                    "Deterioro del valor de investigaci\u00f3n": {
+                        "Deterioro del valor de investigaci\u00f3n": {}
+                    }, 
+                    "Deterioro del valor de propiedad industrial": {
+                        "Deterioro del valor de propiedad industrial": {}
+                    }, 
+                    "Deterioro del valor sobre activos cedidos en uso": {
+                        "Deterioro del valor sobre activos cedidos en uso": {}
+                    }
+                }, 
+                "Deterioro del valor del inmovilizado material": {
+                    "Deterioro de valor de construcciones": {
+                        "Deterioro de valor de construcciones": {}
+                    }, 
+                    "Deterioro de valor de elementos de transporte": {
+                        "Deterioro de valor de elementos de transporte": {}
+                    }, 
+                    "Deterioro de valor de equipos para proceso de informaci\u00f3n": {
+                        "Deterioro de valor de equipos para proceso de informaci\u00f3n": {}
+                    }, 
+                    "Deterioro de valor de instalaciones t\u00e9cnicas": {
+                        "Deterioro de valor de instalaciones t\u00e9cnicas": {}
+                    }, 
+                    "Deterioro de valor de maquinaria": {
+                        "Deterioro de valor de maquinaria": {}
+                    }, 
+                    "Deterioro de valor de mobiliario": {
+                        "Deterioro de valor de mobiliario": {}
+                    }, 
+                    "Deterioro de valor de otras instalaciones": {
+                        "Deterioro de valor de otras instalaciones": {}
+                    }, 
+                    "Deterioro de valor de otro inmovilizado material": {
+                        "Deterioro de valor de otro inmovilizado material": {}
+                    }, 
+                    "Deterioro de valor de terrenos y bienes naturales": {
+                        "Deterioro de valor de terrenos y bienes naturales": {}
+                    }, 
+                    "Deterioro de valor de utillaje": {
+                        "Deterioro de valor de utillaje": {}
+                    }
+                }
+            }, 
+            "Fianzas y dep\u00f3sitos constituidos": {
+                "Dep\u00f3sitos constituidos": {
+                    "Dep\u00f3sitos constituidos": {}
+                }, 
+                "Fianzas constituidas": {
+                    "Fianzas constituidas": {}
+                }
+            }, 
+            "Inmovilizaciones intangibles": {
+                "Anticipos para inmovilizaciones intangibles": {
+                    "Anticipos para inmovilizaciones intangibles": {}
+                }, 
+                "Aplicaciones inform\u00e1ticas": {
+                    "Aplicaciones inform\u00e1ticas": {}
+                }, 
+                "Concesiones administrativas": {
+                    "Concesiones administrativas": {}
+                }, 
+                "Derechos de traspaso": {
+                    "Derechos de traspaso": {}
+                }, 
+                "Derechos sobre activos cedidos en uso": {
+                    "Derechos sobre activos cedidos en uso": {}
+                }, 
+                "Desarrollo": {
+                    "Desarrollo": {}
+                }, 
+                "Fondo de comercio": {
+                    "Fondo de comercio": {}
+                }, 
+                "Investigaci\u00f3n": {
+                    "Investigaci\u00f3n": {}
+                }, 
+                "Propiedad industrial": {
+                    "Propiedad industrial": {}
+                }
+            }, 
+            "Inmovilizaciones materiales": {
+                "Construcciones": {
+                    "Construcciones": {}
+                }, 
+                "Elementos de transporte": {
+                    "Elementos de transporte": {}
+                }, 
+                "Equipos para proceso de informaci\u00f3n": {
+                    "Equipos para proceso de informaci\u00f3n": {}
+                }, 
+                "Instalaciones t\u00e9cnicas": {
+                    "Instalaciones t\u00e9cnicas": {}
+                }, 
+                "Maquinaria": {
+                    "Maquinaria": {}
+                }, 
+                "Mobiliario": {
+                    "Mobiliario": {}
+                }, 
+                "Otras instalaciones": {
+                    "Otras instalaciones": {}
+                }, 
+                "Otro inmovilizado material": {
+                    "Otro inmovilizado material": {}
+                }, 
+                "Terrenos y bienes naturales": {
+                    "Terrenos y bienes naturales": {}
+                }, 
+                "Utillaje": {
+                    "Utillaje": {}
+                }
+            }, 
+            "Inmovilizaciones materiales en curso": {
+                "Adaptaci\u00f3n de terrenos y bienes naturales": {
+                    "Adaptaci\u00f3n de terrenos y bienes naturales": {}
+                }, 
+                "Anticipos para inmovilizaciones materiales": {
+                    "Anticipos para inmovilizaciones materiales": {}
+                }, 
+                "Construcciones en curso": {
+                    "Construcciones en curso": {}
+                }, 
+                "Equipos para procesos de informaci\u00f3n en montaje": {
+                    "Equipos para procesos de informaci\u00f3n en montaje": {}
+                }, 
+                "Instalaciones t\u00e9cnicas en montaje": {
+                    "Instalaciones t\u00e9cnicas en montaje": {}
+                }, 
+                "Maquinaria en montaje": {
+                    "Maquinaria en montaje": {}
+                }
+            }, 
+            "Inversiones financieras en partes vinculadas": {
+                "Anticipos sobre bienes del Patrimonio Hist\u00f3rico": {
+                    "Anticipos sobre archivos del Patrimonio Hist\u00f3rico": {
+                        "Anticipos sobre archivos del Patrimonio Hist\u00f3rico": {}
+                    }, 
+                    "Anticipos sobre bibliotecas del Patrimonio Hist\u00f3rico": {
+                        "Anticipos sobre bibliotecas del Patrimonio Hist\u00f3rico": {}
+                    }, 
+                    "Anticipos sobre bienes inmuebles del Patrimonio Hist\u00f3rico": {
+                        "Anticipos sobre bienes inmuebles del Patrimonio Hist\u00f3rico": {}
+                    }, 
+                    "Anticipos sobre bienes muebles del Patrimonio Hist\u00f3rico": {
+                        "Anticipos sobre bienes muebles del Patrimonio Hist\u00f3rico": {}
+                    }, 
+                    "Anticipos sobre museos del Patrimonio Hist\u00f3rico": {
+                        "Anticipos sobre museos del Patrimonio Hist\u00f3rico": {}
+                    }
+                }, 
+                "Bienes inmuebles": {
+                    "Conjuntos hist\u00f3ricos": {
+                        "Conjuntos hist\u00f3ricos": {}
+                    }, 
+                    "Jardines hist\u00f3ricos": {
+                        "Jardines hist\u00f3ricos": {}
+                    }, 
+                    "Monumentos": {
+                        "Monumentos": {}
+                    }, 
+                    "Sitios hist\u00f3ricos": {
+                        "Sitios hist\u00f3ricos": {}
+                    }, 
+                    "Zonas arqueol\u00f3gicas": {
+                        "Zonas arqueol\u00f3gicas": {}
+                    }
+                }, 
+                "Cr\u00e9ditos a partes vinculadas": {
+                    "Cr\u00e9ditos a empresas asociadas": {
+                        "Cr\u00e9ditos a empresas asociadas": {}
+                    }, 
+                    "Cr\u00e9ditos a empresas del grupo": {
+                        "Cr\u00e9ditos a empresas del grupo": {}
+                    }, 
+                    "Cr\u00e9ditos a otras partes vinculadas": {
+                        "Cr\u00e9ditos a otras partes vinculadas": {}
+                    }
+                }, 
+                "Desembolsos pendientes sobre participaciones en partes vinculadas": {
+                    "Desembolsos pendientes sobre participaciones en empresas asociadas": {
+                        "Desembolsos pendientes sobre participaciones en empresas asociadas": {}
+                    }, 
+                    "Desembolsos pendientes sobre participaciones en empresas del grupo": {
+                        "Desembolsos pendientes sobre participaciones en empresas del grupo": {}
+                    }, 
+                    "Desembolsos pendientes sobre participaciones en otras partes vinculadas": {
+                        "Desembolsos pendientes sobre participaciones en otras partes vinculadas": {}
+                    }
+                }, 
+                "Participaciones en partes vinculadas": {
+                    "Participaciones en empresas asociadas": {
+                        "Participaciones en empresas asociadas": {}
+                    }, 
+                    "Participaciones en empresas del grupo": {
+                        "Participaciones en empresas del grupo": {}
+                    }, 
+                    "Participaciones en otras partes vinculadas": {
+                        "Participaciones en otras partes vinculadas": {}
+                    }
+                }, 
+                "Valores representativos de deuda de partes vinculadas": {
+                    "Valores representativos de deuda de empresas asociadas": {
+                        "Valores representativos de deuda de empresas asociadas": {}
+                    }, 
+                    "Valores representativos de deuda de empresas del grupo": {
+                        "Valores representativos de deuda de empresas del grupo": {}
+                    }, 
+                    "Valores representativos de deuda de otras partes vinculadas": {
+                        "Valores representativos de deuda de otras partes vinculadas": {}
+                    }
+                }
+            }, 
+            "Inversiones inmobiliarias": {
+                "Inversiones en construcciones": {
+                    "Inversiones en construcciones": {}
+                }, 
+                "Inversiones en terrenos y bienes naturales": {
+                    "Inversiones en terrenos y bienes naturales": {}
+                }
+            }, 
+            "Otras inversiones financieras": {
+                "Activos por derivados financieros": {
+                    "Activos por derivados financieros": {}, 
+                    "Activos por derivados financieros, cartera de negociaci\u00f3n": {
+                        "Activos por derivados financieros, cartera de negociaci\u00f3n": {}
+                    }, 
+                    "Activos por derivados financieros, instrumentos de cobertura": {
+                        "Activos por derivados financieros, instrumentos de cobertura": {}
+                    }
+                }, 
+                "Cr\u00e9ditos": {
+                    "Cr\u00e9ditos": {}
+                }, 
+                "Cr\u00e9ditos al personal": {
+                    "Cr\u00e9ditos al personal": {}
+                }, 
+                "Cr\u00e9ditos por enajenaci\u00f3n de inmovilizado": {
+                    "Cr\u00e9ditos por enajenaci\u00f3n de inmovilizado": {}
+                }, 
+                "Derechos de reembolso derivados de contratos de seguro relativos a retribuciones al personal": {
+                    "Derechos de reembolso derivados de contratos de seguro relativos a retribuciones al personal": {}
+                }, 
+                "Desembolsos pendientes sobre participaciones en el patrimonio neto": {
+                    "Desembolsos pendientes sobre participaciones en el patrimonio neto": {}
+                }, 
+                "Imposiciones": {
+                    "Imposiciones": {}
+                }, 
+                "Inversiones financieras en instrumentos de patrimonio": {
+                    "Inversiones financieras en instrumentos de patrimonio": {}
+                }, 
+                "Valores representativos de deuda": {
+                    "Valores representativos de deuda": {}
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "Compras y gastos": {
+            "Ayudas monetarias de la entidad y otros gastos de gesti\u00f3n": {
+                "Ayudas monetarias": {
+                    "Ayudas monetarias a entidades": {
+                        "Ayudas monetarias a entidades": {}
+                    }, 
+                    "Ayudas monetarias de cooperaci\u00f3n internacional": {
+                        "Ayudas monetarias de cooperaci\u00f3n internacional": {}
+                    }, 
+                    "Ayudas monetarias individuales": {
+                        "Ayudas monetarias individuales": {}
+                    }, 
+                    "Ayudas monetarias realizadas a trav\u00e9s de otras entidades o centros": {
+                        "Ayudas monetarias realizadas a trav\u00e9s de otras entidades o centros": {}
+                    }
+                }, 
+                "Ayudas no monetarias": {
+                    "Ayudas no monetarias a entidades": {
+                        "Ayudas no monetarias a entidades": {}
+                    }, 
+                    "Ayudas no monetarias de cooperaci\u00f3n internacional": {
+                        "Ayudas no monetarias de cooperaci\u00f3n internacional": {}
+                    }, 
+                    "Ayudas no monetarias individuales": {
+                        "Ayudas no monetarias individuales": {}
+                    }, 
+                    "Ayudas no monetarias realizadas a trav\u00e9s de otras entidades o centros": {
+                        "Ayudas no monetarias realizadas a trav\u00e9s de otras entidades o centros": {}
+                    }, 
+                    "Beneficio transferido (gestor)": {
+                        "Beneficio transferido (gestor)": {}
+                    }
+                }, 
+                "Compensaci\u00f3n de gastos por prestaciones de colaboraci\u00f3n": {
+                    "Compensaci\u00f3n de gastos por prestaciones de colaboraci\u00f3n": {}
+                }, 
+                "P\u00e9rdidas de cr\u00e9ditos derivados de la actividad incobrables": {
+                    "P\u00e9rdidas de cr\u00e9ditos derivados de la actividad incobrables": {}
+                }, 
+                "Reembolsos de gastos al \u00f3rgano de gobierno": {
+                    "Reembolsos de gastos al \u00f3rgano de gobierno": {}
+                }, 
+                "Reintegro de subvenciones, donaciones y legados recibidos, afectados a la actividad propia de la entidad": {
+                    "Reintegro de subvenciones, donaciones y legados recibidos, afectos a la actividad propia de la entidad ": {}
+                }, 
+                "Resultados de operaciones en com\u00fan": {
+                    "Beneficio transferido (gestor)": {
+                        "Beneficio transferido (gestor)": {}
+                    }, 
+                    "P\u00e9rdida soportada (part\u00edcipe o asociado no gestor)": {
+                        "P\u00e9rdida soportada(part\u00edcipe o asociado no gestor)": {}
+                    }
+                }
+            }, 
+            "Compras": {
+                "Compras de materias primas": {
+                    "Compras de materias primas": {}
+                }, 
+                "Compras de mercader\u00edas": {
+                    "Compras de mercader\u00edas": {}
+                }, 
+                "Compras de otros aprovisionamientos": {
+                    "Compras de otros aprovisionamientos": {}
+                }, 
+                "Descuentos sobre compras por pronto pago": {
+                    "Descuentos sobre compras por pronto pago de materias primas": {
+                        "Descuentos sobre compras por pronto pago de materias primas": {}
+                    }, 
+                    "Descuentos sobre compras por pronto pago de mercader\u00edas": {
+                        "Descuentos sobre compras por pronto pago de mercader\u00edas": {}
+                    }, 
+                    "Descuentos sobre compras por pronto pago de otros aprovisionamientos": {
+                        "Descuentos sobre compras por pronto pago de otros aprovisionamientos": {}
+                    }
+                }, 
+                "Devoluciones de compras y operaciones similares": {
+                    "Devoluciones de compras de materias primas": {
+                        "Devoluciones de compras de materias primas": {}
+                    }, 
+                    "Devoluciones de compras de mercader\u00edas": {
+                        "Devoluciones de compras de mercader\u00edas": {}
+                    }, 
+                    "Devoluciones de compras de otros aprovisionamientos": {
+                        "Devoluciones de compras de otros aprovisionamientos": {}
+                    }
+                }, 
+                "Trabajos realizados por otras empresas": {
+                    "Trabajos realizados por otras empresas": {}
+                }, 
+                "\u201cRappels\u201d por compras": {
+                    "\"Rappels\" por compras de materias primas": {
+                        "\"Rappels\" por compras de materias primas": {}
+                    }, 
+                    "\"Rappels\" por compras de mercader\u00edas": {
+                        "\"Rappels\" por compras de mercader\u00edas": {}
+                    }, 
+                    "\"Rappels\" por compras de otros aprovisionamientos": {
+                        "\"Rappels\" por compras de otros aprovisionamientos": {}
+                    }
+                }
+            }, 
+            "Dotaciones para amortizaciones": {
+                "Amortizaci\u00f3n de las inversiones inmobiliarias": {
+                    "Amortizaci\u00f3n de las inversiones inmobiliarias": {}
+                }, 
+                "Amortizaci\u00f3n del inmovilizado intangible": {
+                    "Amortizaci\u00f3n del inmovilizado intangible": {}
+                }, 
+                "Amortizaci\u00f3n del inmovilizado material": {
+                    "Amortizaci\u00f3n del inmovilizado material": {}
+                }
+            }, 
+            "Gastos de personal": {
+                "Indemnizaciones": {
+                    "Indemnizaciones": {}
+                }, 
+                "Otros gastos sociales": {
+                    "Otros gastos sociales": {}
+                }, 
+                "Retribuciones al personal mediante instrumentos de patrimonio": {
+                    "Retribuciones al personal liquidados con instrumentos de patrimonio": {
+                        "Retribuciones al personal liquidados con instrumentos de patrimonio": {}
+                    }, 
+                    "Retribuciones al personal liquidados en efectivo basado en instrumentos de patrimonio": {
+                        "Retribuciones al personal liquidados en efectivo basado en instrumentos de patrimonio": {}
+                    }
+                }, 
+                "Retribuciones mediante sistemas de aportaci\u00f3n definida": {
+                    "Retribuciones mediante sistemas de aportaci\u00f3n definida": {}
+                }, 
+                "Retribuciones mediante sistemas de prestaci\u00f3n definida": {
+                    "Contribuciones anuales": {
+                        "Contribuciones anuales": {}
+                    }, 
+                    "Otros costes": {
+                        "Otros costes": {}
+                    }
+                }, 
+                "Seguridad Social a cargo de la empresa": {
+                    "Seguridad Social a cargo de la empresa": {}
+                }, 
+                "Sueldos y salarios": {
+                    "Sueldos y salarios": {}
+                }
+            }, 
+            "Gastos financieros": {
+                "Diferencias negativas de cambio": {
+                    "Diferencias negativas de cambio": {}
+                }, 
+                "Dividendos de acciones o participaciones consideradas como pasivos financieros": {
+                    "Dividendos de pasivos, empresas asociadas": {
+                        "Dividendos de pasivos, empresas asociadas": {}
+                    }, 
+                    "Dividendos de pasivos, empresas del grupo": {
+                        "Dividendos de pasivos, empresas del grupo": {}
+                    }, 
+                    "Dividendos de pasivos, otras empresas": {
+                        "Dividendos de pasivos, otras empresas": {}
+                    }, 
+                    "Dividendos de pasivos, otras partes vinculadas": {
+                        "Dividendos de pasivos, otras partes vinculadas": {}
+                    }
+                }, 
+                "Gastos financieros por actualizaci\u00f3n de provisiones": {
+                    "Gastos financieros por actualizaci\u00f3n de provisiones": {}
+                }, 
+                "Intereses de deudas": {
+                    "Intereses de deudas con entidades de cr\u00e9dito": {
+                        "Intereses de deudas con entidades de cr\u00e9dito": {}
+                    }, 
+                    "Intereses de deudas, empresas asociadas": {
+                        "Intereses de deudas, empresas asociadas": {}
+                    }, 
+                    "Intereses de deudas, empresas del grupo": {
+                        "Intereses de deudas, empresas del grupo": {}
+                    }, 
+                    "Intereses de deudas, otras empresas": {
+                        "Intereses de deudas, otras empresas": {}
+                    }, 
+                    "Intereses de deudas, otras partes vinculadas": {
+                        "Intereses de deudas, otras partes vinculadas": {}
+                    }
+                }, 
+                "Intereses de obligaciones y bonos": {
+                    "Intereses de obligaciones y bonos a corto plazo, empresas asociadas": {
+                        "Intereses de obligaciones y bonos a corto plazo, empresas asociadas": {}
+                    }, 
+                    "Intereses de obligaciones y bonos a corto plazo, empresas del grupo": {
+                        "Intereses de obligaciones y bonos a corto plazo, empresas del grupo": {}
+                    }, 
+                    "Intereses de obligaciones y bonos a corto plazo, otras empresas": {
+                        "Intereses de obligaciones y bonos a corto plazo, otras empresas": {}
+                    }, 
+                    "Intereses de obligaciones y bonos a corto plazo, otras partes vinculadas": {
+                        "Intereses de obligaciones y bonos a corto plazo, otras partes vinculadas": {}
+                    }, 
+                    "Intereses de obligaciones y bonos, empresas asociadas": {
+                        "Intereses de obligaciones y bonos, empresas asociadas": {}
+                    }, 
+                    "Intereses de obligaciones y bonos, empresas del grupo": {
+                        "Intereses de obligaciones y bonos, empresas del grupo": {}
+                    }, 
+                    "Intereses de obligaciones y bonos, otras empresas": {
+                        "Intereses de obligaciones y bonos, otras empresas": {}
+                    }, 
+                    "Intereses de obligaciones y bonos, otras partes vinculadas": {
+                        "Intereses de obligaciones y bonos, otras partes vinculadas": {}
+                    }
+                }, 
+                "Intereses por descuento de efectos y operaciones de \u201cfactoring\u201d": {
+                    "Intereses por descuento de efectos en entidades de cr\u00e9dito asociadas": {
+                        "Intereses por descuento de efectos en entidades de cr\u00e9dito asociadas": {}
+                    }, 
+                    "Intereses por descuento de efectos en entidades de cr\u00e9dito del grupo": {
+                        "Intereses por descuento de efectos en entidades de cr\u00e9dito del grupo": {}
+                    }, 
+                    "Intereses por descuento de efectos en entidades de cr\u00e9dito vinculadas": {
+                        "Intereses por descuento de efectos en entidades de cr\u00e9dito vinculadas": {}
+                    }, 
+                    "Intereses por descuento de efectos en otras entidades de cr\u00e9dito": {
+                        "Intereses por descuento de efectos en otras entidades de cr\u00e9dito": {}
+                    }, 
+                    "Intereses por operaciones de \"factoring\" con entidades de cr\u00e9dito asociadas": {
+                        "Intereses por operaciones de \"factoring\" con entidades de cr\u00e9dito asociadas": {}
+                    }, 
+                    "Intereses por operaciones de \"factoring\" con entidades de cr\u00e9dito del grupo": {
+                        "Intereses por operaciones de \"factoring\" con entidades de cr\u00e9dito del grupo": {}
+                    }, 
+                    "Intereses por operaciones de \"factoring\" con entidades de cr\u00e9dito vinculadas": {
+                        "Intereses por operaciones de \"factoring\" con entidades de cr\u00e9dito vinculadas": {}
+                    }, 
+                    "Intereses por operaciones de \"factoring\" con otras entidades de cr\u00e9dito": {
+                        "Intereses por operaciones de \"factoring\" con otras entidades de cr\u00e9dito": {}
+                    }
+                }, 
+                "Otros gastos financieros": {
+                    "Otros gastos financieros": {}
+                }, 
+                "P\u00e9rdidas de cr\u00e9ditos no comerciales": {
+                    "P\u00e9rdidas de cr\u00e9ditos a corto plazo, empresas asociadas": {
+                        "P\u00e9rdidas de cr\u00e9ditos a corto plazo, empresas asociadas": {}
+                    }, 
+                    "P\u00e9rdidas de cr\u00e9ditos a corto plazo, empresas del grupo": {
+                        "P\u00e9rdidas de cr\u00e9ditos a corto plazo, empresas del grupo": {}
+                    }, 
+                    "P\u00e9rdidas de cr\u00e9ditos a corto plazo, otras empresas": {
+                        "P\u00e9rdidas de cr\u00e9ditos a corto plazo, otras empresas": {}
+                    }, 
+                    "P\u00e9rdidas de cr\u00e9ditos a corto plazo, otras partes vinculadas": {
+                        "P\u00e9rdidas de cr\u00e9ditos a corto plazo, otras partes vinculadas": {}
+                    }, 
+                    "P\u00e9rdidas de cr\u00e9ditos, empresas asociadas": {
+                        "P\u00e9rdidas de cr\u00e9ditos, empresas asociadas": {}
+                    }, 
+                    "P\u00e9rdidas de cr\u00e9ditos, empresas del grupo": {
+                        "P\u00e9rdidas de cr\u00e9ditos, empresas del grupo": {}
+                    }, 
+                    "P\u00e9rdidas de cr\u00e9ditos, otras empresas": {
+                        "P\u00e9rdidas de cr\u00e9ditos, otras empresas": {}
+                    }, 
+                    "P\u00e9rdidas de cr\u00e9ditos, otras partes vinculadas": {
+                        "P\u00e9rdidas de cr\u00e9ditos, otras partes vinculadas": {}
+                    }
+                }, 
+                "P\u00e9rdidas en participaciones y valores representativos de deuda": {
+                    "P\u00e9rdidas en valores representativos de deuda a corto plazo, empresas asociadas": {
+                        "P\u00e9rdidas en valores representativos de deuda a corto plazo, empresas asociadas": {}
+                    }, 
+                    "P\u00e9rdidas en valores representativos de deuda a corto plazo, empresas del grupo": {
+                        "P\u00e9rdidas en valores representativos de deuda a corto plazo, empresas del grupo": {}
+                    }, 
+                    "P\u00e9rdidas en valores representativos de deuda a corto plazo, otras empresas": {
+                        "P\u00e9rdidas en valores representativos de deuda a corto plazo, otras empresas": {}
+                    }, 
+                    "P\u00e9rdidas en valores representativos de deuda a corto plazo, otras partes vinculadas": {
+                        "P\u00e9rdidas en valores representativos de deuda a corto plazo, otras partes vinculadas": {}
+                    }, 
+                    "P\u00e9rdidas en valores representativos de deuda, empresas asociadas": {
+                        "P\u00e9rdidas en valores representativos de deuda, empresas asociadas": {}
+                    }, 
+                    "P\u00e9rdidas en valores representativos de deuda, empresas del grupo": {
+                        "P\u00e9rdidas en valores representativos de deuda, empresas del grupo": {}
+                    }, 
+                    "P\u00e9rdidas en valores representativos de deuda, otras empresas": {
+                        "P\u00e9rdidas en valores representativos de deuda, otras empresas": {}
+                    }, 
+                    "P\u00e9rdidas en valores representativos de deuda, otras partes vinculadas": {
+                        "P\u00e9rdidas en valores representativos de deuda, otras partes vinculadas": {}
+                    }
+                }, 
+                "P\u00e9rdidas por valoraci\u00f3n de instrumentos financieros por su valor razonable": {
+                    "P\u00e9rdidas de cartera de negociaci\u00f3n": {
+                        "P\u00e9rdidas de cartera de negociaci\u00f3n": {}
+                    }, 
+                    "P\u00e9rdidas de designados por la empresa": {
+                        "P\u00e9rdidas de designados por la empresa": {}
+                    }, 
+                    "P\u00e9rdidas de disponibles para la venta": {
+                        "P\u00e9rdidas de disponibles para la venta": {}
+                    }, 
+                    "P\u00e9rdidas de instrumentos de cobertura": {
+                        "P\u00e9rdidas de instrumentos de cobertura": {}
+                    }, 
+                    "P\u00e9rdidas por valoraci\u00f3n de instrumentos financieros por su valor razonable": {}
+                }
+            }, 
+            "Otros gastos de gesti\u00f3n": {
+                "Otras p\u00e9rdidas en gesti\u00f3n corriente": {
+                    "Otras p\u00e9rdidas en gesti\u00f3n corriente": {}
+                }, 
+                "P\u00e9rdidas de cr\u00e9ditos comerciales incobrables": {
+                    "P\u00e9rdidas de cr\u00e9ditos comerciales incobrables": {}
+                }, 
+                "Resultados de operaciones en com\u00fan": {
+                    "Beneficio transferido (gestor)": {
+                        "Beneficio transferido (gestor)": {}
+                    }, 
+                    "P\u00e9rdida soportada (part\u00edcipe o asociado no gestor)": {
+                        "P\u00e9rdida soportada (part\u00edcipe o asociado no gestor)": {}
+                    }
+                }
+            }, 
+            "P\u00e9rdidas por deterioro y otras dotaciones": {
+                "Dotaci\u00f3n a la provisi\u00f3n por operaciones comerciales": {
+                    "Dotaci\u00f3n a la provisi\u00f3n para otras operaciones comerciales": {
+                        "Dotaci\u00f3n a la provisi\u00f3n para otras operaciones comerciales": {}
+                    }, 
+                    "Dotaci\u00f3n a la provisi\u00f3n por contratos onerosos": {
+                        "Dotaci\u00f3n a la provisi\u00f3n por contratos onerosos": {}
+                    }
+                }, 
+                "P\u00e9rdidas por deterioro de cr\u00e9ditos": {
+                    "P\u00e9rdidas por deterioro de cr\u00e9ditos, empresas asociadas": {
+                        "P\u00e9rdidas por deterioro de cr\u00e9ditos, empresas asociadas": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro de cr\u00e9ditos, empresas del grupo": {
+                        "P\u00e9rdidas por deterioro de cr\u00e9ditos, empresas del grupo": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro de cr\u00e9ditos, otras empresas": {
+                        "P\u00e9rdidas por deterioro de cr\u00e9ditos, otras empresas": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro de cr\u00e9ditos, otras partes vinculadas": {
+                        "P\u00e9rdidas por deterioro de cr\u00e9ditos, otras partes vinculadas": {}
+                    }
+                }, 
+                "P\u00e9rdidas por deterioro de cr\u00e9ditos a corto plazo": {
+                    "P\u00e9rdidas por deterioro de cr\u00e9ditos a corto plazo, empresas asociadas": {
+                        "P\u00e9rdidas por deterioro de cr\u00e9ditos a corto plazo, empresas asociadas": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro de cr\u00e9ditos a corto plazo, empresas del grupo": {
+                        "P\u00e9rdidas por deterioro de cr\u00e9ditos a corto plazo, empresas del grupo": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro de cr\u00e9ditos a corto plazo, otras empresas": {
+                        "P\u00e9rdidas por deterioro de cr\u00e9ditos a corto plazo, otras empresas": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro de cr\u00e9ditos a corto plazo, otras partes vinculadas": {
+                        "P\u00e9rdidas por deterioro de cr\u00e9ditos a corto plazo, otras partes vinculadas": {}
+                    }
+                }, 
+                "P\u00e9rdidas por deterioro de cr\u00e9ditos por operaciones comerciales": {
+                    "P\u00e9rdidas por deterioro de cr\u00e9ditos por operaciones comerciales": {}
+                }, 
+                "P\u00e9rdidas por deterioro de cr\u00e9ditos por operaciones de la actividad": {
+                    "P\u00e9rdidas por deterioro de cr\u00e9ditos por operaciones de la actividad": {}
+                }, 
+                "P\u00e9rdidas por deterioro de existencias": {
+                    "P\u00e9rdidas por deterioro de materias primas": {
+                        "P\u00e9rdidas por deterioro de materias primas": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro de mercader\u00edas": {
+                        "P\u00e9rdidas por deterioro de mercader\u00edas": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro de otros aprovisionamientos": {
+                        "P\u00e9rdidas por deterioro de otros aprovisionamientos": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro de productos terminados y en curso de fabricaci\u00f3n": {
+                        "P\u00e9rdidas por deterioro de productos terminados y en curso de fabricaci\u00f3n": {}
+                    }
+                }, 
+                "P\u00e9rdidas por deterioro de las inversiones inmobiliarias": {
+                    "P\u00e9rdidas por deterioro de las inversiones inmobiliarias": {}
+                }, 
+                "P\u00e9rdidas por deterioro de participaciones y valores representativos de deuda": {
+                    "P\u00e9rdidas por deterioro de participaciones en instrumentos de patrimonio neto, empresas asociadas": {
+                        "P\u00e9rdidas por deterioro de participaciones en instrumentos de patrimonio neto, empresas asociadas": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro de participaciones en instrumentos de patrimonio neto, empresas del grupo": {
+                        "P\u00e9rdidas por deterioro de participaciones en instrumentos de patrimonio neto, empresas del grupo": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro de participaciones en instrumentos de patrimonio neto, otras empresas": {
+                        "P\u00e9rdidas por deterioro de participaciones en instrumentos de patrimonio neto, otras empresas": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro de participaciones en instrumentos de patrimonio neto, otras partes vinculadas": {
+                        "P\u00e9rdidas por deterioro de participaciones en instrumentos de patrimonio neto, otras partes vinculadas": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro en valores representativos de deuda, empresas asociadas": {
+                        "P\u00e9rdidas por deterioro en valores representativos de deuda, empresas asociadas": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro en valores representativos de deuda, empresas del grupo": {
+                        "P\u00e9rdidas por deterioro en valores representativos de deuda, empresas del grupo": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro en valores representativos de deuda, otras empresas": {
+                        "P\u00e9rdidas por deterioro en valores representativos de deuda, otras empresas": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro en valores representativos de deuda, otras partes vinculadas": {
+                        "P\u00e9rdidas por deterioro en valores representativos de deuda, otras partes vinculadas": {}
+                    }
+                }, 
+                "P\u00e9rdidas por deterioro de participaciones y valores representativos de deuda a corto plazo": {
+                    "P\u00e9rdidas por deterioro de participaciones en instrumentos de patrimonio neto a corto plazo, empresas asociadas": {
+                        "P\u00e9rdidas por deterioro de participaciones en instrumentos de patrimonio neto a corto plazo, empresas asociadas": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro de participaciones en instrumentos de patrimonio neto a corto plazo, empresas del grupo": {
+                        "P\u00e9rdidas por deterioro de participaciones en instrumentos de patrimonio neto a corto plazo, empresas del grupo": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro en valores representativos de deuda a corto plazo, empresas asociadas": {
+                        "P\u00e9rdidas por deterioro en valores representativos de deuda a corto plazo, empresas asociadas": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro en valores representativos de deuda a corto plazo, empresas del grupo": {
+                        "P\u00e9rdidas por deterioro en valores representativos de deuda a corto plazo, empresas del grupo": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro en valores representativos de deuda a corto plazo, otras empresas": {
+                        "P\u00e9rdidas por deterioro en valores representativos de deuda a corto plazo, otras empresas": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro en valores representativos de deuda a corto plazo, otras partes vinculadas": {
+                        "P\u00e9rdidas por deterioro en valores representativos de deuda a corto plazo, otras partes vinculadas": {}
+                    }
+                }, 
+                "P\u00e9rdidas por deterioro del inmovilizado intangible": {
+                    "P\u00e9rdidas por deterioro del inmovilizado intangible": {}
+                }, 
+                "P\u00e9rdidas por deterioro del inmovilizado material": {
+                    "P\u00e9rdidas por deterioro del inmovilizado material": {}
+                }, 
+                "P\u00e9rdidas por deterioro del inmovilizado material y bienes del Patrimonio Hist\u00f3rico": {
+                    "P\u00e9rdidas por deterioro de bienes del Patrimonio Hist\u00f3rico": {
+                        "P\u00e9rdidas por deterioro de bienes del Patrimonio Hist\u00f3rico": {}
+                    }, 
+                    "P\u00e9rdidas por deterioro del inmovilizado material": {}
+                }
+            }, 
+            "P\u00e9rdidas procedentes de activos no corrientes y gastos excepcionales": {
+                "Gastos excepcionales": {
+                    "Gastos excepcionales": {}
+                }, 
+                "P\u00e9rdidas por operaciones con obligaciones propias": {
+                    "P\u00e9rdidas por operaciones con obligaciones propias": {}
+                }, 
+                "P\u00e9rdidas procedentes de las inversiones inmobiliarias": {
+                    "P\u00e9rdidas procedentes de las inversiones inmobiliarias": {}
+                }, 
+                "P\u00e9rdidas procedentes de participaciones en partes vinculadas": {
+                    "P\u00e9rdidas procedentes de participaciones en, empresas del grupo": {
+                        "P\u00e9rdidas procedentes de participaciones en, empresas del grupo": {}
+                    }, 
+                    "P\u00e9rdidas procedentes de participaciones, empresas asociadas": {
+                        "P\u00e9rdidas procedentes de participaciones, empresas asociadas": {}
+                    }, 
+                    "P\u00e9rdidas procedentes de participaciones, otras partes vinculadas": {
+                        "P\u00e9rdidas procedentes de participaciones, otras partes vinculadas": {}
+                    }
+                }, 
+                "P\u00e9rdidas procedentes del inmovilizado intangible": {
+                    "P\u00e9rdidas procedentes del inmovilizado intangible": {}
+                }, 
+                "P\u00e9rdidas procedentes del inmovilizado material": {
+                    "P\u00e9rdidas procedentes del inmovilizado material": {}
+                }, 
+                "P\u00e9rdidas procedentes del inmovilizado material y bienes del Patrimonio Hist\u00f3rico": {
+                    "P\u00e9rdidas procedentes de bienes del Patrimonio Hist\u00f3rico": {
+                        "P\u00e9rdidas procedentes de bienes del Patrimonio Hist\u00f3rico": {}
+                    }, 
+                    "P\u00e9rdidas procedentes del inmovilizado material": {}
+                }
+            }, 
+            "Servicios exteriores": {
+                "Arrendamientos y c\u00e1nones": {
+                    "Arrendamientos y c\u00e1nones": {}
+                }, 
+                "Gastos en investigaci\u00f3n y desarrollo del ejercicio": {
+                    "Gastos en investigaci\u00f3n y desarrollo del ejercicio": {}
+                }, 
+                "Otros servicios": {
+                    "Otros servicios": {}
+                }, 
+                "Primas de seguros": {
+                    "Primas de seguros": {}
+                }, 
+                "Publicidad, propaganda y relaciones p\u00fablicas": {
+                    "Publicidad, propaganda y relaciones p\u00fablicas": {}
+                }, 
+                "Reparaciones y conservaci\u00f3n": {
+                    "Reparaciones y conservaci\u00f3n": {}
+                }, 
+                "Servicios bancarios y similares": {
+                    "Servicios bancarios y similares": {}
+                }, 
+                "Servicios de profesionales independientes": {
+                    "Servicios de profesionales independientes": {}
+                }, 
+                "Suministros": {
+                    "Suministros": {}
+                }, 
+                "Transportes": {
+                    "Transportes": {}
+                }
+            }, 
+            "Tributos": {
+                "Ajustes negativos en la imposici\u00f3n indirecta": {
+                    "Ajustes negativos en IVA de activo corriente": {
+                        "Ajustes negativos en IVA de activo corriente": {}
+                    }, 
+                    "Ajustes negativos en IVA de inversiones": {
+                        "Ajustes negativos en IVA de inversiones": {}
+                    }
+                }, 
+                "Ajustes negativos en la imposici\u00f3n sobre beneficios": {
+                    "Ajustes negativos en la imposici\u00f3n sobre beneficios": {}
+                }, 
+                "Ajustes positivos en la imposici\u00f3n indirecta": {
+                    "Ajustes positivos en IVA de activo corriente": {
+                        "Ajustes positivos en IVA de activo corriente": {}
+                    }, 
+                    "Ajustes positivos en IVA de inversiones": {
+                        "Ajustes positivos en IVA de inversiones": {}
+                    }
+                }, 
+                "Ajustes positivos en la imposici\u00f3n sobre beneficios": {
+                    "Ajustes positivos en la imposici\u00f3n sobre beneficios": {}
+                }, 
+                "Devoluci\u00f3n de impuestos": {
+                    "Devoluci\u00f3n de impuestos": {}
+                }, 
+                "Impuesto sobre beneficios": {
+                    "Impuesto corriente": {
+                        "Impuesto corriente": {}
+                    }, 
+                    "Impuesto diferido": {
+                        "Impuesto diferido": {}
+                    }
+                }, 
+                "Otros tributos": {
+                    "Otros tributos": {}
+                }
+            }, 
+            "Variaci\u00f3n de existencias": {
+                "Variaci\u00f3n de existencias de materias primas": {
+                    "Variaci\u00f3n de existencias de materias primas": {}
+                }, 
+                "Variaci\u00f3n de existencias de mercader\u00edas": {
+                    "Variaci\u00f3n de existencias de mercader\u00edas": {}
+                }, 
+                "Variaci\u00f3n de existencias de otros aprovisionamientos": {
+                    "Variaci\u00f3n de existencias de otros aprovisionamientos": {}
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "Cuentas financieras": {
+            "Activos no corrientes mantenidos para la venta y activos y pasivos asociados": {
+                "Acreedores comerciales y otras cuentas a pagar": {
+                    "Acreedores comerciales y otras cuentas a pagar": {}
+                }, 
+                "Deudas con caracter\u00edsticas especiales": {
+                    "Deudas con caracter\u00edsticas especiales": {}
+                }, 
+                "Deudas con personas y entidades vinculadas": {
+                    "Deudas con personas y entidades vinculadas": {}
+                }, 
+                "Existencias, deudores comerciales y otras cuentas a cobrar": {
+                    "Existencias, deudores comerciales y otras cuentas a cobrar": {}
+                }, 
+                "Inmovilizado": {
+                    "Inmovilizado": {}
+                }, 
+                "Inversiones con personas y entidades vinculadas": {
+                    "Inversiones con personas y entidades vinculadas": {}
+                }, 
+                "Inversiones financieras": {
+                    "Inversiones financieras": {}
+                }, 
+                "Otros activos": {
+                    "Otros activos": {}
+                }, 
+                "Otros pasivos": {
+                    "Otros pasivos": {}
+                }, 
+                "Provisiones": {
+                    "Provisiones": {}
+                }
+            }, 
+            "Deterioro del valor de inversiones financieras a corto plazo y de activos no corrientes mantenidos para la venta": {
+                "Deterioro de valor de activos no corrientes mantenidos para la venta": { 
+                    "Deterioro de valor de inmovilizado no corriente mantenido para la venta": {
+                        "Deterioro de valor de inmovilizado no corriente mantenido para la venta": {}
+                    }, 
+                    "Deterioro de valor de inversiones financieras no corrientes mantenidas para la venta": {
+                        "Deterioro de valor de inversiones financieras no corrientes mantenidas para la venta": {}
+                    }, 
+                    "Deterioro de valor de inversiones y entidades vinculadas no corrientes mantenidas para la venta": {
+                        "Deterioro de valor de inversiones y entidades vinculadas no corrientes mantenidas para la venta": {}
+                    }, 
+                    "Deterioro de valor de otros activos mantenidos para la venta": {
+                        "Deterioro de valor de otros activos mantenidos para la venta": {}
+                    }
+                }, 
+                "Deterioro de valor de cr\u00e9ditos a corto plazo": {
+                    "Deterioro de valor de cr\u00e9ditos a corto plazo": {}
+                }, 
+                "Deterioro de valor de cr\u00e9ditos a corto plazo a partes vinculadas": {
+                    "Deterioro de valor de cr\u00e9ditos a corto plazo a empresas asociadas": {
+                        "Deterioro de valor de cr\u00e9ditos a corto plazo a empresas asociadas": {}
+                    }, 
+                    "Deterioro de valor de cr\u00e9ditos a corto plazo a empresas del grupo": {
+                        "Deterioro de valor de cr\u00e9ditos a corto plazo a empresas del grupo": {}
+                    }, 
+                    "Deterioro de valor de cr\u00e9ditos a corto plazo a otras partes vinculadas": {
+                        "Deterioro de valor de cr\u00e9ditos a corto plazo a otras partes vinculadas": {}
+                    }
+                }, 
+                "Deterioro de valor de participaciones a corto plazo": {
+                    "Deterioro de valor de participaciones a corto plazo": {}
+                }, 
+                "Deterioro de valor de participaciones a corto plazo en partes vinculadas": {
+                    "Deterioro de valor de participaciones a corto plazo en empresas asociadas": {
+                        "Deterioro de valor de participaciones a corto plazo en empresas asociadas": {}
+                    }, 
+                    "Deterioro de valor de participaciones a corto plazo en empresas del grupo": {
+                        "Deterioro de valor de participaciones a corto plazo en empresas del grupo": {}
+                    }, 
+                    "Deterioro de valor de participaciones a corto plazo en otras partes vinculadas": {
+                        "Deterioro de valor de participaciones a corto plazo en otras partes vinculadas": {}
+                    }
+                }, 
+                "Deterioro de valor de valores representativos de deuda a corto plazo": {
+                    "Deterioro de valor de valores representativos de deuda a corto plazo": {}
+                }, 
+                "Deterioro de valor de valores representativos de deuda a corto plazo de partes vinculadas": {
+                    "Deterioro de valor de valores representativos de deuda a corto plazo de empresas asociadas": {
+                        "Deterioro de valor de valores representativos de deuda a corto plazo de empresas asociadas": {}
+                    }, 
+                    "Deterioro de valor de valores representativos de deuda a corto plazo de empresas del grupo": {
+                        "Deterioro de valor de valores representativos de deuda a corto plazo de empresas del grupo": {}
+                    }, 
+                    "Deterioro de valor de valores representativos de deuda a corto plazo de otras partes vinculadas": {
+                        "Deterioro de valor de valores representativos de deuda a corto plazo de otras partes vinculadas": {}
+                    }
+                }
+            }, 
+            "Deudas a corto plazo con partes vinculadas": {
+                "Acreedores por arrendamiento financiero a corto plazo, partes vinculadas": {
+                    "Acreedores por arrendamiento financiero a corto plazo, empresas asociadas": {
+                        "Acreedores por arrendamiento financiero a corto plazo, empresas asociadas": {}
+                    }, 
+                    "Acreedores por arrendamiento financiero a corto plazo, empresas del grupo": {
+                        "Acreedores por arrendamiento financiero a corto plazo, empresas del grupo": {}
+                    }, 
+                    "Acreedores por arrendamiento financiero a corto plazo, otras partes vinculadas": {
+                        "Acreedores por arrendamiento financiero a corto plazo, otras partes vinculadas": {}
+                    }
+                }, 
+                "Deudas a corto plazo con entidades de cr\u00e9dito vinculadas": {
+                    "Deudas a corto plazo con entidades de cr\u00e9dito, empresas asociadas": {
+                        "Deudas a corto plazo con entidades de cr\u00e9dito, empresas asociadas": {}
+                    }, 
+                    "Deudas a corto plazo con entidades de cr\u00e9dito, empresas del grupo": {
+                        "Deudas a corto plazo con entidades de cr\u00e9dito, empresas del grupo": {}
+                    }, 
+                    "Deudas a corto plazo con otras entidades de cr\u00e9dito vinculadas": {
+                        "Deudas a corto plazo con otras entidades de cr\u00e9dito vinculadas": {}
+                    }
+                }, 
+                "Intereses a corto plazo de deudas con partes vinculadas": {
+                    "Intereses a corto plazo de deudas con empresas asociadas": {
+                        "Intereses a corto plazo de deudas con empresas asociadas": {}
+                    }, 
+                    "Intereses a corto plazo de deudas con empresas del grupo": {
+                        "Intereses a corto plazo de deudas con empresas del grupo": {}
+                    }, 
+                    "Intereses a corto plazo de deudas con otras partes vinculadas": {
+                        "Intereses a corto plazo de deudas con otras partes vinculadas": {}
+                    }
+                }, 
+                "Otras deudas a corto plazo con partes vinculadas": {
+                    "Otras deudas a corto plazo con empresas asociadas": {
+                        "Otras deudas a corto plazo con empresas asociadas": {}
+                    }, 
+                    "Otras deudas a corto plazo con empresas del grupo": {
+                        "Otras deudas a corto plazo con empresas del grupo": {}
+                    }, 
+                    "Otras deudas a corto plazo con otras partes vinculadas": {
+                        "Otras deudas a corto plazo con otras partes vinculadas": {}
+                    }
+                }, 
+                "Proveedores de inmovilizado a corto plazo, partes vinculadas": {
+                    "Proveedores de inmovilizado a corto plazo, empresas asociadas": {
+                        "Proveedores de inmovilizado a corto plazo, empresas asociadas": {}
+                    }, 
+                    "Proveedores de inmovilizado a corto plazo, empresas del grupo": {
+                        "Proveedores de inmovilizado a corto plazo, empresas del grupo": {}
+                    }, 
+                    "Proveedores de inmovilizado a corto plazo, otras partes vinculadas": {
+                        "Proveedores de inmovilizado a corto plazo, otras partes vinculadas": {}
+                    }
+                }
+            }, 
+            "Deudas a corto plazo por pr\u00e9stamos recibidos y otros conceptos": {
+                "Acreedores por arrendamiento financiero a corto plazo": {
+                    "Acreedores por arrendamiento financiero a corto plazo": {}
+                }, 
+                "Deudas a corto plazo": {
+                    "Deudas a corto plazo": {}
+                }, 
+                "Deudas a corto plazo con entidades de cr\u00e9dito": {
+                    "Deudas a corto plazo por cr\u00e9dito dispuesto": {
+                        "Deudas a corto plazo por cr\u00e9dito dispuesto": {}
+                    }, 
+                    "Deudas por efectos descontados": {
+                        "Deudas por efectos descontados": {}
+                    }, 
+                    "Deudas por operaciones de \u201cfactoring\u201d": {
+                        "Deudas por operaciones de \u201cfactoring\u201d": {}
+                    }, 
+                    "Pr\u00e9stamos a corto plazo de entidades de cr\u00e9dito": {
+                        "Pr\u00e9stamos a corto plazo de entidades de cr\u00e9dito": {}
+                    }
+                }, 
+                "Deudas a corto plazo transformables en subvenciones, donaciones y legados": {
+                    "Deudas a corto plazo transformables en subvenciones, donaciones y legados": {}
+                }, 
+                "Dividendo activo a pagar": {
+                    "Dividendo activo a pagar": {}
+                }, 
+                "Efectos a pagar a corto plazo": {
+                    "Efectos a pagar a corto plazo": {}
+                }, 
+                "Intereses a corto plazo de deudas": {
+                    "Intereses a corto plazo de deudas": {}
+                }, 
+                "Intereses a corto plazo de deudas con entidades de cr\u00e9dito": {
+                    "Intereses a corto plazo de deudas con entidades de cr\u00e9dito": {}
+                }, 
+                "Proveedores de inmovilizado a corto plazo": {
+                    "Proveedores de inmovilizado a corto plazo": {
+                        "account_type": "Payable"
+                    }, 
+                    "account_type": "Payable"
+                }, 
+                "Provisiones a corto plazo": {
+                    "Provisi\u00f3n a corto plazo para actuaciones medioambientales": {
+                        "Provisi\u00f3n a corto plazo para actuaciones medioambientales": {}
+                    }, 
+                    "Provisi\u00f3n a corto plazo para impuestos": {
+                        "Provisi\u00f3n a corto plazo para impuestos": {}
+                    }, 
+                    "Provisi\u00f3n a corto plazo para otras responsabilidades": {
+                        "Provisi\u00f3n a corto plazo para otras responsabilidades": {}
+                    }, 
+                    "Provisi\u00f3n a corto plazo para reestructuraciones de patrimonio": {
+                        "Provisi\u00f3n a corto plazo para reestructuraciones de patrimonio": {}
+                    }, 
+                    "Provisi\u00f3n a corto plazo por desmantelamiento, retiro o rehabilitaci\u00f3n del inmovilizado": {
+                        "Provisi\u00f3n a corto plazo por desmantelamiento, retiro o rehabilitaci\u00f3n del inmovilizado": {}
+                    }, 
+                    "Provisi\u00f3n a corto plazo por retribuciones al personal": {
+                        "Provisi\u00f3n a corto plazo por retribuciones al personal": {}
+                    }, 
+                    "Provisi\u00f3n a corto plazo por transacciones con pagos basados en instrumentos": {
+                        "Provisi\u00f3n a corto plazo por transacciones con pagos basados en instrumentos": {}
+                    }
+                }
+            }, 
+            "Empr\u00e9stitos, deudas con caracter\u00edsticas especiales y otras emisiones an\u00e1logas a corto plazo": {
+                "Acciones o participaciones a corto plazo consideradas como pasivos financieros": {
+                    "Acciones o participaciones a corto plazo consideradas como pasivos financieros": {}
+                }, 
+                "Deudas representadas en otros valores negociables a corto plazo": {
+                    "Deudas representadas en otros valores negociables a corto plazo": {}
+                }, 
+                "Dividendos de acciones o participaciones consideradas como pasivos financieros": {
+                    "Dividendos de acciones o participaciones consideradas como pasivos financieros": {}
+                }, 
+                "Intereses a corto plazo de empr\u00e9stitos y otras emisiones an\u00e1logas": {
+                    "Intereses a corto plazo de empr\u00e9stitos y otras emisiones an\u00e1logas": {}
+                }, 
+                "Obligaciones y bonos a corto plazo": {
+                    "Obligaciones y bonos a corto plazo": {}
+                }, 
+                "Obligaciones y bonos convertibles a corto plazo": {
+                    "Obligaciones y bonos convertibles a corto plazo": {}
+                }, 
+                "Valores negociables amortizados": {
+                    "Obligaciones y bonos amortizados": {
+                        "Obligaciones y bonos amortizados": {}
+                    }, 
+                    "Obligaciones y bonos convertibles amortizados": {
+                        "Obligaciones y bonos convertibles amortizados": {}
+                    }, 
+                    "Otros valores negociables amortizados": {
+                        "Otros valores negociables amortizados": {}
+                    }
+                }
+            }, 
+            "Fianzas y dep\u00f3sitos recibidos y constituidos a corto plazo y ajustes por periodificaci\u00f3n": {
+                "Dep\u00f3sitos constituidos a corto plazo": {
+                    "Dep\u00f3sitos constituidos a corto plazo": {}
+                }, 
+                "Dep\u00f3sitos recibidos a corto plazo": {
+                    "Dep\u00f3sitos recibidos a corto plazo": {}
+                }, 
+                "Fianzas constituidas a corto plazo": {
+                    "Fianzas constituidas a corto plazo": {}
+                }, 
+                "Fianzas recibidas a corto plazo": {
+                    "Fianzas recibidas a corto plazo": {}
+                }, 
+                "Garant\u00edas financieras a corto plazo": {
+                    "Garant\u00edas financieras a corto plazo": {}
+                }, 
+                "Intereses cobrados por anticipado": {
+                    "Intereses cobrados por anticipado": {}
+                }, 
+                "Intereses pagados por anticipado": {
+                    "Intereses pagados por anticipado": {}
+                }
+            }, 
+            "Inversiones financieras a corto plazo en partes vinculadas": {
+                "Cr\u00e9ditos a corto plazo a partes vinculadas": {
+                    "Cr\u00e9ditos a corto plazo a empresas asociadas": {
+                        "Cr\u00e9ditos a corto plazo a empresas asociadas": {}
+                    }, 
+                    "Cr\u00e9ditos a corto plazo a empresas del grupo": {
+                        "Cr\u00e9ditos a corto plazo a empresas del grupo": {}
+                    }, 
+                    "Cr\u00e9ditos a corto plazo a otras partes vinculadas": {
+                        "Cr\u00e9ditos a corto plazo a otras partes vinculadas": {}
+                    }
+                }, 
+                "Desembolsos pendientes sobre participaciones a corto plazo en partes vinculadas": {
+                    "Desembolsos pendientes sobre participaciones a corto plazo en empresas asociadas": {
+                        "Desembolsos pendientes sobre participaciones a corto plazo en empresas asociadas": {}
+                    }, 
+                    "Desembolsos pendientes sobre participaciones a corto plazo en empresas del grupo": {
+                        "Desembolsos pendientes sobre participaciones a corto plazo en empresas del grupo": {}
+                    }, 
+                    "Desembolsos pendientes sobre participaciones a corto plazo en otras partes vinculadas": {
+                        "Desembolsos pendientes sobre participaciones a corto plazo en otras partes vinculadas": {}
+                    }
+                }, 
+                "Dividendo a cobrar de inversiones financieras en partes vinculadas": {
+                    "Dividendo a cobrar de inversiones financieras en empresas asociadas": {
+                        "Dividendo a cobrar de inversiones financieras en empresas asociadas": {}
+                    }, 
+                    "Dividendo a cobrar de inversiones financieras en empresas del grupo": {
+                        "Dividendo a cobrar de inversiones financieras en empresas del grupo": {}
+                    }, 
+                    "Dividendo a cobrar de inversiones financieras en otras partes vinculadas": {
+                        "Dividendo a cobrar de inversiones financieras en otras partes vinculadas": {}
+                    }
+                }, 
+                "Intereses a corto plazo de cr\u00e9ditos a partes vinculadas": {
+                    "Intereses a corto plazo de cr\u00e9ditos a empresas asociadas": {
+                        "Intereses a corto plazo de cr\u00e9ditos a empresas asociadas": {}
+                    }, 
+                    "Intereses a corto plazo de cr\u00e9ditos a empresas del grupo": {
+                        "Intereses a corto plazo de cr\u00e9ditos a empresas del grupo": {}
+                    }, 
+                    "Intereses a corto plazo de cr\u00e9ditos a otras partes vinculadas": {
+                        "Intereses a corto plazo de cr\u00e9ditos a otras partes vinculadas": {}
+                    }
+                }, 
+                "Intereses a corto plazo de valores representativos de deuda de partes vinculadas": {
+                    "Intereses a corto plazo de valores representativos de deuda de empresas asociadas": {
+                        "Intereses a corto plazo de valores representativos de deuda de empresas asociadas": {}
+                    }, 
+                    "Intereses a corto plazo de valores representativos de deuda de empresas del grupo": {
+                        "Intereses a corto plazo de valores representativos de deuda de empresas del grupo": {}
+                    }, 
+                    "Intereses a corto plazo de valores representativos de deuda de otras partes vinculadas": {
+                        "Intereses a corto plazo de valores representativos de deuda de otras partes vinculadas": {}
+                    }
+                }, 
+                "Participaciones a corto plazo en partes vinculadas": {
+                    "Participaciones a corto plazo en empresas asociadas": {
+                        "Participaciones a corto plazo en empresas asociadas": {}
+                    }, 
+                    "Participaciones a corto plazo en empresas del grupo": {
+                        "Participaciones a corto plazo en empresas del grupo": {}
+                    }, 
+                    "Participaciones a corto plazo en otras partes vinculadas": {
+                        "Participaciones a corto plazo en otras partes vinculadas": {}
+                    }
+                }, 
+                "Valores representativos de deuda a corto plazo de partes vinculadas": {
+                    "Valores representativos de deuda a corto plazo de empresas asociadas": {
+                        "Valores representativos de deuda a corto plazo de empresas asociadas": {}
+                    }, 
+                    "Valores representativos de deuda a corto plazo de empresas del grupo": {
+                        "Valores representativos de deuda a corto plazo de empresas del grupo": {}
+                    }, 
+                    "Valores representativos de deuda a corto plazo de otras partes vinculadas": {
+                        "Valores representativos de deuda a corto plazo de otras partes vinculadas": {}
+                    }
+                }
+            }, 
+            "Otras cuentas no bancarias": {
+                "Cuenta corriente con otras personas y entidades vinculadas": {
+                    "Cuenta corriente con empresas asociadas": {
+                        "Cuenta corriente con empresas asociadas": {}
+                    }, 
+                    "Cuenta corriente con empresas del grupo": {
+                        "Cuenta corriente con empresas del grupo": {}
+                    }, 
+                    "Cuenta corriente con otras partes vinculadas": {
+                        "Cuenta corriente con otras partes vinculadas": {}
+                    }
+                }, 
+                "Cuenta corriente con patronos y otros": {
+                    "Cuenta corriente con patronos y otros": {}
+                }, 
+                "Cuenta corriente con socios y administradores": {
+                    "Cuenta corriente con socios y administradores": {}
+                }, 
+                "Cuenta corriente con uniones temporales de empresas y comunidades de bienes": {
+                    "Cuenta corriente con uniones temporales de empresas y comunidades de bienes": {}
+                }, 
+                "Cuentas corrientes en fusiones y escisiones": {
+                    "Socios de sociedad disuelta": {
+                        "Socios de sociedad disuelta": {}
+                    }, 
+                    "Socios de sociedad escindida": {
+                        "Socios de sociedad escindida": {}
+                    }, 
+                    "Socios, cuenta de escisi\u00f3n": {
+                        "Socios, cuenta de escisi\u00f3n": {}
+                    }, 
+                    "Socios, cuenta de fusi\u00f3n": {
+                        "Socios, cuenta de fusi\u00f3n": {}
+                    }
+                }, 
+                "Derivados financieros a corto plazo": {
+                    "Activos por derivados financieros a corto plazo, cartera de negociaci\u00f3n": {
+                        "Activos por derivados financieros a corto plazo, cartera de negociaci\u00f3n": {}
+                    }, 
+                    "Activos por derivados financieros a corto plazo, instrumentos de cobertura": {
+                        "Activos por derivados financieros a corto plazo, instrumentos de cobertura": {}
+                    }, 
+                    "Pasivos por derivados financieros a corto plazo, cartera de negociaci\u00f3n": {
+                        "Pasivos por derivados financieros a corto plazo, cartera de negociaci\u00f3n": {}
+                    }, 
+                    "Pasivos por derivados financieros a corto plazo, instrumentos de cobertura": {
+                        "Pasivos por derivados financieros a corto plazo, instrumentos de cobertura": {}
+                    }
+                }, 
+                "Desembolsos exigidos sobre participaciones en el patrimonio neto": {
+                    "Desembolsos exigidos sobre participaciones de otras empresas": {
+                        "Desembolsos exigidos sobre participaciones de otras empresas": {}
+                    }, 
+                    "Desembolsos exigidos sobre participaciones, empresas asociadas": {
+                        "Desembolsos exigidos sobre participaciones, empresas asociadas": {}
+                    }, 
+                    "Desembolsos exigidos sobre participaciones, empresas del grupo": {
+                        "Desembolsos exigidos sobre participaciones, empresas del grupo": {}
+                    }, 
+                    "Desembolsos exigidos sobre participaciones, otras partes vinculadas": {
+                        "Desembolsos exigidos sobre participaciones, otras partes vinculadas": {}
+                    }
+                }, 
+                "Dividendo activo a cuenta": {
+                    "Dividendo activo a cuenta": {}
+                }, 
+                "Partidas pendientes de aplicaci\u00f3n": {
+                    "Partidas pendientes de aplicaci\u00f3n": {}
+                }, 
+                "Socios por desembolsos exigidos": {
+                    "Socios por desembolsos exigidos sobre acciones o participaciones consideradas como pasivos financieros": {
+                        "Socios por desembolsos exigidos sobre acciones o participaciones consideradas como pasivos financieros": {}
+                    }, 
+                    "Socios por desembolsos exigidos sobre acciones o participaciones ordinarias": {
+                        "Socios por desembolsos exigidos sobre acciones o participaciones ordinarias": {}
+                    }
+                }, 
+                "Titular de la explotaci\u00f3n": {
+                    "Titular de la explotaci\u00f3n": {}
+                }
+            }, 
+            "Otras inversiones financieras a corto plazo": {
+                "Cr\u00e9ditos a corto plazo": {
+                    "Cr\u00e9ditos a corto plazo": {}
+                }, 
+                "Cr\u00e9ditos a corto plazo al personal": {
+                    "Cr\u00e9ditos a corto plazo al personal": {}
+                }, 
+                "Cr\u00e9ditos a corto plazo por enajenaci\u00f3n de inmovilizado": {
+                    "Cr\u00e9ditos a corto plazo por enajenaci\u00f3n de inmovilizado": {}
+                }, 
+                "Desembolsos pendientes sobre participaciones en el patrimonio neto a corto plazo": {
+                    "Desembolsos pendientes sobre participaciones en el patrimonio neto a corto plazo": {}
+                }, 
+                "Dividendo a cobrar": {
+                    "Dividendo a cobrar": {}
+                }, 
+                "Imposiciones a corto plazo": {
+                    "Imposiciones a corto plazo": {}
+                }, 
+                "Intereses a corto plazo de cr\u00e9ditos": {
+                    "Intereses a corto plazo de cr\u00e9ditos": {}
+                }, 
+                "Intereses a corto plazo de valores representativos de deudas": {
+                    "Intereses a corto plazo de valores representativos de deudas": {}
+                }, 
+                "Inversiones financieras a corto plazo en instrumentos de patrimonio": {
+                    "Inversiones financieras a corto plazo en instrumentos de patrimonio": {}
+                }, 
+                "Valores representativos de deuda a corto plazo": {
+                    "Valores representativos de deuda a corto plazo": {}
+                }
+            }, 
+            "Tesorer\u00eda": {
+                "Bancos e instituciones de cr\u00e9dito c/c vista, euros": {
+                    "Bancos e instituciones de cr\u00e9dito c/c vista, euros": {}
+                }, 
+                "Bancos e instituciones de cr\u00e9dito c/c vista, moneda extranjera": {
+                    "Bancos e instituciones de cr\u00e9dito c/c vista, moneda extranjera": {}
+                }, 
+                "Bancos e instituciones de cr\u00e9dito, cuentas de ahorro, euros": {
+                    "Bancos e instituciones de cr\u00e9dito, cuentas de ahorro, euros": {}
+                }, 
+                "Bancos e instituciones de cr\u00e9dito, cuentas de ahorro, moneda extranjera": {
+                    "Bancos e instituciones de cr\u00e9dito, cuentas de ahorro, moneda extranjera": {}
+                }, 
+                "Caja, euros": {
+                    "Caja, euros": {}
+                }, 
+                "Caja, moneda extranjera": {
+                    "Caja, moneda extranjera": {}
+                }, 
+                "Inversiones a corto plazo de gran liquidez": {
+                    "Inversiones a corto plazo de gran liquidez": {}
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "Existencias": {
+            "Comerciales": {
+                "Mercader\u00edas A": {
+                    "Mercader\u00edas A": {}
+                }, 
+                "Mercader\u00edas B": {
+                    "Mercader\u00edas B": {}
+                }
+            }, 
+            "Deterioro de valor de las existencias": {
+                "Deterioro de valor de las materias primas": {
+                    "Deterioro de valor de las materias primas": {}
+                }, 
+                "Deterioro de valor de las mercader\u00edas": {
+                    "Deterioro de valor de las mercader\u00edas": {}
+                }, 
+                "Deterioro de valor de los productos en curso": {
+                    "Deterioro de valor de los productos en curso": {}
+                }, 
+                "Deterioro de valor de los productos semiterminados": {
+                    "Deterioro de valor de los productos semiterminados": {}
+                }, 
+                "Deterioro de valor de los productos terminados": {
+                    "Deterioro de valor de los productos terminados": {}
+                }, 
+                "Deterioro de valor de los subproductos, residuos y materiales recuperados": {
+                    "Deterioro de valor de los subproductos, residuos y materiales recuperados": {}
+                }, 
+                "Deterioro de valor de otros aprovisionamientos": {
+                    "Deterioro de valor de otros aprovisionamientos": {}
+                }
+            }, 
+            "Materias primas": {
+                "Materias primas A": {
+                    "Materias primas A": {}
+                }, 
+                "Materias primas B": {
+                    "Materias primas B": {}
+                }
+            }, 
+            "Otros aprovisionamientos": {
+                "Combustibles": {
+                    "Combustibles": {}
+                }, 
+                "Elementos y conjuntos incorporables": {
+                    "Elementos y conjuntos incorporables": {}
+                }, 
+                "Embalajes": {
+                    "Embalajes": {}
+                }, 
+                "Envases": {
+                    "Envases": {}
+                }, 
+                "Material de oficina": {
+                    "Material de oficina": {}
+                }, 
+                "Materiales diversos": {
+                    "Materiales diversos": {}
+                }, 
+                "Repuestos": {
+                    "Repuestos": {}
+                }
+            }, 
+            "Productos en curso": {
+                "Productos en curso A": {
+                    "Productos en curso A": {}
+                }, 
+                "Productos en curso B": {
+                    "Productos en curso B": {}
+                }
+            }, 
+            "Productos semiterminados": {
+                "Productos semiterminados A": {
+                    "Productos semiterminados A": {}
+                }, 
+                "Productos semiterminados B": {
+                    "Productos semiterminados B": {}
+                }
+            }, 
+            "Productos terminados": {
+                "Productos terminados A": {
+                    "Productos terminados A": {}
+                }, 
+                "Productos terminados B": {
+                    "Productos terminados B": {}
+                }
+            }, 
+            "Subproductos, residuos y materiales recuperados": {
+                "Materiales recuperados A": {
+                    "Materiales recuperados A": {}
+                }, 
+                "Materiales recuperados B": {
+                    "Materiales recuperados B": {}
+                }, 
+                "Residuos A": {
+                    "Residuos A": {}
+                }, 
+                "Residuos B": {
+                    "Residuos B": {}
+                }, 
+                "Subproductos A": {
+                    "Subproductos A": {}
+                }, 
+                "Subproductos B": {
+                    "Subproductos B": {}
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "Financiaci\u00f3n b\u00e1sica": {
+            "Capital": {
+                "Acciones o participaciones propias en situaciones especiales": {
+                    "Acciones o participaciones propias en situaciones especiales": {}
+                }, 
+                "Acciones o participaciones propias para reducci\u00f3n de capital": {
+                    "Acciones o participaciones propias para reducci\u00f3n de capital": {}
+                }, 
+                "Capital": {
+                    "Capital": {}
+                }, 
+                "Capital social": {
+                    "Capital social": {}
+                }, 
+                "Dotaci\u00f3n fundacional": {
+                    "Dotaci\u00f3n fundacional": {}
+                }, 
+                "Fondo social": {
+                    "Fondo social": {}
+                }, 
+                "Fundadores/asociados por aportaciones no dinerarias pendientes": {
+                    "Asociados, por aportaciones no dinerarias pendientes, en asociaciones": {
+                        "Asociados, por aportaciones no dinerarias pendientes, en asociaciones": {}
+                    }, 
+                    "Fundadores, por aportaciones no dinerarias pendientes, en fundaciones": {
+                        "Fundadores, por aportaciones no dinerarias pendientes, en fundaciones": {}
+                    }
+                }, 
+                "Fundadores/asociados por desembolsos no exigidos": {
+                    "Asociados, parte no desembolsada en asociaciones": {
+                        "Asociados, parte no desembolsada en asociaciones": {}
+                    }, 
+                    "Fundadores, parte no desembolsada en fundaciones": {
+                        "Fundadores, parte no desembolsada en fundaciones": {}
+                    }
+                }, 
+                "Socios por aportaciones no dinerarias pendientes": {
+                    "Socios por aportaciones no dinerarias pendientes, capital pendiente de inscripci\u00f3n": {
+                        "Socios por aportaciones no dinerarias pendientes, capital pendiente de inscripci\u00f3n": {}
+                    }, 
+                    "Socios por aportaciones no dinerarias pendientes, capital social": {
+                        "Socios por aportaciones no dinerarias pendientes, capital social": {}
+                    }
+                }, 
+                "Socios por desembolsos no exigidos": {
+                    "Socios por desembolsos no exigidos, capital pendiente de inscripci\u00f3n": {
+                        "Socios por desembolsos no exigidos, capital pendiente de inscripci\u00f3n": {}
+                    }, 
+                    "Socios por desembolsos no exigidos, capital social": {
+                        "Socios por desembolsos no exigidos, capital social": {}
+                    }
+                }
+            }, 
+            "Deudas con caracter\u00edsticas especiales": {
+                "Acciones o participaciones consideradas como pasivos financieros": {
+                    "Acciones o participaciones consideradas como pasivos financieros": {}
+                }, 
+                "Aportaciones no dinerarias pendientes por acciones o participaciones consideradas como pasivos financieros": {
+                    "Aportaciones no dinerarias pendientes, empresas asociadas": {
+                        "Aportaciones no dinerarias pendientes, empresas asociadas": {}
+                    }, 
+                    "Aportaciones no dinerarias pendientes, empresas del grupo": {
+                        "Aportaciones no dinerarias pendientes, empresas del grupo": {}
+                    }, 
+                    "Aportaciones no dinerarias pendientes, otras partes vinculadas": {
+                        "Aportaciones no dinerarias pendientes, otras partes vinculadas": {}
+                    }, 
+                    "Otras aportaciones no dinerarias pendientes": {
+                        "Otras aportaciones no dinerarias pendientes": {}
+                    }
+                }, 
+                "Desembolsos no exigidos por acciones o participaciones consideradas como pasivos financieros": {
+                    "Desembolsos no exigidos, empresas asociadas": {
+                        "Desembolsos no exigidos, empresas asociadas": {}
+                    }, 
+                    "Desembolsos no exigidos, empresas del grupo": {
+                        "Desembolsos no exigidos, empresas del grupo": {}
+                    }, 
+                    "Desembolsos no exigidos, otras partes vinculadas": {
+                        "Desembolsos no exigidos, otras partes vinculadas": {}
+                    }, 
+                    "Otros desembolsos no exigidos": {
+                        "Otros desembolsos no exigidos": {}
+                    }
+                }
+            }, 
+            "Deudas con partes vinculadas": {
+                "Acreedores por arrendamiento financiero, partes vinculadas": {
+                    "Acreedores por arrendamiento financiero, empresas asociadas": {
+                        "Acreedores por arrendamiento financiero, empresas asociadas": {}
+                    }, 
+                    "Acreedores por arrendamiento financiero, empresas de grupo": {
+                        "Acreedores por arrendamiento financiero, empresas de grupo": {}
+                    }, 
+                    "Acreedores por arrendamiento financiero, otras partes vinculadas": {
+                        "Acreedores por arrendamiento financiero, otras partes vinculadas": {}
+                    }
+                }, 
+                "Deudas con entidades de cr\u00e9dito vinculadas": {
+                    "Deudas con entidades de cr\u00e9dito vinculadas, empresas asociadas": {
+                        "Deudas con entidades de cr\u00e9dito vinculadas, empresas asociadas": {}
+                    }, 
+                    "Deudas con entidades de cr\u00e9dito vinculadas, empresas del grupo": {
+                        "Deudas con entidades de cr\u00e9dito vinculadas, empresas del grupo": {}
+                    }, 
+                    "Deudas con otras entidades de cr\u00e9dito vinculadas": {
+                        "Deudas con otras entidades de cr\u00e9dito vinculadas": {}
+                    }
+                }, 
+                "Otras deudas con partes vinculadas": {
+                    "Otras deudas, con otras partes vinculadas": {
+                        "Otras deudas, con otras partes vinculadas": {}
+                    }, 
+                    "Otras deudas, empresas asociadas": {
+                        "Otras deudas, empresas asociadas": {}
+                    }, 
+                    "Otras deudas, empresas del grupo": {
+                        "Otras deudas, empresas del grupo": {}
+                    }
+                }, 
+                "Proveedores de inmovilizado, partes vinculadas": {
+                    "Proveedores de inmovilizado, empresas asociadas": {
+                        "Proveedores de inmovilizado, empresas asociadas": {}
+                    }, 
+                    "Proveedores de inmovilizado, empresas del grupo": {
+                        "Proveedores de inmovilizado, empresas del grupo": {}
+                    }, 
+                    "Proveedores de inmovilizado, otras partes vinculadas": {
+                        "Proveedores de inmovilizado, otras partes vinculadas": {}
+                    }
+                }
+            }, 
+            "Deudas por pr\u00e9stamos recibidos, empr\u00e9stitos y otros conceptos": {
+                "Acreedores por arrendamiento financiero": {
+                    "Acreedores por arrendamiento financiero": {}
+                }, 
+                "Deudas": {
+                    "Deudas": {}
+                }, 
+                "Deudas con entidades de cr\u00e9dito": {
+                    "Deudas con entidades de cr\u00e9dito": {}
+                }, 
+                "Deudas representadas en otros valores negociables": {
+                    "Deudas representadas en otros valores negociables": {}
+                }, 
+                "Deudas transformables en subvenciones, donaciones y legados": {
+                    "Deudas transformables en subvenciones, donaciones y legados": {}
+                }, 
+                "Efectos a pagar": {
+                    "Efectos a pagar": {}
+                }, 
+                "Obligaciones y bonos": {
+                    "Obligaciones y bonos": {}
+                }, 
+                "Obligaciones y bonos convertibles": {
+                    "Obligaciones y bonos convertibles": {}
+                }, 
+                "Pasivos por derivados financieros": {
+                    "Pasivos por derivados financieros": {}, 
+                    "Pasivos por derivados financieros, carter de negociaci\u00f3n": {
+                        "Pasivos por derivados financieros, carter de negociaci\u00f3n": {}
+                    }, 
+                    "Pasivos por derivados financieros, instrumentos de cobertura": {
+                        "Pasivos por derivados financieros, instrumentos de cobertura": {}
+                    }
+                }, 
+                "Proveedores de inmovilizado": {
+                    "Proveedores de inmovilizado": {}
+                }
+            }, 
+            "Excedentes pendientes de aplicaci\u00f3n": {
+                "Remanente": {
+                    "Remanente": {}
+                }, 
+                "Resultado del ejercicio": {
+                    "Resultado del ejercicio": {}
+                }, 
+                "Resultados negativos de ejercicios anteriores": {
+                    "Resultados negativos de ejercicios anteriores": {}
+                }
+            }, 
+            "Pasivos por fianzas, garant\u00edas y otros conceptos": {
+                "Anticipos recibidos por ventas o prestaciones de servicios": {
+                    "Anticipos recibidos por ventas o prestaciones de servicios": {}
+                }, 
+                "Dep\u00f3sitos recibidos": {
+                    "Dep\u00f3sitos recibidos": {}
+                }, 
+                "Fianzas recibidas": {
+                    "Fianzas recibidas": {}
+                }, 
+                "Garant\u00edas financieras": {
+                    "Garant\u00edas financieras": {}
+                }
+            }, 
+            "Provisiones": {
+                "Provisi\u00f3n para actuaciones medioambientales": {
+                    "Provisi\u00f3n para actuaciones medioambientales": {}
+                }, 
+                "Provisi\u00f3n para impuestos": {
+                    "Provisi\u00f3n para impuestos": {}
+                }, 
+                "Provisi\u00f3n para otras responsabilidades": {
+                    "Provisi\u00f3n para otras responsabilidades": {}
+                }, 
+                "Provisi\u00f3n para reestructuraciones": {
+                    "Provisi\u00f3n para reestructuraciones": {}
+                }, 
+                "Provisi\u00f3n por desmantelamiento, retiro o rehabilitaci\u00f3n del inmovilizado": {
+                    "Provisi\u00f3n por desmantelamiento, retiro o rehabilitaci\u00f3n del inmovilizado": {}
+                }, 
+                "Provisi\u00f3n por retribuciones del personal": {
+                    "Provisi\u00f3n por retribuciones del personal": {}
+                }, 
+                "Provisi\u00f3n por transacciones con pagos basados en instrumentos de patrimonio": {
+                    "Provisi\u00f3n por transacciones con pagos basados en instrumentos de patrimonio": {}
+                }
+            }, 
+            "Reservas y otros instrumentos de patrimonio": {
+                "Aportaciones de socios o propietarios": {
+                    "Aportaciones de socios o propietarios": {}
+                }, 
+                "Diferencias por ajuste del capital a euros": {
+                    "Diferencias por ajuste del capital a euros": {}
+                }, 
+                "Otros Instrumentos de patrimonio neto": {
+                    "Patrimonio neto por emision de instrumentos financieros compuestos": {
+                        "Patrimonio neto por emision de instrumentos financieros compuestos": {}
+                    }, 
+                    "Resto de instrumentos de patrimonio neto": {
+                        "Resto de instrumentos de patrimonio neto": {}
+                    }
+                }, 
+                "Prima de emisi\u00f3n o asunci\u00f3n": {
+                    "Prima de emisi\u00f3n o asunci\u00f3n": {}
+                }, 
+                "Reserva legal": {
+                    "Reserva legal": {}
+                }, 
+                "Reservas especiales": {
+                    "Reserva por capital amortizado": {
+                        "Reserva por capital amortizado": {}
+                    }, 
+                    "Reserva por fondo de comercio": {
+                        "Reserva por fondo de comercio": {}
+                    }, 
+                    "Reservas estatutarias": {
+                        "Reservas estatutarias": {}
+                    }, 
+                    "Reservas para acciones o participaciones de la sociedad dominante": {
+                        "Reservas para acciones o participaciones de la sociedad dominante": {}
+                    }, 
+                    "Reservas por acciones propias aceptadas en garant\u00eda": {
+                        "Reservas por acciones propias aceptadas en garant\u00eda": {}
+                    }
+                }, 
+                "Reservas por p\u00e9rdidas y ganancias actuariales y otros ajustes": {
+                    "Reservas por p\u00e9rdidas y ganancias actuariales y otros ajustes": {}
+                }, 
+                "Reservas voluntarias": {
+                    "Reservas voluntarias": {}
+                }
+            }, 
+            "Resultados pendientes de aplicaci\u00f3n": {
+                "Remanente": {
+                    "Remanente": {}
+                }, 
+                "Resultado del ejercicio": {
+                    "Resultado del ejercicio": {}
+                }, 
+                "Resultados negativos de ejercicios anteriores": {
+                    "Resultados negativos de ejercicios anteriores": {}
+                }
+            }, 
+            "Situaciones transitorias de financiaci\u00f3n": {
+                "Acciones o participaciones emitidas": {
+                    "Acciones o participaciones emitidas": {}
+                }, 
+                "Acciones o participaciones emitidas consideradas como pasivos financieros": {
+                    "Acciones o participaciones emitidas consideradas como pasivos financieros": {}
+                }, 
+                "Acciones o participaciones emitidas consideradas como pasivos financieros pendientes de inscripci\u00f3n": {
+                    "Acciones o participaciones emitidas consideradas como pasivos financieros pendientes de inscripci\u00f3n": {}
+                }, 
+                "Capital emitido pendiente de inscripci\u00f3n": {
+                    "Capital emitido pendiente de inscripci\u00f3n": {}
+                }, 
+                "Suscriptores de acciones": {
+                    "Suscriptores de acciones": {}
+                }, 
+                "Suscriptores de acciones consideradas como pasivos financieros": {
+                    "Suscriptores de acciones consideradas como pasivos financieros": {}
+                }
+            }, 
+            "Subvenciones, donaciones y ajustes por cambio de valor": {
+                "Ajustes por valoraci\u00f3n de activos no corrientes y grupos enajenables de elementos, mantenidos para la venta": {
+                    "Ajustes por valoraci\u00f3n de activos no corrientes y grupos enajenables de elementos, mantenidos para la venta": {}
+                }, 
+                "Ajustes por valoraci\u00f3n en activos financieros disponibles para la venta": {
+                    "Ajustes por valoraci\u00f3n en activos financieros disponibles para la venta": {}
+                }, 
+                "Diferencias de conversi\u00f3n": {
+                    "Diferencias de conversi\u00f3n": {}
+                }, 
+                "Donaciones y legados de capital": {
+                    "Donaciones y legados de capital": {}
+                }, 
+                "Ingresos fiscales a distribuir en varios ejercicios": {
+                    "Ingresos fiscales por deducciones y bonificaciones a distribuir en varios ejercicios": {
+                        "Ingresos fiscales por deducciones y bonificaciones a distribuir en varios ejercicios": {}
+                    }, 
+                    "Ingresos fiscales por diferencias permanentes a distribuir en varios ejercicios": {
+                        "Ingresos fiscales por diferencias permanentes a distribuir en varios ejercicios": {}
+                    }
+                }, 
+                "Operaciones de cobertura": {
+                    "Cobertura de flujos de efectivo": {
+                        "Cobertura de flujos de efectivo": {}
+                    }, 
+                    "Cobertura de una inversi\u00f3n neta en un negocio en el extranjero": {
+                        "Cobertura de una inversi\u00f3n neta en un negocio en el extranjero": {}
+                    }
+                }, 
+                "Otras subvenciones, donaciones y legados": {
+                    "Otras donaciones y legados": {
+                        "Otras donaciones y legados": {}
+                    }, 
+                    "Otras subvenciones": {
+                        "Otras subvenciones": {}
+                    }, 
+                    "Otras subvenciones, donaciones y legados": {}
+                }, 
+                "Subvenciones oficiales de capital": {
+                    "Subvenciones de otras Administraciones P\u00fablicas": {
+                        "Subvenciones de otras Administraciones P\u00fablicas": {}
+                    }, 
+                    "Subvenciones del Estado": {
+                        "Subvenciones del Estado": {}
+                    }, 
+                    "Subvenciones oficiales de capital": {}
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "Gastos imputados al patrimonio neto": {
+            "Gastos de participaciones en empresas del grupo o asociadas con ajustes valorativos positivos previos": {
+                "Deterioro de participaciones en el patrimonio, empresas asociadas": {
+                    "Deterioro de participaciones en el patrimonio, empresas asociadas": {}
+                }, 
+                "Deterioro de participaciones en el patrimonio, empresas del grupo": {
+                    "Deterioro de participaciones en el patrimonio, empresas del grupo": {}
+                }
+            }, 
+            "Gastos en operaciones de cobertura": {
+                "P\u00e9rdidas por coberturas de flujos de efectivo": {
+                    "P\u00e9rdidas por coberturas de flujos de efectivo": {}
+                }, 
+                "P\u00e9rdidas por coberturas de inversiones netas en un negocio en el extranjero": {
+                    "P\u00e9rdidas por coberturas de inversiones netas en un negocio en el extranjero": {}
+                }, 
+                "Transferencia de beneficios por coberturas de flujos de efectivo": {
+                    "Transferencia de beneficios por coberturas de flujos de efectivo": {}
+                }, 
+                "Transferencia de beneficios por coberturas de inversiones netas en un negocio en el extranjero": {
+                    "Transferencia de beneficios por coberturas de inversiones netas en un negocio en el extranjero": {}
+                }
+            }, 
+            "Gastos financieros por valoraci\u00f3n de activos y pasivos": {
+                "P\u00e9rdidas en activos financieros disponibles para la venta": {
+                    "P\u00e9rdidas en activos financieros disponibles para la venta": {}
+                }, 
+                "Transferencia de beneficios en activos financieros disponibles para la venta": {
+                    "Transferencia de beneficios en activos financieros disponibles para la venta": {}
+                }
+            }, 
+            "Gastos por activos no corrientes en venta": {
+                "P\u00e9rdidas en activos no corrientes y grupos enajenables de elementos mantenidos para la venta": {
+                    "P\u00e9rdidas en activos no corrientes y grupos enajenables de elementos mantenidos para la venta": {}
+                }, 
+                "Transferencia de beneficios en activos no corrientes y grupos enajenables de elementos mantenidos para la venta": {
+                    "Transferencia de beneficios en activos no corrientes y grupos enajenables de elementos mantenidos para la venta": {}
+                }
+            }, 
+            "Gastos por diferencias de conversi\u00f3n": {
+                "Diferencias de conversi\u00f3n negativas": {
+                    "Diferencias de conversi\u00f3n negativas": {}
+                }, 
+                "Transferencia de diferencias de conversi\u00f3n positivas": {
+                    "Transferencia de diferencias de conversi\u00f3n positivas": {}
+                }
+            }, 
+            "Gastos por p\u00e9rdidas actuariales y ajustes en los activos por retribuciones a largo plazo de prestaci\u00f3n definida": {
+                "Ajustes negativos en activos por retribuciones a largo plazo de prestaci\u00f3n definida": {
+                    "Ajustes negativos en activos por retribuciones a largo plazo de prestaci\u00f3n definida": {}
+                }, 
+                "P\u00e9rdidas actuariales": {
+                    "P\u00e9rdidas actuariales": {}
+                }
+            }, 
+            "Impuesto sobre beneficios": {
+                "Ajustes negativos en la imposici\u00f3n sobre beneficios": {
+                    "Ajustes negativos en la imposici\u00f3n sobre beneficios": {}
+                }, 
+                "Ajustes positivos en la imposici\u00f3n sobre beneficios": {
+                    "Ajustes positivos en la imposici\u00f3n sobre beneficios": {}
+                }, 
+                "Impuesto sobre beneficios": {
+                    "Impuesto corriente": {
+                        "Impuesto corriente": {}
+                    }, 
+                    "Impuesto diferido": {
+                        "Impuesto diferido": {}
+                    }
+                }, 
+                "Ingresos fiscales por deducciones y bonificaciones": {
+                    "Ingresos fiscales por deducciones y bonificaciones": {}
+                }, 
+                "Ingresos fiscales por diferencias permanentes": {
+                    "Ingresos fiscales por diferencias permanentes": {}
+                }, 
+                "Transferencia de deducciones y bonificaciones": {
+                    "Transferencia de deducciones y bonificaciones": {}
+                }, 
+                "Transferencia de diferencias permanentes": {
+                    "Transferencia de diferencias permanentes": {}
+                }
+            }, 
+            "Transferencias de subvenciones, donaciones y legados": {
+                "Transferencia de donaciones y legados de capital": {
+                    "Transferencia de donaciones y legados de capital": {}
+                }, 
+                "Transferencia de otras subvenciones, donaciones y legados": {
+                    "Transferencia de otras subvenciones, donaciones y legados": {}
+                }, 
+                "Transferencia de subvenciones oficiales de capital": {
+                    "Transferencia de subvenciones oficiales de capital": {}
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "Ingresos imputados al patrimonio neto": {
+            "Ingresos de participaciones en empresas del grupo o asociadas con ajustes valorativos negativos previos": {
+                "Recuperaci\u00f3n de ajustes valorativos negativos previos, empresas asociadas": {
+                    "Recuperaci\u00f3n de ajustes valorativos negativos previos, empresas asociadas": {}
+                }, 
+                "Recuperaci\u00f3n de ajustes valorativos negativos previos, empresas del grupo": {
+                    "Recuperaci\u00f3n de ajustes valorativos negativos previos, empresas del grupo": {}
+                }, 
+                "Transferencia por deterioro de ajustes valorativos negativos previos, empresas asociadas": {
+                    "Transferencia por deterioro de ajustes valorativos negativos previos, empresas asociadas": {}
+                }, 
+                "Transferencia por deterioro de ajustes valorativos negativos previos, empresas del grupo": {
+                    "Transferencia por deterioro de ajustes valorativos negativos previos, empresas del grupo": {}
+                }
+            }, 
+            "Ingresos en operaciones de cobertura": {
+                "Beneficios por coberturas de flujos de efectivo": {
+                    "Beneficios por coberturas de flujos de efectivo": {}
+                }, 
+                "Beneficios por coberturas de inversiones netas en un negocio en el extranjero": {
+                    "Beneficios por coberturas de inversiones netas en un negocio en el extranjero": {}
+                }, 
+                "Transferencia de p\u00e9rdidas por coberturas de flujos de efectivo": {
+                    "Transferencia de p\u00e9rdidas por coberturas de flujos de efectivo": {}
+                }, 
+                "Transferencia de p\u00e9rdidas por coberturas de inversiones netas en un negocio en el extranjero": {
+                    "Transferencia de p\u00e9rdidas por coberturas de inversiones netas en un negocio en el extranjero": {}
+                }
+            }, 
+            "Ingresos financieros por valoraci\u00f3n de activos y pasivos": {
+                "Beneficios en activos financieros disponibles para la venta": {
+                    "Beneficios en activos financieros disponibles para la venta": {}
+                }, 
+                "Transferencia de p\u00e9rdidas en activos financieros disponibles para la venta": {
+                    "Transferencia de p\u00e9rdidas en activos financieros disponibles para la venta": {}
+                }
+            }, 
+            "Ingresos por activos no corrientes en venta": {
+                "Beneficios en activos no corrientes y grupos enajenables de elementos mantenidos para la venta": {
+                    "Beneficios en activos no corrientes y grupos enajenables de elementos mantenidos para la venta": {}
+                }, 
+                "Transferencia de p\u00e9rdidas en activos no corrientes y grupos enajenables de elementos mantenidos para la venta": {
+                    "Transferencia de p\u00e9rdidas en activos no corrientes y grupos enajenables de elementos mantenidos para la venta": {}
+                }
+            }, 
+            "Ingresos por diferencias de conversi\u00f3n": {
+                "Diferencias de conversi\u00f3n positivas": {
+                    "Diferencias de conversi\u00f3n positivas": {}
+                }, 
+                "Transferencia de diferencias de conversi\u00f3n negativas": {
+                    "Transferencia de diferencias de conversi\u00f3n negativas": {}
+                }
+            }, 
+            "Ingresos por ganancias actuariales y ajustes en los activos por retribuciones a largo plazo de prestaci\u00f3n definida": {
+                "Ajustes positivos en activos por retribuciones a largo plazo de prestaci\u00f3n definida": {
+                    "Ajustes positivos en activos por retribuciones a largo plazo de prestaci\u00f3n definida": {}
+                }, 
+                "Ganancias actuariales": {
+                    "Ganancias actuariales": {}
+                }
+            }, 
+            "Ingresos por subvenciones, donaciones y legados": {
+                "Ingresos de donaciones y legados de capital": {
+                    "Ingresos de donaciones y legados de capital": {}
+                }, 
+                "Ingresos de otras subvenciones, donaciones y legados": {
+                    "Ingresos de otras subvenciones, donaciones y legados": {}
+                }, 
+                "Ingresos de subvenciones oficiales de capital": {
+                    "Ingresos de subvenciones oficiales de capital": {}
+                }
+            }, 
+            "root_type": ""
+        }, 
+        "Ventas e ingresos": {
+            "Beneficios procedentes de activos no corrientes e ingresos excepcionales": {
+                "Beneficios procedentes de las inversiones inmobiliarias": {
+                    "Beneficios procedentes de las inversiones inmobiliarias": {}
+                }, 
+                "Beneficios procedentes de participaciones a largo plazo en partes vinculadas": {
+                    "Beneficios procedentes de participaciones a largo plazo, empresas asociadas": {
+                        "Beneficios procedentes de participaciones a largo plazo, empresas asociadas": {}
+                    }, 
+                    "Beneficios procedentes de participaciones a largo plazo, empresas del grupo": {
+                        "Beneficios procedentes de participaciones a largo plazo, empresas del grupo": {}
+                    }, 
+                    "Beneficios procedentes de participaciones a largo plazo, otras partes vinculadas": {
+                        "Beneficios procedentes de participaciones a largo plazo, otras partes vinculadas": {}
+                    }
+                }, 
+                "Beneficios procedentes del inmovilizado intangible": {
+                    "Beneficios procedentes del inmovilizado intangible": {}
+                }, 
+                "Beneficios procedentes del inmovilizado material": {
+                    "Beneficios procedentes del inmovilizado material": {}
+                }, 
+                "Beneficos por operaciones con obligaciones propias": {
+                    "Beneficos por operaciones con obligaciones propias": {}
+                }, 
+                "Diferencia negativa en combinaciones de negocios": {
+                    "Diferencia negativa en combinaciones de negocios": {}
+                }, 
+                "Ingresos excepcionales": {
+                    "Ingresos excepcionales": {}
+                }
+            }, 
+            "Excesos y aplicaciones de provisiones y de p\u00e9rdidas por deterioro": {
+                "Exceso de provisiones": {
+                    "Exceso de provisi\u00f3n para actuaciones medioambientales": {
+                        "Exceso de provisi\u00f3n para actuaciones medioambientales": {}
+                    }, 
+                    "Exceso de provisi\u00f3n para impuestos": {
+                        "Exceso de provisi\u00f3n para impuestos": {}
+                    }, 
+                    "Exceso de provisi\u00f3n para otras responsabilidades": {
+                        "Exceso de provisi\u00f3n para otras responsabilidades": {}
+                    }, 
+                    "Exceso de provisi\u00f3n para reestructuraciones": {
+                        "Exceso de provisi\u00f3n para reestructuraciones": {}
+                    }, 
+                    "Exceso de provisi\u00f3n por operaciones comerciales": {
+                        "Exceso de provisi\u00f3n para otras operaciones comerciales": {
+                            "Exceso de provisi\u00f3n para otras operaciones comerciales": {}
+                        }, 
+                        "Exceso de provisi\u00f3n por contratos onerosos": {
+                            "Exceso de provisi\u00f3n por contratos onerosos": {}
+                        }
+                    }, 
+                    "Exceso de provisi\u00f3n por retribuciones al personal": {
+                        "Exceso de provisi\u00f3n por retribuciones al personal": {}
+                    }, 
+                    "Exceso de provisi\u00f3n por transacciones con pagos basados en instrumentos de patrimonio": {
+                        "Exceso de provisi\u00f3n por transacciones con pagos basados en instrumentos de patrimonio": {}
+                    }
+                }, 
+                "Reversi\u00f3n del deterioro de cr\u00e9ditos a corto plazo": {
+                    "Reversi\u00f3n del deterioro de cr\u00e9ditos a corto plazo, empresas asociadas": {
+                        "Reversi\u00f3n del deterioro de cr\u00e9ditos a corto plazo, empresas asociadas": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de cr\u00e9ditos a corto plazo, empresas del grupo": {
+                        "Reversi\u00f3n del deterioro de cr\u00e9ditos a corto plazo, empresas del grupo": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de cr\u00e9ditos a corto plazo, otras empresas": {
+                        "Reversi\u00f3n del deterioro de cr\u00e9ditos a corto plazo, otras empresas": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de cr\u00e9ditos a corto plazo, otras partes vinculadas": {
+                        "Reversi\u00f3n del deterioro de cr\u00e9ditos a corto plazo, otras partes vinculadas": {}
+                    }
+                }, 
+                "Reversi\u00f3n del deterioro de cr\u00e9ditos a largo plazo": {
+                    "Reversi\u00f3n del deterioro de cr\u00e9ditos a largo plazo, empresas asociadas": {
+                        "Reversi\u00f3n del deterioro de cr\u00e9ditos a largo plazo, empresas asociadas": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de cr\u00e9ditos a largo plazo, empresas del grupo": {
+                        "Reversi\u00f3n del deterioro de cr\u00e9ditos a largo plazo, empresas del grupo": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de cr\u00e9ditos a largo plazo, otras empresas": {
+                        "Reversi\u00f3n del deterioro de cr\u00e9ditos a largo plazo, otras empresas": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de cr\u00e9ditos a largo plazo, otras partes vinculadas": {
+                        "Reversi\u00f3n del deterioro de cr\u00e9ditos a largo plazo, otras partes vinculadas": {}
+                    }
+                }, 
+                "Reversi\u00f3n del deterioro de cr\u00e9ditos por operaciones comerciales": {
+                    "Reversi\u00f3n del deterioro de cr\u00e9ditos por operaciones comerciales": {}
+                }, 
+                "Reversi\u00f3n del deterioro de cr\u00e9ditos por operaciones de la actividad": {
+                    "Reversi\u00f3n del deterioro de cr\u00e9ditos por operaciones de la actividad": {}
+                }, 
+                "Reversi\u00f3n del deterioro de existencias": {
+                    "Reversi\u00f3n del deterioro de materias primas": {
+                        "Reversi\u00f3n del deterioro de materias primas": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de mercader\u00edas": {
+                        "Reversi\u00f3n del deterioro de mercader\u00edas": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de otros aprovisionamientos": {
+                        "Reversi\u00f3n del deterioro de otros aprovisionamientos": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de productos terminados y en curso de fabricaci\u00f3n": {
+                        "Reversi\u00f3n del deterioro de productos terminados y en curso de fabricaci\u00f3n": {}
+                    }
+                }, 
+                "Reversi\u00f3n del deterioro de las inversiones inmobiliarias": {
+                    "Reversi\u00f3n del deterioro de las inversiones inmobiliarias": {}
+                }, 
+                "Reversi\u00f3n del deterioro de participaciones y valores representativos de deuda a corto plazo": {
+                    "Reversi\u00f3n del deterioro de participaciones en instrumentos de patrimonio neto a corto plazo, empresas asociadas": {
+                        "Reversi\u00f3n del deterioro de participaciones en instrumentos de patrimonio neto a corto plazo, empresas asociadas": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de participaciones en instrumentos de patrimonio neto a corto plazo, empresas del grupo": {
+                        "Reversi\u00f3n del deterioro de participaciones en instrumentos de patrimonio neto a corto plazo, empresas del grupo": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de valores representativos de deuda a corto plazo, empresas asociadas": {
+                        "Reversi\u00f3n del deterioro de valores representativos de deuda a corto plazo, empresas asociadas": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de valores representativos de deuda a corto plazo, empresas del grupo": {
+                        "Reversi\u00f3n del deterioro de valores representativos de deuda a corto plazo, empresas del grupo": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de valores representativos de deuda a corto plazo, otras empresas": {
+                        "Reversi\u00f3n del deterioro de valores representativos de deuda a corto plazo, otras empresas": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de valores representativos de deuda a corto plazo, otras partes vinculadas": {
+                        "Reversi\u00f3n del deterioro de valores representativos de deuda a corto plazo, otras partes vinculadas": {}
+                    }
+                }, 
+                "Reversi\u00f3n del deterioro de participaciones y valores representativos de deuda a largo plazo": {
+                    "Reversi\u00f3n del deterioro de participaciones en instrumentos de patrimonio neto a largo plazo, empresas asociadas": {
+                        "Reversi\u00f3n del deterioro de participaciones en instrumentos de patrimonio neto a largo plazo, empresas asociadas": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de participaciones en instrumentos de patrimonio neto a largo plazo, empresas del grupo": {
+                        "Reversi\u00f3n del deterioro de participaciones en instrumentos de patrimonio neto a largo plazo, empresas del grupo": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de participaciones en instrumentos de patrimonio neto a largo plazo, otras empresas": {
+                        "Reversi\u00f3n del deterioro de participaciones en instrumentos de patrimonio neto a largo plazo, otras empresas": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de participaciones en instrumentos de patrimonio neto a largo plazo, otras partes vinculadas": {
+                        "Reversi\u00f3n del deterioro de participaciones en instrumentos de patrimonio neto a largo plazo, otras partes vinculadas": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de valores representativos de deuda a largo plazo, empresas asociadas": {
+                        "Reversi\u00f3n del deterioro de valores representativos de deuda a largo plazo, empresas asociadas": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de valores representativos de deuda a largo plazo, empresas del grupo": {
+                        "Reversi\u00f3n del deterioro de valores representativos de deuda a largo plazo, empresas del grupo": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de valores representativos de deuda a largo plazo, otras empresas": {
+                        "Reversi\u00f3n del deterioro de valores representativos de deuda a largo plazo, otras empresas": {}
+                    }, 
+                    "Reversi\u00f3n del deterioro de valores representativos de deuda a largo plazo, otras partes vinculadas": {
+                        "Reversi\u00f3n del deterioro de valores representativos de deuda a largo plazo, otras partes vinculadas": {}
+                    }
+                }, 
+                "Reversi\u00f3n del deterioro del inmovilizado intangible": {
+                    "Reversi\u00f3n del deterioro del inmovilizado intangible": {}
+                }, 
+                "Reversi\u00f3n del deterioro del inmovilizado material": {
+                    "Reversi\u00f3n del deterioro del inmovilizado material": {}
+                }, 
+                "Reversi\u00f3n del deterioro del inmovilizado material y de bienes del Patrimonio Hist\u00f3rico": {
+                    "Reversi\u00f3n del deterioro del inmovilizado material y de bienes del Patrimonio Hist\u00f3rico": {}
+                }
+            }, 
+            "Ingresos financieros": {
+                "Beneficios en participaciones y valores representativos de deuda": {
+                    "Beneficios en valores representativos de deuda a corto plazo, empresas asociadas": {
+                        "Beneficios en valores representativos de deuda a corto plazo, empresas asociadas": {}
+                    }, 
+                    "Beneficios en valores representativos de deuda a corto plazo, empresas del grupo": {
+                        "Beneficios en valores representativos de deuda a corto plazo, empresas del grupo": {}
+                    }, 
+                    "Beneficios en valores representativos de deuda a corto plazo, otras empresas": {
+                        "Beneficios en valores representativos de deuda a corto plazo, otras empresas": {}
+                    }, 
+                    "Beneficios en valores representativos de deuda a corto plazo, otras partes vinculadas": {
+                        "Beneficios en valores representativos de deuda a corto plazo, otras partes vinculadas": {}
+                    }, 
+                    "Beneficios en valores representativos de deuda a largo plazo, empresas asociadas": {
+                        "Beneficios en valores representativos de deuda a largo plazo, empresas asociadas": {}
+                    }, 
+                    "Beneficios en valores representativos de deuda a largo plazo, empresas del grupo": {
+                        "Beneficios en valores representativos de deuda a largo plazo, empresas del grupo": {}
+                    }, 
+                    "Beneficios en valores representativos de deuda a largo plazo, otras empresas": {
+                        "Beneficios en valores representativos de deuda a largo plazo, otras empresas": {}
+                    }, 
+                    "Beneficios en valores representativos de deuda a largo plazo, otras partes vinculadas": {
+                        "Beneficios en valores representativos de deuda a largo plazo, otras partes vinculadas": {}
+                    }
+                }, 
+                "Beneficios por valoraci\u00f3n de instrumentos financieros por su valor razonable": {
+                    "Beneficios de cartera de negociaci\u00f3n": {
+                        "Beneficios de cartera de negociaci\u00f3n": {}
+                    }, 
+                    "Beneficios de designados por la empresa": {
+                        "Beneficios de designados por la empresa": {}
+                    }, 
+                    "Beneficios de disponibles para la venta": {
+                        "Beneficios de disponibles para la venta": {}
+                    }, 
+                    "Beneficios de instrumentos de cobertura": {
+                        "Beneficios de instrumentos de cobertura": {}
+                    }, 
+                    "Beneficios por valoraci\u00f3n de instrumentos financieros por su valor razonable": {}
+                }, 
+                "Diferencias positivas de cambio": {
+                    "Diferencias positivas de cambio": {}
+                }, 
+                "Ingresos de activos afectos y de derechos de reembolso relativos a retribuciones a largo plazo": {
+                    "Ingresos de activos afectos y de derechos de reembolso relativos a retribuciones a largo plazo": {}
+                }, 
+                "Ingresos de cr\u00e9ditos": {
+                    "Ingresos de cr\u00e9ditos a corto plazo": {
+                        "Ingresos de cr\u00e9ditos a corto plazo, empresas asociadas": {
+                            "Ingresos de cr\u00e9ditos a corto plazo, empresas asociadas": {}
+                        }, 
+                        "Ingresos de cr\u00e9ditos a corto plazo, empresas del grupo": {
+                            "Ingresos de cr\u00e9ditos a corto plazo, empresas del grupo": {}
+                        }, 
+                        "Ingresos de cr\u00e9ditos a corto plazo, otras empresas": {
+                            "Ingresos de cr\u00e9ditos a corto plazo, otras empresas": {}
+                        }, 
+                        "Ingresos de cr\u00e9ditos a corto plazo, otras partes vinculadas": {
+                            "Ingresos de cr\u00e9ditos a corto plazo, otras partes vinculadas": {}
+                        }
+                    }, 
+                    "Ingresos de cr\u00e9ditos a largo plazo": {
+                        "Ingresos de cr\u00e9ditos a largo plazo, empresas asociadas": {
+                            "Ingresos de cr\u00e9ditos a largo plazo, empresas asociadas": {}
+                        }, 
+                        "Ingresos de cr\u00e9ditos a largo plazo, empresas del grupo": {
+                            "Ingresos de cr\u00e9ditos a largo plazo, empresas del grupo": {}
+                        }, 
+                        "Ingresos de cr\u00e9ditos a largo plazo, otras empresas": {
+                            "Ingresos de cr\u00e9ditos a largo plazo, otras empresas": {}
+                        }, 
+                        "Ingresos de cr\u00e9ditos a largo plazo, otras partes vinculadas": {
+                            "Ingresos de cr\u00e9ditos a largo plazo, otras partes vinculadas": {}
+                        }
+                    }
+                }, 
+                "Ingresos de participaciones en instrumentos de patrimonio": {
+                    "Ingresos de participaciones en instrumentos de patrimonio, empresas asociadas": {
+                        "Ingresos de participaciones en instrumentos de patrimonio, empresas asociadas": {}
+                    }, 
+                    "Ingresos de participaciones en instrumentos de patrimonio, empresas del grupo": {
+                        "Ingresos de participaciones en instrumentos de patrimonio, empresas del grupo": {}
+                    }, 
+                    "Ingresos de participaciones en instrumentos de patrimonio, otras empresas": {
+                        "Ingresos de participaciones en instrumentos de patrimonio, otras empresas": {}
+                    }, 
+                    "Ingresos de participaciones en instrumentos de patrimonio, otras partes vinculadas": {
+                        "Ingresos de participaciones en instrumentos de patrimonio, otras partes vinculadas": {}
+                    }
+                }, 
+                "Ingresos de valores representativos de deuda": {
+                    "Ingresos de valores representativos de deuda, empresas asociadas": {
+                        "Ingresos de valores representativos de deuda, empresas asociadas": {}
+                    }, 
+                    "Ingresos de valores representativos de deuda, empresas del grupo": {
+                        "Ingresos de valores representativos de deuda, empresas del grupo": {}
+                    }, 
+                    "Ingresos de valores representativos de deuda, otras empresas": {
+                        "Ingresos de valores representativos de deuda, otras empresas": {}
+                    }, 
+                    "Ingresos de valores representativos de deuda, otras partes vinculadas": {
+                        "Ingresos de valores representativos de deuda, otras partes vinculadas": {}
+                    }
+                }, 
+                "Otros ingresos financieros": {
+                    "Otros ingresos financieros": {}
+                }
+            }, 
+            "Ingresos propios de la entidad": {
+                "Cuotas de asociados y afiliados": {
+                    "Cuotas de asociados y afiliados": {}
+                }, 
+                "Cuotas de usuarios": {
+                    "Cuotas de usuarios": {}
+                }, 
+                "Ingresos de patrocinadores y colaboraciones": {
+                    "Colaboraciones empresariales": {
+                        "Colaboraciones empresariales": {}
+                    }, 
+                    "Patrocinio": {
+                        "Patrocinio": {}
+                    }, 
+                    "Patrocinio publicitario": {
+                        "Patrocinio publicitario": {}
+                    }
+                }, 
+                "Ingresos por reintegro de ayudas y asignaciones": {
+                    "Ingresos por reintegro de ayudas y asignaciones": {}
+                }, 
+                "Promociones de captaci\u00f3n de recursos": {
+                    "Promociones de captaci\u00f3n de recursos": {}
+                }
+            }, 
+            "Otros ingresos de gesti\u00f3n": {
+                "Ingresos de propiedad industrial cedida en explotaci\u00f3n": {
+                    "Ingresos de propiedad industrial cedida en explotaci\u00f3n": {}
+                }, 
+                "Ingresos por arrendamientos": {
+                    "Ingresos por arrendamientos": {}
+                }, 
+                "Ingresos por comisiones": {
+                    "Ingresos por comisiones": {}
+                }, 
+                "Ingresos por servicios al personal": {
+                    "Ingresos por servicios al personal": {}
+                }, 
+                "Ingresos por servicios diversos": {
+                    "Ingresos por servicios diversos": {}
+                }, 
+                "Resultados de operaciones en com\u00fan": {
+                    "Beneficio atribuido (part\u00edcipe o asociado no gestor)": {
+                        "Beneficio atribuido (part\u00edcipe o asociado no gestor)": {}
+                    }, 
+                    "P\u00e9rdida transferido (gestor)": {
+                        "P\u00e9rdida transferido (gestor)": {}
+                    }
+                }
+            }, 
+            "Subvenciones, donaciones y legados": {
+                "Otras subvenciones, donaciones y legados transferidos al resultado del ejercicio": {
+                    "Otras subvenciones, donaciones y legados transferidos al resultado del ejercicio": {}
+                }, 
+                "Subvenciones, donaciones y legados a la explotaci\u00f3n": {
+                    "Subvenciones, donaciones y legados a la explotaci\u00f3n": {}
+                }, 
+                "Subvenciones, donaciones y legados de capital transferidos al resultado del ejercicio": {
+                    "Subvenciones, donaciones y legados de capital transferidos al resultado del ejercicio": {}
+                }
+            }, 
+            "Trabajos realizados para la empresa": {
+                "Trabajos realizados en inversiones inmobiliarias": {
+                    "Trabajos realizados en inversiones inmobiliarias": {}
+                }, 
+                "Trabajos realizados para el inmovilizado intangible": {
+                    "Trabajos realizados para el inmovilizado intangible": {}
+                }, 
+                "Trabajos realizados para el inmovilizado material": {
+                    "Trabajos realizados para el inmovilizado material": {}
+                }, 
+                "Trabajos realizados para el inmovilizado material en curso": {
+                    "Trabajos realizados para el inmovilizado material en curso": {}
+                }
+            }, 
+            "Variaci\u00f3n de existencias": {
+                "Variaci\u00f3n de existencias de productos en curso": {
+                    "Variaci\u00f3n de existencias de productos en curso": {}
+                }, 
+                "Variaci\u00f3n de existencias de productos semiterminados": {
+                    "Variaci\u00f3n de existencias de productos semiterminados": {}
+                }, 
+                "Variaci\u00f3n de existencias de productos terminados": {
+                    "Variaci\u00f3n de existencias de productos terminados": {}
+                }, 
+                "Variaci\u00f3n de existencias de subproductos, residuos y materiales recuperados": {
+                    "Variaci\u00f3n de existencias de subproductos, residuos y materiales recuperados": {}
+                }
+            }, 
+            "Ventas de mercader\u00edas, de producci\u00f3n propia, de servicios, etc.": {
+                "\"Rappels\" sobre ventas": {
+                    "\"Rappels\" sobre ventas de envases y embalajes": {
+                        "\"Rappels\" sobre ventas de envases y embalajes": {}
+                    }, 
+                    "\"Rappels\" sobre ventas de mercader\u00edas": {
+                        "\"Rappels\" sobre ventas de mercader\u00edas": {}
+                    }, 
+                    "\"Rappels\" sobre ventas de productos semiterminados": {
+                        "\"Rappels\" sobre ventas de productos semiterminados": {}
+                    }, 
+                    "\"Rappels\" sobre ventas de productos terminados": {
+                        "\"Rappels\" sobre ventas de productos terminados": {}
+                    }, 
+                    "\"Rappels\" sobre ventas de subproductos y residuos": {
+                        "\"Rappels\" sobre ventas de subproductos y residuos": {}
+                    }
+                }, 
+                "Descuentos sobre ventas por pronto pago": {
+                    "Descuentos sobre ventas por pronto pago de mercader\u00edas": {
+                        "Descuentos sobre ventas por pronto pago de mercader\u00edas": {}
+                    }, 
+                    "Descuentos sobre ventas por pronto pago de productos semiterminados": {
+                        "Descuentos sobre ventas por pronto pago de productos semiterminados": {}
+                    }, 
+                    "Descuentos sobre ventas por pronto pago de productos terminados": {
+                        "Descuentos sobre ventas por pronto pago de productos terminados": {}
+                    }, 
+                    "Descuentos sobre ventas por pronto pago de subproductos y residuos": {
+                        "Descuentos sobre ventas por pronto pago de subproductos y residuos": {}
+                    }
+                }, 
+                "Devoluciones de ventas y operaciones similares": {
+                    "Devoluciones de ventas de envases y embalajes": {
+                        "Devoluciones de ventas de envases y embalajes": {}
+                    }, 
+                    "Devoluciones de ventas de mercader\u00edas": {
+                        "Devoluciones de ventas de mercader\u00edas": {}
+                    }, 
+                    "Devoluciones de ventas de productos semiterminados": {
+                        "Devoluciones de ventas de productos semiterminados": {}
+                    }, 
+                    "Devoluciones de ventas de productos terminados": {
+                        "Devoluciones de ventas de productos terminados": {}
+                    }, 
+                    "Devoluciones de ventas de subproductos y residuos": {
+                        "Devoluciones de ventas de subproductos y residuos": {}
+                    }
+                }, 
+                "Prestaciones de servicios": {
+                    "Prestaciones de servicios Intracomunitarias": {
+                        "Prestaciones de servicios Intracomunitarias": {}
+                    }, 
+                    "Prestaciones de servicios en Espa\u00f1a": {
+                        "Prestaciones de servicios en Espa\u00f1a": {}
+                    }, 
+                    "Prestaciones de servicios fuera de la UE": {
+                        "Prestaciones de servicios fuera de la UE": {}
+                    }
+                }, 
+                "Ventas de envases y embalajes": {
+                    "Ventas de envases y embalajes Exportaci\u00f3n": {
+                        "Ventas de envases y embalajes Exportaci\u00f3n": {}
+                    }, 
+                    "Ventas de envases y embalajes Intracomunitarias": {
+                        "Ventas de envases y embalajes Intracomunitarias": {}
+                    }, 
+                    "Ventas de envases y embalajes en Espa\u00f1a": {
+                        "Ventas de envases y embalajes en Espa\u00f1a": {}
+                    }
+                }, 
+                "Ventas de mercader\u00edas": {
+                    "Ventas de mercader\u00edas Exportaci\u00f3n": {
+                        "Ventas de mercader\u00edas Exportaci\u00f3n": {}
+                    }, 
+                    "Ventas de mercader\u00edas Intracomunitarias": {
+                        "Ventas de mercader\u00edas Intracomunitarias": {}
+                    }, 
+                    "Ventas de mercader\u00edas en Espa\u00f1a": {
+                        "Ventas de mercader\u00edas en Espa\u00f1a": {}
+                    }
+                }, 
+                "Ventas de productos semiterminados": {
+                    "Ventas de productos semiterminados Exportaci\u00f3n": {
+                        "Ventas de productos semiterminados Exportaci\u00f3n": {}
+                    }, 
+                    "Ventas de productos semiterminados Intracomunitarias": {
+                        "Ventas de productos semiterminados Intracomunitarias": {}
+                    }, 
+                    "Ventas de productos semiterminados en Espa\u00f1a": {
+                        "Ventas de productos semiterminados en Espa\u00f1a": {}
+                    }
+                }, 
+                "Ventas de productos terminados": {
+                    "Ventas de productos terminados Exportaci\u00f3n": {
+                        "Ventas de productos terminados Exportaci\u00f3n": {}
+                    }, 
+                    "Ventas de productos terminados Intracomunitarias": {
+                        "Ventas de productos terminados Intracomunitarias": {}
+                    }, 
+                    "Ventas de productos terminados en Espa\u00f1a": {
+                        "Ventas de productos terminados en Espa\u00f1a": {}
+                    }
+                }, 
+                "Ventas de subproductos y residuos": {
+                    "Ventas de subproductos y residuos Exportaci\u00f3n": {
+                        "Ventas de subproductos y residuos Exportaci\u00f3n": {}
+                    }, 
+                    "Ventas de subproductos y residuos Intracomunitarias": {
+                        "Ventas de subproductos y residuos Intracomunitarias": {}
+                    }, 
+                    "Ventas de subproductos y residuos en Espa\u00f1a": {
+                        "Ventas de subproductos y residuos en Espa\u00f1a": {}
+                    }
+                }
+            }, 
+            "root_type": ""
+        }
+    }
+}

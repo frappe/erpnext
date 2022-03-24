@@ -1,0 +1,1 @@
+Salary Template for an Employee, basis of which monthly Salary is calculated.

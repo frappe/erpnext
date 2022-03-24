@@ -1,0 +1,143 @@
+{
+ "actions": [],
+ "beta": 1,
+ "creation": "2016-04-22 05:27:52.109319",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "hero_section_based_on",
+  "column_break_2",
+  "title",
+  "section_break_4",
+  "tag_line",
+  "description",
+  "hero_image",
+  "slideshow",
+  "hero_section",
+  "products_section",
+  "products_url",
+  "products"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "hero_section_based_on",
+   "fieldtype": "Select",
+   "label": "Hero Section Based On",
+   "options": "Default\nSlideshow\nHomepage Section"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title"
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break",
+   "label": "Hero Section"
+  },
+  {
+   "depends_on": "eval:doc.hero_section_based_on === 'Default'",
+   "description": "Company Tagline for website homepage",
+   "fieldname": "tag_line",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Tag Line",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.hero_section_based_on === 'Default'",
+   "description": "Company Description for website homepage",
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "label": "Description",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.hero_section_based_on === 'Default'",
+   "fieldname": "hero_image",
+   "fieldtype": "Attach Image",
+   "label": "Hero Image"
+  },
+  {
+   "depends_on": "eval:doc.hero_section_based_on === 'Slideshow'",
+   "fieldname": "slideshow",
+   "fieldtype": "Link",
+   "label": "Homepage Slideshow",
+   "options": "Website Slideshow"
+  },
+  {
+   "depends_on": "eval:doc.hero_section_based_on === 'Homepage Section'",
+   "fieldname": "hero_section",
+   "fieldtype": "Link",
+   "label": "Homepage Section",
+   "options": "Homepage Section"
+  },
+  {
+   "fieldname": "products_section",
+   "fieldtype": "Section Break",
+   "label": "Products"
+  },
+  {
+   "default": "/all-products",
+   "fieldname": "products_url",
+   "fieldtype": "Data",
+   "label": "URL for \"All Products\""
+  },
+  {
+   "description": "Products to be shown on website homepage",
+   "fieldname": "products",
+   "fieldtype": "Table",
+   "label": "Products",
+   "options": "Homepage Featured Product",
+   "width": "40px"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-02-18 13:29:29.531639",
+ "modified_by": "Administrator",
+ "module": "Portal",
+ "name": "Homepage",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Administrator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "company",
+ "track_changes": 1
+}

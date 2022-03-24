@@ -1,0 +1,1 @@
+Item details (qty, rate etc.) for parent Purchase Order.

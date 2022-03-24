@@ -1,0 +1,149 @@
+{
+ "actions": [],
+ "creation": "2017-04-05 13:33:04.519313",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "current_academic_year",
+  "current_academic_term",
+  "attendance_freeze_date",
+  "column_break_4",
+  "validate_batch",
+  "validate_course",
+  "academic_term_reqd",
+  "user_creation_skip",
+  "section_break_7",
+  "instructor_created_by",
+  "web_academy_settings_section",
+  "enable_lms",
+  "portal_title",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "current_academic_year",
+   "fieldtype": "Link",
+   "label": "Current Academic Year",
+   "options": "Academic Year"
+  },
+  {
+   "fieldname": "current_academic_term",
+   "fieldtype": "Link",
+   "label": "Current Academic Term",
+   "options": "Academic Term"
+  },
+  {
+   "fieldname": "attendance_freeze_date",
+   "fieldtype": "Date",
+   "label": "Attendance Freeze Date"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.",
+   "fieldname": "validate_batch",
+   "fieldtype": "Check",
+   "label": "Validate Batch for Students in Student Group"
+  },
+  {
+   "default": "0",
+   "description": "For Course based Student Group, the Course will be validated for every Student from the enrolled Courses in Program Enrollment.",
+   "fieldname": "validate_course",
+   "fieldtype": "Check",
+   "label": "Validate Enrolled Course for Students in Student Group"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, field Academic Term will be Mandatory in Program Enrollment Tool.",
+   "fieldname": "academic_term_reqd",
+   "fieldtype": "Check",
+   "label": "Make Academic Term Mandatory"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "Full Name",
+   "fieldname": "instructor_created_by",
+   "fieldtype": "Select",
+   "label": "Instructor Records to be created by",
+   "options": "Full Name\nNaming Series\nEmployee Number"
+  },
+  {
+   "fieldname": "web_academy_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Learning Management System Settings"
+  },
+  {
+   "depends_on": "eval: doc.enable_lms",
+   "fieldname": "portal_title",
+   "fieldtype": "Data",
+   "label": "Learning Management System Title"
+  },
+  {
+   "depends_on": "eval: doc.enable_lms",
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_lms",
+   "fieldtype": "Check",
+   "label": "Enable Learning Management System"
+  },
+  {
+   "default": "0",
+   "description": "By default, a new User is created for every new Student. If enabled, no new User will be created when a new Student is created.",
+   "fieldname": "user_creation_skip",
+   "fieldtype": "Check",
+   "label": "Skip User creation for new Student"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2020-05-07 19:18:10.639356",
+ "modified_by": "Administrator",
+ "module": "Education",
+ "name": "Education Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Education Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Guest",
+   "share": 1
+  }
+ ],
+ "quick_entry": 1,
+ "restrict_to_domain": "Education",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

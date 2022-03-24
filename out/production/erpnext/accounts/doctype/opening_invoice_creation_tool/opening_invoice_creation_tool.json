@@ -1,0 +1,98 @@
+{
+ "allow_copy": 1,
+ "beta": 1,
+ "creation": "2017-08-29 02:22:54.947711",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "create_missing_party",
+  "column_break_3",
+  "invoice_type",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "section_break_4",
+  "invoices"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Create missing customer or supplier.",
+   "fieldname": "create_missing_party",
+   "fieldtype": "Check",
+   "label": "Create Missing Party"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "invoice_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Invoice Type",
+   "options": "Sales\nPurchase",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break",
+   "label": "Invoices"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "invoices",
+   "fieldtype": "Table",
+   "options": "Opening Invoice Creation Tool Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "hide_toolbar": 1,
+ "issingle": 1,
+ "modified": "2022-01-04 15:25:06.053187",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Opening Invoice Creation Tool",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

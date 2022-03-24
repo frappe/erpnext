@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "HR-TRR-.YYYY.-.#####",
+ "creation": "2016-11-04 02:13:48.407576",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "training_event",
+  "section_break_3",
+  "employees",
+  "amended_from",
+  "employee_emails"
+ ],
+ "fields": [
+  {
+   "fieldname": "training_event",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Training Event",
+   "options": "Training Event",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "employees",
+   "fieldtype": "Table",
+   "label": "Employees",
+   "options": "Training Result Employee"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Training Result",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee_emails",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Employee Emails",
+   "options": "Email"
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-01-18 19:31:44.900034",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Training Result",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "training_event",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "training_event"
+}

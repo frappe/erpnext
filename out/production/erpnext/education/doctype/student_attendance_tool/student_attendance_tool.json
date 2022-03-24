@@ -1,0 +1,118 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "creation": "2016-11-16 17:12:46.437539",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "based_on",
+  "group_based_on",
+  "column_break_2",
+  "student_group",
+  "academic_year",
+  "academic_term",
+  "course_schedule",
+  "date",
+  "attendance",
+  "students_html"
+ ],
+ "fields": [
+  {
+   "fieldname": "based_on",
+   "fieldtype": "Select",
+   "label": "Based On",
+   "options": "Student Group\nCourse Schedule"
+  },
+  {
+   "default": "Batch",
+   "depends_on": "eval:doc.based_on == \"Student Group\"",
+   "fieldname": "group_based_on",
+   "fieldtype": "Select",
+   "label": "Group Based On",
+   "options": "Batch\nCourse\nActivity"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.based_on ==\"Student Group\"",
+   "fieldname": "student_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Student Group",
+   "options": "Student Group",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.based_on ==\"Course Schedule\"",
+   "fieldname": "course_schedule",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Course Schedule",
+   "options": "Course Schedule",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.based_on ==\"Student Group\"",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval: (doc.course_schedule \n|| (doc.student_group && doc.date))",
+   "fieldname": "attendance",
+   "fieldtype": "Section Break",
+   "label": "Attendance"
+  },
+  {
+   "fieldname": "students_html",
+   "fieldtype": "HTML",
+   "label": "Students HTML"
+  },
+  {
+   "fetch_from": "student_group.academic_year",
+   "fieldname": "academic_year",
+   "fieldtype": "Link",
+   "label": "Academic Year",
+   "options": "Academic Year",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "student_group.academic_term",
+   "fieldname": "academic_term",
+   "fieldtype": "Link",
+   "label": "Academic Term",
+   "options": "Academic Term",
+   "read_only": 1
+  }
+ ],
+ "hide_toolbar": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2020-10-23 17:52:28.078971",
+ "modified_by": "Administrator",
+ "module": "Education",
+ "name": "Student Attendance Tool",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Instructor",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Academics User",
+   "write": 1
+  }
+ ],
+ "restrict_to_domain": "Education",
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

@@ -1,0 +1,370 @@
+{
+ "actions": [],
+ "creation": "2013-06-24 16:37:54",
+ "description": "Settings",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "defaults_tab",
+  "item_defaults_section",
+  "item_naming_by",
+  "item_group",
+  "stock_uom",
+  "column_break_4",
+  "default_warehouse",
+  "sample_retention_warehouse",
+  "valuation_method",
+  "price_list_defaults_section",
+  "auto_insert_price_list_rate_if_missing",
+  "column_break_12",
+  "update_existing_price_list_rate",
+  "stock_validations_tab",
+  "section_break_9",
+  "over_delivery_receipt_allowance",
+  "mr_qty_allowance",
+  "column_break_121",
+  "role_allowed_to_over_deliver_receive",
+  "allow_negative_stock",
+  "show_barcode_field",
+  "clean_description_html",
+  "quality_inspection_settings_section",
+  "action_if_quality_inspection_is_not_submitted",
+  "column_break_23",
+  "action_if_quality_inspection_is_rejected",
+  "serial_and_batch_item_settings_tab",
+  "section_break_7",
+  "automatically_set_serial_nos_based_on_fifo",
+  "set_qty_in_transactions_based_on_serial_no_input",
+  "column_break_10",
+  "disable_serial_no_and_batch_selector",
+  "use_naming_series",
+  "naming_series_prefix",
+  "stock_planning_tab",
+  "auto_material_request",
+  "auto_indent",
+  "column_break_27",
+  "reorder_email_notify",
+  "inter_warehouse_transfer_settings_section",
+  "allow_from_dn",
+  "column_break_31",
+  "allow_from_pr",
+  "stock_closing_tab",
+  "control_historical_stock_transactions_section",
+  "stock_frozen_upto",
+  "stock_frozen_upto_days",
+  "column_break_26",
+  "role_allowed_to_create_edit_back_dated_transactions",
+  "stock_auth_role"
+ ],
+ "fields": [
+  {
+   "default": "Item Code",
+   "fieldname": "item_naming_by",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Item Naming By",
+   "options": "Item Code\nNaming Series"
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Default Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Default Stock UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "default_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "sample_retention_warehouse",
+   "fieldtype": "Link",
+   "label": "Sample Retention Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "valuation_method",
+   "fieldtype": "Select",
+   "label": "Default Valuation Method",
+   "options": "FIFO\nMoving Average\nLIFO"
+  },
+  {
+   "description": "The percentage you are allowed to receive or deliver more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed to receive 110 units.",
+   "fieldname": "over_delivery_receipt_allowance",
+   "fieldtype": "Float",
+   "label": "Over Delivery/Receipt Allowance (%)"
+  },
+  {
+   "default": "Stop",
+   "fieldname": "action_if_quality_inspection_is_not_submitted",
+   "fieldtype": "Select",
+   "label": "Action If Quality Inspection Is Not Submitted",
+   "options": "Stop\nWarn"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_barcode_field",
+   "fieldtype": "Check",
+   "label": "Show Barcode Field in Stock Transactions"
+  },
+  {
+   "default": "1",
+   "fieldname": "clean_description_html",
+   "fieldtype": "Check",
+   "label": "Convert Item Description to Clean HTML in Transactions"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break",
+   "label": "Serial & Batch Item Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_insert_price_list_rate_if_missing",
+   "fieldtype": "Check",
+   "label": "Auto Insert Item Price If Missing"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_negative_stock",
+   "fieldtype": "Check",
+   "label": "Allow Negative Stock"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "automatically_set_serial_nos_based_on_fifo",
+   "fieldtype": "Check",
+   "label": "Automatically Set Serial Nos Based on FIFO"
+  },
+  {
+   "default": "1",
+   "fieldname": "set_qty_in_transactions_based_on_serial_no_input",
+   "fieldtype": "Check",
+   "label": "Set Qty in Transactions Based on Serial No Input"
+  },
+  {
+   "fieldname": "auto_material_request",
+   "fieldtype": "Section Break",
+   "label": "Auto Material Request"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_indent",
+   "fieldtype": "Check",
+   "label": "Raise Material Request When Stock Reaches Re-order Level"
+  },
+  {
+   "default": "0",
+   "fieldname": "reorder_email_notify",
+   "fieldtype": "Check",
+   "label": "Notify by Email on Creation of Automatic Material Request"
+  },
+  {
+   "description": "No stock transactions can be created or modified before this date.",
+   "fieldname": "stock_frozen_upto",
+   "fieldtype": "Date",
+   "label": "Stock Frozen Upto"
+  },
+  {
+   "description": "Stock transactions that are older than the mentioned days cannot be modified.",
+   "fieldname": "stock_frozen_upto_days",
+   "fieldtype": "Int",
+   "label": "Freeze Stocks Older Than (Days)"
+  },
+  {
+   "depends_on": "eval:(doc.stock_frozen_upto || doc.stock_frozen_upto_days)",
+   "description": "The users with this Role are allowed to create/modify a stock transaction, even though the transaction is frozen.",
+   "fieldname": "stock_auth_role",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Edit Frozen Stock",
+   "options": "Role"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_naming_series",
+   "fieldtype": "Check",
+   "label": "Have Default Naming Series for Batch ID?"
+  },
+  {
+   "default": "BATCH-",
+   "depends_on": "eval:doc.use_naming_series==1",
+   "fieldname": "naming_series_prefix",
+   "fieldtype": "Data",
+   "label": "Naming Series Prefix"
+  },
+  {
+   "fieldname": "inter_warehouse_transfer_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Inter Warehouse Transfer Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_from_dn",
+   "fieldtype": "Check",
+   "label": "Allow Material Transfer from Delivery Note to Sales Invoice"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_from_pr",
+   "fieldtype": "Check",
+   "label": "Allow Material Transfer from Purchase Receipt to Purchase Invoice"
+  },
+  {
+   "description": "If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.",
+   "fieldname": "role_allowed_to_create_edit_back_dated_transactions",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Create/Edit Back-dated Transactions",
+   "options": "Role"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "control_historical_stock_transactions_section",
+   "fieldtype": "Section Break",
+   "label": "Control Historical Stock Transactions"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_serial_no_and_batch_selector",
+   "fieldtype": "Check",
+   "label": "Disable Serial No And Batch Selector"
+  },
+  {
+   "description": "Users with this role are allowed to over deliver/receive against orders above the allowance percentage",
+   "fieldname": "role_allowed_to_over_deliver_receive",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Over Deliver/Receive",
+   "options": "Role"
+  },
+  {
+   "fieldname": "item_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Item Defaults"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break",
+   "label": "Stock Transactions Settings"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "quality_inspection_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Quality Inspection Settings"
+  },
+  {
+   "default": "Stop",
+   "fieldname": "action_if_quality_inspection_is_rejected",
+   "fieldtype": "Select",
+   "label": "Action If Quality Inspection Is Rejected",
+   "options": "Stop\nWarn"
+  },
+  {
+   "description": "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units.",
+   "fieldname": "mr_qty_allowance",
+   "fieldtype": "Float",
+   "label": "Over Transfer Allowance"
+  },
+  {
+   "default": "0",
+   "depends_on": "auto_insert_price_list_rate_if_missing",
+   "fieldname": "update_existing_price_list_rate",
+   "fieldtype": "Check",
+   "label": "Update Existing Price List Rate"
+  },
+  {
+   "fieldname": "defaults_tab",
+   "fieldtype": "Tab Break",
+   "label": "Defaults"
+  },
+  {
+   "fieldname": "stock_validations_tab",
+   "fieldtype": "Tab Break",
+   "label": "Stock Validations"
+  },
+  {
+   "fieldname": "stock_planning_tab",
+   "fieldtype": "Tab Break",
+   "label": "Stock Planning"
+  },
+  {
+   "fieldname": "stock_closing_tab",
+   "fieldtype": "Tab Break",
+   "label": "Stock Closing"
+  },
+  {
+   "fieldname": "serial_and_batch_item_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Serial & Batch Item"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "price_list_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Price List Defaults"
+  },
+  {
+   "fieldname": "column_break_121",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "icon": "icon-cog",
+ "idx": 1,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2022-02-05 15:33:43.692736",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,93 @@
+{% var visible_columns = row.get_visible_columns(["item_code", "qty", "rate", "amount",
+	"stock_uom", "uom", "discount_percentage", "warehouse"]); %}
+
+{% if(!doc) { %}
+	<div class="row">
+		<div class="col-sm-6 col-xs-8">{%= __("Items") %}</div>
+		<div class="col-sm-2 hidden-xs text-right">{%= __("Qty") %}</div>
+		<div class="col-sm-2 hidden-xs text-right">{%= __("Rate") %}</div>
+		<div class="col-sm-2 col-xs-4 text-right">{%= __("Amount") %}</div>
+	</div>
+{% } else { %}
+	{% var visible_column_fieldnames = $.map(visible_columns, function(x, i) {return x.fieldname}); %}
+	<div class="row">
+		<div class="col-sm-6 col-xs-8">
+			{% if(doc.warehouse) {
+				var color = "grey",
+					title = "Warehouse",
+					actual_qty = (frm.doc.doctype==="Sales Order"
+						? doc.projected_qty : doc.actual_qty);
+                if(flt(frm.doc.per_delivered) < 100
+                    && in_list(["Sales Order Item", "Delivery Note Item"], doc.doctype)) {
+    				if(actual_qty != undefined) {
+    					if(actual_qty >= doc.qty) {
+    						var color = "green";
+    						var title = "In Stock"
+    					} else {
+    						var color = "red";
+    						var title = "Not In Stock"
+    					}
+    				}
+                } %}
+				<span class="pull-right" title="{%= title %}" style="margin-left: 10px;">
+					<span class="indicator {{ color }}">
+						{%= doc.warehouse %}
+					</span>
+				</span>
+			{% } %}
+
+			{% if(in_list(["Sales Order Item", "Purchase Order Item"],
+				doc.doctype) && frm.doc.docstatus===1) {
+				var delivered = doc.doctype==="Sales Order Item" ?
+                                                doc.delivered_qty : doc.received_qty;
+                                var pending = flt(doc.qty) - flt(delivered);
+                                %}
+                <span class="indicator {%= pending>0 ? "orange" : "green" %}">{%= doc.item_code %}</span>
+			{% } else { %}
+                <strong>{%= doc.item_code %}</strong>
+            {% } %}
+
+			{% if(doc.item_name != doc.item_code && in_list(visible_column_fieldnames, "item_name")) { %}
+				{% if (doc.item_code) { %}<br>{% } %}
+                {%= doc.item_name %}{% } %}
+
+			{% include "templates/form_grid/includes/visible_cols.html" %}
+		</div>
+
+		<!-- qty -->
+		<div class="col-sm-2 hidden-xs text-right">
+			{%= doc.get_formatted("qty") %}
+            <span class="small">{%= doc.uom || doc.stock_uom %}</span>
+		</div>
+
+		<!-- rate -->
+		<div class="col-sm-2 hidden-xs text-right">
+			{% if (!frappe.perm.is_visible("rate", doc, frm.perm)) { %}
+				<span class="text-muted">{%= __("hidden") %}</span>
+			{% } else { %}
+				{%= doc.get_formatted("rate") %}
+				{% if(doc.discount_percentage) { %}
+				<br><span class="label label-default pull-right"
+					title="{%= __("Discount")  %}">
+					{%= -1 * doc.discount_percentage %}%</span>
+				{% }%}
+			{% } %}
+		</div>
+
+		<!-- amount -->
+		<div class="col-sm-2 col-xs-4 text-right">
+			{% if (!frappe.perm.is_visible("amount", doc, frm.perm)) { %}
+				<span class="text-muted">{%= __("hidden") %}</span>
+			{% } else { %}
+				{%= doc.get_formatted("amount") %}
+			{% } %}
+
+			{% if (frappe.perm.is_visible("rate", doc, frm.perm)) { %}
+			<div class="visible-xs text-muted">
+				{%= doc.get_formatted("qty") %} <small>{%= doc.uom || doc.stock_uom %}</small>
+				x {%= doc.get_formatted("rate") %}
+			</div>
+			{% } %}
+		</div>
+	</div>
+{% } %}

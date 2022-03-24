@@ -1,0 +1,36 @@
+[
+	{
+		"doctype": "Salary Component",
+		"salary_component": "_Test Basic Salary",
+		"type": "Earning",
+		"is_tax_applicable": 1
+	},
+	{
+		"doctype": "Salary Component",
+		"salary_component": "_Test Allowance",
+		"type": "Earning",
+		"is_tax_applicable": 1
+	},
+	{
+		"doctype": "Salary Component",
+		"salary_component": "_Test Professional Tax",
+		"type": "Deduction"
+	},
+	{
+		"doctype": "Salary Component",
+		"salary_component": "_Test TDS",
+		"type": "Deduction"
+	},
+	{
+		"doctype": "Salary Component",
+		"salary_component": "Basic",
+		"type": "Earning",
+		"is_tax_applicable": 1
+	},
+	{
+		"doctype": "Salary Component",
+		"salary_component": "Leave Encashment",
+		"type": "Earning",
+		"is_tax_applicable": 1
+	}
+]

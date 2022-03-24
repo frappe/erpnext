@@ -1,0 +1,76 @@
+<h2 class="text-center">{%= __("Statement of Account") %}</h2>
+<h4 class="text-center">
+	{% if (filters.party_name) { %}
+		{%= filters.party_name %}
+	{% } else if (filters.party && filters.party.length) { %}
+		{%= filters.party %}
+	{% } else if (filters.account) { %}
+		{%= filters.account %}
+	{% } %}
+</h4>
+
+<h6 class="text-center">
+	{% if (filters.tax_id) { %}
+	{%= __("Tax Id: ")%}	{%= filters.tax_id %}
+	{% } %}
+</h6>
+
+<h5 class="text-center">
+	{%= frappe.datetime.str_to_user(filters.from_date) %}
+	{%= __("to") %}
+	{%= frappe.datetime.str_to_user(filters.to_date) %}
+</h5>
+<hr>
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th style="width: 12%">{%= __("Date") %}</th>
+			<th style="width: 15%">{%= __("Ref") %}</th>
+			<th style="width: 25%">{%= __("Party") %}</th>
+			<th style="width: 15%">{%= __("Debit") %}</th>
+			<th style="width: 15%">{%= __("Credit") %}</th>
+			<th style="width: 18%">{%= __("Balance (Dr - Cr)") %}</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+			<tr>
+			{% if(data[i].posting_date) { %}
+				<td>{%= frappe.datetime.str_to_user(data[i].posting_date) %}</td>
+				<td>{%= data[i].voucher_type %}
+					<br>{%= data[i].voucher_no %}</td>
+				<td>
+					{% if(!(filters.party || filters.account)) { %}
+						{%= data[i].party || data[i].account %}
+						<br>
+					{% } %}
+
+					{{ __("Against") }}: {%= data[i].against %}
+					<br>{%= __("Remarks") %}: {%= data[i].remarks %}
+					{% if(data[i].bill_no) { %}
+						<br>{%= __("Supplier Invoice No") %}: {%= data[i].bill_no %}
+					{% } %}
+					</td>
+					<td style="text-align: right">
+						{%= format_currency(data[i].debit, filters.presentation_currency) %}</td>
+					<td style="text-align: right">
+						{%= format_currency(data[i].credit, filters.presentation_currency) %}</td>
+			{% } else { %}
+				<td></td>
+				<td></td>
+				<td><b>{%= frappe.format(data[i].account, {fieldtype: "Link"}) || "&nbsp;" %}</b></td>
+				<td style="text-align: right">
+					{%= data[i].account && format_currency(data[i].debit, filters.presentation_currency) %}
+				</td>
+				<td style="text-align: right">
+					{%= data[i].account && format_currency(data[i].credit, filters.presentation_currency) %}
+				</td>
+			{% } %}
+				<td style="text-align: right">
+					{%= format_currency(data[i].balance, filters.presentation_currency) %}
+				</td>
+			</tr>
+		{% } %}
+	</tbody>
+</table>
+<p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>

@@ -1,0 +1,1 @@
+Tool to define Authorization Rules (limits above which only specified roles have right to Submit).

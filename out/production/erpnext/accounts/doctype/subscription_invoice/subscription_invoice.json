@@ -1,0 +1,47 @@
+{
+ "actions": [],
+ "creation": "2018-02-26 04:21:41.265055",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "document_type",
+  "invoice"
+ ],
+ "fields": [
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Link",
+   "label": "Document Type ",
+   "no_copy": 1,
+   "options": "DocType",
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "invoice",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Invoice",
+   "no_copy": 1,
+   "options": "document_type",
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-02-09 15:43:32.026233",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Subscription Invoice",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

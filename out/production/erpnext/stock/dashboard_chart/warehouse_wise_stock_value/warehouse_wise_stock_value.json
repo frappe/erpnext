@@ -1,0 +1,22 @@
+{
+ "chart_name": "Warehouse wise Stock Value",
+ "chart_type": "Custom",
+ "creation": "2020-07-20 21:01:04.296157",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "filters_json": "{}",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "modified": "2020-07-22 13:01:01.815123",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Warehouse wise Stock Value",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "source": "Warehouse wise Stock Value",
+ "timeseries": 0,
+ "type": "Bar",
+ "use_report_chart": 0,
+ "y_axis": []
+}

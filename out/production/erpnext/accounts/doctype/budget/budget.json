@@ -1,0 +1,224 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "creation": "2016-05-16 11:42:29.632528",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "budget_against",
+  "company",
+  "cost_center",
+  "project",
+  "fiscal_year",
+  "column_break_3",
+  "monthly_distribution",
+  "amended_from",
+  "section_break_6",
+  "applicable_on_material_request",
+  "action_if_annual_budget_exceeded_on_mr",
+  "action_if_accumulated_monthly_budget_exceeded_on_mr",
+  "column_break_13",
+  "applicable_on_purchase_order",
+  "action_if_annual_budget_exceeded_on_po",
+  "action_if_accumulated_monthly_budget_exceeded_on_po",
+  "section_break_16",
+  "applicable_on_booking_actual_expenses",
+  "action_if_annual_budget_exceeded",
+  "action_if_accumulated_monthly_budget_exceeded",
+  "section_break_21",
+  "accounts"
+ ],
+ "fields": [
+  {
+   "default": "Cost Center",
+   "fieldname": "budget_against",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Budget Against",
+   "options": "\nCost Center\nProject",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.budget_against == 'Cost Center'",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_standard_filter": 1,
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "depends_on": "eval:doc.budget_against == 'Project'",
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Fiscal Year",
+   "options": "Fiscal Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:in_list([\"Stop\", \"Warn\"], doc.action_if_accumulated_monthly_budget_exceeded_on_po || doc.action_if_accumulated_monthly_budget_exceeded_on_mr || doc.action_if_accumulated_monthly_budget_exceeded_on_actual)",
+   "fieldname": "monthly_distribution",
+   "fieldtype": "Link",
+   "label": "Monthly Distribution",
+   "options": "Monthly Distribution"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Budget",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break",
+   "label": "Control Action"
+  },
+  {
+   "default": "0",
+   "fieldname": "applicable_on_material_request",
+   "fieldtype": "Check",
+   "label": "Applicable on Material Request"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Stop",
+   "depends_on": "eval:doc.applicable_on_material_request == 1",
+   "fieldname": "action_if_annual_budget_exceeded_on_mr",
+   "fieldtype": "Select",
+   "label": "Action if Annual Budget Exceeded on MR",
+   "options": "\nStop\nWarn\nIgnore"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Warn",
+   "depends_on": "eval:doc.applicable_on_material_request == 1",
+   "fieldname": "action_if_accumulated_monthly_budget_exceeded_on_mr",
+   "fieldtype": "Select",
+   "label": "Action if Accumulated Monthly Budget Exceeded on MR",
+   "options": "\nStop\nWarn\nIgnore"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "applicable_on_purchase_order",
+   "fieldtype": "Check",
+   "label": "Applicable on Purchase Order"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Stop",
+   "depends_on": "eval:doc.applicable_on_purchase_order == 1",
+   "fieldname": "action_if_annual_budget_exceeded_on_po",
+   "fieldtype": "Select",
+   "label": "Action if Annual Budget Exceeded on PO",
+   "options": "\nStop\nWarn\nIgnore"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Warn",
+   "depends_on": "eval:doc.applicable_on_purchase_order == 1",
+   "fieldname": "action_if_accumulated_monthly_budget_exceeded_on_po",
+   "fieldtype": "Select",
+   "label": "Action if Accumulated Monthly Budget Exceeded on PO",
+   "options": "\nStop\nWarn\nIgnore"
+  },
+  {
+   "fieldname": "section_break_16",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "applicable_on_booking_actual_expenses",
+   "fieldtype": "Check",
+   "label": "Applicable on booking actual expenses"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Stop",
+   "depends_on": "eval:doc.applicable_on_booking_actual_expenses == 1",
+   "fieldname": "action_if_annual_budget_exceeded",
+   "fieldtype": "Select",
+   "label": "Action if Annual Budget Exceeded on Actual",
+   "options": "\nStop\nWarn\nIgnore"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Warn",
+   "depends_on": "eval:doc.applicable_on_booking_actual_expenses == 1",
+   "fieldname": "action_if_accumulated_monthly_budget_exceeded",
+   "fieldtype": "Select",
+   "label": "Action if Accumulated Monthly Budget Exceeded on Actual",
+   "options": "\nStop\nWarn\nIgnore"
+  },
+  {
+   "fieldname": "section_break_21",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "accounts",
+   "fieldtype": "Table",
+   "label": "Budget Accounts",
+   "options": "Budget Account",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-10-06 15:13:54.055854",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Budget",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

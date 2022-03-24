@@ -1,0 +1,574 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "creation": "2013-01-22 15:11:38",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "company",
+  "item_name",
+  "uom",
+  "cb0",
+  "is_active",
+  "is_default",
+  "allow_alternative_item",
+  "set_rate_of_sub_assembly_item_based_on_bom",
+  "project",
+  "quantity",
+  "image",
+  "currency_detail",
+  "currency",
+  "conversion_rate",
+  "column_break_12",
+  "rm_cost_as_per",
+  "buying_price_list",
+  "price_list_currency",
+  "plc_conversion_rate",
+  "section_break_21",
+  "with_operations",
+  "column_break_23",
+  "transfer_material_against",
+  "routing",
+  "operations_section",
+  "operations",
+  "materials_section",
+  "inspection_required",
+  "quality_inspection_template",
+  "column_break_31",
+  "section_break_33",
+  "items",
+  "scrap_section",
+  "scrap_items",
+  "costing",
+  "operating_cost",
+  "raw_material_cost",
+  "scrap_material_cost",
+  "cb1",
+  "base_operating_cost",
+  "base_raw_material_cost",
+  "base_scrap_material_cost",
+  "column_break_26",
+  "total_cost",
+  "base_total_cost",
+  "section_break_25",
+  "description",
+  "column_break_27",
+  "has_variants",
+  "section_break0",
+  "exploded_items",
+  "website_section",
+  "show_in_website",
+  "route",
+  "column_break_52",
+  "website_image",
+  "thumbnail",
+  "sb_web_spec",
+  "show_items",
+  "show_operations",
+  "web_long_description",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "description": "Item to be manufactured or repacked",
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Item",
+   "oldfieldname": "item",
+   "oldfieldtype": "Link",
+   "options": "Item",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "item.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item.image",
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Image",
+   "options": "image",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "Item UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "description": "Quantity of item obtained after manufacturing / repacking from given quantities of raw materials",
+   "fieldname": "quantity",
+   "fieldtype": "Float",
+   "label": "Quantity",
+   "oldfieldname": "quantity",
+   "oldfieldtype": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active",
+   "no_copy": 1,
+   "oldfieldname": "is_active",
+   "oldfieldtype": "Select"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "1",
+   "fieldname": "is_default",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Default",
+   "no_copy": 1,
+   "oldfieldname": "is_default",
+   "oldfieldtype": "Check"
+  },
+  {
+   "default": "0",
+   "description": "Manage cost of operations",
+   "fieldname": "with_operations",
+   "fieldtype": "Check",
+   "ignore_user_permissions": 1,
+   "label": "With Operations"
+  },
+  {
+   "default": "0",
+   "fieldname": "inspection_required",
+   "fieldtype": "Check",
+   "label": "Quality Inspection Required"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_alternative_item",
+   "fieldtype": "Check",
+   "label": "Allow Alternative Item"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "1",
+   "fieldname": "set_rate_of_sub_assembly_item_based_on_bom",
+   "fieldtype": "Check",
+   "label": "Set rate of sub-assembly item based on BOM"
+  },
+  {
+   "depends_on": "inspection_required",
+   "fieldname": "quality_inspection_template",
+   "fieldtype": "Link",
+   "label": "Quality Inspection Template",
+   "options": "Quality Inspection Template"
+  },
+  {
+   "fieldname": "currency_detail",
+   "fieldtype": "Section Break",
+   "label": "Currency and Price List"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "default": "Work Order",
+   "depends_on": "with_operations",
+   "fieldname": "transfer_material_against",
+   "fieldtype": "Select",
+   "label": "Transfer Material Against",
+   "options": "\nWork Order\nJob Card"
+  },
+  {
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "label": "Conversion Rate",
+   "precision": "9",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Valuation Rate",
+   "fieldname": "rm_cost_as_per",
+   "fieldtype": "Select",
+   "label": "Rate Of Materials Based On",
+   "options": "Valuation Rate\nLast Purchase Rate\nPrice List"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.rm_cost_as_per===\"Price List\"",
+   "fieldname": "buying_price_list",
+   "fieldtype": "Link",
+   "label": "Price List",
+   "options": "Price List"
+  },
+  {
+   "depends_on": "with_operations",
+   "fieldname": "operations_section",
+   "fieldtype": "Section Break",
+   "hide_border": 1,
+   "oldfieldtype": "Section Break"
+  },
+  {
+   "depends_on": "with_operations",
+   "fieldname": "routing",
+   "fieldtype": "Link",
+   "label": "Routing",
+   "options": "Routing"
+  },
+  {
+   "depends_on": "with_operations",
+   "fieldname": "operations",
+   "fieldtype": "Table",
+   "label": "Operations",
+   "oldfieldname": "bom_operations",
+   "oldfieldtype": "Table",
+   "options": "BOM Operation"
+  },
+  {
+   "fieldname": "materials_section",
+   "fieldtype": "Section Break",
+   "label": "Materials",
+   "oldfieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "oldfieldname": "bom_materials",
+   "oldfieldtype": "Table",
+   "options": "BOM Item",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "scrap_section",
+   "fieldtype": "Section Break",
+   "label": "Scrap"
+  },
+  {
+   "fieldname": "scrap_items",
+   "fieldtype": "Table",
+   "label": "Scrap Items",
+   "options": "BOM Scrap Item"
+  },
+  {
+   "fieldname": "costing",
+   "fieldtype": "Section Break",
+   "label": "Costing",
+   "oldfieldtype": "Section Break"
+  },
+  {
+   "fieldname": "operating_cost",
+   "fieldtype": "Currency",
+   "label": "Operating Cost",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "raw_material_cost",
+   "fieldtype": "Currency",
+   "label": "Raw Material Cost",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scrap_material_cost",
+   "fieldtype": "Currency",
+   "label": "Scrap Material Cost",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "base_operating_cost",
+   "fieldtype": "Currency",
+   "label": "Operating Cost (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_raw_material_cost",
+   "fieldtype": "Currency",
+   "label": "Raw Material Cost (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_scrap_material_cost",
+   "fieldtype": "Currency",
+   "label": "Scrap Material Cost(Company Currency)",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_cost",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Cost",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "base_total_cost",
+   "fieldtype": "Currency",
+   "label": "Total Cost (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "oldfieldname": "project",
+   "oldfieldtype": "Link",
+   "options": "Project"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "BOM",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_25",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "item.description",
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Item Description",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "section_break0",
+   "fieldtype": "Section Break",
+   "label": "Materials Required (Exploded)"
+  },
+  {
+   "fieldname": "exploded_items",
+   "fieldtype": "Table",
+   "label": "Exploded Items",
+   "no_copy": 1,
+   "oldfieldname": "flat_bom_details",
+   "oldfieldtype": "Table",
+   "options": "BOM Explosion Item",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "website_section",
+   "fieldtype": "Section Break",
+   "label": "Website"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "show_in_website",
+   "fieldtype": "Check",
+   "label": "Show in Website"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "route",
+   "fieldtype": "Small Text",
+   "label": "Route"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "show_in_website",
+   "description": "Item Image (if not slideshow)",
+   "fieldname": "website_image",
+   "fieldtype": "Attach Image",
+   "label": "Website Image"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "thumbnail",
+   "fieldtype": "Data",
+   "label": "Thumbnail",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "website_items",
+   "depends_on": "show_in_website",
+   "fieldname": "sb_web_spec",
+   "fieldtype": "Section Break",
+   "label": "Website Specifications"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "show_in_website",
+   "fieldname": "web_long_description",
+   "fieldtype": "Text Editor",
+   "label": "Website Description"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "depends_on": "show_in_website",
+   "fieldname": "show_items",
+   "fieldtype": "Check",
+   "label": "Show Items"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "depends_on": "eval:(doc.show_in_website && doc.with_operations)",
+   "fieldname": "show_operations",
+   "fieldtype": "Check",
+   "label": "Show Operations"
+  },
+  {
+   "fieldname": "section_break_21",
+   "fieldtype": "Section Break",
+   "label": "Operations"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_52",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.rm_cost_as_per=='Price List'",
+   "fieldname": "plc_conversion_rate",
+   "fieldtype": "Float",
+   "label": "Price List Exchange Rate"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.rm_cost_as_per=='Price List'",
+   "fieldname": "price_list_currency",
+   "fieldtype": "Link",
+   "label": "Price List Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item.has_variants",
+   "fieldname": "has_variants",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Has Variants",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_33",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  }
+ ],
+ "icon": "fa fa-sitemap",
+ "idx": 1,
+ "image_field": "image",
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-01-30 21:27:54.727298",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "item, item_name",
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

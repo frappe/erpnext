@@ -1,0 +1,138 @@
+{
+ "actions": [],
+ "autoname": "ACC-PCV-.YYYY.-.#####",
+ "creation": "2013-01-10 16:34:07",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "transaction_date",
+  "posting_date",
+  "fiscal_year",
+  "amended_from",
+  "company",
+  "cost_center_wise_pnl",
+  "column_break1",
+  "closing_account_head",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "label": "Transaction Date",
+   "oldfieldname": "transaction_date",
+   "oldfieldtype": "Date"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "oldfieldname": "posting_date",
+   "oldfieldtype": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Closing Fiscal Year",
+   "oldfieldname": "fiscal_year",
+   "oldfieldtype": "Select",
+   "options": "Fiscal Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Amended From",
+   "no_copy": 1,
+   "oldfieldname": "amended_from",
+   "oldfieldtype": "Data",
+   "options": "Period Closing Voucher",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "oldfieldname": "company",
+   "oldfieldtype": "Select",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break1",
+   "fieldtype": "Column Break",
+   "oldfieldtype": "Column Break"
+  },
+  {
+   "description": "The account head under Liability or Equity, in which Profit/Loss will be booked",
+   "fieldname": "closing_account_head",
+   "fieldtype": "Link",
+   "label": "Closing Account Head",
+   "oldfieldname": "closing_account_head",
+   "oldfieldtype": "Link",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks",
+   "oldfieldname": "remarks",
+   "oldfieldtype": "Small Text",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "cost_center_wise_pnl",
+   "fieldtype": "Check",
+   "label": "Book Cost Center Wise Profit/Loss"
+  }
+ ],
+ "icon": "fa fa-file-text",
+ "idx": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-05-20 15:27:37.210458",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Period Closing Voucher",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "posting_date, fiscal_year",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "closing_account_head"
+}

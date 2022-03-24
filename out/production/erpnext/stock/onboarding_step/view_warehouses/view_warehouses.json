@@ -1,0 +1,20 @@
+{
+ "action": "Go to Page",
+ "creation": "2021-05-17 16:12:43.427579",
+ "description": "# View Warehouse\nIn ERPNext the term 'warehouse' can be thought of as a storage location.\n\nWarehouses are arranged in ERPNext in a tree like structure, where multiple sub-warehouses can be grouped under a single warehouse.\n\nIn this step we will view the [**Warehouse Tree**](https://docs.erpnext.com/docs/user/manual/en/stock/warehouse#21-tree-view) to view the [**Warehouses**](https://docs.erpnext.com/docs/user/manual/en/stock/warehouse) that are set by default.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-05-18 15:04:41.198413",
+ "modified_by": "Administrator",
+ "name": "View Warehouses",
+ "owner": "Administrator",
+ "path": "Tree/Warehouse",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "View Warehouses",
+ "validate_action": 1
+}

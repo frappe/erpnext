@@ -1,0 +1,325 @@
+{
+ "actions": [],
+ "autoname": "Prompt",
+ "creation": "2020-05-22 16:46:18.712954",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_11",
+  "from_date",
+  "company",
+  "account",
+  "group_by",
+  "cost_center",
+  "column_break_14",
+  "to_date",
+  "finance_book",
+  "currency",
+  "project",
+  "section_break_3",
+  "customer_collection",
+  "collection_name",
+  "fetch_customers",
+  "column_break_6",
+  "primary_mandatory",
+  "column_break_17",
+  "customers",
+  "preferences",
+  "orientation",
+  "include_ageing",
+  "ageing_based_on",
+  "section_break_14",
+  "letter_head",
+  "terms_and_conditions",
+  "section_break_1",
+  "enable_auto_email",
+  "section_break_18",
+  "frequency",
+  "filter_duration",
+  "column_break_21",
+  "start_date",
+  "section_break_33",
+  "subject",
+  "column_break_28",
+  "cc_to",
+  "section_break_30",
+  "body",
+  "help_text"
+ ],
+ "fields": [
+  {
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "label": "Frequency",
+   "options": "Weekly\nMonthly\nQuarterly"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.enable_auto_email == 0;",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "mandatory_depends_on": "eval:doc.frequency == '';"
+  },
+  {
+   "depends_on": "eval:doc.enable_auto_email == 0;",
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "mandatory_depends_on": "eval:doc.frequency == '';"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Table MultiSelect",
+   "label": "Cost Center",
+   "options": "PSOA Cost Center"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Table MultiSelect",
+   "label": "Project",
+   "options": "PSOA Project"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break",
+   "label": "Customers"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break",
+   "label": "General Ledger Filters"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "customer_collection",
+   "fieldtype": "Select",
+   "label": "Select Customers By",
+   "options": "\nCustomer Group\nTerritory\nSales Partner\nSales Person"
+  },
+  {
+   "depends_on": "eval: doc.customer_collection !== ''",
+   "fieldname": "collection_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Recipient",
+   "options": "customer_collection"
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break",
+   "label": "Email Settings"
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "finance_book",
+   "fieldtype": "Link",
+   "label": "Finance Book",
+   "options": "Finance Book"
+  },
+  {
+   "fieldname": "preferences",
+   "fieldtype": "Section Break",
+   "label": "Print Preferences"
+  },
+  {
+   "fieldname": "orientation",
+   "fieldtype": "Select",
+   "label": "Orientation",
+   "options": "Landscape\nPortrait"
+  },
+  {
+   "default": "Today",
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "default": "Group by Voucher (Consolidated)",
+   "fieldname": "group_by",
+   "fieldtype": "Select",
+   "label": "Group By",
+   "options": "\nGroup by Voucher\nGroup by Voucher (Consolidated)"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "default": "0",
+   "fieldname": "include_ageing",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Include Ageing Summary"
+  },
+  {
+   "default": "Due Date",
+   "depends_on": "eval:doc.include_ageing === 1",
+   "fieldname": "ageing_based_on",
+   "fieldtype": "Select",
+   "label": "Ageing Based On",
+   "options": "Due Date\nPosting Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_auto_email",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Enable Auto Email"
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Column Break",
+   "hide_border": 1
+  },
+  {
+   "depends_on": "eval: doc.enable_auto_email ==1",
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.customer_collection !== ''",
+   "fieldname": "fetch_customers",
+   "fieldtype": "Button",
+   "label": "Fetch Customers",
+   "options": "fetch_customers",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "default": "1",
+   "description": "A customer must have primary contact email.",
+   "fieldname": "primary_mandatory",
+   "fieldtype": "Check",
+   "label": "Send To Primary Contact"
+  },
+  {
+   "fieldname": "cc_to",
+   "fieldtype": "Link",
+   "label": "CC To",
+   "options": "User"
+  },
+  {
+   "default": "1",
+   "fieldname": "filter_duration",
+   "fieldtype": "Int",
+   "label": "Filter Duration (Months)"
+  },
+  {
+   "fieldname": "customers",
+   "fieldtype": "Table",
+   "label": "Customers",
+   "options": "Process Statement Of Accounts Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_30",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "section_break_33",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "help_text",
+   "fieldtype": "HTML",
+   "label": "Help Text",
+   "options": "<br>\n<h4>Note</h4>\n<ul>\n<li>\nYou can use <a href=\"https://jinja.palletsprojects.com/en/2.11.x/\" target=\"_blank\">Jinja tags</a> in <b>Subject</b> and <b>Body</b> fields for dynamic values.\n</li><li>\n    All fields in this doctype are available under the <b>doc</b> object and all fields for the customer to whom the mail will go to is available under the  <b>customer</b> object.\n</li></ul>\n<h4> Examples</h4>\n<!-- {% raw %} -->\n<ul>\n    <li><b>Subject</b>:<br><br><pre><code>Statement Of Accounts for {{ customer.name }}</code></pre><br></li>\n    <li><b>Body</b>: <br><br>\n<pre><code>Hello {{ customer.name }},<br>PFA your Statement Of Accounts from {{ doc.from_date }} to {{ doc.to_date }}.</code> </pre></li>\n</ul>\n<!-- {% endraw %} -->"
+  },
+  {
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Subject"
+  },
+  {
+   "fieldname": "body",
+   "fieldtype": "Text Editor",
+   "label": "Body"
+  },
+  {
+   "fieldname": "letter_head",
+   "fieldtype": "Link",
+   "label": "Letter Head",
+   "options": "Letter Head"
+  },
+  {
+   "fieldname": "terms_and_conditions",
+   "fieldtype": "Link",
+   "label": "Terms and Conditions",
+   "options": "Terms and Conditions"
+  }
+ ],
+ "links": [],
+ "modified": "2021-09-06 21:00:45.732505",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Process Statement Of Accounts",
+ "naming_rule": "Set by user",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

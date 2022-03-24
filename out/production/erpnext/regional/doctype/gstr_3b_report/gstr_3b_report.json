@@ -1,0 +1,62 @@
+{
+ "actions": [],
+ "autoname": "format:GSTR3B-{month}-{year}-{company_address}",
+ "creation": "2019-02-04 11:35:55.964639",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "company_address",
+  "year",
+  "month",
+  "json_output",
+  "missing_field_invoices"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "company_address",
+   "fieldtype": "Link",
+   "label": "Company Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Select",
+   "label": "Year"
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Select",
+   "label": "Month",
+   "options": "January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+  },
+  {
+   "fieldname": "json_output",
+   "fieldtype": "Code",
+   "label": "JSON Output"
+  },
+  {
+   "fieldname": "missing_field_invoices",
+   "fieldtype": "Small Text",
+   "label": "Invoices with no Place Of Supply",
+   "read_only": 1
+  }
+ ],
+ "links": [],
+ "modified": "2020-04-04 19:32:30.772908",
+ "modified_by": "Administrator",
+ "module": "Regional",
+ "name": "GSTR 3B Report",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

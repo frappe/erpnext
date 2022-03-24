@@ -1,0 +1,227 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "EDU-ASP-.YYYY.-.#####",
+ "creation": "2015-11-12 16:34:34.658092",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "student_group",
+  "assessment_name",
+  "assessment_group",
+  "grading_scale",
+  "column_break_2",
+  "program",
+  "course",
+  "academic_year",
+  "academic_term",
+  "section_break_5",
+  "schedule_date",
+  "room",
+  "examiner",
+  "examiner_name",
+  "column_break_4",
+  "from_time",
+  "to_time",
+  "supervisor",
+  "supervisor_name",
+  "section_break_20",
+  "maximum_assessment_score",
+  "assessment_criteria",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "student_group",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Student Group",
+   "options": "Student Group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "assessment_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Assessment Name"
+  },
+  {
+   "fieldname": "assessment_group",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Assessment Group",
+   "options": "Assessment Group",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "course.default_grading_scale",
+   "fetch_if_empty": 1,
+   "fieldname": "grading_scale",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Grading Scale",
+   "options": "Grading Scale",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "student_group.course",
+   "fetch_if_empty": 1,
+   "fieldname": "course",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_standard_filter": 1,
+   "label": "Course",
+   "options": "Course",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "student_group.program",
+   "fieldname": "program",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "label": "Program",
+   "options": "Program"
+  },
+  {
+   "fetch_from": "student_group.academic_year",
+   "fieldname": "academic_year",
+   "fieldtype": "Link",
+   "label": "Academic Year",
+   "options": "Academic Year"
+  },
+  {
+   "fetch_from": "student_group.academic_term",
+   "fieldname": "academic_term",
+   "fieldtype": "Link",
+   "label": "Academic Term",
+   "options": "Academic Term"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break",
+   "label": "Schedule"
+  },
+  {
+   "default": "Today",
+   "fieldname": "schedule_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Schedule Date",
+   "no_copy": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "room",
+   "fieldtype": "Link",
+   "label": "Room",
+   "options": "Room"
+  },
+  {
+   "fieldname": "examiner",
+   "fieldtype": "Link",
+   "label": "Examiner",
+   "options": "Instructor"
+  },
+  {
+   "fetch_from": "examiner.instructor_name",
+   "fieldname": "examiner_name",
+   "fieldtype": "Data",
+   "label": "Examiner Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_time",
+   "fieldtype": "Time",
+   "label": "From Time",
+   "no_copy": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_time",
+   "fieldtype": "Time",
+   "label": "To Time",
+   "no_copy": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "supervisor",
+   "fieldtype": "Link",
+   "label": "Supervisor",
+   "options": "Instructor"
+  },
+  {
+   "fetch_from": "supervisor.instructor_name",
+   "fieldname": "supervisor_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Supervisor Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_20",
+   "fieldtype": "Section Break",
+   "label": "Evaluate"
+  },
+  {
+   "fieldname": "maximum_assessment_score",
+   "fieldtype": "Float",
+   "label": "Maximum Assessment Score",
+   "reqd": 1
+  },
+  {
+   "fieldname": "assessment_criteria",
+   "fieldtype": "Table",
+   "label": "Assessment Criteria",
+   "options": "Assessment Plan Criteria",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Assessment Plan",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-10-23 15:55:35.076251",
+ "modified_by": "Administrator",
+ "module": "Education",
+ "name": "Assessment Plan",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Academics User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "restrict_to_domain": "Education",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "assessment_name"
+}

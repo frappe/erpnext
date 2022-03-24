@@ -1,0 +1,28 @@
+[
+ {
+  "attach_print": 0,
+  "condition": "doc.status in ('Open', 'Overdue')",
+  "date_changed": "exp_end_date",
+  "days_in_advance": 0,
+  "docstatus": 0,
+  "doctype": "Notification",
+  "document_type": "Task",
+  "enabled": 1,
+  "event": "Days After",
+  "is_standard": 0,
+  "message": "<p>Task due today:</p>\n\n<div>\n{{ doc.description }}\n</div>\n\n<hr>\n<p style=\"font-size: 85%\">\nThis is a notification for a task that is due today, and a sample <b>Notification</b>. In ERPNext you can setup notifications on anything, Invoices, Orders, Leads, Opportunities, so you never miss a thing.\n<br>To edit this, and setup other alerts, just type <b>Notification</b> in the search bar.</p>",
+  "method": null,
+  "modified": "2017-03-09 07:34:58.168370",
+  "module": null,
+  "name": "Task Due Alert",
+  "recipients": [
+   {
+    "cc": null,
+    "condition": null,
+    "email_by_document_field": "owner"
+   }
+  ],
+  "subject": "{{ doc.subject }}",
+  "value_changed": null
+ }
+]

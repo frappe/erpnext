@@ -1,0 +1,208 @@
+{
+ "actions": [],
+ "autoname": "MAT-BIN-.YYYY.-.#####",
+ "creation": "2013-01-10 16:34:25",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "warehouse",
+  "item_code",
+  "reserved_qty",
+  "actual_qty",
+  "ordered_qty",
+  "indented_qty",
+  "planned_qty",
+  "projected_qty",
+  "reserved_qty_for_production",
+  "reserved_qty_for_sub_contract",
+  "ma_rate",
+  "stock_uom",
+  "fcfs_rate",
+  "valuation_rate",
+  "stock_value"
+ ],
+ "fields": [
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Warehouse",
+   "oldfieldname": "warehouse",
+   "oldfieldtype": "Link",
+   "options": "Warehouse",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Item Code",
+   "oldfieldname": "item_code",
+   "oldfieldtype": "Link",
+   "options": "Item",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "default": "0.00",
+   "fieldname": "reserved_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Reserved Quantity",
+   "oldfieldname": "reserved_qty",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "default": "0.00",
+   "fieldname": "actual_qty",
+   "fieldtype": "Float",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "label": "Actual Quantity",
+   "oldfieldname": "actual_qty",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "default": "0.00",
+   "fieldname": "ordered_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Ordered Quantity",
+   "oldfieldname": "ordered_qty",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "default": "0.00",
+   "fieldname": "indented_qty",
+   "fieldtype": "Float",
+   "label": "Requested Quantity",
+   "oldfieldname": "indented_qty",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "planned_qty",
+   "fieldtype": "Float",
+   "label": "Planned Qty",
+   "oldfieldname": "planned_qty",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "projected_qty",
+   "fieldtype": "Float",
+   "label": "Projected Qty",
+   "oldfieldname": "projected_qty",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reserved_qty_for_production",
+   "fieldtype": "Float",
+   "label": "Reserved Qty for Production",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reserved_qty_for_sub_contract",
+   "fieldtype": "Float",
+   "label": "Reserved Qty for sub contract",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ma_rate",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Moving Average Rate",
+   "oldfieldname": "ma_rate",
+   "oldfieldtype": "Currency",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "label": "UOM",
+   "oldfieldname": "stock_uom",
+   "oldfieldtype": "Data",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fcfs_rate",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "FCFS Rate",
+   "oldfieldname": "fcfs_rate",
+   "oldfieldtype": "Currency",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "valuation_rate",
+   "fieldtype": "Float",
+   "label": "Valuation Rate",
+   "oldfieldname": "valuation_rate",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_value",
+   "fieldtype": "Float",
+   "label": "Stock Value",
+   "oldfieldname": "stock_value",
+   "oldfieldtype": "Currency",
+   "read_only": 1
+  }
+ ],
+ "hide_toolbar": 1,
+ "idx": 1,
+ "in_create": 1,
+ "links": [],
+ "modified": "2022-01-30 17:04:54.715288",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Bin",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User"
+  }
+ ],
+ "quick_entry": 1,
+ "search_fields": "item_code,warehouse",
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "states": []
+}

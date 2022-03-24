@@ -1,0 +1,1 @@
+Accounting year. Fiscal Year is tagged in all accounting transactions.

@@ -1,0 +1,34 @@
+[
+	{
+		"student_group_name": "Batch-_TP1-_Batch 1-2014-2015 (_Test Academic Term)",
+		"group_based_on": "Batch",
+		"program": "_TP1",
+		"batch": "_Batch 1",
+		"academic_year": "2014-2015",
+		"academic_term": "2014-2015 (_Test Academic Term)",
+		"max_strength": 0
+	},
+	{
+		"student_group_name": "Course-TC101-2014-2015 (_Test Academic Term)",
+		"group_based_on": "Course",
+		"course": "TC101",
+		"academic_year": "2014-2015",
+		"academic_term": "2014-2015 (_Test Academic Term)",
+		"max_strength": 0
+	},
+	{
+		"student_group_name": "Course-TC102-2014-2015 (_Test Academic Term)",
+		"group_based_on": "Course",
+		"course": "TC102",
+		"academic_year": "2014-2015",
+		"academic_term": "2014-2015 (_Test Academic Term)",
+		"max_strength": 0
+	},
+	{
+		"student_group_name": "Activity-2014-2015 (_Test Academic Term)",
+		"group_based_on": "Activity",
+		"academic_year": "2014-2015",
+		"academic_term": "2014-2015 (_Test Academic Term)",
+		"max_strength": 0
+	}
+]

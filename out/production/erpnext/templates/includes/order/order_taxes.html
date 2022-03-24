@@ -1,0 +1,84 @@
+{% if doc.taxes %}
+<tr>
+	<td class="text-left" colspan="1">
+		{{ _("Net Total") }}
+	</td>
+	<td class="text-right totals" colspan="3">
+		{{ doc.get_formatted("net_total") }}
+	</td>
+</tr>
+{% endif %}
+
+{% for d in doc.taxes %}
+	{% if d.base_tax_amount %}
+	<tr>
+		<td class="text-left" colspan="1">
+			{{ d.description }}
+		</td>
+		<td class="text-right totals" colspan="3">
+			{{ d.get_formatted("base_tax_amount") }}
+		</td>
+	</tr>
+	{% endif %}
+{% endfor %}
+
+{% if doc.doctype == 'Quotation' %}
+	{% if doc.coupon_code %}
+		<tr>
+			<td class="text-left total-discount" colspan="1">
+				{{ _("Savings") }}
+			</td>
+			<td class="text-right tot_quotation_discount total-discount totals" colspan="3">
+				{% set tot_quotation_discount = [] %}
+				{%- for item in doc.items -%}
+					{% if tot_quotation_discount.append((((item.price_list_rate * item.qty)
+						* item.discount_percentage) / 100)) %}
+					{% endif %}
+				{% endfor %}
+				{{ frappe.utils.fmt_money((tot_quotation_discount | sum),currency=doc.currency) }}
+			</td>
+		</tr>
+	{% endif %}
+{% endif %}
+
+{% if doc.doctype == 'Sales Order' %}
+	{% if doc.coupon_code %}
+		<tr>
+			<td class="text-left total-discount" colspan="2" style="padding-right: 2rem;">
+				{{ _("Applied Coupon Code") }}
+			</td>
+			<td class="text-right total-discount">
+				<span>
+				{%- for row in frappe.get_all(doctype="Coupon Code",
+				fields=["coupon_code"], filters={ "name":doc.coupon_code}) -%}
+					<span>{{ row.coupon_code }}</span>
+				{% endfor %}
+				</span>
+			</td>
+		</tr>
+		<tr>
+			<td class="text-left total-discount" colspan="2">
+				{{ _("Savings") }}
+			</td>
+			<td class="text-right total-discount">
+				<span>
+				{% set tot_SO_discount = [] %}
+				{%- for item in doc.items -%}
+				{% if tot_SO_discount.append((((item.price_list_rate * item.qty)
+					* item.discount_percentage) / 100)) %}{% endif %}
+				{% endfor %}
+				{{ frappe.utils.fmt_money((tot_SO_discount | sum),currency=doc.currency) }}
+				</span>
+			</td>
+		</tr>
+	{% endif %}
+{% endif %}
+
+<tr>
+	<th class="text-left item-grand-total" colspan="1">
+		{{ _("Grand Total") }}
+	</th>
+	<th class="text-right item-grand-total totals" colspan="3">
+		{{ doc.get_formatted("grand_total") }}
+	</th>
+</tr>

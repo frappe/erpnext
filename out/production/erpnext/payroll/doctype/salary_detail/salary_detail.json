@@ -1,0 +1,260 @@
+{
+ "actions": [],
+ "creation": "2016-06-30 15:32:36.385111",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "salary_component",
+  "abbr",
+  "column_break_3",
+  "amount",
+  "year_to_date",
+  "section_break_5",
+  "additional_salary",
+  "is_recurring_additional_salary",
+  "statistical_component",
+  "depends_on_payment_days",
+  "exempted_from_income_tax",
+  "is_tax_applicable",
+  "column_break_11",
+  "is_flexible_benefit",
+  "variable_based_on_taxable_salary",
+  "do_not_include_in_total",
+  "deduct_full_tax_on_selected_payroll_date",
+  "section_break_2",
+  "condition",
+  "column_break_18",
+  "amount_based_on_formula",
+  "formula",
+  "section_break_19",
+  "default_amount",
+  "additional_amount",
+  "column_break_24",
+  "tax_on_flexible_benefit",
+  "tax_on_additional_salary"
+ ],
+ "fields": [
+  {
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Component",
+   "options": "Salary Component",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "depends_on": "eval:doc.parenttype=='Salary Structure'",
+   "fetch_from": "salary_component.salary_component_abbr",
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Abbr",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If selected, the value specified or calculated in this component will not contribute to the earnings or deductions. However, it's value can be referenced by other components that can be added or deducted. ",
+   "fetch_from": "salary_component.statistical_component",
+   "fieldname": "statistical_component",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Statistical Component"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.parentfield=='earnings'",
+   "fetch_from": "salary_component.is_tax_applicable",
+   "fieldname": "is_tax_applicable",
+   "fieldtype": "Check",
+   "label": "Is Tax Applicable",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.parentfield=='earnings'",
+   "fetch_from": "salary_component.is_flexible_benefit",
+   "fieldname": "is_flexible_benefit",
+   "fieldtype": "Check",
+   "label": "Is Flexible Benefit",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.parentfield=='deductions'",
+   "fetch_from": "salary_component.variable_based_on_taxable_salary",
+   "fieldname": "variable_based_on_taxable_salary",
+   "fieldtype": "Check",
+   "label": "Variable Based On Taxable Salary",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "salary_component.depends_on_payment_days",
+   "fieldname": "depends_on_payment_days",
+   "fieldtype": "Check",
+   "label": "Depends on Payment Days",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "deduct_full_tax_on_selected_payroll_date",
+   "fieldtype": "Check",
+   "label": "Deduct Full Tax on Selected Payroll Date",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:doc.is_flexible_benefit != 1",
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break",
+   "label": "Condition and formula"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.parenttype=='Salary Structure'",
+   "fieldname": "condition",
+   "fieldtype": "Code",
+   "label": "Condition"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.parenttype=='Salary Structure'",
+   "fieldname": "amount_based_on_formula",
+   "fieldtype": "Check",
+   "label": "Amount based on formula"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.amount_based_on_formula!==0 && doc.parenttype==='Salary Structure'",
+   "fieldname": "formula",
+   "fieldtype": "Code",
+   "in_list_view": 1,
+   "label": "Formula"
+  },
+  {
+   "depends_on": "eval:doc.amount_based_on_formula!==1 || doc.parenttype==='Salary Slip'",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "currency"
+  },
+  {
+   "default": "0",
+   "fieldname": "do_not_include_in_total",
+   "fieldtype": "Check",
+   "label": "Do not include in total"
+  },
+  {
+   "depends_on": "eval:doc.parenttype=='Salary Structure'",
+   "fieldname": "default_amount",
+   "fieldtype": "Currency",
+   "label": "Default Amount",
+   "options": "currency",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "additional_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Additional Amount",
+   "no_copy": 1,
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.parenttype=='Salary Slip' && doc.parentfield=='deductions' && doc.variable_based_on_taxable_salary == 1",
+   "fieldname": "tax_on_flexible_benefit",
+   "fieldtype": "Currency",
+   "label": "Tax on flexible benefit",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.parenttype=='Salary Slip' && doc.parentfield=='deductions' && doc.variable_based_on_taxable_salary == 1",
+   "fieldname": "tax_on_additional_salary",
+   "fieldtype": "Currency",
+   "label": "Tax on additional salary",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "additional_salary",
+   "fieldtype": "Link",
+   "label": "Additional Salary ",
+   "options": "Additional Salary",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.parentfield=='deductions'",
+   "fetch_from": "salary_component.exempted_from_income_tax",
+   "fieldname": "exempted_from_income_tax",
+   "fieldtype": "Check",
+   "label": "Exempted from Income Tax",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break",
+   "label": "Component properties and references "
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_19",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Total salary booked against this component for this employee from the beginning of the year (payroll period or fiscal year) up to the current salary slip's end date.",
+   "fieldname": "year_to_date",
+   "fieldtype": "Currency",
+   "label": "Year To Date",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+    "default": "0",
+    "depends_on": "eval:doc.parenttype=='Salary Slip' && doc.additional_salary",
+    "fieldname": "is_recurring_additional_salary",
+    "fieldtype": "Check",
+    "label": "Is Recurring Additional Salary",
+    "read_only": 1
+   }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2021-08-30 13:39:15.847158",
+ "modified_by": "Administrator",
+ "module": "Payroll",
+ "name": "Salary Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

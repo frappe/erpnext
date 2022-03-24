@@ -1,0 +1,401 @@
+[
+ {
+  "company": "_Test Company",
+  "conversion_rate": 1.0,
+  "currency": "INR",
+  "cost_center": "_Test Cost Center - _TC",
+  "customer": "_Test Customer",
+  "customer_name": "_Test Customer",
+  "debit_to": "_Test Receivable - _TC",
+  "doctype": "Sales Invoice",
+  "items": [
+   {
+    "amount": 500.0,
+    "base_amount": 500.0,
+    "base_rate": 500.0,
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "138-CMS Shoe",
+    "doctype": "Sales Invoice Item",
+    "income_account": "Sales - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "item_code": "138-CMS Shoe",
+    "item_name": "138-CMS Shoe",
+    "parentfield": "items",
+    "qty": 1.0,
+    "rate": 500.0,
+	"uom": "_Test UOM",
+	"conversion_factor": 1,
+    "stock_uom": "_Test UOM"
+   }
+  ],
+  "base_grand_total": 561.8,
+  "grand_total": 561.8,
+  "is_pos": 0,
+  "naming_series": "T-SINV-",
+  "base_net_total": 500.0,
+  "taxes": [
+   {
+    "account_head": "_Test Account VAT - _TC",
+    "charge_type": "On Net Total",
+    "description": "VAT",
+    "doctype": "Sales Taxes and Charges",
+	"parentfield": "taxes",
+	"cost_center": "_Test Cost Center - _TC",
+    "rate": 6
+   },
+   {
+    "account_head": "_Test Account Service Tax - _TC",
+    "charge_type": "On Net Total",
+    "description": "Service Tax",
+    "doctype": "Sales Taxes and Charges",
+	"parentfield": "taxes",
+	"cost_center": "_Test Cost Center - _TC",
+    "rate": 6.36
+   }
+  ],
+  "plc_conversion_rate": 1.0,
+  "price_list_currency": "INR",
+  "sales_team": [
+   {
+    "allocated_percentage": 65.5,
+    "doctype": "Sales Team",
+    "parentfield": "sales_team",
+    "sales_person": "_Test Sales Person 1"
+   },
+   {
+    "allocated_percentage": 34.5,
+    "doctype": "Sales Team",
+    "parentfield": "sales_team",
+    "sales_person": "_Test Sales Person 2"
+   }
+  ],
+  "selling_price_list": "_Test Price List",
+  "territory": "_Test Territory"
+ },
+ {
+  "company": "_Test Company",
+  "conversion_rate": 1.0,
+  "currency": "INR",
+  "customer": "_Test Customer",
+  "customer_name": "_Test Customer",
+  "debit_to": "_Test Receivable - _TC",
+  "doctype": "Sales Invoice",
+  "cost_center": "_Test Cost Center - _TC",
+  "items": [
+   {
+    "amount": 500.0,
+    "base_amount": 500.0,
+    "base_rate": 500.0,
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "_Test Item",
+    "doctype": "Sales Invoice Item",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "income_account": "Sales - _TC",
+    "item_code": "_Test Item",
+    "item_name": "_Test Item",
+    "parentfield": "items",
+    "price_list_rate": 500.0,
+    "qty": 1.0,
+	"uom": "_Test UOM",
+	"conversion_factor": 1,
+    "stock_uom": "_Test UOM"
+   }
+  ],
+  "base_grand_total": 630.0,
+  "grand_total": 630.0,
+  "is_pos": 0,
+  "naming_series": "T-SINV-",
+  "base_net_total": 500.0,
+  "taxes": [
+   {
+    "account_head": "_Test Account VAT - _TC",
+    "charge_type": "On Net Total",
+    "description": "VAT",
+    "doctype": "Sales Taxes and Charges",
+	"parentfield": "taxes",
+	"cost_center": "_Test Cost Center - _TC",
+    "rate": 16
+   },
+   {
+    "account_head": "_Test Account Service Tax - _TC",
+    "charge_type": "On Net Total",
+    "description": "Service Tax",
+    "doctype": "Sales Taxes and Charges",
+	"parentfield": "taxes",
+	"cost_center": "_Test Cost Center - _TC",
+    "rate": 10
+   }
+  ],
+  "plc_conversion_rate": 1.0,
+  "price_list_currency": "INR",
+  "selling_price_list": "_Test Price List",
+  "territory": "_Test Territory"
+ },
+ {
+  "company": "_Test Company",
+  "conversion_rate": 1.0,
+  "currency": "INR",
+  "customer": "_Test Customer",
+  "customer_name": "_Test Customer",
+  "debit_to": "_Test Receivable - _TC",
+  "doctype": "Sales Invoice",
+  "cost_center": "_Test Cost Center - _TC",
+  "items": [
+   {
+    "cost_center": "_Test Cost Center - _TC",
+    "doctype": "Sales Invoice Item",
+    "income_account": "Sales - _TC",
+	"expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "item_code": "_Test Item Home Desktop 100",
+    "item_name": "_Test Item Home Desktop 100",
+    "item_tax_template": "_Test Account Excise Duty @ 10 - _TC",
+    "parentfield": "items",
+    "price_list_rate": 50,
+    "qty": 10,
+    "rate": 50,
+	"uom": "_Test UOM 1",
+	"conversion_factor": 1,
+    "stock_uom": "_Test UOM 1"
+   },
+   {
+    "cost_center": "_Test Cost Center - _TC",
+    "doctype": "Sales Invoice Item",
+    "income_account": "Sales - _TC",
+	"expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "item_code": "_Test Item Home Desktop 200",
+    "item_name": "_Test Item Home Desktop 200",
+    "parentfield": "items",
+    "price_list_rate": 150,
+    "qty": 5,
+	"uom": "_Test UOM",
+	"conversion_factor": 1,
+    "rate": 150,
+    "stock_uom": "_Test UOM"
+   }
+  ],
+  "grand_total": 0,
+  "is_pos": 0,
+  "naming_series": "T-SINV-",
+  "taxes": [
+   {
+    "account_head": "_Test Account Shipping Charges - _TC",
+    "charge_type": "Actual",
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "Shipping Charges",
+    "doctype": "Sales Taxes and Charges",
+    "parentfield": "taxes",
+    "tax_amount": 100
+   },
+   {
+    "account_head": "_Test Account Customs Duty - _TC",
+    "charge_type": "On Net Total",
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "Customs Duty",
+    "doctype": "Sales Taxes and Charges",
+    "parentfield": "taxes",
+    "rate": 10
+   },
+   {
+    "account_head": "_Test Account Excise Duty - _TC",
+    "charge_type": "On Net Total",
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "Excise Duty",
+    "doctype": "Sales Taxes and Charges",
+    "parentfield": "taxes",
+    "rate": 12
+   },
+   {
+    "account_head": "_Test Account Education Cess - _TC",
+    "charge_type": "On Previous Row Amount",
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "Education Cess",
+    "doctype": "Sales Taxes and Charges",
+    "parentfield": "taxes",
+    "rate": 2,
+    "row_id": 3
+   },
+   {
+    "account_head": "_Test Account S&H Education Cess - _TC",
+    "charge_type": "On Previous Row Amount",
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "S&H Education Cess",
+    "doctype": "Sales Taxes and Charges",
+    "parentfield": "taxes",
+    "rate": 1,
+    "row_id": 3
+   },
+   {
+    "account_head": "_Test Account CST - _TC",
+    "charge_type": "On Previous Row Total",
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "CST",
+    "doctype": "Sales Taxes and Charges",
+    "parentfield": "taxes",
+    "rate": 2,
+    "row_id": 5
+   },
+   {
+    "account_head": "_Test Account VAT - _TC",
+    "charge_type": "On Net Total",
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "VAT",
+    "doctype": "Sales Taxes and Charges",
+    "parentfield": "taxes",
+    "rate": 12.5
+   },
+   {
+    "account_head": "_Test Account Discount - _TC",
+    "charge_type": "On Previous Row Total",
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "Discount",
+    "doctype": "Sales Taxes and Charges",
+    "parentfield": "taxes",
+    "rate": -10,
+    "row_id": 7
+   }
+  ],
+  "plc_conversion_rate": 1.0,
+  "price_list_currency": "INR",
+  "selling_price_list": "_Test Price List",
+  "territory": "_Test Territory"
+ },
+ {
+  "company": "_Test Company",
+  "conversion_rate": 1.0,
+  "currency": "INR",
+  "customer": "_Test Customer",
+  "customer_name": "_Test Customer",
+  "debit_to": "_Test Receivable - _TC",
+  "doctype": "Sales Invoice",
+  "cost_center": "_Test Cost Center - _TC",
+  "items": [
+   {
+    "cost_center": "_Test Cost Center - _TC",
+    "doctype": "Sales Invoice Item",
+    "income_account": "Sales - _TC",
+	"expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "item_code": "_Test Item Home Desktop 100",
+    "item_name": "_Test Item Home Desktop 100",
+    "item_tax_template": "_Test Account Excise Duty @ 10 - _TC",
+    "parentfield": "items",
+    "price_list_rate": 62.5,
+    "qty": 10,
+	  "uom": "_Test UOM 1",
+	  "conversion_factor": 1,
+    "stock_uom": "_Test UOM 1"
+   },
+   {
+    "cost_center": "_Test Cost Center - _TC",
+    "doctype": "Sales Invoice Item",
+    "income_account": "Sales - _TC",
+	"expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "item_code": "_Test Item Home Desktop 200",
+    "item_name": "_Test Item Home Desktop 200",
+    "parentfield": "items",
+    "price_list_rate": 190.66,
+    "qty": 5,
+	"uom": "_Test UOM",
+	"conversion_factor": 1,
+    "stock_uom": "_Test UOM"
+   }
+  ],
+  "grand_total": 0,
+  "is_pos": 0,
+  "naming_series": "T-SINV-",
+  "taxes": [
+   {
+    "account_head": "_Test Account Excise Duty - _TC",
+    "charge_type": "On Net Total",
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "Excise Duty",
+    "doctype": "Sales Taxes and Charges",
+    "idx": 1,
+    "included_in_print_rate": 1,
+    "parentfield": "taxes",
+    "rate": 12
+   },
+   {
+    "account_head": "_Test Account Education Cess - _TC",
+    "charge_type": "On Previous Row Amount",
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "Education Cess",
+    "doctype": "Sales Taxes and Charges",
+    "idx": 2,
+    "included_in_print_rate": 1,
+    "parentfield": "taxes",
+    "rate": 2,
+    "row_id": 1
+   },
+   {
+    "account_head": "_Test Account S&H Education Cess - _TC",
+    "charge_type": "On Previous Row Amount",
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "S&H Education Cess",
+    "doctype": "Sales Taxes and Charges",
+    "idx": 3,
+    "included_in_print_rate": 1,
+    "parentfield": "taxes",
+    "rate": 1,
+    "row_id": 1
+   },
+   {
+    "account_head": "_Test Account CST - _TC",
+    "charge_type": "On Previous Row Total",
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "CST",
+    "doctype": "Sales Taxes and Charges",
+    "idx": 4,
+    "included_in_print_rate": 1,
+    "parentfield": "taxes",
+    "rate": 2,
+    "row_id": 3
+   },
+   {
+    "account_head": "_Test Account VAT - _TC",
+    "charge_type": "On Net Total",
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "VAT",
+    "doctype": "Sales Taxes and Charges",
+    "idx": 5,
+    "included_in_print_rate": 1,
+    "parentfield": "taxes",
+    "rate": 12.5
+   },
+   {
+    "account_head": "_Test Account Customs Duty - _TC",
+    "charge_type": "On Net Total",
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "Customs Duty",
+    "doctype": "Sales Taxes and Charges",
+    "idx": 6,
+    "parentfield": "taxes",
+    "rate": 10
+   },
+   {
+    "account_head": "_Test Account Shipping Charges - _TC",
+    "charge_type": "Actual",
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "Shipping Charges",
+    "doctype": "Sales Taxes and Charges",
+    "idx": 7,
+    "parentfield": "taxes",
+    "tax_amount": 100
+   },
+   {
+    "account_head": "_Test Account Discount - _TC",
+    "charge_type": "On Previous Row Total",
+    "cost_center": "_Test Cost Center - _TC",
+    "description": "Discount",
+    "doctype": "Sales Taxes and Charges",
+    "idx": 8,
+    "parentfield": "taxes",
+    "rate": -10,
+    "row_id": 7
+   }
+  ],
+  "plc_conversion_rate": 1.0,
+  "price_list_currency": "INR",
+  "selling_price_list": "_Test Price List",
+  "territory": "_Test Territory"
+ }
+]

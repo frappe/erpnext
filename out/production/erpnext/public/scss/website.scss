@@ -1,0 +1,70 @@
+
+.filter-options {
+	max-height: 300px;
+	overflow: auto;
+}
+
+.address-card {
+	cursor: pointer;
+	position: relative;
+
+	.check {
+		display: none;
+	}
+
+	&.active {
+		border-color: var(--primary);
+
+		.check {
+			display: inline-flex;
+		}
+	}
+}
+
+.check {
+	display: inline-flex;
+	padding: 0.25rem;
+	background: var(--primary);
+	color: white;
+	border-radius: 50%;
+	font-size: 12px;
+	width: 24px;
+	height: 24px;
+}
+
+.website-list .result {
+	margin-top: 2rem;
+}
+
+.result {
+	border-bottom: 1px solid var(--border-color);
+}
+
+.transaction-list-item {
+	padding: 1rem 0;
+	border-top: 1px solid var(--border-color);
+	position: relative;
+
+	a.transaction-item-link {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		text-decoration: none;
+		opacity: 0;
+		overflow: hidden;
+		text-indent: -9999px;
+		z-index: 0;
+	}
+}
+
+.place-order-container {
+	text-align: right;
+}
+
+.kb-card {
+	.card-body > .card-title {
+		line-height: 1.3;
+	}
+}

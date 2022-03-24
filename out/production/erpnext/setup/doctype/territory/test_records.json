@@ -1,0 +1,32 @@
+[
+ {
+  "doctype": "Territory", 
+  "is_group": 0, 
+  "parent_territory": "All Territories", 
+  "territory_name": "_Test Territory"
+ }, 
+ {
+  "doctype": "Territory", 
+  "is_group": 1, 
+  "parent_territory": "All Territories", 
+  "territory_name": "_Test Territory India"
+ }, 
+ {
+  "doctype": "Territory", 
+  "is_group": 0, 
+  "parent_territory": "_Test Territory India", 
+  "territory_name": "_Test Territory Maharashtra"
+ }, 
+ {
+  "doctype": "Territory", 
+  "is_group": 0, 
+  "parent_territory": "All Territories", 
+  "territory_name": "_Test Territory Rest Of The World"
+ }, 
+ {
+  "doctype": "Territory", 
+  "is_group": 0, 
+  "parent_territory": "All Territories", 
+  "territory_name": "_Test Territory United States"
+ }
+]

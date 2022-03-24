@@ -1,0 +1,125 @@
+{
+ "actions": [],
+ "autoname": "field:client",
+ "creation": "2019-08-13 23:56:34.259906",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "client",
+  "client_number",
+  "column_break_2",
+  "consultant_number",
+  "consultant",
+  "section_break_4",
+  "account_number_length",
+  "column_break_6",
+  "temporary_against_account_number"
+ ],
+ "fields": [
+  {
+   "fieldname": "client",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Client",
+   "options": "Company",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "client_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Client ID",
+   "length": 5,
+   "reqd": 1
+  },
+  {
+   "fieldname": "consultant",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Consultant",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "consultant_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Consultant ID",
+   "length": 7,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "4",
+   "fieldname": "account_number_length",
+   "fieldtype": "Int",
+   "label": "Account Number Length",
+   "reqd": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "temporary_against_account_number",
+   "fieldtype": "Data",
+   "label": "Temporary Against Account Number",
+   "reqd": 1
+  }
+ ],
+ "links": [],
+ "modified": "2020-11-19 19:00:09.088816",
+ "modified_by": "Administrator",
+ "module": "Regional",
+ "name": "DATEV Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,163 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:supplier_group_name",
+ "creation": "2013-01-10 16:34:24",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "field_order": [
+  "supplier_group_name",
+  "parent_supplier_group",
+  "is_group",
+  "section_credit_limit",
+  "payment_terms",
+  "default_payable_account",
+  "accounts",
+  "lft",
+  "rgt",
+  "old_parent"
+ ],
+ "fields": [
+  {
+   "fieldname": "supplier_group_name",
+   "fieldtype": "Data",
+   "label": "Supplier Group Name",
+   "oldfieldname": "supplier_type",
+   "oldfieldtype": "Data",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "parent_supplier_group",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Parent Supplier Group",
+   "options": "Supplier Group"
+  },
+  {
+   "bold": 1,
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Group"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_credit_limit",
+   "fieldtype": "Section Break",
+   "label": "Credit Limit"
+  },
+  {
+   "fieldname": "payment_terms",
+   "fieldtype": "Link",
+   "label": "Default Payment Terms Template",
+   "options": "Payment Terms Template"
+  },
+  {
+   "fieldname": "default_payable_account",
+   "fieldtype": "Section Break",
+   "label": "Default Payable Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "description": "Mention if non-standard receivable account applicable",
+   "fieldname": "accounts",
+   "fieldtype": "Table",
+   "label": "Accounts",
+   "options": "Party Account"
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "lft",
+   "no_copy": 1,
+   "print_hide": 1,
+   "report_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "rgt",
+   "no_copy": 1,
+   "print_hide": 1,
+   "report_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "ignore_user_permissions": 1,
+   "label": "Old Parent",
+   "no_copy": 1,
+   "options": "Supplier Group",
+   "print_hide": 1,
+   "report_hide": 1
+  }
+ ],
+ "icon": "fa fa-flag",
+ "idx": 1,
+ "is_tree": 1,
+ "links": [],
+ "modified": "2020-03-18 18:10:49.228407",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Supplier Group",
+ "nsm_parent_field": "parent_supplier_group",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Master Manager",
+   "set_user_permissions": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Purchase Master Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Purchase Manager"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Purchase User"
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "sort_order": "ASC"
+}

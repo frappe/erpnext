@@ -1,0 +1,128 @@
+{
+ "actions": [],
+ "autoname": "HR-APP-LETTER-.#####",
+ "creation": "2019-12-26 12:35:49.574828",
+ "default_print_format": "Standard Appointment Letter",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "job_applicant",
+  "applicant_name",
+  "column_break_3",
+  "company",
+  "appointment_date",
+  "appointment_letter_template",
+  "body_section",
+  "introduction",
+  "terms",
+  "closing_notes"
+ ],
+ "fields": [
+  {
+   "fetch_from": "job_applicant.applicant_name",
+   "fieldname": "applicant_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "label": "Applicant Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "appointment_date",
+   "fieldtype": "Date",
+   "label": "Appointment Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "appointment_letter_template",
+   "fieldtype": "Link",
+   "label": "Appointment Letter Template",
+   "options": "Appointment Letter Template",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "appointment_letter_template.introduction",
+   "fieldname": "introduction",
+   "fieldtype": "Long Text",
+   "label": "Introduction",
+   "reqd": 1
+  },
+  {
+   "fieldname": "body_section",
+   "fieldtype": "Section Break",
+   "label": "Body"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "job_applicant",
+   "fieldtype": "Link",
+   "label": "Job Applicant",
+   "options": "Job Applicant",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "closing_notes",
+   "fieldtype": "Text",
+   "label": "Closing Notes"
+  },
+  {
+   "fieldname": "terms",
+   "fieldtype": "Table",
+   "label": "Terms",
+   "options": "Appointment Letter content",
+   "reqd": 1
+  }
+ ],
+ "links": [],
+ "modified": "2022-01-18 19:27:35.649424",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Appointment Letter",
+ "name_case": "Title Case",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "applicant_name, company",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "applicant_name",
+ "track_changes": 1
+}

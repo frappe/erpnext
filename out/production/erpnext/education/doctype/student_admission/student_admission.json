@@ -1,0 +1,122 @@
+{
+ "actions": [],
+ "allow_guest_to_view": 1,
+ "allow_rename": 1,
+ "creation": "2016-09-13 03:05:27.154713",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "route",
+  "column_break_3",
+  "academic_year",
+  "admission_start_date",
+  "admission_end_date",
+  "published",
+  "enable_admission_application",
+  "section_break_5",
+  "program_details",
+  "introduction"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title"
+  },
+  {
+   "fieldname": "route",
+   "fieldtype": "Data",
+   "label": "Route",
+   "no_copy": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "academic_year",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Academic Year",
+   "no_copy": 1,
+   "options": "Academic Year",
+   "reqd": 1
+  },
+  {
+   "fieldname": "admission_start_date",
+   "fieldtype": "Date",
+   "label": "Admission Start Date",
+   "mandatory_depends_on": "enable_admission_application",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "admission_end_date",
+   "fieldtype": "Date",
+   "label": "Admission End Date",
+   "mandatory_depends_on": "enable_admission_application",
+   "no_copy": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "published",
+   "fieldtype": "Check",
+   "label": "Publish on website"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break",
+   "label": "Eligibility and Details"
+  },
+  {
+   "fieldname": "program_details",
+   "fieldtype": "Table",
+   "label": "Eligibility and Details",
+   "options": "Student Admission Program"
+  },
+  {
+   "fieldname": "introduction",
+   "fieldtype": "Text Editor",
+   "label": "Introduction"
+  },
+  {
+   "default": "0",
+   "depends_on": "published",
+   "fieldname": "enable_admission_application",
+   "fieldtype": "Check",
+   "label": "Enable Admission Application"
+  }
+ ],
+ "has_web_view": 1,
+ "is_published_field": "published",
+ "links": [],
+ "modified": "2020-09-18 00:14:54.615321",
+ "modified_by": "Administrator",
+ "module": "Education",
+ "name": "Student Admission",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Academics User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "restrict_to_domain": "Education",
+ "route": "admissions",
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "title"
+}

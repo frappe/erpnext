@@ -1,0 +1,62 @@
+{
+ "actions": [],
+ "creation": "2017-08-28 16:46:41.732676",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "invoice_fields",
+  "pos_search_fields"
+ ],
+ "fields": [
+  {
+   "fieldname": "invoice_fields",
+   "fieldtype": "Table",
+   "label": "POS Field",
+   "options": "POS Field"
+  },
+  {
+   "fieldname": "pos_search_fields",
+   "fieldtype": "Table",
+   "label": "POS Search Fields",
+   "options": "POS Search Fields"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-04-19 14:56:24.465218",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "POS Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

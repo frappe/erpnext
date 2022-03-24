@@ -1,0 +1,177 @@
+{% if shopping_cart and shopping_cart.cart_settings.enabled %}
+
+{% set cart_settings = shopping_cart.cart_settings %}
+{% set product_info = shopping_cart.product_info %}
+
+<div class="item-cart row mt-2" data-variant-item-code="{{ item_code }}">
+	<div class="col-md-12">
+		<!-- Price and Availability -->
+		{% if cart_settings.show_price and product_info.price %}
+			{% set price_info = product_info.price %}
+
+			<div class="product-price">
+				<!-- Final Price -->
+				{{ price_info.formatted_price_sales_uom }}
+
+				<!-- Striked Price and Discount  -->
+				{% if price_info.formatted_mrp %}
+					<small class="formatted-price">
+						<s>MRP {{ price_info.formatted_mrp }}</s>
+					</small>
+					<small class="ml-1 formatted-price in-green">
+						-{{ price_info.get("formatted_discount_percent") or price_info.get("formatted_discount_rate")}}
+					</small>
+				{% endif %}
+
+				<!-- Price per UOM -->
+				<small class="formatted-price ml-2">
+					({{ price_info.formatted_price }} / {{ product_info.uom }})
+				</small>
+			</div>
+		{% else %}
+			{{ _("UOM") }} : {{ product_info.uom }}
+		{% endif %}
+
+		{% if cart_settings.show_stock_availability %}
+		<div class="mt-2">
+			{% if product_info.get("on_backorder") %}
+				<span class="no-stock out-of-stock" style="color: var(--primary-color);">
+					{{ _('Available on backorder') }}
+				</span>
+			{% elif product_info.in_stock == 0 %}
+				<span class="no-stock out-of-stock">
+					{{ _('Out of stock') }}
+				</span>
+			{% elif product_info.in_stock == 1 %}
+				<span class="in-green has-stock">
+					{{ _('In stock') }}
+					{% if product_info.show_stock_qty and product_info.stock_qty %}
+						({{ product_info.stock_qty[0][0] }})
+					{% endif %}
+				</span>
+			{% endif %}
+		</div>
+		{% endif %}
+
+		<!-- Offers -->
+		{% if doc.offers %}
+			<br>
+			<div class="offers-heading mb-4">
+				<span class="mr-1 tag-icon">
+					<svg class="icon icon-lg"><use href="#icon-tag"></use></svg>
+				</span>
+				<b>Available Offers</b>
+			</div>
+			<div class="offer-container">
+				{% for offer in doc.offers %}
+				<div class="mt-2 d-flex">
+					<div class="mr-2" >
+						<svg width="24" height="24" viewBox="0 0 24 24" stroke="var(--yellow-500)" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path d="M19 15.6213C19 15.2235 19.158 14.842 19.4393 14.5607L20.9393 13.0607C21.5251 12.4749 21.5251 11.5251 20.9393 10.9393L19.4393 9.43934C19.158 9.15804 19 8.7765 19 8.37868V6.5C19 5.67157 18.3284 5 17.5 5H15.6213C15.2235 5 14.842 4.84196 14.5607 4.56066L13.0607 3.06066C12.4749 2.47487 11.5251 2.47487 10.9393 3.06066L9.43934 4.56066C9.15804 4.84196 8.7765 5 8.37868 5H6.5C5.67157 5 5 5.67157 5 6.5V8.37868C5 8.7765 4.84196 9.15804 4.56066 9.43934L3.06066 10.9393C2.47487 11.5251 2.47487 12.4749 3.06066 13.0607L4.56066 14.5607C4.84196 14.842 5 15.2235 5 15.6213V17.5C5 18.3284 5.67157 19 6.5 19H8.37868C8.7765 19 9.15804 19.158 9.43934 19.4393L10.9393 20.9393C11.5251 21.5251 12.4749 21.5251 13.0607 20.9393L14.5607 19.4393C14.842 19.158 15.2235 19 15.6213 19H17.5C18.3284 19 19 18.3284 19 17.5V15.6213Z" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+							<path d="M15 9L9 15" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+							<path d="M10.5 9.5C10.5 10.0523 10.0523 10.5 9.5 10.5C8.94772 10.5 8.5 10.0523 8.5 9.5C8.5 8.94772 8.94772 8.5 9.5 8.5C10.0523 8.5 10.5 8.94772 10.5 9.5Z" fill="white" stroke-linecap="round" stroke-linejoin="round"/>
+							<path d="M15.5 14.5C15.5 15.0523 15.0523 15.5 14.5 15.5C13.9477 15.5 13.5 15.0523 13.5 14.5C13.5 13.9477 13.9477 13.5 14.5 13.5C15.0523 13.5 15.5 13.9477 15.5 14.5Z" fill="white" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+					</div>
+					<p class="mr-1 mb-1">
+						{{ _(offer.offer_title) }}:
+						{{ _(offer.offer_subtitle) if offer.offer_subtitle else '' }}
+						<a class="offer-details" href="#"
+							data-offer-title="{{ offer.offer_title }}" data-offer-id="{{ offer.name }}"
+							role="button">
+							{{ _("More") }}
+						</a>
+					</p>
+				</div>
+				{% endfor %}
+			</div>
+		{% endif %}
+
+		<!-- Add to Cart / View in Cart, Contact Us -->
+		<div class="mt-6 mb-5">
+			<div class="mb-4 d-flex">
+				<!-- Add to Cart -->
+				{% if product_info.price and (cart_settings.allow_items_not_in_stock or product_info.in_stock) %}
+					<a href="/cart" class="btn btn-light btn-view-in-cart hidden mr-2 font-md"
+						role="button">
+						{{  _("View in Cart") if cart_settings.enable_checkout else _("View in Quote") }}
+					</a>
+					<button
+						data-item-code="{{item_code}}"
+						class="btn btn-primary btn-add-to-cart mr-2 w-30-40"
+					>
+						<span class="mr-2">
+							<svg class="icon icon-md">
+								<use href="#icon-assets"></use>
+							</svg>
+						</span>
+						{{ _("Add to Cart") if cart_settings.enable_checkout else  _("Add to Quote") }}
+					</button>
+				{% endif %}
+
+				<!-- Contact Us -->
+				{% if cart_settings.show_contact_us_button %}
+					{% include "templates/generators/item/item_inquiry.html" %}
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	frappe.ready(() => {
+		$('.page_content').on('click', '.btn-add-to-cart', (e) => {
+			// Bind action on add to cart button
+			const $btn = $(e.currentTarget);
+			$btn.prop('disabled', true);
+			const item_code = $btn.data('item-code');
+			erpnext.e_commerce.shopping_cart.update_cart({
+				item_code,
+				qty: 1,
+				callback(r) {
+					$btn.prop('disabled', false);
+					if (r.message) {
+						$('.btn-add-to-cart, .btn-view-in-cart').toggleClass('hidden');
+					}
+				}
+			});
+		});
+
+		$('.page_content').on('click', '.offer-details', (e) => {
+			// Bind action on More link in Offers
+			const $btn = $(e.currentTarget);
+			$btn.prop('disabled', true);
+
+			var d = new frappe.ui.Dialog({
+				title: __($btn.data('offer-title')),
+				fields: [
+					{
+						fieldname: 'offer_details',
+						fieldtype: 'HTML'
+					},
+					{
+						fieldname: 'section_break',
+						fieldtype: 'Section Break'
+					}
+				]
+			});
+
+			frappe.call({
+				method: 'erpnext.e_commerce.doctype.website_offer.website_offer.get_offer_details',
+				args: {
+					offer_id: $btn.data('offer-id')
+				},
+				callback: (value) => {
+					d.set_value("offer_details", value.message);
+					d.show();
+					$btn.prop('disabled', false);
+				}
+			})
+
+		});
+	});
+
+
+</script>
+
+{% endif %}

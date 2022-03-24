@@ -1,0 +1,46 @@
+{
+ "autoname": "field:hsn_code",
+ "creation": "2017-06-21 10:48:56.422086",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "hsn_code",
+  "description",
+  "taxes"
+ ],
+ "fields": [
+  {
+   "fieldname": "hsn_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "HSN Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Description"
+  },
+  {
+   "fieldname": "taxes",
+   "fieldtype": "Table",
+   "label": "Taxes",
+   "options": "Item Tax"
+  }
+ ],
+ "modified": "2019-11-01 11:18:59.556931",
+ "modified_by": "Administrator",
+ "module": "Regional",
+ "name": "GST HSN Code",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "search_fields": "hsn_code, description",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "hsn_code",
+ "track_changes": 1
+}

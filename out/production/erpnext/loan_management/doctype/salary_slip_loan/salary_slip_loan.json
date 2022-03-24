@@ -1,0 +1,101 @@
+{
+ "actions": [],
+ "creation": "2019-08-29 18:11:36.829526",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "loan",
+  "loan_type",
+  "loan_account",
+  "interest_income_account",
+  "column_break_4",
+  "principal_amount",
+  "interest_amount",
+  "total_payment",
+  "loan_repayment_entry"
+ ],
+ "fields": [
+  {
+   "fieldname": "loan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Loan",
+   "options": "Loan",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "loan_account",
+   "fieldtype": "Link",
+   "label": "Loan Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "interest_income_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Interest Income Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "principal_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Principal Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "interest_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Interest Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_payment",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Payment",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "loan_repayment_entry",
+   "fieldtype": "Link",
+   "label": "Loan Repayment Entry",
+   "no_copy": 1,
+   "options": "Loan Repayment",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "loan.loan_type",
+   "fieldname": "loan_type",
+   "fieldtype": "Link",
+   "label": "Loan Type",
+   "options": "Loan Type",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-01-31 14:50:14.823213",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Salary Slip Loan",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

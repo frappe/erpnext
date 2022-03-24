@@ -1,0 +1,386 @@
+{
+ "actions": [],
+ "creation": "2013-06-24 15:49:57",
+ "description": "Settings for Accounts",
+ "doctype": "DocType",
+ "document_type": "Other",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "invoice_and_billing_tab",
+  "enable_features_section",
+  "unlink_payment_on_cancellation_of_invoice",
+  "unlink_advance_payment_on_cancelation_of_order",
+  "column_break_13",
+  "delete_linked_ledger_entries",
+  "invoicing_features_section",
+  "check_supplier_invoice_uniqueness",
+  "automatically_fetch_payment_terms",
+  "column_break_17",
+  "enable_common_party_accounting",
+  "enable_discount_accounting",
+  "report_setting_section",
+  "use_custom_cash_flow",
+  "deferred_accounting_settings_section",
+  "book_deferred_entries_based_on",
+  "column_break_18",
+  "automatically_process_deferred_accounting_entry",
+  "book_deferred_entries_via_journal_entry",
+  "submit_journal_entries",
+  "tax_settings_section",
+  "determine_address_tax_category_from",
+  "column_break_19",
+  "add_taxes_from_item_tax_template",
+  "print_settings",
+  "show_inclusive_tax_in_print",
+  "column_break_12",
+  "show_payment_schedule_in_print",
+  "currency_exchange_section",
+  "allow_stale",
+  "stale_days",
+  "invoicing_settings_tab",
+  "accounts_transactions_settings_section",
+  "over_billing_allowance",
+  "column_break_11",
+  "role_allowed_to_over_bill",
+  "credit_controller",
+  "make_payment_via_journal_entry",
+  "pos_tab",
+  "pos_setting_section",
+  "post_change_gl_entries",
+  "assets_tab",
+  "asset_settings_section",
+  "book_asset_depreciation_entry_automatically",
+  "closing_settings_tab",
+  "period_closing_settings_section",
+  "acc_frozen_upto",
+  "column_break_25",
+  "frozen_accounts_modifier",
+  "report_settings_sb"
+ ],
+ "fields": [
+  {
+   "description": "Accounting entries are frozen up to this date. Nobody can create or modify entries except users with the role specified below",
+   "fieldname": "acc_frozen_upto",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Accounts Frozen Till Date"
+  },
+  {
+   "description": "Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts",
+   "fieldname": "frozen_accounts_modifier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Role Allowed to Set Frozen Accounts and Edit Frozen Entries",
+   "options": "Role"
+  },
+  {
+   "default": "Billing Address",
+   "description": "Address used to determine Tax Category in transactions",
+   "fieldname": "determine_address_tax_category_from",
+   "fieldtype": "Select",
+   "label": "Determine Address Tax Category From",
+   "options": "Billing Address\nShipping Address"
+  },
+  {
+   "fieldname": "credit_controller",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Role allowed to bypass Credit Limit",
+   "options": "Role"
+  },
+  {
+   "default": "0",
+   "description": "Enabling ensure each Sales Invoice has a unique value in Supplier Invoice No. field",
+   "fieldname": "check_supplier_invoice_uniqueness",
+   "fieldtype": "Check",
+   "label": "Check Supplier Invoice Number Uniqueness"
+  },
+  {
+   "default": "0",
+   "fieldname": "make_payment_via_journal_entry",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Make Payment via Journal Entry"
+  },
+  {
+   "default": "1",
+   "fieldname": "unlink_payment_on_cancellation_of_invoice",
+   "fieldtype": "Check",
+   "label": "Unlink Payment on Cancellation of Invoice"
+  },
+  {
+   "default": "1",
+   "fieldname": "unlink_advance_payment_on_cancelation_of_order",
+   "fieldtype": "Check",
+   "label": "Unlink Advance Payment on Cancellation of Order"
+  },
+  {
+   "default": "1",
+   "fieldname": "book_asset_depreciation_entry_automatically",
+   "fieldtype": "Check",
+   "label": "Book Asset Depreciation Entry Automatically"
+  },
+  {
+   "default": "1",
+   "fieldname": "add_taxes_from_item_tax_template",
+   "fieldtype": "Check",
+   "label": "Automatically Add Taxes and Charges from Item Tax Template"
+  },
+  {
+   "fieldname": "print_settings",
+   "fieldtype": "Section Break",
+   "label": "Print Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_inclusive_tax_in_print",
+   "fieldtype": "Check",
+   "label": "Show Inclusive Tax in Print"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_payment_schedule_in_print",
+   "fieldtype": "Check",
+   "label": "Show Payment Schedule in Print"
+  },
+  {
+   "fieldname": "currency_exchange_section",
+   "fieldtype": "Section Break",
+   "label": "Currency Exchange Settings"
+  },
+  {
+   "default": "1",
+   "fieldname": "allow_stale",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Allow Stale Exchange Rates"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.allow_stale==0",
+   "fieldname": "stale_days",
+   "fieldtype": "Int",
+   "label": "Stale Days"
+  },
+  {
+   "fieldname": "report_settings_sb",
+   "fieldtype": "Section Break",
+   "label": "Report Settings"
+  },
+  {
+   "default": "0",
+   "description": "Only select this if you have set up the Cash Flow Mapper documents",
+   "fieldname": "use_custom_cash_flow",
+   "fieldtype": "Check",
+   "label": "Enable Custom Cash Flow Format"
+  },
+  {
+   "default": "0",
+   "fieldname": "automatically_fetch_payment_terms",
+   "fieldtype": "Check",
+   "label": "Automatically Fetch Payment Terms from Order"
+  },
+  {
+   "description": "The percentage you are allowed to bill more against the amount ordered. For example, if the order value is $100 for an item and tolerance is set as 10%, then you are allowed to bill up to $110 ",
+   "fieldname": "over_billing_allowance",
+   "fieldtype": "Currency",
+   "label": "Over Billing Allowance (%)"
+  },
+  {
+   "default": "1",
+   "fieldname": "automatically_process_deferred_accounting_entry",
+   "fieldtype": "Check",
+   "label": "Automatically Process Deferred Accounting Entry"
+  },
+  {
+   "fieldname": "deferred_accounting_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Deferred Accounting Settings"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If this is unchecked, direct GL entries will be created to book deferred revenue or expense",
+   "fieldname": "book_deferred_entries_via_journal_entry",
+   "fieldtype": "Check",
+   "label": "Book Deferred Entries Via Journal Entry"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.book_deferred_entries_via_journal_entry",
+   "description": "If this is unchecked Journal Entries will be saved in a Draft state and will have to be submitted manually",
+   "fieldname": "submit_journal_entries",
+   "fieldtype": "Check",
+   "label": "Submit Journal Entries"
+  },
+  {
+   "default": "Days",
+   "description": "If \"Months\" is selected, a fixed amount will be booked as deferred revenue or expense for each month irrespective of the number of days in a month. It will be prorated if deferred revenue or expense is not booked for an entire month",
+   "fieldname": "book_deferred_entries_based_on",
+   "fieldtype": "Select",
+   "label": "Book Deferred Entries Based On",
+   "options": "Days\nMonths"
+  },
+  {
+   "default": "0",
+   "fieldname": "delete_linked_ledger_entries",
+   "fieldtype": "Check",
+   "label": "Delete Accounting and Stock Ledger Entries on deletion of Transaction"
+  },
+  {
+   "description": "Users with this role are allowed to over bill above the allowance percentage",
+   "fieldname": "role_allowed_to_over_bill",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Over Bill ",
+   "options": "Role"
+  },
+  {
+   "fieldname": "period_closing_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Period Closing Settings"
+  },
+  {
+   "fieldname": "accounts_transactions_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Credit Limit Settings"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tax_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Tax Settings"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "description": "If enabled, ledger entries will be posted for change amount in POS transactions",
+   "fieldname": "post_change_gl_entries",
+   "fieldtype": "Check",
+   "label": "Create Ledger Entries for Change Amount"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, additional ledger entries will be made for discounts in a separate Discount Account",
+   "fieldname": "enable_discount_accounting",
+   "fieldtype": "Check",
+   "label": "Enable Discount Accounting"
+  },
+  {
+   "default": "0",
+   "description": "Learn about <a href=\"https://docs.erpnext.com/docs/v13/user/manual/en/accounts/articles/common_party_accounting#:~:text=Common%20Party%20Accounting%20in%20ERPNext,Invoice%20against%20a%20primary%20Supplier.\">Common Party</a>",
+   "fieldname": "enable_common_party_accounting",
+   "fieldtype": "Check",
+   "label": "Enable Common Party Accounting"
+  },
+  {
+   "fieldname": "enable_features_section",
+   "fieldtype": "Section Break",
+   "label": "Invoice Cancellation"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "asset_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Asset Settings"
+  },
+  {
+   "fieldname": "invoicing_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Credit Limits"
+  },
+  {
+   "fieldname": "assets_tab",
+   "fieldtype": "Tab Break",
+   "label": "Assets"
+  },
+  {
+   "fieldname": "closing_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounts Closing"
+  },
+  {
+   "fieldname": "pos_setting_section",
+   "fieldtype": "Section Break",
+   "label": "POS Setting"
+  },
+  {
+   "fieldname": "invoice_and_billing_tab",
+   "fieldtype": "Tab Break",
+   "label": "Invoice and Billing"
+  },
+  {
+   "fieldname": "invoicing_features_section",
+   "fieldtype": "Section Break",
+   "label": "Invoicing Features"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pos_tab",
+   "fieldtype": "Tab Break",
+   "label": "POS"
+  },
+  {
+   "fieldname": "report_setting_section",
+   "fieldtype": "Section Break",
+   "label": "Report Setting"
+  }
+ ],
+ "icon": "icon-cog",
+ "idx": 1,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2022-02-04 12:32:36.805652",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Accounts Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Sales User"
+  },
+  {
+   "read": 1,
+   "role": "Purchase User"
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,20 @@
+[
+	{
+		"docstatus": 1,
+		"doctype": "Leave Allocation",
+		"employee": "_T-Employee-00001",
+		"from_date": "2013-01-01",
+		"to_date": "2013-12-31",
+		"leave_type": "_Test Leave Type",
+		"new_leaves_allocated": 15
+	},
+	{
+		"docstatus": 1,
+		"doctype": "Leave Allocation",
+		"employee": "_T-Employee-00002",
+		"from_date": "2013-01-01",
+		"to_date": "2013-12-31",
+		"leave_type": "_Test Leave Type",
+		"new_leaves_allocated": 15
+	}
+]

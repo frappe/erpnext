@@ -1,0 +1,22 @@
+{% extends 'frappe/templates/includes/navbar/navbar_items.html' %}
+
+{% block navbar_right_extension %}
+	<li class="shopping-cart cart-icon hidden">
+		<a class="nav-link" href="/cart">
+			<svg class="icon icon-lg">
+				<use href="#icon-assets"></use>
+			</svg>
+			<span class="badge badge-primary shopping-badge" id="cart-count"></span>
+		</a>
+	</li>
+	{% if frappe.db.get_single_value("E Commerce Settings", "enable_wishlist") %}
+		<li class="wishlist wishlist-icon hidden">
+			<a class="nav-link" href="/wishlist">
+				<svg class="icon icon-lg">
+					<use href="#icon-heart"></use>
+				</svg>
+				<span class="badge badge-primary shopping-badge" id="wish-count"></span>
+			</a>
+		</li>
+	{% endif %}
+{% endblock %}
