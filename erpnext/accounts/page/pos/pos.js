@@ -1210,8 +1210,10 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					indicator: 'red',
 					message: __('Discount amount cannot be greater than 100%')
 				});
+				debugger
 				me.update_discount(item_code, discount);
 			}else{
+				debugger
 				me.update_discount(item_code, discount);
 				me.update_value();
 			}
@@ -1245,6 +1247,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	},
 
 	update_discount: function(item_code, discount) {
+		debugger
 		var me = this;
 		this.items = this.get_items(item_code);
 		this.set_item_details(item_code, "discount_percentage", discount);
@@ -1303,6 +1306,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	},
 
 	set_item_details: function (item_code, field, value, remove_zero_qty_items) {
+		debugger
 		var me = this;
 		if (value < 0) {
 			frappe.throw(__("Enter value must be positive"));
