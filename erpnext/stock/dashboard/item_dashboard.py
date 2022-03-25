@@ -40,18 +40,15 @@ def get_data(item_code=None, warehouse=None, item_group=None,
 		filters=filters,
 		order_by=sort_by + ' ' + sort_order,
 		limit_start=start,
-		limit_page_length='21')
+		limit_page_length=21)
 
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 
 	for item in items:
 		item.update({
-			'item_name': frappe.get_cached_value(
-				"Item", item.item_code, 'item_name'),
-			'disable_quick_entry': frappe.get_cached_value(
-				"Item", item.item_code, 'has_batch_no')
-			or frappe.get_cached_value(
-				"Item", item.item_code, 'has_serial_no'),
+			'item_name': frappe.get_cached_value("Item", item.item_code, 'item_name'),
+			'disable_quick_entry': frappe.get_cached_value( "Item", item.item_code, 'has_batch_no')
+							or frappe.get_cached_value( "Item", item.item_code, 'has_serial_no'),
 			'projected_qty': flt(item.projected_qty, precision),
 			'reserved_qty': flt(item.reserved_qty, precision),
 			'reserved_qty_for_production': flt(item.reserved_qty_for_production, precision),

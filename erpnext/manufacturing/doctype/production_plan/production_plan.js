@@ -2,6 +2,13 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Production Plan', {
+
+	before_save: function(frm) {
+		// preserve temporary names on production plan item to re-link sub-assembly items
+		frm.doc.po_items.forEach(item => {
+			item.temporary_name = item.name;
+		});
+	},
 	setup: function(frm) {
 		frm.custom_make_buttons = {
 			'Work Order': 'Work Order / Subcontract PO',

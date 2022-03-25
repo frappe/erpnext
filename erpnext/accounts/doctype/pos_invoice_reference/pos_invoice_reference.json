@@ -9,7 +9,9 @@
   "posting_date",
   "column_break_3",
   "customer",
-  "grand_total"
+  "grand_total",
+  "is_return",
+  "return_against"
  ],
  "fields": [
   {
@@ -48,11 +50,27 @@
    "in_list_view": 1,
    "label": "Amount",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "pos_invoice.is_return",
+   "fieldname": "is_return",
+   "fieldtype": "Check",
+   "label": "Is Return",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "pos_invoice.return_against",
+   "fieldname": "return_against",
+   "fieldtype": "Link",
+   "label": "Return Against",
+   "options": "POS Invoice",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-05-29 15:08:42.194979",
+ "modified": "2022-03-24 13:32:02.366257",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice Reference",
@@ -61,5 +79,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

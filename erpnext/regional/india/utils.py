@@ -19,8 +19,9 @@ PAN_NUMBER_FORMAT = re.compile("[A-Z]{5}[0-9]{4}[A-Z]{1}")
 
 
 def validate_gstin_for_india(doc, method):
-	if hasattr(doc, 'gst_state') and doc.gst_state:
-		doc.gst_state_number = state_numbers[doc.gst_state]
+	if hasattr(doc, 'gst_state'):
+		set_gst_state_and_state_number(doc)
+
 	if not hasattr(doc, 'gstin') or not doc.gstin:
 		return
 
@@ -50,7 +51,6 @@ def validate_gstin_for_india(doc, method):
 			frappe.throw(_("The input you've entered doesn't match the format of GSTIN."), title=_("Invalid GSTIN"))
 
 		validate_gstin_check_digit(doc.gstin)
-		set_gst_state_and_state_number(doc)
 
 		if not doc.gst_state:
 			frappe.throw(_("Please enter GST state"), title=_("Invalid State"))
@@ -82,17 +82,14 @@ def update_gst_category(doc, method):
 				frappe.db.set_value(link.link_doctype, {'name': link.link_name, 'gst_category': 'Unregistered'}, 'gst_category', 'Registered Regular')
 
 def set_gst_state_and_state_number(doc):
-	if not doc.gst_state:
-		if not doc.state:
-			return
+	if not doc.gst_state and doc.state:
 		state = doc.state.lower()
 		states_lowercase = {s.lower():s for s in states}
 		if state in states_lowercase:
 			doc.gst_state = states_lowercase[state]
 		else:
 			return
-
-	doc.gst_state_number = state_numbers[doc.gst_state]
+	doc.gst_state_number = state_numbers.get(doc.gst_state)
 
 def validate_gstin_check_digit(gstin, label='GSTIN'):
 	''' Function to validate the check digit of the GSTIN.'''
