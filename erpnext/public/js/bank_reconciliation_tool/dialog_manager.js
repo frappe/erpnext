@@ -159,7 +159,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				label: __("Document Type"),
 				fieldname: "document_type",
 				fieldtype: "Select",
-				options: `Payment Entry\nJournal Entry\nPayment Group`,
+				options: `Payment Entry\nJournal Entry`,
 				default: "Payment Entry",
 				depends_on: "eval:doc.action=='Create Voucher'",
 			},
