@@ -3,6 +3,8 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils.data import flt
+
 
 class PriceListGenerator(Document):
 
@@ -12,11 +14,17 @@ class PriceListGenerator(Document):
 			if res.brand:
 				lst=frappe.get_doc("Brand",res.brand)
 				for i in lst.brand_defaults:
-					if self.company==i.company and self.operating_unit==i.selling_cost_center:
-						res.brand_list_price=i.item_price
+					if i.selling_cost_center:
+						if self.company==i.company and self.operating_unit==i.selling_cost_center:
+							res.brand_list_price=i.item_price
+						if not i.item_price:
+							frappe.throw("Please set Item Price in brand")
 			doc=frappe.get_doc("Item",res.product)
+			if not doc.specific_gravity:
+				frappe.throw("Please set Specific Gravity On Item")
 			if doc.specific_gravity:
-				res.volume=res.weight/doc.specific_gravity
+				res.volume=flt(res.weight)/flt(doc.specific_gravity)
+    
 
 
 	def before_save(self):
@@ -26,14 +34,14 @@ class PriceListGenerator(Document):
 	def get_cost_weight(self):
 		for res in self.price_details:
 			if res.product:
-				res.list_priceweight = (res.brand_list_price + res.addpkg_cost) * res.weight
+				res.list_priceweight = (flt(res.brand_list_price) + flt(res.addpkg_cost)) * flt(res.weight)
 
 
 	def get_cost_volume(self):
 		for res in self.price_details:
 			if res.product:
-				res.list_priceunit = (res.brand_list_price + res.addpkg_cost) * res.weight
-				res.list_pricevolume = (res.brand_list_price + res.addpkg_cost)*res.volume
+				res.list_priceunit = (flt(res.brand_list_price) + flt(res.addpkg_cost)) * flt(res.weight)
+				res.list_pricevolume = (flt(res.brand_list_price) + flt(res.addpkg_cost))*flt(res.volume)
 
 	@frappe.whitelist()
 	def get_items_brand(self):
@@ -43,15 +51,17 @@ class PriceListGenerator(Document):
 			for j in lst:
 				doc=frappe.get_doc("Item",j.name)
 				if doc.item_group==self.item_group:
-					pack=frappe.get_doc("Product Pack",{"item":doc.name})
-					self.append("price_details",{
-						"product":doc.name,
-						"classifications":doc.description,
-						"costunit":doc.valuation_rate,
-						"weight":doc.weight_per_unit,
-						"addpkg_cost":pack.diff_price
+					pack_g=frappe.db.value("Product Pack",{"item":doc.name},["name"])
+					if pack_g:
+						pack=frappe.get_doc("Product Pack",{"item":doc.name})	
+						self.append("price_details",{
+							"product":doc.name,
+							"classifications":doc.description,
+							"costunit":doc.valuation_rate,
+							"weight":doc.weight_per_unit,
+							"addpkg_cost":pack.diff_price
 
-					})
+						})
 		return True
 
 
