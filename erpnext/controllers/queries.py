@@ -602,27 +602,45 @@ def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def item_uom_query(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql("""
-		select distinct uom
-		from `tabUOM Conversion Detail`
-			where parenttype = 'Item' and parent = %(item_code)s
-				and (uom like %(txt)s)
-				{mcond}
+	if filters and filters.get('item_code'):
+		return frappe.db.sql("""
+			select distinct uom
+			from `tabUOM Conversion Detail`
+				where parenttype = 'Item' and parent = %(item_code)s
+					and (uom like %(txt)s)
+					{mcond}
+				order by
+					if(locate(%(_txt)s, uom), locate(%(_txt)s, uom), 99999),
+					idx desc,
+					uom
+				limit %(start)s, %(page_len)s
+		""".format(**{
+			'key': searchfield,
+			'mcond': get_match_cond(doctype)
+		}), {
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len,
+			'item_code': filters.get('item_code')
+		})
+	else:
+		return frappe.db.sql("""
+			select name
+			from `tabUOM`
+			where name like %(txt)s
 			order by
-				if(locate(%(_txt)s, uom), locate(%(_txt)s, uom), 99999),
+				if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 				idx desc,
-				uom
+				name
 			limit %(start)s, %(page_len)s
-	""".format(**{
-		'key': searchfield,
-		'mcond': get_match_cond(doctype)
-	}), {
-		'txt': "%%%s%%" % txt,
-		'_txt': txt.replace("%", ""),
-		'start': start,
-		'page_len': page_len,
-		'item_code': filters.get('item_code')
-	})
+		""", {
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len,
+			'item_code': filters.get('item_code')
+		})
 
 
 @frappe.whitelist()

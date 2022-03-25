@@ -76,6 +76,7 @@ class SalesOrder(SellingController):
 
 	def before_submit(self):
 		self.validate_delivery_date_required()
+		self.validate_item_code_mandatory()
 
 	def on_submit(self):
 		self.check_credit_limit()
@@ -404,7 +405,7 @@ class SalesOrder(SellingController):
 	def set_skip_delivery_note(self):
 		has_deliverable = False
 		for d in self.items:
-			if d.is_stock_item or d.is_fixed_asset:
+			if d.item_code and (d.is_stock_item or d.is_fixed_asset):
 				has_deliverable = True
 				break
 
@@ -465,7 +466,7 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).validate_warehouse()
 
 		for d in self.get("items"):
-			if (frappe.get_cached_value("Item", d.item_code, "is_stock_item") == 1 or
+			if (d.item_code and frappe.get_cached_value("Item", d.item_code, "is_stock_item") == 1 or
 				(self.has_product_bundle(d.item_code) and self.product_bundle_has_stock_item(d.item_code))) \
 				and not d.warehouse and not cint(d.delivered_by_supplier):
 				frappe.throw(_("Delivery Warehouse required for Stock Item {0}").format(d.item_code),

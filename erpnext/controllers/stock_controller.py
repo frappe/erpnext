@@ -402,7 +402,7 @@ class StockController(AccountsController):
 	def validate_customer_provided_item(self):
 		for d in self.get('items'):
 			# Customer Provided parts will have zero valuation rate
-			if frappe.get_cached_value('Item', d.item_code, 'is_customer_provided_item'):
+			if d.item_code and frappe.get_cached_value('Item', d.item_code, 'is_customer_provided_item'):
 				d.allow_zero_valuation_rate = 1
 
 	def validate_vehicle_item(self):

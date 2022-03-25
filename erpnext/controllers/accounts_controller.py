@@ -1528,6 +1528,11 @@ class AccountsController(TransactionBase):
 		if sales_team and total_allocated_percentage != 100.0:
 			throw(_("Total allocated percentage for Sales Team should be 100%"))
 
+	def validate_item_code_mandatory(self):
+		for d in self.items:
+			if not d.item_code:
+				frappe.throw(_("Row #{0}: Item Code is mandatory").format(d.idx))
+
 
 @frappe.whitelist()
 def get_tax_rate(account_head):

@@ -129,7 +129,10 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	refresh: function(doc, dt, dn) {
 		this._super();
 		this.setup_buttons();
-		this.set_skip_delivery_note();
+
+		if (this.frm.doc.__islocal) {
+			this.set_skip_delivery_note();
+		}
 	},
 
 	setup_buttons: function () {
