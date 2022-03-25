@@ -1044,7 +1044,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var company_currency = this.get_company_currency();
 		// Added `ignore_price_list` to determine if document is loading after mapping from another doc
 		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency
-				&& !this.frm.doc.__onload.ignore_price_list) {
+				&& !(this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list)) {
 
 			this.get_exchange_rate(transaction_date, this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
@@ -1145,7 +1145,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		var company_currency = this.get_company_currency();
 		// Added `ignore_price_list` to determine if document is loading after mapping from another doc
-		if(this.frm.doc.price_list_currency !== company_currency  && !this.frm.doc.__onload.ignore_price_list) {
+		if(this.frm.doc.price_list_currency !== company_currency  &&
+				!(this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list)) {
 			this.get_exchange_rate(this.frm.doc.posting_date, this.frm.doc.price_list_currency, company_currency,
 				function(exchange_rate) {
 					me.frm.set_value("plc_conversion_rate", exchange_rate);
