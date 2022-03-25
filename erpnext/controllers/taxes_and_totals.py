@@ -123,7 +123,7 @@ class calculate_taxes_and_totals(object):
 
 						item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
 
-					elif item.discount_amount or item.pricing_rules:
+					elif item.discount_amount and item.pricing_rules:
 						item.rate =  item.price_list_rate - item.discount_amount
 
 				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item',
