@@ -41,10 +41,10 @@ def execute(filters=None):
 			"width": 120
 		},
 		{
-			"label": _("Payment Terms Template"),
-			"fieldname": "payment_terms_template",
+			"label": _("Terms and Conditions"),
+			"fieldname": "terms_and_condition",
 			"fieldtype": "Link",
-			"options": "Payment Terms Template",
+			"options": "Terms and Conditions",
 			"width": 120
 		}
 	]
