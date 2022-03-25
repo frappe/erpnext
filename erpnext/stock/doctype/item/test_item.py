@@ -685,6 +685,12 @@ class TestItem(FrappeTestCase):
 		# standalone return
 		make_purchase_receipt(is_return=True, qty=-1, **typical_args)
 
+	def test_item_dashboard(self):
+		from erpnext.stock.dashboard.item_dashboard import get_data
+
+		self.assertTrue(get_data(item_code="_Test Item"))
+		self.assertTrue(get_data(warehouse="_Test Warehouse - _TC"))
+		self.assertTrue(get_data(item_group="All Item Groups"))
 
 
 def set_item_variant_settings(fields):
