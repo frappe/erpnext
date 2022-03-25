@@ -23,10 +23,10 @@ class ExpenseClaim(AccountsController):
 
 	def validate(self):
 		validate_active_employee(self.employee)
-		self.validate_advances()
+		set_employee_name(self)
 		self.validate_sanctioned_amount()
 		self.calculate_total_amount()
-		set_employee_name(self)
+		self.validate_advances()
 		self.set_expense_account(validate=True)
 		self.set_payable_account()
 		self.set_cost_center()
