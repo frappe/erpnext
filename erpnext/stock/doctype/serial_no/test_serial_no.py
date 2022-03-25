@@ -6,10 +6,12 @@
 
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.serial_no.serial_no import *
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
@@ -18,11 +20,9 @@ from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 test_dependencies = ["Item"]
 test_records = frappe.get_test_records('Serial No')
 
-from erpnext.stock.doctype.serial_no.serial_no import *
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestSerialNo(ERPNextTestCase):
+class TestSerialNo(FrappeTestCase):
 
 	def tearDown(self):
 		frappe.db.rollback()
@@ -241,3 +241,57 @@ class TestSerialNo(ERPNextTestCase):
 			)
 		self.assertEqual(value_diff, -113)
 
+	def test_auto_fetch(self):
+		item_code = make_item(properties={
+			"has_serial_no": 1,
+			"has_batch_no": 1,
+			"create_new_batch": 1,
+			"serial_no_series": "TEST.#######"
+		}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		in1 = make_stock_entry(item_code=item_code, to_warehouse=warehouse, qty=5)
+		in2 = make_stock_entry(item_code=item_code, to_warehouse=warehouse, qty=5)
+
+		in1.reload()
+		in2.reload()
+
+		batch1 = in1.items[0].batch_no
+		batch2 = in2.items[0].batch_no
+
+		batch_wise_serials = {
+			batch1 : get_serial_nos(in1.items[0].serial_no),
+			batch2: get_serial_nos(in2.items[0].serial_no)
+		}
+
+		# Test FIFO
+		first_fetch = auto_fetch_serial_number(5, item_code, warehouse)
+		self.assertEqual(first_fetch, batch_wise_serials[batch1])
+
+		# partial FIFO
+		partial_fetch = auto_fetch_serial_number(2, item_code, warehouse)
+		self.assertTrue(set(partial_fetch).issubset(set(first_fetch)),
+				msg=f"{partial_fetch} should be subset of {first_fetch}")
+
+		# exclusion
+		remaining = auto_fetch_serial_number(3, item_code, warehouse,
+				exclude_sr_nos=json.dumps(partial_fetch))
+		self.assertEqual(sorted(remaining + partial_fetch), first_fetch)
+
+		# batchwise
+		for batch, expected_serials in batch_wise_serials.items():
+			fetched_sr = auto_fetch_serial_number(5, item_code, warehouse, batch_nos=batch)
+			self.assertEqual(fetched_sr, sorted(expected_serials))
+
+		# non existing warehouse
+		self.assertEqual(auto_fetch_serial_number(10, item_code, warehouse="Nonexisting"), [])
+
+		# multi batch
+		all_serials = [sr for sr_list in batch_wise_serials.values() for sr in sr_list]
+		fetched_serials = auto_fetch_serial_number(10, item_code, warehouse, batch_nos=list(batch_wise_serials.keys()))
+		self.assertEqual(sorted(all_serials), fetched_serials)
+
+		# expiry date
+		frappe.db.set_value("Batch", batch1, "expiry_date", "1980-01-01")
+		non_expired_serials = auto_fetch_serial_number(5, item_code, warehouse, posting_date="2021-01-01", batch_nos=batch1)
+		self.assertEqual(non_expired_serials, [])

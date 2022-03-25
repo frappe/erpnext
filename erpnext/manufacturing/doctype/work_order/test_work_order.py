@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe.tests.utils import FrappeTestCase, change_settings, timeout
 from frappe.utils import add_days, add_months, cint, flt, now, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
@@ -21,10 +22,9 @@ from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.utils import get_bin
-from erpnext.tests.utils import ERPNextTestCase, timeout
 
 
-class TestWorkOrder(ERPNextTestCase):
+class TestWorkOrder(FrappeTestCase):
 	def setUp(self):
 		self.warehouse = '_Test Warehouse 2 - _TC'
 		self.item = '_Test Item'
@@ -352,7 +352,6 @@ class TestWorkOrder(ERPNextTestCase):
 		wo_order = make_wo_order_test_record(planned_start_date=now(),
 			sales_order=so.name, qty=3)
 
-		wo_order.submit()
 		self.assertEqual(wo_order.docstatus, 1)
 
 		allow_overproduction("overproduction_percentage_for_sales_order", 0)
@@ -936,6 +935,28 @@ class TestWorkOrder(ERPNextTestCase):
 
 		frappe.db.set_value("Manufacturing Settings", None,
 			"backflush_raw_materials_based_on", "BOM")
+
+	@change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	def test_auto_batch_creation(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		fg_item = frappe.generate_hash(length=20)
+		child_item = frappe.generate_hash(length=20)
+
+		bom_tree =  {fg_item: {child_item: {}}}
+
+		create_nested_bom(bom_tree, prefix="")
+
+		item = frappe.get_doc("Item", fg_item)
+		item.has_batch_no = 1
+		item.create_new_batch = 0
+		item.save()
+
+		try:
+			make_wo_order_test_record(item=fg_item)
+		except frappe.MandatoryError:
+			self.fail("Batch generation causing failing in Work Order")
+
 
 def update_job_card(job_card, jc_qty=None):
 	employee = frappe.db.get_value('Employee', {'status': 'Active'}, 'name')

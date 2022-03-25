@@ -422,19 +422,6 @@ def is_reposting_item_valuation_in_progress():
 	if reposting_in_progress:
 		frappe.msgprint(_("Item valuation reposting in progress. Report might show incorrect item valuation."), alert=1)
 
-
-def calculate_mapped_packed_items_return(return_doc):
-	parent_items = set([item.parent_item for item in return_doc.packed_items])
-	against_doc = frappe.get_doc(return_doc.doctype, return_doc.return_against)
-
-	for original_bundle, returned_bundle in zip(against_doc.items, return_doc.items):
-		if original_bundle.item_code in parent_items:
-			for returned_packed_item, original_packed_item in zip(return_doc.packed_items, against_doc.packed_items):
-				if returned_packed_item.parent_item == original_bundle.item_code:
-					returned_packed_item.parent_detail_docname = returned_bundle.name
-					returned_packed_item.qty = (original_packed_item.qty / original_bundle.qty) * returned_bundle.qty
-
-
 def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool:
 	"""Check if there are pending reposting job till the specified posting date."""
 

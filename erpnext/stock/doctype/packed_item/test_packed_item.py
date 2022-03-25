@@ -1,6 +1,7 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_to_date, nowdate
 
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
@@ -9,23 +10,32 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 
-class TestPackedItem(ERPNextTestCase):
+class TestPackedItem(FrappeTestCase):
 	"Test impact on Packed Items table in various scenarios."
 	@classmethod
 	def setUpClass(cls) -> None:
 		super().setUpClass()
+		cls.warehouse = "_Test Warehouse - _TC"
 		cls.bundle = "_Test Product Bundle X"
 		cls.bundle_items = ["_Test Bundle Item 1", "_Test Bundle Item 2"]
+
+		cls.bundle2 = "_Test Product Bundle Y"
+		cls.bundle2_items = ["_Test Bundle Item 3", "_Test Bundle Item 4"]
+
 		make_item(cls.bundle, {"is_stock_item": 0})
-		for item in cls.bundle_items:
+		make_item(cls.bundle2, {"is_stock_item": 0})
+		for item in cls.bundle_items + cls.bundle2_items:
 			make_item(item, {"is_stock_item": 1})
 
 		make_item("_Test Normal Stock Item", {"is_stock_item": 1})
 
 		make_product_bundle(cls.bundle, cls.bundle_items, qty=2)
+		make_product_bundle(cls.bundle2, cls.bundle2_items, qty=2)
+
+		for item in cls.bundle_items + cls.bundle2_items:
+			make_stock_entry(item_code=item, to_warehouse=cls.warehouse, qty=100, rate=100)
 
 	def test_adding_bundle_item(self):
 		"Test impact on packed items if bundle item row is added."
@@ -156,3 +166,104 @@ class TestPackedItem(ERPNextTestCase):
 		credit_after_reposting = sum(gle.credit for gle in gles)
 		self.assertNotEqual(credit_before_repost, credit_after_reposting)
 		self.assertAlmostEqual(credit_after_reposting, 2 * credit_before_repost)
+
+	def assertReturns(self, original, returned):
+		self.assertEqual(len(original), len(returned))
+
+		sort_function = lambda p: (p.parent_item, p.item_code, p.qty)
+
+		for sent, returned in zip(
+			sorted(original, key=sort_function),
+			sorted(returned, key=sort_function)
+		):
+			self.assertEqual(sent.item_code, returned.item_code)
+			self.assertEqual(sent.parent_item, returned.parent_item)
+			self.assertEqual(sent.qty, -1 * returned.qty)
+
+	def test_returning_full_bundles(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		item_list = [
+			{
+				"item_code": self.bundle,
+				"warehouse": self.warehouse,
+				"qty": 1,
+				"rate": 100,
+			},
+			{
+				"item_code": self.bundle2,
+				"warehouse": self.warehouse,
+				"qty": 1,
+				"rate": 100,
+			}
+		]
+		so = make_sales_order(item_list=item_list, warehouse=self.warehouse)
+
+		dn = make_delivery_note(so.name)
+		dn.save()
+		dn.submit()
+
+		# create return
+		dn_ret = make_sales_return(dn.name)
+		dn_ret.save()
+		dn_ret.submit()
+		self.assertReturns(dn.packed_items, dn_ret.packed_items)
+
+	def test_returning_partial_bundles(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		item_list = [
+			{
+				"item_code": self.bundle,
+				"warehouse": self.warehouse,
+				"qty": 1,
+				"rate": 100,
+			},
+			{
+				"item_code": self.bundle2,
+				"warehouse": self.warehouse,
+				"qty": 1,
+				"rate": 100,
+			}
+		]
+		so = make_sales_order(item_list=item_list, warehouse=self.warehouse)
+
+		dn = make_delivery_note(so.name)
+		dn.save()
+		dn.submit()
+
+		# create return
+		dn_ret = make_sales_return(dn.name)
+		# remove bundle 2
+		dn_ret.items.pop()
+
+		dn_ret.save()
+		dn_ret.submit()
+		dn_ret.reload()
+
+		self.assertTrue(all(d.parent_item == self.bundle for d in dn_ret.packed_items))
+
+		expected_returns = [d for d in dn.packed_items if d.parent_item == self.bundle]
+		self.assertReturns(expected_returns, dn_ret.packed_items)
+
+
+	def test_returning_partial_bundle_qty(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		so = make_sales_order(item_code=self.bundle, warehouse=self.warehouse, qty = 2)
+
+		dn = make_delivery_note(so.name)
+		dn.save()
+		dn.submit()
+
+		# create return
+		dn_ret = make_sales_return(dn.name)
+		# halve the qty
+		dn_ret.items[0].qty = -1
+		dn_ret.save()
+		dn_ret.submit()
+
+		expected_returns = dn.packed_items
+		for d in expected_returns:
+			d.qty /= 2
+		self.assertReturns(expected_returns, dn_ret.packed_items)

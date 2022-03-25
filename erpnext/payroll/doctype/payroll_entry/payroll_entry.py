@@ -660,6 +660,8 @@ def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progr
 	if not_submitted_ss:
 		frappe.msgprint(_("Could not submit some Salary Slips"))
 
+	frappe.flags.via_payroll_entry = False
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filters):
@@ -671,7 +673,7 @@ def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filte
 				where reference_type="Payroll Entry")
 		order by name limit %(start)s, %(page_len)s"""
 		.format(key=searchfield), {
-			'txt': "%%%s%%" % frappe.db.escape(txt),
+			'txt': "%%%s%%" % txt,
 			'start': start, 'page_len': page_len
 		})
 

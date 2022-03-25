@@ -4,6 +4,7 @@
 	--green-info: #38A160;
 	--product-bg-color: white;
 	--body-bg-color:  var(--gray-50);
+	--text-md: 13px; // variables are in desk folder in frappe for v13, this is a temporary fix
 }
 
 body.product-page {
@@ -262,6 +263,15 @@ body.product-page {
 
 		.clear-filters {
 			font-size: 13px;
+		}
+
+		.filter-lookup-input {
+			background-color: white;
+			border: 1px solid var(--gray-300);
+
+			&:focus {
+				border: 1px solid var(--primary);
+			}
 		}
 
 		.filter-label {
@@ -569,15 +579,12 @@ body.product-page {
 }
 
 .scroll-categories {
-	white-space: nowrap;
-	overflow-x: auto;
-
 	.category-pill {
-		margin: 0px 4px;
 		display: inline-block;
-		padding: 6px 12px;
-		background-color: #ecf5fe;
 		width: fit-content;
+		padding: 6px 12px;
+		margin-bottom: 8px;
+		background-color: #ecf5fe;
 		font-size: 14px;
 		border-radius: 18px;
 		color: var(--blue-500);

@@ -185,7 +185,8 @@ def update_packed_item_price_data(pi_row, item_data, doc):
 	row_data.update({
 		"company": doc.get("company"),
 		"price_list": doc.get("selling_price_list"),
-		"currency": doc.get("currency")
+		"currency": doc.get("currency"),
+		"conversion_rate": doc.get("conversion_rate"),
 	})
 	rate = get_price_list_rate(row_data, item_doc).get("price_list_rate")
 
