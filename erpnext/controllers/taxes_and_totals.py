@@ -580,6 +580,9 @@ class calculate_taxes_and_totals(object):
 					.format(self.doc.party_account_currency, invoice_total))
 
 			if self.doc.docstatus == 0:
+				if self.doc.get('write_off_outstanding_amount_automatically'):
+					self.doc.write_off_amount = 0
+
 				self.calculate_outstanding_amount()
 				self.calculate_write_off_amount()
 

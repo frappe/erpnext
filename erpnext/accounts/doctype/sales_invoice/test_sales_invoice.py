@@ -953,40 +953,22 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(pos.write_off_amount, 0)
 
 	def test_auto_write_off_amount(self):
-    
-		make_pos_profile(
-			company="_Test Company with perpetual inventory",
-			income_account="Sales - TCP1",
-			expense_account="Cost of Goods Sold - TCP1",
-			warehouse="Stores - TCP1",
-			cost_center="Main - TCP1",
-			write_off_account="_Test Write Off - TCP1",
-		)
+		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1",
+			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 
-		make_purchase_receipt(
-			company="_Test Company with perpetual inventory",
-			item_code="_Test FG Item",
-			warehouse="Stores - TCP1",
-			cost_center="Main - TCP1",
-		)
+		make_purchase_receipt(company= "_Test Company with perpetual inventory",
+			item_code= "_Test FG Item",warehouse= "Stores - TCP1", cost_center= "Main - TCP1")
 
-		pos = create_sales_invoice(
-			company="_Test Company with perpetual inventory",
-			debit_to="Debtors - TCP1",
-			item_code="_Test FG Item",
-			warehouse="Stores - TCP1",
-			income_account="Sales - TCP1",
-			expense_account="Cost of Goods Sold - TCP1",
-			cost_center="Main - TCP1",
-			do_not_save=True,
-		)
+		pos = create_sales_invoice(company= "_Test Company with perpetual inventory",
+			debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1",
+			income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1",
+			cost_center = "Main - TCP1", do_not_save=True)
+
 		pos.is_pos = 1
 		pos.update_stock = 1
 
-		pos.append(
-			"payments", {"mode_of_payment": "Bank Draft", "account": "_Test Bank - TCP1", "amount": 50}
-		)
-		pos.append("payments", {"mode_of_payment": "Cash", "account": "Cash - TCP1", "amount": 40})
+		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - TCP1', 'amount': 50})
+		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - TCP1', 'amount': 40})
 
 		pos.write_off_outstanding_amount_automatically = 1
 		pos.insert()
