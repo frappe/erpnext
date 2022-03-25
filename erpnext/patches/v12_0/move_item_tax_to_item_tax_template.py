@@ -90,11 +90,16 @@ def get_item_tax_template(item_tax_templates, item_tax_map, item_code, parenttyp
 	# if no item tax template found, create one
 	item_tax_template = frappe.new_doc("Item Tax Template")
 	item_tax_template.title = make_autoname("Item Tax Template-.####")
+	item_tax_template_name = item_tax_template.title
 
 	for tax_type, tax_rate in item_tax_map.items():
 		account_details = frappe.db.get_value("Account", tax_type, ['name', 'account_type', 'company'], as_dict=1)
 		if account_details:
 			item_tax_template.company = account_details.company
+			if not item_tax_template_name:
+				# set name once company is set as name is generated from company & title
+				# setting name is required to update `item_tax_templates` dict
+				item_tax_template_name = item_tax_template.set_new_name()
 			if account_details.account_type not in ('Tax', 'Chargeable', 'Income Account', 'Expense Account', 'Expenses Included In Valuation'):
 				frappe.db.set_value('Account', account_details.name, 'account_type', 'Chargeable')
 		else:
@@ -133,8 +138,9 @@ def get_item_tax_template(item_tax_templates, item_tax_map, item_code, parenttyp
 			if tax_type not in tax_types:
 				item_tax_template.append("taxes", {"tax_type": tax_type, "tax_rate": tax_rate})
 				tax_types.append(tax_type)
-			item_tax_templates.setdefault(item_tax_template.title, {})
-			item_tax_templates[item_tax_template.title][tax_type] = tax_rate
+			item_tax_templates.setdefault(item_tax_template_name, {})
+			item_tax_templates[item_tax_template_name][tax_type] = tax_rate
+
 	if item_tax_template.get("taxes"):
 		item_tax_template.save()
 		return item_tax_template.name
