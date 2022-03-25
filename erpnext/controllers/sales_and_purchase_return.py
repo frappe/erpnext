@@ -399,6 +399,8 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 
+	doclist.set_onload('ignore_price_list', True)
+
 	return doclist
 
 def get_rate_for_return(voucher_type, voucher_no, item_code, return_against=None,
