@@ -457,7 +457,8 @@ class WorkOrder(Document):
 			mr_obj.update_requested_qty([self.material_request_item])
 
 	def update_ordered_qty(self):
-		if self.production_plan and self.production_plan_item:
+		if self.production_plan and self.production_plan_item \
+			and not self.production_plan_sub_assembly_item:
 			qty = frappe.get_value("Production Plan Item", self.production_plan_item, "ordered_qty") or 0.0
 
 			if self.docstatus == 1:
@@ -644,8 +645,12 @@ class WorkOrder(Document):
 		if not self.qty > 0:
 			frappe.throw(_("Quantity to Manufacture must be greater than 0."))
 
-		if self.production_plan and self.production_plan_item:
+		if self.production_plan and self.production_plan_item \
+			and not self.production_plan_sub_assembly_item:
 			qty_dict = frappe.db.get_value("Production Plan Item", self.production_plan_item, ["planned_qty", "ordered_qty"], as_dict=1)
+
+			if not qty_dict:
+				return
 
 			allowance_qty = flt(frappe.db.get_single_value("Manufacturing Settings",
 			"overproduction_percentage_for_work_order"))/100 * qty_dict.get("planned_qty", 0)
