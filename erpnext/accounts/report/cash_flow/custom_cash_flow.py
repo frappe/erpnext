@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_to_date, get_date_str
+from frappe.utils import add_to_date, flt, get_date_str
 
 from erpnext.accounts.report.financial_statements import get_columns, get_data, get_period_list
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
@@ -442,8 +442,8 @@ def _get_account_type_based_data(filters, account_names, period_list, accumulate
 		else:
 			gl_sum = 0
 
-		total += gl_sum
-		data.setdefault(period["key"], gl_sum)
+		total += flt(gl_sum)
+		data.setdefault(period["key"], flt(gl_sum))
 
 	data["total"] = total
 	return data
