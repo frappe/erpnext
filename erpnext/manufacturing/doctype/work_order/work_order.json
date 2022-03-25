@@ -12,6 +12,7 @@
   "status",
   "production_item",
   "item_name",
+  "weight_per_unit",
   "image",
   "bom_no",
   "column_break1",
@@ -22,6 +23,7 @@
   "process_loss_qty",
   "sales_order",
   "project",
+  "rm_cost_center",
   "serial_no_and_batch_for_finished_good_section",
   "has_serial_no",
   "has_batch_no",
@@ -720,8 +722,22 @@
   },
   {
    "fieldname": "wo_specific_gravity",
-   "fieldtype": "Data",
-   "label": "Wo Specific Gravity"
+   "fieldtype": "Float",
+   "label": "Wo Specific Gravity",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "production_item.weight_per_unit",
+   "fieldname": "weight_per_unit",
+   "fieldtype": "Float",
+   "label": "Weight Per Unit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rm_cost_center",
+   "fieldtype": "Link",
+   "label": "RM Cost Center",
+   "options": "Cost Center"
   }
  ],
  "icon": "fa fa-cogs",
@@ -729,11 +745,10 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-24 21:18:12.160114",
+ "modified": "2022-03-25 17:12:24.442852",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
- "naming_rule": "By \"Naming Series\" field",
  "nsm_parent_field": "parent_work_order",
  "owner": "Administrator",
  "permissions": [
@@ -762,7 +777,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "ASC",
- "states": [],
  "title_field": "production_item",
  "track_changes": 1,
  "track_seen": 1
