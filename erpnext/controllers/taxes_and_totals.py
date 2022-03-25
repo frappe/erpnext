@@ -114,18 +114,14 @@ class calculate_taxes_and_totals(object):
 			for item in self.doc.get("items"):
 				self.doc.round_floats_in(item)
 
-				if not item.rate:
-					item.rate = item.price_list_rate
-
 				if item.discount_percentage == 100:
 					item.rate = 0.0
 				elif item.price_list_rate:
-					if item.pricing_rules or abs(item.discount_percentage) > 0:
+					if not item.rate or (item.pricing_rules and item.discount_percentage > 0):
 						item.rate = flt(item.price_list_rate *
 							(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
 
-						if abs(item.discount_percentage) > 0:
-							item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
+						item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
 
 					elif item.discount_amount or item.pricing_rules:
 						item.rate =  item.price_list_rate - item.discount_amount
