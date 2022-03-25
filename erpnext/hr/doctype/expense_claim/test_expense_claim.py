@@ -72,6 +72,15 @@ class TestExpenseClaim(unittest.TestCase):
 		expense_claim = frappe.get_doc("Expense Claim", expense_claim.name)
 		self.assertEqual(expense_claim.status, "Unpaid")
 
+		# expense claim without any sanctioned amount should not have status as Paid
+		claim = make_expense_claim(payable_account, 1000, 0, "_Test Company", "Travel Expenses - _TC")
+		self.assertEqual(claim.total_sanctioned_amount, 0)
+		self.assertEqual(claim.status, "Submitted")
+
+		# no gl entries created
+		gl_entry = frappe.get_all('GL Entry', {'voucher_type': 'Expense Claim', 'voucher_no': claim.name})
+		self.assertEqual(len(gl_entry), 0)
+
 	def test_expense_claim_against_fully_paid_advances(self):
 		from erpnext.hr.doctype.employee_advance.test_employee_advance import (
 			get_advances_for_claim,
