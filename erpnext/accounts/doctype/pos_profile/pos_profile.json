@@ -22,6 +22,7 @@
   "hide_images",
   "hide_unavailable_items",
   "auto_add_item_to_cart",
+  "validate_stock_on_save",
   "column_break_16",
   "update_stock",
   "ignore_pricing_rule",
@@ -351,6 +352,12 @@
   {
    "fieldname": "column_break_25",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "validate_stock_on_save",
+   "fieldtype": "Check",
+   "label": "Validate Stock on Save"
   }
  ],
  "icon": "icon-cog",
@@ -378,10 +385,11 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2021-10-14 14:17:00.469298",
+ "modified": "2022-03-21 13:29:28.480533",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {
@@ -404,5 +412,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

@@ -3,6 +3,7 @@
 
 
 import json
+from typing import List, Optional, Union
 
 import frappe
 from frappe import ValidationError, _
@@ -574,22 +575,30 @@ def get_delivery_note_serial_no(item_code, qty, delivery_note):
 	return serial_nos
 
 @frappe.whitelist()
-def auto_fetch_serial_number(qty, item_code, warehouse,
-		posting_date=None, batch_nos=None, for_doctype=None, exclude_sr_nos=None):
+def auto_fetch_serial_number(
+		qty: float,
+		item_code: str,
+		warehouse: str,
+		posting_date: Optional[str] = None,
+		batch_nos: Optional[Union[str, List[str]]] = None,
+		for_doctype: Optional[str] = None,
+		exclude_sr_nos: Optional[List[str]] = None
+	) -> List[str]:
 
 	filters = frappe._dict({"item_code": item_code, "warehouse": warehouse})
 
 	if exclude_sr_nos is None:
 		exclude_sr_nos = []
 	else:
+		exclude_sr_nos = safe_json_loads(exclude_sr_nos)
 		exclude_sr_nos = get_serial_nos(clean_serial_no_string("\n".join(exclude_sr_nos)))
 
 	if batch_nos:
 		batch_nos = safe_json_loads(batch_nos)
 		if isinstance(batch_nos, list):
 			filters.batch_no = batch_nos
-		elif isinstance(batch_nos, str):
-			filters.batch_no = [batch_nos]
+		else:
+			filters.batch_no = [str(batch_nos)]
 
 	if posting_date:
 		filters.expiry_date = posting_date
@@ -602,25 +611,60 @@ def auto_fetch_serial_number(qty, item_code, warehouse,
 
 	return sorted([d.get('name') for d in serial_numbers])
 
+def get_delivered_serial_nos(serial_nos):
+	'''
+	Returns serial numbers that delivered from the list of serial numbers
+	'''
+	from frappe.query_builder.functions import Coalesce
+
+	SerialNo = frappe.qb.DocType("Serial No")
+	serial_nos = get_serial_nos(serial_nos)
+	query = frappe.qb.select(SerialNo.name).from_(SerialNo).where(
+		(SerialNo.name.isin(serial_nos))
+		& (Coalesce(SerialNo.delivery_document_type, "") != "")
+	)
+
+	result = query.run()
+	if result and len(result) > 0:
+		delivered_serial_nos = [row[0] for row in result]
+		return delivered_serial_nos
+
 @frappe.whitelist()
 def get_pos_reserved_serial_nos(filters):
 	if isinstance(filters, str):
 		filters = json.loads(filters)
 
-	pos_transacted_sr_nos = frappe.db.sql("""select item.serial_no as serial_no
-		from `tabPOS Invoice` p, `tabPOS Invoice Item` item
-		where p.name = item.parent
-		and p.consolidated_invoice is NULL
-		and p.docstatus = 1
-		and item.docstatus = 1
-		and item.item_code = %(item_code)s
-		and item.warehouse = %(warehouse)s
-		and item.serial_no is NOT NULL and item.serial_no != ''
-		""", filters, as_dict=1)
+	POSInvoice = frappe.qb.DocType("POS Invoice")
+	POSInvoiceItem = frappe.qb.DocType("POS Invoice Item")
+	query = frappe.qb.from_(
+		POSInvoice
+	).from_(
+		POSInvoiceItem
+	).select(
+		POSInvoice.is_return,
+		POSInvoiceItem.serial_no
+	).where(
+		(POSInvoice.name == POSInvoiceItem.parent)
+		& (POSInvoice.docstatus == 1)
+		& (POSInvoiceItem.docstatus == 1)
+		& (POSInvoiceItem.item_code == filters.get('item_code'))
+		& (POSInvoiceItem.warehouse == filters.get('warehouse'))
+		& (POSInvoiceItem.serial_no.isnotnull())
+		& (POSInvoiceItem.serial_no != '')
+	)
+
+	pos_transacted_sr_nos = query.run(as_dict=True)
 
 	reserved_sr_nos = []
+	returned_sr_nos = []
 	for d in pos_transacted_sr_nos:
-		reserved_sr_nos += get_serial_nos(d.serial_no)
+		if d.is_return == 0:
+			reserved_sr_nos += get_serial_nos(d.serial_no)
+		elif d.is_return == 1:
+			returned_sr_nos += get_serial_nos(d.serial_no)
+
+	for sr_no in returned_sr_nos:
+		reserved_sr_nos.remove(sr_no)
 
 	return reserved_sr_nos
 
