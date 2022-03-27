@@ -66,8 +66,7 @@ frappe.query_reports["Monthly Attendance Sheet"] = {
 			"Default": 0,
 		}
 	],
-
-	"onload": function() {
+	onload: function() {
 		return  frappe.call({
 			method: "erpnext.hr.report.monthly_attendance_sheet.monthly_attendance_sheet.get_attendance_years",
 			callback: function(r) {

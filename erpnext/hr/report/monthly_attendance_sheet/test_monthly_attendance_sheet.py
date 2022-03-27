@@ -33,14 +33,15 @@ class TestMonthlyAttendanceSheet(FrappeTestCase):
 			}
 		)
 		report = execute(filters=filters)
-		employees = report[1][0]
-		datasets = report[3]["data"]["datasets"]
-		absent = datasets[0]["values"]
-		present = datasets[1]["values"]
-		leaves = datasets[2]["values"]
+
+		record = report[1][0]
+		datasets = report[3]['data']['datasets']
+		absent = datasets[0]['values']
+		present = datasets[1]['values']
+		leaves = datasets[2]['values']
 
 		# ensure correct attendance is reflect on the report
-		self.assertIn(self.employee, employees)
+		self.assertEqual(self.employee, record.get('employee'))
 		self.assertEqual(absent[0], 1)
 		self.assertEqual(present[1], 1)
 		self.assertEqual(leaves[2], 1)
