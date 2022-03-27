@@ -280,7 +280,6 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		}
 	}
 
-<<<<<<< HEAD
 	add_taxes_from_item_tax_template(item_tax_map) {
 		let me = this;
 
@@ -302,9 +301,6 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	calculate_taxes() {
-=======
-	calculate_taxes: function() {
->>>>>>> 7cba4975ef (fix: Taxes not getting fetched from item tax template)
 		var me = this;
 		this.frm.doc.rounding_adjustment = 0;
 		var actual_tax_dict = {};
