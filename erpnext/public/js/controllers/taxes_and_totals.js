@@ -694,12 +694,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		}
 
 		this.calculate_outstanding_amount(update_paid_amount);
-<<<<<<< HEAD
-	}
-=======
 		this.calculate_write_off_amount();
-	},
->>>>>>> 2e33e748ea (fix: Client side changes for POS Write off amount)
+	}
 
 	is_internal_invoice() {
 		if (['Sales Invoice', 'Purchase Invoice'].includes(this.frm.doc.doctype)) {
@@ -823,11 +819,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		this.frm.set_value('base_paid_amount', flt(base_paid_amount, precision("base_paid_amount")));
 	}
 
-<<<<<<< HEAD
 	calculate_change_amount(){
-=======
-	calculate_change_amount: function() {
->>>>>>> ed38679d22 (fix: Ignore for Purchase Invoices)
 		this.frm.doc.change_amount = 0.0;
 		this.frm.doc.base_change_amount = 0.0;
 		if(in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype)
@@ -847,19 +839,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		}
 	}
 
-<<<<<<< HEAD
-	calculate_write_off_amount(){
-		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
-=======
-	calculate_write_off_amount: function() {
-		if (this.frm.doc.write_off_outstanding_amount_automatically) {
-<<<<<<< HEAD
->>>>>>> 2e33e748ea (fix: Client side changes for POS Write off amount)
-			this.frm.doc.write_off_amount = flt(this.frm.doc.grand_total - this.frm.doc.paid_amount
-				+ this.frm.doc.change_amount, precision("write_off_amount"));
-=======
+	calculate_write_off_amount() {
+		if(this.frm.doc.paid_amount > this.frm.doc.grand_total) {
 			this.frm.doc.write_off_amount = flt(this.frm.doc.outstanding_amount, precision("write_off_amount"));
->>>>>>> 6a50f36b31 (test: test for auto write-off amount)
 			this.frm.doc.base_write_off_amount = flt(this.frm.doc.write_off_amount * this.frm.doc.conversion_rate,
 				precision("base_write_off_amount"));
 
