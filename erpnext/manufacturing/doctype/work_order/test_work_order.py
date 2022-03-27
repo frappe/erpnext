@@ -352,7 +352,6 @@ class TestWorkOrder(FrappeTestCase):
 		wo_order = make_wo_order_test_record(planned_start_date=now(),
 			sales_order=so.name, qty=3)
 
-		wo_order.submit()
 		self.assertEqual(wo_order.docstatus, 1)
 
 		allow_overproduction("overproduction_percentage_for_sales_order", 0)

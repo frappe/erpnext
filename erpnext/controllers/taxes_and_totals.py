@@ -114,20 +114,16 @@ class calculate_taxes_and_totals(object):
 			for item in self.doc.get("items"):
 				self.doc.round_floats_in(item)
 
-				if not item.rate:
-					item.rate = item.price_list_rate
-
 				if item.discount_percentage == 100:
 					item.rate = 0.0
 				elif item.price_list_rate:
-					if item.pricing_rules or abs(item.discount_percentage) > 0:
+					if not item.rate or (item.pricing_rules and item.discount_percentage > 0):
 						item.rate = flt(item.price_list_rate *
 							(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
 
-						if abs(item.discount_percentage) > 0:
-							item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
+						item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
 
-					elif item.discount_amount or item.pricing_rules:
+					elif item.discount_amount and item.pricing_rules:
 						item.rate =  item.price_list_rate - item.discount_amount
 
 				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item',
@@ -584,7 +580,11 @@ class calculate_taxes_and_totals(object):
 					.format(self.doc.party_account_currency, invoice_total))
 
 			if self.doc.docstatus == 0:
+				if self.doc.get('write_off_outstanding_amount_automatically'):
+					self.doc.write_off_amount = 0
+
 				self.calculate_outstanding_amount()
+				self.calculate_write_off_amount()
 
 	def is_internal_invoice(self):
 		"""
@@ -625,7 +625,6 @@ class calculate_taxes_and_totals(object):
 			change_amount = 0
 
 			if self.doc.doctype == "Sales Invoice" and not self.doc.get('is_return'):
-				self.calculate_write_off_amount()
 				self.calculate_change_amount()
 				change_amount = self.doc.change_amount \
 					if self.doc.party_account_currency == self.doc.currency else self.doc.base_change_amount
@@ -675,18 +674,19 @@ class calculate_taxes_and_totals(object):
 			and self.doc.paid_amount > grand_total and not self.doc.is_return \
 			and any(d.type == "Cash" for d in self.doc.payments):
 
-			self.doc.change_amount = flt(self.doc.paid_amount - grand_total +
-				self.doc.write_off_amount, self.doc.precision("change_amount"))
+			self.doc.change_amount = flt(self.doc.paid_amount - grand_total,
+				self.doc.precision("change_amount"))
 
-			self.doc.base_change_amount = flt(self.doc.base_paid_amount - base_grand_total +
-				self.doc.base_write_off_amount, self.doc.precision("base_change_amount"))
+			self.doc.base_change_amount = flt(self.doc.base_paid_amount - base_grand_total,
+				self.doc.precision("base_change_amount"))
 
 	def calculate_write_off_amount(self):
-		if flt(self.doc.change_amount) > 0:
-			self.doc.write_off_amount = flt(self.doc.grand_total - self.doc.paid_amount
-				+ self.doc.change_amount, self.doc.precision("write_off_amount"))
+		if self.doc.get('write_off_outstanding_amount_automatically'):
+			self.doc.write_off_amount = flt(self.doc.outstanding_amount, self.doc.precision("write_off_amount"))
 			self.doc.base_write_off_amount = flt(self.doc.write_off_amount * self.doc.conversion_rate,
 				self.doc.precision("base_write_off_amount"))
+
+			self.calculate_outstanding_amount()
 
 	def calculate_margin(self, item):
 		rate_with_margin = 0.0
