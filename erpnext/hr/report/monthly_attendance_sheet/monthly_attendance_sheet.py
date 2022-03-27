@@ -15,13 +15,13 @@ from frappe.query_builder.functions import Count, Extract, Sum
 Filters = frappe._dict
 
 status_map = {
+	'Present': 'P',
 	'Absent': 'A',
 	'Half Day': 'HD',
-	'Holiday': 'H',
-	'Weekly Off': 'WO',
+	'Work From Home': 'WFH',
 	'On Leave': 'L',
-	'Present': 'P',
-	'Work From Home': 'WFH'
+	'Holiday': 'H',
+	'Weekly Off': 'WO'
 }
 
 day_abbr = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -38,9 +38,26 @@ def execute(filters:  Optional[Filters] = None) -> Tuple:
 	if not data:
 		return columns, [], None, None
 
+	message = get_message() if not filters.summarized_view else ''
 	chart = get_chart_data(attendance_map, filters)
 
-	return columns, data, None, chart
+	return columns, data, message, chart
+
+
+def get_message() -> str:
+	message = ''
+	colors = ['green', 'red', 'orange', 'green', '#318AD8', '', '']
+
+	count = 0
+	for status, abbr in status_map.items():
+		message += f"""
+			<span style='border-left: 2px solid {colors[count]}; padding-right: 12px; padding-left: 5px; margin-right: 3px;'>
+				{status} - {abbr}
+			</span>
+		"""
+		count += 1
+
+	return message
 
 
 def get_columns(filters: Filters) -> List[Dict]:
@@ -492,7 +509,8 @@ def get_chart_data(attendance_map: Dict, filters: Filters) -> Dict:
 				{'name': 'Leave', 'values': leave},
 			]
 		},
-		'type': 'line'
+		'type': 'line',
+		'colors': ['red', 'green', 'blue'],
 	}
 
 	return chart
