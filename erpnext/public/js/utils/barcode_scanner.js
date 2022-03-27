@@ -1,31 +1,38 @@
 erpnext.stock.BarcodeScanner = class BarcodeScanner {
 	constructor(opts) {
 		$.extend(this, opts);
-		this.scan_barcode_field = this.frm.fields_dict["scan_barcode"];
+
+		// field from which to capture input of scanned data
+		this.scan_field_name = opts.scan_field_name || "scan_barcode";
+		this.scan_barcode_field = this.frm.fields_dict[this.scan_field_name];
+		this.scan_api = opts.scan_api || "erpnext.selling.page.point_of_sale.point_of_sale.search_for_serial_or_batch_or_barcode_number";
 	}
 
 	process_scan() {
 		let me = this;
 
-		if(this.frm.doc.scan_barcode) {
-			frappe.call({
-				method: "erpnext.selling.page.point_of_sale.point_of_sale.search_for_serial_or_batch_or_barcode_number",
-				args: {
-					search_value: this.frm.doc.scan_barcode
-				}
-			}).then(r => {
-				const data = r && r.message;
-				if (!data || Object.keys(data).length === 0) {
-					frappe.show_alert({
-						message: __('Cannot find Item with this Barcode'),
-						indicator: 'red'
-					});
-					return;
-				}
-
-				me.modify_table_after_scan(data);
-			});
+		const input = this.scan_barcode_field.value;
+		if (!input) {
+			return;
 		}
+
+		frappe.call({
+			method: this.scan_api,
+			args: {
+				search_value: input,
+			}
+		}).then(r => {
+			const data = r && r.message;
+			if (!data || Object.keys(data).length === 0) {
+				frappe.show_alert({
+					message: __('Cannot find Item with this Barcode'),
+					indicator: 'red'
+				});
+				return;
+			}
+
+			me.modify_table_after_scan(data);
+		});
 		this.clean_up();
 	}
 
