@@ -44,6 +44,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 					message: __('Cannot find Item with this Barcode'),
 					indicator: 'red'
 				});
+				this.clean_up();
 				return;
 			}
 
