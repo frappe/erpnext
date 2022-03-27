@@ -444,12 +444,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			frappe.show_alert({
 				message: __('Row #{0}: Qty increased by 1', [idx]),
 				indicator: 'green'
-			});
+			}, 5);
 		} else {
 			frappe.show_alert({
 				message: __('Row #{0}: Item added', [idx]),
 				indicator: 'green'
-			});
+			}, 5);
 		}
 	}
 
