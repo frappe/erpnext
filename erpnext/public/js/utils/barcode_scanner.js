@@ -1,6 +1,7 @@
 erpnext.stock.BarcodeScanner = class BarcodeScanner {
 	constructor(opts) {
 		$.extend(this, opts);
+		this.scan_barcode_field = this.frm.fields_dict["scan_barcode"];
 	}
 
 	process_scan() {
@@ -25,11 +26,11 @@ erpnext.stock.BarcodeScanner = class BarcodeScanner {
 				me.modify_table_after_scan(data);
 			});
 		}
+		this.clean_up();
 	}
 
 
 	modify_table_after_scan(data) {
-		let scan_barcode_field = this.frm.fields_dict["scan_barcode"];
 		let cur_grid = this.frm.fields_dict.items.grid;
 		let row_to_modify = null;
 
@@ -50,15 +51,15 @@ erpnext.stock.BarcodeScanner = class BarcodeScanner {
 		}
 
 		if (this.is_duplicate_serial_no(row_to_modify, data.serial_no)) {
-			scan_barcode_field.set_value("");
+			this.clean_up();
 			return;
 		};
 
 		this.show_scan_message(row_to_modify.idx, row_to_modify.item_code);
-		this.set_scanned_values(row_to_modify, data, scan_barcode_field);
+		this.set_scanned_values(row_to_modify, data);
 	}
 
-	set_scanned_values(row_to_modify, data, scan_barcode_field) {
+	set_scanned_values(row_to_modify, data) {
 		// increase qty and set scanned value and item in row
 		this.frm.from_barcode = this.frm.from_barcode ? this.frm.from_barcode + 1 : 1;
 		frappe.model.set_value(row_to_modify.doctype, row_to_modify.name, {
@@ -79,8 +80,7 @@ erpnext.stock.BarcodeScanner = class BarcodeScanner {
 			}
 		});
 
-		scan_barcode_field.set_value('');
-		refresh_field("items");
+		this.clean_up();
 	}
 
 	show_scan_message (idx, exist = null) {
@@ -129,5 +129,10 @@ erpnext.stock.BarcodeScanner = class BarcodeScanner {
 		}
 
 		return row_to_modify;
+	}
+
+	clean_up() {
+		this.scan_barcode_field.set_value("");
+		refresh_field("items");
 	}
 };
