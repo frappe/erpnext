@@ -118,10 +118,6 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	}
 
 	set_barcode(row, barcode) {
-		// increase qty and set scanned value and item in row
-		// XXX: tightly coupled global flag on frm object used in transaction.js -_-
-		this.frm.from_barcode = this.frm.from_barcode ? this.frm.from_barcode + 1 : 1;
-
 		if (barcode && frappe.meta.has_field(row.doctype, this.barcode_field)) {
 			frappe.model.set_value(row.doctype, row.name, this.barcode_field, barcode);
 		}

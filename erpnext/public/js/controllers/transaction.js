@@ -409,8 +409,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			// barcode cleared, remove item
 			d.item_code = "";
 		}
-
-		this.frm.from_barcode = this.frm.from_barcode ? this.frm.from_barcode + 1 : 1;
 		this.item_code(doc, cdt, cdn);
 	}
 
@@ -431,11 +429,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.doc.doctype === 'Delivery Note') {
 			show_batch_dialog = 1;
 		}
-		// clear barcode if setting item (else barcode will take priority)
-		if (this.frm.from_barcode == 0) {
-			item.barcode = null;
-		}
-		this.frm.from_barcode = this.frm.from_barcode - 1 >= 0 ? this.frm.from_barcode - 1 : 0;
+		item.barcode = null;
 
 
 		if(item.item_code || item.barcode || item.serial_no) {
