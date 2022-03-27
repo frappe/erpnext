@@ -1,10 +1,14 @@
-erpnext.stock.BarcodeScanner = class BarcodeScanner {
+erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	constructor(opts) {
 		$.extend(this, opts);
 
 		// field from which to capture input of scanned data
 		this.scan_field_name = opts.scan_field_name || "scan_barcode";
 		this.scan_barcode_field = this.frm.fields_dict[this.scan_field_name];
+
+		this.items_table_name = opts.items_table_name || "items";
+		this.items_table = this.frm.doc[this.items_table_name];
+
 		this.scan_api = opts.scan_api || "erpnext.selling.page.point_of_sale.point_of_sale.search_for_serial_or_batch_or_barcode_number";
 	}
 
@@ -38,7 +42,7 @@ erpnext.stock.BarcodeScanner = class BarcodeScanner {
 
 
 	modify_table_after_scan(data) {
-		let cur_grid = this.frm.fields_dict.items.grid;
+		let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
 		let row_to_modify = null;
 
 		// Check if batch is scanned and table has batch no field
@@ -53,8 +57,9 @@ erpnext.stock.BarcodeScanner = class BarcodeScanner {
 
 		if (!row_to_modify) {
 			// add new row if new item/batch is scanned
-			row_to_modify = frappe.model.add_child(this.frm.doc, cur_grid.doctype, 'items');
-			this.frm.script_manager.trigger("items_add", row_to_modify.doctype, row_to_modify.name);
+			row_to_modify = frappe.model.add_child(this.frm.doc, cur_grid.doctype, this.items_table_name);
+			// trigger any row add triggers defined on child table.
+			this.frm.script_manager.trigger(`${this.items_table_name}_add`, row_to_modify.doctype, row_to_modify.name);
 		}
 
 		if (this.is_duplicate_serial_no(row_to_modify, data.serial_no)) {
@@ -120,14 +125,14 @@ erpnext.stock.BarcodeScanner = class BarcodeScanner {
 
 	get_batch_row_to_modify(batch_no) {
 		// get row if batch already exists in table
-		const existing_batch_row = this.frm.doc.items.find(d => d.batch_no === batch_no);
+		const existing_batch_row = this.items_table.find(d => d.batch_no === batch_no);
 		return existing_batch_row || null;
 	}
 
 	get_row_to_modify_on_scan(row_to_modify, data) {
 		// get an existing item row to increment or blank row to modify
-		const existing_item_row = this.frm.doc.items.find(d => d.item_code === data.item_code);
-		const blank_item_row = this.frm.doc.items.find(d => !d.item_code);
+		const existing_item_row = this.items_table.find(d => d.item_code === data.item_code);
+		const blank_item_row = this.items_table.find(d => !d.item_code);
 
 		if (existing_item_row) {
 			row_to_modify = existing_item_row;
@@ -140,6 +145,6 @@ erpnext.stock.BarcodeScanner = class BarcodeScanner {
 
 	clean_up() {
 		this.scan_barcode_field.set_value("");
-		refresh_field("items");
+		refresh_field(this.items_table_name);
 	}
 };
