@@ -56,7 +56,7 @@ class TestSalesOrder(FrappeTestCase):
 
 	def test_make_material_request(self):
 		frappe.flags.args = frappe._dict()
-		so = make_sales_order(item_code="_Test FG Item", qty=10, do_not_submit=True)
+		so = make_sales_order(item_code= "_Test FG Item", qty=10, do_not_submit=True)
 
 		self.assertRaises(frappe.ValidationError, make_material_request, so.name)
 
@@ -68,9 +68,7 @@ class TestSalesOrder(FrappeTestCase):
 		self.assertEqual(len(mr.get("items")), len(so.get("items")))
 
 		frappe.flags.args.ignore_available_qty = 0
-		make_stock_entry(
-			item="_Test FG Item", target="_Test Warehouse - _TC", qty=200, purpose="Material Receipt"
-		)
+		make_stock_entry(item="_Test FG Item", target="_Test Warehouse - _TC", qty=200, purpose ="Material Receipt")
 		self.assertRaises(frappe.ValidationError, make_material_request, so.name)
 
 	def test_make_sales_invoice(self):
