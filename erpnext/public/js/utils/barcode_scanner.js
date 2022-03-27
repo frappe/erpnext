@@ -1,10 +1,15 @@
 erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	constructor(opts) {
-		$.extend(this, opts);
+		this.frm = opts.frm;
 
 		// field from which to capture input of scanned data
 		this.scan_field_name = opts.scan_field_name || "scan_barcode";
 		this.scan_barcode_field = this.frm.fields_dict[this.scan_field_name];
+
+		this.barcode_field = opts.barcode_field || "barcode";
+		this.serial_no_field = opts.serial_no_field || "serial_no";
+		this.batch_no_field = opts.batch_no_field || "batch_no";
+		this.qty_field = opts.qty_field || "qty";
 
 		this.items_table_name = opts.items_table_name || "items";
 		this.items_table = this.frm.doc[this.items_table_name];
@@ -51,7 +56,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		let row = null;
 
 		// Check if batch is scanned and table has batch no field
-		let batch_no_scan = Boolean(batch_no) && frappe.meta.has_field(cur_grid.doctype, "batch_no");
+		let batch_no_scan = Boolean(batch_no) && frappe.meta.has_field(cur_grid.doctype, this.batch_no_field);
 
 		if (batch_no_scan) {
 			row = this.get_batch_row_to_modify(batch_no);
@@ -81,24 +86,21 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	}
 
 	set_item(row, item_code) {
-		frappe.model.set_value(row.doctype, row.name, {
-			item_code: item_code,
-			qty: (row.qty || 0) + 1, // TODO: harcoded fieldname
-		});
+		const item_data = {item_code: item_code}
+		item_data[this.qty_field] = (row[this.qty_field] || 0) + 1;
+		frappe.model.set_value(row.doctype, row.name, item_data);
 	}
 
 	set_serial_no(row, serial_no) {
-		if (serial_no && frappe.meta.has_field(row.doctype, "serial_no")) {
-			// TODO: fieldname hardcoded
-			const value = row["serial_no"] + '\n' + serial_no;
-			frappe.model.set_value(row.doctype, row.name, "serial_no", value);
+		if (serial_no && frappe.meta.has_field(row.doctype, this.serial_no_field)) {
+			const value = row[this.serial_no_field] + '\n' + serial_no;
+			frappe.model.set_value(row.doctype, row.name, this.serial_no_field, value);
 		}
 	}
 
 	set_batch_no(row, batch_no) {
-		if (batch_no && frappe.meta.has_field(row.doctype, "batch_no")) {
-			// TODO: fieldname hardcoded
-			frappe.model.set_value(row.doctype, row.name, "batch_no", batch_no);
+		if (batch_no && frappe.meta.has_field(row.doctype, this.batch_no_field)) {
+			frappe.model.set_value(row.doctype, row.name, this.batch_no_field, batch_no);
 		}
 	}
 
@@ -106,9 +108,9 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		// increase qty and set scanned value and item in row
 		// XXX: tightly coupled global flag on frm object used in transaction.js -_-
 		this.frm.from_barcode = this.frm.from_barcode ? this.frm.from_barcode + 1 : 1;
-		if (barcode && frappe.meta.has_field(row.doctype, "barcode")) {
-			// TODO: fieldname hardcoded
-			frappe.model.set_value(row.doctype, row.name, "barcode", barcode);
+
+		if (barcode && frappe.meta.has_field(row.doctype, this.barcode_field)) {
+			frappe.model.set_value(row.doctype, row.name, this.barcode_field, barcode);
 		}
 	}
 
