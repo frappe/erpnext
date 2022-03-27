@@ -387,6 +387,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (!row_to_modify) {
 			// add new row if new item/batch is scanned
 			row_to_modify = frappe.model.add_child(this.frm.doc, cur_grid.doctype, 'items');
+			this.frm.script_manager.trigger("items_add", row_to_modify.doctype, row_to_modify.name);
 		}
 
 		this.show_scan_message(row_to_modify.idx, row_to_modify.item_code);
