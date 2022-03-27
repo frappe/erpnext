@@ -390,6 +390,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.script_manager.trigger("items_add", row_to_modify.doctype, row_to_modify.name);
 		}
 
+		if (this.is_duplicate_serial_no(row_to_modify, data.serial_no)) {
+			scan_barcode_field.set_value("");
+			return;
+		};
+
 		this.show_scan_message(row_to_modify.idx, row_to_modify.item_code);
 		this.set_scanned_values(row_to_modify, data, scan_barcode_field);
 	}
@@ -437,6 +442,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		// get row if batch already exists in table
 		const existing_batch_row = this.frm.doc.items.find(d => d.batch_no === batch_no);
 		return existing_batch_row || null;
+	}
+
+	is_duplicate_serial_no(row, serial_no) {
+		const is_duplicate = !!serial_no && !!row.serial_no && row.serial_no.includes(serial_no);
+
+		if (is_duplicate) {
+			frappe.show_alert({
+				message: __('Serial No {0} is already added', [serial_no]),
+				indicator: 'orange'
+			}, 5);
+		}
+		return is_duplicate;
 	}
 
 	show_scan_message (idx, exist = null) {
