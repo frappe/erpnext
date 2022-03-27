@@ -93,8 +93,15 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 	set_serial_no(row, serial_no) {
 		if (serial_no && frappe.meta.has_field(row.doctype, this.serial_no_field)) {
-			const value = row[this.serial_no_field] + '\n' + serial_no;
-			frappe.model.set_value(row.doctype, row.name, this.serial_no_field, value);
+			const existing_serial_nos = row[this.serial_no_field];
+			let new_serial_nos = '';
+
+			if (!!existing_serial_nos) {
+				new_serial_nos = existing_serial_nos + '\n' + serial_no;
+			} else {
+				new_serial_nos = serial_no;
+			}
+			frappe.model.set_value(row.doctype, row.name, this.serial_no_field, new_serial_nos);
 		}
 	}
 
