@@ -840,7 +840,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	calculate_write_off_amount() {
-		if(this.frm.doc.paid_amount > this.frm.doc.grand_total) {
+		if(this.frm.doc.write_off_outstanding_amount_automatically) {
 			this.frm.doc.write_off_amount = flt(this.frm.doc.outstanding_amount, precision("write_off_amount"));
 			this.frm.doc.base_write_off_amount = flt(this.frm.doc.write_off_amount * this.frm.doc.conversion_rate,
 				precision("base_write_off_amount"));
