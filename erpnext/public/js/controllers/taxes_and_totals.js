@@ -34,11 +34,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		frappe.model.set_value(item.doctype, item.name, "rate", item_rate);
 	}
 
-<<<<<<< HEAD
-	calculate_taxes_and_totals(update_paid_amount) {
-=======
-	calculate_taxes_and_totals: async function(update_paid_amount) {
->>>>>>> a044e92687 (fix: Incorrect default amount to pay for POS invoices)
+	async calculate_taxes_and_totals(update_paid_amount) {
 		this.discount_amount_applied = false;
 		this._calculate_taxes_and_totals();
 		this.calculate_discount_amount();
