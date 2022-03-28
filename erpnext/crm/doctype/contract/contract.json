@@ -2,11 +2,13 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2018-04-12 06:32:04.582486",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "party_type",
   "is_signed",
   "cb_party",
@@ -244,11 +246,20 @@
    "fieldname": "authorised_by_section",
    "fieldtype": "Section Break",
    "label": "Authorised By"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "no_copy": 1,
+   "options": "CRM-CONTR-.YYYY.-",
+   "reqd": 1,
+   "set_only_once": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-07 11:15:58.385521",
+ "modified": "2022-03-28 10:22:11.156658",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Contract",
