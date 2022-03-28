@@ -4,13 +4,14 @@ from frappe.utils import today
 
 def execute():
 	for dt in ("cost_center_allocation", "cost_center_allocation_percentage"):
-		frappe.reload_doc('accounts', 'doctype', dt)
+		frappe.reload_doc("accounts", "doctype", dt)
 
 	cc_allocations = get_existing_cost_center_allocations()
 	if cc_allocations:
 		create_new_cost_center_allocation_records(cc_allocations)
 
-	frappe.delete_doc('DocType', 'Distributed Cost Center', ignore_missing=True)
+	frappe.delete_doc("DocType", "Distributed Cost Center", ignore_missing=True)
+
 
 def create_new_cost_center_allocation_records(cc_allocations):
 	for main_cc, allocations in cc_allocations.items():
@@ -19,12 +20,10 @@ def create_new_cost_center_allocation_records(cc_allocations):
 		cca.valid_from = today()
 
 		for child_cc, percentage in allocations.items():
-			cca.append("allocation_percentages", ({
-				"cost_center": child_cc,
-				"percentage": percentage
-			}))
+			cca.append("allocation_percentages", ({"cost_center": child_cc, "percentage": percentage}))
 		cca.save()
 		cca.submit()
+
 
 def get_existing_cost_center_allocations():
 	if not frappe.db.exists("DocType", "Distributed Cost Center"):
@@ -35,14 +34,16 @@ def get_existing_cost_center_allocations():
 
 	records = (
 		frappe.qb.from_(par)
-		.inner_join(child).on(par.name == child.parent)
+		.inner_join(child)
+		.on(par.name == child.parent)
 		.select(par.name, child.cost_center, child.percentage_allocation)
 		.where(par.enable_distributed_cost_center == 1)
 	).run(as_dict=True)
 
 	cc_allocations = frappe._dict()
 	for d in records:
-		cc_allocations.setdefault(d.name, frappe._dict())\
-			.setdefault(d.cost_center, d.percentage_allocation)
+		cc_allocations.setdefault(d.name, frappe._dict()).setdefault(
+			d.cost_center, d.percentage_allocation
+		)
 
 	return cc_allocations

@@ -264,6 +264,15 @@ body.product-page {
 			font-size: 13px;
 		}
 
+		.filter-lookup-input {
+			background-color: white;
+			border: 1px solid var(--gray-300);
+
+			&:focus {
+				border: 1px solid var(--primary);
+			}
+		}
+
 		.filter-label {
 			font-size: 11px;
 			font-weight: 600;
@@ -338,14 +347,14 @@ body.product-page {
 
 	.btn-add-to-wishlist {
 		svg use {
-			stroke: #F47A7A;
+			--icon-stroke: #F47A7A;
 		}
 	}
 
 	.btn-view-in-wishlist {
 		svg use {
 			fill: #F47A7A;
-			stroke: none;
+			--icon-stroke: none;
 		}
 	}
 
@@ -569,15 +578,12 @@ body.product-page {
 }
 
 .scroll-categories {
-	white-space: nowrap;
-	overflow-x: auto;
-
 	.category-pill {
-		margin: 0px 4px;
 		display: inline-block;
-		padding: 6px 12px;
-		background-color: #ecf5fe;
 		width: fit-content;
+		padding: 6px 12px;
+		margin-bottom: 8px;
+		background-color: #ecf5fe;
 		font-size: 14px;
 		border-radius: 18px;
 		color: var(--blue-500);
@@ -1022,7 +1028,7 @@ body.product-page {
 
 .not-wished {
 	cursor: pointer;
-	stroke: #F47A7A !important;
+	--icon-stroke: #F47A7A !important;
 
 	&:hover {
 		fill: #F47A7A;
@@ -1030,7 +1036,7 @@ body.product-page {
 }
 
 .wished {
-	stroke: none;
+	--icon-stroke: none;
 	fill: #F47A7A !important;
 }
 

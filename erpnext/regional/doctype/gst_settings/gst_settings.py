@@ -11,15 +11,21 @@ from frappe.model.document import Document
 from frappe.utils import date_diff, get_url, nowdate
 
 
-class EmailMissing(frappe.ValidationError): pass
+class EmailMissing(frappe.ValidationError):
+	pass
+
 
 class GSTSettings(Document):
 	def onload(self):
 		data = frappe._dict()
-		data.total_addresses = frappe.db.sql('''select count(*) from tabAddress where country = "India"''')
-		data.total_addresses_with_gstin = frappe.db.sql('''select distinct count(*)
-			from tabAddress where country = "India" and ifnull(gstin, '')!='' ''')
-		self.set_onload('data', data)
+		data.total_addresses = frappe.db.sql(
+			'''select count(*) from tabAddress where country = "India"'''
+		)
+		data.total_addresses_with_gstin = frappe.db.sql(
+			"""select distinct count(*)
+			from tabAddress where country = "India" and ifnull(gstin, '')!='' """
+		)
+		self.set_onload("data", data)
 
 	def validate(self):
 		# Validate duplicate accounts
@@ -27,37 +33,44 @@ class GSTSettings(Document):
 
 	def validate_duplicate_accounts(self):
 		account_list = []
-		for account in self.get('gst_accounts'):
-			for fieldname in ['cgst_account', 'sgst_account', 'igst_account', 'cess_account']:
+		for account in self.get("gst_accounts"):
+			for fieldname in ["cgst_account", "sgst_account", "igst_account", "cess_account"]:
 				if account.get(fieldname) in account_list:
-					frappe.throw(_("Account {0} appears multiple times").format(
-						frappe.bold(account.get(fieldname))))
+					frappe.throw(
+						_("Account {0} appears multiple times").format(frappe.bold(account.get(fieldname)))
+					)
 
 				if account.get(fieldname):
 					account_list.append(account.get(fieldname))
 
+
 @frappe.whitelist()
 def send_reminder():
-	frappe.has_permission('GST Settings', throw=True)
+	frappe.has_permission("GST Settings", throw=True)
 
-	last_sent = frappe.db.get_single_value('GST Settings', 'gstin_email_sent_on')
+	last_sent = frappe.db.get_single_value("GST Settings", "gstin_email_sent_on")
 	if last_sent and date_diff(nowdate(), last_sent) < 3:
 		frappe.throw(_("Please wait 3 days before resending the reminder."))
 
-	frappe.db.set_value('GST Settings', 'GST Settings', 'gstin_email_sent_on', nowdate())
+	frappe.db.set_value("GST Settings", "GST Settings", "gstin_email_sent_on", nowdate())
 
 	# enqueue if large number of customers, suppliser
-	frappe.enqueue('erpnext.regional.doctype.gst_settings.gst_settings.send_gstin_reminder_to_all_parties')
-	frappe.msgprint(_('Email Reminders will be sent to all parties with email contacts'))
+	frappe.enqueue(
+		"erpnext.regional.doctype.gst_settings.gst_settings.send_gstin_reminder_to_all_parties"
+	)
+	frappe.msgprint(_("Email Reminders will be sent to all parties with email contacts"))
+
 
 def send_gstin_reminder_to_all_parties():
 	parties = []
-	for address_name in frappe.db.sql('''select name
-		from tabAddress where country = "India" and ifnull(gstin, '')='' '''):
-		address = frappe.get_doc('Address', address_name[0])
+	for address_name in frappe.db.sql(
+		"""select name
+		from tabAddress where country = "India" and ifnull(gstin, '')='' """
+	):
+		address = frappe.get_doc("Address", address_name[0])
 		for link in address.links:
 			party = frappe.get_doc(link.link_doctype, link.link_name)
-			if link.link_doctype in ('Customer', 'Supplier'):
+			if link.link_doctype in ("Customer", "Supplier"):
 				t = (link.link_doctype, link.link_name, address.email_id)
 				if not t in parties:
 					parties.append(t)
@@ -74,29 +87,30 @@ def send_gstin_reminder_to_all_parties():
 
 @frappe.whitelist()
 def send_gstin_reminder(party_type, party):
-	'''Send GSTIN reminder to one party (called from Customer, Supplier form)'''
+	"""Send GSTIN reminder to one party (called from Customer, Supplier form)"""
 	frappe.has_permission(party_type, throw=True)
-	email = _send_gstin_reminder(party_type ,party)
+	email = _send_gstin_reminder(party_type, party)
 	if email:
-		frappe.msgprint(_('Reminder to update GSTIN Sent'), title='Reminder sent', indicator='green')
+		frappe.msgprint(_("Reminder to update GSTIN Sent"), title="Reminder sent", indicator="green")
+
 
 def _send_gstin_reminder(party_type, party, default_email_id=None, sent_to=None):
-	'''Send GST Reminder email'''
-	email_id = frappe.db.get_value('Contact', get_default_contact(party_type, party), 'email_id')
+	"""Send GST Reminder email"""
+	email_id = frappe.db.get_value("Contact", get_default_contact(party_type, party), "email_id")
 	if not email_id:
 		# get email from address
 		email_id = default_email_id
 
 	if not email_id:
-		frappe.throw(_('Email not found in default contact'), exc=EmailMissing)
+		frappe.throw(_("Email not found in default contact"), exc=EmailMissing)
 
 	if sent_to and email_id in sent_to:
 		return
 
 	frappe.sendmail(
-		subject='Please update your GSTIN',
+		subject="Please update your GSTIN",
 		recipients=email_id,
-		message='''
+		message="""
 		<p>Hello,</p>
 		<p>Please help us send you GST Ready Invoices.</p>
 		<p>
@@ -109,7 +123,9 @@ def _send_gstin_reminder(party_type, party, default_email_id=None, sent_to=None)
 			<br>
 			ERPNext is a free and open source ERP system.
 		</p>
-		'''.format(os.path.join(get_url(), '/regional/india/update-gstin'), party)
+		""".format(
+			os.path.join(get_url(), "/regional/india/update-gstin"), party
+		),
 	)
 
 	return email_id

@@ -116,7 +116,7 @@ frappe.ui.form.on("Timesheet", {
 
 	currency: function(frm) {
 		let base_currency = frappe.defaults.get_global_default('currency');
-		if (base_currency != frm.doc.currency) {
+		if (frm.doc.currency && (base_currency != frm.doc.currency)) {
 			frappe.call({
 				method: "erpnext.setup.utils.get_exchange_rate",
 				args: {
