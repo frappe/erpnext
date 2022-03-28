@@ -41,14 +41,16 @@ class PickList(Document):
 	def before_submit(self):
 		update_sales_orders = set()
 		for item in self.locations:
-			# if the user has not entered any picked qty, set it to stock_qty, before submit
-			if item.picked_qty < item.stock_qty:
+			if self.scan_mode and item.picked_qty < item.stock_qty:
 				frappe.throw(
 					_("Row {0} is short by {1} {2}").format(
 						item.idx, item.stock_qty - item.picked_qty, item.stock_uom
 					),
 					title=_("Pick List Incomplete"),
 				)
+			elif not self.scan_mode and item.picked_qty == 0:
+				# if the user has not entered any picked qty, set it to stock_qty, before submit
+				item.picked_qty = item.stock_qty
 
 			if item.sales_order_item:
 				# update the picked_qty in SO Item

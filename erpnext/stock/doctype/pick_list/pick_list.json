@@ -18,6 +18,8 @@
   "get_item_locations",
   "section_break_6",
   "scan_barcode",
+  "column_break_13",
+  "scan_mode",
   "section_break_15",
   "locations",
   "amended_from",
@@ -138,11 +140,22 @@
    "fieldtype": "Data",
    "label": "Scan Barcode",
    "options": "Barcode"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If checked, picked qty won't automatically be fulfilled on submit of pick list.",
+   "fieldname": "scan_mode",
+   "fieldtype": "Check",
+   "label": "Scan Mode"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-29 13:45:24.401314",
+ "modified": "2022-05-04 11:12:48.044239",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
