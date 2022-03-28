@@ -16,17 +16,21 @@ def create_stripe_subscription(gateway_controller, data):
 
 	try:
 		stripe_settings.integration_request = create_request_log(stripe_settings.data, "Host", "Stripe")
-		stripe_settings.payment_plans = frappe.get_doc("Payment Request", stripe_settings.data.reference_docname).subscription_plans
+		stripe_settings.payment_plans = frappe.get_doc(
+			"Payment Request", stripe_settings.data.reference_docname
+		).subscription_plans
 		return create_subscription_on_stripe(stripe_settings)
 
 	except Exception:
 		frappe.log_error(frappe.get_traceback())
-		return{
+		return {
 			"redirect_to": frappe.redirect_to_message(
-				_('Server Error'),
-				_("It seems that there is an issue with the server's stripe configuration. In case of failure, the amount will get refunded to your account.")
+				_("Server Error"),
+				_(
+					"It seems that there is an issue with the server's stripe configuration. In case of failure, the amount will get refunded to your account."
+				),
 			),
-			"status": 401
+			"status": 401,
 		}
 
 
@@ -40,20 +44,20 @@ def create_subscription_on_stripe(stripe_settings):
 		customer = stripe.Customer.create(
 			source=stripe_settings.data.stripe_token_id,
 			description=stripe_settings.data.payer_name,
-			email=stripe_settings.data.payer_email
+			email=stripe_settings.data.payer_email,
 		)
 
 		subscription = stripe.Subscription.create(customer=customer, items=items)
 
 		if subscription.status == "active":
-			stripe_settings.integration_request.db_set('status', 'Completed', update_modified=False)
+			stripe_settings.integration_request.db_set("status", "Completed", update_modified=False)
 			stripe_settings.flags.status_changed_to = "Completed"
 
 		else:
-			stripe_settings.integration_request.db_set('status', 'Failed', update_modified=False)
-			frappe.log_error('Subscription N°: ' + subscription.id, 'Stripe Payment not completed')
+			stripe_settings.integration_request.db_set("status", "Failed", update_modified=False)
+			frappe.log_error("Subscription N°: " + subscription.id, "Stripe Payment not completed")
 	except Exception:
-		stripe_settings.integration_request.db_set('status', 'Failed', update_modified=False)
+		stripe_settings.integration_request.db_set("status", "Failed", update_modified=False)
 		frappe.log_error(frappe.get_traceback())
 
 	return stripe_settings.finalize_request()

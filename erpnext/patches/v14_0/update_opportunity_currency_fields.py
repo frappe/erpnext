@@ -7,9 +7,11 @@ from erpnext.setup.utils import get_exchange_rate
 
 def execute():
 	frappe.reload_doctype("Opportunity")
-	opportunities = frappe.db.get_list('Opportunity', filters={
-		'opportunity_amount': ['>', 0]
-	}, fields=['name', 'company', 'currency', 'opportunity_amount'])
+	opportunities = frappe.db.get_list(
+		"Opportunity",
+		filters={"opportunity_amount": [">", 0]},
+		fields=["name", "company", "currency", "opportunity_amount"],
+	)
 
 	for opportunity in opportunities:
 		company_currency = erpnext.get_company_currency(opportunity.company)
@@ -22,7 +24,9 @@ def execute():
 			conversion_rate = 1
 			base_opportunity_amount = flt(opportunity.opportunity_amount)
 
-		frappe.db.set_value('Opportunity', opportunity.name, {
-			'conversion_rate': conversion_rate,
-			'base_opportunity_amount': base_opportunity_amount
-		}, update_modified=False)
+		frappe.db.set_value(
+			"Opportunity",
+			opportunity.name,
+			{"conversion_rate": conversion_rate, "base_opportunity_amount": base_opportunity_amount},
+			update_modified=False,
+		)

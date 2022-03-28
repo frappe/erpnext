@@ -6,10 +6,7 @@ from frappe import _
 
 def get_data():
 	return {
-		'reports': [
-			{
-				'label': _('Reports'),
-				'items': ['Final Assessment Grades', 'Course wise Assessment Report']
-			}
+		"reports": [
+			{"label": _("Reports"), "items": ["Final Assessment Grades", "Course wise Assessment Report"]}
 		]
 	}
