@@ -781,11 +781,12 @@ class SalarySlip(TransactionBase):
 		previous_total_paid_taxes = self.get_tax_paid_in_period(payroll_period.start_date, self.start_date, tax_component)
 
 		# get taxable_earnings for current period (all days)
-		current_taxable_earnings = self.get_taxable_earnings(tax_slab.allow_tax_exemption)
+		current_taxable_earnings = self.get_taxable_earnings(tax_slab.allow_tax_exemption, payroll_period=payroll_period)
 		future_structured_taxable_earnings = current_taxable_earnings.taxable_earnings * (math.ceil(remaining_sub_periods) - 1)
 
 		# get taxable_earnings, addition_earnings for current actual payment days
-		current_taxable_earnings_for_payment_days = self.get_taxable_earnings(tax_slab.allow_tax_exemption, based_on_payment_days=1)
+		current_taxable_earnings_for_payment_days = self.get_taxable_earnings(tax_slab.allow_tax_exemption,
+			based_on_payment_days=1, payroll_period=payroll_period)
 		current_structured_taxable_earnings = current_taxable_earnings_for_payment_days.taxable_earnings
 		current_additional_earnings = current_taxable_earnings_for_payment_days.additional_income
 		current_additional_earnings_with_full_tax = current_taxable_earnings_for_payment_days.additional_income_with_full_tax
@@ -911,7 +912,7 @@ class SalarySlip(TransactionBase):
 
 		return total_tax_paid
 
-	def get_taxable_earnings(self, allow_tax_exemption=False, based_on_payment_days=0):
+	def get_taxable_earnings(self, allow_tax_exemption=False, based_on_payment_days=0, payroll_period=None):
 		joining_date, relieving_date = self.get_joining_and_relieving_dates()
 
 		taxable_earnings = 0
@@ -938,7 +939,7 @@ class SalarySlip(TransactionBase):
 					# Get additional amount based on future recurring additional salary
 					if additional_amount and earning.is_recurring_additional_salary:
 						additional_income += self.get_future_recurring_additional_amount(earning.additional_salary,
-							earning.additional_amount) # Used earning.additional_amount to consider the amount for the full month
+							earning.additional_amount, payroll_period) # Used earning.additional_amount to consider the amount for the full month
 
 					if earning.deduct_full_tax_on_selected_payroll_date:
 						additional_income_with_full_tax += additional_amount
@@ -955,7 +956,7 @@ class SalarySlip(TransactionBase):
 
 					if additional_amount and ded.is_recurring_additional_salary:
 						additional_income -= self.get_future_recurring_additional_amount(ded.additional_salary,
-							ded.additional_amount) # Used ded.additional_amount to consider the amount for the full month
+							ded.additional_amount, payroll_period) # Used ded.additional_amount to consider the amount for the full month
 
 		return frappe._dict({
 			"taxable_earnings": taxable_earnings,
@@ -964,12 +965,18 @@ class SalarySlip(TransactionBase):
 			"flexi_benefits": flexi_benefits
 		})
 
-	def get_future_recurring_additional_amount(self, additional_salary, monthly_additional_amount):
+	def get_future_recurring_additional_amount(self, additional_salary, monthly_additional_amount, payroll_period):
 		future_recurring_additional_amount = 0
 		to_date = frappe.db.get_value("Additional Salary", additional_salary, 'to_date')
 
 		# future month count excluding current
 		from_date, to_date = getdate(self.start_date), getdate(to_date)
+
+		# If recurring period end date is beyond the payroll period,
+		# last day of payroll period should be considered for recurring period calculation
+		if getdate(to_date) > getdate(payroll_period.end_date):
+			to_date = getdate(payroll_period.end_date)
+
 		future_recurring_period = ((to_date.year - from_date.year) * 12) + (to_date.month - from_date.month)
 
 		if future_recurring_period > 0:
@@ -999,7 +1006,7 @@ class SalarySlip(TransactionBase):
 
 		# apply rounding
 		if frappe.get_cached_value("Salary Component", row.salary_component, "round_to_the_nearest_integer"):
-			amount, additional_amount = rounded(amount), rounded(additional_amount)
+			amount, additional_amount = rounded(amount or 0), rounded(additional_amount or 0)
 
 		return amount, additional_amount
 
@@ -1276,9 +1283,9 @@ class SalarySlip(TransactionBase):
 	def set_base_totals(self):
 		self.base_gross_pay = flt(self.gross_pay) * flt(self.exchange_rate)
 		self.base_total_deduction = flt(self.total_deduction) * flt(self.exchange_rate)
-		self.rounded_total = rounded(self.net_pay)
+		self.rounded_total = rounded(self.net_pay or 0)
 		self.base_net_pay = flt(self.net_pay) * flt(self.exchange_rate)
-		self.base_rounded_total = rounded(self.base_net_pay)
+		self.base_rounded_total = rounded(self.base_net_pay or 0)
 		self.set_net_total_in_words()
 
 	#calculate total working hours, earnings based on hourly wages and totals
@@ -1390,7 +1397,7 @@ class SalarySlip(TransactionBase):
 					'total_allocated_leaves': flt(leave_values.get('total_leaves')),
 					'expired_leaves': flt(leave_values.get('expired_leaves')),
 					'used_leaves': flt(leave_values.get('leaves_taken')),
-					'pending_leaves': flt(leave_values.get('pending_leaves')),
+					'pending_leaves': flt(leave_values.get('leaves_pending_approval')),
 					'available_leaves': flt(leave_values.get('remaining_leaves'))
 				})
 

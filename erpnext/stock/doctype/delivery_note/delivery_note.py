@@ -14,7 +14,6 @@ from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
-from erpnext.stock.utils import calculate_mapped_packed_items_return
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -129,12 +128,8 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
 
-		# Keeps mapped packed_items in case product bundle is updated.
-		if self.is_return and self.return_against:
-			calculate_mapped_packed_items_return(self)
-		else:
-			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-			make_packing_list(self)
+		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+		make_packing_list(self)
 
 		if self._action != 'submit' and not self.is_return:
 			set_batch_nos(self, 'warehouse', throw=True)
@@ -439,7 +434,6 @@ def make_sales_invoice(source_name, target_doc=None):
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
-		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 
@@ -524,6 +518,8 @@ def make_sales_invoice(source_name, target_doc=None):
 	automatically_fetch_payment_terms = cint(frappe.db.get_single_value('Accounts Settings', 'automatically_fetch_payment_terms'))
 	if automatically_fetch_payment_terms:
 		doc.set_payment_schedule()
+
+	doc.set_onload('ignore_price_list', True)
 
 	return doc
 
@@ -779,3 +775,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+def on_doctype_update():
+	frappe.db.add_index("Delivery Note", ["customer", "is_return", "return_against"])

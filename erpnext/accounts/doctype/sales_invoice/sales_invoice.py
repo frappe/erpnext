@@ -38,14 +38,18 @@ from erpnext.assets.doctype.asset.depreciation import (
 	get_gl_entries_on_asset_regain,
 	make_depreciation_entry,
 )
+from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
-from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
-from erpnext.stock.utils import calculate_mapped_packed_items_return
+from erpnext.stock.doctype.serial_no.serial_no import (
+	get_delivery_note_serial_no,
+	get_serial_nos,
+	update_serial_nos_after_submit,
+)
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -110,6 +114,8 @@ class SalesInvoice(SellingController):
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
 		self.validate_item_cost_centers()
+		self.validate_income_account()
+
 		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_invoice_reference)
 
 		if cint(self.is_pos):
@@ -177,6 +183,10 @@ class SalesInvoice(SellingController):
 			if cost_center_company != self.company:
 				frappe.throw(_("Row #{0}: Cost Center {1} does not belong to company {2}").format(frappe.bold(item.idx), frappe.bold(item.cost_center), frappe.bold(self.company)))
 
+	def validate_income_account(self):
+		for item in self.get('items'):
+			validate_account_head(item.idx, item.income_account, self.company, 'Income')
+
 	def set_tax_withholding(self):
 		tax_withholding_details = get_party_tax_withholding_details(self)
 
@@ -228,6 +238,9 @@ class SalesInvoice(SellingController):
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		if self.update_stock == 1:
 			self.update_stock_ledger()
+		if self.is_return and self.update_stock:
+			update_serial_nos_after_submit(self, "items")
+
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
@@ -752,11 +765,8 @@ class SalesInvoice(SellingController):
 
 	def update_packing_list(self):
 		if cint(self.update_stock) == 1:
-			if cint(self.is_return) and self.return_against:
-				calculate_mapped_packed_items_return(self)
-			else:
-				from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-				make_packing_list(self)
+			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+			make_packing_list(self)
 		else:
 			self.set('packed_items', [])
 
@@ -1415,12 +1425,19 @@ class SalesInvoice(SellingController):
 		frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", lp_details.tier_name)
 
 	def get_returned_amount(self):
-		returned_amount = frappe.db.sql("""
-			select sum(grand_total)
-			from `tabSales Invoice`
-			where docstatus=1 and is_return=1 and ifnull(return_against, '')=%s
-		""", self.name)
-		return abs(flt(returned_amount[0][0])) if returned_amount else 0
+		from frappe.query_builder.functions import Coalesce, Sum
+		doc = frappe.qb.DocType(self.doctype)
+		returned_amount = (
+			frappe.qb.from_(doc)
+			.select(Sum(doc.grand_total))
+			.where(
+				(doc.docstatus == 1)
+				& (doc.is_return == 1)
+				& (Coalesce(doc.return_against, '') == self.name)
+			)
+		).run()
+
+		return abs(returned_amount[0][0]) if returned_amount[0][0] else 0
 
 	# redeem the loyalty points.
 	def apply_loyalty_points(self):
@@ -1700,7 +1717,6 @@ def make_maintenance_schedule(source_name, target_doc=None):
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
@@ -1745,6 +1761,7 @@ def make_delivery_note(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 
+	doclist.set_onload('ignore_price_list', True)
 	return doclist
 
 @frappe.whitelist()

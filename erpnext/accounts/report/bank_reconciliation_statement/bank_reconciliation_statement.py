@@ -267,7 +267,7 @@ def get_loan_amount(filters):
 
 		total_amount += flt(amount)
 
-	return amount
+	return total_amount
 
 def get_balance_row(label, amount, account_currency):
 	if amount > 0:

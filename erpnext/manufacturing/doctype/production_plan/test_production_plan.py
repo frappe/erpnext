@@ -1,6 +1,7 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_to_date, flt, now_datetime, nowdate
 
 from erpnext.controllers.item_variant import create_variant
@@ -16,10 +17,9 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestProductionPlan(ERPNextTestCase):
+class TestProductionPlan(FrappeTestCase):
 	def setUp(self):
 		for item in ['Test Production Item 1', 'Subassembly Item 1',
 			'Raw Material Item 1', 'Raw Material Item 2']:
@@ -604,6 +604,50 @@ class TestProductionPlan(ERPNextTestCase):
 			frappe._dict(planned_qty=5, produce_qty=4)
 		]
 		self.assertFalse(pp.all_items_completed())
+
+	def test_production_plan_planned_qty(self):
+		pln = create_production_plan(item_code="_Test FG Item", planned_qty=0.55)
+		pln.make_work_order()
+		work_order = frappe.db.get_value('Work Order', {'production_plan': pln.name}, 'name')
+		wo_doc = frappe.get_doc('Work Order', work_order)
+		wo_doc.update({
+			'wip_warehouse': 'Work In Progress - _TC',
+			'fg_warehouse': 'Finished Goods - _TC'
+		})
+		wo_doc.submit()
+		self.assertEqual(wo_doc.qty, 0.55)
+
+	def test_temporary_name_relinking(self):
+
+		pp = frappe.new_doc("Production Plan")
+
+		# this can not be unittested so mocking data that would be expected
+		# from client side.
+		for _ in range(10):
+			po_item = pp.append("po_items", {
+				"name": frappe.generate_hash(length=10),
+				"temporary_name": frappe.generate_hash(length=10),
+			})
+			pp.append("sub_assembly_items", {
+				"production_plan_item": po_item.temporary_name
+			})
+		pp._rename_temporary_references()
+
+		for po_item, subassy_item in zip(pp.po_items, pp.sub_assembly_items):
+			self.assertEqual(po_item.name, subassy_item.production_plan_item)
+
+		# bad links should be erased
+		pp.append("sub_assembly_items", {
+			"production_plan_item": frappe.generate_hash(length=16)
+		})
+		pp._rename_temporary_references()
+		self.assertIsNone(pp.sub_assembly_items[-1].production_plan_item)
+		pp.sub_assembly_items.pop()
+
+		# reattempting on same doc shouldn't change anything
+		pp._rename_temporary_references()
+		for po_item, subassy_item in zip(pp.po_items, pp.sub_assembly_items):
+			self.assertEqual(po_item.name, subassy_item.production_plan_item)
 
 
 def create_production_plan(**args):

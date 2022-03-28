@@ -6,6 +6,7 @@ import json
 
 import frappe
 from frappe.test_runner import make_test_objects
+from frappe.tests.utils import FrappeTestCase, change_settings
 
 from erpnext.controllers.item_variant import (
 	InvalidItemAttributeValueError,
@@ -24,12 +25,14 @@ from erpnext.stock.doctype.item.item import (
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
-from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]
 
-def make_item(item_code, properties=None):
+def make_item(item_code=None, properties=None):
+	if not item_code:
+		item_code = frappe.generate_hash(length=16)
+
 	if frappe.db.exists("Item", item_code):
 		return frappe.get_doc("Item", item_code)
 
@@ -52,7 +55,7 @@ def make_item(item_code, properties=None):
 
 	return item
 
-class TestItem(ERPNextTestCase):
+class TestItem(FrappeTestCase):
 	def setUp(self):
 		super().setUp()
 		frappe.flags.attribute_values = None
@@ -618,6 +621,20 @@ class TestItem(ERPNextTestCase):
 		item = frappe.new_doc("Item")
 		item.item_group = "All Item Groups"
 		item.save()  # if item code saved without item_code then series worked
+
+	@change_settings("Stock Settings", {"sample_retention_warehouse": "_Test Warehouse - _TC"})
+	def test_retain_sample(self):
+		item = make_item("_TestRetainSample", {'has_batch_no': 1, 'retain_sample': 1, 'sample_quantity': 1})
+
+		self.assertEqual(item.has_batch_no, 1)
+		self.assertEqual(item.retain_sample, 1)
+		self.assertEqual(item.sample_quantity, 1)
+
+		item.has_batch_no = None
+		item.save()
+		self.assertEqual(item.retain_sample, None)
+		self.assertEqual(item.sample_quantity, None)
+		item.delete()
 
 
 def set_item_variant_settings(fields):

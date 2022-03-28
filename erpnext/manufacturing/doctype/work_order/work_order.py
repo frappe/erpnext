@@ -333,6 +333,14 @@ class WorkOrder(Document):
 		if not self.batch_size:
 			self.batch_size = total_qty
 
+		batch_auto_creation = frappe.get_cached_value("Item", self.production_item, "create_new_batch")
+		if not batch_auto_creation:
+			frappe.msgprint(
+				_("Batch not created for item {} since it does not have a batch series.")
+					.format(frappe.bold(self.production_item)),
+				alert=True, indicator="orange")
+			return
+
 		while total_qty > 0:
 			qty = self.batch_size
 			if self.batch_size >= total_qty:
@@ -449,7 +457,8 @@ class WorkOrder(Document):
 			mr_obj.update_requested_qty([self.material_request_item])
 
 	def update_ordered_qty(self):
-		if self.production_plan and self.production_plan_item:
+		if self.production_plan and self.production_plan_item \
+			and not self.production_plan_sub_assembly_item:
 			qty = frappe.get_value("Production Plan Item", self.production_plan_item, "ordered_qty") or 0.0
 
 			if self.docstatus == 1:
@@ -632,15 +641,19 @@ class WorkOrder(Document):
 		if not self.qty > 0:
 			frappe.throw(_("Quantity to Manufacture must be greater than 0."))
 
-		if self.production_plan and self.production_plan_item:
+		if self.production_plan and self.production_plan_item \
+			and not self.production_plan_sub_assembly_item:
 			qty_dict = frappe.db.get_value("Production Plan Item", self.production_plan_item, ["planned_qty", "ordered_qty"], as_dict=1)
 
-			allowance_qty =flt(frappe.db.get_single_value("Manufacturing Settings",
+			if not qty_dict:
+				return
+
+			allowance_qty = flt(frappe.db.get_single_value("Manufacturing Settings",
 			"overproduction_percentage_for_work_order"))/100 * qty_dict.get("planned_qty", 0)
 
 			max_qty = qty_dict.get("planned_qty", 0) + allowance_qty - qty_dict.get("ordered_qty", 0)
 
-			if max_qty < 1:
+			if not max_qty > 0:
 				frappe.throw(_("Cannot produce more item for {0}")
 				.format(self.production_item), OverProductionError)
 			elif self.qty > max_qty:
@@ -1137,6 +1150,10 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 
 		doc.insert()
 		frappe.msgprint(_("Job card {0} created").format(get_link_to_form("Job Card", doc.name)), alert=True)
+
+	if enable_capacity_planning:
+		# automatically added scheduling rows shouldn't change status to WIP
+		doc.db_set("status", "Open")
 
 	return doc
 

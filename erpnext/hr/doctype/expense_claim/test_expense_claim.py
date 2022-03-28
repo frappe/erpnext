@@ -72,6 +72,72 @@ class TestExpenseClaim(unittest.TestCase):
 		expense_claim = frappe.get_doc("Expense Claim", expense_claim.name)
 		self.assertEqual(expense_claim.status, "Unpaid")
 
+		# expense claim without any sanctioned amount should not have status as Paid
+		claim = make_expense_claim(payable_account, 1000, 0, "_Test Company", "Travel Expenses - _TC")
+		self.assertEqual(claim.total_sanctioned_amount, 0)
+		self.assertEqual(claim.status, "Submitted")
+
+		# no gl entries created
+		gl_entry = frappe.get_all('GL Entry', {'voucher_type': 'Expense Claim', 'voucher_no': claim.name})
+		self.assertEqual(len(gl_entry), 0)
+
+	def test_expense_claim_against_fully_paid_advances(self):
+		from erpnext.hr.doctype.employee_advance.test_employee_advance import (
+			get_advances_for_claim,
+			make_employee_advance,
+			make_payment_entry,
+		)
+
+		frappe.db.delete("Employee Advance")
+
+		payable_account = get_payable_account("_Test Company")
+		claim = make_expense_claim(payable_account, 1000, 1000, "_Test Company", "Travel Expenses - _TC", do_not_submit=True)
+
+		advance = make_employee_advance(claim.employee)
+		pe = make_payment_entry(advance)
+		pe.submit()
+
+		# claim for already paid out advances
+		claim = get_advances_for_claim(claim, advance.name)
+		claim.save()
+		claim.submit()
+
+		self.assertEqual(claim.grand_total, 0)
+		self.assertEqual(claim.status, "Paid")
+
+	def test_expense_claim_partially_paid_via_advance(self):
+		from erpnext.hr.doctype.employee_advance.test_employee_advance import (
+			get_advances_for_claim,
+			make_employee_advance,
+		)
+		from erpnext.hr.doctype.employee_advance.test_employee_advance import (
+			make_payment_entry as make_advance_payment,
+		)
+
+		frappe.db.delete("Employee Advance")
+
+		payable_account = get_payable_account("_Test Company")
+		claim = make_expense_claim(payable_account, 1000, 1000, "_Test Company", "Travel Expenses - _TC", do_not_submit=True)
+
+		# link advance for partial amount
+		advance = make_employee_advance(claim.employee, {'advance_amount': 500})
+		pe = make_advance_payment(advance)
+		pe.submit()
+
+		claim = get_advances_for_claim(claim, advance.name)
+		claim.save()
+		claim.submit()
+
+		self.assertEqual(claim.grand_total, 500)
+		self.assertEqual(claim.status, "Unpaid")
+
+		# reimburse remaning amount
+		make_payment_entry(claim, payable_account, 500)
+		claim.reload()
+
+		self.assertEqual(claim.total_amount_reimbursed, 500)
+		self.assertEqual(claim.status, "Paid")
+
 	def test_expense_claim_gl_entry(self):
 		payable_account = get_payable_account(company_name)
 		taxes = generate_taxes()

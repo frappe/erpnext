@@ -54,7 +54,7 @@ class POSInvoice(SalesInvoice):
 
 	def on_submit(self):
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
-		if self.loyalty_program:
+		if not self.is_return and self.loyalty_program:
 			self.make_loyalty_point_entry()
 		elif self.is_return and self.return_against and self.loyalty_program:
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
@@ -88,7 +88,7 @@ class POSInvoice(SalesInvoice):
 	def on_cancel(self):
 		# run on cancel method of selling controller
 		super(SalesInvoice, self).on_cancel()
-		if self.loyalty_program:
+		if not self.is_return and self.loyalty_program:
 			self.delete_loyalty_point_entry()
 		elif self.is_return and self.return_against and self.loyalty_program:
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
@@ -456,6 +456,7 @@ class POSInvoice(SalesInvoice):
 				pay_req = self.get_existing_payment_request(pay)
 				if not pay_req:
 					pay_req = self.get_new_payment_request(pay)
+					pay_req.insert()
 					pay_req.submit()
 				else:
 					pay_req.request_phone_payment()

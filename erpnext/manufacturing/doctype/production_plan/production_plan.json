@@ -189,7 +189,7 @@
    "label": "Select Items to Manufacture"
   },
   {
-   "depends_on": "get_items_from",
+   "depends_on": "eval:doc.get_items_from && doc.docstatus == 0",
    "fieldname": "get_items",
    "fieldtype": "Button",
    "label": "Get Finished Goods for Manufacture"
@@ -197,6 +197,7 @@
   {
    "fieldname": "po_items",
    "fieldtype": "Table",
+   "label": "Assembly Items",
    "no_copy": 1,
    "options": "Production Plan Item",
    "reqd": 1
@@ -357,6 +358,7 @@
    "options": "Production Plan Sub Assembly Item"
   },
   {
+   "depends_on": "eval:doc.po_items && doc.po_items.length && doc.docstatus == 0",
    "fieldname": "get_sub_assembly_items",
    "fieldtype": "Button",
    "label": "Get Sub Assembly Items"
@@ -376,7 +378,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-06 18:35:59.642232",
+ "modified": "2022-03-25 09:15:25.017664",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
@@ -397,5 +399,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "states": []
 }
