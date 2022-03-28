@@ -16,18 +16,19 @@ from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_
 
 test_dependencies = ["Leave Type"]
 
+
 class TestLeaveEncashment(unittest.TestCase):
 	def setUp(self):
-		frappe.db.sql('''delete from `tabLeave Period`''')
-		frappe.db.sql('''delete from `tabLeave Policy Assignment`''')
-		frappe.db.sql('''delete from `tabLeave Allocation`''')
-		frappe.db.sql('''delete from `tabLeave Ledger Entry`''')
-		frappe.db.sql('''delete from `tabAdditional Salary`''')
+		frappe.db.sql("""delete from `tabLeave Period`""")
+		frappe.db.sql("""delete from `tabLeave Policy Assignment`""")
+		frappe.db.sql("""delete from `tabLeave Allocation`""")
+		frappe.db.sql("""delete from `tabLeave Ledger Entry`""")
+		frappe.db.sql("""delete from `tabAdditional Salary`""")
 
 		# create the leave policy
 		leave_policy = create_leave_policy(
-			leave_type="_Test Leave Type Encashment",
-			annual_allocation=10)
+			leave_type="_Test Leave Type Encashment", annual_allocation=10
+		)
 		leave_policy.submit()
 
 		# create employee, salary structure and assignment
@@ -38,28 +39,44 @@ class TestLeaveEncashment(unittest.TestCase):
 		data = {
 			"assignment_based_on": "Leave Period",
 			"leave_policy": leave_policy.name,
-			"leave_period": self.leave_period.name
+			"leave_period": self.leave_period.name,
 		}
 
-		leave_policy_assignments = create_assignment_for_multiple_employees([self.employee], frappe._dict(data))
+		leave_policy_assignments = create_assignment_for_multiple_employees(
+			[self.employee], frappe._dict(data)
+		)
 
-		salary_structure = make_salary_structure("Salary Structure for Encashment", "Monthly", self.employee,
-			other_details={"leave_encashment_amount_per_day": 50})
+		salary_structure = make_salary_structure(
+			"Salary Structure for Encashment",
+			"Monthly",
+			self.employee,
+			other_details={"leave_encashment_amount_per_day": 50},
+		)
 
 	def tearDown(self):
-		for dt in ["Leave Period", "Leave Allocation", "Leave Ledger Entry", "Additional Salary", "Leave Encashment", "Salary Structure", "Leave Policy"]:
+		for dt in [
+			"Leave Period",
+			"Leave Allocation",
+			"Leave Ledger Entry",
+			"Additional Salary",
+			"Leave Encashment",
+			"Salary Structure",
+			"Leave Policy",
+		]:
 			frappe.db.sql("delete from `tab%s`" % dt)
 
 	def test_leave_balance_value_and_amount(self):
-		frappe.db.sql('''delete from `tabLeave Encashment`''')
-		leave_encashment = frappe.get_doc(dict(
-			doctype='Leave Encashment',
-			employee=self.employee,
-			leave_type="_Test Leave Type Encashment",
-			leave_period=self.leave_period.name,
-			payroll_date=today(),
-			currency="INR"
-		)).insert()
+		frappe.db.sql("""delete from `tabLeave Encashment`""")
+		leave_encashment = frappe.get_doc(
+			dict(
+				doctype="Leave Encashment",
+				employee=self.employee,
+				leave_type="_Test Leave Type Encashment",
+				leave_period=self.leave_period.name,
+				payroll_date=today(),
+				currency="INR",
+			)
+		).insert()
 
 		self.assertEqual(leave_encashment.leave_balance, 10)
 		self.assertEqual(leave_encashment.encashable_days, 5)
@@ -68,23 +85,27 @@ class TestLeaveEncashment(unittest.TestCase):
 		leave_encashment.submit()
 
 		# assert links
-		add_sal = frappe.get_all("Additional Salary", filters = {"ref_docname": leave_encashment.name})[0]
+		add_sal = frappe.get_all("Additional Salary", filters={"ref_docname": leave_encashment.name})[0]
 		self.assertTrue(add_sal)
 
 	def test_creation_of_leave_ledger_entry_on_submit(self):
-		frappe.db.sql('''delete from `tabLeave Encashment`''')
-		leave_encashment = frappe.get_doc(dict(
-			doctype='Leave Encashment',
-			employee=self.employee,
-			leave_type="_Test Leave Type Encashment",
-			leave_period=self.leave_period.name,
-			payroll_date=today(),
-			currency="INR"
-		)).insert()
+		frappe.db.sql("""delete from `tabLeave Encashment`""")
+		leave_encashment = frappe.get_doc(
+			dict(
+				doctype="Leave Encashment",
+				employee=self.employee,
+				leave_type="_Test Leave Type Encashment",
+				leave_period=self.leave_period.name,
+				payroll_date=today(),
+				currency="INR",
+			)
+		).insert()
 
 		leave_encashment.submit()
 
-		leave_ledger_entry = frappe.get_all('Leave Ledger Entry', fields='*', filters=dict(transaction_name=leave_encashment.name))
+		leave_ledger_entry = frappe.get_all(
+			"Leave Ledger Entry", fields="*", filters=dict(transaction_name=leave_encashment.name)
+		)
 
 		self.assertEqual(len(leave_ledger_entry), 1)
 		self.assertEqual(leave_ledger_entry[0].employee, leave_encashment.employee)
@@ -93,7 +114,11 @@ class TestLeaveEncashment(unittest.TestCase):
 
 		# check if leave ledger entry is deleted on cancellation
 
-		frappe.db.sql("Delete from `tabAdditional Salary` WHERE ref_docname = %s", (leave_encashment.name) )
+		frappe.db.sql(
+			"Delete from `tabAdditional Salary` WHERE ref_docname = %s", (leave_encashment.name)
+		)
 
 		leave_encashment.cancel()
-		self.assertFalse(frappe.db.exists("Leave Ledger Entry", {'transaction_name':leave_encashment.name}))
+		self.assertFalse(
+			frappe.db.exists("Leave Ledger Entry", {"transaction_name": leave_encashment.name})
+		)
