@@ -145,7 +145,8 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	}
 
 	is_duplicate_serial_no(row, serial_no) {
-		const is_duplicate = !!serial_no && !!row.serial_no && row.serial_no.includes(serial_no);
+		const is_duplicate = !!serial_no && !!row[this.serial_no_field]
+			&& row[this.serial_no_field].includes(serial_no);
 
 		if (is_duplicate) {
 			frappe.show_alert(
