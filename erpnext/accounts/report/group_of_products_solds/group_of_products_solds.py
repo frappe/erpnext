@@ -6,6 +6,7 @@ import frappe
 from frappe.utils import flt
 from frappe import _
 import datetime
+import time
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -64,6 +65,9 @@ def return_filters(filters, from_date, to_date):
 	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
 	if filters.get("serie"): conditions += ', "name": "{}"'.format(filters.get("serie"))
 	conditions += ', "company": "{}"'.format(filters.get("company"))
+	# from_time = time.strptime(filters.get("from_time"), '%I:%M%p')
+	# to_time = time.strptime(filters.get("to_time"), '%I:%M%p')
+	# conditions += ', "posting_time": ["between", ["{}", "{}"]]'.format(from_time, to_time)
 	conditions += ', "posting_time": [">=", "{}"]'.format(filters.get("from_time"))
 	conditions += ', "posting_time": ["<=", "{}"]'.format(filters.get("to_time"))
 	conditions += '}'
