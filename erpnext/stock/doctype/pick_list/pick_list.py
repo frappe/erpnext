@@ -63,7 +63,7 @@ class PickList(Document):
 			if location.sales_order:
 				so_list.append(location.sales_order)
 			if location.sales_order_item:
-				self.update_so(location.sales_order_item, location.picked_qty, location.item_code)
+				self.update_so(location.sales_order_item, -1 * location.picked_qty, location.item_code)
 		if so_list:
 			self.update_so_status(set(so_list))
 
@@ -90,9 +90,6 @@ class PickList(Document):
 				frappe.throw(_(msg))
 			else:
 				updated_qty = already_picked + picked_qty
-
-		elif self.docstatus == 2:
-				updated_qty = already_picked - picked_qty
 
 		frappe.db.set_value("Sales Order Item", so_item, "picked_qty", updated_qty)
 
