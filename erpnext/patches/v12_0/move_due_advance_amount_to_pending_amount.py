@@ -6,7 +6,7 @@ import frappe
 
 
 def execute():
-    ''' Move from due_advance_amount to pending_amount '''
+	"""Move from due_advance_amount to pending_amount"""
 
-    if frappe.db.has_column("Employee Advance", "due_advance_amount"):
-        frappe.db.sql(''' UPDATE `tabEmployee Advance` SET pending_amount=due_advance_amount ''')
+	if frappe.db.has_column("Employee Advance", "due_advance_amount"):
+		frappe.db.sql(""" UPDATE `tabEmployee Advance` SET pending_amount=due_advance_amount """)

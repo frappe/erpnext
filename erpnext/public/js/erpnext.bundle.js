@@ -19,6 +19,7 @@ import "./utils/supplier_quick_entry";
 import "./education/assessment_result_tool.html";
 import "./call_popup/call_popup";
 import "./utils/dimension_tree_filter";
+import "./utils/barcode_scanner";
 import "./telephony";
 import "./templates/call_link.html";
 import "./bulk_transaction_processing";

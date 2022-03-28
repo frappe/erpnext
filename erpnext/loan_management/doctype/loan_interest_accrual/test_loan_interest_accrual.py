@@ -30,78 +30,98 @@ class TestLoanInterestAccrual(unittest.TestCase):
 	def setUp(self):
 		create_loan_accounts()
 
-		create_loan_type("Demand Loan", 2000000, 13.5, 25, 0, 5, 'Cash', 'Disbursement Account - _TC',
-			'Payment Account - _TC', 'Loan Account - _TC', 'Interest Income Account - _TC', 'Penalty Income Account - _TC')
+		create_loan_type(
+			"Demand Loan",
+			2000000,
+			13.5,
+			25,
+			0,
+			5,
+			"Cash",
+			"Disbursement Account - _TC",
+			"Payment Account - _TC",
+			"Loan Account - _TC",
+			"Interest Income Account - _TC",
+			"Penalty Income Account - _TC",
+		)
 
 		create_loan_security_type()
 		create_loan_security()
 
-		create_loan_security_price("Test Security 1", 500, "Nos", get_datetime() , get_datetime(add_to_date(nowdate(), hours=24)))
+		create_loan_security_price(
+			"Test Security 1", 500, "Nos", get_datetime(), get_datetime(add_to_date(nowdate(), hours=24))
+		)
 
 		if not frappe.db.exists("Customer", "_Test Loan Customer"):
-			frappe.get_doc(get_customer_dict('_Test Loan Customer')).insert(ignore_permissions=True)
+			frappe.get_doc(get_customer_dict("_Test Loan Customer")).insert(ignore_permissions=True)
 
-		self.applicant = frappe.db.get_value("Customer", {'name': '_Test Loan Customer'}, 'name')
+		self.applicant = frappe.db.get_value("Customer", {"name": "_Test Loan Customer"}, "name")
 
 	def test_loan_interest_accural(self):
-		pledge = [{
-			"loan_security": "Test Security 1",
-			"qty": 4000.00
-		}]
+		pledge = [{"loan_security": "Test Security 1", "qty": 4000.00}]
 
-		loan_application = create_loan_application('_Test Company', self.applicant, 'Demand Loan', pledge)
+		loan_application = create_loan_application(
+			"_Test Company", self.applicant, "Demand Loan", pledge
+		)
 		create_pledge(loan_application)
-		loan = create_demand_loan(self.applicant, "Demand Loan", loan_application,
-			posting_date=get_first_day(nowdate()))
+		loan = create_demand_loan(
+			self.applicant, "Demand Loan", loan_application, posting_date=get_first_day(nowdate())
+		)
 		loan.submit()
 
-		first_date = '2019-10-01'
-		last_date = '2019-10-30'
+		first_date = "2019-10-01"
+		last_date = "2019-10-30"
 
 		no_of_days = date_diff(last_date, first_date) + 1
 
-		accrued_interest_amount = (loan.loan_amount * loan.rate_of_interest * no_of_days) \
-			/ (days_in_year(get_datetime(first_date).year) * 100)
+		accrued_interest_amount = (loan.loan_amount * loan.rate_of_interest * no_of_days) / (
+			days_in_year(get_datetime(first_date).year) * 100
+		)
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=first_date)
 		process_loan_interest_accrual_for_demand_loans(posting_date=last_date)
-		loan_interest_accural = frappe.get_doc("Loan Interest Accrual", {'loan': loan.name})
+		loan_interest_accural = frappe.get_doc("Loan Interest Accrual", {"loan": loan.name})
 
 		self.assertEqual(flt(loan_interest_accural.interest_amount, 0), flt(accrued_interest_amount, 0))
 
 	def test_accumulated_amounts(self):
-		pledge = [{
-			"loan_security": "Test Security 1",
-			"qty": 4000.00
-		}]
+		pledge = [{"loan_security": "Test Security 1", "qty": 4000.00}]
 
-		loan_application = create_loan_application('_Test Company', self.applicant, 'Demand Loan', pledge)
+		loan_application = create_loan_application(
+			"_Test Company", self.applicant, "Demand Loan", pledge
+		)
 		create_pledge(loan_application)
-		loan = create_demand_loan(self.applicant, "Demand Loan", loan_application,
-			posting_date=get_first_day(nowdate()))
+		loan = create_demand_loan(
+			self.applicant, "Demand Loan", loan_application, posting_date=get_first_day(nowdate())
+		)
 		loan.submit()
 
-		first_date = '2019-10-01'
-		last_date = '2019-10-30'
+		first_date = "2019-10-01"
+		last_date = "2019-10-30"
 
 		no_of_days = date_diff(last_date, first_date) + 1
-		accrued_interest_amount = (loan.loan_amount * loan.rate_of_interest * no_of_days) \
-			/ (days_in_year(get_datetime(first_date).year) * 100)
+		accrued_interest_amount = (loan.loan_amount * loan.rate_of_interest * no_of_days) / (
+			days_in_year(get_datetime(first_date).year) * 100
+		)
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=first_date)
 		process_loan_interest_accrual_for_demand_loans(posting_date=last_date)
-		loan_interest_accrual = frappe.get_doc("Loan Interest Accrual", {'loan': loan.name})
+		loan_interest_accrual = frappe.get_doc("Loan Interest Accrual", {"loan": loan.name})
 
 		self.assertEqual(flt(loan_interest_accrual.interest_amount, 0), flt(accrued_interest_amount, 0))
 
-		next_start_date = '2019-10-31'
-		next_end_date = '2019-11-29'
+		next_start_date = "2019-10-31"
+		next_end_date = "2019-11-29"
 
 		no_of_days = date_diff(next_end_date, next_start_date) + 1
 		process = process_loan_interest_accrual_for_demand_loans(posting_date=next_end_date)
-		new_accrued_interest_amount = (loan.loan_amount * loan.rate_of_interest * no_of_days) \
-			/ (days_in_year(get_datetime(first_date).year) * 100)
+		new_accrued_interest_amount = (loan.loan_amount * loan.rate_of_interest * no_of_days) / (
+			days_in_year(get_datetime(first_date).year) * 100
+		)
 
 		total_pending_interest_amount = flt(accrued_interest_amount + new_accrued_interest_amount, 0)
 
-		loan_interest_accrual = frappe.get_doc("Loan Interest Accrual", {'loan': loan.name,
-			'process_loan_interest_accrual': process})
-		self.assertEqual(flt(loan_interest_accrual.total_pending_interest_amount, 0), total_pending_interest_amount)
+		loan_interest_accrual = frappe.get_doc(
+			"Loan Interest Accrual", {"loan": loan.name, "process_loan_interest_accrual": process}
+		)
+		self.assertEqual(
+			flt(loan_interest_accrual.total_pending_interest_amount, 0), total_pending_interest_amount
+		)

@@ -6,13 +6,13 @@ import frappe
 
 
 def get_context(context):
-	course = frappe.get_doc('Course', frappe.form_dict.course)
+	course = frappe.get_doc("Course", frappe.form_dict.course)
 	sidebar_title = course.name
 
 	context.no_cache = 1
 	context.show_sidebar = True
-	course = frappe.get_doc('Course', frappe.form_dict.course)
-	course.has_permission('read')
+	course = frappe.get_doc("Course", frappe.form_dict.course)
+	course.has_permission("read")
 	context.doc = course
 	context.sidebar_title = sidebar_title
 	context.intro = course.course_intro

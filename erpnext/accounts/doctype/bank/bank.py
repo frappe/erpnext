@@ -15,4 +15,4 @@ class Bank(Document):
 		load_address_and_contact(self)
 
 	def on_trash(self):
-		delete_contact_and_address('Bank', self.name)
+		delete_contact_and_address("Bank", self.name)
