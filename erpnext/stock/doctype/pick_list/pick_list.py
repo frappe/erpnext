@@ -54,9 +54,9 @@ class PickList(Document):
 
 	def before_cancel(self):
 		#update picked_qty in SO Item on cancel of PL
-		for location in self.get('locations'):
-			if location.sales_order_item:
-				self.update_so(location.sales_order_item,0,location.item_code)
+		for item in self.get('locations'):
+			if item.sales_order_item:
+				self.update_so(item.sales_order_item, -1 * item.picked_qty, item.item_code)
 
 	def update_so(self,so_item,picked_qty,item_code):
 		so_doc = frappe.get_doc("Sales Order",frappe.db.get_value("Sales Order Item",so_item,"parent"))
