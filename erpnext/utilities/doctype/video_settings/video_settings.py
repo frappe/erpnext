@@ -18,5 +18,5 @@ class VideoSettings(Document):
 				build("youtube", "v3", developerKey=self.api_key)
 			except Exception:
 				title = _("Failed to Authenticate the API key.")
-				frappe.log_error(title + "\n\n" +  frappe.get_traceback(), title=title)
+				frappe.log_error(title + "\n\n" + frappe.get_traceback(), title=title)
 				frappe.throw(title + " Please check the error logs.", title=_("Invalid Credentials"))

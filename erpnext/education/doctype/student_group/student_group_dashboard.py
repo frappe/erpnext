@@ -6,15 +6,9 @@ from frappe import _
 
 def get_data():
 	return {
-		'fieldname': 'student_group',
-		'transactions': [
-			{
-				'label': _('Assessment'),
-				'items': ['Assessment Plan', 'Assessment Result']
-			},
-			{
-				'label': _('Course'),
-				'items': ['Course Schedule']
-			}
-		]
+		"fieldname": "student_group",
+		"transactions": [
+			{"label": _("Assessment"), "items": ["Assessment Plan", "Assessment Result"]},
+			{"label": _("Course"), "items": ["Course Schedule"]},
+		],
 	}
