@@ -29,7 +29,8 @@ class PickList(Document):
 		# set percentage picked in SO
 		for location in self.get('locations'):
 			if location.sales_order and frappe.db.get_value("Sales Order", location.sales_order, "per_picked") == 100:
-				frappe.throw(_("Row {0}, has been picked already.").format(location.idx))
+				msg = (f"Row {location.idx} has been picked already.")
+				frappe.throw(_(msg))
 
 	def before_submit(self):
 		so_list = []
@@ -81,10 +82,15 @@ class PickList(Document):
 		already_picked, actual_qty = frappe.db.get_value("Sales Order Item", so_item, ["picked_qty","qty"])
 
 		if self.docstatus == 1:
-			if (((already_picked + picked_qty)/ actual_qty) * 100) > (100 + flt(frappe.db.get_single_value('Stock Settings', 'over_delivery_receipt_allowance'))):
-				frappe.throw(_('You are picking more than required quantity for {0}. Check if there is any other pick list created for {1}.').format(item_code, so_doc.name))
+			od_allowance = frappe.db.get_single_value('Stock Settings', 'over_delivery_receipt_allowance')
+			total_picked_qty = (already_picked + picked_qty)/ actual_qty
+			if (total_picked_qty * 100) > (100 + flt(od_allowance)):
+				msg = (f'You are picking more than required quantity for {item_code}. \
+						 Check if there is any other pick list created for {so_doc.name}.')
+				frappe.throw(_(msg))
 			else:
 				updated_qty = already_picked + picked_qty
+
 		elif self.docstatus == 2:
 				updated_qty = already_picked - picked_qty
 
