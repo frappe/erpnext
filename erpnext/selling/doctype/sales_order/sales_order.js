@@ -358,12 +358,32 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		this.get_terms();
 	}
 
-	make_material_request() {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
-			frm: this.frm
-		})
-	}
+    make_material_request() {
+        const frm = this.frm
+        var d = new frappe.ui.Dialog({
+            title: __("Create Material Request"),
+            fields: [
+                {
+                    'fieldname': 'ignore_available_qty',
+                    'fieldtype': 'Check',
+                    'label': __('Ignore Projected Qty'),
+                    'default': 1
+                }
+            ],
+        });
+        d.set_primary_action(__('Create'), function() {
+            d.hide();
+            var args = d.get_values();
+            frappe.model.open_mapped_doc({
+                method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
+                frm: frm,
+                args: {
+                    ignore_available_qty: args.ignore_available_qty
+                }
+            })
+        });
+        d.show();
+    }
 
 	skip_delivery_note() {
 		this.toggle_delivery_date();

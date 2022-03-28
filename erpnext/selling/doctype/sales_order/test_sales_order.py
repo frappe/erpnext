@@ -49,26 +49,21 @@ class TestSalesOrder(FrappeTestCase):
 		frappe.set_user("Administrator")
 
 	def test_make_material_request(self):
-		so = make_sales_order(do_not_submit=True)
+		frappe.flags.args = frappe._dict()
+		so = make_sales_order(item_code= "_Test FG Item", qty=10, do_not_submit=True)
 
 		self.assertRaises(frappe.ValidationError, make_material_request, so.name)
 
 		so.submit()
-		mr = make_material_request(so.name)
 
+		frappe.flags.args.ignore_available_qty = 1
+		mr = make_material_request(so.name)
 		self.assertEqual(mr.material_request_type, "Purchase")
 		self.assertEqual(len(mr.get("items")), len(so.get("items")))
 
-	def test_make_delivery_note(self):
-		so = make_sales_order(do_not_submit=True)
-
-		self.assertRaises(frappe.ValidationError, make_delivery_note, so.name)
-
-		so.submit()
-		dn = make_delivery_note(so.name)
-
-		self.assertEqual(dn.doctype, "Delivery Note")
-		self.assertEqual(len(dn.get("items")), len(so.get("items")))
+		frappe.flags.args.ignore_available_qty = 0
+		make_stock_entry(item="_Test FG Item", target="_Test Warehouse - _TC", qty=200, purpose ="Material Receipt")
+		self.assertRaises(frappe.ValidationError, make_material_request, so.name)
 
 	def test_make_sales_invoice(self):
 		so = make_sales_order(do_not_submit=True)
