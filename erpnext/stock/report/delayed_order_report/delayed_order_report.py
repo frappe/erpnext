@@ -14,6 +14,7 @@ def execute(filters=None):
 
 	return columns, data
 
+
 class DelayedOrderReport(DelayedItemReport):
 	def run(self):
 		return self.get_columns(), self.get_data(consolidated=True) or []
@@ -33,60 +34,48 @@ class DelayedOrderReport(DelayedItemReport):
 	def get_columns(self):
 		based_on = self.filters.get("based_on")
 
-		return [{
-			"label": _(based_on),
-			"fieldname": "name",
-			"fieldtype": "Link",
-			"options": based_on,
-			"width": 100
-		},{
-			"label": _("Customer"),
-			"fieldname": "customer",
-			"fieldtype": "Link",
-			"options": "Customer",
-			"width": 200
-		},
-		{
-			"label": _("Shipping Address"),
-			"fieldname": "shipping_address_name",
-			"fieldtype": "Link",
-			"options": "Address",
-			"width": 140
-		},
-		{
-			"label": _("Expected Delivery Date"),
-			"fieldname": "delivery_date",
-			"fieldtype": "Date",
-			"width": 100
-		},
-		{
-			"label": _("Actual Delivery Date"),
-			"fieldname": "posting_date",
-			"fieldtype": "Date",
-			"width": 100
-		},
-		{
-			"label": _("Amount"),
-			"fieldname": "grand_total",
-			"fieldtype": "Currency",
-			"width": 100
-		},
-		{
-			"label": _("Delayed Days"),
-			"fieldname": "delayed_days",
-			"fieldtype": "Int",
-			"width": 100
-		},
-		{
-			"label": _("Sales Order"),
-			"fieldname": "sales_order",
-			"fieldtype": "Link",
-			"options": "Sales Order",
-			"width": 150
-		},
-		{
-			"label": _("Customer PO"),
-			"fieldname": "po_no",
-			"fieldtype": "Data",
-			"width": 110
-		}]
+		return [
+			{
+				"label": _(based_on),
+				"fieldname": "name",
+				"fieldtype": "Link",
+				"options": based_on,
+				"width": 100,
+			},
+			{
+				"label": _("Customer"),
+				"fieldname": "customer",
+				"fieldtype": "Link",
+				"options": "Customer",
+				"width": 200,
+			},
+			{
+				"label": _("Shipping Address"),
+				"fieldname": "shipping_address_name",
+				"fieldtype": "Link",
+				"options": "Address",
+				"width": 140,
+			},
+			{
+				"label": _("Expected Delivery Date"),
+				"fieldname": "delivery_date",
+				"fieldtype": "Date",
+				"width": 100,
+			},
+			{
+				"label": _("Actual Delivery Date"),
+				"fieldname": "posting_date",
+				"fieldtype": "Date",
+				"width": 100,
+			},
+			{"label": _("Amount"), "fieldname": "grand_total", "fieldtype": "Currency", "width": 100},
+			{"label": _("Delayed Days"), "fieldname": "delayed_days", "fieldtype": "Int", "width": 100},
+			{
+				"label": _("Sales Order"),
+				"fieldname": "sales_order",
+				"fieldtype": "Link",
+				"options": "Sales Order",
+				"width": 150,
+			},
+			{"label": _("Customer PO"), "fieldname": "po_no", "fieldtype": "Data", "width": 110},
+		]
