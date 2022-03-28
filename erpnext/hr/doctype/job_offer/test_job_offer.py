@@ -12,17 +12,19 @@ from erpnext.hr.doctype.staffing_plan.test_staffing_plan import make_company
 
 # test_records = frappe.get_test_records('Job Offer')
 
+
 class TestJobOffer(unittest.TestCase):
 	def test_job_offer_creation_against_vacancies(self):
 		frappe.db.set_value("HR Settings", None, "check_vacancies", 1)
 		job_applicant = create_job_applicant(email_id="test_job_offer@example.com")
 		job_offer = create_job_offer(job_applicant=job_applicant.name, designation="UX Designer")
 
-		create_staffing_plan(name='Test No Vacancies', staffing_details=[{
-			"designation": "UX Designer",
-			"vacancies": 0,
-			"estimated_cost_per_position": 5000
-		}])
+		create_staffing_plan(
+			name="Test No Vacancies",
+			staffing_details=[
+				{"designation": "UX Designer", "vacancies": 0, "estimated_cost_per_position": 5000}
+			],
+		)
 		self.assertRaises(frappe.ValidationError, job_offer.submit)
 
 		# test creation of job offer when vacancies are not present
@@ -49,6 +51,7 @@ class TestJobOffer(unittest.TestCase):
 	def tearDown(self):
 		frappe.db.sql("DELETE FROM `tabJob Offer` WHERE 1")
 
+
 def create_job_offer(**args):
 	args = frappe._dict(args)
 	if not args.job_applicant:
@@ -57,14 +60,17 @@ def create_job_offer(**args):
 	if not frappe.db.exists("Designation", args.designation):
 		designation = create_designation(designation_name=args.designation)
 
-	job_offer = frappe.get_doc({
-		"doctype": "Job Offer",
-		"job_applicant": args.job_applicant or job_applicant.name,
-		"offer_date": args.offer_date or nowdate(),
-		"designation": args.designation or "Researcher",
-		"status": args.status or "Accepted"
-	})
+	job_offer = frappe.get_doc(
+		{
+			"doctype": "Job Offer",
+			"job_applicant": args.job_applicant or job_applicant.name,
+			"offer_date": args.offer_date or nowdate(),
+			"designation": args.designation or "Researcher",
+			"status": args.status or "Accepted",
+		}
+	)
 	return job_offer
+
 
 def create_staffing_plan(**args):
 	args = frappe._dict(args)
@@ -72,17 +78,16 @@ def create_staffing_plan(**args):
 	frappe.db.set_value("Company", "_Test Company", "is_group", 1)
 	if frappe.db.exists("Staffing Plan", args.name or "Test"):
 		return
-	staffing_plan = frappe.get_doc({
-		"doctype": "Staffing Plan",
-		"name": args.name or "Test",
-		"from_date": args.from_date or nowdate(),
-		"to_date": args.to_date or add_days(nowdate(), 10),
-		"staffing_details": args.staffing_details or [{
-			"designation": "Researcher",
-			"vacancies": 1,
-			"estimated_cost_per_position": 50000
-		}]
-	})
+	staffing_plan = frappe.get_doc(
+		{
+			"doctype": "Staffing Plan",
+			"name": args.name or "Test",
+			"from_date": args.from_date or nowdate(),
+			"to_date": args.to_date or add_days(nowdate(), 10),
+			"staffing_details": args.staffing_details
+			or [{"designation": "Researcher", "vacancies": 1, "estimated_cost_per_position": 50000}],
+		}
+	)
 	staffing_plan.insert()
 	staffing_plan.submit()
 	return staffing_plan

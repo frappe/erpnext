@@ -4,7 +4,8 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
 def execute():
-	broken_sles = frappe.db.sql("""
+	broken_sles = frappe.db.sql(
+		"""
 			select name, serial_no
 			from `tabStock Ledger Entry`
 			where
@@ -12,15 +13,15 @@ def execute():
 				and ( serial_no like %s or serial_no like %s or serial_no like %s or serial_no like %s
 					or serial_no = %s )
 			""",
-			(
-				" %",    # leading whitespace
-				"% ",    # trailing whitespace
-				"%\n %", # leading whitespace on newline
-				"% \n%", # trailing whitespace on newline
-				"\n",    # just new line
-			),
-			as_dict=True,
-		)
+		(
+			" %",  # leading whitespace
+			"% ",  # trailing whitespace
+			"%\n %",  # leading whitespace on newline
+			"% \n%",  # trailing whitespace on newline
+			"\n",  # just new line
+		),
+		as_dict=True,
+	)
 
 	frappe.db.MAX_WRITES_PER_TRANSACTION += len(broken_sles)
 
@@ -37,7 +38,9 @@ def execute():
 		if correct_sr_no == sle.serial_no:
 			continue
 
-		frappe.db.set_value("Stock Ledger Entry", sle.name, "serial_no", correct_sr_no, update_modified=False)
+		frappe.db.set_value(
+			"Stock Ledger Entry", sle.name, "serial_no", correct_sr_no, update_modified=False
+		)
 		broken_serial_nos.update(serial_no_list)
 
 	if not broken_serial_nos:
@@ -45,14 +48,15 @@ def execute():
 
 	# Patch serial No documents if they don't have purchase info
 	# Purchase info is used for fetching incoming rate
-	broken_sr_no_records = frappe.get_list("Serial No",
-			filters={
-				"status":"Active",
-				"name": ("in", broken_serial_nos),
-				"purchase_document_type": ("is", "not set")
-			},
-			pluck="name",
-		)
+	broken_sr_no_records = frappe.get_list(
+		"Serial No",
+		filters={
+			"status": "Active",
+			"name": ("in", broken_serial_nos),
+			"purchase_document_type": ("is", "not set"),
+		},
+		pluck="name",
+	)
 
 	frappe.db.MAX_WRITES_PER_TRANSACTION += len(broken_sr_no_records)
 
