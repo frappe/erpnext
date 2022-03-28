@@ -148,7 +148,10 @@ class MaterialConsumption(Document):
                             se_item.batch_no = line.get('batch_no')
                             se_item.expense_account = item_expense_account or expense_account
                             #se_item.cost_center = item_cost_center or cost_center
-                            se_item.cost_center = get_wo_doc.rm_cost_center
+                            if self.cost_center:
+                                se_item.cost_center = self.cost_center
+                            else:
+                                se_item.cost_center = get_wo_doc.rm_cost_center
             
                             # in stock uom
                             se_item.conversion_factor = 1.00
