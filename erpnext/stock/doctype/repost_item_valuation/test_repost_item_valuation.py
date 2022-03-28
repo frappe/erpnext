@@ -153,7 +153,7 @@ class TestRepostItemValuation(unittest.TestCase):
 			posting_date=today,
 			posting_time="00:01:00",
 		)
-		riv.flags.dont_run_in_test = True # keep it queued
+		riv.flags.dont_run_in_test = True  # keep it queued
 		riv.submit()
 
 		stock_settings = frappe.get_doc("Stock Settings")

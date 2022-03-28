@@ -32,10 +32,9 @@ class TestTrainingFeedback(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, feedback.save)
 
 		# cannot record feedback for absent employee
-		employee = frappe.db.get_value("Training Event Employee", {
-			"parent": training_event.name,
-			"employee": self.employee
-		}, "name")
+		employee = frappe.db.get_value(
+			"Training Event Employee", {"parent": training_event.name, "employee": self.employee}, "name"
+		)
 
 		frappe.db.set_value("Training Event Employee", employee, "attendance", "Absent")
 		feedback = create_training_feedback(training_event.name, self.employee)
@@ -52,10 +51,9 @@ class TestTrainingFeedback(unittest.TestCase):
 		feedback = create_training_feedback(training_event.name, self.employee)
 		feedback.submit()
 
-		status = frappe.db.get_value("Training Event Employee", {
-			"parent": training_event.name,
-			"employee": self.employee
-		}, "status")
+		status = frappe.db.get_value(
+			"Training Event Employee", {"parent": training_event.name, "employee": self.employee}, "status"
+		)
 
 		self.assertEqual(status, "Feedback Submitted")
 
@@ -64,9 +62,11 @@ class TestTrainingFeedback(unittest.TestCase):
 
 
 def create_training_feedback(event, employee):
-	return frappe.get_doc({
-		"doctype": "Training Feedback",
-		"training_event": event,
-		"employee": employee,
-		"feedback": "Test"
-	})
+	return frappe.get_doc(
+		{
+			"doctype": "Training Feedback",
+			"training_event": event,
+			"employee": employee,
+			"feedback": "Test",
+		}
+	)

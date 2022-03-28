@@ -68,7 +68,9 @@ class TestEmployeeAdvance(unittest.TestCase):
 	def test_claimed_status(self):
 		# CLAIMED Status check, full amount claimed
 		payable_account = get_payable_account("_Test Company")
-		claim = make_expense_claim(payable_account, 1000, 1000, "_Test Company", "Travel Expenses - _TC", do_not_submit=True)
+		claim = make_expense_claim(
+			payable_account, 1000, 1000, "_Test Company", "Travel Expenses - _TC", do_not_submit=True
+		)
 
 		advance = make_employee_advance(claim.employee)
 		pe = make_payment_entry(advance)
@@ -95,7 +97,9 @@ class TestEmployeeAdvance(unittest.TestCase):
 
 	def test_partly_claimed_and_returned_status(self):
 		payable_account = get_payable_account("_Test Company")
-		claim = make_expense_claim(payable_account, 1000, 1000, "_Test Company", "Travel Expenses - _TC", do_not_submit=True)
+		claim = make_expense_claim(
+			payable_account, 1000, 1000, "_Test Company", "Travel Expenses - _TC", do_not_submit=True
+		)
 
 		advance = make_employee_advance(claim.employee)
 		pe = make_payment_entry(advance)
@@ -103,7 +107,9 @@ class TestEmployeeAdvance(unittest.TestCase):
 
 		# PARTLY CLAIMED AND RETURNED status check
 		# 500 Claimed, 500 Returned
-		claim = make_expense_claim(payable_account, 500, 500, "_Test Company", "Travel Expenses - _TC", do_not_submit=True)
+		claim = make_expense_claim(
+			payable_account, 500, 500, "_Test Company", "Travel Expenses - _TC", do_not_submit=True
+		)
 
 		advance = make_employee_advance(claim.employee)
 		pe = make_payment_entry(advance)
@@ -125,7 +131,7 @@ class TestEmployeeAdvance(unittest.TestCase):
 			advance_account=advance.advance_account,
 			mode_of_payment=advance.mode_of_payment,
 			currency=advance.currency,
-			exchange_rate=advance.exchange_rate
+			exchange_rate=advance.exchange_rate,
 		)
 
 		entry = frappe.get_doc(entry)
@@ -160,7 +166,9 @@ class TestEmployeeAdvance(unittest.TestCase):
 
 		args = {"type": "Deduction"}
 		create_salary_component("Advance Salary - Deduction", **args)
-		make_salary_structure("Test Additional Salary for Advance Return", "Monthly", employee=employee_name)
+		make_salary_structure(
+			"Test Additional Salary for Advance Return", "Monthly", employee=employee_name
+		)
 
 		# additional salary for 700 first
 		advance.reload()
@@ -204,10 +212,11 @@ def make_payment_entry(advance):
 
 	return journal_entry
 
+
 def make_employee_advance(employee_name, args=None):
 	doc = frappe.new_doc("Employee Advance")
 	doc.employee = employee_name
-	doc.company  = "_Test company"
+	doc.company = "_Test company"
 	doc.purpose = "For site visit"
 	doc.currency = erpnext.get_company_currency("_Test company")
 	doc.exchange_rate = 1
@@ -233,13 +242,16 @@ def get_advances_for_claim(claim, advance_name, amount=None):
 		else:
 			allocated_amount = flt(entry.paid_amount) - flt(entry.claimed_amount)
 
-		claim.append("advances", {
-			"employee_advance": entry.name,
-			"posting_date": entry.posting_date,
-			"advance_account": entry.advance_account,
-			"advance_paid": entry.paid_amount,
-			"unclaimed_amount": allocated_amount,
-			"allocated_amount": allocated_amount
-		})
+		claim.append(
+			"advances",
+			{
+				"employee_advance": entry.name,
+				"posting_date": entry.posting_date,
+				"advance_account": entry.advance_account,
+				"advance_paid": entry.paid_amount,
+				"unclaimed_amount": allocated_amount,
+				"allocated_amount": allocated_amount,
+			},
+		)
 
 	return claim
