@@ -322,6 +322,7 @@ class TestDeferredRevenueAndExpense(unittest.TestCase):
 		]
 		self.assertEqual(report.period_total, expected)
 
+
 def create_company():
 	company = frappe.db.exists("Company", "_Test Company DR")
 	if not company:
