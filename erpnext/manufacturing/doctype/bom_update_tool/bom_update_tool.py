@@ -16,8 +16,11 @@ from erpnext.manufacturing.doctype.bom.bom import get_boms_in_bottom_up_order
 class BOMUpdateTool(Document):
 	pass
 
+
 @frappe.whitelist()
-def enqueue_replace_bom(boms: Optional[Union[Dict, str]] = None, args: Optional[Union[Dict, str]] = None) -> "BOMUpdateLog":
+def enqueue_replace_bom(
+	boms: Optional[Union[Dict, str]] = None, args: Optional[Union[Dict, str]] = None
+) -> "BOMUpdateLog":
 	"""Returns a BOM Update Log (that queues a job) for BOM Replacement."""
 	boms = boms or args
 	if isinstance(boms, str):
@@ -25,6 +28,7 @@ def enqueue_replace_bom(boms: Optional[Union[Dict, str]] = None, args: Optional[
 
 	update_log = create_bom_update_log(boms=boms)
 	return update_log
+
 
 @frappe.whitelist()
 def enqueue_update_cost() -> "BOMUpdateLog":
@@ -38,20 +42,26 @@ def auto_update_latest_price_in_all_boms() -> None:
 	if frappe.db.get_single_value("Manufacturing Settings", "update_bom_costs_automatically"):
 		update_cost()
 
+
 def update_cost() -> None:
 	"""Updates Cost for all BOMs from bottom to top."""
 	bom_list = get_boms_in_bottom_up_order()
 	for bom in bom_list:
 		frappe.get_doc("BOM", bom).update_cost(update_parent=False, from_child_bom=True)
 
-def create_bom_update_log(boms: Optional[Dict] = None, update_type: str = "Replace BOM") -> "BOMUpdateLog":
+
+def create_bom_update_log(
+	boms: Optional[Dict] = None, update_type: str = "Replace BOM"
+) -> "BOMUpdateLog":
 	"""Creates a BOM Update Log that handles the background job."""
 	boms = boms or {}
 	current_bom = boms.get("current_bom")
 	new_bom = boms.get("new_bom")
-	return frappe.get_doc({
-		"doctype": "BOM Update Log",
-		"current_bom": current_bom,
-		"new_bom": new_bom,
-		"update_type": update_type,
-	}).submit()
+	return frappe.get_doc(
+		{
+			"doctype": "BOM Update Log",
+			"current_bom": current_bom,
+			"new_bom": new_bom,
+			"update_type": update_type,
+		}
+	).submit()

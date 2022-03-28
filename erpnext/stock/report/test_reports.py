@@ -43,8 +43,18 @@ REPORT_FILTER_TEST_CASES: List[Tuple[ReportName, ReportFilters]] = [
 		},
 	),
 	("Warehouse wise Item Balance Age and Value", {"_optional": True}),
-	("Item Variant Details", {"item": "_Test Variant Item",}),
-	("Total Stock Summary", {"group_by": "warehouse",}),
+	(
+		"Item Variant Details",
+		{
+			"item": "_Test Variant Item",
+		},
+	),
+	(
+		"Total Stock Summary",
+		{
+			"group_by": "warehouse",
+		},
+	),
 	("Batch Item Expiry Status", {}),
 	("Incorrect Stock Value Report", {"company": "_Test Company with perpetual inventory"}),
 	("Incorrect Serial No Valuation", {}),
@@ -54,12 +64,7 @@ REPORT_FILTER_TEST_CASES: List[Tuple[ReportName, ReportFilters]] = [
 	("Delayed Item Report", {"based_on": "Sales Invoice"}),
 	("Delayed Item Report", {"based_on": "Delivery Note"}),
 	("Stock Ageing", {"range1": 30, "range2": 60, "range3": 90, "_optional": True}),
-	("Stock Ledger Invariant Check",
-		{
-			"warehouse": "_Test Warehouse - _TC",
-			"item": "_Test Item"
-		}
-	),
+	("Stock Ledger Invariant Check", {"warehouse": "_Test Warehouse - _TC", "item": "_Test Item"}),
 ]
 
 OPTIONAL_FILTERS = {
