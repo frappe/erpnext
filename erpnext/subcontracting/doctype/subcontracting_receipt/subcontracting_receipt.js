@@ -37,6 +37,27 @@ frappe.ui.form.on('Subcontracting Receipt', {
 			};
 		});
 	},
+
+	subcontracting_order: function (frm) {
+		if (frm.doc.subcontracting_order) {
+			frappe.call({
+				method: "erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.make_subcontracting_receipt",
+				args: {
+					source_name: frm.doc.subcontracting_order,
+				},
+				freeze_message: __("Mapping Subcontracting Receipt ..."),
+				callback: function (r) {
+					if (!r.exc) {
+						var fields_to_skip = ["owner", "docstatus", "idx", "doctype", "__islocal", "__onload", "__unsaved"];
+						var fields_to_map = Object.keys(r.message).filter(n => !fields_to_skip.includes(n));
+						$.each(fields_to_map, function (i, field) {
+							frm.set_value(field, r.message[field]);
+						});
+					};
+				}
+			});
+		}
+	},
 });
 
 frappe.ui.form.on('Subcontracting Receipt Service Item', {
