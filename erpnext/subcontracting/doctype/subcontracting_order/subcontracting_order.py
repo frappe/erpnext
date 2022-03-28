@@ -5,15 +5,39 @@ import json
 
 import frappe
 from frappe import _
+from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.stock.utils import get_bin
 
 
 class SubcontractingOrder(SubcontractingController):
 	def validate(self):
 		super(SubcontractingOrder, self).validate()
 		self.validate_reserve_warehouse()
+
+	def update_status(self, status):
+		self.check_modified_date()
+		self.set_status(update=True, status=status)
+		self.update_reserved_qty_for_subcontract()
+		self.notify_update()
+		clear_doctype_notifications(self)
+
+	def check_modified_date(self):
+		mod_db = frappe.db.sql("select modified from `tabSubcontracting Order` where name = %s",
+			self.name)
+		date_diff = frappe.db.sql("select '%s' - '%s' " % (mod_db[0][0], frappe.utils.cstr(self.modified)))
+
+		if date_diff and date_diff[0][0]:
+			frappe.msgprint(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name),
+				raise_exception=True)
+
+	def update_reserved_qty_for_subcontract(self):
+		for d in self.supplied_items:
+			if d.rm_item_code:
+				stock_bin = get_bin(d.rm_item_code, d.reserve_warehouse)
+				stock_bin.update_reserved_qty_for_sub_contracting()
 
 @frappe.whitelist()
 def make_subcontracting_receipt(source_name, target_doc=None):
