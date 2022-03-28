@@ -4,7 +4,7 @@
 
 import frappe
 
-test_records = frappe.get_test_records('Item Attribute')
+test_records = frappe.get_test_records("Item Attribute")
 
 from frappe.tests.utils import FrappeTestCase
 
@@ -18,14 +18,16 @@ class TestItemAttribute(FrappeTestCase):
 			frappe.delete_doc("Item Attribute", "_Test_Length")
 
 	def test_numeric_item_attribute(self):
-		item_attribute = frappe.get_doc({
-			"doctype": "Item Attribute",
-			"attribute_name": "_Test_Length",
-			"numeric_values": 1,
-			"from_range": 0.0,
-			"to_range": 100.0,
-			"increment": 0
-		})
+		item_attribute = frappe.get_doc(
+			{
+				"doctype": "Item Attribute",
+				"attribute_name": "_Test_Length",
+				"numeric_values": 1,
+				"from_range": 0.0,
+				"to_range": 100.0,
+				"increment": 0,
+			}
+		)
 
 		self.assertRaises(ItemAttributeIncrementError, item_attribute.save)
 
