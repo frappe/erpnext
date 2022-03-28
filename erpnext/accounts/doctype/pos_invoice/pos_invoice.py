@@ -16,7 +16,11 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 )
 from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.stock.doctype.batch.batch import get_batch_qty, get_pos_reserved_batch_qty
-from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
+from erpnext.stock.doctype.serial_no.serial_no import (
+	get_delivered_serial_nos,
+	get_pos_reserved_serial_nos,
+	get_serial_nos,
+)
 
 
 class POSInvoice(SalesInvoice):
@@ -53,7 +57,7 @@ class POSInvoice(SalesInvoice):
 
 	def on_submit(self):
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
-		if self.loyalty_program:
+		if not self.is_return and self.loyalty_program:
 			self.make_loyalty_point_entry()
 		elif self.is_return and self.return_against and self.loyalty_program:
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
@@ -87,7 +91,7 @@ class POSInvoice(SalesInvoice):
 	def on_cancel(self):
 		# run on cancel method of selling controller
 		super(SalesInvoice, self).on_cancel()
-		if self.loyalty_program:
+		if not self.is_return and self.loyalty_program:
 			self.delete_loyalty_point_entry()
 		elif self.is_return and self.return_against and self.loyalty_program:
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
@@ -145,12 +149,7 @@ class POSInvoice(SalesInvoice):
 						.format(item.idx, bold_invalid_batch_no, bold_item_name, bold_extra_batch_qty_needed), title=_("Item Unavailable"))
 
 	def validate_delivered_serial_nos(self, item):
-		serial_nos = get_serial_nos(item.serial_no)
-		delivered_serial_nos = frappe.db.get_list('Serial No', {
-			'item_code': item.item_code,
-			'name': ['in', serial_nos],
-			'sales_invoice': ['is', 'set']
-		}, pluck='name')
+		delivered_serial_nos = get_delivered_serial_nos(item.serial_no)
 
 		if delivered_serial_nos:
 			bold_delivered_serial_nos = frappe.bold(', '.join(delivered_serial_nos))
@@ -172,10 +171,14 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(error_msg, title=_("Invalid Item"), as_list=True)
 
 	def validate_stock_availablility(self):
+		if self.is_return:
+			return
+
+		if self.docstatus.is_draft() and not frappe.db.get_value('POS Profile', self.pos_profile, 'validate_stock_on_save'):
+			return
+
 		from erpnext.stock.stock_ledger import is_negative_stock_allowed
 
-		if self.is_return or self.docstatus != 1:
-			return
 		for d in self.get('items'):
 			is_service_item = not (frappe.db.get_value('Item', d.get('item_code'), 'is_stock_item'))
 			if is_service_item:
@@ -485,16 +488,15 @@ class POSInvoice(SalesInvoice):
 			"payment_account": pay.account,
 		}, ["name"])
 
-		args = {
-			'doctype': 'Payment Request',
+		filters = {
 			'reference_doctype': 'POS Invoice',
 			'reference_name': self.name,
 			'payment_gateway_account': payment_gateway_account,
 			'email_to': self.contact_mobile
 		}
-		pr = frappe.db.exists(args)
+		pr = frappe.db.get_value('Payment Request', filters=filters)
 		if pr:
-			return frappe.get_doc('Payment Request', pr[0][0])
+			return frappe.get_doc('Payment Request', pr)
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):

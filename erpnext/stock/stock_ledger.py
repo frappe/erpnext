@@ -838,11 +838,13 @@ class update_entries_after(object):
 		for warehouse, data in self.data.items():
 			bin_name = get_or_make_bin(self.item_code, warehouse)
 
-			frappe.db.set_value('Bin', bin_name, {
-				"valuation_rate": data.valuation_rate,
+			updated_values = {
 				"actual_qty": data.qty_after_transaction,
 				"stock_value": data.stock_value
-			})
+			}
+			if data.valuation_rate is not None:
+				updated_values["valuation_rate"] = data.valuation_rate
+			frappe.db.set_value('Bin', bin_name, updated_values)
 
 
 def get_previous_sle_of_current_voucher(args, exclude_current_voucher=False):
@@ -1038,7 +1040,6 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 
 	if not allow_zero_rate and not valuation_rate and raise_error_if_no_rate \
 			and cint(erpnext.is_perpetual_inventory_enabled(company)):
-		frappe.local.message_log = []
 		form_link = get_link_to_form("Item", item_code)
 
 		message = _("Valuation Rate for the Item {0}, is required to do accounting entries for {1} {2}.").format(form_link, voucher_type, voucher_no)

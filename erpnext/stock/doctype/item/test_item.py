@@ -30,7 +30,10 @@ from erpnext.stock.get_item_details import get_item_details
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]
 
-def make_item(item_code, properties=None):
+def make_item(item_code=None, properties=None):
+	if not item_code:
+		item_code = frappe.generate_hash(length=16)
+
 	if frappe.db.exists("Item", item_code):
 		return frappe.get_doc("Item", item_code)
 
@@ -371,23 +374,24 @@ class TestItem(FrappeTestCase):
 		variant.save()
 
 	def test_item_merging(self):
-		create_item("Test Item for Merging 1")
-		create_item("Test Item for Merging 2")
+		old = create_item(frappe.generate_hash(length=20)).name
+		new = create_item(frappe.generate_hash(length=20)).name
 
-		make_stock_entry(item_code="Test Item for Merging 1", target="_Test Warehouse - _TC",
+		make_stock_entry(item_code=old, target="_Test Warehouse - _TC",
 			qty=1, rate=100)
-		make_stock_entry(item_code="Test Item for Merging 2", target="_Test Warehouse 1 - _TC",
+		make_stock_entry(item_code=old, target="_Test Warehouse 1 - _TC",
+			qty=1, rate=100)
+		make_stock_entry(item_code=new, target="_Test Warehouse 1 - _TC",
 			qty=1, rate=100)
 
-		frappe.rename_doc("Item", "Test Item for Merging 1", "Test Item for Merging 2", merge=True)
+		frappe.rename_doc("Item", old, new, merge=True)
 
-		self.assertFalse(frappe.db.exists("Item", "Test Item for Merging 1"))
+		self.assertFalse(frappe.db.exists("Item", old))
 
 		self.assertTrue(frappe.db.get_value("Bin",
-			{"item_code": "Test Item for Merging 2", "warehouse": "_Test Warehouse - _TC"}))
-
+			{"item_code": new, "warehouse": "_Test Warehouse - _TC"}))
 		self.assertTrue(frappe.db.get_value("Bin",
-			{"item_code": "Test Item for Merging 2", "warehouse": "_Test Warehouse 1 - _TC"}))
+			{"item_code": new, "warehouse": "_Test Warehouse 1 - _TC"}))
 
 	def test_item_merging_with_product_bundle(self):
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
@@ -652,6 +656,19 @@ class TestItem(FrappeTestCase):
 		make_stock_entry(qty=1, item_code=item.name, target="_Test Warehouse - _TC", posting_date = add_days(today(), 5))
 		self.consume_item_code_with_differet_stock_transactions(item_code=item.name)
 
+	@change_settings("Stock Settings", {"sample_retention_warehouse": "_Test Warehouse - _TC"})
+	def test_retain_sample(self):
+		item = make_item("_TestRetainSample", {'has_batch_no': 1, 'retain_sample': 1, 'sample_quantity': 1})
+
+		self.assertEqual(item.has_batch_no, 1)
+		self.assertEqual(item.retain_sample, 1)
+		self.assertEqual(item.sample_quantity, 1)
+
+		item.has_batch_no = None
+		item.save()
+		self.assertEqual(item.retain_sample, None)
+		self.assertEqual(item.sample_quantity, None)
+		item.delete()
 
 	def consume_item_code_with_differet_stock_transactions(self, item_code, warehouse="_Test Warehouse - _TC"):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -668,6 +685,12 @@ class TestItem(FrappeTestCase):
 		# standalone return
 		make_purchase_receipt(is_return=True, qty=-1, **typical_args)
 
+	def test_item_dashboard(self):
+		from erpnext.stock.dashboard.item_dashboard import get_data
+
+		self.assertTrue(get_data(item_code="_Test Item"))
+		self.assertTrue(get_data(warehouse="_Test Warehouse - _TC"))
+		self.assertTrue(get_data(item_group="All Item Groups"))
 
 
 def set_item_variant_settings(fields):

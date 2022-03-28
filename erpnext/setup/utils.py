@@ -1,33 +1,22 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
 import frappe
 from frappe import _
 from frappe.utils import add_days, flt, get_datetime_str, nowdate
+from frappe.utils.data import now_datetime
+from frappe.utils.nestedset import get_ancestors_of, get_root_of  # noqa
 
 from erpnext import get_default_company
 
-
-def get_root_of(doctype):
-	"""Get root element of a DocType with a tree structure"""
-	result = frappe.db.sql_list("""select name from `tab%s`
-		where lft=1 and rgt=(select max(rgt) from `tab%s` where docstatus < 2)""" %
-		(doctype, doctype))
-	return result[0] if result else None
-
-def get_ancestors_of(doctype, name):
-	"""Get ancestor elements of a DocType with a tree structure"""
-	lft, rgt = frappe.db.get_value(doctype, name, ["lft", "rgt"])
-	result = frappe.db.sql_list("""select name from `tab%s`
-		where lft<%s and rgt>%s order by lft desc""" % (doctype, "%s", "%s"), (lft, rgt))
-	return result or []
 
 def before_tests():
 	frappe.clear_cache()
 	# complete setup if missing
 	from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
-	if not frappe.get_list("Company"):
+
+	if not frappe.db.a_row_exists("Company"):
+		current_year = now_datetime().year
 		setup_complete({
 			"currency"          :"USD",
 			"full_name"         :"Test User",
@@ -36,8 +25,8 @@ def before_tests():
 			"company_abbr"      :"WP",
 			"industry"          :"Manufacturing",
 			"country"           :"United States",
-			"fy_start_date"     :"2021-01-01",
-			"fy_end_date"       :"2021-12-31",
+			"fy_start_date"     :f"{current_year}-01-01",
+			"fy_end_date"       :f"{current_year}-12-31",
 			"language"          :"english",
 			"company_tagline"   :"Testing",
 			"email"             :"test@erpnext.com",
@@ -45,14 +34,15 @@ def before_tests():
 			"chart_of_accounts" : "Standard",
 			"domains"           : ["Manufacturing"],
 		})
+		_enable_all_domains()
 
 	frappe.db.sql("delete from `tabLeave Allocation`")
 	frappe.db.sql("delete from `tabLeave Application`")
 	frappe.db.sql("delete from `tabSalary Slip`")
 	frappe.db.sql("delete from `tabItem Price`")
 
-	frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 0)
-	enable_all_roles_and_domains()
+	_enable_all_roles_for_admin()
+
 	set_defaults_for_tests()
 
 	frappe.db.commit()
@@ -131,38 +121,43 @@ def format_ces_api(data, param):
 
 def enable_all_roles_and_domains():
 	""" enable all roles and domain for testing """
-	# add all roles to users
-	domains = frappe.get_all("Domain")
+	_enable_all_domains()
+	_enable_all_roles_for_admin()
+
+
+def _enable_all_domains():
+	domains = frappe.get_all("Domain", pluck="name")
 	if not domains:
 		return
+	frappe.get_single('Domain Settings').set_active_domains(domains)
 
+
+def _enable_all_roles_for_admin():
 	from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
-	frappe.get_single('Domain Settings').set_active_domains(\
-		[d.name for d in domains])
-	add_all_roles_to('Administrator')
+
+	all_roles = set(frappe.db.get_values("Role", pluck="name"))
+	admin_roles = set(frappe.db.get_values("Has Role",
+		{"parent": "Administrator"}, fieldname="role", pluck="role"))
+
+	if all_roles.difference(admin_roles):
+		add_all_roles_to('Administrator')
+
 
 def set_defaults_for_tests():
-	from frappe.utils.nestedset import get_root_of
-
-	selling_settings = frappe.get_single("Selling Settings")
-	selling_settings.customer_group = get_root_of("Customer Group")
-	selling_settings.territory = get_root_of("Territory")
-	selling_settings.save()
+	defaults = {
+		"customer_group": get_root_of("Customer Group"),
+		"territory": get_root_of("Territory"),
+	}
+	frappe.db.set_single_value("Selling Settings", defaults)
+	for key, value in defaults.items():
+			frappe.db.set_default(key, value)
+	frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 0)
 
 
 def insert_record(records):
-	for r in records:
-		doc = frappe.new_doc(r.get("doctype"))
-		doc.update(r)
-		try:
-			doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
-		except frappe.DuplicateEntryError as e:
-			# pass DuplicateEntryError and continue
-			if e.args and e.args[0]==doc.doctype and e.args[1]==doc.name:
-				# make sure DuplicateEntryError is for the exact same doc and not a related doc
-				pass
-			else:
-				raise
+	from frappe.desk.page.setup_wizard.setup_wizard import make_records
+
+	make_records(records)
 
 def welcome_email():
 	site_name = get_default_company() or "ERPNext"

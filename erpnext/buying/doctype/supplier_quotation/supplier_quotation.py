@@ -109,7 +109,6 @@ def get_list_context(context=None):
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("get_schedule_dates")
 		target.run_method("calculate_taxes_and_totals")
@@ -140,6 +139,7 @@ def make_purchase_order(source_name, target_doc=None):
 		},
 	}, target_doc, set_missing_values)
 
+	doclist.set_onload('ignore_price_list', True)
 	return doclist
 
 @frappe.whitelist()
