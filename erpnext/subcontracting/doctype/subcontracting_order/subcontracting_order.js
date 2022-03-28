@@ -1,7 +1,7 @@
 // Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.provide("erpnext.buying");
+frappe.provide('erpnext.buying');
 frappe.provide('erpnext.accounts.dimensions');
 {% include 'erpnext/public/js/controllers/buying.js' %};
 
@@ -81,7 +81,25 @@ frappe.ui.form.on('Subcontracting Order', {
 	},
 
 	purchase_order: function (frm) {
-		if (!frm.doc.purchase_order) {
+		if (frm.doc.purchase_order) {
+			frappe.call({
+				method: 'erpnext.buying.doctype.purchase_order.purchase_order.make_subcontracting_order',
+				args: {
+					source_name: frm.doc.purchase_order,
+				},
+				freeze_message: __('Mapping Subcontracting Order ...'),
+				callback: function (r) {
+					if (!r.exc) {
+						var fields_to_skip = ['owner', 'docstatus', 'idx', 'doctype', '__islocal', '__onload', '__unsaved'];
+						var fields_to_map = Object.keys(r.message).filter(n => !fields_to_skip.includes(n));
+						$.each(fields_to_map, function (i, field) {
+							frm.set_value(field, r.message[field]);
+						});
+					};
+				}
+			});
+		}
+		else {
 			frm.set_value('service_items', null);
 		}
 	},
@@ -197,7 +215,7 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 		var me = this;
 
 		if (doc.docstatus == 1) {
-			if (doc.status != "Completed") {
+			if (doc.status != 'Completed') {
 				if (flt(doc.per_billed) == 0) {
 					cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __('Create'));
 				}
@@ -205,7 +223,7 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 					cur_frm.add_custom_button(__('Subcontracting Receipt'), this.make_subcontracting_receipt, __('Create'));
 					if (me.has_unsupplied_items()) {
 						cur_frm.add_custom_button(__('Material to Supplier'),
-							function () { me.make_stock_entry(); }, __("Transfer"));
+							function () { me.make_stock_entry(); }, __('Transfer'));
 					}
 				}
 				cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
@@ -217,9 +235,9 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 		var row = frappe.get_doc(cdt, cdn);
 		if (doc.schedule_date) {
 			row.schedule_date = doc.schedule_date;
-			refresh_field("schedule_date", cdn, "fg_items");
+			refresh_field('schedule_date', cdn, 'fg_items');
 		} else {
-			this.frm.script_manager.copy_from_first_row("fg_items", row, ["schedule_date"]);
+			this.frm.script_manager.copy_from_first_row('fg_items', row, ['schedule_date']);
 		}
 	}
 
@@ -326,7 +344,7 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 					me.values.sub_con_rm_items.map((row, i) => {
 						if (!row.item_code || !row.rm_item_code || !row.warehouse || !row.qty || row.qty === 0) {
 							let row_id = i + 1;
-							frappe.throw(__("Item Code, warehouse and quantity are required on row {0}", [row_id]));
+							frappe.throw(__('Item Code, warehouse and quantity are required on row {0}', [row_id]));
 						}
 					})
 					me.make_rm_stock_entry(me.dialog.fields_dict.sub_con_rm_items.grid.get_selected_children())
@@ -362,14 +380,14 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 
 	make_rm_stock_entry(rm_items) {
 		frappe.call({
-			method: "erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.make_rm_stock_entry",
+			method: 'erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.make_rm_stock_entry',
 			args: {
 				subcontracting_order: cur_frm.doc.name,
 				rm_items: rm_items
 			},
 			callback: function (r) {
 				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				frappe.set_route('Form', doclist[0].doctype, doclist[0].name);
 			}
 		});
 	}
