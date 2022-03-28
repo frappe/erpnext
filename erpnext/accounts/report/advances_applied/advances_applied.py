@@ -84,6 +84,7 @@ def return_filters(filters, from_date, to_date):
 	conditions += "{"
 	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
 	conditions += ', "company": "{}"'.format(filters.get("company"))
+	conditions += ', "docstatus": ["!=", 2]'
 	if filters.get("applied") == 1:
 		conditions += ', "total_allocated_amount": [">", "0"]'
 	else:

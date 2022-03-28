@@ -544,7 +544,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2022-03-21 16:44:18.418256",
+ "modified": "2022-03-28 13:55:17.580857",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -627,6 +627,5 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
- "title_field": "customer_name",
- "track_changes": 1
+ "title_field": "customer_name"
 }
