@@ -771,8 +771,8 @@ def get_bom_item_rate(args, bom_doc):
 	if bom_doc.rm_cost_as_per == 'Valuation Rate':
 		rate = get_valuation_rate(args) * (args.get("conversion_factor") or 1)
 	elif bom_doc.rm_cost_as_per == 'Last Purchase Rate':
-		rate = ( flt(args.get('last_purchase_rate')) \
-			or frappe.db.get_value("Item", args['item_code'], "last_purchase_rate")) \
+		rate = (flt(args.get('last_purchase_rate'))
+			or flt(frappe.db.get_value("Item", args['item_code'], "last_purchase_rate"))) \
 				* (args.get("conversion_factor") or 1)
 	elif bom_doc.rm_cost_as_per == "Price List":
 		if not bom_doc.buying_price_list:
@@ -796,7 +796,7 @@ def get_bom_item_rate(args, bom_doc):
 		price_list_data = get_price_list_rate(bom_args, item_doc)
 		rate = price_list_data.price_list_rate
 
-	return rate
+	return flt(rate)
 
 def get_valuation_rate(args):
 	""" Get weighted average of valuation rate from all warehouses """
