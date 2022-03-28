@@ -1,0 +1,2065 @@
+{
+    "country_code": "ch",
+    "name": "Switzerland - Plan comptable PME",
+    "tree": {
+        "Actif": {
+          "Actifs circulants": {
+              "Tr\u00e9sorerie": {
+                      "Caisse principale": {
+                          "account_type": "Cash",
+                          "account_number": "1000"
+                      },
+                      "Caisse auxiliaire": {
+                          "account_type": "Cash",
+                          "account_number": "1001"
+                      },
+                      "Compte postal Suisse": {
+                          "account_type": "Bank",
+                          "account_number": "1010"
+                      },
+                      "Compte courant CHF": {
+                          "account_type": "Bank",
+                          "account_number": "1020"
+                      },
+                      "Compte d'\u00e9pargne CHF": {
+                          "account_type": "Bank",
+                          "account_number": "1021"
+                      },
+                      "Compte courant EUR": {
+                          "account_type": "Bank",
+                          "account_number": "1024"
+                      },
+                      "Compte courant USD": {
+                          "account_type": "Bank",
+                          "account_number": "1025"
+                      },
+                      "Compte d'attente carte de cr\u00e9dit": {
+                          "account_type": "Bank",
+                          "account_number": "1030"
+                      },
+                      "Compte d'attente Postcard": {
+                          "account_type": "Bank",
+                          "account_number": "1035"
+                      },
+                      "Compte d'attente Twint": {
+                          "account_type": "Bank",
+                          "account_number": "1036"
+                      },
+                      "Compte d'attente Paypal": {
+                          "account_type": "Bank",
+                          "account_number": "1037"
+                      },
+                      "is_group": 1,
+                      "account_number": "100"
+              },
+              "Actifs cot\u00e9s en bourse d\u00e9tenus \u00e0 court terme": {
+                  "Actions \u00e0 court terme": {
+                    "account_number": "1060"
+                  },
+                  "Bons de participation \u00e0 court terme": {
+                    "account_number": "1061"
+                  },
+                  "Parts de fonds de placement \u00e0 court terme": {
+                    "account_number": "1062"
+                  },
+                  "Obligations \u00e0 court terme": {
+                    "account_number": "1063"
+                  },
+                  "R\u00e9serves de fluctuation de valeur sur titres \u00e0 court terme": {
+                    "account_number": "1068"
+                  },
+                  "Corrections de la valeur des titres": {
+                    "account_number": "1069"
+                  },
+                  "Autres placements \u00e0 court terme": {
+                    "account_number": "1070"
+                  },
+                  "R\u00e9serves de fluctuation de valeur sur autres placements \u00e0 court terme": {
+                    "account_number": "1078"
+                  },
+                  "Corrections de la valeur des autres placements \u00e0 court terme": {
+                    "account_number": "1079"
+                  },
+                  "account_number": "106"
+              },
+              "Comptes d'attente": {
+                  "Compte de transfert": {
+                    "account_number": "1090"
+                  },
+                  "Compte d'attente pour salaires": {
+                    "account_number": "1091"
+                  },
+                  "Compte d'attente pour montants \u00e0 clarifier": {
+                    "account_number": "1099"
+                  },
+                  "account_number": "109"
+              },
+              "Cr\u00e9ances r\u00e9sultant de la vente de biens et de prestations de services": {
+                  "Cr\u00e9ances suisse en CHF": {
+                    "account_type": "Receivable",
+                    "account_number": "1100"
+                  },
+                  "Cr\u00e9ances \u00e9trang\u00e8res en CHF": {
+                    "account_type": "Receivable",
+                    "account_number": "1101"
+                  },
+                  "Cr\u00e9ances \u00e9trang\u00e8res en monnaie \u00e9trang\u00e8re EUR": {
+                    "account_type": "Receivable",
+                    "account_number": "1102"
+                  },
+                  "Cr\u00e9ances \u00e9trang\u00e8res en monnaie \u00e9trang\u00e8re USD": {
+                    "account_type": "Receivable",
+                    "account_number": "1103"
+                  },
+                    "Bon cadeaux": {
+                      "account_type": "Receivable",
+                      "account_number": "1105"
+                  },
+                  "Corrections de la valeur des ventes de biens et de prestations de services \u00e0 des tiers (inclus ducroire)": {
+                    "account_type": "Receivable",
+                    "account_number": "1109"
+                  },
+                  "Cr\u00e9ances r\u00e9sultant de la vente de biens et de prestations de services envers des participations": {
+                    "account_type": "Receivable",
+                    "account_number": "1110"
+                  },
+                  "is_group": 1,
+                  "account_type": "Receivable",
+                  "account_number": "110"
+              },
+              "Autres cr\u00e9ances \u00e0 court terme": {
+                  "Pr\u00eats \u00e0 court terme": {
+                    "account_number": "1140"
+                  },
+                  "Corrections de la valeur des avances et des pr\u00eats envers des tiers": {
+                    "account_number": "1149"
+                  },
+                  "Pr\u00eats \u00e0 court terme envers les actionnaires": {
+                    "account_number": "1160"
+                  },
+                  "Corrections de la valeur des autres cr\u00e9ances \u00e0 envers des envers les parties prenantes et les organes": {
+                    "account_number": "1169"
+                },
+                "Imp\u00f4t pr\u00e9alable : TVA s/mat\u00e9riel, marchandises, prestations et \u00e9nergie": {
+                  "TVA 2.5%": {
+                  "account_number": "11701",
+                  "account_type": "Tax",
+                  "tax_rate": 2.5
+                },
+                  "TVA 3.7%": {
+                  "account_number": "11702",
+                  "account_type": "Tax",
+                  "tax_rate": 3.7
+                },
+                "TVA 7.7%": {
+                  "account_number": "11703",
+                  "account_type": "Tax",
+                  "tax_rate": 7.7
+                },
+                  "account_number": "1170"
+                },
+                  "Imp\u00f4t pr\u00e9alable : TVA s/investissements et autres charges d’exploitation": {
+                  "TVA 2.5%": {
+                  "account_number": "11711",
+                  "account_type": "Tax",
+                  "tax_rate": 2.5
+                },
+                  "TVA 3.7%": {
+                  "account_number": "11712",
+                  "account_type": "Tax",
+                  "tax_rate": 3.7
+                },
+                  "TVA 7.7%": {
+                  "account_number": "11713",
+                  "account_type": "Tax",
+                  "tax_rate": 7.7
+                },
+                  "account_number": "1171"   
+                },
+                  "R\u00e9conciliation de l'imp\u00f4t pr\u00e9alable lors de changement de m\u00e9thode": {
+                    "account_number": "1172"
+                  },
+                  "R\u00e9duction de l'imp\u00f4t pr\u00e9alable": {
+                    "account_number": "1173"
+                  },
+                  "Correction de l'imp\u00f4t pr\u00e9alable": {
+                    "account_number": "1174"
+                  },
+                  "D\u00e9compte TVA": {
+                    "account_type": "Tax",
+                    "account_number": "1175"
+                  },
+                  "Imp\u00f4t anticip\u00e9 \u00e0 r\u00e9cup\u00e9rer": {
+                    "account_number": "1176"
+                  },
+                  "Cr\u00e9ances envers l'administration des douanes": {
+                    "account_number": "1177"
+                  },
+                  "Compte courant AVS, AI, APG, AC": {
+                    "account_number": "1180"
+                  },
+                  "Compte courant Caisse d'allocations familiales (CAF)": {
+                    "account_number": "1181"
+                  },
+                  "Compte courant Institutions de pr\u00e9voyance professionnelle": {
+                    "account_number": "1182"
+                  },
+                  "Compte courant Assurance-accidents": {
+                    "account_number": "1183"
+                  },
+                  "Compte courant Assurance maladie (indemnit\u00e9 journali\u00e8re maladie)": {
+                    "account_number": "1184"
+                  },
+                  "Compte courant Imp\u00f4t \u00e0 la source": {
+                    "account_number": "1188"
+                  },
+                  "Cr\u00e9ances (WIR)": {
+                    "account_number": "1190"
+                  },
+                  "Cautionnements": {
+                    "account_number": "1191"
+                  },
+                  "Acomptes pay\u00e9s": {
+                    "account_number": "1192"
+                  },
+                  "Corrections de la valeur des cr\u00e9ances \u00e0 court terme": {
+                    "account_number": "1199"
+                  },
+                  "account_number": "114"
+              },
+              "Stocks et prestations non factur\u00e9es": {
+                  "Stocks de marchandises commerciales": {
+                      "account_type": "Stock",
+                      "account_number": "1200"
+                  },
+                  "Variation des stocks de marchandises": {
+                      "account_type": "Stock",
+                      "account_number": "1207"
+                  },
+                  "Acomptes sur les marchandises commerciales": {
+                      "account_type": "Stock",
+                      "account_number": "1208"
+                  },
+                  "Correction de la valeur des marchandises commerciales": {
+                      "account_type": "Stock",
+                      "account_number": "1209"
+                  },
+                  "Stocks de mati\u00e8res premi\u00e8res": {
+                      "account_type": "Stock",
+                      "account_number": "1210"
+                  },
+                  "Variation des stocks de mati\u00e8res premi\u00e8res": {
+                      "account_type": "Stock",
+                      "account_number": "1217"
+                  },
+                  "Acomptes sur mati\u00e8res premi\u00e8res": {
+                      "account_type": "Stock",
+                      "account_number": "1218"
+                  },
+                  "Correction de la valeur des mati\u00e8res premi\u00e8res": {
+                      "account_type": "Stock",
+                      "account_number": "1219"
+                  },
+                  "Stocks de pi\u00e8ces termin\u00e9es": {
+                      "account_type": "Stock",
+                      "account_number": "1220"
+                  },
+                  "Stocks de pi\u00e8ces semi-ouvr\u00e9es": {
+                      "account_type": "Stock",
+                      "account_number": "1221"
+                  },
+                  "Variation du stock de mati\u00e8res": {
+                      "account_type": "Stock",
+                      "account_number": "1227"
+                  },
+                  "Acompte sur mati\u00e8res": {
+                      "account_type": "Stock",
+                      "account_number": "1228"
+                  },
+                  "Correction de la valeur des stocks de mati\u00e8res": {
+                      "account_type": "Stock",
+                      "account_number": "1229"
+                  },
+                  "Stocks de mati\u00e8res auxiliaires": {
+                      "account_type": "Stock",
+                      "account_number": "1230"
+                  },
+                  "Stocks de mati\u00e8res consommables": {
+                      "account_type": "Stock",
+                      "account_number": "1231"
+                  },
+                  "Stocks de mat\u00e9riel d'emballages": {
+                      "account_type": "Stock",
+                      "account_number": "1232"
+                  },
+                  "Variation des stocks de mati\u00e8res auxiliaires et de mati\u00e8res consommables": {
+                      "account_type": "Stock",
+                      "account_number": "1237"
+                  },
+                  "Acompte sur mati\u00e8res auxiliaires et mati\u00e8res consommables": {
+                      "account_type": "Stock",
+                      "account_number": "1238"
+                  },
+                  "Correction de la valeur des mati\u00e8res auxiliaires et de mati\u00e8res consommables": {
+                      "account_type": "Stock",
+                      "account_number": "1239"
+                  },
+                  "Stocks obligatoires": {
+                      "account_type": "Stock",
+                      "account_number": "1240"
+                  },
+                  "Variation des stocks obligatoires": {
+                      "account_type": "Stock",
+                      "account_number": "1247"
+                  },
+                  "Correction de la valeur des stocks obligatoires": {
+                      "account_type": "Stock",
+                      "account_number": "1249"
+                  },
+                  "Marchandises en consignation": {
+                      "account_number": "1250"
+                  },
+                  "Variation des stocks de marchandises en consignation": {
+                      "account_type": "Stock",
+                      "account_number": "1257"
+                  },
+                  "Correction de la valeur sur stocks de marchandises en consignation": {
+                      "account_type": "Stock",
+                      "account_number": "1259"
+                  },
+                  "Stocks de produits finis": {
+                      "account_type": "Stock",
+                      "account_number": "1260"
+                  },
+                  "Variation des stocks de produits finis": {
+                      "account_type": "Stock",
+                      "account_number": "1267"
+                  },
+                  "Correction de la valeur des produits finis": {
+                      "account_type": "Stock",
+                      "account_number": "1269"
+                  },
+                  "Stocks de produits semi-ouvr\u00e9s": {
+                      "account_type": "Stock",
+                      "account_number": "1270"
+                  },
+                  "Variation des stocks de produits semi-ouvr\u00e9s": {
+                      "account_type": "Stock",
+                      "account_number": "1277"
+                  },
+                  "Correction de la valeur des produits semi-ouvr\u00e9s": {
+                      "account_type": "Stock",
+                      "account_number": "1279"
+                  },
+                  "Travaux en cours": {
+                      "account_number": "1280"
+                  },
+                  "Variation des travaux en cours": {
+                      "account_type": "Stock",
+                      "account_number": "1287"
+                  },
+                  "Correction de la valeur des travaux en cours": {
+                      "account_type": "Stock",
+                      "account_number": "1289"
+                  },
+                  "account_number": "120"
+              },
+              "Actifs de r\u00e9gularisation (actifs transitoires)": {
+                  "Charges pay\u00e9es d'avance": {
+                    "account_number": "1300"
+                  },
+                  "Produits \u00e0 recevoir": {
+                    "account_number": "1301"
+                  },
+                  "R\u00e9serve de contributions de l'employeur": {
+                    "account_number": "1302"
+                  },
+                  "Remise de dettes": {
+                    "account_number": "1303"
+                  },
+                  "account_number": "130"
+              },
+              "account_number": "10"
+          },
+          "Actifs immobilis\u00e9s": {
+              "Immobilisations financi\u00e8res": {
+                  "Actions \u00e0 long terme": {
+                      "account_number": "1400"
+                  },
+                  "Corrections de la valeur des titres \u00e0 long terme": {
+                      "account_number": "1409"
+                  },
+                  "Comptes de placement": {
+                      "account_number": "1410"
+                  },
+                  "Pr\u00eats \u00e0 long terme": {
+                      "account_number": "1440"
+                  },
+                  "Hypoth\u00e8ques": {
+                      "account_number": "1441"
+                  },
+                  "Corrections de la valeur des cr\u00e9ances \u00e0 long terme envers des tiers": {
+                      "account_number": "1449"
+                  },
+                  "account_number": "140"
+              },
+              "Participations": {
+                  "Participations": {
+                      "account_number": "1480"
+                  },
+                  "Corrections de la valeur des participations": {
+                      "account_number": "1489"
+                  },
+                  "account_number": "148"
+              },
+              "Immobilisation corporelle meubles": {
+                  "Machines et appareils": {
+                      "account_number": "1500"
+                  },
+                  "Amortissements et corrections de la valeur des machines et appareils": {
+                      "account_number": "1509"
+                  },
+                  "Mobilier et installations": {
+                      "account_number": "1510"
+                  },
+                  "Amortissements et corrections de la valeur du mobilier et installations": {
+                      "account_number": "1519"
+                  },
+                  "Machines de bureau, informatique, systèmes de communication": {
+                      "account_number": "1520"
+                  },
+                  "Amortissements et corrections de la valeur des machines de bureau, informatique, syst\u00e8mes de communication": {
+                      "account_number": "1529"
+                  },
+                  "V\u00e9hicules": {
+                      "account_number": "1530"
+                  },
+                  "V\u00e9hicules en leasing": {
+                      "account_number": "1537"
+                  },
+                  "Amortissements et corrections de la valeur des v\u00e9hicules": {
+                      "account_number": "1539"
+                  },
+                  "Outillages et appareils": {
+                      "account_number": "1540"
+                  },
+                  "Outillages et appareils en leasing": {
+                      "account_number": "1547"
+                  },
+                  "Acomptes sur outillages et appareils": {
+                      "account_number": "1548"
+                  },
+                  "Amortissements et corrections de la valeur de l’outillage et appareils": {
+                      "account_number": "1549"
+                  },
+                  "account_number": "150"
+              },
+              "Immobilisation corporelle immeubles": {
+                  "Immeubles d’exploitation": {
+                      "account_number": "1600"
+                  },
+                  "Amortissements et corrections de la valeur des immeubles d’exploitation": {
+                      "account_number": "1609"
+                  },
+                  "account_number": "160"
+              },
+              "Immobilisations incorporelles": {
+                  "Brevets": {
+                      "account_number": "1700"
+                  },
+                  "Amortissements et corrections de la valeur des brevets, know-how, processus de fabrication": {
+                      "account_number": "1709"
+                  },
+                  "Goodwill": {
+                      "account_number": "1770"
+                  },
+                  "Amortissements et corrections de la valeur du goodwill": {
+                      "account_number": "1779"
+                  },
+                  "Autres immobilisations incorporelles": {
+                      "account_number": "1790"
+                  },
+                  "Amortissements et corrections de la valeur des autres immobilisations incorporelles": {
+                      "account_number": "1799"
+                  },
+                  "account_number": "170"
+              },
+              "Capital social (ou capital de fondation) non lib\u00e9r\u00e9": {
+                  "Capital social non lib\u00e9r\u00e9": {
+                    "account_number": "1850"
+                  },
+                  "Capital participation non lib\u00e9r\u00e9": {
+                    "account_number": "1851"
+                  },
+                  "account_number": "180"
+              },
+              "account_number": "14"
+          },
+          "root_type": "Asset",
+          "account_number": "1"
+        },
+        "Passif": {
+          "Capitaux \u00e9trangers \u00e0 court terme": {
+              "Dettes \u00e0 court terme r\u00e9sultant de l’achat de biens et de prestations de services": {
+                  "Dettes r\u00e9sultant d’achats de mati\u00e8res et de marchandises": {
+                      "account_type": "Payable",
+                      "account_number": "2000"
+                  },
+                  "Dettes r\u00e9sultant de prestations de services de tiers": {
+                      "account_type": "Payable",
+                      "account_number": "2001"
+                  },
+                  "Dettes r\u00e9sultant de charges de personnel": {
+                      "account_type": "Payable",
+                      "account_number": "2002"
+                  },
+                  "Dettes r\u00e9sultant d'autres charges d'exploitation": {
+                      "account_type": "Payable",
+                      "account_number": "2004"
+                  },
+                    "Stock recu non factur\u00e9": {
+                        "account_type": "Stock Received But Not Billed",
+                        "account_number": "2005"
+                  },
+                  "Acomptes re\u00e7us de tiers": {
+                      "account_type": "Payable",
+                      "account_number": "2030"
+                  },
+                  "Dettes r\u00e9sultant de livraisons et de prestations \u00e0 des participations": {
+                      "account_type": "Payable",
+                      "account_number": "2050"
+                  },
+                  "account_number": "200"
+              },
+              "Dettes \u00e0 court terme portant int\u00e9r\u00eat": {
+                  "Compte courant CHF \u00e0 court terme": {
+                      "account_number": "2100"
+                  },
+                  "Engagements \u00e0 court terme de financement par leasing": {
+                      "account_number": "2120"
+                  },
+                  "Autres dettes financi\u00e8res \u00e0 court terme envers des tiers": {
+                      "account_number": "2140"
+                  },
+                  "Dettes financi\u00e8res envers des participations": {
+                      "account_number": "2150"
+                  },
+                  "account_number": "210"
+                  },
+                "Autres dettes \u00e0 court terme": {
+                "TVA due": {
+                        "TVA 2.5%": {
+                        "account_number": "22001",
+                        "account_type": "Tax",
+                        "tax_rate": 2.5
+                    },
+                        "TVA 3.7%": {
+                        "account_number": "22002",
+                        "account_type": "Tax",
+                        "tax_rate": 3.7
+                    },
+                        "TVA 7.7%": {
+                        "account_number": "22003",
+                        "account_type": "Tax",
+                        "tax_rate": 7.7
+                    },
+                    "account_number": "2200"
+                   },
+                    "D\u00e9compte TVA": {
+                        "account_type": "Tax",
+                        "account_number": "2201"
+                  },
+                  "R\u00e9conciliation du chiffre d'affaires suite \u00e0 un changement de m\u00e9thode": {
+                      "account_number": "2202"
+                  },
+                  "Imp\u00f4t sur les acquisitions": {
+                      "account_number": "2203"
+                  },
+                  "Imp\u00f4t anticip\u00e9 \u00e0 payer": {
+                      "account_number": "2206"
+                  },
+                  "Autres dettes \u00e0 court terme envers des tiers (sans int\u00e9r\u00eats)": {
+                      "account_number": "2210"
+                  },
+                  "Dividendes": {
+                      "account_number": "2261"
+                  },
+                  "Compte courant Institutions de pr\u00e9voyance professionnelle": {
+                      "account_number": "2270"
+                  },
+                  "Compte courant AVS, AI, APG, AC": {
+                      "account_number": "2271"
+                  },
+                  "Compte courant Caisse d'allocations familiales (CAF)": {
+                      "account_number": "2272"
+                  },
+                  "Compte courant Assurance-accidents": {
+                      "account_number": "2273"
+                  },
+                  "Compte courant Assurance maladie (indemnit\u00e9 journali\u00e8re maladie)": {
+                      "account_number": "2274"
+                  },
+                  "Compte courant Imp\u00f4t \u00e0 la source": {
+                      "account_number": "2279"
+                  },
+                  "account_number": "220"
+              },
+              "Passifs de r\u00e9gularisation (passifs transitoires) et provisions \u00e0 court terme": {
+                  "Charges \u00e0 payer": {
+                      "account_number": "2300"
+                  },
+                  "Produits encaiss\u00e9s d’avance": {
+                      "account_number": "2301"
+                  },
+                  "Provisions pour travaux de garantie \u00e0 court terme": {
+                      "account_number": "2330"
+                  },
+                  "Provisions pour imp\u00f4ts directs \u00e0 court terme": {
+                      "account_number": "2340"
+                  },
+                  "Provisions pour imp\u00f4ts indirects \u00e0 court terme": {
+                      "account_number": "2341"
+                  },
+                  "account_number": "230"
+              },
+              "account_number": "20"
+          },
+          "Capitaux \u00e9trangers \u00e0 long terme": {
+              "Dettes \u00e0 long terme portant int\u00e9r\u00eat": {
+                  "Emprunts bancaires en CHF \u00e0 long terme": {
+                      "account_number": "2400"
+                  },
+                  "Engagements \u00e0 long terme de financement par leasing": {
+                      "account_number": "2420"
+                  },
+                  "Emprunts obligataires \u00e0 long terme": {
+                      "account_number": "2430"
+                  },
+                  "Emprunts \u00e0 long terme \u00e0 l'\u00e9gard de tiers portant int\u00e9r\u00eat": {
+                      "account_number": "2450"
+                  },
+                  "Hypoth\u00e8ques \u00e0 long terme \u00e0 l'\u00e9gard de tiers portant int\u00e9r\u00eat": {
+                      "account_number": "2451"
+                  },
+                  "account_number": "240"
+              },
+              "Autres dettes \u00e0 long terme": {
+                  "Autres dettes \u00e0 long terme \u00e0 l'\u00e9gard de tiers (sans int\u00e9r\u00eats)": {
+                      "account_number": "2500"
+                  },
+                  "account_number": "250"
+              },
+              "Provisions et postes analogues pr\u00e9vus par la loi": {
+                "Provisions pour travaux de garantie \u00e0 long terme": {
+                    "account_number": "2600"
+                },
+                  "account_number": "260"
+              },
+              "account_number": "24"
+          },
+          "Capitaux propres": {
+              "Capital propre des entreprises raison individuelle": {
+                  "Capital propre": {
+                      "account_type": "Equity",
+                      "account_number": "2800"
+                  },
+                  "Capital propre du conjoint": {
+                      "account_type": "Equity",
+                      "account_number": "2801"
+                  },
+                  "account_number": "280"
+            },
+            "Capital propre des soci\u00e9t\u00e9s de personnes": {
+                  "Capital propre": {
+                      "account_type": "Equity",
+                      "account_number": "2810"
+                  },
+                    "Capital propre du conjoint": {
+                      "account_type": "Equity",
+                      "account_number": "2811"
+                  },
+                    "Capital social de la S.\u00e0.r.l": {
+                      "account_type": "Equity",
+                      "account_number": "2812"
+                 },
+                  "account_number": "281"
+                 },
+           "Capital social de la S.\u00e0.r.l": {
+                    "Capital social de la S.\u00e0.r.l": {
+                      "account_type": "Equity",
+                      "account_number": "2820"
+                 },
+                 "account_number": "282"
+            },
+          "Capital-actions et participation": {
+                    "Capital-actions": {
+                      "account_type": "Equity",
+                      "account_number": "2840"
+                 },
+                  "Capital-participation": {
+                      "account_type": "Equity",
+                      "account_number": "2841"
+                },
+                "account_number": "284"
+              },
+            "Compte priv\u00e9": {
+                    "Pr\u00e9l\u00e8vements privés en esp\u00e8ces": {
+                      "account_type": "Equity",
+                      "account_number": "2850"
+                   },
+                    "Pr\u00e9l\u00e8vements priv\u00e9s en nature": {
+                      "account_type": "Equity",
+                      "account_number": "2851"
+                  },
+                    "Participations priv\u00e9es aux charges d'exploitation": {
+                      "account_type": "Equity",
+                      "account_number": "2852"
+                  },
+                    "Valeur locative de l'appartement priv\u00e9": {
+                        "account_type": "Equity",
+                        "account_number": "2853"
+                  },
+                    "Primes d'assurance priv\u00e9es": {
+                        "account_type": "Equity",
+                        "account_number": "2854"
+                  },
+                    "Cotisations priv\u00e9es à titre de pr\u00e9voyance": {
+                        "account_type": "Equity",
+                        "account_number": "2855"
+                  },
+                    "Imp\u00f4ts priv\u00e9": {
+                        "account_type": "Equity",
+                        "account_number": "2856"
+              },
+                  "account_number": "285"
+              },
+              "R\u00e9serves et b\u00e9n\u00e9fice report\u00e9 ou perte report\u00e9e": {
+                  "Agio \u00e0 la fondation ou lors d'augmentations de capital": {
+                      "account_type": "Equity",
+                      "account_number": "2900"
+                  },
+                  "R\u00e9serves d‘\u00e9valuation": {
+                      "account_type": "Equity",
+                      "account_number": "2940"
+                  },
+                  "R\u00e9serve l\u00e9gale issue du b\u00e9n\u00e9fice": {
+                      "account_type": "Equity",
+                      "account_number": "2950"
+                  },
+                  "R\u00e9serves facultatives issues du b\u00e9n\u00e9fice": {
+                      "account_type": "Equity",
+                      "account_number": "2960"
+                  },
+                  "B\u00e9n\u00e9fice ou perte report\u00e9e": {
+                      "account_type": "Equity",
+                      "account_number": "2970"
+                  },
+                  "B\u00e9n\u00e9fice ou perte de l’exercice": {
+                      "account_type": "Equity",
+                      "account_number": "2979"
+                  },
+                  "account_number": "290"
+              },
+              "account_number": "28"
+          },
+          "root_type": "Liability",
+          "account_number": "2"
+        },
+        "Produits nets des ventes de biens et de prestations de services": {
+          "Chiffre d'affaires de la production vendue": {
+              "Vente de produits fabriqu\u00e9s": {
+                  "Ventes de produits fabriqu\u00e9s": {
+                      "account_number": "3000"
+                  },
+                  "account_number": "300"
+              },
+              "D\u00e9ductions sur vente de produits fabriqu\u00e9s": {
+                  "Escomptes": {
+                      "account_number": "3090"
+                  },
+                  "Rabais et r\u00e9ductions de prix": {
+                      "account_number": "3091"
+                  },
+                  "Ristournes": {
+                      "account_number": "3092"
+                  },
+                  "Commissions de tiers": {
+                      "account_number": "3093"
+                  },
+                  "Frais d'encaissement": {
+                      "account_number": "3094"
+                  },
+                  "Pertes sur clients, variation de prix": {
+                      "account_number": "3095"
+                  },
+                  "Diff\u00e9rences de change": {
+                      "account_number": "3096"
+                  },
+                  "Frais de ports": {
+                      "account_number": "3097"
+                  },
+                  "account_number": "309"
+              },
+              "account_number": "30"
+          },
+          "Ventes de marchandises": {
+              "Ventes de marchandises": {
+                  "Ventes de marchandises au comptant": {
+                      "account_number": "3200"
+                  },
+                  "account_number": "320"
+              },
+              "D\u00e9ductions sur vente de marchandises": {
+                  "Escomptes": {
+                      "account_number": "3290"
+                  },
+                  "Rabais et r\u00e9ductions de prix": {
+                      "account_number": "3291"
+                  },
+                  "Ristournes": {
+                      "account_number": "3292"
+                  },
+                  "Commissions de tiers": {
+                      "account_number": "3293"
+                  },
+                  "Frais d'encaissement": {
+                      "account_number": "3294"
+                  },
+                  "Pertes sur clients, variation de prix": {
+                      "account_number": "3295"
+                  },
+                  "Diff\u00e9rences de change": {
+                      "account_number": "3296"
+                  },
+                  "Frais de ports": {
+                      "account_number": "3297"
+                  },
+                  "account_number": "329"
+              },
+              "account_number": "32"
+          },
+          "Vente de prestations": {
+              "Ventes de prestations": {
+                  "Ventes de prestations": {
+                      "account_number": "3400"
+                  },
+                  "account_number": "340"
+              },
+              "D\u00e9ductions sur vente de prestations": {
+                  "Escomptes": {
+                      "account_number": "3490"
+                  },
+                  "Rabais et r\u00e9ductions de prix": {
+                      "account_number": "3491"
+                  },
+                  "Ristournes": {
+                      "account_number": "3492"
+                  },
+                  "Commissions de tiers": {
+                      "account_number": "3493"
+                  },
+                  "Frais d'encaissement": {
+                      "account_number": "3494"
+                  },
+                  "Pertes sur clients, variation de prix": {
+                      "account_number": "3495"
+                  },
+                  "Diff\u00e9rences de change": {
+                      "account_number": "3496"
+                  },
+                  "Frais de ports": {
+                      "account_number": "3497"
+                  },
+                  "account_number": "349"
+              },
+              "account_number": "34"
+          },
+          "Produits annexes r\u00e9sultants de la vente de biens et de prestations de services": {
+              "Produits annexes r\u00e9sultant de livraisons et de prestations de services": {
+                  "Ventes de mati\u00e8res premi\u00e8res": {
+                      "account_number": "3600"
+                    },
+                  "account_number": "360"
+                           },
+              "account_number": "36"
+          },
+          "Propres prestations et propres consommations": {
+              "Prestations propres": {
+                  "Propre production d'immobilisations corporelles meubles": {
+                      "account_number": "3700"
+                  },
+                  "Propres consommations produites": {
+                      "account_number": "3710"
+                  },
+                  "Propres consommations de marchandises": {
+                      "account_number": "3720"
+                  },
+                  "Propres consommations de services": {
+                      "account_number": "3740"
+                  },
+                  "account_number": "370"
+              },
+              "account_number": "37"
+          },
+          "D\u00e9ductions sur ventes": {
+              "D\u00e9ductions sur ventes": {
+                  "Escomptes": {
+                      "account_number": "3800"
+                  },
+                  "Rabais et r\u00e9ductions de prix": {
+                      "account_number": "3801"
+                  },
+                  "Ristournes": {
+                      "account_number": "3802"
+                  },
+                  "Commissions de tiers": {
+                      "account_number": "3803"
+                  },
+                  "Frais d'encaissement": {
+                      "account_number": "3804"
+                  },
+                  "Pertes sur clients, variation du ducroire": {
+                      "account_number": "3805"
+                  },
+                  "Diff\u00e9rences de change": {
+                      "account_number": "3806"
+                  },
+                  "Frais d'exp\u00e9dition": {
+                      "account_number": "3807"
+                  },
+                  "TVA - Taux de la dette nette": {
+                      "account_number": "3808"
+                  },
+                  "account_number": "380"
+              },
+              "account_number": "38"
+          },
+          "Variation des stocks de produits finis et semi-finis et variation des prestations de services non factur\u00e9s": {
+              "Variation des stocks de produits semi-finis et finis": {
+                  "Variation des stocks de produits semis-finis": {
+                      "account_number": "3900"
+                  },
+                  "Variation des stocks de produits finis": {
+                      "account_number": "3901"
+                  },
+                  "account_number": "390"
+              },
+              "Variation de la valeur des prestations non factur\u00e9es": {
+                  "Variation de la valeur des prestations non factur\u00e9es": {
+                      "account_number": "3940"
+                  },
+                  "Variation des stocks de produits finis": {
+                      "account_number": "3941"
+                  },
+                  "account_number": "394"
+              },
+              "account_number": "39"
+          },
+          "root_type": "Income",
+          "account_number": "3"
+        },
+        "Charges de mat\u00e9riel, de marchandises, de prestations de tiers et d’\u00e9nergie": {
+          "Charges de mat\u00e9riel": {
+              "Charges de mat\u00e9riel": {
+                  "Achats d'appareils": {
+                      "account_number": "4000"
+                  },
+                  "account_number": "400"
+              },
+              "account_number": "40"
+          },
+          "Charges de marchandises": {
+              "Charge de marchandises destin\u00e9es \u00e0 la revente": {
+                  "Achats de marchandises": {
+                      "account_number": "4200"
+                  },
+                   "Variations de stocks": {
+                     "account_type": "Stock Adjustment",
+                     "account_number": "4208"
+                  },
+                    "D\u00e9penses incluses dans la valorisation": {
+                    "account_type": "Expenses Included In Valuation",
+                    "account_number": "4210"
+                  },
+                  "account_number": "420"
+              },
+              "account_number": "42"
+          },
+          "Prestations et travaux de tiers": {
+              "Charges de prestations de tiers": {
+                  "Charges pour prestations de services": {
+                      "account_number": "4400"
+                  },
+                  "account_number": "440"
+              },
+              "account_number": "44"
+          },
+          "Charges d’\u00e9nergie pour l’exploitation": {
+              "Electricit\u00e9": {
+                "Charges d’\u00e9nergie pour l’exploitation": {
+                      "account_number": "4500"
+                  },
+                  "account_number": "450"
+              },
+              "account_number": "45"
+          },
+          "Charges directes d'achats": {
+              "frais \u00e0 l'achat": {
+                  "account_number": "4700"
+              },
+              "Droit de douane": {
+                  "account_number": "4701"
+              },
+              "Frais de transport \u00e0 l'achat": {
+                  "account_number": "4702"
+              },
+              "account_number": "47"
+          },
+          "D\u00e9ductions  obtenues sur achats": {
+              "Escomptes": {
+                  "account_number": "4900"
+              },
+              "Rabais et r\u00e9ductions de prix": {
+                  "account_number": "4901"
+              },
+              "Ristournes": {
+                  "account_number": "4902"
+              },
+              "Commissions obtenues sur achats": {
+                  "account_number": "4903"
+              },
+              "Diff\u00e9rences de change": {
+                  "account_number": "4906"
+              },
+              "account_number": "49"
+          },
+          "root_type": "Expense",
+          "account_number": "4"
+        },
+        "Charges de personnel": {
+          "Charges de personnel Production": {
+              "Charges salariales Production": {
+                  "Salaires": {
+                      "account_number": "5000"
+                  },
+                  "Indemnit\u00e9s": {
+                      "account_number": "5001"
+                  },
+                  "Participations au b\u00e9n\u00e9fice": {
+                      "account_number": "5002"
+                  },
+                  "Commissions": {
+                      "account_number": "5003"
+                  },
+                  "Prestations des assurances sociales": {
+                      "account_number": "5005"
+                  },
+                  "Mise \u00e0 disposition de personnel": {
+                      "account_number": "5006"
+                  },
+                  "Charges sociales": {
+                      "account_number": "5007"
+                  },
+                  "Autres charges de personnel": {
+                      "account_number": "5008"
+                  },
+                  "prestations de tiers": {
+                      "account_number": "5009"
+                  },
+                  "account_number": "500"
+              },
+              "Charges sociales Production": {
+                  "AVS, AI, APG, AC": {
+                      "account_number": "5070"
+                  },
+                  "Caisse d'allocations familiales (CAF)": {
+                      "account_number": "5071"
+                  },
+                  "Pr\u00e9voyance professionnelle": {
+                      "account_number": "5072"
+                  },
+                  "Assurances-accidents": {
+                      "account_number": "5073"
+                  },
+                  "Assurances maladie (indemnit\u00e9 journali\u00e8re maladie)": {
+                      "account_number": "5074"
+                  },
+                  "Imp\u00f4ts \u00e0 la source": {
+                      "account_number": "5079"
+                  },
+                  "account_number": "507"
+              },
+              "Autres charges de personnel Production": {
+                  "Recherche de personnel": {
+                      "account_number": "5080"
+                  },
+                  "Formation et formation continue": {
+                      "account_number": "5081"
+                  },
+                  "Indemnit\u00e9s effectives": {
+                      "account_number": "5082"
+                  },
+                  "Indemnit\u00e9s forfaitaires": {
+                      "account_number": "5083"
+                  },
+                  "Autres charges de personnel": {
+                      "account_number": "5089"
+                  },
+                  "account_number": "508"
+              },
+              "account_number": "50"
+          },
+          "Charges de personnel Administration": {
+              "Charges sociales": {
+                  "AVS, AI, APG, AC": {
+                      "account_number": "5770"
+                  },
+                  "Caisse d'allocations familiales (CAF)": {
+                      "account_number": "5771"
+                  },
+                  "Pr\u00e9voyance professionnelle": {
+                      "account_number": "5772"
+                  },
+                  "Assurances-accidents": {
+                      "account_number": "5773"
+                  },
+                  "Assurances maladie (indemnit\u00e9 journali\u00e8re maladie)": {
+                      "account_number": "5774"
+                  },
+                  "Imp\u00f4ts \u00e0 la source": {
+                      "account_number": "5779"
+                  },
+                  "account_number": "577"
+              },
+              "account_number": "57"
+          },
+          "Autres charges de personnel": {
+              "Recherche de personnel": {
+                  "Annonces pour recherche de personnel": {
+                      "account_number": "5800"
+                  },
+                  "Commissions pour recherche de personnel": {
+                      "account_number": "5801"
+                  },
+                  "account_number": "580"
+              },
+              "Formation et formation continue": {
+                  "Formation obligatoire": {
+                      "account_number": "5810"
+                  },
+                  "Formation continue/perfectionnement": {
+                      "account_number": "5811"
+                  },
+                  "account_number": "581"
+              },
+              "Indemnit\u00e9s effectives": {
+                  "Frais de voyages": {
+                      "account_number": "5820"
+                  },
+                  "Frais de repas": {
+                      "account_number": "5821"
+                  },
+                  "Frais de logement": {
+                      "account_number": "5822"
+                  },
+                  "account_number": "582"
+              },
+              "Parts priv\u00e9es sur charges de personnel": {
+                  "Parts priv\u00e9es sur charges de personnel": {
+                      "account_number": "5890"
+                  },
+                  "account_number": "589"
+              },
+              "account_number": "58"
+          },
+          "Prestations de tiers/temporaires": {
+              "Prestations de tiers": {
+                  "account_number": "5900"
+              },
+              "Employ\u00e9s temporaires": {
+                  "account_number": "5901"
+              },
+              "account_number": "59"
+          },
+          "root_type": "Expense",
+          "account_number": "5"
+        },
+        "Autres charges d’exploitation, amortissements et corrections de valeur, r\u00e9sultat financier": {
+          "Charges de locaux": {
+                  "Loyers pour locaux": {
+                      "account_number": "6000"
+              },
+                  "Charges accessoires de chauffage": {
+                      "account_number": "6030"
+              },
+                  "Nettoyage": {
+                      "account_number": "6040"
+              },
+                  "R\u00e9paration": {
+                      "account_number": "6050"
+              },
+                  "Parts priv\u00e9es sur charges de chauffage, d'\u00e9clairage, de nettoyage": {
+                      "account_number": "6090"
+              },
+              "account_number": "60"
+          },
+          "Entretien, r\u00e9parations, remplacements (ERR); leasing immobilisations corporelles": {
+              "ERR machines et appareils de production": {
+                  "account_number": "6100"
+              },
+              "ERR mobilier et installations": {
+                  "account_number": "6101"
+              },
+              "ERR outils et mat\u00e9riel": {
+                  "account_number": "6102"
+              },
+              "Leasing \u00e9quipement de production": {
+                  "account_number": "6105"
+              },
+              "ERR installations des magasins": {
+                  "account_number": "6110"
+              },
+              "ERR installations de locaux d'exposition": {
+                  "account_number": "6111"
+              },
+              "Leasing du mobilier de vente": {
+                  "account_number": "6115"
+              },
+              "ERR d\u00e9p\u00f4t central": {
+                  "account_number": "6120"
+              },
+              "Leasing d'\u00e9quipements de d\u00e9p\u00f4ts": {
+                  "account_number": "6125"
+              },
+              "ERR mobilier de bureau": {
+                  "account_number": "6130"
+              },
+              "ERR machines de bureau": {
+                  "account_number": "6131"
+              },
+              "ERR informatique": {
+                  "account_number": "6132"
+              },
+              "ERR technologies de communication": {
+                  "account_number": "6133"
+              },
+              "Leasing d'installations de bureau": {
+                  "account_number": "6135"
+              },
+              "ERR mobilier du restaurant du personnel": {
+                  "account_number": "6141"
+              },
+              "Leasing des installations du personnel": {
+                  "account_number": "6145"
+              },
+              "account_number": "61"
+          },
+          "Charge de v\u00e9hicules et de transport": {
+              "Charges de v\u00e9hicules": {
+                  "R\u00e9paration": {
+                      "account_number": "6200"
+                  },
+                  "Essence": {
+                      "account_number": "6210"
+                  },
+                  "Assurance v\u00e9hicules et Taxe": {
+                      "account_number": "6220"
+                  },
+                  "V\u00e9hicules en leasing": {
+                      "account_number": "6260"
+                  },
+                  "Location de v\u00e9hicules": {
+                      "account_number": "6264"
+                  },
+                  "Parts priv\u00e9es sur charges de v\u00e9hicules": {
+                      "account_number": "6270"
+                  },
+                  "account_number": "620"
+              },
+              "Charges de v\u00e9hicules": {
+                  "Frais": {
+                      "account_number": "6280"
+                  },
+                  "Frais de transport": {
+                      "account_number": "6281"
+                  },
+                  "Cargo domicile": {
+                      "account_number": "6282"
+                  },
+                  "account_number": "628"
+              },
+              "account_number": "62"
+          },
+          "Assurances-choses, droits, taxes, autorisations": {
+              "Assurances-choses": {
+                  "Assurance pour dommages naturels": {
+                      "account_number": "6300"
+                  },
+                  "Assurances pour bris de glace": {
+                      "account_number": "6301"
+                  },
+                  "Assurance vols": {
+                      "account_number": "6302"
+                  },
+                  "Assurance responsabilit\u00e9 civile": {
+                      "account_number": "6310"
+                  },
+                  "Assurance garantie": {
+                      "account_number": "6311"
+                  },
+                  "Assurance protection juridique": {
+                      "account_number": "6312"
+                  },
+                  "Assurance pour pertes d'exploitation": {
+                      "account_number": "6320"
+                  },
+                  "Primes pour assurance-vie": {
+                      "account_number": "6330"
+                  },
+                  "Primes pour cautionnement": {
+                      "account_number": "6331"
+                  },
+                  "account_number": "630"
+              },
+              "Droits, taxes et autorisations": {
+                  "Droits": {
+                      "account_number": "6360"
+                  },
+                  "Taxes": {
+                      "account_number": "6361"
+                  },
+                  "Autorisations": {
+                      "account_number": "6370"
+                  },
+                  "Patentes": {
+                      "account_number": "6371"
+                  },
+                  "account_number": "636"
+              },
+              "account_number": "63"
+          },
+          "Charges d’\u00e9nergie et \u00e9vacuation des d\u00e9chets": {
+              "Charges d'\u00e9nergie": {
+                  "Force Motrice": {
+                      "account_number": "6400"
+                  },
+                  "Gaz naturel": {
+                      "account_number": "6410"
+                  },
+                  "Gaz liquide en bonbonnes": {
+                      "account_number": "6411"
+                  },
+                  "Mazout": {
+                      "account_number": "6420"
+                  },
+                  "Charbon, briquettes, bois": {
+                      "account_number": "6421"
+                  },
+                  "Eau": {
+                      "account_number": "6430"
+                  },
+                  "account_number": "640"
+              },
+              "Evacuation des d\u00e9chets": {
+                  "Evacuation de d\u00e9chets": {
+                      "account_number": "6460"
+                  },
+                  "Evacuation de d\u00e9chets sp\u00e9ciaux": {
+                      "account_number": "6461"
+                  },
+                  "Eaux us\u00e9es": {
+                      "account_number": "6462"
+                  },
+                  "account_number": "646"
+              },
+              "account_number": "64"
+          },
+          "Charges d’administration et d'informatique": {
+              "Charges d'administration": {
+                  "Mat\u00e9riel de bureau": {
+                      "account_number": "6500"
+                  },
+                  "Imprim\u00e9s": {
+                      "account_number": "6501"
+                  },
+                  "Litt\u00e9rature sp\u00e9cialis\u00e9e, journaux, magazines": {
+                      "account_number": "6503"
+                  },
+                  "T\u00e9l\u00e9phone Internet": {
+                      "account_number": "6510"
+                  },
+                  "Frais de port": {
+                      "account_number": "6513"
+                  },
+                  "Cotisations": {
+                      "account_number": "6520"
+                  },
+                  "Dons et cadeaux": {
+                      "account_number": "6521"
+                  },
+                  "Pourboires": {
+                      "account_number": "6522"
+                  },
+                  "Honoraires pour la tenue de la comptabilit\u00e9": {
+                      "account_number": "6530"
+                  },
+                  "Honoraires pour conseil en gestion d'entreprise": {
+                      "account_number": "6531"
+                  },
+                  "Honoraires pour conseil juridique": {
+                      "account_number": "6532"
+                  },
+                  "Charges du conseil d'administration": {
+                      "account_number": "6540"
+                  },
+                  "Charges de l'assembl\u00e9e g\u00e9n\u00e9rale": {
+                      "account_number": "6541"
+                  },
+                  "Charges de l'organe de r\u00e9vision": {
+                      "account_number": "6542"
+                  },
+                  "Frais de fondation, d'augmentation de capital et d'organisation": {
+                      "account_number": "6550"
+                  },
+                  "Frais de recouvrement": {
+                      "account_number": "6551"
+                  },
+                  "Autres frais d'administration": {
+                      "account_number": "6559"
+                  },
+                  "account_number": "650"
+              },
+              "Frais informatiques": {
+                  "Leasing Hardware": {
+                      "account_number": "6570"
+                  },
+                  "Leasing Software": {
+                      "account_number": "6571"
+                  },
+                  "Location de mat\u00e9riel": {
+                      "account_number": "6572"
+                  },
+                  "Charges de licences et de mise \u00e0 jour": {
+                      "account_number": "6580"
+                  },
+                  "Maintenance/Hotline hardware": {
+                      "account_number": "6581"
+                  },
+                  "Maintenance/Hotline software": {
+                      "account_number": "6582"
+                  },
+                  "Consommables": {
+                      "account_number": "6583"
+                  },
+                  "Frais de r\u00e9seau informatique": {
+                      "account_number": "6585"
+                  },
+                  "Conseils en d\u00e9veloppement de strat\u00e9gie": {
+                      "account_number": "6590"
+                  },
+                  "D\u00e9veloppement individualis\u00e9, adaptation individualis\u00e9e": {
+                      "account_number": "6591"
+                  },
+                  "Charges d'installation": {
+                      "account_number": "6592"
+                  },
+                  "account_number": "657"
+              },
+              "account_number": "65"
+          },
+          "Charges de publicit\u00e9": {
+              "Publicit\u00e9, m\u00e9dia \u00e9lectronique": {
+                  "Publicit\u00e9 dans les journaux": {
+                      "account_number": "6600"
+                  },
+                  "Publicit\u00e9 \u00e0 la radio": {
+                      "account_number": "6601"
+                  },
+                  "Publicit\u00e9 \u00e0 la t\u00e9l\u00e9vision": {
+                      "account_number": "6602"
+                  },
+                  "Publicit\u00e9 sur internet": {
+                      "account_number": "6604"
+                  },
+                  "account_number": "660"
+              },
+              "Imprim\u00e9s publicitaires, mat\u00e9riel de publicit\u00e9, articles de publicit\u00e9, \u00e9chantillons": {
+                  "Imprim\u00e9s publicitaires, mat\u00e9riel de publicit\u00e9": {
+                      "account_number": "6610"
+                  },
+                  "Articles de publicit\u00e9, \u00e9chantillons": {
+                      "account_number": "6611"
+                  },
+                  "account_number": "661"
+              },
+              "Vitrines, d\u00e9coration, foires, expositions": {
+                  "Vitrines, d\u00e9coration": {
+                      "account_number": "6620"
+                  },
+                  "Foires, expositions": {
+                      "account_number": "6621"
+                  },
+                  "account_number": "662"
+              },
+              "Frais de d\u00e9placement, service \u00e0 la client\u00e8le": {
+                  "Frais de d\u00e9placement": {
+                      "account_number": "6640"
+                  },
+                  "Service \u00e0 la client\u00e8le": {
+                      "account_number": "6641"
+                  },
+                  "Cadeaux \u00e0 la client\u00e8le": {
+                      "account_number": "6642"
+                  },
+                  "account_number": "664"
+              },
+              "Publicit\u00e9, sponsoring": {
+                  "Annonces publicitaires": {
+                      "account_number": "6660"
+                  },
+                  "Sponsoring": {
+                      "account_number": "6661"
+                  },
+                  "account_number": "666"
+              },
+              "Relations publiques": {
+                  "Manifestations en faveur de la client\u00e8le": {
+                      "account_number": "6670"
+                  },
+                  "Contacts avec les m\u00e9dias": {
+                      "account_number": "6671"
+                  },
+                  "Anniversaire de l'entreprise": {
+                      "account_number": "6672"
+                  },
+                  "account_number": "667"
+              },
+              "Conseils en publicit\u00e9, \u00e9tudes de march\u00e9": {
+                  "Conseils en publicit\u00e9": {
+                      "account_number": "6680"
+                  },
+                  "Etudes de march\u00e9": {
+                      "account_number": "6681"
+                  },
+                  "account_number": "668"
+              },
+              "Charge de publicit\u00e9 comme pr\u00e9l\u00e8vements \u00e0 titre priv\u00e9": {
+                  "Charge de publicit\u00e9 comme pr\u00e9l\u00e8vements \u00e0 titre priv\u00e9": {
+                      "account_number": "6690"
+                  },
+                  "account_number": "669"
+              },
+              "account_number": "66"
+          },
+          "Autres charges d’exploitation": {
+              "Informations \u00e9conomiques, poursuites": {
+                  "Informations \u00e9conomiques": {
+                      "account_number": "6700"
+                  },
+                  "Poursuites": {
+                      "account_number": "6701"
+                  },
+                  "account_number": "670"
+              },
+              "S\u00e9curit\u00e9 et surveillance": {
+                  "S\u00e9curit\u00e9": {
+                      "account_number": "6710"
+                  },
+                  "Surveillance": {
+                      "account_number": "6711"
+                  },
+                  "account_number": "671"
+              },
+              "Recherche et d\u00e9veloppement": {
+                  "Recherche": {
+                      "account_number": "6720"
+                  },
+                  "D\u00e9veloppement": {
+                      "account_number": "6721"
+                  },
+                  "account_number": "672"
+              },
+              "Correction de l'imp\u00f4t pr\u00e9alable (lors d'utilisation mixte)": {
+                  "Correction de l'imp\u00f4t pr\u00e9alable (lors d'utilisation mixte)": {
+                      "account_number": "6740"
+                  },
+                  "account_number": "674"
+              },
+              "Autres charges d'exploitation et pr\u00e9l\u00e8vements \u00e0 titre priv\u00e9": {
+                  "Autres charges d'exploitation": {
+                      "account_number": "6790"
+                  },
+                  "Pr\u00e9l\u00e8vements \u00e0 titre priv\u00e9": {
+                      "account_number": "6791"
+                  },
+                  "account_number": "679"
+              },
+              "account_number": "67"
+          },
+          "Amortissements et corrections de la valeur des actifs immobilis\u00e9s": {
+              "Ajustement de la valeur des immobilisations financi\u00e8res": {
+                  "Ajustement de la valeur des titres des actifs immobilis\u00e9s": {
+                      "account_number": "6800"
+                  },
+                  "Ajustement de la valeur des autres immobilisations financi\u00e8res": {
+                      "account_number": "6801"
+                  },
+                  "Ajustement de la valeur des cr\u00e9ances \u00e0 long terme envers des tiers": {
+                      "account_number": "6804"
+                  },
+                  "Ajustement de la valeur des cr\u00e9ances \u00e0 long terme envers des participations": {
+                      "account_number": "6805"
+                  },
+                  "Ajustement de la valeur des cr\u00e9ances \u00e0 long terme envers les parties prenantes et les organes": {
+                      "account_number": "6806"
+                  },
+                  "account_number": "680"
+              },
+              "Ajustement de la valeur des participations": {
+                  "Ajustement de la valeur de la participation": {
+                      "account_number": "6810"
+                  },
+                  "account_number": "681"
+              },
+              "Amortissement et ajustement de la valeur sur actifs meubles": {
+                  "Amortissement et ajustement de la valeur des machines et appareils": {
+                      "account_number": "6820"
+                  },
+                  "Amortissement et ajustement de la valeur du mobilier et des installations": {
+                      "account_number": "6821"
+                  },
+                  "Amortissement et ajustement de la valeur des machines de bureau, informatique et syst\u00e8me de communication": {
+                      "account_number": "6822"
+                  },
+                  "Amortissement et ajustement de la valeur des v\u00e9hicules": {
+                      "account_number": "6823"
+                  },
+                  "Amortissement et ajustement de la valeur des ateliers et \u00e9quipements": {
+                      "account_number": "6824"
+                  },
+                  "Amortissement et ajustement de la valeur \u00e9quipements d'entrep\u00f4ts": {
+                      "account_number": "6825"
+                  },
+                  "Amortissement et ajustement de la valeur des installations fixes et \u00e9quipements": {
+                      "account_number": "6827"
+                  },
+                  "Amortissement et ajustement de la valeur des autres \u00e9quipements": {
+                      "account_number": "6829"
+                  },
+                  "account_number": "682"
+              },
+              "Amortissement et ajustement de la valeur des immobilisations corporelles immeubles": {
+                  "Amortissement et ajustement de la valeur des immeubles d'exploitation": {
+                      "account_number": "6830"
+                  },
+                  "Amortissement et ajustement de la valeur des usines": {
+                      "account_number": "6831"
+                  },
+                  "Amortissement et ajustement de la valeur des ateliers et \u00e9quipements": {
+                      "account_number": "6832"
+                  },
+                  "Amortissement et ajustement de la valeur des entrep\u00f4ts": {
+                      "account_number": "6833"
+                  },
+                  "Amortissement et ajustement de la valeur des bâtiments d'exposition et de vente": {
+                      "account_number": "6834"
+                  },
+                  "Amortissement et ajustement de la valeur des bâtiments administratifs": {
+                      "account_number": "6835"
+                  },
+                  "Amortissement et ajustement de la valeur des immeubles d'habitation": {
+                      "account_number": "6836"
+                  },
+                  "Correction de la valeur des biens-fonds non bâtis": {
+                      "account_number": "6879"
+                  },
+                  "account_number": "683"
+              },
+              "Amortissement et ajustement de la valeur des immobilisations incorporelles": {
+                  "Amortissement et ajustement de la valeur des brevets, know-how, recettes de fabrication": {
+                      "account_number": "6840"
+                  },
+                  "Amortissement et ajustement de la valeur des marques commerciales, \u00e9chantillons, mod\u00e8les, plans": {
+                      "account_number": "6841"
+                  },
+                  "Amortissement et ajustement de la valeur des droits de licences, concessions, droits de jouissance, raisons de commerce": {
+                      "account_number": "6842"
+                  },
+                  "Amortissement et ajustement de la valeur des droits de propri\u00e9t\u00e9 intellectuelle, droits d'\u00e9dition, droits conventionnels": {
+                      "account_number": "6843"
+                  },
+                  "Amortissement et ajustement de la valeur des d\u00e9veloppements sp\u00e9cifiques": {
+                      "account_number": "6845"
+                  },
+                  "Amortissement et ajustement de la valeur du goodwill": {
+                      "account_number": "6847"
+                  },
+                  "Amortissement et ajustement de la valeur des autres immobilisations incorporelles": {
+                      "account_number": "6849"
+                  },
+                  "account_number": "684"
+              },
+              "account_number": "68"
+          },
+          "Charges et produits financiers": {
+              "Charges financi\u00e8res": {
+                  "Int\u00e9r\u00eats d\u00e9biteurs sur cr\u00e9dit bancaire": {
+                      "account_number": "6900"
+                  },
+                  "Int\u00e9r\u00eats d\u00e9biteurs sur emprunts": {
+                      "account_number": "6901"
+                  },
+                  "Int\u00e9r\u00eats hypoth\u00e9caires": {
+                      "account_number": "6902"
+                  },
+                  "Int\u00e9r\u00eats moratoires": {
+                      "account_number": "6903"
+                  },
+                  "Charge d'int\u00e9r\u00eats pour acomptes de clients": {
+                      "account_number": "6904"
+                  },
+                  "Charge d'int\u00e9r\u00eats sur leasing financier": {
+                      "account_number": "6905"
+                  },
+                  "Charge d'int\u00e9r\u00eats sur compte courant envers les actionnaires": {
+                      "account_number": "6920"
+                  },
+                  "Charge d'int\u00e9r\u00eats sur pr\u00eat envers les actionnaires": {
+                      "account_number": "6921"
+                  },
+                  "Charge d'int\u00e9r\u00eats sur compte courant envers les administrateurs": {
+                      "account_number": "6922"
+                  },
+                  "Charge d'int\u00e9r\u00eats sur pr\u00eat envers les administrateurs": {
+                      "account_number": "6923"
+                  },
+                  "Charge d'int\u00e9r\u00eats sur compte courant envers les membres de la direction": {
+                      "account_number": "6924"
+                  },
+                  "Charge d'int\u00e9r\u00eats sur pr\u00eat envers les membres de la direction": {
+                      "account_number": "6925"
+                  },
+                  "Charge d'int\u00e9r\u00eats sur emprunts aupr\u00e8s d'institutions de pr\u00e9voyance professionnelle": {
+                      "account_number": "6930"
+                  },
+                  "Frais bancaires": {
+                      "account_number": "6940"
+                  },
+                  "Droit de garde": {
+                      "account_number": "6941"
+                  },
+                  "Pertes sur tr\u00e9sorerie et titre avec cours boursier": {
+                      "account_number": "6942"
+                  },
+                  "Pertes sur immobilisations financi\u00e8res": {
+                      "account_number": "6943"
+                  },
+                  "Diff\u00e9rences d'arrondi TVA/IA": {
+                      "account_number": "6945"
+                  },
+                  "Pertes de change": {
+                      "account_number": "6949"
+                  },
+                  "account_number": "690"
+              },
+              "Produits Financiers": {
+                  "Produits financiers sur avoir en banque": {
+                      "account_number": "6950"
+                  },
+                  "Produits financiers sur avoir \u00e0 court terme": {
+                      "account_number": "6951"
+                  },
+                  "Produits financiers sur titres r\u00e9alisables \u00e0 court terme": {
+                      "account_number": "6952"
+                  },
+                  "Produits financiers sur autres placements \u00e0 court terme": {
+                      "account_number": "6953"
+                  },
+                  "Produits financiers sur titre": {
+                      "account_number": "6960"
+                  },
+                  "Produits financiers sur autres immobilisations financi\u00e8res": {
+                      "account_number": "6961"
+                  },
+                  "Produits financiers sur participations": {
+                      "account_number": "6962"
+                  },
+                  "Produits financiers sur cr\u00e9ances \u00e0 long terme envers des tiers": {
+                      "account_number": "6963"
+                  },
+                  "Produits du compte courant envers les actionnaires": {
+                      "account_number": "6980"
+                  },
+                  "Produits des pr\u00eats envers les actionnaires": {
+                      "account_number": "6981"
+                  },
+                  "Produits du compte courant envers les administrateurs": {
+                      "account_number": "6982"
+                  },
+                  "Produits des pr\u00eats envers les administrateurs": {
+                      "account_number": "6983"
+                  },
+                  "Produits du compte courant envers les membres de la direction": {
+                      "account_number": "6984"
+                  },
+                  "Produits des pr\u00eats envers les membres de la direction": {
+                      "account_number": "6985"
+                  },
+                  "Produits financiers r\u00e9sultant d'int\u00e9r\u00eats moratoires et d'escomptes": {
+                      "account_number": "6990"
+                  },
+                  "Produits financiers sur acomptes vers\u00e9s": {
+                      "account_number": "6991"
+                  },
+                  "Gains sur titres d\u00e9tenus \u00e0 court terme cot\u00e9s en bourse": {
+                      "account_number": "6992"
+                  },
+                  "Gains sur immobilisations financi\u00e8res": {
+                      "account_number": "6994"
+                  },
+                  "Remises de fournisseurs": {
+                      "account_number": "6995"
+                  },
+                  "Gains de change": {
+                      "account_number": "6999"
+                  },
+                  "account_number": "695"
+              },
+          "account_number": "69"
+          },
+          "root_type": "Expense",
+          "account_number": "6"
+        },
+        "R\u00e9sultat des activit\u00e9s annexes d’exploitation": {
+          "Produits accessoires": {
+              "Produits accessoires": {
+                  "Produits bruts": {
+                      "account_number": "7000"
+                  },
+                  "Diminutions de produits": {
+                      "account_number": "7009"
+                  },
+                  "Charges de mati\u00e8re": {
+                      "account_number": "7010"
+                  },
+                  "Charges de personnel": {
+                      "account_number": "7011"
+                  },
+                  "Charges de locaux": {
+                      "account_number": "7012"
+                  },
+                  "Charges d'entretien, de r\u00e9parations, de remplacements, leasing": {
+                      "account_number": "7013"
+                  },
+                  "Charge de v\u00e9hicules et de transport": {
+                      "account_number": "7014"
+                  },
+                  "Assurances-choses, droits, taxes, autorisations et patentes": {
+                      "account_number": "7015"
+                  },
+                  "Charges d'\u00e9nergie et \u00e9vacuation des d\u00e9chets": {
+                      "account_number": "7016"
+                  },
+                  "Charges d'administration et d'informatique": {
+                      "account_number": "7017"
+                  },
+                  "Charges de publicit\u00e9": {
+                      "account_number": "7018"
+                  },
+                  "Autres charges": {
+                      "account_number": "7019"
+                  },
+                  "account_number": "700"
+              },
+              "account_number": "70"
+          },
+          "R\u00e9sultat d'immeubles": {
+              "Produits des immeubles d'exploitation": {
+                  "Valeur locative pour locaux d'exploitation": {
+                      "account_number": "7500"
+                  },
+                  "Valeur locative pour locaux d'habitation": {
+                      "account_number": "7501"
+                  },
+                  "Loyers de locaux d'exploitation": {
+                      "account_number": "7502"
+                  },
+                  "Loyers des appartements": {
+                      "account_number": "7503"
+                  },
+                  "Loyers des garages": {
+                      "account_number": "7504"
+                  },
+                  "Loyers (impos\u00e9s par option)": {
+                      "account_number": "7505"
+                  },
+                  "Participation aux frais de chauffage et d'\u00e9clairage": {
+                      "account_number": "7508"
+                  },
+                  "Autres revenus d'immeubles": {
+                      "account_number": "7509"
+                  },
+                  "Int\u00e9r\u00eats hypoth\u00e9caires": {
+                      "account_number": "7510"
+                  },
+                  "Entretien de l'immeuble": {
+                      "account_number": "7511"
+                  },
+                  "Droits, taxes, imp\u00f4ts fonciers": {
+                      "account_number": "7512"
+                  },
+                  "Primes d'assurance": {
+                      "account_number": "7513"
+                  },
+                  "Eau": {
+                      "account_number": "7514"
+                  },
+                  "Ordures, \u00e9vacuation des d\u00e9chets": {
+                      "account_number": "7515"
+                  },
+                  "Charges d'administration": {
+                      "account_number": "7516"
+                  },
+                  "Chauffage et \u00e9clairage": {
+                      "account_number": "7517"
+                  },
+                  "Amortissements et corrections de la valeur": {
+                      "account_number": "7518"
+                  },
+                  "Autres charges d'immeubles": {
+                      "account_number": "7519"
+                  },
+                  "account_number": "750"
+              },
+              "account_number": "75"
+          },
+          "root_type": "Expense",
+          "account_number": "7"
+        },
+        "R\u00e9sultats exceptionnels et hors exploitation": {
+          "R\u00e9sultats hors exploitation": {
+              "Charges hors exploitation": {
+                  "Charges hors exploitation": {
+                      "account_number": "8000"
+                  },
+                  "account_number": "800"
+              },
+              "Produits hors exploitation": {
+                  "Produits hors exploitation": {
+                      "account_number": "8100"
+                  },
+                  "account_number": "810"
+              },
+              "account_number": "80"
+          },
+          "Charges et produits exceptionnels, uniques ou hors p\u00e9riode": {
+              "Charges et produits exceptionnels": {
+                  "Dotations exceptionnelles aux r\u00e9serves": {
+                      "account_number": "8500"
+                  },
+                  "Provisions exceptionnelles": {
+                      "account_number": "8501"
+                  },
+                  "Amortissements et corrections exceptionnelles de la valeur": {
+                      "account_number": "8502"
+                  },
+                  "Pertes de change exceptionnelles": {
+                      "account_number": "8503"
+                  },
+                  "Pertes exceptionnelles sur ali\u00e9nations d'actifs immobilis\u00e9s": {
+                      "account_number": "8504"
+                  },
+                  "Pertes exceptionnelles sur d\u00e9biteurs": {
+                      "account_number": "8505"
+                  },
+                  "Indemnit\u00e9s pour pr\u00e9judices": {
+                      "account_number": "8506"
+                  },
+                  "Dissolutions de r\u00e9serves": {
+                      "account_number": "8510"
+                  },
+                  "Dissolutions exceptionnelles de provisions superflues": {
+                      "account_number": "8511"
+                  },
+                  "Gains de change exceptionnels": {
+                      "account_number": "8513"
+                  },
+                  "B\u00e9n\u00e9fices exceptionnels sur ali\u00e9nations d'actifs immobilis\u00e9s": {
+                      "account_number": "8514"
+                  },
+                  "Subvention re\u00e7ue (avec TVA)": {
+                      "account_number": "8515"
+                  },
+                  "Subvention re\u00e7ue (sans TVA)": {
+                      "account_number": "8516"
+                  },
+                  "Indemnit\u00e9s re\u00e7ues pour pr\u00e9judices": {
+                      "account_number": "8517"
+                  },
+                  "account_number": "850"
+              },
+              "Charges et produits uniques": {
+                  "Charges uniques": {
+                      "account_number": "8600"
+                  },
+                  "Produits uniques": {
+                      "account_number": "8610"
+                  },
+                  "account_number": "860"
+              },
+              "Charges et produits hors p\u00e9riode": {
+                  "Dotations \u00e0 la r\u00e9serve de contributions de l'employeur": {
+                      "account_number": "8704"
+                  },
+                  "Franchise": {
+                      "account_number": "8705"
+                  },
+                  "Autres charges hors p\u00e9riode": {
+                      "account_number": "8709"
+                  },
+                  "Produits de prestations d'assurance ou dommages-int\u00e9r\u00eats": {
+                      "account_number": "8710"
+                  },
+                  "Produits de ristournes": {
+                      "account_number": "8711"
+                  },
+                  "Produits de remboursements": {
+                      "account_number": "8712"
+                  },
+                  "Dissolutions de la r\u00e9serve de contributions de l'employeur": {
+                      "account_number": "8714"
+                  },
+                  "Autres produits hors p\u00e9riode": {
+                      "account_number": "8719"
+                  },
+                  "account_number": "870"
+              },
+              "account_number": "85"
+          },
+          "Imp\u00f4ts directs": {
+              "Imp\u00f4ts sur le b\u00e9n\u00e9fice/Imp\u00f4ts cantonaux et communaux": {
+                  "account_number": "8900"
+              },
+              "Imp\u00f4ts sur le capital/Imp\u00f4t f\u00e9d\u00e9raux": {
+                  "account_number": "8901"
+              },
+              "Imp\u00f4ts directs hors p\u00e9riode": {
+                  "account_number": "8902"
+              },
+              "account_number": "89"
+          },
+          "root_type": "Expense",
+          "account_number": "8"
+        },
+        "Cl\u00f4ture": {
+          "Utilisation du b\u00e9n\u00e9fice": {
+              "B\u00e9n\u00e9fice ou perte de l'exercice": {
+                  "account_number": "9200"
+              },
+              "account_number": "92"
+          },
+          "root_type": "Equity",
+          "account_number": "9"
+        }
+    }
+}
