@@ -40,10 +40,9 @@ class PriceListGenerator(Document):
 	def get_items_brand(self,filters=None):
 		doc=frappe.db.sql("""select b.name,bd.item_price from `tabBrand` b join `tabItem Default` bd on b.name=bd.parent where bd.selling_cost_center='{0}'""".format(self.cost_center),as_dict=1)
 		for i in doc:
-			if not filters.has_key("brand"):
-				filters.update({
-					"brand":i.name
-				})
+			filters.update({
+				"brand":i.name
+			})
 			print(filters)
 			lst=frappe.db.get_all("Item",filters=filters)
 			for j in lst:
