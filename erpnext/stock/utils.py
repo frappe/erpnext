@@ -526,7 +526,7 @@ def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool
 
 	filters = {
 		"docstatus": 1,
-		"status": ["in", ["Queued", "In Progress", "Failed"]],
+		"status": ["in", ["Queued", "In Progress"]],
 		"posting_date": ["<=", posting_date],
 	}
 
