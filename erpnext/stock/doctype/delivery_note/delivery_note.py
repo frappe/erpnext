@@ -280,8 +280,11 @@ class DeliveryNote(SellingController):
 		)
 
 		if bypass_credit_limit_check_at_sales_order:
-			validate_against_credit_limit = True
-			extra_amount = self.base_grand_total
+			for d in self.get("items"):
+				if not d.against_sales_invoice:
+					validate_against_credit_limit = True
+					extra_amount = self.base_grand_total
+					break
 		else:
 			for d in self.get("items"):
 				if not (d.against_sales_order or d.against_sales_invoice):
