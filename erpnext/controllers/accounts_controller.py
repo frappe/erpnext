@@ -1265,6 +1265,9 @@ class AccountsController(TransactionBase):
 		return get_company_default(self.company, fieldname, ignore_validation=ignore_validation)
 
 	def get_stock_items(self):
+		if hasattr(self, "_stock_items") and self._stock_items:
+			return self._stock_items
+
 		stock_items = []
 		item_codes = list(set(item.item_code for item in self.get("items")))
 		if item_codes:
@@ -1280,6 +1283,7 @@ class AccountsController(TransactionBase):
 				)
 			]
 
+		self._stock_items = stock_items
 		return stock_items
 
 	def set_total_advance_paid(self):
