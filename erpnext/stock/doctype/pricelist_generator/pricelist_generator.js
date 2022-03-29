@@ -4,6 +4,7 @@
 frappe.ui.form.on('PriceList Generator', {
 	get_items: function(frm) {
         frm.clear_table("price_details")
+        frm.refresh_field("price_details")
         const filters = frm.filters.reduce((acc, filter) => {
             return Object.assign(acc, {
                 [filter[1]]: [filter[2], filter[3]]
