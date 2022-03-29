@@ -45,7 +45,9 @@ def execute(filters=None):
 
 			child_rows = []
 			for child_item_detail in required_items:
-				child_item_balance = stock_balance.get(child_item_detail.item_code, frappe._dict()).get(warehouse, frappe._dict())
+				child_item_balance = stock_balance.get(child_item_detail.item_code, frappe._dict()).get(
+					warehouse, frappe._dict()
+				)
 				child_row = {
 					"indent": 1,
 					"parent_item": parent_item,
@@ -74,16 +76,46 @@ def execute(filters=None):
 
 def get_columns():
 	columns = [
-		{"fieldname": "item_code", "label": _("Item"), "fieldtype": "Link", "options": "Item", "width": 300},
-		{"fieldname": "warehouse", "label": _("Warehouse"), "fieldtype": "Link", "options": "Warehouse", "width": 100},
+		{
+			"fieldname": "item_code",
+			"label": _("Item"),
+			"fieldtype": "Link",
+			"options": "Item",
+			"width": 300,
+		},
+		{
+			"fieldname": "warehouse",
+			"label": _("Warehouse"),
+			"fieldtype": "Link",
+			"options": "Warehouse",
+			"width": 100,
+		},
 		{"fieldname": "uom", "label": _("UOM"), "fieldtype": "Link", "options": "UOM", "width": 70},
 		{"fieldname": "bundle_qty", "label": _("Bundle Qty"), "fieldtype": "Float", "width": 100},
 		{"fieldname": "actual_qty", "label": _("Actual Qty"), "fieldtype": "Float", "width": 100},
 		{"fieldname": "minimum_qty", "label": _("Minimum Qty"), "fieldtype": "Float", "width": 100},
-		{"fieldname": "item_group", "label": _("Item Group"), "fieldtype": "Link", "options": "Item Group", "width": 100},
-		{"fieldname": "brand", "label": _("Brand"), "fieldtype": "Link", "options": "Brand", "width": 100},
+		{
+			"fieldname": "item_group",
+			"label": _("Item Group"),
+			"fieldtype": "Link",
+			"options": "Item Group",
+			"width": 100,
+		},
+		{
+			"fieldname": "brand",
+			"label": _("Brand"),
+			"fieldtype": "Link",
+			"options": "Brand",
+			"width": 100,
+		},
 		{"fieldname": "description", "label": _("Description"), "width": 140},
-		{"fieldname": "company", "label": _("Company"), "fieldtype": "Link", "options": "Company", "width": 100}
+		{
+			"fieldname": "company",
+			"label": _("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+			"width": 100,
+		},
 	]
 	return columns
 
@@ -93,12 +125,18 @@ def get_items(filters):
 	item_details = frappe._dict()
 
 	conditions = get_parent_item_conditions(filters)
-	parent_item_details = frappe.db.sql("""
+	parent_item_details = frappe.db.sql(
+		"""
 		select item.name as item_code, item.item_name, pb.description, item.item_group, item.brand, item.stock_uom
 		from `tabItem` item
 		inner join `tabProduct Bundle` pb on pb.new_item_code = item.name
 		where ifnull(item.disabled, 0) = 0 {0}
-	""".format(conditions), filters, as_dict=1)  # nosec
+	""".format(
+			conditions
+		),
+		filters,
+		as_dict=1,
+	)  # nosec
 
 	parent_items = []
 	for d in parent_item_details:
@@ -106,7 +144,8 @@ def get_items(filters):
 		item_details[d.item_code] = d
 
 	if parent_items:
-		child_item_details = frappe.db.sql("""
+		child_item_details = frappe.db.sql(
+			"""
 			select
 				pb.new_item_code as parent_item, pbi.item_code, item.item_name, pbi.description, item.item_group, item.brand,
 				item.stock_uom, pbi.uom, pbi.qty
@@ -114,7 +153,12 @@ def get_items(filters):
 			inner join `tabProduct Bundle` pb on pb.name = pbi.parent
 			inner join `tabItem` item on item.name = pbi.item_code
 			where pb.new_item_code in ({0})
-		""".format(", ".join(["%s"] * len(parent_items))), parent_items, as_dict=1)  # nosec
+		""".format(
+				", ".join(["%s"] * len(parent_items))
+			),
+			parent_items,
+			as_dict=1,
+		)  # nosec
 	else:
 		child_item_details = []
 
@@ -141,12 +185,14 @@ def get_stock_ledger_entries(filters, items):
 	if not items:
 		return []
 
-	item_conditions_sql = ' and sle.item_code in ({})' \
-		.format(', '.join(frappe.db.escape(i) for i in items))
+	item_conditions_sql = " and sle.item_code in ({})".format(
+		", ".join(frappe.db.escape(i) for i in items)
+	)
 
 	conditions = get_sle_conditions(filters)
 
-	return frappe.db.sql("""
+	return frappe.db.sql(
+		"""
 		select
 			sle.item_code, sle.warehouse, sle.qty_after_transaction, sle.company
 		from
@@ -154,7 +200,10 @@ def get_stock_ledger_entries(filters, items):
 		left join `tabStock Ledger Entry` sle2 on
 			sle.item_code = sle2.item_code and sle.warehouse = sle2.warehouse
 			and (sle.posting_date, sle.posting_time, sle.name) < (sle2.posting_date, sle2.posting_time, sle2.name)
-		where sle2.name is null and sle.docstatus < 2 %s %s""" % (item_conditions_sql, conditions), as_dict=1)  # nosec
+		where sle2.name is null and sle.docstatus < 2 %s %s"""
+		% (item_conditions_sql, conditions),
+		as_dict=1,
+	)  # nosec
 
 
 def get_parent_item_conditions(filters):
@@ -180,9 +229,14 @@ def get_sle_conditions(filters):
 	conditions += " and sle.posting_date <= %s" % frappe.db.escape(filters.get("date"))
 
 	if filters.get("warehouse"):
-		warehouse_details = frappe.db.get_value("Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1)
+		warehouse_details = frappe.db.get_value(
+			"Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1
+		)
 		if warehouse_details:
-			conditions += " and exists (select name from `tabWarehouse` wh \
-				where wh.lft >= %s and wh.rgt <= %s and sle.warehouse = wh.name)" % (warehouse_details.lft, warehouse_details.rgt)  # nosec
+			conditions += (
+				" and exists (select name from `tabWarehouse` wh \
+				where wh.lft >= %s and wh.rgt <= %s and sle.warehouse = wh.name)"
+				% (warehouse_details.lft, warehouse_details.rgt)
+			)  # nosec
 
 	return conditions

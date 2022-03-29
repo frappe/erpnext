@@ -8,7 +8,8 @@ from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.stock.doctype.item.test_item import create_item
 
-test_records = frappe.get_test_records('BOM')
+test_records = frappe.get_test_records("BOM")
+
 
 class TestBOMUpdateTool(FrappeTestCase):
 	def test_replace_bom(self):
@@ -37,10 +38,13 @@ class TestBOMUpdateTool(FrappeTestCase):
 			if item_doc.valuation_rate != 100.00:
 				frappe.db.set_value("Item", item_doc.name, "valuation_rate", 100)
 
-		bom_no = frappe.db.get_value('BOM', {'item': 'BOM Cost Test Item 1'}, "name")
+		bom_no = frappe.db.get_value("BOM", {"item": "BOM Cost Test Item 1"}, "name")
 		if not bom_no:
-			doc = make_bom(item = 'BOM Cost Test Item 1',
-				raw_materials =['BOM Cost Test Item 2', 'BOM Cost Test Item 3'], currency="INR")
+			doc = make_bom(
+				item="BOM Cost Test Item 1",
+				raw_materials=["BOM Cost Test Item 2", "BOM Cost Test Item 3"],
+				currency="INR",
+			)
 		else:
 			doc = frappe.get_doc("BOM", bom_no)
 

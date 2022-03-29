@@ -13,12 +13,13 @@ class ProductQuery:
 	"""Query engine for product listing
 
 	Attributes:
-		fields (list): Fields to fetch in query
-		conditions (string): Conditions for query building
-		or_conditions (string): Search conditions
-		page_length (Int): Length of page for the query
-		settings (Document): E Commerce Settings DocType
+	        fields (list): Fields to fetch in query
+	        conditions (string): Conditions for query building
+	        or_conditions (string): Search conditions
+	        page_length (Int): Length of page for the query
+	        settings (Document): E Commerce Settings DocType
 	"""
+
 	def __init__(self):
 		self.settings = frappe.get_doc("E Commerce Settings")
 		self.page_length = self.settings.products_per_page or 20
@@ -26,21 +27,33 @@ class ProductQuery:
 		self.or_filters = []
 		self.filters = [["published", "=", 1]]
 		self.fields = [
-			"web_item_name", "name", "item_name", "item_code", "website_image",
-			"variant_of", "has_variants", "item_group", "image", "web_long_description",
-			"short_description", "route", "website_warehouse", "ranking", "on_backorder"
+			"web_item_name",
+			"name",
+			"item_name",
+			"item_code",
+			"website_image",
+			"variant_of",
+			"has_variants",
+			"item_group",
+			"image",
+			"web_long_description",
+			"short_description",
+			"route",
+			"website_warehouse",
+			"ranking",
+			"on_backorder",
 		]
 
 	def query(self, attributes=None, fields=None, search_term=None, start=0, item_group=None):
 		"""
 		Args:
-			attributes (dict, optional): Item Attribute filters
-			fields (dict, optional): Field level filters
-			search_term (str, optional): Search term to lookup
-			start (int, optional): Page start
+		        attributes (dict, optional): Item Attribute filters
+		        fields (dict, optional): Field level filters
+		        search_term (str, optional): Search term to lookup
+		        start (int, optional): Page start
 
 		Returns:
-			dict: Dict containing items, item count & discount range
+		        dict: Dict containing items, item count & discount range
 		"""
 		# track if discounts included in field filters
 		self.filter_with_discount = bool(fields.get("discount"))
@@ -75,11 +88,7 @@ class ProductQuery:
 
 		result = self.filter_results_by_discount(fields, result)
 
-		return {
-			"items": result,
-			"items_count": count,
-			"discounts": discounts
-		}
+		return {"items": result, "items_count": count, "discounts": discounts}
 
 	def query_items(self, start=0):
 		"""Build a query to fetch Website Items based on field filters."""
@@ -91,8 +100,9 @@ class ProductQuery:
 			filters=self.filters,
 			or_filters=self.or_filters,
 			limit_page_length=184467440737095516,
-			limit_start=start, # get all items from this offset for total count ahead
-			order_by="ranking desc")
+			limit_start=start,  # get all items from this offset for total count ahead
+			order_by="ranking desc",
+		)
 		count = len(count_items)
 
 		# If discounts included, return all rows.
@@ -108,7 +118,8 @@ class ProductQuery:
 			or_filters=self.or_filters,
 			limit_page_length=page_length,
 			limit_start=start,
-			order_by="ranking desc")
+			order_by="ranking desc",
+		)
 
 		return items, count
 
@@ -127,8 +138,9 @@ class ProductQuery:
 				filters=[
 					["published_in_website", "=", 1],
 					["Item Variant Attribute", "attribute", "=", attribute],
-					["Item Variant Attribute", "attribute_value", "in", values]
-				])
+					["Item Variant Attribute", "attribute_value", "in", values],
+				],
+			)
 			item_codes.append({x.item_code for x in item_code_list})
 
 		if item_codes:
@@ -143,22 +155,22 @@ class ProductQuery:
 		"""Build filters for field values
 
 		Args:
-			filters (dict): Filters
+		        filters (dict): Filters
 		"""
 		for field, values in filters.items():
 			if not values or field == "discount":
 				continue
 
 			# handle multiselect fields in filter addition
-			meta = frappe.get_meta('Website Item', cached=True)
+			meta = frappe.get_meta("Website Item", cached=True)
 			df = meta.get_field(field)
 
-			if df.fieldtype == 'Table MultiSelect':
+			if df.fieldtype == "Table MultiSelect":
 				child_doctype = df.options
 				child_meta = frappe.get_meta(child_doctype, cached=True)
 				fields = child_meta.get("fields")
 				if fields:
-					self.filters.append([child_doctype, fields[0].fieldname, 'IN', values])
+					self.filters.append([child_doctype, fields[0].fieldname, "IN", values])
 			elif isinstance(values, list):
 				# If value is a list use `IN` query
 				self.filters.append([field, "in", values])
@@ -169,6 +181,7 @@ class ProductQuery:
 	def build_item_group_filters(self, item_group):
 		"Add filters for Item group page and include Website Item Groups."
 		from erpnext.setup.doctype.item_group.item_group import get_child_groups_for_website
+
 		item_group_filters = []
 
 		item_group_filters.append(["Website Item", "item_group", "=", item_group])
@@ -189,10 +202,10 @@ class ProductQuery:
 		"""Query search term in specified fields
 
 		Args:
-			search_term (str): Search candidate
+		        search_term (str): Search candidate
 		"""
 		# Default fields to search from
-		default_fields = {'item_code', 'item_name', 'web_long_description', 'item_group'}
+		default_fields = {"item_code", "item_name", "web_long_description", "item_group"}
 
 		# Get meta search fields
 		meta = frappe.get_meta("Website Item")
@@ -200,22 +213,24 @@ class ProductQuery:
 
 		# Join the meta fields and default fields set
 		search_fields = default_fields.union(meta_fields)
-		if frappe.db.count('Website Item', cache=True) > 50000:
-			search_fields.discard('web_long_description')
+		if frappe.db.count("Website Item", cache=True) > 50000:
+			search_fields.discard("web_long_description")
 
 		# Build or filters for query
-		search = '%{}%'.format(search_term)
+		search = "%{}%".format(search_term)
 		for field in search_fields:
 			self.or_filters.append([field, "like", search])
 
 	def add_display_details(self, result, discount_list, cart_items):
 		"""Add price and availability details in result."""
 		for item in result:
-			product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get('product_info')
+			product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get(
+				"product_info"
+			)
 
-			if product_info and product_info['price']:
+			if product_info and product_info["price"]:
 				# update/mutate item and discount_list objects
-				self.get_price_discount_info(item, product_info['price'], discount_list)
+				self.get_price_discount_info(item, product_info["price"], discount_list)
 
 			if self.settings.show_stock_availability:
 				self.get_stock_availability(item)
@@ -223,7 +238,9 @@ class ProductQuery:
 			item.in_cart = item.item_code in cart_items
 
 			item.wished = False
-			if frappe.db.exists("Wishlist Item", {"item_code": item.item_code, "parent": frappe.session.user}):
+			if frappe.db.exists(
+				"Wishlist Item", {"item_code": item.item_code, "parent": frappe.session.user}
+			):
 				item.wished = True
 
 		return result, discount_list
@@ -234,13 +251,14 @@ class ProductQuery:
 		for field in fields:
 			item[field] = price_object.get(field)
 
-		if price_object.get('discount_percent'):
+		if price_object.get("discount_percent"):
 			item.discount_percent = flt(price_object.discount_percent)
 			discount_list.append(price_object.discount_percent)
 
 		if item.formatted_mrp:
-			item.discount = price_object.get('formatted_discount_percent') or \
-				price_object.get('formatted_discount_rate')
+			item.discount = price_object.get("formatted_discount_percent") or price_object.get(
+				"formatted_discount_rate"
+			)
 
 	def get_stock_availability(self, item):
 		"""Modify item object and add stock details."""
@@ -260,24 +278,29 @@ class ProductQuery:
 		elif warehouse:
 			# stock item and has warehouse
 			actual_qty = frappe.db.get_value(
-				"Bin",
-				{"item_code": item.item_code,"warehouse": item.get("website_warehouse")},
-				"actual_qty")
+				"Bin", {"item_code": item.item_code, "warehouse": item.get("website_warehouse")}, "actual_qty"
+			)
 			item.in_stock = bool(flt(actual_qty))
 
 	def get_cart_items(self):
 		customer = get_customer(silent=True)
 		if customer:
-			quotation = frappe.get_all("Quotation", fields=["name"], filters=
-				{"party_name": customer, "contact_email": frappe.session.user, "order_type": "Shopping Cart", "docstatus": 0},
-				order_by="modified desc", limit_page_length=1)
+			quotation = frappe.get_all(
+				"Quotation",
+				fields=["name"],
+				filters={
+					"party_name": customer,
+					"contact_email": frappe.session.user,
+					"order_type": "Shopping Cart",
+					"docstatus": 0,
+				},
+				order_by="modified desc",
+				limit_page_length=1,
+			)
 			if quotation:
 				items = frappe.get_all(
-					"Quotation Item",
-					fields=["item_code"],
-					filters={
-						"parent": quotation[0].get("name")
-					})
+					"Quotation Item", fields=["item_code"], filters={"parent": quotation[0].get("name")}
+				)
 				items = [row.item_code for row in items]
 				return items
 
@@ -286,11 +309,15 @@ class ProductQuery:
 	def filter_results_by_discount(self, fields, result):
 		if fields and fields.get("discount"):
 			discount_percent = frappe.utils.flt(fields["discount"][0])
-			result = [row for row in result if row.get("discount_percent") and row.discount_percent <= discount_percent]
+			result = [
+				row
+				for row in result
+				if row.get("discount_percent") and row.discount_percent <= discount_percent
+			]
 
 		if self.filter_with_discount:
 			# no limit was added to results while querying
 			# slice results manually
-			result[:self.page_length]
+			result[: self.page_length]
 
 		return result

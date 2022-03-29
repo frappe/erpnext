@@ -1,4 +1,3 @@
-
 import frappe
 
 
@@ -7,7 +6,7 @@ def execute():
 		frappe.delete_doc(dt, dn, ignore_missing=True)
 
 	if frappe.db.exists("DocType", "Data Migration Plan"):
-		data_migration_plans = frappe.get_all("Data Migration Plan", filters={"module": 'Hub Node'})
+		data_migration_plans = frappe.get_all("Data Migration Plan", filters={"module": "Hub Node"})
 		for plan in data_migration_plans:
 			plan_doc = frappe.get_doc("Data Migration Plan", plan.name)
 			for m in plan_doc.get("mappings"):

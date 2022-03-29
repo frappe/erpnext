@@ -11,7 +11,7 @@ from frappe.model.document import Document
 
 class SocialMediaPost(Document):
 	def validate(self):
-		if (not self.twitter and not self.linkedin):
+		if not self.twitter and not self.linkedin:
 			frappe.throw(_("Select atleast one Social Media Platform to Share on."))
 
 		if self.scheduled_time:
@@ -29,7 +29,7 @@ class SocialMediaPost(Document):
 		super(SocialMediaPost, self).submit()
 
 	def on_cancel(self):
-		self.db_set('post_status', 'Cancelled')
+		self.db_set("post_status", "Cancelled")
 
 	@frappe.whitelist()
 	def delete_post(self):
@@ -41,17 +41,17 @@ class SocialMediaPost(Document):
 			linkedin = frappe.get_doc("LinkedIn Settings")
 			linkedin.delete_post(self.linkedin_post_id)
 
-		self.db_set('post_status', 'Deleted')
+		self.db_set("post_status", "Deleted")
 
 	@frappe.whitelist()
 	def get_post(self):
 		response = {}
 		if self.linkedin and self.linkedin_post_id:
 			linkedin = frappe.get_doc("LinkedIn Settings")
-			response['linkedin'] = linkedin.get_post(self.linkedin_post_id)
+			response["linkedin"] = linkedin.get_post(self.linkedin_post_id)
 		if self.twitter and self.twitter_post_id:
 			twitter = frappe.get_doc("Twitter Settings")
-			response['twitter'] = twitter.get_tweet(self.twitter_post_id)
+			response["twitter"] = twitter.get_tweet(self.twitter_post_id)
 
 		return response
 
@@ -65,7 +65,7 @@ class SocialMediaPost(Document):
 			if self.linkedin and not self.linkedin_post_id:
 				linkedin = frappe.get_doc("LinkedIn Settings")
 				linkedin_post = linkedin.post(self.linkedin_post, self.title, self.image)
-				self.db_set("linkedin_post_id", linkedin_post.headers['X-RestLi-Id'])
+				self.db_set("linkedin_post_id", linkedin_post.headers["X-RestLi-Id"])
 			self.db_set("post_status", "Posted")
 
 		except Exception:
@@ -73,13 +73,18 @@ class SocialMediaPost(Document):
 			title = _("Error while POSTING {0}").format(self.name)
 			frappe.log_error(message=frappe.get_traceback(), title=title)
 
+
 def process_scheduled_social_media_posts():
-	posts = frappe.get_list("Social Media Post", filters={"post_status": "Scheduled", "docstatus":1}, fields= ["name", "scheduled_time"])
+	posts = frappe.get_list(
+		"Social Media Post",
+		filters={"post_status": "Scheduled", "docstatus": 1},
+		fields=["name", "scheduled_time"],
+	)
 	start = frappe.utils.now_datetime()
 	end = start + datetime.timedelta(minutes=10)
 	for post in posts:
 		if post.scheduled_time:
 			post_time = frappe.utils.get_datetime(post.scheduled_time)
 			if post_time > start and post_time <= end:
-				sm_post = frappe.get_doc('Social Media Post', post.name)
+				sm_post = frappe.get_doc("Social Media Post", post.name)
 				sm_post.post()

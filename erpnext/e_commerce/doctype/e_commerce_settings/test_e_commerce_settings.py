@@ -15,8 +15,7 @@ class TestECommerceSettings(unittest.TestCase):
 		frappe.db.sql("""delete from `tabSingles` where doctype="Shipping Cart Settings" """)
 
 	def get_cart_settings(self):
-		return frappe.get_doc({"doctype": "E Commerce Settings",
-			"company": "_Test Company"})
+		return frappe.get_doc({"doctype": "E Commerce Settings", "company": "_Test Company"})
 
 	# NOTE: Exchangrate API has all enabled currencies that ERPNext supports.
 	# We aren't checking just currency exchange record anymore
@@ -48,6 +47,7 @@ class TestECommerceSettings(unittest.TestCase):
 
 		frappe.db.sql("update `tabTax Rule` set use_for_shopping_cart = 1")
 
+
 def setup_e_commerce_settings(values_dict):
 	"Accepts a dict of values that updates E Commerce Settings."
 	if not values_dict:
@@ -56,5 +56,6 @@ def setup_e_commerce_settings(values_dict):
 	doc = frappe.get_doc("E Commerce Settings", "E Commerce Settings")
 	doc.update(values_dict)
 	doc.save()
+
 
 test_dependencies = ["Tax Rule"]

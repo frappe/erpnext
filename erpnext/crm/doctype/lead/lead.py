@@ -15,7 +15,7 @@ from erpnext.controllers.selling_controller import SellingController
 
 class Lead(SellingController):
 	def get_feed(self):
-		return '{0}: {1}'.format(_(self.status), self.lead_name)
+		return "{0}: {1}".format(_(self.status), self.lead_name)
 
 	def onload(self):
 		customer = frappe.db.get_value("Customer", {"lead_name": self.name})
@@ -57,8 +57,7 @@ class Lead(SellingController):
 		if self.contact_date and getdate(self.contact_date) < getdate(nowdate()):
 			frappe.throw(_("Next Contact Date cannot be in the past"))
 
-		if (self.ends_on and self.contact_date and
-			(getdate(self.ends_on) < getdate(self.contact_date))):
+		if self.ends_on and self.contact_date and (getdate(self.ends_on) < getdate(self.contact_date)):
 			frappe.throw(_("Ends On date cannot be before Next Contact Date."))
 
 	def on_update(self):
@@ -66,32 +65,38 @@ class Lead(SellingController):
 
 	def set_prev(self):
 		if self.is_new():
-			self._prev = frappe._dict({
-				"contact_date": None,
-				"ends_on": None,
-				"contact_by": None
-			})
+			self._prev = frappe._dict({"contact_date": None, "ends_on": None, "contact_by": None})
 		else:
-			self._prev = frappe.db.get_value("Lead", self.name, ["contact_date", "ends_on", "contact_by"], as_dict=1)
+			self._prev = frappe.db.get_value(
+				"Lead", self.name, ["contact_date", "ends_on", "contact_by"], as_dict=1
+			)
 
 	def add_calendar_event(self, opts=None, force=False):
-		super(Lead, self).add_calendar_event({
-			"owner": self.lead_owner,
-			"starts_on": self.contact_date,
-			"ends_on": self.ends_on or "",
-			"subject": ('Contact ' + cstr(self.lead_name)),
-			"description": ('Contact ' + cstr(self.lead_name)) + (self.contact_by and ('. By : ' + cstr(self.contact_by)) or '')
-		}, force)
+		super(Lead, self).add_calendar_event(
+			{
+				"owner": self.lead_owner,
+				"starts_on": self.contact_date,
+				"ends_on": self.ends_on or "",
+				"subject": ("Contact " + cstr(self.lead_name)),
+				"description": ("Contact " + cstr(self.lead_name))
+				+ (self.contact_by and (". By : " + cstr(self.contact_by)) or ""),
+			},
+			force,
+		)
 
 	def check_email_id_is_unique(self):
 		if self.email_id:
 			# validate email is unique
-			duplicate_leads = frappe.get_all("Lead", filters={"email_id": self.email_id, "name": ["!=", self.name]})
+			duplicate_leads = frappe.get_all(
+				"Lead", filters={"email_id": self.email_id, "name": ["!=", self.name]}
+			)
 			duplicate_leads = [lead.name for lead in duplicate_leads]
 
 			if duplicate_leads:
-				frappe.throw(_("Email Address must be unique, already exists for {0}")
-					.format(comma_and(duplicate_leads)), frappe.DuplicateEntryError)
+				frappe.throw(
+					_("Email Address must be unique, already exists for {0}").format(comma_and(duplicate_leads)),
+					frappe.DuplicateEntryError,
+				)
 
 	def on_trash(self):
 		frappe.db.sql("""update `tabIssue` set lead='' where lead=%s""", self.name)
@@ -105,19 +110,14 @@ class Lead(SellingController):
 		return frappe.db.get_value("Opportunity", {"party_name": self.name, "status": ["!=", "Lost"]})
 
 	def has_quotation(self):
-		return frappe.db.get_value("Quotation", {
-			"party_name": self.name,
-			"docstatus": 1,
-			"status": ["!=", "Lost"]
-
-		})
+		return frappe.db.get_value(
+			"Quotation", {"party_name": self.name, "docstatus": 1, "status": ["!=", "Lost"]}
+		)
 
 	def has_lost_quotation(self):
-		return frappe.db.get_value("Quotation", {
-			"party_name": self.name,
-			"docstatus": 1,
-			"status": "Lost"
-		})
+		return frappe.db.get_value(
+			"Quotation", {"party_name": self.name, "docstatus": 1, "status": "Lost"}
+		)
 
 	def set_lead_name(self):
 		if not self.lead_name:
@@ -136,8 +136,17 @@ class Lead(SellingController):
 			self.title = self.lead_name
 
 	def create_address(self):
-		address_fields = ["address_type", "address_title", "address_line1", "address_line2",
-			"city", "county", "state", "country", "pincode"]
+		address_fields = [
+			"address_type",
+			"address_title",
+			"address_line1",
+			"address_line2",
+			"city",
+			"county",
+			"state",
+			"country",
+			"pincode",
+		]
 		info_fields = ["email_id", "phone", "fax"]
 
 		# do not create an address if no fields are available,
@@ -161,55 +170,46 @@ class Lead(SellingController):
 			first_name, last_name = self.lead_name, None
 
 		contact = frappe.new_doc("Contact")
-		contact.update({
-			"first_name": first_name,
-			"last_name": last_name,
-			"salutation": self.salutation,
-			"gender": self.gender,
-			"designation": self.designation,
-			"company_name": self.company_name,
-		})
+		contact.update(
+			{
+				"first_name": first_name,
+				"last_name": last_name,
+				"salutation": self.salutation,
+				"gender": self.gender,
+				"designation": self.designation,
+				"company_name": self.company_name,
+			}
+		)
 
 		if self.email_id:
-			contact.append("email_ids", {
-				"email_id": self.email_id,
-				"is_primary": 1
-			})
+			contact.append("email_ids", {"email_id": self.email_id, "is_primary": 1})
 
 		if self.phone:
-			contact.append("phone_nos", {
-				"phone": self.phone,
-				"is_primary_phone": 1
-			})
+			contact.append("phone_nos", {"phone": self.phone, "is_primary_phone": 1})
 
 		if self.mobile_no:
-			contact.append("phone_nos", {
-				"phone": self.mobile_no,
-				"is_primary_mobile_no":1
-			})
+			contact.append("phone_nos", {"phone": self.mobile_no, "is_primary_mobile_no": 1})
 
 		contact.insert(ignore_permissions=True)
+		contact.reload()  # load changes by hooks on contact
 
 		return contact
 
 	def update_links(self):
 		# update address links
-		if hasattr(self, 'address_doc'):
-			self.address_doc.append("links", {
-				"link_doctype": "Lead",
-				"link_name": self.name,
-				"link_title": self.lead_name
-			})
+		if hasattr(self, "address_doc"):
+			self.address_doc.append(
+				"links", {"link_doctype": "Lead", "link_name": self.name, "link_title": self.lead_name}
+			)
 			self.address_doc.save()
 
 		# update contact links
 		if self.contact_doc:
-			self.contact_doc.append("links", {
-				"link_doctype": "Lead",
-				"link_name": self.name,
-				"link_title": self.lead_name
-			})
+			self.contact_doc.append(
+				"links", {"link_doctype": "Lead", "link_name": self.name, "link_title": self.lead_name}
+			)
 			self.contact_doc.save()
+
 
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):
@@ -227,16 +227,24 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 
 		target.customer_group = frappe.db.get_default("Customer Group")
 
-	doclist = get_mapped_doc("Lead", source_name,
-		{"Lead": {
-			"doctype": "Customer",
-			"field_map": {
-				"name": "lead_name",
-				"company_name": "customer_name",
-				"contact_no": "phone_1",
-				"fax": "fax_1"
+	doclist = get_mapped_doc(
+		"Lead",
+		source_name,
+		{
+			"Lead": {
+				"doctype": "Customer",
+				"field_map": {
+					"name": "lead_name",
+					"company_name": "customer_name",
+					"contact_no": "phone_1",
+					"fax": "fax_1",
+				},
 			}
-		}}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
+		},
+		target_doc,
+		set_missing_values,
+		ignore_permissions=ignore_permissions,
+	)
 
 	return doclist
 
@@ -246,19 +254,26 @@ def make_opportunity(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
-	target_doc = get_mapped_doc("Lead", source_name,
-		{"Lead": {
-			"doctype": "Opportunity",
-			"field_map": {
-				"campaign_name": "campaign",
-				"doctype": "opportunity_from",
-				"name": "party_name",
-				"lead_name": "contact_display",
-				"company_name": "customer_name",
-				"email_id": "contact_email",
-				"mobile_no": "contact_mobile"
+	target_doc = get_mapped_doc(
+		"Lead",
+		source_name,
+		{
+			"Lead": {
+				"doctype": "Opportunity",
+				"field_map": {
+					"campaign_name": "campaign",
+					"doctype": "opportunity_from",
+					"name": "party_name",
+					"lead_name": "contact_display",
+					"company_name": "customer_name",
+					"email_id": "contact_email",
+					"mobile_no": "contact_mobile",
+				},
 			}
-		}}, target_doc, set_missing_values)
+		},
+		target_doc,
+		set_missing_values,
+	)
 
 	return target_doc
 
@@ -268,13 +283,13 @@ def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
-	target_doc = get_mapped_doc("Lead", source_name,
-		{"Lead": {
-			"doctype": "Quotation",
-			"field_map": {
-				"name": "party_name"
-			}
-		}}, target_doc, set_missing_values)
+	target_doc = get_mapped_doc(
+		"Lead",
+		source_name,
+		{"Lead": {"doctype": "Quotation", "field_map": {"name": "party_name"}}},
+		target_doc,
+		set_missing_values,
+	)
 
 	target_doc.quotation_to = "Lead"
 	target_doc.run_method("set_missing_values")
@@ -283,18 +298,29 @@ def make_quotation(source_name, target_doc=None):
 
 	return target_doc
 
-def _set_missing_values(source, target):
-	address = frappe.get_all('Dynamic Link', {
-			'link_doctype': source.doctype,
-			'link_name': source.name,
-			'parenttype': 'Address',
-		}, ['parent'], limit=1)
 
-	contact = frappe.get_all('Dynamic Link', {
-			'link_doctype': source.doctype,
-			'link_name': source.name,
-			'parenttype': 'Contact',
-		}, ['parent'], limit=1)
+def _set_missing_values(source, target):
+	address = frappe.get_all(
+		"Dynamic Link",
+		{
+			"link_doctype": source.doctype,
+			"link_name": source.name,
+			"parenttype": "Address",
+		},
+		["parent"],
+		limit=1,
+	)
+
+	contact = frappe.get_all(
+		"Dynamic Link",
+		{
+			"link_doctype": source.doctype,
+			"link_name": source.name,
+			"parenttype": "Contact",
+		},
+		["parent"],
+		limit=1,
+	)
 
 	if address:
 		target.customer_address = address[0].parent
@@ -302,39 +328,49 @@ def _set_missing_values(source, target):
 	if contact:
 		target.contact_person = contact[0].parent
 
+
 @frappe.whitelist()
 def get_lead_details(lead, posting_date=None, company=None):
 	if not lead:
 		return {}
 
 	from erpnext.accounts.party import set_address_details
+
 	out = frappe._dict()
 
 	lead_doc = frappe.get_doc("Lead", lead)
 	lead = lead_doc
 
-	out.update({
-		"territory": lead.territory,
-		"customer_name": lead.company_name or lead.lead_name,
-		"contact_display": " ".join(filter(None, [lead.salutation, lead.lead_name])),
-		"contact_email": lead.email_id,
-		"contact_mobile": lead.mobile_no,
-		"contact_phone": lead.phone,
-	})
+	out.update(
+		{
+			"territory": lead.territory,
+			"customer_name": lead.company_name or lead.lead_name,
+			"contact_display": " ".join(filter(None, [lead.salutation, lead.lead_name])),
+			"contact_email": lead.email_id,
+			"contact_mobile": lead.mobile_no,
+			"contact_phone": lead.phone,
+		}
+	)
 
 	set_address_details(out, lead, "Lead")
 
-	taxes_and_charges = set_taxes(None, 'Lead', posting_date, company,
-		billing_address=out.get('customer_address'), shipping_address=out.get('shipping_address_name'))
+	taxes_and_charges = set_taxes(
+		None,
+		"Lead",
+		posting_date,
+		company,
+		billing_address=out.get("customer_address"),
+		shipping_address=out.get("shipping_address_name"),
+	)
 	if taxes_and_charges:
-		out['taxes_and_charges'] = taxes_and_charges
+		out["taxes_and_charges"] = taxes_and_charges
 
 	return out
 
 
 @frappe.whitelist()
 def make_lead_from_communication(communication, ignore_communication_links=False):
-	""" raise a issue from email """
+	"""raise a issue from email"""
 
 	doc = frappe.get_doc("Communication", communication)
 	lead_name = None
@@ -343,12 +379,14 @@ def make_lead_from_communication(communication, ignore_communication_links=False
 	if not lead_name and doc.phone_no:
 		lead_name = frappe.db.get_value("Lead", {"mobile_no": doc.phone_no})
 	if not lead_name:
-		lead = frappe.get_doc({
-			"doctype": "Lead",
-			"lead_name": doc.sender_full_name,
-			"email_id": doc.sender,
-			"mobile_no": doc.phone_no
-		})
+		lead = frappe.get_doc(
+			{
+				"doctype": "Lead",
+				"lead_name": doc.sender_full_name,
+				"email_id": doc.sender,
+				"mobile_no": doc.phone_no,
+			}
+		)
 		lead.flags.ignore_mandatory = True
 		lead.flags.ignore_permissions = True
 		lead.insert()
@@ -358,19 +396,27 @@ def make_lead_from_communication(communication, ignore_communication_links=False
 	link_communication_to_document(doc, "Lead", lead_name, ignore_communication_links)
 	return lead_name
 
-def get_lead_with_phone_number(number):
-	if not number: return
 
-	leads = frappe.get_all('Lead', or_filters={
-		'phone': ['like', '%{}'.format(number)],
-		'mobile_no': ['like', '%{}'.format(number)]
-	}, limit=1, order_by="creation DESC")
+def get_lead_with_phone_number(number):
+	if not number:
+		return
+
+	leads = frappe.get_all(
+		"Lead",
+		or_filters={
+			"phone": ["like", "%{}".format(number)],
+			"mobile_no": ["like", "%{}".format(number)],
+		},
+		limit=1,
+		order_by="creation DESC",
+	)
 
 	lead = leads[0].name if leads else None
 
 	return lead
 
+
 def daily_open_lead():
-	leads = frappe.get_all("Lead", filters = [["contact_date", "Between", [nowdate(), nowdate()]]])
+	leads = frappe.get_all("Lead", filters=[["contact_date", "Between", [nowdate(), nowdate()]]])
 	for lead in leads:
 		frappe.db.set_value("Lead", lead.name, "status", "Open")

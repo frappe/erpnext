@@ -18,8 +18,10 @@ from erpnext.regional.report.gstr_1.gstr_1 import get_company_gstin_number
 def execute(filters=None):
 	return _execute(filters)
 
+
 def _execute(filters=None):
-	if not filters: filters = {}
+	if not filters:
+		filters = {}
 	columns = get_columns()
 
 	company_currency = erpnext.get_company_currency(filters.company)
@@ -47,8 +49,9 @@ def _execute(filters=None):
 			data.append(row)
 			added_item.append((d.parent, d.item_code))
 	if data:
-		data = get_merged_data(columns, data) # merge same hsn code data
+		data = get_merged_data(columns, data)  # merge same hsn code data
 	return columns, data
+
 
 def get_columns():
 	columns = [
@@ -57,54 +60,38 @@ def get_columns():
 			"label": _("HSN/SAC"),
 			"fieldtype": "Link",
 			"options": "GST HSN Code",
-			"width": 100
+			"width": 100,
 		},
-		{
-			"fieldname": "description",
-			"label": _("Description"),
-			"fieldtype": "Data",
-			"width": 300
-		},
-		{
-			"fieldname": "stock_uom",
-			"label": _("Stock UOM"),
-			"fieldtype": "Data",
-			"width": 100
-		},
-		{
-			"fieldname": "stock_qty",
-			"label": _("Stock Qty"),
-			"fieldtype": "Float",
-			"width": 90
-		},
-		{
-			"fieldname": "total_amount",
-			"label": _("Total Amount"),
-			"fieldtype": "Currency",
-			"width": 120
-		},
+		{"fieldname": "description", "label": _("Description"), "fieldtype": "Data", "width": 300},
+		{"fieldname": "stock_uom", "label": _("Stock UOM"), "fieldtype": "Data", "width": 100},
+		{"fieldname": "stock_qty", "label": _("Stock Qty"), "fieldtype": "Float", "width": 90},
+		{"fieldname": "total_amount", "label": _("Total Amount"), "fieldtype": "Currency", "width": 120},
 		{
 			"fieldname": "taxable_amount",
 			"label": _("Total Taxable Amount"),
 			"fieldtype": "Currency",
-			"width": 170
-		}
+			"width": 170,
+		},
 	]
 
 	return columns
 
+
 def get_conditions(filters):
 	conditions = ""
 
-	for opts in (("company", " and company=%(company)s"),
+	for opts in (
+		("company", " and company=%(company)s"),
 		("gst_hsn_code", " and gst_hsn_code=%(gst_hsn_code)s"),
 		("company_gstin", " and company_gstin=%(company_gstin)s"),
 		("from_date", " and posting_date >= %(from_date)s"),
-		("to_date", "and posting_date <= %(to_date)s")):
-			if filters.get(opts[0]):
-				conditions += opts[1]
+		("to_date", "and posting_date <= %(to_date)s"),
+	):
+		if filters.get(opts[0]):
+			conditions += opts[1]
 
 	return conditions
+
 
 def get_items(filters):
 	conditions = get_conditions(filters)
@@ -112,8 +99,8 @@ def get_items(filters):
 	if match_conditions:
 		match_conditions = " and {0} ".format(match_conditions)
 
-
-	items = frappe.db.sql("""
+	items = frappe.db.sql(
+		"""
 		select
 			`tabSales Invoice Item`.gst_hsn_code,
 			`tabSales Invoice Item`.stock_uom,
@@ -130,25 +117,41 @@ def get_items(filters):
 		group by
 			`tabSales Invoice Item`.parent, `tabSales Invoice Item`.item_code
 
-		""" % (conditions, match_conditions), filters, as_dict=1)
+		"""
+		% (conditions, match_conditions),
+		filters,
+		as_dict=1,
+	)
 
 	return items
 
-def get_tax_accounts(item_list, columns, company_currency, doctype="Sales Invoice", tax_doctype="Sales Taxes and Charges"):
+
+def get_tax_accounts(
+	item_list,
+	columns,
+	company_currency,
+	doctype="Sales Invoice",
+	tax_doctype="Sales Taxes and Charges",
+):
 	item_row_map = {}
 	tax_columns = []
 	invoice_item_row = {}
 	itemised_tax = {}
 	conditions = ""
 
-	tax_amount_precision = get_field_precision(frappe.get_meta(tax_doctype).get_field("tax_amount"),
-		currency=company_currency) or 2
+	tax_amount_precision = (
+		get_field_precision(
+			frappe.get_meta(tax_doctype).get_field("tax_amount"), currency=company_currency
+		)
+		or 2
+	)
 
 	for d in item_list:
 		invoice_item_row.setdefault(d.parent, []).append(d)
 		item_row_map.setdefault(d.parent, {}).setdefault(d.item_code or d.item_name, []).append(d)
 
-	tax_details = frappe.db.sql("""
+	tax_details = frappe.db.sql(
+		"""
 		select
 			parent, account_head, item_wise_tax_detail,
 			base_tax_amount_after_discount_amount
@@ -159,8 +162,10 @@ def get_tax_accounts(item_list, columns, company_currency, doctype="Sales Invoic
 			and parent in (%s)
 			%s
 		order by description
-	""" % (tax_doctype, '%s', ', '.join(['%s']*len(invoice_item_row)), conditions),
-		tuple([doctype] + list(invoice_item_row)))
+	"""
+		% (tax_doctype, "%s", ", ".join(["%s"] * len(invoice_item_row)), conditions),
+		tuple([doctype] + list(invoice_item_row)),
+	)
 
 	for parent, account_head, item_wise_tax_detail, tax_amount in tax_details:
 
@@ -184,74 +189,74 @@ def get_tax_accounts(item_list, columns, company_currency, doctype="Sales Invoic
 					for d in item_row_map.get(parent, {}).get(item_code, []):
 						item_tax_amount = tax_amount
 						if item_tax_amount:
-							itemised_tax.setdefault((parent, item_code), {})[account_head] = frappe._dict({
-								"tax_amount": flt(item_tax_amount, tax_amount_precision)
-							})
+							itemised_tax.setdefault((parent, item_code), {})[account_head] = frappe._dict(
+								{"tax_amount": flt(item_tax_amount, tax_amount_precision)}
+							)
 			except ValueError:
 				continue
 
 	tax_columns.sort()
 	for account_head in tax_columns:
-		columns.append({
-			"label": account_head,
-			"fieldname": frappe.scrub(account_head),
-			"fieldtype": "Float",
-			"width": 110
-		})
+		columns.append(
+			{
+				"label": account_head,
+				"fieldname": frappe.scrub(account_head),
+				"fieldtype": "Float",
+				"width": 110,
+			}
+		)
 
 	return itemised_tax, tax_columns
 
+
 def get_merged_data(columns, data):
-	merged_hsn_dict = {} # to group same hsn under one key and perform row addition
+	merged_hsn_dict = {}  # to group same hsn under one key and perform row addition
 	result = []
 
 	for row in data:
 		merged_hsn_dict.setdefault(row[0], {})
 		for i, d in enumerate(columns):
-			if d['fieldtype'] not in ('Int', 'Float', 'Currency'):
-				merged_hsn_dict[row[0]][d['fieldname']] = row[i]
+			if d["fieldtype"] not in ("Int", "Float", "Currency"):
+				merged_hsn_dict[row[0]][d["fieldname"]] = row[i]
 			else:
-				if merged_hsn_dict.get(row[0], {}).get(d['fieldname'], ''):
-					merged_hsn_dict[row[0]][d['fieldname']] += row[i]
+				if merged_hsn_dict.get(row[0], {}).get(d["fieldname"], ""):
+					merged_hsn_dict[row[0]][d["fieldname"]] += row[i]
 				else:
-					merged_hsn_dict[row[0]][d['fieldname']] = row[i]
+					merged_hsn_dict[row[0]][d["fieldname"]] = row[i]
 
 	for key, value in iteritems(merged_hsn_dict):
 		result.append(value)
 
 	return result
 
+
 @frappe.whitelist()
 def get_json(filters, report_name, data):
 	filters = json.loads(filters)
 	report_data = json.loads(data)
-	gstin = filters.get('company_gstin') or get_company_gstin_number(filters["company"])
+	gstin = filters.get("company_gstin") or get_company_gstin_number(filters["company"])
 
-	if not filters.get('from_date') or not filters.get('to_date'):
+	if not filters.get("from_date") or not filters.get("to_date"):
 		frappe.throw(_("Please enter From Date and To Date to generate JSON"))
 
 	fp = "%02d%s" % (getdate(filters["to_date"]).month, getdate(filters["to_date"]).year)
 
-	gst_json = {"version": "GST2.3.4",
-		"hash": "hash", "gstin": gstin, "fp": fp}
+	gst_json = {"version": "GST2.3.4", "hash": "hash", "gstin": gstin, "fp": fp}
 
-	gst_json["hsn"] = {
-		"data": get_hsn_wise_json_data(filters, report_data)
-	}
+	gst_json["hsn"] = {"data": get_hsn_wise_json_data(filters, report_data)}
 
-	return {
-		'report_name': report_name,
-		'data': gst_json
-	}
+	return {"report_name": report_name, "data": gst_json}
+
 
 @frappe.whitelist()
 def download_json_file():
-	'''download json content in a file'''
+	"""download json content in a file"""
 	data = frappe._dict(frappe.local.form_dict)
-	frappe.response['filename'] = frappe.scrub("{0}".format(data['report_name'])) + '.json'
-	frappe.response['filecontent'] = data['data']
-	frappe.response['content_type'] = 'application/json'
-	frappe.response['type'] = 'download'
+	frappe.response["filename"] = frappe.scrub("{0}".format(data["report_name"])) + ".json"
+	frappe.response["filecontent"] = data["data"]
+	frappe.response["content_type"] = "application/json"
+	frappe.response["type"] = "download"
+
 
 def get_hsn_wise_json_data(filters, report_data):
 
@@ -272,23 +277,22 @@ def get_hsn_wise_json_data(filters, report_data):
 			"iamt": 0.0,
 			"camt": 0.0,
 			"samt": 0.0,
-			"csamt": 0.0
-
+			"csamt": 0.0,
 		}
 
-		for account in gst_accounts.get('igst_account'):
-			row['iamt'] += flt(hsn.get(frappe.scrub(cstr(account)), 0.0), 2)
+		for account in gst_accounts.get("igst_account"):
+			row["iamt"] += flt(hsn.get(frappe.scrub(cstr(account)), 0.0), 2)
 
-		for account in gst_accounts.get('cgst_account'):
-			row['camt'] += flt(hsn.get(frappe.scrub(cstr(account)), 0.0), 2)
+		for account in gst_accounts.get("cgst_account"):
+			row["camt"] += flt(hsn.get(frappe.scrub(cstr(account)), 0.0), 2)
 
-		for account in gst_accounts.get('sgst_account'):
-			row['samt'] += flt(hsn.get(frappe.scrub(cstr(account)), 0.0), 2)
+		for account in gst_accounts.get("sgst_account"):
+			row["samt"] += flt(hsn.get(frappe.scrub(cstr(account)), 0.0), 2)
 
-		for account in gst_accounts.get('cess_account'):
-			row['csamt'] += flt(hsn.get(frappe.scrub(cstr(account)), 0.0), 2)
+		for account in gst_accounts.get("cess_account"):
+			row["csamt"] += flt(hsn.get(frappe.scrub(cstr(account)), 0.0), 2)
 
 		data.append(row)
-		count +=1
+		count += 1
 
 	return data
