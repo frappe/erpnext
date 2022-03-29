@@ -359,30 +359,115 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 	}
 
     make_material_request() {
-        const frm = this.frm
-        var d = new frappe.ui.Dialog({
-            title: __("Create Material Request"),
-            fields: [
+		const frm = this.frm
+		let so_data = [];
+        const title = __("Create Material Request");
+        const fields = [
                 {
                     'fieldname': 'ignore_available_qty',
                     'fieldtype': 'Check',
                     'label': __('Ignore Projected Qty'),
-                    'default': 1
-                }
-            ],
-        });
-        d.set_primary_action(__('Create'), function() {
-            d.hide();
-            var args = d.get_values();
-            frappe.model.open_mapped_doc({
-                method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
-                frm: frm,
-                args: {
-                    ignore_available_qty: args.ignore_available_qty
-                }
-            })
-        });
-        d.show();
+                    'default': 1,
+					change:function() {
+						let val = this.get_value();
+						let doc = mr_dialog.get_values();
+						if (val == 0){
+							for (var i in doc.pending_items){
+								if (doc.pending_items[i].projected_qty < 0)
+									doc.pending_items[i].mr_qty = doc.pending_items[i].order_qty 
+								else
+									doc.pending_items[i].mr_qty = 0
+							}
+						}
+						else if (val == 1){
+							for (var i in doc.pending_items){
+									doc.pending_items[i].mr_qty = doc.pending_items[i].order_qty 
+								}
+							}
+						mr_dialog.fields_dict.pending_items.grid.refresh();
+						}
+                },
+				{
+					fieldname: 'sec_brk',
+					read_only: 1,
+					fieldtype:'Section Break'
+			},
+			{
+				fieldname: 'pending_items',
+				read_only: 1,
+				fieldtype:'Table',
+				cannot_add_rows: 'True' ,
+				cannot_delete_rows: 'True',
+				cannot_edit_rows: 'True',
+				in_place_edit: 0,
+				label:__('Material Request Items'),
+				fields:[
+				{
+					fieldname: 'item_code',
+					read_only: 1,
+					fieldtype:'Data',
+					label: __('Item'),
+					in_list_view: 1
+				},
+				{
+					fieldname: 'item_name',
+					read_only: 1,
+					fieldtype:'Data',
+					label: __('Item Name'),
+					in_list_view: 1
+				},
+				{
+					fieldname: 'order_qty',
+					read_only: 1,
+					fieldtype:'Float',
+					label: __('Order Qty'),
+					in_list_view: 1,
+				},
+				{
+					fieldname: 'projected_qty',
+					read_only: 1,
+					fieldtype:'Float',
+					label: __('Projected Qty'),
+					in_list_view: 1,
+				},
+				{
+					fieldname: 'mr_qty',
+					read_only: 1,
+					fieldtype:'Float',
+					label: __('MR Qty'),
+					in_list_view: 1,
+				}],
+				data:so_data
+			}
+            ]
+		var mr_dialog = new frappe.ui.Dialog({
+				title: title,
+				fields: fields,
+				size:'large',
+				primary_action: function(values) {
+					frappe.model.open_mapped_doc({
+						method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
+						frm: frm,
+						args: {
+							ignore_available_qty: values.ignore_available_qty
+						}
+					})
+					mr_dialog.hide();			
+				},
+				primary_action_label: __('Create')
+		}); 
+		so_data = this.frm.doc.items;
+		for (var d in so_data){		
+			mr_dialog.fields_dict.pending_items.df.data.push({
+				'item_code': so_data[d].item_code,
+				'item_name': so_data[d].item_name,
+				'order_qty':so_data[d].qty,
+				'projected_qty': so_data[d].projected_qty,
+				'mr_qty':so_data[d].qty
+				});
+			}
+		mr_dialog.fields_dict.pending_items.grid.refresh();
+        mr_dialog.show();				
     }
 
 	skip_delivery_note() {
