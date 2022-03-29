@@ -1,14 +1,14 @@
-
 import json
 
 import frappe
 
 
 def execute():
-	frappe.reload_doc('accounts', 'doctype', 'purchase_invoice_advance')
-	frappe.reload_doc('accounts', 'doctype', 'sales_invoice_advance')
+	frappe.reload_doc("accounts", "doctype", "purchase_invoice_advance")
+	frappe.reload_doc("accounts", "doctype", "sales_invoice_advance")
 
-	purchase_invoices = frappe.db.sql("""
+	purchase_invoices = frappe.db.sql(
+		"""
 		select
 			parenttype as type, parent as name
 		from
@@ -19,9 +19,12 @@ def execute():
 			and ifnull(exchange_gain_loss, 0) != 0
 		group by
 			parent
-	""", as_dict=1)
+	""",
+		as_dict=1,
+	)
 
-	sales_invoices = frappe.db.sql("""
+	sales_invoices = frappe.db.sql(
+		"""
 		select
 			parenttype as type, parent as name
 		from
@@ -32,14 +35,16 @@ def execute():
 			and ifnull(exchange_gain_loss, 0) != 0
 		group by
 			parent
-	""", as_dict=1)
+	""",
+		as_dict=1,
+	)
 
 	if purchase_invoices + sales_invoices:
 		frappe.log_error(json.dumps(purchase_invoices + sales_invoices, indent=2), title="Patch Log")
 
-	acc_frozen_upto = frappe.db.get_value('Accounts Settings', None, 'acc_frozen_upto')
+	acc_frozen_upto = frappe.db.get_value("Accounts Settings", None, "acc_frozen_upto")
 	if acc_frozen_upto:
-		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
+		frappe.db.set_value("Accounts Settings", None, "acc_frozen_upto", None)
 
 	for invoice in purchase_invoices + sales_invoices:
 		try:
@@ -48,13 +53,13 @@ def execute():
 			doc.make_gl_entries()
 			for advance in doc.advances:
 				if advance.ref_exchange_rate == 1:
-					advance.db_set('exchange_gain_loss', 0, False)
+					advance.db_set("exchange_gain_loss", 0, False)
 			doc.docstatus = 1
 			doc.make_gl_entries()
 			frappe.db.commit()
 		except Exception:
 			frappe.db.rollback()
-			print(f'Failed to correct gl entries of {invoice.name}')
+			print(f"Failed to correct gl entries of {invoice.name}")
 
 	if acc_frozen_upto:
-		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', acc_frozen_upto)
+		frappe.db.set_value("Accounts Settings", None, "acc_frozen_upto", acc_frozen_upto)

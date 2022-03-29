@@ -12,17 +12,20 @@ def execute(filters=None):
 	columns = get_columns()
 	return columns, data
 
+
 def get_item_list(wo_list, filters):
 	out = []
 
-	#Add a row for each item/qty
+	# Add a row for each item/qty
 	for wo_details in wo_list:
 		desc = frappe.db.get_value("BOM", wo_details.bom_no, "description")
 
-		for wo_item_details in frappe.db.get_values("Work Order Item",
-			{"parent": wo_details.name}, ["item_code", "source_warehouse"], as_dict=1):
+		for wo_item_details in frappe.db.get_values(
+			"Work Order Item", {"parent": wo_details.name}, ["item_code", "source_warehouse"], as_dict=1
+		):
 
-			item_list = frappe.db.sql("""SELECT
+			item_list = frappe.db.sql(
+				"""SELECT
 					bom_item.item_code as item_code,
 					ifnull(ledger.actual_qty*bom.quantity/bom_item.stock_qty,0) as build_qty
 				FROM
@@ -36,8 +39,14 @@ def get_item_list(wo_list, filters):
 					and bom.name = %(bom)s
 				GROUP BY
 					bom_item.item_code""",
-			{"bom": wo_details.bom_no, "warehouse": wo_item_details.source_warehouse,
-				"filterhouse": filters.warehouse, "item_code": wo_item_details.item_code}, as_dict=1)
+				{
+					"bom": wo_details.bom_no,
+					"warehouse": wo_item_details.source_warehouse,
+					"filterhouse": filters.warehouse,
+					"item_code": wo_item_details.item_code,
+				},
+				as_dict=1,
+			)
 
 			stock_qty = 0
 			count = 0
@@ -54,97 +63,99 @@ def get_item_list(wo_list, filters):
 			else:
 				build = "N"
 
-			row = frappe._dict({
-				"work_order": wo_details.name,
-				"status": wo_details.status,
-				"req_items": cint(count),
-				"instock": stock_qty,
-				"description": desc,
-				"source_warehouse": wo_item_details.source_warehouse,
-				"item_code": wo_item_details.item_code,
-				"bom_no": wo_details.bom_no,
-				"qty": wo_details.qty,
-				"buildable_qty": buildable_qty,
-				"ready_to_build": build
-			})
+			row = frappe._dict(
+				{
+					"work_order": wo_details.name,
+					"status": wo_details.status,
+					"req_items": cint(count),
+					"instock": stock_qty,
+					"description": desc,
+					"source_warehouse": wo_item_details.source_warehouse,
+					"item_code": wo_item_details.item_code,
+					"bom_no": wo_details.bom_no,
+					"qty": wo_details.qty,
+					"buildable_qty": buildable_qty,
+					"ready_to_build": build,
+				}
+			)
 
 			out.append(row)
 
 	return out
 
+
 def get_work_orders():
-	out =  frappe.get_all("Work Order", filters={"docstatus": 1, "status": ( "!=","Completed")},
-		fields=["name","status", "bom_no", "qty", "produced_qty"], order_by='name')
+	out = frappe.get_all(
+		"Work Order",
+		filters={"docstatus": 1, "status": ("!=", "Completed")},
+		fields=["name", "status", "bom_no", "qty", "produced_qty"],
+		order_by="name",
+	)
 
 	return out
 
+
 def get_columns():
-	columns = [{
-		"fieldname": "work_order",
-		"label": "Work Order",
-		"fieldtype": "Link",
-		"options": "Work Order",
-		"width": 110
-	}, {
-		"fieldname": "bom_no",
-		"label": "BOM",
-		"fieldtype": "Link",
-		"options": "BOM",
-		"width": 120
-	}, {
-		"fieldname": "description",
-		"label": "Description",
-		"fieldtype": "Data",
-		"options": "",
-		"width": 230
-	}, {
-		"fieldname": "item_code",
-		"label": "Item Code",
-		"fieldtype": "Link",
-		"options": "Item",
-		"width": 110
-	},{
-		"fieldname": "source_warehouse",
-		"label": "Source Warehouse",
-		"fieldtype": "Link",
-		"options": "Warehouse",
-		"width": 110
-	},{
-		"fieldname": "qty",
-		"label": "Qty to Build",
-		"fieldtype": "Data",
-		"options": "",
-		"width": 110
-	}, {
-		"fieldname": "status",
-		"label": "Status",
-		"fieldtype": "Data",
-		"options": "",
-		"width": 100
-	}, {
-		"fieldname": "req_items",
-		"label": "# Req'd Items",
-		"fieldtype": "Data",
-		"options": "",
-		"width": 105
-	}, {
-		"fieldname": "instock",
-		"label": "# In Stock",
-		"fieldtype": "Data",
-		"options": "",
-		"width": 105
-	}, {
-		"fieldname": "buildable_qty",
-		"label": "Buildable Qty",
-		"fieldtype": "Data",
-		"options": "",
-		"width": 100
-	}, {
-		"fieldname": "ready_to_build",
-		"label": "Build All?",
-		"fieldtype": "Data",
-		"options": "",
-		"width": 90
-	}]
+	columns = [
+		{
+			"fieldname": "work_order",
+			"label": "Work Order",
+			"fieldtype": "Link",
+			"options": "Work Order",
+			"width": 110,
+		},
+		{"fieldname": "bom_no", "label": "BOM", "fieldtype": "Link", "options": "BOM", "width": 120},
+		{
+			"fieldname": "description",
+			"label": "Description",
+			"fieldtype": "Data",
+			"options": "",
+			"width": 230,
+		},
+		{
+			"fieldname": "item_code",
+			"label": "Item Code",
+			"fieldtype": "Link",
+			"options": "Item",
+			"width": 110,
+		},
+		{
+			"fieldname": "source_warehouse",
+			"label": "Source Warehouse",
+			"fieldtype": "Link",
+			"options": "Warehouse",
+			"width": 110,
+		},
+		{"fieldname": "qty", "label": "Qty to Build", "fieldtype": "Data", "options": "", "width": 110},
+		{"fieldname": "status", "label": "Status", "fieldtype": "Data", "options": "", "width": 100},
+		{
+			"fieldname": "req_items",
+			"label": "# Req'd Items",
+			"fieldtype": "Data",
+			"options": "",
+			"width": 105,
+		},
+		{
+			"fieldname": "instock",
+			"label": "# In Stock",
+			"fieldtype": "Data",
+			"options": "",
+			"width": 105,
+		},
+		{
+			"fieldname": "buildable_qty",
+			"label": "Buildable Qty",
+			"fieldtype": "Data",
+			"options": "",
+			"width": 100,
+		},
+		{
+			"fieldname": "ready_to_build",
+			"label": "Build All?",
+			"fieldtype": "Data",
+			"options": "",
+			"width": 90,
+		},
+	]
 
 	return columns

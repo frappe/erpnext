@@ -8,21 +8,22 @@ import frappe
 
 class TestQualityFeedback(unittest.TestCase):
 	def test_quality_feedback(self):
-		template = frappe.get_doc(dict(
-			doctype = 'Quality Feedback Template',
-			template = 'Test Template',
-			parameters = [
-				dict(parameter='Test Parameter 1'),
-				dict(parameter='Test Parameter 2')
-			]
-		)).insert()
+		template = frappe.get_doc(
+			dict(
+				doctype="Quality Feedback Template",
+				template="Test Template",
+				parameters=[dict(parameter="Test Parameter 1"), dict(parameter="Test Parameter 2")],
+			)
+		).insert()
 
-		feedback = frappe.get_doc(dict(
-			doctype = 'Quality Feedback',
-			template = template.name,
-			document_type = 'User',
-			document_name = frappe.session.user
-		)).insert()
+		feedback = frappe.get_doc(
+			dict(
+				doctype="Quality Feedback",
+				template=template.name,
+				document_type="User",
+				document_name=frappe.session.user,
+			)
+		).insert()
 
 		self.assertEqual(template.parameters[0].parameter, feedback.parameters[0].parameter)
 

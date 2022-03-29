@@ -26,11 +26,18 @@ repos:
         args: ['--config', '.github/helper/.flake8_strict']
         exclude: ".*setup.py$"
 
+  - repo: https://github.com/adityahase/black
+    rev: 9cb0a69f4d0030cdf687eddf314468b39ed54119
+    hooks:
+      - id: black
+        additional_dependencies: ['click==8.0.4']
+
   - repo: https://github.com/timothycrosley/isort
     rev: 5.9.1
     hooks:
       - id: isort
         exclude: ".*setup.py$"
+
 
 ci:
     autoupdate_schedule: weekly

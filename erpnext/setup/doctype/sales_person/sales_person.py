@@ -11,13 +11,13 @@ from erpnext import get_default_currency
 
 
 class SalesPerson(NestedSet):
-	nsm_parent_field = 'parent_sales_person'
+	nsm_parent_field = "parent_sales_person"
 
 	def validate(self):
 		if not self.parent_sales_person:
 			self.parent_sales_person = get_root_of("Sales Person")
 
-		for d in self.get('targets') or []:
+		for d in self.get("targets") or []:
 			if not flt(d.target_qty) and not flt(d.target_amount):
 				frappe.throw(_("Either target qty or target amount is mandatory."))
 		self.validate_employee_id()
@@ -28,17 +28,20 @@ class SalesPerson(NestedSet):
 	def load_dashboard_info(self):
 		company_default_currency = get_default_currency()
 
-		allocated_amount = frappe.db.sql("""
+		allocated_amount = frappe.db.sql(
+			"""
 			select sum(allocated_amount)
 			from `tabSales Team`
 			where sales_person = %s and docstatus=1 and parenttype = 'Sales Order'
-		""",(self.sales_person_name))
+		""",
+			(self.sales_person_name),
+		)
 
 		info = {}
 		info["allocated_amount"] = flt(allocated_amount[0][0]) if allocated_amount else 0
 		info["currency"] = company_default_currency
 
-		self.set_onload('dashboard_info', info)
+		self.set_onload("dashboard_info", info)
 
 	def on_update(self):
 		super(SalesPerson, self).on_update()
@@ -57,30 +60,46 @@ class SalesPerson(NestedSet):
 			sales_person = frappe.db.get_value("Sales Person", {"employee": self.employee})
 
 			if sales_person and sales_person != self.name:
-				frappe.throw(_("Another Sales Person {0} exists with the same Employee id").format(sales_person))
+				frappe.throw(
+					_("Another Sales Person {0} exists with the same Employee id").format(sales_person)
+				)
+
 
 def on_doctype_update():
 	frappe.db.add_index("Sales Person", ["lft", "rgt"])
+
 
 def get_timeline_data(doctype, name):
 
 	out = {}
 
-	out.update(dict(frappe.db.sql('''select
+	out.update(
+		dict(
+			frappe.db.sql(
+				"""select
 			unix_timestamp(dt.transaction_date), count(st.parenttype)
 		from
 			`tabSales Order` dt, `tabSales Team` st
 		where
 			st.sales_person = %s and st.parent = dt.name and dt.transaction_date > date_sub(curdate(), interval 1 year)
-			group by dt.transaction_date ''', name)))
+			group by dt.transaction_date """,
+				name,
+			)
+		)
+	)
 
-	sales_invoice = dict(frappe.db.sql('''select
+	sales_invoice = dict(
+		frappe.db.sql(
+			"""select
 			unix_timestamp(dt.posting_date), count(st.parenttype)
 		from
 			`tabSales Invoice` dt, `tabSales Team` st
 		where
 			st.sales_person = %s and st.parent = dt.name and dt.posting_date > date_sub(curdate(), interval 1 year)
-			group by dt.posting_date ''', name))
+			group by dt.posting_date """,
+			name,
+		)
+	)
 
 	for key in sales_invoice:
 		if out.get(key):
@@ -88,13 +107,18 @@ def get_timeline_data(doctype, name):
 		else:
 			out[key] = sales_invoice[key]
 
-	delivery_note = dict(frappe.db.sql('''select
+	delivery_note = dict(
+		frappe.db.sql(
+			"""select
 			unix_timestamp(dt.posting_date), count(st.parenttype)
 		from
 			`tabDelivery Note` dt, `tabSales Team` st
 		where
 			st.sales_person = %s and st.parent = dt.name and dt.posting_date > date_sub(curdate(), interval 1 year)
-			group by dt.posting_date ''', name))
+			group by dt.posting_date """,
+			name,
+		)
+	)
 
 	for key in delivery_note:
 		if out.get(key):
