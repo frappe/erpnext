@@ -602,9 +602,6 @@ def make_material_request(source_name, target_doc=None):
 		# qty is for packed items, because packed items don't have stock_qty field
 		qty = source.get("qty")
 		target.project = source_parent.project
-		projected_qty = get_projected_qty(source.get("item_code"), source.get("warehouse"))[
-			"projected_qty"
-		]
 		if not ignore_available_qty:
 			target.qty = qty
 		else:
