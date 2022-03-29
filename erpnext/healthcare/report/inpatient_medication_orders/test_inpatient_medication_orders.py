@@ -38,92 +38,94 @@ class TestInpatientMedicationOrders(unittest.TestCase):
 
 	def test_inpatient_medication_orders_report(self):
 		filters = {
-			'company': '_Test Company',
-			'from_date': getdate(),
-			'to_date': getdate(),
-			'patient': '_Test IPD Patient',
-			'service_unit': '_Test Service Unit Ip Occupancy - _TC'
+			"company": "_Test Company",
+			"from_date": getdate(),
+			"to_date": getdate(),
+			"patient": "_Test IPD Patient",
+			"service_unit": "_Test Service Unit Ip Occupancy - _TC",
 		}
 
 		report = execute(filters)
 
 		expected_data = [
 			{
-				'patient': '_Test IPD Patient',
-				'inpatient_record': self.ip_record.name,
-				'practitioner': None,
-				'drug': 'Dextromethorphan',
-				'drug_name': 'Dextromethorphan',
-				'dosage': 1.0,
-				'dosage_form': 'Tablet',
-				'date': getdate(),
-				'time': datetime.timedelta(seconds=32400),
-				'is_completed': 0,
-				'healthcare_service_unit': '_Test Service Unit Ip Occupancy - _TC'
+				"patient": "_Test IPD Patient",
+				"inpatient_record": self.ip_record.name,
+				"practitioner": None,
+				"drug": "Dextromethorphan",
+				"drug_name": "Dextromethorphan",
+				"dosage": 1.0,
+				"dosage_form": "Tablet",
+				"date": getdate(),
+				"time": datetime.timedelta(seconds=32400),
+				"is_completed": 0,
+				"healthcare_service_unit": "_Test Service Unit Ip Occupancy - _TC",
 			},
 			{
-				'patient': '_Test IPD Patient',
-				'inpatient_record': self.ip_record.name,
-				'practitioner': None,
-				'drug': 'Dextromethorphan',
-				'drug_name': 'Dextromethorphan',
-				'dosage': 1.0,
-				'dosage_form': 'Tablet',
-				'date': getdate(),
-				'time': datetime.timedelta(seconds=50400),
-				'is_completed': 0,
-				'healthcare_service_unit': '_Test Service Unit Ip Occupancy - _TC'
+				"patient": "_Test IPD Patient",
+				"inpatient_record": self.ip_record.name,
+				"practitioner": None,
+				"drug": "Dextromethorphan",
+				"drug_name": "Dextromethorphan",
+				"dosage": 1.0,
+				"dosage_form": "Tablet",
+				"date": getdate(),
+				"time": datetime.timedelta(seconds=50400),
+				"is_completed": 0,
+				"healthcare_service_unit": "_Test Service Unit Ip Occupancy - _TC",
 			},
 			{
-				'patient': '_Test IPD Patient',
-				'inpatient_record': self.ip_record.name,
-				'practitioner': None,
-				'drug': 'Dextromethorphan',
-				'drug_name': 'Dextromethorphan',
-				'dosage': 1.0,
-				'dosage_form': 'Tablet',
-				'date': getdate(),
-				'time': datetime.timedelta(seconds=75600),
-				'is_completed': 0,
-				'healthcare_service_unit': '_Test Service Unit Ip Occupancy - _TC'
-			}
+				"patient": "_Test IPD Patient",
+				"inpatient_record": self.ip_record.name,
+				"practitioner": None,
+				"drug": "Dextromethorphan",
+				"drug_name": "Dextromethorphan",
+				"dosage": 1.0,
+				"dosage_form": "Tablet",
+				"date": getdate(),
+				"time": datetime.timedelta(seconds=75600),
+				"is_completed": 0,
+				"healthcare_service_unit": "_Test Service Unit Ip Occupancy - _TC",
+			},
 		]
 
 		self.assertEqual(expected_data, report[1])
 
-		filters = frappe._dict(from_date=getdate(), to_date=getdate(), from_time='', to_time='')
+		filters = frappe._dict(from_date=getdate(), to_date=getdate(), from_time="", to_time="")
 		ipme = create_ipme(filters)
 		ipme.submit()
 
 		filters = {
-			'company': '_Test Company',
-			'from_date': getdate(),
-			'to_date': getdate(),
-			'patient': '_Test IPD Patient',
-			'service_unit': '_Test Service Unit Ip Occupancy - _TC',
-			'show_completed_orders': 0
+			"company": "_Test Company",
+			"from_date": getdate(),
+			"to_date": getdate(),
+			"patient": "_Test IPD Patient",
+			"service_unit": "_Test Service Unit Ip Occupancy - _TC",
+			"show_completed_orders": 0,
 		}
 
 		report = execute(filters)
 		self.assertEqual(len(report[1]), 0)
 
 	def tearDown(self):
-		if frappe.db.get_value('Patient', self.patient, 'inpatient_record'):
+		if frappe.db.get_value("Patient", self.patient, "inpatient_record"):
 			# cleanup - Discharge
-			schedule_discharge(frappe.as_json({'patient': self.patient, 'discharge_ordered_datetime': now_datetime()}))
+			schedule_discharge(
+				frappe.as_json({"patient": self.patient, "discharge_ordered_datetime": now_datetime()})
+			)
 			self.ip_record.reload()
 			mark_invoiced_inpatient_occupancy(self.ip_record)
 
 			self.ip_record.reload()
 			discharge_patient(self.ip_record, now_datetime())
 
-		for entry in frappe.get_all('Inpatient Medication Entry'):
-			doc = frappe.get_doc('Inpatient Medication Entry', entry.name)
+		for entry in frappe.get_all("Inpatient Medication Entry"):
+			doc = frappe.get_doc("Inpatient Medication Entry", entry.name)
 			doc.cancel()
 			doc.delete()
 
-		for entry in frappe.get_all('Inpatient Medication Order'):
-			doc = frappe.get_doc('Inpatient Medication Order', entry.name)
+		for entry in frappe.get_all("Inpatient Medication Order"):
+			doc = frappe.get_doc("Inpatient Medication Order", entry.name)
 			doc.cancel()
 			doc.delete()
 
@@ -136,7 +138,7 @@ def create_records(patient):
 	ip_record.expected_length_of_stay = 0
 	ip_record.save()
 	ip_record.reload()
-	service_unit = get_healthcare_service_unit('_Test Service Unit Ip Occupancy')
+	service_unit = get_healthcare_service_unit("_Test Service Unit Ip Occupancy")
 	admit_patient(ip_record, service_unit, now_datetime())
 
 	ipmo = create_ipmo(patient)

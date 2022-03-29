@@ -9,10 +9,8 @@ from erpnext.stock.utils import _create_bin
 
 
 class TestBin(FrappeTestCase):
-
-
 	def test_concurrent_inserts(self):
-		""" Ensure no duplicates are possible in case of concurrent inserts"""
+		"""Ensure no duplicates are possible in case of concurrent inserts"""
 		item_code = "_TestConcurrentBin"
 		make_item(item_code)
 		warehouse = "_Test Warehouse - _TC"

@@ -28,7 +28,7 @@ class WebsiteItem(WebsiteGenerator):
 		page_title_field="web_item_name",
 		condition_field="published",
 		template="templates/generators/item/item.html",
-		no_cache=1
+		no_cache=1,
 	)
 
 	def autoname(self):
@@ -56,7 +56,8 @@ class WebsiteItem(WebsiteGenerator):
 		self.publish_unpublish_desk_item(publish=True)
 
 		if not self.get("__islocal"):
-			self.old_website_item_groups = frappe.db.sql_list("""
+			self.old_website_item_groups = frappe.db.sql_list(
+				"""
 				select
 					item_group
 				from
@@ -65,7 +66,9 @@ class WebsiteItem(WebsiteGenerator):
 					parentfield='website_item_groups'
 					and parenttype='Website Item'
 					and parent=%s
-				""", self.name)
+				""",
+				self.name,
+			)
 
 	def on_update(self):
 		invalidate_cache_for_web_item(self)
@@ -84,14 +87,17 @@ class WebsiteItem(WebsiteGenerator):
 
 	def publish_unpublish_desk_item(self, publish=True):
 		if frappe.db.get_value("Item", self.item_code, "published_in_website") and publish:
-			return # if already published don't publish again
+			return  # if already published don't publish again
 		frappe.db.set_value("Item", self.item_code, "published_in_website", publish)
 
 	def make_route(self):
 		"""Called from set_route in WebsiteGenerator."""
 		if not self.route:
-			return cstr(frappe.db.get_value('Item Group', self.item_group,
-					'route')) + '/' + self.scrub((self.item_name if self.item_name else self.item_code) + '-' + random_string(5))
+			return (
+				cstr(frappe.db.get_value("Item Group", self.item_group, "route"))
+				+ "/"
+				+ self.scrub((self.item_name if self.item_name else self.item_code) + "-" + random_string(5))
+			)
 
 	def update_template_item(self):
 		"""Publish Template Item if Variant is published."""
@@ -121,12 +127,10 @@ class WebsiteItem(WebsiteGenerator):
 		# find if website image url exists as public
 		file_doc = frappe.get_all(
 			"File",
-			filters={
-				"file_url": self.website_image
-			},
+			filters={"file_url": self.website_image},
 			fields=["name", "is_private"],
 			order_by="is_private asc",
-			limit_page_length=1
+			limit_page_length=1,
 		)
 
 		if file_doc:
@@ -134,7 +138,11 @@ class WebsiteItem(WebsiteGenerator):
 
 		if not file_doc:
 			if not auto_set_website_image:
-				frappe.msgprint(_("Website Image {0} attached to Item {1} cannot be found").format(self.website_image, self.name))
+				frappe.msgprint(
+					_("Website Image {0} attached to Item {1} cannot be found").format(
+						self.website_image, self.name
+					)
+				)
 
 			self.website_image = None
 
@@ -151,18 +159,23 @@ class WebsiteItem(WebsiteGenerator):
 
 		import requests.exceptions
 
-		if not self.is_new() and self.website_image != frappe.db.get_value(self.doctype, self.name, "website_image"):
+		if not self.is_new() and self.website_image != frappe.db.get_value(
+			self.doctype, self.name, "website_image"
+		):
 			self.thumbnail = None
 
 		if self.website_image and not self.thumbnail:
 			file_doc = None
 
 			try:
-				file_doc = frappe.get_doc("File", {
-					"file_url": self.website_image,
-					"attached_to_doctype": "Website Item",
-					"attached_to_name": self.name
-				})
+				file_doc = frappe.get_doc(
+					"File",
+					{
+						"file_url": self.website_image,
+						"attached_to_doctype": "Website Item",
+						"attached_to_name": self.name,
+					},
+				)
 			except frappe.DoesNotExistError:
 				pass
 				# cleanup
@@ -174,18 +187,21 @@ class WebsiteItem(WebsiteGenerator):
 
 			except requests.exceptions.SSLError:
 				frappe.msgprint(
-					_("Warning: Invalid SSL certificate on attachment {0}").format(self.website_image))
+					_("Warning: Invalid SSL certificate on attachment {0}").format(self.website_image)
+				)
 				self.website_image = None
 
 			# for CSV import
 			if self.website_image and not file_doc:
 				try:
-					file_doc = frappe.get_doc({
-						"doctype": "File",
-						"file_url": self.website_image,
-						"attached_to_doctype": "Website Item",
-						"attached_to_name": self.name
-					}).save()
+					file_doc = frappe.get_doc(
+						{
+							"doctype": "File",
+							"file_url": self.website_image,
+							"attached_to_doctype": "Website Item",
+							"attached_to_name": self.name,
+						}
+					).save()
 
 				except IOError:
 					self.website_image = None
@@ -201,11 +217,11 @@ class WebsiteItem(WebsiteGenerator):
 		context.search_link = "/search"
 		context.body_class = "product-page"
 
-		context.parents = get_parent_item_groups(self.item_group, from_item=True) # breadcumbs
+		context.parents = get_parent_item_groups(self.item_group, from_item=True)  # breadcumbs
 		self.attributes = frappe.get_all(
 			"Item Variant Attribute",
 			fields=["attribute", "attribute_value"],
-			filters={"parent": self.item_code}
+			filters={"parent": self.item_code},
 		)
 
 		if self.slideshow:
@@ -224,7 +240,9 @@ class WebsiteItem(WebsiteGenerator):
 			context.reviews = context.reviews[:4]
 
 		context.wished = False
-		if frappe.db.exists("Wishlist Item", {"item_code": self.item_code, "parent": frappe.session.user}):
+		if frappe.db.exists(
+			"Wishlist Item", {"item_code": self.item_code, "parent": frappe.session.user}
+		):
 			context.wished = True
 
 		context.user_is_customer = check_if_user_is_customer()
@@ -240,11 +258,12 @@ class WebsiteItem(WebsiteGenerator):
 			variant.attributes = frappe.get_all(
 				"Item Variant Attribute",
 				filters={"parent": variant.name},
-				fields=["attribute", "attribute_value as value"])
+				fields=["attribute", "attribute_value as value"],
+			)
 
 			# make an attribute-value map for easier access in templates
 			variant.attribute_map = frappe._dict(
-				{attr.attribute : attr.value for attr in variant.attributes}
+				{attr.attribute: attr.value for attr in variant.attributes}
 			)
 
 			for attr in variant.attributes:
@@ -264,9 +283,12 @@ class WebsiteItem(WebsiteGenerator):
 					values.append(val)
 			else:
 				# get list of values defined (for sequence)
-				for attr_value in frappe.db.get_all("Item Attribute Value",
+				for attr_value in frappe.db.get_all(
+					"Item Attribute Value",
 					fields=["attribute_value"],
-					filters={"parent": attr.attribute}, order_by="idx asc"):
+					filters={"parent": attr.attribute},
+					order_by="idx asc",
+				):
 
 					if attr_value.attribute_value in attribute_values_available.get(attr.attribute, []):
 						values.append(attr_value.attribute_value)
@@ -276,10 +298,10 @@ class WebsiteItem(WebsiteGenerator):
 
 		safe_description = frappe.utils.to_markdown(self.description)
 
-		context.metatags.url = frappe.utils.get_url() + '/' + context.route
+		context.metatags.url = frappe.utils.get_url() + "/" + context.route
 
 		if context.website_image:
-			if context.website_image.startswith('http'):
+			if context.website_image.startswith("http"):
 				url = context.website_image
 			else:
 				url = frappe.utils.get_url() + context.website_image
@@ -289,25 +311,29 @@ class WebsiteItem(WebsiteGenerator):
 
 		context.metatags.title = self.web_item_name or self.item_name or self.item_code
 
-		context.metatags['og:type'] = 'product'
-		context.metatags['og:site_name'] = 'ERPNext'
+		context.metatags["og:type"] = "product"
+		context.metatags["og:site_name"] = "ERPNext"
 
 	def set_shopping_cart_data(self, context):
 		from erpnext.e_commerce.shopping_cart.product_info import get_product_info_for_website
-		context.shopping_cart = get_product_info_for_website(self.item_code, skip_quotation_creation=True)
+
+		context.shopping_cart = get_product_info_for_website(
+			self.item_code, skip_quotation_creation=True
+		)
 
 	@frappe.whitelist()
 	def copy_specification_from_item_group(self):
 		self.set("website_specifications", [])
 		if self.item_group:
-			for label, desc in frappe.db.get_values("Item Website Specification",
-				{"parent": self.item_group}, ["label", "description"]):
+			for label, desc in frappe.db.get_values(
+				"Item Website Specification", {"parent": self.item_group}, ["label", "description"]
+			):
 				row = self.append("website_specifications")
 				row.label = label
 				row.description = desc
 
 	def get_product_details_section(self, context):
-		""" Get section with tabs or website specifications. """
+		"""Get section with tabs or website specifications."""
 		context.show_tabs = self.show_tabbed_section
 		if self.show_tabbed_section and (self.tabs or self.website_specifications):
 			context.tabs = self.get_tabs()
@@ -319,10 +345,8 @@ class WebsiteItem(WebsiteGenerator):
 		tab_values["tab_1_title"] = "Product Details"
 		tab_values["tab_1_content"] = frappe.render_template(
 			"templates/generators/item/item_specifications.html",
-			{
-				"website_specifications": self.website_specifications,
-				"show_tabs": self.show_tabbed_section
-			})
+			{"website_specifications": self.website_specifications, "show_tabs": self.show_tabbed_section},
+		)
 
 		for row in self.tabs:
 			tab_values[f"tab_{row.idx + 1}_title"] = _(row.label)
@@ -331,7 +355,8 @@ class WebsiteItem(WebsiteGenerator):
 		return tab_values
 
 	def get_recommended_items(self, settings):
-		items = frappe.db.sql(f"""
+		items = frappe.db.sql(
+			f"""
 			select
 				ri.website_item_thumbnail, ri.website_item_name,
 				ri.route, ri.item_code
@@ -342,7 +367,9 @@ class WebsiteItem(WebsiteGenerator):
 				and ri.parent = '{self.name}'
 				and wi.published = 1
 			order by ri.idx
-		""", as_dict=1)
+		""",
+			as_dict=1,
+		)
 
 		if settings.show_price:
 			is_guest = frappe.session.user == "Guest"
@@ -354,13 +381,11 @@ class WebsiteItem(WebsiteGenerator):
 			selling_price_list = _set_price_list(settings, None)
 			for item in items:
 				item.price_info = get_price(
-					item.item_code,
-					selling_price_list,
-					settings.default_customer_group,
-					settings.company
+					item.item_code, selling_price_list, settings.default_customer_group, settings.company
 				)
 
 		return items
+
 
 def invalidate_cache_for_web_item(doc):
 	"""Invalidate Website Item Group cache and rebuild ItemVariantsCacheManager."""
@@ -368,8 +393,12 @@ def invalidate_cache_for_web_item(doc):
 
 	invalidate_cache_for(doc, doc.item_group)
 
-	website_item_groups = list(set((doc.get("old_website_item_groups") or [])
-		+ [d.item_group for d in doc.get({"doctype": "Website Item Group"}) if d.item_group]))
+	website_item_groups = list(
+		set(
+			(doc.get("old_website_item_groups") or [])
+			+ [d.item_group for d in doc.get({"doctype": "Website Item Group"}) if d.item_group]
+		)
+	)
 
 	for item_group in website_item_groups:
 		invalidate_cache_for(doc, item_group)
@@ -379,12 +408,14 @@ def invalidate_cache_for_web_item(doc):
 
 	invalidate_item_variants_cache_for_website(doc)
 
+
 def on_doctype_update():
 	# since route is a Text column, it needs a length for indexing
 	frappe.db.add_index("Website Item", ["route(500)"])
 
 	frappe.db.add_index("Website Item", ["item_group"])
 	frappe.db.add_index("Website Item", ["brand"])
+
 
 def check_if_user_is_customer(user=None):
 	from frappe.contacts.doctype.contact.contact import get_contact_name
@@ -396,13 +427,14 @@ def check_if_user_is_customer(user=None):
 	customer = None
 
 	if contact_name:
-		contact = frappe.get_doc('Contact', contact_name)
+		contact = frappe.get_doc("Contact", contact_name)
 		for link in contact.links:
 			if link.link_doctype == "Customer":
 				customer = link.link_name
 				break
 
 	return True if customer else False
+
 
 @frappe.whitelist()
 def make_website_item(doc, save=True):
@@ -419,8 +451,17 @@ def make_website_item(doc, save=True):
 	website_item = frappe.new_doc("Website Item")
 	website_item.web_item_name = doc.get("item_name")
 
-	fields_to_map = ["item_code", "item_name", "item_group", "stock_uom", "brand", "image",
-		"has_variants", "variant_of", "description"]
+	fields_to_map = [
+		"item_code",
+		"item_name",
+		"item_group",
+		"stock_uom",
+		"brand",
+		"image",
+		"has_variants",
+		"variant_of",
+		"description",
+	]
 	for field in fields_to_map:
 		website_item.update({field: doc.get(field)})
 

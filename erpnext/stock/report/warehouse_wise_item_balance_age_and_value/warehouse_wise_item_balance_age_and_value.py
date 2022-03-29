@@ -22,7 +22,8 @@ from erpnext.stock.utils import is_reposting_item_valuation_in_progress
 
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
-	if not filters: filters = {}
+	if not filters:
+		filters = {}
 
 	validate_filters(filters)
 
@@ -40,7 +41,8 @@ def execute(filters=None):
 	item_value = {}
 
 	for (company, item, warehouse) in sorted(iwb_map):
-		if not item_map.get(item):  continue
+		if not item_map.get(item):
+			continue
 
 		row = []
 		qty_dict = iwb_map[(company, item, warehouse)]
@@ -51,13 +53,13 @@ def execute(filters=None):
 			total_stock_value += qty_dict.bal_val if wh.name == warehouse else 0.00
 
 		item_balance[(item, item_map[item]["item_group"])].append(row)
-		item_value.setdefault((item, item_map[item]["item_group"]),[])
+		item_value.setdefault((item, item_map[item]["item_group"]), [])
 		item_value[(item, item_map[item]["item_group"])].append(total_stock_value)
-
 
 	# sum bal_qty by item
 	for (item, item_group), wh_balance in iteritems(item_balance):
-		if not item_ageing.get(item):  continue
+		if not item_ageing.get(item):
+			continue
 
 		total_stock_value = sum(item_value[(item, item_group)])
 		row = [item, item_group, total_stock_value]
@@ -82,16 +84,18 @@ def execute(filters=None):
 	add_warehouse_column(columns, warehouse_list)
 	return columns, data
 
+
 def get_columns(filters):
 	"""return columns"""
 
 	columns = [
-		_("Item")+":Link/Item:180",
-		_("Item Group")+"::100",
-		_("Value")+":Currency:100",
-		_("Age")+":Float:60",
+		_("Item") + ":Link/Item:180",
+		_("Item Group") + "::100",
+		_("Value") + ":Currency:100",
+		_("Age") + ":Float:60",
 	]
 	return columns
+
 
 def validate_filters(filters):
 	if not (filters.get("item_code") or filters.get("warehouse")):
@@ -101,11 +105,12 @@ def validate_filters(filters):
 	if not filters.get("company"):
 		filters["company"] = frappe.defaults.get_user_default("Company")
 
+
 def get_warehouse_list(filters):
 	from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 
-	condition = ''
-	user_permitted_warehouse = get_permitted_documents('Warehouse')
+	condition = ""
+	user_permitted_warehouse = get_permitted_documents("Warehouse")
 	value = ()
 	if user_permitted_warehouse:
 		condition = "and name in %s"
@@ -114,13 +119,20 @@ def get_warehouse_list(filters):
 		condition = "and name = %s"
 		value = filters.get("warehouse")
 
-	return frappe.db.sql("""select name
+	return frappe.db.sql(
+		"""select name
 		from `tabWarehouse` where is_group = 0
-		{condition}""".format(condition=condition), value, as_dict=1)
+		{condition}""".format(
+			condition=condition
+		),
+		value,
+		as_dict=1,
+	)
+
 
 def add_warehouse_column(columns, warehouse_list):
 	if len(warehouse_list) > 1:
-		columns += [_("Total Qty")+":Int:50"]
+		columns += [_("Total Qty") + ":Int:50"]
 
 	for wh in warehouse_list:
-		columns += [_(wh.name)+":Int:54"]
+		columns += [_(wh.name) + ":Int:54"]

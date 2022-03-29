@@ -1,4 +1,4 @@
-	# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies and contributors
 # For license information, please see license.txt
 
@@ -20,10 +20,14 @@ class CourseSchedule(Document):
 
 	def set_title(self):
 		"""Set document Title"""
-		self.title = self.course + " by " + (self.instructor_name if self.instructor_name else self.instructor)
+		self.title = (
+			self.course + " by " + (self.instructor_name if self.instructor_name else self.instructor)
+		)
 
 	def validate_course(self):
-		group_based_on, course = frappe.db.get_value("Student Group", self.student_group, ["group_based_on", "course"])
+		group_based_on, course = frappe.db.get_value(
+			"Student Group", self.student_group, ["group_based_on", "course"]
+		)
 		if group_based_on == "Course":
 			self.course = course
 
@@ -35,7 +39,7 @@ class CourseSchedule(Document):
 		"""Handles specicfic case to update schedule date in calendar """
 		if isinstance(self.from_time, str):
 			try:
-				datetime_obj = datetime.strptime(self.from_time, '%Y-%m-%d %H:%M:%S')
+				datetime_obj = datetime.strptime(self.from_time, "%Y-%m-%d %H:%M:%S")
 				self.schedule_date = datetime_obj
 			except ValueError:
 				pass
@@ -45,14 +49,14 @@ class CourseSchedule(Document):
 
 		from erpnext.education.utils import validate_overlap_for
 
-		#Validate overlapping course schedules.
+		# Validate overlapping course schedules.
 		if self.student_group:
 			validate_overlap_for(self, "Course Schedule", "student_group")
 
 		validate_overlap_for(self, "Course Schedule", "instructor")
 		validate_overlap_for(self, "Course Schedule", "room")
 
-		#validate overlapping assessment schedules.
+		# validate overlapping assessment schedules.
 		if self.student_group:
 			validate_overlap_for(self, "Assessment Plan", "student_group")
 

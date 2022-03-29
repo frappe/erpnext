@@ -7,8 +7,8 @@ import frappe
 def execute():
 
 	job_card = frappe.qb.DocType("Job Card")
-	(frappe.qb
-		.update(job_card)
+	(
+		frappe.qb.update(job_card)
 		.set(job_card.status, "Completed")
 		.where(
 			(job_card.docstatus == 1)

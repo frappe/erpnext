@@ -33,12 +33,14 @@ class Membership(Document):
 
 		if not member_name:
 			user = frappe.get_doc("User", frappe.session.user)
-			member = frappe.get_doc(dict(
-				doctype="Member",
-				email_id=frappe.session.user,
-				membership_type=self.membership_type,
-				member_name=user.get_fullname()
-			)).insert(ignore_permissions=True)
+			member = frappe.get_doc(
+				dict(
+					doctype="Member",
+					email_id=frappe.session.user,
+					membership_type=self.membership_type,
+					member_name=user.get_fullname(),
+				)
+			).insert(ignore_permissions=True)
 			member_name = member.name
 
 		if self.get("__islocal"):
@@ -49,9 +51,13 @@ class Membership(Document):
 		last_membership = erpnext.get_last_membership(self.member)
 
 		# if person applied for offline membership
-		if last_membership and last_membership.name != self.name and not frappe.session.user == "Administrator":
+		if (
+			last_membership
+			and last_membership.name != self.name
+			and not frappe.session.user == "Administrator"
+		):
 			# if last membership does not expire in 30 days, then do not allow to renew
-			if getdate(add_days(last_membership.to_date, -30)) > getdate(nowdate()) :
+			if getdate(add_days(last_membership.to_date, -30)) > getdate(nowdate()):
 				frappe.throw(_("You can only renew if your membership expires within 30 days"))
 
 			self.from_date = add_days(last_membership.to_date, 1)
@@ -72,13 +78,16 @@ class Membership(Document):
 		self.db_set("paid", 1)
 		settings = frappe.get_doc("Non Profit Settings")
 		if settings.allow_invoicing and settings.automate_membership_invoicing:
-			self.generate_invoice(with_payment_entry=settings.automate_membership_payment_entries, save=True)
-
+			self.generate_invoice(
+				with_payment_entry=settings.automate_membership_payment_entries, save=True
+			)
 
 	@frappe.whitelist()
 	def generate_invoice(self, save=True, with_payment_entry=False):
 		if not (self.paid or self.currency or self.amount):
-			frappe.throw(_("The payment for this membership is not paid. To generate invoice fill the payment details"))
+			frappe.throw(
+				_("The payment for this membership is not paid. To generate invoice fill the payment details")
+			)
 
 		if self.invoice:
 			frappe.throw(_("An invoice is already linked to this document"))
@@ -110,21 +119,30 @@ class Membership(Document):
 			frappe.throw(_("You need to set <b>Debit Account</b> in {0}").format(settings_link))
 
 		if not settings.company:
-			frappe.throw(_("You need to set <b>Default Company</b> for invoicing in {0}").format(settings_link))
+			frappe.throw(
+				_("You need to set <b>Default Company</b> for invoicing in {0}").format(settings_link)
+			)
 
 		if not plan.linked_item:
-			frappe.throw(_("Please set a Linked Item for the Membership Type {0}").format(
-				get_link_to_form("Membership Type", self.membership_type)))
+			frappe.throw(
+				_("Please set a Linked Item for the Membership Type {0}").format(
+					get_link_to_form("Membership Type", self.membership_type)
+				)
+			)
 
 	def make_payment_entry(self, settings, invoice):
 		if not settings.membership_payment_account:
-			frappe.throw(_("You need to set <b>Payment Account</b> for Membership in {0}").format(
-				get_link_to_form("Non Profit Settings", "Non Profit Settings")))
+			frappe.throw(
+				_("You need to set <b>Payment Account</b> for Membership in {0}").format(
+					get_link_to_form("Non Profit Settings", "Non Profit Settings")
+				)
+			)
 
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+
 		frappe.flags.ignore_account_permission = True
 		pe = get_payment_entry(dt="Sales Invoice", dn=invoice.name, bank_amount=invoice.grand_total)
-		frappe.flags.ignore_account_permission=False
+		frappe.flags.ignore_account_permission = False
 		pe.paid_to = settings.membership_payment_account
 		pe.reference_no = self.name
 		pe.reference_date = getdate()
@@ -136,22 +154,33 @@ class Membership(Document):
 	def send_acknowlement(self):
 		settings = frappe.get_doc("Non Profit Settings")
 		if not settings.send_email:
-			frappe.throw(_("You need to enable <b>Send Acknowledge Email</b> in {0}").format(
-				get_link_to_form("Non Profit Settings", "Non Profit Settings")))
+			frappe.throw(
+				_("You need to enable <b>Send Acknowledge Email</b> in {0}").format(
+					get_link_to_form("Non Profit Settings", "Non Profit Settings")
+				)
+			)
 
 		member = frappe.get_doc("Member", self.member)
 		if not member.email_id:
-			frappe.throw(_("Email address of member {0} is missing").format(frappe.utils.get_link_to_form("Member", self.member)))
+			frappe.throw(
+				_("Email address of member {0} is missing").format(
+					frappe.utils.get_link_to_form("Member", self.member)
+				)
+			)
 
 		plan = frappe.get_doc("Membership Type", self.membership_type)
 		email = member.email_id
-		attachments = [frappe.attach_print("Membership", self.name, print_format=settings.membership_print_format)]
+		attachments = [
+			frappe.attach_print("Membership", self.name, print_format=settings.membership_print_format)
+		]
 
 		if self.invoice and settings.send_invoice:
-			attachments.append(frappe.attach_print("Sales Invoice", self.invoice, print_format=settings.inv_print_format))
+			attachments.append(
+				frappe.attach_print("Sales Invoice", self.invoice, print_format=settings.inv_print_format)
+			)
 
 		email_template = frappe.get_doc("Email Template", settings.email_template)
-		context = { "doc": self, "member": member}
+		context = {"doc": self, "member": member}
 
 		email_args = {
 			"recipients": [email],
@@ -159,7 +188,7 @@ class Membership(Document):
 			"subject": frappe.render_template(email_template.get("subject"), context),
 			"attachments": attachments,
 			"reference_doctype": self.doctype,
-			"reference_name": self.name
+			"reference_name": self.name,
 		}
 
 		if not frappe.flags.in_test:
@@ -173,21 +202,17 @@ class Membership(Document):
 
 
 def make_invoice(membership, member, plan, settings):
-	invoice = frappe.get_doc({
-		"doctype": "Sales Invoice",
-		"customer": member.customer,
-		"debit_to": settings.membership_debit_account,
-		"currency": membership.currency,
-		"company": settings.company,
-		"is_pos": 0,
-		"items": [
-			{
-				"item_code": plan.linked_item,
-				"rate": membership.amount,
-				"qty": 1
-			}
-		]
-	})
+	invoice = frappe.get_doc(
+		{
+			"doctype": "Sales Invoice",
+			"customer": member.customer,
+			"debit_to": settings.membership_debit_account,
+			"currency": membership.currency,
+			"company": settings.company,
+			"is_pos": 0,
+			"items": [{"item_code": plan.linked_item, "rate": membership.amount, "qty": 1}],
+		}
+	)
 	invoice.set_missing_values()
 	invoice.insert()
 	invoice.submit()
@@ -241,11 +266,15 @@ def trigger_razorpay_subscription(*args, **kwargs):
 
 		member = get_member_based_on_subscription(subscription.id, payment.email)
 		if not member:
-			member = create_member(frappe._dict({
-				"fullname": payment.email,
-				"email": payment.email,
-				"plan_id": get_plan_from_razorpay_id(subscription.plan_id)
-			}))
+			member = create_member(
+				frappe._dict(
+					{
+						"fullname": payment.email,
+						"email": payment.email,
+						"plan_id": get_plan_from_razorpay_id(subscription.plan_id),
+					}
+				)
+			)
 
 			member.subscription_id = subscription.id
 			member.customer_id = payment.customer_id
@@ -256,18 +285,20 @@ def trigger_razorpay_subscription(*args, **kwargs):
 		company = get_company_for_memberships()
 		# Update Membership
 		membership = frappe.new_doc("Membership")
-		membership.update({
-			"company": company,
-			"member": member.name,
-			"membership_status": "Current",
-			"membership_type": member.membership_type,
-			"currency": "INR",
-			"paid": 1,
-			"payment_id": payment.id,
-			"from_date": datetime.fromtimestamp(subscription.current_start),
-			"to_date": datetime.fromtimestamp(subscription.current_end),
-			"amount": payment.amount / 100 # Convert to rupees from paise
-		})
+		membership.update(
+			{
+				"company": company,
+				"member": member.name,
+				"membership_status": "Current",
+				"membership_type": member.membership_type,
+				"currency": "INR",
+				"paid": 1,
+				"payment_id": payment.id,
+				"from_date": datetime.fromtimestamp(subscription.current_start),
+				"to_date": datetime.fromtimestamp(subscription.current_end),
+				"amount": payment.amount / 100,  # Convert to rupees from paise
+			}
+		)
 		membership.flags.ignore_mandatory = True
 		membership.insert()
 
@@ -281,7 +312,9 @@ def trigger_razorpay_subscription(*args, **kwargs):
 		settings = frappe.get_doc("Non Profit Settings")
 		if settings.allow_invoicing and settings.automate_membership_invoicing:
 			membership.reload()
-			membership.generate_invoice(with_payment_entry=settings.automate_membership_payment_entries, save=True)
+			membership.generate_invoice(
+				with_payment_entry=settings.automate_membership_payment_entries, save=True
+			)
 
 	except Exception as e:
 		message = "{0}\n\n{1}\n\n{2}: {3}".format(e, frappe.get_traceback(), _("Payment ID"), payment.id)
@@ -328,7 +361,9 @@ def update_halted_razorpay_subscription(*args, **kwargs):
 
 	except Exception as e:
 		message = "{0}\n\n{1}".format(e, frappe.get_traceback())
-		log = frappe.log_error(message, _("Error updating halted status for member {0}").format(member.name))
+		log = frappe.log_error(
+			message, _("Error updating halted status for member {0}").format(member.name)
+		)
 		notify_failure(log)
 		return {"status": "Failed", "reason": e}
 
@@ -354,6 +389,7 @@ def get_company_for_memberships():
 	company = frappe.db.get_single_value("Non Profit Settings", "company")
 	if not company:
 		from erpnext.healthcare.setup import get_company
+
 		company = get_company()
 	return company
 
@@ -365,15 +401,11 @@ def get_additional_notes(member, subscription):
 
 			# extract member name from notes
 			if "name" in k.lower():
-				member.update({
-					"member_name": subscription.notes.get(k)
-				})
+				member.update({"member_name": subscription.notes.get(k)})
 
 			# extract pan number from notes
 			if "pan" in k.lower():
-				member.update({
-					"pan_number": subscription.notes.get(k)
-				})
+				member.update({"pan_number": subscription.notes.get(k)})
 
 		member.add_comment("Comment", notes)
 
@@ -391,15 +423,21 @@ def notify_failure(log):
 			Please check the following error log linked below
 			Error Log: {0}
 			Regards, Administrator
-		""".format(get_link_to_form("Error Log", log.name))
+		""".format(
+			get_link_to_form("Error Log", log.name)
+		)
 
-		sendmail_to_system_managers("[Important] [ERPNext] Razorpay membership webhook failed , please check.", content)
+		sendmail_to_system_managers(
+			"[Important] [ERPNext] Razorpay membership webhook failed , please check.", content
+		)
 	except Exception:
 		pass
 
 
 def get_plan_from_razorpay_id(plan_id):
-	plan = frappe.get_all("Membership Type", filters={"razorpay_plan_id": plan_id}, order_by="creation desc")
+	plan = frappe.get_all(
+		"Membership Type", filters={"razorpay_plan_id": plan_id}, order_by="creation desc"
+	)
 
 	try:
 		return plan[0]["name"]
@@ -408,9 +446,12 @@ def get_plan_from_razorpay_id(plan_id):
 
 
 def set_expired_status():
-	frappe.db.sql("""
+	frappe.db.sql(
+		"""
 		UPDATE
 			`tabMembership` SET `membership_status` = 'Expired'
 		WHERE
 			`membership_status` not in ('Cancelled') AND `to_date` < %s
-		""", (nowdate()))
+		""",
+		(nowdate()),
+	)

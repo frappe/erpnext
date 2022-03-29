@@ -28,24 +28,20 @@ class TestPOSClosingEntry(unittest.TestCase):
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
 		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
-		pos_inv1.append('payments', {
-			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 3500
-		})
+		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
 		pos_inv1.submit()
 
 		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
-		pos_inv2.append('payments', {
-			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 3200
-		})
+		pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3200})
 		pos_inv2.submit()
 
 		pcv_doc = make_closing_entry_from_opening(opening_entry)
 		payment = pcv_doc.payment_reconciliation[0]
 
-		self.assertEqual(payment.mode_of_payment, 'Cash')
+		self.assertEqual(payment.mode_of_payment, "Cash")
 
 		for d in pcv_doc.payment_reconciliation:
-			if d.mode_of_payment == 'Cash':
+			if d.mode_of_payment == "Cash":
 				d.closing_amount = 6700
 
 		pcv_doc.submit()
@@ -58,24 +54,20 @@ class TestPOSClosingEntry(unittest.TestCase):
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
 		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
-		pos_inv1.append('payments', {
-			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 3500
-		})
+		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
 		pos_inv1.submit()
 
 		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
-		pos_inv2.append('payments', {
-			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 3200
-		})
+		pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3200})
 		pos_inv2.submit()
 
 		pcv_doc = make_closing_entry_from_opening(opening_entry)
 		payment = pcv_doc.payment_reconciliation[0]
 
-		self.assertEqual(payment.mode_of_payment, 'Cash')
+		self.assertEqual(payment.mode_of_payment, "Cash")
 
 		for d in pcv_doc.payment_reconciliation:
-			if d.mode_of_payment == 'Cash':
+			if d.mode_of_payment == "Cash":
 				d.closing_amount = 6700
 
 		pcv_doc.submit()
@@ -91,22 +83,19 @@ class TestPOSClosingEntry(unittest.TestCase):
 		si_doc.load_from_db()
 		pos_inv1.load_from_db()
 		self.assertEqual(si_doc.docstatus, 2)
-		self.assertEqual(pos_inv1.status, 'Paid')
+		self.assertEqual(pos_inv1.status, "Paid")
 
 
 def init_user_and_profile(**args):
-	user = 'test@example.com'
-	test_user = frappe.get_doc('User', user)
+	user = "test@example.com"
+	test_user = frappe.get_doc("User", user)
 
 	roles = ("Accounts Manager", "Accounts User", "Sales Manager")
 	test_user.add_roles(*roles)
 	frappe.set_user(user)
 
 	pos_profile = make_pos_profile(**args)
-	pos_profile.append('applicable_for_users', {
-		'default': 1,
-		'user': user
-	})
+	pos_profile.append("applicable_for_users", {"default": 1, "user": user})
 
 	pos_profile.save()
 

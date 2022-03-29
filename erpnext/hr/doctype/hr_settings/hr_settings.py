@@ -10,6 +10,7 @@ from frappe.utils import format_date
 # Wether to proceed with frequency change
 PROCEED_WITH_FREQUENCY_CHANGE = False
 
+
 class HRSettings(Document):
 	def validate(self):
 		self.set_naming_series()
@@ -22,21 +23,24 @@ class HRSettings(Document):
 
 	def set_naming_series(self):
 		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
-		set_by_naming_series("Employee", "employee_number",
-			self.get("emp_created_by")=="Naming Series", hide_name_field=True)
+
+		set_by_naming_series(
+			"Employee",
+			"employee_number",
+			self.get("emp_created_by") == "Naming Series",
+			hide_name_field=True,
+		)
 
 	def validate_frequency_change(self):
 		weekly_job, monthly_job = None, None
 
 		try:
 			weekly_job = frappe.get_doc(
-				'Scheduled Job Type',
-				'employee_reminders.send_reminders_in_advance_weekly'
+				"Scheduled Job Type", "employee_reminders.send_reminders_in_advance_weekly"
 			)
 
 			monthly_job = frappe.get_doc(
-				'Scheduled Job Type',
-				'employee_reminders.send_reminders_in_advance_monthly'
+				"Scheduled Job Type", "employee_reminders.send_reminders_in_advance_monthly"
 			)
 		except frappe.DoesNotExistError:
 			return
@@ -62,17 +66,20 @@ class HRSettings(Document):
 		from_date = frappe.bold(format_date(from_date))
 		to_date = frappe.bold(format_date(to_date))
 		frappe.msgprint(
-			msg=frappe._('Employees will miss holiday reminders from {} until {}. <br> Do you want to proceed with this change?').format(from_date, to_date),
-			title='Confirm change in Frequency',
+			msg=frappe._(
+				"Employees will miss holiday reminders from {} until {}. <br> Do you want to proceed with this change?"
+			).format(from_date, to_date),
+			title="Confirm change in Frequency",
 			primary_action={
-				'label': frappe._('Yes, Proceed'),
-				'client_action': 'erpnext.proceed_save_with_reminders_frequency_change'
+				"label": frappe._("Yes, Proceed"),
+				"client_action": "erpnext.proceed_save_with_reminders_frequency_change",
 			},
-			raise_exception=frappe.ValidationError
+			raise_exception=frappe.ValidationError,
 		)
+
 
 @frappe.whitelist()
 def set_proceed_with_frequency_change():
-	'''Enables proceed with frequency change'''
+	"""Enables proceed with frequency change"""
 	global PROCEED_WITH_FREQUENCY_CHANGE
 	PROCEED_WITH_FREQUENCY_CHANGE = True

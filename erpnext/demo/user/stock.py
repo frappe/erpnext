@@ -16,7 +16,7 @@ from erpnext.stock.stock_ledger import NegativeStockError
 
 
 def work():
-	frappe.set_user(frappe.db.get_global('demo_manufacturing_user'))
+	frappe.set_user(frappe.db.get_global("demo_manufacturing_user"))
 
 	make_purchase_receipt()
 	make_delivery_note()
@@ -25,15 +25,19 @@ def work():
 	make_sales_return_records()
 	make_purchase_return_records()
 
+
 def make_purchase_receipt():
 	if random.random() < 0.6:
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+
 		report = "Purchase Order Items To Be Received"
-		po_list =list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:random.randint(1, 10)]
+		po_list = list(set([r[0] for r in query_report.run(report)["result"] if r[0] != "Total"]))[
+			: random.randint(1, 10)
+		]
 		for po in po_list:
 			pr = frappe.get_doc(make_purchase_receipt(po))
 
-			if pr.is_subcontracted=="Yes":
+			if pr.is_subcontracted == "Yes":
 				pr.supplier_warehouse = "Supplier - WPL"
 
 			pr.posting_date = frappe.flags.current_date
@@ -41,9 +45,10 @@ def make_purchase_receipt():
 			try:
 				pr.submit()
 			except NegativeStockError:
-				print('Negative stock for {0}'.format(po))
+				print("Negative stock for {0}".format(po))
 				pass
 			frappe.db.commit()
+
 
 def make_delivery_note():
 	# make purchase requests
@@ -51,15 +56,18 @@ def make_delivery_note():
 	# make delivery notes (if possible)
 	if random.random() < 0.6:
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+
 		report = "Ordered Items To Be Delivered"
-		for so in list(set([r[0] for r in query_report.run(report)["result"]
-			if r[0]!="Total"]))[:random.randint(1, 3)]:
+		for so in list(set([r[0] for r in query_report.run(report)["result"] if r[0] != "Total"]))[
+			: random.randint(1, 3)
+		]:
 			dn = frappe.get_doc(make_delivery_note(so))
 			dn.posting_date = frappe.flags.current_date
 			for d in dn.get("items"):
 				if not d.expense_account:
-					d.expense_account = ("Cost of Goods Sold - {0}".format(
-						frappe.get_cached_value('Company',  dn.company,  'abbr')))
+					d.expense_account = "Cost of Goods Sold - {0}".format(
+						frappe.get_cached_value("Company", dn.company, "abbr")
+					)
 
 			try:
 				dn.insert()
@@ -67,6 +75,7 @@ def make_delivery_note():
 				frappe.db.commit()
 			except (NegativeStockError, SerialNoRequiredError, SerialNoQtyError, UnableToSelectBatchError):
 				frappe.db.rollback()
+
 
 def make_stock_reconciliation():
 	# random set some items as damaged
@@ -93,6 +102,7 @@ def make_stock_reconciliation():
 			except EmptyStockReconciliationItemsError:
 				frappe.db.rollback()
 
+
 def submit_draft_stock_entries():
 	from erpnext.stock.doctype.stock_entry.stock_entry import (
 		DuplicateEntryForWorkOrderError,
@@ -102,20 +112,25 @@ def submit_draft_stock_entries():
 
 	# try posting older drafts (if exists)
 	frappe.db.commit()
-	for st in frappe.db.get_values("Stock Entry", {"docstatus":0}, "name"):
+	for st in frappe.db.get_values("Stock Entry", {"docstatus": 0}, "name"):
 		try:
 			ste = frappe.get_doc("Stock Entry", st[0])
 			ste.posting_date = frappe.flags.current_date
 			ste.save()
 			ste.submit()
 			frappe.db.commit()
-		except (NegativeStockError, IncorrectValuationRateError, DuplicateEntryForWorkOrderError,
-			OperationsNotCompleteError):
+		except (
+			NegativeStockError,
+			IncorrectValuationRateError,
+			DuplicateEntryForWorkOrderError,
+			OperationsNotCompleteError,
+		):
 			frappe.db.rollback()
+
 
 def make_sales_return_records():
 	if random.random() < 0.1:
-		for data in frappe.get_all('Delivery Note', fields=["name"], filters={"docstatus": 1}):
+		for data in frappe.get_all("Delivery Note", fields=["name"], filters={"docstatus": 1}):
 			if random.random() < 0.1:
 				try:
 					dn = make_sales_return(data.name)
@@ -125,9 +140,10 @@ def make_sales_return_records():
 				except Exception:
 					frappe.db.rollback()
 
+
 def make_purchase_return_records():
 	if random.random() < 0.1:
-		for data in frappe.get_all('Purchase Receipt', fields=["name"], filters={"docstatus": 1}):
+		for data in frappe.get_all("Purchase Receipt", fields=["name"], filters={"docstatus": 1}):
 			if random.random() < 0.1:
 				try:
 					pr = make_purchase_return(data.name)
