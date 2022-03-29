@@ -285,7 +285,7 @@ Asset scrapped via Journal Entry {0},Actif mis au rebut via Écriture de Journal
 "Asset {0} cannot be scrapped, as it is already {1}","L'actif {0} ne peut pas être mis au rebut, car il est déjà {1}",
 Asset {0} does not belong to company {1},L'actif {0} ne fait pas partie à la société {1},
 Asset {0} must be submitted,L'actif {0} doit être soumis,
-Assets,Actifs,
+Assets,Actifs - Immo.,
 Assign,Assigner,
 Assign Salary Structure,Affecter la structure salariale,
 Assign To,Attribuer À,
@@ -9838,7 +9838,7 @@ Enable European Access,Activer l&#39;accès européen,
 Creating Purchase Order ...,Création d&#39;une commande d&#39;achat ...,
 "Select a Supplier from the Default Suppliers of the items below. On selection, a Purchase Order will be made against items belonging to the selected Supplier only.","Sélectionnez un fournisseur parmi les fournisseurs par défaut des articles ci-dessous. Lors de la sélection, un bon de commande sera effectué contre des articles appartenant uniquement au fournisseur sélectionné.",
 Row #{}: You must select {} serial numbers for item {}.,Ligne n ° {}: vous devez sélectionner {} numéros de série pour l&#39;article {}.,
-Update Rate as per Last Purchase,Mettre a jour avec les dernier prix d'achat
+Update Rate as per Last Purchase,Mettre à jour avec les derniers prix d'achats
 Company Shipping Address,Adresse d&#39;expédition
 Shipping Address Details,Détail d&#39;adresse d&#39;expédition
 Company Billing Address,Adresse de la société de facturation
