@@ -10,8 +10,9 @@ from erpnext.selling.doctype.customer.customer import get_credit_limit, get_cust
 
 
 def execute(filters=None):
-	if not filters: filters = {}
-	#Check if customer id is according to naming series or customer name
+	if not filters:
+		filters = {}
+	# Check if customer id is according to naming series or customer name
 	customer_naming_type = frappe.db.get_value("Selling Settings", None, "cust_master_name")
 	columns = get_columns(customer_naming_type)
 
@@ -22,8 +23,9 @@ def execute(filters=None):
 	for d in customer_list:
 		row = []
 
-		outstanding_amt = get_customer_outstanding(d.name, filters.get("company"),
-			ignore_outstanding_sales_order=d.bypass_credit_limit_check)
+		outstanding_amt = get_customer_outstanding(
+			d.name, filters.get("company"), ignore_outstanding_sales_order=d.bypass_credit_limit_check
+		)
 
 		credit_limit = get_credit_limit(d.name, filters.get("company"))
 
@@ -31,21 +33,31 @@ def execute(filters=None):
 
 		if customer_naming_type == "Naming Series":
 			row = [
-				d.name, d.customer_name, credit_limit,
-				outstanding_amt, bal, d.bypass_credit_limit_check,
-				d.is_frozen, d.disabled
+				d.name,
+				d.customer_name,
+				credit_limit,
+				outstanding_amt,
+				bal,
+				d.bypass_credit_limit_check,
+				d.is_frozen,
+				d.disabled,
 			]
 		else:
 			row = [
-				d.name, credit_limit, outstanding_amt, bal,
-				d.bypass_credit_limit_check, d.is_frozen,
-				d.disabled
+				d.name,
+				credit_limit,
+				outstanding_amt,
+				bal,
+				d.bypass_credit_limit_check,
+				d.is_frozen,
+				d.disabled,
 			]
 
 		if credit_limit:
 			data.append(row)
 
 	return columns, data
+
 
 def get_columns(customer_naming_type):
 	columns = [
@@ -62,6 +74,7 @@ def get_columns(customer_naming_type):
 		columns.insert(1, _("Customer Name") + ":Data:120")
 
 	return columns
+
 
 def get_details(filters):
 

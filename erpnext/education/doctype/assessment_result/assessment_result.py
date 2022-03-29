@@ -33,12 +33,23 @@ class AssessmentResult(Document):
 	def validate_grade(self):
 		self.total_score = 0.0
 		for d in self.details:
-			d.grade = get_grade(self.grading_scale, (flt(d.score)/d.maximum_score)*100)
+			d.grade = get_grade(self.grading_scale, (flt(d.score) / d.maximum_score) * 100)
 			self.total_score += d.score
-		self.grade = get_grade(self.grading_scale, (self.total_score/self.maximum_score)*100)
+		self.grade = get_grade(self.grading_scale, (self.total_score / self.maximum_score) * 100)
 
 	def validate_duplicate(self):
-		assessment_result = frappe.get_list("Assessment Result", filters={"name": ("not in", [self.name]),
-			"student":self.student, "assessment_plan":self.assessment_plan, "docstatus":("!=", 2)})
+		assessment_result = frappe.get_list(
+			"Assessment Result",
+			filters={
+				"name": ("not in", [self.name]),
+				"student": self.student,
+				"assessment_plan": self.assessment_plan,
+				"docstatus": ("!=", 2),
+			},
+		)
 		if assessment_result:
-			frappe.throw(_("Assessment Result record {0} already exists.").format(getlink("Assessment Result",assessment_result[0].name)))
+			frappe.throw(
+				_("Assessment Result record {0} already exists.").format(
+					getlink("Assessment Result", assessment_result[0].name)
+				)
+			)
