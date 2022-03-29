@@ -39,6 +39,7 @@ class PriceListGenerator(Document):
 	@frappe.whitelist()
 	def get_items_brand(self,filters=None):
 		doc=frappe.db.sql("""select b.name,bd.item_price,bd.selling_cost_center from `tabBrand` b join `tabItem Default` bd on b.name=bd.parent where bd.selling_cost_center='{0}'""".format(self.cost_center),as_dict=1)
+		print(doc)
 		for i in doc:
 			if i.selling_cost_center==self.cost_center:
 				lst=frappe.db.get_all("Item",filters=filters)

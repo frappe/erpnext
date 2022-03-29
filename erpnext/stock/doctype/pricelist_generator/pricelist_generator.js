@@ -13,6 +13,8 @@ frappe.ui.form.on('PriceList Generator', {
 		frm.call({
             method:"get_items_brand",
             doc:frm.doc,
+            freeze: true,
+			freeze_message: __("Fetching Items..."),
             args:{
                 filters:filters
             },
