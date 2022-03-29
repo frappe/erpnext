@@ -225,12 +225,16 @@ class StockEntry(StockController):
 	def set_transfer_qty(self):
 		for item in self.get("items"):
 			if not flt(item.qty):
-				frappe.throw(_("Row {0}: Qty is mandatory").format(item.idx))
+				frappe.throw(_("Row {0}: Qty is mandatory").format(item.idx), title=_("Zero quantity"))
 			if not flt(item.conversion_factor):
 				frappe.throw(_("Row {0}: UOM Conversion Factor is mandatory").format(item.idx))
 			item.transfer_qty = flt(
 				flt(item.qty) * flt(item.conversion_factor), self.precision("transfer_qty", item)
 			)
+			if not flt(item.transfer_qty):
+				frappe.throw(
+					_("Row {0}: Qty in Stock UOM can not be zero.").format(item.idx), title=_("Zero quantity")
+				)
 
 	def update_cost_in_project(self):
 		if self.work_order and not frappe.db.get_value(
