@@ -247,6 +247,7 @@ class BuyingController(StockController):
 						"posting_time": self.get('posting_time'),
 						"qty": -1 * flt(d.get('stock_qty')),
 						"serial_no": d.get('serial_no'),
+						"batch_no": d.get("batch_no"),
 						"company": self.company,
 						"voucher_type": self.doctype,
 						"voucher_no": self.name,
@@ -276,7 +277,8 @@ class BuyingController(StockController):
 						"posting_date": self.posting_date,
 						"posting_time": self.posting_time,
 						"qty": -1 * d.consumed_qty,
-						"serial_no": d.serial_no
+						"serial_no": d.serial_no,
+						"batch_no": d.batch_no,
 					})
 
 					if rate > 0:

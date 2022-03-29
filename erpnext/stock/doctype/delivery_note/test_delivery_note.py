@@ -6,6 +6,7 @@
 import json
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cstr, flt, nowdate, nowtime
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -35,10 +36,9 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
 from erpnext.stock.stock_ledger import get_previous_sle
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestDeliveryNote(ERPNextTestCase):
+class TestDeliveryNote(FrappeTestCase):
 	def test_over_billing_against_dn(self):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
@@ -821,6 +821,11 @@ class TestDeliveryNote(ERPNextTestCase):
 		compare_payment_schedules(self, so, si)
 
 		automatically_fetch_payment_terms(enable=0)
+
+	def test_standalone_serial_no_return(self):
+		dn = create_delivery_note(item_code="_Test Serialized Item With Series", is_return=True, qty=-1)
+		dn.reload()
+		self.assertTrue(dn.items[0].serial_no)
 
 def create_return_delivery_note(**args):
 	args = frappe._dict(args)

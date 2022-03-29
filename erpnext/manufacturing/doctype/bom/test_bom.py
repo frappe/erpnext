@@ -7,6 +7,7 @@ from functools import partial
 
 import frappe
 from frappe.test_runner import make_test_records
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cstr, flt
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
@@ -17,11 +18,10 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.tests.test_subcontracting import set_backflush_based_on
-from erpnext.tests.utils import ERPNextTestCase
 
 test_records = frappe.get_test_records('BOM')
 
-class TestBOM(ERPNextTestCase):
+class TestBOM(FrappeTestCase):
 	def setUp(self):
 		if not frappe.get_value('Item', '_Test Item'):
 			make_test_records('Item')
@@ -431,6 +431,69 @@ class TestBOM(ERPNextTestCase):
 		bom.save()
 		self.assertEqual(bom.transfer_material_against, "Work Order")
 		bom.delete()
+
+	def test_bom_name_length(self):
+		""" test >140 char names"""
+		bom_tree = {
+			"x" * 140 : {
+				" ".join(["abc"] * 35): {}
+			}
+		}
+		create_nested_bom(bom_tree, prefix="")
+
+	def test_version_index(self):
+
+		bom = frappe.new_doc("BOM")
+
+		version_index_test_cases = [
+			(1, []),
+			(1, ["BOM#XYZ"]),
+			(2, ["BOM/ITEM/001"]),
+			(2, ["BOM-ITEM-001"]),
+			(3, ["BOM-ITEM-001", "BOM-ITEM-002"]),
+			(4, ["BOM-ITEM-001", "BOM-ITEM-002", "BOM-ITEM-003"]),
+		]
+
+		for expected_index, existing_boms in version_index_test_cases:
+			with self.subTest():
+				self.assertEqual(expected_index, bom.get_next_version_index(existing_boms),
+						msg=f"Incorrect index for {existing_boms}")
+
+	def test_bom_versioning(self):
+		bom_tree = {
+			frappe.generate_hash(length=10) : {
+				frappe.generate_hash(length=10): {}
+			}
+		}
+		bom = create_nested_bom(bom_tree, prefix="")
+		self.assertEqual(int(bom.name.split("-")[-1]), 1)
+		original_bom_name = bom.name
+
+		bom.cancel()
+		bom.reload()
+		self.assertEqual(bom.name, original_bom_name)
+
+		# create a new amendment
+		amendment = frappe.copy_doc(bom)
+		amendment.docstatus = 0
+		amendment.amended_from = bom.name
+
+		amendment.save()
+		amendment.submit()
+		amendment.reload()
+
+		self.assertNotEqual(amendment.name, bom.name)
+		# `origname-001-1` version
+		self.assertEqual(int(amendment.name.split("-")[-1]), 1)
+		self.assertEqual(int(amendment.name.split("-")[-2]), 1)
+
+		# create a new version
+		version = frappe.copy_doc(amendment)
+		version.docstatus = 0
+		version.amended_from = None
+		version.save()
+		self.assertNotEqual(amendment.name, version.name)
+		self.assertEqual(int(version.name.split("-")[-1]), 2)
 
 
 def get_default_bom(item_code="_Test FG Item 2"):

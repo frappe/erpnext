@@ -18,7 +18,6 @@ def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
 	if not filters: filters = {}
 
-	from_date = filters.get('from_date')
 	to_date = filters.get('to_date')
 
 	if filters.get("company"):
