@@ -8,6 +8,7 @@ frappe.ui.form.on('PriceList Generator', {
                 [filter[1]]: [filter[2], filter[3]]
             });
         }, {});
+        frm.clear_table("price_details")
 		frm.call({
             method:"get_items_brand",
             doc:frm.doc,
