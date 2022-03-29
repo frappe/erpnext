@@ -372,7 +372,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 		pr = make_purchase_receipt(
 			item_code="_Test FG Item", qty=10,
-			rate=500, is_subcontracted="Yes"
+			rate=500, is_subcontracted=1
 		)
 		self.assertEqual(len(pr.get("supplied_items")), 2)
 
@@ -405,7 +405,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr = make_purchase_receipt(
 			item_code="_Test FG Item",
 			qty=10, rate=0,
-			is_subcontracted="Yes",
+			is_subcontracted=1,
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
 			supplier_warehouse="Work In Progress - TCP1"
@@ -441,7 +441,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		make_subcontracted_item(item_code=item_code)
 
 		po = create_purchase_order(item_code=item_code, qty=1, include_exploded_items=0,
-			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
+			is_subcontracted=1, supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		# stock raw materials in a warehouse before transfer
 		make_stock_entry(
@@ -1206,7 +1206,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		order_qty = 500
 		po = create_purchase_order(item_code=item_code, qty=order_qty,
-			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
+			is_subcontracted=1, supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		ste1=make_stock_entry(target="_Test Warehouse - _TC",
 			item_code = "Sub Contracted Raw Material 3", qty=300, basic_rate=100)
@@ -1525,7 +1525,7 @@ def make_purchase_receipt(**args):
 		pr.set_posting_time = 1
 	pr.company = args.company or "_Test Company"
 	pr.supplier = args.supplier or "_Test Supplier"
-	pr.is_subcontracted = args.is_subcontracted or "No"
+	pr.is_subcontracted = args.is_subcontracted or 0
 	pr.supplier_warehouse = args.supplier_warehouse or "_Test Warehouse 1 - _TC"
 	pr.currency = args.currency or "INR"
 	pr.is_return = args.is_return

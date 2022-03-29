@@ -730,7 +730,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			qty=100, basic_rate=100)
 
 		pi = make_purchase_invoice(item_code="_Test FG Item", qty=10, rate=500,
-			update_stock=1, is_subcontracted="Yes")
+			update_stock=1, is_subcontracted=1)
 
 		self.assertEqual(len(pi.get("supplied_items")), 2)
 
@@ -1334,7 +1334,7 @@ def make_purchase_invoice(**args):
 	pi.conversion_rate = args.conversion_rate or 1
 	pi.is_return = args.is_return
 	pi.return_against = args.return_against
-	pi.is_subcontracted = args.is_subcontracted or "No"
+	pi.is_subcontracted = args.is_subcontracted or 0
 	pi.supplier_warehouse = args.supplier_warehouse or "_Test Warehouse 1 - _TC"
 	pi.cost_center = args.parent_cost_center
 
@@ -1393,7 +1393,7 @@ def make_purchase_invoice_against_cost_center(**args):
 	pi.is_return = args.is_return
 	pi.is_return = args.is_return
 	pi.credit_to = args.return_against or "Creditors - _TC"
-	pi.is_subcontracted = args.is_subcontracted or "No"
+	pi.is_subcontracted = args.is_subcontracted or 0
 	if args.supplier_warehouse:
 		pi.supplier_warehouse = "_Test Warehouse 1 - _TC"
 

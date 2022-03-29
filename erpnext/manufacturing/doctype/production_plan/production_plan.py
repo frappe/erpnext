@@ -454,7 +454,7 @@ class ProductionPlan(Document):
 			po = frappe.new_doc('Purchase Order')
 			po.supplier = supplier
 			po.schedule_date = getdate(po_list[0].schedule_date) if po_list[0].schedule_date else nowdate()
-			po.is_subcontracted = 'Yes'
+			po.is_subcontracted = 1
 			for row in po_list:
 				po_data = {
 					'item_code': row.production_item,

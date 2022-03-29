@@ -46,7 +46,7 @@ class TestSubcontracting(unittest.TestCase):
 		]
 
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+		po = create_purchase_order(rm_items = items, is_subcontracted=1,
 			supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		for d in rm_items:
@@ -90,7 +90,7 @@ class TestSubcontracting(unittest.TestCase):
 		]
 
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+		po = create_purchase_order(rm_items = items, is_subcontracted=1,
 			supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		for d in rm_items:
@@ -138,7 +138,7 @@ class TestSubcontracting(unittest.TestCase):
 		]
 
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+		po = create_purchase_order(rm_items = items, is_subcontracted=1,
 			supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		for d in rm_items:
@@ -191,7 +191,7 @@ class TestSubcontracting(unittest.TestCase):
 		rm_items = [{'item_code': 'Subcontracted SRM Item 2', 'qty': 6, 'main_item_code': 'Subcontracted Item SA2'}]
 
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+		po = create_purchase_order(rm_items = items, is_subcontracted=1,
 			supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		for d in rm_items:
@@ -245,7 +245,7 @@ class TestSubcontracting(unittest.TestCase):
 		]
 
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+		po = create_purchase_order(rm_items = items, is_subcontracted=1,
 			supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		for d in rm_items:
@@ -304,7 +304,7 @@ class TestSubcontracting(unittest.TestCase):
 		]
 
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+		po = create_purchase_order(rm_items = items, is_subcontracted=1,
 			supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		for d in rm_items:
@@ -357,7 +357,7 @@ class TestSubcontracting(unittest.TestCase):
 		rm_items = [{'item_code': 'Subcontracted SRM Item 2', 'qty': 5}]
 
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+		po = create_purchase_order(rm_items = items, is_subcontracted=1,
 			supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		for d in rm_items:
@@ -417,7 +417,7 @@ class TestSubcontracting(unittest.TestCase):
 		rm_items = [{'item_code': 'Subcontracted SRM Item 2', 'qty': 10}]
 
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+		po = create_purchase_order(rm_items = items, is_subcontracted=1,
 			supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		for d in rm_items:
@@ -449,7 +449,7 @@ class TestSubcontracting(unittest.TestCase):
 		rm_items = [{'item_code': 'Subcontracted SRM Item 3', 'qty': 5}]
 
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+		po = create_purchase_order(rm_items = items, is_subcontracted=1,
 			supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		for d in rm_items:
@@ -520,7 +520,7 @@ class TestSubcontracting(unittest.TestCase):
 		]
 
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+		po = create_purchase_order(rm_items = items, is_subcontracted=1,
 			supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		for d in rm_items:
@@ -579,7 +579,7 @@ class TestSubcontracting(unittest.TestCase):
 		rm_items = [{'item_code': 'Subcontracted SRM Item 2', 'qty': 5}]
 
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+		po = create_purchase_order(rm_items = items, is_subcontracted=1,
 			supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		for d in rm_items:
@@ -644,7 +644,7 @@ class TestSubcontracting(unittest.TestCase):
 		rm_items = [{'item_code': 'Subcontracted SRM Item 3', 'qty': 5}]
 
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+		po = create_purchase_order(rm_items = items, is_subcontracted=1,
 			supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		for d in rm_items:
@@ -717,7 +717,7 @@ class TestSubcontracting(unittest.TestCase):
 		]
 
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		po = create_purchase_order(rm_items = items, is_subcontracted="Yes",
+		po = create_purchase_order(rm_items = items, is_subcontracted=1,
 			supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		for d in rm_items:

@@ -440,7 +440,7 @@
             "print_hide": 1
         },
         {
-            "depends_on": "eval:doc.is_subcontracted==\"Yes\"",
+            "depends_on": "eval:doc.is_subcontracted",
             "fieldname": "sec_warehouse",
             "fieldtype": "Section Break",
             "label": "Subcontracting"
@@ -458,12 +458,11 @@
             "fieldtype": "Column Break"
         },
         {
-            "default": "No",
+            "default": 0,
             "fieldname": "is_subcontracted",
-            "fieldtype": "Select",
+            "fieldtype": "Check",
             "in_standard_filter": 1,
             "label": "Is Subcontracting Order",
-            "options": "No\nYes",
             "print_hide": 1
         },
         {

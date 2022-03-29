@@ -34,7 +34,7 @@ class SubcontractingController(BuyingController):
 				msg = f"Please submit Purchase Order {po.name} before proceeding."
 				frappe.throw(_(msg))
 
-			if po.is_subcontracted != "Yes":
+			if not po.is_subcontracted:
 				frappe.throw(_("Please select a valid Purchase Order that is configured for Subcontracting."))
 		else:
 			self.service_items = None
@@ -355,7 +355,7 @@ class SubcontractingController(BuyingController):
 
 	def set_consumed_qty_in_sco(self):
 		# Update consumed qty back in the subcontracting order
-		if self.is_subcontracted != 'Yes':
+		if not self.is_subcontracted:
 			return
 
 		self.get_subcontracting_orders()

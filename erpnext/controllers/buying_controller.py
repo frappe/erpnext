@@ -146,7 +146,7 @@ class BuyingController(StockController):
 			if item.get('from_warehouse') and (item.get('from_warehouse') == item.get('warehouse')):
 				frappe.throw(_("Row #{0}: Accepted Warehouse and Supplier Warehouse cannot be same").format(item.idx))
 
-			if item.get('from_warehouse') and self.get('is_subcontracted') == 'Yes':
+			if item.get('from_warehouse') and self.get('is_subcontracted'):
 				frappe.throw(_("Row #{0}: Cannot select Supplier Warehouse while suppling raw materials to subcontractor").format(item.idx))
 
 	def set_supplier_address(self):
@@ -290,7 +290,7 @@ class BuyingController(StockController):
 		return supplied_items_cost
 
 	def validate_for_subcontracting(self):
-		if self.is_subcontracted == "Yes":
+		if self.is_subcontracted:
 			if self.doctype in ["Purchase Receipt", "Purchase Invoice"] and not self.supplier_warehouse:
 				frappe.throw(_("Supplier Warehouse mandatory for sub-contracted {0}").format(self.doctype))
 

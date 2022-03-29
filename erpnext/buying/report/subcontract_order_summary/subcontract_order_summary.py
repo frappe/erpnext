@@ -34,7 +34,7 @@ def get_subcontracted_orders(report_filters):
 	return frappe.get_all('Purchase Order', fields = fields, filters=filters) or []
 
 def get_filters(report_filters):
-	filters = [['Purchase Order', 'docstatus', '=', 1], ['Purchase Order', 'is_subcontracted', '=', 'Yes'],
+	filters = [['Purchase Order', 'docstatus', '=', 1], ['Purchase Order', 'is_subcontracted', '=', 1],
 		['Purchase Order', 'transaction_date', 'between', (report_filters.from_date, report_filters.to_date)]]
 
 	for field in ['name', 'company']:

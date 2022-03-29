@@ -586,7 +586,7 @@ function set_schedule_date(frm) {
 frappe.provide("erpnext.buying");
 
 frappe.ui.form.on("Purchase Order", "is_subcontracted", function(frm) {
-	if (frm.doc.is_subcontracted === "Yes") {
+	if (frm.doc.is_subcontracted) {
 		erpnext.buying.get_default_bom(frm);
 	}
 });

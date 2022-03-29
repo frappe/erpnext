@@ -37,7 +37,7 @@ class TestItemAlternative(FrappeTestCase):
 
 		supplier_warehouse = "Test Supplier Warehouse - _TC"
 		po = create_purchase_order(item = "Test Finished Goods - A",
-			is_subcontracted='Yes', qty=5, rate=3000, supplier_warehouse=supplier_warehouse)
+			is_subcontracted=1, qty=5, rate=3000, supplier_warehouse=supplier_warehouse)
 
 		rm_item = [{"item_code": "Test Finished Goods - A", "rm_item_code": "Test FG A RW 1", "item_name":"Test FG A RW 1",
 					"qty":5, "warehouse":"_Test Warehouse - _TC", "rate":2000, "amount":10000, "stock_uom":"Nos"},

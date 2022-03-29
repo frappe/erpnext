@@ -297,7 +297,7 @@ class TestStockLedgerEntry(FrappeTestCase):
 		# Purchase Receipt for subcontracted item
 		pr1 = make_purchase_receipt(company=company, posting_date='2020-04-20',
 			warehouse="Finished Goods - _TC", supplier_warehouse="Stores - _TC",
-			item_code=subcontracted_item, qty=10, rate=20, is_subcontracted="Yes")
+			item_code=subcontracted_item, qty=10, rate=20, is_subcontracted=1)
 
 		self.assertEqual(pr1.items[0].valuation_rate, 120)
 

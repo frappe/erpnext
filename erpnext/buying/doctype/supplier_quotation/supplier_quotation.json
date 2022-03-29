@@ -772,11 +772,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "No",
+   "default": 0,
    "fieldname": "is_subcontracted",
-   "fieldtype": "Select",
+   "fieldtype": "Check",
    "label": "Is Subcontracted",
-   "options": "\nYes\nNo",
    "print_hide": 1
   },
   {

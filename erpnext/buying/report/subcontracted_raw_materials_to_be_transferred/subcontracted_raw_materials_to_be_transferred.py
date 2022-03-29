@@ -89,7 +89,7 @@ def get_po_items_to_supply(filters):
 		],
 		filters = [
 			["Purchase Order", "per_received", "<", "100"],
-			["Purchase Order", "is_subcontracted", "=", "Yes"],
+			["Purchase Order", "is_subcontracted", "=", 1],
 			["Purchase Order", "supplier", "=", filters.supplier],
 			["Purchase Order", "transaction_date", "<=", filters.to_date],
 			["Purchase Order", "transaction_date", ">=", filters.from_date],

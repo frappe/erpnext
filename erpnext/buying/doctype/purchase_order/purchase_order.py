@@ -239,7 +239,7 @@ class PurchaseOrder(BuyingController):
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
 		self.update_ordered_qty()
-		if self.is_subcontracted == "Yes":
+		if self.is_subcontracted:
 			self.update_reserved_qty_for_subcontract()
 
 		self.notify_update()
@@ -256,7 +256,7 @@ class PurchaseOrder(BuyingController):
 		self.update_ordered_qty()
 		self.validate_budget()
 
-		if self.is_subcontracted == "Yes":
+		if self.is_subcontracted:
 			self.update_reserved_qty_for_subcontract()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
@@ -275,7 +275,7 @@ class PurchaseOrder(BuyingController):
 		if self.has_drop_ship_item():
 			self.update_delivered_qty_in_sales_order()
 
-		if self.is_subcontracted == "Yes":
+		if self.is_subcontracted:
 			self.update_reserved_qty_for_subcontract()
 
 		self.check_on_hold_or_closed_status()

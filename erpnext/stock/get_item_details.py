@@ -43,7 +43,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 			"transaction_date": None,
 			"conversion_rate": 1.0,
 			"buying_price_list": None,
-			"is_subcontracted": "Yes" / "No",
+			"is_subcontracted": 0/1,
 			"ignore_pricing_rule": 0/1
 			"project": ""
 			"set_warehouse": ""
@@ -112,7 +112,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
 			item.lead_time_days)
 
-	if args.get("is_subcontracted") == "Yes":
+	if args.get("is_subcontracted"):
 		out.bom = args.get('bom') or get_default_bom(args.item_code)
 
 	get_gross_profit(out)
@@ -215,7 +215,7 @@ def validate_item_details(args, item):
 		throw(_("Item {0} is a template, please select one of its variants").format(item.name))
 
 	elif args.transaction_type == "buying" and args.doctype != "Material Request":
-		if args.get("is_subcontracted") == "Yes" and item.is_stock_item:
+		if args.get("is_subcontracted") and item.is_stock_item:
 			throw(_("Item {0} must be a Non Stock Item").format(item.name))
 
 
@@ -236,7 +236,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			"transaction_date": None,
 			"conversion_rate": 1.0,
 			"buying_price_list": None,
-			"is_subcontracted": "Yes" / "No",
+			"is_subcontracted": 0/1,
 			"ignore_pricing_rule": 0/1
 			"project": "",
 			barcode: "",

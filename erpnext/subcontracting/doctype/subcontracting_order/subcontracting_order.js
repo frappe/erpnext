@@ -14,7 +14,7 @@ frappe.ui.form.on('Subcontracting Order', {
 			return {
 				filters: {
 					docstatus: 1,
-					is_subcontracted: 'Yes'
+					is_subcontracted: 1
 				}
 			};
 		});
