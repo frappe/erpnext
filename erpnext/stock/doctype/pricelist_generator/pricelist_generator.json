@@ -32,7 +32,8 @@
   {
    "fieldname": "start_date",
    "fieldtype": "Date",
-   "label": "Start Date"
+   "label": "Start Date",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_4",
@@ -49,7 +50,8 @@
   {
    "fieldname": "end_date",
    "fieldtype": "Date",
-   "label": "End Date"
+   "label": "End Date",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_8",
@@ -105,7 +107,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-29 14:36:02.033746",
+ "modified": "2022-03-29 15:21:23.968519",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "PriceList Generator",

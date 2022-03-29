@@ -13,6 +13,7 @@ class PriceListGenerator(Document):
 		if getdate(self.start_date)>getdate(self.end_date):
 			frappe.throw("End date Cannot be Less than Start date")
 		for res in self.price_details:
+			pack_g=frappe.db.get_value("Product Pack",{"item":res.item},["diff_price"])
 			if res.brand:
 				lst=frappe.get_doc("Brand",res.brand)
 				for i in lst.brand_defaults:
@@ -21,6 +22,10 @@ class PriceListGenerator(Document):
 							res.brand_list_price=i.item_price
 						if not i.item_price:
 							frappe.throw("Please set Item Price in brand")
+
+					if i.selling_cost_center:
+						if self.company==i.company and self.cost_center==i.selling_cost_center:
+							res.brand_list_price=pack_g
 			
 	def before_save(self):
 		self.get_cost_volume()
