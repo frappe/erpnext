@@ -233,6 +233,8 @@ class AccountsController(TransactionBase):
 			self.items_by_item_group = self.group_items_by_item_group(self.items)
 			self.items_by_item_tax_and_item_group = self.group_items_by_item_tax_and_item_group()
 
+			self.calculate_tax_rates_for_print()
+
 			self.warehouses = list(set([frappe.get_cached_value("Warehouse", item.warehouse, 'warehouse_name')
 				for item in self.items if item.get('warehouse')]))
 
@@ -1215,7 +1217,7 @@ class AccountsController(TransactionBase):
 
 		return out
 
-	def calculate_taxes_for_group(self, group_data):
+	def calculate_taxes_for_group(self, group_data, taxes_as_dict=False):
 		tax_copy_fields = ['name', 'idx', 'account_head', 'description', 'charge_type', 'row_id']
 
 		# initialize tax rows for item tax template group
@@ -1272,7 +1274,8 @@ class AccountsController(TransactionBase):
 				tax.rate = (tax.tax_amount_after_discount_amount / group_data.taxable_total) * 100 if group_data.taxable_total\
 					else flt(default_tax_rate.get(tax.account_head))
 
-		group_data.taxes = list(group_data.taxes.values())
+		if not taxes_as_dict:
+			group_data.taxes = list(group_data.taxes.values())
 
 	def get_taxes_for_item(self, item):
 		group_data = frappe._dict()
@@ -1280,6 +1283,24 @@ class AccountsController(TransactionBase):
 		group_data.taxable_total = item.taxable_amount
 		self.calculate_taxes_for_group(group_data)
 		return group_data.taxes
+
+	def calculate_tax_rates_for_print(self):
+		for tax in self.taxes:
+			self.calculate_tax_rate(tax)
+
+	def calculate_tax_rate(self, tax):
+		group_data = frappe._dict({'items': [], 'taxable_total': 0})
+		for item in self.items:
+			item_tax_detail = json.loads(item.item_tax_detail or '{}')
+			if item_tax_detail.get(tax.name):
+				group_data['items'].append(item)
+				group_data.taxable_total += item.taxable_amount
+
+		self.calculate_taxes_for_group(group_data, taxes_as_dict=True)
+		tax.calculated_rate = group_data.taxes[tax.name].rate
+
+		if not tax.rate and tax.charge_type in ('On Net Total', 'On Previous Row Total', 'On Previous Row Amount'):
+			tax.rate = tax.calculated_rate
 
 	def get_gl_entries_for_print(self):
 		from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
