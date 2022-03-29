@@ -40,6 +40,7 @@
             "reqd": 1
         },
         {
+            "default": 1,
             "bold": 1,
             "columns": 1,
             "fieldname": "qty",
