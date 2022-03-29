@@ -23,10 +23,6 @@ class PriceListGenerator(Document):
 						if not i.item_price:
 							frappe.throw("Please set Item Price in brand")
 
-					if i.selling_cost_center:
-						if self.company==i.company and self.cost_center==i.selling_cost_center:
-							res.brand_list_price=pack_g
-			
 	def before_save(self):
 		self.get_cost_volume()
 
