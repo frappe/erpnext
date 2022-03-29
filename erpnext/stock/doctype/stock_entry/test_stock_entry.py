@@ -47,7 +47,6 @@ class TestStockEntry(FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 		frappe.set_user("Administrator")
-		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", "0")
 
 	def test_fifo(self):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
@@ -628,14 +627,20 @@ class TestStockEntry(FrappeTestCase):
 		self.assertEqual(fg_cost,
 			flt(rm_cost + bom_operation_cost + work_order.additional_operating_cost, 2))
 
+	@change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_work_order_manufacture_with_material_consumption(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import (
 			make_stock_entry as _make_stock_entry,
 		)
+<<<<<<< HEAD
 		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", "1")
 
 		bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item",
 			"is_default": 1, "docstatus": 1})
+=======
+
+		bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item", "is_default": 1, "docstatus": 1})
+>>>>>>> b80fac03af (fix: validate 0 transfer qty in stock entry (#30476))
 
 		work_order = frappe.new_doc("Work Order")
 		work_order.update({
@@ -811,43 +816,6 @@ class TestStockEntry(FrappeTestCase):
 
 		repack.insert()
 		self.assertRaises(frappe.ValidationError, repack.submit)
-
-	# def test_material_consumption(self):
-	# 	frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on", "BOM")
-	# 	frappe.db.set_value("Manufacturing Settings", None, "material_consumption", "0")
-
-	# 	from erpnext.manufacturing.doctype.work_order.work_order \
-	# 		import make_stock_entry as _make_stock_entry
-	# 	bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item 2",
-	# 		"is_default": 1, "docstatus": 1})
-
-	# 	work_order = frappe.new_doc("Work Order")
-	# 	work_order.update({
-	# 		"company": "_Test Company",
-	# 		"fg_warehouse": "_Test Warehouse 1 - _TC",
-	# 		"production_item": "_Test FG Item 2",
-	# 		"bom_no": bom_no,
-	# 		"qty": 4.0,
-	# 		"stock_uom": "_Test UOM",
-	# 		"wip_warehouse": "_Test Warehouse - _TC",
-	# 		"additional_operating_cost": 1000,
-	# 		"use_multi_level_bom": 1
-	# 	})
-	# 	work_order.insert()
-	# 	work_order.submit()
-
-	# 	make_stock_entry(item_code="_Test Serialized Item With Series", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
-	# 	make_stock_entry(item_code="_Test Item 2", target="_Test Warehouse - _TC", qty=50, basic_rate=20)
-
-	# 	item_quantity = {
-	# 		'_Test Item': 2.0,
-	# 		'_Test Item 2': 12.0,
-	# 		'_Test Serialized Item With Series': 6.0
-	# 	}
-
-	# 	stock_entry = frappe.get_doc(_make_stock_entry(work_order.name, "Material Consumption for Manufacture", 2))
-	# 	for d in stock_entry.get('items'):
-	# 		self.assertEqual(item_quantity.get(d.item_code), d.qty)
 
 	def test_customer_provided_parts_se(self):
 		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
@@ -1109,6 +1077,142 @@ class TestStockEntry(FrappeTestCase):
 		self.assertEqual(se.value_difference, 0.0)
 		self.assertEqual(se.total_incoming_value, se.total_outgoing_value)
 
+<<<<<<< HEAD
+=======
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_future_negative_sle(self):
+		# Initialize item, batch, warehouse, opening qty
+		item_code = "_Test Future Neg Item"
+		batch_no = "_Test Future Neg Batch"
+		warehouses = ["_Test Future Neg Warehouse Source", "_Test Future Neg Warehouse Destination"]
+		warehouse_names = initialize_records_for_future_negative_sle_test(
+			item_code, batch_no, warehouses, opening_qty=2, posting_date="2021-07-01"
+		)
+
+		# Executing an illegal sequence should raise an error
+		sequence_of_entries = [
+			dict(
+				item_code=item_code,
+				qty=2,
+				from_warehouse=warehouse_names[0],
+				to_warehouse=warehouse_names[1],
+				batch_no=batch_no,
+				posting_date="2021-07-03",
+				purpose="Material Transfer",
+			),
+			dict(
+				item_code=item_code,
+				qty=2,
+				from_warehouse=warehouse_names[1],
+				to_warehouse=warehouse_names[0],
+				batch_no=batch_no,
+				posting_date="2021-07-04",
+				purpose="Material Transfer",
+			),
+			dict(
+				item_code=item_code,
+				qty=2,
+				from_warehouse=warehouse_names[0],
+				to_warehouse=warehouse_names[1],
+				batch_no=batch_no,
+				posting_date="2021-07-02",  # Illegal SE
+				purpose="Material Transfer",
+			),
+		]
+
+		self.assertRaises(NegativeStockError, create_stock_entries, sequence_of_entries)
+
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_future_negative_sle_batch(self):
+		from erpnext.stock.doctype.batch.test_batch import TestBatch
+
+		# Initialize item, batch, warehouse, opening qty
+		item_code = "_Test MultiBatch Item"
+		TestBatch.make_batch_item(item_code)
+
+		batch_nos = []  # store generate batches
+		warehouse = "_Test Warehouse - _TC"
+
+		se1 = make_stock_entry(
+			item_code=item_code,
+			qty=2,
+			to_warehouse=warehouse,
+			posting_date="2021-09-01",
+			purpose="Material Receipt",
+		)
+		batch_nos.append(se1.items[0].batch_no)
+		se2 = make_stock_entry(
+			item_code=item_code,
+			qty=2,
+			to_warehouse=warehouse,
+			posting_date="2021-09-03",
+			purpose="Material Receipt",
+		)
+		batch_nos.append(se2.items[0].batch_no)
+
+		with self.assertRaises(NegativeStockError) as nse:
+			make_stock_entry(
+				item_code=item_code,
+				qty=1,
+				from_warehouse=warehouse,
+				batch_no=batch_nos[1],
+				posting_date="2021-09-02",  # backdated consumption of 2nd batch
+				purpose="Material Issue",
+			)
+
+	def test_multi_batch_value_diff(self):
+		"""Test value difference on stock entry in case of multi-batch.
+		| Stock entry | batch | qty | rate | value diff on SE             |
+		| ---         | ---   | --- | ---  | ---                          |
+		| receipt     | A     | 1   | 10   | 30                           |
+		| receipt     | B     | 1   | 20   |                              |
+		| issue       | A     | -1  | 10   | -30 (to assert after submit) |
+		| issue       | B     | -1  | 20   |                              |
+		"""
+		from erpnext.stock.doctype.batch.test_batch import TestBatch
+
+		batch_nos = []
+
+		item_code = "_TestMultibatchFifo"
+		TestBatch.make_batch_item(item_code)
+		warehouse = "_Test Warehouse - _TC"
+		receipt = make_stock_entry(
+			item_code=item_code,
+			qty=1,
+			rate=10,
+			to_warehouse=warehouse,
+			purpose="Material Receipt",
+			do_not_save=True,
+		)
+		receipt.append(
+			"items", frappe.copy_doc(receipt.items[0], ignore_no_copy=False).update({"basic_rate": 20})
+		)
+		receipt.save()
+		receipt.submit()
+		batch_nos.extend(row.batch_no for row in receipt.items)
+		self.assertEqual(receipt.value_difference, 30)
+
+		issue = make_stock_entry(
+			item_code=item_code, qty=1, from_warehouse=warehouse, purpose="Material Issue", do_not_save=True
+		)
+		issue.append("items", frappe.copy_doc(issue.items[0], ignore_no_copy=False))
+		for row, batch_no in zip(issue.items, batch_nos):
+			row.batch_no = batch_no
+		issue.save()
+		issue.submit()
+
+		issue.reload()  # reload because reposting current voucher updates rate
+		self.assertEqual(issue.value_difference, -30)
+
+	def test_transfer_qty_validation(self):
+		se = make_stock_entry(item_code="_Test Item", do_not_save=True, qty=0.001, rate=100)
+		se.items[0].uom = "Kg"
+		se.items[0].conversion_factor = 0.002
+
+		self.assertRaises(frappe.ValidationError, se.save)
+
+
+>>>>>>> b80fac03af (fix: validate 0 transfer qty in stock entry (#30476))
 def make_serialized_item(**args):
 	args = frappe._dict(args)
 	se = frappe.copy_doc(test_records[0])
