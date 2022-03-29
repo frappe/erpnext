@@ -3,12 +3,12 @@
 
 frappe.ui.form.on('PriceList Generator', {
 	get_items: function(frm) {
+        frm.clear_table("price_details")
         const filters = frm.filters.reduce((acc, filter) => {
             return Object.assign(acc, {
                 [filter[1]]: [filter[2], filter[3]]
             });
         }, {});
-        frm.clear_table("price_details")
 		frm.call({
             method:"get_items_brand",
             doc:frm.doc,
