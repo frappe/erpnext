@@ -40,12 +40,9 @@ class PriceListGenerator(Document):
 			})
 			print(filters)
 			lst=frappe.db.get_all("Item",filters=filters)
-			pack=""
 			for j in lst:
 				doc=frappe.get_doc("Item",j.name)
-				pack_g=frappe.db.get_value("Product Pack",{"item":doc.name},["name"])
-				if pack_g:
-					pack=frappe.get_doc("Product Pack",{"item":doc.name})	
+				pack_g=frappe.db.get_value("Product Pack",{"item":doc.name},["diff_price"])
 				self.append("price_details",{
 					"item":doc.name,
      				"item_name":doc.item_name,
@@ -55,7 +52,7 @@ class PriceListGenerator(Document):
 					"weight":doc.weight_per_unit,
 					"brand":doc.brand,
 					"min_qty":1,
-					"addpkg_cost":pack.diff_price,
+					"addpkg_cost":pack_g,
      				"brand_list_price":i.item_price
 				})
 		return True
