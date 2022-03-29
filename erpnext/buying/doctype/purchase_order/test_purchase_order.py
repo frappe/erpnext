@@ -36,6 +36,41 @@ class TestPurchaseOrder(FrappeTestCase):
 		pr = create_pr_against_po(po.name)
 		self.assertEqual(len(pr.get("items")), 1)
 
+	def test_update_item_code(self):
+		"""Test if Item code changes"""
+
+		if not frappe.db.exists("Item", "Sample Item(1)"):
+			make_item("Sample Item(1)", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		if not frappe.db.exists("Item", "Sample Item(2)"):
+			make_item("Sample Item(2)", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+
+		#create po
+		po = create_purchase_order(item_code="Sample Item(1)",do_not_submit=True)
+		po.submit()
+		print(po.get('items')[0].item_code)
+		#test item_code change
+		trans_item = json.dumps([{
+			"item_code": 'Sample Item(2)',
+			"qty": 2,
+			"rate":500,
+			"docname": po.get("items")[0].name
+		}])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+		po.reload()
+		self.assertEqual(po.get("items")[0].item_code, 'Sample Item(2)')
+
+		pr = make_purchase_receipt(po.name)
+		pr.submit()
+		
+
+		trans_item = json.dumps([{
+			"item_code": 'Sample Item(2)',
+			"docname": po.get("items")[0].name
+		}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate, 'Sales Order', trans_item, po.name)
+
 	def test_ordered_qty(self):
 		existing_ordered_qty = get_ordered_qty()
 

@@ -2044,6 +2044,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			check_doc_permissions(parent, 'write')
 			child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
 
+			prev_item_code, new_item_code = child_item.item_code,d.get('item_code')
 			prev_rate, new_rate = flt(child_item.get("rate")), flt(d.get("rate"))
 			prev_qty, new_qty = flt(child_item.get("qty")), flt(d.get("qty"))
 			prev_con_fac, new_con_fac = flt(child_item.get("conversion_factor")), flt(d.get("conversion_factor"))
@@ -2054,12 +2055,13 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			elif parent_doctype == 'Purchase Order':
 				prev_date, new_date = child_item.get("schedule_date"), d.get("schedule_date")
 
+			item_code_changed = prev_item_code == new_item_code
 			rate_unchanged = prev_rate == new_rate
 			qty_unchanged = prev_qty == new_qty
 			uom_unchanged = prev_uom == new_uom
 			conversion_factor_unchanged = prev_con_fac == new_con_fac
 			date_unchanged = prev_date == getdate(new_date) if prev_date and new_date else False # in case of delivery note etc
-			if rate_unchanged and qty_unchanged and conversion_factor_unchanged and uom_unchanged and date_unchanged:
+			if item_code_changed and rate_unchanged and qty_unchanged and conversion_factor_unchanged and uom_unchanged and date_unchanged:
 				continue
 
 		validate_quantity(child_item, d)
@@ -2068,6 +2070,23 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		rate_precision = child_item.precision("rate") or 2
 		conv_fac_precision = child_item.precision("conversion_factor") or 2
 		qty_precision = child_item.precision("qty") or 2
+
+		user = frappe.session.user
+		if child_item.item_code != d.get("item_code"):
+			if ("Sales Manager" in frappe.get_roles(user)):
+				if parent_doctype in ['Sales Order', 'Purchase Order']:
+					qty_cond = child_item.delivered_qty if parent_doctype == 'Sales Order' else child_item.received_qty
+					if (child_item.billed_amt > 0 or qty_cond > 0):
+						frappe.throw(_("Cannot update item: partial bill or partial delivery exists."))
+					else:
+						item_data = frappe.get_doc("Item", d.get("item_code"))
+						child_item.item_code = d.get("item_code")
+						child_item.item_name = item_data.item_name
+						child_item.description = item_data.description
+						child_item.stock_uom = item_data.stock_uom
+						child_item.uom = item_data.stock_uom
+			else:
+				frappe.throw(_("User must be Sales Manager to update Item Code."))
 
 		if flt(child_item.billed_amt, rate_precision) > flt(flt(d.get("rate"), rate_precision) * flt(d.get("qty"), qty_precision), rate_precision):
 			frappe.throw(_("Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.")

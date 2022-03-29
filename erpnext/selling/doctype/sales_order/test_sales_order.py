@@ -48,6 +48,50 @@ class TestSalesOrder(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
+	def test_update_item_code(self):
+		"""Test if Item code changes"""
+
+		if not frappe.db.exists("Item", "Sample Item(1)"):
+			make_item("Sample Item(1)", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		if not frappe.db.exists("Item", "Sample Item(2)"):
+			make_item("Sample Item(2)", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		so_items = [
+			{
+				"item_code": "Sample Item(1)",
+				"warehouse": "",
+				"qty": 2,
+				"rate": 400,
+				"delivered_by_supplier": 1,
+				"supplier": '_Test Supplier'
+			},
+		]
+
+		#create so
+		so = make_sales_order(item_list=so_items, do_not_submit=True)
+		so.submit()
+		#test item_code change
+		trans_item = json.dumps([{
+			"item_code": 'Sample Item(2)',
+			"qty": 2,
+			"rate":500,
+			"docname": so.get("items")[0].name
+		}])
+		update_child_qty_rate('Sales Order', trans_item, so.name)
+		so.reload()
+		self.assertEqual(so.get("items")[0].item_code, 'Sample Item(2)')
+		
+
+		si = make_sales_invoice(so.name)
+		si.submit()
+		trans_item = json.dumps([{
+			"item_code": 'Sample Item(2)',
+			"docname": so.get("items")[0].name
+		}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate, 'Sales Order', trans_item, so.name)
+
+		
 	def test_make_material_request(self):
 		so = make_sales_order(do_not_submit=True)
 
