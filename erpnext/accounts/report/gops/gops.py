@@ -27,6 +27,7 @@ def return_data(filters):
 	categories = []
 
 	for invoice in invoices:
+		# time_hour = invoice.posting_time.strftime("%H:%M:%S")
 		from_time = datetime.datetime.strptime(filters.get("from_time"), '%H:%M:%S')
 		to_time = datetime.datetime.strptime(filters.get("to_time"), '%H:%M:%S')
 		hour_invoice_str = convert(invoice.posting_time.seconds)
