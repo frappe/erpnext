@@ -285,7 +285,7 @@ Asset scrapped via Journal Entry {0},Actif mis au rebut via Écriture de Journal
 "Asset {0} cannot be scrapped, as it is already {1}","L'actif {0} ne peut pas être mis au rebut, car il est déjà {1}",
 Asset {0} does not belong to company {1},L'actif {0} ne fait pas partie à la société {1},
 Asset {0} must be submitted,L'actif {0} doit être soumis,
-Assets,Les atouts,
+Assets,Actifs,
 Assign,Assigner,
 Assign Salary Structure,Affecter la structure salariale,
 Assign To,Attribuer À,
@@ -1211,7 +1211,7 @@ Hello,Bonjour,
 Help Results for,Aide Résultats pour,
 High,Haut,
 High Sensitivity,Haute sensibilité,
-Hold,Tenir,
+Hold,Mettre en attente,
 Hold Invoice,Facture en attente,
 Holiday,Vacances,
 Holiday List,Liste de vacances,
@@ -5473,7 +5473,7 @@ Percentage you are allowed to transfer more against the quantity ordered. For ex
 PUR-ORD-.YYYY.-,PUR-ORD-.YYYY.-,
 Get Items from Open Material Requests,Obtenir des Articles de Demandes Matérielles Ouvertes,
 Fetch items based on Default Supplier.,Récupérez les articles en fonction du fournisseur par défaut.,
-Required By,Requis Par,
+Required By,Requis pour le,
 Order Confirmation No,No de confirmation de commande,
 Order Confirmation Date,Date de confirmation de la commande,
 Customer Mobile No,N° de Portable du Client,
@@ -7223,13 +7223,13 @@ Basic Rate (Company Currency),Taux de Base (Devise de la Société ),
 Scrap %,% de Rebut,
 Original Item,Article original,
 BOM Operation,Opération LDM,
-Operation Time ,Moment de l&#39;opération,
-In minutes,En quelques minutes,
+Operation Time ,Durée de l&#39;opération,
+In minutes,En minutes,
 Batch Size,Taille du lot,
 Base Hour Rate(Company Currency),Taux Horaire de Base (Devise de la Société),
 Operating Cost(Company Currency),Coût d'Exploitation (Devise Société),
 BOM Scrap Item,Article Mis au Rebut LDM,
-Basic Amount (Company Currency),Montant de Base (Devise de la Société),
+Basic Amount (Company Currency),Montant Sales Orderde Base (Devise de la Société),
 BOM Update Tool,Outil de mise à jour de LDM,
 "Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate ""BOM Explosion Item"" table as per new BOM.\nIt also updates latest price in all the BOMs.","Remplacez une LDM particulière dans toutes les LDM où elles est utilisée. Cela remplacera le lien vers l'ancienne LDM, mettra à jour les coûts et régénérera le tableau ""Article Explosé de LDM"" selon la nouvelle LDM. Cela mettra également à jour les prix les plus récents dans toutes les LDMs.",
 Replace BOM,Remplacer la LDM,
@@ -9267,7 +9267,7 @@ Sales Order Analysis,Analyse des commandes clients,
 Amount Delivered,Montant livré,
 Delay (in Days),Retard (en jours),
 Group by Sales Order,Regrouper par commande client,
- Sales Value,La valeur des ventes,
+Sales Value,La valeur des ventes,
 Stock Qty vs Serial No Count,Quantité de stock vs numéro de série,
 Serial No Count,Numéro de série,
 Work Order Summary,Résumé de l&#39;ordre de travail,
@@ -9838,3 +9838,16 @@ Enable European Access,Activer l&#39;accès européen,
 Creating Purchase Order ...,Création d&#39;une commande d&#39;achat ...,
 "Select a Supplier from the Default Suppliers of the items below. On selection, a Purchase Order will be made against items belonging to the selected Supplier only.","Sélectionnez un fournisseur parmi les fournisseurs par défaut des articles ci-dessous. Lors de la sélection, un bon de commande sera effectué contre des articles appartenant uniquement au fournisseur sélectionné.",
 Row #{}: You must select {} serial numbers for item {}.,Ligne n ° {}: vous devez sélectionner {} numéros de série pour l&#39;article {}.,
+Update Rate as per Last Purchase,Mettre a jour avec les dernier prix d'achat
+Company Shipping Address,Adresse d&#39;expédition
+Shipping Address Details,Détail d&#39;adresse d&#39;expédition
+Company Billing Address,Adresse de la société de facturation
+Supplier Address Details,
+Bank Reconciliation Tool,Outil de réconcialiation d&#39;écritures bancaires
+Supplier Contact,Contact fournisseur
+Subcontracting,Sous traitance
+Order Status,Statut de la commande
+Build,Personnalisations avancées
+Dispatch Address Name,Adresse de livraison intermédiaire
+Amount Eligible for Commission,Montant éligible à comission
+Grant Commission,Eligible aux commissions
