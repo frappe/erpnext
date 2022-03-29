@@ -1553,6 +1553,7 @@ class TestSalesOrder(FrappeTestCase):
 
 		frappe.flags.args = frappe._dict()
 		frappe.flags.args.ignore_available_qty = 1
+		
 		mr = make_material_request(so.name)
 		mr.material_request_type = "Manufacture"
 		mr.schedule_date = today()
