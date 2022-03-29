@@ -186,7 +186,7 @@ TRANSACTION_COLUMNS = [
 	# Steuersatz für Steuerschlüssel
 	"Steuersatz",
 	# Beispiel: DE für Deutschland
-	"Land"
+	"Land",
 ]
 
 DEBTOR_CREDITOR_COLUMNS = [
@@ -447,7 +447,7 @@ DEBTOR_CREDITOR_COLUMNS = [
 	"Mahnfrist 1",
 	"Mahnfrist 2",
 	"Mahnfrist 3",
-	"Letzte Frist"
+	"Letzte Frist",
 ]
 
 ACCOUNT_NAME_COLUMNS = [
@@ -457,10 +457,11 @@ ACCOUNT_NAME_COLUMNS = [
 	"Kontenbeschriftung",
 	# Language of the account name
 	# "de-DE" or "en-GB"
-	"Sprach-ID"
+	"Sprach-ID",
 ]
 
-class DataCategory():
+
+class DataCategory:
 
 	"""Field of the CSV Header."""
 
@@ -469,7 +470,8 @@ class DataCategory():
 	TRANSACTIONS = "21"
 	POSTING_TEXT_CONSTANTS = "67"
 
-class FormatName():
+
+class FormatName:
 
 	"""Field of the CSV Header, corresponds to DataCategory."""
 
@@ -478,19 +480,22 @@ class FormatName():
 	TRANSACTIONS = "Buchungsstapel"
 	POSTING_TEXT_CONSTANTS = "Buchungstextkonstanten"
 
-class Transactions():
+
+class Transactions:
 	DATA_CATEGORY = DataCategory.TRANSACTIONS
 	FORMAT_NAME = FormatName.TRANSACTIONS
 	FORMAT_VERSION = "9"
 	COLUMNS = TRANSACTION_COLUMNS
 
-class DebtorsCreditors():
+
+class DebtorsCreditors:
 	DATA_CATEGORY = DataCategory.DEBTORS_CREDITORS
 	FORMAT_NAME = FormatName.DEBTORS_CREDITORS
 	FORMAT_VERSION = "5"
 	COLUMNS = DEBTOR_CREDITOR_COLUMNS
 
-class AccountNames():
+
+class AccountNames:
 	DATA_CATEGORY = DataCategory.ACCOUNT_NAMES
 	FORMAT_NAME = FormatName.ACCOUNT_NAMES
 	FORMAT_VERSION = "2"

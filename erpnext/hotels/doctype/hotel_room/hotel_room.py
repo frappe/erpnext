@@ -9,5 +9,6 @@ from frappe.model.document import Document
 class HotelRoom(Document):
 	def validate(self):
 		if not self.capacity:
-			self.capacity, self.extra_bed_capacity = frappe.db.get_value('Hotel Room Type',
-					self.hotel_room_type, ['capacity', 'extra_bed_capacity'])
+			self.capacity, self.extra_bed_capacity = frappe.db.get_value(
+				"Hotel Room Type", self.hotel_room_type, ["capacity", "extra_bed_capacity"]
+			)

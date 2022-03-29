@@ -18,9 +18,13 @@ class TherapyPlanTemplate(Document):
 
 	def on_update(self):
 		doc_before_save = self.get_doc_before_save()
-		if not doc_before_save: return
-		if doc_before_save.item_name != self.item_name or doc_before_save.item_group != self.item_group \
-			or doc_before_save.description != self.description:
+		if not doc_before_save:
+			return
+		if (
+			doc_before_save.item_name != self.item_name
+			or doc_before_save.item_group != self.item_group
+			or doc_before_save.description != self.description
+		):
 			self.update_item()
 
 		if doc_before_save.therapy_types != self.therapy_types:
@@ -38,28 +42,30 @@ class TherapyPlanTemplate(Document):
 		self.total_amount = total_amount
 
 	def create_item_from_template(self):
-		uom = frappe.db.exists('UOM', 'Nos') or frappe.db.get_single_value('Stock Settings', 'stock_uom')
+		uom = frappe.db.exists("UOM", "Nos") or frappe.db.get_single_value("Stock Settings", "stock_uom")
 
-		item = frappe.get_doc({
-			'doctype': 'Item',
-			'item_code': self.item_code,
-			'item_name': self.item_name,
-			'item_group': self.item_group,
-			'description': self.description,
-			'is_sales_item': 1,
-			'is_service_item': 1,
-			'is_purchase_item': 0,
-			'is_stock_item': 0,
-			'show_in_website': 0,
-			'is_pro_applicable': 0,
-			'stock_uom': uom
-		}).insert(ignore_permissions=True, ignore_mandatory=True)
+		item = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": self.item_code,
+				"item_name": self.item_name,
+				"item_group": self.item_group,
+				"description": self.description,
+				"is_sales_item": 1,
+				"is_service_item": 1,
+				"is_purchase_item": 0,
+				"is_stock_item": 0,
+				"show_in_website": 0,
+				"is_pro_applicable": 0,
+				"stock_uom": uom,
+			}
+		).insert(ignore_permissions=True, ignore_mandatory=True)
 
 		make_item_price(item.name, self.total_amount)
-		self.db_set('linked_item', item.name)
+		self.db_set("linked_item", item.name)
 
 	def update_item(self):
-		item_doc = frappe.get_doc('Item', {'item_code': self.linked_item})
+		item_doc = frappe.get_doc("Item", {"item_code": self.linked_item})
 		item_doc.item_name = self.item_name
 		item_doc.item_group = self.item_group
 		item_doc.description = self.description
@@ -67,7 +73,7 @@ class TherapyPlanTemplate(Document):
 		item_doc.save(ignore_permissions=True)
 
 	def update_item_price(self):
-		item_price = frappe.get_doc('Item Price', {'item_code': self.linked_item})
+		item_price = frappe.get_doc("Item Price", {"item_code": self.linked_item})
 		item_price.item_name = self.item_name
 		item_price.price_list_rate = self.total_amount
 		item_price.ignore_mandatory = True

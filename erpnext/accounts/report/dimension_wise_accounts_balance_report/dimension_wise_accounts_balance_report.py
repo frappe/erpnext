@@ -28,10 +28,12 @@ def execute(filters=None):
 
 	return columns, data
 
+
 def get_data(filters, dimension_list):
 	company_currency = erpnext.get_company_currency(filters.company)
 
-	acc = frappe.db.sql("""
+	acc = frappe.db.sql(
+		"""
 		select
 			name, account_number, parent_account, lft, rgt, root_type,
 			report_type, account_name, include_in_gross, account_type, is_group
@@ -39,50 +41,62 @@ def get_data(filters, dimension_list):
 			`tabAccount`
 		where
 			company=%s
-			order by lft""", (filters.company), as_dict=True)
+			order by lft""",
+		(filters.company),
+		as_dict=True,
+	)
 
 	if not acc:
 		return None
 
 	accounts, accounts_by_name, parent_children_map = filter_accounts(acc)
 
-	min_lft, max_rgt = frappe.db.sql("""select min(lft), max(rgt) from `tabAccount`
-		where company=%s""", (filters.company))[0]
+	min_lft, max_rgt = frappe.db.sql(
+		"""select min(lft), max(rgt) from `tabAccount`
+		where company=%s""",
+		(filters.company),
+	)[0]
 
-	account = frappe.db.sql_list("""select name from `tabAccount`
-		where lft >= %s and rgt <= %s and company = %s""", (min_lft, max_rgt, filters.company))
+	account = frappe.db.sql_list(
+		"""select name from `tabAccount`
+		where lft >= %s and rgt <= %s and company = %s""",
+		(min_lft, max_rgt, filters.company),
+	)
 
 	gl_entries_by_account = {}
 	set_gl_entries_by_account(dimension_list, filters, account, gl_entries_by_account)
-	format_gl_entries(gl_entries_by_account, accounts_by_name, dimension_list,
-		frappe.scrub(filters.get('dimension')))
+	format_gl_entries(
+		gl_entries_by_account, accounts_by_name, dimension_list, frappe.scrub(filters.get("dimension"))
+	)
 	accumulate_values_into_parents(accounts, accounts_by_name, dimension_list)
 	out = prepare_data(accounts, filters, company_currency, dimension_list)
 	out = filter_out_zero_value_rows(out, parent_children_map)
 
 	return out
 
+
 def set_gl_entries_by_account(dimension_list, filters, account, gl_entries_by_account):
-	condition = get_condition(filters.get('dimension'))
+	condition = get_condition(filters.get("dimension"))
 
 	if account:
-		condition += " and account in ({})"\
-			.format(", ".join([frappe.db.escape(d) for d in account]))
+		condition += " and account in ({})".format(", ".join([frappe.db.escape(d) for d in account]))
 
 	gl_filters = {
 		"company": filters.get("company"),
 		"from_date": filters.get("from_date"),
 		"to_date": filters.get("to_date"),
-		"finance_book": cstr(filters.get("finance_book"))
+		"finance_book": cstr(filters.get("finance_book")),
 	}
 
-	gl_filters['dimensions'] = set(dimension_list)
+	gl_filters["dimensions"] = set(dimension_list)
 
 	if filters.get("include_default_book_entries"):
-		gl_filters["company_fb"] = frappe.db.get_value("Company",
-			filters.company, 'default_finance_book')
+		gl_filters["company_fb"] = frappe.db.get_value(
+			"Company", filters.company, "default_finance_book"
+		)
 
-	gl_entries = frappe.db.sql("""
+	gl_entries = frappe.db.sql(
+		"""
 		select
 			posting_date, account, {dimension}, debit, credit, is_opening, fiscal_year,
 			debit_in_account_currency, credit_in_account_currency, account_currency
@@ -95,10 +109,15 @@ def set_gl_entries_by_account(dimension_list, filters, account, gl_entries_by_ac
 		and posting_date <= %(to_date)s
 		and is_cancelled = 0
 		order by account, posting_date""".format(
-		dimension = frappe.scrub(filters.get('dimension')), condition=condition), gl_filters, as_dict=True) #nosec
+			dimension=frappe.scrub(filters.get("dimension")), condition=condition
+		),
+		gl_filters,
+		as_dict=True,
+	)  # nosec
 
 	for entry in gl_entries:
 		gl_entries_by_account.setdefault(entry.account, []).append(entry)
+
 
 def format_gl_entries(gl_entries_by_account, accounts_by_name, dimension_list, dimension_type):
 
@@ -107,13 +126,17 @@ def format_gl_entries(gl_entries_by_account, accounts_by_name, dimension_list, d
 			d = accounts_by_name.get(entry.account)
 			if not d:
 				frappe.msgprint(
-					_("Could not retrieve information for {0}.").format(entry.account), title="Error",
-					raise_exception=1
+					_("Could not retrieve information for {0}.").format(entry.account),
+					title="Error",
+					raise_exception=1,
 				)
 
 			for dimension in dimension_list:
 				if dimension == entry.get(dimension_type):
-					d[frappe.scrub(dimension)] = d.get(frappe.scrub(dimension), 0.0) + flt(entry.debit) - flt(entry.credit)
+					d[frappe.scrub(dimension)] = (
+						d.get(frappe.scrub(dimension), 0.0) + flt(entry.debit) - flt(entry.credit)
+					)
+
 
 def prepare_data(accounts, filters, company_currency, dimension_list):
 	data = []
@@ -128,8 +151,9 @@ def prepare_data(accounts, filters, company_currency, dimension_list):
 			"from_date": filters.from_date,
 			"to_date": filters.to_date,
 			"currency": company_currency,
-			"account_name": ('{} - {}'.format(d.account_number, d.account_name)
-				if d.account_number else d.account_name)
+			"account_name": (
+				"{} - {}".format(d.account_number, d.account_name) if d.account_number else d.account_name
+			),
 		}
 
 		for dimension in dimension_list:
@@ -146,13 +170,16 @@ def prepare_data(accounts, filters, company_currency, dimension_list):
 
 	return data
 
+
 def accumulate_values_into_parents(accounts, accounts_by_name, dimension_list):
 	"""accumulate children's values in parent accounts"""
 	for d in reversed(accounts):
 		if d.parent_account:
 			for dimension in dimension_list:
-				accounts_by_name[d.parent_account][frappe.scrub(dimension)] = \
-					accounts_by_name[d.parent_account].get(frappe.scrub(dimension), 0.0) + d.get(frappe.scrub(dimension), 0.0)
+				accounts_by_name[d.parent_account][frappe.scrub(dimension)] = accounts_by_name[
+					d.parent_account
+				].get(frappe.scrub(dimension), 0.0) + d.get(frappe.scrub(dimension), 0.0)
+
 
 def get_condition(dimension):
 	conditions = []
@@ -161,46 +188,54 @@ def get_condition(dimension):
 
 	return " and {}".format(" and ".join(conditions)) if conditions else ""
 
+
 def get_dimensions(filters):
-	meta = frappe.get_meta(filters.get('dimension'), cached=False)
+	meta = frappe.get_meta(filters.get("dimension"), cached=False)
 	query_filters = {}
 
-	if meta.has_field('company'):
-		query_filters = {'company': filters.get('company')}
+	if meta.has_field("company"):
+		query_filters = {"company": filters.get("company")}
 
-	return frappe.get_all(filters.get('dimension'), filters=query_filters, pluck='name')
+	return frappe.get_all(filters.get("dimension"), filters=query_filters, pluck="name")
+
 
 def get_columns(dimension_list):
-	columns = [{
-		"fieldname": "account",
-		"label": _("Account"),
-		"fieldtype": "Link",
-		"options": "Account",
-		"width": 300
-	},
-	{
-		"fieldname": "currency",
-		"label": _("Currency"),
-		"fieldtype": "Link",
-		"options": "Currency",
-		"hidden": 1
-	}]
+	columns = [
+		{
+			"fieldname": "account",
+			"label": _("Account"),
+			"fieldtype": "Link",
+			"options": "Account",
+			"width": 300,
+		},
+		{
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Link",
+			"options": "Currency",
+			"hidden": 1,
+		},
+	]
 
 	for dimension in dimension_list:
-		columns.append({
-			"fieldname": frappe.scrub(dimension),
-			"label": dimension,
-			"fieldtype": "Currency",
-			"options": "currency",
-			"width": 150
-		})
+		columns.append(
+			{
+				"fieldname": frappe.scrub(dimension),
+				"label": dimension,
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 150,
+			}
+		)
 
-	columns.append({
+	columns.append(
+		{
 			"fieldname": "total",
 			"label": "Total",
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 150
-		})
+			"width": 150,
+		}
+	)
 
 	return columns

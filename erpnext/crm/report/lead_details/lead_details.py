@@ -10,6 +10,7 @@ def execute(filters=None):
 	columns, data = get_columns(), get_data(filters)
 	return columns, data
 
+
 def get_columns():
 	columns = [
 		{
@@ -19,101 +20,57 @@ def get_columns():
 			"options": "Lead",
 			"width": 150,
 		},
+		{"label": _("Lead Name"), "fieldname": "lead_name", "fieldtype": "Data", "width": 120},
+		{"fieldname": "status", "label": _("Status"), "fieldtype": "Data", "width": 100},
 		{
-			"label": _("Lead Name"),
-			"fieldname": "lead_name",
-			"fieldtype": "Data",
-			"width": 120
-		},
-		{
-			"fieldname":"status",
-			"label": _("Status"),
-			"fieldtype": "Data",
-			"width": 100
-		},
-		{
-			"fieldname":"lead_owner",
+			"fieldname": "lead_owner",
 			"label": _("Lead Owner"),
 			"fieldtype": "Link",
 			"options": "User",
-			"width": 100
+			"width": 100,
 		},
 		{
 			"label": _("Territory"),
 			"fieldname": "territory",
 			"fieldtype": "Link",
 			"options": "Territory",
-			"width": 100
+			"width": 100,
 		},
-		{
-			"label": _("Source"),
-			"fieldname": "source",
-			"fieldtype": "Data",
-			"width": 120
-		},
-		{
-			"label": _("Email"),
-			"fieldname": "email_id",
-			"fieldtype": "Data",
-			"width": 120
-		},
-		{
-			"label": _("Mobile"),
-			"fieldname": "mobile_no",
-			"fieldtype": "Data",
-			"width": 120
-		},
-		{
-			"label": _("Phone"),
-			"fieldname": "phone",
-			"fieldtype": "Data",
-			"width": 120
-		},
+		{"label": _("Source"), "fieldname": "source", "fieldtype": "Data", "width": 120},
+		{"label": _("Email"), "fieldname": "email_id", "fieldtype": "Data", "width": 120},
+		{"label": _("Mobile"), "fieldname": "mobile_no", "fieldtype": "Data", "width": 120},
+		{"label": _("Phone"), "fieldname": "phone", "fieldtype": "Data", "width": 120},
 		{
 			"label": _("Owner"),
 			"fieldname": "owner",
 			"fieldtype": "Link",
 			"options": "user",
-			"width": 120
+			"width": 120,
 		},
 		{
 			"label": _("Company"),
 			"fieldname": "company",
 			"fieldtype": "Link",
 			"options": "Company",
-			"width": 120
+			"width": 120,
 		},
+		{"fieldname": "address", "label": _("Address"), "fieldtype": "Data", "width": 130},
+		{"fieldname": "state", "label": _("State"), "fieldtype": "Data", "width": 100},
+		{"fieldname": "pincode", "label": _("Postal Code"), "fieldtype": "Data", "width": 90},
 		{
-			"fieldname":"address",
-			"label": _("Address"),
-			"fieldtype": "Data",
-			"width": 130
-		},
-		{
-			"fieldname":"state",
-			"label": _("State"),
-			"fieldtype": "Data",
-			"width": 100
-		},
-		{
-			"fieldname":"pincode",
-			"label": _("Postal Code"),
-			"fieldtype": "Data",
-			"width": 90
-		},
-		{
-			"fieldname":"country",
+			"fieldname": "country",
 			"label": _("Country"),
 			"fieldtype": "Link",
 			"options": "Country",
-			"width": 100
+			"width": 100,
 		},
-
 	]
 	return columns
 
+
 def get_data(filters):
-	return frappe.db.sql("""
+	return frappe.db.sql(
+		"""
 		SELECT
 			`tabLead`.name,
 			`tabLead`.lead_name,
@@ -144,9 +101,15 @@ def get_data(filters):
 			AND `tabLead`.creation BETWEEN %(from_date)s AND %(to_date)s
 			{conditions}
 		ORDER BY
-			`tabLead`.creation asc """.format(conditions=get_conditions(filters)), filters, as_dict=1)
+			`tabLead`.creation asc """.format(
+			conditions=get_conditions(filters)
+		),
+		filters,
+		as_dict=1,
+	)
 
-def get_conditions(filters) :
+
+def get_conditions(filters):
 	conditions = []
 
 	if filters.get("territory"):
