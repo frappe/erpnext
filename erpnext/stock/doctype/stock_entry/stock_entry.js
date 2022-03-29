@@ -978,14 +978,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	refresh: function (frm) {
-		console.log('obj: ', frm)
-		if (frm.work_order) {
-			console.log("frm.doc.work_order: ")
-			console.log(frm.work_order)
-			if (frm.doc.stock_entry_type === "Material Consumption for Manufacture") {
-				set_qty(frm)
-			}
-		}
+
 		var me = this;
 		erpnext.toggle_naming_series();
 		this.toggle_related_fields(this.frm.doc);
@@ -996,6 +989,13 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 		erpnext.hide_company();
 		erpnext.utils.add_item(this.frm);
+
+		if (frm.work_order) {
+			
+			if (frm.doc.stock_entry_type === "Material Consumption for Manufacture") {
+				set_qty(frm)
+			}
+		}
 	},
 	scan_barcode: function () {
 		let transaction_controller = new erpnext.TransactionController({ frm: this.frm });
