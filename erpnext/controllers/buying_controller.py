@@ -241,7 +241,6 @@ class BuyingController(StockController):
 					item.item_tax_amount = flt(item.item_tax_amount, self.precision("item_tax_amount", item))
 					valuation_amount_adjustment -= item.item_tax_amount
 
-				self.round_floats_in(item)
 				if flt(item.conversion_factor)==0.0:
 					item.conversion_factor = get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
 
