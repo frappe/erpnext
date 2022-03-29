@@ -427,11 +427,7 @@ def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool
 
 	filters = {
 		"docstatus": 1,
-<<<<<<< HEAD
-		"status": ["in", ["Queued","In Progress", "Failed"]],
-=======
 		"status": ["in", ["Queued", "In Progress"]],
->>>>>>> b12fe0f15b (fix: dont check for failed repost while freezing (#30472))
 		"posting_date": ["<=", posting_date],
 	}
 
