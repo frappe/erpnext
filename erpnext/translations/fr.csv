@@ -9859,3 +9859,5 @@ The percentage you are allowed to transfer more against the quantity ordered. Fo
 Quality Inspection Settings,Paramétre de l&#39;inspection qualité
 Action If Quality Inspection Is Rejected,Action si l'inspection qualité est rejetée
 Disable Serial No And Batch Selector,Désactiver le sélecteur de numéro de lot/série
+Is Rate Adjustment Entry (Debit Note),Est un justement du prix de la note de débit
+Issue a debit note with 0 qty against an existing Sales Invoice,Creer une note de débit avec une quatité à O pour la facture
