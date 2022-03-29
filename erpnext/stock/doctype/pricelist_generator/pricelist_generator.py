@@ -40,7 +40,7 @@ class PriceListGenerator(Document):
 			})
 			print(filters)
 			lst=frappe.db.get_all("Item",filters=filters)
-			print(lst)
+			pack=""
 			for j in lst:
 				doc=frappe.get_doc("Item",j.name)
 				pack_g=frappe.db.get_value("Product Pack",{"item":doc.name},["name"])
