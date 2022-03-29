@@ -2,6 +2,15 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('PriceList Generator', {
+    setup:function(frm){
+        frm.set_query('cost_center', function(doc) {
+			return {
+				filters: {
+					"is_group":0
+				}
+			};
+		})
+    },
 	get_items: function(frm) {
         frm.clear_table("price_details")
         frm.refresh_field("price_details")

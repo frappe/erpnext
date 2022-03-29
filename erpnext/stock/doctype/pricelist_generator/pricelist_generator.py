@@ -74,4 +74,6 @@ class PriceListGenerator(Document):
 			doc_it.brand=res.brand
 			doc_it.price_list=doc.name
 			doc_it.price_list_rate=res.list_priceunit
+			doc_it.valid_from=self.start_date
+			doc_it.valid_upto=self.end_date
 			doc_it.save(ignore_permissions=True)
