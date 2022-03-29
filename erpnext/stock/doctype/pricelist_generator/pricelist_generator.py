@@ -41,10 +41,11 @@ class PriceListGenerator(Document):
 		doc=frappe.db.sql("""select b.name,bd.item_price,bd.selling_cost_center from `tabBrand` b join `tabItem Default` bd on b.name=bd.parent where bd.selling_cost_center='{0}'""".format(self.cost_center),as_dict=1)
 		print(doc)
 		for i in doc:
-			if i.selling_cost_center==self.cost_center:
-				lst=frappe.db.get_all("Item",filters=filters)
-				for j in lst:
-					doc=frappe.get_doc("Item",j.name)
+
+			lst=frappe.db.get_all("Item",filters=filters)
+			for j in lst:
+				doc=frappe.get_doc("Item",j.name)
+				if i.selling_cost_center==self.cost_center and doc.brand==i.name:
 					pack_g=frappe.db.get_value("Product Pack",{"item":doc.name},["diff_price"])
 					self.append("price_details",{
 						"item":doc.name,
