@@ -341,15 +341,41 @@ class TestPaymentEntry(unittest.TestCase):
 				"amount": 100,
 			},
 		)
+
+		# Given the above information is incorrect a validation error must be thrown.
+		# This is because the payment entry has a source_exchange_rate of 62.9,
+		# and a paid amount of $20.00 USD. Resulting in 1258 INR being received.
+		# Only 900 INR is being received to the bank. Therefore, a validation error must be thrown.
+		self.assertRaises(frappe.ValidationError, pe.insert)
+
+		# Reset pe with correct information to continue test.
+		pe = get_payment_entry(
+			"Sales Invoice", si.name, party_amount=20, bank_account="_Test Bank - _TC", bank_amount=1258
+		)
+		pe.reference_no = "1"
+		pe.reference_date = "2016-01-01"
+
 		pe.insert()
+
+		self.assertEqual(pe.difference_amount, -258)
+
+		pe.append(
+			"deductions",
+			{
+				"account": "_Test Exchange Gain/Loss - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"amount": -258,
+			},
+		)
+
 		pe.submit()
 
 		expected_gle = dict(
 			(d[0], d)
 			for d in [
 				["_Test Receivable USD - _TC", 0, 1000, si.name],
-				["_Test Bank - _TC", 900, 0, None],
-				["_Test Exchange Gain/Loss - _TC", 100.0, 0, None],
+				["_Test Bank - _TC", 1258, 0, None],
+				["_Test Exchange Gain/Loss - _TC", 0, 258, None],
 			]
 		)
 
