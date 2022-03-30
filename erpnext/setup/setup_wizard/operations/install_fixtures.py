@@ -146,7 +146,7 @@ def install(country=None):
 		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Cash'),
 			'type': 'Cash'},
 		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Credit Card'),
-			'type': 'Bank'},
+			'type': 'Card'},
 		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Wire Transfer'),
 			'type': 'Bank'},
 		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Bank Draft'),
