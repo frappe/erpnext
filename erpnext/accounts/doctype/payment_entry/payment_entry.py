@@ -268,7 +268,7 @@ class PaymentEntry(AccountsController):
 
 		if (
 			self.payment_type == "Receive"
-			and flt(self.paid_amount * self.source_exchange_rate, self.precision("source_exchange_rate"))
+			and flt(self.paid_amount * self.source_exchange_rate, self.precision("paid_amount"))
 			!= self.received_amount
 			or self.payment_type == "Pay"
 			and flt(self.received_amount * self.target_exchange_rate, self.precision("received_amount"))
