@@ -1,13 +1,11 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 
-import click
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cstr, flt
-from rq.timeouts import JobTimeoutException
 
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 
@@ -71,20 +69,17 @@ def replace_bom(boms: Dict) -> None:
 	new_bom = boms.get("new_bom")
 
 	unit_cost = get_new_bom_unit_cost(new_bom)
-	update_new_bom(unit_cost, current_bom, new_bom)
+	update_new_bom_in_bom_items(unit_cost, current_bom, new_bom)
 
 	frappe.cache().delete_key("bom_children")
 	parent_boms = get_parent_boms(new_bom)
 
-	with click.progressbar(parent_boms) as parent_boms:
-		pass
 	for bom in parent_boms:
-		bom_obj = frappe.get_cached_doc("BOM", bom)
+		bom_obj = frappe.get_doc("BOM", bom)
 		# this is only used for versioning and we do not want
 		# to make separate db calls by using load_doc_before_save
 		# which proves to be expensive while doing bulk replace
 		bom_obj._doc_before_save = bom_obj
-		bom_obj.update_new_bom(unit_cost, current_bom, new_bom)
 		bom_obj.update_exploded_items()
 		bom_obj.calculate_cost()
 		bom_obj.update_parent_cost()
@@ -93,12 +88,16 @@ def replace_bom(boms: Dict) -> None:
 			bom_obj.save_version()
 
 
-def update_new_bom(unit_cost: float, current_bom: str, new_bom: str) -> None:
+def update_new_bom_in_bom_items(unit_cost: float, current_bom: str, new_bom: str) -> None:
 	bom_item = frappe.qb.DocType("BOM Item")
-	frappe.qb.update(bom_item).set(bom_item.bom_no, new_bom).set(bom_item.rate, unit_cost).set(
-		bom_item.amount, (bom_item.stock_qty * unit_cost)
-	).where(
-		(bom_item.bom_no == current_bom) & (bom_item.docstatus < 2) & (bom_item.parenttype == "BOM")
+	(
+		frappe.qb.update(bom_item)
+		.set(bom_item.bom_no, new_bom)
+		.set(bom_item.rate, unit_cost)
+		.set(bom_item.amount, (bom_item.stock_qty * unit_cost))
+		.where(
+			(bom_item.bom_no == current_bom) & (bom_item.docstatus < 2) & (bom_item.parenttype == "BOM")
+		)
 	).run()
 
 
@@ -133,7 +132,9 @@ def get_new_bom_unit_cost(new_bom: str) -> float:
 
 
 def run_bom_job(
-	doc: "BOMUpdateLog", boms: Optional[Dict] = None, update_type: Optional[str] = "Replace BOM"
+	doc: "BOMUpdateLog",
+	boms: Optional[Dict[str, str]] = None,
+	update_type: Literal["Replace BOM", "Update Cost"] = "Replace BOM",
 ) -> None:
 	try:
 		doc.db_set("status", "In Progress")
@@ -151,7 +152,7 @@ def run_bom_job(
 
 		doc.db_set("status", "Completed")
 
-	except (Exception, JobTimeoutException):
+	except Exception:
 		frappe.db.rollback()
 		error_log = frappe.log_error(message=frappe.get_traceback(), title=_("BOM Update Tool Error"))
 

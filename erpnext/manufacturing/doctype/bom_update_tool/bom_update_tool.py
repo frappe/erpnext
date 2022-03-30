@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import json
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Literal, Optional, Union
 
 if TYPE_CHECKING:
 	from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import BOMUpdateLog
@@ -51,9 +51,11 @@ def update_cost() -> None:
 
 
 def create_bom_update_log(
-	boms: Optional[Dict] = None, update_type: str = "Replace BOM"
+	boms: Optional[Dict[str, str]] = None,
+	update_type: Literal["Replace BOM", "Update Cost"] = "Replace BOM",
 ) -> "BOMUpdateLog":
 	"""Creates a BOM Update Log that handles the background job."""
+
 	boms = boms or {}
 	current_bom = boms.get("current_bom")
 	new_bom = boms.get("new_bom")
