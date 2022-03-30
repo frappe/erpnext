@@ -1361,14 +1361,16 @@ class SalesInvoice(SellingController):
 		for item in self.get("items"):
 			base_net_amount = 0
 
-			if self.is_pos:
-				pos = frappe.get_doc("POS Profile", self.pos_profile)
-				if pos.round_off_discount == 1:
-					base_net_amount = math.floor(item.base_net_amount)
-				else:
-					base_net_amount = item.base_net_amount
-			else:
-				base_net_amount = item.base_net_amount
+			# if self.is_pos:
+			# 	pos = frappe.get_doc("POS Profile", self.pos_profile)
+
+			# 	if pos.round_off_discount == 1:
+			# 		self.db_set('rounding_adjustment', 0, update_modified=False)
+			# 		self.db_set('rounded_total', self.grand_total, update_modified=False)
+			# 	else:
+			# 		base_net_amount = item.base_net_amount
+			# else:
+			base_net_amount = item.base_net_amount
 
 			if flt(base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
