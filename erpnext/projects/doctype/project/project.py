@@ -123,7 +123,6 @@ class Project(Document):
 			'applies_to_vehicle': vehicle_received,
 			'fuel_level': vehicle_received,
 			'keys': vehicle_received,
-			'vehicle_warehouse': vehicle_received,
 			'vehicle_checklist': vehicle_received,
 		})
 

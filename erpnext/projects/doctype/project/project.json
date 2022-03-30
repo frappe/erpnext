@@ -11,36 +11,41 @@
   "title",
   "project_number",
   "project_name",
+  "project_type",
   "project_template",
   "copied_from",
-  "column_break_5",
+  "is_internal",
+  "project_details_cb_1",
+  "previous_project",
+  "cash_billing",
+  "has_stin",
+  "column_break_10",
   "status",
   "is_active",
-  "column_break_10",
   "priority",
-  "percent_complete_method",
   "percent_complete",
   "more_info",
-  "project_type",
   "more_info_cb_1",
   "department",
   "more_info_cb_2",
   "more_info_cb_3",
-  "section_break_32",
-  "voice_of_customer",
-  "column_break_22",
-  "expected_delivery_date",
-  "expected_delivery_time",
-  "column_break_25",
-  "previous_project",
   "section_break0",
   "description",
+  "section_break_18",
+  "expected_delivery_date",
+  "expected_delivery_time",
+  "column_break_20",
+  "expected_start_date",
+  "expected_end_date",
+  "column_break_49",
+  "actual_start_date",
+  "actual_end_date",
+  "actual_time",
   "customer_details_section",
   "customer",
   "customer_name",
   "tax_id",
   "tax_cnic",
-  "is_internal",
   "column_break_14",
   "bill_to",
   "bill_to_name",
@@ -55,11 +60,6 @@
   "contact_phone",
   "contact_mobile",
   "contact_email",
-  "billing_details_section",
-  "cash_billing",
-  "has_stin",
-  "cb_37",
-  "mode_of_payment",
   "sec_applies_to",
   "applies_to_item",
   "col_break_applies_to",
@@ -85,14 +85,6 @@
   "service_items_html",
   "stock_items_html",
   "sales_summary_html",
-  "section_break_18",
-  "expected_start_date",
-  "actual_start_date",
-  "column_break_20",
-  "expected_end_date",
-  "actual_end_date",
-  "column_break_49",
-  "actual_time",
   "project_details",
   "total_sales_amount",
   "total_billed_amount",
@@ -125,7 +117,9 @@
   "day_to_send",
   "weekly_time_to_send",
   "column_break_45",
-  "message"
+  "message",
+  "settings_section",
+  "percent_complete_method"
  ],
  "fields": [
   {
@@ -175,15 +169,12 @@
   },
   {
    "bold": 1,
+   "default": "0",
    "fieldname": "percent_complete",
    "fieldtype": "Percent",
    "label": "% Completed",
    "no_copy": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_5",
-   "fieldtype": "Column Break"
   },
   {
    "allow_in_quick_entry": 1,
@@ -683,16 +674,6 @@
    "options": "Project Item Depreciation"
   },
   {
-   "fieldname": "voice_of_customer",
-   "fieldtype": "Small Text",
-   "label": "Voice of Customer"
-  },
-  {
-   "fieldname": "section_break_32",
-   "fieldtype": "Section Break",
-   "label": "Work Details"
-  },
-  {
    "fieldname": "description",
    "fieldtype": "Text Editor",
    "label": "Description",
@@ -729,10 +710,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_22",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "expected_delivery_date",
    "fieldtype": "Date",
    "label": "Expected Delivery Date"
@@ -743,25 +720,10 @@
    "label": "Expected Delivery Time"
   },
   {
-   "fieldname": "billing_details_section",
-   "fieldtype": "Section Break",
-   "label": "Billing Details"
-  },
-  {
-   "fieldname": "mode_of_payment",
-   "fieldtype": "Link",
-   "label": "Mode of Payment",
-   "options": "Mode of Payment"
-  },
-  {
    "default": "0",
    "fieldname": "is_internal",
    "fieldtype": "Check",
    "label": "Is Internal"
-  },
-  {
-   "fieldname": "cb_37",
-   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -840,10 +802,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_25",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "previous_project",
    "fieldtype": "Link",
    "label": "Previous Project",
@@ -871,11 +829,21 @@
    "fieldname": "sales_summary_html",
    "fieldtype": "HTML",
    "label": "Sales Summary HTML"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "settings_section",
+   "fieldtype": "Section Break",
+   "label": "Settings"
+  },
+  {
+   "fieldname": "project_details_cb_1",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2022-02-03 23:11:31.481270",
+ "modified": "2022-03-30 23:46:42.758050",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

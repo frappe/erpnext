@@ -71,7 +71,7 @@ project_vehicle_status = {"label": "Vehicle Status", "fieldname": "vehicle_statu
 insert_field_after('vehicle_color', project_vehicle_status, applies_to_project_fields)
 
 project_vehicle_readings_section = {"label": "Vehicle Readings & Checklist",
-	"fieldname": "sec_vehicle_status", "fieldtype": "Section Break", "collapsible": 0}
+	"fieldname": "sec_vehicle_status", "fieldtype": "Section Break", "collapsible": 1}
 insert_field_after('vehicle_status', project_vehicle_readings_section, applies_to_project_fields)
 
 applies_to_project_fields += [
@@ -81,7 +81,7 @@ applies_to_project_fields += [
 		"insert_after": "cb_warranty_2"},
 
 	{"label": "Is Periodic Maintenance", "fieldname": "is_periodic_maintenance", "fieldtype": "Check",
-		"insert_after": "previous_project"},
+		"insert_after": "project_type"},
 	{"label": "Is General Repair", "fieldname": "is_general_repair", "fieldtype": "Check",
 		"insert_after": "is_periodic_maintenance"},
 ]
@@ -105,7 +105,7 @@ project_vehicle_reading_fields = [
 		"insert_after": "deliver_vehicle_btn"},
 
 	{"label": "Vehicle Warehouse", "fieldname": "vehicle_warehouse", "fieldtype": "Link", "options": "Warehouse",
-		"insert_after": "cb_vehicle_status_1"},
+		"insert_after": "cb_vehicle_status_1", "read_only": 1},
 	{"label": "Fuel Level (%)", "fieldname": "fuel_level", "fieldtype": "Percent", "precision": 0,
 		"insert_after": "vehicle_warehouse", "no_copy": 1},
 	{"label": "No of Keys", "fieldname": "keys", "fieldtype": "Int",
@@ -152,6 +152,10 @@ service_person_fields = [
 material_request_service_person_fields = deepcopy(service_person_fields)
 [d for d in material_request_service_person_fields if d['fieldname'] == 'service_advisor'][0]['insert_after'] = 'more_info_cb_1'
 [d for d in material_request_service_person_fields if d['fieldname'] == 'service_manager'][0]['insert_after'] = 'more_info_cb_2'
+
+poject_service_person_fields = deepcopy(service_person_fields)
+[d for d in poject_service_person_fields if d['fieldname'] == 'service_advisor'][0]['insert_after'] = 'project_details_cb_1'
+[d for d in poject_service_person_fields if d['fieldname'] == 'service_manager'][0]['insert_after'] = 'service_advisor'
 
 # Accounting Dimensions
 accounting_dimension_fields = [
@@ -266,6 +270,7 @@ data = {
 		{"doctype": "Project", "fieldname": "bill_to", "property": "hidden", "value": 0},
 		{"doctype": "Project", "fieldname": "sec_warranty", "property": "hidden", "value": 0},
 		{"doctype": "Project", "fieldname": "previous_project", "property": "label", "value": "Previous Repair Order"},
+		{"doctype": "Project", "fieldname": "project_name", "property": "label", "value": "Voice of Customer"},
 		{"doctype": "Delivery Note", "fieldname": "received_by_type", "property": "default", "value": "Employee"},
 		{"doctype": "Payment Terms Template", "fieldname": "include_in_vehicle_booking", "property": "hidden", "value": 0},
 		{"doctype": "Transaction Type", "fieldname": "vehicle_booking_defaults_section", "property": "hidden", "value": 0},
@@ -280,7 +285,7 @@ data = {
 		"Purchase Receipt": applies_to_fields,
 		"Purchase Invoice": applies_to_fields,
 		"Material Request": applies_to_fields + material_request_service_person_fields,
-		"Project": project_vehicle_owner_fields + applies_to_project_fields + service_person_fields + project_vehicle_reading_fields,
+		"Project": project_vehicle_owner_fields + applies_to_project_fields + poject_service_person_fields + project_vehicle_reading_fields,
 		"Journal Entry": accounting_dimension_fields,
 		"Journal Entry Account": accounting_dimension_table_fields,
 		"Payment Entry": accounting_dimension_fields,
