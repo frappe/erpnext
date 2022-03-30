@@ -15,6 +15,7 @@ from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update
 class BOMMissingError(frappe.ValidationError):
 	pass
 
+
 class BOMUpdateLog(Document):
 	def validate(self):
 		if self.update_type == "Replace BOM":
@@ -28,7 +29,8 @@ class BOMUpdateLog(Document):
 		if self.update_type == "Replace BOM" and not (self.current_bom and self.new_bom):
 			frappe.throw(
 				msg=_("Please mention the Current and New BOM for replacement."),
-				title=_("Mandatory"), exc=BOMMissingError
+				title=_("Mandatory"),
+				exc=BOMMissingError,
 			)
 
 	def validate_same_bom(self):
@@ -47,19 +49,21 @@ class BOMUpdateLog(Document):
 			return
 
 		if self.update_type == "Replace BOM":
-			boms = {
-				"current_bom": self.current_bom,
-				"new_bom": self.new_bom
-			}
+			boms = {"current_bom": self.current_bom, "new_bom": self.new_bom}
 			frappe.enqueue(
 				method="erpnext.manufacturing.doctype.bom_update_log.bom_update_log.run_bom_job",
-				doc=self, boms=boms, timeout=40000
+				doc=self,
+				boms=boms,
+				timeout=40000,
 			)
 		else:
 			frappe.enqueue(
 				method="erpnext.manufacturing.doctype.bom_update_log.bom_update_log.run_bom_job",
-				doc=self, update_type="Update Cost", timeout=40000
+				doc=self,
+				update_type="Update Cost",
+				timeout=40000,
 			)
+
 
 def replace_bom(boms: Dict) -> None:
 	"""Replace current BOM with new BOM in parent BOMs."""
@@ -69,13 +73,13 @@ def replace_bom(boms: Dict) -> None:
 	unit_cost = get_new_bom_unit_cost(new_bom)
 	update_new_bom(unit_cost, current_bom, new_bom)
 
-	frappe.cache().delete_key('bom_children')
+	frappe.cache().delete_key("bom_children")
 	parent_boms = get_parent_boms(new_bom)
 
 	with click.progressbar(parent_boms) as parent_boms:
 		pass
 	for bom in parent_boms:
-		bom_obj = frappe.get_cached_doc('BOM', bom)
+		bom_obj = frappe.get_cached_doc("BOM", bom)
 		# this is only used for versioning and we do not want
 		# to make separate db calls by using load_doc_before_save
 		# which proves to be expensive while doing bulk replace
@@ -85,34 +89,29 @@ def replace_bom(boms: Dict) -> None:
 		bom_obj.calculate_cost()
 		bom_obj.update_parent_cost()
 		bom_obj.db_update()
-		if bom_obj.meta.get('track_changes') and not bom_obj.flags.ignore_version:
+		if bom_obj.meta.get("track_changes") and not bom_obj.flags.ignore_version:
 			bom_obj.save_version()
+
 
 def update_new_bom(unit_cost: float, current_bom: str, new_bom: str) -> None:
 	bom_item = frappe.qb.DocType("BOM Item")
-	frappe.qb.update(bom_item).set(
-		bom_item.bom_no, new_bom
-	).set(
-		bom_item.rate, unit_cost
-	).set(
+	frappe.qb.update(bom_item).set(bom_item.bom_no, new_bom).set(bom_item.rate, unit_cost).set(
 		bom_item.amount, (bom_item.stock_qty * unit_cost)
 	).where(
-		(bom_item.bom_no == current_bom)
-		& (bom_item.docstatus < 2)
-		& (bom_item.parenttype == "BOM")
+		(bom_item.bom_no == current_bom) & (bom_item.docstatus < 2) & (bom_item.parenttype == "BOM")
 	).run()
+
 
 def get_parent_boms(new_bom: str, bom_list: Optional[List] = None) -> List:
 	bom_list = bom_list or []
 	bom_item = frappe.qb.DocType("BOM Item")
 
-	parents = frappe.qb.from_(bom_item).select(
-		bom_item.parent
-	).where(
-		(bom_item.bom_no == new_bom)
-		& (bom_item.docstatus <2)
-		& (bom_item.parenttype == "BOM")
-	).run(as_dict=True)
+	parents = (
+		frappe.qb.from_(bom_item)
+		.select(bom_item.parent)
+		.where((bom_item.bom_no == new_bom) & (bom_item.docstatus < 2) & (bom_item.parenttype == "BOM"))
+		.run(as_dict=True)
+	)
 
 	for d in parents:
 		if new_bom == d.parent:
@@ -123,17 +122,19 @@ def get_parent_boms(new_bom: str, bom_list: Optional[List] = None) -> List:
 
 	return list(set(bom_list))
 
+
 def get_new_bom_unit_cost(new_bom: str) -> float:
 	bom = frappe.qb.DocType("BOM")
-	new_bom_unitcost = frappe.qb.from_(bom).select(
-		bom.total_cost / bom.quantity
-	).where(
-		bom.name == new_bom
-	).run()
+	new_bom_unitcost = (
+		frappe.qb.from_(bom).select(bom.total_cost / bom.quantity).where(bom.name == new_bom).run()
+	)
 
 	return flt(new_bom_unitcost[0][0])
 
-def run_bom_job(doc: "BOMUpdateLog", boms: Optional[Dict] = None, update_type: Optional[str] = "Replace BOM") -> None:
+
+def run_bom_job(
+	doc: "BOMUpdateLog", boms: Optional[Dict] = None, update_type: Optional[str] = "Replace BOM"
+) -> None:
 	try:
 		doc.db_set("status", "In Progress")
 		if not frappe.flags.in_test:
@@ -152,10 +153,7 @@ def run_bom_job(doc: "BOMUpdateLog", boms: Optional[Dict] = None, update_type: O
 
 	except (Exception, JobTimeoutException):
 		frappe.db.rollback()
-		error_log = frappe.log_error(
-			message=frappe.get_traceback(),
-			title=_("BOM Update Tool Error")
-		)
+		error_log = frappe.log_error(message=frappe.get_traceback(), title=_("BOM Update Tool Error"))
 
 		doc.db_set("status", "Failed")
 		doc.db_set("error_log", error_log.name)
