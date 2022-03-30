@@ -218,7 +218,15 @@ class MaintenanceSchedule(TransactionBase):
 		if not doc_before_save:
 			return
 		for prev_item, item in zip(doc_before_save.items, self.items):
-			fields = ['item_code', 'start_date', 'end_date', 'periodicity', 'sales_person', 'no_of_visits', 'serial_no']
+			fields = [
+				"item_code",
+				"start_date",
+				"end_date",
+				"periodicity",
+				"sales_person",
+				"no_of_visits",
+				"serial_no",
+			]
 			for field in fields:
 				b_doc = prev_item.as_dict()
 				doc = item.as_dict()
