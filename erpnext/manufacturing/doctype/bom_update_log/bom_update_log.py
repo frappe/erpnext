@@ -160,4 +160,4 @@ def run_bom_job(
 
 	finally:
 		frappe.db.auto_commit_on_many_writes = 0
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
