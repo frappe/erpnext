@@ -50,12 +50,19 @@ class TestAccountsReceivable(unittest.TestCase):
 		make_credit_note(name)
 		report = execute(filters)
 
-		expected_data_after_credit_note = [100, 0, 0, 40, -40]
+		expected_data_after_credit_note = [100, 0, 0, 40, -40, "Debtors - _TC2"]
 
 		row = report[1][0]
 		self.assertEqual(
 			expected_data_after_credit_note,
-			[row.invoice_grand_total, row.invoiced, row.paid, row.credit_note, row.outstanding],
+			[
+				row.invoice_grand_total,
+				row.invoiced,
+				row.paid,
+				row.credit_note,
+				row.outstanding,
+				row.party_account,
+			],
 		)
 
 
