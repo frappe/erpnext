@@ -183,7 +183,7 @@
             "search_index": 1
         },
         {
-            "depends_on": "eval:doc.supplier && doc.docstatus===0 && (!(doc.items && doc.items.length) || (doc.items.length==1 && !doc.items[0].item_code))",
+            "depends_on": "eval:!doc.is_subcontracted && doc.supplier && doc.docstatus===0 && (!(doc.items && doc.items.length) || (doc.items.length==1 && !doc.items[0].item_code))",
             "description": "Fetch items based on Default Supplier.",
             "fieldname": "get_items_from_open_material_requests",
             "fieldtype": "Button",
