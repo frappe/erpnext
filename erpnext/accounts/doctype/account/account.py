@@ -204,7 +204,9 @@ class Account(NestedSet):
 		if not self.account_currency:
 			self.account_currency = frappe.get_cached_value("Company", self.company, "default_currency")
 
-		elif self.account_currency != frappe.db.get_value("Account", self.name, "account_currency"):
+		gl_currency = frappe.db.get_value("GL Entry", {"account": self.name}, "account_currency")
+
+		if gl_currency and self.account_currency != gl_currency:
 			if frappe.db.get_value("GL Entry", {"account": self.name}):
 				frappe.throw(_("Currency can not be changed after making entries using some other currency"))
 
