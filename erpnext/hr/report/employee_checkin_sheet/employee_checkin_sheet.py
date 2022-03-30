@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate, cstr, add_days, get_weekday, format_time, formatdate
+from frappe.utils import getdate, cstr, add_days, get_weekday, format_time, formatdate, get_time
 from erpnext.hr.utils import get_holiday_description
 from erpnext.hr.report.monthly_attendance_sheet.monthly_attendance_sheet import get_employee_details,\
 	get_attendance_status_abbr, get_holiday_map, is_date_holiday, get_employee_holiday_list
@@ -91,8 +91,8 @@ def execute(filters=None):
 
 						row['shift_type'] = shift_type
 						if checkins:
-							row['shift_start'] = format_time(checkins[0].shift_start)
-							row['shift_end'] = format_time(checkins[-1].shift_end)
+							row['shift_start'] = get_time(checkins[0].shift_start)
+							row['shift_end'] = get_time(checkins[-1].shift_end)
 
 						if not attendance_details and shift_type and checkins:
 							shift_doc = frappe.get_cached_doc("Shift Type", shift_type)
@@ -192,7 +192,7 @@ def get_columns(filters, checkin_column_count):
 		columns.append({
 			"fieldname": checkin_time_fieldname,
 			"label": _("Checkin {0}").format(i+1),
-			"fieldtype": "Time",
+			"fieldtype": "Data",
 			"width": 85,
 			"checkin_idx": i + 1
 		})
