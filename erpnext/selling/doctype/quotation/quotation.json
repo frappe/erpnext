@@ -33,6 +33,9 @@
   "campaign",
   "opportunity",
   "enq_det",
+  "tax_id",
+  "tax_cnic",
+  "tax_strn",
   "contact_section",
   "customer_address",
   "address_display",
@@ -1389,13 +1392,37 @@
    "fieldname": "has_stin",
    "fieldtype": "Check",
    "label": "Apply Taxes"
+  },
+  {
+   "fetch_from": "customer.tax_id",
+   "fieldname": "tax_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Tax Id",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.tax_cnic",
+   "fieldname": "tax_cnic",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "CNIC",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.tax_strn",
+   "fieldname": "tax_strn",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "STRN",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2022-01-20 14:02:01.017720",
+ "modified": "2022-03-30 18:02:35.343752",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

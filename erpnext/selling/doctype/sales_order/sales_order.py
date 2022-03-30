@@ -827,8 +827,7 @@ def make_purchase_invoice(supplier, source_name, target_doc=None):
 @frappe.whitelist()
 def make_project(source_name, target_doc=None):
 	def postprocess(source, doc):
-		doc.project_type = "External"
-		doc.project_name = source.name
+		pass
 
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
