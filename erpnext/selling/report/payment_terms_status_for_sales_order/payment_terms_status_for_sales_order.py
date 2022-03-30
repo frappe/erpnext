@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _, qb, query_builder
-from frappe.query_builder import functions
+from frappe.query_builder import Criterion, functions
 
 
 def get_columns():
@@ -13,6 +13,12 @@ def get_columns():
 			"fieldname": "name",
 			"fieldtype": "Link",
 			"options": "Sales Order",
+		},
+		{
+			"label": _("Customer"),
+			"fieldname": "customer",
+			"fieldtype": "Link",
+			"options": "Customer",
 		},
 		{
 			"label": _("Posting Date"),
@@ -79,9 +85,27 @@ def get_conditions(filters):
 	conditions.start_date = filters.period_start_date or frappe.utils.add_months(
 		conditions.end_date, -1
 	)
-	conditions.sales_order = filters.sales_order or []
 
 	return conditions
+
+
+def build_filter_criterions(filters):
+	filters = frappe._dict(filters) if filters else frappe._dict({})
+	qb_criterions = []
+
+	if filters.customer_group:
+		qb_criterions.append(qb.DocType("Customer").customer_group == filters.customer_group)
+
+	if filters.customer:
+		qb_criterions.append(qb.DocType("Customer").name == filters.customer)
+
+	if filters.item_group:
+		qb_criterions.append(qb.DocType("Item").item_group == filters.item_group)
+
+	if filters.item:
+		qb_criterions.append(qb.DocType("Item").name == filters.item)
+
+	return qb_criterions
 
 
 def get_so_with_invoices(filters):
@@ -92,16 +116,29 @@ def get_so_with_invoices(filters):
 
 	so = qb.DocType("Sales Order")
 	ps = qb.DocType("Payment Schedule")
+	cust = qb.DocType("Customer")
+	item = qb.DocType("Item")
+	soi = qb.DocType("Sales Order Item")
+
+	conditions = get_conditions(filters)
+	filter_criterions = build_filter_criterions(filters)
+
 	datediff = query_builder.CustomFunction("DATEDIFF", ["cur_date", "due_date"])
 	ifelse = query_builder.CustomFunction("IF", ["condition", "then", "else"])
 
-	conditions = get_conditions(filters)
 	query_so = (
-		qb.from_(so)
+		qb.from_(cust)
+		.join(so)
+		.on(so.customer == cust.name)
+		.join(soi)
+		.on(soi.parent == so.name)
+		.join(item)
+		.on(item.item_code == soi.item_code)
 		.join(ps)
 		.on(ps.parent == so.name)
 		.select(
 			so.name,
+			so.customer,
 			so.transaction_date.as_("submitted"),
 			ifelse(datediff(ps.due_date, functions.CurDate()) < 0, "Overdue", "Unpaid").as_("status"),
 			ps.payment_term,
@@ -117,11 +154,9 @@ def get_so_with_invoices(filters):
 			& (so.company == conditions.company)
 			& (so.transaction_date[conditions.start_date : conditions.end_date])
 		)
+		.where(Criterion.all(filter_criterions))
 		.orderby(so.name, so.transaction_date, ps.due_date)
 	)
-
-	if conditions.sales_order != []:
-		query_so = query_so.where(so.name.isin(conditions.sales_order))
 
 	sorders = query_so.run(as_dict=True)
 
