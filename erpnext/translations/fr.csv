@@ -9861,3 +9861,8 @@ Action If Quality Inspection Is Rejected,Action si l'inspection qualité est rej
 Disable Serial No And Batch Selector,Désactiver le sélecteur de numéro de lot/série
 Is Rate Adjustment Entry (Debit Note),Est un justement du prix de la note de débit
 Issue a debit note with 0 qty against an existing Sales Invoice,Creer une note de débit avec une quatité à O pour la facture
+Control Historical Stock Transactions,Controle de l&#39;historique des stransaction de stock
+No stock transactions can be created or modified before this date.,Aucune transaction ne peux être créée ou modifié avant cette date.
+Stock transactions that are older than the mentioned days cannot be modified.,Les transactions de stock plus ancienne que le nombre de jours ci-dessus ne peuvent être modifiées
+Role Allowed to Create/Edit Back-dated Transactions,Rôle autorisé à créer et modifier des transactions anti-datée
+If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.,LEs utilisateur de ce role pourront creer et modifier des transactions dans le passé. Si vide tout les utilisateurs pourrons le faire
