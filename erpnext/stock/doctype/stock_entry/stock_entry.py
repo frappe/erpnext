@@ -1383,8 +1383,8 @@ class StockEntry(StockController):
 	def set_scrap_items(self):
 		if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:
 			scrap_item_dict = self.get_bom_scrap_material(self.fg_completed_qty)
-			for item in itervalues(scrap_item_dict):
-				item.idx = ""
+
+			for item in scrap_item_dict.values():
 				if self.pro_doc and self.pro_doc.scrap_warehouse:
 					item["to_warehouse"] = self.pro_doc.scrap_warehouse
 
@@ -1900,7 +1900,6 @@ class StockEntry(StockController):
 			se_child.is_process_loss = item_row.get("is_process_loss", 0)
 
 			for field in [
-				"idx",
 				"po_detail",
 				"original_item",
 				"expense_account",
