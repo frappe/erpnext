@@ -147,6 +147,8 @@ class AdditionalSalary(Document):
 
 @frappe.whitelist()
 def get_additional_salaries(employee, start_date, end_date, component_type):
+	from frappe.query_builder import Criterion
+
 	comp_type = "Earning" if component_type == "earnings" else "Deduction"
 
 	additional_sal = frappe.qb.DocType("Additional Salary")
@@ -170,8 +172,23 @@ def get_additional_salaries(employee, start_date, end_date, component_type):
 			& (additional_sal.type == comp_type)
 		)
 		.where(
-			additional_sal.payroll_date[start_date:end_date]
-			| ((additional_sal.from_date <= end_date) & (additional_sal.to_date >= end_date))
+			Criterion.any(
+				[
+					Criterion.all(
+						[  # is recurring and additional salary dates fall within the payroll period
+							additional_sal.is_recurring == 1,
+							additional_sal.from_date <= end_date,
+							additional_sal.to_date >= end_date,
+						]
+					),
+					Criterion.all(
+						[  # is not recurring and additional salary's payroll date falls within the payroll period
+							additional_sal.is_recurring == 0,
+							additional_sal.payroll_date[start_date:end_date],
+						]
+					),
+				]
+			)
 		)
 		.run(as_dict=True)
 	)
