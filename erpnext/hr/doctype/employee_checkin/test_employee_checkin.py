@@ -212,7 +212,7 @@ class TestEmployeeCheckin(FrappeTestCase):
 		date = getdate()
 		from_date = get_year_start(date)
 		to_date = get_year_ending(date)
-		holiday_list = make_holiday_list()
+		holiday_list = make_holiday_list(from_date=from_date, to_date=to_date)
 
 		employee = make_employee("test_shift_with_holiday@example.com", company="_Test Company")
 		setup_shift_type(shift_type="Test Holiday Shift", holiday_list=holiday_list)

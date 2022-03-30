@@ -24,7 +24,7 @@ class TestMonthlyAttendanceSheet(FrappeTestCase):
 		date = getdate()
 		from_date = get_year_start(date)
 		to_date = get_year_ending(date)
-		make_holiday_list(start_date=from_date, to_date=to_date)
+		make_holiday_list(from_date=from_date, to_date=to_date)
 
 	@set_holiday_list("Salary Slip Test Holiday List", "_Test Company")
 	def test_monthly_attendance_sheet_report(self):
