@@ -266,9 +266,14 @@ class PaymentEntry(AccountsController):
 		if self.paid_from_account_currency == self.paid_to_account_currency:
 			return
 
-		if self.payment_type == "Receive" and \
-				flt(self.paid_amount * self.source_exchange_rate, self.precision('source_exchange_rate')) != self.received_amount \
-				or self.payment_type == "Pay" and flt(self.received_amount * self.target_exchange_rate, self.precision('received_amount')) != self.paid_amount:
+		if (
+			self.payment_type == "Receive"
+			and flt(self.paid_amount * self.source_exchange_rate, self.precision("source_exchange_rate"))
+			!= self.received_amount
+			or self.payment_type == "Pay"
+			and flt(self.received_amount * self.target_exchange_rate, self.precision("received_amount"))
+			!= self.paid_amount
+		):
 			frappe.throw(_("Invalid Exchange Rate"))
 
 	def set_exchange_rate(self, ref_doc=None):
