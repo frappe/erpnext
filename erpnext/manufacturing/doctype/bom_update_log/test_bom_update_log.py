@@ -46,6 +46,12 @@ class TestBOMUpdateLog(FrappeTestCase):
 		with self.assertRaises(BOMMissingError):
 			enqueue_replace_bom(boms={})
 
+		with self.assertRaises(frappe.ValidationError):
+			enqueue_replace_bom(boms=frappe._dict(current_bom=self.boms.new_bom, new_bom=self.boms.new_bom))
+
+		with self.assertRaises(frappe.ValidationError):
+			enqueue_replace_bom(boms=frappe._dict(current_bom=self.boms.new_bom, new_bom="Dummy BOM"))
+
 	def test_bom_update_log_queueing(self):
 		"Test if BOM Update Log is created and queued."
 
