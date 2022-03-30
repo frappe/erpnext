@@ -302,27 +302,6 @@ def validate_cwip_accounts(gl_map):
 				)
 
 
-def get_debit_credit_difference(gl_map, precision):
-	debit_credit_diff = 0.0
-	for entry in gl_map:
-		entry.debit = flt(entry.debit, precision)
-		entry.credit = flt(entry.credit, precision)
-		debit_credit_diff += entry.debit - entry.credit
-
-	debit_credit_diff = flt(debit_credit_diff, precision)
-
-	return debit_credit_diff
-
-
-def get_debit_credit_allowance(voucher_type, precision):
-	if voucher_type in ("Journal Entry", "Payment Entry"):
-		allowance = 5.0 / (10**precision)
-	else:
-		allowance = 0.5
-
-	return allowance
-
-
 def process_debit_credit_difference(gl_map):
 	precision = get_field_precision(
 		frappe.get_meta("GL Entry").get_field("debit"),
@@ -343,6 +322,27 @@ def process_debit_credit_difference(gl_map):
 	debit_credit_diff = get_debit_credit_difference(gl_map, precision)
 	if abs(debit_credit_diff) > allowance:
 		raise_debit_credit_not_equal_error(debit_credit_diff, voucher_type, gl_map[0].voucher_no)
+
+
+def get_debit_credit_difference(gl_map, precision):
+	debit_credit_diff = 0.0
+	for entry in gl_map:
+		entry.debit = flt(entry.debit, precision)
+		entry.credit = flt(entry.credit, precision)
+		debit_credit_diff += entry.debit - entry.credit
+
+	debit_credit_diff = flt(debit_credit_diff, precision)
+
+	return debit_credit_diff
+
+
+def get_debit_credit_allowance(voucher_type, precision):
+	if voucher_type in ("Journal Entry", "Payment Entry"):
+		allowance = 5.0 / (10**precision)
+	else:
+		allowance = 0.5
+
+	return allowance
 
 
 def raise_debit_credit_not_equal_error(debit_credit_diff, voucher_type, voucher_no):
