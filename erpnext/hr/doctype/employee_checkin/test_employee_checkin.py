@@ -6,7 +6,15 @@ from datetime import datetime, timedelta
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, get_time, getdate, now_datetime, nowdate
+from frappe.utils import (
+	add_days,
+	get_time,
+	get_year_ending,
+	get_year_start,
+	getdate,
+	now_datetime,
+	nowdate,
+)
 
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.employee_checkin.employee_checkin import (
@@ -15,6 +23,7 @@ from erpnext.hr.doctype.employee_checkin.employee_checkin import (
 	mark_attendance_and_link_log,
 )
 from erpnext.hr.doctype.leave_application.test_leave_application import get_first_sunday
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_holiday_list
 
 
 class TestEmployeeCheckin(FrappeTestCase):
@@ -200,13 +209,15 @@ class TestEmployeeCheckin(FrappeTestCase):
 		self.assertEqual(log.shift_actual_end, datetime.combine(date, get_time("02:00:00")))
 
 	def test_no_shift_fetched_on_a_holiday(self):
-		employee = make_employee("test_shift_with_holiday@example.com", company="_Test Company")
-		setup_shift_type(
-			shift_type="Test Holiday Shift", holiday_list="Salary Slip Test Holiday List"
-		)
 		date = getdate()
+		from_date = get_year_start(date)
+		to_date = get_year_ending(date)
+		holiday_list = make_holiday_list()
 
-		first_sunday = get_first_sunday("Salary Slip Test Holiday List", for_date=date)
+		employee = make_employee("test_shift_with_holiday@example.com", company="_Test Company")
+		setup_shift_type(shift_type="Test Holiday Shift", holiday_list=holiday_list)
+
+		first_sunday = get_first_sunday(holiday_list, for_date=date)
 		timestamp = datetime.combine(first_sunday, get_time("08:00:00"))
 		log = make_checkin(employee, timestamp)
 

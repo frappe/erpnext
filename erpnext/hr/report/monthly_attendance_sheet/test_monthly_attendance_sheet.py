@@ -8,7 +8,10 @@ from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.holiday_list.test_holiday_list import set_holiday_list
 from erpnext.hr.doctype.leave_application.test_leave_application import make_allocation_record
 from erpnext.hr.report.monthly_attendance_sheet.monthly_attendance_sheet import execute
-from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_leave_application
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
+	make_holiday_list,
+	make_leave_application,
+)
 
 test_dependencies = ["Shift Type"]
 
@@ -17,6 +20,11 @@ class TestMonthlyAttendanceSheet(FrappeTestCase):
 	def setUp(self):
 		self.employee = make_employee("test_employee@example.com", company="_Test Company")
 		frappe.db.delete("Attendance")
+
+		date = getdate()
+		from_date = get_year_start(date)
+		to_date = get_year_ending(date)
+		make_holiday_list(start_date=from_date, to_date=to_date)
 
 	@set_holiday_list("Salary Slip Test Holiday List", "_Test Company")
 	def test_monthly_attendance_sheet_report(self):
