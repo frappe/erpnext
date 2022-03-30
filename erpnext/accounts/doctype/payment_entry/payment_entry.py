@@ -65,6 +65,7 @@ class PaymentEntry(AccountsController):
 		self.validate_party_details()
 		self.validate_bank_accounts()
 		self.set_exchange_rate()
+		self.validate_exchange_rate()
 		self.validate_mandatory()
 		self.validate_reference_documents()
 		self.set_tax_withholding()
@@ -260,6 +261,15 @@ class PaymentEntry(AccountsController):
 		account_type = frappe.db.get_value("Account", account, "account_type")
 		# if account_type not in account_types:
 		# 	frappe.throw(_("Account Type for {0} must be {1}").format(account, comma_or(account_types)))
+
+	def validate_exchange_rate(self):
+		if self.paid_from_account_currency == self.paid_to_account_currency:
+			return
+
+		if self.payment_type == "Receive" and \
+				flt(self.paid_amount * self.source_exchange_rate, self.precision('source_exchange_rate')) != self.received_amount \
+				or self.payment_type == "Pay" and flt(self.received_amount * self.target_exchange_rate, self.precision('received_amount')) != self.paid_amount:
+			frappe.throw("Invalid Exchange Rate")
 
 	def set_exchange_rate(self, ref_doc=None):
 		self.set_source_exchange_rate(ref_doc)
