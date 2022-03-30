@@ -532,7 +532,8 @@ frappe.ui.form.on('Payment Entry', {
 				to_currency: to_currency
 			},
 			callback: function(r, rt) {
-				frm.set_value(exchange_rate_field, r.message);
+				const ex_rate = flt(r.message, frm.get_field(exchange_rate_field).get_precision());
+				frm.set_value(exchange_rate_field, ex_rate);
 			}
 		})
 	},
