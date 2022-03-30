@@ -13,6 +13,8 @@ test_records = frappe.get_test_records("BOM")
 
 
 class TestBOMUpdateTool(FrappeTestCase):
+	"Test major functions run via BOM Update Tool."
+
 	def test_replace_bom(self):
 		current_bom = "BOM-_Test Item Home Desktop Manufactured-001"
 
