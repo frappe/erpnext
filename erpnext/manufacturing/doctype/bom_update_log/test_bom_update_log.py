@@ -36,7 +36,9 @@ class TestBOMUpdateLog(FrappeTestCase):
 			frappe.db.delete("BOM Update Log")
 			self.new_bom_doc.cancel()
 			self.new_bom_doc.delete()
-			frappe.db.commit()  # explicitly commit and restore to original state
+
+			# explicitly commit and restore to original state
+			frappe.db.commit()  # nosemgrep
 
 	def test_bom_update_log_validate(self):
 		"Test if BOM presence is validated."

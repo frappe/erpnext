@@ -78,7 +78,7 @@ frappe.ui.form.on('BOM Update Tool', {
 	confirm_job_start: (frm, log_data) => {
 		let log_link = frappe.utils.get_form_link("BOM Update Log", log_data.name, true);
 		frappe.msgprint({
-			"message": __(`BOM Updation is queued and may take a few minutes. Check ${log_link} for progress.`),
+			"message": __("BOM Updation is queued and may take a few minutes. Check {0} for progress.", [log_link]),
 			"title": __("BOM Update Initiated"),
 			"indicator": "blue"
 		});
