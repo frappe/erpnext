@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import json
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Literal, Optional, Union
 
 if TYPE_CHECKING:
 	from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import BOMUpdateLog
@@ -205,8 +205,17 @@ def update_cost() -> None:
 	for bom in bom_list:
 		frappe.get_doc("BOM", bom).update_cost(update_parent=False, from_child_bom=True)
 
+<<<<<<< HEAD
 def create_bom_update_log(boms: Optional[Dict] = None, update_type: str = "Replace BOM") -> "BOMUpdateLog":
+=======
+
+def create_bom_update_log(
+	boms: Optional[Dict[str, str]] = None,
+	update_type: Literal["Replace BOM", "Update Cost"] = "Replace BOM",
+) -> "BOMUpdateLog":
+>>>>>>> 620575a901 (fix: Type Annotations, Redundancy, etc.)
 	"""Creates a BOM Update Log that handles the background job."""
+
 	boms = boms or {}
 	current_bom = boms.get("current_bom")
 	new_bom = boms.get("new_bom")
