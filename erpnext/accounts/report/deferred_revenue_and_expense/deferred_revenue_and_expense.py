@@ -361,7 +361,8 @@ class Deferred_Revenue_and_Expense_Report(object):
 					"fieldname": period.key,
 					"fieldtype": "Currency",
 					"read_only": 1,
-				})
+				}
+			)
 		return columns
 
 	def generate_report_data(self):
@@ -408,11 +409,9 @@ class Deferred_Revenue_and_Expense_Report(object):
 		}
 
 		if self.filters.with_upcoming_postings:
-			chart["data"]["datasets"].append({
-				"name": "Expected",
-				"chartType": "line",
-				"values": [x.total for x in self.period_total]
-			})
+			chart["data"]["datasets"].append(
+				{"name": "Expected", "chartType": "line", "values": [x.total for x in self.period_total]}
+			)
 
 		return chart
 

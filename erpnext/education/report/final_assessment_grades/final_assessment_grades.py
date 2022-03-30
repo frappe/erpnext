@@ -22,7 +22,9 @@ def execute(filters=None):
 	assessment_group = args["assessment_group"] = filters.get("assessment_group")
 
 	student_group = filters.get("student_group")
-	args.students = frappe.db.sql_list("select student from `tabStudent Group Student` where parent=%s", (student_group))
+	args.students = frappe.db.sql_list(
+		"select student from `tabStudent Group Student` where parent=%s", (student_group)
+	)
 
 	values = get_formatted_result(args, get_course=True)
 	student_details = values.get("student_details")
@@ -37,8 +39,12 @@ def execute(filters=None):
 			for course in course_dict:
 				scrub_course = frappe.scrub(course)
 				if assessment_group in assessment_result[student][course]:
-					student_row["grade_" + scrub_course] = assessment_result[student][course][assessment_group]["Total Score"]["grade"]
-					student_row["score_" + scrub_course] = assessment_result[student][course][assessment_group]["Total Score"]["score"]
+					student_row["grade_" + scrub_course] = assessment_result[student][course][assessment_group][
+						"Total Score"
+					]["grade"]
+					student_row["score_" + scrub_course] = assessment_result[student][course][assessment_group][
+						"Total Score"
+					]["score"]
 
 					# create the list of possible grades
 					if student_row["grade_" + scrub_course] not in grades:
@@ -59,31 +65,32 @@ def execute(filters=None):
 
 
 def get_column(course_dict):
-	columns = [{
-		"fieldname": "student",
-		"label": _("Student ID"),
-		"fieldtype": "Link",
-		"options": "Student",
-		"width": 90
-	},
-	{
-		"fieldname": "student_name",
-		"label": _("Student Name"),
-		"fieldtype": "Data",
-		"width": 160
-	}]
+	columns = [
+		{
+			"fieldname": "student",
+			"label": _("Student ID"),
+			"fieldtype": "Link",
+			"options": "Student",
+			"width": 90,
+		},
+		{"fieldname": "student_name", "label": _("Student Name"), "fieldtype": "Data", "width": 160},
+	]
 	for course in course_dict:
-		columns.append({
-			"fieldname": "grade_" + frappe.scrub(course),
-			"label": course,
-			"fieldtype": "Data",
-			"width": 110
-		})
-		columns.append({
-			"fieldname": "score_" + frappe.scrub(course),
-			"label": "Score(" + str(course_dict[course]) + ")",
-			"fieldtype": "Float",
-			"width": 100
-		})
+		columns.append(
+			{
+				"fieldname": "grade_" + frappe.scrub(course),
+				"label": course,
+				"fieldtype": "Data",
+				"width": 110,
+			}
+		)
+		columns.append(
+			{
+				"fieldname": "score_" + frappe.scrub(course),
+				"label": "Score(" + str(course_dict[course]) + ")",
+				"fieldtype": "Float",
+				"width": 100,
+			}
+		)
 
 	return columns

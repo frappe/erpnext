@@ -16,7 +16,6 @@ stock_queue_generator = st.lists(st.tuples(qty_gen, value_gen), min_size=10)
 
 
 class TestFIFOValuation(unittest.TestCase):
-
 	def setUp(self):
 		self.queue = FIFOValuation([])
 
@@ -29,7 +28,9 @@ class TestFIFOValuation(unittest.TestCase):
 		self.assertAlmostEqual(sum(q for q, _ in self.queue), qty, msg=f"queue: {self.queue}", places=4)
 
 	def assertTotalValue(self, value):
-		self.assertAlmostEqual(sum(q * r for q, r in self.queue), value, msg=f"queue: {self.queue}", places=2)
+		self.assertAlmostEqual(
+			sum(q * r for q, r in self.queue), value, msg=f"queue: {self.queue}", places=2
+		)
 
 	def test_simple_addition(self):
 		self.queue.add_stock(1, 10)
@@ -55,7 +56,6 @@ class TestFIFOValuation(unittest.TestCase):
 		self.queue.add_stock(6, 10)
 		self.assertEqual(self.queue, [[1, 10]])
 
-
 	def test_negative_stock(self):
 		self.queue.remove_stock(1, 5)
 		self.assertEqual(self.queue, [[-1, 5]])
@@ -75,7 +75,6 @@ class TestFIFOValuation(unittest.TestCase):
 		self.queue.remove_stock(1, 20)
 		self.assertEqual(self.queue, [[1, 10]])
 
-
 	def test_remove_multiple_bins(self):
 		self.queue.add_stock(1, 10)
 		self.queue.add_stock(2, 20)
@@ -84,7 +83,6 @@ class TestFIFOValuation(unittest.TestCase):
 
 		self.queue.remove_stock(4)
 		self.assertEqual(self.queue, [[5, 20]])
-
 
 	def test_remove_multiple_bins_with_rate(self):
 		self.queue.add_stock(1, 10)
@@ -143,7 +141,9 @@ class TestFIFOValuation(unittest.TestCase):
 			else:
 				qty = abs(qty)
 				consumed = self.queue.remove_stock(qty)
-				self.assertAlmostEqual(qty, sum(q for q, _ in consumed), msg=f"incorrect consumption {consumed}")
+				self.assertAlmostEqual(
+					qty, sum(q for q, _ in consumed), msg=f"incorrect consumption {consumed}"
+				)
 				total_qty -= qty
 			self.assertTotalQty(total_qty)
 
@@ -164,7 +164,9 @@ class TestFIFOValuation(unittest.TestCase):
 			else:
 				qty = abs(qty)
 				consumed = self.queue.remove_stock(qty)
-				self.assertAlmostEqual(qty, sum(q for q, _ in consumed), msg=f"incorrect consumption {consumed}")
+				self.assertAlmostEqual(
+					qty, sum(q for q, _ in consumed), msg=f"incorrect consumption {consumed}"
+				)
 				total_qty -= qty
 				total_value -= sum(q * r for q, r in consumed)
 			self.assertTotalQty(total_qty)
@@ -172,7 +174,6 @@ class TestFIFOValuation(unittest.TestCase):
 
 
 class TestLIFOValuation(unittest.TestCase):
-
 	def setUp(self):
 		self.stack = LIFOValuation([])
 
@@ -185,7 +186,9 @@ class TestLIFOValuation(unittest.TestCase):
 		self.assertAlmostEqual(sum(q for q, _ in self.stack), qty, msg=f"stack: {self.stack}", places=4)
 
 	def assertTotalValue(self, value):
-		self.assertAlmostEqual(sum(q * r for q, r in self.stack), value, msg=f"stack: {self.stack}", places=2)
+		self.assertAlmostEqual(
+			sum(q * r for q, r in self.stack), value, msg=f"stack: {self.stack}", places=2
+		)
 
 	def test_simple_addition(self):
 		self.stack.add_stock(1, 10)
@@ -248,7 +251,6 @@ class TestLIFOValuation(unittest.TestCase):
 		consumed = self.stack.remove_stock(5)
 		self.assertEqual(consumed, [[5, 5]])
 
-
 	@given(stock_queue_generator)
 	def test_lifo_qty_hypothesis(self, stock_stack):
 		self.stack = LIFOValuation([])
@@ -263,7 +265,9 @@ class TestLIFOValuation(unittest.TestCase):
 			else:
 				qty = abs(qty)
 				consumed = self.stack.remove_stock(qty)
-				self.assertAlmostEqual(qty, sum(q for q, _ in consumed), msg=f"incorrect consumption {consumed}")
+				self.assertAlmostEqual(
+					qty, sum(q for q, _ in consumed), msg=f"incorrect consumption {consumed}"
+				)
 				total_qty -= qty
 			self.assertTotalQty(total_qty)
 
@@ -284,11 +288,14 @@ class TestLIFOValuation(unittest.TestCase):
 			else:
 				qty = abs(qty)
 				consumed = self.stack.remove_stock(qty)
-				self.assertAlmostEqual(qty, sum(q for q, _ in consumed), msg=f"incorrect consumption {consumed}")
+				self.assertAlmostEqual(
+					qty, sum(q for q, _ in consumed), msg=f"incorrect consumption {consumed}"
+				)
 				total_qty -= qty
 				total_value -= sum(q * r for q, r in consumed)
 			self.assertTotalQty(total_qty)
 			self.assertTotalValue(total_value)
+
 
 class TestLIFOValuationSLE(FrappeTestCase):
 	ITEM_CODE = "_Test LIFO item"
@@ -309,7 +316,9 @@ class TestLIFOValuationSLE(FrappeTestCase):
 		return make_stock_entry(**kwargs)
 
 	def assertStockQueue(self, se, expected_queue):
-		sle_name = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": se.name, "is_cancelled": 0, "voucher_type": "Stock Entry"})
+		sle_name = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": se.name, "is_cancelled": 0, "voucher_type": "Stock Entry"}
+		)
 		sle = frappe.get_doc("Stock Ledger Entry", sle_name)
 
 		stock_queue = json.loads(sle.stock_queue)
@@ -320,7 +329,6 @@ class TestLIFOValuationSLE(FrappeTestCase):
 
 		if total_qty > 0:
 			self.assertEqual(stock_queue, expected_queue)
-
 
 	def test_lifo_values(self):
 
@@ -340,7 +348,7 @@ class TestLIFOValuationSLE(FrappeTestCase):
 		self.assertStockQueue(out2, [[1, 1]])
 
 		in4 = self._make_stock_entry(4, 4)
-		self.assertStockQueue(in4, [[1, 1], [4,4]])
+		self.assertStockQueue(in4, [[1, 1], [4, 4]])
 
 		out3 = self._make_stock_entry(-5)
 		self.assertStockQueue(out3, [])

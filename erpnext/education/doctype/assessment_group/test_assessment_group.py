@@ -5,5 +5,6 @@ import unittest
 
 # test_records = frappe.get_test_records('Assessment Group')
 
+
 class TestAssessmentGroup(unittest.TestCase):
 	pass

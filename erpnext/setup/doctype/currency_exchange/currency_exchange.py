@@ -17,13 +17,17 @@ class CurrencyExchange(Document):
 
 		# If both selling and buying enabled
 		purpose = "Selling-Buying"
-		if cint(self.for_buying)==0 and cint(self.for_selling)==1:
+		if cint(self.for_buying) == 0 and cint(self.for_selling) == 1:
 			purpose = "Selling"
-		if cint(self.for_buying)==1 and cint(self.for_selling)==0:
+		if cint(self.for_buying) == 1 and cint(self.for_selling) == 0:
 			purpose = "Buying"
 
-		self.name = '{0}-{1}-{2}{3}'.format(formatdate(get_datetime_str(self.date), "yyyy-MM-dd"),
-			self.from_currency, self.to_currency, ("-" + purpose) if purpose else "")
+		self.name = "{0}-{1}-{2}{3}".format(
+			formatdate(get_datetime_str(self.date), "yyyy-MM-dd"),
+			self.from_currency,
+			self.to_currency,
+			("-" + purpose) if purpose else "",
+		)
 
 	def validate(self):
 		self.validate_value("exchange_rate", ">", 0)
