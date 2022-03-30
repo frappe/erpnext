@@ -1315,7 +1315,7 @@ def get_serial_nos_for_job_card(row, wo_doc):
 		used_serial_nos.extend(get_serial_nos(d.serial_no))
 
 	serial_nos = sorted(list(set(serial_nos) - set(used_serial_nos)))
-	row.serial_no = "\n".join(serial_nos[0 : row.job_card_qty])
+	row.serial_no = "\n".join(serial_nos[0 : cint(row.job_card_qty)])
 
 
 def validate_operation_data(row):
