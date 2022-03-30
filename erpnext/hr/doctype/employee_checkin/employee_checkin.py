@@ -31,11 +31,21 @@ class EmployeeCheckin(Document):
 			)
 
 	def fetch_shift(self):
-		shift_actual_timings = get_actual_start_end_datetime_of_shift(self.employee, get_datetime(self.time), True)
+		shift_actual_timings = get_actual_start_end_datetime_of_shift(
+			self.employee, get_datetime(self.time), True
+		)
 		if shift_actual_timings:
-			if shift_actual_timings.shift_type.determine_check_in_and_check_out == 'Strictly based on Log Type in Employee Checkin' \
-				and not self.log_type and not self.skip_auto_attendance:
-				frappe.throw(_('Log Type is required for check-ins falling in the shift: {0}.').format(shift_actual_timings.shift_type.name))
+			if (
+				shift_actual_timings.shift_type.determine_check_in_and_check_out
+				== "Strictly based on Log Type in Employee Checkin"
+				and not self.log_type
+				and not self.skip_auto_attendance
+			):
+				frappe.throw(
+					_("Log Type is required for check-ins falling in the shift: {0}.").format(
+						shift_actual_timings.shift_type.name
+					)
+				)
 			if not self.attendance:
 				self.shift = shift_actual_timings.shift_type.name
 				self.shift_actual_start = shift_actual_timings.actual_start
@@ -125,8 +135,8 @@ def mark_attendance_and_link_log(
 			("1", log_names),
 		)
 		return None
-	elif attendance_status in ('Present', 'Absent', 'Half Day'):
-		employee_doc = frappe.get_doc('Employee', employee)
+	elif attendance_status in ("Present", "Absent", "Half Day"):
+		employee_doc = frappe.get_doc("Employee", employee)
 		if not get_duplicate_attendance_record(employee, attendance_date, shift):
 			doc_dict = {
 				"doctype": "Attendance",
