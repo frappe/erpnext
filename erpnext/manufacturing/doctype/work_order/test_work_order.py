@@ -1114,7 +1114,10 @@ class TestWorkOrder(FrappeTestCase):
 		except frappe.MandatoryError:
 			self.fail("Batch generation causing failing in Work Order")
 
-	@change_settings("Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"})
+	@change_settings(
+		"Manufacturing Settings",
+		{"backflush_raw_materials_based_on": "Material Transferred for Manufacture"},
+	)
 	def test_manufacture_entry_mapped_idx_with_exploded_bom(self):
 		"""Test if WO containing BOM with partial exploded items and scrap items, maps idx correctly."""
 		test_stock_entry.make_stock_entry(
@@ -1140,6 +1143,7 @@ class TestWorkOrder(FrappeTestCase):
 
 		for index, row in enumerate(ste_manu.get("items"), start=1):
 			self.assertEqual(index, row.idx)
+
 
 def update_job_card(job_card, jc_qty=None):
 	employee = frappe.db.get_value("Employee", {"status": "Active"}, "name")
