@@ -27,28 +27,64 @@ function get_filters() {
 			"default": frappe.datetime.get_today()
 		},
 		{
-			"fieldname":"sales_order",
-			"label": __("Sales Order"),
-			"fieldtype": "MultiSelectList",
+			"fieldname":"customer_group",
+			"label": __("Customer Group"),
+			"fieldtype": "Link",
 			"width": 100,
-			"options": "Sales Order",
-			"get_data": function(txt) {
-				return frappe.db.get_link_options("Sales Order", txt, this.filters());
-			},
-			"filters": () => {
+			"options": "Customer Group",
+			"get_query": () => {
 				return {
-					docstatus: 1,
-					payment_terms_template: ['not in', ['']],
-					company: frappe.query_report.get_filter_value("company"),
-					transaction_date: ['between', [frappe.query_report.get_filter_value("period_start_date"), frappe.query_report.get_filter_value("period_end_date")]]
+					filters: { 'is_group': 0 }
 				}
-			},
-			on_change: function(){
-				frappe.query_report.refresh();
+			}
+
+		},
+		{
+			"fieldname":"customer",
+			"label": __("Customer"),
+			"fieldtype": "Link",
+			"width": 100,
+			"options": "Customer",
+			"get_query": () => {
+				filters = {
+					'disabled':  0
+				}
+				if(frappe.query_report.get_filter_value("customer_group") != "") {
+					filters['customer_group'] = frappe.query_report.get_filter_value("customer_group");
+				}
+				return { 'filters': filters };
+			}
+		},
+		{
+			"fieldname":"item_group",
+			"label": __("Item Group"),
+			"fieldtype": "Link",
+			"width": 100,
+			"options": "Item Group",
+			"get_query": () => {
+				return {
+					filters: { 'is_group': 0 }
+				}
+			}
+
+		},
+		{
+			"fieldname":"item",
+			"label": __("Item"),
+			"fieldtype": "Link",
+			"width": 100,
+			"options": "Item",
+			"get_query": () => {
+				filters = {
+					'disabled':  0
+				}
+				if(frappe.query_report.get_filter_value("item_group") != "") {
+					filters['item_group'] = frappe.query_report.get_filter_value("item_group");
+				}
+				return { 'filters': filters };
 			}
 		}
 	]
-
 	return filters;
 }
 
