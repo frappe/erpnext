@@ -580,60 +580,60 @@ def get_requested_item_qty(sales_order):
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
 
-    ignore_available_qty = frappe.flags.args.ignore_available_qty
-    requested_item_qty = get_requested_item_qty(source_name)
+	ignore_available_qty = frappe.flags.args.ignore_available_qty
+	requested_item_qty = get_requested_item_qty(source_name)
 
-    if ignore_available_qty:
-        condition = lambda doc: not frappe.db.exists('Product Bundle', doc.item_code) \
-                    and doc.stock_qty > requested_item_qty.get(doc.name, 0)
-    else:
-        condition = lambda doc: not frappe.db.exists('Product Bundle', doc.item_code) \
-                    and doc.stock_qty > requested_item_qty.get(doc.name, 0) \
-                    and get_projected_qty(doc.item_code, doc.warehouse)['projected_qty'] < 0
+	if ignore_available_qty:
+		condition = lambda doc: not frappe.db.exists('Product Bundle', doc.item_code) \
+					and doc.stock_qty > requested_item_qty.get(doc.name, 0)
+	else:
+		condition = lambda doc: not frappe.db.exists('Product Bundle', doc.item_code) \
+					and doc.stock_qty > requested_item_qty.get(doc.name, 0) \
+					and get_projected_qty(doc.item_code, doc.warehouse)['projected_qty'] < 0
 
-    def postprocess(source, target):
-        if not target.get('items'):
-            frappe.throw(_('Items have already been requested/ordered.'))
+	def postprocess(source, target):
+		if not target.get('items'):
+			frappe.throw(_('Items have already been requested/ordered.'))
 
-    def update_item(source, target, source_parent):
-        # qty is for packed items, because packed items don't have stock_qty field
-        qty = source.get("qty")
-        target.project = source_parent.project
-        projected_qty = get_projected_qty(source.get('item_code'), source.get('warehouse'))['projected_qty']
-        if not ignore_available_qty:
-            target.qty = qty
-        else:
-            target.qty = qty - requested_item_qty.get(source.name, 0)
+	def update_item(source, target, source_parent):
+		# qty is for packed items, because packed items don't have stock_qty field
+		qty = source.get("qty")
+		target.project = source_parent.project
+		projected_qty = get_projected_qty(source.get('item_code'), source.get('warehouse'))['projected_qty']
+		if not ignore_available_qty:
+			target.qty = qty
+		else:
+			target.qty = qty - requested_item_qty.get(source.name, 0)
 
-        target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
+		target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
 
-    doc = get_mapped_doc("Sales Order", source_name, {
-        "Sales Order": {
-            "doctype": "Material Request",
-            "validation": {
-                "docstatus": ["=", 1]
-            }
-        },
-        "Packed Item": {
-            "doctype": "Material Request Item",
-            "field_map": {
-                "parent": "sales_order",
-                "uom": "stock_uom"
-            },
-            "postprocess": update_item
-        },
-        "Sales Order Item": {
-            "doctype": "Material Request Item",
-            "field_map": {
-                "name": "sales_order_item",
-                "parent": "sales_order"
-            },
-            "condition": condition,
-            "postprocess": update_item
-        }
-    }, target_doc, postprocess)
+	doc = get_mapped_doc("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Material Request",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Packed Item": {
+			"doctype": "Material Request Item",
+			"field_map": {
+				"parent": "sales_order",
+				"uom": "stock_uom"
+			},
+			"postprocess": update_item
+		},
+		"Sales Order Item": {
+			"doctype": "Material Request Item",
+			"field_map": {
+				"name": "sales_order_item",
+				"parent": "sales_order"
+			},
+			"condition": condition,
+			"postprocess": update_item
+		}
+	}, target_doc, postprocess)
 
-    return doc
+	return doc
 
 @frappe.whitelist()
 def make_project(source_name, target_doc=None):
