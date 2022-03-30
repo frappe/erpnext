@@ -933,7 +933,6 @@ class POSCart {
 	update_grand_total() {
 		frappe.db.get_doc('POS Profile', this.frm.doc.pos_profile)
     	.then(doc => {
-			debugger
 			if (doc.round_off_discount === 1){
 				var total = Math.floor(this.frm.doc.grand_total)
 				this.frm.doc.grand_total = total
@@ -1197,7 +1196,6 @@ class POSCart {
 	update_item(item) {
 		frappe.db.get_doc('POS Profile', this.frm.doc.pos_profile)
     	.then(doc => {
-			debugger
 			const item_selector = item.batch_no ?
 			`[data-batch-no="${item.batch_no}"]` : `[data-item-code="${escape(item.item_code)}"]`;
 
@@ -2080,6 +2078,7 @@ class Payment {
 	}
 
 	update_cur_frm_value(fieldname, callback) {
+		debugger
 		if (frappe.flags[fieldname]) {
 			const value = this.dialog.get_value(fieldname);
 			this.frm.set_value(fieldname, value)
@@ -2110,8 +2109,24 @@ class Payment {
 	}
 
 	update_additional_discount_percentage() {
-		this.dialog.set_value("additional_discount_percentage", this.frm.doc.additional_discount_percentage);
-		this.update_change_amount();
+		frappe.db.get_doc('POS Profile', this.frm.doc.pos_profile)
+    	.then(doc => {
+			if (doc.round_off_discount === 1){
+				var total = Math.floor(this.frm.doc.grand_total)
+
+				debugger
+				this.dialog.set_value("additional_discount_percentage", this.frm.doc.additional_discount_percentage);
+				this.dialog.set_value("change_amount", this.frm.doc.change_amount);
+				this.dialog.set_value("outstanding_amount", total);
+				this.dialog.set_value("total_with_discount", total);
+				this.dialog.set_value("paid_amount", total);
+			}
+			else{
+				debugger
+				this.dialog.set_value("additional_discount_percentage", this.frm.doc.additional_discount_percentage);
+				this.update_change_amount();
+			}
+   	 	})
 	}
 
 	update_change_amount() {
@@ -2130,10 +2145,12 @@ class Payment {
 
 
 	show_paid_amount() {
+		debugger
 		this.dialog.set_value("outstanding_amount", this.frm.doc.outstanding_amount);
 	}
 
 	update_payment_amount() {
+		debugger
 		var me = this;
 		$.each(this.frm.doc.payments, function(i, data) {
 			console.log("setting the ", data.mode_of_payment, " for the value", data.amount);
