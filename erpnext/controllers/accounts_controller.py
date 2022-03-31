@@ -1265,12 +1265,10 @@ class AccountsController(TransactionBase):
 		return get_company_default(self.company, fieldname, ignore_validation=ignore_validation)
 
 	def get_stock_items(self):
-		if hasattr(self, "_stock_items") and self._stock_items:
-			return self._stock_items
-
 		stock_items = []
 		item_codes = list(set(item.item_code for item in self.get("items")))
 		if item_codes:
+<<<<<<< HEAD
 			stock_items = [
 				r[0]
 				for r in frappe.db.sql(
@@ -1282,8 +1280,12 @@ class AccountsController(TransactionBase):
 					item_codes,
 				)
 			]
+=======
+			stock_items = frappe.db.get_values(
+				"Item", {"name": ["in", item_codes], "is_stock_item": 1}, pluck="name", cache=True
+			)
+>>>>>>> 199a6da960 (perf: skip warehouse validation for non-stock items)
 
-		self._stock_items = stock_items
 		return stock_items
 
 	def set_total_advance_paid(self):
