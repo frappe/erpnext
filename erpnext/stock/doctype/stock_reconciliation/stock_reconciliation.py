@@ -343,6 +343,12 @@ class StockReconciliation(StockController):
 		if not serial_nos and row.serial_no:
 			serial_nos = get_serial_nos(row.serial_no)
 
+		valuation_rate = frappe.db.sql(f"SELECT incoming_rate FROM `tabStock Ledger Entry` AS s_l_e WHERE s_l_e.batch_no = '{row.batch_no}' and s_l_e.item_code = '{row.item_code}' AND incoming_rate > 0 ORDER BY s_l_e.creation ASC LIMIT 1")
+		if valuation_rate:
+			valuation_rate = valuation_rate[0][0]
+			row.valuation_rate = valuation_rate
+
+
 		data = frappe._dict({
 			"doctype": "Stock Ledger Entry",
 			"item_code": row.item_code,
