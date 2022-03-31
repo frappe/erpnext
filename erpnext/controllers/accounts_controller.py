@@ -1269,8 +1269,10 @@ class AccountsController(TransactionBase):
 		item_codes = list(set(item.item_code for item in self.get("items")))
 		if item_codes:
 			stock_items = frappe.db.get_values(
-				"Item", {"name": ["in", item_codes], "is_stock_item": 1}, pluck="name", cache=True
+				"Item", {"name": ["in", item_codes], "is_stock_item": 1}, as_dict=True, cache=True
 			)
+			if stock_items:
+				stock_items = [d.get("name") for d in stock_items]
 
 		return stock_items
 
