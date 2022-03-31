@@ -321,7 +321,7 @@ def process_debit_credit_difference(gl_map):
 
 	debit_credit_diff = get_debit_credit_difference(gl_map, precision)
 	if abs(debit_credit_diff) > allowance:
-		raise_debit_credit_not_equal_error(debit_credit_diff, voucher_type, gl_map[0].voucher_no)
+		raise_debit_credit_not_equal_error(debit_credit_diff, voucher_type, voucher_no)
 
 
 def get_debit_credit_difference(gl_map, precision):
