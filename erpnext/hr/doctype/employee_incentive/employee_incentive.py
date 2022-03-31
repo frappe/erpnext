@@ -43,7 +43,7 @@ class EmployeeIncentive(Document):
 			self.db_set('additional_salary', '')
 	
 	def confidentials(self):
-		confidentials_list = frappe.get_all("Confidential Payroll", ["*"])
+		confidentials_list = frappe.get_all("Confidential Payroll Employee", ["*"])
 
 		if len(confidentials_list):
 			employees = frappe.get_all("Confidential Payroll Detail", ["*"], filters = {"parent":confidentials_list[0].name, "employee": self.employee})
