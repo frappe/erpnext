@@ -3,6 +3,7 @@
 
 
 import json
+from typing import Dict, Optional
 
 import frappe
 from frappe.utils.nestedset import get_root_of
@@ -150,24 +151,34 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 
 
 @frappe.whitelist()
-def search_for_serial_or_batch_or_barcode_number(search_value):
+def search_for_serial_or_batch_or_barcode_number(search_value: str) -> Dict[str, Optional[str]]:
+
 	# search barcode no
 	barcode_data = frappe.db.get_value(
-		"Item Barcode", {"barcode": search_value}, ["barcode", "parent as item_code"], as_dict=True
+		"Item Barcode",
+		{"barcode": search_value},
+		["barcode", "parent as item_code"],
+		as_dict=True,
 	)
 	if barcode_data:
 		return barcode_data
 
 	# search serial no
 	serial_no_data = frappe.db.get_value(
-		"Serial No", search_value, ["name as serial_no", "item_code"], as_dict=True
+		"Serial No",
+		search_value,
+		["name as serial_no", "item_code", "batch_no"],
+		as_dict=True,
 	)
 	if serial_no_data:
 		return serial_no_data
 
 	# search batch no
 	batch_no_data = frappe.db.get_value(
-		"Batch", search_value, ["name as batch_no", "item as item_code"], as_dict=True
+		"Batch",
+		search_value,
+		["name as batch_no", "item as item_code"],
+		as_dict=True,
 	)
 	if batch_no_data:
 		return batch_no_data
