@@ -1567,13 +1567,12 @@ def validate_taxes_and_charges(tax):
 		tax.rate = None
 
 
-def validate_account_head(tax, doc):
-	company = frappe.get_cached_value('Account',
-		tax.account_head, 'company')
+def validate_account_head(idx, account, company, context=''):
+	account_company = frappe.get_cached_value('Account', account, 'company')
 
-	if company != doc.company:
-		frappe.throw(_('Row {0}: Account {1} does not belong to Company {2}')
-			.format(tax.idx, frappe.bold(tax.account_head), frappe.bold(doc.company)), title=_('Invalid Account'))
+	if account_company != company:
+		frappe.throw(_('Row {0}: {3} Account {1} does not belong to Company {2}')
+			.format(idx, frappe.bold(account), frappe.bold(company), context), title=_('Invalid Account'))
 
 
 def validate_cost_center(tax, doc):

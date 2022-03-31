@@ -832,6 +832,7 @@
   },
   {
    "default": "0",
+   "fetch_from": "item_code.grant_commission",
    "fieldname": "grant_commission",
    "fieldtype": "Check",
    "label": "Grant Commission",
@@ -841,7 +842,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-10-05 12:24:54.968907",
+ "modified": "2022-02-24 14:41:36.392560",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
@@ -851,3 +852,4 @@
  "sort_field": "modified",
  "sort_order": "DESC"
 }
+

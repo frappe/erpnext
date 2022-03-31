@@ -5,7 +5,8 @@
 import unittest
 
 import frappe
-from frappe.utils import add_months, nowdate
+from frappe.tests.utils import change_settings
+from frappe.utils import add_months, cint, nowdate
 
 from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule
 from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
@@ -13,9 +14,10 @@ from erpnext.e_commerce.shopping_cart.cart import (
 	_get_cart_quotation,
 	get_cart_quotation,
 	get_party,
+	request_for_quotation,
 	update_cart,
 )
-from erpnext.tests.utils import change_settings, create_test_contact_and_address
+from erpnext.tests.utils import create_test_contact_and_address
 
 
 class TestShoppingCart(unittest.TestCase):
@@ -23,11 +25,6 @@ class TestShoppingCart(unittest.TestCase):
 		Note:
 		Shopping Cart == Quotation
 	"""
-
-	@classmethod
-	def tearDownClass(cls):
-		frappe.db.sql("delete from `tabTax Rule`")
-
 	def setUp(self):
 		frappe.set_user("Administrator")
 		create_test_contact_and_address()
@@ -43,6 +40,10 @@ class TestShoppingCart(unittest.TestCase):
 		frappe.set_user("Administrator")
 		self.disable_shopping_cart()
 
+	@classmethod
+	def tearDownClass(cls):
+		frappe.db.sql("delete from `tabTax Rule`")
+
 	def test_get_cart_new_user(self):
 		self.login_as_new_user()
 
@@ -56,13 +57,19 @@ class TestShoppingCart(unittest.TestCase):
 		return quotation
 
 	def test_get_cart_customer(self):
-		self.login_as_customer()
+		def validate_quotation():
+			# test if quotation with customer is fetched
+			quotation = _get_cart_quotation()
+			self.assertEqual(quotation.quotation_to, "Customer")
+			self.assertEqual(quotation.party_name, "_Test Customer")
+			self.assertEqual(quotation.contact_email, frappe.session.user)
+			return quotation
 
-		# test if quotation with customer is fetched
-		quotation = _get_cart_quotation()
-		self.assertEqual(quotation.quotation_to, "Customer")
-		self.assertEqual(quotation.party_name, "_Test Customer")
-		self.assertEqual(quotation.contact_email, frappe.session.user)
+		self.login_as_customer("test_contact_two_customer@example.com", "_Test Contact 2 For _Test Customer")
+		validate_quotation()
+
+		self.login_as_customer()
+		quotation = validate_quotation()
 
 		return quotation
 
@@ -171,6 +178,28 @@ class TestShoppingCart(unittest.TestCase):
 		# test if items are rendered without error
 		frappe.render_template("templates/includes/cart/cart_items.html", cart)
 
+	@change_settings("E Commerce Settings",{
+		"save_quotations_as_draft": 1
+	})
+	def test_cart_without_checkout_and_draft_quotation(self):
+		"Test impact of 'save_quotations_as_draft' checkbox."
+		frappe.local.shopping_cart_settings = None
+
+		# add item to cart
+		update_cart("_Test Item", 1)
+		quote_name = request_for_quotation() # Request for Quote
+		quote_doctstatus = cint(frappe.db.get_value("Quotation", quote_name, "docstatus"))
+
+		self.assertEqual(quote_doctstatus, 0)
+
+		frappe.db.set_value("E Commerce Settings", None, "save_quotations_as_draft", 0)
+		frappe.local.shopping_cart_settings = None
+		update_cart("_Test Item", 1)
+		quote_name = request_for_quotation() # Request for Quote
+		quote_doctstatus = cint(frappe.db.get_value("Quotation", quote_name, "docstatus"))
+
+		self.assertEqual(quote_doctstatus, 1)
+
 	def create_tax_rule(self):
 		tax_rule = frappe.get_test_records("Tax Rule")[0]
 		try:
@@ -253,10 +282,9 @@ class TestShoppingCart(unittest.TestCase):
 		self.create_user_if_not_exists("test_cart_user@example.com")
 		frappe.set_user("test_cart_user@example.com")
 
-	def login_as_customer(self):
-		self.create_user_if_not_exists("test_contact_customer@example.com",
-			"_Test Contact For _Test Customer")
-		frappe.set_user("test_contact_customer@example.com")
+	def login_as_customer(self, email="test_contact_customer@example.com", name="_Test Contact For _Test Customer"):
+		self.create_user_if_not_exists(email, name)
+		frappe.set_user(email)
 
 	def clear_existing_quotations(self):
 		quotations = frappe.get_all("Quotation", filters={

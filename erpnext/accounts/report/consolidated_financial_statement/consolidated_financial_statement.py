@@ -354,9 +354,6 @@ def accumulate_values_into_parents(accounts, accounts_by_name, companies):
 		if d.parent_account:
 			account = d.parent_account_name
 
-			# if not accounts_by_name.get(account):
-			# 	continue
-
 			for company in companies:
 				accounts_by_name[account][company] = \
 					accounts_by_name[account].get(company, 0.0) + d.get(company, 0.0)
@@ -367,7 +364,7 @@ def accumulate_values_into_parents(accounts, accounts_by_name, companies):
 				accounts_by_name[account].get("opening_balance", 0.0) + d.get("opening_balance", 0.0)
 
 def get_account_heads(root_type, companies, filters):
-	accounts = get_accounts(root_type, filters)
+	accounts = get_accounts(root_type, companies)
 
 	if not accounts:
 		return None, None, None
@@ -396,7 +393,7 @@ def update_parent_account_names(accounts):
 
 	for account in accounts:
 		if account.parent_account:
-			account["parent_account_name"] = name_to_account_map[account.parent_account]
+			account["parent_account_name"] = name_to_account_map.get(account.parent_account)
 
 	return accounts
 
@@ -419,12 +416,19 @@ def get_subsidiary_companies(company):
 	return frappe.db.sql_list("""select name from `tabCompany`
 		where lft >= {0} and rgt <= {1} order by lft, rgt""".format(lft, rgt))
 
-def get_accounts(root_type, filters):
-	return frappe.db.sql(""" select name, is_group, company,
-			parent_account, lft, rgt, root_type, report_type, account_name, account_number
-		from
-			`tabAccount` where company = %s and root_type = %s
-		""" , (filters.get('company'), root_type), as_dict=1)
+def get_accounts(root_type, companies):
+	accounts = []
+	added_accounts = []
+
+	for company in companies:
+		for account in frappe.get_all("Account", fields=["name", "is_group", "company",
+			"parent_account", "lft", "rgt", "root_type", "report_type", "account_name", "account_number"],
+			filters={"company": company, "root_type": root_type}):
+			if account.account_name not in added_accounts:
+				accounts.append(account)
+				added_accounts.append(account.account_name)
+
+	return accounts
 
 def prepare_data(accounts, start_date, end_date, balance_must_be, companies, company_currency, filters):
 	data = []

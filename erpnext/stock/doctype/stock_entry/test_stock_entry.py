@@ -6,6 +6,7 @@ import unittest
 
 import frappe
 from frappe.permissions import add_user_permission, remove_user_permission
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import flt, nowdate, nowtime
 from six import iteritems
 
@@ -29,7 +30,6 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle
-from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 
 def get_sle(**args):
@@ -43,8 +43,9 @@ def get_sle(**args):
 		order by timestamp(posting_date, posting_time) desc, creation desc limit 1"""% condition,
 		values, as_dict=1)
 
-class TestStockEntry(ERPNextTestCase):
+class TestStockEntry(FrappeTestCase):
 	def tearDown(self):
+		frappe.db.rollback()
 		frappe.set_user("Administrator")
 		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", "0")
 
@@ -566,6 +567,7 @@ class TestStockEntry(ERPNextTestCase):
 		st1.set_stock_entry_type()
 		st1.insert()
 		st1.submit()
+		st1.cancel()
 
 		frappe.set_user("Administrator")
 		remove_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
@@ -689,6 +691,8 @@ class TestStockEntry(ERPNextTestCase):
 	def test_variant_work_order(self):
 		bom_no = frappe.db.get_value("BOM", {"item": "_Test Variant Item",
 			"is_default": 1, "docstatus": 1})
+
+		make_item_variant() # make variant of _Test Variant Item if absent
 
 		work_order = frappe.new_doc("Work Order")
 		work_order.update({
@@ -1101,12 +1105,9 @@ class TestStockEntry(ERPNextTestCase):
 
 		# Check if FG cost is calculated based on RM total cost
 		# RM total cost = 200, FG rate = 200/4(FG qty) =  50
-		self.assertEqual(se.items[1].basic_rate, 50)
+		self.assertEqual(se.items[1].basic_rate, flt(se.items[0].basic_rate/4))
 		self.assertEqual(se.value_difference, 0.0)
 		self.assertEqual(se.total_incoming_value, se.total_outgoing_value)
-
-		# teardown
-		se.delete()
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)

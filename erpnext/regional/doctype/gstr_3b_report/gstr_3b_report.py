@@ -128,7 +128,8 @@ class GSTR3BReport(Document):
 
 	def get_inward_nil_exempt(self, state):
 		inward_nil_exempt = frappe.db.sql("""
-			SELECT p.place_of_supply, sum(i.base_amount) as base_amount, i.is_nil_exempt, i.is_non_gst
+			SELECT p.place_of_supply, p.supplier_address,
+			i.base_amount, i.is_nil_exempt, i.is_non_gst
 			FROM `tabPurchase Invoice` p , `tabPurchase Invoice Item` i
 			WHERE p.docstatus = 1 and p.name = i.parent
 			and p.is_opening = 'No'
@@ -136,7 +137,7 @@ class GSTR3BReport(Document):
 			and (i.is_nil_exempt = 1 or i.is_non_gst = 1 or p.gst_category = 'Registered Composition') and
 			month(p.posting_date) = %s and year(p.posting_date) = %s
 			and p.company = %s and p.company_gstin = %s
-			GROUP BY p.place_of_supply, i.is_nil_exempt, i.is_non_gst""",
+		""",
 			(self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
 
 		inward_nil_exempt_details = {
@@ -150,18 +151,24 @@ class GSTR3BReport(Document):
 			}
 		}
 
+		address_state_map = get_address_state_map()
+
 		for d in inward_nil_exempt:
-			if d.place_of_supply:
-				if (d.is_nil_exempt == 1 or d.get('gst_category') == 'Registered Composition') \
-					and state == d.place_of_supply.split("-")[1]:
-					inward_nil_exempt_details["gst"]["intra"] += d.base_amount
-				elif (d.is_nil_exempt == 1 or d.get('gst_category') == 'Registered Composition') \
-					and state != d.place_of_supply.split("-")[1]:
-					inward_nil_exempt_details["gst"]["inter"] += d.base_amount
-				elif d.is_non_gst == 1 and state == d.place_of_supply.split("-")[1]:
-					inward_nil_exempt_details["non_gst"]["intra"] += d.base_amount
-				elif d.is_non_gst == 1 and state != d.place_of_supply.split("-")[1]:
-					inward_nil_exempt_details["non_gst"]["inter"] += d.base_amount
+			if not d.place_of_supply:
+				d.place_of_supply = "00-" + cstr(state)
+
+			supplier_state = address_state_map.get(d.supplier_address) or state
+
+			if (d.is_nil_exempt == 1 or d.get('gst_category') == 'Registered Composition') \
+				and cstr(supplier_state) == cstr(d.place_of_supply.split("-")[1]):
+				inward_nil_exempt_details["gst"]["intra"] += d.base_amount
+			elif (d.is_nil_exempt == 1 or d.get('gst_category') == 'Registered Composition') \
+				and cstr(supplier_state) != cstr(d.place_of_supply.split("-")[1]):
+				inward_nil_exempt_details["gst"]["inter"] += d.base_amount
+			elif d.is_non_gst == 1 and cstr(supplier_state) == cstr(d.place_of_supply.split("-")[1]):
+				inward_nil_exempt_details["non_gst"]["intra"] += d.base_amount
+			elif d.is_non_gst == 1 and cstr(supplier_state) != cstr(d.place_of_supply.split("-")[1]):
+				inward_nil_exempt_details["non_gst"]["inter"] += d.base_amount
 
 		return inward_nil_exempt_details
 
@@ -419,6 +426,11 @@ class GSTR3BReport(Document):
 				missing_field_invoices.append(d.name)
 
 		return ",".join(missing_field_invoices)
+
+def get_address_state_map():
+	return frappe._dict(
+		frappe.get_all('Address', fields=['name', 'gst_state'], as_list=1)
+	)
 
 def get_json(template):
 	file_path = os.path.join(os.path.dirname(__file__), '{template}.json'.format(template=template))

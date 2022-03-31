@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.stock.doctype.batch.test_batch import make_new_batch
 from erpnext.stock.doctype.item.test_item import make_item
@@ -9,10 +10,9 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.get_item_details import get_conversion_factor
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestPutawayRule(ERPNextTestCase):
+class TestPutawayRule(FrappeTestCase):
 	def setUp(self):
 		if not frappe.db.exists("Item", "_Rice"):
 			make_item("_Rice", {
@@ -35,6 +35,18 @@ class TestPutawayRule(ERPNextTestCase):
 			new_uom.uom_name = "Bag"
 			new_uom.save()
 
+	def assertUnchangedItemsOnResave(self, doc):
+		""" Check if same items remain even after reapplication of rules.
+
+			This is required since some business logic like subcontracting
+			depends on `name` of items to be same if item isn't changed.
+		"""
+		doc.reload()
+		old_items = {d.name for d in doc.items}
+		doc.save()
+		new_items = {d.name for d in doc.items}
+		self.assertSetEqual(old_items, new_items)
+
 	def test_putaway_rules_priority(self):
 		"""Test if rule is applied by priority, irrespective of free space."""
 		rule_1 = create_putaway_rule(item_code="_Rice", warehouse=self.warehouse_1, capacity=200,
@@ -49,6 +61,8 @@ class TestPutawayRule(ERPNextTestCase):
 		self.assertEqual(pr.items[0].warehouse, self.warehouse_1)
 		self.assertEqual(pr.items[1].qty, 100)
 		self.assertEqual(pr.items[1].warehouse, self.warehouse_2)
+
+		self.assertUnchangedItemsOnResave(pr)
 
 		pr.delete()
 		rule_1.delete()
@@ -162,6 +176,8 @@ class TestPutawayRule(ERPNextTestCase):
 		# leftover space was for 500 kg (0.5 Bag)
 		# Since Bag is a whole UOM, 1(out of 2) Bag will be unassigned
 
+		self.assertUnchangedItemsOnResave(pr)
+
 		pr.delete()
 		rule_1.delete()
 		rule_2.delete()
@@ -195,6 +211,8 @@ class TestPutawayRule(ERPNextTestCase):
 		self.assertEqual(pr.items[1].qty, 100) # 100 unassigned in second row from 200
 		self.assertEqual(pr.items[1].warehouse, self.warehouse_1)
 		self.assertEqual(pr.items[1].putaway_rule, rule_1.name)
+
+		self.assertUnchangedItemsOnResave(pr)
 
 		pr.delete()
 		rule_1.delete()
@@ -238,6 +256,8 @@ class TestPutawayRule(ERPNextTestCase):
 		self.assertEqual(stock_entry_item.t_warehouse, self.warehouse_2)
 		self.assertEqual(stock_entry_item.qty, 100) # unassigned 100 out of 200 Kg
 		self.assertEqual(stock_entry_item.putaway_rule, rule_2.name)
+
+		self.assertUnchangedItemsOnResave(stock_entry)
 
 		stock_entry.delete()
 		rule_1.delete()
@@ -294,6 +314,8 @@ class TestPutawayRule(ERPNextTestCase):
 		self.assertEqual(stock_entry.items[2].qty, 200)
 		self.assertEqual(stock_entry.items[2].putaway_rule, rule_2.name)
 
+		self.assertUnchangedItemsOnResave(stock_entry)
+
 		stock_entry.delete()
 		rule_1.delete()
 		rule_2.delete()
@@ -344,6 +366,8 @@ class TestPutawayRule(ERPNextTestCase):
 		self.assertEqual(stock_entry.items[1].serial_no, "\n".join(serial_nos[3:]))
 		self.assertEqual(stock_entry.items[1].batch_no, "BOTTL-BATCH-1")
 
+		self.assertUnchangedItemsOnResave(stock_entry)
+
 		stock_entry.delete()
 		pr.cancel()
 		rule_1.delete()
@@ -365,6 +389,8 @@ class TestPutawayRule(ERPNextTestCase):
 		self.assertEqual(stock_entry_item.t_warehouse, self.warehouse_1)
 		self.assertEqual(stock_entry_item.qty, 100)
 		self.assertEqual(stock_entry_item.putaway_rule, rule_1.name)
+
+		self.assertUnchangedItemsOnResave(stock_entry)
 
 		stock_entry.delete()
 		rule_1.delete()

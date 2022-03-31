@@ -121,6 +121,7 @@ def get_booking_dates(doc, item, posting_date=None):
 	prev_gl_entry = frappe.db.sql('''
 		select name, posting_date from `tabGL Entry` where company=%s and account=%s and
 		voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
+		and is_cancelled = 0
 		order by posting_date desc limit 1
 	''', (doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name), as_dict=True)
 
@@ -228,6 +229,7 @@ def get_already_booked_amount(doc, item):
 	gl_entries_details = frappe.db.sql('''
 		select sum({0}) as total_credit, sum({1}) as total_credit_in_account_currency, voucher_detail_no
 		from `tabGL Entry` where company=%s and account=%s and voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
+		and is_cancelled = 0
 		group by voucher_detail_no
 	'''.format(total_credit_debit, total_credit_debit_currency),
 		(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name), as_dict=True)
@@ -283,7 +285,7 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 			return
 
 		# check if books nor frozen till endate:
-		if getdate(end_date) >= getdate(accounts_frozen_upto):
+		if accounts_frozen_upto and (end_date) <= getdate(accounts_frozen_upto):
 			end_date = get_last_day(add_days(accounts_frozen_upto, 1))
 
 		if via_journal_entry:

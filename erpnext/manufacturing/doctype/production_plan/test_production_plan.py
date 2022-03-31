@@ -1,6 +1,7 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_to_date, flt, now_datetime, nowdate
 
 from erpnext.controllers.item_variant import create_variant
@@ -9,16 +10,16 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_sales_orders,
 	get_warehouse_list,
 )
+from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestProductionPlan(ERPNextTestCase):
+class TestProductionPlan(FrappeTestCase):
 	def setUp(self):
 		for item in ['Test Production Item 1', 'Subassembly Item 1',
 			'Raw Material Item 1', 'Raw Material Item 2']:
@@ -409,9 +410,6 @@ class TestProductionPlan(ERPNextTestCase):
 		boms = {
 			"Assembly": {
 				"SubAssembly1": {"ChildPart1": {}, "ChildPart2": {},},
-				"SubAssembly2": {"ChildPart3": {}},
-				"SubAssembly3": {"SubSubAssy1": {"ChildPart4": {}}},
-				"ChildPart5": {},
 				"ChildPart6": {},
 				"SubAssembly4": {"SubSubAssy2": {"ChildPart7": {}}},
 			},
@@ -469,26 +467,29 @@ class TestProductionPlan(ERPNextTestCase):
 		bom = make_bom(item=item, raw_materials=raw_materials)
 
 		# Create Production Plan
-		pln = create_production_plan(item_code=bom.item, planned_qty=10)
+		pln = create_production_plan(item_code=bom.item, planned_qty=5)
 
 		# All the created Work Orders
 		wo_list = []
 
-		# Create and Submit 1st Work Order for 5 qty
-		create_work_order(item, pln, 5)
+		# Create and Submit 1st Work Order for 3 qty
+		create_work_order(item, pln, 3)
+		pln.reload()
+		self.assertEqual(pln.po_items[0].ordered_qty, 3)
+
+		# Create and Submit 2nd Work Order for 2 qty
+		create_work_order(item, pln, 2)
 		pln.reload()
 		self.assertEqual(pln.po_items[0].ordered_qty, 5)
 
-		# Create and Submit 2nd Work Order for 3 qty
-		create_work_order(item, pln, 3)
-		pln.reload()
-		self.assertEqual(pln.po_items[0].ordered_qty, 8)
+		# Overproduction
+		self.assertRaises(OverProductionError, create_work_order, item=item, pln=pln, qty=2)
 
 		# Cancel 1st Work Order
 		wo1 = frappe.get_doc("Work Order", wo_list[0])
 		wo1.cancel()
 		pln.reload()
-		self.assertEqual(pln.po_items[0].ordered_qty, 3)
+		self.assertEqual(pln.po_items[0].ordered_qty, 2)
 
 		# Cancel 2nd Work Order
 		wo2 = frappe.get_doc("Work Order", wo_list[1])
@@ -590,6 +591,64 @@ class TestProductionPlan(ERPNextTestCase):
 		se.cancel()
 		pln.reload()
 		self.assertEqual(pln.po_items[0].pending_qty, 1)
+
+	def test_qty_based_status(self):
+		pp = frappe.new_doc("Production Plan")
+		pp.po_items = [
+			frappe._dict(planned_qty=5, produce_qty=4)
+		]
+		self.assertFalse(pp.all_items_completed())
+
+		pp.po_items = [
+			frappe._dict(planned_qty=5, produce_qty=10),
+			frappe._dict(planned_qty=5, produce_qty=4)
+		]
+		self.assertFalse(pp.all_items_completed())
+
+	def test_production_plan_planned_qty(self):
+		pln = create_production_plan(item_code="_Test FG Item", planned_qty=0.55)
+		pln.make_work_order()
+		work_order = frappe.db.get_value('Work Order', {'production_plan': pln.name}, 'name')
+		wo_doc = frappe.get_doc('Work Order', work_order)
+		wo_doc.update({
+			'wip_warehouse': 'Work In Progress - _TC',
+			'fg_warehouse': 'Finished Goods - _TC'
+		})
+		wo_doc.submit()
+		self.assertEqual(wo_doc.qty, 0.55)
+
+	def test_temporary_name_relinking(self):
+
+		pp = frappe.new_doc("Production Plan")
+
+		# this can not be unittested so mocking data that would be expected
+		# from client side.
+		for _ in range(10):
+			po_item = pp.append("po_items", {
+				"name": frappe.generate_hash(length=10),
+				"temporary_name": frappe.generate_hash(length=10),
+			})
+			pp.append("sub_assembly_items", {
+				"production_plan_item": po_item.temporary_name
+			})
+		pp._rename_temporary_references()
+
+		for po_item, subassy_item in zip(pp.po_items, pp.sub_assembly_items):
+			self.assertEqual(po_item.name, subassy_item.production_plan_item)
+
+		# bad links should be erased
+		pp.append("sub_assembly_items", {
+			"production_plan_item": frappe.generate_hash(length=16)
+		})
+		pp._rename_temporary_references()
+		self.assertIsNone(pp.sub_assembly_items[-1].production_plan_item)
+		pp.sub_assembly_items.pop()
+
+		# reattempting on same doc shouldn't change anything
+		pp._rename_temporary_references()
+		for po_item, subassy_item in zip(pp.po_items, pp.sub_assembly_items):
+			self.assertEqual(po_item.name, subassy_item.production_plan_item)
+
 
 def create_production_plan(**args):
 	"""

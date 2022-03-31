@@ -2,6 +2,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, getdate
 
 from erpnext.hr.doctype.employee.test_employee import make_employee
@@ -13,7 +14,7 @@ from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_
 from erpnext.projects.report.project_profitability.project_profitability import execute
 
 
-class TestProjectProfitability(unittest.TestCase):
+class TestProjectProfitability(FrappeTestCase):
 	def setUp(self):
 		frappe.db.sql('delete from `tabTimesheet`')
 		emp = make_employee('test_employee_9@salary.com', company='_Test Company')
@@ -68,6 +69,3 @@ class TestProjectProfitability(unittest.TestCase):
 
 		fractional_cost = self.salary_slip.base_gross_pay * utilization
 		self.assertEqual(fractional_cost, row.fractional_cost)
-
-	def tearDown(self):
-		frappe.db.rollback()

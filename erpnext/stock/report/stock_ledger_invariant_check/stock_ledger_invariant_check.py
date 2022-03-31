@@ -21,6 +21,7 @@ SLE_FIELDS = (
 	"stock_value",
 	"stock_value_difference",
 	"valuation_rate",
+	"voucher_detail_no",
 )
 
 
@@ -60,10 +61,15 @@ def add_invariant_check_fields(sles):
 			fifo_qty += qty
 			fifo_value += qty * rate
 
+		if sle.actual_qty < 0:
+			sle.consumption_rate = sle.stock_value_difference  / sle.actual_qty
+
 		balance_qty += sle.actual_qty
 		balance_stock_value += sle.stock_value_difference
 		if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no:
-			balance_qty = sle.qty_after_transaction
+			balance_qty = frappe.db.get_value("Stock Reconciliation Item", sle.voucher_detail_no, "qty")
+			if balance_qty is None:
+				balance_qty = sle.qty_after_transaction
 
 		sle.fifo_queue_qty = fifo_qty
 		sle.fifo_stock_value = fifo_value
@@ -145,9 +151,9 @@ def get_columns():
 			"label": "Incoming Rate",
 		},
 		{
-			"fieldname": "outgoing_rate",
+			"fieldname": "consumption_rate",
 			"fieldtype": "Float",
-			"label": "Outgoing Rate",
+			"label": "Consumption Rate",
 		},
 		{
 			"fieldname": "qty_after_transaction",

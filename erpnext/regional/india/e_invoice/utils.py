@@ -215,8 +215,6 @@ def get_item_list(invoice):
 		item.taxable_value = abs(item.taxable_value)
 		item.discount_amount = 0
 
-		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
-		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
 		item.is_service_item = 'Y' if item.gst_hsn_code and item.gst_hsn_code[:2] == "99" else 'N'
 		item.serial_no = ""
 

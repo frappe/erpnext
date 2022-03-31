@@ -5,7 +5,7 @@ import unittest
 
 import frappe
 
-from erpnext.non_profit.doctype.donation.donation import create_donation
+from erpnext.non_profit.doctype.donation.donation import create_razorpay_donation
 
 
 class TestDonation(unittest.TestCase):
@@ -30,7 +30,7 @@ class TestDonation(unittest.TestCase):
 			'method': 'Debit Card',
 			'id': 'pay_MeXAmsgeKOhq7O'
 		})
-		donation = create_donation(donor, payment)
+		donation = create_razorpay_donation(donor, payment)
 
 		self.assertTrue(donation.name)
 

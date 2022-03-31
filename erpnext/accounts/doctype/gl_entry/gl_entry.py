@@ -33,6 +33,8 @@ class GLEntry(Document):
 		name will be changed using autoname options (in a scheduled job)
 		"""
 		self.name = frappe.generate_hash(txt="", length=10)
+		if self.meta.autoname == "hash":
+			self.to_rename = 0
 
 	def validate(self):
 		self.flags.ignore_submit_comment = True
@@ -135,7 +137,7 @@ class GLEntry(Document):
 
 	def check_pl_account(self):
 		if self.is_opening=='Yes' and \
-				frappe.db.get_value("Account", self.account, "report_type")=="Profit and Loss":
+				frappe.db.get_value("Account", self.account, "report_type")=="Profit and Loss" and not self.is_cancelled:
 			frappe.throw(_("{0} {1}: 'Profit and Loss' type account {2} not allowed in Opening Entry")
 				.format(self.voucher_type, self.voucher_no, self.account))
 

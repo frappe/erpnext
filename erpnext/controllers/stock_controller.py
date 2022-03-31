@@ -507,12 +507,40 @@ class StockController(AccountsController):
 			"voucher_no": self.name,
 			"company": self.company
 		})
-		if future_sle_exists(args):
+
+		if future_sle_exists(args) or repost_required_for_queue(self):
 			item_based_reposting =  cint(frappe.db.get_single_value("Stock Reposting Settings", "item_based_reposting"))
 			if item_based_reposting:
 				create_item_wise_repost_entries(voucher_type=self.doctype, voucher_no=self.name)
 			else:
 				create_repost_item_valuation_entry(args)
+
+def repost_required_for_queue(doc: StockController) -> bool:
+	"""check if stock document contains repeated item-warehouse with queue based valuation.
+
+	if queue exists for repeated items then SLEs need to reprocessed in background again.
+	"""
+
+	consuming_sles = frappe.db.get_all("Stock Ledger Entry",
+		filters={
+			"voucher_type": doc.doctype,
+			"voucher_no": doc.name,
+			"actual_qty": ("<", 0),
+			"is_cancelled": 0
+		},
+		fields=["item_code", "warehouse", "stock_queue"]
+	)
+	item_warehouses = [(sle.item_code, sle.warehouse) for sle in consuming_sles]
+
+	unique_item_warehouses = set(item_warehouses)
+
+	if len(unique_item_warehouses) == len(item_warehouses):
+		return False
+
+	for sle in consuming_sles:
+		if sle.stock_queue != "[]":  # using FIFO/LIFO valuation
+			return True
+	return False
 
 
 @frappe.whitelist()

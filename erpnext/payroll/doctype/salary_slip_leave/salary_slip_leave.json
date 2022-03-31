@@ -26,7 +26,7 @@
    "fieldname": "total_allocated_leaves",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Total Allocated Leave",
+   "label": "Total Allocated Leave(s)",
    "no_copy": 1,
    "read_only": 1
   },
@@ -34,7 +34,7 @@
    "fieldname": "expired_leaves",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Expired Leave",
+   "label": "Expired Leave(s)",
    "no_copy": 1,
    "read_only": 1
   },
@@ -42,7 +42,7 @@
    "fieldname": "used_leaves",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Used Leave",
+   "label": "Used Leave(s)",
    "no_copy": 1,
    "read_only": 1
   },
@@ -50,7 +50,7 @@
    "fieldname": "pending_leaves",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Pending Leave",
+   "label": "Leave(s) Pending Approval",
    "no_copy": 1,
    "read_only": 1
   },
@@ -58,7 +58,7 @@
    "fieldname": "available_leaves",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Available Leave",
+   "label": "Available Leave(s)",
    "no_copy": 1,
    "read_only": 1
   }
@@ -66,7 +66,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-19 10:47:48.546724",
+ "modified": "2022-02-28 14:01:32.327204",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip Leave",
@@ -74,5 +74,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

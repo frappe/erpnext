@@ -151,6 +151,35 @@ class TestTimesheet(unittest.TestCase):
 		settings.ignore_employee_time_overlap = initial_setting
 		settings.save()
 
+	def test_timesheet_not_overlapping_with_continuous_timelogs(self):
+		emp = make_employee("test_employee_6@salary.com")
+
+		update_activity_type("_Test Activity Type")
+		timesheet = frappe.new_doc("Timesheet")
+		timesheet.employee = emp
+		timesheet.append(
+			'time_logs',
+			{
+				"billable": 1,
+				"activity_type": "_Test Activity Type",
+				"from_time": now_datetime(),
+				"to_time": now_datetime() + datetime.timedelta(hours=3),
+				"company": "_Test Company"
+			}
+		)
+		timesheet.append(
+			'time_logs',
+			{
+				"billable": 1,
+				"activity_type": "_Test Activity Type",
+				"from_time": now_datetime() + datetime.timedelta(hours=3),
+				"to_time": now_datetime() + datetime.timedelta(hours=4),
+				"company": "_Test Company"
+			}
+		)
+
+		timesheet.save() # should not throw an error
+
 	def test_to_time(self):
 		emp = make_employee("test_employee_6@salary.com")
 		from_time = now_datetime()

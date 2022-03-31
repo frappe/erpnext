@@ -316,6 +316,16 @@ class PurchaseOrder(BuyingController):
 			'target_ref_field': 'stock_qty',
 			'source_field': 'stock_qty'
 		})
+		self.status_updater.append({
+			'source_dt': 'Purchase Order Item',
+			'target_dt': 'Packed Item',
+			'target_field': 'ordered_qty',
+			'target_parent_dt': 'Sales Order',
+			'target_parent_field': '',
+			'join_field': 'sales_order_packed_item',
+			'target_ref_field': 'qty',
+			'source_field': 'stock_qty'
+		})
 
 	def update_delivered_qty_in_sales_order(self):
 		"""Update delivered qty in Sales Order for drop ship"""
@@ -392,7 +402,6 @@ def close_or_unclose_purchase_orders(names, status):
 	frappe.local.message_log = []
 
 def set_missing_values(source, target):
-	target.ignore_pricing_rule = 1
 	target.run_method("set_missing_values")
 	target.run_method("calculate_taxes_and_totals")
 
@@ -432,6 +441,8 @@ def make_purchase_receipt(source_name, target_doc=None):
 			"add_if_empty": True
 		}
 	}, target_doc, set_missing_values)
+
+	doc.set_onload('ignore_price_list', True)
 
 	return doc
 
@@ -500,6 +511,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 
 	doc = get_mapped_doc("Purchase Order", source_name,	fields,
 		target_doc, postprocess, ignore_permissions=ignore_permissions)
+	doc.set_onload('ignore_price_list', True)
 
 	return doc
 

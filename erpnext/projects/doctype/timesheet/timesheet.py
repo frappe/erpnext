@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_to_date, flt, getdate, time_diff_in_hours
+from frappe.utils import add_to_date, flt, get_datetime, getdate, time_diff_in_hours
 
 from erpnext.controllers.queries import get_match_cond
 from erpnext.hr.utils import validate_active_employee
@@ -145,7 +145,7 @@ class Timesheet(Document):
 		if not (data.from_time and data.hours):
 			return
 
-		_to_time = add_to_date(data.from_time, hours=data.hours, as_datetime=True)
+		_to_time = get_datetime(add_to_date(data.from_time, hours=data.hours, as_datetime=True))
 		if data.to_time != _to_time:
 			data.to_time = _to_time
 
@@ -171,38 +171,53 @@ class Timesheet(Document):
 				.format(args.idx, self.name, existing.name), OverlapError)
 
 	def get_overlap_for(self, fieldname, args, value):
-		cond = "ts.`{0}`".format(fieldname)
-		if fieldname == 'workstation':
-			cond = "tsd.`{0}`".format(fieldname)
+		timesheet = frappe.qb.DocType("Timesheet")
+		timelog = frappe.qb.DocType("Timesheet Detail")
 
-		existing = frappe.db.sql("""select ts.name as name, tsd.from_time as from_time, tsd.to_time as to_time from
-			`tabTimesheet Detail` tsd, `tabTimesheet` ts where {0}=%(val)s and tsd.parent = ts.name and
-			(
-				(%(from_time)s > tsd.from_time and %(from_time)s < tsd.to_time) or
-				(%(to_time)s > tsd.from_time and %(to_time)s < tsd.to_time) or
-				(%(from_time)s <= tsd.from_time and %(to_time)s >= tsd.to_time))
-			and tsd.name!=%(name)s
-			and ts.name!=%(parent)s
-			and ts.docstatus < 2""".format(cond),
-			{
-				"val": value,
-				"from_time": args.from_time,
-				"to_time": args.to_time,
-				"name": args.name or "No Name",
-				"parent": args.parent or "No Name"
-			}, as_dict=True)
-		# check internal overlap
-		for time_log in self.time_logs:
-			if not (time_log.from_time and time_log.to_time
-				and args.from_time and args.to_time): continue
+		from_time = get_datetime(args.from_time)
+		to_time = get_datetime(args.to_time)
 
-			if (fieldname != 'workstation' or args.get(fieldname) == time_log.get(fieldname)) and \
-				args.idx != time_log.idx and ((args.from_time > time_log.from_time and args.from_time < time_log.to_time) or
-				(args.to_time > time_log.from_time and args.to_time < time_log.to_time) or
-				(args.from_time <= time_log.from_time and args.to_time >= time_log.to_time)):
-				return self
+		existing = (
+			frappe.qb.from_(timesheet)
+				.join(timelog)
+				.on(timelog.parent == timesheet.name)
+				.select(timesheet.name.as_('name'), timelog.from_time.as_('from_time'), timelog.to_time.as_('to_time'))
+				.where(
+					(timelog.name != (args.name or "No Name"))
+					& (timesheet.name != (args.parent or "No Name"))
+					& (timesheet.docstatus < 2)
+					& (timesheet[fieldname] == value)
+					& (
+						((from_time > timelog.from_time) & (from_time < timelog.to_time))
+						| ((to_time > timelog.from_time) & (to_time < timelog.to_time))
+						| ((from_time <= timelog.from_time) & (to_time >= timelog.to_time))
+					)
+				)
+		).run(as_dict=True)
+
+		if self.check_internal_overlap(fieldname, args):
+			return self
 
 		return existing[0] if existing else None
+
+	def check_internal_overlap(self, fieldname, args):
+		for time_log in self.time_logs:
+			if not (time_log.from_time and time_log.to_time
+				and args.from_time and args.to_time):
+				continue
+
+			from_time = get_datetime(time_log.from_time)
+			to_time = get_datetime(time_log.to_time)
+			args_from_time = get_datetime(args.from_time)
+			args_to_time = get_datetime(args.to_time)
+
+			if (args.get(fieldname) == time_log.get(fieldname)) and (args.idx != time_log.idx) and (
+				(args_from_time > from_time and args_from_time < to_time)
+				or (args_to_time > from_time and args_to_time < to_time)
+				or (args_from_time <= from_time and args_to_time >= to_time)
+			):
+				return True
+		return False
 
 	def update_cost(self):
 		for data in self.time_logs:

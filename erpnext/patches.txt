@@ -1,6 +1,6 @@
 erpnext.patches.v12_0.update_is_cancelled_field
-erpnext.patches.v13_0.add_bin_unique_constraint
 erpnext.patches.v11_0.rename_production_order_to_work_order
+erpnext.patches.v13_0.add_bin_unique_constraint
 erpnext.patches.v11_0.refactor_naming_series
 erpnext.patches.v11_0.refactor_autoname_naming
 execute:frappe.reload_doc("accounts", "doctype", "POS Payment Method") #2020-05-28
@@ -351,3 +351,9 @@ erpnext.patches.v13_0.update_disbursement_account
 erpnext.patches.v13_0.update_reserved_qty_closed_wo
 erpnext.patches.v13_0.amazon_mws_deprecation_warning
 erpnext.patches.v13_0.set_work_order_qty_in_so_from_mr
+erpnext.patches.v13_0.update_accounts_in_loan_docs
+erpnext.patches.v13_0.remove_unknown_links_to_prod_plan_items # 24-03-2022
+erpnext.patches.v13_0.rename_non_profit_fields
+erpnext.patches.v13_0.enable_ksa_vat_docs #1
+erpnext.patches.v13_0.update_expense_claim_status_for_paid_advances
+erpnext.patches.v13_0.create_gst_custom_fields_in_quotation

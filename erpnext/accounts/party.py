@@ -152,7 +152,7 @@ def set_contact_details(party_details, party, party_type):
 
 def set_other_values(party_details, party, party_type):
 	# copy
-	if party_type=="Customer":
+	if party_type == "Customer":
 		to_copy = ["customer_name", "customer_group", "territory", "language"]
 	else:
 		to_copy = ["supplier_name", "supplier_group", "language"]
@@ -171,12 +171,8 @@ def get_default_price_list(party):
 		return party.default_price_list
 
 	if party.doctype == "Customer":
-		price_list =  frappe.get_cached_value("Customer Group",
-			party.customer_group, "default_price_list")
-		if price_list:
-			return price_list
+		return frappe.db.get_value("Customer Group", party.customer_group, "default_price_list")
 
-	return None
 
 def set_price_list(party_details, party, party_type, given_price_list, pos=None):
 	# price list
@@ -308,7 +304,7 @@ def validate_party_gle_currency(party_type, party, company, party_account_curren
 			.format(frappe.bold(party_type), frappe.bold(party), frappe.bold(existing_gle_currency), frappe.bold(company)), InvalidAccountCurrency)
 
 def validate_party_accounts(doc):
-
+	from erpnext.controllers.accounts_controller import validate_account_head
 	companies = []
 
 	for account in doc.get("accounts"):
@@ -330,6 +326,9 @@ def validate_party_accounts(doc):
 		if doc.get("default_currency") and party_account_currency and company_default_currency:
 			if doc.default_currency != party_account_currency and doc.default_currency != company_default_currency:
 				frappe.throw(_("Billing currency must be equal to either default company's currency or party account currency"))
+
+		# validate if account is mapped for same company
+		validate_account_head(account.idx, account.account, account.company)
 
 
 @frappe.whitelist()

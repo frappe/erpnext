@@ -85,19 +85,11 @@ class POSInvoiceMergeLog(Document):
 		sales_invoice.set_posting_time = 1
 		sales_invoice.posting_date = getdate(self.posting_date)
 		sales_invoice.save()
-		self.write_off_fractional_amount(sales_invoice, data)
 		sales_invoice.submit()
 
 		self.consolidated_invoice = sales_invoice.name
 
 		return sales_invoice.name
-
-	def write_off_fractional_amount(self, invoice, data):
-		pos_invoice_grand_total = sum(d.grand_total for d in data)
-
-		if abs(pos_invoice_grand_total - invoice.grand_total) < 1:
-			invoice.write_off_amount += -1 * (pos_invoice_grand_total - invoice.grand_total)
-			invoice.save()
 
 	def process_merging_into_credit_note(self, data):
 		credit_note = self.get_new_sales_invoice()
@@ -111,7 +103,6 @@ class POSInvoiceMergeLog(Document):
 		# TODO: return could be against multiple sales invoice which could also have been consolidated?
 		# credit_note.return_against = self.consolidated_invoice
 		credit_note.save()
-		self.write_off_fractional_amount(credit_note, data)
 		credit_note.submit()
 
 		self.consolidated_credit_note = credit_note.name

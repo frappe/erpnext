@@ -32,6 +32,7 @@ class ProductionPlan(Document):
 		self.set_pending_qty_in_row_without_reference()
 		self.calculate_total_planned_qty()
 		self.set_status()
+		self._rename_temporary_references()
 
 	def set_pending_qty_in_row_without_reference(self):
 		"Set Pending Qty in independent rows (not from SO or MR)."
@@ -56,6 +57,18 @@ class ProductionPlan(Document):
 
 			if not flt(d.planned_qty):
 				frappe.throw(_("Please enter Planned Qty for Item {0} at row {1}").format(d.item_code, d.idx))
+
+	def _rename_temporary_references(self):
+		""" po_items and sub_assembly_items items are both constructed client side without saving.
+
+			Attempt to fix linkages by using temporary names to map final row names.
+		"""
+		new_name_map = {d.temporary_name: d.name for d in self.po_items if d.temporary_name}
+		actual_names = {d.name for d in self.po_items}
+
+		for sub_assy in self.sub_assembly_items:
+			if sub_assy.production_plan_item not in actual_names:
+				sub_assy.production_plan_item = new_name_map.get(sub_assy.production_plan_item)
 
 	@frappe.whitelist()
 	def get_open_sales_orders(self):
@@ -320,7 +333,7 @@ class ProductionPlan(Document):
 
 		if self.total_produced_qty > 0:
 			self.status = "In Process"
-			if self.check_have_work_orders_completed():
+			if self.all_items_completed():
 				self.status = "Completed"
 
 		if self.status != 'Completed':
@@ -592,14 +605,24 @@ class ProductionPlan(Document):
 
 			self.append("sub_assembly_items", data)
 
-	def check_have_work_orders_completed(self):
-		wo_status = frappe.db.get_list(
+	def all_items_completed(self):
+		all_items_produced = all(flt(d.planned_qty) - flt(d.produced_qty) < 0.000001
+									for d in self.po_items)
+		if not all_items_produced:
+			return False
+
+		wo_status = frappe.get_all(
 			"Work Order",
-			filters={"production_plan": self.name},
+			filters={
+				"production_plan": self.name,
+				"status": ("not in", ["Closed", "Stopped"]),
+				"docstatus": ("<", 2),
+			},
 			fields="status",
-			pluck="status"
+			pluck="status",
 		)
-		return all(s == "Completed" for s in wo_status)
+		all_work_orders_completed = all(s == "Completed" for s in wo_status)
+		return all_work_orders_completed
 
 @frappe.whitelist()
 def download_raw_materials(doc, warehouses=None):
@@ -972,21 +995,21 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 	required_qty = item.get("quantity")
 	# get available material by transferring to production warehouse
 	for d in locations:
-		if required_qty <=0: return
+		if required_qty <= 0:
+			return
 
 		new_dict = copy.deepcopy(item)
 		quantity = required_qty if d.get("qty") > required_qty else d.get("qty")
 
-		if required_qty > 0:
-			new_dict.update({
-				"quantity": quantity,
-				"material_request_type": "Material Transfer",
-				"uom": new_dict.get("stock_uom"),  # internal transfer should be in stock UOM
-				"from_warehouse": d.get("warehouse")
-			})
+		new_dict.update({
+			"quantity": quantity,
+			"material_request_type": "Material Transfer",
+			"uom": new_dict.get("stock_uom"),  # internal transfer should be in stock UOM
+			"from_warehouse": d.get("warehouse")
+		})
 
-			required_qty -= quantity
-			new_mr_items.append(new_dict)
+		required_qty -= quantity
+		new_mr_items.append(new_dict)
 
 	# raise purchase request for remaining qty
 	if required_qty:

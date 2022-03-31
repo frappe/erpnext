@@ -1,13 +1,13 @@
-# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, format_report_data
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestStockAgeing(ERPNextTestCase):
+class TestStockAgeing(FrappeTestCase):
 	def setUp(self) -> None:
 		self.filters = frappe._dict(
 			company="_Test Company",
