@@ -5,7 +5,6 @@
 import json
 
 import frappe
-import six
 from frappe import _
 from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.model.document import Document
@@ -341,20 +340,12 @@ def split_invoices(invoices):
 
 def create_merge_logs(invoice_by_customer, closing_entry=None):
 	try:
-<<<<<<< HEAD
-		for customer, invoices in six.iteritems(invoice_by_customer):
-			merge_log = frappe.new_doc('POS Invoice Merge Log')
-			merge_log.posting_date = getdate(closing_entry.get('posting_date')) if closing_entry else nowdate()
-			merge_log.customer = customer
-			merge_log.pos_closing_entry = closing_entry.get('name') if closing_entry else None
-=======
 		for customer, invoices in invoice_by_customer.items():
 			for _invoices in split_invoices(invoices):
 				merge_log = frappe.new_doc('POS Invoice Merge Log')
 				merge_log.posting_date = getdate(closing_entry.get('posting_date')) if closing_entry else nowdate()
 				merge_log.customer = customer
 				merge_log.pos_closing_entry = closing_entry.get('name') if closing_entry else None
->>>>>>> cf51a0a1b8 (fix(pos): cannot close the pos if sr. no. is sold & returned)
 
 				merge_log.set('pos_invoices', _invoices)
 				merge_log.save(ignore_permissions=True)
