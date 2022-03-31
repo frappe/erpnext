@@ -339,9 +339,6 @@ class BuyingController(StockController, Subcontracting):
 		return supplied_items_cost
 
 	def validate_for_subcontracting(self):
-		if not self.is_subcontracted and self.sub_contracted_items:
-			frappe.throw(_("Please enter 'Is Subcontracted' as Yes or No"))
-
 		if self.is_subcontracted:
 			if self.doctype in ["Purchase Receipt", "Purchase Invoice"] and not self.supplier_warehouse:
 				frappe.throw(_("Supplier Warehouse mandatory for sub-contracted {0}").format(self.doctype))
