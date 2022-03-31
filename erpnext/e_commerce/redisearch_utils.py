@@ -22,6 +22,12 @@ def get_indexable_web_fields():
 	return [df.fieldname for df in valid_fields]
 
 
+def is_redisearch_enabled():
+	"Return True only if redisearch is loaded and enabled."
+	is_redisearch_enabled = frappe.db.get_single_value("E Commerce Settings", "is_redisearch_enabled")
+	return is_search_module_loaded() and is_redisearch_enabled
+
+
 def is_search_module_loaded():
 	try:
 		cache = frappe.cache()
@@ -35,11 +41,11 @@ def is_search_module_loaded():
 		return False
 
 
-def if_redisearch_loaded(function):
-	"Decorator to check if Redisearch is loaded."
+def if_redisearch_enabled(function):
+	"Decorator to check if Redisearch is enabled."
 
 	def wrapper(*args, **kwargs):
-		if is_search_module_loaded():
+		if is_redisearch_enabled():
 			func = function(*args, **kwargs)
 			return func
 		return
@@ -51,7 +57,7 @@ def make_key(key):
 	return "{0}|{1}".format(frappe.conf.db_name, key).encode("utf-8")
 
 
-@if_redisearch_loaded
+@if_redisearch_enabled
 def create_website_items_index():
 	"Creates Index Definition."
 
@@ -91,7 +97,7 @@ def to_search_field(field):
 	return TextField(field)
 
 
-@if_redisearch_loaded
+@if_redisearch_enabled
 def insert_item_to_index(website_item_doc):
 	# Insert item to index
 	key = get_cache_key(website_item_doc.name)
@@ -104,7 +110,7 @@ def insert_item_to_index(website_item_doc):
 	insert_to_name_ac(website_item_doc.web_item_name, website_item_doc.name)
 
 
-@if_redisearch_loaded
+@if_redisearch_enabled
 def insert_to_name_ac(web_name, doc_name):
 	ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=frappe.cache())
 	ac.add_suggestions(Suggestion(web_name, payload=doc_name))
@@ -120,14 +126,14 @@ def create_web_item_map(website_item_doc):
 	return web_item
 
 
-@if_redisearch_loaded
+@if_redisearch_enabled
 def update_index_for_item(website_item_doc):
 	# Reinsert to Cache
 	insert_item_to_index(website_item_doc)
 	define_autocomplete_dictionary()
 
 
-@if_redisearch_loaded
+@if_redisearch_enabled
 def delete_item_from_index(website_item_doc):
 	cache = frappe.cache()
 	key = get_cache_key(website_item_doc.name)
@@ -141,7 +147,7 @@ def delete_item_from_index(website_item_doc):
 	return True
 
 
-@if_redisearch_loaded
+@if_redisearch_enabled
 def delete_from_ac_dict(website_item_doc):
 	"""Removes this items's name from autocomplete dictionary"""
 	cache = frappe.cache()
@@ -149,7 +155,7 @@ def delete_from_ac_dict(website_item_doc):
 	name_ac.delete(website_item_doc.web_item_name)
 
 
-@if_redisearch_loaded
+@if_redisearch_enabled
 def define_autocomplete_dictionary():
 	"""Creates an autocomplete search dictionary for `name`.
 	Also creats autocomplete dictionary for `categories` if
@@ -182,7 +188,7 @@ def define_autocomplete_dictionary():
 	return True
 
 
-@if_redisearch_loaded
+@if_redisearch_enabled
 def reindex_all_web_items():
 	items = frappe.get_all("Website Item", fields=get_fields_indexed(), filters={"published": True})
 
@@ -208,9 +214,3 @@ def get_fields_indexed():
 	fields_to_index = fields_to_index + mandatory_fields
 
 	return fields_to_index
-
-
-# TODO: Remove later
-# # Figure out a way to run this at startup
-define_autocomplete_dictionary()
-create_website_items_index()

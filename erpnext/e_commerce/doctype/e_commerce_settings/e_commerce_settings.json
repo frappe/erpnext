@@ -47,6 +47,7 @@
   "item_search_settings_section",
   "redisearch_warning",
   "search_index_fields",
+  "is_redisearch_enabled",
   "show_categories_in_search_autocomplete",
   "is_redisearch_loaded",
   "shop_by_category_section",
@@ -303,6 +304,7 @@
   },
   {
    "default": "1",
+   "depends_on": "is_redisearch_enabled",
    "fieldname": "show_categories_in_search_autocomplete",
    "fieldtype": "Check",
    "label": "Show Categories in Search Autocomplete",
@@ -365,12 +367,19 @@
    "fieldname": "show_price_in_quotation",
    "fieldtype": "Check",
    "label": "Show Price in Quotation"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_redisearch_enabled",
+   "fieldtype": "Check",
+   "label": "Enable Redisearch",
+   "read_only_depends_on": "eval:!doc.is_redisearch_loaded"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-02 14:02:44.785824",
+ "modified": "2022-03-31 16:01:46.308663",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",
@@ -389,5 +398,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
