@@ -821,16 +821,17 @@ def auto_fetch_serial_number(
 
 
 def get_delivered_serial_nos(serial_nos):
-	'''
+	"""
 	Returns serial numbers that delivered from the list of serial numbers
-	'''
+	"""
 	from frappe.query_builder.functions import Coalesce
 
 	SerialNo = frappe.qb.DocType("Serial No")
 	serial_nos = get_serial_nos(serial_nos)
-	query = frappe.qb.select(SerialNo.name).from_(SerialNo).where(
-		(SerialNo.name.isin(serial_nos))
-		& (Coalesce(SerialNo.delivery_document_type, "") != "")
+	query = (
+		frappe.qb.select(SerialNo.name)
+		.from_(SerialNo)
+		.where((SerialNo.name.isin(serial_nos)) & (Coalesce(SerialNo.delivery_document_type, "") != ""))
 	)
 
 	result = query.run()
@@ -838,48 +839,30 @@ def get_delivered_serial_nos(serial_nos):
 		delivered_serial_nos = [row[0] for row in result]
 		return delivered_serial_nos
 
+
 @frappe.whitelist()
 def get_pos_reserved_serial_nos(filters):
 	if isinstance(filters, str):
 		filters = json.loads(filters)
 
-<<<<<<< HEAD
-	pos_transacted_sr_nos = frappe.db.sql(
-		"""select item.serial_no as serial_no
-		from `tabPOS Invoice` p, `tabPOS Invoice Item` item
-		where p.name = item.parent
-		and p.consolidated_invoice is NULL
-		and p.docstatus = 1
-		and item.docstatus = 1
-		and item.item_code = %(item_code)s
-		and item.warehouse = %(warehouse)s
-		and item.serial_no is NOT NULL and item.serial_no != ''
-		""",
-		filters,
-		as_dict=1,
-	)
-=======
 	POSInvoice = frappe.qb.DocType("POS Invoice")
 	POSInvoiceItem = frappe.qb.DocType("POS Invoice Item")
-	query = frappe.qb.from_(
-		POSInvoice
-	).from_(
-		POSInvoiceItem
-	).select(
-		POSInvoice.is_return,
-		POSInvoiceItem.serial_no
-	).where(
-		(POSInvoice.name == POSInvoiceItem.parent)
-		& (POSInvoice.docstatus == 1)
-		& (POSInvoiceItem.docstatus == 1)
-		& (POSInvoiceItem.item_code == filters.get('item_code'))
-		& (POSInvoiceItem.warehouse == filters.get('warehouse'))
-		& (POSInvoiceItem.serial_no.isnotnull())
-		& (POSInvoiceItem.serial_no != '')
+	query = (
+		frappe.qb.from_(POSInvoice)
+		.from_(POSInvoiceItem)
+		.select(POSInvoice.is_return, POSInvoiceItem.serial_no)
+		.where(
+			(POSInvoice.name == POSInvoiceItem.parent)
+			& (POSInvoice.docstatus == 1)
+			& (POSInvoiceItem.docstatus == 1)
+			& (POSInvoiceItem.item_code == filters.get("item_code"))
+			& (POSInvoiceItem.warehouse == filters.get("warehouse"))
+			& (POSInvoiceItem.serial_no.isnotnull())
+			& (POSInvoiceItem.serial_no != "")
+		)
 	)
 
 	pos_transacted_sr_nos = query.run(as_dict=True)
->>>>>>> f2ae63cbfd (fix(pos): remove returned sr. nos. from pos reserved sr. nos. list)
 
 	reserved_sr_nos = []
 	returned_sr_nos = []
