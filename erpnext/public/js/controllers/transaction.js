@@ -403,15 +403,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var sms_man = new erpnext.SMSManager(this.frm.doc);
 	}
 
-	barcode(doc, cdt, cdn) {
-		var d = locals[cdt][cdn];
-		if(d.barcode=="" || d.barcode==null) {
-			// barcode cleared, remove item
-			d.item_code = "";
-		}
-		this.item_code(doc, cdt, cdn);
-	}
-
 	item_code(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
