@@ -214,7 +214,7 @@ class POSInvoice(SalesInvoice):
 		if self.is_return:
 			return
 
-		if self.docstatus.is_draft() and not frappe.db.get_value(
+		if self.docstatus == 0 and not frappe.db.get_value(
 			"POS Profile", self.pos_profile, "validate_stock_on_save"
 		):
 			return
