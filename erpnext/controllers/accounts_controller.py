@@ -1268,23 +1268,9 @@ class AccountsController(TransactionBase):
 		stock_items = []
 		item_codes = list(set(item.item_code for item in self.get("items")))
 		if item_codes:
-<<<<<<< HEAD
-			stock_items = [
-				r[0]
-				for r in frappe.db.sql(
-					"""
-				select name from `tabItem`
-				where name in (%s) and is_stock_item=1
-			"""
-					% (", ".join((["%s"] * len(item_codes))),),
-					item_codes,
-				)
-			]
-=======
 			stock_items = frappe.db.get_values(
 				"Item", {"name": ["in", item_codes], "is_stock_item": 1}, pluck="name", cache=True
 			)
->>>>>>> 199a6da960 (perf: skip warehouse validation for non-stock items)
 
 		return stock_items
 

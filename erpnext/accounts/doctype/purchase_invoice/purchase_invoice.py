@@ -245,26 +245,14 @@ class PurchaseInvoice(BuyingController):
 
 	def validate_warehouse(self, for_validate=True):
 		if self.update_stock and for_validate:
-<<<<<<< HEAD
-<<<<<<< HEAD
-			for d in self.get("items"):
-				if not d.warehouse:
-=======
 			stock_items = self.get_stock_items()
 			for d in self.get("items"):
 				if not d.warehouse and d.item_code in stock_items:
->>>>>>> 6528218ac3 (perf: skip warehouse validation for non-stock items)
 					frappe.throw(
 						_(
 							"Warehouse required at Row No {0}, please set default warehouse for the item {1} for the company {2}"
 						).format(d.idx, d.item_code, self.company)
 					)
-=======
-			for d in self.get('items'):
-				if not d.warehouse and not d.is_fixed_asset:
-					frappe.throw(_("Row No {0}: Warehouse is required. Please set a Default Warehouse for Item {1} and Company {2}").
-						format(d.idx, d.item_code, self.company), exc=WarehouseMissingError)
->>>>>>> 136466d255 (fix(asset): do not validate warehouse on asset purchase)
 
 		super(PurchaseInvoice, self).validate_warehouse()
 
