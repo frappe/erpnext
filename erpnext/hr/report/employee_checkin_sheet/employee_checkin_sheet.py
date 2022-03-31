@@ -91,8 +91,8 @@ def execute(filters=None):
 
 						row['shift_type'] = shift_type
 						if checkins:
-							row['shift_start'] = get_time(checkins[0].shift_start)
-							row['shift_end'] = get_time(checkins[-1].shift_end)
+							row['shift_start'] = get_time(checkins[0].shift_start) if checkins[0].shift_start else None
+							row['shift_end'] = get_time(checkins[-1].shift_end) if checkins[-1].shift_end else None
 
 						if not attendance_details and shift_type and checkins:
 							shift_doc = frappe.get_cached_doc("Shift Type", shift_type)
