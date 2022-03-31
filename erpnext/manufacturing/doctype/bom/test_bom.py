@@ -462,6 +462,27 @@ class TestBOM(FrappeTestCase):
 
 		self.assertEqual(bom.quality_inspection_template, None)
 
+	def test_bom_pricing_based_on_lpp(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		parent = frappe.generate_hash(length=10)
+		child = frappe.generate_hash(length=10)
+		bom_tree = {parent: {child: {}}
+		}
+		bom = create_nested_bom(bom_tree, prefix="")
+
+		# add last purchase price
+		make_purchase_receipt(item_code=child, rate=42)
+
+		bom = frappe.copy_doc(bom)
+		bom.docstatus = 0
+		bom.amended_from = None
+		bom.rm_cost_as_per = "Last Purchase Rate"
+		bom.conversion_rate = 1
+		bom.save()
+		bom.submit()
+		self.assertEqual(bom.items[0].rate, 42)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
@@ -511,6 +532,7 @@ def create_nested_bom(tree, prefix="_Test bom "):
 			bom = frappe.get_doc(doctype="BOM", item=bom_item_code)
 			for child_item in child_items.keys():
 				bom.append("items", {"item_code": prefix + child_item})
+			bom.company = "_Test Company"
 			bom.currency = "INR"
 			bom.insert()
 			bom.submit()
