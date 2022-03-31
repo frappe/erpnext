@@ -112,7 +112,7 @@ frappe.ui.form.on('Payment Entry', {
 			if(child.reference_doctype == "Purchase Invoice"){
 				filters = {"docstatus": 1, "company": doc.company, "status": ["in", ["Unpaid", "Overdue"]], "supplier": doc.party};
 			}
-			if(child.reference_doctype == "Sales Invoice" ){
+			if(child.reference_doctype == "Sales Invoice" || child.reference_doctype == "Customer Documents"){
 				filters = {"docstatus": 1, "company": doc.company, "status": ["in", ["Unpaid", "Overdue"]], "customer": doc.party};
 			}
 			if(child.reference_doctype == "Supplier Documents" || child.reference_doctype == "Credit Note CXP"){

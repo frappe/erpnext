@@ -152,20 +152,34 @@ class PaymentEntry(AccountsController):
 		self.set_missing_ref_details(force=True)
 
 	def paid_supplier_documents(self):
-		documents = frappe.get_all("Payment Entry Reference", ["reference_doctype", "reference_name"], filters = {"parent": self.name})
+		documents = frappe.get_all("Payment Entry Reference", ["*"], filters = {"parent": self.name})
 
 		for document in documents:
 			if document.reference_doctype == "Supplier Documents":
 				doc = frappe.get_doc("Supplier Documents", document.reference_name)
-				doc.db_set('status', "Paid", update_modified=False)
+				outstanding = doc.outstanding_amount - document.allocated_amount 
+
+				doc.db_set('outstanding_amount', outstanding, update_modified=False)
+
+				if outstanding == 0:
+					doc.db_set('status', "Paid", update_modified=False)
+				else:
+					doc.db_set('status', "Unpaid", update_modified=False)
 	
 	def paid_customer_documents(self):
-		documents = frappe.get_all("Payment Entry Reference", ["reference_doctype", "reference_name"], filters = {"parent": self.name})
+		documents = frappe.get_all("Payment Entry Reference", ["*"], filters = {"parent": self.name})
 
 		for document in documents:
 			if document.reference_doctype == "Customer Documents":
 				doc = frappe.get_doc("Customer Documents", document.reference_name)
-				doc.db_set('status', "Paid", update_modified=False)
+				outstanding = doc.outstanding_amount - document.allocated_amount 
+
+				doc.db_set('outstanding_amount', outstanding, update_modified=False)
+
+				if outstanding == 0:
+					doc.db_set('status', "Paid", update_modified=False)
+				else:
+					doc.db_set('status', "Unpaid", update_modified=False)
 
 	def update_accounts_status(self):
 		if self.party_type == "Customer":
