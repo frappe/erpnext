@@ -20,6 +20,7 @@
    "fieldname": "current_bom",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Current BOM",
    "options": "BOM"
   },
@@ -27,6 +28,7 @@
    "fieldname": "new_bom",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "New BOM",
    "options": "BOM"
   },
@@ -37,6 +39,7 @@
   {
    "fieldname": "update_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Update Type",
    "options": "Replace BOM\nUpdate Cost"
   },
@@ -66,7 +69,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-17 12:51:28.067900",
+ "modified": "2022-03-31 12:51:44.885102",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Update Log",
