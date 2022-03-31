@@ -384,6 +384,27 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None, args=Non
 	return target_doc
 
 @frappe.whitelist()
+def make_subcontracting_order_based_on_supplier(source_name, target_doc=None, args=None):
+	target_doc = get_mapped_doc("Material Request", source_name, {
+		"Material Request": {
+			"doctype": "Subcontracting Order",
+		},
+		"Material Request Item": {
+			"doctype": "Subcontracting Order Finished Good Item",
+			"field_map": [
+				["name", "material_request_item"],
+				["parent", "material_request"],
+				["uom", "stock_uom"],
+				["uom", "uom"]
+			],
+			"postprocess": update_item,
+			"condition": lambda doc: doc.ordered_qty < doc.qty
+		}
+	}, target_doc)
+
+	return target_doc
+
+@frappe.whitelist()
 def get_items_based_on_default_supplier(supplier):
 	supplier_items = [d.parent for d in frappe.db.get_all("Item Default",
 		{"default_supplier": supplier, "parenttype": "Item"}, 'parent')]
