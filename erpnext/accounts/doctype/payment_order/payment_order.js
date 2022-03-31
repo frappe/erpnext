@@ -12,7 +12,6 @@ frappe.ui.form.on('Payment Order', {
 		});
 
 		frm.set_df_property('references', 'cannot_add_rows', true);
-		frm.set_df_property('references', 'cannot_delete_rows', true);
 	},
 	refresh: function(frm) {
 		if (frm.doc.docstatus == 0) {
