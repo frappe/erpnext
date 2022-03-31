@@ -26,6 +26,7 @@ from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
+from erpnext.stock.get_item_details import get_projected_qty
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -578,38 +579,57 @@ def get_requested_item_qty(sales_order):
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
-	requested_item_qty = get_requested_item_qty(source_name)
 
-	def update_item(source, target, source_parent):
-		# qty is for packed items, because packed items don't have stock_qty field
-		qty = source.get("qty")
-		target.project = source_parent.project
-		target.qty = qty - requested_item_qty.get(source.name, 0)
-		target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
+    ignore_available_qty = frappe.flags.args.ignore_available_qty
+    requested_item_qty = get_requested_item_qty(source_name)
 
-	doc = get_mapped_doc(
-		"Sales Order",
-		source_name,
-		{
-			"Sales Order": {"doctype": "Material Request", "validation": {"docstatus": ["=", 1]}},
-			"Packed Item": {
-				"doctype": "Material Request Item",
-				"field_map": {"parent": "sales_order", "uom": "stock_uom"},
-				"postprocess": update_item,
-			},
-			"Sales Order Item": {
-				"doctype": "Material Request Item",
-				"field_map": {"name": "sales_order_item", "parent": "sales_order"},
-				"condition": lambda doc: not frappe.db.exists("Product Bundle", doc.item_code)
-				and doc.stock_qty > requested_item_qty.get(doc.name, 0),
-				"postprocess": update_item,
-			},
-		},
-		target_doc,
-	)
+    if ignore_available_qty:
+        condition = lambda doc: not frappe.db.exists(
+            "Product Bundle", doc.item_code
+        ) and doc.stock_qty > requested_item_qty.get(doc.name, 0)
+    else:
+        condition = (
+            lambda doc: not frappe.db.exists("Product Bundle", doc.item_code)
+            and doc.stock_qty > requested_item_qty.get(doc.name, 0)
+            and get_projected_qty(doc.item_code, doc.warehouse)["projected_qty"] < 0
+        )
 
-	return doc
+    def postprocess(source, target):
+        if not target.get("items"):
+            frappe.throw(_("Items have already been requested/ordered."))
 
+    def update_item(source, target, source_parent):
+        # qty is for packed items, because packed items don't have stock_qty field
+        qty = source.get("qty")
+        target.project = source_parent.project
+        if not ignore_available_qty:
+            target.qty = qty
+        else:
+            target.qty = qty - requested_item_qty.get(source.name, 0)
+
+        target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
+
+    doc = get_mapped_doc(
+        "Sales Order",
+        source_name,
+        {
+            "Sales Order": {"doctype": "Material Request", "validation": {"docstatus": ["=", 1]}},
+            "Packed Item": {
+                "doctype": "Material Request Item",
+                "field_map": {"parent": "sales_order", "uom": "stock_uom"},
+                "postprocess": update_item,
+            },
+            "Sales Order Item": {
+                "doctype": "Material Request Item",
+                "field_map": {"name": "sales_order_item", "parent": "sales_order"},
+                "condition": condition,
+                "postprocess": update_item,
+            },
+        },
+        target_doc,
+        postprocess,
+    )
+    return doc
 
 @frappe.whitelist()
 def make_project(source_name, target_doc=None):

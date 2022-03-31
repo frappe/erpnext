@@ -1,7 +1,7 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
+import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_months, nowdate
 
@@ -14,6 +14,8 @@ from erpnext.selling.report.pending_so_items_for_purchase_request.pending_so_ite
 
 class TestPendingSOItemsForPurchaseRequest(FrappeTestCase):
 	def test_result_for_partial_material_request(self):
+		frappe.flags.args = frappe._dict()
+		frappe.flags.args.ignore_available_qty = 1  
 		so = make_sales_order()
 		mr = make_material_request(so.name)
 		mr.items[0].qty = 4
