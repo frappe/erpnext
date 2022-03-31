@@ -534,6 +534,7 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
 			dn_item = map_child_doc(source_doc, delivery_note, table_mapper)
 
 			if dn_item:
+				dn_item.pick_list_item = location.name
 				dn_item.warehouse = location.warehouse
 				dn_item.qty = flt(location.picked_qty) / (flt(location.conversion_factor) or 1)
 				dn_item.batch_no = location.batch_no
