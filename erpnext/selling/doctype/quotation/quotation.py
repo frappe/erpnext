@@ -34,6 +34,14 @@ class Quotation(SellingController):
 		if self.items:
 			self.with_items = 1
 	
+	def on_update(self):
+		self.verify_rounding()
+
+	def verify_rounding(self):
+		if self.disable_rounded_total:
+			self.rounding_adjustment = 0
+			self.rounded_total = self.grand_total
+			
 	def set_total_deduction_product(self):
 		if self.docstatus==1:
 			total_deduction = 0

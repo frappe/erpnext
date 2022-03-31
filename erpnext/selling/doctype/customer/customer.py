@@ -58,29 +58,22 @@ class Customer(TransactionBase):
 		confidentials_list = frappe.get_all("Confidential Customer", ["*"])
 
 		if len(confidentials_list):
-			customers = frappe.get_all("Confidential Customer Detail", ["*"], filters = {"parent":confidentials_list[0].name, "customer": self.name})
+			customers = frappe.get_all("Confidential Customer Detail", ["*"], filters = {"parent":confidentials_list[0].name})
 			
 			if len(customers) > 0:
 				user = frappe.session.user
+				confidential = False
 
-				users = frappe.get_all("User", ["*"], filters = {"name": user})
+				for customer in customers:
+					if user == customer.user or user == customer.name_user:
+						confidential = True
 
-				roles = frappe.get_all("Has Role", ["*"], filters = {"parent": users[0].name})
-
-				roles_arr = []
-
-				for role in roles:
-
-					roles_arr.append(role.role)
-
-				if confidentials_list[0].rol in roles_arr:
+				if confidential:
 					self.db_set('confidential', 1, update_modified=False)
 				else:
 					self.db_set('confidential', 0, update_modified=False)
-			else:
-				self.db_set('confidential', 1, update_modified=False)
 		else:
-			self.db_set('confidential', 1, update_modified=False)
+			self.db_set('confidential', 0, update_modified=False)
 		
 		if self.confidential:
 			self.load_dashboard_info()
