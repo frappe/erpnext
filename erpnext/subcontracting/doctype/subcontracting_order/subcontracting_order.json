@@ -1,62 +1,140 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
+ "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2022-02-21 14:58:53.790565",
  "doctype": "DocType",
- "editable_grid": 1,
+ "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
+  "supplier_section",
   "title",
   "naming_series",
-  "status",
   "purchase_order",
   "supplier",
+  "get_items_from_open_material_requests",
   "supplier_name",
+  "supplier_warehouse",
+  "column_break1",
   "company",
   "transaction_date",
   "schedule_date",
   "order_confirmation_no",
   "order_confirmation_date",
   "amended_from",
+  "section_addresses",
   "supplier_address",
   "address_display",
   "contact_person",
   "contact_display",
   "contact_mobile",
   "contact_email",
+  "col_break_address",
   "shipping_address",
   "shipping_address_display",
   "billing_address",
   "billing_address_display",
+  "currency_and_price_list",
   "currency",
-  "supplier_warehouse",
+  "conversion_rate",
+  "cb_price_list",
+  "buying_price_list",
+  "price_list_currency",
+  "plc_conversion_rate",
+  "ignore_pricing_rule",
+  "before_items_section",
+  "scan_barcode",
+  "items_col_break",
+  "set_warehouse",
+  "items_section",
   "service_items",
   "fg_items",
+  "sb_last_subcontracted",
   "total_qty",
-  "supplied_items",
   "base_total",
   "base_net_total",
-  "apply_tds",
-  "tax_withholding_category",
-  "conversion_rate",
-  "plc_conversion_rate",
-  "per_received",
+  "column_break_26",
+  "total_net_weight",
+  "total",
+  "net_total",
+  "section_break_48",
+  "pricing_rules",
+  "raw_material_details",
   "set_reserve_warehouse",
-  "grand_total"
+  "supplied_items",
+  "section_break_52",
+  "column_break_39",
+  "discount_section",
+  "apply_discount_on",
+  "base_discount_amount",
+  "column_break_45",
+  "additional_discount_percentage",
+  "discount_amount",
+  "totals_section",
+  "base_grand_total",
+  "base_rounding_adjustment",
+  "base_in_words",
+  "base_rounded_total",
+  "column_break4",
+  "grand_total",
+  "rounding_adjustment",
+  "rounded_total",
+  "disable_rounded_total",
+  "in_words",
+  "advance_paid",
+  "payment_schedule_section",
+  "payment_terms_template",
+  "payment_schedule",
+  "tracking_section",
+  "status",
+  "column_break_75",
+  "per_billed",
+  "per_received",
+  "terms_section_break",
+  "tc_name",
+  "terms",
+  "column_break5",
+  "letter_head",
+  "select_print_heading",
+  "column_break_86",
+  "language",
+  "group_same_items",
+  "subscription_section",
+  "from_date",
+  "to_date",
+  "column_break_97",
+  "auto_repeat",
+  "update_auto_repeat_reference",
+  "more_info",
+  "ref_sq",
+  "column_break_74",
+  "party_account_currency",
+  "is_internal_supplier",
+  "represents_company",
+  "inter_company_order_reference"
  ],
  "fields": [
   {
-   "default": "Draft",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_standard_filter": 1,
-   "label": "Status",
-   "no_copy": 1,
-   "options": "Draft\nOpen\nPartially Received\nCompleted\nMaterial Transferred\nPartial Material Transferred",
-   "print_hide": 1,
-   "read_only": 1,
-   "reqd": 1,
-   "search_index": 1
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "label": "Subcontracting Purchase Order",
+   "options": "Purchase Order",
+   "reqd": 1
+  },
+  {
+   "depends_on": "purchase_order",
+   "fieldname": "service_items",
+   "fieldtype": "Table",
+   "label": "Service Items",
+   "mandatory_depends_on": "purchase_order",
+   "options": "Subcontracting Order Service Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "supplier_section",
+   "fieldtype": "Section Break",
+   "options": "fa fa-user"
   },
   {
    "allow_on_submit": 1,
@@ -79,13 +157,6 @@
    "set_only_once": 1
   },
   {
-   "fieldname": "purchase_order",
-   "fieldtype": "Link",
-   "label": "Subcontracting Purchase Order",
-   "options": "Purchase Order",
-   "reqd": 1
-  },
-  {
    "bold": 1,
    "fieldname": "supplier",
    "fieldtype": "Link",
@@ -98,13 +169,21 @@
    "search_index": 1
   },
   {
+   "depends_on": "eval:doc.supplier && doc.docstatus===0 && (!(doc.fg_items && doc.fg_items.length) || (doc.fg_items.length==1 && !doc.fg_items[0].item_code))",
+   "description": "Fetch items based on Default Supplier.",
+   "fieldname": "get_items_from_open_material_requests",
+   "fieldtype": "Button",
+   "label": "Get Items from Open Material Requests"
+  },
+  {
    "bold": 1,
    "fetch_from": "supplier.supplier_name",
    "fieldname": "supplier_name",
    "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Supplier Name",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "company",
@@ -117,7 +196,15 @@
    "reqd": 1
   },
   {
+   "fieldname": "column_break1",
+   "fieldtype": "Column Break",
+   "print_width": "50%",
+   "width": "50%"
+  },
+  {
    "default": "Today",
+   "fetch_from": "purchase_order.transaction_date",
+   "fetch_if_empty": 1,
    "fieldname": "transaction_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -127,6 +214,8 @@
   },
   {
    "allow_on_submit": 1,
+   "fetch_from": "purchase_order.schedule_date",
+   "fetch_if_empty": 1,
    "fieldname": "schedule_date",
    "fieldtype": "Date",
    "label": "Required By"
@@ -134,6 +223,8 @@
   {
    "allow_on_submit": 1,
    "depends_on": "eval:doc.docstatus===1",
+   "fetch_from": "purchase_order.order_confirmation_no",
+   "fetch_if_empty": 1,
    "fieldname": "order_confirmation_no",
    "fieldtype": "Data",
    "label": "Order Confirmation No"
@@ -141,6 +232,8 @@
   {
    "allow_on_submit": 1,
    "depends_on": "eval:doc.order_confirmation_no",
+   "fetch_from": "purchase_order.order_confirmation_date",
+   "fetch_if_empty": 1,
    "fieldname": "order_confirmation_date",
    "fieldtype": "Date",
    "label": "Order Confirmation Date"
@@ -156,6 +249,14 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
+   "fieldname": "section_addresses",
+   "fieldtype": "Section Break",
+   "label": "Address and Contact"
+  },
+  {
+   "fetch_from": "supplier.supplier_primary_address",
+   "fetch_if_empty": 1,
    "fieldname": "supplier_address",
    "fieldtype": "Link",
    "label": "Supplier Address",
@@ -163,17 +264,19 @@
    "print_hide": 1
   },
   {
-   "fieldname": "address_display",
-   "fieldtype": "Small Text",
-   "label": "Supplier Address Details",
-   "read_only": 1
-  },
-  {
+   "fetch_from": "supplier.supplier_primary_contact",
+   "fetch_if_empty": 1,
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "label": "Supplier Contact",
    "options": "Contact",
    "print_hide": 1
+  },
+  {
+   "fieldname": "address_display",
+   "fieldtype": "Small Text",
+   "label": "Supplier Address Details",
+   "read_only": 1
   },
   {
    "fieldname": "contact_display",
@@ -197,6 +300,10 @@
    "read_only": 1
   },
   {
+   "fieldname": "col_break_address",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "shipping_address",
    "fieldtype": "Link",
    "label": "Company Shipping Address",
@@ -211,16 +318,11 @@
    "read_only": 1
   },
   {
-   "fieldname": "billing_address",
-   "fieldtype": "Link",
-   "label": "Company Billing Address",
-   "options": "Address"
-  },
-  {
-   "fieldname": "billing_address_display",
-   "fieldtype": "Small Text",
-   "label": "Billing Address Details",
-   "read_only": 1
+   "collapsible": 1,
+   "fieldname": "currency_and_price_list",
+   "fieldtype": "Section Break",
+   "label": "Currency and Price List",
+   "options": "fa fa-tag"
   },
   {
    "fieldname": "currency",
@@ -231,6 +333,59 @@
    "reqd": 1
   },
   {
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "precision": "9",
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_price_list",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "buying_price_list",
+   "fieldtype": "Link",
+   "label": "Price List",
+   "options": "Price List",
+   "print_hide": 1
+  },
+  {
+   "fetch_from": "buying_price_list.currency",
+   "fieldname": "price_list_currency",
+   "fieldtype": "Link",
+   "label": "Price List Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "plc_conversion_rate",
+   "fieldtype": "Float",
+   "label": "Price List Exchange Rate",
+   "precision": "9",
+   "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "purchase_order.ignore_pricing_rule",
+   "fieldname": "ignore_pricing_rule",
+   "fieldtype": "Check",
+   "label": "Ignore Pricing Rule",
+   "no_copy": 1,
+   "permlevel": 1,
+   "print_hide": 1
+  },
+  {
+   "description": "Sets 'Warehouse' in each row of the Finished Good Items table.",
+   "fieldname": "set_warehouse",
+   "fieldtype": "Link",
+   "label": "Set Target Warehouse",
+   "options": "Warehouse",
+   "print_hide": 1
+  },
+  {
    "fieldname": "supplier_warehouse",
    "fieldtype": "Link",
    "label": "Supplier Warehouse",
@@ -238,21 +393,58 @@
    "reqd": 1
   },
   {
-   "depends_on": "purchase_order",
-   "fieldname": "service_items",
-   "fieldtype": "Table",
-   "label": "Service Items",
-   "mandatory_depends_on": "purchase_order",
-   "options": "Subcontracting Order Service Item",
-   "read_only": 1
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "hide_border": 1,
+   "options": "fa fa-shopping-cart"
+  },
+  {
+   "fieldname": "scan_barcode",
+   "fieldtype": "Data",
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
+   "depends_on": "purchase_order",
    "fieldname": "fg_items",
    "fieldtype": "Table",
    "label": "Finished Good Items",
    "options": "Subcontracting Order Finished Good Item",
    "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_48",
+   "fieldtype": "Section Break",
+   "label": "Pricing Rules"
+  },
+  {
+   "fieldname": "pricing_rules",
+   "fieldtype": "Table",
+   "label": "Subcontracting Order Pricing Rule",
+   "options": "Pricing Rule Detail",
+   "read_only": 1
+  },
+  {
+   "collapsible_depends_on": "supplied_items",
+   "depends_on": "supplied_items",
+   "fieldname": "raw_material_details",
+   "fieldtype": "Section Break",
+   "label": "Raw Materials Supplied"
+  },
+  {
+   "fieldname": "supplied_items",
+   "fieldtype": "Table",
+   "label": "Supplied Items",
+   "no_copy": 1,
+   "options": "Subcontracting Order Supplied Item",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_last_subcontracted",
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "total_qty",
@@ -278,13 +470,263 @@
    "read_only": 1
   },
   {
-   "fieldname": "supplied_items",
-   "fieldtype": "Table",
-   "label": "Supplied Items",
-   "no_copy": 1,
-   "options": "Subcontracting Order Supplied Item",
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Total",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "net_total",
+   "fieldtype": "Currency",
+   "label": "Net Total",
+   "options": "currency",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "total_net_weight",
+   "fieldtype": "Float",
+   "label": "Total Net Weight",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_52",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "column_break_39",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "apply_discount_on",
+   "fieldname": "discount_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Discount"
+  },
+  {
+   "default": "Grand Total",
+   "fieldname": "apply_discount_on",
+   "fieldtype": "Select",
+   "label": "Apply Additional Discount On",
+   "options": "\nGrand Total\nNet Total",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "base_discount_amount",
+   "fieldtype": "Currency",
+   "label": "Additional Discount Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_45",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "additional_discount_percentage",
+   "fieldtype": "Float",
+   "label": "Additional Discount Percentage",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "discount_amount",
+   "fieldtype": "Currency",
+   "label": "Additional Discount Amount",
+   "options": "currency",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "fieldname": "base_grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total (Company Currency)",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.disable_rounded_total",
+   "fieldname": "base_rounding_adjustment",
+   "fieldtype": "Currency",
+   "label": "Rounding Adjustment (Company Currency)",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "description": "In Words will be visible once you save the Purchase Order.",
+   "fieldname": "base_in_words",
+   "fieldtype": "Data",
+   "label": "In Words (Company Currency)",
+   "length": 240,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_rounded_total",
+   "fieldtype": "Currency",
+   "label": "Rounded Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Grand Total",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.disable_rounded_total",
+   "fieldname": "rounding_adjustment",
+   "fieldtype": "Currency",
+   "label": "Rounding Adjustment",
+   "no_copy": 1,
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rounded_total",
+   "fieldtype": "Currency",
+   "label": "Rounded Total",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_rounded_total",
+   "fieldtype": "Check",
+   "label": "Disable Rounded Total"
+  },
+  {
+   "fieldname": "in_words",
+   "fieldtype": "Data",
+   "label": "In Words",
+   "length": 240,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "advance_paid",
+   "fieldtype": "Currency",
+   "label": "Advance Paid",
+   "no_copy": 1,
+   "options": "party_account_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "payment_schedule_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Terms"
+  },
+  {
+   "fieldname": "payment_terms_template",
+   "fieldtype": "Link",
+   "label": "Payment Terms Template",
+   "options": "Payment Terms Template"
+  },
+  {
+   "fieldname": "payment_schedule",
+   "fieldtype": "Table",
+   "label": "Payment Schedule",
+   "no_copy": 1,
+   "options": "Payment Schedule",
+   "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "terms",
+   "fieldname": "terms_section_break",
+   "fieldtype": "Section Break",
+   "label": "Terms and Conditions",
+   "options": "fa fa-legal"
+  },
+  {
+   "fetch_from": "purchase_order.tc_name",
+   "fieldname": "tc_name",
+   "fieldtype": "Link",
+   "label": "Terms",
+   "options": "Terms and Conditions",
+   "print_hide": 1
+  },
+  {
+   "fetch_from": "purchase_order.terms",
+   "fieldname": "terms",
+   "fieldtype": "Text Editor",
+   "label": "Terms and Conditions"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_info",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nOpen\nPartially Received\nCompleted\nMaterial Transferred\nPartial Material Transferred\nCancelled",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "ref_sq",
+   "fieldtype": "Link",
+   "label": "Supplier Quotation",
+   "no_copy": 1,
+   "options": "Supplier Quotation",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "party_account_currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Party Account Currency",
+   "no_copy": 1,
+   "options": "Currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "inter_company_order_reference",
+   "fieldtype": "Link",
+   "label": "Inter Company Order Reference",
+   "options": "Sales Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_74",
+   "fieldtype": "Column Break"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -297,53 +739,161 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "apply_tds",
-   "fieldtype": "Check",
-   "label": "Apply Tax Withholding Amount"
-  },
-  {
-   "depends_on": "eval: doc.apply_tds",
-   "fieldname": "tax_withholding_category",
-   "fieldtype": "Link",
-   "label": "Tax Withholding Category",
-   "options": "Tax Withholding Category"
-  },
-  {
-   "fieldname": "conversion_rate",
-   "fieldtype": "Float",
-   "label": "Exchange Rate",
-   "precision": "9",
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "per_billed",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "% Billed",
+   "no_copy": 1,
    "print_hide": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
-   "fieldname": "plc_conversion_rate",
-   "fieldtype": "Float",
-   "label": "Price List Exchange Rate",
-   "precision": "9",
+   "collapsible": 1,
+   "fieldname": "column_break5",
+   "fieldtype": "Section Break",
+   "label": "Printing Settings",
+   "print_hide": 1,
+   "print_width": "50%",
+   "width": "50%"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "letter_head",
+   "fieldtype": "Link",
+   "label": "Letter Head",
+   "options": "Letter Head",
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
+   "fieldname": "select_print_heading",
+   "fieldtype": "Link",
+   "label": "Print Heading",
+   "no_copy": 1,
+   "options": "Print Heading",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "column_break_86",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "group_same_items",
+   "fieldtype": "Check",
+   "label": "Group same items",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "language",
+   "fieldtype": "Data",
+   "label": "Print Language",
+   "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "subscription_section",
+   "fieldtype": "Section Break",
+   "label": "Subscription Section"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_97",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "auto_repeat",
+   "fieldtype": "Link",
+   "label": "Auto Repeat",
+   "no_copy": 1,
+   "options": "Auto Repeat",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval: doc.auto_repeat",
+   "fieldname": "update_auto_repeat_reference",
+   "fieldtype": "Button",
+   "label": "Update Auto Repeat Reference"
+  },
+  {
    "depends_on": "supplied_items",
+   "description": "Sets 'Reserve Warehouse' in each row of the Supplied Items table.",
    "fieldname": "set_reserve_warehouse",
    "fieldtype": "Link",
    "label": "Set Reserve Warehouse",
    "options": "Warehouse"
   },
   {
-   "fieldname": "grand_total",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Grand Total",
-   "options": "currency",
+   "collapsible": 1,
+   "fieldname": "tracking_section",
+   "fieldtype": "Section Break",
+   "label": "Order Status"
+  },
+  {
+   "fieldname": "column_break_75",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "billing_address",
+   "fieldtype": "Link",
+   "label": "Company Billing Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "billing_address_display",
+   "fieldtype": "Small Text",
+   "label": "Billing Address Details",
+   "read_only": 1
+  },
+  {
+   "fieldname": "before_items_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fetch_from": "supplier.is_internal_supplier",
+   "fieldname": "is_internal_supplier",
+   "fieldtype": "Check",
+   "label": "Is Internal Supplier"
+  },
+  {
+   "fetch_from": "supplier.represents_company",
+   "fieldname": "represents_company",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Represents Company",
+   "options": "Company",
    "read_only": 1
   }
  ],
- "index_web_pages_for_search": 1,
+ "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-22 21:47:59.606388",
+ "modified": "2022-03-30 14:01:25.852089",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order",
@@ -351,20 +901,51 @@
  "owner": "Administrator",
  "permissions": [
   {
+   "read": 1,
+   "report": 1,
+   "role": "Stock User"
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
-   "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "System Manager",
+   "role": "Purchase Manager",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Purchase Manager",
    "write": 1
   }
  ],
+ "search_fields": "status, transaction_date, supplier, grand_total",
+ "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
+ "timeline_field": "supplier",
+ "title_field": "supplier_name",
  "track_changes": 1
 }
