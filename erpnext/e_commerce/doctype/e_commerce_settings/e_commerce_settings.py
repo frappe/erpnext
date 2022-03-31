@@ -9,6 +9,7 @@ from frappe.utils import comma_and, flt, unique
 
 from erpnext.e_commerce.redisearch_utils import (
 	create_website_items_index,
+	define_autocomplete_dictionary,
 	get_indexable_web_fields,
 	is_search_module_loaded,
 )
@@ -21,6 +22,8 @@ class ShoppingCartSetupError(frappe.ValidationError):
 class ECommerceSettings(Document):
 	def onload(self):
 		self.get("__onload").quotation_series = frappe.get_meta("Quotation").get_options("naming_series")
+
+		# flag >> if redisearch is installed and loaded
 		self.is_redisearch_loaded = is_search_module_loaded()
 
 	def validate(self):
@@ -33,6 +36,20 @@ class ECommerceSettings(Document):
 			self.validate_price_list_exchange_rate()
 
 		frappe.clear_document_cache("E Commerce Settings", "E Commerce Settings")
+
+		self.is_redisearch_enabled_pre_save = frappe.db.get_single_value(
+			"E Commerce Settings", "is_redisearch_enabled"
+		)
+
+	def after_save(self):
+		self.create_redisearch_indexes()
+
+	def create_redisearch_indexes(self):
+		# if redisearch is enabled (value changed) create indexes and dictionary
+		value_changed = self.is_redisearch_enabled != self.is_redisearch_enabled_pre_save
+		if self.is_redisearch_loaded and self.is_redisearch_enabled and value_changed:
+			define_autocomplete_dictionary()
+			create_website_items_index()
 
 	def validate_field_filters(self):
 		if not (self.enable_field_filters and self.filter_fields):
