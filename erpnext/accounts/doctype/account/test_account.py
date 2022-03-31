@@ -241,6 +241,28 @@ class TestAccount(unittest.TestCase):
 		for doc in to_delete:
 			frappe.delete_doc("Account", doc)
 
+	def test_validate_account_currency(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		if not frappe.db.get_value("Account", "Test Currency Account - _TC"):
+			acc = frappe.new_doc("Account")
+			acc.account_name = "Test Currency Account"
+			acc.parent_account = "Tax Assets - _TC"
+			acc.company = "_Test Company"
+			acc.insert()
+		else:
+			acc = frappe.get_doc("Account", "Test Currency Account - _TC")
+
+		self.assertEqual(acc.account_currency, "INR")
+
+		# Make a JV against this account
+		make_journal_entry(
+			"Test Currency Account - _TC", "Miscellaneous Expenses - _TC", 100, submit=True
+		)
+
+		acc.account_currency = "USD"
+		self.assertRaises(frappe.ValidationError, acc.save)
+
 
 def _make_test_records(verbose=None):
 	from frappe.test_runner import make_test_objects
