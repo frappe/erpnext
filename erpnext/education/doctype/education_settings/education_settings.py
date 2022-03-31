@@ -41,4 +41,4 @@ class EducationSettings(Document):
 
 
 def update_website_context(context):
-	context["lms_enabled"] = frappe.get_doc("Education Settings").enable_lms
+	context["lms_enabled"] = frappe.get_cached_doc("Education Settings").enable_lms
