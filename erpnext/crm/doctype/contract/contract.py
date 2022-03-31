@@ -22,9 +22,12 @@ class Contract(Document):
 
 			# If identical, append contract name with the next number in the iteration
 			if frappe.db.exists("Contract", name):
-				count = frappe.db.count('Contract', filters={
-					'name': ('like', f"%{name}%"),
-				})
+				count = frappe.db.count(
+					"Contract",
+					filters={
+						"name": ("like", f"%{name}%"),
+					},
+				)
 				name = f"{name} - {count}"
 
 			self.name = _(name)
