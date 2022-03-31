@@ -9,10 +9,12 @@
   "company",
   "pricelist_name",
   "start_date",
+  "selling",
   "column_break_4",
   "currency",
   "end_date",
   "cost_center",
+  "buying",
   "filters_section",
   "filters_json",
   "section_break_8",
@@ -102,12 +104,26 @@
    "label": "Cost Center",
    "options": "Cost Center",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "selling",
+   "fieldtype": "Check",
+   "label": "Selling",
+   "mandatory_depends_on": "!doc.buying"
+  },
+  {
+   "default": "0",
+   "fieldname": "buying",
+   "fieldtype": "Check",
+   "label": "Buying",
+   "mandatory_depends_on": "!doc.selling"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-29 15:21:23.968519",
+ "modified": "2022-03-31 18:38:36.843013",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "PriceList Generator",
