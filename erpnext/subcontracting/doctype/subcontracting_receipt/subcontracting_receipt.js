@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Subcontracting Receipt', {
-	setup: function (frm) {
+	setup: (frm) => {
 		frm.set_query('subcontracting_order', () => {
 			return {
 				filters: {
@@ -11,7 +11,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 			};
 		});
 
-		frm.set_query("item_code", "service_items", () => {
+		frm.set_query('item_code', 'service_items', () => {
 			return {
 				filters: {
 					is_stock_item: 0
@@ -19,7 +19,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 			};
 		});
 
-		frm.set_query("item_code", "fg_items", () => {
+		frm.set_query('item_code', 'fg_items', () => {
 			return {
 				filters: {
 					is_sub_contracted_item: 1
@@ -27,7 +27,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 			};
 		});
 
-		frm.set_query("bom", "fg_items", function (doc, cdt, cdn) {
+		frm.set_query('bom', 'fg_items', (doc, cdt, cdn) => {
 			let d = locals[cdt][cdn];
 			return {
 				filters: {
@@ -38,19 +38,19 @@ frappe.ui.form.on('Subcontracting Receipt', {
 		});
 	},
 
-	subcontracting_order: function (frm) {
+	subcontracting_order: (frm) => {
 		if (frm.doc.subcontracting_order) {
 			frappe.call({
-				method: "erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.make_subcontracting_receipt",
+				method: 'erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.make_subcontracting_receipt',
 				args: {
 					source_name: frm.doc.subcontracting_order,
 				},
-				freeze_message: __("Mapping Subcontracting Receipt ..."),
-				callback: function (r) {
+				freeze_message: __('Mapping Subcontracting Receipt ...'),
+				callback: (r) => {
 					if (!r.exc) {
-						var fields_to_skip = ["owner", "docstatus", "idx", "doctype", "__islocal", "__onload", "__unsaved"];
+						var fields_to_skip = ['owner', 'docstatus', 'idx', 'doctype', '__islocal', '__onload', '__unsaved'];
 						var fields_to_map = Object.keys(r.message).filter(n => !fields_to_skip.includes(n));
-						$.each(fields_to_map, function (i, field) {
+						$.each(fields_to_map, (i, field) => {
 							frm.set_value(field, r.message[field]);
 						});
 					};
