@@ -1,5 +1,5 @@
 {
- "creation": "2020-01-14 10:24:31.318171",
+ "creation": "2022-03-31 12:33:46.822160",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -34,10 +34,10 @@
   }
  ],
  "istable": 1,
- "modified": "2022-03-31 11:46:47.420836",
+ "modified": "2022-03-31 12:33:46.822160",
  "modified_by": "Administrator",
  "module": "HR",
- "name": "Employee Detail Salary Component",
+ "name": "Employee Detail Salary Component Confidential",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
