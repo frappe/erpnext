@@ -334,6 +334,7 @@ erpnext.patches.v13_0.delete_bank_reconciliation_detail
 erpnext.patches.v13_0.enable_provisional_accounting
 erpnext.patches.v13_0.non_profit_deprecation_warning
 erpnext.patches.v13_0.enable_ksa_vat_docs #1
+erpnext.patches.v14_0.change_is_subcontracted_fieldtype
 
 [post_model_sync]
 erpnext.patches.v14_0.rename_ongoing_status_in_sla_documents

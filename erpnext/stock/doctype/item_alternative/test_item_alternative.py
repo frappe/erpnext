@@ -41,7 +41,7 @@ class TestItemAlternative(FrappeTestCase):
 		supplier_warehouse = "Test Supplier Warehouse - _TC"
 		po = create_purchase_order(
 			item="Test Finished Goods - A",
-			is_subcontracted="Yes",
+			is_subcontracted=1,
 			qty=5,
 			rate=3000,
 			supplier_warehouse=supplier_warehouse,

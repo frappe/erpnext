@@ -436,7 +436,7 @@ class TestStockLedgerEntry(FrappeTestCase):
 			item_code=subcontracted_item,
 			qty=10,
 			rate=20,
-			is_subcontracted="Yes",
+			is_subcontracted=1,
 		)
 
 		self.assertEqual(pr1.items[0].valuation_rate, 120)
