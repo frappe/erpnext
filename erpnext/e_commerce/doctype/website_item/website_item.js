@@ -5,6 +5,12 @@ frappe.ui.form.on('Website Item', {
 	onload: function(frm) {
 		// should never check Private
 		frm.fields_dict["website_image"].df.is_private = 0;
+
+		frm.set_query("website_warehouse", () => {
+			return {
+				filters: {"is_group": 0}
+			};
+		});
 	},
 
 	image: function() {

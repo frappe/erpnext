@@ -19,33 +19,35 @@ from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journ
 
 class TestCostCenterAllocation(unittest.TestCase):
 	def setUp(self):
-		cost_centers = ["Main Cost Center 1", "Main Cost Center 2", "Sub Cost Center 1", "Sub Cost Center 2"]
+		cost_centers = [
+			"Main Cost Center 1",
+			"Main Cost Center 2",
+			"Sub Cost Center 1",
+			"Sub Cost Center 2",
+		]
 		for cc in cost_centers:
 			create_cost_center(cost_center_name=cc, company="_Test Company")
 
 	def test_gle_based_on_cost_center_allocation(self):
-		cca = create_cost_center_allocation("_Test Company", "Main Cost Center 1 - _TC",
-			{
-				"Sub Cost Center 1 - _TC": 60,
-				"Sub Cost Center 2 - _TC": 40
-			}
+		cca = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 1 - _TC": 60, "Sub Cost Center 2 - _TC": 40},
 		)
 
-		jv = make_journal_entry("_Test Cash - _TC", "Sales - _TC", 100,
-			cost_center = "Main Cost Center 1 - _TC", submit=True)
+		jv = make_journal_entry(
+			"_Test Cash - _TC", "Sales - _TC", 100, cost_center="Main Cost Center 1 - _TC", submit=True
+		)
 
-		expected_values = [
-			["Sub Cost Center 1 - _TC", 0.0, 60],
-			["Sub Cost Center 2 - _TC", 0.0, 40]
-		]
+		expected_values = [["Sub Cost Center 1 - _TC", 0.0, 60], ["Sub Cost Center 2 - _TC", 0.0, 40]]
 
 		gle = frappe.qb.DocType("GL Entry")
 		gl_entries = (
 			frappe.qb.from_(gle)
 			.select(gle.cost_center, gle.debit, gle.credit)
-			.where(gle.voucher_type == 'Journal Entry')
+			.where(gle.voucher_type == "Journal Entry")
 			.where(gle.voucher_no == jv.name)
-			.where(gle.account == 'Sales - _TC')
+			.where(gle.account == "Sales - _TC")
 			.orderby(gle.cost_center)
 		).run(as_dict=1)
 
@@ -61,11 +63,11 @@ class TestCostCenterAllocation(unittest.TestCase):
 
 	def test_main_cost_center_cant_be_child(self):
 		# Main cost center itself cannot be entered in child table
-		cca = create_cost_center_allocation("_Test Company", "Main Cost Center 1 - _TC",
-			{
-				"Sub Cost Center 1 - _TC": 60,
-				"Main Cost Center 1 - _TC": 40
-			}, save=False
+		cca = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 1 - _TC": 60, "Main Cost Center 1 - _TC": 40},
+			save=False,
 		)
 
 		self.assertRaises(MainCostCenterCantBeChild, cca.save)
@@ -73,17 +75,14 @@ class TestCostCenterAllocation(unittest.TestCase):
 	def test_invalid_main_cost_center(self):
 		# If main cost center is used for allocation under any other cost center,
 		# allocation cannot be done against it
-		cca1 = create_cost_center_allocation("_Test Company", "Main Cost Center 1 - _TC",
-			{
-				"Sub Cost Center 1 - _TC": 60,
-				"Sub Cost Center 2 - _TC": 40
-			}
+		cca1 = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 1 - _TC": 60, "Sub Cost Center 2 - _TC": 40},
 		)
 
-		cca2 = create_cost_center_allocation("_Test Company", "Sub Cost Center 1 - _TC",
-			{
-				"Sub Cost Center 2 - _TC": 100
-			}, save=False
+		cca2 = create_cost_center_allocation(
+			"_Test Company", "Sub Cost Center 1 - _TC", {"Sub Cost Center 2 - _TC": 100}, save=False
 		)
 
 		self.assertRaises(InvalidMainCostCenter, cca2.save)
@@ -92,18 +91,17 @@ class TestCostCenterAllocation(unittest.TestCase):
 
 	def test_if_child_cost_center_has_any_allocation_record(self):
 		# Check if any child cost center is used as main cost center in any other existing allocation
-		cca1 = create_cost_center_allocation("_Test Company", "Main Cost Center 1 - _TC",
-			{
-				"Sub Cost Center 1 - _TC": 60,
-				"Sub Cost Center 2 - _TC": 40
-			}
+		cca1 = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 1 - _TC": 60, "Sub Cost Center 2 - _TC": 40},
 		)
 
-		cca2 = create_cost_center_allocation("_Test Company", "Main Cost Center 2 - _TC",
-			{
-				"Main Cost Center 1 - _TC": 60,
-				"Sub Cost Center 1 - _TC": 40
-			}, save=False
+		cca2 = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 2 - _TC",
+			{"Main Cost Center 1 - _TC": 60, "Sub Cost Center 1 - _TC": 40},
+			save=False,
 		)
 
 		self.assertRaises(InvalidChildCostCenter, cca2.save)
@@ -111,43 +109,55 @@ class TestCostCenterAllocation(unittest.TestCase):
 		cca1.cancel()
 
 	def test_total_percentage(self):
-		cca = create_cost_center_allocation("_Test Company", "Main Cost Center 1 - _TC",
-			{
-				"Sub Cost Center 1 - _TC": 40,
-				"Sub Cost Center 2 - _TC": 40
-			}, save=False
+		cca = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 1 - _TC": 40, "Sub Cost Center 2 - _TC": 40},
+			save=False,
 		)
 		self.assertRaises(WrongPercentageAllocation, cca.save)
 
 	def test_valid_from_based_on_existing_gle(self):
 		# GLE posted against Sub Cost Center 1 on today
-		jv = make_journal_entry("_Test Cash - _TC", "Sales - _TC", 100,
-			cost_center = "Main Cost Center 1 - _TC", posting_date=today(), submit=True)
+		jv = make_journal_entry(
+			"_Test Cash - _TC",
+			"Sales - _TC",
+			100,
+			cost_center="Main Cost Center 1 - _TC",
+			posting_date=today(),
+			submit=True,
+		)
 
 		# try to set valid from as yesterday
-		cca = create_cost_center_allocation("_Test Company", "Main Cost Center 1 - _TC",
-			{
-				"Sub Cost Center 1 - _TC": 60,
-				"Sub Cost Center 2 - _TC": 40
-			}, valid_from=add_days(today(), -1), save=False
+		cca = create_cost_center_allocation(
+			"_Test Company",
+			"Main Cost Center 1 - _TC",
+			{"Sub Cost Center 1 - _TC": 60, "Sub Cost Center 2 - _TC": 40},
+			valid_from=add_days(today(), -1),
+			save=False,
 		)
 
 		self.assertRaises(InvalidDateError, cca.save)
 
 		jv.cancel()
 
-def create_cost_center_allocation(company, main_cost_center, allocation_percentages,
-		valid_from=None, valid_upto=None, save=True, submit=True):
+
+def create_cost_center_allocation(
+	company,
+	main_cost_center,
+	allocation_percentages,
+	valid_from=None,
+	valid_upto=None,
+	save=True,
+	submit=True,
+):
 	doc = frappe.new_doc("Cost Center Allocation")
 	doc.main_cost_center = main_cost_center
 	doc.company = company
 	doc.valid_from = valid_from or today()
 	doc.valid_upto = valid_upto
 	for cc, percentage in allocation_percentages.items():
-		doc.append("allocation_percentages", {
-			"cost_center": cc,
-			"percentage": percentage
-		})
+		doc.append("allocation_percentages", {"cost_center": cc, "percentage": percentage})
 	if save:
 		doc.save()
 		if submit:

@@ -345,112 +345,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	scan_barcode() {
-		let me = this;
-
-		if(this.frm.doc.scan_barcode) {
-			frappe.call({
-				method: "erpnext.selling.page.point_of_sale.point_of_sale.search_for_serial_or_batch_or_barcode_number",
-				args: {
-					search_value: this.frm.doc.scan_barcode
-				}
-			}).then(r => {
-				const data = r && r.message;
-				if (!data || Object.keys(data).length === 0) {
-					frappe.show_alert({
-						message: __('Cannot find Item with this Barcode'),
-						indicator: 'red'
-					});
-					return;
-				}
-
-				me.modify_table_after_scan(data);
-			});
-		}
-		return false;
-	}
-
-	modify_table_after_scan(data) {
-		let scan_barcode_field = this.frm.fields_dict["scan_barcode"];
-		let cur_grid = this.frm.fields_dict.items.grid;
-		let row_to_modify = null;
-
-		// Check if batch is scanned and table has batch no field
-		let batch_no_scan = Boolean(data.batch_no) && frappe.meta.has_field(cur_grid.doctype, "batch_no");
-
-		if (batch_no_scan) {
-			row_to_modify = this.get_batch_row_to_modify(data.batch_no);
-		} else {
-			// serial or barcode scan
-			row_to_modify = this.get_row_to_modify_on_scan(row_to_modify, data);
-		}
-
-		if (!row_to_modify) {
-			// add new row if new item/batch is scanned
-			row_to_modify = frappe.model.add_child(this.frm.doc, cur_grid.doctype, 'items');
-		}
-
-		this.show_scan_message(row_to_modify.idx, row_to_modify.item_code);
-		this.set_scanned_values(row_to_modify, data, scan_barcode_field);
-	}
-
-	set_scanned_values(row_to_modify, data, scan_barcode_field) {
-		// increase qty and set scanned value and item in row
-		this.frm.from_barcode = this.frm.from_barcode ? this.frm.from_barcode + 1 : 1;
-		frappe.model.set_value(row_to_modify.doctype, row_to_modify.name, {
-			item_code: data.item_code,
-			qty: (row_to_modify.qty || 0) + 1
-		});
-
-		['serial_no', 'batch_no', 'barcode'].forEach(field => {
-			if (data[field] && frappe.meta.has_field(row_to_modify.doctype, field)) {
-				let is_serial_no = row_to_modify[field] && field === "serial_no";
-				let value = data[field];
-
-				if (is_serial_no) {
-					value = row_to_modify[field] + '\n' + data[field];
-				}
-
-				frappe.model.set_value(row_to_modify.doctype, row_to_modify.name, field, value);
-			}
-		});
-
-		scan_barcode_field.set_value('');
-		refresh_field("items");
-	}
-
-	get_row_to_modify_on_scan(row_to_modify, data) {
-		// get an existing item row to increment or blank row to modify
-		const existing_item_row = this.frm.doc.items.find(d => d.item_code === data.item_code);
-		const blank_item_row = this.frm.doc.items.find(d => !d.item_code);
-
-		if (existing_item_row) {
-			row_to_modify = existing_item_row;
-		} else if (blank_item_row) {
-			row_to_modify = blank_item_row;
-		}
-
-		return row_to_modify;
-	}
-
-	get_batch_row_to_modify(batch_no) {
-		// get row if batch already exists in table
-		const existing_batch_row = this.frm.doc.items.find(d => d.batch_no === batch_no);
-		return existing_batch_row || null;
-	}
-
-	show_scan_message (idx, exist = null) {
-		// show new row or qty increase toast
-		if (exist) {
-			frappe.show_alert({
-				message: __('Row #{0}: Qty increased by 1', [idx]),
-				indicator: 'green'
-			});
-		} else {
-			frappe.show_alert({
-				message: __('Row #{0}: Item added', [idx]),
-				indicator: 'green'
-			});
-		}
+		const barcode_scanner = new erpnext.utils.BarcodeScanner({frm:this.frm});
+		barcode_scanner.process_scan();
 	}
 
 	apply_default_taxes() {
@@ -508,13 +404,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	barcode(doc, cdt, cdn) {
-		var d = locals[cdt][cdn];
-		if(d.barcode=="" || d.barcode==null) {
+		const d = locals[cdt][cdn];
+		if (!d.barcode) {
 			// barcode cleared, remove item
 			d.item_code = "";
 		}
-
-		this.frm.from_barcode = this.frm.from_barcode ? this.frm.from_barcode + 1 : 1;
+		// flag required for circular triggers
+		d._triggerd_from_barcode = true;
 		this.item_code(doc, cdt, cdn);
 	}
 
@@ -535,11 +431,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.doc.doctype === 'Delivery Note') {
 			show_batch_dialog = 1;
 		}
-		// clear barcode if setting item (else barcode will take priority)
-		if (this.frm.from_barcode == 0) {
+		if (!item._triggerd_from_barcode) {
 			item.barcode = null;
 		}
-		this.frm.from_barcode = this.frm.from_barcode - 1 >= 0 ? this.frm.from_barcode - 1 : 0;
 
 
 		if(item.item_code || item.barcode || item.serial_no) {
@@ -1042,9 +936,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		this.set_dynamic_labels();
 		var company_currency = this.get_company_currency();
-		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
+		// Added `ignore_price_list` to determine if document is loading after mapping from another doc
 		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency
-				&& !this.frm.doc.ignore_pricing_rule) {
+				&& !(this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list)) {
 
 			this.get_exchange_rate(transaction_date, this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
@@ -1070,7 +964,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		if(flt(this.frm.doc.conversion_rate)>0.0) {
-			if(this.frm.doc.ignore_pricing_rule) {
+			if(this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list) {
 				this.calculate_taxes_and_totals();
 			} else if (!this.in_apply_price_list){
 				this.apply_price_list();
@@ -1144,8 +1038,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.set_dynamic_labels();
 
 		var company_currency = this.get_company_currency();
-		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
-		if(this.frm.doc.price_list_currency !== company_currency  && !this.frm.doc.ignore_pricing_rule) {
+		// Added `ignore_price_list` to determine if document is loading after mapping from another doc
+		if(this.frm.doc.price_list_currency !== company_currency  &&
+				!(this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list)) {
 			this.get_exchange_rate(this.frm.doc.posting_date, this.frm.doc.price_list_currency, company_currency,
 				function(exchange_rate) {
 					me.frm.set_value("plc_conversion_rate", exchange_rate);
@@ -1884,6 +1779,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				callback: function(r) {
 					if(!r.exc) {
 						item.item_tax_rate = r.message;
+						me.add_taxes_from_item_tax_template(item.item_tax_rate);
 						me.calculate_taxes_and_totals();
 					}
 				}
