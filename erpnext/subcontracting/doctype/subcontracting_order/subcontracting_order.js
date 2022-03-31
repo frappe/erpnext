@@ -85,6 +85,8 @@ frappe.ui.form.on('Subcontracting Order', {
 		}
 		else {
 			frm.set_value('service_items', null);
+			frm.set_value('fg_items', null);
+			frm.set_value('supplied_items', null);
 		}
 	},
 
