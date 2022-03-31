@@ -357,7 +357,8 @@ class StockReconciliation(StockController):
 			"is_cancelled": "No" if self.docstatus != 2 else "Yes",
 			"serial_no": '\n'.join(serial_nos) if serial_nos else '',
 			"batch_no": row.batch_no,
-			"valuation_rate": flt(row.valuation_rate, row.precision("valuation_rate"))
+			"valuation_rate": flt(row.valuation_rate, row.precision("valuation_rate")),
+			"stock_value_difference": flt((row.quantity_difference * row.valuation_rate), row.precision("valuation_rate"))
 		})
 
 		if not row.batch_no:
@@ -546,6 +547,12 @@ def get_stock_balance_for(item_code, warehouse,
 		qty, rate, serial_nos = data
 	else:
 		qty, rate = data
+	if batch_no:
+		valuation_rate = frappe.db.sql(f"SELECT incoming_rate FROM `tabStock Ledger Entry` AS s_l_e WHERE s_l_e.batch_no = '{batch_no}' and s_l_e.item_code = '{item_code}' AND incoming_rate > 0 ORDER BY s_l_e.creation ASC LIMIT 1")
+		if valuation_rate:
+			valuation_rate = valuation_rate[0][0]
+			rate = valuation_rate
+
 
 	if item_dict.get("has_batch_no"):
 		qty = get_batch_qty(batch_no, warehouse, posting_date=posting_date, posting_time=posting_time) or 0
