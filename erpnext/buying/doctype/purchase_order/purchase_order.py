@@ -509,7 +509,7 @@ def make_subcontracting_order(source_name, target_doc=None):
 	return get_mapped_subcontracting_order(source_name, target_doc)
 
 def get_mapped_subcontracting_order(source_name, target_doc=None):
-	doc = get_mapped_doc("Purchase Order", source_name,	{
+	target_doc = get_mapped_doc("Purchase Order", source_name,	{
 		"Purchase Order": {
 			"doctype": "Subcontracting Order",
 			"field_map": {
@@ -525,7 +525,7 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 		},
 	}, target_doc)
 
-	return doc
+	return target_doc
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

@@ -82,21 +82,11 @@ frappe.ui.form.on('Subcontracting Order', {
 
 	purchase_order: function (frm) {
 		if (frm.doc.purchase_order) {
-			frappe.call({
+			erpnext.utils.map_current_doc({
 				method: 'erpnext.buying.doctype.purchase_order.purchase_order.make_subcontracting_order',
-				args: {
-					source_name: frm.doc.purchase_order,
-				},
+				source_name: frm.doc.purchase_order,
+				target_doc: frm,
 				freeze_message: __('Mapping Subcontracting Order ...'),
-				callback: function (r) {
-					if (!r.exc) {
-						var fields_to_skip = ['owner', 'docstatus', 'idx', 'doctype', '__islocal', '__onload', '__unsaved'];
-						var fields_to_map = Object.keys(r.message).filter(n => !fields_to_skip.includes(n));
-						$.each(fields_to_map, function (i, field) {
-							frm.set_value(field, r.message[field]);
-						});
-					};
-				}
 			});
 		}
 		else {
