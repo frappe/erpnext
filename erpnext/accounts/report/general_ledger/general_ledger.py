@@ -480,13 +480,14 @@ def get_result_as_list(data, filters):
 
 	for d in data:
 		#Sales Return and Credit issue voucher types
-		d["voucher_type_custom"] = d.voucher_type
-		if d.voucher_type == "Sales Invoice" :
-			si_status = frappe.db.get_value ("Sales Invoice",{"name":d.get('voucher_no')},"status")
-			if si_status == "Credit Note Issued":
-				d['voucher_type_custom'] ="Credit Note"
-			elif si_status == "Return":
-				d['voucher_type_custom'] ="Sales Return"
+		if "voucher_type" in d:
+			d["voucher_type_custom"] = d.voucher_type
+			if d.voucher_type == "Sales Invoice" :
+				si_status = frappe.db.get_value ("Sales Invoice",{"name":d.get('voucher_no')},"status")
+				if si_status == "Credit Note Issued":
+					d['voucher_type_custom'] ="Credit Note"
+				elif si_status == "Return":
+					d['voucher_type_custom'] ="Sales Return"
 
 		if not d.get('posting_date'):
 			balance, balance_in_account_currency = 0, 0
