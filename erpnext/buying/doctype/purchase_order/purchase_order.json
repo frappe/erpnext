@@ -461,7 +461,7 @@
    "fieldname": "is_subcontracted",
    "fieldtype": "Check",
    "in_standard_filter": 1,
-   "label": "Supply Raw Materials",
+   "label": "Is Subcontracted",
    "print_hide": 1
   },
   {

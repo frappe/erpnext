@@ -440,7 +440,7 @@
    "default": "0",
    "fieldname": "is_subcontracted",
    "fieldtype": "Check",
-   "label": "Raw Materials Consumed",
+   "label": "Is Subcontracted",
    "oldfieldname": "is_subcontracted",
    "oldfieldtype": "Select",
    "print_hide": 1

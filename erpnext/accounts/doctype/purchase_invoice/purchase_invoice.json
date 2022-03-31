@@ -546,7 +546,7 @@
    "default": "0",
    "fieldname": "is_subcontracted",
    "fieldtype": "Check",
-   "label": "Raw Materials Supplied",
+   "label": "Is Subcontracted",
    "print_hide": 1
   },
   {
