@@ -351,7 +351,6 @@
    "hide_border": 1
   },
   {
-   "depends_on": "get_items_from",
    "fieldname": "sub_assembly_items",
    "fieldtype": "Table",
    "label": "Sub Assembly Items",
@@ -379,7 +378,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-14 03:56:23.209247",
+ "modified": "2022-03-25 09:15:25.017664",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

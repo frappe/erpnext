@@ -62,12 +62,7 @@ def get_columns():
 			"fieldname": "status",
 			"fieldtype": "Data",
 		},
-		{
-			"label": _("Currency"),
-			"fieldname": "currency",
-			"fieldtype": "Currency",
-			"hidden": 1
-		}
+		{"label": _("Currency"), "fieldname": "currency", "fieldtype": "Currency", "hidden": 1},
 	]
 	return columns
 
@@ -156,7 +151,7 @@ def set_payment_terms_statuses(sales_orders, invoices, filters):
 	"""
 
 	for so in sales_orders:
-		so.currency = frappe.get_cached_value('Company', filters.get('company'), 'default_currency')
+		so.currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
 		so.invoices = ""
 		for inv in [x for x in invoices if x.sales_order == so.name and x.invoice_amount > 0]:
 			if so.base_payment_amount - so.paid_amount > 0:
@@ -182,8 +177,14 @@ def prepare_chart(s_orders):
 			"data": {
 				"labels": [term.payment_term for term in s_orders],
 				"datasets": [
-					{"name": "Payment Amount", "values": [x.base_payment_amount for x in s_orders],},
-					{"name": "Paid Amount", "values": [x.paid_amount for x in s_orders],},
+					{
+						"name": "Payment Amount",
+						"values": [x.base_payment_amount for x in s_orders],
+					},
+					{
+						"name": "Paid Amount",
+						"values": [x.paid_amount for x in s_orders],
+					},
 				],
 			},
 			"type": "bar",
