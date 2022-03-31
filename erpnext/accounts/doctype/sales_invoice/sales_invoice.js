@@ -281,6 +281,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 		var me = this;
 		if(this.frm.updating_party_details) return;
+
+		if (this.frm.doc.__onload && this.frm.doc.__onload.load_after_mapping) return;
+
 		erpnext.utils.get_party_details(this.frm,
 			"erpnext.accounts.party.get_party_details", {
 				posting_date: this.frm.doc.posting_date,
