@@ -249,8 +249,9 @@ class PurchaseInvoice(BuyingController):
 
 	def validate_warehouse(self, for_validate=True):
 		if self.update_stock and for_validate:
+			stock_items = self.get_stock_items()
 			for d in self.get("items"):
-				if not d.warehouse:
+				if not d.warehouse and d.item_code in stock_items:
 					frappe.throw(
 						_(
 							"Row No {0}: Warehouse is required. Please set a Default Warehouse for Item {1} and Company {2}"

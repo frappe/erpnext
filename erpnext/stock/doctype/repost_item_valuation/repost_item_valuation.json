@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "REPOST-ITEM-VAL-.######",
+ "autoname": "hash",
  "creation": "2022-01-11 15:03:38.273179",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -177,11 +177,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-18 10:57:33.450907",
+ "modified": "2022-03-30 07:22:48.520266",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {
