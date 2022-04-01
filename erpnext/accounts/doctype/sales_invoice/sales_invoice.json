@@ -2,7 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
- "creation": "2022-02-13 16:52:30.579162",
+ "creation": "2022-01-25 10:29:57.771398",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -1974,9 +1974,10 @@
   },
   {
    "default": "0",
+   "description": "Issue a debit note with 0 qty against an existing Sales Invoice",
    "fieldname": "is_debit_note",
    "fieldtype": "Check",
-   "label": "Is Debit Note"
+   "label": "Is Rate Adjustment Entry (Debit Note)"
   },
   {
    "default": "0",
@@ -2044,7 +2045,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-02-15 08:07:33.833114",
+ "modified": "2022-03-28 16:08:53.517903",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

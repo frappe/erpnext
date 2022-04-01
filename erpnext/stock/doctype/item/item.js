@@ -165,21 +165,21 @@ frappe.ui.form.on("Item", {
 		frm.set_value('has_batch_no', 0);
 		frm.toggle_enable(['has_serial_no', 'serial_no_series'], !frm.doc.is_fixed_asset);
 
-		frm.call({
-			method: "set_asset_naming_series",
-			doc: frm.doc,
-			callback: function() {
+		frappe.call({
+			method: "erpnext.stock.doctype.item.item.get_asset_naming_series",
+			callback: function(r) {
 				frm.set_value("is_stock_item", frm.doc.is_fixed_asset ? 0 : 1);
-				frm.trigger("set_asset_naming_series");
+				frm.events.set_asset_naming_series(frm, r.message);
 			}
 		});
 
 		frm.trigger('auto_create_assets');
 	},
 
-	set_asset_naming_series: function(frm) {
-		if (frm.doc.__onload && frm.doc.__onload.asset_naming_series) {
-			frm.set_df_property("asset_naming_series", "options", frm.doc.__onload.asset_naming_series);
+	set_asset_naming_series: function(frm, asset_naming_series) {
+		if ((frm.doc.__onload && frm.doc.__onload.asset_naming_series) || asset_naming_series) {
+			let naming_series = (frm.doc.__onload && frm.doc.__onload.asset_naming_series) || asset_naming_series;
+			frm.set_df_property("asset_naming_series", "options", naming_series);
 		}
 	},
 

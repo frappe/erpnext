@@ -163,20 +163,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 			});
 		}
 	},
-	set_item_code: function(doc, cdt, cdn) {
-		var d = frappe.model.get_doc(cdt, cdn);
-		if (d.barcode) {
-			frappe.call({
-				method: "erpnext.stock.get_item_details.get_item_code",
-				args: {"barcode": d.barcode },
-				callback: function(r) {
-					if (!r.exe){
-						frappe.model.set_value(cdt, cdn, "item_code", r.message);
-					}
-				}
-			});
-		}
-	},
+
 	set_amount_quantity: function(doc, cdt, cdn) {
 		var d = frappe.model.get_doc(cdt, cdn);
 		if (d.qty & d.valuation_rate) {
@@ -214,9 +201,6 @@ frappe.ui.form.on("Stock Reconciliation", {
 });
 
 frappe.ui.form.on("Stock Reconciliation Item", {
-	barcode: function(frm, cdt, cdn) {
-		frm.events.set_item_code(frm, cdt, cdn);
-	},
 
 	warehouse: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
