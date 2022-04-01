@@ -110,6 +110,8 @@ class PricingRule(Document):
 
 			# reset all values except for the logic field
 			options = (self.meta.get_options(logic_field) or "").split("\n")
+			new_doc = frappe.new_doc(self.doctype)
+
 			for f in options:
 				if not f:
 					continue
@@ -122,7 +124,7 @@ class PricingRule(Document):
 					apply_on_f = scrubbed_f
 
 				if scrubbed_f != fieldname:
-					self.set(apply_on_f, None)
+					self.set(apply_on_f, new_doc.get(apply_on_f), as_value=True)
 
 		if self.mixed_conditions and self.get("same_item"):
 			self.same_item = 0
