@@ -143,7 +143,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Open\nCompleted\nCancelled",
+   "options": "Open\nTo Bill\nCompleted\nCancelled",
    "reqd": 1,
    "search_index": 1
   },
@@ -179,6 +179,7 @@
    "fieldtype": "Percent",
    "label": "% Completed",
    "no_copy": 1,
+   "precision": "1",
    "read_only": 1
   },
   {
@@ -874,7 +875,7 @@
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2022-04-01 14:12:20.770162",
+ "modified": "2022-04-01 14:37:42.500620",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

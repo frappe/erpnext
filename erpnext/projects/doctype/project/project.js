@@ -22,6 +22,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		erpnext.hide_company();
 		this.setup_web_link();
 		this.setup_buttons();
+		this.set_percent_complete_read_only();
 		this.set_cant_change_read_only();
 		this.set_applies_to_read_only();
 		this.toggle_vehicle_odometer_fields();
@@ -434,6 +435,16 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 
 	collect_progress: function() {
 		this.frm.set_df_property("message", "reqd", this.frm.doc.collect_progress);
+	},
+
+	percent_complete: function () {
+		this.set_percent_complete_read_only();
+	},
+
+	set_percent_complete_read_only: function () {
+		var read_only = cint(this.frm.doc.percent_complete_method != "Manual");
+		console.log(read_only);
+		this.frm.set_df_property("percent_complete", "read_only", read_only);
 	},
 
 	open_form: function (doctype) {

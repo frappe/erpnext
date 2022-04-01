@@ -95,8 +95,6 @@ class Project(Document):
 	def set_title(self):
 		if self.project_name:
 			self.title = self.project_name
-			if self.customer_name or self.customer:
-				self.title += " ({0})".format(self.customer_name or self.customer)
 		elif self.customer_name or self.customer:
 			self.title = self.customer_name or self.customer
 		else:
