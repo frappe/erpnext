@@ -126,8 +126,11 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 		$(`<button type="button" class="btn btn-light btn-sm add-checklist-item" style="margin-right: 5px;">
 			${__('Add Checklist Item')}
 		</button>`).appendTo(this.buttons_container);
-		$(`<button type="button" class="btn btn-light btn-sm reset-checklist">
+		$(`<button type="button" class="btn btn-light btn-sm reset-checklist" style="margin-right: 5px;">
 			${__('Reset Checklist')}
+		</button>`).appendTo(this.buttons_container);
+		$(`<button type="button" class="btn btn-light btn-sm checklist-check-all">
+			${__('Check All')}
 		</button>`).appendTo(this.buttons_container);
 	},
 
@@ -168,6 +171,10 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 		me.buttons_container.on("click", ".reset-checklist", function () {
 			me.on_reset_checklist();
 		});
+
+		me.buttons_container.on("click", ".checklist-check-all", function () {
+			me.on_check_all();
+		});
 	},
 
 	on_check: function (el) {
@@ -188,6 +195,19 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 			me.frm.add_child('vehicle_checklist', {"checklist_item": checklist_item, "checklist_item_checked": checked});
 		}
 
+		me.frm.dirty();
+	},
+
+	on_check_all: function () {
+		var me = this;
+
+		var found = false;
+		$.each(me.frm.doc.vehicle_checklist || [], function(i, d) {
+			d.checklist_item_checked = 1;
+			found = true;
+		});
+
+		me.render_checklist();
 		me.frm.dirty();
 	},
 
