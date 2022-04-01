@@ -12,6 +12,7 @@
   "project_number",
   "project_template",
   "reference_no",
+  "project_type",
   "copied_from",
   "project_details_cb_1",
   "priority",
@@ -45,7 +46,8 @@
   "contact_email",
   "work_details_section",
   "project_name",
-  "project_type",
+  "is_warranty_claim",
+  "is_internal",
   "column_break_23",
   "expected_delivery_date",
   "expected_delivery_time",
@@ -54,7 +56,6 @@
   "cb_28",
   "previous_project",
   "campaign",
-  "is_internal",
   "section_break0",
   "description",
   "sec_applies_to",
@@ -63,9 +64,7 @@
   "applies_to_item_name",
   "sec_warranty",
   "warranty_claim_no",
-  "is_warranty_claim",
   "cb_warranty_1",
-  "cb_warranty_2",
   "sec_insurance",
   "insurance_company",
   "insurance_company_name",
@@ -226,6 +225,7 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_global_search": 1,
+   "in_standard_filter": 1,
    "label": "Customer",
    "oldfieldname": "customer",
    "oldfieldtype": "Link",
@@ -712,10 +712,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "cb_warranty_2",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "expected_delivery_date",
    "fieldtype": "Date",
    "label": "Expected Delivery Date"
@@ -875,7 +871,7 @@
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2022-04-01 14:37:42.500620",
+ "modified": "2022-04-01 22:55:11.205406",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

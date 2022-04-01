@@ -65,23 +65,19 @@ vehicle_last_odometer = {"label": "Odometer Reading", "fieldname": "vehicle_last
 insert_field_after('vehicle_color', vehicle_last_odometer, applies_to_fields)
 
 # Additional Project Vehicle Fields
-project_vehicle_status = {"label": "Vehicle Status", "fieldname": "vehicle_status", "fieldtype": "Select",
-	"options": "Not Received\nReceived\nDelivered", "default": "Not Received",
-	"read_only": 1, "no_copy": 1}
-insert_field_after('vehicle_color', project_vehicle_status, applies_to_project_fields)
+project_vehicle_warranty_no = {"label": "Warranty Book No", "fieldname": "vehicle_warranty_no", "fieldtype": "Data"}
+insert_field_after('vehicle_color', project_vehicle_warranty_no, applies_to_project_fields)
 
 project_vehicle_readings_section = {"label": "Vehicle Readings & Checklist",
-	"fieldname": "sec_vehicle_status", "fieldtype": "Section Break", "collapsible": 1}
-insert_field_after('vehicle_status', project_vehicle_readings_section, applies_to_project_fields)
+	"fieldname": "sec_vehicle_status", "fieldtype": "Section Break", "collapsible": 0}
+insert_field_after('vehicle_warranty_no', project_vehicle_readings_section, applies_to_project_fields)
 
 applies_to_project_fields += [
-	{"label": "Warranty Book No", "fieldname": "vehicle_warranty_no", "fieldtype": "Data",
-		"insert_after": "cb_warranty_1"},
 	{"label": "FQR No", "fieldname": "fqr_no", "fieldtype": "Data", "no_copy": 1,
-		"insert_after": "cb_warranty_2"},
+		"insert_after": "cb_warranty_1"},
 
 	{"label": "Is Periodic Maintenance", "fieldname": "is_periodic_maintenance", "fieldtype": "Check",
-		"insert_after": "project_type"},
+		"insert_after": "project_name"},
 	{"label": "Is General Repair", "fieldname": "is_general_repair", "fieldtype": "Check",
 		"insert_after": "is_periodic_maintenance"},
 ]
@@ -104,8 +100,11 @@ project_vehicle_reading_fields = [
 	{"label": "", "fieldname": "cb_vehicle_status_1", "fieldtype": "Column Break",
 		"insert_after": "deliver_vehicle_btn"},
 
+	{"label": "Vehicle Status", "fieldname": "vehicle_status", "fieldtype": "Select",
+		"options": "Not Received\nReceived\nDelivered", "default": "Not Received",
+		"insert_after": "cb_vehicle_status_1", "read_only": 1, "no_copy": 1},
 	{"label": "Vehicle Warehouse", "fieldname": "vehicle_warehouse", "fieldtype": "Link", "options": "Warehouse",
-		"insert_after": "cb_vehicle_status_1", "read_only": 1, "ignore_user_permissions": 1},
+		"insert_after": "vehicle_status", "read_only": 1, "ignore_user_permissions": 1},
 	{"label": "Fuel Level (%)", "fieldname": "fuel_level", "fieldtype": "Percent", "precision": 0,
 		"insert_after": "vehicle_warehouse", "no_copy": 1},
 	{"label": "No of Keys", "fieldname": "keys", "fieldtype": "Int",
