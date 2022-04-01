@@ -8,7 +8,7 @@ import frappe
 from frappe.utils.nestedset import get_root_of
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
-from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
+from erpnext.accounts.doctype.pos_profile.pos_profile import get_child_nodes, get_item_groups
 
 
 def search_by_term(search_term, warehouse, price_list):
@@ -324,3 +324,17 @@ def set_customer_info(fieldname, customer, value=""):
 		contact_doc.set("phone_nos", [{"phone": value, "is_primary_mobile_no": 1}])
 		frappe.db.set_value("Customer", customer, "mobile_no", value)
 	contact_doc.save()
+
+
+@frappe.whitelist()
+def get_pos_profile_data(pos_profile):
+	pos_profile = frappe.get_doc("POS Profile", pos_profile)
+	pos_profile = pos_profile.as_dict()
+
+	_customer_groups_with_children = []
+	for row in pos_profile.customer_groups:
+		children = get_child_nodes("Customer Group", row.customer_group)
+		_customer_groups_with_children.extend(children)
+
+	pos_profile.customer_groups = _customer_groups_with_children
+	return pos_profile

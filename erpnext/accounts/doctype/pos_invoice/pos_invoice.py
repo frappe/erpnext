@@ -17,7 +17,11 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 )
 from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.stock.doctype.batch.batch import get_batch_qty, get_pos_reserved_batch_qty
-from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
+from erpnext.stock.doctype.serial_no.serial_no import (
+	get_delivered_serial_nos,
+	get_pos_reserved_serial_nos,
+	get_serial_nos,
+)
 
 
 class POSInvoice(SalesInvoice):
@@ -179,12 +183,7 @@ class POSInvoice(SalesInvoice):
 			)
 
 	def validate_delivered_serial_nos(self, item):
-		serial_nos = get_serial_nos(item.serial_no)
-		delivered_serial_nos = frappe.db.get_list(
-			"Serial No",
-			{"item_code": item.item_code, "name": ["in", serial_nos], "sales_invoice": ["is", "set"]},
-			pluck="name",
-		)
+		delivered_serial_nos = get_delivered_serial_nos(item.serial_no)
 
 		if delivered_serial_nos:
 			bold_delivered_serial_nos = frappe.bold(", ".join(delivered_serial_nos))
@@ -212,9 +211,16 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(error_msg, title=_("Invalid Item"), as_list=True)
 
 	def validate_stock_availablility(self):
-		if self.is_return or self.docstatus != 1:
+		if self.is_return:
 			return
+
+		if self.docstatus == 0 and not frappe.db.get_value(
+			"POS Profile", self.pos_profile, "validate_stock_on_save"
+		):
+			return
+
 		allow_negative_stock = frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
+
 		for d in self.get("items"):
 			is_service_item = not (frappe.db.get_value("Item", d.get("item_code"), "is_stock_item"))
 			if is_service_item:

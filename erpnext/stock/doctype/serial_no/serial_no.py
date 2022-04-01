@@ -820,29 +820,60 @@ def auto_fetch_serial_number(
 	return sorted([d.get("name") for d in serial_numbers])
 
 
+def get_delivered_serial_nos(serial_nos):
+	"""
+	Returns serial numbers that delivered from the list of serial numbers
+	"""
+	from frappe.query_builder.functions import Coalesce
+
+	SerialNo = frappe.qb.DocType("Serial No")
+	serial_nos = get_serial_nos(serial_nos)
+	query = (
+		frappe.qb.select(SerialNo.name)
+		.from_(SerialNo)
+		.where((SerialNo.name.isin(serial_nos)) & (Coalesce(SerialNo.delivery_document_type, "") != ""))
+	)
+
+	result = query.run()
+	if result and len(result) > 0:
+		delivered_serial_nos = [row[0] for row in result]
+		return delivered_serial_nos
+
+
 @frappe.whitelist()
 def get_pos_reserved_serial_nos(filters):
 	if isinstance(filters, str):
 		filters = json.loads(filters)
 
-	pos_transacted_sr_nos = frappe.db.sql(
-		"""select item.serial_no as serial_no
-		from `tabPOS Invoice` p, `tabPOS Invoice Item` item
-		where p.name = item.parent
-		and p.consolidated_invoice is NULL
-		and p.docstatus = 1
-		and item.docstatus = 1
-		and item.item_code = %(item_code)s
-		and item.warehouse = %(warehouse)s
-		and item.serial_no is NOT NULL and item.serial_no != ''
-		""",
-		filters,
-		as_dict=1,
+	POSInvoice = frappe.qb.DocType("POS Invoice")
+	POSInvoiceItem = frappe.qb.DocType("POS Invoice Item")
+	query = (
+		frappe.qb.from_(POSInvoice)
+		.from_(POSInvoiceItem)
+		.select(POSInvoice.is_return, POSInvoiceItem.serial_no)
+		.where(
+			(POSInvoice.name == POSInvoiceItem.parent)
+			& (POSInvoice.docstatus == 1)
+			& (POSInvoiceItem.docstatus == 1)
+			& (POSInvoiceItem.item_code == filters.get("item_code"))
+			& (POSInvoiceItem.warehouse == filters.get("warehouse"))
+			& (POSInvoiceItem.serial_no.isnotnull())
+			& (POSInvoiceItem.serial_no != "")
+		)
 	)
 
+	pos_transacted_sr_nos = query.run(as_dict=True)
+
 	reserved_sr_nos = []
+	returned_sr_nos = []
 	for d in pos_transacted_sr_nos:
-		reserved_sr_nos += get_serial_nos(d.serial_no)
+		if d.is_return == 0:
+			reserved_sr_nos += get_serial_nos(d.serial_no)
+		elif d.is_return == 1:
+			returned_sr_nos += get_serial_nos(d.serial_no)
+
+	for sr_no in returned_sr_nos:
+		reserved_sr_nos.remove(sr_no)
 
 	return reserved_sr_nos
 
