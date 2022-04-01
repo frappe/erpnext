@@ -253,7 +253,7 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 	if not from_repost:
 		validate_cwip_accounts(gl_map)
 
-	round_off_debit_credit(gl_map)
+	process_debit_credit_difference(gl_map)
 
 	if gl_map:
 		check_freezing_date(gl_map[0]["posting_date"], adv_adj)
@@ -302,12 +302,29 @@ def validate_cwip_accounts(gl_map):
 				)
 
 
-def round_off_debit_credit(gl_map):
+def process_debit_credit_difference(gl_map):
 	precision = get_field_precision(
 		frappe.get_meta("GL Entry").get_field("debit"),
 		currency=frappe.get_cached_value("Company", gl_map[0].company, "default_currency"),
 	)
 
+	voucher_type = gl_map[0].voucher_type
+	voucher_no = gl_map[0].voucher_no
+	allowance = get_debit_credit_allowance(voucher_type, precision)
+
+	debit_credit_diff = get_debit_credit_difference(gl_map, precision)
+	if abs(debit_credit_diff) > allowance:
+		raise_debit_credit_not_equal_error(debit_credit_diff, voucher_type, voucher_no)
+
+	elif abs(debit_credit_diff) >= (1.0 / (10**precision)):
+		make_round_off_gle(gl_map, debit_credit_diff, precision)
+
+	debit_credit_diff = get_debit_credit_difference(gl_map, precision)
+	if abs(debit_credit_diff) > allowance:
+		raise_debit_credit_not_equal_error(debit_credit_diff, voucher_type, voucher_no)
+
+
+def get_debit_credit_difference(gl_map, precision):
 	debit_credit_diff = 0.0
 	for entry in gl_map:
 		entry.debit = flt(entry.debit, precision)
@@ -316,20 +333,24 @@ def round_off_debit_credit(gl_map):
 
 	debit_credit_diff = flt(debit_credit_diff, precision)
 
-	if gl_map[0]["voucher_type"] in ("Journal Entry", "Payment Entry"):
+	return debit_credit_diff
+
+
+def get_debit_credit_allowance(voucher_type, precision):
+	if voucher_type in ("Journal Entry", "Payment Entry"):
 		allowance = 5.0 / (10**precision)
 	else:
 		allowance = 0.5
 
-	if abs(debit_credit_diff) > allowance:
-		frappe.throw(
-			_("Debit and Credit not equal for {0} #{1}. Difference is {2}.").format(
-				gl_map[0].voucher_type, gl_map[0].voucher_no, debit_credit_diff
-			)
-		)
+	return allowance
 
-	elif abs(debit_credit_diff) >= (1.0 / (10**precision)):
-		make_round_off_gle(gl_map, debit_credit_diff, precision)
+
+def raise_debit_credit_not_equal_error(debit_credit_diff, voucher_type, voucher_no):
+	frappe.throw(
+		_("Debit and Credit not equal for {0} #{1}. Difference is {2}.").format(
+			voucher_type, voucher_no, debit_credit_diff
+		)
+	)
 
 
 def make_round_off_gle(gl_map, debit_credit_diff, precision):
