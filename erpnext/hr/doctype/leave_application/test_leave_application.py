@@ -205,7 +205,12 @@ class TestLeaveApplication(unittest.TestCase):
 		# creates separate leave ledger entries
 		frappe.delete_doc_if_exists("Leave Type", "Test Leave Validation", force=1)
 		leave_type = frappe.get_doc(
-			dict(leave_type_name="Test Leave Validation", doctype="Leave Type", allow_negative=True)
+			dict(
+				leave_type_name="Test Leave Validation",
+				doctype="Leave Type",
+				allow_negative=True,
+				include_holiday=True,
+			)
 		).insert()
 
 		employee = get_employee()
@@ -217,8 +222,14 @@ class TestLeaveApplication(unittest.TestCase):
 		# application across allocations
 
 		# CASE 1: from date has no allocation, to date has an allocation / both dates have allocation
+		start_date = add_days(year_start, -10)
 		application = make_leave_application(
-			employee.name, add_days(year_start, -10), add_days(year_start, 3), leave_type.name
+			employee.name,
+			start_date,
+			add_days(year_start, 3),
+			leave_type.name,
+			half_day=1,
+			half_day_date=start_date,
 		)
 
 		# 2 separate leave ledger entries
@@ -827,6 +838,7 @@ class TestLeaveApplication(unittest.TestCase):
 			leave_type_name="_Test_CF_leave_expiry",
 			is_carry_forward=1,
 			expire_carry_forwarded_leaves_after_days=90,
+			include_holiday=True,
 		)
 		leave_type.submit()
 
@@ -839,6 +851,8 @@ class TestLeaveApplication(unittest.TestCase):
 				leave_type=leave_type.name,
 				from_date=add_days(nowdate(), -3),
 				to_date=add_days(nowdate(), 7),
+				half_day=1,
+				half_day_date=add_days(nowdate(), -3),
 				description="_Test Reason",
 				company="_Test Company",
 				docstatus=1,
@@ -854,7 +868,7 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertEqual(len(leave_ledger_entry), 2)
 		self.assertEqual(leave_ledger_entry[0].employee, leave_application.employee)
 		self.assertEqual(leave_ledger_entry[0].leave_type, leave_application.leave_type)
-		self.assertEqual(leave_ledger_entry[0].leaves, -9)
+		self.assertEqual(leave_ledger_entry[0].leaves, -8.5)
 		self.assertEqual(leave_ledger_entry[1].leaves, -2)
 
 	def test_leave_application_creation_after_expiry(self):
