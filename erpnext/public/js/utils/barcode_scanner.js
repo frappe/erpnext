@@ -21,9 +21,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		//     batch_no: "LOT12", // present if batch was scanned
 		//     serial_no: "987XYZ", // present if serial no was scanned
 		// }
-		this.scan_api =
-			opts.scan_api ||
-			"erpnext.selling.page.point_of_sale.point_of_sale.search_for_serial_or_batch_or_barcode_number";
+		this.scan_api = opts.scan_api || "erpnext.stock.utils.scan_barcode";
 	}
 
 	process_scan() {
