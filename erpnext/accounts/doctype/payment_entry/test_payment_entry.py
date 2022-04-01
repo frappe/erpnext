@@ -33,7 +33,11 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.submit()
 
 		expected_gle = dict(
-			((d[0], d[5]), d) for d in [["Debtors - _TC", 0, 1000, 0, 1000, so.name], ["_Test Cash - _TC", 1000.0, 0, 1000.0, 0, None]]
+			((d[0], d[5]), d)
+			for d in [
+				["Debtors - _TC", 0, 1000, 0, 1000, so.name],
+				["_Test Cash - _TC", 1000.0, 0, 1000.0, 0, None],
+			]
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)
@@ -156,14 +160,10 @@ class TestPaymentEntry(unittest.TestCase):
 			currency="USD",
 			rate=20,
 			qty=1,
-			conversion_rate=50
+			conversion_rate=50,
 		)
 		pe = get_payment_entry(
-			"Purchase Invoice",
-			pi.name,
-			party_amount=40,
-			bank_account="_Test Bank - _TC",
-			bank_amount=2000
+			"Purchase Invoice", pi.name, party_amount=40, bank_account="_Test Bank - _TC", bank_amount=2000
 		)
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
@@ -171,15 +171,18 @@ class TestPaymentEntry(unittest.TestCase):
 
 		# Have to set reference manually or get_payment_entry will assign all $40.00 USD to a $20.00 USD invoice.
 		pe.references = []
-		pe.append("references", {
-			"reference_doctype": pi.doctype,
-			"reference_name": pi.name,
-			"due_date": frappe.utils.nowdate(),
-			"total_amount": pi.grand_total,
-			"outstanding": pi.grand_total,
-			"allocated_amount": 20,
-			"exchange_rate": 50
-		})
+		pe.append(
+			"references",
+			{
+				"reference_doctype": pi.doctype,
+				"reference_name": pi.name,
+				"due_date": frappe.utils.nowdate(),
+				"total_amount": pi.grand_total,
+				"outstanding": pi.grand_total,
+				"allocated_amount": 20,
+				"exchange_rate": 50,
+			},
+		)
 		pe.insert()
 
 		self.assertEqual(pe.unallocated_amount, 20)
@@ -191,7 +194,7 @@ class TestPaymentEntry(unittest.TestCase):
 			for d in [
 				["_Test Payable USD - _TC", 1000, 0, 20.00, 0, None],
 				["_Test Payable USD - _TC", 1000, 0, 20.00, 0, pi.name],
-				["_Test Bank - _TC", 0, pe.paid_amount, 0, pe.paid_amount, None]
+				["_Test Bank - _TC", 0, pe.paid_amount, 0, pe.paid_amount, None],
 			]
 		)
 
@@ -356,7 +359,11 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.submit()
 
 		expected_gle = dict(
-			((d[0], d[5]), d) for d in [[payable, 300, 0, 300, 0, ec.name], ["_Test Bank USD - _TC", 0, 300, 0, pe.paid_amount, None]]
+			((d[0], d[5]), d)
+			for d in [
+				[payable, 300, 0, 300, 0, ec.name],
+				["_Test Bank USD - _TC", 0, 300, 0, pe.paid_amount, None],
+			]
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)
@@ -552,7 +559,11 @@ class TestPaymentEntry(unittest.TestCase):
 		pe3.submit()
 
 		expected_gle = dict(
-			((d[0], d[5]), d) for d in [["Debtors - _TC", 100, 0, 100, 0, si1.name], ["_Test Cash - _TC", 0, 100, 0, 100, None]]
+			((d[0], d[5]), d)
+			for d in [
+				["Debtors - _TC", 100, 0, 100, 0, si1.name],
+				["_Test Cash - _TC", 0, 100, 0, 100, None],
+			]
 		)
 
 		self.validate_gl_entries(pe3.name, expected_gle)
@@ -574,10 +585,13 @@ class TestPaymentEntry(unittest.TestCase):
 			self.assertEqual(expected_gle[gle.account, gle.against_voucher][0], gle.account)
 			self.assertEqual(expected_gle[gle.account, gle.against_voucher][1], gle.debit)
 			self.assertEqual(expected_gle[gle.account, gle.against_voucher][2], gle.credit)
-			self.assertEqual(expected_gle[gle.account, gle.against_voucher][3], gle.debit_in_account_currency)
-			self.assertEqual(expected_gle[gle.account, gle.against_voucher][4], gle.credit_in_account_currency)
+			self.assertEqual(
+				expected_gle[gle.account, gle.against_voucher][3], gle.debit_in_account_currency
+			)
+			self.assertEqual(
+				expected_gle[gle.account, gle.against_voucher][4], gle.credit_in_account_currency
+			)
 			self.assertEqual(expected_gle[gle.account, gle.against_voucher][5], gle.against_voucher)
-
 
 	def get_gle(self, voucher_no):
 		return frappe.db.sql(
