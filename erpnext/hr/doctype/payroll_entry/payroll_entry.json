@@ -12,6 +12,7 @@
   "payroll_frequency",
   "column_break1",
   "company",
+  "salary_structure",
   "section_break_8",
   "branch",
   "department",
@@ -264,11 +265,17 @@
    "label": "State",
    "options": "Open\nClosed\nCancelled",
    "read_only": 1
+  },
+  {
+   "fieldname": "salary_structure",
+   "fieldtype": "Link",
+   "label": "Salary Structure",
+   "options": "Salary Structure"
   }
  ],
  "icon": "fa fa-cog",
  "is_submittable": 1,
- "modified": "2021-03-26 02:54:48.445112",
+ "modified": "2022-04-01 10:30:41.364894",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Payroll Entry",

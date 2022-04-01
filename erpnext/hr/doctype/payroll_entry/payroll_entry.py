@@ -62,7 +62,7 @@ class PayrollEntry(Document):
 			cond += "and %(from_date)s >= t2.from_date"
 			emp_list = frappe.db.sql("""
 				select
-					distinct t1.name as employee, t1.employee_name, t1.department, t1.designation
+					distinct t1.name as employee, t1.employee_name, t1.department, t1.designation, t2.salary_structure
 				from
 					`tabEmployee` t1, `tabSalary Structure Assignment` t2
 				where
@@ -79,7 +79,11 @@ class PayrollEntry(Document):
 			frappe.throw(_("No employees for the mentioned criteria"))
 
 		for d in employees:
-			self.append('employees', d)
+			if self.salary_structure != None:
+				if self.salary_structure == d.salary_structure:
+					self.append('employees', d)
+			else:
+				self.append('employees', d)
 
 		self.number_of_employees = len(employees)
 		if self.validate_attendance:
