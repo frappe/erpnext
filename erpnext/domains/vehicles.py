@@ -105,7 +105,7 @@ project_vehicle_reading_fields = [
 		"insert_after": "deliver_vehicle_btn"},
 
 	{"label": "Vehicle Warehouse", "fieldname": "vehicle_warehouse", "fieldtype": "Link", "options": "Warehouse",
-		"insert_after": "cb_vehicle_status_1", "read_only": 1},
+		"insert_after": "cb_vehicle_status_1", "read_only": 1, "ignore_user_permissions": 1},
 	{"label": "Fuel Level (%)", "fieldname": "fuel_level", "fieldtype": "Percent", "precision": 0,
 		"insert_after": "vehicle_warehouse", "no_copy": 1},
 	{"label": "No of Keys", "fieldname": "keys", "fieldtype": "Int",
