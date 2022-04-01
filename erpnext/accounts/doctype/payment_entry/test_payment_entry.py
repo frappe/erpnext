@@ -330,6 +330,7 @@ class TestPaymentEntry(unittest.TestCase):
 		)
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
+		pe.source_exchange_rate = pe.received_amount / pe.paid_amount
 
 		self.assertEqual(pe.difference_amount, 100)
 
