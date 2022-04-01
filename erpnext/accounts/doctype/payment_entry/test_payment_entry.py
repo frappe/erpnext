@@ -411,7 +411,7 @@ class TestPaymentEntry(unittest.TestCase):
 			{
 				"account": "_Test Exchange Gain/Loss - _TC",
 				"cost_center": "_Test Cost Center - _TC",
-				"amount": 94.80,
+				"amount": 94.74,
 			},
 		)
 
