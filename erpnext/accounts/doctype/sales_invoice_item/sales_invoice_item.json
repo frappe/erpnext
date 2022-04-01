@@ -813,6 +813,7 @@
    "fieldtype": "Currency",
    "label": "Incoming Rate (Costing)",
    "no_copy": 1,
+   "options": "Company:company:default_currency",
    "print_hide": 1
   },
   {
@@ -832,6 +833,7 @@
   },
   {
    "default": "0",
+   "fetch_from": "item_code.grant_commission",
    "fieldname": "grant_commission",
    "fieldtype": "Check",
    "label": "Grant Commission",
@@ -841,7 +843,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-10-05 12:24:54.968907",
+ "modified": "2022-03-23 08:18:04.928287",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
@@ -849,5 +851,6 @@
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

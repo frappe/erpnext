@@ -14,6 +14,16 @@ frappe.ui.form.on("Item Group", {
 				]
 			}
 		}
+		frm.fields_dict['item_group_defaults'].grid.get_field("default_discount_account").get_query = function(doc, cdt, cdn) {
+			const row = locals[cdt][cdn];
+			return {
+				filters: {
+					'report_type': 'Profit and Loss',
+					'company': row.company,
+					"is_group": 0
+				}
+			};
+		}
 		frm.fields_dict["item_group_defaults"].grid.get_field("expense_account").get_query = function(doc, cdt, cdn) {
 			const row = locals[cdt][cdn];
 			return {

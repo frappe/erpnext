@@ -10,6 +10,7 @@
   "item_name",
   "operation",
   "column_break_3",
+  "do_not_explode",
   "bom_no",
   "source_warehouse",
   "allow_alternative_item",
@@ -73,6 +74,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.do_not_explode",
    "fieldname": "bom_no",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -284,18 +286,25 @@
    "fieldname": "sourced_by_supplier",
    "fieldtype": "Check",
    "label": "Sourced by Supplier"
+  },
+  {
+   "default": "0",
+   "fieldname": "do_not_explode",
+   "fieldtype": "Check",
+   "label": "Do Not Explode"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-10-08 14:19:37.563300",
+ "modified": "2022-01-24 16:57:57.020232",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

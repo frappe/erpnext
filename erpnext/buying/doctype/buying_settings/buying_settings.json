@@ -6,14 +6,17 @@
  "document_type": "Other",
  "engine": "InnoDB",
  "field_order": [
+  "supplier_and_price_defaults_section",
   "supp_master_name",
   "supplier_group",
+  "column_break_4",
   "buying_price_list",
   "maintain_same_rate_action",
   "role_to_override_stop_action",
-  "column_break_3",
+  "transaction_settings_section",
   "po_required",
   "pr_required",
+  "column_break_12",
   "maintain_same_rate",
   "allow_multiple_items",
   "bill_for_rejected_quantity_in_purchase_invoice",
@@ -43,10 +46,6 @@
    "options": "Price List"
   },
   {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "po_required",
    "fieldtype": "Select",
    "label": "Is Purchase Order Required for Purchase Invoice & Receipt Creation?",
@@ -73,7 +72,7 @@
   {
    "fieldname": "subcontract",
    "fieldtype": "Section Break",
-   "label": "Subcontract"
+   "label": "Subcontracting Settings"
   },
   {
    "default": "Material Transferred for Subcontract",
@@ -116,6 +115,24 @@
    "fieldname": "bill_for_rejected_quantity_in_purchase_invoice",
    "fieldtype": "Check",
    "label": "Bill for Rejected Quantity in Purchase Invoice"
+  },
+  {
+   "fieldname": "supplier_and_price_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Supplier and Price Defaults"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transaction_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Transaction Settings"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-cog",
@@ -123,7 +140,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-08 19:26:23.548837",
+ "modified": "2022-01-27 17:57:58.367048",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
@@ -141,5 +158,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

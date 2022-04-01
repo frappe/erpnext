@@ -204,10 +204,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-26 11:10:00.812698",
+ "modified": "2022-01-19 12:56:51.765353",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Additional Salary",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -239,8 +240,10 @@
    "write": 1
   }
  ],
+ "search_fields": "employee_name",
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "employee",
+ "states": [],
+ "title_field": "employee_name",
  "track_changes": 1
 }

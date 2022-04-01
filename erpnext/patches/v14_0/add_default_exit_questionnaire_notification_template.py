@@ -5,21 +5,22 @@ from frappe import _
 
 
 def execute():
-	frappe.reload_doc("email", "doctype", "email_template")
-	frappe.reload_doc("hr", "doctype", "hr_settings")
-
 	template = frappe.db.exists("Email Template", _("Exit Questionnaire Notification"))
 	if not template:
 		base_path = frappe.get_app_path("erpnext", "hr", "doctype")
-		response = frappe.read_file(os.path.join(base_path, "exit_interview/exit_questionnaire_notification_template.html"))
+		response = frappe.read_file(
+			os.path.join(base_path, "exit_interview/exit_questionnaire_notification_template.html")
+		)
 
-		template = frappe.get_doc({
-			"doctype": "Email Template",
-			"name": _("Exit Questionnaire Notification"),
-			"response": response,
-			"subject": _("Exit Questionnaire Notification"),
-			"owner": frappe.session.user,
-		}).insert(ignore_permissions=True)
+		template = frappe.get_doc(
+			{
+				"doctype": "Email Template",
+				"name": _("Exit Questionnaire Notification"),
+				"response": response,
+				"subject": _("Exit Questionnaire Notification"),
+				"owner": frappe.session.user,
+			}
+		).insert(ignore_permissions=True)
 		template = template.name
 
 	hr_settings = frappe.get_doc("HR Settings")

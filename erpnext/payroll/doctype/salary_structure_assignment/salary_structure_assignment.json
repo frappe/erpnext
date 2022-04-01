@@ -162,7 +162,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-12-23 17:28:09.794444",
+ "modified": "2022-01-19 12:43:54.439073",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Structure Assignment",
@@ -209,6 +209,7 @@
    "write": 1
   }
  ],
+ "search_fields": "employee_name, salary_structure",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

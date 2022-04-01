@@ -10,7 +10,7 @@ from frappe.website.serve import get_response
 
 class TestHomepage(unittest.TestCase):
 	def test_homepage_load(self):
-		set_request(method='GET', path='home')
+		set_request(method="GET", path="home")
 		response = get_response()
 
 		self.assertEqual(response.status_code, 200)

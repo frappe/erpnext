@@ -25,10 +25,10 @@
    "fieldtype": "Link",
    "in_filter": 1,
    "in_list_view": 1,
-   "label": "Item Code",
+   "label": "Item",
    "oldfieldname": "item_code",
    "oldfieldtype": "Link",
-   "options": "Item",
+   "options": "Website Item",
    "print_width": "150px",
    "reqd": 1,
    "search_index": 1,
@@ -63,7 +63,7 @@
    "collapsible": 1,
    "fieldname": "section_break_5",
    "fieldtype": "Section Break",
-   "label": "Description"
+   "label": "Details"
   },
   {
    "fetch_from": "item_code.web_long_description",
@@ -89,12 +89,14 @@
    "label": "Image"
   },
   {
+   "fetch_from": "item_code.thumbnail",
    "fieldname": "thumbnail",
    "fieldtype": "Attach Image",
    "hidden": 1,
    "label": "Thumbnail"
   },
   {
+   "fetch_from": "item_code.route",
    "fieldname": "route",
    "fieldtype": "Small Text",
    "label": "route",
@@ -104,7 +106,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-08-25 15:27:49.573537",
+ "modified": "2021-02-18 13:05:50.669311",
  "modified_by": "Administrator",
  "module": "Portal",
  "name": "Homepage Featured Product",

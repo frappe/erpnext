@@ -131,16 +131,14 @@ frappe.ui.form.on("Work Order", {
 		erpnext.work_order.set_custom_buttons(frm);
 		frm.set_intro("");
 
-		if (frm.doc.docstatus === 0 && !frm.doc.__islocal) {
+		if (frm.doc.docstatus === 0 && !frm.is_new()) {
 			frm.set_intro(__("Submit this Work Order for further processing."));
+		} else {
+			frm.trigger("show_progress_for_items");
+			frm.trigger("show_progress_for_operations");
 		}
 
 		if (frm.doc.status != "Closed") {
-			if (frm.doc.docstatus===1) {
-				frm.trigger('show_progress_for_items');
-				frm.trigger('show_progress_for_operations');
-			}
-
 			if (frm.doc.docstatus === 1
 				&& frm.doc.operations && frm.doc.operations.length) {
 

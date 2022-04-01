@@ -79,14 +79,20 @@ erpnext.PointOfSale.ItemSelector = class {
 		const me = this;
 		// eslint-disable-next-line no-unused-vars
 		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom, price_list_rate } = item;
-		const indicator_color = actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange";
 		const precision = flt(price_list_rate, 2) % 1 != 0 ? 2 : 0;
-
+		let indicator_color;
 		let qty_to_display = actual_qty;
 
-		if (Math.round(qty_to_display) > 999) {
-			qty_to_display = Math.round(qty_to_display)/1000;
-			qty_to_display = qty_to_display.toFixed(1) + 'K';
+		if (item.is_stock_item) {
+			indicator_color = (actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange");
+
+			if (Math.round(qty_to_display) > 999) {
+				qty_to_display = Math.round(qty_to_display)/1000;
+				qty_to_display = qty_to_display.toFixed(1) + 'K';
+			}
+		} else {
+			indicator_color = '';
+			qty_to_display = '';
 		}
 
 		function get_item_image_html() {
