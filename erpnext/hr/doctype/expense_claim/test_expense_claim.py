@@ -366,6 +366,7 @@ def make_payment_entry(expense_claim, payable_account, amt):
 	pe.reference_no = "1"
 	pe.reference_date = nowdate()
 	pe.source_exchange_rate = 1
+	pe.target_exchange_rate = pe.paid_amount / pe.received_amount
 	pe.paid_to = payable_account
 	pe.references[0].allocated_amount = amt
 	pe.insert()
