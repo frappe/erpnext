@@ -17,6 +17,7 @@
   "is_internal",
   "project_details_cb_1",
   "previous_project",
+  "reference_no",
   "cash_billing",
   "has_stin",
   "column_break_10",
@@ -839,11 +840,18 @@
   {
    "fieldname": "project_details_cb_1",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_no",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Reference Number",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2022-03-30 23:46:42.758050",
+ "modified": "2022-04-01 09:26:31.083777",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
@@ -898,7 +906,7 @@
   }
  ],
  "quick_entry": 1,
- "search_fields": "customer, status, priority, is_active",
+ "search_fields": "customer, reference_no, status, priority, is_active",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

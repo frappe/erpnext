@@ -1078,6 +1078,7 @@ def get_sales_invoice(project_name, depreciation_type=None):
 	target_doc = frappe.new_doc("Sales Invoice")
 	target_doc.company = project.company
 	target_doc.project = project.name
+	target_doc.is_pos = project.cash_billing
 
 	# Set Project Details
 	for k, v in project_details.items():
