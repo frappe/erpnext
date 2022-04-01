@@ -877,16 +877,16 @@ frappe.ui.form.on('Payment Entry', {
 			function(d) { return flt(d.amount) }));
 
 		if(frm.doc.party) {
-			if(frm.doc.payment_type == "Receive"
-				&& frm.doc.base_total_allocated_amount < flt(frm.doc.base_received_amount + total_deductions, precision("base_total_allocated_amount"))
-				&& frm.doc.total_allocated_amount < frm.doc.paid_amount + (total_deductions / frm.doc.source_exchange_rate)) {
-				unallocated_amount = ((frm.doc.base_received_amount + frm.doc.base_total_taxes_and_charges + total_deductions)
-					/ frm.doc.source_exchange_rate) - frm.doc.total_allocated_amount;
-			} else if(frm.doc.payment_type == "Pay"
-				&& frm.doc.base_total_allocated_amount < flt(frm.doc.base_paid_amount  - total_deductions, precision("base_total_allocated_amount"))
-				&& frm.doc.total_allocated_amount < frm.doc.received_amount + (total_deductions / frm.doc.target_exchange_rate)) {
-				unallocated_amount = ((frm.doc.base_paid_amount + frm.doc.base_total_taxes_and_charges + total_deductions)
-					/ frm.doc.target_exchange_rate) - frm.doc.total_allocated_amount;
+			if(frm.doc.payment_type === "Receive"
+				&& frm.doc.base_total_allocated_amount < frm.doc.base_received_amount + total_deductions) {
+				unallocated_amount = (
+					(frm.doc.base_received_amount + frm.doc.base_total_taxes_and_charge) / frm.doc.source_exchange_rate
+				) - frm.doc.total_allocated_amount;
+			} else if(frm.doc.payment_type === "Pay"
+				&& frm.doc.base_total_allocated_amount < frm.doc.base_paid_amount - total_deductions) {
+				unallocated_amount = (
+					(frm.doc.base_paid_amount + frm.doc.base_total_taxes_and_charges) / frm.doc.target_exchange_rate
+				) - frm.doc.total_allocated_amount;
 			}
 		}
 
