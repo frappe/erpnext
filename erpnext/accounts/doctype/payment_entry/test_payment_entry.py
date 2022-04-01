@@ -149,6 +149,54 @@ class TestPaymentEntry(unittest.TestCase):
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 100)
 
+	def test_payment_entry_advance_payment_with_allocation(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier USD",
+			debit_to="_Test Payable USD - _TC",
+			currency="USD",
+			rate=20,
+			qty=1,
+			conversion_rate=50
+		)
+		pe = get_payment_entry(
+			"Purchase Invoice",
+			pi.name,
+			party_amount=40,
+			bank_account="_Test Bank - _TC",
+			bank_amount=2000
+		)
+		pe.reference_no = "1"
+		pe.reference_date = "2016-01-01"
+		pe.target_exchange_rate = pe.paid_amount / pe.received_amount
+
+		# Have to set reference manually or get_payment_entry will assign all $40.00 USD to a $20.00 USD invoice.
+		pe.references = []
+		pe.append("references", {
+			"reference_doctype": pi.doctype,
+			"reference_name": pi.name,
+			"due_date": frappe.utils.nowdate(),
+			"total_amount": pi.grand_total,
+			"outstanding": pi.grand_total,
+			"allocated_amount": 20,
+			"exchange_rate": 50
+		})
+		pe.insert()
+
+		self.assertEqual(pe.unallocated_amount, 20)
+
+		pe.submit()
+		print(pe.name)
+
+		expected_gl = dict(
+			(d[0], d)
+			for d in [
+				["_Test Payable USD - _TC", 1000, 0, pi.name],
+				["_Test Bank - _TC", 0, pe.paid_amount, None]
+			]
+		)
+
+		self.validate_gl_entries(pe.name, expected_gl)
+
 	def test_payment_entry_against_pi(self):
 		pi = make_purchase_invoice(
 			supplier="_Test Supplier USD",
