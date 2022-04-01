@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.utils import cint, getdate
+from frappe.utils.data import flt
 
 
 def execute(filters=None):
@@ -29,10 +30,10 @@ def execute(filters=None):
 							frappe.db.get_value('Batch', batch, 'expiry_date'), qty_dict.expiry_status
 						])
 					else:
-						if qty_dict.expiry_status <= filters.get('expiry_days') and date_exp <= getdate(filters["to_date"]) and date_exp >= getdate(filters["from_date"]):
+						if flt(qty_dict.expiry_status) <= flt(filters.get('expiry_days')) and date_exp <= getdate(filters["to_date"]) and date_exp >= getdate(filters["from_date"]):
 							data.append([item, item_map[item]["item_name"], item_map[item]["description"], wh, batch,
-										 frappe.db.get_value('Batch', batch, 'expiry_date'), qty_dict.expiry_status
-										 ])
+										frappe.db.get_value('Batch', batch, 'expiry_date'), qty_dict.expiry_status
+										])
 
 
 	return columns, data

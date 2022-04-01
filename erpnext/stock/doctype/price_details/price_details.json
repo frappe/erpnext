@@ -5,64 +5,41 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "product",
-  "classifications",
-  "costunit",
+  "item",
+  "item_name",
+  "item_group",
+  "column_break_4",
   "weight",
-  "volume",
+  "weight_uom",
   "uom",
-  "min_qty",
+  "brand_details_section",
   "brand",
-  "brand_cost",
+  "column_break_7",
   "brand_list_price",
+  "qty_rate",
+  "min_qty",
+  "valuation_rate",
+  "column_break_12",
   "addpkg_cost",
-  "list_priceweight",
-  "list_pricevolume",
   "list_priceunit"
  ],
  "fields": [
   {
-   "fieldname": "product",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Product",
-   "options": "Item"
-  },
-  {
-   "fetch_from": "product.item_group",
-   "fieldname": "classifications",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Classifications",
-   "options": "Item Group"
-  },
-  {
-   "fetch_from": "product.valuation_rate",
-   "fieldname": "costunit",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Cost/Unit"
-  },
-  {
-   "fetch_from": "product.weight_per_unit",
+   "fetch_from": "item.weight_per_unit",
    "fieldname": "weight",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Weight"
+   "label": "Weight",
+   "read_only": 1
   },
   {
-   "fieldname": "volume",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Volume"
-  },
-  {
-   "fetch_from": "product.stock_uom",
+   "fetch_from": "item.stock_uom",
    "fieldname": "uom",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Uom",
-   "options": "UOM"
+   "label": "Default UOM",
+   "options": "UOM",
+   "read_only": 1
   },
   {
    "default": "1",
@@ -72,52 +49,101 @@
    "label": "Min Qty"
   },
   {
-   "fetch_from": "product.brand",
+   "fetch_from": "item.brand",
    "fieldname": "brand",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Brand",
-   "options": "Brand"
-  },
-  {
-   "fieldname": "brand_cost",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Brand Cost"
+   "options": "Brand",
+   "read_only": 1
   },
   {
    "fieldname": "addpkg_cost",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Add./Pkg Cost"
-  },
-  {
-   "fieldname": "list_pricevolume",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "List price/Volume"
+   "label": "Add./Pkg Cost",
+   "read_only": 1
   },
   {
    "fieldname": "list_priceunit",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "List price/Unit"
+   "label": "List price/Unit",
+   "read_only": 1
   },
   {
    "fieldname": "brand_list_price",
-   "fieldtype": "Float",
-   "label": "Brand List Price"
+   "fieldtype": "Currency",
+   "label": "Brand List Price",
+   "options": "Currency",
+   "read_only": 1
   },
   {
-   "fieldname": "list_priceweight",
-   "fieldtype": "Float",
-   "label": "List price/Weight"
+   "fieldname": "brand_details_section",
+   "fieldtype": "Section Break",
+   "label": "Brand Details"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qty_rate",
+   "fieldtype": "Section Break",
+   "label": "Qty & Rate"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "item.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item"
+  },
+  {
+   "fetch_from": "item.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Group",
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item.valuation_rate",
+   "fieldname": "valuation_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Valuation Rate",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item.weight_uom",
+   "fieldname": "weight_uom",
+   "fieldtype": "Link",
+   "label": "Weight UOM",
+   "options": "UOM"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-07-05 11:40:53.744312",
+ "modified": "2022-03-31 18:50:56.686642",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Price Details",

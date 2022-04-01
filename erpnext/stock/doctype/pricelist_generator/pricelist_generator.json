@@ -9,13 +9,16 @@
   "company",
   "pricelist_name",
   "start_date",
-  "discount_policy",
+  "selling",
   "column_break_4",
   "currency",
   "end_date",
-  "operating_unit",
-  "item_group",
+  "cost_center",
+  "buying",
+  "filters_section",
+  "filters_json",
   "section_break_8",
+  "get_items",
   "price_details",
   "amended_from"
  ],
@@ -23,19 +26,16 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "fieldname": "start_date",
    "fieldtype": "Date",
-   "label": "Start Date"
-  },
-  {
-   "fieldname": "discount_policy",
-   "fieldtype": "Select",
-   "label": "Discount Policy",
-   "options": "\nDiscount Included In The Price\nShow Public Price & Discount To the Customer"
+   "label": "Start Date",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_4",
@@ -44,19 +44,16 @@
   {
    "fieldname": "currency",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Currency",
-   "options": "Currency"
+   "options": "Currency",
+   "reqd": 1
   },
   {
    "fieldname": "end_date",
    "fieldtype": "Date",
-   "label": "End Date"
-  },
-  {
-   "fieldname": "operating_unit",
-   "fieldtype": "Link",
-   "label": "Operating Unit",
-   "options": "Cost Center"
+   "label": "End Date",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_8",
@@ -80,20 +77,53 @@
   {
    "fieldname": "pricelist_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "PriceList Name",
+   "reqd": 1,
    "unique": 1
   },
   {
-   "fieldname": "item_group",
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Item Filters"
+  },
+  {
+   "fieldname": "filters_json",
+   "fieldtype": "Code",
+   "label": "Filers Json",
+   "options": "JSON"
+  },
+  {
+   "fieldname": "get_items",
+   "fieldtype": "Button",
+   "label": "Get Items"
+  },
+  {
+   "fieldname": "cost_center",
    "fieldtype": "Link",
-   "label": "Item Group",
-   "options": "Item Group"
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "selling",
+   "fieldtype": "Check",
+   "label": "Selling",
+   "mandatory_depends_on": "!doc.buying"
+  },
+  {
+   "default": "0",
+   "fieldname": "buying",
+   "fieldtype": "Check",
+   "label": "Buying",
+   "mandatory_depends_on": "!doc.selling"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-04 16:52:58.871624",
+ "modified": "2022-03-31 18:38:36.843013",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "PriceList Generator",

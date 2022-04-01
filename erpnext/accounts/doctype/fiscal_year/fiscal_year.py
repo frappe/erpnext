@@ -6,6 +6,7 @@ import frappe
 from dateutil.relativedelta import relativedelta
 import datetime
 from datetime import timedelta
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, add_years, cstr, getdate
 
@@ -23,7 +24,7 @@ class FiscalYear(Document):
 		# clear cache
 		frappe.clear_cache()
 
-		msgprint(_("{0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.").format(self.name))
+		frappe.msgprint(frappe._("{0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.").format(self.name))
 
 	def validate(self):
 		self.validate_dates()

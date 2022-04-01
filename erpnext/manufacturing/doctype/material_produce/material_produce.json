@@ -34,6 +34,8 @@
   "wo_actual_rm_cost",
   "wo_actual_operating_cost",
   "amount",
+  "accounting_dimensions_section",
+  "cost_center",
   "amended_from"
  ],
  "fields": [
@@ -227,6 +229,17 @@
    "fieldtype": "Small Text",
    "label": "Target Warehouse Address",
    "read_only": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -238,7 +251,7 @@
    "link_fieldname": "material_produce"
   }
  ],
- "modified": "2022-03-15 15:46:36.580004",
+ "modified": "2022-03-25 17:57:30.600885",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Produce",

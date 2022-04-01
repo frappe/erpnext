@@ -743,21 +743,6 @@ frappe.ui.form.on('Stock Entry', {
 		if (frm.doc.apply_putaway_rule) erpnext.apply_putaway_rule(frm, frm.doc.purpose);
 	},
 
-	create_batch: function (frm) {
-		console.log(" this is create nbutton")
-		frm.save()
-		frappe.call({
-			method: "create_new_batch_no",
-			doc : frm.doc,
-			callback: function (r) {
-				if (r.message) {
-					console.log(" Success")
-					// frappe.model.set_value(cdt, cdn, r.message);
-				}
-			}
-		});
-	}
-
 });
 
 frappe.ui.form.on('Stock Entry Detail', {
@@ -978,14 +963,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	refresh: function (frm) {
-		console.log('obj: ', frm)
-		if (frm.work_order) {
-			console.log("frm.doc.work_order: ")
-			console.log(frm.work_order)
-			if (frm.doc.stock_entry_type === "Material Consumption for Manufacture") {
-				set_qty(frm)
-			}
-		}
+
 		var me = this;
 		erpnext.toggle_naming_series();
 		this.toggle_related_fields(this.frm.doc);
@@ -996,6 +974,13 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 		erpnext.hide_company();
 		erpnext.utils.add_item(this.frm);
+
+		if (frm.work_order) {
+			
+			if (frm.doc.stock_entry_type === "Material Consumption for Manufacture") {
+				set_qty(frm)
+			}
+		}
 	},
 	scan_barcode: function () {
 		let transaction_controller = new erpnext.TransactionController({ frm: this.frm });

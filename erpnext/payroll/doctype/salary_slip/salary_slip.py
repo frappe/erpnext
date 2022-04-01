@@ -71,8 +71,6 @@ class SalarySlip(TransactionBase):
 	def autoname(self):
 		self.name = make_autoname(self.series)
 
-
-
 	def validate(self):
 		self.status = self.get_status()
 		validate_active_employee(self.employee)
@@ -98,7 +96,6 @@ class SalarySlip(TransactionBase):
 			if self.salary_slip_based_on_timesheet and (self.total_working_hours > int(max_working_hours)):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
 								format(max_working_hours), alert=True)
-
 		
 	def set_net_total_in_words(self):
 		doc_currency = self.currency
@@ -342,6 +339,16 @@ class SalarySlip(TransactionBase):
 
 		return self.total_working_days - marked_days
 
+	@frappe.whitelist()		
+	def paid(self):	
+		#Paid Holidays
+		cdoc = frappe.get_doc("Employee",self.employee)
+		if cdoc.holiday_list:
+			get_national_holiday = frappe.db.sql("""select count(is_national_holiday) as inh from `tabHoliday`
+												where weekly_off = 0 and holiday_date
+												between '{0}' and '{1}'""".format(self.start_date, self.end_date), as_dict= True)
+			get_paid_value = get_national_holiday[0].get('inh')
+			return get_paid_value
 
 	def get_payment_days(self, joining_date, relieving_date, include_holidays_in_total_working_days):
 		if not joining_date:
@@ -373,7 +380,7 @@ class SalarySlip(TransactionBase):
 
 	def get_holidays_for_employee(self, start_date, end_date):
 		return get_holiday_dates_for_employee(self.employee, start_date, end_date)
-
+	
 	@frappe.whitelist()
 	def get_payroll(self):
 		from datetime import date
@@ -1641,3 +1648,4 @@ def get_payroll_payable_account(company, payroll_entry):
 		payroll_payable_account = frappe.db.get_value('Company', company, 'default_payroll_payable_account')
 
 	return payroll_payable_account
+

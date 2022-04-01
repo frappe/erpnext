@@ -26,6 +26,8 @@
   "material_consumption_detail",
   "assign_material",
   "section_break_19",
+  "accounting_dimensions_section",
+  "cost_center",
   "amended_from"
  ],
  "fields": [
@@ -158,12 +160,23 @@
    "label": "Consumption Deviation Percentage",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-14 14:03:02.676351",
+ "modified": "2022-03-25 18:11:32.714334",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Consumption",

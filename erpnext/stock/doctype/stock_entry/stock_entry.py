@@ -156,16 +156,17 @@ class StockEntry(StockController):
 		
 		manufacture = frappe.get_doc('Manufacturing Settings')
 		if self.stock_entry_type == "Manufacture" and manufacture.batch_price_list:
-			for item in self.stock_entry_detail:
-				doc = frappe.new_doc({
-					'doctype': 'Item Price',
-					'item_code':'item.item_code',
-					'item_name':'item.item_name',
-					'rate':'item.mrp',
-					'uom':'item.uom',
-					'batch_no':'item.batch_no',
+			for item in self.items:
+				doc = frappe.new_doc('Item Price')
+				doc.item_code=item.item_code
+				doc.item_name=item.item_name
+				doc.price_list=manufacture.batch_price_list
+				doc.price_list_rate=item.mrp
+				doc.uom =item.uom
+				doc.batch_no =item.batch_no
+				doc.valid_from =""
 					
-				})
+				
 				doc.insert()
 
 
@@ -1914,23 +1915,6 @@ class StockEntry(StockController):
 			return
 
 		self.title = self.purpose
-
-	# Code for new Button above Items
-	@frappe.whitelist()
-	def create_new_batch_no(self):
-		print(" We are in stock Entry ", self.items)
-		item = self.items
-		if len(item) > 0:
-			for i in item:
-				print(i.item_code)
-				batch = frappe.new_doc("Batch")
-				batch.batch_id = self.name + "*" + i.item_code 
-				batch.item = i.item_code 
-				batch.save()
-				
-				i.batch_no = batch.name
-
-		return True
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
