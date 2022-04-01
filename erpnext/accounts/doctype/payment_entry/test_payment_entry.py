@@ -33,7 +33,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.submit()
 
 		expected_gle = dict(
-			(d[0], d) for d in [["Debtors - _TC", 0, 1000, so.name], ["_Test Cash - _TC", 1000.0, 0, None]]
+			((d[0], d[5]), d) for d in [["Debtors - _TC", 0, 1000, 0, 1000, so.name], ["_Test Cash - _TC", 1000.0, 0, 1000.0, 0, None]]
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)
@@ -132,10 +132,10 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.submit()
 
 		expected_gle = dict(
-			(d[0], d)
+			((d[0], d[5]), d)
 			for d in [
-				["_Test Receivable USD - _TC", 0, 5000, si.name],
-				["_Test Bank USD - _TC", 5000.0, 0, None],
+				["_Test Receivable USD - _TC", 0, 5000, 0, pe.paid_amount, si.name],
+				["_Test Bank USD - _TC", 5000.0, 0, pe.received_amount, 0, None],
 			]
 		)
 
@@ -185,13 +185,13 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(pe.unallocated_amount, 20)
 
 		pe.submit()
-		print(pe.name)
 
 		expected_gl = dict(
-			(d[0], d)
+			((d[0], d[5]), d)
 			for d in [
-				["_Test Payable USD - _TC", 1000, 0, pi.name],
-				["_Test Bank - _TC", 0, pe.paid_amount, None]
+				["_Test Payable USD - _TC", 1000, 0, 20.00, 0, None],
+				["_Test Payable USD - _TC", 1000, 0, 20.00, 0, pi.name],
+				["_Test Bank - _TC", 0, pe.paid_amount, 0, pe.paid_amount, None]
 			]
 		)
 
@@ -212,10 +212,10 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.submit()
 
 		expected_gle = dict(
-			(d[0], d)
+			((d[0], d[5]), d)
 			for d in [
-				["_Test Payable USD - _TC", 12500, 0, pi.name],
-				["_Test Bank USD - _TC", 0, 12500, None],
+				["_Test Payable USD - _TC", 12500, 0, pe.paid_amount, 0, pi.name],
+				["_Test Bank USD - _TC", 0, 12500, 0, pe.received_amount, None],
 			]
 		)
 
@@ -356,7 +356,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.submit()
 
 		expected_gle = dict(
-			(d[0], d) for d in [[payable, 300, 0, ec.name], ["_Test Bank USD - _TC", 0, 300, None]]
+			((d[0], d[5]), d) for d in [[payable, 300, 0, 300, 0, ec.name], ["_Test Bank USD - _TC", 0, 300, 0, pe.paid_amount, None]]
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)
@@ -394,11 +394,11 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.submit()
 
 		expected_gle = dict(
-			(d[0], d)
+			((d[0], d[5]), d)
 			for d in [
-				["_Test Receivable USD - _TC", 0, 1000, si.name],
-				["_Test Bank - _TC", 900, 0, None],
-				["_Test Exchange Gain/Loss - _TC", 100.0, 0, None],
+				["_Test Receivable USD - _TC", 0, 1000, 0, pe.paid_amount, si.name],
+				["_Test Bank - _TC", 900, 0, 900, 0, None],
+				["_Test Exchange Gain/Loss - _TC", 100.0, 0, 100.0, 0, None],
 			]
 		)
 
@@ -505,11 +505,11 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.submit()
 
 		expected_gle = dict(
-			(d[0], d)
+			((d[0], d[5]), d)
 			for d in [
-				["_Test Bank USD - _TC", 0, 5000, None],
-				["_Test Bank - _TC", 4500, 0, None],
-				["_Test Exchange Gain/Loss - _TC", 500.0, 0, None],
+				["_Test Bank USD - _TC", 0, 5000, 0, 100, None],
+				["_Test Bank - _TC", 4500, 0, 4500, 0, None],
+				["_Test Exchange Gain/Loss - _TC", 500.0, 0, 500.0, 0, None],
 			]
 		)
 
@@ -552,7 +552,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe3.submit()
 
 		expected_gle = dict(
-			(d[0], d) for d in [["Debtors - _TC", 100, 0, si1.name], ["_Test Cash - _TC", 0, 100, None]]
+			((d[0], d[5]), d) for d in [["Debtors - _TC", 100, 0, 100, 0, si1.name], ["_Test Cash - _TC", 0, 100, 0, 100, None]]
 		)
 
 		self.validate_gl_entries(pe3.name, expected_gle)
@@ -571,14 +571,17 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		for gle in gl_entries:
-			self.assertEqual(expected_gle[gle.account][0], gle.account)
-			self.assertEqual(expected_gle[gle.account][1], gle.debit)
-			self.assertEqual(expected_gle[gle.account][2], gle.credit)
-			self.assertEqual(expected_gle[gle.account][3], gle.against_voucher)
+			self.assertEqual(expected_gle[gle.account, gle.against_voucher][0], gle.account)
+			self.assertEqual(expected_gle[gle.account, gle.against_voucher][1], gle.debit)
+			self.assertEqual(expected_gle[gle.account, gle.against_voucher][2], gle.credit)
+			self.assertEqual(expected_gle[gle.account, gle.against_voucher][3], gle.debit_in_account_currency)
+			self.assertEqual(expected_gle[gle.account, gle.against_voucher][4], gle.credit_in_account_currency)
+			self.assertEqual(expected_gle[gle.account, gle.against_voucher][5], gle.against_voucher)
+
 
 	def get_gle(self, voucher_no):
 		return frappe.db.sql(
-			"""select account, debit, credit, against_voucher
+			"""select account, debit, credit, debit_in_account_currency, credit_in_account_currency, against_voucher
 			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
 			order by account asc""",
 			voucher_no,
@@ -608,11 +611,11 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.submit()
 
 		expected_gle = dict(
-			(d[0], d)
+			((d[0], d[5]), d)
 			for d in [
-				["Debtors - _TC", 0, 100, si.name],
-				["_Test Cash - _TC", 95, 0, None],
-				["_Test Write Off - _TC", 5, 0, None],
+				["Debtors - _TC", 0, 100, 0, 100, si.name],
+				["_Test Cash - _TC", 95, 0, 95, 0, None],
+				["_Test Write Off - _TC", 5, 0, 5, 0, None],
 			]
 		)
 
@@ -646,11 +649,11 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.submit()
 
 		expected_gle = dict(
-			(d[0], d)
+			((d[0], d[5]), d)
 			for d in [
-				["_Test Receivable USD - _TC", 0, 5000, si.name],
-				["_Test Bank USD - _TC", 5500, 0, None],
-				["_Test Exchange Gain/Loss - _TC", 0, 500, None],
+				["_Test Receivable USD - _TC", 0, 5000, 0, pe.paid_amount, si.name],
+				["_Test Bank USD - _TC", 5500, 0, pe.received_amount, 0, None],
+				["_Test Exchange Gain/Loss - _TC", 0, 500, 0, 500, None],
 			]
 		)
 
