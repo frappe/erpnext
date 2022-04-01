@@ -325,14 +325,15 @@ def set_customer_info(fieldname, customer, value=""):
 		frappe.db.set_value("Customer", customer, "mobile_no", value)
 	contact_doc.save()
 
+
 @frappe.whitelist()
 def get_pos_profile_data(pos_profile):
-	pos_profile = frappe.get_doc('POS Profile', pos_profile)
+	pos_profile = frappe.get_doc("POS Profile", pos_profile)
 	pos_profile = pos_profile.as_dict()
 
 	_customer_groups_with_children = []
 	for row in pos_profile.customer_groups:
-		children = get_child_nodes('Customer Group', row.customer_group)
+		children = get_child_nodes("Customer Group", row.customer_group)
 		_customer_groups_with_children.extend(children)
 
 	pos_profile.customer_groups = _customer_groups_with_children

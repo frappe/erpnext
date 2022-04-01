@@ -774,14 +774,12 @@ class TestPOSInvoice(unittest.TestCase):
 		from erpnext.stock.doctype.serial_no.test_serial_no import get_serial_nos
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
-		frappe.db.savepoint('before_test_delivered_serial_no_case')
+		frappe.db.savepoint("before_test_delivered_serial_no_case")
 		try:
 			se = make_serialized_item()
 			serial_no = get_serial_nos(se.get("items")[0].serial_no)[0]
 
-			dn = create_delivery_note(
-					item_code="_Test Serialized Item With Series", serial_no=serial_no
-			)
+			dn = create_delivery_note(item_code="_Test Serialized Item With Series", serial_no=serial_no)
 
 			delivery_document_no = frappe.db.get_value("Serial No", serial_no, "delivery_document_no")
 			self.assertEquals(delivery_document_no, dn.name)
@@ -789,17 +787,17 @@ class TestPOSInvoice(unittest.TestCase):
 			init_user_and_profile()
 
 			pos_inv = create_pos_invoice(
-					item_code="_Test Serialized Item With Series",
-					serial_no=serial_no,
-					qty=1,
-					rate=100,
-					do_not_submit=True
+				item_code="_Test Serialized Item With Series",
+				serial_no=serial_no,
+				qty=1,
+				rate=100,
+				do_not_submit=True,
 			)
 
 			self.assertRaises(frappe.ValidationError, pos_inv.submit)
 
 		finally:
-			frappe.db.rollback(save_point='before_test_delivered_serial_no_case')
+			frappe.db.rollback(save_point="before_test_delivered_serial_no_case")
 			frappe.set_user("Administrator")
 
 	def test_returned_serial_no_case(self):
@@ -810,7 +808,7 @@ class TestPOSInvoice(unittest.TestCase):
 		from erpnext.stock.doctype.serial_no.test_serial_no import get_serial_nos
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
-		frappe.db.savepoint('before_test_returned_serial_no_case')
+		frappe.db.savepoint("before_test_returned_serial_no_case")
 		try:
 			se = make_serialized_item()
 			serial_no = get_serial_nos(se.get("items")[0].serial_no)[0]
@@ -818,10 +816,10 @@ class TestPOSInvoice(unittest.TestCase):
 			init_user_and_profile()
 
 			pos_inv = create_pos_invoice(
-					item_code="_Test Serialized Item With Series",
-					serial_no=serial_no,
-					qty=1,
-					rate=100,
+				item_code="_Test Serialized Item With Series",
+				serial_no=serial_no,
+				qty=1,
+				rate=100,
 			)
 
 			pos_return = make_sales_return(pos_inv.name)
@@ -829,15 +827,15 @@ class TestPOSInvoice(unittest.TestCase):
 			pos_return.insert()
 			pos_return.submit()
 
-			pos_reserved_serial_nos = get_pos_reserved_serial_nos({
-				'item_code': '_Test Serialized Item With Series',
-				'warehouse': '_Test Warehouse - _TC'
-			})
+			pos_reserved_serial_nos = get_pos_reserved_serial_nos(
+				{"item_code": "_Test Serialized Item With Series", "warehouse": "_Test Warehouse - _TC"}
+			)
 			self.assertTrue(serial_no not in pos_reserved_serial_nos)
 
 		finally:
-			frappe.db.rollback(save_point='before_test_returned_serial_no_case')
+			frappe.db.rollback(save_point="before_test_returned_serial_no_case")
 			frappe.set_user("Administrator")
+
 
 def create_pos_invoice(**args):
 	args = frappe._dict(args)
