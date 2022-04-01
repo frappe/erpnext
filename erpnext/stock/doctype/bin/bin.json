@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "MAT-BIN-.YYYY.-.#####",
+ "autoname": "hash",
  "creation": "2013-01-10 16:34:25",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -171,11 +171,11 @@
  "idx": 1,
  "in_create": 1,
  "links": [],
- "modified": "2022-01-30 17:04:54.715288",
+ "modified": "2022-03-30 07:22:23.868602",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Bin",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {
