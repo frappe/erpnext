@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import json
+
 import frappe
 from frappe.utils import cint, cstr
 from redisearch import AutoCompleter, Client, Query
@@ -135,8 +137,10 @@ def get_category_suggestions(query):
 		return search_results
 
 	ac = AutoCompleter(make_key(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE), conn=frappe.cache())
-	suggestions = ac.get_suggestions(query, num=10)
+	suggestions = ac.get_suggestions(query, num=10, with_payloads=True)
 
-	search_results["results"] = [s.string for s in suggestions]
+	results = [json.loads(s.payload) for s in suggestions]
+
+	search_results["results"] = results
 
 	return search_results

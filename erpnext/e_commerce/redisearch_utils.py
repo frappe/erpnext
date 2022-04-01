@@ -157,17 +157,14 @@ def delete_from_ac_dict(website_item_doc):
 
 @if_redisearch_enabled
 def define_autocomplete_dictionary():
-	"""Creates an autocomplete search dictionary for `name`.
-	Also creats autocomplete dictionary for `categories` if
-	checked in E Commerce Settings"""
+	"""
+	Defines/Redefines an autocomplete search dictionary for Website Item Name.
+	Also creats autocomplete dictionary for Published Item Groups.
+	"""
 
 	cache = frappe.cache()
-	name_ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=cache)
-	cat_ac = AutoCompleter(make_key(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE), conn=cache)
-
-	ac_categories = frappe.db.get_single_value(
-		"E Commerce Settings", "show_categories_in_search_autocomplete"
-	)
+	item_ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=cache)
+	item_group_ac = AutoCompleter(make_key(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE), conn=cache)
 
 	# Delete both autocomplete dicts
 	try:
@@ -176,16 +173,39 @@ def define_autocomplete_dictionary():
 	except Exception:
 		return False
 
+	create_items_autocomplete_dict(autocompleter=item_ac)
+	create_item_groups_autocomplete_dict(autocompleter=item_group_ac)
+
+
+@if_redisearch_enabled
+def create_items_autocomplete_dict(autocompleter):
+	"Add items as suggestions in Autocompleter."
 	items = frappe.get_all(
 		"Website Item", fields=["web_item_name", "item_group"], filters={"published": 1}
 	)
 
 	for item in items:
-		name_ac.add_suggestions(Suggestion(item.web_item_name))
-		if ac_categories and item.item_group:
-			cat_ac.add_suggestions(Suggestion(item.item_group))
+		autocompleter.add_suggestions(Suggestion(item.web_item_name))
 
-	return True
+
+@if_redisearch_enabled
+def create_item_groups_autocomplete_dict(autocompleter):
+	"Add item groups with weightage as suggestions in Autocompleter."
+	published_item_groups = frappe.get_all(
+		"Item Group", fields=["name", "route", "weightage"], filters={"show_in_website": 1}
+	)
+	if not published_item_groups:
+		return
+
+	for item_group in published_item_groups:
+		payload = {"name": item_group, "route": item_group.route}
+		autocompleter.add_suggestions(
+			Suggestion(
+				string=item_group.name,
+				score=item_group.weightage,
+				payload=payload,  # additional info that can be retrieved later
+			)
+		)
 
 
 @if_redisearch_enabled
