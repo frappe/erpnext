@@ -112,7 +112,8 @@
   "enq_det",
   "supplier_quotation",
   "opportunity",
-  "lost_reasons"
+  "lost_reasons",
+  "competitors"
  ],
  "fields": [
   {
@@ -950,6 +951,13 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
+   "fieldname": "competitors",
+   "fieldtype": "Table MultiSelect",
+   "label": "Competitors",
+   "options": "Competitor Detail"
+  },
+  {
    "fieldname": "company_address",
    "fieldtype": "Link",
    "label": "Company Address Name",
@@ -966,7 +974,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-02 17:21:48.578719",
+ "modified": "2022-04-03 17:21:48.578719",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
