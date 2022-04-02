@@ -177,11 +177,11 @@ def get_customer_details():
 
 
 def get_item_details():
-	details = frappe.db.get_all("Item", fields=["item_code", "item_name", "item_group"])
+	details = frappe.db.get_all("Item", fields=["name", "item_name", "item_group"])
 	item_details = {}
 	for d in details:
 		item_details.setdefault(
-			d.item_code, frappe._dict({"item_name": d.item_name, "item_group": d.item_group})
+			d.name, frappe._dict({"item_name": d.item_name, "item_group": d.item_group})
 		)
 	return item_details
 

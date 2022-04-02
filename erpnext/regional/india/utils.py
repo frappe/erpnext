@@ -268,6 +268,7 @@ def get_regional_address_details(party_details, doctype, company):
 
 	if tax_template_by_category:
 		party_details["taxes_and_charges"] = tax_template_by_category
+		party_details["taxes"] = get_taxes_and_charges(master_doctype, tax_template_by_category)
 		return party_details
 
 	if not party_details.place_of_supply:
@@ -292,7 +293,7 @@ def get_regional_address_details(party_details, doctype, company):
 		return party_details
 
 	party_details["taxes_and_charges"] = default_tax
-	party_details.taxes = get_taxes_and_charges(master_doctype, default_tax)
+	party_details["taxes"] = get_taxes_and_charges(master_doctype, default_tax)
 
 	return party_details
 

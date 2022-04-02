@@ -697,15 +697,6 @@ class BOM(WebsiteGenerator):
 		self.scrap_material_cost = total_sm_cost
 		self.base_scrap_material_cost = base_total_sm_cost
 
-	def update_new_bom(self, old_bom, new_bom, rate):
-		for d in self.get("items"):
-			if d.bom_no != old_bom:
-				continue
-
-			d.bom_no = new_bom
-			d.rate = rate
-			d.amount = (d.stock_qty or d.qty) * rate
-
 	def update_exploded_items(self, save=True):
 		"""Update Flat BOM, following will be correct data"""
 		self.get_exploded_items()
@@ -1025,7 +1016,7 @@ def get_bom_items_as_dict(
 		query = query.format(
 			table="BOM Scrap Item",
 			where_conditions="",
-			select_columns=", bom_item.idx, item.description, is_process_loss",
+			select_columns=", item.description, is_process_loss",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
 		)
@@ -1038,7 +1029,7 @@ def get_bom_items_as_dict(
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
 			select_columns=""", bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
-				bom_item.idx, bom_item.operation, bom_item.include_item_in_manufacturing, bom_item.sourced_by_supplier,
+				bom_item.operation, bom_item.include_item_in_manufacturing, bom_item.sourced_by_supplier,
 				bom_item.description, bom_item.base_rate as rate """,
 		)
 		items = frappe.db.sql(query, {"qty": qty, "bom": bom, "company": company}, as_dict=True)
