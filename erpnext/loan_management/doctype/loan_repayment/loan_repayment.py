@@ -745,6 +745,8 @@ def calculate_amounts(against_loan, posting_date, payment_type=""):
 	if payment_type == "Loan Closure":
 		amounts["payable_principal_amount"] = amounts["pending_principal_amount"]
 		amounts["interest_amount"] += amounts["unaccrued_interest"]
-		amounts["payable_amount"] = amounts["payable_principal_amount"] + amounts["interest_amount"]
+		amounts["payable_amount"] = (
+			amounts["payable_principal_amount"] + amounts["interest_amount"] + amounts["penalty_amount"]
+		)
 
 	return amounts
