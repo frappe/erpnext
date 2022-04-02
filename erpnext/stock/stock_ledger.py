@@ -1337,37 +1337,27 @@ def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 	if not (args.actual_qty < 0 or args.voucher_type == "Stock Reconciliation"):
 		return
 
-	neg_sle = get_future_sle_with_negative_qty(args)
-	if neg_sle:
-		message = _(
-			"{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
-		).format(
-			abs(neg_sle[0]["qty_after_transaction"]),
-			frappe.get_desk_link("Item", args.item_code),
-			frappe.get_desk_link("Warehouse", args.warehouse),
-			neg_sle[0]["posting_date"],
-			neg_sle[0]["posting_time"],
-			frappe.get_desk_link(neg_sle[0]["voucher_type"], neg_sle[0]["voucher_no"]),
-		)
+	if args.batch_no:
+		neg_sle = get_future_sle_with_negative_batch_qty(args)
+		item_link = frappe.get_desk_link("Batch", args.batch_no)
+	else:
+		neg_sle = get_future_sle_with_negative_qty(args)
+		item_link = frappe.get_desk_link("Item", args.item_code)
 
-		frappe.throw(message, NegativeStockError, title=_("Insufficient Stock"))
-
-	if not args.batch_no:
+	if not neg_sle:
 		return
 
-	neg_batch_sle = get_future_sle_with_negative_batch_qty(args)
-	if neg_batch_sle:
-		message = _(
-			"{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
-		).format(
-			abs(neg_batch_sle[0]["cumulative_total"]),
-			frappe.get_desk_link("Batch", args.batch_no),
-			frappe.get_desk_link("Warehouse", args.warehouse),
-			neg_batch_sle[0]["posting_date"],
-			neg_batch_sle[0]["posting_time"],
-			frappe.get_desk_link(neg_batch_sle[0]["voucher_type"], neg_batch_sle[0]["voucher_no"]),
-		)
-		frappe.throw(message, NegativeStockError, title=_("Insufficient Stock for Batch"))
+	message = _(
+		"{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
+	).format(
+		abs(neg_sle[0]["qty_after_transaction"]),
+		item_link,
+		frappe.get_desk_link("Warehouse", args.warehouse),
+		neg_sle[0]["posting_date"],
+		neg_sle[0]["posting_time"],
+		frappe.get_desk_link(neg_sle[0]["voucher_type"], neg_sle[0]["voucher_no"]),
+	)
+	frappe.throw(message, NegativeStockError, title=_("Insufficient Stock"))
 
 
 def get_future_sle_with_negative_qty(args):
