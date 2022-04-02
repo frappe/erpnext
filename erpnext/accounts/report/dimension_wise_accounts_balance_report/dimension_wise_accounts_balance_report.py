@@ -230,7 +230,7 @@ def get_columns(dimension_list):
 	columns.append(
 		{
 			"fieldname": "total",
-			"label": "Total",
+			"label": _("Total"),
 			"fieldtype": "Currency",
 			"options": "currency",
 			"width": 150,

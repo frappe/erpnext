@@ -69,13 +69,13 @@ class StudentGroupCreationTool(Document):
 		l = len(self.courses)
 		for d in self.courses:
 			if not d.student_group_name:
-				frappe.throw(_("""Student Group Name is mandatory in row {0}""".format(d.idx)))
+				frappe.throw(_("Student Group Name is mandatory in row {0}").format(d.idx))
 
 			if d.group_based_on == "Course" and not d.course:
-				frappe.throw(_("""Course is mandatory in row {0}""".format(d.idx)))
+				frappe.throw(_("Course is mandatory in row {0}").format(d.idx))
 
 			if d.group_based_on == "Batch" and not d.batch:
-				frappe.throw(_("""Batch is mandatory in row {0}""".format(d.idx)))
+				frappe.throw(_("Batch is mandatory in row {0}").format(d.idx))
 
 			frappe.publish_realtime(
 				"student_group_creation_progress", {"progress": [d.idx, l]}, user=frappe.session.user
