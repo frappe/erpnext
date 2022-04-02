@@ -35,7 +35,6 @@ class CallLog(Document):
 		# Add Employee Name
 		if self.is_incoming_call():
 			# Taking the last 10 digits of the number
-			employee_number = strip_number(self.get('to'))
 			employee = get_employees_with_number(self.get("to"))
 
 			self.call_received_by = employee[0].get("name")
