@@ -1399,19 +1399,20 @@ def get_future_sle_with_negative_batch_qty(args):
 		as_dict=1,
 	)
 
+	qty_precision = frappe.get_precision("Stock Ledger Entry", "qty_after_transaction")
+
 	cumulative_total = 0.0
 	current_posting_datetime = get_datetime(str(args.posting_date) + " " + str(args.posting_time))
 	for entry in batch_ledger:
 		cumulative_total += entry.actual_qty
-		if cumulative_total > -1e-6:
+		if flt(cumulative_total, qty_precision) > 0.0:
 			continue
 
 		if (
 			get_datetime(str(entry.posting_date) + " " + str(entry.posting_time))
 			>= current_posting_datetime
 		):
-
-			entry.cumulative_total = cumulative_total
+			entry.qty_after_transaction = flt(cumulative_total, qty_precision)
 			return [entry]
 
 
