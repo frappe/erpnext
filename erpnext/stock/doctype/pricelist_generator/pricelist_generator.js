@@ -30,6 +30,7 @@ frappe.ui.form.on('PriceList Generator', {
             callback: function(r) {
                 if(r.message){
                         console.log("***",r.message);
+						frm.refresh_field("price_details")
                     }
                 }
         });
