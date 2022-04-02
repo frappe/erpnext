@@ -226,7 +226,7 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 
 	warehouse: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		if (child.batch_no) {
+		if (child.batch_no && !frm.doc.scan_mode) {
 			frappe.model.set_value(child.cdt, child.cdn, "batch_no", "");
 		}
 
@@ -235,7 +235,7 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 
 	item_code: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		if (child.batch_no) {
+		if (child.batch_no && !frm.doc.scan_mode) {
 			frappe.model.set_value(cdt, cdn, "batch_no", "");
 		}
 
