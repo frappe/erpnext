@@ -909,7 +909,6 @@ def get_custom_fields():
 				read_only=1,
 			),
 		],
-<<<<<<< HEAD
 		"Purchase Invoice": purchase_invoice_gst_category
 		+ invoice_gst_fields
 		+ purchase_invoice_itc_fields
@@ -931,6 +930,7 @@ def get_custom_fields():
 		"Journal Entry": journal_entry_fields,
 		"Sales Order": sales_invoice_gst_fields,
 		"Tax Category": inter_state_gst_field,
+		"Quotation": sales_invoice_gst_fields,
 		"Item": [
 			dict(
 				fieldname="gst_hsn_code",
@@ -948,26 +948,6 @@ def get_custom_fields():
 			dict(
 				fieldname="is_non_gst", label="Is Non GST ", fieldtype="Check", insert_after="is_nil_exempt"
 			),
-=======
-		'Purchase Invoice': purchase_invoice_gst_category + invoice_gst_fields + purchase_invoice_itc_fields + purchase_invoice_gst_fields,
-		'Purchase Order': purchase_invoice_gst_fields,
-		'Purchase Receipt': purchase_invoice_gst_fields,
-		'Sales Invoice': sales_invoice_gst_category + invoice_gst_fields + sales_invoice_shipping_fields + sales_invoice_gst_fields + si_ewaybill_fields + si_einvoice_fields,
-		'POS Invoice': sales_invoice_gst_fields,
-		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields + delivery_note_gst_category,
-		'Payment Entry': payment_entry_fields,
-		'Journal Entry': journal_entry_fields,
-		'Sales Order': sales_invoice_gst_fields,
-		'Tax Category': inter_state_gst_field,
-		'Quotation': sales_invoice_gst_fields,
-		'Item': [
-			dict(fieldname='gst_hsn_code', label='HSN/SAC',
-				fieldtype='Link', options='GST HSN Code', insert_after='item_group'),
-			dict(fieldname='is_nil_exempt', label='Is Nil Rated or Exempted',
-				fieldtype='Check', insert_after='gst_hsn_code'),
-			dict(fieldname='is_non_gst', label='Is Non GST ',
-				fieldtype='Check', insert_after='is_nil_exempt')
->>>>>>> 7cae669e81 (fix(India): Auto tax fetching based on GSTIN)
 		],
 		"Quotation Item": [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		"Supplier Quotation Item": [hsn_sac_field, nil_rated_exempt, is_non_gst],
