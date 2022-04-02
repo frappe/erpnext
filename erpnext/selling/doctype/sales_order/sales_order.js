@@ -184,20 +184,20 @@ frappe.ui.form.on("Sales Order", {
 			}
 		});
 	},
-	company_address:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
+	// company_address:function(frm){
+	// 	frm.call({
+	// 		method:"calculate_taxes",
+	// 		doc:frm.doc,
+	// 		callback: function(r)
+	// 		{
 
-                frm.set_value("tax_category","");
-				frm.refresh_field("tax_category")
-                frm.set_value("tax_category",r.message);
-                refresh_field("tax_category")
-			}
-		});
-	},
+    //             frm.set_value("tax_category","");
+	// 			frm.refresh_field("tax_category")
+    //             frm.set_value("tax_category",r.message);
+    //             refresh_field("tax_category")
+	// 		}
+	// 	});
+	// },
 	branch:function(frm){
 		frm.call({
 			method:"calculate_taxes",
