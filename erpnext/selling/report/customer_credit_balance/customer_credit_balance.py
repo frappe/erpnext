@@ -65,7 +65,7 @@ def get_columns(customer_naming_type):
 		_("Credit Limit") + ":Currency:120",
 		_("Outstanding Amt") + ":Currency:100",
 		_("Credit Balance") + ":Currency:120",
-		_("Bypass credit check at Sales Order ") + ":Check:80",
+		_("Bypass credit check at Sales Order") + ":Check:80",
 		_("Is Frozen") + ":Check:80",
 		_("Disabled") + ":Check:80",
 	]
