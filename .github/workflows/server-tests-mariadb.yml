@@ -4,8 +4,10 @@ on:
   pull_request:
     paths-ignore:
       - '**.js'
+      - '**.css'
       - '**.md'
       - '**.html'
+      - '**.csv'
   push:
     branches: [ develop ]
     paths-ignore:

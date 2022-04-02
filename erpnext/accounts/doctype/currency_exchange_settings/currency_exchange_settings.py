@@ -15,24 +15,24 @@ class CurrencyExchangeSettings(Document):
 		self.validate_result(response, value)
 
 	def set_parameters_and_result(self):
-		if self.service_provider == 'exchangerate.host':
-			self.set('result_key', [])
-			self.set('req_params', [])
+		if self.service_provider == "exchangerate.host":
+			self.set("result_key", [])
+			self.set("req_params", [])
 
 			self.api_endpoint = "https://api.exchangerate.host/convert"
-			self.append('result_key', {'key': 'result'})
-			self.append('req_params', {'key': 'date', 'value': '{transaction_date}'})
-			self.append('req_params', {'key': 'from', 'value': '{from_currency}'})
-			self.append('req_params', {'key': 'to', 'value': '{to_currency}'})
-		elif self.service_provider == 'frankfurter.app':
-			self.set('result_key', [])
-			self.set('req_params', [])
+			self.append("result_key", {"key": "result"})
+			self.append("req_params", {"key": "date", "value": "{transaction_date}"})
+			self.append("req_params", {"key": "from", "value": "{from_currency}"})
+			self.append("req_params", {"key": "to", "value": "{to_currency}"})
+		elif self.service_provider == "frankfurter.app":
+			self.set("result_key", [])
+			self.set("req_params", [])
 
 			self.api_endpoint = "https://frankfurter.app/{transaction_date}"
-			self.append('result_key', {'key': 'rates'})
-			self.append('result_key', {'key': '{to_currency}'})
-			self.append('req_params', {'key': 'base', 'value': '{from_currency}'})
-			self.append('req_params', {'key': 'symbols', 'value': '{to_currency}'})
+			self.append("result_key", {"key": "rates"})
+			self.append("result_key", {"key": "{to_currency}"})
+			self.append("req_params", {"key": "base", "value": "{from_currency}"})
+			self.append("req_params", {"key": "symbols", "value": "{to_currency}"})
 
 	def validate_parameters(self):
 		if frappe.flags.in_test:
@@ -41,15 +41,11 @@ class CurrencyExchangeSettings(Document):
 		params = {}
 		for row in self.req_params:
 			params[row.key] = row.value.format(
-				transaction_date=nowdate(),
-				to_currency='INR',
-				from_currency='USD'
+				transaction_date=nowdate(), to_currency="INR", from_currency="USD"
 			)
 
 		api_url = self.api_endpoint.format(
-			transaction_date=nowdate(),
-			to_currency='INR',
-			from_currency='USD'
+			transaction_date=nowdate(), to_currency="INR", from_currency="USD"
 		)
 
 		try:
@@ -68,11 +64,9 @@ class CurrencyExchangeSettings(Document):
 
 		try:
 			for key in self.result_key:
-				value = value[str(key.key).format(
-					transaction_date=nowdate(),
-					to_currency='INR',
-					from_currency='USD'
-				)]
+				value = value[
+					str(key.key).format(transaction_date=nowdate(), to_currency="INR", from_currency="USD")
+				]
 		except Exception:
 			frappe.throw("Invalid result key. Response: " + response.text)
 		if not isinstance(value, (int, float)):

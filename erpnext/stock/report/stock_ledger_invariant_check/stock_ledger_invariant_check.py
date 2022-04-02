@@ -40,11 +40,7 @@ def get_stock_ledger_entries(filters):
 	return frappe.get_all(
 		"Stock Ledger Entry",
 		fields=SLE_FIELDS,
-		filters={
-			"item_code": filters.item_code,
-			"warehouse": filters.warehouse,
-			"is_cancelled": 0
-		},
+		filters={"item_code": filters.item_code, "warehouse": filters.warehouse, "is_cancelled": 0},
 		order_by="timestamp(posting_date, posting_time), creation",
 	)
 
@@ -62,7 +58,7 @@ def add_invariant_check_fields(sles):
 			fifo_value += qty * rate
 
 		if sle.actual_qty < 0:
-			sle.consumption_rate = sle.stock_value_difference  / sle.actual_qty
+			sle.consumption_rate = sle.stock_value_difference / sle.actual_qty
 
 		balance_qty += sle.actual_qty
 		balance_stock_value += sle.stock_value_difference
@@ -90,14 +86,16 @@ def add_invariant_check_fields(sles):
 		sle.valuation_diff = (
 			sle.valuation_rate - sle.balance_value_by_qty if sle.balance_value_by_qty else None
 		)
-		sle.diff_value_diff = sle.stock_value_from_diff -  sle.stock_value
+		sle.diff_value_diff = sle.stock_value_from_diff - sle.stock_value
 
 		if idx > 0:
 			sle.fifo_stock_diff = sle.fifo_stock_value - sles[idx - 1].fifo_stock_value
 			sle.fifo_difference_diff = sle.fifo_stock_diff - sle.stock_value_difference
 
 		if sle.batch_no:
-			sle.use_batchwise_valuation = frappe.db.get_value("Batch", sle.batch_no, "use_batchwise_valuation", cache=True)
+			sle.use_batchwise_valuation = frappe.db.get_value(
+				"Batch", sle.batch_no, "use_batchwise_valuation", cache=True
+			)
 
 	return sles
 
@@ -183,7 +181,6 @@ def get_columns():
 			"fieldtype": "Data",
 			"label": "FIFO/LIFO Queue",
 		},
-
 		{
 			"fieldname": "fifo_queue_qty",
 			"fieldtype": "Float",
@@ -244,7 +241,6 @@ def get_columns():
 			"fieldtype": "Float",
 			"label": "(I) Valuation Rate as per FIFO",
 		},
-
 		{
 			"fieldname": "fifo_valuation_diff",
 			"fieldtype": "Float",

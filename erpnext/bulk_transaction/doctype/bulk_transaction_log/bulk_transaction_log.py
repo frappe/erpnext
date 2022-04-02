@@ -15,6 +15,8 @@ class BulkTransactionLog(Document):
 
 @frappe.whitelist()
 def retry_failing_transaction(log_date=None):
+	if not log_date:
+		log_date = str(date.today())
 	btp = frappe.qb.DocType("Bulk Transaction Log Detail")
 	data = (
 		frappe.qb.from_(btp)
@@ -26,14 +28,13 @@ def retry_failing_transaction(log_date=None):
 	).run(as_dict=True)
 
 	if data:
-		if not log_date:
-			log_date = str(date.today())
 		if len(data) > 10:
 			frappe.enqueue(job, queue="long", job_name="bulk_retry", data=data, log_date=log_date)
 		else:
 			job(data, log_date)
 	else:
 		return "No Failed Records"
+
 
 def job(data, log_date):
 	for d in data:
@@ -51,7 +52,7 @@ def job(data, log_date):
 				d.to_doctype,
 				status="Failed",
 				log_date=log_date,
-				restarted=1
+				restarted=1,
 			)
 
 		if not failed:

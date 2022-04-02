@@ -15,7 +15,6 @@ from erpnext.hr.doctype.employee_referral.employee_referral import (
 
 
 class TestEmployeeReferral(unittest.TestCase):
-
 	def setUp(self):
 		frappe.db.sql("DELETE FROM `tabJob Applicant`")
 		frappe.db.sql("DELETE FROM `tabEmployee Referral`")
@@ -23,13 +22,12 @@ class TestEmployeeReferral(unittest.TestCase):
 	def test_workflow_and_status_sync(self):
 		emp_ref = create_employee_referral()
 
-		#Check Initial status
+		# Check Initial status
 		self.assertTrue(emp_ref.status, "Pending")
 
 		job_applicant = create_job_applicant(emp_ref.name)
 
-
-		#Check status sync
+		# Check status sync
 		emp_ref.reload()
 		self.assertTrue(emp_ref.status, "In Process")
 
@@ -46,7 +44,6 @@ class TestEmployeeReferral(unittest.TestCase):
 
 		emp_ref.reload()
 		self.assertTrue(emp_ref.status, "Accepted")
-
 
 		# Check for Referral reference in additional salary
 
