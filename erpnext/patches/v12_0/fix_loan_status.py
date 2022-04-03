@@ -4,11 +4,11 @@ import frappe
 def execute():
 	frappe.reload_doc("hr", "doctype", "salary_slip_loan")
 
-	loans = frappe.db.get_all("Loan", {'docstatus': 1})
+	loans = frappe.db.get_all("Loan", {'docstatus': ['>', 0]})
 	for d in loans:
 		doc = frappe.get_doc("Loan", d.name)
 		doc.update_total_amount_paid(update_modified=False)
-		doc.set_status(update_modified=False)
+		doc.set_status(update=True, update_modified=False)
 
 	salary_slip_loan = frappe.db.sql("""
 		select sl.name as salary_slip_loan, sl.loan, ss.start_date, ss.end_date, ss.employee

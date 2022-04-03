@@ -19,6 +19,9 @@ class Loan(AccountsController):
 		self.calculate_totals()
 		self.set_status()
 
+	def on_cancel(self):
+		self.db_set('status', 'Cancelled')
+
 	def set_missing_fields(self):
 		if not self.company:
 			self.company = erpnext.get_default_company()
@@ -112,24 +115,26 @@ class Loan(AccountsController):
 		self.db_set("total_amount_paid", self.total_amount_paid, update_modified=update_modified)
 
 	def set_status(self, update=False, status=None, update_modified=True):
-		disbursement = self.get_disbursement_entry()
 		disbursement_date = None
 
-		self.status = "Draft"
-
-		if (not disbursement or disbursement.disbursed_amount == 0) and self.docstatus == 1:
+		if self.docstatus == 0:
+			self.status = "Draft"
+		elif self.docstatus == 2:
+			self.status = "Cancelled"
+		else:
 			self.status = "Sanctioned"
-		if disbursement:
-			self.validate_disbursed_amount_and_loan_amount(disbursement.disbursed_amount)
-			if disbursement.disbursed_amount == self.loan_amount and disbursement.disbursed_amount != 0:
-				self.status = "Disbursed"
-				disbursement_date = disbursement.posting_date
 
-		if self.total_amount_paid == self.total_payment:
-			self.status = "Repaid/Closed"
+			disbursement = self.get_disbursement_entry()
+			if disbursement:
+				self.validate_disbursed_amount_and_loan_amount(disbursement.disbursed_amount)
+				if disbursement.disbursed_amount == self.loan_amount and disbursement.disbursed_amount != 0:
+					self.status = "Disbursed"
+					disbursement_date = disbursement.posting_date
+
+			if self.total_amount_paid == self.total_payment:
+				self.status = "Repaid/Closed"
 
 		self.disbursement_date = disbursement_date
-
 		if update:
 			self.db_set({
 				"status": self.status,
