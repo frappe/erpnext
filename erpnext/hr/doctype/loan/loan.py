@@ -9,6 +9,7 @@ from frappe import _
 from frappe.utils import flt, rounded, add_months, nowdate, getdate
 from erpnext.controllers.accounts_controller import AccountsController
 
+
 class Loan(AccountsController):
 	def validate(self):
 		validate_repayment_method(self.repayment_method, self.loan_amount, self.monthly_repayment_amount, self.repayment_periods)
@@ -16,7 +17,7 @@ class Loan(AccountsController):
 		self.make_repayment_schedule()
 		self.set_repayment_period()
 		self.calculate_totals()
-		self.set_status(from_validate=True)
+		self.set_status()
 
 	def set_missing_fields(self):
 		if not self.company:
@@ -102,14 +103,15 @@ class Loan(AccountsController):
 			if schedule.paid:
 				self.total_amount_paid += schedule.total_payment
 
-	def update_total_amount_paid(self):
-		total_amount_paid = 0
+	def update_total_amount_paid(self, update_modified=True):
+		self.total_amount_paid = 0
 		for schedule in self.repayment_schedule:
 			if schedule.paid:
-				total_amount_paid += schedule.total_payment
-		frappe.db.set_value("Loan", self.name, "total_amount_paid", total_amount_paid)
+				self.total_amount_paid += schedule.total_payment
 
-	def set_status(self, from_validate=False):
+		self.db_set("total_amount_paid", self.total_amount_paid, update_modified=update_modified)
+
+	def set_status(self, update=False, status=None, update_modified=True):
 		disbursement = self.get_disbursement_entry()
 		disbursement_date = None
 
@@ -122,20 +124,21 @@ class Loan(AccountsController):
 			if disbursement.disbursed_amount == self.loan_amount and disbursement.disbursed_amount != 0:
 				self.status = "Disbursed"
 				disbursement_date = disbursement.posting_date
-				self.validate_disbursement_date(disbursement_date, self.status)
 
 		if self.total_amount_paid == self.total_payment:
 			self.status = "Repaid/Closed"
 
-		if not from_validate:
-			frappe.db.set_value("Loan", self.name, "status", self.status)
-			if disbursement_date:
-				frappe.db.set_value("Loan", self.name, "disbursement_date", disbursement_date)
+		self.disbursement_date = disbursement_date
 
-	def validate_disbursement_date(self, disbursement_date, loan_status):
-		if loan_status == 'Disbursed' and getdate(disbursement_date) > getdate(frappe.db.get_value("Loan", self.name, "repayment_start_date")):
+		if update:
+			self.db_set({
+				"status": self.status,
+				"disbursement_date": self.disbursement_date
+			}, update_modified=update_modified)
+
+	def validate_disbursement_date(self):
+		if self.disbursement_date and getdate(self.disbursement_date) > getdate(self.repayment_start_date):
 			frappe.throw(_("Disbursement Date cannot be after Loan Repayment Start Date"))
-
 
 	def validate_disbursed_amount_and_loan_amount(self, disbursed_amount):
 		if disbursed_amount > self.loan_amount:
@@ -143,10 +146,11 @@ class Loan(AccountsController):
 
 	def get_disbursement_entry(self):
 		return frappe.db.sql("""
-			select posting_date, ifnull(sum(credit_in_account_currency), 0) as disbursed_amount
+			select posting_date, ifnull(sum(debit-credit), 0) as disbursed_amount
 			from `tabGL Entry`
-			where account = %s and against_voucher_type = 'Loan' and against_voucher = %s
-		""", (self.payment_account, self.name), as_dict=1)[0]
+			where account = %s and against_voucher_type = 'Loan' and against_voucher = %s and debit-credit > 0
+		""", (self.loan_account, self.name), as_dict=1)[0]
+
 
 def validate_repayment_method(repayment_method, loan_amount, monthly_repayment_amount, repayment_periods):
 	if repayment_method == "Repay Over Number of Periods" and not repayment_periods:
@@ -158,6 +162,7 @@ def validate_repayment_method(repayment_method, loan_amount, monthly_repayment_a
 		if monthly_repayment_amount > loan_amount:
 			frappe.throw(_("Monthly Repayment Amount cannot be greater than Loan Amount"))
 
+
 def get_monthly_repayment_amount(repayment_method, loan_amount, rate_of_interest, repayment_periods):
 	if rate_of_interest:
 		monthly_interest_rate = flt(rate_of_interest) / (12 *100)
@@ -168,11 +173,13 @@ def get_monthly_repayment_amount(repayment_method, loan_amount, rate_of_interest
 		monthly_repayment_amount = math.ceil(flt(loan_amount) / repayment_periods)
 	return monthly_repayment_amount
 
+
 @frappe.whitelist()
 def get_loan_application(loan_application):
 	loan = frappe.get_doc("Loan Application", loan_application)
 	if loan:
 		return loan.as_dict()
+
 
 @frappe.whitelist()
 def make_repayment_entry(payment_rows, loan, company, loan_account, applicant_type, applicant, \
@@ -217,15 +224,19 @@ def make_repayment_entry(payment_rows, loan, company, loan_account, applicant_ty
 		"reference_type": "Loan",
 		"reference_name": loan,
 		})
-	account_amt_list.append({
-		"account": interest_income_account,
-		"credit_in_account_currency": interest_amount,
-		"reference_type": "Loan",
-		"reference_name": loan,
-		})
+
+	if interest_amount:
+		account_amt_list.append({
+			"account": interest_income_account,
+			"credit_in_account_currency": interest_amount,
+			"reference_type": "Loan",
+			"reference_name": loan,
+			})
+
 	journal_entry.set("accounts", account_amt_list)
 
 	return journal_entry.as_dict()
+
 
 @frappe.whitelist()
 def make_jv_entry(loan, company, loan_account, applicant_type, applicant, loan_amount,payment_account=None):

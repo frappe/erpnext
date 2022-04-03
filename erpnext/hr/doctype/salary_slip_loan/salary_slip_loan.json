@@ -4,9 +4,11 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "loan_repayment_date",
   "loan",
   "loan_account",
   "interest_income_account",
+  "loan_repayment_detail",
   "column_break_4",
   "principal_amount",
   "interest_amount",
@@ -25,7 +27,6 @@
   {
    "fieldname": "loan_account",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Loan Account",
    "options": "Account",
    "read_only": 1
@@ -33,7 +34,6 @@
   {
    "fieldname": "interest_income_account",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Interest Income Account",
    "options": "Account",
    "read_only": 1
@@ -59,12 +59,28 @@
   {
    "fieldname": "total_payment",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Total Payment",
    "read_only": 1
+  },
+  {
+   "fieldname": "loan_repayment_detail",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Loan Repayment Detail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "loan_repayment_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Loan Repayment Date",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "istable": 1,
- "modified": "2020-03-03 15:42:15.286425",
+ "modified": "2022-04-03 14:16:03.007180",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Slip Loan",

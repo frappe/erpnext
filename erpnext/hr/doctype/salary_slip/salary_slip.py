@@ -959,7 +959,9 @@ class SalarySlip(TransactionBase):
 				'interest_amount': loan.interest_amount,
 				'principal_amount': loan.principal_amount,
 				'loan_account': loan.loan_account,
-				'interest_income_account': loan.interest_income_account
+				'interest_income_account': loan.interest_income_account,
+				'loan_repayment_detail': loan.loan_repayment_detail,
+				'loan_repayment_date': loan.payment_date,
 			})
 
 			self.total_loan_repayment += loan.total_payment
@@ -967,15 +969,21 @@ class SalarySlip(TransactionBase):
 			self.total_principal_amount += loan.principal_amount
 
 	def get_loan_details(self):
-		return frappe.db.sql("""select rps.principal_amount,
-				rps.name as repayment_name, rps.interest_amount, l.name,
-				rps.total_payment, l.loan_account, l.interest_income_account
+		return frappe.db.sql("""
+			select loan.name, rps.name as loan_repayment_detail,
+				rps.principal_amount, rps.interest_amount, rps.total_payment,
+				rps.payment_date,
+				loan.loan_account, loan.interest_income_account
 			from
-				`tabRepayment Schedule` as rps, `tabLoan` as l
+				`tabRepayment Schedule` as rps, `tabLoan` as loan
 			where
-				l.name = rps.parent and rps.payment_date between %s and %s and
-				l.repay_from_salary = 1 and l.docstatus = 1 and l.applicant = %s""",
-			(self.start_date, self.end_date, self.employee), as_dict=True) or []
+				loan.name = rps.parent
+				and loan.docstatus = 1
+				and rps.payment_date between %s and %s
+				and rps.paid = 0
+				and loan.repay_from_salary = 1
+				and loan.applicant_type = 'Employee' and loan.applicant = %s
+		""", (self.start_date, self.end_date, self.employee), as_dict=True) or []
 
 	def update_salary_slip_in_additional_salary(self):
 		salary_slip = self.name if self.docstatus==1 else None
@@ -1020,15 +1028,15 @@ class SalarySlip(TransactionBase):
 				timesheet.save()
 
 	def update_loans(self):
-		for loan in self.get_loan_details():
-			doc = frappe.get_doc("Loan", loan.name)
+		for loan in self.loans:
+			# setting repayment schedule and updating total amount to pay
+			is_paid = 1 if self.docstatus == 1 else 0
+			if loan.loan_repayment_detail:
+				frappe.db.set_value("Repayment Schedule", loan.loan_repayment_detail, "paid", is_paid)
 
-			#setting repayment schedule and updating total amount to pay
-			repayment_status = 1 if doc.docstatus == 1 else 0
-			frappe.db.set_value("Repayment Schedule", loan.repayment_name, "paid", repayment_status)
-			doc.reload()
+			doc = frappe.get_doc("Loan", loan.loan)
 			doc.update_total_amount_paid()
-			doc.set_status()
+			doc.set_status(update=True)
 
 	def set_status(self, status=None):
 		'''Get and update status'''

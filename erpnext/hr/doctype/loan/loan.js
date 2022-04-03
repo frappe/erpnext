@@ -39,12 +39,13 @@ frappe.ui.form.on('Loan', {
 	},
 
 	refresh: function (frm) {
+		erpnext.hide_company();
 		if (frm.doc.docstatus == 1) {
 			if (frm.doc.status == "Sanctioned") {
 				frm.add_custom_button(__('Create Disbursement Entry'), function() {
 					frm.trigger("make_jv");
 				}).addClass("btn-primary");
-			} else if (frm.doc.status == "Disbursed" && frm.doc.repayment_start_date && (frm.doc.applicant_type == 'Member' || frm.doc.repay_from_salary == 0)) {
+			} else if (frm.doc.status == "Disbursed" && frm.doc.repayment_start_date) {
 				frm.add_custom_button(__('Create Repayment Entry'), function() {
 					frm.trigger("make_repayment_entry");
 				}).addClass("btn-primary");
@@ -77,7 +78,7 @@ frappe.ui.form.on('Loan', {
 		if(repayment_schedule.length >= 1){
 			frm.repayment_data = [];
 			frm.show_dialog = 1;
-			let title = "";
+			let title = "Select Repayment Schedule";
 			let fields = [
 			{fieldtype:'Section Break', label: __('Repayment Schedule')},
 			{fieldname: 'payments', fieldtype: 'Table',

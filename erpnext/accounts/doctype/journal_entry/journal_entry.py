@@ -745,14 +745,17 @@ class JournalEntry(AccountsController):
 	def update_loan(self):
 		if self.paid_loan:
 			paid_loan = json.loads(self.paid_loan)
-			value = 1 if self.docstatus < 2 else 0
+			is_paid = 1 if self.docstatus < 2 else 0
 			for name in paid_loan:
-				frappe.db.set_value("Repayment Schedule", name, "paid", value)
+				frappe.db.set_value("Repayment Schedule", name, "paid", is_paid)
+
 		for d in self.accounts:
-			if d.reference_type=="Loan" and flt(d.debit) > 0:
+			if d.reference_type == "Loan":
 				doc = frappe.get_doc("Loan", d.reference_name)
 				doc.update_total_amount_paid()
-				doc.set_status()
+				doc.set_status(update=True)
+				doc.validate_disbursement_date()
+				doc.notify_update()
 
 	def validate_credit_debit_note(self):
 		if self.stock_entry:

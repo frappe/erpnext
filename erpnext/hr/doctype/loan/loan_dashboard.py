@@ -7,7 +7,7 @@ def get_data():
 		'non_standard_fieldnames': {
 			'Journal Entry': 'reference_name',
 			'Salary Slip': 'employee'
-			},
+		},
 		'transactions': [
 			{
 				'label': _('Applicant'),
