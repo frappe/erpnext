@@ -300,6 +300,7 @@
   {
    "fieldname": "customer",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Customer (User)",
    "no_copy": 1,
    "options": "Customer"
@@ -496,7 +497,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-01-24 14:46:47.996345",
+ "modified": "2022-04-03 21:49:55.984783",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Receipt",
