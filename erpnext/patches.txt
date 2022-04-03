@@ -729,4 +729,4 @@ erpnext.patches.v12_0.set_is_stock_item_in_line_item
 erpnext.patches.v12_0.rename_transaction_line_item_reference_fieldname
 execute:frappe.delete_doc_if_exists("Report", "Vehicle Stock")
 erpnext.patches.v12_0.update_material_request_status
-erpnext.patches.v12_0.fix_loan_status #3
+erpnext.patches.v12_0.fix_loan_status

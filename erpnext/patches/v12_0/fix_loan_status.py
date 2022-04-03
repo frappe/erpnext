@@ -2,6 +2,8 @@ import frappe
 
 
 def execute():
+	frappe.reload_doc("hr", "doctype", "salary_slip_loan")
+
 	loans = frappe.db.get_all("Loan", {'docstatus': 1})
 	for d in loans:
 		doc = frappe.get_doc("Loan", d.name)
