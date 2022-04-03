@@ -9,7 +9,7 @@ from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.shift_assignment.shift_assignment import OverlappingShiftError
-from erpnext.hr.doctype.shift_type.test_shift_type import setup_shift_type
+from erpnext.hr.doctype.shift_type.test_shift_type import make_shift_assignment, setup_shift_type
 
 test_dependencies = ["Shift Type"]
 
@@ -154,19 +154,3 @@ class TestShiftAssignment(FrappeTestCase):
 		shift_type = setup_shift_type(shift_type="Shift 2", start_time="13:00:00", end_time="15:00:00")
 		date = getdate()
 		make_shift_assignment(shift_type.name, employee, date)
-
-
-def make_shift_assignment(shift_type, employee, start_date, end_date=None):
-	shift_assignment = frappe.get_doc(
-		{
-			"doctype": "Shift Assignment",
-			"shift_type": shift_type,
-			"company": "_Test Company",
-			"employee": employee,
-			"start_date": start_date,
-			"end_date": end_date,
-		}
-	).insert()
-	shift_assignment.submit()
-
-	return shift_assignment

@@ -23,8 +23,7 @@ from erpnext.hr.doctype.employee_checkin.employee_checkin import (
 	mark_attendance_and_link_log,
 )
 from erpnext.hr.doctype.leave_application.test_leave_application import get_first_sunday
-from erpnext.hr.doctype.shift_assignment.test_shift_assignment import make_shift_assignment
-from erpnext.hr.doctype.shift_type.test_shift_type import setup_shift_type
+from erpnext.hr.doctype.shift_type.test_shift_type import make_shift_assignment, setup_shift_type
 from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_holiday_list
 
 
@@ -183,7 +182,9 @@ class TestEmployeeCheckin(FrappeTestCase):
 
 	def test_fetch_shift_spanning_over_two_days(self):
 		employee = make_employee("test_employee_checkin@example.com", company="_Test Company")
-		shift_type = setup_shift_type(start_time="23:00:00", end_time="01:00:00")
+		shift_type = setup_shift_type(
+			shift_type="Midnight Shift", start_time="23:00:00", end_time="01:00:00"
+		)
 		date = getdate()
 		next_day = add_days(date, 1)
 		make_shift_assignment(shift_type.name, employee, date)
