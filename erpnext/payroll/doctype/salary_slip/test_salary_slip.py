@@ -1290,7 +1290,16 @@ def create_additional_salary(employee, payroll_period, amount):
 	return salary_date
 
 
-def make_leave_application(employee, from_date, to_date, leave_type, company=None, submit=True):
+def make_leave_application(
+	employee,
+	from_date,
+	to_date,
+	leave_type,
+	company=None,
+	half_day=False,
+	half_day_date=None,
+	submit=True,
+):
 	leave_application = frappe.get_doc(
 		dict(
 			doctype="Leave Application",
@@ -1298,6 +1307,8 @@ def make_leave_application(employee, from_date, to_date, leave_type, company=Non
 			leave_type=leave_type,
 			from_date=from_date,
 			to_date=to_date,
+			half_day=half_day,
+			half_day_date=half_day_date,
 			company=company or erpnext.get_default_company() or "_Test Company",
 			status="Approved",
 			leave_approver="test@example.com",
