@@ -98,15 +98,15 @@ class ShiftType(Document):
 			early_exit = True
 
 		if (
-			self.working_hours_threshold_for_absent
-			and total_working_hours < self.working_hours_threshold_for_absent
-		):
-			return "Absent", total_working_hours, late_entry, early_exit, in_time, out_time
-		if (
 			self.working_hours_threshold_for_half_day
 			and total_working_hours < self.working_hours_threshold_for_half_day
 		):
 			return "Half Day", total_working_hours, late_entry, early_exit, in_time, out_time
+		if (
+			self.working_hours_threshold_for_absent
+			and total_working_hours < self.working_hours_threshold_for_absent
+		):
+			return "Absent", total_working_hours, late_entry, early_exit, in_time, out_time
 		return "Present", total_working_hours, late_entry, early_exit, in_time, out_time
 
 	def mark_absent_for_dates_with_no_attendance(self, employee):
@@ -116,7 +116,7 @@ class ShiftType(Document):
 		start_date, end_date = self.get_start_and_end_dates(employee)
 
 		# no shift assignment found, no need to process absent attendance records
-		if end_date is None:
+		if start_date is None:
 			return
 
 		holiday_list_name = self.holiday_list
@@ -137,6 +137,10 @@ class ShiftType(Document):
 				mark_attendance(employee, date, "Absent", self.name)
 
 	def get_start_and_end_dates(self, employee):
+		"""Returns start and end dates for checking attendance and marking absent
+		return: start date = max of `process_attendance_after` and DOJ
+		return: end date = min of shift before `last_sync_of_checkin` and Relieving Date
+		"""
 		date_of_joining, relieving_date, employee_creation = frappe.db.get_value(
 			"Employee", employee, ["date_of_joining", "relieving_date", "creation"]
 		)
@@ -152,6 +156,8 @@ class ShiftType(Document):
 			shift_details.actual_start if shift_details else get_datetime(self.last_sync_of_checkin)
 		)
 
+		# check if shift is found for 1 day before the last sync of checkin
+		# absentees are auto-marked 1 day after the shift to wait for any manual attendance records
 		prev_shift = get_employee_shift(employee, last_shift_time - timedelta(days=1), True, "reverse")
 		if prev_shift:
 			end_date = (
@@ -159,7 +165,9 @@ class ShiftType(Document):
 				if relieving_date
 				else prev_shift.start_datetime.date()
 			)
-
+		else:
+			# no shift found
+			return None, None
 		return start_date, end_date
 
 	def get_assigned_employee(self, from_date=None, consider_default_shift=False):

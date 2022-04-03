@@ -230,7 +230,7 @@ def calculate_working_hours(logs, check_in_out_type, working_hours_calc_type):
 
 
 def time_diff_in_hours(start, end):
-	return round((end - start).total_seconds() / 3600, 1)
+	return round(float((end - start).total_seconds()) / 3600, 2)
 
 
 def find_index_in_dict(dict_list, key, value):
