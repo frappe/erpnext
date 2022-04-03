@@ -103,7 +103,7 @@ class TestShiftAssignment(FrappeTestCase):
 		# shift with end date
 		make_shift_assignment(shift_type.name, employee, date, add_days(date, 30))
 
-		# shift setup for 13-15
+		# shift setup for 11-15
 		shift_type = setup_shift_type(shift_type="Shift 2", start_time="11:00:00", end_time="15:00:00")
 		date = getdate()
 
@@ -127,7 +127,7 @@ class TestShiftAssignment(FrappeTestCase):
 		date = getdate()
 		make_shift_assignment(shift_type.name, employee, date)
 
-		# shift setup for 13-15
+		# shift setup for 11-15
 		shift_type = setup_shift_type(shift_type="Shift 2", start_time="11:00:00", end_time="15:00:00")
 		date = getdate()
 

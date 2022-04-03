@@ -32,7 +32,7 @@ class ShiftAssignment(Document):
 		overlapping_dates = self.get_overlapping_dates()
 		if len(overlapping_dates):
 			# if dates are overlapping, check if timings are overlapping, else allow
-			overlapping_timings = self.has_overlapping_timings(overlapping_dates[0].shift_type)
+			overlapping_timings = has_overlapping_timings(self.shift_type, overlapping_dates[0].shift_type)
 			if overlapping_timings:
 				self.throw_overlap_error(overlapping_dates[0])
 
@@ -43,9 +43,7 @@ class ShiftAssignment(Document):
 		shift = frappe.qb.DocType("Shift Assignment")
 		query = (
 			frappe.qb.from_(shift)
-			.select(
-				shift.name, shift.shift_type, shift.start_date, shift.end_date, shift.docstatus, shift.status
-			)
+			.select(shift.name, shift.shift_type, shift.docstatus, shift.status)
 			.where(
 				(shift.employee == self.employee)
 				& (shift.docstatus == 1)
@@ -81,53 +79,44 @@ class ShiftAssignment(Document):
 
 		return query.run(as_dict=True)
 
-	def has_overlapping_timings(self, overlapping_shift):
-		curr_shift = frappe.db.get_value(
-			"Shift Type", self.shift_type, ["start_time", "end_time"], as_dict=True
-		)
-		overlapping_shift = frappe.db.get_value(
-			"Shift Type", overlapping_shift, ["start_time", "end_time"], as_dict=True
-		)
-
-		if (
-			(
-				curr_shift.start_time > overlapping_shift.start_time
-				and curr_shift.start_time < overlapping_shift.end_time
-			)
-			or (
-				curr_shift.end_time > overlapping_shift.start_time
-				and curr_shift.end_time < overlapping_shift.end_time
-			)
-			or (
-				curr_shift.start_time <= overlapping_shift.start_time
-				and curr_shift.end_time >= overlapping_shift.end_time
-			)
-		):
-			return True
-		return False
-
 	def throw_overlap_error(self, shift_details):
 		shift_details = frappe._dict(shift_details)
-		msg = None
 		if shift_details.docstatus == 1 and shift_details.status == "Active":
-			if shift_details.start_date and shift_details.end_date:
-				msg = _("Employee {0} already has an active Shift {1}: {2} from {3} to {4}").format(
-					frappe.bold(self.employee),
-					frappe.bold(self.shift_type),
-					get_link_to_form("Shift Assignment", shift_details.name),
-					getdate(self.start_date).strftime("%d-%m-%Y"),
-					getdate(self.end_date).strftime("%d-%m-%Y"),
-				)
-			else:
-				msg = _("Employee {0} already has an active Shift {1}: {2} from {3}").format(
-					frappe.bold(self.employee),
-					frappe.bold(self.shift_type),
-					get_link_to_form("Shift Assignment", shift_details.name),
-					getdate(self.start_date).strftime("%d-%m-%Y"),
-				)
-
-		if msg:
+			msg = _(
+				"Employee {0} already has an active Shift {1}: {2} that overlaps within this period."
+			).format(
+				frappe.bold(self.employee),
+				frappe.bold(shift_details.shift_type),
+				get_link_to_form("Shift Assignment", shift_details.name),
+			)
 			frappe.throw(msg, title=_("Overlapping Shifts"), exc=OverlappingShiftError)
+
+
+def has_overlapping_timings(shift_1: str, shift_2: str) -> bool:
+	"""
+	Accepts two shift types and checks whether their timings are overlapping
+	"""
+	curr_shift = frappe.db.get_value("Shift Type", shift_1, ["start_time", "end_time"], as_dict=True)
+	overlapping_shift = frappe.db.get_value(
+		"Shift Type", shift_2, ["start_time", "end_time"], as_dict=True
+	)
+
+	if (
+		(
+			curr_shift.start_time > overlapping_shift.start_time
+			and curr_shift.start_time < overlapping_shift.end_time
+		)
+		or (
+			curr_shift.end_time > overlapping_shift.start_time
+			and curr_shift.end_time < overlapping_shift.end_time
+		)
+		or (
+			curr_shift.start_time <= overlapping_shift.start_time
+			and curr_shift.end_time >= overlapping_shift.end_time
+		)
+	):
+		return True
+	return False
 
 
 @frappe.whitelist()
