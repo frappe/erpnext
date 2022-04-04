@@ -7,7 +7,10 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, get_datetime
 
-from erpnext.hr.doctype.attendance.attendance import get_duplicate_attendance_record
+from erpnext.hr.doctype.attendance.attendance import (
+	get_duplicate_attendance_record,
+	get_overlapping_shift_attendance,
+)
 from erpnext.hr.doctype.shift_assignment.shift_assignment import (
 	get_actual_start_end_datetime_of_shift,
 )
@@ -137,7 +140,10 @@ def mark_attendance_and_link_log(
 		return None
 	elif attendance_status in ("Present", "Absent", "Half Day"):
 		employee_doc = frappe.get_doc("Employee", employee)
-		if not get_duplicate_attendance_record(employee, attendance_date, shift):
+		duplicate = get_duplicate_attendance_record(employee, attendance_date, shift)
+		overlapping = get_overlapping_shift_attendance(employee, attendance_date, shift)
+
+		if not duplicate and not overlapping:
 			doc_dict = {
 				"doctype": "Attendance",
 				"employee": employee,
