@@ -375,12 +375,12 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 
 def update_args_for_pricing_rule(args):
 	if not (args.item_group and args.brand):
-		try:
-			args.item_group, args.brand = frappe.get_cached_value(
-				"Item", args.item_code, ["item_group", "brand"]
-			)
-		except frappe.DoesNotExistError:
+		item = frappe.get_cached_value("Item", args.item_code, ("item_group", "brand"))
+		if not item:
 			return
+
+		args.item_group, args.brand = item
+
 		if not args.item_group:
 			frappe.throw(_("Item Group not mentioned in item master for item {0}").format(args.item_code))
 
