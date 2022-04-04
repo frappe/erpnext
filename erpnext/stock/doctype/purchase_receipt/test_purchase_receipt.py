@@ -1346,6 +1346,31 @@ class TestPurchaseReceipt(FrappeTestCase):
 			if gle.account == account:
 				self.assertEqual(gle.credit, 50)
 
+	def test_create_and_auto_link_purchase_order(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_order
+
+		frappe.db.set_value("Buying Settings", "Buying Settings", "po_required", "No")
+		pr = make_purchase_receipt(item_code="_Test Item", qty=3, do_not_submit=True)
+		po = make_purchase_order(pr.name)
+		po.save()
+		po_detail = po.items[0].name
+		self.assertEqual(po.items[0].item_code, "_Test Item")
+		self.assertEqual(po.items[0].qty, 3)
+		po.submit()
+		self.assertEqual(po.status, "To Receive and Bill")
+		pr.reload()
+		# Checking po is linked properly and status is updated.
+		for row in pr.items:
+			self.assertEqual(row.purchase_order_item, po_detail)
+			self.assertEqual(row.purchase_order, po.name)
+		pr.submit()
+		po.reload()
+		self.assertEqual(po.status, "To Bill")
+		self.assertEqual(po.per_billed, 0)
+		self.assertEqual(po.per_received, 100)
+
+		frappe.db.rollback()
+
 
 def get_sl_entries(voucher_type, voucher_no):
 	return frappe.db.sql(

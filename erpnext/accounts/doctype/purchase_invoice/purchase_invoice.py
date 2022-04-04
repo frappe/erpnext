@@ -396,19 +396,29 @@ class PurchaseInvoice(BuyingController):
 			for d in self.get("items"):
 				if not d.purchase_order:
 					from erpnext.accounts.utils import check_permissions_so_po_required
-					perms = check_permissions_so_po_required('Purchase Order', 'Buying Settings')
-					module_settings = get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings') \
-						if perms['perm_setting'] else frappe.bold('Buying Settings')
+
+					perms = check_permissions_so_po_required("Purchase Order", "Buying Settings")
+					module_settings = (
+						get_link_to_form("Buying Settings", "Buying Settings", "Buying Settings")
+						if perms["perm_setting"]
+						else frappe.bold("Buying Settings")
+					)
 					msg = _("Purchase Order Required for item {}").format(frappe.bold(d.item_code))
 					msg += "<br><br>"
 					msg += _("To submit the invoice without purchase order please set {0} as {1} in {2}").format(
-						frappe.bold(_('Purchase Order Required')), frappe.bold('No'), module_settings)
+						frappe.bold(_("Purchase Order Required")), frappe.bold("No"), module_settings
+					)
 
-					frappe.msgprint(msg, title=_("Purchase Order Required"), primary_action={
-						'label': _('Create Purchase Order'),
-						'client_action': 'erpnext.route_to_new_purchase_order',
-						'args': {"supplier": self.supplier, "perm": perms['perm_so_po']}
-					}, raise_exception=1)
+					frappe.msgprint(
+						msg,
+						title=_("Purchase Order Required"),
+						primary_action={
+							"label": _("Create Purchase Order"),
+							"client_action": "erpnext.route_to_new_purchase_order",
+							"args": {"supplier": self.supplier, "perm": perms["perm_so_po"]},
+						},
+						raise_exception=1,
+					)
 
 	def pr_required(self):
 		stock_items = self.get_stock_items()
@@ -1786,18 +1796,22 @@ def make_purchase_receipt(source_name, target_doc=None):
 
 	return doc
 
+
 @frappe.whitelist()
-def make_purchase_order(source_name, target_doc = None):
+def make_purchase_order(source_name, target_doc=None):
 	def update_reference(source, target, source_parent):
 		target.purchase_invoice_reference = source.name
+		target.schedule_date = source.posting_date
 
-	return get_mapped_doc("Purchase Invoice", source_name, {
-		"Purchase Invoice": {
-			"doctype": "Purchase Order",
-			"postprocess": update_reference
+	return get_mapped_doc(
+		"Purchase Invoice",
+		source_name,
+		{
+			"Purchase Invoice": {"doctype": "Purchase Order", "postprocess": update_reference},
+			"Purchase Invoice Item": {
+				"doctype": "Purchase Order Item",
+				"condition": lambda row: not row.po_detail,
+			},
 		},
-		"Purchase Invoice Item": {
-			"doctype": "Purchase Order Item",
-			"condition": lambda row: not row.po_detail
-		}
-	}, target_doc)
+		target_doc,
+	)

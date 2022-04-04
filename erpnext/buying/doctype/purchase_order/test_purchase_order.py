@@ -1202,6 +1202,21 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		automatically_fetch_payment_terms(enable=0)
 
+	def test_po_required(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.stock.doctype.item.test_item import create_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		# Testing po_required for purchase receipt/invoice.
+		frappe.db.set_value("Buying Settings", "Buying Settings", "po_required", "Yes")
+		create_item("_Test PO Required Item")
+		pr = make_purchase_receipt(item_code="_Test PO Required Item", do_not_save=True)
+		self.assertRaises(frappe.ValidationError, pr.save)
+
+		pi = make_purchase_invoice(item_code="_Test PO Required Item", do_not_save=True)
+		self.assertRaises(frappe.ValidationError, pi.save)
+		frappe.db.rollback()
+
 
 def make_pr_against_po(po, received_qty=0):
 	pr = make_purchase_receipt(po)

@@ -1525,6 +1525,31 @@ class TestPurchaseInvoice(unittest.TestCase):
 		company.enable_provisional_accounting_for_non_stock_items = 0
 		company.save()
 
+	def test_create_and_auto_link_purchase_order(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_purchase_order
+
+		frappe.db.set_value("Buying Settings", "Buying Settings", "po_required", "No")
+		pi = make_purchase_invoice(item_code="_Test Item", update_stock=True, qty=3, do_not_submit=True)
+		po = make_purchase_order(pi.name)
+		po.save()
+		po_detail = po.items[0].name
+		self.assertEqual(po.items[0].item_code, "_Test Item")
+		self.assertEqual(po.items[0].qty, 3)
+		po.submit()
+		self.assertEqual(po.status, "To Receive and Bill")
+		pi.reload()
+		# Checking po is linked properly and status is updated.
+		for row in pi.items:
+			self.assertEqual(row.po_detail, po_detail)
+			self.assertEqual(row.purchase_order, po.name)
+		pi.submit()
+		po.reload()
+		self.assertEqual(po.status, "Completed")
+		self.assertEqual(po.per_billed, 100)
+		self.assertEqual(po.per_received, 100)
+
+		frappe.db.rollback()
+
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 	gl_entries = frappe.db.sql(
