@@ -221,7 +221,6 @@ class TestMonthlyAttendanceSheet(FrappeTestCase):
 		# execute report without attendance record
 		now = now_datetime()
 		previous_month = now.month - 1
-		previous_month_first = now.replace(day=1).replace(month=previous_month).date()
 
 		company = frappe.db.get_value("Employee", self.employee, "company")
 		filters = frappe._dict(
