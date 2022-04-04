@@ -94,13 +94,6 @@ class CallLog(Document):
 			for email in emails:
 				frappe.publish_realtime("show_call_popup", self, user=email)
 
-def get_employee_name(emp):
-	employee_name = ''
-	for name in ['first_name', 'middle_name', 'last_name']:
-		if emp.get(name):
-			employee_name += (' ' if employee_name else '') + emp.get(name)
-	return employee_name
-
 
 @frappe.whitelist()
 def add_call_summary_and_call_type(call_log, summary, call_type):

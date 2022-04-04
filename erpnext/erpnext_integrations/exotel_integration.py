@@ -68,16 +68,9 @@ def update_call_log(call_payload, status="Ringing", call_log=None):
 
 
 def get_call_log(call_payload):
-	call_log = frappe.get_all(
-		"Call Log",
-		{
-			"id": call_payload.get("CallSid"),
-		},
-		limit=1,
-	)
-
-	if call_log:
-		return frappe.get_doc("Call Log", call_log[0].name)
+	call_log_id = call_payload.get("CallSid")
+	if frappe.db.exists("Call Log", call_log_id):
+		return frappe.get_doc("Call Log", call_log_id)
 
 
 def create_call_log(call_payload):
