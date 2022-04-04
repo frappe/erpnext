@@ -156,7 +156,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			}
 		}
 
-		if(doc.docstatus==0 && !doc.is_return) {
+		if(doc.docstatus==0 && !doc.is_return && !doc.__islocal) {
 			doc.items.some((row) => {
 				if (!row.so_detail) {
 					this.frm.add_custom_button(__('Sales Order'),

@@ -539,7 +539,7 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	add_custom_buttons: function(frm) {
-		if(frm.doc.docstatus==0) {
+		if(frm.doc.docstatus==0 && !frm.doc.__islocal) {
 			frm.doc.items.some((row) => {
 				if(!row.po_detail) {
 					frm.add_custom_button(__('Purchase Order'), () => {

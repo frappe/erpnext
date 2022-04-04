@@ -249,7 +249,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 						frm: me.frm
 					}) }, __('Create'));
 			}
-			if(doc.docstatus==0 && !doc.is_return) {
+			if(doc.docstatus==0 && !doc.is_return && !doc.__islocal) {
 				doc.items.some((row) => {
 					if (!row.so_detail) {
 						this.frm.add_custom_button(__('Sales Order'),
