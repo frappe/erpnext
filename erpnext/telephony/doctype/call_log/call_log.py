@@ -35,10 +35,10 @@ class CallLog(Document):
 		# Add Employee Name
 		if self.is_incoming_call():
 			# Taking the last 10 digits of the number
-			employee = get_employees_with_number(self.get("to"))
-
-			self.call_received_by = employee[0].get("name")
-			self.employee_user_id = employee[0].get("user_id")
+			employees = get_employees_with_number(self.get("to"))
+			if employees:
+				self.call_received_by = employees[0].get("name")
+				self.employee_user_id = employees[0].get("user_id")
 
 	def after_insert(self):
 		self.trigger_call_popup()
