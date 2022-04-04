@@ -246,8 +246,7 @@ def notify_errors(exceptions_list):
 		_("Dear System Manager,")
 		+ "<br>"
 		+ _(
-			"An error occured for certain Items while creating Material Requests based on Re-order level. \
-		Please rectify these issues :"
+			"An error occured for certain Items while creating Material Requests based on Re-order level. Please rectify these issues :"
 		)
 		+ "<br>"
 	)

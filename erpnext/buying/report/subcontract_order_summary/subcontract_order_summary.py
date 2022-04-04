@@ -45,7 +45,7 @@ def get_subcontracted_orders(report_filters):
 def get_filters(report_filters):
 	filters = [
 		["Purchase Order", "docstatus", "=", 1],
-		["Purchase Order", "is_subcontracted", "=", "Yes"],
+		["Purchase Order", "is_subcontracted", "=", 1],
 		[
 			"Purchase Order",
 			"transaction_date",

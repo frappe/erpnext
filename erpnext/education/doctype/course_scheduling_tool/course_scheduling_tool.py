@@ -41,10 +41,8 @@ class CourseSchedulingTool(Document):
 			if self.day == calendar.day_name[getdate(date).weekday()]:
 				course_schedule = self.make_course_schedule(date)
 				try:
-					print("pass")
 					course_schedule.save()
 				except OverlapError:
-					print("fail")
 					course_schedules_errors.append(date)
 				else:
 					course_schedules.append(course_schedule)
