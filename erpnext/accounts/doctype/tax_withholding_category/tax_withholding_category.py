@@ -28,11 +28,11 @@ class TaxWithholdingCategory(Document):
 			if (
 					d.cumulative_threshold and d.single_threshold and d.cumulative_threshold < d.single_threshold
 			):
-					frappe.throw(
-						_("Row #{0}: Cumulative threshold cannot be less than Single Transaction threshold").format(
-							d.idx
-						)
+				frappe.throw(
+					_("Row #{0}: Cumulative threshold cannot be less than Single Transaction threshold").format(
+						d.idx
 					)
+				)
 
 def get_party_details(inv):
 	party_type, party = "", ""
