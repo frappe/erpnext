@@ -403,17 +403,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var sms_man = new erpnext.SMSManager(this.frm.doc);
 	}
 
-	barcode(doc, cdt, cdn) {
-		const d = locals[cdt][cdn];
-		if (!d.barcode) {
-			// barcode cleared, remove item
-			d.item_code = "";
-		}
-		// flag required for circular triggers
-		d._triggerd_from_barcode = true;
-		this.item_code(doc, cdt, cdn);
-	}
-
 	item_code(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
@@ -431,9 +420,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.doc.doctype === 'Delivery Note') {
 			show_batch_dialog = 1;
 		}
-		if (!item._triggerd_from_barcode) {
-			item.barcode = null;
-		}
+		item.barcode = null;
 
 
 		if(item.item_code || item.barcode || item.serial_no) {
@@ -538,6 +525,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 										$.each(r.message, function(k, v) {
 											if(!d[k]) d[k] = v;
 										});
+
+										if (d.__disable_batch_serial_selector) {
+											// reset for future use.
+											d.__disable_batch_serial_selector = false;
+											return;
+										}
 
 										if (d.has_batch_no && d.has_serial_no) {
 											d.batch_no = undefined;
