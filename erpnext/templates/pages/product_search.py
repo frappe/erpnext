@@ -88,6 +88,8 @@ def product_search(query, limit=10, fuzzy_search=True):
 	red = frappe.cache()
 	query = clean_up_query(query)
 
+	# TODO: Check perf/correctness with Suggestions & Query vs only Query
+	# TODO: Use Levenshtein Distance in Query (max=3)
 	ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=red)
 	client = Client(make_key(WEBSITE_ITEM_INDEX), conn=red)
 	suggestions = ac.get_suggestions(
