@@ -350,15 +350,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Vehicle Gate Pass",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "sales_invoice",
    "fieldtype": "Link",
    "label": "Sales Invoice",
