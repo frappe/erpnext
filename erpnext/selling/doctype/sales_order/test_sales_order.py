@@ -1615,6 +1615,21 @@ class TestSalesOrder(FrappeTestCase):
 		sales_order.save()
 		self.assertEqual(sales_order.taxes[0].tax_amount, 0)
 
+	def test_so_required(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.item.test_item import create_item
+
+		# Testing so_required for devlivery note and sales invoice.
+		frappe.db.set_value("Selling Settings", "Selling Settings", "so_required", "Yes")
+		create_item("_Test SO Required Item")
+		dn = create_delivery_note(item_code="_Test So Required Item", do_not_save=True)
+		self.assertRaises(frappe.ValidationError, dn.save)
+
+		si = create_sales_invoice(item_code="_Test SO Required Item", do_not_save=True)
+		self.assertRaises(frappe.ValidationError, si.save)
+		frappe.db.rollback()
+
 
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")

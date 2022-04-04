@@ -1016,6 +1016,31 @@ class TestDeliveryNote(FrappeTestCase):
 
 		automatically_fetch_payment_terms(enable=0)
 
+	def test_create_and_auto_link_sales_order(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_order_dn
+
+		frappe.db.set_value("Selling Settings", "Selling Settings", "so_required", "No")
+		dn = create_delivery_note(item_code="_Test Item", qty=3, do_not_submit=True)
+		so = make_sales_order_dn(dn.name)
+		so.save()
+		so_detail = so.items[0].name
+		self.assertEqual(so.items[0].item_code, "_Test Item")
+		self.assertEqual(so.items[0].qty, 3)
+		so.submit()
+		self.assertEqual(so.status, "To Deliver and Bill")
+		dn.reload()
+		# Checking SO is linked properly and so_status is updated.
+		for row in dn.items:
+			self.assertEqual(row.so_detail, so_detail)
+			self.assertEqual(row.against_sales_order, so.name)
+		dn.submit()
+		so.reload()
+		self.assertEqual(so.status, "To Bill")
+		self.assertEqual(so.per_billed, 0)
+		self.assertEqual(so.per_delivered, 100)
+
+		frappe.db.rollback()
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

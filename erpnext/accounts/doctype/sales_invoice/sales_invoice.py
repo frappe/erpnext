@@ -751,21 +751,31 @@ class SalesInvoice(SellingController):
 				if frappe.get_value("Customer", self.customer, value[0]):
 					continue
 
-				for d in self.get('items'):
-					if (d.item_code and not d.get(key.lower().replace(' ', '_')) and not self.get(value[1])):
+				for d in self.get("items"):
+					if d.item_code and not d.get(key.lower().replace(" ", "_")) and not self.get(value[1]):
 						from erpnext.accounts.utils import check_permissions_so_po_required
-						perms = check_permissions_so_po_required('Sales Order', 'Selling Settings')
-						module_settings = get_link_to_form('Selling Settings', 'Selling Settings', 'Selling Settings') \
-							if perms['perm_setting'] else frappe.bold('Selling Settings')
+
+						perms = check_permissions_so_po_required("Sales Order", "Selling Settings")
+						module_settings = (
+							get_link_to_form("Selling Settings", "Selling Settings", "Selling Settings")
+							if perms["perm_setting"]
+							else frappe.bold("Selling Settings")
+						)
 						msg = _("Sales Order Required for item {}").format(frappe.bold(d.item_code))
 						msg += "<br><br>"
 						msg += _("To submit the invoice without sales order please set {0} as {1} in {2}").format(
-							frappe.bold(_('Sales Order Required')), frappe.bold('No'), module_settings)
-						frappe.msgprint(msg, title=_('Sales Order Required'), primary_action={
-							'label': _('Create Sales Order'),
-							'client_action': 'erpnext.route_to_new_sales_order',
-							'args': {"customer": self.customer, "perm": perms['perm_so_po']}
-						}, raise_exception=1)
+							frappe.bold(_("Sales Order Required")), frappe.bold("No"), module_settings
+						)
+						frappe.msgprint(
+							msg,
+							title=_("Sales Order Required"),
+							primary_action={
+								"label": _("Create Sales Order"),
+								"client_action": "erpnext.route_to_new_sales_order",
+								"args": {"customer": self.customer, "perm": perms["perm_so_po"]},
+							},
+							raise_exception=1,
+						)
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
@@ -2587,18 +2597,22 @@ def check_if_return_invoice_linked_with_payment_entry(self):
 			message += _("to unallocate the amount of this Return Invoice before cancelling it.")
 			frappe.throw(message)
 
+
 @frappe.whitelist()
-def make_sales_order(source_name, target_doc = None):
+def make_sales_order(source_name, target_doc=None):
 	def update_reference(source, target, source_parent):
 		target.sales_invoice_reference = source.name
+		target.delivery_date = source.posting_date
 
-	return get_mapped_doc("Sales Invoice", source_name, {
-		"Sales Invoice": {
-			"doctype": "Sales Order",
-			"postprocess": update_reference
+	return get_mapped_doc(
+		"Sales Invoice",
+		source_name,
+		{
+			"Sales Invoice": {"doctype": "Sales Order", "postprocess": update_reference},
+			"Sales Invoice Item": {
+				"doctype": "Sales Order Item",
+				"condition": lambda row: not row.so_detail,
+			},
 		},
-		"Sales Invoice Item": {
-			"doctype": "Sales Order Item",
-			"condition": lambda row: not row.so_detail
-		}
-	}, target_doc)
+		target_doc,
+	)

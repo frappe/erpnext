@@ -3116,6 +3116,31 @@ class TestSalesInvoice(unittest.TestCase):
 		si.reload()
 		self.assertTrue(si.items[0].serial_no)
 
+	def test_create_and_auto_link_sales_order(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_order
+
+		frappe.db.set_value("Selling Settings", "Selling Settings", "so_required", "No")
+		si = create_sales_invoice(item_code="_Test Item", update_stock=True, qty=3, do_not_submit=True)
+		so = make_sales_order(si.name)
+		so.save()
+		so_detail = so.items[0].name
+		self.assertEqual(so.items[0].item_code, "_Test Item")
+		self.assertEqual(so.items[0].qty, 3)
+		so.submit()
+		self.assertEqual(so.status, "To Deliver and Bill")
+		si.reload()
+		# Checking SO is linked properly.
+		for row in si.items:
+			self.assertEqual(row.so_detail, so_detail)
+			self.assertEqual(row.sales_order, so.name)
+		si.submit()
+		so.reload()
+		self.assertEqual(so.status, "Completed")
+		self.assertEqual(so.per_billed, 100)
+		self.assertEqual(so.per_delivered, 100)
+
+		frappe.db.rollback()
+
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
