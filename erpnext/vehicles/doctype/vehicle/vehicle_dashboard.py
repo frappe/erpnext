@@ -7,12 +7,12 @@ def get_data():
 	if vehicle_domain_active:
 		vehicle_domain_sections = [
 			{
-				'label': ['Reference'],
-				'items': ['Vehicle Booking Order', 'Project']
+				'label': ['Stock'],
+				'items': ['Vehicle Booking Order', 'Vehicle Receipt', 'Vehicle Delivery']
 			},
 			{
-				'label': ['Stock'],
-				'items': ['Vehicle Receipt', 'Vehicle Delivery']
+				'label': ['Service'],
+				'items': ['Project', 'Vehicle Service Receipt', 'Vehicle Gate Pass']
 			},
 			{
 				'label': ['Invoice'],
@@ -32,7 +32,11 @@ def get_data():
 			},
 			{
 				'label': ['Accounting Entries'],
-				'items': ['Journal Entry', 'Payment Entry']
+				'items': ['Journal Entry', 'Payment Entry', 'Stock Entry']
+			},
+			{
+				'label': ['Reference'],
+				'items': ['Vehicle Log']
 			},
 		]
 
@@ -51,10 +55,5 @@ def get_data():
 			'Purchase Receipt': 'applies_to_vehicle',
 			'Purchase Invoice': 'applies_to_vehicle',
 		},
-		'transactions': vehicle_domain_sections + [
-			{
-				'label': ['Movement'],
-				'items': ['Stock Entry', 'Vehicle Log']
-			},
-		]
+		'transactions': vehicle_domain_sections
 	}
