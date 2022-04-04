@@ -12,9 +12,8 @@ class TreatmentPlanTemplate(Document):
 
 	def validate_age(self):
 		if self.patient_age_from and self.patient_age_from < 0:
-			frappe.throw(_('Patient Age From cannot be less than 0'))
+			frappe.throw(_("Patient Age From cannot be less than 0"))
 		if self.patient_age_to and self.patient_age_to < 0:
-			frappe.throw(_('Patient Age To cannot be less than 0'))
-		if self.patient_age_to and self.patient_age_from and \
-			self.patient_age_to < self.patient_age_from:
-			frappe.throw(_('Patient Age To cannot be less than Patient Age From'))
+			frappe.throw(_("Patient Age To cannot be less than 0"))
+		if self.patient_age_to and self.patient_age_from and self.patient_age_to < self.patient_age_from:
+			frappe.throw(_("Patient Age To cannot be less than Patient Age From"))

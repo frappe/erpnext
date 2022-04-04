@@ -7,7 +7,7 @@ from frappe.utils.nestedset import NestedSet, get_root_of
 
 
 class SupplierGroup(NestedSet):
-	nsm_parent_field = 'parent_supplier_group'
+	nsm_parent_field = "parent_supplier_group"
 
 	def validate(self):
 		if not self.parent_supplier_group:

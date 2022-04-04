@@ -9,6 +9,8 @@ from frappe.model.document import Document
 class PlantAnalysis(Document):
 	@frappe.whitelist()
 	def load_contents(self):
-		docs = frappe.get_all("Agriculture Analysis Criteria", filters={'linked_doctype':'Plant Analysis'})
+		docs = frappe.get_all(
+			"Agriculture Analysis Criteria", filters={"linked_doctype": "Plant Analysis"}
+		)
 		for doc in docs:
-			self.append('plant_analysis_criteria', {'title': str(doc.name)})
+			self.append("plant_analysis_criteria", {"title": str(doc.name)})

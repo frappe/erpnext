@@ -4,7 +4,7 @@
 import unittest
 
 import frappe
-from frappe.utils import nowdate
+from frappe.utils import flt, nowdate
 
 import erpnext
 from erpnext.hr.doctype.employee.test_employee import make_employee
@@ -13,6 +13,7 @@ from erpnext.hr.doctype.employee_advance.employee_advance import (
 	create_return_through_additional_salary,
 	make_bank_entry,
 )
+from erpnext.hr.doctype.expense_claim.expense_claim import get_advances
 from erpnext.payroll.doctype.salary_component.test_salary_component import create_salary_component
 from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
@@ -58,7 +59,9 @@ class TestEmployeeAdvance(unittest.TestCase):
 
 		args = {"type": "Deduction"}
 		create_salary_component("Advance Salary - Deduction", **args)
-		make_salary_structure("Test Additional Salary for Advance Return", "Monthly", employee=employee_name)
+		make_salary_structure(
+			"Test Additional Salary for Advance Return", "Monthly", employee=employee_name
+		)
 
 		# additional salary for 700 first
 		advance.reload()
@@ -100,10 +103,11 @@ def make_payment_entry(advance):
 
 	return journal_entry
 
+
 def make_employee_advance(employee_name, args=None):
 	doc = frappe.new_doc("Employee Advance")
 	doc.employee = employee_name
-	doc.company  = "_Test company"
+	doc.company = "_Test company"
 	doc.purpose = "For site visit"
 	doc.currency = erpnext.get_company_currency("_Test company")
 	doc.exchange_rate = 1
@@ -118,3 +122,27 @@ def make_employee_advance(employee_name, args=None):
 	doc.submit()
 
 	return doc
+
+
+def get_advances_for_claim(claim, advance_name, amount=None):
+	advances = get_advances(claim.employee, advance_name)
+
+	for entry in advances:
+		if amount:
+			allocated_amount = amount
+		else:
+			allocated_amount = flt(entry.paid_amount) - flt(entry.claimed_amount)
+
+		claim.append(
+			"advances",
+			{
+				"employee_advance": entry.name,
+				"posting_date": entry.posting_date,
+				"advance_account": entry.advance_account,
+				"advance_paid": entry.paid_amount,
+				"unclaimed_amount": allocated_amount,
+				"allocated_amount": allocated_amount,
+			},
+		)
+
+	return claim

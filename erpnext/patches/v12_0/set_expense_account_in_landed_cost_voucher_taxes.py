@@ -1,17 +1,21 @@
-
 import frappe
 from six import iteritems
 
 
 def execute():
-	frappe.reload_doctype('Landed Cost Taxes and Charges')
+	frappe.reload_doctype("Landed Cost Taxes and Charges")
 
-	company_account_map = frappe._dict(frappe.db.sql("""
+	company_account_map = frappe._dict(
+		frappe.db.sql(
+			"""
 		SELECT name, expenses_included_in_valuation from `tabCompany`
-	"""))
+	"""
+		)
+	)
 
 	for company, account in iteritems(company_account_map):
-		frappe.db.sql("""
+		frappe.db.sql(
+			"""
 			UPDATE
 				`tabLanded Cost Taxes and Charges` t, `tabLanded Cost Voucher` l
 			SET
@@ -20,9 +24,12 @@ def execute():
 				l.docstatus = 1
 				AND l.company = %s
 				AND t.parent = l.name
-		""", (account, company))
+		""",
+			(account, company),
+		)
 
-		frappe.db.sql("""
+		frappe.db.sql(
+			"""
 			UPDATE
 				`tabLanded Cost Taxes and Charges` t, `tabStock Entry` s
 			SET
@@ -31,4 +38,6 @@ def execute():
 				s.docstatus = 1
 				AND s.company = %s
 				AND t.parent = s.name
-		""", (account, company))
+		""",
+			(account, company),
+		)

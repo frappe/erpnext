@@ -1,6 +1,7 @@
 import datetime
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days
 
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
@@ -9,12 +10,11 @@ from erpnext.selling.report.payment_terms_status_for_sales_order.payment_terms_s
 	execute,
 )
 from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ["Sales Order", "Item", "Sales Invoice", "Payment Terms Template"]
 
 
-class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
+class TestPaymentTermsStatusForSalesOrder(FrappeTestCase):
 	def create_payment_terms_template(self):
 		# create template for 50-50 payments
 		template = None
@@ -94,7 +94,7 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
 				"currency": "INR",
 				"base_payment_amount": 500000.0,
 				"paid_amount": 500000.0,
-				"invoices": ","+sinv.name,
+				"invoices": "," + sinv.name,
 			},
 			{
 				"name": so.name,
@@ -107,25 +107,29 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
 				"currency": "INR",
 				"base_payment_amount": 500000.0,
 				"paid_amount": 100000.0,
-				"invoices": ","+sinv.name,
+				"invoices": "," + sinv.name,
 			},
 		]
 		self.assertEqual(data, expected_value)
 
 	def create_exchange_rate(self, date):
 		# make an entry in Currency Exchange list. serves as a static exchange rate
-		if frappe.db.exists({'doctype': "Currency Exchange",'date': date,'from_currency': 'USD', 'to_currency':'INR'}):
+		if frappe.db.exists(
+			{"doctype": "Currency Exchange", "date": date, "from_currency": "USD", "to_currency": "INR"}
+		):
 			return
 		else:
-			doc = frappe.get_doc({
-				'doctype': "Currency Exchange",
-				'date': date,
-				'from_currency': 'USD',
-				'to_currency': frappe.get_cached_value("Company", '_Test Company','default_currency'),
-				'exchange_rate': 70,
-				'for_buying': True,
-				'for_selling': True
-			})
+			doc = frappe.get_doc(
+				{
+					"doctype": "Currency Exchange",
+					"date": date,
+					"from_currency": "USD",
+					"to_currency": frappe.get_cached_value("Company", "_Test Company", "default_currency"),
+					"exchange_rate": 70,
+					"for_buying": True,
+					"for_selling": True,
+				}
+			)
 			doc.insert()
 
 	def test_alternate_currency(self):
@@ -176,10 +180,10 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
 				"description": "_Test 50-50",
 				"due_date": datetime.date(2021, 6, 30),
 				"invoice_portion": 50.0,
-				"currency": frappe.get_cached_value("Company", '_Test Company','default_currency'),
+				"currency": frappe.get_cached_value("Company", "_Test Company", "default_currency"),
 				"base_payment_amount": 3500000.0,
 				"paid_amount": 3500000.0,
-				"invoices": ","+sinv.name,
+				"invoices": "," + sinv.name,
 			},
 			{
 				"name": so.name,
@@ -189,10 +193,10 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
 				"description": "_Test 50-50",
 				"due_date": datetime.date(2021, 7, 15),
 				"invoice_portion": 50.0,
-				"currency": frappe.get_cached_value("Company", '_Test Company','default_currency'),
+				"currency": frappe.get_cached_value("Company", "_Test Company", "default_currency"),
 				"base_payment_amount": 3500000.0,
 				"paid_amount": 700000.0,
-				"invoices": ","+sinv.name,
+				"invoices": "," + sinv.name,
 			},
 		]
 		self.assertEqual(data, expected_value)

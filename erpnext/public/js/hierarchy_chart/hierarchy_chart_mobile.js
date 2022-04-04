@@ -235,7 +235,7 @@ erpnext.HierarchyChartMobile = class {
 		let me = this;
 		return new Promise(resolve => {
 			frappe.call({
-				method: this.method,
+				method: me.method,
 				args: {
 					parent: node_id,
 					company: me.company,
@@ -286,8 +286,8 @@ erpnext.HierarchyChartMobile = class {
 	}
 
 	add_connector(parent_id, child_id) {
-		const parent_node = document.querySelector(`#${parent_id}`);
-		const child_node = document.querySelector(`#${child_id}`);
+		const parent_node = document.getElementById(`${parent_id}`);
+		const child_node = document.getElementById(`${child_id}`);
 
 		const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
@@ -518,7 +518,8 @@ erpnext.HierarchyChartMobile = class {
 		level.nextAll('li').remove();
 
 		let node_object = this.nodes[node.id];
-		let current_node = level.find(`#${node.id}`).detach();
+		let current_node = level.find(`[id="${node.id}"]`).detach();
+
 		current_node.removeClass('active-child active-path');
 
 		node_object.expanded = 0;

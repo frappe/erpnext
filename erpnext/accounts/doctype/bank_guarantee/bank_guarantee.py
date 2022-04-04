@@ -23,10 +23,16 @@ class BankGuarantee(Document):
 		if not self.bank:
 			frappe.throw(_("Enter the name of the bank or lending institution before submittting."))
 
+
 @frappe.whitelist()
 def get_vouchar_detials(column_list, doctype, docname):
 	column_list = json.loads(column_list)
 	for col in column_list:
 		sanitize_searchfield(col)
-	return frappe.db.sql(''' select {columns} from `tab{doctype}` where name=%s'''
-		.format(columns=", ".join(column_list), doctype=doctype), docname, as_dict=1)[0]
+	return frappe.db.sql(
+		""" select {columns} from `tab{doctype}` where name=%s""".format(
+			columns=", ".join(column_list), doctype=doctype
+		),
+		docname,
+		as_dict=1,
+	)[0]
