@@ -185,8 +185,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		});
 		doc.items.some((row) => {
 			if(!row.against_sales_order) {
-
-
 				d.show();
 				return
 			}

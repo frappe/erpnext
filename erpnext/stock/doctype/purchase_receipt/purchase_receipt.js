@@ -81,7 +81,7 @@ frappe.ui.form.on("Purchase Receipt", {
 		if (frm.doc.docstatus == 0) {
 			if(!frm.doc.is_return) {
 				frm.doc.items.some((row) => {
-					if(!row.po_detail) {
+					if(!row.purchase_order_item) {
 						frm.add_custom_button(__('Purchase Order'), () => {
 							frm.events.make_po();
 						}, __('Create'));
