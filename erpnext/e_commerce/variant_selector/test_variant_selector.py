@@ -1,6 +1,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.controllers.item_variant import create_variant
 from erpnext.e_commerce.doctype.e_commerce_settings.test_e_commerce_settings import (
@@ -9,11 +10,10 @@ from erpnext.e_commerce.doctype.e_commerce_settings.test_e_commerce_settings imp
 from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
 from erpnext.e_commerce.variant_selector.utils import get_next_attribute_and_values
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ["Item"]
 
-class TestVariantSelector(ERPNextTestCase):
+class TestVariantSelector(FrappeTestCase):
 
 	@classmethod
 	def setUpClass(cls):

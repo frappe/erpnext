@@ -47,7 +47,6 @@ def get_product_filter_data(query_args=None):
 
 	sub_categories = []
 	if item_group:
-		field_filters['item_group'] = item_group
 		sub_categories = get_child_groups_for_website(item_group, immediate=True)
 
 	engine = ProductQuery()

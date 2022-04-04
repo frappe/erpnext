@@ -83,7 +83,10 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			pos_inv_cn = make_sales_return(pos_inv.name)
 			pos_inv_cn.set("payments", [])
 			pos_inv_cn.append('payments', {
-				'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': -300
+				'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': -100
+			})
+			pos_inv_cn.append('payments', {
+				'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': -200
 			})
 			pos_inv_cn.paid_amount = -300
 			pos_inv_cn.submit()
@@ -98,7 +101,12 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 
 			pos_inv_cn.load_from_db()
 			self.assertTrue(frappe.db.exists("Sales Invoice", pos_inv_cn.consolidated_invoice))
-			self.assertTrue(frappe.db.get_value("Sales Invoice", pos_inv_cn.consolidated_invoice, "is_return"))
+			consolidated_credit_note = frappe.get_doc("Sales Invoice", pos_inv_cn.consolidated_invoice)
+			self.assertEqual(consolidated_credit_note.is_return, 1)
+			self.assertEqual(consolidated_credit_note.payments[0].mode_of_payment, 'Cash')
+			self.assertEqual(consolidated_credit_note.payments[0].amount, -100)
+			self.assertEqual(consolidated_credit_note.payments[1].mode_of_payment, 'Bank Draft')
+			self.assertEqual(consolidated_credit_note.payments[1].amount, -200)
 
 		finally:
 			frappe.set_user("Administrator")

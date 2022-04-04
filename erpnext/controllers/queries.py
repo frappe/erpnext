@@ -168,7 +168,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 				{account_type_condition}
 				AND is_group = 0
 				AND company = %(company)s
-				AND account_currency = %(currency)s
+				AND (account_currency = %(currency)s or ifnull(account_currency, '') = '')
 				AND `{searchfield}` LIKE %(txt)s
 				{mcond}
 			ORDER BY idx DESC, name

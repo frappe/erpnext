@@ -21,8 +21,9 @@ PAN_NUMBER_FORMAT = re.compile("[A-Z]{5}[0-9]{4}[A-Z]{1}")
 
 
 def validate_gstin_for_india(doc, method):
-	if hasattr(doc, 'gst_state') and doc.gst_state:
-		doc.gst_state_number = state_numbers[doc.gst_state]
+	if hasattr(doc, 'gst_state'):
+		set_gst_state_and_state_number(doc)
+
 	if not hasattr(doc, 'gstin') or not doc.gstin:
 		return
 
@@ -52,7 +53,6 @@ def validate_gstin_for_india(doc, method):
 			frappe.throw(_("The input you've entered doesn't match the format of GSTIN."), title=_("Invalid GSTIN"))
 
 		validate_gstin_check_digit(doc.gstin)
-		set_gst_state_and_state_number(doc)
 
 		if not doc.gst_state:
 			frappe.throw(_("Please enter GST state"), title=_("Invalid State"))
@@ -84,17 +84,14 @@ def update_gst_category(doc, method):
 				frappe.db.set_value(link.link_doctype, {'name': link.link_name, 'gst_category': 'Unregistered'}, 'gst_category', 'Registered Regular')
 
 def set_gst_state_and_state_number(doc):
-	if not doc.gst_state:
-		if not doc.state:
-			return
+	if not doc.gst_state and doc.state:
 		state = doc.state.lower()
 		states_lowercase = {s.lower():s for s in states}
 		if state in states_lowercase:
 			doc.gst_state = states_lowercase[state]
 		else:
 			return
-
-	doc.gst_state_number = state_numbers[doc.gst_state]
+	doc.gst_state_number = state_numbers.get(doc.gst_state)
 
 def validate_gstin_check_digit(gstin, label='GSTIN'):
 	''' Function to validate the check digit of the GSTIN.'''
@@ -181,7 +178,7 @@ def test_method():
 def get_place_of_supply(party_details, doctype):
 	if not frappe.get_meta('Address').has_field('gst_state'): return
 
-	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
+	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order", "Quotation"):
 		address_name = party_details.customer_address or party_details.shipping_address_name
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		address_name = party_details.shipping_address or party_details.supplier_address
@@ -207,7 +204,7 @@ def get_regional_address_details(party_details, doctype, company):
 		party_details.taxes = []
 		return party_details
 
-	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
+	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order", "Quotation"):
 		master_doctype = "Sales Taxes and Charges Template"
 		tax_template_by_category = get_tax_template_based_on_category(master_doctype, company, party_details)
 
@@ -243,7 +240,7 @@ def update_party_details(party_details, doctype):
 			party_details.update(get_fetch_values(doctype, address_field, party_details.get(address_field)))
 
 def is_internal_transfer(party_details, doctype):
-	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
+	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order", "Quotation"):
 		destination_gstin = party_details.company_gstin
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		destination_gstin = party_details.supplier_gstin
