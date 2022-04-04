@@ -1,8 +1,10 @@
-# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe import _
 from frappe.utils.redis_wrapper import RedisWrapper
+from redis import ResponseError
 from redisearch import AutoCompleter, Client, IndexDefinition, Suggestion, TagField, TextField
 
 WEBSITE_ITEM_INDEX = "website_items_index"
@@ -38,7 +40,7 @@ def is_search_module_loaded():
 		)
 		return "search" in parsed_output
 	except Exception:
-		return False
+		return False  # handling older redis versions
 
 
 def if_redisearch_enabled(function):
@@ -64,15 +66,18 @@ def create_website_items_index():
 	# CREATE index
 	client = Client(make_key(WEBSITE_ITEM_INDEX), conn=frappe.cache())
 
-	# DROP if already exists
 	try:
-		client.drop_index()
-	except Exception:
+		client.drop_index()  # drop if already exists
+	except ResponseError:
+		# will most likely raise a ResponseError if index does not exist
+		# ignore and create index
 		pass
+	except Exception:
+		raise_redisearch_error()
 
 	idx_def = IndexDefinition([make_key(WEBSITE_ITEM_KEY_PREFIX)])
 
-	# Based on e-commerce settings
+	# Index fields mentioned in e-commerce settings
 	idx_fields = frappe.db.get_single_value("E Commerce Settings", "search_index_fields")
 	idx_fields = idx_fields.split(",") if idx_fields else []
 
@@ -104,8 +109,8 @@ def insert_item_to_index(website_item_doc):
 	cache = frappe.cache()
 	web_item = create_web_item_map(website_item_doc)
 
-	for k, v in web_item.items():
-		super(RedisWrapper, cache).hset(make_key(key), k, v)
+	for field, value in web_item.items():
+		super(RedisWrapper, cache).hset(make_key(key), field, value)
 
 	insert_to_name_ac(website_item_doc.web_item_name, website_item_doc.name)
 
@@ -120,8 +125,8 @@ def create_web_item_map(website_item_doc):
 	fields_to_index = get_fields_indexed()
 	web_item = {}
 
-	for f in fields_to_index:
-		web_item[f] = website_item_doc.get(f) or ""
+	for field in fields_to_index:
+		web_item[field] = website_item_doc.get(field) or ""
 
 	return web_item
 
@@ -141,7 +146,7 @@ def delete_item_from_index(website_item_doc):
 	try:
 		cache.delete(key)
 	except Exception:
-		return False
+		raise_redisearch_error()
 
 	delete_from_ac_dict(website_item_doc)
 	return True
@@ -171,7 +176,7 @@ def define_autocomplete_dictionary():
 		cache.delete(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE))
 		cache.delete(make_key(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE))
 	except Exception:
-		return False
+		raise_redisearch_error()
 
 	create_items_autocomplete_dict(autocompleter=item_ac)
 	create_item_groups_autocomplete_dict(autocompleter=item_group_ac)
@@ -217,8 +222,8 @@ def reindex_all_web_items():
 		web_item = create_web_item_map(item)
 		key = make_key(get_cache_key(item.name))
 
-		for k, v in web_item.items():
-			super(RedisWrapper, cache).hset(key, k, v)
+		for field, value in web_item.items():
+			super(RedisWrapper, cache).hset(key, field, value)
 
 
 def get_cache_key(name):
@@ -234,3 +239,14 @@ def get_fields_indexed():
 	fields_to_index = fields_to_index + mandatory_fields
 
 	return fields_to_index
+
+
+def raise_redisearch_error():
+	"Create an Error Log and raise error."
+	traceback = frappe.get_traceback()
+	log = frappe.log_error(traceback, frappe._("Redisearch Error"))
+	log_link = frappe.utils.get_link_to_form("Error Log", log.name)
+
+	frappe.throw(
+		msg=_("Something went wrong. Check {0}").format(log_link), title=_("Redisearch Error")
+	)
