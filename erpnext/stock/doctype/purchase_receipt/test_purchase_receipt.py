@@ -647,6 +647,45 @@ class TestPurchaseReceipt(FrappeTestCase):
 		return_pr.cancel()
 		pr.cancel()
 
+	def test_purchase_receipt_for_rejected_gle_without_accepted_warehouse(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
+
+		rejected_warehouse = "_Test Rejected Warehouse - TCP1"
+		if not frappe.db.exists("Warehouse", rejected_warehouse):
+			get_warehouse(
+				company="_Test Company with perpetual inventory",
+				abbr=" - TCP1",
+				warehouse_name="_Test Rejected Warehouse",
+			).name
+
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			received_qty=2,
+			rejected_qty=2,
+			rejected_warehouse=rejected_warehouse,
+			do_not_save=True,
+		)
+
+		pr.items[0].qty = 0.0
+		pr.items[0].warehouse = ""
+		pr.submit()
+
+		actual_qty = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": pr.name,
+				"warehouse": pr.items[0].rejected_warehouse,
+				"is_cancelled": 0,
+			},
+			"actual_qty",
+		)
+
+		self.assertEqual(actual_qty, 2)
+		self.assertFalse(pr.items[0].warehouse)
+		pr.cancel()
+
 	def test_purchase_return_for_serialized_items(self):
 		def _check_serial_no_values(serial_no, field_values):
 			serial_no = frappe.get_doc("Serial No", serial_no)
