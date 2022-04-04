@@ -9,6 +9,9 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, get_time, get_year_ending, get_year_start, getdate, now_datetime
 
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.holiday_list.test_holiday_list import set_holiday_list
+from erpnext.hr.doctype.leave_application.test_leave_application import get_first_sunday
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_holiday_list
 
 
 class TestShiftType(FrappeTestCase):
@@ -17,6 +20,10 @@ class TestShiftType(FrappeTestCase):
 		frappe.db.delete("Shift Assignment")
 		frappe.db.delete("Employee Checkin")
 		frappe.db.delete("Attendance")
+
+		from_date = get_year_start(getdate())
+		to_date = get_year_ending(getdate())
+		self.holiday_list = make_holiday_list(from_date=from_date, to_date=to_date)
 
 	def test_mark_attendance(self):
 		from erpnext.hr.doctype.employee_checkin.test_employee_checkin import make_checkin
@@ -195,6 +202,28 @@ class TestShiftType(FrappeTestCase):
 			"Attendance", {"attendance_date": date, "employee": employee}, "status"
 		)
 		self.assertEqual(attendance, "Absent")
+
+	@set_holiday_list("Salary Slip Test Holiday List", "_Test Company")
+	def test_skip_marking_absent_on_a_holiday(self):
+		employee = make_employee("test_employee_checkin@example.com", company="_Test Company")
+		shift_type = setup_shift_type(shift_type="Test Absent with no Attendance")
+		shift_type.holiday_list = None
+		shift_type.save()
+
+		# should not mark any attendance if no shift assignment is created
+		shift_type.process_auto_attendance()
+		attendance = frappe.db.get_value("Attendance", {"employee": employee}, "status")
+		self.assertIsNone(attendance)
+
+		first_sunday = get_first_sunday(self.holiday_list, for_date=getdate())
+		make_shift_assignment(shift_type.name, employee, first_sunday)
+
+		shift_type.process_auto_attendance()
+
+		attendance = frappe.db.get_value(
+			"Attendance", {"attendance_date": first_sunday, "employee": employee}, "status"
+		)
+		self.assertIsNone(attendance)
 
 	def test_get_start_and_end_dates(self):
 		date = getdate()
