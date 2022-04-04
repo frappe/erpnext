@@ -34,7 +34,7 @@ class TaxWithholdingCategory(Document):
 					)
 				)
 
-				
+
 def get_party_details(inv):
 	party_type, party = "", ""
 
