@@ -17,7 +17,7 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 class TestSubcontractedItemToBeReceived(FrappeTestCase):
 	def test_pending_and_received_qty(self):
-		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
+		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted=1)
 		transfer_param = []
 		make_stock_entry(
 			item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=100, basic_rate=100

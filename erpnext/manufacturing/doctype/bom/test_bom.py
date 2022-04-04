@@ -251,7 +251,7 @@ class TestBOM(FrappeTestCase):
 		self.assertEqual(bom.items[2].rate, 0)
 		# test in Purchase Order sourced_by_supplier is not added to Supplied Item
 		po = create_purchase_order(
-			item_code=item_code, qty=1, is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC"
+			item_code=item_code, qty=1, is_subcontracted=1, supplier_warehouse="_Test Warehouse 1 - _TC"
 		)
 		bom_items = sorted([d.item_code for d in bom.items if d.sourced_by_supplier != 1])
 		supplied_items = sorted([d.rm_item_code for d in po.supplied_items])

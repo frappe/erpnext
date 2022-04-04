@@ -778,7 +778,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			return {
 				"filters": {
 					"docstatus": 1,
-					"is_subcontracted": "Yes",
+					"is_subcontracted": 1,
 					"company": me.frm.doc.company
 				}
 			};
