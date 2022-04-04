@@ -464,6 +464,9 @@ class BuyingController(StockController, Subcontracting):
 		stock_items = self.get_stock_items()
 
 		for d in self.get("items"):
+			if d.item_code not in stock_items:
+				continue
+
 			if d.item_code in stock_items and d.warehouse:
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 
@@ -489,6 +492,7 @@ class BuyingController(StockController, Subcontracting):
 					sle = self.get_sl_entries(
 						d, {"actual_qty": flt(pr_qty), "serial_no": cstr(d.serial_no).strip()}
 					)
+
 					if self.is_return:
 						outgoing_rate = get_rate_for_return(
 							self.doctype, self.name, d.item_code, self.return_against, item_row=d
@@ -518,18 +522,18 @@ class BuyingController(StockController, Subcontracting):
 
 						sl_entries.append(from_warehouse_sle)
 
-				if flt(d.rejected_qty) != 0:
-					sl_entries.append(
-						self.get_sl_entries(
-							d,
-							{
-								"warehouse": d.rejected_warehouse,
-								"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
-								"serial_no": cstr(d.rejected_serial_no).strip(),
-								"incoming_rate": 0.0,
-							},
-						)
+			if flt(d.rejected_qty) != 0:
+				sl_entries.append(
+					self.get_sl_entries(
+						d,
+						{
+							"warehouse": d.rejected_warehouse,
+							"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
+							"serial_no": cstr(d.rejected_serial_no).strip(),
+							"incoming_rate": 0.0,
+						},
 					)
+				)
 
 		self.make_sl_entries_for_supplier_warehouse(sl_entries)
 		self.make_sl_entries(
