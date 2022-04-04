@@ -26,7 +26,7 @@ class TaxWithholdingCategory(Document):
 	def validate_thresholds(self):
 		for d in self.get("rates"):
 			if (
-					d.cumulative_threshold and d.single_threshold and d.cumulative_threshold < d.single_threshold
+				d.cumulative_threshold and d.single_threshold and d.cumulative_threshold < d.single_threshold
 			):
 				frappe.throw(
 					_("Row #{0}: Cumulative threshold cannot be less than Single Transaction threshold").format(
