@@ -116,7 +116,7 @@ class TestAttendance(FrappeTestCase):
 		shift_2 = setup_shift_type(shift_type="Shift 2", start_time="11:00:00", end_time="12:00:00")
 
 		mark_attendance(employee, date, "Present", shift_1.name)
-		attendance = frappe.get_doc(
+		frappe.get_doc(
 			{
 				"doctype": "Attendance",
 				"employee": employee,

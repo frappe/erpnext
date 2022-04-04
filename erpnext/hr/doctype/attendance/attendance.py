@@ -166,6 +166,9 @@ def get_duplicate_attendance_record(employee, attendance_date, shift, name=None)
 
 
 def get_overlapping_shift_attendance(employee, attendance_date, shift, name=None):
+	if not shift:
+		return {}
+
 	attendance = frappe.qb.DocType("Attendance")
 	query = (
 		frappe.qb.from_(attendance)
