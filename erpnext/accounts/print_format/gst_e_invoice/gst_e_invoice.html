@@ -1,7 +1,8 @@
 {%- from "templates/print_formats/standard_macros.html" import add_header, render_field, print_value -%}
-{%- set einvoice = json.loads(doc.signed_einvoice) -%}
 
 <div class="page-break">
+	{% if doc.signed_einvoice %}
+	{%- set einvoice = json.loads(doc.signed_einvoice) -%}
 	<div {% if print_settings.repeat_header_footer %} id="header-html" class="hidden-pdf" {% endif %}>
 		{% if letter_head and not no_letterhead %}
 			<div class="letter-head">{{ letter_head }}</div>
@@ -163,4 +164,14 @@
 			</tbody>
 		</table>
 	</div>
+<<<<<<< HEAD
 </div>
+=======
+	{% else %}
+	<div class="text-center" style="color: var(--gray-500); font-size: 14px;">
+		You must generate IRN before you can preview GST E-Invoice.
+	</div>
+	{% endif %}
+</div>
+
+>>>>>>> b91bf40f1b (fix: server error while viewing gst e-invoice)
