@@ -32,12 +32,6 @@ function get_filters() {
 			"fieldtype": "Link",
 			"width": 100,
 			"options": "Customer Group",
-			"get_query": () => {
-				return {
-					filters: { 'is_group': 0 }
-				}
-			}
-
 		},
 		{
 			"fieldname":"customer",
@@ -46,13 +40,14 @@ function get_filters() {
 			"width": 100,
 			"options": "Customer",
 			"get_query": () => {
-				filters = {
-					'disabled':  0
+				var customer_group = frappe.query_report.get_filter_value('customer_group');
+				return{
+					"query": "erpnext.selling.report.payment_terms_status_for_sales_order.payment_terms_status_for_sales_order.get_customers_or_items",
+					"filters": [
+						['Customer', 'disabled', '=', '0'],
+						['Customer Group','name', '=', customer_group]
+					]
 				}
-				if(frappe.query_report.get_filter_value("customer_group") != "") {
-					filters['customer_group'] = frappe.query_report.get_filter_value("customer_group");
-				}
-				return { 'filters': filters };
 			}
 		},
 		{
@@ -61,11 +56,6 @@ function get_filters() {
 			"fieldtype": "Link",
 			"width": 100,
 			"options": "Item Group",
-			"get_query": () => {
-				return {
-					filters: { 'is_group': 0 }
-				}
-			}
 
 		},
 		{
@@ -75,13 +65,14 @@ function get_filters() {
 			"width": 100,
 			"options": "Item",
 			"get_query": () => {
-				filters = {
-					'disabled':  0
+				var item_group = frappe.query_report.get_filter_value('item_group');
+				return{
+					"query": "erpnext.selling.report.payment_terms_status_for_sales_order.payment_terms_status_for_sales_order.get_customers_or_items",
+					"filters": [
+						['Item', 'disabled', '=', '0'],
+						['Item Group','name', '=', item_group]
+					]
 				}
-				if(frappe.query_report.get_filter_value("item_group") != "") {
-					filters['item_group'] = frappe.query_report.get_filter_value("item_group");
-				}
-				return { 'filters': filters };
 			}
 		}
 	]

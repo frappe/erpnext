@@ -73,6 +73,55 @@ def get_columns():
 	return columns
 
 
+def get_descendants_of(doctype, group_name):
+	group_doc = qb.DocType(doctype)
+	# get lft and rgt of group node
+	lft, rgt = (
+		qb.from_(group_doc).select(group_doc.lft, group_doc.rgt).where(group_doc.name == group_name)
+	).run()[0]
+
+	# get all children of group node
+	query = (
+		qb.from_(group_doc).select(group_doc.name).where((group_doc.lft >= lft) & (group_doc.rgt <= rgt))
+	)
+
+	child_nodes = []
+	for x in query.run():
+		child_nodes.append(x[0])
+
+	return child_nodes
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_customers_or_items(doctype, txt, searchfield, start, page_len, filters):
+	filter_list = []
+	if isinstance(filters, list):
+		for item in filters:
+			if item[0] == doctype:
+				filter_list.append(item)
+			elif item[0] == "Customer Group":
+				if item[3] != "":
+					filter_list.append(
+						[doctype, "customer_group", "in", get_descendants_of("Customer Group", item[3])]
+					)
+			elif item[0] == "Item Group":
+				if item[3] != "":
+					filter_list.append([doctype, "item_group", "in", get_descendants_of("Item Group", item[3])])
+
+	if searchfield and txt:
+		filter_list.append([doctype, searchfield, "like", "%%%s%%" % txt])
+
+	return frappe.desk.reportview.execute(
+		doctype,
+		filters=filter_list,
+		fields=["name", "customer_group"] if doctype == "Customer" else ["name", "item_group"],
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
+	)
+
+
 def get_conditions(filters):
 	"""
 	Convert filter options to conditions used in query
