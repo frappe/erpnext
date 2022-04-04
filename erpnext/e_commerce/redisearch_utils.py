@@ -1,6 +1,8 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import json
+
 import frappe
 from frappe import _
 from frappe.utils.redis_wrapper import RedisWrapper
@@ -203,7 +205,7 @@ def create_item_groups_autocomplete_dict(autocompleter):
 		return
 
 	for item_group in published_item_groups:
-		payload = {"name": item_group, "route": item_group.route}
+		payload = json.dumps({"name": item_group, "route": item_group.route})
 		autocompleter.add_suggestions(
 			Suggestion(
 				string=item_group.name,
