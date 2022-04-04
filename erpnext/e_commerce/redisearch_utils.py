@@ -205,7 +205,7 @@ def create_item_groups_autocomplete_dict(autocompleter):
 		return
 
 	for item_group in published_item_groups:
-		payload = json.dumps({"name": item_group, "route": item_group.route})
+		payload = json.dumps({"name": item_group.name, "route": item_group.route})
 		autocompleter.add_suggestions(
 			Suggestion(
 				string=item_group.name,
