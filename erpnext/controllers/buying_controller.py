@@ -466,7 +466,7 @@ class BuyingController(StockController, Subcontracting):
 			if d.item_code not in stock_items:
 				continue
 
-			if d.item_code in stock_items and d.warehouse:
+			if d.warehouse:
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 
 				if pr_qty:
