@@ -143,16 +143,24 @@ def build_filter_criterions(filters):
 	qb_criterions = []
 
 	if filters.customer_group:
-		qb_criterions.append(qb.DocType("Customer").customer_group == filters.customer_group)
+		qb_criterions.append(
+			qb.DocType("Sales Order").customer_group.isin(
+				get_descendants_of("Customer Group", filters.customer_group)
+			)
+		)
 
 	if filters.customer:
-		qb_criterions.append(qb.DocType("Customer").name == filters.customer)
+		qb_criterions.append(qb.DocType("Sales Order").customer == filters.customer)
 
 	if filters.item_group:
-		qb_criterions.append(qb.DocType("Item").item_group == filters.item_group)
+		qb_criterions.append(
+			qb.DocType("Sales Order Item").item_group.isin(
+				get_descendants_of("Item Group", filters.item_group)
+			)
+		)
 
 	if filters.item:
-		qb_criterions.append(qb.DocType("Item").name == filters.item)
+		qb_criterions.append(qb.DocType("Sales Order Item").item_code == filters.item)
 
 	return qb_criterions
 
@@ -165,8 +173,6 @@ def get_so_with_invoices(filters):
 
 	so = qb.DocType("Sales Order")
 	ps = qb.DocType("Payment Schedule")
-	cust = qb.DocType("Customer")
-	item = qb.DocType("Item")
 	soi = qb.DocType("Sales Order Item")
 
 	conditions = get_conditions(filters)
@@ -176,13 +182,9 @@ def get_so_with_invoices(filters):
 	ifelse = query_builder.CustomFunction("IF", ["condition", "then", "else"])
 
 	query_so = (
-		qb.from_(cust)
-		.join(so)
-		.on(so.customer == cust.name)
+		qb.from_(so)
 		.join(soi)
 		.on(soi.parent == so.name)
-		.join(item)
-		.on(item.item_code == soi.item_code)
 		.join(ps)
 		.on(ps.parent == so.name)
 		.select(
