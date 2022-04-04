@@ -3,17 +3,17 @@
 
 import frappe
 from frappe.test_runner import make_test_records
-from frappe.utils import cint
+from frappe.tests.utils import FrappeTestCase
 
 import erpnext
-from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
+from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.tests.utils import ERPNextTestCase
+from erpnext.stock.doctype.warehouse.warehouse import convert_to_group_or_ledger, get_children
 
 test_records = frappe.get_test_records('Warehouse')
 
-class TestWarehouse(ERPNextTestCase):
+class TestWarehouse(FrappeTestCase):
 	def setUp(self):
 		super().setUp()
 		if not frappe.get_value('Item', '_Test Item'):
@@ -64,6 +64,33 @@ class TestWarehouse(ERPNextTestCase):
 					warehouse_ids,
 					f"{item} linked to {item_default.default_warehouse} in {warehouse_ids}."
 				)
+
+	def test_group_non_group_conversion(self):
+
+		warehouse = frappe.get_doc("Warehouse", create_warehouse("TestGroupConversion"))
+
+		convert_to_group_or_ledger(warehouse.name)
+		warehouse.reload()
+		self.assertEqual(warehouse.is_group, 1)
+
+		child = create_warehouse("GroupWHChild", {"parent_warehouse": warehouse.name})
+		# chid exists
+		self.assertRaises(frappe.ValidationError, convert_to_group_or_ledger, warehouse.name)
+		frappe.delete_doc("Warehouse", child)
+
+		convert_to_group_or_ledger(warehouse.name)
+		warehouse.reload()
+		self.assertEqual(warehouse.is_group, 0)
+
+		make_stock_entry(item_code="_Test Item", target=warehouse.name, qty=1)
+		# SLE exists
+		self.assertRaises(frappe.ValidationError, convert_to_group_or_ledger, warehouse.name)
+
+	def test_get_children(self):
+		company = "_Test Company"
+
+		children = get_children("Warehouse", parent=company, company=company, is_root=True)
+		self.assertTrue(any(wh['value'] == "_Test Warehouse - _TC" for wh in children))
 
 
 def create_warehouse(warehouse_name, properties=None, company=None):

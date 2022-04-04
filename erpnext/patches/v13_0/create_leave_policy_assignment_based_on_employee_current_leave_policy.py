@@ -6,13 +6,13 @@ import frappe
 
 
 def execute():
+    frappe.reload_doc('hr', 'doctype', 'leave_policy_assignment')
+    frappe.reload_doc('hr', 'doctype', 'employee_grade')
+    employee_with_assignment = []
+    leave_policy = []
+
     if "leave_policy" in frappe.db.get_table_columns("Employee"):
         employees_with_leave_policy = frappe.db.sql("SELECT name, leave_policy FROM `tabEmployee` WHERE leave_policy IS NOT NULL and leave_policy != ''", as_dict = 1)
-
-        employee_with_assignment = []
-        leave_policy =[]
-
-        #for employee
 
         for employee in employees_with_leave_policy:
             alloc = frappe.db.exists("Leave Allocation", {"employee":employee.name, "leave_policy": employee.leave_policy, "docstatus": 1})
@@ -22,12 +22,10 @@ def execute():
             employee_with_assignment.append(employee.name)
             leave_policy.append(employee.leave_policy)
 
-
-    if "default_leave_policy" in frappe.db.get_table_columns("Employee"):
+    if "default_leave_policy" in frappe.db.get_table_columns("Employee Grade"):
         employee_grade_with_leave_policy = frappe.db.sql("SELECT name, default_leave_policy FROM `tabEmployee Grade` WHERE default_leave_policy IS NOT NULL and default_leave_policy!=''", as_dict = 1)
 
         #for whole employee Grade
-
         for grade in employee_grade_with_leave_policy:
             employees = get_employee_with_grade(grade.name)
             for employee in employees:
@@ -47,12 +45,12 @@ def execute():
                 allocation_exists=True)
 
 def create_assignment(employee, leave_policy, leave_period=None, allocation_exists = False):
+    if frappe.db.get_value("Leave Policy", leave_policy, "docstatus") == 2:
+        return
 
     filters = {"employee":employee, "leave_policy": leave_policy}
     if leave_period:
         filters["leave_period"] = leave_period
-
-    frappe.reload_doc('hr', 'doctype', 'leave_policy_assignment')
 
     if not frappe.db.exists("Leave Policy Assignment" , filters):
         lpa = frappe.new_doc("Leave Policy Assignment")
