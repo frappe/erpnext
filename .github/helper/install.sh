@@ -11,7 +11,7 @@ pip install frappe-bench
 frappeuser=${FRAPPE_USER:-"frappe"}
 frappebranch=${FRAPPE_BRANCH:-${GITHUB_BASE_REF:-${GITHUB_REF##*/}}}
 
-git clone "https://github.com/${frappeuser}/frappe" --branch "${frappebranch}" --depth 1
+git clone "https://github.com/gavindsouza/frappe" --branch "nestedset-fixes" --depth 1
 bench init --skip-assets --frappe-path ~/frappe --python "$(which python)" frappe-bench
 
 mkdir ~/frappe-bench/sites/test_site
