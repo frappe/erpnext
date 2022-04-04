@@ -83,7 +83,7 @@
    "label": "Validations"
   }
  ],
- "modified": "2022-04-05 00:57:58.774890",
+ "modified": "2022-04-05 01:34:42.507747",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Type",
@@ -124,7 +124,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "idx",
  "sort_order": "DESC",
  "track_changes": 1
 }
