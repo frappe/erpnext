@@ -24,6 +24,7 @@ class TaxWithholdingCategory(Document):
 				frappe.throw(_("Row #{0}: Dates overlapping with other row").format(d.idx))
 
 	def validate_thresholds(self):
+		for d in self.get("rates"):
 			if d.cumulative_threshold and d.single_threshold and d.cumulative_threshold < d.single_threshold:
 				frappe.throw(
 					_("Row #{0}: Cumulative threshold cannot be less than Single Transaction threshold").format(
