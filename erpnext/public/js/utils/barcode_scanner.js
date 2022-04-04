@@ -21,9 +21,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		//     batch_no: "LOT12", // present if batch was scanned
 		//     serial_no: "987XYZ", // present if serial no was scanned
 		// }
-		this.scan_api =
-			opts.scan_api ||
-			"erpnext.selling.page.point_of_sale.point_of_sale.search_for_serial_or_batch_or_barcode_number";
+		this.scan_api = opts.scan_api || "erpnext.stock.utils.scan_barcode";
 	}
 
 	process_scan() {
@@ -52,13 +50,15 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 					return;
 				}
 
-				me.update_table(data.item_code, data.barcode, data.batch_no, data.serial_no);
+				me.update_table(data);
 			});
 	}
 
-	update_table(item_code, barcode, batch_no, serial_no) {
+	update_table(data) {
 		let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
 		let row = null;
+
+		const {item_code, barcode, batch_no, serial_no} = data;
 
 		// Check if batch is scanned and table has batch no field
 		let batch_no_scan =
@@ -84,11 +84,25 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		}
 
 		this.show_scan_message(row.idx, row.item_code);
+		this.set_selector_trigger_flag(row, data);
 		this.set_item(row, item_code);
 		this.set_serial_no(row, serial_no);
 		this.set_batch_no(row, batch_no);
 		this.set_barcode(row, barcode);
 		this.clean_up();
+	}
+
+	// batch and serial selector is reduandant when all info can be added by scan
+	// this flag on item row is used by transaction.js to avoid triggering selector
+	set_selector_trigger_flag(row, data) {
+		const {batch_no, serial_no, has_batch_no, has_serial_no} = data;
+
+		const require_selecting_batch = has_batch_no && !batch_no;
+		const require_selecting_serial = has_serial_no && !serial_no;
+
+		if (!(require_selecting_batch || require_selecting_serial)) {
+			row.__disable_batch_serial_selector = true;
+		}
 	}
 
 	set_item(row, item_code) {

@@ -8,7 +8,7 @@ no_cache = 1
 
 
 def get_context(context):
-	homepage = frappe.get_doc("Homepage")
+	homepage = frappe.get_cached_doc("Homepage")
 
 	for item in homepage.products:
 		route = frappe.db.get_value("Website Item", {"item_code": item.item_code}, "route")
@@ -20,10 +20,10 @@ def get_context(context):
 	context.homepage = homepage
 
 	if homepage.hero_section_based_on == "Homepage Section" and homepage.hero_section:
-		homepage.hero_section_doc = frappe.get_doc("Homepage Section", homepage.hero_section)
+		homepage.hero_section_doc = frappe.get_cached_doc("Homepage Section", homepage.hero_section)
 
 	if homepage.slideshow:
-		doc = frappe.get_doc("Website Slideshow", homepage.slideshow)
+		doc = frappe.get_cached_doc("Website Slideshow", homepage.slideshow)
 		context.slideshow = homepage.slideshow
 		context.slideshow_header = doc.header
 		context.slides = doc.slideshow_items
@@ -46,7 +46,7 @@ def get_context(context):
 		order_by="section_order asc",
 	)
 	context.homepage_sections = [
-		frappe.get_doc("Homepage Section", name) for name in homepage_sections
+		frappe.get_cached_doc("Homepage Section", name) for name in homepage_sections
 	]
 
 	context.metatags = context.metatags or frappe._dict({})
