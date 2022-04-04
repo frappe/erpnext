@@ -33,7 +33,6 @@
   "vehicle_service_section",
   "service_warehouse_group",
   "column_break_28",
-  "default_service_warehouse",
   "section_break_14",
   "role_change_booking_after_payment",
   "role_change_payment_adjustment",
@@ -274,12 +273,6 @@
    "label": "Vehicle Service"
   },
   {
-   "fieldname": "default_service_warehouse",
-   "fieldtype": "Link",
-   "label": "Default Service Warehouse",
-   "options": "Warehouse"
-  },
-  {
    "fieldname": "service_warehouse_group",
    "fieldtype": "Link",
    "label": "Service Warehouse Group",
@@ -292,7 +285,7 @@
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2022-02-06 11:45:34.663590",
+ "modified": "2022-04-03 22:25:29.250122",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",

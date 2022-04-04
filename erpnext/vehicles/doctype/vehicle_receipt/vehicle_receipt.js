@@ -3,13 +3,10 @@
 
 frappe.provide("erpnext.vehicles");
 
-{% include 'erpnext/vehicles/vehicle_checklist.js' %};
-
 erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehicleTransactionController.extend({
 	refresh: function () {
 		this._super();
 		this.show_stock_ledger();
-		this.make_vehicle_checklist();
 	},
 
 	setup_queries: function () {
@@ -51,47 +48,6 @@ erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehicleTransactionC
 				filters: filters
 			};
 		});
-
-		this.frm.set_query("project", function() {
-			var filters = {};
-
-			if (cint(me.frm.doc.is_return)) {
-				filters['vehicle_status'] = 'Received';
-			} else {
-				filters['vehicle_status'] = 'Not Received';
-			}
-
-			return {
-				filters: filters
-			};
-		});
-	},
-
-	vehicle_checklist: function () {
-		this.make_vehicle_checklist();
-	},
-	vehicle_checklist_add: function () {
-		this.make_vehicle_checklist();
-	},
-	vehicle_checklist_remove: function () {
-		this.make_vehicle_checklist();
-	},
-	checklist_item: function () {
-		this.make_vehicle_checklist();
-	},
-	checklist_item_checked: function () {
-		this.refresh_checklist();
-	},
-
-	make_vehicle_checklist: function () {
-		this.frm.vehicle_checklist_editor = erpnext.vehicles.make_vehicle_checklist(this.frm,
-			this.frm.fields_dict.vehicle_checklist_html.wrapper);
-	},
-
-	refresh_checklist: function () {
-		if (this.frm.vehicle_checklist_editor) {
-			this.frm.vehicle_checklist_editor.render_checklist();
-		}
 	},
 });
 

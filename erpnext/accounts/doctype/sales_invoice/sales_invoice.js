@@ -79,6 +79,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			});
 		}
 
+		if (doc.docstatus == 1 && doc.project && doc.__onload && doc.__onload.can_make_vehicle_gate_pass) {
+			this.frm.add_custom_button(__('Vehicle Gate Pass'), function () {
+				me.make_vehicle_gate_pass();
+			});
+		}
+
 		this.show_general_ledger();
 
 		if(doc.update_stock) this.show_stock_ledger();
@@ -180,6 +186,24 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			}
 		});
+	},
+
+	make_vehicle_gate_pass: function () {
+		if (this.frm.doc.project) {
+			return frappe.call({
+				method: "erpnext.projects.doctype.project.project.get_vehicle_gate_pass",
+				args: {
+					"project": this.frm.doc.project,
+					"sales_invoice": this.frm.doc.name
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						var doclist = frappe.model.sync(r.message);
+						frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+					}
+				}
+			});
+		}
 	},
 
 	make_maintenance_schedule: function() {
@@ -725,7 +749,8 @@ frappe.ui.form.on('Sales Invoice', {
 			'Payment Request': 'Payment Request',
 			'Invoice Discounting': 'Invoice Discounting',
 			'Payment Entry': 'Payment',
-			'Auto Repeat': 'Subscription'
+			'Auto Repeat': 'Subscription',
+			'Vehicle Gate Pass': 'Vehicle Gate Pass',
 		};
 		frm.fields_dict["timesheets"].grid.get_field("time_sheet").get_query = function(doc, cdt, cdn){
 			return{

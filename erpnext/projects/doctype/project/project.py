@@ -119,9 +119,7 @@ class Project(Document):
 		vehicle_received = self.get('vehicle_status') and self.get('vehicle_status') != 'Not Received'
 		return frappe._dict({
 			'applies_to_vehicle': vehicle_received,
-			'fuel_level': vehicle_received,
-			'keys': vehicle_received,
-			'vehicle_checklist': vehicle_received,
+			'vehicle_workshop': vehicle_received,
 		})
 
 	def set_missing_values(self):
@@ -160,6 +158,9 @@ class Project(Document):
 	def validate_applies_to(self):
 		from erpnext.vehicles.utils import format_vehicle_fields
 		format_vehicle_fields(self)
+
+		if self.get('applies_to_item') and not self.get('vehicle_workshop'):
+			frappe.throw(_("Vehicle Workshop is mandatory when Applies to Item is set"))
 
 	def update_odometer(self):
 		from erpnext.vehicles.doctype.vehicle_log.vehicle_log import make_odometer_log
@@ -313,24 +314,32 @@ class Project(Document):
 		self.sales_data.service_items, self.sales_data.labour_items, self.sales_data.sublet_items = get_service_items(self.name, self.company)
 		self.sales_data.totals = get_totals_data([self.sales_data.stock_items, self.sales_data.service_items])
 
+	def get_sales_invoices(self):
+		return frappe.db.sql("""
+			select inv.name, inv.customer, inv.bill_to
+			from `tabSales Invoice` inv
+			where inv.docstatus = 1 and (inv.project = %(project)s or exists(
+				select item.name from `tabSales Invoice Item` item
+				where item.parent = inv.name and item.project = %(project)s))
+			order by posting_date, posting_time, creation
+		""", {'project': self.name}, as_dict=1)
+
+	def get_invoice_for_vehicle_gate_pass(self):
+		all_invoices = self.get_sales_invoices()
+		direct_invoices = [d for d in all_invoices if d.customer == d.bill_to == self.customer]
+
+		sales_invoice = None
+		if len(all_invoices) == 1:
+			sales_invoice = all_invoices[0].name
+		elif len(direct_invoices) == 1:
+			sales_invoice = direct_invoices[0].name
+
+		return sales_invoice
+
 	def get_sales_invoice_names(self):
 		# Invoices
-		invoices = frappe.get_all("Sales Invoice", {"project": self.name, "docstatus": 1},
-			order_by="posting_date desc, posting_time desc")
-		invoices = [d.name for d in invoices]
-
-		invoice_items = frappe.db.sql_list("""
-			select distinct inv.name
-			from `tabSales Invoice Item` item
-			inner join `tabSales Invoice` inv on inv.name = item.parent
-			where inv.docstatus = 1 and item.project = %s
-			order by posting_date desc, posting_time desc
-		""", self.name)
-
-		self.sales_data.invoices = invoices
-		for name in invoice_items:
-			if name not in self.sales_data.invoices:
-				self.sales_data.invoices.append(name)
+		invoices = self.get_sales_invoices()
+		self.sales_data.invoices = [d.name for d in invoices]
 
 	def set_costing(self):
 		from_time_sheet = frappe.db.sql("""select
@@ -363,41 +372,35 @@ class Project(Document):
 		if not self.meta.has_field('vehicle_status'):
 			return
 
-		vehicle_receipts = None
-		vehicle_deliveries = None
+		vehicle_service_receipts = None
+		vehicle_gate_passes = None
 
 		if self.get('applies_to_vehicle'):
-			vehicle_receipts = frappe.db.get_all("Vehicle Receipt",
+			vehicle_service_receipts = frappe.db.get_all("Vehicle Service Receipt",
 				{"project": self.name, "vehicle": self.applies_to_vehicle, "docstatus": 1},
-				['name', 'timestamp(posting_date, posting_time) as posting_dt', 'is_return',
-					'fuel_level', '`keys`'],
+				['name', 'timestamp(posting_date, posting_time) as posting_dt'],
 				order_by="posting_date, posting_time, creation")
-			vehicle_deliveries = frappe.db.get_all("Vehicle Delivery",
+			vehicle_gate_passes = frappe.db.get_all("Vehicle Gate Pass",
 				{"project": self.name, "vehicle": self.applies_to_vehicle, "docstatus": 1},
-				['name', 'timestamp(posting_date, posting_time) as posting_dt', 'is_return'],
+				['name', 'timestamp(posting_date, posting_time) as posting_dt'],
 				order_by="posting_date, posting_time, creation")
 
-		vehicle_receipt = frappe._dict()
-		vehicle_delivery = frappe._dict()
+		vehicle_service_receipt = frappe._dict()
+		vehicle_gate_pass = frappe._dict()
 
-		if vehicle_receipts and not vehicle_receipts[-1].get('is_return'):
-			vehicle_receipt = vehicle_receipts[-1]
+		if vehicle_service_receipts:
+			vehicle_service_receipt = vehicle_service_receipts[0]
 
-		if vehicle_deliveries and not vehicle_deliveries[-1].get('is_return'):
-			vehicle_delivery = vehicle_deliveries[-1]
+		if vehicle_gate_passes:
+			vehicle_gate_pass = vehicle_gate_passes[-1]
 
-		self.vehicle_received_dt = vehicle_receipt.posting_dt
-		self.vehicle_delivered_dt = vehicle_delivery.posting_dt
+		self.vehicle_received_dt = vehicle_service_receipt.posting_dt
+		self.vehicle_delivered_dt = vehicle_gate_pass.posting_dt
 
-		if vehicle_receipt:
-			self.vehicle_warehouse = frappe.db.get_value("Vehicle", self.applies_to_vehicle, "warehouse")
-			self.fuel_level = vehicle_receipt.fuel_level
-			self.keys = vehicle_receipt.get('keys')
-
-		if not vehicle_receipt:
+		if not vehicle_service_receipt:
 			self.vehicle_status = "Not Received"
-		elif not vehicle_delivery:
-			self.vehicle_status = "Received"
+		elif not vehicle_gate_pass:
+			self.vehicle_status = "In Workshop"
 		else:
 			self.vehicle_status = "Delivered"
 
@@ -405,9 +408,6 @@ class Project(Document):
 			self.db_set({
 				"vehicle_received_dt": self.vehicle_received_dt,
 				"vehicle_delivered_dt": self.vehicle_delivered_dt,
-				"vehicle_warehouse": self.vehicle_warehouse,
-				"fuel_level": flt(self.fuel_level),
-				"keys": cint(self.get('keys')),
 				"vehicle_status": self.vehicle_status,
 			})
 
@@ -1077,7 +1077,6 @@ def get_sales_invoice(project_name, depreciation_type=None):
 	target_doc = frappe.new_doc("Sales Invoice")
 	target_doc.company = project.company
 	target_doc.project = project.name
-	target_doc.is_pos = project.cash_billing
 
 	# Set Project Details
 	for k, v in project_details.items():
@@ -1085,8 +1084,6 @@ def get_sales_invoice(project_name, depreciation_type=None):
 			target_doc.set(k, v)
 
 	filters = {"project": project.name}
-	if project.customer:
-		filters['customer'] = project.customer
 	if project.company:
 		filters['company'] = project.company
 
@@ -1125,6 +1122,9 @@ def get_sales_invoice(project_name, depreciation_type=None):
 		elif depreciation_type == "After Depreciation Amount":
 			if not project.bill_to and project.insurance_company:
 				target_doc.bill_to = project.insurance_company
+
+	if depreciation_type != 'After Depreciation Amount':
+		target_doc.is_pos = project.cash_billing
 
 	# Insurance Company Fetch Values
 	target_doc.update(get_fetch_values(target_doc.doctype, 'insurance_company', target_doc.insurance_company))
@@ -1167,7 +1167,6 @@ def get_delivery_note(project_name):
 		"status": ["not in", ["Closed", "On Hold"]],
 		"per_delivered": ["<", 99.99],
 		"project": project.name,
-		"customer": project.customer,
 		"company": project.company,
 		"skip_delivery_note": 0,
 	}
@@ -1193,21 +1192,29 @@ def get_delivery_note(project_name):
 
 
 @frappe.whitelist()
-def get_vehicle_receipt(project):
+def get_vehicle_service_receipt(project):
 	doc = frappe.get_doc("Project", project)
-	check_if_doc_exists("Vehicle Receipt", doc.name, {'docstatus': 0, 'is_return': 0})
-	target = frappe.new_doc("Vehicle Receipt")
+	check_if_doc_exists("Vehicle Service Receipt", doc.name, {'docstatus': 0})
+	target = frappe.new_doc("Vehicle Service Receipt")
 	set_vehicle_transaction_values(doc, target)
 	target.run_method("set_missing_values")
 	return target
 
 
 @frappe.whitelist()
-def get_vehicle_delivery(project):
+def get_vehicle_gate_pass(project, sales_invoice=None):
 	doc = frappe.get_doc("Project", project)
-	check_if_doc_exists("Vehicle Delivery", doc.name, {'docstatus': 0, 'is_return': 0})
-	target = frappe.new_doc("Vehicle Delivery")
+	check_if_doc_exists("Vehicle Gate Pass", doc.name, {'docstatus': 0})
+	target = frappe.new_doc("Vehicle Gate Pass")
 	set_vehicle_transaction_values(doc, target)
+
+	if sales_invoice:
+		target.sales_invoice = sales_invoice
+	else:
+		sales_invoice = doc.get_invoice_for_vehicle_gate_pass()
+		if sales_invoice:
+			target.sales_invoice = sales_invoice
+
 	target.run_method("set_missing_values")
 	return target
 

@@ -44,6 +44,10 @@ class SalesInvoice(SellingController):
 		if self.has_stin:
 			set_name_by_naming_series(self, 'stin')
 
+	def onload(self):
+		super(SalesInvoice, self).onload()
+		self.set_can_make_vehicle_gate_pass()
+
 	def validate(self):
 		self.validate_posting_time()
 		super(SalesInvoice, self).validate()
@@ -1524,6 +1528,15 @@ class SalesInvoice(SellingController):
 				d.rate = 0
 				d.margin_rate_or_amount = 0
 				d.discount_percentage = 0
+
+	def set_can_make_vehicle_gate_pass(self):
+		if 'Vehicles' not in frappe.get_active_domains():
+			return
+
+		if self.get('project') and self.get('applies_to_vehicle') and self.docstatus == 1:
+			project_vehicle_status = frappe.db.get_value("Project", self.project, 'vehicle_status')
+			gate_pass_exists = frappe.db.get_value("Vehicle Gate Pass", {'sales_invoice': self.name, 'docstatus': 1})
+			self.set_onload('can_make_vehicle_gate_pass', project_vehicle_status == "Received" and not gate_pass_exists)
 
 
 def get_discounting_status(sales_invoice):

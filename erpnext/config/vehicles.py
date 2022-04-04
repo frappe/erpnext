@@ -75,16 +75,13 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Vehicle Log",
-					"dependencies": ["Vehicle"],
+					"name": "Vehicle Service Receipt",
+					"dependencies": ["Vehicle", "Project"],
 				},
 				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Vehicles In Workshop",
-					"doctype": "Vehicle",
-					"dependencies": ["Vehicle"],
-					"onboard": 1,
+					"type": "doctype",
+					"name": "Vehicle Gate Pass",
+					"dependencies": ["Vehicle", "Project"],
 				},
 			],
 		},
@@ -145,6 +142,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Vehicle Allocation"
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Workshop"
 				},
 			]
 		},
@@ -227,6 +228,24 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Vehicle Allocation Creation Tool",
+				},
+			]
+		},
+		{
+			"label": _("More / Work in Progress"),
+			"icon": "fa fa-cog",
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicles In Workshop",
+					"doctype": "Vehicle",
+					"dependencies": ["Vehicle"],
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Log",
+					"dependencies": ["Vehicle"],
 				},
 			]
 		},

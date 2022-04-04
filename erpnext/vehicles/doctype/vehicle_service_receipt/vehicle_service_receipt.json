@@ -1,7 +1,7 @@
 {
  "allow_import": 1,
  "autoname": "naming_series:",
- "creation": "2021-03-14 14:21:40.334844",
+ "creation": "2022-04-03 21:45:44.776492",
  "doctype": "DocType",
  "document_type": "Document",
  "editable_grid": 1,
@@ -11,57 +11,42 @@
   "title",
   "naming_series",
   "company",
-  "supplier",
-  "supplier_name",
-  "is_return",
+  "project",
+  "vehicle_workshop",
   "column_break_8",
-  "vehicle_booking_order",
-  "remarks",
+  "service_advisor",
   "column_break_11",
-  "amended_from",
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "amended_from",
   "customer_details_section",
   "customer",
   "customer_name",
-  "cb_23",
+  "column_break_17",
+  "project_contact_mobile",
+  "project_contact_phone",
+  "project_contact_email",
+  "column_break_16",
   "vehicle_owner",
   "vehicle_owner_name",
-  "column_break_22",
-  "booking_customer_name",
   "vehicle_details_section",
+  "vehicle",
   "variant_of",
   "variant_of_name",
   "item_code",
   "item_name",
-  "warehouse",
   "item_group",
   "brand",
   "column_break_21",
-  "vehicle",
-  "serial_no",
   "vehicle_chassis_no",
   "vehicle_engine_no",
-  "column_break_25",
-  "vehicle_color",
   "vehicle_license_plate",
   "vehicle_unregistered",
-  "transporter_details_section",
-  "transporter",
-  "transporter_name",
-  "col_break_23",
-  "driver",
-  "driver_name",
-  "column_break_23",
-  "lr_no",
-  "more_info_section",
-  "vehicle_odometer",
-  "vehicle_log",
+  "column_break_25",
+  "vehicle_color",
   "vehicle_warranty_no",
-  "column_break_48",
-  "keys",
-  "fuel_level"
+  "vehicle_delivery_date"
  ],
  "fields": [
   {
@@ -84,7 +69,7 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Series",
-   "options": "VREC-",
+   "options": "VSREC-",
    "read_only": 1,
    "set_only_once": 1
   },
@@ -97,45 +82,63 @@
    "reqd": 1
   },
   {
-   "fieldname": "supplier",
+   "fieldname": "customer",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Supplier",
-   "options": "Supplier"
+   "label": "Customer (User)",
+   "no_copy": 1,
+   "options": "Customer",
+   "reqd": 1
   },
   {
-   "depends_on": "eval:doc.supplier && doc.supplier_name != doc.supplier",
-   "fetch_from": "supplier.supplier_name",
-   "fieldname": "supplier_name",
+   "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
+   "fieldname": "customer_name",
    "fieldtype": "Data",
-   "label": "Supplier Name",
+   "label": "Customer Name",
+   "no_copy": 1,
    "read_only": 1
   },
   {
-   "fieldname": "vehicle_booking_order",
+   "fieldname": "vehicle_owner",
    "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Vehicle Booking Order",
+   "label": "Vehicle Owner",
    "no_copy": 1,
-   "options": "Vehicle Booking Order"
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.vehicle_owner && doc.vehicle_owner_name != doc.vehicle_owner",
+   "fieldname": "vehicle_owner_name",
+   "fieldtype": "Data",
+   "label": "Vehicle Owner Name",
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "remarks",
-   "fieldtype": "Small Text",
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Remarks",
+   "label": "Project",
    "no_copy": 1,
-   "print_hide": 1
+   "options": "Project",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_11",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Vehicle Service Receipt",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "default": "Today",
@@ -157,13 +160,42 @@
    "reqd": 1
   },
   {
+   "default": "0",
+   "depends_on": "eval:doc.docstatus==0",
+   "fieldname": "set_posting_time",
+   "fieldtype": "Check",
+   "label": "Edit Posting Date and Time",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
    "fieldname": "vehicle_details_section",
    "fieldtype": "Section Break",
    "label": "Vehicle Details"
   },
   {
+   "fetch_from": "item_code.variant_of",
+   "fieldname": "variant_of",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Model Item Code",
+   "options": "Item",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "variant_of.item_name",
+   "fieldname": "variant_of_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Model Item Name",
+   "read_only": 1
+  },
+  {
    "fieldname": "item_code",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Variant Item Code",
    "options": "Item",
@@ -177,13 +209,6 @@
    "fieldtype": "Data",
    "label": "Variant Item Name",
    "read_only": 1
-  },
-  {
-   "fieldname": "warehouse",
-   "fieldtype": "Link",
-   "label": "Warehouse",
-   "options": "Warehouse",
-   "reqd": 1
   },
   {
    "fetch_from": "item_code.item_group",
@@ -214,6 +239,7 @@
    "label": "Vehicle",
    "no_copy": 1,
    "options": "Vehicle",
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -251,24 +277,6 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.docstatus==0",
-   "fieldname": "set_posting_time",
-   "fieldtype": "Check",
-   "label": "Edit Posting Date and Time",
-   "no_copy": 1,
-   "print_hide": 1
-  },
-  {
-   "fieldname": "serial_no",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Serial No",
-   "no_copy": 1,
-   "options": "Serial No",
-   "read_only": 1
-  },
-  {
-   "default": "0",
    "depends_on": "eval:!doc.vehicle_license_plate || doc.vehicle_unregistered",
    "fieldname": "vehicle_unregistered",
    "fieldtype": "Check",
@@ -277,134 +285,36 @@
    "read_only": 1
   },
   {
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Customer (User)",
-   "no_copy": 1,
-   "options": "Customer"
-  },
-  {
-   "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
-   "fieldname": "customer_name",
-   "fieldtype": "Data",
-   "label": "Customer Name",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "transporter",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Transporter",
-   "options": "Supplier"
-  },
-  {
-   "depends_on": "eval:doc.transporter && doc.transporter_name != doc.transporter",
-   "fetch_from": "transporter.supplier_name",
-   "fieldname": "transporter_name",
-   "fieldtype": "Data",
-   "label": "Transporter Name",
-   "read_only": 1
-  },
-  {
-   "fieldname": "transporter_details_section",
-   "fieldtype": "Section Break",
-   "label": "Transporter Details"
-  },
-  {
-   "fieldname": "column_break_23",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "col_break_23",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "driver",
-   "fieldtype": "Link",
-   "label": "Driver",
-   "options": "Driver"
-  },
-  {
-   "depends_on": "eval:doc.driver && doc.driver_name != doc.driver",
-   "fetch_from": "driver.full_name",
-   "fieldname": "driver_name",
-   "fieldtype": "Data",
-   "label": "Driver Name",
-   "read_only": 1
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Vehicle Receipt",
+   "options": "Vehicle Service Receipt",
    "print_hide": 1,
    "read_only": 1
   },
   {
-   "fetch_from": "item_code.variant_of",
-   "fieldname": "variant_of",
+   "fieldname": "vehicle_workshop",
    "fieldtype": "Link",
-   "hidden": 1,
-   "in_standard_filter": 1,
-   "label": "Model Item Code",
-   "options": "Item",
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fetch_from": "variant_of.item_name",
-   "fieldname": "variant_of_name",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Model Item Name",
-   "read_only": 1
-  },
-  {
-   "fieldname": "lr_no",
-   "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Transport Receipt No (Bilty)"
+   "label": "Vehicle Workshop",
+   "options": "Vehicle Workshop",
+   "reqd": 1
   },
   {
    "fieldname": "vehicle_warranty_no",
    "fieldtype": "Data",
    "label": "Warranty Book No",
-   "no_copy": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "is_return",
-   "fieldtype": "Check",
-   "in_standard_filter": 1,
-   "label": "Is Return",
-   "search_index": 1
-  },
-  {
-   "fieldname": "more_info_section",
-   "fieldtype": "Section Break",
-   "label": "Readings & Checklist"
-  },
-  {
-   "fieldname": "column_break_48",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "vehicle_log",
-   "fieldtype": "Link",
-   "label": "Vehicle Odometer Log",
    "no_copy": 1,
-   "options": "Vehicle Log",
    "read_only": 1
   },
   {
-   "fieldname": "vehicle_odometer",
-   "fieldtype": "Int",
-   "label": "Odometer Reading",
-   "no_copy": 1
+   "fieldname": "vehicle_delivery_date",
+   "fieldtype": "Date",
+   "label": "Vehicle Delivery Date",
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "customer_details_section",
@@ -412,58 +322,49 @@
    "label": "Customer Details"
   },
   {
-   "depends_on": "eval:doc.vehicle_booking_order && doc.booking_customer_name != doc.customer_name",
-   "fetch_from": "vehicle_booking_order.customer_name",
-   "fieldname": "booking_customer_name",
-   "fieldtype": "Data",
-   "label": "Booking Customer Name",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "cb_23",
+   "fieldname": "column_break_16",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "vehicle_owner",
+   "fieldname": "service_advisor",
    "fieldtype": "Link",
-   "label": "Vehicle Owner",
-   "no_copy": 1,
-   "options": "Customer"
+   "in_standard_filter": 1,
+   "label": "Service Advisor",
+   "options": "Sales Person"
   },
   {
-   "depends_on": "eval:doc.vehicle_owner && doc.vehicle_owner_name != doc.vehicle_owner",
-   "fieldname": "vehicle_owner_name",
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project_contact_mobile",
    "fieldtype": "Data",
-   "label": "Vehicle Owner Name",
+   "label": "Mobile No",
    "no_copy": 1,
    "read_only": 1
   },
   {
-   "fieldname": "column_break_22",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "fuel_level",
-   "fieldtype": "Percent",
-   "label": "Fuel Level (%)",
+   "fieldname": "project_contact_phone",
+   "fieldtype": "Data",
+   "label": "Phone No",
    "no_copy": 1,
-   "precision": "0"
+   "read_only": 1
   },
   {
-   "fieldname": "keys",
-   "fieldtype": "Int",
-   "label": "No of Keys",
-   "no_copy": 1
+   "fieldname": "project_contact_email",
+   "fieldtype": "Data",
+   "label": "Contact Email",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-04-04 14:18:58.653717",
+ "modified": "2022-04-04 00:04:49.097740",
  "modified_by": "Administrator",
  "module": "Vehicles",
- "name": "Vehicle Receipt",
+ "name": "Vehicle Service Receipt",
  "owner": "Administrator",
  "permissions": [
   {
@@ -476,7 +377,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Vehicle Stock User",
+   "role": "Projects User",
    "share": 1,
    "submit": 1,
    "write": 1
@@ -501,11 +402,11 @@
   }
  ],
  "restrict_to_domain": "Vehicles",
- "search_fields": "supplier,item_code,item_name,posting_date,vehicle_booking_order,vehicle_chassis_no,vehicle_engine_no,vehicle_license_plate",
+ "search_fields": "project,item_code,item_name,posting_date,vehicle_license_plate,vehicle_chassis_no,vehicle_engine_no,vehicle_license_plate",
  "show_name_in_global_search": 1,
  "sort_field": "posting_date",
  "sort_order": "DESC",
- "timeline_field": "supplier",
+ "timeline_field": "customer",
  "title_field": "title",
  "track_changes": 1,
  "track_seen": 1

@@ -7,6 +7,7 @@
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
+  "image",
   "naming_series",
   "title",
   "project_number",
@@ -867,11 +868,21 @@
    "fieldtype": "Link",
    "label": "Campaign",
    "options": "Campaign"
+  },
+  {
+   "fetch_from": "applies_to_item.image",
+   "fetch_if_empty": 1,
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Image",
+   "options": "image"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2022-04-01 22:55:11.205406",
+ "image_field": "image",
+ "modified": "2022-04-04 01:29:02.244400",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

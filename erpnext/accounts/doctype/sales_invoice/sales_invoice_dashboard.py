@@ -3,6 +3,10 @@ import frappe
 from frappe import _
 
 def get_data():
+	vehicle_gate_pass = []
+	if 'Vehicles' in frappe.get_active_domains():
+		vehicle_gate_pass = ['Vehicle Gate Pass']
+
 	return {
 		'fieldname': 'sales_invoice',
 		'non_standard_fieldnames': {
@@ -30,7 +34,7 @@ def get_data():
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Timesheet', 'Auto Repeat']
+				'items': vehicle_gate_pass + ['Timesheet', 'Auto Repeat']
 			},
 			{
 				'label': _('Returns'),

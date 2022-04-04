@@ -7,8 +7,6 @@ import frappe
 from frappe import _
 from frappe.utils import flt, cint
 from erpnext.vehicles.vehicle_transaction_controller import VehicleTransactionController
-from erpnext.vehicles.vehicle_checklist import get_default_vehicle_checklist_items, set_missing_checklist,\
-	clear_empty_checklist
 
 
 class VehicleReceipt(VehicleTransactionController):
@@ -20,10 +18,6 @@ class VehicleReceipt(VehicleTransactionController):
 			return _("From {0} | {1}").format(self.get("suplier_name") or self.get('supplier') or self.get("customer_name") or self.get('customer'),
 				self.get("item_name") or self.get("item_code"))
 
-	def onload(self):
-		super(VehicleReceipt, self).onload()
-		self.set_onload('default_vehicle_checklist_items', get_default_vehicle_checklist_items())
-
 	def validate(self):
 		super(VehicleReceipt, self).validate()
 		self.validate_party_mandatory()
@@ -33,25 +27,17 @@ class VehicleReceipt(VehicleTransactionController):
 	def before_submit(self):
 		self.validate_vehicle_mandatory()
 		self.validate_transporter()
-		clear_empty_checklist(self)
 
 	def on_submit(self):
 		self.update_stock_ledger()
 		self.update_vehicle_warranty_no()
 		self.make_odometer_log()
 		self.update_vehicle_booking_order_delivery()
-		self.update_project_vehicle_status()
-		self.update_project_vehicle_checklist()
 
 	def on_cancel(self):
 		self.update_stock_ledger()
 		self.cancel_odometer_log()
 		self.update_vehicle_booking_order_delivery()
-		self.update_project_vehicle_status()
-
-	def set_missing_values(self, doc=None, for_validate=False):
-		super(VehicleReceipt, self).set_missing_values(doc, for_validate)
-		set_missing_checklist(self)
 
 	def set_title(self):
 		party = self.get('customer_name') or self.get('customer') or self.get('supplier_name') or self.get('supplier')
@@ -66,18 +52,3 @@ class VehicleReceipt(VehicleTransactionController):
 			frappe.throw(_("Fuel Level must be between 0% and 100%"))
 		if cint(self.keys) < 0:
 			frappe.throw(_("No of Keys cannot be negative"))
-
-	def update_project_vehicle_checklist(self):
-		if self.get('project') and self.get('vehicle_checklist'):
-			frappe.db.sql("""
-				delete from `tabVehicle Checklist Item`
-				where parenttype = 'Project' and parentfield = 'vehicle_checklist' and parent = %s
-			""", self.project)
-
-			for d in self.vehicle_checklist:
-				project_checklist_row = frappe.copy_doc(d)
-				project_checklist_row.docstatus = 0
-				project_checklist_row.parenttype = 'Project'
-				project_checklist_row.parentfield = 'vehicle_checklist'
-				project_checklist_row.parent = self.project
-				project_checklist_row.db_insert()

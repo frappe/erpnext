@@ -27,13 +27,11 @@ class VehicleDelivery(VehicleTransactionController):
 		self.update_vehicle_warranty_no()
 		self.make_odometer_log()
 		self.update_vehicle_booking_order_delivery()
-		self.update_project_vehicle_status()
 
 	def on_cancel(self):
 		self.update_stock_ledger()
 		self.cancel_odometer_log()
 		self.update_vehicle_booking_order_delivery()
-		self.update_project_vehicle_status()
 
 	def validate_return(self):
 		if cint(self.is_return) and self.vehicle:

@@ -144,6 +144,8 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		me.frm.custom_make_buttons = {
 			'Sales Invoice': 'Sales Invoice',
 			'Delivery Note': 'Delivery Note',
+			'Vehicle Service Receipt': 'Receive Vehicle',
+			'Vehicle Gate Pass': 'Create Gate Pass',
 			'Vehicle Log': 'Update Odometer',
 		};
 
@@ -196,15 +198,15 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 			me.frm.add_custom_button(__('Duplicate Project with Tasks'), () => me.create_duplicate(), __("Tasks"));
 
 			if (me.frm.doc.applies_to_vehicle) {
-				if (frappe.model.can_create("Vehicle Receipt") && me.frm.doc.vehicle_status == "Not Received") {
+				if (frappe.model.can_create("Vehicle Service Receipt") && me.frm.doc.vehicle_status == "Not Received") {
 					me.frm.add_custom_button(__("Receive Vehicle"), () => me.receive_vehicle_btn(), __("Vehicle"));
 					if (me.frm.fields_dict.receive_vehicle_btn) {
 						me.frm.set_df_property('receive_vehicle_btn', 'hidden', 0);
 					}
 				}
 
-				if (frappe.model.can_create("Vehicle Delivery") && me.frm.doc.vehicle_status == "Received") {
-					me.frm.add_custom_button(__("Deliver Vehicle"), () => me.deliver_vehicle_btn(), __("Vehicle"));
+				if (frappe.model.can_create("Vehicle Gate Pass") && me.frm.doc.vehicle_status == "In Workshop") {
+					me.frm.add_custom_button(__("Create Gate Pass"), () => me.deliver_vehicle_btn(), __("Vehicle"));
 					if (me.frm.fields_dict.deliver_vehicle_btn) {
 						me.frm.set_df_property('deliver_vehicle_btn', 'hidden', 0);
 					}
@@ -430,7 +432,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		this.make_vehicle_receipt();
 	},
 	deliver_vehicle_btn: function () {
-		this.make_vehicle_delivery();
+		this.make_vehicle_gate_pass();
 	},
 
 	collect_progress: function() {
@@ -443,7 +445,6 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 
 	set_percent_complete_read_only: function () {
 		var read_only = cint(this.frm.doc.percent_complete_method != "Manual");
-		console.log(read_only);
 		this.frm.set_df_property("percent_complete", "read_only", read_only);
 	},
 
@@ -551,7 +552,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	make_vehicle_receipt: function () {
 		this.frm.check_if_unsaved();
 		return frappe.call({
-			method: "erpnext.projects.doctype.project.project.get_vehicle_receipt",
+			method: "erpnext.projects.doctype.project.project.get_vehicle_service_receipt",
 			args: {
 				"project": this.frm.doc.name
 			},
@@ -564,10 +565,10 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		});
 	},
 
-	make_vehicle_delivery: function () {
+	make_vehicle_gate_pass: function () {
 		this.frm.check_if_unsaved();
 		return frappe.call({
-			method: "erpnext.projects.doctype.project.project.get_vehicle_delivery",
+			method: "erpnext.projects.doctype.project.project.get_vehicle_gate_pass",
 			args: {
 				"project": this.frm.doc.name
 			},

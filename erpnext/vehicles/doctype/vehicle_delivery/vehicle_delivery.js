@@ -45,20 +45,6 @@ erpnext.vehicles.VehicleDeliveryController = erpnext.vehicles.VehicleTransaction
 				filters: filters
 			};
 		});
-
-		this.frm.set_query("project", function() {
-			var filters = {};
-
-			if (cint(me.frm.doc.is_return)) {
-				filters['vehicle_status'] = 'Delivered';
-			} else {
-				filters['vehicle_status'] = 'Received';
-			}
-
-			return {
-				filters: filters
-			};
-		});
 	}
 });
 

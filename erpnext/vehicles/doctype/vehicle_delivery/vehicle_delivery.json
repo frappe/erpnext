@@ -13,20 +13,17 @@
   "customer",
   "customer_name",
   "booking_customer_name",
+  "finance_type",
   "column_break_8",
+  "vehicle_booking_order",
   "vehicle_owner",
   "vehicle_owner_name",
   "is_return",
   "column_break_11",
-  "amended_from",
   "posting_date",
   "posting_time",
   "set_posting_time",
-  "section_break_18",
-  "vehicle_booking_order",
-  "finance_type",
-  "column_break_20",
-  "project",
+  "amended_from",
   "address_and_contact_section",
   "customer_address",
   "address_display",
@@ -299,13 +296,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "no_copy": 1,
-   "options": "Project"
-  },
-  {
    "collapsible": 1,
    "fieldname": "address_and_contact_section",
    "fieldtype": "Section Break",
@@ -490,14 +480,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_18",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_20",
-   "fieldtype": "Column Break"
-  },
-  {
    "fetch_from": "vehicle_booking_order.finance_type",
    "fieldname": "finance_type",
    "fieldtype": "Data",
@@ -671,7 +653,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-01-24 14:02:26.858195",
+ "modified": "2022-04-04 14:13:43.042438",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Delivery",

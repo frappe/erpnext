@@ -8,6 +8,18 @@ def get_data():
 		'fieldname': 'project',
 		'transactions': [
 			{
+				'label': _('Vehicle'),
+				'items': ['Vehicle Service Receipt', 'Vehicle Gate Pass', 'Vehicle Log']
+			},
+			{
+				'label': _('Sales'),
+				'items': ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
+			},
+			{
+				'label': _('Purchase'),
+				'items': ['Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
+			},
+			{
 				'label': _('Tasks'),
 				'items': ['Task', 'Issue', 'Project Update']
 			},
@@ -22,18 +34,6 @@ def get_data():
 			{
 				'label': _('Expenses'),
 				'items': ['Employee Advance', 'Expense Claim', 'Landed Cost Voucher']
-			},
-			{
-				'label': _('Sales'),
-				'items': ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
-			},
-			{
-				'label': _('Purchase'),
-				'items': ['Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
-			},
-			{
-				'label': _('Vehicle'),
-				'items': ['Vehicle Receipt', 'Vehicle Delivery', 'Vehicle Log']
 			},
 			{
 				'label': _('Accounting'),

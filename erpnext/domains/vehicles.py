@@ -73,6 +73,9 @@ project_vehicle_readings_section = {"label": "Vehicle Readings & Checklist",
 insert_field_after('vehicle_warranty_no', project_vehicle_readings_section, applies_to_project_fields)
 
 applies_to_project_fields += [
+	{"label": "Vehicle Workshop", "fieldname": "vehicle_workshop", "fieldtype": "Link", "options": "Vehicle Workshop",
+		"insert_after": "reference_no", "bold": 1, "allow_in_quick_entry": 1},
+
 	{"label": "FQR No", "fieldname": "fqr_no", "fieldtype": "Data", "no_copy": 1,
 		"insert_after": "cb_warranty_1"},
 
@@ -100,18 +103,16 @@ project_vehicle_reading_fields = [
 	{"label": "", "fieldname": "cb_vehicle_status_1", "fieldtype": "Column Break",
 		"insert_after": "deliver_vehicle_btn"},
 
-	{"label": "Vehicle Status", "fieldname": "vehicle_status", "fieldtype": "Select",
-		"options": "Not Received\nReceived\nDelivered", "default": "Not Received",
-		"insert_after": "cb_vehicle_status_1", "read_only": 1, "no_copy": 1},
-	{"label": "Vehicle Warehouse", "fieldname": "vehicle_warehouse", "fieldtype": "Link", "options": "Warehouse",
-		"insert_after": "vehicle_status", "read_only": 1, "ignore_user_permissions": 1},
 	{"label": "Fuel Level (%)", "fieldname": "fuel_level", "fieldtype": "Percent", "precision": 0,
-		"insert_after": "vehicle_warehouse", "no_copy": 1},
+		"insert_after": "cb_vehicle_status_1", "no_copy": 1},
 	{"label": "No of Keys", "fieldname": "keys", "fieldtype": "Int",
 		"insert_after": "fuel_level"},
+	{"label": "Vehicle Status", "fieldname": "vehicle_status", "fieldtype": "Select",
+		"options": "Not Received\nIn Workshop\nDelivered", "default": "Not Received",
+		"insert_after": "keys", "read_only": 1, "no_copy": 1},
 
 	{"label": "", "fieldname": "cb_vehicle_status_2", "fieldtype": "Column Break",
-		"insert_after": "keys"},
+		"insert_after": "vehicle_status"},
 
 	{"label": "Vehicle Checklist", "fieldname": "vehicle_checklist_html", "fieldtype": "HTML",
 		"insert_after": "cb_vehicle_status_2"},

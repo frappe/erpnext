@@ -283,7 +283,7 @@ class VehicleTransactionController(StockController):
 	def validate_project(self):
 		if self.get('project'):
 			project = frappe.db.get_value("Project", self.project,
-				['customer', 'applies_to_item', 'applies_to_vehicle'], as_dict=1)
+				['customer', 'applies_to_item', 'applies_to_vehicle', 'service_advisor', 'vehicle_workshop'], as_dict=1)
 
 			if not project:
 				frappe.throw(_("Project {0} does not exist").format(self.project))
@@ -301,6 +301,21 @@ class VehicleTransactionController(StockController):
 			if self.get('vehicle'):
 				if project.applies_to_vehicle and self.vehicle != project.applies_to_vehicle:
 					frappe.throw(_("Vehicle does not match in {0}")
+						.format(frappe.get_desk_link("Project", self.project)))
+
+			if self.get('service_advisor'):
+				if project.service_advisor and self.service_advisor != project.service_advisor:
+					frappe.throw(_("Service Advisor does not match in {0}")
+						.format(frappe.get_desk_link("Project", self.project)))
+
+			if self.get('service_manager'):
+				if project.service_manager and self.service_manager != project.service_manager:
+					frappe.throw(_("Service Manager does not match in {0}")
+						.format(frappe.get_desk_link("Project", self.project)))
+
+			if self.get('vehicle_workshop'):
+				if project.vehicle_workshop and self.vehicle_workshop != project.vehicle_workshop:
+					frappe.throw(_("Vehicle Workshop does not match in {0}")
 						.format(frappe.get_desk_link("Project", self.project)))
 
 	def validate_vehicle_registration_order(self, doc=None):
@@ -544,6 +559,21 @@ class VehicleTransactionController(StockController):
 
 			self.db_set('vehicle_log', None)
 
+	def update_project_vehicle_checklist(self):
+		if self.get('project') and self.get('vehicle_checklist'):
+			frappe.db.sql("""
+				delete from `tabVehicle Checklist Item`
+				where parenttype = 'Project' and parentfield = 'vehicle_checklist' and parent = %s
+			""", self.project)
+
+			for d in self.vehicle_checklist:
+				project_checklist_row = frappe.copy_doc(d)
+				project_checklist_row.docstatus = 0
+				project_checklist_row.parenttype = 'Project'
+				project_checklist_row.parentfield = 'vehicle_checklist'
+				project_checklist_row.parent = self.project
+				project_checklist_row.db_insert()
+
 
 @frappe.whitelist()
 def get_customer_details(args):
@@ -735,8 +765,10 @@ def get_project_details(args):
 		project_details = frappe.db.get_value("Project", args.project,
 			[
 				'customer', 'customer_name', 'contact_person', 'customer_address',
-				'applies_to_vehicle', 'applies_to_item', 'vehicle_warehouse',
+				'contact_mobile', 'contact_phone', 'contact_email', 'address_display',
+				'applies_to_vehicle', 'applies_to_item', 'vehicle_workshop',
 				'fuel_level', 'keys', 'vehicle_first_odometer', 'vehicle_last_odometer',
+				'service_advisor', 'service_manager',
 			], as_dict=1)
 
 	out = frappe._dict()
@@ -747,6 +779,11 @@ def get_project_details(args):
 			out.customer_address = project_details.customer_address
 			out.contact_person = project_details.contact_person
 
+		out.project_contact_mobile = project_details.contact_mobile
+		out.project_contact_phone = project_details.contact_phone
+		out.project_contact_email = project_details.contact_email
+		out.project_address_display = project_details.address_display
+
 		if project_details.applies_to_vehicle:
 			out.vehicle = project_details.applies_to_vehicle
 			out.item_code = project_details.applies_to_item
@@ -754,16 +791,12 @@ def get_project_details(args):
 			out.vehicle = None
 			out.item_code = project_details.applies_to_item
 
+		out.vehicle_workshop = project_details.vehicle_workshop
+		out.service_advisor = project_details.service_advisor
+		out.service_manager = project_details.service_manager
 		out.fuel_level = project_details.fuel_level
 		out['keys'] = project_details.get('keys')
 		out.vehicle_odometer = project_details.vehicle_last_odometer or project_details.vehicle_first_odometer or 0
-
-		if args.doctype == "Vehicle Receipt":
-			default_service_warehouse = frappe.get_cached_value("Vehicles Settings", None, "default_service_warehouse")
-			if project_details.vehicle_warehouse:
-				out.warehouse = project_details.vehicle_warehouse
-			elif default_service_warehouse:
-				out.warehouse = default_service_warehouse
 
 	if project_details and args.doctype and frappe.get_meta(args.doctype).has_field('vehicle_checklist'):
 		vehicle_checklist = frappe.get_all("Vehicle Checklist Item",
@@ -774,7 +807,6 @@ def get_project_details(args):
 			out.vehicle_checklist = vehicle_checklist
 
 	return out
-
 
 
 @frappe.whitelist()
@@ -791,7 +823,7 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, warn_reserved=True
 			'item_code', 'warehouse',
 			'chassis_no', 'engine_no',
 			'license_plate', 'unregistered',
-			'warranty_no',
+			'warranty_no', 'delivery_date',
 			'color', 'image'
 		], as_dict=1)
 
@@ -809,6 +841,7 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, warn_reserved=True
 	out.vehicle_unregistered = vehicle_details.unregistered
 	out.vehicle_color = vehicle_details.color
 	out.vehicle_warranty_no = vehicle_details.warranty_no
+	out.vehicle_delivery_date = vehicle_details.delivery_date
 	out.image = vehicle_details.image
 
 	if not out.image and item_code:
