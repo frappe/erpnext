@@ -6,6 +6,7 @@
 
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt, today
 
 from erpnext.stock.doctype.item.test_item import create_item
@@ -15,10 +16,9 @@ from erpnext.stock.doctype.material_request.material_request import (
 	make_supplier_quotation,
 	raise_work_orders,
 )
-from erpnext.tests.utils import ERPNextTestCase
 
 
-class TestMaterialRequest(ERPNextTestCase):
+class TestMaterialRequest(FrappeTestCase):
 	def test_make_purchase_order(self):
 		mr = frappe.copy_doc(test_records[0]).insert()
 
@@ -626,13 +626,13 @@ class TestMaterialRequest(ERPNextTestCase):
 		mr.schedule_date = today()
 
 		if not frappe.db.get_value('UOM Conversion Detail',
-			 {'parent': item.item_code, 'uom': 'Kg'}):
-			 item_doc = frappe.get_doc('Item', item.item_code)
-			 item_doc.append('uoms', {
-				 'uom': 'Kg',
-				 'conversion_factor': 5
-			 })
-			 item_doc.save(ignore_permissions=True)
+			{'parent': item.item_code, 'uom': 'Kg'}):
+			item_doc = frappe.get_doc('Item', item.item_code)
+			item_doc.append('uoms', {
+				'uom': 'Kg',
+				'conversion_factor': 5
+			})
+			item_doc.save(ignore_permissions=True)
 
 		item.uom = 'Kg'
 		for item in mr.items:

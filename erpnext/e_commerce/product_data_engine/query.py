@@ -46,10 +46,10 @@ class ProductQuery:
 		self.filter_with_discount = bool(fields.get("discount"))
 		result, discount_list, website_item_groups, cart_items, count = [], [], [], [], 0
 
-		website_item_groups = self.get_website_item_group_results(item_group, website_item_groups)
-
 		if fields:
 			self.build_fields_filters(fields)
+		if item_group:
+			self.build_item_group_filters(item_group)
 		if search_term:
 			self.build_search_filters(search_term)
 		if self.settings.hide_variants:
@@ -60,8 +60,6 @@ class ProductQuery:
 			result, count = self.query_items_with_attributes(attributes, start)
 		else:
 			result, count = self.query_items(start=start)
-
-		result = self.combine_web_item_group_results(item_group, result, website_item_groups)
 
 		# sort combined results by ranking
 		result = sorted(result, key=lambda x: x.get("ranking"), reverse=True)
@@ -168,6 +166,25 @@ class ProductQuery:
 				# `=` will be faster than `IN` for most cases
 				self.filters.append([field, "=", values])
 
+	def build_item_group_filters(self, item_group):
+		"Add filters for Item group page and include Website Item Groups."
+		from erpnext.setup.doctype.item_group.item_group import get_child_groups_for_website
+		item_group_filters = []
+
+		item_group_filters.append(["Website Item", "item_group", "=", item_group])
+		# Consider Website Item Groups
+		item_group_filters.append(["Website Item Group", "item_group", "=", item_group])
+
+		if frappe.db.get_value("Item Group", item_group, "include_descendants"):
+			# include child item group's items as well
+			# eg. Group Node A, will show items of child 1 and child 2 as well
+			# on it's web page
+			include_groups = get_child_groups_for_website(item_group, include_self=True)
+			include_groups = [x.name for x in include_groups]
+			item_group_filters.append(["Website Item", "item_group", "in", include_groups])
+
+		self.or_filters.extend(item_group_filters)
+
 	def build_search_filters(self, search_term):
 		"""Query search term in specified fields
 
@@ -190,19 +207,6 @@ class ProductQuery:
 		search = '%{}%'.format(search_term)
 		for field in search_fields:
 			self.or_filters.append([field, "like", search])
-
-	def get_website_item_group_results(self, item_group, website_item_groups):
-		"""Get Web Items for Item Group Page via Website Item Groups."""
-		if item_group:
-			website_item_groups = frappe.db.get_all(
-				"Website Item",
-				fields=self.fields + ["`tabWebsite Item Group`.parent as wig_parent"],
-				filters=[
-					["Website Item Group", "item_group", "=", item_group],
-					["published", "=", 1]
-				]
-			)
-		return website_item_groups
 
 	def add_display_details(self, result, discount_list, cart_items):
 		"""Add price and availability details in result."""
@@ -278,16 +282,6 @@ class ProductQuery:
 				return items
 
 		return []
-
-	def combine_web_item_group_results(self, item_group, result, website_item_groups):
-		"""Combine results with context of website item groups into item results."""
-		if item_group and website_item_groups:
-			items_list = {row.name for row in result}
-			for row in website_item_groups:
-				if row.wig_parent not in items_list:
-					result.append(row)
-
-		return result
 
 	def filter_results_by_discount(self, fields, result):
 		if fields and fields.get("discount"):

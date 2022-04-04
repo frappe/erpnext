@@ -208,9 +208,14 @@ def get_already_returned_items(doc):
 
 	return items
 
-def get_returned_qty_map_for_row(row_name, doctype):
+def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	child_doctype = doctype + " Item"
 	reference_field = "dn_detail" if doctype == "Delivery Note" else frappe.scrub(child_doctype)
+
+	if doctype in ('Purchase Receipt', 'Purchase Invoice'):
+		party_type = 'supplier'
+	else:
+		party_type = 'customer'
 
 	fields = [
 		"sum(abs(`tab{0}`.qty)) as qty".format(child_doctype),
@@ -226,9 +231,12 @@ def get_returned_qty_map_for_row(row_name, doctype):
 		if doctype == "Purchase Receipt":
 			fields += ["sum(abs(`tab{0}`.received_stock_qty)) as received_stock_qty".format(child_doctype)]
 
+	# Used retrun against and supplier and is_retrun because there is an index added for it
 	data = frappe.db.get_list(doctype,
 		fields = fields,
 		filters = [
+			[doctype, "return_against", "=", return_against],
+			[doctype, party_type, "=", party],
 			[doctype, "docstatus", "=", 1],
 			[doctype, "is_return", "=", 1],
 			[child_doctype, reference_field, "=", row_name]
@@ -307,7 +315,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 				target_doc.serial_no = '\n'.join(serial_nos)
 
 		if doctype == "Purchase Receipt":
-			returned_qty_map = get_returned_qty_map_for_row(source_doc.name, doctype)
+			returned_qty_map = get_returned_qty_map_for_row(source_parent.name, source_parent.supplier, source_doc.name, doctype)
 			target_doc.received_qty = -1 * flt(source_doc.received_qty - (returned_qty_map.get('received_qty') or 0))
 			target_doc.rejected_qty = -1 * flt(source_doc.rejected_qty - (returned_qty_map.get('rejected_qty') or 0))
 			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get('qty') or 0))
@@ -321,7 +329,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.purchase_receipt_item = source_doc.name
 
 		elif doctype == "Purchase Invoice":
-			returned_qty_map = get_returned_qty_map_for_row(source_doc.name, doctype)
+			returned_qty_map = get_returned_qty_map_for_row(source_parent.name, source_parent.supplier, source_doc.name, doctype)
 			target_doc.received_qty = -1 * flt(source_doc.received_qty - (returned_qty_map.get('received_qty') or 0))
 			target_doc.rejected_qty = -1 * flt(source_doc.rejected_qty - (returned_qty_map.get('rejected_qty') or 0))
 			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get('qty') or 0))
@@ -335,7 +343,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.purchase_invoice_item = source_doc.name
 
 		elif doctype == "Delivery Note":
-			returned_qty_map = get_returned_qty_map_for_row(source_doc.name, doctype)
+			returned_qty_map = get_returned_qty_map_for_row(source_parent.name, source_parent.customer, source_doc.name, doctype)
 			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get('qty') or 0))
 			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get('stock_qty') or 0))
 
@@ -348,7 +356,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
 		elif doctype == "Sales Invoice" or doctype == "POS Invoice":
-			returned_qty_map = get_returned_qty_map_for_row(source_doc.name, doctype)
+			returned_qty_map = get_returned_qty_map_for_row(source_parent.name, source_parent.customer, source_doc.name, doctype)
 			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get('qty') or 0))
 			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get('stock_qty') or 0))
 
@@ -390,6 +398,8 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			"postprocess": update_terms
 		}
 	}, target_doc, set_missing_values)
+
+	doclist.set_onload('ignore_price_list', True)
 
 	return doclist
 

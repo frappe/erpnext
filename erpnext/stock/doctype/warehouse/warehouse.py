@@ -41,14 +41,11 @@ class Warehouse(NestedSet):
 
 	def on_trash(self):
 		# delete bin
-		bins = frappe.db.sql("select * from `tabBin` where warehouse = %s",
-			self.name, as_dict=1)
+		bins = frappe.get_all("Bin", fields="*", filters={"warehouse": self.name})
 		for d in bins:
 			if d['actual_qty'] or d['reserved_qty'] or d['ordered_qty'] or \
 					d['indented_qty'] or d['projected_qty'] or d['planned_qty']:
 				throw(_("Warehouse {0} can not be deleted as quantity exists for Item {1}").format(self.name, d['item_code']))
-			else:
-				frappe.db.sql("delete from `tabBin` where name = %s", d['name'])
 
 		if self.check_if_sle_exists():
 			throw(_("Warehouse can not be deleted as stock ledger entry exists for this warehouse."))
@@ -56,16 +53,15 @@ class Warehouse(NestedSet):
 		if self.check_if_child_exists():
 			throw(_("Child warehouse exists for this warehouse. You can not delete this warehouse."))
 
+		frappe.db.delete("Bin", filters={"warehouse": self.name})
 		self.update_nsm_model()
 		self.unlink_from_items()
 
 	def check_if_sle_exists(self):
-		return frappe.db.sql("""select name from `tabStock Ledger Entry`
-			where warehouse = %s limit 1""", self.name)
+		return frappe.db.exists("Stock Ledger Entry", {"warehouse": self.name})
 
 	def check_if_child_exists(self):
-		return frappe.db.sql("""select name from `tabWarehouse`
-			where parent_warehouse = %s limit 1""", self.name)
+		return frappe.db.exists("Warehouse", {"parent_warehouse": self.name})
 
 	def convert_to_group_or_ledger(self):
 		if self.is_group:
@@ -92,10 +88,7 @@ class Warehouse(NestedSet):
 			return 1
 
 	def unlink_from_items(self):
-		frappe.db.sql("""
-				update `tabItem Default`
-				set default_warehouse=NULL
-				where default_warehouse=%s""", self.name)
+		frappe.db.set_value("Item Default", {"default_warehouse": self.name}, "default_warehouse", None)
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False):
@@ -164,15 +157,16 @@ def add_node():
 	frappe.get_doc(args).insert()
 
 @frappe.whitelist()
-def convert_to_group_or_ledger():
-	args = frappe.form_dict
-	return frappe.get_doc("Warehouse", args.docname).convert_to_group_or_ledger()
+def convert_to_group_or_ledger(docname=None):
+	if not docname:
+		docname = frappe.form_dict.docname
+	return frappe.get_doc("Warehouse", docname).convert_to_group_or_ledger()
 
 def get_child_warehouses(warehouse):
-	lft, rgt = frappe.get_cached_value("Warehouse", warehouse, ["lft", "rgt"])
+	from frappe.utils.nestedset import get_descendants_of
 
-	return frappe.db.sql_list("""select name from `tabWarehouse`
-		where lft >= %s and rgt <= %s""", (lft, rgt))
+	children = get_descendants_of("Warehouse", warehouse, ignore_permissions=True, order_by="lft")
+	return children + [warehouse]   # append self for backward compatibility
 
 def get_warehouses_based_on_account(account, company=None):
 	warehouses = []

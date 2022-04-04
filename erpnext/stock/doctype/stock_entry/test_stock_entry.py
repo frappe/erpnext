@@ -6,6 +6,7 @@ import unittest
 
 import frappe
 from frappe.permissions import add_user_permission, remove_user_permission
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import flt, nowdate, nowtime
 from six import iteritems
 
@@ -29,7 +30,6 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle
-from erpnext.tests.utils import ERPNextTestCase, change_settings
 
 
 def get_sle(**args):
@@ -43,7 +43,7 @@ def get_sle(**args):
 		order by timestamp(posting_date, posting_time) desc, creation desc limit 1"""% condition,
 		values, as_dict=1)
 
-class TestStockEntry(ERPNextTestCase):
+class TestStockEntry(FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 		frappe.set_user("Administrator")
