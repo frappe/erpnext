@@ -6,7 +6,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "vehicle_workshop_name"
+  "vehicle_workshop_name",
+  "service_manager"
  ],
  "fields": [
   {
@@ -14,9 +15,16 @@
    "fieldtype": "Data",
    "label": "Vehicle Workshop Name",
    "unique": 1
+  },
+  {
+   "fieldname": "service_manager",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Service Manager",
+   "options": "Sales Person"
   }
  ],
- "modified": "2022-04-03 22:00:36.046511",
+ "modified": "2022-04-05 00:27:57.097991",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Workshop",

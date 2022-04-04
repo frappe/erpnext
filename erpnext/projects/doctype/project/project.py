@@ -72,6 +72,7 @@ class Project(Document):
 			self.copy_from_template()
 
 		self.set_missing_values()
+		self.validate_project_type()
 		self.set_vehicle_status()
 		self.validate_applies_to()
 		self.validate_readings()
@@ -121,6 +122,15 @@ class Project(Document):
 			'applies_to_vehicle': vehicle_received,
 			'vehicle_workshop': vehicle_received,
 		})
+
+	def validate_project_type(self):
+		if self.project_type:
+			project_type = frappe.get_cached_doc("Project Type", self.project_type)
+			if project_type.campaign_mandatory and not self.get('campaign'):
+				frappe.throw(_("Campaign is mandatory for Project Type {0}").format(self.project_type))
+			if project_type.previous_project_mandatory and not self.get('previous_project'):
+				frappe.throw(_("{0} is mandatory for Project Type {1}")
+					.format(self.meta.get_label('previous_project'), self.project_type))
 
 	def set_missing_values(self):
 		self.set_customer_details()

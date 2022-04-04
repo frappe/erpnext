@@ -7,7 +7,16 @@
  "engine": "InnoDB",
  "field_order": [
   "project_type",
-  "description"
+  "description",
+  "sec_defaults",
+  "is_warranty_claim",
+  "is_internal",
+  "cb_defaults_1",
+  "cash_billing",
+  "has_stin",
+  "validations_section",
+  "campaign_mandatory",
+  "previous_project_mandatory"
  ],
  "fields": [
   {
@@ -20,11 +29,61 @@
   },
   {
    "fieldname": "description",
-   "fieldtype": "Text",
+   "fieldtype": "Data",
    "label": "Description"
+  },
+  {
+   "fieldname": "sec_defaults",
+   "fieldtype": "Section Break",
+   "label": "Defaults and Validations"
+  },
+  {
+   "fieldname": "cash_billing",
+   "fieldtype": "Select",
+   "label": "Cash Billing",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "has_stin",
+   "fieldtype": "Select",
+   "label": "Apply Taxes",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "cb_defaults_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "is_warranty_claim",
+   "fieldtype": "Select",
+   "label": "Is Warranty Claim",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "is_internal",
+   "fieldtype": "Select",
+   "label": "Is Internal",
+   "options": "\nNo\nYes"
+  },
+  {
+   "default": "0",
+   "fieldname": "campaign_mandatory",
+   "fieldtype": "Check",
+   "label": "Campaign Mandatory"
+  },
+  {
+   "default": "0",
+   "fieldname": "previous_project_mandatory",
+   "fieldtype": "Check",
+   "label": "Previous Project Mandatory"
+  },
+  {
+   "fieldname": "validations_section",
+   "fieldtype": "Section Break",
+   "label": "Validations"
   }
  ],
- "modified": "2020-03-03 15:42:47.443926",
+ "modified": "2022-04-05 00:57:58.774890",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Type",

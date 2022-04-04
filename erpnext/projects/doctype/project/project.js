@@ -435,6 +435,50 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		this.make_vehicle_gate_pass();
 	},
 
+	vehicle_workshop: function () {
+		this.get_vehicle_workshop_details();
+	},
+
+	project_type: function () {
+		this.get_project_type_defaults();
+	},
+
+	get_vehicle_workshop_details: function () {
+		var me = this;
+
+		if (me.frm.doc.vehicle_workshop) {
+			return frappe.call({
+				method: "erpnext.vehicles.doctype.vehicle_workshop.vehicle_workshop.get_vehicle_workshop_details",
+				args: {
+					vehicle_workshop: me.frm.doc.vehicle_workshop
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						return me.frm.set_value(r.message);
+					}
+				}
+			});
+		}
+	},
+
+	get_project_type_defaults: function () {
+		var me = this;
+
+		if (me.frm.doc.project_type) {
+			return frappe.call({
+				method: "erpnext.projects.doctype.project_type.project_type.get_project_type_defaults",
+				args: {
+					project_type: me.frm.doc.project_type
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						return me.frm.set_value(r.message);
+					}
+				}
+			});
+		}
+	},
+
 	collect_progress: function() {
 		this.frm.set_df_property("message", "reqd", this.frm.doc.collect_progress);
 	},

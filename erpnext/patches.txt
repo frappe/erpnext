@@ -723,7 +723,7 @@ erpnext.patches.v12_0.set_vehicle_registration_agent_outstanding
 erpnext.patches.v12_0.set_vehicle_invoice_customer
 erpnext.patches.v12_0.set_sales_team_commission_rate_numerical
 erpnext.patches.v12_0.remove_vehicle_registration_to_pay_agent_status
-erpnext.patches.v12_0.resetup_vehicle_domain #4-12-2021 #20-01-2022 #24-01-2022/2 #01-02-2022 #17-03-2022 #30-03-2022 #1-04-2022 #3-04-2022
+erpnext.patches.v12_0.resetup_vehicle_domain #4-12-2021 #20-01-2022 #24-01-2022/2 #01-02-2022 #17-03-2022 #30-03-2022 #1-04-2022 #3-04-2022 #5-04-2022
 erpnext.patches.v12_0.remove_vehicle_owner_field
 erpnext.patches.v12_0.set_is_stock_item_in_line_item
 erpnext.patches.v12_0.rename_transaction_line_item_reference_fieldname

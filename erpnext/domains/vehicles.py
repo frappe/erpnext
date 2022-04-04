@@ -74,7 +74,7 @@ insert_field_after('vehicle_warranty_no', project_vehicle_readings_section, appl
 
 applies_to_project_fields += [
 	{"label": "Vehicle Workshop", "fieldname": "vehicle_workshop", "fieldtype": "Link", "options": "Vehicle Workshop",
-		"insert_after": "reference_no", "bold": 1, "allow_in_quick_entry": 1},
+		"insert_after": "reference_no", "bold": 1, "allow_in_quick_entry": 1, "in_standard_filter": 1},
 
 	{"label": "FQR No", "fieldname": "fqr_no", "fieldtype": "Data", "no_copy": 1,
 		"insert_after": "cb_warranty_1"},
@@ -109,7 +109,7 @@ project_vehicle_reading_fields = [
 		"insert_after": "fuel_level"},
 	{"label": "Vehicle Status", "fieldname": "vehicle_status", "fieldtype": "Select",
 		"options": "Not Received\nIn Workshop\nDelivered", "default": "Not Received",
-		"insert_after": "keys", "read_only": 1, "no_copy": 1},
+		"insert_after": "keys", "read_only": 1, "no_copy": 1, "in_standard_filter": 1},
 
 	{"label": "", "fieldname": "cb_vehicle_status_2", "fieldtype": "Column Break",
 		"insert_after": "vehicle_status"},
@@ -156,6 +156,16 @@ material_request_service_person_fields = deepcopy(service_person_fields)
 poject_service_person_fields = deepcopy(service_person_fields)
 [d for d in poject_service_person_fields if d['fieldname'] == 'service_advisor'][0]['insert_after'] = 'project_details_cb_1'
 [d for d in poject_service_person_fields if d['fieldname'] == 'service_manager'][0]['insert_after'] = 'service_advisor'
+
+# Project Type Fields
+project_type_fields = [
+	{"label": "Is Periodic Maintenance", "fieldname": "is_periodic_maintenance", "fieldtype": "Select",
+		"insert_after": "sec_defaults", "options": "\nNo\nYes"},
+	{"label": "Is General Repair", "fieldname": "is_general_repair", "fieldtype": "Select",
+		"insert_after": "is_periodic_maintenance", "options": "\nNo\nYes"},
+	{"label": "", "fieldname": "cb_defaults_0", "fieldtype": "Column Break",
+		"insert_after": "is_general_repair"},
+]
 
 # Accounting Dimensions
 accounting_dimension_fields = [
@@ -216,6 +226,8 @@ for d in accounting_dimension_table_fields:
 	d['translatable'] = 0
 for d in item_fields:
 	d['translatable'] = 0
+for d in project_type_fields:
+	d['translatable'] = 0
 
 common_properties = [
 	[('Delivery Note Item', 'Sales Invoice Item', 'Purchase Receipt Item', 'Purchase Invoice Item', 'Stock Entry Detail'),
@@ -270,6 +282,7 @@ data = {
 		{"doctype": "Project", "fieldname": "bill_to", "property": "hidden", "value": 0},
 		{"doctype": "Project", "fieldname": "sec_warranty", "property": "hidden", "value": 0},
 		{"doctype": "Project", "fieldname": "previous_project", "property": "label", "value": "Previous Repair Order"},
+		{"doctype": "Project Type", "fieldname": "previous_project_mandatory", "property": "label", "value": "Previous Repair Order Mandatory"},
 		{"doctype": "Project", "fieldname": "project_name", "property": "label", "value": "Voice of Customer"},
 		{"doctype": "Delivery Note", "fieldname": "received_by_type", "property": "default", "value": "Employee"},
 		{"doctype": "Payment Terms Template", "fieldname": "include_in_vehicle_booking", "property": "hidden", "value": 0},
@@ -289,6 +302,7 @@ data = {
 		"Journal Entry": accounting_dimension_fields,
 		"Journal Entry Account": accounting_dimension_table_fields,
 		"Payment Entry": accounting_dimension_fields,
+		"Project Type": project_type_fields,
 	},
 	'default_portal_role': 'Customer'
 }
