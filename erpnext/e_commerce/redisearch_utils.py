@@ -209,7 +209,7 @@ def create_item_groups_autocomplete_dict(autocompleter):
 		autocompleter.add_suggestions(
 			Suggestion(
 				string=item_group.name,
-				score=item_group.weightage,
+				score=frappe.utils.flt(item_group.weightage) or 1.0,
 				payload=payload,  # additional info that can be retrieved later
 			)
 		)
