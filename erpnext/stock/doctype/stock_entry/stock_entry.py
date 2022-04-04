@@ -512,8 +512,10 @@ class StockEntry(StockController):
 						raw_material_cost = sum([flt(row.qty)*flt(row.rate) for row in bom_items.values()])
 
 					if raw_material_cost and self.purpose == "Manufacture" and not d.allow_zero_valuation_rate:
-						#d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
-						d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(total_fg_qty), d.precision("basic_rate"))
+						if d.qty:
+							d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.qty), d.precision("basic_rate"))
+						else:
+							d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
 						d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
 					elif self.purpose == "Repack" and total_fg_qty:
 						d.basic_rate = flt(raw_material_cost) / flt(total_fg_qty)
