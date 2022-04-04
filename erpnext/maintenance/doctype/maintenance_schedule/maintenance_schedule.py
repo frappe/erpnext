@@ -250,7 +250,7 @@ class MaintenanceSchedule(TransactionBase):
 					_("Serial No {0} does not belong to Item {1}").format(
 						frappe.bold(serial_no), frappe.bold(item_code)
 					),
-					title="Invalid",
+					title=_("Invalid"),
 				)
 
 			if sr_details.warranty_expiry_date and getdate(sr_details.warranty_expiry_date) >= getdate(
