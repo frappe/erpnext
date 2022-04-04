@@ -87,7 +87,7 @@ class AssetCategory(Document):
 					missing_cwip_accounts_for_company.append(get_link_to_form("Company", d.company_name))
 
 			if missing_cwip_accounts_for_company:
-				msg = _("""To enable Capital Work in Progress Accounting, """)
+				msg = _("""To enable Capital Work in Progress Accounting,""") + " "
 				msg += _("""you must select Capital Work in Progress Account in accounts table""")
 				msg += "<br><br>"
 				msg += _("You can also set default CWIP account in Company {}").format(
