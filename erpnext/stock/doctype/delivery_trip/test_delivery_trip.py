@@ -4,6 +4,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, flt, now_datetime, nowdate
 
 import erpnext
@@ -12,10 +13,10 @@ from erpnext.stock.doctype.delivery_trip.delivery_trip import (
 	make_expense_claim,
 	notify_customers,
 )
-from erpnext.tests.utils import ERPNextTestCase, create_test_contact_and_address
+from erpnext.tests.utils import create_test_contact_and_address
 
 
-class TestDeliveryTrip(ERPNextTestCase):
+class TestDeliveryTrip(FrappeTestCase):
 	def setUp(self):
 		super().setUp()
 		driver = create_driver()

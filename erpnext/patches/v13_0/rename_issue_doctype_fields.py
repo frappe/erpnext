@@ -60,7 +60,7 @@ def execute():
 
 def convert_to_seconds(value, unit):
 	seconds = 0
-	if value == 0:
+	if not value:
 		return seconds
 	if unit == 'Hours':
 		seconds = value * 3600

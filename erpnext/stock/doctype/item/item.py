@@ -50,15 +50,7 @@ class DataValidationError(frappe.ValidationError):
 class Item(Document):
 	def onload(self):
 		self.set_onload('stock_exists', self.stock_ledger_created())
-		self.set_asset_naming_series()
-
-	@frappe.whitelist()
-	def set_asset_naming_series(self):
-		if not hasattr(self, '_asset_naming_series'):
-			from erpnext.assets.doctype.asset.asset import get_asset_naming_series
-			self._asset_naming_series = get_asset_naming_series()
-
-		self.set_onload('asset_naming_series', self._asset_naming_series)
+		self.set_onload('asset_naming_series', get_asset_naming_series())
 
 	def autoname(self):
 		if frappe.db.get_default("item_naming_by") == "Naming Series":
@@ -116,6 +108,7 @@ class Item(Document):
 		self.validate_variant_attributes()
 		self.validate_variant_based_on_change()
 		self.validate_fixed_asset()
+		self.clear_retain_sample()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
 		self.validate_customer_provided_part()
@@ -225,6 +218,13 @@ class Item(Document):
 		if self.retain_sample and not self.has_batch_no:
 			frappe.throw(_("{0} Retain Sample is based on batch, please check Has Batch No to retain sample of item").format(
 				self.item_code))
+
+	def clear_retain_sample(self):
+		if not self.has_batch_no:
+			self.retain_sample = None
+
+		if not self.retain_sample:
+			self.sample_quantity = None
 
 	def add_default_uom_in_conversion_factor_table(self):
 		if not self.is_new() and self.has_value_changed("stock_uom"):
@@ -409,6 +409,7 @@ class Item(Document):
 			self.validate_properties_before_merge(new_name)
 			self.validate_duplicate_product_bundles_before_merge(old_name, new_name)
 			self.validate_duplicate_website_item_before_merge(old_name, new_name)
+			self.delete_old_bins(old_name)
 
 	def after_rename(self, old_name, new_name, merge):
 		if merge:
@@ -436,6 +437,9 @@ class Item(Document):
 
 					frappe.db.set_value(dt, d.name, "item_wise_tax_detail",
 											json.dumps(item_wise_tax_detail), update_modified=False)
+
+	def delete_old_bins(self, old_name):
+		frappe.db.delete("Bin", {"item_code": old_name})
 
 	def validate_duplicate_item_in_stock_reconciliation(self, old_name, new_name):
 		records = frappe.db.sql(""" SELECT parent, COUNT(*) as records
@@ -517,11 +521,11 @@ class Item(Document):
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
-		repost_stock_for_warehouses = frappe.db.sql_list("""select distinct warehouse
-			from tabBin where item_code=%s""", new_name)
+		repost_stock_for_warehouses = frappe.get_all("Stock Ledger Entry",
+				"warehouse", filters={"item_code": new_name}, pluck="warehouse", distinct=True)
 
 		# Delete all existing bins to avoid duplicate bins for the same item and warehouse
-		frappe.db.sql("delete from `tabBin` where item_code=%s", new_name)
+		frappe.db.delete("Bin", {"item_code": new_name})
 
 		for warehouse in repost_stock_for_warehouses:
 			repost_stock(new_name, warehouse)
@@ -1008,7 +1012,7 @@ def get_uom_conv_factor(uom, stock_uom):
 	if uom == stock_uom:
 		return 1.0
 
-	from_uom, to_uom = uom, stock_uom   # renaming for readability
+	from_uom, to_uom = uom, stock_uom	# renaming for readability
 
 	exact_match = frappe.db.get_value("UOM Conversion Factor", {"to_uom": to_uom, "from_uom": from_uom}, ["value"], as_dict=1)
 	if exact_match:
@@ -1020,9 +1024,9 @@ def get_uom_conv_factor(uom, stock_uom):
 
 	# This attempts to try and get conversion from intermediate UOM.
 	# case:
-	#            g -> mg = 1000
-	#            g -> kg = 0.001
-	# therefore  kg -> mg = 1000  / 0.001 = 1,000,000
+	#			 g -> mg = 1000
+	#			 g -> kg = 0.001
+	# therefore	 kg -> mg = 1000  / 0.001 = 1,000,000
 	intermediate_match = frappe.db.sql("""
 			select (first.value / second.value) as value
 			from `tabUOM Conversion Factor` first
@@ -1081,3 +1085,11 @@ def validate_item_default_company_links(item_defaults: List[ItemDefault]) -> Non
 							frappe.bold(item_default.company),
 							frappe.bold(frappe.unscrub(field))
 						), title=_("Invalid Item Defaults"))
+
+
+@frappe.whitelist()
+def get_asset_naming_series():
+	from erpnext.assets.doctype.asset.asset import get_asset_naming_series
+
+	return get_asset_naming_series()
+

@@ -27,6 +27,8 @@ class StockLedgerEntry(Document):
 		name will be changed using autoname options (in a scheduled job)
 		"""
 		self.name = frappe.generate_hash(txt="", length=10)
+		if self.meta.autoname == "hash":
+			self.to_rename = 0
 
 	def validate(self):
 		self.flags.ignore_submit_comment = True
