@@ -54,7 +54,7 @@ class TestMonthlyAttendanceSheet(FrappeTestCase):
 		present = datasets[1]["values"]
 		leaves = datasets[2]["values"]
 
-		# ensure correct attendance is reflect on the report
+		# ensure correct attendance is reflected on the report
 		self.assertEqual(self.employee, record.get("employee"))
 		self.assertEqual(absent[0], 1)
 		self.assertEqual(present[1], 1)
@@ -111,6 +111,9 @@ class TestMonthlyAttendanceSheet(FrappeTestCase):
 		mark_attendance(
 			self.employee, previous_month_first + relativedelta(days=1), "Present", "Day Shift"
 		)
+		mark_attendance(
+			self.employee, previous_month_first + relativedelta(days=2), "Half Day"
+		)  # half day
 
 		mark_attendance(
 			self.employee, previous_month_first + relativedelta(days=3), "Present"
@@ -131,9 +134,13 @@ class TestMonthlyAttendanceSheet(FrappeTestCase):
 
 		row = report[1][0]
 		self.assertEqual(row["employee"], self.employee)
-		self.assertEqual(row["total_present"], 4)
-		self.assertEqual(row["total_absent"], 1)
-		self.assertEqual(row["total_leaves"], leave_application.total_leave_days)
+
+		# 4 present + half day absent 0.5
+		self.assertEqual(row["total_present"], 4.5)
+		# 1 present + half day absent 0.5
+		self.assertEqual(row["total_absent"], 1.5)
+		# leave days + half day leave 0.5
+		self.assertEqual(row["total_leaves"], leave_application.total_leave_days + 0.5)
 
 		self.assertEqual(row["_test_leave_type"], leave_application.total_leave_days)
 		self.assertEqual(row["total_late_entries"], 1)
@@ -177,6 +184,52 @@ class TestMonthlyAttendanceSheet(FrappeTestCase):
 		self.assertEqual(row_without_shift[3], "L")  # on leave on the 3rd day
 		self.assertEqual(row_without_shift[4], "P")  # present on the 4th day
 
+	def test_attendance_with_employee_filter(self):
+		now = now_datetime()
+		previous_month = now.month - 1
+		previous_month_first = now.replace(day=1).replace(month=previous_month).date()
+
+		company = frappe.db.get_value("Employee", self.employee, "company")
+
+		# mark different attendance status on first 3 days of previous month
+		mark_attendance(self.employee, previous_month_first, "Absent")
+		mark_attendance(self.employee, previous_month_first + relativedelta(days=1), "Present")
+		mark_attendance(self.employee, previous_month_first + relativedelta(days=2), "On Leave")
+
+		filters = frappe._dict(
+			{"month": previous_month, "year": now.year, "company": company, "employee": self.employee}
+		)
+		report = execute(filters=filters)
+
+		record = report[1][0]
+		datasets = report[3]["data"]["datasets"]
+		absent = datasets[0]["values"]
+		present = datasets[1]["values"]
+		leaves = datasets[2]["values"]
+
+		# ensure correct attendance is reflected on the report
+		self.assertEqual(self.employee, record.get("employee"))
+		self.assertEqual(absent[0], 1)
+		self.assertEqual(present[1], 1)
+		self.assertEqual(leaves[2], 1)
+
+	@set_holiday_list("Salary Slip Test Holiday List", "_Test Company")
+	def test_validations(self):
+		# validation error for filters without month and year
+		self.assertRaises(frappe.ValidationError, execute_report_with_invalid_filters)
+
+		# execute report without attendance record
+		now = now_datetime()
+		previous_month = now.month - 1
+		previous_month_first = now.replace(day=1).replace(month=previous_month).date()
+
+		company = frappe.db.get_value("Employee", self.employee, "company")
+		filters = frappe._dict(
+			{"month": previous_month, "year": now.year, "company": company, "group_by": "Department"}
+		)
+		report = execute(filters=filters)
+		self.assertEqual(report, ([], [], None, None))
+
 
 def get_leave_application(employee):
 	now = now_datetime()
@@ -190,3 +243,8 @@ def get_leave_application(employee):
 	from_date = now.replace(day=7).replace(month=previous_month).date()
 	to_date = now.replace(day=8).replace(month=previous_month).date()
 	return make_leave_application(employee, from_date, to_date, "_Test Leave Type")
+
+
+def execute_report_with_invalid_filters():
+	filters = frappe._dict({"company": "_Test Company", "group_by": "Department"})
+	execute(filters=filters)
