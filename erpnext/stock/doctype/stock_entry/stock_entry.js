@@ -214,7 +214,7 @@ frappe.ui.form.on('Stock Entry', {
 
 		if (frm.doc.docstatus === 1) {
 			if (frm.doc.add_to_transit && frm.doc.purpose=='Material Transfer' && frm.doc.per_transferred < 100) {
-				frm.add_custom_button('End Transit', function() {
+				frm.add_custom_button(__('End Transit'), function() {
 					frappe.model.open_mapped_doc({
 						method: "erpnext.stock.doctype.stock_entry.stock_entry.make_stock_in_entry",
 						frm: frm
@@ -646,21 +646,6 @@ frappe.ui.form.on('Stock Entry Detail', {
 		frm.events.calculate_basic_amount(frm, item);
 	},
 
-	barcode: function(doc, cdt, cdn) {
-		var d = locals[cdt][cdn];
-		if (d.barcode) {
-			frappe.call({
-				method: "erpnext.stock.get_item_details.get_item_code",
-				args: {"barcode": d.barcode },
-				callback: function(r) {
-					if (!r.exe){
-						frappe.model.set_value(cdt, cdn, "item_code", r.message);
-					}
-				}
-			});
-		}
-	},
-
 	uom: function(doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		if(d.uom && d.item_code){
@@ -793,7 +778,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			return {
 				"filters": {
 					"docstatus": 1,
-					"is_subcontracted": "Yes",
+					"is_subcontracted": 1,
 					"company": me.frm.doc.company
 				}
 			};

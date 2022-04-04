@@ -78,7 +78,7 @@ def get_data(data, filters):
 
 def get_po(filters):
 	record_filters = [
-		["is_subcontracted", "=", "Yes"],
+		["is_subcontracted", "=", 1],
 		["supplier", "=", filters.supplier],
 		["transaction_date", "<=", filters.to_date],
 		["transaction_date", ">=", filters.from_date],

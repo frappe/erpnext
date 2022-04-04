@@ -1,7 +1,7 @@
 # frappe   # https://github.com/frappe/frappe is installed during bench-init
 gocardless-pro~=1.22.0
 googlemaps
-pandas~=1.1.5
+pandas>=1.1.5,<2.0.0
 plaid-python~=7.2.1
 pycountry~=20.7.3
 PyGithub~=1.55
@@ -10,4 +10,4 @@ python-youtube~=0.8.0
 taxjar~=1.9.2
 tweepy~=3.10.0
 Unidecode~=1.2.0
-redisearch==2.0.0
+redisearch~=2.1.0

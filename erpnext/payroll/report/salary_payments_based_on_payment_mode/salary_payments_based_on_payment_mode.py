@@ -142,21 +142,21 @@ def get_report_summary(gross_pay, total_deductions, net_pay, currency):
 	return [
 		{
 			"value": gross_pay,
-			"label": "Total Gross Pay",
+			"label": _("Total Gross Pay"),
 			"indicator": "Green",
 			"datatype": "Currency",
 			"currency": currency,
 		},
 		{
 			"value": total_deductions,
-			"label": "Total Deduction",
+			"label": _("Total Deduction"),
 			"datatype": "Currency",
 			"indicator": "Red",
 			"currency": currency,
 		},
 		{
 			"value": net_pay,
-			"label": "Total Net Pay",
+			"label": _("Total Net Pay"),
 			"datatype": "Currency",
 			"indicator": "Blue",
 			"currency": currency,

@@ -211,7 +211,7 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 			cur_frm.add_custom_button(__('Reopen'), this.reopen_purchase_receipt, __("Status"))
 		}
 
-		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
+		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted);
 	}
 
 	make_purchase_invoice() {
@@ -308,10 +308,10 @@ cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt
 frappe.provide("erpnext.buying");
 
 frappe.ui.form.on("Purchase Receipt", "is_subcontracted", function(frm) {
-	if (frm.doc.is_subcontracted === "Yes") {
+	if (frm.doc.is_subcontracted) {
 		erpnext.buying.get_default_bom(frm);
 	}
-	frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
+	frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted);
 });
 
 frappe.ui.form.on("Purchase Receipt", {

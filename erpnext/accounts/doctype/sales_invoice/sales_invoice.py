@@ -1434,7 +1434,7 @@ class SalesInvoice(SellingController):
 					)
 				)
 			else:
-				frappe.throw(_("Select change amount account"), title="Mandatory Field")
+				frappe.throw(_("Select change amount account"), title=_("Mandatory Field"))
 
 	def make_write_off_gl_entry(self, gl_entries):
 		# write off entries, applicable if only pos
