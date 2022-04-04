@@ -1364,71 +1364,66 @@ def check_and_delete_linked_reports(report):
 		for icon in icons:
 			frappe.delete_doc("Desktop Icon", icon)
 
+
 def so_required_settings_message(msg, primary_action, title):
 	msgprint(msg, title, primary_action=primary_action, raise_exception=1)
 
+
 @frappe.whitelist()
 def check_open_sos(customer, doctype=None):
-	if frappe.db.get_single_value('Selling Settings', 'so_required') == 'No':
+	if frappe.db.get_single_value("Selling Settings", "so_required") == "No":
 		return True
-	elif doctype == 'Sales Invoice' and frappe.db.get_value('Customer', customer, 'so_required'):
-		return True
-
-	if frappe.db.get_all('Sales Order', filters={
-		'customer': customer,
-		'docstatus': 1,
-		'status': 'To Deliver and Bill'}):
+	elif doctype == "Sales Invoice" and frappe.db.get_value("Customer", customer, "so_required"):
 		return True
 
-	elif doctype == 'Sales Invoice' and frappe.db.get_all('Sales Order', filters={
-		'customer': customer,
-		'docstatus': 1,
-		'status': 'To Bill'}):
+	if frappe.db.get_all(
+		"Sales Order", filters={"customer": customer, "docstatus": 1, "status": "To Deliver and Bill"}
+	):
 		return True
 
-	elif doctype == 'Delivery Note' and frappe.db.get_all('Sales Order', filters={
-		'customer': customer,
-		'docstatus': 1,
-		'status': 'To Receive'}):
+	elif doctype == "Sales Invoice" and frappe.db.get_all(
+		"Sales Order", filters={"customer": customer, "docstatus": 1, "status": "To Bill"}
+	):
 		return True
+
+	elif doctype == "Delivery Note" and frappe.db.get_all(
+		"Sales Order", filters={"customer": customer, "docstatus": 1, "status": "To Receive"}
+	):
+		return True
+
 
 @frappe.whitelist()
 def check_open_pos(supplier, doctype=None):
-	if frappe.db.get_single_value('Buying Settings', 'po_required') == 'No':
+	if frappe.db.get_single_value("Buying Settings", "po_required") == "No":
 		return True
-	elif doctype == 'Purchase Invoice' and frappe.db.get_value(
-		'Supplier', supplier, 'allow_purchase_invoice_creation_without_purchase_order'):
-		return True
-
-	if frappe.db.get_all('Purchase Order', filters={
-		'supplier': supplier,
-		'docstatus': 1,
-		'status': 'To Receive and Bill'}):
+	elif doctype == "Purchase Invoice" and frappe.db.get_value(
+		"Supplier", supplier, "allow_purchase_invoice_creation_without_purchase_order"
+	):
 		return True
 
-	elif doctype == 'Purchase Invoice' and frappe.db.get_all('Purchase Order', filters={
-		'supplier': supplier,
-		'docstatus': 1,
-		'status': 'To Bill'}):
+	if frappe.db.get_all(
+		"Purchase Order", filters={"supplier": supplier, "docstatus": 1, "status": "To Receive and Bill"}
+	):
 		return True
 
-	elif doctype == 'Purchase Receipt' and frappe.db.get_all('Purchase Order', filters={
-		'supplier': supplier,
-		'docstatus': 1,
-		'status': 'To Receive'}):
+	elif doctype == "Purchase Invoice" and frappe.db.get_all(
+		"Purchase Order", filters={"supplier": supplier, "docstatus": 1, "status": "To Bill"}
+	):
 		return True
+
+	elif doctype == "Purchase Receipt" and frappe.db.get_all(
+		"Purchase Order", filters={"supplier": supplier, "docstatus": 1, "status": "To Receive"}
+	):
+		return True
+
 
 @frappe.whitelist()
 def check_permissions_so_po_required(doctype, module_settings):
 	perm_setting, perm_so_po = True, True
-	setting_field = 'so_required' if module_settings == 'Selling Settings' else 'po_required'
+	setting_field = "so_required" if module_settings == "Selling Settings" else "po_required"
 	so_po_required = frappe.db.get_singles_value(module_settings, setting_field)
 	if not frappe.has_permission(module_settings, "write"):
 		perm_setting = False
 	if not frappe.has_permission(doctype, "create"):
 		perm_so_po = False
 	return {"perm_setting": perm_setting, "perm_so_po": perm_so_po, "so_po_required": so_po_required}
-
-
-
-

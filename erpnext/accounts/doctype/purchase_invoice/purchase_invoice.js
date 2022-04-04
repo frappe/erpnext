@@ -383,7 +383,6 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			frm: cur_frm
 		})
 	}
-
 };
 
 cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);

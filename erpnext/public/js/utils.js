@@ -102,14 +102,14 @@ $.extend(erpnext, {
 		if (!args.perm) {
 			frappe.throw(__("Not permitted"), frappe.PermissionError);
 		} else {
-			frappe.new_doc('Sales Order', {'customer':args.customer});
+			frappe.new_doc('Sales Order', {'customer': args.customer});
 		}
 	},
 	route_to_new_purchase_order: (args) => {
 		if (!args.perm) {
 			frappe.throw(__("Not permitted"), frappe.PermissionError);
 		} else {
-			frappe.new_doc('Purchase Order', {'supplier':args.supplier});
+			frappe.new_doc('Purchase Order', {'supplier': args.supplier});
 		}
 	}
 });
@@ -347,7 +347,7 @@ $.extend(erpnext.utils, {
 				{
 					fieldtype: "HTML",
 					options: `<p class="frappe-confirm-message settings-message">${message}</p>`
-			  }
+				}
 			],
 		});
 		return d;

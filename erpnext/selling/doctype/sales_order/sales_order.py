@@ -228,7 +228,8 @@ class SalesOrder(SellingController):
 		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
-			update_coupon_code_count(self.coupon_code,'used')
+
+			update_coupon_code_count(self.coupon_code, "used")
 		if self.sales_invoice_reference or self.delivery_note_reference:
 			self.link_sales_order_to_inv_and_dn()
 
@@ -523,27 +524,31 @@ class SalesOrder(SellingController):
 					).format(item.item_code)
 				)
 
-
 	def link_sales_order_to_inv_and_dn(self):
-		so_details = {item.item_code:item.name for item in self.items}
+		so_details = {item.item_code: item.name for item in self.items}
 		if self.sales_invoice_reference:
-			si = frappe.get_doc('Sales Invoice', self.sales_invoice_reference)
+			si = frappe.get_doc("Sales Invoice", self.sales_invoice_reference)
 			for si_item in si.items:
 				si_item.sales_order = self.name
 			si.save()
 
 			for si_item in si.items:
-				frappe.db.set_value('Sales Invoice Item', si_item.name, 'so_detail', so_details[si_item.item_code])
+				frappe.db.set_value(
+					"Sales Invoice Item", si_item.name, "so_detail", so_details[si_item.item_code]
+				)
 
 		elif self.delivery_note_reference:
-			dn = frappe.get_doc('Delivery Note', self.delivery_note_reference)
+			dn = frappe.get_doc("Delivery Note", self.delivery_note_reference)
 
 			for dn_item in dn.items:
 				dn_item.against_sales_order = self.name
 			dn.save()
 
 			for dn_item in dn.items:
-				frappe.db.set_value('Delivery Note Item', dn_item.name, 'so_detail', so_details[dn_item.item_code])
+				frappe.db.set_value(
+					"Delivery Note Item", dn_item.name, "so_detail", so_details[dn_item.item_code]
+				)
+
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

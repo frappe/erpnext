@@ -122,18 +122,30 @@ class DeliveryNote(SellingController):
 			for d in self.get("items"):
 				if not d.against_sales_order:
 					from erpnext.accounts.utils import check_permissions_so_po_required
-					perms = check_permissions_so_po_required('Sales Order', 'Selling Settings')
-					module_settings = get_link_to_form('Selling Settings', 'Selling Settings', 'Selling Settings') \
-						if perms['perm_setting'] else frappe.bold('Selling Settings')
+
+					perms = check_permissions_so_po_required("Sales Order", "Selling Settings")
+					module_settings = (
+						get_link_to_form("Selling Settings", "Selling Settings", "Selling Settings")
+						if perms["perm_setting"]
+						else frappe.bold("Selling Settings")
+					)
 					msg = _("Sales Order Required for item {}").format(frappe.bold(d.item_code))
 					msg += "<br><br>"
-					msg += _("To submit the delivery note without sales order please set {0} as {1} in {2}").format(
-						frappe.bold(_('Sales Order Required')), frappe.bold('No'), module_settings)
-					frappe.msgprint(msg, title=_('Sales Order Required'), primary_action={
-						'label': _('Create Sales Order'),
-						'client_action': 'erpnext.route_to_new_sales_order',
-						'args': {"customer": self.customer, "perm": perms['perm_so_po']}
-					}, raise_exception=1)
+					msg += _(
+						"To submit the delivery note without sales order please set {0} as {1} in {2}"
+					).format(
+						frappe.bold(_("Sales Order Required")), frappe.bold("No"), module_settings
+					)
+					frappe.msgprint(
+						msg,
+						title=_("Sales Order Required"),
+						primary_action={
+							"label": _("Create Sales Order"),
+							"client_action": "erpnext.route_to_new_sales_order",
+							"args": {"customer": self.customer, "perm": perms["perm_so_po"]},
+						},
+						raise_exception=1,
+					)
 
 	def validate(self):
 		self.validate_posting_time()
@@ -918,24 +930,30 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 	return doclist
 
+
 @frappe.whitelist()
-def make_sales_order_dn(source_name, target_doc = None):
+def make_sales_order_dn(source_name, target_doc=None):
 	def update_reference(source, target, source_parent):
 		target.delivery_note_reference = source.name
+		target.delivery_date = source.posting_date
 
-	return get_mapped_doc("Delivery Note", source_name, {
-		"Delivery Note": {
-			"doctype": "Sales Order",
-			"field_map": {
-				"posting_date": "delivery_date"
+	return get_mapped_doc(
+		"Delivery Note",
+		source_name,
+		{
+			"Delivery Note": {
+				"doctype": "Sales Order",
+				"field_map": {"posting_date": "delivery_date"},
+				"postprocess": update_reference,
 			},
-			"postprocess": update_reference
+			"Delivery Note Item": {
+				"doctype": "Sales Order Item",
+				"condition": lambda row: not row.so_detail,
+			},
 		},
-		"Delivery Note Item": {
-			"doctype": "Sales Order Item",
-			"condition": lambda row: not row.so_detail
-		}
-	}, target_doc)
+		target_doc,
+	)
+
 
 def on_doctype_update():
 	frappe.db.add_index("Delivery Note", ["customer", "is_return", "return_against"])
