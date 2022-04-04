@@ -2,7 +2,7 @@
 # See license.txt
 
 import unittest
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -233,6 +233,70 @@ class TestShiftType(FrappeTestCase):
 		)
 		self.assertIsNone(attendance)
 
+	def test_skip_auto_attendance_for_duplicate_record(self):
+		# Skip auto attendance in case of duplicate attendance record
+		from erpnext.hr.doctype.attendance.attendance import mark_attendance
+		from erpnext.hr.doctype.employee_checkin.test_employee_checkin import make_checkin
+
+		employee = make_employee("test_employee_checkin@example.com", company="_Test Company")
+
+		shift_type = setup_shift_type()
+		date = getdate()
+
+		# mark attendance
+		mark_attendance(employee, date, "Present")
+		make_shift_assignment(shift_type.name, employee, date)
+
+		timestamp = datetime.combine(date, get_time("08:00:00"))
+		log_in = make_checkin(employee, timestamp)
+		self.assertEqual(log_in.shift, shift_type.name)
+
+		timestamp = datetime.combine(date, get_time("12:00:00"))
+		log_out = make_checkin(employee, timestamp)
+		self.assertEqual(log_out.shift, shift_type.name)
+
+		# auto attendance should skip marking
+		shift_type.process_auto_attendance()
+
+		log_in.reload()
+		log_out.reload()
+		self.assertEqual(log_in.skip_auto_attendance, 1)
+		self.assertEqual(log_out.skip_auto_attendance, 1)
+
+	def test_skip_auto_attendance_for_overlapping_shift(self):
+		# Skip auto attendance in case of overlapping shift attendance record
+		# this case won't occur in case of shift assignment, since it will not allow overlapping shifts to be assigned
+		# can happen if manual attendance records are created
+		from erpnext.hr.doctype.attendance.attendance import mark_attendance
+		from erpnext.hr.doctype.employee_checkin.test_employee_checkin import make_checkin
+
+		employee = make_employee("test_employee_checkin@example.com", company="_Test Company")
+		shift_1 = setup_shift_type(shift_type="Shift 1", start_time="08:00:00", end_time="10:00:00")
+		shift_2 = setup_shift_type(shift_type="Shift 2", start_time="09:30:00", end_time="11:00:00")
+
+		date = getdate()
+
+		# mark attendance
+		mark_attendance(employee, date, "Present", shift=shift_1.name)
+		make_shift_assignment(shift_2.name, employee, date)
+
+		timestamp = datetime.combine(date, get_time("09:30:00"))
+		log_in = make_checkin(employee, timestamp)
+		self.assertEqual(log_in.shift, shift_2.name)
+
+		timestamp = datetime.combine(date, get_time("11:00:00"))
+		log_out = make_checkin(employee, timestamp)
+		self.assertEqual(log_out.shift, shift_2.name)
+
+		# auto attendance should be skipped for shift 2
+		# since it is already marked for overlapping shift 1
+		shift_2.process_auto_attendance()
+
+		log_in.reload()
+		log_out.reload()
+		self.assertEqual(log_in.skip_auto_attendance, 1)
+		self.assertEqual(log_out.skip_auto_attendance, 1)
+
 
 def setup_shift_type(**args):
 	args = frappe._dict(args)
@@ -250,7 +314,7 @@ def setup_shift_type(**args):
 			"begin_check_in_before_shift_start_time": 60,
 			"allow_check_out_after_shift_end_time": 60,
 			"process_attendance_after": add_days(date, -2),
-			"last_sync_of_checkin": now_datetime(),
+			"last_sync_of_checkin": now_datetime() + timedelta(days=1),
 		}
 	)
 
