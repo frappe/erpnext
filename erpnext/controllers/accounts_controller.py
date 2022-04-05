@@ -1185,7 +1185,8 @@ class AccountsController(TransactionBase):
 		grouped = OrderedDict()
 
 		for item in items:
-			group_data = grouped.setdefault(item.item_group, frappe._dict({"items": []}))
+			item_group_print_heading = self.get_item_group_print_heading(item)
+			group_data = grouped.setdefault(item_group_print_heading, frappe._dict({"items": []}))
 			group_data['items'].append(item)
 
 		# calculate group totals
@@ -1216,6 +1217,16 @@ class AccountsController(TransactionBase):
 				item_idx += 1
 
 		return out
+
+	def get_item_group_print_heading(self, item):
+		from erpnext.setup.doctype.item_group.item_group import get_item_group_print_heading
+
+		if item.get('item_group_print_heading'):
+			return item.get('item_group_print_heading')
+
+		item_group_print_heading = get_item_group_print_heading(item.item_group)
+		item.set('item_group_print_heading', item_group_print_heading)
+		return item_group_print_heading
 
 	def calculate_taxes_for_group(self, group_data, taxes_as_dict=False):
 		tax_copy_fields = ['name', 'idx', 'account_head', 'description', 'charge_type', 'row_id']

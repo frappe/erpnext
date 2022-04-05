@@ -15,6 +15,7 @@ from erpnext.utilities.product import get_qty_in_stock
 from six import iteritems
 from six.moves.urllib.parse import quote
 
+
 class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'
 	website = frappe._dict(
@@ -89,6 +90,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 	def delete_child_item_groups_key(self):
 		frappe.cache().hdel("child_item_groups", self.name)
 
+
 @frappe.whitelist(allow_guest=True)
 def get_product_list_for_group(product_group=None, start=0, limit=10, search=None):
 	if product_group:
@@ -131,6 +133,7 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 
 	return data
 
+
 def get_child_groups_for_list_in_html(item_group, start, limit, search):
 	search_filters = None
 	if search_filters:
@@ -154,6 +157,7 @@ def get_child_groups_for_list_in_html(item_group, start, limit, search):
 
 	return data
 
+
 def adjust_qty_for_expired_items(data):
 	adjusted_data = []
 
@@ -174,6 +178,7 @@ def get_child_groups(item_group_name):
 		from `tabItem Group` where lft>=%(lft)s and rgt<=%(rgt)s
 			and show_in_website = 1""", {"lft": item_group.lft, "rgt": item_group.rgt})
 
+
 def get_child_item_groups(item_group_name):
 	item_group = frappe.get_cached_value("Item Group",
 		item_group_name, ["lft", "rgt"], as_dict=1)
@@ -182,6 +187,7 @@ def get_child_item_groups(item_group_name):
 		filters= {'lft': ('>=', item_group.lft),'rgt': ('<=', item_group.rgt)})]
 
 	return child_item_groups or {}
+
 
 def get_item_for_list_in_html(context):
 	# add missing absolute link in files
@@ -195,6 +201,7 @@ def get_item_for_list_in_html(context):
 	products_template = 'templates/includes/products_as_list.html'
 
 	return frappe.get_template(products_template).render(context)
+
 
 def get_group_item_count(item_group):
 	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(item_group)])
@@ -221,6 +228,7 @@ def get_parent_item_groups(item_group_name):
 
 	return base_parents + parent_groups
 
+
 def invalidate_cache_for(doc, item_group=None):
 	if not item_group:
 		item_group = doc.name
@@ -229,6 +237,7 @@ def invalidate_cache_for(doc, item_group=None):
 		item_group_name = frappe.db.get_value("Item Group", d.get('name'))
 		if item_group_name:
 			clear_cache(frappe.db.get_value('Item Group', item_group_name, 'route'))
+
 
 def get_item_group_defaults(item, company):
 	item = frappe.get_cached_doc("Item", item)
@@ -247,3 +256,18 @@ def get_item_group_defaults(item, company):
 		item_group = frappe.get_cached_doc("Item Group", item_group.parent_item_group) if item_group.parent_item_group else None
 
 	return item_defaults
+
+
+def get_item_group_print_heading(item_group):
+	item_group_print_heading = item_group
+
+	current_item_group = item_group
+	while current_item_group:
+		current_item_group_doc = frappe.get_cached_doc("Item Group", current_item_group)
+		if current_item_group_doc.is_print_heading:
+			item_group_print_heading = current_item_group
+			break
+
+		current_item_group = current_item_group_doc.parent_item_group
+
+	return item_group_print_heading

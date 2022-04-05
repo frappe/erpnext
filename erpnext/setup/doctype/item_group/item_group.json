@@ -15,6 +15,7 @@
   "image",
   "column_break_5",
   "show_item_code",
+  "is_print_heading",
   "override_item_settings_section",
   "item_naming_by",
   "item_naming_series",
@@ -264,6 +265,12 @@
   {
    "fieldname": "column_break_18",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_print_heading",
+   "fieldtype": "Check",
+   "label": "Is Print Heading"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -271,7 +278,7 @@
  "image_field": "image",
  "is_tree": 1,
  "max_attachments": 3,
- "modified": "2021-03-12 15:02:55.087626",
+ "modified": "2022-04-05 20:12:54.940141",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",
