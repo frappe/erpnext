@@ -1,11 +1,12 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
-from typing import Dict, List, Literal, Optional
+from typing import Dict, List, Optional
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cstr, flt
+from typing_extensions import Literal
 
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 
