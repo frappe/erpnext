@@ -29,6 +29,12 @@ force_customer_fields = ("customer_name",
 	"tax_id", "tax_cnic", "tax_strn", "tax_status",
 	"address_display", "contact_display", "contact_phone", "contact_mobile", "contact_email")
 
+vehicle_change_fields = [
+	('change_vehicle_license_plate', 'license_plate'),
+	('change_vehicle_warranty_no', 'warranty_no'),
+	('change_vehicle_delivery_date', 'delivery_date')
+]
+
 
 class Project(Document):
 	def __init__(self, *args, **kwargs):
@@ -54,6 +60,8 @@ class Project(Document):
 		self.set_onload('default_vehicle_checklist_items', get_default_vehicle_checklist_items())
 		self.set_onload('cant_change_fields', self.get_cant_change_fields())
 
+		self.reset_quick_change_fields()
+
 		self.set_costing()
 
 		self.get_project_sales_data()
@@ -71,6 +79,7 @@ class Project(Document):
 		if not self.is_new():
 			self.copy_from_template()
 
+		self.quick_change_master_details()
 		self.set_missing_values()
 		self.validate_project_type()
 		self.set_vehicle_status()
@@ -131,6 +140,29 @@ class Project(Document):
 			if project_type.previous_project_mandatory and not self.get('previous_project'):
 				frappe.throw(_("{0} is mandatory for Project Type {1}")
 					.format(self.meta.get_label('previous_project'), self.project_type))
+
+	def quick_change_master_details(self):
+		if not self._action:
+			return
+
+		if self.get('applies_to_vehicle'):
+			vehicle_change_map = frappe._dict()
+			for project_field, vehicle_field in vehicle_change_fields:
+				if self.meta.has_field(project_field) and self.get(project_field):
+					vehicle_change_map[vehicle_field] = self.get(project_field)
+
+			if vehicle_change_map:
+				if vehicle_change_map.get('license_plate'):
+					vehicle_change_map['is_unregistered'] = 0
+
+				frappe.set_value("Vehicle", self.applies_to_vehicle, vehicle_change_map)
+
+		self.reset_quick_change_fields()
+
+	def reset_quick_change_fields(self):
+		for project_field, vehicle_field in vehicle_change_fields:
+			if self.meta.has_field(project_field):
+				self.set(project_field, None)
 
 	def set_missing_values(self):
 		self.set_customer_details()

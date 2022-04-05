@@ -327,6 +327,7 @@
    "read_only": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "delivery_date",
    "fieldtype": "Date",
    "label": "Delivery Date",
@@ -714,7 +715,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2022-04-05 06:53:30.235235",
+ "modified": "2022-04-05 17:12:08.070057",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

@@ -27,7 +27,7 @@ def get_field(fieldname, field_list):
 	return None
 
 
-# Vehicle Details
+# Vehicle Details / Applies To
 applies_to_fields = [
 	{"label": "Applies to Model", "fieldname": "applies_to_variant_of", "fieldtype": "Link", "options": "Item",
 		"insert_after": "sec_applies_to", "in_standard_filter": 1, "hidden": 1, "read_only": 1,
@@ -58,24 +58,49 @@ applies_to_fields = [
 		"insert_after": "col_break_vehicle_2"},
 ]
 
-# Vehicle Odometer field in transactions but not project
-applies_to_project_fields = deepcopy(applies_to_fields)
-
+applies_to_transaction_fields = deepcopy(applies_to_fields)
 vehicle_last_odometer = {"label": "Odometer Reading", "fieldname": "vehicle_last_odometer", "fieldtype": "Int"}
-insert_field_after('vehicle_color', vehicle_last_odometer, applies_to_fields)
+insert_field_after('vehicle_color', vehicle_last_odometer, applies_to_transaction_fields)
 
-# Additional Project Vehicle Fields
-project_vehicle_warranty_no = {"label": "Warranty Book No", "fieldname": "vehicle_warranty_no", "fieldtype": "Data"}
-insert_field_after('vehicle_color', project_vehicle_warranty_no, applies_to_project_fields)
+# Vehicle Owner
+vehicle_owner_fields = [
+	{"label": "Vehicle Owner", "fieldname": "vehicle_owner", "fieldtype": "Link", "options": "Customer",
+		"insert_after": ""},
+	{"label": "Vehicle Owner Name", "fieldname": "vehicle_owner_name", "fieldtype": "Data",
+		"insert_after": "vehicle_owner", "fetch_from": "vehicle_owner.customer_name", "read_only": 1,
+		"depends_on": "eval:doc.vehicle_owner && doc.vehicle_owner_name != doc.vehicle_owner"},
+]
 
-project_vehicle_delivery_date = {"label": "Vehicle Delivery Date", "fieldname": "vehicle_delivery_date", "fieldtype": "Date"}
-insert_field_after('vehicle_warranty_no', project_vehicle_delivery_date, applies_to_project_fields)
+sales_invoice_vehicle_owner_fields = deepcopy(vehicle_owner_fields)
+sales_invoice_vehicle_owner_field = [f for f in sales_invoice_vehicle_owner_fields if f['fieldname'] == 'vehicle_owner'][0]
+sales_invoice_vehicle_owner_field['insert_after'] = 'bill_to_name'
 
-project_vehicle_readings_section = {"label": "Vehicle Readings & Checklist",
-	"fieldname": "sec_vehicle_status", "fieldtype": "Section Break", "collapsible": 0}
-insert_field_after('vehicle_delivery_date', project_vehicle_readings_section, applies_to_project_fields)
+project_vehicle_owner_fields = deepcopy(vehicle_owner_fields)
+project_vehicle_owner_column_break = {"label": "", "fieldname": "col_break_customer_details_2", "fieldtype": "Column Break",
+	"insert_after": "bill_to_name"}
+project_vehicle_owner_fields.insert(0, project_vehicle_owner_column_break)
 
-applies_to_project_fields += [
+project_vehicle_owner_field = [f for f in project_vehicle_owner_fields if f['fieldname'] == 'vehicle_owner'][0]
+project_vehicle_owner_field['insert_after'] = 'col_break_customer_details_2'
+
+# Service Persons
+service_person_fields = [
+	{"label": "Service Advisor", "fieldname": "service_advisor", "fieldtype": "Link", "options": "Sales Person",
+		"insert_after": "more_info_cb_2", "in_standard_filter": 1},
+	{"label": "Service Manager", "fieldname": "service_manager", "fieldtype": "Link", "options": "Sales Person",
+		"insert_after": "more_info_cb_3", "in_standard_filter": 1},
+]
+
+material_request_service_person_fields = deepcopy(service_person_fields)
+[d for d in material_request_service_person_fields if d['fieldname'] == 'service_advisor'][0]['insert_after'] = 'more_info_cb_1'
+[d for d in material_request_service_person_fields if d['fieldname'] == 'service_manager'][0]['insert_after'] = 'more_info_cb_2'
+
+project_service_person_fields = deepcopy(service_person_fields)
+[d for d in project_service_person_fields if d['fieldname'] == 'service_advisor'][0]['insert_after'] = 'project_details_cb_1'
+[d for d in project_service_person_fields if d['fieldname'] == 'service_manager'][0]['insert_after'] = 'service_advisor'
+
+# Project fields
+project_fields = [
 	{"label": "Vehicle Workshop", "fieldname": "vehicle_workshop", "fieldtype": "Link", "options": "Vehicle Workshop",
 		"insert_after": "reference_no", "bold": 1, "allow_in_quick_entry": 1, "in_standard_filter": 1},
 
@@ -88,7 +113,43 @@ applies_to_project_fields += [
 		"insert_after": "is_periodic_maintenance"},
 ]
 
+# Applies To Project Fields
+applies_to_project_fields = deepcopy(applies_to_fields)
+
+project_vehicle_warranty_no = {"label": "Warranty Book No", "fieldname": "vehicle_warranty_no", "fieldtype": "Data"}
+insert_field_after('vehicle_color', project_vehicle_warranty_no, applies_to_project_fields)
+
+project_vehicle_delivery_date = {"label": "Vehicle Delivery Date", "fieldname": "vehicle_delivery_date", "fieldtype": "Date"}
+insert_field_after('vehicle_warranty_no', project_vehicle_delivery_date, applies_to_project_fields)
+
+# Change Vehicle Detail Fields
+project_change_vehicle_details_section = {"label": "Change Vehicle Details",
+	"fieldname": "sec_change_vehicle_details", "fieldtype": "Section Break", "collapsible": 1,
+	"depends_on": "applies_to_vehicle"}
+insert_field_after('vehicle_delivery_date', project_change_vehicle_details_section, applies_to_project_fields)
+
+project_change_vehicle_details_fields = [
+	{"label": "Change License Plate", "fieldname": "change_vehicle_license_plate", "fieldtype": "Data",
+		"insert_after": "sec_change_vehicle_details", "no_copy": 1, "report_hide": 1},
+
+	{"label": "", "fieldname": "cb_change_vehicle_details_1", "fieldtype": "Column Break",
+		"insert_after": "change_vehicle_license_plate"},
+
+	{"label": "Change Warranty Book No", "fieldname": "change_vehicle_warranty_no", "fieldtype": "Data",
+		"insert_after": "cb_change_vehicle_details_1", "no_copy": 1, "report_hide": 1},
+
+	{"label": "", "fieldname": "cb_change_vehicle_details_2", "fieldtype": "Column Break",
+		"insert_after": "change_vehicle_warranty_no"},
+
+	{"label": "Change Vehicle Delivery Date", "fieldname": "change_vehicle_delivery_date", "fieldtype": "Date",
+		"insert_after": "cb_change_vehicle_details_2", "no_copy": 1, "report_hide": 1},
+]
+
 # Project Vehicle Status Fields
+project_vehicle_readings_section = {"label": "Vehicle Readings & Checklist",
+	"fieldname": "sec_vehicle_status", "fieldtype": "Section Break", "collapsible": 0}
+insert_field_after('change_vehicle_delivery_date', project_vehicle_readings_section, project_change_vehicle_details_fields)
+
 project_vehicle_reading_fields = [
 	{"label": "Odometer Reading (First)", "fieldname": "vehicle_first_odometer", "fieldtype": "Int",
 		"insert_after": "sec_vehicle_status", "no_copy": 1},
@@ -122,43 +183,6 @@ project_vehicle_reading_fields = [
 	{"label": "Vehicle Checklist", "fieldname": "vehicle_checklist", "fieldtype": "Table", "options": "Vehicle Checklist Item",
 		"insert_after": "vehicle_checklist_html", "hidden": 1},
 ]
-
-# Vehicle Owner
-vehicle_owner_fields = [
-	{"label": "Vehicle Owner", "fieldname": "vehicle_owner", "fieldtype": "Link", "options": "Customer",
-		"insert_after": ""},
-	{"label": "Vehicle Owner Name", "fieldname": "vehicle_owner_name", "fieldtype": "Data",
-		"insert_after": "vehicle_owner", "fetch_from": "vehicle_owner.customer_name", "read_only": 1,
-		"depends_on": "eval:doc.vehicle_owner && doc.vehicle_owner_name != doc.vehicle_owner"},
-]
-
-sales_invoice_vehicle_owner_fields = deepcopy(vehicle_owner_fields)
-sales_invoice_vehicle_owner_field = [f for f in sales_invoice_vehicle_owner_fields if f['fieldname'] == 'vehicle_owner'][0]
-sales_invoice_vehicle_owner_field['insert_after'] = 'bill_to_name'
-
-project_vehicle_owner_fields = deepcopy(vehicle_owner_fields)
-project_vehicle_owner_column_break = {"label": "", "fieldname": "col_break_customer_details_2", "fieldtype": "Column Break",
-	"insert_after": "bill_to_name"}
-project_vehicle_owner_fields.insert(0, project_vehicle_owner_column_break)
-
-project_vehicle_owner_field = [f for f in project_vehicle_owner_fields if f['fieldname'] == 'vehicle_owner'][0]
-project_vehicle_owner_field['insert_after'] = 'col_break_customer_details_2'
-
-# Service Person
-service_person_fields = [
-	{"label": "Service Advisor", "fieldname": "service_advisor", "fieldtype": "Link", "options": "Sales Person",
-		"insert_after": "more_info_cb_2", "in_standard_filter": 1},
-	{"label": "Service Manager", "fieldname": "service_manager", "fieldtype": "Link", "options": "Sales Person",
-		"insert_after": "more_info_cb_3", "in_standard_filter": 1},
-]
-
-material_request_service_person_fields = deepcopy(service_person_fields)
-[d for d in material_request_service_person_fields if d['fieldname'] == 'service_advisor'][0]['insert_after'] = 'more_info_cb_1'
-[d for d in material_request_service_person_fields if d['fieldname'] == 'service_manager'][0]['insert_after'] = 'more_info_cb_2'
-
-poject_service_person_fields = deepcopy(service_person_fields)
-[d for d in poject_service_person_fields if d['fieldname'] == 'service_advisor'][0]['insert_after'] = 'project_details_cb_1'
-[d for d in poject_service_person_fields if d['fieldname'] == 'service_manager'][0]['insert_after'] = 'service_advisor'
 
 # Project Type Fields
 project_type_fields = [
@@ -209,6 +233,8 @@ item_fields = [
 # Set Translatable = 0
 for d in applies_to_fields:
 	d['translatable'] = 0
+for d in applies_to_transaction_fields:
+	d['translatable'] = 0
 for d in applies_to_project_fields:
 	d['translatable'] = 0
 for d in project_vehicle_reading_fields:
@@ -229,7 +255,11 @@ for d in accounting_dimension_table_fields:
 	d['translatable'] = 0
 for d in item_fields:
 	d['translatable'] = 0
+for d in project_fields:
+	d['translatable'] = 0
 for d in project_type_fields:
+	d['translatable'] = 0
+for d in project_change_vehicle_details_fields:
 	d['translatable'] = 0
 
 common_properties = [
@@ -287,21 +317,20 @@ data = {
 		{"doctype": "Project", "fieldname": "previous_project", "property": "label", "value": "Previous Repair Order"},
 		{"doctype": "Project Type", "fieldname": "previous_project_mandatory", "property": "label", "value": "Previous Repair Order Mandatory"},
 		{"doctype": "Project", "fieldname": "project_name", "property": "label", "value": "Voice of Customer"},
-		{"doctype": "Delivery Note", "fieldname": "received_by_type", "property": "default", "value": "Employee"},
 		{"doctype": "Payment Terms Template", "fieldname": "include_in_vehicle_booking", "property": "hidden", "value": 0},
-		{"doctype": "Transaction Type", "fieldname": "vehicle_booking_defaults_section", "property": "hidden", "value": 0},
 	],
 	'custom_fields': {
 		"Item": item_fields,
-		"Sales Invoice": sales_invoice_vehicle_owner_fields + applies_to_fields + service_person_fields,
-		"Delivery Note": applies_to_fields + service_person_fields,
-		"Sales Order": applies_to_fields + service_person_fields,
-		"Quotation": applies_to_fields + service_person_fields,
-		"Purchase Order": applies_to_fields,
-		"Purchase Receipt": applies_to_fields,
-		"Purchase Invoice": applies_to_fields,
-		"Material Request": applies_to_fields + material_request_service_person_fields,
-		"Project": project_vehicle_owner_fields + applies_to_project_fields + poject_service_person_fields + project_vehicle_reading_fields,
+		"Sales Invoice": sales_invoice_vehicle_owner_fields + applies_to_transaction_fields + service_person_fields,
+		"Delivery Note": applies_to_transaction_fields + service_person_fields,
+		"Sales Order": applies_to_transaction_fields + service_person_fields,
+		"Quotation": applies_to_transaction_fields + service_person_fields,
+		"Purchase Order": applies_to_transaction_fields,
+		"Purchase Receipt": applies_to_transaction_fields,
+		"Purchase Invoice": applies_to_transaction_fields,
+		"Material Request": applies_to_transaction_fields + material_request_service_person_fields,
+		"Project": project_fields + applies_to_project_fields + project_change_vehicle_details_fields +
+			project_vehicle_reading_fields + project_vehicle_owner_fields + project_service_person_fields,
 		"Journal Entry": accounting_dimension_fields,
 		"Journal Entry Account": accounting_dimension_table_fields,
 		"Payment Entry": accounting_dimension_fields,
