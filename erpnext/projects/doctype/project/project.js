@@ -230,16 +230,12 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	toggle_vehicle_odometer_fields: function () {
 		if (this.frm.fields_dict.vehicle_first_odometer && this.frm.fields_dict.vehicle_last_odometer) {
 			var first_odometer_read_only = cint(this.frm.doc.vehicle_first_odometer);
-			var last_odometer_read_only = !cint(this.frm.doc.vehicle_first_odometer)
-				|| cint(this.frm.doc.vehicle_last_odometer) !== cint(this.frm.doc.vehicle_first_odometer);
 
-			if (!this.frm.doc.applies_to_vehicle) {
+			if (!this.frm.doc.applies_to_vehicle || this.frm.doc.__islocal) {
 				first_odometer_read_only = 0;
-				last_odometer_read_only = 0;
 			}
 
 			this.frm.set_df_property("vehicle_first_odometer", "read_only", first_odometer_read_only);
-			this.frm.set_df_property("vehicle_last_odometer", "read_only", last_odometer_read_only);
 		}
 	},
 
@@ -644,7 +640,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		dialog.set_primary_action(__("Create"), function () {
 			var values = dialog.get_values();
 			return frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle_log.vehicle_log.make_odometer_log",
+				method: "erpnext.vehicles.doctype.vehicle_log.vehicle_log.make_odometer_log_api",
 				args: {
 					"vehicle": me.frm.doc.applies_to_vehicle,
 					"odometer": cint(values.new_odometer),

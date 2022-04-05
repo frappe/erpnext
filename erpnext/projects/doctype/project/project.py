@@ -181,13 +181,18 @@ class Project(Document):
 
 		if self.get('applies_to_vehicle'):
 			reload = False
+
 			odo = get_project_odometer(self.name, self.applies_to_vehicle)
 			if not odo.vehicle_first_odometer and self.vehicle_first_odometer:
-				make_odometer_log(self.applies_to_vehicle, self.vehicle_first_odometer, project=self.name)
+				make_odometer_log(self.applies_to_vehicle, self.vehicle_first_odometer, project=self.name,
+					from_project_update=True)
 				reload = True
-			if (not odo.vehicle_last_odometer or odo.vehicle_first_odometer == odo.vehicle_last_odometer)\
-					and self.vehicle_last_odometer and self.vehicle_last_odometer > self.vehicle_first_odometer:
-				make_odometer_log(self.applies_to_vehicle, self.vehicle_last_odometer, project=self.name)
+
+			if reload:
+				odo = get_project_odometer(self.name, self.applies_to_vehicle)
+			if self.vehicle_last_odometer and self.vehicle_last_odometer > odo.vehicle_last_odometer:
+				make_odometer_log(self.applies_to_vehicle, self.vehicle_last_odometer, project=self.name,
+					from_project_update=True)
 				reload = True
 
 			if reload:

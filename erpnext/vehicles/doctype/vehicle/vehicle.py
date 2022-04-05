@@ -487,6 +487,11 @@ def validate_duplicate_vehicle(fieldname, value, exclude=None, throw=False):
 
 @frappe.whitelist()
 def get_vehicle_odometer(vehicle, date=None, project=None, ascending=False):
+	odometer_log = get_last_odometer_log(vehicle, date, project, ascending)
+	return cint(odometer_log.odometer) if odometer_log else 0
+
+
+def get_last_odometer_log(vehicle, date=None, project=None, ascending=False, date_operator='<='):
 	if not vehicle:
 		frappe.throw(_("Vehicle not provided"))
 
@@ -498,14 +503,14 @@ def get_vehicle_odometer(vehicle, date=None, project=None, ascending=False):
 	if project:
 		filters['project'] = project
 	if date:
-		filters['date'] = ['<=', getdate(date)]
+		filters['date'] = [date_operator, getdate(date)]
 
 	asc_or_desc = "asc" if ascending else "desc"
 	order_by = "date {0}, odometer {0}".format(asc_or_desc)
 
-	odometer = frappe.get_all("Vehicle Log", filters=filters, fields=['odometer'], order_by=order_by, limit_page_length=1)
-
-	return cint(odometer[0].odometer) if odometer else 0
+	odometer_log = frappe.get_all("Vehicle Log", filters=filters, fields=['odometer', 'date'], order_by=order_by,
+		limit_page_length=1)
+	return odometer_log[0] if odometer_log else None
 
 
 @frappe.whitelist()

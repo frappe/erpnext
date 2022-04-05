@@ -5,20 +5,15 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, getdate
+from frappe.utils import cint, flt, getdate, formatdate
 from frappe.model.document import Document
-from erpnext.vehicles.doctype.vehicle.vehicle import get_vehicle_odometer
+from erpnext.vehicles.doctype.vehicle.vehicle import get_vehicle_odometer, get_last_odometer_log
 
 class VehicleLog(Document):
 	def validate(self):
-		if getdate(self.date) > getdate():
-			frappe.throw(_("Vehicle Log Date cannot be in the future"))
-
-		self.last_odometer = get_vehicle_odometer(self.vehicle, self.date)
-
-		if cint(self.odometer) < cint(self.last_odometer):
-			frappe.throw(_("Current Odometer Reading {0} km cannot be less than Last Odometer Reading {1} km")
-				.format(frappe.bold(self.get_formatted('odometer')), frappe.bold(self.get_formatted('last_odometer'))))
+		self.validate_negative_odometer()
+		self.validate_last_odometer()
+		self.validate_future_date()
 
 	def on_submit(self):
 		self.update_vehicle_odometer()
@@ -27,6 +22,31 @@ class VehicleLog(Document):
 	def on_cancel(self):
 		self.update_vehicle_odometer()
 		self.update_project_odometer()
+
+	def validate_future_date(self):
+		if getdate(self.date) > getdate():
+			frappe.throw(_("Vehicle Log Date cannot be in the future"))
+
+	def validate_negative_odometer(self):
+		if cint(self.odometer) < 0:
+			frappe.throw(_("Odometer Reading cannot be negative"))
+
+	def validate_last_odometer(self):
+		previous_odometer_log = get_last_odometer_log(self.vehicle, self.date)
+		self.last_odometer = cint(previous_odometer_log.odometer) if previous_odometer_log else 0
+
+		# if current odometer reading is less than previous odometer, allow if previous odometer is on same date
+		if cint(self.odometer) < cint(self.last_odometer):
+			if previous_odometer_log and previous_odometer_log.date == getdate(self.date):
+				previous_odometer_log = get_last_odometer_log(self.vehicle, self.date, date_operator='<')
+				self.last_odometer = cint(previous_odometer_log.odometer) if previous_odometer_log else 0
+
+		if cint(self.odometer) < cint(self.last_odometer):
+			frappe.throw(_("Current Odometer Reading {0} km on {1} cannot be less than Previous Odometer Reading {2} km{3}")
+				.format(frappe.bold(self.get_formatted('odometer')),
+				formatdate(self.date),
+				frappe.bold(self.get_formatted('last_odometer')),
+				" on {0}".format(formatdate(previous_odometer_log.date)) if previous_odometer_log else ""))
 
 	def update_vehicle_odometer(self):
 		odometer = get_vehicle_odometer(self.vehicle)
@@ -38,7 +58,7 @@ class VehicleLog(Document):
 		if self.project and frappe.get_meta("Project").has_field("applies_to_vehicle") and 'Vehicles' in frappe.get_active_domains():
 			vehicle = frappe.db.get_value("Project", self.project, "applies_to_vehicle")
 			if vehicle:
-				update_modified = ('Project', self.project) not in frappe.flags.currently_saving
+				update_modified = not self.flags.from_project_update
 
 				odo = get_project_odometer(self.project, vehicle)
 				frappe.db.set_value("Project", self.project, {
@@ -72,7 +92,11 @@ def make_expense_claim(docname):
 
 
 @frappe.whitelist()
-def make_odometer_log(vehicle, odometer, date=None, project=None):
+def make_odometer_log_api(vehicle, odometer, date=None, project=None):
+	make_odometer_log(vehicle, odometer, date, project, ignore_permissions=False)
+
+
+def make_odometer_log(vehicle, odometer, date=None, project=None, ignore_permissions=True, from_project_update=False):
 	if not vehicle:
 		frappe.throw(_("Vehicle is not provided to make Vehicle Odometer Log"))
 
@@ -84,7 +108,8 @@ def make_odometer_log(vehicle, odometer, date=None, project=None):
 	doc.odometer = cint(odometer)
 	doc.project = project
 
-	doc.flags.ignore_permissions = True
+	doc.flags.ignore_permissions = ignore_permissions
+	doc.flags.from_project_update = from_project_update
 	doc.save()
 	doc.submit()
 
