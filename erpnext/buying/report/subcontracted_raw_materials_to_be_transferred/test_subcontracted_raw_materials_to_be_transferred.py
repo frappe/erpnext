@@ -19,7 +19,7 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 class TestSubcontractedItemToBeTransferred(FrappeTestCase):
 	def test_pending_and_transferred_qty(self):
 		po = create_purchase_order(
-			item_code="_Test FG Item", is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC"
+			item_code="_Test FG Item", is_subcontracted=1, supplier_warehouse="_Test Warehouse 1 - _TC"
 		)
 
 		# Material Receipt of RMs
