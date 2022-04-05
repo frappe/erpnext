@@ -732,3 +732,4 @@ erpnext.patches.v12_0.update_material_request_status
 erpnext.patches.v12_0.fix_loan_status #1
 execute:frappe.delete_doc_if_exists("Custom Field", "Project-vehicle_warehouse")
 erpnext.patches.v12_0.refactor_repair_order
+execute:frappe.delete_doc_if_exists("DocType", "Vehicle Booking Default")

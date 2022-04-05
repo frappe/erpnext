@@ -30,9 +30,7 @@
   "sec_break_1",
   "item_defaults",
   "sec_billing_defaults",
-  "accounts",
-  "vehicle_booking_defaults_section",
-  "vehicle_booking_defaults"
+  "accounts"
  ],
  "fields": [
   {
@@ -175,18 +173,6 @@
    "label": "Disabled"
   },
   {
-   "fieldname": "vehicle_booking_defaults_section",
-   "fieldtype": "Section Break",
-   "hidden": 1,
-   "label": "Vehicle Booking Defaults"
-  },
-  {
-   "fieldname": "vehicle_booking_defaults",
-   "fieldtype": "Table",
-   "label": "Vehicle Booking Defaults",
-   "options": "Vehicle Booking Default"
-  },
-  {
    "fieldname": "mode_of_payment",
    "fieldtype": "Link",
    "label": "Default Mode of Payment",
@@ -197,7 +183,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2021-09-28 12:48:21.881546",
+ "modified": "2022-04-05 16:48:48.308961",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transaction Type",
