@@ -21,7 +21,7 @@ class CancellationOfInvoices(Document):
 			self.get_items()
 		
 		if self.docstatus == 1:
-			self.add_bin()
+			# self.add_bin()
 			self.delete_gl_entry()
 			self.modified_sale_invoice()
 	
