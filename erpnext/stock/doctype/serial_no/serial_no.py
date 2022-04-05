@@ -154,13 +154,12 @@ class SerialNo(StockController):
 		if delivery_sle:
 			self.delivery_document_type = delivery_sle.voucher_type
 			self.delivery_document_no = delivery_sle.voucher_no
-			self.delivery_date = delivery_sle.posting_date
+			self.delivery_date = delivery_sle.posting_date or self.delivery_date
 			self.delivery_time = delivery_sle.posting_time
 			self.is_reserved = 0
 
 			if self.warranty_period:
-				self.warranty_expiry_date	= add_days(cstr(delivery_sle.posting_date),
-					cint(self.warranty_period))
+				self.warranty_expiry_date = add_days(self.delivery_date, cint(self.warranty_period))
 		else:
 			for fieldname in ("delivery_document_type", "delivery_document_no",
 				"delivery_date", "delivery_time",

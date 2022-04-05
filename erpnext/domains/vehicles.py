@@ -68,9 +68,12 @@ insert_field_after('vehicle_color', vehicle_last_odometer, applies_to_fields)
 project_vehicle_warranty_no = {"label": "Warranty Book No", "fieldname": "vehicle_warranty_no", "fieldtype": "Data"}
 insert_field_after('vehicle_color', project_vehicle_warranty_no, applies_to_project_fields)
 
+project_vehicle_delivery_date = {"label": "Vehicle Delivery Date", "fieldname": "vehicle_delivery_date", "fieldtype": "Date"}
+insert_field_after('vehicle_warranty_no', project_vehicle_delivery_date, applies_to_project_fields)
+
 project_vehicle_readings_section = {"label": "Vehicle Readings & Checklist",
 	"fieldname": "sec_vehicle_status", "fieldtype": "Section Break", "collapsible": 0}
-insert_field_after('vehicle_warranty_no', project_vehicle_readings_section, applies_to_project_fields)
+insert_field_after('vehicle_delivery_date', project_vehicle_readings_section, applies_to_project_fields)
 
 applies_to_project_fields += [
 	{"label": "Vehicle Workshop", "fieldname": "vehicle_workshop", "fieldtype": "Link", "options": "Vehicle Workshop",

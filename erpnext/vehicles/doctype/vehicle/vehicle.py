@@ -25,7 +25,7 @@ class Vehicle(Document):
 	]
 
 	_sync_fields = [
-		'item_code', 'sales_order', 'is_reserved', 'reserved_customer', 'reserved_customer_name',
+		'item_code', 'sales_order', 'is_reserved', 'reserved_customer', 'reserved_customer_name', 'delivery_date',
 	]
 
 	def __init__(self, *args, **kwargs):

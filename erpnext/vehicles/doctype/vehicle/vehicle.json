@@ -60,21 +60,21 @@
   "column_break_45",
   "dispatch_date",
   "purchase_details",
-  "purchase_document_type",
-  "purchase_document_no",
-  "column_break_41",
   "purchase_date",
   "purchase_time",
+  "column_break_41",
+  "purchase_document_type",
+  "purchase_document_no",
   "column_break3",
   "supplier",
   "supplier_name",
   "purchase_rate",
   "delivery_details",
-  "delivery_document_type",
-  "delivery_document_no",
-  "column_break_50",
   "delivery_date",
   "delivery_time",
+  "column_break_50",
+  "delivery_document_type",
+  "delivery_document_no",
   "column_break5",
   "sales_invoice",
   "reservation_section",
@@ -242,7 +242,7 @@
   {
    "fieldname": "purchase_document_type",
    "fieldtype": "Link",
-   "label": "Creation Document Type",
+   "label": "Receiving Document Type",
    "no_copy": 1,
    "options": "DocType",
    "read_only": 1
@@ -250,7 +250,7 @@
   {
    "fieldname": "purchase_document_no",
    "fieldtype": "Dynamic Link",
-   "label": "Creation Document No",
+   "label": "Receiving Document No",
    "no_copy": 1,
    "options": "purchase_document_type",
    "read_only": 1
@@ -258,7 +258,7 @@
   {
    "fieldname": "purchase_date",
    "fieldtype": "Date",
-   "label": "Creation Date",
+   "label": "Received Date",
    "no_copy": 1,
    "oldfieldname": "purchase_date",
    "oldfieldtype": "Date",
@@ -267,7 +267,7 @@
   {
    "fieldname": "purchase_time",
    "fieldtype": "Time",
-   "label": "Creation Time",
+   "label": "Received Time",
    "no_copy": 1,
    "read_only": 1
   },
@@ -332,8 +332,7 @@
    "label": "Delivery Date",
    "no_copy": 1,
    "oldfieldname": "delivery_date",
-   "oldfieldtype": "Date",
-   "read_only": 1
+   "oldfieldtype": "Date"
   },
   {
    "fieldname": "delivery_time",
@@ -715,7 +714,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2022-01-20 16:52:46.511318",
+ "modified": "2022-04-05 06:53:30.235235",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

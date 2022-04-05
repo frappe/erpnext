@@ -252,7 +252,8 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 			'applies_to_item', 'applies_to_item_name',
 			'vehicle_license_plate', 'vehicle_unregistered',
 			'vehicle_chassis_no', 'vehicle_engine_no',
-			'vehicle_color', 'vehicle_warranty_no',
+			'vehicle_color',
+			'vehicle_warranty_no', 'vehicle_delivery_date',
 		];
 
 		var read_only = me.frm.doc.applies_to_vehicle || me.frm.doc.vehicle_status != "Not Received" ? 1 : 0;

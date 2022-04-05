@@ -27,11 +27,11 @@
   "vehicle_owner",
   "vehicle_owner_name",
   "purchase_details",
-  "purchase_document_type",
-  "purchase_document_no",
-  "column_break2",
   "purchase_date",
   "purchase_time",
+  "column_break2",
+  "purchase_document_type",
+  "purchase_document_no",
   "column_break3",
   "supplier",
   "supplier_name",
@@ -43,11 +43,11 @@
   "location",
   "employee",
   "delivery_details",
-  "delivery_document_type",
-  "delivery_document_no",
-  "column_break_34",
   "delivery_date",
   "delivery_time",
+  "column_break_34",
+  "delivery_document_type",
+  "delivery_document_no",
   "column_break5",
   "sales_invoice",
   "warranty_amc_details",
@@ -166,7 +166,7 @@
   {
    "fieldname": "purchase_details",
    "fieldtype": "Section Break",
-   "label": "Purchase / Manufacture Details"
+   "label": "Receiving Details"
   },
   {
    "fieldname": "column_break2",
@@ -176,7 +176,7 @@
   {
    "fieldname": "purchase_document_type",
    "fieldtype": "Link",
-   "label": "Creation Document Type",
+   "label": "Receiving Document Type",
    "no_copy": 1,
    "options": "DocType",
    "read_only": 1
@@ -184,7 +184,7 @@
   {
    "fieldname": "purchase_document_no",
    "fieldtype": "Dynamic Link",
-   "label": "Creation Document No",
+   "label": "Receiving Document No",
    "no_copy": 1,
    "options": "purchase_document_type",
    "read_only": 1
@@ -192,7 +192,7 @@
   {
    "fieldname": "purchase_date",
    "fieldtype": "Date",
-   "label": "Creation Date",
+   "label": "Received Date",
    "no_copy": 1,
    "oldfieldname": "purchase_date",
    "oldfieldtype": "Date",
@@ -201,7 +201,7 @@
   {
    "fieldname": "purchase_time",
    "fieldtype": "Time",
-   "label": "Creation Time",
+   "label": "Received Time",
    "no_copy": 1,
    "read_only": 1
   },
@@ -306,8 +306,7 @@
    "label": "Delivery Date",
    "no_copy": 1,
    "oldfieldname": "delivery_date",
-   "oldfieldtype": "Date",
-   "read_only": 1
+   "oldfieldtype": "Date"
   },
   {
    "fieldname": "delivery_time",
@@ -514,7 +513,7 @@
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
- "modified": "2021-06-14 23:32:10.134019",
+ "modified": "2022-04-05 06:57:49.818458",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
