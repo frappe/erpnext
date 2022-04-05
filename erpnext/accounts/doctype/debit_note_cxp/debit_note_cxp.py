@@ -94,8 +94,8 @@ class DebitNoteCXP(Document):
 	def update_accounts_status(self):
 		supplier = frappe.get_doc("Supplier", self.supplier)
 		if supplier:
-			supplier.debit += self.amount_total
-			supplier.remaining_balance += self.amount_total
+			supplier.credit += self.amount_total
+			supplier.remaining_balance -= self.amount_total
 			supplier.save()
 	
 	def apply_gl_entry(self):
