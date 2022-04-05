@@ -559,7 +559,13 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 			loyalty_points = loyalty_point_details.get(d.company)
 
 		info = {}
-		info["billing_this_year"] = flt(billing_this_year) if billing_this_year else 0
+
+		if party_type == "Supplier":
+			supplier = frappe.get_doc("Supplier", party)
+			info["billing_this_year"] = supplier.remaining_balance
+		else:
+			info["billing_this_year"] = flt(billing_this_year) if billing_this_year else 0
+
 		info["currency"] = party_account_currency
 		info["total_unpaid"] = flt(total_unpaid) if total_unpaid else 0
 		info["company"] = d.company
