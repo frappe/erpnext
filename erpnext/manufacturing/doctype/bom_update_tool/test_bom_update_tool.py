@@ -4,8 +4,8 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import replace_bom
+from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.stock.doctype.item.test_item import create_item
 
@@ -22,10 +22,7 @@ class TestBOMUpdateTool(FrappeTestCase):
 		bom_doc.items[1].item_code = "_Test Item"
 		bom_doc.insert()
 
-		boms = frappe._dict(
-			current_bom=current_bom,
-			new_bom=bom_doc.name
-		)
+		boms = frappe._dict(current_bom=current_bom, new_bom=bom_doc.name)
 		replace_bom(boms)
 
 		self.assertFalse(frappe.db.sql("select name from `tabBOM Item` where bom_no=%s", current_bom))
