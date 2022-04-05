@@ -262,7 +262,8 @@ def copy_attributes_to_variant(item, variant):
 	# copy non no-copy fields
 
 	exclude_fields = ["naming_series", "item_code", "item_name", "show_in_website",
-		"show_variant_in_website", "opening_stock", "variant_of", "valuation_rate"]
+		"show_variant_in_website", "opening_stock", "variant_of", "valuation_rate",
+		"variant_item_code_format", "variant_item_name_format"]
 
 	if item.variant_based_on=='Manufacturer':
 		# don't copy manufacturer values if based on part no
@@ -306,7 +307,7 @@ def make_variant_item_code(template_item_code, template_item_name, variant):
 		return
 
 	abbreviations = []
-	name_parts = []
+	values = []
 	for attr in variant.attributes:
 		item_attribute = frappe.db.sql("""select i.numeric_values, v.abbr, i.item_name_by
 			from `tabItem Attribute` i left join `tabItem Attribute Value` v
@@ -324,11 +325,30 @@ def make_variant_item_code(template_item_code, template_item_name, variant):
 
 		abbr_or_value = cstr(attr.attribute_value) if item_attribute[0].numeric_values else item_attribute[0].abbr
 		abbreviations.append(abbr_or_value)
-		name_parts.append(item_attribute[0].abbr if item_attribute[0].item_name_by == "Abbreviation" else attr.attribute_value)
+		values.append(item_attribute[0].abbr if item_attribute[0].item_name_by == "Abbreviation" else attr.attribute_value)
 
 	if abbreviations:
 		variant.item_code = "{0}-{1}".format(template_item_code, "-".join(abbreviations))
-		variant.item_name = "{0} - {1}".format(template_item_name, " - ".join(name_parts))
+		variant.item_name = "{0} - {1}".format(template_item_name, " - ".join(values))
+
+	variant_item_code_format = frappe.get_cached_value("Item", template_item_code, "variant_item_code_format")
+	variant_item_name_format = frappe.get_cached_value("Item", template_item_code, "variant_item_name_format")
+
+	if variant_item_code_format:
+		variant.item_code = evaluate_variant_naming_format(variant_item_code_format, abbreviations, values)
+	if variant_item_name_format:
+		variant.item_name = evaluate_variant_naming_format(variant_item_name_format, abbreviations, values)
+
+
+def evaluate_variant_naming_format(naming_format, abbreviations, values):
+	evaluated_name = cstr(naming_format)
+	for i, v in enumerate(abbreviations):
+		evaluated_name = evaluated_name.replace("{{abbr{0}}}".format(i + 1), v)
+	for i, v in enumerate(values):
+		evaluated_name = evaluated_name.replace("{{value{0}}}".format(i + 1), v)
+
+	return evaluated_name
+
 
 @frappe.whitelist()
 def create_variant_doc_for_quick_entry(template, args):

@@ -81,6 +81,8 @@
   "has_variants",
   "variant_based_on",
   "attributes",
+  "variant_item_code_format",
+  "variant_item_name_format",
   "unit_of_measure_conversion",
   "uom_conversion_graph",
   "uoms",
@@ -1282,6 +1284,18 @@
    "fieldtype": "Data",
    "label": "Bill Only To Customer Name",
    "read_only": 1
+  },
+  {
+   "depends_on": "has_variants",
+   "fieldname": "variant_item_code_format",
+   "fieldtype": "Data",
+   "label": "Variant Item Code Format"
+  },
+  {
+   "depends_on": "has_variants",
+   "fieldname": "variant_item_name_format",
+   "fieldtype": "Data",
+   "label": "Variant Item Name Format"
   }
  ],
  "has_web_view": 1,
@@ -1289,7 +1303,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2022-03-22 16:52:04.047943",
+ "modified": "2022-04-06 03:54:54.082306",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
