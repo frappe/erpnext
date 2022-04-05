@@ -68,9 +68,8 @@ class CurrencyExchangeSettings(Document):
 					str(key.key).format(transaction_date=nowdate(), to_currency="INR", from_currency="USD")
 				]
 		except Exception:
-			frappe.throw("Invalid result key. Response: " + response.text)
+			frappe.throw(_("Invalid result key. Response:") + " " + response.text)
 		if not isinstance(value, (int, float)):
 			frappe.throw(_("Returned exchange rate is neither integer not float."))
 
 		self.url = response.url
-		frappe.msgprint("Exchange rate of USD to INR is " + str(value))

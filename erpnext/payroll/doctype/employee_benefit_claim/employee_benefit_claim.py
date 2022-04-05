@@ -44,8 +44,7 @@ class EmployeeBenefitClaim(Document):
 		if max_benefits < claimed_amount:
 			frappe.throw(
 				_(
-					"Maximum benefit of employee {0} exceeds {1} by the sum {2} of previous claimed\
-			amount"
+					"Maximum benefit of employee {0} exceeds {1} by the sum {2} of previous claimed amount"
 				).format(self.employee, max_benefits, claimed_amount - max_benefits)
 			)
 
@@ -84,8 +83,7 @@ class EmployeeBenefitClaim(Document):
 		if max_benefits < pro_rata_amount + claimed_amount:
 			frappe.throw(
 				_(
-					"Maximum benefit of employee {0} exceeds {1} by the sum {2} of benefit application pro-rata component\
-			amount and previous claimed amount"
+					"Maximum benefit of employee {0} exceeds {1} by the sum {2} of benefit application pro-rata component amount and previous claimed amount"
 				).format(
 					self.employee, max_benefits, pro_rata_amount + claimed_amount - max_benefits
 				)

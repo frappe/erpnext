@@ -167,7 +167,7 @@ class BuyingController(StockController, Subcontracting):
 					_("Row #{0}: Accepted Warehouse and Supplier Warehouse cannot be same").format(item.idx)
 				)
 
-			if item.get("from_warehouse") and self.get("is_subcontracted") == "Yes":
+			if item.get("from_warehouse") and self.get("is_subcontracted"):
 				frappe.throw(
 					_(
 						"Row #{0}: Cannot select Supplier Warehouse while suppling raw materials to subcontractor"
@@ -339,10 +339,7 @@ class BuyingController(StockController, Subcontracting):
 		return supplied_items_cost
 
 	def validate_for_subcontracting(self):
-		if not self.is_subcontracted and self.sub_contracted_items:
-			frappe.throw(_("Please enter 'Is Subcontracted' as Yes or No"))
-
-		if self.is_subcontracted == "Yes":
+		if self.is_subcontracted:
 			if self.doctype in ["Purchase Receipt", "Purchase Invoice"] and not self.supplier_warehouse:
 				frappe.throw(_("Supplier Warehouse mandatory for sub-contracted {0}").format(self.doctype))
 
@@ -363,14 +360,14 @@ class BuyingController(StockController, Subcontracting):
 					item.bom = None
 
 	def create_raw_materials_supplied(self, raw_material_table):
-		if self.is_subcontracted == "Yes":
+		if self.is_subcontracted:
 			self.set_materials_for_subcontracted_items(raw_material_table)
 
 		elif self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 			for item in self.get("items"):
 				item.rm_supp_cost = 0.0
 
-		if self.is_subcontracted == "No" and self.get("supplied_items"):
+		if not self.is_subcontracted and self.get("supplied_items"):
 			self.set("supplied_items", [])
 
 	@property
@@ -466,7 +463,10 @@ class BuyingController(StockController, Subcontracting):
 		stock_items = self.get_stock_items()
 
 		for d in self.get("items"):
-			if d.item_code in stock_items and d.warehouse:
+			if d.item_code not in stock_items:
+				continue
+
+			if d.warehouse:
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 
 				if pr_qty:
@@ -491,6 +491,7 @@ class BuyingController(StockController, Subcontracting):
 					sle = self.get_sl_entries(
 						d, {"actual_qty": flt(pr_qty), "serial_no": cstr(d.serial_no).strip()}
 					)
+
 					if self.is_return:
 						outgoing_rate = get_rate_for_return(
 							self.doctype, self.name, d.item_code, self.return_against, item_row=d
@@ -520,18 +521,18 @@ class BuyingController(StockController, Subcontracting):
 
 						sl_entries.append(from_warehouse_sle)
 
-				if flt(d.rejected_qty) != 0:
-					sl_entries.append(
-						self.get_sl_entries(
-							d,
-							{
-								"warehouse": d.rejected_warehouse,
-								"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
-								"serial_no": cstr(d.rejected_serial_no).strip(),
-								"incoming_rate": 0.0,
-							},
-						)
+			if flt(d.rejected_qty) != 0:
+				sl_entries.append(
+					self.get_sl_entries(
+						d,
+						{
+							"warehouse": d.rejected_warehouse,
+							"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
+							"serial_no": cstr(d.rejected_serial_no).strip(),
+							"incoming_rate": 0.0,
+						},
 					)
+				)
 
 		self.make_sl_entries_for_supplier_warehouse(sl_entries)
 		self.make_sl_entries(
@@ -803,7 +804,7 @@ class BuyingController(StockController, Subcontracting):
 		if self.doctype == "Material Request":
 			return
 
-		if hasattr(self, "is_subcontracted") and self.is_subcontracted == "Yes":
+		if hasattr(self, "is_subcontracted") and self.is_subcontracted:
 			validate_item_type(self, "is_sub_contracted_item", "subcontracted")
 		else:
 			validate_item_type(self, "is_purchase_item", "purchase")

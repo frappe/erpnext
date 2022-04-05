@@ -3,6 +3,6 @@
 
 frappe.ui.form.on('DATEV Settings', {
 	refresh: function(frm) {
-		frm.add_custom_button('Show Report', () => frappe.set_route('query-report', 'DATEV'), "fa fa-table");
+		frm.add_custom_button(__('Show Report'), () => frappe.set_route('query-report', 'DATEV'), "fa fa-table");
 	}
 });

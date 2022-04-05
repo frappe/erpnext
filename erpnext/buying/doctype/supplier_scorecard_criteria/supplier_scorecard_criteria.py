@@ -80,6 +80,6 @@ def _get_variables(criteria):
 				)[0]
 				my_variables.append(var)
 			except Exception:
-				frappe.throw(_("Unable to find variable: ") + str(match.group(1)), InvalidFormulaVariable)
+				frappe.throw(_("Unable to find variable:") + " " + str(match.group(1)), InvalidFormulaVariable)
 
 	return my_variables

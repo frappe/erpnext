@@ -97,8 +97,8 @@ def get_columns(filters):
 			if filters["period"] == "Yearly":
 				labels = [
 					_("Budget") + " " + str(year[0]),
-					_("Actual ") + " " + str(year[0]),
-					_("Variance ") + " " + str(year[0]),
+					_("Actual") + " " + str(year[0]),
+					_("Variance") + " " + str(year[0]),
 				]
 				for label in labels:
 					columns.append(

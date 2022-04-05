@@ -86,7 +86,7 @@ frappe.ui.form.on('Social Media Post', {
 				frm.trigger('add_post_btn');
 			}
 			if (frm.doc.post_status !='Deleted') {
-				frm.add_custom_button(('Delete Post'), function() {
+				frm.add_custom_button(__('Delete Post'), function() {
 					frappe.confirm(__('Are you sure want to delete the Post from Social Media platforms?'),
 						function() {
 							frappe.call({
