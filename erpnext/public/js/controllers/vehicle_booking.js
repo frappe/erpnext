@@ -80,19 +80,6 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		if (this.frm.fields_dict.color_3) {
 			this.frm.set_query("color_3", () => me.color_query());
 		}
-
-		if (this.frm.fields_dict.additional_items) {
-			this.frm.set_query("additional_item_code", "additional_items", function (doc) {
-				var filters = {'include_in_vehicle_booking': 1, 'is_vehicle': 0};
-				if (doc.item_code) {
-					filters.applicable_to_item = doc.item_code;
-				}
-				return {
-					query: "erpnext.controllers.queries.item_query",
-					filters: filters
-				}
-			});
-		}
 	},
 
 	setup_route_options: function () {

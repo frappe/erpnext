@@ -115,8 +115,6 @@
   "column_break_56",
   "in_words",
   "payment_adjustment",
-  "additional_services_section",
-  "additional_items",
   "payment_schedule_section",
   "payment_terms_template",
   "payment_schedule",
@@ -888,18 +886,6 @@
   },
   {
    "collapsible": 1,
-   "fieldname": "additional_services_section",
-   "fieldtype": "Section Break",
-   "label": "Additional Items and Services"
-  },
-  {
-   "fieldname": "additional_items",
-   "fieldtype": "Table",
-   "label": "Additional Items",
-   "options": "Vehicle Booking Additional Item"
-  },
-  {
-   "collapsible": 1,
    "fieldname": "terms_section_break",
    "fieldtype": "Section Break",
    "label": "Terms and Conditions"
@@ -1151,7 +1137,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-11-20 10:48:47.787119",
+ "modified": "2022-04-06 14:19:57.467352",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",
