@@ -341,3 +341,4 @@ frappe.ui.form.on('Salary Detail', {
 		}
 	}
 });
+

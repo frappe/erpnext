@@ -11,8 +11,10 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc
 from frappe.utils import cint, floor, flt, today
+
 from six import iteritems
 from frappe.model.meta import get_field_precision
+
 from erpnext.selling.doctype.sales_order.sales_order import (
 	make_delivery_note as create_delivery_note_from_sales_order,
 )
@@ -54,6 +56,7 @@ class PickList(Document):
 			frappe.throw(_('For item {0} at row {1}, count of serial numbers does not match with the picked quantity')
 				.format(frappe.bold(item.item_code), frappe.bold(item.idx)), title=_("Quantity Mismatch"))
 
+
 	
 	def weight_details(self):
 		total_weight = total_stock_weight = total_picked_weight =0
@@ -70,6 +73,7 @@ class PickList(Document):
 		if self.work_order:
 			weight = frappe.db.get_value("Work Order", {'name':self.work_order}, 'planned_rm_weight')
 			self.planned_rm_weight = weight
+
 	def before_cancel(self):
 		#update picked_qty in SO Item on cancel of PL
 		for item in self.get('locations'):
