@@ -271,6 +271,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	calculate_shipping_charges: function() {
+		// Do not apply shipping rule for POS
+		if (this.frm.doc.is_pos) {
+			return;
+		}
+
 		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total"]);
 		if (frappe.meta.get_docfield(this.frm.doc.doctype, "shipping_rule", this.frm.doc.name)) {
 			return this.shipping_rule();

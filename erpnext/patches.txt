@@ -355,5 +355,6 @@ erpnext.patches.v13_0.update_accounts_in_loan_docs
 erpnext.patches.v13_0.remove_unknown_links_to_prod_plan_items # 24-03-2022
 erpnext.patches.v13_0.rename_non_profit_fields
 erpnext.patches.v13_0.enable_ksa_vat_docs #1
-erpnext.patches.v13_0.update_expense_claim_status_for_paid_advances
 erpnext.patches.v13_0.create_gst_custom_fields_in_quotation
+erpnext.patches.v13_0.update_expense_claim_status_for_paid_advances
+erpnext.patches.v13_0.set_return_against_in_pos_invoice_references

@@ -4,7 +4,7 @@ from erpnext.regional.saudi_arabia.setup import add_permissions, add_print_forma
 
 
 def execute():
-	company = frappe.get_all('Company', filters = {'country': 'Saudi Arabia'})
+	company = frappe.get_all("Company", filters={"country": "Saudi Arabia"})
 	if not company:
 		return
 
