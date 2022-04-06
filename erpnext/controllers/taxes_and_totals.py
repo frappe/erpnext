@@ -307,6 +307,11 @@ class calculate_taxes_and_totals(object):
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total"])
 
 	def calculate_shipping_charges(self):
+
+		# Do not apply shipping rule for POS
+		if self.doc.get("is_pos"):
+			return
+
 		if hasattr(self.doc, "shipping_rule") and self.doc.shipping_rule:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.doc.shipping_rule)
 			shipping_rule.apply(self.doc)
