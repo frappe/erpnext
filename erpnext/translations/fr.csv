@@ -285,7 +285,7 @@ Asset scrapped via Journal Entry {0},Actif mis au rebut via Écriture de Journal
 "Asset {0} cannot be scrapped, as it is already {1}","L'actif {0} ne peut pas être mis au rebut, car il est déjà {1}",
 Asset {0} does not belong to company {1},L'actif {0} ne fait pas partie à la société {1},
 Asset {0} must be submitted,L'actif {0} doit être soumis,
-Assets,Les atouts,
+Assets,Actifs - Immo.,
 Assign,Assigner,
 Assign Salary Structure,Affecter la structure salariale,
 Assign To,Attribuer À,
@@ -1211,7 +1211,7 @@ Hello,Bonjour,
 Help Results for,Aide Résultats pour,
 High,Haut,
 High Sensitivity,Haute sensibilité,
-Hold,Tenir,
+Hold,Mettre en attente,
 Hold Invoice,Facture en attente,
 Holiday,Vacances,
 Holiday List,Liste de vacances,
@@ -4240,7 +4240,7 @@ For Default Supplier (Optional),Pour le fournisseur par défaut (facultatif),
 From date cannot be greater than To date,La Date Initiale ne peut pas être postérieure à la Date Finale,
 Group by,Grouper Par,
 In stock,En stock,
-Item name,Nom de l'article,
+Item name,Libellé de l'article,
 Loan amount is mandatory,Le montant du prêt est obligatoire,
 Minimum Qty,Quantité minimum,
 More details,Plus de détails,
@@ -5473,7 +5473,7 @@ Percentage you are allowed to transfer more against the quantity ordered. For ex
 PUR-ORD-.YYYY.-,PUR-ORD-.YYYY.-,
 Get Items from Open Material Requests,Obtenir des Articles de Demandes Matérielles Ouvertes,
 Fetch items based on Default Supplier.,Récupérez les articles en fonction du fournisseur par défaut.,
-Required By,Requis Par,
+Required By,Requis pour le,
 Order Confirmation No,No de confirmation de commande,
 Order Confirmation Date,Date de confirmation de la commande,
 Customer Mobile No,N° de Portable du Client,
@@ -7223,8 +7223,8 @@ Basic Rate (Company Currency),Taux de Base (Devise de la Société ),
 Scrap %,% de Rebut,
 Original Item,Article original,
 BOM Operation,Opération LDM,
-Operation Time ,Moment de l&#39;opération,
-In minutes,En quelques minutes,
+Operation Time ,Durée de l&#39;opération,
+In minutes,En minutes,
 Batch Size,Taille du lot,
 Base Hour Rate(Company Currency),Taux Horaire de Base (Devise de la Société),
 Operating Cost(Company Currency),Coût d'Exploitation (Devise Société),
@@ -9267,7 +9267,7 @@ Sales Order Analysis,Analyse des commandes clients,
 Amount Delivered,Montant livré,
 Delay (in Days),Retard (en jours),
 Group by Sales Order,Regrouper par commande client,
- Sales Value,La valeur des ventes,
+Sales Value,La valeur des ventes,
 Stock Qty vs Serial No Count,Quantité de stock vs numéro de série,
 Serial No Count,Numéro de série,
 Work Order Summary,Résumé de l&#39;ordre de travail,
@@ -9647,7 +9647,7 @@ Allow Multiple Sales Orders Against a Customer's Purchase Order,Autoriser plusie
 Validate Selling Price for Item Against Purchase Rate or Valuation Rate,Valider le prix de vente de l&#39;article par rapport au taux d&#39;achat ou au taux de valorisation,
 Hide Customer's Tax ID from Sales Transactions,Masquer le numéro d&#39;identification fiscale du client dans les transactions de vente,
 "The percentage you are allowed to receive or deliver more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed to receive 110 units.","Le pourcentage que vous êtes autorisé à recevoir ou à livrer plus par rapport à la quantité commandée. Par exemple, si vous avez commandé 100 unités et que votre allocation est de 10%, vous êtes autorisé à recevoir 110 unités.",
-Action If Quality Inspection Is Not Submitted,Action si l&#39;inspection de la qualité n&#39;est pas soumise,
+Action If Quality Inspection Is Not Submitted,Action si l&#39;inspection qualité n&#39;est pas soumise,
 Auto Insert Price List Rate If Missing,Taux de liste de prix d&#39;insertion automatique s&#39;il est manquant,
 Automatically Set Serial Nos Based on FIFO,Définir automatiquement les numéros de série en fonction de FIFO,
 Set Qty in Transactions Based on Serial No Input,Définir la quantité dans les transactions en fonction du numéro de série,
@@ -9838,3 +9838,36 @@ Enable European Access,Activer l&#39;accès européen,
 Creating Purchase Order ...,Création d&#39;une commande d&#39;achat ...,
 "Select a Supplier from the Default Suppliers of the items below. On selection, a Purchase Order will be made against items belonging to the selected Supplier only.","Sélectionnez un fournisseur parmi les fournisseurs par défaut des articles ci-dessous. Lors de la sélection, un bon de commande sera effectué contre des articles appartenant uniquement au fournisseur sélectionné.",
 Row #{}: You must select {} serial numbers for item {}.,Ligne n ° {}: vous devez sélectionner {} numéros de série pour l&#39;article {}.,
+Update Rate as per Last Purchase,Mettre à jour avec les derniers prix d'achats
+Company Shipping Address,Adresse d&#39;expédition
+Shipping Address Details,Détail d&#39;adresse d&#39;expédition
+Company Billing Address,Adresse de la société de facturation
+Supplier Address Details,
+Bank Reconciliation Tool,Outil de réconcialiation d&#39;écritures bancaires
+Supplier Contact,Contact fournisseur
+Subcontracting,Sous traitance
+Order Status,Statut de la commande
+Build,Personnalisations avancées
+Dispatch Address Name,Adresse de livraison intermédiaire
+Amount Eligible for Commission,Montant éligible à comission
+Grant Commission,Eligible aux commissions
+Stock Transactions Settings, Paramétre des transactions
+Role Allowed to Over Deliver/Receive, Rôle autorisé à dépasser cette limite
+Users with this role are allowed to over deliver/receive against orders above the allowance percentage,Rôle Utilisateur qui sont autorisé à livrée/commandé au-delà de la limite
+Over Transfer Allowance,Autorisation de limite de transfert
+The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units, Le pourcentage de quantité que vous pourrez receptionné en plus de la quantité commandée
+Quality Inspection Settings,Paramétre de l&#39;inspection qualité
+Action If Quality Inspection Is Rejected,Action si l'inspection qualité est rejetée
+Disable Serial No And Batch Selector,Désactiver le sélecteur de numéro de lot/série
+Is Rate Adjustment Entry (Debit Note),Est un justement du prix de la note de débit
+Issue a debit note with 0 qty against an existing Sales Invoice,Creer une note de débit avec une quatité à O pour la facture
+Control Historical Stock Transactions,Controle de l&#39;historique des stransaction de stock
+No stock transactions can be created or modified before this date.,Aucune transaction ne peux être créée ou modifié avant cette date.
+Stock transactions that are older than the mentioned days cannot be modified.,Les transactions de stock plus ancienne que le nombre de jours ci-dessus ne peuvent être modifiées
+Role Allowed to Create/Edit Back-dated Transactions,Rôle autorisé à créer et modifier des transactions anti-datée
+If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.,LEs utilisateur de ce role pourront creer et modifier des transactions dans le passé. Si vide tout les utilisateurs pourrons le faire
+Auto Insert Item Price If Missing,Création du prix de l'article dans les listes de prix si abscent
+Update Existing Price List Rate,Mise a jour automatique du prix dans les listes de prix
+Show Barcode Field in Stock Transactions,Afficher le champ Code Barre dans les transactions de stock
+Convert Item Description to Clean HTML in Transactions,Convertir les descriptions d'articles en HTML valide lors des transactions
+Have Default Naming Series for Batch ID?,Nom de série par défaut pour les Lots ou Séries
