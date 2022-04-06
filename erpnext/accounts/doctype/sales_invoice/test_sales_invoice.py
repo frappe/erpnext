@@ -3017,7 +3017,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		acc_settings = frappe.get_single("Accounts Settings")
 		acc_settings.book_deferred_entries_via_journal_entry = 0
-		acc_settings.submit_journal_entriessubmit_journal_entries = 0
+		acc_settings.submit_journal_entries = 0
 		acc_settings.save()
 
 		frappe.db.set_value("Accounts Settings", None, "acc_frozen_upto", None)
