@@ -309,7 +309,7 @@ class calculate_taxes_and_totals(object):
 	def calculate_shipping_charges(self):
 
 		# Do not apply shipping rule for POS
-		if self.doc.is_pos:
+		if self.doc.get("is_pos"):
 			return
 
 		if hasattr(self.doc, "shipping_rule") and self.doc.shipping_rule:
