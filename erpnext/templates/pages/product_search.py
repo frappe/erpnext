@@ -1,6 +1,8 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import json
+
 import frappe
 from frappe.utils import cint, cstr
 from redisearch import AutoCompleter, Client, Query
@@ -9,7 +11,7 @@ from erpnext.e_commerce.redisearch_utils import (
 	WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE,
 	WEBSITE_ITEM_INDEX,
 	WEBSITE_ITEM_NAME_AUTOCOMPLETE,
-	is_search_module_loaded,
+	is_redisearch_enabled,
 	make_key,
 )
 from erpnext.e_commerce.shopping_cart.product_info import set_product_info_for_website
@@ -74,8 +76,8 @@ def search(query):
 def product_search(query, limit=10, fuzzy_search=True):
 	search_results = {"from_redisearch": True, "results": []}
 
-	if not is_search_module_loaded():
-		# Redisearch module not loaded
+	if not is_redisearch_enabled():
+		# Redisearch module not enabled
 		search_results["from_redisearch"] = False
 		search_results["results"] = get_product_data(query, 0, limit)
 		return search_results
@@ -86,6 +88,8 @@ def product_search(query, limit=10, fuzzy_search=True):
 	red = frappe.cache()
 	query = clean_up_query(query)
 
+	# TODO: Check perf/correctness with Suggestions & Query vs only Query
+	# TODO: Use Levenshtein Distance in Query (max=3)
 	ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=red)
 	client = Client(make_key(WEBSITE_ITEM_INDEX), conn=red)
 	suggestions = ac.get_suggestions(
@@ -121,8 +125,8 @@ def convert_to_dict(redis_search_doc):
 def get_category_suggestions(query):
 	search_results = {"results": []}
 
-	if not is_search_module_loaded():
-		# Redisearch module not loaded, query db
+	if not is_redisearch_enabled():
+		# Redisearch module not enabled, query db
 		categories = frappe.db.get_all(
 			"Item Group",
 			filters={"name": ["like", "%{0}%".format(query)], "show_in_website": 1},
@@ -135,8 +139,10 @@ def get_category_suggestions(query):
 		return search_results
 
 	ac = AutoCompleter(make_key(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE), conn=frappe.cache())
-	suggestions = ac.get_suggestions(query, num=10)
+	suggestions = ac.get_suggestions(query, num=10, with_payloads=True)
 
-	search_results["results"] = [s.string for s in suggestions]
+	results = [json.loads(s.payload) for s in suggestions]
+
+	search_results["results"] = results
 
 	return search_results
