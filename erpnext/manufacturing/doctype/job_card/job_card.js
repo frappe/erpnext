@@ -33,7 +33,7 @@ frappe.ui.form.on('Job Card', {
 			return;
 		}
 
-		if (!frm.doc.is_new() && has_items && frm.doc.docstatus < 2) {
+		if (!frm.is_new() && has_items && frm.doc.docstatus < 2) {
 			let to_request = frm.doc.for_quantity > frm.doc.transferred_qty;
 			let excess_transfer_allowed = frm.doc.__onload.job_card_excess_transfer;
 
