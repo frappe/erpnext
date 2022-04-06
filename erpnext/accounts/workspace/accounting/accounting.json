@@ -273,11 +273,20 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Follow Up",
+   "label": "Payment Follow Up",
    "link_to": "Follow Up",
    "link_type": "DocType",
    "onboard": 0,
    "only_for": "",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Commitment",
+   "link_to": "Payment Receivable Commitment",
+   "link_type": "DocType",
+   "onboard": 0,
    "type": "Link"
   },
   {
@@ -613,6 +622,16 @@
    "link_to": "Mode of Payment",
    "link_type": "DocType",
    "onboard": 0,
+   "only_for": "",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Follow Up Level",
+   "link_to": "Follow Up Level",
+   "link_type": "DocType",
+   "onboard": 0,
    "type": "Link"
   },
   {
@@ -620,6 +639,7 @@
    "is_query_report": 0,
    "label": "Banking and Payments",
    "onboard": 0,
+   "only_for": "",
    "type": "Card Break"
   },
   {
@@ -1149,7 +1169,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-04-05 10:19:11.223580",
+ "modified": "2022-04-06 11:40:50.588218",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
