@@ -139,6 +139,7 @@ class Item(WebsiteGenerator):
 		self.validate_customer_provided_part()
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.validate_applicable_to()
+		self.validate_applicable_items()
 		self.cant_change()
 		self.update_show_in_website()
 		self.validate_item_override_values()
@@ -1056,6 +1057,19 @@ class Item(WebsiteGenerator):
 		for d in self.applicable_to:
 			if d.applicable_to_item == self.name:
 				frappe.throw(_("Row #{0}: Applicable To Item cannot be the same as this Item").format(d.idx))
+
+	def validate_applicable_items(self):
+		visited = set()
+		for d in self.applicable_items:
+			if d.applicable_item_code:
+				if d.applicable_item_code == self.name:
+					frappe.throw(_("Row #{0}: Applicable Item cannot be the same as this Item").format(d.idx))
+
+				if d.applicable_item_code in visited:
+					frappe.throw(_("Row #{0}: Duplicate Applicable Item {1}")
+						.format(d.idx, frappe.bold(d.applicable_item_code)))
+
+				visited.add(cstr(d.applicable_item_code))
 
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''

@@ -1,0 +1,79 @@
+{
+ "creation": "2022-04-06 14:47:41.303227",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "applicable_item_code",
+  "applicable_item_name",
+  "applicable_qty",
+  "applicable_uom",
+  "applicable_item_group",
+  "inactive"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "applicable_item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Applicable Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "columns": 3,
+   "fetch_from": "applicable_item_code.item_name",
+   "fieldname": "applicable_item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Applicable Item Name",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fetch_from": "applicable_item_code.item_group",
+   "fieldname": "applicable_item_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Applicable Item Group",
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "default": "1",
+   "fieldname": "applicable_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty"
+  },
+  {
+   "columns": 1,
+   "fieldname": "applicable_uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "inactive",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Inactive"
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-04-06 20:56:07.819863",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item Applicable Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

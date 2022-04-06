@@ -1,0 +1,30 @@
+{
+ "creation": "2022-04-06 17:30:45.768331",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "applicable_item_group"
+ ],
+ "fields": [
+  {
+   "fieldname": "applicable_item_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Group",
+   "options": "Item Group",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-04-06 17:41:42.643464",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Project Template Item Group",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,78 @@
+{
+ "creation": "2022-04-06 17:43:31.446166",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "applicable_item_code",
+  "applicable_item_name",
+  "applicable_qty",
+  "applicable_uom",
+  "applies_to_item",
+  "applies_to_item_name"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "applies_to_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Applies To",
+   "options": "Item"
+  },
+  {
+   "columns": 2,
+   "fetch_from": "applies_to_item.item_name",
+   "fieldname": "applies_to_item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Applies To Item Name",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "applicable_item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Applicable Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fetch_from": "applicable_item_code.item_name",
+   "fieldname": "applicable_item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Applicable Item Name",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "default": "1",
+   "fieldname": "applicable_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty"
+  },
+  {
+   "columns": 1,
+   "fieldname": "applicable_uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "UOM"
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-04-06 21:01:30.813639",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Project Template Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

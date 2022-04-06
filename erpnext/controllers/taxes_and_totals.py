@@ -132,7 +132,7 @@ class calculate_taxes_and_totals(object):
 					item.discount_amount = 0
 					item.discount_percentage = 0
 
-				if not item.qty and self.doc.is_return:
+				if not item.qty and self.doc.get('is_return'):
 					item.amount_before_discount = flt(rate_before_discount * -1, item.precision("amount_before_discount"))
 					item.amount = flt(item.rate * -1, item.precision("amount"))
 				else:

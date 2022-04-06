@@ -123,6 +123,9 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 						}
 					})
 				}, __("Get Items From"), "btn-default");
+
+			me.add_get_applicable_items_button();
+			me.add_get_project_template_items_button();
 		}
 
 		this.toggle_reqd_lead_customer();

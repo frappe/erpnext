@@ -79,5 +79,179 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));
 		}
-	}
+	},
+
+	get_applicable_items: function() {
+		var me = this;
+		var dialog = new frappe.ui.Dialog({
+			title: __("Get Applicable Items"),
+			fields: [
+				{
+					"fieldtype": "Link",
+					"label": __("Item Group"),
+					"fieldname": "item_group",
+					"options": "Item Group",
+					"reqd": 1,
+				},
+				{
+					"fieldtype": "Link",
+					"label": __("Applies To Item Code"),
+					"fieldname": "applies_to_item",
+					"options":"Item",
+					"reqd": 1,
+					"default": me.frm.doc.applies_to_item,
+					onchange: () => {
+						let item_code = dialog.get_value('applies_to_item');
+						if (item_code) {
+							frappe.db.get_value("Item", item_code, 'item_name', (r) => {
+								if (r) {
+									dialog.set_value('applies_to_item_name', r.item_name);
+								}
+							});
+						} else {
+							dialog.set_value('applies_to_item_name', "");
+						}
+					},
+				},
+				{
+					"fieldtype": "Data",
+					"label": __("Applies To Item Name"),
+					"fieldname": "applies_to_item_name",
+					"read_only": 1,
+					"default": me.frm.doc.applies_to_item ? me.frm.doc.applies_to_item_name : "",
+				},
+			]
+		});
+
+		dialog.set_primary_action(__("Get Items"), function () {
+			var args = dialog.get_values();
+			if (!args.applies_to_item){
+				return;
+			}
+
+			frappe.call({
+				method: "erpnext.stock.doctype.item_applicable_item.item_applicable_item.add_applicable_items",
+				args: {
+					applies_to_item: args.applies_to_item,
+					item_groups: [args.item_group],
+					target_doc: me.frm.doc,
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						dialog.hide();
+						frappe.model.sync(r.message);
+						me.frm.dirty();
+						me.frm.refresh_fields();
+					}
+				}
+			});
+		});
+
+		dialog.show();
+	},
+
+	get_project_template_items: function() {
+		var me = this;
+		var dialog = new frappe.ui.Dialog({
+			title: __("Get Project Template Items"),
+			fields: [
+				{
+					"fieldtype": "Link",
+					"label": __("Project Template"),
+					"fieldname": "project_template",
+					"options": "Project Template",
+					"reqd": 1,
+					onchange: () => {
+						let project_template = dialog.get_value('project_template');
+						if (project_template) {
+							frappe.db.get_value("Project Template", project_template, 'project_template_name', (r) => {
+								if (r) {
+									dialog.set_value('project_template_name', r.project_template_name);
+								}
+							});
+						}
+					},
+				},
+				{
+					"fieldtype": "Data",
+					"label": __("Project Template Name"),
+					"fieldname": "project_template_name",
+					"read_only": 1,
+				},
+				{
+					"fieldtype": "Link",
+					"label": __("Applies To Item Code"),
+					"fieldname": "applies_to_item",
+					"options":"Item",
+					"default": me.frm.doc.applies_to_item,
+					onchange: () => {
+						let item_code = dialog.get_value('applies_to_item');
+						if (item_code) {
+							frappe.db.get_value("Item", item_code, 'item_name', (r) => {
+								if (r) {
+									dialog.set_value('applies_to_item_name', r.item_name);
+								}
+							});
+						} else {
+							dialog.set_value('applies_to_item_name', "");
+						}
+					},
+				},
+				{
+					"fieldtype": "Data",
+					"label": __("Applies To Item Name"),
+					"fieldname": "applies_to_item_name",
+					"read_only": 1,
+					"default": me.frm.doc.applies_to_item ? me.frm.doc.applies_to_item_name : "",
+				},
+				{
+					"fieldtype": "Link",
+					"label": __("Item Group"),
+					"fieldname": "item_group",
+					"options": "Item Group",
+				},
+			]
+		});
+
+		dialog.set_primary_action(__("Get Items"), function () {
+			var args = dialog.get_values();
+			if (!args.project_template){
+				return;
+			}
+
+			frappe.call({
+				method: "erpnext.projects.doctype.project_template.project_template.add_project_template_items",
+				args: {
+					project_template: args.project_template,
+					applies_to_item: args.applies_to_item,
+					item_group: args.item_group,
+					target_doc: me.frm.doc,
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						dialog.hide();
+						frappe.model.sync(r.message);
+						me.frm.dirty();
+						me.frm.refresh_fields();
+					}
+				}
+			});
+		});
+
+		dialog.show();
+	},
+
+	add_get_applicable_items_button: function() {
+		var me = this;
+		me.frm.add_custom_button(__("Applicable Items"), function() {
+			me.get_applicable_items();
+		}, __("Get Items From"));
+	},
+
+	add_get_project_template_items_button: function() {
+		var me = this;
+		me.frm.add_custom_button(__("Project Template"), function() {
+			me.get_project_template_items();
+		}, __("Get Items From"));
+	},
 });

@@ -341,14 +341,6 @@ $.extend(erpnext.item, {
 			}
 		}
 
-		frm.set_query("applicable_to", function (doc, cdt, cdn) {
-			if (!doc.__islocal) {
-				return {
-					filters: { 'name': ['!=', doc.name] }
-				}
-			}
-		});
-
 		frm.fields_dict['deferred_revenue_account'].get_query = function() {
 			return {
 				filters: {
@@ -407,6 +399,31 @@ $.extend(erpnext.item, {
 			}
 		}
 
+		frm.set_query("applicable_to", function (doc, cdt, cdn) {
+			if (!doc.__islocal) {
+				return {
+					filters: { 'name': ['!=', doc.name] }
+				}
+			}
+		});
+
+		frm.set_query("applicable_item_code", "applicable_items", function (doc, cdt, cdn) {
+			var filters = {};
+			if (!doc.__islocal) {
+				filters['name'] = ['!=', doc.name];
+			}
+			return erpnext.queries.item(filters);
+		});
+
+		frm.set_query("applicable_uom", "applicable_items", function(doc, cdt, cdn) {
+			var d = locals[cdt][cdn];
+			return {
+				query : "erpnext.controllers.queries.item_uom_query",
+				filters: {
+					item_code: d.applicable_item_code
+				}
+			}
+		});
 	},
 
 	make_dashboard: function(frm) {
@@ -872,4 +889,14 @@ frappe.ui.form.on("UOM Conversion Detail", {
 			});
 		}
 	}
-})
+});
+
+frappe.ui.form.on('Item Applicable Item', {
+	applicable_item_code: function (frm, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		if (!row.applicable_item_code) {
+			frappe.model.set_value(cdt, cdn, 'applicable_item_name', null);
+			frappe.model.set_value(cdt, cdn, 'applicable_item_group', null);
+		}
+	},
+});

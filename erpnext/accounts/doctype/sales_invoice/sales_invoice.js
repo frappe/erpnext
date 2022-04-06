@@ -154,6 +154,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				this.frm.cscript.sales_order_btn();
 				this.frm.cscript.quotation_btn();
 			}
+			this.add_get_applicable_items_button();
+			this.add_get_project_template_items_button();
 		}
 
 		this.set_default_print_format();

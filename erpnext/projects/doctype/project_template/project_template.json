@@ -1,30 +1,79 @@
 {
- "autoname": "Prompt",
+ "allow_rename": 1,
+ "autoname": "field:project_template_code",
  "creation": "2019-02-18 17:23:11.708371",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "project_type",
+  "project_template_code",
+  "project_template_name",
+  "column_break_3",
+  "project_template_category",
+  "items_section",
+  "applicable_items",
+  "applicable_item_groups",
+  "tasks_section",
   "tasks"
  ],
  "fields": [
   {
-   "fieldname": "project_type",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Project Type",
-   "options": "Project Type"
-  },
-  {
    "fieldname": "tasks",
    "fieldtype": "Table",
    "label": "Tasks",
-   "options": "Project Template Task",
+   "options": "Project Template Task"
+  },
+  {
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "applicable_item_groups",
+   "fieldtype": "Table",
+   "label": "Applicable Item Groups",
+   "options": "Project Template Item Group"
+  },
+  {
+   "fieldname": "tasks_section",
+   "fieldtype": "Section Break",
+   "label": "Tasks"
+  },
+  {
+   "fieldname": "project_template_code",
+   "fieldtype": "Data",
+   "label": "Project Template Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "project_template_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Project Template Name",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project_template_category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Project Template Category",
+   "options": "Project Template Category",
+   "reqd": 1
+  },
+  {
+   "fieldname": "applicable_items",
+   "fieldtype": "Table",
+   "label": "Applicable Items",
+   "options": "Project Template Item"
   }
  ],
- "modified": "2020-03-03 15:37:50.570665",
+ "modified": "2022-04-07 00:57:12.479016",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Template",
@@ -38,13 +87,59 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "System Manager",
+   "role": "Projects Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Projects User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
   }
  ],
- "quick_entry": 1,
- "sort_field": "modified",
+ "search_fields": "project_template_name, project_template_category",
+ "sort_field": "idx",
  "sort_order": "DESC",
+ "title_field": "project_template_name",
  "track_changes": 1
 }
