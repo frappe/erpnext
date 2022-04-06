@@ -812,12 +812,37 @@ class TestSalesInvoice(unittest.TestCase):
 		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - TCP1', 'amount': 50})
 		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - TCP1', 'amount': 60})
 
-		pos.change_amount = 5.0
+		pos.write_off_outstanding_amount_automatically = 1
 		pos.insert()
 		pos.submit()
 
 		self.assertEqual(pos.grand_total, 100.0)
-		self.assertEqual(pos.write_off_amount, -5)
+		self.assertEqual(pos.write_off_amount, 0)
+
+	def test_auto_write_off_amount(self):
+		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1",
+			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
+
+		make_purchase_receipt(company= "_Test Company with perpetual inventory",
+			item_code= "_Test FG Item",warehouse= "Stores - TCP1", cost_center= "Main - TCP1")
+
+		pos = create_sales_invoice(company= "_Test Company with perpetual inventory",
+			debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1",
+			income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1",
+			cost_center = "Main - TCP1", do_not_save=True)
+
+		pos.is_pos = 1
+		pos.update_stock = 1
+
+		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - TCP1', 'amount': 50})
+		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - TCP1', 'amount': 40})
+
+		pos.write_off_outstanding_amount_automatically = 1
+		pos.insert()
+		pos.submit()
+
+		self.assertEqual(pos.grand_total, 100.0)
+		self.assertEqual(pos.write_off_amount, 10)
 
 	def test_pos_with_no_gl_entry_for_change_amount(self):
 		frappe.db.set_value('Accounts Settings', None, 'post_change_gl_entries', 0)
@@ -2551,6 +2576,12 @@ class TestSalesInvoice(unittest.TestCase):
 		acc_settings.save()
 
 		frappe.db.set_value('Accounts Settings', None, 'acc_frozen_upto', None)
+
+	def test_standalone_serial_no_return(self):
+		si = create_sales_invoice(item_code="_Test Serialized Item With Series", update_stock=True, is_return=True, qty=-1)
+		si.reload()
+		self.assertTrue(si.items[0].serial_no)
+
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()

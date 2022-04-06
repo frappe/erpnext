@@ -1,6 +1,7 @@
 import datetime
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days
 
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
@@ -9,12 +10,11 @@ from erpnext.selling.report.payment_terms_status_for_sales_order.payment_terms_s
 	execute,
 )
 from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ["Sales Order", "Item", "Sales Invoice", "Payment Terms Template"]
 
 
-class TestPaymentTermsStatusForSalesOrder(ERPNextTestCase):
+class TestPaymentTermsStatusForSalesOrder(FrappeTestCase):
 	def create_payment_terms_template(self):
 		# create template for 50-50 payments
 		template = None

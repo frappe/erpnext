@@ -11,7 +11,6 @@
   "standard_working_hours",
   "column_break_9",
   "retirement_age",
-  "d_restrict",
   "reminders_section",
   "send_birthday_reminders",
   "column_break_11",
@@ -227,19 +226,13 @@
    "fieldname": "check_vacancies",
    "fieldtype": "Check",
    "label": "Check Vacancies On Job Offer Creation"
-  },
-  {
-   "default": "0",
-   "fieldname": "d_restrict",
-   "fieldtype": "Check",
-   "label": "Restrict Back Dated Timesheet Entry For Last 3 Days"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-03-28 19:21:27.874202",
+ "modified": "2022-04-02 12:11:43.761590",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",

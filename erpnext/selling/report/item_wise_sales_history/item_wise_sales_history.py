@@ -156,24 +156,24 @@ def get_data(filters):
 		customer_record = customer_details.get(record.customer)
 		item_record = item_details.get(record.item_code)
 		row = {
-			"item_code": record.item_code,
-			"item_name": item_record.item_name,
-			"item_group": item_record.item_group,
-			"description": record.description,
-			"quantity": record.qty,
-			"uom": record.uom,
-			"rate": record.base_rate,
-			"amount": record.base_amount,
-			"sales_order": record.name,
-			"transaction_date": record.transaction_date,
-			"customer": record.customer,
-			"customer_name": customer_record.customer_name,
-			"customer_group": customer_record.customer_group,
-			"territory": record.territory,
-			"project": record.project,
-			"delivered_quantity": flt(record.delivered_qty),
-			"billed_amount": flt(record.billed_amt),
-			"company": record.company
+			"item_code": record.get('item_code'),
+			"item_name": item_record.get('item_name'),
+			"item_group": item_record.get('item_group'),
+			"description": record.get('description'),
+			"quantity": record.get('qty'),
+			"uom": record.get('uom'),
+			"rate": record.get('base_rate'),
+			"amount": record.get('base_amount'),
+			"sales_order": record.get('name'),
+			"transaction_date": record.get('transaction_date'),
+			"customer": record.get('customer'),
+			"customer_name": customer_record.get('customer_name'),
+			"customer_group": customer_record.get('customer_group'),
+			"territory": record.get('territory'),
+			"project": record.get('project'),
+			"delivered_quantity": flt(record.get('delivered_qty')),
+			"billed_amount": flt(record.get('billed_amt')),
+			"company": record.get('company')
 		}
 		data.append(row)
 

@@ -889,7 +889,6 @@ def make_purchase_invoice(source_name, target_doc=None):
 			frappe.throw(_("All items have already been Invoiced/Returned"))
 
 		doc = frappe.get_doc(target)
-		doc.ignore_pricing_rule = 1
 		doc.payment_terms_template = get_payment_terms_template(source.supplier, "Supplier", source.company)
 		doc.run_method("onload")
 		doc.run_method("set_missing_values")
@@ -951,6 +950,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 
+	doclist.set_onload('ignore_price_list', True)
 	return doclist
 
 def get_invoiced_qty_map(purchase_receipt):
@@ -1053,3 +1053,6 @@ def get_item_account_wise_additional_cost(purchase_document):
 						account.base_amount * item.get(based_on_field) / total_item_cost
 
 	return item_account_wise_cost
+
+def on_doctype_update():
+	frappe.db.add_index("Purchase Receipt", ["supplier", "is_return", "return_against"])

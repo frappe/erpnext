@@ -56,6 +56,7 @@ class PriceListGenerator(Document):
 						"addpkg_cost":pack_g,
 						"brand_list_price":i.item_price
 					})
+		self.save()
 		return True
 
 

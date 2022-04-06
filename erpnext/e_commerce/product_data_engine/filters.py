@@ -14,6 +14,8 @@ class ProductFiltersBuilder:
 		self.item_group = item_group
 
 	def get_field_filters(self):
+		from erpnext.setup.doctype.item_group.item_group import get_child_groups_for_website
+
 		if not self.item_group and not self.doc.enable_field_filters:
 			return
 
@@ -25,18 +27,26 @@ class ProductFiltersBuilder:
 		fields = [item_meta.get_field(field) for field in filter_fields if item_meta.has_field(field)]
 
 		for df in fields:
-			item_filters, item_or_filters = {}, []
+			item_filters, item_or_filters = {"published_in_website": 1}, []
 			link_doctype_values = self.get_filtered_link_doctype_records(df)
 
 			if df.fieldtype == "Link":
 				if self.item_group:
-					item_or_filters.extend([
-						["item_group", "=", self.item_group],
-						["Website Item Group", "item_group", "=", self.item_group] # consider website item groups
-					])
+					include_child = frappe.db.get_value("Item Group", self.item_group, "include_descendants")
+					if include_child:
+						include_groups = get_child_groups_for_website(self.item_group, include_self=True)
+						include_groups = [x.name for x in include_groups]
+						item_or_filters.extend([
+							["item_group", "in", include_groups],
+							["Website Item Group", "item_group", "=", self.item_group] # consider website item groups
+						])
+					else:
+						item_or_filters.extend([
+							["item_group", "=", self.item_group],
+							["Website Item Group", "item_group", "=", self.item_group] # consider website item groups
+						])
 
 				# Get link field values attached to published items
-				item_filters['published_in_website'] = 1
 				item_values = frappe.get_all(
 					"Item",
 					fields=[df.fieldname],

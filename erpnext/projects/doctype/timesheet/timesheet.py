@@ -30,16 +30,7 @@ class Timesheet(Document):
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
 		self.set_dates()
-		hrs = frappe.get_doc("HR Settings")
-		if hrs.d_restrict == 1:
-			today = date.today() 
-			s_date = self.start_date
-			c_date =  add_to_date(today,days = -3)
-			print(today,s_date,c_date)  
-			if s_date <= c_date:
-				frappe.throw("Not Allowed To Fill The Timesheet Before {0}".format(c_date))
-		else:
-			pass
+		
 
 	def set_employee_name(self):
 		if self.employee and not self.employee_name:
