@@ -29,6 +29,7 @@
   {
    "fieldname": "customer",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Customer",
    "options": "Customer"
   },
@@ -41,12 +42,14 @@
   {
    "fieldname": "customer_group",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Customer Group",
    "options": "Customer Group"
   },
   {
    "fieldname": "territory",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Territory",
    "options": "Territory"
   },
@@ -63,17 +66,20 @@
   {
    "fieldname": "due_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Due Date"
   },
   {
    "fieldname": "commitment_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Commitment Date"
   },
   {
    "fieldname": "commitment_amount",
    "fieldtype": "Currency",
-   "label": "Commitment Amount"
+   "label": "Commitment Amount",
+   "search_index": 1
   },
   {
    "fieldname": "commitment_to",
@@ -95,6 +101,7 @@
   {
    "fieldname": "invoice_amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Invoice Amount"
   },
   {
@@ -125,7 +132,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-06 11:03:52.008913",
+ "modified": "2022-04-06 11:46:29.624921",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Receivable Commitment",
@@ -140,6 +147,30 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
    "share": 1,
    "write": 1
   }
