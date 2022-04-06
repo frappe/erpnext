@@ -19,6 +19,8 @@ def execute():
 	if not open_pos_closing_entries:
 		return
 
+	frappe.reload_doc("Accounts", "doctype", "pos_invoice_reference")
+
 	POSInvoiceReference = frappe.qb.DocType("POS Invoice Reference")
 	POSInvoice = frappe.qb.DocType("POS Invoice")
 	pos_invoice_references = (
