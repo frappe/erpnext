@@ -39,11 +39,15 @@ class LeaveAllocation(Document):
 	def validate(self):
 		self.validate_period()
 		self.validate_allocation_overlap()
-		self.validate_back_dated_allocation()
-		self.set_total_leaves_allocated()
-		self.validate_total_leaves_allocated()
 		self.validate_lwp()
 		set_employee_name(self)
+		self.set_total_leaves_allocated()
+		self.validate_leave_days_and_dates()
+
+	def validate_leave_days_and_dates(self):
+		# all validations that should run on save as well as on update after submit
+		self.validate_back_dated_allocation()
+		self.validate_total_leaves_allocated()
 		self.validate_leave_allocation_days()
 
 	def validate_leave_allocation_days(self):
@@ -56,14 +60,19 @@ class LeaveAllocation(Document):
 			leave_allocated = 0
 			if leave_period:
 				leave_allocated = get_leave_allocation_for_period(
-					self.employee, self.leave_type, leave_period[0].from_date, leave_period[0].to_date
+					self.employee,
+					self.leave_type,
+					leave_period[0].from_date,
+					leave_period[0].to_date,
+					exclude_allocation=self.name,
 				)
 			leave_allocated += flt(self.new_leaves_allocated)
 			if leave_allocated > max_leaves_allowed:
 				frappe.throw(
 					_(
-						"Total allocated leaves are more days than maximum allocation of {0} leave type for employee {1} in the period"
-					).format(self.leave_type, self.employee)
+						"Total allocated leaves are more than maximum allocation allowed for {0} leave type for employee {1} in the period"
+					).format(self.leave_type, self.employee),
+					OverAllocationError,
 				)
 
 	def on_submit(self):
@@ -84,6 +93,12 @@ class LeaveAllocation(Document):
 	def on_update_after_submit(self):
 		if self.has_value_changed("new_leaves_allocated"):
 			self.validate_against_leave_applications()
+
+			# recalculate total leaves allocated
+			self.total_leaves_allocated = flt(self.unused_leaves) + flt(self.new_leaves_allocated)
+			# run required validations again since total leaves are being updated
+			self.validate_leave_days_and_dates()
+
 			leaves_to_be_added = self.new_leaves_allocated - self.get_existing_leave_count()
 			args = {
 				"leaves": leaves_to_be_added,
@@ -92,6 +107,7 @@ class LeaveAllocation(Document):
 				"is_carry_forward": 0,
 			}
 			create_leave_ledger_entry(self, args, True)
+			self.db_update()
 
 	def get_existing_leave_count(self):
 		ledger_entries = frappe.get_all(
@@ -279,27 +295,27 @@ def get_previous_allocation(from_date, leave_type, employee):
 	)
 
 
-def get_leave_allocation_for_period(employee, leave_type, from_date, to_date):
-	leave_allocated = 0
-	leave_allocations = frappe.db.sql(
-		"""
-		select employee, leave_type, from_date, to_date, total_leaves_allocated
-		from `tabLeave Allocation`
-		where employee=%(employee)s and leave_type=%(leave_type)s
-			and docstatus=1
-			and (from_date between %(from_date)s and %(to_date)s
-				or to_date between %(from_date)s and %(to_date)s
-				or (from_date < %(from_date)s and to_date > %(to_date)s))
-	""",
-		{"from_date": from_date, "to_date": to_date, "employee": employee, "leave_type": leave_type},
-		as_dict=1,
-	)
+def get_leave_allocation_for_period(
+	employee, leave_type, from_date, to_date, exclude_allocation=None
+):
+	from frappe.query_builder.functions import Sum
 
-	if leave_allocations:
-		for leave_alloc in leave_allocations:
-			leave_allocated += leave_alloc.total_leaves_allocated
-
-	return leave_allocated
+	Allocation = frappe.qb.DocType("Leave Allocation")
+	return (
+		frappe.qb.from_(Allocation)
+		.select(Sum(Allocation.total_leaves_allocated).as_("total_allocated_leaves"))
+		.where(
+			(Allocation.employee == employee)
+			& (Allocation.leave_type == leave_type)
+			& (Allocation.docstatus == 1)
+			& (Allocation.name != exclude_allocation)
+			& (
+				(Allocation.from_date.between(from_date, to_date))
+				| (Allocation.to_date.between(from_date, to_date))
+				| ((Allocation.from_date < from_date) & (Allocation.to_date > to_date))
+			)
+		)
+	).run()[0][0] or 0.0
 
 
 @frappe.whitelist()

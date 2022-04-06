@@ -387,7 +387,7 @@ def update_other_charges(
 
 def get_payment_details(invoice):
 	payee_name = invoice.company
-	mode_of_payment = ", ".join([d.mode_of_payment for d in invoice.payments])
+	mode_of_payment = ""
 	paid_amount = invoice.base_paid_amount
 	outstanding_amount = invoice.outstanding_amount
 
