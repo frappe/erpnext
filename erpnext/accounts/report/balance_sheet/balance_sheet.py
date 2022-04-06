@@ -201,17 +201,17 @@ def get_report_summary(
 			net_provisional_profit_loss += provisional_profit_loss.get(key)
 
 	return [
-		{"value": net_asset, "label": "Total Asset", "datatype": "Currency", "currency": currency},
+		{"value": net_asset, "label": _("Total Asset"), "datatype": "Currency", "currency": currency},
 		{
 			"value": net_liability,
-			"label": "Total Liability",
+			"label": _("Total Liability"),
 			"datatype": "Currency",
 			"currency": currency,
 		},
-		{"value": net_equity, "label": "Total Equity", "datatype": "Currency", "currency": currency},
+		{"value": net_equity, "label": _("Total Equity"), "datatype": "Currency", "currency": currency},
 		{
 			"value": net_provisional_profit_loss,
-			"label": "Provisional Profit / Loss (Credit)",
+			"label": _("Provisional Profit / Loss (Credit)"),
 			"indicator": "Green" if net_provisional_profit_loss > 0 else "Red",
 			"datatype": "Currency",
 			"currency": currency,

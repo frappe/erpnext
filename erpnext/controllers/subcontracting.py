@@ -407,7 +407,7 @@ class Subcontracting:
 
 	def set_consumed_qty_in_po(self):
 		# Update consumed qty back in the purchase order
-		if self.is_subcontracted != "Yes":
+		if not self.is_subcontracted:
 			return
 
 		self.__get_purchase_orders()

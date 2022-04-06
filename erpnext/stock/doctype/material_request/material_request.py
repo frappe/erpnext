@@ -209,16 +209,14 @@ class MaterialRequest(BuyingController):
 						if d.ordered_qty and d.ordered_qty > allowed_qty:
 							frappe.throw(
 								_(
-									"The total Issue / Transfer quantity {0} in Material Request {1}  \
-								cannot be greater than allowed requested quantity {2} for Item {3}"
+									"The total Issue / Transfer quantity {0} in Material Request {1}  cannot be greater than allowed requested quantity {2} for Item {3}"
 								).format(d.ordered_qty, d.parent, allowed_qty, d.item_code)
 							)
 
 					elif d.ordered_qty and d.ordered_qty > d.stock_qty:
 						frappe.throw(
 							_(
-								"The total Issue / Transfer quantity {0} in Material Request {1}  \
-							cannot be greater than requested quantity {2} for Item {3}"
+								"The total Issue / Transfer quantity {0} in Material Request {1} cannot be greater than requested quantity {2} for Item {3}"
 							).format(d.ordered_qty, d.parent, d.qty, d.item_code)
 						)
 

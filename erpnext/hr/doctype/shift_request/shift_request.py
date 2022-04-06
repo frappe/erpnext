@@ -109,7 +109,7 @@ class ShiftRequest(Document):
 				self.throw_overlap_error(date_overlap)
 
 	def throw_overlap_error(self, d):
-		msg = _("Employee {0} has already applied for {1} between {2} and {3} : ").format(
+		msg = _("Employee {0} has already applied for {1} between {2} and {3}").format(
 			self.employee, d["shift_type"], formatdate(d["from_date"]), formatdate(d["to_date"])
-		) + """ <b><a href="/app/Form/Shift Request/{0}">{0}</a></b>""".format(d["name"])
+		) + """ : <b><a href="/app/Form/Shift Request/{0}">{0}</a></b>""".format(d["name"])
 		frappe.throw(msg, OverlapError)
