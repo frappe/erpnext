@@ -267,10 +267,7 @@ class MaterialProduce(Document):
                         se_item.stock_uom = res.uom
                         se_item.batch_no = batch_no
                         se_item.expense_account = item_expense_account or expense_account
-                        if self.cost_center:
-                            se_item.cost_center = self.cost_center
-                        else:
-                            se_item.cost_center = item_cost_center or cost_center
+                        se_item.cost_center = wo.rm_cost_center or item_cost_center or cost_center
                         se_item.is_finished_item = 1 if res.type == 'FG' else 0
                         se_item.is_scrap_item = 1 if res.type == 'Scrap' else 0
                         # in stock uom

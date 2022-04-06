@@ -1393,7 +1393,14 @@ def create_pick_list(source_name, target_doc=None, for_qty=None):
 	max_finished_goods_qty = frappe.db.get_value('Work Order', source_name, 'planned_rm_weight')
 	def update_item_quantity(source, target, source_parent):
 		pending_to_issue = flt(source.required_qty) - flt(source.transferred_qty)
-		desire_to_transfer = flt(source.required_qty) / max_finished_goods_qty * flt(for_qty)
+		if max_finished_goods_qty:
+			desire_to_transfer = flt(source.required_qty) / max_finished_goods_qty * flt(for_qty)
+		else:
+			max_qty=[]
+			max = frappe.get_doc('Work Order', source_name)
+			for i in max.required_items:
+				max_qty.append(i.required_qty)
+			desire_to_transfer = flt(source.required_qty) / sum(max_qty) * flt(for_qty)
 		qty = 0
 		if desire_to_transfer <= pending_to_issue:
 			qty = desire_to_transfer

@@ -387,8 +387,7 @@
    "depends_on": "is_stock_item",
    "fieldname": "weight_per_unit",
    "fieldtype": "Float",
-   "label": "Weight Per Unit",
-   "mandatory_depends_on": "eval: doc.bom_item_type == 'RM'"
+   "label": "Weight Per Unit"
   },
   {
    "depends_on": "eval:doc.is_stock_item",
@@ -1007,7 +1006,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-03-15 15:32:38.457184",
+ "modified": "2022-04-05 20:06:13.049150",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
