@@ -75,6 +75,8 @@ class PayrollEntry(Document):
 	def fill_employee_details(self):
 		self.set('employees', [])
 		employees = self.get_emp_list()
+		number_of_employees = 0
+
 		if not employees:
 			frappe.throw(_("No employees for the mentioned criteria"))
 
@@ -82,10 +84,12 @@ class PayrollEntry(Document):
 			if self.salary_structure != None:
 				if self.salary_structure == d.salary_structure:
 					self.append('employees', d)
+					number_of_employees += 1
 			else:
 				self.append('employees', d)
+				number_of_employees += 1
 
-		self.number_of_employees = len(employees)
+		self.number_of_employees = number_of_employees
 		if self.validate_attendance:
 			return self.validate_employee_attendance()
 
