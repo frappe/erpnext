@@ -391,3 +391,61 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			frappe.set_user("Administrator")
 			frappe.db.sql("delete from `tabPOS Profile`")
 			frappe.db.sql("delete from `tabPOS Invoice`")
+
+	def test_serial_no_case_1(self):
+		"""
+		Create a POS Invoice with serial no
+		Create a Return Invoice with serial no
+		Create a POS Invoice with serial no again
+		Consolidate the invoices
+
+		The first POS Invoice should be consolidated with a separate single Merge Log
+		The second and third POS Invoice should be consolidated with a single Merge Log
+		"""
+
+		from erpnext.stock.doctype.serial_no.test_serial_no import get_serial_nos
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+
+		frappe.db.sql("delete from `tabPOS Invoice`")
+
+		try:
+			se = make_serialized_item()
+			serial_no = get_serial_nos(se.get("items")[0].serial_no)[0]
+
+			init_user_and_profile()
+
+			pos_inv = create_pos_invoice(
+				item_code="_Test Serialized Item With Series",
+				serial_no=serial_no,
+				qty=1,
+				rate=100,
+				do_not_submit=1,
+			)
+			pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
+			pos_inv.submit()
+
+			pos_inv_cn = make_sales_return(pos_inv.name)
+			pos_inv_cn.paid_amount = -100
+			pos_inv_cn.submit()
+
+			pos_inv2 = create_pos_invoice(
+				item_code="_Test Serialized Item With Series",
+				serial_no=serial_no,
+				qty=1,
+				rate=100,
+				do_not_submit=1,
+			)
+			pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
+			pos_inv2.submit()
+
+			consolidate_pos_invoices()
+
+			pos_inv.load_from_db()
+			pos_inv2.load_from_db()
+
+			self.assertNotEqual(pos_inv.consolidated_invoice, pos_inv2.consolidated_invoice)
+
+		finally:
+			frappe.set_user("Administrator")
+			frappe.db.sql("delete from `tabPOS Profile`")
+			frappe.db.sql("delete from `tabPOS Invoice`")

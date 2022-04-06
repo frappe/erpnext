@@ -55,8 +55,13 @@ frappe.ui.form.on("Item", {
 
 		if (frm.doc.has_variants) {
 			frm.set_intro(__("This Item is a Template and cannot be used in transactions. Item attributes will be copied over into the variants unless 'No Copy' is set"), true);
+
 			frm.add_custom_button(__("Show Variants"), function() {
 				frappe.set_route("List", "Item", {"variant_of": frm.doc.name});
+			}, __("View"));
+
+			frm.add_custom_button(__("Item Variant Settings"), function() {
+				frappe.set_route("Form", "Item Variant Settings");
 			}, __("View"));
 
 			frm.add_custom_button(__("Variant Details Report"), function() {
@@ -110,6 +115,13 @@ frappe.ui.form.on("Item", {
 					}
 				});
 			}, __('Actions'));
+		} else {
+			frm.add_custom_button(__("Website Item"), function() {
+				frappe.db.get_value("Website Item", {item_code: frm.doc.name}, "name", (d) => {
+					if (!d.name) frappe.throw(__("Website Item not found"));
+					frappe.set_route("Form", "Website Item", d.name);
+				});
+			}, __("View"));
 		}
 
 		erpnext.item.edit_prices_button(frm);
@@ -130,12 +142,6 @@ frappe.ui.form.on("Item", {
 			}
 			frappe.set_route('Form', 'Item', new_item.name);
 		});
-
-		if(frm.doc.has_variants) {
-			frm.add_custom_button(__("Item Variant Settings"), function() {
-				frappe.set_route("Form", "Item Variant Settings");
-			}, __("View"));
-		}
 
 		const stock_exists = (frm.doc.__onload
 			&& frm.doc.__onload.stock_exists) ? 1 : 0;
