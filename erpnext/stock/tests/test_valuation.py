@@ -60,9 +60,9 @@ class TestFIFOValuation(unittest.TestCase):
 		self.queue.remove_stock(1, 5)
 		self.assertEqual(self.queue, [[-1, 5]])
 
-		# XXX
-		self.queue.remove_stock(1, 10)
+		self.queue.remove_stock(1)
 		self.assertTotalQty(-2)
+		self.assertEqual(self.queue, [[-2, 5]])
 
 		self.queue.add_stock(2, 10)
 		self.assertTotalQty(0)
@@ -93,7 +93,7 @@ class TestFIFOValuation(unittest.TestCase):
 		self.queue.remove_stock(3, 20)
 		self.assertEqual(self.queue, [[1, 10], [5, 20]])
 
-	def test_collapsing_of_queue(self):
+	def test_queue_with_unknown_rate(self):
 		self.queue.add_stock(1, 1)
 		self.queue.add_stock(1, 2)
 		self.queue.add_stock(1, 3)
@@ -102,8 +102,7 @@ class TestFIFOValuation(unittest.TestCase):
 		self.assertTotalValue(10)
 
 		self.queue.remove_stock(3, 1)
-		# XXX
-		self.assertEqual(self.queue, [[1, 7]])
+		self.assertEqual(self.queue, [[1, 4]])
 
 	def test_rounding_off(self):
 		self.queue.add_stock(1.0, 1.0)
@@ -171,6 +170,32 @@ class TestFIFOValuation(unittest.TestCase):
 				total_value -= sum(q * r for q, r in consumed)
 			self.assertTotalQty(total_qty)
 			self.assertTotalValue(total_value)
+
+	@given(stock_queue_generator, st.floats(min_value=0.1, max_value=1e6))
+	def test_fifo_qty_value_nonneg_hypothesis_with_outgoing_rate(self, stock_queue, outgoing_rate):
+		self.queue = FIFOValuation([])
+		total_qty = 0.0
+		total_value = 0.0
+
+		for qty, rate in stock_queue:
+			# don't allow negative stock
+			if qty == 0 or total_qty + qty < 0 or abs(qty) < 0.1:
+				continue
+			if qty > 0:
+				self.queue.add_stock(qty, rate)
+				total_qty += qty
+				total_value += qty * rate
+			else:
+				qty = abs(qty)
+				consumed = self.queue.remove_stock(qty, outgoing_rate)
+				self.assertAlmostEqual(
+					qty, sum(q for q, _ in consumed), msg=f"incorrect consumption {consumed}"
+				)
+				total_qty -= qty
+				total_value -= sum(q * r for q, r in consumed)
+			self.assertTotalQty(total_qty)
+			self.assertTotalValue(total_value)
+			self.assertGreaterEqual(total_value, 0)
 
 
 class TestLIFOValuation(unittest.TestCase):

@@ -61,13 +61,13 @@ class POSProfile(Document):
 
 		if len(item_groups) != len(set(item_groups)):
 			frappe.throw(
-				_("Duplicate item group found in the item group table"), title="Duplicate Item Group"
+				_("Duplicate item group found in the item group table"), title=_("Duplicate Item Group")
 			)
 
 		if len(customer_groups) != len(set(customer_groups)):
 			frappe.throw(
 				_("Duplicate customer group found in the cutomer group table"),
-				title="Duplicate Customer Group",
+				title=_("Duplicate Customer Group"),
 			)
 
 	def validate_payment_methods(self):

@@ -464,7 +464,7 @@ class Item(Document):
 			frappe.msgprint(
 				_("It can take upto few hours for accurate stock values to be visible after merging items."),
 				indicator="orange",
-				title="Note",
+				title=_("Note"),
 			)
 
 		if self.published_in_website:

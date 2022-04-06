@@ -387,13 +387,13 @@ class LoanRepayment(AccountsController):
 		gle_map = []
 
 		if self.shortfall_amount and self.amount_paid > self.shortfall_amount:
-			remarks = _("Shortfall Repayment of {0}.\nRepayment against Loan: {1}").format(
+			remarks = _("Shortfall Repayment of {0}.<br>Repayment against Loan: {1}").format(
 				self.shortfall_amount, self.against_loan
 			)
 		elif self.shortfall_amount:
 			remarks = _("Shortfall Repayment of {0}").format(self.shortfall_amount)
 		else:
-			remarks = _("Repayment against Loan: ") + self.against_loan
+			remarks = _("Repayment against Loan:") + " " + self.against_loan
 
 		if self.repay_from_salary:
 			payment_account = self.payroll_payable_account
@@ -746,6 +746,8 @@ def calculate_amounts(against_loan, posting_date, payment_type=""):
 	if payment_type == "Loan Closure":
 		amounts["payable_principal_amount"] = amounts["pending_principal_amount"]
 		amounts["interest_amount"] += amounts["unaccrued_interest"]
-		amounts["payable_amount"] = amounts["payable_principal_amount"] + amounts["interest_amount"]
+		amounts["payable_amount"] = (
+			amounts["payable_principal_amount"] + amounts["interest_amount"] + amounts["penalty_amount"]
+		)
 
 	return amounts

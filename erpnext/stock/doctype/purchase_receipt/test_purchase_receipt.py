@@ -327,7 +327,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			target="_Test Warehouse 1 - _TC",
 			basic_rate=100,
 		)
-		pr = make_purchase_receipt(item_code="_Test FG Item", qty=10, rate=500, is_subcontracted="Yes")
+		pr = make_purchase_receipt(item_code="_Test FG Item", qty=10, rate=500, is_subcontracted=1)
 		self.assertEqual(len(pr.get("supplied_items")), 2)
 
 		rm_supp_cost = sum(d.amount for d in pr.get("supplied_items"))
@@ -362,7 +362,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			item_code="_Test FG Item",
 			qty=10,
 			rate=0,
-			is_subcontracted="Yes",
+			is_subcontracted=1,
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
 			supplier_warehouse="Work In Progress - TCP1",
@@ -401,7 +401,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			item_code=item_code,
 			qty=1,
 			include_exploded_items=0,
-			is_subcontracted="Yes",
+			is_subcontracted=1,
 			supplier_warehouse="_Test Warehouse 1 - _TC",
 		)
 
@@ -645,6 +645,45 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(actual_qty, -2)
 
 		return_pr.cancel()
+		pr.cancel()
+
+	def test_purchase_receipt_for_rejected_gle_without_accepted_warehouse(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
+
+		rejected_warehouse = "_Test Rejected Warehouse - TCP1"
+		if not frappe.db.exists("Warehouse", rejected_warehouse):
+			get_warehouse(
+				company="_Test Company with perpetual inventory",
+				abbr=" - TCP1",
+				warehouse_name="_Test Rejected Warehouse",
+			).name
+
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			received_qty=2,
+			rejected_qty=2,
+			rejected_warehouse=rejected_warehouse,
+			do_not_save=True,
+		)
+
+		pr.items[0].qty = 0.0
+		pr.items[0].warehouse = ""
+		pr.submit()
+
+		actual_qty = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": pr.name,
+				"warehouse": pr.items[0].rejected_warehouse,
+				"is_cancelled": 0,
+			},
+			"actual_qty",
+		)
+
+		self.assertEqual(actual_qty, 2)
+		self.assertFalse(pr.items[0].warehouse)
 		pr.cancel()
 
 	def test_purchase_return_for_serialized_items(self):
@@ -1122,7 +1161,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		po = create_purchase_order(
 			item_code=item_code,
 			qty=order_qty,
-			is_subcontracted="Yes",
+			is_subcontracted=1,
 			supplier_warehouse="_Test Warehouse 1 - _TC",
 		)
 
@@ -1465,7 +1504,7 @@ def make_purchase_receipt(**args):
 		pr.set_posting_time = 1
 	pr.company = args.company or "_Test Company"
 	pr.supplier = args.supplier or "_Test Supplier"
-	pr.is_subcontracted = args.is_subcontracted or "No"
+	pr.is_subcontracted = args.is_subcontracted or 0
 	pr.supplier_warehouse = args.supplier_warehouse or "_Test Warehouse 1 - _TC"
 	pr.currency = args.currency or "INR"
 	pr.is_return = args.is_return

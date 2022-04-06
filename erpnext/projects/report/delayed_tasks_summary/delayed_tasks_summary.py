@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe import _
 from frappe.utils import date_diff, nowdate
 
 
@@ -83,19 +84,24 @@ def get_chart_data(data):
 
 def get_columns():
 	columns = [
-		{"fieldname": "name", "fieldtype": "Link", "label": "Task", "options": "Task", "width": 150},
-		{"fieldname": "subject", "fieldtype": "Data", "label": "Subject", "width": 200},
-		{"fieldname": "status", "fieldtype": "Data", "label": "Status", "width": 100},
-		{"fieldname": "priority", "fieldtype": "Data", "label": "Priority", "width": 80},
-		{"fieldname": "progress", "fieldtype": "Data", "label": "Progress (%)", "width": 120},
+		{"fieldname": "name", "fieldtype": "Link", "label": _("Task"), "options": "Task", "width": 150},
+		{"fieldname": "subject", "fieldtype": "Data", "label": _("Subject"), "width": 200},
+		{"fieldname": "status", "fieldtype": "Data", "label": _("Status"), "width": 100},
+		{"fieldname": "priority", "fieldtype": "Data", "label": _("Priority"), "width": 80},
+		{"fieldname": "progress", "fieldtype": "Data", "label": _("Progress (%)"), "width": 120},
 		{
 			"fieldname": "exp_start_date",
 			"fieldtype": "Date",
-			"label": "Expected Start Date",
+			"label": _("Expected Start Date"),
 			"width": 150,
 		},
-		{"fieldname": "exp_end_date", "fieldtype": "Date", "label": "Expected End Date", "width": 150},
-		{"fieldname": "completed_on", "fieldtype": "Date", "label": "Actual End Date", "width": 130},
-		{"fieldname": "delay", "fieldtype": "Data", "label": "Delay (In Days)", "width": 120},
+		{
+			"fieldname": "exp_end_date",
+			"fieldtype": "Date",
+			"label": _("Expected End Date"),
+			"width": 150,
+		},
+		{"fieldname": "completed_on", "fieldtype": "Date", "label": _("Actual End Date"), "width": 130},
+		{"fieldname": "delay", "fieldtype": "Data", "label": _("Delay (In Days)"), "width": 120},
 	]
 	return columns
