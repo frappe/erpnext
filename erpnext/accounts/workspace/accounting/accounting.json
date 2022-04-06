@@ -273,6 +273,16 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Follow Up",
+   "link_to": "Follow Up",
+   "link_type": "DocType",
+   "onboard": 0,
+   "only_for": "",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Accounts Payable",
    "onboard": 0,
    "type": "Card Break"
@@ -848,6 +858,15 @@
   },
   {
    "hidden": 0,
+   "is_query_report": 1,
+   "label": "ITC",
+   "link_to": "ITC-04",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
    "is_query_report": 0,
    "label": "Share Management",
    "onboard": 0,
@@ -1130,7 +1149,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-02-21 12:55:17.768043",
+ "modified": "2022-04-05 10:19:11.223580",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
