@@ -521,6 +521,8 @@ class TestPickList(FrappeTestCase):
 			for dn_item in frappe.get_doc("Delivery Note", dn.name).get("items"):
 				self.assertEqual(dn_item.item_code, "_Test Item")
 				self.assertEqual(dn_item.against_sales_order, sales_order_1.name)
+				self.assertEqual(dn_item.pick_list_item, pick_list.locations[dn_item.idx - 1].name)
+
 		for dn in frappe.get_all(
 			"Delivery Note",
 			filters={"pick_list": pick_list.name, "customer": "_Test Customer 1"},

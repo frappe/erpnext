@@ -1267,17 +1267,9 @@ class AccountsController(TransactionBase):
 		stock_items = []
 		item_codes = list(set(item.item_code for item in self.get("items")))
 		if item_codes:
-			stock_items = [
-				r[0]
-				for r in frappe.db.sql(
-					"""
-				select name from `tabItem`
-				where name in (%s) and is_stock_item=1
-			"""
-					% (", ".join(["%s"] * len(item_codes)),),
-					item_codes,
-				)
-			]
+			stock_items = frappe.db.get_values(
+				"Item", {"name": ["in", item_codes], "is_stock_item": 1}, pluck="name", cache=True
+			)
 
 		return stock_items
 
@@ -2594,7 +2586,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		parent.update_ordered_qty()
 		parent.update_ordered_and_reserved_qty()
 		parent.update_receiving_percentage()
-		if parent.is_subcontracted == "Yes":
+		if parent.is_subcontracted:
 			parent.update_reserved_qty_for_subcontract()
 			parent.create_raw_materials_supplied("supplied_items")
 			parent.save()

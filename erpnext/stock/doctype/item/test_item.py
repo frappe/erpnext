@@ -744,6 +744,13 @@ class TestItem(FrappeTestCase):
 		self.assertTrue(get_data(warehouse="_Test Warehouse - _TC"))
 		self.assertTrue(get_data(item_group="All Item Groups"))
 
+	def test_empty_description(self):
+		item = make_item(properties={"description": "<p></p>"})
+		self.assertEqual(item.description, item.item_name)
+		item.description = ""
+		item.save()
+		self.assertEqual(item.description, item.item_name)
+
 
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc("Item Variant Settings")

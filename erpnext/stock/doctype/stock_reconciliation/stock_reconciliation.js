@@ -55,6 +55,25 @@ frappe.ui.form.on("Stock Reconciliation", {
 		}
 	},
 
+	scan_barcode: function(frm) {
+		const barcode_scanner = new erpnext.utils.BarcodeScanner({frm:frm});
+		barcode_scanner.process_scan();
+	},
+
+	scan_mode: function(frm) {
+		if (frm.doc.scan_mode) {
+			frappe.show_alert({
+				message: __("Scan mode enabled, existing quantity will not be fetched."),
+				indicator: "green"
+			});
+		}
+	},
+
+	set_warehouse: function(frm) {
+		let transaction_controller = new erpnext.TransactionController({frm:frm});
+		transaction_controller.autofill_warehouse(frm.doc.items, "warehouse", frm.doc.set_warehouse);
+	},
+
 	get_items: function(frm) {
 		let fields = [
 			{
@@ -148,35 +167,25 @@ frappe.ui.form.on("Stock Reconciliation", {
 					batch_no: d.batch_no
 				},
 				callback: function(r) {
-					frappe.model.set_value(cdt, cdn, "qty", r.message.qty);
+					const row = frappe.model.get_doc(cdt, cdn);
+					if (!frm.doc.scan_mode) {
+						frappe.model.set_value(cdt, cdn, "qty", r.message.qty);
+					}
 					frappe.model.set_value(cdt, cdn, "valuation_rate", r.message.rate);
 					frappe.model.set_value(cdt, cdn, "current_qty", r.message.qty);
 					frappe.model.set_value(cdt, cdn, "current_valuation_rate", r.message.rate);
 					frappe.model.set_value(cdt, cdn, "current_amount", r.message.rate * r.message.qty);
-					frappe.model.set_value(cdt, cdn, "amount", r.message.rate * r.message.qty);
+					frappe.model.set_value(cdt, cdn, "amount", row.qty * row.valuation_rate);
 					frappe.model.set_value(cdt, cdn, "current_serial_no", r.message.serial_nos);
 
-					if (frm.doc.purpose == "Stock Reconciliation") {
+					if (frm.doc.purpose == "Stock Reconciliation" && !frm.doc.scan_mode) {
 						frappe.model.set_value(cdt, cdn, "serial_no", r.message.serial_nos);
 					}
 				}
 			});
 		}
 	},
-	set_item_code: function(doc, cdt, cdn) {
-		var d = frappe.model.get_doc(cdt, cdn);
-		if (d.barcode) {
-			frappe.call({
-				method: "erpnext.stock.get_item_details.get_item_code",
-				args: {"barcode": d.barcode },
-				callback: function(r) {
-					if (!r.exe){
-						frappe.model.set_value(cdt, cdn, "item_code", r.message);
-					}
-				}
-			});
-		}
-	},
+
 	set_amount_quantity: function(doc, cdt, cdn) {
 		var d = frappe.model.get_doc(cdt, cdn);
 		if (d.qty & d.valuation_rate) {
@@ -214,13 +223,10 @@ frappe.ui.form.on("Stock Reconciliation", {
 });
 
 frappe.ui.form.on("Stock Reconciliation Item", {
-	barcode: function(frm, cdt, cdn) {
-		frm.events.set_item_code(frm, cdt, cdn);
-	},
 
 	warehouse: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		if (child.batch_no) {
+		if (child.batch_no && !frm.doc.scan_mode) {
 			frappe.model.set_value(child.cdt, child.cdn, "batch_no", "");
 		}
 
@@ -229,7 +235,7 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 
 	item_code: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		if (child.batch_no) {
+		if (child.batch_no && !frm.doc.scan_mode) {
 			frappe.model.set_value(cdt, cdn, "batch_no", "");
 		}
 
@@ -255,7 +261,14 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 			const serial_nos = child.serial_no.trim().split('\n');
 			frappe.model.set_value(cdt, cdn, "qty", serial_nos.length);
 		}
-	}
+	},
+
+	items_add: function(frm, cdt, cdn) {
+		var item = frappe.get_doc(cdt, cdn);
+		if (!item.warehouse && frm.doc.set_warehouse) {
+			frappe.model.set_value(cdt, cdn, "warehouse", frm.doc.set_warehouse);
+		}
+	},
 
 });
 

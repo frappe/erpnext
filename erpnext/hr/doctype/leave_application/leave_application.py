@@ -735,9 +735,9 @@ def get_number_of_leave_days(
 	(Based on the include_holiday setting in Leave Type)"""
 	number_of_days = 0
 	if cint(half_day) == 1:
-		if from_date == to_date:
+		if getdate(from_date) == getdate(to_date):
 			number_of_days = 0.5
-		elif half_day_date and half_day_date <= to_date:
+		elif half_day_date and getdate(from_date) <= getdate(half_day_date) <= getdate(to_date):
 			number_of_days = date_diff(to_date, from_date) + 0.5
 		else:
 			number_of_days = date_diff(to_date, from_date) + 1

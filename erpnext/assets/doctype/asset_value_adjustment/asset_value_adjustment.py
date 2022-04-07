@@ -37,7 +37,7 @@ class AssetValueAdjustment(Document):
 				_("Asset Value Adjustment cannot be posted before Asset's purchase date <b>{0}</b>.").format(
 					formatdate(asset_purchase_date)
 				),
-				title="Incorrect Date",
+				title=_("Incorrect Date"),
 			)
 
 	def set_difference_amount(self):

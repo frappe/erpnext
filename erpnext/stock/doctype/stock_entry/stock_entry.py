@@ -225,12 +225,16 @@ class StockEntry(StockController):
 	def set_transfer_qty(self):
 		for item in self.get("items"):
 			if not flt(item.qty):
-				frappe.throw(_("Row {0}: Qty is mandatory").format(item.idx))
+				frappe.throw(_("Row {0}: Qty is mandatory").format(item.idx), title=_("Zero quantity"))
 			if not flt(item.conversion_factor):
 				frappe.throw(_("Row {0}: UOM Conversion Factor is mandatory").format(item.idx))
 			item.transfer_qty = flt(
 				flt(item.qty) * flt(item.conversion_factor), self.precision("transfer_qty", item)
 			)
+			if not flt(item.transfer_qty):
+				frappe.throw(
+					_("Row {0}: Qty in Stock UOM can not be zero.").format(item.idx), title=_("Zero quantity")
+				)
 
 	def update_cost_in_project(self):
 		if self.work_order and not frappe.db.get_value(
@@ -1382,7 +1386,6 @@ class StockEntry(StockController):
 		if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:
 			scrap_item_dict = self.get_bom_scrap_material(self.fg_completed_qty)
 			for item in scrap_item_dict.values():
-				item.idx = ""
 				if self.pro_doc and self.pro_doc.scrap_warehouse:
 					item["to_warehouse"] = self.pro_doc.scrap_warehouse
 
@@ -1898,7 +1901,6 @@ class StockEntry(StockController):
 			se_child.is_process_loss = item_row.get("is_process_loss", 0)
 
 			for field in [
-				"idx",
 				"po_detail",
 				"original_item",
 				"expense_account",

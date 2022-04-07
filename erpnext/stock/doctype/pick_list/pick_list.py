@@ -33,7 +33,9 @@ class PickList(Document):
 				location.sales_order
 				and frappe.db.get_value("Sales Order", location.sales_order, "per_picked") == 100
 			):
-				frappe.throw("Row " + str(location.idx) + " has been picked already!")
+				frappe.throw(
+					_("Row #{}: item {} has been picked already.").format(location.idx, location.item_code)
+				)
 
 	def before_submit(self):
 		for item in self.locations:
@@ -82,10 +84,9 @@ class PickList(Document):
 				100 + flt(frappe.db.get_single_value("Stock Settings", "over_delivery_receipt_allowance"))
 			):
 				frappe.throw(
-					"You are picking more than required quantity for "
-					+ item_code
-					+ ". Check if there is any other pick list created for "
-					+ so_doc.name
+					_(
+						"You are picking more than required quantity for {}. Check if there is any other pick list created for {}"
+					).format(item_code, so_doc.name)
 				)
 
 		frappe.db.set_value("Sales Order Item", so_item, "picked_qty", already_picked + picked_qty)
@@ -534,6 +535,7 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
 			dn_item = map_child_doc(source_doc, delivery_note, table_mapper)
 
 			if dn_item:
+				dn_item.pick_list_item = location.name
 				dn_item.warehouse = location.warehouse
 				dn_item.qty = flt(location.picked_qty) / (flt(location.conversion_factor) or 1)
 				dn_item.batch_no = location.batch_no
