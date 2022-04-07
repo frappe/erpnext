@@ -127,7 +127,6 @@ def get_columns(invoice_list, additional_table_columns):
 
 	expense_accounts = []
 	tax_accounts = []
-	tax_columns = []
 	unrealized_profit_loss_accounts = []
 
 	if invoice_list:
@@ -163,10 +162,11 @@ def get_columns(invoice_list, additional_table_columns):
 	unrealized_profit_loss_account_columns = [
 		(account + ":Currency/currency:120") for account in unrealized_profit_loss_accounts
 	]
-
-	for account in tax_accounts:
-		if account not in expense_accounts:
-			tax_columns.append(account + ":Currency/currency:120")
+	tax_columns = [
+		(account + ":Currency/currency:120")
+		for account in tax_accounts
+		if account not in expense_accounts
+	]
 
 	columns = (
 		columns
