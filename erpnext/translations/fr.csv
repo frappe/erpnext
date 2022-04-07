@@ -9855,7 +9855,7 @@ Stock Transactions Settings, Paramétre des transactions
 Role Allowed to Over Deliver/Receive, Rôle autorisé à dépasser cette limite
 Users with this role are allowed to over deliver/receive against orders above the allowance percentage,Rôle Utilisateur qui sont autorisé à livrée/commandé au-delà de la limite
 Over Transfer Allowance,Autorisation de limite de transfert
-The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units, Le pourcentage de quantité que vous pourrez receptionné en plus de la quantité commandée
+"The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units","Le pourcentage de quantité que vous pourrez receptionné en plus de la quantité commandée"
 Quality Inspection Settings,Paramétre de l&#39;inspection qualité
 Action If Quality Inspection Is Rejected,Action si l'inspection qualité est rejetée
 Disable Serial No And Batch Selector,Désactiver le sélecteur de numéro de lot/série
@@ -9865,7 +9865,7 @@ Control Historical Stock Transactions,Controle de l&#39;historique des stransact
 No stock transactions can be created or modified before this date.,Aucune transaction ne peux être créée ou modifié avant cette date.
 Stock transactions that are older than the mentioned days cannot be modified.,Les transactions de stock plus ancienne que le nombre de jours ci-dessus ne peuvent être modifiées
 Role Allowed to Create/Edit Back-dated Transactions,Rôle autorisé à créer et modifier des transactions anti-datée
-If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.,LEs utilisateur de ce role pourront creer et modifier des transactions dans le passé. Si vide tout les utilisateurs pourrons le faire
+"If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.","LEs utilisateur de ce role pourront creer et modifier des transactions dans le passé. Si vide tout les utilisateurs pourrons le faire"
 Auto Insert Item Price If Missing,Création du prix de l'article dans les listes de prix si abscent
 Update Existing Price List Rate,Mise a jour automatique du prix dans les listes de prix
 Show Barcode Field in Stock Transactions,Afficher le champ Code Barre dans les transactions de stock
