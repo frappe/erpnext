@@ -826,8 +826,18 @@ def make_purchase_invoice(supplier, source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_project(source_name, target_doc=None):
-	def postprocess(source, doc):
-		pass
+	def postprocess(source, target):
+		project_templates = []
+		for d in source.items:
+			if d.project_template and d.project_template not in project_templates:
+				project_templates.append(d.project_template)
+
+		for project_template in project_templates:
+			pt_row = target.append("project_templates")
+			pt_row.project_template = project_template
+			pt_row.sales_order = source.name
+
+		target.run_method("set_missing_values")
 
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -835,10 +845,10 @@ def make_project(source_name, target_doc=None):
 			"validation": {
 				"docstatus": ["=", 1]
 			},
-			"field_map":{
-				"name" : "sales_order",
-				"base_grand_total" : "estimated_costing",
-			}
+			"field_map": {
+				"name": "sales_order",
+				"delivery_date": "expected_delivery_date",
+			},
 		},
 	}, target_doc, postprocess)
 

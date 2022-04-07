@@ -223,6 +223,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 				"field_map": {
 					"parent": "quotation",
 					"name": "quotation_item",
+					"project_template": "project_template",
 				},
 				"postprocess": update_item
 			},

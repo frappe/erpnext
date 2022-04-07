@@ -78,6 +78,9 @@ def get_applicable_items(applies_to_item, item_groups, items_type=None):
 
 
 def append_applicable_items(target_doc, applicable_items, check_duplicate=True, project_template_detail=None):
+	if isinstance(project_template_detail, string_types):
+		project_template_detail = frappe._dict(json.loads(project_template_detail))
+
 	existing_item_codes = [d.item_code for d in target_doc.items if d.item_code]
 
 	for applicable_item in applicable_items:
@@ -94,12 +97,12 @@ def append_applicable_items(target_doc, applicable_items, check_duplicate=True, 
 
 			if project_template_detail:
 				if trn_item.meta.has_field('project_template'):
-					trn_item.project_template = project_template_detail.project_template
+					trn_item.project_template = project_template_detail.get('project_template')
 				if trn_item.meta.has_field('project_template_detail'):
-					trn_item.project_template_detail = project_template_detail.name
+					trn_item.project_template_detail = project_template_detail.get('name')
 
-				if applicable_item.get('use_template_description'):
-					trn_item.item_name = project_template_detail.project_template_name
+				if applicable_item.get('use_template_description') and project_template_detail.get('project_template_name'):
+					trn_item.item_name = project_template_detail.get('project_template_name')
 
 					if strip_html(cstr(project_template_detail.get('description'))).strip():
 						trn_item.description = project_template_detail.description

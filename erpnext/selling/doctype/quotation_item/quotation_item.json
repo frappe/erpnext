@@ -110,6 +110,7 @@
   "item_tax_detail_before_discount",
   "prevdoc_doctype",
   "prevdoc_docname",
+  "project_template",
   "item_balance",
   "projected_qty",
   "actual_qty",
@@ -1016,11 +1017,23 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "project_template",
+   "fieldtype": "Link",
+   "label": "Project Template",
+   "oldfieldname": "prevdoc_docname",
+   "oldfieldtype": "Data",
+   "options": "Project Template",
+   "print_hide": 1,
+   "print_width": "150px",
+   "read_only": 1,
+   "width": "150px"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-12-18 18:19:34.992007",
+ "modified": "2022-04-07 16:53:26.864480",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation Item",

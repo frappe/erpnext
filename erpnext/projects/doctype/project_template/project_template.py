@@ -45,6 +45,9 @@ def add_project_template_items(target_doc, project_template, applies_to_item=Non
 	if isinstance(target_doc, string_types):
 		target_doc = frappe.get_doc(json.loads(target_doc))
 
+	if not project_template_detail and project_template:
+		project_template_detail = frappe._dict({'project_template': project_template})
+
 	if not target_doc.meta.has_field('items'):
 		frappe.throw(_("Target document does not have items table"))
 
@@ -59,9 +62,10 @@ def add_project_template_items(target_doc, project_template, applies_to_item=Non
 		applicable_items_groups = [d.applicable_item_group for d in project_template_doc.applicable_item_groups
 			if d.applicable_item_group and (not item_group or d.applicable_item_group == item_group)]
 
-		target_doc = add_applicable_items(target_doc, applies_to_item, item_groups=applicable_items_groups,
-			items_type=items_type, check_duplicate=check_duplicate, project_template_detail=project_template_detail,
-			postprocess=False)
+		if applicable_items_groups:
+			target_doc = add_applicable_items(target_doc, applies_to_item, item_groups=applicable_items_groups,
+				items_type=items_type, check_duplicate=check_duplicate, project_template_detail=project_template_detail,
+				postprocess=False)
 
 	# get applicable items from project template
 	project_template_items = get_project_template_items(project_template, applies_to_item, item_group=item_group,

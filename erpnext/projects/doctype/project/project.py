@@ -95,8 +95,7 @@ class Project(Document):
 			self.update_odometer()
 
 	def after_insert(self):
-		if self.sales_order:
-			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
+		self.set_project_in_sales_order_and_quotation()
 
 	def set_title(self):
 		if self.project_name:
@@ -105,6 +104,20 @@ class Project(Document):
 			self.title = self.customer_name or self.customer
 		else:
 			self.title = self.name
+
+	def set_project_in_sales_order_and_quotation(self):
+		if self.sales_order:
+			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name, notify=1)
+
+			quotations = frappe.db.sql_list("""
+				select distinct qtn.name
+				from `tabQuotation` qtn
+				inner join `tabSales Order Item` item on item.quotation = qtn.name
+				where item.parent = %s and qtn.docstatus < 2 and ifnull(qtn.project, '') = ''
+			""", self.sales_order)
+
+			for quotation in quotations:
+				frappe.db.set_value("Quotation", quotation, "project", self.name, notify=1)
 
 	def validate_cant_change(self):
 		if self.is_new():
@@ -164,6 +177,7 @@ class Project(Document):
 		self.set_customer_details()
 		self.set_applies_to_details()
 		self.set_missing_checklist()
+		self.set_project_template_details()
 
 	def set_customer_details(self):
 		args = self.as_dict()
@@ -184,6 +198,11 @@ class Project(Document):
 	def set_missing_checklist(self):
 		if self.meta.has_field('vehicle_checklist'):
 			set_missing_checklist(self)
+
+	def set_project_template_details(self):
+		for d in self.project_templates:
+			if d.project_template and not d.project_template_name:
+				d.project_template_name = frappe.get_cached_value("Project Template", d.project_template, "project_template_name")
 
 	def validate_readings(self):
 		if self.meta.has_field('fuel_level'):
@@ -1254,8 +1273,9 @@ def get_sales_order(project_name, items_type=None):
 
 	# Get Project Template Items
 	for d in project.project_templates:
-		target_doc = add_project_template_items(target_doc, d.project_template, project.applies_to_item,
-			check_duplicate=False, project_template_detail=d, items_type=items_type)
+		if not d.get('sales_order'):
+			target_doc = add_project_template_items(target_doc, d.project_template, project.applies_to_item,
+				check_duplicate=False, project_template_detail=d, items_type=items_type)
 
 	# Remove already ordered items
 	project_template_ordered_set = get_project_template_ordered_set(project)

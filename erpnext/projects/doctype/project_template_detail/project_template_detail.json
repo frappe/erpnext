@@ -7,7 +7,9 @@
   "project_template",
   "project_template_name",
   "description_section",
-  "description"
+  "description",
+  "section_break_5",
+  "sales_order"
  ],
  "fields": [
   {
@@ -38,10 +40,24 @@
    "fieldname": "description",
    "fieldtype": "Text Editor",
    "label": "Description"
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "no_copy": 1,
+   "options": "Sales Order",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break",
+   "label": "Reference"
   }
  ],
  "istable": 1,
- "modified": "2022-04-07 01:33:43.181934",
+ "modified": "2022-04-07 17:00:27.753371",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Template Detail",
