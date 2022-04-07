@@ -125,6 +125,8 @@
   "quotation_item",
   "blanket_order",
   "blanket_order_rate",
+  "project_template",
+  "project_template_detail",
   "planning_section",
   "projected_qty",
   "actual_qty",
@@ -1273,11 +1275,28 @@
    "label": "Bill Only To Customer",
    "options": "Customer",
    "read_only": 1
+  },
+  {
+   "fieldname": "project_template",
+   "fieldtype": "Link",
+   "label": "Project Template",
+   "no_copy": 1,
+   "options": "Project Template",
+   "read_only": 1
+  },
+  {
+   "fieldname": "project_template_detail",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Project Template Detail",
+   "no_copy": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-03-24 16:30:33.284283",
+ "modified": "2022-04-07 05:19:23.301776",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

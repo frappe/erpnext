@@ -76,9 +76,6 @@ class Project(Document):
 		self.get_sales_invoice_names()
 
 	def validate(self):
-		if not self.is_new():
-			self.copy_from_template()
-
 		self.quick_change_master_details()
 		self.set_missing_values()
 		self.validate_project_type()
@@ -98,7 +95,6 @@ class Project(Document):
 			self.update_odometer()
 
 	def after_insert(self):
-		self.copy_from_template()
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
@@ -1236,6 +1232,64 @@ def get_delivery_note(project_name):
 	target_doc.run_method("calculate_taxes_and_totals")
 
 	return target_doc
+
+
+@frappe.whitelist()
+def get_sales_order(project_name):
+	from erpnext.projects.doctype.project_template.project_template import add_project_template_items
+
+	project = frappe.get_doc("Project", project_name)
+	project_details = get_project_details(project, "Sales Order")
+
+	# Create Sales Invoice
+	target_doc = frappe.new_doc("Sales Order")
+	target_doc.company = project.company
+	target_doc.project = project.name
+	target_doc.delivery_date = project.expected_delivery_date
+
+	# Set Project Details
+	for k, v in project_details.items():
+		if target_doc.meta.has_field(k):
+			target_doc.set(k, v)
+
+	# Get Project Template Items
+	for d in project.project_templates:
+		target_doc = add_project_template_items(target_doc, d.project_template, project.applies_to_item,
+			project_template_detail=d)
+
+	# Remove already ordered items
+	project_template_ordered_set = get_project_template_ordered_set(project)
+	to_remove = []
+	for d in target_doc.items:
+		if d.item_code and d.project_template_detail and (d.item_code, d.project_template_detail) in project_template_ordered_set:
+			to_remove.append(d)
+
+	for d in to_remove:
+		target_doc.remove(d)
+	for i, d in enumerate(target_doc.items):
+		d.idx = i + 1
+
+	# Missing Values and Forced Values
+	target_doc.run_method("set_missing_values")
+	target_doc.run_method("append_taxes_from_master")
+	target_doc.run_method("calculate_taxes_and_totals")
+
+	return target_doc
+
+
+def get_project_template_ordered_set(project):
+	project_template_ordered_set = []
+
+	project_template_details = [d.name for d in project.project_templates]
+	if project_template_details:
+		project_template_ordered_set = frappe.db.sql("""
+			select distinct item.item_code, item.project_template_detail
+			from `tabSales Order Item` item
+			inner join `tabSales Order` so on so.name = item.parent
+			where so.docstatus = 1 and so.project = %s and item.project_template_detail in %s
+		""", (project.name, project_template_details))
+
+	return project_template_ordered_set
 
 
 @frappe.whitelist()

@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import strip_html, cstr
 from frappe.model.document import Document
 from six import string_types
 import json
@@ -15,7 +16,8 @@ class ItemApplicableItem(Document):
 
 
 @frappe.whitelist()
-def add_applicable_items(target_doc, applies_to_item, item_groups=None, postprocess=True):
+def add_applicable_items(target_doc, applies_to_item, item_groups=None, get_stock_items=True, get_service_items=True,
+		project_template_detail=None, postprocess=True):
 	if isinstance(target_doc, string_types):
 		target_doc = frappe.get_doc(json.loads(target_doc))
 	if isinstance(item_groups, string_types):
@@ -31,20 +33,10 @@ def add_applicable_items(target_doc, applies_to_item, item_groups=None, postproc
 	if target_doc.get('items') and not target_doc.items[0].item_code and not target_doc.items[0].item_name:
 		target_doc.remove(target_doc.items[0])
 
-	existing_item_codes = [d.item_code for d in target_doc.items if d.item_code]
+	applicable_items = get_applicable_items(applies_to_item, item_groups, get_stock_items=get_stock_items,
+		get_service_items=get_service_items)
 
-	applicable_items = get_applicable_items(applies_to_item, item_groups)
-	for applicable_item in applicable_items:
-		if applicable_item.applicable_item_code:
-			# do not duplicate item
-			if applicable_item.applicable_item_code in existing_item_codes:
-				continue
-
-			# add item
-			trn_item = target_doc.append('items')
-			trn_item.item_code = applicable_item.applicable_item_code
-			trn_item.qty = applicable_item.applicable_qty
-			trn_item.uom = applicable_item.applicable_uom
+	append_applicable_items(target_doc, applicable_items, project_template_detail=project_template_detail)
 
 	# postprocess
 	if postprocess:
@@ -54,14 +46,15 @@ def add_applicable_items(target_doc, applies_to_item, item_groups=None, postproc
 	return target_doc
 
 
-def get_applicable_items(applies_to_item, item_groups):
+def get_applicable_items(applies_to_item, item_groups, get_stock_items=True, get_service_items=True):
 	applicable_items = []
 	item_groups_in_variant = set()
 
 	applies_to_item_doc = frappe.get_cached_doc("Item", applies_to_item)
 	for applicable_item in applies_to_item_doc.applicable_items:
 		if applicable_item.applicable_item_code:
-			if filter_applicable_item(applicable_item, item_groups):
+			if filter_applicable_item(applicable_item, item_groups, get_stock_items=get_stock_items,
+					get_service_items=get_service_items):
 				continue
 
 			applicable_item_group = frappe.get_cached_value("Item", applicable_item.applicable_item_code, "item_group")
@@ -72,7 +65,8 @@ def get_applicable_items(applies_to_item, item_groups):
 		applies_to_item_template_doc = frappe.get_cached_doc("Item", applies_to_item_doc.variant_of)
 		for applicable_item in applies_to_item_template_doc.applicable_items:
 			if applicable_item.applicable_item_code:
-				if filter_applicable_item(applicable_item, item_groups):
+				if filter_applicable_item(applicable_item, item_groups, get_stock_items=get_stock_items,
+						get_service_items=get_service_items):
 					continue
 
 				# do not get applicable item from template if item group in variant exist/is overridden
@@ -85,14 +79,49 @@ def get_applicable_items(applies_to_item, item_groups):
 	return applicable_items
 
 
-def filter_applicable_item(applicable_item, item_groups):
+def append_applicable_items(target_doc, applicable_items, project_template_detail=None):
+	existing_item_codes = [d.item_code for d in target_doc.items if d.item_code]
+
+	for applicable_item in applicable_items:
+		if applicable_item.applicable_item_code:
+			# do not duplicate item
+			if applicable_item.applicable_item_code in existing_item_codes:
+				continue
+
+			# add item
+			trn_item = target_doc.append('items')
+			trn_item.item_code = applicable_item.applicable_item_code
+			trn_item.qty = applicable_item.applicable_qty
+			trn_item.uom = applicable_item.applicable_uom
+
+			if project_template_detail:
+				if trn_item.meta.has_field('project_template'):
+					trn_item.project_template = project_template_detail.project_template
+				if trn_item.meta.has_field('project_template_detail'):
+					trn_item.project_template_detail = project_template_detail.name
+
+				if applicable_item.get('use_template_description'):
+					trn_item.item_name = project_template_detail.project_template_name
+
+					if strip_html(cstr(project_template_detail.get('description'))).strip():
+						trn_item.description = project_template_detail.description
+
+
+def filter_applicable_item(applicable_item, item_groups, get_stock_items=True, get_service_items=True):
 	# filter out inactive applicable item
 	if applicable_item.get('inactive'):
 		return True
 
+	applicable_item_doc = frappe.get_cached_doc("Item", applicable_item.applicable_item_code)
+
 	# filter by item group
-	applicable_item_group = frappe.get_cached_value("Item", applicable_item.applicable_item_code, "item_group")
-	if item_groups and applicable_item_group not in item_groups:
+	if item_groups and applicable_item_doc.item_group not in item_groups:
+		return True
+
+	# filter by stock item / service item
+	if not get_stock_items and applicable_item_doc.is_stock_item:
+		return True
+	if not get_service_items and not applicable_item_doc.is_stock_item and not applicable_item_doc.is_fixed_asset:
 		return True
 
 	return False

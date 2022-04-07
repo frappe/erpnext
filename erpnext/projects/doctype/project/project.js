@@ -224,6 +224,10 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 			if (frappe.model.can_create("Delivery Note")) {
 				me.frm.add_custom_button(__("Delivery Note"), () => me.make_delivery_note(), __("Create"));
 			}
+
+			if (frappe.model.can_create("Sales Order")) {
+				me.frm.add_custom_button(__("Sales Order"), () => me.make_sales_order(), __("Create"));
+			}
 		}
 	},
 
@@ -578,6 +582,23 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		me.frm.check_if_unsaved();
 		return frappe.call({
 			method: "erpnext.projects.doctype.project.project.get_delivery_note",
+			args: {
+				"project_name": me.frm.doc.name,
+			},
+			callback: function (r) {
+				if (!r.exc) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				}
+			}
+		});
+	},
+
+	make_sales_order: function () {
+		var me = this;
+		me.frm.check_if_unsaved();
+		return frappe.call({
+			method: "erpnext.projects.doctype.project.project.get_sales_order",
 			args: {
 				"project_name": me.frm.doc.name,
 			},

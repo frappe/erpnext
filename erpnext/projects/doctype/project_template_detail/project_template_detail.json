@@ -1,0 +1,54 @@
+{
+ "creation": "2022-04-07 01:12:52.402850",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "project_template",
+  "project_template_name",
+  "description_section",
+  "description"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "project_template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Template",
+   "options": "Project Template",
+   "reqd": 1
+  },
+  {
+   "columns": 8,
+   "fetch_from": "project_template.project_template_name",
+   "fetch_if_empty": 1,
+   "fieldname": "project_template_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Template Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description_section",
+   "fieldtype": "Section Break",
+   "label": "Description"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description"
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-04-07 01:33:43.181934",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Project Template Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
