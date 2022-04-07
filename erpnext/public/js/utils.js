@@ -330,27 +330,6 @@ $.extend(erpnext.utils, {
 			}
 			frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
 		});
-	},
-
-	get_dialog_message: function(source_doctype, target_doctype, module_name, customer, supplier) {
-		let customer_supplier_type = "Customer";
-		let customer_supplier = customer;
-		if (!customer) {
-			customer_supplier_type = "Supplier";
-			customer_supplier = supplier;
-		}
-		let message = __("You can now create a {} without a {} for {} <b><a class='customer_supplier' href='#'>{}</a></b><br><br> You can also change this globally in <b><a class='settings' href='#'>{} Settings</a></b>", [source_doctype, target_doctype, customer_supplier_type, customer_supplier, module_name]);
-		let d = new frappe.ui.Dialog({
-			title: __("Message"),
-			indicator: "blue",
-			fields: [
-				{
-					fieldtype: "HTML",
-					options: `<p class="frappe-confirm-message settings-message">${message}</p>`
-				}
-			],
-		});
-		return d;
 	}
 });
 
