@@ -267,6 +267,7 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 			AND tsd.docstatus = 1
 			AND tsd.is_billable = 1
 			AND tsd.sales_invoice is NULL
+			AND ts.status not in ("Billed","Cancelled")
 			{condition}
 		ORDER BY tsd.from_time ASC
 	"""
