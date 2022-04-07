@@ -47,7 +47,8 @@ class TestCustomer(FrappeTestCase):
 		c_doc.customer_name = "Testing Customer"
 		c_doc.customer_group = "_Testing Customer Group"
 		c_doc.payment_terms = c_doc.default_price_list = ""
-		c_doc.accounts = c_doc.credit_limits = []
+		c_doc.accounts = []
+		c_doc.credit_limits = []
 		c_doc.insert()
 		c_doc.get_customer_group_details()
 		self.assertEqual(c_doc.payment_terms, "_Test Payment Term Template 3")
