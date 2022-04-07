@@ -68,7 +68,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			row = this.get_batch_row_to_modify(batch_no);
 		} else {
 			// serial or barcode scan
-			row = this.get_row_to_modify_on_scan(row, item_code);
+			row = this.get_row_to_modify_on_scan(item_code);
 		}
 
 		if (!row) {
@@ -177,21 +177,17 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	get_batch_row_to_modify(batch_no) {
 		// get row if batch already exists in table
 		const existing_batch_row = this.items_table.find((d) => d.batch_no === batch_no);
-		return existing_batch_row || null;
+		return existing_batch_row || this.get_existing_blank_row();
 	}
 
-	get_row_to_modify_on_scan(row_to_modify, item_code) {
+	get_row_to_modify_on_scan(item_code) {
 		// get an existing item row to increment or blank row to modify
 		const existing_item_row = this.items_table.find((d) => d.item_code === item_code);
-		const blank_item_row = this.items_table.find((d) => !d.item_code);
+		return existing_item_row || this.get_existing_blank_row();
+	}
 
-		if (existing_item_row) {
-			row_to_modify = existing_item_row;
-		} else if (blank_item_row) {
-			row_to_modify = blank_item_row;
-		}
-
-		return row_to_modify;
+	get_existing_blank_row() {
+		return this.items_table.find((d) => !d.item_code);
 	}
 
 	clean_up() {
