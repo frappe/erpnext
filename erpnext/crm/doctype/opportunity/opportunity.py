@@ -109,7 +109,13 @@ class Opportunity(TransactionBase):
 	@frappe.whitelist()
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_active_quotation():
+<<<<<<< HEAD
 			frappe.db.set(self, "status", "Lost")
+=======
+			self.status = "Lost"
+			self.lost_reasons = []
+			self.competitors = []
+>>>>>>> fa4f57f470 (fix: dont reassign mutable (list) to a different field)
 
 			if detailed_reason:
 				frappe.db.set(self, "order_lost_reason", detailed_reason)
