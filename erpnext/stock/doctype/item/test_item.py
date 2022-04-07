@@ -683,32 +683,6 @@ class TestItem(FrappeTestCase):
 		self.assertEqual(item.sample_quantity, None)
 		item.delete()
 
-<<<<<<< HEAD
-=======
-	def consume_item_code_with_differet_stock_transactions(
-		self, item_code, warehouse="_Test Warehouse - _TC"
-	):
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-
-		typical_args = {"item_code": item_code, "warehouse": warehouse}
-
-		create_delivery_note(**typical_args)
-		create_sales_invoice(update_stock=1, **typical_args)
-		make_stock_entry(item_code=item_code, source=warehouse, qty=1, purpose="Material Issue")
-		make_stock_entry(item_code=item_code, source=warehouse, target="Stores - _TC", qty=1)
-		# standalone return
-		make_purchase_receipt(is_return=True, qty=-1, **typical_args)
-
-	def test_item_dashboard(self):
-		from erpnext.stock.dashboard.item_dashboard import get_data
-
-		self.assertTrue(get_data(item_code="_Test Item"))
-		self.assertTrue(get_data(warehouse="_Test Warehouse - _TC"))
-		self.assertTrue(get_data(item_group="All Item Groups"))
-
 	def test_empty_description(self):
 		item = make_item(properties={"description": "<p></p>"})
 		self.assertEqual(item.description, item.item_name)
@@ -716,7 +690,6 @@ class TestItem(FrappeTestCase):
 		item.save()
 		self.assertEqual(item.description, item.item_name)
 
->>>>>>> e4c6d6a1a6 (fix: strip html tags before checking for empty description (#30619))
 
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc("Item Variant Settings")
