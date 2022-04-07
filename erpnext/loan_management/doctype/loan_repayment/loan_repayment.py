@@ -584,9 +584,10 @@ def regenerate_repayment_schedule(loan, cancel=0):
 			balance_amount / len(loan_doc.get("repayment_schedule")) - accrued_entries
 		)
 	else:
-		if not cancel:
+		repayment_period = loan_doc.repayment_periods - accrued_entries
+		if not cancel and repayment_period > 0:
 			monthly_repayment_amount = get_monthly_repayment_amount(
-				balance_amount, loan_doc.rate_of_interest, loan_doc.repayment_periods - accrued_entries
+				balance_amount, loan_doc.rate_of_interest, repayment_period
 			)
 		else:
 			monthly_repayment_amount = last_repayment_amount
