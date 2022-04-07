@@ -9864,7 +9864,7 @@ Control Historical Stock Transactions,Controle de l&#39;historique des stransact
 No stock transactions can be created or modified before this date.,Aucune transaction ne peux être créée ou modifié avant cette date.
 Stock transactions that are older than the mentioned days cannot be modified.,Les transactions de stock plus ancienne que le nombre de jours ci-dessus ne peuvent être modifiées
 Role Allowed to Create/Edit Back-dated Transactions,Rôle autorisé à créer et modifier des transactions anti-datée
-If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.,LEs utilisateur de ce role pourront creer et modifier des transactions dans le passé. Si vide tout les utilisateurs pourrons le faire
+"If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.","LEs utilisateur de ce role pourront creer et modifier des transactions dans le passé. Si vide tout les utilisateurs pourrons le faire"
 Auto Insert Item Price If Missing,Création du prix de l'article dans les listes de prix si abscent
 Update Existing Price List Rate,Mise a jour automatique du prix dans les listes de prix
 Show Barcode Field in Stock Transactions,Afficher le champ Code Barre dans les transactions de stock
