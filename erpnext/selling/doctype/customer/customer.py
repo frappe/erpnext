@@ -100,7 +100,8 @@ class Customer(TransactionBase):
 	@frappe.whitelist()
 	def get_customer_group_details(self):
 		doc = frappe.get_doc("Customer Group", self.customer_group)
-		self.accounts = self.credit_limits = []
+		self.accounts = []
+		self.credit_limits = []
 		self.payment_terms = self.default_price_list = ""
 
 		tables = [["accounts", "account"], ["credit_limits", "credit_limit"]]

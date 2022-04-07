@@ -124,11 +124,11 @@ def get_columns(invoice_list, additional_table_columns):
 		_("Purchase Receipt") + ":Link/Purchase Receipt:100",
 		{"fieldname": "currency", "label": _("Currency"), "fieldtype": "Data", "width": 80},
 	]
-	expense_accounts = (
-		tax_accounts
-	) = (
-		expense_columns
-	) = tax_columns = unrealized_profit_loss_accounts = unrealized_profit_loss_account_columns = []
+
+	expense_accounts = []
+	tax_accounts = []
+	tax_columns = []
+	unrealized_profit_loss_accounts = []
 
 	if invoice_list:
 		expense_accounts = frappe.db.sql_list(
