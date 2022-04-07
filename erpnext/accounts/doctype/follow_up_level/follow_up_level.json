@@ -1,0 +1,180 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:level",
+ "creation": "2022-01-12 13:16:16.873281",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "level",
+  "column_break_2",
+  "no_of_days",
+  "actions_section",
+  "send_email",
+  "email_template",
+  "auto_execute",
+  "column_break_6",
+  "send_message",
+  "sms_template",
+  "column_break_8",
+  "manual_action",
+  "responsible",
+  "responsible_name",
+  "action_type",
+  "action_to_do"
+ ],
+ "fields": [
+  {
+   "fieldname": "level",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Level ",
+   "unique": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "no_of_days",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Follow-up after no. of days"
+  },
+  {
+   "fieldname": "actions_section",
+   "fieldtype": "Section Break",
+   "label": "Actions"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_email",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Send Email"
+  },
+  {
+   "depends_on": "send_email",
+   "description": "Following variables can be used for designing Email Template - \ncustomer, customer_name,  total_due, outstanding_details",
+   "fieldname": "email_template",
+   "fieldtype": "Link",
+   "label": "Email Template",
+   "mandatory_depends_on": "send_email",
+   "options": "Email Template"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_execute",
+   "fieldtype": "Check",
+   "label": "Auto Execute"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_message",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Send SMS Message"
+  },
+  {
+   "depends_on": "send_message",
+   "fieldname": "sms_template",
+   "fieldtype": "Link",
+   "label": "SMS Template",
+   "mandatory_depends_on": "send_message",
+   "options": "Email Template"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "manual_action",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Manual Action"
+  },
+  {
+   "depends_on": "manual_action",
+   "fieldname": "responsible",
+   "fieldtype": "Link",
+   "label": "Assign a Responsilbe ",
+   "mandatory_depends_on": "manual_action",
+   "options": "User"
+  },
+  {
+   "fetch_from": "responsible.full_name",
+   "fieldname": "responsible_name",
+   "fieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "depends_on": "manual_action",
+   "fieldname": "action_type",
+   "fieldtype": "Select",
+   "label": "Manual Action Type",
+   "mandatory_depends_on": "manual_action",
+   "options": "Email\nCall\nMeet"
+  },
+  {
+   "depends_on": "manual_action",
+   "fieldname": "action_to_do",
+   "fieldtype": "Text",
+   "label": "Action To Do",
+   "mandatory_depends_on": "manual_action"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-04-06 11:48:44.764877",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Follow Up Level",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

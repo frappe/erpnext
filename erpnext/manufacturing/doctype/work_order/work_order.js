@@ -47,7 +47,13 @@ frappe.ui.form.on("Work Order", {
 				}
 			};
 		});
-
+		frm.set_query("bom_no", function() {
+			return {
+				filters: {
+					'company': frm.doc.company,
+				}
+			};
+		});
 		frm.set_query("scrap_warehouse", function() {
 			return {
 				filters: {
@@ -163,13 +169,7 @@ frappe.ui.form.on("Work Order", {
 		if (prev_route[1] == "Additional Item"){
 			location.reload();
 		}
-		frm.set_query("bom_no", function() {
-			return {
-				filters: {
-					'company': frm.doc.company,
-				}
-			};
-		});
+		
 		if(frm.doc.transfer_material_against === "Work Order"){
 			frm.add_custom_button(__('Add Additional Items'),function() {
 				var usr = frappe.session.user
@@ -221,12 +221,18 @@ frappe.ui.form.on("Work Order", {
 					}
 				});
 
-				// code commented for issue ISS-2021-2022-00236
-				// if (not_completed && not_completed.length) {
-				// 	frm.add_custom_button(__('Create Job Card'), () => {
-				// 		frm.trigger("make_job_card");
-				// 	}).addClass('btn-primary');
-				// }
+				if (not_completed && not_completed.length) {
+					frm.add_custom_button(__('Create Job Card'), () => {
+					frappe.confirm('Job Card Already Created , DO you Still Want to created again?',
+				() => {
+					frm.trigger("make_job_card");
+				}, () => {
+					// action to perform if No is selected
+				})
+
+						
+					}).addClass('btn-primary');
+				}
 			}
 		}
 
@@ -656,8 +662,21 @@ erpnext.work_order = {
 
 			if (show_start_btn) {
 				// if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty))
+				var trans = 0;
+				var req=0;
+				var tbl = frm.doc.required_items || [];
+				var tbl_lenght = tbl.length;
+				for (var i = 0, len = tbl_lenght; i < len; i++) {
+					
+					
+						trans += frm.doc.required_items[i].transferred_qty;
+						req +=frm.doc.required_items[i].required_qty;
+
+					
+				}
 				if ((flt(doc.transfered_rm_weight) < flt(doc.planned_rm_weight))
-					&& frm.doc.status != 'Stopped') {
+					&& frm.doc.status != 'Stopped' && frm.doc.status != 'Completed' && frm.doc.status != 'Cancelled' 
+					|| flt(req)>flt(trans) && frm.doc.status != 'Stopped' && frm.doc.status != 'Completed' && frm.doc.status != 'Cancelled') {
 					frm.has_start_btn = true;
 					frm.add_custom_button(__('Create Pick List'), function() {
 						erpnext.work_order.create_pick_list(frm);
@@ -674,7 +693,7 @@ erpnext.work_order = {
 			if(!frm.doc.skip_transfer){
 				// If "Material Consumption is check in Manufacturing Settings, allow Material Consumption
 				if ((flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing))
-				&& frm.doc.status != 'Stopped') {
+				&& frm.doc.status != 'Stopped' && frm.doc.status != 'Completed' && frm.doc.status != 'Cancelled') {
 					frm.has_finish_btn = true;
 
 					if (frm.doc.__onload && frm.doc.__onload.material_consumption == 1) {
@@ -793,16 +812,42 @@ erpnext.work_order = {
 
 	get_max_transferable_qty: (frm, purpose) => {
 		let max = 0;
+		var trans = 0;
+				var req=0;
+				var consume=0;
+				var tbl = frm.doc.required_items || [];
+				var tbl_lenght = tbl.length;
+				for (var i = 0, len = tbl_lenght; i < len; i++) {
+					
+					
+						trans += frm.doc.required_items[i].transferred_qty;
+						req +=frm.doc.required_items[i].required_qty;
+						consume+=frm.doc.required_items[i].consumed_qty;
+
+					
+				}
 		if (frm.doc.skip_transfer) {
-			// max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
+				
+			if(frm.doc.planned_total_weight || frm.doc.consumed_total_weight){
 			max = flt(frm.doc.planned_total_weight) - flt(frm.doc.consumed_total_weight);
+			}else{
+				max=flt(req)-flt(consume)
+			}
 		} else {
 			if (purpose === 'Manufacture') {
 				// max = flt(frm.doc.material_transferred_for_manufacturing) - flt(frm.doc.produced_qty);
+				if(frm.doc.transfered_total_weight || frm.doc.consumed_total_weight){
 				max = flt(frm.doc.transfered_total_weight) - flt(frm.doc.consumed_total_weight);
+				}else{
+					max=flt(trans)-flt(consume)
+				}
 			} else {
 				// max = flt(frm.doc.qty) - flt(frm.doc.material_transferred_for_manufacturing);
-				max = flt(frm.doc.planned_total_weight) - flt(frm.doc.transfered_total_weight);
+				if(frm.doc.planned_total_weight || frm.doc.transfered_total_weight){
+					max = flt(frm.doc.planned_total_weight) - flt(frm.doc.transfered_total_weight);
+				}else{
+					max=flt(req)-flt(trans)
+				}
 			}
 		}
 		return flt(max, precision('qty'));
