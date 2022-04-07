@@ -10,7 +10,7 @@ def execute():
 			"""
 				UPDATE `tab{doctype}`
 				SET is_subcontracted = 0
-				where is_subcontracted in ('', NULL, 'No')""".format(
+				where is_subcontracted in ('', 'No') or is_subcontracted is null""".format(
 				doctype=doctype
 			)
 		)
