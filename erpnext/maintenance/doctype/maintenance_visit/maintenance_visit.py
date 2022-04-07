@@ -20,7 +20,7 @@ class MaintenanceVisit(TransactionBase):
 
 	def validate_purpose_table(self):
 		if not self.purposes:
-			frappe.throw(_("Add Items in the Purpose Table"), title="Purposes Required")
+			frappe.throw(_("Add Items in the Purpose Table"), title=_("Purposes Required"))
 
 	def validate_maintenance_date(self):
 		if self.maintenance_type == "Scheduled" and self.maintenance_schedule_detail:
