@@ -81,7 +81,7 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	get_applicable_items: function() {
+	get_applicable_items: function(items_type) {
 		var me = this;
 		var dialog = new frappe.ui.Dialog({
 			title: __("Get Applicable Items"),
@@ -135,6 +135,7 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 					applies_to_item: args.applies_to_item,
 					item_groups: [args.item_group],
 					target_doc: me.frm.doc,
+					items_type: items_type,
 				},
 				callback: function (r) {
 					if (!r.exc) {
@@ -150,7 +151,7 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 		dialog.show();
 	},
 
-	get_project_template_items: function() {
+	get_project_template_items: function(items_type) {
 		var me = this;
 		var dialog = new frappe.ui.Dialog({
 			title: __("Get Project Template Items"),
@@ -226,6 +227,7 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 					applies_to_item: args.applies_to_item,
 					item_group: args.item_group,
 					target_doc: me.frm.doc,
+					items_type: items_type,
 				},
 				callback: function (r) {
 					if (!r.exc) {
@@ -241,17 +243,17 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 		dialog.show();
 	},
 
-	add_get_applicable_items_button: function() {
+	add_get_applicable_items_button: function(items_type) {
 		var me = this;
 		me.frm.add_custom_button(__("Applicable Items"), function() {
-			me.get_applicable_items();
+			me.get_applicable_items(items_type);
 		}, __("Get Items From"));
 	},
 
-	add_get_project_template_items_button: function() {
+	add_get_project_template_items_button: function(items_type) {
 		var me = this;
 		me.frm.add_custom_button(__("Project Template"), function() {
-			me.get_project_template_items();
+			me.get_project_template_items(items_type);
 		}, __("Get Items From"));
 	},
 });

@@ -16,7 +16,7 @@ class ItemApplicableItem(Document):
 
 
 @frappe.whitelist()
-def add_applicable_items(target_doc, applies_to_item, item_groups=None, get_stock_items=True, get_service_items=True,
+def add_applicable_items(target_doc, applies_to_item, item_groups=None, items_type=None, check_duplicate=True,
 		project_template_detail=None, postprocess=True):
 	if isinstance(target_doc, string_types):
 		target_doc = frappe.get_doc(json.loads(target_doc))
@@ -33,10 +33,10 @@ def add_applicable_items(target_doc, applies_to_item, item_groups=None, get_stoc
 	if target_doc.get('items') and not target_doc.items[0].item_code and not target_doc.items[0].item_name:
 		target_doc.remove(target_doc.items[0])
 
-	applicable_items = get_applicable_items(applies_to_item, item_groups, get_stock_items=get_stock_items,
-		get_service_items=get_service_items)
+	applicable_items = get_applicable_items(applies_to_item, item_groups, items_type=items_type)
 
-	append_applicable_items(target_doc, applicable_items, project_template_detail=project_template_detail)
+	append_applicable_items(target_doc, applicable_items, check_duplicate=check_duplicate,
+		project_template_detail=project_template_detail)
 
 	# postprocess
 	if postprocess:
@@ -46,15 +46,14 @@ def add_applicable_items(target_doc, applies_to_item, item_groups=None, get_stoc
 	return target_doc
 
 
-def get_applicable_items(applies_to_item, item_groups, get_stock_items=True, get_service_items=True):
+def get_applicable_items(applies_to_item, item_groups, items_type=None):
 	applicable_items = []
 	item_groups_in_variant = set()
 
 	applies_to_item_doc = frappe.get_cached_doc("Item", applies_to_item)
 	for applicable_item in applies_to_item_doc.applicable_items:
 		if applicable_item.applicable_item_code:
-			if filter_applicable_item(applicable_item, item_groups, get_stock_items=get_stock_items,
-					get_service_items=get_service_items):
+			if filter_applicable_item(applicable_item, item_groups, items_type=items_type):
 				continue
 
 			applicable_item_group = frappe.get_cached_value("Item", applicable_item.applicable_item_code, "item_group")
@@ -65,8 +64,7 @@ def get_applicable_items(applies_to_item, item_groups, get_stock_items=True, get
 		applies_to_item_template_doc = frappe.get_cached_doc("Item", applies_to_item_doc.variant_of)
 		for applicable_item in applies_to_item_template_doc.applicable_items:
 			if applicable_item.applicable_item_code:
-				if filter_applicable_item(applicable_item, item_groups, get_stock_items=get_stock_items,
-						get_service_items=get_service_items):
+				if filter_applicable_item(applicable_item, item_groups, items_type=items_type):
 					continue
 
 				# do not get applicable item from template if item group in variant exist/is overridden
@@ -79,13 +77,13 @@ def get_applicable_items(applies_to_item, item_groups, get_stock_items=True, get
 	return applicable_items
 
 
-def append_applicable_items(target_doc, applicable_items, project_template_detail=None):
+def append_applicable_items(target_doc, applicable_items, check_duplicate=True, project_template_detail=None):
 	existing_item_codes = [d.item_code for d in target_doc.items if d.item_code]
 
 	for applicable_item in applicable_items:
 		if applicable_item.applicable_item_code:
 			# do not duplicate item
-			if applicable_item.applicable_item_code in existing_item_codes:
+			if check_duplicate and applicable_item.applicable_item_code in existing_item_codes:
 				continue
 
 			# add item
@@ -107,7 +105,7 @@ def append_applicable_items(target_doc, applicable_items, project_template_detai
 						trn_item.description = project_template_detail.description
 
 
-def filter_applicable_item(applicable_item, item_groups, get_stock_items=True, get_service_items=True):
+def filter_applicable_item(applicable_item, item_groups, items_type=None):
 	# filter out inactive applicable item
 	if applicable_item.get('inactive'):
 		return True
@@ -119,9 +117,9 @@ def filter_applicable_item(applicable_item, item_groups, get_stock_items=True, g
 		return True
 
 	# filter by stock item / service item
-	if not get_stock_items and applicable_item_doc.is_stock_item:
+	if items_type == "stock" and not applicable_item_doc.is_stock_item:
 		return True
-	if not get_service_items and not applicable_item_doc.is_stock_item and not applicable_item_doc.is_fixed_asset:
+	elif items_type == "service" and (applicable_item_doc.is_stock_item or applicable_item_doc.is_fixed_asset):
 		return True
 
 	return False

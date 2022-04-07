@@ -37,8 +37,8 @@ class ProjectTemplate(Document):
 
 
 @frappe.whitelist()
-def add_project_template_items(target_doc, project_template, applies_to_item=None, item_group=None,
-		get_stock_items=True, get_service_items=True, project_template_detail=None, postprocess=True):
+def add_project_template_items(target_doc, project_template, applies_to_item=None, item_group=None, items_type=None,
+		check_duplicate=True, project_template_detail=None, postprocess=True):
 	from erpnext.stock.doctype.item_applicable_item.item_applicable_item import add_applicable_items,\
 		append_applicable_items
 
@@ -60,14 +60,15 @@ def add_project_template_items(target_doc, project_template, applies_to_item=Non
 			if d.applicable_item_group and (not item_group or d.applicable_item_group == item_group)]
 
 		target_doc = add_applicable_items(target_doc, applies_to_item, item_groups=applicable_items_groups,
-			get_stock_items=get_stock_items, get_service_items=get_service_items,
-			project_template_detail=project_template_detail, postprocess=False)
+			items_type=items_type, check_duplicate=check_duplicate, project_template_detail=project_template_detail,
+			postprocess=False)
 
 	# get applicable items from project template
 	project_template_items = get_project_template_items(project_template, applies_to_item, item_group=item_group,
-		get_stock_items=get_stock_items, get_service_items=get_service_items)
+		items_type=items_type)
 
-	append_applicable_items(target_doc, project_template_items, project_template_detail=project_template_detail)
+	append_applicable_items(target_doc, project_template_items, check_duplicate=check_duplicate,
+		project_template_detail=project_template_detail)
 
 	# postprocess
 	if postprocess:
@@ -77,8 +78,7 @@ def add_project_template_items(target_doc, project_template, applies_to_item=Non
 	return target_doc
 
 
-def get_project_template_items(project_template, applies_to_item=None, item_group=None, get_stock_items=True,
-		get_service_items=True):
+def get_project_template_items(project_template, applies_to_item=None, item_group=None, items_type=None):
 	from erpnext.stock.doctype.item_applicable_item.item_applicable_item import filter_applicable_item
 
 	project_template_doc = frappe.get_cached_doc("Project Template", project_template)
@@ -102,8 +102,7 @@ def get_project_template_items(project_template, applies_to_item=None, item_grou
 				continue
 
 		# filter by item group
-		if filter_applicable_item(pt_item, item_groups, get_stock_items=get_stock_items,
-				get_service_items=get_service_items):
+		if filter_applicable_item(pt_item, item_groups, items_type=items_type):
 			continue
 
 		project_template_items.append(pt_item)

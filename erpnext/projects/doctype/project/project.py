@@ -1235,7 +1235,7 @@ def get_delivery_note(project_name):
 
 
 @frappe.whitelist()
-def get_sales_order(project_name):
+def get_sales_order(project_name, items_type=None):
 	from erpnext.projects.doctype.project_template.project_template import add_project_template_items
 
 	project = frappe.get_doc("Project", project_name)
@@ -1255,7 +1255,7 @@ def get_sales_order(project_name):
 	# Get Project Template Items
 	for d in project.project_templates:
 		target_doc = add_project_template_items(target_doc, d.project_template, project.applies_to_item,
-			project_template_detail=d)
+			check_duplicate=False, project_template_detail=d, items_type=items_type)
 
 	# Remove already ordered items
 	project_template_ordered_set = get_project_template_ordered_set(project)
