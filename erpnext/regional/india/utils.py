@@ -824,7 +824,7 @@ def get_gst_accounts(
 	gst_settings_accounts = frappe.get_all(
 		"GST Account",
 		filters=filters,
-		fields=["cgst_account", "sgst_account", "igst_account", "cess_account"],
+		fields=["cgst_account", "sgst_account", "igst_account", "cess_account", "utgst_account"],
 	)
 
 	if not gst_settings_accounts and not frappe.flags.in_test and not frappe.flags.in_migrate:
