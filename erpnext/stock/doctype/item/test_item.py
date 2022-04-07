@@ -751,6 +751,33 @@ class TestItem(FrappeTestCase):
 		item.save()
 		self.assertEqual(item.description, item.item_name)
 
+	def test_item_type_field_change(self):
+		"""Check if critical fields like `is_stock_item`, `has_batch_no` are not changed if transactions exist."""
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		transaction_creators = [
+			lambda i: make_purchase_receipt(item_code=i),
+			lambda i: make_purchase_invoice(item_code=i, update_stock=1),
+			lambda i: make_stock_entry(item_code=i, qty=1, target="_Test Warehouse - _TC"),
+			lambda i: create_delivery_note(item_code=i),
+		]
+
+		properties = {"has_batch_no": 0, "allow_negative_stock": 1, "valuation_rate": 10}
+		for transaction_creator in transaction_creators:
+			item = make_item(properties=properties)
+			transaction = transaction_creator(item.name)
+			item.has_batch_no = 1
+			self.assertRaises(frappe.ValidationError, item.save)
+
+			transaction.cancel()
+			# should be allowed now
+			item.reload()
+			item.has_batch_no = 1
+			item.save()
+
 
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc("Item Variant Settings")
