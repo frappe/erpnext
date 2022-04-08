@@ -122,7 +122,18 @@ class PayrollEntry(Document):
 		self.check_permission('write')
 		self.created = 1
 		emp_list = [d.employee for d in self.get_emp_list()]
-		if emp_list:
+		
+		aployees_list_verificate = []
+		aployees_list = []
+
+		for emp in self.get("employees"):
+			aployees_list_verificate.append(emp.employee)
+
+		for emp in emp_list: 
+			if emp in aployees_list_verificate:
+				aployees_list.append(emp) 
+
+		if aployees_list:
 			args = frappe._dict({
 				"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
 				"payroll_frequency": self.payroll_frequency,
@@ -134,10 +145,10 @@ class PayrollEntry(Document):
 				"deduct_tax_for_unsubmitted_tax_exemption_proof": self.deduct_tax_for_unsubmitted_tax_exemption_proof,
 				"payroll_entry": self.name
 			})
-			if len(emp_list) > 30:
-				frappe.enqueue(create_salary_slips_for_employees, timeout=600, employees=emp_list, args=args)
+			if len(aployees_list) > 30:
+				frappe.enqueue(create_salary_slips_for_employees, timeout=600, employees=aployees_list, args=args)
 			else:
-				create_salary_slips_for_employees(emp_list, args, publish_progress=False)
+				create_salary_slips_for_employees(aployees_list, args, publish_progress=False)
 				# since this method is called via frm.call this doc needs to be updated manually
 				self.reload()
 
