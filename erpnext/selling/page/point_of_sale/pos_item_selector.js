@@ -243,7 +243,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				value: "+1",
 				item: { item_code, batch_no, serial_no, uom, rate }
 			});
-			me.set_search_value('');
+			me.search_field.set_focus();
 		});
 
 		this.search_field.$input.on('input', (e) => {
@@ -328,6 +328,7 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	add_filtered_item_to_cart() {
 		this.$items_container.find(".item-wrapper").click();
+		this.set_search_value('');
 	}
 
 	resize_selector(minimize) {

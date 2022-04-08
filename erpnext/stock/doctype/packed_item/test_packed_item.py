@@ -14,6 +14,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 class TestPackedItem(FrappeTestCase):
 	"Test impact on Packed Items table in various scenarios."
+
 	@classmethod
 	def setUpClass(cls) -> None:
 		super().setUpClass()
@@ -39,8 +40,7 @@ class TestPackedItem(FrappeTestCase):
 
 	def test_adding_bundle_item(self):
 		"Test impact on packed items if bundle item row is added."
-		so = make_sales_order(item_code = self.bundle, qty=1,
-			do_not_submit=True)
+		so = make_sales_order(item_code=self.bundle, qty=1, do_not_submit=True)
 
 		self.assertEqual(so.items[0].qty, 1)
 		self.assertEqual(len(so.packed_items), 2)
@@ -51,7 +51,7 @@ class TestPackedItem(FrappeTestCase):
 		"Test impact on packed items if bundle item row is updated."
 		so = make_sales_order(item_code=self.bundle, qty=1, do_not_submit=True)
 
-		so.items[0].qty = 2 # change qty
+		so.items[0].qty = 2  # change qty
 		so.save()
 
 		self.assertEqual(so.packed_items[0].qty, 4)
@@ -67,12 +67,9 @@ class TestPackedItem(FrappeTestCase):
 		"Test impact on packed items if same bundle item is added and removed."
 		so_items = []
 		for qty in [2, 4, 6, 8]:
-			so_items.append({
-				"item_code": self.bundle,
-				"qty": qty,
-				"rate": 400,
-				"warehouse": "_Test Warehouse - _TC"
-			})
+			so_items.append(
+				{"item_code": self.bundle, "qty": qty, "rate": 400, "warehouse": "_Test Warehouse - _TC"}
+			)
 
 		# create SO with recurring bundle item
 		so = make_sales_order(item_list=so_items, do_not_submit=True)
@@ -120,18 +117,15 @@ class TestPackedItem(FrappeTestCase):
 		"Test impact on packed items in newly mapped DN from SO."
 		so_items = []
 		for qty in [2, 4]:
-			so_items.append({
-				"item_code": self.bundle,
-				"qty": qty,
-				"rate": 400,
-				"warehouse": "_Test Warehouse - _TC"
-			})
+			so_items.append(
+				{"item_code": self.bundle, "qty": qty, "rate": 400, "warehouse": "_Test Warehouse - _TC"}
+			)
 
 		# create SO with recurring bundle item
 		so = make_sales_order(item_list=so_items)
 
 		dn = make_delivery_note(so.name)
-		dn.items[1].qty = 3 # change second row qty for inserting doc
+		dn.items[1].qty = 3  # change second row qty for inserting doc
 		dn.save()
 
 		self.assertEqual(len(dn.packed_items), 4)
@@ -148,7 +142,7 @@ class TestPackedItem(FrappeTestCase):
 		for item in self.bundle_items:
 			make_stock_entry(item_code=item, to_warehouse=warehouse, qty=10, rate=100, posting_date=today)
 
-		so = make_sales_order(item_code = self.bundle, qty=1, company=company, warehouse=warehouse)
+		so = make_sales_order(item_code=self.bundle, qty=1, company=company, warehouse=warehouse)
 
 		dn = make_delivery_note(so.name)
 		dn.save()
@@ -159,7 +153,9 @@ class TestPackedItem(FrappeTestCase):
 
 		# backdated stock entry
 		for item in self.bundle_items:
-			make_stock_entry(item_code=item, to_warehouse=warehouse, qty=10, rate=200, posting_date=yesterday)
+			make_stock_entry(
+				item_code=item, to_warehouse=warehouse, qty=10, rate=200, posting_date=yesterday
+			)
 
 		# assert correct reposting
 		gles = get_gl_entries(dn.doctype, dn.name)
@@ -173,8 +169,7 @@ class TestPackedItem(FrappeTestCase):
 		sort_function = lambda p: (p.parent_item, p.item_code, p.qty)
 
 		for sent, returned in zip(
-			sorted(original, key=sort_function),
-			sorted(returned, key=sort_function)
+			sorted(original, key=sort_function), sorted(returned, key=sort_function)
 		):
 			self.assertEqual(sent.item_code, returned.item_code)
 			self.assertEqual(sent.parent_item, returned.parent_item)
@@ -195,7 +190,7 @@ class TestPackedItem(FrappeTestCase):
 				"warehouse": self.warehouse,
 				"qty": 1,
 				"rate": 100,
-			}
+			},
 		]
 		so = make_sales_order(item_list=item_list, warehouse=self.warehouse)
 
@@ -224,7 +219,7 @@ class TestPackedItem(FrappeTestCase):
 				"warehouse": self.warehouse,
 				"qty": 1,
 				"rate": 100,
-			}
+			},
 		]
 		so = make_sales_order(item_list=item_list, warehouse=self.warehouse)
 
@@ -246,11 +241,10 @@ class TestPackedItem(FrappeTestCase):
 		expected_returns = [d for d in dn.packed_items if d.parent_item == self.bundle]
 		self.assertReturns(expected_returns, dn_ret.packed_items)
 
-
 	def test_returning_partial_bundle_qty(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
-		so = make_sales_order(item_code=self.bundle, warehouse=self.warehouse, qty = 2)
+		so = make_sales_order(item_code=self.bundle, warehouse=self.warehouse, qty=2)
 
 		dn = make_delivery_note(so.name)
 		dn.save()

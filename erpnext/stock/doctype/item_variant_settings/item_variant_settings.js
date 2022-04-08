@@ -13,10 +13,16 @@ frappe.ui.form.on('Item Variant Settings', {
 		const exclude_field_types = ['HTML', 'Section Break', 'Column Break', 'Button', 'Read Only'];
 
 		frappe.model.with_doctype('Item', () => {
+			const field_label_map = {};
 			frappe.get_meta('Item').fields.forEach(d => {
+				field_label_map[d.fieldname] = __(d.label) + ` (${d.fieldname})`;
+
 				if (!in_list(exclude_field_types, d.fieldtype)
 					&& !d.no_copy && !in_list(exclude_fields, d.fieldname)) {
-					allow_fields.push(d.fieldname);
+					allow_fields.push({
+						label: field_label_map[d.fieldname],
+						value: d.fieldname,
+					});
 				}
 			});
 
