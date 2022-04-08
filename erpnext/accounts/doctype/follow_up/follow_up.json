@@ -1,0 +1,210 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "creation": "2022-01-15 12:45:10.290350",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "range1",
+  "customer",
+  "sales_partner",
+  "column_break_4",
+  "report_date",
+  "range2",
+  "customer_group",
+  "sales_person",
+  "column_break_9",
+  "ageing_based_on",
+  "range3",
+  "cost_center",
+  "payment_terms_template",
+  "column_break_15",
+  "finance_book",
+  "range4",
+  "territory",
+  "based_on_payment_terms",
+  "show_future_payments",
+  "section_break_21",
+  "get_follow_up_details",
+  "items"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "default": "30",
+   "fieldname": "range1",
+   "fieldtype": "Int",
+   "label": "Age Range 1"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer ",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "sales_partner",
+   "fieldtype": "Link",
+   "label": "Sales Partner",
+   "options": "Sales Partner"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "report_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "default": "60",
+   "fieldname": "range2",
+   "fieldtype": "Int",
+   "label": "Age Range 2"
+  },
+  {
+   "fieldname": "customer_group",
+   "fieldtype": "Link",
+   "label": "Customer Group",
+   "options": "Customer Group"
+  },
+  {
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "label": "Sales Person",
+   "options": "Sales Person"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ageing_based_on",
+   "fieldtype": "Select",
+   "label": "Ageing Base On",
+   "options": "Posting Date\nDue Date"
+  },
+  {
+   "default": "90",
+   "fieldname": "range3",
+   "fieldtype": "Int",
+   "label": "Age Range 3"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "payment_terms_template",
+   "fieldtype": "Link",
+   "label": "Payment Terms Template",
+   "options": "Payment Terms Template"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "finance_book",
+   "fieldtype": "Link",
+   "label": "Finance Book",
+   "options": "Finance Book"
+  },
+  {
+   "default": "120",
+   "fieldname": "range4",
+   "fieldtype": "Int",
+   "label": "Age Range 4"
+  },
+  {
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "options": "Territory"
+  },
+  {
+   "default": "0",
+   "fieldname": "based_on_payment_terms",
+   "fieldtype": "Check",
+   "label": "Based On Payment Terms"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_future_payments",
+   "fieldtype": "Check",
+   "label": "Show Future Payments"
+  },
+  {
+   "fieldname": "section_break_21",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "get_follow_up_details",
+   "fieldtype": "Button",
+   "label": "Get Follow Up Details"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Follow Up Item"
+  }
+ ],
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2022-04-06 11:44:03.603098",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Follow Up",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

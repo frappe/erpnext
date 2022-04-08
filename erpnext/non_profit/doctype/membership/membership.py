@@ -104,7 +104,7 @@ class Membership(Document):
 		return invoice
 
 	def validate_membership_type_and_settings(self, plan, settings):
-		settings_link = get_link_to_form("Membership Type", self.membership_type)
+		settings_link = get_link_to_form("Non Profit Settings", "Non Profit Settings")
 
 		if not settings.membership_debit_account:
 			frappe.throw(_("You need to set <b>Debit Account</b> in {0}").format(settings_link))

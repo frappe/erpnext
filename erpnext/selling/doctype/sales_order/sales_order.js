@@ -184,20 +184,20 @@ frappe.ui.form.on("Sales Order", {
 			}
 		});
 	},
-	// company_address:function(frm){
-	// 	frm.call({
-	// 		method:"calculate_taxes",
-	// 		doc:frm.doc,
-	// 		callback: function(r)
-	// 		{
+	company_address:function(frm){
+		frm.call({
+			method:"calculate_taxes",
+			doc:frm.doc,
+			callback: function(r)
+			{
 
-    //             frm.set_value("tax_category","");
-	// 			frm.refresh_field("tax_category")
-    //             frm.set_value("tax_category",r.message);
-    //             refresh_field("tax_category")
-	// 		}
-	// 	});
-	// },
+                frm.set_value("tax_category","");
+				frm.refresh_field("tax_category")
+                frm.set_value("tax_category",r.message);
+                refresh_field("tax_category")
+			}
+		});
+	},
 	branch:function(frm){
 		frm.call({
 			method:"calculate_taxes",
@@ -895,12 +895,12 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 	get_ordered_qty: function(item, so) {
 		let ordered_qty = item.ordered_qty;
-		if (so.packed_items) {
+		if (so.packed_items && so.packed_items.length) {
 			// calculate ordered qty based on packed items in case of product bundle
 			let packed_items = so.packed_items.filter(
 				(pi) => pi.parent_detail_docname == item.name
 			);
-			if (packed_items) {
+			if (packed_items && packed_items.length) {
 				ordered_qty = packed_items.reduce(
 					(sum, pi) => sum + flt(pi.ordered_qty),
 					0
