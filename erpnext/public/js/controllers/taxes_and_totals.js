@@ -7,7 +7,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	apply_pricing_rule_on_item: function(item) {
-		if (is_mapped_doc()) return;
+		if (this.is_mapped_doc()) return;
 
 		let effective_item_rate = item.price_list_rate;
 		let item_rate = item.rate;
