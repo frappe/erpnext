@@ -934,7 +934,7 @@ class POSCart {
 		frappe.db.get_doc('POS Profile', this.frm.doc.pos_profile)
     	.then(doc => {
 			if (doc.round_off_discount === 1){
-				var total = Math.floor(this.frm.doc.grand_total)
+				var total = Math.ceil(this.frm.doc.grand_total)
 				this.frm.doc.grand_total = total
 				this.frm.doc.rounded_total = total
 				this.frm.doc.paid_amount = total
@@ -1208,7 +1208,7 @@ class POSCart {
 				
 				if (doc.round_off_discount === 1){
 					var itemrate = item.rate;
-					var rate = Math.floor(itemrate);
+					var rate = Math.ceil(itemrate);
 					item.rate = rate;
 				}
 
@@ -2112,7 +2112,7 @@ class Payment {
 		frappe.db.get_doc('POS Profile', this.frm.doc.pos_profile)
     	.then(doc => {
 			if (doc.round_off_discount === 1){
-				var total = Math.floor(this.frm.doc.grand_total)
+				var total = Math.ceil(this.frm.doc.grand_total)
 
 				debugger
 				this.dialog.set_value("additional_discount_percentage", this.frm.doc.additional_discount_percentage);

@@ -491,6 +491,12 @@ def get_data():
 					"name": "Salary Register Detail",
 					"doctype": "Salary Slip"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Salary Register Detail Without Components",
+					"doctype": "Salary Slip"
+				},
 			]
 		},
 	]
