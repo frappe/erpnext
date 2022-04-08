@@ -364,3 +364,4 @@ erpnext.patches.v13_0.add_cost_center_in_loans
 erpnext.patches.v13_0.set_return_against_in_pos_invoice_references
 erpnext.patches.v13_0.remove_unknown_links_to_prod_plan_items # 24-03-2022
 erpnext.patches.v13_0.update_expense_claim_status_for_paid_advances
+erpnext.patches.v14_0.discount_accounting_separation
