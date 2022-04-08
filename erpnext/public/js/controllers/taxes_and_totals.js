@@ -7,7 +7,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	apply_pricing_rule_on_item: function(item) {
-		if (is_mapped_doc) return
+		if (is_mapped_doc()) return;
 
 		let effective_item_rate = item.price_list_rate;
 		let item_rate = item.rate;
@@ -40,14 +40,14 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		if (doctype == "Sales Invoice") {
 			if (item.get('sales_invoice_item') || item.get('so_detail') || item.get('dn_detail')) return true;
 		} else if (doctype == "Delivery Note") {
-			if (item.get('si_detail') || item.get('so_detail') || item.get('dn_detail')) return true
+			if (item.get('si_detail') || item.get('so_detail') || item.get('dn_detail')) return true;
 		} else if (doctype == "Purchase Invoice") {
-			if (item.get('purchase_invoice_item') || item.get('po_detail') || item.get('pr_detail')) return true
+			if (item.get('purchase_invoice_item') || item.get('po_detail') || item.get('pr_detail')) return true;
 		} else if (doctype == "Purchase Receipt") {
-			if (item.get('purchase_order_item') || item.get('purchase_invoice_item') || item.get('purchase_receipt_item')) return true
+			if (item.get('purchase_order_item') || item.get('purchase_invoice_item') || item.get('purchase_receipt_item')) return true;
 		}
 
-		return false
+		return false;
 	},
 
 	calculate_taxes_and_totals: async function(update_paid_amount) {
