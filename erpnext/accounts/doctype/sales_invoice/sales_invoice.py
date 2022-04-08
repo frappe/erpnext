@@ -449,8 +449,8 @@ class SalesInvoice(SellingController):
 				net_total = math.floor(self.net_total)
 				self.db_set('net_total', net_total, update_modified=False)
 
-				rounding_adjustment = math.ceil(self.rounding_adjustment)
-				self.db_set('rounding_adjustment', rounding_adjustment, update_modified=False)
+				# rounding_adjustment = math.floor(self.rounding_adjustment)
+				self.db_set('rounding_adjustment', 0, update_modified=False)
 
 				self.discount_amount = discount_amount
 				self.db_set('discount_amount', discount_amount, update_modified=False)
@@ -486,6 +486,12 @@ class SalesInvoice(SellingController):
 		self.db_set('total_exempt', exempt, update_modified=False)
 		self.db_set('taxed_sales18', taxed_sales18, update_modified=False)
 		self.db_set('total_taxes_and_charges', taxed15 + taxed18, update_modified=False)
+
+		if self.is_pos:
+			pos = frappe.get_doc("POS Profile", self.pos_profile)
+
+			if pos.round_off_discount == 1:
+				self.db_set('rounded_total', self.grand_total, update_modified=False)
 
 	# def validate_camps(self):
 	# 	if not self.type_document:
@@ -1358,19 +1364,24 @@ class SalesInvoice(SellingController):
 
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
+		total_amount = 0
+		cont = 0
 		for item in self.get("items"):
 			base_net_amount = 0
 
-			# if self.is_pos:
-			# 	pos = frappe.get_doc("POS Profile", self.pos_profile)
+			if self.is_pos:
+				pos = frappe.get_doc("POS Profile", self.pos_profile)
 
-			# 	if pos.round_off_discount == 1:
-			# 		self.db_set('rounding_adjustment', 0, update_modified=False)
-			# 		self.db_set('rounded_total', self.grand_total, update_modified=False)
-			# 	else:
-			# 		base_net_amount = item.base_net_amount
-			# else:
-			base_net_amount = item.base_net_amount
+				if pos.round_off_discount == 1:
+					base_net_amount = math.floor(item.base_net_amount)
+					total_amount += base_net_amount
+					if len(self.get("items")) == len(gl_entries):
+						if total_amount < gl_entries[0].debit:
+							base_net_amount = math.ceil(item.base_net_amount)
+				else:
+					base_net_amount = item.base_net_amount
+			else:
+				base_net_amount = item.base_net_amount
 
 			if flt(base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
