@@ -79,10 +79,12 @@ class ApplyPaymentEntriesWithoutReferences(Document):
 			doc = frappe.get_doc("Sales Invoice", reference.reference_name)
 
 			outstanding_amount = doc.outstanding_amount - reference.allocated
+			total_advance = doc.total_advance + reference.allocated
 
 			if outstanding_amount < 0:
 				frappe.throw(_("Allocated cannot be greater than outsanding amount of the invoice {}.".format(reference.reference_name)))
 			
+			doc.db_set('total_advance', total_advance, update_modified=False)
 			doc.db_set('outstanding_amount', outstanding_amount, update_modified=False)
 
 			if outstanding_amount == 0:
@@ -94,9 +96,11 @@ class ApplyPaymentEntriesWithoutReferences(Document):
 			doc = frappe.get_doc("Sales Invoice", reference.reference_name)
 
 			outstanding_amount = doc.outstanding_amount + reference.allocated
+			total_advance = doc.total_advance - reference.allocated
 
-			if doc.outstanding_amount == 0:
+			if doc.outstanding_amount > 0:
 				doc.db_set('docstatus', 5, update_modified=False)
 				doc.db_set('status', "Unpaid", update_modified=False)
 			
+			doc.db_set('total_advance', total_advance, update_modified=False)
 			doc.db_set('outstanding_amount', outstanding_amount, update_modified=False)

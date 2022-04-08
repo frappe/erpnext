@@ -16,14 +16,18 @@
   "section1",
   "details",
   "section2",
+  "payments",
+  "section3",
+  "terms_and_conditions",
+  "section4",
   "total_cash",
-  "actual_cash",
   "total_cards",
+  "actual_cash",
   "total_advances_applied",
   "total_no_monetary",
   "total_income",
-  "column2",
   "total_credit",
+  "column2",
   "total_utility",
   "total_invoice",
   "total_operations",
@@ -82,12 +86,14 @@
   {
    "fieldname": "total_cash",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Cash",
    "read_only": 1
   },
   {
    "fieldname": "total_cards",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Cards",
    "read_only": 1
   },
@@ -165,11 +171,32 @@
   {
    "fieldname": "actual_cash",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Actual Cash",
    "read_only": 1
+  },
+  {
+   "fieldname": "payments",
+   "fieldtype": "Table",
+   "label": "Sales Invoice Payment",
+   "options": "Sales Invoice Payment Detail"
+  },
+  {
+   "fieldname": "section3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "terms_and_conditions",
+   "fieldtype": "Table",
+   "label": "Terms and Conditions Detail",
+   "options": "Terms and Conditions Detail"
+  },
+  {
+   "fieldname": "section4",
+   "fieldtype": "Section Break"
   }
  ],
- "modified": "2022-01-25 15:18:23.379470",
+ "modified": "2022-04-08 01:13:53.050181",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales For User",
