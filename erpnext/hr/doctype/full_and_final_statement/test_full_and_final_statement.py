@@ -12,7 +12,6 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 
 
 class TestFullandFinalStatement(unittest.TestCase):
-
 	def setUp(self):
 		create_asset_data()
 
@@ -27,17 +26,25 @@ class TestFullandFinalStatement(unittest.TestCase):
 		frappe.db.set_value("Employee", employee, "relieving_date", add_days(today(), 30))
 		fnf = create_full_and_final_statement(employee)
 
-		payables_bootstraped_component = ["Salary Slip", "Gratuity",
-			"Expense Claim", "Bonus", "Leave Encashment"]
+		payables_bootstraped_component = [
+			"Salary Slip",
+			"Gratuity",
+			"Expense Claim",
+			"Bonus",
+			"Leave Encashment",
+		]
 
 		receivable_bootstraped_component = ["Loan", "Employee Advance"]
 
-		#checking payable s and receivables bootstraped value
+		# checking payable s and receivables bootstraped value
 		self.assertEqual([payable.component for payable in fnf.payables], payables_bootstraped_component)
-		self.assertEqual([receivable.component for receivable in fnf.receivables], receivable_bootstraped_component)
+		self.assertEqual(
+			[receivable.component for receivable in fnf.receivables], receivable_bootstraped_component
+		)
 
-		#checking allocated asset
+		# checking allocated asset
 		self.assertIn(movement, [asset.reference for asset in fnf.assets_allocated])
+
 
 def create_full_and_final_statement(employee):
 	fnf = frappe.new_doc("Full and Final Statement")
@@ -46,6 +53,7 @@ def create_full_and_final_statement(employee):
 	fnf.save()
 	return fnf
 
+
 def create_asset_movement(employee):
 	asset_name = create_asset()
 	movement = frappe.new_doc("Asset Movement")
@@ -53,18 +61,17 @@ def create_asset_movement(employee):
 	movement.purpose = "Issue"
 	movement.transaction_date = today()
 
-	movement.append("assets", {
-		"asset": asset_name,
-		"to_employee": employee
-	})
+	movement.append("assets", {"asset": asset_name, "to_employee": employee})
 
 	movement.save()
 	movement.submit()
 	return movement.name
 
+
 def create_asset():
-	pr = make_purchase_receipt(item_code="Macbook Pro",
-			qty=1, rate=100000.0, location="Test Location")
+	pr = make_purchase_receipt(
+		item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location"
+	)
 
 	asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name")
 	asset = frappe.get_doc("Asset", asset_name)

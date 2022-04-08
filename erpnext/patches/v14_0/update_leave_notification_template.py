@@ -6,7 +6,9 @@ from frappe import _
 
 def execute():
 	base_path = frappe.get_app_path("erpnext", "hr", "doctype")
-	response = frappe.read_file(os.path.join(base_path, "leave_application/leave_application_email_template.html"))
+	response = frappe.read_file(
+		os.path.join(base_path, "leave_application/leave_application_email_template.html")
+	)
 
 	template = frappe.db.exists("Email Template", _("Leave Approval Notification"))
 	if template:

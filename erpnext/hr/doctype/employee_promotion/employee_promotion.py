@@ -16,12 +16,16 @@ class EmployeePromotion(Document):
 
 	def before_submit(self):
 		if getdate(self.promotion_date) > getdate():
-			frappe.throw(_("Employee Promotion cannot be submitted before Promotion Date"),
-				frappe.DocstatusTransitionError)
+			frappe.throw(
+				_("Employee Promotion cannot be submitted before Promotion Date"),
+				frappe.DocstatusTransitionError,
+			)
 
 	def on_submit(self):
 		employee = frappe.get_doc("Employee", self.employee)
-		employee = update_employee_work_history(employee, self.promotion_details, date=self.promotion_date)
+		employee = update_employee_work_history(
+			employee, self.promotion_details, date=self.promotion_date
+		)
 		employee.save()
 
 	def on_cancel(self):

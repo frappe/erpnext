@@ -15,7 +15,6 @@ Maintenance
 Education
 Regional
 ERPNext Integrations
-Non Profit
 Quality Management
 Communication
 Loan Management
