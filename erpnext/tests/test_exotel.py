@@ -8,6 +8,7 @@ from erpnext.hr.doctype.employee.test_employee import make_employee
 class TestExotel(FrappeAPITestCase):
 	@classmethod
 	def setUpClass(cls):
+		frappe.form_dict = frappe._dict()
 		cls.CURRENT_DB_CONNECTION = frappe.db
 		cls.test_employee_name = make_employee(
 			user="test_employee_exotel@company.com", cell_number="9999999999"
@@ -37,7 +38,6 @@ class TestExotel(FrappeAPITestCase):
 		api_method = "handle_missed_call"
 		self.emulate_api_call_from_exotel(api_method, call_disconnected_data)
 		call_log = frappe.get_doc("Call Log", call_disconnected_data.CallSid)
-
 		self.assertEqual(call_log.get("from"), call_disconnected_data.CallFrom)
 		self.assertEqual(call_log.get("to"), call_disconnected_data.DialWhomNumber)
 		self.assertEqual(call_log.get("call_received_by"), self.test_employee_name)
