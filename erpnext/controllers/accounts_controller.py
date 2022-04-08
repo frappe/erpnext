@@ -487,6 +487,7 @@ class AccountsController(TransactionBase):
 
 							elif (
 								ret.get("pricing_rule_removed")
+								and not self.get("is_retrun")
 								and value is not None
 								and fieldname
 								in [
@@ -513,12 +514,32 @@ class AccountsController(TransactionBase):
 							"cost_center", self.get("cost_center") or erpnext.get_default_cost_center(self.company)
 						)
 
-					if ret.get("pricing_rules"):
+					if ret.get("pricing_rules") and not self.is_mapped_item("item"):
 						self.apply_pricing_rule_on_items(item, ret)
 						self.set_pricing_rule_details(item, ret)
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
+
+	def is_mapped_item(doctype, item):
+		if doctype == "Sales Invoice":
+			if item.get("sales_invoice_item") or item.get("so_detail") or item.get("dn_detail"):
+				return True
+		elif doctype == "Delivery Note":
+			if item.get("si_detail") or item.get("so_detail") or item.get("dn_detail"):
+				return True
+		elif doctype == "Purchase Invoice":
+			if item.get("purchase_invoice_item") or item.get("po_detail") or item.get("pr_detail"):
+				return True
+		elif doctype == "Purchase Receipt":
+			if (
+				item.get("purchase_order_item")
+				or item.get("purchase_invoice_item")
+				or item.get("purchase_receipt_item")
+			):
+				return True
+
+		return False
 
 	def apply_pricing_rule_on_items(self, item, pricing_rule_args):
 		if not pricing_rule_args.get("validate_applied_rule", 0):
