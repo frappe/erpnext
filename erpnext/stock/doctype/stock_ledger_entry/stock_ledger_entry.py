@@ -209,6 +209,11 @@ class StockLedgerEntry(Document):
 					msg += "<br>" + "<br>".join(authorized_users)
 					frappe.throw(msg, BackDatedStockTransaction, title=_("Backdated Stock Entry"))
 
+	def on_cancel(self):
+		msg = _("Individual Stock Ledger Entry cannot be cancelled.")
+		msg += "<br>" + _("Please cancel related transaction.")
+		frappe.throw(msg)
+
 
 def on_doctype_update():
 	if not frappe.db.has_index("tabStock Ledger Entry", "posting_sort_index"):
