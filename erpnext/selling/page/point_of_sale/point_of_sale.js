@@ -934,7 +934,7 @@ class POSCart {
 		frappe.db.get_doc('POS Profile', this.frm.doc.pos_profile)
     	.then(doc => {
 			if (doc.round_off_discount === 1){
-				var total = Math.ceil(this.frm.doc.grand_total)
+				var total = Math.floor(this.frm.doc.grand_total)
 				this.frm.doc.grand_total = total
 				this.frm.doc.rounded_total = total
 				this.frm.doc.paid_amount = total
@@ -1208,7 +1208,7 @@ class POSCart {
 				
 				if (doc.round_off_discount === 1){
 					var itemrate = item.rate;
-					var rate = Math.ceil(itemrate);
+					var rate = Math.floor(itemrate);
 					item.rate = rate;
 				}
 
@@ -2078,7 +2078,6 @@ class Payment {
 	}
 
 	update_cur_frm_value(fieldname, callback) {
-		debugger
 		if (frappe.flags[fieldname]) {
 			const value = this.dialog.get_value(fieldname);
 			this.frm.set_value(fieldname, value)
@@ -2112,14 +2111,18 @@ class Payment {
 		frappe.db.get_doc('POS Profile', this.frm.doc.pos_profile)
     	.then(doc => {
 			if (doc.round_off_discount === 1){
-				var total = Math.ceil(this.frm.doc.grand_total)
+				var total = Math.floor(this.frm.doc.grand_total)
+				var out_amount = 0
+				$.each(this.frm.doc.payments, function(i, data) {
+					out_amount += data.amount;
+				});				
 
 				debugger
 				this.dialog.set_value("additional_discount_percentage", this.frm.doc.additional_discount_percentage);
 				this.dialog.set_value("change_amount", this.frm.doc.change_amount);
-				this.dialog.set_value("outstanding_amount", total);
 				this.dialog.set_value("total_with_discount", total);
 				this.dialog.set_value("paid_amount", total);
+				this.dialog.set_value("grand_total", total);
 			}
 			else{
 				debugger
@@ -2145,13 +2148,12 @@ class Payment {
 
 
 	show_paid_amount() {
-		debugger
 		this.dialog.set_value("outstanding_amount", this.frm.doc.outstanding_amount);
 	}
 
 	update_payment_amount() {
-		debugger
 		var me = this;
+		debugger
 		$.each(this.frm.doc.payments, function(i, data) {
 			console.log("setting the ", data.mode_of_payment, " for the value", data.amount);
 			me.dialog.set_value(data.mode_of_payment, data.amount);
