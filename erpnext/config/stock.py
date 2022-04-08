@@ -302,7 +302,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Comparative Cost Of Products",
+					"name": "Comparative Cost and Price Of Products",
 					"doctype": "Purchase Invoice"
 				},
 				{

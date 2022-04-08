@@ -1,0 +1,36 @@
+{
+ "creation": "2022-04-07 23:59:59.209906",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "terms_and_conditions",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "terms_and_conditions",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Terms and Conditions",
+   "options": "Terms and Conditions"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-04-08 00:04:17.008245",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Terms and Conditions Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
