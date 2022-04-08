@@ -88,6 +88,7 @@
    "fieldtype": "Currency",
    "hidden": 1,
    "label": "Total Cash",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -95,6 +96,7 @@
    "fieldtype": "Currency",
    "hidden": 1,
    "label": "Total Cards",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -173,13 +175,15 @@
    "fieldtype": "Currency",
    "hidden": 1,
    "label": "Actual Cash",
+   "print_hide": 1,
    "read_only": 1
   },
   {
    "fieldname": "payments",
    "fieldtype": "Table",
    "label": "Sales Invoice Payment",
-   "options": "Sales Invoice Payment Detail"
+   "options": "Sales Invoice Payment Detail",
+   "read_only": 1
   },
   {
    "fieldname": "section3",
@@ -189,14 +193,15 @@
    "fieldname": "terms_and_conditions",
    "fieldtype": "Table",
    "label": "Terms and Conditions Detail",
-   "options": "Terms and Conditions Detail"
+   "options": "Terms and Conditions Detail",
+   "read_only": 1
   },
   {
    "fieldname": "section4",
    "fieldtype": "Section Break"
   }
  ],
- "modified": "2022-04-08 01:13:53.050181",
+ "modified": "2022-04-08 09:38:22.750565",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales For User",
