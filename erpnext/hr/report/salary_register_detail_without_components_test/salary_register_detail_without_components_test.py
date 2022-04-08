@@ -35,7 +35,7 @@ def execute(filters=None):
 					if sc.name == sdd.salary_component:
 						value_component = sdd.amount
 
-						assigments = frappe.get_all("Assignment Salary Component", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": sc.salary_component, "docstatus": 0})
+						assigments = frappe.get_all("Assignment Salary Component", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": sc.name, "docstatus": 0})
 
 						for assigment in assigments:
 							employees = frappe.get_all("Employee Detail Salary Component", ["*"], filters = {"parent": assigment.name, "employee": ss.employee})
@@ -44,7 +44,7 @@ def execute(filters=None):
 								value_component += employee.moneda		
 
 						#Confidentials
-						assigments = frappe.get_all("Assignment Salary Component Confidential", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": sc.salary_component, "docstatus": 0})
+						assigments = frappe.get_all("Assignment Salary Component Confidential", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": sc.name, "docstatus": 0})
 
 						for assigment in assigments:
 							employees = frappe.get_all("Employee Detail Salary Component", ["*"], filters = {"parent": assigment.name, "employee": ss.employee})
@@ -52,7 +52,7 @@ def execute(filters=None):
 							for employee in employees:
 								value_component += employee.moneda						
 					else:
-						assigments = frappe.get_all("Assignment Salary Component", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": sc.salary_component, "docstatus": 0})
+						assigments = frappe.get_all("Assignment Salary Component", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": sc.name, "docstatus": 0})
 
 						for assigment in assigments:
 							employees = frappe.get_all("Employee Detail Salary Component", ["*"], filters = {"parent": assigment.name, "employee": ss.employee})
@@ -61,14 +61,17 @@ def execute(filters=None):
 								value_component += employee.moneda
 						
 						#Confidentials
-						assigments = frappe.get_all("Assignment Salary Component Confidential", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": sc.salary_component, "docstatus": 0})
+						assigments = frappe.get_all("Assignment Salary Component Confidential", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": sc.name, "docstatus": 0})
 
 						for assigment in assigments:
 							employees = frappe.get_all("Employee Detail Salary Component", ["*"], filters = {"parent": assigment.name, "employee": ss.employee})
 
 							for employee in employees:
 								value_component += employee.moneda	
-				
+
+					if value_component > 0:
+						break
+					
 				row += [value_component]
 			# else:
 			# 	row += [0]
@@ -83,7 +86,7 @@ def execute(filters=None):
 					if coldata.name == sdd.salary_component:
 						value_component = sdd.amount
 
-						assigments = frappe.get_all("Assignment Salary Component", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": coldata.salary_component, "docstatus": 0})
+						assigments = frappe.get_all("Assignment Salary Component", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": coldata.name, "docstatus": 0})
 
 						for assigment in assigments:
 							employees = frappe.get_all("Employee Detail Salary Component", ["*"], filters = {"parent": assigment.name, "employee": ss.employee})
@@ -92,7 +95,7 @@ def execute(filters=None):
 								value_component += employee.moneda	
 
 						#Confidentials
-						assigments = frappe.get_all("Assignment Salary Component Confidential", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": coldata.salary_component, "docstatus": 0})
+						assigments = frappe.get_all("Assignment Salary Component Confidential", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": coldata.name, "docstatus": 0})
 
 						for assigment in assigments:
 							employees = frappe.get_all("Employee Detail Salary Component", ["*"], filters = {"parent": assigment.name, "employee": ss.employee})
@@ -100,7 +103,7 @@ def execute(filters=None):
 							for employee in employees:
 								value_component += employee.moneda						
 					else:
-						assigments = frappe.get_all("Assignment Salary Component", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": coldata.salary_component, "docstatus": 0})
+						assigments = frappe.get_all("Assignment Salary Component", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": coldata.name, "docstatus": 0})
 
 						for assigment in assigments:
 							employees = frappe.get_all("Employee Detail Salary Component", ["*"], filters = {"parent": assigment.name, "employee": ss.employee})
@@ -109,13 +112,16 @@ def execute(filters=None):
 								value_component += employee.moneda
 						
 						#Confidentials
-						assigments = frappe.get_all("Assignment Salary Component Confidential", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": coldata.salary_component, "docstatus": 0})
+						assigments = frappe.get_all("Assignment Salary Component Confidential", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": coldata.name, "docstatus": 0})
 
 						for assigment in assigments:
 							employees = frappe.get_all("Employee Detail Salary Component", ["*"], filters = {"parent": assigment.name, "employee": ss.employee})
 
 							for employee in employees:
-								value_component += employee.moneda	
+								value_component += employee.moneda
+					
+					if value_component > 0:
+						break
 				
 				row += [value_component]	
 			# else:
