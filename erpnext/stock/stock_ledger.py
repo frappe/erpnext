@@ -175,9 +175,9 @@ def validate_cancellation(args):
 				)
 			if repost_entry.status == "Queued":
 				doc = frappe.get_doc("Repost Item Valuation", repost_entry.name)
+				doc.status = "Skipped"
 				doc.flags.ignore_permissions = True
 				doc.cancel()
-				doc.delete()
 
 
 def set_as_cancel(voucher_type, voucher_no):
