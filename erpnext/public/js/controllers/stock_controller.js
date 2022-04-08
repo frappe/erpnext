@@ -83,16 +83,14 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 
 	get_applicable_items: function(items_type) {
 		var me = this;
+
+		var item_groups = [{
+			"item_group": null
+		}];
+
 		var dialog = new frappe.ui.Dialog({
 			title: __("Get Applicable Items"),
 			fields: [
-				{
-					"fieldtype": "Link",
-					"label": __("Item Group"),
-					"fieldname": "item_group",
-					"options": "Item Group",
-					"reqd": 1,
-				},
 				{
 					"fieldtype": "Link",
 					"label": __("Applies To Item Code"),
@@ -120,6 +118,27 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 					"read_only": 1,
 					"default": me.frm.doc.applies_to_item ? me.frm.doc.applies_to_item_name : "",
 				},
+				{
+					"fieldtype": "Section Break",
+				},
+				{
+					"fieldtype": "Table",
+					"label": __("Item Groups"),
+					"fieldname": "item_groups",
+					"reqd": 1,
+					"data": item_groups,
+					"get_data": () => item_groups,
+					"fields": [
+						{
+							"fieldtype": "Link",
+							"label": __("Item Group"),
+							"fieldname": "item_group",
+							"options": "Item Group",
+							"reqd": 1,
+							"in_list_view": 1,
+						},
+					]
+				},
 			]
 		});
 
@@ -133,7 +152,7 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 				method: "erpnext.stock.doctype.item_applicable_item.item_applicable_item.add_applicable_items",
 				args: {
 					applies_to_item: args.applies_to_item,
-					item_groups: [args.item_group],
+					item_groups: args.item_groups.map(d => d.item_group).filter(d => d),
 					target_doc: me.frm.doc,
 					items_type: items_type,
 				},
