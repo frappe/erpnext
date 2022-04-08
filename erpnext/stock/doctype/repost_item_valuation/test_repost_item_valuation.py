@@ -1,20 +1,25 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import nowdate
 
 from erpnext.controllers.stock_controller import create_item_wise_repost_entries
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
 	in_configured_timeslot,
 )
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.utils import PendingRepostingError
 
 
-class TestRepostItemValuation(unittest.TestCase):
+class TestRepostItemValuation(FrappeTestCase):
+	def tearDown(self):
+		frappe.flags.dont_execute_stock_reposts = False
+
 	def test_repost_time_slot(self):
 		repost_settings = frappe.get_doc("Stock Reposting Settings")
 
@@ -162,3 +167,22 @@ class TestRepostItemValuation(unittest.TestCase):
 		self.assertRaises(PendingRepostingError, stock_settings.save)
 
 		riv.set_status("Skipped")
+
+	def test_prevention_of_cancelled_transaction_riv(self):
+		frappe.flags.dont_execute_stock_reposts = True
+
+		item = make_item()
+		warehouse = "_Test Warehouse - _TC"
+		old = make_stock_entry(item_code=item.name, to_warehouse=warehouse, qty=2, rate=5)
+		_new = make_stock_entry(item_code=item.name, to_warehouse=warehouse, qty=5, rate=10)
+
+		old.cancel()
+
+		riv = frappe.get_last_doc(
+			"Repost Item Valuation", {"voucher_type": old.doctype, "voucher_no": old.name}
+		)
+		self.assertRaises(frappe.ValidationError, riv.cancel)
+
+		riv.db_set("status", "Skipped")
+		riv.reload()
+		riv.cancel()  # it should cancel now
