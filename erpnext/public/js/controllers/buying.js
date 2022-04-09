@@ -115,10 +115,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				filters['is_purchase_item'] = 1;
 			}
 
-			if (doc.applies_to_item) {
-				filters.applicable_to_item = doc.applies_to_item;
-			}
-
 			return {
 				query: "erpnext.controllers.queries.item_query",
 				filters: filters

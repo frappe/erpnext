@@ -98,9 +98,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		if(this.frm.fields_dict["items"].grid.get_field('item_code')) {
 			this.frm.set_query("item_code", "items", function(doc) {
 				var filters = {'is_sales_item': 1};
-				if (doc.applies_to_item) {
-					filters.applicable_to_item = doc.applies_to_item;
-				}
 				return {
 					query: "erpnext.controllers.queries.item_query",
 					filters: filters

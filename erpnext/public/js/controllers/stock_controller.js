@@ -110,6 +110,7 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 							dialog.set_value('applies_to_item_name', "");
 						}
 					},
+					get_query: () => erpnext.queries.item({'has_applicable_items': 1, 'include_templates': 1})
 				},
 				{
 					"fieldtype": "Data",
@@ -136,6 +137,9 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 							"options": "Item Group",
 							"reqd": 1,
 							"in_list_view": 1,
+							get_query: () => {
+								return { query: "erpnext.controllers.queries.applicable_item_group" }
+							}
 						},
 					]
 				},

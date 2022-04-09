@@ -218,31 +218,35 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		# scan description only if items are less than 50000
 		description_cond = 'or tabItem.description LIKE %(txt)s'
 
-	# Item applicability condition
-	applicable_to_item_cond = ""
-	if filters and isinstance(filters, dict) and filters.get('applicable_to_item'):
-		applicable_to_item = filters.get('applicable_to_item')
-		del filters['applicable_to_item']
+	# Item applicability conditions
+	has_applicable_items_cond = ""
+	if filters and isinstance(filters, dict) and filters.get('has_applicable_items'):
+		filters.pop('has_applicable_items')
+		has_applicable_items_cond = """ and exists(select iai.name
+			from `tabItem Applicable Item` iai
+			where tabItem.name = iai.parent or tabItem.variant_of = iai.parent)
+		"""
 
-		force_applicable_to = filters.get('force_applicable_to')
-		if force_applicable_to:
-			del filters['force_applicable_to']
+	# applicable_to_item_cond = ""
+	# if filters and isinstance(filters, dict) and filters.get('applicable_to_item'):
+	# 	applicable_to_item = filters.get('applicable_to_item')
+	# 	del filters['applicable_to_item']
+	#
+	# 	variant_of = frappe.get_cached_value("Item", applicable_to_item, "variant_of")
+	# 	if variant_of:
+	# 		all_variants = frappe.db.sql_list("select name from `tabItem` where variant_of = %s", variant_of)
+	# 		all_variants.append(variant_of)
+	# 		applicable_to_item_match_cond = "ap.applicable_to_item in ({0})"\
+	# 			.format(", ".join([frappe.db.escape(d) for d in all_variants]))
+	# 	else:
+	# 		applicable_to_item_match_cond = "ap.applicable_to_item = {0}".format(frappe.db.escape(applicable_to_item))
+	#
+	# 	applicable_to_item_cond = """and (tabItem.applicable_to_all = 1
+	# 		or exists(select ap.name
+	# 			from `tabItem Applicable To` ap
+	# 			where ap.parent = tabItem.name and {0}))
+	# 	""".format(applicable_to_item_match_cond)
 
-		if force_applicable_to or frappe.get_cached_value("Stock Settings", None, "filter_items_by_applicable_to"):
-			variant_of = frappe.get_cached_value("Item", applicable_to_item, "variant_of")
-			if variant_of:
-				all_variants = frappe.db.sql_list("select name from `tabItem` where variant_of = %s", variant_of)
-				all_variants.append(variant_of)
-				applicable_to_item_match_cond = "ap.applicable_to_item in ({0})"\
-					.format(", ".join([frappe.db.escape(d) for d in all_variants]))
-			else:
-				applicable_to_item_match_cond = "ap.applicable_to_item = {0}".format(frappe.db.escape(applicable_to_item))
-
-			applicable_to_item_cond = """and (tabItem.applicable_to_all = 1
-				or exists(select ap.name
-					from `tabItem Applicable To` ap
-					where ap.parent = tabItem.name and {0}))
-			""".format(applicable_to_item_match_cond)
 
 	# Default Conditions
 	default_conditions = []
@@ -259,7 +263,9 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			if not filters.get('end_of_life'):
 				default_conditions.append(default_eol_condition)
 
-		if not filters.get('has_variants'):
+		if filters.get('include_templates'):
+			filters.pop('include_templates')
+		elif not filters.get('has_variants'):
 			default_conditions.append(default_variant_condition)
 	else:
 		default_conditions = [default_disabled_condition, default_variant_condition, default_eol_condition]
@@ -281,7 +287,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			)
 			{fcond}
 			{mcond}
-			{applicable_to_item_cond}
+			{has_applicable_items_cond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
@@ -293,8 +299,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			scond=searchfields,
 			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
 			mcond=get_match_cond(doctype).replace('%', '%%'),
-			description_cond = description_cond,
-			applicable_to_item_cond=applicable_to_item_cond),
+			description_cond=description_cond,
+			has_applicable_items_cond=has_applicable_items_cond),
 			{
 				"today": nowdate(),
 				"txt": "%%%s%%" % txt,
@@ -302,6 +308,38 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				"start": start,
 				"page_len": page_len
 			}, as_dict=as_dict)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def applicable_item_group(doctype, txt, searchfield, start, page_len, filters):
+	conditions = []
+	fields = get_fields("Item Group", ["name"])
+
+	return frappe.db.sql("""
+		select {fields}
+		from `tabItem Group`
+		where `tabItem Group`.`{key}` like %(txt)s
+			and exists(select iai.name
+				from `tabItem Applicable Item` iai
+				inner join `tabItem` iaim on iaim.name = iai.applicable_item_code
+				where iaim.item_group = `tabItem Group`.name)
+			{fcond} {mcond}
+		order by
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			idx desc, name
+		limit %(start)s, %(page_len)s
+	""".format(
+			fields=", ".join(fields),
+			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
+			mcond=get_match_cond(doctype).replace('%', '%%'),
+			key=searchfield
+		), {
+			'txt': '%' + txt + '%',
+			'_txt': txt.replace("%", ""),
+			'start': start or 0,
+			'page_len': page_len or 20
+		})
 
 
 @frappe.whitelist()
