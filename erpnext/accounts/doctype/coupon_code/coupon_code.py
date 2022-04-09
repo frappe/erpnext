@@ -15,7 +15,7 @@ class CouponCode(Document):
 
 		if not self.coupon_code:
 			if self.coupon_type == "Promotional":
-				self.coupon_code =''.join(i for i in self.coupon_name if not i.isdigit())[0:8].upper()
+				self.coupon_code = "".join(i for i in self.coupon_name if not i.isdigit())[0:8].upper()
 			elif self.coupon_type == "Gift Card":
 				self.coupon_code = frappe.generate_hash()[:10].upper()
 

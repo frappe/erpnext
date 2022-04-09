@@ -134,7 +134,8 @@
   {
    "fieldname": "allocated_amount",
    "fieldtype": "Currency",
-   "label": "Allocated Amount"
+   "label": "Allocated Amount",
+   "options": "currency"
   },
   {
    "fieldname": "amended_from",
@@ -152,7 +153,8 @@
   {
    "fieldname": "unallocated_amount",
    "fieldtype": "Currency",
-   "label": "Unallocated Amount"
+   "label": "Unallocated Amount",
+   "options": "currency"
   },
   {
    "fieldname": "party_section",
@@ -192,10 +194,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-14 17:31:58.963529",
+ "modified": "2022-03-21 19:05:04.208222",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -242,6 +245,7 @@
  ],
  "sort_field": "date",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "bank_account",
  "track_changes": 1
 }

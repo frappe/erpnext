@@ -60,11 +60,17 @@ erpnext.PointOfSale.ItemDetails = class {
 		return item && item.name == this.current_item.name;
 	}
 
-	toggle_item_details_section(item) {
+	async toggle_item_details_section(item) {
 		const current_item_changed = !this.compare_with_current_item(item);
 
 		// if item is null or highlighted cart item is clicked twice
 		const hide_item_details = !Boolean(item) || !current_item_changed;
+
+		if ((!hide_item_details && current_item_changed) || hide_item_details) {
+			// if item details is being closed OR if item details is opened but item is changed
+			// in both cases, if the current item is a serialized item, then validate and remove the item
+			await this.validate_serial_batch_item();
+		}
 
 		this.events.toggle_item_selector(!hide_item_details);
 		this.toggle_component(!hide_item_details);
@@ -83,7 +89,6 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.render_form(item);
 			this.events.highlight_cart_item(item);
 		} else {
-			this.validate_serial_batch_item();
 			this.current_item = {};
 		}
 	}
@@ -103,11 +108,11 @@ erpnext.PointOfSale.ItemDetails = class {
 			(serialized && batched && (no_batch_selected || no_serial_selected))) {
 
 			frappe.show_alert({
-				message: __("Item will be removed since no serial / batch no selected."),
+				message: __("Item is removed since no serial / batch no selected."),
 				indicator: 'orange'
 			});
 			frappe.utils.play_sound("cancel");
-			this.events.remove_item_from_cart();
+			return this.events.remove_item_from_cart();
 		}
 	}
 

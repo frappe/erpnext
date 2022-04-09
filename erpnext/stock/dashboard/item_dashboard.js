@@ -213,7 +213,14 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, call
 			label: __('Target Warehouse'),
 			fieldtype: 'Link',
 			options: 'Warehouse',
-			reqd: 1
+			reqd: 1,
+			get_query() {
+				return {
+					filters: {
+						is_group: 0
+					}
+				}
+			}
 		},
 		{
 			fieldname: 'qty',
@@ -252,52 +259,21 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, call
 		dialog.get_field('target').refresh();
 	}
 
-	dialog.set_primary_action(__('Submit'), function () {
-		var values = dialog.get_values();
-		if (!values) {
-			return;
-		}
-		if (source && values.qty > actual_qty) {
-			frappe.msgprint(__('Quantity must be less than or equal to {0}', [actual_qty]));
-			return;
-		}
-		if (values.source === values.target) {
-			frappe.msgprint(__('Source and target warehouse must be different'));
-		}
-
-		frappe.call({
-			method: 'erpnext.stock.doctype.stock_entry.stock_entry_utils.make_stock_entry',
-			args: values,
-			btn: dialog.get_primary_btn(),
-			freeze: true,
-			freeze_message: __('Creating Stock Entry'),
-			callback: function (r) {
-				frappe.show_alert(__('Stock Entry {0} created',
-					['<a href="/app/stock-entry/' + r.message.name + '">' + r.message.name + '</a>']));
-				dialog.hide();
-				callback(r);
-			},
+	dialog.set_primary_action(__('Create Stock Entry'), function () {
+		frappe.model.with_doctype('Stock Entry', function () {
+			let doc = frappe.model.get_new_doc('Stock Entry');
+			doc.from_warehouse = dialog.get_value('source');
+			doc.to_warehouse = dialog.get_value('target');
+			doc.stock_entry_type = doc.from_warehouse ? "Material Transfer" : "Material Receipt";
+			let row = frappe.model.add_child(doc, 'items');
+			row.item_code = dialog.get_value('item_code');
+			row.s_warehouse = dialog.get_value('source');
+			row.t_warehouse = dialog.get_value('target');
+			row.qty = dialog.get_value('qty');
+			row.conversion_factor = 1;
+			row.transfer_qty = dialog.get_value('qty');
+			row.basic_rate = dialog.get_value('rate');
+			frappe.set_route('Form', doc.doctype, doc.name);
 		});
 	});
-
-	$('<p style="margin-left: 10px;"><a class="link-open text-muted small">' +
-			__("Add more items or open full form") + '</a></p>')
-		.appendTo(dialog.body)
-		.find('.link-open')
-		.on('click', function () {
-			frappe.model.with_doctype('Stock Entry', function () {
-				var doc = frappe.model.get_new_doc('Stock Entry');
-				doc.from_warehouse = dialog.get_value('source');
-				doc.to_warehouse = dialog.get_value('target');
-				var row = frappe.model.add_child(doc, 'items');
-				row.item_code = dialog.get_value('item_code');
-				row.f_warehouse = dialog.get_value('target');
-				row.t_warehouse = dialog.get_value('target');
-				row.qty = dialog.get_value('qty');
-				row.conversion_factor = 1;
-				row.transfer_qty = dialog.get_value('qty');
-				row.basic_rate = dialog.get_value('rate');
-				frappe.set_route('Form', doc.doctype, doc.name);
-			});
-		});
 };

@@ -437,17 +437,16 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "No",
+   "default": "0",
    "fieldname": "is_subcontracted",
-   "fieldtype": "Select",
-   "label": "Raw Materials Consumed",
+   "fieldtype": "Check",
+   "label": "Is Subcontracted",
    "oldfieldname": "is_subcontracted",
    "oldfieldtype": "Select",
-   "options": "No\nYes",
    "print_hide": 1
   },
   {
-   "depends_on": "eval:doc.is_subcontracted==\"Yes\"",
+   "depends_on": "eval:doc.is_subcontracted",
    "fieldname": "supplier_warehouse",
    "fieldtype": "Link",
    "label": "Supplier Warehouse",
@@ -1165,7 +1164,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-01 11:40:52.690984",
+ "modified": "2022-03-10 11:40:52.690984",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
