@@ -105,6 +105,30 @@ erpnext.setup_einvoice_actions = (doctype) => {
 						},
 						primary_action_label: __('Submit')
 					});
+					d.fields_dict.transporter.df.onchange = function () {
+						const transporter = d.fields_dict.transporter.value;
+						if (transporter) {
+							frappe.db.get_value('Supplier', transporter, ['gst_transporter_id', 'supplier_name'])
+								.then(({ message }) => {
+									d.set_value('gst_transporter_id', message.gst_transporter_id);
+									d.set_value('transporter_name', message.supplier_name);
+								});
+						} else {
+							d.set_value('gst_transporter_id', '');
+							d.set_value('transporter_name', '');
+						}
+					};
+					d.fields_dict.driver.df.onchange = function () {
+						const driver = d.fields_dict.driver.value;
+						if (driver) {
+							frappe.db.get_value('Driver', driver, ['full_name'])
+								.then(({ message }) => {
+									d.set_value('driver_name', message.full_name);
+								});
+						} else {
+							d.set_value('driver_name', '');
+						}
+					};
 					d.show();
 				};
 
@@ -153,7 +177,6 @@ const get_ewaybill_fields = (frm) => {
 			'fieldname': 'gst_transporter_id',
 			'label': 'GST Transporter ID',
 			'fieldtype': 'Data',
-			'fetch_from': 'transporter.gst_transporter_id',
 			'default': frm.doc.gst_transporter_id
 		},
 		{
@@ -189,9 +212,9 @@ const get_ewaybill_fields = (frm) => {
 			'fieldname': 'transporter_name',
 			'label': 'Transporter Name',
 			'fieldtype': 'Data',
-			'fetch_from': 'transporter.name',
 			'read_only': 1,
-			'default': frm.doc.transporter_name
+			'default': frm.doc.transporter_name,
+			'depends_on': 'transporter'
 		},
 		{
 			'fieldname': 'mode_of_transport',
@@ -206,7 +229,8 @@ const get_ewaybill_fields = (frm) => {
 			'fieldtype': 'Data',
 			'fetch_from': 'driver.full_name',
 			'read_only': 1,
-			'default': frm.doc.driver_name
+			'default': frm.doc.driver_name,
+			'depends_on': 'driver'
 		},
 		{
 			'fieldname': 'lr_date',

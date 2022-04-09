@@ -10,6 +10,7 @@ def execute(filters=None):
 	columns, data = get_columns(), get_data(filters)
 	return columns, data
 
+
 def get_columns():
 	columns = [
 		{
@@ -24,59 +25,56 @@ def get_columns():
 			"fieldname": "opportunity_from",
 			"fieldtype": "Link",
 			"options": "DocType",
-			"width": 130
+			"width": 130,
 		},
 		{
 			"label": _("Party"),
-			"fieldname":"party_name",
+			"fieldname": "party_name",
 			"fieldtype": "Dynamic Link",
 			"options": "opportunity_from",
-			"width": 160
+			"width": 160,
 		},
 		{
 			"label": _("Customer/Lead Name"),
-			"fieldname":"customer_name",
+			"fieldname": "customer_name",
 			"fieldtype": "Data",
-			"width": 150
+			"width": 150,
 		},
 		{
 			"label": _("Opportunity Type"),
 			"fieldname": "opportunity_type",
 			"fieldtype": "Data",
-			"width": 130
+			"width": 130,
 		},
-		{
-			"label": _("Lost Reasons"),
-			"fieldname": "lost_reason",
-			"fieldtype": "Data",
-			"width": 220
-		},
+		{"label": _("Lost Reasons"), "fieldname": "lost_reason", "fieldtype": "Data", "width": 220},
 		{
 			"label": _("Sales Stage"),
 			"fieldname": "sales_stage",
 			"fieldtype": "Link",
 			"options": "Sales Stage",
-			"width": 150
+			"width": 150,
 		},
 		{
 			"label": _("Territory"),
 			"fieldname": "territory",
 			"fieldtype": "Link",
 			"options": "Territory",
-			"width": 150
+			"width": 150,
 		},
 		{
 			"label": _("Next Contact By"),
 			"fieldname": "contact_by",
 			"fieldtype": "Link",
 			"options": "User",
-			"width": 150
-		}
+			"width": 150,
+		},
 	]
 	return columns
 
+
 def get_data(filters):
-	return frappe.db.sql("""
+	return frappe.db.sql(
+		"""
 		SELECT
 			`tabOpportunity`.name,
 			`tabOpportunity`.opportunity_from,
@@ -97,7 +95,12 @@ def get_data(filters):
 		GROUP BY
 			`tabOpportunity`.name
 		ORDER BY
-			`tabOpportunity`.creation asc  """.format(conditions=get_conditions(filters), join=get_join(filters)), filters, as_dict=1)
+			`tabOpportunity`.creation asc  """.format(
+			conditions=get_conditions(filters), join=get_join(filters)
+		),
+		filters,
+		as_dict=1,
+	)
 
 
 def get_conditions(filters):
@@ -117,6 +120,7 @@ def get_conditions(filters):
 
 	return " ".join(conditions) if conditions else ""
 
+
 def get_join(filters):
 	join = """LEFT JOIN `tabOpportunity Lost Reason Detail`
 			ON `tabOpportunity Lost Reason Detail`.parenttype = 'Opportunity' and
@@ -127,6 +131,8 @@ def get_join(filters):
 			ON `tabOpportunity Lost Reason Detail`.parenttype = 'Opportunity' and
 			`tabOpportunity Lost Reason Detail`.parent = `tabOpportunity`.name and
 			`tabOpportunity Lost Reason Detail`.lost_reason = '{0}'
-			""".format(filters.get("lost_reason"))
+			""".format(
+			filters.get("lost_reason")
+		)
 
 	return join

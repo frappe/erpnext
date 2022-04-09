@@ -9,14 +9,19 @@ from erpnext import get_default_currency
 
 
 def get_ordered_to_be_billed_data(args):
-	doctype, party = args.get('doctype'), args.get('party')
+	doctype, party = args.get("doctype"), args.get("party")
 	child_tab = doctype + " Item"
-	precision = get_field_precision(frappe.get_meta(child_tab).get_field("billed_amt"),
-		currency=get_default_currency()) or 2
+	precision = (
+		get_field_precision(
+			frappe.get_meta(child_tab).get_field("billed_amt"), currency=get_default_currency()
+		)
+		or 2
+	)
 
 	project_field = get_project_field(doctype, party)
 
-	return frappe.db.sql("""
+	return frappe.db.sql(
+		"""
 		Select
 			`{parent_tab}`.name, `{parent_tab}`.{date_field},
 			`{parent_tab}`.{party}, `{parent_tab}`.{party}_name,
@@ -40,9 +45,20 @@ def get_ordered_to_be_billed_data(args):
 			(`{child_tab}`.base_rate * ifnull(`{child_tab}`.returned_qty, 0))) > 0
 		order by
 			`{parent_tab}`.{order} {order_by}
-		""".format(parent_tab = 'tab' + doctype, child_tab = 'tab' + child_tab, precision= precision, party = party,
-			date_field = args.get('date'), project_field = project_field, order= args.get('order'), order_by = args.get('order_by')))
+		""".format(
+			parent_tab="tab" + doctype,
+			child_tab="tab" + child_tab,
+			precision=precision,
+			party=party,
+			date_field=args.get("date"),
+			project_field=project_field,
+			order=args.get("order"),
+			order_by=args.get("order_by"),
+		)
+	)
+
 
 def get_project_field(doctype, party):
-	if party == "supplier": doctype = doctype + ' Item'
-	return "`tab%s`.project"%(doctype)
+	if party == "supplier":
+		doctype = doctype + " Item"
+	return "`tab%s`.project" % (doctype)
