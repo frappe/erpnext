@@ -43,6 +43,8 @@
   "price_list_currency",
   "plc_conversion_rate",
   "ignore_pricing_rule",
+  "section_break_33",
+  "scan_barcode",
   "items_section",
   "items",
   "bundle_items_section",
@@ -968,13 +970,23 @@
    "fieldtype": "Small Text",
    "label": "Company Address",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_33",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "scan_barcode",
+   "fieldtype": "Data",
+   "label": "Scan Barcode",
+   "options": "Barcode"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-03 17:21:48.578719",
+ "modified": "2022-04-07 11:01:31.157084",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

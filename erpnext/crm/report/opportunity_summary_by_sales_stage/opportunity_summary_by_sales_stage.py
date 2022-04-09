@@ -1,9 +1,9 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 import json
+from itertools import groupby
 
 import frappe
-import pandas
 from frappe import _
 from frappe.utils import flt
 
@@ -101,18 +101,19 @@ class OpportunitySummaryBySalesStage(object):
 
 			self.convert_to_base_currency()
 
-			dataframe = pandas.DataFrame.from_records(self.query_result)
-			dataframe.replace(to_replace=[None], value="Not Assigned", inplace=True)
-			result = dataframe.groupby(["sales_stage", based_on], as_index=False)["amount"].sum()
+			for row in self.query_result:
+				if not row.get(based_on):
+					row[based_on] = "Not Assigned"
 
 			self.grouped_data = []
 
-			for i in range(len(result["amount"])):
+			grouping_key = lambda o: (o["sales_stage"], o[based_on])  # noqa
+			for (sales_stage, _based_on), rows in groupby(self.query_result, grouping_key):
 				self.grouped_data.append(
 					{
-						"sales_stage": result["sales_stage"][i],
-						based_on: result[based_on][i],
-						"amount": result["amount"][i],
+						"sales_stage": sales_stage,
+						based_on: _based_on,
+						"amount": sum(flt(r["amount"]) for r in rows),
 					}
 				)
 
