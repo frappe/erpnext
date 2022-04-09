@@ -115,9 +115,9 @@ def get_columns(filters):
 		{"fieldname": "credit", "label": _("Credit"), "fieldtype": "Currency", "width": 140},
 		{"fieldname": "remarks", "label": _("Remarks"), "fieldtype": "Data", "width": 200},
 		{"fieldname": "age", "label": _("Age"), "fieldtype": "Int", "width": 50},
-		{"fieldname": "range1", "label": "0-30", "fieldtype": "Currency", "width": 140},
-		{"fieldname": "range2", "label": "30-60", "fieldtype": "Currency", "width": 140},
-		{"fieldname": "range3", "label": "60-90", "fieldtype": "Currency", "width": 140},
+		{"fieldname": "range1", "label": _("0-30"), "fieldtype": "Currency", "width": 140},
+		{"fieldname": "range2", "label": _("30-60"), "fieldtype": "Currency", "width": 140},
+		{"fieldname": "range3", "label": _("60-90"), "fieldtype": "Currency", "width": 140},
 		{"fieldname": "range4", "label": _("90 Above"), "fieldtype": "Currency", "width": 140},
 		{
 			"fieldname": "delay_in_payment",

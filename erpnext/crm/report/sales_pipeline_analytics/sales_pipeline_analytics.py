@@ -3,9 +3,9 @@
 
 import json
 from datetime import date
+from itertools import groupby
 
 import frappe
-import pandas
 from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.utils import cint, flt
@@ -109,18 +109,15 @@ class SalesPipelineAnalytics(object):
 
 			self.convert_to_base_currency()
 
-			dataframe = pandas.DataFrame.from_records(self.query_result)
-			dataframe.replace(to_replace=[None], value="Not Assigned", inplace=True)
-			result = dataframe.groupby([self.pipeline_by, self.period_by], as_index=False)["amount"].sum()
-
 			self.grouped_data = []
 
-			for i in range(len(result["amount"])):
+			grouping_key = lambda o: (o.get(self.pipeline_by) or "Not Assigned", o[self.period_by])  # noqa
+			for (pipeline_by, period_by), rows in groupby(self.query_result, grouping_key):
 				self.grouped_data.append(
 					{
-						self.pipeline_by: result[self.pipeline_by][i],
-						self.period_by: result[self.period_by][i],
-						"amount": result["amount"][i],
+						self.pipeline_by: pipeline_by,
+						self.period_by: period_by,
+						"amount": sum(flt(r["amount"]) for r in rows),
 					}
 				)
 

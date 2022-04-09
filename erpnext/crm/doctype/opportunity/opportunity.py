@@ -126,7 +126,8 @@ class Opportunity(TransactionBase):
 	def declare_enquiry_lost(self, lost_reasons_list, competitors, detailed_reason=None):
 		if not self.has_active_quotation():
 			self.status = "Lost"
-			self.lost_reasons = self.competitors = []
+			self.lost_reasons = []
+			self.competitors = []
 
 			if detailed_reason:
 				self.order_lost_reason = detailed_reason

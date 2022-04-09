@@ -200,7 +200,7 @@ frappe.ui.form.on("Bank Statement Import", {
 				})
 				.then((result) => {
 					if (result.length > 0) {
-						frm.add_custom_button("Report Error", () => {
+						frm.add_custom_button(__("Report Error"), () => {
 							let fake_xhr = {
 								responseText: JSON.stringify({
 									exc: result[0].error,
