@@ -49,11 +49,11 @@ erpnext.PointOfSale.ItemCart = class {
 		this.$component.append(
 			`<div class="cart-container">
 				<div class="abs-cart-container">
-					<div class="cart-label">${__('Item Cart')}</div>
+					<div class="cart-label" data-name="Item Cart">${__('Item Cart')}</div>
 					<div class="cart-header">
-						<div class="name-header">${__('Item')}</div>
-						<div class="qty-header">${__('Quantity')}</div>
-						<div class="rate-amount-header">${__('Amount')}</div>
+						<div class="name-header" data-name="Item">${__('Item')}</div>
+						<div class="qty-header" data-name="Quantity">${__('Quantity')}</div>
+						<div class="rate-amount-header" data-name="Amount">${__('Amount')}</div>
 					</div>
 					<div class="cart-items-section"></div>
 					<div class="cart-totals-section"></div>
@@ -130,10 +130,10 @@ erpnext.PointOfSale.ItemCart = class {
 			},
 			cols: 5,
 			keys: [
-				[ 1, 2, 3, __('Quantity') ],
-				[ 4, 5, 6, __('Discount') ],
-				[ 7, 8, 9, __('Rate') ],
-				[ '.', 0, __('Delete'), __('Remove') ]
+				[ 1, 2, 3, 'Quantity' ],
+				[ 4, 5, 6, 'Discount' ],
+				[ 7, 8, 9, 'Rate' ],
+				[ '.', 0, 'Delete', 'Remove' ]
 			],
 			css_classes: [
 				[ '', '', '', 'col-span-2' ],
