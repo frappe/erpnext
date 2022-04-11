@@ -24,18 +24,18 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 		wheres = []
 		query_values = []
 		for attribute_value in attribute_values:
-			wheres.append('( attribute = %s and attribute_value = %s )')
+			wheres.append("( attribute = %s and attribute_value = %s )")
 			query_values += [attribute, attribute_value]
 
-		attribute_query = ' or '.join(wheres)
+		attribute_query = " or ".join(wheres)
 
 		if template_item_code:
-			variant_of_query = 'AND t2.variant_of = %s'
+			variant_of_query = "AND t2.variant_of = %s"
 			query_values.append(template_item_code)
 		else:
-			variant_of_query = ''
+			variant_of_query = ""
 
-		query = '''
+		query = """
 			SELECT
 				t1.parent
 			FROM
@@ -58,7 +58,9 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 				t1.parent
 			ORDER BY
 				NULL
-		'''.format(attribute_query=attribute_query, variant_of_query=variant_of_query)
+		""".format(
+			attribute_query=attribute_query, variant_of_query=variant_of_query
+		)
 
 		item_codes = set([r[0] for r in frappe.db.sql(query, query_values)])
 		items.append(item_codes)
@@ -67,11 +69,12 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 
 	return res
 
+
 @frappe.whitelist(allow_guest=True)
 def get_attributes_and_values(item_code):
-	'''Build a list of attributes and their possible values.
+	"""Build a list of attributes and their possible values.
 	This will ignore the values upon selection of which there cannot exist one item.
-	'''
+	"""
 	item_cache = ItemVariantsCacheManager(item_code)
 	item_variants_data = item_cache.get_item_variants_data()
 
@@ -83,8 +86,9 @@ def get_attributes_and_values(item_code):
 		if attribute in attribute_list:
 			valid_options.setdefault(attribute, set()).add(attribute_value)
 
-	item_attribute_values = frappe.db.get_all('Item Attribute Value',
-		['parent', 'attribute_value', 'idx'], order_by='parent asc, idx asc')
+	item_attribute_values = frappe.db.get_all(
+		"Item Attribute Value", ["parent", "attribute_value", "idx"], order_by="parent asc, idx asc"
+	)
 	ordered_attribute_value_map = frappe._dict()
 	for iv in item_attribute_values:
 		ordered_attribute_value_map.setdefault(iv.parent, []).append(iv.attribute_value)
@@ -93,18 +97,18 @@ def get_attributes_and_values(item_code):
 	for attr in attributes:
 		valid_attribute_values = valid_options.get(attr.attribute, [])
 		ordered_values = ordered_attribute_value_map.get(attr.attribute, [])
-		attr['values'] = [v for v in ordered_values if v in valid_attribute_values]
+		attr["values"] = [v for v in ordered_values if v in valid_attribute_values]
 
 	return attributes
 
 
 @frappe.whitelist(allow_guest=True)
 def get_next_attribute_and_values(item_code, selected_attributes):
-	'''Find the count of Items that match the selected attributes.
+	"""Find the count of Items that match the selected attributes.
 	Also, find the attribute values that are not applicable for further searching.
 	If less than equal to 10 items are found, return item_codes of those items.
 	If one item is matched exactly, return item_code of that item.
-	'''
+	"""
 	selected_attributes = frappe.parse_json(selected_attributes)
 
 	item_cache = ItemVariantsCacheManager(item_code)
@@ -133,7 +137,11 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 
 	for row in item_variants_data:
 		item_code, attribute, attribute_value = row
-		if item_code in filtered_items and attribute not in selected_attributes and attribute in attribute_list:
+		if (
+			item_code in filtered_items
+			and attribute not in selected_attributes
+			and attribute in attribute_list
+		):
 			valid_options_for_attributes[attribute].add(attribute_value)
 
 	optional_attributes = item_cache.get_optional_attributes()
@@ -159,12 +167,12 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 		product_info = None
 
 	return {
-		'next_attribute': next_attribute,
-		'valid_options_for_attributes': valid_options_for_attributes,
-		'filtered_items_count': filtered_items_count,
-		'filtered_items': filtered_items if filtered_items_count < 10 else [],
-		'exact_match': exact_match,
-		'product_info': product_info
+		"next_attribute": next_attribute,
+		"valid_options_for_attributes": valid_options_for_attributes,
+		"filtered_items_count": filtered_items_count,
+		"filtered_items": filtered_items if filtered_items_count < 10 else [],
+		"exact_match": exact_match,
+		"product_info": product_info,
 	}
 
 
@@ -179,16 +187,16 @@ def get_items_with_selected_attributes(item_code, selected_attributes):
 
 	return set.intersection(*items)
 
+
 # utilities
 
+
 def get_item_attributes(item_code):
-	attributes = frappe.db.get_all('Item Variant Attribute',
-		fields=['attribute'],
-		filters={
-			'parenttype': 'Item',
-			'parent': item_code
-		},
-		order_by='idx asc'
+	attributes = frappe.db.get_all(
+		"Item Variant Attribute",
+		fields=["attribute"],
+		filters={"parenttype": "Item", "parent": item_code},
+		order_by="idx asc",
 	)
 
 	optional_attributes = ItemVariantsCacheManager(item_code).get_optional_attributes()
@@ -199,6 +207,7 @@ def get_item_attributes(item_code):
 
 	return attributes
 
+
 def get_item_variant_price_dict(item_code, cart_settings):
 	if cart_settings.enabled and cart_settings.show_price:
 		is_guest = frappe.session.user == "Guest"
@@ -207,12 +216,8 @@ def get_item_variant_price_dict(item_code, cart_settings):
 		if not is_guest or not cart_settings.hide_price_for_guest:
 			price_list = _set_price_list(cart_settings, None)
 			price = get_price(
-				item_code,
-				price_list,
-				cart_settings.default_customer_group,
-				cart_settings.company
+				item_code, price_list, cart_settings.default_customer_group, cart_settings.company
 			)
 			return {"price": price}
 
 	return None
-

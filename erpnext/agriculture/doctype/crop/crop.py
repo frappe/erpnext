@@ -27,5 +27,5 @@ class Crop(Document):
 
 @frappe.whitelist()
 def get_item_details(item_code):
-	item = frappe.get_doc('Item', item_code)
+	item = frappe.get_doc("Item", item_code)
 	return {"uom": item.stock_uom, "rate": item.valuation_rate}

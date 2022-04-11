@@ -1,4 +1,3 @@
-
 from frappe import _
 
 
@@ -11,8 +10,8 @@ def get_data():
 			'Auto Repeat': 'reference_document',
 			'Purchase Receipt':'inter_company_reference'
 		},
-		'internal_links': {
-			'Sales Order': ['items', 'against_sales_order'],
+		"internal_links": {
+			"Sales Order": ["items", "against_sales_order"],
 		},
 		'transactions': [
 			{

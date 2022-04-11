@@ -119,10 +119,15 @@ erpnext.PointOfSale.Controller = class {
 			this.allow_negative_stock = flt(message.allow_negative_stock) || false;
 		});
 
-		frappe.db.get_doc("POS Profile", this.pos_profile).then((profile) => {
-			Object.assign(this.settings, profile);
-			this.settings.customer_groups = profile.customer_groups.map(group => group.customer_group);
-			this.make_app();
+		frappe.call({
+			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_pos_profile_data",
+			args: { "pos_profile": this.pos_profile },
+			callback: (res) => {
+				const profile = res.message;
+				Object.assign(this.settings, profile);
+				this.settings.customer_groups = profile.customer_groups.map(group => group.name);
+				this.make_app();
+			}
 		});
 	}
 
@@ -555,7 +560,7 @@ erpnext.PointOfSale.Controller = class {
 				if (this.item_details.$component.is(':visible'))
 					this.edit_item_details_of(item_row);
 
-				if (this.check_serial_batch_selection_needed(item_row))
+				if (this.check_serial_batch_selection_needed(item_row) && !this.item_details.$component.is(':visible'))
 					this.edit_item_details_of(item_row);
 			}
 
@@ -704,7 +709,7 @@ erpnext.PointOfSale.Controller = class {
 		frappe.dom.freeze();
 		const { doctype, name, current_item } = this.item_details;
 
-		frappe.model.set_value(doctype, name, 'qty', 0)
+		return frappe.model.set_value(doctype, name, 'qty', 0)
 			.then(() => {
 				frappe.model.clear_doc(doctype, name);
 				this.update_cart_html(current_item, true);
@@ -715,7 +720,17 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	async save_and_checkout() {
-		this.frm.is_dirty() && await this.frm.save();
-		this.payment.checkout();
+		if (this.frm.is_dirty()) {
+			let save_error = false;
+			await this.frm.save(null, null, null, () => save_error = true);
+			// only move to payment section if save is successful
+			!save_error && this.payment.checkout();
+			// show checkout button on error
+			save_error && setTimeout(() => {
+				this.cart.toggle_checkout_btn(true);
+			}, 300); // wait for save to finish
+		} else {
+			this.payment.checkout();
+		}
 	}
 };
