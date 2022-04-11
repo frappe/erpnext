@@ -330,7 +330,6 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		doc = frappe.get_doc(target)
 		doc.is_return = 1
 		doc.return_against = source.name
-		doc.ignore_pricing_rule = 1
 		doc.set_warehouse = ""
 		if doctype == "Sales Invoice" or doctype == "POS Invoice":
 			doc.is_pos = source.is_pos
