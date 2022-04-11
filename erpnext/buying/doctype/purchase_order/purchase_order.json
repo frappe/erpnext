@@ -935,18 +935,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "per_billed",
-   "fieldtype": "Percent",
-   "in_list_view": 1,
-   "label": "% Billed",
-   "no_copy": 1,
-   "oldfieldname": "per_billed",
-   "oldfieldtype": "Currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "collapsible": 1,
    "fieldname": "column_break5",
    "fieldtype": "Section Break",
@@ -1050,14 +1038,25 @@
    "fieldtype": "Link",
    "label": "Set Reserve Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "per_billed",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "% Billed",
+   "no_copy": 1,
+   "oldfieldname": "per_billed",
+   "oldfieldtype": "Currency",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "links": [],
- "modified": "2021-01-22 20:27:11.418690",
- "modified_by": "Administrator",
+ "modified": "2022-02-02 17:13:29.928177",
+ "modified_by": "support.adil@gourmetpakistan.com",
  "module": "Buying",
  "name": "Purchase Order",
  "owner": "Administrator",
