@@ -97,6 +97,12 @@ def before_cancel_fbr_pos_invoice(invoice):
 def on_submit_fbr_pos_invoice(invoice):
 	ignore_connection_error = cint(frappe.get_cached_value("FBR POS Settings", None, "ignore_connection_error_on_submit"))
 	post_fbr_pos_invoice(invoice, ignore_connection_error=ignore_connection_error)
+	if frappe.flags.fbr_pos_connection_error:
+		frappe.msgprint(_(
+			"FBR POS Invoice Number could not be generated because of a connection error to the FBR POS Service.<br><br>"
+			"System will attempt to generate FBR POS Invoice Number again in the background. "
+			"You can also retry manually by clicking the 'Sync FBR POS Invoice' button."
+		), title=_("FBR POS Service Connection Failed"))
 
 
 # called by scheduler
@@ -482,21 +488,25 @@ def push_invoice_data(data, sales_invoice, ignore_connection_error=False):
 
 	except requests.exceptions.ConnectionError as err:
 		log_fbr_pos_request("Error", sales_invoice, data, invoice_number, error_type="Connection Error")
+		frappe.flags.fbr_pos_connection_error = True
 		if not ignore_connection_error:
 			frappe.throw(_("Could not connect to <b>FBR POS Service</b>:<br>{0}").format(err), exc=FBRPOSConnectionError)
 
 	except requests.exceptions.Timeout as err:
 		log_fbr_pos_request("Error", sales_invoice, data, invoice_number, error_type="Connection Timeout")
+		frappe.flags.fbr_pos_connection_error = True
 		if not ignore_connection_error:
 			frappe.throw(_("Connection to <b>FBR POS Service</b> timed out:<br>{0}").format(err), exc=FBRPOSConnectionError)
 
 	except requests.exceptions.HTTPError as err:
 		log_fbr_pos_request("Error", sales_invoice, data, invoice_number, error_type="HTTP Error")
+		frappe.flags.fbr_pos_connection_error = True
 		if not ignore_connection_error:
 			frappe.throw(_("An HTTP error occurred while connecting to the <b>FBR POS Service</b>:<br>{0}").format(err), exc=FBRPOSConnectionError)
 
 	except requests.exceptions.RequestException as err:
 		log_fbr_pos_request("Error", sales_invoice, data, invoice_number, error_type="Request Error")
+		frappe.flags.fbr_pos_connection_error = True
 		if not ignore_connection_error:
 			frappe.throw(_("Request to <b>FBR POS Service</b> failed:<br>{0}").format(err), exc=FBRPOSConnectionError)
 
