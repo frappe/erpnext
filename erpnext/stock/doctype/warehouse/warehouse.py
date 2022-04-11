@@ -21,8 +21,9 @@ class Warehouse(NestedSet):
 			suffix = " - " + frappe.get_cached_value("Company", self.company, "abbr")
 			if not self.warehouse_name.endswith(suffix):
 				self.name = self.warehouse_name + suffix
-		else:
-			self.name = self.warehouse_name
+				return
+
+		self.name = self.warehouse_name
 
 	def onload(self):
 		"""load account name for General Ledger Report"""

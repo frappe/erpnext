@@ -269,6 +269,11 @@ class GLEntry(Document):
 		if not self.fiscal_year:
 			self.fiscal_year = get_fiscal_year(self.posting_date, company=self.company)[0]
 
+	def on_cancel(self):
+		msg = _("Individual GL Entry cannot be cancelled.")
+		msg += "<br>" + _("Please cancel related transaction.")
+		frappe.throw(msg)
+
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:
