@@ -61,6 +61,22 @@ class RepostItemValuation(Document):
 
 		repost(self)
 
+	def before_cancel(self):
+		self.check_pending_repost_against_cancelled_transaction()
+
+	def check_pending_repost_against_cancelled_transaction(self):
+		if self.status not in ("Queued", "In Progress"):
+			return
+
+		if not (self.voucher_no and self.voucher_no):
+			return
+
+		transaction_status = frappe.db.get_value(self.voucher_type, self.voucher_no, "docstatus")
+		if transaction_status == 2:
+			msg = _("Cannot cancel as processing of cancelled documents is  pending.")
+			msg += "<br>" + _("Please try again in an hour.")
+			frappe.throw(msg, title=_("Pending processing"))
+
 	@frappe.whitelist()
 	def restart_reposting(self):
 		self.set_status("Queued", write=False)
