@@ -1803,7 +1803,9 @@ class StockEntry(StockController):
 				or (desire_to_transfer > 0 and backflush_based_on == "Material Transferred for Manufacture")
 				or allow_overproduction
 			):
-				item_dict[item]["qty"] = desire_to_transfer
+				# "No need for transfer but qty still pending to transfer" case can occur
+				# when transferring multiple RM in different Stock Entries
+				item_dict[item]["qty"] = desire_to_transfer if (desire_to_transfer > 0) else pending_to_issue
 			elif pending_to_issue > 0:
 				item_dict[item]["qty"] = pending_to_issue
 			else:
