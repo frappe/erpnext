@@ -164,32 +164,41 @@ erpnext.PointOfSale.ItemDetails = class {
 	render_form(item) {
 		const fields_to_display = this.get_form_fields(item);
 		this.$form_container.html('');
+		let is_stock = null
+		frappe.db.get_value("Item", this.item_row.item_code, "is_stock_item").then(r => {
+			is_stock = r.message.is_stock_item
+			console.log(is_stock)
+			fields_to_display.forEach((fieldname, idx) => {
 
-		fields_to_display.forEach((fieldname, idx) => {
-			this.$form_container.append(
-				`<div class="${fieldname}-control" data-fieldname="${fieldname}"></div>`
-			)
+				if((fieldname == "warehouse" || fieldname == "actual_qty") &&  !is_stock) {
+					return
+				}
+				this.$form_container.append(
+					`<div class="${fieldname}-control" data-fieldname="${fieldname}"></div>`
+				)
 
-			const field_meta = this.item_meta.fields.find(df => df.fieldname === fieldname);
-			fieldname === 'discount_percentage' ? (field_meta.label = __('Discount (%)')) : '';
-			const me = this;
+				const field_meta = this.item_meta.fields.find(df => df.fieldname === fieldname);
+				fieldname === 'discount_percentage' ? (field_meta.label = __('Discount (%)')) : '';
+				const me = this;
 
-			this[`${fieldname}_control`] = frappe.ui.form.make_control({
-				df: {
-					...field_meta,
-					onchange: function() {
-						me.events.form_updated(me.current_item, fieldname, this.value);
-					}
-				},
-				parent: this.$form_container.find(`.${fieldname}-control`),
-				render_input: true,
-			})
-			this[`${fieldname}_control`].set_value(item[fieldname]);
-		});
+				this[`${fieldname}_control`] = frappe.ui.form.make_control({
+					df: {
+						...field_meta,
+						onchange: function() {
+							me.events.form_updated(me.current_item, fieldname, this.value);
+						}
+					},
+					parent: this.$form_container.find(`.${fieldname}-control`),
+					render_input: true,
+				})
+				this[`${fieldname}_control`].set_value(item[fieldname]);
+			});
 
-		this.make_auto_serial_selection_btn(item);
+			this.make_auto_serial_selection_btn(item);
 
-		this.bind_custom_control_change_event();
+			this.bind_custom_control_change_event();
+
+		})
 	}
 
 	get_form_fields(item) {
