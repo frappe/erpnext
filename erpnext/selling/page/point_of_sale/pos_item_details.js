@@ -167,7 +167,6 @@ erpnext.PointOfSale.ItemDetails = class {
 		let is_stock = null
 		frappe.db.get_value("Item", this.item_row.item_code, "is_stock_item").then(r => {
 			is_stock = r.message.is_stock_item
-			console.log(is_stock)
 			fields_to_display.forEach((fieldname, idx) => {
 
 				if((fieldname == "warehouse" || fieldname == "actual_qty") &&  !is_stock) {
