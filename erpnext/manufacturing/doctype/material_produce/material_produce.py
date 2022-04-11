@@ -38,6 +38,7 @@ class MaterialProduce(Document):
             #         pass
                     #frappe.throw(_("Can not allow total produced qty greater then {0}").format(l_doc.qty_produced))
             lst = []
+            i = frappe.get_doc("Batch Settings")
             for res in self.material_produce_details:
                 if res.qty_produced:
                     lst.append({
@@ -46,7 +47,7 @@ class MaterialProduce(Document):
                         "t_warehouse": res.t_warehouse,
                         "qty_produced": flt(res.qty_produced, res.precision('qty_produced')),
                         "has_batch_no": res.has_batch_no,
-                        "batch": res.batch_series,
+                        "batch": res.batch_no if i.is_finish_batch_series == "Manual" else res.batch_series,
                         "rate": flt(res.rate, res.precision('rate')),
                         "weight": res.weight,
                         "line_ref": res.line_ref
@@ -267,10 +268,7 @@ class MaterialProduce(Document):
                         se_item.stock_uom = res.uom
                         se_item.batch_no = batch_no
                         se_item.expense_account = item_expense_account or expense_account
-                        if self.cost_center:
-                            se_item.cost_center = self.cost_center
-                        else:
-                            se_item.cost_center = item_cost_center or cost_center
+                        se_item.cost_center = wo.rm_cost_center or item_cost_center or cost_center
                         se_item.is_finished_item = 1 if res.type == 'FG' else 0
                         se_item.is_scrap_item = 1 if res.type == 'Scrap' else 0
                         # in stock uom
@@ -295,6 +293,7 @@ class MaterialProduce(Document):
         precision2 = get_field_precision(frappe.get_meta("Material Produce").get_field("batch_size"))
         precision3 = get_field_precision(frappe.get_meta("Material Produce").get_field("amount"))
         precision4 = get_field_precision(frappe.get_meta("Material Produce Detail").get_field("rate"))
+
         if qty_produced:
             qty_produced = flt(qty_produced, precision1)
         else:
@@ -308,9 +307,10 @@ class MaterialProduce(Document):
             lst = []
             batch_option = None
             enabled = frappe.db.get_single_value('Batch Settings', 'enabled')
+            #i = frappe.get_doc("Material Produce Detail",{"item_code":item_code})
             # item_master_batch_series = frappe.db.get_value('Item', {"item_code": item_code}, ['batch_series'])
             # if item_master_batch_series:
-            if item.batch_number_series:
+            if item.batch_number_series and enabled == 0:
                 batch_option = item.batch_number_series
             elif enabled:
                 is_finish_batch_series = frappe.db.get_single_value('Batch Settings', 'is_finish_batch_series')
@@ -319,6 +319,9 @@ class MaterialProduce(Document):
                     batch_option = str(work_order) + "-.##"
                 if is_finish_batch_series == 'Create New':
                     batch_option = batch_series
+                # if is_finish_batch_series == 'Manual':
+                #     batch_option = i.batch_no  
+                
             else:
                 # if item.batch_number_series:
                 #     batch_option = item.batch_number_series

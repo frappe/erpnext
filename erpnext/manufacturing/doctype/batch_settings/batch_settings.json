@@ -27,6 +27,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.is_finish_batch_series == \"Create New\" && doc.enabled == 1\n",
    "fieldname": "batch_series",
    "fieldtype": "Data",
    "label": "Batch Series"
@@ -34,14 +35,14 @@
   {
    "fieldname": "is_finish_batch_series",
    "fieldtype": "Select",
-   "label": "Finish Good Batch Series",
-   "options": "\nUse Work Order as Series\nCreate New"
+   "label": "Finished Naming Series",
+   "options": "\nUse Work Order as Series\nCreate New\nManual"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-04-13 18:00:24.527348",
+ "modified": "2022-04-07 12:07:54.034835",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Batch Settings",

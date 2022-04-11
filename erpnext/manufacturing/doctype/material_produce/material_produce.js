@@ -12,6 +12,8 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Material Produce', {
+
+   
     setup: function(frm){
         apply_filter(frm)
         frm.set_query('target_warehouse_address', function() {
@@ -22,6 +24,10 @@ frappe.ui.form.on('Material Produce', {
 				}
 			}
 		});
+        
+        
+
+        
     },
     target_warehouse_address:function(frm){
         erpnext.utils.get_address_display(frm, 'target_warehouse_address', 'target_warehouse_display', false);
@@ -34,6 +40,7 @@ frappe.ui.form.on('Material Produce', {
 //            }).addClass('btn-primary');
 //        }
 //    },
+    
 	add_details: function(frm) {
 	    frappe.call({
             doc: frm.doc,
@@ -51,9 +58,38 @@ frappe.ui.form.on('Material Produce Item', {
         if (frm.doc.__islocal){
             frappe.throw(__("Please Save Material Produce first!"))
         }
+        
         var row = locals[cdt][cdn];
         add_details_line(frm,row)
     },
+    
+    
+});
+
+
+frappe.ui.form.on('Material Produce Detail', {
+    
+  
+    form_render: function(frm, cdt, cdn) {
+       var child = locals[cdt][cdn];
+       frappe.call({
+           "method":"frappe.client.get",
+           "args":{
+               "doctype":"Batch Settings"
+           },
+           "callback":function(r){
+               var v = r.message;
+               if (v.is_finish_batch_series == "Manual" && v.enabled == 1){
+               frappe.model.set_value(cdt,cdn,"manual",1)
+               console.log("")
+                
+
+               }
+           }
+       })
+    
+
+    }    
 });
 
 function apply_filter(frm){
