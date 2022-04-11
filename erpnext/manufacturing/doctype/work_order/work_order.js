@@ -542,7 +542,7 @@ erpnext.work_order = {
 			if (show_start_btn) {
 				let pending_to_transfer = frm.doc.required_items.some(
 					item => flt(item.transferred_qty) < flt(item.required_qty)
-				)
+				);
 				if (pending_to_transfer && frm.doc.status != 'Stopped') {
 					frm.has_start_btn = true;
 					frm.add_custom_button(__('Create Pick List'), function() {
