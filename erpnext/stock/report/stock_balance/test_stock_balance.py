@@ -38,11 +38,9 @@ class TestStockBalance(FrappeTestCase):
 	def generate_stock_ledger(self, item_code: str, movements):
 
 		for movement in map(_dict, movements):
-			make_stock_entry(
-				item_code=item_code,
-				**movement,
-				to_warehouse=movement.to_warehouse or "_Test Warehouse - _TC",
-			)
+			if "to_warehouse" not in movement:
+				movement.to_warehouse = "_Test Warehouse - _TC"
+			make_stock_entry(item_code=item_code, **movement)
 
 	def assertInvariants(self, rows):
 		last_balance = frappe.db.sql(
@@ -135,3 +133,20 @@ class TestStockBalance(FrappeTestCase):
 
 		rows = stock_balance(self.filters.update({"include_uom": "Box"}))
 		self.assertEqual(rows[0].bal_qty_alt, 1)
+
+	def test_item_group(self):
+		self.filters.pop("item_code", None)
+		rows = stock_balance(self.filters.update({"item_group": self.item.item_group}))
+		self.assertTrue(all(r.item_group == self.item.item_group for r in rows))
+
+	def test_child_warehouse_balances(self):
+		# This is default
+		self.generate_stock_ledger(self.item.name, [_dict(qty=5, rate=10, to_warehouse="Stores - _TC")])
+
+		self.filters.pop("item_code", None)
+		rows = stock_balance(self.filters.update({"warehouse": "All Warehouses - _TC"}))
+
+		self.assertTrue(
+			any(r.item_code == self.item.name and r.warehouse == "Stores - _TC" for r in rows),
+			msg=f"Expected child warehouse balances \n{rows}",
+		)
