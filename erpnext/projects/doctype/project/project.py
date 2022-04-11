@@ -117,7 +117,7 @@ class Project(StatusUpdater):
 		else:
 			self.title = self.name
 
-	def set_billing_status(self, update=False, update_modified=True):
+	def set_billing_status(self, update=False, update_modified=False):
 		previous_billing_status = self.billing_status
 
 		sales_orders = frappe.get_all("Sales Order", fields=['per_completed'], filters={
