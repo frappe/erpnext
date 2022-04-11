@@ -280,6 +280,8 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		if(this.frm.updating_party_details || this.frm.doc.inter_company_invoice_reference)
 			return;
 
+		if (this.frm.doc.__onload && this.frm.doc.__onload.load_after_mapping) return;
+
 		erpnext.utils.get_party_details(this.frm, "erpnext.accounts.party.get_party_details",
 			{
 				posting_date: this.frm.doc.posting_date,
@@ -725,9 +727,6 @@ frappe.ui.form.on("Purchase Invoice", {
 				callback: (response) => {
 					if (response) frm.set_value("credit_to", response.message);
 				},
-			});
-			frappe.db.get_value('Company', frm.doc.company, 'default_payable_account', (r) => {
-				frm.set_value('credit_to', r.default_payable_account);
 			});
 		}
 	},

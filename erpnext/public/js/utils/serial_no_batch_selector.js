@@ -607,8 +607,8 @@ function check_can_calculate_pending_qty(me) {
 		&& erpnext.stock.bom
 		&& erpnext.stock.bom.name === doc.bom_no;
 	const itemChecks = !!item
-		&& !item.allow_alternative_item
-		&& erpnext.stock.bom && erpnext.stock.items
+		&& !item.original_item
+		&& erpnext.stock.bom && erpnext.stock.bom.items
 		&& (item.item_code in erpnext.stock.bom.items);
 	return docChecks && itemChecks;
 }

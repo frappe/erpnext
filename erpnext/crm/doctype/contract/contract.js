@@ -2,6 +2,17 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Contract", {
+	onload: function(frm) {
+		frappe.db.get_value(
+			"Selling Settings",
+			"Selling Settings",
+			"contract_naming_by",
+			(r) => {
+				frm.toggle_display("naming_series", r.contract_naming_by === "Naming Series");
+			}
+		);
+	},
+
 	contract_template: function (frm) {
 		if (frm.doc.contract_template) {
 			frappe.call({

@@ -40,11 +40,7 @@ def get_stock_ledger_entries(filters):
 	return frappe.get_all(
 		"Stock Ledger Entry",
 		fields=SLE_FIELDS,
-		filters={
-			"item_code": filters.item_code,
-			"warehouse": filters.warehouse,
-			"is_cancelled": 0
-		},
+		filters={"item_code": filters.item_code, "warehouse": filters.warehouse, "is_cancelled": 0},
 		order_by="timestamp(posting_date, posting_time), creation",
 	)
 
@@ -62,7 +58,7 @@ def add_invariant_check_fields(sles):
 			fifo_value += qty * rate
 
 		if sle.actual_qty < 0:
-			sle.consumption_rate = sle.stock_value_difference  / sle.actual_qty
+			sle.consumption_rate = sle.stock_value_difference / sle.actual_qty
 
 		balance_qty += sle.actual_qty
 		balance_stock_value += sle.stock_value_difference
@@ -175,7 +171,6 @@ def get_columns():
 			"fieldtype": "Data",
 			"label": "FIFO Queue",
 		},
-
 		{
 			"fieldname": "fifo_queue_qty",
 			"fieldtype": "Float",
@@ -236,7 +231,6 @@ def get_columns():
 			"fieldtype": "Float",
 			"label": "(I) Valuation Rate as per FIFO",
 		},
-
 		{
 			"fieldname": "fifo_valuation_diff",
 			"fieldtype": "Float",
