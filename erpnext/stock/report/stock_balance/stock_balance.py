@@ -3,6 +3,7 @@
 
 
 from operator import itemgetter
+from typing import Optional, TypedDict
 
 import frappe
 from frappe import _
@@ -14,7 +15,20 @@ from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condit
 from erpnext.stock.utils import add_additional_uom_columns, is_reposting_item_valuation_in_progress
 
 
-def execute(filters=None):
+class StockBalanceFilter(TypedDict):
+	company: Optional[str]
+	from_date: str
+	to_date: str
+	item_group: Optional[str]
+	item: Optional[str]
+	warehouse: Optional[str]
+	warehouse_type: Optional[str]
+	include_uom: Optional[str]  # include extra info in converted UOM
+	show_stock_ageing_data: bool
+	show_variant_attributes: bool
+
+
+def execute(filters: Optional[StockBalanceFilter] = None):
 	is_reposting_item_valuation_in_progress()
 	if not filters:
 		filters = {}
@@ -92,7 +106,7 @@ def execute(filters=None):
 	return columns, data
 
 
-def get_columns(filters):
+def get_columns(filters: StockBalanceFilter):
 	"""return columns"""
 	columns = [
 		{
@@ -215,7 +229,7 @@ def get_columns(filters):
 	return columns
 
 
-def get_conditions(filters):
+def get_conditions(filters: StockBalanceFilter):
 	conditions = ""
 	if not filters.get("from_date"):
 		frappe.throw(_("'From Date' is required"))
@@ -249,7 +263,7 @@ def get_conditions(filters):
 	return conditions
 
 
-def get_stock_ledger_entries(filters, items):
+def get_stock_ledger_entries(filters: StockBalanceFilter, items):
 	item_conditions_sql = ""
 	if items:
 		item_conditions_sql = " and sle.item_code in ({})".format(
@@ -274,7 +288,7 @@ def get_stock_ledger_entries(filters, items):
 	)
 
 
-def get_item_warehouse_map(filters, sle):
+def get_item_warehouse_map(filters: StockBalanceFilter, sle):
 	iwb_map = {}
 	from_date = getdate(filters.get("from_date"))
 	to_date = getdate(filters.get("to_date"))
@@ -349,7 +363,7 @@ def filter_items_with_no_transactions(iwb_map, float_precision):
 	return iwb_map
 
 
-def get_items(filters):
+def get_items(filters: StockBalanceFilter):
 	"Get items based on item code, item group or brand."
 	conditions = []
 	if filters.get("item_code"):
@@ -368,7 +382,7 @@ def get_items(filters):
 	return items
 
 
-def get_item_details(items, sle, filters):
+def get_item_details(items, sle, filters: StockBalanceFilter):
 	item_details = {}
 	if not items:
 		items = list(set(d.item_code for d in sle))
