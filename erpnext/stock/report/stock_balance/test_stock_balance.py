@@ -125,3 +125,13 @@ class TestStockBalance(FrappeTestCase):
 		rows = stock_balance(self.filters.update({"from_date": "2022-01-01"}))
 		self.assertInvariants(rows)
 		self.assertPartialDictionary({"opening_qty": 6, "in_qty": 0}, rows[0])
+
+	def test_uom_converted_info(self):
+
+		self.item.append("uoms", {"conversion_factor": 5, "uom": "Box"})
+		self.item.save()
+
+		self.generate_stock_ledger(self.item.name, [_dict(qty=5, rate=10)])
+
+		rows = stock_balance(self.filters.update({"include_uom": "Box"}))
+		self.assertEqual(rows[0].bal_qty_alt, 1)
