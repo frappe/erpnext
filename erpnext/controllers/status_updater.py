@@ -36,7 +36,7 @@ class StatusUpdater(Document):
 			if status:
 				self.status = status
 				if update:
-					self.db_set("status", status)
+					self.db_set("status", status, update_modified=update_modified)
 
 			sl = self.status_map[:]
 			sl.reverse()

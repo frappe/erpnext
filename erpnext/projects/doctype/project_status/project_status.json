@@ -1,0 +1,122 @@
+{
+ "allow_rename": 1,
+ "autoname": "field:project_status",
+ "creation": "2022-04-08 00:51:50.091071",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "project_status",
+  "status",
+  "manual_status",
+  "disabled",
+  "column_break_4",
+  "sorting_index",
+  "indicator_color",
+  "section_break_8",
+  "condition",
+  "on_set_validation",
+  "transaction_validation"
+ ],
+ "fields": [
+  {
+   "fieldname": "project_status",
+   "fieldtype": "Data",
+   "label": "Project Status",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "bold": 1,
+   "default": "999",
+   "fieldname": "sorting_index",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Sorting Index",
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "indicator_color",
+   "fieldtype": "Data",
+   "label": "Indicator Color"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Open\nReleased\nCompleted\nClosed\nCancelled",
+   "reqd": 1
+  },
+  {
+   "fieldname": "condition",
+   "fieldtype": "Code",
+   "label": "Condition"
+  },
+  {
+   "default": "0",
+   "fieldname": "manual_status",
+   "fieldtype": "Check",
+   "label": "User Can Set Manually"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "manual_status",
+   "fieldname": "on_set_validation",
+   "fieldtype": "Code",
+   "label": "On Set Validation"
+  },
+  {
+   "fieldname": "transaction_validation",
+   "fieldtype": "Code",
+   "label": "Transaction Validation"
+  }
+ ],
+ "modified": "2022-04-11 14:07:02.999410",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Project Status",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Projects Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "sorting_index",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

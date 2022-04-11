@@ -141,6 +141,7 @@ class SalesOrder(SellingController):
 	def update_status(self, status):
 		self.check_modified_date()
 		self.set_status(update=True, status=status)
+		self.update_project_billing_status()
 		self.update_reserved_qty()
 		self.notify_update()
 		clear_doctype_notifications(self)
@@ -164,6 +165,8 @@ class SalesOrder(SellingController):
 				doc.set_ordered_status(update=True)
 				doc.update_opportunity()
 				doc.notify_update()
+
+		self.update_project_billing_status()
 
 	def set_delivery_status(self, update=False, update_modified=True):
 		data = self.get_delivery_status_data()

@@ -96,7 +96,7 @@ material_request_service_person_fields = deepcopy(service_person_fields)
 [d for d in material_request_service_person_fields if d['fieldname'] == 'service_manager'][0]['insert_after'] = 'more_info_cb_2'
 
 project_service_person_fields = deepcopy(service_person_fields)
-[d for d in project_service_person_fields if d['fieldname'] == 'service_advisor'][0]['insert_after'] = 'project_details_cb_1'
+[d for d in project_service_person_fields if d['fieldname'] == 'service_advisor'][0]['insert_after'] = 'project_type'
 [d for d in project_service_person_fields if d['fieldname'] == 'service_manager'][0]['insert_after'] = 'service_advisor'
 
 # Project fields

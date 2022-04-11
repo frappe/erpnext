@@ -8,7 +8,6 @@ frappe.provide('erpnext.projects');
 erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	setup: function() {
 		this.setup_make_methods();
-		this.setup_indicator();
 	},
 
 	onload: function () {
@@ -16,12 +15,13 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	},
 
 	refresh: function () {
+		erpnext.hide_company();
 		this.set_dynamic_link();
 		this.setup_route_options();
 		this.setup_naming_series();
-		erpnext.hide_company();
 		this.setup_web_link();
 		this.setup_buttons();
+		this.set_status_read_only();
 		this.set_percent_complete_read_only();
 		this.set_cant_change_read_only();
 		this.set_applies_to_read_only();
@@ -107,20 +107,6 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	setup_indicator: function () {
-		this.frm.set_indicator_formatter('title', function (doc) {
-			let indicator = 'orange';
-			if (doc.status == 'Overdue') {
-				indicator = 'red';
-			} else if (doc.status == 'Cancelled') {
-				indicator = 'dark grey';
-			} else if (doc.status == 'Closed') {
-				indicator = 'green';
-			}
-			return indicator;
-		});
-	},
-
 	setup_naming_series: function () {
 		if (frappe.defaults.get_default("project_naming_by")!="Naming Series") {
 			this.frm.toggle_display("naming_series", false);
@@ -170,14 +156,30 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		}
 
 		if (!me.frm.is_new()) {
-			me.frm.add_custom_button(__('Completed'), () => {
-				me.set_status('Completed');
-			}, __('Set Status'));
+			// Set Status
+			if (!me.frm.doc.is_released && !['Cancelled', 'Closed'].includes(me.frm.doc.status)) {
+				me.frm.add_custom_button(__('Released'), () => {
+					me.set_project_released();
+				}, __('Set Status'));
+			}
 
-			me.frm.add_custom_button(__('Cancelled'), () => {
-				me.set_status('Cancelled');
-			}, __('Set Status'));
+			if (me.frm.doc.status != 'Open' || (me.frm.doc.__onload && me.frm.doc.__onload.is_manual_project_status)) {
+				me.frm.add_custom_button(__('Re-Open'), () => {
+					me.reopen_project(false);
+				}, __('Set Status'));
+			}
 
+			if (me.frm.doc.__onload && me.frm.doc.__onload.valid_manual_project_status_names) {
+				$.each(me.frm.doc.__onload.valid_manual_project_status_names || [], function (i, project_status) {
+					if (me.frm.doc.project_status != project_status) {
+						me.frm.add_custom_button(__(project_status), () => {
+							me.set_project_status(project_status);
+						}, __('Set Status'));
+					}
+				});
+			}
+
+			// Task Buttons
 			if (frappe.model.can_read("Task")) {
 				me.frm.add_custom_button(__("Gantt Chart"), function () {
 					frappe.route_options = {
@@ -197,6 +199,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 
 			me.frm.add_custom_button(__('Duplicate Project with Tasks'), () => me.create_duplicate(), __("Tasks"));
 
+			// Vehicle Buttons
 			if (me.frm.doc.applies_to_vehicle) {
 				if (frappe.model.can_create("Vehicle Service Receipt") && me.frm.doc.vehicle_status == "Not Received") {
 					me.frm.add_custom_button(__("Receive Vehicle"), () => me.receive_vehicle_btn(), __("Vehicle"));
@@ -217,6 +220,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 				}
 			}
 
+			// Create Buttons
 			if (frappe.model.can_create("Sales Invoice")) {
 				me.frm.add_custom_button(__("Sales Invoice"), () => me.make_sales_invoice(), __("Create"));
 			}
@@ -226,9 +230,9 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 			}
 
 			if (frappe.model.can_create("Sales Order")) {
-				me.frm.add_custom_button(__("Sales Order (All)"), () => me.make_sales_order(), __("Create"));
 				me.frm.add_custom_button(__("Sales Order (Services)"), () => me.make_sales_order("service"), __("Create"));
 				me.frm.add_custom_button(__("Sales Order (Meterials)"), () => me.make_sales_order("stock"), __("Create"));
+				me.frm.add_custom_button(__("Sales Order (All)"), () => me.make_sales_order(), __("Create"));
 			}
 		}
 	},
@@ -288,11 +292,33 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		});
 	},
 
-	set_status: function(status) {
+	set_project_status: function(project_status) {
 		var me = this;
-		frappe.confirm(__('Set Project and all Tasks to status {0}?', [status.bold()]), () => {
+
+		me.frm.check_if_unsaved();
+		frappe.confirm(__('Set status as <b>{0}</b>?', [project_status]), () => {
 			frappe.xcall('erpnext.projects.doctype.project.project.set_project_status',
-				{project: me.frm.doc.name, status: status}).then(() => { /* page will auto reload */ });
+				{project: me.frm.doc.name, project_status: project_status}).then(() => me.frm.reload_doc());
+		});
+	},
+
+	set_project_released: function () {
+		var me = this;
+
+		me.frm.check_if_unsaved();
+		frappe.confirm(__('Are you sure you want to mark this Project as <b>Released</b>?'), () => {
+			frappe.xcall('erpnext.projects.doctype.project.project.set_project_released',
+				{project: me.frm.doc.name, is_released: 1}).then(() => me.frm.reload_doc());
+		});
+	},
+
+	reopen_project: function () {
+		var me = this;
+
+		me.frm.check_if_unsaved();
+		frappe.confirm(__('Are you sure you want to <b>Re-Open</b> this Project?'), () => {
+			frappe.xcall('erpnext.projects.doctype.project.project.reopen_project',
+				{project: me.frm.doc.name}).then(() => me.frm.reload_doc());
 		});
 	},
 
@@ -493,6 +519,11 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	set_percent_complete_read_only: function () {
 		var read_only = cint(this.frm.doc.percent_complete_method != "Manual");
 		this.frm.set_df_property("percent_complete", "read_only", read_only);
+	},
+
+	set_status_read_only: function () {
+		var read_only = this.frm.doc.project_status ? 1 : 0;
+		this.frm.set_df_property("status", "read_only", read_only);
 	},
 
 	open_form: function (doctype) {

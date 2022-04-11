@@ -326,6 +326,8 @@ class SalesInvoice(SellingController):
 			if self.update_stock:
 				doc.validate_returned_qty(from_doctype=self.doctype)
 
+		self.update_project_billing_status()
+
 	def set_delivery_status(self, update=False, update_modified=True):
 		delivered_qty_map = self.get_delivered_qty_map()
 

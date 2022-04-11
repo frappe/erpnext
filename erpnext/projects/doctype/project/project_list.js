@@ -1,21 +1,32 @@
 frappe.listview_settings['Project'] = {
-	add_fields: ["status", "priority", "is_active", "percent_complete", "expected_end_date", "project_name"],
+	add_fields: ["project_status", "status", "indicator_color", "priority", "is_active", "percent_complete", "project_name"],
 	get_indicator: function(doc) {
 		var percentage = "";
-		if (doc.percent_complete) {
+		if (doc.percent_complete && doc.status != "Completed") {
 			percentage = " " + __("({0}%)", [cint(doc.percent_complete)]);
 		}
 
-		if(doc.status == "Open") {
-			return [__(doc.status) + percentage, "orange", "status,=," + doc.status];
-		} else if (doc.status == "To Bill") {
-			return [__(doc.status) + percentage, "purple", "status,=," + doc.status];
-		} else if (doc.status == "Completed") {
-			return [__(doc.status), "green", "status,=," + doc.status];
-		} else if (doc.status == "Cancelled") {
-			return [__(doc.status), "darkgrey", "status,=," + doc.status];
-		} else {
-			return [__(doc.status), frappe.utils.guess_colour(doc.status), "status,=," + doc.status];
+		var color_map = {
+			"Open": "orange",
+			"Completed": "green",
+			"Closed": "green",
+			"Cancelled": "darkgrey",
 		}
-	}
+
+		var guessed_color = color_map[doc.status] || frappe.utils.guess_colour(doc.status);
+
+		if (doc.project_status) {
+			return [
+				__(doc.project_status) + percentage,
+				doc.indicator_color || guessed_color,
+				"project_status,=," + doc.project_status
+			];
+		} else {
+			return [
+				__(doc.status) + percentage,
+				guessed_color,
+				"status,=," + doc.status
+			];
+		}
+	},
 };

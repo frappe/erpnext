@@ -16,7 +16,9 @@ from frappe.model.naming import set_name_by_naming_series
 from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
-from frappe.model.document import Document
+from erpnext.controllers.status_updater import StatusUpdater
+from erpnext.projects.doctype.project_status.project_status import get_auto_project_status, set_manual_project_status,\
+	get_valid_manual_project_status_names, is_manual_project_status, validate_project_status_for_transaction
 from six import string_types
 from erpnext.vehicles.vehicle_checklist import get_default_vehicle_checklist_items, set_missing_checklist
 import json
@@ -36,7 +38,7 @@ vehicle_change_fields = [
 ]
 
 
-class Project(Document):
+class Project(StatusUpdater):
 	def __init__(self, *args, **kwargs):
 		super(Project, self).__init__(*args, **kwargs)
 		self.sales_data = frappe._dict()
@@ -59,6 +61,8 @@ class Project(Document):
 
 		self.set_onload('default_vehicle_checklist_items', get_default_vehicle_checklist_items())
 		self.set_onload('cant_change_fields', self.get_cant_change_fields())
+		self.set_onload('valid_manual_project_status_names', get_valid_manual_project_status_names(self))
+		self.set_onload('is_manual_project_status', is_manual_project_status(self.project_status))
 
 		self.reset_quick_change_fields()
 
@@ -77,18 +81,26 @@ class Project(Document):
 
 	def validate(self):
 		self.quick_change_master_details()
+
 		self.set_missing_values()
+
 		self.validate_project_type()
-		self.set_vehicle_status()
 		self.validate_applies_to()
 		self.validate_readings()
 		self.validate_depreciation()
+
 		self.set_costing()
+
 		self.set_percent_complete()
+		self.set_vehicle_status()
+		self.set_billing_status()
+		self.set_status()
+
+		self.set_title()
+
 		self.validate_cant_change()
 
 		self.send_welcome_email()
-		self.set_title()
 
 	def on_update(self):
 		if 'Vehicles' in frappe.get_active_domains():
@@ -105,19 +117,84 @@ class Project(Document):
 		else:
 			self.title = self.name
 
-	def set_project_in_sales_order_and_quotation(self):
-		if self.sales_order:
-			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name, notify=1)
+	def set_billing_status(self, update=False, update_modified=True):
+		previous_billing_status = self.billing_status
 
-			quotations = frappe.db.sql_list("""
-				select distinct qtn.name
-				from `tabQuotation` qtn
-				inner join `tabSales Order Item` item on item.quotation = qtn.name
-				where item.parent = %s and qtn.docstatus < 2 and ifnull(qtn.project, '') = ''
-			""", self.sales_order)
+		sales_orders = frappe.get_all("Sales Order", fields=['per_completed'], filters={
+			"project": self.name, "docstatus": 1, "status": ['!=', 'Closed']
+		})
+		delivery_notes = frappe.get_all("Delivery Note", fields=['per_completed'], filters={
+			"project": self.name, "docstatus": 1, "status": ['!=', 'Closed']
+		})
 
-			for quotation in quotations:
-				frappe.db.set_value("Quotation", quotation, "project", self.name, notify=1)
+		has_billables = False
+		has_unbilled = False
+		for d in sales_orders + delivery_notes:
+			has_billables = True
+			if d.per_completed < 99.99:
+				has_unbilled = True
+
+		sales_invoices = self.get_sales_invoices()
+		has_sales_invoice = False
+		if sales_invoices:
+			has_sales_invoice = True
+
+		if has_billables:
+			if has_sales_invoice:
+				if has_unbilled:
+					self.billing_status = "Partially Billed"
+				else:
+					self.billing_status = "Fully Billed"
+			else:
+				self.billing_status = "Not Billed"
+		else:
+			if has_sales_invoice:
+				self.billing_status = "Fully Billed"
+			else:
+				self.billing_status = "Not Billable"
+
+		if update and self.billing_status != previous_billing_status:
+			self.db_set('billing_status', self.billing_status, update_modified=update_modified)
+
+	def validate_project_status_for_transaction(self, doc):
+		validate_project_status_for_transaction(self, doc)
+
+	def set_status(self, update=False, status=None, update_modified=True, reset=False):
+		previous_status = self.status
+		previous_project_status = self.project_status
+		previous_indicator_color = self.indicator_color
+
+		# set/reset manual status
+		if reset:
+			self.project_status = None
+		elif status:
+			set_manual_project_status(self, status)
+
+		# get evaulated status
+		project_status = get_auto_project_status(self)
+
+		# no applicable status
+		if not project_status:
+			return
+
+		# set status
+		self.project_status = project_status.name
+		self.status = project_status.status
+		self.indicator_color = project_status.indicator_color
+
+		# status comment only if project status changed
+		if self.project_status != previous_project_status and not self.is_new():
+			self.add_comment("Label", _(self.project_status))
+
+		# update database only if changed
+		if update:
+			if self.project_status != previous_project_status or self.status != previous_status\
+					or cstr(self.indicator_color) != cstr(previous_indicator_color):
+				self.db_set({
+					'project_status': self.project_status,
+					'status': self.status,
+					'indicator_color': self.indicator_color,
+				}, None, update_modified=update_modified)
 
 	def validate_cant_change(self):
 		if self.is_new():
@@ -149,29 +226,6 @@ class Project(Document):
 			if project_type.previous_project_mandatory and not self.get('previous_project'):
 				frappe.throw(_("{0} is mandatory for Project Type {1}")
 					.format(self.meta.get_label('previous_project'), self.project_type))
-
-	def quick_change_master_details(self):
-		if not self._action:
-			return
-
-		if self.get('applies_to_vehicle'):
-			vehicle_change_map = frappe._dict()
-			for project_field, vehicle_field in vehicle_change_fields:
-				if self.meta.has_field(project_field) and self.get(project_field):
-					vehicle_change_map[vehicle_field] = self.get(project_field)
-
-			if vehicle_change_map:
-				if vehicle_change_map.get('license_plate'):
-					vehicle_change_map['is_unregistered'] = 0
-
-				frappe.set_value("Vehicle", self.applies_to_vehicle, vehicle_change_map)
-
-		self.reset_quick_change_fields()
-
-	def reset_quick_change_fields(self):
-		for project_field, vehicle_field in vehicle_change_fields:
-			if self.meta.has_field(project_field):
-				self.set(project_field, None)
 
 	def set_missing_values(self):
 		self.set_customer_details()
@@ -218,6 +272,43 @@ class Project(Document):
 
 		if self.get('applies_to_item') and not self.get('vehicle_workshop'):
 			frappe.throw(_("Vehicle Workshop is mandatory when Applies to Item is set"))
+
+	def set_project_in_sales_order_and_quotation(self):
+		if self.sales_order:
+			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name, notify=1)
+
+			quotations = frappe.db.sql_list("""
+				select distinct qtn.name
+				from `tabQuotation` qtn
+				inner join `tabSales Order Item` item on item.quotation = qtn.name
+				where item.parent = %s and qtn.docstatus < 2 and ifnull(qtn.project, '') = ''
+			""", self.sales_order)
+
+			for quotation in quotations:
+				frappe.db.set_value("Quotation", quotation, "project", self.name, notify=1)
+
+	def quick_change_master_details(self):
+		if not self._action:
+			return
+
+		if self.get('applies_to_vehicle'):
+			vehicle_change_map = frappe._dict()
+			for project_field, vehicle_field in vehicle_change_fields:
+				if self.meta.has_field(project_field) and self.get(project_field):
+					vehicle_change_map[vehicle_field] = self.get(project_field)
+
+			if vehicle_change_map:
+				if vehicle_change_map.get('license_plate'):
+					vehicle_change_map['is_unregistered'] = 0
+
+				frappe.set_value("Vehicle", self.applies_to_vehicle, vehicle_change_map)
+
+		self.reset_quick_change_fields()
+
+	def reset_quick_change_fields(self):
+		for project_field, vehicle_field in vehicle_change_fields:
+			if self.meta.has_field(project_field):
+				self.set(project_field, None)
 
 	def update_odometer(self):
 		from erpnext.vehicles.doctype.vehicle_log.vehicle_log import make_odometer_log
@@ -323,36 +414,26 @@ class Project(Document):
 		if not total:
 			self.percent_complete = 0
 		else:
-			if (self.percent_complete_method == "Task Completion" and total > 0) or (
-				not self.percent_complete_method and total > 0):
-				completed = frappe.db.sql("""select count(name) from tabTask where
-					project=%s and status in ('Cancelled', 'Completed')""", self.name)[0][0]
+			if (self.percent_complete_method == "Task Completion" and total > 0) or (not self.percent_complete_method and total > 0):
+				completed = frappe.db.sql("""
+					select count(name)
+					from tabTask where
+					project=%s and status in ('Cancelled', 'Completed')
+				""", self.name)[0][0]
 				self.percent_complete = flt(flt(completed) / total * 100, 2)
 
-			if (self.percent_complete_method == "Task Progress" and total > 0):
-				progress = frappe.db.sql("""select sum(progress) from tabTask where
-					project=%s""", self.name)[0][0]
+			if self.percent_complete_method == "Task Progress" and total > 0:
+				progress = frappe.db.sql("""select sum(progress) from tabTask where project=%s""", self.name)[0][0]
 				self.percent_complete = flt(flt(progress) / total, 2)
 
-			if (self.percent_complete_method == "Task Weight" and total > 0):
-				weight_sum = frappe.db.sql("""select sum(task_weight) from tabTask where
-					project=%s""", self.name)[0][0]
-				weighted_progress = frappe.db.sql("""select progress, task_weight from tabTask where
-					project=%s""", self.name, as_dict=1)
+			if self.percent_complete_method == "Task Weight" and total > 0:
+				weight_sum = frappe.db.sql("""select sum(task_weight) from tabTask where project=%s""", self.name)[0][0]
+				weighted_progress = frappe.db.sql("""select progress, task_weight from tabTask where project=%s""",
+					self.name, as_dict=1)
 				pct_complete = 0
 				for row in weighted_progress:
 					pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
 				self.percent_complete = flt(flt(pct_complete), 2)
-
-		# don't update status if it is cancelled
-		if self.status == 'Cancelled':
-			return
-
-		if self.percent_complete == 100:
-			self.status = "Completed"
-
-		else:
-			self.status = "Open"
 
 	def set_sales_data_html_onload(self):
 		currency = erpnext.get_company_currency(self.company)
@@ -992,20 +1073,39 @@ def create_kanban_board_if_not_exists(project):
 
 
 @frappe.whitelist()
-def set_project_status(project, status):
-	'''
-	set status for project and all related tasks
-	'''
-	if not status in ('Completed', 'Cancelled'):
-		frappe.throw(_('Status must be Cancelled or Completed'))
-
+def set_project_released(project, is_released):
 	project = frappe.get_doc('Project', project)
-	frappe.has_permission(doc = project, throw = True)
+	project.check_permission('write')
 
-	for task in frappe.get_all('Task', dict(project = project.name)):
-		frappe.db.set_value('Task', task.name, 'status', status)
+	is_released = cint(is_released)
+	project.is_released = is_released
 
-	project.status = status
+	if is_released:
+		project.status = "Released"
+	elif project.status == "Released":
+		project.status = "Open"
+
+	project.save()
+
+
+@frappe.whitelist()
+def reopen_project(project):
+	project = frappe.get_doc('Project', project)
+	project.check_permission('write')
+
+	project.is_released = 0
+	project.status = "Open"
+
+	project.set_status(reset=True)
+	project.save()
+
+
+@frappe.whitelist()
+def set_project_status(project, project_status):
+	project = frappe.get_doc('Project', project)
+	project.check_permission('write')
+
+	project.set_status(status=project_status)
 	project.save()
 
 
