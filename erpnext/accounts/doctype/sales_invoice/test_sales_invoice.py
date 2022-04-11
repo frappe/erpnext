@@ -2240,6 +2240,14 @@ class TestSalesInvoice(unittest.TestCase):
 
 		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
 
+	def test_deferred_revenue_missing_account(self):
+		si = create_sales_invoice(posting_date="2019-01-10", do_not_submit=True)
+		si.items[0].enable_deferred_revenue = 1
+		si.items[0].service_start_date = "2019-01-10"
+		si.items[0].service_end_date = "2019-03-15"
+
+		self.assertRaises(frappe.ValidationError, si.save)
+
 	def test_fixed_deferred_revenue(self):
 		deferred_account = create_account(
 			account_name="Deferred Revenue",
@@ -3104,7 +3112,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		acc_settings = frappe.get_single("Accounts Settings")
 		acc_settings.book_deferred_entries_via_journal_entry = 0
-		acc_settings.submit_journal_entriessubmit_journal_entries = 0
+		acc_settings.submit_journal_entries = 0
 		acc_settings.save()
 
 		frappe.db.set_value("Accounts Settings", None, "acc_frozen_upto", None)
