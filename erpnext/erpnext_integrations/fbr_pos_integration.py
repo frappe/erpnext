@@ -57,6 +57,20 @@ def determine_is_fbr_pos(invoice):
 		return 0
 
 
+def check_fbr_pos_enabled(throw=False):
+	if not cint(frappe.conf.get('enable_fbr_pos')):
+		if throw:
+			frappe.throw(_("FBR POS is not enabled from the backend. Please contact your system administrator."))
+		return False
+
+	if not cint(frappe.db.get_single_value("FBR POS Settings", "enable_fbr_pos")):
+		if throw:
+			frappe.throw(_("FBR POS is not enabled from FBR POS Settings. Please contact your system administrator."))
+		return False
+
+	return True
+
+
 def validate_is_fbr_pos(invoice):
 	if cint(invoice.get('set_posting_time')):
 		frappe.throw(_("Cannot set Posting Date/Time manually for FBR POS Invoice. Please uncheck 'Edit Posting Date and Time'"))
@@ -95,6 +109,9 @@ def before_cancel_fbr_pos_invoice(invoice):
 
 
 def on_submit_fbr_pos_invoice(invoice):
+	if not check_fbr_pos_enabled():
+		return
+
 	ignore_connection_error = cint(frappe.get_cached_value("FBR POS Settings", None, "ignore_connection_error_on_submit"))
 	post_fbr_pos_invoice(invoice, ignore_connection_error=ignore_connection_error)
 	if frappe.flags.fbr_pos_connection_error:
@@ -107,8 +124,7 @@ def on_submit_fbr_pos_invoice(invoice):
 
 # called by scheduler
 def post_fbr_pos_invoices_without_number():
-	enable_fbr_pos = frappe.db.get_single_value("FBR POS Settings", "enable_fbr_pos")
-	if not cint(enable_fbr_pos):
+	if not check_fbr_pos_enabled():
 		return
 
 	failed_invoices = frappe.db.sql_list("""
@@ -403,6 +419,8 @@ def get_item_tax_details(item, invoice, account):
 
 @frappe.whitelist()
 def sync_fbr_pos_invoice(sales_invoice):
+	check_fbr_pos_enabled(throw=True)
+
 	invoice = frappe.get_doc("Sales Invoice", sales_invoice)
 	invoice.check_permission("submit")
 
@@ -417,6 +435,8 @@ def sync_fbr_pos_invoice(sales_invoice):
 
 
 def post_fbr_pos_invoice(invoice, ignore_connection_error=False):
+	if not check_fbr_pos_enabled():
+		return
 	if not invoice.meta.has_field('is_fbr_pos_invoice'):
 		return
 	if not cint(invoice.get('is_fbr_pos_invoice')):

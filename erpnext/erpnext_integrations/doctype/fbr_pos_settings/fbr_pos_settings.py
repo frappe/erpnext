@@ -4,6 +4,8 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
+from frappe.utils import cint
 from frappe.model.document import Document
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
@@ -86,9 +88,14 @@ for d in item_group_custom_fields:
 class FBRPOSSettings(Document):
 	def validate(self):
 		if self.enable_fbr_pos:
+			self.validate_fbr_pos_enabled_from_site_config()
 			setup_fbr_pos_fields()
 		else:
 			disable_fbr_pos()
+
+	def validate_fbr_pos_enabled_from_site_config(self):
+		if not cint(frappe.conf.get('enable_fbr_pos')):
+			frappe.throw(_("FBR POS is not enabled from the backend. Please contact your system administrator."))
 
 
 def setup_fbr_pos_fields():
