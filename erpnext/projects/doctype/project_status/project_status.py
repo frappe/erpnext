@@ -66,6 +66,9 @@ def get_valid_manual_project_status_docs(project):
 
 	all_docs = get_manual_project_status_docs()
 	for project_status_doc in all_docs:
+		if not project_status_doc.user_can_set:
+			continue
+
 		condition_met = evaluate_project_status_condition(project_status_doc, project)
 		if condition_met:
 			valid_docs.append(project_status_doc)
@@ -87,10 +90,9 @@ def is_manual_project_status(project_status):
 
 def get_auto_project_status(project):
 	auto_project_status_docs = get_auto_project_status_docs()
-	manual_project_status_names = get_manaul_project_status_names()
 
 	# is current status a valid manually set status do not change
-	if project.project_status and project.project_status in manual_project_status_names:
+	if is_manual_project_status(project.project_status):
 		project_status_doc = frappe.get_cached_doc("Project Status", project.project_status)
 		condition_met = evaluate_project_status_condition(project_status_doc, project)
 		if condition_met:
@@ -107,16 +109,20 @@ def set_manual_project_status(project, project_status):
 	project_status_names = get_project_status_names()
 
 	if project_status not in project_status_names:
-		frappe.throw(_("{0} is not a valid Project Status").format(project_status))
+		frappe.throw(_("{0} is not a valid Project Status").format(frappe.bold(project_status)))
 
 	project_status_doc = frappe.get_cached_doc("Project Status", project_status)
+
+	if not project_status_doc.user_can_set:
+		frappe.throw(_("Not allowed to set Project Status as {0}").format(frappe.bold(project_status)))
 
 	# run validation script first (for specific error messages)
 	execute_project_status_validation(project_status_doc, project, 'on_set_validation')
 
 	# then evaluate condition
 	if not evaluate_project_status_condition(project_status_doc, project):
-		frappe.throw(_("Project Status cannot be set to {0}").format(project_status))
+		frappe.throw(_("Project Status cannot be set to {0} because status condition was not met")
+			.format(frappe.bold(project_status)))
 
 	project.project_status = project_status
 
@@ -143,7 +149,7 @@ def execute_project_status_validation(project_status_doc, project, validation_fi
 	if not project_status_doc.get(validation_field):
 		return
 
-	context = frappe._dict(context)
+	context = frappe._dict(context or {})
 	context.update({"doc": project})
 
 	safe_exec(project_status_doc.get(validation_field), None, context)

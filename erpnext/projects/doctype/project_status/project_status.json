@@ -9,6 +9,7 @@
   "project_status",
   "status",
   "manual_status",
+  "user_can_set",
   "disabled",
   "column_break_4",
   "sorting_index",
@@ -62,7 +63,7 @@
    "default": "0",
    "fieldname": "manual_status",
    "fieldtype": "Check",
-   "label": "User Can Set Manually"
+   "label": "Manual Status"
   },
   {
    "fieldname": "column_break_4",
@@ -82,9 +83,16 @@
    "fieldname": "transaction_validation",
    "fieldtype": "Code",
    "label": "Transaction Validation"
+  },
+  {
+   "default": "0",
+   "depends_on": "manual_status",
+   "fieldname": "user_can_set",
+   "fieldtype": "Check",
+   "label": "User Can Set Manually"
   }
  ],
- "modified": "2022-04-11 14:07:02.999410",
+ "modified": "2022-04-11 17:41:31.049121",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Status",
