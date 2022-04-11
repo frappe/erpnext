@@ -67,6 +67,9 @@ class IncomeTaxComputationReport(object):
 				d.update(ss_assignments[d.employee])
 				self.employees.setdefault(d.employee, d)
 
+		if not self.employees:
+			frappe.throw(_("No employees found with selected filters and active salary structure"))
+
 	def get_employee_filters(self):
 		filters = {"company": self.filters.company}
 		or_filters = {
