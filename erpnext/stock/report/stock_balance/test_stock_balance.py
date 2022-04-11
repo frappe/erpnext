@@ -19,12 +19,14 @@ class TestStockBalance(FrappeTestCase):
 
 	def setUp(self):
 		self.item = make_item()
-		self.filters = {
-			"company": "_Test Company",
-			"item_code": self.item.name,
-			"from_date": str(today()),
-			"to_date": str(today()),
-		}
+		self.filters = _dict(
+			{
+				"company": "_Test Company",
+				"item_code": self.item.name,
+				"from_date": str(today()),
+				"to_date": str(today()),
+			}
+		)
 
 	def tearDown(self):
 		frappe.db.rollback()
@@ -51,6 +53,9 @@ class TestStockBalance(FrappeTestCase):
 			# value invariant
 			self.assertAlmostEqual(row.bal_val, row.opening_val + row.in_val - row.out_val, msg)
 
+			# valuation rate
+			self.assertAlmostEqual(row.val_rate, row.bal_val / row.bal_qty, 3, msg)
+
 	# ----------- tests
 
 	def test_basic_stock_balance(self):
@@ -75,3 +80,23 @@ class TestStockBalance(FrappeTestCase):
 			rows[0],
 		)
 		self.assertBasicInvariants(rows)
+
+	def test_opening_balance(self):
+		self.generate_stock_ledger(
+			self.item.name,
+			[
+				_dict(qty=1, rate=1, posting_date="2021-01-01"),
+				_dict(qty=2, rate=2, posting_date="2021-01-02"),
+				_dict(qty=3, rate=3, posting_date="2021-01-03"),
+			],
+		)
+		rows = stock_balance(self.filters)
+		self.assertBasicInvariants(rows)
+
+		rows = stock_balance(self.filters.update({"from_date": "2021-01-02"}))
+		self.assertBasicInvariants(rows)
+		self.assertPartialDictionary({"opening_qty": 1, "in_qty": 5}, rows[0])
+
+		rows = stock_balance(self.filters.update({"from_date": "2022-01-01"}))
+		self.assertBasicInvariants(rows)
+		self.assertPartialDictionary({"opening_qty": 6, "in_qty": 0}, rows[0])
