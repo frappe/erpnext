@@ -3,7 +3,7 @@
 
 import copy
 import json
-from typing import List
+from typing import Dict, List, Optional
 
 import frappe
 from frappe import _
@@ -887,25 +887,38 @@ class Item(Document):
 		if self.is_new():
 			return
 
-		fields = ("has_serial_no", "is_stock_item", "valuation_method", "has_batch_no")
+		restricted_fields = ("has_serial_no", "is_stock_item", "valuation_method", "has_batch_no")
 
-		values = frappe.db.get_value("Item", self.name, fields, as_dict=True)
+		values = frappe.db.get_value("Item", self.name, restricted_fields, as_dict=True)
+		if not values:
+			return
+
 		if not values.get("valuation_method") and self.get("valuation_method"):
 			values["valuation_method"] = (
 				frappe.db.get_single_value("Stock Settings", "valuation_method") or "FIFO"
 			)
 
-		if values:
-			for field in fields:
-				if cstr(self.get(field)) != cstr(values.get(field)):
-					if self.check_if_linked_document_exists(field):
-						frappe.throw(
-							_(
-								"As there are existing transactions against item {0}, you can not change the value of {1}"
-							).format(self.name, frappe.bold(self.meta.get_label(field)))
-						)
+		changed_fields = [
+			field for field in restricted_fields if cstr(self.get(field)) != cstr(values.get(field))
+		]
+		if not changed_fields:
+			return
 
-	def check_if_linked_document_exists(self, field):
+		if linked_doc := self._get_linked_submitted_documents(changed_fields):
+			changed_field_labels = [frappe.bold(self.meta.get_label(f)) for f in changed_fields]
+			msg = _(
+				"As there are existing submitted transactions against item {0}, you can not change the value of {1}."
+			).format(self.name, ", ".join(changed_field_labels))
+
+			if linked_doc and isinstance(linked_doc, dict):
+				msg += "<br>"
+				msg += _("Example of a linked document: {0}").format(
+					frappe.get_desk_link(linked_doc.doctype, linked_doc.docname)
+				)
+
+			frappe.throw(msg, title=_("Linked with submitted documents"))
+
+	def _get_linked_submitted_documents(self, changed_fields: List[str]) -> Optional[Dict[str, str]]:
 		linked_doctypes = [
 			"Delivery Note Item",
 			"Sales Invoice Item",
@@ -918,7 +931,7 @@ class Item(Document):
 
 		# For "Is Stock Item", following doctypes is important
 		# because reserved_qty, ordered_qty and requested_qty updated from these doctypes
-		if field == "is_stock_item":
+		if "is_stock_item" in changed_fields:
 			linked_doctypes += [
 				"Sales Order Item",
 				"Purchase Order Item",
@@ -937,11 +950,21 @@ class Item(Document):
 				"Sales Invoice Item",
 			):
 				# If Invoice has Stock impact, only then consider it.
-				if self.stock_ledger_created():
-					return True
+				if linked_doc := frappe.db.get_value(
+					"Stock Ledger Entry",
+					{"item_code": self.name, "is_cancelled": 0},
+					["voucher_no as docname", "voucher_type as doctype"],
+					as_dict=True,
+				):
+					return linked_doc
 
-			elif frappe.db.get_value(doctype, filters):
-				return True
+			elif linked_doc := frappe.db.get_value(
+				doctype,
+				filters,
+				["parent as docname", "parenttype as doctype"],
+				as_dict=True,
+			):
+				return linked_doc
 
 	def validate_auto_reorder_enabled_in_stock_settings(self):
 		if self.reorder_levels:

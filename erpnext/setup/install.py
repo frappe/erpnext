@@ -56,12 +56,11 @@ def set_single_defaults():
 		)
 		if default_values:
 			try:
-				b = frappe.get_doc(dt, dt)
+				doc = frappe.get_doc(dt, dt)
 				for fieldname, value in default_values:
-					b.set(fieldname, value)
-				b.save()
-			except frappe.MandatoryError:
-				pass
+					doc.set(fieldname, value)
+				doc.flags.ignore_mandatory = True
+				doc.save()
 			except frappe.ValidationError:
 				pass
 
