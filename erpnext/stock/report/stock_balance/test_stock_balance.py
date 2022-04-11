@@ -23,7 +23,7 @@ class TestStockBalance(FrappeTestCase):
 			{
 				"company": "_Test Company",
 				"item_code": self.item.name,
-				"from_date": str(today()),
+				"from_date": "2020-01-01",
 				"to_date": str(today()),
 			}
 		)
@@ -44,7 +44,27 @@ class TestStockBalance(FrappeTestCase):
 				to_warehouse=movement.to_warehouse or "_Test Warehouse - _TC",
 			)
 
-	def assertBasicInvariants(self, rows):
+	def assertInvariants(self, rows):
+		last_balance = frappe.db.sql(
+			"""
+			WITH last_balances AS (
+				SELECT item_code, warehouse,
+					stock_value, qty_after_transaction,
+					ROW_NUMBER() OVER (PARTITION BY item_code, warehouse
+						ORDER BY timestamp(posting_date, posting_time) desc, creation desc)
+						AS rn
+					FROM `tabStock Ledger Entry`
+					where is_cancelled=0
+				)
+				SELECT * FROM last_balances WHERE rn = 1""",
+			as_dict=True,
+		)
+
+		item_wh_stock = _dict()
+
+		for line in last_balance:
+			item_wh_stock.setdefault((line.item_code, line.warehouse), line)
+
 		for row in rows:
 			msg = f"Invariants not met for {rows=}"
 			# qty invariant
@@ -55,6 +75,11 @@ class TestStockBalance(FrappeTestCase):
 
 			# valuation rate
 			self.assertAlmostEqual(row.val_rate, row.bal_val / row.bal_qty, 3, msg)
+
+			# check against SLE
+			last_sle = item_wh_stock[(row.item_code, row.warehouse)]
+			self.assertAlmostEqual(row.bal_qty, last_sle.qty_after_transaction, 3)
+			self.assertAlmostEqual(row.bal_val, last_sle.stock_value, 3)
 
 	# ----------- tests
 
@@ -79,7 +104,7 @@ class TestStockBalance(FrappeTestCase):
 			},
 			rows[0],
 		)
-		self.assertBasicInvariants(rows)
+		self.assertInvariants(rows)
 
 	def test_opening_balance(self):
 		self.generate_stock_ledger(
@@ -91,12 +116,12 @@ class TestStockBalance(FrappeTestCase):
 			],
 		)
 		rows = stock_balance(self.filters)
-		self.assertBasicInvariants(rows)
+		self.assertInvariants(rows)
 
 		rows = stock_balance(self.filters.update({"from_date": "2021-01-02"}))
-		self.assertBasicInvariants(rows)
+		self.assertInvariants(rows)
 		self.assertPartialDictionary({"opening_qty": 1, "in_qty": 5}, rows[0])
 
 		rows = stock_balance(self.filters.update({"from_date": "2022-01-01"}))
-		self.assertBasicInvariants(rows)
+		self.assertInvariants(rows)
 		self.assertPartialDictionary({"opening_qty": 6, "in_qty": 0}, rows[0])
