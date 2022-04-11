@@ -1,10 +1,9 @@
 import unittest
 
 import frappe
-from frappe.utils import add_days, getdate
+from frappe.utils import getdate
 
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.hr.report.employee_exits.test_employee_exits import create_company
 from erpnext.payroll.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration import (
 	create_payroll_period,
 )
