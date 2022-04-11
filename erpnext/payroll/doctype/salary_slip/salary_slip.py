@@ -955,7 +955,9 @@ class SalarySlip(TransactionBase):
 		eval_locals = self.get_data_for_eval()
 		total_structured_tax_amount = calculate_tax_by_tax_slab(
 			total_taxable_earnings_without_full_tax_addl_components,
-			tax_slab, self.whitelisted_globals, eval_locals
+			tax_slab,
+			self.whitelisted_globals,
+			eval_locals,
 		)
 		current_structured_tax_amount = (
 			total_structured_tax_amount - previous_total_paid_taxes
@@ -964,8 +966,9 @@ class SalarySlip(TransactionBase):
 		# Total taxable earnings with additional earnings with full tax
 		full_tax_on_additional_earnings = 0.0
 		if current_additional_earnings_with_full_tax:
-			total_tax_amount = calculate_tax_by_tax_slab(total_taxable_earnings,
-				tax_slab, self.whitelisted_globals, eval_locals)
+			total_tax_amount = calculate_tax_by_tax_slab(
+				total_taxable_earnings, tax_slab, self.whitelisted_globals, eval_locals
+			)
 			full_tax_on_additional_earnings = total_tax_amount - total_structured_tax_amount
 
 		current_tax_amount = current_structured_tax_amount + full_tax_on_additional_earnings
@@ -1665,7 +1668,10 @@ def get_payroll_payable_account(company, payroll_entry):
 
 	return payroll_payable_account
 
-def calculate_tax_by_tax_slab(annual_taxable_earning, tax_slab, eval_globals=None, eval_locals=None):
+
+def calculate_tax_by_tax_slab(
+	annual_taxable_earning, tax_slab, eval_globals=None, eval_locals=None
+):
 	eval_locals.update({"annual_taxable_earning": annual_taxable_earning})
 	tax_amount = 0
 	for slab in tax_slab.slabs:
@@ -1692,6 +1698,7 @@ def calculate_tax_by_tax_slab(annual_taxable_earning, tax_slab, eval_globals=Non
 
 	return tax_amount
 
+
 def eval_tax_slab_condition(condition, eval_globals=None, eval_locals=None):
 	if not eval_globals:
 		eval_globals = {
@@ -1700,7 +1707,7 @@ def eval_tax_slab_condition(condition, eval_globals=None, eval_locals=None):
 			"long": int,
 			"round": round,
 			"date": datetime.date,
-			"getdate": getdate
+			"getdate": getdate,
 		}
 
 	try:
