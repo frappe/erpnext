@@ -169,7 +169,6 @@ erpnext.PointOfSale.Payment = class {
 					request_button.removeClass('btn-primary').addClass('btn-default');
 				}
 			}
-		}
     });
 
 		frappe.ui.form.on('POS Invoice', 'coupon_code', (frm) => {
