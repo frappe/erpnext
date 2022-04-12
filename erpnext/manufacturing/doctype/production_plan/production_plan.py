@@ -462,6 +462,7 @@ class ProductionPlan(Document):
 			work_order_data = {
 				"wip_warehouse": default_warehouses.get("wip_warehouse"),
 				"fg_warehouse": default_warehouses.get("fg_warehouse"),
+				"company": self.get("company"),
 			}
 
 			self.prepare_data_for_sub_assembly_items(row, work_order_data)
