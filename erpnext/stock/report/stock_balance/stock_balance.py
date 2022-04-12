@@ -387,7 +387,7 @@ def get_items(filters: StockBalanceFilter):
 		if brand := filters.get("brand"):
 			item_filters["brand"] = brand
 
-		return frappe.get_all("Item", filters=item_filters, pluck="name", order_by=None, debug=1)
+		return frappe.get_all("Item", filters=item_filters, pluck="name", order_by=None)
 
 
 def get_item_details(items, sle, filters: StockBalanceFilter):

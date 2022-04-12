@@ -71,13 +71,15 @@ class TestStockBalance(FrappeTestCase):
 			# value invariant
 			self.assertAlmostEqual(row.bal_val, row.opening_val + row.in_val - row.out_val, msg)
 
-			# valuation rate
-			self.assertAlmostEqual(row.val_rate, row.bal_val / row.bal_qty, 3, msg)
-
 			# check against SLE
 			last_sle = item_wh_stock[(row.item_code, row.warehouse)]
 			self.assertAlmostEqual(row.bal_qty, last_sle.qty_after_transaction, 3)
 			self.assertAlmostEqual(row.bal_val, last_sle.stock_value, 3)
+
+			# valuation rate
+			if not row.bal_qty:
+				continue
+			self.assertAlmostEqual(row.val_rate, row.bal_val / row.bal_qty, 3, msg)
 
 	# ----------- tests
 
@@ -133,6 +135,7 @@ class TestStockBalance(FrappeTestCase):
 
 		rows = stock_balance(self.filters.update({"include_uom": "Box"}))
 		self.assertEqual(rows[0].bal_qty_alt, 1)
+		self.assertInvariants(rows)
 
 	def test_item_group(self):
 		self.filters.pop("item_code", None)
@@ -167,3 +170,4 @@ class TestStockBalance(FrappeTestCase):
 			self.filters.update({"show_variant_attributes": 1, "item_code": variant.name})
 		)
 		self.assertPartialDictEq(attributes, rows[0])
+		self.assertInvariants(rows)
