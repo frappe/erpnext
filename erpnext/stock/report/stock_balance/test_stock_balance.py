@@ -31,7 +31,7 @@ class TestStockBalance(FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 
-	def assertPartialDictionary(self, expected: Dict[str, Any], actual: Dict[str, Any]):
+	def assertPartialDictEq(self, expected: Dict[str, Any], actual: Dict[str, Any]):
 		for k, v in expected.items():
 			self.assertEqual(v, actual[k], msg=f"{expected=}\n{actual=}")
 
@@ -90,7 +90,7 @@ class TestStockBalance(FrappeTestCase):
 
 		# check item info
 		rows = stock_balance(self.filters)
-		self.assertPartialDictionary(
+		self.assertPartialDictEq(
 			{
 				"item_code": self.item.name,
 				"item_name": self.item.item_name,
@@ -118,11 +118,11 @@ class TestStockBalance(FrappeTestCase):
 
 		rows = stock_balance(self.filters.update({"from_date": "2021-01-02"}))
 		self.assertInvariants(rows)
-		self.assertPartialDictionary({"opening_qty": 1, "in_qty": 5}, rows[0])
+		self.assertPartialDictEq({"opening_qty": 1, "in_qty": 5}, rows[0])
 
 		rows = stock_balance(self.filters.update({"from_date": "2022-01-01"}))
 		self.assertInvariants(rows)
-		self.assertPartialDictionary({"opening_qty": 6, "in_qty": 0}, rows[0])
+		self.assertPartialDictEq({"opening_qty": 6, "in_qty": 0}, rows[0])
 
 	def test_uom_converted_info(self):
 
@@ -150,3 +150,20 @@ class TestStockBalance(FrappeTestCase):
 			any(r.item_code == self.item.name and r.warehouse == "Stores - _TC" for r in rows),
 			msg=f"Expected child warehouse balances \n{rows}",
 		)
+
+	def test_show_item_attr(self):
+		from erpnext.controllers.item_variant import create_variant
+
+		self.item.has_variants = True
+		self.item.append("attributes", {"attribute": "Test Size"})
+		self.item.save()
+
+		attributes = {"Test Size": "Large"}
+		variant = create_variant(self.item.name, attributes)
+		variant.save()
+
+		self.generate_stock_ledger(variant.name, [_dict(qty=5, rate=10)])
+		rows = stock_balance(
+			self.filters.update({"show_variant_attributes": 1, "item_code": variant.name})
+		)
+		self.assertPartialDictEq(attributes, rows[0])
