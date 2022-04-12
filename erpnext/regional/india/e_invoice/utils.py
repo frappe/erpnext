@@ -315,10 +315,14 @@ def update_item_taxes(invoice, item):
 					item.cess_rate += item_tax_rate
 					item.cess_amount += abs(item_tax_amount_after_discount)
 
-			for tax_type in ["igst", "cgst", "sgst"]:
+			for tax_type in ["igst", "cgst", "sgst", "utgst"]:
 				if t.account_head in gst_accounts[f"{tax_type}_account"]:
 					item.tax_rate += item_tax_rate
-					item[f"{tax_type}_amount"] += abs(item_tax_amount)
+					if tax_type == "utgst":
+						# utgst taxes are reported same as sgst tax
+						item["sgst_amount"] += abs(item_tax_amount)
+					else:
+						item[f"{tax_type}_amount"] += abs(item_tax_amount)
 		else:
 			# TODO: other charges per item
 			pass
@@ -360,11 +364,15 @@ def update_invoice_taxes(invoice, invoice_value_details):
 				# using after discount amt since item also uses after discount amt for cess calc
 				invoice_value_details.total_cess_amt += abs(t.base_tax_amount_after_discount_amount)
 
-			for tax_type in ["igst", "cgst", "sgst"]:
+			for tax_type in ["igst", "cgst", "sgst", "utgst"]:
 				if t.account_head in gst_accounts[f"{tax_type}_account"]:
+					if tax_type == "utgst":
+						invoice_value_details["total_sgst_amt"] += abs(tax_amount)
+					else:
+						invoice_value_details[f"total_{tax_type}_amt"] += abs(tax_amount)
 
-					invoice_value_details[f"total_{tax_type}_amt"] += abs(tax_amount)
 				update_other_charges(t, invoice_value_details, gst_accounts_list, invoice, considered_rows)
+
 		else:
 			invoice_value_details.total_other_charges += abs(tax_amount)
 
