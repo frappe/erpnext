@@ -47,7 +47,7 @@
   "item_search_settings_section",
   "redisearch_warning",
   "search_index_fields",
-  "show_categories_in_search_autocomplete",
+  "is_redisearch_enabled",
   "is_redisearch_loaded",
   "shop_by_category_section",
   "slideshow",
@@ -293,6 +293,7 @@
    "fieldname": "search_index_fields",
    "fieldtype": "Small Text",
    "label": "Search Index Fields",
+   "mandatory_depends_on": "is_redisearch_enabled",
    "read_only_depends_on": "eval:!doc.is_redisearch_loaded"
   },
   {
@@ -300,13 +301,6 @@
    "fieldname": "item_search_settings_section",
    "fieldtype": "Section Break",
    "label": "Item Search Settings"
-  },
-  {
-   "default": "1",
-   "fieldname": "show_categories_in_search_autocomplete",
-   "fieldtype": "Check",
-   "label": "Show Categories in Search Autocomplete",
-   "read_only_depends_on": "eval:!doc.is_redisearch_loaded"
   },
   {
    "default": "0",
@@ -365,12 +359,19 @@
    "fieldname": "show_price_in_quotation",
    "fieldtype": "Check",
    "label": "Show Price in Quotation"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_redisearch_enabled",
+   "fieldtype": "Check",
+   "label": "Enable Redisearch",
+   "read_only_depends_on": "eval:!doc.is_redisearch_loaded"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-02 14:02:44.785824",
+ "modified": "2022-04-01 18:35:56.106756",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",
@@ -389,5 +390,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

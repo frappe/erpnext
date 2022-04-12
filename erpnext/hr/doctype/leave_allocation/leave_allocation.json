@@ -237,7 +237,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-18 19:15:53.262536",
+ "modified": "2022-04-07 09:50:33.145825",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Allocation",
@@ -281,5 +281,6 @@
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "employee",
- "title_field": "employee_name"
+ "title_field": "employee_name",
+ "track_changes": 1
 }

@@ -15,7 +15,7 @@ class TestQualityReview(unittest.TestCase):
 		review()
 
 		# check if review exists
-		quality_review = frappe.get_doc('Quality Review', dict(goal = quality_goal.name))
+		quality_review = frappe.get_doc("Quality Review", dict(goal=quality_goal.name))
 		self.assertEqual(quality_goal.objectives[0].target, quality_review.reviews[0].target)
 		quality_review.delete()
 
