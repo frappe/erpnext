@@ -8,7 +8,7 @@
  "hide_custom": 0,
  "icon": "integration",
  "idx": 0,
- "label": "ERPNext Integrations",
+ "label": "Neo Integrations",
  "links": [
   {
    "hidden": 0,
@@ -90,16 +90,16 @@
    "type": "Link"
   }
  ],
- "modified": "2022-04-12 14:31:50.236252",
+ "modified": "2022-04-12 15:55:12.924739",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
- "name": "ERPNext Integrations",
+ "name": "Neo Integrations",
  "owner": "Administrator",
  "parent_page": "Setup",
- "public": 1,
+ "public": 0,
  "restrict_to_domain": "",
  "roles": [],
  "sequence_id": 39.0,
  "shortcuts": [],
- "title": "ERPNext Integrations"
+ "title": "Neo Integrations"
 }
