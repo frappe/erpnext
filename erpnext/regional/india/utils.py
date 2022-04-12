@@ -341,7 +341,7 @@ def get_tax_template(master_doctype, company, is_inter_state, state_code):
 	tax_categories = frappe.get_all(
 		"Tax Category",
 		fields=["name", "is_inter_state", "gst_state"],
-		filters={"is_inter_state": is_inter_state, "is_reverse_charge": 0},
+		filters={"is_inter_state": is_inter_state, "is_reverse_charge": 0, "disabled": 0},
 	)
 
 	default_tax = ""
@@ -825,7 +825,7 @@ def get_gst_accounts(
 	gst_settings_accounts = frappe.get_all(
 		"GST Account",
 		filters=filters,
-		fields=["cgst_account", "sgst_account", "igst_account", "cess_account"],
+		fields=["cgst_account", "sgst_account", "igst_account", "cess_account", "utgst_account"],
 	)
 
 	if not gst_settings_accounts and not frappe.flags.in_test and not frappe.flags.in_migrate:

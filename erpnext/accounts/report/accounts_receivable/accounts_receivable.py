@@ -111,6 +111,7 @@ class ReceivablePayableReport(object):
 					voucher_type=gle.voucher_type,
 					voucher_no=gle.voucher_no,
 					party=gle.party,
+					party_account=gle.account,
 					posting_date=gle.posting_date,
 					account_currency=gle.account_currency,
 					remarks=gle.remarks if self.filters.get("show_remarks") else None,
@@ -777,18 +778,21 @@ class ReceivablePayableReport(object):
 			conditions.append("party=%s")
 			values.append(self.filters.get(party_type_field))
 
-		# get GL with "receivable" or "payable" account_type
-		account_type = "Receivable" if self.party_type == "Customer" else "Payable"
-		accounts = [
-			d.name
-			for d in frappe.get_all(
-				"Account", filters={"account_type": account_type, "company": self.filters.company}
-			)
-		]
-
-		if accounts:
-			conditions.append("account in (%s)" % ",".join(["%s"] * len(accounts)))
-			values += accounts
+		if self.filters.party_account:
+			conditions.append("account =%s")
+			values.append(self.filters.party_account)
+		else:
+			# get GL with "receivable" or "payable" account_type
+			account_type = "Receivable" if self.party_type == "Customer" else "Payable"
+			accounts = [
+				d.name
+				for d in frappe.get_all(
+					"Account", filters={"account_type": account_type, "company": self.filters.company}
+				)
+			]
+			if accounts:
+				conditions.append("account in (%s)" % ",".join(["%s"] * len(accounts)))
+				values += accounts
 
 	def add_customer_filters(self, conditions, values):
 		if self.filters.get("customer_group"):
@@ -886,6 +890,14 @@ class ReceivablePayableReport(object):
 			fieldname="party",
 			fieldtype="Link",
 			options=self.party_type,
+			width=180,
+		)
+
+		self.add_column(
+			label="Receivable Account" if self.party_type == "Customer" else "Payable Account",
+			fieldname="party_account",
+			fieldtype="Link",
+			options="Account",
 			width=180,
 		)
 
