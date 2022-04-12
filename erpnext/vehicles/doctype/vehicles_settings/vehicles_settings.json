@@ -47,7 +47,9 @@
   "default_vehicle_invoice_documents_section",
   "invoice_documents",
   "vehicle_checklist_section",
-  "vehicle_checklist_items"
+  "vehicle_checklist",
+  "column_break_44",
+  "customer_request_checklist"
  ],
  "fields": [
   {
@@ -257,15 +259,9 @@
    "label": "Service"
   },
   {
-   "fieldname": "vehicle_checklist_items",
-   "fieldtype": "Table",
-   "label": "Vehicle Checklist Items",
-   "options": "Vehicle Checklist Item"
-  },
-  {
    "fieldname": "vehicle_checklist_section",
    "fieldtype": "Section Break",
-   "label": "Vehicle Checklist"
+   "label": "Service Checklist"
   },
   {
    "fieldname": "vehicle_service_section",
@@ -281,11 +277,27 @@
   {
    "fieldname": "column_break_28",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_44",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_checklist",
+   "fieldtype": "Table",
+   "label": "Vehicle Checklist Items",
+   "options": "Vehicle Checklist Item"
+  },
+  {
+   "fieldname": "customer_request_checklist",
+   "fieldtype": "Table",
+   "label": "Customer Request Checklist",
+   "options": "Vehicle Checklist Item"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2022-04-03 22:25:29.250122",
+ "modified": "2022-04-12 00:52:44.827659",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",

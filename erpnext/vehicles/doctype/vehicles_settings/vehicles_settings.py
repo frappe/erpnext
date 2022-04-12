@@ -10,4 +10,5 @@ from frappe.model.document import Document
 
 class VehiclesSettings(Document):
 	def validate(self):
-		validate_duplicate_checklist_items(self.vehicle_checklist_items)
+		validate_duplicate_checklist_items(self.vehicle_checklist)
+		validate_duplicate_checklist_items(self.customer_request_checklist)

@@ -1,16 +1,19 @@
 frappe.provide("erpnext.vehicles");
 
-erpnext.vehicles.make_vehicle_checklist = function (frm, wrapper, read_only) {
+erpnext.vehicles.make_vehicle_checklist = function (frm, parentfield, wrapper, default_items, read_only, title) {
 	$(wrapper).empty();
-	$(`<label class="control-label">Checklist</label>`).appendTo(wrapper);
+	if (title) {
+		$(`<label class="control-label">${title}</label>`).appendTo(wrapper);
+	}
 	var checklist_area = $('<div></div>').appendTo(wrapper);
-	return new erpnext.vehicles.VehicleChecklistEditor(frm, checklist_area, read_only);
+	return new erpnext.vehicles.VehicleChecklistEditor(frm, parentfield, checklist_area, default_items, read_only);
 };
 
 erpnext.vehicles.VehicleChecklistEditor = Class.extend({
-	init: function(frm, wrapper, read_only) {
+	init: function(frm, parentfield, wrapper, default_items, read_only) {
 		var me = this;
 		me.wrapper = $(wrapper);
+		me.parentfield = parentfield;
 		me.checklist_wrapper = $(`<div class="row vehicle-checklist"></div>`).appendTo(me.wrapper);
 		me.left_container = $(`<div class="col-sm-6"></div>`).appendTo(me.checklist_wrapper);
 		me.right_container = $(`<div class="col-sm-6"></div>`).appendTo(me.checklist_wrapper);
@@ -20,7 +23,7 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 		me.frm = frm;
 		me.read_only = cint(read_only);
 
-		me.default_checklist_items = me.frm.doc.__onload && me.frm.doc.__onload.default_vehicle_checklist_items || [];
+		me.default_checklist_items = default_items || [];
 
 		var checklist_items = me.get_checklist_items();
 		if (checklist_items && checklist_items.length) {
@@ -43,23 +46,30 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 		var me = this;
 		frappe.call({
 			method: "erpnext.vehicles.vehicle_checklist.get_default_vehicle_checklist_items",
+			args: {
+				parentfield: me.parentfield,
+			},
 			callback: function (r) {
 				if (r.message && !r.exc) {
 					me.default_checklist_items = r.message;
-
-					if (me.can_write()) {
-						me.frm.clear_table('vehicle_checklist');
-						$.each(r.message || [], function (i, item) {
-							me.frm.add_child('vehicle_checklist', {
-								"checklist_item": item,
-								"checklist_item_checked": 0
-							});
-						});
-					}
+					me.set_from_default_checklist_items();
 					me.render_checklist();
 				}
 			}
 		});
+	},
+
+	set_from_default_checklist_items: function () {
+		var me = this;
+		if (me.can_write()) {
+			me.frm.clear_table(me.parentfield);
+			$.each(me.default_checklist_items || [], function (i, item) {
+				me.frm.add_child(me.parentfield, {
+					"checklist_item": item,
+					"checklist_item_checked": 0
+				});
+			});
+		}
 	},
 
 	render_checklist: function() {
@@ -138,7 +148,7 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 		var me = this;
 		me.wrapper.find(".vehicle-checklist-check").prop("checked", false);
 		me.wrapper.find(".remove-checklist-item").hide();
-		$.each(me.frm.doc.vehicle_checklist || [], function(i, d) {
+		$.each(me.frm.doc[me.parentfield] || [], function(i, d) {
 			if (d.checklist_item) {
 				var el = me.wrapper.find(`.vehicle-checklist-check[data-checklist-item='${d.checklist_item.replace("'", "\\'")}']`);
 				var remove_el = me.wrapper.find(`.remove-checklist-item[data-checklist-item='${d.checklist_item.replace("'", "\\'")}']`);
@@ -184,7 +194,7 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 		var checked = cint($(el).prop("checked"));
 
 		var found = false;
-		$.each(me.frm.doc.vehicle_checklist || [], function(i, d) {
+		$.each(me.frm.doc[me.parentfield] || [], function(i, d) {
 			if (d.checklist_item == checklist_item) {
 				d.checklist_item_checked = checked;
 				found = true;
@@ -192,7 +202,7 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 		});
 
 		if (!found && checked) {
-			me.frm.add_child('vehicle_checklist', {"checklist_item": checklist_item, "checklist_item_checked": checked});
+			me.frm.add_child(me.parentfield, {"checklist_item": checklist_item, "checklist_item_checked": checked});
 		}
 
 		me.frm.dirty();
@@ -202,7 +212,7 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 		var me = this;
 
 		var found = false;
-		$.each(me.frm.doc.vehicle_checklist || [], function(i, d) {
+		$.each(me.frm.doc[me.parentfield] || [], function(i, d) {
 			d.checklist_item_checked = 1;
 			found = true;
 		});
@@ -214,11 +224,11 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 	on_add_checklist_item: function () {
 		var me = this;
 		frappe.prompt('Checklist Item', ({ value }) => {
-			var exists = (me.frm.doc.vehicle_checklist || []).filter(d => d.checklist_item == value);
+			var exists = (me.frm.doc[me.parentfield] || []).filter(d => d.checklist_item == value);
 			if (exists.length) {
 				frappe.throw(__("<b>{0}</b> Checklist Item already exists", [value]));
 			} else {
-				me.frm.add_child('vehicle_checklist', {
+				me.frm.add_child(me.parentfield, {
 					"checklist_item": value,
 					"checklist_item_checked": 1,
 					"is_custom_checklist_item": 1
@@ -235,9 +245,9 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 
 		var checklist_item = $(el).attr('data-checklist-item');
 		if (checklist_item) {
-			me.frm.doc.vehicle_checklist = (me.frm.doc.vehicle_checklist || []).filter(d => d.checklist_item != checklist_item);
+			me.frm.doc[me.parentfield] = (me.frm.doc[me.parentfield] || []).filter(d => d.checklist_item != checklist_item);
 
-			$.each(me.frm.doc.vehicle_checklist || [], function (i, d) {
+			$.each(me.frm.doc[me.parentfield] || [], function (i, d) {
 				d.idx = i + 1;
 			});
 
@@ -251,9 +261,10 @@ erpnext.vehicles.VehicleChecklistEditor = Class.extend({
 	},
 
 	get_checklist_items: function () {
-		if (this.frm.doc.vehicle_checklist && this.frm.doc.vehicle_checklist.length) {
-			return this.frm.doc.vehicle_checklist.map(d => d.checklist_item);
+		if (this.frm.doc[this.parentfield] && this.frm.doc[this.parentfield].length) {
+			return this.frm.doc[this.parentfield].map(d => d.checklist_item);
 		} else if (this.default_checklist_items && this.default_checklist_items.length) {
+			this.set_from_default_checklist_items();
 			return this.default_checklist_items;
 		} else {
 			return null;

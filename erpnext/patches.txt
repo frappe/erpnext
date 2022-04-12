@@ -734,5 +734,8 @@ execute:frappe.delete_doc_if_exists("Custom Field", "Project-vehicle_warehouse")
 erpnext.patches.v12_0.refactor_repair_order
 execute:frappe.delete_doc_if_exists("DocType", "Vehicle Booking Default")
 execute:frappe.delete_doc_if_exists("DocType", "Vehicle Booking Additional Item")
-erpnext.patches.v12_0.resetup_vehicle_domain #5-04-2022 #11-04-2022
+erpnext.patches.v12_0.resetup_vehicle_domain #5-04-2022 #11-04-2022 #12-04-2022 #1
 erpnext.patches.v12_0.set_project_billing_status
+execute:frappe.delete_doc_if_exists("Custom Field", "Project-receive_vehicle_btn")
+execute:frappe.delete_doc_if_exists("Custom Field", "Project-deliver_vehicle_btn")
+erpnext.patches.v12_0.change_vehicle_checklist_parentfield

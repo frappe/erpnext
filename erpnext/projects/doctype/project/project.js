@@ -27,6 +27,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		this.set_applies_to_read_only();
 		this.toggle_vehicle_odometer_fields();
 		this.make_vehicle_checklist();
+		this.make_customer_request_checklist();
 		this.set_sales_data_html();
 	},
 
@@ -148,13 +149,6 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	setup_buttons: function() {
 		var me = this;
 
-		if (me.frm.fields_dict.receive_vehicle_btn) {
-			me.frm.set_df_property('receive_vehicle_btn', 'hidden', 1);
-		}
-		if (me.frm.fields_dict.deliver_vehicle_btn) {
-			me.frm.set_df_property('receive_vehicle_btn', 'hidden', 1);
-		}
-
 		if (!me.frm.is_new()) {
 			// Set Status
 			if (!me.frm.doc.is_released && !['Cancelled', 'Closed'].includes(me.frm.doc.status)) {
@@ -202,17 +196,11 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 			// Vehicle Buttons
 			if (me.frm.doc.applies_to_vehicle) {
 				if (frappe.model.can_create("Vehicle Service Receipt") && me.frm.doc.vehicle_status == "Not Received") {
-					me.frm.add_custom_button(__("Receive Vehicle"), () => me.receive_vehicle_btn(), __("Vehicle"));
-					if (me.frm.fields_dict.receive_vehicle_btn) {
-						me.frm.set_df_property('receive_vehicle_btn', 'hidden', 0);
-					}
+					me.frm.add_custom_button(__("Receive Vehicle"), () => me.make_vehicle_receipt(), __("Vehicle"));
 				}
 
 				if (frappe.model.can_create("Vehicle Gate Pass") && me.frm.doc.vehicle_status == "In Workshop") {
-					me.frm.add_custom_button(__("Create Gate Pass"), () => me.deliver_vehicle_btn(), __("Vehicle"));
-					if (me.frm.fields_dict.deliver_vehicle_btn) {
-						me.frm.set_df_property('deliver_vehicle_btn', 'hidden', 0);
-					}
+					me.frm.add_custom_button(__("Create Gate Pass"), () => me.make_vehicle_gate_pass(), __("Vehicle"));
 				}
 
 				if (frappe.model.can_create("Vehicle Log")) {
@@ -420,34 +408,41 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	vehicle_checklist: function () {
-		this.make_vehicle_checklist();
-	},
-	vehicle_checklist_add: function () {
-		this.make_vehicle_checklist();
-	},
-	vehicle_checklist_remove: function () {
-		this.make_vehicle_checklist();
-	},
-	checklist_item: function () {
-		this.make_vehicle_checklist();
-	},
-	checklist_item_checked: function () {
-		this.refresh_checklist();
-	},
-
 	make_vehicle_checklist: function () {
 		if (this.frm.fields_dict.vehicle_checklist_html) {
 			var is_read_only = cint(this.frm.doc.__onload && this.frm.doc.__onload.cant_change_fields && this.frm.doc.__onload.cant_change_fields.vehicle_checklist);
 
 			this.frm.vehicle_checklist_editor = erpnext.vehicles.make_vehicle_checklist(this.frm,
-				this.frm.fields_dict.vehicle_checklist_html.wrapper, is_read_only);
+				'vehicle_checklist',
+				this.frm.fields_dict.vehicle_checklist_html.wrapper,
+				this.frm.doc.__onload && this.frm.doc.__onload.default_vehicle_checklist_items,
+				is_read_only,
+				__("Vehicle Checklist"));
 		}
 	},
 
-	refresh_checklist: function () {
+	make_customer_request_checklist: function () {
+		if (this.frm.fields_dict.customer_request_checklist_html) {
+			var is_read_only = cint(this.frm.doc.__onload && this.frm.doc.__onload.cant_change_fields && this.frm.doc.__onload.cant_change_fields.customer_request_checklist);
+
+			this.frm.customer_request_checklist_editor = erpnext.vehicles.make_vehicle_checklist(this.frm,
+				'customer_request_checklist',
+				this.frm.fields_dict.customer_request_checklist_html.wrapper,
+				this.frm.doc.__onload && this.frm.doc.__onload.default_customer_request_checklist_items,
+				is_read_only,
+				__("Customer Request Checklist"));
+		}
+	},
+
+	refresh_vehicle_checklist: function () {
 		if (this.frm.vehicle_checklist_editor) {
 			this.frm.vehicle_checklist_editor.render_checklist();
+		}
+	},
+
+	refresh_customer_request_checklist: function () {
+		if (this.frm.customer_request_checklist_editor) {
+			this.frm.customer_request_checklist_editor.render_checklist();
 		}
 	},
 
@@ -455,13 +450,6 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		this.frm.get_field("stock_items_html").$wrapper.html(this.frm.doc.__onload && this.frm.doc.__onload.stock_items_html || '');
 		this.frm.get_field("service_items_html").$wrapper.html(this.frm.doc.__onload && this.frm.doc.__onload.service_items_html || '');
 		this.frm.get_field("sales_summary_html").$wrapper.html(this.frm.doc.__onload && this.frm.doc.__onload.sales_summary_html || '');
-	},
-
-	receive_vehicle_btn: function () {
-		this.make_vehicle_receipt();
-	},
-	deliver_vehicle_btn: function () {
-		this.make_vehicle_gate_pass();
 	},
 
 	vehicle_workshop: function () {

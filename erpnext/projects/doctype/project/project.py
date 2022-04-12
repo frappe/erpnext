@@ -6,7 +6,7 @@ import frappe
 import erpnext
 from frappe import _
 from email_reply_parser import EmailReplyParser
-from frappe.utils import flt, cint, get_url, cstr, nowtime, get_time, today, get_datetime, add_days
+from frappe.utils import flt, cint, get_url, cstr, nowtime, get_time, today, get_datetime, add_days, ceil
 from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
@@ -59,12 +59,14 @@ class Project(StatusUpdater):
 			from `tabTimesheet Detail` where project=%s and docstatus < 2 group by activity_type
 			order by total_hours desc''', self.name, as_dict=True))
 
-		self.set_onload('default_vehicle_checklist_items', get_default_vehicle_checklist_items())
+		self.set_onload('default_vehicle_checklist_items', get_default_vehicle_checklist_items('vehicle_checklist'))
+		self.set_onload('default_customer_request_checklist_items', get_default_vehicle_checklist_items('customer_request_checklist'))
 		self.set_onload('cant_change_fields', self.get_cant_change_fields())
 		self.set_onload('valid_manual_project_status_names', get_valid_manual_project_status_names(self))
 		self.set_onload('is_manual_project_status', is_manual_project_status(self.project_status))
 
 		self.reset_quick_change_fields()
+		self.set_missing_checklist()
 
 		self.set_costing()
 
@@ -76,7 +78,6 @@ class Project(StatusUpdater):
 
 		self.company_address_doc = erpnext.get_company_address(self)
 
-		self.set_missing_checklist()
 		self.get_sales_invoice_names()
 
 	def validate(self):
@@ -251,7 +252,23 @@ class Project(StatusUpdater):
 
 	def set_missing_checklist(self):
 		if self.meta.has_field('vehicle_checklist'):
-			set_missing_checklist(self)
+			set_missing_checklist(self, 'vehicle_checklist')
+		if self.meta.has_field('customer_request_checklist'):
+			set_missing_checklist(self, 'customer_request_checklist')
+
+	def get_checklist_rows(self, parentfield, rows=1):
+		checklist = self.get(parentfield) or []
+		per_row = ceil(len(checklist) / rows)
+
+		out = []
+		for i in range(rows):
+			out.append([])
+
+		for i, d in enumerate(checklist):
+			row_id = i // per_row
+			out[row_id].append(d)
+
+		return out
 
 	def set_project_template_details(self):
 		for d in self.project_templates:

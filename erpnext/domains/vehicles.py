@@ -111,6 +111,10 @@ project_fields = [
 		"insert_after": "project_name"},
 	{"label": "Is General Repair", "fieldname": "is_general_repair", "fieldtype": "Check",
 		"insert_after": "is_periodic_maintenance"},
+
+	{"label": "Vehicle Status", "fieldname": "vehicle_status", "fieldtype": "Select",
+		"insert_after": "billing_status", "options": "Not Received\nIn Workshop\nDelivered", "default": "Not Received",
+		"read_only": 1, "no_copy": 1, "in_standard_filter": 1}
 ]
 
 # Applies To Project Fields
@@ -146,7 +150,7 @@ project_change_vehicle_details_fields = [
 ]
 
 # Project Vehicle Status Fields
-project_vehicle_readings_section = {"label": "Vehicle Readings & Checklist",
+project_vehicle_readings_section = {"label": "Vehicle Readings",
 	"fieldname": "sec_vehicle_status", "fieldtype": "Section Break", "collapsible": 0}
 insert_field_after('change_vehicle_delivery_date', project_vehicle_readings_section, project_change_vehicle_details_fields)
 
@@ -155,33 +159,38 @@ project_vehicle_reading_fields = [
 		"insert_after": "sec_vehicle_status", "no_copy": 1},
 	{"label": "Vehicle Received Date/Time", "fieldname": "vehicle_received_dt", "fieldtype": "Datetime",
 		"insert_after": "vehicle_first_odometer", "read_only": 1, "no_copy": 1},
-	{"label": "Odometer Reading (Last)", "fieldname": "vehicle_last_odometer", "fieldtype": "Int",
-		"insert_after": "vehicle_received_dt", "no_copy": 1},
-	{"label": "Vehicle Delivered Date/Time", "fieldname": "vehicle_delivered_dt", "fieldtype": "Datetime",
-		"insert_after": "vehicle_last_odometer", "read_only": 1, "no_copy": 1},
-	{"label": "Receive Vehicle", "fieldname": "receive_vehicle_btn", "fieldtype": "Button",
-		"insert_after": "vehicle_delivered_dt", "hidden": 1},
-	{"label": "Deliver Vehicle", "fieldname": "deliver_vehicle_btn", "fieldtype": "Button",
-		"insert_after": "receive_vehicle_btn", "hidden": 1},
 
 	{"label": "", "fieldname": "cb_vehicle_status_1", "fieldtype": "Column Break",
-		"insert_after": "deliver_vehicle_btn"},
+		"insert_after": "vehicle_received_dt"},
 
-	{"label": "Fuel Level (%)", "fieldname": "fuel_level", "fieldtype": "Percent", "precision": 0,
+	{"label": "Odometer Reading (Last)", "fieldname": "vehicle_last_odometer", "fieldtype": "Int",
 		"insert_after": "cb_vehicle_status_1", "no_copy": 1},
-	{"label": "No of Keys", "fieldname": "keys", "fieldtype": "Int",
-		"insert_after": "fuel_level"},
-	{"label": "Vehicle Status", "fieldname": "vehicle_status", "fieldtype": "Select",
-		"options": "Not Received\nIn Workshop\nDelivered", "default": "Not Received",
-		"insert_after": "keys", "read_only": 1, "no_copy": 1, "in_standard_filter": 1},
+	{"label": "Vehicle Delivered Date/Time", "fieldname": "vehicle_delivered_dt", "fieldtype": "Datetime",
+		"insert_after": "vehicle_last_odometer", "read_only": 1, "no_copy": 1},
 
 	{"label": "", "fieldname": "cb_vehicle_status_2", "fieldtype": "Column Break",
-		"insert_after": "vehicle_status"},
+		"insert_after": "vehicle_delivered_dt"},
+
+	{"label": "Fuel Level (%)", "fieldname": "fuel_level", "fieldtype": "Percent", "precision": 0,
+		"insert_after": "cb_vehicle_status_2", "no_copy": 1},
+	{"label": "No of Keys", "fieldname": "keys", "fieldtype": "Int",
+		"insert_after": "fuel_level"},
+
+	{"label": "Checklist", "fieldname": "sec_vehicle_checklist", "fieldtype": "Section Break",
+		"insert_after": "keys", "collapsible": 0},
 
 	{"label": "Vehicle Checklist", "fieldname": "vehicle_checklist_html", "fieldtype": "HTML",
-		"insert_after": "cb_vehicle_status_2"},
+		"insert_after": "sec_vehicle_checklist"},
 	{"label": "Vehicle Checklist", "fieldname": "vehicle_checklist", "fieldtype": "Table", "options": "Vehicle Checklist Item",
 		"insert_after": "vehicle_checklist_html", "hidden": 1},
+
+	{"label": "", "fieldname": "cb_vehicle_checklist_1", "fieldtype": "Column Break",
+		"insert_after": "vehicle_checklist"},
+
+	{"label": "Customer Request Checklist", "fieldname": "customer_request_checklist_html", "fieldtype": "HTML",
+		"insert_after": "cb_vehicle_checklist_1"},
+	{"label": "Customer Request Checklist", "fieldname": "customer_request_checklist", "fieldtype": "Table", "options": "Vehicle Checklist Item",
+		"insert_after": "customer_request_checklist_html", "hidden": 1},
 ]
 
 # Project Type Fields
