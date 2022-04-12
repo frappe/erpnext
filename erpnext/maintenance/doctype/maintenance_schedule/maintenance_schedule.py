@@ -213,6 +213,26 @@ class MaintenanceSchedule(TransactionBase):
 				if chk:
 					throw(_("Maintenance Schedule {0} exists against {1}").format(chk[0][0], d.sales_order))
 
+	def validate_items_table_change(self):
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save:
+			return
+		for prev_item, item in zip(doc_before_save.items, self.items):
+			fields = [
+				"item_code",
+				"start_date",
+				"end_date",
+				"periodicity",
+				"sales_person",
+				"no_of_visits",
+				"serial_no",
+			]
+			for field in fields:
+				b_doc = prev_item.as_dict()
+				doc = item.as_dict()
+				if cstr(b_doc[field]) != cstr(doc[field]):
+					return True
+
 	def validate_no_of_visits(self):
 		return len(self.schedules) != sum(d.no_of_visits for d in self.items)
 
@@ -221,7 +241,7 @@ class MaintenanceSchedule(TransactionBase):
 		self.validate_maintenance_detail()
 		self.validate_dates_with_periodicity()
 		self.validate_sales_order()
-		if not self.schedules or self.validate_no_of_visits():
+		if not self.schedules or self.validate_items_table_change() or self.validate_no_of_visits():
 			self.generate_schedule()
 
 	def on_update(self):
