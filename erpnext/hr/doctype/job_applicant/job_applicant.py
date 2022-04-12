@@ -13,7 +13,9 @@ from frappe.utils import validate_email_address
 from erpnext.hr.doctype.interview.interview import get_interviewers
 
 
-class DuplicationError(frappe.ValidationError): pass
+class DuplicationError(frappe.ValidationError):
+	pass
+
 
 class JobApplicant(Document):
 	def onload(self):
@@ -36,8 +38,8 @@ class JobApplicant(Document):
 			self.set_status_for_employee_referral()
 
 		if not self.applicant_name and self.email_id:
-			guess = self.email_id.split('@')[0]
-			self.applicant_name = ' '.join([p.capitalize() for p in guess.split('.')])
+			guess = self.email_id.split("@")[0]
+			self.applicant_name = " ".join([p.capitalize() for p in guess.split(".")])
 
 	def set_status_for_employee_referral(self):
 		emp_ref = frappe.get_doc("Employee Referral", self.employee_referral)
@@ -46,10 +48,10 @@ class JobApplicant(Document):
 		elif self.status in ["Accepted", "Rejected"]:
 			emp_ref.db_set("status", self.status)
 
+
 @frappe.whitelist()
 def create_interview(doc, interview_round):
 	import json
-
 
 	if isinstance(doc, str):
 		doc = json.loads(doc)
@@ -58,7 +60,11 @@ def create_interview(doc, interview_round):
 	round_designation = frappe.db.get_value("Interview Round", interview_round, "designation")
 
 	if round_designation and doc.designation and round_designation != doc.designation:
-		frappe.throw(_("Interview Round {0} is only applicable for the Designation {1}").format(interview_round, round_designation))
+		frappe.throw(
+			_("Interview Round {0} is only applicable for the Designation {1}").format(
+				interview_round, round_designation
+			)
+		)
 
 	interview = frappe.new_doc("Interview")
 	interview.interview_round = interview_round
@@ -69,23 +75,25 @@ def create_interview(doc, interview_round):
 	interviewer_detail = get_interviewers(interview_round)
 
 	for d in interviewer_detail:
-		interview.append("interview_details", {
-			"interviewer": d.interviewer
-		})
+		interview.append("interview_details", {"interviewer": d.interviewer})
 	return interview
+
 
 @frappe.whitelist()
 def get_interview_details(job_applicant):
-	interview_details = frappe.db.get_all("Interview",
-		filters={"job_applicant":job_applicant, "docstatus": ["!=", 2]},
-		fields=["name", "interview_round", "expected_average_rating", "average_rating", "status"]
+	interview_details = frappe.db.get_all(
+		"Interview",
+		filters={"job_applicant": job_applicant, "docstatus": ["!=", 2]},
+		fields=["name", "interview_round", "expected_average_rating", "average_rating", "status"],
 	)
 	interview_detail_map = {}
 	meta = frappe.get_meta("Interview")
 	number_of_stars = meta.get_options("expected_average_rating") or 5
 
 	for detail in interview_details:
-		detail.expected_average_rating = detail.expected_average_rating * number_of_stars if detail.expected_average_rating else 0
+		detail.expected_average_rating = (
+			detail.expected_average_rating * number_of_stars if detail.expected_average_rating else 0
+		)
 		detail.average_rating = detail.average_rating * number_of_stars if detail.average_rating else 0
 
 		interview_detail_map[detail.name] = detail

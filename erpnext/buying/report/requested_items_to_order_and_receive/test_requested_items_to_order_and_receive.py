@@ -16,13 +16,15 @@ from erpnext.stock.doctype.material_request.material_request import make_purchas
 class TestRequestedItemsToOrderAndReceive(FrappeTestCase):
 	def setUp(self) -> None:
 		create_item("Test MR Report Item")
-		self.setup_material_request() # to order and receive
-		self.setup_material_request(order=True, days=1) # to receive (ordered)
-		self.setup_material_request(order=True, receive=True, days=2) # complete (ordered & received)
+		self.setup_material_request()  # to order and receive
+		self.setup_material_request(order=True, days=1)  # to receive (ordered)
+		self.setup_material_request(order=True, receive=True, days=2)  # complete (ordered & received)
 
 		self.filters = frappe._dict(
-			company="_Test Company", from_date=today(), to_date=add_days(today(), 30),
-			item_code="Test MR Report Item"
+			company="_Test Company",
+			from_date=today(),
+			to_date=add_days(today(), 30),
+			item_code="Test MR Report Item",
 		)
 
 	def tearDown(self) -> None:
@@ -30,10 +32,10 @@ class TestRequestedItemsToOrderAndReceive(FrappeTestCase):
 
 	def test_date_range(self):
 		data = get_data(self.filters)
-		self.assertEqual(len(data), 2) # MRs today should be fetched
+		self.assertEqual(len(data), 2)  # MRs today should be fetched
 
 		data = get_data(self.filters.update({"from_date": add_days(today(), 10)}))
-		self.assertEqual(len(data), 0) # MRs today should not be fetched as from date is in future
+		self.assertEqual(len(data), 0)  # MRs today should not be fetched as from date is in future
 
 	def test_ordered_received_material_requests(self):
 		data = get_data(self.filters)
@@ -45,7 +47,7 @@ class TestRequestedItemsToOrderAndReceive(FrappeTestCase):
 
 	def setup_material_request(self, order=False, receive=False, days=0):
 		po = None
-		test_records = frappe.get_test_records('Material Request')
+		test_records = frappe.get_test_records("Material Request")
 
 		mr = frappe.copy_doc(test_records[0])
 		mr.transaction_date = add_days(today(), days)
@@ -65,4 +67,3 @@ class TestRequestedItemsToOrderAndReceive(FrappeTestCase):
 			if receive:
 				pr = make_purchase_receipt(po.name)
 				pr.submit()
-
