@@ -15,6 +15,7 @@ class TestVariantSelector(FrappeTestCase):
 
 	@classmethod
 	def setUpClass(cls):
+		super().setUpClass()
 		template_item = make_item("Test-Tshirt-Temp", {
 			"has_variant": 1,
 			"variant_based_on": "Item Attribute",

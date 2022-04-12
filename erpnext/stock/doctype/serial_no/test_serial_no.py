@@ -274,7 +274,8 @@ class TestSerialNo(FrappeTestCase):
 				msg=f"{partial_fetch} should be subset of {first_fetch}")
 
 		# exclusion
-		remaining = auto_fetch_serial_number(3, item_code, warehouse, exclude_sr_nos=partial_fetch)
+		remaining = auto_fetch_serial_number(3, item_code, warehouse,
+				exclude_sr_nos=json.dumps(partial_fetch))
 		self.assertEqual(sorted(remaining + partial_fetch), first_fetch)
 
 		# batchwise

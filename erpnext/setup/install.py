@@ -21,9 +21,7 @@ default_mail_footer = """<div style="padding: 7px; text-align: right; color: #88
 def after_install():
 	frappe.get_doc({'doctype': "Role", "role_name": "Analytics"}).insert()
 	set_single_defaults()
-	create_compact_item_print_custom_field()
-	create_print_uom_after_qty_custom_field()
-	create_print_zero_amount_taxes_custom_field()
+	create_print_setting_custom_fields()
 	add_all_roles_to("Administrator")
 	create_default_cash_flow_mapper_templates()
 	create_default_success_action()
@@ -77,7 +75,7 @@ def setup_currency_exchange():
 	except frappe.ValidationError:
 		pass
 
-def create_compact_item_print_custom_field():
+def create_print_setting_custom_fields():
 	create_custom_field('Print Settings', {
 		'label': _('Compact Item Print'),
 		'fieldname': 'compact_item_print',
@@ -85,9 +83,6 @@ def create_compact_item_print_custom_field():
 		'default': 1,
 		'insert_after': 'with_letterhead'
 	})
-
-
-def create_print_uom_after_qty_custom_field():
 	create_custom_field('Print Settings', {
 		'label': _('Print UOM after Quantity'),
 		'fieldname': 'print_uom_after_quantity',
@@ -95,9 +90,6 @@ def create_print_uom_after_qty_custom_field():
 		'default': 0,
 		'insert_after': 'compact_item_print'
 	})
-
-
-def create_print_zero_amount_taxes_custom_field():
 	create_custom_field('Print Settings', {
 		'label': _('Print taxes with zero amount'),
 		'fieldname': 'print_taxes_with_zero_amount',

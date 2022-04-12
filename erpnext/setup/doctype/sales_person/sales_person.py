@@ -28,14 +28,17 @@ class SalesPerson(NestedSet):
 	def load_dashboard_info(self):
 		company_default_currency = get_default_currency()
 
-		allocated_amount = frappe.db.sql("""
-			select sum(allocated_amount)
-			from `tabSales Team`
-			where sales_person = %s and docstatus=1 and parenttype = 'Sales Order'
-		""",(self.sales_person_name))
+		allocated_amount_against_order = flt(frappe.db.get_value('Sales Team',
+			{'docstatus': 1, 'parenttype': 'Sales Order', 'sales_person': self.sales_person_name},
+			'sum(allocated_amount)'))
+
+		allocated_amount_against_invoice = flt(frappe.db.get_value('Sales Team',
+			{'docstatus': 1, 'parenttype': 'Sales Invoice', 'sales_person': self.sales_person_name},
+			'sum(allocated_amount)'))
 
 		info = {}
-		info["allocated_amount"] = flt(allocated_amount[0][0]) if allocated_amount else 0
+		info["allocated_amount_against_order"] = allocated_amount_against_order
+		info["allocated_amount_against_invoice"] = allocated_amount_against_invoice
 		info["currency"] = company_default_currency
 
 		self.set_onload('dashboard_info', info)

@@ -3,6 +3,7 @@
 
 
 import json
+from typing import List, Optional, Union
 
 import frappe
 from frappe import ValidationError, _
@@ -574,22 +575,30 @@ def get_delivery_note_serial_no(item_code, qty, delivery_note):
 	return serial_nos
 
 @frappe.whitelist()
-def auto_fetch_serial_number(qty, item_code, warehouse,
-		posting_date=None, batch_nos=None, for_doctype=None, exclude_sr_nos=None):
+def auto_fetch_serial_number(
+		qty: float,
+		item_code: str,
+		warehouse: str,
+		posting_date: Optional[str] = None,
+		batch_nos: Optional[Union[str, List[str]]] = None,
+		for_doctype: Optional[str] = None,
+		exclude_sr_nos: Optional[List[str]] = None
+	) -> List[str]:
 
 	filters = frappe._dict({"item_code": item_code, "warehouse": warehouse})
 
 	if exclude_sr_nos is None:
 		exclude_sr_nos = []
 	else:
+		exclude_sr_nos = safe_json_loads(exclude_sr_nos)
 		exclude_sr_nos = get_serial_nos(clean_serial_no_string("\n".join(exclude_sr_nos)))
 
 	if batch_nos:
 		batch_nos = safe_json_loads(batch_nos)
 		if isinstance(batch_nos, list):
 			filters.batch_no = batch_nos
-		elif isinstance(batch_nos, str):
-			filters.batch_no = [batch_nos]
+		else:
+			filters.batch_no = [str(batch_nos)]
 
 	if posting_date:
 		filters.expiry_date = posting_date

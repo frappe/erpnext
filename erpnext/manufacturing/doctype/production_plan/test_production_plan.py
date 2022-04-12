@@ -667,6 +667,39 @@ class TestProductionPlan(FrappeTestCase):
 		wo_doc.submit()
 		self.assertEqual(wo_doc.qty, 0.55)
 
+	def test_temporary_name_relinking(self):
+
+		pp = frappe.new_doc("Production Plan")
+
+		# this can not be unittested so mocking data that would be expected
+		# from client side.
+		for _ in range(10):
+			po_item = pp.append("po_items", {
+				"name": frappe.generate_hash(length=10),
+				"temporary_name": frappe.generate_hash(length=10),
+			})
+			pp.append("sub_assembly_items", {
+				"production_plan_item": po_item.temporary_name
+			})
+		pp._rename_temporary_references()
+
+		for po_item, subassy_item in zip(pp.po_items, pp.sub_assembly_items):
+			self.assertEqual(po_item.name, subassy_item.production_plan_item)
+
+		# bad links should be erased
+		pp.append("sub_assembly_items", {
+			"production_plan_item": frappe.generate_hash(length=16)
+		})
+		pp._rename_temporary_references()
+		self.assertIsNone(pp.sub_assembly_items[-1].production_plan_item)
+		pp.sub_assembly_items.pop()
+
+		# reattempting on same doc shouldn't change anything
+		pp._rename_temporary_references()
+		for po_item, subassy_item in zip(pp.po_items, pp.sub_assembly_items):
+			self.assertEqual(po_item.name, subassy_item.production_plan_item)
+
+
 def create_production_plan(**args):
 	"""
 	sales_order (obj): Sales Order Doc Object

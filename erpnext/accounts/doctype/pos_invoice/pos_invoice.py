@@ -485,16 +485,15 @@ class POSInvoice(SalesInvoice):
 			"payment_account": pay.account,
 		}, ["name"])
 
-		args = {
-			'doctype': 'Payment Request',
+		filters = {
 			'reference_doctype': 'POS Invoice',
 			'reference_name': self.name,
 			'payment_gateway_account': payment_gateway_account,
 			'email_to': self.contact_mobile
 		}
-		pr = frappe.db.exists(args)
+		pr = frappe.db.get_value('Payment Request', filters=filters)
 		if pr:
-			return frappe.get_doc('Payment Request', pr[0][0])
+			return frappe.get_doc('Payment Request', pr)
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):
