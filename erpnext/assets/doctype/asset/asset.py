@@ -364,7 +364,7 @@ class Asset(AccountsController):
 							if has_pro_rata and n == 0:
 								# For first entry of monthly depr
 								if r == 0:
-									days_until_first_depr = date_diff(monthly_schedule_date, self.available_for_use_date)
+									days_until_first_depr = date_diff(monthly_schedule_date, self.available_for_use_date) + 1
 									per_day_amt = depreciation_amount / days
 									depreciation_amount_for_current_month = per_day_amt * days_until_first_depr
 									depreciation_amount -= depreciation_amount_for_current_month
