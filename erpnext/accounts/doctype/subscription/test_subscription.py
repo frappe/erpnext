@@ -71,6 +71,16 @@ def create_plan():
 		plan.billing_interval_count = 1
 		plan.insert()
 
+	if not frappe.db.exists('Subscription Plan', '_Test Plan Advance Payment'):
+		plan = frappe.new_doc('Subscription Plan')
+		plan.plan_name = '_Test Plan Advance Payment'
+		plan.item = '_Test Non Stock Item'
+		plan.price_determination = "Fixed Rate"
+		plan.cost = 50
+		plan.billing_interval = 'Month'
+		plan.billing_interval_count = 1
+		plan.insert()
+
 def create_parties():
 	if not frappe.db.exists('Supplier', '_Test Supplier'):
 		supplier = frappe.new_doc('Supplier')
@@ -679,3 +689,46 @@ class TestSubscription(unittest.TestCase):
 		# Check the currency of the created invoice
 		currency = frappe.db.get_value('Sales Invoice', subscription.invoices[0].invoice, 'currency')
 		self.assertEqual(currency, 'USD')
+
+	def test_apply_advance_payment(self):
+		subscription = frappe.new_doc('Subscription')
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Subscription Customer'
+		subscription.generate_invoice_at_period_start = 1
+		subscription.company = '_Test Company'
+		# select subscription start date as '2022-01-01'
+		subscription.start_date = '2022-01-01'
+		subscription.append('plans', {'plan': '_Test Plan Advance Payment', 'qty': 1})
+
+		# select "Generate Invoice At Beginning Of Period"
+		subscription.apply_advance_payment = 1
+		subscription.save()
+
+		# insert a payment entry of 35, outstanding should be 15
+		pe = frappe.get_doc({
+			"doctype": "Payment Entry",
+			"payment_type": "Receive",
+			"party_type": "Customer",
+			"party": "_Test Subscription Customer",
+			"company": "_Test Company",
+			"reference_no": "1",
+			"reference_date": nowdate(),
+			"received_amount": 35,
+			"paid_amount": 35,
+			"paid_from": "_Test Receivable - _TC",
+			"paid_to": "_Test Cash - _TC"
+		})
+		pe.insert()
+		pe.submit()
+
+		# create first invoice
+		subscription.process()
+		self.assertEqual(len(subscription.invoices), 1)
+		self.assertEqual(subscription.status, 'Unpaid')
+
+		# Check the advance payment option and the outstanding amount of the created invoice
+		invoice = subscription.invoices[0].invoice
+		advance = frappe.db.get_value('Sales Invoice', invoice, 'allocate_advances_automatically')
+		self.assertEqual(advance, 1)
+
+		self.assertEqual(invoice.outstanding_amount, 15)
