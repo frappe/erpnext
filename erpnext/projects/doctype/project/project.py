@@ -316,7 +316,7 @@ class Project(StatusUpdater):
 
 			if vehicle_change_map:
 				if vehicle_change_map.get('license_plate'):
-					vehicle_change_map['is_unregistered'] = 0
+					vehicle_change_map['unregistered'] = 0
 
 				frappe.set_value("Vehicle", self.applies_to_vehicle, vehicle_change_map)
 
