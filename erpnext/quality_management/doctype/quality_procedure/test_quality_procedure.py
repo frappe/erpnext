@@ -19,7 +19,8 @@ class TestQualityProcedure(unittest.TestCase):
 				)
 			).insert()
 
-			frappe.local.form_dict = dict(
+
+			frappe.local.form_dict = frappe._dict(
 				doctype="Quality Procedure",
 				quality_procedure_name="Test Child 1",
 				parent_quality_procedure=procedure.name,
