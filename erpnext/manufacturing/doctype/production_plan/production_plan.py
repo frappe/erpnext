@@ -500,6 +500,7 @@ class ProductionPlan(Document):
 
 		for supplier, po_list in subcontracted_po.items():
 			po = frappe.new_doc("Purchase Order")
+			po.company = self.company
 			po.supplier = supplier
 			po.schedule_date = getdate(po_list[0].schedule_date) if po_list[0].schedule_date else nowdate()
 			po.is_subcontracted = 1
