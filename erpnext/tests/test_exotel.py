@@ -8,7 +8,6 @@ from erpnext.hr.doctype.employee.test_employee import make_employee
 class TestExotel(FrappeAPITestCase):
 	@classmethod
 	def setUpClass(cls):
-		frappe.form_dict = frappe._dict()
 		cls.CURRENT_DB_CONNECTION = frappe.db
 		cls.test_employee_name = make_employee(
 			user="test_employee_exotel@company.com", cell_number="9999999999"
