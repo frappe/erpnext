@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe import _
 
 
 def execute(filters=None):
@@ -46,17 +47,22 @@ def get_exploded_items(bom, data, indent=0, qty=1):
 def get_columns():
 	return [
 		{
-			"label": "Item Code",
+			"label": _("Item Code"),
 			"fieldtype": "Link",
 			"fieldname": "item_code",
 			"width": 300,
 			"options": "Item",
 		},
-		{"label": "Item Name", "fieldtype": "data", "fieldname": "item_name", "width": 100},
-		{"label": "BOM", "fieldtype": "Link", "fieldname": "bom", "width": 150, "options": "BOM"},
-		{"label": "Qty", "fieldtype": "data", "fieldname": "qty", "width": 100},
-		{"label": "UOM", "fieldtype": "data", "fieldname": "uom", "width": 100},
-		{"label": "BOM Level", "fieldtype": "Int", "fieldname": "bom_level", "width": 100},
-		{"label": "Standard Description", "fieldtype": "data", "fieldname": "description", "width": 150},
-		{"label": "Scrap", "fieldtype": "data", "fieldname": "scrap", "width": 100},
+		{"label": _("Item Name"), "fieldtype": "data", "fieldname": "item_name", "width": 100},
+		{"label": _("BOM"), "fieldtype": "Link", "fieldname": "bom", "width": 150, "options": "BOM"},
+		{"label": _("Qty"), "fieldtype": "data", "fieldname": "qty", "width": 100},
+		{"label": _("UOM"), "fieldtype": "data", "fieldname": "uom", "width": 100},
+		{"label": _("BOM Level"), "fieldtype": "Int", "fieldname": "bom_level", "width": 100},
+		{
+			"label": _("Standard Description"),
+			"fieldtype": "data",
+			"fieldname": "description",
+			"width": 150,
+		},
+		{"label": _("Scrap"), "fieldtype": "data", "fieldname": "scrap", "width": 100},
 	]

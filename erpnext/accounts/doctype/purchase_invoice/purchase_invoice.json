@@ -543,11 +543,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "No",
+   "default": "0",
    "fieldname": "is_subcontracted",
-   "fieldtype": "Select",
-   "label": "Raw Materials Supplied",
-   "options": "No\nYes",
+   "fieldtype": "Check",
+   "label": "Is Subcontracted",
    "print_hide": 1
   },
   {
@@ -1366,7 +1365,7 @@
    "width": "50px"
   },
   {
-   "depends_on": "eval:doc.update_stock && doc.is_subcontracted==\"Yes\"",
+   "depends_on": "eval:doc.update_stock && doc.is_subcontracted",
    "fieldname": "supplier_warehouse",
    "fieldtype": "Link",
    "label": "Supplier Warehouse",

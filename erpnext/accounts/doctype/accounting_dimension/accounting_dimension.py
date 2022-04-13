@@ -205,10 +205,16 @@ def get_doctypes_with_dimensions():
 	return frappe.get_hooks("accounting_dimension_doctypes")
 
 
-def get_accounting_dimensions(as_list=True):
+def get_accounting_dimensions(as_list=True, filters=None):
+
+	if not filters:
+		filters = {"disabled": 0}
+
 	if frappe.flags.accounting_dimensions is None:
 		frappe.flags.accounting_dimensions = frappe.get_all(
-			"Accounting Dimension", fields=["label", "fieldname", "disabled", "document_type"]
+			"Accounting Dimension",
+			fields=["label", "fieldname", "disabled", "document_type"],
+			filters=filters,
 		)
 
 	if as_list:

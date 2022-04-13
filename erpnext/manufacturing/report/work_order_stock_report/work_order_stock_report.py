@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe import _
 from frappe.utils import cint
 
 
@@ -99,59 +100,65 @@ def get_columns():
 	columns = [
 		{
 			"fieldname": "work_order",
-			"label": "Work Order",
+			"label": _("Work Order"),
 			"fieldtype": "Link",
 			"options": "Work Order",
 			"width": 110,
 		},
-		{"fieldname": "bom_no", "label": "BOM", "fieldtype": "Link", "options": "BOM", "width": 120},
+		{"fieldname": "bom_no", "label": _("BOM"), "fieldtype": "Link", "options": "BOM", "width": 120},
 		{
 			"fieldname": "description",
-			"label": "Description",
+			"label": _("Description"),
 			"fieldtype": "Data",
 			"options": "",
 			"width": 230,
 		},
 		{
 			"fieldname": "item_code",
-			"label": "Item Code",
+			"label": _("Item Code"),
 			"fieldtype": "Link",
 			"options": "Item",
 			"width": 110,
 		},
 		{
 			"fieldname": "source_warehouse",
-			"label": "Source Warehouse",
+			"label": _("Source Warehouse"),
 			"fieldtype": "Link",
 			"options": "Warehouse",
 			"width": 110,
 		},
-		{"fieldname": "qty", "label": "Qty to Build", "fieldtype": "Data", "options": "", "width": 110},
-		{"fieldname": "status", "label": "Status", "fieldtype": "Data", "options": "", "width": 100},
+		{
+			"fieldname": "qty",
+			"label": _("Qty to Build"),
+			"fieldtype": "Data",
+			"options": "",
+			"width": 110,
+		},
+		{"fieldname": "status", "label": _("Status"), "fieldtype": "Data", "options": "", "width": 100},
 		{
 			"fieldname": "req_items",
-			"label": "# Req'd Items",
+			"label": _("# Req'd Items"),
 			"fieldtype": "Data",
 			"options": "",
 			"width": 105,
 		},
 		{
 			"fieldname": "instock",
-			"label": "# In Stock",
+			"label": _("# In Stock"),
 			"fieldtype": "Data",
 			"options": "",
 			"width": 105,
 		},
 		{
 			"fieldname": "buildable_qty",
-			"label": "Buildable Qty",
+			"label": _("Buildable Qty"),
 			"fieldtype": "Data",
 			"options": "",
 			"width": 100,
 		},
 		{
 			"fieldname": "ready_to_build",
-			"label": "Build All?",
+			"label": _("Build All?"),
 			"fieldtype": "Data",
 			"options": "",
 			"width": 90,

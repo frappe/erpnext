@@ -1144,6 +1144,56 @@ class TestWorkOrder(FrappeTestCase):
 		for index, row in enumerate(ste_manu.get("items"), start=1):
 			self.assertEqual(index, row.idx)
 
+	@change_settings(
+		"Manufacturing Settings",
+		{"backflush_raw_materials_based_on": "Material Transferred for Manufacture"},
+	)
+	def test_work_order_multiple_material_transfer(self):
+		"""
+		Test transferring multiple RMs in separate Stock Entries.
+		"""
+		work_order = make_wo_order_test_record(planned_start_date=now(), qty=1)
+		test_stock_entry.make_stock_entry(  # stock up RM
+			item_code="_Test Item",
+			target="_Test Warehouse - _TC",
+			qty=1,
+			basic_rate=5000.0,
+		)
+		test_stock_entry.make_stock_entry(  # stock up RM
+			item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=1000.0,
+		)
+
+		transfer_entry = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 1)
+		)
+		del transfer_entry.get("items")[0]  # transfer only one RM
+		transfer_entry.submit()
+
+		# WO's "Material Transferred for Mfg" shows all is transferred, one RM is pending
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 1)
+		self.assertEqual(work_order.required_items[0].transferred_qty, 0)
+		self.assertEqual(work_order.required_items[1].transferred_qty, 2)
+
+		final_transfer_entry = frappe.get_doc(  # transfer last RM with For Quantity = 0
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0)
+		)
+		final_transfer_entry.save()
+
+		self.assertEqual(final_transfer_entry.fg_completed_qty, 0.0)
+		self.assertEqual(final_transfer_entry.items[0].qty, 1)
+
+		final_transfer_entry.submit()
+		work_order.reload()
+
+		# WO's "Material Transferred for Mfg" shows all is transferred, no RM is pending
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 1)
+		self.assertEqual(work_order.required_items[0].transferred_qty, 1)
+		self.assertEqual(work_order.required_items[1].transferred_qty, 2)
+
 
 def update_job_card(job_card, jc_qty=None):
 	employee = frappe.db.get_value("Employee", {"status": "Active"}, "name")

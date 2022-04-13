@@ -930,6 +930,7 @@ def get_custom_fields():
 		"Journal Entry": journal_entry_fields,
 		"Sales Order": sales_invoice_gst_fields,
 		"Tax Category": inter_state_gst_field,
+		"Quotation": sales_invoice_gst_fields,
 		"Item": [
 			dict(
 				fieldname="gst_hsn_code",
