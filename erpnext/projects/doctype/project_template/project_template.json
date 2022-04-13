@@ -78,6 +78,7 @@
   {
    "fieldname": "applies_to_item",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Applies to Item",
    "options": "Item",
@@ -98,7 +99,7 @@
    "label": "Disabled"
   }
  ],
- "modified": "2022-04-13 19:54:43.026959",
+ "modified": "2022-04-13 20:18:03.581010",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Template",
