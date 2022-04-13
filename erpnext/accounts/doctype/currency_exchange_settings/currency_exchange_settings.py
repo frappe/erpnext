@@ -11,6 +11,8 @@ from frappe.utils import nowdate
 class CurrencyExchangeSettings(Document):
 	def validate(self):
 		self.set_parameters_and_result()
+		if frappe.flags.in_test or frappe.flags.in_install or frappe.flags.in_setup_wizard:
+			return
 		response, value = self.validate_parameters()
 		self.validate_result(response, value)
 
@@ -35,9 +37,6 @@ class CurrencyExchangeSettings(Document):
 			self.append("req_params", {"key": "symbols", "value": "{to_currency}"})
 
 	def validate_parameters(self):
-		if frappe.flags.in_test:
-			return None, None
-
 		params = {}
 		for row in self.req_params:
 			params[row.key] = row.value.format(
@@ -59,9 +58,6 @@ class CurrencyExchangeSettings(Document):
 		return response, value
 
 	def validate_result(self, response, value):
-		if frappe.flags.in_test:
-			return
-
 		try:
 			for key in self.result_key:
 				value = value[
