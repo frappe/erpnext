@@ -224,23 +224,34 @@ def notify_error_to_stock_managers(doc, traceback):
 
 
 def repost_entries():
+	"""
+	Reposts 'Repost Item Valuation' entries in queue.
+	Called hourly via hooks.py.
+	"""
 	if not in_configured_timeslot():
 		return
 
-	riv_entries = get_repost_item_valuation_entries()
+	try:
+		riv_entries = get_repost_item_valuation_entries()
 
-	for row in riv_entries:
-		doc = frappe.get_doc("Repost Item Valuation", row.name)
-		if doc.status in ("Queued", "In Progress"):
-			repost(doc)
-			doc.deduplicate_similar_repost()
+		for row in riv_entries:
+			doc = frappe.get_doc("Repost Item Valuation", row.name)
+			if doc.status in ("Queued", "In Progress"):
+				repost(doc)
+				doc.deduplicate_similar_repost()
 
-	riv_entries = get_repost_item_valuation_entries()
-	if riv_entries:
-		return
+		riv_entries = get_repost_item_valuation_entries()
+		if riv_entries:
+			return
 
-	for d in frappe.get_all("Company", filters={"enable_perpetual_inventory": 1}):
-		check_if_stock_and_account_balance_synced(today(), d.name)
+		for d in frappe.get_all("Company", filters={"enable_perpetual_inventory": 1}):
+			check_if_stock_and_account_balance_synced(today(), d.name)
+	except Exception:
+		frappe.log_error(
+			message=frappe.get_traceback(),
+			title=_("Repost Item Valuation Error"),
+		)
+		raise  # scheduled job type has exception handling and must set job log as Failed
 
 
 def get_repost_item_valuation_entries():
