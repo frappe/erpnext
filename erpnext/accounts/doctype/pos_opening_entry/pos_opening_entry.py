@@ -17,7 +17,9 @@ class POSOpeningEntry(StatusUpdater):
 
 	def validate_pos_profile_and_cashier(self):
 		if self.company != frappe.db.get_value("POS Profile", self.pos_profile, "company"):
-			frappe.throw(_("POS Profile {} does not belongs to company {}").format(self.pos_profile, self.company))
+			frappe.throw(
+				_("POS Profile {} does not belongs to company {}").format(self.pos_profile, self.company)
+			)
 
 		if not cint(frappe.db.get_value("User", self.user, "enabled")):
 			frappe.throw(_("User {} is disabled. Please select valid user/cashier").format(self.user))
@@ -26,8 +28,11 @@ class POSOpeningEntry(StatusUpdater):
 		invalid_modes = []
 		for d in self.balance_details:
 			if d.mode_of_payment:
-				account = frappe.db.get_value("Mode of Payment Account",
-					{"parent": d.mode_of_payment, "company": self.company}, "default_account")
+				account = frappe.db.get_value(
+					"Mode of Payment Account",
+					{"parent": d.mode_of_payment, "company": self.company},
+					"default_account",
+				)
 				if not account:
 					invalid_modes.append(get_link_to_form("Mode of Payment", d.mode_of_payment))
 

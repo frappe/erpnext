@@ -18,6 +18,7 @@ class TestSetUp(unittest.TestCase):
 		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
 		create_service_level_agreements_for_issues()
 
+
 class TestIssue(TestSetUp):
 	def test_response_time_and_resolution_time_based_on_different_sla(self):
 		creation = get_datetime("2019-03-04 12:00")
@@ -36,9 +37,10 @@ class TestIssue(TestSetUp):
 		self.assertEqual(issue.response_by, get_datetime("2019-03-04 14:00"))
 		self.assertEqual(issue.resolution_by, get_datetime("2019-03-04 15:00"))
 
-
 		# make issue with territory specific SLA
-		customer = create_customer("___Test Customer", "__Test SLA Customer Group", "_Test SLA Territory")
+		customer = create_customer(
+			"___Test Customer", "__Test SLA Customer Group", "_Test SLA Territory"
+		)
 		issue = make_issue(creation, "___Test Customer", 3)
 
 		self.assertEqual(issue.response_by, get_datetime("2019-03-04 14:00"))
@@ -73,10 +75,10 @@ class TestIssue(TestSetUp):
 
 		frappe.flags.current_time = get_datetime("2019-03-04 15:00")
 
-		issue.status = 'Closed'
+		issue.status = "Closed"
 		issue.save()
 
-		self.assertEqual(issue.agreement_status, 'Fulfilled')
+		self.assertEqual(issue.agreement_status, "Fulfilled")
 
 	def test_issue_metrics(self):
 		creation = get_datetime("2020-03-04 4:00")
@@ -95,7 +97,7 @@ class TestIssue(TestSetUp):
 
 		frappe.flags.current_time = get_datetime("2020-03-04 5:05")
 		issue.reload()
-		issue.status = 'Closed'
+		issue.status = "Closed"
 		issue.save()
 
 		self.assertEqual(issue.avg_response_time, 600)
@@ -113,7 +115,7 @@ class TestIssue(TestSetUp):
 
 		frappe.flags.current_time = get_datetime("2020-03-04 4:15")
 		issue.reload()
-		issue.status = 'Replied'
+		issue.status = "Replied"
 		issue.save()
 
 		self.assertEqual(issue.on_hold_since, frappe.flags.current_time)
@@ -131,11 +133,12 @@ class TestIssue(TestSetUp):
 
 		frappe.flags.current_time = get_datetime("2020-03-04 5:05")
 		issue.reload()
-		issue.status = 'Closed'
+		issue.status = "Closed"
 		issue.save()
 
 		issue.reload()
 		self.assertEqual(flt(issue.total_hold_time, 2), 2700)
+
 
 class TestFirstResponseTime(TestSetUp):
 	# working hours used in all cases: Mon-Fri, 10am to 6pm
@@ -144,208 +147,267 @@ class TestFirstResponseTime(TestSetUp):
 	# issue creation and first response are on the same day
 	def test_first_response_time_case1(self):
 		"""
-			Test frt when issue creation and first response are during working hours on the same day.
+		Test frt when issue creation and first response are during working hours on the same day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 11:00"), get_datetime("06-28-2021 12:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 11:00"), get_datetime("06-28-2021 12:00")
+		)
 		self.assertEqual(issue.first_response_time, 3600.0)
 
 	def test_first_response_time_case2(self):
 		"""
-			Test frt when issue creation was during working hours, but first response is sent after working hours on the same day.
+		Test frt when issue creation was during working hours, but first response is sent after working hours on the same day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 12:00"), get_datetime("06-28-2021 20:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 12:00"), get_datetime("06-28-2021 20:00")
+		)
 		self.assertEqual(issue.first_response_time, 21600.0)
 
 	def test_first_response_time_case3(self):
 		"""
-			Test frt when issue creation was before working hours but first response is sent during working hours on the same day.
+		Test frt when issue creation was before working hours but first response is sent during working hours on the same day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 6:00"), get_datetime("06-28-2021 12:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 6:00"), get_datetime("06-28-2021 12:00")
+		)
 		self.assertEqual(issue.first_response_time, 7200.0)
 
 	def test_first_response_time_case4(self):
 		"""
-			Test frt when both issue creation and first response were after working hours on the same day.
+		Test frt when both issue creation and first response were after working hours on the same day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 19:00"), get_datetime("06-28-2021 20:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 19:00"), get_datetime("06-28-2021 20:00")
+		)
 		self.assertEqual(issue.first_response_time, 1.0)
 
 	def test_first_response_time_case5(self):
 		"""
-			Test frt when both issue creation and first response are on the same day, but it's not a work day.
+		Test frt when both issue creation and first response are on the same day, but it's not a work day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-27-2021 10:00"), get_datetime("06-27-2021 11:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-27-2021 10:00"), get_datetime("06-27-2021 11:00")
+		)
 		self.assertEqual(issue.first_response_time, 1.0)
 
 	# issue creation and first response are on consecutive days
 	def test_first_response_time_case6(self):
 		"""
-			Test frt when the issue was created before working hours and the first response is also sent before working hours, but on the next day.
+		Test frt when the issue was created before working hours and the first response is also sent before working hours, but on the next day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 6:00"), get_datetime("06-29-2021 6:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 6:00"), get_datetime("06-29-2021 6:00")
+		)
 		self.assertEqual(issue.first_response_time, 28800.0)
 
 	def test_first_response_time_case7(self):
 		"""
-			Test frt when the issue was created before working hours and the first response is sent during working hours, but on the next day.
+		Test frt when the issue was created before working hours and the first response is sent during working hours, but on the next day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 6:00"), get_datetime("06-29-2021 11:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 6:00"), get_datetime("06-29-2021 11:00")
+		)
 		self.assertEqual(issue.first_response_time, 32400.0)
 
 	def test_first_response_time_case8(self):
 		"""
-			Test frt when the issue was created before working hours and the first response is sent after working hours, but on the next day.
+		Test frt when the issue was created before working hours and the first response is sent after working hours, but on the next day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 6:00"), get_datetime("06-29-2021 20:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 6:00"), get_datetime("06-29-2021 20:00")
+		)
 		self.assertEqual(issue.first_response_time, 57600.0)
 
 	def test_first_response_time_case9(self):
 		"""
-			Test frt when the issue was created before working hours and the first response is sent on the next day, which is not a work day.
+		Test frt when the issue was created before working hours and the first response is sent on the next day, which is not a work day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-25-2021 6:00"), get_datetime("06-26-2021 11:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-25-2021 6:00"), get_datetime("06-26-2021 11:00")
+		)
 		self.assertEqual(issue.first_response_time, 28800.0)
 
 	def test_first_response_time_case10(self):
 		"""
-			Test frt when the issue was created during working hours and the first response is sent before working hours, but on the next day.
+		Test frt when the issue was created during working hours and the first response is sent before working hours, but on the next day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 12:00"), get_datetime("06-29-2021 6:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 12:00"), get_datetime("06-29-2021 6:00")
+		)
 		self.assertEqual(issue.first_response_time, 21600.0)
 
 	def test_first_response_time_case11(self):
 		"""
-			Test frt when the issue was created during working hours and the first response is also sent during working hours, but on the next day.
+		Test frt when the issue was created during working hours and the first response is also sent during working hours, but on the next day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 12:00"), get_datetime("06-29-2021 11:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 12:00"), get_datetime("06-29-2021 11:00")
+		)
 		self.assertEqual(issue.first_response_time, 25200.0)
 
 	def test_first_response_time_case12(self):
 		"""
-			Test frt when the issue was created during working hours and the first response is sent after working hours, but on the next day.
+		Test frt when the issue was created during working hours and the first response is sent after working hours, but on the next day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 12:00"), get_datetime("06-29-2021 20:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 12:00"), get_datetime("06-29-2021 20:00")
+		)
 		self.assertEqual(issue.first_response_time, 50400.0)
 
 	def test_first_response_time_case13(self):
 		"""
-			Test frt when the issue was created during working hours and the first response is sent on the next day, which is not a work day.
+		Test frt when the issue was created during working hours and the first response is sent on the next day, which is not a work day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-25-2021 12:00"), get_datetime("06-26-2021 11:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-25-2021 12:00"), get_datetime("06-26-2021 11:00")
+		)
 		self.assertEqual(issue.first_response_time, 21600.0)
 
 	def test_first_response_time_case14(self):
 		"""
-			Test frt when the issue was created after working hours and the first response is sent before working hours, but on the next day.
+		Test frt when the issue was created after working hours and the first response is sent before working hours, but on the next day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 20:00"), get_datetime("06-29-2021 6:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 20:00"), get_datetime("06-29-2021 6:00")
+		)
 		self.assertEqual(issue.first_response_time, 1.0)
 
 	def test_first_response_time_case15(self):
 		"""
-			Test frt when the issue was created after working hours and the first response is sent during working hours, but on the next day.
+		Test frt when the issue was created after working hours and the first response is sent during working hours, but on the next day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 20:00"), get_datetime("06-29-2021 11:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 20:00"), get_datetime("06-29-2021 11:00")
+		)
 		self.assertEqual(issue.first_response_time, 3600.0)
 
 	def test_first_response_time_case16(self):
 		"""
-			Test frt when the issue was created after working hours and the first response is also sent after working hours, but on the next day.
+		Test frt when the issue was created after working hours and the first response is also sent after working hours, but on the next day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 20:00"), get_datetime("06-29-2021 20:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 20:00"), get_datetime("06-29-2021 20:00")
+		)
 		self.assertEqual(issue.first_response_time, 28800.0)
 
 	def test_first_response_time_case17(self):
 		"""
-			Test frt when the issue was created after working hours and the first response is sent on the next day, which is not a work day.
+		Test frt when the issue was created after working hours and the first response is sent on the next day, which is not a work day.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-25-2021 20:00"), get_datetime("06-26-2021 11:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-25-2021 20:00"), get_datetime("06-26-2021 11:00")
+		)
 		self.assertEqual(issue.first_response_time, 1.0)
 
 	# issue creation and first response are a few days apart
 	def test_first_response_time_case18(self):
 		"""
-			Test frt when the issue was created before working hours and the first response is also sent before working hours, but after a few days.
+		Test frt when the issue was created before working hours and the first response is also sent before working hours, but after a few days.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 6:00"), get_datetime("07-01-2021 6:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 6:00"), get_datetime("07-01-2021 6:00")
+		)
 		self.assertEqual(issue.first_response_time, 86400.0)
 
 	def test_first_response_time_case19(self):
 		"""
-			Test frt when the issue was created before working hours and the first response is sent during working hours, but after a few days.
+		Test frt when the issue was created before working hours and the first response is sent during working hours, but after a few days.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 6:00"), get_datetime("07-01-2021 11:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 6:00"), get_datetime("07-01-2021 11:00")
+		)
 		self.assertEqual(issue.first_response_time, 90000.0)
 
 	def test_first_response_time_case20(self):
 		"""
-			Test frt when the issue was created before working hours and the first response is sent after working hours, but after a few days.
+		Test frt when the issue was created before working hours and the first response is sent after working hours, but after a few days.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 6:00"), get_datetime("07-01-2021 20:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 6:00"), get_datetime("07-01-2021 20:00")
+		)
 		self.assertEqual(issue.first_response_time, 115200.0)
 
 	def test_first_response_time_case21(self):
 		"""
-			Test frt when the issue was created before working hours and the first response is sent after a few days, on a holiday.
+		Test frt when the issue was created before working hours and the first response is sent after a few days, on a holiday.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-25-2021 6:00"), get_datetime("06-27-2021 11:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-25-2021 6:00"), get_datetime("06-27-2021 11:00")
+		)
 		self.assertEqual(issue.first_response_time, 28800.0)
 
 	def test_first_response_time_case22(self):
 		"""
-			Test frt when the issue was created during working hours and the first response is sent before working hours, but after a few days.
+		Test frt when the issue was created during working hours and the first response is sent before working hours, but after a few days.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 12:00"), get_datetime("07-01-2021 6:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 12:00"), get_datetime("07-01-2021 6:00")
+		)
 		self.assertEqual(issue.first_response_time, 79200.0)
 
 	def test_first_response_time_case23(self):
 		"""
-			Test frt when the issue was created during working hours and the first response is also sent during working hours, but after a few days.
+		Test frt when the issue was created during working hours and the first response is also sent during working hours, but after a few days.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 12:00"), get_datetime("07-01-2021 11:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 12:00"), get_datetime("07-01-2021 11:00")
+		)
 		self.assertEqual(issue.first_response_time, 82800.0)
 
 	def test_first_response_time_case24(self):
 		"""
-			Test frt when the issue was created during working hours and the first response is sent after working hours, but after a few days.
+		Test frt when the issue was created during working hours and the first response is sent after working hours, but after a few days.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 12:00"), get_datetime("07-01-2021 20:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 12:00"), get_datetime("07-01-2021 20:00")
+		)
 		self.assertEqual(issue.first_response_time, 108000.0)
 
 	def test_first_response_time_case25(self):
 		"""
-			Test frt when the issue was created during working hours and the first response is sent after a few days, on a holiday.
+		Test frt when the issue was created during working hours and the first response is sent after a few days, on a holiday.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-25-2021 12:00"), get_datetime("06-27-2021 11:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-25-2021 12:00"), get_datetime("06-27-2021 11:00")
+		)
 		self.assertEqual(issue.first_response_time, 21600.0)
 
 	def test_first_response_time_case26(self):
 		"""
-			Test frt when the issue was created after working hours and the first response is sent before working hours, but after a few days.
+		Test frt when the issue was created after working hours and the first response is sent before working hours, but after a few days.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 20:00"), get_datetime("07-01-2021 6:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 20:00"), get_datetime("07-01-2021 6:00")
+		)
 		self.assertEqual(issue.first_response_time, 57600.0)
 
 	def test_first_response_time_case27(self):
 		"""
-			Test frt when the issue was created after working hours and the first response is sent during working hours, but after a few days.
+		Test frt when the issue was created after working hours and the first response is sent during working hours, but after a few days.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 20:00"), get_datetime("07-01-2021 11:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 20:00"), get_datetime("07-01-2021 11:00")
+		)
 		self.assertEqual(issue.first_response_time, 61200.0)
 
 	def test_first_response_time_case28(self):
 		"""
-			Test frt when the issue was created after working hours and the first response is also sent after working hours, but after a few days.
+		Test frt when the issue was created after working hours and the first response is also sent after working hours, but after a few days.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-28-2021 20:00"), get_datetime("07-01-2021 20:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-28-2021 20:00"), get_datetime("07-01-2021 20:00")
+		)
 		self.assertEqual(issue.first_response_time, 86400.0)
 
 	def test_first_response_time_case29(self):
 		"""
-			Test frt when the issue was created after working hours and the first response is sent after a few days, on a holiday.
+		Test frt when the issue was created after working hours and the first response is sent after a few days, on a holiday.
 		"""
-		issue = create_issue_and_communication(get_datetime("06-25-2021 20:00"), get_datetime("06-27-2021 11:00"))
+		issue = create_issue_and_communication(
+			get_datetime("06-25-2021 20:00"), get_datetime("06-27-2021 11:00")
+		)
 		self.assertEqual(issue.first_response_time, 1.0)
+
 
 def create_issue_and_communication(issue_creation, first_responded_on):
 	issue = make_issue(issue_creation, index=1)
@@ -355,20 +417,23 @@ def create_issue_and_communication(issue_creation, first_responded_on):
 
 	return issue
 
+
 def make_issue(creation=None, customer=None, index=0, priority=None, issue_type=None):
-	issue = frappe.get_doc({
-		"doctype": "Issue",
-		"subject": "Service Level Agreement Issue {0}".format(index),
-		"customer": customer,
-		"raised_by": "test@example.com",
-		"description": "Service Level Agreement Issue",
-		"issue_type": issue_type,
-		"priority": priority,
-		"creation": creation,
-		"opening_date": creation,
-		"service_level_agreement_creation": creation,
-		"company": "_Test Company"
-	}).insert(ignore_permissions=True)
+	issue = frappe.get_doc(
+		{
+			"doctype": "Issue",
+			"subject": "Service Level Agreement Issue {0}".format(index),
+			"customer": customer,
+			"raised_by": "test@example.com",
+			"description": "Service Level Agreement Issue",
+			"issue_type": issue_type,
+			"priority": priority,
+			"creation": creation,
+			"opening_date": creation,
+			"service_level_agreement_creation": creation,
+			"company": "_Test Company",
+		}
+	).insert(ignore_permissions=True)
 
 	return issue
 
@@ -379,45 +444,50 @@ def create_customer(name, customer_group, territory):
 	create_territory(territory)
 
 	if not frappe.db.exists("Customer", {"customer_name": name}):
-		frappe.get_doc({
-			"doctype": "Customer",
-			"customer_name": name,
-			"customer_group": customer_group,
-			"territory": territory
-		}).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": name,
+				"customer_group": customer_group,
+				"territory": territory,
+			}
+		).insert(ignore_permissions=True)
 
 
 def create_customer_group(customer_group):
 
 	if not frappe.db.exists("Customer Group", {"customer_group_name": customer_group}):
-		frappe.get_doc({
-			"doctype": "Customer Group",
-			"customer_group_name": customer_group
-		}).insert(ignore_permissions=True)
+		frappe.get_doc({"doctype": "Customer Group", "customer_group_name": customer_group}).insert(
+			ignore_permissions=True
+		)
 
 
 def create_territory(territory):
 
 	if not frappe.db.exists("Territory", {"territory_name": territory}):
-		frappe.get_doc({
-			"doctype": "Territory",
-			"territory_name": territory,
-		}).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "Territory",
+				"territory_name": territory,
+			}
+		).insert(ignore_permissions=True)
 
 
 def create_communication(reference_name, sender, sent_or_received, creation):
-	communication = frappe.get_doc({
-		"doctype": "Communication",
-		"communication_type": "Communication",
-		"communication_medium": "Email",
-		"sent_or_received": sent_or_received,
-		"email_status": "Open",
-		"subject": "Test Issue",
-		"sender": sender,
-		"content": "Test",
-		"status": "Linked",
-		"reference_doctype": "Issue",
-		"creation": creation,
-		"reference_name": reference_name
-	})
+	communication = frappe.get_doc(
+		{
+			"doctype": "Communication",
+			"communication_type": "Communication",
+			"communication_medium": "Email",
+			"sent_or_received": sent_or_received,
+			"email_status": "Open",
+			"subject": "Test Issue",
+			"sender": sender,
+			"content": "Test",
+			"status": "Linked",
+			"reference_doctype": "Issue",
+			"creation": creation,
+			"reference_name": reference_name,
+		}
+	)
 	communication.save()

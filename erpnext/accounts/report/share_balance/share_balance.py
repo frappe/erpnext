@@ -7,7 +7,8 @@ from frappe import _
 
 
 def execute(filters=None):
-	if not filters: filters = {}
+	if not filters:
+		filters = {}
 
 	if not filters.get("date"):
 		frappe.throw(_("Please select date"))
@@ -38,12 +39,18 @@ def execute(filters=None):
 					break
 			# new entry
 			if not row:
-				row = [filters.get("shareholder"),
-					share_entry.share_type, share_entry.no_of_shares, share_entry.rate, share_entry.amount]
+				row = [
+					filters.get("shareholder"),
+					share_entry.share_type,
+					share_entry.no_of_shares,
+					share_entry.rate,
+					share_entry.amount,
+				]
 
 				data.append(row)
 
 	return columns, data
+
 
 def get_columns(filters):
 	columns = [
@@ -51,9 +58,10 @@ def get_columns(filters):
 		_("Share Type") + "::90",
 		_("No of Shares") + "::90",
 		_("Average Rate") + ":Currency:90",
-		_("Amount") + ":Currency:90"
+		_("Amount") + ":Currency:90",
 	]
 	return columns
 
+
 def get_all_shares(shareholder):
-	return frappe.get_doc('Shareholder', shareholder).share_balance
+	return frappe.get_doc("Shareholder", shareholder).share_balance

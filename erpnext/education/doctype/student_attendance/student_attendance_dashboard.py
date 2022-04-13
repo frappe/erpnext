@@ -1,13 +1,12 @@
-
 from frappe import _
 
 
 def get_data():
 	return {
-		'reports': [
+		"reports": [
 			{
-				'label': _('Reports'),
-				'items': ['Student Monthly Attendance Sheet', 'Student Batch-Wise Attendance']
+				"label": _("Reports"),
+				"items": ["Student Monthly Attendance Sheet", "Student Batch-Wise Attendance"],
 			}
 		]
 	}

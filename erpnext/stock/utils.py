@@ -12,8 +12,13 @@ from six import string_types
 import erpnext
 
 
-class InvalidWarehouseCompany(frappe.ValidationError): pass
-class PendingRepostingError(frappe.ValidationError): pass
+class InvalidWarehouseCompany(frappe.ValidationError):
+	pass
+
+
+class PendingRepostingError(frappe.ValidationError):
+	pass
+
 
 def get_stock_value_from_bin(warehouse=None, item_code=None):
 	values = {}
@@ -26,22 +31,27 @@ def get_stock_value_from_bin(warehouse=None, item_code=None):
 						and w2.lft between w1.lft and w1.rgt
 						) """
 
-		values['warehouse'] = warehouse
+		values["warehouse"] = warehouse
 
 	if item_code:
 		conditions += " and `tabBin`.item_code = %(item_code)s"
 
-		values['item_code'] = item_code
+		values["item_code"] = item_code
 
-	query = """select sum(stock_value) from `tabBin`, `tabItem` where 1 = 1
-		and `tabItem`.name = `tabBin`.item_code and ifnull(`tabItem`.disabled, 0) = 0 %s""" % conditions
+	query = (
+		"""select sum(stock_value) from `tabBin`, `tabItem` where 1 = 1
+		and `tabItem`.name = `tabBin`.item_code and ifnull(`tabItem`.disabled, 0) = 0 %s"""
+		% conditions
+	)
 
 	stock_value = frappe.db.sql(query, values)
 
 	return stock_value
 
+
 def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
-	if not posting_date: posting_date = nowdate()
+	if not posting_date:
+		posting_date = nowdate()
 
 	values, condition = [posting_date], ""
 
@@ -63,13 +73,19 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 		values.append(item_code)
 		condition += " AND item_code = %s"
 
-	stock_ledger_entries = frappe.db.sql("""
+	stock_ledger_entries = frappe.db.sql(
+		"""
 		SELECT item_code, stock_value, name, warehouse
 		FROM `tabStock Ledger Entry` sle
 		WHERE posting_date <= %s {0}
 			and is_cancelled = 0
 		ORDER BY timestamp(posting_date, posting_time) DESC, creation DESC
-	""".format(condition), values, as_dict=1)
+	""".format(
+			condition
+		),
+		values,
+		as_dict=1,
+	)
 
 	sle_map = {}
 	for sle in stock_ledger_entries:
@@ -78,23 +94,32 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 
 	return sum(sle_map.values())
 
+
 @frappe.whitelist()
-def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None,
-	with_valuation_rate=False, with_serial_no=False):
+def get_stock_balance(
+	item_code,
+	warehouse,
+	posting_date=None,
+	posting_time=None,
+	with_valuation_rate=False,
+	with_serial_no=False,
+):
 	"""Returns stock balance quantity at given warehouse on given posting date or current date.
 
 	If `with_valuation_rate` is True, will return tuple (qty, rate)"""
 
 	from erpnext.stock.stock_ledger import get_previous_sle
 
-	if posting_date is None: posting_date = nowdate()
-	if posting_time is None: posting_time = nowtime()
+	if posting_date is None:
+		posting_date = nowdate()
+	if posting_time is None:
+		posting_time = nowtime()
 
 	args = {
 		"item_code": item_code,
-		"warehouse":warehouse,
+		"warehouse": warehouse,
 		"posting_date": posting_date,
-		"posting_time": posting_time
+		"posting_time": posting_time,
 	}
 
 	last_entry = get_previous_sle(args)
@@ -103,33 +128,41 @@ def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None
 		if with_serial_no:
 			serial_nos = get_serial_nos_data_after_transactions(args)
 
-			return ((last_entry.qty_after_transaction, last_entry.valuation_rate, serial_nos)
-				if last_entry else (0.0, 0.0, None))
+			return (
+				(last_entry.qty_after_transaction, last_entry.valuation_rate, serial_nos)
+				if last_entry
+				else (0.0, 0.0, None)
+			)
 		else:
-			return (last_entry.qty_after_transaction, last_entry.valuation_rate) if last_entry else (0.0, 0.0)
+			return (
+				(last_entry.qty_after_transaction, last_entry.valuation_rate) if last_entry else (0.0, 0.0)
+			)
 	else:
 		return last_entry.qty_after_transaction if last_entry else 0.0
+
 
 def get_serial_nos_data_after_transactions(args):
 	from pypika import CustomFunction
 
 	serial_nos = set()
 	args = frappe._dict(args)
-	sle = frappe.qb.DocType('Stock Ledger Entry')
-	Timestamp = CustomFunction('timestamp', ['date', 'time'])
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	Timestamp = CustomFunction("timestamp", ["date", "time"])
 
-	stock_ledger_entries = frappe.qb.from_(
-		sle
-	).select(
-		'serial_no','actual_qty'
-	).where(
-		(sle.item_code == args.item_code)
-		& (sle.warehouse == args.warehouse)
-		& (Timestamp(sle.posting_date, sle.posting_time) < Timestamp(args.posting_date, args.posting_time))
-		& (sle.is_cancelled == 0)
-	).orderby(
-		sle.posting_date, sle.posting_time, sle.creation
-	).run(as_dict=1)
+	stock_ledger_entries = (
+		frappe.qb.from_(sle)
+		.select("serial_no", "actual_qty")
+		.where(
+			(sle.item_code == args.item_code)
+			& (sle.warehouse == args.warehouse)
+			& (
+				Timestamp(sle.posting_date, sle.posting_time) < Timestamp(args.posting_date, args.posting_time)
+			)
+			& (sle.is_cancelled == 0)
+		)
+		.orderby(sle.posting_date, sle.posting_time, sle.creation)
+		.run(as_dict=1)
+	)
 
 	for stock_ledger_entry in stock_ledger_entries:
 		changed_serial_no = get_serial_nos_data(stock_ledger_entry.serial_no)
@@ -138,11 +171,14 @@ def get_serial_nos_data_after_transactions(args):
 		else:
 			serial_nos.difference_update(changed_serial_no)
 
-	return '\n'.join(serial_nos)
+	return "\n".join(serial_nos)
+
 
 def get_serial_nos_data(serial_nos):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 	return get_serial_nos(serial_nos)
+
 
 @frappe.whitelist()
 def get_latest_stock_qty(item_code, warehouse=None):
@@ -160,36 +196,47 @@ def get_latest_stock_qty(item_code, warehouse=None):
 			values.append(warehouse)
 			condition += " AND warehouse = %s"
 
-	actual_qty = frappe.db.sql("""select sum(actual_qty) from tabBin
-		where item_code=%s {0}""".format(condition), values)[0][0]
+	actual_qty = frappe.db.sql(
+		"""select sum(actual_qty) from tabBin
+		where item_code=%s {0}""".format(
+			condition
+		),
+		values,
+	)[0][0]
 
 	return actual_qty
 
 
 def get_latest_stock_balance():
 	bin_map = {}
-	for d in frappe.db.sql("""SELECT item_code, warehouse, stock_value as stock_value
-		FROM tabBin""", as_dict=1):
-			bin_map.setdefault(d.warehouse, {}).setdefault(d.item_code, flt(d.stock_value))
+	for d in frappe.db.sql(
+		"""SELECT item_code, warehouse, stock_value as stock_value
+		FROM tabBin""",
+		as_dict=1,
+	):
+		bin_map.setdefault(d.warehouse, {}).setdefault(d.item_code, flt(d.stock_value))
 
 	return bin_map
+
 
 def get_bin(item_code, warehouse):
 	bin = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
 	if not bin:
 		bin_obj = _create_bin(item_code, warehouse)
 	else:
-		bin_obj = frappe.get_doc('Bin', bin, for_update=True)
+		bin_obj = frappe.get_doc("Bin", bin, for_update=True)
 	bin_obj.flags.ignore_permissions = True
 	return bin_obj
 
-def get_or_make_bin(item_code: str , warehouse: str) -> str:
-	bin_record = frappe.db.get_value('Bin', {'item_code': item_code, 'warehouse': warehouse})
+
+def get_or_make_bin(item_code: str, warehouse: str) -> str:
+	bin_record = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse})
 
 	if not bin_record:
 		bin_obj = _create_bin(item_code, warehouse)
 		bin_record = bin_obj.name
 	return bin_record
+
 
 def _create_bin(item_code, warehouse):
 	"""Create a bin and take care of concurrent inserts."""
@@ -206,20 +253,24 @@ def _create_bin(item_code, warehouse):
 
 	return bin_obj
 
+
 def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	"""WARNING: This function is deprecated. Inline this function instead of using it."""
 	from erpnext.stock.doctype.bin.bin import update_stock
-	is_stock_item = frappe.get_cached_value('Item', args.get("item_code"), 'is_stock_item')
+
+	is_stock_item = frappe.get_cached_value("Item", args.get("item_code"), "is_stock_item")
 	if is_stock_item:
 		bin_name = get_or_make_bin(args.get("item_code"), args.get("warehouse"))
 		update_stock(bin_name, args, allow_negative_stock, via_landed_cost_voucher)
 	else:
 		frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))
 
+
 @frappe.whitelist()
 def get_incoming_rate(args, raise_error_if_no_rate=True):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
+
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
@@ -229,36 +280,52 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 	else:
 		valuation_method = get_valuation_method(args.get("item_code"))
 		previous_sle = get_previous_sle(args)
-		if valuation_method == 'FIFO':
+		if valuation_method == "FIFO":
 			if previous_sle:
-				previous_stock_queue = json.loads(previous_sle.get('stock_queue', '[]') or '[]')
-				in_rate = get_fifo_rate(previous_stock_queue, args.get("qty") or 0) if previous_stock_queue else 0
-		elif valuation_method == 'Moving Average':
-			in_rate = previous_sle.get('valuation_rate') or 0
+				previous_stock_queue = json.loads(previous_sle.get("stock_queue", "[]") or "[]")
+				in_rate = (
+					get_fifo_rate(previous_stock_queue, args.get("qty") or 0) if previous_stock_queue else 0
+				)
+		elif valuation_method == "Moving Average":
+			in_rate = previous_sle.get("valuation_rate") or 0
 
 	if not in_rate:
-		voucher_no = args.get('voucher_no') or args.get('name')
-		in_rate = get_valuation_rate(args.get('item_code'), args.get('warehouse'),
-			args.get('voucher_type'), voucher_no, args.get('allow_zero_valuation'),
-			currency=erpnext.get_company_currency(args.get('company')), company=args.get('company'),
-			raise_error_if_no_rate=raise_error_if_no_rate)
+		voucher_no = args.get("voucher_no") or args.get("name")
+		in_rate = get_valuation_rate(
+			args.get("item_code"),
+			args.get("warehouse"),
+			args.get("voucher_type"),
+			voucher_no,
+			args.get("allow_zero_valuation"),
+			currency=erpnext.get_company_currency(args.get("company")),
+			company=args.get("company"),
+			raise_error_if_no_rate=raise_error_if_no_rate,
+		)
 
 	return flt(in_rate)
+
 
 def get_avg_purchase_rate(serial_nos):
 	"""get average value of serial numbers"""
 
 	serial_nos = get_valid_serial_nos(serial_nos)
-	return flt(frappe.db.sql("""select avg(purchase_rate) from `tabSerial No`
-		where name in (%s)""" % ", ".join(["%s"] * len(serial_nos)),
-		tuple(serial_nos))[0][0])
+	return flt(
+		frappe.db.sql(
+			"""select avg(purchase_rate) from `tabSerial No`
+		where name in (%s)"""
+			% ", ".join(["%s"] * len(serial_nos)),
+			tuple(serial_nos),
+		)[0][0]
+	)
+
 
 def get_valuation_method(item_code):
 	"""get valuation method from item or default"""
-	val_method = frappe.db.get_value('Item', item_code, 'valuation_method', cache=True)
+	val_method = frappe.db.get_value("Item", item_code, "valuation_method", cache=True)
 	if not val_method:
 		val_method = frappe.db.get_value("Stock Settings", None, "valuation_method") or "FIFO"
 	return val_method
+
 
 def get_fifo_rate(previous_stock_queue, qty):
 	"""get FIFO (average) Rate from Queue"""
@@ -286,10 +353,11 @@ def get_fifo_rate(previous_stock_queue, qty):
 
 		return outgoing_cost / available_qty_for_outgoing
 
-def get_valid_serial_nos(sr_nos, qty=0, item_code=''):
+
+def get_valid_serial_nos(sr_nos, qty=0, item_code=""):
 	"""split serial nos, validate and return list of valid serial nos"""
 	# TODO: remove duplicates in client side
-	serial_nos = cstr(sr_nos).strip().replace(',', '\n').split('\n')
+	serial_nos = cstr(sr_nos).strip().replace(",", "\n").split("\n")
 
 	valid_serial_nos = []
 	for val in serial_nos:
@@ -305,19 +373,29 @@ def get_valid_serial_nos(sr_nos, qty=0, item_code=''):
 
 	return valid_serial_nos
 
+
 def validate_warehouse_company(warehouse, company):
 	warehouse_company = frappe.db.get_value("Warehouse", warehouse, "company", cache=True)
 	if warehouse_company and warehouse_company != company:
-		frappe.throw(_("Warehouse {0} does not belong to company {1}").format(warehouse, company),
-			InvalidWarehouseCompany)
+		frappe.throw(
+			_("Warehouse {0} does not belong to company {1}").format(warehouse, company),
+			InvalidWarehouseCompany,
+		)
+
 
 def is_group_warehouse(warehouse):
 	if frappe.db.get_value("Warehouse", warehouse, "is_group", cache=True):
 		frappe.throw(_("Group node warehouse is not allowed to select for transactions"))
 
+
 def validate_disabled_warehouse(warehouse):
 	if frappe.db.get_value("Warehouse", warehouse, "disabled", cache=True):
-		frappe.throw(_("Disabled Warehouse {0} cannot be used for this transaction.").format(get_link_to_form('Warehouse', warehouse)))
+		frappe.throw(
+			_("Disabled Warehouse {0} cannot be used for this transaction.").format(
+				get_link_to_form("Warehouse", warehouse)
+			)
+		)
+
 
 def update_included_uom_in_report(columns, result, include_uom, conversion_factors):
 	if not include_uom or not conversion_factors:
@@ -335,11 +413,14 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 			convertible_columns.setdefault(key, d.get("convertible"))
 
 			# Add new column to show qty/rate as per the selected UOM
-			columns.insert(idx+1, {
-				'label': "{0} (per {1})".format(d.get("label"), include_uom),
-				'fieldname': "{0}_{1}".format(d.get("fieldname"), frappe.scrub(include_uom)),
-				'fieldtype': 'Currency' if d.get("convertible") == 'rate' else 'Float'
-			})
+			columns.insert(
+				idx + 1,
+				{
+					"label": "{0} (per {1})".format(d.get("label"), include_uom),
+					"fieldname": "{0}_{1}".format(d.get("fieldname"), frappe.scrub(include_uom)),
+					"fieldtype": "Currency" if d.get("convertible") == "rate" else "Float",
+				},
+			)
 
 	update_dict_values = []
 	for row_idx, row in enumerate(result):
@@ -351,13 +432,13 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 			if not conversion_factors[row_idx]:
 				conversion_factors[row_idx] = 1
 
-			if convertible_columns.get(key) == 'rate':
+			if convertible_columns.get(key) == "rate":
 				new_value = flt(value) * conversion_factors[row_idx]
 			else:
 				new_value = flt(value) / conversion_factors[row_idx]
 
 			if not is_dict_obj:
-				row.insert(key+1, new_value)
+				row.insert(key + 1, new_value)
 			else:
 				new_key = "{0}_{1}".format(key, frappe.scrub(include_uom))
 				update_dict_values.append([row, new_key, new_value])
@@ -366,11 +447,17 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 		row, key, value = data
 		row[key] = value
 
+
 def get_available_serial_nos(args):
-	return frappe.db.sql(""" SELECT name from `tabSerial No`
+	return frappe.db.sql(
+		""" SELECT name from `tabSerial No`
 		WHERE item_code = %(item_code)s and warehouse = %(warehouse)s
 		 and timestamp(purchase_date, purchase_time) <= timestamp(%(posting_date)s, %(posting_time)s)
-	""", args, as_dict=1)
+	""",
+		args,
+		as_dict=1,
+	)
+
 
 def add_additional_uom_columns(columns, result, include_uom, conversion_factors):
 	if not include_uom or not conversion_factors:
@@ -379,60 +466,54 @@ def add_additional_uom_columns(columns, result, include_uom, conversion_factors)
 	convertible_column_map = {}
 	for col_idx in list(reversed(range(0, len(columns)))):
 		col = columns[col_idx]
-		if isinstance(col, dict) and col.get('convertible') in ['rate', 'qty']:
+		if isinstance(col, dict) and col.get("convertible") in ["rate", "qty"]:
 			next_col = col_idx + 1
 			columns.insert(next_col, col.copy())
-			columns[next_col]['fieldname'] += '_alt'
-			convertible_column_map[col.get('fieldname')] = frappe._dict({
-				'converted_col': columns[next_col]['fieldname'],
-				'for_type': col.get('convertible')
-			})
-			if col.get('convertible') == 'rate':
-				columns[next_col]['label'] += ' (per {})'.format(include_uom)
+			columns[next_col]["fieldname"] += "_alt"
+			convertible_column_map[col.get("fieldname")] = frappe._dict(
+				{"converted_col": columns[next_col]["fieldname"], "for_type": col.get("convertible")}
+			)
+			if col.get("convertible") == "rate":
+				columns[next_col]["label"] += " (per {})".format(include_uom)
 			else:
-				columns[next_col]['label'] += ' ({})'.format(include_uom)
+				columns[next_col]["label"] += " ({})".format(include_uom)
 
 	for row_idx, row in enumerate(result):
 		for convertible_col, data in convertible_column_map.items():
-			conversion_factor = conversion_factors[row.get('item_code')] or 1
+			conversion_factor = conversion_factors[row.get("item_code")] or 1
 			for_type = data.for_type
 			value_before_conversion = row.get(convertible_col)
-			if for_type == 'rate':
+			if for_type == "rate":
 				row[data.converted_col] = flt(value_before_conversion) * conversion_factor
 			else:
 				row[data.converted_col] = flt(value_before_conversion) / conversion_factor
 
 		result[row_idx] = row
 
+
 def get_incoming_outgoing_rate_for_cancel(item_code, voucher_type, voucher_no, voucher_detail_no):
-	outgoing_rate = frappe.db.sql("""SELECT abs(stock_value_difference / actual_qty)
+	outgoing_rate = frappe.db.sql(
+		"""SELECT abs(stock_value_difference / actual_qty)
 		FROM `tabStock Ledger Entry`
 		WHERE voucher_type = %s and voucher_no = %s
 			and item_code = %s and voucher_detail_no = %s
 			ORDER BY CREATION DESC limit 1""",
-		(voucher_type, voucher_no, item_code, voucher_detail_no))
+		(voucher_type, voucher_no, item_code, voucher_detail_no),
+	)
 
 	outgoing_rate = outgoing_rate[0][0] if outgoing_rate else 0.0
 
 	return outgoing_rate
 
+
 def is_reposting_item_valuation_in_progress():
-	reposting_in_progress = frappe.db.exists("Repost Item Valuation",
-		{'docstatus': 1, 'status': ['in', ['Queued','In Progress']]})
+	reposting_in_progress = frappe.db.exists(
+		"Repost Item Valuation", {"docstatus": 1, "status": ["in", ["Queued", "In Progress"]]}
+	)
 	if reposting_in_progress:
-		frappe.msgprint(_("Item valuation reposting in progress. Report might show incorrect item valuation."), alert=1)
-
-
-def calculate_mapped_packed_items_return(return_doc):
-	parent_items = set([item.parent_item for item in return_doc.packed_items])
-	against_doc = frappe.get_doc(return_doc.doctype, return_doc.return_against)
-
-	for original_bundle, returned_bundle in zip(against_doc.items, return_doc.items):
-		if original_bundle.item_code in parent_items:
-			for returned_packed_item, original_packed_item in zip(return_doc.packed_items, against_doc.packed_items):
-				if returned_packed_item.parent_item == original_bundle.item_code:
-					returned_packed_item.parent_detail_docname = returned_bundle.name
-					returned_packed_item.qty = (original_packed_item.qty / original_bundle.qty) * returned_bundle.qty
+		frappe.msgprint(
+			_("Item valuation reposting in progress. Report might show incorrect item valuation."), alert=1
+		)
 
 
 def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool:
@@ -440,22 +521,25 @@ def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool
 
 	filters = {
 		"docstatus": 1,
-		"status": ["in", ["Queued","In Progress", "Failed"]],
+		"status": ["in", ["Queued", "In Progress"]],
 		"posting_date": ["<=", posting_date],
 	}
 
-	reposting_pending =  frappe.db.exists("Repost Item Valuation", filters)
+	reposting_pending = frappe.db.exists("Repost Item Valuation", filters)
 	if reposting_pending and throw_error:
-		msg = _("Stock/Accounts can not be frozen as processing of backdated entries is going on. Please try again later.")
-		frappe.msgprint(msg,
-				raise_exception=PendingRepostingError,
-				title="Stock Reposting Ongoing",
-				indicator="red",
-				primary_action={
-					"label": _("Show pending entries"),
-					"client_action": "erpnext.route_to_pending_reposts",
-					"args": filters,
-				}
-			)
+		msg = _(
+			"Stock/Accounts can not be frozen as processing of backdated entries is going on. Please try again later."
+		)
+		frappe.msgprint(
+			msg,
+			raise_exception=PendingRepostingError,
+			title="Stock Reposting Ongoing",
+			indicator="red",
+			primary_action={
+				"label": _("Show pending entries"),
+				"client_action": "erpnext.route_to_pending_reposts",
+				"args": filters,
+			},
+		)
 
 	return bool(reposting_pending)

@@ -693,12 +693,12 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 	get_ordered_qty: function(item, so) {
 		let ordered_qty = item.ordered_qty;
-		if (so.packed_items) {
+		if (so.packed_items && so.packed_items.length) {
 			// calculate ordered qty based on packed items in case of product bundle
 			let packed_items = so.packed_items.filter(
 				(pi) => pi.parent_detail_docname == item.name
 			);
-			if (packed_items) {
+			if (packed_items && packed_items.length) {
 				ordered_qty = packed_items.reduce(
 					(sum, pi) => sum + flt(pi.ordered_qty),
 					0
