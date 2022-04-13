@@ -341,6 +341,7 @@ erpnext.patches.v14_0.delete_shopify_doctypes
 erpnext.patches.v14_0.delete_hub_doctypes
 erpnext.patches.v14_0.delete_hospitality_doctypes # 20-01-2022
 erpnext.patches.v14_0.delete_agriculture_doctypes
+erpnext.patches.v14_0.delete_datev_doctypes
 erpnext.patches.v14_0.rearrange_company_fields
 erpnext.patches.v14_0.update_leave_notification_template
 erpnext.patches.v14_0.restore_einvoice_fields
