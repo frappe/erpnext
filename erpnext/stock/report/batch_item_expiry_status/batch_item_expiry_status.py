@@ -23,7 +23,6 @@ def execute(filters=None):
 		for wh in sorted(iwb_map[item]):
 			for batch in sorted(iwb_map[item][wh]):
 
-<<<<<<< HEAD
 				qty_dict = iwb_map[item][wh][batch]
 				date_exp = frappe.db.get_value('Batch', batch, 'expiry_date')
 				if date_exp:
@@ -37,19 +36,6 @@ def execute(filters=None):
 										frappe.db.get_value('Batch', batch, 'expiry_date'), qty_dict.expiry_status
 										])
 
-=======
-				data.append(
-					[
-						item,
-						item_map[item]["item_name"],
-						item_map[item]["description"],
-						wh,
-						batch,
-						frappe.db.get_value("Batch", batch, "expiry_date"),
-						qty_dict.expiry_status,
-					]
-				)
->>>>>>> 71f72458bfb3371b30ca240efa10e3b4602c6f62
 
 	return columns, data
 

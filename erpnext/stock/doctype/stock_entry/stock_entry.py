@@ -157,18 +157,10 @@ class StockEntry(StockController):
 		# if self.work_order and self.stock_entry_type == "Material Consumption for Manufacture":
 		# 	self.set_work_order_total_cost()
 
-<<<<<<< HEAD
-		if self.purpose == 'Material Transfer' and self.add_to_transit:
-			self.set_material_request_transfer_status('In Transit')
-			
-		if self.purpose == 'Material Transfer' and self.outgoing_stock_entry:
-			self.set_material_request_transfer_status('Completed')
-=======
 		if self.purpose == "Material Transfer" and self.add_to_transit:
 			self.set_material_request_transfer_status("In Transit")
 		if self.purpose == "Material Transfer" and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status("Completed")
->>>>>>> 71f72458bfb3371b30ca240efa10e3b4602c6f62
 
 		
 		manufacture = frappe.get_doc('Manufacturing Settings')
@@ -273,25 +265,6 @@ class StockEntry(StockController):
 				frappe.throw(_("Row {0}: Qty is mandatory").format(item.idx), title=_("Zero quantity"))
 			if not flt(item.conversion_factor):
 				frappe.throw(_("Row {0}: UOM Conversion Factor is mandatory").format(item.idx))
-<<<<<<< HEAD
-			item.transfer_qty = flt(flt(item.qty) * flt(item.conversion_factor),
-				self.precision("transfer_qty", item))
-	# def scrap_qty(self):
-	# 	if self.stock_entry_type=="Manufacture" and self.work_order:
-	# 		doc=frappe.get_doc("Work Order",{"name":self.work_order})
-	# 		a=[]
-	# 		b=[]
-	# 		for i in self.items:
-	# 			if i.is_scrap_item==1:
-	# 				a.append(i.qty)
-	# 				b.append(i.basic_amount)
-	# 				d=sum(a)
-	# 				c=sum(b)
-	# 				doc.total_manufacture_of_scrap=d
-	# 				doc.scrap_total_cost=c
-	# 		doc.save(ignore_permissions=True)
-
-=======
 			item.transfer_qty = flt(
 				flt(item.qty) * flt(item.conversion_factor), self.precision("transfer_qty", item)
 			)
@@ -299,7 +272,6 @@ class StockEntry(StockController):
 				frappe.throw(
 					_("Row {0}: Qty in Stock UOM can not be zero.").format(item.idx), title=_("Zero quantity")
 				)
->>>>>>> 71f72458bfb3371b30ca240efa10e3b4602c6f62
 
 	def update_cost_in_project(self):
 		if self.work_order and not frappe.db.get_value(
@@ -568,7 +540,6 @@ class StockEntry(StockController):
 						)
 					)
 
-<<<<<<< HEAD
 				work_order_link = frappe.utils.get_link_to_form('Work Order', self.work_order)
 				job_card_link = frappe.utils.get_link_to_form('Job Card', job_card)
 				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}.")
@@ -588,23 +559,6 @@ class StockEntry(StockController):
 		frappe.db.sql(query)
 		frappe.db.commit()
 		return total_weight
-=======
-				work_order_link = frappe.utils.get_link_to_form("Work Order", self.work_order)
-				job_card_link = frappe.utils.get_link_to_form("Job Card", job_card)
-				frappe.throw(
-					_(
-						"Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}."
-					).format(
-						d.idx,
-						frappe.bold(d.operation),
-						frappe.bold(total_completed_qty),
-						work_order_link,
-						job_card_link,
-					),
-					OperationsNotCompleteError,
-				)
-
->>>>>>> 71f72458bfb3371b30ca240efa10e3b4602c6f62
 	def check_duplicate_entry_for_work_order(self):
 		other_ste = [
 			t[0]
@@ -1748,13 +1702,8 @@ class StockEntry(StockController):
 							"cost_center": item_account_details.get("buying_cost_center"),
 						}
 					}
-<<<<<<< HEAD
-				})
-	
-=======
 				)
 
->>>>>>> 71f72458bfb3371b30ca240efa10e3b4602c6f62
 	def get_transfered_raw_materials(self):
 		transferred_materials = frappe.db.sql(
 			"""
@@ -2292,15 +2241,12 @@ class StockEntry(StockController):
 
 		return sorted(list(set(get_serial_nos(self.pro_doc.serial_no)) - set(used_serial_nos)))
 
-<<<<<<< HEAD
 	def set_title(self):
 		if frappe.flags.in_import and self.title:
 			# Allow updating title during data import/update
 			return
 
 		self.title = self.purpose
-=======
->>>>>>> 71f72458bfb3371b30ca240efa10e3b4602c6f62
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):

@@ -531,17 +531,12 @@ class StockReconciliation(StockController):
 
 	def submit(self):
 		if len(self.items) > 100:
-<<<<<<< HEAD
-			msgprint(_("The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage"))
-			self.queue_action('submit', timeout=4600)
-=======
 			msgprint(
 				_(
 					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage"
 				)
 			)
 			self.queue_action("submit", timeout=2000)
->>>>>>> 71f72458bfb3371b30ca240efa10e3b4602c6f62
 		else:
 			self._submit()
 

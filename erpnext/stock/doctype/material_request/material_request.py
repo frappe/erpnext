@@ -122,7 +122,6 @@ class MaterialRequest(BuyingController):
 	def set_title(self):
 		"""Set title as comma separated list of items"""
 		if not self.title:
-<<<<<<< HEAD
 			items = ', '.join([d.item_name for d in self.items][:3])
 			self.title = _('{0} Request for {1}').format(self.material_request_type, items)[:100]
 	def validate_item_qty(self):
@@ -188,22 +187,14 @@ class MaterialRequest(BuyingController):
 						"min_order_qty" : item.get('min_order_qty'),
 						"amount" : float(item.get('valuation_rate')) * float(item.get('qty')),
 					})
-=======
-			items = ", ".join([d.item_name for d in self.items][:3])
-			self.title = _("{0} Request for {1}").format(self.material_request_type, items)[:100]
->>>>>>> 71f72458bfb3371b30ca240efa10e3b4602c6f62
 
 	def on_submit(self):
 		# frappe.db.set(self, 'status', 'Submitted')
 		self.update_requested_qty()
 		self.update_requested_qty_in_production_plan()
-<<<<<<< HEAD
 		# under tetsing create stock entry
 		self.create_stock_entry()
 		if self.material_request_type == 'Purchase':
-=======
-		if self.material_request_type == "Purchase":
->>>>>>> 71f72458bfb3371b30ca240efa10e3b4602c6f62
 			self.validate_budget()
 
 	def before_save(self):
