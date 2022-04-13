@@ -310,12 +310,15 @@ def project_template_query(doctype, txt, searchfield, start, page_len, filters):
 		else:
 			applies_to_item_match_cond = "`tabProject Template`.applies_to_item = {0}".format(frappe.db.escape(applies_to_item))
 
-		applies_to_item_cond = "and (ifnull(`tabProject Template`.applies_to_item) = '' or {0})".format(applies_to_item_match_cond)
+		applies_to_item_cond = "and (ifnull(`tabProject Template`.applies_to_item, '') = '' or {0})".format(applies_to_item_match_cond)
 
 	return frappe.db.sql("""
 			select {fields}
 			from `tabProject Template`
-			where ({scond}) and disabled = 0 {applies_to_item_cond} {fcond} {mcond}
+			where ({scond}) and disabled = 0
+				{applies_to_item_cond}
+				{fcond}
+				{mcond}
 			order by
 				if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 				idx desc, name
