@@ -285,6 +285,7 @@ class Asset(AccountsController):
 						finance_book.idx,
 					)
 
+<<<<<<< HEAD
 				break
 
 			# For first row
@@ -360,6 +361,27 @@ class Asset(AccountsController):
 								depreciation_amount -= depreciation_amount_for_current_month
 								date = monthly_schedule_date
 								amount = depreciation_amount_for_current_month
+=======
+						for r in range(month_range):
+							if has_pro_rata and n == 0:
+								# For first entry of monthly depr
+								if r == 0:
+									days_until_first_depr = date_diff(monthly_schedule_date, self.available_for_use_date) + 1
+									per_day_amt = depreciation_amount / days
+									depreciation_amount_for_current_month = per_day_amt * days_until_first_depr
+									depreciation_amount -= depreciation_amount_for_current_month
+									date = monthly_schedule_date
+									amount = depreciation_amount_for_current_month
+								else:
+									date = add_months(monthly_schedule_date, r)
+									amount = depreciation_amount / (month_range - 1)
+							elif (has_pro_rata and n == cint(number_of_pending_depreciations) - 1) and r == cint(
+								month_range
+							) - 1:
+								# For last entry of monthly depr
+								date = last_schedule_date
+								amount = depreciation_amount / month_range
+>>>>>>> 9cf790db9d (fix: Depreciation Amount calculation for first row when Monthly Depreciation is allowed (#30692))
 							else:
 								date = add_months(monthly_schedule_date, r)
 								amount = depreciation_amount / (month_range - 1)
