@@ -34,11 +34,7 @@ class CallLog(Document):
 
 		# Add Employee Name
 		if self.is_incoming_call():
-			# Taking the last 10 digits of the number
-			employees = get_employees_with_number(self.get("to"))
-			if employees:
-				self.call_received_by = employees[0].get("name")
-				self.employee_user_id = employees[0].get("user_id")
+			self.update_received_by()
 
 	def after_insert(self):
 		self.trigger_call_popup()
@@ -56,6 +52,9 @@ class CallLog(Document):
 		doc_before_save = self.get_doc_before_save()
 		if not doc_before_save:
 			return
+
+		if self.is_incoming_call() and self.has_value_changed("to"):
+			self.update_received_by()
 
 		if _is_call_missed(doc_before_save, self):
 			frappe.publish_realtime("call_{id}_missed".format(id=self.id), self)
@@ -93,6 +92,11 @@ class CallLog(Document):
 
 			for email in emails:
 				frappe.publish_realtime("show_call_popup", self, user=email)
+
+	def update_received_by(self):
+		if employees := get_employees_with_number(self.get("to")):
+			self.call_received_by = employees[0].get("name")
+			self.employee_user_id = employees[0].get("user_id")
 
 
 @frappe.whitelist()
