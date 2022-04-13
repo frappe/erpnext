@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cstr
 from frappe.model.document import Document
 from six import string_types
 import json
@@ -19,12 +18,11 @@ class ProjectTemplate(Document):
 	def validate_duplicate_items(self):
 		visited = set()
 		for d in self.applicable_items:
-			key = (cstr(d.applicable_item_code), cstr(d.applies_to_item))
-			if key in visited:
+			if d.applicable_item_code in visited:
 				frappe.throw(_("Row #{0}: Duplicate Applicable Item {1}")
 					.format(d.idx, frappe.bold(d.applicable_item_code)))
 
-			visited.add(key)
+			visited.add(d.applicable_item_code)
 
 	def validate_duplicate_applicable_item_groups(self):
 		visited = set()
@@ -68,8 +66,7 @@ def add_project_template_items(target_doc, project_template, applies_to_item=Non
 				postprocess=False)
 
 	# get applicable items from project template
-	project_template_items = get_project_template_items(project_template, applies_to_item, item_group=item_group,
-		items_type=items_type)
+	project_template_items = get_project_template_items(project_template, item_group=item_group, items_type=items_type)
 
 	append_applicable_items(target_doc, project_template_items, check_duplicate=check_duplicate,
 		project_template_detail=project_template_detail)
@@ -82,7 +79,7 @@ def add_project_template_items(target_doc, project_template, applies_to_item=Non
 	return target_doc
 
 
-def get_project_template_items(project_template, applies_to_item=None, item_group=None, items_type=None):
+def get_project_template_items(project_template, item_group=None, items_type=None):
 	from erpnext.stock.doctype.item_applicable_item.item_applicable_item import filter_applicable_item
 
 	project_template_doc = frappe.get_cached_doc("Project Template", project_template)
@@ -94,18 +91,6 @@ def get_project_template_items(project_template, applies_to_item=None, item_grou
 	project_template_items = []
 
 	for pt_item in project_template_doc.applicable_items:
-		# check applicability
-		if pt_item.applies_to_item:
-			# project template item is applicable to some item but no item provided
-			if not applies_to_item:
-				continue
-
-			# if item does not match applies to nor template of applies to
-			applies_to_item_template = frappe.get_cached_value("Item", applies_to_item, "variant_of")
-			if pt_item.applies_to_item not in (applies_to_item, applies_to_item_template):
-				continue
-
-		# filter by item group
 		if filter_applicable_item(pt_item, item_groups, items_type=items_type):
 			continue
 

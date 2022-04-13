@@ -8,8 +8,11 @@
  "field_order": [
   "project_template_code",
   "project_template_name",
-  "column_break_3",
   "project_template_category",
+  "disabled",
+  "column_break_3",
+  "applies_to_item",
+  "applies_to_item_name",
   "items_section",
   "applicable_items",
   "applicable_item_groups",
@@ -71,9 +74,31 @@
    "fieldtype": "Table",
    "label": "Applicable Items",
    "options": "Project Template Item"
+  },
+  {
+   "fieldname": "applies_to_item",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Applies to Item",
+   "options": "Item",
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:!doc.applies_to_item || doc.applies_to_item_name != doc.applies_to_item",
+   "fetch_from": "applies_to_item.item_name",
+   "fieldname": "applies_to_item_name",
+   "fieldtype": "Data",
+   "label": "Applies to Item Name",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
- "modified": "2022-04-07 00:57:12.479016",
+ "modified": "2022-04-13 19:54:43.026959",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Template",
@@ -137,7 +162,7 @@
    "share": 1
   }
  ],
- "search_fields": "project_template_name, project_template_category",
+ "search_fields": "project_template_name, project_template_category, applies_to_item_name",
  "sort_field": "idx",
  "sort_order": "DESC",
  "title_field": "project_template_name",

@@ -8,28 +8,9 @@
   "applicable_item_name",
   "applicable_qty",
   "applicable_uom",
-  "applies_to_item",
-  "applies_to_item_name",
   "use_template_description"
  ],
  "fields": [
-  {
-   "columns": 2,
-   "fieldname": "applies_to_item",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Applies To",
-   "options": "Item"
-  },
-  {
-   "columns": 2,
-   "fetch_from": "applies_to_item.item_name",
-   "fieldname": "applies_to_item_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Applies To Item Name",
-   "read_only": 1
-  },
   {
    "columns": 2,
    "fieldname": "applicable_item_code",
@@ -40,7 +21,7 @@
    "reqd": 1
   },
   {
-   "columns": 2,
+   "columns": 4,
    "fetch_from": "applicable_item_code.item_name",
    "fieldname": "applicable_item_name",
    "fieldtype": "Data",
@@ -65,14 +46,16 @@
    "options": "UOM"
   },
   {
+   "columns": 2,
    "default": "0",
    "fieldname": "use_template_description",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Use Template Description"
   }
  ],
  "istable": 1,
- "modified": "2022-04-07 01:35:17.137181",
+ "modified": "2022-04-13 18:26:58.555940",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Template Item",

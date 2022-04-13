@@ -227,27 +227,6 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			where tabItem.name = iai.parent or tabItem.variant_of = iai.parent)
 		"""
 
-	# applicable_to_item_cond = ""
-	# if filters and isinstance(filters, dict) and filters.get('applicable_to_item'):
-	# 	applicable_to_item = filters.get('applicable_to_item')
-	# 	del filters['applicable_to_item']
-	#
-	# 	variant_of = frappe.get_cached_value("Item", applicable_to_item, "variant_of")
-	# 	if variant_of:
-	# 		all_variants = frappe.db.sql_list("select name from `tabItem` where variant_of = %s", variant_of)
-	# 		all_variants.append(variant_of)
-	# 		applicable_to_item_match_cond = "ap.applicable_to_item in ({0})"\
-	# 			.format(", ".join([frappe.db.escape(d) for d in all_variants]))
-	# 	else:
-	# 		applicable_to_item_match_cond = "ap.applicable_to_item = {0}".format(frappe.db.escape(applicable_to_item))
-	#
-	# 	applicable_to_item_cond = """and (tabItem.applicable_to_all = 1
-	# 		or exists(select ap.name
-	# 			from `tabItem Applicable To` ap
-	# 			where ap.parent = tabItem.name and {0}))
-	# 	""".format(applicable_to_item_match_cond)
-
-
 	# Default Conditions
 	default_conditions = []
 	default_disabled_condition = "tabItem.disabled = 0"
@@ -308,6 +287,52 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				"start": start,
 				"page_len": page_len
 			}, as_dict=as_dict)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def project_template_query(doctype, txt, searchfield, start, page_len, filters):
+	conditions = []
+	fields = get_fields("Project Template", ["name", "project_template_name"])
+
+	searchfields = frappe.get_meta("Project Template").get_search_fields()
+	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
+
+	applies_to_item_cond = ""
+	if filters and isinstance(filters, dict) and filters.get('applies_to_item'):
+		applies_to_item = filters.get('applies_to_item')
+		del filters['applies_to_item']
+
+		variant_of = frappe.get_cached_value("Item", applies_to_item, "variant_of")
+		if variant_of:
+			applies_to_item_match_cond = "`tabProject Template`.applies_to_item in ({0}, {1})"\
+				.format(frappe.db.escape(applies_to_item), frappe.db.escape(variant_of))
+		else:
+			applies_to_item_match_cond = "`tabProject Template`.applies_to_item = {0}".format(frappe.db.escape(applies_to_item))
+
+		applies_to_item_cond = "and (ifnull(`tabProject Template`.applies_to_item) = '' or {0})".format(applies_to_item_match_cond)
+
+	return frappe.db.sql("""
+			select {fields}
+			from `tabProject Template`
+			where ({scond}) and disabled = 0 {applies_to_item_cond} {fcond} {mcond}
+			order by
+				if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+				idx desc, name
+			limit %(start)s, %(page_len)s
+		""".format(
+		fields=", ".join(fields),
+		scond=searchfields,
+		fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
+		mcond=get_match_cond(doctype).replace('%', '%%'),
+		key=searchfield,
+		applies_to_item_cond=applies_to_item_cond,
+	), {
+		'txt': '%' + txt + '%',
+		'_txt': txt.replace("%", ""),
+		'start': start or 0,
+		'page_len': page_len or 20
+	})
 
 
 @frappe.whitelist()

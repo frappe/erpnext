@@ -135,7 +135,22 @@ $.extend(erpnext.queries, {
 		return {
 			filters: filters
 		}
-	}
+	},
+
+	project_template: function (applies_to_item, filters) {
+		if (!filters) {
+			filters = {};
+		}
+
+		if (applies_to_item) {
+			filters['applies_to_item'] = applies_to_item
+		}
+
+		return {
+			query: "erpnext.controllers.queries.project_template_query",
+			filters: filters,
+		};
+	},
 });
 
 erpnext.queries.setup_queries = function(frm, options, query_fn) {
