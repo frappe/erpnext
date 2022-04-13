@@ -18,25 +18,17 @@ class TestDelayedTasksSummary(unittest.TestCase):
 		task1.save()
 
 	def test_delayed_tasks_summary(self):
-		filters = frappe._dict({
-			"from_date": add_months(nowdate(), -1),
-			"to_date": nowdate(),
-			"priority": "Low",
-			"status": "Open"
-		})
-		expected_data = [
+		filters = frappe._dict(
 			{
-				"subject": "_Test Task 99",
+				"from_date": add_months(nowdate(), -1),
+				"to_date": nowdate(),
+				"priority": "Low",
 				"status": "Open",
-				"priority": "Low",
-				"delay": 1
-			},
-			{
-				"subject": "_Test Task 98",
-				"status": "Completed",
-				"priority": "Low",
-				"delay": -1
 			}
+		)
+		expected_data = [
+			{"subject": "_Test Task 99", "status": "Open", "priority": "Low", "delay": 1},
+			{"subject": "_Test Task 98", "status": "Completed", "priority": "Low", "delay": -1},
 		]
 		report = execute(filters)
 		data = list(filter(lambda x: x.subject == "_Test Task 99", report[1]))[0]
