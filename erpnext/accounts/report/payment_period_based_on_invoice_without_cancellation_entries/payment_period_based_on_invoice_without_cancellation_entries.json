@@ -1,0 +1,36 @@
+{
+ "add_total_row": 1,
+ "columns": [],
+ "creation": "2022-04-12 17:58:08.349940",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "",
+ "modified": "2022-04-12 17:58:08.349940",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Payment Period Based On Invoice Without Cancellation Entries",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Journal Entry",
+ "report_name": "Payment Period Based On Invoice Without Cancellation Entries",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Auditor"
+  },
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Employee Self Service"
+  }
+ ]
+}

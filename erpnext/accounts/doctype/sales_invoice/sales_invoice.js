@@ -29,9 +29,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			});
 		}
 
-			frappe.db.get_value('Company', this.frm.doc.company, 'default_receivable_account', (r) => {
-				me.frm.set_value('debit_to', r.default_receivable_account);
-			});
+		
 	},
 
 	onload: function() {
@@ -282,7 +280,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			var pos_profile = this.frm.doc.pos_profile;
 		}
 		var me = this;
-		if (this.frm.updating_party_details) return;
+		if(this.frm.updating_party_details) return;
+
+		if (this.frm.doc.__onload && this.frm.doc.__onload.load_after_mapping) return;
+
 		erpnext.utils.get_party_details(this.frm,
 			"erpnext.accounts.party.get_party_details", {
 			posting_date: this.frm.doc.posting_date,

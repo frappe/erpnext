@@ -20,13 +20,11 @@ class TestJobCard(FrappeTestCase):
 
 		transfer_material_against, source_warehouse = None, None
 
-		tests_that_skip_setup = (
-			"test_job_card_material_transfer_correctness",
-		)
+		tests_that_skip_setup = ("test_job_card_material_transfer_correctness",)
 		tests_that_transfer_against_jc = (
 			"test_job_card_multiple_materials_transfer",
 			"test_job_card_excess_material_transfer",
-			"test_job_card_partial_material_transfer"
+			"test_job_card_partial_material_transfer",
 		)
 
 		if self._testMethodName in tests_that_skip_setup:
@@ -40,7 +38,7 @@ class TestJobCard(FrappeTestCase):
 			item="_Test FG Item 2",
 			qty=2,
 			transfer_material_against=transfer_material_against,
-			source_warehouse=source_warehouse
+			source_warehouse=source_warehouse,
 		)
 
 	def tearDown(self):
@@ -48,8 +46,9 @@ class TestJobCard(FrappeTestCase):
 
 	def test_job_card(self):
 
-		job_cards = frappe.get_all('Job Card',
-			filters = {'work_order': self.work_order.name}, fields = ["operation_id", "name"])
+		job_cards = frappe.get_all(
+			"Job Card", filters={"work_order": self.work_order.name}, fields=["operation_id", "name"]
+		)
 
 		if job_cards:
 			job_card = job_cards[0]
@@ -63,30 +62,38 @@ class TestJobCard(FrappeTestCase):
 			frappe.delete_doc("Job Card", d.name)
 
 	def test_job_card_with_different_work_station(self):
-		job_cards = frappe.get_all('Job Card',
-			filters = {'work_order': self.work_order.name},
-			fields = ["operation_id", "workstation", "name", "for_quantity"])
+		job_cards = frappe.get_all(
+			"Job Card",
+			filters={"work_order": self.work_order.name},
+			fields=["operation_id", "workstation", "name", "for_quantity"],
+		)
 
 		job_card = job_cards[0]
 
 		if job_card:
-			workstation = frappe.db.get_value("Workstation",
-				{"name": ("not in", [job_card.workstation])}, "name")
+			workstation = frappe.db.get_value(
+				"Workstation", {"name": ("not in", [job_card.workstation])}, "name"
+			)
 
 			if not workstation or job_card.workstation == workstation:
 				workstation = make_workstation(workstation_name=random_string(5)).name
 
 			doc = frappe.get_doc("Job Card", job_card.name)
 			doc.workstation = workstation
-			doc.append("time_logs", {
-				"from_time": "2009-01-01 12:06:25",
-				"to_time": "2009-01-01 12:37:25",
-				"time_in_mins": "31.00002",
-				"completed_qty": job_card.for_quantity
-			})
+			doc.append(
+				"time_logs",
+				{
+					"from_time": "2009-01-01 12:06:25",
+					"to_time": "2009-01-01 12:37:25",
+					"time_in_mins": "31.00002",
+					"completed_qty": job_card.for_quantity,
+				},
+			)
 			doc.submit()
 
-			completed_qty = frappe.db.get_value("Work Order Operation", job_card.operation_id, "completed_qty")
+			completed_qty = frappe.db.get_value(
+				"Work Order Operation", job_card.operation_id, "completed_qty"
+			)
 			self.assertEqual(completed_qty, job_card.for_quantity)
 
 			doc.cancel()
@@ -97,51 +104,49 @@ class TestJobCard(FrappeTestCase):
 	def test_job_card_overlap(self):
 		wo2 = make_wo_order_test_record(item="_Test FG Item 2", qty=2)
 
-		jc1_name = frappe.db.get_value("Job Card", {'work_order': self.work_order.name})
-		jc2_name = frappe.db.get_value("Job Card", {'work_order': wo2.name})
+		jc1_name = frappe.db.get_value("Job Card", {"work_order": self.work_order.name})
+		jc2_name = frappe.db.get_value("Job Card", {"work_order": wo2.name})
 
 		jc1 = frappe.get_doc("Job Card", jc1_name)
 		jc2 = frappe.get_doc("Job Card", jc2_name)
 
-		employee = "_T-Employee-00001" # from test records
+		employee = "_T-Employee-00001"  # from test records
 
-		jc1.append("time_logs", {
-			"from_time": "2021-01-01 00:00:00",
-			"to_time": "2021-01-01 08:00:00",
-			"completed_qty": 1,
-			"employee": employee,
-		})
+		jc1.append(
+			"time_logs",
+			{
+				"from_time": "2021-01-01 00:00:00",
+				"to_time": "2021-01-01 08:00:00",
+				"completed_qty": 1,
+				"employee": employee,
+			},
+		)
 		jc1.save()
 
 		# add a new entry in same time slice
-		jc2.append("time_logs", {
-			"from_time": "2021-01-01 00:01:00",
-			"to_time": "2021-01-01 06:00:00",
-			"completed_qty": 1,
-			"employee": employee,
-		})
+		jc2.append(
+			"time_logs",
+			{
+				"from_time": "2021-01-01 00:01:00",
+				"to_time": "2021-01-01 06:00:00",
+				"completed_qty": 1,
+				"employee": employee,
+			},
+		)
 		self.assertRaises(OverlapError, jc2.save)
 
 	def test_job_card_multiple_materials_transfer(self):
 		"Test transferring RMs separately against Job Card with multiple RMs."
+		make_stock_entry(item_code="_Test Item", target="Stores - _TC", qty=10, basic_rate=100)
 		make_stock_entry(
-			item_code="_Test Item",
-			target="Stores - _TC",
-			qty=10,
-			basic_rate=100
-		)
-		make_stock_entry(
-			item_code="_Test Item Home Desktop Manufactured",
-			target="Stores - _TC",
-			qty=6,
-			basic_rate=100
+			item_code="_Test Item Home Desktop Manufactured", target="Stores - _TC", qty=6, basic_rate=100
 		)
 
-		job_card_name = frappe.db.get_value("Job Card", {'work_order': self.work_order.name})
+		job_card_name = frappe.db.get_value("Job Card", {"work_order": self.work_order.name})
 		job_card = frappe.get_doc("Job Card", job_card_name)
 
 		transfer_entry_1 = make_stock_entry_from_jc(job_card_name)
-		del transfer_entry_1.items[1] # transfer only 1 of 2 RMs
+		del transfer_entry_1.items[1]  # transfer only 1 of 2 RMs
 		transfer_entry_1.insert()
 		transfer_entry_1.submit()
 
@@ -162,12 +167,12 @@ class TestJobCard(FrappeTestCase):
 
 	def test_job_card_excess_material_transfer(self):
 		"Test transferring more than required RM against Job Card."
-		make_stock_entry(item_code="_Test Item", target="Stores - _TC",
-			qty=25, basic_rate=100)
-		make_stock_entry(item_code="_Test Item Home Desktop Manufactured",
-			target="Stores - _TC", qty=15, basic_rate=100)
+		make_stock_entry(item_code="_Test Item", target="Stores - _TC", qty=25, basic_rate=100)
+		make_stock_entry(
+			item_code="_Test Item Home Desktop Manufactured", target="Stores - _TC", qty=15, basic_rate=100
+		)
 
-		job_card_name = frappe.db.get_value("Job Card", {'work_order': self.work_order.name})
+		job_card_name = frappe.db.get_value("Job Card", {"work_order": self.work_order.name})
 		job_card = frappe.get_doc("Job Card", job_card_name)
 		self.assertEqual(job_card.status, "Open")
 
@@ -193,11 +198,10 @@ class TestJobCard(FrappeTestCase):
 		transfer_entry_3 = make_stock_entry_from_jc(job_card_name)
 		self.assertEqual(transfer_entry_3.fg_completed_qty, 0)
 
-		job_card.append("time_logs", {
-			"from_time": "2021-01-01 00:01:00",
-			"to_time": "2021-01-01 06:00:00",
-			"completed_qty": 2
-		})
+		job_card.append(
+			"time_logs",
+			{"from_time": "2021-01-01 00:01:00", "to_time": "2021-01-01 06:00:00", "completed_qty": 2},
+		)
 		job_card.save()
 		job_card.submit()
 
@@ -207,12 +211,12 @@ class TestJobCard(FrappeTestCase):
 	def test_job_card_partial_material_transfer(self):
 		"Test partial material transfer against Job Card"
 
-		make_stock_entry(item_code="_Test Item", target="Stores - _TC",
-			qty=25, basic_rate=100)
-		make_stock_entry(item_code="_Test Item Home Desktop Manufactured",
-			target="Stores - _TC", qty=15, basic_rate=100)
+		make_stock_entry(item_code="_Test Item", target="Stores - _TC", qty=25, basic_rate=100)
+		make_stock_entry(
+			item_code="_Test Item Home Desktop Manufactured", target="Stores - _TC", qty=15, basic_rate=100
+		)
 
-		job_card_name = frappe.db.get_value("Job Card", {'work_order': self.work_order.name})
+		job_card_name = frappe.db.get_value("Job Card", {"work_order": self.work_order.name})
 		job_card = frappe.get_doc("Job Card", job_card_name)
 
 		# partially transfer
@@ -242,15 +246,14 @@ class TestJobCard(FrappeTestCase):
 
 	def test_job_card_material_transfer_correctness(self):
 		"""
-			1. Test if only current Job Card Items are pulled in a Stock Entry against a Job Card
-			2. Test impact of changing 'For Qty' in such a Stock Entry
+		1. Test if only current Job Card Items are pulled in a Stock Entry against a Job Card
+		2. Test impact of changing 'For Qty' in such a Stock Entry
 		"""
 		create_bom_with_multiple_operations()
 		work_order = make_wo_with_transfer_against_jc()
 
 		job_card_name = frappe.db.get_value(
-			"Job Card",
-			{"work_order": work_order.name,"operation": "Test Operation A"}
+			"Job Card", {"work_order": work_order.name, "operation": "Test Operation A"}
 		)
 		job_card = frappe.get_doc("Job Card", job_card_name)
 
@@ -276,6 +279,7 @@ class TestJobCard(FrappeTestCase):
 
 		# rollback via tearDown method
 
+
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
@@ -287,25 +291,29 @@ def create_bom_with_multiple_operations():
 		"operation": "Test Operation A",
 		"workstation": "_Test Workstation A",
 		"hour_rate_rent": 300,
-		"time_in_mins": 60
+		"time_in_mins": 60,
 	}
 	make_workstation(row)
 	make_operation(row)
 
-	bom_doc.append("operations", {
-		"operation": "Test Operation A",
-		"description": "Test Operation A",
-		"workstation": "_Test Workstation A",
-		"hour_rate": 300,
-		"time_in_mins": 60,
-		"operating_cost": 100
-	})
+	bom_doc.append(
+		"operations",
+		{
+			"operation": "Test Operation A",
+			"description": "Test Operation A",
+			"workstation": "_Test Workstation A",
+			"hour_rate": 300,
+			"time_in_mins": 60,
+			"operating_cost": 100,
+		},
+	)
 
 	bom_doc.transfer_material_against = "Job Card"
 	bom_doc.save()
 	bom_doc.submit()
 
 	return bom_doc
+
 
 def make_wo_with_transfer_against_jc():
 	"Create a WO with multiple operations and Material Transfer against Job Card"
@@ -315,7 +323,7 @@ def make_wo_with_transfer_against_jc():
 		qty=4,
 		transfer_material_against="Job Card",
 		source_warehouse="Stores - _TC",
-		do_not_submit=True
+		do_not_submit=True,
 	)
 	work_order.required_items[0].operation = "Test Operation A"
 	work_order.required_items[1].operation = "_Test Operation 1"
@@ -323,8 +331,9 @@ def make_wo_with_transfer_against_jc():
 
 	return work_order
 
+
 def make_bom_for_jc_tests():
-	test_records = frappe.get_test_records('BOM')
+	test_records = frappe.get_test_records("BOM")
 	bom = frappe.copy_doc(test_records[2])
 	bom.set_rate_of_sub_assembly_item_based_on_bom = 0
 	bom.rm_cost_as_per = "Valuation Rate"
