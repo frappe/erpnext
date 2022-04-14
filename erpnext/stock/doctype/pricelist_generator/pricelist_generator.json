@@ -20,7 +20,8 @@
   "section_break_8",
   "get_items",
   "price_details",
-  "amended_from"
+  "amended_from",
+  "stock_transfer"
  ],
  "fields": [
   {
@@ -118,12 +119,18 @@
    "fieldtype": "Check",
    "label": "Buying",
    "mandatory_depends_on": "!doc.selling"
+  },
+  {
+   "default": "0",
+   "fieldname": "stock_transfer",
+   "fieldtype": "Check",
+   "label": "Stock Transfer/Scheme Price"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-31 18:38:36.843013",
+ "modified": "2022-04-14 12:32:26.067390",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "PriceList Generator",

@@ -11,7 +11,8 @@
   "series",
   "brand",
   "cost_center",
-  "price"
+  "price",
+  "nrv"
  ],
  "fields": [
   {
@@ -47,11 +48,16 @@
    "fieldname": "price",
    "fieldtype": "Currency",
    "label": "Price"
+  },
+  {
+   "fieldname": "nrv",
+   "fieldtype": "Currency",
+   "label": "NRV"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-07 10:37:20.364400",
+ "modified": "2022-04-11 11:30:31.814515",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Brand Price",
