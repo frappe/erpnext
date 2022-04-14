@@ -1674,6 +1674,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if (me.in_apply_price_list == true) return;
 
 		me.in_apply_price_list = true;
+		console.log(args);
 		return this.frm.call({
 			method: "erpnext.stock.get_item_details.apply_price_list",
 			args: {	args: args },
