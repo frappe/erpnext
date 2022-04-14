@@ -87,13 +87,6 @@ class JournalEntry(AccountsController):
 		self.update_expense_claim()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
-<<<<<<< HEAD
-		check_if_stock_and_account_balance_synced(
-			self.posting_date, self.company, self.doctype, self.name
-		)
-=======
-		self.update_status_for_full_and_final_statement()
->>>>>>> 89fab78027 (fix: Remove "Values Out of Sync" validation from Journal Entry)
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
