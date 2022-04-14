@@ -1397,7 +1397,7 @@ def get_sales_order(project_name, items_type=None):
 	# Remove already ordered items
 	project_template_ordered_set = get_project_template_ordered_set(project)
 	to_remove = []
-	for d in target_doc.items:
+	for d in target_doc.get('items'):
 		if d.item_code and d.project_template_detail and (d.item_code, d.project_template_detail) in project_template_ordered_set:
 			to_remove.append(d)
 
