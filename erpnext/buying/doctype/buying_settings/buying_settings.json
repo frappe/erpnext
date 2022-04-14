@@ -140,7 +140,7 @@
    "description": "If enabled, additional ledger entries will be made for discounts in a separate Discount Account",
    "fieldname": "enable_discount_accounting",
    "fieldtype": "Check",
-   "label": "Enable Discount Accounting"
+   "label": "Enable Discount Accounting for Buying"
   }
  ],
  "icon": "fa fa-cog",
@@ -148,7 +148,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-04-08 07:48:12.632498",
+ "modified": "2022-04-14 15:56:42.340223",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
