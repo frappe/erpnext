@@ -1538,7 +1538,7 @@ class SalesInvoice(SellingController):
 		if self.get('project') and self.get('applies_to_vehicle') and self.docstatus == 1:
 			project_vehicle_status = frappe.db.get_value("Project", self.project, 'vehicle_status')
 			gate_pass_exists = frappe.db.get_value("Vehicle Gate Pass", {'sales_invoice': self.name, 'docstatus': 1})
-			self.set_onload('can_make_vehicle_gate_pass', project_vehicle_status == "Received" and not gate_pass_exists)
+			self.set_onload('can_make_vehicle_gate_pass', project_vehicle_status == "In Workshop" and not gate_pass_exists)
 
 
 def get_discounting_status(sales_invoice):
