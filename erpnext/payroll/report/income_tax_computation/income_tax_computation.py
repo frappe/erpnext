@@ -257,7 +257,7 @@ class IncomeTaxComputationReport(object):
 		tax_exempted_deduction_components = [
 			d.name
 			for d in frappe.get_all(
-				"Salary Component", {"type": "Deduction", "exempted_from_income_tax": 1}
+				"Salary Component", {"type": "Deduction", "exempted_from_income_tax": 1, "disabled": 0}
 			)
 		]
 
