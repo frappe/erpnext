@@ -129,6 +129,9 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
+      - name: Clone
+        uses: actions/checkout@v2
+
       - name: Download artifacts
         uses: actions/download-artifact@v3
 

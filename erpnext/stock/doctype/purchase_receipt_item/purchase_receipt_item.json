@@ -96,7 +96,6 @@
   "include_exploded_items",
   "batch_no",
   "rejected_serial_no",
-  "expense_account",
   "item_tax_rate",
   "item_weight_details",
   "weight_per_unit",
@@ -107,6 +106,10 @@
   "manufacturer",
   "column_break_16",
   "manufacturer_part_no",
+  "accounting_details_section",
+  "expense_account",
+  "column_break_102",
+  "provisional_expense_account",
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
@@ -971,12 +974,27 @@
    "label": "Product Bundle",
    "options": "Product Bundle",
    "read_only": 1
+  },
+  {
+   "fieldname": "provisional_expense_account",
+   "fieldtype": "Link",
+   "label": "Provisional Expense Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "column_break_102",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-02-01 11:32:27.980524",
+ "modified": "2022-04-11 13:07:32.061402",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
