@@ -262,8 +262,6 @@ erpnext.patches.v13_0.make_non_standard_user_type #13-04-2021 #17-01-2022
 erpnext.patches.v13_0.update_shipment_status
 erpnext.patches.v13_0.remove_attribute_field_from_item_variant_setting
 erpnext.patches.v12_0.add_ewaybill_validity_field
-erpnext.patches.v13_0.germany_make_custom_fields
-erpnext.patches.v13_0.germany_fill_debtor_creditor_number
 erpnext.patches.v13_0.set_pos_closing_as_failed
 erpnext.patches.v13_0.rename_stop_to_send_birthday_reminders
 execute:frappe.rename_doc("Workspace", "Loan Management", "Loans", force=True)
@@ -343,6 +341,7 @@ erpnext.patches.v14_0.delete_shopify_doctypes
 erpnext.patches.v14_0.delete_hub_doctypes
 erpnext.patches.v14_0.delete_hospitality_doctypes # 20-01-2022
 erpnext.patches.v14_0.delete_agriculture_doctypes
+erpnext.patches.v14_0.delete_datev_doctypes
 erpnext.patches.v14_0.rearrange_company_fields
 erpnext.patches.v14_0.update_leave_notification_template
 erpnext.patches.v14_0.restore_einvoice_fields
@@ -364,3 +363,4 @@ erpnext.patches.v13_0.add_cost_center_in_loans
 erpnext.patches.v13_0.set_return_against_in_pos_invoice_references
 erpnext.patches.v13_0.remove_unknown_links_to_prod_plan_items # 24-03-2022
 erpnext.patches.v13_0.update_expense_claim_status_for_paid_advances
+erpnext.patches.v13_0.create_gst_custom_fields_in_quotation

@@ -462,6 +462,7 @@ class ProductionPlan(Document):
 			work_order_data = {
 				"wip_warehouse": default_warehouses.get("wip_warehouse"),
 				"fg_warehouse": default_warehouses.get("fg_warehouse"),
+				"company": self.get("company"),
 			}
 
 			self.prepare_data_for_sub_assembly_items(row, work_order_data)
@@ -499,6 +500,7 @@ class ProductionPlan(Document):
 
 		for supplier, po_list in subcontracted_po.items():
 			po = frappe.new_doc("Purchase Order")
+			po.company = self.company
 			po.supplier = supplier
 			po.schedule_date = getdate(po_list[0].schedule_date) if po_list[0].schedule_date else nowdate()
 			po.is_subcontracted = 1

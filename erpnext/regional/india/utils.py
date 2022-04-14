@@ -225,7 +225,7 @@ def get_place_of_supply(party_details, doctype):
 	if not frappe.get_meta("Address").has_field("gst_state"):
 		return
 
-	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
+	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order", "Quotation"):
 		address_name = party_details.customer_address or party_details.shipping_address_name
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		address_name = party_details.shipping_address or party_details.supplier_address
@@ -254,7 +254,7 @@ def get_regional_address_details(party_details, doctype, company):
 		party_details.taxes = []
 		return party_details
 
-	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
+	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order", "Quotation"):
 		master_doctype = "Sales Taxes and Charges Template"
 		tax_template_by_category = get_tax_template_based_on_category(
 			master_doctype, company, party_details
@@ -311,7 +311,7 @@ def update_party_details(party_details, doctype):
 
 
 def is_internal_transfer(party_details, doctype):
-	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
+	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order", "Quotation"):
 		destination_gstin = party_details.company_gstin
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		destination_gstin = party_details.supplier_gstin
@@ -824,7 +824,7 @@ def get_gst_accounts(
 	gst_settings_accounts = frappe.get_all(
 		"GST Account",
 		filters=filters,
-		fields=["cgst_account", "sgst_account", "igst_account", "cess_account"],
+		fields=["cgst_account", "sgst_account", "igst_account", "cess_account", "utgst_account"],
 	)
 
 	if not gst_settings_accounts and not frappe.flags.in_test and not frappe.flags.in_migrate:
