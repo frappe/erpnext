@@ -3053,7 +3053,7 @@ class TestSalesInvoice(unittest.TestCase):
 		jv.accounts[0].exchange_rate = 70
 		jv.accounts[0].credit_in_account_currency = 100
 		jv.accounts[0].party_type = "Customer"
-		jv.accounts[0].party = "Overseas Customer"
+		jv.accounts[0].party = "_Test Customer USD"
 
 		jv.save()
 		jv.submit()
