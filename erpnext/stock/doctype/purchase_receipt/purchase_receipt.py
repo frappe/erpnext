@@ -145,10 +145,13 @@ class PurchaseReceipt(BuyingController):
 			)
 		)
 
-		if provisional_accounting_for_non_stock_items:
-			default_provisional_account = self.get_company_default("default_provisional_account")
-			if not self.provisional_expense_account:
-				self.provisional_expense_account = default_provisional_account
+		if not provisional_accounting_for_non_stock_items:
+			return
+
+		default_provisional_account = self.get_company_default("default_provisional_account")
+		for item in self.get("items"):
+			if not item.get("provisional_expense_account"):
+				item.provisional_expense_account = default_provisional_account
 
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc(
@@ -509,7 +512,9 @@ class PurchaseReceipt(BuyingController):
 				and flt(d.qty)
 				and provisional_accounting_for_non_stock_items
 			):
-				self.add_provisional_gl_entry(d, gl_entries, self.posting_date)
+				self.add_provisional_gl_entry(
+					d, gl_entries, self.posting_date, d.get("provisional_expense_account")
+				)
 
 		if warehouse_with_no_account:
 			frappe.msgprint(
@@ -518,9 +523,10 @@ class PurchaseReceipt(BuyingController):
 				+ "\n".join(warehouse_with_no_account)
 			)
 
-	def add_provisional_gl_entry(self, item, gl_entries, posting_date, reverse=0):
-		provisional_expense_account = self.get("provisional_expense_account")
-		credit_currency = get_account_currency(provisional_expense_account)
+	def add_provisional_gl_entry(
+		self, item, gl_entries, posting_date, provisional_account, reverse=0
+	):
+		credit_currency = get_account_currency(provisional_account)
 		debit_currency = get_account_currency(item.expense_account)
 		expense_account = item.expense_account
 		remarks = self.get("remarks") or _("Accounting Entry for Service")
@@ -534,7 +540,7 @@ class PurchaseReceipt(BuyingController):
 
 		self.add_gl_entry(
 			gl_entries=gl_entries,
-			account=provisional_expense_account,
+			account=provisional_account,
 			cost_center=item.cost_center,
 			debit=0.0,
 			credit=multiplication_factor * item.amount,
@@ -554,7 +560,7 @@ class PurchaseReceipt(BuyingController):
 			debit=multiplication_factor * item.amount,
 			credit=0.0,
 			remarks=remarks,
-			against_account=provisional_expense_account,
+			against_account=provisional_account,
 			account_currency=debit_currency,
 			project=item.project,
 			voucher_detail_no=item.name,
