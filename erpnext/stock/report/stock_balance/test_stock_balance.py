@@ -11,7 +11,8 @@ from erpnext.stock.report.stock_balance.stock_balance import execute
 
 
 def stock_balance(filters):
-	return list(map(_dict, execute(filters)[1]))
+	"""Get rows from stock balance report"""
+	return [_dict(row) for row in execute(filters)[1]]
 
 
 class TestStockBalance(FrappeTestCase):
