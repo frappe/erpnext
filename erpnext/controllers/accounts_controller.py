@@ -1080,7 +1080,7 @@ class AccountsController(TransactionBase):
 
 	def make_discount_gl_entries(self, gl_entries):
 		enable_discount_accounting = cint(
-			frappe.db.get_single_value("Accounts Settings", "enable_discount_accounting")
+			frappe.db.get_single_value("Selling Settings", "enable_discount_accounting")
 		)
 
 		if enable_discount_accounting:
