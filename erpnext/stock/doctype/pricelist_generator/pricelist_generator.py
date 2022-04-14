@@ -31,6 +31,7 @@ class PriceListGenerator(Document):
 		for res in self.price_details:
 			if res.item:
 				res.list_priceunit = (flt(res.brand_list_price) + flt(res.addpkg_cost)) * flt(res.weight)
+				res.nrv_unit = (flt(res.nrv_per_litre) + flt(res.addpkg_cost)) * flt(res.weight)
 			
 	@frappe.whitelist()
 	def get_items_brand(self,filters=None):
@@ -52,7 +53,8 @@ class PriceListGenerator(Document):
 						"brand":doc.brand,
 						"min_qty":1,
 						"addpkg_cost":pack_g,
-						"brand_list_price":d.get("price")
+						"brand_list_price":d.get("price"),
+						"nrv_per_liter":doc1.nrv
 					})
 
 			self.save()
@@ -76,4 +78,6 @@ class PriceListGenerator(Document):
 			doc_it.price_list_rate=res.list_priceunit
 			doc_it.valid_from=self.start_date
 			doc_it.valid_upto=self.end_date
+			doc_it.nrv=res.nrv_unit
+			doc.it.stock_transfer=self.stock_transfer 
 			doc_it.save(ignore_permissions=True)

@@ -21,7 +21,9 @@
   "valuation_rate",
   "column_break_12",
   "addpkg_cost",
-  "list_priceunit"
+  "list_priceunit",
+  "nrv_per_liter",
+  "nrv_unit"
  ],
  "fields": [
   {
@@ -138,12 +140,22 @@
    "fieldtype": "Link",
    "label": "Weight UOM",
    "options": "UOM"
+  },
+  {
+   "fieldname": "nrv_per_liter",
+   "fieldtype": "Currency",
+   "label": "NRV Per Liter"
+  },
+  {
+   "fieldname": "nrv_unit",
+   "fieldtype": "Currency",
+   "label": "NRV Unit"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-03-31 18:50:56.686642",
+ "modified": "2022-04-14 12:37:12.967055",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Price Details",
