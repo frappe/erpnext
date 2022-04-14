@@ -16,6 +16,9 @@ from erpnext.stock.utils import get_incoming_rate
 
 
 class SellingController(StockController):
+	def __setup__(self):
+		self.flags.ignore_permlevel_for_fields = ["selling_price_list", "price_list_currency"]
+
 	def get_feed(self):
 		return _("To {0} | {1} {2}").format(self.customer_name, self.currency, self.grand_total)
 

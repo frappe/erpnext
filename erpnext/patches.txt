@@ -350,6 +350,7 @@ erpnext.patches.v13_0.enable_provisional_accounting
 erpnext.patches.v13_0.update_disbursement_account
 erpnext.patches.v13_0.update_reserved_qty_closed_wo
 erpnext.patches.v13_0.amazon_mws_deprecation_warning
+erpnext.patches.v13_0.datev_deprecation_warning
 erpnext.patches.v13_0.set_work_order_qty_in_so_from_mr
 erpnext.patches.v13_0.update_accounts_in_loan_docs
 erpnext.patches.v13_0.remove_unknown_links_to_prod_plan_items # 24-03-2022
