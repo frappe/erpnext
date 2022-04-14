@@ -3059,7 +3059,7 @@ class TestSalesInvoice(unittest.TestCase):
 		jv.submit()
 
 		si = create_sales_invoice(
-			customer="Overseas Customer",
+			customer="_Test Customer USD",
 			debit_to="_Test Receivable USD - _TC",
 			currency="USD",
 			conversion_rate=75,

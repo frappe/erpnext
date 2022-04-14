@@ -2000,6 +2000,7 @@ def get_advance_journal_entries(
 
 	reference_condition = " and (" + " or ".join(conditions) + ")" if conditions else ""
 
+	# nosemgrep
 	journal_entries = frappe.db.sql(
 		"""
 		select
