@@ -385,8 +385,8 @@ $.extend(erpnext.item, {
 					"root_type": ["in", ["Liability", "Asset"]],
 					"is_group": 0
 				}
-			}
-		})
+			};
+		});
 
 	},
 
