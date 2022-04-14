@@ -250,7 +250,7 @@ class IncomeTaxComputationReport(object):
 	def get_tax_exempted_components(self):
 		# nontaxable earning components
 		nontaxable_earning_components = [
-			d.name for d in frappe.get_all("Salary Component", {"type": "Earning", "is_tax_applicable": 0})
+			d.name for d in frappe.get_all("Salary Component", {"type": "Earning", "is_tax_applicable": 0, "disabled": 0})
 		]
 
 		# tax exempted deduction components
