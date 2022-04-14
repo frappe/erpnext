@@ -469,7 +469,9 @@ class PurchaseReceipt(BuyingController):
 				and flt(d.qty)
 				and provisional_accounting_for_non_stock_items
 			):
-				self.add_provisional_gl_entry(d, gl_entries, self.posting_date)
+				self.add_provisional_gl_entry(
+					d, gl_entries, self.posting_date, d.get("provisional_expense_account")
+				)
 
 		if warehouse_with_no_account:
 			frappe.msgprint(
