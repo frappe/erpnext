@@ -3037,6 +3037,7 @@ To Date must be greater than From Date,La date de fin doit être supérieure à 
 To Date should be within the Fiscal Year. Assuming To Date = {0},La Date Finale doit être dans l'exercice. En supposant Date Finale = {0},
 To Datetime,À la Date,
 To Deliver,À Livrer,
+{}  To Deliver, {} à livrer
 To Deliver and Bill,À Livrer et Facturer,
 To Fiscal Year,À l'année fiscale,
 To GSTIN,GSTIN (Destination),
