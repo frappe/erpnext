@@ -103,9 +103,9 @@ def append_applicable_items(target_doc, applicable_items, check_duplicate=True, 
 
 				if applicable_item.get('use_template_description') and project_template_detail.get('project_template_name'):
 					trn_item.item_name = project_template_detail.get('project_template_name')
-
-					if strip_html(cstr(project_template_detail.get('description'))).strip():
-						trn_item.description = project_template_detail.description
+					#
+					# if strip_html(cstr(project_template_detail.get('description'))).strip():
+					# 	trn_item.description = project_template_detail.description
 
 
 def filter_applicable_item(applicable_item, item_groups, items_type=None):
