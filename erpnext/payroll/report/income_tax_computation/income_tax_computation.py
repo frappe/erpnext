@@ -40,7 +40,6 @@ class IncomeTaxComputationReport(object):
 		self.get_employee_tax_exemptions()
 		self.get_hra()
 		self.get_standard_tax_exemption()
-		self.add_column("Total Exemption")
 		self.get_total_taxable_amount()
 		self.get_applicable_tax()
 		self.get_total_deducted_tax()
@@ -250,7 +249,10 @@ class IncomeTaxComputationReport(object):
 	def get_tax_exempted_components(self):
 		# nontaxable earning components
 		nontaxable_earning_components = [
-			d.name for d in frappe.get_all("Salary Component", {"type": "Earning", "is_tax_applicable": 0, "disabled": 0})
+			d.name
+			for d in frappe.get_all(
+				"Salary Component", {"type": "Earning", "is_tax_applicable": 0, "disabled": 0}
+			)
 		]
 
 		# tax exempted deduction components
@@ -395,6 +397,8 @@ class IncomeTaxComputationReport(object):
 			standard_exemption = standard_exemptions_per_slab.get(income_tax_slab, 0)
 			emp_details["standard_tax_exemption"] = standard_exemption
 			self.add_to_total_exemption(emp, standard_exemption)
+
+		self.add_column("Total Exemption")
 
 	def get_total_taxable_amount(self):
 		self.add_column("Total Taxable Amount")
