@@ -126,6 +126,17 @@ class LeaveApplication(Document):
 					holidays = 0
 					if not frappe.db.get_value("Leave Type", self.leave_type, "include_holiday"):
 						holidays = get_holidays(self.employee, date_of_joining, self.from_date)
+					else:
+						if frappe.db.get_value(
+							"Leave Type", leave_type, "exclude_non_weekly_off_holidays_within_leaves"
+						):
+							number_of_days = flt(number_of_days) - flt(
+								get_non_weekly_holidays(self.employee, date_of_joining, self.from_date)
+							)
+						if frappe.db.get_value("Leave Type", leave_type, "exclude_public_holidays_within_leaves"):
+							number_of_days = flt(number_of_days) - flt(
+								get_public_holidays(self.employee, date_of_joining, self.from_date)
+							)
 					number_of_days = number_of_days - leave_days - holidays
 					if number_of_days < leave_type.applicable_after:
 						frappe.throw(
@@ -748,6 +759,18 @@ def get_number_of_leave_days(
 		number_of_days = flt(number_of_days) - flt(
 			get_holidays(employee, from_date, to_date, holiday_list=holiday_list)
 		)
+	else:
+		if frappe.db.get_value(
+			"Leave Type", leave_type, "exclude_non_weekly_off_holidays_within_leaves"
+		):
+			number_of_days = flt(number_of_days) - flt(
+				get_non_weekly_holidays(employee, from_date, to_date, holiday_list=holiday_list)
+			)
+		if frappe.db.get_value("Leave Type", leave_type, "exclude_public_holidays_within_leaves"):
+			number_of_days = flt(number_of_days) - flt(
+				get_public_holidays(employee, from_date, to_date, holiday_list=holiday_list)
+			)
+
 	return number_of_days
 
 
@@ -1033,6 +1056,36 @@ def get_holidays(employee, from_date, to_date, holiday_list=None):
 		"""select count(distinct holiday_date) from `tabHoliday` h1, `tabHoliday List` h2
 		where h1.parent = h2.name and h1.holiday_date between %s and %s
 		and h2.name = %s""",
+		(from_date, to_date, holiday_list),
+	)[0][0]
+
+	return holidays
+
+
+def get_non_weekly_holidays(employee, from_date, to_date, holiday_list=None):
+	"""get non weekly holidays between two dates for the given employee"""
+	if not holiday_list:
+		holiday_list = get_holiday_list_for_employee(employee)
+
+	holidays = frappe.db.sql(
+		"""select count(distinct holiday_date) from `tabHoliday` h1, `tabHoliday List` h2
+		where h1.parent = h2.name and h1.holiday_date between %s and %s
+		and h2.name = %s and h1.weekly_off = 0 and h1.public = 0""",
+		(from_date, to_date, holiday_list),
+	)[0][0]
+
+	return holidays
+
+
+def get_public_holidays(employee, from_date, to_date, holiday_list=None):
+	"""get public holidays between two dates for the given employee"""
+	if not holiday_list:
+		holiday_list = get_holiday_list_for_employee(employee)
+
+	holidays = frappe.db.sql(
+		"""select count(distinct holiday_date) from `tabHoliday` h1, `tabHoliday List` h2
+		where h1.parent = h2.name and h1.holiday_date between %s and %s
+		and h2.name = %s and h1.public = 1""",
 		(from_date, to_date, holiday_list),
 	)[0][0]
 

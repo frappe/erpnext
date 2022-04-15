@@ -3,7 +3,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:leave_type_name",
- "creation": "2013-02-21 09:55:58",
+ "creation": "2022-01-31 18:37:12.530495",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
@@ -20,6 +20,8 @@
   "is_optional_leave",
   "allow_negative",
   "include_holiday",
+  "exclude_non_weekly_off_holidays_within_leaves",
+  "exclude_public_holidays_within_leaves",
   "is_compensatory",
   "carry_forward_section",
   "maximum_carry_forwarded_leaves",
@@ -211,15 +213,30 @@
    "fieldtype": "Float",
    "label": "Fraction of Daily Salary per Leave",
    "mandatory_depends_on": "eval:doc.is_ppl == 1"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.include_holiday",
+   "fieldname": "exclude_non_weekly_off_holidays_within_leaves",
+   "fieldtype": "Check",
+   "label": "Exclude non weekly off holidays within leaves"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.include_holiday",
+   "fieldname": "exclude_public_holidays_within_leaves",
+   "fieldtype": "Check",
+   "label": "Exclude public holidays within leaves"
   }
  ],
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2021-10-02 11:59:40.503359",
+ "modified": "2022-04-15 23:09:43.587808",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Type",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -251,5 +268,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
