@@ -271,7 +271,7 @@ Assessment Report,Rapport d'Évaluation,
 Assessment Reports,Rapports d'évaluation,
 Assessment Result,Résultat de l'Évaluation,
 Assessment Result record {0} already exists.,Le Résultat d'Évaluation {0} existe déjà.,
-Asset,Atout,
+Asset,Actif - Immo.,
 Asset Category,Catégorie d'Actif,
 Asset Category is mandatory for Fixed Asset item,Catégorie d'Actif est obligatoire pour l'article Immobilisé,
 Asset Maintenance,Maintenance des actifs,
@@ -3037,6 +3037,7 @@ To Date must be greater than From Date,La date de fin doit être supérieure à 
 To Date should be within the Fiscal Year. Assuming To Date = {0},La Date Finale doit être dans l'exercice. En supposant Date Finale = {0},
 To Datetime,À la Date,
 To Deliver,À Livrer,
+{}  To Deliver,{} à livrer
 To Deliver and Bill,À Livrer et Facturer,
 To Fiscal Year,À l'année fiscale,
 To GSTIN,GSTIN (Destination),
@@ -9872,3 +9873,4 @@ Show Barcode Field in Stock Transactions,Afficher le champ Code Barre dans les t
 Convert Item Description to Clean HTML in Transactions,Convertir les descriptions d'articles en HTML valide lors des transactions
 Have Default Naming Series for Batch ID?,Nom de série par défaut pour les Lots ou Séries
 "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units","Le pourcentage de quantité que vous pourrez réceptionner en plus de la quantité commandée. Par exemple, vous avez commandé 100 unités, votre pourcentage de dépassement est de 10%, vous pourrez réceptionner 110 unités"
+Unit Of Measure (UOM),Unité de mesure (UDM),
