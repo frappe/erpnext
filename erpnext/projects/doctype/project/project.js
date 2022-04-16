@@ -30,6 +30,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		this.make_vehicle_checklist();
 		this.make_customer_request_checklist();
 		this.set_sales_data_html();
+		this.set_service_advisor_from_user();
 	},
 
 	setup_queries: function () {
@@ -528,6 +529,18 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 				}
 			});
 		}
+	},
+
+	set_service_advisor_from_user: function () {
+		if (!this.frm.get_field('service_advisor') || this.frm.doc.service_advisor || !this.frm.doc.__islocal) {
+			return;
+		}
+
+		erpnext.utils.get_sales_person_from_user(sales_person => {
+			if (sales_person) {
+				this.frm.set_value('service_advisor', sales_person);
+			}
+		});
 	},
 
 	collect_progress: function() {

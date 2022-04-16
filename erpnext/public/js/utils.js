@@ -503,8 +503,18 @@ $.extend(erpnext.utils, {
 			}
 			frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
 		});
-	}
+	},
 
+	get_sales_person_from_user: function (callback) {
+		return frappe.call({
+			method: "erpnext.setup.doctype.sales_person.sales_person.get_sales_person_from_user",
+			callback: function (r) {
+				if (!r.exc && callback) {
+					callback(r.message);
+				}
+			}
+		});
+	},
 });
 
 erpnext.utils.select_alternate_items = function(opts) {

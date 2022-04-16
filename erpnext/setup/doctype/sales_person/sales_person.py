@@ -113,3 +113,16 @@ def get_timeline_data(doctype, name):
 			out[key] = delivery_note[key]
 
 	return out
+
+
+@frappe.whitelist()
+def get_sales_person_from_user():
+	sales_person = frappe.db.sql("""
+		select sp.name
+		from `tabSales Person` sp
+		inner join `tabEmployee` emp on emp.name = sp.employee
+		where sp.enabled = 1 and emp.user_id = %s
+		limit 1
+	""", frappe.session.user)
+
+	return sales_person[0][0] if sales_person else None
