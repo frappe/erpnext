@@ -211,15 +211,31 @@ class Project(StatusUpdater):
 			for f, old_value in previous_values.items():
 				if cstr(self.get(f)) != cstr(old_value):
 					label = self.meta.get_label(f)
-					frappe.throw(_("Cannot change {0}")
+					frappe.throw(_("Cannot change {0} because transactions already exist against this Project")
 						.format(frappe.bold(label)))
 
 	def get_cant_change_fields(self):
 		vehicle_received = self.get('vehicle_status') and self.get('vehicle_status') != 'Not Received'
+		has_sales_transaction = self.has_sales_transaction()
 		return frappe._dict({
 			'applies_to_vehicle': vehicle_received,
 			'vehicle_workshop': vehicle_received,
+			# 'customer': has_sales_transaction,
 		})
+
+	def has_sales_transaction(self):
+		if getattr(self, '_has_sales_transaction', None):
+			return self._has_sales_transaction
+
+		if frappe.db.get_value("Sales Order", {'project': self.name, 'docstatus': 1})\
+				or frappe.db.get_value("Sales Invoice", {'project': self.name, 'docstatus': 1})\
+				or frappe.db.get_value("Delivery Note", {'project': self.name, 'docstatus': 1})\
+				or frappe.db.get_value("Quotation", {'project': self.name, 'docstatus': 1}):
+			self._has_sales_transaction = True
+		else:
+			self._has_sales_transaction = False
+
+		return self._has_sales_transaction
 
 	def validate_project_type(self):
 		if self.project_type:
