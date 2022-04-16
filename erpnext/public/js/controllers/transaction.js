@@ -1152,6 +1152,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		if(!this.in_apply_price_list) {
 			this.apply_price_list(null, true);
+			// console.log("plc_conversion_rate");
 		}
 	},
 
