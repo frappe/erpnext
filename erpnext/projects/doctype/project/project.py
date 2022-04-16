@@ -1410,6 +1410,10 @@ def get_sales_order(project_name, items_type=None):
 	target_doc.project = project.name
 	target_doc.delivery_date = project.expected_delivery_date
 
+	sales_order_print_heading = frappe.get_cached_value("Projects Settings", None, "sales_order_print_heading")
+	if sales_order_print_heading:
+		target_doc.select_print_heading = sales_order_print_heading
+
 	# Set Project Details
 	for k, v in project_details.items():
 		if target_doc.meta.has_field(k):

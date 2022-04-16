@@ -7,6 +7,7 @@
   "project_naming_by",
   "sublet_item_group",
   "lubricants_item_group",
+  "sales_order_print_heading",
   "column_break_2",
   "ignore_workstation_time_overlap",
   "ignore_user_time_overlap",
@@ -54,10 +55,16 @@
    "fieldtype": "Link",
    "label": "Lubricants Item Group",
    "options": "Item Group"
+  },
+  {
+   "fieldname": "sales_order_print_heading",
+   "fieldtype": "Link",
+   "label": "Project Sales Order Print Heading",
+   "options": "Print Heading"
   }
  ],
  "issingle": 1,
- "modified": "2022-01-19 17:03:26.091561",
+ "modified": "2022-04-16 20:12:23.725553",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects Settings",
