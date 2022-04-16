@@ -64,23 +64,23 @@
   "campaign",
   "section_break0",
   "description",
-  "project_template_section",
-  "project_templates",
   "sec_insurance",
   "insurance_company",
   "insurance_company_name",
+  "default_depreciation_percentage",
   "col_break_insurance",
   "insurance_policy_no",
   "insurance_loss_no",
   "col_break_insurance2",
   "insurance_surveyor",
   "insurance_surveyor_company",
-  "depreciation_details_section",
-  "default_depreciation_percentage",
+  "non_standard_depreciation_section",
   "non_standard_depreciation",
   "sec_warranty",
   "warranty_claim_no",
   "cb_warranty_1",
+  "project_template_section",
+  "project_templates",
   "items_section",
   "service_items_html",
   "stock_items_html",
@@ -663,15 +663,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "insurance_company",
    "fieldname": "default_depreciation_percentage",
    "fieldtype": "Percent",
    "label": "Default Depreciation (%)"
-  },
-  {
-   "depends_on": "insurance_company",
-   "fieldname": "depreciation_details_section",
-   "fieldtype": "Section Break",
-   "label": "Depreciation Details"
   },
   {
    "fieldname": "non_standard_depreciation",
@@ -945,12 +940,20 @@
   {
    "fieldname": "cb_37",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "non_standard_depreciation",
+   "depends_on": "insurance_company",
+   "fieldname": "non_standard_depreciation_section",
+   "fieldtype": "Section Break",
+   "label": "Non Standard Depreciation"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-04-16 05:34:23.387893",
+ "modified": "2022-04-16 20:55:41.483453",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
