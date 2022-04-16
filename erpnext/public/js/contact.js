@@ -6,11 +6,20 @@ frappe.ui.form.on("Contact", {
 	validate: function (frm) {
 		erpnext.utils.format_mobile_pakistan_in_contact(frm);
 		erpnext.utils.format_cnic(frm, "tax_cnic");
+		erpnext.utils.format_mobile_pakistan(frm, "mobile_no");
+		erpnext.utils.format_mobile_pakistan(frm, "mobile_no_2");
 	},
 
 	tax_cnic: function (frm) {
 		erpnext.utils.format_cnic(frm, "tax_cnic");
-	}
+	},
+
+	mobile_no: function (frm) {
+		erpnext.utils.format_mobile_pakistan(frm, "mobile_no");
+	},
+	mobile_no_2: function (frm) {
+		erpnext.utils.format_mobile_pakistan(frm, "mobile_no_2");
+	},
 });
 
 frappe.ui.form.on("Contact Phone", {

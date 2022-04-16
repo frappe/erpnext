@@ -15,7 +15,7 @@ from erpnext.stock.get_item_details import get_applies_to_details
 from frappe.model.naming import set_name_by_naming_series
 from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
-from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
+from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact, get_all_phone_numbers
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.projects.doctype.project_status.project_status import get_auto_project_status, set_manual_project_status,\
 	get_valid_manual_project_status_names, is_manual_project_status, validate_project_status_for_transaction
@@ -29,7 +29,7 @@ force_applies_to_fields = ("vehicle_chassis_no", "vehicle_engine_no", "vehicle_l
 
 force_customer_fields = ("customer_name",
 	"tax_id", "tax_cnic", "tax_strn", "tax_status",
-	"address_display", "contact_display", "contact_phone", "contact_mobile", "contact_email")
+	"address_display", "contact_display", "contact_email")
 
 vehicle_change_fields = [
 	('change_vehicle_license_plate', 'license_plate'),
@@ -64,6 +64,7 @@ class Project(StatusUpdater):
 		self.set_onload('cant_change_fields', self.get_cant_change_fields())
 		self.set_onload('valid_manual_project_status_names', get_valid_manual_project_status_names(self))
 		self.set_onload('is_manual_project_status', is_manual_project_status(self.project_status))
+		self.set_onload('phone_nos', get_all_phone_numbers('Customer', self.customer))
 
 		self.reset_quick_change_fields()
 		self.set_missing_checklist()
@@ -85,6 +86,7 @@ class Project(StatusUpdater):
 
 		self.set_missing_values()
 
+		self.validate_phone_nos()
 		self.validate_project_type()
 		self.validate_applies_to()
 		self.validate_readings()
@@ -227,6 +229,13 @@ class Project(StatusUpdater):
 			if project_type.previous_project_mandatory and not self.get('previous_project'):
 				frappe.throw(_("{0} is mandatory for Project Type {1}")
 					.format(self.meta.get_label('previous_project'), self.project_type))
+
+	def validate_phone_nos(self):
+		if not self.get('contact_mobile') and self.get('contact_mobile_2'):
+			self.contact_mobile = self.contact_mobile_2
+			self.contact_mobile_2 = ''
+		if self.get('contact_mobile') == self.get('contact_mobile_2'):
+			self.contact_mobile_2 = ''
 
 	def set_missing_values(self):
 		self.set_customer_details()
@@ -1159,6 +1168,8 @@ def get_customer_details(args):
 		out.contact_person = get_default_contact("Customer", customer.name)
 
 	out.update(get_contact_details(out.contact_person))
+
+	out.phone_nos = get_all_phone_numbers("Customer", customer.name)
 
 	return out
 

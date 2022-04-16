@@ -12,6 +12,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 
 	onload: function () {
 		this.setup_queries();
+		this.setup_contact_fields();
 	},
 
 	refresh: function () {
@@ -322,7 +323,26 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	},
 
 	contact_person: function() {
-		erpnext.utils.get_contact_details(this.frm);
+		var me = this;
+		frappe.run_serially([
+			() => erpnext.utils.get_contact_details(me.frm),
+			() => me.get_phone_numbers(),
+		])
+	},
+
+	setup_contact_fields: function () {
+		this.set_dynamic_link();
+		frappe.contacts.set_phone_no_select_options(this.frm, 'contact_mobile', 'is_primary_mobile_no');
+		frappe.contacts.set_phone_no_select_options(this.frm, 'contact_mobile_2', 'is_primary_mobile_no');
+		frappe.contacts.set_phone_no_select_options(this.frm, 'contact_phone', 'is_primary_phone');
+	},
+
+	get_phone_numbers: function () {
+		this.set_dynamic_link();
+		return frappe.run_serially([
+			() => frappe.contacts.get_all_phone_numbers(),
+			() => this.setup_contact_fields()
+		]);
 	},
 
 	get_customer_details: function () {
@@ -340,7 +360,18 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 			},
 			callback: function (r) {
 				if (r.message && !r.exc) {
-					me.frm.set_value(r.message);
+					frappe.run_serially([
+						() => me.frm.set_value(r.message),
+						() => {
+							if (r.message.phone_nos) {
+								if (!me.frm.doc.__onload) {
+									me.frm.doc.__onload = {};
+								}
+								me.frm.doc.__onload.phone_nos = r.message.phone_nos;
+							}
+						},
+						() => me.setup_contact_fields()
+					]);
 				}
 			}
 		});

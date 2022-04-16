@@ -29,10 +29,10 @@ primary_contact_fields = [
 	{'customer_field': 'contact_first_name', 'contact_field': 'first_name', 'default_from': 'customer_name'},
 	{'customer_field': 'contact_middle_name', 'contact_field': 'middle_name'},
 	{'customer_field': 'contact_last_name', 'contact_field': 'last_name'},
-	{'customer_field': 'mobile_no', 'contact_field': 'mobile_no', 'custom_setter': 1},
-	{'customer_field': 'mobile_no_2', 'contact_field': 'mobile_no_2', 'custom_setter': 1},
-	{'customer_field': 'phone_no', 'contact_field': 'phone', 'custom_setter': 1},
-	{'customer_field': 'email_id', 'contact_field': 'email_id', 'custom_setter': 1}
+	{'customer_field': 'mobile_no', 'contact_field': 'mobile_no'},
+	{'customer_field': 'mobile_no_2', 'contact_field': 'mobile_no_2'},
+	{'customer_field': 'phone_no', 'contact_field': 'phone'},
+	{'customer_field': 'email_id', 'contact_field': 'email_id'}
 ]
 
 class Customer(TransactionBase):
@@ -178,60 +178,6 @@ class Customer(TransactionBase):
 								value = self.get(field.get('default_from'))
 
 							contact.set(field['contact_field'], value)
-
-					if cstr(self.get('email_id')) != cstr(contact.get('email_id')):
-						primary_row = [d for d in contact.email_ids if d.is_primary]
-						primary_row = primary_row[0] if primary_row else None
-						if self.get('email_id'):
-							if primary_row:
-								primary_row.email_id = self.email_id
-							else:
-								contact.add_email(self.email_id, is_primary=1)
-						else:
-							contact.remove(primary_row)
-
-					if cstr(self.get('phone_no')) != cstr(contact.get('phone')):
-						primary_row = [d for d in contact.phone_nos if d.is_primary_phone]
-						primary_row = primary_row[0] if primary_row else None
-						if self.get('phone_no'):
-							if primary_row:
-								primary_row.phone = self.phone_no
-							else:
-								contact.add_phone(self.phone_no, is_primary_phone=1)
-						else:
-							contact.remove(primary_row)
-
-					remove_contact_rows = []
-
-					if self.get('mobile_no_2') and not self.get('mobile_no'):
-						self.mobile_no = self.mobile_no_2
-						self.mobile_no_2 = ""
-
-					if cstr(self.get('mobile_no')) != cstr(contact.get('mobile_no')):
-						primary_row = [d for d in contact.phone_nos if d.is_primary_mobile_no]
-						primary_row = primary_row[0] if primary_row else None
-						if self.get('mobile_no'):
-							if primary_row:
-								primary_row.phone = self.mobile_no
-							else:
-								contact.add_phone(self.mobile_no, is_primary_mobile_no=1)
-						elif primary_row:
-							remove_contact_rows.append(primary_row)
-
-					if cstr(self.get('mobile_no_2')) != cstr(contact.get('mobile_no_2')):
-						secondary_row = [d for d in contact.phone_nos if d.is_primary_mobile_no]
-						secondary_row = secondary_row[1] if len(secondary_row) > 1 else None
-						if self.get('mobile_no_2'):
-							if secondary_row:
-								secondary_row.phone = self.mobile_no_2
-							else:
-								contact.add_phone(self.mobile_no_2, is_primary_mobile_no=1)
-						elif secondary_row:
-							remove_contact_rows.append(secondary_row)
-
-					for d in remove_contact_rows:
-						if d:
-							contact.remove(d)
 
 					contact.flags.from_linked_document = ("Customer", self.name)
 					contact.save(ignore_permissions=True)

@@ -27,7 +27,10 @@
   "customer_details_section",
   "customer",
   "customer_name",
-  "column_break_14",
+  "col_break_customer_details_1",
+  "tax_cnic",
+  "tax_id",
+  "col_break_customer_details_2",
   "bill_to",
   "bill_to_name",
   "sales_order",
@@ -37,12 +40,16 @@
   "column_break_38",
   "contact_person",
   "contact_display",
-  "contact_phone",
-  "contact_mobile",
-  "contact_email",
   "column_break_41",
-  "tax_id",
-  "tax_cnic",
+  "contact_mobile",
+  "contact_mobile_2",
+  "cb_37",
+  "contact_phone",
+  "contact_email",
+  "sec_applies_to",
+  "applies_to_item",
+  "col_break_applies_to",
+  "applies_to_item_name",
   "work_details_section",
   "project_name",
   "is_warranty_claim",
@@ -57,15 +64,8 @@
   "campaign",
   "section_break0",
   "description",
-  "sec_applies_to",
-  "applies_to_item",
-  "col_break_applies_to",
-  "applies_to_item_name",
   "project_template_section",
   "project_templates",
-  "sec_warranty",
-  "warranty_claim_no",
-  "cb_warranty_1",
   "sec_insurance",
   "insurance_company",
   "insurance_company_name",
@@ -78,6 +78,9 @@
   "depreciation_details_section",
   "default_depreciation_percentage",
   "non_standard_depreciation",
+  "sec_warranty",
+  "warranty_claim_no",
+  "cb_warranty_1",
   "items_section",
   "service_items_html",
   "stock_items_html",
@@ -233,10 +236,6 @@
    "options": "Customer",
    "print_hide": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "column_break_14",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "sales_order",
@@ -774,15 +773,13 @@
   },
   {
    "fieldname": "contact_phone",
-   "fieldtype": "Data",
-   "label": "Phone No",
-   "read_only": 1
+   "fieldtype": "Select",
+   "label": "Phone No"
   },
   {
    "fieldname": "contact_mobile",
-   "fieldtype": "Data",
-   "label": "Mobile No",
-   "read_only": 1
+   "fieldtype": "Select",
+   "label": "Mobile No (Primary)"
   },
   {
    "fieldname": "contact_email",
@@ -930,12 +927,30 @@
    "no_copy": 1,
    "options": "Not Billable\nNot Billed\nPartially Billed\nFully Billed",
    "read_only": 1
+  },
+  {
+   "fieldname": "col_break_customer_details_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_break_customer_details_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.contact_mobile_2 || doc.contact_mobile",
+   "fieldname": "contact_mobile_2",
+   "fieldtype": "Select",
+   "label": "Mobile No (Secondary)"
+  },
+  {
+   "fieldname": "cb_37",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-04-12 00:42:31.068573",
+ "modified": "2022-04-16 05:34:23.387893",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

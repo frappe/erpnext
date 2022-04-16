@@ -315,12 +315,13 @@ erpnext.utils.get_contact_details = function(frm) {
 	if (frm.updating_party_details) return;
 
 	if (frm.doc["contact_person"]) {
-		frappe.call({
+		return frappe.call({
 			method: "frappe.contacts.doctype.contact.contact.get_contact_details",
 			args: {contact: frm.doc.contact_person },
 			callback: function(r) {
-				if (r.message)
-					frm.set_value(r.message);
+				if (r.message) {
+					return frm.set_value(r.message);
+				}
 			}
 		})
 	}

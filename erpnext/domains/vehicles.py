@@ -75,14 +75,6 @@ sales_invoice_vehicle_owner_fields = deepcopy(vehicle_owner_fields)
 sales_invoice_vehicle_owner_field = [f for f in sales_invoice_vehicle_owner_fields if f['fieldname'] == 'vehicle_owner'][0]
 sales_invoice_vehicle_owner_field['insert_after'] = 'bill_to_name'
 
-project_vehicle_owner_fields = deepcopy(vehicle_owner_fields)
-project_vehicle_owner_column_break = {"label": "", "fieldname": "col_break_customer_details_2", "fieldtype": "Column Break",
-	"insert_after": "bill_to_name"}
-project_vehicle_owner_fields.insert(0, project_vehicle_owner_column_break)
-
-project_vehicle_owner_field = [f for f in project_vehicle_owner_fields if f['fieldname'] == 'vehicle_owner'][0]
-project_vehicle_owner_field['insert_after'] = 'col_break_customer_details_2'
-
 # Service Persons
 service_person_fields = [
 	{"label": "Service Advisor", "fieldname": "service_advisor", "fieldtype": "Link", "options": "Sales Person",
@@ -149,12 +141,10 @@ project_change_vehicle_details_fields = [
 		"insert_after": "cb_change_vehicle_details_2", "no_copy": 1, "report_hide": 1},
 ]
 
-# Project Vehicle Status Fields
-project_vehicle_readings_section = {"label": "Vehicle Readings",
-	"fieldname": "sec_vehicle_status", "fieldtype": "Section Break", "collapsible": 0}
-insert_field_after('change_vehicle_delivery_date', project_vehicle_readings_section, project_change_vehicle_details_fields)
-
+# Project Vehicle Reading Fields
 project_vehicle_reading_fields = [
+	{"label": "Vehicle Readings", "fieldname": "sec_vehicle_status", "fieldtype": "Section Break",
+		"insert_after": "project_templates", "collapsible": 0},
 	{"label": "Odometer Reading (First)", "fieldname": "vehicle_first_odometer", "fieldtype": "Int",
 		"insert_after": "sec_vehicle_status", "no_copy": 1},
 	{"label": "Vehicle Received Date/Time", "fieldname": "vehicle_received_dt", "fieldtype": "Datetime",
@@ -252,8 +242,6 @@ for d in vehicle_owner_fields:
 	d['translatable'] = 0
 for d in sales_invoice_vehicle_owner_fields:
 	d['translatable'] = 0
-for d in project_vehicle_owner_fields:
-	d['translatable'] = 0
 for d in service_person_fields:
 	d['translatable'] = 0
 for d in material_request_service_person_fields:
@@ -339,7 +327,7 @@ data = {
 		"Purchase Invoice": applies_to_transaction_fields,
 		"Material Request": applies_to_transaction_fields + material_request_service_person_fields,
 		"Project": project_fields + applies_to_project_fields + project_change_vehicle_details_fields +
-			project_vehicle_reading_fields + project_vehicle_owner_fields + project_service_person_fields,
+			project_vehicle_reading_fields + project_service_person_fields,
 		"Journal Entry": accounting_dimension_fields,
 		"Journal Entry Account": accounting_dimension_table_fields,
 		"Payment Entry": accounting_dimension_fields,

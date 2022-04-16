@@ -55,6 +55,7 @@
 		"public/js/utils/customer_quick_entry.js",
 		"public/js/utils/vehicle_quick_entry.js",
 		"public/js/utils/insurance_surveyor_quick_entry.js",
+		"public/js/utils/contact_quick_entry_erpnext.js",
         "public/js/education/student_button.html",
         "public/js/education/assessment_result_tool.html",
         "public/js/hub/hub_factory.js",
