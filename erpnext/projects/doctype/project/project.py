@@ -1425,7 +1425,11 @@ def get_sales_order(project_name, items_type=None):
 	project_template_ordered_set = get_project_template_ordered_set(project)
 	to_remove = []
 	for d in target_doc.get('items'):
-		if d.item_code and d.project_template_detail and (d.item_code, d.project_template_detail) in project_template_ordered_set:
+		is_stock_item = 0
+		if d.item_code:
+			is_stock_item = cint(frappe.get_cached_value("Item", d.item_code, 'is_stock_item'))
+
+		if d.project_template_detail and (d.project_template_detail, is_stock_item) in project_template_ordered_set:
 			to_remove.append(d)
 
 	for d in to_remove:
@@ -1447,7 +1451,7 @@ def get_project_template_ordered_set(project):
 	project_template_details = [d.name for d in project.project_templates]
 	if project_template_details:
 		project_template_ordered_set = frappe.db.sql("""
-			select distinct item.item_code, item.project_template_detail
+			select distinct item.project_template_detail, item.is_stock_item
 			from `tabSales Order Item` item
 			inner join `tabSales Order` so on so.name = item.parent
 			where so.docstatus = 1 and so.project = %s and item.project_template_detail in %s
