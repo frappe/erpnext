@@ -15,10 +15,10 @@
   "salutation",
   "customer_name",
   "gender",
-  "tax_withholding_category",
   "default_bank_account",
   "tax_id",
   "tax_category",
+  "tax_withholding_category",
   "lead_name",
   "opportunity_name",
   "image",
@@ -511,7 +511,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-04-16 18:02:24.499110",
+ "modified": "2022-04-16 20:32:34.000304",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
