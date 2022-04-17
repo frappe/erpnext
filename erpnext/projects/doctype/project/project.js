@@ -12,7 +12,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 
 	onload: function () {
 		this.setup_queries();
-		this.setup_contact_fields();
+		this.setup_contact_no_fields();
 	},
 
 	refresh: function () {
@@ -319,33 +319,6 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		this.get_customer_details();
 	},
 
-	customer_address: function() {
-		erpnext.utils.get_address_display(this.frm, "customer_address");
-	},
-
-	contact_person: function() {
-		var me = this;
-		frappe.run_serially([
-			() => erpnext.utils.get_contact_details(me.frm),
-			() => me.get_phone_numbers(),
-		])
-	},
-
-	setup_contact_fields: function () {
-		this.set_dynamic_link();
-		frappe.contacts.set_phone_no_select_options(this.frm, 'contact_mobile', 'is_primary_mobile_no');
-		frappe.contacts.set_phone_no_select_options(this.frm, 'contact_mobile_2', 'is_primary_mobile_no');
-		frappe.contacts.set_phone_no_select_options(this.frm, 'contact_phone', 'is_primary_phone');
-	},
-
-	get_phone_numbers: function () {
-		this.set_dynamic_link();
-		return frappe.run_serially([
-			() => frappe.contacts.get_all_phone_numbers(),
-			() => this.setup_contact_fields()
-		]);
-	},
-
 	get_customer_details: function () {
 		var me = this;
 
@@ -363,19 +336,94 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 				if (r.message && !r.exc) {
 					frappe.run_serially([
 						() => me.frm.set_value(r.message),
-						() => {
-							if (r.message.phone_nos) {
-								if (!me.frm.doc.__onload) {
-									me.frm.doc.__onload = {};
-								}
-								me.frm.doc.__onload.phone_nos = r.message.phone_nos;
-							}
-						},
-						() => me.setup_contact_fields()
+						() => me.setup_contact_no_fields(r.message.contact_nos),
 					]);
 				}
 			}
 		});
+	},
+
+	customer_address: function() {
+		erpnext.utils.get_address_display(this.frm, "customer_address");
+	},
+
+	contact_person: function() {
+		var me = this;
+
+		if (me.frm.doc.contact_person) {
+			me.set_dynamic_link();
+			return frappe.call({
+				method: "frappe.contacts.doctype.contact.contact.get_contact_details",
+				args: {
+					contact: me.frm.doc.contact_person,
+					get_contact_no_list: 1,
+					link_doctype: frappe.dynamic_link.doctype,
+					link_name: me.frm.doc[frappe.dynamic_link.fieldname]
+				},
+				callback: function (r) {
+					if (r.message) {
+						$.each(r.message || {}, function (k, v) {
+							if (me.frm.get_field(k)) {
+								me.frm.doc[k] = v;
+								me.frm.refresh_field(k);
+							}
+						});
+						me.setup_contact_no_fields(r.message.contact_nos);
+					}
+				}
+			});
+		} else {
+			me.frm.set_value("contact_display", "");
+		}
+	},
+
+	contact_mobile: function () {
+		var tasks = [];
+
+		var mobile_no = this.frm.doc.contact_mobile;
+		if (mobile_no) {
+			var contacts = frappe.contacts.get_contacts_from_number(this.frm, mobile_no);
+			if (contacts && contacts.length && !contacts.includes(this.frm.doc.contact_person)) {
+				tasks = [
+					() => this.frm.doc.contact_person = contacts[0],
+					() => this.frm.trigger('contact_person'),
+					() => {
+						this.frm.doc.contact_mobile = mobile_no;
+						this.frm.refresh_field('contact_mobile');
+					},
+				];
+			}
+		}
+
+		tasks.push(() => {
+			if (this.frm.doc.contact_mobile_2 == this.frm.doc.contact_mobile) {
+				this.frm.doc.contact_mobile_2 = '';
+				this.frm.refresh_field('contact_mobile_2');
+			}
+		});
+
+		return frappe.run_serially(tasks);
+	},
+
+	setup_contact_no_fields: function (contact_nos) {
+		this.set_dynamic_link();
+
+		if (contact_nos) {
+			frappe.contacts.set_all_contact_nos(this.frm, contact_nos);
+		}
+
+		frappe.contacts.set_contact_no_select_options(this.frm, 'contact_mobile', 'is_primary_mobile_no');
+		frappe.contacts.set_contact_no_select_options(this.frm, 'contact_mobile_2', 'is_primary_mobile_no');
+		frappe.contacts.set_contact_no_select_options(this.frm, 'contact_phone', 'is_primary_phone');
+	},
+
+	get_all_contact_nos: function () {
+		this.set_dynamic_link();
+		return frappe.run_serially([
+			() => frappe.contacts.get_all_contact_nos(this.frm, frappe.dynamic_link.doctype,
+				this.frm.doc[frappe.dynamic_link.fieldname]),
+			() => this.setup_contact_no_fields()
+		]);
 	},
 
 	applies_to_item: function () {

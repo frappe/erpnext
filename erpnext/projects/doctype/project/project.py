@@ -15,7 +15,7 @@ from erpnext.stock.get_item_details import get_applies_to_details
 from frappe.model.naming import set_name_by_naming_series
 from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
-from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact, get_all_phone_numbers
+from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact, get_all_contact_nos
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.projects.doctype.project_status.project_status import get_auto_project_status, set_manual_project_status,\
 	get_valid_manual_project_status_names, is_manual_project_status, validate_project_status_for_transaction
@@ -64,7 +64,7 @@ class Project(StatusUpdater):
 		self.set_onload('cant_change_fields', self.get_cant_change_fields())
 		self.set_onload('valid_manual_project_status_names', get_valid_manual_project_status_names(self))
 		self.set_onload('is_manual_project_status', is_manual_project_status(self.project_status))
-		self.set_onload('phone_nos', get_all_phone_numbers('Customer', self.customer))
+		self.set_onload('contact_nos', get_all_contact_nos('Customer', self.customer))
 
 		self.reset_quick_change_fields()
 		self.set_missing_checklist()
@@ -1185,7 +1185,7 @@ def get_customer_details(args):
 
 	out.update(get_contact_details(out.contact_person))
 
-	out.phone_nos = get_all_phone_numbers("Customer", customer.name)
+	out.contact_nos = get_all_contact_nos("Customer", customer.name)
 
 	return out
 
