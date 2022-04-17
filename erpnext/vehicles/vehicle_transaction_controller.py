@@ -766,7 +766,7 @@ def get_project_details(args):
 		project_details = frappe.db.get_value("Project", args.project,
 			[
 				'customer', 'customer_name', 'contact_person', 'customer_address',
-				'contact_mobile', 'contact_phone', 'contact_email', 'address_display',
+				'contact_mobile', 'contact_mobile_2', 'contact_phone', 'contact_email', 'address_display',
 				'applies_to_vehicle', 'applies_to_item', 'vehicle_workshop',
 				'fuel_level', 'keys', 'vehicle_first_odometer', 'vehicle_last_odometer',
 				'service_advisor', 'service_manager',
@@ -781,6 +781,7 @@ def get_project_details(args):
 			out.contact_person = project_details.contact_person
 
 		out.project_contact_mobile = project_details.contact_mobile
+		out.project_contact_mobile_2 = project_details.contact_mobile_2
 		out.project_contact_phone = project_details.contact_phone
 		out.project_contact_email = project_details.contact_email
 		out.project_address_display = project_details.address_display

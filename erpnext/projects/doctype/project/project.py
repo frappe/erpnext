@@ -1201,6 +1201,7 @@ def get_project_details(project, doctype):
 	fieldnames = [
 		'company',
 		'customer', 'bill_to', 'vehicle_owner',
+		'contact_person', 'contact_mobile', 'contact_phone',
 		'applies_to_item', 'applies_to_vehicle',
 		'vehicle_chassis_no', 'vehicle_engine_no',
 		'vehicle_license_plate', 'vehicle_unregistered',
@@ -1211,7 +1212,8 @@ def get_project_details(project, doctype):
 		'has_stin', 'default_depreciation_percentage',
 		'campaign'
 	]
-	sales_only_fields = ['customer', 'bill_to', 'vehicle_owner', 'has_stin', 'default_depreciation_percentage']
+	sales_only_fields = ['customer', 'bill_to', 'vehicle_owner', 'has_stin', 'default_depreciation_percentage',
+		'contact_person', 'contact_mobile', 'contact_phone']
 
 	for f in fieldnames:
 		if f in sales_only_fields and doctype not in sales_doctypes:

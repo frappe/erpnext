@@ -11,7 +11,7 @@ from frappe.utils import (add_days, getdate, formatdate, date_diff,
 	add_years, get_timestamp, nowdate, flt, cstr, cint, add_months, get_last_day)
 from frappe.contacts.doctype.address.address import (get_address_display,
 	get_default_address, get_company_address)
-from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
+from frappe.contacts.doctype.contact.contact import get_default_contact
 from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext import get_company_currency
@@ -24,7 +24,7 @@ class DuplicatePartyAccountError(frappe.ValidationError): pass
 def get_party_details(party=None, account=None, party_type="Customer", letter_of_credit=None, bill_to=None, company=None, posting_date=None,
 	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True,
 	transaction_type=None, cost_center=None, tax_id=None, tax_cnic=None, tax_strn=None, has_stin=None,
-	party_address=None, company_address=None, shipping_address=None, contact_person=None, pos_profile=None):
+	party_address=None, company_address=None, shipping_address=None, contact_person=None, pos_profile=None, project=None):
 
 	if not party:
 		return {}
@@ -33,12 +33,12 @@ def get_party_details(party=None, account=None, party_type="Customer", letter_of
 	return _get_party_details(party, account, party_type, letter_of_credit, bill_to, company, posting_date,
 		bill_date, price_list, currency, doctype, ignore_permissions, fetch_payment_terms_template,
 		transaction_type, cost_center, tax_id, tax_cnic, tax_strn, has_stin,
-		party_address, shipping_address, company_address, contact_person, pos_profile)
+		party_address, shipping_address, company_address, contact_person, pos_profile, project)
 
 def _get_party_details(party=None, account=None, party_type="Customer", letter_of_credit=None, bill_to=None, company=None, posting_date=None,
 		bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True,
 		transaction_type=None, cost_center=None, tax_id=None, tax_cnic=None, tax_strn=None, has_stin=None,
-		party_address=None, shipping_address=None, company_address=None, contact_person=None, pos_profile=None):
+		party_address=None, shipping_address=None, company_address=None, contact_person=None, pos_profile=None, project=None):
 
 	party_details = frappe._dict(set_due_date(party, party_type, company, posting_date, bill_date, doctype))
 	party = party_details[scrub(party_type)]
@@ -68,7 +68,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", letter_o
 	currency = party.default_currency if party.get("default_currency") else get_company_currency(company)
 
 	party_address, shipping_address = set_address_details(party_details, party, party_type, doctype, company, party_address, company_address, shipping_address, bill_to)
-	set_contact_details(party_details, billing_party_doc, billing_party_type, contact_person)
+	set_contact_details(party_details, billing_party_doc, billing_party_type, contact_person, project=project)
 	set_other_values(party_details, party, party_type)
 	set_price_list(party_details, party, party_type, price_list, pos_profile)
 
@@ -167,21 +167,38 @@ def set_address_details(party_details, party, party_type, doctype=None, company=
 def get_regional_address_details(party_details, doctype, company):
 	pass
 
-def set_contact_details(party_details, party, party_type, contact_person=None):
-	party_details.contact_person = contact_person or get_default_contact(party_type, party.name)
+def set_contact_details(party_details, party, party_type, contact_person=None, project=None):
+	if contact_person:
+		party_details.contact_person = contact_person
+
+	project_details = None
+	if project and party_type == "Customer":
+		project_details = frappe.db.get_value("Project", project,
+			['customer', 'contact_person', 'contact_mobile', 'contact_phone'], as_dict=1)
+
+	if not party_details.contact_person and project_details and party.name == project_details.customer:
+		party_details.contact_person = project_details.contact_person
 
 	if not party_details.contact_person:
-		party_details.update({
-			"contact_person": None,
-			"contact_display": None,
-			"contact_email": None,
-			"contact_mobile": None,
-			"contact_phone": None,
-			"contact_designation": None,
-			"contact_department": None
-		})
-	else:
-		party_details.update(get_contact_details(party_details.contact_person))
+		party_details.contact_person = get_default_contact(party_type, party.name)
+
+	party_details.update(get_contact_details(party_details.contact_person, project=project_details))
+
+
+@frappe.whitelist()
+def get_contact_details(contact, project=None):
+	from frappe.contacts.doctype.contact.contact import get_contact_details
+
+	if isinstance(project, string_types):
+		project = frappe.db.get_value("Project", project, ['contact_person', 'contact_mobile', 'contact_phone'], as_dict=1)
+
+	out = get_contact_details(contact)
+
+	if project and cstr(contact) == cstr(project.get('contact_person')):
+		out.contact_mobile = project.contact_mobile
+		out.contact_phone = project.contact_phone
+
+	return out
 
 def set_other_values(party_details, party, party_type):
 	# copy

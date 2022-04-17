@@ -89,6 +89,7 @@ class BuyingController(StockController):
 				letter_of_credit=self.get("letter_of_credit"),
 				doctype=self.doctype,
 				company=self.company,
+				project=self.get('project'),
 				party_address=self.supplier_address,
 				shipping_address=self.get('shipping_address'),
 				contact_person=self.get('contact_person'),

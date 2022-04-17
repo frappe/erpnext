@@ -92,6 +92,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	args.currency = frm.doc.currency;
 	args.company = frm.doc.company;
 	args.doctype = frm.doc.doctype;
+	args.project = frm.doc.project;
 	args.transaction_type = frm.doc.transaction_type;
 	args.cost_center = frm.doc.cost_center;
 	args.tax_id = frm.doc.tax_id;
@@ -316,14 +317,17 @@ erpnext.utils.get_contact_details = function(frm) {
 
 	if (frm.doc["contact_person"]) {
 		return frappe.call({
-			method: "frappe.contacts.doctype.contact.contact.get_contact_details",
-			args: {contact: frm.doc.contact_person },
+			method: "erpnext.accounts.party.get_contact_details",
+			args: {
+				contact: frm.doc.contact_person,
+				project: frm.doc.project,
+			},
 			callback: function(r) {
 				if (r.message) {
 					return frm.set_value(r.message);
 				}
 			}
-		})
+		});
 	}
 }
 
