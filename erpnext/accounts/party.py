@@ -608,6 +608,11 @@ def validate_ntn_cnic_strn(ntn=None, cnic=None, strn=None):
 		frappe.throw(_("Invalid STRN. STRN must be in the format ##-##-####-###-##"))
 
 def validate_mobile_pakistan_in_contact(doc, method):
+	if doc.get('mobile_no'):
+		validate_mobile_pakistan(doc.mobile_no)
+	if doc.get('mobile_no_2'):
+		validate_mobile_pakistan(doc.mobile_no_2)
+
 	for d in doc.phone_nos:
 		if d.is_primary_mobile_no:
 			validate_mobile_pakistan(d.phone)
