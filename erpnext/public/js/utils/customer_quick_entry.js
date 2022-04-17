@@ -60,16 +60,16 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			label: __("Identification & Tax Id"),
 		},
 		{
-			label: __("Tax Id"),
-			fieldname: "tax_id",
+			label: __("CNIC"),
+			fieldname: "tax_cnic",
 			fieldtype: "Data"
 		},
 		{
 			fieldtype: "Column Break"
 		},
 		{
-			label: __("CNIC"),
-			fieldname: "tax_cnic",
+			label: __("Tax Id"),
+			fieldname: "tax_id",
 			fieldtype: "Data"
 		},
 		{
@@ -93,14 +93,6 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			label: __("Primary Contact Details"),
 		},
 		{
-			label: __("Email Id"),
-			fieldname: "email_id",
-			fieldtype: "Data"
-		},
-		{
-			fieldtype: "Column Break"
-		},
-		{
 			label: __("Mobile Number (Primary)"),
 			fieldname: "mobile_no",
 			fieldtype: "Data"
@@ -119,6 +111,14 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		{
 			label: __("Phone Number"),
 			fieldname: "phone_no",
+			fieldtype: "Data"
+		},
+		{
+			fieldtype: "Column Break"
+		},
+		{
+			label: __("Email Id"),
+			fieldname: "email_id",
 			fieldtype: "Data"
 		},
 		{
