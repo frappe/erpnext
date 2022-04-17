@@ -378,6 +378,10 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	},
 
 	contact_mobile: function () {
+		if (this.add_new_contact_number('contact_mobile', 'is_primary_mobile_no')) {
+			return;
+		}
+
 		var tasks = [];
 
 		var mobile_no = this.frm.doc.contact_mobile;
@@ -405,6 +409,34 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		return frappe.run_serially(tasks);
 	},
 
+	contact_mobile_2: function () {
+		this.add_new_contact_number('contact_mobile_2', 'is_primary_mobile_no');
+	},
+
+	contact_phone: function () {
+		this.add_new_contact_number('contact_phone', 'is_primary_phone');
+	},
+
+	add_new_contact_number: function (number_field, number_type) {
+		if (this.frm.doc[number_field] == __("[Add New Number]")) {
+			this.set_dynamic_link();
+			frappe.contacts.add_new_number_dialog(this.frm, number_field,
+				'contact_person', 'contact_display', number_type,
+				(phone) => {
+					return frappe.run_serially([
+						() => this.get_all_contact_nos(),
+						() => this.frm.set_value(number_field, phone)
+					]);
+				}
+			);
+
+			this.frm.doc[number_field] = "";
+			this.frm.refresh_field(number_field);
+
+			return true;
+		}
+	},
+
 	setup_contact_no_fields: function (contact_nos) {
 		this.set_dynamic_link();
 
@@ -412,9 +444,9 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 			frappe.contacts.set_all_contact_nos(this.frm, contact_nos);
 		}
 
-		frappe.contacts.set_contact_no_select_options(this.frm, 'contact_mobile', 'is_primary_mobile_no');
-		frappe.contacts.set_contact_no_select_options(this.frm, 'contact_mobile_2', 'is_primary_mobile_no');
-		frappe.contacts.set_contact_no_select_options(this.frm, 'contact_phone', 'is_primary_phone');
+		frappe.contacts.set_contact_no_select_options(this.frm, 'contact_mobile', 'is_primary_mobile_no', true);
+		frappe.contacts.set_contact_no_select_options(this.frm, 'contact_mobile_2', 'is_primary_mobile_no', true);
+		frappe.contacts.set_contact_no_select_options(this.frm, 'contact_phone', 'is_primary_phone', true);
 	},
 
 	get_all_contact_nos: function () {
