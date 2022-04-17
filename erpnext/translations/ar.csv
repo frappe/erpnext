@@ -9,7 +9,7 @@
 'Has Serial No' can not be 'Yes' for non-stock item,"""لهُ رقم تسلسل""  لا يمكن ان يكون ""نعم"" لبند غير قابل للتخزين",
 'Opening','افتتاحي',
 'To Case No.' cannot be less than 'From Case No.','الى الحالة  رقم' لا يمكن أن يكون أقل من 'من الحالة رقم',
-'To Date' is required,' إلى تاريخ ' مطلوب,
+'To Date' is required,' الى تاريخ ' مطلوب,
 'Total',&#39;مجموع&#39;,
 'Update Stock' can not be checked because items are not delivered via {0},&quot;الأوراق المالية التحديث&quot; لا يمكن التحقق من أنه لم يتم تسليم المواد عن طريق {0},
 'Update Stock' cannot be checked for fixed asset sale,لا يمكن التحقق من ' تحديث المخزون ' لبيع الأصول الثابتة\n<br>\n'Update Stock' cannot be checked for fixed asset sale,
