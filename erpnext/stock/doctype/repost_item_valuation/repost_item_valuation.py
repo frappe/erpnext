@@ -6,7 +6,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, get_link_to_form, get_weekday, now, nowtime
 from frappe.utils.user import get_users_with_role
-from rq.timeouts import JobTimeoutException
 
 import erpnext
 from erpnext.accounts.utils import update_gl_entries_after
@@ -129,12 +128,12 @@ def repost(doc):
 
 		doc.set_status("Completed")
 
-	except (Exception, JobTimeoutException):
+	except Exception:
 		frappe.db.rollback()
 		traceback = frappe.get_traceback()
 		frappe.log_error(traceback)
 
-		message = frappe.message_log.pop()
+		message = frappe.message_log.pop() if frappe.message_log else ""
 		if traceback:
 			message += "<br>" + "Traceback: <br>" + traceback
 		frappe.db.set_value(doc.doctype, doc.name, "error_log", message)
