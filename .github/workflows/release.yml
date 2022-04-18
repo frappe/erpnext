@@ -2,7 +2,7 @@ name: Generate Semantic Release
 on:
   push:
     branches:
-      - test-release
+      - version-13
 jobs:
   release:
     name: Release
