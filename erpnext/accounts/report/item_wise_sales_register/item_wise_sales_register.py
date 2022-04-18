@@ -52,6 +52,9 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			delivery_note = d.parent
 
 		row = {
+            'batch_no': d.batch_no,
+            'incoming_rate': d.incoming_rate,
+            'outgoing_rate': d.outgoing_rate,
 			'item_code': d.item_code,
 			'item_name': item_record.item_name if item_record else d.item_name,
 			'item_group': item_record.item_group if item_record else d.item_group,
@@ -135,6 +138,25 @@ def get_columns(additional_table_columns, filters):
 	if filters.get('group_by') != ('Item'):
 		columns.extend(
 			[
+				{
+					'label': _('Batch No.'),
+					'fieldname': 'batch_no',
+					'fieldtype': 'Link',
+					'options': 'Batch',
+					'width': 120
+				},
+				{
+					'label': _('Incoming Rate'),
+					'fieldname': 'incoming_rate',
+					'fieldtype': 'Data',
+					'width': 120
+				},
+				{
+					'label': _('Outgoing Rate'),
+					'fieldname': 'outgoing_rate',
+					'fieldtype': 'Data',
+					'width': 120
+				},
 				{
 					'label': _('Item Code'),
 					'fieldname': 'item_code',
@@ -396,7 +418,10 @@ def get_items(filters, additional_query_columns):
 			`tabSales Invoice Item`.stock_qty, `tabSales Invoice Item`.stock_uom,
 			`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
 			`tabSales Invoice`.customer_name, `tabSales Invoice`.customer_group, `tabSales Invoice Item`.so_detail,
-			`tabSales Invoice`.update_stock, `tabSales Invoice Item`.uom, `tabSales Invoice Item`.qty {0}
+			`tabSales Invoice`.update_stock, `tabSales Invoice Item`.uom, `tabSales Invoice Item`.qty {0},
+            `tabSales Invoice Item`.batch_no,
+            (SELECT incoming_rate FROM `tabStock Ledger Entry` AS s_l_e WHERE s_l_e.batch_no = `tabSales Invoice Item`.batch_no and s_l_e.item_code = `tabSales Invoice Item`.item_code AND incoming_rate > 0 ORDER BY s_l_e.creation ASC LIMIT 1) AS incoming_rate,
+            (SELECT outgoing_rate FROM `tabStock Ledger Entry` AS s_l_e WHERE s_l_e.batch_no = `tabSales Invoice Item`.batch_no and s_l_e.item_code = `tabSales Invoice Item`.item_code AND outgoing_rate > 0 ORDER BY s_l_e.creation ASC LIMIT 1) AS outgoing_rate
 		from `tabSales Invoice`, `tabSales Invoice Item`
 		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent
 			and `tabSales Invoice`.docstatus = 1 {1}
