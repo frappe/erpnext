@@ -272,8 +272,6 @@ def validate_item_warehouse(args):
 def update_args_in_repost_item_valuation(
 	doc, index, args, distinct_item_warehouses, affected_transactions
 ):
-	affected_transactions_list = [list(transaction) for transaction in affected_transactions]
-
 	doc.db_set(
 		{
 			"items_to_be_repost": json.dumps(args, default=str),
@@ -281,7 +279,7 @@ def update_args_in_repost_item_valuation(
 				{str(k): v for k, v in distinct_item_warehouses.items()}, default=str
 			),
 			"current_index": index,
-			"affected_transactions": json.dumps(affected_transactions_list),
+			"affected_transactions": frappe.as_json(affected_transactions),
 		}
 	)
 
