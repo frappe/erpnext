@@ -15,6 +15,9 @@
   "cash_billing",
   "has_stin",
   "validations_section",
+  "bill_to_mandatory",
+  "insurance_company_mandatory",
+  "column_break_12",
   "campaign_mandatory",
   "previous_project_mandatory"
  ],
@@ -81,9 +84,25 @@
    "fieldname": "validations_section",
    "fieldtype": "Section Break",
    "label": "Validations"
+  },
+  {
+   "default": "0",
+   "fieldname": "bill_to_mandatory",
+   "fieldtype": "Check",
+   "label": "Bill To Mandatory"
+  },
+  {
+   "default": "0",
+   "fieldname": "insurance_company_mandatory",
+   "fieldtype": "Check",
+   "label": "Insurance Company Mandatory"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2022-04-05 01:34:42.507747",
+ "modified": "2022-04-19 01:52:53.117000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Type",

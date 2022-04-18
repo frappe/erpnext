@@ -220,7 +220,9 @@ class Project(StatusUpdater):
 		return frappe._dict({
 			'applies_to_vehicle': vehicle_received,
 			'vehicle_workshop': vehicle_received,
-			# 'customer': has_sales_transaction,
+			'customer': has_sales_transaction,
+			'bill_to': has_sales_transaction and self.is_warranty_claim,
+			'is_warranty_claim': has_sales_transaction and self.is_warranty_claim,
 		})
 
 	def has_sales_transaction(self):
@@ -240,8 +242,16 @@ class Project(StatusUpdater):
 	def validate_project_type(self):
 		if self.project_type:
 			project_type = frappe.get_cached_doc("Project Type", self.project_type)
+
+			if project_type.bill_to_mandatory and not self.get('bill_to'):
+				frappe.throw(_("Bill To is mandatory for Project Type {0}").format(self.project_type))
+
+			if project_type.insurance_company_mandatory and not self.get('insurance_company'):
+				frappe.throw(_("Insurance Company is mandatory for Project Type {0}").format(self.project_type))
+
 			if project_type.campaign_mandatory and not self.get('campaign'):
 				frappe.throw(_("Campaign is mandatory for Project Type {0}").format(self.project_type))
+
 			if project_type.previous_project_mandatory and not self.get('previous_project'):
 				frappe.throw(_("{0} is mandatory for Project Type {1}")
 					.format(self.meta.get_label('previous_project'), self.project_type))
