@@ -1,7 +1,12 @@
 {
 	"branches": ["version-13"],
 	"plugins": [
-		"@semantic-release/commit-analyzer",
+		"@semantic-release/commit-analyzer", {
+			"preset": "angular",
+			"releaseRules": [
+				{"breaking": true, "release": false}
+			]
+		},
 		"@semantic-release/release-notes-generator",
 		[
 			"@semantic-release/exec", {
