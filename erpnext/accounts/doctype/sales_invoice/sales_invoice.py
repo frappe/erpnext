@@ -1522,14 +1522,13 @@ class SalesInvoice(SellingController):
 			vro.set_status(update=True)
 			vro.notify_update()
 
-	def set_item_rate_zero_based_on_customer(self):
-		from erpnext.stock.get_item_details import should_bill_item_for_customer_as_zero
-		for d in self.items:
-			if should_bill_item_for_customer_as_zero(d.item_code, self.get('bill_to') or self.get('customer')):
-				d.price_list_rate = 0
-				d.rate = 0
-				d.margin_rate_or_amount = 0
-				d.discount_percentage = 0
+	def set_item_rate_zero_for_bill_only_to_customer(self, source_row, target_row):
+		bill_to = self.get('bill_to') or self.get('customer')
+		if bill_to and source_row.get('bill_only_to_customer') and bill_to != source_row.bill_only_to_customer:
+			target_row.price_list_rate = 0
+			target_row.rate = 0
+			target_row.margin_rate_or_amount = 0
+			target_row.discount_percentage = 0
 
 	def set_can_make_vehicle_gate_pass(self):
 		if 'Vehicles' not in frappe.get_active_domains():
@@ -1682,7 +1681,7 @@ def make_delivery_note(source_name, target_doc=None):
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
-	def update_item(source, target, source_parent):
+	def update_item(source, target, source_parent, target_parent):
 		target.qty = get_pending_qty(source)
 
 	doclist = get_mapped_doc("Sales Invoice", source_name, 	{
@@ -1809,7 +1808,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
 
-	def update_details(source_doc, target_doc, source_parent):
+	def update_details(source_doc, target_doc, source_parent, target_parent):
 		target_doc.inter_company_invoice_reference = source_doc.name
 		if target_doc.doctype in ["Purchase Invoice", "Purchase Order"]:
 			target_doc.company = details.get("company")

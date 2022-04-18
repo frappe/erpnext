@@ -297,7 +297,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"weight_uom":item.weight_uom,
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0,
 		"transaction_date": args.get("transaction_date"),
-		"bill_only_to_customer": item.bill_only_to_customer,
+		"bill_only_to_customer": get_bill_only_to_customer(args, item),
 	})
 
 	out.update(get_item_defaults_details(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults,
@@ -785,20 +785,17 @@ def get_price_list_rate(args, item_doc, out):
 		if meta.get_field("currency"):
 			validate_conversion_rate(args, meta)
 
-		if meta.name == "Sales Invoice" and should_bill_item_for_customer_as_zero(item_doc.name, args.bill_to or args.customer):
-			price_list_rate = 0
-		else:
-			price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
+		price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
 
-			# variant
-			if not price_list_rate and item_doc.variant_of:
-				price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
+		# variant
+		if not price_list_rate and item_doc.variant_of:
+			price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
 
-			# insert in database
-			if not price_list_rate:
-				if args.price_list and args.rate:
-					insert_item_price(args)
-				return {}
+		# insert in database
+		if not price_list_rate:
+			if args.price_list and args.rate:
+				insert_item_price(args)
+			return {}
 
 		out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
 			/ flt(args.conversion_rate)
@@ -809,12 +806,50 @@ def get_price_list_rate(args, item_doc, out):
 				args.name, args.conversion_rate))
 
 
-def should_bill_item_for_customer_as_zero(item_code, customer):
-	if not item_code:
-		return False
+def get_bill_only_to_customer(args, item):
+	bill_only_to_customer = None
 
-	bill_only_to_customer = frappe.get_cached_value("Item", item_code, 'bill_only_to_customer')
-	return bill_only_to_customer and customer != bill_only_to_customer
+	# from campaign
+	if args.campaign:
+		bill_only_to_customer = frappe.get_cached_value("Campaign", args.campaign, 'bill_only_to_customer')
+
+	# from item
+	if not bill_only_to_customer:
+		bill_only_to_customer = item.bill_only_to_customer
+
+	# from item group
+	if not bill_only_to_customer:
+		bill_only_to_customer = get_bill_only_to_customer_from_item_group(item.item_group)
+
+	# from project warranty bill_to
+	if not bill_only_to_customer:
+		bill_only_to_customer = get_bill_only_to_customer_from_project(args.project)
+
+	return bill_only_to_customer
+
+
+def get_bill_only_to_customer_from_item_group(item_group):
+	current_item_group = item_group
+	while current_item_group:
+		item_group_doc = frappe.get_cached_doc("Item Group", current_item_group)
+		if item_group_doc.bill_only_to_customer:
+			return item_group_doc.bill_only_to_customer
+
+		current_item_group = item_group_doc.parent_item_group
+
+	return None
+
+
+def get_bill_only_to_customer_from_project(project):
+	if not project:
+		return None
+
+	project_details = frappe.db.get_value("Project", project, ['customer', 'bill_to', 'is_warranty_claim'], as_dict=1)
+	if not project_details:
+		return None
+
+	if project_details.is_warranty_claim and project_details.bill_to and project_details.bill_to != project_details.customer:
+		return project_details.bill_to
 
 
 def insert_item_price(args):

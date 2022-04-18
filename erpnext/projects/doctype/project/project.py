@@ -53,7 +53,7 @@ class Project(StatusUpdater):
 		else:
 			set_name_by_naming_series(self, 'project_number')
 
-	def onload(self):
+	def onload(self, set_free_item_rates=False):
 		self.set_onload('activity_summary', frappe.db.sql('''select activity_type,
 			sum(hours) as total_hours
 			from `tabTimesheet Detail` where project=%s and docstatus < 2 group by activity_type
@@ -71,11 +71,11 @@ class Project(StatusUpdater):
 
 		self.set_costing()
 
-		self.get_project_sales_data()
+		self.get_project_sales_data(set_free_item_rates=set_free_item_rates)
 		self.set_sales_data_html_onload()
 
 	def before_print(self):
-		self.onload()
+		self.onload(set_free_item_rates=True)
 
 		self.company_address_doc = erpnext.get_company_address(self)
 
@@ -494,9 +494,9 @@ class Project(StatusUpdater):
 		self.set_onload('service_items_html', service_items_html)
 		self.set_onload('sales_summary_html', sales_summary_html)
 
-	def get_project_sales_data(self):
-		self.sales_data.stock_items, self.sales_data.part_items, self.sales_data.lubricant_items = get_stock_items(self.name, self.customer, self.company)
-		self.sales_data.service_items, self.sales_data.labour_items, self.sales_data.sublet_items = get_service_items(self.name, self.customer, self.company)
+	def get_project_sales_data(self, set_free_item_rates=False):
+		self.sales_data.stock_items, self.sales_data.part_items, self.sales_data.lubricant_items = get_stock_items(self.name, self.customer, self.company, set_free_item_rates=set_free_item_rates)
+		self.sales_data.service_items, self.sales_data.labour_items, self.sales_data.sublet_items = get_service_items(self.name, self.customer, self.company, set_free_item_rates=set_free_item_rates)
 		self.sales_data.totals = get_totals_data([self.sales_data.stock_items, self.sales_data.service_items])
 
 	def get_sales_invoices(self):
@@ -646,7 +646,7 @@ class Project(StatusUpdater):
 				user.welcome_email_sent = 1
 
 
-def get_stock_items(project, customer, company):
+def get_stock_items(project, customer, company, set_free_item_rates=False):
 	dn_data = frappe.db.sql("""
 		select p.name as delivery_note, i.sales_order,
 			p.posting_date, p.posting_time, i.idx,
@@ -654,13 +654,15 @@ def get_stock_items(project, customer, company):
 			i.qty, i.uom,
 			i.net_amount, i.base_net_amount,
 			i.net_rate, i.base_net_rate,
-			i.item_tax_detail
+			i.item_tax_detail, i.bill_only_to_customer
 		from `tabDelivery Note Item` i
 		inner join `tabDelivery Note` p on p.name = i.parent
 		where p.docstatus = 1 and i.is_stock_item = 1
 			and p.project = %s
 	""", project, as_dict=1)
-	set_rate_for_free_customer_items(dn_data, customer)
+
+	if set_free_item_rates:
+		set_rate_for_free_customer_items(dn_data, customer)
 
 	so_data = frappe.db.sql("""
 		select p.name as sales_order,
@@ -676,7 +678,9 @@ def get_stock_items(project, customer, company):
 		where p.docstatus = 1 and i.is_stock_item = 1 and i.delivered_qty < i.qty and i.qty > 0 and p.status != 'Closed'
 			and p.project = %s
 	""", project, as_dict=1)
-	set_rate_for_free_customer_items(so_data, customer)
+
+	if set_free_item_rates:
+		set_rate_for_free_customer_items(so_data, customer)
 
 	stock_data = get_items_data_template()
 	parts_data = get_items_data_template()
@@ -712,7 +716,7 @@ def get_stock_items(project, customer, company):
 	return stock_data, parts_data, lubricants_data
 
 
-def get_service_items(project, customer, company):
+def get_service_items(project, customer, company, set_free_item_rates=False):
 	so_data = frappe.db.sql("""
 		select p.name as sales_order,
 			p.transaction_date,
@@ -727,7 +731,9 @@ def get_service_items(project, customer, company):
 			and p.project = %s
 		order by p.transaction_date, p.creation, i.idx
 	""", project, as_dict=1)
-	set_rate_for_free_customer_items(so_data, customer)
+
+	if set_free_item_rates:
+		set_rate_for_free_customer_items(so_data, customer)
 
 	sinv_data = frappe.db.sql("""
 		select p.name as sales_invoice, i.delivery_note, i.sales_order,

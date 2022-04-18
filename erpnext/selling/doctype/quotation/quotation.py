@@ -205,7 +205,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		target.run_method("calculate_taxes_and_totals")
 		target.run_method("set_payment_schedule")
 
-	def update_item(obj, target, source_parent):
+	def update_item(obj, target, source_parent, target_parent):
 		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
 
 	doclist = get_mapped_doc("Quotation", source_name, {
@@ -270,16 +270,18 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
-		target.run_method("set_item_rate_zero_based_on_customer")
 		target.run_method("calculate_taxes_and_totals")
 		target.run_method("set_payment_schedule")
 		target.run_method("set_due_date")
 
-	def update_item(obj, target, source_parent):
+	def update_item(source, target, source_parent, target_parent):
 		target.project = source_parent.get('project')
 		target.cost_center = None
-		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
+		target.stock_qty = flt(source.qty) * flt(source.conversion_factor)
 		target.depreciation_percentage = None
+
+		if target_parent:
+			target_parent.set_item_rate_zero_for_bill_only_to_customer(source, target)
 
 	doclist = get_mapped_doc("Quotation", source_name, {
 			"Quotation": {

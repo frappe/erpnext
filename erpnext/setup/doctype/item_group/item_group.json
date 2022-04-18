@@ -28,6 +28,10 @@
   "column_break_18",
   "is_vehicle",
   "has_variants",
+  "billing_section",
+  "bill_only_to_customer",
+  "column_break_23",
+  "bill_only_to_customer_name",
   "defaults",
   "item_group_defaults",
   "sec_break_taxes",
@@ -271,6 +275,31 @@
    "fieldname": "is_print_heading",
    "fieldtype": "Check",
    "label": "Is Print Heading"
+  },
+  {
+   "fieldname": "bill_only_to_customer",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Bill Only To Customer",
+   "options": "Customer"
+  },
+  {
+   "fetch_from": "bill_only_to_customer.customer_name",
+   "fieldname": "bill_only_to_customer_name",
+   "fieldtype": "Data",
+   "label": "Bill Only To Customer Name",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "bill_only_to_customer",
+   "fieldname": "billing_section",
+   "fieldtype": "Section Break",
+   "label": "Billing"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -278,7 +307,7 @@
  "image_field": "image",
  "is_tree": 1,
  "max_attachments": 3,
- "modified": "2022-04-05 20:12:54.940141",
+ "modified": "2022-04-18 23:20:00.414583",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",

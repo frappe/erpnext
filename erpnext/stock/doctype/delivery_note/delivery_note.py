@@ -465,12 +465,18 @@ def update_directly_billed_qty_for_dn(delivery_note, delivery_note_item, update_
 	else:
 		is_delivery_return = delivery_note.get('is_return')
 
+	bill_only_to_customer = frappe.db.get_value("Delivery Note Item", delivery_note_item, "bill_only_to_customer")
+	bill_only_to_customer_cond = ""
+	if bill_only_to_customer:
+		bill_only_to_customer_cond = " and (inv.bill_to = {0} or i.amount != 0)"\
+			.format(frappe.db.escape(bill_only_to_customer))
+
 	billed = frappe.db.sql("""
 		select i.qty, i.amount, inv.is_return, inv.update_stock, inv.reopen_order, inv.depreciation_type
 		from `tabSales Invoice Item` i
 		inner join `tabSales Invoice` inv on inv.name = i.parent
-		where i.delivery_note_item=%s and inv.docstatus = 1
-	""", delivery_note_item, as_dict=1)
+		where i.delivery_note_item=%s and inv.docstatus = 1 {0}
+	""".format(bill_only_to_customer_cond), delivery_note_item, as_dict=1)
 
 	billed_qty, billed_amt = calculate_billed_qty_and_amount(billed, for_delivery_return=is_delivery_return)
 	frappe.db.set_value("Delivery Note Item", delivery_note_item, {"billed_qty": billed_qty, "billed_amt": billed_amt},
@@ -478,13 +484,19 @@ def update_directly_billed_qty_for_dn(delivery_note, delivery_note_item, update_
 
 
 def update_indirectly_billed_qty_for_dn_against_so(sales_order_item, update_modified=True):
+	bill_only_to_customer = frappe.db.get_value("Sales Order Item", sales_order_item, "bill_only_to_customer")
+	bill_only_to_customer_cond = ""
+	if bill_only_to_customer:
+		bill_only_to_customer_cond = " and (inv.bill_to = {0} or item.amount != 0)" \
+			.format(frappe.db.escape(bill_only_to_customer))
+
 	# Billed against Sales Order directly
 	billed_against_so = frappe.db.sql("""
 		select item.qty, item.amount, inv.is_return, inv.update_stock, inv.reopen_order, inv.depreciation_type
 		from `tabSales Invoice Item` item, `tabSales Invoice` inv
 		where inv.name = item.parent and inv.docstatus = 1
-			and item.sales_order_item=%s and (item.delivery_note_item is null or item.delivery_note_item = '')
-	""", sales_order_item, as_dict=1)
+			and item.sales_order_item=%s and (item.delivery_note_item is null or item.delivery_note_item = '') {0}
+	""".format(bill_only_to_customer_cond), sales_order_item, as_dict=1)
 
 	billed_qty_against_so, billed_amt_against_so = calculate_billed_qty_and_amount(billed_against_so)
 
@@ -514,8 +526,8 @@ def update_indirectly_billed_qty_for_dn_against_so(sales_order_item, update_modi
 			billed_against_dn = frappe.db.sql("""
 				select item.qty, item.amount, inv.is_return, inv.update_stock, inv.reopen_order, inv.depreciation_type
 				from `tabSales Invoice Item` item, `tabSales Invoice` inv
-				where inv.name=item.parent and item.delivery_note_item=%s and item.docstatus=1
-			""", dnd.name, as_dict=1)
+				where inv.name=item.parent and item.delivery_note_item=%s and item.docstatus=1 {0}
+			""".format(bill_only_to_customer_cond), dnd.name, as_dict=1)
 
 			billed_qty_against_dn, billed_amt_against_dn = calculate_billed_qty_and_amount(billed_against_dn)
 
@@ -563,30 +575,33 @@ def make_sales_invoice(source_name, target_doc=None):
 		if source.name in [d.delivery_note_item for d in target_parent.get('items') if d.delivery_note_item]:
 			return False
 
+		if source.bill_only_to_customer:
+			bill_to = target_parent.get('bill_to') or target_parent.get('customer')
+			if not bill_to or bill_to != source.bill_only_to_customer:
+				return False
+
 		if source_parent.get('is_return'):
 			return get_pending_qty(source) <= 0
 		else:
 			return get_pending_qty(source) > 0
 
-	def update_item(source_doc, target_doc, source_parent):
-		target_doc.project = source_parent.get('project')
-		target_doc.qty = get_pending_qty(source_doc)
-		target_doc.delivered_qty = source_doc.qty
-		target_doc.depreciation_percentage = None
+	def update_item(source, target, source_parent, target_parent):
+		target.project = source_parent.get('project')
+		target.qty = get_pending_qty(source)
+		target.delivered_qty = source.qty
+		target.depreciation_percentage = None
 
-		if source_doc.serial_no and source_parent.per_billed > 0:
-			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
-				target_doc.qty, source_parent.name)
+		if target_parent:
+			target_parent.set_item_rate_zero_for_bill_only_to_customer(source, target)
+
+		if source.serial_no and source_parent.per_billed > 0:
+			target.serial_no = get_delivery_note_serial_no(source.item_code,
+				target.qty, source_parent.name)
 
 	def set_missing_values(source, target):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
-		target.run_method("set_item_rate_zero_based_on_customer")
-
-		if len(target.get("items")) == 0:
-			frappe.throw(_("All items from Delivery Note {0} have already been invoiced or returned").format(source.name))
-
 		target.run_method("calculate_taxes_and_totals")
 
 		# set company address

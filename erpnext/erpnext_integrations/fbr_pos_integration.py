@@ -39,6 +39,9 @@ def validate_fbr_pos_invoice(invoice):
 	# If no FBR POS Items, not an FBR POS
 	if not invoice.get('fbr_pos_items'):
 		invoice.is_fbr_pos_invoice = 0
+	# If no taxes charged or no taxable
+	if not any([d.fbr_pos_sale_value or d.fbr_pos_tax_charged for d in invoice.get('fbr_pos_items')]):
+		invoice.is_fbr_pos_invoice = 0
 
 	if cint(invoice.get('is_fbr_pos_invoice')):
 		# Validate FBR POS

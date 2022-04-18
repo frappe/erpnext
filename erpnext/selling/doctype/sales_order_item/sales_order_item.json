@@ -1270,7 +1270,6 @@
   {
    "fieldname": "bill_only_to_customer",
    "fieldtype": "Link",
-   "hidden": 1,
    "ignore_user_permissions": 1,
    "label": "Bill Only To Customer",
    "options": "Customer",
@@ -1296,7 +1295,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-04-07 05:19:23.301776",
+ "modified": "2022-04-18 23:12:26.581685",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

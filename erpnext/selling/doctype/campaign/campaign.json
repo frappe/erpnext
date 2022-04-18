@@ -11,10 +11,14 @@
   "campaign",
   "campaign_name",
   "naming_series",
+  "column_break_4",
+  "description",
   "campaign_schedules_section",
   "campaign_schedules",
-  "description_section",
-  "description"
+  "billing_section",
+  "bill_only_to_customer",
+  "column_break_10",
+  "bill_only_to_customer_name"
  ],
  "fields": [
   {
@@ -41,16 +45,12 @@
   },
   {
    "fieldname": "description",
-   "fieldtype": "Text",
+   "fieldtype": "Small Text",
    "in_list_view": 1,
    "label": "Description",
    "oldfieldname": "description",
    "oldfieldtype": "Text",
    "width": "300px"
-  },
-  {
-   "fieldname": "description_section",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "campaign_schedules",
@@ -62,11 +62,40 @@
    "fieldname": "campaign_schedules_section",
    "fieldtype": "Section Break",
    "label": "Campaign Schedules"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "bill_only_to_customer",
+   "fieldname": "billing_section",
+   "fieldtype": "Section Break",
+   "label": "Billing"
+  },
+  {
+   "fieldname": "bill_only_to_customer",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Bill Only To Customer",
+   "options": "Customer"
+  },
+  {
+   "fetch_from": "bill_only_to_customer.customer_name",
+   "fieldname": "bill_only_to_customer_name",
+   "fieldtype": "Data",
+   "label": "Bill Only To Customer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-bullhorn",
  "idx": 1,
- "modified": "2020-08-15 13:08:49.090434",
+ "modified": "2022-04-18 23:22:50.156846",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Campaign",

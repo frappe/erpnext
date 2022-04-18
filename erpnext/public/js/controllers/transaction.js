@@ -829,6 +829,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							doctype: me.frm.doc.doctype,
 							name: me.frm.doc.name,
 							project: item.project || me.frm.doc.project,
+							campaign: me.frm.doc.campaign,
 							qty: item.qty || 1,
 							stock_qty: item.stock_qty,
 							weight_per_unit: item.weight_per_unit,
