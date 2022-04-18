@@ -5,8 +5,8 @@
 
 
 import frappe
-from frappe.model.document import Document
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.model.document import Document
 from frappe.utils import cint
 
 
@@ -26,7 +26,7 @@ class BuyingSettings(Document):
 			self.get("supp_master_name") == "Naming Series",
 			hide_name_field=False,
 		)
-	
+
 	def toggle_discount_accounting_fields(self):
 		enable_discount_accounting = cint(self.enable_discount_accounting)
 
