@@ -19,12 +19,6 @@
 				"message": "chore(release): Bumped to Version ${nextRelease.version}\n\n${nextRelease.notes}"
 			}
 		],
-		[
-			"@semantic-release/github", {
-				"assets": [
-					{"path": "dist/*"},
-				]
-			}
-		]
+		"@semantic-release/github"
 	]
 }
