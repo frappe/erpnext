@@ -27,7 +27,7 @@ class ECommerceSettings(Document):
 		self.is_redisearch_loaded = is_search_module_loaded()
 
 	def validate(self):
-		self.validate_field_filters()
+		self.validate_field_filters(self.filter_fields, self.enable_field_filters)
 		self.validate_attribute_filters()
 		self.validate_checkout()
 		self.validate_search_index_fields()
@@ -51,21 +51,22 @@ class ECommerceSettings(Document):
 			define_autocomplete_dictionary()
 			create_website_items_index()
 
-	def validate_field_filters(self):
-		if not (self.enable_field_filters and self.filter_fields):
+	@staticmethod
+	def validate_field_filters(filter_fields, enable_field_filters):
+		if not (enable_field_filters and filter_fields):
 			return
 
-		item_meta = frappe.get_meta("Item")
+		web_item_meta = frappe.get_meta("Website Item")
 		valid_fields = [
-			df.fieldname for df in item_meta.fields if df.fieldtype in ["Link", "Table MultiSelect"]
+			df.fieldname for df in web_item_meta.fields if df.fieldtype in ["Link", "Table MultiSelect"]
 		]
 
-		for f in self.filter_fields:
-			if f.fieldname not in valid_fields:
+		for row in filter_fields:
+			if row.fieldname not in valid_fields:
 				frappe.throw(
 					_(
-						"Filter Fields Row #{0}: Fieldname <b>{1}</b> must be of type 'Link' or 'Table MultiSelect'"
-					).format(f.idx, f.fieldname)
+						"Filter Fields Row #{0}: Fieldname {1} must be of type 'Link' or 'Table MultiSelect'"
+					).format(row.idx, frappe.bold(row.fieldname))
 				)
 
 	def validate_attribute_filters(self):
