@@ -495,8 +495,8 @@ class Project(StatusUpdater):
 		self.set_onload('sales_summary_html', sales_summary_html)
 
 	def get_project_sales_data(self):
-		self.sales_data.stock_items, self.sales_data.part_items, self.sales_data.lubricant_items = get_stock_items(self.name, self.company)
-		self.sales_data.service_items, self.sales_data.labour_items, self.sales_data.sublet_items = get_service_items(self.name, self.company)
+		self.sales_data.stock_items, self.sales_data.part_items, self.sales_data.lubricant_items = get_stock_items(self.name, self.customer, self.company)
+		self.sales_data.service_items, self.sales_data.labour_items, self.sales_data.sublet_items = get_service_items(self.name, self.customer, self.company)
 		self.sales_data.totals = get_totals_data([self.sales_data.stock_items, self.sales_data.service_items])
 
 	def get_sales_invoices(self):
@@ -646,7 +646,7 @@ class Project(StatusUpdater):
 				user.welcome_email_sent = 1
 
 
-def get_stock_items(project, company):
+def get_stock_items(project, customer, company):
 	dn_data = frappe.db.sql("""
 		select p.name as delivery_note, i.sales_order,
 			p.posting_date, p.posting_time, i.idx,
@@ -660,6 +660,7 @@ def get_stock_items(project, company):
 		where p.docstatus = 1 and i.is_stock_item = 1
 			and p.project = %s
 	""", project, as_dict=1)
+	set_rate_for_free_customer_items(dn_data, customer)
 
 	so_data = frappe.db.sql("""
 		select p.name as sales_order,
@@ -669,12 +670,13 @@ def get_stock_items(project, company):
 			i.net_amount * (i.qty - i.delivered_qty) / i.qty as net_amount,
 			i.base_net_amount * (i.qty - i.delivered_qty) / i.qty as base_net_amount,
 			i.net_rate, i.base_net_rate,
-			i.item_tax_detail
+			i.item_tax_detail, i.bill_only_to_customer
 		from `tabSales Order Item` i
 		inner join `tabSales Order` p on p.name = i.parent
 		where p.docstatus = 1 and i.is_stock_item = 1 and i.delivered_qty < i.qty and i.qty > 0 and p.status != 'Closed'
 			and p.project = %s
 	""", project, as_dict=1)
+	set_rate_for_free_customer_items(so_data, customer)
 
 	stock_data = get_items_data_template()
 	parts_data = get_items_data_template()
@@ -710,7 +712,7 @@ def get_stock_items(project, company):
 	return stock_data, parts_data, lubricants_data
 
 
-def get_service_items(project, company):
+def get_service_items(project, customer, company):
 	so_data = frappe.db.sql("""
 		select p.name as sales_order,
 			p.transaction_date,
@@ -718,13 +720,14 @@ def get_service_items(project, company):
 			i.qty, i.uom,
 			i.net_amount, i.base_net_amount,
 			i.net_rate, i.base_net_rate,
-			i.item_tax_detail
+			i.item_tax_detail, i.bill_only_to_customer
 		from `tabSales Order Item` i
 		inner join `tabSales Order` p on p.name = i.parent
 		where p.docstatus = 1 and i.is_stock_item = 0 and i.is_fixed_asset = 0
 			and p.project = %s
 		order by p.transaction_date, p.creation, i.idx
 	""", project, as_dict=1)
+	set_rate_for_free_customer_items(so_data, customer)
 
 	sinv_data = frappe.db.sql("""
 		select p.name as sales_invoice, i.delivery_note, i.sales_order,
@@ -784,6 +787,16 @@ def get_items_data_template():
 	})
 
 
+def set_rate_for_free_customer_items(data, customer=None):
+	for d in data:
+		if d.get('bill_only_to_customer') and customer and d.get('bill_only_to_customer') != customer:
+			d.is_free_item = 1
+			d.net_amount = 0
+			d.base_net_amount = 0
+			d.net_rate = 0
+			d.base_net_rate = 0
+
+
 def get_item_taxes(data, company):
 	sales_tax_account = frappe.get_cached_value('Company', company, "sales_tax_account")
 	service_tax_account = frappe.get_cached_value('Company', company, "service_tax_account")
@@ -799,7 +812,7 @@ def get_item_taxes(data, company):
 			for tax_row_name, amount in item_tax_detail.items():
 				tax_account = frappe.db.get_value("Sales Taxes and Charges", tax_row_name, 'account_head', cache=1)
 				if tax_account:
-					tax_amount = flt(amount)
+					tax_amount = 0 if d.get('is_free_item') else flt(amount)
 					if flt(d.ordered_qty):
 						tax_amount = tax_amount * flt(d.qty) / flt(d.ordered_qty)
 
