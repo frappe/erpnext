@@ -4,15 +4,12 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, get_link_to_form, get_weekday, now, nowtime, today
+from frappe.utils import cint, get_link_to_form, get_weekday, now, nowtime
 from frappe.utils.user import get_users_with_role
 from rq.timeouts import JobTimeoutException
 
 import erpnext
-from erpnext.accounts.utils import (
-	check_if_stock_and_account_balance_synced,
-	update_gl_entries_after,
-)
+from erpnext.accounts.utils import update_gl_entries_after
 from erpnext.stock.stock_ledger import get_items_to_be_repost, repost_future_sle
 
 
@@ -224,6 +221,10 @@ def notify_error_to_stock_managers(doc, traceback):
 
 
 def repost_entries():
+	"""
+	Reposts 'Repost Item Valuation' entries in queue.
+	Called hourly via hooks.py.
+	"""
 	if not in_configured_timeslot():
 		return
 
@@ -238,9 +239,6 @@ def repost_entries():
 	riv_entries = get_repost_item_valuation_entries()
 	if riv_entries:
 		return
-
-	for d in frappe.get_all("Company", filters={"enable_perpetual_inventory": 1}):
-		check_if_stock_and_account_balance_synced(today(), d.name)
 
 
 def get_repost_item_valuation_entries():
