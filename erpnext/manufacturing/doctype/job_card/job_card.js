@@ -77,14 +77,9 @@ frappe.ui.form.on('Job Card', {
 			//if Job Card is link to Work Order, the job card must not be able to start if Work Order not "Started"
 			// and if stock mvt for WIP is required
 			if (frm.doc.work_order) {
-				frappe.db.get_value('Work Order', frm.doc.work_order, 'skip_transfer').then((r) => {
-					if (r.message.skip_transfer !== 1 ) {
-						frappe.db.get_value('Work Order', frm.doc.work_order, 'status').then((r) => {
-							if (r.message.status == 'In Process' || r.message.status == 'Completed') {
-								frm.trigger("prepare_timer_buttons");
-							}
-						});
-					} else {
+				frappe.db.get_value('Work Order', frm.doc.work_order, ['skip_transfer', 'status']).then((result) => {
+					result=result.message;
+					if (result.skip_transfer !== 1 && result.status == 'In Process') {
 						frm.trigger("prepare_timer_buttons");
 					}
 				});
