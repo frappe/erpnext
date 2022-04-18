@@ -1,4 +1,3 @@
-
 import unittest
 
 from frappe.test_runner import make_test_objects
@@ -44,7 +43,8 @@ class TestUtils(unittest.TestCase):
 		posting_date = "2021-01-01"
 		gl_entries = get_voucherwise_gl_entries(future_vouchers, posting_date)
 		self.assertTrue(
-			voucher_type_and_no in gl_entries, msg="get_voucherwise_gl_entries not returning expected GLes",
+			voucher_type_and_no in gl_entries,
+			msg="get_voucherwise_gl_entries not returning expected GLes",
 		)
 
 

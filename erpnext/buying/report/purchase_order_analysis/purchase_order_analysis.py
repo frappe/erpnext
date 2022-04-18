@@ -27,6 +27,7 @@ def execute(filters=None):
 
 	return columns, data, None, chart_data
 
+
 def validate_filters(filters):
 	from_date, to_date = filters.get("from_date"), filters.get("to_date")
 
@@ -35,25 +36,28 @@ def validate_filters(filters):
 	elif date_diff(to_date, from_date) < 0:
 		frappe.throw(_("To Date cannot be before From Date."))
 
+
 def get_conditions(filters):
 	conditions = ""
 	if filters.get("from_date") and filters.get("to_date"):
 		conditions += " and po.transaction_date between %(from_date)s and %(to_date)s"
 
-	for field in ['company', 'name']:
+	for field in ["company", "name"]:
 		if filters.get(field):
 			conditions += f" and po.{field} = %({field})s"
 
-	if filters.get('status'):
+	if filters.get("status"):
 		conditions += " and po.status in %(status)s"
 
-	if filters.get('project'):
+	if filters.get("project"):
 		conditions += " and poi.project = %(project)s"
 
 	return conditions
 
+
 def get_data(conditions, filters):
-	data = frappe.db.sql("""
+	data = frappe.db.sql(
+		"""
 		SELECT
 			po.transaction_date as date,
 			poi.schedule_date as required_date,
@@ -81,13 +85,19 @@ def get_data(conditions, filters):
 			{0}
 		GROUP BY poi.name
 		ORDER BY po.transaction_date ASC
-	""".format(conditions), filters, as_dict=1)
+	""".format(
+			conditions
+		),
+		filters,
+		as_dict=1,
+	)
 
 	return data
 
+
 def prepare_data(data, filters):
 	completed, pending = 0, 0
-	pending_field =  "pending_amount"
+	pending_field = "pending_amount"
 	completed_field = "billed_amount"
 
 	if filters.get("group_by_po"):
@@ -114,8 +124,17 @@ def prepare_data(data, filters):
 				po_row["required_date"] = min(getdate(po_row["required_date"]), getdate(row["required_date"]))
 
 				# sum numeric columns
-				fields = ["qty", "received_qty", "pending_qty", "billed_qty", "qty_to_bill", "amount",
-					"received_qty_amount", "billed_amount", "pending_amount"]
+				fields = [
+					"qty",
+					"received_qty",
+					"pending_qty",
+					"billed_qty",
+					"qty_to_bill",
+					"amount",
+					"received_qty_amount",
+					"billed_amount",
+					"pending_amount",
+				]
 				for field in fields:
 					po_row[field] = flt(row[field]) + flt(po_row[field])
 
@@ -129,152 +148,140 @@ def prepare_data(data, filters):
 
 	return data, chart_data
 
+
 def prepare_chart_data(pending, completed):
 	labels = ["Amount to Bill", "Billed Amount"]
 
 	return {
-		"data" : {
-			"labels": labels,
-			"datasets": [
-				{"values": [pending, completed]}
-				]
-		},
-		"type": 'donut',
-		"height": 300
+		"data": {"labels": labels, "datasets": [{"values": [pending, completed]}]},
+		"type": "donut",
+		"height": 300,
 	}
+
 
 def get_columns(filters):
 	columns = [
-		{
-			"label":_("Date"),
-			"fieldname": "date",
-			"fieldtype": "Date",
-			"width": 90
-		},
-		{
-			"label":_("Required By"),
-			"fieldname": "required_date",
-			"fieldtype": "Date",
-			"width": 90
-		},
+		{"label": _("Date"), "fieldname": "date", "fieldtype": "Date", "width": 90},
+		{"label": _("Required By"), "fieldname": "required_date", "fieldtype": "Date", "width": 90},
 		{
 			"label": _("Purchase Order"),
 			"fieldname": "purchase_order",
 			"fieldtype": "Link",
 			"options": "Purchase Order",
-			"width": 160
+			"width": 160,
 		},
-		{
-			"label":_("Status"),
-			"fieldname": "status",
-			"fieldtype": "Data",
-			"width": 130
-		},
+		{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 130},
 		{
 			"label": _("Supplier"),
 			"fieldname": "supplier",
 			"fieldtype": "Link",
 			"options": "Supplier",
-			"width": 130
-		},{
+			"width": 130,
+		},
+		{
 			"label": _("Project"),
 			"fieldname": "project",
 			"fieldtype": "Link",
 			"options": "Project",
-			"width": 130
-		}]
+			"width": 130,
+		},
+	]
 
 	if not filters.get("group_by_po"):
-		columns.append({
-			"label":_("Item Code"),
-			"fieldname": "item_code",
-			"fieldtype": "Link",
-			"options": "Item",
-			"width": 100
-		})
+		columns.append(
+			{
+				"label": _("Item Code"),
+				"fieldname": "item_code",
+				"fieldtype": "Link",
+				"options": "Item",
+				"width": 100,
+			}
+		)
 
-	columns.extend([
-		{
-			"label": _("Qty"),
-			"fieldname": "qty",
-			"fieldtype": "Float",
-			"width": 120,
-			"convertible": "qty"
-		},
-		{
-			"label": _("Received Qty"),
-			"fieldname": "received_qty",
-			"fieldtype": "Float",
-			"width": 120,
-			"convertible": "qty"
-		},
-		{
-			"label": _("Pending Qty"),
-			"fieldname": "pending_qty",
-			"fieldtype": "Float",
-			"width": 80,
-			"convertible": "qty"
-		},
-		{
-			"label": _("Billed Qty"),
-			"fieldname": "billed_qty",
-			"fieldtype": "Float",
-			"width": 80,
-			"convertible": "qty"
-		},
-		{
-			"label": _("Qty to Bill"),
-			"fieldname": "qty_to_bill",
-			"fieldtype": "Float",
-			"width": 80,
-			"convertible": "qty"
-		},
-		{
-			"label": _("Amount"),
-			"fieldname": "amount",
-			"fieldtype": "Currency",
-			"width": 110,
-			"options": "Company:company:default_currency",
-			"convertible": "rate"
-		},
-		{
-			"label": _("Billed Amount"),
-			"fieldname": "billed_amount",
-			"fieldtype": "Currency",
-			"width": 110,
-			"options": "Company:company:default_currency",
-			"convertible": "rate"
-		},
-		{
-			"label": _("Pending Amount"),
-			"fieldname": "pending_amount",
-			"fieldtype": "Currency",
-			"width": 130,
-			"options": "Company:company:default_currency",
-			"convertible": "rate"
-		},
-		{
-			"label": _("Received Qty Amount"),
-			"fieldname": "received_qty_amount",
-			"fieldtype": "Currency",
-			"width": 130,
-			"options": "Company:company:default_currency",
-			"convertible": "rate"
-		},
-		{
-			"label": _("Warehouse"),
-			"fieldname": "warehouse",
-			"fieldtype": "Link",
-			"options": "Warehouse",
-			"width": 100
-		},
-		{
-			"label": _("Company"),
-			"fieldname": "company",
-			"fieldtype": "Link",
-			"options": "Company",
-			"width": 100
-		}
-	])
+	columns.extend(
+		[
+			{
+				"label": _("Qty"),
+				"fieldname": "qty",
+				"fieldtype": "Float",
+				"width": 120,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Received Qty"),
+				"fieldname": "received_qty",
+				"fieldtype": "Float",
+				"width": 120,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Pending Qty"),
+				"fieldname": "pending_qty",
+				"fieldtype": "Float",
+				"width": 80,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Billed Qty"),
+				"fieldname": "billed_qty",
+				"fieldtype": "Float",
+				"width": 80,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Qty to Bill"),
+				"fieldname": "qty_to_bill",
+				"fieldtype": "Float",
+				"width": 80,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Amount"),
+				"fieldname": "amount",
+				"fieldtype": "Currency",
+				"width": 110,
+				"options": "Company:company:default_currency",
+				"convertible": "rate",
+			},
+			{
+				"label": _("Billed Amount"),
+				"fieldname": "billed_amount",
+				"fieldtype": "Currency",
+				"width": 110,
+				"options": "Company:company:default_currency",
+				"convertible": "rate",
+			},
+			{
+				"label": _("Pending Amount"),
+				"fieldname": "pending_amount",
+				"fieldtype": "Currency",
+				"width": 130,
+				"options": "Company:company:default_currency",
+				"convertible": "rate",
+			},
+			{
+				"label": _("Received Qty Amount"),
+				"fieldname": "received_qty_amount",
+				"fieldtype": "Currency",
+				"width": 130,
+				"options": "Company:company:default_currency",
+				"convertible": "rate",
+			},
+			{
+				"label": _("Warehouse"),
+				"fieldname": "warehouse",
+				"fieldtype": "Link",
+				"options": "Warehouse",
+				"width": 100,
+			},
+			{
+				"label": _("Company"),
+				"fieldname": "company",
+				"fieldtype": "Link",
+				"options": "Company",
+				"width": 100,
+			},
+		]
+	)
 
 	return columns

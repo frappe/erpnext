@@ -13,7 +13,8 @@ from erpnext.hr.doctype.attendance.attendance import (
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.leave_application.test_leave_application import get_first_sunday
 
-test_records = frappe.get_test_records('Attendance')
+test_records = frappe.get_test_records("Attendance")
+
 
 class TestAttendance(FrappeTestCase):
 	def setUp(self):
@@ -26,9 +27,11 @@ class TestAttendance(FrappeTestCase):
 	def test_mark_absent(self):
 		employee = make_employee("test_mark_absent@example.com")
 		date = nowdate()
-		frappe.db.delete('Attendance', {'employee':employee, 'attendance_date':date})
-		attendance = mark_attendance(employee, date, 'Absent')
-		fetch_attendance = frappe.get_value('Attendance', {'employee':employee, 'attendance_date':date, 'status':'Absent'})
+		frappe.db.delete("Attendance", {"employee": employee, "attendance_date": date})
+		attendance = mark_attendance(employee, date, "Absent")
+		fetch_attendance = frappe.get_value(
+			"Attendance", {"employee": employee, "attendance_date": date, "status": "Absent"}
+		)
 		self.assertEqual(attendance, fetch_attendance)
 
 	def test_unmarked_days(self):
@@ -36,12 +39,14 @@ class TestAttendance(FrappeTestCase):
 		previous_month = now.month - 1
 		first_day = now.replace(day=1).replace(month=previous_month).date()
 
-		employee = make_employee('test_unmarked_days@example.com', date_of_joining=add_days(first_day, -1))
-		frappe.db.delete('Attendance', {'employee': employee})
-		frappe.db.set_value('Employee', employee, 'holiday_list', self.holiday_list)
+		employee = make_employee(
+			"test_unmarked_days@example.com", date_of_joining=add_days(first_day, -1)
+		)
+		frappe.db.delete("Attendance", {"employee": employee})
+		frappe.db.set_value("Employee", employee, "holiday_list", self.holiday_list)
 
 		first_sunday = get_first_sunday(self.holiday_list, for_date=first_day)
-		mark_attendance(employee, first_day, 'Present')
+		mark_attendance(employee, first_day, "Present")
 		month_name = get_month_name(first_day)
 
 		unmarked_days = get_unmarked_days(employee, month_name)
@@ -59,13 +64,15 @@ class TestAttendance(FrappeTestCase):
 		previous_month = now.month - 1
 		first_day = now.replace(day=1).replace(month=previous_month).date()
 
-		employee = make_employee('test_unmarked_days@example.com', date_of_joining=add_days(first_day, -1))
-		frappe.db.delete('Attendance', {'employee': employee})
+		employee = make_employee(
+			"test_unmarked_days@example.com", date_of_joining=add_days(first_day, -1)
+		)
+		frappe.db.delete("Attendance", {"employee": employee})
 
-		frappe.db.set_value('Employee', employee, 'holiday_list', self.holiday_list)
+		frappe.db.set_value("Employee", employee, "holiday_list", self.holiday_list)
 
 		first_sunday = get_first_sunday(self.holiday_list, for_date=first_day)
-		mark_attendance(employee, first_day, 'Present')
+		mark_attendance(employee, first_day, "Present")
 		month_name = get_month_name(first_day)
 
 		unmarked_days = get_unmarked_days(employee, month_name, exclude_holidays=True)
@@ -85,14 +92,15 @@ class TestAttendance(FrappeTestCase):
 
 		doj = add_days(first_day, 1)
 		relieving_date = add_days(first_day, 5)
-		employee = make_employee('test_unmarked_days_as_per_doj@example.com', date_of_joining=doj,
-			relieving_date=relieving_date)
-		frappe.db.delete('Attendance', {'employee': employee})
+		employee = make_employee(
+			"test_unmarked_days_as_per_doj@example.com", date_of_joining=doj, relieving_date=relieving_date
+		)
+		frappe.db.delete("Attendance", {"employee": employee})
 
-		frappe.db.set_value('Employee', employee, 'holiday_list', self.holiday_list)
+		frappe.db.set_value("Employee", employee, "holiday_list", self.holiday_list)
 
 		attendance_date = add_days(first_day, 2)
-		mark_attendance(employee, attendance_date, 'Present')
+		mark_attendance(employee, attendance_date, "Present")
 		month_name = get_month_name(first_day)
 
 		unmarked_days = get_unmarked_days(employee, month_name)

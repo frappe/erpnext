@@ -78,8 +78,9 @@ frappe.query_reports["GSTR-1"] = {
 			}
 		});
 
-
 		report.page.add_inner_button(__("Download as JSON"), function () {
+			let filters = report.get_values();
+
 			frappe.call({
 				method: 'erpnext.regional.report.gstr_1.gstr_1.get_json',
 				args: {

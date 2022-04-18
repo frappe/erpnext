@@ -27,28 +27,55 @@ function get_filters() {
 			"default": frappe.datetime.get_today()
 		},
 		{
-			"fieldname":"sales_order",
-			"label": __("Sales Order"),
-			"fieldtype": "MultiSelectList",
+			"fieldname":"customer_group",
+			"label": __("Customer Group"),
+			"fieldtype": "Link",
 			"width": 100,
-			"options": "Sales Order",
-			"get_data": function(txt) {
-				return frappe.db.get_link_options("Sales Order", txt, this.filters());
-			},
-			"filters": () => {
-				return {
-					docstatus: 1,
-					payment_terms_template: ['not in', ['']],
-					company: frappe.query_report.get_filter_value("company"),
-					transaction_date: ['between', [frappe.query_report.get_filter_value("period_start_date"), frappe.query_report.get_filter_value("period_end_date")]]
+			"options": "Customer Group",
+		},
+		{
+			"fieldname":"customer",
+			"label": __("Customer"),
+			"fieldtype": "Link",
+			"width": 100,
+			"options": "Customer",
+			"get_query": () => {
+				var customer_group = frappe.query_report.get_filter_value('customer_group');
+				return{
+					"query": "erpnext.selling.report.payment_terms_status_for_sales_order.payment_terms_status_for_sales_order.get_customers_or_items",
+					"filters": [
+						['Customer', 'disabled', '=', '0'],
+						['Customer Group','name', '=', customer_group]
+					]
 				}
-			},
-			on_change: function(){
-				frappe.query_report.refresh();
+			}
+		},
+		{
+			"fieldname":"item_group",
+			"label": __("Item Group"),
+			"fieldtype": "Link",
+			"width": 100,
+			"options": "Item Group",
+
+		},
+		{
+			"fieldname":"item",
+			"label": __("Item"),
+			"fieldtype": "Link",
+			"width": 100,
+			"options": "Item",
+			"get_query": () => {
+				var item_group = frappe.query_report.get_filter_value('item_group');
+				return{
+					"query": "erpnext.selling.report.payment_terms_status_for_sales_order.payment_terms_status_for_sales_order.get_customers_or_items",
+					"filters": [
+						['Item', 'disabled', '=', '0'],
+						['Item Group','name', '=', item_group]
+					]
+				}
 			}
 		}
 	]
-
 	return filters;
 }
 

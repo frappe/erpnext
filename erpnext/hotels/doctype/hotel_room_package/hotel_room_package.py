@@ -9,12 +9,10 @@ from frappe.model.document import Document
 class HotelRoomPackage(Document):
 	def validate(self):
 		if not self.item:
-			item = frappe.get_doc(dict(
-				doctype = 'Item',
-				item_code = self.name,
-				item_group = 'Products',
-				is_stock_item = 0,
-				stock_uom = 'Unit'
-			))
+			item = frappe.get_doc(
+				dict(
+					doctype="Item", item_code=self.name, item_group="Products", is_stock_item=0, stock_uom="Unit"
+				)
+			)
 			item.insert()
 			self.item = item.name
