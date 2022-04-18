@@ -227,11 +227,11 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 					},
 					callback:function(r){
 						if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-
 							if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
-
-							me.set_batch_number(cdt, cdn);
-							me.batch_no(doc, cdt, cdn);
+							if (has_batch_no) {
+								me.set_batch_number(cdt, cdn);
+								me.batch_no(doc, cdt, cdn);
+							}
 						}
 					}
 				});

@@ -3,6 +3,10 @@
 frappe.provide("education");
 
 frappe.ui.form.on('Student Attendance Tool', {
+	setup: (frm) => {
+		frm.students_area = $('<div>')
+			.appendTo(frm.fields_dict.students_html.wrapper);
+	},
 	onload: function(frm) {
 		frm.set_query("student_group", function() {
 			return {
@@ -34,6 +38,7 @@ frappe.ui.form.on('Student Attendance Tool', {
 
 	student_group: function(frm) {
 		if ((frm.doc.student_group && frm.doc.date) || frm.doc.course_schedule) {
+			frm.students_area.find('.student-attendance-checks').html(`<div style='padding: 2rem 0'>Fetching...</div>`);
 			var method = "erpnext.education.doctype.student_attendance_tool.student_attendance_tool.get_student_attendance_records";
 
 			frappe.call({
@@ -62,10 +67,6 @@ frappe.ui.form.on('Student Attendance Tool', {
 	},
 
 	get_students: function(frm, students) {
-		if (!frm.students_area) {
-			frm.students_area = $('<div>')
-				.appendTo(frm.fields_dict.students_html.wrapper);
-		}
 		students = students || [];
 		frm.students_editor = new education.StudentsEditor(frm, frm.students_area, students);
 	}
@@ -163,16 +164,26 @@ education.StudentsEditor = class StudentsEditor {
 				);
 			});
 
-		var htmls = students.map(function(student) {
-			return frappe.render_template("student_button", {
-				student: student.student,
-				student_name: student.student_name,
-				group_roll_number: student.group_roll_number,
-				status: student.status
-			})
-		});
+		// make html grid of students
+		let student_html = '';
+		for (let student of students) {
+			student_html += `<div class="col-sm-3">
+					<div class="checkbox">
+						<label>
+							<input
+								type="checkbox"
+								data-group_roll_number="${student.group_roll_number}"
+								data-student="${student.student}"
+								data-student-name="${student.student_name}"
+								class="students-check"
+								${student.status==='Present' ? 'checked' : ''}>
+							${student.group_roll_number} - ${student.student_name}
+						</label>
+					</div>
+				</div>`;
+		}
 
-		$(htmls.join("")).appendTo(me.wrapper);
+		$(`<div class='student-attendance-checks'>${student_html}</div>`).appendTo(me.wrapper);
 	}
 
 	show_empty_state() {

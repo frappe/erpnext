@@ -39,12 +39,14 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"label": __("From Date"),
 				"fieldtype": "Date",
 				"default": frappe.defaults.get_user_default("year_start_date"),
+				"reqd": 1
 			},
 			{
 				"fieldname": "to_date",
 				"label": __("To Date"),
 				"fieldtype": "Date",
 				"default": frappe.defaults.get_user_default("year_end_date"),
+				"reqd": 1
 			},
 			{
 				"fieldname": "finance_book",
@@ -56,6 +58,7 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"fieldname": "dimension",
 				"label": __("Select Dimension"),
 				"fieldtype": "Select",
+				"default": "Cost Center",
 				"options": get_accounting_dimension_options(),
 				"reqd": 1,
 			},
@@ -70,7 +73,7 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 });
 
 function get_accounting_dimension_options() {
-	let options =["", "Cost Center", "Project"];
+	let options =["Cost Center", "Project"];
 	frappe.db.get_list('Accounting Dimension',
 		{fields:['document_type']}).then((res) => {
 			res.forEach((dimension) => {

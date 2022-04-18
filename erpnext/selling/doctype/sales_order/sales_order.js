@@ -562,6 +562,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		var me = this;
 		var dialog = new frappe.ui.Dialog({
 			title: __("Select Items"),
+			size: "large",
 			fields: [
 				{
 					"fieldtype": "Check",
@@ -663,7 +664,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			} else {
 				let po_items = [];
 				me.frm.doc.items.forEach(d => {
-					let pending_qty = (flt(d.stock_qty) - flt(d.ordered_qty)) / flt(d.conversion_factor);
+					let ordered_qty = me.get_ordered_qty(d, me.frm.doc);
+					let pending_qty = (flt(d.stock_qty) - ordered_qty) / flt(d.conversion_factor);
 					if (pending_qty > 0) {
 						po_items.push({
 							"doctype": "Sales Order Item",
@@ -689,6 +691,24 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		dialog.show();
 	}
 
+	get_ordered_qty(item, so) {
+		let ordered_qty = item.ordered_qty;
+		if (so.packed_items && so.packed_items.length) {
+			// calculate ordered qty based on packed items in case of product bundle
+			let packed_items = so.packed_items.filter(
+				(pi) => pi.parent_detail_docname == item.name
+			);
+			if (packed_items && packed_items.length) {
+				ordered_qty = packed_items.reduce(
+					(sum, pi) => sum + flt(pi.ordered_qty),
+					0
+				);
+				ordered_qty = ordered_qty / packed_items.length;
+			}
+		}
+		return ordered_qty;
+	}
+
 	hold_sales_order(){
 		var me = this;
 		var d = new frappe.ui.Dialog({
@@ -707,7 +727,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					args: {
 						reference_doctype: me.frm.doctype,
 						reference_name: me.frm.docname,
-						content: __('Reason for hold: ')+data.reason_for_hold,
+						content: __('Reason for hold:') + ' ' + data.reason_for_hold,
 						comment_email: frappe.session.user,
 						comment_by: frappe.session.user_fullname
 					},

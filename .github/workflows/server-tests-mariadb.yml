@@ -4,14 +4,27 @@ on:
   pull_request:
     paths-ignore:
       - '**.js'
+      - '**.css'
       - '**.md'
       - '**.html'
-  workflow_dispatch:
+      - '**.csv'
   push:
     branches: [ develop ]
     paths-ignore:
       - '**.js'
       - '**.md'
+  workflow_dispatch:
+    inputs:
+      user:
+        description: 'user'
+        required: true
+        default: 'frappe'
+        type: string
+      branch:
+        description: 'Branch name'
+        default: 'develop'
+        required: false
+        type: string
 
 concurrency:
   group: server-mariadb-develop-${{ github.event.number }}
@@ -95,6 +108,8 @@ jobs:
         env:
           DB: mariadb
           TYPE: server
+          FRAPPE_USER: ${{ github.event.inputs.user }}
+          FRAPPE_BRANCH: ${{ github.event.inputs.branch }}
 
       - name: Run Tests
         run: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --use-orchestrator --with-coverage
@@ -104,9 +119,25 @@ jobs:
           ORCHESTRATOR_URL: http://test-orchestrator.frappe.io
 
       - name: Upload coverage data
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-${{ matrix.container }}
+          path: /home/runner/frappe-bench/sites/coverage.xml
+
+  coverage:
+    name: Coverage Wrap Up
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone
+        uses: actions/checkout@v2
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Upload coverage data
         uses: codecov/codecov-action@v2
         with:
           name: MariaDB
           fail_ci_if_error: true
-          files: /home/runner/frappe-bench/sites/coverage.xml
           verbose: true

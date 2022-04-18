@@ -17,8 +17,6 @@ frappe.ui.form.on("Item", {
 			frm.fields_dict["attributes"].grid.set_column_disp("attribute_value", true);
 		}
 
-		// should never check Private
-		frm.fields_dict["website_image"].df.is_private = 0;
 		if (frm.doc.is_fixed_asset) {
 			frm.trigger("set_asset_naming_series");
 		}
@@ -57,8 +55,13 @@ frappe.ui.form.on("Item", {
 
 		if (frm.doc.has_variants) {
 			frm.set_intro(__("This Item is a Template and cannot be used in transactions. Item attributes will be copied over into the variants unless 'No Copy' is set"), true);
+
 			frm.add_custom_button(__("Show Variants"), function() {
 				frappe.set_route("List", "Item", {"variant_of": frm.doc.name});
+			}, __("View"));
+
+			frm.add_custom_button(__("Item Variant Settings"), function() {
+				frappe.set_route("Form", "Item Variant Settings");
 			}, __("View"));
 
 			frm.add_custom_button(__("Variant Details Report"), function() {
@@ -91,6 +94,36 @@ frappe.ui.form.on("Item", {
 			erpnext.toggle_naming_series();
 		}
 
+		if (!frm.doc.published_in_website) {
+			frm.add_custom_button(__("Publish in Website"), function() {
+				frappe.call({
+					method: "erpnext.e_commerce.doctype.website_item.website_item.make_website_item",
+					args: {doc: frm.doc},
+					freeze: true,
+					freeze_message: __("Publishing Item ..."),
+					callback: function(result) {
+						frappe.msgprint({
+							message: __("Website Item {0} has been created.",
+								[repl('<a href="/app/website-item/%(item_encoded)s" class="strong">%(item)s</a>', {
+									item_encoded: encodeURIComponent(result.message[0]),
+									item: result.message[1]
+								})]
+							),
+							title: __("Published"),
+							indicator: "green"
+						});
+					}
+				});
+			}, __('Actions'));
+		} else {
+			frm.add_custom_button(__("Website Item"), function() {
+				frappe.db.get_value("Website Item", {item_code: frm.doc.name}, "name", (d) => {
+					if (!d.name) frappe.throw(__("Website Item not found"));
+					frappe.set_route("Form", "Website Item", d.name);
+				});
+			}, __("View"));
+		}
+
 		erpnext.item.edit_prices_button(frm);
 		erpnext.item.toggle_attributes(frm);
 
@@ -109,12 +142,6 @@ frappe.ui.form.on("Item", {
 			}
 			frappe.set_route('Form', 'Item', new_item.name);
 		});
-
-		if(frm.doc.has_variants) {
-			frm.add_custom_button(__("Item Variant Settings"), function() {
-				frappe.set_route("Form", "Item Variant Settings");
-			}, __("View"));
-		}
 
 		const stock_exists = (frm.doc.__onload
 			&& frm.doc.__onload.stock_exists) ? 1 : 0;
@@ -144,21 +171,21 @@ frappe.ui.form.on("Item", {
 		frm.set_value('has_batch_no', 0);
 		frm.toggle_enable(['has_serial_no', 'serial_no_series'], !frm.doc.is_fixed_asset);
 
-		frm.call({
-			method: "set_asset_naming_series",
-			doc: frm.doc,
-			callback: function() {
+		frappe.call({
+			method: "erpnext.stock.doctype.item.item.get_asset_naming_series",
+			callback: function(r) {
 				frm.set_value("is_stock_item", frm.doc.is_fixed_asset ? 0 : 1);
-				frm.trigger("set_asset_naming_series");
+				frm.events.set_asset_naming_series(frm, r.message);
 			}
 		});
 
 		frm.trigger('auto_create_assets');
 	},
 
-	set_asset_naming_series: function(frm) {
-		if (frm.doc.__onload && frm.doc.__onload.asset_naming_series) {
-			frm.set_df_property("asset_naming_series", "options", frm.doc.__onload.asset_naming_series);
+	set_asset_naming_series: function(frm, asset_naming_series) {
+		if ((frm.doc.__onload && frm.doc.__onload.asset_naming_series) || asset_naming_series) {
+			let naming_series = (frm.doc.__onload && frm.doc.__onload.asset_naming_series) || asset_naming_series;
+			frm.set_df_property("asset_naming_series", "options", naming_series);
 		}
 	},
 
@@ -182,25 +209,8 @@ frappe.ui.form.on("Item", {
 		}
 	},
 
-	copy_from_item_group: function(frm) {
-		return frm.call({
-			doc: frm.doc,
-			method: "copy_specification_from_item_group"
-		});
-	},
-
 	has_variants: function(frm) {
 		erpnext.item.toggle_attributes(frm);
-	},
-
-	show_in_website: function(frm) {
-		if (frm.doc.default_warehouse && !frm.doc.website_warehouse){
-			frm.set_value("website_warehouse", frm.doc.default_warehouse);
-		}
-	},
-
-	set_meta_tags(frm) {
-		frappe.utils.set_meta_tag(frm.doc.route);
 	}
 });
 
@@ -367,6 +377,17 @@ $.extend(erpnext.item, {
 			}
 		}
 
+		frm.set_query('default_provisional_account', 'item_defaults', (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					"company": row.company,
+					"root_type": ["in", ["Liability", "Asset"]],
+					"is_group": 0
+				}
+			};
+		});
+
 	},
 
 	make_dashboard: function(frm) {
@@ -392,13 +413,15 @@ $.extend(erpnext.item, {
 	edit_prices_button: function(frm) {
 		frm.add_custom_button(__("Add / Edit Prices"), function() {
 			frappe.set_route("List", "Item Price", {"item_code": frm.doc.name});
-		}, __("View"));
+		}, __("Actions"));
 	},
 
-	weight_to_validate: function(frm){
-		if((frm.doc.nett_weight || frm.doc.gross_weight) && !frm.doc.weight_uom) {
-			frappe.msgprint(__('Weight is mentioned,\nPlease mention "Weight UOM" too'));
-			frappe.validated = 0;
+	weight_to_validate: function(frm) {
+		if (frm.doc.weight_per_unit && !frm.doc.weight_uom) {
+			frappe.msgprint({
+				message: __("Please mention 'Weight UOM' along with Weight."),
+				title: __("Note")
+			});
 		}
 	},
 
@@ -539,7 +562,7 @@ $.extend(erpnext.item, {
 			let selected_attributes = {};
 			me.multiple_variant_dialog.$wrapper.find('.form-column').each((i, col) => {
 				if(i===0) return;
-				let attribute_name = $(col).find('label').html();
+				let attribute_name = $(col).find('label').html().trim();
 				selected_attributes[attribute_name] = [];
 				let checked_opts = $(col).find('.checkbox input');
 				checked_opts.each((i, opt) => {
@@ -588,7 +611,7 @@ $.extend(erpnext.item, {
 							const increment = r.message.increment;
 
 							let values = [];
-							for(var i = from; i <= to; i += increment) {
+							for(var i = from; i <= to; i = flt(i + increment, 6)) {
 								values.push(i);
 							}
 							attr_val_fields[d.attribute] = values;
