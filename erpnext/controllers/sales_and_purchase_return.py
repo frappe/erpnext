@@ -339,7 +339,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		doc.discount_amount = -1 * source.discount_amount
 		doc.run_method("calculate_taxes_and_totals")
 
-	def update_item(source_doc, target_doc, source_parent):
+	def update_item(source_doc, target_doc, source_parent, target_parent):
 		default_warehouse_for_sales_return = frappe.get_cached_value("Company", source_parent.company,
 			"default_warehouse_for_sales_return")
 
@@ -390,7 +390,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
 
-	def update_terms(source_doc, target_doc, source_parent):
+	def update_terms(source_doc, target_doc, source_parent, target_parent):
 		target_doc.payment_amount = -source_doc.payment_amount
 
 	doclist = get_mapped_doc(doctype, source_name,	{

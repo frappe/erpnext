@@ -118,7 +118,7 @@ def make_purchase_order(source_name, target_doc=None):
 		target.run_method("get_schedule_dates")
 		target.run_method("calculate_taxes_and_totals")
 
-	def update_item(obj, target, source_parent):
+	def update_item(obj, target, source_parent, target_parent):
 		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
 
 	doclist = get_mapped_doc("Supplier Quotation", source_name,		{

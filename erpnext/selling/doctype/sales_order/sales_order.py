@@ -739,7 +739,7 @@ def make_material_request(source_name, target_doc=None):
 
 		return flt(source.stock_qty) > flt(requested_item_qty_map.get(source.name))
 
-	def update_item(source, target, source_parent):
+	def update_item(source, target, source_parent, target_parent):
 		# qty is for packed items, because packed items don't have stock_qty field
 		target.qty = get_pending_qty(source)
 		target.project = source_parent.project
@@ -803,7 +803,7 @@ def make_purchase_invoice(supplier, source_name, target_doc=None):
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
-	def update_item(source, target, source_parent):
+	def update_item(source, target, source_parent, target_parent):
 		target.discount_percentage = 0
 		target.price_list_rate = 0
 		target.rate = 0
@@ -899,7 +899,7 @@ def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_m
 		if target.company_address:
 			target.update(get_fetch_values("Delivery Note", 'company_address', target.company_address))
 
-	def update_item(source, target, source_parent):
+	def update_item(source, target, source_parent, target_parent):
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
 
 	def update_purchase_receipt_item_details(source, target):
@@ -1232,7 +1232,7 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
-	def update_item(source, target, source_parent):
+	def update_item(source, target, source_parent, target_parent):
 		target.schedule_date = source.delivery_date
 		target.qty = flt(source.qty) - flt(source.ordered_qty)
 		target.stock_qty = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.conversion_factor)
@@ -1438,7 +1438,7 @@ def make_inter_company_purchase_order(source_name, target_doc=None):
 
 @frappe.whitelist()
 def create_pick_list(source_name, target_doc=None):
-	def update_item_quantity(source, target, source_parent):
+	def update_item_quantity(source, target, source_parent, target_parent):
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
 		target.stock_qty = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.conversion_factor)
 

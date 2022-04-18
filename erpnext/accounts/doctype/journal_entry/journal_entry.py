@@ -1290,7 +1290,7 @@ def make_inter_company_journal_entry(name, voucher_type, company):
 def make_reverse_journal_entry(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 
-	def update_accounts(source, target, source_parent):
+	def update_accounts(source, target, source_parent, target_parent):
 		target.reference_type = "Journal Entry"
 		target.reference_name = source_parent.name
 

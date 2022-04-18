@@ -1231,7 +1231,7 @@ def make_payment_order(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.payment_order_type = "Payment Entry"
 
-	def update_item(source_doc, target_doc, source_parent):
+	def update_item(source_doc, target_doc, source_parent, target_parent):
 		target_doc.bank_account = source_parent.party_bank_account
 		target_doc.amount = source_doc.allocated_amount
 		target_doc.account = source_parent.paid_to

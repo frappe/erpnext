@@ -244,7 +244,7 @@ class MaintenanceSchedule(TransactionBase):
 def make_maintenance_visit(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 
-	def update_status(source, target, parent):
+	def update_status(source, target, source_parent, target_parent):
 		target.maintenance_type = "Scheduled"
 
 	doclist = get_mapped_doc("Maintenance Schedule", source_name, {

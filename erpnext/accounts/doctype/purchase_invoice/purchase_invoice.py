@@ -1244,7 +1244,7 @@ def make_sales_order(customer, source_name, target_doc=None):
 		for item in target.items:
 			item.gross_profit = 0.0
 
-	def update_item(source, target, source_parent):
+	def update_item(source, target, source_parent, target_parent):
 		target.discount_percentage = 0
 		target.price_list_rate = 0
 		target.rate = 0

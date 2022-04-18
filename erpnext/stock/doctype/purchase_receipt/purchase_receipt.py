@@ -515,7 +515,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 		else:
 			return get_pending_qty(source) > 0
 
-	def update_item(source_doc, target_doc, source_parent):
+	def update_item(source_doc, target_doc, source_parent, target_parent):
 		target_doc.qty = get_pending_qty(source_doc)
 		target_doc.received_qty = target_doc.qty
 

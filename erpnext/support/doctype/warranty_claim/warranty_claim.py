@@ -41,7 +41,7 @@ class WarrantyClaim(TransactionBase):
 def make_maintenance_visit(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc, map_child_doc
 
-	def _update_links(source_doc, target_doc, source_parent):
+	def _update_links(source_doc, target_doc, source_parent, target_parent):
 		target_doc.prevdoc_doctype = source_parent.doctype
 		target_doc.prevdoc_docname = source_parent.name
 

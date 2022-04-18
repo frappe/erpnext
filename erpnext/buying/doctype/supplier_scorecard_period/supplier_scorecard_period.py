@@ -85,7 +85,7 @@ def import_string_path(path):
 
 @frappe.whitelist()
 def make_supplier_scorecard(source_name, target_doc=None):
-	def update_criteria_fields(obj, target, source_parent):
+	def update_criteria_fields(obj, target, source_parent, target_parent):
 		target.max_score, target.formula = frappe.db.get_value('Supplier Scorecard Criteria',
 			obj.criteria_name, ['max_score', 'formula'])
 

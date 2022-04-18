@@ -648,7 +648,7 @@ def make_sales_invoice(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_delivery_trip(source_name, target_doc=None):
-	def update_stop_details(source_doc, target_doc, source_parent):
+	def update_stop_details(source_doc, target_doc, source_parent, target_parent):
 		target_doc.customer = source_parent.customer
 		target_doc.address = source_parent.shipping_address_name
 		target_doc.customer_address = source_parent.shipping_address
@@ -683,7 +683,7 @@ def make_delivery_trip(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_installation_note(source_name, target_doc=None):
-	def update_item(obj, target, source_parent):
+	def update_item(obj, target, source_parent, target_parent):
 		target.qty = flt(obj.qty) - flt(obj.installed_qty)
 		target.serial_no = obj.serial_no
 

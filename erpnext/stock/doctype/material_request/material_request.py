@@ -299,7 +299,7 @@ def set_missing_values(source, target_doc):
 	target_doc.run_method("calculate_taxes_and_totals")
 
 
-def update_item(obj, target, source_parent):
+def update_item(obj, target, source_parent, target_parent):
 	target.conversion_factor = obj.conversion_factor
 	target.qty = flt(flt(obj.stock_qty) - flt(obj.ordered_qty))/ target.conversion_factor
 	target.stock_qty = (target.qty * target.conversion_factor)
@@ -514,7 +514,7 @@ def make_stock_entry(source_name, target_doc=None):
 
 		return flt(source.ordered_qty) < flt(source.stock_qty)
 
-	def update_item(obj, target, source_parent):
+	def update_item(obj, target, source_parent, target_parent):
 		qty = flt(flt(obj.stock_qty) - flt(obj.ordered_qty))/ target.conversion_factor \
 			if flt(obj.stock_qty) > flt(obj.ordered_qty) else 0
 		target.qty = qty

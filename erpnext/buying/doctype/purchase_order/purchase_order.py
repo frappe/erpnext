@@ -568,7 +568,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 
 		return abs(source.received_qty) < abs(source.qty)
 
-	def update_item(source, target, source_parent):
+	def update_item(source, target, source_parent, target_parent):
 		target.qty = get_pending_qty(source)
 
 	doc = get_mapped_doc("Purchase Order", source_name,	{
@@ -634,7 +634,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 
 		return get_pending_qty(source)
 
-	def update_item(source, target, source_parent):
+	def update_item(source, target, source_parent, target_parent):
 		target.qty = get_pending_qty(source)
 
 	def postprocess(source, target):

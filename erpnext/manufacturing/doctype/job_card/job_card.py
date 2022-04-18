@@ -238,7 +238,7 @@ def get_operations(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
-	def update_item(obj, target, source_parent):
+	def update_item(obj, target, source_parent, target_parent):
 		target.warehouse = source_parent.wip_warehouse
 
 	def set_missing_values(source, target):
@@ -265,7 +265,7 @@ def make_material_request(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None):
-	def update_item(obj, target, source_parent):
+	def update_item(obj, target, source_parent, target_parent):
 		target.t_warehouse = source_parent.wip_warehouse
 
 	def set_missing_values(source, target):

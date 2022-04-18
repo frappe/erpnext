@@ -1569,7 +1569,7 @@ def make_stock_in_entry(source_name, target_doc=None):
 		target.purpose = 'Receive at Warehouse'
 		target.set_stock_entry_type()
 
-	def update_item(source_doc, target_doc, source_parent):
+	def update_item(source_doc, target_doc, source_parent, target_parent):
 		target_doc.t_warehouse = ''
 		target_doc.s_warehouse = source_doc.t_warehouse
 		target_doc.qty = source_doc.qty - source_doc.transferred_qty
