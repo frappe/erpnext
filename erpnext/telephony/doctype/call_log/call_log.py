@@ -32,6 +32,10 @@ class CallLog(Document):
 		if lead:
 			self.add_link(link_type="Lead", link_name=lead)
 
+		# Add Employee Name
+		if self.is_incoming_call():
+			self.update_received_by()
+
 	def after_insert(self):
 		self.trigger_call_popup()
 
@@ -49,6 +53,9 @@ class CallLog(Document):
 		if not doc_before_save:
 			return
 
+		if self.is_incoming_call() and self.has_value_changed("to"):
+			self.update_received_by()
+
 		if _is_call_missed(doc_before_save, self):
 			frappe.publish_realtime("call_{id}_missed".format(id=self.id), self)
 			self.trigger_call_popup()
@@ -65,7 +72,8 @@ class CallLog(Document):
 	def trigger_call_popup(self):
 		if self.is_incoming_call():
 			scheduled_employees = get_scheduled_employees_for_popup(self.medium)
-			employee_emails = get_employees_with_number(self.to)
+			employees = get_employees_with_number(self.to)
+			employee_emails = [employee.get("user_id") for employee in employees]
 
 			# check if employees with matched number are scheduled to receive popup
 			emails = set(scheduled_employees).intersection(employee_emails)
@@ -85,10 +93,17 @@ class CallLog(Document):
 			for email in emails:
 				frappe.publish_realtime("show_call_popup", self, user=email)
 
+	def update_received_by(self):
+		if employees := get_employees_with_number(self.get("to")):
+			self.call_received_by = employees[0].get("name")
+			self.employee_user_id = employees[0].get("user_id")
+
 
 @frappe.whitelist()
-def add_call_summary(call_log, summary):
+def add_call_summary_and_call_type(call_log, summary, call_type):
 	doc = frappe.get_doc("Call Log", call_log)
+	doc.type_of_call = call_type
+	doc.save()
 	doc.add_comment("Comment", frappe.bold(_("Call Summary")) + "<br><br>" + summary)
 
 
@@ -97,20 +112,19 @@ def get_employees_with_number(number):
 	if not number:
 		return []
 
-	employee_emails = frappe.cache().hget("employees_with_number", number)
-	if employee_emails:
-		return employee_emails
+	employee_doc_name_and_emails = frappe.cache().hget("employees_with_number", number)
+	if employee_doc_name_and_emails:
+		return employee_doc_name_and_emails
 
-	employees = frappe.get_all(
+	employee_doc_name_and_emails = frappe.get_all(
 		"Employee",
-		filters={"cell_number": ["like", "%{}%".format(number)], "user_id": ["!=", ""]},
-		fields=["user_id"],
+		filters={"cell_number": ["like", f"%{number}%"], "user_id": ["!=", ""]},
+		fields=["name", "user_id"],
 	)
 
-	employee_emails = [employee.user_id for employee in employees]
-	frappe.cache().hset("employees_with_number", number, employee_emails)
+	frappe.cache().hset("employees_with_number", number, employee_doc_name_and_emails)
 
-	return employee_emails
+	return employee_doc_name_and_emails
 
 
 def link_existing_conversations(doc, state):

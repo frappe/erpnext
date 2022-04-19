@@ -1482,7 +1482,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(payment_entry.taxes[0].allocated_amount, 0)
 
 	def test_provisional_accounting_entry(self):
-		item = create_item("_Test Non Stock Item", is_stock_item=0)
+		create_item("_Test Non Stock Item", is_stock_item=0)
+
 		provisional_account = create_account(
 			account_name="Provision Account",
 			parent_account="Current Liabilities - _TC",
@@ -1504,6 +1505,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.items[0].expense_account = "Cost of Goods Sold - _TC"
 		pi.save()
 		pi.submit()
+
+		self.assertEquals(pr.items[0].provisional_expense_account, "Provision Account - _TC")
 
 		# Check GLE for Purchase Invoice
 		expected_gle = [

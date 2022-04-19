@@ -106,8 +106,6 @@
   "terms",
   "bill_no",
   "bill_date",
-  "accounting_details_section",
-  "provisional_expense_account",
   "more_info",
   "project",
   "status",
@@ -1145,26 +1143,13 @@
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "accounting_details_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Details"
-  },
-  {
-   "fieldname": "provisional_expense_account",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Provisional Expense Account",
-   "options": "Account"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-10 11:40:52.690984",
+ "modified": "2022-04-10 22:50:37.761362",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
