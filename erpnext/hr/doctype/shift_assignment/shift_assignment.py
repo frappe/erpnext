@@ -251,7 +251,7 @@ def get_shifts_for_date(employee: str, for_timestamp: datetime) -> List[Dict[str
 				Criterion.any(
 					[
 						assignment.end_date.isnull(),
-						(assignment.end_date.isnotnull() & (getdate(for_timestamp.date()) >= assignment.end_date)),
+						(assignment.end_date.isnotnull() & (getdate(for_timestamp.date()) <= assignment.end_date)),
 					]
 				)
 			)

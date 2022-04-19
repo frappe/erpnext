@@ -377,6 +377,17 @@ $.extend(erpnext.item, {
 			}
 		}
 
+		frm.set_query('default_provisional_account', 'item_defaults', (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					"company": row.company,
+					"root_type": ["in", ["Liability", "Asset"]],
+					"is_group": 0
+				}
+			};
+		});
+
 	},
 
 	make_dashboard: function(frm) {

@@ -123,6 +123,36 @@ class TestMaintenanceSchedule(unittest.TestCase):
 
 		frappe.db.rollback()
 
+	def test_schedule_with_serials(self):
+		# Checks whether serials are automatically updated when changing in items table.
+		# Also checks if other fields trigger generate schdeule if changed in items table.
+		item_code = "_Test Serial Item"
+		make_serial_item_with_serial(item_code)
+		ms = make_maintenance_schedule(item_code=item_code, serial_no="TEST001, TEST002")
+		ms.save()
+
+		# Before Save
+		self.assertEqual(ms.schedules[0].serial_no, "TEST001, TEST002")
+		self.assertEqual(ms.schedules[0].sales_person, "Sales Team")
+		self.assertEqual(len(ms.schedules), 4)
+		self.assertFalse(ms.validate_items_table_change())
+		# After Save
+		ms.items[0].serial_no = "TEST001"
+		ms.items[0].sales_person = "_Test Sales Person"
+		ms.items[0].no_of_visits = 2
+		self.assertTrue(ms.validate_items_table_change())
+		ms.save()
+		self.assertEqual(ms.schedules[0].serial_no, "TEST001")
+		self.assertEqual(ms.schedules[0].sales_person, "_Test Sales Person")
+		self.assertEqual(len(ms.schedules), 2)
+		# When user manually deleted a row from schedules table.
+		ms.schedules.pop()
+		self.assertEqual(len(ms.schedules), 1)
+		ms.save()
+		self.assertEqual(len(ms.schedules), 2)
+
+		frappe.db.rollback()
+
 
 def make_serial_item_with_serial(item_code):
 	serial_item_doc = create_item(item_code, is_stock_item=1)

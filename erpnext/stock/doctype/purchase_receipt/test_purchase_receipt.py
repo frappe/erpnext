@@ -747,13 +747,12 @@ class TestPurchaseReceipt(FrappeTestCase):
 			update_purchase_receipt_status,
 		)
 
-		pr = make_purchase_receipt()
+		item = make_item()
+
+		pr = make_purchase_receipt(item_code=item.name)
 
 		update_purchase_receipt_status(pr.name, "Closed")
 		self.assertEqual(frappe.db.get_value("Purchase Receipt", pr.name, "status"), "Closed")
-
-		pr.reload()
-		pr.cancel()
 
 	def test_pr_billing_status(self):
 		"""Flow:

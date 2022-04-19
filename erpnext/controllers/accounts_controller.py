@@ -180,6 +180,7 @@ class AccountsController(TransactionBase):
 			else:
 				self.validate_deferred_start_and_end_date()
 
+			self.validate_deferred_income_expense_account()
 			self.set_inter_company_account()
 
 		if self.doctype == "Purchase Invoice":
@@ -207,6 +208,27 @@ class AccountsController(TransactionBase):
 				"delete from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s",
 				(self.doctype, self.name),
 			)
+
+	def validate_deferred_income_expense_account(self):
+		field_map = {
+			"Sales Invoice": "deferred_revenue_account",
+			"Purchase Invoice": "deferred_expense_account",
+		}
+
+		for item in self.get("items"):
+			if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
+				if not item.get(field_map.get(self.doctype)):
+					default_deferred_account = frappe.db.get_value(
+						"Company", self.company, "default_" + field_map.get(self.doctype)
+					)
+					if not default_deferred_account:
+						frappe.throw(
+							_(
+								"Row #{0}: Please update deferred revenue/expense account in item row or default account in company master"
+							).format(item.idx)
+						)
+					else:
+						item.set(field_map.get(self.doctype), default_deferred_account)
 
 	def validate_deferred_start_and_end_date(self):
 		for d in self.items:
@@ -1975,12 +1997,13 @@ def get_advance_journal_entries(
 
 	reference_condition = " and (" + " or ".join(conditions) + ")" if conditions else ""
 
+	# nosemgrep
 	journal_entries = frappe.db.sql(
 		"""
 		select
 			"Journal Entry" as reference_type, t1.name as reference_name,
 			t1.remark as remarks, t2.{0} as amount, t2.name as reference_row,
-			t2.reference_name as against_order
+			t2.reference_name as against_order, t2.exchange_rate
 		from
 			`tabJournal Entry` t1, `tabJournal Entry Account` t2
 		where
