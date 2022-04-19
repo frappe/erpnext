@@ -57,11 +57,10 @@ def execute(filters=None):
 
 	data = []
 
-	leave_list = None
+	leave_types = None
 	if filters.summarized_view:
-		leave_types = frappe.db.sql("""select name from `tabLeave Type`""", as_list=True)
-		leave_list = [d[0] + ":Float:120" for d in leave_types]
-		columns.extend(leave_list)
+		leave_types = frappe.get_all("Leave Type", pluck="name")
+		columns.extend([leave_type + ":Float:120" for leave_type in leave_types])
 		columns.extend([_("Total Late Entries") + ":Float:120", _("Total Early Exits") + ":Float:120"])
 
 	if filters.group_by:
@@ -81,13 +80,19 @@ def execute(filters=None):
 					holiday_map,
 					conditions,
 					default_holiday_list,
-					leave_list=leave_list,
+					leave_types=leave_types,
 				)
 				emp_att_map.update(emp_att_data)
 				data += record
 	else:
 		record, emp_att_map = add_data(
-			emp_map, att_map, filters, holiday_map, conditions, default_holiday_list, leave_list=leave_list
+			emp_map,
+			att_map,
+			filters,
+			holiday_map,
+			conditions,
+			default_holiday_list,
+			leave_types=leave_types,
 		)
 		data += record
 
@@ -104,12 +109,10 @@ def get_chart_data(emp_att_map, days):
 		{"name": "Leave", "values": []},
 	]
 	for idx, day in enumerate(days, start=0):
-		p = day.replace("::65", "")
 		labels.append(day.replace("::65", ""))
 		total_absent_on_day = 0
 		total_leave_on_day = 0
 		total_present_on_day = 0
-		total_holiday = 0
 		for emp in emp_att_map.keys():
 			if emp_att_map[emp][idx]:
 				if emp_att_map[emp][idx] == "A":
@@ -134,9 +137,8 @@ def get_chart_data(emp_att_map, days):
 
 
 def add_data(
-	employee_map, att_map, filters, holiday_map, conditions, default_holiday_list, leave_list=None
+	employee_map, att_map, filters, holiday_map, conditions, default_holiday_list, leave_types=None
 ):
-
 	record = []
 	emp_att_map = {}
 	for emp in employee_map:
@@ -222,7 +224,7 @@ def add_data(
 				else:
 					leaves[d.leave_type] = d.count
 
-			for d in leave_list:
+			for d in leave_types:
 				if d in leaves:
 					row.append(leaves[d])
 				else:
