@@ -1074,7 +1074,7 @@ class GSPConnector:
 				"Distance": cint(eway_bill_details.distance),
 				"TransMode": eway_bill_details.mode_of_transport,
 				"TransId": eway_bill_details.gstin,
-				"TransName": eway_bill_details.transporter,
+				"TransName": eway_bill_details.name,
 				"TrnDocDt": eway_bill_details.document_date,
 				"TrnDocNo": eway_bill_details.document_name,
 				"VehNo": eway_bill_details.vehicle_no,
