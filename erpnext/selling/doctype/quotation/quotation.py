@@ -55,8 +55,20 @@ class Quotation(SellingController):
 			return
 
 		for item in self.items:
-			if not frappe.db.exists("Website Item", {"item_code": item.item_code}):
-				frappe.throw(_("Item {0} must be a website item for Shopping Cart quotations").format(item.item_code))
+			has_web_item = frappe.db.exists("Website Item", {"item_code": item.item_code})
+
+			# If variant is unpublished but template is published: valid
+			template = frappe.get_cached_value("Item", item.item_code, "variant_of")
+			if template and not has_web_item:
+				has_web_item = frappe.db.exists("Website Item", {"item_code": template})
+
+			if not has_web_item:
+				frappe.throw(
+					_(
+						"Row #{0}: Item {1} must have a Website Item for Shopping Cart Quotations"
+					).format(item.idx, frappe.bold(item.item_code)),
+					title=_("Unpublished Item")
+				)
 
 	def has_sales_order(self):
 		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.name, "docstatus": 1})
