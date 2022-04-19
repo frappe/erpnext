@@ -3062,6 +3062,62 @@ class TestSalesInvoice(unittest.TestCase):
 		si.reload()
 		self.assertTrue(si.items[0].serial_no)
 
+	def test_gain_loss_with_advance_entry(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		unlink_enabled = frappe.db.get_value(
+			"Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice"
+		)
+
+		frappe.db.set_value(
+			"Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice", 1
+		)
+
+		jv = make_journal_entry("_Test Receivable USD - _TC", "_Test Bank - _TC", -7000, save=False)
+
+		jv.accounts[0].exchange_rate = 70
+		jv.accounts[0].credit_in_account_currency = 100
+		jv.accounts[0].party_type = "Customer"
+		jv.accounts[0].party = "_Test Customer USD"
+
+		jv.save()
+		jv.submit()
+
+		si = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=75,
+			do_not_save=1,
+			rate=100,
+		)
+
+		si.append(
+			"advances",
+			{
+				"reference_type": "Journal Entry",
+				"reference_name": jv.name,
+				"reference_row": jv.accounts[0].name,
+				"advance_amount": 100,
+				"allocated_amount": 100,
+				"ref_exchange_rate": 70,
+			},
+		)
+		si.save()
+		si.submit()
+
+		expected_gle = [
+			["_Test Receivable USD - _TC", 7500.0, 500],
+			["Exchange Gain/Loss - _TC", 500.0, 0.0],
+			["Sales - _TC", 0.0, 7500.0],
+		]
+
+		check_gl_entries(self, si.name, expected_gle, nowdate())
+
+		frappe.db.set_value(
+			"Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice", unlink_enabled
+		)
+
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
