@@ -8,6 +8,7 @@
   "applicable_item_name",
   "applicable_qty",
   "applicable_uom",
+  "use_template_name",
   "use_template_description"
  ],
  "fields": [
@@ -22,7 +23,7 @@
    "reqd": 1
   },
   {
-   "columns": 4,
+   "columns": 3,
    "fetch_from": "applicable_item_code.item_name",
    "fieldname": "applicable_item_name",
    "fieldtype": "Data",
@@ -42,7 +43,6 @@
    "columns": 1,
    "fieldname": "applicable_uom",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "UOM",
    "options": "UOM"
   },
@@ -53,10 +53,18 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Use Template Description"
+  },
+  {
+   "columns": 2,
+   "default": "0",
+   "fieldname": "use_template_name",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Use Template Name"
   }
  ],
  "istable": 1,
- "modified": "2022-04-17 16:59:29.887540",
+ "modified": "2022-04-19 11:34:53.398959",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Template Item",
