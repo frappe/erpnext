@@ -21,5 +21,6 @@ jobs:
           npm install @semantic-release/git @semantic-release/exec --no-save
       - name: Create Release
         env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         run: npx semantic-release
