@@ -448,15 +448,18 @@
    "print_hide": 1
   },
   {
-   "default": "No",
+   "fieldname": "col_break_warehouse",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
    "fieldname": "is_subcontracted",
-   "fieldtype": "Select",
-   "label": "Supply Raw Materials",
-   "options": "No\nYes",
+   "fieldtype": "Check",
+   "label": "Is Subcontracted",
    "print_hide": 1
   },
   {
-   "depends_on": "eval:doc.is_subcontracted==\"Yes\"",
+   "depends_on": "eval:doc.is_subcontracted",
    "fieldname": "supplier_warehouse",
    "fieldtype": "Link",
    "label": "Supplier Warehouse",

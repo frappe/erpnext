@@ -574,6 +574,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:parent.is_subcontracted",
    "fieldname": "bom",
    "fieldtype": "Link",
    "label": "BOM",
@@ -583,6 +584,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:parent.is_subcontracted",
    "fieldname": "include_exploded_items",
    "fieldtype": "Check",
    "hidden": 1,
@@ -849,20 +851,20 @@
    "print_hide": 1
   },
   {
-   "depends_on": "eval:parent.is_subcontracted == 'Yes'",
+   "depends_on": "eval:parent.is_subcontracted",
    "fieldname": "fg_item",
    "fieldtype": "Link",
    "label": "Finished Good Item",
-   "mandatory_depends_on": "eval:parent.is_subcontracted == 'Yes'",
+   "mandatory_depends_on": "eval:parent.is_subcontracted",
    "options": "Item"
   },
   {
    "default": "1",
-   "depends_on": "eval:parent.is_subcontracted == 'Yes'",
+   "depends_on": "eval:parent.is_subcontracted",
    "fieldname": "fg_item_qty",
    "fieldtype": "Float",
    "label": "Finished Good Item Qty",
-   "mandatory_depends_on": "eval:parent.is_subcontracted == 'Yes'"
+   "mandatory_depends_on": "eval:parent.is_subcontracted"
   }
  ],
  "idx": 1,
