@@ -172,7 +172,7 @@ def get_columns(filters):
 def get_conditions(filters):
 	conditions = []
 
-	if not filters.party_type:
+	if not filters.getparty_type:
 		if filters.payment_type == _("Outgoing"):
 			filters.party_type = "Supplier"
 		else:
