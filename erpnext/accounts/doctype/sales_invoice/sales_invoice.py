@@ -1301,6 +1301,9 @@ class SalesInvoice(SellingController):
 
 		self.make_customer_gl_entry(gl_entries)
 
+		if self.discount_reason != None:
+			self.make_discount_gl_entries(gl_entries)
+
 		# if self.exonerated and self.account_head == None:
 		# 	frappe.throw(_("You need to fill the account head field"))
 
@@ -1344,6 +1347,39 @@ class SalesInvoice(SellingController):
 					"cost_center": self.cost_center
 				}, self.party_account_currency)
 			)
+	
+	def make_discount_gl_entries(self, gl_entries):
+		account = frappe.get_all("Mode of Payment Account", ["*"], filters = {"company": self.company, "parent": self.discount_reason})
+
+		if len(account) == 0:
+			frappe.throw(_("The discount ratio does not have a ledger account assigned for this company."))
+
+		account_currency = get_account_currency(account[0].default_account)
+
+		# gl_entries.append(
+		# 	self.get_gl_dict({
+		# 		"account": account[0].default_account,
+		# 		"against": self.customer,
+		# 		"credit": self.discount_amount,
+		# 		"credit_in_account_currency": self.discount_amount,
+		# 		"cost_center": self.cost_center
+		# 	}, account_currency)
+		# )
+
+		gl_entries.append(
+				self.get_gl_dict({
+					"account": account[0].default_account,
+					"party_type": "Customer",
+					"party": self.customer,
+					"due_date": self.due_date,
+					"against": self.against_income_account,
+					"debit": self.discount_amount,
+					"debit_in_account_currency": self.discount_amount,
+					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
+					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center
+			}, account_currency)
+		)
 
 	def make_tax_gl_entries(self, gl_entries):
 		for tax in self.get("taxes"):
