@@ -40,6 +40,7 @@ class VehicleBookingOrder(VehicleBookingController):
 		self.set_delivery_status()
 		self.set_invoice_status()
 		self.set_registration_status()
+		self.set_pdi_status()
 		self.set_transfer_customer()
 		self.set_status()
 
@@ -445,6 +446,31 @@ class VehicleBookingOrder(VehicleBookingController):
 				'registration_status': self.registration_status
 			})
 
+	def set_pdi_status(self, update=False):
+		previous_pdi_status = self.pdi_status
+
+		project = frappe.db.get_value("Project", fieldname=['name', 'status', 'is_released'], filters={
+			'vehicle_booking_order': self.name,
+			'status': ['!=', 'Cancelled'],
+			'vehicle_status': ['!=', 'Not Received']
+		}, as_dict=1)
+
+		if project:
+			if project.is_released or project.status in ['Completed', 'Closed']:
+				self.pdi_status = "Done"
+			else:
+				self.pdi_status = "In Process"
+		else:
+			if cint(self.pdi_requested):
+				self.pdi_status = "Requested"
+			else:
+				self.pdi_status = "Not Requested"
+
+		if update and self.pdi_status != previous_pdi_status:
+			self.db_set({
+				'pdi_status': self.pdi_status
+			})
+
 	def set_transfer_customer(self, update=False):
 		vehicle_transfer_letter = []
 		vehicle_registration_receipt = []
@@ -570,6 +596,8 @@ def get_next_document(vehicle_booking_order, doctype):
 		return get_vehicle_transfer_letter(doc)
 	elif doctype == "Vehicle Registration Order":
 		return get_vehicle_registration_order(doc)
+	elif doctype == "Project":
+		return get_pdi_repair_order(doc)
 	else:
 		frappe.throw(_("Invalid DocType"))
 
@@ -676,6 +704,55 @@ def get_vehicle_invoice_delivery(source):
 
 	target = frappe.new_doc("Vehicle Invoice Delivery")
 	set_next_document_values(source, target)
+	target.run_method("set_missing_values")
+	return target
+
+
+def get_pdi_repair_order(source):
+	from erpnext.projects.doctype.project_type.project_type import get_project_type_defaults
+	from erpnext.vehicles.doctype.vehicle_workshop.vehicle_workshop import get_vehicle_workshop_details
+	from erpnext.projects.doctype.project_template.project_template import guess_project_template
+
+	if not frappe.has_permission("Project", "create"):
+		frappe.throw(_("You do not have permission to make Repair Order"))
+
+	check_if_doc_exists("Project", source.name, {'status': ['!=', 'Cancelled']})
+
+	if not source.vehicle:
+		frappe.throw(_("Please set Vehicle first"))
+
+	target = frappe.new_doc("Project")
+
+	target.company = source.company
+	target.vehicle_booking_order = source.name
+	target.customer = source.customer
+	target.contact_person = source.contact_person
+	target.applies_to_item = source.item_code
+	target.applies_to_vehicle = source.vehicle
+	target.project_name = _("PDI")
+
+	vehicles_settings = frappe.get_cached_doc("Vehicles Settings", None)
+
+	# Project Type
+	target.project_type = vehicles_settings.pdi_project_type
+	if target.project_type:
+		target.update(get_project_type_defaults(target.project_type))
+
+	# Vehicle Workshop
+	target.vehicle_workshop = vehicles_settings.pdi_vehicle_workshop
+	if target.vehicle_workshop:
+		target.update(get_vehicle_workshop_details(target.vehicle_workshop))
+
+	# Project Template
+	if target.applies_to_item and vehicles_settings.pdi_project_template_category:
+		project_template = guess_project_template(vehicles_settings.pdi_project_template_category, target.applies_to_item)
+		if project_template:
+			target.append('project_templates', {'project_template': project_template})
+
+	# Odometer
+	if target.applies_to_vehicle:
+		target.vehicle_first_odometer = cint(frappe.db.get_value("Vehicle", target.applies_to_vehicle, 'last_odometer'))
+
 	target.run_method("set_missing_values")
 	return target
 

@@ -508,6 +508,7 @@ class VehicleTransactionController(StockController):
 			project = frappe.get_doc("Project", doc.project)
 			project.set_vehicle_status(update=True)
 			project.set_status(update=True)
+			project.update_vehicle_booking_order_pdi_status()
 			project.notify_update()
 
 	def update_vehicle_party_details(self):

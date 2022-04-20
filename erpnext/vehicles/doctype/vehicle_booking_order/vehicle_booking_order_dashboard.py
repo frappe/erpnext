@@ -14,7 +14,7 @@ def get_data():
 			},
 			{
 				'label': _('Delivery'),
-				'items': ['Vehicle Receipt', 'Vehicle Delivery']
+				'items': ['Vehicle Receipt', 'Vehicle Delivery', 'Project']
 			},
 			{
 				'label': _('Invoice'),

@@ -97,3 +97,21 @@ def get_project_template_items(project_template, item_group=None, items_type=Non
 		project_template_items.append(pt_item)
 
 	return project_template_items
+
+
+@frappe.whitelist()
+def guess_project_template(project_template_category, applies_to_item):
+	project_template = frappe.db.get_value("Project Template", {
+		'project_template_category': project_template_category,
+		'applies_to_item': applies_to_item
+	})
+
+	if not project_template:
+		applies_to_variant_of = frappe.get_cached_value("Item", applies_to_item, "variant_of")
+		if applies_to_variant_of:
+			project_template = frappe.db.get_value("Project Template", {
+				'project_template_category': project_template_category,
+				'applies_to_item': applies_to_variant_of
+			})
+
+	return project_template

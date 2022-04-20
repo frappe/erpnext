@@ -80,6 +80,7 @@ class Project(StatusUpdater):
 		if self.status not in ['Completed', 'Closed']:
 			self.set_missing_values()
 
+		self.validate_vehicle_booking_order()
 		self.validate_phone_nos()
 		self.validate_project_type()
 		self.validate_applies_to()
@@ -448,6 +449,35 @@ class Project(StatusUpdater):
 			if project_type.previous_project_mandatory and not self.get('previous_project'):
 				frappe.throw(_("{0} is mandatory for Project Type {1}")
 					.format(self.meta.get_label('previous_project'), self.project_type))
+
+	def validate_vehicle_booking_order(self):
+		if self.get('vehicle_booking_order'):
+			vehicle_booking_order = frappe.db.get_value("Vehicle Booking Order", self.vehicle_booking_order,
+				['docstatus', 'status', 'customer', 'financer', 'transfer_customer', 'vehicle', 'item_code'], as_dict=1)
+
+			if not vehicle_booking_order:
+				frappe.throw(_("Vehicle Booking Order {0} does not exist").format(self.vehicle_booking_order))
+
+			if vehicle_booking_order.status == "Cancelled Booking" or vehicle_booking_order.docstatus == 2:
+				frappe.throw(_("Vehicle Booking Order {0} is cancelled").format(self.vehicle_booking_order))
+
+			if vehicle_booking_order.docstatus != 1:
+				frappe.throw(_("Vehicle Booking Order {0} is not submitted").format(self.vehicle_booking_order))
+
+			if self.get('customer') and self.customer not in [vehicle_booking_order.customer, vehicle_booking_order.financer, vehicle_booking_order.transfer_customer]:
+				frappe.throw(_("Customer does not match with Vehicle Booking Order {0}").format(self.vehicle_booking_order))
+
+			if self.get('applies_to_vehicle') and self.applies_to_vehicle != vehicle_booking_order.vehicle:
+				frappe.throw(_("Vehicle does not match with Vehicle Booking Order {0}").format(self.vehicle_booking_order))
+
+			if self.get('applies_to_item') and self.applies_to_item != vehicle_booking_order.item_code:
+				frappe.throw(_("Vehicle Variant Code does not match with Vehicle Booking Order {0}").format(self.vehicle_booking_order))
+
+	def update_vehicle_booking_order_pdi_status(self):
+		if self.get('vehicle_booking_order'):
+			vbo = frappe.get_doc("Vehicle Booking Order", self.vehicle_booking_order)
+			vbo.set_pdi_status(update=True)
+			vbo.notify_update()
 
 	def validate_phone_nos(self):
 		if not self.get('contact_mobile') and self.get('contact_mobile_2'):
@@ -1336,6 +1366,8 @@ def set_project_released(project, is_released):
 
 	project.save()
 
+	project.update_vehicle_booking_order_pdi_status()
+
 
 @frappe.whitelist()
 def reopen_project(project):
@@ -1348,6 +1380,8 @@ def reopen_project(project):
 	project.set_status(reset=True)
 	project.save()
 
+	project.update_vehicle_booking_order_pdi_status()
+
 
 @frappe.whitelist()
 def set_project_status(project, project_status):
@@ -1356,6 +1390,8 @@ def set_project_status(project, project_status):
 
 	project.set_status(status=project_status)
 	project.save()
+
+	project.update_vehicle_booking_order_pdi_status()
 
 
 @frappe.whitelist()

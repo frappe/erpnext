@@ -489,6 +489,26 @@ def can_change_priority(vbo_doc, throw=False):
 
 
 @frappe.whitelist()
+def change_pdi_requested(vehicle_booking_order, pdi_requested):
+	vbo_doc = get_document_for_update(vehicle_booking_order)
+	can_deliver_vehicle(vbo_doc, throw=True)
+
+	pdi_requested = cint(pdi_requested)
+
+	if pdi_requested == cint(vbo_doc.pdi_requested):
+		if pdi_requested:
+			frappe.throw(_("Pre-Delivery Inspection is already requested"))
+		else:
+			frappe.throw(_("Pre-Delivery Inspection is not requested"))
+
+	vbo_doc.pdi_requested = pdi_requested
+	vbo_doc.set_pdi_status()
+	save_document_for_update(vbo_doc)
+
+	frappe.msgprint(_("Pre-Delivery Inspection Request Updated Successfully"), indicator='green', alert=True)
+
+
+@frappe.whitelist()
 def change_cancellation(vehicle_booking_order, cancelled):
 	vbo_doc = get_document_for_update(vehicle_booking_order)
 	can_change_cancellation(vbo_doc, throw=True)

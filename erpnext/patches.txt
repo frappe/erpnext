@@ -740,5 +740,5 @@ execute:frappe.delete_doc_if_exists("Custom Field", "Project-deliver_vehicle_btn
 erpnext.patches.v12_0.change_vehicle_checklist_parentfield
 execute:frappe.delete_doc_if_exists("Custom Field", "Project-vehicle_owner")
 execute:frappe.delete_doc_if_exists("Custom Field", "Project-col_break_customer_details_2")
-erpnext.patches.v12_0.resetup_vehicle_domain #5-04-2022 #11-04-2022 #12-04-2022 #15-04-2022 #2
+erpnext.patches.v12_0.resetup_vehicle_domain #5-04-2022 #11-04-2022 #12-04-2022 #15-04-2022 #20-04-2022 #1
 erpnext.patches.v12_0.rename_customer_billable_amount_field

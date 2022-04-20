@@ -565,6 +565,7 @@
   {
    "fieldname": "insurance_company",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Insurance Company",
    "options": "Customer"
   },
@@ -612,6 +613,7 @@
    "fieldname": "bill_to",
    "fieldtype": "Link",
    "hidden": 1,
+   "in_standard_filter": 1,
    "label": "Bill To",
    "options": "Customer"
   },
@@ -1015,7 +1017,7 @@
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-04-20 03:23:12.091683",
+ "modified": "2022-04-20 15:50:23.385428",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

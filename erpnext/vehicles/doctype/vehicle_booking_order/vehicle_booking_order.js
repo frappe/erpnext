@@ -14,6 +14,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			'Vehicle Transfer Letter': 'Transfer Letter',
 			'Vehicle Registration Order': 'Registration Order',
 			'Vehicle Invoice Movement': 'Invoice Movement',
+			'Project': 'Create PDI Repair Order',
 		}
 	},
 
@@ -149,6 +150,20 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 					if (this.can_change('vehicle_transfer')) {
 						this.frm.add_custom_button(__('Transfer Letter'), () => this.make_next_document('Vehicle Transfer Letter'),
 							__("Registration"));
+					}
+				}
+
+				// PDI Buttons
+				if (this.frm.doc.vehicle_status != "Not Received" && !['In Process', 'Done'].includes(this.frm.doc.pdi_status)) {
+					if (frappe.model.can_create("Project")) {
+						this.frm.add_custom_button(__('Create PDI Repair Order'), () => this.make_next_document('Project'),
+							__("Service"));
+					}
+
+					if (this.can_change('vehicle_delivery')) {
+						var pdi_request_label = this.frm.doc.pdi_requested ? __('Cancel PDI Request') : __('Request PDI');
+						this.frm.add_custom_button(pdi_request_label, () => this.change_pdi_requested(),
+							__("Service"));
 					}
 				}
 
@@ -336,6 +351,17 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			registration_status_color = "green";
 		}
 
+		var pdi_status_color;
+		if (me.frm.doc.pdi_status == "Not Requested") {
+			pdi_status_color = "grey";
+		} else if (me.frm.doc.pdi_status == "Requested") {
+			pdi_status_color = "blue";
+		} else if (me.frm.doc.pdi_status == "In Process") {
+			pdi_status_color = "orange";
+		} else if (me.frm.doc.pdi_status == "Done") {
+			pdi_status_color = "green";
+		}
+
 		me.add_indicator_section(__("Fulfilment"), [
 			{
 				contents: __('Priority: {0}', [cint(me.frm.doc.priority) ? 'High' : 'Normal']),
@@ -354,6 +380,10 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			{
 				contents: __('Registration Status: {0}', [me.frm.doc.registration_status]),
 				indicator: registration_status_color
+			},
+			{
+				contents: __('PDI Status: {0}', [me.frm.doc.pdi_status]),
+				indicator: pdi_status_color
 			},
 		]);
 
@@ -1117,7 +1147,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		var new_priority = cint(me.frm.doc.priority) ? 0 : 1;
 		var priority_label = new_priority ? "High" : "Normal";
 
-		frappe.confirm(__(`Are you sure you want to change the priority to <b>${__(priority_label)}</b>`),
+		frappe.confirm(__(`Are you sure you want to change the priority to <b>${__(priority_label)}</b>?`),
 			function() {
 				frappe.call({
 					method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_priority",
@@ -1148,6 +1178,30 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 					args: {
 						vehicle_booking_order: me.frm.doc.name,
 						cancelled: cancelled
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							me.frm.reload_doc();
+						}
+					}
+				});
+			}
+		)
+	},
+
+	change_pdi_requested: function () {
+		var me = this;
+
+		var new_pdi_requested = cint(me.frm.doc.pdi_requested) ? 0 : 1;
+		var label = new_pdi_requested ? "request Pre-Delivery Inspection" : "cancel Pre-Delivery Inspection request";
+
+		frappe.confirm(__(`Are you sure you want to ${__(label)}?`),
+			function() {
+				frappe.call({
+					method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_pdi_requested",
+					args: {
+						vehicle_booking_order: me.frm.doc.name,
+						pdi_requested: new_pdi_requested
 					},
 					callback: function (r) {
 						if (!r.exc) {

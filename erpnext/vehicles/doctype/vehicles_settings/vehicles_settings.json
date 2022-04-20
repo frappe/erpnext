@@ -17,7 +17,6 @@
   "vehicle_allocation_periodicity",
   "column_break_8",
   "dealership_code",
-  "service_section",
   "registration_section",
   "registration_customer_account",
   "registration_agent_account",
@@ -31,8 +30,11 @@
   "registration_cost_center",
   "registration_transaction_type",
   "vehicle_service_section",
-  "service_warehouse_group",
+  "pdi_project_type",
+  "pdi_vehicle_workshop",
+  "pdi_project_template_category",
   "column_break_28",
+  "service_warehouse_group",
   "section_break_14",
   "role_change_booking_after_payment",
   "role_change_payment_adjustment",
@@ -254,11 +256,6 @@
    "options": "Transaction Type"
   },
   {
-   "fieldname": "service_section",
-   "fieldtype": "Section Break",
-   "label": "Service"
-  },
-  {
    "fieldname": "vehicle_checklist_section",
    "fieldtype": "Section Break",
    "label": "Service Checklist"
@@ -293,11 +290,29 @@
    "fieldtype": "Table",
    "label": "Customer Request Checklist",
    "options": "Vehicle Checklist Item"
+  },
+  {
+   "fieldname": "pdi_project_type",
+   "fieldtype": "Link",
+   "label": "Pre-Delivery Inspection Project Type",
+   "options": "Project Type"
+  },
+  {
+   "fieldname": "pdi_vehicle_workshop",
+   "fieldtype": "Link",
+   "label": "Pre-Delivery Inspection Vehicle Workshop",
+   "options": "Vehicle Workshop"
+  },
+  {
+   "fieldname": "pdi_project_template_category",
+   "fieldtype": "Link",
+   "label": "Pre-Delivery Inspection Project Template Category",
+   "options": "Project Template Category"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2022-04-12 00:52:44.827659",
+ "modified": "2022-04-20 17:00:27.883693",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",
