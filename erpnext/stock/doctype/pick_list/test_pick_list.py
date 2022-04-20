@@ -3,17 +3,22 @@
 
 import frappe
 from frappe import _dict
-
-test_dependencies = ["Item", "Sales Invoice", "Stock Entry", "Batch"]
-
 from frappe.tests.utils import FrappeTestCase
 
+<<<<<<< HEAD
 from erpnext.stock.doctype.item.test_item import create_item
+=======
+from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.stock.doctype.item.test_item import create_item, make_item
+>>>>>>> 7d5682020a (test: bundles in picklist)
 from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
+
+test_dependencies = ["Item", "Sales Invoice", "Stock Entry", "Batch"]
 
 
 class TestPickList(FrappeTestCase):
@@ -565,6 +570,19 @@ class TestPickList(FrappeTestCase):
 					self.assertEqual(dn_item.qty, 1)
 				if dn_item.item_code == "_Test Item 2":
 					self.assertEqual(dn_item.qty, 2)
+
+	def test_picklist_with_bundles(self):
+		# from test_records.json
+		bundle = "_Test Product Bundle Item"
+		bundle_items = {"_Test Item": 5, "_Test Item Home Desktop 100": 2}
+
+		so = make_sales_order(item_code=bundle, qty=1)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		self.assertEqual(len(pl.locations), 2)
+		for item in pl.locations:
+			self.assertEqual(item.stock_qty, bundle_items[item.item_code])
 
 	# def test_pick_list_skips_items_in_expired_batch(self):
 	# 	pass
