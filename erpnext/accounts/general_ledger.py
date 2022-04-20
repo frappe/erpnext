@@ -355,7 +355,7 @@ def raise_debit_credit_not_equal_error(debit_credit_diff, voucher_type, voucher_
 
 def make_round_off_gle(gl_map, debit_credit_diff, precision):
 	round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
-		gl_map[0].company
+		gl_map[0].company, gl_map[0].voucher_type, gl_map[0].voucher_no
 	)
 	round_off_account_exists = False
 	round_off_gle = frappe._dict()
@@ -396,10 +396,17 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 		gl_map.append(round_off_gle)
 
 
-def get_round_off_account_and_cost_center(company):
+def get_round_off_account_and_cost_center(company, voucher_type, voucher_no):
 	round_off_account, round_off_cost_center = frappe.get_cached_value(
 		"Company", company, ["round_off_account", "round_off_cost_center"]
 	) or [None, None]
+
+	# Give first preference to parent cost center for round off GLE
+	if frappe.db.has_column(voucher_type, "cost_center"):
+		parent_cost_center = frappe.db.get_value(voucher_type, voucher_no, "cost_center")
+		if parent_cost_center:
+			round_off_cost_center = parent_cost_center
+
 	if not round_off_account:
 		frappe.throw(_("Please mention Round Off Account in Company"))
 
