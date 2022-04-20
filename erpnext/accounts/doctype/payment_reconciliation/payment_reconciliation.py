@@ -3,8 +3,11 @@
 
 
 import frappe
-from frappe import _, msgprint
+from frappe import _, msgprint, qb
 from frappe.model.document import Document
+from frappe.query_builder import AliasedQuery, Criterion
+from frappe.query_builder.custom import ConstantColumn
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt, getdate, nowdate, today
 
 import erpnext
@@ -90,44 +93,98 @@ class PaymentReconciliation(Document):
 		return list(journal_entries)
 
 	def get_dr_or_cr_notes(self):
+		"""
+		get unreconciled credit/debit notes
+		"""
+
 		condition = self.get_conditions(get_return_invoices=True)
-		dr_or_cr = ("credit_in_account_currency"
-			if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit_in_account_currency")
 
-		reconciled_dr_or_cr =  ("debit_in_account_currency"
-			if dr_or_cr == "credit_in_account_currency" else "credit_in_account_currency")
+		gle = qb.DocType('GL Entry')
+		ple = qb.DocType('Payment Ledger Entry')
 
-		voucher_type = ('Sales Invoice'
-			if self.party_type == 'Customer' else "Purchase Invoice")
+		invoice = (qb.DocType('Sales Invoice') if self.party_type == 'Customer'
+				   else qb.DocType ('Purchase Invoice'))
 
-		return frappe.db.sql(""" SELECT doc.name as reference_name, %(voucher_type)s as reference_type,
-				(sum(gl.{dr_or_cr}) - sum(gl.{reconciled_dr_or_cr})) as amount, doc.posting_date,
-				account_currency as currency
-			FROM `tab{doc}` doc, `tabGL Entry` gl
-			WHERE
-				(doc.name = gl.against_voucher or doc.name = gl.voucher_no)
-				and doc.{party_type_field} = %(party)s
-				and doc.is_return = 1 and ifnull(doc.return_against, "") = ""
-				and gl.against_voucher_type = %(voucher_type)s
-				and doc.docstatus = 1 and gl.party = %(party)s
-				and gl.party_type = %(party_type)s and gl.account = %(account)s
-				and gl.is_cancelled = 0 {condition}
-			GROUP BY doc.name
-			Having
-				amount > 0
-			ORDER BY doc.posting_date
-		""".format(
-			doc=voucher_type,
-			dr_or_cr=dr_or_cr,
-			reconciled_dr_or_cr=reconciled_dr_or_cr,
-			party_type_field=frappe.scrub(self.party_type),
-			condition=condition or ""),
-			{
-				'party': self.party,
-				'party_type': self.party_type,
-				'voucher_type': voucher_type,
-				'account': self.receivable_payable_account
-			}, as_dict=1)
+		invoice_type = (ConstantColumn('Sales Invoice') if self.party_type == 'Customer'
+						else ConstantColumn('Purchase Invoice'))
+
+		dr_or_cr = (gle.credit_in_account_currency if erpnext.get_party_account_type(self.party_type) == 'Receivable'
+					else gle.debit_in_account_currency)
+
+		reconciled_dr_or_cr = (gle.debit_in_account_currency if erpnext.get_party_account_type(self.party_type) == 'Receivable'
+							   else gle.credit_in_account_currency)
+
+		# get dr_or_cr notes balance
+		dr_or_cr_notes = (
+			qb.from_(invoice)
+			.join(gle)
+			.on(gle.voucher_no == invoice.name)
+			.select(invoice.name.as_('reference_name'),
+					invoice_type.as_('reference_type'),
+					(dr_or_cr - reconciled_dr_or_cr).as_('outstanding'),
+					invoice.posting_date,
+					gle.account_currency.as_('currency'))
+			.where(
+				(gle.voucher_no == invoice.name)
+				& (invoice.company == self.company)
+				& (invoice[self.party_type] == self.party)
+				& ((invoice.is_return == 1) & IfNull((invoice.return_against), "") == "")
+				& (gle.party_type == frappe.scrub(self.party_type))
+				& (gle.account == self.receivable_payable_account)
+				& (invoice.docstatus == 1)
+				& (gle.is_cancelled == 0)
+			)
+			.where(
+				Criterion.all(self.qb_filter_criterion)
+			)
+			.orderby(invoice.posting_date)
+		)
+
+		# fetch paid amount for dr/cr notes
+		vouchers = (
+			qb.from_(invoice)
+			.left_join(ple)
+			.on(ple.voucher_no == invoice.name)
+			.select(invoice.name.as_('reference_name'),
+					ple.voucher_type.as_('reference_type'),
+					ple.against_voucher_no.as_('against_voucher_no'),
+					ple.against_voucher_type.as_('against_voucher_type'),
+					Sum(IfNull(ple.amount,0)).as_('paid')
+					)
+			.where(
+				(ple.is_cancelled == 0)
+				& (invoice.company == self.company)
+				& (invoice[self.party_type] == self.party)
+				& ((invoice.is_return == 1) & IfNull((invoice.return_against), "") == "")
+				& (invoice.docstatus == 1)
+			)
+			.where(
+				Criterion.all(self.qb_filter_criterion)
+			)
+			.groupby(ple.voucher_no)
+			.orderby(invoice.posting_date)
+		)
+
+		# calculate outstanding of debit/credit notes using CTE
+		outstanding_dr_or_cr_notes = (
+			qb.with_(dr_or_cr_notes,"dr_cr_notes")
+			.with_(vouchers, "vouchers")
+			.from_(AliasedQuery("dr_cr_notes"))
+			.left_join(AliasedQuery("vouchers"))
+			.on((AliasedQuery("dr_cr_notes").reference_type == AliasedQuery("vouchers").reference_type)
+				& (AliasedQuery("dr_cr_notes").reference_name == AliasedQuery("vouchers").reference_name))
+			.select(AliasedQuery("dr_cr_notes").reference_type,
+					AliasedQuery("dr_cr_notes").reference_name,
+					(AliasedQuery("dr_cr_notes").outstanding - IfNull(AliasedQuery("vouchers").paid,0)).as_("amount"),
+					AliasedQuery("dr_cr_notes").posting_date,
+					AliasedQuery("dr_cr_notes").currency,
+					)
+			.having(
+				qb.Field("amount") > 0
+			)
+		)
+		dr_or_cr_notes = outstanding_dr_or_cr_notes.run(as_dict=True)
+		return dr_or_cr_notes
 
 	def add_payment_entries(self, non_reconciled_payments):
 		self.set('payments', [])
@@ -141,8 +198,7 @@ class PaymentReconciliation(Document):
 
 		condition = self.get_conditions(get_invoices=True)
 
-		non_reconciled_invoices = get_outstanding_invoices(self.party_type, self.party,
-			self.receivable_payable_account, condition=condition)
+		non_reconciled_invoices = get_outstanding_invoices(self.party_type, self.party, self.receivable_payable_account, condition=condition, filter_criterion=self.qb_filter_criterion)
 
 		if self.invoice_limit:
 			non_reconciled_invoices = non_reconciled_invoices[:self.invoice_limit]
@@ -287,31 +343,46 @@ class PaymentReconciliation(Document):
 			frappe.throw(_("No records found in Allocation table"))
 
 	def get_conditions(self, get_invoices=False, get_payments=False, get_return_invoices=False):
+		self.qb_filter_criterion = []
+		criterions = self.qb_filter_criterion
+		gle = qb.DocType('GL Entry')
+
 		condition = " and company = '{0}' ".format(self.company)
 
 		if get_invoices:
-			condition += " and posting_date >= {0}".format(frappe.db.escape(self.from_invoice_date)) if self.from_invoice_date else ""
-			condition += " and posting_date <= {0}".format(frappe.db.escape(self.to_invoice_date)) if self.to_invoice_date else ""
-			dr_or_cr = ("debit_in_account_currency" if erpnext.get_party_account_type(self.party_type) == 'Receivable'
-				else "credit_in_account_currency")
+			dr_or_cr = (gle.debit_in_account_currency if erpnext.get_party_account_type(self.party_type) == 'Receivable'
+						else gle.credit_in_account_currency)
+			if self.from_invoice_date and self.to_invoice_date:
+				criterions.append(gle.posting_date[self.from_invoice_date:self.to_invoice_date])
+			elif self.from_invoice_date:
+				criterions.append(gle.posting_date.gte(self.from_invoice_date))
+			elif self.to_invoice_date:
+				criterions.append(gle.posting_date.lte(self.to_invoice_date))
 
 			if self.minimum_invoice_amount:
-				condition += " and `{0}` >= {1}".format(dr_or_cr, flt(self.minimum_invoice_amount))
+				criterions.append(dr_or_cr.gte(flt(self.minimum_invoice_amount)))
 			if self.maximum_invoice_amount:
-				condition += " and `{0}` <= {1}".format(dr_or_cr, flt(self.maximum_invoice_amount))
+				criterions.append(dr_or_cr.lte(flt(self.maximum_invoice_amount)))
+			criterions.append(gle.company == self.company)
 
 		elif get_return_invoices:
-			condition = " and doc.company = '{0}' ".format(self.company)
-			condition += " and doc.posting_date >= {0}".format(frappe.db.escape(self.from_payment_date)) if self.from_payment_date else ""
-			condition += " and doc.posting_date <= {0}".format(frappe.db.escape(self.to_payment_date)) if self.to_payment_date else ""
-			dr_or_cr = ("gl.debit_in_account_currency" if erpnext.get_party_account_type(self.party_type) == 'Receivable'
-				else "gl.credit_in_account_currency")
+			invoice = (qb.DocType('Sales Invoice') if self.party_type == 'Customer'
+					   else qb.DocType ('Purchase Invoice'))
+
+			if self.from_invoice_date and self.to_invoice_date:
+				criterions.append(invoice.posting_date[self.from_invoice_date:self.to_invoice_date])
+			elif self.from_invoice_date:
+				criterions.append(invoice.posting_date.gte(self.from_invoice_date))
+			elif self.to_invoice_date:
+				criterions.append(invoice.posting_date.lte(self.to_invoice_date))
+
+			dr_or_cr = (gle.debit_in_account_currency if erpnext.get_party_account_type(self.party_type) == 'Receivable'
+				else gle.credit_in_account_currency)
 
 			if self.minimum_invoice_amount:
-				condition += " and `{0}` >= {1}".format(dr_or_cr, flt(self.minimum_payment_amount))
+				criterions.append(dr_or_cr.gte(flt(self.minimum_payment_amount)))
 			if self.maximum_invoice_amount:
-				condition += " and `{0}` <= {1}".format(dr_or_cr, flt(self.maximum_payment_amount))
-
+				criterions.append(dr_or_cr.lte(flt(self.maximum_payment_amount)))
 		else:
 			condition += " and posting_date >= {0}".format(frappe.db.escape(self.from_payment_date)) if self.from_payment_date else ""
 			condition += " and posting_date <= {0}".format(frappe.db.escape(self.to_payment_date)) if self.to_payment_date else ""
