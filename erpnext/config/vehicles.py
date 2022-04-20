@@ -163,7 +163,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Vehicle Sales Stock",
+					"name": "Vehicle Stock",
 					"doctype": "Vehicle",
 					"dependencies": ["Vehicle"],
 					"onboard": 1,

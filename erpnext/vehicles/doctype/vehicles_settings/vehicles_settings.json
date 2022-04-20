@@ -31,10 +31,10 @@
   "registration_transaction_type",
   "vehicle_service_section",
   "pdi_project_type",
-  "pdi_vehicle_workshop",
-  "pdi_project_template_category",
   "column_break_28",
-  "service_warehouse_group",
+  "pdi_vehicle_workshop",
+  "column_break_29",
+  "pdi_project_template_category",
   "section_break_14",
   "role_change_booking_after_payment",
   "role_change_payment_adjustment",
@@ -266,12 +266,6 @@
    "label": "Vehicle Service"
   },
   {
-   "fieldname": "service_warehouse_group",
-   "fieldtype": "Link",
-   "label": "Service Warehouse Group",
-   "options": "Warehouse"
-  },
-  {
    "fieldname": "column_break_28",
    "fieldtype": "Column Break"
   },
@@ -308,11 +302,15 @@
    "fieldtype": "Link",
    "label": "Pre-Delivery Inspection Project Template Category",
    "options": "Project Template Category"
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2022-04-20 17:00:27.883693",
+ "modified": "2022-04-21 00:24:32.826750",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",
