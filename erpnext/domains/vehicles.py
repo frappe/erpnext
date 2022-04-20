@@ -148,21 +148,26 @@ project_change_vehicle_details_fields = [
 project_vehicle_reading_fields = [
 	{"label": "Vehicle Readings", "fieldname": "sec_vehicle_status", "fieldtype": "Section Break",
 		"insert_after": "project_templates", "collapsible": 0},
+
 	{"label": "Odometer Reading (First)", "fieldname": "vehicle_first_odometer", "fieldtype": "Int",
 		"insert_after": "sec_vehicle_status", "no_copy": 1},
-	{"label": "Vehicle Received Date/Time", "fieldname": "vehicle_received_dt", "fieldtype": "Datetime",
-		"insert_after": "vehicle_first_odometer", "read_only": 1, "no_copy": 1},
+	{"label": "Vehicle Received Date", "fieldname": "vehicle_received_date", "fieldtype": "Date",
+		"insert_after": "vehicle_first_odometer", "read_only": 1, "no_copy": 1, "in_standard_filter": 1},
+	{"label": "Vehicle Received Time", "fieldname": "vehicle_received_time", "fieldtype": "Time",
+		"insert_after": "vehicle_received_date", "read_only": 1, "no_copy": 1},
 
 	{"label": "", "fieldname": "cb_vehicle_status_1", "fieldtype": "Column Break",
-		"insert_after": "vehicle_received_dt"},
+		"insert_after": "vehicle_received_time"},
 
 	{"label": "Odometer Reading (Last)", "fieldname": "vehicle_last_odometer", "fieldtype": "Int",
 		"insert_after": "cb_vehicle_status_1", "no_copy": 1},
-	{"label": "Vehicle Delivered Date/Time", "fieldname": "vehicle_delivered_dt", "fieldtype": "Datetime",
-		"insert_after": "vehicle_last_odometer", "read_only": 1, "no_copy": 1},
+	{"label": "Vehicle Delivered Date", "fieldname": "vehicle_delivered_date", "fieldtype": "Date",
+		"insert_after": "vehicle_last_odometer", "read_only": 1, "no_copy": 1, "in_standard_filter": 1},
+	{"label": "Vehicle Delivered Time", "fieldname": "vehicle_delivered_time", "fieldtype": "Time",
+		"insert_after": "vehicle_delivered_date", "read_only": 1, "no_copy": 1},
 
 	{"label": "", "fieldname": "cb_vehicle_status_2", "fieldtype": "Column Break",
-		"insert_after": "vehicle_delivered_dt"},
+		"insert_after": "vehicle_delivered_time"},
 
 	{"label": "Fuel Level (%)", "fieldname": "fuel_level", "fieldtype": "Percent", "precision": 0,
 		"insert_after": "cb_vehicle_status_2", "no_copy": 1},

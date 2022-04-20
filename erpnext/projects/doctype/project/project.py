@@ -745,11 +745,11 @@ class Project(StatusUpdater):
 		if self.get('applies_to_vehicle'):
 			vehicle_service_receipts = frappe.db.get_all("Vehicle Service Receipt",
 				{"project": self.name, "vehicle": self.applies_to_vehicle, "docstatus": 1},
-				['name', 'timestamp(posting_date, posting_time) as posting_dt'],
+				['name', 'posting_date', 'posting_time'],
 				order_by="posting_date, posting_time, creation")
 			vehicle_gate_passes = frappe.db.get_all("Vehicle Gate Pass",
 				{"project": self.name, "vehicle": self.applies_to_vehicle, "docstatus": 1},
-				['name', 'timestamp(posting_date, posting_time) as posting_dt'],
+				['name', 'posting_date', 'posting_time'],
 				order_by="posting_date, posting_time, creation")
 
 		vehicle_service_receipt = frappe._dict()
@@ -761,8 +761,11 @@ class Project(StatusUpdater):
 		if vehicle_gate_passes:
 			vehicle_gate_pass = vehicle_gate_passes[-1]
 
-		self.vehicle_received_dt = vehicle_service_receipt.posting_dt
-		self.vehicle_delivered_dt = vehicle_gate_pass.posting_dt
+		self.vehicle_received_date = vehicle_service_receipt.posting_date
+		self.vehicle_received_time = vehicle_service_receipt.posting_time
+
+		self.vehicle_delivered_date = vehicle_gate_pass.posting_date
+		self.vehicle_delivered_time = vehicle_gate_pass.posting_time
 
 		if not vehicle_service_receipt:
 			self.vehicle_status = "Not Received"
@@ -773,8 +776,10 @@ class Project(StatusUpdater):
 
 		if update:
 			self.db_set({
-				"vehicle_received_dt": self.vehicle_received_dt,
-				"vehicle_delivered_dt": self.vehicle_delivered_dt,
+				"vehicle_received_date": self.vehicle_received_date,
+				"vehicle_received_time": self.vehicle_received_time,
+				"vehicle_delivered_date": self.vehicle_delivered_date,
+				"vehicle_delivered_time": self.vehicle_delivered_time,
 				"vehicle_status": self.vehicle_status,
 			})
 
