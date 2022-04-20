@@ -621,7 +621,8 @@
    "fieldname": "material_consumption",
    "fieldtype": "Link",
    "label": "Material Consumption",
-   "options": "Material Consumption"
+   "options": "Material Consumption",
+   "read_only_depends_on": "eval:doc.purpose!=\"Material Consumption for Manufacture\""
   },
   {
    "depends_on": "eval:doc.stock_entry_type==\"Material Receipt\"",
@@ -667,7 +668,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-29 10:13:59.477245",
+ "modified": "2022-04-20 14:39:19.044478",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
