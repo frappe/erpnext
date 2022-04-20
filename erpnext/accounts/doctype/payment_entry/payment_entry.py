@@ -6,7 +6,7 @@ import json
 from functools import reduce
 
 import frappe
-from frappe import ValidationError, _, scrub, throw
+from frappe import ValidationError, _, qb, scrub, throw
 from frappe.utils import cint, comma_or, flt, getdate, nowdate
 
 import erpnext
@@ -96,7 +96,7 @@ class PaymentEntry(AccountsController):
 		self.set_status()
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Payment Ledger Entry')
 		self.make_gl_entries(cancel=1)
 		self.update_expense_claim()
 		self.update_outstanding_amounts()
@@ -1038,14 +1038,21 @@ def get_outstanding_reference_documents(args):
 	company_currency = frappe.get_cached_value('Company',  args.get("company"),  "default_currency")
 
 	# Get positive outstanding sales /purchase invoices/ Fees
+	gle = qb.DocType('GL Entry')
+	qb_filter_criterion = []
+
 	condition = ""
 	if args.get("voucher_type") and args.get("voucher_no"):
 		condition = " and voucher_type={0} and voucher_no={1}"\
 			.format(frappe.db.escape(args["voucher_type"]), frappe.db.escape(args["voucher_no"]))
 
+		qb_filter_criterion.append(gle.voucher_type == args.get('voucher_type'))
+		qb_filter_criterion.append(gle.voucher_no == args.get('voucher_no'))
+
 	# Add cost center condition
 	if args.get("cost_center"):
 		condition += " and cost_center='%s'" % args.get("cost_center")
+		qb_filter_criterion.append(gle.cost_center == args.get('cost_center'))
 
 	date_fields_dict = {
 		'posting_date': ['from_posting_date', 'to_posting_date'],
@@ -1056,12 +1063,14 @@ def get_outstanding_reference_documents(args):
 		if args.get(date_fields[0]) and args.get(date_fields[1]):
 			condition += " and {0} between '{1}' and '{2}'".format(fieldname,
 				args.get(date_fields[0]), args.get(date_fields[1]))
+			qb_filter_criterion.append(gle[fieldname][args.get(date_fields[0]):args.get(date_fields[1])])
 
 	if args.get("company"):
 		condition += " and company = {0}".format(frappe.db.escape(args.get("company")))
+		qb_filter_criterion.append(gle.company == args.get('company'))
 
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
-		args.get("party_account"), filters=args, condition=condition)
+			args.get("party_account"), filters=args, filter_criterion=qb_filter_criterion)
 
 	outstanding_invoices = split_invoices_based_on_payment_terms(outstanding_invoices)
 
