@@ -360,7 +360,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-04-14 13:45:31.324990",
+ "modified": "2022-04-21 00:41:38.958637",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Gate Pass",
@@ -411,7 +411,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Sales Admin",
+   "role": "Vehicle Stock User",
    "share": 1
   }
  ],
