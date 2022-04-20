@@ -745,3 +745,4 @@ erpnext.patches.v12_0.rename_customer_billable_amount_field
 execute:frappe.delete_doc_if_exists("Report", "Vehicle Sales Stock")
 execute:frappe.delete_doc_if_exists("Report", "Vehicles In Workshop")
 erpnext.patches.v12_0.split_vehicle_received_delivered_dt
+erpnext.patches.v12_0.rename_project_released_to_ready_to_close

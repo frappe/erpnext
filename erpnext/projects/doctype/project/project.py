@@ -338,6 +338,35 @@ class Project(StatusUpdater):
 				'percent_complete': self.percent_complete,
 			}, None, update_modified=update_modified)
 
+	def set_ready_to_close(self, update=True):
+		previous_ready_to_close = self.ready_to_close
+
+		self.ready_to_close = 1
+
+		if not previous_ready_to_close:
+			self.ready_to_close_dt = frappe.utils.now_datetime()
+
+		self.status = "To Close"
+
+		if update:
+			self.db_set({
+				'ready_to_close': self.ready_to_close,
+				'ready_to_close_dt': self.ready_to_close_dt,
+				'status': self.status,
+			}, None)
+
+	def reopen_status(self, update=True):
+		self.ready_to_close = 0
+		self.ready_to_close_dt = None
+		self.status = "Open"
+
+		if update:
+			self.db_set({
+				'ready_to_close': self.ready_to_close,
+				'ready_to_close_dt': self.ready_to_close_dt,
+				'status': self.status,
+			}, None)
+
 	def validate_project_status_for_transaction(self, doc):
 		validate_project_status_for_transaction(self, doc)
 
@@ -1357,35 +1386,25 @@ def create_kanban_board_if_not_exists(project):
 
 
 @frappe.whitelist()
-def set_project_released(project, is_released):
+def set_project_ready_to_close(project):
 	project = frappe.get_doc('Project', project)
 	project.check_permission('write')
 
-	is_released = cint(is_released)
-	project.is_released = is_released
-
-	if is_released:
-		project.status = "Released"
-	elif project.status == "Released":
-		project.status = "Open"
-
-	project.save()
-
+	project.set_ready_to_close(update=True)
+	project.set_status(update=True)
 	project.update_vehicle_booking_order_pdi_status()
+	project.notify_update()
 
 
 @frappe.whitelist()
-def reopen_project(project):
+def reopen_project_status(project):
 	project = frappe.get_doc('Project', project)
 	project.check_permission('write')
 
-	project.is_released = 0
-	project.status = "Open"
-
-	project.set_status(reset=True)
-	project.save()
-
+	project.reopen_status(update=True)
+	project.set_status(update=True, reset=True)
 	project.update_vehicle_booking_order_pdi_status()
+	project.notify_update()
 
 
 @frappe.whitelist()

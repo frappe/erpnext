@@ -156,9 +156,9 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 
 		if (!me.frm.is_new()) {
 			// Set Status
-			if (!me.frm.doc.is_released && !['Cancelled', 'Closed'].includes(me.frm.doc.status)) {
-				me.frm.add_custom_button(__('Released'), () => {
-					me.set_project_released();
+			if (!me.frm.doc.ready_to_close && !['Cancelled', 'Closed'].includes(me.frm.doc.status)) {
+				me.frm.add_custom_button(__('Ready To Close'), () => {
+					me.set_project_ready_to_close();
 				}, __('Set Status'));
 			}
 
@@ -295,13 +295,13 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		});
 	},
 
-	set_project_released: function () {
+	set_project_ready_to_close: function () {
 		var me = this;
 
 		me.frm.check_if_unsaved();
-		frappe.confirm(__('Are you sure you want to mark this Project as <b>Released</b>?'), () => {
-			frappe.xcall('erpnext.projects.doctype.project.project.set_project_released',
-				{project: me.frm.doc.name, is_released: 1}).then(() => me.frm.reload_doc());
+		frappe.confirm(__('Are you sure you want to mark this Project as <b>Ready To Close</b>?'), () => {
+			frappe.xcall('erpnext.projects.doctype.project.project.set_project_ready_to_close',
+				{project: me.frm.doc.name}).then(() => me.frm.reload_doc());
 		});
 	},
 
@@ -310,7 +310,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 
 		me.frm.check_if_unsaved();
 		frappe.confirm(__('Are you sure you want to <b>Re-Open</b> this Project?'), () => {
-			frappe.xcall('erpnext.projects.doctype.project.project.reopen_project',
+			frappe.xcall('erpnext.projects.doctype.project.project.reopen_project_status',
 				{project: me.frm.doc.name}).then(() => me.frm.reload_doc());
 		});
 	},

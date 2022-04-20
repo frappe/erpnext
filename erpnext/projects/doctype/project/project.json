@@ -133,10 +133,12 @@
   "column_break_45",
   "message",
   "status_section",
-  "percent_complete_method",
-  "column_break_119",
+  "ready_to_close_dt",
+  "ready_to_close",
+  "column_break_128",
   "billing_status",
-  "is_released",
+  "column_break_119",
+  "percent_complete_method",
   "column_break_121",
   "project_status",
   "indicator_color",
@@ -160,7 +162,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Open\nReleased\nCompleted\nClosed\nCancelled",
+   "options": "Open\nTo Close\nCompleted\nCancelled",
    "reqd": 1,
    "search_index": 1
   },
@@ -912,15 +914,6 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "is_released",
-   "fieldtype": "Check",
-   "in_standard_filter": 1,
-   "label": "Is Released",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
    "default": "Not Billable",
    "fieldname": "billing_status",
    "fieldtype": "Select",
@@ -1012,12 +1005,32 @@
   {
    "fieldname": "column_break_100",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "ready_to_close",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Ready To Close",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "ready_to_close_dt",
+   "fieldtype": "Datetime",
+   "label": "Ready To Close Date/Time",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_128",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-04-20 15:50:23.385428",
+ "modified": "2022-04-21 02:24:17.309084",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

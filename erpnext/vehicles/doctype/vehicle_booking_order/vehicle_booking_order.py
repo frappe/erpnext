@@ -449,14 +449,14 @@ class VehicleBookingOrder(VehicleBookingController):
 	def set_pdi_status(self, update=False):
 		previous_pdi_status = self.pdi_status
 
-		project = frappe.db.get_value("Project", fieldname=['name', 'status', 'is_released'], filters={
+		project = frappe.db.get_value("Project", fieldname=['name', 'status', 'ready_to_close'], filters={
 			'vehicle_booking_order': self.name,
 			'status': ['!=', 'Cancelled'],
 			'vehicle_status': ['!=', 'Not Received']
 		}, as_dict=1)
 
 		if project:
-			if project.is_released or project.status in ['Completed', 'Closed']:
+			if project.ready_to_close or project.status in ['Completed', 'Closed']:
 				self.pdi_status = "Done"
 			else:
 				self.pdi_status = "In Process"

@@ -51,7 +51,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Open\nReleased\nCompleted\nClosed\nCancelled",
+   "options": "Open\nTo Close\nCompleted\nCancelled",
    "reqd": 1
   },
   {
@@ -92,7 +92,7 @@
    "label": "User Can Set Manually"
   }
  ],
- "modified": "2022-04-11 17:41:31.049121",
+ "modified": "2022-04-21 01:44:15.589168",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Status",
