@@ -77,7 +77,8 @@ class Project(StatusUpdater):
 	def validate(self):
 		self.quick_change_master_details()
 
-		self.set_missing_values()
+		if self.status not in ['Completed', 'Closed']:
+			self.set_missing_values()
 
 		self.validate_phone_nos()
 		self.validate_project_type()
@@ -429,6 +430,9 @@ class Project(StatusUpdater):
 		return self._has_vehicle_log
 
 	def validate_project_type(self):
+		if self.status in ['Completed', 'Closed']:
+			return
+
 		if self.project_type:
 			project_type = frappe.get_cached_doc("Project Type", self.project_type)
 
@@ -509,7 +513,8 @@ class Project(StatusUpdater):
 
 	def validate_applies_to(self):
 		from erpnext.vehicles.utils import format_vehicle_fields
-		format_vehicle_fields(self)
+		if not self.get('applies_to_item'):
+			format_vehicle_fields(self)
 
 		if self.get('applies_to_item') and not self.get('vehicle_workshop'):
 			frappe.throw(_("Vehicle Workshop is mandatory when Applies to Item is set"))
