@@ -474,6 +474,33 @@
    "type": "Link"
   },
   {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Trial Balance Without Cancellation Entries",
+   "link_to": "Trial Balance Without Cancellation Entries",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Payment Period Based On Invoice Without Cancellation Entries",
+   "link_to": "Payment Period Based On Invoice Without Cancellation Entries",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Trial Balance for Party Without Cancellation Entry",
+   "link_to": "Trial Balance for Party Without Cancellation Entry",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
@@ -1169,7 +1196,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-04-06 11:40:50.588218",
+ "modified": "2022-04-18 19:36:09.509505",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",

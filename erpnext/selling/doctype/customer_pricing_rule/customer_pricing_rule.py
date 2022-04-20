@@ -3,15 +3,17 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+from re import I
 import frappe
 from frappe.model.document import Document
 from frappe.utils import getdate, now_datetime, nowdate
+from datetime import date
 import json
 class CustomerPricingRule(Document):
 	def on_submit(self):
 		for i in self.item_details:
 			price_list_rate = frappe.db.get_value("Item Price", {"item_code": i.item, 'price_list':self.for_price_list}, "price_list_rate")
-			list_price = price_list_rate + i.additional_price
+			list_price = price_list_rate + i.additional_price if  price_list_rate else  i.additional_price
 			i.base_price = price_list_rate
 			i.list_price = list_price
 			doc_title = self.customer+'-'+i.get("item")
@@ -53,7 +55,13 @@ class CustomerPricingRule(Document):
 					frappe.db.commit()
 
 	def on_cancel(self):
-		frappe.db.sql("""delete from `tabPricing Rule` where customer_pricing_rule_id ='{0}' """.format(self.name))
+		# frappe.db.sql("""delete from `tabPricing Rule` where customer_pricing_rule_id ='{0}' """.format(self.name))
+		d = frappe.db.get_all("Pricing Rule",{"customer_pricing_rule_id":self.name},["name"])
+		if d:
+			for i in d:
+				pr = frappe.get_doc("Pricing Rule",i.name)
+				pr.valid_upto = date.today()
+				pr.save()
 
 
 	def before_insert(self):

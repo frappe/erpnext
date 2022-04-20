@@ -121,13 +121,13 @@ class Analytics(object):
 		if self.filters["price_list"] == 'Selling':
 			self.entries = frappe.db.sql("""
 							select customer as entity,c.customer_name as entity_name,{value_field} as value_field,valid_from
-							from `tabItem Price` join `tabCustomer` c Where selling='selling' between %s and %s"""
+							from `tabItem Price` join `tabCustomer` c Where selling=1 and valid_from between %s and %s"""
 							.format(value_field='price_list_rate'),
 							(self.filters.from_date, self.filters.to_date), as_dict=1)
 		else:
 			self.entries = frappe.db.sql("""
 							select customer as entity,c.customer_name as entity_name,{value_field} as value_field,valid_from
-							from `tabItem Price` join `tabCustomer` c Where buying='buying' between %s and %s"""
+							from `tabItem Price` join `tabCustomer` c Where buying=1 and  valid_from between %s and %s"""
 							.format(value_field='price_list_rate'),
 							(self.filters.from_date, self.filters.to_date), as_dict=1)
 
@@ -139,13 +139,13 @@ class Analytics(object):
 		if self.filters["price_list"] == 'Selling':
 			self.entries = frappe.db.sql("""
 							select item_code as entity,item_name as entity_name, uom ,brand,price_list,{value_field} as value_field,valid_from
-							from `tabItem Price` Where selling = 'selling' between %s and %s"""
+							from `tabItem Price` Where selling = 1 and valid_from between %s and %s"""
 							.format(value_field='price_list_rate'),
 							 (self.filters.from_date, self.filters.to_date), as_dict=1)
 		else:
 			self.entries = frappe.db.sql("""
 							select item_code as entity,item_name as entity_name, uom ,brand,price_list,{value_field} as value_field,valid_from
-							from `tabItem Price` Where buying='buying' between %s and %s"""
+							from `tabItem Price` Where buying=1 and valid_from between %s and %s"""
 							 .format(value_field='price_list_rate'),
 							(self.filters.from_date, self.filters.to_date), as_dict=1)
 
@@ -197,7 +197,7 @@ class Analytics(object):
 
 			self.entries = frappe.db.sql("""
 							select i.item_group as entity, {value_field} as value_field,valid_from
-							from `tabItem Price` join `tabItem` i where selling='selling' between %s and %s
+							from `tabItem Price` join `tabItem` i where selling=1 and valid_from between %s and %s
 						""".format( value_field= "price_list_rate"),
 						 ( self.filters.from_date, self.filters.to_date), as_dict=1)
 
@@ -206,7 +206,7 @@ class Analytics(object):
 
 			self.entries = frappe.db.sql("""
 				select i.item_group as entity, {value_field} as value_field,valid_from
-				from `tabItem Price` join `tabItem` i where buying='buying' between %s and %s
+				from `tabItem Price` join `tabItem` i where buying=1 and valid_from between %s and %s
 			""".format( value_field="price_list_rate"),
 			(self.filters.from_date, self.filters.to_date), as_dict=1)
 
