@@ -12,6 +12,10 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
+from erpnext.accounts.doctype.payment_ledger_entry.payment_ledger_entry import (
+	get_payment_ledger_entries,
+	save_ple_entries,
+)
 
 
 class ClosedAccountingPeriod(frappe.ValidationError): pass
@@ -20,8 +24,10 @@ def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, upd
 	if gl_map:
 		if not cancel:
 			validate_accounting_period(gl_map)
-			gl_map = process_gl_map(gl_map, merge_entries)
+			ple_entries = get_payment_ledger_entries(gl_map)
+			gl_map = process_gl_map(gl_map, merge_entries,merge_against_voucher=True)
 			if gl_map and len(gl_map) > 1:
+				save_ple_entries(ple_entries)
 				save_entries(gl_map, adv_adj, update_outstanding, from_repost)
 			# Post GL Map proccess there may no be any GL Entries
 			elif gl_map:
@@ -50,9 +56,10 @@ def validate_accounting_period(gl_map):
 		frappe.throw(_("You cannot create or cancel any accounting entries with in the closed Accounting Period {0}")
 			.format(frappe.bold(accounting_periods[0].name)), ClosedAccountingPeriod)
 
-def process_gl_map(gl_map, merge_entries=True, precision=None):
+def process_gl_map(gl_map, merge_entries=True, precision=None, cancel=False, merge_against_voucher=False):
+
 	if merge_entries:
-		gl_map = merge_similar_entries(gl_map, precision)
+		gl_map = merge_similar_entries(gl_map, precision, merge_against_voucher=merge_against_voucher)
 	for entry in gl_map:
 		# toggle debit, credit if negative entry
 		if flt(entry.debit) < 0:
@@ -95,22 +102,38 @@ def update_net_values(entry):
 			entry.debit = 0
 			entry.debit_in_account_currency = 0
 
-def merge_similar_entries(gl_map, precision=None):
+def merge_similar_entries(gl_map, precision=None, merge_against_voucher=False):
 	merged_gl_map = []
 	accounting_dimensions = get_accounting_dimensions()
+
+	def merge_similar(gl_map, merged_gl_map, accounting_dimensions):
+		for entry in gl_map:
+			# if there is already an entry in this account then just add it
+			# to that entry
+			same_head = check_if_in_list(entry, merged_gl_map, accounting_dimensions, merge_against_voucher)
+			if same_head:
+				same_head.debit	= flt(same_head.debit) + flt(entry.debit)
+				same_head.debit_in_account_currency	= \
+					flt(same_head.debit_in_account_currency) + flt(entry.debit_in_account_currency)
+				same_head.credit = flt(same_head.credit) + flt(entry.credit)
+				same_head.credit_in_account_currency = \
+					flt(same_head.credit_in_account_currency) + flt(entry.credit_in_account_currency)
+			else:
+				merged_gl_map.append(entry)
+	debit_entries = []
+	merged_debit_entries = []
+	credit_entries = []
+	merged_credit_entries = []
 	for entry in gl_map:
-		# if there is already an entry in this account then just add it
-		# to that entry
-		same_head = check_if_in_list(entry, merged_gl_map, accounting_dimensions)
-		if same_head:
-			same_head.debit	= flt(same_head.debit) + flt(entry.debit)
-			same_head.debit_in_account_currency	= \
-				flt(same_head.debit_in_account_currency) + flt(entry.debit_in_account_currency)
-			same_head.credit = flt(same_head.credit) + flt(entry.credit)
-			same_head.credit_in_account_currency = \
-				flt(same_head.credit_in_account_currency) + flt(entry.credit_in_account_currency)
+		if entry.debit > entry.credit:
+			debit_entries.append(entry)
 		else:
-			merged_gl_map.append(entry)
+			credit_entries.append(entry)
+
+	merge_similar(debit_entries, merged_debit_entries, accounting_dimensions)
+	merge_similar(credit_entries, merged_credit_entries, accounting_dimensions)
+
+	merged_gl_map = merged_debit_entries + merged_credit_entries
 
 	company = gl_map[0].company if gl_map else erpnext.get_default_company()
 	company_currency = erpnext.get_company_currency(company)
@@ -124,9 +147,12 @@ def merge_similar_entries(gl_map, precision=None):
 
 	return merged_gl_map
 
-def check_if_in_list(gle, gl_map, dimensions=None):
-	account_head_fieldnames = ['voucher_detail_no', 'party', 'against_voucher',
-			'cost_center', 'against_voucher_type', 'party_type', 'project', 'finance_book']
+def check_if_in_list(gle, gl_map, dimensions=None, merge_against_voucher=False):
+	account_head_fieldnames = ['voucher_detail_no', 'party',
+			'cost_center', 'party_type', 'project', 'finance_book']
+
+	if not merge_against_voucher:
+		account_head_fieldnames.extend(['against_voucher', 'against_voucher_type'])
 
 	if dimensions:
 		account_head_fieldnames = account_head_fieldnames + dimensions
@@ -274,9 +300,13 @@ def make_reverse_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 				"is_cancelled": 0
 			})
 
+	ple_entries = get_payment_ledger_entries(gl_entries, cancel=1)
+	gl_entries = process_gl_map(gl_entries, merge_entries=True, precision=None, cancel=True, merge_against_voucher=True)
 	if gl_entries:
 		validate_accounting_period(gl_entries)
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
+		if ple_entries:
+			save_ple_entries(ple_entries, cancel=1)
 		set_as_cancel(gl_entries[0]['voucher_type'], gl_entries[0]['voucher_no'])
 
 		for entry in gl_entries:
