@@ -94,7 +94,7 @@ class JournalEntry(AccountsController):
 		from erpnext.payroll.doctype.salary_slip.salary_slip import unlink_ref_doc_from_salary_slip
 		unlink_ref_doc_from_payment_entries(self)
 		unlink_ref_doc_from_salary_slip(self.name)
-		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Payment Ledger Entry')
 		self.make_gl_entries(1)
 		self.update_advance_paid()
 		self.update_expense_claim()
