@@ -12,7 +12,11 @@ import traceback
 
 import frappe
 import jwt
+<<<<<<< HEAD
 import six
+=======
+import requests
+>>>>>>> ee8047aba3 (fix(india): 401 & 403 client error while generating IRN)
 from frappe import _, bold
 from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.integrations.utils import make_get_request, make_post_request
@@ -828,13 +832,24 @@ class GSPConnector:
 		return self.e_invoice_settings.auth_token
 
 	def make_request(self, request_type, url, headers=None, data=None):
-		if request_type == "post":
-			res = make_post_request(url, headers=headers, data=data)
-		else:
-			res = make_get_request(url, headers=headers, data=data)
+		try:
+			if request_type == "post":
+				res = make_post_request(url, headers=headers, data=data)
+			else:
+				res = make_get_request(url, headers=headers, data=data)
+
+		except requests.exceptions.HTTPError as e:
+			if e.response.status_code in [401, 403] and not hasattr(self, "token_auto_refreshed"):
+				self.auto_refresh_token()
+				headers = self.get_headers()
+				return self.make_request(request_type, url, headers, data)
 
 		self.log_request(url, headers, data, res)
 		return res
+
+	def auto_refresh_token(self):
+		self.fetch_auth_token()
+		self.token_auto_refreshed = True
 
 	def log_request(self, url, headers, data, res):
 		headers.update({"password": self.credentials.password})
