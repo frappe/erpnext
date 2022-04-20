@@ -2685,9 +2685,6 @@ class TestSalesInvoice(unittest.TestCase):
 		)
 
 	def test_sales_invoice_with_discount_accounting_enabled(self):
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
-			enable_discount_accounting,
-		)
 
 		enable_discount_accounting()
 
@@ -2708,9 +2705,6 @@ class TestSalesInvoice(unittest.TestCase):
 		enable_discount_accounting(enable=0)
 
 	def test_additional_discount_for_sales_invoice_with_discount_accounting_enabled(self):
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
-			enable_discount_accounting,
-		)
 
 		enable_discount_accounting()
 		additional_discount_account = create_account(
@@ -3179,6 +3173,12 @@ class TestSalesInvoice(unittest.TestCase):
 		frappe.db.set_value(
 			"Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice", unlink_enabled
 		)
+
+
+def enable_discount_accounting(enable=1):
+	selling_settings = frappe.get_doc("Selling Settings")
+	selling_settings.enable_discount_accounting = enable
+	selling_settings.save()
 
 
 def get_sales_invoice_for_e_invoice():

@@ -1589,9 +1589,9 @@ def unlink_payment_on_cancel_of_invoice(enable=1):
 
 
 def enable_discount_accounting(enable=1):
-	accounts_settings = frappe.get_doc("Accounts Settings")
-	accounts_settings.enable_discount_accounting = enable
-	accounts_settings.save()
+	buying_settings = frappe.get_doc("Buying Settings")
+	buying_settings.enable_discount_accounting = enable
+	buying_settings.save()
 
 
 def make_purchase_invoice(**args):
