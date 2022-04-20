@@ -1352,7 +1352,7 @@ class SalesInvoice(SellingController):
 		account = frappe.get_all("Mode of Payment Account", ["*"], filters = {"company": self.company, "parent": self.discount_reason})
 
 		if len(account) == 0:
-			frappe.throw(_("The discount ratio does not have a ledger account assigned for this company."))
+			frappe.throw(_("The discount reason does not have a ledger account assigned for this company."))
 
 		account_currency = get_account_currency(account[0].default_account)
 

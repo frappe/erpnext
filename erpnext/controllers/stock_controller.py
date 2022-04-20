@@ -96,15 +96,16 @@ class StockController(AccountsController):
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
 		
-		if self.discount_reason != None:
-			gl_list.append(self.get_gl_dict({
-				"account": warehouse_account[sle.warehouse]["account"],
-				"against": warehouse_account[sle.warehouse]["account"],
-				"cost_center": self.cost_center,
-				"remarks": self.get("remarks") or "Accounting Entry for Stock",
-				"credit": self.discount_amount,
-				"credit_in_account_currency": self.discount_amount
-			}, warehouse_account[sle.warehouse]["account_currency"]))
+		if self.doctype == "Sales Invoice":
+			if self.discount_reason != None:
+				gl_list.append(self.get_gl_dict({
+					"account": warehouse_account[sle.warehouse]["account"],
+					"against": warehouse_account[sle.warehouse]["account"],
+					"cost_center": self.cost_center,
+					"remarks": self.get("remarks") or "Accounting Entry for Stock",
+					"credit": self.discount_amount,
+					"credit_in_account_currency": self.discount_amount
+				}, warehouse_account[sle.warehouse]["account_currency"]))
 
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
