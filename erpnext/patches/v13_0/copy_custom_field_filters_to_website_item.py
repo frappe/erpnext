@@ -4,6 +4,43 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 
 def execute():
 	"Add Field Filters, that are not standard fields in Website Item, as Custom Fields."
+
+	def move_table_multiselect_data(docfield):
+		"Copy child table data (Table Multiselect) from Item to Website Item for a docfield."
+		table_multiselect_data = get_table_multiselect_data(docfield)
+		field = docfield.fieldname
+
+		for row in table_multiselect_data:
+			# add copied multiselect data rows in Website Item
+			web_item = frappe.db.get_value("Website Item", {"item_code": row.parent})
+			web_item_doc = frappe.get_doc("Website Item", web_item)
+
+			child_doc = frappe.new_doc(docfield.options, web_item_doc, field)
+
+			for field in ["name", "creation", "modified", "idx"]:
+				row[field] = None
+
+			child_doc.update(row)
+
+			child_doc.parenttype = "Website Item"
+			child_doc.parent = web_item
+
+			child_doc.insert()
+
+	def get_table_multiselect_data(docfield):
+		child_table = frappe.qb.DocType(docfield.options)
+		item = frappe.qb.DocType("Item")
+
+		table_multiselect_data = (  # query table data for field
+			frappe.qb.from_(child_table)
+			.join(item)
+			.on(item.item_code == child_table.parent)
+			.select(child_table.star)
+			.where((child_table.parentfield == docfield.fieldname) & (item.published_in_website == 1))
+		).run(as_dict=True)
+
+		return table_multiselect_data
+
 	settings = frappe.get_doc("E Commerce Settings")
 
 	if not (settings.enable_field_filters or settings.filter_fields):
@@ -43,12 +80,15 @@ def execute():
 			)
 
 			# map field values
-			frappe.db.sql(
-				"""
-				UPDATE `tabWebsite Item` wi, `tabItem` i
-				SET wi.{0} = i.{0}
-				WHERE wi.item_code = i.item_code
-			""".format(
-					row.fieldname
+			if df.fieldtype == "Table MultiSelect":
+				move_table_multiselect_data(df)
+			else:
+				frappe.db.sql(  # nosemgrep
+					"""
+						UPDATE `tabWebsite Item` wi, `tabItem` i
+						SET wi.{0} = i.{0}
+						WHERE wi.item_code = i.item_code
+					""".format(
+						row.fieldname
+					)
 				)
-			)
