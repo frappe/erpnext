@@ -8,7 +8,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.hr.doctype.shift_assignment.shift_assignment import OverlappingShiftError
+from erpnext.hr.doctype.shift_assignment.shift_assignment import OverlappingShiftError, get_events
 from erpnext.hr.doctype.shift_type.test_shift_type import make_shift_assignment, setup_shift_type
 
 test_dependencies = ["Shift Type"]
@@ -154,3 +154,18 @@ class TestShiftAssignment(FrappeTestCase):
 		shift_type = setup_shift_type(shift_type="Shift 2", start_time="13:00:00", end_time="15:00:00")
 		date = getdate()
 		make_shift_assignment(shift_type.name, employee, date)
+
+	def test_shift_assignment_calendar(self):
+		employee1 = make_employee("test_shift_assignment1@example.com", company="_Test Company")
+		employee2 = make_employee("test_shift_assignment2@example.com", company="_Test Company")
+
+		shift_type = setup_shift_type(shift_type="Shift 1", start_time="08:00:00", end_time="12:00:00")
+		date = getdate()
+		shift1 = make_shift_assignment(shift_type.name, employee1, date)
+		make_shift_assignment(shift_type.name, employee2, date)
+
+		events = get_events(
+			start=date, end=date, filters=[["Shift Assignment", "employee", "=", employee1, False]]
+		)
+		self.assertEqual(len(events), 1)
+		self.assertEqual(events[0]["name"], shift1.name)
