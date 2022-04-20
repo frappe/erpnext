@@ -66,12 +66,12 @@ class Project(StatusUpdater):
 		self.reset_quick_change_fields()
 		self.set_missing_checklist()
 
-		self.sales_data = self.get_project_sales_data(get_sales_invoice=True, without_claim_amounts=False)
+		self.sales_data = self.get_project_sales_data(get_sales_invoice=True)
 		self.set_sales_data_html_onload(self.sales_data)
 
 	def before_print(self):
 		self.company_address_doc = erpnext.get_company_address(self)
-		self.sales_data = self.get_project_sales_data(get_sales_invoice=True, without_claim_amounts=True)
+		self.sales_data = self.get_project_sales_data(get_sales_invoice=True)
 		self.get_sales_invoice_names()
 
 	def validate(self):
@@ -116,11 +116,9 @@ class Project(StatusUpdater):
 	def set_billing_status(self, update=False, update_modified=False):
 		self.billing_status = self.get_billing_status()
 
-		sales_data = self.get_project_sales_data(get_sales_invoice=False, without_claim_amounts=False)
+		sales_data = self.get_project_sales_data(get_sales_invoice=False)
 		self.total_billable_amount = sales_data.totals.grand_total
-
-		sales_data_without_claim = self.get_project_sales_data(get_sales_invoice=False, without_claim_amounts=True)
-		self.billable_amount_without_claim = sales_data_without_claim.totals.grand_total
+		self.customer_billable_amount = sales_data.totals.customer_grand_total
 
 		self.total_billed_amount = self.get_billed_amount()
 
@@ -128,7 +126,7 @@ class Project(StatusUpdater):
 			self.db_set({
 				'billing_status': self.billing_status,
 				'total_billable_amount': self.total_billable_amount,
-				'billable_amount_without_claim': self.billable_amount_without_claim,
+				'customer_billable_amount': self.customer_billable_amount,
 				'total_billed_amount': self.total_billed_amount,
 			}, None, update_modified=update_modified)
 
@@ -195,7 +193,7 @@ class Project(StatusUpdater):
 		self.set_gross_margin(update=update, update_modified=update_modified)
 
 	def set_sales_amount(self, update=False, update_modified=False):
-		sales_data = self.get_project_sales_data(get_sales_invoice=True, without_claim_amounts=False)
+		sales_data = self.get_project_sales_data(get_sales_invoice=True)
 		self.total_sales_amount = sales_data.totals.net_total
 		self.stock_sales_amount = sales_data.stock_items.net_total
 		self.service_sales_amount = sales_data.service_items.net_total
@@ -656,12 +654,12 @@ class Project(StatusUpdater):
 		self.set_onload('service_items_html', service_items_html)
 		self.set_onload('sales_summary_html', sales_summary_html)
 
-	def get_project_sales_data(self, get_sales_invoice=True, without_claim_amounts=False):
+	def get_project_sales_data(self, get_sales_invoice=True):
 		sales_data = frappe._dict()
 		sales_data.stock_items, sales_data.part_items, sales_data.lubricant_items = get_stock_items(self.name,
-			self.customer, self.company, without_claim_amounts=without_claim_amounts, get_sales_invoice=get_sales_invoice)
+			self.customer, self.company, get_sales_invoice=get_sales_invoice)
 		sales_data.service_items, sales_data.labour_items, sales_data.sublet_items = get_service_items(self.name,
-			self.customer, self.company, without_claim_amounts=without_claim_amounts, get_sales_invoice=get_sales_invoice)
+			self.customer, self.company, get_sales_invoice=get_sales_invoice)
 		sales_data.totals = get_totals_data([sales_data.stock_items, sales_data.service_items])
 
 		return sales_data
@@ -769,7 +767,7 @@ class Project(StatusUpdater):
 				user.welcome_email_sent = 1
 
 
-def get_stock_items(project, customer, company, without_claim_amounts=False, get_sales_invoice=True):
+def get_stock_items(project, customer, company, get_sales_invoice=True):
 	dn_data = frappe.db.sql("""
 		select p.name as delivery_note, i.sales_order,
 			p.posting_date, p.posting_time, i.idx,
@@ -783,9 +781,7 @@ def get_stock_items(project, customer, company, without_claim_amounts=False, get
 		where p.docstatus = 1 and i.is_stock_item = 1
 			and p.project = %s
 	""", project, as_dict=1)
-
-	if without_claim_amounts:
-		set_rate_for_free_customer_items(dn_data, customer)
+	set_is_claim_item(dn_data, customer)
 
 	so_data = frappe.db.sql("""
 		select p.name as sales_order,
@@ -800,9 +796,7 @@ def get_stock_items(project, customer, company, without_claim_amounts=False, get
 		where p.docstatus = 1 and i.is_stock_item = 1 and i.delivered_qty < i.qty and i.qty > 0 and p.status != 'Closed'
 			and p.project = %s
 	""", project, as_dict=1)
-
-	if without_claim_amounts:
-		set_rate_for_free_customer_items(so_data, customer)
+	set_is_claim_item(so_data, customer)
 
 	stock_data = get_items_data_template()
 	parts_data = get_items_data_template()
@@ -838,7 +832,7 @@ def get_stock_items(project, customer, company, without_claim_amounts=False, get
 	return stock_data, parts_data, lubricants_data
 
 
-def get_service_items(project, customer, company, without_claim_amounts=False, get_sales_invoice=True):
+def get_service_items(project, customer, company, get_sales_invoice=True):
 	so_data = frappe.db.sql("""
 		select p.name as sales_order,
 			p.transaction_date,
@@ -853,9 +847,7 @@ def get_service_items(project, customer, company, without_claim_amounts=False, g
 			and p.project = %s
 		order by p.transaction_date, p.creation, i.idx
 	""", project, as_dict=1)
-
-	if without_claim_amounts:
-		set_rate_for_free_customer_items(so_data, customer)
+	set_is_claim_item(so_data, customer)
 
 	sinv_data = []
 	if get_sales_invoice:
@@ -907,21 +899,36 @@ def get_service_items(project, customer, company, without_claim_amounts=False, g
 def get_items_data_template():
 	return frappe._dict({
 		'total_qty': 0,
+
 		'net_total': 0,
+		'customer_net_total': 0,
+
 		'sales_tax_total': 0,
+		'customer_sales_tax_total': 0,
+
 		'service_tax_total': 0,
+		'customer_service_tax_total': 0,
+
 		'other_taxes_and_charges': 0,
+		'customer_other_taxes_and_charges': 0,
+
 		'taxes': {},
+		'customer_taxes': {},
+
 		'items': [],
 	})
 
 
-def set_rate_for_free_customer_items(data, customer=None):
+def set_is_claim_item(data, customer=None):
 	for d in data:
 		if d.get('bill_only_to_customer') and customer and d.get('bill_only_to_customer') != customer:
-			d.is_free_item = 1
-			d.net_amount = 0
-			d.net_rate = 0
+			d.is_claim_item = 1
+			d.customer_net_amount = 0
+			d.customer_net_rate = 0
+		else:
+			d.is_claim_item = 0
+			d.customer_net_amount = d.net_amount
+			d.customer_net_rate = d.net_rate
 
 
 def get_item_taxes(data, company):
@@ -932,69 +939,122 @@ def get_item_taxes(data, company):
 		conversion_rate = flt(d.get('conversion_rate')) or 1
 
 		d.setdefault('taxes', {})
+		d.setdefault('customer_taxes', {})
+
 		d.setdefault('sales_tax_amount', 0)
+		d.setdefault('customer_sales_tax_amount', 0)
+
 		d.setdefault('service_tax_amount', 0)
+		d.setdefault('customer_service_tax_amount', 0)
+
 		d.setdefault('other_taxes_and_charges', 0)
+		d.setdefault('customer_other_taxes_and_charges', 0)
 
-		if sales_tax_account or service_tax_account:
-			item_tax_detail = json.loads(d.item_tax_detail or '{}')
-			for tax_row_name, amount in item_tax_detail.items():
-				tax_account = frappe.db.get_value("Sales Taxes and Charges", tax_row_name, 'account_head', cache=1)
-				if tax_account:
-					tax_amount = 0 if d.get('is_free_item') else flt(amount)
-					tax_amount *= conversion_rate
-					if flt(d.ordered_qty):
-						tax_amount = tax_amount * flt(d.qty) / flt(d.ordered_qty)
+		item_tax_detail = json.loads(d.item_tax_detail or '{}')
+		for tax_row_name, amount in item_tax_detail.items():
+			tax_account = frappe.db.get_value("Sales Taxes and Charges", tax_row_name, 'account_head', cache=1)
+			if tax_account:
+				tax_amount = flt(amount)
+				tax_amount *= conversion_rate
 
-					d.taxes.setdefault(tax_account, 0)
-					d.taxes[tax_account] += tax_amount
+				customer_tax_amount = 0 if d.get('is_claim_item') else flt(amount)
+				customer_tax_amount *= conversion_rate
 
-					if tax_account in sales_tax_account:
-						d.sales_tax_amount += tax_amount
-					elif tax_account in service_tax_account:
-						d.service_tax_amount += tax_amount
-					else:
-						d.other_taxes_and_charges += tax_amount
+				if flt(d.ordered_qty):
+					tax_amount = tax_amount * flt(d.qty) / flt(d.ordered_qty)
+					customer_tax_amount = customer_tax_amount * flt(d.qty) / flt(d.ordered_qty)
+
+				d.taxes.setdefault(tax_account, 0)
+				d.taxes[tax_account] += tax_amount
+
+				d.customer_taxes.setdefault(tax_account, 0)
+				d.customer_taxes[tax_account] += customer_tax_amount
+
+				if tax_account == sales_tax_account:
+					d.sales_tax_amount += tax_amount
+					d.customer_sales_tax_amount += customer_tax_amount
+				elif tax_account == service_tax_account:
+					d.service_tax_amount += tax_amount
+					d.customer_service_tax_amount += customer_tax_amount
+				else:
+					d.other_taxes_and_charges += tax_amount
+					d.customer_other_taxes_and_charges += customer_tax_amount
 
 
 def post_process_items_data(data):
 	for i, d in enumerate(data['items']):
 		d.idx = i + 1
+
 		data.total_qty += d.qty
+
 		data.net_total += d.net_amount
+		data.customer_net_total += d.customer_net_amount
+
 		data.sales_tax_total += d.sales_tax_amount
+		data.customer_sales_tax_total += d.customer_sales_tax_amount
+
 		data.service_tax_total += d.service_tax_amount
+		data.customer_service_tax_total += d.customer_service_tax_amount
+
 		data.other_taxes_and_charges += d.other_taxes_and_charges
+		data.customer_other_taxes_and_charges += d.customer_other_taxes_and_charges
 
 		for tax_account, tax_amount in d.taxes.items():
 			data.taxes.setdefault(tax_account, 0)
 			data.taxes[tax_account] += tax_amount
+		for tax_account, tax_amount in d.customer_taxes.items():
+			data.customer_taxes.setdefault(tax_account, 0)
+			data.customer_taxes[tax_account] += tax_amount
 
 
 def get_totals_data(items_dataset):
 	totals_data = frappe._dict({
 		'taxes': {},
+		'customer_taxes': {},
+
 		'sales_tax_total': 0,
+		'customer_sales_tax_total': 0,
+
 		'service_tax_total': 0,
+		'customer_service_tax_total': 0,
+
 		'other_taxes_and_charges': 0,
+		'customer_other_taxes_and_charges': 0,
+
 		'total_taxes_and_charges': 0,
+		'customer_total_taxes_and_charges': 0,
+
 		'net_total': 0,
+		'customer_net_total': 0,
+
 		'grand_total': 0,
+		'customer_grand_total': 0,
 	})
 	for data in items_dataset:
 		totals_data.net_total += flt(data.net_total)
+		totals_data.customer_net_total += flt(data.customer_net_total)
 
 		totals_data.sales_tax_total += flt(data.sales_tax_total)
+		totals_data.customer_sales_tax_total += flt(data.customer_sales_tax_total)
+
 		totals_data.service_tax_total += flt(data.service_tax_total)
+		totals_data.customer_service_tax_total += flt(data.customer_service_tax_total)
+
 		totals_data.other_taxes_and_charges += flt(data.other_taxes_and_charges)
+		totals_data.customer_other_taxes_and_charges += flt(data.customer_other_taxes_and_charges)
 
 		for tax_account, tax_amount in data.taxes.items():
 			totals_data.taxes.setdefault(tax_account, 0)
 			totals_data.taxes[tax_account] += tax_amount
-
 			totals_data.total_taxes_and_charges += tax_amount
 
+		for tax_account, tax_amount in data.customer_taxes.items():
+			totals_data.customer_taxes.setdefault(tax_account, 0)
+			totals_data.customer_taxes[tax_account] += tax_amount
+			totals_data.customer_total_taxes_and_charges += tax_amount
+
 	totals_data.grand_total += totals_data.net_total + totals_data.total_taxes_and_charges
+	totals_data.customer_grand_total += totals_data.customer_net_total + totals_data.customer_total_taxes_and_charges
 
 	return totals_data
 

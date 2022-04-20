@@ -99,7 +99,7 @@
   "stock_sales_amount",
   "column_break_28",
   "total_billable_amount",
-  "billable_amount_without_claim",
+  "customer_billable_amount",
   "total_billed_amount",
   "column_break_58",
   "total_consumed_material_cost",
@@ -999,10 +999,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.total_billable_amount != doc.total_billable_amount_without_claim",
-   "fieldname": "billable_amount_without_claim",
+   "depends_on": "eval:doc.total_billable_amount != doc.total_customer_billable_amount",
+   "fieldname": "customer_billable_amount",
    "fieldtype": "Currency",
-   "label": "Billable Amount (Without Claims)",
+   "label": "Customer Billable Amount",
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
@@ -1015,7 +1015,7 @@
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-04-20 03:23:12.091682",
+ "modified": "2022-04-20 03:23:12.091683",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
