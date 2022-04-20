@@ -74,12 +74,11 @@ frappe.ui.form.on('Job Card', {
 			(frm.doc.for_quantity > frm.doc.total_completed_qty || !frm.doc.for_quantity)
 			&& (frm.doc.items || !frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)) {
 
-			//if Job Card is link to Work Order, the job card must not be able to start if Work Order not "Started"
+			// if Job Card is link to Work Order, the job card must not be able to start if Work Order not "Started"
 			// and if stock mvt for WIP is required
 			if (frm.doc.work_order) {
-				frappe.db.get_value('Work Order', frm.doc.work_order, ['skip_transfer', 'status']).then((result) => {
-					result=result.message;
-					if (result.skip_transfer !== 1 && result.status == 'In Process') {
+				frappe.db.get_value('Work Order', frm.doc.work_order, ['skip_transfer', 'status'], (result) => {
+					if (result.skip_transfer === 1 || result.status == 'In Process') {
 						frm.trigger("prepare_timer_buttons");
 					}
 				});
@@ -89,6 +88,7 @@ frappe.ui.form.on('Job Card', {
 		}
 
 		frm.trigger("setup_quality_inspection");
+
 		if (frm.doc.work_order) {
 			frappe.db.get_value('Work Order', frm.doc.work_order,
 				'transfer_material_against').then((r) => {
