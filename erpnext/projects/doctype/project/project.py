@@ -42,6 +42,7 @@ class Project(StatusUpdater):
 	def __init__(self, *args, **kwargs):
 		super(Project, self).__init__(*args, **kwargs)
 		self.sales_data = frappe._dict()
+		self.invoices = []
 
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), frappe.safe_decode(self.project_name or self.name))
@@ -53,12 +54,8 @@ class Project(StatusUpdater):
 		else:
 			set_name_by_naming_series(self, 'project_number')
 
-	def onload(self, set_free_item_rates=False):
-		self.set_onload('activity_summary', frappe.db.sql('''select activity_type,
-			sum(hours) as total_hours
-			from `tabTimesheet Detail` where project=%s and docstatus < 2 group by activity_type
-			order by total_hours desc''', self.name, as_dict=True))
-
+	def onload(self):
+		self.set_onload('activity_summary', self.get_activity_summary())
 		self.set_onload('default_vehicle_checklist_items', get_default_vehicle_checklist_items('vehicle_checklist'))
 		self.set_onload('default_customer_request_checklist_items', get_default_vehicle_checklist_items('customer_request_checklist'))
 		self.set_onload('cant_change_fields', self.get_cant_change_fields())
@@ -69,16 +66,12 @@ class Project(StatusUpdater):
 		self.reset_quick_change_fields()
 		self.set_missing_checklist()
 
-		self.set_costing()
-
-		self.get_project_sales_data(set_free_item_rates=set_free_item_rates)
-		self.set_sales_data_html_onload()
+		self.sales_data = self.get_project_sales_data(get_sales_invoice=True, without_claim_amounts=False)
+		self.set_sales_data_html_onload(self.sales_data)
 
 	def before_print(self):
-		self.onload(set_free_item_rates=True)
-
 		self.company_address_doc = erpnext.get_company_address(self)
-
+		self.sales_data = self.get_project_sales_data(get_sales_invoice=True, without_claim_amounts=True)
 		self.get_sales_invoice_names()
 
 	def validate(self):
@@ -92,11 +85,11 @@ class Project(StatusUpdater):
 		self.validate_readings()
 		self.validate_depreciation()
 
-		self.set_costing()
-
 		self.set_percent_complete()
 		self.set_vehicle_status()
 		self.set_billing_status()
+		self.set_costing()
+
 		self.set_status()
 
 		self.set_title()
@@ -121,8 +114,25 @@ class Project(StatusUpdater):
 			self.title = self.name
 
 	def set_billing_status(self, update=False, update_modified=False):
-		previous_billing_status = self.billing_status
+		self.billing_status = self.get_billing_status()
 
+		sales_data = self.get_project_sales_data(get_sales_invoice=False, without_claim_amounts=False)
+		self.total_billable_amount = sales_data.totals.grand_total
+
+		sales_data_without_claim = self.get_project_sales_data(get_sales_invoice=False, without_claim_amounts=True)
+		self.billable_amount_without_claim = sales_data_without_claim.totals.grand_total
+
+		self.total_billed_amount = self.get_billed_amount()
+
+		if update:
+			self.db_set({
+				'billing_status': self.billing_status,
+				'total_billable_amount': self.total_billable_amount,
+				'billable_amount_without_claim': self.billable_amount_without_claim,
+				'total_billed_amount': self.total_billed_amount,
+			}, None, update_modified=update_modified)
+
+	def get_billing_status(self):
 		sales_orders = frappe.get_all("Sales Order", fields=['per_completed'], filters={
 			"project": self.name, "docstatus": 1, "status": ['!=', 'Closed']
 		})
@@ -145,19 +155,188 @@ class Project(StatusUpdater):
 		if has_billables:
 			if has_sales_invoice:
 				if has_unbilled:
-					self.billing_status = "Partially Billed"
+					billing_status = "Partially Billed"
 				else:
-					self.billing_status = "Fully Billed"
+					billing_status = "Fully Billed"
 			else:
-				self.billing_status = "Not Billed"
+				billing_status = "Not Billed"
 		else:
 			if has_sales_invoice:
-				self.billing_status = "Fully Billed"
+				billing_status = "Fully Billed"
 			else:
-				self.billing_status = "Not Billable"
+				billing_status = "Not Billable"
 
-		if update and self.billing_status != previous_billing_status:
-			self.db_set('billing_status', self.billing_status, update_modified=update_modified)
+		return billing_status
+
+	def get_billed_amount(self):
+		directly_billed = frappe.db.sql("""
+			select sum(base_grand_total)
+			from `tabSales Invoice`
+			where project = %s and docstatus = 1
+		""", self.name)
+		directly_billed = flt(directly_billed[0][0]) if directly_billed else 0
+
+		indirectly_billed = frappe.db.sql("""
+			select sum(i.base_tax_inclusive_amount)
+			from `tabSales Invoice Item` i
+			inner join `tabSales Invoice` p on p.name = i.parent
+			where i.project = %s and p.project != %s and p.docstatus = 1
+		""", (self.name, self.name))
+		indirectly_billed = flt(indirectly_billed[0][0]) if indirectly_billed else 0
+
+		return directly_billed + indirectly_billed
+
+	def set_costing(self, update=False, update_modified=False):
+		self.set_sales_amount(update=update, update_modified=update_modified)
+		self.set_timesheet_values(update=update, update_modified=update_modified)
+		self.set_expense_claim_values(update=update, update_modified=update_modified)
+		self.set_purchase_values(update=update, update_modified=update_modified)
+		self.set_material_consumed_cost(update=update, update_modified=update_modified)
+		self.set_gross_margin(update=update, update_modified=update_modified)
+
+	def set_sales_amount(self, update=False, update_modified=False):
+		sales_data = self.get_project_sales_data(get_sales_invoice=True, without_claim_amounts=False)
+		self.total_sales_amount = sales_data.totals.net_total
+		self.stock_sales_amount = sales_data.stock_items.net_total
+		self.service_sales_amount = sales_data.service_items.net_total
+
+		if update:
+			self.db_set({
+				'total_sales_amount': self.total_sales_amount,
+				'stock_sales_amount': self.stock_sales_amount,
+				'service_sales_amount': self.service_sales_amount,
+			}, None, update_modified=update_modified)
+
+	def set_timesheet_values(self, update=False, update_modified=False):
+		time_sheet_data = frappe.db.sql("""
+			select
+				sum(costing_amount) as costing_amount,
+				sum(billing_amount) as billing_amount,
+				min(from_time) as start_date,
+				max(to_time) as end_date,
+				sum(hours) as time
+			from `tabTimesheet Detail`
+			where project = %s and docstatus = 1
+		""", self.name, as_dict=1)[0]
+
+		self.actual_start_date = time_sheet_data.start_date
+		self.actual_end_date = time_sheet_data.end_date
+
+		self.timesheet_costing_amount = flt(time_sheet_data.costing_amount)
+		self.timesheet_billable_amount = flt(time_sheet_data.billing_amount)
+		self.actual_time = flt(time_sheet_data.time)
+
+		if update:
+			self.db_set({
+				'actual_start_date': self.actual_start_date,
+				'actual_end_date': self.actual_end_date,
+				'timesheet_costing_amount': self.timesheet_costing_amount,
+				'timesheet_billable_amount': self.timesheet_billable_amount,
+				'actual_time': self.actual_time,
+			}, None, update_modified=update_modified)
+
+	def set_expense_claim_values(self, update=False, update_modified=False):
+		expense_claim_data = frappe.db.sql("""
+			select sum(sanctioned_amount) as total_sanctioned_amount
+			from `tabExpense Claim Detail`
+			where project = %s and docstatus = 1
+		""", self.name, as_dict=1)[0]
+
+		self.total_expense_claim = flt(expense_claim_data.total_sanctioned_amount)
+
+		if update:
+			self.db_set({
+				'total_expense_claim': self.total_expense_claim,
+			}, None, update_modified=update_modified)
+
+	def set_purchase_values(self, update=False, update_modified=False):
+		total_purchase_cost = frappe.db.sql("""
+			select sum(base_net_amount)
+			from `tabPurchase Invoice Item`
+			where project = %s and docstatus=1
+		""", self.name)
+
+		self.total_purchase_cost = flt(total_purchase_cost[0][0]) if total_purchase_cost else 0
+
+		if update:
+			self.db_set({
+				'total_purchase_cost': self.total_purchase_cost,
+			}, None, update_modified=update_modified)
+
+	def set_material_consumed_cost(self, update=False, update_modified=False):
+		amount = frappe.db.sql("""
+			select ifnull(sum(sed.amount), 0)
+			from `tabStock Entry` se, `tabStock Entry Detail` sed
+			where se.docstatus = 1 and se.project = %s and sed.parent = se.name
+				and (sed.t_warehouse is null or sed.t_warehouse = '')
+		""", self.name, as_list=1)
+		amount = flt(amount[0][0]) if amount else 0
+
+		additional_costs = frappe.db.sql("""
+			select ifnull(sum(sed.amount), 0)
+			from `tabStock Entry` se, `tabStock Entry Taxes and Charges` sed
+			where se.docstatus = 1 and se.project = %s and sed.parent = se.name
+				and se.purpose = 'Manufacture'""", self.name, as_list=1)
+		additional_cost_amt = flt(additional_costs[0][0]) if additional_costs else 0
+
+		amount += additional_cost_amt
+
+		self.total_consumed_material_cost = amount
+
+		if update:
+			self.db_set({
+				'total_consumed_material_cost': self.total_consumed_material_cost,
+			}, None, update_modified=update_modified)
+
+	def set_gross_margin(self, update=False, update_modified=False):
+		total_revenue = flt(self.total_sales_amount)
+		total_expense = (flt(self.timesheet_costing_amount) + flt(self.total_expense_claim)
+			+ flt(self.total_purchase_cost) + flt(self.total_consumed_material_cost))
+
+		self.gross_margin = total_revenue - total_expense
+		self.per_gross_margin = self.gross_margin / total_revenue * 100 if total_revenue else 0
+
+		if update:
+			self.db_set({
+				'gross_margin': self.gross_margin,
+				'per_gross_margin': self.per_gross_margin,
+			}, None, update_modified=update_modified)
+
+	def set_percent_complete(self, update=False, update_modified=False):
+		if self.percent_complete_method == "Manual":
+			if self.status == "Completed":
+				self.percent_complete = 100
+			return
+
+		total = frappe.db.count('Task', dict(project=self.name))
+
+		if not total:
+			self.percent_complete = 0
+		else:
+			if (self.percent_complete_method == "Task Completion" and total > 0) or (not self.percent_complete_method and total > 0):
+				completed = frappe.db.sql("""
+					select count(name)
+					from tabTask where
+					project=%s and status in ('Cancelled', 'Completed')
+				""", self.name)[0][0]
+				self.percent_complete = flt(flt(completed) / total * 100, 2)
+
+			if self.percent_complete_method == "Task Progress" and total > 0:
+				progress = frappe.db.sql("""select sum(progress) from tabTask where project=%s""", self.name)[0][0]
+				self.percent_complete = flt(flt(progress) / total, 2)
+
+			if self.percent_complete_method == "Task Weight" and total > 0:
+				weight_sum = frappe.db.sql("""select sum(task_weight) from tabTask where project=%s""", self.name)[0][0]
+				weighted_progress = frappe.db.sql("""select progress, task_weight from tabTask where project=%s""", self.name, as_dict=1)
+				pct_complete = 0
+				for row in weighted_progress:
+					pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
+				self.percent_complete = flt(flt(pct_complete), 2)
+
+		if update:
+			self.db_set({
+				'percent_complete': self.percent_complete,
+			}, None, update_modified=update_modified)
 
 	def validate_project_status_for_transaction(self, doc):
 		validate_project_status_for_transaction(self, doc)
@@ -217,8 +396,9 @@ class Project(StatusUpdater):
 	def get_cant_change_fields(self):
 		vehicle_received = self.get('vehicle_status') and self.get('vehicle_status') != 'Not Received'
 		has_sales_transaction = self.has_sales_transaction()
+		has_vehicle_log = self.has_vehicle_log()
 		return frappe._dict({
-			'applies_to_vehicle': vehicle_received,
+			'applies_to_vehicle': vehicle_received or has_vehicle_log,
 			'vehicle_workshop': vehicle_received,
 			'customer': has_sales_transaction,
 			'bill_to': has_sales_transaction and self.is_warranty_claim,
@@ -238,6 +418,17 @@ class Project(StatusUpdater):
 			self._has_sales_transaction = False
 
 		return self._has_sales_transaction
+
+	def has_vehicle_log(self):
+		if getattr(self, '_has_vehicle_log', None):
+			return self._has_vehicle_log
+
+		if frappe.db.get_value("Vehicle Log", {'project': self.name, 'docstatus': 1}):
+			self._has_vehicle_log = True
+		else:
+			self._has_vehicle_log = False
+
+		return self._has_vehicle_log
 
 	def validate_project_type(self):
 		if self.project_type:
@@ -448,53 +639,14 @@ class Project(StatusUpdater):
 					task_weight = task.task_weight
 				)).insert()
 
-	def update_project(self):
-		'''Called externally by Task'''
-		self.set_percent_complete()
-		self.set_costing()
-		self.db_update()
-		self.notify_update()
-
-	def set_percent_complete(self):
-		if self.percent_complete_method == "Manual":
-			if self.status == "Completed":
-				self.percent_complete = 100
-			return
-
-		total = frappe.db.count('Task', dict(project=self.name))
-
-		if not total:
-			self.percent_complete = 0
-		else:
-			if (self.percent_complete_method == "Task Completion" and total > 0) or (not self.percent_complete_method and total > 0):
-				completed = frappe.db.sql("""
-					select count(name)
-					from tabTask where
-					project=%s and status in ('Cancelled', 'Completed')
-				""", self.name)[0][0]
-				self.percent_complete = flt(flt(completed) / total * 100, 2)
-
-			if self.percent_complete_method == "Task Progress" and total > 0:
-				progress = frappe.db.sql("""select sum(progress) from tabTask where project=%s""", self.name)[0][0]
-				self.percent_complete = flt(flt(progress) / total, 2)
-
-			if self.percent_complete_method == "Task Weight" and total > 0:
-				weight_sum = frappe.db.sql("""select sum(task_weight) from tabTask where project=%s""", self.name)[0][0]
-				weighted_progress = frappe.db.sql("""select progress, task_weight from tabTask where project=%s""",
-					self.name, as_dict=1)
-				pct_complete = 0
-				for row in weighted_progress:
-					pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
-				self.percent_complete = flt(flt(pct_complete), 2)
-
-	def set_sales_data_html_onload(self):
+	def set_sales_data_html_onload(self, sales_data):
 		currency = erpnext.get_company_currency(self.company)
 
 		stock_items_html = frappe.render_template("erpnext/projects/doctype/project/project_items_table.html",
-			{"doc": self, "data": self.sales_data.stock_items, "currency": currency,
+			{"doc": self, "data": sales_data.stock_items, "currency": currency,
 				"title": _("Materials"), "show_delivery_note": True, "show_uom": True})
 		service_items_html = frappe.render_template("erpnext/projects/doctype/project/project_items_table.html",
-			{"doc": self, "data": self.sales_data.service_items, "currency": currency,
+			{"doc": self, "data": sales_data.service_items, "currency": currency,
 				"title": _("Services"), "show_delivery_note": False, "show_uom": False})
 
 		sales_summary_html = frappe.render_template("erpnext/projects/doctype/project/project_sales_summary.html",
@@ -504,10 +656,15 @@ class Project(StatusUpdater):
 		self.set_onload('service_items_html', service_items_html)
 		self.set_onload('sales_summary_html', sales_summary_html)
 
-	def get_project_sales_data(self, set_free_item_rates=False):
-		self.sales_data.stock_items, self.sales_data.part_items, self.sales_data.lubricant_items = get_stock_items(self.name, self.customer, self.company, set_free_item_rates=set_free_item_rates)
-		self.sales_data.service_items, self.sales_data.labour_items, self.sales_data.sublet_items = get_service_items(self.name, self.customer, self.company, set_free_item_rates=set_free_item_rates)
-		self.sales_data.totals = get_totals_data([self.sales_data.stock_items, self.sales_data.service_items])
+	def get_project_sales_data(self, get_sales_invoice=True, without_claim_amounts=False):
+		sales_data = frappe._dict()
+		sales_data.stock_items, sales_data.part_items, sales_data.lubricant_items = get_stock_items(self.name,
+			self.customer, self.company, without_claim_amounts=without_claim_amounts, get_sales_invoice=get_sales_invoice)
+		sales_data.service_items, sales_data.labour_items, sales_data.sublet_items = get_service_items(self.name,
+			self.customer, self.company, without_claim_amounts=without_claim_amounts, get_sales_invoice=get_sales_invoice)
+		sales_data.totals = get_totals_data([sales_data.stock_items, sales_data.service_items])
+
+		return sales_data
 
 	def get_sales_invoices(self):
 		return frappe.db.sql("""
@@ -534,34 +691,16 @@ class Project(StatusUpdater):
 	def get_sales_invoice_names(self):
 		# Invoices
 		invoices = self.get_sales_invoices()
-		self.sales_data.invoices = [d.name for d in invoices]
+		self.invoices = [d.name for d in invoices]
 
-	def set_costing(self):
-		from_time_sheet = frappe.db.sql("""select
-			sum(costing_amount) as costing_amount,
-			sum(billing_amount) as billing_amount,
-			min(from_time) as start_date,
-			max(to_time) as end_date,
-			sum(hours) as time
-			from `tabTimesheet Detail` where project = %s and docstatus = 1""", self.name, as_dict=1)[0]
-
-		from_expense_claim = frappe.db.sql("""select
-			sum(sanctioned_amount) as total_sanctioned_amount
-			from `tabExpense Claim Detail` where project = %s
-			and docstatus = 1""", self.name, as_dict=1)[0]
-
-		self.actual_start_date = from_time_sheet.start_date
-		self.actual_end_date = from_time_sheet.end_date
-
-		self.total_costing_amount = from_time_sheet.costing_amount
-		self.total_billable_amount = from_time_sheet.billing_amount
-		self.actual_time = from_time_sheet.time
-
-		self.total_expense_claim = from_expense_claim.total_sanctioned_amount
-		self.update_purchase_costing()
-		self.update_sales_amount()
-		self.update_billed_amount()
-		self.calculate_gross_margin()
+	def get_activity_summary(self):
+		return frappe.db.sql("""
+			select activity_type, sum(hours) as total_hours
+			from `tabTimesheet Detail`
+			where project=%s and docstatus < 2
+			group by activity_type
+			order by total_hours desc
+		""", self.name, as_dict=True)
 
 	def set_vehicle_status(self, update=False):
 		if not self.meta.has_field('vehicle_status'):
@@ -606,32 +745,6 @@ class Project(StatusUpdater):
 				"vehicle_status": self.vehicle_status,
 			})
 
-	def calculate_gross_margin(self):
-		expense_amount = (flt(self.total_costing_amount) + flt(self.total_expense_claim)
-			+ flt(self.total_purchase_cost) + flt(self.get('total_consumed_material_cost', 0)))
-
-		self.gross_margin = flt(self.total_billed_amount) - expense_amount
-		if self.total_billed_amount:
-			self.per_gross_margin = (self.gross_margin / flt(self.total_billed_amount)) * 100
-
-	def update_purchase_costing(self):
-		total_purchase_cost = frappe.db.sql("""select sum(base_net_amount)
-			from `tabPurchase Invoice Item` where project = %s and docstatus=1""", self.name)
-
-		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0
-
-	def update_sales_amount(self):
-		total_sales_amount = frappe.db.sql("""select sum(base_net_total)
-			from `tabSales Order` where project = %s and docstatus=1""", self.name)
-
-		self.total_sales_amount = total_sales_amount and total_sales_amount[0][0] or 0
-
-	def update_billed_amount(self):
-		total_billed_amount = frappe.db.sql("""select sum(base_net_total)
-			from `tabSales Invoice` where project = %s and docstatus=1""", self.name)
-
-		self.total_billed_amount = total_billed_amount and total_billed_amount[0][0] or 0
-
 	def after_rename(self, old_name, new_name, merge=False):
 		if old_name == self.copied_from:
 			frappe.db.set_value('Project', new_name, 'copied_from', new_name)
@@ -656,22 +769,22 @@ class Project(StatusUpdater):
 				user.welcome_email_sent = 1
 
 
-def get_stock_items(project, customer, company, set_free_item_rates=False):
+def get_stock_items(project, customer, company, without_claim_amounts=False, get_sales_invoice=True):
 	dn_data = frappe.db.sql("""
 		select p.name as delivery_note, i.sales_order,
 			p.posting_date, p.posting_time, i.idx,
 			i.item_code, i.item_name, i.description, i.item_group,
 			i.qty, i.uom,
-			i.net_amount, i.base_net_amount,
-			i.net_rate, i.base_net_rate,
-			i.item_tax_detail, i.bill_only_to_customer
+			i.base_net_amount as net_amount,
+			i.base_net_rate as net_rate,
+			i.item_tax_detail, i.bill_only_to_customer, p.conversion_rate
 		from `tabDelivery Note Item` i
 		inner join `tabDelivery Note` p on p.name = i.parent
 		where p.docstatus = 1 and i.is_stock_item = 1
 			and p.project = %s
 	""", project, as_dict=1)
 
-	if set_free_item_rates:
+	if without_claim_amounts:
 		set_rate_for_free_customer_items(dn_data, customer)
 
 	so_data = frappe.db.sql("""
@@ -679,17 +792,16 @@ def get_stock_items(project, customer, company, set_free_item_rates=False):
 			p.transaction_date, i.idx,
 			i.item_code, i.item_name, i.description, i.item_group,
 			i.qty - i.delivered_qty as qty, i.qty as ordered_qty, i.uom,
-			i.net_amount * (i.qty - i.delivered_qty) / i.qty as net_amount,
-			i.base_net_amount * (i.qty - i.delivered_qty) / i.qty as base_net_amount,
-			i.net_rate, i.base_net_rate,
-			i.item_tax_detail, i.bill_only_to_customer
+			i.base_net_amount * (i.qty - i.delivered_qty) / i.qty as net_amount,
+			i.base_net_rate as net_rate,
+			i.item_tax_detail, i.bill_only_to_customer, p.conversion_rate
 		from `tabSales Order Item` i
 		inner join `tabSales Order` p on p.name = i.parent
 		where p.docstatus = 1 and i.is_stock_item = 1 and i.delivered_qty < i.qty and i.qty > 0 and p.status != 'Closed'
 			and p.project = %s
 	""", project, as_dict=1)
 
-	if set_free_item_rates:
+	if without_claim_amounts:
 		set_rate_for_free_customer_items(so_data, customer)
 
 	stock_data = get_items_data_template()
@@ -726,15 +838,15 @@ def get_stock_items(project, customer, company, set_free_item_rates=False):
 	return stock_data, parts_data, lubricants_data
 
 
-def get_service_items(project, customer, company, set_free_item_rates=False):
+def get_service_items(project, customer, company, without_claim_amounts=False, get_sales_invoice=True):
 	so_data = frappe.db.sql("""
 		select p.name as sales_order,
 			p.transaction_date,
 			i.item_code, i.item_name, i.description, i.item_group,
 			i.qty, i.uom,
-			i.net_amount, i.base_net_amount,
-			i.net_rate, i.base_net_rate,
-			i.item_tax_detail, i.bill_only_to_customer
+			i.base_net_amount as net_amount,
+			i.base_net_rate as net_rate,
+			i.item_tax_detail, i.bill_only_to_customer, p.conversion_rate
 		from `tabSales Order Item` i
 		inner join `tabSales Order` p on p.name = i.parent
 		where p.docstatus = 1 and i.is_stock_item = 0 and i.is_fixed_asset = 0
@@ -742,23 +854,25 @@ def get_service_items(project, customer, company, set_free_item_rates=False):
 		order by p.transaction_date, p.creation, i.idx
 	""", project, as_dict=1)
 
-	if set_free_item_rates:
+	if without_claim_amounts:
 		set_rate_for_free_customer_items(so_data, customer)
 
-	sinv_data = frappe.db.sql("""
-		select p.name as sales_invoice, i.delivery_note, i.sales_order,
-			p.posting_date as transaction_date,
-			i.item_code, i.item_name, i.description, i.item_group,
-			i.qty, i.uom,
-			i.net_amount, i.base_net_amount,
-			i.net_rate, i.base_net_rate,
-			i.item_tax_detail
-		from `tabSales Invoice Item` i
-		inner join `tabSales Invoice` p on p.name = i.parent
-		where p.docstatus = 1 and i.is_stock_item = 0 and i.is_fixed_asset = 0 and ifnull(i.sales_order, '') = ''
-			and (p.project = %s or i.project = %s)
-		order by p.posting_date, p.creation, i.idx
-	""", [project, project], as_dict=1)
+	sinv_data = []
+	if get_sales_invoice:
+		sinv_data = frappe.db.sql("""
+			select p.name as sales_invoice, i.delivery_note, i.sales_order,
+				p.posting_date as transaction_date,
+				i.item_code, i.item_name, i.description, i.item_group,
+				i.qty, i.uom,
+				i.base_net_amount as net_amount,
+				i.base_net_rate as net_rate,
+				i.item_tax_detail, p.conversion_rate
+			from `tabSales Invoice Item` i
+			inner join `tabSales Invoice` p on p.name = i.parent
+			where p.docstatus = 1 and i.is_stock_item = 0 and i.is_fixed_asset = 0 and ifnull(i.sales_order, '') = ''
+				and (p.project = %s or i.project = %s)
+			order by p.posting_date, p.creation, i.idx
+		""", [project, project], as_dict=1)
 
 	service_data = get_items_data_template()
 	labour_data = get_items_data_template()
@@ -794,7 +908,6 @@ def get_items_data_template():
 	return frappe._dict({
 		'total_qty': 0,
 		'net_total': 0,
-		'base_net_total': 0,
 		'sales_tax_total': 0,
 		'service_tax_total': 0,
 		'other_taxes_and_charges': 0,
@@ -808,9 +921,7 @@ def set_rate_for_free_customer_items(data, customer=None):
 		if d.get('bill_only_to_customer') and customer and d.get('bill_only_to_customer') != customer:
 			d.is_free_item = 1
 			d.net_amount = 0
-			d.base_net_amount = 0
 			d.net_rate = 0
-			d.base_net_rate = 0
 
 
 def get_item_taxes(data, company):
@@ -818,6 +929,8 @@ def get_item_taxes(data, company):
 	service_tax_account = frappe.get_cached_value('Company', company, "service_tax_account")
 
 	for d in data['items']:
+		conversion_rate = flt(d.get('conversion_rate')) or 1
+
 		d.setdefault('taxes', {})
 		d.setdefault('sales_tax_amount', 0)
 		d.setdefault('service_tax_amount', 0)
@@ -829,6 +942,7 @@ def get_item_taxes(data, company):
 				tax_account = frappe.db.get_value("Sales Taxes and Charges", tax_row_name, 'account_head', cache=1)
 				if tax_account:
 					tax_amount = 0 if d.get('is_free_item') else flt(amount)
+					tax_amount *= conversion_rate
 					if flt(d.ordered_qty):
 						tax_amount = tax_amount * flt(d.qty) / flt(d.ordered_qty)
 
@@ -848,7 +962,6 @@ def post_process_items_data(data):
 		d.idx = i + 1
 		data.total_qty += d.qty
 		data.net_total += d.net_amount
-		data.base_net_total += d.base_net_amount
 		data.sales_tax_total += d.sales_tax_amount
 		data.service_tax_total += d.service_tax_amount
 		data.other_taxes_and_charges += d.other_taxes_and_charges

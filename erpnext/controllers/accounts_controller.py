@@ -2158,7 +2158,6 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			parent.update_reserved_qty_for_subcontract()
 	else:
 		parent.update_reserved_qty()
-		parent.update_project()
 		parent.update_previous_doc_status()
 		parent.set_delivery_status(update=True)
 

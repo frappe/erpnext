@@ -115,7 +115,10 @@ class Task(NestedSet):
 
 	def update_project(self):
 		if self.project and not self.flags.from_project:
-			frappe.get_cached_doc("Project", self.project).update_project()
+			doc = frappe.get_doc("Project", self.project)
+			doc.set_percent_complete(update=True)
+			doc.set_status(update=True)
+			doc.notify_update()
 
 	def check_recursion(self):
 		if self.flags.ignore_recursion_check: return

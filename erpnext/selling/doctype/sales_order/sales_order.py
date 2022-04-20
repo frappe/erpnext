@@ -83,7 +83,6 @@ class SalesOrder(SellingController):
 		self.update_reserved_qty()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.base_grand_total, self)
-		self.update_project()
 		self.update_previous_doc_status()
 
 		self.update_blanket_order()
@@ -102,7 +101,6 @@ class SalesOrder(SellingController):
 
 		self.check_nextdoc_docstatus()
 		self.update_reserved_qty()
-		self.update_project()
 		self.update_previous_doc_status()
 
 		frappe.db.set(self, 'status', 'Cancelled')
@@ -141,7 +139,7 @@ class SalesOrder(SellingController):
 	def update_status(self, status):
 		self.check_modified_date()
 		self.set_status(update=True, status=status)
-		self.update_project_billing_status()
+		self.update_project_billing_and_sales()
 		self.update_reserved_qty()
 		self.notify_update()
 		clear_doctype_notifications(self)
@@ -166,7 +164,7 @@ class SalesOrder(SellingController):
 				doc.update_opportunity()
 				doc.notify_update()
 
-		self.update_project_billing_status()
+		self.update_project_billing_and_sales()
 
 	def set_delivery_status(self, update=False, update_modified=True):
 		data = self.get_delivery_status_data()
@@ -479,12 +477,6 @@ class SalesOrder(SellingController):
 		for d in self.get('items'):
 			if d.delivered_by_supplier and not d.supplier:
 				frappe.throw(_("Row #{0}: Set Supplier for item {1}").format(d.idx, d.item_code))
-
-	def update_project(self):
-		if self.project:
-			project = frappe.get_doc("Project", self.project)
-			project.update_sales_amount()
-			project.db_update()
 
 	def check_credit_limit(self):
 		# if bypass credit limit check is set to true (1) at sales order level,

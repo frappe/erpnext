@@ -531,7 +531,7 @@ class SellingController(StockController):
 			if not res:
 				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
 
-	def update_project_billing_status(self):
+	def update_project_billing_and_sales(self):
 		projects = []
 		if self.get('project'):
 			projects.append(self.get('project'))
@@ -544,6 +544,8 @@ class SellingController(StockController):
 			doc = frappe.get_doc("Project", project)
 			doc.validate_project_status_for_transaction(self)
 			doc.set_billing_status(update=True)
+			doc.set_sales_amount(update=True)
+			doc.set_gross_margin(update=True)
 			doc.set_status(update=True)
 			doc.notify_update()
 

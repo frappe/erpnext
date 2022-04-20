@@ -1087,8 +1087,10 @@ class PurchaseInvoice(BuyingController):
 		for d in self.items:
 			if d.project and d.project not in project_list:
 				project = frappe.get_doc("Project", d.project)
-				project.update_purchase_costing()
-				project.db_update()
+				project.set_purchase_values(update=True)
+				project.set_gross_margin(update=True)
+				project.set_status(update=True)
+				project.notify_update()
 				project_list.append(d.project)
 
 	def validate_supplier_invoice(self):

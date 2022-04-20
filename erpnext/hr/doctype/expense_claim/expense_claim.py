@@ -142,7 +142,11 @@ class ExpenseClaim(AccountsController):
 
 		projects = set(projects)
 		for project in projects:
-			frappe.get_doc("Project", project).update_project()
+			doc = frappe.get_doc("Project", project)
+			doc.set_expense_claim_values(update=True)
+			doc.set_gross_margin(update=True)
+			doc.set_status(update=True)
+			doc.notify_update()
 
 		tasks = set(tasks)
 		for task in tasks:

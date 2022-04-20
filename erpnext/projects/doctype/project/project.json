@@ -93,17 +93,23 @@
   "actual_end_date",
   "column_break_49",
   "actual_time",
-  "project_details",
+  "billing_and_costing_section",
   "total_sales_amount",
-  "total_billed_amount",
+  "service_sales_amount",
+  "stock_sales_amount",
   "column_break_28",
   "total_billable_amount",
-  "total_costing_amount",
+  "billable_amount_without_claim",
+  "total_billed_amount",
   "column_break_58",
-  "total_expense_claim",
-  "total_purchase_cost",
-  "column_break_61",
   "total_consumed_material_cost",
+  "total_expense_claim",
+  "column_break_61",
+  "total_purchase_cost",
+  "column_break_100",
+  "timesheet_billable_amount",
+  "timesheet_costing_amount",
+  "column_break_102",
   "estimated_costing",
   "cost_center",
   "company",
@@ -302,38 +308,29 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "project_details",
-   "fieldtype": "Section Break",
-   "label": "Costing and Billing",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-money"
-  },
-  {
    "fieldname": "estimated_costing",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Estimated Cost",
+   "no_copy": 1,
    "oldfieldname": "project_value",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency"
   },
   {
-   "fieldname": "total_costing_amount",
-   "fieldtype": "Currency",
-   "label": "Total Costing Amount (via Timesheets)",
-   "read_only": 1
-  },
-  {
    "fieldname": "total_expense_claim",
    "fieldtype": "Currency",
-   "label": "Total Expense Claim (via Expense Claims)",
+   "label": "Total Expense Claims",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
    "fieldname": "total_purchase_cost",
    "fieldtype": "Currency",
-   "label": "Total Purchase Cost (via Purchase Invoice)",
+   "label": "Total Purchase Value",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -350,25 +347,33 @@
   {
    "fieldname": "total_sales_amount",
    "fieldtype": "Currency",
-   "label": "Total Sales Amount (via Sales Order)",
+   "label": "Total Sales Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
    "fieldname": "total_billable_amount",
    "fieldtype": "Currency",
-   "label": "Total Billable Amount (via Timesheets)",
+   "label": "Total Billable Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
    "fieldname": "total_billed_amount",
    "fieldtype": "Currency",
-   "label": "Total Billed Amount (via Sales Invoices)",
+   "label": "Total Billed Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
    "fieldname": "total_consumed_material_cost",
    "fieldtype": "Currency",
-   "label": "Total Consumed Material Cost  (via Stock Entry)",
+   "label": "Consumed Material Cost",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -948,12 +953,69 @@
    "fieldname": "non_standard_depreciation_section",
    "fieldtype": "Section Break",
    "label": "Non Standard Depreciation"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "billing_and_costing_section",
+   "fieldtype": "Section Break",
+   "label": "Billing and Costing",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-money"
+  },
+  {
+   "fieldname": "service_sales_amount",
+   "fieldtype": "Currency",
+   "label": "Service Sales Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_sales_amount",
+   "fieldtype": "Currency",
+   "label": "Material Sales Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "timesheet_billable_amount",
+   "fieldtype": "Currency",
+   "label": "Timesheets Billable Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "timesheet_costing_amount",
+   "fieldtype": "Currency",
+   "label": "Timesheets Costing Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_102",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.total_billable_amount != doc.total_billable_amount_without_claim",
+   "fieldname": "billable_amount_without_claim",
+   "fieldtype": "Currency",
+   "label": "Billable Amount (Without Claims)",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_100",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-04-18 18:31:31.901685",
+ "modified": "2022-04-20 03:23:12.091682",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

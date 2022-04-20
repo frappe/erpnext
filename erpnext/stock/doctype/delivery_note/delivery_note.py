@@ -168,7 +168,7 @@ class DeliveryNote(SellingController):
 			doc.validate_returned_qty(from_doctype=self.doctype, row_names=delivery_note_row_names)
 			doc.validate_billed_qty(from_doctype=self.doctype, row_names=delivery_note_row_names)
 
-		self.update_project_billing_status()
+		self.update_project_billing_and_sales()
 
 	def update_billing_status(self, update_modified=True):
 		updated_delivery_notes = [self.name]
@@ -299,7 +299,7 @@ class DeliveryNote(SellingController):
 
 	def update_status(self, status):
 		self.set_status(update=True, status=status)
-		self.update_project_billing_status()
+		self.update_project_billing_and_sales()
 		self.notify_update()
 		clear_doctype_notifications(self)
 
