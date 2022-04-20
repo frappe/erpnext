@@ -6,7 +6,7 @@ def execute():
 	"Add Field Filters, that are not standard fields in Website Item, as Custom Fields."
 	settings = frappe.get_doc("E Commerce Settings")
 
-	if not (settings.filter_fields or settings.field_filters):
+	if not (settings.enable_field_filters or settings.filter_fields):
 		return
 
 	item_meta = frappe.get_meta("Item")
