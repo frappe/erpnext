@@ -9,7 +9,7 @@ frappe.query_reports["Price List Versions Report"] = {
 			fieldname: "tree_type",
 			label: __("Tree Type"),
 			fieldtype: "Select",
-			options: ["Item","Customer","Item Group"],
+			options: ["Item", "Item Group"],
 			default: "",
 			reqd: 1
 		},
