@@ -18,6 +18,7 @@
   "is_return",
   "is_debit_note",
   "update_billed_amount_in_sales_order",
+  "task",
   "column_break1",
   "company",
   "company_tax_id",
@@ -2036,6 +2037,12 @@
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
    "read_only": 1
+  },
+  {
+   "fieldname": "task",
+   "fieldtype": "Link",
+   "label": "Task",
+   "options": "Task"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2048,12 +2055,11 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-03-08 16:08:53.517903",
+ "modified": "2022-04-19 19:13:28.089594",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
  "name_case": "Title Case",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -2099,7 +2105,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
  "timeline_field": "customer",
  "title_field": "title",
  "track_changes": 1,
