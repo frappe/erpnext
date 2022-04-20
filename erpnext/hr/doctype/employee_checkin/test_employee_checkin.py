@@ -153,6 +153,31 @@ class TestEmployeeCheckin(FrappeTestCase):
 		log = make_checkin(employee, timestamp)
 		self.assertIsNone(log.shift)
 
+	def test_fetch_shift_for_assignment_with_end_date(self):
+		employee = make_employee("test_employee_checkin@example.com", company="_Test Company")
+
+		# shift setup for 8-12
+		shift1 = setup_shift_type()
+		# 12:30 - 16:30
+		shift2 = setup_shift_type(shift_type="Shift 2", start_time="12:30:00", end_time="16:30:00")
+
+		date = getdate()
+		make_shift_assignment(shift1.name, employee, date, add_days(date, 15))
+		make_shift_assignment(shift2.name, employee, date, add_days(date, 15))
+
+		timestamp = datetime.combine(date, get_time("08:45:00"))
+		log = make_checkin(employee, timestamp)
+		self.assertEqual(log.shift, shift1.name)
+
+		timestamp = datetime.combine(date, get_time("12:45:00"))
+		log = make_checkin(employee, timestamp)
+		self.assertEqual(log.shift, shift2.name)
+
+		# log after end date
+		timestamp = datetime.combine(add_days(date, 16), get_time("12:45:00"))
+		log = make_checkin(employee, timestamp)
+		self.assertIsNone(log.shift)
+
 	def test_shift_start_and_end_timings(self):
 		employee = make_employee("test_employee_checkin@example.com", company="_Test Company")
 
