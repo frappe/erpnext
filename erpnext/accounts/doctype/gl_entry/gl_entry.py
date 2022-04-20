@@ -3,11 +3,13 @@
 
 
 import frappe
-from frappe import _
+from frappe import _, qb
 from frappe.model.document import Document
 from frappe.model.meta import get_field_precision
 from frappe.model.naming import set_name_from_naming_options
-from frappe.utils import flt, fmt_money
+from frappe.query_builder import AliasedQuery, Criterion, Table
+from frappe.query_builder.functions import Abs, IfNull, Sum
+from frappe.utils import flt
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -204,47 +206,58 @@ def validate_balance_type(account, adv_adj=False):
 				frappe.throw(_("Balance for Account {0} must always be {1}").format(account, _(balance_must_be)))
 
 def update_outstanding_amt(account, party_type, party, against_voucher_type, against_voucher, on_cancel=False):
+
+	gle = qb.DocType('GL Entry')
+	ple = qb.DocType('Payment Ledger Entry')
+	filter_criterions = []
+
 	if party_type and party:
 		party_condition = " and party_type={0} and party={1}"\
 			.format(frappe.db.escape(party_type), frappe.db.escape(party))
+
+		filter_criterions.append(gle.party_type == party_type)
+		filter_criterions.append(gle.party == party)
 	else:
 		party_condition = ""
 
 	if against_voucher_type == "Sales Invoice":
 		party_account = frappe.db.get_value(against_voucher_type, against_voucher, "debit_to")
 		account_condition = "and account in ({0}, {1})".format(frappe.db.escape(account), frappe.db.escape(party_account))
+		filter_criterions.append(gle.account.isin([account, party_account]))
 	else:
 		account_condition = " and account = {0}".format(frappe.db.escape(account))
+		filter_criterions.append(gle.account == account)
 
 	# get final outstanding amt
-	bal = flt(frappe.db.sql("""
-		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
-		from `tabGL Entry`
-		where against_voucher_type=%s and against_voucher=%s
-		and voucher_type != 'Invoice Discounting'
-		{0} {1}""".format(party_condition, account_condition),
-		(against_voucher_type, against_voucher))[0][0] or 0.0)
+	# get gl postings of invoice
+	invoice_query = (
+		qb.from_(gle)
+		.select(gle.voucher_type, gle.voucher_no, Abs(Sum(gle.debit_in_account_currency-gle.credit_in_account_currency)).as_('amount'))
+		.where((gle.voucher_type == against_voucher_type)
+			   & (gle.voucher_no == against_voucher)
+			   & (gle.voucher_type != 'Invoice Discounting'))
+		.where(Criterion.all(filter_criterions))
+	)
 
-	if against_voucher_type == 'Purchase Invoice':
-		bal = -bal
-	elif against_voucher_type == "Journal Entry":
-		against_voucher_amount = flt(frappe.db.sql("""
-			select sum(debit_in_account_currency) - sum(credit_in_account_currency)
-			from `tabGL Entry` where voucher_type = 'Journal Entry' and voucher_no = %s
-			and account = %s and (against_voucher is null or against_voucher='') {0}"""
-			.format(party_condition), (against_voucher, account))[0][0])
+	# get payments against an invoice from payment ledger
+	payments_query = (
+		qb.from_(ple)
+		.select(ple.against_voucher_type.as_('voucher_type'), ple.against_voucher_no.as_("voucher_no"), ple.amount)
+		.where((ple.is_cancelled == 0)
+			   & (ple.against_voucher_type == against_voucher_type)
+			   & (ple.against_voucher_no == against_voucher))
+	)
 
-		if not against_voucher_amount:
-			frappe.throw(_("Against Journal Entry {0} is already adjusted against some other voucher")
-				.format(against_voucher))
-
-		bal = against_voucher_amount + bal
-		if against_voucher_amount < 0:
-			bal = -bal
-
-		# Validation : Outstanding can not be negative for JV
-		if bal < 0 and not on_cancel:
-			frappe.throw(_("Outstanding for {0} cannot be less than zero ({1})").format(against_voucher, fmt_money(bal)))
+	# get outstanding balance for invoice using gl and payment ledger
+	bal = flt((
+		qb.with_(invoice_query, "invoices")
+		.with_(payments_query, "payments")
+		.from_(AliasedQuery("invoices"))
+		.left_join(AliasedQuery("payments"))
+		.on((AliasedQuery("invoices").voucher_type == AliasedQuery("payments").voucher_type)
+			& (AliasedQuery("invoices").voucher_no == AliasedQuery("payments").voucher_no))
+		.select((Table("invoices").amount - IfNull(Table("payments").amount,0.0)))
+	).run()[0][0])
 
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
