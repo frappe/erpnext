@@ -354,6 +354,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
+		enable_discount_accounting(enable=0)
 
 	@change_settings("Buying Settings", {"enable_discount_accounting": 1})
 	def test_additional_discount_for_purchase_invoice_with_discount_accounting_enabled(self):
@@ -389,6 +390,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
+		enable_discount_accounting(enable=0)
 
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(test_records[1])
@@ -1528,6 +1530,12 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		company.enable_provisional_accounting_for_non_stock_items = 0
 		company.save()
+
+
+def enable_discount_accounting(enable=1):
+	buying_settings = frappe.get_doc("Buying Settings")
+	buying_settings.enable_discount_accounting = enable
+	buying_settings.save()
 
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
