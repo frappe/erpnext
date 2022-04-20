@@ -3173,12 +3173,6 @@ class TestSalesInvoice(unittest.TestCase):
 		)
 
 
-def enable_discount_accounting(enable=1):
-	selling_settings = frappe.get_doc("Selling Settings")
-	selling_settings.enable_discount_accounting = enable
-	selling_settings.save()
-
-
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
 	si.naming_series = "INV-2020-.#####"
