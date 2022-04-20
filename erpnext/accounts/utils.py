@@ -6,8 +6,10 @@ from json import loads
 
 import frappe
 import frappe.defaults
-from frappe import _, throw
+from frappe import _, qb, throw
 from frappe.model.meta import get_field_precision
+from frappe.query_builder import AliasedQuery, Criterion, Table
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, cstr, flt, formatdate, get_number_format_info, getdate, now, nowdate
 
 import erpnext
@@ -576,6 +578,12 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 
 		frappe.msgprint(_("Payment Entries {0} are un-linked").format("\n".join(linked_pe)))
 
+	from erpnext.accounts.doctype.payment_ledger_entry.payment_ledger_entry import (
+		unlink_invoice_from_payment,
+	)
+	if ref_type != 'Journal Entry':
+		unlink_invoice_from_payment(ref_type, ref_no)
+
 @frappe.whitelist()
 def get_company_default(company, fieldname, ignore_validation=False):
 	value = frappe.get_cached_value('Company',  company,  fieldname)
@@ -654,8 +662,11 @@ def get_held_invoices(party_type, party):
 
 	return held_invoices
 
+def get_outstanding_invoices(party_type, party, account, condition=None, filters=None, filter_criterion=None):
 
-def get_outstanding_invoices(party_type, party, account, condition=None, filters=None):
+	gle = qb.DocType('GL Entry')
+	ple = qb.DocType('Payment Ledger Entry')
+
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
@@ -667,82 +678,69 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 		party_account_type = erpnext.get_party_account_type(party_type)
 
 	if party_account_type == 'Receivable':
-		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
-		payment_dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
+		dr_or_cr = gle.debit_in_account_currency - gle.credit_in_account_currency
+		payment_dr_or_cr = gle.credit_in_account_currency - gle.debit_in_account_currency
 	else:
-		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
-		payment_dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
+		dr_or_cr = gle.credit_in_account_currency - gle.debit_in_account_currency
+		payment_dr_or_cr = gle.debit_in_account_currency - gle.credit_in_account_currency
+
+	if filter_criterion is None:
+		filter_criterion = []
 
 	held_invoices = get_held_invoices(party_type, party)
 
-	invoice_list = frappe.db.sql("""
-		select
-			voucher_no, voucher_type, posting_date, due_date,
-			ifnull(sum({dr_or_cr}), 0) as invoice_amount,
-			account_currency as currency
-		from
-			`tabGL Entry`
-		where
-			party_type = %(party_type)s and party = %(party)s
-			and account = %(account)s and {dr_or_cr} > 0
-			and is_cancelled=0
-			{condition}
-			and ((voucher_type = 'Journal Entry'
-					and (against_voucher = '' or against_voucher is null))
-				or (voucher_type not in ('Journal Entry', 'Payment Entry')))
-		group by voucher_type, voucher_no
-		order by posting_date, name""".format(
-			dr_or_cr=dr_or_cr,
-			condition=condition or ""
-		), {
-			"party_type": party_type,
-			"party": party,
-			"account": account,
-		}, as_dict=True)
-
-	payment_entries = frappe.db.sql("""
-		select against_voucher_type, against_voucher,
-			ifnull(sum({payment_dr_or_cr}), 0) as payment_amount
-		from `tabGL Entry`
-		where party_type = %(party_type)s and party = %(party)s
-			and account = %(account)s
-			and {payment_dr_or_cr} > 0
-			and against_voucher is not null and against_voucher != ''
-			and is_cancelled=0
-		group by against_voucher_type, against_voucher
-	""".format(payment_dr_or_cr=payment_dr_or_cr), {
-		"party_type": party_type,
-		"party": party,
-		"account": account
-	}, as_dict=True)
-
-	pe_map = frappe._dict()
-	for d in payment_entries:
-		pe_map.setdefault((d.against_voucher_type, d.against_voucher), d.payment_amount)
-
-	for d in invoice_list:
-		payment_amount = pe_map.get((d.voucher_type, d.voucher_no), 0)
-		outstanding_amount = flt(d.invoice_amount - payment_amount, precision)
-		if outstanding_amount > 0.5 / (10**precision):
-			if (filters and filters.get("outstanding_amt_greater_than") and
-				not (outstanding_amount >= filters.get("outstanding_amt_greater_than") and
-				outstanding_amount <= filters.get("outstanding_amt_less_than"))):
-				continue
-
-			if not d.voucher_type == "Purchase Invoice" or d.voucher_no not in held_invoices:
-				outstanding_invoices.append(
-					frappe._dict({
-						'voucher_no': d.voucher_no,
-						'voucher_type': d.voucher_type,
-						'posting_date': d.posting_date,
-						'invoice_amount': flt(d.invoice_amount),
-						'payment_amount': payment_amount,
-						'outstanding_amount': outstanding_amount,
-						'due_date': d.due_date,
-						'currency': d.currency
-					})
+	invoices_query = (
+		qb.from_(gle)
+		.select(gle.voucher_no,
+				gle.voucher_type,
+				gle.posting_date,
+				gle.due_date,
+				IfNull(Sum(dr_or_cr),0).as_('invoice_amount'),
+				gle.account_currency.as_('currency')
 				)
+		.where((gle.party_type == party_type)
+			   & (gle.party == party)
+			   & (gle.account == account)
+			   & (dr_or_cr > 0)
+			   & (gle.is_cancelled == 0)
+		)
+		.where(Criterion.all(filter_criterion))
+		.groupby(gle.voucher_type, gle.voucher_no)
+		.orderby(gle.posting_date, gle.name)
+	)
 
+	payments_query = (
+		qb.from_(ple)
+		.select(ple.against_voucher_type,
+				ple.against_voucher_no,
+				Sum(ple.amount).as_('payment_amount'),
+				)
+		.where(
+			ple.is_cancelled == 0
+		)
+		.groupby(ple.against_voucher_no)
+	)
+
+	outstanding_query = (
+		qb.with_(invoices_query, "invoices")
+		.with_(payments_query, "payments")
+		.from_(AliasedQuery("invoices"))
+		.left_join(AliasedQuery("payments"))
+		.on((AliasedQuery("invoices").voucher_type == AliasedQuery("payments").against_voucher_type)
+			& (AliasedQuery("invoices").voucher_no == AliasedQuery("payments").against_voucher_no))
+		.select(Table("invoices").voucher_type,
+				Table("invoices").voucher_no,
+				Table("invoices").posting_date,
+				Table("invoices").invoice_amount,
+				Table("invoices").currency,
+				Table("invoices").due_date,
+				Table("payments").payment_amount,
+				(Table("invoices").invoice_amount - IfNull(Table("payments").payment_amount,0)).as_('outstanding_amount'))
+		.having(
+			qb.Field("outstanding_amount") > 0
+		)
+	)
+	outstanding_invoices = outstanding_query.run(as_dict=True)
 	outstanding_invoices = sorted(outstanding_invoices, key=lambda k: k['due_date'] or getdate(nowdate()))
 	return outstanding_invoices
 
