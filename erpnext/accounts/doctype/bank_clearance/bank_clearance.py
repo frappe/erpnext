@@ -107,7 +107,7 @@ class BankClearance(Document):
 		loan_repayments = (
 			frappe.qb.from_(loan_repayment)
 			.select(
-				ConstantColumn("Loan Repayment").as_("doctype"),
+				ConstantColumn("Loan Repayment").as_("payment_document"),
 				loan_repayment.name.as_("payment_entry"),
 				loan_repayment.amount_paid.as_("debit"),
 				ConstantColumn(0).as_("credit"),
@@ -185,6 +185,7 @@ class BankClearance(Document):
 
 			formatted_amount = fmt_money(abs(amount), 2, d.account_currency)
 			d.amount = formatted_amount + " " + (_("Dr") if amount > 0 else _("Cr"))
+			d.posting_date = getdate(d.posting_date)
 
 			d.pop("credit")
 			d.pop("debit")
