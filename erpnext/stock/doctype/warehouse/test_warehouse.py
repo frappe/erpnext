@@ -32,6 +32,15 @@ class TestWarehouse(unittest.TestCase):
 			self.assertEqual(p_warehouse.name, child_warehouse.parent_warehouse)
 			self.assertEqual(child_warehouse.is_group, 0)
 
+	def test_naming(self):
+		company = "Wind Power LLC"
+		warehouse_name = "Named Warehouse - WP"
+		wh = frappe.get_doc(doctype="Warehouse", warehouse_name=warehouse_name, company=company).insert()
+		self.assertEqual(wh.name, warehouse_name)
+
+		warehouse_name = "Unnamed Warehouse"
+		wh = frappe.get_doc(doctype="Warehouse", warehouse_name=warehouse_name, company=company).insert()
+		self.assertIn(warehouse_name, wh.name)
 
 def create_warehouse(warehouse_name, properties=None, company=None):
 	if not company:
