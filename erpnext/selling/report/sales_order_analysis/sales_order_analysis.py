@@ -77,7 +77,15 @@ def get_data(conditions, filters):
 			`tabSales Order` so,
 			`tabSales Order Item` soi
 		LEFT JOIN `tabSales Invoice Item` sii
+<<<<<<< HEAD
 			ON sii.so_detail = soi.name and sii.docstatus = 1
+=======
+			ON sii.so_detail = soi.name and sii.docstatus = 1)
+		LEFT JOIN `tabDelivery Note Item` dni
+			on dni.so_detail = soi.name
+		LEFT JOIN `tabDelivery Note` dn
+			on dni.parent = dn.name and dn.docstatus = 1
+>>>>>>> e28e6726f1 (fix: SO analysis rpt will fetch SO's without Delivery note as well)
 		WHERE
 			soi.parent = so.name
 			and so.status not in ('Stopped', 'Closed', 'On Hold')

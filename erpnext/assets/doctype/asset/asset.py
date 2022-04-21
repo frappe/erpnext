@@ -628,7 +628,7 @@ class Asset(AccountsController):
 
 				asset_value_after_full_schedule = flt(
 					flt(self.gross_purchase_amount) - flt(accumulated_depreciation_after_full_schedule),
-					self.precision("gross_purchase_amount"),
+					row.precision("expected_value_after_useful_life"),
 				)
 
 				if (
