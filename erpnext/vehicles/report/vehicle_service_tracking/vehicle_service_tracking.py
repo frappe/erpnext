@@ -59,7 +59,10 @@ class VehicleServiceTrackingReport(object):
 			d.delivered = 1 if d.vehicle_delivered_date else 0
 			d.billed = 1 if d.billing_status in ["Partially Billed", "Fully Billed"] else 0
 
+			d.vehicle_received_date_fmt = formatdate(d.vehicle_received_dt, date_format)
+			d.vehicle_received_time_fmt = format_time(d.vehicle_received_dt, time_format)
 			d.vehicle_received_dt_fmt = format_datetime(d.vehicle_received_dt, datetime_format)
+
 			d.vehicle_delivered_dt_fmt = format_datetime(d.vehicle_delivered_dt, datetime_format)
 
 			d.ready_to_close_date_fmt = formatdate(d.ready_to_close_dt, date_format)

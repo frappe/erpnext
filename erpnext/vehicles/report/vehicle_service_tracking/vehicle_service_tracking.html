@@ -17,7 +17,7 @@
 }
 </style>
 
-<h2 class="text-center">{%= __("Vehicle Service Tracking") %}</h2>
+<h2 class="text-center">{%= __("Vehicle Tracking Sheet") %}</h2>
 
 <h5 class="text-center">
 	{% if (filters.from_date == filters.to_date) { %}
@@ -44,8 +44,8 @@
 			<th class="text-center">{%= __("Customer") %}</th>
 			{% endif %}
 
+			<th class="text-center">{%= __("Received") %}<br>{%= __("Date/Time") %}</th>
 			<th class="text-center">{%= __("Promised") %}<br>{%= __("Date/Time") %}</th>
-
 			<th class="text-center">{%= __("Ready") %}<br>{%= __("Date/Time") %}</th>
 
 			<th class="text-center">{%= __("Bill Amount") %}</th>
@@ -81,6 +81,11 @@
 					<div>{%= [data[i].contact_mobile, data[i].contact_mobile_2].filter(d=>d).join(" / ") %}</div>
 				</td>
 				{% endif %}
+
+				<td class="text-center">
+					<div>{%= data[i].vehicle_received_date_fmt %}</div>
+					<div>{%= data[i].vehicle_received_time_fmt %}</div>
+				</td>
 
 				<td class="text-center">
 					<div>{%= data[i].expected_delivery_date_fmt %}</div>
