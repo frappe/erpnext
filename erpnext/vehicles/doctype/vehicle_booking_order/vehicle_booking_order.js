@@ -154,7 +154,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				}
 
 				// PDI Buttons
-				if (this.frm.doc.vehicle_status != "Not Received" && !['In Process', 'Done'].includes(this.frm.doc.pdi_status)) {
+				if (this.frm.doc.delivery_status != "Not Received" && !['In Process', 'Done'].includes(this.frm.doc.pdi_status)) {
 					if (frappe.model.can_create("Project")) {
 						this.frm.add_custom_button(__('Create PDI Repair Order'), () => this.make_next_document('Project'),
 							__("Service"));

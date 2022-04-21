@@ -1164,7 +1164,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-04-20 16:00:52.338284",
+ "modified": "2022-04-21 13:34:39.598450",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",
@@ -1229,6 +1229,11 @@
    "permlevel": 1,
    "read": 1,
    "role": "Accounts User"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Vehicle Manager"
   },
   {
    "permlevel": 2,
