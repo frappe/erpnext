@@ -188,6 +188,14 @@ class SalesForUser(Document):
 
 			conta += 1
 
+		payment_entry = 0
+
+		if self.user != None:
+			entries = frappe.get_all("Payment Entry", ["paid_amount"], filters = {"user": self.user})
+
+			for entry in entries:
+				payment_entry += entry.paid_amount
+		
 		self.total_cash = cash
 		self.actual_cash = change_amount
 		self.total_cards = cards
@@ -199,6 +207,7 @@ class SalesForUser(Document):
 
 		self.total_invoice = operations
 		self.total_operations = operations
+		self.payment_entry = payment_entry
 
 	def return_filters(self):
 		conditions = ''
