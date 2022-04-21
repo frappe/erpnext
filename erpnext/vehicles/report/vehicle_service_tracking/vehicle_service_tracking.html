@@ -3,6 +3,10 @@
 	.print-format {
 		padding: 8mm;
 	}
+	.table td, .table th {
+		padding-top: 3px !important;
+		padding-bottom: 3px !important;
+	}
 }
 
 .print-format {
@@ -25,7 +29,7 @@
 	{% } %}
 </h5>
 
-<table class="table table-bordered">
+<table class="table table-bordered" style="margin-bottom: 2px;">
 	<thead>
 		<tr>
 			<th class="text-center">#</th>
@@ -100,4 +104,4 @@
 	</tbody>
 </table>
 
-<p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
+<p class="text-right text-muted" style="margin: 0;">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
