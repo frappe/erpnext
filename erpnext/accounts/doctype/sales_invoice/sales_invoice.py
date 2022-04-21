@@ -199,6 +199,7 @@ class SalesInvoice(SellingController):
 	def calculate_insurance(self):
 		self.total_insurance_deduction = self.excesses + self.deductible + self.ineligible_expenses + self.co_pay20
 		self.deduction_grand_total = self.grand_total - self.total_insurance_deduction
+		self.db_set('deduction_grand_total', self.deduction_grand_total, update_modified=False)
 
 	def validate(self):
 		super(SalesInvoice, self).validate()
@@ -492,6 +493,11 @@ class SalesInvoice(SellingController):
 
 			if pos.round_off_discount == 1:
 				self.db_set('rounded_total', self.grand_total, update_modified=False)
+
+				if self.grand_total == self.paid_amount:
+					self.db_set('outstanding_amount', 0, update_modified=False)
+		
+		self.calculate_insurance()
 
 	# def validate_camps(self):
 	# 	if not self.type_document:
