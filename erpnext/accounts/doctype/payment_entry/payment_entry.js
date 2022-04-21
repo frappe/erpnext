@@ -896,17 +896,17 @@ frappe.ui.form.on('Payment Entry', {
 
 	set_difference_amount: function(frm) {
 		var difference_amount = 0;
-		var base_unallocated_amount = flt(frm.doc.unallocated_amount) *
+		var base_unallocated_amount = flt(frm.doc.unallocated_amount, precision("unallocated_amount")) *
 			(frm.doc.payment_type=="Receive" ? frm.doc.source_exchange_rate : frm.doc.target_exchange_rate);
 
-		var base_party_amount = flt(frm.doc.base_total_allocated_amount) + base_unallocated_amount;
+		var base_party_amount = flt(frm.doc.base_total_allocated_amount, precision("base_total_allocated_amount")) + base_unallocated_amount;
 
 		if(frm.doc.payment_type == "Receive") {
-			difference_amount = base_party_amount - flt(frm.doc.base_received_amount);
+			difference_amount = base_party_amount - flt(frm.doc.base_received_amount, precision("base_received_amount"));
 		} else if (frm.doc.payment_type == "Pay") {
-			difference_amount = flt(frm.doc.base_paid_amount) - base_party_amount;
+			difference_amount = flt(frm.doc.base_paid_amount, precision("base_paid_amount")) - base_party_amount;
 		} else {
-			difference_amount = flt(frm.doc.base_paid_amount) - flt(frm.doc.base_received_amount);
+			difference_amount = flt(frm.doc.base_paid_amount, precision("base_paid_amount")) - flt(frm.doc.base_received_amount, precision("base_received_amount"));
 		}
 
 		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
