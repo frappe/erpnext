@@ -476,7 +476,6 @@ class SalesInvoice(SellingController):
 			self.outstanding_amount = self.grand_total - self.total_advance
 		
 		self.rounded_total = self.grand_total
-		self.in_words = money_in_words(self.grand_total)
 
 		# if self.status == 'Draft' or self.docstatus == 1:
 		self.db_set('grand_total', grand_total, update_modified=False)
@@ -495,8 +494,10 @@ class SalesInvoice(SellingController):
 				self.db_set('rounded_total', self.grand_total, update_modified=False)
 
 				if self.grand_total == self.paid_amount:
-					self.db_set('outstanding_amount', 0, update_modified=False)
-		
+					self.db_set('outstanding_amount', 0, update_modified=False)		
+
+		self.in_words = money_in_words(self.grand_total)
+		self.db_set('in_words', self.in_words, update_modified=False)		
 		self.calculate_insurance()
 
 	# def validate_camps(self):
