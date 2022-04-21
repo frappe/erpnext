@@ -28,6 +28,8 @@ class TestECommerceSettings(unittest.TestCase):
 		"Check if Item fields are blocked in E Commerce Settings filter fields."
 		from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 
+		setup_e_commerce_settings({"enable_field_filters": 1})
+
 		create_custom_field(
 			"Item",
 			dict(owner="Administrator", fieldname="test_data", label="Test", fieldtype="Data"),
