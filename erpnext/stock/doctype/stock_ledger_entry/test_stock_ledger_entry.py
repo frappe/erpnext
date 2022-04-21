@@ -2,11 +2,6 @@
 # See license.txt
 
 import json
-<<<<<<< HEAD
-=======
-from datetime import timedelta
-from uuid import uuid4
->>>>>>> a2af2daca7 (test: dependent GL entry reposting)
 
 import frappe
 from frappe.core.page.permission_manager.permission_manager import reset

@@ -3,10 +3,7 @@
 
 import copy
 import json
-<<<<<<< HEAD
-=======
-from typing import Optional, Set, Tuple
->>>>>>> ecdb49314f (fix: dependent GLE reposting)
+from typing import Set, Tuple
 
 import frappe
 from frappe import _
@@ -261,24 +258,10 @@ def repost_future_sle(
 		)
 
 
-<<<<<<< HEAD
-def update_args_in_repost_item_valuation(doc, index, args, distinct_item_warehouses):
-	frappe.db.set_value(
-		doc.doctype,
-		doc.name,
-=======
-def validate_item_warehouse(args):
-	for field in ["item_code", "warehouse", "posting_date", "posting_time"]:
-		if not args.get(field):
-			validation_msg = f"The field {frappe.unscrub(args.get(field))} is required for the reposting"
-			frappe.throw(_(validation_msg))
-
-
 def update_args_in_repost_item_valuation(
 	doc, index, args, distinct_item_warehouses, affected_transactions
 ):
 	doc.db_set(
->>>>>>> ecdb49314f (fix: dependent GLE reposting)
 		{
 			"items_to_be_repost": json.dumps(args, default=str),
 			"distinct_item_and_warehouse": json.dumps(

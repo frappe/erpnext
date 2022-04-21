@@ -4,11 +4,8 @@
 
 import frappe
 from frappe.model.document import Document
-<<<<<<< HEAD
-=======
-from frappe.query_builder import Case, Order
-from frappe.query_builder.functions import Coalesce, CombineDatetime, Sum
->>>>>>> b24920c0e9 (fix: correct sorting while updating bin)
+from frappe.query_builder import Order
+from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import flt
 
 
