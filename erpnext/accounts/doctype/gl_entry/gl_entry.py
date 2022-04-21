@@ -366,7 +366,7 @@ def update_outstanding_amt(
 				(AliasedQuery("invoices").voucher_type == AliasedQuery("payments").voucher_type)
 				& (AliasedQuery("invoices").voucher_no == AliasedQuery("payments").voucher_no)
 			)
-			.select((Table("invoices").amount - IfNull(Table("payments").amount, 0.0)))
+			.select((Table("invoices").amount - IfNull(Sum(Table("payments").amount), 0.0)))
 		).run()[0][0]
 	)
 
