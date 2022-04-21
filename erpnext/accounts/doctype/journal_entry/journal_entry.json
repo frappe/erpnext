@@ -13,6 +13,7 @@
   "is_transaction",
   "bank_transaction",
   "customer_document",
+  "inventory_download",
   "column_break1",
   "posting_date",
   "company",
@@ -513,12 +514,18 @@
    "fieldtype": "Link",
    "label": "Customer Document",
    "options": "Customer Documents"
+  },
+  {
+   "fieldname": "inventory_download",
+   "fieldtype": "Link",
+   "label": "Inventory Download",
+   "options": "Inventory Download"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
- "modified": "2022-03-14 15:19:43.077772",
+ "modified": "2022-04-21 13:53:35.316579",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
