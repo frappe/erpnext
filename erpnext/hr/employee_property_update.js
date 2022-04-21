@@ -9,6 +9,16 @@ frappe.ui.form.on(cur_frm.doctype, {
 		});
 	},
 
+	onload: function(frm){
+		if (frm.doc.__islocal) {
+			if (frm.doctype == "Employee Promotion") {
+				frm.clear_table("promotion_details");
+			} else if (frm.doctype == "Employee Transfer") {
+				frm.clear_table("transfer_details");
+			}
+		}
+	},
+
 	refresh: function(frm) {
 		let table;
 		if (frm.doctype == "Employee Promotion") {
@@ -32,7 +42,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 			}
 
 			const allowed_fields = [];
-			const exclude_fields = ["naming_series", "employee", "first_name", "middle_name", "last_name",
+			const exclude_fields = ["naming_series", "employee", "first_name", "middle_name", "last_name", "marital_status",
 				"employee_name", "status", "image", "gender", "date_of_birth", "date_of_joining", "lft", "rgt", "old_parent"];
 
 			const exclude_field_types = ["HTML", "Section Break", "Column Break", "Button", "Read Only", "Tab Break", "Table"];
@@ -60,16 +70,14 @@ var show_dialog = function(frm, table, field_labels) {
 		title: "Update Property",
 		fields: [
 			{fieldname: "property", label: __("Select Property"), fieldtype: "Autocomplete", options: field_labels},
-			{fieldname: "current", fieldtype: "Data", label:__("Current"), read_only: true},
-			{fieldname: "field_html", fieldtype: "HTML"}
+			{fieldname: "current", fieldtype: "Data", label: __("Current"), read_only: true},
+			{fieldname: "new_value", fieldtype: "Data", label: __("New")}
 		],
 		primary_action_label: __("Add to Details"),
 		primary_action: () => {
 			d.get_primary_btn().attr("disabled", true);
 			if (d.data) {
-				var input = $('[data-fieldname="field_html"] input');
-				d.data.new = input.val();
-				$(input).remove();
+				d.data.new = d.get_values().new_value;
 				add_to_details(frm, d, table);
 			}
 		}
@@ -86,7 +94,7 @@ var show_dialog = function(frm, table, field_labels) {
 				if(r.message){
 					d.data.current = r.message.value;
 					d.data.property = r.message.label;
-					d.fields_dict.field_html.$wrapper.html("");
+
 					d.set_value('current', r.message.value);
 					render_dynamic_field(d, r.message.datatype, r.message.options, property);
 					d.get_primary_btn().attr('disabled', false);
@@ -105,18 +113,19 @@ var render_dynamic_field = function(d, fieldtype, options, fieldname) {
 		df: {
 			"fieldtype": fieldtype,
 			"fieldname": fieldname,
-			"options": options || ''
+			"options": options || '',
+			"label": __("New")
 		},
-		parent: d.fields_dict.field_html.wrapper,
+		parent: d.fields_dict.new_value.wrapper,
 		only_input: false
 	});
 	dynamic_field.make_input();
-	$(dynamic_field.label_area).text(__("New"));
+	d.replace_field("new_value", dynamic_field.df);
 };
 
 var add_to_details = function(frm, d, table) {
 	let data = d.data;
-	if(data.fieldname){
+	if (data.fieldname) {
 		if(validate_duplicate(frm, table, data.fieldname)){
 			frappe.show_alert({message:__("Property already added"), indicator:'orange'});
 			return false;
@@ -136,12 +145,12 @@ var add_to_details = function(frm, d, table) {
 
 		frm.fields_dict[table].grid.wrapper.find(".grid-add-row").hide();
 
-		d.fields_dict.field_html.$wrapper.html("");
+		d.fields_dict.new_value.$wrapper.html("");
 		d.set_value("property", "");
-		d.set_value('current', "");
-		frappe.show_alert({message:__("Added to details"),indicator:'green'});
+		d.set_value("current", "");
+		frappe.show_alert({message:__("Added to details"), indicator:'green'});
 		d.data = {};
-	}else {
+	} else {
 		frappe.show_alert({message:__("Value missing"),indicator:'red'});
 	}
 };
