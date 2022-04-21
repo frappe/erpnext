@@ -54,6 +54,7 @@ def get_conditions(filters):
 
 
 def get_data(conditions, filters):
+	# nosemgrep
 	data = frappe.db.sql(
 		"""
 		SELECT
