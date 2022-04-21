@@ -374,13 +374,21 @@ class SellingController(StockController):
 					sl_entries.append(target_warehouse_sle)
 
 				if d.warehouse and ((not cint(self.is_return) and self.docstatus==2)
-					or (cint(self.is_return) and self.docstatus==1)):
+					or (cint(self.is_return) and self.docstatus==1) and self.return_type != 'Shop Return'):
 						sl_entries.append(self.get_sl_entries(d, {
 							"actual_qty": -1*flt(d.qty),
 							"incoming_rate": return_rate,
                             "valuation_rate":return_rate,
                             "stock_value_difference":-1*flt(d.qty*return_rate)
 						}))
+				elif (cint(self.is_return) and self.docstatus==1) and self.return_type == 'Shop Return':
+					sl_entries.append(self.get_sl_entries(d, {
+						"actual_qty": flt(d.qty),
+						"incoming_rate": return_rate,
+						"valuation_rate":return_rate,
+						"stock_value_difference": flt(d.qty*return_rate)
+					}))
+
 		self.make_sl_entries(sl_entries)
 
 	def set_po_nos(self, for_validate=False):

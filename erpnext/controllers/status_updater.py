@@ -148,10 +148,13 @@ class StatusUpdater(Document):
 			for d in self.get_all_children():
 				if hasattr(d, 'qty') and d.qty < 0 and not self.get('is_return'):
 					frappe.throw(_("For an item {0}, quantity must be positive number").format(d.item_code))
-
-				if hasattr(d, 'qty') and d.qty > 0 and self.get('is_return'):
-					frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
-
+				
+				# Also ignore Shop returns
+				if self.doctype == "Delivery Note":
+					if hasattr(d, 'qty') and d.qty > 0 and self.get('is_return') and self.return_type !='Shop Return':
+						frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
+				elif hasattr(d, 'qty') and d.qty > 0 and self.get('is_return') and self.is_return != 1:
+						frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
 				if d.doctype == args['source_dt'] and d.get(args["join_field"]):
 					args['name'] = d.get(args['join_field'])
 

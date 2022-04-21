@@ -408,7 +408,7 @@ def get_returned_qty_map(delivery_note):
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
 	doc = frappe.get_doc('Delivery Note', source_name)
-
+	
 	to_make_invoice_qty_map = {}
 	returned_qty_map = get_returned_qty_map(source_name)
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
@@ -434,6 +434,9 @@ def make_sales_invoice(source_name, target_doc=None):
 			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
 
 	def update_item(source_doc, target_doc, source_parent):
+		is_return_dn = doc.as_dict()
+		if is_return_dn.return_type == 'Shop Return':
+			return {}
 		target_doc.qty = to_make_invoice_qty_map[source_doc.name]
 
 		if source_doc.serial_no and source_parent.per_billed > 0:
@@ -441,8 +444,12 @@ def make_sales_invoice(source_name, target_doc=None):
 				target_doc.qty, source_parent.name)
 
 	def get_pending_qty(item_row):
-		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0)
-
+		is_return_dn = doc.as_dict()
+		if is_return_dn.return_type == 'Shop Return':
+			pending_qty = 0
+			return pending_qty
+		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0)	
+		
 		returned_qty = 0
 		if returned_qty_map.get(item_row.name, 0) > 0:
 			returned_qty = flt(returned_qty_map.get(item_row.name, 0))
@@ -496,6 +503,12 @@ def make_sales_invoice(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 
+	if doc.is_return == 1:
+		for item in doc.items:
+			if(item.qty > 0):
+				item.qty = -1 * item.qty
+				item.amount = -1 * item.amount
+	
 	return doc
 
 @frappe.whitelist()
