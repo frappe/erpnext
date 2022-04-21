@@ -31,7 +31,8 @@
   "total_utility",
   "total_invoice",
   "total_operations",
-  "total_exempt_sales"
+  "total_exempt_sales",
+  "payment_entry"
  ],
  "fields": [
   {
@@ -199,9 +200,15 @@
   {
    "fieldname": "section4",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "payment_entry",
+   "fieldtype": "Currency",
+   "label": "Payment Entry",
+   "read_only": 1
   }
  ],
- "modified": "2022-04-08 09:38:22.750565",
+ "modified": "2022-04-20 10:52:51.290360",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales For User",
