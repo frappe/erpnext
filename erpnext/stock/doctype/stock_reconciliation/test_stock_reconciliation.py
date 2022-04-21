@@ -10,7 +10,7 @@ from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cstr, flt, nowdate, nowtime, random_string
 
 from erpnext.accounts.utils import get_stock_and_account_balance
-from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
@@ -31,6 +31,7 @@ class TestStockReconciliation(FrappeTestCase):
 
 	def tearDown(self):
 		frappe.flags.dont_execute_stock_reposts = None
+		frappe.local.future_sle = {}
 
 	def test_reco_for_fifo(self):
 		self._test_reco_sle_gle("FIFO")
@@ -311,9 +312,8 @@ class TestStockReconciliation(FrappeTestCase):
 		SR4		| Reco	|	0	|	6	(posting date: today-1) [backdated]
 		PR3		| PR	|	1	|	7	(posting date: today) # can't post future PR
 		"""
-		item_code = "Backdated-Reco-Item"
+		item_code = make_item().name
 		warehouse = "_Test Warehouse - _TC"
-		create_item(item_code)
 
 		pr1 = make_purchase_receipt(
 			item_code=item_code, warehouse=warehouse, qty=10, rate=100, posting_date=add_days(nowdate(), -3)
@@ -395,9 +395,8 @@ class TestStockReconciliation(FrappeTestCase):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.stock_ledger import NegativeStockError
 
-		item_code = "Backdated-Reco-Item"
+		item_code = make_item().name
 		warehouse = "_Test Warehouse - _TC"
-		create_item(item_code)
 
 		pr1 = make_purchase_receipt(
 			item_code=item_code, warehouse=warehouse, qty=10, rate=100, posting_date=add_days(nowdate(), -2)
@@ -444,9 +443,8 @@ class TestStockReconciliation(FrappeTestCase):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.stock_ledger import NegativeStockError
 
-		item_code = "Backdated-Reco-Cancellation-Item"
+		item_code = make_item().name
 		warehouse = "_Test Warehouse - _TC"
-		create_item(item_code)
 
 		sr = create_stock_reconciliation(
 			item_code=item_code,
@@ -487,9 +485,8 @@ class TestStockReconciliation(FrappeTestCase):
 		frappe.flags.dont_execute_stock_reposts = True
 		frappe.db.rollback()
 
-		item_code = "Backdated-Reco-Cancellation-Item"
+		item_code = make_item().name
 		warehouse = "_Test Warehouse - _TC"
-		create_item(item_code)
 
 		sr = create_stock_reconciliation(
 			item_code=item_code, warehouse=warehouse, qty=10, rate=100, posting_date=add_days(nowdate(), 10)
