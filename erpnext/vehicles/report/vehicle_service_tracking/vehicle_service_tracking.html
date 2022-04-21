@@ -4,13 +4,13 @@
 		padding: 8mm;
 	}
 	.table td, .table th {
-		padding-top: 3px !important;
-		padding-bottom: 3px !important;
+		padding-top: 2px !important;
+		padding-bottom: 2px !important;
 	}
 }
 
 .print-format {
-	font-size: 8pt;
+	font-size: 7.5pt;
 }
 .print-format td, .print-format th {
 	vertical-align: middle !important;
@@ -19,17 +19,21 @@
 
 <h2 class="text-center">{%= __("Vehicle Tracking Sheet") %}</h2>
 
-<h5 class="text-center">
-	{% if (filters.from_date == filters.to_date) { %}
-		{%= frappe.datetime.str_to_user(filters.from_date) %}
-	{% } else { %}
-		{%= frappe.datetime.str_to_user(filters.from_date) %}
-		{%= __("to") %}
-		{%= frappe.datetime.str_to_user(filters.to_date) %}
-	{% } %}
-</h5>
+<div class="clearfix">
+	<div class="pull-left">
+		<b>Report Date:</b>
+		{% if (filters.from_date == filters.to_date) { %}
+			{%= frappe.datetime.str_to_user(filters.from_date) %}
+		{% } else { %}
+			{%= frappe.datetime.str_to_user(filters.from_date) %}
+			{%= __("to") %}
+			{%= frappe.datetime.str_to_user(filters.to_date) %}
+		{% } %}
+	</div>
+	<div class="pull-right"><b>Print Date/Time:</b> {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</div>
+</div>
 
-<table class="table table-bordered" style="margin-bottom: 2px;">
+<table class="table table-bordered" style="margin-bottom: 2px; margin-top: 5px;">
 	<thead>
 		<tr>
 			<th class="text-center">#</th>
@@ -39,6 +43,8 @@
 			<th class="text-center">{%= __("Reg No") %}</th>
 
 			<th class="text-center">{%= __("Model/Variant") %}</th>
+
+			<th class="text-center">{%= __("Voice") %}</th>
 
 			{% if filters.show_customer_in_print %}
 			<th class="text-center">{%= __("Customer") %}</th>
@@ -54,7 +60,7 @@
 			<th class="text-center">{%= __("B") %}</th>
 			<th class="text-center">{%= __("D") %}</th>
 
-			<th class="text-center" style="width: 15%;">Remarks</th>
+			<th class="text-center" style="width: 10%;">Remarks</th>
 		</tr>
 	</thead>
 
@@ -68,11 +74,15 @@
 					<div>{%= data[i].service_advisor %}</div>
 				</td>
 
-				<td class="text-center">{%= data[i].vehicle_license_plate || data[i].vehicle_chassis_no %}</td>
+				<td class="text-center">{%= data[i].vehicle_license_plate %}</td>
 
 				<td>
 					<div>{%= data[i].applies_to_variant_of_name %}</div>
 					<div>{%= data[i].applies_to_item %}</div>
+				</td>
+
+				<td>
+					<div>{%= data[i].project_name %}</div>
 				</td>
 
 				{% if filters.show_customer_in_print %}
@@ -99,14 +109,12 @@
 
 				<td class="text-right">{%= format_currency(data[i].customer_billable_amount) %}</td>
 
-				<td class="text-center">{%= data[i].ready_to_close ? '<i class="fa fa-check"></i>' : '&nbsp;' %}</td>
-				<td class="text-center">{%= data[i].billed ? '<i class="fa fa-check"></i>' : '&nbsp;' %}</td>
-				<td class="text-center">{%= data[i].delivered ? '<i class="fa fa-check"></i>' : '&nbsp;' %}</td>
+				<td class="text-center">{%= data[i].ready_to_close ? 'R' : '&nbsp;' %}</td>
+				<td class="text-center">{%= data[i].billed ? 'B' : '&nbsp;' %}</td>
+				<td class="text-center">{%= data[i].delivered ? 'D' : '&nbsp;' %}</td>
 
 				<td>&nbsp;</td>
 			</tr>
 		{% } %}
 	</tbody>
 </table>
-
-<p class="text-right text-muted" style="margin: 0;">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
