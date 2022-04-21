@@ -1024,6 +1024,17 @@
    "type": "Link"
   },
   {
+    "dependencies": "Cost Center",
+    "hidden": 0,
+    "is_query_report": 0,
+    "label": "Cost Center Allocation",
+    "link_count": 0,
+    "link_to": "Cost Center Allocation",
+    "link_type": "DocType",
+    "onboard": 0,
+    "type": "Link"
+   },
+  {
    "dependencies": "Cost Center",
    "hidden": 0,
    "is_query_report": 1,

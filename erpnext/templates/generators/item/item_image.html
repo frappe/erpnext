@@ -1,29 +1,30 @@
-<div class="col-md-5 h-100 d-flex">
+{% set column_size = 5 if slides else 4 %}
+<div class="col-md-{{ column_size }} h-100 d-flex mb-4">
 	{% if slides %}
-	<div class="item-slideshow d-flex flex-column mr-3">
-		{% for item in slides %}
-		<img class="item-slideshow-image mb-2 {% if loop.first %}active{% endif %}"
-				src="{{ item.image }}" alt="{{ item.heading }}">
-		{% endfor %}
-	</div>
-	{{ product_image(slides[0].image, 'product-image') }}
-	<!-- Simple image slideshow -->
-	<script>
-		frappe.ready(() => {
-			$('.page_content').on('click', '.item-slideshow-image', (e) => {
-				const $img = $(e.currentTarget);
-				const link = $img.prop('src');
-				const $product_image = $('.product-image');
-				$product_image.find('a').prop('href', link);
-				$product_image.find('img').prop('src', link);
+		<div class="item-slideshow d-flex flex-column mr-3">
+			{% for item in slides %}
+			<img class="item-slideshow-image mb-2 {% if loop.first %}active{% endif %}"
+					src="{{ item.image }}" alt="{{ item.heading }}">
+			{% endfor %}
+		</div>
+		{{ product_image(slides[0].image, 'product-image') }}
+		<!-- Simple image slideshow -->
+		<script>
+			frappe.ready(() => {
+				$('.page_content').on('click', '.item-slideshow-image', (e) => {
+					const $img = $(e.currentTarget);
+					const link = $img.prop('src');
+					const $product_image = $('.product-image');
+					$product_image.find('a').prop('href', link);
+					$product_image.find('img').prop('src', link);
 
-				$('.item-slideshow-image').removeClass('active');
-				$img.addClass('active');
-			});
-		})
-	</script>
+					$('.item-slideshow-image').removeClass('active');
+					$img.addClass('active');
+				});
+			})
+		</script>
 	{% else %}
-	{{ product_image(website_image or image or 'no-image.jpg', alt=website_image_alt or item_name) }}
+		{{ product_image(doc.website_image or doc.image, alt=doc.website_image_alt or doc.item_name) }}
 	{% endif %}
 
 	<!-- Simple image preview -->

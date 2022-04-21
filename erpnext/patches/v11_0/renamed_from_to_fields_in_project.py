@@ -7,8 +7,8 @@ from frappe.model.utils.rename_field import rename_field
 
 
 def execute():
-    frappe.reload_doc('projects', 'doctype', 'project')
+	frappe.reload_doc("projects", "doctype", "project")
 
-    if frappe.db.has_column('Project', 'from'):
-        rename_field('Project', 'from', 'from_time')
-        rename_field('Project', 'to', 'to_time')
+	if frappe.db.has_column("Project", "from"):
+		rename_field("Project", "from", "from_time")
+		rename_field("Project", "to", "to_time")

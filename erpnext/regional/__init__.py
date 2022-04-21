@@ -13,6 +13,7 @@ def check_deletion_permission(doc, method):
 	if region in ["Nepal", "France"] and doc.docstatus != 0:
 		frappe.throw(_("Deletion is not permitted for country {0}").format(region))
 
+
 def create_transaction_log(doc, method):
 	"""
 	Appends the transaction to a chain of hashed logs for legal resons.
@@ -24,10 +25,11 @@ def create_transaction_log(doc, method):
 
 	data = str(doc.as_dict())
 
-	frappe.get_doc({
-		"doctype": "Transaction Log",
-		"reference_doctype": doc.doctype,
-		"document_name": doc.name,
-		"data": data
-	}).insert(ignore_permissions=True)
-
+	frappe.get_doc(
+		{
+			"doctype": "Transaction Log",
+			"reference_doctype": doc.doctype,
+			"document_name": doc.name,
+			"data": data,
+		}
+	).insert(ignore_permissions=True)

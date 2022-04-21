@@ -66,7 +66,9 @@
   "tax_withholding_category",
   "section_break_56",
   "taxes",
+  "section_break_60",
   "base_total_taxes_and_charges",
+  "column_break_61",
   "total_taxes_and_charges",
   "deductions_or_loss_section",
   "deductions",
@@ -715,12 +717,21 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Paid To Account Type"
+  },
+  {
+   "fieldname": "column_break_61",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_60",
+   "fieldtype": "Section Break",
+   "hide_border": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-24 18:58:24.919764",
+ "modified": "2022-02-23 20:08:39.559814",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
@@ -763,6 +774,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "title",
  "track_changes": 1
 }

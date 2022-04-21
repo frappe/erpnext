@@ -1,8 +1,10 @@
 [pre_model_sync]
 erpnext.patches.v12_0.update_is_cancelled_field
 erpnext.patches.v11_0.rename_production_order_to_work_order
+erpnext.patches.v13_0.add_bin_unique_constraint
 erpnext.patches.v11_0.refactor_naming_series
 erpnext.patches.v11_0.refactor_autoname_naming
+erpnext.patches.v14_0.change_is_subcontracted_fieldtype
 execute:frappe.reload_doc("accounts", "doctype", "POS Payment Method") #2020-05-28
 execute:frappe.reload_doc("HR", "doctype", "HR Settings") #2020-01-16 #2020-07-24
 erpnext.patches.v4_2.update_requested_and_ordered_qty #2021-03-31
@@ -203,6 +205,7 @@ execute:frappe.delete_doc_if_exists("DocType", "Bank Reconciliation")
 erpnext.patches.v13_0.move_doctype_reports_and_notification_from_hr_to_payroll #22-06-2020
 erpnext.patches.v13_0.move_payroll_setting_separately_from_hr_settings #22-06-2020
 erpnext.patches.v12_0.create_itc_reversal_custom_fields
+execute:frappe.reload_doc("regional", "doctype", "e_invoice_settings")
 erpnext.patches.v13_0.check_is_income_tax_component #22-06-2020
 erpnext.patches.v13_0.loyalty_points_entry_for_pos_invoice #22-07-2020
 erpnext.patches.v12_0.add_taxjar_integration_field
@@ -223,6 +226,7 @@ erpnext.patches.v13_0.set_youtube_video_id
 erpnext.patches.v13_0.set_app_name
 erpnext.patches.v13_0.print_uom_after_quantity_patch
 erpnext.patches.v13_0.set_payment_channel_in_payment_gateway_account
+erpnext.patches.v12_0.setup_einvoice_fields #2020-12-02
 erpnext.patches.v13_0.updates_for_multi_currency_payroll
 erpnext.patches.v13_0.update_reason_for_resignation_in_employee
 execute:frappe.delete_doc("Report", "Quoted Item Comparison")
@@ -242,6 +246,8 @@ erpnext.patches.v12_0.add_state_code_for_ladakh
 erpnext.patches.v13_0.item_reposting_for_incorrect_sl_and_gl
 erpnext.patches.v13_0.delete_old_bank_reconciliation_doctypes
 erpnext.patches.v13_0.update_vehicle_no_reqd_condition
+erpnext.patches.v12_0.add_einvoice_status_field #2021-03-17
+erpnext.patches.v12_0.add_einvoice_summary_report_permissions
 erpnext.patches.v13_0.setup_fields_for_80g_certificate_and_donation
 erpnext.patches.v13_0.rename_membership_settings_to_non_profit_settings
 erpnext.patches.v13_0.setup_gratuity_rule_for_india_and_uae
@@ -255,8 +261,7 @@ erpnext.patches.v12_0.add_document_type_field_for_italy_einvoicing
 erpnext.patches.v13_0.make_non_standard_user_type #13-04-2021 #17-01-2022
 erpnext.patches.v13_0.update_shipment_status
 erpnext.patches.v13_0.remove_attribute_field_from_item_variant_setting
-erpnext.patches.v13_0.germany_make_custom_fields
-erpnext.patches.v13_0.germany_fill_debtor_creditor_number
+erpnext.patches.v12_0.add_ewaybill_validity_field
 erpnext.patches.v13_0.set_pos_closing_as_failed
 erpnext.patches.v13_0.rename_stop_to_send_birthday_reminders
 execute:frappe.rename_doc("Workspace", "Loan Management", "Loans", force=True)
@@ -267,10 +272,10 @@ erpnext.patches.v13_0.bill_for_rejected_quantity_in_purchase_invoice
 erpnext.patches.v13_0.rename_issue_status_hold_to_on_hold
 erpnext.patches.v13_0.update_response_by_variance
 erpnext.patches.v13_0.update_job_card_details
-erpnext.patches.v13_0.update_level_in_bom #1234sswef
 erpnext.patches.v13_0.add_missing_fg_item_for_stock_entry
 erpnext.patches.v13_0.update_subscription_status_in_memberships
 erpnext.patches.v13_0.update_amt_in_work_order_required_items
+erpnext.patches.v12_0.show_einvoice_irn_cancelled_field
 erpnext.patches.v13_0.delete_orphaned_tables
 erpnext.patches.v13_0.update_export_type_for_gst #2021-08-16
 erpnext.patches.v13_0.update_tds_check_field #3
@@ -281,13 +286,15 @@ erpnext.patches.v13_0.remove_bad_selling_defaults
 erpnext.patches.v13_0.trim_whitespace_from_serial_nos  # 16-01-2022
 erpnext.patches.v13_0.migrate_stripe_api
 erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
-erpnext.patches.v13_0.einvoicing_deprecation_warning
 execute:frappe.reload_doc("erpnext_integrations", "doctype", "TaxJar Settings")
 execute:frappe.reload_doc("erpnext_integrations", "doctype", "Product Tax Category")
 erpnext.patches.v13_0.custom_fields_for_taxjar_integration          #08-11-2021
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
 erpnext.patches.v13_0.create_gst_payment_entry_fields #27-11-2021
 erpnext.patches.v13_0.fix_invoice_statuses
+erpnext.patches.v13_0.create_website_items #30-09-2021
+erpnext.patches.v13_0.populate_e_commerce_settings
+erpnext.patches.v13_0.make_homepage_products_website_items
 erpnext.patches.v13_0.replace_supplier_item_group_with_party_specific_item
 erpnext.patches.v13_0.update_dates_in_tax_withholding_category
 erpnext.patches.v14_0.update_opportunity_currency_fields
@@ -309,6 +316,7 @@ erpnext.patches.v13_0.item_naming_series_not_mandatory
 erpnext.patches.v14_0.delete_healthcare_doctypes
 erpnext.patches.v13_0.update_category_in_ltds_certificate
 erpnext.patches.v13_0.create_pan_field_for_india #2
+erpnext.patches.v13_0.fetch_thumbnail_in_website_items
 erpnext.patches.v13_0.update_maintenance_schedule_field_in_visit
 erpnext.patches.v13_0.create_ksa_vat_custom_fields # 07-01-2022
 erpnext.patches.v14_0.migrate_crm_settings
@@ -320,18 +328,39 @@ execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings'
 erpnext.patches.v14_0.set_payroll_cost_centers
 erpnext.patches.v13_0.agriculture_deprecation_warning
 erpnext.patches.v13_0.hospitality_deprecation_warning
-erpnext.patches.v13_0.update_exchange_rate_settings
 erpnext.patches.v13_0.update_asset_quantity_field
 erpnext.patches.v13_0.delete_bank_reconciliation_detail
+erpnext.patches.v13_0.enable_provisional_accounting
+erpnext.patches.v13_0.non_profit_deprecation_warning
+erpnext.patches.v13_0.enable_ksa_vat_docs #1
 
 [post_model_sync]
 erpnext.patches.v14_0.rename_ongoing_status_in_sla_documents
 erpnext.patches.v14_0.add_default_exit_questionnaire_notification_template
-erpnext.patches.v14_0.delete_einvoicing_doctypes
 erpnext.patches.v14_0.delete_shopify_doctypes
 erpnext.patches.v14_0.delete_hub_doctypes
 erpnext.patches.v14_0.delete_hospitality_doctypes # 20-01-2022
 erpnext.patches.v14_0.delete_agriculture_doctypes
+erpnext.patches.v14_0.delete_datev_doctypes
 erpnext.patches.v14_0.rearrange_company_fields
 erpnext.patches.v14_0.update_leave_notification_template
+erpnext.patches.v14_0.restore_einvoice_fields
 erpnext.patches.v13_0.update_sane_transfer_against
+erpnext.patches.v12_0.add_company_link_to_einvoice_settings
+erpnext.patches.v14_0.migrate_cost_center_allocations
+erpnext.patches.v13_0.convert_to_website_item_in_item_card_group_template
+erpnext.patches.v13_0.shopping_cart_to_ecommerce
+erpnext.patches.v13_0.update_disbursement_account
+erpnext.patches.v13_0.update_reserved_qty_closed_wo
+erpnext.patches.v13_0.update_exchange_rate_settings
+erpnext.patches.v14_0.delete_amazon_mws_doctype
+erpnext.patches.v13_0.set_work_order_qty_in_so_from_mr
+erpnext.patches.v13_0.update_accounts_in_loan_docs
+erpnext.patches.v14_0.update_batch_valuation_flag
+erpnext.patches.v14_0.delete_non_profit_doctypes
+erpnext.patches.v14_0.update_employee_advance_status
+erpnext.patches.v13_0.add_cost_center_in_loans
+erpnext.patches.v13_0.set_return_against_in_pos_invoice_references
+erpnext.patches.v13_0.remove_unknown_links_to_prod_plan_items # 24-03-2022
+erpnext.patches.v13_0.update_expense_claim_status_for_paid_advances
+erpnext.patches.v13_0.create_gst_custom_fields_in_quotation
