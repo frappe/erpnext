@@ -934,6 +934,7 @@ def get_service_items(project, customer, company, get_sales_invoice=True):
 				and (p.project = %s or i.project = %s)
 			order by p.posting_date, p.creation, i.idx
 		""", [project, project], as_dict=1)
+	set_is_claim_item(sinv_data, customer)
 
 	service_data = get_items_data_template()
 	labour_data = get_items_data_template()
@@ -1054,19 +1055,19 @@ def post_process_items_data(data):
 	for i, d in enumerate(data['items']):
 		d.idx = i + 1
 
-		data.total_qty += d.qty
+		data.total_qty += flt(d.qty)
 
-		data.net_total += d.net_amount
-		data.customer_net_total += d.customer_net_amount
+		data.net_total += flt(d.net_amount)
+		data.customer_net_total += flt(d.customer_net_amount)
 
-		data.sales_tax_total += d.sales_tax_amount
-		data.customer_sales_tax_total += d.customer_sales_tax_amount
+		data.sales_tax_total += flt(d.sales_tax_amount)
+		data.customer_sales_tax_total += flt(d.customer_sales_tax_amount)
 
-		data.service_tax_total += d.service_tax_amount
-		data.customer_service_tax_total += d.customer_service_tax_amount
+		data.service_tax_total += flt(d.service_tax_amount)
+		data.customer_service_tax_total += flt(d.customer_service_tax_amount)
 
-		data.other_taxes_and_charges += d.other_taxes_and_charges
-		data.customer_other_taxes_and_charges += d.customer_other_taxes_and_charges
+		data.other_taxes_and_charges += flt(d.other_taxes_and_charges)
+		data.customer_other_taxes_and_charges += flt(d.customer_other_taxes_and_charges)
 
 		for tax_account, tax_amount in d.taxes.items():
 			data.taxes.setdefault(tax_account, 0)
