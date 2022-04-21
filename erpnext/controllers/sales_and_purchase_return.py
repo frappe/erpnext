@@ -343,7 +343,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			# look for Print Heading "Debit Note"
 			doc.select_print_heading = frappe.db.get_value("Print Heading", _("Debit Note"))
 
-		for tax in doc.get("taxes"):
+		for tax in doc.get("taxes") or []:
 			if tax.charge_type == "Actual":
 				tax.tax_amount = -1 * tax.tax_amount
 
@@ -382,8 +382,11 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			for d in doc.get("packed_items"):
 				d.qty = d.qty * -1
 
-		doc.discount_amount = -1 * source.discount_amount
-		doc.run_method("calculate_taxes_and_totals")
+		if doc.get("discount_amount"):
+			doc.discount_amount = -1 * source.discount_amount
+
+		if doctype != "Subcontracting Receipt":
+			doc.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = -1 * source_doc.qty
