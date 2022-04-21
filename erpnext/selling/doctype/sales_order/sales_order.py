@@ -1302,9 +1302,26 @@ def make_inter_company_purchase_order(source_name, target_doc=None):
 
 @frappe.whitelist()
 def create_pick_list(source_name, target_doc=None):
-	def update_item_quantity(source, target, source_parent):
+	from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
+
+	def update_item_quantity(source, target, source_parent) -> None:
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
 		target.stock_qty = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.conversion_factor)
+
+	def update_packed_item_qty(source, target, source_parent) -> None:
+		qty = flt(source.qty)
+		for item in source_parent.items:
+			if source.parent_detail_docname == item.name:
+				pending_percent = (item.qty - item.delivered_qty) / item.qty
+				target.qty = target.stock_qty = qty * pending_percent
+				return
+
+	def should_pick_order_item(item) -> bool:
+		return (
+			abs(item.delivered_qty) < abs(item.qty)
+			and item.delivered_by_supplier != 1
+			and not is_product_bundle(item.item_code)
+		)
 
 	doc = get_mapped_doc(
 		"Sales Order",
@@ -1315,8 +1332,16 @@ def create_pick_list(source_name, target_doc=None):
 				"doctype": "Pick List Item",
 				"field_map": {"parent": "sales_order", "name": "sales_order_item"},
 				"postprocess": update_item_quantity,
-				"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty)
-				and doc.delivered_by_supplier != 1,
+				"condition": should_pick_order_item,
+			},
+			"Packed Item": {
+				"doctype": "Pick List Item",
+				"field_map": {
+					"parent": "sales_order",
+					"name": "sales_order_item",
+					"parent_detail_docname": "product_bundle_item",
+				},
+				"postprocess": update_packed_item_qty,
 			},
 		},
 		target_doc,

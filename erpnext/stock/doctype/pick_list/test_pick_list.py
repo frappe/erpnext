@@ -14,6 +14,7 @@ from erpnext.stock.doctype.item.test_item import create_item, make_item
 >>>>>>> 7d5682020a (test: bundles in picklist)
 from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
@@ -573,16 +574,19 @@ class TestPickList(FrappeTestCase):
 
 	def test_picklist_with_bundles(self):
 		# from test_records.json
+		warehouse = "_Test Warehouse - _TC"
 		bundle = "_Test Product Bundle Item"
 		bundle_items = {"_Test Item": 5, "_Test Item Home Desktop 100": 2}
+		for item in bundle_items:
+			make_stock_entry(item=item, to_warehouse=warehouse, qty=10, rate=10)
 
-		so = make_sales_order(item_code=bundle, qty=1)
+		so = make_sales_order(item_code=bundle, qty=3)
 
 		pl = create_pick_list(so.name)
 		pl.save()
 		self.assertEqual(len(pl.locations), 2)
 		for item in pl.locations:
-			self.assertEqual(item.stock_qty, bundle_items[item.item_code])
+			self.assertEqual(item.stock_qty, bundle_items[item.item_code] * 3)
 
 	# def test_pick_list_skips_items_in_expired_batch(self):
 	# 	pass
