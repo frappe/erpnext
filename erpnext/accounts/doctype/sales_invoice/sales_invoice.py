@@ -1473,7 +1473,9 @@ class SalesInvoice(SellingController):
 			and self.base_rounding_adjustment
 			and not self.is_internal_transfer()
 		):
-			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(self.company)
+			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
+				self.company, "Sales Invoice", self.name
+			)
 
 			gl_entries.append(
 				self.get_gl_dict(
