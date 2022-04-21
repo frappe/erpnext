@@ -386,6 +386,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
 		pe.source_exchange_rate = pe.received_amount / pe.paid_amount
+		pe.insert()
 
 		self.assertEqual(pe.difference_amount, 100)
 
@@ -397,7 +398,6 @@ class TestPaymentEntry(unittest.TestCase):
 				"amount": 100,
 			},
 		)
-		pe.insert()
 		pe.submit()
 
 		expected_gle = dict(
