@@ -11,6 +11,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc
 from frappe.utils import cint, floor, flt, today
+from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.selling.doctype.sales_order.sales_order import (
 	make_delivery_note as create_delivery_note_from_sales_order,
@@ -108,7 +109,7 @@ class PickList(Document):
 
 		from_warehouses = None
 		if self.parent_warehouse:
-			from_warehouses = frappe.db.get_descendants("Warehouse", self.parent_warehouse)
+			from_warehouses = get_descendants_of("Warehouse", self.parent_warehouse)
 
 		# Create replica before resetting, to handle empty table on update after submit.
 		locations_replica = self.get("locations")
@@ -189,8 +190,7 @@ class PickList(Document):
 			frappe.throw(_("Qty of Finished Goods Item should be greater than 0."))
 
 	def before_print(self, settings=None):
-		if self.get("group_same_items"):
-			self.group_similar_items()
+		self.group_similar_items()
 
 	def group_similar_items(self):
 		group_item_qty = defaultdict(float)
