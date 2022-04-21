@@ -874,20 +874,26 @@ frappe.ui.form.on('Payment Entry', {
 		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
 			function(d) { return flt(d.amount) }));
 
-		if (frm.doc.party) {
-			if (frm.doc.payment_type == "Receive"
-				&& frm.doc.base_total_allocated_amount < frm.doc.base_received_amount + total_deductions
-				&& frm.doc.total_allocated_amount < frm.doc.paid_amount + (total_deductions / frm.doc.source_exchange_rate)) {
-				unallocated_amount = (
-					(frm.doc.base_received_amount + frm.doc.base_total_taxes_and_charges + total_deductions)
-					/ frm.doc.source_exchange_rate) - frm.doc.total_allocated_amount
-			} else if (frm.doc.payment_type == "Pay"
-				&& frm.doc.base_total_allocated_amount < frm.doc.base_paid_amount - total_deductions
-				&& frm.doc.total_allocated_amount < frm.doc.received_amount + (total_deductions / frm.doc.target_exchange_rate)) {
-				unallocated_amount = (
-					(frm.doc.base_paid_amount + frm.doc.base_total_taxes_and_charges - total_deductions)
-					/ frm.doc.target_exchange_rate ) - frm.doc.total_allocated_amount;
-			}
+		const {
+			party,
+			payment_type,
+			base_paid_amount,
+			base_received_amount,
+			base_total_taxes_and_charges,
+			total_allocated_amount,
+			target_exchange_rate,
+			source_exchange_rate,
+		} = frm.doc;
+
+		const exchange_rate = payment_type === "Pay" ? target_exchange_rate : source_exchange_rate;
+		const base_amount = payment_type === "Pay" ? base_paid_amount : base_received_amount;
+
+		if (party &&
+			total_allocated_amount < (base_amount - total_deductions) / exchange_rate) {
+			unallocated_amount = (
+				((base_amount + base_total_taxes_and_charges - total_deductions) / exchange_rate)
+				+ (total_deductions / exchange_rate)
+			) - total_allocated_amount
 		}
 
 		frm.set_value("unallocated_amount", unallocated_amount);

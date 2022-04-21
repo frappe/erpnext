@@ -641,29 +641,18 @@ class PaymentEntry(AccountsController):
 
 	def set_unallocated_amount(self):
 		self.unallocated_amount = 0
-		if self.party:
-			total_deductions = sum(flt(d.amount) for d in self.get("deductions"))
-			included_taxes = self.get_included_taxes()
-			if (
-				self.payment_type == "Receive"
-				and self.base_total_allocated_amount < self.base_received_amount + total_deductions
-				and self.total_allocated_amount
-				< self.paid_amount + (total_deductions / self.source_exchange_rate)
-			):
-				self.unallocated_amount = (
-					(self.base_received_amount + included_taxes - total_deductions)
-					/ self.source_exchange_rate
-				) - self.total_allocated_amount
-			elif (
-				self.payment_type == "Pay"
-				and self.base_total_allocated_amount < (self.base_paid_amount - total_deductions)
-				and self.total_allocated_amount
-				< self.received_amount + (total_deductions / self.target_exchange_rate)
-			):
-				self.unallocated_amount = (
-					(self.base_paid_amount + included_taxes - total_deductions)
-					/ self.target_exchange_rate
-				) - self.total_allocated_amount
+		total_deductions = sum(flt(d.amount) for d in self.get("deductions"))
+		included_taxes = self.get_included_taxes()
+		exchange_rate = (
+			self.target_exchange_rate if self.payment_type == "Pay" else self.source_exchange_rate
+		)
+		base_amount = self.base_paid_amount if self.payment_type == "Pay" else self.base_received_amount
+
+		if self.party and self.total_allocated_amount < (base_amount - total_deductions) / exchange_rate:
+			self.unallocated_amount = (
+				((base_amount + included_taxes - total_deductions) / exchange_rate)
+				+ (total_deductions / exchange_rate)
+			) - self.total_allocated_amount
 
 	def set_difference_amount(self):
 		base_unallocated_amount = flt(self.unallocated_amount) * (
