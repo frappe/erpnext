@@ -54,8 +54,6 @@
 			<th class="text-center">{%= __("Promised") %}<br>{%= __("Date/Time") %}</th>
 			<th class="text-center">{%= __("Ready") %}<br>{%= __("Date/Time") %}</th>
 
-			<th class="text-center">{%= __("Bill Amount") %}</th>
-
 			<th class="text-center">{%= __("R") %}</th>
 			<th class="text-center">{%= __("B") %}</th>
 			<th class="text-center">{%= __("D") %}</th>
@@ -107,11 +105,9 @@
 					<div>{%= data[i].ready_to_close_time_fmt %}</div>
 				</td>
 
-				<td class="text-right">{%= format_currency(data[i].customer_billable_amount) %}</td>
-
-				<td class="text-center">{%= data[i].ready_to_close ? 'R' : '&nbsp;' %}</td>
-				<td class="text-center">{%= data[i].billed ? 'B' : '&nbsp;' %}</td>
-				<td class="text-center">{%= data[i].delivered ? 'D' : '&nbsp;' %}</td>
+				<td class="text-center"><b>{%= data[i].ready_to_close ? 'R' : '&nbsp;' %}</b></td>
+				<td class="text-center"><b>{%= data[i].billed ? 'B' : '&nbsp;' %}</b></td>
+				<td class="text-center"><b>{%= data[i].delivered ? 'D' : '&nbsp;' %}</b></td>
 
 				<td>&nbsp;</td>
 			</tr>
