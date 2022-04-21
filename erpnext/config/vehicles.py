@@ -13,15 +13,23 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Customer",
+					"onboard": 1,
+					"description": _("Customer List."),
+				},
+				{
+					"type": "doctype",
 					"name": "Vehicle Booking Payment",
 					"description": _("Payments for Vehicle Booking."),
 					"dependencies": ["Vehicle Booking Order"],
 				},
 				{
-					"type": "doctype",
-					"name": "Customer",
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Allocation Register",
+					"doctype": "Vehicle Allocation",
+					"dependencies": ["Vehicle Allocation"],
 					"onboard": 1,
-					"description": _("Customer List."),
 				},
 			]
 		},
@@ -54,6 +62,14 @@ def get_data():
 					"onboard": 1,
 				},
 				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Stock",
+					"doctype": "Vehicle",
+					"dependencies": ["Vehicle"],
+					"onboard": 1,
+				},
+				{
 					"type": "doctype",
 					"name": "Vehicle Receipt",
 					"dependencies": ["Vehicle"],
@@ -71,6 +87,14 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Project",
+					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Service Tracking",
+					"doctype": "Vehicle",
+					"dependencies": ["Vehicle"],
 					"onboard": 1,
 				},
 				{
@@ -102,6 +126,13 @@ def get_data():
 					"type": "doctype",
 					"name": "Vehicle Transfer Letter",
 					"dependencies": ["Vehicle"],
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Registration Register",
+					"doctype": "Vehicle Registration Order",
+					"dependencies": ["Vehicle Registration Order"],
 				},
 			],
 		},
@@ -150,24 +181,8 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Key Reports"),
+			"label": _("Reports"),
 			"items": [
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Vehicle Allocation Register",
-					"doctype": "Vehicle Allocation",
-					"dependencies": ["Vehicle Allocation"],
-					"onboard": 1,
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Vehicle Stock",
-					"doctype": "Vehicle",
-					"dependencies": ["Vehicle"],
-					"onboard": 1,
-				},
 				{
 					"type": "report",
 					"is_query_report": True,
@@ -175,18 +190,6 @@ def get_data():
 					"doctype": "Vehicle Booking Order",
 					"dependencies": ["Vehicle Booking Order"],
 				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Vehicle Registration Register",
-					"doctype": "Vehicle Registration Order",
-					"dependencies": ["Vehicle Registration Order"],
-				},
-			]
-		},
-		{
-			"label": _("Summary Reports"),
-			"items": [
 				{
 					"type": "report",
 					"is_query_report": True,
@@ -235,13 +238,6 @@ def get_data():
 			"label": _("More / Work in Progress"),
 			"icon": "fa fa-cog",
 			"items": [
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Vehicles In Workshop",
-					"doctype": "Vehicle",
-					"dependencies": ["Vehicle"],
-				},
 				{
 					"type": "doctype",
 					"name": "Vehicle Log",
