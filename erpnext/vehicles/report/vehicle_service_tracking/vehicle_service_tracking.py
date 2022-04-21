@@ -33,7 +33,7 @@ class VehicleServiceTrackingReport(object):
 
 		self.data = frappe.db.sql("""
 			select p.name as project, p.project_name, p.project_type, p.vehicle_workshop, p.company,
-				p.customer, p.customer_name, p.contact_mobile, p.contact_mobile_2,
+				p.customer, p.customer_name, p.contact_mobile, p.contact_mobile_2, p.contact_phone,
 				p.insurance_company, p.insurance_company_name,
 				p.applies_to_vehicle, p.service_advisor, p.service_manager,
 				p.applies_to_item, p.applies_to_item_name, p.applies_to_variant_of, p.applies_to_variant_of_name,
@@ -60,9 +60,14 @@ class VehicleServiceTrackingReport(object):
 			d.billed = 1 if d.billing_status in ["Partially Billed", "Fully Billed"] else 0
 
 			d.vehicle_received_dt_fmt = format_datetime(d.vehicle_received_dt, datetime_format)
-			d.ready_to_close_dt_fmt = format_datetime(d.ready_to_close_dt, datetime_format)
 			d.vehicle_delivered_dt_fmt = format_datetime(d.vehicle_delivered_dt, datetime_format)
 
+			d.ready_to_close_date_fmt = formatdate(d.ready_to_close_dt, date_format)
+			d.ready_to_close_time_fmt = format_time(d.ready_to_close_dt, time_format)
+			d.ready_to_close_dt_fmt = format_datetime(d.ready_to_close_dt, datetime_format)
+
+			d.expected_delivery_date_fmt = formatdate(d.expected_delivery_date, date_format)
+			d.expected_delivery_time_fmt = format_time(d.expected_delivery_time, time_format)
 			if d.expected_delivery_date and d.expected_delivery_time:
 				d.expected_delivery_dt_fmt = format_datetime(d.expected_delivery_dt, datetime_format)
 			elif d.expected_delivery_date:

@@ -1,0 +1,103 @@
+<style>
+@media screen {
+	.print-format {
+		padding: 8mm;
+	}
+}
+
+.print-format {
+	font-size: 8pt;
+}
+.print-format td, .print-format th {
+	vertical-align: middle !important;
+}
+</style>
+
+<h2 class="text-center">{%= __("Vehicle Service Tracking") %}</h2>
+
+<h5 class="text-center">
+	{% if (filters.from_date == filters.to_date) { %}
+		{%= frappe.datetime.str_to_user(filters.from_date) %}
+	{% } else { %}
+		{%= frappe.datetime.str_to_user(filters.from_date) %}
+		{%= __("to") %}
+		{%= frappe.datetime.str_to_user(filters.to_date) %}
+	{% } %}
+</h5>
+
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th class="text-center">#</th>
+
+			<th class="text-center">{%= __("Project") %}</th>
+
+			<th class="text-center">{%= __("Reg No") %}</th>
+
+			<th class="text-center">{%= __("Model/Variant") %}</th>
+
+			{% if filters.show_customer_in_print %}
+			<th class="text-center">{%= __("Customer") %}</th>
+			{% endif %}
+
+			<th class="text-center">{%= __("Promised") %}<br>{%= __("Date/Time") %}</th>
+
+			<th class="text-center">{%= __("Ready") %}<br>{%= __("Date/Time") %}</th>
+
+			<th class="text-center">{%= __("Bill Amount") %}</th>
+
+			<th class="text-center">{%= __("R") %}</th>
+			<th class="text-center">{%= __("B") %}</th>
+			<th class="text-center">{%= __("D") %}</th>
+
+			<th class="text-center" style="width: 15%;">Remarks</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+			<tr>
+				<td class="text-center">{%= i+1 %}</td>
+
+				<td class="text-center">
+					<div>{%= data[i].project %}</div>
+					<div>{%= data[i].service_advisor %}</div>
+				</td>
+
+				<td class="text-center">{%= data[i].vehicle_license_plate || data[i].vehicle_chassis_no %}</td>
+
+				<td>
+					<div>{%= data[i].applies_to_variant_of_name %}</div>
+					<div>{%= data[i].applies_to_item %}</div>
+				</td>
+
+				{% if filters.show_customer_in_print %}
+				<td>
+					<div>{%= data[i].customer_name %}</div>
+					<div>{%= [data[i].contact_mobile, data[i].contact_mobile_2].filter(d=>d).join(" / ") %}</div>
+				</td>
+				{% endif %}
+
+				<td class="text-center">
+					<div>{%= data[i].expected_delivery_date_fmt %}</div>
+					<div>{%= data[i].expected_delivery_time_fmt %}</div>
+				</td>
+
+				<td class="text-center">
+					<div>{%= data[i].ready_to_close_date_fmt %}</div>
+					<div>{%= data[i].ready_to_close_time_fmt %}</div>
+				</td>
+
+				<td class="text-right">{%= format_currency(data[i].customer_billable_amount) %}</td>
+
+				<td class="text-center">{%= data[i].ready_to_close ? '<i class="fa fa-check"></i>' : '&nbsp;' %}</td>
+				<td class="text-center">{%= data[i].billed ? '<i class="fa fa-check"></i>' : '&nbsp;' %}</td>
+				<td class="text-center">{%= data[i].delivered ? '<i class="fa fa-check"></i>' : '&nbsp;' %}</td>
+
+				<td>&nbsp;</td>
+			</tr>
+		{% } %}
+	</tbody>
+</table>
+
+<p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>

@@ -132,5 +132,12 @@ frappe.query_reports["Vehicle Service Tracking"] = {
 			fieldtype: "Link",
 			options: "Brand"
 		},
+		{
+			fieldname: "show_customer_in_print",
+			label: __("Show Customer In Print"),
+			fieldtype: "Check",
+			default: 1,
+			on_change: function() { return false; }
+		},
 	]
 };
