@@ -121,7 +121,7 @@ def has_overlapping_timings(shift_1: str, shift_2: str) -> bool:
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
-	events = []
+	from frappe.desk.calendar import get_event_conditions
 
 	employee = frappe.db.get_value(
 		"Employee", {"user_id": frappe.session.user}, ["name", "company"], as_dict=True
@@ -132,20 +132,22 @@ def get_events(start, end, filters=None):
 		employee = ""
 		company = frappe.db.get_value("Global Defaults", None, "default_company")
 
-	from frappe.desk.reportview import get_filters_cond
-
-	conditions = get_filters_cond("Shift Assignment", filters, [])
-	add_assignments(events, start, end, conditions=conditions)
+	conditions = get_event_conditions("Shift Assignment", filters)
+	events = add_assignments(start, end, conditions=conditions)
 	return events
 
 
-def add_assignments(events, start, end, conditions=None):
+def add_assignments(start, end, conditions=None):
+	events = []
+
 	query = """select name, start_date, end_date, employee_name,
 		employee, docstatus, shift_type
 		from `tabShift Assignment` where
-		start_date >= %(start_date)s
-		or end_date <=  %(end_date)s
-		or (%(start_date)s between start_date and end_date and %(end_date)s between start_date and end_date)
+		(
+			start_date >= %(start_date)s
+			or end_date <=  %(end_date)s
+			or (%(start_date)s between start_date and end_date and %(end_date)s between start_date and end_date)
+		)
 		and docstatus = 1"""
 	if conditions:
 		query += conditions
@@ -251,7 +253,7 @@ def get_shifts_for_date(employee: str, for_timestamp: datetime) -> List[Dict[str
 				Criterion.any(
 					[
 						assignment.end_date.isnull(),
-						(assignment.end_date.isnotnull() & (getdate(for_timestamp.date()) >= assignment.end_date)),
+						(assignment.end_date.isnotnull() & (getdate(for_timestamp.date()) <= assignment.end_date)),
 					]
 				)
 			)
