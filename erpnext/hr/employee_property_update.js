@@ -9,7 +9,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 		});
 	},
 
-	onload: function(frm){
+	onload: function(frm) {
 		if (frm.doc.__islocal) {
 			if (frm.doctype == "Employee Promotion") {
 				frm.clear_table("promotion_details");
@@ -31,7 +31,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 			return;
 
 		frm.fields_dict[table].grid.wrapper.find(".grid-add-row").hide();
-		frm.events.setup_employee_property_button(frm, table)
+		frm.events.setup_employee_property_button(frm, table);
 	},
 
 	setup_employee_property_button: function(frm, table) {
@@ -59,7 +59,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 					}
 				});
 
-				show_dialog(frm, table, allowed_fields)
+				show_dialog(frm, table, allowed_fields);
 			});
 		});
 	}
@@ -91,7 +91,7 @@ var show_dialog = function(frm, table, field_labels) {
 			method: 'erpnext.hr.utils.get_employee_field_property',
 			args: {employee: frm.doc.employee, fieldname: property},
 			callback: function(r) {
-				if(r.message){
+				if (r.message) {
 					d.data.current = r.message.value;
 					d.data.property = r.message.label;
 
@@ -126,13 +126,13 @@ var render_dynamic_field = function(d, fieldtype, options, fieldname) {
 var add_to_details = function(frm, d, table) {
 	let data = d.data;
 	if (data.fieldname) {
-		if(validate_duplicate(frm, table, data.fieldname)){
-			frappe.show_alert({message:__("Property already added"), indicator:'orange'});
+		if (validate_duplicate(frm, table, data.fieldname)) {
+			frappe.show_alert({message: __("Property already added"), indicator: "orange"});
 			return false;
 		}
-		if(data.current == data.new){
-			frappe.show_alert({message:__("Nothing to change"), indicator:'orange'});
-			d.get_primary_btn().attr('disabled', false);
+		if (data.current == data.new) {
+			frappe.show_alert({message: __("Nothing to change"), indicator: "orange"});
+			d.get_primary_btn().attr("disabled", false);
 			return false;
 		}
 		frm.add_child(table, {
@@ -148,10 +148,10 @@ var add_to_details = function(frm, d, table) {
 		d.fields_dict.new_value.$wrapper.html("");
 		d.set_value("property", "");
 		d.set_value("current", "");
-		frappe.show_alert({message:__("Added to details"), indicator:'green'});
+		frappe.show_alert({message: __("Added to details"), indicator: "green"});
 		d.data = {};
 	} else {
-		frappe.show_alert({message:__("Value missing"),indicator:'red'});
+		frappe.show_alert({message: __("Value missing"), indicator: "red"});
 	}
 };
 
