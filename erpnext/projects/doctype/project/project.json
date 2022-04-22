@@ -62,6 +62,7 @@
   "cb_28",
   "previous_project",
   "campaign",
+  "allow_billing_undelivered_sales_orders",
   "section_break0",
   "description",
   "sec_insurance",
@@ -1025,12 +1026,19 @@
   {
    "fieldname": "column_break_128",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_billing_undelivered_sales_orders",
+   "fieldtype": "Check",
+   "label": "Allow Billing of Undelivered Materials",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-04-22 15:36:55.220325",
+ "modified": "2022-04-23 01:04:26.961832",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

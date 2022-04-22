@@ -1625,6 +1625,27 @@ def get_sales_invoice(project_name, depreciation_type=None):
 	# Calcualte Taxes and Totals
 	target_doc.run_method("calculate_taxes_and_totals")
 
+	# Check Undelivered Sales Order Stock Items
+	if not cint(project.get('allow_billing_undelivered_sales_orders')):
+		undelivered_sales_orders = []
+		has_undelivered_items = False
+		for d in target_doc.items:
+			if d.is_stock_item and not d.delivery_note:
+				has_undelivered_items = True
+				if d.sales_order and d.sales_order not in undelivered_sales_orders:
+					undelivered_sales_orders.append(d.sales_order)
+
+		if has_undelivered_items:
+			undelivered_sales_orders_txt = [frappe.utils.get_link_to_form("Sales Order", so) for so in undelivered_sales_orders]
+			undelivered_sales_orders_txt = ", ".join(undelivered_sales_orders_txt)
+			if undelivered_sales_orders_txt:
+				undelivered_sales_orders_txt = "<br><br>" + undelivered_sales_orders_txt
+
+			frappe.throw(_("There are Sales Orders with undelivered stock items. "
+				"If you want to bill undelivered stock items, please confirm billing amount and check "
+				"<b>'Allow Billing of Undelivered Materials'</b>{0}").format(undelivered_sales_orders_txt),
+				title=_("Undelivered Sales Orders"))
+
 	return target_doc
 
 
