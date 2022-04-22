@@ -11,6 +11,7 @@ from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, 
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock import get_warehouse_account_map
+from erpnext.accounts.utils import get_account_currency
 
 class QualityInspectionRequiredError(frappe.ValidationError): pass
 class QualityInspectionRejectedError(frappe.ValidationError): pass
@@ -53,13 +54,11 @@ class StockController(AccountsController):
 
 		gl_list = []
 		warehouse_with_no_account = []
-		sle_out = None
 
 		for item_row in voucher_details:
 			sle_list = sle_map.get(item_row.name)
 			if sle_list:
 				for sle in sle_list:
-					sle_out = sle
 					if warehouse_account.get(sle.warehouse):
 						# from warehouse account
 
@@ -100,14 +99,21 @@ class StockController(AccountsController):
 		
 		if self.doctype == "Sales Invoice":
 			if self.discount_reason != None:
+				company = frappe.get_doc("Company", self.company)
+
+				if company.default_account_for_discounts == None:
+					frappe.throw(_("You must assign a default account for discounts in the company."))
+
+				account_currency = get_account_currency(company.default_account_for_discounts)
+
 				gl_list.append(self.get_gl_dict({
-					"account": warehouse_account[sle_out.warehouse]["account"],
-					"against": warehouse_account[sle_out.warehouse]["account"],
+					"account": company.default_account_for_discounts,
+					"against": company.default_account_for_discounts,
 					"cost_center": self.cost_center,
 					"remarks": self.get("remarks") or "Accounting Entry for Stock",
 					"credit": self.discount_amount,
 					"credit_in_account_currency": self.discount_amount
-				}, warehouse_account[sle_out.warehouse]["account_currency"]))
+				}, account_currency))
 
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
