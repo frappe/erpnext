@@ -12,11 +12,8 @@ import traceback
 
 import frappe
 import jwt
-<<<<<<< HEAD
 import six
-=======
 import requests
->>>>>>> ee8047aba3 (fix(india): 401 & 403 client error while generating IRN)
 from frappe import _, bold
 from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.integrations.utils import make_get_request, make_post_request
