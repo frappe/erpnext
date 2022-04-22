@@ -793,13 +793,13 @@
   },
   {
    "fieldname": "tax_id",
-   "fieldtype": "Data",
+   "fieldtype": "Read Only",
    "label": "Tax ID",
    "read_only": 1
   },
   {
    "fieldname": "tax_cnic",
-   "fieldtype": "Data",
+   "fieldtype": "Read Only",
    "label": "CNIC",
    "read_only": 1
   },
@@ -1030,7 +1030,7 @@
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-04-22 14:42:33.684442",
+ "modified": "2022-04-22 15:36:55.220325",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
