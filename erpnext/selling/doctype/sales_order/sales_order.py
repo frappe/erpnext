@@ -455,6 +455,16 @@ class SalesOrder(SellingController):
 		if tot_qty != 0:
 			self.db_set("per_delivered", flt(delivered_qty / tot_qty) * 100, update_modified=False)
 
+	def update_picking_status(self):
+		total_picked_qty = 0.0
+		total_qty = 0.0
+		for so_item in self.items:
+			total_picked_qty += flt(so_item.picked_qty)
+			total_qty += flt(so_item.stock_qty)
+		per_picked = total_picked_qty / total_qty * 100
+
+		self.db_set("per_picked", flt(per_picked), update_modified=False)
+
 	def set_indicator(self):
 		"""Set indicator for portal"""
 		if self.per_billed < 100 and self.per_delivered < 100:
