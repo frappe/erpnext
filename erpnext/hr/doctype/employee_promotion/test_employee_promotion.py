@@ -43,7 +43,7 @@ class TestEmployeePromotion(FrappeTestCase):
 
 		employee = make_employee(
 			"test_employee_promotion@example.com",
-			company="Test Company",
+			company="_Test Company",
 			date_of_birth=getdate("30-09-1980"),
 			date_of_joining=getdate("01-10-2021"),
 			designation="Software Developer",
@@ -57,7 +57,7 @@ class TestEmployeePromotion(FrappeTestCase):
 				"doctype": "Employee Promotion",
 				"employee": employee,
 				"promotion_date": getdate(),
-				"revised_annual_ctc": "1000000",
+				"revised_ctc": "1000000",
 				"promotion_details": [
 					{
 						"property": "Designation",
@@ -74,7 +74,7 @@ class TestEmployeePromotion(FrappeTestCase):
 		employee = frappe.get_doc("Employee", employee)
 		self.assertEqual(employee.grade, "L2")
 		self.assertEqual(employee.designation, "Project Manager")
-		self.assertEqual(employee.annual_ctc, 1000000)
+		self.assertEqual(employee.ctc, 1000000)
 
 		# internal work history updated
 		self.assertEqual(employee.internal_work_history[0].designation, "Software Developer")
