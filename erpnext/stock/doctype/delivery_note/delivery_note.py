@@ -37,7 +37,7 @@ class DeliveryNote(SellingController):
 		self.validate_posting_time()
 		super(DeliveryNote, self).validate()
 		self.validate_order_required()
-		self.check_sales_order_on_hold_or_close("sales_order")
+		self.check_sales_order_on_hold_or_close()
 		self.validate_project_customer()
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
@@ -76,7 +76,6 @@ class DeliveryNote(SellingController):
 	def on_cancel(self):
 		super(DeliveryNote, self).on_cancel()
 
-		self.check_sales_order_on_hold_or_close("sales_order")
 		self.check_next_docstatus()
 
 		self.update_billing_status()

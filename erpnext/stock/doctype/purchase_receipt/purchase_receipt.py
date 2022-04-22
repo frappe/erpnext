@@ -79,7 +79,6 @@ class PurchaseReceipt(BuyingController):
 	def on_cancel(self):
 		super(PurchaseReceipt, self).on_cancel()
 
-		self.check_on_hold_or_closed_status()
 		# Check if Purchase Invoice has been submitted against current Purchase Order
 		submitted = frappe.db.sql("""select t1.name
 			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
@@ -287,7 +286,7 @@ class PurchaseReceipt(BuyingController):
 			if (d.meta.get_field('purchase_order') and d.purchase_order
 				and d.purchase_order not in check_list):
 				check_list.append(d.purchase_order)
-				check_on_hold_or_closed_status('Purchase Order', d.purchase_order)
+				check_on_hold_or_closed_status('Purchase Order', d.purchase_order, is_return=self.get('is_return'))
 
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import process_gl_map

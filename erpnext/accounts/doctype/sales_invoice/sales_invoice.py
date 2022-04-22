@@ -58,7 +58,7 @@ class SalesInvoice(SellingController):
 		self.validate_pos_return()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
-		self.check_sales_order_on_hold_or_close("sales_order")
+		self.check_sales_order_on_hold_or_close()
 		self.validate_debit_to_acc()
 		self.validate_return_against()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
@@ -186,7 +186,6 @@ class SalesInvoice(SellingController):
 	def on_cancel(self):
 		super(SalesInvoice, self).on_cancel()
 
-		self.check_sales_order_on_hold_or_close("sales_order")
 		self.update_previous_doc_status()
 
 		if not self.is_return:
@@ -500,6 +499,7 @@ class SalesInvoice(SellingController):
 			total_amount_in_payments = 0
 			for payment in self.payments:
 				total_amount_in_payments += payment.amount
+
 			invoice_total = self.rounded_total or self.grand_total
 			if total_amount_in_payments < invoice_total:
 				frappe.throw(_("Total payments amount can't be greater than {}".format(-invoice_total)))

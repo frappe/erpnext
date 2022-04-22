@@ -290,12 +290,14 @@ class SellingController(StockController):
 		so_warehouse = so_item and so_item[0]["warehouse"] or ""
 		return so_qty, so_warehouse
 
-	def check_sales_order_on_hold_or_close(self, ref_fieldname):
+	def check_sales_order_on_hold_or_close(self):
 		for d in self.get("items"):
-			if d.get(ref_fieldname):
-				status = frappe.db.get_value("Sales Order", d.get(ref_fieldname), "status", cache=1)
-				if status in ("Closed", "On Hold"):
-					frappe.throw(_("Sales Order {0} is {1}").format(d.get(ref_fieldname), status))
+			if d.get('sales_order') and not d.get('delivery_note'):
+				status = frappe.db.get_value("Sales Order", d.get('sales_order'), "status", cache=1)
+				if status == "Closed" and not cint(self.get('is_return')):
+					frappe.throw(_("Row #{0}: {1} is {2}").format(d.idx, frappe.get_desk_link("Sales Order", d.get('sales_order')), status))
+				if status == "On Hold":
+					frappe.throw(_("Row #{0}: {1} is {2}").format(d.idx, frappe.get_desk_link("Sales Order", d.get('sales_order')), status))
 
 	def update_reserved_qty(self):
 		so_map = {}

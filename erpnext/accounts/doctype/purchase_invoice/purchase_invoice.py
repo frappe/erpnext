@@ -129,8 +129,6 @@ class PurchaseInvoice(BuyingController):
 	def on_cancel(self):
 		super(PurchaseInvoice, self).on_cancel()
 
-		self.check_on_hold_or_closed_status()
-
 		self.update_previous_doc_status()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
@@ -458,12 +456,9 @@ class PurchaseInvoice(BuyingController):
 		self.party_account_currency = account.account_currency
 
 	def check_on_hold_or_closed_status(self):
-		check_list = []
-
 		for d in self.get('items'):
-			if d.purchase_order and not d.purchase_order in check_list and not d.purchase_receipt:
-				check_list.append(d.purchase_order)
-				check_on_hold_or_closed_status('Purchase Order', d.purchase_order)
+			if d.purchase_order and not d.purchase_receipt:
+				check_on_hold_or_closed_status('Purchase Order', d.purchase_order, is_return=self.get('is_return'))
 
 	def validate_warehouse(self):
 		if self.update_stock:

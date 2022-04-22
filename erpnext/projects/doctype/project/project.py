@@ -116,13 +116,13 @@ class Project(StatusUpdater):
 			self.title = self.name
 
 	def set_billing_status(self, update=False, update_modified=False):
-		self.billing_status = self.get_billing_status()
-
 		sales_data = self.get_project_sales_data(get_sales_invoice=False)
 		self.total_billable_amount = sales_data.totals.grand_total
 		self.customer_billable_amount = sales_data.totals.customer_grand_total
 
 		self.total_billed_amount = self.get_billed_amount()
+
+		self.billing_status = self.get_billing_status()
 
 		if update:
 			self.db_set({
@@ -155,7 +155,10 @@ class Project(StatusUpdater):
 		if has_billables:
 			if has_sales_invoice:
 				if has_unbilled:
-					billing_status = "Partially Billed"
+					if flt(self.total_billed_amount) > 0:
+						billing_status = "Partially Billed"
+					else:
+						billing_status = "Not Billed"
 				else:
 					billing_status = "Fully Billed"
 			else:
@@ -862,7 +865,12 @@ def get_stock_items(project, customer, company, get_sales_invoice=True):
 			i.item_tax_detail, i.bill_only_to_customer, p.conversion_rate
 		from `tabSales Order Item` i
 		inner join `tabSales Order` p on p.name = i.parent
-		where p.docstatus = 1 and i.is_stock_item = 1 and i.delivered_qty < i.qty and i.qty > 0 and p.status != 'Closed'
+		where p.docstatus = 1 and i.is_stock_item = 1 and i.delivered_qty < i.qty and i.qty > 0
+			and (p.status != 'Closed' or exists(select sum(si_item.amount)
+				from `tabSales Invoice Item` si_item
+				where si_item.docstatus = 1 and si_item.sales_order_item = i.name and ifnull(si_item.delivery_note, '') = ''
+				having sum(si_item.amount) > 0)
+			)
 			and p.project = %s
 	""", project, as_dict=1)
 	set_is_claim_item(so_data, customer)
