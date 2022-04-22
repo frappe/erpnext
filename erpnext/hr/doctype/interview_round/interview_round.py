@@ -11,6 +11,7 @@ from frappe.model.document import Document
 class InterviewRound(Document):
 	pass
 
+
 @frappe.whitelist()
 def create_interview(doc):
 	if isinstance(doc, str):
@@ -24,10 +25,5 @@ def create_interview(doc):
 	if doc.interviewers:
 		interview.interview_details = []
 		for data in doc.interviewers:
-			interview.append("interview_details", {
-				"interviewer": data.user
-			})
+			interview.append("interview_details", {"interviewer": data.user})
 	return interview
-
-
-

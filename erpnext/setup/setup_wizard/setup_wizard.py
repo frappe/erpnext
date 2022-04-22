@@ -14,96 +14,66 @@ def get_setup_stages(args=None):
 	if frappe.db.sql("select name from tabCompany"):
 		stages = [
 			{
-				'status': _('Wrapping up'),
-				'fail_msg': _('Failed to login'),
-				'tasks': [
-					{
-						'fn': fin,
-						'args': args,
-						'fail_msg': _("Failed to login")
-					}
-				]
+				"status": _("Wrapping up"),
+				"fail_msg": _("Failed to login"),
+				"tasks": [{"fn": fin, "args": args, "fail_msg": _("Failed to login")}],
 			}
 		]
 	else:
 		stages = [
 			{
-				'status': _('Installing presets'),
-				'fail_msg': _('Failed to install presets'),
-				'tasks': [
-					{
-						'fn': stage_fixtures,
-						'args': args,
-						'fail_msg': _("Failed to install presets")
-					}
-				]
+				"status": _("Installing presets"),
+				"fail_msg": _("Failed to install presets"),
+				"tasks": [{"fn": stage_fixtures, "args": args, "fail_msg": _("Failed to install presets")}],
 			},
 			{
-				'status': _('Setting up company'),
-				'fail_msg': _('Failed to setup company'),
-				'tasks': [
-					{
-						'fn': setup_company,
-						'args': args,
-						'fail_msg': _("Failed to setup company")
-					}
-				]
+				"status": _("Setting up company"),
+				"fail_msg": _("Failed to setup company"),
+				"tasks": [{"fn": setup_company, "args": args, "fail_msg": _("Failed to setup company")}],
 			},
 			{
-				'status': _('Setting defaults'),
-				'fail_msg': 'Failed to set defaults',
-				'tasks': [
-					{
-						'fn': setup_defaults,
-						'args': args,
-						'fail_msg': _("Failed to setup defaults")
-					},
-					{
-						'fn': stage_four,
-						'args': args,
-						'fail_msg': _("Failed to create website")
-					},
-					{
-						'fn': set_active_domains,
-						'args': args,
-						'fail_msg': _("Failed to add Domain")
-					},
-				]
+				"status": _("Setting defaults"),
+				"fail_msg": "Failed to set defaults",
+				"tasks": [
+					{"fn": setup_defaults, "args": args, "fail_msg": _("Failed to setup defaults")},
+					{"fn": stage_four, "args": args, "fail_msg": _("Failed to create website")},
+					{"fn": set_active_domains, "args": args, "fail_msg": _("Failed to add Domain")},
+				],
 			},
 			{
-				'status': _('Wrapping up'),
-				'fail_msg': _('Failed to login'),
-				'tasks': [
-					{
-						'fn': fin,
-						'args': args,
-						'fail_msg': _("Failed to login")
-					}
-				]
-			}
+				"status": _("Wrapping up"),
+				"fail_msg": _("Failed to login"),
+				"tasks": [{"fn": fin, "args": args, "fail_msg": _("Failed to login")}],
+			},
 		]
 
 	return stages
 
+
 def stage_fixtures(args):
-	fixtures.install(args.get('country'))
+	fixtures.install(args.get("country"))
+
 
 def setup_company(args):
 	fixtures.install_company(args)
 
+
 def setup_defaults(args):
 	fixtures.install_defaults(frappe._dict(args))
+
 
 def stage_four(args):
 	company_setup.create_website(args)
 	company_setup.create_email_digest()
 	company_setup.create_logo(args)
 
+
 def fin(args):
 	frappe.local.message_log = []
 	login_as_first_user(args)
 
-	make_sample_data(args.get('domains'))
+	make_sample_data(args.get("domains"))
+
 
 def make_sample_data(domains):
 	try:
@@ -113,6 +83,7 @@ def make_sample_data(domains):
 		if frappe.message_log:
 			frappe.message_log.pop()
 		pass
+
 
 def login_as_first_user(args):
 	if args.get("email") and hasattr(frappe.local, "login_manager"):
@@ -127,6 +98,7 @@ def setup_complete(args=None):
 	stage_four(args)
 	fin(args)
 
+
 def set_active_domains(args):
-	domain_settings = frappe.get_single('Domain Settings')
-	domain_settings.set_active_domains(args.get('domains'))
+	domain_settings = frappe.get_single("Domain Settings")
+	domain_settings.set_active_domains(args.get("domains"))

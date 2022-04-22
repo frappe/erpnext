@@ -14,18 +14,18 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 class TestPointOfSale(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls) -> None:
-		frappe.db.savepoint('before_test_point_of_sale')
+		frappe.db.savepoint("before_test_point_of_sale")
 
 	@classmethod
 	def tearDownClass(cls) -> None:
-		frappe.db.rollback(save_point='before_test_point_of_sale')
+		frappe.db.rollback(save_point="before_test_point_of_sale")
 
 	def test_item_search(self):
 		"""
 		Test Stock and Service Item Search.
 		"""
 
-		pos_profile = make_pos_profile()
+		pos_profile = make_pos_profile(name="Test POS Profile for Search")
 		item1 = make_item("Test Search Stock Item", {"is_stock_item": 1})
 		make_stock_entry(
 			item_code="Test Search Stock Item",

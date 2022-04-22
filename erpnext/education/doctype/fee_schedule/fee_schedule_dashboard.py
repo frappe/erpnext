@@ -3,11 +3,4 @@
 
 
 def get_data():
-	return {
-		'fieldname': 'fee_schedule',
-		'transactions': [
-			{
-				'items': ['Fees']
-			}
-		]
-	}
+	return {"fieldname": "fee_schedule", "transactions": [{"items": ["Fees"]}]}

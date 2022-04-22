@@ -21,12 +21,25 @@ class PayrollSettings(Document):
 			if not self.password_policy:
 				frappe.throw(_("Password policy for Salary Slips is not set"))
 
-
 	def on_update(self):
 		self.toggle_rounded_total()
 		frappe.clear_cache()
 
 	def toggle_rounded_total(self):
 		self.disable_rounded_total = cint(self.disable_rounded_total)
-		make_property_setter("Salary Slip", "rounded_total", "hidden", self.disable_rounded_total, "Check", validate_fields_for_doctype=False)
-		make_property_setter("Salary Slip", "rounded_total", "print_hide", self.disable_rounded_total, "Check", validate_fields_for_doctype=False)
+		make_property_setter(
+			"Salary Slip",
+			"rounded_total",
+			"hidden",
+			self.disable_rounded_total,
+			"Check",
+			validate_fields_for_doctype=False,
+		)
+		make_property_setter(
+			"Salary Slip",
+			"rounded_total",
+			"print_hide",
+			self.disable_rounded_total,
+			"Check",
+			validate_fields_for_doctype=False,
+		)

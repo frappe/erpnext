@@ -525,6 +525,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		item.weight_per_unit = 0;
 		item.weight_uom = '';
+		item.conversion_factor = 0;
 
 		if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
@@ -733,6 +734,26 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				frappe.model.set_value(item.doctype, item.name, 'rate', r.message * item.conversion_factor);
 			}
 		});
+	},
+
+	add_taxes_from_item_tax_template: function(item_tax_map) {
+		let me = this;
+
+		if (item_tax_map && cint(frappe.defaults.get_default("add_taxes_from_item_tax_template"))) {
+			if (typeof (item_tax_map) == "string") {
+				item_tax_map = JSON.parse(item_tax_map);
+			}
+
+			$.each(item_tax_map, function(tax, rate) {
+				let found = (me.frm.doc.taxes || []).find(d => d.account_head === tax);
+				if (!found) {
+					let child = frappe.model.add_child(me.frm.doc, "taxes");
+					child.charge_type = "On Net Total";
+					child.account_head = tax;
+					child.rate = 0;
+				}
+			});
+		}
 	},
 
 	serial_no: function(doc, cdt, cdn) {
@@ -1020,9 +1041,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		this.set_dynamic_labels();
 		var company_currency = this.get_company_currency();
-		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
+		// Added `ignore_price_list` to determine if document is loading after mapping from another doc
 		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency
-				&& !this.frm.doc.ignore_pricing_rule) {
+				&& !(this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list)) {
 
 			this.get_exchange_rate(transaction_date, this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
@@ -1048,7 +1069,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		if(flt(this.frm.doc.conversion_rate)>0.0) {
-			if(this.frm.doc.ignore_pricing_rule) {
+			if(this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list) {
 				this.calculate_taxes_and_totals();
 			} else if (!this.in_apply_price_list){
 				this.apply_price_list();
@@ -1065,6 +1086,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			return this.frm.call({
 				doc: this.frm.doc,
 				method: "apply_shipping_rule",
+				callback: function(r) {
+					me._calculate_taxes_and_totals();
+				}
 			}).fail(() => this.frm.set_value('shipping_rule', ''));
 		}
 	},
@@ -1122,8 +1146,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.set_dynamic_labels();
 
 		var company_currency = this.get_company_currency();
-		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
-		if(this.frm.doc.price_list_currency !== company_currency  && !this.frm.doc.ignore_pricing_rule) {
+		// Added `ignore_price_list` to determine if document is loading after mapping from another doc
+		if(this.frm.doc.price_list_currency !== company_currency  &&
+				!(this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list)) {
 			this.get_exchange_rate(this.frm.doc.posting_date, this.frm.doc.price_list_currency, company_currency,
 				function(exchange_rate) {
 					me.frm.set_value("plc_conversion_rate", exchange_rate);
@@ -1475,6 +1500,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			return;
 		}
 
+		// Target doc created from a mapped doc
+		if (this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list) {
+			return;
+		}
+
 		return this.frm.call({
 			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule",
 			args: {	args: args, doc: me.frm.doc },
@@ -1591,7 +1621,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				me.remove_pricing_rule(frappe.get_doc(d.doctype, d.name));
 			}
 
-			if (d.free_item_data) {
+			if (d.free_item_data.length > 0) {
 				me.apply_product_discount(d);
 			}
 
@@ -1862,6 +1892,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				callback: function(r) {
 					if(!r.exc) {
 						item.item_tax_rate = r.message;
+						me.add_taxes_from_item_tax_template(item.item_tax_rate);
 						me.calculate_taxes_and_totals();
 					}
 				}
@@ -2264,13 +2295,17 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	coupon_code: function() {
-		var me = this;
-		frappe.run_serially([
-			() => this.frm.doc.ignore_pricing_rule=1,
-			() => me.ignore_pricing_rule(),
-			() => this.frm.doc.ignore_pricing_rule=0,
-			() => me.apply_pricing_rule()
-		]);
+		if (this.frm.doc.coupon_code || this.frm._last_coupon_code) {
+			// reset pricing rules if coupon code is set or is unset
+			const _ignore_pricing_rule = this.frm.doc.ignore_pricing_rule;
+			return frappe.run_serially([
+				() => this.frm.doc.ignore_pricing_rule=1,
+				() => this.frm.trigger('ignore_pricing_rule'),
+				() => this.frm.doc.ignore_pricing_rule=_ignore_pricing_rule,
+				() => this.frm.trigger('apply_pricing_rule'),
+				() => this.frm._last_coupon_code = this.frm.doc.coupon_code
+			]);
+		}
 	}
 });
 

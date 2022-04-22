@@ -8,20 +8,22 @@ frappe.query_reports["Gross Profit"] = {
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
-			"reqd": 1,
-			"default": frappe.defaults.get_user_default("Company")
+			"default": frappe.defaults.get_user_default("Company"),
+			"reqd": 1
 		},
 		{
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
-			"default": frappe.defaults.get_user_default("year_start_date")
+			"default": frappe.defaults.get_user_default("year_start_date"),
+			"reqd": 1
 		},
 		{
 			"fieldname":"to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
-			"default": frappe.defaults.get_user_default("year_end_date")
+			"default": frappe.defaults.get_user_default("year_end_date"),
+			"reqd": 1
 		},
 		{
 			"fieldname":"sales_invoice",
