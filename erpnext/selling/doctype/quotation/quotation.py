@@ -64,10 +64,10 @@ class Quotation(SellingController):
 
 			if not has_web_item:
 				frappe.throw(
-					_(
-						"Row #{0}: Item {1} must have a Website Item for Shopping Cart Quotations"
-					).format(item.idx, frappe.bold(item.item_code)),
-					title=_("Unpublished Item")
+					_("Row #{0}: Item {1} must have a Website Item for Shopping Cart Quotations").format(
+						item.idx, frappe.bold(item.item_code)
+					),
+					title=_("Unpublished Item"),
 				)
 
 	def has_sales_order(self):
