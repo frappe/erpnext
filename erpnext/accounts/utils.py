@@ -3,6 +3,7 @@
 
 
 from json import loads
+from typing import List, Tuple
 
 import frappe
 import frappe.defaults
@@ -1123,12 +1124,17 @@ def update_gl_entries_after(
 def repost_gle_for_stock_vouchers(
 	stock_vouchers, posting_date, company=None, warehouse_account=None
 ):
+	if not stock_vouchers:
+		return
+
 	def _delete_gl_entries(voucher_type, voucher_no):
 		frappe.db.sql(
 			"""delete from `tabGL Entry`
 			where voucher_type=%s and voucher_no=%s""",
 			(voucher_type, voucher_no),
 		)
+
+	stock_vouchers = sort_stock_vouchers_by_posting_date(stock_vouchers)
 
 	if not warehouse_account:
 		warehouse_account = get_warehouse_account_map(company)
@@ -1148,6 +1154,27 @@ def repost_gle_for_stock_vouchers(
 				voucher_obj.make_gl_entries(gl_entries=expected_gle, from_repost=True)
 		else:
 			_delete_gl_entries(voucher_type, voucher_no)
+
+
+def sort_stock_vouchers_by_posting_date(
+	stock_vouchers: List[Tuple[str, str]]
+) -> List[Tuple[str, str]]:
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	voucher_nos = [v[1] for v in stock_vouchers]
+
+	sles = (
+		frappe.qb.from_(sle)
+		.select(sle.voucher_type, sle.voucher_no, sle.posting_date, sle.posting_time, sle.creation)
+		.where((sle.is_cancelled == 0) & (sle.voucher_no.isin(voucher_nos)))
+		.groupby(sle.voucher_type, sle.voucher_no)
+	).run(as_dict=True)
+	sorted_vouchers = [(sle.voucher_type, sle.voucher_no) for sle in sles]
+
+	unknown_vouchers = set(stock_vouchers) - set(sorted_vouchers)
+	if unknown_vouchers:
+		sorted_vouchers.extend(unknown_vouchers)
+
+	return sorted_vouchers
 
 
 def get_future_stock_vouchers(
