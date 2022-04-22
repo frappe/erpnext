@@ -627,6 +627,17 @@ class SubcontractingController(StockController):
 
 		return supplied_items_cost
 
+	def set_subcontracting_order_status(self):
+		if self.doctype == "Subcontracting Order":
+			self.update_status()
+		elif self.doctype == "Subcontracting Receipt":
+			self.__get_subcontracting_orders
+
+			if self.subcontracting_orders:
+				for sco in set(self.subcontracting_orders):
+					sco_doc = frappe.get_doc("Subcontracting Order", sco)
+					sco_doc.update_status()
+
 	@property
 	def sub_contracted_items(self):
 		if not hasattr(self, "_sub_contracted_items"):

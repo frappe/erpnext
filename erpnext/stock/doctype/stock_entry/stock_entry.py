@@ -136,6 +136,7 @@ class StockEntry(StockController):
 		self.update_work_order()
 		self.validate_subcontracting_order()
 		self.update_subcontracting_order_supplied_items()
+		self.update_subcontracting_order_status()
 
 		self.make_gl_entries()
 
@@ -155,6 +156,7 @@ class StockEntry(StockController):
 
 	def on_cancel(self):
 		self.update_subcontracting_order_supplied_items()
+		self.update_subcontracting_order_status()
 
 		if self.work_order and self.purpose == "Material Consumption for Manufacture":
 			self.validate_work_order_status()
@@ -2211,6 +2213,14 @@ class StockEntry(StockController):
 				used_serial_nos.extend(get_serial_nos(row.serial_no))
 
 		return sorted(list(set(get_serial_nos(self.pro_doc.serial_no)) - set(used_serial_nos)))
+
+	def update_subcontracting_order_status(self):
+		if self.subcontracting_order and self.purpose == "Send to Subcontractor":
+			from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+				update_subcontracting_order_status,
+			)
+
+			update_subcontracting_order_status(self.subcontracting_order)
 
 
 @frappe.whitelist()
