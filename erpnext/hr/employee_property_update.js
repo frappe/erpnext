@@ -42,7 +42,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 			}
 
 			const allowed_fields = [];
-			const exclude_fields = ["naming_series", "employee", "first_name", "middle_name", "last_name", "marital_status",
+			const exclude_fields = ["naming_series", "employee", "first_name", "middle_name", "last_name", "marital_status", "ctc",
 				"employee_name", "status", "image", "gender", "date_of_birth", "date_of_joining", "lft", "rgt", "old_parent"];
 
 			const exclude_field_types = ["HTML", "Section Break", "Column Break", "Button", "Read Only", "Tab Break", "Table"];

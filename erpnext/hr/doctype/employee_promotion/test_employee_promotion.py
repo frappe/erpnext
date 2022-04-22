@@ -49,7 +49,7 @@ class TestEmployeePromotion(FrappeTestCase):
 			designation="Software Developer",
 			grade="L1",
 			salary_currency="INR",
-			annual_ctc="500000",
+			ctc="500000",
 		)
 
 		promotion = frappe.get_doc(
@@ -85,6 +85,11 @@ class TestEmployeePromotion(FrappeTestCase):
 
 		promotion.cancel()
 		employee.reload()
+
+		# fields restored
+		self.assertEqual(employee.grade, "L1")
+		self.assertEqual(employee.designation, "Software Developer")
+		self.assertEqual(employee.ctc, 500000)
 
 		# internal work history updated on cancellation
 		self.assertEqual(len(employee.internal_work_history), 1)

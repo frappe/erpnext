@@ -106,6 +106,7 @@
    "fieldname": "current_ctc",
    "fieldtype": "Currency",
    "label": "Current CTC",
+   "mandatory_depends_on": "revised_ctc",
    "options": "salary_currency"
   },
   {
@@ -118,7 +119,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-22 16:26:46.933791",
+ "modified": "2022-04-22 18:47:10.168744",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Promotion",
