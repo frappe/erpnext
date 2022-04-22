@@ -46,7 +46,7 @@ class PickList(Document):
 
 			if item.sales_order_item:
 				# update the picked_qty in SO Item
-				self.update_so(item.sales_order_item, item.picked_qty, item.item_code)
+				self.update_sales_order_item(item, item.picked_qty, item.item_code)
 
 			if not frappe.get_cached_value("Item", item.item_code, "has_serial_no"):
 				continue
@@ -70,14 +70,13 @@ class PickList(Document):
 		# update picked_qty in SO Item on cancel of PL
 		for item in self.get("locations"):
 			if item.sales_order_item:
-				self.update_so(item.sales_order_item, -1 * item.picked_qty, item.item_code)
+				self.update_sales_order_item(item, -1 * item.picked_qty, item.item_code)
 
-	def update_so(self, so_item, picked_qty, item_code):
-		so_doc = frappe.get_doc(
-			"Sales Order", frappe.db.get_value("Sales Order Item", so_item, "parent")
-		)
+	def update_sales_order_item(self, item, picked_qty, item_code):
+		item_table = "Sales Order Item" if not item.product_bundle_item else "Packed Item"
+
 		already_picked, actual_qty = frappe.db.get_value(
-			"Sales Order Item", so_item, ["picked_qty", "qty"]
+			item_table, item.sales_order_item, ["picked_qty", "qty"]
 		)
 
 		if self.docstatus == 1:
@@ -87,20 +86,22 @@ class PickList(Document):
 				frappe.throw(
 					_(
 						"You are picking more than required quantity for {}. Check if there is any other pick list created for {}"
-					).format(item_code, so_doc.name)
+					).format(item_code, item.sales_order)
 				)
 
-		frappe.db.set_value("Sales Order Item", so_item, "picked_qty", already_picked + picked_qty)
+		frappe.db.set_value(item_table, item.sales_order_item, "picked_qty", already_picked + picked_qty)
 
+		# TODO: only do this once after all items
+		sales_order = frappe.get_doc("Sales Order", item.sales_order)
 		total_picked_qty = 0
 		total_so_qty = 0
-		for item in so_doc.get("items"):
-			total_picked_qty += flt(item.picked_qty)
-			total_so_qty += flt(item.stock_qty)
+		for so_item in sales_order.get("items"):
+			total_picked_qty += flt(so_item.picked_qty)
+			total_so_qty += flt(so_item.stock_qty)
 		total_picked_qty = total_picked_qty + picked_qty
 		per_picked = total_picked_qty / total_so_qty * 100
 
-		so_doc.db_set("per_picked", flt(per_picked), update_modified=False)
+		sales_order.db_set("per_picked", flt(per_picked), update_modified=False)
 
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):
