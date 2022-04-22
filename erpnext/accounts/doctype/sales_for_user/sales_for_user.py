@@ -191,7 +191,8 @@ class SalesForUser(Document):
 		payment_entry = 0
 
 		if self.user != None:
-			entries = frappe.get_all("Payment Entry", ["paid_amount"], filters = {"user": self.user})
+			con_entry = self.filters_entries()
+			entries = frappe.get_all("Payment Entry", ["paid_amount"], filters = con_entry)
 
 			for entry in entries:
 				payment_entry += entry.paid_amount
@@ -208,6 +209,16 @@ class SalesForUser(Document):
 		self.total_invoice = operations
 		self.total_operations = operations
 		self.payment_entry = payment_entry
+	
+	def filters_entries(self):
+		conditions = ''
+
+		conditions += "{"
+		conditions += '"creation": ["between", ["{}", "{}"]]'.format(self.start_date, self.final_date)
+		conditions += ', "user": "{}"'.format(self.user)
+		conditions += '}'
+
+		return conditions
 
 	def return_filters(self):
 		conditions = ''
