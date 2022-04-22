@@ -162,7 +162,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Open\nTo Close\nCompleted\nCancelled",
+   "options": "Open\nTo Close\nCompleted\nClosed\nCancelled",
    "reqd": 1,
    "search_index": 1
   },
@@ -1030,7 +1030,7 @@
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-04-21 02:24:17.309084",
+ "modified": "2022-04-22 14:42:33.684442",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

@@ -11,7 +11,7 @@ def get_notification_config():
 			"Issue": {"status": "Open"},
 			"Warranty Claim": {"status": "Open"},
 			"Task": {"status": ("in", ("Open", "Overdue"))},
-			"Project": {"status": "Open"},
+			"Project": {"status": ("not in", ("Completed", "Cancelled", "Closed"))},
 			"Lead": {"status": "Open"},
 			"Contact": {"status": "Open"},
 			"Opportunity": {"status": "Open"},

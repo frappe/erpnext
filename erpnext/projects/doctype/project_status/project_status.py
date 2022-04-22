@@ -113,8 +113,8 @@ def set_manual_project_status(project, project_status):
 
 	project_status_doc = frappe.get_cached_doc("Project Status", project_status)
 
-	if not project_status_doc.user_can_set:
-		frappe.throw(_("Not allowed to set Project Status as {0}").format(frappe.bold(project_status)))
+	if not project_status_doc.manual_status:
+		frappe.throw(_("Not allowed to manually set Project Status as {0}").format(frappe.bold(project_status)))
 
 	# run validation script first (for specific error messages)
 	execute_project_status_validation(project_status_doc, project, 'on_set_validation')
