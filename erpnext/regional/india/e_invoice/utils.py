@@ -12,8 +12,8 @@ import traceback
 
 import frappe
 import jwt
-import six
 import requests
+import six
 from frappe import _, bold
 from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.integrations.utils import make_get_request, make_post_request
