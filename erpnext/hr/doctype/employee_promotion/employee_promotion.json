@@ -9,11 +9,16 @@
   "employee",
   "employee_name",
   "department",
+  "salary_currency",
   "column_break_3",
   "promotion_date",
   "company",
   "details_section",
   "promotion_details",
+  "salary_details_section",
+  "current_ctc",
+  "column_break_12",
+  "revised_ctc",
   "amended_from"
  ],
  "fields": [
@@ -77,11 +82,43 @@
    "options": "Employee Promotion",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "salary_details_section",
+   "fieldtype": "Section Break",
+   "label": "Salary Details"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.salary_currency",
+   "fieldname": "salary_currency",
+   "fieldtype": "Link",
+   "label": "Salary Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.ctc",
+   "fetch_if_empty": 1,
+   "fieldname": "current_ctc",
+   "fieldtype": "Currency",
+   "label": "Current CTC",
+   "options": "salary_currency"
+  },
+  {
+   "depends_on": "current_ctc",
+   "fieldname": "revised_ctc",
+   "fieldtype": "Currency",
+   "label": "Revised CTC",
+   "options": "salary_currency"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-09 12:24:07.667237",
+ "modified": "2022-04-22 16:26:46.933791",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Promotion",

@@ -26,6 +26,10 @@ class EmployeePromotion(Document):
 		employee = update_employee_work_history(
 			employee, self.promotion_details, date=self.promotion_date
 		)
+
+		if self.revised_ctc:
+			employee.ctc = self.revised_ctc
+
 		employee.save()
 
 	def on_cancel(self):
