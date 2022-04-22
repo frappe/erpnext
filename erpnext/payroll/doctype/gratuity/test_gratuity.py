@@ -24,7 +24,9 @@ class TestGratuity(unittest.TestCase):
 		frappe.db.delete("Gratuity")
 		frappe.db.delete("Additional Salary", {"ref_doctype": "Gratuity"})
 
-		make_earning_salary_component(setup=True, test_tax=True, company_list=["_Test Company"])
+		make_earning_salary_component(
+			setup=True, test_tax=True, company_list=["_Test Company"], include_flexi_benefits=True
+		)
 		make_deduction_salary_component(setup=True, test_tax=True, company_list=["_Test Company"])
 
 	def test_get_last_salary_slip_should_return_none_for_new_employee(self):
