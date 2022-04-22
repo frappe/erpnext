@@ -5,6 +5,7 @@ import json
 from collections import OrderedDict, defaultdict
 from itertools import groupby
 from operator import itemgetter
+from typing import Set
 
 import frappe
 from frappe import _
@@ -39,6 +40,8 @@ class PickList(Document):
 				)
 
 	def before_submit(self):
+
+		update_sales_orders = set()
 		for item in self.locations:
 			# if the user has not entered any picked qty, set it to stock_qty, before submit
 			if item.picked_qty == 0:
@@ -47,6 +50,7 @@ class PickList(Document):
 			if item.sales_order_item:
 				# update the picked_qty in SO Item
 				self.update_sales_order_item(item, item.picked_qty, item.item_code)
+				update_sales_orders.add(item.sales_order)
 
 			if not frappe.get_cached_value("Item", item.item_code, "has_serial_no"):
 				continue
@@ -66,11 +70,18 @@ class PickList(Document):
 				title=_("Quantity Mismatch"),
 			)
 
+		self.update_sales_order_picking_status(update_sales_orders)
+
 	def before_cancel(self):
-		# update picked_qty in SO Item on cancel of PL
+		"""Deduct picked qty on cancelling pick list"""
+		updated_sales_orders = set()
+
 		for item in self.get("locations"):
 			if item.sales_order_item:
 				self.update_sales_order_item(item, -1 * item.picked_qty, item.item_code)
+				updated_sales_orders.add(item.sales_order)
+
+		self.update_sales_order_picking_status(updated_sales_orders)
 
 	def update_sales_order_item(self, item, picked_qty, item_code):
 		item_table = "Sales Order Item" if not item.product_bundle_item else "Packed Item"
@@ -91,17 +102,11 @@ class PickList(Document):
 
 		frappe.db.set_value(item_table, item.sales_order_item, "picked_qty", already_picked + picked_qty)
 
-		# TODO: only do this once after all items
-		sales_order = frappe.get_doc("Sales Order", item.sales_order)
-		total_picked_qty = 0
-		total_so_qty = 0
-		for so_item in sales_order.get("items"):
-			total_picked_qty += flt(so_item.picked_qty)
-			total_so_qty += flt(so_item.stock_qty)
-		total_picked_qty = total_picked_qty + picked_qty
-		per_picked = total_picked_qty / total_so_qty * 100
-
-		sales_order.db_set("per_picked", flt(per_picked), update_modified=False)
+	@staticmethod
+	def update_sales_order_picking_status(sales_orders: Set[str]) -> None:
+		for sales_order in sales_orders:
+			if sales_order:
+				frappe.get_doc("Sales Order", sales_order).update_picking_status()
 
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):
