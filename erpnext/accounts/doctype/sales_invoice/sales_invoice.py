@@ -502,7 +502,7 @@ class SalesInvoice(SellingController):
 
 			invoice_total = self.rounded_total or self.grand_total
 			if total_amount_in_payments < invoice_total:
-				frappe.throw(_("Total payments amount can't be greater than {}".format(-invoice_total)))
+				frappe.throw(_("Total payments amount can't be greater than {}".format(frappe.format(-invoice_total, df=self.meta.get_field('grand_total')))))
 
 	def validate_pos_paid_amount(self):
 		if self.is_pos:
@@ -827,7 +827,8 @@ class SalesInvoice(SellingController):
 
 	def validate_pos(self):
 		if self.is_return:
-			if flt(self.paid_amount) + flt(self.write_off_amount) - flt(self.grand_total) > \
+			grand_total = flt(self.rounded_total) or flt(self.grand_total)
+			if flt(self.paid_amount) + flt(self.write_off_amount) - grand_total > \
 				1.0/(10.0**(self.precision("grand_total") + 1.0)):
 					frappe.throw(_("Paid Amount + Write Off Amount can not be greater than Grand Total"))
 
