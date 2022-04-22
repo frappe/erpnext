@@ -100,20 +100,35 @@ class StockController(AccountsController):
 		if self.doctype == "Sales Invoice":
 			if self.discount_reason != None:
 				company = frappe.get_doc("Company", self.company)
+				
+				if self.outstanding_amount == 0:
+					if company.default_account_for_spot_discounts == None:
+						frappe.throw(_("You must assign a default account for spot discounts in the company."))
 
-				if company.default_account_for_discounts == None:
-					frappe.throw(_("You must assign a default account for discounts in the company."))
+					account_currency = get_account_currency(company.default_account_for_spot_discounts)
 
-				account_currency = get_account_currency(company.default_account_for_discounts)
+					gl_list.append(self.get_gl_dict({
+						"account": company.default_account_for_spot_discounts,
+						"against": company.default_account_for_spot_discounts,
+						"cost_center": self.cost_center,
+						"remarks": self.get("remarks") or "Accounting Entry for Stock",
+						"credit": self.discount_amount,
+						"credit_in_account_currency": self.discount_amount
+					}, account_currency))
+				else:
+					if company.default_account_for_credit_discounts == None:
+						frappe.throw(_("You must assign a default account for credit discounts in the company."))
 
-				gl_list.append(self.get_gl_dict({
-					"account": company.default_account_for_discounts,
-					"against": company.default_account_for_discounts,
-					"cost_center": self.cost_center,
-					"remarks": self.get("remarks") or "Accounting Entry for Stock",
-					"credit": self.discount_amount,
-					"credit_in_account_currency": self.discount_amount
-				}, account_currency))
+					account_currency = get_account_currency(company.default_account_for_credit_discounts)
+
+					gl_list.append(self.get_gl_dict({
+						"account": company.default_account_for_credit_discounts,
+						"against": company.default_account_for_credit_discounts,
+						"cost_center": self.cost_center,
+						"remarks": self.get("remarks") or "Accounting Entry for Stock",
+						"credit": self.discount_amount,
+						"credit_in_account_currency": self.discount_amount
+					}, account_currency))
 
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
