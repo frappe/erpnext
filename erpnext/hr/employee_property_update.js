@@ -10,13 +10,20 @@ frappe.ui.form.on(cur_frm.doctype, {
 	},
 
 	onload: function(frm) {
-		if (frm.doc.__islocal) {
-			if (frm.doctype == "Employee Promotion") {
-				frm.clear_table("promotion_details");
-			} else if (frm.doctype == "Employee Transfer") {
-				frm.clear_table("transfer_details");
-			}
-		}
+		if (frm.doc.__islocal)
+			frm.trigger("clear_property_table");
+	},
+
+	employee: function(frm) {
+		frm.trigger("clear_property_table");
+	},
+
+	clear_property_table: function(frm) {
+		let table = (frm.doctype == "Employee Promotion") ? "promotion_details" : "transfer_details";
+		frm.clear_table(table);
+		frm.refresh_field(table);
+
+		frm.fields_dict[table].grid.wrapper.find(".grid-add-row").hide();
 	},
 
 	refresh: function(frm) {
