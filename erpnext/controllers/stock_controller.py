@@ -53,11 +53,13 @@ class StockController(AccountsController):
 
 		gl_list = []
 		warehouse_with_no_account = []
+		sle_out = None
 
 		for item_row in voucher_details:
 			sle_list = sle_map.get(item_row.name)
 			if sle_list:
 				for sle in sle_list:
+					sle_out = sle
 					if warehouse_account.get(sle.warehouse):
 						# from warehouse account
 
@@ -99,13 +101,13 @@ class StockController(AccountsController):
 		if self.doctype == "Sales Invoice":
 			if self.discount_reason != None:
 				gl_list.append(self.get_gl_dict({
-					"account": warehouse_account[sle.warehouse]["account"],
-					"against": warehouse_account[sle.warehouse]["account"],
+					"account": warehouse_account[sle_out.warehouse]["account"],
+					"against": warehouse_account[sle_out.warehouse]["account"],
 					"cost_center": self.cost_center,
 					"remarks": self.get("remarks") or "Accounting Entry for Stock",
 					"credit": self.discount_amount,
 					"credit_in_account_currency": self.discount_amount
-				}, warehouse_account[sle.warehouse]["account_currency"]))
+				}, warehouse_account[sle_out.warehouse]["account_currency"]))
 
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
