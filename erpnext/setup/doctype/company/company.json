@@ -53,6 +53,7 @@
   "allow_account_creation_against_child_company",
   "default_payable_account",
   "default_credit_account",
+  "default_account_for_discounts",
   "default_employee_advance_account",
   "default_expense_account",
   "default_income_account",
@@ -728,12 +729,18 @@
    "fieldtype": "Link",
    "label": "Default Credit Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "default_account_for_discounts",
+   "fieldtype": "Link",
+   "label": "Default Account For Discounts",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "image_field": "company_logo",
- "modified": "2022-01-14 14:07:57.720955",
+ "modified": "2022-04-22 14:23:17.211674",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
