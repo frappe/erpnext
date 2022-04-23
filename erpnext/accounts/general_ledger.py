@@ -392,8 +392,20 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 		}
 	)
 
+	update_accounting_dimensions(round_off_gle)
+
 	if not round_off_account_exists:
 		gl_map.append(round_off_gle)
+
+
+def update_accounting_dimensions(round_off_gle):
+	dimensions = get_accounting_dimensions()
+	dimension_values = frappe.db.get_value(
+		round_off_gle["voucher_type"], round_off_gle["voucher_no"], dimensions
+	)
+
+	for dimension in dimensions:
+		round_off_gle[dimension] = dimension_values.get(dimension)
 
 
 def get_round_off_account_and_cost_center(company, voucher_type, voucher_no):
