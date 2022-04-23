@@ -1,102 +1,148 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
+from __future__ import unicode_literals
 import frappe
 from frappe import _
-
+from frappe.utils import getdate
 
 def execute(filters=None):
+	filters["invoices"] = frappe.cache().hget("invoices", frappe.session.user)
 	validate_filters(filters)
-	tds_docs, tds_accounts, tax_category_map = get_tds_docs(filters)
+	set_filters(filters)
+
+	# TDS payment entries
+	payment_entries = get_payment_entires(filters)
 
 	columns = get_columns(filters)
+	if not filters.get("invoices"):
+		return columns, []
 
-	res = get_result(filters, tds_docs, tds_accounts, tax_category_map)
+	res = get_result(filters, payment_entries)
+
 	return columns, res
 
-
 def validate_filters(filters):
-	"""Validate if dates are properly set"""
+	''' Validate if dates are properly set '''
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date must be before To Date"))
 
+def set_filters(filters):
+	invoices = []
 
-def get_result(filters, tds_docs, tds_accounts, tax_category_map):
-	supplier_map = get_supplier_pan_map()
-	tax_rate_map = get_tax_rate_map(filters)
-	gle_map = get_gle_map(tds_docs)
+	if not filters.get("invoices"):
+		filters["invoices"] = get_tds_invoices_and_orders()
+
+	if filters.supplier and filters.purchase_invoice:
+		for d in filters["invoices"]:
+			if d.name == filters.purchase_invoice and d.supplier == filters.supplier:
+				invoices.append(d)
+	elif filters.supplier and not filters.purchase_invoice:
+		for d in filters["invoices"]:
+			if d.supplier == filters.supplier:
+				invoices.append(d)
+	elif filters.purchase_invoice and not filters.supplier:
+		for d in filters["invoices"]:
+			if d.name == filters.purchase_invoice:
+				invoices.append(d)
+	elif filters.supplier and filters.purchase_order:
+		for d in filters.get("invoices"):
+			if d.name == filters.purchase_order and d.supplier == filters.supplier:
+				invoices.append(d)
+	elif filters.supplier and not filters.purchase_order:
+		for d in filters.get("invoices"):
+			if d.supplier == filters.supplier:
+				invoices.append(d)
+	elif filters.purchase_order and not filters.supplier:
+		for d in filters.get("invoices"):
+			if d.name == filters.purchase_order:
+				invoices.append(d)
+
+	filters["invoices"] = invoices if invoices else filters["invoices"]
+	filters.naming_series = frappe.db.get_single_value('Buying Settings', 'supp_master_name')
+
+	#print(filters.get('invoices'))
+
+def get_result(filters, payment_entries):
+	supplier_map, tds_docs = get_supplier_map(filters, payment_entries)
+	documents = [d.get('name') for d in filters.get('invoices')] + [d.get('name') for d in payment_entries]
+
+	gle_map = get_gle_map(filters, documents)
 
 	out = []
-	for name, details in gle_map.items():
+	for d in gle_map:
 		tds_deducted, total_amount_credited = 0, 0
-		tax_withholding_category = tax_category_map.get(name)
-		rate = tax_rate_map.get(tax_withholding_category)
+		supplier = supplier_map[d]
 
-		for entry in details:
-			supplier = entry.party or entry.against
-			posting_date = entry.posting_date
-			voucher_type = entry.voucher_type
+		tds_doc = tds_docs[supplier.tax_withholding_category]
+		account_list = [i.account for i in tds_doc.accounts if i.company == filters.company]
 
-			if not tax_withholding_category:
-				tax_withholding_category = supplier_map.get(supplier, {}).get("tax_withholding_category")
-				rate = tax_rate_map.get(tax_withholding_category)
+		if account_list:
+			account = account_list[0]
 
-			if entry.account in tds_accounts:
-				tds_deducted += entry.credit - entry.debit
+		for k in gle_map[d]:
+			if k.party == supplier_map[d] and k.credit > 0:
+				total_amount_credited += (k.credit - k.debit)
+			elif account_list and k.account == account and (k.credit - k.debit) > 0:
+				tds_deducted = (k.credit - k.debit)
+				total_amount_credited += (k.credit - k.debit)
+			voucher_type = k.voucher_type
 
-			total_amount_credited += entry.credit
+		rate = [i.tax_withholding_rate for i in tds_doc.rates
+			if i.fiscal_year == gle_map[d][0].fiscal_year]
 
-		if tds_deducted:
-			row = {
-				"pan"
-				if frappe.db.has_column("Supplier", "pan")
-				else "tax_id": supplier_map.get(supplier, {}).get("pan"),
-				"supplier": supplier_map.get(supplier, {}).get("name"),
-			}
+		if rate and len(rate) > 0 and tds_deducted:
+			rate = rate[0]
 
-			if filters.naming_series == "Naming Series":
-				row.update({"supplier_name": supplier_map.get(supplier, {}).get("supplier_name")})
+			row = [supplier.pan, supplier.name]
 
-			row.update(
-				{
-					"section_code": tax_withholding_category,
-					"entity_type": supplier_map.get(supplier, {}).get("supplier_type"),
-					"tds_rate": rate,
-					"total_amount_credited": total_amount_credited,
-					"tds_deducted": tds_deducted,
-					"transaction_date": posting_date,
-					"transaction_type": voucher_type,
-					"ref_no": name,
-				}
-			)
+			if filters.naming_series == 'Naming Series':
+				row.append(supplier.supplier_name)
 
+			row.extend([tds_doc.name, supplier.supplier_type, rate, total_amount_credited,
+				tds_deducted, gle_map[d][0].posting_date, voucher_type, d])
 			out.append(row)
 
 	return out
 
+def get_supplier_map(filters, payment_entries):
+	# create a supplier_map of the form {"purchase_invoice": {supplier_name, pan, tds_name}}
+	# pre-fetch all distinct applicable tds docs
+	supplier_map, tds_docs = {}, {}
+	pan = "pan" if frappe.db.has_column("Supplier", "pan") else "tax_id"
+	supplier_list = [d.supplier for d in filters["invoices"]]
 
-def get_supplier_pan_map():
-	supplier_map = frappe._dict()
-	suppliers = frappe.db.get_all(
-		"Supplier", fields=["name", "pan", "supplier_type", "supplier_name", "tax_withholding_category"]
-	)
+	supplier_detail = frappe.db.get_all('Supplier',
+		{"name": ["in", supplier_list]},
+		["tax_withholding_category", "name", pan+" as pan", "supplier_type", "supplier_name"])
 
-	for d in suppliers:
-		supplier_map[d.name] = d
+	for d in filters["invoices"]:
+		supplier_map[d.get("name")] = [k for k in supplier_detail
+			if k.name == d.get("supplier")][0]
 
-	return supplier_map
+	for d in payment_entries:
+		supplier_map[d.get("name")] = [k for k in supplier_detail
+			if k.name == d.get("supplier")][0]
 
+	for d in supplier_detail:
+		if d.get("tax_withholding_category") not in tds_docs:
+			tds_docs[d.get("tax_withholding_category")] = \
+				frappe.get_doc("Tax Withholding Category", d.get("tax_withholding_category"))
 
-def get_gle_map(documents):
+	return supplier_map, tds_docs
+
+def get_gle_map(filters, documents):
 	# create gle_map of the form
 	# {"purchase_invoice": list of dict of all gle created for this invoice}
 	gle_map = {}
 
-	gle = frappe.db.get_all(
-		"GL Entry",
-		{"voucher_no": ["in", documents], "is_cancelled": 0},
-		["credit", "debit", "account", "voucher_no", "posting_date", "voucher_type", "against", "party"],
+	gle = frappe.db.get_all('GL Entry',
+		{
+			"voucher_no": ["in", documents],
+			'is_cancelled': 0,
+			'posting_date': ("between", [filters.get('from_date'), filters.get('to_date')]),
+		},
+		["fiscal_year", "credit", "debit", "account", "voucher_no", "posting_date", "voucher_type"],
 	)
 
 	for d in gle:
@@ -107,144 +153,118 @@ def get_gle_map(documents):
 
 	return gle_map
 
-
 def get_columns(filters):
 	pan = "pan" if frappe.db.has_column("Supplier", "pan") else "tax_id"
 	columns = [
-		{"label": _(frappe.unscrub(pan)), "fieldname": pan, "fieldtype": "Data", "width": 90},
+		{
+			"label": _(frappe.unscrub(pan)),
+			"fieldname": pan,
+			"fieldtype": "Data",
+			"width": 90
+		},
 		{
 			"label": _("Supplier"),
 			"options": "Supplier",
 			"fieldname": "supplier",
 			"fieldtype": "Link",
-			"width": 180,
+			"width": 180
+		}]
+
+	if filters.naming_series == 'Naming Series':
+		columns.append({
+			"label": _("Supplier Name"),
+			"fieldname": "supplier_name",
+			"fieldtype": "Data",
+			"width": 180
+		})
+
+	columns.extend([
+		{
+			"label": _("Section Code"),
+			"options": "Tax Withholding Category",
+			"fieldname": "section_code",
+			"fieldtype": "Link",
+			"width": 180
 		},
-	]
-
-	if filters.naming_series == "Naming Series":
-		columns.append(
-			{"label": _("Supplier Name"), "fieldname": "supplier_name", "fieldtype": "Data", "width": 180}
-		)
-
-	columns.extend(
-		[
-			{
-				"label": _("Section Code"),
-				"options": "Tax Withholding Category",
-				"fieldname": "section_code",
-				"fieldtype": "Link",
-				"width": 180,
-			},
-			{"label": _("Entity Type"), "fieldname": "entity_type", "fieldtype": "Data", "width": 180},
-			{"label": _("TDS Rate %"), "fieldname": "tds_rate", "fieldtype": "Percent", "width": 90},
-			{
-				"label": _("Total Amount Credited"),
-				"fieldname": "total_amount_credited",
-				"fieldtype": "Float",
-				"width": 90,
-			},
-			{
-				"label": _("Amount of TDS Deducted"),
-				"fieldname": "tds_deducted",
-				"fieldtype": "Float",
-				"width": 90,
-			},
-			{
-				"label": _("Date of Transaction"),
-				"fieldname": "transaction_date",
-				"fieldtype": "Date",
-				"width": 90,
-			},
-			{"label": _("Transaction Type"), "fieldname": "transaction_type", "width": 90},
-			{
-				"label": _("Reference No."),
-				"fieldname": "ref_no",
-				"fieldtype": "Dynamic Link",
-				"options": "transaction_type",
-				"width": 90,
-			},
-		]
-	)
+		{
+			"label": _("Entity Type"),
+			"fieldname": "entity_type",
+			"fieldtype": "Data",
+			"width": 180
+		},
+		{
+			"label": _("TDS Rate %"),
+			"fieldname": "tds_rate",
+			"fieldtype": "Percent",
+			"width": 90
+		},
+		{
+			"label": _("Total Amount Credited"),
+			"fieldname": "total_amount_credited",
+			"fieldtype": "Float",
+			"width": 90
+		},
+		{
+			"label": _("Amount of TDS Deducted"),
+			"fieldname": "tds_deducted",
+			"fieldtype": "Float",
+			"width": 90
+		},
+		{
+			"label": _("Date of Transaction"),
+			"fieldname": "transaction_date",
+			"fieldtype": "Date",
+			"width": 90
+		},
+		{
+			"label": _("Transaction Type"),
+			"fieldname": "transaction_type",
+			"width": 90
+		},
+		{
+			"label": _("Reference No."),
+			"fieldname": "ref_no",
+			"fieldtype": "Dynamic Link",
+			"options": "transaction_type",
+			"width": 90
+		}
+	])
 
 	return columns
 
-
-def get_tds_docs(filters):
-	tds_documents = []
-	purchase_invoices = []
-	payment_entries = []
-	journal_entries = []
-	tax_category_map = {}
-	or_filters = {}
-	bank_accounts = frappe.get_all("Account", {"is_group": 0, "account_type": "Bank"}, pluck="name")
-
-	tds_accounts = frappe.get_all(
-		"Tax Withholding Account", {"company": filters.get("company")}, pluck="account"
-	)
-
-	query_filters = {
-		"account": ("in", tds_accounts),
-		"posting_date": ("between", [filters.get("from_date"), filters.get("to_date")]),
-		"is_cancelled": 0,
-		"against": ("not in", bank_accounts),
+def get_payment_entires(filters):
+	filter_dict = {
+		'posting_date': ("between", [filters.get('from_date'), filters.get('to_date')]),
+		'party_type': 'Supplier',
+		'apply_tax_withholding_amount': 1
 	}
 
-	if filters.get("supplier"):
-		del query_filters["account"]
-		del query_filters["against"]
-		or_filters = {"against": filters.get("supplier"), "party": filters.get("supplier")}
+	if filters.get('purchase_invoice') or filters.get('purchase_order'):
+		parent = frappe.db.get_all('Payment Entry Reference',
+			{'reference_name': ('in', [d.get('name') for d in filters.get('invoices')])}, ['parent'])
 
-	tds_docs = frappe.get_all(
-		"GL Entry",
-		filters=query_filters,
-		or_filters=or_filters,
-		fields=["voucher_no", "voucher_type", "against", "party"],
-	)
+		filter_dict.update({'name': ('in', [d.get('parent') for d in parent])})
 
-	for d in tds_docs:
-		if d.voucher_type == "Purchase Invoice":
-			purchase_invoices.append(d.voucher_no)
-		elif d.voucher_type == "Payment Entry":
-			payment_entries.append(d.voucher_no)
-		elif d.voucher_type == "Journal Entry":
-			journal_entries.append(d.voucher_no)
+	payment_entries = frappe.get_all('Payment Entry', fields=['name', 'party_name as supplier'],
+		filters=filter_dict)
 
-		tds_documents.append(d.voucher_no)
+	return payment_entries
 
-	if purchase_invoices:
-		get_tax_category_map(purchase_invoices, "Purchase Invoice", tax_category_map)
+@frappe.whitelist()
+def get_tds_invoices_and_orders():
+	# fetch tds applicable supplier and fetch invoices for these suppliers
+	suppliers = [d.name for d in frappe.db.get_list("Supplier",
+		{"tax_withholding_category": ["!=", ""]}, ["name"])]
 
-	if payment_entries:
-		get_tax_category_map(payment_entries, "Payment Entry", tax_category_map)
+	invoices = frappe.db.get_list("Purchase Invoice",
+		{"supplier": ["in", suppliers]}, ["name", "supplier"])
 
-	if journal_entries:
-		get_tax_category_map(journal_entries, "Journal Entry", tax_category_map)
+	orders = frappe.db.get_list("Purchase Order",
+		{"supplier": ["in", suppliers]}, ["name", "supplier"])
 
-	return tds_documents, tds_accounts, tax_category_map
+	invoices = invoices + orders
+	invoices = [d for d in invoices if d.supplier]
 
+	frappe.cache().hset("invoices", frappe.session.user, invoices)
 
-def get_tax_category_map(vouchers, doctype, tax_category_map):
-	tax_category_map.update(
-		frappe._dict(
-			frappe.get_all(
-				doctype,
-				filters={"name": ("in", vouchers)},
-				fields=["name", "tax_withholding_category"],
-				as_list=1,
-			)
-		)
-	)
-
-
-def get_tax_rate_map(filters):
-	rate_map = frappe.get_all(
-		"Tax Withholding Rate",
-		filters={
-			"from_date": ("<=", filters.get("from_date")),
-			"to_date": (">=", filters.get("to_date")),
-		},
-		fields=["parent", "tax_withholding_rate"],
-		as_list=1,
-	)
-
-	return frappe._dict(rate_map)
+	return invoices

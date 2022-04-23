@@ -27,13 +27,12 @@
    "fetch_from": "employee.user_id",
    "fieldname": "user_id",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "ERPNext User ID",
    "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2022-02-13 19:44:21.302938",
+ "modified": "2019-06-06 10:41:20.313756",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Group Table",

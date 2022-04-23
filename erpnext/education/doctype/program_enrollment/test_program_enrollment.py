@@ -1,23 +1,20 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe and Contributors
 # See license.txt
-
-import unittest
+from __future__ import unicode_literals
 
 import frappe
+import unittest
 
+from erpnext.education.doctype.student.test_student import create_student
+from erpnext.education.doctype.student.test_student import get_student
 from erpnext.education.doctype.program.test_program import make_program_and_linked_courses
-from erpnext.education.doctype.student.test_student import create_student, get_student
-
+from erpnext.education.doctype.course_activity.test_course_activity import make_course_activity
 
 class TestProgramEnrollment(unittest.TestCase):
+
 	def setUp(self):
-		create_student(
-			{
-				"first_name": "_Test Name",
-				"last_name": "_Test Last Name",
-				"email": "_test_student@example.com",
-			}
-		)
+		create_student({"first_name": "_Test Name", "last_name": "_Test Last Name", "email": "_test_student@example.com"})
 		make_program_and_linked_courses("_Test Program 1", ["_Test Course 1", "_Test Course 2"])
 
 	def test_create_course_enrollments(self):

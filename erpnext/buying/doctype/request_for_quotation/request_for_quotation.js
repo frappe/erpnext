@@ -124,14 +124,6 @@ frappe.ui.form.on("Request for Quotation",{
 		dialog.show()
 	},
 
-	schedule_date(frm) {
-		if(frm.doc.schedule_date){
-			frm.doc.items.forEach((item) => {
-				item.schedule_date = frm.doc.schedule_date;
-			})
-		}
-		refresh_field("items");
-	},
 	preview: (frm) => {
 		let dialog = new frappe.ui.Dialog({
 			title: __('Preview Email'),
@@ -192,13 +184,7 @@ frappe.ui.form.on("Request for Quotation",{
 		dialog.show();
 	}
 })
-frappe.ui.form.on("Request for Quotation Item", {
-	items_add(frm, cdt, cdn) {
-		if (frm.doc.schedule_date) {
-			frappe.model.set_value(cdt, cdn, 'schedule_date', frm.doc.schedule_date);
-		}
-	}
-});
+
 frappe.ui.form.on("Request for Quotation Supplier",{
 	supplier: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn]
@@ -219,10 +205,10 @@ frappe.ui.form.on("Request for Quotation Supplier",{
 
 })
 
-erpnext.buying.RequestforQuotationController = class RequestforQuotationController extends erpnext.buying.BuyingController {
-	refresh() {
+erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.extend({
+	refresh: function() {
 		var me = this;
-		super.refresh();
+		this._super();
 		if (this.frm.doc.docstatus===0) {
 			this.frm.add_custom_button(__('Material Request'),
 				function() {
@@ -316,17 +302,17 @@ erpnext.buying.RequestforQuotationController = class RequestforQuotationControll
 					me.get_suppliers_button(me.frm);
 				}, __("Tools"));
 		}
-	}
+	},
 
-	calculate_taxes_and_totals() {
+	calculate_taxes_and_totals: function() {
 		return;
-	}
+	},
 
-	tc_name() {
+	tc_name: function() {
 		this.get_terms();
-	}
+	},
 
-	get_suppliers_button (frm) {
+	get_suppliers_button: function (frm) {
 		var doc = frm.doc;
 		var dialog = new frappe.ui.Dialog({
 			title: __("Get Suppliers"),
@@ -424,8 +410,8 @@ erpnext.buying.RequestforQuotationController = class RequestforQuotationControll
 		});
 
 		dialog.show();
-	}
-};
+	},
+});
 
 // for backward compatibility: combine new and previous states
-extend_cscript(cur_frm.cscript, new erpnext.buying.RequestforQuotationController({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.buying.RequestforQuotationController({frm: cur_frm}));

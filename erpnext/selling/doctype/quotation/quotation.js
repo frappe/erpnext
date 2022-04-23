@@ -18,8 +18,6 @@ frappe.ui.form.on('Quotation', {
 			}
 		});
 
-		frm.set_df_property('packed_items', 'cannot_add_rows', true);
-		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
 	},
 
 	refresh: function(frm) {
@@ -38,11 +36,13 @@ frappe.ui.form.on('Quotation', {
 	}
 });
 
-erpnext.selling.QuotationController = class QuotationController extends erpnext.selling.SellingController {
-	onload(doc, dt, dn) {
-		super.onload(doc, dt, dn);
-	}
-	party_name() {
+erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
+	onload: function(doc, dt, dn) {
+		var me = this;
+		this._super(doc, dt, dn);
+
+	},
+	party_name: function() {
 		var me = this;
 		erpnext.utils.get_party_details(this.frm, null, null, function() {
 			me.apply_price_list();
@@ -51,14 +51,11 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 		if(me.frm.doc.quotation_to=="Lead" && me.frm.doc.party_name) {
 			me.frm.trigger("get_lead_details");
 		}
-	}
-	refresh(doc, dt, dn) {
-		super.refresh(doc, dt, dn);
-		frappe.dynamic_link = {
-			doc: this.frm.doc,
-			fieldname: 'party_name',
-			doctype: doc.quotation_to == 'Customer' ? 'Customer' : 'Lead',
-		};
+	},
+	refresh: function(doc, dt, dn) {
+		this._super(doc, dt, dn);
+		doctype = doc.quotation_to == 'Customer' ? 'Customer':'Lead';
+		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'party_name', doctype: doctype}
 
 		var me = this;
 
@@ -124,9 +121,9 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 
 		this.toggle_reqd_lead_customer();
 
-	}
+	},
 
-	set_dynamic_field_label(){
+	set_dynamic_field_label: function(){
 		if (this.frm.doc.quotation_to == "Customer")
 		{
 			this.frm.set_df_property("party_name", "label", "Customer");
@@ -141,22 +138,22 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				return{	query: "erpnext.controllers.queries.lead_query" }
 			}
 		}
-	}
+	},
 
-	toggle_reqd_lead_customer() {
+	toggle_reqd_lead_customer: function() {
 		var me = this;
 
 		// to overwrite the customer_filter trigger from queries.js
 		this.frm.toggle_reqd("party_name", this.frm.doc.quotation_to);
 		this.frm.set_query('customer_address', this.address_query);
 		this.frm.set_query('shipping_address_name', this.address_query);
-	}
+	},
 
-	tc_name() {
+	tc_name: function() {
 		this.get_terms();
-	}
+	},
 
-	address_query(doc) {
+	address_query: function(doc) {
 		return {
 			query: 'frappe.contacts.doctype.address.address.address_query',
 			filters: {
@@ -164,20 +161,20 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				link_name: doc.party_name
 			}
 		};
-	}
+	},
 
-	validate_company_and_party(party_field) {
+	validate_company_and_party: function(party_field) {
 		if(!this.frm.doc.quotation_to) {
 			frappe.msgprint(__("Please select a value for {0} quotation_to {1}", [this.frm.doc.doctype, this.frm.doc.name]));
 			return false;
 		} else if (this.frm.doc.quotation_to == "Lead") {
 			return true;
 		} else {
-			return super.validate_company_and_party(party_field);
+			return this._super(party_field);
 		}
-	}
+	},
 
-	get_lead_details() {
+	get_lead_details: function() {
 		var me = this;
 		if(!this.frm.doc.quotation_to === "Lead") {
 			return;
@@ -201,7 +198,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 			}
 		})
 	}
-};
+});
 
 cur_frm.script_manager.make(erpnext.selling.QuotationController);
 

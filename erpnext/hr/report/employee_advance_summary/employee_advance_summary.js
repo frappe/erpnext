@@ -38,3 +38,4 @@ frappe.query_reports["Employee Advance Summary"] = {
 		}
 	]
 };
+

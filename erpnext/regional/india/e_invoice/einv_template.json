@@ -38,7 +38,7 @@
         "Pos": "{buyer_details.place_of_supply}"
     }},
     "DispDtls": {{
-        "Nm": "{dispatch_details.legal_name}",
+        "Nm": "{dispatch_details.company_name}",
         "Addr1": "{dispatch_details.address_line1}",
         "Addr2": "{dispatch_details.address_line2}",
         "Loc": "{dispatch_details.location}",

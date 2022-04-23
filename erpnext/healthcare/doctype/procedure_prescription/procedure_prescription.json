@@ -1,0 +1,99 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "beta": 1,
+ "creation": "2017-11-17 15:52:48.324157",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "procedure",
+  "procedure_name",
+  "department",
+  "practitioner",
+  "date",
+  "comments",
+  "appointment_booked",
+  "procedure_created",
+  "invoiced"
+ ],
+ "fields": [
+  {
+   "fieldname": "procedure",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Clinical Procedure",
+   "options": "Clinical Procedure Template",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "procedure.template",
+   "fieldname": "procedure_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Procedure Name"
+  },
+  {
+   "fetch_from": "procedure.medical_department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Medical Department"
+  },
+  {
+   "fieldname": "practitioner",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Referring Practitioner",
+   "options": "Healthcare Practitioner"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date"
+  },
+  {
+   "fieldname": "comments",
+   "fieldtype": "Data",
+   "label": "Comments"
+  },
+  {
+   "default": "0",
+   "fieldname": "appointment_booked",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Appointment Booked",
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "procedure_created",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Procedure Created",
+   "no_copy": 1,
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "invoiced",
+   "fieldtype": "Check",
+   "label": "Invoiced",
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-02-26 15:42:33.988081",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Procedure Prescription",
+ "owner": "Administrator",
+ "permissions": [],
+ "restrict_to_domain": "Healthcare",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

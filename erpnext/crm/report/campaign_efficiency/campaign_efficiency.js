@@ -16,3 +16,4 @@ frappe.query_reports["Campaign Efficiency"] = {
 		}
 	]
 };
+

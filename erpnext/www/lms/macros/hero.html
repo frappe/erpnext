@@ -11,7 +11,7 @@
 			{% if frappe.session.user == 'Guest' %}
 			<a id="signup" class="btn btn-primary btn-lg" href="/login#signup">{{_('Sign Up')}}</a>
 			{% elif not has_access %}
-			<button id="enroll" class="btn btn-primary btn-lg" onclick="enroll()">{{_('Enroll')}}</button>
+			<button id="enroll" class="btn btn-primary btn-lg" onclick="enroll()" disabled>{{_('Enroll')}}</button>
 			{% endif %}
 		</p>
 	</div>
@@ -20,32 +20,34 @@
 <script type="text/javascript">
 	frappe.ready(() => {
 		btn = document.getElementById('enroll');
+		if (btn) btn.disabled = false;
 	})
 
 	function enroll() {
 		let params = frappe.utils.get_query_params()
 
 		let btn = document.getElementById('enroll');
+		btn.disbaled = true;
+		btn.innerText = __('Enrolling...')
 
 		let opts = {
 			method: 'erpnext.education.utils.enroll_in_program',
 			args: {
 				program_name: params.program
-			},
-			freeze: true,
-			freeze_message: __('Enrolling...')
+			}
 		}
 
 		frappe.call(opts).then(res => {
 			let success_dialog = new frappe.ui.Dialog({
 				title: __('Success'),
-				primary_action_label: __('OK'),
-				primary_action: function() {
-					window.location.reload();
+				secondary_action: function() {
+					window.location.reload()
 				}
 			})
+			success_dialog.set_message(__('You have successfully enrolled for the program '));
+			success_dialog.$message.show()
 			success_dialog.show();
-			success_dialog.set_message(__('You have successfully enrolled for the program.'));
+			btn.disbaled = false;
 		})
 	}
 </script>

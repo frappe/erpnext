@@ -27,6 +27,7 @@ erpnext.setup.slides_settings = [
 					{ "label": __("Manufacturing"), "value": "Manufacturing" },
 					{ "label": __("Retail"), "value": "Retail" },
 					{ "label": __("Services"), "value": "Services" },
+					{ "label": __("Agriculture (beta)"), "value": "Agriculture" },
 					{ "label": __("Healthcare (beta)"), "value": "Healthcare" },
 					{ "label": __("Non Profit (beta)"), "value": "Non Profit" }
 				], reqd: 1
@@ -78,11 +79,11 @@ erpnext.setup.slides_settings = [
 			slide.get_input("company_name").on("change", function () {
 				var parts = slide.get_input("company_name").val().split(" ");
 				var abbr = $.map(parts, function (p) { return p ? p.substr(0, 1) : null }).join("");
-				slide.get_field("company_abbr").set_value(abbr.slice(0, 10).toUpperCase());
+				slide.get_field("company_abbr").set_value(abbr.slice(0, 5).toUpperCase());
 			}).val(frappe.boot.sysdefaults.company_name || "").trigger("change");
 
 			slide.get_input("company_abbr").on("change", function () {
-				if (slide.get_input("company_abbr").val().length > 10) {
+				if (slide.get_input("company_abbr").val().length > 5) {
 					frappe.msgprint(__("Company Abbreviation cannot have more than 5 characters"));
 					slide.get_field("company_abbr").set_value("");
 				}
@@ -96,7 +97,7 @@ erpnext.setup.slides_settings = [
 			if (!this.values.company_abbr) {
 				return false;
 			}
-			if (this.values.company_abbr.length > 10) {
+			if (this.values.company_abbr.length > 5) {
 				return false;
 			}
 			return true;
@@ -146,7 +147,7 @@ erpnext.setup.slides_settings = [
 			}
 
 			// Validate bank name
-			if(me.values.bank_account) {
+			if(me.values.bank_account) { 
 				frappe.call({
 					async: false,
 					method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.validate_bank_account",

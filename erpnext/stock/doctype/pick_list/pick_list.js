@@ -146,6 +146,10 @@ frappe.ui.form.on('Pick List', {
 			customer: frm.doc.customer
 		};
 		frm.get_items_btn = frm.add_custom_button(__('Get Items'), () => {
+			if (!frm.doc.customer) {
+				frappe.msgprint(__('Please select Customer first'));
+				return;
+			}
 			erpnext.utils.map_current_doc({
 				method: 'erpnext.selling.doctype.sales_order.sales_order.create_pick_list',
 				source_doctype: 'Sales Order',

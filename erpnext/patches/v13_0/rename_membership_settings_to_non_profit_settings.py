@@ -1,6 +1,6 @@
+from __future__ import unicode_literals
 import frappe
 from frappe.model.utils.rename_field import rename_field
-
 
 def execute():
 	if frappe.db.table_exists("Membership Settings"):
@@ -15,7 +15,7 @@ def execute():
 			"enable_razorpay": "enable_razorpay_for_memberships",
 			"debit_account": "membership_debit_account",
 			"payment_account": "membership_payment_account",
-			"webhook_secret": "membership_webhook_secret",
+			"webhook_secret": "membership_webhook_secret"
 		}
 
 		for old_name, new_name in rename_fields_map.items():

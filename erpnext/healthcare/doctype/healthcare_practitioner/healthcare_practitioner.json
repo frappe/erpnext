@@ -1,0 +1,333 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "beta": 1,
+ "creation": "2016-02-23 11:20:53.565119",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "basic_details_section",
+  "naming_series",
+  "first_name",
+  "middle_name",
+  "last_name",
+  "practitioner_name",
+  "gender",
+  "image",
+  "column_break_7",
+  "status",
+  "mobile_phone",
+  "residence_phone",
+  "office_phone",
+  "employee_and_user_details_section",
+  "employee",
+  "department",
+  "designation",
+  "column_break_17",
+  "user_id",
+  "hospital",
+  "appointments",
+  "practitioner_schedules",
+  "charges",
+  "op_consulting_charge_item",
+  "op_consulting_charge",
+  "column_break_18",
+  "inpatient_visit_charge_item",
+  "inpatient_visit_charge",
+  "account_details",
+  "default_currency",
+  "accounts",
+  "address_and_contacts_section",
+  "address_html",
+  "column_break_19",
+  "contact_html"
+ ],
+ "fields": [
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name",
+   "no_copy": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "middle_name",
+   "fieldtype": "Data",
+   "label": "Middle Name (Optional)",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Image",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "user_id",
+   "fieldtype": "Link",
+   "label": "User",
+   "options": "User",
+   "search_index": 1
+  },
+  {
+   "fetch_from": "employee",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Medical Department",
+   "options": "Medical Department"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "hospital",
+   "fieldtype": "Data",
+   "label": "Hospital"
+  },
+  {
+   "fieldname": "mobile_phone",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mobile"
+  },
+  {
+   "fieldname": "residence_phone",
+   "fieldtype": "Data",
+   "label": "Phone (R)"
+  },
+  {
+   "fieldname": "office_phone",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Phone (Office)"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "appointments",
+   "fieldtype": "Section Break",
+   "label": "Appointments"
+  },
+  {
+   "fieldname": "practitioner_schedules",
+   "fieldtype": "Table",
+   "label": "Practitioner Schedules",
+   "options": "Practitioner Service Unit Schedule"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "charges",
+   "fieldtype": "Section Break",
+   "label": "Charges"
+  },
+  {
+   "fieldname": "op_consulting_charge_item",
+   "fieldtype": "Link",
+   "label": "Out Patient Consulting Charge Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "op_consulting_charge",
+   "fieldtype": "Currency",
+   "label": "Out Patient Consulting Charge",
+   "mandatory_depends_on": "op_consulting_charge_item",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "inpatient_visit_charge_item",
+   "fieldtype": "Link",
+   "label": "Inpatient Visit Charge Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "inpatient_visit_charge",
+   "fieldtype": "Currency",
+   "label": "Inpatient Visit Charge",
+   "mandatory_depends_on": "inpatient_visit_charge_item"
+  },
+  {
+   "depends_on": "eval: !doc.__islocal",
+   "fieldname": "address_html",
+   "fieldtype": "HTML",
+   "label": "Address HTML",
+   "no_copy": 1,
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: !doc.__islocal",
+   "fieldname": "contact_html",
+   "fieldtype": "HTML",
+   "label": "Contact HTML",
+   "no_copy": 1,
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "account_details",
+   "fieldtype": "Section Break",
+   "label": "Account Details"
+  },
+  {
+   "fieldname": "accounts",
+   "fieldtype": "Table",
+   "label": "Income Account",
+   "options": "Party Account"
+  },
+  {
+   "fieldname": "default_currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Default Currency",
+   "no_copy": 1,
+   "options": "Currency",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "practitioner_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Full Name",
+   "no_copy": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "HLC-PRAC-.YYYY.-",
+   "report_hide": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Link",
+   "label": "Gender",
+   "options": "Gender"
+  },
+  {
+   "fieldname": "employee_and_user_details_section",
+   "fieldtype": "Section Break",
+   "label": "Employee and User Details"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "\nActive\nDisabled",
+   "reqd": 1
+  },
+  {
+   "fieldname": "basic_details_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Details"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval: !doc.__islocal",
+   "fieldname": "address_and_contacts_section",
+   "fieldtype": "Section Break",
+   "label": "Address and Contacts"
+  }
+ ],
+ "image_field": "image",
+ "links": [],
+ "modified": "2021-01-22 10:14:43.187675",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Healthcare Practitioner",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Laboratory User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Nursing User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "restrict_to_domain": "Healthcare",
+ "search_fields": "practitioner_name, mobile_phone, office_phone",
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "practitioner_name",
+ "track_changes": 1
+}

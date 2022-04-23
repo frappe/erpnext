@@ -27,12 +27,10 @@
   "payment_accounts_section",
   "party_balance",
   "paid_from",
-  "paid_from_account_type",
   "paid_from_account_currency",
   "paid_from_account_balance",
   "column_break_18",
   "paid_to",
-  "paid_to_account_type",
   "paid_to_account_currency",
   "paid_to_account_balance",
   "payment_amounts_section",
@@ -61,14 +59,13 @@
   "taxes_and_charges_section",
   "purchase_taxes_and_charges_template",
   "sales_taxes_and_charges_template",
+  "advance_tax_account",
   "column_break_55",
   "apply_tax_withholding_amount",
   "tax_withholding_category",
   "section_break_56",
   "taxes",
-  "section_break_60",
   "base_total_taxes_and_charges",
-  "column_break_61",
   "total_taxes_and_charges",
   "deductions_or_loss_section",
   "deductions",
@@ -443,8 +440,7 @@
    "depends_on": "eval:(doc.paid_from && doc.paid_to)",
    "fieldname": "reference_no",
    "fieldtype": "Data",
-   "label": "Cheque/Reference No",
-   "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')"
+   "label": "Cheque/Reference No"
   },
   {
    "fieldname": "column_break_23",
@@ -456,7 +452,6 @@
    "fieldname": "reference_date",
    "fieldtype": "Date",
    "label": "Cheque/Reference Date",
-   "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')",
    "search_index": 1
   },
   {
@@ -687,6 +682,15 @@
    "hide_border": 1
   },
   {
+   "depends_on": "eval:doc.apply_tax_withholding_amount",
+   "description": "Provisional tax account for advance tax. Taxes are parked in this account until payments are allocated to invoices",
+   "fieldname": "advance_tax_account",
+   "fieldtype": "Link",
+   "label": "Advance Tax Account",
+   "mandatory_depends_on": "eval:doc.apply_tax_withholding_amount",
+   "options": "Account"
+  },
+  {
    "depends_on": "eval:doc.received_amount && doc.payment_type != 'Internal Transfer'",
    "fieldname": "received_amount_after_tax",
    "fieldtype": "Currency",
@@ -703,39 +707,15 @@
    "label": "Received Amount After Tax (Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1
-  },
-  {
-   "fetch_from": "paid_from.account_type",
-   "fieldname": "paid_from_account_type",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Paid From Account Type"
-  },
-  {
-   "fetch_from": "paid_to.account_type",
-   "fieldname": "paid_to_account_type",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Paid To Account Type"
-  },
-  {
-   "fieldname": "column_break_61",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_60",
-   "fieldtype": "Section Break",
-   "hide_border": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-23 20:08:39.559814",
+ "modified": "2021-07-09 08:58:15.008761",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -774,7 +754,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
  "title_field": "title",
  "track_changes": 1
 }

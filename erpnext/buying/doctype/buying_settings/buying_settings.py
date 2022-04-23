@@ -3,10 +3,10 @@
 
 # For license information, please see license.txt
 
-
+from __future__ import unicode_literals
 import frappe
-from frappe.model.document import Document
 
+from frappe.model.document import Document
 
 class BuyingSettings(Document):
 	def validate(self):
@@ -14,10 +14,5 @@ class BuyingSettings(Document):
 			frappe.db.set_default(key, self.get(key, ""))
 
 		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
-
-		set_by_naming_series(
-			"Supplier",
-			"supplier_name",
-			self.get("supp_master_name") == "Naming Series",
-			hide_name_field=False,
-		)
+		set_by_naming_series("Supplier", "supplier_name",
+			self.get("supp_master_name")=="Naming Series", hide_name_field=False)

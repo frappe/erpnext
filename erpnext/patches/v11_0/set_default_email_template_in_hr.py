@@ -1,6 +1,6 @@
-import frappe
+from __future__ import unicode_literals
 from frappe import _
-
+import frappe
 
 def execute():
 	hr_settings = frappe.get_single("HR Settings")

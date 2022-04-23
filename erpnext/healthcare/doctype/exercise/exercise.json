@@ -1,0 +1,62 @@
+{
+ "actions": [],
+ "creation": "2020-03-11 09:25:00.968572",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "exercise_type",
+  "difficulty_level",
+  "counts_target",
+  "counts_completed",
+  "assistance_level"
+ ],
+ "fields": [
+  {
+   "fieldname": "exercise_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Exercise Type",
+   "options": "Exercise Type",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "exercise_type.difficulty_level",
+   "fieldname": "difficulty_level",
+   "fieldtype": "Link",
+   "label": "Difficulty Level",
+   "options": "Exercise Difficulty Level"
+  },
+  {
+   "fieldname": "counts_target",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Counts Target"
+  },
+  {
+   "depends_on": "eval:doc.parenttype==\"Therapy\";",
+   "fieldname": "counts_completed",
+   "fieldtype": "Int",
+   "label": "Counts Completed",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "assistance_level",
+   "fieldtype": "Select",
+   "label": "Assistance Level",
+   "options": "\nPassive\nActive Assist\nActive"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-11-04 18:20:25.583491",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Exercise",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

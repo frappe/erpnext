@@ -1,11 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 # For license information, please see license.txt
 
+from __future__ import unicode_literals
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
-
 
 class Operation(Document):
 	def validate(self):
@@ -19,14 +19,12 @@ class Operation(Document):
 		operation_list = []
 		for row in self.sub_operations:
 			if row.operation in operation_list:
-				frappe.throw(
-					_("The operation {0} can not add multiple times").format(frappe.bold(row.operation))
-				)
+				frappe.throw(_("The operation {0} can not add multiple times")
+					.format(frappe.bold(row.operation)))
 
 			if self.name == row.operation:
-				frappe.throw(
-					_("The operation {0} can not be the sub operation").format(frappe.bold(row.operation))
-				)
+				frappe.throw(_("The operation {0} can not be the sub operation")
+					.format(frappe.bold(row.operation)))
 
 			operation_list.append(row.operation)
 

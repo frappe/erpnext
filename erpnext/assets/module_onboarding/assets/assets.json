@@ -13,26 +13,26 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/asset",
  "idx": 0,
  "is_complete": 0,
- "modified": "2021-12-02 11:24:37.963746",
+ "modified": "2020-07-08 14:05:51.828497",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Assets",
  "owner": "Administrator",
  "steps": [
   {
-   "step": "Fixed Asset Accounts"
+   "step": "Introduction to Assets"
   },
   {
-   "step": "Asset Category"
+   "step": "Create a Fixed Asset Item"
   },
   {
-   "step": "Asset Item"
+   "step": "Create an Asset Category"
   },
   {
-   "step": "Asset Purchase"
+   "step": "Purchase an Asset Item"
   },
   {
-   "step": "Existing Asset"
+   "step": "Create an Asset"
   }
  ],
  "subtitle": "Assets, Depreciations, Repairs, and more.",

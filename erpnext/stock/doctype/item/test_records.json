@@ -40,7 +40,9 @@
       "conversion_factor": 10.0
     }
   ],
-  "stock_uom": "_Test UOM"
+  "stock_uom": "_Test UOM",
+  "show_in_website": 1,
+  "website_warehouse": "_Test Warehouse - _TC"
  },
  {
   "description": "_Test Item 2",
@@ -54,6 +56,8 @@
   "item_group": "_Test Item Group",
   "item_name": "_Test Item 2",
   "stock_uom": "_Test UOM",
+  "show_in_website": 1,
+  "website_warehouse": "_Test Warehouse - _TC",
   "gst_hsn_code": "999800",
   "opening_stock": 10,
   "valuation_rate": 100,
@@ -307,7 +311,8 @@
        "warehouse_reorder_level": 20,
        "warehouse_reorder_qty": 20
       }
-  ]
+  ],
+  "show_in_website": 1
  },
  {
   "description": "_Test Item 1",
@@ -339,7 +344,9 @@
     "warehouse_reorder_qty": 20
    }
   ],
-  "stock_uom": "_Test UOM"
+  "stock_uom": "_Test UOM",
+  "show_in_website": 1,
+  "website_warehouse": "_Test Warehouse Group-C1 - _TC"
  },
  {
   "description": "_Test Item With Item Tax Template",

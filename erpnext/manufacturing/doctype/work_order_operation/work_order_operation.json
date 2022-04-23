@@ -6,27 +6,27 @@
  "field_order": [
   "details",
   "operation",
-  "status",
-  "completed_qty",
-  "column_break_4",
   "bom",
-  "workstation",
-  "sequence_id",
-  "section_break_10",
+  "column_break_4",
   "description",
+  "sequence_id",
+  "col_break1",
+  "completed_qty",
+  "status",
+  "workstation",
   "estimated_time_and_cost",
   "planned_start_time",
-  "hour_rate",
-  "time_in_mins",
-  "column_break_10",
   "planned_end_time",
+  "column_break_10",
+  "time_in_mins",
+  "hour_rate",
   "batch_size",
   "planned_operating_cost",
   "section_break_9",
   "actual_start_time",
-  "actual_operation_time",
-  "column_break_11",
   "actual_end_time",
+  "column_break_11",
+  "actual_operation_time",
   "actual_operating_cost"
  ],
  "fields": [
@@ -42,6 +42,7 @@
    "oldfieldname": "operation_no",
    "oldfieldtype": "Data",
    "options": "Operation",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -51,14 +52,20 @@
    "label": "BOM",
    "no_copy": 1,
    "options": "BOM",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
    "label": "Operation Description",
    "oldfieldname": "opn_description",
-   "oldfieldtype": "Text"
+   "oldfieldtype": "Text",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break1",
+   "fieldtype": "Column Break"
   },
   {
    "columns": 1,
@@ -67,16 +74,19 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Completed Qty",
-   "no_copy": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "columns": 1,
    "default": "Pending",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Pending\nWork in Progress\nCompleted"
+   "options": "Pending\nWork in Progress\nCompleted",
+   "read_only": 1
   },
   {
    "fieldname": "workstation",
@@ -96,13 +106,15 @@
    "fieldname": "planned_start_time",
    "fieldtype": "Datetime",
    "label": "Planned Start Time",
-   "no_copy": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "planned_end_time",
    "fieldtype": "Datetime",
    "label": "Planned End Time",
-   "no_copy": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_10",
@@ -110,7 +122,7 @@
   },
   {
    "columns": 1,
-   "description": "In Minutes",
+   "description": "in Minutes",
    "fieldname": "time_in_mins",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -140,7 +152,6 @@
    "label": "Actual Time and Cost"
   },
   {
-   "description": "Updated via 'Time Log' (In Minutes)",
    "fieldname": "actual_start_time",
    "fieldtype": "Datetime",
    "label": "Actual Start Time",
@@ -148,7 +159,7 @@
    "read_only": 1
   },
   {
-   "description": "Updated via 'Time Log' (In Minutes)",
+   "description": "Updated via 'Time Log'",
    "fieldname": "actual_end_time",
    "fieldtype": "Datetime",
    "label": "Actual End Time",
@@ -160,7 +171,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Updated via 'Time Log' (In Minutes)",
+   "description": "in Minutes\nUpdated via 'Time Log'",
    "fieldname": "actual_operation_time",
    "fieldtype": "Float",
    "label": "Actual Operation Time",
@@ -178,30 +189,26 @@
   },
   {
    "fieldname": "batch_size",
-   "fieldtype": "Float",
+   "fieldtype": "Int",
    "label": "Batch Size",
    "read_only": 1
   },
   {
    "fieldname": "sequence_id",
    "fieldtype": "Int",
-   "hidden": 1,
    "label": "Sequence ID",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_10",
-   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-11-29 16:37:18.824489",
+ "modified": "2021-06-24 14:36:12.835543",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Operation",

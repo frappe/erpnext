@@ -1,23 +1,20 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
+from __future__ import unicode_literals
 import frappe
-from frappe.model.document import Document
 from frappe.utils import get_datetime
-
-from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import (
-	check_for_ltv_shortfall,
-)
-
+from frappe import _
+from frappe.model.document import Document
+from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import check_for_ltv_shortfall
 
 class ProcessLoanSecurityShortfall(Document):
 	def onload(self):
-		self.set_onload("update_time", get_datetime())
+		self.set_onload('update_time', get_datetime())
 
 	def on_submit(self):
 		check_for_ltv_shortfall(self.name)
-
 
 def create_process_loan_security_shortfall():
 	if check_for_secured_loans():
@@ -25,6 +22,5 @@ def create_process_loan_security_shortfall():
 		process.update_time = get_datetime()
 		process.submit()
 
-
 def check_for_secured_loans():
-	return frappe.db.count("Loan", {"docstatus": 1, "is_secured_loan": 1})
+	return frappe.db.count('Loan', {'docstatus': 1, 'is_secured_loan': 1})

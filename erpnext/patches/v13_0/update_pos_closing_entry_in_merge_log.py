@@ -1,16 +1,14 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
-
+from __future__ import unicode_literals
 import frappe
-
 
 def execute():
 	frappe.reload_doc("accounts", "doctype", "POS Invoice Merge Log")
 	frappe.reload_doc("accounts", "doctype", "POS Closing Entry")
-	if frappe.db.count("POS Invoice Merge Log"):
-		frappe.db.sql(
-			"""
+	if frappe.db.count('POS Invoice Merge Log'):
+		frappe.db.sql('''
 			UPDATE
 				`tabPOS Invoice Merge Log` log, `tabPOS Invoice Reference` log_ref
 			SET
@@ -21,8 +19,7 @@ def execute():
 				)
 			WHERE
 				log_ref.parent = log.name
-		"""
-		)
+		''')
 
-		frappe.db.sql("""UPDATE `tabPOS Closing Entry` SET status = 'Submitted' where docstatus = 1""")
-		frappe.db.sql("""UPDATE `tabPOS Closing Entry` SET status = 'Cancelled' where docstatus = 2""")
+		frappe.db.sql('''UPDATE `tabPOS Closing Entry` SET status = 'Submitted' where docstatus = 1''')
+		frappe.db.sql('''UPDATE `tabPOS Closing Entry` SET status = 'Cancelled' where docstatus = 2''')

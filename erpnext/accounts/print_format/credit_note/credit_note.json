@@ -17,7 +17,7 @@
  "owner": "Administrator",
  "parentfield": "__print_formats",
  "print_format_builder": 0,
- "print_format_type": "Jinja",
+ "print_format_type": "Server",
  "show_section_headings": 0,
  "standard": "Yes"
 }

@@ -20,14 +20,12 @@
   "sec_break_taxes",
   "taxes",
   "sb9",
-  "route",
-  "website_title",
-  "description",
   "show_in_website",
-  "include_descendants",
-  "column_break_16",
+  "route",
   "weightage",
   "slideshow",
+  "website_title",
+  "description",
   "website_specifications",
   "website_filters_section",
   "filter_fields",
@@ -113,7 +111,7 @@
   },
   {
    "default": "0",
-   "description": "Make Item Group visible in website",
+   "description": "Check this if you want to show in website",
    "fieldname": "show_in_website",
    "fieldtype": "Check",
    "label": "Show in Website"
@@ -126,7 +124,6 @@
    "unique": 1
   },
   {
-   "depends_on": "show_in_website",
    "fieldname": "weightage",
    "fieldtype": "Int",
    "label": "Weightage"
@@ -189,8 +186,6 @@
    "report_hide": 1
   },
   {
-   "collapsible": 1,
-   "depends_on": "show_in_website",
    "fieldname": "website_filters_section",
    "fieldtype": "Section Break",
    "label": "Website Filters"
@@ -208,22 +203,9 @@
    "options": "Website Attribute"
   },
   {
-   "depends_on": "show_in_website",
    "fieldname": "website_title",
    "fieldtype": "Data",
    "label": "Title"
-  },
-  {
-   "fieldname": "column_break_16",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "depends_on": "show_in_website",
-   "description": "Include Website Items belonging to child Item Groups",
-   "fieldname": "include_descendants",
-   "fieldtype": "Check",
-   "label": "Include Descendants"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -232,12 +214,11 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2022-03-09 12:27:11.055782",
+ "modified": "2021-02-18 13:40:30.049650",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",
  "name_case": "Title Case",
- "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_item_group",
  "owner": "Administrator",
  "permissions": [
@@ -304,6 +285,5 @@
  "search_fields": "parent_item_group",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+ "sort_order": "DESC"
 }

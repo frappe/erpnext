@@ -145,7 +145,6 @@
   "sales_team_section_break",
   "sales_partner",
   "column_break7",
-  "amount_eligible_for_commission",
   "commission_rate",
   "total_commission",
   "section_break1",
@@ -396,7 +395,8 @@
    "fieldtype": "Link",
    "label": "Billing Address Name",
    "options": "Address",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "tax_id",
@@ -515,8 +515,7 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
-   "label": "Scan Barcode",
-   "options": "Barcode"
+   "label": "Scan Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -543,7 +542,6 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "packed_items",
-   "depends_on": "packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "label": "Packing List",
@@ -552,7 +550,6 @@
    "print_hide": 1
   },
   {
-   "depends_on": "packed_items",
    "fieldname": "packed_items",
    "fieldtype": "Table",
    "label": "Packed Items",
@@ -1277,7 +1274,6 @@
    "fetch_from": "customer.represents_company",
    "fieldname": "represents_company",
    "fieldtype": "Link",
-   "ignore_user_permissions": 1,
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
@@ -1303,23 +1299,16 @@
    "label": "Dispatch Address",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "amount_eligible_for_commission",
-   "fieldtype": "Currency",
-   "label": "Amount Eligible for Commission",
-   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-10 14:29:13.428984",
+ "modified": "2021-07-08 21:37:20.802652",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

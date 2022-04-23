@@ -1,17 +1,15 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
+from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt
-
 
 def execute(filters=None):
 	columns = get_columns(filters)
 	data = get_data(filters)
 	return columns, data
-
 
 def get_columns(filters):
 	columns = [
@@ -19,135 +17,145 @@ def get_columns(filters):
 			"label": _("Material Request Date"),
 			"fieldname": "material_request_date",
 			"fieldtype": "Date",
-			"width": 140,
+			"width": 140
 		},
 		{
 			"label": _("Material Request No"),
 			"options": "Material Request",
 			"fieldname": "material_request_no",
 			"fieldtype": "Link",
-			"width": 140,
+			"width": 140
 		},
 		{
 			"label": _("Cost Center"),
 			"options": "Cost Center",
 			"fieldname": "cost_center",
 			"fieldtype": "Link",
-			"width": 140,
+			"width": 140
 		},
 		{
 			"label": _("Project"),
 			"options": "Project",
 			"fieldname": "project",
 			"fieldtype": "Link",
-			"width": 140,
+			"width": 140
 		},
 		{
 			"label": _("Requesting Site"),
 			"options": "Warehouse",
 			"fieldname": "requesting_site",
 			"fieldtype": "Link",
-			"width": 140,
+			"width": 140
 		},
 		{
 			"label": _("Requestor"),
 			"options": "Employee",
 			"fieldname": "requestor",
 			"fieldtype": "Link",
-			"width": 140,
+			"width": 140
 		},
 		{
 			"label": _("Item"),
 			"fieldname": "item_code",
 			"fieldtype": "Link",
 			"options": "Item",
-			"width": 150,
+			"width": 150
 		},
-		{"label": _("Quantity"), "fieldname": "quantity", "fieldtype": "Float", "width": 140},
+		{
+			"label": _("Quantity"),
+			"fieldname": "quantity",
+			"fieldtype": "Float",
+			"width": 140
+		},
 		{
 			"label": _("Unit of Measure"),
 			"options": "UOM",
 			"fieldname": "unit_of_measurement",
 			"fieldtype": "Link",
-			"width": 140,
+			"width": 140
 		},
-		{"label": _("Status"), "fieldname": "status", "fieldtype": "data", "width": 140},
+		{
+			"label": _("Status"),
+			"fieldname": "status",
+			"fieldtype": "data",
+			"width": 140
+		},
 		{
 			"label": _("Purchase Order Date"),
 			"fieldname": "purchase_order_date",
 			"fieldtype": "Date",
-			"width": 140,
+			"width": 140
 		},
 		{
 			"label": _("Purchase Order"),
 			"options": "Purchase Order",
 			"fieldname": "purchase_order",
 			"fieldtype": "Link",
-			"width": 140,
+			"width": 140
 		},
 		{
 			"label": _("Supplier"),
 			"options": "Supplier",
 			"fieldname": "supplier",
 			"fieldtype": "Link",
-			"width": 140,
+			"width": 140
 		},
 		{
 			"label": _("Estimated Cost"),
 			"fieldname": "estimated_cost",
 			"fieldtype": "Float",
-			"width": 140,
+			"width": 140
 		},
-		{"label": _("Actual Cost"), "fieldname": "actual_cost", "fieldtype": "Float", "width": 140},
+		{
+			"label": _("Actual Cost"),
+			"fieldname": "actual_cost",
+			"fieldtype": "Float",
+			"width": 140
+		},
 		{
 			"label": _("Purchase Order Amount"),
 			"fieldname": "purchase_order_amt",
 			"fieldtype": "Float",
-			"width": 140,
+			"width": 140
 		},
 		{
 			"label": _("Purchase Order Amount(Company Currency)"),
 			"fieldname": "purchase_order_amt_in_company_currency",
 			"fieldtype": "Float",
-			"width": 140,
+			"width": 140
 		},
 		{
 			"label": _("Expected Delivery Date"),
 			"fieldname": "expected_delivery_date",
 			"fieldtype": "Date",
-			"width": 140,
+			"width": 140
 		},
 		{
 			"label": _("Actual Delivery Date"),
 			"fieldname": "actual_delivery_date",
 			"fieldtype": "Date",
-			"width": 140,
+			"width": 140
 		},
 	]
 	return columns
-
 
 def get_conditions(filters):
 	conditions = ""
 
 	if filters.get("company"):
-		conditions += " AND parent.company=%s" % frappe.db.escape(filters.get("company"))
+		conditions += " AND parent.company=%s" % frappe.db.escape(filters.get('company'))
 
 	if filters.get("cost_center") or filters.get("project"):
 		conditions += """
 			AND (child.`cost_center`=%s OR child.`project`=%s)
-			""" % (
-			frappe.db.escape(filters.get("cost_center")),
-			frappe.db.escape(filters.get("project")),
-		)
+			""" % (frappe.db.escape(filters.get('cost_center')), frappe.db.escape(filters.get('project')))
 
 	if filters.get("from_date"):
-		conditions += " AND parent.transaction_date>='%s'" % filters.get("from_date")
+		conditions += " AND parent.transaction_date>='%s'" % filters.get('from_date')
 
 	if filters.get("to_date"):
-		conditions += " AND parent.transaction_date<='%s'" % filters.get("to_date")
+		conditions += " AND parent.transaction_date<='%s'" % filters.get('to_date')
 	return conditions
-
 
 def get_data(filters):
 	conditions = get_conditions(filters)
@@ -156,14 +164,14 @@ def get_data(filters):
 	pr_records = get_mapped_pr_records()
 	pi_records = get_mapped_pi_records()
 
-	procurement_record = []
+	procurement_record=[]
 	if procurement_record_against_mr:
 		procurement_record += procurement_record_against_mr
 	for po in purchase_order_entry:
 		# fetch material records linked to the purchase order item
 		mr_record = mr_records.get(po.material_request_item, [{}])[0]
 		procurement_detail = {
-			"material_request_date": mr_record.get("transaction_date"),
+			"material_request_date": mr_record.get('transaction_date'),
 			"cost_center": po.cost_center,
 			"project": po.project,
 			"requesting_site": po.warehouse,
@@ -176,21 +184,19 @@ def get_data(filters):
 			"purchase_order_date": po.transaction_date,
 			"purchase_order": po.parent,
 			"supplier": po.supplier,
-			"estimated_cost": flt(mr_record.get("amount")),
+			"estimated_cost": flt(mr_record.get('amount')),
 			"actual_cost": flt(pi_records.get(po.name)),
 			"purchase_order_amt": flt(po.amount),
 			"purchase_order_amt_in_company_currency": flt(po.base_amount),
 			"expected_delivery_date": po.schedule_date,
-			"actual_delivery_date": pr_records.get(po.name),
+			"actual_delivery_date": pr_records.get(po.name)
 		}
 		procurement_record.append(procurement_detail)
 	return procurement_record
 
-
 def get_mapped_mr_details(conditions):
 	mr_records = {}
-	mr_details = frappe.db.sql(
-		"""
+	mr_details = frappe.db.sql("""
 		SELECT
 			parent.transaction_date,
 			parent.per_ordered,
@@ -210,11 +216,7 @@ def get_mapped_mr_details(conditions):
 			AND parent.name=child.parent
 			AND parent.docstatus=1
 			{conditions}
-		""".format(
-			conditions=conditions
-		),
-		as_dict=1,
-	)  # nosec
+		""".format(conditions=conditions), as_dict=1) #nosec
 
 	procurement_record_against_mr = []
 	for record in mr_details:
@@ -233,17 +235,14 @@ def get_mapped_mr_details(conditions):
 				actual_cost=0,
 				purchase_order_amt=0,
 				purchase_order_amt_in_company_currency=0,
-				project=record.project,
-				cost_center=record.cost_center,
+				project = record.project,
+				cost_center = record.cost_center
 			)
 			procurement_record_against_mr.append(procurement_record_details)
 	return mr_records, procurement_record_against_mr
 
-
 def get_mapped_pi_records():
-	return frappe._dict(
-		frappe.db.sql(
-			"""
+	return frappe._dict(frappe.db.sql("""
 		SELECT
 			pi_item.po_detail,
 			pi_item.base_amount
@@ -254,15 +253,10 @@ def get_mapped_pi_records():
 			pi_item.docstatus = 1
 			AND po.status not in ("Closed","Completed","Cancelled")
 			AND pi_item.po_detail IS NOT NULL
-		"""
-		)
-	)
-
+		"""))
 
 def get_mapped_pr_records():
-	return frappe._dict(
-		frappe.db.sql(
-			"""
+	return frappe._dict(frappe.db.sql("""
 		SELECT
 			pr_item.purchase_order_item,
 			pr.posting_date
@@ -272,14 +266,10 @@ def get_mapped_pr_records():
 			AND pr.name=pr_item.parent
 			AND pr_item.purchase_order_item IS NOT NULL
 			AND pr.status not in  ("Closed","Completed","Cancelled")
-		"""
-		)
-	)
-
+		"""))
 
 def get_po_entries(conditions):
-	return frappe.db.sql(
-		"""
+	return frappe.db.sql("""
 		SELECT
 			child.name,
 			child.parent,
@@ -306,8 +296,4 @@ def get_po_entries(conditions):
 			{conditions}
 		GROUP BY
 			parent.name, child.item_code
-		""".format(
-			conditions=conditions
-		),
-		as_dict=1,
-	)  # nosec
+		""".format(conditions=conditions), as_dict=1) #nosec

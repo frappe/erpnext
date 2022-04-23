@@ -86,12 +86,11 @@
   }
  ],
  "links": [],
- "modified": "2022-01-18 19:27:35.649424",
+ "modified": "2020-01-21 17:30:36.334395",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Appointment Letter",
  "name_case": "Title Case",
- "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -119,10 +118,7 @@
    "write": 1
   }
  ],
- "search_fields": "applicant_name, company",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
- "title_field": "applicant_name",
  "track_changes": 1
 }

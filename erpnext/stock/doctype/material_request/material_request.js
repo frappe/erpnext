@@ -214,7 +214,6 @@ frappe.ui.form.on('Material Request', {
 					material_request_type: frm.doc.material_request_type,
 					plc_conversion_rate: 1,
 					rate: item.rate,
-					uom: item.uom,
 					conversion_factor: item.conversion_factor
 				},
 				overwrite_warehouse: overwrite_warehouse
@@ -393,7 +392,6 @@ frappe.ui.form.on("Material Request Item", {
 	item_code: function(frm, doctype, name) {
 		const item = locals[doctype][name];
 		item.rate = 0;
-		item.uom = '';
 		set_schedule_date(frm);
 		frm.events.get_item_data(frm, item, true);
 	},
@@ -410,33 +408,33 @@ frappe.ui.form.on("Material Request Item", {
 	}
 });
 
-erpnext.buying.MaterialRequestController = class MaterialRequestController extends erpnext.buying.BuyingController {
-	tc_name() {
+erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.extend({
+	tc_name: function() {
 		this.get_terms();
-	}
+	},
 
-	item_code() {
+	item_code: function() {
 		// to override item code trigger from transaction.js
-	}
+	},
 
-	validate_company_and_party() {
+	validate_company_and_party: function() {
 		return true;
-	}
+	},
 
-	calculate_taxes_and_totals() {
+	calculate_taxes_and_totals: function() {
 		return;
-	}
+	},
 
-	validate() {
+	validate: function() {
 		set_schedule_date(this.frm);
-	}
+	},
 
-	onload(doc, cdt, cdn) {
+	onload: function(doc, cdt, cdn) {
 		this.frm.set_query("item_code", "items", function() {
 			if (doc.material_request_type == "Customer Provided") {
 				return{
 					query: "erpnext.controllers.queries.item_query",
-					filters:{
+					filters:{ 
 						'customer': me.frm.doc.customer,
 						'is_stock_item':1
 					}
@@ -453,9 +451,9 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 				}
 			}
 		});
-	}
+	},
 
-	items_add(doc, cdt, cdn) {
+	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		if(doc.schedule_date) {
 			row.schedule_date = doc.schedule_date;
@@ -463,19 +461,19 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 		} else {
 			this.frm.script_manager.copy_from_first_row("items", row, ["schedule_date"]);
 		}
-	}
+	},
 
-	items_on_form_rendered() {
+	items_on_form_rendered: function() {
+		set_schedule_date(this.frm);
+	},
+
+	schedule_date: function() {
 		set_schedule_date(this.frm);
 	}
-
-	schedule_date() {
-		set_schedule_date(this.frm);
-	}
-};
+});
 
 // for backward compatibility: combine new and previous states
-extend_cscript(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur_frm}));
 
 function set_schedule_date(frm) {
 	if(frm.doc.schedule_date){

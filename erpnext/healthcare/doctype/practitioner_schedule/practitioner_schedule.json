@@ -1,0 +1,71 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:schedule_name",
+ "beta": 1,
+ "creation": "2017-05-03 17:28:03.926787",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "disabled",
+  "schedule_details_section",
+  "schedule_name",
+  "time_slots"
+ ],
+ "fields": [
+  {
+   "fieldname": "schedule_name",
+   "fieldtype": "Data",
+   "ignore_xss_filter": 1,
+   "in_list_view": 1,
+   "label": "Schedule Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "time_slots",
+   "fieldtype": "Table",
+   "label": "Time Slots",
+   "options": "Healthcare Schedule Time Slot"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "schedule_details_section",
+   "fieldtype": "Section Break",
+   "label": "Schedule Details"
+  }
+ ],
+ "links": [],
+ "modified": "2020-09-18 17:26:09.703215",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Practitioner Schedule",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Healthcare Administrator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "restrict_to_domain": "Healthcare",
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -25,3 +25,4 @@ frappe.query_reports["Bank Remittance"] = {
 
 	]
 }
+

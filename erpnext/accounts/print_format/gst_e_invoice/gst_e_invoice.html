@@ -1,8 +1,7 @@
 {%- from "templates/print_formats/standard_macros.html" import add_header, render_field, print_value -%}
+{%- set einvoice = json.loads(doc.signed_einvoice) -%}
 
 <div class="page-break">
-	{% if doc.signed_einvoice %}
-	{%- set einvoice = json.loads(doc.signed_einvoice) -%}
 	<div {% if print_settings.repeat_header_footer %} id="header-html" class="hidden-pdf" {% endif %}>
 		{% if letter_head and not no_letterhead %}
 			<div class="letter-head">{{ letter_head }}</div>
@@ -69,7 +68,7 @@
 
 			{%- if einvoice.ShipDtls -%}
 				{%- set shipping = einvoice.ShipDtls -%}
-				<h5 style="margin-bottom: 5px;">Shipped From</h5>
+				<h5 style="margin-bottom: 5px;">Shipping</h5>
 				<p>{{ shipping.Gstin }}</p>
 				<p>{{ shipping.LglNm }}</p>
 				<p>{{ shipping.Addr1 }}</p>
@@ -87,17 +86,6 @@
 			{%- if buyer.Addr2 -%} <p>{{ buyer.Addr2 }}</p> {% endif %}
 			<p>{{ buyer.Loc }}</p>
 			<p>{{ frappe.db.get_value("Address", doc.customer_address, "gst_state") }} - {{ buyer.Pin }}</p>
-
-			{%- if einvoice.DispDtls -%}
-				{%- set dispatch = einvoice.DispDtls -%}
-				<h5 style="margin-bottom: 5px;">Dispatched From</h5>
-				{%- if dispatch.Gstin -%} <p>{{ dispatch.Gstin }}</p> {% endif %}
-				<p>{{ dispatch.LglNm }}</p>
-				<p>{{ dispatch.Addr1 }}</p>
-				{%- if dispatch.Addr2 -%} <p>{{ dispatch.Addr2 }}</p> {% endif %}
-				<p>{{ dispatch.Loc }}</p>
-				<p>{{ frappe.db.get_value("Address", doc.dispatch_address_name, "gst_state") }} - {{ dispatch.Pin }}</p>
-			{% endif %}
 		</div>
 	</div>
 	<div style="overflow-x: auto;">
@@ -171,10 +159,4 @@
 			</tbody>
 		</table>
 	</div>
-	{% else %}
-	<div class="text-center" style="color: var(--gray-500); font-size: 14px;">
-		You must generate IRN before you can preview GST E-Invoice.
-	</div>
-	{% endif %}
 </div>
-

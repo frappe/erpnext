@@ -64,10 +64,10 @@
 				<td></td>
 				<td><b>{{ frappe.format(row.account, {fieldtype: "Link"}) or "&nbsp;" }}</b></td>
 				<td style="text-align: right">
-					{{ row.get('account', '') and frappe.utils.fmt_money(row.debit, currency=filters.presentation_currency) }}
+					{{ row.account and frappe.utils.fmt_money(row.debit, currency=filters.presentation_currency) }}
 				</td>
 				<td style="text-align: right">
-					{{ row.get('account', '') and frappe.utils.fmt_money(row.credit, currency=filters.presentation_currency) }}
+					{{ row.account and frappe.utils.fmt_money(row.credit, currency=filters.presentation_currency) }}
 				</td>
 			{% endif %}
 				<td style="text-align: right">

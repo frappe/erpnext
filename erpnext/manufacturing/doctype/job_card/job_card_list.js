@@ -1,5 +1,4 @@
 frappe.listview_settings['Job Card'] = {
-	has_indicator_for_draft: true,
 	get_indicator: function(doc) {
 		if (doc.status === "Work In Progress") {
 			return [__("Work In Progress"), "orange", "status,=,Work In Progress"];

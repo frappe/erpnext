@@ -12,7 +12,7 @@
           .get_value("User", timesheet.modified_by, [
             "full_name", "user_image"
           ], as_dict = True)
- 		    %}
+ 		%}
         {% if user_details.user_image %}
           <span class="avatar avatar-small" style="width:32px; height:32px;" title="{{ user_details.full_name }}">
             <img src="{{ user_details.user_image }}">

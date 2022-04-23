@@ -19,14 +19,14 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/manufacturing",
  "idx": 0,
  "is_complete": 0,
- "modified": "2021-08-13 16:04:34.333812",
+ "modified": "2020-06-29 20:25:36.899106",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
  "owner": "Administrator",
  "steps": [
   {
-   "step": "Explore Manufacturing Settings"
+   "step": "Warehouse"
   },
   {
    "step": "Workstation"
@@ -35,19 +35,19 @@
    "step": "Operation"
   },
   {
-   "step": "Routing"
+   "step": "Create Product"
   },
   {
-   "step": "Create Product"
+   "step": "Create Raw Materials"
   },
   {
    "step": "Create BOM"
   },
   {
-   "step": "Production Planning"
+   "step": "Work Order"
   },
   {
-   "step": "Work Order"
+   "step": "Explore Manufacturing Settings"
   }
  ],
  "subtitle": "Products, Raw Materials, BOM, Work Order, and more.",

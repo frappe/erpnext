@@ -219,8 +219,7 @@
    "fieldname": "leave_policy_assignment",
    "fieldtype": "Link",
    "label": "Leave Policy Assignment",
-   "options": "Leave Policy Assignment",
-   "read_only": 1
+   "options": "Leave Policy Assignment"
   },
   {
    "fetch_from": "employee.company",
@@ -237,11 +236,10 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-07 09:50:33.145825",
+ "modified": "2021-06-03 15:28:26.335104",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Allocation",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -279,8 +277,5 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
- "timeline_field": "employee",
- "title_field": "employee_name",
- "track_changes": 1
+ "timeline_field": "employee"
 }

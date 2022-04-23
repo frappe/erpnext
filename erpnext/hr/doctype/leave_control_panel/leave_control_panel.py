@@ -1,12 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
+from __future__ import unicode_literals
 import frappe
-from frappe import _, msgprint
-from frappe.model.document import Document
-from frappe.utils import cint, comma_and, cstr, flt
 
+from frappe.utils import cint, cstr, flt, nowdate, comma_and, date_diff
+from frappe import msgprint, _
+from frappe.model.document import Document
 
 class LeaveControlPanel(Document):
 	def get_employees(self):
@@ -18,12 +18,8 @@ class LeaveControlPanel(Document):
 
 		condition_str = " and " + " and ".join(conditions) if len(conditions) else ""
 
-		e = frappe.db.sql(
-			"select name from tabEmployee where status='Active' {condition}".format(
-				condition=condition_str
-			),
-			tuple(values),
-		)
+		e = frappe.db.sql("select name from tabEmployee where status='Active' {condition}"
+			.format(condition=condition_str), tuple(values))
 
 		return e
 
@@ -31,7 +27,7 @@ class LeaveControlPanel(Document):
 		for f in ["from_date", "to_date", "leave_type", "no_of_days"]:
 			if not self.get(f):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(f)))
-		self.validate_from_to_dates("from_date", "to_date")
+		self.validate_from_to_dates('from_date', 'to_date')
 
 	@frappe.whitelist()
 	def allocate_leave(self):
@@ -43,10 +39,10 @@ class LeaveControlPanel(Document):
 
 		for d in self.get_employees():
 			try:
-				la = frappe.new_doc("Leave Allocation")
+				la = frappe.new_doc('Leave Allocation')
 				la.set("__islocal", 1)
 				la.employee = cstr(d[0])
-				la.employee_name = frappe.db.get_value("Employee", cstr(d[0]), "employee_name")
+				la.employee_name = frappe.db.get_value('Employee',cstr(d[0]),'employee_name')
 				la.leave_type = self.leave_type
 				la.from_date = self.from_date
 				la.to_date = self.to_date
@@ -55,7 +51,7 @@ class LeaveControlPanel(Document):
 				la.docstatus = 1
 				la.save()
 				leave_allocated_for.append(d[0])
-			except Exception:
+			except:
 				pass
 		if leave_allocated_for:
 			msgprint(_("Leaves Allocated Successfully for {0}").format(comma_and(leave_allocated_for)))

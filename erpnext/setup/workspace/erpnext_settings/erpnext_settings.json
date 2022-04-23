@@ -1,38 +1,32 @@
 {
+ "category": "Modules",
  "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts\\n\\t\\t\\t\\n\\t\\t\\n\\t\\t\\t\\n\\t\\t\\n\\t\\t\\t\\n\\t\\t</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Projects Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Accounts Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Stock Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"HR Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Selling Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Buying Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Support Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Shopping Cart Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Portal Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Domain Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Products Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Naming Series\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Manufacturing Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Education Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Hotel Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"CRM Settings\",\"col\":3}}]",
  "creation": "2020-03-12 14:47:51.166455",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Workspace",
- "for_user": "",
+ "extends": "Settings",
+ "extends_another_page": 1,
  "hide_custom": 0,
- "icon": "setting",
+ "icon": "settings",
  "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
  "label": "ERPNext Settings",
  "links": [],
- "modified": "2022-01-13 19:18:59.362820",
+ "modified": "2021-06-12 01:58:11.399566",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "ERPNext Settings",
  "owner": "Administrator",
- "parent_page": "",
- "public": 1,
- "restrict_to_domain": "",
- "roles": [],
- "sequence_id": 12.0,
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
  "shortcuts": [
   {
    "icon": "project",
    "label": "Projects Settings",
    "link_to": "Projects Settings",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "",
-   "icon": "dot-horizontal",
-   "label": "Naming Series",
-   "link_to": "Naming Series",
    "type": "DocType"
   },
   {
@@ -105,6 +99,13 @@
    "type": "DocType"
   },
   {
+   "icon": "non-profit",
+   "label": "Healthcare Settings",
+   "link_to": "Healthcare Settings",
+   "restrict_to_domain": "Healthcare",
+   "type": "DocType"
+  },
+  {
    "icon": "setting",
    "label": "Domain Settings",
    "link_to": "Domain Settings",
@@ -116,14 +117,6 @@
    "label": "Products Settings",
    "link_to": "Products Settings",
    "type": "DocType"
-  },
-  {
-   "doc_view": "",
-   "icon": "crm",
-   "label": "CRM Settings",
-   "link_to": "CRM Settings",
-   "type": "DocType"
   }
- ],
- "title": "ERPNext Settings"
+ ]
 }

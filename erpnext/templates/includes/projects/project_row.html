@@ -1,11 +1,11 @@
 {% if doc.status == "Open" %}
   <div class="web-list-item transaction-list-item">
     <div class="row">
-      <div class="col-xs-2 project-link">
+      <div class="col-xs-2">
         <a class="transaction-item-link" href="/projects?project={{ doc.name | urlencode }}">Link</a>
         {{ doc.name }}
       </div>
-      <div class="col-xs-2 project-name">
+      <div class="col-xs-2">
         {{ doc.project_name }}
       </div>
       <div class="col-xs-3 text-center">
@@ -19,13 +19,13 @@
             </span>
           </div>
         {% else %}
-          <span class="indicator-pill {{ " red" if doc.status=="Open" else "darkgrey" }}">
+          <span class="indicator-pill {{ " red" if doc.status=="Open" else " darkgrey" }}">
             {{ doc.status }}</span>
         {% endif %}
       </div>
       {% if doc["_assign"] %}
         {% set assigned_users = json.loads(doc["_assign"])%}
-        <div class="col-xs-2 project-users">
+        <div class="col-xs-2">
           {% for user in assigned_users %}
             {% set user_details = frappe
               .db
@@ -46,7 +46,7 @@
           {% endfor %}
         </div>
       {% endif %}
-      <div class="col-xs-3 text-right small text-muted project-modified-on">
+      <div class="col-xs-3 text-right small text-muted">
         {{ frappe.utils.pretty_date(doc.modified) }}
       </div>
     </div>

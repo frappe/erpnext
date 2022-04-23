@@ -3,14 +3,13 @@
 
 frappe.ui.form.on('Gratuity', {
 	setup: function (frm) {
-		frm.set_query("salary_component", function () {
+		frm.set_query('salary_component', function () {
 			return {
 				filters: {
 					type: "Earning"
 				}
 			};
 		});
-
 		frm.set_query("expense_account", function () {
 			return {
 				filters: {
@@ -32,7 +31,7 @@ frappe.ui.form.on('Gratuity', {
 		});
 	},
 	refresh: function (frm) {
-		if (frm.doc.docstatus == 1 && !frm.doc.pay_via_salary_slip && frm.doc.status == "Unpaid") {
+		if (frm.doc.docstatus === 1 && frm.doc.pay_via_salary_slip === 0 && frm.doc.status === "Unpaid") {
 			frm.add_custom_button(__("Create Payment Entry"), function () {
 				return frappe.call({
 					method: 'erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry',

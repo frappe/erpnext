@@ -10,10 +10,6 @@
   "sandbox_mode",
   "applicable_from",
   "credentials",
-  "advanced_settings_section",
-  "client_id",
-  "column_break_8",
-  "client_secret",
   "auth_token",
   "token_expiry"
  ],
@@ -60,32 +56,12 @@
    "in_list_view": 1,
    "label": "Applicable From",
    "reqd": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "advanced_settings_section",
-   "fieldtype": "Section Break",
-   "label": "Advanced Settings"
-  },
-  {
-   "fieldname": "client_id",
-   "fieldtype": "Data",
-   "label": "Client ID"
-  },
-  {
-   "fieldname": "client_secret",
-   "fieldtype": "Password",
-   "label": "Client Secret"
-  },
-  {
-   "fieldname": "column_break_8",
-   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-11-16 19:50:28.029517",
+ "modified": "2021-03-30 12:26:25.538294",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "E Invoice Settings",

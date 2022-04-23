@@ -36,8 +36,8 @@ frappe.ui.form.on("Warranty Claim", {
 	}
 });
 
-erpnext.support.WarrantyClaim = class WarrantyClaim extends frappe.ui.form.Controller {
-	refresh() {
+erpnext.support.WarrantyClaim = frappe.ui.form.Controller.extend({
+	refresh: function() {
 		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
 
 		if(!cur_frm.doc.__islocal &&
@@ -45,17 +45,17 @@ erpnext.support.WarrantyClaim = class WarrantyClaim extends frappe.ui.form.Contr
 			cur_frm.add_custom_button(__('Maintenance Visit'),
 				this.make_maintenance_visit);
 		}
-	}
+	},
 
-	make_maintenance_visit() {
+	make_maintenance_visit: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.support.doctype.warranty_claim.warranty_claim.make_maintenance_visit",
 			frm: cur_frm
 		})
 	}
-};
+});
 
-extend_cscript(cur_frm.cscript, new erpnext.support.WarrantyClaim({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.support.WarrantyClaim({frm: cur_frm}));
 
 cur_frm.fields_dict['serial_no'].get_query = function(doc, cdt, cdn) {
 	var cond = [];

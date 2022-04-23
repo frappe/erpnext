@@ -17,7 +17,7 @@ frappe.ui.form.on('Routing', {
 	},
 
 	calculate_operating_cost: function(frm, child) {
-		const operating_cost = flt(flt(child.hour_rate) * flt(child.time_in_mins) / 60, precision("operating_cost", child));
+		const operating_cost = flt(flt(child.hour_rate) * flt(child.time_in_mins) / 60, 2);
 		frappe.model.set_value(child.doctype, child.name, "operating_cost", operating_cost);
 	}
 });
@@ -69,16 +69,3 @@ frappe.ui.form.on('BOM Operation', {
 		frm.events.calculate_operating_cost(frm, d);
 	}
 });
-
-frappe.tour['Routing'] = [
-	{
-		fieldname: "routing_name",
-		title: "Routing Name",
-		description: __("Enter a name for Routing.")
-	},
-	{
-		fieldname: "operations",
-		title: "BOM Operations",
-		description: __("Enter the Operation, the table will fetch the Operation details like Hourly Rate, Workstation automatically.\n\n After that, set the Operation Time in minutes and the table will calculate the Operation Costs based on the Hourly Rate and Operation Time.")
-	}
-];

@@ -1,10 +1,9 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
+from __future__ import unicode_literals
 import frappe
 from frappe import _
-
 
 def execute(filters=None):
 	if filters.from_date >= filters.to_date:
@@ -15,7 +14,6 @@ def execute(filters=None):
 
 	return columns, data or []
 
-
 def get_columns():
 	return [
 		{
@@ -23,27 +21,46 @@ def get_columns():
 			"fieldtype": "Link",
 			"fieldname": "purchase_order",
 			"options": "Purchase Order",
-			"width": 200,
+			"width": 200
 		},
-		{"label": _("Date"), "fieldtype": "Date", "fieldname": "date", "width": 150},
+		{
+			"label": _("Date"),
+			"fieldtype": "Date",
+			"fieldname": "date",
+			"width": 150
+		},
 		{
 			"label": _("Supplier"),
 			"fieldtype": "Link",
 			"fieldname": "supplier",
 			"options": "Supplier",
-			"width": 150,
+			"width": 150
 		},
-		{"label": _("Item Code"), "fieldtype": "Data", "fieldname": "rm_item_code", "width": 150},
-		{"label": _("Required Quantity"), "fieldtype": "Float", "fieldname": "reqd_qty", "width": 150},
+		{
+			"label": _("Item Code"),
+			"fieldtype": "Data",
+			"fieldname": "rm_item_code",
+			"width": 150
+		},
+		{
+			"label": _("Required Quantity"),
+			"fieldtype": "Float",
+			"fieldname": "reqd_qty",
+			"width": 150
+		},
 		{
 			"label": _("Transferred Quantity"),
 			"fieldtype": "Float",
 			"fieldname": "transferred_qty",
-			"width": 200,
+			"width": 200
 		},
-		{"label": _("Pending Quantity"), "fieldtype": "Float", "fieldname": "p_qty", "width": 150},
+		{
+			"label": _("Pending Quantity"),
+			"fieldtype": "Float",
+			"fieldname": "p_qty",
+			"width": 150
+		}
 	]
-
 
 def get_data(filters):
 	po_rm_item_details = get_po_items_to_supply(filters)
@@ -58,7 +75,6 @@ def get_data(filters):
 
 	return data
 
-
 def get_po_items_to_supply(filters):
 	return frappe.db.get_all(
 		"Purchase Order",
@@ -68,14 +84,14 @@ def get_po_items_to_supply(filters):
 			"supplier as supplier",
 			"`tabPurchase Order Item Supplied`.rm_item_code as rm_item_code",
 			"`tabPurchase Order Item Supplied`.required_qty as reqd_qty",
-			"`tabPurchase Order Item Supplied`.supplied_qty as transferred_qty",
+			"`tabPurchase Order Item Supplied`.supplied_qty as transferred_qty"
 		],
-		filters=[
+		filters = [
 			["Purchase Order", "per_received", "<", "100"],
-			["Purchase Order", "is_subcontracted", "=", 1],
+			["Purchase Order", "is_subcontracted", "=", "Yes"],
 			["Purchase Order", "supplier", "=", filters.supplier],
 			["Purchase Order", "transaction_date", "<=", filters.to_date],
 			["Purchase Order", "transaction_date", ">=", filters.from_date],
-			["Purchase Order", "docstatus", "=", 1],
-		],
+			["Purchase Order", "docstatus", "=", 1]
+		]
 	)

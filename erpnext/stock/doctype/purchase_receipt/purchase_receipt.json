@@ -106,8 +106,6 @@
   "terms",
   "bill_no",
   "bill_date",
-  "accounting_details_section",
-  "provisional_expense_account",
   "more_info",
   "project",
   "status",
@@ -437,16 +435,17 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
+   "default": "No",
    "fieldname": "is_subcontracted",
-   "fieldtype": "Check",
-   "label": "Is Subcontracted",
+   "fieldtype": "Select",
+   "label": "Raw Materials Consumed",
    "oldfieldname": "is_subcontracted",
    "oldfieldtype": "Select",
+   "options": "No\nYes",
    "print_hide": 1
   },
   {
-   "depends_on": "eval:doc.is_subcontracted",
+   "depends_on": "eval:doc.is_subcontracted==\"Yes\"",
    "fieldname": "supplier_warehouse",
    "fieldtype": "Link",
    "label": "Supplier Warehouse",
@@ -1099,8 +1098,7 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
-   "label": "Scan Barcode",
-   "options": "Barcode"
+   "label": "Scan Barcode"
   },
   {
    "fieldname": "billing_address",
@@ -1141,34 +1139,19 @@
    "fetch_from": "supplier.represents_company",
    "fieldname": "represents_company",
    "fieldtype": "Link",
-   "ignore_user_permissions": 1,
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "accounting_details_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Details"
-  },
-  {
-   "fieldname": "provisional_expense_account",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Provisional Expense Account",
-   "options": "Account"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-10 11:40:52.690984",
+ "modified": "2021-05-25 00:15:12.239017",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1229,7 +1212,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
  "timeline_field": "supplier",
  "title_field": "title",
  "track_changes": 1

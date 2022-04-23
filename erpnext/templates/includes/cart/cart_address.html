@@ -4,14 +4,18 @@
 	{% set select_address = True %}
 {% endif %}
 
-<div class="mb-3 frappe-card p-5" data-section="shipping-address">
-	<div class="d-flex">
-		<div class="col-6 address-header"><h6>{{ _("Shipping Address") }}</h6></div>
-		<div class="col-6" style="padding: 0;">
-			<a class="ml-4 btn-new-address" role="button">{{ _("Add a new address") }}</a>
+{% set show_coupon_code = frappe.db.get_single_value('Shopping Cart Settings', 'show_apply_coupon_code_in_website') %}
+{% if show_coupon_code == 1%}
+<div class="mb-3">
+	<div class="row no-gutters">
+		<input type="text" class="txtcoupon form-control mr-3 w-25" placeholder="Enter Coupon Code" name="txtcouponcode"  ></input>
+		<button class="btn btn-primary btn-sm  bt-coupon">{{ _("Apply Coupon Code") }}</button>
+		<input type="hidden" class="txtreferral_sales_partner" placeholder="Enter Sales Partner" name="txtreferral_sales_partner" type="text"></input>
 		</div>
-	</div>
-
+</div>
+{% endif %}
+<div class="mb-3 frappe-card p-5" data-section="shipping-address">
+	<h6>{{ _("Shipping Address") }}</h6>
 	<hr>
 	{% for address in shipping_addresses %}
 	{% if doc.shipping_address_name == address.name %}
@@ -23,36 +27,26 @@
 	{% endif %}
 	{% endfor %}
 </div>
-
-<!-- Billing Address -->
 <div class="checkbox ml-1 mb-2">
 	<label for="input_same_billing">
-		<input type="checkbox" class="product-filter" id="input_same_billing" checked style="width: 14px !important">
-		<span class="label-area font-md">{{ _('Billing Address is same as Shipping Address') }}</span>
+		<input type="checkbox" id="input_same_billing" checked>
+		<span class="label-area">{{ _('Billing Address is same as Shipping Address') }}</span>
 	</label>
 </div>
-
-{% if billing_addresses %}
-	<div class="mb-3 frappe-card p-5" data-section="billing-address">
-		<div class="d-flex">
-			<div class="col-6 address-header"><h6>{{ _("Billing Address") }}</h6></div>
-			<div class="col-6" style="padding: 0;">
-				<a class="ml-4 btn-new-address" role="button">{{ _("Add a new address") }}</a>
-			</div>
+<div class="mb-3 frappe-card p-5" data-section="billing-address">
+	<h6>{{ _("Billing Address") }}</h6>
+	<hr>
+	{% for address in billing_addresses %}
+		{% if doc.customer_address == address.name %}
+		<div class="row no-gutters" data-fieldname="customer_address">
+			<div class="w-100 address-container" data-address-name="{{address.name}}" data-address-type="billing" data-active>
+					{% include "templates/includes/cart/address_card.html" %}
+				</div>
 		</div>
-
-		<hr>
-		{% for address in billing_addresses %}
-			{% if doc.customer_address == address.name %}
-			<div class="row no-gutters" data-fieldname="customer_address">
-				<div class="w-100 address-container" data-address-name="{{address.name}}" data-address-type="billing" data-active>
-						{% include "templates/includes/cart/address_card.html" %}
-					</div>
-			</div>
-			{% endif %}
-		{% endfor %}
-	</div>
-{% endif %}
+		{% endif %}
+	{% endfor %}
+</div>
+<button class="btn btn-outline-primary btn-sm mt-1 btn-new-address bg-white">{{ _("Add a new address") }}</button>
 
 <script>
 frappe.ready(() => {
@@ -131,16 +125,15 @@ frappe.ready(() => {
 				{
 					fieldname: "phone",
 					fieldtype: "Data",
-					label: "Phone",
-					reqd: 1
+					label: "Phone"
 				},
 			],
 			primary_action_label: __('Save'),
 			primary_action: (values) => {
-				frappe.call('erpnext.e_commerce.shopping_cart.cart.add_new_address', { doc: values })
+				frappe.call('erpnext.shopping_cart.cart.add_new_address', { doc: values })
 					.then(r => {
 						frappe.call({
-							method: "erpnext.e_commerce.shopping_cart.cart.update_cart_address",
+							method: "erpnext.shopping_cart.cart.update_cart_address",
 							args: {
 								address_type: r.message.address_type,
 								address_name: r.message.name

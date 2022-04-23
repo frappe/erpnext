@@ -97,7 +97,6 @@
    "width": "100px"
   },
   {
-   "depends_on": "exchange_gain_loss",
    "fieldname": "exchange_gain_loss",
    "fieldtype": "Currency",
    "label": "Exchange Gain/Loss",
@@ -105,7 +104,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "exchange_gain_loss",
    "fieldname": "ref_exchange_rate",
    "fieldtype": "Float",
    "label": "Reference Exchange Rate",
@@ -117,7 +115,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-26 15:47:28.167371",
+ "modified": "2021-04-20 16:26:53.820530",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Advance",

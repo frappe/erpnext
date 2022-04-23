@@ -4,19 +4,19 @@
 // attach required files
 {% include 'erpnext/public/js/controllers/buying.js' %};
 
-erpnext.buying.SupplierQuotationController = class SupplierQuotationController extends erpnext.buying.BuyingController {
-	setup() {
+erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.extend({
+	setup: function() {
 		this.frm.custom_make_buttons = {
 			'Purchase Order': 'Purchase Order',
 			'Quotation': 'Quotation'
 		}
 
-		super.setup();
-	}
+		this._super();
+	},
 
-	refresh() {
+	refresh: function() {
 		var me = this;
-		super.refresh();
+		this._super();
 
 		if (this.frm.doc.__islocal && !this.frm.doc.valid_till) {
 			this.frm.set_value('valid_till', frappe.datetime.add_months(this.frm.doc.transaction_date, 1));
@@ -77,25 +77,25 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 				})
 			}, __("Get Items From"));
 		}
-	}
+	},
 
-	make_purchase_order() {
+	make_purchase_order: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
 			frm: cur_frm
 		})
-	}
-	make_quotation() {
+	},
+	make_quotation: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_quotation",
 			frm: cur_frm
 		})
 
 	}
-};
+});
 
 // for backward compatibility: combine new and previous states
-extend_cscript(cur_frm.cscript, new erpnext.buying.SupplierQuotationController({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.buying.SupplierQuotationController({frm: cur_frm}));
 
 cur_frm.fields_dict['items'].grid.get_field('project').get_query =
 	function(doc, cdt, cdn) {

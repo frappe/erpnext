@@ -2,8 +2,8 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('LinkedIn Settings', {
-	onload: function(frm) {
-		if (frm.doc.session_status == 'Expired' && frm.doc.consumer_key && frm.doc.consumer_secret) {
+	onload: function(frm){
+		if (frm.doc.session_status == 'Expired' && frm.doc.consumer_key && frm.doc.consumer_secret){
 			frappe.confirm(
 				__('Session not valid, Do you want to login?'),
 				function(){
@@ -14,9 +14,8 @@ frappe.ui.form.on('LinkedIn Settings', {
 				}
 			);
 		}
-		frm.dashboard.set_headline(__("For more information, {0}.", [`<a target='_blank' href='https://docs.erpnext.com/docs/user/manual/en/CRM/linkedin-settings'>${__('Click here')}</a>`]));
 	},
-	refresh: function(frm) {
+	refresh: function(frm){
 		if (frm.doc.session_status=="Expired"){
 			let msg = __("Session Not Active. Save doc to login.");
 			frm.dashboard.set_headline_alert(
@@ -37,7 +36,7 @@ frappe.ui.form.on('LinkedIn Settings', {
 			let msg,color;
 
 			if (days>0){
-				msg = __("Your Session will be expire in {0} days.", [days]);
+				msg = __("Your Session will be expire in ") + days + __(" days.");
 				color = "green";
 			}
 			else {
@@ -54,7 +53,7 @@ frappe.ui.form.on('LinkedIn Settings', {
 			);
 		}
 	},
-	login: function(frm) {
+	login: function(frm){
 		if (frm.doc.consumer_key && frm.doc.consumer_secret){
 			frappe.dom.freeze();
 			frappe.call({
@@ -68,7 +67,7 @@ frappe.ui.form.on('LinkedIn Settings', {
 			});
 		}
 	},
-	after_save: function(frm) {
+	after_save: function(frm){
 		frm.trigger("login");
 	}
 });

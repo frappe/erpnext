@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-extend_cscript(cur_frm.cscript, {
+$.extend(cur_frm.cscript, {
 	message: function () {
 		var total_characters = this.frm.doc.message.length;
 		var total_msg = 1;

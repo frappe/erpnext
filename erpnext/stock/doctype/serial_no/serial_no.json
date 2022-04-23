@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
+ "allow_rename": 1,
  "autoname": "field:serial_no",
  "creation": "2013-05-16 10:59:15",
  "description": "Distinct unit of an Item",
@@ -433,11 +434,10 @@
  "icon": "fa fa-barcode",
  "idx": 1,
  "links": [],
- "modified": "2021-12-23 10:44:30.299450",
+ "modified": "2021-01-08 14:31:15.375996",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
- "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -476,6 +476,5 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
  "track_changes": 1
 }

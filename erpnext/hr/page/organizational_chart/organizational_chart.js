@@ -6,7 +6,7 @@ frappe.pages['organizational-chart'].on_page_load = function(wrapper) {
 	});
 
 	$(wrapper).bind('show', () => {
-		frappe.require('hierarchy-chart.bundle.js', () => {
+		frappe.require('/assets/js/hierarchy-chart.min.js', () => {
 			let organizational_chart = undefined;
 			let method = 'erpnext.hr.page.organizational_chart.organizational_chart.get_children';
 
@@ -15,8 +15,6 @@ frappe.pages['organizational-chart'].on_page_load = function(wrapper) {
 			} else {
 				organizational_chart = new erpnext.HierarchyChart('Employee', wrapper, method);
 			}
-
-			frappe.breadcrumbs.add('HR');
 			organizational_chart.show();
 		});
 	});

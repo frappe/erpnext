@@ -1,0 +1,64 @@
+{
+ "actions": [],
+ "creation": "2018-07-12 12:07:36.932333",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "service_unit",
+  "check_in",
+  "left",
+  "check_out",
+  "invoiced"
+ ],
+ "fields": [
+  {
+   "fieldname": "service_unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Healthcare Service Unit",
+   "options": "Healthcare Service Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "check_in",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Check In"
+  },
+  {
+   "default": "0",
+   "fieldname": "left",
+   "fieldtype": "Check",
+   "label": "Left",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "check_out",
+   "fieldtype": "Datetime",
+   "label": "Check Out"
+  },
+  {
+   "default": "0",
+   "fieldname": "invoiced",
+   "fieldtype": "Check",
+   "label": "Invoiced",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-03-18 15:08:54.634132",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Inpatient Occupancy",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "restrict_to_domain": "Healthcare",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,11 @@
+{% if doc.published %}
+	<div style='margin-bottom: 30px; max-width: 600px;'
+		class='with-border clickable'>
+		<a href="/{{ doc.route }}">
+			<h3 style='margin-top: 0px;'>{{ doc.name }}</h3>
+			<p>
+				<span class='label'>{{ frappe.format_date(doc.creation) }}</span>
+			</p>
+		</a>
+	</div>
+{% endif %}

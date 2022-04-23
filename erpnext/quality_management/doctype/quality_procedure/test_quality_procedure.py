@@ -1,31 +1,26 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe and Contributors
 # See license.txt
-
-import unittest
+from __future__ import unicode_literals
 
 import frappe
+import unittest
 
 from .quality_procedure import add_node
-
 
 class TestQualityProcedure(unittest.TestCase):
 	def test_add_node(self):
 		try:
-			procedure = frappe.get_doc(
-				dict(
-					doctype="Quality Procedure",
-					quality_procedure_name="Test Procedure 1",
-					processes=[dict(process_description="Test Step 1")],
-				)
-			).insert()
+			procedure = frappe.get_doc(dict(
+				doctype = 'Quality Procedure',
+				quality_procedure_name = 'Test Procedure 1',
+				processes = [
+					dict(process_description = 'Test Step 1')
+				]
+			)).insert()
 
-			frappe.form_dict = dict(
-				doctype="Quality Procedure",
-				quality_procedure_name="Test Child 1",
-				parent_quality_procedure=procedure.name,
-				cmd="test",
-				is_root="false",
-			)
+			frappe.form_dict = dict(doctype = 'Quality Procedure', quality_procedure_name = 'Test Child 1',
+				parent_quality_procedure = procedure.name, cmd='test', is_root='false')
 			node = add_node()
 
 			procedure.reload()
@@ -44,13 +39,12 @@ class TestQualityProcedure(unittest.TestCase):
 		finally:
 			procedure.delete()
 
-
 def create_procedure():
-	return frappe.get_doc(
-		dict(
-			doctype="Quality Procedure",
-			quality_procedure_name="Test Procedure 1",
-			is_group=1,
-			processes=[dict(process_description="Test Step 1")],
-		)
-	).insert()
+	return frappe.get_doc(dict(
+		doctype = 'Quality Procedure',
+		quality_procedure_name = 'Test Procedure 1',
+		is_group = 1,
+		processes = [
+			dict(process_description = 'Test Step 1')
+		]
+	)).insert()

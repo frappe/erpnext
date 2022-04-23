@@ -1,0 +1,121 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "beta": 1,
+ "creation": "2016-09-16 16:41:45.533374",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "drug_code",
+  "drug_name",
+  "dosage",
+  "period",
+  "dosage_form",
+  "column_break_7",
+  "comment",
+  "usage_interval",
+  "interval",
+  "interval_uom",
+  "update_schedule"
+ ],
+ "fields": [
+  {
+   "fieldname": "drug_code",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Drug",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "drug_code.item_name",
+   "fieldname": "drug_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Drug Name / Description"
+  },
+  {
+   "fieldname": "dosage",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Dosage",
+   "options": "Prescription Dosage",
+   "reqd": 1
+  },
+  {
+   "fieldname": "period",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Period",
+   "options": "Prescription Duration",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dosage_form",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Dosage Form",
+   "options": "Dosage Form",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "comment",
+   "fieldtype": "Small Text",
+   "ignore_xss_filter": 1,
+   "in_list_view": 1,
+   "label": "Comment"
+  },
+  {
+   "depends_on": "usage_interval",
+   "fieldname": "interval",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Interval"
+  },
+  {
+   "default": "1",
+   "depends_on": "usage_interval",
+   "fieldname": "update_schedule",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Update Schedule",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "depends_on": "use_interval",
+   "fieldname": "interval_uom",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Interval UOM",
+   "options": "\nHour\nDay"
+  },
+  {
+   "default": "0",
+   "fieldname": "usage_interval",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Dosage by Time Interval"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-09-30 23:32:09.495288",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Drug Prescription",
+ "owner": "Administrator",
+ "permissions": [],
+ "restrict_to_domain": "Healthcare",
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

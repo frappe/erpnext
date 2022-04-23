@@ -54,11 +54,13 @@ erpnext.HierarchyChartMobile = class {
 		});
 
 		node.parent.append(node_card);
-		node.$link = $(`[id="${node.id}"]`);
+		node.$link = $(`#${node.id}`);
 		node.$link.addClass('mobile-node');
 	}
 
 	show() {
+		frappe.breadcrumbs.add('HR');
+
 		let me = this;
 		if ($(`[data-fieldname="company"]`).length) return;
 
@@ -184,7 +186,7 @@ erpnext.HierarchyChartMobile = class {
 			this.refresh_connectors(node.parent_id, node.id);
 
 			// rebuild incoming connections of parent
-			let grandparent = $(`[id="${node.parent_id}"]`).attr('data-parent');
+			let grandparent = $(`#${node.parent_id}`).attr('data-parent');
 			this.refresh_connectors(grandparent, node.parent_id);
 		}
 
@@ -221,7 +223,7 @@ erpnext.HierarchyChartMobile = class {
 
 	show_active_path(node) {
 		// mark node parent on active path
-		$(`[id="${node.parent_id}"]`).addClass('active-path');
+		$(`#${node.parent_id}`).addClass('active-path');
 	}
 
 	load_children(node) {
@@ -235,7 +237,7 @@ erpnext.HierarchyChartMobile = class {
 		let me = this;
 		return new Promise(resolve => {
 			frappe.call({
-				method: me.method,
+				method: this.method,
 				args: {
 					parent: node_id,
 					company: me.company,
@@ -256,7 +258,7 @@ erpnext.HierarchyChartMobile = class {
 			if (child_nodes) {
 				$.each(child_nodes, (_i, data) => {
 					this.add_node(node, data);
-					$(`[id="${data.id}"]`).addClass('active-child');
+					$(`#${data.id}`).addClass('active-child');
 
 					setTimeout(() => {
 						this.add_connector(node.id, data.id);
@@ -286,16 +288,16 @@ erpnext.HierarchyChartMobile = class {
 	}
 
 	add_connector(parent_id, child_id) {
-		const parent_node = document.getElementById(`${parent_id}`);
-		const child_node = document.getElementById(`${child_id}`);
+		const parent_node = document.querySelector(`#${parent_id}`);
+		const child_node = document.querySelector(`#${child_id}`);
 
 		const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
 		let connector = undefined;
 
-		if ($(`[id="${parent_id}"]`).hasClass('active')) {
+		if ($(`#${parent_id}`).hasClass('active')) {
 			connector = this.get_connector_for_active_node(parent_node, child_node);
-		} else if ($(`[id="${parent_id}"]`).hasClass('active-path')) {
+		} else if ($(`#${parent_id}`).hasClass('active-path')) {
 			connector = this.get_connector_for_collapsed_node(parent_node, child_node);
 		}
 
@@ -351,7 +353,7 @@ erpnext.HierarchyChartMobile = class {
 	set_path_attributes(path, parent_id, child_id) {
 		path.setAttribute("data-parent", parent_id);
 		path.setAttribute("data-child", child_id);
-		const parent = $(`[id="${parent_id}"]`);
+		const parent = $(`#${parent_id}`);
 
 		if (parent.hasClass('active')) {
 			path.setAttribute("class", "active-connector");
@@ -374,7 +376,7 @@ erpnext.HierarchyChartMobile = class {
 
 	setup_node_click_action(node) {
 		let me = this;
-		let node_element = $(`[id="${node.id}"]`);
+		let node_element = $(`#${node.id}`);
 
 		node_element.click(function() {
 			let el = undefined;
@@ -398,7 +400,7 @@ erpnext.HierarchyChartMobile = class {
 	}
 
 	setup_edit_node_action(node) {
-		let node_element = $(`[id="${node.id}"]`);
+		let node_element = $(`#${node.id}`);
 		let me = this;
 
 		node_element.find('.btn-edit-node').click(function() {
@@ -512,14 +514,13 @@ erpnext.HierarchyChartMobile = class {
 	}
 
 	remove_levels_after_node(node) {
-		let level = $(`[id="${node.id}"]`).parent().parent().index();
+		let level = $(`#${node.id}`).parent().parent().index();
 
 		level = $('.hierarchy-mobile > li:eq('+ level + ')');
 		level.nextAll('li').remove();
 
 		let node_object = this.nodes[node.id];
-		let current_node = level.find(`[id="${node.id}"]`).detach();
-
+		let current_node = level.find(`#${node.id}`).detach();
 		current_node.removeClass('active-child active-path');
 
 		node_object.expanded = 0;
@@ -534,7 +535,7 @@ erpnext.HierarchyChartMobile = class {
 			const parent = $(path).data('parent');
 			const child = $(path).data('child');
 
-			if ($(`[id="${parent}"]`).length && $(`[id="${child}"]`).length)
+			if ($(`#${parent}`).length && $(`#${child}`).length)
 				return;
 
 			$(path).remove();

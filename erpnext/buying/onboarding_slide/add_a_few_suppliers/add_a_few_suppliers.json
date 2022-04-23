@@ -1,0 +1,49 @@
+{
+ "add_more_button": 1,
+ "app": "ERPNext",
+ "creation": "2019-11-15 14:45:32.626641",
+ "docstatus": 0,
+ "doctype": "Onboarding Slide",
+ "domains": [],
+ "help_links": [
+  {
+   "label": "Learn More",
+   "video_id": "zsrrVDk6VBs"
+  }
+ ],
+ "idx": 0,
+ "image_src": "",
+ "is_completed": 0,
+ "max_count": 3,
+ "modified": "2019-12-09 17:54:18.452038",
+ "modified_by": "Administrator",
+ "name": "Add A Few Suppliers",
+ "owner": "Administrator",
+ "ref_doctype": "Supplier",
+ "slide_desc": "",
+ "slide_fields": [
+  {
+   "align": "",
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name",
+   "placeholder": "",
+   "reqd": 1
+  },
+  {
+   "align": "",
+   "fieldtype": "Column Break",
+   "reqd": 0
+  },
+  {
+   "align": "",
+   "fieldname": "supplier_email",
+   "fieldtype": "Data",
+   "label": "Supplier Email",
+   "reqd": 1
+  }
+ ],
+ "slide_order": 50,
+ "slide_title": "Add A Few Suppliers",
+ "slide_type": "Create"
+}

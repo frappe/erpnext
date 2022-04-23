@@ -112,7 +112,7 @@ frappe.ui.form.on('Payroll Entry', {
 			},
 			callback: function (r) {
 				if (r.message && !r.message.submitted) {
-					frm.add_custom_button(__("Make Bank Entry"), function () {
+					frm.add_custom_button("Make Bank Entry", function () {
 						make_bank_entry(frm);
 					}).addClass("btn-primary");
 				}

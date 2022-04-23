@@ -16,7 +16,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				doctype: "Bank Transaction",
 				filters: { name: this.bank_transaction_name },
 				fieldname: [
-					"date as reference_date",
+					"date",
 					"deposit",
 					"withdrawal",
 					"currency",
@@ -182,12 +182,6 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				onchange: () => this.update_options(),
 			},
 			{
-				fieldtype: "Check",
-				label: "Loan Repayment",
-				fieldname: "loan_repayment",
-				onchange: () => this.update_options(),
-			},
-			{
 				fieldname: "column_break_5",
 				fieldtype: "Column Break",
 			},
@@ -197,16 +191,11 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldname: "sales_invoice",
 				onchange: () => this.update_options(),
 			},
+
 			{
 				fieldtype: "Check",
 				label: "Purchase Invoice",
 				fieldname: "purchase_invoice",
-				onchange: () => this.update_options(),
-			},
-			{
-				fieldtype: "Check",
-				label: "Show Only Exact Amount",
-				fieldname: "exact_match",
 				onchange: () => this.update_options(),
 			},
 			{
@@ -221,8 +210,8 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			},
 			{
 				fieldtype: "Check",
-				label: "Loan Disbursement",
-				fieldname: "loan_disbursement",
+				label: "Show Only Exact Amount",
+				fieldname: "exact_match",
 				onchange: () => this.update_options(),
 			},
 			{
@@ -238,7 +227,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			{
 				fieldtype: "HTML",
 				fieldname: "no_matching_vouchers",
-				options: "<div class=\"text-muted text-center\">No Matching Vouchers Found</div>"
+				options: "<div class='text-muted text-center'>No Matching Vouchers Found</div>"
 			},
 			{
 				fieldtype: "Section Break",

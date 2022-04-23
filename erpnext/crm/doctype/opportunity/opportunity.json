@@ -23,6 +23,7 @@
   "status",
   "converted_by",
   "sales_stage",
+  "order_lost_reason",
   "first_response_time",
   "expected_closing",
   "next_contact",
@@ -32,18 +33,12 @@
   "to_discuss",
   "section_break_14",
   "currency",
-  "conversion_rate",
-  "base_opportunity_amount",
+  "opportunity_amount",
   "with_items",
   "column_break_17",
   "probability",
-  "opportunity_amount",
   "items_section",
   "items",
-  "section_break_32",
-  "base_total",
-  "column_break_33",
-  "total",
   "contact_info",
   "customer_address",
   "address_display",
@@ -61,11 +56,7 @@
   "transaction_date",
   "language",
   "amended_from",
-  "lost_detail_section",
-  "lost_reasons",
-  "order_lost_reason",
-  "column_break_56",
-  "competitors"
+  "lost_reasons"
  ],
  "fields": [
   {
@@ -155,9 +146,10 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.status===\"Lost\"",
    "fieldname": "order_lost_reason",
    "fieldtype": "Small Text",
-   "label": "Detailed Reason",
+   "label": "Lost Reason",
    "no_copy": 1,
    "read_only": 1
   },
@@ -409,7 +401,6 @@
    "width": "150px"
   },
   {
-   "depends_on": "eval:doc.status===\"Lost\"",
    "fieldname": "lost_reasons",
    "fieldtype": "Table MultiSelect",
    "label": "Lost Reasons",
@@ -434,70 +425,15 @@
    "fieldtype": "Link",
    "label": "Print Language",
    "options": "Language"
-  },
-  {
-   "fieldname": "base_opportunity_amount",
-   "fieldtype": "Currency",
-   "label": "Opportunity Amount (Company Currency)",
-   "options": "Company:company:default_currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "depends_on": "with_items",
-   "fieldname": "section_break_32",
-   "fieldtype": "Section Break",
-   "hide_border": 1
-  },
-  {
-   "fieldname": "base_total",
-   "fieldtype": "Currency",
-   "label": "Total (Company Currency)",
-   "options": "Company:company:default_currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "total",
-   "fieldtype": "Currency",
-   "label": "Total",
-   "options": "currency",
-   "read_only": 1
-  },
-  {
-   "fieldname": "conversion_rate",
-   "fieldtype": "Float",
-   "label": "Exchange Rate"
-  },
-  {
-   "fieldname": "column_break_33",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "lost_detail_section",
-   "fieldtype": "Section Break",
-   "label": "Lost Reasons"
-  },
-  {
-   "fieldname": "column_break_56",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "competitors",
-   "fieldtype": "Table MultiSelect",
-   "label": "Competitors",
-   "options": "Competitor Detail",
-   "read_only": 1
   }
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2022-01-29 19:32:26.382896",
+ "modified": "2021-06-04 10:11:22.831139",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -530,7 +466,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
  "subject_field": "title",
  "timeline_field": "party_name",
  "title_field": "title",

@@ -2,20 +2,17 @@
 import os
 import frappe
 
-
 def set_up_address_templates(default_country=None):
 	for country, html in get_address_templates():
 		is_default = 1 if country == default_country else 0
 		update_address_template(country, html, is_default)
 
-
 def get_address_templates():
 	"""
 	Return country and path for all HTML files in this directory.
-
+	
 	Returns a list of dicts.
 	"""
-
 	def country(file_name):
 		"""Convert 'united_states.html' to 'United States'."""
 		suffix_pos = file_name.find(".html")
@@ -48,6 +45,9 @@ def update_address_template(country, html, is_default=0):
 		frappe.db.set_value("Address Template", country, "template", html)
 		frappe.db.set_value("Address Template", country, "is_default", is_default)
 	else:
-		frappe.get_doc(
-			dict(doctype="Address Template", country=country, is_default=is_default, template=html)
-		).insert()
+		frappe.get_doc(dict(
+			doctype="Address Template",
+			country=country,
+			is_default=is_default,
+			template=html
+		)).insert()

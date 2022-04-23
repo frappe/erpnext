@@ -6,13 +6,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
 
     steps:
       - name: 'Setup Environment'
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.6
 
       - name: 'Clone repo'
         uses: actions/checkout@v2

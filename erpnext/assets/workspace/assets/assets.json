@@ -1,25 +1,27 @@
 {
+ "category": "Modules",
  "charts": [
   {
    "chart_name": "Asset Value Analytics",
    "label": "Asset Value Analytics"
   }
  ],
- "content": "[{\"type\":\"onboarding\",\"data\":{\"onboarding_name\":\"Assets\",\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Asset Value Analytics\",\"col\":12}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Asset\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Asset Category\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Fixed Asset Register\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Assets\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Maintenance\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
  "creation": "2020-03-02 15:43:27.634865",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Workspace",
- "for_user": "",
+ "extends_another_page": 0,
  "hide_custom": 0,
  "icon": "assets",
  "idx": 0,
+ "is_standard": 1,
  "label": "Assets",
  "links": [
   {
    "hidden": 0,
    "is_query_report": 0,
    "label": "Assets",
-   "link_count": 0,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -28,7 +30,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset",
-   "link_count": 0,
    "link_to": "Asset",
    "link_type": "DocType",
    "onboard": 1,
@@ -39,7 +40,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Location",
-   "link_count": 0,
    "link_to": "Location",
    "link_type": "DocType",
    "onboard": 1,
@@ -50,7 +50,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset Category",
-   "link_count": 0,
    "link_to": "Asset Category",
    "link_type": "DocType",
    "onboard": 1,
@@ -61,7 +60,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset Movement",
-   "link_count": 0,
    "link_to": "Asset Movement",
    "link_type": "DocType",
    "onboard": 0,
@@ -71,7 +69,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Maintenance",
-   "link_count": 0,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -80,7 +77,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset Maintenance Team",
-   "link_count": 0,
    "link_to": "Asset Maintenance Team",
    "link_type": "DocType",
    "onboard": 1,
@@ -91,7 +87,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset Maintenance",
-   "link_count": 0,
    "link_to": "Asset Maintenance",
    "link_type": "DocType",
    "onboard": 1,
@@ -102,7 +97,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset Maintenance Log",
-   "link_count": 0,
    "link_to": "Asset Maintenance Log",
    "link_type": "DocType",
    "onboard": 0,
@@ -113,7 +107,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset Value Adjustment",
-   "link_count": 0,
    "link_to": "Asset Value Adjustment",
    "link_type": "DocType",
    "onboard": 0,
@@ -124,7 +117,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset Repair",
-   "link_count": 0,
    "link_to": "Asset Repair",
    "link_type": "DocType",
    "onboard": 0,
@@ -134,7 +126,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Reports",
-   "link_count": 0,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -143,7 +134,6 @@
    "hidden": 0,
    "is_query_report": 1,
    "label": "Asset Depreciation Ledger",
-   "link_count": 0,
    "link_to": "Asset Depreciation Ledger",
    "link_type": "Report",
    "onboard": 0,
@@ -154,7 +144,6 @@
    "hidden": 0,
    "is_query_report": 1,
    "label": "Asset Depreciations and Balances",
-   "link_count": 0,
    "link_to": "Asset Depreciations and Balances",
    "link_type": "Report",
    "onboard": 0,
@@ -165,23 +154,20 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset Maintenance",
-   "link_count": 0,
    "link_to": "Asset Maintenance",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2022-01-13 17:25:41.730628",
+ "modified": "2020-12-01 13:38:37.977119",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Assets",
+ "onboarding": "Assets",
  "owner": "Administrator",
- "parent_page": "",
- "public": 1,
- "restrict_to_domain": "",
- "roles": [],
- "sequence_id": 4.0,
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
  "shortcuts": [
   {
    "label": "Asset",
@@ -203,6 +189,5 @@
    "link_to": "Asset",
    "type": "Dashboard"
   }
- ],
- "title": "Assets"
+ ]
 }

@@ -15,7 +15,6 @@
   "company",
   "boarding_status",
   "resignation_letter_date",
-  "boarding_begins_on",
   "project",
   "table_for_activity",
   "employee_separation_template",
@@ -51,12 +50,11 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "Pending",
    "fieldname": "boarding_status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Pending\nIn Process\nCompleted",
-   "read_only": 1
+   "options": "\nPending\nIn Process\nCompleted",
+   "reqd": 1
   },
   {
    "allow_on_submit": 1,
@@ -145,17 +143,11 @@
    "options": "Employee Separation",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "boarding_begins_on",
-   "fieldtype": "Date",
-   "label": "Separation Begins On",
-   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-30 14:03:51.218791",
+ "modified": "2021-04-28 15:58:36.020196",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Separation",

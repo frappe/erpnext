@@ -2,12 +2,7 @@ context('Organizational Chart', () => {
 	before(() => {
 		cy.login();
 		cy.visit('/app/website');
-	});
-
-	it('navigates to org chart', () => {
-		cy.visit('/app');
-		cy.visit('/app/organizational-chart');
-		cy.url().should('include', '/organizational-chart');
+		cy.awesomebar('Organizational Chart');
 
 		cy.window().its('frappe.csrf_token').then(csrf_token => {
 			return cy.request({
@@ -24,7 +19,7 @@ context('Organizational Chart', () => {
 				cy.get('.frappe-control[data-fieldname=company] input').focus().as('input');
 				cy.get('@input')
 					.clear({ force: true })
-					.type('Test Org Chart{downarrow}{enter}', { force: true })
+					.type('Test Org Chart{enter}', { force: true })
 					.blur({ force: true });
 			});
 		});

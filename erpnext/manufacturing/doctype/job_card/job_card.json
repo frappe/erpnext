@@ -19,7 +19,6 @@
   "serial_no",
   "column_break_12",
   "wip_warehouse",
-  "quality_inspection_template",
   "quality_inspection",
   "project",
   "batch_no",
@@ -39,8 +38,6 @@
   "total_time_in_mins",
   "section_break_8",
   "items",
-  "scrap_items_section",
-  "scrap_items",
   "corrective_operation_section",
   "for_job_card",
   "is_corrective_job_card",
@@ -188,7 +185,7 @@
    "default": "0",
    "fieldname": "transferred_qty",
    "fieldtype": "Float",
-   "label": "FG Qty from Transferred Raw Materials",
+   "label": "Transferred Qty",
    "read_only": 1
   },
   {
@@ -395,36 +392,14 @@
    "fieldtype": "Link",
    "label": "Batch No",
    "options": "Batch"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "scrap_items_section",
-   "fieldtype": "Section Break",
-   "label": "Scrap Items"
-  },
-  {
-   "fieldname": "scrap_items",
-   "fieldtype": "Table",
-   "label": "Scrap Items",
-   "no_copy": 1,
-   "options": "Job Card Scrap Item",
-   "print_hide": 1
-  },
-  {
-   "fetch_from": "operation.quality_inspection_template",
-   "fieldname": "quality_inspection_template",
-   "fieldtype": "Link",
-   "label": "Quality Inspection Template",
-   "options": "Quality Inspection Template"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-24 19:17:40.879235",
+ "modified": "2021-03-16 15:59:32.766484",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

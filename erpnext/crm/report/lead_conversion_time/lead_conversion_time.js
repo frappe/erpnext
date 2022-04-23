@@ -20,3 +20,5 @@ frappe.query_reports["Lead Conversion Time"] = {
 		},
 	]
 };
+
+

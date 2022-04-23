@@ -1,5 +1,5 @@
-erpnext.ItemSelector = class ItemSelector {
-	constructor(opts) {
+erpnext.ItemSelector = Class.extend({
+	init: function(opts) {
 		$.extend(this, opts);
 
 		if (!this.item_field) {
@@ -12,9 +12,9 @@ erpnext.ItemSelector = class ItemSelector {
 
 		this.grid = this.frm.get_field("items").grid;
 		this.setup();
-	}
+	},
 
-	setup() {
+	setup: function() {
 		var me = this;
 		if(!this.grid.add_items_button) {
 			this.grid.add_items_button = this.grid.add_custom_button(__('Add Items'), function() {
@@ -26,9 +26,9 @@ erpnext.ItemSelector = class ItemSelector {
 				setTimeout(function() { me.dialog.input.focus(); }, 1000);
 			});
 		}
-	}
+	},
 
-	make_dialog() {
+	make_dialog: function() {
 		this.dialog = new frappe.ui.Dialog({
 			title: __('Add Items')
 		});
@@ -53,9 +53,9 @@ erpnext.ItemSelector = class ItemSelector {
 				me.timeout_id = undefined;
 			}, 500);
 		});
-	}
+	},
 
-	add_item(item_code) {
+	add_item: function(item_code) {
 		// add row or update qty
 		var added = false;
 
@@ -82,9 +82,9 @@ erpnext.ItemSelector = class ItemSelector {
 			]);
 		}
 
-	}
+	},
 
-	render_items() {
+	render_items: function() {
 		let args = {
 			query: this.item_query,
 			filters: {}
@@ -107,4 +107,4 @@ erpnext.ItemSelector = class ItemSelector {
 			me.dialog.results.html(frappe.render_template('item_selector', {'data':r.values}));
 		});
 	}
-};
+});

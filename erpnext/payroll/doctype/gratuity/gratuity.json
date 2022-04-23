@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "HR-GRA-PAY-.#####",
- "creation": "2022-01-27 16:24:28.200061",
+ "creation": "2020-08-05 20:52:13.024683",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -50,10 +50,24 @@
    "reqd": 1
   },
   {
+   "default": "1",
+   "fieldname": "pay_via_salary_slip",
+   "fieldtype": "Check",
+   "label": "Pay via Salary Slip"
+  },
+  {
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "label": "Posting date",
    "reqd": 1
+  },
+  {
+   "depends_on": "eval: doc.pay_via_salary_slip == 1",
+   "fieldname": "salary_component",
+   "fieldtype": "Link",
+   "label": "Salary Component",
+   "mandatory_depends_on": "eval: doc.pay_via_salary_slip == 1",
+   "options": "Salary Component"
   },
   {
    "default": "0",
@@ -81,19 +95,19 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval: !doc.pay_via_salary_slip",
+   "depends_on": "eval: doc.pay_via_salary_slip == 0",
    "fieldname": "expense_account",
    "fieldtype": "Link",
    "label": "Expense Account",
-   "mandatory_depends_on": "eval: !doc.pay_via_salary_slip",
+   "mandatory_depends_on": "eval: doc.pay_via_salary_slip == 0",
    "options": "Account"
   },
   {
-   "depends_on": "eval: !doc.pay_via_salary_slip",
+   "depends_on": "eval: doc.pay_via_salary_slip == 0",
    "fieldname": "mode_of_payment",
    "fieldtype": "Link",
    "label": "Mode of Payment",
-   "mandatory_depends_on": "eval: !doc.pay_via_salary_slip",
+   "mandatory_depends_on": "eval: doc.pay_via_salary_slip == 0",
    "options": "Mode of Payment"
   },
   {
@@ -148,6 +162,13 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval: doc.pay_via_salary_slip == 1",
+   "fieldname": "payroll_date",
+   "fieldtype": "Date",
+   "label": "Payroll Date",
+   "mandatory_depends_on": "eval: doc.pay_via_salary_slip == 1"
+  },
+  {
    "default": "0",
    "depends_on": "eval:doc.pay_via_salary_slip == 0",
    "fieldname": "paid_amount",
@@ -156,49 +177,29 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: !doc.pay_via_salary_slip",
+   "depends_on": "eval: doc.pay_via_salary_slip == 0",
    "fieldname": "payable_account",
    "fieldtype": "Link",
    "label": "Payable Account",
-   "mandatory_depends_on": "eval: !doc.pay_via_salary_slip",
+   "mandatory_depends_on": "eval: doc.pay_via_salary_slip == 0",
    "options": "Account"
   },
   {
+   "depends_on": "eval: doc.pay_via_salary_slip == 0",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
+   "mandatory_depends_on": "eval: doc.pay_via_salary_slip == 0",
    "options": "Cost Center"
-  },
-  {
-   "default": "1",
-   "fieldname": "pay_via_salary_slip",
-   "fieldtype": "Check",
-   "label": "Pay via Salary Slip"
-  },
-  {
-   "depends_on": "pay_via_salary_slip",
-   "fieldname": "payroll_date",
-   "fieldtype": "Date",
-   "label": "Payroll Date",
-   "mandatory_depends_on": "pay_via_salary_slip"
-  },
-  {
-   "depends_on": "pay_via_salary_slip",
-   "fieldname": "salary_component",
-   "fieldtype": "Link",
-   "label": "Salary Component",
-   "mandatory_depends_on": "pay_via_salary_slip",
-   "options": "Salary Component"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-02 14:00:45.536152",
+ "modified": "2020-11-02 18:21:11.971488",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Gratuity",
- "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -226,9 +227,6 @@
    "write": 1
   }
  ],
- "search_fields": "employee_name",
  "sort_field": "modified",
- "sort_order": "DESC",
- "states": [],
- "title_field": "employee_name"
+ "sort_order": "DESC"
 }

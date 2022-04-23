@@ -4,7 +4,7 @@ frappe.pages['warehouse-capacity-summary'].on_page_load = function(wrapper) {
 		title: 'Warehouse Capacity Summary',
 		single_column: true
 	});
-	page.set_secondary_action('Refresh', () => page.capacity_dashboard.refresh(), 'refresh');
+	page.set_secondary_action('Refresh', () => page.capacity_dashboard.refresh(), 'octicon octicon-sync');
 	page.start = 0;
 
 	page.company_field = page.add_field({
@@ -68,7 +68,7 @@ frappe.pages['warehouse-capacity-summary'].on_page_load = function(wrapper) {
 			options: [
 				{fieldname: 'stock_capacity', label: __('Capacity (Stock UOM)')},
 				{fieldname: 'percent_occupied', label: __('% Occupied')},
-				{fieldname: 'actual_qty', label: __('Balance Qty (Stock)')}
+				{fieldname: 'actual_qty', label: __('Balance Qty (Stock ')}
 			]
 		},
 		change: function(sort_by, sort_order) {
@@ -79,7 +79,7 @@ frappe.pages['warehouse-capacity-summary'].on_page_load = function(wrapper) {
 		}
 	});
 
-	frappe.require('item-dashboard.bundle.js', function() {
+	frappe.require('assets/js/item-dashboard.min.js', function() {
 		$(frappe.render_template('warehouse_capacity_summary_header')).appendTo(page.main);
 
 		page.capacity_dashboard = new erpnext.stock.ItemDashboard({

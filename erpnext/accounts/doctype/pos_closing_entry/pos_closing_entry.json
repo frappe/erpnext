@@ -180,7 +180,8 @@
    "fieldname": "pos_transactions",
    "fieldtype": "Table",
    "label": "POS Transactions",
-   "options": "POS Invoice Reference"
+   "options": "POS Invoice Reference",
+   "reqd": 1
   },
   {
    "fieldname": "pos_opening_entry",
@@ -228,7 +229,7 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2021-10-20 16:19:25.340565",
+ "modified": "2021-05-05 16:59:49.723261",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",

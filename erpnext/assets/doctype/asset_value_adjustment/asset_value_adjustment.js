@@ -14,14 +14,6 @@ frappe.ui.form.on('Asset Value Adjustment', {
 				}
 			}
 		});
-		frm.set_query('asset', function() {
-			return {
-				filters: {
-					calculate_depreciation: 1,
-					docstatus: 1
-				}
-			};
-		});
 	},
 
 	onload: function(frm) {

@@ -1,18 +1,20 @@
+from __future__ import unicode_literals
 from unittest import TestCase
 
 import frappe
-
-from erpnext.regional.address_template.setup import get_address_templates, update_address_template
-
+from erpnext.regional.address_template.setup import get_address_templates
+from erpnext.regional.address_template.setup import update_address_template
 
 def ensure_country(country):
 	if frappe.db.exists("Country", country):
 		return frappe.get_doc("Country", country)
 	else:
-		c = frappe.get_doc({"doctype": "Country", "country_name": country})
+		c = frappe.get_doc({
+			"doctype": "Country",
+			"country_name": country
+		})
 		c.insert()
 		return c
-
 
 class TestRegionalAddressTemplate(TestCase):
 	def test_get_address_templates(self):
@@ -32,9 +34,11 @@ class TestRegionalAddressTemplate(TestCase):
 		"""Update an existing Address Template."""
 		country = ensure_country("Germany")
 		if not frappe.db.exists("Address Template", country.name):
-			template = frappe.get_doc(
-				{"doctype": "Address Template", "country": country.name, "template": "EXISTING"}
-			).insert()
+			template = frappe.get_doc({
+				"doctype": "Address Template",
+				"country": country.name,
+				"template": "EXISTING"
+			}).insert()
 
 		update_address_template(country.name, "NEW")
 		doc = frappe.get_doc("Address Template", country.name)

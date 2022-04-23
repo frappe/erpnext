@@ -7,19 +7,15 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 		frm.set_query("bank_account", function () {
 			return {
 				filters: {
-					company: frm.doc.company,
+					company: ["in", frm.doc.company],
 					'is_company_account': 1
 				},
 			};
 		});
 	},
 
-	onload: function (frm) {
-		frm.trigger('bank_account');
-	},
-
 	refresh: function (frm) {
-		frappe.require("bank-reconciliation-tool.bundle.js", () =>
+		frappe.require("assets/js/bank-reconciliation-tool.min.js", () =>
 			frm.trigger("make_reconciliation_tool")
 		);
 		frm.upload_statement_button = frm.page.set_secondary_action(
@@ -55,7 +51,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 	bank_account: function (frm) {
 		frappe.db.get_value(
 			"Bank Account",
-			frm.doc.bank_account,
+			frm.bank_account,
 			"account",
 			(r) => {
 				frappe.db.get_value(
@@ -64,7 +60,6 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 					"account_currency",
 					(r) => {
 						frm.currency = r.account_currency;
-						frm.trigger("render_chart");
 					}
 				);
 			}
@@ -129,7 +124,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 		}
 	},
 
-	render_chart: frappe.utils.debounce((frm) => {
+	render_chart(frm) {
 		frm.cards_manager = new erpnext.accounts.bank_reconciliation.NumberCardManager(
 			{
 				$reconciliation_tool_cards: frm.get_field(
@@ -141,7 +136,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 				currency: frm.currency,
 			}
 		);
-	}, 500),
+	},
 
 	render(frm) {
 		if (frm.doc.bank_account) {

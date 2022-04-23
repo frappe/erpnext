@@ -99,7 +99,6 @@
   "loyalty_redemption_account",
   "loyalty_redemption_cost_center",
   "section_break_49",
-  "coupon_code",
   "apply_discount_on",
   "base_discount_amount",
   "column_break_51",
@@ -171,7 +170,6 @@
   "sales_team_section_break",
   "sales_partner",
   "column_break10",
-  "amount_eligible_for_commission",
   "commission_rate",
   "total_commission",
   "section_break2",
@@ -264,6 +262,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "is_return",
    "fieldtype": "Check",
@@ -596,8 +595,7 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
-   "label": "Scan Barcode",
-   "options": "Barcode"
+   "label": "Scan Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -622,7 +620,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "packed_items",
    "fieldname": "packing_list",
    "fieldtype": "Section Break",
    "label": "Packing List",
@@ -630,7 +627,6 @@
    "print_hide": 1
   },
   {
-   "depends_on": "packed_items",
    "fieldname": "packed_items",
    "fieldtype": "Table",
    "label": "Packed Items",
@@ -1186,8 +1182,7 @@
    "label": "Write Off Amount",
    "no_copy": 1,
    "options": "currency",
-   "print_hide": 1,
-   "read_only_depends_on": "eval: doc.write_off_outstanding_amount_automatically"
+   "print_hide": 1
   },
   {
    "fieldname": "base_write_off_amount",
@@ -1553,31 +1548,16 @@
    "no_copy": 1,
    "options": "Sales Invoice",
    "read_only": 1
-  },
-  {
-   "depends_on": "coupon_code",
-   "fieldname": "coupon_code",
-   "fieldtype": "Link",
-   "label": "Coupon Code",
-   "options": "Coupon Code",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "amount_eligible_for_commission",
-   "fieldtype": "Currency",
-   "label": "Amount Eligible for Commission",
-   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-22 13:00:24.166684",
+ "modified": "2021-07-29 13:37:20.636171",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
  "name_case": "Title Case",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1622,7 +1602,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
  "timeline_field": "customer",
  "title_field": "title",
  "track_changes": 1,

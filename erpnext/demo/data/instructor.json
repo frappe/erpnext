@@ -1,0 +1,128 @@
+[
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Eddie Jessup",
+		"naming_series": "INS/",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "William Dyer",
+		"naming_series": "INS/",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Alastor Moody",
+		"naming_series": "INS/",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Charles Xavier",
+		"naming_series": "INS/",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Cuthbert Calculus",
+		"naming_series": "INS/",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Reed Richards",
+		"naming_series": "INS/",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Urban Chronotis",
+		"naming_series": "INS/",
+		"department": "Physics"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "River Song",
+		"naming_series": "INS/",
+		"department": "Physics"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Yana",
+		"naming_series": "INS/",
+		"department": "Physics"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Neil Lasrado",
+		"naming_series": "INS/",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Deepshi Garg",
+		"naming_series": "INS/",
+		"department": "Chemistry"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Shubham Saxena",
+		"naming_series": "INS/",
+		"department": "Physics"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Rushabh Mehta",
+		"naming_series": "INS/",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Umari Syed",
+		"naming_series": "INS/",
+		"department": "Chemistry"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Aman Singh",
+		"naming_series": "INS/",
+		"department": "Physics"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Nabin",
+		"naming_series": "INS/",
+		"department": "Chemistry"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Kanchan Chauhan",
+		"naming_series": "INS/",
+		"department": "Information Technology"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Valmik Jangla",
+		"naming_series": "INS/",
+		"department": "Chemistry"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Amit Jain",
+		"naming_series": "INS/",
+		"department": "Physics"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Shreyas P",
+		"naming_series": "INS/",
+		"department": "Chemistry"
+	},
+	{
+		"doctype": "Instructor",
+		"instructor_name": "Rohit",
+		"naming_series": "INS/",
+		"department": "Information Technology"
+	}
+]

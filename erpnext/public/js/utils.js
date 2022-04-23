@@ -82,21 +82,6 @@ $.extend(erpnext, {
 			});
 			frappe.set_route('Form','Journal Entry', journal_entry.name);
 		});
-	},
-
-	route_to_pending_reposts: (args) => {
-		frappe.set_route('List', 'Repost Item Valuation', args);
-	},
-
-	proceed_save_with_reminders_frequency_change: () => {
-		frappe.ui.hide_open_dialog();
-
-		frappe.call({
-			method: 'erpnext.hr.doctype.hr_settings.hr_settings.set_proceed_with_frequency_change',
-			callback: () => {
-				cur_frm.save();
-			}
-		});
 	}
 });
 
@@ -430,9 +415,12 @@ erpnext.utils.select_alternate_items = function(opts) {
 					qty = row.qty;
 				}
 				row[item_field] = d.alternate_item;
-				frappe.model.set_value(row.doctype, row.name, 'qty', qty);
-				frappe.model.set_value(row.doctype, row.name, opts.original_item_field, d.item_code);
-				frm.trigger(item_field, row.doctype, row.name);
+				frm.script_manager.trigger(item_field, row.doctype, row.name)
+					.then(() => {
+						frappe.model.set_value(row.doctype, row.name, 'qty', qty);
+						frappe.model.set_value(row.doctype, row.name,
+							opts.original_item_field, d.item_code);
+					});
 			});
 
 			refresh_field(opts.child_docname);
@@ -477,23 +465,7 @@ erpnext.utils.update_child_items = function(opts) {
 		in_list_view: 1,
 		read_only: 0,
 		disabled: 0,
-		label: __('Item Code'),
-		get_query: function() {
-			let filters;
-			if (frm.doc.doctype == 'Sales Order') {
-				filters = {"is_sales_item": 1};
-			} else if (frm.doc.doctype == 'Purchase Order') {
-				if (frm.doc.is_subcontracted) {
-					filters = {"is_sub_contracted_item": 1};
-				} else {
-					filters = {"is_purchase_item": 1};
-				}
-			}
-			return {
-				query: "erpnext.controllers.queries.item_query",
-				filters: filters
-			};
-		}
+		label: __('Item Code')
 	}, {
 		fieldtype:'Link',
 		fieldname:'uom',
@@ -575,7 +547,7 @@ erpnext.utils.update_child_items = function(opts) {
 			},
 		],
 		primary_action: function() {
-			const trans_items = this.get_values()["trans_items"].filter((item) => !!item.item_code);
+			const trans_items = this.get_values()["trans_items"];
 			frappe.call({
 				method: 'erpnext.controllers.accounts_controller.update_child_qty_rate',
 				freeze: true,
@@ -710,21 +682,14 @@ erpnext.utils.map_current_doc = function(opts) {
 			setters: opts.setters,
 			get_query: opts.get_query,
 			add_filters_group: 1,
-			allow_child_item_selection: opts.allow_child_item_selection,
-			child_fieldname: opts.child_fielname,
-			child_columns: opts.child_columns,
-			size: opts.size,
 			action: function(selections, args) {
 				let values = selections;
-				if (values.length === 0) {
+				if(values.length === 0){
 					frappe.msgprint(__("Please select {0}", [opts.source_doctype]))
 					return;
 				}
 				opts.source_name = values;
-				if (opts.allow_child_item_selection) {
-					// args contains filtered child docnames
-					opts.args = args;
-				}
+				opts.setters = args;
 				d.dialog.hide();
 				_map();
 			},
@@ -752,13 +717,9 @@ frappe.form.link_formatters['Item'] = function(value, doc) {
 }
 
 frappe.form.link_formatters['Employee'] = function(value, doc) {
-	if (doc && value && doc.employee_name && doc.employee_name !== value && doc.employee === value) {
-		return value + ': ' + doc.employee_name;
-	} else if (!value && doc.doctype && doc.employee_name) {
-		// format blank value in child table
-		return doc.employee;
+	if(doc && doc.employee_name && doc.employee_name !== value) {
+		return value? value + ': ' + doc.employee_name: doc.employee_name;
 	} else {
-		// if value is blank in report view or project name and name are the same, return as is
 		return value;
 	}
 }
@@ -787,156 +748,6 @@ $(document).on('app_ready', function() {
 		});
 	}
 });
-
-// Show SLA dashboard
-$(document).on('app_ready', function() {
-	frappe.call({
-		method: 'erpnext.support.doctype.service_level_agreement.service_level_agreement.get_sla_doctypes',
-		callback: function(r) {
-			if (!r.message)
-				return;
-
-			$.each(r.message, function(_i, d) {
-				frappe.ui.form.on(d, {
-					onload: function(frm) {
-						if (!frm.doc.service_level_agreement)
-							return;
-
-						frappe.call({
-							method: 'erpnext.support.doctype.service_level_agreement.service_level_agreement.get_service_level_agreement_filters',
-							args: {
-								doctype: frm.doc.doctype,
-								name: frm.doc.service_level_agreement,
-								customer: frm.doc.customer
-							},
-							callback: function (r) {
-								if (r && r.message) {
-									frm.set_query('priority', function() {
-										return {
-											filters: {
-												'name': ['in', r.message.priority],
-											}
-										};
-									});
-									frm.set_query('service_level_agreement', function() {
-										return {
-											filters: {
-												'name': ['in', r.message.service_level_agreements],
-											}
-										};
-									});
-								}
-							}
-						});
-					},
-
-					refresh: function(frm) {
-						if (frm.doc.status !== 'Closed' && frm.doc.service_level_agreement
-							&& ['First Response Due', 'Resolution Due'].includes(frm.doc.agreement_status)) {
-							frappe.call({
-								'method': 'frappe.client.get',
-								args: {
-									doctype: 'Service Level Agreement',
-									name: frm.doc.service_level_agreement
-								},
-								callback: function(data) {
-									let statuses = data.message.pause_sla_on;
-									const hold_statuses = [];
-									$.each(statuses, (_i, entry) => {
-										hold_statuses.push(entry.status);
-									});
-									if (hold_statuses.includes(frm.doc.status)) {
-										frm.dashboard.clear_headline();
-										let message = {'indicator': 'orange', 'msg': __('SLA is on hold since {0}', [moment(frm.doc.on_hold_since).fromNow(true)])};
-										frm.dashboard.set_headline_alert(
-											'<div class="row">' +
-												'<div class="col-xs-12">' +
-													'<span class="indicator whitespace-nowrap '+ message.indicator +'"><span>'+ message.msg +'</span></span> ' +
-												'</div>' +
-											'</div>'
-										);
-									} else {
-										set_time_to_resolve_and_response(frm, data.message.apply_sla_for_resolution);
-									}
-								}
-							});
-						} else if (frm.doc.service_level_agreement) {
-							frm.dashboard.clear_headline();
-
-							let agreement_status = (frm.doc.agreement_status == 'Fulfilled') ?
-								{'indicator': 'green', 'msg': 'Service Level Agreement has been fulfilled'} :
-								{'indicator': 'red', 'msg': 'Service Level Agreement Failed'};
-
-							frm.dashboard.set_headline_alert(
-								'<div class="row">' +
-									'<div class="col-xs-12">' +
-										'<span class="indicator whitespace-nowrap '+ agreement_status.indicator +'"><span class="hidden-xs">'+ agreement_status.msg +'</span></span> ' +
-									'</div>' +
-								'</div>'
-							);
-						}
-					},
-				});
-			});
-		}
-	});
-});
-
-function set_time_to_resolve_and_response(frm, apply_sla_for_resolution) {
-	frm.dashboard.clear_headline();
-
-	let time_to_respond;
-	if (!frm.doc.first_responded_on) {
-		time_to_respond = get_time_left(frm.doc.response_by, frm.doc.agreement_status);
-	} else {
-		time_to_respond = get_status(frm.doc.response_by, frm.doc.first_responded_on);
-	}
-
-	let alert = `
-		<div class="row">
-			<div class="col-xs-12 col-sm-6">
-				<span class="indicator whitespace-nowrap ${time_to_respond.indicator}">
-					<span>Time to Respond: ${time_to_respond.diff_display}</span>
-				</span>
-			</div>`;
-
-
-	if (apply_sla_for_resolution) {
-		let time_to_resolve;
-		if (!frm.doc.resolution_date) {
-			time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_status);
-		} else {
-			time_to_resolve = get_status(frm.doc.resolution_by, frm.doc.resolution_date);
-		}
-
-		alert += `
-			<div class="col-xs-12 col-sm-6">
-				<span class="indicator whitespace-nowrap ${time_to_resolve.indicator}">
-					<span>Time to Resolve: ${time_to_resolve.diff_display}</span>
-				</span>
-			</div>`;
-	}
-
-	alert += '</div>';
-
-	frm.dashboard.set_headline_alert(alert);
-}
-
-function get_time_left(timestamp, agreement_status) {
-	const diff = moment(timestamp).diff(moment());
-	const diff_display = diff >= 44500 ? moment.duration(diff).humanize() : 'Failed';
-	let indicator = (diff_display == 'Failed' && agreement_status != 'Fulfilled') ? 'red' : 'green';
-	return {'diff_display': diff_display, 'indicator': indicator};
-}
-
-function get_status(expected, actual) {
-	const time_left = moment(expected).diff(moment(actual));
-	if (time_left >= 0) {
-		return {'diff_display': 'Fulfilled', 'indicator': 'green'};
-	} else {
-		return {'diff_display': 'Failed', 'indicator': 'red'};
-	}
-}
 
 function attach_selector_button(inner_text, append_loction, context, grid_row) {
 	let $btn_div = $("<div>").css({"margin-bottom": "10px", "margin-top": "10px"})

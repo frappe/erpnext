@@ -49,3 +49,4 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 		}
 	});
 }
+

@@ -1,0 +1,33 @@
+{
+ "add_total_row": 0,
+ "creation": "2013-04-23 18:15:29",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 1,
+ "is_standard": "Yes",
+ "modified": "2020-07-30 18:53:20.102873",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Lab Test Report",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Lab Test",
+ "report_name": "Lab Test Report",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Laboratory User"
+  },
+  {
+   "role": "Nursing User"
+  },
+  {
+   "role": "LabTest Approver"
+  },
+  {
+   "role": "Healthcare Administrator"
+  }
+ ]
+}

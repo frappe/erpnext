@@ -3,7 +3,6 @@
  "creation": "2014-08-29 16:02:39.740505",
  "doctype": "DocType",
  "editable_grid": 1,
- "engine": "InnoDB",
  "field_order": [
   "company",
   "account"
@@ -12,7 +11,6 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Company",
    "options": "Company",
@@ -29,7 +27,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-04-04 12:31:02.994197",
+ "modified": "2021-04-07 18:13:08.833822",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Party Account",
@@ -37,6 +35,5 @@
  "permissions": [],
  "quick_entry": 1,
  "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+ "sort_order": "DESC"
 }

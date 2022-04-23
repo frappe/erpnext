@@ -51,7 +51,7 @@ frappe.query_reports["Work Order Summary"] = {
 			label: __("Status"),
 			fieldname: "status",
 			fieldtype: "Select",
-			options: ["", "Not Started", "In Process", "Completed", "Stopped", "Closed"]
+			options: ["", "Not Started", "In Process", "Completed", "Stopped"]
 		},
 		{
 			label: __("Sales Orders"),

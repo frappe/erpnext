@@ -2,8 +2,8 @@
 // License: GNU General Public License v3. See license.txt
 
 
-erpnext.StockAnalytics = class StockAnalytics extends erpnext.StockGridReport {
-	constructor(wrapper, opts) {
+erpnext.StockAnalytics = erpnext.StockGridReport.extend({
+	init: function(wrapper, opts) {
 		var args = {
 			title: __("Stock Analytics"),
 			parent: $(wrapper).find('.layout-main'),
@@ -30,33 +30,9 @@ erpnext.StockAnalytics = class StockAnalytics extends erpnext.StockGridReport {
 
 		if(opts) $.extend(args, opts);
 
-		super(args);
-
-		this.filters = [
-			{fieldtype:"Select", label: __("Value or Qty"), fieldname: "value_or_qty",
-				options:[{label:__("Value"), value:"Value"}, {label:__("Quantity"), value:"Quantity"}],
-				filter: function(val, item, opts, me) {
-					return me.apply_zero_filter(val, item, opts, me);
-				}},
-			{fieldtype:"Select", label: __("Brand"), link:"Brand", fieldname: "brand",
-				default_value: __("Select Brand..."), filter: function(val, item, opts) {
-					return val == opts.default_value || item.brand == val || item._show;
-				}, link_formatter: {filter_input: "brand"}},
-			{fieldtype:"Select", label: __("Warehouse"), link:"Warehouse", fieldname: "warehouse",
-				default_value: __("Select Warehouse...")},
-			{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
-			{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
-			{fieldtype:"Select", label: __("Range"), fieldname: "range",
-				options:[
-					{label:__("Daily"), value:"Daily"},
-					{label:__("Weekly"), value:"Weekly"},
-					{label:__("Monthly"), value:"Monthly"},
-					{label:__("Quarterly"), value:"Quarterly"},
-					{label:__("Yearly"), value:"Yearly"},
-				]}
-		];
-	}
-	setup_columns() {
+		this._super(args);
+	},
+	setup_columns: function() {
 		var std_columns = [
 			{id: "name", name: __("Item"), field: "name", width: 300},
 			{id: "brand", name: __("Brand"), field: "brand", width: 100},
@@ -67,21 +43,43 @@ erpnext.StockAnalytics = class StockAnalytics extends erpnext.StockGridReport {
 
 		this.make_date_range_columns();
 		this.columns = std_columns.concat(this.columns);
-	}
-
-	setup_filters() {
+	},
+	filters: [
+		{fieldtype:"Select", label: __("Value or Qty"), fieldname: "value_or_qty",
+			options:[{label:__("Value"), value:"Value"}, {label:__("Quantity"), value:"Quantity"}],
+			filter: function(val, item, opts, me) {
+				return me.apply_zero_filter(val, item, opts, me);
+			}},
+		{fieldtype:"Select", label: __("Brand"), link:"Brand", fieldname: "brand",
+			default_value: __("Select Brand..."), filter: function(val, item, opts) {
+				return val == opts.default_value || item.brand == val || item._show;
+			}, link_formatter: {filter_input: "brand"}},
+		{fieldtype:"Select", label: __("Warehouse"), link:"Warehouse", fieldname: "warehouse",
+			default_value: __("Select Warehouse...")},
+		{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
+		{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
+		{fieldtype:"Select", label: __("Range"), fieldname: "range",
+			options:[
+				{label:__("Daily"), value:"Daily"},
+				{label:__("Weekly"), value:"Weekly"},
+				{label:__("Monthly"), value:"Monthly"},
+				{label:__("Quarterly"), value:"Quarterly"},
+				{label:__("Yearly"), value:"Yearly"},
+			]}
+	],
+	setup_filters: function() {
 		var me = this;
-		super.setup_filters();
+		this._super();
 
 		this.trigger_refresh_on_change(["value_or_qty", "brand", "warehouse", "range"]);
 
 		this.show_zero_check();
-	}
-	init_filter_values() {
-		super.init_filter_values();
+	},
+	init_filter_values: function() {
+		this._super();
 		this.filter_inputs.range && this.filter_inputs.range.val('Monthly');
-	}
-	prepare_data() {
+	},
+	prepare_data: function() {
 		var me = this;
 
 		if(!this.data) {
@@ -114,8 +112,8 @@ erpnext.StockAnalytics = class StockAnalytics extends erpnext.StockGridReport {
 		this.prepare_balances();
 		this.update_groups();
 
-	}
-	prepare_balances() {
+	},
+	prepare_balances: function() {
 		var me = this;
 		var from_date = frappe.datetime.str_to_obj(this.from_date);
 		var to_date = frappe.datetime.str_to_obj(this.to_date);
@@ -166,8 +164,8 @@ erpnext.StockAnalytics = class StockAnalytics extends erpnext.StockGridReport {
 				item.closing_qty_value += diff;
 			}
 		}
-	}
-	update_groups() {
+	},
+	update_groups: function() {
 		var me = this;
 		$.each(this.data, function(i, item) {
 			// update groups
@@ -194,8 +192,8 @@ erpnext.StockAnalytics = class StockAnalytics extends erpnext.StockGridReport {
 				}
 			}
 		});
-	}
-	show_stock_ledger(item_code) {
+	},
+	show_stock_ledger: function(item_code) {
 		frappe.route_options = {
 			item_code: item_code,
 			from_date: this.from_date,
@@ -203,4 +201,5 @@ erpnext.StockAnalytics = class StockAnalytics extends erpnext.StockGridReport {
 		};
 		frappe.set_route("query-report", "Stock Ledger");
 	}
-};
+});
+

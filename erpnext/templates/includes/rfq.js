@@ -11,23 +11,23 @@ $(document).ready(function() {
 	doc.buying_price_list = "{{ doc.buying_price_list }}"
 });
 
-rfq = class rfq {
-	constructor(){
+rfq = Class.extend({
+	init: function(){
 		this.onfocus_select_all();
 		this.change_qty();
 		this.change_rate();
 		this.terms();
 		this.submit_rfq();
 		this.navigate_quotations();
-	}
+	},
 
-	onfocus_select_all(){
+	onfocus_select_all: function(){
 		$("input").click(function(){
 			$(this).select();
 		})
-	}
+	},
 
-	change_qty(){
+	change_qty: function(){
 		var me = this;
 		$('.rfq-items').on("change", ".rfq-qty", function(){
 			me.idx = parseFloat($(this).attr('data-idx'));
@@ -36,9 +36,9 @@ rfq = class rfq {
 			me.update_qty_rate();
 			$(this).val(format_number(me.qty, doc.number_format, 2));
 		})
-	}
+	},
 
-	change_rate(){
+	change_rate: function(){
 		var me = this;
 		$(".rfq-items").on("change", ".rfq-rate", function(){
 			me.idx = parseFloat($(this).attr('data-idx'));
@@ -47,15 +47,15 @@ rfq = class rfq {
 			me.update_qty_rate();
 			$(this).val(format_number(me.rate, doc.number_format, 2));
 		})
-	}
+	},
 
-	terms(){
+	terms: function(){
 		$(".terms").on("change", ".terms-feedback", function(){
 			doc.terms = $(this).val();
 		})
-	}
+	},
 
-	update_qty_rate(){
+	update_qty_rate: function(){
 		var me = this;
 		doc.grand_total = 0.0;
 		$.each(doc.items, function(idx, data){
@@ -69,9 +69,9 @@ rfq = class rfq {
 			doc.grand_total += flt(data.amount);
 			$('.tax-grand-total').text(format_number(doc.grand_total, doc.number_format, 2));
 		})
-	}
+	},
 
-	submit_rfq(){
+	submit_rfq: function(){
 		$('.btn-sm').click(function(){
 			frappe.freeze();
 			frappe.call({
@@ -90,12 +90,12 @@ rfq = class rfq {
 				}
 			})
 		})
-	}
+	},
 
-	navigate_quotations() {
+	navigate_quotations: function() {
 		$('.quotations').click(function(){
 			name = $(this).attr('idx')
 			window.location.href = "/quotations/" + encodeURIComponent(name);
 		})
 	}
-}
+})

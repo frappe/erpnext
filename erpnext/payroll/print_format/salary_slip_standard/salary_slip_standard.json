@@ -16,7 +16,7 @@
  "name": "Salary Slip Standard",
  "owner": "Administrator",
  "print_format_builder": 1,
- "print_format_type": "Jinja",
+ "print_format_type": "Server",
  "show_section_headings": 0,
  "standard": "Yes"
 }

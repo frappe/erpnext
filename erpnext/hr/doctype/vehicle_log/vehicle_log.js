@@ -24,3 +24,4 @@ frappe.ui.form.on("Vehicle Log", {
 		});
 	}
 });
+

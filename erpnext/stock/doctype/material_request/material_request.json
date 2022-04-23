@@ -133,8 +133,7 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
-   "label": "Scan Barcode",
-   "options": "Barcode"
+   "label": "Scan Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -182,7 +181,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nSubmitted\nStopped\nCancelled\nPending\nPartially Ordered\nOrdered\nIssued\nTransferred\nReceived",
+   "options": "\nDraft\nSubmitted\nStopped\nCancelled\nPending\nPartially Ordered\nPartially Received\nOrdered\nIssued\nTransferred\nReceived",
    "print_hide": 1,
    "print_width": "100px",
    "read_only": 1,
@@ -315,7 +314,7 @@
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-17 20:16:12.737743",
+ "modified": "2021-03-31 23:52:55.392512",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",

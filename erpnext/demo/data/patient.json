@@ -1,0 +1,27 @@
+[
+  {
+  "patient_name": "lila",
+  "gender": "Female"
+  },
+  {
+  "patient_name": "charline",
+  "gender": "Female"
+  },
+  {
+  "patient_name": "soren",
+  "last_name": "le gall",
+  "gender": "Male"
+  },
+  {
+  "patient_name": "fanny",
+  "gender": "Female"
+  },
+  {
+  "patient_name": "julie",
+  "gender": "Female"
+  },
+  {
+  "patient_name": "louka",
+  "gender": "Male"
+  }
+]

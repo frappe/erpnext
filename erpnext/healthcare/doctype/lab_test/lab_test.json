@@ -1,0 +1,610 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "allow_import": 1,
+ "autoname": "naming_series:",
+ "beta": 1,
+ "creation": "2016-03-29 17:34:47.509094",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "template",
+  "lab_test_name",
+  "lab_test_group",
+  "medical_code",
+  "department",
+  "column_break_26",
+  "company",
+  "status",
+  "submitted_date",
+  "result_date",
+  "approved_date",
+  "expected_result_date",
+  "expected_result_time",
+  "printed_on",
+  "invoiced",
+  "sb_first",
+  "patient",
+  "patient_name",
+  "patient_age",
+  "patient_sex",
+  "inpatient_record",
+  "report_preference",
+  "email",
+  "mobile",
+  "c_b",
+  "practitioner",
+  "practitioner_name",
+  "requesting_department",
+  "employee",
+  "employee_name",
+  "employee_designation",
+  "user",
+  "sample",
+  "sb_normal",
+  "lab_test_html",
+  "normal_test_items",
+  "sb_descriptive",
+  "descriptive_test_items",
+  "organisms_section",
+  "organism_test_items",
+  "sb_sensitivity",
+  "sensitivity_test_items",
+  "sb_comments",
+  "lab_test_comment",
+  "sb_customresult",
+  "custom_result",
+  "worksheet_section",
+  "worksheet_instructions",
+  "result_legend_section",
+  "legend_print_position",
+  "result_legend",
+  "section_break_50",
+  "email_sent",
+  "sms_sent",
+  "printed",
+  "normal_toggle",
+  "descriptive_toggle",
+  "sensitivity_toggle",
+  "amended_from",
+  "prescription"
+ ],
+ "fields": [
+  {
+   "fetch_from": "patient.inpatient_record",
+   "fieldname": "inpatient_record",
+   "fieldtype": "Link",
+   "label": "Inpatient Record",
+   "options": "Inpatient Record",
+   "read_only": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "HLC-LAB-.YYYY.-",
+   "print_hide": 1,
+   "report_hide": 1,
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "invoiced",
+   "fieldtype": "Check",
+   "label": "Invoiced",
+   "no_copy": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "inpatient_record.patient",
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1,
+   "search_index": 1,
+   "set_only_once": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "patient_age",
+   "fieldtype": "Data",
+   "label": "Age",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "patient_sex",
+   "fieldtype": "Link",
+   "label": "Gender",
+   "options": "Gender",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "practitioner",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Requesting Practitioner",
+   "no_copy": 1,
+   "options": "Healthcare Practitioner",
+   "search_index": 1
+  },
+  {
+   "fetch_from": "patient.email",
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Email",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fetch_from": "patient.mobile",
+   "fieldname": "mobile",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Mobile",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "c_b",
+   "fieldtype": "Column Break",
+   "print_hide": 1
+  },
+  {
+   "fetch_from": "template.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Department",
+   "options": "Medical Department",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Draft\nCompleted\nApproved\nRejected\nCancelled",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "submitted_date",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Submitted Date",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "approved_date",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Approved Date",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "sample",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_filter": 1,
+   "label": "Sample ID",
+   "options": "Sample Collection",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "expected_result_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Expected Result Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "expected_result_time",
+   "fieldtype": "Time",
+   "hidden": 1,
+   "label": "Expected Result Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "result_date",
+   "fieldtype": "Date",
+   "label": "Result Date",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "printed_on",
+   "fieldtype": "Datetime",
+   "label": "Printed on",
+   "read_only": 1
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee (Lab Technician)",
+   "no_copy": 1,
+   "options": "Employee",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Lab Technician Name",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "employee_designation",
+   "fieldtype": "Data",
+   "label": "Lab Technician Designation",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "User",
+   "no_copy": 1,
+   "options": "User",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "fetch_from": "patient.report_preference",
+   "fieldname": "report_preference",
+   "fieldtype": "Data",
+   "label": "Report Preference",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "sb_first",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "lab_test_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Test Name",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "template",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Test Template",
+   "options": "Lab Test Template",
+   "print_hide": 1,
+   "report_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "lab_test_group",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Test Group",
+   "options": "Item Group",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "fetch_from": "template.medical_code",
+   "fieldname": "medical_code",
+   "fieldtype": "Link",
+   "label": "Medical Code",
+   "options": "Medical Code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_normal",
+   "fieldtype": "Section Break",
+   "label": "Compound Test Result"
+  },
+  {
+   "fieldname": "normal_test_items",
+   "fieldtype": "Table",
+   "label": "Normal Test Result",
+   "options": "Normal Test Result",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "lab_test_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "depends_on": "descriptive_toggle",
+   "fieldname": "organisms_section",
+   "fieldtype": "Section Break",
+   "label": "Organism Test Result"
+  },
+  {
+   "fieldname": "sb_sensitivity",
+   "fieldtype": "Section Break",
+   "label": "Sensitivity Test Result"
+  },
+  {
+   "fieldname": "sensitivity_test_items",
+   "fieldtype": "Table",
+   "label": "Sensitivity Test Result",
+   "options": "Sensitivity Test Result",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_comments",
+   "fieldtype": "Section Break",
+   "label": "Comments"
+  },
+  {
+   "fieldname": "lab_test_comment",
+   "fieldtype": "Text",
+   "ignore_xss_filter": 1,
+   "label": "Comments",
+   "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_customresult",
+   "fieldtype": "Section Break",
+   "label": "Custom Result"
+  },
+  {
+   "fieldname": "custom_result",
+   "fieldtype": "Text Editor",
+   "ignore_xss_filter": 1,
+   "label": "Custom Result",
+   "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "email_sent",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "sms_sent",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "printed",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "normal_toggle",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "sensitivity_toggle",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Lab Test",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "prescription",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Prescription",
+   "no_copy": 1,
+   "options": "Lab Prescription",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "practitioner.department",
+   "fieldname": "requesting_department",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Requesting Department",
+   "options": "Medical Department",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "practitioner.practitioner_name",
+   "fieldname": "practitioner_name",
+   "fieldtype": "Data",
+   "label": "Requesting Practitioner",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "result_legend_section",
+   "fieldtype": "Section Break",
+   "label": "Result Legend Print"
+  },
+  {
+   "fieldname": "legend_print_position",
+   "fieldtype": "Select",
+   "label": "Print Position",
+   "options": "\nBottom\nTop\nBoth",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "result_legend",
+   "fieldtype": "Text Editor",
+   "label": "Result Legend",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "section_break_50",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "worksheet_instructions",
+   "fieldtype": "Text Editor",
+   "label": "Worksheet Instructions",
+   "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "worksheet_section",
+   "fieldtype": "Section Break",
+   "label": "Worksheet Print"
+  },
+  {
+   "fieldname": "descriptive_test_items",
+   "fieldtype": "Table",
+   "label": "Descriptive Test Result",
+   "options": "Descriptive Test Result",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "sb_descriptive",
+   "fieldtype": "Section Break",
+   "label": "Descriptive Test Result"
+  },
+  {
+   "default": "0",
+   "fieldname": "descriptive_toggle",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "organism_test_items",
+   "fieldtype": "Table",
+   "label": "Organism Test Result",
+   "options": "Organism Test Result",
+   "print_hide": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-11-30 11:04:17.195848",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Lab Test",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Laboratory User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "LabTest Approver",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "restrict_to_domain": "Healthcare",
+ "search_fields": "patient,practitioner,lab_test_name,sample",
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "patient",
+ "track_changes": 1,
+ "track_seen": 1
+}

@@ -1,20 +1,22 @@
 {
+ "category": "Modules",
  "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Issue\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Maintenance Visit\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Level Agreement\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Issues\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Maintenance\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Service Level Agreement\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Warranty\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
  "creation": "2020-03-02 15:48:23.224699",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Workspace",
- "for_user": "",
+ "extends_another_page": 0,
  "hide_custom": 0,
  "icon": "support",
  "idx": 0,
+ "is_standard": 1,
  "label": "Support",
  "links": [
   {
    "hidden": 0,
    "is_query_report": 0,
    "label": "Issues",
-   "link_count": 0,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -23,7 +25,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Issue",
-   "link_count": 0,
    "link_to": "Issue",
    "link_type": "DocType",
    "onboard": 1,
@@ -34,7 +35,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Issue Type",
-   "link_count": 0,
    "link_to": "Issue Type",
    "link_type": "DocType",
    "onboard": 0,
@@ -45,7 +45,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Issue Priority",
-   "link_count": 0,
    "link_to": "Issue Priority",
    "link_type": "DocType",
    "onboard": 0,
@@ -55,7 +54,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Maintenance",
-   "link_count": 0,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -64,7 +62,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Maintenance Schedule",
-   "link_count": 0,
    "link_to": "Maintenance Schedule",
    "link_type": "DocType",
    "onboard": 0,
@@ -75,7 +72,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Maintenance Visit",
-   "link_count": 0,
    "link_to": "Maintenance Visit",
    "link_type": "DocType",
    "onboard": 0,
@@ -85,7 +81,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Service Level Agreement",
-   "link_count": 0,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -94,7 +89,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Service Level Agreement",
-   "link_count": 0,
    "link_to": "Service Level Agreement",
    "link_type": "DocType",
    "onboard": 0,
@@ -104,7 +98,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Warranty",
-   "link_count": 0,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -113,7 +106,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Warranty Claim",
-   "link_count": 0,
    "link_to": "Warranty Claim",
    "link_type": "DocType",
    "onboard": 0,
@@ -124,7 +116,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Serial No",
-   "link_count": 0,
    "link_to": "Serial No",
    "link_type": "DocType",
    "onboard": 0,
@@ -134,7 +125,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Settings",
-   "link_count": 0,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -143,7 +133,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Support Settings",
-   "link_count": 0,
    "link_to": "Support Settings",
    "link_type": "DocType",
    "onboard": 0,
@@ -153,7 +142,6 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Reports",
-   "link_count": 0,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -162,23 +150,19 @@
    "hidden": 0,
    "is_query_report": 1,
    "label": "First Response Time for Issues",
-   "link_count": 0,
    "link_to": "First Response Time for Issues",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2022-01-13 17:48:27.247406",
+ "modified": "2020-12-01 13:38:37.073482",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support",
  "owner": "Administrator",
- "parent_page": "",
- "public": 1,
- "restrict_to_domain": "",
- "roles": [],
- "sequence_id": 25.0,
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
  "shortcuts": [
   {
    "color": "Yellow",
@@ -198,6 +182,5 @@
    "link_to": "Service Level Agreement",
    "type": "DocType"
   }
- ],
- "title": "Support"
+ ]
 }

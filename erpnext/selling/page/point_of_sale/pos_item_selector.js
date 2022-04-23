@@ -24,7 +24,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.wrapper.append(
 			`<section class="items-selector">
 				<div class="filter-section">
-					<div class="label">${__('All Items')}</div>
+					<div class="label">All Items</div>
 					<div class="search-field"></div>
 					<div class="item-group-field"></div>
 				</div>
@@ -79,20 +79,14 @@ erpnext.PointOfSale.ItemSelector = class {
 		const me = this;
 		// eslint-disable-next-line no-unused-vars
 		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom, price_list_rate } = item;
+		const indicator_color = actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange";
 		const precision = flt(price_list_rate, 2) % 1 != 0 ? 2 : 0;
-		let indicator_color;
+
 		let qty_to_display = actual_qty;
 
-		if (item.is_stock_item) {
-			indicator_color = (actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange");
-
-			if (Math.round(qty_to_display) > 999) {
-				qty_to_display = Math.round(qty_to_display)/1000;
-				qty_to_display = qty_to_display.toFixed(1) + 'K';
-			}
-		} else {
-			indicator_color = '';
-			qty_to_display = '';
+		if (Math.round(qty_to_display) > 999) {
+			qty_to_display = Math.round(qty_to_display)/1000;
+			qty_to_display = qty_to_display.toFixed(1) + 'K';
 		}
 
 		function get_item_image_html() {
@@ -101,7 +95,7 @@ erpnext.PointOfSale.ItemSelector = class {
 							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
 						</div>
 						<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
-							<img
+							<img 
 								onerror="cur_pos.item_selector.handle_broken_image(this)"
 								class="h-full" src="${item_image}"
 								alt="${frappe.get_abbr(item.item_name)}"
@@ -119,7 +113,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			`<div class="item-wrapper"
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
 				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
-				data-rate="${escape(price_list_rate || 0)}"
+				data-rate="${escape(price_list_rate)}"
 				title="${item.item_name}">
 
 				${get_item_image_html()}
@@ -243,7 +237,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				value: "+1",
 				item: { item_code, batch_no, serial_no, uom, rate }
 			});
-			me.search_field.set_focus();
+			me.set_search_value('');
 		});
 
 		this.search_field.$input.on('input', (e) => {
@@ -328,7 +322,6 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	add_filtered_item_to_cart() {
 		this.$items_container.find(".item-wrapper").click();
-		this.set_search_value('');
 	}
 
 	resize_selector(minimize) {

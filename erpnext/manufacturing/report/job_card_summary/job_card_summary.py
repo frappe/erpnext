@@ -1,13 +1,11 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
+from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate
-
-from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
-
+from frappe.utils import getdate, flt
+from erpnext.stock.report.stock_analytics.stock_analytics import (get_period_date_ranges, get_period)
 
 def execute(filters=None):
 	columns, data = [], []
@@ -16,34 +14,23 @@ def execute(filters=None):
 	chart_data = get_chart_data(data, filters)
 	return columns, data, None, chart_data
 
-
 def get_data(filters):
 	query_filters = {
 		"docstatus": ("<", 2),
-		"posting_date": ("between", [filters.from_date, filters.to_date]),
+		"posting_date": ("between", [filters.from_date, filters.to_date])
 	}
 
-	fields = [
-		"name",
-		"status",
-		"work_order",
-		"production_item",
-		"item_name",
-		"posting_date",
-		"total_completed_qty",
-		"workstation",
-		"operation",
-		"total_time_in_mins",
-	]
+	fields = ["name", "status", "work_order", "production_item", "item_name", "posting_date",
+		"total_completed_qty", "workstation", "operation", "employee_name", "total_time_in_mins"]
 
 	for field in ["work_order", "workstation", "operation", "company"]:
 		if filters.get(field):
 			query_filters[field] = ("in", filters.get(field))
 
-	data = frappe.get_all("Job Card", fields=fields, filters=query_filters)
+	data = frappe.get_all("Job Card",
+		fields= fields, filters=query_filters)
 
-	if not data:
-		return []
+	if not data: return []
 
 	job_cards = [d.name for d in data]
 
@@ -53,12 +40,9 @@ def get_data(filters):
 	}
 
 	job_card_time_details = {}
-	for job_card_data in frappe.get_all(
-		"Job Card Time Log",
+	for job_card_data in frappe.get_all("Job Card Time Log",
 		fields=["min(from_time) as from_time", "max(to_time) as to_time", "parent"],
-		filters=job_card_time_filter,
-		group_by="parent",
-	):
+		filters=job_card_time_filter, group_by="parent", debug=1):
 		job_card_time_details[job_card_data.parent] = job_card_data
 
 	res = []
@@ -74,7 +58,6 @@ def get_data(filters):
 
 	return res
 
-
 def get_chart_data(job_card_details, filters):
 	labels, periodic_data = prepare_chart_data(job_card_details, filters)
 
@@ -88,15 +71,23 @@ def get_chart_data(job_card_details, filters):
 	datasets.append({"name": "Open", "values": open_job_cards})
 	datasets.append({"name": "Completed", "values": completed})
 
-	chart = {"data": {"labels": labels, "datasets": datasets}, "type": "bar"}
+	chart = {
+		"data": {
+			'labels': labels,
+			'datasets': datasets
+		},
+		"type": "bar"
+	}
 
 	return chart
-
 
 def prepare_chart_data(job_card_details, filters):
 	labels = []
 
-	periodic_data = {"Open": {}, "Completed": {}}
+	periodic_data = {
+		"Open": {},
+		"Completed": {}
+	}
 
 	filters.range = "Monthly"
 
@@ -117,7 +108,6 @@ def prepare_chart_data(job_card_details, filters):
 
 	return labels, periodic_data
 
-
 def get_columns(filters):
 	columns = [
 		{
@@ -125,62 +115,90 @@ def get_columns(filters):
 			"fieldname": "name",
 			"fieldtype": "Link",
 			"options": "Job Card",
-			"width": 100,
+			"width": 100
 		},
-		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 100},
+		{
+			"label": _("Posting Date"),
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
+			"width": 100
+		},
 	]
 
 	if not filters.get("status"):
 		columns.append(
-			{"label": _("Status"), "fieldname": "status", "width": 100},
+			{
+				"label": _("Status"),
+				"fieldname": "status",
+				"width": 100
+			},
 		)
 
-	columns.extend(
-		[
-			{
-				"label": _("Work Order"),
-				"fieldname": "work_order",
-				"fieldtype": "Link",
-				"options": "Work Order",
-				"width": 100,
-			},
-			{
-				"label": _("Production Item"),
-				"fieldname": "production_item",
-				"fieldtype": "Link",
-				"options": "Item",
-				"width": 110,
-			},
-			{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 100},
-			{
-				"label": _("Workstation"),
-				"fieldname": "workstation",
-				"fieldtype": "Link",
-				"options": "Workstation",
-				"width": 110,
-			},
-			{
-				"label": _("Operation"),
-				"fieldname": "operation",
-				"fieldtype": "Link",
-				"options": "Operation",
-				"width": 110,
-			},
-			{
-				"label": _("Total Completed Qty"),
-				"fieldname": "total_completed_qty",
-				"fieldtype": "Float",
-				"width": 120,
-			},
-			{"label": _("From Time"), "fieldname": "from_time", "fieldtype": "Datetime", "width": 120},
-			{"label": _("To Time"), "fieldname": "to_time", "fieldtype": "Datetime", "width": 120},
-			{
-				"label": _("Time Required (In Mins)"),
-				"fieldname": "total_time_in_mins",
-				"fieldtype": "Float",
-				"width": 100,
-			},
-		]
-	)
+	columns.extend([
+		{
+			"label": _("Work Order"),
+			"fieldname": "work_order",
+			"fieldtype": "Link",
+			"options": "Work Order",
+			"width": 100
+		},
+		{
+			"label": _("Production Item"),
+			"fieldname": "production_item",
+			"fieldtype": "Link",
+			"options": "Item",
+			"width": 110
+		},
+		{
+			"label": _("Item Name"),
+			"fieldname": "item_name",
+			"fieldtype": "Data",
+			"width": 100
+		},
+		{
+			"label": _("Workstation"),
+			"fieldname": "workstation",
+			"fieldtype": "Link",
+			"options": "Workstation",
+			"width": 110
+		},
+		{
+			"label": _("Operation"),
+			"fieldname": "operation",
+			"fieldtype": "Link",
+			"options": "Operation",
+			"width": 110
+		},
+		{
+			"label": _("Employee Name"),
+			"fieldname": "employee_name",
+			"fieldtype": "Data",
+			"width": 110
+		},
+		{
+			"label": _("Total Completed Qty"),
+			"fieldname": "total_completed_qty",
+			"fieldtype": "Float",
+			"width": 120
+		},
+		{
+			"label": _("From Time"),
+			"fieldname": "from_time",
+			"fieldtype": "Datetime",
+			"width": 120
+		},
+		{
+			"label": _("To Time"),
+			"fieldname": "to_time",
+			"fieldtype": "Datetime",
+			"width": 120
+		},
+		{
+			"label": _("Time Required (In Mins)"),
+			"fieldname": "total_time_in_mins",
+			"fieldtype": "Float",
+			"width": 100
+		}
+	])
 
 	return columns

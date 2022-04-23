@@ -59,3 +59,4 @@ document_list.forEach((doctype) => {
 		}
 	});
 });
+

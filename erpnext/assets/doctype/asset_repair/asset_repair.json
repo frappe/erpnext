@@ -176,7 +176,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"

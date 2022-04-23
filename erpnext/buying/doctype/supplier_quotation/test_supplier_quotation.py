@@ -2,17 +2,19 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from __future__ import unicode_literals
+import unittest
 import frappe
-from frappe.tests.utils import FrappeTestCase
+import frappe.defaults
 
-
-class TestPurchaseOrder(FrappeTestCase):
+class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_order(self):
 		from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
 
 		sq = frappe.copy_doc(test_records[0]).insert()
 
-		self.assertRaises(frappe.ValidationError, make_purchase_order, sq.name)
+		self.assertRaises(frappe.ValidationError, make_purchase_order,
+			sq.name)
 
 		sq = frappe.get_doc("Supplier Quotation", sq.name)
 		sq.submit()
@@ -29,5 +31,4 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		po.insert()
 
-
-test_records = frappe.get_test_records("Supplier Quotation")
+test_records = frappe.get_test_records('Supplier Quotation')

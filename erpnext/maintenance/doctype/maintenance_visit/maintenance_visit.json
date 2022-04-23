@@ -179,7 +179,8 @@
    "label": "Purposes",
    "oldfieldname": "maintenance_visit_details",
    "oldfieldtype": "Table",
-   "options": "Maintenance Visit Purpose"
+   "options": "Maintenance Visit Purpose",
+   "reqd": 1
   },
   {
    "fieldname": "more_info",
@@ -293,11 +294,10 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-12-17 03:10:27.608112",
+ "modified": "2021-05-27 16:06:17.352572",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Visit",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

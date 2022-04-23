@@ -1,36 +1,152 @@
-{% from "erpnext/templates/includes/macros.html" import attribute_filter_section, field_filter_section, discount_range_filters %}
 {% extends "templates/web.html" %}
-
-{% block title %}{{ _('All Products') }}{% endblock %}
+{% block title %}{{ _('Products') }}{% endblock %}
 {% block header %}
-<div class="mb-6">{{ _('All Products') }}</div>
+<div class="mb-6">{{ _('Products') }}</div>
 {% endblock header %}
 
 {% block page_content %}
-<div class="row">
-	<!-- Items section -->
-	<div id="product-listing" class="col-12 order-2 col-md-9 order-md-2 item-card-group-section">
-		<!-- Rendered via JS -->
+<div class="row" style="display: none;">
+	<div class="col-8">
+		<div class="input-group input-group-sm mb-3">
+			<input type="search" class="form-control" placeholder="{{_('Search')}}"
+				aria-label="{{_('Product Search')}}" aria-describedby="product-search"
+				value="{{ frappe.sanitize_html(frappe.form_dict.search) or '' }}"
+			>
+		</div>
 	</div>
 
-	<!-- Filters Section -->
+	<div class="col-4 pl-0">
+		<button class="btn btn-light btn-sm btn-block d-md-none"
+			type="button"
+			data-toggle="collapse"
+			data-target="#product-filters"
+			aria-expanded="false"
+			aria-controls="product-filters"
+			style="white-space: nowrap;"
+		>
+			{{ _('Toggle Filters') }}
+		</button>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col-12 order-2 col-md-9 order-md-2 item-card-group-section">
+		<div class="row products-list">
+			{% if items %}
+				{% for item in items %}
+					{% include "erpnext/www/all-products/item_row.html" %}
+				{% endfor %}
+			{% else %}
+				{% include "erpnext/www/all-products/not_found.html" %}
+			{% endif %}
+		</div>
+	</div>
 	<div class="col-12 order-1 col-md-3 order-md-1">
+
+		{% if frappe.form_dict.start or frappe.form_dict.field_filters or frappe.form_dict.attribute_filters or frappe.form_dict.search %}
+
+
+		{% endif  %}
+
 		<div class="collapse d-md-block mr-4 filters-section" id="product-filters">
 			<div class="d-flex justify-content-between align-items-center mb-5 title-section">
 				<div class="mb-4 filters-title" > {{ _('Filters') }} </div>
 				<a class="mb-4 clear-filters" href="/all-products">{{ _('Clear All') }}</a>
 			</div>
-			<!-- field filters -->
-			{% if field_filters %}
-				{{ field_filter_section(field_filters) }}
-			{% endif %}
+			{% for field_filter in field_filters %}
+				{%- set item_field =  field_filter[0] %}
+				{%- set values =  field_filter[1] %}
+				<div class="mb-4 filter-block pb-5">
+					<div class="filter-label mb-3">{{ item_field.label }}</div>
 
-			<!-- attribute filters -->
-			{% if attribute_filters %}
-				{{ attribute_filter_section(attribute_filters) }}
-			{% endif %}
+					{% if values | len > 20 %}
+					<!-- show inline filter if values more than 20 -->
+					<input type="text" class="form-control form-control-sm mb-2 product-filter-filter"/>
+					{% endif %}
+
+					{% if values %}
+					<div class="filter-options">
+						{% for value in values %}
+						<div class="checkbox" data-value="{{ value }}">
+							<label for="{{value}}">
+								<input type="checkbox"
+									class="product-filter field-filter"
+									id="{{value}}"
+									data-filter-name="{{ item_field.fieldname }}"
+									data-filter-value="{{ value }}"
+								>
+								<span class="label-area">{{ value }}</span>
+							</label>
+						</div>
+						{% endfor %}
+					</div>
+					{% else %}
+					<i class="text-muted">{{ _('No values') }}</i>
+					{% endif %}
+				</div>
+			{% endfor %}
+
+			{% for attribute in attribute_filters %}
+				<div class="mb-4 filter-block pb-5">
+					<div class="filter-label mb-3">{{ attribute.name}}</div>
+					{% if values | len > 20 %}
+					<!-- show inline filter if values more than 20 -->
+					<input type="text" class="form-control form-control-sm mb-2 product-filter-filter"/>
+					{% endif %}
+
+					{% if attribute.item_attribute_values %}
+					<div class="filter-options">
+						{% for attr_value in attribute.item_attribute_values %}
+						<div class="checkbox">
+							<label data-value="{{ value }}">
+								<input type="checkbox"
+									class="product-filter attribute-filter"
+									id="{{attr_value.name}}"
+									data-attribute-name="{{ attribute.name }}"
+									data-attribute-value="{{ attr_value.attribute_value }}"
+									{% if attr_value.checked %} checked {% endif %}>
+									<span class="label-area">{{ attr_value.attribute_value }}</span>
+							</label>
+						</div>
+						{% endfor %}
+					</div>
+					{% else %}
+					<i class="text-muted">{{ _('No values') }}</i>
+					{% endif %}
+				</div>
+			{% endfor %}
 		</div>
 
+		<script>
+			frappe.ready(() => {
+				$('.product-filter-filter').on('keydown', frappe.utils.debounce((e) => {
+					const $input = $(e.target);
+					const keyword = ($input.val() || '').toLowerCase();
+					const $filter_options = $input.next('.filter-options');
+
+					$filter_options.find('.custom-control').show();
+					$filter_options.find('.custom-control').each((i, el) => {
+						const $el = $(el);
+						const value = $el.data('value').toLowerCase();
+						if (!value.includes(keyword)) {
+							$el.hide();
+						}
+					});
+				}, 300));
+			})
+		</script>
+	</div>
+</div>
+<div class="row product-paging-area mt-5">
+	<div class="col-3">
+	</div>
+	<div class="col-9 text-right">
+		{% if frappe.form_dict.start|int > 0 %}
+		<button class="btn btn-default btn-prev" data-start="{{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</button>
+		{% endif %}
+		{% if items|length >= page_length %}
+		<button class="btn btn-default btn-next" data-start="{{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</button>
+		{% endif %}
 	</div>
 </div>
 

@@ -1,0 +1,71 @@
+@import "variables.less";
+
+.products-list .product-image {
+	display: inline-block;
+	width: 160px;
+	height: 160px;
+	object-fit: contain;
+	margin-right: 1rem;
+}
+
+.product-image.no-image {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 3rem;
+	color: var(--gray);
+	background: var(--light);
+}
+
+.product-image a {
+	text-decoration: none;
+}
+
+.filter-options {
+	margin-left: -5px;
+	padding-left: 5px;
+	max-height: 300px;
+	overflow: auto;
+}
+
+.item-slideshow-image {
+	height: 3rem;
+	width: 3rem;
+	object-fit: contain;
+	padding: 0.5rem;
+	border: 1px solid @border-color;
+	border-radius: 4px;
+	cursor: pointer;
+
+	&:hover, &.active {
+		border-color: var(--primary);
+	}
+}
+
+.address-card {
+	cursor: pointer;
+	position: relative;
+
+	.check {
+		display: none;
+	}
+
+	&.active {
+		border-color: var(--primary);
+
+		.check {
+			display: inline-flex;
+		}
+	}
+}
+
+.check {
+	display: inline-flex;
+    padding: 0.25rem;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+	font-size: 12px;
+	width: 24px;
+	height: 24px;
+}

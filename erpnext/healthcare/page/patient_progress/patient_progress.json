@@ -1,0 +1,33 @@
+{
+ "content": null,
+ "creation": "2020-06-12 15:46:23.111928",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2020-07-23 21:45:45.540055",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "patient-progress",
+ "owner": "Administrator",
+ "page_name": "patient-progress",
+ "restrict_to_domain": "Healthcare",
+ "roles": [
+  {
+   "role": "Healthcare Administrator"
+  },
+  {
+   "role": "Physician"
+  },
+  {
+   "role": "Patient"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Patient Progress"
+}

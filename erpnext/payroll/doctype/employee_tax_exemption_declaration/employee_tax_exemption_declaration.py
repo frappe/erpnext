@@ -1,28 +1,21 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
+from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.model.mapper import get_mapped_doc
+from frappe import _
 from frappe.utils import flt
-
-from erpnext.hr.utils import (
-	calculate_annual_eligible_hra_exemption,
-	get_total_exemption_amount,
-	validate_active_employee,
-	validate_duplicate_exemption_for_payroll_period,
-	validate_tax_declaration,
-)
-
+from frappe.model.mapper import get_mapped_doc
+from erpnext.hr.utils import validate_tax_declaration, get_total_exemption_amount, validate_active_employee, \
+	calculate_annual_eligible_hra_exemption, validate_duplicate_exemption_for_payroll_period
 
 class EmployeeTaxExemptionDeclaration(Document):
 	def validate(self):
 		validate_active_employee(self.employee)
 		validate_tax_declaration(self.declarations)
-		validate_duplicate_exemption_for_payroll_period(
-			self.doctype, self.name, self.payroll_period, self.employee
-		)
+		validate_duplicate_exemption_for_payroll_period(self.doctype, self.name, self.payroll_period, self.employee)
 		self.set_total_declared_amount()
 		self.set_total_exemption_amount()
 		self.calculate_hra_exemption()
@@ -45,23 +38,17 @@ class EmployeeTaxExemptionDeclaration(Document):
 				self.annual_hra_exemption = hra_exemption["annual_exemption"]
 				self.monthly_hra_exemption = hra_exemption["monthly_exemption"]
 
-
 @frappe.whitelist()
 def make_proof_submission(source_name, target_doc=None):
-	doclist = get_mapped_doc(
-		"Employee Tax Exemption Declaration",
-		source_name,
-		{
-			"Employee Tax Exemption Declaration": {
-				"doctype": "Employee Tax Exemption Proof Submission",
-				"field_no_map": ["monthly_house_rent", "monthly_hra_exemption"],
-			},
-			"Employee Tax Exemption Declaration Category": {
-				"doctype": "Employee Tax Exemption Proof Submission Detail",
-				"add_if_empty": True,
-			},
+	doclist = get_mapped_doc("Employee Tax Exemption Declaration", source_name, {
+		"Employee Tax Exemption Declaration": {
+			"doctype": "Employee Tax Exemption Proof Submission",
+			"field_no_map": ["monthly_house_rent", "monthly_hra_exemption"]
 		},
-		target_doc,
-	)
+		"Employee Tax Exemption Declaration Category": {
+			"doctype": "Employee Tax Exemption Proof Submission Detail",
+			"add_if_empty": True
+		}
+	}, target_doc)
 
 	return doclist

@@ -7,7 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "certificate_details_section",
-  "tax_withholding_category",
+  "section_code",
   "fiscal_year",
   "column_break_3",
   "certificate_no",
@@ -32,6 +32,13 @@
    "label": "Certificate No",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "section_code",
+   "fieldtype": "Select",
+   "label": "Section Code",
+   "options": "192\n193\n194\n194A\n194C\n194D\n194H\n194I\n194J\n194LA\n194LBB\n194LBC\n195",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_3",
@@ -116,22 +123,13 @@
    "label": "Fiscal Year",
    "options": "Fiscal Year",
    "reqd": 1
-  },
-  {
-   "fieldname": "tax_withholding_category",
-   "fieldtype": "Link",
-   "label": "Tax Withholding Category",
-   "options": "Tax Withholding Category",
-   "reqd": 1
   }
  ],
- "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-10-23 18:33:38.962622",
+ "modified": "2020-04-23 23:04:41.203721",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Lower Deduction Certificate",
- "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

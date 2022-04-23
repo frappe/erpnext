@@ -1,33 +1,27 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
+from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt, cstr
+from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
-from frappe.utils import flt
-
 
 class VehicleLog(Document):
 	def validate(self):
 		if flt(self.odometer) < flt(self.last_odometer):
-			frappe.throw(
-				_("Current Odometer Value should be greater than Last Odometer Value {0}").format(
-					self.last_odometer
-				)
-			)
+			frappe.throw(_("Current Odometer Value should be greater than Last Odometer Value {0}").format(self.last_odometer))
 
 	def on_submit(self):
 		frappe.db.set_value("Vehicle", self.license_plate, "last_odometer", self.odometer)
 
 	def on_cancel(self):
 		distance_travelled = self.odometer - self.last_odometer
-		if distance_travelled > 0:
-			updated_odometer_value = (
-				int(frappe.db.get_value("Vehicle", self.license_plate, "last_odometer")) - distance_travelled
-			)
+		if(distance_travelled > 0):
+			updated_odometer_value = int(frappe.db.get_value("Vehicle", self.license_plate, "last_odometer")) - distance_travelled
 			frappe.db.set_value("Vehicle", self.license_plate, "last_odometer", updated_odometer_value)
-
 
 @frappe.whitelist()
 def make_expense_claim(docname):
@@ -46,8 +40,9 @@ def make_expense_claim(docname):
 	exp_claim.employee = vehicle_log.employee
 	exp_claim.vehicle_log = vehicle_log.name
 	exp_claim.remark = _("Expense Claim for Vehicle Log {0}").format(vehicle_log.name)
-	exp_claim.append(
-		"expenses",
-		{"expense_date": vehicle_log.date, "description": _("Vehicle Expenses"), "amount": claim_amount},
-	)
+	exp_claim.append("expenses", {
+		"expense_date": vehicle_log.date,
+		"description": _("Vehicle Expenses"),
+		"amount": claim_amount
+	})
 	return exp_claim.as_dict()

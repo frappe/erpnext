@@ -1,11 +1,13 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from __future__ import unicode_literals
 
 import frappe
-from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import flt, cint
+from frappe import _
 
 
 class PaymentTermsTemplate(Document):
@@ -16,12 +18,10 @@ class PaymentTermsTemplate(Document):
 	def validate_invoice_portion(self):
 		total_portion = 0
 		for term in self.terms:
-			total_portion += flt(term.get("invoice_portion", 0))
+			total_portion += flt(term.get('invoice_portion', 0))
 
 		if flt(total_portion, 2) != 100.00:
-			frappe.msgprint(
-				_("Combined invoice portion must equal 100%"), raise_exception=1, indicator="red"
-			)
+			frappe.msgprint(_('Combined invoice portion must equal 100%'), raise_exception=1, indicator='red')
 
 	def check_duplicate_terms(self):
 		terms = []
@@ -29,9 +29,8 @@ class PaymentTermsTemplate(Document):
 			term_info = (term.payment_term, term.credit_days, term.credit_months, term.due_date_based_on)
 			if term_info in terms:
 				frappe.msgprint(
-					_("The Payment Term at row {0} is possibly a duplicate.").format(term.idx),
-					raise_exception=1,
-					indicator="red",
+					_('The Payment Term at row {0} is possibly a duplicate.').format(term.idx),
+					raise_exception=1, indicator='red'
 				)
 			else:
 				terms.append(term_info)

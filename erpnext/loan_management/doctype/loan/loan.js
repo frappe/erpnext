@@ -46,7 +46,7 @@ frappe.ui.form.on('Loan', {
 			});
 		});
 
-		$.each(["payment_account", "loan_account", "disbursement_account"], function (i, field) {
+		$.each(["payment_account", "loan_account"], function (i, field) {
 			frm.set_query(field, function () {
 				return {
 					"filters": {
@@ -87,10 +87,6 @@ frappe.ui.form.on('Loan', {
 			if (["Loan Closure Requested", "Disbursed", "Partially Disbursed"].includes(frm.doc.status)) {
 				frm.add_custom_button(__('Loan Write Off'), function() {
 					frm.trigger("make_loan_write_off_entry");
-				},__('Create'));
-
-				frm.add_custom_button(__('Loan Refund'), function() {
-					frm.trigger("make_loan_refund");
 				},__('Create'));
 			}
 		}
@@ -155,21 +151,6 @@ frappe.ui.form.on('Loan', {
 				if (r.message)
 					var doc = frappe.model.sync(r.message)[0];
 				frappe.set_route("Form", doc.doctype, doc.name);
-			}
-		})
-	},
-
-	make_loan_refund: function(frm) {
-		frappe.call({
-			args: {
-				"loan": frm.doc.name
-			},
-			method: "erpnext.loan_management.doctype.loan.loan.make_refund_jv",
-			callback: function (r) {
-				if (r.message) {
-					let doc = frappe.model.sync(r.message)[0];
-					frappe.set_route("Form", doc.doctype, doc.name);
-				}
 			}
 		})
 	},

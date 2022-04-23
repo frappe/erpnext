@@ -1,0 +1,264 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2020-03-11 08:57:40.669857",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "appointment",
+  "patient",
+  "patient_name",
+  "patient_age",
+  "gender",
+  "column_break_5",
+  "company",
+  "therapy_plan",
+  "therapy_type",
+  "practitioner",
+  "department",
+  "details_section",
+  "medical_code",
+  "duration",
+  "rate",
+  "location",
+  "column_break_12",
+  "service_unit",
+  "start_date",
+  "start_time",
+  "invoiced",
+  "exercises_section",
+  "exercises",
+  "section_break_23",
+  "total_counts_targeted",
+  "column_break_25",
+  "total_counts_completed",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "HLC-THP-.YYYY.-"
+  },
+  {
+   "fieldname": "appointment",
+   "fieldtype": "Link",
+   "label": "Appointment",
+   "options": "Patient Appointment",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.sex",
+   "fieldname": "gender",
+   "fieldtype": "Link",
+   "label": "Gender",
+   "options": "Gender",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "practitioner",
+   "fieldtype": "Link",
+   "label": "Healthcare Practitioner",
+   "options": "Healthcare Practitioner"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Medical Department",
+   "options": "Medical Department"
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fetch_from": "therapy_template.default_duration",
+   "fieldname": "duration",
+   "fieldtype": "Int",
+   "label": "Duration",
+   "reqd": 1
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Select",
+   "label": "Location",
+   "options": "\nCenter\nHome\nTele"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "therapy_template.rate",
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "label": "Rate"
+  },
+  {
+   "fieldname": "exercises_section",
+   "fieldtype": "Section Break",
+   "label": "Exercises"
+  },
+  {
+   "fieldname": "exercises",
+   "fieldtype": "Table",
+   "label": "Exercises",
+   "options": "Exercise"
+  },
+  {
+   "depends_on": "eval: doc.therapy_plan",
+   "fieldname": "therapy_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Therapy Type",
+   "options": "Therapy Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "therapy_plan",
+   "fieldtype": "Link",
+   "label": "Therapy Plan",
+   "options": "Therapy Plan",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Therapy Session",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "service_unit",
+   "fieldtype": "Link",
+   "label": "Healthcare Service Unit",
+   "options": "Healthcare Service Unit"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "start_time",
+   "fieldtype": "Time",
+   "label": "Start Time"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "invoiced",
+   "fieldtype": "Check",
+   "label": "Invoiced",
+   "read_only": 1
+  },
+  {
+   "fieldname": "patient_age",
+   "fieldtype": "Data",
+   "label": "Patient Age",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_counts_targeted",
+   "fieldtype": "Int",
+   "label": "Total Counts Targeted",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_counts_completed",
+   "fieldtype": "Int",
+   "label": "Total Counts Completed",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_23",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "therapy_type.medical_code",
+   "fieldname": "medical_code",
+   "fieldtype": "Link",
+   "label": "Medical Code",
+   "options": "Medical Code",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-11-04 18:14:25.999939",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Therapy Session",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "search_fields": "patient,appointment,therapy_plan,therapy_type",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "patient",
+ "track_changes": 1
+}

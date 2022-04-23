@@ -13,6 +13,6 @@
  "name": "Drop Shipping Format", 
  "owner": "Administrator", 
  "print_format_builder": 0, 
- "print_format_type": "Jinja", 
+ "print_format_type": "Server", 
  "standard": "Yes"
 }

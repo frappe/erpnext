@@ -1,18 +1,13 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
-
 import frappe
+import unittest
 from frappe.utils import today
-
 from erpnext.hr.doctype.employee.test_employee import make_employee
-
-
 class TestEmployeeGrievance(unittest.TestCase):
 	def test_create_employee_grievance(self):
 		create_employee_grievance()
-
 
 def create_employee_grievance():
 	grievance_type = create_grievance_type()
@@ -28,10 +23,10 @@ def create_employee_grievance():
 	grievance.grievance_against = emp_2
 	grievance.description = "test descrip"
 
-	# set cause
+	#set cause
 	grievance.cause_of_grievance = "test cause"
 
-	# resolution details
+	#resolution details
 	grievance.resolution_date = today()
 	grievance.resolution_detail = "test resolution detail"
 	grievance.resolved_by = "test_emp_grievance_@example.com"
@@ -53,3 +48,4 @@ def create_grievance_type():
 	grievance_type.save()
 
 	return grievance_type.name
+

@@ -110,26 +110,9 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname":"group_by",
 			"label": __("Group by"),
 			"fieldtype": "Select",
-			"options": [
-				"",
-				{
-					label: __("Group by Voucher"),
-					value: "Group by Voucher",
-				},
-				{
-					label: __("Group by Voucher (Consolidated)"),
-					value: "Group by Voucher (Consolidated)",
-				},
-				{
-					label: __("Group by Account"),
-					value: "Group by Account",
-				},
-				{
-					label: __("Group by Party"),
-					value: "Group by Party",
-				},
-			],
-			"default": "Group by Voucher (Consolidated)"
+			"options": ["", __("Group by Voucher"), __("Group by Voucher (Consolidated)"),
+				__("Group by Account"), __("Group by Party")],
+			"default": __("Group by Voucher (Consolidated)")
 		},
 		{
 			"fieldname":"tax_id",
@@ -167,7 +150,7 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname": "include_dimensions",
 			"label": __("Consider Accounting Dimensions"),
 			"fieldtype": "Check",
-			"default": 1
+			"default": 0
 		},
 		{
 			"fieldname": "show_opening_entries",
@@ -193,3 +176,4 @@ frappe.query_reports["General Ledger"] = {
 }
 
 erpnext.utils.add_dimensions('General Ledger', 15)
+

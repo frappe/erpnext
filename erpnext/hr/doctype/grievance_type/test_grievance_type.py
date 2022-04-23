@@ -4,6 +4,5 @@
 # import frappe
 import unittest
 
-
 class TestGrievanceType(unittest.TestCase):
 	pass

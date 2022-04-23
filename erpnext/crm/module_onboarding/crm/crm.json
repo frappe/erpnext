@@ -16,7 +16,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/CRM",
  "idx": 0,
  "is_complete": 0,
- "modified": "2022-01-29 20:14:29.502145",
+ "modified": "2020-07-08 14:05:42.644448",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
@@ -33,9 +33,6 @@
   },
   {
    "step": "Create and Send Quotation"
-  },
-  {
-   "step": "CRM Settings"
   }
  ],
  "subtitle": "Lead, Opportunity, Customer, and more.",

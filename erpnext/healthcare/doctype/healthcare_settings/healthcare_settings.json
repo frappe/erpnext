@@ -1,0 +1,351 @@
+{
+ "actions": [],
+ "beta": 1,
+ "creation": "2017-05-09 11:26:22.337760",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sb_op_settings",
+  "patient_name_by",
+  "link_customer_to_patient",
+  "default_medical_code_standard",
+  "column_break_9",
+  "collect_registration_fee",
+  "registration_fee",
+  "automate_appointment_invoicing",
+  "enable_free_follow_ups",
+  "max_visits",
+  "valid_days",
+  "inpatient_settings_section",
+  "allow_discharge_despite_unbilled_services",
+  "do_not_bill_inpatient_encounters",
+  "healthcare_service_items",
+  "inpatient_visit_charge_item",
+  "op_consulting_charge_item",
+  "column_break_13",
+  "clinical_procedure_consumable_item",
+  "sb_in_ac",
+  "income_account",
+  "receivable_account",
+  "out_patient_sms_alerts",
+  "send_registration_msg",
+  "registration_msg",
+  "send_appointment_confirmation",
+  "appointment_confirmation_msg",
+  "avoid_confirmation",
+  "column_break_16",
+  "send_appointment_reminder",
+  "appointment_reminder_msg",
+  "remind_before",
+  "sb_lab_settings",
+  "create_lab_test_on_si_submit",
+  "create_sample_collection_for_lab_test",
+  "column_break_34",
+  "lab_test_approval_required",
+  "employee_name_and_designation_in_print",
+  "custom_signature_in_print",
+  "laboratory_sms_alerts",
+  "sms_printed",
+  "column_break_28",
+  "sms_emailed"
+ ],
+ "fields": [
+  {
+   "fieldname": "sb_op_settings",
+   "fieldtype": "Section Break",
+   "label": "Out Patient Settings"
+  },
+  {
+   "fieldname": "default_medical_code_standard",
+   "fieldtype": "Link",
+   "label": "Default Medical Code Standard",
+   "options": "Medical Code Standard"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Checking this will create new Patients with a Disabled status by default and will only be enabled after invoicing the Registration Fee.",
+   "fieldname": "collect_registration_fee",
+   "fieldtype": "Check",
+   "label": "Collect Fee for Patient Registration"
+  },
+  {
+   "depends_on": "collect_registration_fee",
+   "fieldname": "registration_fee",
+   "fieldtype": "Currency",
+   "label": "Registration Fee",
+   "mandatory_depends_on": "eval:doc.collect_registration_fee == 1",
+   "options": "Currency"
+  },
+  {
+   "depends_on": "eval:doc.enable_free_follow_ups == 1",
+   "description": "Time period (Valid number of days) for free consultations",
+   "fieldname": "valid_days",
+   "fieldtype": "Int",
+   "label": "Valid Number of Days",
+   "mandatory_depends_on": "eval:doc.enable_free_follow_ups == 1"
+  },
+  {
+   "collapsible": 1,
+   "description": "You can configure default Items for billing consultation charges, procedure consumption items and inpatient visits",
+   "fieldname": "healthcare_service_items",
+   "fieldtype": "Section Break",
+   "label": "Default Healthcare Service Items"
+  },
+  {
+   "fieldname": "inpatient_visit_charge_item",
+   "fieldtype": "Link",
+   "label": "Inpatient Visit Charge Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "op_consulting_charge_item",
+   "fieldtype": "Link",
+   "label": "Out Patient Consulting Charge Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "clinical_procedure_consumable_item",
+   "fieldtype": "Link",
+   "label": "Clinical Procedure Consumable Item",
+   "options": "Item"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "out_patient_sms_alerts",
+   "fieldtype": "Section Break",
+   "label": "Out Patient SMS Alerts"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_in_ac",
+   "fieldtype": "Section Break",
+   "label": "Default Accounts"
+  },
+  {
+   "description": "Default income accounts to be used if not set in Healthcare Practitioner to book Appointment charges.",
+   "fieldname": "income_account",
+   "fieldtype": "Table",
+   "label": "Income Account",
+   "options": "Party Account"
+  },
+  {
+   "description": "Default receivable accounts to be used to book Appointment charges.",
+   "fieldname": "receivable_account",
+   "fieldtype": "Table",
+   "label": "Receivable Account",
+   "options": "Party Account"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_lab_settings",
+   "fieldtype": "Section Break",
+   "label": "Laboratory Settings"
+  },
+  {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "description": "Check this if you want the Name and Designation of the Employee associated with the User who submits the document to be printed in the Lab Test Report.",
+   "fieldname": "employee_name_and_designation_in_print",
+   "fieldtype": "Check",
+   "label": "Employee name and designation in print"
+  },
+  {
+   "depends_on": "eval:doc.employee_name_and_designation_in_print == '0'\n",
+   "fieldname": "custom_signature_in_print",
+   "fieldtype": "Small Text",
+   "label": "Custom Signature in Print"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "laboratory_sms_alerts",
+   "fieldtype": "Section Break",
+   "label": "Laboratory SMS Alerts"
+  },
+  {
+   "default": "Hello {{doc.patient}}, Your {{doc.lab_test_name}} result is ready with {{doc.company }}. \nThank You, Good day!",
+   "fieldname": "sms_printed",
+   "fieldtype": "Small Text",
+   "ignore_xss_filter": 1,
+   "label": "Result Printed Message"
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Hello {{doc.patient}}, Your {{doc.lab_test_name}} result has been emailed to {{doc.email}}. \n{{doc.company }}. \nThank You, Good day!",
+   "fieldname": "sms_emailed",
+   "fieldtype": "Small Text",
+   "ignore_xss_filter": 1,
+   "label": "Result Emailed Message"
+  },
+  {
+   "default": "0",
+   "description": "Checking this will restrict printing and emailing of Lab Test documents unless they have the status as Approved.",
+   "fieldname": "lab_test_approval_required",
+   "fieldtype": "Check",
+   "label": "Do not print or email Lab Tests without Approval"
+  },
+  {
+   "default": "1",
+   "description": "If checked, a customer will be created, mapped to Patient.\nPatient Invoices will be created against this Customer. You can also select existing Customer while creating Patient.",
+   "fieldname": "link_customer_to_patient",
+   "fieldtype": "Check",
+   "label": "Link Customer to Patient"
+  },
+  {
+   "default": "0",
+   "description": "Checking this will create Lab Test(s) specified in the Sales Invoice on submission.",
+   "fieldname": "create_lab_test_on_si_submit",
+   "fieldtype": "Check",
+   "label": "Create Lab Test(s) on Sales Invoice Submission"
+  },
+  {
+   "default": "0",
+   "description": "Checking this will create a Sample Collection document  every time you create a Lab Test",
+   "fieldname": "create_sample_collection_for_lab_test",
+   "fieldtype": "Check",
+   "label": "Create Sample Collection document for Lab Test"
+  },
+  {
+   "fieldname": "patient_name_by",
+   "fieldtype": "Select",
+   "label": "Patient Name By",
+   "options": "Patient Name\nNaming Series"
+  },
+  {
+   "default": "0",
+   "description": "Manage Appointment Invoice submit and cancel automatically for Patient Encounter",
+   "fieldname": "automate_appointment_invoicing",
+   "fieldtype": "Check",
+   "label": "Automate Appointment Invoicing"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_registration_msg",
+   "fieldtype": "Check",
+   "label": "Patient Registration"
+  },
+  {
+   "default": "Hello {{doc.patient}}, Thank you for registering with  {{doc.company}}. Your ID is {{doc.name}} . Please note this ID for future reference. \nThank You!",
+   "depends_on": "send_registration_msg",
+   "fieldname": "registration_msg",
+   "fieldtype": "Small Text",
+   "ignore_xss_filter": 1,
+   "label": "Registration Message"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_appointment_confirmation",
+   "fieldtype": "Check",
+   "label": "Appointment Confirmation"
+  },
+  {
+   "default": "Hello {{doc.patient}}, You have scheduled an appointment with {{doc.practitioner}} on {{doc.appointment_datetime}} at  {{doc.company}}.\nThank you, Good day!",
+   "depends_on": "send_appointment_confirmation",
+   "fieldname": "appointment_confirmation_msg",
+   "fieldtype": "Small Text",
+   "ignore_xss_filter": 1,
+   "label": "Confirmation Message"
+  },
+  {
+   "default": "0",
+   "depends_on": "send_appointment_confirmation",
+   "description": "Do not confirm if appointment is created for the same day",
+   "fieldname": "avoid_confirmation",
+   "fieldtype": "Check",
+   "label": "Avoid Confirmation"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_appointment_reminder",
+   "fieldtype": "Check",
+   "label": "Appointment Reminder"
+  },
+  {
+   "default": "Hello {{doc.patient}}, You have an appointment with {{doc.practitioner}} by {{doc.appointment_datetime}} at  {{doc.company}}.\nThank you, Good day!\n",
+   "depends_on": "send_appointment_reminder",
+   "fieldname": "appointment_reminder_msg",
+   "fieldtype": "Small Text",
+   "ignore_xss_filter": 1,
+   "label": "Reminder Message"
+  },
+  {
+   "depends_on": "send_appointment_reminder",
+   "fieldname": "remind_before",
+   "fieldtype": "Time",
+   "label": "Remind Before"
+  },
+  {
+   "depends_on": "eval:doc.enable_free_follow_ups == 1",
+   "description": "The number of free follow ups (Patient Encounters in valid days) allowed",
+   "fieldname": "max_visits",
+   "fieldtype": "Int",
+   "label": "Number of Patient Encounters in Valid Days",
+   "mandatory_depends_on": "eval:doc.enable_free_follow_ups == 1"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_free_follow_ups",
+   "fieldtype": "Check",
+   "label": "Enable Free Follow-ups"
+  },
+  {
+   "fieldname": "inpatient_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Inpatient Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_discharge_despite_unbilled_services",
+   "fieldtype": "Check",
+   "label": "Allow Discharge Despite Unbilled Healthcare Services"
+  },
+  {
+   "default": "0",
+   "fieldname": "do_not_bill_inpatient_encounters",
+   "fieldtype": "Check",
+   "label": "Do Not Bill Patient Encounters for Inpatients"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-01-13 09:04:35.877700",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Healthcare Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Healthcare Administrator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "restrict_to_domain": "Healthcare",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

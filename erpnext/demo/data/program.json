@@ -1,0 +1,46 @@
+[
+	{
+		"doctype": "Program",
+		"name": "MCA",
+		"program_name": "Masters of Computer Applications",
+		"program_code": "MCA",
+		"department": "Information Technology",
+		"courses": [
+			{ "course": "MCA4010" },
+			{ "course": "MCA4020" },
+			{ "course": "MCA4030" }
+		]
+	},
+	{
+		"doctype": "Program",
+		"name": "BCA",
+		"program_name": "Bachelor of Computer Applications",
+		"program_code": "BCA",
+		"department": "Information Technology",
+		"courses": [
+			{ "course": "BCA2030" },
+			{ "course": "BCA1030" },
+			{ "course": "BCA2020" },
+			{ "course": "BCA1040" },
+			{ "course": "BCA1010" },
+			{ "course": "BCA2010" },
+			{ "course": "BCA1020" }
+		]
+	},
+	{
+		"doctype": "Program",
+		"name": "BBA",
+		"program_name": "Bachelor of Business Administration",
+		"program_code": "BBA",
+		"department": "Management Studies",
+		"courses": [
+			{ "course": "BBA 101" },
+			{ "course": "BBA 102" },
+			{ "course": "BBA 103" },
+			{ "course": "BBA 301" },
+			{ "course": "BBA 302" },
+			{ "course": "BBA 304" },
+			{ "course": "BBA 505" }
+		]
+	}
+]

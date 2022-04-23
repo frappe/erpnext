@@ -1178,13 +1178,11 @@
 			{
 				"title": "Reverse Charge In-State",
 				"is_inter_state": 0,
-				"is_reverse_charge": 1,
 				"gst_state": ""
 			},
 			{
 				"title": "Reverse Charge Out-State",
 				"is_inter_state": 1,
-				"is_reverse_charge": 1,
 				"gst_state": ""
 			},
 			{
@@ -1197,7 +1195,7 @@
 			"*": {
 				"item_tax_templates": [
 					{
-						"title": "GST 18%",
+						"title": "GST 9%",
 						"taxes": [
 							{
 								"tax_type": {
@@ -2118,10 +2116,6 @@
 	},
 
 	"Saudi Arabia": {
-		"KSA VAT 15%": {
-			"account_name": "VAT 15%",
-			"tax_rate": 15.00
-		},
 		"KSA VAT 5%": {
 			"account_name": "VAT 5%",
 			"tax_rate": 5.00

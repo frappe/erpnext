@@ -1,0 +1,30 @@
+rules:
+- id: frappe-missing-translate-function-python
+  pattern-either:
+  - patterns:
+      - pattern: frappe.msgprint("...", ...)
+      - pattern-not: frappe.msgprint(_("..."), ...)
+  - patterns:
+      - pattern: frappe.throw("...", ...)
+      - pattern-not: frappe.throw(_("..."), ...)
+  message: |
+      All user facing text must be wrapped in translate function. Please refer to translation documentation. https://frappeframework.com/docs/user/en/guides/basics/translations
+  languages: [python]
+  severity: ERROR
+
+- id: frappe-missing-translate-function-js
+  pattern-either:
+  - patterns:
+      - pattern: frappe.msgprint("...", ...)
+      - pattern-not: frappe.msgprint(__("..."), ...)
+      # ignore microtemplating e.g. msgprint("{{ _("server side translation") }}")
+      - pattern-not: frappe.msgprint("=~/\{\{.*\_.*\}\}/i", ...)
+  - patterns:
+      - pattern: frappe.throw("...", ...)
+      - pattern-not: frappe.throw(__("..."), ...)
+      # ignore microtemplating
+      - pattern-not: frappe.throw("=~/\{\{.*\_.*\}\}/i", ...)
+  message: |
+      All user facing text must be wrapped in translate function. Please refer to translation documentation. https://frappeframework.com/docs/user/en/guides/basics/translations
+  languages: [javascript]
+  severity: ERROR

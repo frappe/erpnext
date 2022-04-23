@@ -32,12 +32,12 @@ frappe.ui.form.on("Timesheet", {
 		};
 	},
 
-	onload: function(frm) {
+	onload: function(frm){
 		if (frm.doc.__islocal && frm.doc.time_logs) {
 			calculate_time_and_amount(frm);
 		}
 
-		if (frm.is_new() && !frm.doc.employee) {
+		if (frm.is_new()) {
 			set_employee_and_company(frm);
 		}
 	},
@@ -116,7 +116,7 @@ frappe.ui.form.on("Timesheet", {
 
 	currency: function(frm) {
 		let base_currency = frappe.defaults.get_global_default('currency');
-		if (frm.doc.currency && (base_currency != frm.doc.currency)) {
+		if (base_currency != frm.doc.currency) {
 			frappe.call({
 				method: "erpnext.setup.utils.get_exchange_rate",
 				args: {
@@ -283,9 +283,7 @@ frappe.ui.form.on("Timesheet Detail", {
 		calculate_time_and_amount(frm);
 	},
 
-	activity_type: function (frm, cdt, cdn) {
-		if (!frappe.get_doc(cdt, cdn).activity_type) return;
-
+	activity_type: function(frm, cdt, cdn) {
 		frappe.call({
 			method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
 			args: {
@@ -293,10 +291,10 @@ frappe.ui.form.on("Timesheet Detail", {
 				activity_type: frm.selected_doc.activity_type,
 				currency: frm.doc.currency
 			},
-			callback: function (r) {
-				if (r.message) {
-					frappe.model.set_value(cdt, cdn, "billing_rate", r.message["billing_rate"]);
-					frappe.model.set_value(cdt, cdn, "costing_rate", r.message["costing_rate"]);
+			callback: function(r){
+				if(r.message){
+					frappe.model.set_value(cdt, cdn, 'billing_rate', r.message['billing_rate']);
+					frappe.model.set_value(cdt, cdn, 'costing_rate', r.message['costing_rate']);
 					calculate_billing_costing_amount(frm, cdt, cdn);
 				}
 			}

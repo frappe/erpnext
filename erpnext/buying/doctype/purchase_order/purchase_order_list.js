@@ -29,22 +29,8 @@ frappe.listview_settings['Purchase Order'] = {
 			listview.call_for_selected_items(method, { "status": "Closed" });
 		});
 
-		listview.page.add_menu_item(__("Reopen"), function () {
+		listview.page.add_menu_item(__("Re-open"), function () {
 			listview.call_for_selected_items(method, { "status": "Submitted" });
 		});
-
-
-		listview.page.add_action_item(__("Purchase Invoice"), ()=>{
-			erpnext.bulk_transaction_processing.create(listview, "Purchase Order", "Purchase Invoice");
-		});
-
-		listview.page.add_action_item(__("Purchase Receipt"), ()=>{
-			erpnext.bulk_transaction_processing.create(listview, "Purchase Order", "Purchase Receipt");
-		});
-
-		listview.page.add_action_item(__("Advance Payment"), ()=>{
-			erpnext.bulk_transaction_processing.create(listview, "Purchase Order", "Advance Payment");
-		});
-
 	}
 };

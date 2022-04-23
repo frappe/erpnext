@@ -379,12 +379,11 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-22 16:26:57.787838",
+ "modified": "2021-05-04 05:35:12.040199",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",
  "name_case": "Title Case",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

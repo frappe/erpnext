@@ -48,16 +48,7 @@ frappe.listview_settings['Leave Policy Assignment'] = {
 						if (cur_dialog.fields_dict.leave_period.value) {
 							me.set_effective_date();
 						}
-					},
-					get_query() {
-						let filters = {"is_active": 1};
-						if (cur_dialog.fields_dict.company.value)
-							filters["company"] = cur_dialog.fields_dict.company.value;
-
-						return {
-							filters: filters
-						};
-					},
+					}
 				},
 				{
 					fieldtype: "Column Break"

@@ -10,3 +10,4 @@ frappe.listview_settings['Asset Repair'] = {
 		}
 	}
 };
+

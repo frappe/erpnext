@@ -12,6 +12,7 @@
   "department",
   "designation",
   "branch",
+  "payroll_cost_center",
   "column_break1",
   "status",
   "journal_entry",
@@ -55,8 +56,6 @@
   "totals",
   "gross_pay",
   "base_gross_pay",
-  "gross_year_to_date",
-  "base_gross_year_to_date",
   "column_break_25",
   "total_deduction",
   "base_total_deduction",
@@ -328,7 +327,7 @@
   {
    "fieldname": "earning_deduction",
    "fieldtype": "Section Break",
-   "label": "Earnings & Deductions",
+   "label": "Earning & Deduction",
    "oldfieldtype": "Section Break"
   },
   {
@@ -379,7 +378,7 @@
    "depends_on": "total_loan_repayment",
    "fieldname": "loan_repayment",
    "fieldtype": "Section Break",
-   "label": "Loan Repayment"
+   "label": "Loan repayment"
   },
   {
    "fieldname": "loans",
@@ -424,7 +423,7 @@
   {
    "fieldname": "net_pay_info",
    "fieldtype": "Section Break",
-   "label": "Net Pay Info"
+   "label": "net pay info"
   },
   {
    "fieldname": "net_pay",
@@ -459,6 +458,15 @@
    "oldfieldtype": "Data",
    "options": "Salary Slip",
    "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.payroll_cost_center",
+   "fetch_if_empty": 1,
+   "fieldname": "payroll_cost_center",
+   "fieldtype": "Link",
+   "label": "Payroll Cost Center",
+   "options": "Cost Center",
    "read_only": 1
   },
   {
@@ -617,27 +625,13 @@
    "label": "Leave Details",
    "options": "Salary Slip Leave",
    "read_only": 1
-  },
-  {
-   "fieldname": "gross_year_to_date",
-   "fieldtype": "Currency",
-   "label": "Gross Year To Date",
-   "options": "currency",
-   "read_only": 1
-  },
-  {
-   "fieldname": "base_gross_year_to_date",
-   "fieldtype": "Currency",
-   "label": "Gross Year To Date(Company Currency)",
-   "options": "Company:company:default_currency",
-   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-19 12:45:54.999345",
+ "modified": "2021-03-31 22:44:09.772331",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
@@ -673,11 +667,9 @@
    "role": "Employee"
   }
  ],
- "search_fields": "employee_name",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
  "timeline_field": "employee",
  "title_field": "employee_name"
 }

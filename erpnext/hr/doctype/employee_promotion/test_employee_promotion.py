@@ -1,13 +1,12 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-
-import unittest
+from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import add_days, getdate
-
+import unittest
+from frappe.utils import getdate, add_days
 from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_employee
-
 
 class TestEmployeePromotion(unittest.TestCase):
 	def setUp(self):
@@ -15,20 +14,18 @@ class TestEmployeePromotion(unittest.TestCase):
 		frappe.db.sql("""delete from `tabEmployee Promotion`""")
 
 	def test_submit_before_promotion_date(self):
-		promotion_obj = frappe.get_doc(
-			{
-				"doctype": "Employee Promotion",
-				"employee": self.employee,
-				"promotion_details": [
-					{
-						"property": "Designation",
-						"current": "Software Developer",
-						"new": "Project Manager",
-						"fieldname": "designation",
-					}
-				],
-			}
-		)
+		promotion_obj = frappe.get_doc({
+			"doctype": "Employee Promotion",
+			"employee": self.employee,
+			"promotion_details" :[
+				{
+				"property": "Designation",
+				"current": "Software Developer",
+				"new": "Project Manager",
+				"fieldname": "designation"
+				}
+			]
+		})
 		promotion_obj.promotion_date = add_days(getdate(), 1)
 		promotion_obj.save()
 		self.assertRaises(frappe.DocstatusTransitionError, promotion_obj.submit)

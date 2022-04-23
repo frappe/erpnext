@@ -41,12 +41,8 @@
   "price_list_currency",
   "plc_conversion_rate",
   "ignore_pricing_rule",
-  "section_break_33",
-  "scan_barcode",
   "items_section",
   "items",
-  "bundle_items_section",
-  "packed_items",
   "pricing_rule_details",
   "pricing_rules",
   "sec_break23",
@@ -112,8 +108,7 @@
   "enq_det",
   "supplier_quotation",
   "opportunity",
-  "lost_reasons",
-  "competitors"
+  "lost_reasons"
  ],
  "fields": [
   {
@@ -931,53 +926,17 @@
    "label": "Lost Reasons",
    "options": "Quotation Lost Reason Detail",
    "read_only": 1
-  },
-  {
-   "depends_on": "packed_items",
-   "fieldname": "packed_items",
-   "fieldtype": "Table",
-   "label": "Bundle Items",
-   "options": "Packed Item",
-   "print_hide": 1
-  },
-  {
-   "collapsible": 1,
-   "collapsible_depends_on": "packed_items",
-   "depends_on": "packed_items",
-   "fieldname": "bundle_items_section",
-   "fieldtype": "Section Break",
-   "label": "Bundle Items",
-   "options": "fa fa-suitcase",
-   "print_hide": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "competitors",
-   "fieldtype": "Table MultiSelect",
-   "label": "Competitors",
-   "options": "Competitor Detail",
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_break_33",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "scan_barcode",
-   "fieldtype": "Data",
-   "label": "Scan Barcode",
-   "options": "Barcode"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-07 11:01:31.157084",
+ "max_attachments": 1,
+ "modified": "2020-10-30 13:58:59.212060",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1068,7 +1027,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
  "timeline_field": "party_name",
  "title_field": "title"
 }

@@ -1,0 +1,134 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "allow_import": 1,
+ "beta": 1,
+ "creation": "2017-01-05 10:56:29.564806",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "practitioner",
+  "patient",
+  "column_break_3",
+  "status",
+  "section_break_5",
+  "section_break_3",
+  "max_visits",
+  "visited",
+  "ref_appointments",
+  "column_break_6",
+  "start_date",
+  "valid_till"
+ ],
+ "fields": [
+  {
+   "fieldname": "practitioner",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Healthcare Practitioner",
+   "options": "Healthcare Practitioner",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "visited",
+   "fieldtype": "Int",
+   "label": "Visited yet",
+   "read_only": 1
+  },
+  {
+   "fieldname": "valid_till",
+   "fieldtype": "Date",
+   "label": "Valid till",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break",
+   "label": "Validity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "max_visits",
+   "fieldtype": "Int",
+   "label": "Max number of visit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Completed\nPending",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "ref_appointment.appointment_date",
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ref_appointments",
+   "fieldtype": "Table MultiSelect",
+   "label": "Reference Appointments",
+   "options": "Fee Validity Reference",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "in_create": 1,
+ "links": [],
+ "modified": "2020-03-17 20:25:06.487418",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Fee Validity",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Healthcare Administrator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "restrict_to_domain": "Healthcare",
+ "search_fields": "practitioner, patient",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "practitioner"
+}
