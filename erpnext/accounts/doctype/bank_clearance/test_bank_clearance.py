@@ -27,6 +27,8 @@ class TestBankClearance(unittest.TestCase):
 
 	@classmethod
 	def tearDownClass(cls):
+		frappe.db.set_single_value("Accounts Settings", "delete_linked_ledger_entries", 1)
+
 		payment_entry = frappe.get_doc(
 			"Payment Entry", {"party_name": "_Test Supplier", "paid_from": "_Test Bank Clearance - _TC"}
 		)
@@ -62,6 +64,8 @@ class TestBankClearance(unittest.TestCase):
 		loan.cancel()
 		loan.flags.ignore_links = True
 		loan.delete()
+
+		frappe.db.set_single_value("Accounts Settings", "delete_linked_ledger_entries", 0)
 
 	# Basic test case to test if bank clearance tool doesn't break
 	# Detailed test can be added later
