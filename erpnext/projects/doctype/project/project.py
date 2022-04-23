@@ -25,7 +25,8 @@ import json
 
 
 force_applies_to_fields = ("vehicle_chassis_no", "vehicle_engine_no", "vehicle_license_plate", "vehicle_unregistered",
-	"vehicle_color", "applies_to_item", "vehicle_owner_name", "vehicle_warranty_no")
+	"vehicle_color", "applies_to_item", "applies_to_item_name", "applies_to_variant_of", "applies_to_variant_of_name",
+	"vehicle_owner_name", "vehicle_warranty_no")
 
 force_customer_fields = ("customer_name",
 	"tax_id", "tax_cnic", "tax_strn", "tax_status",
