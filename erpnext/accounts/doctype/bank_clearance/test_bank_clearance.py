@@ -30,25 +30,33 @@ class TestBankClearance(unittest.TestCase):
 		payment_entry = frappe.get_doc(
 			"Payment Entry", {"party_name": "_Test Supplier", "paid_from": "_Test Bank Clearance - _TC"}
 		)
-		payment_entry.cancel()
-		payment_entry.delete()
+
+		if payment_entry.docstatus == 1:
+			payment_entry.cancel()
+			payment_entry.delete()
 
 		loan = frappe.get_doc("Loan", {"applicant": "_Test Customer"})
 
 		ld_doc = frappe.get_doc("Loan Disbursement", {"against_loan": loan.name})
-		ld_doc.cancel()
-		ld_doc.delete()
+
+		if ld_doc.docstatus == 1:
+			ld_doc.cancel()
+			ld_doc.delete()
 
 		lr_doc = frappe.get_doc("Loan Repayment", {"against_loan": loan.name})
-		lr_doc.cancel()
-		lr_doc.delete()
+
+		if lr_doc.docstatus == 1:
+			lr_doc.cancel()
+			lr_doc.delete()
 
 		lia = frappe.get_doc("Loan Interest Accrual", {"loan": loan.name})
 		lia.delete()
 
 		plia = frappe.get_doc("Process Loan Interest Accrual", {"loan": loan.name})
-		plia.cancel()
-		plia.delete()
+
+		if plia.docstatus == 1:
+			plia.cancel()
+			plia.delete()
 
 		loan.load_from_db()
 		loan.cancel()
