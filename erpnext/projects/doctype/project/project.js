@@ -31,6 +31,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		this.make_customer_request_checklist();
 		this.set_sales_data_html();
 		this.set_service_advisor_from_user();
+		this.setup_dashboard();
 	},
 
 	setup_queries: function () {
@@ -228,6 +229,132 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 				me.frm.add_custom_button(__("Sales Order (All)"), () => me.make_sales_order(), __("Create"));
 			}
 		}
+	},
+
+	setup_dashboard: function() {
+		if (this.frm.doc.__islocal) {
+			return;
+		}
+
+		var me = this;
+		var company_currency = erpnext.get_currency(me.frm.doc.company);
+
+		me.frm.dashboard.stats_area.removeClass('hidden');
+		me.frm.dashboard.stats_area_row.addClass('flex');
+		me.frm.dashboard.stats_area_row.css('flex-wrap', 'wrap');
+
+		// Work Status
+		var vehicle_status_color;
+		if (me.frm.doc.vehicle_status == "Not Received") {
+			vehicle_status_color = "red";
+		} else if (me.frm.doc.vehicle_status == "In Workshop") {
+			vehicle_status_color = "yellow";
+		} else if (me.frm.doc.vehicle_status == "Delivered") {
+			vehicle_status_color = "green";
+		}
+
+		var delivery_status_color;
+		if (me.frm.doc.delivery_status == "Not Applicable") {
+			delivery_status_color = "grey";
+		} else if (me.frm.doc.delivery_status == "Not Delivered") {
+			delivery_status_color = "orange";
+		} else if (me.frm.doc.delivery_status == "Partly Delivered") {
+			delivery_status_color = "yellow";
+		} else if (me.frm.doc.delivery_status == "Fully Delivered") {
+			delivery_status_color = "green";
+		}
+
+		var status_items = [
+			{
+				contents: __('Material Status: {0}', [me.frm.doc.delivery_status]),
+				indicator: delivery_status_color
+			},
+			{
+				contents: __('Ready To Close: {0}', [me.frm.doc.ready_to_close ? __("Yes") : __("No")]),
+				indicator: me.frm.doc.ready_to_close ? 'green' : 'orange'
+			},
+		];
+
+		if (me.frm.get_field('vehicle_status')) {
+			var vehicle_status_item = {
+				contents: __('Vehicle Status: {0}', [me.frm.doc.vehicle_status]),
+				indicator: vehicle_status_color
+			};
+			status_items = [vehicle_status_item].concat(status_items);
+		}
+
+		me.add_indicator_section(__("Work"), status_items);
+
+		// Billing Status
+		var billing_status_color;
+		if (me.frm.doc.billing_status == "Not Applicable") {
+			billing_status_color = "grey";
+		} else if (me.frm.doc.billing_status == "Not Billed") {
+			billing_status_color = "orange";
+		} else if (me.frm.doc.billing_status == "Partly Billed") {
+			billing_status_color = "yellow";
+		} else if (me.frm.doc.billing_status == "Fully Billed") {
+			billing_status_color = "green";
+		}
+
+		var total_billable_color = me.frm.doc.total_billable_amount ? "blue" : "grey";
+		var customer_billable_color = me.frm.doc.customer_billable_amount ? "blue" : "grey";
+
+		var billed_amount_color;
+		if (me.frm.doc.total_billed_amount) {
+			if (me.frm.doc.total_billed_amount < me.frm.doc.total_billable_amount) {
+				billed_amount_color = 'yellow';
+			} else if (me.frm.doc.total_billed_amount > me.frm.doc.total_billable_amount) {
+				billed_amount_color = 'purple';
+			} else {
+				billed_amount_color = 'green';
+			}
+		} else {
+			if (me.frm.doc.total_billable_amount) {
+				billed_amount_color = 'orange';
+			} else {
+				billed_amount_color = 'grey';
+			}
+		}
+
+		var biling_items = [
+			{
+				contents: __('Billing Status: {0}', [me.frm.doc.billing_status]),
+				indicator: billing_status_color
+			},
+			{
+				contents: __('Total Billable: {0}', [format_currency(me.frm.doc.total_billable_amount, company_currency)]),
+				indicator: total_billable_color
+			},
+			{
+				contents: __('Customer Billable: {0}', [format_currency(me.frm.doc.customer_billable_amount, company_currency)]),
+				indicator: customer_billable_color
+			},
+			{
+				contents: __('Billed Amount: {0}', [format_currency(me.frm.doc.total_billed_amount, company_currency)]),
+				indicator: billed_amount_color
+			},
+		];
+
+		me.add_indicator_section(__("Billing"), biling_items);
+	},
+
+	add_indicator_section: function (title, items) {
+		var items_html = '';
+		$.each(items || [], function (i, d) {
+			items_html += `<div class="badge-link small">
+				<span class="indicator ${d.indicator}">${d.contents}</span>
+			</div>`
+		});
+
+		var html = $(`<div class="flex-column col-sm-4 col-md-4">
+			<div><h6>${title}</h6></div>
+			${items_html}
+		</div>`);
+
+		html.appendTo(this.frm.dashboard.stats_area_row);
+
+		return html
 	},
 
 	toggle_vehicle_odometer_fields: function () {
