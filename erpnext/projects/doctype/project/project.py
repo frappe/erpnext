@@ -21,6 +21,7 @@ from erpnext.projects.doctype.project_status.project_status import get_auto_proj
 	get_valid_manual_project_status_names, is_manual_project_status, validate_project_status_for_transaction
 from six import string_types
 from erpnext.vehicles.vehicle_checklist import get_default_vehicle_checklist_items, set_missing_checklist
+from frappe.model.meta import get_field_precision
 import json
 
 
@@ -90,7 +91,7 @@ class Project(StatusUpdater):
 
 		self.set_percent_complete()
 		self.set_vehicle_status()
-		self.set_billing_status()
+		self.set_billing_and_delivery_status()
 		self.set_costing()
 
 		self.set_status()
@@ -116,61 +117,107 @@ class Project(StatusUpdater):
 		else:
 			self.title = self.name
 
-	def set_billing_status(self, update=False, update_modified=False):
+	def set_billing_and_delivery_status(self, update=False, update_modified=False):
 		sales_data = self.get_project_sales_data(get_sales_invoice=False)
 		self.total_billable_amount = sales_data.totals.grand_total
 		self.customer_billable_amount = sales_data.totals.customer_grand_total
-
 		self.total_billed_amount = self.get_billed_amount()
 
-		self.billing_status = self.get_billing_status()
+		sales_orders = frappe.get_all("Sales Order", fields=['per_completed', 'per_delivered', 'status', 'skip_delivery_note'], filters={
+			"project": self.name, "docstatus": 1
+		})
+		delivery_notes = frappe.get_all("Delivery Note", fields=['per_completed', 'status'], filters={
+			"project": self.name, "docstatus": 1
+		})
+		sales_invoices = self.get_sales_invoices()
+
+		self.billing_status, self.to_bill = self.get_billing_status(sales_orders, delivery_notes, sales_invoices, self.total_billed_amount)
+		self.delivery_status, self.to_deliver = self.get_delivery_status(sales_orders, delivery_notes)
 
 		if update:
 			self.db_set({
-				'billing_status': self.billing_status,
 				'total_billable_amount': self.total_billable_amount,
 				'customer_billable_amount': self.customer_billable_amount,
 				'total_billed_amount': self.total_billed_amount,
+				'billing_status': self.billing_status,
+				'to_bill': self.to_bill,
+				'delivery_status': self.delivery_status,
+				'to_deliver': self.to_deliver,
 			}, None, update_modified=update_modified)
 
-	def get_billing_status(self):
-		sales_orders = frappe.get_all("Sales Order", fields=['per_completed'], filters={
-			"project": self.name, "docstatus": 1, "status": ['!=', 'Closed']
-		})
-		delivery_notes = frappe.get_all("Delivery Note", fields=['per_completed'], filters={
-			"project": self.name, "docstatus": 1, "status": ['!=', 'Closed']
-		})
-
+	def get_billing_status(self, sales_orders, delivery_notes, sales_invoices, total_billed_amount):
 		has_billables = False
 		has_unbilled = False
-		for d in sales_orders + delivery_notes:
-			has_billables = True
-			if d.per_completed < 99.99:
-				has_unbilled = True
-
-		sales_invoices = self.get_sales_invoices()
 		has_sales_invoice = False
+
+		for d in sales_orders + delivery_notes:
+			if d.status != "Closed":
+				has_billables = True
+				if d.per_completed < 99.99:
+					has_unbilled = True
+
 		if sales_invoices:
 			has_sales_invoice = True
 
 		if has_billables:
 			if has_sales_invoice:
 				if has_unbilled:
-					if flt(self.total_billed_amount) > 0:
-						billing_status = "Partially Billed"
+					if flt(total_billed_amount) > 0:
+						billing_status = "Partly Billed"
+						to_bill = 1
 					else:
 						billing_status = "Not Billed"
+						to_bill = 1
 				else:
 					billing_status = "Fully Billed"
+					to_bill = 0
 			else:
 				billing_status = "Not Billed"
+				to_bill = 1
 		else:
 			if has_sales_invoice:
 				billing_status = "Fully Billed"
+				to_bill = 0
 			else:
-				billing_status = "Not Billable"
+				billing_status = "Not Applicable"
+				to_bill = 0
 
-		return billing_status
+		return billing_status, to_bill
+
+	def get_delivery_status(self, sales_orders, delivery_notes):
+		has_deliverables = False
+		has_undelivered = False
+		has_delivery_note = False
+
+		if delivery_notes:
+			has_delivery_note = True
+
+		for d in sales_orders:
+			if d.status != 'Closed' and not d.skip_delivery_note:
+				has_deliverables = True
+				if d.per_delivered < 99.99:
+					has_undelivered = True
+
+		if has_deliverables:
+			if has_delivery_note:
+				if has_undelivered:
+					delivery_status = "Partly Delivered"
+					to_deliver = 1
+				else:
+					delivery_status = "Fully Delivered"
+					to_deliver = 0
+			else:
+				delivery_status = "Not Delivered"
+				to_deliver = 1
+		else:
+			if has_delivery_note:
+				delivery_status = "Fully Delivered"
+				to_deliver = 0
+			else:
+				delivery_status = "Not Applicable"
+				to_deliver = 0
+
+		return delivery_status, to_deliver
 
 	def get_billed_amount(self):
 		directly_billed = frappe.db.sql("""
@@ -188,7 +235,9 @@ class Project(StatusUpdater):
 		""", (self.name, self.name))
 		indirectly_billed = flt(indirectly_billed[0][0]) if indirectly_billed else 0
 
-		return directly_billed + indirectly_billed
+		grand_total_precision = get_field_precision(frappe.get_meta("Sales Invoice").get_field("grand_total"),
+			currency=frappe.get_cached_value('Company', self.company, "default_currency"))
+		return flt(directly_billed + indirectly_billed, grand_total_precision)
 
 	def set_costing(self, update=False, update_modified=False):
 		self.set_sales_amount(update=update, update_modified=update_modified)
@@ -728,7 +777,7 @@ class Project(StatusUpdater):
 			self.customer, self.company, get_sales_invoice=get_sales_invoice)
 		sales_data.service_items, sales_data.labour_items, sales_data.sublet_items = get_service_items(self.name,
 			self.customer, self.company, get_sales_invoice=get_sales_invoice)
-		sales_data.totals = get_totals_data([sales_data.stock_items, sales_data.service_items])
+		sales_data.totals = get_totals_data([sales_data.stock_items, sales_data.service_items], self.company)
 
 		return sales_data
 
@@ -1086,7 +1135,7 @@ def post_process_items_data(data):
 			data.customer_taxes[tax_account] += tax_amount
 
 
-def get_totals_data(items_dataset):
+def get_totals_data(items_dataset, company):
 	totals_data = frappe._dict({
 		'taxes': {},
 		'customer_taxes': {},
@@ -1134,6 +1183,12 @@ def get_totals_data(items_dataset):
 
 	totals_data.grand_total += totals_data.net_total + totals_data.total_taxes_and_charges
 	totals_data.customer_grand_total += totals_data.customer_net_total + totals_data.customer_total_taxes_and_charges
+
+	# Round Grand Totals
+	grand_total_precision = get_field_precision(frappe.get_meta("Sales Invoice").get_field("grand_total"),
+		currency=frappe.get_cached_value('Company', company, "default_currency"))
+	totals_data.grand_total = flt(totals_data.grand_total, grand_total_precision)
+	totals_data.customer_grand_total = flt(totals_data.customer_grand_total, grand_total_precision)
 
 	return totals_data
 

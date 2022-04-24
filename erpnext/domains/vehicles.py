@@ -105,7 +105,7 @@ project_fields = [
 		"insert_after": "is_periodic_maintenance"},
 
 	{"label": "Vehicle Status", "fieldname": "vehicle_status", "fieldtype": "Select",
-		"insert_after": "billing_status", "options": "Not Received\nIn Workshop\nDelivered", "default": "Not Received",
+		"insert_after": "status_section", "options": "Not Received\nIn Workshop\nDelivered", "default": "Not Received",
 		"read_only": 1, "no_copy": 1, "in_standard_filter": 1},
 
 	{"label": "Vehicle Booking Order", "fieldname": "vehicle_booking_order", "fieldtype": "Link",

@@ -138,6 +138,9 @@
   "ready_to_close",
   "column_break_128",
   "billing_status",
+  "to_bill",
+  "delivery_status",
+  "to_deliver",
   "column_break_119",
   "percent_complete_method",
   "column_break_121",
@@ -915,13 +918,13 @@
    "read_only": 1
   },
   {
-   "default": "Not Billable",
+   "default": "Not Applicable",
    "fieldname": "billing_status",
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Billing Status",
    "no_copy": 1,
-   "options": "Not Billable\nNot Billed\nPartially Billed\nFully Billed",
+   "options": "Not Applicable\nNot Billed\nPartly Billed\nFully Billed",
    "read_only": 1
   },
   {
@@ -1033,12 +1036,42 @@
    "fieldtype": "Check",
    "label": "Allow Billing of Undelivered Materials",
    "no_copy": 1
+  },
+  {
+   "default": "Not Applicable",
+   "fieldname": "delivery_status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Material Delivery Status",
+   "no_copy": 1,
+   "options": "Not Applicable\nNot Delivered\nPartly Delivered\nFully Delivered",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "to_bill",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "To Bill",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "to_deliver",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "To Deliver Materials",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-04-23 01:04:26.961832",
+ "modified": "2022-04-24 15:05:39.146334",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

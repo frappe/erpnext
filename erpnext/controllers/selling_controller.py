@@ -550,7 +550,7 @@ class SellingController(StockController):
 			if self.doctype == "Sales Invoice" and self.docstatus == 1 and not doc.ready_to_close:
 				doc.set_ready_to_close(update=True)
 
-			doc.set_billing_status(update=True)
+			doc.set_billing_and_delivery_status(update=True)
 			doc.set_sales_amount(update=True)
 			doc.set_gross_margin(update=True)
 			doc.set_status(update=True)

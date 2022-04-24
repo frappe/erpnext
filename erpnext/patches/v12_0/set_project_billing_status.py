@@ -8,7 +8,6 @@ def execute():
 	projects = frappe.get_all("Project")
 	for d in projects:
 		doc = frappe.get_doc("Project", d.name)
-		doc.set_billing_status(update=True, update_modified=False)
-		doc.set_costing(update=True, update_modified=False)
+		doc.set_billing_and_delivery_status(update=True, update_modified=False)
 		doc.set_status(update=True, update_modified=False)
 		doc.clear_cache()
