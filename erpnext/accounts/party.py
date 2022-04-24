@@ -881,11 +881,11 @@ def get_default_contact(doctype, name):
 		"""
 			SELECT dl.parent, c.is_primary_contact, c.is_billing_contact
 			FROM `tabDynamic Link` dl
-			INNER JOIN tabContact c ON c.name = dl.parent
+			INNER JOIN `tabContact` c ON c.name = dl.parent
 			WHERE
 				dl.link_doctype=%s AND
 				dl.link_name=%s AND
-				dl.parenttype = "Contact"
+				dl.parenttype = 'Contact'
 			ORDER BY is_primary_contact DESC, is_billing_contact DESC
 		""",
 		(doctype, name),
