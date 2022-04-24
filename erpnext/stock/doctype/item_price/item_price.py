@@ -64,7 +64,7 @@ class ItemPrice(Document):
 			if self.get(field):
 				conditions += " and {0} = %({0})s ".format(field)
 			else:
-				conditions += "and (isnull({0}) or {0} = '')".format(field)
+				conditions += "and ({0} is null or {0} = '')".format(field)
 
 		price_list_rate = frappe.db.sql(
 			"""
