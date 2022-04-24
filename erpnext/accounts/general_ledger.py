@@ -318,12 +318,20 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 
 def update_accounting_dimensions(round_off_gle):
 	dimensions = get_accounting_dimensions()
-	dimension_values = frappe.db.get_value(
-		round_off_gle["voucher_type"], round_off_gle["voucher_no"], dimensions
-	)
+	meta = frappe.get_meta(round_off_gle["voucher_type"])
+	has_all_dimensions = True
 
 	for dimension in dimensions:
-		round_off_gle[dimension] = dimension_values.get(dimension)
+		if not meta.has_field(dimension):
+			has_all_dimensions = False
+
+	if dimensions and has_all_dimensions:
+		dimension_values = frappe.db.get_value(
+			round_off_gle["voucher_type"], round_off_gle["voucher_no"], dimensions
+		)
+
+		for dimension in dimensions:
+			round_off_gle[dimension] = dimension_values.get(dimension)
 
 
 def get_round_off_account_and_cost_center(company, voucher_type, voucher_no):
@@ -331,8 +339,10 @@ def get_round_off_account_and_cost_center(company, voucher_type, voucher_no):
 		"Company", company, ["round_off_account", "round_off_cost_center"]
 	) or [None, None]
 
+	meta = frappe.get_meta(voucher_type)
+
 	# Give first preference to parent cost center for round off GLE
-	if frappe.db.has_column(voucher_type, "cost_center"):
+	if meta.has_field("cost_center"):
 		parent_cost_center = frappe.db.get_value(voucher_type, voucher_no, "cost_center")
 		if parent_cost_center:
 			round_off_cost_center = parent_cost_center
