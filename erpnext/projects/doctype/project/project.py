@@ -127,7 +127,7 @@ class Project(StatusUpdater):
 			"project": self.name, "docstatus": 1
 		})
 		delivery_notes = frappe.get_all("Delivery Note", fields=['per_completed', 'status'], filters={
-			"project": self.name, "docstatus": 1
+			"project": self.name, "docstatus": 1, "is_return": 0,
 		})
 		sales_invoices = self.get_sales_invoices()
 
