@@ -187,7 +187,6 @@ class PaymentReconciliation(Document):
 				& ((invoice.is_return == 1) & IfNull((invoice.return_against), "") == "")
 				& (invoice.docstatus == 1)
 			)
-			.where(Criterion.all(self.qb_filter_criterion))
 			.groupby(ple.voucher_no)
 			.orderby(invoice.posting_date)
 		)
