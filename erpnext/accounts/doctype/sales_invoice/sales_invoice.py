@@ -1051,7 +1051,7 @@ class SalesInvoice(SellingController):
 
 	def make_tax_gl_entries(self, gl_entries):
 		enable_discount_accounting = cint(
-			frappe.db.get_single_value("Accounts Settings", "enable_discount_accounting")
+			frappe.db.get_single_value("Selling Settings", "enable_discount_accounting")
 		)
 
 		for tax in self.get("taxes"):
@@ -1097,7 +1097,7 @@ class SalesInvoice(SellingController):
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
 		enable_discount_accounting = cint(
-			frappe.db.get_single_value("Accounts Settings", "enable_discount_accounting")
+			frappe.db.get_single_value("Selling Settings", "enable_discount_accounting")
 		)
 
 		for item in self.get("items"):
@@ -1276,7 +1276,7 @@ class SalesInvoice(SellingController):
 	def enable_discount_accounting(self):
 		if not hasattr(self, "_enable_discount_accounting"):
 			self._enable_discount_accounting = cint(
-				frappe.db.get_single_value("Accounts Settings", "enable_discount_accounting")
+				frappe.db.get_single_value("Selling Settings", "enable_discount_accounting")
 			)
 
 		return self._enable_discount_accounting

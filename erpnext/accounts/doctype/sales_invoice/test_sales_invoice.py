@@ -7,6 +7,7 @@ import unittest
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.model.naming import make_autoname
+from frappe.tests.utils import change_settings
 from frappe.utils import add_days, flt, getdate, nowdate
 
 import erpnext
@@ -2684,12 +2685,8 @@ class TestSalesInvoice(unittest.TestCase):
 			sales_invoice.items[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC"
 		)
 
+	@change_settings("Selling Settings", {"enable_discount_accounting": 1})
 	def test_sales_invoice_with_discount_accounting_enabled(self):
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
-			enable_discount_accounting,
-		)
-
-		enable_discount_accounting()
 
 		discount_account = create_account(
 			account_name="Discount Account",
@@ -2705,14 +2702,10 @@ class TestSalesInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
-		enable_discount_accounting(enable=0)
 
+	@change_settings("Selling Settings", {"enable_discount_accounting": 1})
 	def test_additional_discount_for_sales_invoice_with_discount_accounting_enabled(self):
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
-			enable_discount_accounting,
-		)
 
-		enable_discount_accounting()
 		additional_discount_account = create_account(
 			account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC",
@@ -2743,7 +2736,6 @@ class TestSalesInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
-		enable_discount_accounting(enable=0)
 
 	def test_asset_depreciation_on_sale_with_pro_rata(self):
 		"""
