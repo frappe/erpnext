@@ -4,7 +4,6 @@
 import json
 from collections import OrderedDict, defaultdict
 from itertools import groupby
-from operator import itemgetter
 from typing import Dict, List, Set
 
 import frappe
@@ -507,11 +506,13 @@ def create_delivery_note(source_name, target_doc=None):
 	for location in pick_list.locations:
 		if location.sales_order:
 			sales_orders.append(
-				[frappe.db.get_value("Sales Order", location.sales_order, "customer"), location.sales_order]
+				frappe.db.get_value(
+					"Sales Order", location.sales_order, ["customer", "name as sales_order"], as_dict=True
+				)
 			)
-	# Group sales orders by customer
-	for key, keydata in groupby(sales_orders, key=itemgetter(0)):
-		sales_dict[key] = set([d[1] for d in keydata])
+
+	for customer, rows in groupby(sales_orders, key=lambda so: so["customer"]):
+		sales_dict[customer] = {row.sales_order for row in rows}
 
 	if sales_dict:
 		delivery_note = create_dn_with_so(sales_dict, pick_list)
