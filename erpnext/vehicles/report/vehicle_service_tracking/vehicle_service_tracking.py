@@ -76,6 +76,9 @@ class VehicleServiceTrackingReport(object):
 			elif d.expected_delivery_date:
 				d.expected_delivery_dt_fmt = formatdate(d.expected_delivery_date, date_format)
 
+			if not d.applies_to_variant_of_name:
+				d.applies_to_variant_of_name = d.applies_to_item_name
+
 	def get_conditions(self):
 		conditions = []
 
@@ -127,7 +130,8 @@ class VehicleServiceTrackingReport(object):
 			{"label": _("Model"), "fieldname": "applies_to_variant_of_name", "fieldtype": "Data", "width": 120},
 			{"label": _("Variant Code"), "fieldname": "applies_to_item", "fieldtype": "Link", "options": "Item", "width": 120},
 			{"label": _("Service Advisor"), "fieldname": "service_advisor", "fieldtype": "Link", "options": "Sales Person", "width": 120},
-			{"label": _("Voice of Customer"), "fieldname": "project_name", "fieldtype": "Data", "width": 180},
+			{"label": _("Voice of Customer"), "fieldname": "project_name", "fieldtype": "Data", "width": 150},
+			{"label": _("Project Type"), "fieldname": "project_type", "fieldtype": "Link", "options": "Project Type", "width": 100},
 			{"label": _("Bill Amount"), "fieldname": "customer_billable_amount", "fieldtype": "Currency", "options": "Company:company:default_currency", "width": 90},
 			{"label": _("Customer Name"), "fieldname": "customer_name", "fieldtype": "Data", "width": 130},
 			{"label": _("Contact #"), "fieldname": "contact_mobile", "fieldtype": "Data", "width": 100},
