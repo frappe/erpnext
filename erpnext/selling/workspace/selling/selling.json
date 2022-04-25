@@ -426,8 +426,8 @@
   {
    "hidden": 0,
    "is_query_report": 1,
-   "label": "Price List  Version report",
-   "link_to": "Price List Versions Report",
+   "label": "Price List  Version",
+   "link_to": "Price List Version",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
@@ -604,7 +604,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-03-05 12:45:26.751123",
+ "modified": "2022-04-25 12:49:13.023499",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
