@@ -53,7 +53,6 @@
   "allow_account_creation_against_child_company",
   "default_payable_account",
   "default_credit_account",
-  "default_account_for_spot_discounts",
   "default_account_for_credit_discounts",
   "default_employee_advance_account",
   "default_expense_account",
@@ -732,12 +731,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "default_account_for_spot_discounts",
-   "fieldtype": "Link",
-   "label": "Default Account For Spot Discounts",
-   "options": "Account"
-  },
-  {
    "fieldname": "default_account_for_credit_discounts",
    "fieldtype": "Link",
    "label": "Default Account For Credit Discounts",
@@ -747,7 +740,7 @@
  "icon": "fa fa-building",
  "idx": 1,
  "image_field": "company_logo",
- "modified": "2022-04-22 16:54:50.758097",
+ "modified": "2022-04-25 15:19:35.832937",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

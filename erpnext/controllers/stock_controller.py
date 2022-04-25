@@ -98,24 +98,25 @@ class StockController(AccountsController):
 						warehouse_with_no_account.append(sle.warehouse)
 		
 		if self.doctype == "Sales Invoice":
-			if self.discount_reason != None:
-				company = frappe.get_doc("Company", self.company)
-				
+			if self.discount_reason != None:				
 				if self.outstanding_amount == 0:
-					if company.default_account_for_spot_discounts == None:
-						frappe.throw(_("You must assign a default account for spot discounts in the company."))
+					pos = frappe.get_doc("POS Profile", self.pos_profile)
+					if pos.income_account == None:
+						frappe.throw(_("You must assign a income account in the Pos Profile."))
 
-					account_currency = get_account_currency(company.default_account_for_spot_discounts)
+					account_currency = get_account_currency(pos.income_account)
 
 					gl_list.append(self.get_gl_dict({
-						"account": company.default_account_for_spot_discounts,
-						"against": company.default_account_for_spot_discounts,
+						"account": pos.income_account,
+						"against": pos.income_account,
 						"cost_center": self.cost_center,
 						"remarks": self.get("remarks") or "Accounting Entry for Stock",
 						"credit": self.discount_amount,
 						"credit_in_account_currency": self.discount_amount
 					}, account_currency))
 				else:
+					company = frappe.get_doc("Company", self.company)
+					
 					if company.default_account_for_credit_discounts == None:
 						frappe.throw(_("You must assign a default account for credit discounts in the company."))
 
