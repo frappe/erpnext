@@ -565,7 +565,10 @@ def create_dn_with_so(sales_dict, pick_list):
 			# map all items of all sales orders of that customer
 			for so in sales_dict[customer]:
 				map_pl_locations(pick_list, item_table_mapper, delivery_note, so)
-			delivery_note.insert(ignore_mandatory=True)
+			delivery_note.flags.ignore_mandatory = True
+			delivery_note.insert()
+			update_packed_item_details(pick_list, delivery_note)
+			delivery_note.save()
 
 	return delivery_note
 
@@ -605,6 +608,10 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
 def add_product_bundles_to_delivery_note(
 	pick_list: "PickList", delivery_note, item_mapper
 ) -> None:
+	"""Add product bundles found in pick list to delivery note.
+
+	When mapping pick list items, the bundle item itself isn't part of the
+	locations. Dynamically fetch and add parent bundle item into DN."""
 	product_bundles = pick_list._get_product_bundles()
 	product_bundle_qty_map = pick_list._get_product_bundle_qty_map(product_bundles.values())
 
@@ -616,6 +623,31 @@ def add_product_bundles_to_delivery_note(
 			so_row, product_bundle_qty_map[item_code]
 		)
 		update_delivery_note_item(sales_order_item, dn_bundle_item, delivery_note)
+
+
+def update_packed_item_details(pick_list: "PickList", delivery_note) -> None:
+	"""Update stock details on packed items table of delivery note."""
+
+	def _find_so_row(packed_item):
+		for item in delivery_note.items:
+			if packed_item.parent_detail_docname == item.name:
+				return item.so_detail
+
+	def _find_pick_list_location(bundle_row, packed_item):
+		if not bundle_row:
+			return
+		for loc in pick_list.locations:
+			if loc.product_bundle_item == bundle_row and loc.item_code == packed_item.item_code:
+				return loc
+
+	for packed_item in delivery_note.packed_items:
+		so_row = _find_so_row(packed_item)
+		location = _find_pick_list_location(so_row, packed_item)
+		if not location:
+			continue
+		packed_item.warehouse = location.warehouse
+		packed_item.batch_no = location.batch_no
+		packed_item.serial_no = location.serial_no
 
 
 @frappe.whitelist()
