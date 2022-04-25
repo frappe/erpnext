@@ -133,6 +133,14 @@
   "weekly_time_to_send",
   "column_break_45",
   "message",
+  "settings_section",
+  "materials_item_group",
+  "sublet_item_group",
+  "column_break_130",
+  "consumables_item_group",
+  "lubricants_item_group",
+  "column_break_133",
+  "percent_complete_method",
   "status_section",
   "ready_to_close_dt",
   "ready_to_close",
@@ -141,8 +149,6 @@
   "to_bill",
   "delivery_status",
   "to_deliver",
-  "column_break_119",
-  "percent_complete_method",
   "column_break_121",
   "project_status",
   "indicator_color",
@@ -887,10 +893,6 @@
    "options": "Project Template Detail"
   },
   {
-   "fieldname": "column_break_119",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "project_status",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -1066,12 +1068,58 @@
    "label": "To Deliver Materials",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "settings_section",
+   "fieldtype": "Section Break",
+   "label": "Settings"
+  },
+  {
+   "fieldname": "materials_item_group",
+   "fieldtype": "Link",
+   "label": "Materials Parent Item Group",
+   "no_copy": 1,
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sublet_item_group",
+   "fieldtype": "Link",
+   "label": "Sublet Item Group",
+   "no_copy": 1,
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_130",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "consumables_item_group",
+   "fieldtype": "Link",
+   "label": "Consumables Item Group",
+   "no_copy": 1,
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "lubricants_item_group",
+   "fieldtype": "Link",
+   "label": "Lubricants Item Group",
+   "no_copy": 1,
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_133",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-04-24 15:05:39.146334",
+ "modified": "2022-04-25 14:07:49.985354",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

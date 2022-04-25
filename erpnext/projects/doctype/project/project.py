@@ -573,6 +573,7 @@ class Project(StatusUpdater):
 		self.set_applies_to_details()
 		self.set_missing_checklist()
 		self.set_project_template_details()
+		self.set_material_and_service_item_groups()
 
 	def set_customer_details(self):
 		args = self.as_dict()
@@ -614,6 +615,13 @@ class Project(StatusUpdater):
 		for d in self.project_templates:
 			if d.project_template and not d.project_template_name:
 				d.project_template_name = frappe.get_cached_value("Project Template", d.project_template, "project_template_name")
+
+	def set_material_and_service_item_groups(self):
+		settings = frappe.get_cached_doc("Projects Settings", None)
+		self.materials_item_group = settings.materials_item_group
+		self.consumables_item_group = settings.consumables_item_group
+		self.lubricants_item_group = settings.lubricants_item_group
+		self.sublet_item_group = settings.sublet_item_group
 
 	def validate_readings(self):
 		if self.meta.has_field('fuel_level'):
@@ -773,10 +781,10 @@ class Project(StatusUpdater):
 
 	def get_project_sales_data(self, get_sales_invoice=True):
 		sales_data = frappe._dict()
-		sales_data.stock_items, sales_data.part_items, sales_data.lubricant_items = get_stock_items(self.name,
-			self.customer, self.company, get_sales_invoice=get_sales_invoice)
-		sales_data.service_items, sales_data.labour_items, sales_data.sublet_items = get_service_items(self.name,
-			self.customer, self.company, get_sales_invoice=get_sales_invoice)
+		sales_data.stock_items, sales_data.part_items, sales_data.lubricant_items = get_stock_items(self,
+			get_sales_invoice=get_sales_invoice)
+		sales_data.service_items, sales_data.labour_items, sales_data.sublet_items = get_service_items(self,
+			get_sales_invoice=get_sales_invoice)
 		sales_data.totals = get_totals_data([sales_data.stock_items, sales_data.service_items], self.company)
 
 		return sales_data
@@ -889,52 +897,53 @@ class Project(StatusUpdater):
 				user.welcome_email_sent = 1
 
 
-def get_stock_items(project, customer, company, get_sales_invoice=True):
+def get_stock_items(project, get_sales_invoice=True):
+	is_material_condition = "i.is_stock_item = 1"
+	materials_item_groups = get_item_groups_subtree(project.materials_item_group)
+	if materials_item_groups:
+		is_material_condition = "(i.is_stock_item = 1 or i.item_group in ({0}))"\
+			.format(", ".join([frappe.db.escape(d) for d in materials_item_groups]))
+
 	dn_data = frappe.db.sql("""
 		select p.name as delivery_note, i.sales_order,
 			p.posting_date, p.posting_time, i.idx,
-			i.item_code, i.item_name, i.description, i.item_group,
+			i.item_code, i.item_name, i.description, i.item_group, i.is_stock_item,
 			i.qty, i.uom,
 			i.base_net_amount as net_amount,
 			i.base_net_rate as net_rate,
 			i.item_tax_detail, i.bill_only_to_customer, p.conversion_rate
 		from `tabDelivery Note Item` i
 		inner join `tabDelivery Note` p on p.name = i.parent
-		where p.docstatus = 1 and i.is_stock_item = 1
+		where p.docstatus = 1 and {0}
 			and p.project = %s
-	""", project, as_dict=1)
-	set_is_claim_item(dn_data, customer)
+	""".format(is_material_condition), project.name, as_dict=1)
+	set_sales_data_customer_amounts(dn_data, project)
 
 	so_data = frappe.db.sql("""
 		select p.name as sales_order,
 			p.transaction_date, i.idx,
-			i.item_code, i.item_name, i.description, i.item_group,
+			i.item_code, i.item_name, i.description, i.item_group, i.is_stock_item,
 			i.qty - i.delivered_qty as qty, i.qty as ordered_qty, i.uom,
 			i.base_net_amount * (i.qty - i.delivered_qty) / i.qty as net_amount,
 			i.base_net_rate as net_rate,
 			i.item_tax_detail, i.bill_only_to_customer, p.conversion_rate
 		from `tabSales Order Item` i
 		inner join `tabSales Order` p on p.name = i.parent
-		where p.docstatus = 1 and i.is_stock_item = 1 and i.delivered_qty < i.qty and i.qty > 0
+		where p.docstatus = 1 and {0} and i.delivered_qty < i.qty and i.qty > 0
 			and (p.status != 'Closed' or exists(select sum(si_item.amount)
 				from `tabSales Invoice Item` si_item
 				where si_item.docstatus = 1 and si_item.sales_order_item = i.name and ifnull(si_item.delivery_note, '') = ''
 				having sum(si_item.amount) > 0)
 			)
 			and p.project = %s
-	""", project, as_dict=1)
-	set_is_claim_item(so_data, customer)
+	""".format(is_material_condition), project.name, as_dict=1)
+	set_sales_data_customer_amounts(so_data, project)
 
 	stock_data = get_items_data_template()
 	parts_data = get_items_data_template()
 	lubricants_data = get_items_data_template()
 
-	lubricants_item_group = frappe.get_cached_value("Projects Settings", None, "lubricants_item_group")
-	lubricants_item_groups = []
-	if lubricants_item_group:
-		lubricants_item_groups = frappe.get_all("Item Group", {"name": ["subtree of", lubricants_item_group]})
-		lubricants_item_groups = [d.name for d in lubricants_item_groups]
-
+	lubricants_item_groups = get_item_groups_subtree(project.lubricants_item_group)
 	for d in dn_data + so_data:
 		stock_data['items'].append(d)
 
@@ -947,63 +956,64 @@ def get_stock_items(project, customer, company, get_sales_invoice=True):
 	parts_data['items'] = sorted(parts_data['items'], key=lambda d: (cstr(d.posting_date), cstr(d.posting_time), d.idx))
 	lubricants_data['items'] = sorted(lubricants_data['items'], key=lambda d: (cstr(d.posting_date), cstr(d.posting_time), d.idx))
 
-	get_item_taxes(stock_data, company)
+	get_item_taxes(stock_data, project.company)
 	post_process_items_data(stock_data)
 
-	get_item_taxes(parts_data, company)
+	get_item_taxes(parts_data, project.company)
 	post_process_items_data(parts_data)
 
-	get_item_taxes(lubricants_data, company)
+	get_item_taxes(lubricants_data, project.company)
 	post_process_items_data(lubricants_data)
 
 	return stock_data, parts_data, lubricants_data
 
 
-def get_service_items(project, customer, company, get_sales_invoice=True):
+def get_service_items(project, get_sales_invoice=True):
+	is_service_condition = "(i.is_stock_item = 0 and i.is_fixed_asset = 0)"
+	materials_item_groups = get_item_groups_subtree(project.materials_item_group)
+	if materials_item_groups:
+		is_service_condition = "(i.is_stock_item = 0 and i.is_fixed_asset = 0 and i.item_group not in ({0}))"\
+			.format(", ".join([frappe.db.escape(d) for d in materials_item_groups]))
+
 	so_data = frappe.db.sql("""
 		select p.name as sales_order,
 			p.transaction_date,
-			i.item_code, i.item_name, i.description, i.item_group,
+			i.item_code, i.item_name, i.description, i.item_group, i.is_stock_item,
 			i.qty, i.uom,
 			i.base_net_amount as net_amount,
 			i.base_net_rate as net_rate,
 			i.item_tax_detail, i.bill_only_to_customer, p.conversion_rate
 		from `tabSales Order Item` i
 		inner join `tabSales Order` p on p.name = i.parent
-		where p.docstatus = 1 and i.is_stock_item = 0 and i.is_fixed_asset = 0
+		where p.docstatus = 1 and {0}
 			and p.project = %s
 		order by p.transaction_date, p.creation, i.idx
-	""", project, as_dict=1)
-	set_is_claim_item(so_data, customer)
+	""".format(is_service_condition), project.name, as_dict=1)
+	set_sales_data_customer_amounts(so_data, project)
 
 	sinv_data = []
 	if get_sales_invoice:
 		sinv_data = frappe.db.sql("""
 			select p.name as sales_invoice, i.delivery_note, i.sales_order,
 				p.posting_date as transaction_date,
-				i.item_code, i.item_name, i.description, i.item_group,
+				i.item_code, i.item_name, i.description, i.item_group, i.is_stock_item,
 				i.qty, i.uom,
 				i.base_net_amount as net_amount,
 				i.base_net_rate as net_rate,
 				i.item_tax_detail, p.conversion_rate
 			from `tabSales Invoice Item` i
 			inner join `tabSales Invoice` p on p.name = i.parent
-			where p.docstatus = 1 and i.is_stock_item = 0 and i.is_fixed_asset = 0 and ifnull(i.sales_order, '') = ''
+			where p.docstatus = 1 and {0} and ifnull(i.sales_order, '') = ''
 				and (p.project = %s or i.project = %s)
 			order by p.posting_date, p.creation, i.idx
-		""", [project, project], as_dict=1)
-	set_is_claim_item(sinv_data, customer)
+		""".format(is_service_condition), [project.name, project.name], as_dict=1)
+	set_sales_data_customer_amounts(sinv_data, project)
 
 	service_data = get_items_data_template()
 	labour_data = get_items_data_template()
 	sublet_data = get_items_data_template()
 
-	sublet_item_group = frappe.get_cached_value("Projects Settings", None, "sublet_item_group")
-	sublet_item_groups = []
-	if sublet_item_group:
-		sublet_item_groups = frappe.get_all("Item Group", {"name": ["subtree of", sublet_item_group]})
-		sublet_item_groups = [d.name for d in sublet_item_groups]
-
+	sublet_item_groups = get_item_groups_subtree(project.sublet_item_group)
 	for d in so_data + sinv_data:
 		service_data['items'].append(d)
 
@@ -1012,16 +1022,25 @@ def get_service_items(project, customer, company, get_sales_invoice=True):
 		else:
 			labour_data['items'].append(d.copy())
 
-	get_item_taxes(service_data, company)
+	get_item_taxes(service_data, project.company)
 	post_process_items_data(service_data)
 
-	get_item_taxes(labour_data, company)
+	get_item_taxes(labour_data, project.company)
 	post_process_items_data(labour_data)
 
-	get_item_taxes(sublet_data, company)
+	get_item_taxes(sublet_data, project.company)
 	post_process_items_data(sublet_data)
 
 	return service_data, labour_data, sublet_data
+
+
+def get_item_groups_subtree(item_group):
+	item_group_tree = []
+	if item_group:
+		item_group_tree = frappe.get_all("Item Group", {"name": ["subtree of", item_group]})
+		item_group_tree = [d.name for d in item_group_tree]
+
+	return item_group_tree
 
 
 def get_items_data_template():
@@ -1047,16 +1066,26 @@ def get_items_data_template():
 	})
 
 
-def set_is_claim_item(data, customer=None):
+def set_sales_data_customer_amounts(data, project):
+	set_depreciation_in_invoice_items(data, project)
+
 	for d in data:
-		if d.get('bill_only_to_customer') and customer and d.get('bill_only_to_customer') != customer:
+		d.has_customer_depreciation = 0
+
+		if d.get('bill_only_to_customer') and project.customer and d.get('bill_only_to_customer') != project.customer:
 			d.is_claim_item = 1
 			d.customer_net_amount = 0
 			d.customer_net_rate = 0
 		else:
 			d.is_claim_item = 0
-			d.customer_net_amount = d.net_amount
-			d.customer_net_rate = d.net_rate
+
+			if project.insurance_company and project.bill_to and project.bill_to != project.customer:
+				d.has_customer_depreciation = 1
+				d.customer_net_amount = d.net_amount * flt(d.depreciation_percentage) / 100
+				d.customer_net_rate = d.net_rate * flt(d.depreciation_percentage) / 100
+			else:
+				d.customer_net_amount = d.net_amount
+				d.customer_net_rate = d.net_rate
 
 
 def get_item_taxes(data, company):
@@ -1086,6 +1115,9 @@ def get_item_taxes(data, company):
 				tax_amount *= conversion_rate
 
 				customer_tax_amount = 0 if d.get('is_claim_item') else flt(amount)
+				if d.has_customer_depreciation:
+					customer_tax_amount *= d.depreciation_percentage / 100
+
 				customer_tax_amount *= conversion_rate
 
 				if flt(d.ordered_qty):
@@ -1673,7 +1705,7 @@ def get_sales_invoice(project_name, depreciation_type=None):
 	target_doc.run_method("set_missing_values")
 
 	# Set Depreciation Rates
-	set_depreciation_in_invoice_items(target_doc, project)
+	set_depreciation_in_invoice_items(target_doc.get('items'), project)
 
 	# Tax Table
 	target_doc.run_method("append_taxes_from_master")
@@ -1867,13 +1899,13 @@ def check_if_doc_exists(doctype, project, filters=None):
 		frappe.throw(_("{0} already exists").format(frappe.get_desk_link(doctype, existing)))
 
 
-def set_depreciation_in_invoice_items(target_doc, project):
+def set_depreciation_in_invoice_items(items_list, project):
 	non_standard_depreciation_items = {}
 	for d in project.non_standard_depreciation:
 		if d.depreciation_item_code:
 			non_standard_depreciation_items[d.depreciation_item_code] = flt(d.depreciation_percentage)
 
-	for d in target_doc.get('items'):
+	for d in items_list:
 		if d.is_stock_item:
 			if not flt(d.depreciation_percentage):
 				if d.item_code in non_standard_depreciation_items:

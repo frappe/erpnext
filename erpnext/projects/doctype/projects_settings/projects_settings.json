@@ -5,8 +5,10 @@
  "engine": "InnoDB",
  "field_order": [
   "project_naming_by",
-  "sublet_item_group",
+  "materials_item_group",
+  "consumables_item_group",
   "lubricants_item_group",
+  "sublet_item_group",
   "sales_order_print_heading",
   "column_break_2",
   "ignore_workstation_time_overlap",
@@ -61,10 +63,22 @@
    "fieldtype": "Link",
    "label": "Project Sales Order Print Heading",
    "options": "Print Heading"
+  },
+  {
+   "fieldname": "materials_item_group",
+   "fieldtype": "Link",
+   "label": "Materials Parent Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "consumables_item_group",
+   "fieldtype": "Link",
+   "label": "Consumables Item Group",
+   "options": "Item Group"
   }
  ],
  "issingle": 1,
- "modified": "2022-04-16 20:12:23.725553",
+ "modified": "2022-04-25 03:08:08.302956",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects Settings",
