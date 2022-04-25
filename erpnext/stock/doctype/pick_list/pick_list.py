@@ -554,21 +554,21 @@ def create_dn_wo_so(pick_list):
 def create_dn_with_so(sales_dict, pick_list):
 	delivery_note = None
 
+	item_table_mapper = {
+		"doctype": "Delivery Note Item",
+		"field_map": {
+			"rate": "rate",
+			"name": "so_detail",
+			"parent": "against_sales_order",
+		},
+		"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty)
+		and doc.delivered_by_supplier != 1,
+	}
+
 	for customer in sales_dict:
 		for so in sales_dict[customer]:
 			delivery_note = None
 			delivery_note = create_delivery_note_from_sales_order(so, delivery_note, skip_item_mapping=True)
-
-			item_table_mapper = {
-				"doctype": "Delivery Note Item",
-				"field_map": {
-					"rate": "rate",
-					"name": "so_detail",
-					"parent": "against_sales_order",
-				},
-				"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty)
-				and doc.delivered_by_supplier != 1,
-			}
 			break
 		if delivery_note:
 			# map all items of all sales orders of that customer
@@ -582,28 +582,26 @@ def create_dn_with_so(sales_dict, pick_list):
 def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
 
 	for location in pick_list.locations:
-		if location.sales_order == sales_order:
-			if location.sales_order_item:
-				sales_order_item = frappe.get_cached_doc(
-					"Sales Order Item", {"name": location.sales_order_item}
-				)
-			else:
-				sales_order_item = None
+		if location.sales_order != sales_order:
+			continue
 
-			source_doc, table_mapper = (
-				[sales_order_item, item_mapper] if sales_order_item else [location, item_mapper]
-			)
+		if location.sales_order_item:
+			sales_order_item = frappe.get_doc("Sales Order Item", location.sales_order_item)
+		else:
+			sales_order_item = None
 
-			dn_item = map_child_doc(source_doc, delivery_note, table_mapper)
+		source_doc = sales_order_item or location
 
-			if dn_item:
-				dn_item.pick_list_item = location.name
-				dn_item.warehouse = location.warehouse
-				dn_item.qty = flt(location.picked_qty) / (flt(location.conversion_factor) or 1)
-				dn_item.batch_no = location.batch_no
-				dn_item.serial_no = location.serial_no
+		dn_item = map_child_doc(source_doc, delivery_note, item_mapper)
 
-				update_delivery_note_item(source_doc, dn_item, delivery_note)
+		if dn_item:
+			dn_item.pick_list_item = location.name
+			dn_item.warehouse = location.warehouse
+			dn_item.qty = flt(location.picked_qty) / (flt(location.conversion_factor) or 1)
+			dn_item.batch_no = location.batch_no
+			dn_item.serial_no = location.serial_no
+
+			update_delivery_note_item(source_doc, dn_item, delivery_note)
 	set_delivery_note_missing_values(delivery_note)
 
 	delivery_note.pick_list = pick_list.name
