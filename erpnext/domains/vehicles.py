@@ -129,10 +129,13 @@ insert_field_after('vehicle_delivery_date', project_change_vehicle_details_secti
 
 project_change_vehicle_details_fields = [
 	{"label": "Change License Plate", "fieldname": "change_vehicle_license_plate", "fieldtype": "Data",
-		"insert_after": "sec_change_vehicle_details", "no_copy": 1, "report_hide": 1},
+		"insert_after": "sec_change_vehicle_details", "no_copy": 1, "report_hide": 1,
+		"depends_on": "eval:!doc.change_vehicle_unregistered"},
+	{"label": "Set Is Unregistered", "fieldname": "change_vehicle_unregistered", "fieldtype": "Check",
+		"insert_after": "change_vehicle_license_plate", "no_copy": 1, "report_hide": 1},
 
 	{"label": "", "fieldname": "cb_change_vehicle_details_1", "fieldtype": "Column Break",
-		"insert_after": "change_vehicle_license_plate"},
+		"insert_after": "change_vehicle_unregistered"},
 
 	{"label": "Change Warranty Book No", "fieldname": "change_vehicle_warranty_no", "fieldtype": "Data",
 		"insert_after": "cb_change_vehicle_details_1", "no_copy": 1, "report_hide": 1},

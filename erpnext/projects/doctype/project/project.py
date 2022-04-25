@@ -35,6 +35,7 @@ force_customer_fields = ("customer_name",
 
 vehicle_change_fields = [
 	('change_vehicle_license_plate', 'license_plate'),
+	('change_vehicle_unregistered', 'unregistered'),
 	('change_vehicle_warranty_no', 'warranty_no'),
 	('change_vehicle_delivery_date', 'delivery_date')
 ]
@@ -664,6 +665,8 @@ class Project(StatusUpdater):
 					vehicle_change_map[vehicle_field] = self.get(project_field)
 
 			if vehicle_change_map:
+				if vehicle_change_map.get('unregistered'):
+					vehicle_change_map['license_plate'] = None
 				if vehicle_change_map.get('license_plate'):
 					vehicle_change_map['unregistered'] = 0
 
