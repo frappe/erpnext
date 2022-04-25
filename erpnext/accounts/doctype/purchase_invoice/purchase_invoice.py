@@ -1317,7 +1317,9 @@ class PurchaseInvoice(BuyingController):
 		if (
 			not self.is_internal_transfer() and self.rounding_adjustment and self.base_rounding_adjustment
 		):
-			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(self.company)
+			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
+				self.company, "Purchase Invoice", self.name
+			)
 
 			gl_entries.append(
 				self.get_gl_dict(
