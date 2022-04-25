@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Vehicle Service Tracking"] = {
+frappe.query_reports["Vehicle Tracking Sheet"] = {
 	"filters": [
 		{
 			fieldname: "from_date",

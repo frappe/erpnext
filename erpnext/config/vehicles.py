@@ -92,7 +92,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Vehicle Service Tracking",
+					"name": "Vehicle Tracking Sheet",
 					"doctype": "Vehicle",
 					"dependencies": ["Vehicle"],
 					"onboard": 1,

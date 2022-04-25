@@ -747,3 +747,4 @@ erpnext.patches.v12_0.split_vehicle_received_delivered_dt
 erpnext.patches.v12_0.rename_project_released_to_ready_to_close
 erpnext.patches.v12_0.set_project_billing_status #20-04-2022 #24-04-2022
 erpnext.patches.v12_0.set_project_setting_item_groups
+execute:frappe.delete_doc_if_exists("Report", "Vehicle Service Tracking")
