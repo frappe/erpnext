@@ -572,7 +572,7 @@ def create_dn_with_so(sales_dict, pick_list):
 def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
 
 	for location in pick_list.locations:
-		if location.sales_order != sales_order:
+		if location.sales_order != sales_order or location.product_bundle_item:
 			continue
 
 		if location.sales_order_item:
@@ -592,11 +592,29 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
 			dn_item.serial_no = location.serial_no
 
 			update_delivery_note_item(source_doc, dn_item, delivery_note)
+
+	add_product_bundles_to_delivery_note(pick_list, delivery_note, item_mapper)
 	set_delivery_note_missing_values(delivery_note)
 
 	delivery_note.pick_list = pick_list.name
 	delivery_note.company = pick_list.company
 	delivery_note.customer = frappe.get_value("Sales Order", sales_order, "customer")
+
+
+def add_product_bundles_to_delivery_note(
+	pick_list: "PickList", delivery_note, item_mapper
+) -> None:
+	product_bundles = pick_list._get_product_bundles()
+	product_bundle_qty_map = pick_list._get_product_bundle_qty_map(product_bundles.values())
+
+	for so_row, item_code in product_bundles.items():
+		sales_order_item = frappe.get_doc("Sales Order Item", so_row)
+		dn_bundle_item = map_child_doc(sales_order_item, delivery_note, item_mapper)
+		# TODO: post process packed items and update stock details
+		dn_bundle_item.qty = pick_list._compute_picked_qty_for_bundle(
+			so_row, product_bundle_qty_map[item_code]
+		)
+		update_delivery_note_item(sales_order_item, dn_bundle_item, delivery_note)
 
 
 @frappe.whitelist()
