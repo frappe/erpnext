@@ -229,8 +229,6 @@ class PickList(Document):
 			item.idx = idx
 
 	def update_bundle_picked_qty(self):
-		"""Ensure that picked quantity is sufficient for fulfilling a whole number of."""
-
 		product_bundles = self._get_product_bundles()
 		product_bundle_qty_map = self._get_product_bundle_qty_map(product_bundles.values())
 
@@ -251,10 +249,11 @@ class PickList(Document):
 		for item in self.locations:
 			if not item.product_bundle_item:
 				continue
-			bundle_item_code = frappe.db.get_value(
-				"Sales Order Item", item.product_bundle_item, "item_code"
+			product_bundles[item.product_bundle_item] = frappe.db.get_value(
+				"Sales Order Item",
+				item.product_bundle_item,
+				"item_code",
 			)
-			product_bundles[item.product_bundle_item] = bundle_item_code
 		return product_bundles
 
 	def _get_product_bundle_qty_map(self, bundles: List[str]) -> Dict[str, Dict[str, float]]:
