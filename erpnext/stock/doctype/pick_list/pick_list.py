@@ -517,13 +517,7 @@ def create_delivery_note(source_name, target_doc=None):
 	if sales_dict:
 		delivery_note = create_dn_with_so(sales_dict, pick_list)
 
-	is_item_wo_so = 0
-	for location in pick_list.locations:
-		if not location.sales_order:
-			is_item_wo_so = 1
-			break
-	if is_item_wo_so == 1:
-		# Create a DN for items without sales orders as well
+	if not all(item.sales_order for item in pick_list.locations):
 		delivery_note = create_dn_wo_so(pick_list)
 
 	frappe.msgprint(_("Delivery Note(s) created for the Pick List"))
