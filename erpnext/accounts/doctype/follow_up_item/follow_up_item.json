@@ -92,7 +92,7 @@
    "fieldname": "range1",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "0-30",
+   "label": "Range 1",
    "read_only": 1
   },
   {
@@ -100,7 +100,7 @@
    "fieldname": "range2",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "31-60",
+   "label": "Range 2",
    "read_only": 1
   },
   {
@@ -108,19 +108,19 @@
    "fieldname": "range3",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "61-90",
+   "label": "Range 3",
    "read_only": 1
   },
   {
    "fieldname": "range4",
    "fieldtype": "Currency",
-   "label": "91-120",
+   "label": "Range 4",
    "read_only": 1
   },
   {
    "fieldname": "range5",
    "fieldtype": "Currency",
-   "label": "121-Above"
+   "label": "Above Range 4"
   },
   {
    "columns": 1,
@@ -157,7 +157,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-04-06 10:56:26.966375",
+ "modified": "2022-04-25 10:57:47.523322",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Follow Up Item",
