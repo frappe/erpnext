@@ -21,7 +21,7 @@
 
 <div class="clearfix">
 	<div class="pull-left">
-		<b>Report Date:</b>
+		<b>Report Date/Time:</b>
 		{% if (filters.from_date == filters.to_date) { %}
 			{%= frappe.datetime.str_to_user(filters.from_date) %}
 		{% } else { %}
@@ -29,8 +29,28 @@
 			{%= __("to") %}
 			{%= frappe.datetime.str_to_user(filters.to_date) %}
 		{% } %}
+
+		{%= columns[0].report_time_fmt %}
 	</div>
 	<div class="pull-right"><b>Print Date/Time:</b> {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</div>
+</div>
+
+<div class="clearfix">
+	{% if filters.vehicle_workshop %}
+		<div class="pull-left" style="margin-right: 10px"><b>Workshop:</b> {%= filters.vehicle_workshop %}</div>
+	{% endif %}
+	{% if filters.service_advisor %}
+		<div class="pull-left" style="margin-right: 10px"><b>Service Advisor:</b> {%= filters.service_advisor %}</div>
+	{% endif %}
+	{% if filters.service_manager %}
+		<div class="pull-left" style="margin-right: 10px"><b>Service Manager:</b> {%= filters.service_manager %}</div>
+	{% endif %}
+	{% if filters.applies_to_variant_of %}
+		<div class="pull-left" style="margin-right: 10px"><b>Model:</b> {%= filters.applies_to_variant_of_name %}</div>
+	{% endif %}
+	{% if filters.applies_to_item %}
+		<div class="pull-left" style="margin-right: 10px"><b>Variant:</b> {%= filters.applies_to_item_name %}</div>
+	{% endif %}
 </div>
 
 <table class="table table-bordered" style="margin-bottom: 2px; margin-top: 5px;">
@@ -69,7 +89,9 @@
 
 				<td class="text-center">
 					<div>{%= data[i].project %}</div>
+					{% if !filters.service_advisor %}
 					<div>{%= data[i].service_advisor %}</div>
+					{% endif %}
 				</td>
 
 				<td class="text-center">{%= data[i].vehicle_license_plate %}</td>

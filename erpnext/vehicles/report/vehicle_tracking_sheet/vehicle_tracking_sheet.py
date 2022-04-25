@@ -4,8 +4,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate, formatdate, format_time, format_datetime
+from frappe.utils import getdate, formatdate, format_time, format_datetime, get_time, now_datetime, date_diff
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
+import datetime
 
 
 date_format = "d/MM/Y"
@@ -17,6 +18,10 @@ class VehicleServiceTrackingReport(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 		self.filters.to_date = getdate(self.filters.to_date)
+
+		self.report_date = getdate(self.filters.to_date)
+		self.report_time = get_time(now_datetime()) if self.report_date == getdate() else datetime.time.max
+		self.report_dt = frappe.utils.combine_datetime(self.report_date, self.report_time)
 
 		if getdate(self.filters.from_date) > self.filters.to_date:
 			frappe.throw(_("From Date cannot be after To Date"))
@@ -37,7 +42,7 @@ class VehicleServiceTrackingReport(object):
 				p.insurance_company, p.insurance_company_name,
 				p.applies_to_vehicle, p.service_advisor, p.service_manager,
 				p.applies_to_item, p.applies_to_item_name, p.applies_to_variant_of, p.applies_to_variant_of_name,
-				p.vehicle_license_plate, p.vehicle_chassis_no, p.vehicle_engine_no,
+				p.vehicle_license_plate, p.vehicle_chassis_no, p.vehicle_engine_no, p.vehicle_unregistered,
 				p.vehicle_received_date, p.vehicle_received_time,
 				timestamp(p.vehicle_received_date, p.vehicle_received_time) as vehicle_received_dt,
 				p.vehicle_delivered_date, p.vehicle_delivered_time,
@@ -45,6 +50,7 @@ class VehicleServiceTrackingReport(object):
 				p.expected_delivery_date, p.expected_delivery_time,
 				timestamp(p.expected_delivery_date, p.expected_delivery_time) as expected_delivery_dt,
 				p.ready_to_close, p.ready_to_close_dt,
+				date(p.ready_to_close_dt) as ready_to_close_date, time(p.ready_to_close_dt) as ready_to_close_time,
 				p.billing_status, p.customer_billable_amount, p.total_billable_amount
 			from `tabProject` p
 			left join `tabItem` item on item.name = p.applies_to_item
@@ -56,28 +62,76 @@ class VehicleServiceTrackingReport(object):
 
 	def process_data(self):
 		for d in self.data:
+			# Status
 			d.delivered = 1 if d.vehicle_delivered_date else 0
-			d.billed = 1 if d.billing_status in ["Partially Billed", "Fully Billed"] else 0
+			d.billed = 0 if d.billing_status in ["Not Applicable", "Not Billed"] else 1
 
-			d.vehicle_received_date_fmt = formatdate(d.vehicle_received_dt, date_format)
-			d.vehicle_received_time_fmt = format_time(d.vehicle_received_dt, time_format)
-			d.vehicle_received_dt_fmt = format_datetime(d.vehicle_received_dt, datetime_format)
+			# Date/Time Formatting
+			self.set_formatted_datetime(d)
 
-			d.vehicle_delivered_dt_fmt = format_datetime(d.vehicle_delivered_dt, datetime_format)
-
-			d.ready_to_close_date_fmt = formatdate(d.ready_to_close_dt, date_format)
-			d.ready_to_close_time_fmt = format_time(d.ready_to_close_dt, time_format)
-			d.ready_to_close_dt_fmt = format_datetime(d.ready_to_close_dt, datetime_format)
-
-			d.expected_delivery_date_fmt = formatdate(d.expected_delivery_date, date_format)
-			d.expected_delivery_time_fmt = format_time(d.expected_delivery_time, time_format)
-			if d.expected_delivery_date and d.expected_delivery_time:
-				d.expected_delivery_dt_fmt = format_datetime(d.expected_delivery_dt, datetime_format)
-			elif d.expected_delivery_date:
-				d.expected_delivery_dt_fmt = formatdate(d.expected_delivery_date, date_format)
-
+			# Model Name if not a variant
 			if not d.applies_to_variant_of_name:
 				d.applies_to_variant_of_name = d.applies_to_item_name
+
+			# Unregistered
+			if not d.vehicle_license_plate and d.vehicle_unregistered:
+				d.vehicle_license_plate = _('Unreg')
+
+			# Is Late
+			self.set_late_or_early(d)
+
+	def set_formatted_datetime(self, d):
+		d.vehicle_received_date_fmt = formatdate(d.vehicle_received_dt, date_format)
+		d.vehicle_received_time_fmt = format_time(d.vehicle_received_dt, time_format)
+		d.vehicle_received_dt_fmt = format_datetime(d.vehicle_received_dt, datetime_format)
+
+		d.vehicle_delivered_dt_fmt = format_datetime(d.vehicle_delivered_dt, datetime_format)
+
+		d.ready_to_close_date_fmt = formatdate(d.ready_to_close_dt, date_format)
+		d.ready_to_close_time_fmt = format_time(d.ready_to_close_dt, time_format)
+		d.ready_to_close_dt_fmt = format_datetime(d.ready_to_close_dt, datetime_format)
+
+		d.expected_delivery_date_fmt = formatdate(d.expected_delivery_date, date_format)
+		d.expected_delivery_time_fmt = format_time(d.expected_delivery_time, time_format)
+		if d.expected_delivery_date and d.expected_delivery_time:
+			d.expected_delivery_dt_fmt = format_datetime(d.expected_delivery_dt, datetime_format)
+		elif d.expected_delivery_date:
+			d.expected_delivery_dt_fmt = formatdate(d.expected_delivery_date, date_format)
+
+	def set_late_or_early(self, d):
+		# only if expected delivery date is set other no late/early marking
+		if d.expected_delivery_date:
+			compare_date = d.ready_to_close_date if d.ready_to_close_dt else self.report_date
+			compare_dt = d.ready_to_close_dt if d.ready_to_close_dt else self.report_dt
+
+			if d.expected_delivery_time:
+				if compare_dt > d.expected_delivery_dt:
+					d.is_late = 1
+					d.is_early = 0
+
+					if date_diff(compare_date, d.expected_delivery_date) > 0:
+						d.time_color = 'red'
+					else:
+						d.time_color = 'orange'
+				else:
+					d.is_late = 0
+					d.is_early = 0
+
+					if d.ready_to_close:
+						d.is_early = 1
+						d.time_color = 'green'
+			else:
+				if compare_date > d.expected_delivery_date:
+					d.is_late = 1
+					d.is_early = 0
+					d.time_color = 'red'
+				else:
+					d.is_late = 0
+					d.is_early = 0
+
+					if d.ready_to_close:
+						d.is_early = 1
+						d.time_color = 'green'
 
 	def get_conditions(self):
 		conditions = []
@@ -122,7 +176,8 @@ class VehicleServiceTrackingReport(object):
 
 	def get_columns(self):
 		columns = [
-			{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 95},
+			{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 95,
+				"report_time": self.report_time, "report_time_fmt": format_time(self.report_time, time_format)},
 			{"label": _("Ready"), "fieldname": "ready_to_close", "fieldtype": "Check", "width": 55},
 			{"label": _("Billed"), "fieldname": "billed", "fieldtype": "Check", "width": 55},
 			{"label": _("Delivered"), "fieldname": "delivered", "fieldtype": "Check", "width": 55},

@@ -71,7 +71,7 @@ frappe.query_reports["Vehicle Tracking Sheet"] = {
 				};
 			},
 			on_change: function() {
-				var variant_of = frappe.query_report.get_filter_value('variant_of');
+				var variant_of = frappe.query_report.get_filter_value('applies_to_variant_of');
 				if(!variant_of) {
 					frappe.query_report.set_filter_value('applies_to_variant_of_name', "");
 				} else {
@@ -139,5 +139,18 @@ frappe.query_reports["Vehicle Tracking Sheet"] = {
 			default: 1,
 			on_change: function() { return false; }
 		},
-	]
+	],
+	formatter: function(value, row, column, data, default_formatter) {
+		var style = {};
+
+		if (['ready_to_close_dt_fmt', 'expected_delivery_dt_fmt'].includes(column.fieldname) && data.time_color) {
+			style['color'] = data.time_color || 'orange';
+		}
+
+		if (column.fieldname == "vehicle_license_plate" && data.vehicle_unregistered) {
+			style['font-weight'] = 'bold';
+		}
+
+		return default_formatter(value, row, column, data, {css: style});
+	}
 };
