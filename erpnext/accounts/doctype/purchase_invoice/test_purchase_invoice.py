@@ -1530,12 +1530,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		company.save()
 
 
-def enable_discount_accounting(enable=1):
-	buying_settings = frappe.get_doc("Buying Settings")
-	buying_settings.enable_discount_accounting = enable
-	buying_settings.save()
-
-
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 	gl_entries = frappe.db.sql(
 		"""select account, debit, credit, posting_date
