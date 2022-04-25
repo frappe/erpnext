@@ -409,7 +409,7 @@ def update_accounting_dimensions(round_off_gle):
 
 	if dimensions and has_all_dimensions:
 		dimension_values = frappe.db.get_value(
-			round_off_gle["voucher_type"], round_off_gle["voucher_no"], dimensions
+			round_off_gle["voucher_type"], round_off_gle["voucher_no"], dimensions, as_dict=1
 		)
 
 		for dimension in dimensions:
