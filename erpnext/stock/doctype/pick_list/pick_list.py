@@ -5,7 +5,7 @@ import json
 from collections import OrderedDict, defaultdict
 from itertools import groupby
 from operator import itemgetter
-from typing import Set
+from typing import Dict, List, Set
 
 import frappe
 from frappe import _
@@ -38,7 +38,6 @@ class PickList(Document):
 				frappe.throw("Row " + str(location.idx) + " has been picked already!")
 
 	def before_submit(self):
-
 		update_sales_orders = set()
 		for item in self.locations:
 			# if the user has not entered any picked qty, set it to stock_qty, before submit
@@ -68,6 +67,7 @@ class PickList(Document):
 				title=_("Quantity Mismatch"),
 			)
 
+		self.update_bundle_picked_qty()
 		self.update_sales_order_picking_status(update_sales_orders)
 
 	def before_cancel(self):
@@ -79,6 +79,7 @@ class PickList(Document):
 				self.update_sales_order_item(item, -1 * item.picked_qty, item.item_code)
 				updated_sales_orders.add(item.sales_order)
 
+		self.update_bundle_picked_qty()
 		self.update_sales_order_picking_status(updated_sales_orders)
 
 	def update_sales_order_item(self, item, picked_qty, item_code):
@@ -227,6 +228,56 @@ class PickList(Document):
 
 		for idx, item in enumerate(self.locations, start=1):
 			item.idx = idx
+
+	def update_bundle_picked_qty(self):
+		"""Ensure that picked quantity is sufficient for fulfilling a whole number of."""
+
+		product_bundles = self._get_product_bundles()
+		product_bundle_qty_map = self._get_product_bundle_qty_map(product_bundles.values())
+
+		for so_row, item_code in product_bundles.items():
+			picked_qty = self._compute_picked_qty_for_bundle(so_row, product_bundle_qty_map[item_code])
+			item_table = "Sales Order Item"
+			already_picked = frappe.db.get_value(item_table, so_row, "picked_qty")
+			frappe.db.set_value(
+				item_table,
+				so_row,
+				"picked_qty",
+				already_picked + (picked_qty * (1 if self.docstatus == 1 else -1)),
+			)
+
+	def _get_product_bundles(self) -> Dict[str, str]:
+		# Dict[so_item_row: item_code]
+		product_bundles = {}
+		for item in self.locations:
+			if not item.product_bundle_item:
+				continue
+			bundle_item_code = frappe.db.get_value(
+				"Sales Order Item", item.product_bundle_item, "item_code"
+			)
+			product_bundles[item.product_bundle_item] = bundle_item_code
+		return product_bundles
+
+	def _get_product_bundle_qty_map(self, bundles: List[str]) -> Dict[str, Dict[str, float]]:
+		# bundle_item_code: Dict[component, qty]
+		product_bundle_qty_map = {}
+		for bundle_item_code in bundles:
+			bundle = frappe.get_last_doc("Product Bundle", {"new_item_code": bundle_item_code})
+			product_bundle_qty_map[bundle_item_code] = {item.item_code: item.qty for item in bundle.items}
+		return product_bundle_qty_map
+
+	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items) -> float:
+		"""Compute how many full bundles can be created from picked items."""
+		possible_bundles = []
+		for item in self.locations:
+			if item.product_bundle_item != bundle_row:
+				continue
+
+			if qty_in_bundle := bundle_items.get(item.item_code):
+				possible_bundles.append(item.picked_qty / qty_in_bundle)
+			else:
+				possible_bundles.append(0)
+		return min(possible_bundles)
 
 
 def validate_item_locations(pick_list):
