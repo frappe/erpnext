@@ -14,8 +14,13 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
-def create_product_bundle(quantities: Optional[List[int]] = None) -> Tuple[str, List[str]]:
-	"""Get a new product_bundle for use in tests"""
+def create_product_bundle(
+	quantities: Optional[List[int]] = None, warehouse: Optional[str] = None
+) -> Tuple[str, List[str]]:
+	"""Get a new product_bundle for use in tests.
+
+	Create 10x required stock if warehouse is specified.
+	"""
 	if not quantities:
 		quantities = [2, 2]
 
@@ -28,8 +33,11 @@ def create_product_bundle(quantities: Optional[List[int]] = None) -> Tuple[str, 
 		compoenent = make_item().name
 		components.append(compoenent)
 		bundle_doc.append("items", {"item_code": compoenent, "qty": qty})
+		if warehouse:
+			make_stock_entry(item=compoenent, to_warehouse=warehouse, qty=10 * qty, rate=100)
 
 	bundle_doc.insert()
+
 	return bundle, components
 
 
@@ -41,12 +49,10 @@ class TestPackedItem(FrappeTestCase):
 		super().setUpClass()
 		cls.warehouse = "_Test Warehouse - _TC"
 
-		cls.bundle, cls.bundle_items = create_product_bundle()
-		cls.bundle2, cls.bundle2_items = create_product_bundle()
+		cls.bundle, cls.bundle_items = create_product_bundle(warehouse=cls.warehouse)
+		cls.bundle2, cls.bundle2_items = create_product_bundle(warehouse=cls.warehouse)
 
 		cls.normal_item = make_item().name
-		for item in cls.bundle_items + cls.bundle2_items:
-			make_stock_entry(item_code=item, to_warehouse=cls.warehouse, qty=100, rate=100)
 
 	def test_adding_bundle_item(self):
 		"Test impact on packed items if bundle item row is added."

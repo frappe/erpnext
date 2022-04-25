@@ -618,7 +618,6 @@ def add_product_bundles_to_delivery_note(
 	for so_row, item_code in product_bundles.items():
 		sales_order_item = frappe.get_doc("Sales Order Item", so_row)
 		dn_bundle_item = map_child_doc(sales_order_item, delivery_note, item_mapper)
-		# TODO: post process packed items and update stock details
 		dn_bundle_item.qty = pick_list._compute_picked_qty_for_bundle(
 			so_row, product_bundle_qty_map[item_code]
 		)
