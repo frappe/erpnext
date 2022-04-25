@@ -55,11 +55,19 @@ frappe.ui.form.on("Follow Up Item", {
 
 			// creation of unique button list
 			var buttons  = []
-			r.message.forEach(d => { 
+			r.message.forEach(d => {
+				if (d.follow_up === null) {
+					// console.log(" this is Null");
+				}
+
+				else{
+				// console.log(" this is follow up", d.follow_up)
 				buttons.push(d.follow_up)
+				}
 			});
 			
 			var unique = [...new Set(buttons)]
+			console.log(" Unique", unique)
 			
 			const cannot_add_row = (typeof false === 'undefined') ? true : false;
 			const child_docname = (typeof false === 'undefined') ? "items" : "items";
@@ -165,7 +173,7 @@ frappe.ui.form.on("Follow Up Item", {
 					read_only: 1,
 					in_list_view: 1,
 					columns: 1,
-					label: ('0-30')
+					label: ('Range 1')
 				},
 				{
 					fieldtype: 'Currency',
@@ -173,7 +181,7 @@ frappe.ui.form.on("Follow Up Item", {
 					
 					read_only: 1,
 					
-					label: ('31-60'),
+					label: ('Range 2'),
 				},
 				{
 					fieldtype: 'Currency',
@@ -182,7 +190,7 @@ frappe.ui.form.on("Follow Up Item", {
 					read_only: 1,
 				
 					columns: 1,
-					label: ('61-90'),
+					label: ('Range 3'),
 				},
 				{
 					fieldtype: 'Currency',
@@ -190,7 +198,7 @@ frappe.ui.form.on("Follow Up Item", {
 					columns: 1,
 					read_only: 1,
 					
-					label: ('91-120'),
+					label: ('Range 4'),
 				},
 				{
 					fieldtype: 'Currency',
@@ -198,7 +206,7 @@ frappe.ui.form.on("Follow Up Item", {
 					read_only: 1,
 				
 					columns: 1,
-					label: __('120-Above'),
+					label: __('Above Range 4'),
 				},
 				{
 					fieldtype: 'Int',
@@ -266,7 +274,7 @@ frappe.ui.form.on("Follow Up Item", {
 						in_list_view: 1,
 						columns: 1,
 						default: child.range1,
-						label: ('0-30') 
+						label: ('Range 1') 
 					},
 					{
 						fieldtype: 'Currency',
@@ -275,7 +283,7 @@ frappe.ui.form.on("Follow Up Item", {
 						read_only: 1,
 						in_list_view: 1,
 						columns: 1,
-						label: ('31-60')
+						label: ('Range 2')
 					},
 					{
 						fieldtype: 'Currency',
@@ -284,7 +292,7 @@ frappe.ui.form.on("Follow Up Item", {
 						read_only: 1,
 						in_list_view: 1,
 						columns: 1,
-						label: ('61-90'),
+						label: ('Range 3'),
 					},
 					{
 						fieldtype: 'Currency',
@@ -292,7 +300,7 @@ frappe.ui.form.on("Follow Up Item", {
 						default: child.range4,
 						read_only: 1,
 						in_list_view: 1,
-						label: ('91-120'),
+						label: ('Range 4'),
 					},
 					{
 						fieldtype: 'Currency',
@@ -301,7 +309,7 @@ frappe.ui.form.on("Follow Up Item", {
 						read_only: 1,
 						in_list_view: 1,
 						columns: 1,
-						label: __('120-Above'),
+						label: __('Above Range 4'),
 					},
 					{
 						fieldtype: 'Section Break'
@@ -393,26 +401,26 @@ frappe.ui.form.on("Follow Up Item", {
 			
 			r.message.forEach(d => {
 						dialog.fields_dict.trans_items.df.data.push({
-					"voucher_type": d.voucher_type,
-					"voucher_no": d.voucher_no,
-					"due_date": d.due_date,
-					"invoice_amount": d.invoice_grand_total,
-					"paid_amount": d.paid,
-					"credit_note": d.credit_note,
-					"outstanding_amount": d.outstanding,
-					"range1": d.range1,
-					"range2": d.range2,
-					"range3": d.range3,
-					"range4": d.range4,
-					"range5": d.range5,
-					"__checked" : 1,
-					"age" : d.age,
-					"follow_up" : d.follow_up,	
-					"territory" : d.territory,
-					"customer_group" : d.customer_group,
-					"total_due" : d.total_due
-					
-				});
+							"voucher_type": d.voucher_type,
+							"voucher_no": d.voucher_no,
+							"due_date": d.due_date,
+							"invoice_amount": d.invoice_grand_total,
+							"paid_amount": d.paid,
+							"credit_note": d.credit_note,
+							"outstanding_amount": d.outstanding,
+							"range1": d.range1,
+							"range2": d.range2,
+							"range3": d.range3,
+							"range4": d.range4,
+							"range5": d.range5,
+							"__checked" : 1,
+							"age" : d.age,
+							"follow_up" : d.follow_up,	
+							"territory" : d.territory,
+							"customer_group" : d.customer_group,
+							"total_due" : d.total_due
+							
+						});
 				console.log(" Line 237")
 				//dialog.fields_dict.trans_items.df.data = r.message;
 				this.data = dialog.fields_dict.trans_items.df.data;
@@ -432,7 +440,7 @@ frappe.ui.form.on("Follow Up Item", {
 					},
 					callback: function(r) {
 						// frm.reload_doc();
-						if (r.message == True){
+						if (r.message){
 							frappe.msgprint("Commitment Submited Sucessfully")
 							console.log(" this is call from Commited", r.message)
 						}
@@ -440,27 +448,34 @@ frappe.ui.form.on("Follow Up Item", {
 				})
 			}
 
-			unique.forEach(d => {
+			unique.forEach(d   => {
 				var trans_items = dialog.fields_dict.trans_items.df.get_data()
-				let btn = dialog.fields_dict[d].input.onclick = function() {
-					console.log(" nutoom", d)
-					frappe.call({
-								method: 'on_follow_up_button_click',
-								doc : frm.doc,
-								freeze: true,
-								args: {
-									'follow_up': d,
-									'trans_items': trans_items,
-									't_date': frm.doc.report_date,
-									'customer': child.customer,
-								},
-								callback: function(r) {
-									// frm.reload_doc();
-									if (r.message){
-										console.log(" this is call from follow Ups", r.message)
+				console.log(" nutoom", d)
+				if (d === 'undefined'){
+					console.log(" NULL ")
+				}
+				else
+				{
+					let btn = dialog.fields_dict[d].input.onclick = function() {
+						
+						frappe.call({
+									method: 'on_follow_up_button_click',
+									doc : frm.doc,
+									freeze: true,
+									args: {
+										'follow_up': d,
+										'trans_items': trans_items,
+										't_date': frm.doc.report_date,
+										'customer': child.customer,
+									},
+									callback: function(r) {
+										// frm.reload_doc();
+										if (r.message){
+											console.log(" this is call from follow Ups", r.message)
+										}
 									}
-								}
-							});
+								});
+					}
 				}
 				//dinamic_btn
 			})

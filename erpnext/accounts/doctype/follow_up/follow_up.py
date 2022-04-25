@@ -59,7 +59,12 @@ class FollowUp(Document):
 		if a:	
 			for i in a :
 				if i.party == name:
-					new_acc.append(i)
+					print(" a thi is aaaaaaaaaaaaaaa", i)
+					#  Checking for log avaibality for voucher number
+					v_no = frappe.db.get_value("Follow Up Logs", {"voucher_no": i.voucher_no}, ["posting_date"])
+					if not v_no:
+						v_no = frappe.db.get_value("Follow Up Logs", {"voucher_no": i.voucher_no}, ["posting_date"])
+						new_acc.append(i)
 
 		for i in new_acc:
 			i["follow_up"] = frappe.db.get_value('Follow Up Level', {"no_of_days": ['<=',i["age"]]}, 'name')		
@@ -73,12 +78,19 @@ class FollowUp(Document):
 		# print(" this is click, this is follow", follow_up, trans_items, t_date, customer )
 		comm_voucher_no = " Voucher Type     Voucher No  	   Due Date   Outstanding Amount \n"
 		follow = frappe.get_doc("Follow Up Level", follow_up)
-		add_to_date = follow.no_of_days
+		to_add_to_date = follow.no_of_days
 		total_due = 0
 		# Creating logs
 		for i in trans_items:
-			# print("thi is i ", i)
-			if i["__checked"] == 1:
+			print("thi is i ", type(trans_items) , i.keys())
+			# if "due_date" not in i.keys():
+			# 	print(" no due date 000000000000000000000000000000000000000000000000000" )
+			# 	frappe.throw(" No Due Date for Row- {0} of Voucher No- {1}").format(i.idx, i.voucher_no) 
+			# 	# frappe.throw("Please set Email Id for Customer {0}").format(customer)
+			print(" In sidde follow up button click", i.get("follow_up"),  follow_up)
+			if i["__checked"] == 1 and i["follow_up"] == follow_up :
+			# if i["__checked"] == 1 and i["follow_up"] == follow_up and "due_date" in i.keys():
+				print(" In sidde follow up button click", i.get("follow_up", follow_up))
 				comm_voucher_no += i["voucher_type"] + "    " + i["voucher_no"] + "    " + i["due_date"]+ "    " + str(i["outstanding_amount"]) +" \n "
 				total_due += i["outstanding_amount"]
 				# print(" i[__checked]", i["__checked"], i["voucher_type"] )
@@ -88,78 +100,80 @@ class FollowUp(Document):
 				new_log.voucher_no = i["voucher_no"]
 				new_log.outstanding_amount = i["outstanding_amount"]
 				new_log.posting_date = t_date
-				new_log.due_date = i["due_date"]
+				new_log.due_date = i["due_date"] if i["due_date"] else datetime.now()
 				new_log.age = i["age"]
 				new_log.level_called = follow_up
-				new_log.follow_up_date = add_to_date(datetime.now(), days= add_to_date, as_string=True, as_datetime=True)
+				new_log.follow_up_date = add_to_date(datetime.now(), days= to_add_to_date, as_string=True, as_datetime=True)
 				new_log.save()
 
-		# continue from here
+				# continue from here
 
 
-		# Adding comment on Customer of Follow Up Performed
-		comm = frappe.new_doc("Comment")
-		comm.subject = "Overdue payment reminder"
-		comm.comment_type = "Comment" 
-		comm.reference_doctype = "Customer"
-		comm.reference_name = customer
-		comm.comment_by = frappe.session.user
-		comm.comment_email = frappe.db.get_value("User",{"name":frappe.session.user}, "email")
-		comm.content = """<div class="ql-editor read-mode"><p>Follow Up Conducted for Following Transcations</p>
-						<p>{0}</p> </div>	""".format(comm_voucher_no)
-		comm.save()		
+				# Adding comment on Customer of Follow Up Performed
+				comm = frappe.new_doc("Comment")
+				comm.subject = "Overdue payment reminder"
+				comm.comment_type = "Comment" 
+				comm.reference_doctype = "Customer"
+				comm.reference_name = customer
+				comm.comment_by = frappe.session.user
+				comm.comment_email = frappe.db.get_value("User",{"name":frappe.session.user}, "email")
+				comm.content = """<div class="ql-editor read-mode"><p>Follow Up Conducted for Following Transcations</p>
+								<p>{0}</p> </div>	""".format(comm_voucher_no)
+				comm.save()		
 
-		#Creating new dict for args for email Template ,comment and ToDo
-		args = {}
-		args["customer"] = customer
-		args["customer_name"] = frappe.db.get_value('Customer', customer, "customer_name")
-		args["outstanding_details"] = comm_voucher_no
-		args["total_due"] = total_due
+				#Creating new dict for args for email Template ,comment and ToDo
+				args = {}
+				args["customer"] = customer
+				args["customer_name"] = frappe.db.get_value('Customer', customer, "customer_name")
+				args["outstanding_details"] = comm_voucher_no
+				args["total_due"] = total_due
 
-		# Sending Email
-		if follow.send_email == 1:
-			# print(" Send Email")
-			# email_template = follow.email_template
-			email_template = frappe.get_doc("Email Template", follow.email_template)
-			primary_c = frappe.db.get_value('Customer', customer, "customer_primary_contact")
-			email_id = frappe.db.get_value('Contact', primary_c , 'email_id')
+				# Sending Email
+				if follow.send_email == 1:
+					# print(" Send Email")
+					# email_template = follow.email_template
+					email_template = frappe.get_doc("Email Template", follow.email_template)
+					primary_c = frappe.db.get_value('Customer', customer, "customer_primary_contact")
+					email_id = frappe.db.get_value('Contact', primary_c , 'email_id')
 
-			if not email_id:
-				frappe.throw("Please set Email Id for Customer {0}").format(customer)
-			message = frappe.render_template(email_template.response, args)
-			self.notify({
-			# for post in messages
-			"message": message,
-			"message_to": email_id,
-			# for email
-			"subject": email_template.subject,
-			
-		})
+					if not email_id:
+						frappe.throw("Please set Email Id for Customer {0}".format(customer))
+					message = frappe.render_template(email_template.response, args)
+					self.notify({
+					# for post in messages
+					"message": message,
+					"message_to": email_id,
+					# for email
+					"subject": email_template.subject,
+					
+				})
 
-		# Send SMS	
-		if follow.send_message == 1:
-			# print(" Send Message")
-			pass
-		
-		# Adding ToDo if Manual Action in Follow Up Level
-		if follow.manual_action == 1:
-			desc = "Please {0} Customer  {1} , ".format(follow.action_type, frappe.db.get_value('Customer', customer, "customer_name"))
-			desc += "\n For Following Overdues : \n{0} ; ".format(args)
-			desc += "ACTION TODO : \n {0}".format(follow.action_to_do)
-			# print(" Adding ToDo")
-			todo = frappe.new_doc('ToDo')
-			todo.status = "Open"
-			todo.priority = "High"
-			todo.date = datetime.today()
-			todo.owner = follow.responsible
-			todo.description = desc
-			todo.reference_type = "Customer"
-			todo.reference_name = customer
-			todo.assigned_by = frappe.session.user
-			todo.save()
+				# Send SMS	
+				if follow.send_message == 1:
+					# print(" Send Message")
+					pass
+				
+				# Adding ToDo if Manual Action in Follow Up Level
+				if follow.manual_action == 1:
+					desc = "Please {0} Customer  {1} , ".format(follow.action_type, frappe.db.get_value('Customer', customer, "customer_name"))
+					desc += "\n For Following Overdues : \n{0} ; ".format(args)
+					desc += "ACTION TODO : \n {0}".format(follow.action_to_do)
+					# print(" Adding ToDo")
+					todo = frappe.new_doc('ToDo')
+					todo.status = "Open"
+					todo.priority = "High"
+					todo.date = datetime.today()
+					todo.owner = follow.responsible
+					todo.description = desc
+					todo.reference_type = "Customer"
+					todo.reference_name = customer
+					todo.assigned_by = frappe.session.user
+					todo.save()
 
 				
-		return True
+				return True
+			# elif "due_date" not in i.keys():
+			# 	frappe.throw(" No Due Date for Voucher No- {0}".format(i.get("voucher_no")))
 
 	# To Added Customer commitment
 	@frappe.whitelist()
@@ -187,7 +201,7 @@ class FollowUp(Document):
 				prc.age = i["age"]
 				prc.save()
 
-		if commit_amt > 0:
+		if commit_amt > 0 :
 			return True
 
 
@@ -297,11 +311,12 @@ class FollowUp(Document):
 
 		new_entry = []
 		for e in sorted_entry:
-			if e.get("party"):
+			if e.get("party") :
+				print(" this is eeeeeeeeeeeee", e)
 				# print(" Inside e",  e.get("party"))
 				logs = frappe.db.get_value("Follow Up Logs", { "customer" :e.get("party")}, ["level_called", "submitted_date"])
 				
-				if not logs:
+				if not logs or  e.get("total_due")>0 :
 					# print("not in logs")
 					new_entry.append(e)	
 

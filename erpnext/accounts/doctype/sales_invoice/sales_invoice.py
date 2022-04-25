@@ -165,7 +165,7 @@ class SalesInvoice(SellingController):
 			self.timesheets = []
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
-		if not self.task:
+		if self.task:
 			self.update_timesheet_billing_for_project()
 		self.set_status()
 		if self.is_pos and not self.is_return:

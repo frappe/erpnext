@@ -736,7 +736,7 @@
   {
    "fieldname": "rm_cost_center",
    "fieldtype": "Link",
-   "label": "RM Cost Center",
+   "label": "Work Order Cost Center",
    "options": "Cost Center"
   }
  ],
@@ -745,7 +745,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-25 17:12:24.442852",
+ "modified": "2022-04-20 14:42:58.872653",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
