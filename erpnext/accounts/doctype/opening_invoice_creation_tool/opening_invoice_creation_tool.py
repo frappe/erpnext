@@ -154,6 +154,7 @@ class OpeningInvoiceCreationTool(Document):
 				"income_account" if row.party_type == "Customer" else "expense_account"
 			)
 			default_uom = frappe.db.get_single_value("Stock Settings", "stock_uom") or _("Nos")
+			default_currency = frappe.db.get_value(row.party_type, row.party, "default_currency")
 			rate = flt(row.outstanding_amount) / flt(row.qty)
 
 			item_dict = frappe._dict(
@@ -166,6 +167,7 @@ class OpeningInvoiceCreationTool(Document):
 					"description": row.item_name or "Opening Invoice Item",
 					income_expense_account_field: row.temporary_opening_account,
 					"cost_center": cost_center,
+					"currency": default_currency,
 				}
 			)
 
