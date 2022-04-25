@@ -261,6 +261,8 @@ class PickList(Document):
 
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items) -> float:
 		"""Compute how many full bundles can be created from picked items."""
+		precision = frappe.get_precision("Stock Ledger Entry", "qty_after_transaction")
+
 		possible_bundles = []
 		for item in self.locations:
 			if item.product_bundle_item != bundle_row:
@@ -270,7 +272,7 @@ class PickList(Document):
 				possible_bundles.append(item.picked_qty / qty_in_bundle)
 			else:
 				possible_bundles.append(0)
-		return min(possible_bundles)
+		return flt(min(possible_bundles), precision or 6)
 
 
 def validate_item_locations(pick_list):
