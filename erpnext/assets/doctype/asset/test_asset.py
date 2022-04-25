@@ -207,7 +207,7 @@ class TestAsset(AssetSetup):
 		si = make_sales_invoice(asset=asset.name, item_code="Macbook Pro", company="_Test Company")
 		si.customer = "_Test Customer"
 		si.posting_date = getdate("2022-04-22")
-		si.due_date = nowdate()
+		si.due_date = getdate("2022-04-22")
 		si.get("items")[0].rate = 75000
 		si.insert()
 		si.submit()
