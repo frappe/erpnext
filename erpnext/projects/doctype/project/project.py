@@ -899,10 +899,26 @@ class Project(StatusUpdater):
 								content=content.format(*messages))
 				user.welcome_email_sent = 1
 
+	def get_item_groups_subtree(self, item_group):
+		if (self.get('_item_group_subtree') or {}).get(item_group):
+			return self._item_group_subtree[item_group]
+
+		item_group_tree = []
+		if item_group:
+			item_group_tree = frappe.get_all("Item Group", {"name": ["subtree of", item_group]})
+			item_group_tree = [d.name for d in item_group_tree]
+
+		if not self.get('_item_group_subtree'):
+			self._item_group_subtree = {}
+
+		self._item_group_subtree[item_group] = item_group_tree
+
+		return self._item_group_subtree[item_group]
+
 
 def get_stock_items(project, get_sales_invoice=True):
 	is_material_condition = "i.is_stock_item = 1"
-	materials_item_groups = get_item_groups_subtree(project.materials_item_group)
+	materials_item_groups = project.get_item_groups_subtree(project.materials_item_group)
 	if materials_item_groups:
 		is_material_condition = "(i.is_stock_item = 1 or i.item_group in ({0}))"\
 			.format(", ".join([frappe.db.escape(d) for d in materials_item_groups]))
@@ -946,7 +962,7 @@ def get_stock_items(project, get_sales_invoice=True):
 	parts_data = get_items_data_template()
 	lubricants_data = get_items_data_template()
 
-	lubricants_item_groups = get_item_groups_subtree(project.lubricants_item_group)
+	lubricants_item_groups = project.get_item_groups_subtree(project.lubricants_item_group)
 	for d in dn_data + so_data:
 		stock_data['items'].append(d)
 
@@ -973,7 +989,7 @@ def get_stock_items(project, get_sales_invoice=True):
 
 def get_service_items(project, get_sales_invoice=True):
 	is_service_condition = "(i.is_stock_item = 0 and i.is_fixed_asset = 0)"
-	materials_item_groups = get_item_groups_subtree(project.materials_item_group)
+	materials_item_groups = project.get_item_groups_subtree(project.materials_item_group)
 	if materials_item_groups:
 		is_service_condition = "(i.is_stock_item = 0 and i.is_fixed_asset = 0 and i.item_group not in ({0}))"\
 			.format(", ".join([frappe.db.escape(d) for d in materials_item_groups]))
@@ -1016,7 +1032,7 @@ def get_service_items(project, get_sales_invoice=True):
 	labour_data = get_items_data_template()
 	sublet_data = get_items_data_template()
 
-	sublet_item_groups = get_item_groups_subtree(project.sublet_item_group)
+	sublet_item_groups = project.get_item_groups_subtree(project.sublet_item_group)
 	for d in so_data + sinv_data:
 		service_data['items'].append(d)
 
@@ -1035,15 +1051,6 @@ def get_service_items(project, get_sales_invoice=True):
 	post_process_items_data(sublet_data)
 
 	return service_data, labour_data, sublet_data
-
-
-def get_item_groups_subtree(item_group):
-	item_group_tree = []
-	if item_group:
-		item_group_tree = frappe.get_all("Item Group", {"name": ["subtree of", item_group]})
-		item_group_tree = [d.name for d in item_group_tree]
-
-	return item_group_tree
 
 
 def get_items_data_template():
@@ -1908,8 +1915,9 @@ def set_depreciation_in_invoice_items(items_list, project):
 		if d.depreciation_item_code:
 			non_standard_depreciation_items[d.depreciation_item_code] = flt(d.depreciation_percentage)
 
+	materials_item_groups = project.get_item_groups_subtree(project.materials_item_group)
 	for d in items_list:
-		if d.is_stock_item:
+		if d.is_stock_item or d.item_group in materials_item_groups:
 			if not flt(d.depreciation_percentage):
 				if d.item_code in non_standard_depreciation_items:
 					d.depreciation_percentage = non_standard_depreciation_items[d.item_code]
