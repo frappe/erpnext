@@ -661,15 +661,6 @@ cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
 	}
 }
 
-// project name
-//--------------------------
-cur_frm.fields_dict['project'].get_query = function(doc, cdt, cdn) {
-	return{
-		query: "erpnext.controllers.queries.get_project_name",
-		filters: {'customer': doc.customer}
-	}
-}
-
 // Income Account in Details Table
 // --------------------------------
 cur_frm.set_query("income_account", "items", function(doc) {

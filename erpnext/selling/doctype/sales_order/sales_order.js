@@ -78,15 +78,6 @@ frappe.ui.form.on("Sales Order", {
 			return erpnext.queries.warehouse(frm.doc);
 		});
 
-		frm.set_query('project', function(doc, cdt, cdn) {
-			return {
-				query: "erpnext.controllers.queries.get_project_name",
-				filters: {
-					'customer': doc.customer
-				}
-			}
-		});
-
 		erpnext.queries.setup_warehouse_query(frm);
 
 		if (frm.doc.__islocal) {
