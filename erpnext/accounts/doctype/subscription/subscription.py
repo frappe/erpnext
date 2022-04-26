@@ -368,10 +368,10 @@ class Subscription(Document):
 			if frappe.db.get_value("Supplier", self.party, "tax_withholding_category"):
 				invoice.apply_tds = 1
 
-		### Add party currency to invoice
+		# Add party currency to invoice
 		invoice.currency = get_party_account_currency(self.party_type, self.party, self.company)
 
-		## Add dimensions in invoice for subscription:
+		# Add dimensions in invoice for subscription:
 		accounting_dimensions = get_accounting_dimensions()
 
 		for dimension in accounting_dimensions:
