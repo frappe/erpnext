@@ -6,7 +6,11 @@
    "label": "Sales Order Trends"
   }
  ],
+<<<<<<< HEAD
  "charts_label": "Selling ",
+=======
+ "content": "[{\"type\":\"onboarding\",\"data\":{\"onboarding_name\":\"Selling\",\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Sales Order Trends\",\"col\":12}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Quick Access</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Order\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Analytics\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Order Analysis\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Selling\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Items and Pricing\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Key Reports\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Other Reports\",\"col\":4}}]",
+>>>>>>> b0ead459a0 (feat: add payment terms status rpr to Selling homepage)
  "creation": "2020-01-28 11:49:12.092882",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
@@ -293,7 +297,152 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+<<<<<<< HEAD
    "label": "Key Reports",
+=======
+   "label": "Other Reports",
+   "link_count": 12,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "Lead",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Lead Details",
+   "link_count": 0,
+   "link_to": "Lead Details",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Address",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Customer Addresses And Contacts",
+   "link_count": 0,
+   "link_to": "Address And Contacts",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Item",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Available Stock for Packing Items",
+   "link_count": 0,
+   "link_to": "Available Stock for Packing Items",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Sales Order",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Pending SO Items For Purchase Request",
+   "link_count": 0,
+   "link_to": "Pending SO Items For Purchase Request",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Delivery Note",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Delivery Note Trends",
+   "link_count": 0,
+   "link_to": "Delivery Note Trends",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Sales Invoice",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Sales Invoice Trends",
+   "link_count": 0,
+   "link_to": "Sales Invoice Trends",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Customer",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Customer Credit Balance",
+   "link_count": 0,
+   "link_to": "Customer Credit Balance",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Customer",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Customers Without Any Sales Transactions",
+   "link_count": 0,
+   "link_to": "Customers Without Any Sales Transactions",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Customer",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Sales Partners Commission",
+   "link_count": 0,
+   "link_to": "Sales Partners Commission",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Sales Order",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Territory Target Variance Based On Item Group",
+   "link_count": 0,
+   "link_to": "Territory Target Variance Based On Item Group",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Sales Order",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Sales Person Target Variance Based On Item Group",
+   "link_count": 0,
+   "link_to": "Sales Person Target Variance Based On Item Group",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Sales Order",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Sales Partner Target Variance Based On Item Group",
+   "link_count": 0,
+   "link_to": "Sales Partner Target Variance based on Item Group",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Key Reports",
+   "link_count": 22,
+>>>>>>> b0ead459a0 (feat: add payment terms status rpr to Selling homepage)
    "onboard": 0,
    "type": "Card Break"
   },
@@ -388,6 +537,7 @@
    "type": "Link"
   },
   {
+<<<<<<< HEAD
    "hidden": 0,
    "is_query_report": 0,
    "label": "Other Reports",
@@ -395,6 +545,8 @@
    "type": "Card Break"
   },
   {
+=======
+>>>>>>> b0ead459a0 (feat: add payment terms status rpr to Selling homepage)
    "dependencies": "Lead",
    "hidden": 0,
    "is_query_report": 1,
@@ -513,9 +665,23 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Payment Terms Status for Sales Order",
+   "link_count": 0,
+   "link_to": "Payment Terms Status for Sales Order",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
+<<<<<<< HEAD
  "modified": "2020-12-01 13:38:35.971277",
+=======
+ "modified": "2022-04-26 13:29:55.087240",
+>>>>>>> b0ead459a0 (feat: add payment terms status rpr to Selling homepage)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
