@@ -1167,7 +1167,7 @@ class StockEntry(StockController):
 			from `tabItem` i LEFT JOIN `tabItem Default` id ON i.name=id.parent and id.company=%s
 			where i.name=%s
 				and i.disabled=0
-				and (i.end_of_life is null or i.end_of_life='0000-00-00' or i.end_of_life > %s)""",
+				and (i.end_of_life is null or i.end_of_life<'1900-01-01' or i.end_of_life > %s)""",
 			(self.company, args.get("item_code"), nowdate()),
 			as_dict=1,
 		)

@@ -553,6 +553,7 @@ def validate_totals(einvoice):
 		+ flt(value_details["CgstVal"])
 		+ flt(value_details["SgstVal"])
 		+ flt(value_details["IgstVal"])
+		+ flt(value_details["CesVal"])
 		+ flt(value_details["OthChrg"])
 		+ flt(value_details["RndOffAmt"])
 		- flt(value_details["Discount"])

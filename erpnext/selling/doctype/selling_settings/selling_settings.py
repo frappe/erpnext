@@ -14,6 +14,7 @@ class SellingSettings(Document):
 	def on_update(self):
 		self.toggle_hide_tax_id()
 		self.toggle_editable_rate_for_bundle_items()
+		self.toggle_discount_accounting_fields()
 
 	def validate(self):
 		for key in [
@@ -58,3 +59,60 @@ class SellingSettings(Document):
 			"Check",
 			validate_fields_for_doctype=False,
 		)
+
+	def toggle_discount_accounting_fields(self):
+		enable_discount_accounting = cint(self.enable_discount_accounting)
+
+		make_property_setter(
+			"Sales Invoice Item",
+			"discount_account",
+			"hidden",
+			not (enable_discount_accounting),
+			"Check",
+			validate_fields_for_doctype=False,
+		)
+		if enable_discount_accounting:
+			make_property_setter(
+				"Sales Invoice Item",
+				"discount_account",
+				"mandatory_depends_on",
+				"eval: doc.discount_amount",
+				"Code",
+				validate_fields_for_doctype=False,
+			)
+		else:
+			make_property_setter(
+				"Sales Invoice Item",
+				"discount_account",
+				"mandatory_depends_on",
+				"",
+				"Code",
+				validate_fields_for_doctype=False,
+			)
+
+		make_property_setter(
+			"Sales Invoice",
+			"additional_discount_account",
+			"hidden",
+			not (enable_discount_accounting),
+			"Check",
+			validate_fields_for_doctype=False,
+		)
+		if enable_discount_accounting:
+			make_property_setter(
+				"Sales Invoice",
+				"additional_discount_account",
+				"mandatory_depends_on",
+				"eval: doc.discount_amount",
+				"Code",
+				validate_fields_for_doctype=False,
+			)
+		else:
+			make_property_setter(
+				"Sales Invoice",
+				"additional_discount_account",
+				"mandatory_depends_on",
+				"",
+				"Code",
+				validate_fields_for_doctype=False,
+			)

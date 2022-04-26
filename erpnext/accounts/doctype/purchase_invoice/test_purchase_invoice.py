@@ -5,6 +5,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import change_settings
 from frappe.utils import add_days, cint, flt, getdate, nowdate, today
 
 import erpnext
@@ -336,8 +337,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
 
+	@change_settings("Buying Settings", {"enable_discount_accounting": 1})
 	def test_purchase_invoice_with_discount_accounting_enabled(self):
-		enable_discount_accounting()
 
 		discount_account = create_account(
 			account_name="Discount Account",
@@ -353,10 +354,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
-		enable_discount_accounting(enable=0)
 
+	@change_settings("Buying Settings", {"enable_discount_accounting": 1})
 	def test_additional_discount_for_purchase_invoice_with_discount_accounting_enabled(self):
-		enable_discount_accounting()
+
 		additional_discount_account = create_account(
 			account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC",
@@ -1585,12 +1586,6 @@ def update_tax_witholding_category(company, account):
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.unlink_payment_on_cancellation_of_invoice = enable
-	accounts_settings.save()
-
-
-def enable_discount_accounting(enable=1):
-	accounts_settings = frappe.get_doc("Accounts Settings")
-	accounts_settings.enable_discount_accounting = enable
 	accounts_settings.save()
 
 
