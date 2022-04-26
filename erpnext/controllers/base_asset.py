@@ -61,6 +61,7 @@ class BaseAsset(AccountsController):
 		self.cancel_movement_entries()
 		self.delete_depreciation_entries()
 		self.delete_depreciation_schedules()
+		self.set_status()
 
 	# to reduce number of db calls
 	def get_asset_values(self):
