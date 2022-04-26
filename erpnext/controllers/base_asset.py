@@ -16,7 +16,7 @@ from assets.asset.doctype.depreciation_schedule_.depreciation_schedule_ import (
 	create_a_single_depreciation_schedule,
 	delete_existing_schedules
 )
-from frappe.utils.data import get_link_to_form
+from frappe.utils.data import get_link_to_form, get_last_day
 
 
 class BaseAsset(AccountsController):
@@ -216,6 +216,9 @@ class BaseAsset(AccountsController):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
 
 	def validate_depreciation_posting_start_date(self):
+		if not self.depreciation_posting_start_date:
+			self.depreciation_posting_start_date = get_last_day(self.available_for_use_date)
+
 		if self.depreciation_posting_start_date == self.available_for_use_date:
 			frappe.throw(_("Depreciation Posting Date should not be equal to Available for Use Date."),
 				title=_("Incorrect Date"))
