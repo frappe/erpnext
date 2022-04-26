@@ -89,7 +89,7 @@ class Warehouse(NestedSet):
 				.on(ac.name == gle.account)
 				.select(gle.account)
 				.distinct()
-				.where((sle.warehouse == name) & (ac.root_type == "Asset"))
+				.where((sle.warehouse == name) & (ac.account_type == "Stock"))
 				.orderby(sle.creation)
 				.run(as_dict=True)
 			)
