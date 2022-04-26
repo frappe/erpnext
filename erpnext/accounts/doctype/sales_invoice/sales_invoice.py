@@ -1418,9 +1418,19 @@ class SalesInvoice(SellingController):
 				if pos.round_off_discount == 1:
 					base_net_amount = math.floor(item.base_net_amount)
 					total_amount += base_net_amount
-					if len(self.get("items")) == len(gl_entries):
+					items = self.get("items")
+					last = items[-1]
+					
+					if last.item_code == item.item_code:
 						if total_amount < gl_entries[0].debit:
+							total_amount -= base_net_amount
 							base_net_amount = math.ceil(item.base_net_amount)
+							total_amount += base_net_amount
+
+							if total_amount < gl_entries[0].debit:
+								sum_amount = gl_entries[0].debit - total_amount
+								base_net_amount += sum_amount
+								total_amount += sum_amount
 				else:
 					base_net_amount = item.base_net_amount
 			else:
