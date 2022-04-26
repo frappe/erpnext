@@ -12,6 +12,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Setup Node.js v14
         uses: actions/setup-node@v2
         with:
@@ -23,4 +24,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GIT_AUTHOR_NAME: "Frappe PR Bot"
+          GIT_AUTHOR_EMAIL: "developers@frappe.io"
+          GIT_COMMITTER_NAME: "Frappe PR Bot"
+          GIT_COMMITTER_EMAIL: "developers@frappe.io"
         run: npx semantic-release

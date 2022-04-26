@@ -54,6 +54,7 @@ def get_conditions(filters):
 
 
 def get_data(conditions, filters):
+	# nosemgrep
 	data = frappe.db.sql(
 		"""
 		SELECT
@@ -65,6 +66,7 @@ def get_data(conditions, filters):
 			IF(so.status in ('Completed','To Bill'), 0, (SELECT delay_days)) as delay,
 			soi.qty, soi.delivered_qty,
 			(soi.qty - soi.delivered_qty) AS pending_qty,
+			IF((SELECT pending_qty) = 0, (TO_SECONDS(Max(dn.posting_date))-TO_SECONDS(so.transaction_date)), 0) as time_taken_to_deliver,
 			IFNULL(SUM(sii.qty), 0) as billed_qty,
 			soi.base_amount as amount,
 			(soi.delivered_qty * soi.base_rate) as delivered_qty_amount,
@@ -75,9 +77,13 @@ def get_data(conditions, filters):
 			soi.description as description
 		FROM
 			`tabSales Order` so,
-			`tabSales Order Item` soi
+			(`tabSales Order Item` soi
 		LEFT JOIN `tabSales Invoice Item` sii
-			ON sii.so_detail = soi.name and sii.docstatus = 1
+			ON sii.so_detail = soi.name and sii.docstatus = 1)
+		LEFT JOIN `tabDelivery Note Item` dni
+			on dni.so_detail = soi.name
+		LEFT JOIN `tabDelivery Note` dn
+			on dni.parent = dn.name and dn.docstatus = 1
 		WHERE
 			soi.parent = so.name
 			and so.status not in ('Stopped', 'Closed', 'On Hold')
@@ -264,6 +270,12 @@ def get_columns(filters):
 			},
 			{"label": _("Delivery Date"), "fieldname": "delivery_date", "fieldtype": "Date", "width": 120},
 			{"label": _("Delay (in Days)"), "fieldname": "delay", "fieldtype": "Data", "width": 100},
+			{
+				"label": _("Time Taken to Deliver"),
+				"fieldname": "time_taken_to_deliver",
+				"fieldtype": "Duration",
+				"width": 100,
+			},
 		]
 	)
 	if not filters.get("group_by_so"):
