@@ -59,6 +59,8 @@ class BaseAsset(AccountsController):
 	def on_cancel(self):
 		self.validate_cancellation()
 		self.cancel_movement_entries()
+		self.delete_depreciation_entries()
+		self.delete_depreciation_schedules()
 
 	# to reduce number of db calls
 	def get_asset_values(self):
@@ -718,13 +720,44 @@ class BaseAsset(AccountsController):
 		if self.doctype == "Asset":
 			return {
 				"asset": self.name,
-				"serial_no": None
+				"serial_no": None,
+				"docstatus": ["<", 2]
 			}
 		else:
 			return {
 				"asset": self.asset,
-				"serial_no": self.serial_no
+				"serial_no": self.serial_no,
+				"docstatus": ["<", 2]
 			}
+
+	def delete_depreciation_schedules(self):
+		filters = self.get_filters()
+
+		linked_schedules = frappe.get_all(
+			"Depreciation Schedule",
+			filters = filters,
+			fields = ["name", "docstatus"]
+		)
+
+		for schedule in linked_schedules:
+			if schedule.docstatus == 1:
+				schedule = frappe.get_doc("Depreciation Schedule", schedule.name)
+				schedule.cancel()
+			else:
+				frappe.db.delete("Depreciation Schedule", schedule.name)
+
+	def delete_depreciation_entries(self):
+		filters = self.get_filters()
+
+		linked_entries = frappe.get_all(
+			"Depreciation Entry",
+			filters = filters,
+			pluck = "name"
+		)
+
+		for entry in linked_entries:
+			entry = frappe.get_doc("Depreciation Entry", entry.name)
+			entry.cancel()
 
 def get_default_finance_book(company=None):
 	from erpnext import get_default_company
