@@ -433,9 +433,9 @@ class PaymentReconciliation(Document):
 				criterions.append(invoice.posting_date.lte(self.to_invoice_date))
 
 			dr_or_cr = (
-				gle.debit_in_account_currency
+				gle.credit_in_account_currency
 				if erpnext.get_party_account_type(self.party_type) == "Receivable"
-				else gle.credit_in_account_currency
+				else gle.debit_in_account_currency
 			)
 
 			if self.minimum_invoice_amount:
