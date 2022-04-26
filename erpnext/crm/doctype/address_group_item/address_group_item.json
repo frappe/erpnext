@@ -1,0 +1,32 @@
+{
+ "actions": [],
+ "creation": "2021-10-04 15:45:51.803750",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "address"
+ ],
+ "fields": [
+  {
+   "fieldname": "address",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Address",
+   "options": "Address",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-04-26 10:48:24.220714",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Address Group Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
