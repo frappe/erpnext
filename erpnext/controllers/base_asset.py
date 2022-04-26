@@ -7,6 +7,7 @@ from frappe.utils import flt, cint, getdate, get_datetime, add_months, format_da
 import json
 
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 
 from assets.asset.doctype.asset_activity.asset_activity import create_asset_activity
 from assets.asset.doctype.asset_category_.asset_category_ import get_asset_category_account
@@ -62,6 +63,9 @@ class BaseAsset(AccountsController):
 		self.delete_depreciation_entries()
 		self.delete_depreciation_schedules()
 		self.set_status()
+
+		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
+		make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 	# to reduce number of db calls
 	def get_asset_values(self):
@@ -620,8 +624,6 @@ class BaseAsset(AccountsController):
 			)
 
 		if gl_entries:
-			from erpnext.accounts.general_ledger import make_gl_entries
-
 			make_gl_entries(gl_entries)
 
 	def set_status(self, status=None):
