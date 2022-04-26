@@ -34,6 +34,7 @@ class BaseAsset(AccountsController):
 				self.validate_depreciation_template_fields()
 				self.validate_available_for_use_date()
 				self.validate_depreciation_posting_start_date()
+				self.validate_salvage_value()
 
 				if self.is_new():
 					self.set_initial_asset_value_for_finance_books()
@@ -243,6 +244,17 @@ class BaseAsset(AccountsController):
 				message += _(" in Row {} of the Template Details table.").format(row)
 
 			frappe.throw(message, title = _("Invalid Depreciation Posting Start Date"))
+
+	def validate_salvage_value(self):
+		gross_purchase_amount = self.get("gross_purchase_amount") \
+			if self.doctype == "Asset" \
+			else self.asset_values["gross_purchase_amount"]
+
+		if self.salvage_value and flt(self.salvage_value) >= flt(gross_purchase_amount):
+			frappe.throw(
+				_("Expected Value After Useful Life must be less than Gross Purchase Amount"),
+				title = _("Invalid Salvage Value"),
+			)
 
 	def validate_depreciation_template_fields(self):
 		if self.enable_finance_books:
