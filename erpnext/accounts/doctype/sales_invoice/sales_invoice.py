@@ -279,6 +279,7 @@ class SalesInvoice(SellingController):
 		self.exonerated_value()
 		if self.docstatus == 1:
 			self.update_accounts_status()
+			self.calculated_taxes()
 			if self.is_pos:
 				self.allow_credit_pos()
 			# self.create_dispatch_control()
@@ -294,7 +295,8 @@ class SalesInvoice(SellingController):
 
 		if self.outstanding_amount > 0:
 			if pos_profile[0].allow_credit == 0:
-				frappe.throw(_("It is not allowed to give credit at this point of sale"))
+				if self.grand_total > self.paid_amount:
+					frappe.throw(_("It is not allowed to give credit at this point of sale"))
 
 	def create_dispatch_control(self):
 		products = frappe.get_all("Sales Invoice Item", ["item_code", "qty"], filters = {"parent": self.name})
