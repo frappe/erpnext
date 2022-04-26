@@ -1,10 +1,9 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import unittest
-
 import frappe
 from frappe.permissions import clear_user_permissions_for_doctype
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -74,7 +73,7 @@ _test_records = [
 ]
 
 
-class TestLeaveApplication(unittest.TestCase):
+class TestLeaveApplication(FrappeTestCase):
 	def setUp(self):
 		for dt in ["Leave Application", "Leave Allocation", "Salary Slip", "Leave Ledger Entry"]:
 			frappe.db.delete(dt)
