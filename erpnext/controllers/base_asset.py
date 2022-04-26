@@ -35,6 +35,7 @@ class BaseAsset(AccountsController):
 				self.validate_available_for_use_date()
 				self.validate_depreciation_posting_start_date()
 				self.validate_salvage_value()
+				self.validate_opening_accumulated_depreciation()
 
 				if self.is_new():
 					self.set_initial_asset_value_for_finance_books()
@@ -84,7 +85,8 @@ class BaseAsset(AccountsController):
 				"company",
 				"cost_center",
 				"purchase_receipt",
-				"purchase_invoice"
+				"purchase_invoice",
+				"is_existing_asset"
 			],
 			as_dict = 1
 		)
@@ -258,6 +260,24 @@ class BaseAsset(AccountsController):
 				_("Expected Value After Useful Life must be less than Gross Purchase Amount"),
 				title = _("Invalid Salvage Value"),
 			)
+
+	def validate_opening_accumulated_depreciation(self):
+		if self.doctype == "Asset":
+			gross_purchase_amount = self.gross_purchase_amount
+			is_existing_asset = self.is_existing_asset
+		else:
+			gross_purchase_amount = self.asset_values["gross_purchase_amount"]
+			is_existing_asset = self.asset_values["is_existing_asset"]
+
+		if is_existing_asset:
+			depreciable_amount = flt(gross_purchase_amount) - flt(self.salvage_value)
+
+			if flt(self.opening_accumulated_depreciation) > depreciable_amount:
+				frappe.throw(
+					_("Opening Accumulated Depreciation must be less than equal to {0}").format(
+						depreciable_amount
+					)
+				)
 
 	def validate_depreciation_template_fields(self):
 		if self.enable_finance_books:
