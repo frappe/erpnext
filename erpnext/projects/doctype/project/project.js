@@ -245,7 +245,9 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 
 		// Work Status
 		var vehicle_status_color;
-		if (me.frm.doc.vehicle_status == "Not Received") {
+		if (me.frm.doc.vehicle_status == "Not Applicable") {
+			vehicle_status_color = "grey";
+		} else if (me.frm.doc.vehicle_status == "Not Received") {
 			vehicle_status_color = "red";
 		} else if (me.frm.doc.vehicle_status == "In Workshop") {
 			vehicle_status_color = "yellow";
@@ -386,7 +388,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 			'vehicle_warranty_no', 'vehicle_delivery_date',
 		];
 
-		var read_only = me.frm.doc.applies_to_vehicle || me.frm.doc.vehicle_status != "Not Received" ? 1 : 0;
+		var read_only = me.frm.doc.applies_to_vehicle ? 1 : 0;
 
 		$.each(read_only_fields, function (i, f) {
 			if (me.frm.fields_dict[f]) {

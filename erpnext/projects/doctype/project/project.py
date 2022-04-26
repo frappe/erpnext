@@ -477,7 +477,7 @@ class Project(StatusUpdater):
 						.format(frappe.bold(label)))
 
 	def get_cant_change_fields(self):
-		vehicle_received = self.get('vehicle_status') and self.get('vehicle_status') != 'Not Received'
+		vehicle_received = self.get('vehicle_received_date')
 		has_sales_transaction = self.has_sales_transaction()
 		has_vehicle_log = self.has_vehicle_log()
 		return frappe._dict({
@@ -832,7 +832,7 @@ class Project(StatusUpdater):
 			order by total_hours desc
 		""", self.name, as_dict=True)
 
-	def set_vehicle_status(self, update=False):
+	def set_vehicle_status(self, update=False, update_modified=True):
 		if not self.meta.has_field('vehicle_status'):
 			return
 
@@ -864,7 +864,9 @@ class Project(StatusUpdater):
 		self.vehicle_delivered_date = vehicle_gate_pass.posting_date
 		self.vehicle_delivered_time = vehicle_gate_pass.posting_time
 
-		if not vehicle_service_receipt:
+		if not self.get('applies_to_vehicle'):
+			self.vehicle_status = "Not Applicable"
+		elif not vehicle_service_receipt:
 			self.vehicle_status = "Not Received"
 		elif not vehicle_gate_pass:
 			self.vehicle_status = "In Workshop"
@@ -878,7 +880,7 @@ class Project(StatusUpdater):
 				"vehicle_delivered_date": self.vehicle_delivered_date,
 				"vehicle_delivered_time": self.vehicle_delivered_time,
 				"vehicle_status": self.vehicle_status,
-			})
+			}, update_modified=update_modified)
 
 	def after_rename(self, old_name, new_name, merge=False):
 		if old_name == self.copied_from:
