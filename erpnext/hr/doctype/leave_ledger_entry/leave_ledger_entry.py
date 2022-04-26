@@ -12,6 +12,9 @@ class LeaveLedgerEntry(Document):
 	def validate(self):
 		if getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("To date needs to be before from date"))
+		if self.name == "_T-Leave Allocation-00001":
+			import traceback
+			traceback.print_stack()
 
 	def on_cancel(self):
 		# allow cancellation of expiry leaves
