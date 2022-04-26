@@ -4,8 +4,9 @@
 import frappe
 from frappe import _
 from frappe.utils import flt, cint, getdate, get_datetime, add_months, format_date
-from frappe.model.document import Document
 import json
+
+from erpnext.controllers.accounts_controller import AccountsController
 
 from assets.asset.doctype.asset_activity.asset_activity import create_asset_activity
 from assets.asset.doctype.asset_category_.asset_category_ import get_asset_category_account
@@ -16,7 +17,7 @@ from assets.asset.doctype.depreciation_schedule_.depreciation_schedule_ import (
 )
 
 
-class BaseAsset(Document):
+class BaseAsset(AccountsController):
 	def validate(self):
 		if self.doctype == "Asset Serial No":
 			self.get_asset_values()
@@ -49,6 +50,9 @@ class BaseAsset(Document):
 				self.record_asset_creation()
 				self.record_asset_receipt()
 
+			if self.validate_make_gl_entry():
+				self.make_gl_entries()
+
 		self.set_status()
 
 	# to reduce number of db calls
@@ -64,7 +68,10 @@ class BaseAsset(Document):
 				"opening_accumulated_depreciation",
 				"purchase_date",
 				"asset_name",
-				"company"
+				"company",
+				"cost_center",
+				"purchase_receipt",
+				"purchase_invoice"
 			],
 			as_dict = 1
 		)
@@ -452,6 +459,163 @@ class BaseAsset(Document):
 		else:
 			return self.asset_values["asset_name"], self.asset_values["company"]
 
+	def validate_make_gl_entry(self):
+		purchase_document, asset_bought_with_invoice = self.get_purchase_document()
+
+		if not purchase_document:
+			return False
+
+		cwip_enabled = is_cwip_accounting_enabled(self.asset_category)
+		cwip_account = self.get_cwip_account(cwip_enabled=cwip_enabled)
+
+		query = """SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s"""
+
+		if asset_bought_with_invoice:
+			return self.has_expense_or_cwip_been_booked(query, purchase_document, cwip_account)
+		else:
+			return self.has_cwip_been_booked(query, purchase_document, cwip_account)
+
+	def get_purchase_document(self):
+		if self.doctype == "Asset":
+			purchase_receipt, purchase_invoice = self.purchase_receipt, self.purchase_invoice
+		else:
+			purchase_receipt = self.asset_values["purchase_receipt"]
+			purchase_invoice = self.asset_values["purchase_invoice"]
+
+		asset_bought_with_invoice = self.was_asset_bought_with_invoice(purchase_invoice)
+		purchase_document = purchase_invoice if asset_bought_with_invoice else purchase_receipt
+
+		return purchase_document, asset_bought_with_invoice
+
+	def was_asset_bought_with_invoice(self, purchase_invoice):
+		return purchase_invoice and frappe.db.get_value(
+			"Purchase Invoice", purchase_invoice, "update_stock"
+		)
+
+	def get_cwip_account(self, cwip_enabled=False):
+		cwip_account = None
+
+		try:
+			if self.doctype == "Asset":
+				asset, asset_category, company = self.name, self.asset_category, self.company
+			else:
+				asset = self.asset
+				asset_category = self.asset_values["asset_category"]
+				company = self.asset_values["company"]
+
+			cwip_account = get_asset_account(
+				"capital_work_in_progress_account", asset, asset_category, company
+			)
+		except Exception:
+			# if no cwip account found in category or company and "cwip is enabled"
+			# then raise else silently pass
+			if cwip_enabled:
+				raise
+
+		return cwip_account
+
+	def has_expense_or_cwip_been_booked(self, query, purchase_document, cwip_account):
+		fixed_asset_account = self.get_fixed_asset_account()
+
+		# with invoice purchase either expense or cwip has been booked
+		expense_booked = frappe.db.sql(query, (purchase_document, fixed_asset_account), as_dict=1)
+		if expense_booked:
+			# if expense is already booked from invoice
+			# then do not make gl entries regardless of cwip enabled/disabled
+			return False
+
+		cwip_booked = frappe.db.sql(query, (purchase_document, cwip_account), as_dict=1)
+		if cwip_booked:
+			# if cwip is booked from invoice then make gl entries regardless of cwip enabled/disabled
+			return True
+
+	def get_fixed_asset_account(self):
+		if self.doctype == "Asset":
+			asset, asset_category, company = self.name, self.asset_category, self.company
+		else:
+			asset = self.asset
+			asset_category = self.asset_values["asset_category"]
+			company = self.asset_values["company"]
+
+		fixed_asset_account = get_asset_category_account(
+			"fixed_asset_account", None, asset, None, asset_category, company
+		)
+
+		if not fixed_asset_account:
+			frappe.throw(
+				_("Set {0} in asset category {1} for company {2}").format(
+					frappe.bold("Fixed Asset Account"),
+					frappe.bold(self.asset_category),
+					frappe.bold(self.company),
+				),
+				title=_("Account not Found"),
+			)
+
+		return fixed_asset_account
+
+	def has_cwip_been_booked(self, query, purchase_document, cwip_account):
+		# with receipt purchase either cwip has been booked or no entries have been made
+		if not cwip_account:
+			# if cwip account isn't available do not make gl entries
+			return False
+
+		cwip_booked = frappe.db.sql(query, (purchase_document, cwip_account), as_dict=1)
+		# if cwip is not booked from receipt then do not make gl entries
+		# if cwip is booked from receipt then make gl entries
+		return cwip_booked
+
+	def make_gl_entries(self):
+		gl_entries = []
+
+		purchase_document = self.get_purchase_document()
+		fixed_asset_account, cwip_account = self.get_fixed_asset_account(), self.get_cwip_account()
+
+		if self.doctype == "Asset":
+			gross_purchase_amount = self.gross_purchase_amount
+			cost_center = self.cost_center
+		else:
+			gross_purchase_amount = self.asset_values["gross_purchase_amount"]
+			cost_center = self.asset_values["cost_center"]
+
+		if (
+			purchase_document and gross_purchase_amount and self.available_for_use_date <= getdate()
+		):
+
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": cwip_account,
+						"against": fixed_asset_account,
+						"remarks": self.get("remarks") or _("Accounting Entry for {0}").format(self.doctype),
+						"posting_date": self.available_for_use_date,
+						"credit": gross_purchase_amount,
+						"credit_in_account_currency": gross_purchase_amount,
+						"cost_center": cost_center,
+					},
+					item=self,
+				)
+			)
+
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": fixed_asset_account,
+						"against": cwip_account,
+						"remarks": self.get("remarks") or _("Accounting Entry for {0}").format(self.doctype),
+						"posting_date": self.available_for_use_date,
+						"debit": gross_purchase_amount,
+						"debit_in_account_currency": gross_purchase_amount,
+						"cost_center": cost_center,
+					},
+					item=self,
+				)
+			)
+
+		if gl_entries:
+			from erpnext.accounts.general_ledger import make_gl_entries
+
+			make_gl_entries(gl_entries)
+
 	def set_status(self, status=None):
 		if not status:
 			status = self.get_status()
@@ -508,6 +672,9 @@ def get_default_finance_book(company=None):
 			company,  "default_finance_book")
 
 	return frappe.local.default_finance_book[company]
+
+def is_cwip_accounting_enabled(asset_category):
+	return cint(frappe.db.get_value("Asset Category", asset_category, "enable_cwip_accounting"))
 
 def get_asset_account(account_name, asset=None, asset_category=None, company=None):
 	account = None
