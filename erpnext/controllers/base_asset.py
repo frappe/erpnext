@@ -55,6 +55,9 @@ class BaseAsset(AccountsController):
 
 		self.set_status()
 
+	def on_cancel(self):
+		self.validate_cancellation()
+
 	# to reduce number of db calls
 	def get_asset_values(self):
 		self.asset_values = frappe.get_value(
@@ -657,6 +660,18 @@ class BaseAsset(AccountsController):
 			for finance_book in self.get("finance_books"):
 				if finance_book.finance_book == self.default_finance_book:
 					return cint(finance_book.idx) - 1
+
+	def validate_cancellation(self):
+		if self.status in ("In Maintenance", "Out of Order"):
+			frappe.throw(
+				_(
+					"There are active maintenance or repairs against the asset. \
+					You must complete all of them before cancelling the asset."
+				)
+			)
+
+		if self.status not in ("Submitted", "Partially Depreciated", "Fully Depreciated"):
+			frappe.throw(_("{0} cannot be cancelled, as it is already {1}").format(self.name, self.status))
 
 def get_default_finance_book(company=None):
 	from erpnext import get_default_company
