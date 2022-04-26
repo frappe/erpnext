@@ -27,7 +27,7 @@ import json
 
 force_applies_to_fields = ("vehicle_chassis_no", "vehicle_engine_no", "vehicle_license_plate", "vehicle_unregistered",
 	"vehicle_color", "applies_to_item", "applies_to_item_name", "applies_to_variant_of", "applies_to_variant_of_name",
-	"vehicle_owner_name", "vehicle_warranty_no")
+	"vehicle_owner_name", "vehicle_warranty_no", "vehicle_delivery_date")
 
 force_customer_fields = ("customer_name",
 	"tax_id", "tax_cnic", "tax_strn", "tax_status",
@@ -676,8 +676,12 @@ class Project(StatusUpdater):
 
 	def reset_quick_change_fields(self):
 		for project_field, vehicle_field in vehicle_change_fields:
-			if self.meta.has_field(project_field):
-				self.set(project_field, None)
+			df = self.meta.get_field(project_field)
+			if df:
+				if df.fieldtype in frappe.model.numeric_fieldtypes:
+					self.set(project_field, 0)
+				else:
+					self.set(project_field, None)
 
 	def update_odometer(self):
 		from erpnext.vehicles.doctype.vehicle_log.vehicle_log import make_odometer_log
