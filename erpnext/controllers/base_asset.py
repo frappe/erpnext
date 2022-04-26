@@ -15,6 +15,7 @@ from assets.asset.doctype.depreciation_schedule_.depreciation_schedule_ import (
 	create_a_single_depreciation_schedule,
 	delete_existing_schedules
 )
+from frappe.utils.data import get_link_to_form
 
 
 class BaseAsset(AccountsController):
@@ -57,6 +58,7 @@ class BaseAsset(AccountsController):
 
 	def on_cancel(self):
 		self.validate_cancellation()
+		self.cancel_movement_entries()
 
 	# to reduce number of db calls
 	def get_asset_values(self):
@@ -672,6 +674,57 @@ class BaseAsset(AccountsController):
 
 		if self.status not in ("Submitted", "Partially Depreciated", "Fully Depreciated"):
 			frappe.throw(_("{0} cannot be cancelled, as it is already {1}").format(self.name, self.status))
+
+	def cancel_movement_entries(self):
+		movement_entries = self.get_movement_entries()
+		movement_drafts = []
+
+		for movement in movement_entries:
+			if movement.docstatus == 1:
+				movement = frappe.get_doc("Asset Movement", movement.name)
+				movement.cancel()
+			else:
+				movement_drafts.append(
+					get_link_to_form("Asset Movement", movement.name)
+				)
+
+		if movement_drafts:
+			frappe.msgprint(
+				_("The following Asset Movements drafts are linked with {0}: {1}. \
+				Kindly delete the Movements or remove the Asset from them to avoid raising errors.")
+				.format(self.name, movement_drafts)
+			)
+
+	def get_movement_entries(self):
+		filters = self.get_filters()
+
+		movement_names = list(set(frappe.get_all(
+			"Asset Movement Item",
+			filters = filters,
+			pluck = "parent"
+		)))
+
+		movement_entries = frappe.get_all(
+			"Asset Movement",
+			filters = {
+				"name": ["in", movement_names]
+			},
+			fields = ["name", "docstatus"]
+		)
+
+		return movement_entries
+
+	def get_filters(self):
+		if self.doctype == "Asset":
+			return {
+				"asset": self.name,
+				"serial_no": None
+			}
+		else:
+			return {
+				"asset": self.asset,
+				"serial_no": self.serial_no
+			}
 
 def get_default_finance_book(company=None):
 	from erpnext import get_default_company
