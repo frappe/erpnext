@@ -8,553 +8,554 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
-    "item_code",
-    "asset_name",
-    "is_serialized_asset",
-    "column_break_1",
-    "naming_series",
-    "asset_category",
-    "num_of_assets",
-    "asset_value",
-    "image",
-    "disposal_date",
-    "journal_entry_for_scrap",
-    "is_intangible_asset",
-    "is_amortizable_asset",
-    "tracking_details_section",
-    "asset_owner",
-    "company",
-    "supplier",
-    "customer",
-    "department",
-    "column_break_23",
-    "location",
-    "custodian",
-    "purchase_details_section",
-    "purchase_receipt",
-    "gross_purchase_amount",
-    "is_existing_asset",
-    "column_break_2",
-    "purchase_invoice",
-    "purchase_date",
-    "depreciation_section",
-    "available_for_use_date",
-    "salvage_value",
-    "calculate_depreciation",
-    "column_break_3",
-    "depreciation_posting_start_date",
-    "depreciation_template",
-    "opening_accumulated_depreciation",
-    "section_break_41",
-    "finance_books",
-    "depr_details_section",
-    "depreciation_method",
-    "asset_life_in_months",
-    "column_break_45",
-    "frequency_of_depreciation",
-    "rate_of_depreciation",
-    "accounting_dimensions_section",
-    "cost_center",
-    "insurance_details",
-    "policy_number",
-    "insurer",
-    "insured_value",
-    "column_break_4",
-    "insurance_start_date",
-    "insurance_end_date",
-    "comprehensive_insurance",
-    "maintenance_section",
-    "maintenance_required",
-    "other_details",
-    "status",
-    "booked_fixed_asset",
-    "column_break_5",
-    "purchase_receipt_amount",
-    "default_finance_book",
-    "amended_from"
-   ],
-"fields": [
-    {
-     "fieldname": "asset_owner",
-     "fieldtype": "Select",
-     "label": "Asset Owner",
-     "options": "\nCompany\nSupplier\nCustomer",
-     "reqd": 1
-    },
-    {
-     "depends_on": "eval:doc.asset_owner == \"Company\"",
-     "fieldname": "company",
-     "fieldtype": "Link",
-     "label": "Company",
-     "mandatory_depends_on": "eval:doc.asset_owner == \"Company\"",
-     "options": "Company"
-    },
-    {
-     "depends_on": "eval:doc.asset_owner == \"Supplier\"",
-     "fieldname": "supplier",
-     "fieldtype": "Link",
-     "label": "Supplier",
-     "mandatory_depends_on": "eval:doc.asset_owner == \"Supplier\"",
-     "options": "Supplier"
-    },
-    {
-     "depends_on": "eval:doc.asset_owner == \"Customer\"",
-     "fieldname": "customer",
-     "fieldtype": "Link",
-     "label": "Customer",
-     "mandatory_depends_on": "eval:doc.asset_owner == \"Customer\"",
-     "options": "Customer"
-    },
-    {
-     "fieldname": "item_code",
-     "fieldtype": "Link",
-     "in_standard_filter": 1,
-     "label": "Item",
-     "options": "Item",
-     "reqd": 1
-    },
-    {
-     "allow_on_submit": 1,
-     "fieldname": "image",
-     "fieldtype": "Attach Image",
-     "hidden": 1,
-     "label": "Image",
-     "no_copy": 1,
-     "print_hide": 1
-    },
-    {
-     "default": "0",
-     "fieldname": "is_existing_asset",
-     "fieldtype": "Check",
-     "label": "Is Existing Asset"
-    },
-    {
-     "depends_on": "is_serialized_asset",
-     "fieldname": "journal_entry_for_scrap",
-     "fieldtype": "Link",
-     "label": "Journal Entry for Scrap",
-     "no_copy": 1,
-     "options": "Journal Entry",
-     "print_hide": 1,
-     "read_only": 1
-    },
-    {
-     "fieldname": "column_break_1",
-     "fieldtype": "Column Break"
-    },
-    {
-     "fieldname": "naming_series",
-     "fieldtype": "Select",
-     "label": "Naming Series",
-     "options": "ACC-ASS-.YYYY.-"
-    },
-    {
-     "fetch_from": "item_code.item_name",
-     "fieldname": "asset_name",
-     "fieldtype": "Data",
-     "in_list_view": 1,
-     "label": "Asset Name",
-     "reqd": 1
-    },
-    {
-     "depends_on": "item_code",
-     "fetch_from": "item_code.asset_category",
-     "fieldname": "asset_category",
-     "fieldtype": "Link",
-     "in_global_search": 1,
-     "in_list_view": 1,
-     "in_standard_filter": 1,
-     "label": "Asset Category",
-     "options": "Asset Category_",
-     "read_only": 1
-    },
-    {
-     "depends_on": "eval:!(doc.is_serialized_asset)",
-     "fieldname": "location",
-     "fieldtype": "Link",
-     "in_list_view": 1,
-     "label": "Location",
-     "mandatory_depends_on": "eval:!(doc.is_serialized_asset)",
-     "options": "Location_"
-    },
-    {
-     "depends_on": "eval:!(doc.is_serialized_asset)",
-     "fieldname": "custodian",
-     "fieldtype": "Link",
-     "ignore_user_permissions": 1,
-     "label": "Custodian",
-     "options": "Employee"
-    },
-    {
-     "depends_on": "eval:!(doc.is_serialized_asset)",
-     "fieldname": "department",
-     "fieldtype": "Link",
-     "label": "Department",
-     "options": "Department"
-    },
-    {
-     "fieldname": "disposal_date",
-     "fieldtype": "Date",
-     "label": "Disposal Date",
-     "read_only": 1
-    },
-    {
-     "collapsible": 1,
-     "fieldname": "accounting_dimensions_section",
-     "fieldtype": "Section Break",
-     "label": "Accounting Dimensions"
-    },
-    {
-     "fieldname": "cost_center",
-     "fieldtype": "Link",
-     "label": "Cost Center",
-     "options": "Cost Center"
-    },
-    {
-     "collapsible": 1,
-     "collapsible_depends_on": "eval: !(doc.gross_purchase_amount)",
-     "fieldname": "purchase_details_section",
-     "fieldtype": "Section Break",
-     "label": "Purchase Details"
-    },
-    {
-     "fieldname": "purchase_receipt",
-     "fieldtype": "Link",
-     "label": "Purchase Receipt",
-     "no_copy": 1,
-     "options": "Purchase Receipt",
-     "print_hide": 1
-    },
-    {
-     "fieldname": "purchase_invoice",
-     "fieldtype": "Link",
-     "label": "Purchase Invoice",
-     "no_copy": 1,
-     "options": "Purchase Invoice"
-    },
-    {
-     "depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
-     "fieldname": "available_for_use_date",
-     "fieldtype": "Date",
-     "label": "Available-for-use Date",
-     "mandatory_depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)"
-    },
-    {
-     "fieldname": "column_break_2",
-     "fieldtype": "Column Break"
-    },
-    {
-     "fieldname": "gross_purchase_amount",
-     "fieldtype": "Currency",
-     "label": "Gross Purchase Amount",
-     "options": "Company:company:default_currency",
-     "read_only": 1,
-     "read_only_depends_on": "eval:!doc.is_existing_asset",
-     "reqd": 1
-    },
-    {
-     "fieldname": "purchase_date",
-     "fieldtype": "Date",
-     "label": "Purchase Date",
-     "read_only": 1,
-     "read_only_depends_on": "eval:!doc.is_existing_asset",
-     "reqd": 1
-    },
-    {
-     "collapsible": 1,
-     "collapsible_depends_on": "eval:!(doc.calculate_depreciation)",
-     "fieldname": "depreciation_section",
-     "fieldtype": "Section Break",
-     "label": "Depreciation"
-    },
-    {
-     "default": "0",
-     "depends_on": "eval:!(doc.is_intangible_asset)",
-     "fieldname": "calculate_depreciation",
-     "fieldtype": "Check",
-     "label": "Is Depreciable Asset"
-    },
-    {
-     "fieldname": "column_break_3",
-     "fieldtype": "Column Break"
-    },
-    {
-     "depends_on": "eval: doc.is_existing_asset && doc.calculate_depreciation && !(doc.is_serialized_asset)",
-     "fieldname": "opening_accumulated_depreciation",
-     "fieldtype": "Currency",
-     "label": "Opening Accumulated Depreciation",
-     "no_copy": 1,
-     "options": "Company:company:default_currency"
-    },
-    {
-     "columns": 10,
-     "depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
-     "fieldname": "finance_books",
-     "fieldtype": "Table",
-     "label": "Finance Books",
-     "options": "Asset Finance Book_"
-    },
-    {
-     "collapsible": 1,
-     "fieldname": "insurance_details",
-     "fieldtype": "Section Break",
-     "label": "Insurance details"
-    },
-    {
-     "fieldname": "policy_number",
-     "fieldtype": "Data",
-     "label": "Policy number"
-    },
-    {
-     "fieldname": "insurer",
-     "fieldtype": "Data",
-     "label": "Insurer"
-    },
-    {
-     "fieldname": "insured_value",
-     "fieldtype": "Data",
-     "label": "Insured value"
-    },
-    {
-     "fieldname": "column_break_4",
-     "fieldtype": "Column Break"
-    },
-    {
-     "fieldname": "insurance_start_date",
-     "fieldtype": "Date",
-     "label": "Insurance Start Date"
-    },
-    {
-     "fieldname": "insurance_end_date",
-     "fieldtype": "Date",
-     "label": "Insurance End Date"
-    },
-    {
-     "fieldname": "comprehensive_insurance",
-     "fieldtype": "Data",
-     "label": "Comprehensive Insurance"
-    },
-    {
-     "collapsible": 1,
-     "fieldname": "maintenance_section",
-     "fieldtype": "Section Break",
-     "label": "Maintenance"
-    },
-    {
-     "allow_on_submit": 1,
-     "default": "0",
-     "description": "Check if Asset requires Preventive Maintenance or Calibration",
-     "fieldname": "maintenance_required",
-     "fieldtype": "Check",
-     "label": "Maintenance Required"
-    },
-    {
-     "collapsible": 1,
-     "fieldname": "other_details",
-     "fieldtype": "Section Break",
-     "label": "Other Details"
-    },
-    {
-     "allow_on_submit": 1,
-     "default": "Draft",
-     "fieldname": "status",
-     "fieldtype": "Select",
-     "hidden": 1,
-     "in_list_view": 1,
-     "in_standard_filter": 1,
-     "label": "Status",
-     "no_copy": 1,
-     "options": "Draft\nSubmitted\nPartially Depreciated\nFully Depreciated\nSold\nScrapped\nIn Maintenance\nOut of Order\nIssue\nReceipt",
-     "read_only": 1
-    },
-    {
-     "default": "0",
-     "fieldname": "booked_fixed_asset",
-     "fieldtype": "Check",
-     "label": "Booked Fixed Asset",
-     "no_copy": 1,
-     "read_only": 1
-    },
-    {
-     "fieldname": "column_break_5",
-     "fieldtype": "Column Break"
-    },
-    {
-     "fieldname": "purchase_receipt_amount",
-     "fieldtype": "Currency",
-     "hidden": 1,
-     "label": "Purchase Receipt Amount",
-     "no_copy": 1,
-     "print_hide": 1,
-     "read_only": 1
-    },
-    {
-     "fetch_from": "company.default_finance_book",
-     "fieldname": "default_finance_book",
-     "fieldtype": "Link",
-     "hidden": 1,
-     "label": "Default Finance Book",
-     "options": "Finance Book",
-     "read_only": 1
-    },
-    {
-     "fieldname": "amended_from",
-     "fieldtype": "Link",
-     "label": "Amended From",
-     "no_copy": 1,
-     "options": "Asset",
-     "print_hide": 1,
-     "read_only": 1
-    },
-    {
-     "default": "0",
-     "fieldname": "is_serialized_asset",
-     "fieldtype": "Check",
-     "label": "Is Serialized Asset"
-    },
-    {
-     "fieldname": "num_of_assets",
-     "fieldtype": "Int",
-     "label": "Number of Assets",
-     "reqd": 1
-    },
-    {
-     "depends_on": "eval:!(doc.is_serialized_asset)",
-     "fieldname": "asset_value",
-     "fieldtype": "Currency",
-     "hidden": 1,
-     "label": "Asset Value",
-     "options": "Company:company:default_currency",
-     "read_only": 1
-    },
-    {
-     "default": "0",
-     "fieldname": "is_intangible_asset",
-     "fieldtype": "Check",
-     "hidden": 1,
-     "label": "Is Intangible Asset"
-    },
-    {
-     "default": "0",
-     "depends_on": "is_intangible_asset",
-     "fieldname": "is_amortizable_asset",
-     "fieldtype": "Check",
-     "label": "Is Amortizable Asset"
-    },
-    {
-     "collapsible": 1,
-     "collapsible_depends_on": "eval: !(doc.asset_owner)",
-     "fieldname": "tracking_details_section",
-     "fieldtype": "Section Break",
-     "label": "Tracking Details"
-    },
-    {
-     "fieldname": "column_break_23",
-     "fieldtype": "Column Break"
-    },
-    {
-     "depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
-     "fieldname": "depreciation_posting_start_date",
-     "fieldtype": "Date",
-     "label": "Depreciation Posting Start Date",
-     "mandatory_depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)"
-    },
-    {
-     "depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
-     "fieldname": "salvage_value",
-     "fieldtype": "Currency",
-     "label": "Salvage Value",
-     "mandatory_depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
-     "options": "Company:company:default_currency"
-    },
-    {
-     "depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
-     "fieldname": "depreciation_template",
-     "fieldtype": "Link",
-     "label": "Depreciation Template",
-     "options": "Depreciation Template"
-    },
-    {
-     "fetch_from": "depreciation_template.depreciation_method",
-     "fieldname": "depreciation_method",
-     "fieldtype": "Data",
-     "label": "Depreciation Method",
-     "read_only": 1
-    },
-    {
-     "fetch_from": "depreciation_template.frequency_of_depreciation",
-     "fieldname": "frequency_of_depreciation",
-     "fieldtype": "Data",
-     "label": "Frequency of Depreciation",
-     "read_only": 1
-    },
-    {
-     "depends_on": "asset_life_in_months",
-     "fieldname": "asset_life_in_months",
-     "fieldtype": "Int",
-     "label": "Asset Life (In Months)",
-     "read_only": 1
-    },
-    {
-     "depends_on": "rate_of_depreciation",
-     "fetch_from": "depreciation_template.rate_of_depreciation",
-     "fieldname": "rate_of_depreciation",
-     "fieldtype": "Percent",
-     "label": "Rate of Depreciation",
-     "read_only": 1
-    },
-    {
-     "collapsible": 1,
-     "collapsible_depends_on": "eval:!(doc.calculate_depreciation)",
-     "depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
-     "fieldname": "depr_details_section",
-     "fieldtype": "Section Break",
-     "label": "Template Details"
-    },
-    {
-     "fieldname": "column_break_45",
-     "fieldtype": "Column Break"
-    },
-    {
-     "collapsible": 1,
-     "collapsible_depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
-     "depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
-     "fieldname": "section_break_41",
-     "fieldtype": "Section Break",
-     "label": "Template Details"
-    }
-   ],
-"image_field": "image",
-"index_web_pages_for_search": 1,
-"is_submittable": 1,
-"links": [
-    {
-     "group": "Maintenance",
-     "link_doctype": "Asset Maintenance_",
-     "link_fieldname": "asset"
-    },
-    {
-     "group": "Repair",
-     "link_doctype": "Asset Repair_",
-     "link_fieldname": "asset"
-    },
-    {
-     "group": "Revalue",
-     "link_doctype": "Asset Revaluation",
-     "link_fieldname": "asset"
-    },
-    {
-     "group": "Depreciation",
-     "link_doctype": "Depreciation Schedule_",
-     "link_fieldname": "asset"
-    },
-    {
-     "group": "Serial Nos",
-     "link_doctype": "Asset Serial No",
-     "link_fieldname": "asset"
-    }
-   ],
- "modified": "2022-01-30 20:19:24.680027",
+  "item_code",
+  "asset_name",
+  "is_serialized_asset",
+  "column_break_1",
+  "naming_series",
+  "asset_category",
+  "num_of_assets",
+  "asset_value",
+  "image",
+  "disposal_date",
+  "journal_entry_for_scrap",
+  "is_intangible_asset",
+  "is_amortizable_asset",
+  "tracking_details_section",
+  "asset_owner",
+  "company",
+  "supplier",
+  "customer",
+  "department",
+  "column_break_23",
+  "location",
+  "custodian",
+  "purchase_details_section",
+  "purchase_receipt",
+  "gross_purchase_amount",
+  "is_existing_asset",
+  "column_break_2",
+  "purchase_invoice",
+  "purchase_date",
+  "depreciation_section",
+  "available_for_use_date",
+  "salvage_value",
+  "calculate_depreciation",
+  "column_break_3",
+  "depreciation_posting_start_date",
+  "depreciation_template",
+  "opening_accumulated_depreciation",
+  "section_break_41",
+  "finance_books",
+  "depr_details_section",
+  "depreciation_method",
+  "asset_life_in_months",
+  "column_break_45",
+  "frequency_of_depreciation",
+  "rate_of_depreciation",
+  "accounting_dimensions_section",
+  "cost_center",
+  "insurance_details",
+  "policy_number",
+  "insurer",
+  "insured_value",
+  "column_break_4",
+  "insurance_start_date",
+  "insurance_end_date",
+  "comprehensive_insurance",
+  "maintenance_section",
+  "maintenance_required",
+  "other_details",
+  "status",
+  "booked_fixed_asset",
+  "column_break_5",
+  "purchase_receipt_amount",
+  "default_finance_book",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "asset_owner",
+   "fieldtype": "Select",
+   "label": "Asset Owner",
+   "options": "\nCompany\nSupplier\nCustomer",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.asset_owner == \"Company\"",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "mandatory_depends_on": "eval:doc.asset_owner == \"Company\"",
+   "options": "Company"
+  },
+  {
+   "depends_on": "eval:doc.asset_owner == \"Supplier\"",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "mandatory_depends_on": "eval:doc.asset_owner == \"Supplier\"",
+   "options": "Supplier"
+  },
+  {
+   "depends_on": "eval:doc.asset_owner == \"Customer\"",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "mandatory_depends_on": "eval:doc.asset_owner == \"Customer\"",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Image",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_existing_asset",
+   "fieldtype": "Check",
+   "label": "Is Existing Asset"
+  },
+  {
+   "depends_on": "is_serialized_asset",
+   "fieldname": "journal_entry_for_scrap",
+   "fieldtype": "Link",
+   "label": "Journal Entry for Scrap",
+   "no_copy": 1,
+   "options": "Journal Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "ACC-ASS-.YYYY.-"
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "asset_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Asset Name",
+   "reqd": 1
+  },
+  {
+   "depends_on": "item_code",
+   "fetch_from": "item_code.asset_category",
+   "fieldname": "asset_category",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Asset Category",
+   "options": "Asset Category_",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!(doc.is_serialized_asset)",
+   "fieldname": "location",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Location",
+   "mandatory_depends_on": "eval:!(doc.is_serialized_asset)",
+   "options": "Location_"
+  },
+  {
+   "depends_on": "eval:!(doc.is_serialized_asset)",
+   "fieldname": "custodian",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Custodian",
+   "options": "Employee"
+  },
+  {
+   "depends_on": "eval:!(doc.is_serialized_asset)",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department"
+  },
+  {
+   "fieldname": "disposal_date",
+   "fieldtype": "Date",
+   "label": "Disposal Date",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: !(doc.gross_purchase_amount)",
+   "fieldname": "purchase_details_section",
+   "fieldtype": "Section Break",
+   "label": "Purchase Details"
+  },
+  {
+   "fieldname": "purchase_receipt",
+   "fieldtype": "Link",
+   "label": "Purchase Receipt",
+   "no_copy": 1,
+   "options": "Purchase Receipt",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "purchase_invoice",
+   "fieldtype": "Link",
+   "label": "Purchase Invoice",
+   "no_copy": 1,
+   "options": "Purchase Invoice"
+  },
+  {
+   "depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
+   "fieldname": "available_for_use_date",
+   "fieldtype": "Date",
+   "label": "Available-for-use Date",
+   "mandatory_depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gross_purchase_amount",
+   "fieldtype": "Currency",
+   "label": "Gross Purchase Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1,
+   "read_only_depends_on": "eval:!doc.is_existing_asset",
+   "reqd": 1
+  },
+  {
+   "fieldname": "purchase_date",
+   "fieldtype": "Date",
+   "label": "Purchase Date",
+   "read_only": 1,
+   "read_only_depends_on": "eval:!doc.is_existing_asset",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:!(doc.calculate_depreciation)",
+   "fieldname": "depreciation_section",
+   "fieldtype": "Section Break",
+   "label": "Depreciation"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!(doc.is_intangible_asset)",
+   "fieldname": "calculate_depreciation",
+   "fieldtype": "Check",
+   "label": "Is Depreciable Asset"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.is_existing_asset && doc.calculate_depreciation && !(doc.is_serialized_asset)",
+   "fieldname": "opening_accumulated_depreciation",
+   "fieldtype": "Currency",
+   "label": "Opening Accumulated Depreciation",
+   "no_copy": 1,
+   "options": "Company:company:default_currency"
+  },
+  {
+   "columns": 10,
+   "depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
+   "fieldname": "finance_books",
+   "fieldtype": "Table",
+   "label": "Finance Books",
+   "options": "Asset Finance Book_"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "insurance_details",
+   "fieldtype": "Section Break",
+   "label": "Insurance details"
+  },
+  {
+   "fieldname": "policy_number",
+   "fieldtype": "Data",
+   "label": "Policy number"
+  },
+  {
+   "fieldname": "insurer",
+   "fieldtype": "Data",
+   "label": "Insurer"
+  },
+  {
+   "fieldname": "insured_value",
+   "fieldtype": "Data",
+   "label": "Insured value"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insurance_start_date",
+   "fieldtype": "Date",
+   "label": "Insurance Start Date"
+  },
+  {
+   "fieldname": "insurance_end_date",
+   "fieldtype": "Date",
+   "label": "Insurance End Date"
+  },
+  {
+   "fieldname": "comprehensive_insurance",
+   "fieldtype": "Data",
+   "label": "Comprehensive Insurance"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "maintenance_section",
+   "fieldtype": "Section Break",
+   "label": "Maintenance"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "description": "Check if Asset requires Preventive Maintenance or Calibration",
+   "fieldname": "maintenance_required",
+   "fieldtype": "Check",
+   "label": "Maintenance Required"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "other_details",
+   "fieldtype": "Section Break",
+   "label": "Other Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nSubmitted\nPartially Depreciated\nFully Depreciated\nSold\nScrapped\nIn Maintenance\nOut of Order\nIssue\nReceipt",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "To check if CWIP entries have been made or not (since they need to be posted on an Asset's available-for-use date and not its date of submission)",
+   "fieldname": "booked_fixed_asset",
+   "fieldtype": "Check",
+   "label": "Booked Fixed Asset",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "purchase_receipt_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Purchase Receipt Amount",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.default_finance_book",
+   "fieldname": "default_finance_book",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Default Finance Book",
+   "options": "Finance Book",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Asset",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_serialized_asset",
+   "fieldtype": "Check",
+   "label": "Is Serialized Asset"
+  },
+  {
+   "fieldname": "num_of_assets",
+   "fieldtype": "Int",
+   "label": "Number of Assets",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:!(doc.is_serialized_asset)",
+   "fieldname": "asset_value",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Asset Value",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_intangible_asset",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Intangible Asset"
+  },
+  {
+   "default": "0",
+   "depends_on": "is_intangible_asset",
+   "fieldname": "is_amortizable_asset",
+   "fieldtype": "Check",
+   "label": "Is Amortizable Asset"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: !(doc.asset_owner)",
+   "fieldname": "tracking_details_section",
+   "fieldtype": "Section Break",
+   "label": "Tracking Details"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
+   "fieldname": "depreciation_posting_start_date",
+   "fieldtype": "Date",
+   "label": "Depreciation Posting Start Date",
+   "mandatory_depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)"
+  },
+  {
+   "depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
+   "fieldname": "salvage_value",
+   "fieldtype": "Currency",
+   "label": "Salvage Value",
+   "mandatory_depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
+   "fieldname": "depreciation_template",
+   "fieldtype": "Link",
+   "label": "Depreciation Template",
+   "options": "Depreciation Template"
+  },
+  {
+   "fetch_from": "depreciation_template.depreciation_method",
+   "fieldname": "depreciation_method",
+   "fieldtype": "Data",
+   "label": "Depreciation Method",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "depreciation_template.frequency_of_depreciation",
+   "fieldname": "frequency_of_depreciation",
+   "fieldtype": "Data",
+   "label": "Frequency of Depreciation",
+   "read_only": 1
+  },
+  {
+   "depends_on": "asset_life_in_months",
+   "fieldname": "asset_life_in_months",
+   "fieldtype": "Int",
+   "label": "Asset Life (In Months)",
+   "read_only": 1
+  },
+  {
+   "depends_on": "rate_of_depreciation",
+   "fetch_from": "depreciation_template.rate_of_depreciation",
+   "fieldname": "rate_of_depreciation",
+   "fieldtype": "Percent",
+   "label": "Rate of Depreciation",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:!(doc.calculate_depreciation)",
+   "depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
+   "fieldname": "depr_details_section",
+   "fieldtype": "Section Break",
+   "label": "Template Details"
+  },
+  {
+   "fieldname": "column_break_45",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
+   "depends_on": "eval:doc.calculate_depreciation && !(doc.is_serialized_asset)",
+   "fieldname": "section_break_41",
+   "fieldtype": "Section Break",
+   "label": "Template Details"
+  }
+ ],
+ "image_field": "image",
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [
+  {
+   "group": "Maintenance",
+   "link_doctype": "Asset Maintenance_",
+   "link_fieldname": "asset"
+  },
+  {
+   "group": "Repair",
+   "link_doctype": "Asset Repair_",
+   "link_fieldname": "asset"
+  },
+  {
+   "group": "Revalue",
+   "link_doctype": "Asset Revaluation",
+   "link_fieldname": "asset"
+  },
+  {
+   "group": "Depreciation",
+   "link_doctype": "Depreciation Schedule_",
+   "link_fieldname": "asset"
+  },
+  {
+   "group": "Serial Nos",
+   "link_doctype": "Asset Serial No",
+   "link_fieldname": "asset"
+  }
+ ],
+ "modified": "2022-04-28 00:33:03.884653",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

@@ -225,6 +225,7 @@
      },
      {
         "default": "0",
+        "description": "To check if CWIP entries have been made or not (since they need to be posted on an Asset's available-for-use date and not its date of submission)",
         "fieldname": "booked_fixed_asset",
         "fieldtype": "Check",
         "label": "Booked Fixed Asset",
@@ -241,7 +242,7 @@
       "link_fieldname": "serial_no"
      }
     ],
-    "modified": "2022-03-20 21:26:38.394732",
+    "modified": "2022-04-28 21:26:38.394732",
     "modified_by": "Administrator",
     "module": "Asset",
     "name": "Asset Serial No",
