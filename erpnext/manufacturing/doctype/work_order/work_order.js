@@ -609,7 +609,6 @@ frappe.ui.form.on("Work Order Item", {
 	// 		}
 	// 	});
 	// }
-
 });
 
 frappe.ui.form.on("Work Order Operation", {
@@ -677,6 +676,7 @@ erpnext.work_order = {
 				if ((flt(doc.transfered_rm_weight) < flt(doc.planned_rm_weight))
 					&& frm.doc.status != 'Stopped' && frm.doc.status != 'Completed' && frm.doc.status != 'Cancelled' 
 					|| flt(req)>flt(trans) && frm.doc.status != 'Stopped' && frm.doc.status != 'Completed' && frm.doc.status != 'Cancelled') {
+
 					frm.has_start_btn = true;
 					frm.add_custom_button(__('Create Pick List'), function() {
 						erpnext.work_order.create_pick_list(frm);
