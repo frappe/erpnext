@@ -78,56 +78,6 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
 
-	# def test_delivery_note_gl_entry(self):
-	# 	company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
-
-	# 	set_valuation_method("_Test Item", "FIFO")
-
-	# 	make_stock_entry(target="Stores - TCP1", qty=5, basic_rate=100)
-
-	# 	stock_in_hand_account = get_inventory_account('_Test Company with perpetual inventory')
-	# 	prev_bal = get_balance_on(stock_in_hand_account)
-
-	# 	dn = create_delivery_note(company='_Test Company with perpetual inventory', warehouse='Stores - TCP1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1")
-
-	# 	gl_entries = get_gl_entries("Delivery Note", dn.name)
-	# 	self.assertTrue(gl_entries)
-
-	# 	stock_value_difference = abs(frappe.db.get_value("Stock Ledger Entry",
-	# 		{"voucher_type": "Delivery Note", "voucher_no": dn.name}, "stock_value_difference"))
-
-	# 	expected_values = {
-	# 		stock_in_hand_account: [0.0, stock_value_difference],
-	# 		"Cost of Goods Sold - TCP1": [stock_value_difference, 0.0]
-	# 	}
-	# 	for i, gle in enumerate(gl_entries):
-	# 		self.assertEqual([gle.debit, gle.credit], expected_values.get(gle.account))
-
-	# 	# check stock in hand balance
-	# 	bal = get_balance_on(stock_in_hand_account)
-	# 	self.assertEqual(bal, prev_bal - stock_value_difference)
-
-	# 	# back dated incoming entry
-	# 	make_stock_entry(posting_date=add_days(nowdate(), -2), target="Stores - TCP1",
-	# 		qty=5, basic_rate=100)
-
-	# 	gl_entries = get_gl_entries("Delivery Note", dn.name)
-	# 	self.assertTrue(gl_entries)
-
-	# 	stock_value_difference = abs(frappe.db.get_value("Stock Ledger Entry",
-	# 		{"voucher_type": "Delivery Note", "voucher_no": dn.name}, "stock_value_difference"))
-
-	# 	expected_values = {
-	# 		stock_in_hand_account: [0.0, stock_value_difference],
-	# 		"Cost of Goods Sold - TCP1": [stock_value_difference, 0.0]
-	# 	}
-	# 	for i, gle in enumerate(gl_entries):
-	# 		self.assertEqual([gle.debit, gle.credit], expected_values.get(gle.account))
-
-	# 	dn.cancel()
-	# 	self.assertTrue(get_gl_entries("Delivery Note", dn.name))
-	# 	set_perpetual_inventory(0, company)
-
 	def test_delivery_note_gl_entry_packing_item(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
 
@@ -854,8 +804,6 @@ class TestDeliveryNote(FrappeTestCase):
 			company="_Test Company with perpetual inventory",
 		)
 
-		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
-
 		set_valuation_method("_Test Item", "FIFO")
 
 		make_stock_entry(target="Stores - TCP1", qty=5, basic_rate=100)
@@ -880,8 +828,6 @@ class TestDeliveryNote(FrappeTestCase):
 
 	def test_delivery_note_cost_center_with_balance_sheet_account(self):
 		cost_center = "Main - TCP1"
-
-		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
 
 		set_valuation_method("_Test Item", "FIFO")
 
