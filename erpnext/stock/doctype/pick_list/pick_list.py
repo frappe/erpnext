@@ -96,16 +96,9 @@ class PickList(Document):
 				100 + flt(frappe.db.get_single_value("Stock Settings", "over_delivery_receipt_allowance"))
 			):
 				frappe.throw(
-<<<<<<< HEAD
-					"You are picking more than required quantity for "
-					+ item_code
-					+ ". Check if there is any other pick list created for "
-					+ so_doc.name
-=======
 					_(
 						"You are picking more than required quantity for {}. Check if there is any other pick list created for {}"
 					).format(item_code, item.sales_order)
->>>>>>> e64cc66df7 (refactor: sales order status update)
 				)
 
 		frappe.db.set_value(item_table, item.sales_order_item, "picked_qty", already_picked + picked_qty)
@@ -276,7 +269,8 @@ class PickList(Document):
 			if item.product_bundle_item != bundle_row:
 				continue
 
-			if qty_in_bundle := bundle_items.get(item.item_code):
+			qty_in_bundle = bundle_items.get(item.item_code)
+			if qty_in_bundle:
 				possible_bundles.append(item.picked_qty / qty_in_bundle)
 			else:
 				possible_bundles.append(0)
