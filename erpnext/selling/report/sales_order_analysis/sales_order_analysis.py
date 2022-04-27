@@ -81,7 +81,7 @@ def get_data(conditions, filters):
 			ON sii.so_detail = soi.name and sii.docstatus = 1)
 		LEFT JOIN `tabDelivery Note Item` dni
 			on dni.so_detail = soi.name
-		RIGHT JOIN `tabDelivery Note` dn
+		LEFT JOIN `tabDelivery Note` dn
 			on dni.parent = dn.name and dn.docstatus = 1
 		WHERE
 			soi.parent = so.name

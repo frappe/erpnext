@@ -54,11 +54,11 @@ class Opportunity(TransactionBase):
 			self.calculate_totals()
 
 	def map_fields(self):
-		for field in self.meta.fields:
-			if not self.get(field.fieldname):
+		for field in self.meta.get_valid_columns():
+			if not self.get(field) and frappe.db.field_exists(self.opportunity_from, field):
 				try:
-					value = frappe.db.get_value(self.opportunity_from, self.party_name, field.fieldname)
-					frappe.db.set(self, field.fieldname, value)
+					value = frappe.db.get_value(self.opportunity_from, self.party_name, field)
+					frappe.db.set(self, field, value)
 				except Exception:
 					continue
 

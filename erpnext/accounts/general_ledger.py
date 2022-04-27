@@ -355,7 +355,7 @@ def raise_debit_credit_not_equal_error(debit_credit_diff, voucher_type, voucher_
 
 def make_round_off_gle(gl_map, debit_credit_diff, precision):
 	round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
-		gl_map[0].company
+		gl_map[0].company, gl_map[0].voucher_type, gl_map[0].voucher_no
 	)
 	round_off_account_exists = False
 	round_off_gle = frappe._dict()
@@ -392,14 +392,43 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 		}
 	)
 
+	update_accounting_dimensions(round_off_gle)
+
 	if not round_off_account_exists:
 		gl_map.append(round_off_gle)
 
 
-def get_round_off_account_and_cost_center(company):
+def update_accounting_dimensions(round_off_gle):
+	dimensions = get_accounting_dimensions()
+	meta = frappe.get_meta(round_off_gle["voucher_type"])
+	has_all_dimensions = True
+
+	for dimension in dimensions:
+		if not meta.has_field(dimension):
+			has_all_dimensions = False
+
+	if dimensions and has_all_dimensions:
+		dimension_values = frappe.db.get_value(
+			round_off_gle["voucher_type"], round_off_gle["voucher_no"], dimensions, as_dict=1
+		)
+
+		for dimension in dimensions:
+			round_off_gle[dimension] = dimension_values.get(dimension)
+
+
+def get_round_off_account_and_cost_center(company, voucher_type, voucher_no):
 	round_off_account, round_off_cost_center = frappe.get_cached_value(
 		"Company", company, ["round_off_account", "round_off_cost_center"]
 	) or [None, None]
+
+	meta = frappe.get_meta(voucher_type)
+
+	# Give first preference to parent cost center for round off GLE
+	if meta.has_field("cost_center"):
+		parent_cost_center = frappe.db.get_value(voucher_type, voucher_no, "cost_center")
+		if parent_cost_center:
+			round_off_cost_center = parent_cost_center
+
 	if not round_off_account:
 		frappe.throw(_("Please mention Round Off Account in Company"))
 

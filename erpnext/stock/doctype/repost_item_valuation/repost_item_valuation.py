@@ -4,16 +4,16 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, get_link_to_form, get_weekday, now, nowtime, today
+from frappe.utils import cint, get_link_to_form, get_weekday, now, nowtime
 from frappe.utils.user import get_users_with_role
-from rq.timeouts import JobTimeoutException
 
 import erpnext
-from erpnext.accounts.utils import (
-	check_if_stock_and_account_balance_synced,
-	update_gl_entries_after,
+from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
+from erpnext.stock.stock_ledger import (
+	get_affected_transactions,
+	get_items_to_be_repost,
+	repost_future_sle,
 )
-from erpnext.stock.stock_ledger import get_items_to_be_repost, repost_future_sle
 
 
 class RepostItemValuation(Document):
@@ -132,12 +132,12 @@ def repost(doc):
 
 		doc.set_status("Completed")
 
-	except (Exception, JobTimeoutException):
+	except Exception:
 		frappe.db.rollback()
 		traceback = frappe.get_traceback()
 		frappe.log_error(traceback)
 
-		message = frappe.message_log.pop()
+		message = frappe.message_log.pop() if frappe.message_log else ""
 		if traceback:
 			message += "<br>" + "Traceback: <br>" + traceback
 		frappe.db.set_value(doc.doctype, doc.name, "error_log", message)
@@ -173,6 +173,7 @@ def repost_sl_entries(doc):
 			],
 			allow_negative_stock=doc.allow_negative_stock,
 			via_landed_cost_voucher=doc.via_landed_cost_voucher,
+			doc=doc,
 		)
 
 
@@ -180,27 +181,46 @@ def repost_gl_entries(doc):
 	if not cint(erpnext.is_perpetual_inventory_enabled(doc.company)):
 		return
 
+	# directly modified transactions
+	directly_dependent_transactions = _get_directly_dependent_vouchers(doc)
+	repost_affected_transaction = get_affected_transactions(doc)
+	repost_gle_for_stock_vouchers(
+		directly_dependent_transactions + list(repost_affected_transaction),
+		doc.posting_date,
+		doc.company,
+	)
+
+
+def _get_directly_dependent_vouchers(doc):
+	"""Get stock vouchers that are directly affected by reposting
+	i.e. any one item-warehouse is present in the stock transaction"""
+
+	items = set()
+	warehouses = set()
+
 	if doc.based_on == "Transaction":
 		ref_doc = frappe.get_doc(doc.voucher_type, doc.voucher_no)
 		doc_items, doc_warehouses = ref_doc.get_items_and_warehouses()
+		items.update(doc_items)
+		warehouses.update(doc_warehouses)
 
 		sles = get_items_to_be_repost(doc.voucher_type, doc.voucher_no)
-		sle_items = [sle.item_code for sle in sles]
-		sle_warehouse = [sle.warehouse for sle in sles]
-
-		items = list(set(doc_items).union(set(sle_items)))
-		warehouses = list(set(doc_warehouses).union(set(sle_warehouse)))
+		sle_items = {sle.item_code for sle in sles}
+		sle_warehouses = {sle.warehouse for sle in sles}
+		items.update(sle_items)
+		warehouses.update(sle_warehouses)
 	else:
-		items = [doc.item_code]
-		warehouses = [doc.warehouse]
+		items.add(doc.item_code)
+		warehouses.add(doc.warehouse)
 
-	update_gl_entries_after(
-		doc.posting_date,
-		doc.posting_time,
-		for_warehouses=warehouses,
-		for_items=items,
+	affected_vouchers = get_future_stock_vouchers(
+		posting_date=doc.posting_date,
+		posting_time=doc.posting_time,
+		for_warehouses=list(warehouses),
+		for_items=list(items),
 		company=doc.company,
 	)
+	return affected_vouchers
 
 
 def notify_error_to_stock_managers(doc, traceback):
@@ -224,6 +244,10 @@ def notify_error_to_stock_managers(doc, traceback):
 
 
 def repost_entries():
+	"""
+	Reposts 'Repost Item Valuation' entries in queue.
+	Called hourly via hooks.py.
+	"""
 	if not in_configured_timeslot():
 		return
 
@@ -238,9 +262,6 @@ def repost_entries():
 	riv_entries = get_repost_item_valuation_entries()
 	if riv_entries:
 		return
-
-	for d in frappe.get_all("Company", filters={"enable_perpetual_inventory": 1}):
-		check_if_stock_and_account_balance_synced(today(), d.name)
 
 
 def get_repost_item_valuation_entries():

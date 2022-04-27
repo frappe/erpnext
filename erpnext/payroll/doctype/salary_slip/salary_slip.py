@@ -952,8 +952,12 @@ class SalarySlip(TransactionBase):
 		)
 
 		# Structured tax amount
-		total_structured_tax_amount = self.calculate_tax_by_tax_slab(
-			total_taxable_earnings_without_full_tax_addl_components, tax_slab
+		eval_locals = self.get_data_for_eval()
+		total_structured_tax_amount = calculate_tax_by_tax_slab(
+			total_taxable_earnings_without_full_tax_addl_components,
+			tax_slab,
+			self.whitelisted_globals,
+			eval_locals,
 		)
 		current_structured_tax_amount = (
 			total_structured_tax_amount - previous_total_paid_taxes
@@ -962,7 +966,9 @@ class SalarySlip(TransactionBase):
 		# Total taxable earnings with additional earnings with full tax
 		full_tax_on_additional_earnings = 0.0
 		if current_additional_earnings_with_full_tax:
-			total_tax_amount = self.calculate_tax_by_tax_slab(total_taxable_earnings, tax_slab)
+			total_tax_amount = calculate_tax_by_tax_slab(
+				total_taxable_earnings, tax_slab, self.whitelisted_globals, eval_locals
+			)
 			full_tax_on_additional_earnings = total_tax_amount - total_structured_tax_amount
 
 		current_tax_amount = current_structured_tax_amount + full_tax_on_additional_earnings
@@ -1277,50 +1283,6 @@ class SalarySlip(TransactionBase):
 			},
 			fields="SUM(amount) as total_amount",
 		)[0].total_amount
-
-	def calculate_tax_by_tax_slab(self, annual_taxable_earning, tax_slab):
-		data = self.get_data_for_eval()
-		data.update({"annual_taxable_earning": annual_taxable_earning})
-		tax_amount = 0
-		for slab in tax_slab.slabs:
-			cond = cstr(slab.condition).strip()
-			if cond and not self.eval_tax_slab_condition(cond, data):
-				continue
-			if not slab.to_amount and annual_taxable_earning >= slab.from_amount:
-				tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction * 0.01
-				continue
-			if annual_taxable_earning >= slab.from_amount and annual_taxable_earning < slab.to_amount:
-				tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction * 0.01
-			elif annual_taxable_earning >= slab.from_amount and annual_taxable_earning >= slab.to_amount:
-				tax_amount += (slab.to_amount - slab.from_amount + 1) * slab.percent_deduction * 0.01
-
-		# other taxes and charges on income tax
-		for d in tax_slab.other_taxes_and_charges:
-			if flt(d.min_taxable_income) and flt(d.min_taxable_income) > annual_taxable_earning:
-				continue
-
-			if flt(d.max_taxable_income) and flt(d.max_taxable_income) < annual_taxable_earning:
-				continue
-
-			tax_amount += tax_amount * flt(d.percent) / 100
-
-		return tax_amount
-
-	def eval_tax_slab_condition(self, condition, data):
-		try:
-			condition = condition.strip()
-			if condition:
-				return frappe.safe_eval(condition, self.whitelisted_globals, data)
-		except NameError as err:
-			frappe.throw(
-				_("{0} <br> This error can be due to missing or deleted field.").format(err),
-				title=_("Name error"),
-			)
-		except SyntaxError as err:
-			frappe.throw(_("Syntax error in condition: {0}").format(err))
-		except Exception as e:
-			frappe.throw(_("Error in formula or condition: {0}").format(e))
-			raise
 
 	def get_component_totals(self, component_type, depends_on_payment_days=0):
 		joining_date, relieving_date = frappe.get_cached_value(
@@ -1705,3 +1667,60 @@ def get_payroll_payable_account(company, payroll_entry):
 		)
 
 	return payroll_payable_account
+
+
+def calculate_tax_by_tax_slab(
+	annual_taxable_earning, tax_slab, eval_globals=None, eval_locals=None
+):
+	eval_locals.update({"annual_taxable_earning": annual_taxable_earning})
+	tax_amount = 0
+	for slab in tax_slab.slabs:
+		cond = cstr(slab.condition).strip()
+		if cond and not eval_tax_slab_condition(cond, eval_globals, eval_locals):
+			continue
+		if not slab.to_amount and annual_taxable_earning >= slab.from_amount:
+			tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction * 0.01
+			continue
+		if annual_taxable_earning >= slab.from_amount and annual_taxable_earning < slab.to_amount:
+			tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction * 0.01
+		elif annual_taxable_earning >= slab.from_amount and annual_taxable_earning >= slab.to_amount:
+			tax_amount += (slab.to_amount - slab.from_amount + 1) * slab.percent_deduction * 0.01
+
+	# other taxes and charges on income tax
+	for d in tax_slab.other_taxes_and_charges:
+		if flt(d.min_taxable_income) and flt(d.min_taxable_income) > annual_taxable_earning:
+			continue
+
+		if flt(d.max_taxable_income) and flt(d.max_taxable_income) < annual_taxable_earning:
+			continue
+
+		tax_amount += tax_amount * flt(d.percent) / 100
+
+	return tax_amount
+
+
+def eval_tax_slab_condition(condition, eval_globals=None, eval_locals=None):
+	if not eval_globals:
+		eval_globals = {
+			"int": int,
+			"float": float,
+			"long": int,
+			"round": round,
+			"date": datetime.date,
+			"getdate": getdate,
+		}
+
+	try:
+		condition = condition.strip()
+		if condition:
+			return frappe.safe_eval(condition, eval_globals, eval_locals)
+	except NameError as err:
+		frappe.throw(
+			_("{0} <br> This error can be due to missing or deleted field.").format(err),
+			title=_("Name error"),
+		)
+	except SyntaxError as err:
+		frappe.throw(_("Syntax error in condition: {0} in Income Tax Slab").format(err))
+	except Exception as e:
+		frappe.throw(_("Error in formula or condition: {0} in Income Tax Slab").format(e))
+		raise
