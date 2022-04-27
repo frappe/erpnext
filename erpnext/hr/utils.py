@@ -489,6 +489,17 @@ def update_previous_leave_allocation(
 			allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
 			create_additional_leave_ledger_entry(allocation, earned_leaves, today_date)
 
+			if e_leave_type.based_on_date_of_joining:
+				text = _("allocated {0} leave(s) via scheduler on {1} based on the date of joining").format(
+					frappe.bold(earned_leaves), frappe.bold(formatdate(today_date))
+				)
+			else:
+				text = _("allocated {0} leave(s) via scheduler on {1}").format(
+					frappe.bold(earned_leaves), frappe.bold(formatdate(today_date))
+				)
+
+			allocation.add_comment(comment_type="Info", text=text)
+
 
 def get_monthly_earned_leave(annual_leaves, frequency, rounding):
 	earned_leaves = 0.0

@@ -22,12 +22,14 @@ class ProductFiltersBuilder:
 		fields, filter_data = [], []
 		filter_fields = [row.fieldname for row in self.doc.filter_fields]  # fields in settings
 
-		# filter valid field filters i.e. those that exist in Item
-		item_meta = frappe.get_meta("Item", cached=True)
-		fields = [item_meta.get_field(field) for field in filter_fields if item_meta.has_field(field)]
+		# filter valid field filters i.e. those that exist in Website Item
+		web_item_meta = frappe.get_meta("Website Item", cached=True)
+		fields = [
+			web_item_meta.get_field(field) for field in filter_fields if web_item_meta.has_field(field)
+		]
 
 		for df in fields:
-			item_filters, item_or_filters = {"published_in_website": 1}, []
+			item_filters, item_or_filters = {"published": 1}, []
 			link_doctype_values = self.get_filtered_link_doctype_records(df)
 
 			if df.fieldtype == "Link":
@@ -50,9 +52,13 @@ class ProductFiltersBuilder:
 							]
 						)
 
+				# exclude variants if mentioned in settings
+				if frappe.db.get_single_value("E Commerce Settings", "hide_variants"):
+					item_filters["variant_of"] = ["is", "not set"]
+
 				# Get link field values attached to published items
 				item_values = frappe.get_all(
-					"Item",
+					"Website Item",
 					fields=[df.fieldname],
 					filters=item_filters,
 					or_filters=item_or_filters,
