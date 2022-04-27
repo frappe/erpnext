@@ -131,7 +131,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-06 11:48:44.764877",
+ "modified": "2022-04-26 12:21:40.204654",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Follow Up Level",
@@ -170,6 +170,30 @@
    "read": 1,
    "report": 1,
    "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Auditor",
    "share": 1,
    "write": 1
   }

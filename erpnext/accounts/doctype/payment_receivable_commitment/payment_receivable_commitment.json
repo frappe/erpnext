@@ -10,12 +10,14 @@
   "customer_name",
   "customer_group",
   "territory",
+  "follow_up_level",
   "column_break_5",
   "date",
   "due_date",
   "commitment_date",
   "commitment_amount",
   "commitment_to",
+  "commitment_status",
   "invoice_details_section",
   "voucher_type",
   "invoice_amount",
@@ -23,7 +25,8 @@
   "column_break_15",
   "voucher_no",
   "total_due",
-  "age"
+  "age",
+  "company"
  ],
  "fields": [
   {
@@ -31,27 +34,31 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Customer",
-   "options": "Customer"
+   "options": "Customer",
+   "read_only": 1
   },
   {
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
-   "label": "Customer Name"
+   "label": "Customer Name",
+   "read_only": 1
   },
   {
    "fieldname": "customer_group",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Customer Group",
-   "options": "Customer Group"
+   "options": "Customer Group",
+   "read_only": 1
   },
   {
    "fieldname": "territory",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Territory",
-   "options": "Territory"
+   "options": "Territory",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_5",
@@ -61,31 +68,36 @@
    "default": "Today",
    "fieldname": "date",
    "fieldtype": "Date",
-   "label": "Date "
+   "label": "Date ",
+   "read_only": 1
   },
   {
    "fieldname": "due_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Due Date"
+   "label": "Due Date",
+   "read_only": 1
   },
   {
    "fieldname": "commitment_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Commitment Date"
+   "label": "Commitment Date",
+   "read_only": 1
   },
   {
    "fieldname": "commitment_amount",
    "fieldtype": "Currency",
    "label": "Commitment Amount",
+   "read_only": 1,
    "search_index": 1
   },
   {
    "fieldname": "commitment_to",
    "fieldtype": "Link",
    "label": "Commitment To ",
-   "options": "User"
+   "options": "User",
+   "read_only": 1
   },
   {
    "fieldname": "invoice_details_section",
@@ -96,18 +108,21 @@
    "fieldname": "voucher_type",
    "fieldtype": "Link",
    "label": "Voucher Type",
-   "options": "DocType"
+   "options": "DocType",
+   "read_only": 1
   },
   {
    "fieldname": "invoice_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Invoice Amount"
+   "label": "Invoice Amount",
+   "read_only": 1
   },
   {
    "fieldname": "total_outstanding",
    "fieldtype": "Currency",
-   "label": "Total Outstanding"
+   "label": "Total Outstanding",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_15",
@@ -117,22 +132,49 @@
    "fieldname": "voucher_no",
    "fieldtype": "Dynamic Link",
    "label": "Voucher No",
-   "options": "voucher_type"
+   "options": "voucher_type",
+   "read_only": 1
   },
   {
    "fieldname": "total_due",
    "fieldtype": "Currency",
-   "label": "Total Due "
+   "label": "Total Due ",
+   "read_only": 1
   },
   {
    "fieldname": "age",
    "fieldtype": "Int",
-   "label": "Age"
+   "label": "Age",
+   "read_only": 1
+  },
+  {
+   "fieldname": "commitment_status",
+   "fieldtype": "Select",
+   "label": "Commitment Status",
+   "options": "Active\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "follow_up_level",
+   "fieldtype": "Link",
+   "label": "Follow Up Level",
+   "options": "Follow Up Level",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "voucher_no.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
   }
  ],
+ "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-06 11:46:29.624921",
+ "modified": "2022-04-27 17:21:06.722355",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Receivable Commitment",
