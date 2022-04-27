@@ -1500,6 +1500,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			return;
 		}
 
+		// Target doc created from a mapped doc
+		if (this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list) {
+			return;
+		}
+
 		return this.frm.call({
 			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule",
 			args: {	args: args, doc: me.frm.doc },
@@ -1616,7 +1621,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				me.remove_pricing_rule(frappe.get_doc(d.doctype, d.name));
 			}
 
-			if (d.free_item_data) {
+			if (d.free_item_data.length > 0) {
 				me.apply_product_discount(d);
 			}
 

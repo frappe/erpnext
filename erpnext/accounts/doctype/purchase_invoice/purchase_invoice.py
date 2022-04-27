@@ -837,7 +837,9 @@ class PurchaseInvoice(BuyingController):
 
 					if provisional_accounting_for_non_stock_items:
 						if item.purchase_receipt:
-							provisional_account = self.get_company_default("default_provisional_account")
+							provisional_account = frappe.db.get_value(
+								"Purchase Receipt Item", item.pr_detail, "provisional_expense_account"
+							) or self.get_company_default("default_provisional_account")
 							purchase_receipt_doc = purchase_receipt_doc_map.get(item.purchase_receipt)
 
 							if not purchase_receipt_doc:
@@ -860,7 +862,7 @@ class PurchaseInvoice(BuyingController):
 							if expense_booked_in_pr:
 								# Intentionally passing purchase invoice item to handle partial billing
 								purchase_receipt_doc.add_provisional_gl_entry(
-									item, gl_entries, self.posting_date, reverse=1
+									item, gl_entries, self.posting_date, provisional_account, reverse=1
 								)
 
 					if not self.is_internal_transfer():
@@ -1351,7 +1353,9 @@ class PurchaseInvoice(BuyingController):
 		if (
 			not self.is_internal_transfer() and self.rounding_adjustment and self.base_rounding_adjustment
 		):
-			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(self.company)
+			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
+				self.company, "Purchase Invoice", self.name
+			)
 
 			gl_entries.append(
 				self.get_gl_dict(

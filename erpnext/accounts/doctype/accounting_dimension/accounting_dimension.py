@@ -99,7 +99,7 @@ def make_dimension_in_accounting_doctypes(doc, doclist=None):
 			if doctype == "Budget":
 				add_dimension_to_budget_doctype(df.copy(), doc)
 			else:
-				create_custom_field(doctype, df)
+				create_custom_field(doctype, df, ignore_validate=True)
 
 		count += 1
 
@@ -115,7 +115,7 @@ def add_dimension_to_budget_doctype(df, doc):
 		}
 	)
 
-	create_custom_field("Budget", df)
+	create_custom_field("Budget", df, ignore_validate=True)
 
 	property_setter = frappe.db.exists("Property Setter", "Budget-budget_against-options")
 
@@ -205,10 +205,16 @@ def get_doctypes_with_dimensions():
 	return frappe.get_hooks("accounting_dimension_doctypes")
 
 
-def get_accounting_dimensions(as_list=True):
+def get_accounting_dimensions(as_list=True, filters=None):
+
+	if not filters:
+		filters = {"disabled": 0}
+
 	if frappe.flags.accounting_dimensions is None:
 		frappe.flags.accounting_dimensions = frappe.get_all(
-			"Accounting Dimension", fields=["label", "fieldname", "disabled", "document_type"]
+			"Accounting Dimension",
+			fields=["label", "fieldname", "disabled", "document_type"],
+			filters=filters,
 		)
 
 	if as_list:

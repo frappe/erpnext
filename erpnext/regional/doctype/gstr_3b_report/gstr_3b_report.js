@@ -2,6 +2,13 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('GSTR 3B Report', {
+
+	validate : function(frm) {
+		if (frm.doc.address_group && frm.doc.company_address || !frm.doc.address_group && !frm.doc.company_address ){
+			frappe.throw(__('Please on select anyone from Address and Address Group'))
+		}
+	},
+
 	refresh : function(frm) {
 		frm.doc.__unsaved = 1;
 		if(!frm.is_new()) {
@@ -45,7 +52,7 @@ frappe.ui.form.on('GSTR 3B Report', {
 		let options = [current_year, current_year-1, current_year-2];
 		frm.set_df_property('year', 'options', options);
 	},
-
+	
 	setup: function(frm) {
 		frm.set_query('company_address', function(doc) {
 			if(!doc.company) {

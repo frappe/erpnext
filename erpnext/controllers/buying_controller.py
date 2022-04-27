@@ -22,6 +22,9 @@ class QtyMismatchError(ValidationError):
 
 
 class BuyingController(StockController, Subcontracting):
+	def __setup__(self):
+		self.flags.ignore_permlevel_for_fields = ["buying_price_list", "price_list_currency"]
+
 	def get_feed(self):
 		if self.get("supplier_name"):
 			return _("From {0} | {1} {2}").format(self.supplier_name, self.currency, self.grand_total)
