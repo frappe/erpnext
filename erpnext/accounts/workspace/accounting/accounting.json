@@ -522,6 +522,15 @@
   },
   {
    "hidden": 0,
+   "is_query_report": 1,
+   "label": "Collection Commitment vs Payment",
+   "link_to": "Collection Commitment vs Payment",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
    "is_query_report": 0,
    "label": "Financial Statements",
    "onboard": 0,
@@ -1196,7 +1205,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-04-18 19:36:09.509505",
+ "modified": "2022-04-27 17:58:52.193061",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
