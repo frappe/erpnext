@@ -343,9 +343,9 @@ erpnext.PointOfSale.Controller = class {
 				toggle_other_sections: (show) => {
 					if (show) {
 						this.item_details.$component.is(':visible') ? this.item_details.$component.css('display', 'none') : '';
-						this.item_selector.$component.css('display', 'none');
+						this.item_selector.toggle_component(false);
 					} else {
-						this.item_selector.$component.css('display', 'flex');
+						this.item_selector.toggle_component(true);
 					}
 				},
 
