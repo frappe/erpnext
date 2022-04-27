@@ -83,9 +83,12 @@ class PickList(Document):
 
 	def update_sales_order_item(self, item, picked_qty, item_code):
 		item_table = "Sales Order Item" if not item.product_bundle_item else "Packed Item"
+		stock_qty_field = "stock_qty" if not item.product_bundle_item else "qty"
 
 		already_picked, actual_qty = frappe.db.get_value(
-			item_table, item.sales_order_item, ["picked_qty", "qty"]
+			item_table,
+			item.sales_order_item,
+			["picked_qty", stock_qty_field],
 		)
 
 		if self.docstatus == 1:
@@ -264,7 +267,7 @@ class PickList(Document):
 			product_bundle_qty_map[bundle_item_code] = {item.item_code: item.qty for item in bundle.items}
 		return product_bundle_qty_map
 
-	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items) -> float:
+	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items) -> int:
 		"""Compute how many full bundles can be created from picked items."""
 		precision = frappe.get_precision("Stock Ledger Entry", "qty_after_transaction")
 
@@ -277,7 +280,7 @@ class PickList(Document):
 				possible_bundles.append(item.picked_qty / qty_in_bundle)
 			else:
 				possible_bundles.append(0)
-		return flt(min(possible_bundles), precision or 6)
+		return int(flt(min(possible_bundles), precision or 6))
 
 
 def validate_item_locations(pick_list):
