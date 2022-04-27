@@ -582,8 +582,23 @@ class TestPickList(FrappeTestCase):
 				if dn_item.item_code == "_Test Item 2":
 					self.assertEqual(dn_item.qty, 2)
 
+	def test_picklist_with_multi_uom(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(properties={"uoms": [dict(uom="Box", conversion_factor=24)]}).name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=1000)
+
+		so = make_sales_order(item_code=item, qty=10, rate=42, uom="Box")
+		pl = create_pick_list(so.name)
+		# pick half the qty
+		for loc in pl.locations:
+			loc.picked_qty = loc.stock_qty / 2
+		pl.save()
+		pl.submit()
+
+		so.reload()
+		self.assertEqual(so.per_picked, 50)
+
 	def test_picklist_with_bundles(self):
-		# from test_records.json
 		warehouse = "_Test Warehouse - _TC"
 
 		quantities = [5, 2]
