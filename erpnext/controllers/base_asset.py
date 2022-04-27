@@ -1058,3 +1058,69 @@ def update_finance_book(depr_entry):
 
 	if len(finance_books) == 1:
 		depr_entry.finance_book = finance_books[0]
+
+def update_maintenance_status():
+	assets_that_require_maintenance = get_assets_that_require_maintenance()
+
+	for asset in assets_that_require_maintenance:
+		if not asset.is_serialized_asset:
+			update_status_for_asset(asset)
+		else:
+			serial_nos = get_linked_serial_nos(asset)
+
+			for serial_no in serial_nos:
+				update_status_for_asset(asset, serial_no)
+
+def update_status_for_asset(asset, serial_no=None):
+	if not has_pending_repairs(asset, serial_no):
+		asset_or_serial_no = serial_no if serial_no else asset
+
+		if has_maintenance_task_due_today(asset_or_serial_no):
+			if asset_or_serial_no.status != "In Maintenance":
+				asset_or_serial_no = frappe.get_doc(asset_or_serial_no.doctype, asset_or_serial_no.name)
+				asset_or_serial_no.set_status("In Maintenance")
+		else:
+			if asset_or_serial_no.status == "In Maintenance":
+				asset_or_serial_no = frappe.get_doc(asset_or_serial_no.doctype, asset_or_serial_no.name)
+				asset_or_serial_no.set_status()
+
+def get_assets_that_require_maintenance():
+	assets = frappe.get_all(
+		"Asset",
+		filters = {
+			"docstatus": 1,
+			"maintenance_required": 1
+		},
+		fields = ["doctype", "name", "status", "is_serialized_asset"]
+	)
+
+	return assets
+
+def has_pending_repairs(asset, serial_no=None):
+	return frappe.db.exists(
+		"Asset Repair",
+		{
+			"asset_name": asset.name,
+			"serial_no": serial_no.name,
+			"repair_status": "Pending"
+		}
+	)
+
+def has_maintenance_task_due_today(parent):
+	return frappe.db.exists(
+		"Asset Maintenance Task",
+		{
+			"parent": parent.name,
+			"next_due_date": getdate()
+		}
+	)
+
+def get_linked_serial_nos(asset):
+	return frappe.get_all(
+		"Asset Serial No_",
+		filters = {
+			"asset": asset.name,
+			"docstatus": 1,
+		},
+		fields = ["doctype", "name", "status"]
+	)
