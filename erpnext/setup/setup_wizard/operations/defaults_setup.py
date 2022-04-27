@@ -26,9 +26,6 @@ def set_default_settings(args):
 	system_settings.email_footer_address = args.get("company_name")
 	system_settings.save()
 
-	domain_settings = frappe.get_single("Domain Settings")
-	domain_settings.set_active_domains(args.get("domains"))
-
 	stock_settings = frappe.get_doc("Stock Settings")
 	stock_settings.item_naming_by = "Item Code"
 	stock_settings.valuation_method = "FIFO"
