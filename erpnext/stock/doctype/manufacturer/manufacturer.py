@@ -4,6 +4,7 @@
 
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.model.document import Document
+import frappe
 
 
 class Manufacturer(Document):
