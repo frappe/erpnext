@@ -9,7 +9,7 @@ from frappe.model.meta import get_field_precision
 from frappe.model.naming import set_name_from_naming_options
 from frappe.query_builder import AliasedQuery, Criterion, Table
 from frappe.query_builder.functions import Abs, IfNull, Sum
-from frappe.utils import flt
+from frappe.utils import flt, fmt_money
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -346,7 +346,7 @@ def update_outstanding_amt(
 		.select(
 			ple.against_voucher_type.as_("voucher_type"),
 			ple.against_voucher_no.as_("voucher_no"),
-			ple.amount,
+			Sum(ple.amount).as_("amount"),
 		)
 		.where(
 			(ple.is_cancelled == 0)
@@ -369,6 +369,24 @@ def update_outstanding_amt(
 			.select((Table("invoices").amount - IfNull(Sum(Table("payments").amount), 0.0)))
 		).run()[0][0]
 	)
+
+	if against_voucher_type == "Journal Entry" and bal < 0 and not on_cancel:
+		frappe.throw(
+			_("Outstanding for {0} cannot be less than zero ({1})").format(against_voucher, fmt_money(bal))
+		)
+	elif against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
+		# check if it is a link voucher
+		transfer_voucher_query = (
+			qb.from_(ple)
+			.select(Sum(ple.amount).as_("amount"))
+			.where(
+				(ple.is_cancelled == 0)
+				& (ple.voucher_type == against_voucher_type)
+				& (ple.voucher_no == against_voucher)
+			)
+		)
+		transfer_amount = flt(transfer_voucher_query.run()[0][0])
+		bal = transfer_amount + bal
 
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)

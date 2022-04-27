@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe import qb
+from frappe import _, qb
 from frappe.model.document import Document
 from frappe.utils import now
 
@@ -10,11 +10,11 @@ from frappe.utils import now
 class PaymentLedgerEntry(Document):
 	def validate(self):
 		if not self.voucher_no:
-			frappe.throw("Voucher No is mandatory")
+			frappe.throw(_("Voucher No is mandatory"))
 		if not self.against_voucher_no:
-			frappe.throw("Against Voucher No is mandatory")
+			frappe.throw(_("Against Voucher No is mandatory"))
 		if not self.amount:
-			frappe.throw("Amount is mandatory")
+			frappe.throw(_("Amount is mandatory"))
 
 
 def reverse_payment_ledger_entry(payment_ledger_entry):
@@ -55,7 +55,7 @@ def get_payment_ledger_entries(gl_map, cancel=0):
 				# identify transaction type
 				if frappe.db.get_value("Account", entry.account, "root_type") == "Asset":
 					dr_or_cr = entry.debit - entry.credit
-				elif frappe.db.get_value("Account", entry.account, "root_type") == "Liabilities":
+				elif frappe.db.get_value("Account", entry.account, "root_type") == "Liability":
 					dr_or_cr = entry.credit - entry.debit
 
 				if dr_or_cr > 0:
@@ -89,7 +89,7 @@ def get_active_payments(inv_type, inv_no):
 		.where(
 			(pledger.against_voucher_type == inv_type)
 			& (pledger.against_voucher_no == inv_no)
-			& (pledger.is_cancelled == False)
+			& (pledger.is_cancelled == 0)
 		)
 		.run(as_dict=True)
 	)
@@ -127,7 +127,7 @@ def mark_original_as_is_cancelled(payment_ledger_entry):
 					if payment_ledger_entry.against_voucher_no is None
 					else pl.against_voucher_no == payment_ledger_entry.against_voucher_no
 				)
-				& (pl.is_cancelled == False)
+				& (pl.is_cancelled == 0)
 			)
 			.run()
 		)
