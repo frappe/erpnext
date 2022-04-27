@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt, cint, getdate, get_datetime, add_months, format_date
+from frappe.utils import flt, cint, getdate, get_datetime, add_months, format_date, nowdate
 import json
 
 from erpnext.controllers.accounts_controller import AccountsController
@@ -54,7 +54,7 @@ class BaseAsset(AccountsController):
 				self.record_asset_creation()
 				self.record_asset_receipt()
 
-			if self.validate_make_gl_entry():
+			if not self.booked_fixed_asset and self.validate_make_gl_entry():
 				self.make_gl_entries()
 
 		self.set_status()
@@ -68,6 +68,7 @@ class BaseAsset(AccountsController):
 
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 		make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+		self.db_set("booked_fixed_asset", 0)
 
 	# to reduce number of db calls
 	def get_asset_values(self):
@@ -660,6 +661,7 @@ class BaseAsset(AccountsController):
 
 		if gl_entries:
 			make_gl_entries(gl_entries)
+			self.db_set("booked_fixed_asset", 1)
 
 	def set_status(self, status=None):
 		if not status:
@@ -1123,4 +1125,59 @@ def get_linked_serial_nos(asset):
 			"docstatus": 1,
 		},
 		fields = ["doctype", "name", "status"]
+	)
+
+# cwip entries need to be posted on an asset's available-for-use date
+# not on its date of submission
+def post_cwip_entries():
+	asset_categories= get_asset_categories_with_cwip_accounting_enabled()
+
+	assets = get_assets_that_need_to_be_booked_today(asset_categories)
+	serial_nos = get_serial_nos_that_need_to_be_booked_today(asset_categories)
+
+	for asset in (assets + serial_nos):
+		doc = frappe.get_doc(asset.doctype, asset.name)
+		doc.make_gl_entries()
+
+def get_asset_categories_with_cwip_accounting_enabled():
+	return frappe.db.get_all(
+		"Asset Category",
+		filters = {
+			"enable_cwip_accounting": 1
+		},
+		pluck = "name"
+	)
+
+def get_assets_that_need_to_be_booked_today(asset_categories):
+	return frappe.get_all(
+		"Asset",
+		filters = {
+			"asset_category": ["in", asset_categories],
+			"available_for_use_date": nowdate(),
+			"booked_fixed_asset": 0
+		},
+		fields = ["doctype", "name"]
+	)
+
+def get_serial_nos_that_need_to_be_booked_today(asset_categories):
+	assets = get_serialized_assets_that_need_cwip_booking(asset_categories)
+
+	return frappe.get_all(
+		"Asset Serial No_",
+		filters = {
+			"asset": ["in", assets],
+			"available_for_use_date": nowdate(),
+			"booked_fixed_asset": 0
+		},
+		fields = ["doctype", "name"]
+	)
+
+def get_serialized_assets_that_need_cwip_booking(asset_categories):
+	return frappe.get_all(
+		"Asset",
+		filters = {
+			"asset_category": ["in", asset_categories],
+			"is_serialized_asset": 1
+		},
+		pluck = "name"
 	)
