@@ -21,8 +21,5 @@ class Manufacturer(Document):
 			where
 				default_item_manufacturer = %s
 			""",
-			(
-				new_name,
-				old_name
-			)
+			(new_name, old_name)
 		)
