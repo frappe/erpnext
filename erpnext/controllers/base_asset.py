@@ -73,7 +73,7 @@ class BaseAsset(AccountsController):
 	# to reduce number of db calls
 	def get_asset_values(self):
 		self.asset_values = frappe.get_value(
-			"Asset_",
+			"Asset",
 			self.asset,
 			[
 				"calculate_depreciation",
@@ -102,7 +102,7 @@ class BaseAsset(AccountsController):
 		return False
 
 	def is_depreciable_asset(self):
-		if self.doctype == "Asset_":
+		if self.doctype == "Asset":
 			return self.calculate_depreciation
 		else:
 			if not self.get("asset_values"):
@@ -111,7 +111,7 @@ class BaseAsset(AccountsController):
 			return self.asset_values["calculate_depreciation"]
 
 	def validate_number_of_assets(self):
-		if self.doctype == "Asset_" and self.num_of_assets <= 0:
+		if self.doctype == "Asset" and self.num_of_assets <= 0:
 			frappe.throw(_("Number of Assets needs to be greater than zero."))
 
 		purchase_doctype, purchase_docname = get_purchase_details(self)
@@ -127,10 +127,10 @@ class BaseAsset(AccountsController):
 
 	def get_num_of_assets_already_created(self, purchase_doctype, purchase_docname):
 		purchase_doctype = "purchase_receipt" if purchase_doctype == "Purchase Receipt" else "purchase_invoice"
-		asset_name = self.name if self.doctype == "Asset_" else self.asset
+		asset_name = self.name if self.doctype == "Asset" else self.asset
 
 		num_of_assets_already_created = frappe.db.get_all(
-			"Asset_",
+			"Asset",
 			filters = {
 				purchase_doctype: purchase_docname,
 				"name": ["!=", asset_name]
@@ -142,7 +142,7 @@ class BaseAsset(AccountsController):
 		return num_of_assets_already_created
 
 	def get_num_of_assets_in_this_group(self):
-		if self.doctype == "Asset_":
+		if self.doctype == "Asset":
 			return self.num_of_assets
 		else:
 			return self.asset_values["num_of_assets"]
@@ -173,7 +173,7 @@ class BaseAsset(AccountsController):
 			finance_books = get_finance_books(asset_category)
 			self.set("finance_books", finance_books)
 
-		elif self.doctype == "Asset_" and not self.get("asset_category"):
+		elif self.doctype == "Asset" and not self.get("asset_category"):
 			self.set_asset_category()
 
 	def set_initial_asset_value(self):
@@ -191,7 +191,7 @@ class BaseAsset(AccountsController):
 		return asset_value
 
 	def get_asset_category(self):
-		if self.doctype == "Asset_":
+		if self.doctype == "Asset":
 			if not self.get("asset_category"):
 				self.set_asset_category()
 
@@ -204,7 +204,7 @@ class BaseAsset(AccountsController):
 			self.asset_category = frappe.get_cached_value("Item", self.item_code, "asset_category")
 
 	def get_gross_purchase_amount_and_opening_accumulated_depreciation(self):
-		if self.doctype == "Asset_":
+		if self.doctype == "Asset":
 			return self.gross_purchase_amount, self.opening_accumulated_depreciation
 		else:
 			return self.asset_values["gross_purchase_amount"], self.asset_values["opening_accumulated_depreciation"]
@@ -395,7 +395,7 @@ class BaseAsset(AccountsController):
 			delete_existing_schedules(self, fb)
 
 	def get_purchase_date(self):
-		if self.doctype == "Asset_":
+		if self.doctype == "Asset":
 			return self.purchase_date
 		else:
 			return self.asset_values["purchase_date"]
@@ -407,20 +407,20 @@ class BaseAsset(AccountsController):
 		}
 
 		depreciation_schedules = frappe.get_all(
-			"Depreciation Schedule_",
+			"Depreciation Schedule",
 			filters = filters,
 			fields = ["name", "status"]
 		)
 
 		for schedule in depreciation_schedules:
 			if schedule["status"] == "Draft":
-				ds = frappe.get_doc("Depreciation Schedule_", schedule["name"])
+				ds = frappe.get_doc("Depreciation Schedule", schedule["name"])
 				ds.submit()
 			elif schedule["status"] == "Active":
 				self.cancel_active_schedule(schedule["name"], notes)
 
 	def cancel_active_schedule(self, schedule_name, notes):
-		active_schedule = frappe.get_doc("Depreciation Schedule_", schedule_name)
+		active_schedule = frappe.get_doc("Depreciation Schedule", schedule_name)
 
 		active_schedule.flags.ignore_validate_update_after_submit = True
 		active_schedule.notes = notes
@@ -479,7 +479,7 @@ class BaseAsset(AccountsController):
 		}]
 
 		asset_movement = frappe.get_doc({
-			"doctype": "Asset Movement_",
+			"doctype": "Asset Movement",
 			"assets": assets,
 			"purpose": "Receipt",
 			"company": company,
@@ -490,19 +490,19 @@ class BaseAsset(AccountsController):
 		asset_movement.submit()
 
 	def get_serial_no(self):
-		if self.doctype == "Asset_":
+		if self.doctype == "Asset":
 			return ""
 		else:
 			return self.serial_no
 
 	def get_asset(self):
-		if self.doctype == "Asset_":
+		if self.doctype == "Asset":
 			return self.name
 		else:
 			return self.asset
 
 	def get_asset_details(self):
-		if self.doctype == "Asset_":
+		if self.doctype == "Asset":
 			return self.asset_name, self.company
 		else:
 			return self.asset_values["asset_name"], self.asset_values["company"]
@@ -840,7 +840,7 @@ def get_asset_account(account_name, asset=None, asset_category=None, company=Non
 
 @frappe.whitelist()
 def get_finance_books(asset_category):
-	asset_category_doc = frappe.get_doc("Asset Category_", asset_category)
+	asset_category_doc = frappe.get_doc("Asset Category", asset_category)
 	books = []
 
 	for d in asset_category_doc.finance_books:
@@ -859,7 +859,7 @@ def make_asset_movement(assets, purpose=None):
 	if len(assets) == 0:
 		frappe.throw(_("Atleast one asset has to be selected."))
 
-	asset_movement = frappe.new_doc("Asset Movement_")
+	asset_movement = frappe.new_doc("Asset Movement")
 	asset_movement.quantity = len(assets)
 	asset_movement.purpose = purpose
 
@@ -882,11 +882,11 @@ def fetch_asset_tracking_details(asset):
 
 	if asset.get("serial_no"):
 		location, custodian = frappe.get_value("Asset Serial No", asset.name, ["location", "custodian"])
-		company = frappe.get_value("Asset_", asset.asset, "company")
+		company = frappe.get_value("Asset", asset.asset, "company")
 		asset_name = asset.asset
 		serial_no = asset.name
 	else:
-		location, custodian, company = frappe.get_value("Asset_", asset.name, ["location", "custodian", "company"])
+		location, custodian, company = frappe.get_value("Asset", asset.name, ["location", "custodian", "company"])
 		asset_name = asset.name
 		serial_no = ""
 
@@ -897,11 +897,11 @@ def get_purchase_details(asset):
 	if isinstance(asset, str):
 		asset = frappe._dict(json.loads(asset))
 
-	if asset.doctype == "Asset_":
+	if asset.doctype == "Asset":
 		purchase_receipt, purchase_invoice = asset.purchase_receipt, asset.purchase_invoice
 	else:
 		purchase_receipt, purchase_invoice = frappe.db.get_value(
-			"Asset_",
+			"Asset",
 			asset.asset,
 			["purchase_receipt", "purchase_invoice"]
 		)
@@ -930,13 +930,13 @@ def get_num_of_items_in_purchase_doc(asset, purchase_doctype, purchase_docname):
 	return num_of_items_in_purchase_doc
 
 def get_item(asset):
-	if asset.doctype == "Asset_":
+	if asset.doctype == "Asset":
 		return asset.item_code
 	else:
-		return frappe.db.get_value("Asset_", asset.asset, "item_code")
+		return frappe.db.get_value("Asset", asset.asset, "item_code")
 
 def validate_serial_no(doc):
-	is_serialized_asset = frappe.db.get_value("Asset_", doc.asset, "is_serialized_asset")
+	is_serialized_asset = frappe.db.get_value("Asset", doc.asset, "is_serialized_asset")
 
 	if is_serialized_asset and not doc.serial_no:
 		frappe.throw(_("Please enter Serial No as {0} is a Serialized Asset")
@@ -944,7 +944,7 @@ def validate_serial_no(doc):
 
 @frappe.whitelist()
 def transfer_asset(asset, purpose, source_location, company):
-	movement_entry = frappe.new_doc("Asset Movement_")
+	movement_entry = frappe.new_doc("Asset Movement")
 	movement_entry.company = company
 	movement_entry.purpose = purpose
 	movement_entry.transaction_date = get_datetime()
@@ -988,7 +988,7 @@ def get_disposal_account_and_cost_center(company):
 
 @frappe.whitelist()
 def create_asset_maintenance(asset, item_code, item_name, asset_category, company):
-	asset_maintenance = frappe.new_doc("Asset Maintenance_")
+	asset_maintenance = frappe.new_doc("Asset Maintenance")
 	asset_maintenance.update({
 		"asset_name": asset,
 		"company": company,
@@ -1001,7 +1001,7 @@ def create_asset_maintenance(asset, item_code, item_name, asset_category, compan
 
 @frappe.whitelist()
 def create_asset_repair(asset, asset_name):
-	asset_repair = frappe.new_doc("Asset Repair_")
+	asset_repair = frappe.new_doc("Asset Repair")
 	asset_repair.update({
 		"asset": asset,
 		"asset_name": asset_name
@@ -1026,7 +1026,7 @@ def create_depreciation_entry(asset_name, serial_no=None):
 	from assets.asset.doctype.depreciation_schedule_.depreciation_posting import get_depreciation_accounts, get_depreciation_details
 
 	asset_category, company, cost_center, is_depreciable_asset = frappe.get_value(
-		"Asset_", asset_name, ["asset_category", "company", "cost_center", "calculate_depreciation"]
+		"Asset", asset_name, ["asset_category", "company", "cost_center", "calculate_depreciation"]
 	)
 
 	credit_account, debit_account = get_depreciation_accounts(asset_category, company)
@@ -1042,7 +1042,7 @@ def create_depreciation_entry(asset_name, serial_no=None):
 		"cost_center": cost_center,
 		"credit_account": credit_account,
 		"debit_account": debit_account,
-		"reference_doctype": "Asset Serial No" if serial_no else "Asset_",
+		"reference_doctype": "Asset Serial No" if serial_no else "Asset",
 		"reference_docname": serial_no if serial_no else asset_name
 	})
 
