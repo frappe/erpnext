@@ -83,14 +83,6 @@ calendars = [
 	"Course Schedule",
 ]
 
-domains = {
-	"Distribution": "erpnext.domains.distribution",
-	"Education": "erpnext.domains.education",
-	"Manufacturing": "erpnext.domains.manufacturing",
-	"Retail": "erpnext.domains.retail",
-	"Services": "erpnext.domains.services",
-}
-
 website_generators = [
 	"Item Group",
 	"Website Item",
