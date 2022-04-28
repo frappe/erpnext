@@ -7,7 +7,6 @@ from typing import Optional, Set, Tuple
 
 import frappe
 from frappe import _
-from frappe.model.meta import get_field_precision
 from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdate
 
@@ -370,7 +369,7 @@ class update_entries_after(object):
 			self.args["name"] = self.args.sle_id
 
 		self.company = frappe.get_cached_value("Warehouse", self.args.warehouse, "company")
-		self.get_precision()
+		self.set_precision()
 		self.valuation_method = get_valuation_method(self.item_code)
 
 		self.new_items_found = False
@@ -381,11 +380,9 @@ class update_entries_after(object):
 		self.initialize_previous_data(self.args)
 		self.build()
 
-	def get_precision(self):
-		company_base_currency = frappe.get_cached_value("Company", self.company, "default_currency")
-		self.precision = get_field_precision(
-			frappe.get_meta("Stock Ledger Entry").get_field("stock_value"), currency=company_base_currency
-		)
+	def set_precision(self):
+		self.flt_precision = cint(frappe.db.get_default("float_precision")) or 2
+		self.currency_precision = cint(frappe.db.get_default("currency_precision")) or 2
 
 	def initialize_previous_data(self, args):
 		"""
@@ -581,7 +578,7 @@ class update_entries_after(object):
 					self.update_queue_values(sle)
 
 		# rounding as per precision
-		self.wh_data.stock_value = flt(self.wh_data.stock_value, self.precision)
+		self.wh_data.stock_value = flt(self.wh_data.stock_value, self.currency_precision)
 		if not self.wh_data.qty_after_transaction:
 			self.wh_data.stock_value = 0.0
 		stock_value_difference = self.wh_data.stock_value - self.wh_data.prev_stock_value
@@ -605,6 +602,7 @@ class update_entries_after(object):
 		will not consider cancelled entries
 		"""
 		diff = self.wh_data.qty_after_transaction + flt(sle.actual_qty)
+		diff = flt(diff, self.flt_precision)  # respect system precision
 
 		if diff < 0 and abs(diff) > 0.0001:
 			# negative stock!
