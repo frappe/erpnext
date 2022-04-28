@@ -229,6 +229,10 @@ class PurchaseInvoice(BuyingController):
 
 		return out
 
+	def validate_returned_qty(self, from_doctype=None, row_names=None):
+		self.validate_completed_qty('returned_qty', 'qty', self.items,
+			allowance_type=None, from_doctype=from_doctype, row_names=row_names)
+
 	def validate_previous_docstatus(self):
 		for d in self.get('items'):
 			if d.purchase_order:
