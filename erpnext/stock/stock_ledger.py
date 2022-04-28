@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 import copy
@@ -1406,7 +1406,8 @@ def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 		return
 
 	neg_sle = get_future_sle_with_negative_qty(args)
-	if neg_sle:
+
+	if is_negative_with_precision(neg_sle):
 		message = _(
 			"{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
 		).format(
@@ -1424,7 +1425,7 @@ def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 		return
 
 	neg_batch_sle = get_future_sle_with_negative_batch_qty(args)
-	if neg_batch_sle:
+	if is_negative_with_precision(neg_batch_sle, is_batch=True):
 		message = _(
 			"{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
 		).format(
@@ -1436,6 +1437,22 @@ def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 			frappe.get_desk_link(neg_batch_sle[0]["voucher_type"], neg_batch_sle[0]["voucher_no"]),
 		)
 		frappe.throw(message, NegativeStockError, title=_("Insufficient Stock for Batch"))
+
+
+def is_negative_with_precision(neg_sle, is_batch=False):
+	"""
+	Returns whether system precision rounded qty is insufficient.
+	E.g: -0.0003 in precision 3 (0.000) is sufficient for the user.
+	"""
+
+	if not neg_sle:
+		return False
+
+	field = "cumulative_total" if is_batch else "qty_after_transaction"
+	precision = cint(frappe.db.get_default("float_precision")) or 2
+	qty_deficit = flt(neg_sle[0][field], precision)
+
+	return qty_deficit < 0 and abs(qty_deficit) > 0.0001
 
 
 def get_future_sle_with_negative_qty(args):
