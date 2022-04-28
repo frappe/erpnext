@@ -79,25 +79,16 @@ calendars = [
 	"Leave Application",
 	"Sales Order",
 	"Holiday List",
-	"Course Schedule",
 ]
 
 domains = {
 	"Distribution": "erpnext.domains.distribution",
-	"Education": "erpnext.domains.education",
 	"Manufacturing": "erpnext.domains.manufacturing",
 	"Retail": "erpnext.domains.retail",
 	"Services": "erpnext.domains.services",
 }
 
-website_generators = [
-	"Item Group",
-	"Website Item",
-	"BOM",
-	"Sales Partner",
-	"Job Opening",
-	"Student Admission",
-]
+website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner", "Job Opening"]
 
 website_context = {
 	"favicon": "/assets/erpnext/images/erpnext-favicon.svg",
@@ -181,7 +172,6 @@ website_route_rules = [
 		"defaults": {"doctype": "Address", "parents": [{"label": _("Addresses"), "route": "addresses"}]},
 	},
 	{"from_route": "/jobs", "to_route": "Job Opening"},
-	{"from_route": "/admissions", "to_route": "Student Admission"},
 	{"from_route": "/boms", "to_route": "BOM"},
 	{"from_route": "/timesheets", "to_route": "Timesheet"},
 	{"from_route": "/material-requests", "to_route": "Material Request"},
@@ -254,14 +244,7 @@ standard_portal_menu_items = [
 		"reference_doctype": "Timesheet",
 		"role": "Customer",
 	},
-	{"title": _("Fees"), "route": "/fees", "reference_doctype": "Fees", "role": "Student"},
 	{"title": _("Newsletter"), "route": "/newsletters", "reference_doctype": "Newsletter"},
-	{
-		"title": _("Admission"),
-		"route": "/admissions",
-		"reference_doctype": "Student Admission",
-		"role": "Student",
-	},
 	{
 		"title": _("Material Request"),
 		"route": "/material-requests",
@@ -274,7 +257,6 @@ standard_portal_menu_items = [
 default_roles = [
 	{"role": "Customer", "doctype": "Contact", "email_field": "email_id"},
 	{"role": "Supplier", "doctype": "Contact", "email_field": "email_id"},
-	{"role": "Student", "doctype": "Student", "email_field": "student_email_id"},
 ]
 
 sounds = [
@@ -538,8 +520,6 @@ accounting_dimension_doctypes = [
 	"Landed Cost Item",
 	"Asset Value Adjustment",
 	"Loyalty Program",
-	"Fee Schedule",
-	"Fee Structure",
 	"Stock Reconciliation",
 	"Travel Request",
 	"Fees",
@@ -644,48 +624,6 @@ global_search_doctypes = {
 		{"doctype": "Maintenance Schedule", "index": 45},
 		{"doctype": "Maintenance Visit", "index": 46},
 		{"doctype": "Warranty Claim", "index": 47},
-	],
-	"Education": [
-		{"doctype": "Article", "index": 1},
-		{"doctype": "Video", "index": 2},
-		{"doctype": "Topic", "index": 3},
-		{"doctype": "Course", "index": 4},
-		{"doctype": "Program", "index": 5},
-		{"doctype": "Quiz", "index": 6},
-		{"doctype": "Question", "index": 7},
-		{"doctype": "Fee Schedule", "index": 8},
-		{"doctype": "Fee Structure", "index": 9},
-		{"doctype": "Fees", "index": 10},
-		{"doctype": "Student Group", "index": 11},
-		{"doctype": "Student", "index": 12},
-		{"doctype": "Instructor", "index": 13},
-		{"doctype": "Course Activity", "index": 14},
-		{"doctype": "Quiz Activity", "index": 15},
-		{"doctype": "Course Enrollment", "index": 16},
-		{"doctype": "Program Enrollment", "index": 17},
-		{"doctype": "Student Language", "index": 18},
-		{"doctype": "Student Applicant", "index": 19},
-		{"doctype": "Assessment Result", "index": 20},
-		{"doctype": "Assessment Plan", "index": 21},
-		{"doctype": "Grading Scale", "index": 22},
-		{"doctype": "Guardian", "index": 23},
-		{"doctype": "Student Leave Application", "index": 24},
-		{"doctype": "Student Log", "index": 25},
-		{"doctype": "Room", "index": 26},
-		{"doctype": "Course Schedule", "index": 27},
-		{"doctype": "Student Attendance", "index": 28},
-		{"doctype": "Announcement", "index": 29},
-		{"doctype": "Student Category", "index": 30},
-		{"doctype": "Assessment Group", "index": 31},
-		{"doctype": "Student Batch Name", "index": 32},
-		{"doctype": "Assessment Criteria", "index": 33},
-		{"doctype": "Academic Year", "index": 34},
-		{"doctype": "Academic Term", "index": 35},
-		{"doctype": "School House", "index": 36},
-		{"doctype": "Student Admission", "index": 37},
-		{"doctype": "Fee Category", "index": 38},
-		{"doctype": "Assessment Code", "index": 39},
-		{"doctype": "Discussion", "index": 40},
 	],
 }
 

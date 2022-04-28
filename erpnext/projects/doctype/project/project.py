@@ -9,11 +9,12 @@ from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
 from frappe.utils import add_days, flt, get_datetime, get_time, get_url, nowtime, today
 
+from erpnext import get_default_company
 from erpnext.controllers.employee_boarding_controller import update_employee_boarding_status
 from erpnext.controllers.queries import get_filters_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
-from erpnext import get_default_company
+
 
 class Project(Document):
 	def get_feed(self):
@@ -664,6 +665,7 @@ def set_project_status(project, status):
 
 	project.status = status
 	project.save()
+
 
 def get_holiday_list(company=None):
 	if not company:
