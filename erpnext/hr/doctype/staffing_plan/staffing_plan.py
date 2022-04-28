@@ -91,8 +91,7 @@ class StaffingPlan(Document):
 		) > flt(parent_plan_details[0].total_estimated_cost):
 			frappe.throw(
 				_(
-					"You can only plan for upto {0} vacancies and budget {1} \
-				for {2} as per staffing plan {3} for parent company {4}."
+					"You can only plan for upto {0} vacancies and budget {1} for {2} as per staffing plan {3} for parent company {4}."
 				).format(
 					cint(parent_plan_details[0].vacancies),
 					parent_plan_details[0].total_estimated_cost,
@@ -128,8 +127,7 @@ class StaffingPlan(Document):
 		):
 			frappe.throw(
 				_(
-					"{0} vacancies and {1} budget for {2} already planned for subsidiary companies of {3}. \
-				You can only plan for upto {4} vacancies and and budget {5} as per staffing plan {6} for parent company {3}."
+					"{0} vacancies and {1} budget for {2} already planned for subsidiary companies of {3}. You can only plan for upto {4} vacancies and and budget {5} as per staffing plan {6} for parent company {3}."
 				).format(
 					cint(all_sibling_details.vacancies),
 					all_sibling_details.total_estimated_cost,
@@ -162,8 +160,7 @@ class StaffingPlan(Document):
 		):
 			frappe.throw(
 				_(
-					"Subsidiary companies have already planned for {1} vacancies at a budget of {2}. \
-				Staffing Plan for {0} should allocate more vacancies and budget for {3} than planned for its subsidiary companies"
+					"Subsidiary companies have already planned for {1} vacancies at a budget of {2}. Staffing Plan for {0} should allocate more vacancies and budget for {3} than planned for its subsidiary companies"
 				).format(
 					self.company,
 					cint(children_details.vacancies),

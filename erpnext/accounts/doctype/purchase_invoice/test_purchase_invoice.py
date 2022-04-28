@@ -5,6 +5,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import change_settings
 from frappe.utils import add_days, cint, flt, getdate, nowdate, today
 
 import erpnext
@@ -336,8 +337,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
 
+	@change_settings("Buying Settings", {"enable_discount_accounting": 1})
 	def test_purchase_invoice_with_discount_accounting_enabled(self):
-		enable_discount_accounting()
 
 		discount_account = create_account(
 			account_name="Discount Account",
@@ -353,10 +354,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
-		enable_discount_accounting(enable=0)
 
+	@change_settings("Buying Settings", {"enable_discount_accounting": 1})
 	def test_additional_discount_for_purchase_invoice_with_discount_accounting_enabled(self):
-		enable_discount_accounting()
+
 		additional_discount_account = create_account(
 			account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC",
@@ -901,7 +902,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		)
 
 		pi = make_purchase_invoice(
-			item_code="_Test FG Item", qty=10, rate=500, update_stock=1, is_subcontracted="Yes"
+			item_code="_Test FG Item", qty=10, rate=500, update_stock=1, is_subcontracted=1
 		)
 
 		self.assertEqual(len(pi.get("supplied_items")), 2)
@@ -1482,7 +1483,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(payment_entry.taxes[0].allocated_amount, 0)
 
 	def test_provisional_accounting_entry(self):
-		item = create_item("_Test Non Stock Item", is_stock_item=0)
+		create_item("_Test Non Stock Item", is_stock_item=0)
+
 		provisional_account = create_account(
 			account_name="Provision Account",
 			parent_account="Current Liabilities - _TC",
@@ -1504,6 +1506,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.items[0].expense_account = "Cost of Goods Sold - _TC"
 		pi.save()
 		pi.submit()
+
+		self.assertEquals(pr.items[0].provisional_expense_account, "Provision Account - _TC")
 
 		# Check GLE for Purchase Invoice
 		expected_gle = [
@@ -1585,12 +1589,6 @@ def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings.save()
 
 
-def enable_discount_accounting(enable=1):
-	accounts_settings = frappe.get_doc("Accounts Settings")
-	accounts_settings.enable_discount_accounting = enable
-	accounts_settings.save()
-
-
 def make_purchase_invoice(**args):
 	pi = frappe.new_doc("Purchase Invoice")
 	args = frappe._dict(args)
@@ -1611,7 +1609,7 @@ def make_purchase_invoice(**args):
 	pi.conversion_rate = args.conversion_rate or 1
 	pi.is_return = args.is_return
 	pi.return_against = args.return_against
-	pi.is_subcontracted = args.is_subcontracted or "No"
+	pi.is_subcontracted = args.is_subcontracted or 0
 	pi.supplier_warehouse = args.supplier_warehouse or "_Test Warehouse 1 - _TC"
 	pi.cost_center = args.parent_cost_center
 
@@ -1674,7 +1672,7 @@ def make_purchase_invoice_against_cost_center(**args):
 	pi.is_return = args.is_return
 	pi.is_return = args.is_return
 	pi.credit_to = args.return_against or "Creditors - _TC"
-	pi.is_subcontracted = args.is_subcontracted or "No"
+	pi.is_subcontracted = args.is_subcontracted or 0
 	if args.supplier_warehouse:
 		pi.supplier_warehouse = "_Test Warehouse 1 - _TC"
 

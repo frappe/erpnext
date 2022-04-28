@@ -4,8 +4,8 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.query_builder import Case
-from frappe.query_builder.functions import Coalesce, Sum
+from frappe.query_builder import Case, Order
+from frappe.query_builder.functions import Coalesce, CombineDatetime, Sum
 from frappe.utils import flt
 
 
@@ -54,7 +54,7 @@ class Bin(Document):
 				(supplied_item.rm_item_code == self.item_code)
 				& (po.name == supplied_item.parent)
 				& (po.docstatus == 1)
-				& (po.is_subcontracted == "Yes")
+				& (po.is_subcontracted)
 				& (po.status != "Closed")
 				& (po.per_received < 100)
 				& (supplied_item.reserve_warehouse == self.warehouse)
@@ -79,7 +79,7 @@ class Bin(Document):
 				& (se.name == se_item.parent)
 				& (po.name == se.purchase_order)
 				& (po.docstatus == 1)
-				& (po.is_subcontracted == "Yes")
+				& (po.is_subcontracted == 1)
 				& (po.status != "Closed")
 				& (po.per_received < 100)
 			)
@@ -121,23 +121,22 @@ def update_qty(bin_name, args):
 
 	bin_details = get_bin_details(bin_name)
 	# actual qty is already updated by processing current voucher
-	actual_qty = bin_details.actual_qty
+	actual_qty = bin_details.actual_qty or 0.0
+	sle = frappe.qb.DocType("Stock Ledger Entry")
 
 	# actual qty is not up to date in case of backdated transaction
 	if future_sle_exists(args):
-		actual_qty = (
-			frappe.db.get_value(
-				"Stock Ledger Entry",
-				filters={
-					"item_code": args.get("item_code"),
-					"warehouse": args.get("warehouse"),
-					"is_cancelled": 0,
-				},
-				fieldname="qty_after_transaction",
-				order_by="posting_date desc, posting_time desc, creation desc",
-			)
-			or 0.0
+		last_sle_qty = (
+			frappe.qb.from_(sle)
+			.select(sle.qty_after_transaction)
+			.where((sle.item_code == args.get("item_code")) & (sle.warehouse == args.get("warehouse")))
+			.orderby(CombineDatetime(sle.posting_date, sle.posting_time), order=Order.desc)
+			.orderby(sle.creation, order=Order.desc)
+			.run()
 		)
+
+		if last_sle_qty:
+			actual_qty = last_sle_qty[0][0]
 
 	ordered_qty = flt(bin_details.ordered_qty) + flt(args.get("ordered_qty"))
 	reserved_qty = flt(bin_details.reserved_qty) + flt(args.get("reserved_qty"))

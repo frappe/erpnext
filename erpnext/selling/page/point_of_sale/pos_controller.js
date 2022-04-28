@@ -343,9 +343,9 @@ erpnext.PointOfSale.Controller = class {
 				toggle_other_sections: (show) => {
 					if (show) {
 						this.item_details.$component.is(':visible') ? this.item_details.$component.css('display', 'none') : '';
-						this.item_selector.$component.css('display', 'none');
+						this.item_selector.toggle_component(false);
 					} else {
-						this.item_selector.$component.css('display', 'flex');
+						this.item_selector.toggle_component(true);
 					}
 				},
 
@@ -721,11 +721,14 @@ erpnext.PointOfSale.Controller = class {
 
 	async save_and_checkout() {
 		if (this.frm.is_dirty()) {
+			let save_error = false;
+			await this.frm.save(null, null, null, () => save_error = true);
 			// only move to payment section if save is successful
-			frappe.route_hooks.after_save = () => this.payment.checkout();
-			return this.frm.save(
-				null, null, null, () => this.cart.toggle_checkout_btn(true) // show checkout button on error
-			);
+			!save_error && this.payment.checkout();
+			// show checkout button on error
+			save_error && setTimeout(() => {
+				this.cart.toggle_checkout_btn(true);
+			}, 300); // wait for save to finish
 		} else {
 			this.payment.checkout();
 		}

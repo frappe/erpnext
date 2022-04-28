@@ -777,11 +777,11 @@ def auto_fetch_serial_number(
 		exclude_sr_nos = get_serial_nos(clean_serial_no_string("\n".join(exclude_sr_nos)))
 
 	if batch_nos:
-		batch_nos = safe_json_loads(batch_nos)
-		if isinstance(batch_nos, list):
-			filters.batch_no = batch_nos
+		batch_nos_list = safe_json_loads(batch_nos)
+		if isinstance(batch_nos_list, list):
+			filters.batch_no = batch_nos_list
 		else:
-			filters.batch_no = [str(batch_nos)]
+			filters.batch_no = [batch_nos]
 
 	if posting_date:
 		filters.expiry_date = posting_date

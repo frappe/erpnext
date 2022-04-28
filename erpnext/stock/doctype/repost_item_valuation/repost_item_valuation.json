@@ -23,6 +23,7 @@
   "error_section",
   "error_log",
   "items_to_be_repost",
+  "affected_transactions",
   "distinct_item_and_warehouse",
   "current_index"
  ],
@@ -172,12 +173,20 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "affected_transactions",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Affected Transactions",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-30 07:22:48.520266",
+ "modified": "2022-04-18 14:08:08.821602",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",

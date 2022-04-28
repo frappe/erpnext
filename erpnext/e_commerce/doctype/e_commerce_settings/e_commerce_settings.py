@@ -9,6 +9,7 @@ from frappe.utils import comma_and, flt, unique
 
 from erpnext.e_commerce.redisearch_utils import (
 	create_website_items_index,
+	define_autocomplete_dictionary,
 	get_indexable_web_fields,
 	is_search_module_loaded,
 )
@@ -21,10 +22,12 @@ class ShoppingCartSetupError(frappe.ValidationError):
 class ECommerceSettings(Document):
 	def onload(self):
 		self.get("__onload").quotation_series = frappe.get_meta("Quotation").get_options("naming_series")
+
+		# flag >> if redisearch is installed and loaded
 		self.is_redisearch_loaded = is_search_module_loaded()
 
 	def validate(self):
-		self.validate_field_filters()
+		self.validate_field_filters(self.filter_fields, self.enable_field_filters)
 		self.validate_attribute_filters()
 		self.validate_checkout()
 		self.validate_search_index_fields()
@@ -34,21 +37,36 @@ class ECommerceSettings(Document):
 
 		frappe.clear_document_cache("E Commerce Settings", "E Commerce Settings")
 
-	def validate_field_filters(self):
-		if not (self.enable_field_filters and self.filter_fields):
+		self.is_redisearch_enabled_pre_save = frappe.db.get_single_value(
+			"E Commerce Settings", "is_redisearch_enabled"
+		)
+
+	def after_save(self):
+		self.create_redisearch_indexes()
+
+	def create_redisearch_indexes(self):
+		# if redisearch is enabled (value changed) create indexes and dictionary
+		value_changed = self.is_redisearch_enabled != self.is_redisearch_enabled_pre_save
+		if self.is_redisearch_loaded and self.is_redisearch_enabled and value_changed:
+			define_autocomplete_dictionary()
+			create_website_items_index()
+
+	@staticmethod
+	def validate_field_filters(filter_fields, enable_field_filters):
+		if not (enable_field_filters and filter_fields):
 			return
 
-		item_meta = frappe.get_meta("Item")
+		web_item_meta = frappe.get_meta("Website Item")
 		valid_fields = [
-			df.fieldname for df in item_meta.fields if df.fieldtype in ["Link", "Table MultiSelect"]
+			df.fieldname for df in web_item_meta.fields if df.fieldtype in ["Link", "Table MultiSelect"]
 		]
 
-		for f in self.filter_fields:
-			if f.fieldname not in valid_fields:
+		for row in filter_fields:
+			if row.fieldname not in valid_fields:
 				frappe.throw(
 					_(
-						"Filter Fields Row #{0}: Fieldname <b>{1}</b> must be of type 'Link' or 'Table MultiSelect'"
-					).format(f.idx, f.fieldname)
+						"Filter Fields Row #{0}: Fieldname {1} must be of type 'Link' or 'Table MultiSelect'"
+					).format(row.idx, frappe.bold(row.fieldname))
 				)
 
 	def validate_attribute_filters(self):

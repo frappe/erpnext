@@ -1167,7 +1167,7 @@ class StockEntry(StockController):
 			from `tabItem` i LEFT JOIN `tabItem Default` id ON i.name=id.parent and id.company=%s
 			where i.name=%s
 				and i.disabled=0
-				and (i.end_of_life is null or i.end_of_life='0000-00-00' or i.end_of_life > %s)""",
+				and (i.end_of_life is null or i.end_of_life<'1900-01-01' or i.end_of_life > %s)""",
 			(self.company, args.get("item_code"), nowdate()),
 			as_dict=1,
 		)
@@ -1803,7 +1803,9 @@ class StockEntry(StockController):
 				or (desire_to_transfer > 0 and backflush_based_on == "Material Transferred for Manufacture")
 				or allow_overproduction
 			):
-				item_dict[item]["qty"] = desire_to_transfer
+				# "No need for transfer but qty still pending to transfer" case can occur
+				# when transferring multiple RM in different Stock Entries
+				item_dict[item]["qty"] = desire_to_transfer if (desire_to_transfer > 0) else pending_to_issue
 			elif pending_to_issue > 0:
 				item_dict[item]["qty"] = pending_to_issue
 			else:
