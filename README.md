@@ -39,7 +39,7 @@ ERPNext is built on the [Frappe Framework](https://github.com/frappe/frappe), a 
 ## Installation
 
 <div align="center" style="max-height: 40px;">
-    <a href="https://frappecloud.com/deploy?apps=frappe,erpnext&source=erpnext_readme">
+    <a href="https://frappecloud.com/erpnext/signup">
         <img src=".github/try-on-f-cloud-button.svg" height="40">
     </a>
     <a href="https://labs.play-with-docker.com/?stack=https://raw.githubusercontent.com/frappe/frappe_docker/main/pwd.yml">
