@@ -61,7 +61,7 @@
    "fieldname": "employees",
    "fieldtype": "Table",
    "label": "Employees",
-   "options": "Employee Detail Salary Component",
+   "options": "Employee Detail Salary Component Confidential",
    "reqd": 1
   },
   {
@@ -92,7 +92,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-03-31 12:33:50.448958",
+ "modified": "2022-04-28 10:46:07.164434",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Assignment Salary Component Confidential",
