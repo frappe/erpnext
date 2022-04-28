@@ -16,7 +16,7 @@ def get_assets_without_available_for_use_date():
 	return frappe.get_all(
 		"Asset",
 		filters = {
-			"available_for_use_date": None
+			"available_for_use_date": ["in", ["", None]]
 		},
 		fields = ["name", "purchase_date"]
 	)
