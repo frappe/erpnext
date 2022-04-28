@@ -3,17 +3,20 @@
 
 import frappe
 from frappe import _dict
-
-test_dependencies = ["Item", "Sales Invoice", "Stock Entry", "Batch"]
-
 from frappe.tests.utils import FrappeTestCase
 
+from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item, make_item
+from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
 from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
+
+test_dependencies = ["Item", "Sales Invoice", "Stock Entry", "Batch"]
 
 
 class TestPickList(FrappeTestCase):
@@ -579,14 +582,79 @@ class TestPickList(FrappeTestCase):
 				if dn_item.item_code == "_Test Item 2":
 					self.assertEqual(dn_item.qty, 2)
 
-	# def test_pick_list_skips_items_in_expired_batch(self):
-	# 	pass
+	def test_picklist_with_multi_uom(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(properties={"uoms": [dict(uom="Box", conversion_factor=24)]}).name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=1000)
 
-	# def test_pick_list_from_sales_order(self):
-	# 	pass
+		so = make_sales_order(item_code=item, qty=10, rate=42, uom="Box")
+		pl = create_pick_list(so.name)
+		# pick half the qty
+		for loc in pl.locations:
+			loc.picked_qty = loc.stock_qty / 2
+		pl.save()
+		pl.submit()
 
-	# def test_pick_list_from_work_order(self):
-	# 	pass
+		so.reload()
+		self.assertEqual(so.per_picked, 50)
 
-	# def test_pick_list_from_material_request(self):
-	# 	pass
+	def test_picklist_with_bundles(self):
+		warehouse = "_Test Warehouse - _TC"
+
+		quantities = [5, 2]
+		bundle, components = create_product_bundle(quantities, warehouse=warehouse)
+		bundle_items = dict(zip(components, quantities))
+
+		so = make_sales_order(item_code=bundle, qty=3, rate=42)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		self.assertEqual(len(pl.locations), 2)
+		for item in pl.locations:
+			self.assertEqual(item.stock_qty, bundle_items[item.item_code] * 3)
+
+		# check picking status on sales order
+		pl.submit()
+		so.reload()
+		self.assertEqual(so.per_picked, 100)
+
+		# deliver
+		dn = create_delivery_note(pl.name).submit()
+		self.assertEqual(dn.items[0].rate, 42)
+		self.assertEqual(dn.packed_items[0].warehouse, warehouse)
+		so.reload()
+		self.assertEqual(so.per_delivered, 100)
+
+	def test_picklist_with_partial_bundles(self):
+		# from test_records.json
+		warehouse = "_Test Warehouse - _TC"
+
+		quantities = [5, 2]
+		bundle, components = create_product_bundle(quantities, warehouse=warehouse)
+
+		so = make_sales_order(item_code=bundle, qty=4, rate=42)
+
+		pl = create_pick_list(so.name)
+		for loc in pl.locations:
+			loc.picked_qty = loc.qty / 2
+
+		pl.save().submit()
+		so.reload()
+		self.assertEqual(so.per_picked, 50)
+
+		# deliver half qty
+		dn = create_delivery_note(pl.name).submit()
+		self.assertEqual(dn.items[0].rate, 42)
+		so.reload()
+		self.assertEqual(so.per_delivered, 50)
+
+		pl = create_pick_list(so.name)
+		pl.save().submit()
+		so.reload()
+		self.assertEqual(so.per_picked, 100)
+
+		# deliver remaining
+		dn = create_delivery_note(pl.name).submit()
+		self.assertEqual(dn.items[0].rate, 42)
+		so.reload()
+		self.assertEqual(so.per_delivered, 100)

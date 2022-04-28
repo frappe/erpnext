@@ -27,7 +27,8 @@
   "column_break_5",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
-  "hide_tax_id"
+  "hide_tax_id",
+  "enable_discount_accounting"
  ],
  "fields": [
   {
@@ -164,6 +165,13 @@
    "fieldname": "editable_bundle_item_rates",
    "fieldtype": "Check",
    "label": "Calculate Product Bundle Price based on Child Items' Rates"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, additional ledger entries will be made for discounts in a separate Discount Account",
+   "fieldname": "enable_discount_accounting",
+   "fieldtype": "Check",
+   "label": "Enable Discount Accounting for Selling"
   }
  ],
  "icon": "fa fa-cog",
@@ -171,7 +179,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-02-04 15:41:59.939261",
+ "modified": "2022-04-14 16:01:29.405642",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

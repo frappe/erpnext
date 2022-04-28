@@ -20,6 +20,7 @@
   "maintain_same_rate",
   "allow_multiple_items",
   "bill_for_rejected_quantity_in_purchase_invoice",
+  "enable_discount_accounting",
   "subcontract",
   "backflush_raw_materials_of_subcontract_based_on",
   "column_break_11",
@@ -133,6 +134,13 @@
   {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, additional ledger entries will be made for discounts in a separate Discount Account",
+   "fieldname": "enable_discount_accounting",
+   "fieldtype": "Check",
+   "label": "Enable Discount Accounting for Buying"
   }
  ],
  "icon": "fa fa-cog",
@@ -140,7 +148,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-01-27 17:57:58.367048",
+ "modified": "2022-04-14 15:56:42.340223",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
