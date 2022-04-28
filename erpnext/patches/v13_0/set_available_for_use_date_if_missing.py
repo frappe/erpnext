@@ -3,8 +3,8 @@ import frappe
 
 def execute():
 	"""
-		Sets available-for-use date for Assets created in older versions of ERPNext,
-		before the field was introduced.
+	Sets available-for-use date for Assets created in older versions of ERPNext,
+	before the field was introduced.
 	"""
 
 	assets = get_assets_without_available_for_use_date()
