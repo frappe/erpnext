@@ -158,6 +158,17 @@ frappe.ui.form.on('Pick List', {
 				get_query_filters: get_query_filters
 			});
 		});
+	},
+	scan_barcode: (frm) => {
+		const opts = {
+			frm,
+			items_table_name: 'locations',
+			qty_field: 'picked_qty',
+			max_qty_field: 'qty',
+			allow_new_row: false
+		};
+		const barcode_scanner = new erpnext.utils.BarcodeScanner(opts);
+		barcode_scanner.process_scan();
 	}
 });
 
