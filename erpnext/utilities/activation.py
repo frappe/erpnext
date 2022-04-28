@@ -37,7 +37,6 @@ def get_level():
 		"Sales Order": 2,
 		"Sales Invoice": 2,
 		"Stock Entry": 3,
-		"Student": 5,
 		"Supplier": 5,
 		"Task": 5,
 		"User": 5,
