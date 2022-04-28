@@ -1219,7 +1219,7 @@ def make_fixtures(company=None):
 		try:
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_permissions = True
-			doc.insert()
+			doc.insert(ignore_if_duplicate=True)
 		except frappe.NameError:
 			frappe.clear_messages()
 		except frappe.DuplicateEntryError:

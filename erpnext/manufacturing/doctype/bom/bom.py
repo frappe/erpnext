@@ -753,7 +753,7 @@ class BOM(WebsiteGenerator):
 				bom_item.include_item_in_manufacturing,
 				bom_item.sourced_by_supplier,
 				bom_item.stock_qty / ifnull(bom.quantity, 1) AS qty_consumed_per_unit
-			FROM `tabBOM Explosion Item` bom_item, tabBOM bom
+			FROM `tabBOM Explosion Item` bom_item, `tabBOM` bom
 			WHERE
 				bom_item.parent = bom.name
 				AND bom.name = %s

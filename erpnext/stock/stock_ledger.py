@@ -8,9 +8,8 @@ from typing import Optional, Set, Tuple
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdate
-from pypika import CustomFunction
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
@@ -1158,16 +1157,15 @@ def get_batch_incoming_rate(
 	item_code, warehouse, batch_no, posting_date, posting_time, creation=None
 ):
 
-	Timestamp = CustomFunction("timestamp", ["date", "time"])
-
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 
-	timestamp_condition = Timestamp(sle.posting_date, sle.posting_time) < Timestamp(
+	timestamp_condition = CombineDatetime(sle.posting_date, sle.posting_time) < CombineDatetime(
 		posting_date, posting_time
 	)
 	if creation:
 		timestamp_condition |= (
-			Timestamp(sle.posting_date, sle.posting_time) == Timestamp(posting_date, posting_time)
+			CombineDatetime(sle.posting_date, sle.posting_time)
+			== CombineDatetime(posting_date, posting_time)
 		) & (sle.creation < creation)
 
 	batch_details = (
