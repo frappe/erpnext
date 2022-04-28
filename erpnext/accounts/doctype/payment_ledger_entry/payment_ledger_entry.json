@@ -60,7 +60,7 @@
   },
   {
    "fieldname": "posting_date",
-   "fieldtype": "Datetime",
+   "fieldtype": "Date",
    "label": "Posting Date"
   },
   {
@@ -73,7 +73,7 @@
  "icon": "fa fa-list",
  "in_create": 1,
  "links": [],
- "modified": "2022-03-29 15:38:38.856488",
+ "modified": "2022-04-28 11:19:51.472158",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Ledger Entry",

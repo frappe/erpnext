@@ -45,7 +45,7 @@ def get_payment_ledger_entries(gl_map, cancel=0):
 				ple = frappe.get_doc(
 					{
 						"doctype": "Payment Ledger Entry",
-						"posting_date": now(),
+						"posting_date": entry.posting_date,
 						"amount": abs(entry.debit - entry.credit) * -1
 						if cancel
 						else abs(entry.debit - entry.credit),
