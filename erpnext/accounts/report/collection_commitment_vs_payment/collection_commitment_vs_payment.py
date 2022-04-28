@@ -59,12 +59,13 @@ def get_data(conditions, filters):
 	print(" In get Data", conditions)
 	query = frappe.db.sql("""
 							Select prc.customer , prc.customer_name, sum(prc.commitment_amount) as c_amount, 
-							CASE when 1
-								THEN (Select sum(pe.paid_amount) from `tabPayment Entry` pe 
+							IF ( (Select sum(pe.paid_amount) from `tabPayment Entry` pe 
 									where pe.party = prc.customer and pe.payment_type ="Receive" 
-									and pe.posting_date between '{0}' and '{1}')
-								Else 0
-							End as col_amount, prc.company
+									and pe.posting_date between '{0}' and '{1}'),
+								
+								(Select sum(pe.paid_amount) from `tabPayment Entry` pe 
+									where pe.party = prc.customer and pe.payment_type ="Receive" 
+									and pe.posting_date between '{0}' and '{1}'), 0) as col_amount, prc.company
 							from `tabPayment Receivable Commitment` prc 
 							where prc.company = '{3}' and prc.commitment_status ="Active" 
 							and prc.commitment_date between '{0}' and '{1}' {2}

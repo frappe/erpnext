@@ -5,6 +5,7 @@ from hashlib import new
 from locale import currency
 from pydoc import describe
 import frappe
+from frappe import email
 from frappe.model.document import Document
 
 from frappe import _, scrub
@@ -117,6 +118,15 @@ class FollowUp(Document):
 				# continue from here
 
 		if log_name:
+			email_template = frappe.get_doc("Email Template", follow.email_template)
+			primary_c = frappe.db.get_value('Customer', customer, "customer_primary_contact")
+			email_id = frappe.db.get_list('Contact Email', {"parent":primary_c }, ['email_id'])
+			comm_email = ""
+			emails = []
+			for e in email_id:
+				emails.append(e.get('email_id'))
+				comm_email += e.get('email_id') +', '
+
 			# Adding comment on Customer of Follow Up Performed
 			comm = frappe.new_doc("Comment")
 			comm.subject = "Overdue payment reminder"
@@ -134,7 +144,7 @@ class FollowUp(Document):
 			args["customer"] = customer
 			args["customer_name"] = frappe.db.get_value('Customer', customer, "customer_name")
 			args["outstanding_details"] = comm_voucher_no
-			args["total_due"] = total_due
+			args["total_due"] = "<b>"+ total_due + "</b>"
 
 			# Sending Email
 			if follow.send_email == 1:
@@ -143,9 +153,9 @@ class FollowUp(Document):
 				email_template = frappe.get_doc("Email Template", follow.email_template)
 				primary_c = frappe.db.get_value('Customer', customer, "customer_primary_contact")
 				email_id = frappe.db.get_list('Contact Email', {"parent":primary_c }, ['email_id'])
-				emails = []
-				for e in email_id:
-					emails.append(e.get('email_id'))
+				# emails = []
+				# for e in email_id:
+				# 	emails.append(e.get('email_id'))
 
 				if not email_id:
 					frappe.throw("Please set Email Id for Customer {0}".format(customer))
@@ -153,7 +163,7 @@ class FollowUp(Document):
 				self.notify({
 				# for post in messages
 				"message": message,
-				"message_to": email_id,
+				"message_to": comm_email,
 				# for email
 				"subject": email_template.subject,
 				
@@ -166,9 +176,10 @@ class FollowUp(Document):
 			
 			# Adding ToDo if Manual Action in Follow Up Level
 			if follow.manual_action == 1:
-				desc = "Please {0} Customer  {1} , ".format(follow.action_type, frappe.db.get_value('Customer', customer, "customer_name"))
-				desc += "\n For Following Overdues : \n{0} ; ".format(args)
-				desc += "ACTION TODO : \n {0}".format(follow.action_to_do)
+
+				desc = "<div><p> Please {0} Customer  <b>{1}</b><br> ".format(follow.action_type, frappe.db.get_value('Customer', customer, "customer_name"))
+				desc += "For Following Overdues : {0} <br> ".format(args)
+				desc += "ACTION TODO : {0}</p> </div>".format(follow.action_to_do)
 				# print(" Adding ToDo")
 				todo = frappe.new_doc('ToDo')
 				todo.status = "Open"
@@ -181,23 +192,24 @@ class FollowUp(Document):
 				todo.assigned_by = frappe.session.user
 				todo.save()
 
-			# new_comm = frappe.new_doc("Communication")
+			message = frappe.render_template(email_template.response, args)
+			new_comm = frappe.new_doc("Communication")
 			
-			# new_comm.subject = "Invoice Commitment"
-			# new_comm.communication_medium = "Email"
-			# new_comm.sender = frappe.db.get_value("User",{"name":frappe.session.user}, "email")
-			# new_comm.receipents = email_id
-			# new_comm.content = "This is content"
-			# new_comm.content = str(comm_voucher_no)
-			# new_comm.communication_type	= "Communication"
-			# new_comm.status = "Linked"
-			# new_comm.sent_or_received = "Sent"
-			# new_comm.communication_date	= str(utils.today())
-			# new_comm.sender_full_name = frappe.session.user_fullname
-			# new_comm.reference_doctype = "Sales Invoice"
-			# new_comm.reference_name = i["voucher_no"]
-			# new_comm.reference_owner = customer
-			# new_comm.save()	
+			new_comm.subject = "Invoice Follow Up"
+			new_comm.communication_medium = "Email"
+			new_comm.sender = frappe.db.get_value("User",{"name":frappe.session.user}, "email")
+			new_comm.recipients = comm_email
+			# new_comm.content = message
+			new_comm.content = str(comm_voucher_no)
+			new_comm.communication_type	= "Communication"
+			new_comm.status = "Linked"
+			new_comm.sent_or_received = "Sent"      
+			new_comm.communication_date	= str(utils.today())
+			new_comm.sender_full_name = frappe.session.user_fullname
+			new_comm.reference_doctype = "Sales Invoice"
+			new_comm.reference_name = i["voucher_no"]
+			new_comm.reference_owner = customer
+			new_comm.save()	
 
 			
 			return True
@@ -219,8 +231,12 @@ class FollowUp(Document):
 			primary_c, full_name, currency = frappe.db.get_value('Customer', customer, ["customer_primary_contact", "customer_name", "default_currency"])
 			email_id = frappe.db.get_list('Contact Email', {"parent":primary_c }, ['email_id'])
 			emails = []
+			
+			comm_email = ""
 			for e in email_id:
 				emails.append(e.get('email_id'))
+				comm_email += e.get('email_id') +', '
+			
 			
 			print(" this is emails", emails)
 			
@@ -288,24 +304,26 @@ class FollowUp(Document):
 						frappe.throw("Please set Email Id for Customer {0}".format(customer))
 
 
-				
+				# Sending email
 				content += "Thank You"
 				self.notify({
 					# for post in messages
 					"message": " <div class='ql-editor read-mode'><p> {0} </p></div>".format(content),
-					"message_to": email_id,
+					"message_to": comm_email,
 					# for email
 					"subject": "Invoice Commitment",
 					})
 
-
-				
+				print(" this is emial,    ddddddddddd", comm_email)
+				# Creating New Communication
 				new_comm = frappe.new_doc("Communication")
 				
 				new_comm.subject = "Invoice Commitment"
 				new_comm.communication_medium = "Email"
 				new_comm.sender = frappe.db.get_value("User",{"name":frappe.session.user}, "email")
-				new_comm.receipents = emails
+				new_comm.recipients = comm_email
+				# new_comm.cc = comm_email
+				# new_comm.bcc = com_mail
 				new_comm.content = "This is content"
 				new_comm.content = str(content)
 				new_comm.communication_type	= "Communication"
@@ -317,6 +335,10 @@ class FollowUp(Document):
 				new_comm.reference_name = i["voucher_no"]
 				new_comm.reference_owner = customer
 				new_comm.save()
+
+				# frappe.db.set_value("Communication", new_comm.name, 'recipients', comm_email)
+				# new_comm.receipents = comm_email
+				# new_comm.save()
 						
 		if commit_amt > 0 :
 			return True
@@ -328,21 +350,29 @@ class FollowUp(Document):
 		# args -> message, message_to, subject
 		print(" args  111 ", args.message_to)
 		recipient = []
-		for e in args.message_to:
-			recipient.append(e.get('email_id'))
-		contact = args.message_to
+		# for e in args.message_to:
+		# 	recipient.append(e.get('email_id'))
+		# contact = args.message_to
+
+		outgoing = frappe.db.get_value("Email Account", {'enable_outgoing': 1, 'default_outgoing':1}, ['email_id'])
+		print(" outgoing", outgoing)
+
+		if not outgoing:
+			frappe.throw(" Please add Email account with Eable Outgoing and Default Outgoing")
+		
 		sender      	    = dict()
-		sender['email']     = frappe.get_doc('User', frappe.session.user).email
+		# sender['email']     = frappe.get_doc('User', frappe.session.user).email
+		sender['email']     = outgoing 
 		sender['full_name'] = get_fullname(sender['email'])
 
 		try:
 			frappe.sendmail(
-				recipients = recipient,
+				recipients = args.message_to,
 				sender = sender['email'],
 				subject = args.subject,
 				message = args.message,
 			)
-			frappe.msgprint(_("Email sent to {0}").format(contact))
+			frappe.msgprint(_("Email sent to {0}").format(args.message_to))
 		except frappe.OutgoingEmailError:
 			pass	
 
