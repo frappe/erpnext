@@ -62,7 +62,6 @@ treeviews = [
 	"Supplier Group",
 	"Sales Person",
 	"Territory",
-	"Assessment Group",
 	"Department",
 ]
 
