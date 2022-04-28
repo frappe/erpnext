@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt
-from frappe import _
+from frappe import _, get_all
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -15,6 +15,28 @@ def execute(filters=None):
 	ss_earning_map = get_ss_earning_map(salary_slips)
 	ss_ded_map = get_ss_ded_map(salary_slips)
 	doj_map = get_employee_doj_map()
+
+	confidential_list = []
+
+	roles_arr = []
+
+	confidential_payroll = frappe.get_all("Confidential Payroll Employee", ["*"])
+
+	if len(confidential_payroll) > 0:
+
+		employees = frappe.get_all("Confidential Payroll Detail", ["*"], filters = {"parent": confidential_payroll[0].name})
+
+		for employee in employees:
+			confidential_list.append(employee.employee)
+		
+		user = frappe.session.user
+
+		users = frappe.get_all("User", ["*"], filters = {"name": user})
+
+		roles = frappe.get_all("Has Role", ["*"], filters = {"parent": users[0].name})
+
+		for role in roles:
+			roles_arr.append(role.role)		
 
 	data = []
 	for ss in salary_slips:
@@ -43,7 +65,11 @@ def execute(filters=None):
 
 		row += [ss.total_deduction, ss.net_pay]
 
-		data.append(row)
+		if ss.employee in confidential_list:
+			if confidential_payroll[0].rol in roles_arr:
+				data.append(row)
+		else:
+			data.append(row)
 	
 	row = ["ELABORADO POR:", "","","","",""]
 	data.append(row)
