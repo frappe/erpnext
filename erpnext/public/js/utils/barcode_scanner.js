@@ -10,6 +10,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		this.serial_no_field = opts.serial_no_field || "serial_no";
 		this.batch_no_field = opts.batch_no_field || "batch_no";
 		this.qty_field = opts.qty_field || "qty";
+		this.max_qty_field = opts.max_qty_field || null;
 
 		this.items_table_name = opts.items_table_name || "items";
 		this.items_table = this.frm.doc[this.items_table_name];
@@ -182,7 +183,11 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 	get_row_to_modify_on_scan(item_code) {
 		// get an existing item row to increment or blank row to modify
-		const existing_item_row = this.items_table.find((d) => d.item_code === item_code);
+		const existing_item_row = this.items_table.filter((d) => {
+			const [qty, max_qty] = [d[this.qty_field], d[this.max_qty_field] || null]
+			return d.item_code === item_code && ((max_qty === null) || (qty < max_qty));
+		}).splice(0, 1).pop();
+
 		return existing_item_row || this.get_existing_blank_row();
 	}
 
