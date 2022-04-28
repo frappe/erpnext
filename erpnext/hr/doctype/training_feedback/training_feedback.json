@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "HR-TRF-.YYYY.-.#####",
- "creation": "2016-08-08 06:35:34.158568",
+ "creation": "2022-01-27 13:14:35.935580",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -46,9 +46,8 @@
   {
    "fetch_from": "training_event.course",
    "fieldname": "course",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Course",
-   "options": "Course",
    "read_only": 1
   },
   {
@@ -101,7 +100,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-18 19:32:20.805277",
+ "modified": "2022-04-28 13:32:29.261421",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Training Feedback",
