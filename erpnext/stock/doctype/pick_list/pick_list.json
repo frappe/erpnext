@@ -17,6 +17,10 @@
   "parent_warehouse",
   "get_item_locations",
   "section_break_6",
+  "scan_barcode",
+  "column_break_13",
+  "scan_mode",
+  "section_break_15",
   "locations",
   "amended_from",
   "print_settings_section",
@@ -126,11 +130,32 @@
    "fieldtype": "Check",
    "label": "Group Same Items",
    "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "scan_mode",
+   "fieldtype": "Check",
+   "label": "Scan Mode"
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.scan_mode",
+   "fieldname": "scan_barcode",
+   "fieldtype": "Data",
+   "label": "Scan Barcode",
+   "options": "Barcode"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-21 07:56:40.646473",
+ "modified": "2022-04-27 20:31:49.260238",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
