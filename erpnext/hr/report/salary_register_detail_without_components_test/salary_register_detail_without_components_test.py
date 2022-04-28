@@ -13,6 +13,28 @@ def execute(filters=None):
 
 	conditions = get_conditions(filters)
 
+	confidential_list = []
+
+	roles_arr = []
+
+	confidential_payroll = frappe.get_all("Confidential Payroll Employee", ["*"])
+
+	if len(confidential_payroll) > 0:
+
+		employees = frappe.get_all("Confidential Payroll Detail", ["*"], filters = {"parent": confidential_payroll[0].name})
+
+		for employee in employees:
+			confidential_list.append(employee.employee)
+		
+		user = frappe.session.user
+
+		users = frappe.get_all("User", ["*"], filters = {"name": user})
+
+		roles = frappe.get_all("Has Role", ["*"], filters = {"parent": users[0].name})
+
+		for role in roles:
+			roles_arr.append(role.role)	
+
 	salary_slips = frappe.get_all("Salary Slip", ["name", "employee", "gross_pay", "total_deduction", "net_pay", "employee_name", "payment_days", "payroll_entry"], filters = conditions)
 	
 	for ss in salary_slips:
@@ -129,7 +151,11 @@ def execute(filters=None):
 
 		row += [ss.total_deduction, ss.net_pay]
 
-		data.append(row)
+		if ss.employee in confidential_list:
+			if confidential_payroll[0].rol in roles_arr:
+				data.append(row)
+		else:
+			data.append(row)
 	
 	row = ["ELABORADO POR:"]
 
