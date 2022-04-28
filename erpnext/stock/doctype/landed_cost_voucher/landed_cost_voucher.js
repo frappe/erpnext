@@ -76,6 +76,16 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 		this.show_general_ledger();
 
+		if (doc.docstatus < 2 && !doc.__islocal) {
+			cur_frm.add_custom_button(__('Costing Report'), () => {
+				frappe.set_route('query-report', 'LC Costing', {
+					landed_cost_voucher: doc.name,
+					from_date: doc.posting_date,
+					to_date: doc.posting_date,
+				});
+			}, __("View"));
+		}
+
 		if (doc.docstatus===1 && doc.outstanding_amount != 0 && frappe.model.can_create("Payment Entry")) {
 			cur_frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
 			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));

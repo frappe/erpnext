@@ -387,7 +387,7 @@
  ],
  "icon": "icon-usd",
  "is_submittable": 1,
- "modified": "2020-03-03 16:14:10.102861",
+ "modified": "2022-04-28 14:42:05.924083",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Voucher",
@@ -405,6 +405,30 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
   }
  ],
  "search_fields": "total_taxes_and_charges, outstanding_amount, party",
@@ -413,5 +437,6 @@
  "sort_order": "DESC",
  "timeline_field": "party",
  "title_field": "title",
- "track_changes": 1
+ "track_changes": 1,
+ "track_seen": 1
 }

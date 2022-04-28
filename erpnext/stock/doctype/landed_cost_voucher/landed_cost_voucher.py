@@ -53,20 +53,16 @@ class LandedCostVoucher(AccountsController):
 		self.set("items", [])
 		for pr in self.get("purchase_receipts"):
 			if pr.receipt_document_type and pr.receipt_document:
-				if pr.receipt_document_type == "Purchase Invoice":
-					po_detail_field = "purchase_order_item"
-				else:
-					po_detail_field = "purchase_order_item"
-
 				pr_items = frappe.db.sql("""
 					select
-						pr_item.item_code, pr_item.item_name, pr_item.total_weight,
-						pr_item.qty, pr_item.base_rate, pr_item.base_amount, pr_item.amount, pr_item.name,
-						pr_item.{po_detail_field}, pr_item.purchase_order, pr_item.cost_center
+						pr_item.item_code, pr_item.item_name,
+						pr_item.qty, pr_item.uom, pr_item.total_weight,
+						pr_item.base_rate, pr_item.base_amount, pr_item.amount, pr_item.name,
+						pr_item.purchase_order_item, pr_item.purchase_order, pr_item.cost_center
 					from `tab{doctype} Item` pr_item
 					inner join tabItem i on i.name = pr_item.item_code and i.is_stock_item = 1
 					where pr_item.parent = %s
-				""".format(doctype=pr.receipt_document_type, po_detail_field=po_detail_field),
+				""".format(doctype=pr.receipt_document_type),
 					pr.receipt_document, as_dict=True)
 
 				for d in pr_items:
@@ -74,12 +70,13 @@ class LandedCostVoucher(AccountsController):
 					item.item_code = d.item_code
 					item.item_name = d.item_name
 					item.qty = d.qty
+					item.uom = d.uom
 					item.weight = d.total_weight
 					item.rate = d.base_rate
 					item.cost_center = d.cost_center or erpnext.get_default_cost_center(self.company)
 					item.amount = d.base_amount
 					item.purchase_order = d.purchase_order
-					item.purchase_order_item = d.get(po_detail_field)
+					item.purchase_order_item = d.purchase_order_item
 					if pr.receipt_document_type == "Purchase Receipt":
 						item.purchase_receipt = pr.receipt_document
 						item.purchase_receipt_item = d.name

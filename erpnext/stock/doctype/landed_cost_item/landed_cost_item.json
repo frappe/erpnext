@@ -13,6 +13,7 @@
   "cost_center",
   "col_break2",
   "qty",
+  "uom",
   "weight",
   "rate",
   "amount",
@@ -159,11 +160,19 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:38:12.240215",
+ "modified": "2022-04-28 15:22:32.187199",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Item",

@@ -360,13 +360,12 @@ def set_item_pl_rate(effective_date, item_code, price_list, price_list_rate, uom
 	effective_date = getdate(effective_date)
 	_set_item_pl_rate(effective_date, item_code, price_list, price_list_rate, uom, conversion_factor)
 
-	if not filters:
-		filters = {}
-	if isinstance(filters, string_types):
-		filters = json.loads(filters)
+	if filters is not None:
+		if isinstance(filters, string_types):
+			filters = json.loads(filters)
 
-	filters['item_code'] = item_code
-	return execute(filters)
+		filters['item_code'] = item_code
+		return execute(filters)
 
 
 def _set_item_pl_rate(effective_date, item_code, price_list, price_list_rate, uom=None, conversion_factor=None):
